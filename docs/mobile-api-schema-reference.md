@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.27.1925**
+Update version: **v2026.10.28.1525**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 180 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 181 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4672,6 +4672,40 @@ _No request body._
 | messages[].sender_user_id | false | string |  |
 | messages[].body | true | string |  |
 | messages[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/support/threads/:id/transcript` — Export up to 500 messages from my own support conversation
+
+- Authorization: 로그인 + 최신 동의 + 문의 소유자 (PostgreSQL SECURITY DEFINER)
+- Success status: 200
+- Response mode: json
+- After success: 최대 500건의 대화와 truncated 표시를 확인; 이 응답은 전체 기록 보증이 아님
+- Operation ID: `SupportController_transcript`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| threadId | true | string |  |
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+| truncated | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

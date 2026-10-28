@@ -306,3 +306,36 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('Android member support transcript cache boundary', () => {
+  it.each([200, 403, 404, 500])('never caches support transcript response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ messages: [{ body: 'private' }] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    })));
+    const parts = ['support', 'threads', 'b0000000-0000-4000-8000-000000000002', 'transcript'];
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+});
+
+describe('support transcript gateway error privacy', () => {
+  const parts = ['support', 'threads', 'b0000000-0000-4000-8000-000000000002', 'transcript'];
+  it('marks app-version denials as private and noindex', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', '99.0.0');
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`, { 'x-moneyverse-app-version': '1.0.0' }), context(...parts));
+    expect(response.status).toBe(426);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('marks private API outages as private and noindex', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+});

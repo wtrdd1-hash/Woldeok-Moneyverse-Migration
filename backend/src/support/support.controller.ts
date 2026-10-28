@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -48,6 +48,17 @@ export class SupportController {
   @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
   async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
     return { messages: await this.repo().messages(requireUserId(req), id) };
+  }
+
+  @Get('threads/:id/transcript')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Export up to 500 messages from my own support conversation' })
+  async transcript(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
+    // support_thread_messages checks thread ownership inside PostgreSQL.
+    // A full-history export needs a separate cursor API; do not claim this is complete.
+    const messages = await this.repo().messages(requireUserId(req), id, 500);
+    return { threadId: id, messages, truncated: messages.length === 500 };
   }
 
   @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })

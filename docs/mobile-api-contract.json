@@ -1,6 +1,6 @@
 {
-  "contractVersion": "v2026.10.27.1925",
-  "apiVersion": "v2026.10.27.1925",
+  "contractVersion": "v2026.10.28.1525",
+  "apiVersion": "v2026.10.28.1525",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
     "primary": "en",
@@ -14663,6 +14663,101 @@
         },
         "required": [
           "messages"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/support/threads/:id/transcript",
+      "purpose": "내 관리자 문의 대화 최대 500건 JSON 내보내기",
+      "callWhen": "회원이 자신의 문의 대화 내역을 내보내려 할 때",
+      "authorization": "로그인 + 최신 동의 + 문의 소유자 (PostgreSQL SECURITY DEFINER)",
+      "afterSuccess": "최대 500건의 대화와 truncated 표시를 확인; 이 응답은 전체 기록 보증이 아님",
+      "backendRoute": "/api/v1/support/threads/:id/transcript",
+      "operationId": "SupportController_transcript",
+      "backendOpenApiPath": "/support/threads/{id}/transcript",
+      "summary": "Export up to 500 messages from my own support conversation",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "threadId",
+          "messages",
+          "truncated"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string"
+                },
+                "sender_kind": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "user"
+                    },
+                    {
+                      "type": "string",
+                      "const": "admin"
+                    }
+                  ]
+                },
+                "sender_user_id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "message_id",
+                "sender_kind",
+                "body",
+                "created_at"
+              ]
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "threadId",
+          "messages",
+          "truncated"
         ]
       },
       "responseCompatibility": {
