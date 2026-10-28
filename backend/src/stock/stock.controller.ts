@@ -122,8 +122,10 @@ export class StockController {
   @Get('history')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Trades made by the caller' })
-  async history(@Req() request: RequestWithSession) {
-    return { trades: await this.service().history(requireUserId(request)) };
+  async history(@Req() request: RequestWithSession, @Query('limit') limit?: unknown) {
+    const count = limit === undefined || limit === '50' ? 50 : limit === '100' ? 100 : limit === '200' ? 200 : null;
+    if (count === null) throw new BadRequestException('limit must be 50, 100 or 200');
+    return { trades: await this.service().history(requireUserId(request), count) };
   }
 
   /**
