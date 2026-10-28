@@ -37,10 +37,7 @@ describe('app API route compatibility', () => {
   });
 
   it('returns a stable problem document for paths outside the app allow-list', async () => {
-    const response = await GET(
-      request('/app-api/v1/integrations/discord'),
-      context('integrations', 'discord'),
-    );
+    const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);
     expect(response.headers.get('content-type')).toContain('application/problem+json');
     expect(await response.json()).toMatchObject({ status: 404, code: 'app_gateway_path' });
@@ -84,56 +81,27 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
-  it.each([200, 401, 403, 500])(
-    'fences privacy request GET response %s regardless of upstream cache policy',
-    async (status) => {
-      process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(
-          async () =>
-            new Response(JSON.stringify({ requests: [{ detail: 'private detail' }] }), {
-              status,
-              headers: {
-                'content-type': 'application/json',
-                'cache-control': 'public, max-age=86400',
-              },
-            }),
-        ),
-      );
-      const response = await GET(
-        request('/app-api/v1/privacy/requests'),
-        context('privacy', 'requests'),
-      );
-      expect(response.status).toBe(status);
-      expect(response.headers.get('cache-control')).toBe('private, no-store');
-      expect(response.headers.get('x-robots-tag')).toBe('noindex');
-    },
-  );
+  it.each([200, 401, 403, 500])('fences privacy request GET response %s regardless of upstream cache policy', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requests: [{ detail: 'private detail' }] }), {
+      status,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    })));
+    const response = await GET(request('/app-api/v1/privacy/requests'), context('privacy', 'requests'));
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
 
   it('fences privacy request POST receipt even when upstream marks it public', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          new Response(JSON.stringify({ requestId: 'private-receipt' }), {
-            status: 201,
-            headers: {
-              'content-type': 'application/json',
-              'cache-control': 'public, max-age=3600',
-            },
-          }),
-      ),
-    );
-    const response = await POST(
-      new NextRequest('https://easy-scraping.com/app-api/v1/privacy/requests', {
-        method: 'POST',
-        headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https' },
-        body: JSON.stringify({ requestType: 'access' }),
-      }),
-      context('privacy', 'requests'),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requestId: 'private-receipt' }), {
+      status: 201, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/privacy/requests', {
+      method: 'POST', headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https' },
+      body: JSON.stringify({ requestType: 'access' }),
+    }), context('privacy', 'requests'));
     expect(response.status).toBe(201);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
@@ -141,43 +109,25 @@ describe('app API route compatibility', () => {
 
   it('never caches privacy gateway failures or app-version refusals', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new TypeError('upstream unavailable');
-      }),
-    );
-    const failure = await GET(
-      request('/app-api/v1/privacy/requests'),
-      context('privacy', 'requests'),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('upstream unavailable'); }));
+    const failure = await GET(request('/app-api/v1/privacy/requests'), context('privacy', 'requests'));
     expect(failure.status).toBe(502);
     expect(failure.headers.get('cache-control')).toBe('private, no-store');
     vi.stubEnv('APP_API_MIN_VERSION', '3.0.0');
-    const refused = await GET(
-      request('/app-api/v1/privacy/requests', {
-        'x-moneyverse-app-version': '2.0.0',
-      }),
-      context('privacy', 'requests'),
-    );
+    const refused = await GET(request('/app-api/v1/privacy/requests', {
+      'x-moneyverse-app-version': '2.0.0',
+    }), context('privacy', 'requests'));
     expect(refused.status).toBe(426);
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(
-      async (_input: RequestInfo | URL) =>
-        new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
-          status: 200,
-          headers: { 'content-type': 'application/json' },
-        }),
-    );
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(
-      request('/app-api/v1/wallet?recent=50&period=7d'),
-      context('wallet'),
-    );
+    const response = await GET(request('/app-api/v1/wallet?recent=50&period=7d'), context('wallet'));
     expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.pathname).toBe('/api/v1/wallet');
@@ -189,24 +139,18 @@ describe('app API route compatibility', () => {
 
   it('forwards the shop in-stock query and disables caching of member stock/ownership', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(
-      async () =>
-        new Response(JSON.stringify({ catalogItems: [] }), {
-          status: 200,
-          headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-        }),
-    );
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(
-      request('/app-api/v1/shop/catalog?stock=available&q=frame'),
-      context('shop', 'catalog'),
-    );
+    const response = await GET(request('/app-api/v1/shop/catalog?stock=available&q=frame'), context('shop', 'catalog'));
     expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.pathname).toBe('/api/v1/shop/catalog');
     expect(target.searchParams.get('stock')).toBe('available');
     expect(target.searchParams.get('q')).toBe('frame');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
@@ -232,20 +176,14 @@ describe('app API route compatibility', () => {
       context('stocks'),
     );
     expect(response.status).toBe(503);
-    expect(await response.json()).toMatchObject({
-      status: 503,
-      code: 'app_gateway_version_policy_invalid',
-    });
+    expect(await response.json()).toMatchObject({ status: 503, code: 'app_gateway_version_policy_invalid' });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('allows a supported app version to reach the private API', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(
-      async () =>
-        new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }),
-    );
+    const fetchSpy = vi.fn(async () => new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchSpy);
     const response = await GET(
       request('/app-api/v1/stocks', { 'x-moneyverse-app-version': '2.4.1' }),
@@ -257,12 +195,7 @@ describe('app API route compatibility', () => {
 
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new TypeError('network down');
-      }),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
     const response = await GET(request('/app-api/v1/stocks'), context('stocks'));
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({
@@ -273,24 +206,12 @@ describe('app API route compatibility', () => {
 
   it('adds camelCase aliases to every JSON response while preserving legacy keys', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          new Response(
-            JSON.stringify({
-              daily_bet_limit: '5000',
-              rows: [{ joined_at: '2026-09-14T00:00:00.000Z' }],
-            }),
-            { status: 200, headers: { 'content-type': 'application/json' } },
-          ),
-      ),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      daily_bet_limit: '5000',
+      rows: [{ joined_at: '2026-09-14T00:00:00.000Z' }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
 
-    const response = await GET(
-      request('/app-api/v1/casino/self-limit'),
-      context('casino', 'self-limit'),
-    );
+    const response = await GET(request('/app-api/v1/casino/self-limit'), context('casino', 'self-limit'));
     expect(response.status).toBe(200);
     expect(response.headers.get('x-moneyverse-field-naming')).toBe('camelCase+legacy');
     expect(await response.json()).toEqual({
@@ -302,29 +223,17 @@ describe('app API route compatibility', () => {
 
   it('does not transform binary media bodies', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          new Response(new Uint8Array([1, 2, 3]), {
-            status: 200,
-            headers: { 'content-type': 'image/png' },
-          }),
-      ),
-    );
-    const response = await GET(
-      request('/app-api/v1/media/picture.png'),
-      context('media', 'picture.png'),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {
+      status: 200,
+      headers: { 'content-type': 'image/png' },
+    })));
+    const response = await GET(request('/app-api/v1/media/picture.png'), context('media', 'picture.png'));
     expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([1, 2, 3]);
   });
 
   it('does not reflect a spoofed forwarded host into contract metadata', async () => {
     const response = await GET(
-      request('/app-api/v1/meta/contract', {
-        'x-forwarded-host': 'attacker.example',
-        'x-forwarded-proto': 'http',
-      }),
+      request('/app-api/v1/meta/contract', { 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'http' }),
       context('meta', 'contract'),
     );
     const body = await response.json();
@@ -332,7 +241,9 @@ describe('app API route compatibility', () => {
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(JSON.stringify(body)).not.toContain('attacker.example');
   });
+
 });
+
 
 describe('Android owner-scoped banking cache privacy', () => {
   it.each([
@@ -341,19 +252,10 @@ describe('Android owner-scoped banking cache privacy', () => {
     ['repayment preview', ['banking', 'repay-preview']],
   ])('never forwards public cache policy for %s', async (_label, parts) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          new Response(JSON.stringify({ loans: [] }), {
-            status: 200,
-            headers: {
-              'content-type': 'application/json',
-              'cache-control': 'public, max-age=3600',
-            },
-          }),
-      ),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ loans: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
     const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
@@ -361,12 +263,7 @@ describe('Android owner-scoped banking cache privacy', () => {
 
   it('never caches a bank loan gateway failure', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new Error('unavailable');
-      }),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('unavailable'); }));
     const response = await GET(request('/app-api/v1/bank/loans'), context('bank', 'loans'));
     expect(response.status).toBe(502);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
@@ -389,26 +286,17 @@ describe('Android owner-scoped banking cache privacy', () => {
   });
 });
 
+
 describe('Android chat bigint cursor and private cache boundary', () => {
   it('forwards exact bigint sync cursors without converting them to JS numbers', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(
-      async (_input: RequestInfo | URL) =>
-        new Response(JSON.stringify({ messages: [{ sequence: '9007199254740993' }] }), {
-          status: 200,
-          headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
-        }),
-    );
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ messages: [{ sequence: '9007199254740993' }] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+    }));
     vi.stubGlobal('fetch', fetchSpy);
-    const path =
-      '/app-api/v1/chat/conversations/11111111-1111-4111-8111-111111111111/sync?sinceSequence=9007199254740993';
-    const response = await GET(
-      request(path),
-      context('chat', 'conversations', '11111111-1111-4111-8111-111111111111', 'sync'),
-    );
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('sinceSequence')).toBe(
-      '9007199254740993',
-    );
+    const path = '/app-api/v1/chat/conversations/11111111-1111-4111-8111-111111111111/sync?sinceSequence=9007199254740993';
+    const response = await GET(request(path), context('chat', 'conversations', '11111111-1111-4111-8111-111111111111', 'sync'));
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('sinceSequence')).toBe('9007199254740993');
     expect((await response.json()).messages[0].sequence).toBe('9007199254740993');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
@@ -416,36 +304,20 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   it('does not cache private chat gateway failures or forward read receipts as rounded numbers', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      expect(JSON.parse(new TextDecoder().decode(init?.body as ArrayBuffer)).sequence).toBe(
-        '9007199254740993',
-      );
+      expect(JSON.parse(new TextDecoder().decode(init?.body as ArrayBuffer)).sequence).toBe('9007199254740993');
       return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
     });
     vi.stubGlobal('fetch', fetchSpy);
     const conversation = '11111111-1111-4111-8111-111111111111';
-    const response = await POST(
-      new NextRequest(
-        `https://easy-scraping.com/app-api/v1/chat/conversations/${conversation}/read`,
-        {
-          method: 'POST',
-          headers: { host: 'easy-scraping.com', 'content-type': 'application/json' },
-          body: JSON.stringify({ sequence: '9007199254740993' }),
-        },
-      ),
-      context('chat', 'conversations', conversation, 'read'),
-    );
+    const response = await POST(new NextRequest(`https://easy-scraping.com/app-api/v1/chat/conversations/${conversation}/read`, {
+      method: 'POST', headers: { host: 'easy-scraping.com', 'content-type': 'application/json' },
+      body: JSON.stringify({ sequence: '9007199254740993' }),
+    }), context('chat', 'conversations', conversation, 'read'));
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new Error('offline');
-      }),
-    );
-    const failed = await GET(
-      request(`/app-api/v1/chat/conversations/${conversation}/messages`),
-      context('chat', 'conversations', conversation, 'messages'),
-    );
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    const failed = await GET(request(`/app-api/v1/chat/conversations/${conversation}/messages`),
+      context('chat', 'conversations', conversation, 'messages'));
     expect(failed.status).toBe(502);
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
