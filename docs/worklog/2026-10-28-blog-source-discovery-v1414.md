@@ -9,4 +9,4 @@ Read `AGENTS.md`, `docs/RELEASING.md`, EN integrated master and KR v1405 policy,
 New bounded BOK/Federal Reserve official RSS and localized MDN index discovery added. Read-only MiniPC verification: BOK RSS HTTP 200, 220204 bytes; US Fed RSS HTTP 200; MDN JS page 203914 bytes. Focused tests added. Current main f7552b1608cde18676c877792753787fe5709bc7 was rechecked; PR #1666 isolated from #1665/#1662. Exact-head CI is running, and no Test or Production publication is claimed.
 
 ## End
-Pending CI and official Test/Production gates. Production scheduler remains OFF; no claim of public posts.
+Source discovery code and regression fixtures recorded in Draft PR #1666. Concurrent main rechecked at d5dc15452e8187ba2558a710390cded92762e8dc without merging others' work. Latest-head CI lint/typecheck/build/PostgreSQL tests are still pending and must not be reported as passed. No official Test or Production deployment, scheduler enabling, restored posts, or observed public article publication. Semantic claim corroboration and finance/security release gates remain outstanding.
