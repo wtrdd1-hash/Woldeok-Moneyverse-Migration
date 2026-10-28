@@ -11,8 +11,8 @@ export interface VerifiedOriginalArticle extends OriginalArticle {
 export type ArticleModel = (slot: BlogRotationSlot, source: PrimarySourceEvidence) => Promise<OriginalArticle>;
 
 function extractJson(text: string): OriginalArticle {
-  const cleaned = text.trim().replace(/^`json\s*/i,'')
-    .replace(/`$/,'').trim();
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i,'')
+    .replace(/\s*```$/,'').trim();
   const candidate: unknown = JSON.parse(cleaned);
   if (!candidate || typeof candidate !== 'object') throw new Error('MODEL_OUTPUT_INVALID');
   const obj = candidate as Record<string, unknown>;

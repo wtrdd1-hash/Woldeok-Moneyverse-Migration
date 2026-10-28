@@ -41,7 +41,7 @@ const COUNTRY_OPTIONS: ReadonlyArray<{ id: BlogCountry; label: string; flag: str
   { id: 'KR', label: '대한민국 (KRW)', flag: '🇰🇷' },
   { id: 'US', label: '미국 (USD)', flag: '🇺🇸' },
   { id: 'JP', label: '일본 (JPY)', flag: '🇯🇵' },
-  { id: 'VN', label: '베트남 (VND)', flag: '🇻🇳' },
+  { id: 'CN', label: '중국 (CNY)', flag: '🇨🇳' },
 ];
 
 export function AdminBlogClient({ initialPosts }: Props) {
@@ -53,7 +53,11 @@ export function AdminBlogClient({ initialPosts }: Props) {
 
   // 관리자 삭제 및 철회 (소프트 삭제 vs 영구 소거)
   const handleDelete = async (slug: string, purge: boolean) => {
-    if (purge && !window.confirm(`[주의] '${slug}' 글을 디스크에서 완전히 영구 삭제하시겠습니까?`)) {
+    if (purge && !window.confirm(
+      posts.find((post) => post.slug === slug)?.verificationReceipt
+        ? `[주의] '${slug}' 글을 공개 목록에서 삭제하고 복구 불가 상태로 변경합니다. 감사 영수증은 보존됩니다. 계속하시겠습니까?`
+        : `[주의] '${slug}' 글을 디스크에서 완전히 영구 삭제하시겠습니까?`
+    )) {
       return;
     }
     setActionSlug(slug);
@@ -72,7 +76,10 @@ export function AdminBlogClient({ initialPosts }: Props) {
         }
         setResult({
           success: true,
-          message: purge ? '글이 영구 삭제되었습니다.' : '글이 철회(비공개) 처리되었습니다.',
+          message: purge
+            ? (posts.find((post)=>post.slug===slug)?.verificationReceipt
+              ? '공개 게시물이 삭제 처리되었습니다. 감사 기록은 보존됩니다.' : '글이 영구 삭제되었습니다.')
+            : '글이 철회(비공개) 처리되었습니다.',
         });
       } else {
         setResult({
@@ -101,11 +108,11 @@ export function AdminBlogClient({ initialPosts }: Props) {
                 <Sparkles className="h-5 w-5 text-sky-400" aria-hidden="true" />
                 <CardTitle className="text-lg">AI 블로그 발행 엔진 관제</CardTitle>
                 <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-300">
-                  편집 검토 대기
+                  품질 검증 기반 · 서버 상태 확인 필요
                 </Badge>
               </div>
               <CardDescription className="text-sm mt-1 text-slate-300">
-                생성형 콘텐츠의 출처·사실관계·편집 승인을 확인할 수 없어 자동 발행을 중단했습니다. 기존 발행 기록 조회와 철회는 별도로 유지됩니다.
+                사람의 사전·사후 승인을 요구하지 않습니다. 국가별 공식 출처·독창성·언어 검증을 통과한 글만 서버 스케줄러가 공개할 수 있으며, 실제 자동발행은 서버 스위치와 배포 상태에 따릅니다.
               </CardDescription>
             </div>
             <Button
@@ -120,7 +127,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
           <p id="blog-editorial-hold" role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
-            발행 승인 검증 전: 편집 검토 및 승인 증빙이 없으므로 관리자·자동 스케줄러의 신규 발행이 중단되었습니다.
+            검증 미통과 원고는 게시하지 않습니다. 이 화면의 수동 즉시 생성은 아직 제공하지 않으며, 기존에 게시한 글의 비공개·삭제는 관리자만 수행합니다.
           </p>
           {/* 타겟 국가 & 주제 선택 컨트롤 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-lg border border-border/50 bg-card/60 text-xs">
@@ -219,10 +226,10 @@ export function AdminBlogClient({ initialPosts }: Props) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs text-muted-foreground border-t border-border/40">
-            <div>• 품질 게이트: <strong>편집 승인 미검증 · 발행 보류</strong></div>
-            <div>• 출처 검증: <strong>미확인</strong></div>
-            <div>• 자동 발행: <strong>중단</strong></div>
-            <div>• 삭제 정책: <strong>2단계 안전 제어</strong></div>
+            <div>• 품질 게이트: <strong>독립 출처·언어·중복 검사</strong></div>
+            <div>• 출처 검증: <strong>공식 출처 영수증 필수</strong></div>
+            <div>• 자동 발행: <strong>서버 스케줄/스위치 상태 별도 확인</strong></div>
+            <div>• 삭제 정책: <strong>관리자 명시적 조치만 허용</strong></div>
           </div>
         </CardContent>
       </Card>

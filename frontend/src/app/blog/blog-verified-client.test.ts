@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { verifiedArticleBySlug, verifiedPublicArticles } from './blog-verified-client';
-import { hasCountryEdition, isBlogDiscoverable } from './blog-seo';
+import { verifiedArticleBySlug, verifiedArticlesForAdmin, verifiedPublicArticles } from './blog-verified-client';
+import { blogAlternateLanguages, hasCountryEdition, isBlogDiscoverable } from './blog-seo';
 
 const row = {
   slug:'2026-10-28-cn-coding-5',country:'CN',locale:'zh-CN',topic:'CODING',
@@ -22,8 +22,16 @@ describe('DB-verified country blog public projection',()=>{
   expect(hasCountryEdition(posts[0]!,'zh')).toBe(true);
   expect(hasCountryEdition(posts[0]!,'ko')).toBe(false);
   expect(hasCountryEdition(posts[0]!,'ja')).toBe(false);
+  expect(blogAlternateLanguages(posts[0]!)).toEqual({'zh-CN':'https://easy-scraping.com/zh/blog/'+row.slug});
   expect(posts[0]?.views).toBe(0);
   expect(posts[0]?.verificationReceipt).toBe(row.receipt);
+ });
+ it('lets the administrator inspect withdrawn verified posts without resurrecting public discovery',()=>{
+  const entries=verifiedArticlesForAdmin([row,{...row,status:'WITHDRAWN'}, {...row,status:'DELETED'}]);
+  expect(entries).toHaveLength(2);
+  expect(entries[0]?.status).toBe('PUBLISHED');
+  expect(entries[1]?.status).toBe('WITHDRAWN');
+  expect(isBlogDiscoverable(entries[1]!)).toBe(false);
  });
  it('rejects server-delivered unpublished, missing-receipt, and fake short posts',async()=>{
   vi.stubEnv('BLOG_API_ORIGIN','http://127.0.0.1:3000');

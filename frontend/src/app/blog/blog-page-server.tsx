@@ -18,16 +18,16 @@ const MARKET_NAMES: Record<BlogLocale, string> = {
   ko: '한국', en: 'United States', ja: '日本', zh: '中国',
 };
 const PAGE_TITLES: Record<BlogLocale, string> = {
-  ko: '월덕 금융 교육 블로그 | 한국 금융 · 저축 · 투자',
-  en: 'US Personal Finance Education | Woldeok Moneyverse',
-  ja: '日本の金融教育ブログ | Woldeok Moneyverse',
-  zh: '中国家庭金融知识 | Woldeok Moneyverse',
+  ko: '월덕 블로그 | 경제 · 코딩 · 컴퓨터',
+  en: 'US Economics, Coding & Computers | Woldeok Moneyverse',
+  ja: '日本の経済・プログラミング・コンピュータ | Woldeok Moneyverse',
+  zh: '经济、编程与计算机知识 | Woldeok Moneyverse',
 };
 const PAGE_DESCRIPTIONS: Record<BlogLocale, string> = {
-  ko: '복리, 세금, ETF, 대출, 물가, 연금의 기본 원리를 한국 제도와 공식 자료를 바탕으로 배웁니다.',
-  en: 'Practical US guides to compounding, dividends, ETFs, mortgage math, CPI, and retirement, with primary sources.',
-  ja: '新NISA、ETF、住宅ローン、物価、年金、積立など日本の家計に役立つ金融教育記事。',
-  zh: '面向中国家庭的储蓄复利、股息税、ETF、房贷、物价、养老知识与官方参考资料。',
+  ko: '경제 원리, 프로그래밍, 네트워크와 컴퓨터 시스템을 국가별 공식 자료와 실제 예제로 학습합니다.',
+  en: 'US-focused educational explanations of economics, programming, networking, and computer systems with primary sources.',
+  ja: '経済の基礎、プログラミング、ネットワークとコンピュータの仕組みを一次資料から学びます。',
+  zh: '根据权威来源介绍经济基础、编程实践、网络与计算机系统的原理。',
 };
 
 function safeHeroImage(url?: string): string | undefined {
