@@ -11,6 +11,7 @@ import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
 import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
+import { memberCatalogUrl, normalizedShopPriceOrder } from './shop-price-order';
 
 /**
  * One member's own shelf, and a catalogue only a member can reach.
@@ -29,16 +30,17 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly sort?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery } = await searchParams;
+  const { q: rawQuery, sort: rawSort } = await searchParams;
+  const sort = normalizedShopPriceOrder(rawSort);
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    apiOrNull<{ catalogItems: CatalogItem[] }>(memberCatalogUrl(sort)),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -101,7 +103,7 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-md gap-2" role="search">
+          <form className="flex max-w-xl flex-wrap gap-2" role="search">
             <Input
               name="q"
               type="search"
@@ -109,6 +111,17 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
+            <label htmlFor="shop-price-sort" className="sr-only">가격 정렬</label>
+            <select
+              id="shop-price-sort"
+              name="sort"
+              defaultValue={sort}
+              className="min-h-11 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="default">기본순</option>
+              <option value="price_asc">낮은 가격순</option>
+              <option value="price_desc">높은 가격순</option>
+            </select>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"

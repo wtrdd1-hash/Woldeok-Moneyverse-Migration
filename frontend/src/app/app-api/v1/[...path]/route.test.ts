@@ -137,6 +137,19 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
+  it.each([200, 400, 403, 500])('keeps member shop sorted catalogue private on Android response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/shop/catalog?sort=price_desc'), context('shop', 'catalog'));
+    expect(response.status).toBe(status);
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('sort')).toBe('price_desc');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();

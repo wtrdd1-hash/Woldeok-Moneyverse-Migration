@@ -3,6 +3,7 @@ import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { ShopCatalogRepository } from './shop.repository';
+import { orderShopCatalog } from './shop-catalog-order';
 
 /**
  * Migrations 071-075, executed.
@@ -74,6 +75,17 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       // rounds silently once the economy grows past a safe integer.
       expect(typeof gloves?.price, 'price must survive as a string').toBe('string');
       expect(BigInt(gloves?.price ?? '0') > 0n).toBe(true);
+    });
+
+    it('sorts real owner-scoped PostgreSQL catalogue rows without losing bigint precision', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      const sorted = orderShopCatalog(rows, 'price_asc');
+      expect(sorted).toHaveLength(rows.length);
+      expect(sorted.every((row) => typeof row.price === 'string')).toBe(true);
+      for (let index = 1; index < sorted.length; index += 1) {
+        expect(BigInt(sorted[index - 1]!.price) <= BigInt(sorted[index]!.price)).toBe(true);
+      }
+      expect(rows.every((row) => sorted.some((entry) => entry.catalog_id === row.catalog_id))).toBe(true);
     });
 
     it('carries the weekly upkeep 075 attaches to a vehicle', async () => {
