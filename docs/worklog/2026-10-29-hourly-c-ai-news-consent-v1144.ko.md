@@ -16,3 +16,5 @@
 - HTTP E2E 4/4 PASS. Frontend 전체 1,877 PASS; Backend DB 없는 1,946 PASS/440 SKIP; Database 46 PASS/4 SKIP; Contract 38 PASS; app-api 180 일치; 전체 Lint 오류 0/경고 1,099; 전체 Typecheck PASS; Backend Build PASS; Bot 11 PASS 및 운영 Bot 감사 취약점 0.
 - 보안 운영 감사 Moderate 1/전체 Low 3 Moderate 9로 FAIL. 위험한 백업 루트 테스트 미실행. 디스크·임시 저장소 부족으로 로컬 Frontend 대형 빌드와 격리 PostgreSQL 복구 미실행, CI DB 검증 필요. 공식 Test `cfb13272...`, Production `unknown`으로 정확 SHA E2E BLOCKED.
 - main/Test/Production/GitOps/롤백/DB·WLD/공유 작업폴더/예약 변경 없음. Draft/HOLD PR 및 최종 SHA CI 확인 예정. 운영 배포 금지.
+
+- **후속 강화:** 건너뛰기와 발행이 동시에 주장되는 모순 응답 TDD RED 1, 수정 후 영수증 2/2 및 Frontend 집중 8/8 PASS. 최종 소스의 Frontend 전체 재시험은 미니PC 고부하로 115초 시간 초과(전체 PASS 미확인). 전체 Typecheck/Lint 재검증 PASS. 이전 Frontend 1,877 PASS는 수정 전 후보 기준. 최종 SHA CI 필수.

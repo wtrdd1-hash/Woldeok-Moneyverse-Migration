@@ -13,6 +13,7 @@ export function parseAutoGenerateReceipt(value: unknown): Receipt | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
   const row = value as Record<string, unknown>;
   if (row.skipped === true && typeof row.reason === 'string' && row.reason.length > 0) {
+    if (row.published !== undefined || row.generated !== undefined || row.eventId !== undefined || row.batchId !== undefined) return null;
     return { kind: 'skipped', reason: row.reason };
   }
   if (row.skipped !== undefined) return null;
