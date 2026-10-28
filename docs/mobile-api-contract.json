@@ -12549,6 +12549,10 @@
             "oneOf": [
               {
                 "type": "number",
+                "const": 604800
+              },
+              {
+                "type": "number",
                 "const": 86400
               },
               {
@@ -12574,10 +12578,6 @@
               {
                 "type": "number",
                 "const": 14400
-              },
-              {
-                "type": "number",
-                "const": 604800
               }
             ]
           },
