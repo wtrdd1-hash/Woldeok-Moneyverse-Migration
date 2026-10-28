@@ -1,0 +1,51 @@
+# v1440 — 시작·중간·완료 기획 작업일지
+- GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
+
+- 시작 04:02 KST: using-superpowers 커넥터 목록 없음; 설치 스킬 확인, Debian 13.6 서버·디스크·main 조사.
+- 중간 04:06 KST: main 불변, 실제 용어 화면·GitHub 중복 검색·QA v1355 확인, F675-166 범위 확정.
+- 완료: 국영문 문서 14개·이슈 #1779, CI/정확SHA·외부 근거 미인증, 런타임·DB·Test·운영 변경 없음.
+
+## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+- 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.
+- 회원 직접 저장/취소 및 자발적 읽음/취소, 비공개 /account/learning/glossary, 실제 배포 slug·개정 검증, 원본 영수증·본인 API·Android 동등성·CAS·100개 제한·409/503·삭제 용어 묘비·SEO/접근성/개인정보/롤백 설계. 읽음은 숙달·보상·WLD 증거가 아니다. [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); 영문 정본·국문 상세는 통합 기획 참조.
+- P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: 루트/데이터 ~98%, 18명 18,000 WLD 차이, 앱 쓰기 가능 239개 테이블, PUBLIC 은행 실행 3개, 체크섬 불일치 5/미적용 20, 외부 복원·공식 Test 정확 SHA 미검증. 운영승격 보류.
+- 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 불변.
+
+## v1440 / F675-166 — 검증 가능한 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차·기준:** 이전 Feature Improvement v1438 → 현재 Feature Addition v1440 → 다음 Feature Improvement v1442(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1355 읽기 전용 증거, main에서 분리한 독립 브랜치. 기존 F675-165 용어 정정 제안(#1770/#1775)은 별도 미병합 기획이며 실제 운영 기능 또는 이번 기능의 기구현 의존성으로 취급하지 않는다. 이번 회차는 런타임·DB·WLD·Test·Production·기능 스위치를 변경하지 않는다.
+
+### 실제 기능 공백, 목적, 데이터 진실 기준
+최신 main의 공개 /guide/glossary 및 /guide/glossary/[term]은 frontend/src/config/pseo-glossary.config.ts의 GLOSSARY_TERMS에서 생성된다. 상세 페이지는 86400초 재검증을 사용하며 DefinedTerm/FAQ 검색 구조화 데이터를 노출한다. 회원별 용어 저장 목록, 자발적 읽음 표시, 이에 대응하는 NestJS/DB 본인 전용 API는 main에서 발견되지 않았다. 기존 CalculatorSaveAction은 계산 시뮬레이션을 브라우저 localStorage에 저장할 뿐, 용어 학습 목록의 계정 동기화를 입증하지 않는다. GitHub 이슈의 glossary bookmark/learning 검색에서도 동일 기능을 확인하지 못했다. 목적은 회원이 실제 게시된 용어를 직접 저장하고 나중에 읽거나 '읽어봄'을 스스로 표시하는 것이다. 읽음은 이해·숙달·교육 성과·투자 수익·보상 획득의 증거가 아니다.
+
+### 이용 대상, 진입점, 버튼 및 상태
+비회원도 공개 용어 목록·상세 설명은 검색 색인 가능한 상태로 읽는다. /guide/glossary/[term]의 활성·동의 회원에게만 '용어 저장/저장 취소', '읽어봄 표시/읽음 취소'를 제공한다. 비회원에게는 '로그인 후 저장'을 표시하되 조회만으로 추적·자동저장하지 않는다. /account/learning/glossary는 본인 전용 저장 목록, SAVED/READ/UNREAD 필터, 실제 공개 용어 제목 검색, 삭제, 다시 열기 및 '본인이 표시한 읽음 수'를 제공한다. 열람 시 자동 저장·localStorage 무단 이전·숙달 점수화는 금지한다. 상태는 UNAUTHENTICATED, LOADING, UNSAVED, SAVING, SAVED_UNREAD, SAVED_READ, REMOVING, NETWORK_UNKNOWN(영수증 재조회), CONFLICT(409 버전 충돌), UNAVAILABLE_TERM(비공개 묘비+삭제 가능), RATE_LIMITED(429), ERROR(재시도)로 구분한다. 서버 확정 영수증 전에는 저장·읽음 성공을 표시하지 않는다. 로그아웃·계정 전환 때 캐시, 진행 중 응답 및 요청 키를 폐기하여 타인 목록이 노출되지 않도록 한다. 푸시·이메일·포인트·업적·WLD 변경은 없다.
+
+### 실제 배포 콘텐츠 버전 및 삭제된 용어
+검토된 빌드에서 GLOSSARY_TERMS로 생성한 불변 slug manifest를 정확한 배포 SHA와 용어별 편집 내용 digest에 결합한다. 프론트엔드 배열만 존재할 때 백엔드가 동일 버전을 검증할 수 있다고 가정하지 않는다. F675-165의 향후 manifest 계약을 독립 검토 후 재사용할 수 있으나 해당 PR이 병합됐다고 가정하지 않는다. 신뢰 가능한 manifest/registry가 없다면 기능은 OFF로 두고 공개 용어사전은 정상 제공한다. 진짜 과거 콘텐츠 개정은 409 CONTENT_CHANGED로 재확인을 요구하며, 프론트·백엔드·DB의 버전 일치 자체를 입증할 수 없으면 503 REVISION_UNAVAILABLE로 쓰기를 차단한다. 용어 slug가 삭제·변경되면 다른 용어로 자동 연결하지 않고 본인 전용 '현재 이용 불가' 묘비를 유지해 삭제만 허용한다. 기존 읽음 기록은 당시 정확한 개정에 연결하고 개정 후에는 '다시 읽어야 함'으로 표시하되 과거 본인 표시를 위조·삭제하지 않는다. 개인 활동은 공개 메타데이터나 검색에 노출하지 않는다.
+
+### NestJS·Next.js·Android API 동등성
+인증된 회원용 NestJS API: GET /api/v1/guide/glossary-learning?state=&cursor=&limit= (본인 전용 키셋, 페이지 최대 50), GET /api/v1/guide/glossary-learning/:slug, PUT /api/v1/guide/glossary-learning/:slug (termRevision, expectedVersion, requestId), POST /api/v1/guide/glossary-learning/:slug/read-state (read:boolean, termRevision, expectedVersion, requestId), DELETE /api/v1/guide/glossary-learning/:slug (requestId, expectedVersion), GET /api/v1/guide/glossary-learning/receipts/:requestId. 불변 원본 처리 영수증은 {requestId,slug,operation,version,committedAt,state,termRevision}; 타임아웃이면 영수증을 먼저 조회하고 같은 키로 재시도한다. 400 형식 오류, 401 비회원, 403 정지·동의·CSRF, 404 타인/없는 기록 동일 응답, 409 버전·개정·요청 키 재사용 내용 불일치, 429 한도, 503 manifest/DB 불일치를 구분한다. 웹은 HttpOnly 동일 출처 세션과 CSRF가 있는 Next 서버 액션/BFF를 통하고, Android /app-api/v1은 별도 검증된 모바일 인증으로 동일 DTO·상태를 제공한다. 내부 웹 API 토큰을 앱에 배포하지 않는다. 본인 응답은 Cache-Control: private, no-store 및 필요 시 Vary: Cookie를 사용하며 비밀 키를 URL에 넣지 않는다. 관리자는 개인 목록을 열람하지 못하고 비식별 집계만 조회한다.
+
+### PostgreSQL 소유권·제약·트랜잭션·악용 방지
+추가형 glossary_term_registry(slug PK, schemaVersion, revision, contentDigest, releaseSha, active), glossary_learning_entries(user_id,slug,saved_at,read_revision nullable,read_at nullable,version 양수,removed_at nullable,updated_at; PK(user_id,slug), 삭제된 slug도 참조할 수 있는 registry FK), glossary_learning_receipts(user_id,request_id,operation,slug,canonical_payload_digest,original_result,committed_at; UNIQUE(user_id,request_id))를 설계한다. 허용 연산·상태·버전·정규 slug는 CHECK로 제한하고 (user_id,removed_at,saved_at DESC,slug) 및 (user_id,read_revision) 인덱스는 실제 EXPLAIN으로 검증한다. now() 같은 변동 조건을 부분 인덱스에 넣지 않는다. 회원당 활성 저장 100개 제한(10,001건은 격리 성능시험 합성 데이터일 뿐), 삭제하더라도 불변 영수증은 유지하고 반복 저장으로 제한을 우회하지 못한다. 인증된 회원 행 → 용어/저장 행 순서로 잠그고 CAS expectedVersion 및 유일 제약으로 동시 요청의 단일 승자를 확정한다. 동일 requestId+정규화 내용 digest는 최초 영수증을 재전달하고, 연산/본문이 달라지면 재로그인 후라도 409로 거부한다. 클라이언트 actor ID를 신뢰하지 않는다. SECURITY DEFINER 함수는 본인·권한을 확인하고 승인된 역할에만 EXECUTE를 부여하며 PUBLIC과 앱 역할의 직접 테이블 접근을 금지한다. 공유 DB 계정의 p_actor 인자만으로는 독립 인증이 되지 않으므로 SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard, 세션 기반 actor, 모바일 토큰 경계 및 실제 DB 권한 음성시험을 결합한다. 회원·기기·IP 별 요청 제한을 적용하되 타인 존재 여부는 누설하지 않는다. 임의 slug, 초과 본문, 외부 URL을 거부하고 금융 계정 식별자를 저장하지 않는다.
+
+### 관리자·SEO·개인정보·분석·접근성
+관리자에게는 최소 집계 집단 기준을 적용한 저장 수, 자발적 읽음 수, 409/503 비율, 응답 p95, 영수증 검증 수, 삭제된 용어 정리 수만 보여준다. 회원별 목록 열람 기능은 만들지 않는다. 공개 용어사전의 canonical, FAQ/DefinedTerm JSON-LD, sitemap, OG는 별도 검증된 공개 편집 배포 외에는 그대로 유지한다. 개인 학습 목록은 noindex/nofollow·사이트맵 제외·비공개 SSR·광고 타기팅 금지다. 개인 활동 보존 최소화, 회원 삭제·정보주체 요청 시 비식별화와 법적 감사 보존 범위를 문서화한다. WCAG 2.2 AA, 키보드, 320px, 200% 확대, aria-live, 목록 삭제 후 초점 복원, 색 외 상태 구분, 움직임 감소, Android TalkBack·오프라인 NETWORK_UNKNOWN을 수용한다. KPI는 확정 저장 영수증 전환율, 7일 자발적 재방문(집계), 기기간 일치율, 개정 충돌률, 개인정보 침해 0 목표, 중복 연산 비율이며 자가 읽음 표시를 학습 성취라고 주장하지 않는다.
+
+### 개발 수용시험 및 배포·롤백
+개발 예약은 별도 브랜치에서 RED 실패 시험을 먼저 작성하고, 격리된 실제 PostgreSQL에 합성 저장 10,001건으로 페이지·인덱스 성능, 동시 저장/읽음/삭제·재전송 100건, 타인 계정/CSRF/무효 slug/재사용 UUID 음성 100건, 동시 100개 제한, 삭제·이름 변경된 slug, 24시간 ISR의 빌드 A/B 혼재, 정확 SHA manifest 불일치 409/503, 로그아웃·계정 전환, Android/API/접근성/SEO/no-store, 금융 원장 변화 0을 입증한다. DB 시험 SKIP은 PASS로 간주하지 않는다. 기능 스위치는 기본 OFF, 추가형 마이그레이션·외부 암호화 백업·독립 복원·읽기 전용 그림자 검증·카나리, 공식 Test 정확 SHA 회원/관리자/금융 E2E와 승인된 운영 승격·롤백이 필수다. 빌드 성공만으로 자동 병합하는 #1088 방식은 금지한다. 롤백 시 쓰기만 OFF로 전환하고 기존 비공개 영수증·공개 용어사전은 보존한다. 실패 기록 은폐를 위한 삭제는 금지한다.
+
+### P0/P1 개발 백로그 (총 10개)
+- **P0 ENV1440-01:** QA v1355 루트/데이터 볼륨 각각 약 98%/98%, 다른 작업 증거 보존, 공간 확보와 독립 복원된 외부 암호화 백업 증명. 임의 삭제 금지.
+- **P0 FIN1440-02:** QA v1355 USER_CASH 18명 총 18,000 WLD 원장 차이, 계정·분개 근거 독립 대사. 근거 없는 조정 금지, 국고 0 WLD.
+- **P0 SEC1440-03:** QA v1355 앱 쓰기 가능 239개 테이블, PUBLIC 은행 EXECUTE 3개, 마이그레이션 체크섬 불일치 5개/미적용 20개. 본인·manifest·최소권한 경계 검증 실패 시 차단.
+- **P0 REL1440-04:** 공식 Test 정확 SHA, 격리 DB 권한, 보안·금융 E2E, 독립 복원 증거 전 운영승격 차단. 빌드만으로 병합하는 #1088 금지.
+- **P1 GLOS1440-05:** 실제 배포 용어 불변 manifest, 회원 저장·영수증 추가형 스키마·제약·인덱스·보존 정책.
+- **P1 GLOS1440-06:** 회원 잠금·100개 한도·CAS·원본 영수증·409/503 개정 구분·삭제 slug 묘비.
+- **P1 GLOS1440-07:** NestJS/Next BFF/Android app-api 인증·CSRF·비공개 캐시·페이지네이션·영수증 조회 동등성.
+- **P1 GLOS1440-08:** 용어 상세·계정 목록 CTA/상태, 320px·접근성·TalkBack·계정 전환·오프라인 UNKNOWN.
+- **P1 GLOS1440-09:** 관리자 비식별 집계, 개인정보 삭제, 공개 SEO 불변, 안전한 KPI·악용 방지.
+- **P1 GLOS1440-10:** 실제 격리 PostgreSQL 합성 10,001건, 동시 100건·BOLA/CSRF 음성 100건, 혼합 릴리스/ISR·롤백·WLD 0 변화 증명.
+
+**외부 독립 근거 게이트:** 이번 신규 검증 승인 0건, 누적 중복 제거 검증 승인 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 용어 slug·합성 데이터·GitHub 이슈·외부 발행처 언급을 독립 승인 근거로 집계하지 않는다. 신규 분산 세부기획 파일 없이 기존 영문 정본·한국어 동등 통합 문서에 반영한다.
