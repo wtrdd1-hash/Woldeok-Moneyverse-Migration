@@ -183,9 +183,15 @@ export async function approvePhotoAction(photoId: string): Promise<ActionState> 
 export async function rejectPhotoAction(photoId: string): Promise<ActionState> {
   if (!photoId) return { status: 'error', message: '사진 ID가 필요해요.' };
   try {
-    await mutate(`/api/v1/admin/photos/${encodeURIComponent(photoId)}`, {
-      method: 'DELETE',
-    });
+    const receipt = await mutate<{ rejected: boolean; deleted: boolean }>(
+      `/api/v1/admin/photos/${encodeURIComponent(photoId)}`,
+      { method: 'DELETE' },
+    );
+    // The API returns HTTP 200 even when PostgreSQL found no target row.
+    // An absent or ambiguous receipt must never be reported as a deletion.
+    if (receipt?.rejected !== false || receipt.deleted !== true) {
+      return { status: 'error', message: '사진 삭제가 확인되지 않았습니다. 목록을 다시 조회해 주세요.' };
+    }
     revalidatePath('/admin/content');
     revalidatePath('/gallery');
     return { status: 'ok', message: '사진을 반려하고 삭제했어요.' };
@@ -215,9 +221,13 @@ export async function togglePhotoPublicationAction(
 export async function deleteAnnouncementAction(announcementId: string): Promise<ActionState> {
   if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
   try {
-    await mutate(`/api/v1/admin/announcements/${encodeURIComponent(announcementId)}`, {
-      method: 'DELETE',
-    });
+    const receipt = await mutate<{ deleted: boolean }>(
+      `/api/v1/admin/announcements/${encodeURIComponent(announcementId)}`,
+      { method: 'DELETE' },
+    );
+    if (receipt?.deleted !== true) {
+      return { status: 'error', message: '공지사항 삭제가 확인되지 않았습니다. 목록을 다시 조회해 주세요.' };
+    }
     revalidatePath('/admin/content');
     revalidatePath('/announcements');
     revalidatePath('/');
