@@ -18,33 +18,23 @@ const MARKET_NAMES: Record<BlogLocale, string> = {
   ko: '한국', en: 'United States', ja: '日本', zh: '中国',
 };
 const PAGE_TITLES: Record<BlogLocale, string> = {
-  ko: '월덕 금융 교육 블로그 | 한국 금융 · 저축 · 투자',
-  en: 'US Personal Finance Education | Woldeok Moneyverse',
-  ja: '日本の金融教育ブログ | Woldeok Moneyverse',
-  zh: '中国家庭金融知识 | Woldeok Moneyverse',
+  ko: '월덕 블로그 | 경제 · 코딩 · 컴퓨터',
+  en: 'US Economics, Coding & Computers | Woldeok Moneyverse',
+  ja: '日本の経済・プログラミング・コンピュータ | Woldeok Moneyverse',
+  zh: '经济、编程与计算机知识 | Woldeok Moneyverse',
 };
 const PAGE_DESCRIPTIONS: Record<BlogLocale, string> = {
-  ko: '복리, 세금, ETF, 대출, 물가, 연금의 기본 원리를 한국 제도와 공식 자료를 바탕으로 배웁니다.',
-  en: 'Practical US guides to compounding, dividends, ETFs, mortgage math, CPI, and retirement, with primary sources.',
-  ja: '新NISA、ETF、住宅ローン、物価、年金、積立など日本の家計に役立つ金融教育記事。',
-  zh: '面向中国家庭的储蓄复利、股息税、ETF、房贷、物价、养老知识与官方参考资料。',
+  ko: '경제 원리, 프로그래밍, 네트워크와 컴퓨터 시스템을 국가별 공식 자료와 실제 예제로 학습합니다.',
+  en: 'US-focused educational explanations of economics, programming, networking, and computer systems with primary sources.',
+  ja: '経済の基礎、プログラミング、ネットワークとコンピュータの仕組みを一次資料から学びます。',
+  zh: '根据权威来源介绍经济基础、编程实践、网络与计算机系统的原理。',
 };
 
-function safeHeroImage(url?: string, category?: string): string {
-  if (url && /^\/images\/blog\/[a-zA-Z0-9._/-]+\.(png|webp|jpg|jpeg|svg)$/.test(url) && !url.includes('..')) {
-    if (fs.existsSync(path.join(process.cwd(), 'public', url.slice(1)))) {
-      return url;
-    }
+function safeHeroImage(url?: string): string | undefined {
+  if (!url || !/^\/images\/blog\/[a-zA-Z0-9._/-]+\.(png|webp|jpg|jpeg|svg)$/.test(url) || url.includes('..')) {
+    return undefined;
   }
-  const categoryMap: Record<string, string> = {
-    COMPOUND: '/images/blog/compound-interest-72-rule.svg',
-    MACRO: '/images/blog/macro-global-forex-pulse.svg',
-    WEALTH: '/images/blog/wealth-portfolio-roadmap.svg',
-    STOCKS: '/images/blog/stocks-valuation-dca.svg',
-    TAX: '/images/blog/tax-saving-isa-pension.svg',
-    TECH: '/images/blog/tech-distributed-ledger.svg',
-  };
-  return categoryMap[category || ''] || '/images/blog/compound-interest-72-rule.svg';
+  return fs.existsSync(path.join(process.cwd(), 'public', url.slice(1))) ? url : undefined;
 }
 
 export function metadataForHub(locale: BlogLocale): Metadata {
@@ -61,13 +51,13 @@ export function metadataForHub(locale: BlogLocale): Metadata {
   };
 }
 
-export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
-  const original = getBlogPostBySlug(slug);
+export async function metadataForArticle(slug: string, locale: BlogLocale): Promise<Metadata> {
+  const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) return { title: 'Article not found', robots: { index: false, follow: false } };
   const post = getBlogCountryEdition(original, locale);
   if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
   const canonical = blogUrl(slug, locale);
-  const hero = safeHeroImage(post.heroImage, post.category);
+  const hero = safeHeroImage(post.heroImage);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
     ...(isBlogDiscoverable(original) ? {} : { robots: { index: false, follow: true } }),
@@ -84,11 +74,10 @@ export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
 
 export function summarizeBlogPost(post: BlogPost) {
   const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
-  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage, category),relatedCalculatorHref,relatedCalculatorName};
+  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
 }
-
-export function renderBlogHub(locale: BlogLocale) {
-  const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
+export async function renderBlogHub(locale: BlogLocale) {
+  const posts = countryBlogPosts([...await verifiedPublicArticles(),...getAllBlogPosts()].filter(isBlogDiscoverable), locale);
   const canonical = blogHubUrl(locale);
   const freshnessNotice = getBlogFreshnessNotice(posts, locale);
   const jsonLd = {
@@ -134,12 +123,11 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   if (canonicalBlogSlug(slug) !== slug) {
     permanentRedirect(blogUrl(slug, locale));
   }
-  const original = getBlogPostBySlug(slug);
+  const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) notFound();
   const post = getBlogCountryEdition(original, locale);
   if (!post) notFound();
   const canonical = blogUrl(slug, locale);
-  const guaranteedHero = safeHeroImage(post.heroImage, post.category);
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'BlogPosting',
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
@@ -148,7 +136,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
     inLanguage: ({ ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN' })[locale],
     author: { '@type': 'Organization', name: post.author.name },
     publisher: { '@type': 'Organization', name: 'Woldeok Moneyverse', url: 'https://easy-scraping.com' },
-    ...(guaranteedHero ? { image: 'https://easy-scraping.com' + guaranteedHero } : {}),
+    ...(safeHeroImage(post.heroImage) ? { image: 'https://easy-scraping.com' + safeHeroImage(post.heroImage) } : {}),
   };
   return (
     <>
@@ -161,7 +149,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
             보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
           </p>
         )}
-        <BlogPostClient post={{ ...post, heroImage: guaranteedHero }} locale={locale} />
+        <BlogPostClient post={{ ...post, heroImage: safeHeroImage(post.heroImage) }} locale={locale} />
       </div>
     </>
   );

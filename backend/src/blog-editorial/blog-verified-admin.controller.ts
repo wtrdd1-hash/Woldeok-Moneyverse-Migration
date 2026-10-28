@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -9,10 +9,16 @@ import { requireUserId, type RequestWithSession } from '../auth/session.context'
 import { BlogVerifiedRepository } from './blog-verified.repository';
 
 @Controller('admin/blog-verified')
-@UseGuards(SessionGuard,AuthenticatedGuard,ConsentGuard,AdminGuard,AdminSessionGuard,CsrfGuard)
+@UseGuards(SessionGuard,AuthenticatedGuard,ConsentGuard,AdminGuard,AdminSessionGuard)
 export class BlogVerifiedAdminController {
   constructor(@Inject(BlogVerifiedRepository) private readonly repo:BlogVerifiedRepository) {}
+  @Get()
+  async list() {
+    return {posts: await this.repo.listForAdmin()};
+  }
+
   @Post(':slug/moderate')
+  @UseGuards(CsrfGuard)
   async moderate(@Req() req:RequestWithSession, @Param('slug') slug:string, @Body() body:unknown) {
     const input = body && typeof body==='object' ? body as Record<string,unknown> : {};
     const action = input.action;

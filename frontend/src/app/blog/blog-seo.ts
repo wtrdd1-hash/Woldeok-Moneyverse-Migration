@@ -6,9 +6,9 @@ export type BlogLocale = 'ko' | 'en' | 'ja' | 'zh';
 // Never equate an AI-generated article with a source-verified, approved publication.
 // A future explicit approval schema must replace this gate before reviewed AI drafts publish.
 export function isBlogDiscoverable(post: BlogPost): boolean {
-  return post.isAiGenerated === false || (post.status === "PUBLISHED" &&
+  return post.status !== "WITHDRAWN" && (post.isAiGenerated === false || (post.status === "PUBLISHED" &&
     typeof post.verificationReceipt === "string" &&
-    /^[a-f0-9-]{36}$/i.test(post.verificationReceipt));
+    /^[a-f0-9-]{36}$/i.test(post.verificationReceipt)));
 }
 
 const ALIASES: Readonly<Record<string, string>> = {
@@ -36,6 +36,13 @@ export function hasCountryEdition(post: BlogPost, locale: BlogLocale): boolean {
   return Boolean(post.translations?.[locale]?.content?.trim());
 }
 export function blogAlternateLanguages(post: BlogPost): Record<string, string> {
+  // Original-country AI articles have exactly one native canonical language;
+  // do not advertise a nonexistent /blog Korean counterpart for US/JP/CN.
+  if (post.verificationReceipt) {
+    const locale = ({ KR:'ko', US:'en', JP:'ja', CN:'zh' } as Record<string,BlogLocale>)[post.country ?? ''];
+    const code = ({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'} as const)[locale ?? 'ko'];
+    return locale ? { [code]:blogUrl(post.slug,locale) } : {};
+  }
   const languages: Record<string, string> = { 'ko-KR': blogUrl(post.slug, 'ko') };
   for (const [locale, code] of [['en', 'en-US'], ['ja', 'ja-JP'], ['zh', 'zh-CN']] as const) {
     if (hasCountryEdition(post, locale)) languages[code] = blogUrl(post.slug, locale);
