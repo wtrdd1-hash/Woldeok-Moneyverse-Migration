@@ -229,7 +229,7 @@ export default async function AdminMarketPage() {
                 <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
                   {stocks.stocks.map((stock) => {
                     const dyn = dynamics?.stocks.find((d) => d.symbol === stock.symbol);
-                    const gap = dyn ? gapPercent(stock.current_price, dyn.fair_value) : '—';
+                    const gap = dyn ? formatMarketGap(stock.current_price, dyn.fair_value) : '—';
 
                     return (
                       <div key={stock.symbol} className="pt-3 first:pt-0 space-y-2.5">
