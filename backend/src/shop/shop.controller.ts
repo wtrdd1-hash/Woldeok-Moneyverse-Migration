@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { filterShopUpkeep, parseShopUpkeepCap } from './shop-upkeep-cap';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -122,24 +123,34 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
-  async publicCatalog(@Query('q') query?: string) {
+  @ApiOperation({
+    summary: 'The public catalogue; q searches text, maxUpkeep caps weekly WLD maintenance',
+  })
+  async publicCatalog(@Query('q') query?: string, @Query('maxUpkeep') maxUpkeep?: string) {
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopUpkeep(filterShopItems(catalogItems, query), maxUpkeep) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+  @ApiOperation({
+    summary: 'The member catalogue; q searches text, maxUpkeep caps weekly WLD maintenance',
+  })
+  async catalog(
+    @Req() request: RequestWithSession,
+    @Query('q') query?: string,
+    @Query('maxUpkeep') maxUpkeep?: string,
+  ) {
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopUpkeep(filterShopItems(catalogItems, query), maxUpkeep) };
   }
 
   @Get('holdings')
