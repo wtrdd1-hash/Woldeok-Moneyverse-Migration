@@ -70,7 +70,10 @@ export function BlogPostClient({ post, locale }: Props) {
   const activeTags = (locale !== 'ko' && post.translations?.[locale]?.tags) || post.tags;
 
   const blocks = renderBlogMarkdownBlocks(activeContent);
-  const adPlan = getBlogAdPlan(blocks.length);
+  // AI-published articles have no human curation receipt: Google-served ads are ineligible.
+  const adPlan = post.verificationReceipt
+    ? { showTop:false, showBottom:false, inlineAfter:[] as number[] }
+    : getBlogAdPlan(blocks.length);
 
   return (
     <article className="max-w-4xl mx-auto space-y-8">

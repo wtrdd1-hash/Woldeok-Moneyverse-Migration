@@ -70,7 +70,7 @@ describe('country-specific blog and canonical SEO', () => {
       expect(getAllBlogPosts()).toEqual(expect.arrayContaining([expect.objectContaining({ slug: generated.slug })]));
       const xml = await (await getBlogSitemap()).text();
       expect(xml).not.toContain(generated.slug);
-      expect(metadataForArticle(generated.slug, 'ko').robots).toMatchObject({ index: false });
+      expect((await metadataForArticle(generated.slug, 'ko')).robots).toMatchObject({ index: false });
     } finally {
       if (old === undefined) fs.rmSync(store, { force: true });
       else fs.writeFileSync(store, old);

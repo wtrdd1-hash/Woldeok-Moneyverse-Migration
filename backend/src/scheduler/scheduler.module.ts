@@ -11,7 +11,9 @@ import { OperationsRepository } from '../admin/operations.repository';
 import { sealingKeyFrom } from '../auth/totp';
 import { sendDirectAdminAlert } from '../discord/discord-direct-alert';
 import { Scheduler } from './scheduler';
-import { selectTwoHourBlogSlot } from '../blog-editorial/blog-two-hour-rotation';
+import { BlogVerifiedModule } from '../blog-editorial/blog-verified.module';
+import { BlogVerifiedRepository } from '../blog-editorial/blog-verified.repository';
+import { createVerifiedBlogJob } from '../blog-editorial/blog-verified-job';
 
 /**
  * Starts the schedule, if this deployment has a database.
@@ -55,11 +57,12 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
 }
 
 @Module({
+  imports: [BlogVerifiedModule],
   providers: [
     {
       provide: SCHEDULER,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null): Scheduler | null => {
+      inject: [PG_POOL, BlogVerifiedRepository],
+      useFactory: (pool: Queryable | null, blogRepo: BlogVerifiedRepository): Scheduler | null => {
         if (!pool) return null;
         const reconcilerUrl = process.env.RECONCILER_DATABASE_URL;
         const logger = new Logger('Scheduler');
@@ -95,18 +98,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
               }
               return result;
             },
-            'blog.rotation_2h': async () => {
-              const slot = selectTwoHourBlogSlot(new Date());
-              if (!slot) return { skipped: true, reason: 'ODD_HOUR', cadence: 'two_hours' };
-              // The scheduler selects intent only; verified country-native
-              // writer, evidence checks and atomic DB publisher are still
-              // required. A cron credential cannot bypass approval of claims.
-              // Do not call legacy /api/blog/generate or silently publish JSON.
-              if (process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED !== 'true') {
-                return { skipped: true, reason: 'VERIFIED_PUBLISHER_NOT_ENABLED', ...slot };
-              }
-              return { skipped: true, reason: 'VERIFIED_PUBLISHER_NOT_IMPLEMENTED', ...slot };
-            },
+            'blog.rotation_2h': createVerifiedBlogJob(blogRepo, detail => logger.warn(detail)),
             'work.auto_tune_policy': async () => {
               if (process.env.WORK_AUTOTUNE_ENABLED === 'false') {
                 return { skipped: true, reason: 'disabled' };

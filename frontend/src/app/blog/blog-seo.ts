@@ -6,7 +6,9 @@ export type BlogLocale = 'ko' | 'en' | 'ja' | 'zh';
 // Never equate an AI-generated article with a source-verified, approved publication.
 // A future explicit approval schema must replace this gate before reviewed AI drafts publish.
 export function isBlogDiscoverable(post: BlogPost): boolean {
-  return post.isAiGenerated === false;
+  return post.isAiGenerated === false || (post.status === "PUBLISHED" &&
+    typeof post.verificationReceipt === "string" &&
+    /^[a-f0-9-]{36}$/i.test(post.verificationReceipt));
 }
 
 const ALIASES: Readonly<Record<string, string>> = {
@@ -27,6 +29,9 @@ export function blogHubUrl(locale: BlogLocale): string {
   return 'https://easy-scraping.com' + (locale === 'ko' ? '' : '/' + locale) + '/blog';
 }
 export function hasCountryEdition(post: BlogPost, locale: BlogLocale): boolean {
+  if (post.verificationReceipt) {
+    return ({ KR:'ko', US:'en', JP:'ja', CN:'zh' } as Record<string,string>)[post.country ?? ''] === locale;
+  }
   if (locale === 'ko') return true;
   return Boolean(post.translations?.[locale]?.content?.trim());
 }
