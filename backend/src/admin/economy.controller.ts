@@ -313,11 +313,17 @@ export class AdminEconomyController {
   @Get('alerts')
   @ApiOperation({ summary: 'Alerts, unacknowledged first' })
   async alerts(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
-    // A query string arrives as text or not at all. Parsing it here keeps the
-    // repository's limit check about the number rather than about the shape.
-    const requested = limit === undefined ? undefined : Number(limit);
-    if (requested !== undefined && !Number.isSafeInteger(requested)) {
-      throw new BadRequestException('limit must be a whole number');
+    // Reject noncanonical wire values before the financial alert query.
+    // Number() accepts blanks, exponent notation, hex and signed values;
+    // repeated query parameters arrive as arrays and must also fail closed.
+    const requested =
+      limit === undefined
+        ? undefined
+        : typeof limit === 'string' && /^[1-9][0-9]{0,2}$/.test(limit)
+          ? Number(limit)
+          : NaN;
+    if (requested !== undefined && (!Number.isSafeInteger(requested) || requested > 200)) {
+      throw new BadRequestException('limit must be a decimal integer between 1 and 200');
     }
     return {
       alerts: await this.guarded(
