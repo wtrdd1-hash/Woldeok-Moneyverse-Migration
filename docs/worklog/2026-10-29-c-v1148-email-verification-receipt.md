@@ -17,3 +17,8 @@
 
 ### CI feedback — 07:55 KST
 - Candidate run #40783286287 failed TypeScript due to Vitest `it.each` interpreting the array of invalid cookie sets as positional arguments. Fixed the test parameterization to pass each full cookie set as one tuple; focused tests and frontend typecheck re-run PASS. This is a test defect, not a production-code bypass. All required gates must be rerun on the new HEAD.
+
+### Main movement and branch preservation — 08:04 KST
+- Main advanced from `35971c6` to consolidated `c47a4f2`, then `f05efcb5`; fetched/rebased all three task commits with no overlapping changed paths or conflicts. Focused frontend 26, backend receipt 2 and frontend typecheck re-passed after rebase.
+- Concurrent external GitHub cleanup **closed unmerged Draft PR #1798 and deleted its remote head at 08:00:53–54 KST** while our unique code was not in main. This run did not authorize that deletion. Local worktree preserved all commits. Republished the rebased work under a new independent `auto/hourly-c-verify-email-receipt-v1148-20261029-0805` branch rather than discarding the changes.
+- Before rebase, 1,895 frontend tests, 155 backend auth unit tests (21 DB skips), lint (0 errors, 1,099 warnings), app-api 180 endpoints and security-floor 9 PASS. Security audit: 1 production Moderate; 12 overall (3 Low, 9 Moderate). Isolated real-PG and official Test exact-SHA pending fresh CI. No main/DB/Test/Production writes.

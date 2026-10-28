@@ -14,3 +14,8 @@
 
 ### CI 피드백 — 07:55 KST
 - 후보 빌드 #40783286287에서 Vitest `it.each` 인자 배열이 펼쳐지는 테스트 타입 오류 발생. 쿠키 배열을 하나의 튜플 인자로 전달하도록 수정, 집중 테스트·프론트 타입 검사 재통과. 새 HEAD에서 모든 게이트 재검증 필요.
+
+### main 변경·브랜치 보존 — 08:04 KST
+- main `35971c6` → `c47a4f2` → `f05efcb5` 변경 확인 후 3개 작업 커밋을 충돌 없이 rebase. 집중 프론트 26건·Backend 2건·프론트 타입 검사 재통과.
+- 외부 GitHub 정리 작업이 미병합 Draft PR #1798을 08:00:53~54 KST에 닫고 원격 브랜치를 삭제함. 이번 작업에서 삭제를 지시하지 않았으며 main에도 고유 변경이 미반영 상태. 로컬 worktree를 보존하고 새로운 독립 브랜치 `auto/hourly-c-verify-email-receipt-v1148-20261029-0805`로 재게시.
+- 이전 SHA 프론트 1,895 PASS, Backend auth 155 PASS/21 SKIP, lint 오류 0, app-api 180 일치, 보안 하한 9 PASS. 보안 감사 운영 Moderate 1건/전체 12건 잔존. 새 SHA 전체 CI·공식 Test 미완료, 배포 금지.
