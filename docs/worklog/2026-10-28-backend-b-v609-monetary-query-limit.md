@@ -26,3 +26,6 @@ Scope: no DB migration, no ledger writes, no admin mutation, no frontend UX chan
 - Root Next build: Next static-page worker SIGABRT; **root build gate FAIL** (backend build PASS). Root audit: 3 LOW + 9 MODERATE (qs advisory), **security gate FAIL**. QA v1342 also reports five applied migration checksum mismatches and overbroad application DML on shared live DB; not modified here.
 - Official Test exact-SHA authenticated API/DB/finance E2E, independent backup restore and GitOps approvals: **BLOCKED**. No main merge, Test promotion, Production deployment, schema change, ledger write, or branch cleanup.
 - Existing concurrent PRs #1695 (blog), #1696 (monetary audit docs), A/C/QA and their worktrees untouched.
+
+## Latest main synchronization (14:53 KST)
+During verification `origin/main` advanced to `2f2169a99698fdcf3a03867f532caca3ff599d77` (blog publisher integration and webpack build fix). This independent B branch was rebased cleanly; the prior candidate SHA `d3f9a3c8ceb2b1c0f9e6e06c443167dfccb8a06f` is superseded. EN/KO project plan reread; no conflict with monetary query validation. Focused and required gates must be rerun on the rebased SHA. Other branches untouched.
