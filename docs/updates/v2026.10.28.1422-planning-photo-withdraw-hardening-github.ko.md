@@ -9,3 +9,8 @@
 **외부 근거:** PostgreSQL/OWASP/W3C 공식 발행처 3곳 검토, 신규 중복 제거 승인 0건, 누적 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 운영/Test 코드·DB·WLD·미디어·기능 스위치 변경 없음.
 
 **개발 연계:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726 및 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1730.
+
+## GitHub 전달·완료 기록
+- Draft PR #1732: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1732 (미병합 기획 #1727 기반, main 독립 병합 금지).
+- 개발 이슈 #1726 전달: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726#issuecomment-6466288371 ; 개발 A Draft #1730 리뷰: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1730#issuecomment-6466289117 .
+- 문서 14개, git diff --check PASS, 릴리스 분류 시험 17 PASS / 0 FAIL, 영문·국문 기획 3쌍·백로그 10개 PASS. 원격 SHA 검증, PR CI는 완료 확인 전이며 공식 Test가 아님. QA v1347 진행 중, 완료된 최신 QA v1346 FAILED.
