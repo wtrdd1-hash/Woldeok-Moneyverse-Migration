@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { completePasswordReset } from './actions';
 export const metadata: Metadata = { title: '새 비밀번호 설정', robots: { index: false, follow: false } };
-const errors: Record<string,string> = { invalid:'재설정 링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해 주세요.', policy:'사용하기 어려운 비밀번호입니다. 다른 비밀번호를 선택해 주세요.', fields:'새 비밀번호를 모두 입력해 주세요.', mismatch:'새 비밀번호 확인 값이 일치하지 않습니다.' };
+const errors: Record<string,string> = { invalid:'재설정 링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해 주세요.', policy:'사용하기 어려운 비밀번호입니다. 다른 비밀번호를 선택해 주세요.', fields:'새 비밀번호를 모두 입력해 주세요.', mismatch:'새 비밀번호 확인 값이 일치하지 않습니다.', unverified:'비밀번호 변경 완료를 확인할 수 없습니다. 다시 시도하거나 새 재설정 링크를 요청해 주세요.' };
 export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<{token?: string; error?: string}> }) {
  const p=await searchParams; const token=p.token??'';
  return <div data-page="reset-password" className="mv-page mv-page--utility grid gap-6"><PageHeader title="새 비밀번호 설정">재설정이 완료되면 기존 로그인 세션은 모두 종료됩니다.</PageHeader>
