@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
-import { Controller, Get, Post, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 export interface BackupFileInfo {
   readonly fileName: string;
@@ -30,7 +30,7 @@ export interface BackupStatusResponse {
 
 @ApiTags('admin')
 @Controller('admin/backups')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard, AdminGuard)
 export class AdminBackupController {
   private getBackupDir(): string {
     const defaultProd = '/srv/moneyverse-data/backups/daily';
@@ -71,7 +71,7 @@ export class AdminBackupController {
               sizeBytes: stat.size,
               sizeMb: Math.round((stat.size / (1024 * 1024)) * 100) / 100,
               createdAt: stat.mtime.toISOString(),
-              status: 'VERIFIED' as const,
+              status: 'PENDING' as const,
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -94,36 +94,9 @@ export class AdminBackupController {
   }
 
   @Post('trigger')
-  @ApiOperation({ summary: 'Manually trigger database dump and Cloudflare R2 backup pipeline' })
-  async triggerBackup(): Promise<{ message: string; scriptPath: string; triggeredAt: string }> {
-    const prodScript = '/srv/moneyverse-data/releases/production-current/scripts/backup/backup-r2-free.sh';
-    const localScript = path.resolve(process.cwd(), 'scripts/backup/backup-r2-free.sh');
-    const targetScript = fs.existsSync(prodScript) ? prodScript : localScript;
-
-    if (!fs.existsSync(targetScript)) {
-      throw new HttpException(
-        { message: 'Backup script not found', path: targetScript },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    try {
-      const child = spawn('bash', [targetScript], {
-        detached: true,
-        stdio: 'ignore',
-      });
-      child.unref();
-
-      return {
-        message: 'Backup pipeline triggered successfully in background',
-        scriptPath: targetScript,
-        triggeredAt: new Date().toISOString(),
-      };
-    } catch (err: any) {
-      throw new HttpException(
-        { message: 'Failed to launch backup process', error: err?.message },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @ApiOperation({ summary: 'Manual backup disabled until verified job receipts and restore checks exist' })
+  async triggerBackup(): Promise<never> {
+    // A detached child PID is not a completed, durable or restorable backup receipt.
+    throw new ServiceUnavailableException('Verified backup execution is not available');
   }
 }
