@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1417.6 — Blog administrator SEO header privacy correction
+- After isolated blog-only Production routing, administrator blog HTTP header had index,follow despite HTML noindex. Production-only four admin blog routes now send explicit X-Robots-Tag noindex,nofollow, while public blog retains index,follow; Nginx syntax, anonymous 403 deletion and live headers verified. Private old-config rollback retained.
+
+## v2026.10.28.1417 — Blog-only Production promotion ACTIVE
+- Blog-only isolated Production 3481 backend/3482 Next frontend now serve country blog hubs, admin blog, verified API and blog sitemap; exact CI/Test app SHA 4688e84... . Only blog SQL 288-290 added after restricted full DB backup. Nginx routed blog URL patterns and dual static fallback only; legacy homepage/finance/membership and production-current pointer untouched. Actual live locale blogs/verified API 200 and Playwright 320–1024px PASS. Legacy JSON post generator 503, existing 13 public posts protected. AI 2h publisher remains OFF after 125-second model timeout (0 DB-verified posts); authenticated administrator edits for old JSON posts limited by immutable file. Finance gate still BLOCKED with unchanged baseline. See docs/worklog/2026-10-28-blog-only-production-v1417.md.
+
 ## v2026.10.28.1416 — Blog source merged; Treasury 18k dividend root cause found
 - PR #1695 merged to main 2f2169a99698fdcf3a03867f532caca3ff599d77 after CI #3971 and premerge exact-SHA Test success. 18 USER_CASH account variances of +1000 WLD correspond exactly to a contemporaneous audited 18-person Treasury citizen dividend and Treasury audit journal; migration 240 updates available_amount directly without ledger_postings. Source identified but main-ledger reconciliation, 3 core app DML privileges and Production DB migration 268 remain outstanding. A real Test AI publication attempt failed at 125-second model generation timeout, zero verified posts. No Production code cutover or two-hour publisher activation. See docs/worklog/2026-10-28-blog-main-finance-v1416.md.
 
