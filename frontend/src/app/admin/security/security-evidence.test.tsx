@@ -32,6 +32,8 @@ describe('admin IP block evidence boundary', () => {
   });
   it('distinguishes verified empty from unavailable or malformed responses', () => {
     expect(parseAdminIpBlocks({ blocks: [] })).toEqual([]);
+    const { blocked_by: _actor, lifted_by: _lifter, ...essential } = block;
+    expect(parseAdminIpBlocks({ blocks: [essential] })?.length).toBe(1);
     expect(parseAdminIpBlocks(null)).toBeNull();
     expect(parseAdminIpBlocks({ blocks: 'none' })).toBeNull();
     expect(parseAdminIpBlocks({ blocks: [{ ...block, block_id: 'not-uuid' }] })).toBeNull();

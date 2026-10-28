@@ -2,10 +2,10 @@ export interface VerifiedIpBlock {
   readonly block_id: string;
   readonly network: string;
   readonly reason: string;
-  readonly blocked_by: string;
+  readonly blocked_by?: string;
   readonly blocked_at: string;
   readonly expires_at: string | null;
-  readonly lifted_by: string | null;
+  readonly lifted_by?: string | null;
   readonly lifted_at: string | null;
   readonly active: boolean;
 }
@@ -45,11 +45,11 @@ export function parseAdminIpBlocks(raw: unknown): readonly VerifiedIpBlock[] | n
     if (!object(item) || typeof item.block_id !== 'string' || !ADMIN_BLOCK_UUID.test(item.block_id) ||
         ids.has(item.block_id.toLowerCase()) || !network(item.network) ||
         typeof item.reason !== 'string' || item.reason.trim().length < 3 || item.reason.length > 1000 ||
-        typeof item.blocked_by !== 'string' || !ADMIN_BLOCK_UUID.test(item.blocked_by) ||
+        (item.blocked_by !== undefined && (typeof item.blocked_by !== 'string' || !ADMIN_BLOCK_UUID.test(item.blocked_by))) ||
         !date(item.blocked_at) || !optionalDate(item.expires_at) || !optionalDate(item.lifted_at) ||
-        !(item.lifted_by === null || (typeof item.lifted_by === 'string' && ADMIN_BLOCK_UUID.test(item.lifted_by))) ||
+        !(item.lifted_by === undefined || item.lifted_by === null || (typeof item.lifted_by === 'string' && ADMIN_BLOCK_UUID.test(item.lifted_by))) ||
         typeof item.active !== 'boolean' || (item.lifted_at !== null && item.active) ||
-        ((item.lifted_at === null) !== (item.lifted_by === null))) return null;
+        (item.lifted_by !== undefined && ((item.lifted_at === null) !== (item.lifted_by === null)))) return null;
     ids.add(item.block_id.toLowerCase());
     blocks.push(item as unknown as VerifiedIpBlock);
   }
