@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  BadRequestException, Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -36,7 +36,12 @@ export class SupportController {
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
   @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
-  async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
+  async threads(@Req() req: RequestWithSession, @Query('status') status?: string) {
+    if (status !== undefined && (typeof status !== 'string' || !['open', 'waiting_user', 'resolved'].includes(status))) {
+      throw new BadRequestException('invalid support status');
+    }
+    return { threads: await this.repo().myThreads(requireUserId(req), status ?? null) };
+  }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {

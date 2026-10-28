@@ -23,10 +23,18 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, limit = 50) {
+  myThreads(actor: string, status: string | null = null) {
+    if (status !== null) {
+      return queryRows<SupportThreadRow>(this.pool,
+        `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
+         FROM public.support_my_threads($1,$2)
+         WHERE status = $3
+         ORDER BY last_message_at DESC,thread_id DESC LIMIT $4`,
+        [actor, 100, status, 50]);
+    }
     return queryRows<SupportThreadRow>(this.pool,
       'SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at FROM public.support_my_threads($1,$2)',
-      [actor, limit]);
+      [actor, 50]);
   }
 
   createThread(actor: string, key: string, subject: string, body: string) {

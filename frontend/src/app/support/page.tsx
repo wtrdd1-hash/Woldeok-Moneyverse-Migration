@@ -11,10 +11,14 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string }> }) {
   await requireMember();
-  const { threads } = await api<{ threads: Thread[] }>('/api/v1/support/threads');
-  const selected = (await searchParams).thread ?? threads[0]?.thread_id;
+  const params = await searchParams;
+  const status = params.status && ['open', 'waiting_user', 'resolved'].includes(params.status) ? params.status : null;
+  const { threads } = await api<{ threads: Thread[] }>(`/api/v1/support/threads${status ? `?status=${status}` : ''}`);
+  const selected = status
+    ? (threads.some(t => t.thread_id === params.thread) ? params.thread : threads[0]?.thread_id)
+    : (params.thread ?? threads[0]?.thread_id);
   const messages = selected
     ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
     : [];
@@ -26,7 +30,15 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
         <textarea name="body" maxLength={2000} required placeholder="문의 내용을 적어 주세요." className="min-h-28 rounded-xl border bg-background p-3" />
         <button className="rounded-xl bg-primary px-4 py-3 font-bold text-primary-foreground">문의 시작</button>
       </form>
-      <div className="grid gap-2">{threads.map(t => <Link key={t.thread_id} href={`/support?thread=${t.thread_id}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <form method="get" action="/support" className="grid gap-2 rounded-xl border bg-card p-3">
+        <label htmlFor="support-status" className="text-sm font-semibold">문의 처리 상태</label>
+        <select id="support-status" name="status" defaultValue={status ?? ''} className="min-h-11 rounded-xl border bg-background p-2">
+          <option value="">전체</option><option value="open">관리자 답변 대기</option>
+          <option value="waiting_user">내 답변 대기</option><option value="resolved">처리 완료</option>
+        </select>
+        <button type="submit" className="min-h-11 rounded-xl border bg-primary px-4 text-primary-foreground">필터 적용</button>
+      </form>
+      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">조건에 맞는 문의가 없습니다.</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
       </Link>)}</div>
     </section>

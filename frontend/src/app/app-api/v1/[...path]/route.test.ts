@@ -306,3 +306,25 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('Android member support status privacy', () => {
+  it.each([200, 403, 500])('forwards status and fences owner-only support response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ threads: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/support/threads?status=resolved'), context('support', 'threads'));
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('status')).toBe('resolved');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
+  it('fences support errors before upstream responds', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('unavailable'); }));
+    const response = await GET(request('/app-api/v1/support/threads?status=open'), context('support', 'threads'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+});
