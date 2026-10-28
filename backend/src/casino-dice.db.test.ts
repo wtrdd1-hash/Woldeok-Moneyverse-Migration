@@ -91,6 +91,14 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
   beforeAll(async () => {
     pool = new Pool({ connectionString: DATABASE_URL, max: 2 });
     migrator = new Pool({ connectionString: MIGRATOR_DATABASE_URL, max: 1 });
+    // The activation trigger also requires a qualifying coin trial. Never rely
+    // on the separate coin test suite running first in a parallel CI worker.
+    const { rows: coinRows } = await pool.query<{ passed: boolean }>(
+      'SELECT passed FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)',
+      [randomUUID(), TRIAL_SIZE],
+    );
+    expect(firstRow(coinRows, 'the coin prerequisite trial').passed).toBe(true);
+
     // Committed, not rolled back: the activation gate below reads these, and
     // so does anything else that wants to open the casino on this database.
     for (const game of GAMES) {
@@ -208,6 +216,13 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
   };
 
   describe('the die, and the modulo bias it refuses to have', () => {
+    it('establishes the coin prerequisite even when the dice suite runs alone', async () => {
+      const { rows } = await pool.query<{ qualifies: boolean }>(
+        'SELECT EXISTS(SELECT 1 FROM public.casino_latest_qualifying_distribution_trial()) AS qualifies',
+      );
+      expect(firstRow(rows, 'the qualifying coin trial').qualifies).toBe(true);
+    });
+
     /**
      * The whole of requirement one, in one assertion, and it needs no
      * randomness at all: `byte % 6` gives faces 1-4 forty-three byte values
