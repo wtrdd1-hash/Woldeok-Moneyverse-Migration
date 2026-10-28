@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1418 — Mobile admin publisher status Production release
+- Production screenshot root cause: manual AI publish controls were hard-disabled and mobile admin header/badge wrapped poorly. PR #1707 code SHA cfb13272beea53c4d8c20eff7f379b6f66343033, CI #40644673371 PASS, exact official Test PASS, v1418 blog-only Production backend 3483 and frontend 3484 promoted with Nginx scoped blog cutover and previous Next bundle fallback. Fixed Production blog frontend API_ORIGIN from legacy 3000 to verified 3483. Admin-only read-only verified writer status/refresh displays real scheduler/model flags, DB post count and next KST country/topic. No false manual AI publisher. Live blog mobile QA 320–1024 PASS, 4-country/old pages 200, anonymous admin status 403/401; financial/member runtimes unchanged. Model-generated publication remains OFF/zero verified articles; legacy JSON write guard prevents old admin edits, logged-in admin flow not E2E tested. See v1418 bilingual release worklog.
+
 ## v2026.10.28.1417.6 — Blog administrator SEO header privacy correction
 - After isolated blog-only Production routing, administrator blog HTTP header had index,follow despite HTML noindex. Production-only four admin blog routes now send explicit X-Robots-Tag noindex,nofollow, while public blog retains index,follow; Nginx syntax, anonymous 403 deletion and live headers verified. Private old-config rollback retained.
 
