@@ -24,3 +24,19 @@ describe('account privacy center', () => {
     expect(actions).toContain("revalidatePath('/account/privacy');");
   });
 });
+
+describe('privacy request type filter', () => {
+  it('uses allowlisted request types and never interpolates an arbitrary query into the backend URL', () => {
+    expect(page).toContain('searchParams');
+    expect(page).toContain('REQUEST_TYPE_NAME');
+    expect(page).toContain('Object.hasOwn(REQUEST_TYPE_NAME');
+    expect(page).toContain('`/api/v1/privacy/requests?type=${selectedType}`');
+  });
+
+  it('provides keyboard-accessible recent-history filter links and a bounded result explanation', () => {
+    expect(page).toContain('aria-label="개인정보 요청 종류 필터"');
+    expect(page).toContain('aria-current={selectedType === value ?');
+    expect(page).toContain('최근 100건');
+    expect(page).toContain('href="/account/privacy"');
+  });
+});

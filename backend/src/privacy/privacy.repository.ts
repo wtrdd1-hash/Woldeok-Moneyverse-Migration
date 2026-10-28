@@ -117,6 +117,7 @@ export interface PrivacyRequestCreateInput {
 export interface PrivacyRequestListInput {
   readonly actorUserId: unknown;
   readonly limit?: unknown;
+  readonly requestType?: unknown;
 }
 
 // The service layer re-validates every receipt/list field, so these stay
@@ -193,14 +194,33 @@ export class PostgresPrivacyRequestRepository {
   }
 
   async listMyRequests(input: PrivacyRequestListInput): Promise<PrivacyRequestListedRow[]> {
-    const { actorUserId, limit = 30 } = exactInput(
+    const { actorUserId, limit = 30, requestType } = exactInput(
       input,
       'privacy request list',
-      new Set(['actorUserId', 'limit']),
+      new Set(['actorUserId', 'limit', 'requestType']),
     );
     const actor = requirePrivacyRequestUuid(actorUserId, 'authenticated user id');
     const requestLimit = requirePrivacyRequestLimit(limit);
     /** public.privacy_list_my_requests RETURNS TABLE: packages/database/migrations/015-privacy-data-subject-requests.sql */
+    if (requestType !== undefined) {
+      const type = requirePrivacyRequestType(requestType);
+      // Filtering is deliberately bounded to the latest 100 owner-scoped records;
+      // never imply this is an all-history search or read the underlying table.
+      const { rows } = await this.pool.query<PrivacyRequestListedRow>(
+        `SELECT
+           r.request_id::text AS request_id,
+           r.request_type,
+           r.detail,
+           r.status,
+           r.created_at
+         FROM public.privacy_list_my_requests($1, $2) AS r
+         WHERE r.request_type = $3
+         ORDER BY r.created_at DESC, r.request_id DESC
+         LIMIT $4`,
+        [actor, 100, type, requestLimit],
+      );
+      return rows;
+    }
     const { rows } = await this.pool.query<PrivacyRequestListedRow>(
       `SELECT
          request_id::text AS request_id,

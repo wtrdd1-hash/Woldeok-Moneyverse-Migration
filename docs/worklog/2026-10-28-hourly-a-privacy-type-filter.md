@@ -16,3 +16,9 @@
 
 ## FINISHED
 - Pending verification. No merge, deployment, DB mutation, rollback or branch deletion authorized.
+
+### 09:29 KST checkpoint
+- RED: Backend new filter 3 failed/1 passed; Web privacy filter 2 failed/3 passed. Android query forwarding already existed, and its new regression passes.
+- GREEN: Backend focused 4/4 and Web focused 31/31 (including Android gateway). Existing session/consent/CSRF and no-store boundaries remain.
+- Backend and Frontend typecheck PASS after building contract. Changed-file ESLint PASS; initial frontend test mock signature corrected after TS2493.
+- Mid-task `origin/main` and EN/KO plan re-read; integration still HOLD. No other worktrees touched.

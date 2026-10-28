@@ -93,6 +93,19 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
+  it('preserves a selected privacy request type through Android while preventing private caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ requests: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/privacy/requests?type=deletion'), context('privacy', 'requests'));
+    expect(response.status).toBe(200);
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('type')).toBe('deletion');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
   it('fences privacy request POST receipt even when upstream marks it public', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requestId: 'private-receipt' }), {
