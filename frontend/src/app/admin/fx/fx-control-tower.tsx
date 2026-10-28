@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { toast } from 'sonner';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 export interface FxStatusData {
   reserves: {
@@ -85,137 +85,17 @@ export interface FxStatusData {
   };
 }
 
-export function FxControlTower({ initialData }: { initialData: FxStatusData | null }) {
-  const [data, setData] = useState<FxStatusData | null>(initialData);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [swapDrawAmount, setSwapDrawAmount] = useState<number>(500000000); // 기본 5억 USD
+export function FxControlTower({ initialData }: { initialData: FxStatusData }) {
+  const router = useRouter();
+  const data = initialData;
+  const refreshData = () => router.refresh();
 
-  const refreshData = async () => {
-    try {
-      const res = await fetch('/api/v1/admin/fx/status');
-      const json = await res.json();
-      if (json.success && json.data) {
-        setData(json.data);
-      }
-    } catch (e) {
-      console.error('Failed to refresh FX status', e);
-    }
-  };
-
-  const handleIntervention = async (type: 'SELL_USD' | 'BUY_USD', amountUsd: number = 50000) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-    const actionLabel = type === 'SELL_USD' ? '달러 매도 개입 (환율 하락 안정화)' : '달러 매수 개입 (외환보유액 확충)';
-    
-    try {
-      const res = await fetch('/api/v1/admin/fx/intervene', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, amountUsd }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success(`🏛️ [스무딩 오퍼레이션] ${actionLabel} 완료!`, {
-          description: `조정 후 환율: 1 USD = ${result.data.newRate.toFixed(2)} WLD (잔여 외환보유액: $${result.data.newReservesUsd.toLocaleString()})`,
-        });
-        await refreshData();
-      } else {
-        toast.error('시장개입 실패', { description: result.error || '권한 또는 유동성 오류' });
-      }
-    } catch {
-      toast.error('시장개입 처리 중 네트워크 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleDrawdownSwap = async (agreementId: string) => {
-    if (isProcessing || swapDrawAmount <= 0) return;
-    setIsProcessing(true);
-
-    try {
-      const res = await fetch('/api/v1/admin/fx/swaps/drawdown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agreementId,
-          amountUsd: swapDrawAmount,
-          purpose: '외환위기 대응 긴급 유동성 수혈 및 시장 안정화',
-        }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success('🚨 [통화스왑] 우방국 긴급 자금 인출 및 외환보유액 확충 완료!', {
-          description: `$${swapDrawAmount.toLocaleString()} USD 인출 집행 (확충 후 보유액: $${result.data.newReservesUsd.toLocaleString()})`,
-        });
-        await refreshData();
-      } else {
-        toast.error('통화스왑 인출 실패', { description: result.error || '한도 초과' });
-      }
-    } catch {
-      toast.error('통화스왑 인출 처리 중 네트워크 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSettleForward = async (contractId: string) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const res = await fetch('/api/v1/admin/fx/forward/settle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contractId }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.success('선물환 계약 즉시 정산 완료', {
-          description: `환급액: ${result.data.refundWld.toLocaleString()} WLD (실현손익: ${result.data.contract.realizedPnlWld?.toLocaleString()} WLD)`,
-        });
-        await refreshData();
-      } else {
-        toast.error('정산 실패', { description: result.error });
-      }
-    } catch {
-      toast.error('선물환 정산 중 오류가 발생했습니다.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleToggleHalt = async () => {
-    if (!data || isProcessing) return;
-    setIsProcessing(true);
-    const nextHaltState = !data.reserves.isHalted;
-
-    try {
-      const res = await fetch('/api/v1/admin/fx/halt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isHalted: nextHaltState }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        toast.warning(nextHaltState ? '🚨 외환시장이 긴급 동결되었습니다.' : '✅ 외환시장이 정상 재개되었습니다.');
-        await refreshData();
-      } else {
-        toast.error('상태 변경 실패', { description: result.error });
-      }
-    } catch {
-      toast.error('네트워크 오류');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const reserves = data?.reserves;
-  const txs = data?.txs ?? [];
-  const sdrAllocations = data?.sdrAllocations ?? [];
-  const swapAgreements = data?.swapAgreements ?? [];
-  const forwardContracts = data?.forwardContracts ?? [];
-  const ews = data?.ews;
+  const reserves = data.reserves;
+  const txs = data.txs;
+  const sdrAllocations = data.sdrAllocations ?? [];
+  const swapAgreements = data.swapAgreements ?? [];
+  const forwardContracts = data.forwardContracts ?? [];
+  const ews = data.ews;
 
   const getStageColor = (stage?: string) => {
     switch (stage) {
@@ -233,7 +113,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              한국은행 외국환평형기금 & IMF SDR 연동
+              가상 외환시장 · 서버 검증 관측값
             </span>
             {reserves?.isHalted ? (
               <span className="px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse">
@@ -241,41 +121,40 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
               </span>
             ) : (
               <span className="px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                정상 개장 (OPEN)
+                거래 정지 기록 없음 (NOT HALTED)
               </span>
             )}
             {ews && (
               <span className={`px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase rounded-full border ${getStageColor(ews.stage)}`}>
-                EWS {ews.stage} (FSI: {ews.fsiScore}점)
+                EWS {ews.stage} (FSI: {ews?.fsiScore ?? '—'}점)
               </span>
             )}
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            🏛️ 글로벌 외환안정망 & 서울외환시장(FX) 종합 관제탑
+            가상 외환시장(FX) 관측 현황
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            SDR 바스켓·금보유고 다변화, 우방국 통화스왑 비상 라인, 내외금리차 CIP 선물환 및 스무딩 오퍼레이션을 지휘합니다.
+            서비스 내부 가상 데이터입니다. 실물 외환보유액·국가 협정 또는 투자상품이 아닙니다. 금융 집행은 검증 전까지 비활성화됩니다.
           </p>
+          <p className="mt-1 text-xs text-slate-400">마지막 보유액 갱신: {new Date(reserves.updatedAt).toLocaleString()} · 24시간 이내 확인된 관측값</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={refreshData}
-            disabled={isProcessing}
             className="px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all"
           >
             새로고침
           </button>
           <button
-            onClick={handleToggleHalt}
-            disabled={isProcessing}
+            disabled
             className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-semibold shadow-lg transition-all active:scale-95 ${
               reserves?.isHalted
                 ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30'
                 : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/30'
             }`}
           >
-            {reserves?.isHalted ? '외환시장 정상 재개' : '외환시장 긴급 동결 (킬스위치)'}
+            {reserves?.isHalted ? '정상 재개 (검증 전 중지)' : '긴급 동결 (검증 전 중지)'}
           </button>
         </div>
       </div>
@@ -285,79 +164,68 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
         {/* 외환보유액 잔고 */}
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-            총 외환보유액 (FX Reserves)
+            가상 외환보유액 (FX Reserves)
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
-            ${reserves ? reserves.totalReservesUsd.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '1,000,000.00'}
+            ${reserves.totalReservesUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            BIS 기준 대외준비금 적정성 142.8% (최상급)
+            가상 서비스 내부 잔액 · 실물 외환보유액 아님
           </div>
         </div>
 
         {/* 현재 시장 환율 */}
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-            서울외환시장 실시간 환율 (USD/WLD)
+            가상 시장 기준환율 (USD/WLD)
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">
-            {reserves ? reserves.currentRate.toFixed(2) : '1,352.50'} <span className="text-sm font-sans text-slate-400">WLD</span>
+            {reserves.currentRate.toFixed(2)} <span className="text-sm font-sans text-slate-400">WLD</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            기준 앵커: 1,350.00 WLD (변동폭 정상)
+            기준 앵커: {reserves.targetAnchorRate.toLocaleString()} WLD (가상 기준값)
           </div>
         </div>
 
         {/* 통화스왑 총 가용한도 */}
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-            우방국 통화스왑 가용한도
+            가상 통화스왑 가용한도
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
-            $70.0 <span className="text-sm font-sans text-slate-400">Billion USD</span>
+            ${(swapAgreements.reduce((total, item) => total + item.availableFacilityUsd, 0) / 1e9).toFixed(2)} <span className="text-sm font-sans text-slate-400">Billion virtual USD</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            한미($600억) + 한일($100억) 상설 안전판
+            조회된 가상 협정의 잔여 가용한도 합계
           </div>
         </div>
 
         {/* 외환위기 조기경보 FSI 지수 */}
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
           <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-            외환위기지수 (FSI Index)
+            가상 외환 위험지표 (FSI Index)
           </span>
           <div className="mt-2 text-2xl font-bold font-mono text-amber-400">
-            {ews?.fsiScore ?? 12} <span className="text-sm font-sans text-slate-400">/ 100 pt</span>
+            {ews?.fsiScore ?? '—'} <span className="text-sm font-sans text-slate-400">/ 100 pt</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            {ews?.triggerReason ?? '외환시장 정상 범위 내 안정 유지'}
+            {ews?.triggerReason ?? '미측정'}
           </div>
         </div>
       </div>
 
-      {/* 3. 우방국 통화스왑(Currency Swap) 협정 및 긴급 인출 콘솔 */}
+      {/* 3. 가상 통화스왑(Currency Swap) 협정 및 긴급 인출 콘솔 */}
       <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span>🤝</span> 양자간 통화스왑(Currency Swap) 협정 및 비상 유동성 인출 라인
+              <span>🤝</span> 가상 통화스왑(Currency Swap) 협정 기록
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              외환위기 발생 시 우방국 중앙은행과의 스왑 협정에 따라 즉시 달러를 인출하여 국내 외환보유액에 수혈합니다.
+              가상 스왑 협정 기록입니다. 인출 집행은 원장·권한 검증 전까지 중단됩니다.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">인출 단위:</span>
-            <select
-              value={swapDrawAmount}
-              onChange={(e) => setSwapDrawAmount(Number(e.target.value))}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
-            >
-              <option value={100000000}>$1억 USD</option>
-              <option value={500000000}>$5억 USD</option>
-              <option value={1000000000}>$10억 USD</option>
-            </select>
-          </div>
+          <span role="status" className="text-xs text-amber-300">집행 기능 검증 전 중지</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -386,11 +254,11 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
                 </div>
               </div>
               <button
-                onClick={() => handleDrawdownSwap(swap.id)}
-                disabled={isProcessing || swap.availableFacilityUsd <= 0}
-                className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/30 active:scale-95 transition-all"
+                disabled
+                aria-disabled="true"
+                className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold opacity-50 cursor-not-allowed bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/30 active:scale-95 transition-all"
               >
-                ${(swapDrawAmount / 1e6).toLocaleString()}M USD 비상 인출 집행
+                스왑 인출 중지
               </button>
             </div>
           ))}
@@ -401,10 +269,10 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
       <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <span>🪙</span> 외환보유액 다변화: IMF 공식 SDR 바스켓 & 한국은행 실물 금 보유고
+            <span>🪙</span> 가상 SDR 바스켓 및 자산 배분 기록
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            달러 단일 의존성을 탈피하여 5대 기축통화 및 실물 금(104.4t)을 분산 비축해 국가 신인도를 극대화합니다.
+            조회된 가상 서비스 자산 배분입니다. 실물 금 보유고를 뜻하지 않습니다.
           </p>
         </div>
 
@@ -426,14 +294,14 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
         </div>
       </div>
 
-      {/* 5. 중앙은행 외환당국 시장개입(스무딩 오퍼레이션) 작전 본부 */}
+      {/* 5. 가상 외환 운영 시장개입(스무딩 오퍼레이션) 작전 본부 */}
       <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <span>🎯</span> 중앙은행 외환당국 스무딩 오퍼레이션 (시장개입 컨트롤)
+            <span>🎯</span> 가상 외환 운영 스무딩 오퍼레이션 (시장개입 컨트롤)
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            원화 가치 급락(환율 1,420 초과) 또는 수출 기업 타격(환율 1,280 미만) 발생 시 즉시 외환보유액을 투입하여 시장을 안정화합니다.
+            가상 시장 개입은 회계 원장 및 권한 경계의 독립 검증 전까지 실행할 수 없습니다.
           </p>
         </div>
 
@@ -442,18 +310,19 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
             <div>
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-bold text-rose-300">달러 매도 개입 (WLD 가치 방어)</h4>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-rose-500/20 text-rose-300">환율 25 WLD 하락 효과</span>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-rose-500/20 text-rose-300">예상 효과 미검증</span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                외환보유액에서 $50,000 USD를 시장에 매도 공급하여 WLD 가치를 방어하고 환율 급등을 진정시킵니다.
+                가상 매도 개입의 효과는 검증되지 않았습니다. 원장 검증 전 집행할 수 없습니다.
               </p>
             </div>
             <button
-              onClick={() => handleIntervention('SELL_USD', 50000)}
-              disabled={isProcessing}
-              className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/30 active:scale-95 transition-all"
+              
+              disabled
+              aria-disabled="true"
+              className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold opacity-50 cursor-not-allowed bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/30 active:scale-95 transition-all"
             >
-              $50,000 USD 매도 개입 집행
+              매도 개입 중지
             </button>
           </div>
 
@@ -461,18 +330,19 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
             <div>
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-bold text-emerald-300">달러 매수 개입 (외환보유액 확충)</h4>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/20 text-emerald-300">환율 20 WLD 상승 효과</span>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/20 text-emerald-300">예상 효과 미검증</span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                시장의 달러를 $50,000 USD 매수하여 외환보유액을 비축하고 과도한 WLD 원화 강세를 완화합니다.
+                가상 매수 개입의 효과는 검증되지 않았습니다. 원장 검증 전 집행할 수 없습니다.
               </p>
             </div>
             <button
-              onClick={() => handleIntervention('BUY_USD', 50000)}
-              disabled={isProcessing}
-              className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all"
+              
+              disabled
+              aria-disabled="true"
+              className="w-full py-2.5 min-h-[44px] rounded-xl text-xs font-bold opacity-50 cursor-not-allowed bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all"
             >
-              $50,000 USD 매수 개입 집행
+              매수 개입 중지
             </button>
           </div>
         </div>
@@ -481,7 +351,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
       {/* 6. 선물환(Forward) 전체 계약 체결 현황 및 즉시 정산 */}
       <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <span>🛡️</span> 대국민 & 기업 선물환(Forward) 환헤지 체결 원장 및 정산 관리
+          <span>🛡️</span> 가상 선물환(Forward) 계약 관측 및 정산 보류
         </h3>
         <div className="overflow-x-auto rounded-xl border border-slate-800/80">
           <table className="w-full text-left text-xs text-slate-300">
@@ -504,7 +374,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
                     <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
                       <span className="text-2xl opacity-60">📑</span>
                       <p className="text-sm font-medium">현재 체결된 선물환 환헤지 계약이 없습니다.</p>
-                      <p className="text-xs text-slate-500">기업 및 유저의 신규 1/3/6개월 환헤지 신청 시 실시간으로 기록됩니다.</p>
+                      <p className="text-xs text-slate-500">확인된 가상 선물환 계약 기록이 없습니다.</p>
                     </div>
                   </td>
                 </tr>
@@ -533,11 +403,11 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
                     <td className="px-4 py-3">
                       {c.status === 'ACTIVE' ? (
                         <button
-                          onClick={() => handleSettleForward(c.id)}
-                          disabled={isProcessing}
-                          className="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-medium transition-colors"
+                          disabled
+                          aria-disabled="true"
+                          className="min-h-11 px-2.5 py-1 rounded opacity-50 cursor-not-allowed bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-medium transition-colors"
                         >
-                          즉시정산
+                          정산 중지
                         </button>
                       ) : (
                         <span className="font-mono text-slate-400">손익: {c.realizedPnlWld?.toLocaleString()} WLD</span>
@@ -554,7 +424,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
       {/* 7. 최근 외환 환전 실시간 원장 테이블 */}
       <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <span>📋</span> 서울외환시장 최근 실시간 환전 체결 원장
+          <span>📋</span> 가상 외환시장 최근 환전 기록
         </h3>
         <div className="overflow-x-auto rounded-xl border border-slate-800/80">
           <table className="w-full text-left text-xs text-slate-300">
@@ -575,7 +445,7 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData | nu
                     <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
                       <span className="text-2xl opacity-60">💱</span>
                       <p className="text-sm font-medium">최근 외환 거래 내역이 없습니다.</p>
-                      <p className="text-xs text-slate-500">외환 시장 참여자의 실시간 환전 체결 내역이 즉시 동기화됩니다.</p>
+                      <p className="text-xs text-slate-500">서버에 기록된 최근 환전 내역을 조회합니다.</p>
                     </div>
                   </td>
                 </tr>
