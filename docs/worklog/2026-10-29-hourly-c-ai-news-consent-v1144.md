@@ -14,5 +14,7 @@
 - Controller validates optional boolean and explicitly defaults admin POST to draft-only. Service persists batch without calling publication when false; scheduled invocations retain true default. Next action parses actual backend receipt, rejects skipped/malformed/contradictory publication and distinguishes deterministic fallback. No schema changes.
 - `origin/main` unchanged `35971c600...`; canonical EN/KO plans unchanged at mid-check. `git diff --check` PASS. Root 98%, /tmp 97%: no unsafe backup root test or local large restore.
 
-## FINISHED
-- Pending exact HEAD evidence and release decision.
+## FINISHED — provisional release HOLD (05:24 KST)
+- HTTP controller E2E 4/4 PASS. Frontend full 1,877 PASS; backend no-DB 1,946 PASS/440 SKIP; database 46 PASS/4 SKIP; contract 38 PASS; app-api 180 endpoints match; whole lint 0 errors/1,099 warnings; whole typecheck PASS; backend build PASS; bot 11 PASS and bot production audit 0.
+- Security production audit FAIL (1 Moderate, `qs`), full audit FAIL (3 Low/9 Moderate). Root test unsafe backup path not executed. Local frontend large build and isolated real PostgreSQL restore NOT RUN due root 98%, /tmp 97%; CI PostgreSQL required. Official Test `/api/version` `cfb13272...` and Production `unknown`, so exact-SHA auth/API/DB/user E2E BLOCKED.
+- No Test/Production rollout, main merge, GitOps, rollback, DB/WLD mutation, shared worktree or reservation modification. Draft/HOLD PR and final SHA CI evidence pending. Never claim release PASS.

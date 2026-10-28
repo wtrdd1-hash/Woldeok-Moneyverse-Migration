@@ -23,18 +23,18 @@
 - Scheduler's existing explicit auto-publication continues unchanged.
 
 ### Task 1 — backend explicit consent
-- [ ] Add RED tests in service/controller for false/missing/true publication choice.
-- [ ] Run RED and record failure.
-- [ ] Add DTO boolean, explicit controller pass-through and draft-only service branch.
-- [ ] Run GREEN and regression tests.
+- [x] Add RED tests in service/controller for false/missing/true publication choice.
+- [x] Run RED and record failure.
+- [x] Add DTO boolean, explicit controller pass-through and draft-only service branch.
+- [x] Run GREEN and regression tests.
 
 ### Task 2 — frontend receipt truth
-- [ ] Add RED tests for skipped/malformed/published/draft/fallback.
-- [ ] Run RED and record failure.
-- [ ] Parse real receipt and default checkbox off; distinguish generated, published, skipped and fallback.
-- [ ] Run GREEN and broader frontend tests.
+- [x] Add RED tests for skipped/malformed/published/draft/fallback.
+- [x] Run RED and record failure.
+- [x] Parse real receipt and default checkbox off; distinguish generated, published, skipped and fallback.
+- [x] Run GREEN and broader frontend tests.
 
 ### Task 3 — gates and review
-- [ ] Re-fetch main and canonical plan, inspect overlap.
-- [ ] Run safe build/lint/typecheck/unit/integration/real-PG/security/app-api/E2E and CI.
-- [ ] Record PASS/FAIL/BLOCKED with exact SHA and preserve Draft/HOLD until release gates pass.
+- [x] Re-fetch main and canonical plan, inspect overlap.
+- [x] Run safe build/lint/typecheck/unit/integration/security/app-api/E2E; real-PG/CI remain blocked or pending as documented.
+- [x] Record PASS/FAIL/BLOCKED and preserve Draft/HOLD until release gates pass.
