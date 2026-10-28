@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1442 / F675-166 — 금융 용어 학습 목록의 정규 식별자·다국어 읽음·재시도 무결성 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- GitHub 연계: [Draft PR #1784](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1784)는 미병합 선행 [#1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780)에 의존하며 [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779)를 갱신함. 문서 전용·운영승격 HOLD.
 
 **기준 및 사이클.** Previous Feature Addition v1440 → Current Feature Improvement v1442 → Next Feature Addition v1444(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730을 시작·중간에 재확인했다. 선행 Draft PR #1780은 미병합이며 이번 변경은 문서 전용 후속 기획이다. 마지막 독립 확인 가능 QA 기준선은 v1355 FAILED/HOLD이며 miniPC Debian 13.6과 개발 PostgreSQL을 읽기 전용으로 조사했다. 서비스가 ACTIVE라는 사실만으로 운영 안전을 인정하지 않는다.
 

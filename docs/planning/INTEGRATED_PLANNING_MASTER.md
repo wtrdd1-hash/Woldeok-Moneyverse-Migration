@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1442 / F675-166 — Canonical glossary identity, locale reading and replay hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- GitHub handoff: [Draft PR #1784](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1784) is stacked on unmerged [#1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780); [development issue #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779) updated. Docs only; release HOLD.
 
 **Authority and cycle.** Previous Feature Addition v1440 -> Current Feature Improvement v1442 -> Next Feature Addition v1444 (provisional). The latest remote main is 35971c600f25869c96f1c666d4b9f58927202730 (start/mid checked), predecessor planning Draft PR #1780 remains unmerged; this is a docs-only stacked change, not a deployed glossary feature. The latest independently available prior QA baseline is v1355 (FAILED/HOLD); live miniPC Debian 13.6 and development PostgreSQL were read-only inspected. Never infer Production safety from active services or source-only tests.
 
