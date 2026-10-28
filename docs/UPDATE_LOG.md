@@ -1,3 +1,9 @@
+## 2026-10-28 12:04 KST — Planning v1408 / F675-158 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1406 → Current Addition v1408 → Next Improvement v1410 provisional. Main a28bed9aa40ff74d492824ae12892a7d52132fdd start/mid; canonical AGENTS.md, README.md, EN/KO project plan, real wallet UI/controller/repository/CSV/Android gateway and QA v1339 checked. GitHub issue #1680; open unmerged support Draft #1675 untouched.
+- New verified owner-only wallet activity pagination beyond 50: signed session-bound keyset cursor, fixed period, honest asOf/hasMore, exact WLD strings, Load older/Retry, Android/no-store/noindex/a11y and CSV loaded-only disclaimer. No ledger mutation. Backlog ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. Synthetic 10,001/100 concurrency/100 forgery acceptance specified, NOT run.
+- QA v1339 Production SHA unknown, Test SHA not main, exact-SHA official Test and restore unverified; data disk 87%. Release HOLD. External approved new 0, deduplicated cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only, no runtime/DB/WLD/Test/Production writes. Skill plugin list empty; installed Superpowers skills read on miniPC.
+
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

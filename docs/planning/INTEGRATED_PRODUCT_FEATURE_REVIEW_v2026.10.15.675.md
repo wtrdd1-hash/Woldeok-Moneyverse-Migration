@@ -1,3 +1,9 @@
+## v1408 / F675-158 — Wallet activity pagination: addition candidate (DRAFT/HOLD)
+- Source-backed opportunity: Next /wallet/activity exposes only recent 50 with all/7d/30d and truncation notice; NestJS controller recent 1..50; SQL owner cash/bank posting aggregation and deterministic created_at,id order. No Load older or dedicated paginated read. Existing CSV is recent rows only.
+- Proposal: separate owner-bound read-only keyset endpoint and explicit Load older/Retry/Start over; signed session+period+expiry cursor, fixed bounds and honest best-effort asOf; no finance writes or total-history guarantee. Preserve GET /wallet. Android, accessibility, noindex/no-store, admin aggregates, exact BigInt strings and negative ACL tests.
+- P0 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04; P1 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. Detailed design in integrated master; tests specified not run; default OFF; QA v1339/Production BLOCKED; approved external new 0, cumulative UNKNOWN/10,000. Issue #1680. Independent main branch; unmerged #1675 remains untouched.
+
+
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
 ## F675-06 detailed adoption — v2026.10.15.688

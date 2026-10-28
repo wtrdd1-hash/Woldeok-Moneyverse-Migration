@@ -1,3 +1,12 @@
+## v1408 — F675-158 verified wallet history pagination (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Feature Improvement v1406 → Current Feature Addition v1408 → Next Feature Improvement v1410 (provisional). Main a28bed9aa40ff74d492824ae12892a7d52132fdd verified start/midpoint 2026-10-28 12:01–12:04 KST; authoritative AGENTS.md, README.md, this English canonical and Korean counterpart inspected. Issue #1680. Independent from open unmerged support Draft #1675 and other A/B/C/QA/Gemini branches.
+- Verified frontend /wallet/activity has all/7d/30d but only recent=50, a hasMore warning without Load older; backend wallet.controller.ts enforces recent<=50, repository aggregates owner cash/bank postings with created_at/id order and LIMIT+1. Existing recent CSV is only loaded rows. No deployed paginated endpoint.
+- Add owner/session-bound GET /api/v1/wallet/activity?period=all|7d|30d&limit=1..50&cursor=opaque; signed keyset, bounded absolute period and upper tuple, truthful asOf observation (not durable cross-request snapshot), hasMore/nextCursor, exact integer-string WLD, private no-store/noindex, Android parity. /wallet/activity Load older/Retry/Start over and accessibility. No financial writes, no auto full export.
+- P0 ENV1408-01 (runtime SHA/87% data/restore), SEC1408-02 (app DML 235/241, PUBLIC bank EXECUTE 3, checksum 5), REL1408-03 (#1663 PR preservation and exact-SHA Test/GitOps), WAL1408-04 (owner/cursor/precision/completeness). P1 WAL1408-05 (DB read/ACL/index), WAL1408-06 (cursor/consistency), WAL1408-07 (Nest/Next/Android), WAL1408-08 (member UX/a11y), WAL1408-09 (admin privacy/SEO/KPI), WAL1408-10 (isolated PG/rollback). Full contract and acceptance in INTEGRATED_PLANNING_MASTER.md and Korean equivalent.
+- QA v1339: main CI classify/policy PASS, runtime SKIPPED; Production version unknown; Test 6f697e74... not main; exact-SHA official Test, independent restore, authenticated finance E2E unverified. Production BLOCKED. 10,001 synthetic transactions, 100 concurrency and 100 forged requests are TESTS SPECIFIED, NOT RUN. Feature OFF, docs-only; no runtime/DB/WLD/Test/Production change. External independent approved new 0; cumulative deduplicated verified UNKNOWN / 10,000, BLOCKED / IN PROGRESS.
+- Backlog IDs: ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10.
+
+
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
