@@ -21,3 +21,7 @@ Pending RED/GREEN and review.
 ## Finished
 
 Pending evidence and release decision.
+
+### RED checkpoint — 07:34 KST
+
+New tests fail against the original implementation: Backend 4/4 RED (authenticated HTTP returns 200; absent repository fabricates success and empty history; direct repository issues SQL); Frontend action 1/1 RED (returns `ok` without a settlement receipt). No shared database was queried. These are test-double/source-path reproductions, not evidence of actual Production payouts.
