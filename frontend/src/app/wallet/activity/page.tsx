@@ -62,7 +62,7 @@ export default async function WalletActivityPage({
           ['7d', '최근 7일'],
           ['30d', '최근 30일'],
         ] as const).map(([value, label]) => (
-          <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm">
+          <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm" className="min-h-11">
             <Link href={activityPeriodUrl(value, direction)} aria-current={period === value ? 'page' : undefined}>
               {label}
             </Link>
@@ -76,7 +76,7 @@ export default async function WalletActivityPage({
           ['out', '나간 금액'],
           ['neutral', '잔액 변동 없음'],
         ] as const).map(([value, label]) => (
-          <Button key={value} asChild variant={direction === value ? 'default' : 'outline'} size="sm">
+          <Button key={value} asChild variant={direction === value ? 'default' : 'outline'} size="sm" className="min-h-11">
             <Link href={activityPeriodUrl(period, value)} aria-current={direction === value ? 'page' : undefined}>
               {label}
             </Link>
@@ -96,7 +96,7 @@ export default async function WalletActivityPage({
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
               title={direction === "all" && period === "all" ? "아직 기록된 활동이 없어요." : "선택한 조건의 기록이 없어요."}
-              description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
+              description={direction === "all" && period === "all" ? "보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다." : "다른 기간이나 입출금 조건을 선택해 확인해 주세요."}
             />
           ) : (
             wallet.recentTransactions.map((entry) => {

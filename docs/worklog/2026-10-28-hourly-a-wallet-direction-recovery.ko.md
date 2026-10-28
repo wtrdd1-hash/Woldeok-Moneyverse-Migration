@@ -16,3 +16,8 @@
 ### GREEN 및 충돌 해결
 - Backend 8/8, Frontend/Android 30/30 통과. app-api 캐시 충돌은 기존 채팅/은행 보호를 유지하고 지갑을 추가해 해결했다.
 - 중간 main과 영문/국문 통합기획서 재확인 완료. 운영 DB/원장 변경 없음.
+
+## 종료 — 코드 구현, 통합 보류
+- [완료] RED/GREEN, 격리 PostgreSQL 2 PASS, Backend 1,930 PASS/442 SKIP, DB 45 PASS/3 SKIP, Bot 11 PASS, 전체 Lint/Typecheck/계약/빌드 PASS.
+- [차단] Frontend 기존 블로그 테스트 1 FAIL(1,866 PASS), 루트 통합 테스트 310초 TIMEOUT, 공식 Test 정확 SHA·DB ACL·인증 E2E·독립 복원·GitOps 미검증.
+- 원격 브랜치/PR 삭제 0건, 보호 참조 352개 보존, Test/Production/원장 변경 및 롤백 0건. QA 상세는 `docs/qa/2026-10-28-a1025-wallet-direction-recovery.ko.md`.

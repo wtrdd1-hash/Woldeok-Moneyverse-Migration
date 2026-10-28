@@ -27,3 +27,16 @@
 - Backend wallet focused 8/8 PASS; Frontend wallet + Android app-api focused 30/30 PASS. No ledger writes or migrations.
 - Mid-work remote main still a28bed9aa; EN/KO integrated plan hashes unchanged.
 - Awaiting isolated real PostgreSQL, full gates, CI, exact-SHA Test.
+
+## FINISHED — source implementation; integration HOLD
+- [x] RED and GREEN TDD checkpoints, SQL before LIMIT, integer-string precision, owner scoping and Android cache boundary.
+- [x] Original #1647 unmerged head verified against recovery ref; no destructive cleanup.
+- [x] Mid-work and pre-integration latest main/EN+KO plans re-read (unchanged a28bed9aa).
+- [x] Isolated PostgreSQL 17.11 synthetic owner/ledger 2 PASS; ephemeral container removed.
+- [x] Backend 1,930 PASS / 442 SKIP, DB 45 PASS / 3 SKIP, Bot 11 PASS, Frontend 1,866 PASS / 1 FAIL (unchanged admin blog test).
+- [x] Full lint 0 errors / 1,102 warnings on retry; typecheck, contract, backend and Next builds PASS; root+bot high+ audit PASS.
+- [ ] Aggregate root test: TIMEOUT after 310s; no PASS.
+- [ ] Official Test exact-SHA authenticated E2E, full real DB ACL, independent restore, accessibility/SEO browser audit, GitOps release: BLOCKED.
+- P0 incident #1663, Test release symlink target missing, Production public version unknown; no merge or deployment.
+- Branches/PRs: 10 live remote heads incl main, 8 open PR before new PR; 352 recovery refs. Deleted 0; all unique/unmerged preserved. Rollback not triggered (no Test/Production change).
+- See paired docs/qa/2026-10-28-a1025-wallet-direction-recovery[.ko].md and miniPC report logs.
