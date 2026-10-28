@@ -13,3 +13,12 @@
 
 ## FINISHED
 - Pending exact SHA, test/CI/PR and final release decision.
+
+### Main correction before implementation
+- Fresh `origin/main` already includes C FX evidence parser and disabled browser write buttons; earlier inspection of a stale integration worktree misidentified these as missing. Scope narrowed to latent service mutation methods and read-on-GET wallet creation, which remain unsafe in current main. Existing P0 #1129 documents the ledger bypass.
+
+### MID (2026-10-28 21:49 KST)
+- Confirmed current main's FX frontend already has validated response parser and disabled write controls. Added explicit member/admin FX settlement suspension banner to both error and verified read-only views.
+- RED: 8/8 service containment tests failed against current main (repository invoked). Initial test collection was blocked by missing local `undici`; resolved with a read-only dependency symlink to an existing worktree with byte-identical lockfile. No dependency installation or other worktree modification.
+- GREEN: 8 service + 8 repository + 2 read-only tests PASS, 9 frontend FX tests PASS. Backend TypeScript typecheck and changed-file ESLint PASS. Removed direct financial UPDATE/INSERT logic from eight repository write methods, and fail-closed at both service and repository boundaries. No SQL or live DB writes.
+- Current main fetched again; no integration attempted pending complete gates.
