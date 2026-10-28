@@ -114,14 +114,15 @@ describe('admin support authoritative mutation receipts', () => {
     await expect(adminSupportStatus(statusForm())).rejects.toThrow();
   });
 
-  it('rejects a status not confirmed by authorized readback', async () => {
-    mockStatus(undefined, { threads: [{ thread_id: threadId, status: 'open' }] });
-    await expect(adminSupportStatus(statusForm())).rejects.toThrow();
+  it('trusts a verified DB status receipt even when the bounded inbox omits the thread', async () => {
+    mockStatus(undefined, { threads: [] });
+    await expect(adminSupportStatus(statusForm())).resolves.toBeUndefined();
+    expect(mockApi).not.toHaveBeenCalledWith('/api/v1/admin/support/threads');
   });
 
-  it('accepts a status only after authorized readback confirms it', async () => {
+  it('accepts a status only after a matching database-backed mutation receipt', async () => {
     mockStatus();
     await expect(adminSupportStatus(statusForm())).resolves.toBeUndefined();
-    expect(mockApi).toHaveBeenCalledWith('/api/v1/admin/support/threads');
+    expect(mockApi).toHaveBeenCalledWith(expect.stringContaining('/status'), expect.objectContaining({ method: 'PUT' }));
   });
 });

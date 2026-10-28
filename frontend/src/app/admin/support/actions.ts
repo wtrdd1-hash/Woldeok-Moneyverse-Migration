@@ -79,14 +79,9 @@ export async function adminSupportStatus(formData: FormData): Promise<void> {
     throw new Error('Support status receipt was not verified');
   }
 
-  // The existing backend performs the privileged DB mutation; verify its result with an independent admin read.
-  const readback = await api<unknown>('/api/v1/admin/support/threads');
-  if (!isRecord(readback) || !Array.isArray(readback.threads) ||
-      readback.threads.filter((thread: unknown) =>
-        isRecord(thread) && thread.thread_id === id && thread.status === status
-      ).length !== 1) {
-    throw new Error('Support status could not be confirmed');
-  }
+  // NestJS returns this receipt only after the privileged SQL function reports
+  // a successful UPDATE. The inbox is capped at 100 and sorted by status; a
+  // separate list read cannot reliably find a newly resolved thread.
 
   revalidatePath('/admin/support');
 }
