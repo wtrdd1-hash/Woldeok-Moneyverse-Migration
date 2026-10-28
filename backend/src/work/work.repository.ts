@@ -202,8 +202,12 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, recommendedOnly?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
+    if (recommendedOnly !== undefined && recommendedOnly !== 'true' && recommendedOnly !== 'false') {
+      throw new WorkInputError('recommendedOnly must be true or false');
+    }
+    const recommended = recommendedOnly === 'true';
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -212,8 +216,9 @@ export class WorkRepository {
               task.daily_limit, task.taken_today, task.reward_preview::text,
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
-       FROM public.work_task_board($1) AS task`,
-      [actor],
+       FROM public.work_task_board($1) AS task
+       WHERE ($2::boolean = false OR task.recommended)`,
+      [actor, recommended],
     );
     const now = Date.now();
     return rows.map((task) => {

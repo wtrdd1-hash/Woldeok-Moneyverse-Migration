@@ -15,3 +15,12 @@
 
 ## FINISHED
 Pending verification. No merge or release authorized.
+
+## IN PROGRESS — 07:32 KST
+- RED verified: backend recommended SQL/query/controller tests 9 FAIL; frontend recommendation tests 2 FAIL. Existing app-api proxy test added.
+- GREEN implementation: strict optional `recommendedOnly` query, actor-bound function SQL predicate, accessible Today’s picks toggle, no-store work app-api responses. No schema, grants or WLD writes.
+
+## MID-CHECKPOINT — 07:35 KST
+- New repository unit tests 9 PASS; frontend filter + Android gateway 31 PASS; real DOM recommendation toggle 1 PASS with `NODE_ENV=test` (initial React production-mode test setup failure corrected). Real-PG regression added; without `DATABASE_URL` database suite SKIPS, not PASS.
+- Backend/frontend typechecks PASS after repairing **worktree-local dependency linkage** (`undici` from an existing local pnpm store; no tracked dependency changes). First frontend typecheck found a test spy signature defect; fixed and reran. Lint PASS with 0 errors/1099 pre-existing warnings.
+- Main rechecked: `35971c600f25869c96f1c666d4b9f58927202730`. Other agents' work untouched. Full suites, build, isolated PG, security audit and CI pending.

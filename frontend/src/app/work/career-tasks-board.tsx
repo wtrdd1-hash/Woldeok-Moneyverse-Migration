@@ -19,7 +19,7 @@ import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TakeButton } from './work-forms';
 import { dailyQuotaLabel } from './work-quota';
-import { filterWorkTasks } from './work-search';
+import { filterRecommendedWorkTasks, filterWorkTasks } from './work-search';
 import {
   boardOrder,
   difficultyLabel,
@@ -68,6 +68,7 @@ export function CareerTasksBoard({
 
   const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [recommendedOnly, setRecommendedOnly] = useState(false);
 
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
 
@@ -75,7 +76,7 @@ export function CareerTasksBoard({
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
   const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
-  const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
+  const displayTasks = boardOrder(filterWorkTasks(filterRecommendedWorkTasks(scopedTasks, recommendedOnly), searchQuery), activeJobType);
 
   return (
     <div className="grid gap-4 w-full max-w-full min-w-0">
@@ -129,6 +130,17 @@ export function CareerTasksBoard({
           )}
         </div>
 
+        <Button
+          type="button"
+          variant={recommendedOnly ? 'default' : 'outline'}
+          size="sm"
+          aria-pressed={recommendedOnly}
+          onClick={() => setRecommendedOnly((current) => !current)}
+          className="self-start min-h-9 gap-2 text-xs"
+        >
+          <Star aria-hidden="true" className="size-3.5" />
+          {isEn ? "Today's picks only" : '오늘의 추천만 보기'}
+        </Button>
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
           <span>{isEn ? 'Find a task' : '업무 검색'}</span>
           <input
@@ -146,7 +158,11 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim()
+            recommendedOnly && !searchQuery.trim()
+              ? isEn
+                ? 'No recommended tasks in this category today.'
+                : '오늘 이 직업에 추천된 업무가 없어요.'
+              : searchQuery.trim()
               ? isEn
                 ? 'No work tasks match your search.'
                 : '검색 조건에 맞는 업무가 없어요.'
