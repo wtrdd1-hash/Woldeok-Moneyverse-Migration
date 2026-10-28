@@ -83,16 +83,10 @@ describe('TreasuryBondService Unit Tests', () => {
     );
   });
 
-  it('시간당 쿠폰 이자 정산 시 이자 지급 집행 및 관리자 알림을 전송한다', async () => {
-    const res = await service.processHourlyCouponsAndMaturities();
-    expect(res.couponsDistributedWld).toBe('4500');
-    expect(res.maturedCount).toBe(1);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('국채 정산'),
-      }),
-      '886478189520637992',
-    );
+  it('refuses uncertified hourly bond payouts before repository access', async () => {
+    vi.mocked(mockRepo.processHourlyCouponsAndMaturities).mockClear();
+    await expect(service.processHourlyCouponsAndMaturities()).rejects.toMatchObject({ status: 503 });
+    expect(mockRepo.processHourlyCouponsAndMaturities).not.toHaveBeenCalled();
   });
 
   it('국채 담보 80% LTV 레포 대출 신청 및 상환을 성공적으로 처리한다', async () => {

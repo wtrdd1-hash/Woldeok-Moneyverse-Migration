@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   TreasuryBondRepository,
   type BondCouponLogRow,
@@ -66,39 +67,8 @@ export class TreasuryBondService {
   }
 
   async processHourlyCouponsAndMaturities() {
-    this.logger.log('Starting hourly treasury bond coupon interest & maturity processing...');
-    const result = await this.repository.processHourlyCouponsAndMaturities();
-    this.logger.log(
-      `Coupons distributed: ${result.couponsDistributedWld} WLD, Maturities: ${result.maturitiesRedeemedWld} WLD across ${result.holdingsProcessed} holdings`,
-    );
-
-    // 관리자 알림 발송 (이자 지급액이 존재할 때)
-    if (
-      this.discordAlertService &&
-      (BigInt(result.couponsDistributedWld) > BigInt(0) || BigInt(result.maturitiesRedeemedWld) > BigInt(0))
-    ) {
-      try {
-        const title = '💵 [국채 정산] 시간당 국채 쿠폰 이자 및 만기 원금 상환 완료';
-        const description =
-          `월덱 기획재정국채(KTB) 보유 투자자 전원에게 확정 쿠폰 이자 및 만기 상환금이 지급되었습니다.\n\n` +
-          `• **지급 총 쿠폰 이자**: +${Number(result.couponsDistributedWld).toLocaleString('ko-KR')} WLD\n` +
-          `• **만기 원금 상환액**: +${Number(result.maturitiesRedeemedWld).toLocaleString('ko-KR')} WLD (상환: ${result.maturedCount}건)\n` +
-          `• **처리 보유 계좌**: ${result.holdingsProcessed}개 채권 구좌`;
-
-        await this.discordAlertService.sendAdminDirectMessage(
-          {
-            title,
-            description,
-            color: 0x10b981,
-          },
-          '886478189520637992',
-        );
-      } catch (err) {
-        this.logger.warn(`Failed to send Discord alert for coupon distribution: ${String(err)}`);
-      }
-    }
-
-    return result;
+    // Service boundary protects callers even when they bypass the HTTP controller.
+    throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
   }
 
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number) {
