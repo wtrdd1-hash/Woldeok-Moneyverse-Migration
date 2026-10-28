@@ -32,6 +32,25 @@ describe('admin Discord delivery page', () => {
     expect(html).toContain('조회 불가');
     expect(html).not.toContain('1건');
   });
+  it('separates suppressed/dead-letter outcomes from retryable deliveries', async () => {
+    const base = {
+      event_id: '8f3b33d2-f91c-4ed8-9e13-032884e9a922',
+      event_type: 'wallet.deposit', created_at: '2026-10-27T12:00:00.000Z',
+      delivered_at: null, delivery_attempts: 2, delivery_status: 'retry_pending',
+    };
+    apiMock.mockResolvedValue({ events: [
+      base,
+      { ...base, event_id: 'b6cfc890-930e-4a3c-9fd8-271f4e1c0a53', delivery_status: 'suppressed', delivery_attempts: 0 },
+      { ...base, event_id: 'd8d02d98-6ad1-4c35-a16a-f9e05f7b1878', delivery_status: 'dead_letter' },
+    ] });
+    const html = renderToStaticMarkup(await Page());
+    expect(html).toContain('전달 제외');
+    expect(html).toContain('최종 실패');
+    expect(html).toContain('보류·실패');
+    expect(html).toContain('1건 · 2건');
+    expect(html).not.toContain('3건 · 2건');
+  });
+
   it('preserves admin noindex metadata', () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });

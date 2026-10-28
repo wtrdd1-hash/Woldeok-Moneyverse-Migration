@@ -35,9 +35,6 @@ export default async function AdminDeliveryLogsPage() {
   );
   const outbox = parseDeliveryEvidence(response);
   const events = outbox?.events ?? [];
-  const delivered = events.filter((event) => event.delivery_status === 'delivered').length;
-  const pending = events.filter((event) => event.delivery_status !== 'delivered').length;
-  const retried = events.filter((event) => event.delivery_attempts > 1).length;
 
   return (
     <div data-page="admin-logs-delivery" className="mv-page mv-page--admin grid gap-5">
@@ -49,14 +46,20 @@ export default async function AdminDeliveryLogsPage() {
       {/* Navigation Sub-Tabs */}
       <LogsSubNav current="delivery" />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <DeliverySummary icon={Send} label="최근 기록" value={outbox === null ? '조회 불가' : `${events.length}건`} />
-        <DeliverySummary icon={CheckCircle2} label="전달 완료" value={outbox === null ? '조회 불가' : `${delivered}건`} />
+        <DeliverySummary icon={CheckCircle2} label="전달 완료" value={outbox === null ? '조회 불가' : `${outbox.delivered}건`} />
         <DeliverySummary
-          icon={pending > 0 ? TriangleAlert : RotateCcw}
-          label="미완료 · 재시도"
-          value={outbox === null ? '조회 불가' : `${pending}건 · ${retried}건`}
-          attention={outbox !== null && pending > 0}
+          icon={outbox !== null && outbox.outstanding > 0 ? TriangleAlert : RotateCcw}
+          label="진행 중 · 재시도 이력"
+          value={outbox === null ? '조회 불가' : `${outbox.outstanding}건 · ${outbox.retried}건`}
+          attention={outbox !== null && outbox.outstanding > 0}
+        />
+        <DeliverySummary
+          icon={TriangleAlert}
+          label="보류·실패 (전달 제외·최종 실패)"
+          value={outbox === null ? '조회 불가' : `${outbox.terminal}건`}
+          attention={outbox !== null && outbox.terminal > 0}
         />
       </div>
 
@@ -108,7 +111,7 @@ export default async function AdminDeliveryLogsPage() {
                       </TableCell>
                       <TableCell className="tabular text-right">{event.delivery_attempts}</TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {event.delivered_at ? formatMoment(event.delivered_at) : '대기 중'}
+                        {event.delivered_at ? formatMoment(event.delivered_at) : ['suppressed', 'dead_letter'].includes(event.delivery_status) ? '해당 없음' : '대기 중'}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -148,10 +151,11 @@ function DeliverySummary({
 
 function DeliveryStatus({ status }: { readonly status: string }) {
   const complete = status === 'delivered';
+  const terminal = status === 'suppressed' || status === 'dead_letter';
   return (
     <Badge variant={complete ? 'secondary' : 'outline'}>
-      {complete ? <CheckCircle2 className="size-3" /> : <Clock3 className="size-3" />}
-      {complete ? '전달 완료' : status}
+      {complete ? <CheckCircle2 className="size-3" /> : terminal ? <TriangleAlert className="size-3" /> : <Clock3 className="size-3" />}
+      {complete ? '전달 완료' : status === 'suppressed' ? '전달 제외' : status === 'dead_letter' ? '최종 실패' : status === 'retry_pending' ? '재시도 대기' : status === 'delivering' ? '전달 중' : '대기 중'}
     </Badge>
   );
 }
