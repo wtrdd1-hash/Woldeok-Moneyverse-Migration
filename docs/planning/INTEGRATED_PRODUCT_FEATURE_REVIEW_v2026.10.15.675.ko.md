@@ -1,5 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.28.1426 — F675-162 증빙·소유권 무결성 강화 (기획 초안/HOLD)
+- 이전 Addition v1424 → 현재 Improvement v1426 → 다음 Addition v1428(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인, 선행 Draft #1740 미병합, QA v1348 FAILED. 마이그레이션232의 UNIQUE(user_id,code)만으로 영수증·쇼케이스 소유권을 보장할 수 없어 복합 FK·유일키 필요. 발행기관 인증 수령 슬롯, 불변 공개 스냅샷, 증빙 취소 재검증, URL 토큰 로그 차단. 기본 예시는 UNVERIFIED. 시간 의존 부분 인덱스 대신 철회 여부 부분 인덱스+조회 시 만료 필터. 철회 커밋 이후 조회 차단과 이미 전송된 응답 회수 불가를 구분.
+- P0 ENV1426-01 FIN1426-02 SEC1426-03 REL1426-04; P1 COL1426-05~10. [영문](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md), 이슈 #1739. 문서만 변경, 합성 10,001/동시 100/위조 100 시험 미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000, RELEASE HOLD.
+
+
 ## v2026.10.28.1424 — F675-162 검증 가능한 회원 컬렉션 쇼케이스 (기획 초안 / 운영 보류)
 - 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1347 FAILED. 실제 코드는 고정 /collections?showcase=arch-1063, DEFAULT_PIECES/localStorage, GET 시 4개 예시 INSERT, migration 232의 지급 증빙 부재. **예시를 검증 소유권으로 표시 금지.**
 - 명시적 동의·검증 조각만 비공개 공유, 7일 만료·활성 링크 5개·192비트 토큰 지문·발행 증빙·철회·no-store/noindex·Android 동등성·WCAG 명세. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md); [전달 이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740).
