@@ -1,4 +1,12 @@
 ## v2026.10.29.1442 — F675-166 금융 용어 정규 식별자·언어별 읽음 무결성 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+## v2026.10.29.1444 — F675-167 검증 가능한 금융 용어 자가점검 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- 이전 기능 보완 v1442 → 현재 기능 추가 v1444 → 다음 기능 보완 v1446(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1357 FAILED/HOLD. 미병합 #1784/#1780 후속 기획이며 [개발 이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789)로 연계.
+- main에는 금융 용어 50개·별도 시스템 용어 12개, 4개 언어 정적 페이지와 86400초 ISR이 있지만 조사 범위에 검증된 퀴즈 문제은행·본인 시도/점수 영수증·대응 DB가 없다. 회원이 선택하는 5문항은 언어별 독립 승인된 서로 다른 용어 5개, 문항당 선택지 4개·정답 1개, 불변 개정·서버 전용 정답·원본 영수증을 요구한다. 자동 읽음·숙련·보상·WLD·원장 변경 없음.
+- 개인 /account/learning/glossary/practice, NestJS/Next/Android 동등성, 본인 전용 PostgreSQL SECURITY DEFINER 시도·문항·영수증, 30분 만료·하루 10회·90일 보존, 작성자/심사자 분리, noindex/no-store, WCAG 2.2 AA·320px/TalkBack·KPI, 동시성 100·권한 음성 100·격리 PG 10,001건을 기획. 화면/API/DB/롤백 상세는 기존 국영문 통합 마스터에 기재.
+- P0/P1: ENV1444-01 FIN1444-02 SEC1444-03 REL1444-04 QUIZ1444-05 QUIZ1444-06 QUIZ1444-07 QUIZ1444-08 QUIZ1444-09 QUIZ1444-10. QA v1357: 루트 98%/데이터 99%, USER_CASH +18,000 WLD, 앱 쓰기 239개 관계, PUBLIC 은행 함수 3개, 마이그레이션 불일치 5·미적용 20, 공식 Test SHA 불일치·독립 복원 미검증으로 운영승격 HOLD.
+- 외부 독립 중복제거 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임/DB/Test/운영 변경 없음.
+
 - GitHub 연계: [Draft PR #1784](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1784)는 미병합 선행 [#1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780)에 의존하며 [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779)를 갱신함. 문서 전용·운영승격 HOLD.
 - 사이클: Previous Addition v1440 → Current Improvement v1442 → Next Addition v1444(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, 선행 Draft #1780 미병합. 마지막 확인 가능 QA v1355 FAILED/HOLD, 새 QA 결과는 미인증.
 - 실제 소스: 정규 PSEO 금융 용어 50개, 별도 서비스 용어 ID 12개(교집합 0), 다국어 별칭 5개. volatility → sharpe-ratio는 동의어가 아니다. ko/en/ja/zh 페이지의 86400초 ISR과 언어 변경을 고려하여 불변 term ID·namespace, 검증된 별칭만 허용, 언어별 읽음 revision을 명세했다.

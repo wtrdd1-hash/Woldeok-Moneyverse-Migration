@@ -1,5 +1,58 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+- 개발 연계: [이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789); 기획 Draft PR 작성 예정. 미병합 #1784 / #1780 후속이며 운영 미승격.
+
+## v1444 / F675-167 — 검증 가능한 금융 용어사전 자가점검 퀴즈 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**기준과 사이클.** Previous Feature Improvement v1442 → Current Feature Addition v1444 → Next Feature Improvement v1446(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730을 시작·중간에 확인했고 QA v1357(05:20 KST)은 FAILED/HOLD이다. 이 문서 전용 기획은 미병합 #1784(그 선행 #1780)에 쌓이는 초안이며, 실제 구현·배포가 아니다. 선행 기획의 콘텐츠 레지스트리가 main에 이미 존재한다고 가정하지 않는다.
+
+### 목적·대상·실제 코드·대안
+- main의 frontend/src/config/pseo-glossary.config.ts는 정적 금융 용어 50개를 공개하며, frontend/src/app/guide/components/glossary-search.tsx에는 별도 시스템 용어 12개가 있다. 한국어와 en/ja/zh 용어 페이지의 ISR은 86400초다. 확인한 frontend/backend/DB 마이그레이션에는 용어별 퀴즈, 승인된 문제은행, 점수 영수증, 본인 전용 시도 API 및 대응 테이블이 없고 GitHub 용어 퀴즈 이슈 검색에도 동일 과제가 없었다. 이는 조사 범위 내 발견이며 모든 배포의 절대적 부재를 증명하지 않는다.
+- 목적은 초보 회원이 PER/PBR/ROE 등 금융 개념을 **자발적으로 5문항 자가점검**하고, 검토된 해설과 원본 개정번호를 확인하도록 하는 것이다. 성공 기준은 선택 언어에서 서로 다른 금융 용어 5개에 연결된 검증 문제, 비공개 결과 영수증, 정확한 재시도다. 시스템 용어 12개는 제외한다.
+- (A) 본문 자동생성 문제는 사실 오류·가짜 정답을 증폭할 수 있고, (B) 클라이언트 전용 퀴즈는 독립 검토·서버 영수증을 보증할 수 없다. 따라서 (C) **편집 검토를 통과한 서버 검증 문제은행과 본인 전용 시도**를 선택한다. AI 즉석 문제, 투자 조언, 공개 순위, 보상·업적·알림·WLD 지급, 자동 읽음 처리 및 금융 원장 변경은 범위 밖이다. v1440/v1442 저장·읽음 기능도 아직 미병합 초안이므로 의존 기능으로 간주하지 않는다.
+
+### 진입점·화면·CTA·상태
+- 공개 /guide/glossary 및 정규 용어 페이지에 선택형 '개념 자가점검' 링크를 제공한다. 비회원은 변경 없는 로그인 안내만 표시한다. 본인 인증된 활성 회원은 /account/learning/glossary/practice에서 ko/en/ja/zh를 선택하고 '5문항 시작'을 누른다. 페이지 방문·스크롤·체류·분석 이벤트로 자동 시작하지 않는다. 선택 언어에 **서로 다른 유효 용어에 연결된 독립 승인 문제 5개 미만**이면 QUIZ_UNAVAILABLE/503을 표시하고 모의 문제로 대체하지 않는다.
+- 문제마다 상호 배타적인 선택지 4개, 건너뛰기, 이전/다음, 답안 제출 CTA를 제공한다. 제출 전 선택은 일시적 화면 상태에만 보관하고 성공으로 표시하지 않는다. 서버가 확정한 제출 영수증 후 0~5 정답 수, 각 정답·오답·미응답 구분, 검토된 해설, 용어 링크와 문제 개정번호를 보여준다. 다시 풀기는 새 시도이며 읽음·숙련·투자능력을 자동 인정하지 않는다.
+- 상태: SIGN_IN_REQUIRED, REGISTRY_UNAVAILABLE, LOADING, READY, STARTING, IN_PROGRESS, SUBMITTING, RECEIPT_UNKNOWN(시간초과), SUBMITTED_VERIFIED, EXPIRED, CONTENT_REVOKED, CONFLICT_409, RATE_LIMITED_429, ERROR. 일시적 오류 시 선택과 키보드 초점을 보존하고 동일 요청 UUID·본문 지문으로 영수증 조회 후 재시도한다. 승인 문제 철회 중에는 다른 정답으로 몰래 대체하지 않고 CONTENT_REVOKED로 중단 후 재시작을 안내한다. 로그아웃·계정 전환 시 선택, 요청 키, 개인 캐시, 지연 응답을 모두 무효화한다.
+
+### 문제은행 정본·심사·언어별 정확성
+- 언어·배포별 불변 문제은행 manifest에 bank_revision, release_sha, canonical_manifest_sha256, question_id, question_revision, term_id, locale, approved_at, 작성자·독립 심사자, 인용 용어 개정번호 및 편집 근거 식별자를 기록한다. 작성자와 승인자는 달라야 하며 금융 사실·권리·원본성·정답을 독립 검증한다. 퀴즈 몇 개의 근거를 외부 독립 레퍼런스 10,000건 달성으로 세지 않는다.
+- 각 문제는 동일 언어로 검토한 서로 다른 비어 있지 않은 선택지 4개, 정확히 하나의 승인 정답, 해설, 정규 용어 링크를 가진다. 정답 키는 서버 전용이며 시작/목록 응답·클라이언트 번들·공개 페이지·분석·로그에 포함하지 않는다. 선택지 인덱스 대신 불변 choiceId를 사용한다. volatility와 sharpe-ratio처럼 다른 개념을 동의어로 오인하지 않는다. 철회된 용어·별칭·언어별 개정번호 불일치·배포 manifest 검증 실패는 문제은행을 차단하며 공개 용어 페이지는 계속 제공한다.
+- 편집 단계 DRAFT → REVIEW_PENDING → APPROVED → ACTIVE → REVOKED/RETIRED. 승인된 문제·정답을 제자리 수정하지 않고 새 불변 개정번호를 발행한다. 관리자 작성·검토·철회는 감사 기록과 독립 심사를 필요로 한다. 무검토 URL 가져오기, HTML 삽입, 임의 문제 제출 및 수익 보장 표현을 금지한다.
+
+### NestJS·Next.js·Android API 계약
+- 신규 인증 API 제안: GET /api/v1/guide/glossary-practice/availability?locale=ko|en|ja|zh; POST /api/v1/guide/glossary-practice/attempts(requestId UUID,locale,expectedBankRevision); GET /api/v1/guide/glossary-practice/attempts/:attemptId; POST /api/v1/guide/glossary-practice/attempts/:attemptId/submit(requestId UUID,expectedVersion,selections[{questionId,choiceId|null}],expectedBankRevision); GET /api/v1/guide/glossary-practice/receipts/:requestId; DELETE /api/v1/guide/glossary-practice/attempts/:attemptId(본인 철회). 개인 목록 GET /api/v1/guide/glossary-practice/attempts?cursor=...&limit<=20은 제한된 페이지네이션으로 제공한다.
+- 시작 응답은 attemptId, 30분 만료시각, version, bankRevision, 정답 표시 없는 승인 문제 5개와 각 선택지 4개다. 제출은 시작 당시 고정한 5개 문제 ID와 서버가 발행한 선택지 ID 또는 미응답 null만 허용하며 중복을 거부한다. 서버만 불변 정답을 채점한다. 최종 영수증에는 요청 UUID, 본인 시도 ID, bankRevision, score(0~5), total=5, answeredCount, 문항별 정오답·미응답과 해설·출처, version, committedAt을 포함한다. 점수를 공개 URL에 넣지 않는다.
+- 웹은 HttpOnly 실제 세션·CSRF·Next BFF, Android /app-api/v1은 검증된 모바일 bearer와 동일한 소유권·응답 계약을 사용한다. 클라이언트가 보낸 userId나 공유 DB의 p_actor만으로 본인을 신뢰하지 않는다. 400 형식 오류, 401 미인증, 403 비활성/동의/CSRF, 404 타인 또는 없는 시도, 409 버전·요청 키 본문 충돌, 410 만료·철회, 422 잘못된 선택지·언어, 429 한도, 503 미검증 문제은행/배포를 구분한다. 비공개 응답은 no-store이며 오류에도 정답 키가 노출되지 않는다. 웹·Android 동등성은 테스트로 입증한다.
+
+### PostgreSQL 제약·인덱스·트랜잭션·영수증
+- 독립 PostgreSQL에서 검증 후에만 추가형 순방향 마이그레이션을 제안한다. glossary_practice_questions(question_id UUID,question_revision BIGINT,term_id UUID,locale CHECK ko/en/ja/zh,bank_revision,source_revision,approved_editor,independent_reviewer,status,answer_choice_id,explanation,immutable_payload_digest,created_at; PK(question_id,question_revision), 정규 용어·언어 개정 FK), choices PK(question_id,question_revision,choice_id)를 둔다. 승인 함수가 선택지 정확히 4개·정답 하나·서로 다른 choiceId를 원자적으로 검증한다. 앱 역할의 직접 DML·PUBLIC EXECUTE를 허용하지 않고 search_path를 고정한 좁은 SECURITY DEFINER 함수만 사용한다.
+- glossary_practice_attempts(attempt_id UUID PK,user_id FK,locale,bank_revision,created_at,expires_at,version,status CHECK,submitted_at,score CHECK 0..5,deleted_at), glossary_practice_attempt_items(attempt_id,position 1..5,question_id,question_revision,choice_order_snapshot,selected_choice_id nullable,correct_at_submission, 문제 불변 개정 FK), glossary_practice_receipts(user_id,request_id UUID,operation,canonical_payload_digest,result_snapshot,committed_at,PK(user_id,request_id))를 추가한다. 본인·시도 복합 FK로 타인 기록 연결을 방지한다. 인덱스는 (user_id,created_at DESC,attempt_id DESC), (user_id,status,expires_at), (attempt_id,position)이며 now()를 부분 인덱스 조건에 넣지 않는다.
+- 한 시도에는 서로 다른 정규 금융 용어 5개/문제 5개가 있어야 한다. 문제은행 개정번호를 잠근 뒤 시도·문항 5개를 한 트랜잭션에 생성한다. 회원별 최근 UTC 24시간 시작 최대 10회, 언어별 활성 시도 최대 1개, 만료 30분을 회원 잠금 후 직렬 검증한다. 제출은 회원→시도→문항 순서로 잠그고 version·은행 개정·선택지를 확인해 채점·결과·불변 영수증을 원자 기록한다. 동일 회원/requestId/작업/본문 지문 재시도는 **최초 영수증 그대로** 반환하고, 다른 작업·본문·시도 재사용은 409이며 변경하지 않는다. 시간초과 시 영수증 조회 후 동일 UUID로 재시도한다. 철회는 본인만 멱등 처리하고 개인정보 시도 상세는 90일 후 승인된 보존정책에 따라 삭제한다.
+- 목록 커서는 본인·세션·필터·만료에 결합해 서명한다. 관리자는 최소 20명 집계 버킷과 문제 심사·철회만 접근하며 개별 회원 점수는 기본적으로 볼 수 없다. 문제 철회는 신규 시작과 미제출 시도를 차단하되 이미 확정된 과거 영수증을 재채점하지 않는다.
+
+### 보안·SEO·접근성·KPI·배포·롤백
+- 회원/IP/기기별 속도 제한, 정답 키·타이밍 유출·열거 방지, UUID/길이/언어/선택지 허용목록, CSRF·계정 전환 차단을 적용한다. 비공개 퀴즈와 결과는 noindex,nofollow/no-store, 사이트맵·광고 개인화 제외. 기존 공개 정규 용어의 canonical/hreflang/DefinedTerm SEO는 변경하지 않는다. 관리자 발행·철회는 관리자 권한·CSRF·최근 재인증·독립 심사를 요구한다.
+- WCAG 2.2 AA: 라벨 있는 radio 그룹, 키보드 이동, 명시적 진행도·해설, 색만으로 정오답 구별 금지, 포커스 복귀·오류 live region, reduced motion, 200% 확대, 320/360/390/768/1024/1280px, Android TalkBack을 시험한다. 만료 30분은 설명하되 답변 시간을 압박하지 않으며 만료 시 새로 시작한다. ko/en/ja/zh 문구와 정답은 각 언어별로 독립 심사한다.
+- KPI는 동의한 시작→제출 완료율, 언어별 승인 문제 충족률, 부정 선택지 차단, 409/503, 확정 영수증 성공률, 자발적 재학습 및 개인정보 사고 0 목표다. 점수를 학습 성취 인증·투자능력·수익률로 표현하지 않고 답변 내용을 일반 분석 이벤트로 보내지 않는다.
+- 기능 플래그 기본 OFF. 독립 실제 PostgreSQL에서 언어별 유효 용어 5개, 부족 언어, 합성 시도 10,001건 인덱스·커서, 동시 시작/제출 100건, 타인/CSRF/재시도 위조 100건, ISR 24시간 개정 경합, 중도 철회, 동일/변조 UUID, 30분 만료, 제출 전 정답 비노출, 웹/Android·접근성·SEO 및 **WLD/원장 변화 0**을 검증한다. 독립 암호화 백업 복원·DB 권한/마이그레이션 대조·18,000 WLD 원장 불일치 해결·전체 CI·공식 Test exact-SHA 인증 E2E·승인된 GitOps 무중단 승격·롤백 검증 전 Production 금지. 롤백은 시작/제출을 OFF로 막고 기존 영수증을 보존한다.
+
+### 개발 백로그 P0 4 / P1 6
+- **P0 ENV1444-01:** 06:04 KST 루트 98%(약 2.0GiB), 데이터 99%(약 3.5GiB); 용량 확장·승인된 보존정책 및 독립 오프사이트 암호화 백업 복원. 타 작업 파일 임의 삭제 금지.
+- **P0 FIN1444-02:** QA v1357의 USER_CASH 18명 총 +18,000 WLD 차이와 국고 0 WLD. 근거 추적·승인된 순방향 정산만 허용, 지급 재실행·가짜 분개 금지.
+- **P0 SEC1444-03:** QA v1357 앱 직접 쓰기 권한 239개 관계, PUBLIC 은행 함수 3개, 체크섬 불일치 5개, 미적용 20개. 최소권한·문제은행 출처·마이그레이션 검증.
+- **P0 REL1444-04:** main runtime CI SKIPPED, 공식 Test SHA가 main과 불일치, 운영 SHA unknown. 정확 SHA 전체 인증 Test·보안·백업·롤백·승인 GitOps 선행.
+- **P1 QUIZ1444-05:** 4개 언어 불변 문제/선택지/용어 manifest, 독립 편집 심사, 정답 비공개, 철회·개정.
+- **P1 QUIZ1444-06:** 본인 전용 시도·문항·영수증 DB 함수, 5문항/하루 10회/30분 만료/90일 보존, 잠금·멱등.
+- **P1 QUIZ1444-07:** NestJS·Next BFF·Android app-api DTO/인증/상태코드/영수증 조회·캐시 차단.
+- **P1 QUIZ1444-08:** 공개 선택 진입, 회원 퀴즈·비공개 결과·4개 언어, 320px/WCAG/TalkBack.
+- **P1 QUIZ1444-09:** 관리자 독립 검토·철회·감사, 개인정보 수명, 공개 SEO 유지, 집계 KPI, 악용·정답 유출 방지.
+- **P1 QUIZ1444-10:** 격리 PostgreSQL 10,001건, 동시성 100건, 권한 음성 100건, 철회·만료·재시도·정확 SHA E2E, 원장 변화 0과 OFF 롤백.
+
+**외부 독립 근거 게이트:** 신규 중복제거·독립검증 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 용어·문제·발행기관·GitHub 이슈·합성 데이터는 독립 승인 외부 레퍼런스 수량이 아니다. 이번 산출물은 기획 초안이며 코드 구현·Test·운영 배포가 아니다.
+
+
 ## v1442 / F675-166 — 금융 용어 학습 목록의 정규 식별자·다국어 읽음·재시도 무결성 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - GitHub 연계: [Draft PR #1784](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1784)는 미병합 선행 [#1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780)에 의존하며 [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779)를 갱신함. 문서 전용·운영승격 HOLD.
 
