@@ -40,6 +40,19 @@ export function overallState(states: readonly StatusState[]): StatusState {
   return 'operational';
 }
 
+/**
+ * Aggregate only verified-current collector observations. An old success is
+ * not evidence of current health, even when another source is healthy.
+ * Confirmed outages still outrank uncertainty, preserving worst-first UX.
+ */
+export function statusAggregateState(
+  rows: readonly { readonly state: unknown; readonly freshnessState: string }[],
+): StatusState {
+  return overallState(rows.map((row) =>
+    row.freshnessState === 'fresh' ? asStatusState(row.state) : 'unknown',
+  ));
+}
+
 export const OVERALL_HEADLINE: Readonly<Record<StatusState, string>> = Object.freeze({
   operational: '모든 서비스가 정상입니다.',
   degraded: '일부 서비스가 느려지고 있어요.',
