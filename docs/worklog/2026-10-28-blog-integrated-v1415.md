@@ -43,3 +43,9 @@ Source branch builds/tests passed; official Test/Production release remains bloc
 - GitHub CI for cb6bc27 was still IN_PROGRESS when observed. No merged main, no official Test exact-identity PASS, no Production promotion.
 - The current live 11 publicly accessible unverified articles remain unchanged. No automatic takedown; owner-controlled moderation requires appropriate authorization.
 - Latest origin/main rechecked, SHA unchanged a28bed9aa40ff74d492824ae12892a7d52132fdd at last checkpoint; independent worktree avoids overwriting collaborator changes.
+
+## v1415.5 — User-ordered PR/CI/Test/Production promotion attempt (started 2026-10-28 14:24 KST)
+- User explicitly requested completion through PR CI and Production promotion; no new policy override for finance/DB identity or session safeguards.
+- Latest origin/main a28bed9aa, PR #1695 draft head 9f11360a; GH CI #3969 classify/policy PASS and runtime-check IN PROGRESS on first inspection.
+- Observed Test test-current symlink points to immutable 2026-10-21 test generation, not candidate; published Test /api/version 9f39f041...; verify live symlink and target rather than trusting one prior host preflight exception.
+- Read release guide's financial/identity/backup contract, identify actual service/DB before migrations or traffic switches. Never take over someone else's Test/production release workstream without compatibility evidence.
