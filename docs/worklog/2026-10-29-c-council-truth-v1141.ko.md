@@ -10,8 +10,10 @@
 - Frontend는 API 결과 부재 시 14명 가상 투표를 제거하고 접근성 있는 미확인 안내 표시. 모바일/비색인 유지.
 - 실패 테스트부터 작성, 변경 후 SHA 기준 테스트·빌드·린트·보안·CI 확인. Test/Production은 전부 PASS 전 금지.
 
-## 중간
-- RED/GREEN 및 main 재확인 기록 대기.
+## 중간 (02:48 KST)
+- 실패 재현: Backend 1실패/1통과(검증 전용 503 미구현), Frontend 1실패(미확인 안내 부재, 가상 만장일치 표시). 프론트 테스트는 `NODE_ENV=test`로 실행해 테스트 하네스 문제를 분리함.
+- 수정 후 집중 테스트 Backend 2/2, Frontend 1/1 PASS. Backend DB 조회 전 503 `COUNCIL_DEBATE_UNVERIFIED`; 관리자 권한 가드 유지. Frontend 가상 14표·89% 대체로 접근성 있는 미확인 안내.
+- 중간 main 재확인 `35971c600f25869c96f1c666d4b9f58927202730` 불변. 실제 DB·운영 변경 없음.
 
 ## 종료
 - 검증·배포 보류 사유 기록 대기.

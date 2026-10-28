@@ -16,16 +16,16 @@
 - English code/test/PR; Korean supplemental worklog. Do not claim verified council execution.
 
 ## Task 1: Backend fail-closed
-- [ ] Write controller test asserting 503 with code, no repository call, no fake `prop_live_*` data.
-- [ ] Run RED focused test.
-- [ ] Remove synthetic proposal construction and return explicit 503; document Swagger response.
-- [ ] Run GREEN focused test and inspect guards.
+- [x] Write controller test asserting 503 with code, no repository call, no fake `prop_live_*` data.
+- [x] Run RED focused test.
+- [x] Remove synthetic proposal construction and return explicit 503; document Swagger response.
+- [x] Run GREEN focused test and inspect guards.
 
 ## Task 2: Frontend fail-closed
-- [ ] Write component test asserting no votes/recommendation when `initialData` is absent.
-- [ ] Run RED focused test.
-- [ ] Remove fallback data and render accessible unavailable state.
-- [ ] Run GREEN focused test and ensure responsive/noindex context remains.
+- [x] Write component test asserting no votes/recommendation when `initialData` is absent.
+- [x] Run RED focused test.
+- [x] Remove fallback data and render accessible unavailable state.
+- [x] Run GREEN focused test and ensure responsive/noindex context remains.
 
 ## Task 3: Release evidence
 - [ ] Fetch/recheck main, run focused/full test, lint/typecheck/build, API contract, security, real isolated PG and CI.

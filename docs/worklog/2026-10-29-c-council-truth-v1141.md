@@ -12,8 +12,11 @@
 - TDD: RED controller test and client component test; GREEN minimal code; focused/full test, lint, typecheck, build, API contract, security audit, isolated PG and exact-SHA CI if safe.
 - Deployment gates: no merge, official Test or Production until every required check including exact-SHA authenticated Test and outstanding P0 release blockers passes. No shared/production DB changes.
 
-## MID
-- Pending RED/GREEN evidence and main recheck.
+## MID — 2026-10-29 02:48 KST
+- TDD RED backend: 1 failed/1 passed because existing controller did not return evidence-specific 503; frontend: 1 failed because no accessible unavailable state and synthetic votes were displayed. Direct Vitest without `NODE_ENV=test` initially hit the React test-mode harness; reran in correct test mode to confirm behavioral RED.
+- TDD GREEN: backend 2/2 PASS, frontend 1/1 PASS. Backend now fails closed with HTTP 503 `COUNCIL_DEBATE_UNVERIFIED` before any repository access; admin guards unchanged. Frontend removes the 14-agent unanimous fallback and shows responsive `role=status` with no decision claim.
+- Midpoint `git fetch origin main`: `35971c600f25869c96f1c666d4b9f58927202730`, unchanged. No overlapping council PR; no DB writes or release changes.
+- Next: exact-HEAD full gates, isolated DB only if safe, CI, and final main recheck.
 
 ## AFTER
 - Pending exact-SHA validation, CI, Test/Production disposition and cleanup rationale.

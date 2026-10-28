@@ -13,7 +13,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   IsBoolean,
@@ -520,42 +520,14 @@ export class AdminEconomyController {
   }
 
   @Get('council-debate')
-  @ApiOperation({ summary: 'Get multi-agent economy council debate status across 14 specialist agents' })
-  councilDebate(@Req() request: RequestWithSession) {
-    return this.guarded(
-      async () => {
-        const dashboard = await this.repository().dashboard(requireUserId(request));
-        const proposal = {
-          id: `prop_live_${Date.now()}`,
-          category: 'macro_stability_review',
-          description: '정기 거시경제 안정성 및 14개 분과 정책 정합성 감사',
-          knobs: [
-            {
-              key: 'macro.deposit_rate_bps',
-              currentValue: 350,
-              proposedValue: 350,
-              deltaPct: 0,
-            },
-            {
-              key: 'macro.loan_rate_bps',
-              currentValue: 700,
-              proposedValue: 700,
-              deltaPct: 0,
-            },
-          ],
-          metricsSnapshot: {
-            faucet_ratio: 1.0,
-            sink_burn: 0.95,
-          },
-        };
-        const { executeCouncilDebate } = await import('../economy/multi-agent-council.service');
-        const debate = executeCouncilDebate(proposal);
-        return {
-          dashboard,
-          debate,
-        };
-      },
-      'failed to load council debate status',
-    );
+  @ApiOperation({ summary: 'Council decision evidence (unavailable until verified proposal provenance exists)' })
+  @ApiResponse({ status: 503, description: 'No verified council proposal, metrics snapshot or persisted evaluation receipt' })
+  async councilDebate() {
+    // A fabricated proposal must never be presented as an executed policy vote.
+    throw new ServiceUnavailableException({
+      code: 'COUNCIL_DEBATE_UNVERIFIED',
+      message: 'Verified council proposal and decision evidence are unavailable',
+    });
   }
+
 }
