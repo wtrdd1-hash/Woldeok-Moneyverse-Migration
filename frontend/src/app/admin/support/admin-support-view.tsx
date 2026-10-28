@@ -121,6 +121,7 @@ export function AdminSupportView({
   );
   const [messages, setMessages] = useState<readonly AdminSupportMessage[]>(initialMessages);
   const [replyText, setReplyText] = useState('');
+  const pendingReplyRef = useRef<{ body: string; threadId: string; key: string } | null>(null);
   const [currentStatusSelect, setCurrentStatusSelect] = useState<string>('open');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -278,14 +279,21 @@ export function AdminSupportView({
     }
     if (!finalBody) return;
 
+    // Preserve the DB idempotency key when a write succeeds but its acknowledgement is lost.
+    if (pendingReplyRef.current?.body !== finalBody ||
+        pendingReplyRef.current?.threadId !== selectedThreadId) {
+      pendingReplyRef.current = { body: finalBody, threadId: selectedThreadId, key: crypto.randomUUID() };
+    }
     setIsSending(true);
 
     try {
       const formData = new FormData();
       formData.set('threadId', selectedThreadId);
       formData.set('body', finalBody);
+      formData.set('idempotencyKey', pendingReplyRef.current.key);
 
       await adminSupportReply(formData);
+      pendingReplyRef.current = null;
       synthSound.playMessageSent();
       toast.success('관리자 답장이 서버에 저장되었습니다.');
       setReplyText('');
@@ -317,7 +325,7 @@ export function AdminSupportView({
       await fetchAllThreads(false);
       router.refresh();
     } catch {
-      toast.error('상태 변경 중 오류가 발생했습니다.');
+      toast.error('문의 상태 변경 결과를 확인하지 못했습니다. 다시 조회해 주세요.');
     } finally {
       setIsChangingStatus(false);
     }
@@ -379,7 +387,8 @@ export function AdminSupportView({
             variant="outline"
             size="sm"
             onClick={() => setAutoPoll((p) => !p)}
-            className={cn('text-xs font-semibold rounded-xl gap-1.5', autoPoll && 'border-emerald-500/50 text-emerald-600 bg-emerald-500/10')}
+            aria-pressed={autoPoll}
+            className={cn('min-h-11 text-xs font-semibold rounded-xl gap-1.5', autoPoll && 'border-emerald-500/50 text-emerald-600 bg-emerald-500/10')}
           >
             <span className={cn('size-2 rounded-full', autoPoll ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground')} />
             <span>{autoPoll ? '실시간 5초 폴링 ON' : '폴링 일시정지'}</span>
@@ -412,7 +421,7 @@ export function AdminSupportView({
             key={tab.href}
             href={tab.href}
             className={cn(
-              'min-h-9 shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors',
+              'min-h-11 shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors',
               tab.active
                 ? 'bg-primary text-primary-foreground border-primary shadow-xs'
                 : 'bg-card text-muted-foreground hover:bg-muted hover:text-foreground border-border'
@@ -442,8 +451,9 @@ export function AdminSupportView({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="문의 검색"
               placeholder="회원 닉네임, 문의 제목 검색..."
-              className="w-full rounded-xl border bg-background pl-9 pr-3 py-2 text-xs placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="min-h-11 w-full rounded-xl border bg-background pl-9 pr-3 py-2 text-xs placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
@@ -646,7 +656,8 @@ export function AdminSupportView({
                       type="button"
                       disabled={isUploadingImage}
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                      aria-label="이미지 파일 첨부"
                       title="이미지 파일 첨부 (최대 8MB, 보안 스캔)"
                     >
                       <Paperclip className="size-4" />

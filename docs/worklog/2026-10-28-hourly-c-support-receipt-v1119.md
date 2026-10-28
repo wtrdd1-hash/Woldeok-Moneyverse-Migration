@@ -8,10 +8,10 @@
 - Plan: RED receipt tests; enforce UUID/DTO/response/readback; preserve CSRF, admin guard, noindex and mobile controls; validate full exact-SHA gates; HOLD on any failures. No schema/finance change.
 
 ## IN PROGRESS
-- [ ] RED tests demonstrate false-positive reply/status success.
-- [ ] Implement verified backend receipts and authorized readbacks.
-- [ ] GREEN regression, frontend tests and exact-SHA gates.
+- [x] RED tests demonstrated 7/10 failures before changes; new idempotency and accessibility tests also failed before implementation.
+- [x] Validate DB-backed reply receipt, CSRF and status receipt; verify status through authorized admin readback. Avoid reply history readback: SQL migration 196 returns oldest 500 messages, which would falsely reject successful replies in long threads. Preserve client idempotency key across uncertain acknowledgements.
+- [x] GREEN 17/17 focused tests. First typecheck found Promise<object> incompatible with HTML form action; corrected to Promise<void>. Full gates pending.
 - [ ] Midpoint and final origin/main/plan checks; PR and release gate decision.
 
 ## FINISHED
-- Pending verification.
+- Pending exact-SHA gates and PR release decision.
