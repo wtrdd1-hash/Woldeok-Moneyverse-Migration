@@ -18,12 +18,12 @@ export default async function NewspaperPage() {
   const [eventsResult, stocksResult, weeklyBriefResult] = await Promise.all([
     apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
     apiOrNull<{ stocks: StockTickerItem[] }>('/api/v1/stocks'),
-    apiOrNull<WeeklyBriefData>('/api/v1/newspaper/weekly-brief'),
+    apiOrNull<{ success: boolean; data: WeeklyBriefData }>('/api/v1/newspaper/weekly-brief'),
   ]);
 
   const events: readonly MarketEvent[] = eventsResult?.events ?? [];
   const stocks: readonly StockTickerItem[] = stocksResult?.stocks ?? [];
-  const weeklyBrief = weeklyBriefResult ?? undefined;
+  const weeklyBrief = weeklyBriefResult?.success === true ? weeklyBriefResult.data : undefined;
 
   return <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} />;
 }
