@@ -1,6 +1,5 @@
 import type { Pool } from 'pg';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
-import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -717,7 +716,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
    */
   async liquidateToTreasuryVault(_targetPortfolioAumWld = '20000000'): Promise<never> {
     throw new ServiceUnavailableException({
-      code: 'SWF_LIQUIDATION_LEDGER_UNCERTIFIED',
+      code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
       message: 'SWF liquidation is suspended pending ledger-backed settlement verification.',
     });
   }

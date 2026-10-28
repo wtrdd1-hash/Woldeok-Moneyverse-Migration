@@ -1,12 +1,20 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import type { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { SessionGuard } from '../../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Pool } from 'pg';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 import { AdminTreasuryController } from './treasury.controller';
+import { TreasuryService } from './treasury.service';
 
-const HOLD_CODE = 'SWF_LIQUIDATION_LEDGER_UNCERTIFIED';
+const HOLD_CODE = 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE';
 
 describe('P0 SWF manual liquidation financial boundary', () => {
   for (const enabled of ['true', 'false']) {
@@ -56,5 +64,41 @@ describe('P0 SWF manual liquidation financial boundary', () => {
     const liquidation = source.slice(source.indexOf('  async liquidateToTreasuryVault('));
     expect(liquidation).not.toMatch(/UPDATE public\.(?:system_treasury_vaults|treasury_swf_portfolios)/);
     expect(liquidation).not.toMatch(/INSERT INTO public\.system_treasury_ledger/);
+  });
+});
+
+
+describe('SWF manual liquidation HTTP contract', () => {
+  let app: INestApplication;
+  const connect = vi.fn();
+  beforeAll(async () => {
+    const swf = new AutoSovereignWealthFundService(
+      { connect } as unknown as Pool,
+      {} as DiscordAlertService,
+    );
+    const testingModule = await Test.createTestingModule({
+      controllers: [AdminTreasuryController],
+      providers: [
+        { provide: TreasuryService, useValue: {} },
+        { provide: AutoSovereignWealthFundService, useValue: swf },
+      ],
+    })
+      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
+      .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
+      .compile();
+    app = testingModule.createNestApplication();
+    await app.init();
+  });
+  afterAll(async () => { await app?.close(); });
+
+  it('responds with 503 and a machine-readable hold code without opening a transaction', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/admin/treasury/swf/liquidate')
+      .send({ targetPortfolioAumWld: '20000000' })
+      .expect(503);
+    expect(response.body).toMatchObject({ code: HOLD_CODE });
+    expect(connect).not.toHaveBeenCalled();
   });
 });
