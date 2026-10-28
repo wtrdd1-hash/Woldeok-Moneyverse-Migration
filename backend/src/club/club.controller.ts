@@ -21,6 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { ClubService } from './club.service';
+import { rejectUnjournaledClubSettlement } from './club.ledger-hold';
 
 export class CreateClubDto {
   @ApiProperty({ description: '클럽 태그 (2-8자 대문자 영문/숫자)', example: 'ALPHA' })
@@ -141,6 +142,7 @@ export class ClubController {
   @ApiOperation({ summary: '신규 클럽 창설 (10,000 WLD 소각)' })
   @Post()
   async createClub(@Req() req: RequestWithSession, @Body() dto: CreateClubDto) {
+    rejectUnjournaledClubSettlement();
     const actorUserId = requireUserId(req);
     return this.clubService.createClub(actorUserId, dto, dto.idempotencyKey);
   }
@@ -221,6 +223,7 @@ export class ClubController {
     @Param('projectId', ParseUUIDPipe) projectId: string,
     @Body() dto: ContributeProjectDto,
   ) {
+    rejectUnjournaledClubSettlement();
     const actorUserId = requireUserId(req);
     return this.clubService.contributeToProject(
       actorUserId,

@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ClubInputError, PostgresClubRepository } from './club.repository';
+import { rejectUnjournaledClubSettlement } from './club.ledger-hold';
 
 export interface CreateClubInput {
   readonly tag: string;
@@ -20,6 +21,7 @@ export class ClubService {
   constructor(private readonly repo: PostgresClubRepository) {}
 
   async createClub(actorUserId: string, dto: CreateClubInput, idempotencyKey: string) {
+    rejectUnjournaledClubSettlement();
     try {
       return await this.repo.createClub(
         actorUserId,
@@ -116,6 +118,7 @@ export class ClubService {
     amountWld: number,
     idempotencyKey: string,
   ) {
+    rejectUnjournaledClubSettlement();
     try {
       return await this.repo.contributeToProject(actorUserId, clubId, projectId, amountWld, idempotencyKey);
     } catch (err: unknown) {

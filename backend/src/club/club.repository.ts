@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { rejectUnjournaledClubSettlement } from './club.ledger-hold';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -96,6 +97,7 @@ export class PostgresClubRepository {
     joinMode: string,
     idempotencyKey: string,
   ): Promise<CreateClubResult> {
+    rejectUnjournaledClubSettlement();
     if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(idempotencyKey)) throw new ClubInputError('idempotencyKey must be a valid UUID');
     if (!tag || tag.length < 2 || tag.length > 8) throw new ClubInputError('tag must be 2-8 uppercase alphanumeric');
@@ -330,6 +332,7 @@ export class PostgresClubRepository {
     amountWld: number,
     idempotencyKey: string,
   ): Promise<ContributeProjectResult> {
+    rejectUnjournaledClubSettlement();
     if (!UUID_REGEX.test(actorUserId)) throw new ClubInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(clubId)) throw new ClubInputError('clubId must be a valid UUID');
     if (!UUID_REGEX.test(projectId)) throw new ClubInputError('projectId must be a valid UUID');

@@ -11,7 +11,7 @@ Status: IN PROGRESS / HOLD. Base: `35971c600f25869c96f1c666d4b9f58927202730`.
 ## Plan and checkpoints
 - [x] Inspect main, AGENTS, README, English/Korean plans, open PRs, QA and CI; use isolated worktree.
 - [x] RED: 4/5 new tests fail on main behavior (HTTP 201 twice, direct service and repository writes accepted); read-only directory passes. See internal red.log.
-- [ ] GREEN: reject both routes with HTTP 503 and stable `CLUB_LEDGER_SETTLEMENT_UNAVAILABLE` code before DB access.
+- [x] GREEN: 5/5 new tests pass; HTTP create/contribute return 503 with `CLUB_LEDGER_SETTLEMENT_UNAVAILABLE`, service/repository direct calls reject without SQL; club directory remains 200. Updated obsolete success-only tests (7/7 focused PASS).
 - [ ] Verify regression tests, lint, typecheck, build, security and API contract.
 - [ ] Recheck latest main and CI; record Test exact-SHA and Production release gates.
 
