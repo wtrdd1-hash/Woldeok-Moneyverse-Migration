@@ -6,7 +6,7 @@ export const PRIMARY_SOURCES = {
   KR: { ECONOMY: 'https://www.bok.or.kr/portal/main/main.do', CODING: 'https://developer.mozilla.org/ko/docs/Web/JavaScript', COMPUTER: 'https://developer.mozilla.org/ko/docs/Web/HTTP' },
   US: { ECONOMY: 'https://www.federalreserve.gov/monetarypolicy.htm', CODING: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript', COMPUTER: 'https://developer.mozilla.org/en-US/docs/Web/HTTP' },
   JP: { ECONOMY: 'https://www.boj.or.jp/mopo/index.htm', CODING: 'https://developer.mozilla.org/ja/docs/Web/JavaScript', COMPUTER: 'https://developer.mozilla.org/ja/docs/Web/HTTP' },
-  CN: { ECONOMY: 'https://www.pbc.gov.cn/en/3688110/index.html', CODING: 'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript', COMPUTER: 'https://developer.mozilla.org/zh-CN/docs/Web/HTTP' },
+  CN: { ECONOMY: 'https://www.pbc.gov.cn/zhengcehuobisi/125207/index.html', CODING: 'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript', COMPUTER: 'https://developer.mozilla.org/zh-CN/docs/Web/HTTP' },
 } as const;
 
 export interface PrimarySourceEvidence { url: string; digest: string; excerpt: string }
