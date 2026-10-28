@@ -1,3 +1,8 @@
+## 2026-10-28 — 기획 v1402 / F675-156 (기능 보완 / DRAFT / RELEASE HOLD)
+- 이전 추가 v1400 → 현재 보완 v1402 → 다음 추가 v1404(잠정). 최신 main f396d009f41f421ca38f93ef2e7f8d26960dcae2 (09:01), 선행 미병합 #1651. QA v1336은 이전 main의 08:21 결과이고 이후 #1646 병합; 현재 main 정확 SHA 전체 QA UNKNOWN.
+- migration 082 NPC 주문 재실행은 UUID만 확인하여 회원/NPC/명령 결속이 없고, 타인 키는 replayed=true/affinity NULL로 반환 가능하며 같은 회원의 다른 NPC 키도 거짓 재실행으로 보일 수 있다. active 조회에 FOR SHARE가 없어 비활성화 경합이 가능. P0는 불변 주문 영수증·과거 모호한 키 보수적 거부·비활성화 직렬화·DB actor 위조 #993 해결. 키셋 커서는 안정된 스냅샷이 아님.
+- P0 ENV1402-01 SEC1402-02 REL1402-03 NPC1402-04 (P0 #1656), P1 NPC1402-05 NPC1402-06 NPC1402-07 NPC1402-08 NPC1402-09 NPC1402-10. 상세 UX/API/DB/관리자/개인정보/SEO/Android/a11y/KPI/테스트/롤백은 영문·국문 통합 기획서. 합성 10,001/100/100 미실행, 외부 근거 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 코드·DB·원장·WLD·Test·운영 변경 없음.
+
 ## 2026-10-28 — 기획 v1400 / F675-156 (기능 추가 / DRAFT / RELEASE HOLD)
 - 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c` 확인. 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). **이슈 #1650.**
 - `/quests`의 정적 NPC 버튼은 DB `npc_profiles.active`와 불일치 가능. 인증 회원용 읽기 전용 GET `/api/v1/engagement/npcs`·Android 동등 API, 범위 제한 SECDEF 함수·코드 키셋·안전한 카드 필드·직접 테이블 권한 금지·금융 쓰기 0건을 설계. 기존 주문 POST는 `active` 조회에 NPC 행 잠금이 없으므로 B가 비활성화 경합을 보완한 뒤 최종 거부를 보장해야 한다.

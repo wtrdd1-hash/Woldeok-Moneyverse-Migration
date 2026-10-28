@@ -1,3 +1,40 @@
+## 2026-10-28 — 기획 v1402 / F675-156 NPC 주문 재시도·비활성화 경합·목록 무결성 보완 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 추가 v1400 → 현재 기능 보완 v1402 → 다음 기능 추가 v1404(잠정). 시작·중간 최신 main f396d009f41f421ca38f93ef2e7f8d26960dcae2 (09:01 KST), AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·국문 대조 확인. 미병합 기획 PR #1651 기반 문서 전용 브랜치. QA v1336은 08:21 기준 과거 main 결과이며 이후 #1646 병합·main 변경이 있었으므로 현재 main 전체 QA 결과는 재실행 전 UNKNOWN.
+
+### 실제 코드에서 확인한 결함과 설계 보완
+
+- **P0 영수증 동일성:** migration 082 engagement_record_npc_order는 engagement_progress_receipts를 멱등성 UUID만으로 조회하고 replayed=true를 반환한다. 다른 사용자 영수증·동일 사용자의 다른 NPC·일반 퀘스트 영수증인지 확인하지 않는다. 타인 키를 전달하면 다른 회원의 친밀도를 직접 공개한다고 단정할 수는 없지만 affinity=NULL인 성공형 재실행 응답이 나올 수 있다. 기존 DB 테스트도 NULL을 허용한다. 이를 정확한 원본 주문 확인으로 간주하면 안 된다. 운영 악용 확인은 아님.
+- **P0 비활성화 경합:** NPC active 조회 후 행 잠금이 없어 관리자가 active=false로 변경한 직후에도 진행도·친밀도가 증가할 가능성을 차단해야 한다. 동일 트랜잭션에서 NPC 행 SELECT ... FOR SHARE를 확보하고, 비활성화 UPDATE와 직렬화한다. FOR KEY SHARE는 비키 active 변경 차단에 충분하지 않다. 이미 확정된 주문의 정상 재실행과 신규 주문을 구별한다.
+- **영수증 이관:** B는 순방향 마이그레이션으로 UUID 키·회원·NPC·명령 종류·원본 결과 또는 참조를 묶은 불변 주문 영수증을 설계한다. 동일 키에 다른 회원/NPC/명령을 제시하면 403/409로 실패하고 진행도·친밀도를 변경하지 않는다. 과거 공용 진행도 영수증에는 NPC 식별 정보가 없으므로 기존 기록을 임의로 소급 연결하지 않는다. 과거 모호한 키는 보수적으로 실패/불확정 상태를 반환한다. 원본 migration 082 수정·기존 영수증 덮어쓰기 금지. 잠금 순서: 멱등성 키 → NPC FOR SHARE → 퀘스트 행 → 진행도·친밀도 → 영수증 원자적 커밋.
+- **소유권 신뢰 경계:** NestJS 세션에서 actor를 가져오더라도 SECDEF의 p_actor UUID 자체는 DB 세션에 암호학적으로 결속되지 않는다. 기존 P0 #993, moneyverse_app 직접 권한과 PUBLIC 함수 검증을 유지하고, 앱 역할 위조 호출 음성 테스트를 별도로 요구한다.
+- **목록 일관성:** v1400 GET API와 Android 동등 기능은 여전히 제안 단계. code 키셋 커서는 위치일 뿐 안정된 스냅샷이 아니다. 페이지 사이 활성화·비활성화 시 목록이 달라질 수 있고 observedAt은 커밋 순서 증명이 아니다. 최종 POST에서 다시 활성 상태를 잠금 검증한다. 코드·이름·역할만 길이/형식 검증해 노출하며, 영문 DB 시드에 대해 국영문 화면 문구를 별도로 관리한다. 알 수 없는 NPC 이름을 임의 번역하지 않는다.
+
+### 회원·API·DB·운영 수용 기준
+
+- 대상: 인증·동의한 /quests 회원. CTA 주문받기·다시 시도·더 보기. 상태 로딩/목록/비어 있음/조회 실패/세션 만료/주문 중 비활성화/정확한 재실행/모호한 과거 영수증/권한 거부. 세션 변경 시 늦은 응답 폐기. 실패한 주문에 새 멱등성 키를 자동 발급해 반복 실행하지 않는다.
+- GET /api/v1/engagement/npcs?after=code&limit=1..50, Android /app-api/v1/engagement/npcs: code,name,role,nextCursor,observedAt,nonbinding:true; 400/401/403/429/503, 성공·오류 전체 private/no-store, 회원 세션·동의, GET CSRF 불필요. 기존 POST /api/v1/engagement/npcs/:code/orders는 CSRF·UUID 멱등성 유지, 소유권·재실행 충돌은 회원/Android 동일 403/409 계약으로 고정.
+- DB: 고정 search_path SECDEF 조회, active=true, code 정렬 키셋, limit+1, PUBLIC EXECUTE 회수·app EXECUTE만, 테이블 직접 SELECT 부여 금지. 신규 영수증 UNIQUE(key), 회원/NPC FK, 불변 결속, 앱 DML 금지. 10,001개 합성 행 EXPLAIN 후 인덱스 결정. 조회와 영수증 검증에는 금융 원장·WLD·Outbox 쓰기 0건.
+- 관리자: 활성 NPC·실패·불일치 건수의 비식별 집계만, k<20 억제; 활성화 제어는 MVP 밖. 개인정보 키/회원/NPC 친밀도 분석 로그 금지. 비공개 /quests noindex·sitemap 제외. 국영문·Android 동등성, WCAG 2.2 AA, 320/390/768px·200% 확대·키보드·음성 안내. KPI 성공률·p95·재실행 불일치·주문 전환·교차 계정 노출 0건.
+- **테스트는 명세만, 미실행:** 격리 PostgreSQL 17에서 합성 NPC 10,001개, 동시 주문/비활성화/재시도 100건, 위조 사용자/키/CSRF 100건, 2명×2 NPC 동일 키, 일반 진행도 영수증, 과거 모호한 키, 트랜잭션 실패 롤백, ACL 음성 테스트, 키셋 변화, Android/접근성/SEO 회귀. 비활성화 확정 이후 신규 진행도 0, 정확한 동일 주문 재실행 중복 0, 불일치 타인 정보 노출 0을 증명해야 한다.
+- **배포 보류:** QA v1336 당시 과거 main lint·migration FAIL, #1646 후보 격리 PG/CI PASS. 현재 main f396d009는 그 이후 변경되어 정확 SHA 재검증 전 PASS/FAIL 단정 금지. 개발 DB 권한 235/241·PUBLIC 은행 함수 3·이력 체크섬 5건은 마지막 검증 시 미해결. Test 링크 대상 누락 확인, 운영 링크 존재하나 정확 SHA·manifest 승격 검증 미완료, 독립 백업 복원 미검증. 기능 기본 OFF → 별도 개발 브랜치 → 격리 PG → 공식 Test 정확 SHA·인증/금융/Android E2E·복원 → 승인된 GitOps 운영승격. 기획은 코드·DB·WLD·원장·Test·운영 변경 없음.
+- 외부 독립 근거 신규 승인 0건, 중복 제거 누적 승인 UNKNOWN/10,000건. BLOCKED / IN PROGRESS. 합성 테스트 데이터는 외부 레퍼런스가 아니다.
+
+### P0/P1 개발 백로그
+| 우선순위 | ID | 담당·수용 기준 |
+|---|---|---|
+| P0 | ENV1402-01 | Ops/QA: Test 릴리스 대상·운영 SHA/manifest·안전 백업·독립 복원 |
+| P0 | SEC1402-02 | B/QA: 앱 직접 DML·PUBLIC 은행 함수·actor 위조 #993·체크섬 5건 |
+| P0 | REL1402-03 | QA: 현재 main 전체 lint/test/audit/격리 PG·공식 Test 정확 SHA·승격 게이트 |
+| P0 | NPC1402-04 (P0 #1656) | A/B: 회원/NPC/명령 영수증 결속, 불일치 차단, NPC 잠금, 과거 모호성 보존 |
+| P1 | NPC1402-05 | B: 순방향 불변 영수증 스키마·ACL·과거 키 회귀 |
+| P1 | NPC1402-06 | B: FOR SHARE·비활성화 직렬화·100건 경합/교착/롤백 |
+| P1 | NPC1402-07 | A: GET/POST·Android·세션/동의/CSRF/no-store/호출 제한 |
+| P1 | NPC1402-08 | A/C: /quests 만료·재시도·모호성 UI·국영문/a11y·세션 격리 |
+| P1 | NPC1402-09 | C/QA: 관리자 비식별 집계·SEO·KPI·로그 보존 |
+| P1 | NPC1402-10 | QA: 격리 PG 10,001/100/100·타인 키·정확 SHA·OFF 롤백 |
+
+
 ## v1400 / F675-156 — 검증된 활성 NPC 주문 목록 (기능 추가 / DRAFT / RELEASE HOLD) — 이슈 #1650
 
 **주기:** 이전 기능 보완 v1398 → 현재 기능 추가 v1400 → 다음 기능 보완 v1402(잠정). 시작·중간 main `b1cd54fda1123fb07ca81b6e5b3ead70f59f556c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본 확인. 미병합 기획 Draft #1645 위에 쌓는 문서 전용 변경이며 Gemini/A/B/C/QA 코드·WLD·원장·DB·스위치·Test·운영 변경 없음.
