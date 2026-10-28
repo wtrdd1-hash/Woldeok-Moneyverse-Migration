@@ -15,3 +15,6 @@
 
 ## MIDPOINT
 - 01:10 KST: origin/main 35971c600 unchanged; canonical EN/KO project plans rechecked; predecessor #1759 OPEN/DRAFT. Integrated design and backlog added.
+
+## GitHub / final checkpoint
+- Draft PR #1763 (stacked on #1759), development issue #1758 updated. Start commit d6818a91, planning commit d31289b05. Local classifier 17/17 PASS; official exact-SHA Test and independent restore NOT run. PR classify/release-input/verify classify/policy PASS; policy and non-runtime-summary PENDING at checkpoint. No merge/deploy.

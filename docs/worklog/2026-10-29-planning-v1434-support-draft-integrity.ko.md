@@ -15,3 +15,6 @@
 
 ## MIDPOINT
 - 01:10 KST: origin/main 35971c600 unchanged; canonical EN/KO project plans rechecked; predecessor #1759 OPEN/DRAFT. Integrated design and backlog added.
+
+## GitHub 및 완료 기록
+- Draft PR #1763(선행 #1759 기반), 개발 이슈 #1758 갱신. 시작 커밋 d6818a91, 기획 커밋 d31289b05. 로컬 분류 17/17 PASS, 공식 Test 정확 SHA·독립 복원 미실행. PR classify/release-input/verify classify/policy PASS, policy 및 non-runtime-summary 확인 당시 PENDING. 병합·배포 없음.
