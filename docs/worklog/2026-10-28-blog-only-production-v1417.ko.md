@@ -29,3 +29,8 @@
 - 예전 JSON 공개 13건 보존 및 파일 변경 금지 유지. 신규 검증 DB 게시 글 0건. 로컬 AI 원고 생성 125초 시간초과로 2시간 자동게시 OFF; 자동 생성 성공이라고 주장하지 않음. 인증 관리자 글 수정/삭제 실계정 E2E 미검증, 예전 JSON 게시물 수동 변경은 파일 잠금으로 제한되는 것이 알려진 결함.
 - 이번은 블로그 전용 운영 실제 승격으로 전체 금융·회원 앱 승격이 아님. 금융 사전검사 BLOCKED 수치는 변경 없음.
 - 롤백: 운영 Nginx 원본을 복원하고 nginx -t 후 reload, 새 블로그 두 서비스만 중단/비활성. 기존 데이터 보존을 위해 추가 블로그 SQL 및 감사 영수증 무단 DROP 금지. 전체 운영 DB 백업은 별도 승인된 사고 복구에만 사용.
+
+## v1417.6 — 운영 관리자 페이지 SEO 개인정보 안전 보완
+- 운영 관리자 /admin/blog는 HTML 메타 noindex와 달리 HTTP 응답 헤더가 index,follow였던 불일치 발견. 익명 브라우저에서 관리자 본문 노출은 확인되지 않았고, 기존 글을 대상으로 한 익명 DELETE는 403으로 거부되어 실제 글 변경 없음.
+- 현 v1417 Nginx 설정을 0600 /srv/moneyverse-data/ops/private/blog-v1417/nginx-before-admin-noindex-hotfix.conf 에 백업. 운영 블록의 /admin/blog, /admin/blog/*, /api/admin/blog/*, /api/v1/admin/blog-verified* 4개 라우트에만 상위 색인 헤더 숨김과 noindex,nofollow 추가. 최초 스크립트는 Test 서버 블록이 먼저 검색되어 변경 없이 중단, 운영 블록만 대상으로 다시 적용. nginx -t 통과 및 무중단 reload.
+- 최종 공개 관리자 HTTP 200 및 v1417/noindex,nofollow 헤더 확인. 공개 블로그는 index,follow 유지, 기존/신규 서비스 모두 active, 게시글/금융 DB 변경 없음.
