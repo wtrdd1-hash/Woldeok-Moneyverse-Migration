@@ -38,7 +38,7 @@ export async function retrievePrimarySource(
         signal: AbortSignal.timeout(12000),
         headers: { 'User-Agent': 'Moneyverse-Source-Verification/1.0' },
       });
-      if (response.status !== 200 || !/^text\\/html/i.test(response.headers.get('content-type') || '')) {
+      if (response.status !== 200 || !(response.headers.get('content-type') || '').toLowerCase().startsWith('text/html')) {
         throw new Error('SOURCE_NOT_AVAILABLE');
       }
       if (Number(response.headers.get('content-length') || 0) > 2000000) {
