@@ -72,5 +72,7 @@ describe('venture preview financial truth', () => {
     render(<VenturesPage />);
     expect(screen.getByText(/시뮬레이션 · 미리보기/)).toBeDefined();
     expect(screen.queryByText('실시간 원장')).toBeNull();
+    expect(screen.queryByText('수령 가능한 미수령 배당금')).toBeNull();
+    expect(screen.queryByText(/실시간 누적 배당금/)).toBeNull();
   });
 });

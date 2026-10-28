@@ -10,7 +10,7 @@
 
 ## In progress
 - [x] RED: two real NestJS HTTP requests returned 200 instead of required 503; frontend badge still called hardcoded WLD a live ledger. Evidence: `v624-logs/red-backend.log`, `red-frontend.log`.
-- [ ] GREEN code and contract tests.
+- [x] GREEN: restored closed PR #1374 Backend fail-closed 503/no-store, contract expectations and frontend preview truth. Added real HTTP tests and extended misleading dividend-label test (additional RED then GREEN). Backend focused 7/7, frontend 5/5 PASS.
 - [ ] Full gates, CI, final main sync, and release hold.
 
 ## Finished

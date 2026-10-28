@@ -29,10 +29,10 @@
 - [x] Run both RED suites and record expected failures.
 
 ## Task 2 — GREEN implementation
-- [ ] Replace fabricated backend venture GET payloads with 503 evidence boundary.
-- [ ] Update the API-contract test to assert the new response.
-- [ ] Relabel frontend sample WLD and dividend claims.
-- [ ] Run focused tests and review code diff.
+- [x] Replace fabricated backend venture GET payloads with 503 evidence boundary.
+- [x] Update the API-contract test to assert the new response.
+- [x] Relabel frontend sample WLD and dividend claims.
+- [x] Run focused tests and review code diff.
 
 ## Task 3 — Release gates and handoff
 - [ ] Run typecheck, backend build, lint, unit/integration/security/API and available CI.

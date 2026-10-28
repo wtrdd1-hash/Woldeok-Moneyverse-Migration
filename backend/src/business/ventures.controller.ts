@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   Post,
@@ -105,83 +106,28 @@ export interface VentureInvestment {
 @Controller('businesses/ventures')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class VenturesController {
-  private mockPitches: VenturePitch[] = [
-    {
-      id: 'pitch-ai-01',
-      name: '뉴럴 오토트레이드 랩스',
-      sector: 'AI/퀀트 핀테크',
-      stage: 'SEED',
-      founderName: '알고마스터 (Lv.88)',
-      targetFundingWld: 50000000,
-      currentFundingWld: 38500000,
-      investorCount: 142,
-      equitySharePercent: 12.5,
-      expectedAnnualYieldPercent: 24.8,
-      daysRemaining: 5,
-      description: '초고속 틱 데이터 분산 머신러닝 기반 가상 선물 오토트레이딩 솔루션',
-    },
-    {
-      id: 'pitch-meta-02',
-      name: '메타버스 테헤란 랜드 스튜디오',
-      sector: '가상 부동산/엔터',
-      stage: 'SERIES_A',
-      founderName: '랜드로드 (Lv.95)',
-      targetFundingWld: 120000000,
-      currentFundingWld: 96000000,
-      investorCount: 310,
-      equitySharePercent: 18.0,
-      expectedAnnualYieldPercent: 31.5,
-      daysRemaining: 12,
-      description: '월덕 메타버스 특별구역 초고층 복합 타워 설계 및 임대 수익 분배 DAO',
-    },
-    {
-      id: 'pitch-game-03',
-      name: '사이버 룰렛 VR 엔진',
-      sector: '게임/웹3 카지노',
-      stage: 'PRE_IPO',
-      founderName: '카지노킹 (Lv.99)',
-      targetFundingWld: 300000000,
-      currentFundingWld: 285000000,
-      investorCount: 890,
-      equitySharePercent: 8.5,
-      expectedAnnualYieldPercent: 42.0,
-      daysRemaining: 2,
-      description: '검증 가능한 공정성(Provably Fair) 기반 인터랙티브 카지노 VR 엔진',
-    },
-  ];
+  private evidenceUnavailable(): never {
+    throw new ServiceUnavailableException({
+      code: 'VENTURE_EVIDENCE_UNAVAILABLE',
+      message: 'Verified venture funding and owner-scoped equity ledger receipts are unavailable.',
+    });
+  }
 
   @ApiOperation({ summary: '현재 크라우드펀딩 진행 중인 스타트업 피치 목록 조회' })
+  @Header('Cache-Control', 'no-store')
   @Get('pitches')
   async listPitches() {
-    return {
-      pitches: this.mockPitches,
-      totalActivePitches: this.mockPitches.length,
-      timestamp: new Date().toISOString(),
-    };
+    // No persisted, audited funding source exists. A fabricated market is not an empty market.
+    return this.evidenceUnavailable();
   }
 
   @ApiOperation({ summary: '내 VC 엔젤투자 포트폴리오 및 배당금 현황 조회' })
+  @Header('Cache-Control', 'no-store')
   @Get('investments')
   async listMyInvestments(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    const investments: VentureInvestment[] = [
-      {
-        id: 'inv-001',
-        userId: actorUserId,
-        pitchId: 'pitch-ai-01',
-        startupName: '뉴럴 오토트레이드 랩스',
-        investedAmountWld: 2500000,
-        equitySharePercent: 0.625,
-        totalDividendsClaimedWld: 150000,
-        unclaimedDividendsWld: 48500,
-        investedAt: new Date(Date.now() - 86400000 * 14).toISOString(),
-      },
-    ];
-    return {
-      investments,
-      totalInvestedWld: 2500000,
-      totalUnclaimedDividendsWld: 48500,
-    };
+    requireUserId(req);
+    // Member-bound sample holdings are not verified equity or claimable dividends.
+    return this.evidenceUnavailable();
   }
 
   @ApiOperation({ summary: '스타트업 피치 엔젤투자 집행 (SAFE 지분 취득)' })

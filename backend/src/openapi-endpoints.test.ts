@@ -88,11 +88,15 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
 
   it('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 엔드포인트 정상 동작', async () => {
     const controller = new VenturesController();
-    const pitches = await controller.listPitches();
-    expect(pitches.pitches.length).toBeGreaterThan(0);
-
-    const investments = await controller.listMyInvestments(mockReq);
-    expect(investments.investments.length).toBeGreaterThan(0);
+    // Financial read endpoints must not publish fabricated venture market or member balances.
+    await expect(controller.listPitches()).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'VENTURE_EVIDENCE_UNAVAILABLE' },
+    });
+    await expect(controller.listMyInvestments(mockReq)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'VENTURE_EVIDENCE_UNAVAILABLE' },
+    });
 
     // No fake funding, dividends or incorporation receipts.
     await expect(controller.investVenture(mockReq, {
