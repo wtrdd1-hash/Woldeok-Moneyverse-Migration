@@ -8,6 +8,7 @@ import { BlogPostClient } from './[slug]/blog-post-client';
 import { BlogHubClient } from './blog-hub-client';
 import { getBlogFreshnessNotice } from './blog-freshness';
 import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
+import { verifiedPublicArticles, verifiedArticleBySlug } from './blog-verified-client';
 import {
   blogAlternateLanguages, blogHubUrl, blogUrl, canonicalBlogSlug,
   countryBlogPosts, getBlogCountryEdition, isBlogDiscoverable, type BlogLocale,
@@ -118,7 +119,7 @@ export function renderBlogHub(locale: BlogLocale) {
   );
 }
 
-export function renderBlogArticle(slug: string, locale: BlogLocale) {
+export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   if (canonicalBlogSlug(slug) !== slug) {
     permanentRedirect(blogUrl(slug, locale));
   }

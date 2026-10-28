@@ -30,7 +30,7 @@ export interface AcademicReference {
   readonly doiOrUrl?: string | undefined;
 }
 
-export type BlogCountry = 'KR' | 'US' | 'JP' | 'VN';
+export type BlogCountry = 'KR' | 'US' | 'JP' | 'CN' | 'VN';
 
 export type BlogPostStatus = 'PUBLISHED' | 'WITHDRAWN';
 
@@ -50,6 +50,8 @@ export interface BlogPost {
   readonly relatedCalculatorName: string;
   readonly relatedStockTicker?: string | undefined;
   readonly isAiGenerated: boolean;
+  /** DB-issued receipt, not an AI-provided string. */
+  readonly verificationReceipt?: string | undefined;
   readonly views: number;
   /** Supplied only by verified analytics, not by the article generator. */
   readonly viewCountVerified?: boolean | undefined;

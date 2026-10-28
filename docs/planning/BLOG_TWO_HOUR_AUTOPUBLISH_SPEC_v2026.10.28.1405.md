@@ -1,5 +1,7 @@
 # v2026.10.28.1405 — Two-hour multilingual economy/coding/computer blog rotation and unattended publication
 
+> v1412 implementation update: New code candidate provides original-country author, guarded source retrieval, idempotent DB publication and owner moderation, with frontend read/SEO. The source is not yet Test/Production deployed and future claims still require independent verified evidence; see v1412 worklog.
+
 **Status: OWNER POLICY ADOPTED; schedule and pure evidence checks are source-code candidates only. Country-native AI writing, atomic publishing and Production activation are NOT implemented.**
 
 ## 1. Owner-approved policy history and latest authority

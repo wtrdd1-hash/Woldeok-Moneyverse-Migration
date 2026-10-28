@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllBlogPosts } from '@/app/blog/blog-data';
+import { verifiedPublicArticles } from '@/app/blog/blog-verified-client';
 import { blogAlternateLanguages, blogHubUrl, blogUrl, hasCountryEdition, isBlogDiscoverable } from '@/app/blog/blog-seo';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,7 @@ function entry(url: string, date: string, languages: Record<string, string>) {
   return '<url><loc>' + esc(url) + '</loc><lastmod>' + date + '</lastmod>' + alternate + '</url>';
 }
 export async function GET() {
-  const posts = getAllBlogPosts().filter(isBlogDiscoverable);
+  const posts = [...await verifiedPublicArticles(), ...getAllBlogPosts()].filter(isBlogDiscoverable);
   const latest = posts.map(p => p.updatedAt).sort().at(-1) ?? '2026-10-15T14:00:00.000Z';
   const hubs = Object.fromEntries(LOCALES.map(l => [({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'})[l], blogHubUrl(l)]));
   const entries = LOCALES.map(l => entry(blogHubUrl(l), new Date(latest).toISOString(), hubs));

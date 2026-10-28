@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getBlogPostBySlug } from '@/app/blog/blog-data';
+import { verifiedArticleBySlug } from '@/app/blog/blog-verified-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await props.params;
-    const post = getBlogPostBySlug(slug);
+    const post = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
 
     if (!post) {
       return NextResponse.json(

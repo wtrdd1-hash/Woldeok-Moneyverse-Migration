@@ -917,6 +917,7 @@ const COUNTRY_MARKET_PROFILES: Record<BlogCountry, {
   KR: { name: '대한민국', currency: 'KRW (원)', centralBank: '한국은행 (BOK)', benchmarkIndex: 'KOSPI 지수', flag: '🇰🇷', researchInstitution: '한국금융연구원(KIF) & KDI' },
   US: { name: '미국', currency: 'USD (달러)', centralBank: '연방준비제도 (Federal Reserve)', benchmarkIndex: 'S&P 500 & NASDAQ', flag: '🇺🇸', researchInstitution: '전미경제연구소 (NBER) & FRED' },
   JP: { name: '일본', currency: 'JPY (엔)', centralBank: '일본은행 (Bank of Japan)', benchmarkIndex: 'Nikkei 225', flag: '🇯🇵', researchInstitution: '일본경제연구센터 (JCER)' },
+  CN: { name: '중국', currency: 'CNY (위안)', centralBank: '중국인민은행 (PBOC)', benchmarkIndex: '상하이종합지수', flag: '🇨🇳', researchInstitution: '중국인민은행' },
   VN: { name: '베트남', currency: 'VND (동)', centralBank: '베트남중앙은행 (SBV)', benchmarkIndex: 'VN-Index', flag: '🇻🇳', researchInstitution: '베트남 경제연구원 (VEPR)' },
 };
 
