@@ -20,3 +20,7 @@
 - The other two frontend failures concern the separate AI blog generate route (HTTP 500 instead of 200); no blog code changed in this branch.
 - Initial full typecheck failed because the worktree reused stale root `node_modules` without the latest backend `undici` dependency; installed the lockfile offline in the isolated worktree. Full typecheck PASS after environment repair.
 - Isolated PostgreSQL 17.11 full migration PASS; `moneyverse_app` cannot directly SELECT `admin_ip_blocks` (`f`) but can EXECUTE `admin_list_ip_blocks` (`t`); 21 targeted backend/DB tests PASS. Temporary container removed.
+
+## MID 3 — 2026-10-28 09:54 KST
+- `origin/main` advanced with independent blog article image/formula changes and a blog generation test-storage fix (`75ef01088`, `2e3004ed3`). These are disjoint from administrator security files but directly address the two remaining full frontend test failures. Stop obsolete SHA validation and rebase to new main before final exact-SHA gates.
+- Previous candidate had full ESLint PASS (0 errors, 1,102 warnings), full Typecheck PASS, 16 focused tests PASS, Backend unit 1,927 PASS / 440 SKIP, and real isolated PostgreSQL 17.11 full migrations + 21 tests PASS. Full frontend 1,871 PASS / 2 FAIL (blog tests before upstream fix); no merge or deployment.
