@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1415.8 — Emergency legacy blog filesystem write containment
+- After public Nginx legacy generator POST was retired, an internal JSON writer still generated two additional duplicate unsourced Korean finance posts (11 to 13) at 14:43 KST. Existing published articles were not automatically withdrawn. Production shared blog-posts.json is now backed up to a restricted 0600 file, SHA-256 verified and protected by filesystem immutable flag; write-denial as the debian service account tested PASS. This blocks legacy JSON admin edits/withdrawals until controlled removal; it is not a substitute for DB verified publisher. Full source app promotion remains held on finance/ledger integrity. See worklog v1415.8.
+
 ## v2026.10.28.1415.7 — Blog CI and official Test release; Production finance HOLD
 - PR #1695 SHA 4688e84be0f831a3f6e5e16040b3764dff6d78bf: CI #3971 PASS, exact SHA official Test deployment, backed-up and applied Test DB migrations 280-290, blog E2E and four-country mobile/noindex checks PASS. Emergency production Nginx exact-path blocks old unverified JSON generator with HTTP 503; existing articles and financial DB untouched. **Full production application promotion BLOCKED** by three unsafe app finance DML grants and 18 unexplained account opening records totaling 18,000 WLD; Prod DB migration 268, model-generated verified articles 0 in Test. See docs/worklog/2026-10-28-blog-release-v1415.7.md.
 
