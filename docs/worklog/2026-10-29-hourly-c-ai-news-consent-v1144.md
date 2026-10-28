@@ -8,8 +8,11 @@
 - Design: backend DTO boolean, controller explicit flag, service draft-only early return after durable batch creation; client default unchecked, exact typed response parsing and fail-closed unknown/skipped results. Keyboard/reader checkbox label and responsive card preserved. Test RED then GREEN.
 - Gate: focused backend/frontend, full suites when safe, lint/typecheck/build, app-api contract, security audit, isolated PG if capacity allows, CI and official Test exact SHA. HOLD on any failure.
 
-## IN PROGRESS
-- Pending RED/GREEN, mid-main refresh and tests.
+## IN PROGRESS (05:19 KST)
+- TDD RED: frontend 5/5 expected failures (skipped, malformed, draft, missing event, fallback); backend 3/3 expected failures after correcting test fixture. Initial backend run was blocked by missing `undici` in stale shared node_modules; used existing complete dependency tree from prior isolated C worktree without modifying shared dependencies.
+- GREEN: backend focused 59/59 PASS including prior scheduler default-publish regression; frontend 6/6 PASS including accessible checkbox initially unchecked. First DOM run without `NODE_ENV=test` failed with React.act production-mode mismatch; rerun with `NODE_ENV=test` PASS.
+- Controller validates optional boolean and explicitly defaults admin POST to draft-only. Service persists batch without calling publication when false; scheduled invocations retain true default. Next action parses actual backend receipt, rejects skipped/malformed/contradictory publication and distinguishes deterministic fallback. No schema changes.
+- `origin/main` unchanged `35971c600...`; canonical EN/KO plans unchanged at mid-check. `git diff --check` PASS. Root 98%, /tmp 97%: no unsafe backup root test or local large restore.
 
 ## FINISHED
 - Pending exact HEAD evidence and release decision.

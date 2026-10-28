@@ -831,6 +831,7 @@ export class AiNewsService {
   async autoGenerateAndPublish(
     actorUserId: string,
     runtimeCredential?: AiNewsRuntimeCredential,
+    publishImmediate = true,
   ): Promise<Record<string, unknown>> {
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);
@@ -859,11 +860,13 @@ export class AiNewsService {
       });
       scenarios = normaliseRegisteredStockAuto(batch, context);
     } catch {
-      // 2. Fallback to deterministic financial news engine
+      // The deterministic fallback is not model inference and must be labeled as such.
+      usedModel = 'deterministic-financial-engine';
       scenarios = generateDeterministicStockNews(context);
     }
 
     if (scenarios.length === 0) {
+      usedModel = 'deterministic-financial-engine';
       scenarios = generateDeterministicStockNews(context);
     }
 
@@ -879,6 +882,10 @@ export class AiNewsService {
       context,
       scenarios,
     });
+
+    if (!publishImmediate) {
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, engine: usedModel };
+    }
 
     const stored = await this.repository.latest(actorUserId);
     const candidates = (stored?.scenarios ?? []).filter((scenario) => {
