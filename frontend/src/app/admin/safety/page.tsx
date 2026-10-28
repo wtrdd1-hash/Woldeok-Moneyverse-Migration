@@ -63,9 +63,9 @@ function chatReportStatusBadge(status: string) {
     case 'SUBMITTED':
       return <Badge variant="destructive" className="animate-pulse text-xs">접수 대기 (SLA)</Badge>;
     case 'ACTIONED_BLOCKED':
-      return <Badge className="bg-rose-600 text-white text-xs font-semibold">계정 제재 / 차단</Badge>;
+      return <Badge className="bg-rose-600 text-white text-xs font-semibold">차단 결정 기록 (실제 계정 차단 미확인)</Badge>;
     case 'ACTIONED_WARNED':
-      return <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 text-xs font-semibold">경고 조치</Badge>;
+      return <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 text-xs font-semibold">경고 결정 기록 (실제 알림 미발송)</Badge>;
     case 'REJECTED':
       return <Badge variant="secondary" className="text-muted-foreground text-xs">기각 / 무혐의</Badge>;
     default:
