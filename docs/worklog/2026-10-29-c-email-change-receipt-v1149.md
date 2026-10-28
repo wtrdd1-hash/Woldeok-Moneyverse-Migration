@@ -6,3 +6,8 @@
 - Reviewed AGENTS.md, README.md, README/README.ko.md, English/Korean living project plans, recent main commits, open A/B/C/QA/planning PRs and previous C v1148. Scope excludes overlapping credential request/change work in C #1793.
 - Source finding: `frontend/src/app/verify-email-change/actions.ts` treats HTTP 2xx and TypeScript-only `{ outcome:'email-changed', sessionsRevoked:true }` as success without validating the JSON. Backend `local-auth.controller.ts` returns those fields only after `credentialStore.completeEmailChange` reports success. A malformed/contradictory upstream 2xx may display a false success banner. No claim of observed production exploitation.
 - Target: verify actual response, show a clear unverified status on failure, preserve keyboard/mobile/noindex and authoritative backend contract.
+
+## MID — 2026-10-29 08:49 KST
+- TDD RED reproduced: 6 failing cases against the existing unverified-success behavior, with 3 baseline cases passing. GREEN: 12/12 targeted tests (new 9 + existing 3) passed after runtime receipt validation and accessible failure text.
+- No Backend/DB changes: authoritative controller returns `{outcome:'email-changed',sessionsRevoked:true}` after successful store completion. A 2xx response with missing/false/contradictory fields now redirects to an unverified state instead of `email_changed=1`.
+- Main re-fetch advanced from `aeef78a3` to `308adb748` (blog card and implementation plan only; no changed files overlap). Canonical EN/KO plans now include v1448 and QA v1359 FAILED/HOLD. Release blockers remain.

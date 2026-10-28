@@ -6,3 +6,8 @@
 - AGENTS.md, README, 국영문 기획서, 활성 PR/QA/A/B/C 개발을 조사하고 C #1793 중복을 회피함.
 - 실제 코드 문제: 이메일 변경 완료 Server Action은 TypeScript 반환 타입만 믿고 HTTP 2xx를 성공으로 표시하며 JSON의 `outcome` 및 `sessionsRevoked`를 확인하지 않음. Backend는 성공 시 해당 값을 반환함. 운영 악용은 입증되지 않음.
 - 목표: 런타임 완료 증빙 검증, 검증 불가 시 오류 안내, 모바일·키보드·스크린리더·비색인 유지. DB/원장 변경 없음.
+
+## 중간 — 2026-10-29 08:49 KST
+- TDD RED 6건 재현(기존 통과 3건), 수정 후 집중 테스트 12/12 PASS.
+- Backend/DB 수정 없음. NestJS의 `outcome=email-changed`, `sessionsRevoked=true`를 런타임 검증하며 누락·거짓·모순 응답은 성공 표시 대신 미검증 안내로 처리함.
+- main이 `aeef78a3` → `308adb748`로 변경됨. 변경 파일은 블로그 카드·통합 계획으로 이번 작업과 겹치지 않음. 국영문 기획 v1448 및 QA v1359 FAILED/HOLD 확인.
