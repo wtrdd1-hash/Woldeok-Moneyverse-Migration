@@ -16,7 +16,7 @@ const status = {
 
 describe('FX administrator status evidence', () => {
   it('accepts only a verified NestJS status envelope', () => {
-    expect(parseFxStatusResponse({ success: true, data: status })).toEqual(status);
+    expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) + 1000)).toEqual(status);
     expect(parseFxStatusResponse(status)).toBeNull();
     expect(parseFxStatusResponse({ success: false, data: status })).toBeNull();
   });
@@ -37,6 +37,17 @@ describe('FX administrator status evidence', () => {
   it('rejects duplicate financial row identifiers and malformed dates', () => {
     expect(parseFxStatusResponse({ success: true, data: { ...status, history: [...status.history, ...status.history] } })).toBeNull();
     expect(parseFxStatusResponse({ success: true, data: { ...status, reserves: { ...status.reserves, updatedAt: 'not-a-date' } } })).toBeNull();
+  });
+
+  it('rejects stale and future-dated reserve evidence', () => {
+    expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) + 25 * 60 * 60_000)).toBeNull();
+    expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) - 10 * 60_000)).toBeNull();
+  });
+
+  it('accepts actual migration 256 code IDs for virtual swap and SDR rows', () => {
+    const swap = { id: 'SWAP_FED_BOK', counterparty: 'Virtual counterparty', totalFacilityUsd: 100, drawnAmountUsd: 0, availableFacilityUsd: 100, status: 'ACTIVE', interestRatePct: 2, effectiveDate: TS, expiryDate: TS, updatedAt: TS };
+    const sdr = { id: 'SDR_USD', assetName: 'Virtual USD', assetType: 'SDR_CURRENCY', allocationWeightPct: 10, holdingAmount: 1, unit: 'USD', usdValue: 1, updatedAt: TS };
+    expect(parseFxStatusResponse({ success: true, data: { ...status, swapAgreements: [swap], sdrAllocations: [sdr] } }, Date.parse(TS) + 1000)).not.toBeNull();
   });
 
   it('rejects malformed transaction and swap evidence', () => {
