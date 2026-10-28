@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
+- Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
+
 ## v2026.10.28.1422 — Citizen dividend wallet ledger labeling
 - Fixed a failing exact-SHA backend test: `TREASURY_CITIZEN_DIVIDEND` now displays a specific Korean user wallet label (29 tests PASS). Financial readiness and official Test remain BLOCKED. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
 

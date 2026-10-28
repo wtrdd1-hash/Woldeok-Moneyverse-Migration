@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1423 — Production DB-only treasury dividend protection
+- Real Production migration291 applied after verified encrypted backup; blocking old direct-wallet payout and adding canonical UUID transaction entrypoint. Exact PostgreSQL schema acceptance and authorized-role rejection probes PASS; 890 journal transactions and 18k WLD account-sum unchanged, no restart. PR #1706 source merged to main `3c251d93`. Not a full app release: historical 18k drift, Treasury 0 funds, SQL gap269–287, official Test mismatch and data disk97% remain. Owner accepted existing DML grants, unchanged. [Worklog](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
+
 ## v2026.10.28.1422 — Accurate member wallet dividend label
 - Added canonical treasury payout transaction label, allowing CI label coverage. Existing historical divergence and absent approved treasury funding still block finance Production. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
 

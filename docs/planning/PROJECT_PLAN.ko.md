@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)
+- 17:18 KST 실제 권위 운영 DB에 migration 291 적용해 구형 미분개 배당 차단 및 신규 UUID 멱등 복식원장 함수 등록. 최신 암호화 백업, 운영 실제 스키마 격리시험 및 운영 app역할 비인가/구형 지급 거부 확인. 원장거래 890→890, 전체 계좌 합 18,000→18,000, backend HTTP200. GitHub PR #1706은 CI PASS로 main 병합 `3c251d93`. 앱 전체 운영 교체는 **미수행**: 18,000 WLD 원장 차이, 국고 정식 재원 0, 269~287 누락, 공식 Test/디스크97% 문제. [기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
+
 ## v2026.10.28.1422 — 국고 시민배당 사용자 지갑 거래명칭 CI 수정
 - 신규 TREASURY_CITIZEN_DIVIDEND 거래유형의 한국어 지갑 표시 누락을 수정하여 라벨 회귀 29건 PASS. SQL 원자결제 Test PASS와 별개로 운영의 18,000 WLD 원장 차이, 국고실재원 0, 269~287 마이그레이션 공백, 공식 Test SHA 불일치가 해소되지 않아 금융 운영승격 차단. [기록](../worklog/2026-10-28-treasury-wallet-label-v1422.ko.md).
 
