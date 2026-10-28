@@ -14,3 +14,6 @@
 
 ## Finished
 - Pending exact-SHA validation, PR and release decision.
+
+### CI feedback — 07:55 KST
+- Candidate run #40783286287 failed TypeScript due to Vitest `it.each` interpreting the array of invalid cookie sets as positional arguments. Fixed the test parameterization to pass each full cookie set as one tuple; focused tests and frontend typecheck re-run PASS. This is a test defect, not a production-code bypass. All required gates must be rerun on the new HEAD.
