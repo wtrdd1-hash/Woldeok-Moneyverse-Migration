@@ -12,8 +12,8 @@
 ## Mid / 중간
 - [x] Main and EN/KO plan rechecked; actual frontend glossary source and ISR confirmed.
 - [x] Integrated EN/KO spec, feature review, project plan, update logs and worklog.
-- [ ] Update GitHub issue and open Draft PR; verify remote SHA.
-- [ ] Run diff, docs-only classifier and GitHub CI.
+- [x] Update issue #1769 and predecessor #1770, open Draft #1775; verify first remote SHA.
+- [x] Run diff, docs-only classifier (17 PASS) and check GitHub CI (partial PASS; policy pending, final commit not yet certified).
 
 ## Evidence / 근거
 - Backlog: ENV1438-01 FIN1438-02 SEC1438-03 REL1438-04 GLOS1438-05 GLOS1438-06 GLOS1438-07 GLOS1438-08 GLOS1438-09 GLOS1438-10
@@ -23,4 +23,6 @@
 - No runtime, DB, WLD, ledger, Test or Production changes. DRAFT / RELEASE HOLD.
 
 ## Completion / 완료
-PENDING remote and CI verification.
+Draft PR #1775 OPEN (stacked on #1770), issue #1769 updated, 14 documentation files, first remote SHA verified. Classifier 17 PASS / 0 FAIL, EN/KO 10/10, diff check PASS. Initial GitHub release-input/classify/verify-classify SUCCESS; policy IN_PROGRESS; final commit CI NOT CERTIFIED. Main unchanged. Release HOLD.
+
+Final verification must use the exact final commit SHA; do not equate documentation CI with real PostgreSQL, authenticated official Test or Production release readiness.
