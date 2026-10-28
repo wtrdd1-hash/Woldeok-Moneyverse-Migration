@@ -29,3 +29,16 @@ Database-side constraints reject invalid prices or impossible stock states, such
 - `/shop/catalog`
 - member inventory/collections
 - quests and progression
+
+## Member catalogue category filter (A2225 candidate, not released)
+
+The authenticated `/shop/catalog` page offers a category selector alongside text search.
+`GET /api/v1/shop/catalog?category=vehicle` uses the existing actor-scoped
+`shop_catalog_list_v2(actor)` read model, then applies an exact category token
+filter. The API returns `categories` from the same actor-visible catalog so
+new categories do not disappear from the selector. `q` and `category` combine
+without client-supplied prices, arbitrary SQL, new grants, or ledger writes.
+Malformed category tokens receive HTTP 400 before the database call. The
+Android `/app-api/v1/shop/catalog` gateway preserves the query string and
+forces private, no-store/noindex for member catalog, holdings and purchases.
+This remains a Draft candidate until exact-SHA Test and release gates pass.

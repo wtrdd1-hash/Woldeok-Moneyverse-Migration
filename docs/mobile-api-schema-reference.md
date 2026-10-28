@@ -3747,6 +3747,7 @@ _No request body._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
+| categories[] | true | string[] |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
@@ -4062,6 +4063,7 @@ _No request body._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
+| categories[] | true | string[] |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

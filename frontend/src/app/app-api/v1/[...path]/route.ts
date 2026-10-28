@@ -178,6 +178,11 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
   }
+  // Member catalogue categories and inventory must not survive an account switch.
+  if (parts[0] === 'shop' && ['catalog', 'holdings', 'purchases'].includes(parts[1] ?? '')) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
   return response;
 }
 

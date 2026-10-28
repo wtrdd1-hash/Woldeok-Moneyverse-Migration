@@ -317,6 +317,10 @@ export interface CatalogGroup {
  * category added by a later migration therefore lands in the place the
  * database put it instead of falling off the end of a hardcoded order.
  */
+export function filterCatalogByCategory(items: readonly CatalogItem[], category: string): CatalogItem[] {
+  return category === '' ? [...items] : items.filter((item) => item.category === category);
+}
+
 export function groupByCategory(items: readonly CatalogItem[]): readonly CatalogGroup[] {
   const groups = new Map<string, CatalogItem[]>();
   for (const item of items) {

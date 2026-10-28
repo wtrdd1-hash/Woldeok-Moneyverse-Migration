@@ -306,3 +306,18 @@ describe('Android chat bigint cursor and private cache boundary', () => {
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+describe('Android shop category selection', () => {
+  it.each([200, 401, 500])('forwards category query and never caches member catalogue response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/shop/catalog?category=vehicle'), context('shop', 'catalog'));
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('category')).toBe('vehicle');
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+});
