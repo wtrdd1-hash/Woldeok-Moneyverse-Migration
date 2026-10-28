@@ -32,9 +32,10 @@ Pending.
 - [x] Full lint PASS (0 errors, 1096 warnings); root test PASS after offline dependency installation, including backend and frontend suites.
 - [x] Bot tests 11 PASS and bot audit 0 vulnerabilities after isolated offline install.
 - [x] Repository security, control-byte and Prisma checks PASS.
-- [ ] Typecheck/build PASS: blocked by main SSRF pinned transport undici LookupFunction TS2322 after upstream integration; not part of this stock API change.
+- [x] Typecheck/build PASS after upstream main f396d009 fixed the unrelated SSRF undici callback TS2322.
 - [ ] Full root dependency audit PASS: 3 low, 9 moderate.
 - [ ] Official Test exact-SHA authenticated E2E/real production schema/rollback PASS: not executed; public Test reports 6f697e74b7bf0cd1e4521d36534cfd9c140f8010.
 - [ ] Production: forbidden. Public Production reports 6a989b5ac0c6155587d43426d64f6def6b62c917.
 - No migrations, financial mutations, live DB changes, other branches/worktrees edits, or deployment.
 - PR to remain Draft + hold until every required gate is independently verified.
+- Final integration synchronization: main f396d009 includes an upstream SSRF callback typing fix. Rebased again; typecheck/build PASS on the rebased source. Previous CI failed on pre-fix base, so new exact SHA must be checked separately.
