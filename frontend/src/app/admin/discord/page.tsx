@@ -118,7 +118,7 @@ export default async function AdminDiscordPage() {
                   value={groupDigits(console_.outbox.stuck_count)}
                   plain
                   hint={
-                    stuck > 0
+                    stuck
                       ? `가장 오래된 미전달 ${formatMoment(
                           console_.outbox.oldest_undelivered_at,
                           '없음',

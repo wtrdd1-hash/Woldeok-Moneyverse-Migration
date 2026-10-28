@@ -14,5 +14,12 @@
 - Mid-run `origin/main` re-fetched: `952e487d0a0eb4d7520fa98a81e413a1b2cb869c` unchanged; plans unchanged. Next: full validation and CI.
 
 
-## Finished
-- Pending validation. No Test/Production change authorized.
+## Finished — 2026-10-28 15:54 KST (CI pending)
+- Corrected a TypeScript boolean-vs-number regression found by full typecheck, then re-ran focused tests (25 PASS), full typecheck (PASS), and full build (PASS).
+- `pnpm lint`: PASS (0 errors, 1,095 existing warnings). `pnpm test` with isolated real PostgreSQL: PASS (database 45 PASS/3 SKIP; backend 2,522 PASS/70 SKIP; frontend 1,894 PASS). app-api contract: 180 endpoints match. Bot: 11 PASS, high audit 0 vulnerabilities.
+- Disposable PostgreSQL 17.11: 289 migrations applied; 19/19 admin read-model DB/ACL tests PASS; `moneyverse_app` can execute the two authorized Discord read functions but cannot SELECT the raw `discord_outbox_routes` table.
+- `pnpm build`: PASS (NestJS and Next.js). Production dependency high audit PASS with 1 moderate finding; full moderate audit FAIL (3 low, 9 moderate). Existing QA #1687 owns `qs` dependency remediation; do not duplicate or bypass gate.
+- Initial full-test run aborted transiently; isolated retry with a complete frozen-lockfile install passed. No database or Production data mutation.
+- Main advanced twice: `952e487d` -> `b2272d5e` -> `d12c948a` (blog code and bilingual planning). Rebase to latest main required; unrelated A/B/QA/Gemini work preserved.
+- Official Test `/api/version`: `cfb13272beea53c4d8c20eff7f379b6f66343033`, not candidate; Production version `unknown`. Authenticated exact-SHA official Test E2E BLOCKED. Main merge, Test/Production promotion, GitOps, rollback, branch deletion NOT performed. Release HOLD pending full security and official Test gates.
+- Final GitHub CI/Build Test Candidate status will be attached to PR and internal closure evidence after the final SHA is pushed.
