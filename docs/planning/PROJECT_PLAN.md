@@ -1,3 +1,10 @@
+## v1412 — F675-159 owner-verified in-app notification inbox (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414 provisional. Main a28bed9aa40ff74d492824ae12892a7d52132fdd checked start/mid; issue #1693; QA v1341 candidate incomplete; planning-only independent branch.
+- Source: /account/notifications renders six hardcoded sample alerts including +1,840 WLD interest and 20 WLD sink; local read-all does not call DB. Existing NestJS notifications API, Next BFF and dev DB table/functions exist (dev rows 0), but BFF omits category/offset, SQL has no ID tie-breaker, app role has direct SELECT/UPDATE, and tracked migration DDL provenance is unverified.
+- Proposed live owner-scoped six-category inbox, real unread count, server receipts, Load older/Retry, KO/EN/a11y/mobile, noindex/no-store, safe links, validated API/Android parity, forward-only SECDEF and DB ACL correction; no WLD claims or synthetic finance data. Full design in integrated master EN/KO.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. Isolated PG 10,001/100/100 acceptance specified, NOT RUN. External approved 0, unique cumulative UNKNOWN/10,000 BLOCKED; Test exact-SHA and independent restore unverified; Production HOLD.
+- Backlog IDs: ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
+
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)

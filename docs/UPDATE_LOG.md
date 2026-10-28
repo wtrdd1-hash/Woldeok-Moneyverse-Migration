@@ -1,3 +1,8 @@
+## 2026-10-28 14:10 KST — Planning v1412 / F675-159 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414 provisional; latest main a28bed9aa40ff74d492824ae12892a7d52132fdd verified start/mid, AGENTS/README/EN+KO project plans; issue #1693.
+- Found six hardcoded notifications with invented WLD amounts and local-only read acknowledgements in member UI; existing backend/BFF and dev DB rows=0, app-role SELECT/UPDATE=true, tracked SQL DDL provenance unverified. Proposed verified real inbox, category/pagination/atomic receipt, security/Android/mobile/SEO/KPI and rollback in integrated EN/KO master.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 candidate not full certified Test, Production HOLD; 10,001/100/100 tests specified not run. External approved 0, cumulative unique UNKNOWN/10,000 BLOCKED. No runtime/DB/ledger/WLD/Test/Production writes.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

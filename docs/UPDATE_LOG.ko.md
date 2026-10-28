@@ -1,3 +1,8 @@
+## 2026-10-28 14:10 KST — 자동 기획 v1412 / F675-159 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 및 AGENTS/README/영문 정본·한국어 기획 확인, 이슈 #1693.
+- 회원 알림 화면의 허구 WLD 수치 포함 6건·로컬 읽음 확인, 기존 API/BFF, 개발 DB 0건·앱 직접 SELECT/UPDATE·추적 DDL 출처 미확인. 실제 본인 알림·분류·페이지·원자적 영수증·보안·Android·모바일·SEO·KPI·롤백을 영문·국문 통합 기획에 명세.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 후보 공식 Test 인증 아님, 운영 HOLD. 10,001/100/100 테스트 명세만·미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·WLD·원장·Test·운영 미변경.
+
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
 ## 2026-10-24 v1210 — F675-109 게시판 읽기 목록 삭제·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 보류)

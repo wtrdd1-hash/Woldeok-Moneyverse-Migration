@@ -1,3 +1,10 @@
+## v1412 — 본인 검증형 실제 알림함 F675-159 (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 확인, 이슈 #1693, QA v1341 후보 미완료. 최신 main 기반 독립 문서 브랜치.
+- 현재 /account/notifications는 +1,840 WLD 이자·20 WLD 소각 등을 포함한 하드코딩 6건과 로컬 읽음 상태를 표시한다. NestJS 알림 API·Next BFF·개발 DB 객체는 있으나 개발 DB 실수량 0건, BFF 분류/offset 미전달, 동일 시각 정렬 미보장, 앱 계정 직접 SELECT/UPDATE, 추적 마이그레이션 DDL 출처 미확인.
+- 실제 본인 알림 6분류·서버 미읽음·읽음 영수증·이전 알림·재시도·KO/EN·모바일/a11y·noindex/no-store·안전 링크·Android 동등성·SECDEF/최소권한을 명세했다. 가짜 금융 수치·WLD 보상은 금지. 영문 정본·한국어 통합 기획 참조.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. 격리 PG 10,001/100/100은 명세만, 미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED, 공식 Test 정확 SHA·독립 복원 미검증, 운영 HOLD.
+- 백로그 ID: ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
+
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.28.1405 — 2시간 국가·주제 자동 블로그 최신 사용자 지시(코드 후보)
