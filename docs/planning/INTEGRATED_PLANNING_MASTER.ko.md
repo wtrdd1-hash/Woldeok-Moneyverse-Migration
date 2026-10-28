@@ -1,5 +1,48 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1422 / F675-161 — 검토 대기 사진 철회 무결성·배포 계약 보완 (FEATURE IMPROVEMENT / DRAFT / HOLD)
+
+**주기:** Previous Feature Addition v1420 → Current Feature Improvement v1422 → Next Feature Addition v1424(잠정). **기준:** main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인. 선행 기획 Draft #1727 미병합, 개발 A Draft #1730(head 1295fbed43424965b253a7a9ebe7c2b953f70b0d)은 후보이지 main/운영 코드가 아님. 완료된 최신 QA v1346 FAILED; QA v1347 진행 중(별도 카지노 주사위 시험 P1 #1725, 운영 합격 아님), 전체 앱 RELEASE HOLD. 이번 기획에서 런타임·DB·금융·미디어·Test·Production 변경 없음.
+
+### 1. 실제 구현 후보와 기존 기획의 차이
+- 현재 main에는 업로드·제출·내 목록만 있고 철회 없음. #1730은 POST /api/v1/photos/withdraw에 {photoId,idempotencyKey}를 전달하고 SQL의 snake_case {photo_id,withdrawn_at,replayed}를 반환함. v1420 기획의 POST /api/v1/photos/:photoId/withdraw와 camelCase {photoId,status,withdrawnAt,replayed} 계약과 다름. 개발 담당자가 정식 단일 API 및 호환 방식을 확정해야 하며 Android 경로와 모바일 계약이 갱신됐다고 간주하지 않음. 현재 모바일 문서에는 GET /app-api/v1/photos/mine만 있음. 후보 컨트롤러는 타인/없는/철회 불가 사진에 대한 SQLSTATE 55000을 게시된 사진 안내와 함께 HTTP 409로 매핑하여 기존 기획의 비소유/없는 사진 동일 404와 다름. 정보 노출 없는 정확한 오류 계약을 확정하고 시험해야 함.
+- 후보 migration 292는 photos 초안 행을 DELETE하고 별도 member_photo_withdrawals 영수증에 회원·사진·요청 해시·제출일·저장키 해시를 남김. v1420의 사진 행 유지+ON DELETE RESTRICT 외래키 제안과 양립 불가. **두 방식 중 하나를 명시적으로 선택**: 권장안은 사진 행 유지+철회 표식+모든 조회/승인/미디어 차단, 대안은 사진 행 삭제+본인 전용 비식별 영수증 이력+감사·할당량 보존. 삭제 방식을 채택한다면 사진 행 FK를 달지 않으며 물리 파일 삭제 완료라고 표시하지 않음.
+- 후보 GET /photos/mine은 여전히 migration 098의 최근 30건 조회. 삭제된 사진은 WITHDRAWN 상태로 표시되지 않고, 31번째 이후 페이지 조회도 없음. 새로고침 후 사라지는 카드는 철회 이력이 아님. 본인 전용 영수증 조회와 삭제된 사진의 비식별 상태 표시, 30/31 키셋 페이지 조회를 추가하고 기존 API 필드는 호환 유지.
+- 후보 DB 철회 함수에는 활성 회원 확인 및 전용 member_photo_withdrawal 기능 스위치 검증이 없음. 프론트에도 OFF 조건이 없음. DB에서 정지 회원 거절·신규 철회 OFF 거절을 구현하되 기존 철회 기록의 게시·미디어 차단은 OFF에서도 유지.
+- 후보 서버 렌더링은 카드마다 새 randomUUID를 생성하므로 새로고침 후 같은 철회 재시도가 다른 UUID로 처리될 수 있음. 철회 의도별 요청 UUID를 재시도 간 유지하고 서버 현재 상태를 재조회한 뒤 성공/오류 표시. 기존 사진 제출 함수의 재실행 분기는 회원만 대조하고 저장키·설명 변경은 대조하지 않으므로 기존 동작을 별도 검토하고 요청 내용 불일치 회귀시험 추가.
+- 후보 SQL 테스트는 소유권·영수증 재실행·재사용 차단·할당량·미디어 차단을 일부 다루지만 DATABASE_URL/MIGRATOR_DATABASE_URL이 없으면 describe.skipIf로 건너뜀. CI SUCCESS만으로 실제 PostgreSQL 시험 완료를 주장하지 않음. 동시 승인/철회, 같은 날 제출/철회, 미디어 캐시·진행 중 요청, 독립 복원 증거가 필요. 실제 개인정보 유출·운영 악용이 발생했다고 단정하지 않음.
+
+### 2. 회원·관리자 화면, 상태, 접근성
+- /gallery/submit → 내가 보낸 사진 → 검토 중 카드 → 제출 철회 → 하루 5회 제한 미환급 및 파일 즉시 삭제 아님 안내 → 철회 확인/유지. 게시됨·철회됨·거절됨·관리자 소유 사진에는 철회 버튼 금지. PENDING, WITHDRAWING, WITHDRAWN, PUBLISHED, UNAVAILABLE, FAILED_RETRYABLE 상태를 서버 기준으로 표시하고 낙관적 성공 금지. 성공 후 비식별 WITHDRAWN 카드에 시간·영수증만 남기고 썸네일·설명·미디어 주소·저장키 제거. 기기 변경·새로고침 후에도 상태 유지.
+- 목록 0건과 API 실패 구분. 31건 이상은 (submitted_at,photo_id) 불투명 암호화/서버 보관 키셋 커서, LIMIT+1, 1~30건 제한 및 회원·세션 결속; 여러 HTTP 요청 간 완전 스냅샷 보장 주장 금지. 로그아웃·계정 전환 시 오래된 응답 폐기, 개인 캐시·object URL 해제. 키보드·스크린리더 확인, aria-live 상태 알림, 포커스 복귀, 320px/200% 확대 및 한영 동등 문구.
+- 관리자는 철회 사진 승인 불가. 승인 먼저 완료 시 본인에게만 충돌, 철회 먼저 완료 시 관리자 승인 거절. 감사 담당자만 비식별 영수증 조회, 이미지 원본·타인 얼굴은 불필요하게 노출 금지. 이미 게시된 사진은 기존 별도 비공개·신고 절차. 개인 화면/영수증은 sitemap·검색 색인 제외.
+
+### 3. DB·API·동시성·보안·배포 계약
+- main에서 최종 마이그레이션 번호 재확인 후 가산적 스키마 작성; 292는 현재 미병합 후보 전용 번호. UNIQUE idempotency_key, UNIQUE photo_id, 불변 actor·요청 해시(actor+photo+command)·submitted_at·withdrawn_at·미디어 해시·버전. 행 유지 방식은 제한 FK와 전 조회/게시 차단, 행 삭제 방식은 사진 FK 금지와 본인 영수증 조회·보존/계정 삭제 정책 필수. 공개 API에 저장키·회원 UUID·해시 원문 노출 금지.
+- 요청키 잠금 → 공통 저장키/사진 행 잠금 → 회원·일자 할당량 잠금 순서와 관리자 승인/삭제·업로드 경합 검토. 잠금 후 본인 소유·초안·비공개·미게시 재검증. 영수증+상태 변경 원자화, 하루 5건 제한 미환급. 같은 UUID+요청 재시도는 원래 시각 반환, 다른 회원/사진/명령 UUID 재사용 거절, 오류 시 부분 기록·성공 응답 금지. DB SECURITY DEFINER·고정 search_path·app EXECUTE만 허용, PUBLIC·app 직접 DML 금지. DB에서 활성 회원 및 OFF 확인, OFF라도 기존 미디어 차단 유지.
+- 개발 담당자가 URL 경로형 또는 body형 중 정식 API 하나를 확정. 200 {photoId,status:'withdrawn',withdrawnAt,replayed}, 타인/없는 사진 동일 404, 본인 게시됨 409, 잘못된 값 400, 남용 429, DB 장애 503. 세션 기반 actor, 쿠키 쓰기 CSRF, UUID·크기·빈도 제한, no-store/noindex. Android /app-api/v1 계약·실제 시험 필수. 철회 후 신규 미디어 요청과 공유 캐시 차단; 이미 다운로드한 바이트와 진행 중 응답을 소급 삭제할 수 없다는 한계 명시.
+
+### 4. 우선순위 개발 백로그 (P0 4건, P1 6건)
+| 우선순위 | ID | 개발 산출물 및 검증 |
+| --- | --- | --- |
+| P0 | ENV1422-01 | 데이터 디스크 97%, 백업 사고 #1718, 타 작업 삭제 금지; 암호화 백업의 독립 복원/R2 회복 증명. |
+| P0 | FIN1422-02 | 과거 18명×1,000 WLD 원장 불일치·국고 0·마이그레이션 5개 불일치/20개 미적용. 운영 DB 단독 291 안전조치는 전체 금융 승인 아님. 배당 재지급 금지. |
+| P0 | PHOTO1422-03 | 표식 대 삭제 모델 확정, 본인 철회 이력, 활성 회원·OFF 차단, 관리자 승인·미디어·일일 제한 및 타인 정보 노출 차단. #1730 병합 전 필수. |
+| P0 | REL1422-04 | 정확 SHA 격리 실DB/ACL, 최신 main QA, 인증 회원·관리자·Android E2E, 동시성 100회, 독립 복원/롤백. 전체 운영승격 HOLD. |
+| P1 | PHOTO1422-05 | 본인 비식별 영수증 조회, 30/31/10,001건 키셋, FK 정합성, 보존·계정 삭제 정책. |
+| P1 | PHOTO1422-06 | SQL 잠금 순서, 명령 결속 멱등성, 활성 회원·OFF, 할당량 유지, 미디어 캐시·철회 시점. |
+| P1 | PHOTO1422-07 | NestJS DTO·오류, Next BFF, Android /app-api/v1 타입 계약 및 camelCase 응답 호환. |
+| P1 | PHOTO1422-08 | 재시도 UUID 유지, 확인/실패/철회 UI, 세션 변경 격리, WCAG 2.2 AA, 320px/200%. |
+| P1 | PHOTO1422-09 | 관리자 감사·게시 차단, 개인정보/보존, noindex/no-store, 10회/분 제한 가설, PII 없는 KPI. |
+| P1 | PHOTO1422-10 | 격리 PG 합성 10,001건·동시 100회·위조 100회, 스킵 없는 SQL 시험, OFF/ON/OFF·마이그레이션/복원 회귀. |
+
+### 5. 연계, 외부 근거 및 승인 조건
+- 개발 A가 #1730 소유, 기획은 문서만 수정하고 개발 브랜치에 직접 커밋하지 않음. 차이를 #1730과 이슈 #1726에 전달. v1420 원래 기획은 이력으로 보존하되 본 섹션의 계약 정정 우선. 기능 기본 OFF, DB 표식·미디어·승인 차단 선배포 후 정확 SHA 공식 Test·실회원/Android·관리자 E2E, 독립 복원, 서명된 manifest, 승인된 GitOps 필요. 롤백 시 신규 철회만 OFF, 이미 철회된 사진은 다시 공개 금지.
+- QA v1346: main 정책 집중시험 44 PASS이나 전체 FAILED, 공식 Test SHA 불일치, Production 버전 unknown, 디스크 97%, 과거 18,000 WLD 불일치, app DML 235개 테이블 및 PUBLIC 은행 함수 3개. 실제 공격·유출 증거로 단정 금지. #1730 CI는 코드 후보의 검사이지 운영 인증이 아님. 기존 독립 발행처 PostgreSQL/OWASP/W3C 3곳 검토, 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000, 외부 근거 게이트 BLOCKED/IN PROGRESS. 수량 허위 주장 금지.
+
+---
+
+
 ## v1420 / F675-161 — 회원 검토 대기 사진 제출 철회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **회차:** Previous Feature Improvement v1418 → Current Feature Addition v1420 → Next Feature Improvement v1422(잠정). **기준:** 최신 main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 재확인. QA v1345 FAILED/HOLD. [개발 이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726). 신규 제안이며 이번 회차에서 런타임·DB·WLD·Test·Production·기능 스위치·이미지 파일은 변경하지 않는다.
