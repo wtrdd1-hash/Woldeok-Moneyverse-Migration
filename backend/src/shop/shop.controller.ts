@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } from './shop-compare';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -140,6 +141,29 @@ export class ShopController {
       'the catalogue is unavailable',
     );
     return { catalogItems: filterShopItems(catalogItems, query) };
+  }
+
+  @Get('compare')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'Compare two current catalogue prices for the authenticated member' })
+  async compare(@Req() request: RequestWithSession, @Query('ids') ids: unknown) {
+    let selected: readonly [string, string];
+    try {
+      selected = parseShopCompareIds(ids);
+    } catch (error: unknown) {
+      if (error instanceof ShopInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
+    const rows = await this.guarded(
+      () => this.repository().catalog(requireUserId(request)),
+      'the catalogue is unavailable',
+    );
+    try {
+      return compareShopCatalog(rows, selected);
+    } catch (error: unknown) {
+      if (error instanceof ShopCompareUnavailableError) throw new NotFoundException('one or more items are unavailable');
+      throw error;
+    }
   }
 
   @Get('holdings')

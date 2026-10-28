@@ -24,6 +24,7 @@ import { compareAmounts, groupDigits } from '@/lib/money';
 import { FiatBadge } from '@/components/fiat-amount';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 import { buyCatalogItemDirect } from './actions';
+import { ShopComparePanel } from './shop-compare-panel';
 
 export interface CatalogItem {
   readonly catalog_id: string;
@@ -48,6 +49,7 @@ export interface CatalogItem {
 
 interface ShopStoreViewProps {
   readonly items: CatalogItem[];
+  readonly allowCompare?: boolean;
   readonly userBalance: string;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
@@ -69,6 +71,7 @@ const CATEGORIES = [
 
 export function ShopStoreView({
   items,
+  allowCompare = false,
   userBalance,
   currentUsername = '모험가',
   userAvatarUrl,
@@ -76,6 +79,7 @@ export function ShopStoreView({
   const router = useRouter();
   const [mounted, setMounted] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [comparisonIds, setComparisonIds] = useState<string[]>([]);
   const [previewItem, setPreviewItem] = useState<CatalogItem | null>(null);
   const [buyingItem, setBuyingItem] = useState<CatalogItem | null>(null);
   const [buyQuantity, setBuyQuantity] = useState<number>(1);
@@ -102,6 +106,12 @@ export function ShopStoreView({
     if (selectedCategory === 'all') return true;
     return item.category === selectedCategory;
   });
+
+  const toggleComparison = (catalogId: string) => {
+    setComparisonIds((previous) => previous.includes(catalogId)
+      ? previous.filter((id) => id !== catalogId)
+      : [...previous.slice(-1), catalogId]);
+  };
 
   const handleBuy = async (item: CatalogItem) => {
     setBuyStatus('구매 처리 중...');
@@ -173,6 +183,8 @@ export function ShopStoreView({
           );
         })}
       </div>
+
+      {allowCompare ? <ShopComparePanel selectedIds={comparisonIds} /> : null}
 
       {/* Items Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -281,6 +293,16 @@ export function ShopStoreView({
                   </div>
                 </div>
 
+                {allowCompare ? (
+                  <button
+                    type="button"
+                    aria-pressed={comparisonIds.includes(item.catalog_id)}
+                    onClick={() => toggleComparison(item.catalog_id)}
+                    className="mb-2 w-full rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    {comparisonIds.includes(item.catalog_id) ? '비교 선택 해제' : '비교에 추가'}
+                  </button>
+                ) : null}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPreviewItem(item)}
