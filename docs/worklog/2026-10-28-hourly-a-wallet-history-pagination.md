@@ -12,3 +12,9 @@
 
 ## Finished
 - Pending verification and release decision.
+
+### Midpoint checkpoint
+- Implemented a bounded 50+1 owner-scoped keyset read using existing ledger SELECT boundary, absolute `asOf`/7d/30d bounds, signed session+owner+period cursor, 1-hour expiration and BigInt-safe string normalization. No migrations, no new grants, no financial mutations.
+- NestJS authenticated endpoint, web server-rendered previous-page navigation, Android gateway private no-store/noindex, TDD unit and gateway coverage. TDD RED observed (backend missing module, frontend missing URL helper), GREEN backend 4 and frontend 30 PASS.
+- Backend typecheck PASS; frontend initially failed due new test mock typing, corrected and typecheck PASS. Changed-file lint PASS.
+- Main and planning re-fetched before QA. No other branch or worker modified.

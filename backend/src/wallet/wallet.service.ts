@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { signWalletActivityCursor, verifyWalletActivityCursor, type WalletActivityPeriod } from './wallet-activity-cursor';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -84,6 +85,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
+  activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -385,6 +387,30 @@ export class WalletService {
       recentTransactions: normalizeTransactions(transactions.slice(0, limit)),
       recentTransactionsHasMore: transactions.length > limit,
     };
+  }
+
+  async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
+    period: WalletActivityPeriod = 'all', cursor?: string,
+  ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const session = requireUuid(authenticatedSessionId, 'authenticated session id');
+    if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
+    const now = this.clock();
+    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now) : null;
+    const asOf = decoded ? new Date(decoded.asOf) : now;
+    const since = period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000);
+    if (!this.repository.activityTransactionsForUser) throw new Error('wallet activity pagination repository is unavailable');
+    const rows = await this.repository.activityTransactionsForUser(owner, {
+      asOf, since, ...(decoded ? { after: { at: new Date(decoded.afterAt), id: decoded.afterId } } : {}),
+    });
+    const transactions = normalizeTransactions(rows.slice(0, 50));
+    const hasMore = rows.length > 50;
+    const last = rows[49];
+    const nextCursor = hasMore && last ? signWalletActivityCursor({
+      owner, session, period, asOf: asOf.toISOString(), afterAt: timestamp(last.created_at, 'cursor timestamp'),
+      afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
+    }) : null;
+    return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
   }
 
   async transfer(

@@ -23,7 +23,7 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
-import { requireUserId } from '../auth/session.context';
+import { requireSession, requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
 import { WalletRecipientError, WalletService } from './wallet.service';
@@ -100,6 +100,21 @@ export class WalletController {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
+  }
+
+  @Get('wallet/activity')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
+  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string) {
+    if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
+      throw new BadRequestException('period must be all, 7d or 30d');
+    }
+    if (cursor !== undefined && (typeof cursor !== 'string' || cursor.length > 2048)) {
+      throw new BadRequestException('invalid wallet activity cursor');
+    }
+    return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
+      period === '7d' || period === '30d' ? period : 'all', cursor), 'wallet activity is unavailable');
   }
 
   @Get('wallet/recipients/search')
