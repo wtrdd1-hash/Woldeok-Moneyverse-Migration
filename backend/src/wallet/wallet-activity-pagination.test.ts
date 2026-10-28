@@ -64,6 +64,15 @@ describe('wallet owner- and session-bound keyset history', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('expires signed cursors after one hour and never performs SQL for expired reads', async () => {
+    const query = vi.fn(async () => ({ rows: Array.from({ length: 51 }, (_, i) => row(i + 1)) }));
+    const repo = new PostgresWalletRepository({ query } as unknown as Queryable);
+    const first = await new WalletService(repo, { clock: () => new Date('2026-10-28T00:00:00Z') }).activityPage(ACTOR, SESSION, '30d');
+    query.mockClear();
+    await expect(new WalletService(repo, { clock: () => new Date('2026-10-28T01:00:01Z') }).activityPage(ACTOR, SESSION, '30d', first.nextCursor!)).rejects.toThrow('expired');
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('enforces authenticated session identity and private no-store on the new endpoint', async () => {
     const activityPage = vi.fn(async () => ({ transactions: [], hasMore: false, nextCursor: null, asOf: '2026-10-28T00:00:00Z' }));
     const controller = new WalletController({ activityPage } as unknown as WalletService);
