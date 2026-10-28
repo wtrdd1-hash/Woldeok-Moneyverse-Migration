@@ -21,3 +21,7 @@
 - `/shop/catalog`
 - 회원 인벤토리/컬렉션
 - 퀘스트 및 성장
+
+## 회원 보유 여부 필터 (A0425 후보·미배포)
+
+로그인한 회원은 `/shop/catalog`에서 **전체 상품**, **보유 중**, **미보유**를 선택하고 검색어와 함께 사용할 수 있습니다. 회원 API `GET /api/v1/shop/catalog?ownership=all|owned|unowned`는 생략 시 전체를 반환하며, 잘못된 값은 비공개 DB 조회 전에 HTTP 400으로 거부합니다. PostgreSQL `shop_catalog_list_v2(actor)`가 인증된 회원의 `user_owned_quantity`를 직접 반환하므로 사용자 ID나 보유 수량을 클라이언트에서 지정하지 않습니다. 공개 카탈로그는 영향을 받지 않습니다. Android `/app-api/v1/shop/catalog?ownership=...`는 검색 조건을 전달하면서 응답을 비공개·캐시 금지·검색 제외로 처리합니다. 신규 마이그레이션·금융 원장 변경은 없으며, 운영 배포는 승인 게이트 충족 전까지 보류합니다.
