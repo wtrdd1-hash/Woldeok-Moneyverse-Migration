@@ -38,3 +38,8 @@ New tests fail against the original implementation: Backend 4/4 RED (authenticat
 ### Code review notes
 
 No applied migration modified. Session, authentication, consent and CSRF guards remain on the controller. Existing wallet ledger reads are unaffected. The GET daily quest status retains its historical ledger-tagged claim list when available; the UI does not treat localStorage as a ledger receipt. The reward program remains unavailable until a new approved, atomic, server-verified settlement function and client receipt flow exist.
+
+### Build/typecheck/lint checkpoint — 07:38 KST
+
+- Workspace TypeScript typecheck PASS; Backend build PASS.
+- First full lint FAIL (one new test variable named `module` prohibited by Next.js rule, 1,096 existing warnings). Renamed to `testingModule`; changed-file ESLint PASS with zero errors/warnings. Full lint must be re-run at the new SHA.

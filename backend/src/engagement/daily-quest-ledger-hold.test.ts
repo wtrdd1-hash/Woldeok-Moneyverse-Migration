@@ -23,7 +23,7 @@ describe('daily quest ledger settlement hold', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [DopamineController],
       providers: [{ provide: DopamineRepository, useValue: { claimDailyQuest } }],
     })
@@ -32,7 +32,7 @@ describe('daily quest ledger settlement hold', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
       req.session = { user_id: USER };
       next();
