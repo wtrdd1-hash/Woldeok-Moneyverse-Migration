@@ -1,3 +1,7 @@
+## 2026-10-28 v1420 — F675-161 owner-only gallery withdrawal (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1418 / Current Addition v1420 / Next Improvement v1422. Main `35971c600f25869c96f1c666d4b9f58927202730` unchanged at start/mid. QA v1345 FAILED; 97% disk, backup incident #1718, 18,000 WLD historical drift, exact-SHA Test/restore/Production HOLD. Inspected photo member UI/API, migrations 098/127 and Android app-api; no withdrawal exists.
+- Owner-confirmed pending-only withdrawal, immutable tombstone and replay receipt, admin approval `FOR UPDATE` race fence, immediate private media denial, paginated member status, no false physical delete or quota refund. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. EN/KO integrated spec and GitHub [issue #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726); no code/DB/deployment. Independent families reviewed 3, newly approved 0, cumulative UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

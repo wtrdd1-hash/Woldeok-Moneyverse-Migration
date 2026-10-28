@@ -1,5 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.28.1420 — F675-161 회원 검토 대기 사진 철회 (기획 DRAFT / RELEASE HOLD)
+- Previous Improvement v1418 → Current Addition v1420 → Next Improvement v1422(잠정). main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED/HOLD. 실제 회원 갤러리 UI/NestJS는 업로드·제출·내 목록만 있고 철회 없음. Migration 098은 최근 30건·본인 초안 미리보기, 127은 관리자 게시 승인. 본인 검토 대기 사진 철회 표식·불변 영수증·`FOR UPDATE` 승인 경합 차단·미디어 즉시 차단 설계. 게시된 사진은 별도 신고/비공개 절차, 파일 즉시 삭제 보장 없음, 하루 5건 제한 환급 없음, WLD 변화 없음.
+- P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. API·DB·트랜잭션·Android·관리자·SEO·접근성·KPI·10,001/100/100·기본 OFF 롤백은 [영문 통합문서](INTEGRATED_PLANNING_MASTER.md) 및 [한국어](INTEGRATED_PLANNING_MASTER.ko.md) 참조. [개발 이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
+- 데이터 디스크 97%, 백업 사고 #1718, 과거 금융 18,000 WLD 불일치, 공식 Test 정확 SHA·독립 복원·전체 운영승격 BLOCKED. 외부 발행처 PostgreSQL/OWASP/W3C 3곳 검토, 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED. 문서만 변경, 런타임/DB/WLD/Test/Production 변경 없음.
+
+
 ## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)
 - 17:18 KST 실제 권위 운영 DB에 migration 291 적용해 구형 미분개 배당 차단 및 신규 UUID 멱등 복식원장 함수 등록. 최신 암호화 백업, 운영 실제 스키마 격리시험 및 운영 app역할 비인가/구형 지급 거부 확인. 원장거래 890→890, 전체 계좌 합 18,000→18,000, backend HTTP200. GitHub PR #1706은 CI PASS로 main 병합 `3c251d93`. 앱 전체 운영 교체는 **미수행**: 18,000 WLD 원장 차이, 국고 정식 재원 0, 269~287 누락, 공식 Test/디스크97% 문제. [기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 

@@ -1,5 +1,65 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1420 / F675-161 — 회원 검토 대기 사진 제출 철회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**회차:** Previous Feature Improvement v1418 → Current Feature Addition v1420 → Next Feature Improvement v1422(잠정). **기준:** 최신 main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 재확인. QA v1345 FAILED/HOLD. [개발 이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726). 신규 제안이며 이번 회차에서 런타임·DB·WLD·Test·Production·기능 스위치·이미지 파일은 변경하지 않는다.
+
+### 1. 실제 구현 확인 및 문제
+- `frontend/src/app/gallery/submit/page.tsx`는 회원이 `GET /api/v1/photos/mine`으로 제출 사진을 확인하게 하지만 **제출 철회 CTA가 없다**. 업로드 폼은 사진 파일과 메타데이터를 제출할 뿐 제출 후 철회하지 않는다.
+- `backend/src/content/member-photo.controller.ts`에는 `POST /photos/uploads`, `POST /photos`, `GET /photos/mine`만 있으며 세션·인증·동의·CSRF 가드가 적용된다. 저장소는 직접 테이블 DML 대신 DB 함수를 호출한다. Android는 `/app-api/v1/photos/mine` 조회만 문서화되어 있다.
+- Migration `098-member-photo-submissions.sql`: 회원은 비공개 초안을 제출하고 UUID를 제출 멱등 키로 사용한다. `member_my_photo_submissions`는 **최신 30건**만 반환하며 상태는 `published` 불리언뿐이다. 초안은 본인 미리보기 가능, 하루 제출 제한은 **5건**이다. 철회하더라도 이 제한은 환급하지 않는다.
+- Migration `127-fix-member-photo-approval.sql`: 운영자는 동일 사진 행을 `FOR UPDATE`로 잠그고 게시할 수 있다. 철회와 게시 승인이 경합하면 둘 중 하나만 유효해야 한다. 기존 거절/철회 상태나 회원 철회 명령은 확인되지 않았다.
+- **목적:** 잘못된 사진·설명·제3자 초상을 올린 회원이 운영자 검토 전 직접 제출을 철회하도록 하되, 즉시 물리적 삭제나 이미 게시된 사진의 자동 비공개화를 허위 약속하지 않는다.
+
+### 2. 설계 대안과 채택 범위
+사진 행·파일을 바로 DELETE하면 기존 영수증이 소실되고 DB와 파일시스템 사이 원자성이 없어지며 승인 사진 오삭제 위험이 있다. 기존 `content_state` enum을 직접 확장하면 기존 조회·게시 경로 전체 영향이 크다. 따라서 **추가형 불변 `member_photo_withdrawals` 철회 표식(tombstone)**, DB 단일 트랜잭션, 운영자 승인 차단, 미디어 조회 즉시 차단을 채택한다. 파일 정리는 별도 감사·보존 정책에서 처리한다. 새로운 분산 세부기획 파일을 만들지 않고 기존 영문·국문 통합문서에 흡수한다.
+
+### 3. 사용자·권한·화면·CTA·상태
+- **회원:** `/gallery/submit` → 내 제출 사진 → 검토 대기 카드의 **제출 철회** → “검토가 중단되고 목록에서 이미지가 숨겨집니다. 감사 기록 및 원본 파일이 즉시 삭제되는 것은 아닙니다.” 확인 → **철회 확정** / **유지**. `pending` 본인 초안에만 CTA를 노출한다. `published`는 철회 대신 기존 개인정보·신고·운영자 문의 안내로 이동한다. 운영자 소유 사진은 회원이 철회할 수 없다.
+- **상태:** `PENDING`(본인 미리보기 가능), `WITHDRAWING`(버튼 비활성화, 성공 선반영 금지), `WITHDRAWN`(썸네일·대체텍스트·미디어 URL 제거, 시각과 영수증만 표시), `PUBLISHED`(철회 불가), `UNAVAILABLE`(타인 존재 여부 누출 없는 오류), `FAILED_RETRYABLE`(기존 상태 유지·재시도). 존재하지 않는 거절 상태를 꾸며내지 않는다. 빈 목록과 API 오류를 구별한다.
+- **관리자:** 철회된 제출물은 승인 대기열에서 제외하고 최소 감사 메타데이터만 확인한다. 철회 후 재승인/재공개 금지. 게시된 사진의 비공개·신고는 별도 기존 절차다.
+- **비회원·타인:** 제출물/미디어/영수증/저장 키/소유자 정보를 조회할 수 없다. 로그아웃·계정 전환 시 이전 응답 폐기, 개인 캐시와 객체 URL 정리. 한·영 문구, 키보드, 포커스 복귀, `aria-live`, 320px·200% 확대를 지원한다.
+
+### 4. 제안 API 계약(미구현)
+- 기존 `GET /api/v1/photos/mine`, `GET /app-api/v1/photos/mine` 필드는 호환 유지. 추가 `GET /api/v1/photos/mine/page?limit=30&cursor=<opaque>`: limit 정수 1~30, `(created_at,id)` 기준 서명/암호화된 회원·세션 결속 Keyset 커서, LIMIT+1로 `items`, `nextCursor|null`, `hasMore` 반환. 검증된 `status=pending|withdrawn|published`만 반환. 커서에서 사용자/저장 키가 노출되지 않아야 한다. 기존 30건 API는 페이지 기능이 **없다**.
+- 신규 `POST /api/v1/photos/:photoId/withdraw` JSON `{ "idempotencyKey": "UUID" }`, Android `/app-api/v1/photos/:photoId/withdraw` 동등 제공. 로그인·활성 회원·동의·CSRF(쿠키 경로)·UUID 검증·속도 제한. `actor`는 세션에서만 도출하며 클라이언트 `ownerId`, `storageKey`, 게시 상태는 수용하지 않는다.
+- 첫 성공 `200 {"photoId":"UUID","status":"withdrawn","withdrawnAt":"ISO8601","replayed":false}`. 같은 요청 재시도는 원본 영수증 `replayed:true`, 상태 재변경 금지. 타인/미존재는 동일한 404, 본인의 이미 게시된 사진은 409, 잘못된 요청 400, 제한 초과 429, DB 장애 503 및 성공 알림 금지. Next.js 서버 액션은 변경 후 서버 상태 재조회. 회원 페이지·미디어는 noindex, private/no-store.
+- **Android/App API:** 개발 담당자가 계약/스키마·네이티브 확인·오프라인 재시도·계정 전환을 웹과 동등하게 구현해야 한다. 이번 기획 회차에서 코드 수정 금지.
+
+### 5. DB 제약·인덱스·트랜잭션·보존
+- 최신 main에서 마이그레이션 번호를 재확인한 뒤 추가형 `member_photo_withdrawals(photo_id uuid PRIMARY KEY REFERENCES public.photos(id) ON DELETE RESTRICT, actor_user_id uuid NOT NULL REFERENCES public.users(id), request_id uuid NOT NULL UNIQUE, request_digest bytea NOT NULL, withdrawn_at timestamptz NOT NULL DEFAULT clock_timestamp())` 생성. `(actor_user_id,withdrawn_at DESC,photo_id DESC)` 인덱스와 `photos(uploaded_by,created_at DESC,id DESC)` 인덱스는 격리 `EXPLAIN` 후 결정. `moneyverse_app`/PUBLIC에 테이블 직접 DML·SELECT를 부여하지 않는다. `SECURITY DEFINER`, 고정 `search_path`, 앱 계정에 필요한 EXECUTE만 허용한다.
+- `member_withdraw_photo(p_actor uuid,p_photo_id uuid,p_request_id uuid)`는 활성 회원·기능 스위치 확인, **회원+사진+명령** digest로 요청 결속. 요청 키 잠금(또는 영수증 행 잠금) 후 사진 행 `FOR UPDATE`, 소유권·`content_state='draft'`·`visibility='private'`·`published_at IS NULL`·미철회 검증. 표식과 불변 영수증을 한 트랜잭션에 삽입. 타인 UUID/다른 명령 재사용 거부, 과거 제출 UUID 재실행으로 철회 상태 복원 금지. DB/파일 즉시 DELETE 또는 WLD 거래 없음.
+- **필수 경합 차단:** 관리자 `content_set_photo_publication`은 같은 사진 행 잠금 상태에서 철회 표식을 검사하고 `publish=true`를 거부한다. 공개 갤러리/관리자 승인 목록도 철회 표식 제외. `content_storage_key_visible`은 철회된 사진을 본인에게도 제공하지 않으며 썸네일·URL을 반환하지 않는다. 승인 먼저 커밋 시 본인 철회 409, 철회 먼저 커밋 시 승인 거부. 100개 동시 요청·교착·재시도 검증. 기능 OFF여도 기존 철회 표식의 공개/조회 차단은 계속 유효해야 한다.
+- **보존/정리:** 불변 표식·최소 감사 영수증은 검토된 보존 정책을 따르고, 파일은 DB와 원자적으로 삭제할 수 없으므로 즉시 삭제를 약속하지 않는다. 별도 GC는 저장 키 참조·법적 보존·백업/복원·2단계 삭제·dry-run 검증 후 승인한다. 하루 5건 제출 제한은 철회로 환급되지 않는다.
+
+### 6. 관리자·보안·SEO·KPI·수용시험
+- **위협:** 사진 IDOR, 타인 멱등 UUID 재사용, 세션 위조, CSRF, 승인/철회 경합, 미디어 캐시, 남은 썸네일, 메타데이터 노출, 대량 철회, 삭제 오인. DB 소유권 재검증, 프라이빗 no-store/noindex, 최소 PII 감사, 회원당 10회/분 속도 제한(실측 후 조정)을 명세한다.
+- **관리자:** 철회/대기/게시 집계와 익명화 감사만, 무관한 관리자에게 원본 공개 금지. 게시 사진 신고는 기존 절차 유지. `/gallery/submit`·회원 API·철회 미디어는 검색 색인·사이트맵 제외, 공개 갤러리 SEO는 유지한다.
+- **KPI 목표(측정 전 가설):** 철회 후 게시·미디어 허용 0건, 타인 조회 0건, 허위 성공 0건, 웹/Android 계약 100% 동등, 격리 부하 p95 <400ms, 재시도 가능 오류 <1%. `withdraw_intent`, `withdraw_confirm`, `withdraw_success`, `withdraw_conflict`, `withdraw_failure` 이벤트에는 저장 키·설명·개인정보를 넣지 않는다.
+- **수용시험(명세만, 미실행):** 격리 PostgreSQL 마이그레이션·권한 `42501` 음성 시험, 합성 사진 10,001건(실제 5433 DB에 넣지 않음), 30/31 페이지, 철회/승인 동시 100건, 타인·위조 100건, UUID 충돌, 철회 후 원래 제출 재시도, 로그아웃·계정 전환, 모바일 320px·200%·스크린리더, 미디어 캐시 차단, 관리자 목록, 5건/일 비환급, 스위치 OFF/ON/OFF, 독립 복원·롤백. 개인정보 경계 실패는 P0 NO-GO.
+
+### 7. 우선순위 개발 백로그(10개)
+| 우선순위 | ID | 산출물 / 검증 게이트 |
+| --- | --- | --- |
+| P0 | ENV1420-01 | 데이터 디스크 97%, 백업 사고 #1718, 안전한 용량·독립 복원 확인; 타 작업 증거 임의 삭제 금지. |
+| P0 | FIN1420-02 | 과거 18,000 WLD 불일치, 국고 정식 재원 0, 마이그레이션 간극 및 금융 운영승격 HOLD 유지. |
+| P0 | SEC1420-03 | 본인 전용 철회·불변 영수증, 관리자 승인 잠금 경합, 미디어 차단, 최소권한, 개인정보 보호. |
+| P0 | REL1420-04 | QA v1345 FAILED; 공식 Test 정확 SHA·인증 E2E·백업 복원·롤백 및 승인 검증. |
+| P1 | PHOTO1420-05 | 추가형 표식·영수증 DB, 인덱스, 권한·실행계획. |
+| P1 | PHOTO1420-06 | 트랜잭션 잠금 순서, digest/재실행, 게시/미디어 경합 차단. |
+| P1 | PHOTO1420-07 | NestJS·Next.js BFF·Android App API 계약·검증·오류 코드. |
+| P1 | PHOTO1420-08 | 검토 대기 전용 CTA·확인·철회 상태·접근성·계정 격리. |
+| P1 | PHOTO1420-09 | 관리자 목록·감사, 파일 보존/GC 후속, SEO·KPI·악용 방지. |
+| P1 | PHOTO1420-10 | 격리 PostgreSQL 10,001/100/100 회귀, CI·공식 Test 정확 SHA·롤백·OFF 게이트. |
+
+### 8. 배포·롤백·외부 근거
+새 스위치 `member_photo_withdrawal`은 **기본 OFF**. 추가형 DB/권한/미디어 조회 차단 → 관리자 게시 차단 → 회원 CTA 순서로 개발한다. 격리 PostgreSQL 후 공식 Test 정확 SHA, 회원·관리자·Android 인증 E2E, 안전한 백업·독립 복원·릴리스 manifest·승인을 거쳐야 한다. 롤백은 신규 철회 명령만 OFF하며 기존 철회 표식의 공개·미디어 차단은 제거하지 않는다. 런타임 배포는 개발 예약이 담당한다.
+
+외부 독립 발행처 PostgreSQL(행 잠금), OWASP(IDOR), W3C(WCAG 상태 알림) **3곳 검토, 신규 중복 제거 승인 근거 0건, 누적 승인 UNKNOWN / 10,000건**, 게이트 **BLOCKED / IN PROGRESS**. [PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html), [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html), [W3C](https://www.w3.org/TR/WCAG22/#status-messages). Gemini/개발 A/B/C/QA 변경과 분리된 문서 기획만 수행한다.
+
+---
+
+
 ## v2026.10.28.1423 — 금융 운영 DB 291 보호 승격 확인 (전체 서버 코드는 기존)
 - 신규 배당 4인자 멱등 복식분개 함수와 구형 무분개 배당 차단을 실제 Production DB에 적용. 신규 암호화 백업 체크섬/운영 스키마 모사시험/운영 app역할 차단/잔액 불변 검증 완료, 서버 다운 없음. PR #1706 코드 main 3c251d93 병합(운영 앱 실행 SHA는 별도). 운영 TREASURY 계정 0 WLD, 과거 18명 18,000 WLD 원장 미대사, 누락 migration269~287, 공식 Test SHA·디스크97%로 **앱 전체 승격은 HOLD**. 권한은 사용자 의사에 따라 변경하지 않음. [국문기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
 

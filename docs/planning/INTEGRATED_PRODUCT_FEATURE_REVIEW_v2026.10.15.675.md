@@ -1,5 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1420 / F675-161 — Gallery pending submission withdrawal (ADDITION / DRAFT / HOLD)
+- Source-backed gap: `/gallery/submit` shows latest 30 member photo submissions and no withdraw CTA; `member-photo.controller.ts` only supports upload/submit/mine, while migration 127 can publish under a row lock. New feature is a **pending-only owner withdrawal**, not published-content takedown or physical file deletion.
+- Proposed user-confirmed withdrawal, immutable receipt, owner/session isolation, `member_photo_withdrawals` tombstone, publication and media-read race fences, 30-item opaque keyset pagination, NestJS/Next.js/Android parity, admin audit, private SEO/WCAG and OFF-by-default rollback. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. Full [integrated master](INTEGRATED_PLANNING_MASTER.md); [issue #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
+- Main `35971c600f25869c96f1c666d4b9f58927202730` start/mid; QA v1345 FAILED; data disk 97%, historical 18k WLD drift, backup restore/Test/Production BLOCKED. Three official source families reviewed; approved 0, cumulative UNKNOWN/10,000. Docs-only.
+
+
 ## F675-06 detailed adoption — v2026.10.15.688
 
 - [Google Search Evidence & Canonical Action Center](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md) / [한국어](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) is the next v675 adopted **detailed planning** feature. Reuses /admin/seo and v685; identifies top-10-only GSC data, missing date=0, GSC PT/freshness, crawler-indexed mislabel and legacy index submission success/Google Indexing API misclaims. Separates source/submission/Google indexed-version/performance into independently verifiable evidence, 16 Google/WCAG references and D0–D7 gated implementation. Not a live SEO audit or deployed feature.

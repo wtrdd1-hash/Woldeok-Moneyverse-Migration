@@ -1,3 +1,7 @@
+## 2026-10-28 v1420 — F675-161 회원 갤러리 제출 철회 (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1418 / Current Addition v1420 / Next Improvement v1422. main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED. 디스크 97%, 백업 사고 #1718, 과거 18,000 WLD 불일치, 정확 SHA Test/복원/운영승격 HOLD. 회원 사진 UI/API, Migration 098/127, Android 계약 대조: 철회 기능 없음.
+- 본인 검토 대기 사진만 확인 후 철회, 불변 표식·영수증, 관리자 승인 행 잠금 경합 차단, 미디어 즉시 접근 차단, 내 제출물 페이지 조회. 파일 즉시 삭제·하루 제출 횟수 환급 허위 약속 금지. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. 영문·국문 통합 명세와 [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726); 코드·DB·배포 없음. 외부 3곳 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
+
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
 ## 2026-10-24 v1210 — F675-109 게시판 읽기 목록 삭제·커서·이어읽기 무결성 강화 (기능 보완 / DRAFT / 보류)

@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.28.1420 — F675-161 member pending photo withdrawal (PLANNING DRAFT / RELEASE HOLD)
+- Cycle Previous Improvement v1418 → Current Addition v1420 → Next Improvement v1422 (provisional). Main `35971c600f25869c96f1c666d4b9f58927202730` unchanged start/mid; QA v1345 FAILED/HOLD. Real gallery submission UI and NestJS photo controller have upload/submit/mine but no member withdrawal; migration 098 returns 30 rows and owner draft previews, migration 127 permits operator publish. Design owner-only pending withdrawal tombstone/immutable receipt, `FOR UPDATE` publication race fence, immediate media deny and private status UX. Published photos require separate takedown; no physical deletion guarantee, no daily 5-cap refund, no WLD effects.
+- P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. Complete API/DB/transaction/Android/admin/SEO/WCAG/KPI/10,001+100+100/flag-OFF rollback in [integrated EN master](INTEGRATED_PLANNING_MASTER.md) and [KO](INTEGRATED_PLANNING_MASTER.ko.md). [Handoff issue #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
+- 97% data disk, backup incident #1718, 18,000 WLD historical finance drift, Test exact-SHA, independent restore and full app Production promotion BLOCKED. External families PostgreSQL/OWASP/W3C reviewed 3, newly approved 0, cumulative deduplicated approved UNKNOWN/10,000 => BLOCKED. Docs only; no runtime/DB/WLD/Test/Production change.
+
+
 ## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
 - Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
 
