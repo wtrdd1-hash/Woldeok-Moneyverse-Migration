@@ -3,12 +3,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { groupDigits } from '@/lib/money';
-import type { AdminBankOverview, AdminCreditGrade, AdminLoan } from '../types';
+import type { AdminBankOverview, AdminCreditGrade } from '../types';
 
 interface Props {
   readonly overview: AdminBankOverview;
   readonly grades: readonly AdminCreditGrade[];
-  readonly loans: readonly AdminLoan[];
 }
 
 export function BankRiskDashboard({ overview, grades }: Props) {
@@ -105,7 +104,7 @@ export function BankRiskDashboard({ overview, grades }: Props) {
 
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground font-medium">연체 원금 비율 (NPL Ratio)</span>
+              <span className="text-muted-foreground font-medium">연체 잔액 비율 (NPL Ratio)</span>
               <span className="font-mono font-bold text-foreground">
                 {overdueRatioPercent.toFixed(1)}%{' '}
                 <span className="text-[11px] font-normal text-muted-foreground">

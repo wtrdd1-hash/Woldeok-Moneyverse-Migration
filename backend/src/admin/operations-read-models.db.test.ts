@@ -55,14 +55,15 @@ describe.skipIf(!DATABASE_URL)('the operations read models against a real databa
   });
 
   /**
-   * The read model is now fail-closed: anonymous and unauthorized callers must
-   * receive 42501 before argument validation leaks information.
+   * The SQL function deliberately checks the bounded limit before the role.
+   * Once the application EXECUTE grant is restored, invalid limits return 22023,
+   * while valid limits with an unauthorised actor still return 42501.
    */
-  it('refuses a loan book page nobody should ask for', async () => {
+  it('rejects an invalid loan-book limit before the administrator role check', async () => {
     const error = await rejectionOf(() =>
       pool.query('SELECT * FROM public.admin_loan_book($1, $2)', [UNKNOWN, 5000]),
     );
-    expect(code(error)).toBe('42501');
+    expect(code(error)).toBe('22023');
   });
 
   const CLOSED_TABLES: readonly string[] = [

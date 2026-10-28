@@ -29,6 +29,7 @@ describe('bank console real API integration and portfolio scope', () => {
     const html = renderToStaticMarkup(await AdminBankPage());
     expect(html).toContain('9,007,199,254,740,993');
     expect(html).toContain('10.0%');
+    expect(html).toContain('연체 잔액 비율');
     expect(html).toContain('전체 대출 건수');
     expect(html).toContain('100');
     expect(html).toContain('최대 50건');

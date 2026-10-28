@@ -73,11 +73,7 @@ export default async function AdminBankPage() {
       ) : (
         <>
           {/* 실시간 여신 건전성 및 신용등급 리스크 대시보드 */}
-          <BankRiskDashboard
-            overview={console_.overview}
-            grades={console_.grades}
-            loans={console_.loans}
-          />
+          <BankRiskDashboard overview={console_.overview} grades={console_.grades} />
 
           <Card>
             <CardHeader>

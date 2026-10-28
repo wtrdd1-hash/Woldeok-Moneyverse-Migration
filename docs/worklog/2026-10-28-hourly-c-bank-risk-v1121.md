@@ -19,3 +19,7 @@ Main re-fetched unchanged `a28bed9aa40ff74d492824ae12892a7d52132fdd`; English/Ko
 ## Real PostgreSQL contract discovery / migration dependency
 
 On a new isolated PostgreSQL 17.11 database, migrations 002..290 (289 files) applied. `moneyverse_app` had no direct `virtual_bank_loans` SELECT (correct) and could EXECUTE `admin_bank_overview` (correct), **but lacked EXECUTE on `admin_credit_grades(uuid)` and `admin_loan_book(uuid,integer)`**. Root cause: migration 264 dropped and recreated both functions without restoring migration 106's app-role grants. Added minimal additive migration **293** and a database-backed ACL/role-guard regression. No raw table grants, no financial writes. **Migration numbering dependency:** 291 is in B Draft PR #1664; 292 is in B Draft PR #1678. This PR cannot pass contiguous migration parity or merge until both are safely integrated; do not renumber, cherry-pick, or deploy them without coordination.
+
+## Correction before final candidate
+
+The restored app EXECUTE grant exposed a stale existing database test expecting SQLSTATE 42501 for an invalid loan-book limit. The actual SQL function deliberately checks the limit first and returns 22023, while valid-limit unauthorized access returns 42501. Updated the test expectation and explanation. Also corrected the dashboard's metric name to **overdue outstanding balance ratio**, and removed unnecessary member-loan props from the client risk widget. The first real-PG pass had 2,518 PASS / 1 FAIL / 70 SKIP; the final candidate must rerun all gates after this correction.
