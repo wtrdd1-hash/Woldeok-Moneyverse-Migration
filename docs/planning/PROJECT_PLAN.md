@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
-- [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790) is stacked on unmerged #1784 and docs-only.
 
 ## v2026.10.29.1444 — F675-167 verified glossary self-check practice (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790) is stacked on unmerged #1784 and docs-only.
 - Previous Feature Improvement v1442 -> Current Feature Addition v1444 -> Next Feature Improvement v1446 (provisional). Main 35971c600f25869c96f1c666d4b9f58927202730 start/mid unchanged; QA v1357 FAILED/HOLD. Planning is stacked on unmerged #1784/#1780 and handed off in [#1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789).
 - Main source has 50 financial glossary terms, separate 12 system terms, four-language static detail pages and 86400s ISR; no verified question bank, owner attempt/score receipt or corresponding DB found in inspected source. New optional member-only 5-question practice requires five distinct independently approved finance terms per locale, exactly four choices and one correct answer each, immutable question revisions, server-only keys and original replay receipt. No automatic READ/mastery, reward, WLD or ledger mutation.
 - Private /account/learning/glossary/practice, proposed NestJS/Next/Android parity, owner-only PG SECURITY DEFINER attempts/items/receipts, 30-minute expiry, 10 starts/day, 90-day retention, independent editor/reviewer, noindex/no-store, WCAG 2.2 AA, 320px/TalkBack, KPI, 100-way concurrency/100 negative auth and 10,001-row isolated PG acceptance. Full API/DB/CTA/rollback contract is in existing bilingual integrated master.
