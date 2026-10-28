@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.28.1412 — Original-country verified AI blog writer and DB publisher source candidate
+- [EN worklog](docs/worklog/2026-10-28-blog-verified-publisher-v1412.md) / [KO](docs/worklog/2026-10-28-blog-verified-publisher-v1412.ko.md), [internal EN](docs/updates/v2026.10.28.1412-blog-verified-internal.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-internal.ko.md), [GitHub EN](docs/updates/v2026.10.28.1412-blog-verified-github.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-github.ko.md). Source implementation only, no verified live auto-publication or Production deployment.
+
+
 ## v2026.10.28.1410 — Blog combined release attempt
 - [Worklog](docs/worklog/2026-10-28-blog-full-release-v1410.ko.md) · [Internal](docs/updates/v2026.10.28.1410-blog-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1410-blog-release-github.md). Integrated source passes local tests/build, but real AI publisher and official Test/finance release gates remain blocked; no operation deployed.
 

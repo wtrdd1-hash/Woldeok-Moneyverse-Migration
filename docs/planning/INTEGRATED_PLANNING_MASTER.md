@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.28.1412 — Original-country AI writer and database publisher (source candidate, NOT DEPLOYED)
+- [EN implementation log](../worklog/2026-10-28-blog-verified-publisher-v1412.md) / [KO](../worklog/2026-10-28-blog-verified-publisher-v1412.ko.md). Adds original language Ollama generation, primary HTTPS evidence/locale/risk/duplicate gates, unique-slot DB publication receipt, explicit admin revise/withdraw/delete with audit, public blog/API/sitemaps native country projection, no timer-based unpublishing and default exclusion of uncurated AI posts from Google ad banners. Existing 199 manually withdrawn legacy items remain withdrawn.
+- Rebased feature onto moving main f396d009 (unrelated 286/287 migrations retained); new feature SQL uses 288/289/290. Local Front 1,690/Back 1,701/DB 38 unit PASS (430 DB integration skipped), lint/type/build PASS. **CI, actual official Test DB/auth, financial release gates and Production deployment not certified; scheduler default OFF.** Factual correctness of AI writing needs stronger E2E/source grounding before live authorization.
+
+
 ## v2026.10.28.1410 — Combined TECH and two-hour blog release candidate (NOT DEPLOYED)
 - Source combines v1403 TECH correction + v1405 2h rotation. Reordered previously unapplied duplicate migration 283-space to 285 after read-only Production/Test history check. Frontend 1686/backend 1695 tests PASS, lint/type/build PASS; verified AI author+publisher missing, exact-SHA Test identity and Production financial DML gates BLOCKED. [Worklog](../worklog/2026-10-28-blog-full-release-v1410.ko.md). Preserve v1406 owner-withdrawn posts.
 
