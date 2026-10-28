@@ -18,3 +18,6 @@
 - Draft PR #1719. Open PRs 44 before this PR, 45 after; final inventory 46 non-main remote branches, 45 Draft PRs, 3 conflicts, 17 failing-check PRs, 0 duplicate PR heads. All 352 incident recovery refs valid; 0 branches deleted.
 - Official Test `/api/version` `cfb13272beea53c4d8c20eff7f379b6f66343033`, not candidate; Production version `unknown`. QA v1344: 18,000 WLD cash/ledger drift, broad app DML, backup restore not verified, data disk 97%. Full authenticated Test E2E and GitOps financial release gate BLOCKED. No main merge, Test/Production deployment, live DB/ledger writes, feature activation or rollback.
 - Main remained `d12c948ac454b0762cfb7fb0cddf83703a775172` at start/mid/pre-final; canonical EN/KO planning SHA256 unchanged. Final documentation SHA requires repeat exact-SHA verification before any merge; PR will carry latest evidence. **Production RELEASE HOLD.**
+
+## Post-verification accessibility review (17:19 KST)
+- Replaced Next client-side Link to CSV with a native downloadable anchor to prevent RSC navigation interception; added Korean/English, keyboard-focus and download-attribute regression tests. New final SHA requires all gates again. Release HOLD unchanged.

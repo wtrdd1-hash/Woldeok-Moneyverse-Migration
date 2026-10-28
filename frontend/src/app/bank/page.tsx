@@ -32,6 +32,7 @@ import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { BankPrivacyNotice } from './bank-privacy-notice';
+import { BankStatementDownloadLink } from './bank-statement-link';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
@@ -129,9 +130,7 @@ export default async function BankPage() {
 
       <BankPrivacyNotice locale={locale} />
       <div className="flex justify-end">
-        <Link href="/bank/statement.csv" prefetch={false} className="text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:underline">
-          {localeLabel(locale, '내 은행 잔액 CSV 저장', 'Download my bank snapshot (CSV)', '銀行残高のCSVを保存', '下载我的银行余额CSV')}
-        </Link>
+        <BankStatementDownloadLink locale={locale} />
       </div>
 
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
