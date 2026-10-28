@@ -11,3 +11,9 @@
 - TDD RED 6건 재현(기존 통과 3건), 수정 후 집중 테스트 12/12 PASS.
 - Backend/DB 수정 없음. NestJS의 `outcome=email-changed`, `sessionsRevoked=true`를 런타임 검증하며 누락·거짓·모순 응답은 성공 표시 대신 미검증 안내로 처리함.
 - main이 `aeef78a3` → `308adb748`로 변경됨. 변경 파일은 블로그 카드·통합 계획으로 이번 작업과 겹치지 않음. 국영문 기획 v1448 및 QA v1359 FAILED/HOLD 확인.
+
+## 검증 체크포인트 — 2026-10-29 08:52 KST
+- 집중 Frontend 12/12, Backend 이메일 변경 계약 3/3, Frontend Typecheck, 전체 Lint(오류 0/기존 경고 1,095), app-api 180/180 PASS.
+- Frontend 전체 1,915 PASS / 4 FAIL: 블로그 API 3건·관리자 블로그 UI 1건(기존 main 회귀). 전체 릴리스 게이트 FAIL.
+- 로컬 전체 Typecheck FAIL: 공유 의존성의 `undici` 누락. 공유 설치물 수정하지 않으며 깨끗한 CI 필요.
+- 보안 감사 운영 Moderate 1건, 전체 Low 3/Moderate 9건 FAIL. 디스크 99%로 호스트에 DB 볼륨/빌드 생성 금지. 공식 exact-SHA Test 및 운영배포 BLOCKED.

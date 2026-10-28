@@ -11,3 +11,9 @@
 - TDD RED reproduced: 6 failing cases against the existing unverified-success behavior, with 3 baseline cases passing. GREEN: 12/12 targeted tests (new 9 + existing 3) passed after runtime receipt validation and accessible failure text.
 - No Backend/DB changes: authoritative controller returns `{outcome:'email-changed',sessionsRevoked:true}` after successful store completion. A 2xx response with missing/false/contradictory fields now redirects to an unverified state instead of `email_changed=1`.
 - Main re-fetch advanced from `aeef78a3` to `308adb748` (blog card and implementation plan only; no changed files overlap). Canonical EN/KO plans now include v1448 and QA v1359 FAILED/HOLD. Release blockers remain.
+
+## VALIDATION CHECKPOINT — 2026-10-29 08:52 KST
+- Final feature tests: 12/12 PASS; Backend email-change repository contract: 3/3 PASS; Frontend Typecheck PASS; workspace Lint PASS (0 errors / 1,095 pre-existing warnings); app-api 180/180 contract match.
+- Full Frontend: 1,915 PASS / 4 FAIL (two blog test files: `api/blog/generate/route.test.ts` 3, `admin/blog/admin-blog-client.test.tsx` 1), unrelated to changed email action. These same four blog failures were reported in C v1148 on main; full-suite release gate FAIL.
+- Local full Typecheck FAIL: `backend/src/security/ssrf-pinned-transport.ts` cannot resolve `undici` in shared local dependency install. Do not mutate the shared pnpm store; isolated clean CI required.
+- Dependency audit FAIL: production 1 Moderate (`qs`), full 12 (3 Low / 9 Moderate). Root filesystem 99% used; do not build or create a PostgreSQL volume on the shared host until capacity is restored. Official exact-SHA Test and production release BLOCKED.

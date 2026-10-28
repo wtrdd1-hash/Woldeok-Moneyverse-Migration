@@ -8,9 +8,9 @@
 
 **Tech Stack:** Next.js server actions, NestJS, TypeScript, Vitest, PostgreSQL.
 
-- [ ] Write Vitest negative/positive tests for completeLoginEmailChange, including missing/contradictory receipt and invalid token.
-- [ ] Confirm RED against latest main.
-- [ ] Implement minimal runtime receipt validator and unverified UI state.
-- [ ] Confirm GREEN with focused tests and existing auth tests.
+- [x] Write Vitest negative/positive tests for completeLoginEmailChange, including missing/contradictory receipt and invalid token.
+- [x] Confirm RED against latest main.
+- [x] Implement minimal runtime receipt validator and unverified UI state.
+- [x] Confirm GREEN with focused tests and existing auth tests.
 - [ ] Check backend controller/store contract, typecheck/lint/build, whole-suite tests and CI.
 - [ ] Refresh main and plan, record results, publish Draft/HOLD PR. Never merge without all release gates.
