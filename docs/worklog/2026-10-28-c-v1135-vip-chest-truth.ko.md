@@ -6,8 +6,10 @@
 - 실제 권한·원장·주사위 영수증이 구현되기 전에는 GET에 이용 불가·미확인 상태를 반환하고 POST는 503으로 차단. 화면은 조회된 상태만 표시하며 허위 수령/유료 업그레이드 버튼을 제거. 비색인/모바일/접근성 유지.
 - TDD, Backend/API/DB 계약 및 CI/보안/공식 Test exact-SHA 검증. PASS 전 병합·배포 금지.
 
-## 진행
-- 대기.
+## 진행 — 2026-10-28 22:59 KST
+- 실패 재현 RED: Backend 2건, Frontend 및 Android API 캐시·허위 성공 문제. 수정 후 Backend 단위 2건/HTTP E2E 2건, Frontend 4건, Android API 4건 통과.
+- Backend GET은 이용 불가·권한 미검증·지급 0 반환, POST는 HTTP 503. Next 화면 허위 Plus 자격·보상 수령 버튼 제거, 회원 화면 비색인. Android app-api는 오래된 서버의 허위 성공 응답도 503 처리, 비공개 캐시 차단.
+- Lint 오류 0건(기존 경고 1,097건), Frontend Typecheck 통과. 전체 Typecheck는 미니PC의 기존 `undici` 의존성 누락으로 차단되어 CI 검증 필요. 최신 main SHA 변화 없음.
 
 ## 종료
 - 대기.

@@ -8,8 +8,12 @@
 - TDD plan: failing backend controller and frontend component/SSR tests, implement minimal fail-closed contract, verify HTTP/API integration, full build/lint/typecheck/unit/real-PG/security/app-api/E2E/CI and official Test SHA; no merge or deploy until all PASS.
 - No migrations or ledger writes. Existing P0 backup #1718 and other developers' branches protected.
 
-## In progress
-- TDD pending.
+## In progress — 2026-10-28 22:59 KST
+- RED reproduced: backend 2/2 false-success assertions failed; frontend status/receipt tests failed; Android gateway 4/4 cache/legacy-success assertions failed.
+- GREEN after implementation: backend controller 2/2 and HTTP E2E 2/2; frontend SSR/status + component 4/4; Android gateway 4/4. The old `react.act` error came from invoking Vitest without `NODE_ENV=test`; correct project test environment fixed that harness error.
+- Backend GET now returns explicit unavailable/unverified/zero verified award, POST 503; no reward SQL or ledger mutation. Next SSR consumes real backend hold status, no fake Plus claim, noindex; Android app-api rejects legacy success and sets private/no-store + noindex.
+- `pnpm lint` PASS (0 errors, 1,097 existing warnings). Frontend typecheck PASS. Workspace typecheck BLOCKED locally: `backend/src/security/ssrf-pinned-transport.ts` cannot resolve pre-existing missing `undici` dependency in the miniPC node_modules. GitHub clean-install CI is required. Isolated database checks and full tests pending.
+- Mid-work `origin/main` rechecked: `35971c600f25869c96f1c666d4b9f58927202730`, unchanged. Other branches and shared services untouched.
 
 ## Finished
 - Awaiting evidence.
