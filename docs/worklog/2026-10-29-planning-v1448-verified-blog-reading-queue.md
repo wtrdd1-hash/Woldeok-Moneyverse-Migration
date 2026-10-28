@@ -1,0 +1,20 @@
+# v1448 — Verified member blog reading queue (DRAFT / RELEASE HOLD)
+
+Cycle: Previous Feature Improvement v1446 -> Current Feature Addition v1448 -> Next Feature Improvement v1450 (provisional).
+
+## Checklist and execution
+- [x] Read available using-superpowers/brainstorming/worktree/verification skills from miniPC; skills connector returned no available skill URI.
+- [x] Verify Debian 13.6, GitHub main, AGENTS.md, README, English canonical and Korean cross-check, frontend/backend/API/DB and QA v1359.
+- [x] Search existing GitHub issues for duplicate blog reading queue; distinguish board reading list #1086 and existing blog editorial publication.
+- [x] Update existing bilingual integrated planning master, living plan, feature review and update logs; no new standalone feature spec.
+- [x] Create developer handoff issue #1800, preserve P0/P1 and external evidence gate.
+- [ ] Final exact-SHA GitHub CI and independent Test/Production release (NOT authorized by planning).
+
+## Verified observations
+Main start f05efcb5d7c21d9553f68df227f9771217a30671 -> mid 8ba355374a2553926f67140febbf85c114f00ba1 (implementation_plan.md only). QA v1359 FAILED/HOLD; 18 USER_CASH accounts +18,000 WLD, 239 app-writable relations, three PUBLIC bank EXECUTE, five checksum mismatches, 20 unapplied migrations including blog 278/279. Root/data 99% at start, data reached 100% while allocating isolated planning worktree. Existing blog article has Share but no owner Save; verified API has receipt-bearing PUBLISHED rows, but verified publication authority must be proven before enabling any CTA.
+
+## Design decision and release
+Server-authoritative opt-in member queue only for independently approved verified publications; no automatic reading inference, no fabricated publication/analytics, no WLD or ledger mutation. Proposed 10,001 synthetic rows, 100 concurrent mutations, 100 negative auth/CSRF/replay tests are NOT executed. Developer branch, additive PG migration, full exact-SHA Test gate and authorized rollback required. External independently verified/deduplicated references new 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+## GitHub
+Development issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800. Draft planning PR: #1801 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801). Runtime, Test, Production, finance and database changes: NONE.
