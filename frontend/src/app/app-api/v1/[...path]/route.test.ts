@@ -121,6 +121,35 @@ describe('app API route compatibility', () => {
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
+  it('prevents public caching and indexing of private chat media on Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('private bytes', {
+      status: 200,
+      headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' },
+    })));
+    const response = await GET(
+      request('/app-api/v1/content/chat/media/chat_example.png'),
+      context('content', 'chat', 'media', 'chat_example.png'),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
+  it('prevents public caching of denied chat media on Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ status: 404 }), {
+      status: 404,
+      headers: { 'content-type': 'application/problem+json', 'cache-control': 'public, max-age=600' },
+    })));
+    const response = await GET(
+      request('/app-api/v1/content/chat/media/chat_example.png'),
+      context('content', 'chat', 'media', 'chat_example.png'),
+    );
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
