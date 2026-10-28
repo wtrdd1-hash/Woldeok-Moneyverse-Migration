@@ -3,6 +3,8 @@
 - Preserve current engagement preference and disabled claim-all. Require DB migration provenance, no direct app-role UPDATE/SELECT, verified actor boundary, Android parity, private SEO/a11y/analytics and exact-SHA release gates.
 - P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 HOLD; tests specified not run; external approved 0, cumulative UNKNOWN/10,000 BLOCKED.
 
+**Latest independent QA cross-check (14:11 KST).** QA Draft PR #1692 (v1413) reports a separate P0 blog publishing bypass and 500 on verified publisher; its 11-post observations are QA-reported, not independently reproduced in this planning run. Keep this cross-domain Production release blocker with QA ownership; do not expand notification feature scope or claim that #1692 passed official Test. QA v1341 remains the latest inspected hourly evidence set.
+
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
 ## F675-06 detailed adoption — v2026.10.15.688

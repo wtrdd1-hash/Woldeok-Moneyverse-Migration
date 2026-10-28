@@ -1,5 +1,7 @@
 # Planning worklog v1412 / F675-159
 
+**Latest independent QA cross-check (14:11 KST).** QA Draft PR #1692 (v1413) reports a separate P0 blog publishing bypass and 500 on verified publisher; its 11-post observations are QA-reported, not independently reproduced in this planning run. Keep this cross-domain Production release blocker with QA ownership; do not expand notification feature scope or claim that #1692 passed official Test. QA v1341 remains the latest inspected hourly evidence set.
+
 ## v1412 / F675-159 — Owner-verified notification inbox, replacing synthetic finance notices (Feature Addition / DRAFT / RELEASE HOLD) — issue #1693
 
 **Authority and cycle.** Previous Feature Improvement v1410 → Current Feature Addition v1412 → Next Feature Improvement v1414 (provisional). Verified on 2026-10-28 14:04–14:10 KST against main a28bed9aa40ff74d492824ae12892a7d52132fdd, AGENTS.md, README.md, English canonical PROJECT_PLAN.md, Korean counterpart, latest open PRs and QA v1341. This is a planning-only independent main-based Draft; implementation belongs to A/B/C/QA separate branches. No production runtime or finance mutation.

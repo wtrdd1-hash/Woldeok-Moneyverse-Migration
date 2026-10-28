@@ -5,6 +5,8 @@
 - P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. Isolated PG 10,001/100/100 acceptance specified, NOT RUN. External approved 0, unique cumulative UNKNOWN/10,000 BLOCKED; Test exact-SHA and independent restore unverified; Production HOLD.
 - Backlog IDs: ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
 
+**Latest independent QA cross-check (14:11 KST).** QA Draft PR #1692 (v1413) reports a separate P0 blog publishing bypass and 500 on verified publisher; its 11-post observations are QA-reported, not independently reproduced in this planning run. Keep this cross-domain Production release blocker with QA ownership; do not expand notification feature scope or claim that #1692 passed official Test. QA v1341 remains the latest inspected hourly evidence set.
+
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)

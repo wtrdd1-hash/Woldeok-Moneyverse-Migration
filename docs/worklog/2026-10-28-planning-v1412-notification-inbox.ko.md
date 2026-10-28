@@ -1,5 +1,7 @@
 # Planning worklog v1412 / F675-159
 
+**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
+
 ## v1412 / F675-159 — 가상 금융 알림을 제거한 본인 검증형 알림함 (Feature Addition / DRAFT / RELEASE HOLD) — 이슈 #1693
 
 **기준·회차.** Previous Feature Improvement v1410 → Current Feature Addition v1412 → Next Feature Improvement v1414(잠정). 2026-10-28 14:04~14:10 KST에 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md와 한국어 대조본, 열린 PR 및 QA v1341을 확인했다. 최신 main에서 분리된 문서 전용 Draft이며 A/B/C/QA 코드와 충돌시키지 않는다. 운영·금융 데이터 변경 없음.

@@ -3,6 +3,8 @@
 - Found six hardcoded notifications with invented WLD amounts and local-only read acknowledgements in member UI; existing backend/BFF and dev DB rows=0, app-role SELECT/UPDATE=true, tracked SQL DDL provenance unverified. Proposed verified real inbox, category/pagination/atomic receipt, security/Android/mobile/SEO/KPI and rollback in integrated EN/KO master.
 - P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 candidate not full certified Test, Production HOLD; 10,001/100/100 tests specified not run. External approved 0, cumulative unique UNKNOWN/10,000 BLOCKED. No runtime/DB/ledger/WLD/Test/Production writes.
 
+**Latest independent QA cross-check (14:11 KST).** QA Draft PR #1692 (v1413) reports a separate P0 blog publishing bypass and 500 on verified publisher; its 11-post observations are QA-reported, not independently reproduced in this planning run. Keep this cross-domain Production release blocker with QA ownership; do not expand notification feature scope or claim that #1692 passed official Test. QA v1341 remains the latest inspected hourly evidence set.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
