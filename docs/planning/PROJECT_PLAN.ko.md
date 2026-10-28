@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.28.1430 — F675-163 캘린더 저장 마감 출처·개정 무결성 (기획 초안 / 운영 보류)
+- 이전 기능 추가 v1428 → 현재 기능 보완 v1430 → 다음 기능 추가 v1432(잠정). 최신 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인. 선행 Draft #1749 미병합, 별도 문서 전용 브랜치.
+- 실제 코드 정정: shop-deadlines.ts는 지난 날짜를 제거하지 않고 테스트에 현재 시각 주입이 없다. shop_catalog_list_v2의 sale_ends_at 출처는 shop_catalog이며 shop_inventory.ends_at은 별도 판매 노출 제약이다. 시즌 마감은 virtual_seasons.ends_at. 출처 UUID가 같아도 마감은 변경될 수 있다.
+- 저장 회차 source_revision·유효 마감·출처를 불변 기록하고 운영자 수정/원복(ABA) 시 자동 재구독하지 않는다. 회원이 새 회차를 명시적으로 확인하며 SOURCE_UNKNOWN과 EXPIRED를 구별하고 출처 삭제 후에도 본인 해제를 허용한다. 모든 관리자 수정 경로에서 동일 트랜잭션으로 개정번호 증가.
+- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. API·DB 제약/잠금/인덱스, 화면·CTA·상태, 관리자, 개인정보·SEO, Android·접근성, KPI, 회귀·정확 SHA Test·롤백은 통합 기획 정본에 상세 기재. QA v1350 FAILED, 디스크 98%, 과거 18,000 WLD 차이, 광범위한 앱 DML·마이그레이션 불일치·복원·공식 Test는 HOLD.
+- 외부 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 런타임·DB·금융·Test·Production 변경 없음.
+
+
 ## v2026.10.28.1428 — F675-163 회원 이벤트 캘린더 저장 목록 (기획 초안 / 운영 보류)
 - **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
 - 이전 기능 보완 v1426 → 현재 기능 추가 v1428 → 다음 기능 보완 v1430(잠정). 시작·중간 확인 main 35971c600f25869c96f1c666d4b9f58927202730. QA v1349 FAILED, v1350 중간 시점 진행 중. /calendar는 시즌/오늘/주간/상점 일정 API를 조회하지만 회원별 저장 기능 없음. 시즌 이벤트 UUID·종료시각, 상점 UUID·판매 종료시각을 근거로 1차 대상 설정; 안정 ID가 없는 오늘·주간 카드는 제외. F675-160 상품 찜과 분리.

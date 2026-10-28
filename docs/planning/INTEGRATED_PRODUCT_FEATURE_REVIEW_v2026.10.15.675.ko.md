@@ -1,5 +1,12 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## F675-163 v1430 — 캘린더 저장 마감 무결성 (기능 보완 / DRAFT / 보류)
+- 이전 기능 추가 v1428 / 현재 기능 보완 v1430 / 다음 기능 추가 v1432(잠정).
+- 최신 main 근거 정정: 캘린더 마감 헬퍼는 파싱 가능한 지난 날짜를 포함하며 테스트에는 시계가 없다. shop_catalog_list_v2는 shop_catalog.sale_ends_at을 사용하고 shop_inventory 노출 기간은 별도이며 시즌 마감은 virtual_seasons.ends_at. v1428 출처 설명 정정.
+- source_revision·불변 저장 마감, 운영자 일정 변경 시 회원 재확인, 변경 후 원복 ABA 방지, 출처 장애 시 차단, 본인 해제 보장. 실제 DB 잠금·권한, Nest/Next/Android, no-store/noindex, 접근성·롤백을 통합 기획에 상세 명세. 자동 알림·참가·WLD 변경 없음.
+- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. 선행 Draft #1749, QA v1350 FAILED, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+
+
 ## F675-163 — v1428 회원 이벤트 캘린더 저장 목록 (기능 추가 / 초안 / 보류)
 - **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
 - 실제 /calendar는 시즌·상점 마감·오늘 사건·주간 목표를 보여주지만 회원별 저장 목록 없음. 시즌 이벤트 UUID와 상점 마감 UUID만 1차 지원, 안정 ID 없는 오늘·주간은 제외. F675-160 상품 찜과 중복되지 않음.

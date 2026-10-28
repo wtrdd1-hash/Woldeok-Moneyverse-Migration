@@ -14,5 +14,10 @@
 - [ ] Validate ten backlog IDs, all EN/KO pairs, docs-only diff, no secrets.
 - [ ] Push Draft PR and GitHub issue handoff.
 
+
+## MIDPOINT — 23:11 KST
+- Latest main rechecked and unchanged; v1428 Draft #1749 remains unmerged. 12 further documentation files updated, English canonical and Korean equivalent.
+- Source correction and explicit revision-bound deadline confirmation documented. QA v1350 FAILED; external accepted newly 0, cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS; release HOLD.
+
 ## FINISHED
 - PENDING: final verification, SHA and PR evidence.
