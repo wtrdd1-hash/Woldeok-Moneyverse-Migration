@@ -21,7 +21,10 @@ function parseAppVersion(value: string | null): [number, number, number] | null 
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
-function isVersionBelow(current: [number, number, number], minimum: [number, number, number]): boolean {
+function isVersionBelow(
+  current: [number, number, number],
+  minimum: [number, number, number],
+): boolean {
   for (let i = 0; i < 3; i += 1) {
     if (current[i]! !== minimum[i]!) return current[i]! < minimum[i]!;
   }
@@ -31,7 +34,10 @@ function isVersionBelow(current: [number, number, number], minimum: [number, num
 function looksLikeOfficialAndroid(request: NextRequest): boolean {
   const client = request.headers.get('x-moneyverse-client')?.toLowerCase();
   const userAgent = request.headers.get('user-agent') ?? '';
-  return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
+  return (
+    client === 'android' &&
+    /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent)
+  );
 }
 
 function internalToken(): string {
@@ -48,33 +54,72 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } },
+    {
+      status,
+      headers: {
+        'content-type': 'application/problem+json',
+        'cache-control': 'private, no-store',
+        'x-robots-tag': 'noindex',
+      },
+    },
   );
 }
 
 async function proxy(request: NextRequest, parts: readonly string[]): Promise<NextResponse> {
   if (parts.length === 2 && parts[0] === 'meta' && parts[1] === 'contract') {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return gatewayProblem(405, 'Method Not Allowed', 'app_gateway_method_not_allowed', 'contract metadata is read-only');
+      return gatewayProblem(
+        405,
+        'Method Not Allowed',
+        'app_gateway_method_not_allowed',
+        'contract metadata is read-only',
+      );
     }
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
-    const response = contractJson(appApiContract(origin), { status: 200, headers: { 'cache-control': 'public, max-age=300' } });
-    return request.method === 'HEAD' ? new NextResponse(null, { status: response.status, headers: response.headers }) : response;
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
+    const response = contractJson(appApiContract(origin), {
+      status: 200,
+      headers: { 'cache-control': 'public, max-age=300' },
+    });
+    return request.method === 'HEAD'
+      ? new NextResponse(null, { status: response.status, headers: response.headers })
+      : response;
   }
 
   const path = appGatewayPath(parts);
-  if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  if (!path)
+    return gatewayProblem(
+      404,
+      'Not Found',
+      'app_gateway_path',
+      'this path is not part of the public app API',
+    );
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
     if (!minimumVersion) {
-      return gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'app_gateway_version_policy_invalid',
+        'the app compatibility policy is unavailable',
+      );
     }
     const currentVersion = parseAppVersion(request.headers.get('x-moneyverse-app-version'));
     if (!currentVersion || isVersionBelow(currentVersion, minimumVersion)) {
-      const response = gatewayProblem(426, 'Upgrade Required', 'app_upgrade_required', `app version ${minimumVersionRaw} or newer is required`);
+      const response = gatewayProblem(
+        426,
+        'Upgrade Required',
+        'app_upgrade_required',
+        `app version ${minimumVersionRaw} or newer is required`,
+      );
       response.headers.set('x-moneyverse-min-app-version', minimumVersionRaw);
       return response;
     }
@@ -100,7 +145,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     request.nextUrl.searchParams.get('client') === 'mobile'
   ) {
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
     return contractJson({
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
@@ -134,9 +185,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   } catch (error: unknown) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'TimeoutError' || name === 'AbortError') {
-      return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
+      return gatewayProblem(
+        504,
+        'Gateway Timeout',
+        'app_gateway_timeout',
+        'the private API did not answer within 15 seconds',
+      );
     }
-    return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+    return gatewayProblem(
+      502,
+      'Bad Gateway',
+      'app_gateway_unavailable',
+      'the private API could not be reached',
+    );
   }
 
   const headers = appendAppContractHeaders(new Headers());
@@ -147,7 +208,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
-  if (parts[0] === 'wallet' || parts[0] === 'privacy') headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy')
+    headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'privacy') headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
@@ -175,8 +237,17 @@ async function handle(request: NextRequest, context: Context) {
   const response = await proxy(request, parts);
   // Bank loan and standing data belong to the viewer, including error paths.
   // Never trust an upstream cache policy after a session or account change.
-  if (parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  if (
+    parts[0] === 'bank' ||
+    parts[0] === 'banking' ||
+    parts[0] === 'chat' ||
+    (parts[0] === 'content' && parts[1] === 'chat') ||
+    (parts[0] === 'shop' && (parts[1] === 'catalog' || parts[1] === 'holdings'))
+  ) {
     response.headers.set('cache-control', 'private, no-store');
+  }
+  if (parts[0] === 'shop' && (parts[1] === 'catalog' || parts[1] === 'holdings')) {
+    response.headers.set('x-robots-tag', 'noindex');
   }
   return response;
 }
