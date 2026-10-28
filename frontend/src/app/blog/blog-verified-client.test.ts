@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { verifiedArticleBySlug, verifiedArticlesForAdmin, verifiedPublicArticles } from './blog-verified-client';
 import { blogAlternateLanguages, hasCountryEdition, isBlogDiscoverable } from './blog-seo';
+import { metadataForArticle, renderBlogHub } from './blog-page-server';
 
 const row = {
   slug:'2026-10-28-cn-coding-5',country:'CN',locale:'zh-CN',topic:'CODING',
@@ -13,6 +15,21 @@ const row = {
 };
 describe('DB-verified country blog public projection',()=>{
  afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();});
+ it('renders the verified DB article on the actual native hub and metadata', async()=>{
+  vi.stubEnv('BLOG_API_ORIGIN','http://127.0.0.1:3000');
+  // Every HTTP request receives a fresh Response stream; a consumed Response
+  // must not make a subsequent hub query appear empty.
+  vi.stubGlobal('fetch',vi.fn().mockImplementation(async () =>
+    new Response(JSON.stringify({posts:[row],post:row}),{status:200})));
+  const meta=await metadataForArticle(row.slug,'zh');
+  expect(meta.title).toBe(row.title);
+  expect(meta.alternates?.canonical).toContain('/zh/blog/'+row.slug);
+  const hub=await renderBlogHub('zh');
+  const html=renderToStaticMarkup(hub);
+  expect(html).toContain(row.slug);
+  expect(html).toContain(row.title);
+  expect((await metadataForArticle(row.slug,'ko')).robots).toMatchObject({index:false});
+ });
  it('only renders a verified publication receipt in its native country, without fake analytics',async()=>{
   vi.stubEnv('BLOG_API_ORIGIN','http://127.0.0.1:3000');
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({posts:[row]}),{status:200})));

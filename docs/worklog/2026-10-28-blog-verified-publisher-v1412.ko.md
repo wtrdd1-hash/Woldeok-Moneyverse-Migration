@@ -30,3 +30,7 @@
 ## v1412.1 통합 상태 재조회 — 2026-10-28 KST
 - 병행 자동통합으로 최초 Draft PR #1658 기초 커밋이 origin/main 8b6e1641f에 이미 병합됨. GitHub #1658 closed/merged 확인. 운영 공개 /api/version은 unknown, 공식 Test 버전은 6f697e74...이므로 메인 병합을 운영 자동발행 성공으로 보지 않음.
 - 원어 SEO, 관리자 전용 DB 목록/수동 수정·비공개·삭제, 발행 실패 오인 방지, 감사 보존 문구와 테스트는 아직 메인에 없으므로 최신 메인 위 별도 후속 브랜치/PR로 격리. 기존 merged PR 재사용 금지.
+## v1412.2 — 공개 페이지 실제 게시물 연결 QA
+- v1412 소스 정적 검토에서 심각한 기능 누락 발견: /api/blog API는 DB 게시 기록을 조회하지만 국가별 허브 renderBlogHub, 기사 메타데이터 metadataForArticle, 상세 renderBlogArticle은 구형 JSON만 조회. 새 AI 글을 발행해도 실제 페이지 목록/상세가 누락되는 결함.
+- 실제 서버 렌더링 코드를 수정하여 DB 발행 영수증 보유 글과 기존 공개 유효 글을 함께 조회하고, 상세 및 SEO도 DB 원문을 읽게 연결. 중국어 신규 게시물 mock으로 메타데이터 native canonical, zh 허브 HTML 및 구조화 데이터의 기사 제목/slug 표시를 검증. 최초 목 Response 본문 재사용으로 실패, 요청마다 새로운 body stream을 반환하도록 보정 후 6/6 테스트 PASS.
+- 새 소스 신원 CI 전에는 운영 게시 성공을 주장하지 않음. 운영 DB/서비스/사용자 철회 기존 글 변경하지 않음.

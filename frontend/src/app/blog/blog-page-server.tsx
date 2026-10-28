@@ -51,8 +51,8 @@ export function metadataForHub(locale: BlogLocale): Metadata {
   };
 }
 
-export function metadataForArticle(slug: string, locale: BlogLocale): Metadata {
-  const original = getBlogPostBySlug(slug);
+export async function metadataForArticle(slug: string, locale: BlogLocale): Promise<Metadata> {
+  const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) return { title: 'Article not found', robots: { index: false, follow: false } };
   const post = getBlogCountryEdition(original, locale);
   if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
@@ -76,8 +76,8 @@ export function summarizeBlogPost(post: BlogPost) {
   const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
   return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
 }
-export function renderBlogHub(locale: BlogLocale) {
-  const posts = countryBlogPosts(getAllBlogPosts().filter(isBlogDiscoverable), locale);
+export async function renderBlogHub(locale: BlogLocale) {
+  const posts = countryBlogPosts([...await verifiedPublicArticles(),...getAllBlogPosts()].filter(isBlogDiscoverable), locale);
   const canonical = blogHubUrl(locale);
   const freshnessNotice = getBlogFreshnessNotice(posts, locale);
   const jsonLd = {
@@ -123,7 +123,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   if (canonicalBlogSlug(slug) !== slug) {
     permanentRedirect(blogUrl(slug, locale));
   }
-  const original = getBlogPostBySlug(slug);
+  const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) notFound();
   const post = getBlogCountryEdition(original, locale);
   if (!post) notFound();
