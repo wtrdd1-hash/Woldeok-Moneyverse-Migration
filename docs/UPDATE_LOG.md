@@ -1,3 +1,6 @@
+## 2026-10-28 C v1133 — KDIC unverified financial settlement hard stop (DRAFT / HOLD)
+- Three backend admin KDIC POST operations (`assess-premiums`, `liquidity-loan`, `payout`) now fail closed with stable HTTP 503; service and repository entry points reject before any SQL/Discord side effects. Removed legacy unjournaled write implementations, retained verified read-only web/Next/NestJS paths and displayed the server hold to administrators. TDD backend 8/8 and frontend 10/10 focused PASS; full exact-SHA security/CI/isolated PostgreSQL/official Test pending. No financial DB, Production or Test mutation. See `docs/worklog/2026-10-28-kdic-evidence-v1133.md`.
+
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 ## 2026-10-24 v1210 — F675-109 board reading-list deletion, cursor and resume hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)

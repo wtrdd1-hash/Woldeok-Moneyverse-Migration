@@ -1,12 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { KdicService } from './kdic.service';
 import { KdicRepository } from './kdic.repository';
-import { DiscordAlertService } from '../../discord/discord-alert.service';
 
 describe('KdicService', () => {
   let service: KdicService;
   let mockRepo: Partial<KdicRepository>;
-  let mockDiscord: Partial<DiscordAlertService>;
 
   beforeEach(() => {
     mockRepo = {
@@ -61,14 +59,7 @@ describe('KdicService', () => {
       listRecentPayouts: vi.fn().mockResolvedValue([]),
     };
 
-    mockDiscord = {
-      sendAdminDirectMessage: vi.fn().mockResolvedValue({ success: true }),
-    };
-
-    service = new KdicService(
-      mockRepo as KdicRepository,
-      mockDiscord as DiscordAlertService
-    );
+    service = new KdicService(mockRepo as KdicRepository);
   });
 
   it('예금보험기금 및 금융기관 건전성 개요를 정상 조회한다', async () => {
@@ -86,35 +77,20 @@ describe('KdicService', () => {
     expect(coverage.isFullyProtected).toBe(false);
   });
 
-  it('분기별 예금보험료를 정기 징수하고 관리자 DM을 발송한다', async () => {
-    const res = await service.assessQuarterlyPremiums('ADMIN_TEST');
-    expect(res.totalCollectedWld).toBe(5000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('예금보험료 정기 징수'),
-      })
-    );
+  it('금융 집행 3종을 거부하며 조회만 허용한다', async () => {
+    for (const operation of [
+      service.assessQuarterlyPremiums('ADMIN_TEST'),
+      service.injectEmergencyLiquidity('BANK_COMMERCIAL', 1000000, 'ADMIN_TEST'),
+      service.executeDepositPayout('BANK_COMMERCIAL', 'user-victim', 'ADMIN_TEST'),
+    ]) {
+      await expect(operation).rejects.toMatchObject({
+        status: 503,
+        response: expect.objectContaining({ code: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED' }),
+      });
+    }
+    expect(mockRepo.assessQuarterlyPremiums).not.toHaveBeenCalled();
+    expect(mockRepo.injectEmergencyLiquidity).not.toHaveBeenCalled();
+    expect(mockRepo.executeDepositPayout).not.toHaveBeenCalled();
   });
 
-  it('부실 우려 금융기관에 긴급 유동성 대여를 집행하고 BIS 비율을 회복시킨다', async () => {
-    const res = await service.injectEmergencyLiquidity('BANK_COMMERCIAL', 1000000, 'ADMIN_TEST');
-    expect(res.newBisRatioPct).toBe(15.5);
-    expect(res.newFundWld).toBe(9000000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('긴급 유동성 대여'),
-      })
-    );
-  });
-
-  it('파산 금융기관 예금자에 대해 50만 WLD 한도 내 대위변제를 집행한다', async () => {
-    const res = await service.executeDepositPayout('BANK_COMMERCIAL', 'user-victim', 'ADMIN_TEST');
-    expect(res.payoutAmountWld).toBe(500000);
-    expect(res.newFundWld).toBe(9500000);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('대위변제금(Payout) 지급 완료'),
-      })
-    );
-  });
 });

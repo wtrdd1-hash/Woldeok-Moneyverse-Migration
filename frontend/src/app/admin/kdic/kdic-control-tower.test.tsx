@@ -19,6 +19,7 @@ describe('KDIC admin truthful observation and unsafe action hold', () => {
     expect((screen.getByRole('button', { name: /예보료.*징수/ }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /긴급 유동성.*대여/ }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /대위변제금.*환급/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getAllByRole('status').map((node) => node.textContent).join(' ')).toContain('서버에서도 집행 요청을 HTTP 503으로 차단');
   });
   it('refreshes via same-origin authenticated Next endpoint and discards stale observations on failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));

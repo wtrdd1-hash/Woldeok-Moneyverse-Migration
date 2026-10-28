@@ -89,7 +89,7 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
           KDIC 조회 결과를 확인할 수 없습니다. 미확인 금액을 0 WLD 또는 정상 상태로 판단하지 마세요.
         </div>
       )}
-      <p role="status" className="text-xs text-amber-300">금융 집행 기능 보류: 관리자 API와 DB 권한·원장 안전성 검증 필요</p>
+      <p role="status" className="text-xs text-amber-300">금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.</p>
       {/* 1. 상단 브리핑 헤더 & 정기 징수 액션 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl backdrop-blur-md">
         <div>
