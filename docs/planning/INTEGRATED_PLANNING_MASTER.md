@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1428 / F675-163 — Verified member calendar event watchlist (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **QA final refresh 22:17 KST:** v1350 FAILED; 68 Draft PRs/3 conflicts, 18 USER_CASH divergences +18,000 WLD and Treasury 0, app UPDATE/DELETE 235/243 tables, PUBLIC bank EXECUTE 3, 5 migration checksum mismatches, 20 unapplied migrations, data disk 98% / 4.1GiB free. Production version unknown, Test not exact current main, independent restore unverified. Public HTTP 50/50 and anonymous mobile 36/36 PASS do not certify authenticated finance or official Test. RELEASE HOLD.
 
 **Cycle and authority.** Previous Feature Improvement v1426 → Current Feature Addition v1428 → Next Feature Improvement v1430 (provisional). Source-of-truth main 35971c600f25869c96f1c666d4b9f58927202730 rechecked at start and midpoint on 2026-10-28 KST. AGENTS.md, README.md, PROJECT_PLAN.md canonical and PROJECT_PLAN.ko.md cross-check govern. QA v1349 FAILED (read-only evidence: 235/243 app-writable tables, 3 PUBLIC bank EXECUTE, 5 migration checksum mismatches, 20 source migrations unapplied, 18,000 WLD drift); v1350 in progress at midpoint. Feature is proposed, not in main or deployed. Independent planning branch, no A/B/C/Gemini/QA edits. GitHub handoff issue #1748.
 

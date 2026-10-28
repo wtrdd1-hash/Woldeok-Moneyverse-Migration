@@ -1,6 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
 ## F675-163 — v1428 회원 이벤트 캘린더 저장 목록 (기능 추가 / 초안 / 보류)
+- **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
 - 실제 /calendar는 시즌·상점 마감·오늘 사건·주간 목표를 보여주지만 회원별 저장 목록 없음. 시즌 이벤트 UUID와 상점 마감 UUID만 1차 지원, 안정 ID 없는 오늘·주간은 제외. F675-160 상품 찜과 중복되지 않음.
 - 출처별 FK·본인 전용 SECURITY DEFINER·회원 행 잠금 100개 제한·멱등 영수증·제거 이력·비공개 비식별화·Next/Nest/Android·접근성·개인정보·SEO·정확 SHA 배포 게이트. 자동 알림/참가/WLD 없음. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05..10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md). [이슈 #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748) · [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
 - QA v1349 FAILED, 데이터 디스크 98%, 과거 18,000 WLD 원장 차이, 독립 복원·공식 Test 보류. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 문서 전용.

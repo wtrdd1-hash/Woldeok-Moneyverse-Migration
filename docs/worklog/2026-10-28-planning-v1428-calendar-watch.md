@@ -10,3 +10,5 @@
 **External evidence gate:** 10,000 independent deduplicated, evidence-classified records required. Newly accepted 0; cumulative verified UNKNOWN/10,000; BLOCKED / IN PROGRESS. Do not equate publisher families or references reviewed with accepted records.
 
 **Deployment:** DOCUMENTATION ONLY / DRAFT / RELEASE HOLD. No Test/Production/runtime/database/WLD/ledger changes authorized.
+
+- **QA final refresh 22:17 KST:** v1350 FAILED; 68 Draft PRs/3 conflicts, 18 USER_CASH divergences +18,000 WLD and Treasury 0, app UPDATE/DELETE 235/243 tables, PUBLIC bank EXECUTE 3, 5 migration checksum mismatches, 20 unapplied migrations, data disk 98% / 4.1GiB free. Production version unknown, Test not exact current main, independent restore unverified. Public HTTP 50/50 and anonymous mobile 36/36 PASS do not certify authenticated finance or official Test. RELEASE HOLD.
