@@ -18,7 +18,8 @@
 - Root `pnpm test` timed out after 110 seconds during Frontend, so NOT PASS. Independent bounded Frontend test run: 1,424 PASS / 401 FAIL, including React test environment and blog cases; no Frontend code modified. Not a complete green gate.
 - Root `pnpm audit --audit-level=moderate`: FAIL (3 Low, 9 Moderate); QA v1341 has a separate Draft PR for `qs` advisory.
 - Repository security, control bytes, forbidden Prisma migration, release hold policy and Bot production audit: PASS.
-- Real PostgreSQL ACL and official isolated Test exact-SHA/auth/finance E2E: NOT RUN. No shared/production-connected DB modified.
+- Disposable PostgreSQL 17 (network-isolated) PASS: extracted exact `admin_list_alerts` function body from immutable migration 087 into a synthetic 205-alert fixture; checked admin 200/default 30 bounds, unauthorized actor rejection and app-role direct table SELECT denial. This is **not** a full migrated production schema or official Test proof. Container removed; no shared/production-connected DB modified.
+- Official isolated Test exact-SHA/auth/finance E2E and full migrated-schema ACL: NOT RUN.
 
 ## Gate and ownership
 
@@ -29,4 +30,4 @@
 ## 한국어 요약
 
 - 관리자 경제 알림 조회의 `limit` 쿼리 입력을 1~200 범위의 정규 10진수 문자열로 제한. 빈 값·공백·지수·16진수·중복 파라미터·범위 초과는 DB 조회 전에 HTTP 400.
-- 신규 회귀 테스트 RED 15건 재현 후 집중 46건 PASS, 전체 린트/타입 검사/빌드 PASS. 전체 프론트 테스트와 의존성 감사 실패, 공식 Test·실제 PG 검증 미완료로 병합·운영 배포 보류.
+- 신규 회귀 테스트 RED 15건 재현 후 집중 46건 PASS, 전체 린트/타입 검사/빌드 PASS. 전체 프론트 테스트와 의존성 감사 실패, 격리 PostgreSQL 17 합성 스키마 검증 PASS이나 공식 Test·전체 운영 스키마 검증 미완료로 병합·운영 배포 보류.
