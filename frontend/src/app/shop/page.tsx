@@ -98,7 +98,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <form
           action="/shop"
           method="get"
-          className="flex min-w-0 w-full max-w-3xl flex-wrap gap-2"
+          className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap"
           role="search"
         >
           <input
