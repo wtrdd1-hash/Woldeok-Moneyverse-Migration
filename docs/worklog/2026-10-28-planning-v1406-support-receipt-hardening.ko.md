@@ -6,3 +6,7 @@
 - 서비스 ACTIVE/데이터 볼륨 85%, 운영 버전 unknown/Test `6f697e74...`; 공식 정확 SHA Test·복원·운영 승인 미검증. 런타임/DB/금융/스위치/Test/운영 변경 없음. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 
 **상세 기획:** [영문 정본](../planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](../planning/INTEGRATED_PLANNING_MASTER.ko.md).
+
+### GitHub·검증 기록 (2026-10-28 11:14 KST)
+- Draft PR **#1675** OPEN, 미병합 #1670 기반; 이슈 #1669 및 개발 C PR #1671에 작업 분리 의견 기록. 최초 문서 커밋 `da0c5d32ec49ff941579e470491068ffd3214177`; 12파일 +126/-0, 영문·한국어 6쌍 모두 백로그 ID 10개 확인.
+- `git diff --check` PASS, 릴리스 분류 테스트 17/17 PASS. 시작·중간 main 동일. PR CI·공식 정확 SHA Test 미검증, 병합/배포/DB·금융 변경/PR 정리 없음.
