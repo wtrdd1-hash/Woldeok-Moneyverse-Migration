@@ -19,7 +19,7 @@ function getSharedBlogStorePath(): string {
   return path.join(process.cwd(), 'data', 'blog-posts.json');
 }
 
-export function getCategoryHeroImage(category: BlogCategory): string {
+function getCategoryHeroImage(category: BlogCategory): string {
   const images: Record<BlogCategory, string> = {
     COMPOUND: '/images/blog/compound-interest-72-rule.svg',
     MACRO: '/images/blog/macro-global-forex-pulse.svg',
@@ -53,7 +53,7 @@ export async function GET(_req: Request) {
   );
 }
 
-export function generateDeepLongformContent(prompt: string, category: BlogCategory, country: BlogCountry): { title: string; excerpt: string; content: string; tags: string[]; heroImage: string } {
+function generateDeepLongformContent(prompt: string, category: BlogCategory, country: BlogCountry): { title: string; excerpt: string; content: string; tags: string[]; heroImage: string } {
   const targetTopic = prompt || '2026 글로벌 거시경제 펄스와 디파이 복리 자산 배분 전략';
   const heroImage = getCategoryHeroImage(category);
   
