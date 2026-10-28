@@ -293,11 +293,11 @@ export interface AdminStockDynamics {
   readonly symbol: string;
   readonly name: string;
   readonly current_price: string;
-  readonly fair_value: string | null;
+  readonly fair_value: string;
   /** Basis points a day, as numerics cross the wire: strings, read and never summed. */
-  readonly trend_bps: string | null;
-  readonly vol_bps: string | null;
-  readonly market_trend_bps: string | null;
+  readonly trend_bps: string;
+  readonly vol_bps: string;
+  readonly market_trend_bps: string;
   readonly live_events: number;
 }
 

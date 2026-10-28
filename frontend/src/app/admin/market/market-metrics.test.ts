@@ -24,7 +24,7 @@ describe('verified administrator market dynamics', () => {
   it('does not invent zero volatility when the SQL LEFT JOIN has no dynamics row', () => {
     expect(formatMarketVolatility(null)).toBe('—');
     expect(formatStockTrend(null)).toBe('—');
-    expect(hasUnverifiedMarketEvidence({ ...stock, vol_bps: null })).toBe(true);
+    expect(hasUnverifiedMarketEvidence({ ...stock, vol_bps: null } as unknown as AdminStockDynamics)).toBe(true);
   });
 
   it('rejects malformed, nonfinite, or negative volatility instead of NaN and fake zero', () => {
@@ -55,8 +55,8 @@ describe('verified administrator market dynamics', () => {
 
   it('flags absent/contradictory evidence without hiding valid rows', () => {
     expect(hasUnverifiedMarketEvidence(stock)).toBe(false);
-    expect(hasUnverifiedMarketEvidence({ ...stock, fair_value: null })).toBe(true);
-    expect(hasUnverifiedMarketEvidence({ ...stock, market_trend_bps: null })).toBe(true);
+    expect(hasUnverifiedMarketEvidence({ ...stock, fair_value: null } as unknown as AdminStockDynamics)).toBe(true);
+    expect(hasUnverifiedMarketEvidence({ ...stock, market_trend_bps: null } as unknown as AdminStockDynamics)).toBe(true);
     expect(hasUnverifiedMarketEvidence({ ...stock, live_events: -1 })).toBe(true);
   });
 });

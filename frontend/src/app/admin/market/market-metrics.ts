@@ -30,7 +30,7 @@ export function stockTrendDirection(value: unknown): 'up' | 'down' | null {
 }
 
 /** A single row cannot establish the market-wide regime when other rows disagree. */
-export function formatMarketTrend(rows: readonly Pick<AdminStockDynamics, 'market_trend_bps'>[] | null): string {
+export function formatMarketTrend(rows: readonly { readonly market_trend_bps: unknown }[] | null): string {
   if (!rows?.length) return '—';
   const first = basisPoints(rows[0]?.market_trend_bps);
   if (first === null || rows.some((row) => basisPoints(row.market_trend_bps) !== first)) return '—';
