@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1440 / F675-166 — 검증 가능한 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+- GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
 
 **회차·기준:** 이전 Feature Improvement v1438 → 현재 Feature Addition v1440 → 다음 Feature Improvement v1442(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1355 읽기 전용 증거, main에서 분리한 독립 브랜치. 기존 F675-165 용어 정정 제안(#1770/#1775)은 별도 미병합 기획이며 실제 운영 기능 또는 이번 기능의 기구현 의존성으로 취급하지 않는다. 이번 회차는 런타임·DB·WLD·Test·Production·기능 스위치를 변경하지 않는다.
 

@@ -1,4 +1,5 @@
 # v1440 — 시작·중간·완료 기획 작업일지
+- GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
 
 - 시작 04:02 KST: using-superpowers 커넥터 목록 없음; 설치 스킬 확인, Debian 13.6 서버·디스크·main 조사.
 - 중간 04:06 KST: main 불변, 실제 용어 화면·GitHub 중복 검색·QA v1355 확인, F675-166 범위 확정.

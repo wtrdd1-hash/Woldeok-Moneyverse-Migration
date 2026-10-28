@@ -1,4 +1,5 @@
 ## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
+- GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
 - 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.
 - 회원 직접 저장/취소 및 자발적 읽음/취소, 비공개 /account/learning/glossary, 실제 배포 slug·개정 검증, 원본 영수증·본인 API·Android 동등성·CAS·100개 제한·409/503·삭제 용어 묘비·SEO/접근성/개인정보/롤백 설계. 읽음은 숙달·보상·WLD 증거가 아니다. [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); 영문 정본·국문 상세는 통합 기획 참조.
 - P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: 루트/데이터 ~98%, 18명 18,000 WLD 차이, 앱 쓰기 가능 239개 테이블, PUBLIC 은행 실행 3개, 체크섬 불일치 5/미적용 20, 외부 복원·공식 Test 정확 SHA 미검증. 운영승격 보류.

@@ -1,4 +1,5 @@
 # v1440 — Start/Mid/End planning worklog
+- GitHub handoff: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [development issue #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). Unmerged / release hold.
 
 - START 04:02 KST: using-superpowers connector empty; installed skill read; Debian 13.6 miniPC health, disk and main inspected.
 - MID 04:06 KST: main unchanged; actual glossary pages, GitHub duplicate searches, QA v1355 checked; F675-166 scope chosen.

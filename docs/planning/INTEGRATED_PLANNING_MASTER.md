@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1440 / F675-166 — Verified private glossary study list (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- GitHub handoff: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [development issue #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). Unmerged / release hold.
 
 **Cycle and authority.** Previous Feature Improvement v1438 → Current Feature Addition v1440 → Next Feature Improvement v1442 (provisional). Fresh remote main 35971c600f25869c96f1c666d4b9f58927202730 at start and midpoint; QA v1355 read-only evidence; independent branch from main. Earlier F675-165 glossary correction feedback is a distinct, unmerged proposal (#1770/#1775), not a deployed dependency. This design changes no runtime, DB, WLD, Test, Production, or feature switch.
 
