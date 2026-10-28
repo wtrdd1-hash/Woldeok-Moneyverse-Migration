@@ -9,7 +9,7 @@ CREATE TABLE public.member_photo_withdrawals (
   actor uuid NOT NULL,
   photo_id uuid NOT NULL UNIQUE,
   request_hash bytea NOT NULL,
-  storage_key_digest bytea NOT NULL,
+  storage_key_digest bytea NOT NULL UNIQUE,
   submitted_at timestamptz NOT NULL,
   withdrawn_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp()
 );
@@ -37,6 +37,7 @@ DECLARE
   v_state text;
   v_published_at timestamptz;
   v_storage_key text;
+  v_key_before text;
   v_submitted_at timestamptz;
 BEGIN
   IF p_actor IS NULL OR p_photo_id IS NULL OR p_idempotency_key IS NULL THEN
@@ -64,11 +65,27 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Acquire the same storage-key lock as new submissions BEFORE the row
+  -- lock, preventing a concurrent reattachment of withdrawn private bytes.
+  SELECT p.storage_key INTO v_key_before
+  FROM public.photos AS p
+  WHERE p.id = p_photo_id AND p.uploaded_by = p_actor
+    AND p.content_state = 'draft' AND p.published_at IS NULL;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'photo is unavailable for withdrawal';
+  END IF;
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('moneyverse:member-photo-storage:' || v_key_before, 0)
+  );
+
   SELECT p.uploaded_by, p.content_state, p.published_at, p.storage_key, p.created_at
     INTO v_owner, v_state, v_published_at, v_storage_key, v_submitted_at
   FROM public.photos AS p WHERE p.id = p_photo_id FOR UPDATE;
   IF NOT FOUND THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'photo is unavailable for withdrawal';
+  END IF;
+  IF v_storage_key IS DISTINCT FROM v_key_before THEN
+    RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'photo changed during withdrawal';
   END IF;
   IF v_owner IS DISTINCT FROM p_actor THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'photo is unavailable for withdrawal';
@@ -166,6 +183,19 @@ BEGIN
   -- of control characters and length-checked rather than trusted.
   v_key := public.content_normalize_storage_key(p_storage_key);
   v_alt := public.content_normalize_plain_text(p_alt_text, 300, false);
+
+  -- An old storage key must never be attached to a fresh photo UUID after
+  -- withdrawal. This lock also serializes the check against the withdrawal
+  -- row deletion and tombstone insert in the other function.
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('moneyverse:member-photo-storage:' || v_key, 0)
+  );
+  IF EXISTS (
+    SELECT 1 FROM public.member_photo_withdrawals AS w
+    WHERE w.storage_key_digest = public.digest(v_key, 'sha256')
+  ) THEN
+    RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'withdrawn media cannot be resubmitted';
+  END IF;
 
   -- A second lock, on the member rather than on the key: the key lock
   -- serialises retries of one request and does nothing about two different

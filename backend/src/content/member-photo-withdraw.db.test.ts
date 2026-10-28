@@ -120,6 +120,12 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('owner photo withdrawal
         'SELECT public.member_submit_photo($1,$2,$3,$4)',
         [owner, photo, storageKey(), 'resubmit']);
       expect((reuseError as { code?: string }).code).toBe('55000');
+
+      // The private bytes must not be reattached under a fresh photo UUID.
+      const retiredMedia = await rejected(client,
+        'SELECT public.member_submit_photo($1,$2,$3,$4)',
+        [stranger, randomUUID(), key, 'reattach withdrawn bytes']);
+      expect((retiredMedia as { code?: string }).code).toBe('55000');
     });
   });
 

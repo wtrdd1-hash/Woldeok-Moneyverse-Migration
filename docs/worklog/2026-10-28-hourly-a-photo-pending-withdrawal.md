@@ -20,3 +20,9 @@
 - Exact current migration source replay: 291 numbered SQL files through new migration 292 PASS in a dedicated PostgreSQL 17.11 container; 4 transactional SQL tests PASS, 3 Backend focused PASS and 29 Android gateway focused PASS. The first DB migration wrapper failed to connect as root; the wrapper was corrected and full migrations replayed twice; all failure evidence retained.
 - Security review: foreign and missing photo IDs return indistinguishable 409 errors. Owner-only row locks and post-withdraw denial verified. No physical media deletion or daily submission quota refund. Existing 098 and other applied migrations unchanged.
 - Official Test exact-SHA authenticated E2E, full live-schema ACL, independent backup restore and GitOps release gate remain BLOCKED. Draft PR only, no main merge or Test/Production deployment, no DB/ledger mutation on shared services, no branch deletion.
+
+## Security review repair — 2026-10-28 18:47 KST
+- TDD RED exposed a previously unhandled storage-key reuse: after deleting a withdrawn draft row, a second member could submit its former private storage key under a fresh photo UUID. This would defeat media withdrawal if an operator later published it.
+- Repair in the **same new migration 292 only**: retire the SHA-256 storage-key digest uniquely; acquire the same storage-key advisory lock in submission and withdrawal before any row delete/insert; recheck owner/pending state under the row lock. A foreign or missing photo is indistinguishable to callers.
+- TDD GREEN: fresh isolated PostgreSQL 17.11 replay of all 291 numbered migrations through 292 PASS; real SQL 4 tests PASS, including retired-key reattachment rejection. No existing applied migration, live database, media bytes or other worker state changed.
+- First candidate SHA 4837c5d0 is superseded by the repair commit. All final CI evidence must refer to the newer SHA.
