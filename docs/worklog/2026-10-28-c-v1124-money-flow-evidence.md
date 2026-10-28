@@ -5,16 +5,17 @@
 - Isolated branch: auto/hourly-c-money-flow-evidence-v1124-20261028-1445.
 - Reviewed AGENTS.md, README.md, README/README.ko.md, docs/planning/PROJECT_PLAN.md and .ko.md, active PRs #1691/#1697/#1695, QA #1687, and latest A/B work.
 - Confirmed Debian 13.6, seven services active, PostgreSQL connected. Production database must not be modified.
-- Evidence from main: /admin/money-flow silently treats API failure as zero activity, invents 831 transactions and 13 users, claims 100% ledger reconciliation without a reconciliation receipt, and converts exact WLD amounts with Number(). Backend endpoint exists at /api/v1/admin/treasury/user-money-flows with summary and keyset cursor.
+- Correction after inspecting **fetched origin/main worktree** (not the stale integration checkout): those false statistics and rounding problems were already fixed. The remaining P1 is that frontend `validateMoneyFlowResponse()` treats the backend `mf1.<base64url>` keyset cursor as an ISO timestamp. Thus real 50+ posting pages fail closed and no next-page link is available. The NestJS cursor contract is in `backend/src/admin/treasury/treasury-moneyflow-cursor.ts`.
 - Scope: one P1 read-only frontend/backend contract integration; no new DB writes or migrations.
 
 ## Plan / TDD
-1. RED: test invalid/failed backend response, exact WLD values >2^53, verified summary and pagination, admin gate.
-2. GREEN: validate complete server response and fail closed; use canonical money formatter, real counts and honest reconciliation disclosure.
+1. RED: test real backend `mf1` cursor and SSR next-page link, malformed/legacy cursors, admin gate.
+2. GREEN: accept bounded versioned opaque keyset cursor while keeping backend-owned fingerprint and posting checks; preserve existing financial evidence guards and exact WLD rendering.
 3. Run focused, full and isolated PostgreSQL gates on exact SHA; re-fetch main before merge; hold PR if any required gate fails.
 
 ## In progress
-- Worktree created; tests and implementation pending.
+- TDD RED reproduced: 3 failures / 5 passes on the real `mf1` cursor and server-side next-page link; existing main already has financial evidence and WLD formatting.
+- Minimal contract fix in `money-flow-data.ts`: bounded `mf1` base64url envelope; server retains authoritative cursor content validation.
 
 ## Finished
 - Pending exact-SHA verification and release decision.
