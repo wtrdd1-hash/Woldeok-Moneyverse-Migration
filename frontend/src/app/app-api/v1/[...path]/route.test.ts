@@ -310,7 +310,7 @@ describe('Android chat bigint cursor and private cache boundary', () => {
 describe('Android verified notification privacy', () => {
   it.each([200, 401, 403, 500])('never publicly caches notification response %s', async (status) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const spy = vi.fn(async () => new Response(JSON.stringify({ notifications: [] }), {
+    const spy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ notifications: [] }), {
       status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
     }));
     vi.stubGlobal('fetch', spy);
