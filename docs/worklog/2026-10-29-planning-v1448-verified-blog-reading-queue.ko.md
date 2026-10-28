@@ -15,4 +15,4 @@
 
 독립 검토된 게시 글만 회원이 직접 저장/읽음 표시한다. 자동 읽음·가짜 집계·WLD·원장 변경 금지. 합성 10,001건, 동시 100건, 위조 100건 시험은 명세만 작성했고 실행하지 않았다. 외부 독립 검증 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 
-GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800. 기획 Draft PR: PENDING. 런타임/DB/금융/Test/Production 변경 없음.
+GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800. 기획 Draft PR: #1801 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801). 런타임/DB/금융/Test/Production 변경 없음.

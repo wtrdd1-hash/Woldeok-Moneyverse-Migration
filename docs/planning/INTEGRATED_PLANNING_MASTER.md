@@ -2,6 +2,8 @@
 
 ## v1448 / F675-168 — Verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
+**Development handoff:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
+
 **Authority and cycle.** Previous Feature Improvement v1446 → Current Feature Addition v1448 → Next Feature Improvement v1450 (provisional). Read main f05efcb5d7c21d9553f68df227f9771217a30671 at start; mid-run main advanced to 8ba355374a2553926f67140febbf85c114f00ba1 (implementation_plan.md only; planning authority unchanged); QA v1359 FAILED/HOLD. This is a proposal, not a deployed feature. Development handoff: GitHub issue #1800. No separate planning specification file is authorized.
 
 ### Source-backed gap and non-duplication

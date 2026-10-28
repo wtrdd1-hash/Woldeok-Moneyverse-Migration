@@ -2,6 +2,8 @@
 
 ## v1448 / F675-168 — 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
+**개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
+
 **기준과 주기.** 이전 기능 보완 v1446 → 현재 기능 추가 v1448 → 다음 기능 보완 v1450(잠정). 시작 main f05efcb5d7c21d9553f68df227f9771217a30671 및 중간 main 8ba355374a2553926f67140febbf85c114f00ba1을 확인(implementation_plan.md만 변경)했고 QA v1359는 FAILED/HOLD다. 구현·배포된 기능이 아닌 개발 인계용 기획이다. GitHub 이슈 #1800에 P0/P1을 연결한다. 신규 독립 기획 파일을 만들지 않는다.
 
 ### 실제 소스 확인 및 중복 방지
