@@ -1,11 +1,7 @@
-## v1412 — 본인 검증형 실제 알림함 F675-159 (Feature Addition / DRAFT / RELEASE HOLD)
-- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 확인, 이슈 #1693, QA v1341 후보 미완료. 최신 main 기반 독립 문서 브랜치.
-- 현재 /account/notifications는 +1,840 WLD 이자·20 WLD 소각 등을 포함한 하드코딩 6건과 로컬 읽음 상태를 표시한다. NestJS 알림 API·Next BFF·개발 DB 객체는 있으나 개발 DB 실수량 0건, BFF 분류/offset 미전달, 동일 시각 정렬 미보장, 앱 계정 직접 SELECT/UPDATE, 추적 마이그레이션 DDL 출처 미확인.
-- 실제 본인 알림 6분류·서버 미읽음·읽음 영수증·이전 알림·재시도·KO/EN·모바일/a11y·noindex/no-store·안전 링크·Android 동등성·SECDEF/최소권한을 명세했다. 가짜 금융 수치·WLD 보상은 금지. 영문 정본·한국어 통합 기획 참조.
-- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. 격리 PG 10,001/100/100은 명세만, 미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED, 공식 Test 정확 SHA·독립 복원 미검증, 운영 HOLD.
-- 백로그 ID: ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
-
-**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
+## v1414 — F675-159 알림함 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1412 → 현재 기능 보완 v1414 → 다음 기능 추가 v1416(잠정). main `9ff388ab608af99b9ccc806c35ebac5c14bd15e9`; 개발 A 미병합 PR #1698, QA v1342는 이전 main 대상. 별도 기획 브랜치, 런타임 변경 없음.
+- 후보 코드 문제: offset 5000 이후 알림이 있어도 종료, 동시 삽입 시 OFFSET 중복·누락, 현재 분류가 비면 전체 읽음 버튼 비활성·활성 시 모든 분류에 적용, 서버 전체 미읽음 미표시, 계정 변경 응답 격리 미흡, 읽음 영수증의 별도 SQL 관측값. DB 직접 권한·알림 DDL 출처 미확인도 P0.
+- P0 ENV1414-01 SEC1414-02 REL1414-03 NTF1414-04; P1 NTF1414-05 NTF1414-06 NTF1414-07 NTF1414-08 NTF1414-09 NTF1414-10. 화면/API/DB/권한/SEO/Android·격리 합성 10,001/100/100·롤백은 통합 마스터 영문/국문 참조. 테스트 미실행, 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED. 운영 SHA 불명, 공식 Test·독립 복원 미검증, 디스크 91%, RELEASE HOLD.
 
 # 월덕 머니버스 — Living Project Plan
 

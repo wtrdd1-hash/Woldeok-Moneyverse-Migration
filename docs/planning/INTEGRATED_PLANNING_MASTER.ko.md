@@ -1,40 +1,46 @@
-## v1412 / F675-159 — 가상 금융 알림을 제거한 본인 검증형 알림함 (Feature Addition / DRAFT / RELEASE HOLD) — 이슈 #1693
+## v1414 / F675-159 — 검증된 알림함 페이지·읽음 영수증·계정 격리 보완 (기능 보완 / 초안 / 운영 보류)
 
-**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
+**회차·정본.** 이전 기능 추가 v1412 → 현재 기능 보완 v1414 → 다음 기능 추가 v1416(잠정). 2026-10-28 15:03~15:10 KST에 최신 main `9ff388ab608af99b9ccc806c35ebac5c14bd15e9`, AGENTS.md, README.md, 영문 정본/한국어 프로젝트 계획, 실제 Next/NestJS/DB/Android 경로, 열린 PR, QA v1342를 읽기 전용 조사했다. 선행 기획 PR #1694와 개발 A의 PR #1698(헤드 `dde62fa...`)은 모두 미병합이다. 이번 별도 main 기반 기획 브랜치는 개발 브랜치와 런타임을 수정하지 않는다.
 
-**기준·회차.** Previous Feature Improvement v1410 → Current Feature Addition v1412 → Next Feature Improvement v1414(잠정). 2026-10-28 14:04~14:10 KST에 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md와 한국어 대조본, 열린 PR 및 QA v1341을 확인했다. 최신 main에서 분리된 문서 전용 Draft이며 A/B/C/QA 코드와 충돌시키지 않는다. 운영·금융 데이터 변경 없음.
+**목적·대상·진입.** 로그인·동의 완료 회원이 `/account/notifications`에서 서버에 실제 저장된 본인 알림만 보고, 정확한 미읽음 수와 서버가 확인한 읽음 처리를 이용하도록 한다. 현재 main의 여섯 예시에는 근거 없는 +1,840 WLD 이자와 20 WLD 소각 문구가 있으며 읽음 처리는 로컬 상태다. 개발 A의 미병합 후보는 이를 실제 알림으로 교체하지만 배포·승인된 기능이 아니다. 알림을 금융 원장 정산으로 오인시키지 말고 보상 일괄 수령(409)은 비활성 상태로 유지하며 별도 알림 수신 설정을 보존한다. 실제 데이터 0건은 정직한 빈 화면으로 표시한다.
 
-**목적·대상·진입점·확인된 문제.** 로그인·동의한 회원의 /account/notifications는 서버에 실제 저장된 알림과 읽음 상태만 표시해야 한다. 현재 frontend/src/app/account/notifications/notification-tabs-bar.tsx는 INITIAL_NOTIFICATIONS 6건을 하드코딩하며 +1,840 WLD 이자 및 20 WLD 소각 정산 등 실제 원장 증빙이 없는 예시 문구를 포함한다. 클릭·모두 읽음은 React 로컬 상태만 바꿔 DB 반영 없이 성공처럼 보일 수 있다. 기존 목표·NPC 알림 수신 설정 폼은 실서버 기능이므로 보존한다. 이 사실은 코드에서 확인된 사용자 신뢰 문제이며 운영 사고 발생의 증거는 아니다. 개발 DB의 in_app_notifications는 현재 0건이므로 정직한 빈 상태가 필요하다.
+**실제 후보 코드에서 확인한 보완 필요 사항.** ① 후보 UI는 `limit=21`, `offset=0,20,...`을 사용하지만 백엔드는 offset 5000까지만 허용한다. `nextOffset+20<=5000` 조건이 거짓이면 뒤에 기록이 있어도 `hasMore=false`가 되어 10,001건 전체 조회 수용 기준에 못 미친다. 동시 INSERT/DELETE가 OFFSET 앞쪽에 발생하면 중복·누락도 생긴다. ② 현재 분류 탭에 알림이 0개면 다른 분류에 미읽음이 있어도 모두 읽음 버튼이 비활성화된다. 반대로 버튼이 활성화되면 분류 내 읽음이 아닌 **전체 분류** 읽음 API를 호출한다. ③ 전체 미읽음 수를 서버에서 별도로 가져와 표시하지 않는다. ④ 요청 세대 번호는 분류 변경/새로고침에만 연결되며 계정 변경/로그아웃의 인증 세대와 명시적으로 결합하지 않는다. ⑤ main의 `markAllReadWithReceipt`는 UPDATE와 잔여 미읽음 조회를 별도 SQL 문장으로 실행한다. 후자는 나중에 관측한 값이지 하나의 원자적 스냅샷이 아니다. ⑥ 알림 테이블 직접 SELECT/UPDATE 권한 및 추적 불가한 DDL 출처가 남아 있다. HTTP가 세션에서 사용자 UUID를 추출하더라도 SQL 호출자가 임의 UUID를 전달할 수 있는 권한 경계는 별도 검증해야 한다. 이는 코드상 위험이며 실제 개인정보 유출·금전 손실 증거는 아니다.
 
-**기존 기능 재사용·중복 방지.** NestJS에는 GET /api/v1/notifications, GET /unread-count, POST /:id/read, POST /read-all-receipt 및 409로 차단된 POST /claim-all이 이미 있다. Next.js app/api/notifications/route.ts도 인증된 GET/POST BFF와 no-store를 제공한다. 알림함·미읽음 집계·보상 수령을 중복 생성하지 않는다. 현재 BFF GET은 limit·unreadOnly만 전달하고 offset·category는 전달하지 않는다. DB 조회는 사용자 조건과 created_at DESC만 사용하여 동일 시각 순서가 결정적이지 않다. F675-152 보안 알림, F675-153 잔액 경보, F675-157 문의 답변은 독립 생산 기능으로 유지하고 실제 저장된 레코드만 표시한다. 알림을 금융 원장 정산 증거로 취급하지 않는다.
+**화면·CTA·상태.** 전체/실제 저장된 열 가지 분류 필터, 이전 알림 더 보기, 다시 시도, 개별 읽음, 필터 초기화, **전체 분류 모두 읽음**을 제공한다. 전체 읽음은 대상 범위를 명확히 고지·확인하고, 현재 분류가 비어 있어도 서버 전체 미읽음이 1개 이상이면 실행 가능해야 한다. 분류 한정 모두 읽음은 별도 API/DB 함수 없이는 제공하지 않는다. 로딩·빈 상태·오프라인·401·동의 403·429·만료 커서·계정 전환·DB 장애·기존 offset 5000 한도 초과를 구분한다. 성공 영수증은 `updatedCount`와 **작업 후 관측** `remainingUnreadCount`를 구분해 표시한다. 목록 조회만으로 읽음 처리하거나 검증되지 않은 외부 링크로 이동하지 않는다.
 
-**화면·CTA·상태.** /account/notifications → 전체/사업/은행/시즌/공간/보안/시스템 탭 → 검증된 분류·제목·평문 본문·생성 시각·읽음 상태를 표시한다. CTA는 내부 링크 열기(허용된 상대 경로만), 읽음 처리, 모두 읽음, 이전 알림 더 보기, 재시도, 필터 초기화다. 기존 목표 알림 받기/중단 폼은 보존한다. 로딩·0건·오프라인·로그아웃·동의 미완료·잘못된 분류·만료 커서·429·세션 변경·DB 장애·쓰기 실패를 명시한다. 서버 영수증 확인 전 읽음 성공을 확정하지 않고 낙관적 UI 실패 시 원복한다. 미읽음 배지는 서버 집계만 사용한다. 목록 조회 자체로 읽음 처리하지 않는다. 모두 읽음은 변경 건수와 남은 미읽음을 구분하고 동시성 한계를 표시한다.
+**API·DB·트랜잭션.** 기존 `GET /api/v1/notifications`, `/unread-count`, `POST /:id/read`, `/read-all-receipt`, Next `/api/notifications`, Android app-api를 재사용한다. `created_at DESC,id DESC`의 LIMIT+1 Keyset과 회원·세션·분류·페이지 크기 결합 불투명 커서(서버 보관 임의 토큰 또는 AEAD)를 단계적으로 추가한다. 단순 HMAC+base64는 내부 사용자 식별자를 숨기지 못한다. `items,nextCursor,hasMore,unreadCount,observedAt` 계약과 기존 `{notifications:[]}` 호환 어댑터를 명시하고, legacy offset은 명확한 한도 상태를 반환해야 한다. 400/401/403/404/409/410/429/503의 웹·Android 오류 동등성, 성공·실패 전체 private/no-store·noindex·no-referrer, POST CSRF·세션·호출 제한을 검증한다. DB는 DDL/함수 출처·체크섬부터 확인하고, search_path 고정 SECURITY DEFINER 소유자 함수와 PUBLIC REVOKE·최소 EXECUTE를 전진 마이그레이션으로 적용한다. 앱 직접 테이블 권한은 실DB 회귀 통과 후 제거하며, 임의 `p_actor` 위조·직접 SQL 거부를 반드시 시험한다. 소유자 FK·UUID·분류 CHECK·중복키·읽음 시각 정합성·보존 정책을 명시한다. 인덱스는 `(user_id,category,created_at DESC,id DESC)` 등을 합성 10,001건 EXPLAIN으로 검증한 뒤 결정한다. 읽음 전체 처리의 동시 삽입·컷오프·원자성 또는 관측성 표시를 구체화하고 금융 원장은 수정하지 않는다.
 
-**API·권한.** 기존 호환성을 유지하면서 GET /api/v1/notifications?category=BUSINESS|BANK|SEASON|SPACE|SECURITY|SYSTEM&unreadOnly=true|false&limit=1..50&cursor=opaque를 추가 명세한다. 기존 offset 소비자는 전환 전까지 보존한다. 응답은 items[{id,category,title,body,link,isRead,readAt,createdAt}], nextCursor,hasMore,unreadCount,observedAt이며 실제 DTO의 표기법을 통일한다. 400 잘못된 분류, 401 인증 없음, 403 동의·권한 없음, 404 타인/없는 알림, 409 세션·필터 충돌, 410 커서 만료, 429 제한, 503 의존성 장애. GET은 CSRF 불필요, POST 읽음은 기존 CSRF·세션 가드를 유지한다. Next BFF는 허용된 필터·커서만 전달하고 모든 응답에 private/no-store를 적용한다. 503을 빈 목록 성공으로 바꾸지 않는다. Android App API도 인증·DTO·오류·캐시·내부 링크를 동일하게 맞추되 기존 어댑터를 조사한 뒤 연계한다. 사용자 UUID는 서버 세션에서만 확정한다.
+**관리자·보안·SEO·모바일·KPI.** 관리자는 집계 수치만 접근하며 소수집단 k<20 억제·감사 로그를 적용하고 개인 알림 본문 및 임의 읽음 조작을 허용하지 않는다. 악성 javascript/data/외부 링크를 차단하고 민감한 제목·본문·회원 ID·전체 커서·CSRF 토큰을 로그/분석에 남기지 않는다. 회원 화면은 색인·사이트맵 제외. 한국어/영어, 320/390/768px, 44px 터치, 키보드, 스크린리더 aria-pressed 및 상태 공지, reduced motion을 수용한다. KPI는 본인 조회 성공률·읽음 영수증 정확성·페이지 중복/누락률·p95·실패/롤백률을 민감정보 없이 집계하되 측정 완료를 주장하지 않는다.
 
-**DB·제약·인덱스·트랜잭션.** 개발 DB 읽기 검사에서 public.in_app_notifications 테이블 0건, notification_unread_count(uuid)·notification_mark_read(uuid,uuid) 존재, moneyverse_app의 테이블 SELECT·UPDATE 권한이 확인되었다. 반면 최신 main의 packages/database 추적 SQL에서는 in_app_notifications DDL을 찾지 못했다. 스키마 출처와 마이그레이션·체크섬 일치 여부를 먼저 규명하며 개발 DB 전용 객체를 이식 가능한 기준으로 가정하지 않는다. 전진 전용 SECURITY DEFINER 본인 범위 조회/읽음 함수, 고정 search_path, PUBLIC EXECUTE 회수, 최소 EXECUTE 권한을 검토한다. 임의 p_actor 인자만으로 DB 본인 인증이 되지 않으므로 세션→DB 주체 결속을 위조시험으로 증명해야 한다. ID 유일성, 소유자 FK, 분류 CHECK, 중복 키의 범위 유일성(존재 시), read_at/is_read 일관성, 링크 제한, 보존 정책을 검증한다. 사용자·분류·미읽음 조건을 LIMIT+1 전에 적용하고 created_at DESC,id DESC의 결정적 Keyset 조회를 사용한다. HTTP 요청 간 영구 스냅샷을 주장하지 않는다. 10,001건 EXPLAIN (ANALYZE, BUFFERS) 확인 후에만 (user_id,category,is_read,created_at DESC,id DESC) 등 인덱스를 결정한다. 기존 markAllReadWithReceipt는 UPDATE와 COUNT가 별도 SQL이므로 단일 트랜잭션 영수증 함수 또는 '처리 후 관측값' 표시가 필요하다. WLD·원장은 변경하지 않으며 claim-all은 계속 차단한다.
+**수용시험·배포.** 격리 PostgreSQL 10,001건(동일 시각 포함), 5,020건 초과, 페이지 사이 삽입/삭제, 서로 다른 두 회원, 위조 100건, 동시 조회/읽음/삽입 100건, 비어 있는 분류+다른 분류 미읽음, 분류별/전체 읽음 구분, 로그아웃/재로그인, 악성 링크·XSS, 429/503 캐시, Android 동등성, ACL 거부, 복원/롤백을 명세했다. **실행하지 않았다.** QA v1342는 과거 main `a28bed9...` 기준이므로 현 main 합격 근거가 아니다. 데이터 볼륨 91%, Production `/api/version=unknown`, Test SHA `4688e84...`, 공식 Test 정확 SHA 로그인·금융 E2E와 독립 복원 미검증. PR #1700·#1701은 별도 릴리스/금융 후보로 범위 분리. 기능 기본 OFF, QA·승인 GitOps 전 운영승격 보류. 외부 독립 근거 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 → BLOCKED / IN PROGRESS.
 
-**관리자·보안·악용 방지.** 제목·본문은 이스케이프하고 javascript:/data:/외부 URL 및 변조된 내부 경로를 거부한다. 본문·사용자 UUID·커서 값을 로그/분석/리퍼러/캐시에 남기지 않는다. 본인 조회·세션 결속·회원/IP 호출 제한·커서 TTL·POST CSRF·멱등성·계정 전환 시 이전 응답 차단을 요구한다. 권한 오류를 직접 테이블 GRANT로 해결하지 않는다. 관리자는 k<20 소규모 집계 억제를 적용한 발송·읽음·실패 합계만 확인하며 회원 메시지 본문 조회나 임의 읽음 처리는 허용하지 않는다. 금융 금액은 실제 원천 영수증이 없으면 확정 정보처럼 표시하지 않고 대기/정산을 구분한다.
+**개발 백로그 및 담당.**
+- **P0 ENV1414-01 (운영/QA):** Nginx→프로세스→manifest SHA·91% 디스크 여유·암호화 백업 독립 복원 증거 확보.
+- **P0 SEC1414-02 (B/QA):** 알림 DDL 출처·과거 체크섬 불일치·앱 직접 권한·위조 사용자·PUBLIC EXECUTE 차단 검증.
+- **P0 REL1414-03 (QA/운영):** 열린 PR 보존, 전체 CI, 공식 Test 정확 SHA, 인증 금융/Android E2E, 서명된 롤백·승격 승인.
+- **P0 NTF1414-04 (A/B/C):** 페이지 허위 완료, 분류별 모두 읽음 혼동, 서버 미읽음 수, 계정 변경 지연 응답 노출 방지.
+- **P1 NTF1414-05 (B):** 본인 Keyset·LIMIT+1·인덱스·10,001건 순회·커서 기밀성.
+- **P1 NTF1414-06 (B):** 원자적 또는 관측성 명시된 읽음 영수증·동시성·멱등성·전체 미읽음 근거.
+- **P1 NTF1414-07 (A):** NestJS/Next/Android 버전 계약·legacy offset 호환·오류/캐시 동등성.
+- **P1 NTF1414-08 (C):** 전체 분류 읽음 안내·빈 분류 버튼·한국어/영어·모바일/a11y·계정 격리.
+- **P1 NTF1414-09 (C/QA):** 안전한 내부 링크·관리자 집계·개인정보/SEO·KPI.
+- **P1 NTF1414-10 (QA):** 격리 PG 10,001/100/100·동일 시각·동시성·ACL·복원·롤백 검증.
 
-**SEO·모바일·접근성·분석.** 회원 화면·BFF는 noindex,nofollow, private/no-store, Referrer-Policy no-referrer, 개인 데이터 사이트맵/구조화 데이터 금지다. KO/EN 동등 문구, 320/390/768px, 버튼/탭 시맨틱, 키보드·포커스, aria-selected, 오류 상태 음성 안내, 움직임 줄이기, 44px 터치 영역을 검증한다. KPI는 실측 조회 성공률, 서버 읽음 성공률, 오류율, 미읽음 정확도, p95 응답 시간이며 원문/ID는 분석하지 않는다. 실측 전 KPI 달성을 주장하지 않는다.
-
-**수용·배포.** 격리 PostgreSQL 합성 10,001건, 동시 읽기·읽음·삽입 100건, 사용자/세션 위조 100건, 6개 분류, 동일 시각 정렬, 201번째 조회, XSS/악성 링크, 0건 상태, 로그아웃, claim-all 차단, 모두 읽음 경합, 401/403/429/503 no-store, Android·모바일 회귀를 요구한다. **이번 회차는 테스트 명세만 작성했으며 실행하지 않았다.** 기능 기본 OFF, 별도 브랜치 TDD, lint/typecheck/build/보안/DB 회귀, 공식 Test 정확 SHA와 인증 웹·Android E2E, 암호화 백업 독립 복원, Nginx→프로세스→systemd→manifest SHA 대조, 무중단 전환 및 승인된 롤백을 거쳐야 한다. QA v1341 후보 CI는 공식 Test·Production 승인 증거가 아니며 데이터 볼륨 사용률 89%, 운영 정확 SHA 미확인으로 RELEASE HOLD다. 신규 승인 외부 독립 근거 0건, 누적 중복 제거 승인 UNKNOWN/10,000건으로 BLOCKED / IN PROGRESS 유지.
-
-**P0/P1 개발 백로그·담당.**
-- P0 ENV1412-01 (Ops/QA): 릴리스 경로·정확 SHA·저장 공간·암호화 백업 독립 복원.
-- P0 SEC1412-02 (B/QA): DB 스키마 출처·마이그레이션·앱 직접 SELECT/UPDATE·사용자 위조·PUBLIC 권한.
-- P0 REL1412-03 (QA/Ops): 미병합 PR 보존·전체 게이트·공식 Test 정확 SHA·승인 운영승격.
-- P0 NTF1412-04 (A/B/C): 허구 알림 6건과 가짜 읽음 성공 제거, 본인·링크·세션 차단.
-- P1 NTF1412-05 (B): SECDEF 조회·분류별 결정적 커서·ACL·인덱스 검증.
-- P1 NTF1412-06 (B): 원자적 또는 정확히 설명된 모두 읽음 영수증·경합·멱등성.
-- P1 NTF1412-07 (A): NestJS·Next BFF·Android DTO/오류/캐시 정합성.
-- P1 NTF1412-08 (C): 실시간 KO/EN 회원 UI·미읽음·모바일·접근성·계정 전환.
-- P1 NTF1412-09 (C/QA): 개인정보·SEO·관리자 집계·안전 KPI.
-- P1 NTF1412-10 (QA): 격리 PG 10,001/100/100·전체 회귀·복원·롤백 증거.
-
-**백로그 ID:** ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
+**백로그 식별자:** ENV1414-01 SEC1414-02 REL1414-03 NTF1414-04 NTF1414-05 NTF1414-06 NTF1414-07 NTF1414-08 NTF1414-09 NTF1414-10.
 
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.28.1416 — 블로그 메인 통합·국고배당 18,000 WLD 원인 확인
+- PR #1695 메인 2f2169a99698fdcf3a03867f532caca3ff599d77 병합(CI #3971, 기존 Test 통과). USER_CASH 18개 계정 각각 +1,000 WLD 차이는 국고 시민배당 18명×1,000 WLD 감사 기록과 일치하고 마이그레이션 240이 잔액만 직접 갱신해 본원장 분개를 누락하는 것이 원인. 다만 분개 보정/권한 3건/운영 DB 268은 미해결. Test AI 실발행도 모델 125초 시간 초과로 0건. 운영 앱 전체 코드/2시간 자동발행 미승격. docs/worklog/2026-10-28-blog-main-finance-v1416.ko.md 상세 참조.
+
+## v2026.10.28.1415.8 — 운영 구형 블로그 내부 쓰기 경로 긴급 차단
+- 운영 Nginx의 구형 발행 API 차단 뒤에도 14:43 KST 내부 JSON 작성으로 무검증 한국어 글 2개 추가(공개 11→13건) 확인. 기존 글 자동 비공개 금지 지침 유지. 공유 blog-posts.json을 0600 비공개 백업·SHA-256 검증 후 immutable 설정, debian 계정 쓰기 거부 테스트 통과. 구형 JSON 관리자 수정·비공개도 일시 제한되어 향후 검증형 DB 이관 시 통제된 해제 필요. 운영 전체 코드 승격은 금융/원장 게이트로 계속 보류. v1415.8 작업기록 참조.
+
+## v2026.10.28.1415.7 — 블로그 CI·정식 Test 성공, 운영 금융 차단
+- PR #1695 SHA 4688e84be0f831a3f6e5e16040b3764dff6d78bf: CI #3971 PASS, 공식 Test 정확 SHA 승격 및 DB 280~290 백업·적용, 4개국 블로그/모바일/noindex/E2E 통과. 운영 구형 무검증 발행기만 Nginx 503 차단, 기존 글·금융 DB 불변. **운영 전체 앱 승격 차단**: 3개 금융 테이블 과도 DML 및 계정 18건·18,000 WLD 원장 미확인. 운영 DB는 268, Test 검증형 자동 발행 실게시 0건. 상세 작업기록 docs/worklog/2026-10-28-blog-release-v1415.7.ko.md 참조.
+
+## v2026.10.28.1415 — 블로그 안전 발행 통합 (소스 QA 통과 / 운영 보류)
+- PR #1695 별도 브랜치에서 최신 main 구형 JSON 즉시게시 우회를 차단하고, 기존 국가별 검증형 DB/SSR/관리자 수정·삭제/공식출처 검색 구현을 통합. 백엔드 1,934·프론트 1,868·DB 45 테스트 및 Nest/Next 빌드 통과. 그러나 공식 Test 정확 SHA 미작동(test-current 부재), 운영 DB 블로그 288~290 테이블·함수 미반영으로 검증 API 500, 발행 플래그 미설정. **운영승격·운영글 변경·실제 새 자동 게시 성공은 아님**. 최신 v1405: KR/US/JP/CN 국가별 2시간 3주제 순환, 자동검증 GREEN 즉시발행, 사람 필수검토 없음, 시간 경과 자동 비공개 금지, 관리자 직접 조치만. 사이트맵 정정: /sitemap-blog.xml에는 게시 주소가 있고 인덱스와 연결됨. [내부 업데이트](../updates/v2026.10.28.1415-blog-integrated-internal.ko.md) / [작업기록](../worklog/2026-10-28-blog-integrated-v1415.ko.md).
 
 ## v2026.10.28.1412 — 원어 AI/DB 자동 블로그 구현 후보 (운영 미반영)
 - [국문 구현·검증기록](../worklog/2026-10-28-blog-verified-publisher-v1412.ko.md) / [EN](../worklog/2026-10-28-blog-verified-publisher-v1412.md). 기존 v1405 2시간 KST KR/US/JP/CN×경제/코딩/컴퓨터 시간창을 실제 원어 Ollama 작성기·공식 HTTPS 출처·언어/위험/중복 검사 및 DB 원자 게시영수증·관리자 수동 수정/비공개/삭제 함수에 연결. 공개 API/국가별 블로그/사이트맵은 영수증 보유 글만 표시, 기존 철회 199편 복원 금지, 자동 비공개 없음, 새 무검토 AI 글의 Google 광고 배너 OFF.
