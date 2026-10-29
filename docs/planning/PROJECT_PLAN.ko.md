@@ -1,5 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1492 — F675-179 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
+- 회차: 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1381 FAILED/P0. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 #1170.
+- 소스 공백: 기존 `/admin/api-health` 및 Nest `admin/api-health/status`는 CPU·메모리·DB 검사를 표시하지만 호스트 파일시스템·inode·롤백 여유 근거는 제공하지 않는다. Debian 13.6 2026-10-30 06:09 KST 실측: 루트 92%, 데이터 99%, 일반 사용자 가용 약 3.1GiB. 서비스 장애로 단정하거나 삭제를 승인하지 않는다.
+- 신규 `/admin/operations/storage`, `GET /api/v1/admin/operations/storage`: ROOT/DATA 고정 허용목록 호스트 statvfs 수집, 인증된 로컬 채널, 출처·마운트 네임스페이스 검증, 정확한 바이트·inode, `df` 호환 사용률, 120초 최신성. 80% 이상 주의, 90% 이상 위험, 95% 이상 또는 가용 <5GiB 긴급. 오래되거나 위조된 근거는 UNKNOWN으로 차단. CTA는 새로고침/근거 보기/#1170 열기뿐이며 삭제·재시작·배포 승인 없음.
+- 관리자 세션·동의·관리자 세션 가드, 관리자당 분당 6회·IP당 30회, 2초 제한, private/no-store/noindex, 한국어·영어 WCAG 2.2 AA/320px, 민감 경로 없는 집계 KPI·감사. v1 **DB 테이블·인덱스·권한·마이그레이션 추가 없음**. 향후 이력 테이블은 용량·체크섬 복구 후 별도 승인. 기능 OFF, 코드 롤백, WLD·금융 영향 없음. 전체 명세는 [한국어 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 **DISK1492-01 SEC1492-02 FIN1492-03 REL1492-04**: 소유권·백업·롤백 보존 안전 용량 복구, DB 체크섬 5건·ACL, MINT 18,000 WLD·국고 552건·SWF Test 진실성, Git 참조 462개·전체 CI·독립 복원·정확 SHA Test. P1 **STORAGE1492-05 STORAGE1492-06 STORAGE1492-07 STORAGE1492-08 STORAGE1492-09 STORAGE1492-10**: 수집기, 계산·최신성, 관리자 API, 화면·접근성, 개인정보·KPI·롤백, 격리 수용시험. 합성 10,001건, 위조 100건, 동시 100건, 오래됨 50건, 네임스페이스·임계값 30건 **기획만 하고 미실행**.
+- 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, 게이트 **BLOCKED / IN PROGRESS**. 문서 전용, 런타임·DB·원장·Test·Production 변경 없음. DRAFT / RELEASE HOLD.
+
+
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

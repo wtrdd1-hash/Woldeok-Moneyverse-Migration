@@ -1,6 +1,11 @@
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 
+## v2026.10.30.1492 — F675-179 Operator-only verified storage headroom (planning draft)
+- Added bilingual integrated specification for read-only host filesystem/inode headroom, authenticated source/freshness, strict admin API and no-delete UX. Observed Debian root 92%, data 99% (~3.1 GiB free) at 06:09 KST; no cleanup performed.
+- P0 DISK1492-01 SEC1492-02 FIN1492-03 REL1492-04; P1 STORAGE1492-05..10. QA v1381 FAILED/P0; exact-SHA Test and independent restore unverified. External evidence 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Draft/HOLD, feature OFF, no runtime/DB/WLD/Test/Production mutation. Issue #1948.
+
+
 ## v2026.10.29.1510 — Private Telegram operations alert bridge (Production active and paired)
 - Read-only service/QA/blog/backup/disk changes with private pairing, safe redaction, deduplicated dispatch and daily summary. No account events or monetary data are forwarded. Test/Production evidence pending. [Release](../releases/v2026.10.29.1510.md).
 
