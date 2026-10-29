@@ -12,16 +12,18 @@ describe('verified help repository', () => {
     expect(sql).not.toMatch(/FROM\s+public\.help_articles/i);
     expect(args).toEqual(['ko', 'account', '로그인', 20]);
   });
-  it('selects the authoritative published_at from the narrow SQL functions', async () => {
-    const query = vi.fn().mockResolvedValue({ rows: [] });
+  it('reads the exact approved edition and rendered content digest through a dedicated SECURITY DEFINER function', async () => {
+    const row = { article_id: 'a', published_revision_id: 'b', article_version: '9007199254740993', content_digest: 'c'.repeat(64) };
+    const query = vi.fn().mockResolvedValue({ rows: [row] });
     const repo = new HelpRepository({ query });
-    await repo.search('en', null, 'wallet', 20);
-    await repo.article('en', 'wallet-guide');
-    for (const [sql] of query.mock.calls as [string, unknown[]][]) {
-      expect(sql).toMatch(/published_at/);
-      expect(sql).toMatch(/public\.help_public_(search|article)\(/);
-      expect(sql).not.toMatch(/FROM\s+public\.help_article_revisions/i);
-    }
+    expect(await repo.article('ko', 'account-login')).toMatchObject(row);
+    const [sql, args] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toMatch(/public\.help_public_article_revision\(/);
+    expect(sql).toContain('published_revision_id::text');
+    expect(sql).toContain('article_version::text');
+    expect(sql).toContain('content_digest');
+    expect(sql).not.toMatch(/FROM\s+public\.help_articles/i);
+    expect(args).toEqual(['ko', 'account-login']);
   });
   it('looks up one public article by locale and slug only', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
