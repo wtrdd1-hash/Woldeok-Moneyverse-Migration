@@ -6,3 +6,4 @@
 - Planned steps: (1) RED regression tests, (2) fail-closed gate implementation, (3) focused and broad checks, (4) current-main recheck/PR/evidence. Other developers' PRs and branches are untouched.
 - Start: Debian 13.6 and core services active; DEV DB reachable; root repository checkout is dirty from other work and intentionally untouched. Main SHA and open PR/branch/CI inventory saved to `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0025/`.
 - Test: PENDING. Official exact-SHA Test auth E2E: BLOCKED until release gate. Production: HOLD. Rollback: revert gate-only commit; no schema/data migration.
+- RED checkpoint: four new regression groups added to `verify-host-runtime-identity.test.mjs`; they fail against the pre-fix gate, including the exact observed timestamp-only Production frontend ID and Test synthetic Treasury 200. Evidence: `red-tests.log`. Next: implement independent edge attestation without touching production.

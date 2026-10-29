@@ -21,6 +21,17 @@ function healthy() {
     frontendReleaseSha: sha,
     frontendBuildSha: sha,
     publicVersionSha: sha,
+    publicFrontendVersionSha: sha,
+    publicTreasury: {
+      status: 503,
+      cacheControl: 'private, no-store',
+      body: {
+        ok: false, status: 'UNVERIFIED',
+        code: 'PUBLIC_TREASURY_RECONCILIATION_PENDING',
+        overview: { verified: false, totalBalanceWld: '—' },
+        recentLedger: [],
+      },
+    },
     backendCwd: path.join(root, 'backend'),
     frontendCwd: path.join(root, 'frontend'),
   };
@@ -106,4 +117,43 @@ test('uses active service EnvironmentFiles and last-wins BUILD_ID but never dupl
   assert.equal(mergeServiceBuildIds(['PORT=3100', 'BUILD_ID=' + sha]), sha);
   assert.throws(() => mergeServiceBuildIds(['BUILD_ID=' + sha + '\nBUILD_ID=' + sha]));
   assert.throws(() => mergeServiceBuildIds(['PORT=3100']));
+});
+
+
+test('rejects a stale or timestamp-only public frontend even when backend identity agrees', () => {
+  for (const frontendSha of ['b'.repeat(40), '1793277134644', null]) {
+    const state = healthy();
+    state.publicFrontendVersionSha = frontendSha;
+    assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_frontend_sha_mismatch'));
+  }
+});
+
+test('rejects a synthetic public Treasury 200 even when all source identities agree', () => {
+  const state = healthy();
+  state.publicTreasury.status = 200;
+  state.publicTreasury.body = { ok: true, recentLedger: [{ id: 'disb-101' }] };
+  assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_treasury_not_fail_closed'));
+});
+
+test('rejects unverifiable Treasury payloads and missing privacy cache controls', () => {
+  for (const change of [
+    (s) => { s.publicTreasury.cacheControl = 'public, max-age=300'; },
+    (s) => { s.publicTreasury.body.recentLedger = [{ id: 'disb-101' }]; },
+    (s) => { s.publicTreasury.body.overview.totalBalanceWld = '60,000,000'; },
+    (s) => { s.publicTreasury.body.code = 'OK'; },
+    (s) => { s.publicTreasury = null; },
+  ]) {
+    const state = healthy();
+    change(state);
+    assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_treasury_not_fail_closed'));
+  }
+});
+
+test('production channel also requires independent frontend and Treasury evidence', () => {
+  const state = healthy();
+  state.channel = 'prod';
+  state.manifest.channel = 'prod';
+  assert.deepEqual(verifyHostRuntimeIdentity(state), { ok: true, failures: [] });
+  state.publicFrontendVersionSha = '1793277134644';
+  assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_frontend_sha_mismatch'));
 });
