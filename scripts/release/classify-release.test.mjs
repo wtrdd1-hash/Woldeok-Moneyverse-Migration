@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -163,4 +163,71 @@ test('merged branch cleanup batches PR evidence and uses local ancestry', async 
   assert.match(workflow, /pulls\?state=closed&base=main&per_page=100/);
   assert.doesNotMatch(workflow, /\bgit\s+push\b|--force-with-lease/);
   assert.match(workflow, /Read-only merged branch retention inventory/);
+});
+
+
+function withDocumentFixture(run) {
+  const repo = mkdtempSync(join(tmpdir(), 'moneyverse-doc-payload-'));
+  const git = (...args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
+  const commit = (message) => {
+    git('add', '-A');
+    git('-c', 'user.name=CI', '-c', 'user.email=ci@example.test', 'commit', '-q', '-m', message);
+    return git('rev-parse', 'HEAD');
+  };
+  try {
+    git('init', '-q');
+    mkdirSync(join(repo, 'docs'), { recursive: true });
+    writeFileSync(join(repo, 'docs', 'guide.md'), '# Safe guide\n');
+    const base = commit('base docs');
+    run({ repo, git, commit, base });
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+}
+
+test('executable and contract-like documentation paths fail closed', () => {
+  for (const path of [
+    'docs/embedded-script.sh',
+    'docs/embedded-script.mjs',
+    'docs/embedded-script.py',
+    'docs/mobile-api-contract.json',
+    'docs/unsafe.html',
+    'docs/guide.md\nbackend/src/unsafe.ts',
+  ]) {
+    assert.equal(classifyPaths([path]), 'UNKNOWN', path);
+  }
+  assert.equal(classifyPaths(['docs/guide.md', 'docs/images/safe.png']), 'DOCS_ONLY');
+  assert.equal(classifyPaths(['docs/embedded-script.sh', 'backend/src/app.module.ts']), 'UNKNOWN');
+});
+
+test('executable documentation mode cannot bypass release classification', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    chmodSync(join(repo, 'docs', 'guide.md'), 0o755);
+    const head = commit('mark docs guide executable');
+    const evidence = buildReleaseInput({ repo, base, head });
+    assert.deepEqual(evidence.changedPaths, ['docs/guide.md']);
+    assert.equal(evidence.classification, 'UNKNOWN');
+  });
+});
+
+test('documentation symlink additions and deletions fail closed at both revisions', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    symlinkSync('../outside-secret', join(repo, 'docs', 'reference.md'));
+    const linked = commit('add docs symlink');
+    assert.equal(buildReleaseInput({ repo, base, head: linked }).classification, 'UNKNOWN');
+    unlinkSync(join(repo, 'docs', 'reference.md'));
+    const deleted = commit('delete docs symlink');
+    assert.equal(buildReleaseInput({ repo, base: linked, head: deleted }).classification, 'UNKNOWN');
+  });
+});
+
+test('ordinary documentation changes remain docs-only, including deletions', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    writeFileSync(join(repo, 'docs', 'guide.md'), '# Updated safe guide\n');
+    const head = commit('update docs');
+    assert.equal(buildReleaseInput({ repo, base, head }).classification, 'DOCS_ONLY');
+    unlinkSync(join(repo, 'docs', 'guide.md'));
+    const deleted = commit('delete safe docs');
+    assert.equal(buildReleaseInput({ repo, base: head, head: deleted }).classification, 'DOCS_ONLY');
+  });
 });

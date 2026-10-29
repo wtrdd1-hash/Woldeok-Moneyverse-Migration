@@ -79,8 +79,16 @@ function matchesAny(path, patterns) {
 }
 
 function pathKind(path) {
-  if (!path || path.startsWith('/') || path.split('/').includes('..')) return 'unknown';
-  if (matchesAny(path, DOC_PATHS)) return 'docs';
+  const unsafeCharacter = Array.from(path).some((character) => {
+    const code = character.charCodeAt(0);
+    return code < 32 || code === 127 || character === '\\';
+  });
+  if (!path || path.startsWith('/') || path.split('/').includes('..') || unsafeCharacter) return 'unknown';
+  if (matchesAny(path, DOC_PATHS)) {
+    // An executable or machine-readable payload inside docs must not bypass release verification.
+    if (path.startsWith('docs/') && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf)$/.test(path)) return 'unknown';
+    return 'docs';
+  }
   if (matchesAny(path, CONTROL_PATHS)) return 'control';
   if (matchesAny(path, RUNTIME_PATHS)) return 'runtime';
   return 'unknown';
@@ -104,6 +112,23 @@ function git(repo, args, options = {}) {
     stdio: ['ignore', 'pipe', 'pipe'],
     ...options,
   }).trim();
+}
+
+function gitNul(repo, args) {
+  return execFileSync('git', ['-C', repo, ...args], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).split('\0').filter(Boolean);
+}
+
+function isSafeDocumentBlob(repo, revision, path) {
+  const entries = gitNul(repo, ['ls-tree', '-z', '--full-tree', revision, '--', `:(literal)${path}`]);
+  // A missing entry is a normal addition/deletion; inspect the other revision too.
+  if (entries.length === 0) return true;
+  if (entries.length !== 1) return false;
+  const [metadata, actualPath] = entries[0].split('\t');
+  // Symlinks, gitlinks, executable files and tree entries must fail closed.
+  return actualPath === path && /^100644 blob [0-9a-f]{40}$/.test(metadata);
 }
 
 function sha256(value) {
@@ -131,20 +156,22 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
   const root = resolve(repo);
   const repositoryHeadSha = git(root, ['rev-parse', `${head}^{commit}`]);
   const baseSha = git(root, ['rev-parse', `${base}^{commit}`]);
-  const changed = git(root, [
+  const changedPaths = gitNul(root, [
     'diff',
     '--no-renames',
     '--name-only',
+    '-z',
     '--diff-filter=ACMRD',
     baseSha,
     repositoryHeadSha,
-  ]);
-  const changedPaths = changed ? changed.split('\n').filter(Boolean).sort() : [];
-  // An unchanged branch ref (base === head) is an intentional no-op, not a release error.
-  // Unrecognised changed paths still fail closed as UNKNOWN.
+  ]).sort();
+  const unsafeDocumentBlob = changedPaths.some((path) =>
+    pathKind(path) === 'docs' &&
+    (!isSafeDocumentBlob(root, baseSha, path) || !isSafeDocumentBlob(root, repositoryHeadSha, path)));
+  // An unchanged branch ref is a no-op. Unknown paths or unsafe tree modes block release.
   const classification = baseSha === repositoryHeadSha && changedPaths.length === 0
     ? 'NO_CHANGES'
-    : classifyPaths(changedPaths);
+    : unsafeDocumentBlob ? 'UNKNOWN' : classifyPaths(changedPaths);
   const applicationSourceSha = latestShaForPaths(root, repositoryHeadSha, RUNTIME_GIT_PATHS);
   const controlPlaneSha = latestShaForPaths(root, repositoryHeadSha, CONTROL_GIT_PATHS);
 
