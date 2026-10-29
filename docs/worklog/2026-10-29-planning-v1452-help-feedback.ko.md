@@ -12,9 +12,11 @@
 - [x] main 재조회: `bd590720...` 유지, 영어·한국어 기획서 상단 재검토.
 - [x] 선행 [초안 PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806)을 **독립 브랜치에만** 통합. UPDATE_LOG 충돌은 최신 main과 v1450 항목 모두 보존. 기존 브랜치·main 미변경.
 - [x] 영문·국문 통합 마스터 상세 명세, 살아 있는 기획서·기능 검토 반영.
-- [ ] 영문·국문 동등성, P0/P1 10건, 런타임 미변경, 릴리스 분류 검증.
-- [ ] 초안 PR·최종 SHA·CI·차단 조건 기록.
+- [x] 영문·국문 동등성, P0/P1 10건, 런타임 미변경, 릴리스 분류 검증.
+- [x] 초안 PR·최종 SHA·CI·차단 조건 기록.
 
-## 완료 — 검증 대기
+## 완료 — 2026-10-29 10:14 KST
 - 런타임·DB·WLD·기능 스위치·Test·Production 변경 권한 없음.
 - 마지막 독립 QA v1361 HOLD는 현재 main 승인 증거가 아님. 외부 독립 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
+
+- [초안 PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) OPEN / DRAFT / RELEASE HOLD. 변경 20개 모두 docs/ 아래(선행 v1450 문서 포함), 새 런타임 파일 0. 영문·국문 P0/P1 각 10개, `git diff --check` PASS, 릴리스 분류 `17 PASS / 0 FAIL`. GitHub 첫 CI는 QUEUED로 아직 PASS가 아니다. 시작·중간·완료 main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` 동일. 독립 PG·정확 SHA Test·외부 근거 10,000건 미검증, 운영승격 차단. 최종 브랜치 SHA는 GitHub PR HEAD 참조.
