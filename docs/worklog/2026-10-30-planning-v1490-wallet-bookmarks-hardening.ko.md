@@ -1,4 +1,5 @@
 # 기획 v1490 — 지갑 북마크 보완 (2026-10-30 KST)
+**Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
 - 이전 Feature Addition v1488 → 현재 Feature Improvement v1490 → 다음 Feature Addition v1492(잠정).
 - 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6, AGENTS.md·README.md·영문 원본/국문 대조 계획서 시작·중간 확인. 선행 Draft PR #1937 미병합, 기존 개발 이슈 #1936 유지. QA v1380 FAILED/P0.

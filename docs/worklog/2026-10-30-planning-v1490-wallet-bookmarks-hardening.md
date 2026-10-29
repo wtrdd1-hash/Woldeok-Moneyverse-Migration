@@ -1,4 +1,5 @@
 # Planning v1490 — wallet bookmarks hardening (2026-10-30 KST)
+**Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
 - Previous Feature Addition v1488; Current Feature Improvement v1490; Next Feature Addition v1492 (provisional).
 - Main authority: 62c6cd038951d65c94b709302bdaec6e75b080b6; AGENTS.md, README.md, PROJECT_PLAN.md English canonical and PROJECT_PLAN.ko.md verified start/mid. Predecessor Draft PR #1937 unmerged, existing issue #1936 retained. QA v1380 FAILED/P0.

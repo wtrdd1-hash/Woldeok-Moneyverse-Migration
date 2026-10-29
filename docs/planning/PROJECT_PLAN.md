@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+**Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
 ## v2026.10.30.1490 — F675-178 Wallet Bookmark Consistency Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1488 → Current Improvement v1490 → Next Addition v1492 (provisional). Authority main 62c6cd038951d65c94b709302bdaec6e75b080b6 rechecked start/mid; QA v1380 FAILED/P0; predecessor Draft #1937 unmerged; handoff #1936. Documentation-only.

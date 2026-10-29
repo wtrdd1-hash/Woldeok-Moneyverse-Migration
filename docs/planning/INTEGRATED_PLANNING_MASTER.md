@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+**Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
 ## v1490 / F675-178 — Wallet Bookmark Consistency, Replay and Mobile Privacy Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
