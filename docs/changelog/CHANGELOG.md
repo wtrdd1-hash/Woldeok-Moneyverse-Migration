@@ -1,4 +1,4 @@
-## v2026.10.29.1510 — Private Telegram operations alert bridge (candidate)
+## v2026.10.29.1510 — Private Telegram operations alert bridge (merged, activation pending)
 - Read-only service/QA/blog/backup/disk changes with private pairing, safe redaction, deduplicated dispatch and daily summary. No account events or monetary data are forwarded. Test/Production evidence pending. [Release](../releases/v2026.10.29.1510.md).
 
 
