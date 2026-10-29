@@ -27,8 +27,8 @@ export function readVerifiedStorageSnapshot(): VerifiedStorageSnapshot {
     bootId: readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim(),
     mountNamespace: readlinkSync('/proc/self/ns/mnt'),
     now: Date.now(),
-    minimumSequence: lastSequence,
-    lastSignature,
+    ...(lastSequence === undefined ? {} : { minimumSequence: lastSequence }),
+    ...(lastSignature === undefined ? {} : { lastSignature }),
   });
   const verified = document as { payload: { sequence: string }; signature: string };
   lastSequence = BigInt(verified.payload.sequence);

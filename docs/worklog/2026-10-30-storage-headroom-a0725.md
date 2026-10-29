@@ -17,5 +17,10 @@
 - Current DATA capacity ~980 MiB unprivileged available (df rounds 100%). No cleanup or changes to other workers.
 - Collector/key provisioning is intentionally not performed against Production or Test. Missing host evidence yields 503 and UNKNOWN; it is not an approved release gate.
 
-## Finished — v3
-- Pending authoritative final SHA, checks, Test/Production/rollback and branch-preservation audit.
+## Finished — v3 / CANDIDATE ONLY
+- Implementation checkpoint SHA `55cb5c1c3a91fc810184db815b17d78b535c79f2`, Draft PR #1956. Final head/CI recorded in PR after documentation commit.
+- Backend verifier 5 PASS, guards 2 PASS, HTTP 3 PASS, actual host collector 1 PASS, host→backend tamper 1 PASS; Next data 2 PASS, proxy 2 PASS, page/a11y/SEO 2 PASS. Backend/Frontend Typecheck, backend build and changed ESLint PASS; DB unit 56 PASS/4 SKIP, security 11 PASS, production audit 0 known vulnerabilities.
+- Full lint FAIL 3 existing errors; backend full 2,358 PASS/240 FAIL/493 SKIP; frontend full TIMEOUT 100s; app-api contract FAIL pre-existing NPC affinity drift. Frontend full build BLOCKED due DATA 100% capacity (<1 GiB). Exact SHA CI FAIL. Official Test E2E and Production not run.
+- Dev PG read-only: 293 applied migrations vs 304 source; app direct audit_logs DML incl DELETE and users UPDATE. No DB/ledger mutation. Security #993 and capacity #1170 updated.
+- Start/end remote branches 38→39; open PR 32→33; unique unmerged 35, fully behind 3, conflicts 2, duplicates/head mismatches 0. Deleted 0, merged 0, closed 0; preserve all other workers.
+- English/Korean QA and Release HOLD: `docs/qa/2026-10-30-a0725-storage-headroom*`, `docs/releases/2026-10-30-a0725-storage-headroom-HOLD*`. No Test/Production/rollback changes; feature unavailable until approved host signing key and collector provisioned.

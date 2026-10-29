@@ -28,4 +28,4 @@
 - [x] Implement fixed-path signed host collector and strict backend parser, then GREEN tests.
 - [x] Write RED controller authorization/privacy tests; implement admin-only read endpoint.
 - [x] Add Next admin page and link, fail-closed UI tests and no public/mobile exposure.
-- [ ] Run exact-HEAD targeted/full gates; record all failures and no deployment.
+- [x] Run exact-HEAD targeted/full gates; record failures, capacity-blocked build and no deployment.
