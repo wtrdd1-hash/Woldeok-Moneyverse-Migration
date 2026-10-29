@@ -1,5 +1,53 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1438 / F675-165 — 금융 용어사전 정정 제안의 출처·공개 무결성 보완 (기능 보완 / 초안 / 운영승격 보류)
+
+**회차:** 이전 기능 추가 v1436 → 현재 기능 보완 v1438 → 다음 기능 추가 v1440(잠정). **기준:** 최신 main 35971c600f25869c96f1c666d4b9f58927202730, 미병합 Draft #1770, QA v1354 FAILED/HOLD. 미구현 F675-165의 설계를 개선하는 것이며, 실제 회원 제안 API가 존재한다는 의미가 아니다. 런타임·DB·잔액·공식 Test·운영 환경 변경은 허가하지 않는다.
+
+### 실제 코드 불일치와 정정된 기능 계약
+
+현재 frontend/src/config/pseo-glossary.config.ts의 GLOSSARY_TERMS는 프론트엔드 TypeScript 배열이다. 각 용어에는 slug, 한국어·영어·일본어·중국어 설명, 공식, formulaDescriptionKo, 핵심 요약, 종목과 계산기 링크가 있다. frontend/src/app/guide/glossary/[term]/page.tsx는 generateStaticParams와 revalidate=86400을 사용하고, 메타데이터 및 DefinedTerm JSON-LD도 같은 배열에서 생성한다. 확인한 backend/src에는 용어 정정 API나 공유 정본 레지스트리가 없다. 따라서 v1436의 '실제 배포된 용어 allowlist와 연결'이라는 문장을 별개 DB 테이블 조회나 NestJS의 프론트엔드 전용 설정 직접 import만으로 구현할 수 없다. 정적 페이지 캐시가 예전 버전을 제공하는 동안 API만 새 버전을 판단할 수 있으므로 출처가 다른 목록을 동일한 정본이라고 주장하면 안 된다.
+
+**공개 원본 계약:** 검토된 빌드 단계에서 정확한 용어 설정과 Next.js 빌드 SHA를 기반으로 변경 불가능한 스키마 버전별 manifest를 생성한다. slug별 manifest는 공개 편집 필드(slug, termKo/En/Ja/Zh, category, formula 또는 null, formulaDescriptionKo 또는 null, descriptionKo/En/Ja/Zh, keyTakeawayKo/En, 기타 실제 공개 표시 필드)를 정해진 키 순서의 UTF-8 NFC JSON으로 직렬화하고 SHA-256을 계산한다. 콘텐츠 해시와 배포 SHA는 별개이다. JSON-LD에 쓰는 설명이 바뀌면 콘텐츠 해시도 바뀌어야 한다. 서명 또는 무결성 검증된 manifest는 프론트엔드 배포물과 함께 제공하며 회원 요청으로 재생성하지 않는다. 백엔드는 승인된 릴리스 경로에서 전달된 manifest의 스키마·해시·배포 ID·DB 레지스트리 활성 상태를 검증한다. NestJS에 과거 목록을 수동 복제하거나 회원 입력으로 레지스트리를 수정하지 않는다.
+
+**정적 캐시·배포 경합:** 페이지의 제출 폼 개정번호와 백엔드의 활성 개정번호는 동일한 실제 공개물에 대응해야 한다. 과거 공개물에서 제출한 요청임이 검증되면 409 CONTENT_CHANGED와 비공개 정보가 없는 현재 개정번호를 반환하고 회원에게 재확인받는다. 프론트엔드 공개물, 레지스트리, 백엔드 배포본의 일치가 증명되지 않거나 부분 배포·24시간 ISR 캐시 충돌이 있으면 503 REVISION_UNAVAILABLE로 제출을 차단한다. 기능 OFF 시 기존 공개 용어사전은 유지하되 제출 CTA는 숨긴다. 캐시 무효화·재검증 계획, 다중 인스턴스 카나리 검증, 이전 클라이언트의 기존 영수증 읽기 전용 경로가 필요하다. ISR 경과 시간을 콘텐츠 버전으로 간주하지 않는다.
+
+### 회원·관리자·공개 화면 흐름
+
+/guide/glossary/[term]에서 로그인·동의·활성 상태인 회원은 '정정 제안' CTA를 사용하고, 비회원은 로그인 안내를 본다. 릴리스 manifest의 실제 slug, 출처 개정번호, 언어, DEFINITION/FORMULA/TRANSLATION/OUTDATED 사유, 유니코드 코드포인트 20~1000자 설명, 선택적 2048자 이하 HTTPS 근거 URL을 검증한다. 상태는 EDITING → SUBMITTING → CONFIRMED(서버 영수증) 또는 NETWORK_UNKNOWN(영수증 조회) / CONTENT_CHANGED(재확인) / REVISION_UNAVAILABLE(나중에 재시도) / RATE_LIMITED로 구분한다. /account/glossary-feedback는 본인 전용 영수증·상태·페이지네이션을 제공하고 PENDING에서만 철회를 허용한다. 로그아웃·계정 전환 시 이전 요청의 응답을 폐기한다. 공개 JSON-LD, 메타데이터, 사이트맵, OG, 광고 타기팅 및 검색 결과에 비공개 제안 내용을 노출하지 않는다. Android는 별도 인증된 /app-api/v1 계약을 사용하며 웹 내부 토큰을 공유하지 않는다.
+
+관리자 심사는 ACCEPTED_FOR_EDIT(편집 검토 승인)와 PUBLISHED_VERIFIED(독립적으로 배포된 정확 SHA와 실제 공개 개정번호 검증 완료)를 구분한다. REJECTED, WITHDRAWN, STALE_REVIEW_REQUIRED, CLOSED도 명확히 구분한다. v1436의 ACCEPTED를 곧바로 '수정 완료'나 '공개 완료'로 표시하지 않는다. 금융 사실 수정은 서로 다른 권한 있는 검토자 2명의 승인과 별도 콘텐츠 PR을 요구한다. PR에는 독립 근거, 이전/신규 해시 및 배포 SHA를 기록한다. 제안 API나 심사 API에서 프론트엔드 설정, 공개 SEO, DB 레지스트리를 직접 수정하지 않는다. 공개 후 롤백되면 불변 심사 이력은 유지하되 공개 검증 상태를 RECHECK_REQUIRED로 바꾼다. 개인 메모는 회원 영수증에서 제외한다.
+
+### API·신원·DB·동시성 강화
+
+기존 제안 API는 본인 GET 목록(키셋 커서), GET 상세, POST 생성, POST 철회, 관리자 GET 및 POST 결정과 Android 동등 계약을 유지한다. 불일치 탐지에 필요하면 공개 slug/개정번호만 반환하는 읽기 전용 GET /api/v1/guide/glossary-feedback/manifest-status를 추가한다. NestJS는 SessionGuard, AuthenticatedGuard, ConsentGuard 및 웹 변경 요청 CsrfGuard를 사용하고 requireUserId(req)로 인증된 회원을 결정한다. 관리자에는 RBAC/AdminSessionGuard를 적용한다. 클라이언트가 회원 ID를 전달하여 권한을 결정하지 않는다. PostgreSQL SECURITY DEFINER 함수는 소유권·관리자 권한을 검사하고 필요한 역할에만 EXECUTE를 부여하며 PUBLIC에는 부여하지 않는다. 공용 DB 계정의 p_actor 인자만으로는 독립적 신원 인증이 성립하지 않는다. 본인·관리자 응답은 private, no-store, 타인/미존재 영수증은 구분할 수 없는 404이다. 400 잘못된 값, 401 비회원, 403 정지·동의·CSRF, 409 개정번호/CAS/요청 해시 불일치, 429 한도, 503 manifest 불일치/처리 불명으로 매핑한다. 다른 회원의 제출 수를 누출하지 않는다.
+
+스키마는 추가형으로 유지한다. glossary_term_registry는 slug, manifest_schema_version, content_revision, release_sha, activated_at, status를 갖는다. glossary_feedback는 owner, slug, submitted_revision, locale, category, 설명, 근거 URL, 상태, 행 버전 및 시각을 저장한다. glossary_feedback_receipts는 UNIQUE(user_id,request_id), operation, 정규화 payload digest, 확정 결과를 저장하며 심사·공개 감사는 추가 전용이다. 외래키로 유효 slug를 보장하고 CHECK로 유형·상태·길이·버전을 제한한다. 회원(created_at DESC,id DESC), 관리자(status,created_at,id), slug/status, 영수증 유일키 인덱스를 계획한다. now() 등 시각에 따라 달라지는 부분 인덱스 조건을 사용하지 않는다. 정해진 직렬화·유니코드 정규화·대소문자 규칙 및 operation을 멱등 해시에 포함한다. 같은 UUID+같은 해시는 원본 불변 영수증을 재현하고, 같은 UUID에 다른 작업·본문은 409이다. 타임아웃 시 UUID를 새로 만들지 않고 영수증 조회 후 재시도한다. 생성·철회는 회원→제안 행 순서로 잠그고 회원당 활성 10건, 회원·용어당 이동 24시간 내 제출 3건을 원자 검증한다(철회해도 한도 환급 없음). 관리자 심사는 제안 행 잠금, expectedVersion CAS, 감사·영수증을 단일 트랜잭션으로 처리한다. 철회·심사·공개 경합에서 한 번의 상태 전이만 성공해야 한다. 외부 GitHub PR 상태와 DB 트랜잭션은 원자적으로 묶이지 않으므로 PR 상태만으로 공개 완료를 증명하지 않는다. 금융 DB 쓰기는 없다.
+
+**근거 URL:** 제출 URL을 서버에서 자동 가져오기, 미리보기 생성, DNS 조회·리다이렉트 따라가기, 크롤러 사전 요청에 사용하지 않는다. HTTPS·호스트명·자격증명 없음 검증, IP 주소·localhost 거절, IDN/punycode 정규화 표시를 요구한다. 관리자의 외부 링크에는 경고 화면과 rel="noopener noreferrer nofollow"를 사용한다. 본문은 일반 텍스트만 허용하고 로그·추적·측정·오류 응답에서 회원 신원·설명·URL을 제거한다. 법적 보존 예외를 제외한 기한 경과 시 설명·URL·식별자를 삭제하거나 비가역 비식별화하되 최소한의 불변 작업 증명만 보존한다. URL이나 해시 자체는 외부 근거의 진실성을 증명하지 않는다.
+
+### 관리자·SEO·접근성·KPI·회귀·배포
+
+관리자 화면에는 출처, 심사자, 독립 승인, 대기·원본 변경 필터를 제공하되 자동 콘텐츠 수정은 없다. 실제 승인된 콘텐츠 배포 전 공개 SEO/OG/DefinedTerm은 변경하지 않는다. 본인·관리자 화면은 noindex·사이트맵 제외, 제안 본문을 구조화 데이터에 넣지 않는다. WCAG 2.2 AA 키보드·초점·aria-live, 320px, 200% 확대, 안정적 스크린리더 이름, Android TalkBack, 오프라인 NETWORK_UNKNOWN, 오류 후 입력 보존을 검증한다. KPI는 서버 확인 제출률, 409/503 배포 불일치율, 중복 방지율, 심사 중간시간, 승인 PR 대비 실제 공개율, 공개 롤백 후 정정률, 오탐률이며 개인 내용은 수집하지 않는다.
+
+개발 수용시험은 격리 PostgreSQL 합성 제안 10,001건(외부 근거 아님), 동시 생성·중복·철회·심사 100건, 타인 권한·관리자·악성 URL 100건, 빌드 A/B와 24시간 ISR 혼합, manifest 스키마·해시·릴리스 SHA 불일치 차단, 공개 후 롤백, 심사 경합, UUID 재시도, 10/3 제한, Android 동등성, 모바일·접근성, private 캐시·SEO 회귀, WLD·원장 변동 0을 포함한다. 실제 RED/GREEN, DB 테스트 미실행 없음, 공식 Test 정확 SHA의 로그인 회원·관리자·금융 E2E가 없으면 병합·승격하지 않는다. glossary_feedback 기능은 기본 OFF, 전진형 검토 마이그레이션, manifest 활성화의 롤백 안전성, 외부 독립 백업 복원, 빌드 성공만으로 자동 병합 금지(이슈 #1088), 승인 GitOps 카나리를 요구한다. 이번 기획에서 런타임을 배포하지 않는다.
+
+### P0/P1 개발 백로그 (기존 이슈 #1769의 v1438 보완)
+
+- **P0 ENV1438-01:** 03:02 KST 루트 96%/약 4.0GiB, 데이터 98%/약 4.3GiB. 사고 #1718의 외부 암호화 백업 독립 복원·보존 검증, 다른 작업자의 증거·브랜치 보존, 임의 삭제 금지.
+- **P0 FIN1438-02:** QA v1354 USER_CASH 계좌 18건의 18,000 WLD 불일치 출처 규명. 근거 없는 조정 분개 금지, 정규 국고 잔액 0.
+- **P0 SEC1438-03:** manifest/릴리스 신뢰, 회원·관리자 경계, 앱 쓰기 권한 테이블 235개, PUBLIC 은행 함수 3개, 마이그레이션 체크섬 불일치 5건과 미적용 20건의 차단·최소권한.
+- **P0 REL1438-04:** 빌드만으로 자동 병합 위험 #1088, 격리 PostgreSQL 음성시험, 공식 Test 정확 SHA, 승인·롤백, 모든 게이트 전 운영승격 금지.
+- **P1 GLOS1438-05:** 다국어 결정적 편집 manifest 생성기, 스키마 버전·배포 SHA 연결, DB 레지스트리·제약·인덱스.
+- **P1 GLOS1438-06:** ISR/릴리스 혼합 시 409와 503 구분, 10/3 한도, 회원·제안 잠금, 안정적 해시 영수증.
+- **P1 GLOS1438-07:** NestJS·Next BFF·Android API, 세션 유래 신원, 관리자 2인 승인, 안전한 영수증 조회·no-store.
+- **P1 GLOS1438-08:** 회원·관리자 CTA·상태, 재확인 접근성, 계정 격리, 근거 URL 안전 표시·오프라인.
+- **P1 GLOS1438-09:** 독립 콘텐츠 PR과 실제 배포 SHA 이후 공개 검증, SEO/OG 무결성, 롤백 상태, 보존·집계 KPI.
+- **P1 GLOS1438-10:** 실제 격리 PostgreSQL·프론트엔드 A/B 혼합 캐시, 합성 10,001건, 동시 100건+권한/SSRF 100건, 앱·접근성·롤백·원장 무변동 시험(미실행).
+
+외부 독립 근거 신규 승인 0건, 누적 중복 제거·실제 검증 승인 UNKNOWN / 10,000건, 게이트 BLOCKED / IN PROGRESS. 합성 데이터, 회원이 제출한 URL, 단순히 검토한 발행기관은 10,000건에 포함하지 않는다. 새 분산 기획서는 만들지 않고 기존 영문 정본·동등한 국문 통합문서에 흡수한다. v1436의 역사적 기획은 보존하며, 공개 증명·manifest 관련 모호한 표현은 이 v1438 보완안이 우선한다.
+
+
 ## v1436 / F675-165 — 금융 용어사전 정정 제안과 검증 영수증 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 기능 보완 v1434 → 현재 기능 추가 v1436 → 다음 기능 보완 v1438(잠정). 기준 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 개발 이슈 #1769. 실제 구현·배포가 아닌 신규 기획이다.
