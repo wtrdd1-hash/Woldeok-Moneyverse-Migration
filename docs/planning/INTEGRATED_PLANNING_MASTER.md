@@ -1,5 +1,46 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v1454 / F675-169 — Help feedback publication identity, replay and privacy hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
+**Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). This is a documentation-only refinement of unmerged Draft PR #1815 and development issue #1814. At start, latest GitHub main was b44ffd0af9e2bd6e7c2be7345b72094827078c3d; PR #1815 was OPEN and CONFLICTING with main. This proposal is stacked on that exact predecessor, not merged. AGENTS.md, README.md, PROJECT_PLAN.md (English canonical) and PROJECT_PLAN.ko.md govern engineering.
+
+**QA freshness (11:12 KST):** QA v1363 branch-audit evidence has started but no completed independent QA report is available; v1362 remains the last completed HOLD evidence.
+
+
+### Verified findings and authority
+- Migration 282 already checks independent reviewer approval and reviewed_until > clock_timestamp() in public help reads. **Do not claim these checks are absent.** But help_public_article, HelpRepository.article and the Next.js help DTO omit the exact published_revision_id, article.version and a digest of rendered content. The existing source_sha256 identifies source evidence, not necessarily the displayed title/body. Member feedback therefore cannot yet bind to the exact approved text shown on screen.
+- Read-only miniPC query at 11:09 KST: connected development DB woldeok_moneyverse_dev returned NULL for help_articles, help_article_revisions, help_article_feedback_current and help_article_feedback_events. QA v1362 reports five migration checksum mismatches and **22 source-unapplied migrations including 282**. These observations do not establish Production DB state or prove the help feature is live.
+- QA v1362 measured **zero arithmetic account/journal mismatches** after a 19-posting backfill (18 USER_CASH debit entries totaling 18,000 WLD; one MINT credit). The historical funding authority, MINT-versus-operator-attested-Treasury source and linked receipts remain **UNVERIFIED**, issue #1816. No further balancing, reversal or reissue is authorized. QA #1818 also reported an unverified JSON blog publisher; main b44ffd0a includes a blog-safety merge, but fresh exact-SHA CI was IN PROGRESS at first check. Full release remains HOLD.
+- No independently approved external references added: **0 new**, **UNKNOWN/10,000 cumulative** after deduplication/classification; gate **BLOCKED / IN PROGRESS**. Help feedback must not auto-publish, create support cases, edit sources, pay WLD or bypass this gate.
+
+### Revised user journey and API contract
+- A genuinely verified /help/[slug]?locale=ko|en response must carry an **atomic publication descriptor**: articleId UUID, publishedRevisionId UUID, articleVersion bigint, locale, publishedAt, reviewedUntil and canonical contentDigest SHA-256. Hash a versioned canonical encoding of the exact locale/title/summary/body/source URL/source hash; do not treat slug, timestamp or source_sha256 alone as rendered-content identity. The same descriptor governs SSR, NestJS, Next BFF and Android; never trust a client-supplied revision or digest as authority.
+- An authenticated, consent-eligible member can choose Yes/No, optional enum reason for No, Change, Remove and Contact support. Guests only see sign-in. UI states: FEATURE_OFF, NO_VERIFIED_PUBLICATION, AUTH_REQUIRED, READY, SUBMITTING, SAVED_VERIFIED, REVISION_CHANGED_409, RETRACTED_OR_EXPIRED_410, RATE_LIMITED_429, UNKNOWN_COMMIT, UNAVAILABLE_503, REMOVING and REMOVED_VERIFIED. Do not display success on HTTP 2xx/redirect/timeout alone: verify owner, intent UUID, article/revision, locale, action/choice and committed version in the receipt. Old receipts after withdrawal display HISTORICAL_NOT_CURRENT.
+- Proposed endpoints: GET /api/v1/help/articles/:id/feedback/me?revisionId=; PUT /api/v1/help/articles/:id/feedback with revisionId, articleVersion, contentDigest, locale, choice, reasonCode?, intentId, expectedVersion; DELETE same resource; GET /api/v1/help/feedback/receipts/:intentId. Preserve 401/403/404/409/410/422/429/503 semantics and private,no-store in Next BFF and Android /app-api/v1. OwnerId or SQL p_actor alone is not authentication.
+
+### DB, security, admin and rollback
+- Only forward-only migrations after checksum/tip and isolated DB review; never edit migration 282 or grant app direct table DML. Under a DB transaction lock the publication row, validate the same published revision/version/digest, independent reviewer and DB clock_timestamp() freshness at the decision point; then lock (owner,intentId) and current feedback row in deterministic order. Current row, immutable event and receipt commit atomically with UNIQUE(owner,intentId), canonical request digest and optimistic version. SECURITY DEFINER uses fixed search_path, verified session identity, revoked PUBLIC EXECUTE and least-privilege app EXECUTE only.
+- After authenticated owner resolution, check already-committed intent replay **before** rejecting current publication state: identical intent returns the original historical receipt after retraction without creating a new vote; same UUID/different digest gives 409, foreign/unknown intent is non-disclosing. On timeout query receipt then retry the same UUID. An owner may Remove their historical vote even when article is retracted/expired, via owner-owned current row and tombstone; no new vote is allowed. Race tests must prove no false success on expiry/retraction. Retention 90 days remains proposed pending legal review; preserve minimal required audit evidence.
+- Admin aggregate is available only for >=20 **distinct owners per exact revision**, but threshold alone is insufficient: block differencing across filters, adjacent snapshots and complementary small cells. Use fixed coarse cohorts, suppress small and revealing complement cells, rate-limit/audit access, no individual voter export. No free-text PII, IP/UA, public rating schema, private cache leakage or SEO indexation. On logout/account switch fence pending receipts and clear owner cache; Android offline intent remains UNKNOWN until verified. WCAG 2.2 AA, keyboard/screen reader/TalkBack, 320px, no-store/noindex. KPIs: receipt correctness 100% target, false success/owner leak/stale acceptance/duplicate commit/small-cohort leak 0; opt-in baseline unknown. WLD/ledger/quest effects 0.
+
+### Development backlog — P0 four / P1 six
+- **P0 ENV1454-01:** prove dev/Test/Production isolation, storage headroom, encrypted off-host backup and independent restore.
+- **P0 FIN1454-02:** preserve the 19-posting journal and independently verify original 18 payments, MINT funding authority, approvals and missing linked receipts (#1816). Arithmetic zero is not provenance approval.
+- **P0 SEC1454-03:** investigate 5 checksum mismatches, 22 source-unapplied SQL files including 282; remeasure historical 239 app-writable relations and PUBLIC bank EXECUTE, require authenticated owner and approved publication.
+- **P0 REL1454-04:** verify QA #1818 remediation and latest main CI, resolve predecessor PR #1815 conflict, exact-SHA official Test authenticated E2E, independent restore and approved rollback. No Production promotion.
+- **P1 HELP1454-05:** exact publishedRevisionId/articleVersion/reviewedUntil/rendered contentDigest projection, forward-only schema/FK/index/ACL.
+- **P1 HELP1454-06:** publication/intent lock ordering, historical replay, atomic current/event/receipt, expiry/retraction races, owner-safe Remove.
+- **P1 HELP1454-07:** NestJS/Next BFF/Android parity, consent/session/CSRF/BOLA, no-store and fail-closed 503.
+- **P1 HELP1454-08:** member/guest UI, exact receipt verification, account switch/offline, 320px/WCAG/TalkBack.
+- **P1 HELP1454-09:** admin k>=20 anti-differencing, privacy retention/erasure, SEO and analytics.
+- **P1 HELP1454-10:** isolated PostgreSQL **10,001 synthetic events**, **100 concurrent** vote/replay/remove requests, **100 forged owner/revision** negatives, **30 expiry/retraction races**, **20 differencing probes**, zero unexpected WLD delta, API/Android regression and exact-SHA Test/rollback. **NOT RUN.**
+
+**Final gate:** PARTIAL / DRAFT / RELEASE HOLD. This is a developer handoff only, not permission to deploy. No runtime code, database writes, Test/Production, WLD, ledger or feature flag changes; preserve Gemini/A/B/C/QA branches.
+
+
+
 ## v1452 / F675-169 — Verified help article usefulness feedback and owner receipts (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Read-only connected-DB verification (10:15 KST):** `SELECT current_database(), to_regclass(...)` returned `woldeok_moneyverse_dev`; `help_articles`, `help_article_revisions`, `help_article_feedback_current` and `help_article_feedback_events` were **all NULL**. Migration 282 is source-only for this connected DB; do not assert the help center or feedback is deployed. This does **not** establish Production schema state.

@@ -1,3 +1,15 @@
+## v2026.10.29.1454 — F675-169 도움말 피드백 게시·재시도·개인정보 보호 개선 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
+- **회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합·충돌 중인 Draft PR #1815에 적층, 개발 이슈 #1814. 시작 시 main b44ffd0af9e2bd6e7c2be7345b72094827078c3d. 런타임·금융 데이터 변경 없음.
+- **QA 최신성(11:12 KST):** v1363 브랜치 감사 IN PROGRESS, 완료 보고서 없음. 마지막 완료 QA v1362 HOLD.
+- **실제 소스 결함:** 마이그레이션 282에는 이미 독립 승인·reviewed_until 만료 검사가 있다. 그러나 help_public_article·NestJS·Next DTO에는 정확한 publishedRevisionId/articleVersion/표시 본문 contentDigest가 없다. source_sha256은 출처 해시이지 본문 해시가 아니다. 11:09 KST DEV DB 읽기 전용 조회에서 도움말/개정/피드백 테이블 4개 모두 NULL, Production 증거 아님. 기능 OFF.
+- **개선:** 도움됨/도움되지 않음/변경/삭제를 승인된 정확 개정·본문 SHA-256에 결합, DB 게시 잠금, 구버전 409·철회 410·근거 부재 503, 소유자 intent 영수증 및 철회 이후 원본 과거 영수증 재생, 본인 삭제, CSRF/BOLA, 모바일 동등성, WCAG 2.2 AA·320px, noindex/no-store, WLD 영향 0. 관리자 k>=20만으로는 부족하므로 기간·필터·보완집계 차분 공격 방지.
+- **백로그:** P0 ENV1454-01, FIN1454-02, SEC1454-03, REL1454-04; P1 HELP1454-05, HELP1454-06, HELP1454-07, HELP1454-08, HELP1454-09, HELP1454-10. QA v1362: 19개 MINT 상계 분개 후 원장 **산술 차이 0**이나 자금 출처·영수증 **미검증**(#1816). 체크섬 5건/소스 미적용 **22건**(282 포함), 과거 앱 직접 쓰기 239개 관계, 블로그 근거 #1818, 최신 main CI 초기 IN PROGRESS. RELEASE HOLD. 격리 PG 합성 10,001건/동시 100건/위조 100건/만료 경합 30건/차분 탐침 20건 **미실행**.
+- **외부 독립 근거 게이트:** 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 영문·국문 상세 계약은 통합 기획서에 반영하며 새 분산기획 문서는 만들지 않는다.
+
+
 ## v2026.10.29.1452 — F675-169 검증 도움말 유용성 피드백 (초안 / 운영 보류)
 - [초안 PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) 미병합, 초기 CI 대기.
 - [개발 이슈 #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814), [영문 통합 정본](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어 대조](planning/INTEGRATED_PLANNING_MASTER.ko.md). 이전 v1450 보완 → 현재 v1452 추가 → 다음 v1454 보완(잠정). 시작·중간 main `bd590720...`; 도움말에 피드백 CTA·영수증이 없고 공개 API가 게시 개정을 반환하지 않음. 명시적 개정별 예/아니요·사유·본인 불변 영수증·CAS·관리자 20명 이상 집계, 웹/Android·WCAG·개인정보·SEO·WLD 0. P0 4/P1 6, 실제 PG 수용시험 미실행. 과거 QA v1361 HOLD이며 최신 main 재검증 필요, 외부 승인 신규 0·누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·Test·운영 미변경. [내부](updates/v2026.10.29.1452-planning-help-feedback-internal.ko.md) / [GitHub](updates/v2026.10.29.1452-planning-help-feedback-github.ko.md).
