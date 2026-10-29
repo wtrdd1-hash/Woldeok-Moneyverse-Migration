@@ -3717,7 +3717,10 @@ _요청 본문 없음._
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| q | query | false | string |  |
+| rarity | query | false | string | enum="common","uncommon","rare","epic","legendary","mythic" |
 
 ### 요청 본문
 

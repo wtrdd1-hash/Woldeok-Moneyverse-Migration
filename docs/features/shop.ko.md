@@ -22,12 +22,6 @@
 - 회원 인벤토리/컬렉션
 - 퀘스트 및 성장
 
-## 회원 카탈로그 가격순 정렬 (A2125 코드 후보, 운영 미적용)
+## 희귀도 필터 (개발 A 후보)
 
-로그인 회원은 `/shop/catalog`에서 기본순·낮은 가격순·높은 가격순을 선택할 수 있습니다.
-`GET /api/v1/shop/catalog?sort=price_asc|price_desc`는 기존 회원별 PostgreSQL 조회
-결과의 정수 문자열 가격을 서버에서 `BigInt`로 비교합니다. 동일 가격은 코드/ID로
-안정 정렬하며, 정렬 값이 없으면 기존 순서를 유지하고 잘못된 값은 조회 전 400입니다.
-Android `/app-api/v1/shop/catalog`에서도 같은 쿼리를 전달하며 오류 응답까지
-`private, no-store`와 `noindex`를 적용합니다. 실제 결제 가격·재고는 구매 트랜잭션에서
-다시 확인합니다. 신규 마이그레이션·가격 예약·WLD 변동은 없습니다. PR #1745는 운영 보류입니다.
+공개 `/shop` 및 회원 `/shop/catalog`에서 데이터베이스 희귀도(`common`, `uncommon`, `rare`, `epic`, `legendary`, `mythic`)를 정확히 선택할 수 있습니다. 서버는 `shop_catalog_list_v2`에서 권한 검증을 거친 결과만 필터링하며, 잘못된 희귀도는 400을 반환합니다. 검색어와 함께 사용할 수 있고 가격은 정수 문자열로 유지합니다. Android 앱은 로그인 세션으로 `GET /app-api/v1/shop/catalog?rarity=rare`를 사용합니다. 아직 배포되지 않은 Draft PR 후보입니다.

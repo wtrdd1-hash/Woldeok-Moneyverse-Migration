@@ -11,7 +11,7 @@ import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
 import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
-import { memberCatalogUrl, normalizedShopPriceOrder } from './shop-price-order';
+import { SHOP_RARITIES, shopFilterQuery } from '../shop-rarity';
 
 /**
  * One member's own shelf, and a catalogue only a member can reach.
@@ -30,17 +30,18 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly sort?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly rarity?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery, sort: rawSort } = await searchParams;
-  const sort = normalizedShopPriceOrder(rawSort);
+  const { q: rawQuery, rarity: rawRarity } = await searchParams;
+  const rarity = rawRarity ?? '';
+  const querySuffix = shopFilterQuery({ q: rawQuery ?? '', rarity });
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>(memberCatalogUrl(sort)),
+    apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -111,16 +112,16 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
-            <label htmlFor="shop-price-sort" className="sr-only">가격 정렬</label>
             <select
-              id="shop-price-sort"
-              name="sort"
-              defaultValue={sort}
-              className="min-h-11 rounded-md border border-input bg-background px-2 text-sm"
+              name="rarity"
+              defaultValue={SHOP_RARITIES.some((option) => option.value === rarity) ? rarity : ''}
+              aria-label="아이템 희귀도"
+              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm"
             >
-              <option value="default">기본순</option>
-              <option value="price_asc">낮은 가격순</option>
-              <option value="price_desc">높은 가격순</option>
+              <option value="">전체 희귀도</option>
+              {SHOP_RARITIES.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
             <button
               type="submit"
@@ -140,9 +141,9 @@ export default async function ShopCatalogPage({
           // A different fact from the one above: the request worked and the
           // catalogue has nothing on sale right now.
           <EmptyState
-            title={query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
+            title={query === '' && rarity === '' ? '지금 판매 중인 아이템이 없어요.' : '검색 조건에 맞는 아이템이 없어요.'}
             description={
-              query === ''
+              query === '' && rarity === ''
                 ? '운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요.'
                 : '다른 이름, 설명 또는 아이템 코드로 다시 검색해 주세요.'
             }

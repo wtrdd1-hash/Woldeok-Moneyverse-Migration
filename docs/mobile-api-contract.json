@@ -11129,7 +11129,32 @@
       "operationId": "ShopController_catalog",
       "backendOpenApiPath": "/shop/catalog",
       "summary": "The catalogue with prices, stock, purchase limits and cosmetics",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "rarity",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "common",
+              "uncommon",
+              "rare",
+              "epic",
+              "legendary",
+              "mythic"
+            ]
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200

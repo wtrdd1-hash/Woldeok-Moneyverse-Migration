@@ -137,15 +137,19 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
-  it.each([200, 400, 403, 500])('keeps member shop sorted catalogue private on Android response %s', async (status) => {
+  it('forwards shop rarity to the owner-scoped catalog and never caches member inventory', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/shop/catalog?sort=price_desc'), context('shop', 'catalog'));
-    expect(response.status).toBe(status);
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('sort')).toBe('price_desc');
+    const response = await GET(
+      request('/app-api/v1/shop/catalog?rarity=legendary&q=frame'), context('shop', 'catalog'),
+    );
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/shop/catalog');
+    expect(target.searchParams.get('rarity')).toBe('legendary');
+    expect(target.searchParams.get('q')).toBe('frame');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
