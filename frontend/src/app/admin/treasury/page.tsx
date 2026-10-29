@@ -12,7 +12,8 @@ import type {
   AdminTreasuryRevenueSource,
 } from '../types';
 import { TreasuryView } from './treasury-view';
-import { SwfControlPanel, type SwfPortfolioItem, type SwfEvent } from './swf-control-panel';
+import { SwfControlPanel } from './swf-control-panel';
+import { parseSwfEvidence } from './swf-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,12 +42,10 @@ export default async function AdminTreasuryPage() {
       total_7d_wld: string;
       total_30d_wld: string;
     }>('/api/v1/admin/treasury/expenditure'),
-    apiOrNull<{
-      config: any;
-      portfolios: SwfPortfolioItem[];
-      events: SwfEvent[];
-    }>('/api/v1/admin/treasury/swf'),
+    apiOrNull<unknown>('/api/v1/admin/treasury/swf'),
   ]);
+
+  const swfEvidence = parseSwfEvidence(swfRes);
 
   return (
     <div data-page="admin-treasury" className="mv-page mv-page--admin grid gap-6 pb-32 sm:pb-12">
@@ -62,11 +61,19 @@ export default async function AdminTreasuryPage() {
         />
       ) : (
         <>
-          <SwfControlPanel
-            initialConfig={swfRes?.config}
-            initialPortfolios={swfRes?.portfolios ?? []}
-            initialEvents={swfRes?.events ?? []}
-          />
+          {swfEvidence === null ? (
+            <section role="alert" className="rounded-xl border border-amber-500/40 p-5 text-sm" aria-label="국부펀드 관측 상태">
+              <p className="font-semibold">국부펀드 관측 정보를 검증할 수 없습니다.</p>
+              <p>관리자 API 또는 데이터베이스의 재무정보를 확인하지 못했습니다. 투자 자산 0건을 의미하지 않으며, 검증 전 정책 변경과 자금 집행은 표시하지 않습니다.</p>
+              <a href="/admin/treasury" className="inline-flex min-h-11 items-center rounded-lg border px-4 py-2 underline focus-visible:outline-2 focus-visible:outline-offset-2">다시 조회</a>
+            </section>
+          ) : (
+            <SwfControlPanel
+              initialConfig={swfEvidence.config}
+              initialPortfolios={swfEvidence.portfolios}
+              initialEvents={swfEvidence.events}
+            />
+          )}
           <TreasuryView
             overview={overview}
             ledger={transactionsRes?.items ?? []}
