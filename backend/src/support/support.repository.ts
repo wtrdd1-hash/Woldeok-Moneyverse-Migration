@@ -23,18 +23,18 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, limit = 50, search?: string) {
-    if (search) {
-      // Search only the latest 100 owner-scoped rows; do not imply all-history coverage.
+  myThreads(actor: string, status: string | null = null) {
+    if (status !== null) {
       return queryRows<SupportThreadRow>(this.pool,
         `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
          FROM public.support_my_threads($1,$2)
-         WHERE pg_catalog.strpos(pg_catalog.lower(subject), pg_catalog.lower($3::text)) > 0`,
-        [actor, 100, search]);
+         WHERE status = $3
+         ORDER BY last_message_at DESC,thread_id DESC LIMIT $4`,
+        [actor, 100, status, 50]);
     }
     return queryRows<SupportThreadRow>(this.pool,
       'SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at FROM public.support_my_threads($1,$2)',
-      [actor, limit]);
+      [actor, 50]);
   }
 
   createThread(actor: string, key: string, subject: string, body: string) {
@@ -47,12 +47,6 @@ export class SupportRepository {
     return queryRows<SupportMessageRow>(this.pool,
       'SELECT message_id::text,sender_kind,body,created_at FROM public.support_thread_messages($1,$2,$3)',
       [actor, thread, limit]);
-  }
-
-  exactMessage(actor: string, thread: string, messageId: string) {
-    return queryOne<SupportMessageRow>(this.pool,
-      'SELECT message_id::text,sender_kind,body,created_at FROM public.support_my_message_receipt($1,$2,$3)',
-      [actor, thread, messageId]);
   }
 
   addMessage(actor: string, key: string, thread: string, body: string) {
