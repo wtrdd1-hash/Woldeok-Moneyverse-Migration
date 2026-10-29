@@ -17,6 +17,15 @@ describe('public verified help controller', () => {
     await expect(controller.search({ locale: 'ko', query: '😀'.repeat(101) })).rejects.toThrow('invalid');
     expect(search).not.toHaveBeenCalled();
   });
+  it('adds a genuine approximate reading estimate to an approved article', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const approved = { article_id: 'article', locale: 'en', slug: 'wallet', category: 'wallet', title: 'Wallet',
+      summary: 'Verified', body_plain: 'word '.repeat(210), source_url: 'https://example.org', published_at: new Date() };
+    const article = vi.fn().mockResolvedValue(approved);
+    const controller = new HelpController({ article } as unknown as HelpRepository);
+    await expect(controller.article('en', 'wallet')).resolves.toMatchObject({ article: { article_id: 'article', estimated_reading_minutes: 2 } });
+    expect(article).toHaveBeenCalledWith('en', 'wallet');
+  });
   it('returns a genuine empty result only after a successful DB read', async () => {
     vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
     const search = vi.fn().mockResolvedValue([]);

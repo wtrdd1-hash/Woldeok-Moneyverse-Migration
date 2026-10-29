@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundExc
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { HelpRepository } from './help.repository';
+import { estimateHelpReadingMinutes } from './help-reading-time';
 
 const LOCALES = ['ko','en'] as const;
 const CATEGORIES = ['account','wallet','shop','community','support'] as const;
@@ -45,6 +46,6 @@ export class HelpController {
     }
     const article = await repo.article(locale, slug);
     if (!article) throw new NotFoundException('help article not found');
-    return { article };
+    return { article: { ...article, estimated_reading_minutes: estimateHelpReadingMinutes(article.body_plain, article.locale) } };
   }
 }

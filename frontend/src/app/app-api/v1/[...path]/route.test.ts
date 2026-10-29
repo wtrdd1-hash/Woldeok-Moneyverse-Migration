@@ -40,6 +40,18 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
+  it.each([200, 404])('preserves verified help reading time and private no-store on Android %s', async status => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify(status === 200 ? { article: { article_id: 'id', estimated_reading_minutes: 2 } } : { message: 'not found' }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/help/articles/en/wallet'), context('help', 'articles', 'en', 'wallet'));
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    if (status === 200) expect(await response.json()).toMatchObject({ article: { estimated_reading_minutes: 2, estimatedReadingMinutes: 2 } });
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/articles/en/wallet');
+  });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
