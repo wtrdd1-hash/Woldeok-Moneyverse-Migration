@@ -30,7 +30,7 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { WorkInputError, WorkRepository } from './work.repository';
+import { parseWorkTaskMaxDuration, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -105,12 +105,28 @@ export class WorkController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
-  async tasks(@Req() request: RequestWithSession, @Query('minReward') minReward?: string) {
+  async tasks(
+    @Req() request: RequestWithSession,
+    @Query('minReward') minReward?: string,
+    @Query('maxDurationSeconds') maxDurationSeconds?: unknown,
+  ) {
     const repository = this.repository();
     const actor = requireUserId(request);
+    let maxDuration: number | null;
+    try {
+      maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+    } catch (error: unknown) {
+      if (error instanceof WorkInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
-      this.guarded(() => repository.tasks(actor, minReward), 'the task board is unavailable'),
+      this.guarded(
+        () => maxDuration === null
+          ? repository.tasks(actor, minReward)
+          : repository.tasks(actor, minReward, maxDuration),
+        'the task board is unavailable',
+      ),
     ]);
     return { featureState, tasks };
   }

@@ -1,0 +1,26 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CareerTasksBoard } from './career-tasks-board';
+
+vi.mock('./actions', () => ({ switchJobAction: vi.fn() }));
+vi.mock('./work-forms', () => ({ TakeButton: () => null }));
+vi.mock('@/components/locale-provider', () => ({ useLocale: () => ({ locale: 'ko' }) }));
+afterEach(cleanup);
+
+describe('member work duration filter UI', () => {
+  it('renders a labelled GET selector with stable presets and explicit reset', () => {
+    const { container } = render(<CareerTasksBoard tasks={[]} selectedMaxDuration="300" />);
+    const select = screen.getByLabelText('최대 업무 수행시간') as HTMLSelectElement;
+    expect(select.name).toBe('maxDurationSeconds');
+    expect(select.value).toBe('300');
+    expect(Array.from(select.options).map((option) => option.value)).toEqual(['', '60', '120', '180', '300', '600', '900']);
+    expect(container.querySelector('form[action="/work"][method="get"]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: '적용' })).toBeDefined();
+    expect(screen.getByRole('link', { name: '시간 필터 초기화' }).getAttribute('href')).toBe('/work');
+  });
+
+  it('keeps the default catalogue when no duration is selected', () => {
+    render(<CareerTasksBoard tasks={[]} selectedMaxDuration={null} />);
+    expect((screen.getByLabelText('최대 업무 수행시간') as HTMLSelectElement).value).toBe('');
+  });
+});

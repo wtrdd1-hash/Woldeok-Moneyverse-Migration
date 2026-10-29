@@ -30,11 +30,21 @@ describe('member work task maximum duration filter', () => {
   it('filters through the actor-bound PostgreSQL function using parameters, not table grants', async () => {
     const query = vi.fn(async () => ({ rows: [] }));
     const repository = new WorkRepository({ query } as unknown as Queryable);
-    expect(await repository.tasks(ACTOR, 900)).toEqual([]);
+    expect(await repository.tasks(ACTOR, undefined, 900)).toEqual([]);
     expect(query).toHaveBeenCalledTimes(1);
     const [sql, params] = query.mock.calls[0] as unknown as [string, unknown[]];
     expect(sql).toContain('FROM public.work_task_board($1) AS task');
-    expect(sql).toMatch(/task\.minimum_duration_seconds\s*<=\s*\$2::integer/);
-    expect(params).toEqual([ACTOR, 900]);
+    expect(sql).toMatch(/task\.minimum_duration_seconds\s*<=\s*\$3::integer/);
+    expect(params).toEqual([ACTOR, null, 900]);
+  });
+
+  it('combines the exact reward floor with the bounded duration in SQL', async () => {
+    const query = vi.fn(async () => ({ rows: [] }));
+    const repository = new WorkRepository({ query } as unknown as Queryable);
+    await repository.tasks(ACTOR, '9007199254740993', 300);
+    const [sql, params] = query.mock.calls[0] as unknown as [string, unknown[]];
+    expect(sql).toMatch(/reward_preview\s*>=\s*\$2::numeric/);
+    expect(sql).toMatch(/minimum_duration_seconds\s*<=\s*\$3::integer/);
+    expect(params).toEqual([ACTOR, '9007199254740993', 300]);
   });
 });

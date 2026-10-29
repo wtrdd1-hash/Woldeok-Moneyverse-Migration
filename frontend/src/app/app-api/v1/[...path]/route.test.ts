@@ -188,6 +188,22 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
+  it.each([200, 400, 401, 503])('forwards Android work maxDurationSeconds with private headers on HTTP %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ tasks: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/work/tasks?maxDurationSeconds=300&minReward=9007199254740993'), context('work', 'tasks'));
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/work/tasks');
+    expect(target.searchParams.get('maxDurationSeconds')).toBe('300');
+    expect(target.searchParams.get('minReward')).toBe('9007199254740993');
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {

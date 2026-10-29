@@ -13,3 +13,9 @@
 
 ## Finished
 - Pending verification. Release HOLD until exact-SHA gates pass.
+
+### Mid-run checkpoint 06:33 KST
+- RED: baseline duration tests 15 failed, frontend selector test 2 failed. GREEN: Backend duration/reward/controller 28/28; Frontend Android gateway/route/UI 57/57.
+- Typecheck all workspaces PASS. Changed-file ESLint 0 errors, 1 pre-existing `selectedDifficulty` unused warning. Full lint, build, real PG and CI pending.
+- Work filter is a read-only bound predicate on `work_task_board($1)`. Default and existing `minReward` paths preserved; active assignments retrieve the full duration metadata and fail closed when unavailable.
+- Refetched origin/main and bilingual plans before integration; no production/test mutation.

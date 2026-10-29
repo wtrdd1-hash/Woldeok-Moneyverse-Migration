@@ -320,7 +320,7 @@ ERROR
 | `POST` | `/app-api/v1/work/assignments/:id/verify` | 근무 과제 완료 검증 | 로그인 + 최신 동의 + CSRF(변경 요청) | params id[path]:string*; body WorkCompletionDto (application/json) | `201` | JSON 직접 반환(필드 추가 허용) | work/profile/tasks/receipts 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/work/profile` | 내 근무 프로필/통계 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 직접 반환(필드 추가 허용) | work/profile/tasks/receipts 중 관련 상태 재조회 |
 | `GET` | `/app-api/v1/work/receipts` | 근무 보상 영수증 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: receipts | work/profile/tasks/receipts 중 관련 상태 재조회 |
-| `GET` | `/app-api/v1/work/tasks` | 현재 수행 가능한 근무 작업 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: tasks | work/profile/tasks/receipts 중 관련 상태 재조회 |
+| `GET` | `/app-api/v1/work/tasks` | 현재 수행 가능한 근무 작업 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 선택 query `maxDurationSeconds` (1~86400 정수), `minReward` (정확한 음이 아닌 정수 문자열) | `200` | JSON 키: tasks | work/profile/tasks/receipts 중 관련 상태 재조회 |
 | `POST` | `/app-api/v1/work/tasks/:id/complete` | 선택한 근무 작업 완료 처리 | 로그인 + 최신 동의 + CSRF(변경 요청) | params id[path]:string*; body WorkCompleteTaskDto (application/json) | `201` | JSON 직접 반환(필드 추가 허용) | work/profile/tasks/receipts 중 관련 상태 재조회 |
 
 ### media — 미디어 바이트

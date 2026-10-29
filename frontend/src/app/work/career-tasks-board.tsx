@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useActionState } from 'react';
+import Link from 'next/link';
 import { useLocale } from '@/components/locale-provider';
 import { Badge } from '@/components/ui/badge';
 import { Briefcase, Compass, Sparkles, Star } from 'lucide-react';
@@ -134,6 +135,27 @@ export function CareerTasksBoard({
           )}
         </div>
 
+        <form action="/work" method="get" className="flex flex-col gap-2 sm:flex-row sm:items-end min-w-0">
+          <label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
+            <span>{isEn ? 'Maximum task duration' : '최대 업무 수행시간'}</span>
+            <select
+              name="maxDurationSeconds"
+              defaultValue={selectedMaxDuration ?? ''}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{isEn ? 'Any duration' : '전체 시간'}</option>
+              {['60', '120', '180', '300', '600', '900'].map((seconds) => (
+                <option key={seconds} value={seconds}>
+                  {isEn ? `Up to ${Number(seconds) / 60} min` : `${Number(seconds) / 60}분 이내`}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
+          <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+            {isEn ? 'Reset duration filter' : '시간 필터 초기화'}
+          </Link>
+        </form>
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
           <span>{isEn ? 'Find a task' : '업무 검색'}</span>
           <input
