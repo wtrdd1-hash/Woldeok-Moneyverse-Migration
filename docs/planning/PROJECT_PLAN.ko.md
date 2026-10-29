@@ -2,7 +2,7 @@
 
 ## v2026.10.29.1464 — F675-172 회원 전용 대시보드 바로가기 (기능 추가 / 초안 / 배포 보류)
 
-**기준 및 주기:** 최신 main 9ebc5613845ba2e8179a0051e86db996593c8a19 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 원본·국문 PROJECT_PLAN.ko.md 대조. 이전 기능 보완 v1462 → 현재 기능 추가 v1464 → 다음 기능 보완 v1466(잠정). 기획 Draft #1856/#1846/#1837/#1830 선행 의존성이 있어 독립 병합하지 않는다. QA v1367 FAILED/P0. Test·Production /api/version의 실행 앱 SHA는 c2129625aa6629c616fb31ce790950618b8d92b2이며 main과 다르다. [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+**기준 및 주기:** 최신 main 9ebc5613845ba2e8179a0051e86db996593c8a19 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 원본·국문 PROJECT_PLAN.ko.md 대조. 이전 기능 보완 v1462 → 현재 기능 추가 v1464 → 다음 기능 보완 v1466(잠정). 기획 Draft #1856/#1846/#1837/#1830 선행 의존성이 있어 독립 병합하지 않는다. QA v1367 FAILED/P0. Test·Production /api/version의 실행 앱 SHA는 c2129625aa6629c616fb31ce790950618b8d92b2이며 main과 다르다. [Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) / [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
 
 ### 실제 소스 공백과 목적
 frontend/src/app/dashboard/page.tsx의 '다음 활동'은 /quests, /work, /wallet, /stocks 네 링크가 고정되어 있다. 확인한 대시보드·backend/src/profile·DB 마이그레이션에는 회원별 바로가기 편집 기능이 없다. mobile-home-view.tsx의 isPinned는 공지 속성이지 개인 바로가기가 아니다. 기존 상점 관심 목록 F675-160을 중복 기획하지 않는다. 로그인하고 동의한 회원이 최대 **6개** 내부 화면을 직접 선택·순서 변경하고 Android에서도 동기화하도록 한다. 이 기능은 이동만 지원하며 WLD, 원장, 주문, 퀘스트 보상, 알림을 변경하지 않는다.

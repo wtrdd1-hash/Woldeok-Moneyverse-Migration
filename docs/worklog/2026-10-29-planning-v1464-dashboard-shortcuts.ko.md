@@ -7,3 +7,5 @@
 **백로그:** [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865): P0 REPO1464-01 FIN1464-02 SEC1464-03 REL1464-04, P1 SHORTCUT1464-05, SHORTCUT1464-06, SHORTCUT1464-07, SHORTCUT1464-08, SHORTCUT1464-09, SHORTCUT1464-10. 합성 10,001건·동시 100·권한 위조 100·응답 유실 50·경로 경합 30 시험 목표 미실행.
 **게이트:** 과거 체크섬 불일치 5건, 국고 미연계 552행, MINT 조정 19건/18,000 WLD 출처, 브랜치 보존, 외부 독립 복원·공식 정확 SHA Test 미인증. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
 **변경 범위:** 기획 문서만 변경. runtime·DB·Test·Production·WLD·원장·스위치·병합 없음.
+
+**GitHub update:** [Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) opened against unmerged v1462; [Issue #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865) contains P0/P1 acceptance contract. Initial documentation commit d1a77682493826d6f83d4e12c71e34132f9d1cc6. Release classifier 17/17 PASS; no official exact-SHA Test, CI still to be verified.

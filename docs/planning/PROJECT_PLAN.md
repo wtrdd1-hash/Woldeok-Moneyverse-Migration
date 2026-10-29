@@ -2,7 +2,7 @@
 
 ## v2026.10.29.1464 — F675-172 member-private dashboard shortcuts (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Authority:** latest main 9ebc5613845ba2e8179a0051e86db996593c8a19 verified at start and mid-work; AGENTS.md, README.md, PROJECT_PLAN.md (canonical English) and PROJECT_PLAN.ko.md (parity). Previous Feature Improvement v1462 → Current Feature Addition v1464 → Next Feature Improvement v1466 (provisional). Draft planning depends on #1856/#1846/#1837/#1830. QA v1367 FAILED/P0. Test and Production /api/version both report c2129625aa6629c616fb31ce790950618b8d92b2, not main. Engineering handoff [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+**Authority:** latest main 9ebc5613845ba2e8179a0051e86db996593c8a19 verified at start and mid-work; AGENTS.md, README.md, PROJECT_PLAN.md (canonical English) and PROJECT_PLAN.ko.md (parity). Previous Feature Improvement v1462 → Current Feature Addition v1464 → Next Feature Improvement v1466 (provisional). Draft planning depends on #1856/#1846/#1837/#1830. QA v1367 FAILED/P0. Test and Production /api/version both report c2129625aa6629c616fb31ce790950618b8d92b2, not main. [Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) / Engineering handoff [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
 
 **Source findings and full implementation-ready contract:**
 
