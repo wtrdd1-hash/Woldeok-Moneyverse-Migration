@@ -1,6 +1,17 @@
 ## v2026.10.29.1204 — Database construction runbook (isolated rebuild, not Production)
 - [Step-by-step English build](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [Korean](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). PostgreSQL dump, ACL, second disk, container, restoration, schema and ledger verification. User-approved finance DML preserved; live DB unchanged. [Internal](updates/v2026.10.29.1204-database-construction-internal.md) / [GitHub](updates/v2026.10.29.1204-database-construction-github.md).
 
+## 2026-10-29 v1450 — F675-168 blog queue publication identity and clean-state hardening
+
+- **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
+
+[Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / issue #1800.
+
+- Feature Improvement following v1448 Addition; next v1452 Addition (provisional). Main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; prior PR #1801 MERGED.
+- Live public counts at 09:12 KST: blog 0, verified blog 0; v265 records 14 legacy JSON posts withdrawn on owner request. Do not enable Save or resurrect articles.
+- Source-backed risks: static-first detail/API versus verified-first hub; migration 290 REVISE keeps receipt; DELETE invisible to public PUBLISHED reads. Harden immutable reviewed identity, epoch, tombstone Remove, signed receipts, owner security, web/Android, accessibility and SEO/cache purge. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04; P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. Real PG tests NOT RUN.
+- QA v1360 finance +18,000 WLD/18 accounts, app DML239, PUBLIC bank3, checksum5/unapplied20, 104 PRs closed unmerged with content parity unverified, Test exact-SHA mismatch; release HOLD. 09:12 disk recovered to root59%/data76%/tmp27% but restore unverified. External independent references 0 new, cumulative UNKNOWN/10,000. Documentation only; no deployment.
+
 ## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Development handoff:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

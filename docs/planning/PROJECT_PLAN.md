@@ -1,5 +1,17 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1450 — F675-168 blog reading-queue identity and purge-safe clean state (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**Draft planning PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — documentation only, RELEASE HOLD.
+
+- Previous v1448 Feature Addition → Current v1450 Feature Improvement → Next v1452 Feature Addition (provisional). Main `30ef09aa17e33be6104dd97971790f00a427dafc` checked start/mid; QA v1360 FAILED/HOLD. Prior PR #1801 MERGED, issue #1800 owns implementation. Source v265 records owner-directed withdrawal of 14 shared-JSON posts; 09:12 KST public `/api/blog` and `/api/v1/blog/verified` each reported count=0. No eligible article is asserted; keep Save feature OFF and preserve owner-directed clean state.
+
+- **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
+- Source risk: blog hub lists verified before legacy, but detail, metadata and `/api/blog/[slug]` resolve legacy/static before verified. Slug collision may misbind a bookmark; migration 290 REVISE retains receipt despite content change, and DELETE is hidden by PUBLISHED-only public reads. Define immutable reviewed publication ID+edition+epoch+revision+digest, source-authoritative resolver, deleted/withdrawn owner-only tombstones and safe Remove. No automatic re-publication or client-only success.
+- Owner-only web/Android saved queue (<=100 items, 20/page), immutable UUID+payload receipt, signed cursor, 409/410/422/429/503, CSRF/BOLA protections, noindex/no-store, WCAG 2.2 AA, admin revoke/cache purge/SEO, zero WLD. P0: ENV1450-01 FIN1450-02 SEC1450-03 REL1450-04; P1: BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 10,001-row/100-concurrent/100-negative isolated PG acceptance specified **NOT RUN**. QA v1360 18 USER_CASH/+18,000 WLD, 239 app writable, 3 PUBLIC bank functions, 5 checksum mismatches/20 unapplied, 104 PRs closed unmerged requiring exact content parity, Test SHA mismatch and off-host restore unknown; Production BLOCKED.
+- QA v1360 disk root99%/data100%/tmp97% at 08:26; 09:12 live read-only df root59%/data76%/tmp27% recovered, **cause and restore not verified**. External independently approved/deduplicated evidence new 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. No runtime, DB, WLD, Test or Production changes. Full bilingual specification in integrated master; developer handoff [#1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800).
+
+
 ## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Development handoff:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
