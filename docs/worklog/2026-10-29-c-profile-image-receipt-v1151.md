@@ -19,3 +19,8 @@
 ### TDD RED — 10:46 KST
 - Seven new owner-profile image receipt tests failed on the unmodified action (7 FAIL / 0 PASS): missing/foreign upload receipt, mismatched owner readback, false removal success, absent readback. Command: `pnpm --filter @moneyverse/frontend exec vitest run src/app/profile/image-action-receipts.test.ts`. Evidence `/tmp/mv-c-v1151-red.log`.
 - The backend returns 201 `{imagePath}` on upload and 204 on removal, with a separate owner-only GET settings; no DB migration required. Implement only server-side evidence checks and truthful action state.
+
+### TDD GREEN and mid-main refresh — 10:47 KST
+- Exact focused test: 7/7 PASS after requiring canonical `/media/profile/<uuid>.<png|jpg|webp>` upload receipt, owner GET `/api/v1/profile/settings` equality, and `image_url: null` after 204 removal. Unverified results show a retry/readback warning, never success.
+- Mid-run `git fetch origin main` unchanged at `f018d6300def45572c023c794d909691a2ce9128`. Existing responsive 44px upload button, live action alerts and profile noindex remain unchanged.
+- Next: run full package/build/typecheck/lint/security/app-api and isolated DB/CI gates. Do not change shared DB or Test/Production.
