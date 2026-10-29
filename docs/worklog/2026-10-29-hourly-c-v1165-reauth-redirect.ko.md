@@ -10,3 +10,8 @@
 
 ## 종료
 - 최종 검증 대기.
+
+### 중간 — 18:24 KST
+- RED: 기존 코드에서 11건 실패·3건 통과로 잘못된 이동 주소 수락 재현.
+- GREEN: 집중 Next 서버 액션 테스트 15/15 통과. Discord/Google 공급자별 HTTPS·state·PKCE·callback·scope/nonce 검사 추가.
+- main 재조회 및 기획서 확인. DB·운영 변경 없음.

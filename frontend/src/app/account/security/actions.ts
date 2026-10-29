@@ -11,6 +11,45 @@ import { parseSecuritySessions } from './account-security-evidence';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const PROVIDERS = new Set(['discord', 'google']);
 
+
+/** Only navigate to the provider's own OAuth endpoint with a complete PKCE challenge. */
+function verifiedReauthenticationUrl(receipt: unknown, provider: string): string {
+  if (typeof receipt !== 'object' || receipt === null ||
+      !('authorizationUrl' in receipt) || typeof receipt.authorizationUrl !== 'string') {
+    throw new Error('missing OAuth authorization receipt');
+  }
+  const endpoint = provider === 'discord'
+    ? 'https://discord.com/oauth2/authorize'
+    : 'https://accounts.google.com/o/oauth2/v2/auth';
+  const url = new URL(receipt.authorizationUrl);
+  if (url.origin + url.pathname !== endpoint || url.username || url.password || url.hash) {
+    throw new Error('unexpected OAuth provider endpoint');
+  }
+  const param = (key: string): string => {
+    const values = url.searchParams.getAll(key);
+    if (values.length !== 1 || !values[0]) throw new Error(`missing OAuth ${key}`);
+    return values[0];
+  };
+  if (param('response_type') !== 'code' || param('code_challenge_method') !== 'S256' ||
+      !/^[A-Za-z0-9_-]{16,256}$/.test(param('state')) ||
+      !/^[A-Za-z0-9_-]{43,128}$/.test(param('code_challenge')) ||
+      param('scope') !== (provider === 'discord' ? 'identify' : 'openid profile')) {
+    throw new Error('invalid OAuth challenge');
+  }
+  param('client_id');
+  if (provider === 'google' && !/^[A-Za-z0-9_-]{16,256}$/.test(param('nonce'))) {
+    throw new Error('missing Google OIDC nonce');
+  }
+  const callback = new URL(param('redirect_uri'));
+  const isLocalHttp = callback.protocol === 'http:' &&
+    (callback.hostname === 'localhost' || callback.hostname === '127.0.0.1');
+  if ((callback.protocol !== 'https:' && !isLocalHttp) || callback.username || callback.password ||
+      callback.search || callback.hash || callback.pathname !== `/auth/${provider}/callback`) {
+    throw new Error('invalid OAuth callback');
+  }
+  return receipt.authorizationUrl;
+}
+
 async function verifiedSessionReadback() {
   const inventory = parseSecuritySessions(await api<unknown>('/api/v1/account/security/sessions'));
   if (inventory === null) throw new Error('session readback is unavailable or invalid');
@@ -114,9 +153,10 @@ export async function beginSecurityReauthentication(formData: FormData): Promise
 
   let authorizationUrl: string;
   try {
-    ({ authorizationUrl } = await mutate<{ authorizationUrl: string }>(
-      `/api/v1/auth/${provider}/reauthentication`,
-    ));
+    authorizationUrl = verifiedReauthenticationUrl(
+      await mutate<unknown>(`/api/v1/auth/${provider}/reauthentication`),
+      provider,
+    );
   } catch {
     redirect('/account/security?error=reauth-start');
   }

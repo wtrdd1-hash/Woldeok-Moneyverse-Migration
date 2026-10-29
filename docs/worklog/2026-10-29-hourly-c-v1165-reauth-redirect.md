@@ -12,3 +12,8 @@
 
 ## Finished
 - Pending final evidence.
+
+### Midpoint — 2026-10-29 18:24 KST
+- TDD RED: 11 failed / 3 passed, demonstrating absent/malicious/mismatched authorization URL acceptance on the original action.
+- GREEN: 15/15 focused Next server-action tests passed. Added exact Discord/Google HTTPS endpoint checks, state, PKCE S256, callback shape and provider-specific scope/nonce checks; malformed receipts fail closed to existing accessible error banner.
+- Mid-run origin/main fetched and canonical planning digest checked. No migration or database change.
