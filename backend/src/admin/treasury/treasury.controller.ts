@@ -21,6 +21,7 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
+import { decodeTreasuryLedgerCursor, parseTreasuryLedgerLimit } from './treasury-ledger-cursor';
 
 export class TreasuryOperationDto {
   @ApiProperty({ example: 'VAULT_MAIN', description: '금고 코드' })
@@ -111,9 +112,9 @@ export class TreasuryDisburseGrantDto {
 export class TreasuryListQueryDto {
   @ApiProperty({ required: false, example: 30 })
   @IsOptional()
-  limit?: number;
+  limit?: string;
 
-  @ApiProperty({ required: false, example: '2026-09-21T00:00:00.000Z' })
+  @ApiProperty({ required: false, description: 'Opaque tl1 cursor from the previous page; timestamp-only cursors are not accepted' })
   @IsOptional()
   cursor?: string;
 }
@@ -224,7 +225,9 @@ export class AdminTreasuryController {
   @Get('transactions')
   @ApiOperation({ summary: '국고 원장 입출금 및 순환 감사 내역 조회' })
   async listTransactions(@Query() query: TreasuryListQueryDto) {
-    return this.service.listTransactions(query.limit, query.cursor);
+    const limit = parseTreasuryLedgerLimit(query.limit);
+    if (query.cursor !== undefined) decodeTreasuryLedgerCursor(query.cursor);
+    return this.service.listTransactions(limit, query.cursor);
   }
 
   @Get('user-money-flows')

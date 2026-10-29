@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { decodeMoneyFlowCursor, encodeMoneyFlowCursor, moneyFlowFilterFingerprint } from './treasury-moneyflow-cursor';
+import { decodeTreasuryLedgerCursor, encodeTreasuryLedgerCursor, parseTreasuryLedgerLimit } from './treasury-ledger-cursor';
 
 export interface TreasuryVaultRow {
   id: string;
@@ -891,7 +892,8 @@ export class TreasuryRepository {
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {
-    const boundedLimit = Math.max(1, Math.min(limit, 100));
+    const boundedLimit = parseTreasuryLedgerLimit(limit);
+    const position = cursor === undefined ? null : decodeTreasuryLedgerCursor(cursor);
     let query = `
       SELECT
         l.id,
@@ -905,34 +907,36 @@ export class TreasuryRepository {
         l.reason,
         l.balance_before,
         l.balance_after,
-        l.created_at
+        l.created_at,
+        l.created_at::text AS cursor_created_at
       FROM public.system_treasury_ledger l
       JOIN public.system_treasury_vaults v ON v.id = l.vault_id
       LEFT JOIN public.member_profiles mp ON mp.user_id = l.actor_id
     `;
     const params: unknown[] = [];
-
-    if (cursor) {
-      query += ` WHERE l.created_at < $1`;
-      params.push(cursor);
-      query += ` ORDER BY l.created_at DESC LIMIT $2`;
-      params.push(boundedLimit + 1);
-    } else {
-      query += ` ORDER BY l.created_at DESC LIMIT $1`;
-      params.push(boundedLimit + 1);
+    if (position) {
+      query += ` WHERE (l.created_at, l.id) < ($1::timestamptz, $2::uuid)`;
+      params.push(position.at, position.id);
     }
+    query += ` ORDER BY l.created_at DESC, l.id DESC LIMIT $${params.length + 1}`;
+    params.push(boundedLimit + 1);
 
-    const res = await this.pool.query<TreasuryLedgerRow>(query, params);
-    const rows = res.rows;
+    type LedgerQueryRow = TreasuryLedgerRow & { cursor_created_at: string };
+    const rows = (await this.pool.query<LedgerQueryRow>(query, params)).rows;
     let nextCursor: string | null = null;
-
     if (rows.length > boundedLimit) {
       const last = rows[boundedLimit - 1];
-      nextCursor = last ? last.created_at.toISOString() : null;
-      rows.pop();
+      if (!last || typeof last.cursor_created_at !== 'string') {
+        throw new Error('Treasury ledger cursor evidence unavailable');
+      }
+      nextCursor = encodeTreasuryLedgerCursor({ at: last.cursor_created_at, id: last.id });
     }
-
-    return { items: rows, next_cursor: nextCursor };
+    // Keep the public ledger row schema unchanged; cursor timestamp is internal.
+    const items = rows.slice(0, boundedLimit).map(({ cursor_created_at, ...ledger }) => {
+      void cursor_created_at;
+      return ledger;
+    });
+    return { items, next_cursor: nextCursor };
   }
 
   async injectFunds(adminId: string, vaultCode: string, amountWld: string, reason: string): Promise<Record<string, unknown>> {
