@@ -47,10 +47,12 @@ function matchesOwnerSubmission(
   result: unknown, id: string, storageKey: string, caption: string, submittedAt: string,
 ): boolean {
   if (!isRecord(result) || !Array.isArray(result.submissions)) return false;
+  // Migration 013 collapses whitespace for single-line captions before storage.
+  const normalizedCaption = caption.replace(/\s+/g, ' ').trim();
   return result.submissions.some((row: unknown) => isRecord(row)
     && row.photo_id === id
     && row.image_url === `/media/${storageKey}`
-    && row.alt_text === caption
+    && row.alt_text === normalizedCaption
     && typeof row.published === 'boolean'
     && typeof row.submitted_at === 'string'
     && Number.isFinite(Date.parse(row.submitted_at))

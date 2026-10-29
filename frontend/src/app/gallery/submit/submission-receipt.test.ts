@@ -16,10 +16,10 @@ const storageKey = 'dbf031ce-5aa4-4b91-bce8-bec1b2b4f023.png';
 const timestamp = '2026-10-29T05:00:00.000Z';
 const caption = 'My original gallery photo';
 
-function form(): FormData {
+function form(description = caption): FormData {
   const data = new FormData();
   data.set('photo', new File([new Uint8Array([137, 80, 78, 71])], 'photo.png', { type: 'image/png' }));
-  data.set('altText', caption);
+  data.set('altText', description);
   return data;
 }
 
@@ -124,6 +124,12 @@ describe('member gallery submission persistence receipts', () => {
     const result = await submitPhoto({ status: 'idle' }, form());
     expect(result.status).toBe('error');
     expect(result.message).toContain('내 제출 목록');
+  });
+
+
+  it('accepts the same caption after PostgreSQL collapses repeated spaces', async () => {
+    const result = await submitPhoto({ status: 'idle' }, form('My  original   gallery photo'));
+    expect(result.status).toBe('ok');
   });
 
 });
