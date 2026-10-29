@@ -13,8 +13,13 @@
 - [ ] Run focused tests, classify historical issues versus new defects, capture pass/fail/skip and release state.
 - [ ] Refetch main/integrated docs midway; record findings in versioned English/Korean documentation and GitHub review.
 
-## FINISHED
-- Pending evidence and disposition.
+## FINISHED — 2026-10-29 23:16 KST
+- Completed direct running-source and PostgreSQL read-only checks, focused backend/frontend safety tests and 12-area NPS/SWF/Treasury feature review.
+- Published bilingual findings `docs/findings/NPS_SWF_TREASURY_FULL_RUNTIME_AUDIT_v2026.10.29.1513.{md,ko.md}` and versioned internal/GitHub English/Korean update notes. Exposed both P0 live false-success #1909 and P1 pension-rate math #1910 on GitHub.
+- Source/test evidence: NPS backend 47 PASS, frontend 21 PASS; SWF backend 7 PASS / 11 FAIL, frontend 7 PASS / 2 FAIL. Production read-only data and auth negative documented; **no authenticated finance E2E**, no exact-SHA Test release, no migration, no data mutation, no deployment.
+- At end-of-audit fetch, `origin/main` remained `54b182d2214a15974350701174175f589789613b`; integrated planning master unchanged. GitHub documentation-only review PR [#1912](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1912) opened, with no app/runtime scope; its merge/review state is tracked on PR, not a claim of financial release.
+- Financial P0 disposition: **RELEASE HOLD** until actual source receipts and canonical Treasury funding are proven; block SWF fake-success endpoints. Preserve other workers' app code branches and production availability.
+
 
 ### IN PROGRESS checkpoint — 2026-10-29 23:12 KST
 - Confirmed exact running v1502 application source `c2129625aa66` is the same risky SWF service implementation inspected on freshly fetched main `54b182d22`. Git checkout with unrelated local mutations is untouched.
