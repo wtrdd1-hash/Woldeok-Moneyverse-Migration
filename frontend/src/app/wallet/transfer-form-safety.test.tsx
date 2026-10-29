@@ -74,4 +74,27 @@ describe('transfer form uncertain-outcome safety', () => {
     expect(container.textContent).not.toContain('동일한 요청');
   });
 
+  it('clears a restored transfer when the authenticated wallet user changes without a remount', async () => {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ATTEMPT));
+    const { container, rerender } = render(<TransferForm currency="WLD" userId={USER} />);
+    const recipient = container.querySelector<HTMLInputElement>('input[name="recipientUserId"]')!;
+    await waitFor(() => expect(recipient.value).toBe(ATTEMPT.recipientUserId));
+    rerender(<TransferForm currency="WLD" userId={OTHER_USER} />);
+    await waitFor(() => expect(recipient.value).toBe(''));
+    expect(recipient.readOnly).toBe(false);
+  });
+
+  it('shows a validation error instead of silently ignoring malformed amount input', async () => {
+    const { container } = render(<TransferForm currency="WLD" userId={USER} />);
+    const recipient = container.querySelector<HTMLInputElement>('input[name="recipientUserId"]')!;
+    const amount = container.querySelector<HTMLInputElement>('input[name="amount"]')!;
+    const key = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')!;
+    await waitFor(() => expect(key.value).toMatch(/^[0-9a-f-]{36}$/i));
+    fireEvent.change(recipient, { target: { value: ATTEMPT.recipientUserId } });
+    fireEvent.change(amount, { target: { value: '1e2' } });
+    fireEvent.submit(container.querySelector('form')!);
+    expect(container.textContent).toContain('정확한 머니버스 ID와 1 이상의 정수 금액');
+    expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
 });

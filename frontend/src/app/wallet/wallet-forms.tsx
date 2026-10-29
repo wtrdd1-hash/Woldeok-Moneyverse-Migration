@@ -88,6 +88,7 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
   const [requestKey, setRequestKey] = useState('');
   const [pendingAttempt, setPendingAttempt] = useState<TransferAttempt | null>(null);
   const [storageError, setStorageError] = useState(false);
+  const [validationError, setValidationError] = useState(false);
 
   useEffect(() => {
     try {
@@ -100,6 +101,10 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
         setPendingAttempt(restored);
       } else {
         if (stored) sessionStorage.removeItem(storageKey);
+        setPendingAttempt(null);
+        setRecipientUserId('');
+        setAmount('');
+        setValidationError(false);
         setRequestKey(crypto.randomUUID());
       }
     } catch {
@@ -130,6 +135,7 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
     if (pendingAttempt) return;
     const cur = parseInt(amount, 10) || 0;
     setAmount(String(cur + num));
+    setValidationError(false);
     setRequestKey(crypto.randomUUID());
   };
 
@@ -140,8 +146,10 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
     };
     if (storageError || !validTransferAttempt(attempt)) {
       event.preventDefault();
+      if (!storageError) setValidationError(true);
       return;
     }
+    setValidationError(false);
     try {
       // Persist before dispatch, not only after an error response: the browser
       // may never receive that response or may be reloaded during the request.
@@ -186,6 +194,7 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
                 onChange={(event) => {
                   if (pendingAttempt) return;
                   setRecipientUserId(event.target.value);
+                  setValidationError(false);
                   setRequestKey(crypto.randomUUID());
                 }}
                 className="min-h-11"
@@ -217,6 +226,7 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
                   onChange={(event) => {
                     if (pendingAttempt) return;
                     setAmount(event.target.value);
+                    setValidationError(false);
                     setRequestKey(crypto.randomUUID());
                   }}
                   required
@@ -256,6 +266,9 @@ export function TransferForm({ currency, userId }: { readonly currency: string; 
           )}
           {storageError && (
             <p role="alert" className="text-sm text-destructive">브라우저가 송금 요청을 안전하게 보관할 수 없어 송금이 차단되었습니다. 저장 기능을 확인한 뒤 다시 열어 주세요.</p>
+          )}
+          {validationError && (
+            <p role="alert" className="text-sm text-destructive">정확한 머니버스 ID와 1 이상의 정수 금액을 입력해 주세요.</p>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
