@@ -40,6 +40,19 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
+  it('preserves the authoritative published_at for Android help reads without public caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const published_at = '2026-10-29T01:15:00.000Z';
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ article: { article_id: 'test', published_at } }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/help/articles/ko/account-login'), context('help', 'articles', 'ko', 'account-login'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect((await response.json()).article.published_at).toBe(published_at);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/articles/ko/account-login');
+  });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 import { searchVerifiedHelp, type HelpSearchState } from './actions';
 import { helpArticleHref, normalizeHelpLocale, type HelpLocale } from './locale';
+import { HelpPublicationDate } from './help-publication-date';
 
 const initial: HelpSearchState = { status: 'initial', articles: [] };
 export function HelpSearch({ initialLocale = 'ko' }: { initialLocale?: HelpLocale }) {
@@ -30,7 +31,7 @@ export function HelpSearch({ initialLocale = 'ko' }: { initialLocale?: HelpLocal
       {state.status === 'results' && <p>{state.articles.length}개의 검증된 도움말</p>}
     </div>
     {state.status === 'results' && <ul className="grid gap-3">{state.articles.map(article =>
-      <li key={article.article_id} className="rounded-xl border p-4"><Link className="font-semibold underline underline-offset-4" href={helpArticleHref(article.slug, normalizeHelpLocale(article.locale))}>{article.title}</Link><p className="mt-2 text-sm">{article.summary}</p></li>
+      <li key={article.article_id} className="rounded-xl border p-4"><Link className="font-semibold underline underline-offset-4" href={helpArticleHref(article.slug, normalizeHelpLocale(article.locale))}>{article.title}</Link><p className="mt-2 text-sm">{article.summary}</p><HelpPublicationDate publishedAt={article.published_at} locale={normalizeHelpLocale(article.locale)} /></li>
     )}</ul>}
   </section>;
 }

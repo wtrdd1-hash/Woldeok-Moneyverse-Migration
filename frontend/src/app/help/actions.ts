@@ -3,7 +3,7 @@
 import { api } from '@/lib/api';
 import { normalizeHelpLocale, type HelpLocale } from './locale';
 
-export type HelpSummary = { article_id: string; locale: HelpLocale; slug: string; title: string; summary: string; category: string };
+export type HelpSummary = { article_id: string; locale: HelpLocale; slug: string; title: string; summary: string; category: string; published_at?: string };
 export type HelpSearchState = { status: 'initial'|'results'|'empty'|'invalid'|'unavailable'; articles: HelpSummary[] };
 
 /** Query is sent in the POST body, never a URL, referrer or client-side cache. */
