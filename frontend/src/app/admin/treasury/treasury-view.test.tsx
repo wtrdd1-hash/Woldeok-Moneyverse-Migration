@@ -153,6 +153,8 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(within(expenditureSection).queryByText(/0 WLD/)).toBeNull();
     expect(revenueSection.querySelector('[class*="sm:p-6"]')).toBeTruthy();
     expect(expenditureSection.querySelector('[class*="sm:p-6"]')).toBeTruthy();
+    expect(within(revenueSection).getByRole('link', { name: '다시 조회' }).getAttribute('href')).toBe('/admin/treasury');
+    expect(within(expenditureSection).getByRole('link', { name: '다시 조회' }).getAttribute('href')).toBe('/admin/treasury');
   });
 
   it('preserves verified empty-ledger zero for revenue while expenditure is unavailable', () => {

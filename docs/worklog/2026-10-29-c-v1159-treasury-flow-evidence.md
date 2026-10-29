@@ -21,3 +21,9 @@ Pending. No deployment authorized without every gate PASS.
 - Added four regression cases to the existing treasury view suite, mocked unrelated server-action dialogs to avoid browser `node:crypto` import; `NODE_ENV=test` required for React act.
 - Confirmed expected RED: 3 failures for missing independent unavailable sections, 5 PASS. Existing unrelated 200-zero test assertion was adjusted to scope legitimate totals.
 - No production code modified at this checkpoint. Release remains HOLD.
+
+### GREEN checkpoint — 15:15 KST
+- Added explicit independent accessible status Cards with 44px retry links, responsive wrapping, and no unknown WLD totals. Verified 200-empty ledger still shows real zero.
+- Added server-page integration tests for independent null/200 responses, admin guard, force-dynamic/noindex; existing authenticated `api` defaults to `cache: no-store`.
+- Focused test suite 11 PASS / 0 FAIL on Debian miniPC. No backend, DB, finance or deployment changes; depends on B draft #1852 for 503 source contract.
+- Mid-run `origin/main` advanced `679cb5904` -> `95a8fdb85` (release documentation only, no touched frontend files). Canonical project plan header remains v1452; integrated master changed and will be reviewed before final rebase.
