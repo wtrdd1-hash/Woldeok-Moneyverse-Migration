@@ -1,0 +1,10 @@
+[Unit]
+Description=Moneyverse Telegram stock market and news alerts every 2 minutes
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=2min
+AccuracySec=15s
+Persistent=true
+Unit=moneyverse-telegram-market.service
+[Install]
+WantedBy=timers.target

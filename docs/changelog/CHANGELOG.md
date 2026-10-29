@@ -1,3 +1,6 @@
+## v2026.10.29.1511 — Telegram market news, prices and critical logs (candidate)
+- Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. [Release](../releases/v2026.10.29.1511.md).
+
 ## v2026.10.29.1510 — Private Telegram operations alert bridge (merged, activation pending)
 - Read-only service/QA/blog/backup/disk changes with private pairing, safe redaction, deduplicated dispatch and daily summary. No account events or monetary data are forwarded. Test/Production evidence pending. [Release](../releases/v2026.10.29.1510.md).
 
