@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
+import type { ActionState } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
 import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
 
@@ -67,18 +68,97 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
   );
 }
 
-export function TransferForm({ currency }: { readonly currency: string }) {
+const PENDING_TRANSFER_STORAGE = 'moneyverse:wallet:pending-transfer:v1';
+const TRANSFER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+type TransferAttempt = NonNullable<ActionState['transferAttempt']>;
+
+function validTransferAttempt(value: unknown): value is TransferAttempt {
+  if (!value || typeof value !== 'object') return false;
+  const attempt = value as Partial<TransferAttempt>;
+  return typeof attempt.recipientUserId === 'string' && TRANSFER_UUID.test(attempt.recipientUserId)
+    && typeof attempt.idempotencyKey === 'string' && TRANSFER_UUID.test(attempt.idempotencyKey)
+    && typeof attempt.amount === 'string' && /^[1-9][0-9]*$/.test(attempt.amount);
+}
+
+export function TransferForm({ currency, userId }: { readonly currency: string; readonly userId: string }) {
+  const storageKey = `${PENDING_TRANSFER_STORAGE}:${userId}`;
   const [state, action] = useActionState(transfer, IDLE);
+  const [recipientUserId, setRecipientUserId] = useState('');
   const [amount, setAmount] = useState('');
   const [requestKey, setRequestKey] = useState('');
+  const [pendingAttempt, setPendingAttempt] = useState<TransferAttempt | null>(null);
+  const [storageError, setStorageError] = useState(false);
+  const [validationError, setValidationError] = useState(false);
 
   useEffect(() => {
-    setRequestKey(crypto.randomUUID());
-  }, [state]);
+    try {
+      const stored = sessionStorage.getItem(storageKey);
+      const restored: unknown = stored ? JSON.parse(stored) : null;
+      if (validTransferAttempt(restored)) {
+        setRecipientUserId(restored.recipientUserId);
+        setAmount(restored.amount);
+        setRequestKey(restored.idempotencyKey);
+        setPendingAttempt(restored);
+      } else {
+        if (stored) sessionStorage.removeItem(storageKey);
+        setPendingAttempt(null);
+        setRecipientUserId('');
+        setAmount('');
+        setValidationError(false);
+        setRequestKey(crypto.randomUUID());
+      }
+    } catch {
+      // No persistent request identity means a lost response could be retried
+      // with a new key after navigation. Fail closed instead.
+      setStorageError(true);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (state.status === 'ok') {
+      try { sessionStorage.removeItem(storageKey); } catch { setStorageError(true); }
+      setPendingAttempt(null);
+      setRecipientUserId('');
+      setAmount('');
+      setRequestKey(crypto.randomUUID());
+    } else if (state.errorCode === 'transfer_verification_pending' && state.transferAttempt) {
+      setPendingAttempt(state.transferAttempt);
+      try { sessionStorage.setItem(storageKey, JSON.stringify(state.transferAttempt)); }
+      catch { setStorageError(true); }
+    } else if (state.status === 'error') {
+      setPendingAttempt(null);
+      try { sessionStorage.removeItem(storageKey); } catch { setStorageError(true); }
+    }
+  }, [state, storageKey]);
 
   const addAmount = (num: number) => {
+    if (pendingAttempt) return;
     const cur = parseInt(amount, 10) || 0;
     setAmount(String(cur + num));
+    setValidationError(false);
+    setRequestKey(crypto.randomUUID());
+  };
+
+  const submitTransfer = (event: React.FormEvent<HTMLFormElement>) => {
+    const canonicalAmount = amount.replace(/^0+(?=\d)/, '');
+    const attempt = {
+      recipientUserId: recipientUserId.trim(), amount: canonicalAmount, idempotencyKey: requestKey,
+    };
+    if (storageError || !validTransferAttempt(attempt)) {
+      event.preventDefault();
+      if (!storageError) setValidationError(true);
+      return;
+    }
+    setValidationError(false);
+    try {
+      // Persist before dispatch, not only after an error response: the browser
+      // may never receive that response or may be reloaded during the request.
+      sessionStorage.setItem(storageKey, JSON.stringify(attempt));
+      setPendingAttempt(attempt);
+    } catch {
+      event.preventDefault();
+      setStorageError(true);
+    }
   };
 
   return (
@@ -92,7 +172,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={action} className="grid gap-4">
+        <form action={action} onSubmit={submitTransfer} className="grid gap-4">
           <input type="hidden" name="idempotencyKey" value={requestKey} />
           <FieldGroup className="gap-4 sm:grid-cols-2">
             <Field>
@@ -108,6 +188,15 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                 maxLength={36}
                 placeholder="UUID"
                 required
+                readOnly={Boolean(pendingAttempt)}
+                aria-readonly={Boolean(pendingAttempt)}
+                value={recipientUserId}
+                onChange={(event) => {
+                  if (pendingAttempt) return;
+                  setRecipientUserId(event.target.value);
+                  setValidationError(false);
+                  setRequestKey(crypto.randomUUID());
+                }}
                 className="min-h-11"
               />
               <FieldDescription>
@@ -132,7 +221,14 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                   step={1}
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  readOnly={Boolean(pendingAttempt)}
+                  aria-readonly={Boolean(pendingAttempt)}
+                  onChange={(event) => {
+                    if (pendingAttempt) return;
+                    setAmount(event.target.value);
+                    setValidationError(false);
+                    setRequestKey(crypto.randomUUID());
+                  }}
                   required
                   className="min-h-11"
                 />
@@ -145,6 +241,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                     type="button"
                     variant="outline"
                     size="sm"
+                    disabled={Boolean(pendingAttempt)}
                     className="h-7 text-xs px-2"
                     onClick={() => addAmount(val)}
                   >
@@ -161,12 +258,24 @@ export function TransferForm({ currency }: { readonly currency: string }) {
             </Field>
           </FieldGroup>
 
+          {pendingAttempt && (
+            <div role="status" aria-live="polite" className="rounded-md border border-amber-500/60 bg-amber-500/10 p-3 text-sm">
+              <p className="font-semibold">송금 처리 여부 확인 중 — 동일한 요청만 다시 보낼 수 있습니다.</p>
+              <p className="mt-1">이전 요청이 아직 처리되지 않았다면 같은 키로 다시 보내는 동작이 실제 송금을 실행할 수 있습니다. 새 송금을 시작하지 말고 <Link className="underline" href="/wallet/activity">원장 내역</Link>을 확인하세요.</p>
+            </div>
+          )}
+          {storageError && (
+            <p role="alert" className="text-sm text-destructive">브라우저가 송금 요청을 안전하게 보관할 수 없어 송금이 차단되었습니다. 저장 기능을 확인한 뒤 다시 열어 주세요.</p>
+          )}
+          {validationError && (
+            <p role="alert" className="text-sm text-destructive">정확한 머니버스 ID와 1 이상의 정수 금액을 입력해 주세요.</p>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
               <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
             </p>
-            <SubmitButton className="min-h-11 font-bold">
-              <T korean="돈 보내기" english="Send WLD" />
+            <SubmitButton disabled={storageError || !requestKey} className="min-h-11 font-bold">
+              {pendingAttempt ? '동일 요청 다시 보내기' : <T korean="돈 보내기" english="Send WLD" />}
             </SubmitButton>
           </div>
           <ActionAlert state={state} />

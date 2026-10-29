@@ -444,11 +444,12 @@ export class WalletService {
       idempotencyKey: key,
     });
 
+    const transactionId = requireUuid(receipt.transactionId, 'database transaction id');
     if (this.broadcast) {
       try {
         // Notify recipient in real-time
         this.broadcast.publishUserNotification(recipient, {
-          id: `notif_recv_${Date.now()}`,
+          id: `notif_recv_${transactionId}`,
           title: 'WLD 송금 도착',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
           type: 'success',
@@ -456,7 +457,7 @@ export class WalletService {
         });
         // Notify sender in real-time
         this.broadcast.publishUserNotification(actorUserId, {
-          id: `notif_send_${Date.now()}`,
+          id: `notif_send_${transactionId}`,
           title: 'WLD 송금 완료',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
           type: 'info',
@@ -467,7 +468,7 @@ export class WalletService {
       }
     }
 
-    return { transactionId: requireUuid(receipt.transactionId, 'database transaction id') };
+    return { transactionId };
   }
 
   async claimDaily(
