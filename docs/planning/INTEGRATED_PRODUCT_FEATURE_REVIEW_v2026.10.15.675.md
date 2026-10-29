@@ -1,5 +1,16 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.29.1454 — F675-169 verified help feedback publication/replay/privacy improvement (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+- **Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). Stacked on unmerged/conflicting Draft PR #1815, engineering issue #1814. Source main b44ffd0af9e2bd6e7c2be7345b72094827078c3d at start; no runtime or finance writes.
+- **QA freshness (11:12 KST):** v1363 branch audit IN PROGRESS, no completed report; last completed QA v1362 HOLD.
+- **Actual source gap:** migration 282 **already checks independent review and reviewed_until expiry**. But help_public_article, NestJS repository and Next DTO omit exact publishedRevisionId/articleVersion/rendered contentDigest; source_sha256 is not a rendered-content digest. DEV DB read-only 11:09 KST: four help/revision/feedback tables NULL, not Production proof. Feature OFF.
+- **Improvement:** bind Yes/No/Change/Remove to exact approved revision and canonical content SHA-256; DB publication lock, stale 409/retracted 410/unavailable 503, owner intent receipts and original historical replay after retraction, safe owner removal, anti-BOLA/CSRF, mobile parity, WCAG 2.2 AA, 320px, noindex/no-store and zero WLD. Admin k>=20 is insufficient without filter/time/complement differencing protection.
+- **Backlog:** P0 ENV1454-01, FIN1454-02, SEC1454-03, REL1454-04; P1 HELP1454-05, HELP1454-06, HELP1454-07, HELP1454-08, HELP1454-09, HELP1454-10. QA v1362: ledger arithmetic mismatch **0 after 19-posting MINT backfill**, but funding authority/receipts **UNVERIFIED** (#1816); 5 checksum mismatches, **22** source-unapplied migrations including 282, historical 239 app-writable relations, blog publisher provenance #1818; latest main CI initially IN PROGRESS. RELEASE HOLD. Proposed isolated PG 10,001 rows / 100 concurrency / 100 forged / 30 expiry races / 20 differencing probes **NOT RUN**.
+- **External independent evidence gate:** new approved 0, cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS. Full bilingual contract in integrated planning master, no new distributed planning spec.
+
+
+
 ## v2026.10.29.1452 — Portfolio decision — F675-169 verified help article usefulness feedback (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Actual connected development DB (read-only 10:15 KST):** `woldeok_moneyverse_dev` `to_regclass` reports all four help/revision/feedback tables absent (NULL); Production not queried. Source migration 282 is not live proof.

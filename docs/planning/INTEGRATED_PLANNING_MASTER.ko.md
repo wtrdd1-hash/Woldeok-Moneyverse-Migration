@@ -1,5 +1,44 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1454 / F675-169 — 도움말 피드백 게시 식별·재시도·개인정보 보호 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합 Draft PR #1815 및 개발 이슈 #1814의 문서 전용 보완이다. 시작 시 GitHub main은 b44ffd0af9e2bd6e7c2be7345b72094827078c3d이고 PR #1815는 OPEN이면서 main과 CONFLICTING이었다. 이번 변경은 선행 PR의 정확한 HEAD에 적층하며 main에 병합하지 않는다. AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 한국어 PROJECT_PLAN.ko.md를 기준으로 한다.
+
+**QA 최신성(11:12 KST):** QA v1363 브랜치 감사 증거가 생성됐으나 완료된 독립 QA 보고서는 없다. 마지막 완료 QA는 v1362 HOLD다.
+
+
+### 확인된 근거와 검증 한계
+- 마이그레이션 282의 공개 도움말 함수에는 이미 독립 승인자 검증과 reviewed_until > clock_timestamp() 만료 검사가 있다. **해당 검사가 없다고 주장하지 않는다.** 그러나 help_public_article, NestJS HelpRepository.article, Next.js 도움말 DTO에는 정확한 published_revision_id, article.version, 화면에 표시한 본문 해시가 없다. 기존 source_sha256은 출처 근거 자료의 해시이며 표시된 제목·본문 해시와 같다는 보장이 없다. 따라서 회원 피드백을 실제 승인된 개정에 정확히 연결할 수 없다.
+- 11:09 KST miniPC 개발 DB woldeok_moneyverse_dev 읽기 전용 조회에서 help_articles, help_article_revisions, help_article_feedback_current, help_article_feedback_events가 모두 NULL이었다. QA v1362에서 마이그레이션 282를 포함한 **소스 기준 미적용 22개**, 체크섬 불일치 5건이 확인됐다. 개발 DB 증거이며 Production DB 상태나 도움말 운영 여부를 증명하지 않는다.
+- QA v1362에서 기존 18명/18,000 WLD의 **원장 산술 차이**는 19개 분개(18 USER_CASH 차변, 1 MINT 대변) 후 **0**으로 측정됐다. 그러나 과거 지급 자금 출처, MINT와 운영자가 주장한 TREASURY의 불일치, 승인 및 연결 감사·아웃박스·재무 영수증은 **미검증**이다(이슈 #1816). 추가 임의 역분개·재지급을 금지하며 산술 0을 감사 완료로 표시하지 않는다. QA #1818은 근거 미검증 JSON 블로그 발행도 지적했다. main b44ffd0a에 블로그 안전성 병합이 있지만 시작 시 정확 SHA CI는 IN PROGRESS였다. 전체 릴리스 HOLD.
+- 외부 독립 근거 신규 승인 **0건**, 중복 제거·분류 후 누적 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 피드백만으로 자동 게시·수정·고객지원 문의 생성·WLD 지급을 하지 않고 이 게이트를 우회하지 않는다.
+
+### 회원 흐름 및 API 계약 보완
+- 실제 승인된 /help/[slug]?locale=ko|en 응답은 **원자적 게시 설명자**를 제공해야 한다: articleId UUID, publishedRevisionId UUID, articleVersion bigint, locale, publishedAt, reviewedUntil, 정규 contentDigest SHA-256. 해시는 언어·제목·요약·본문·출처 URL·출처 해시를 버전 지정한 정규 인코딩으로 계산한다. 가변 slug·발행시각·source_sha256만으로 본문을 식별하지 않는다. SSR·NestJS·Next BFF·Android는 같은 설명자를 사용하고 클라이언트가 제출한 개정·해시를 권위로 인정하지 않는다.
+- 인증 및 동의된 회원은 도움됨/도움되지 않음, 부정 응답의 제한된 사유 코드, 변경·삭제·고객지원 연결을 선택한다. 비회원은 로그인 안내만 본다. 상태: FEATURE_OFF, NO_VERIFIED_PUBLICATION, AUTH_REQUIRED, READY, SUBMITTING, SAVED_VERIFIED, REVISION_CHANGED_409, RETRACTED_OR_EXPIRED_410, RATE_LIMITED_429, UNKNOWN_COMMIT, UNAVAILABLE_503, REMOVING, REMOVED_VERIFIED. HTTP 2xx·리다이렉트·타임아웃만으로 저장 성공을 표시하지 않는다. 영수증의 소유자·intent UUID·게시물/개정·언어·선택/작업·커밋 버전을 확인한다. 철회 후 과거 영수증은 HISTORICAL_NOT_CURRENT로 표시한다.
+- 제안 API: GET /api/v1/help/articles/:id/feedback/me?revisionId=, PUT /api/v1/help/articles/:id/feedback (revisionId, articleVersion, contentDigest, locale, choice, reasonCode?, intentId, expectedVersion), 동일 리소스 DELETE, GET /api/v1/help/feedback/receipts/:intentId. Next BFF·Android /app-api/v1에서 401/403/404/409/410/422/429/503 및 private,no-store를 동일하게 적용한다. ownerId나 SQL p_actor만으로 인증하지 않는다.
+
+### DB·보안·관리자·롤백
+- 체크섬·최신 마이그레이션 순서·격리 DB 검토 후 **전진형 추가 마이그레이션**만 허용한다. 기존 282를 수정하거나 앱 계정에 직접 테이블 DML을 부여하지 않는다. DB 트랜잭션에서 게시물 행을 잠그고 같은 게시 개정·버전·해시, 독립 심사, DB clock_timestamp() 시점의 유효성을 검사한 다음 (owner,intentId) 및 현재 피드백 행을 일정 순서로 잠근다. 현재값·변경 불가 이벤트·영수증을 원자적으로 커밋한다. UNIQUE(owner,intentId), 정규 요청 해시, SECURITY DEFINER 고정 search_path, 세션 결합 소유자 검증, PUBLIC EXECUTE 및 앱 직접 DML 철회가 필수다.
+- 인증된 소유자 확인 후 **현재 게시 상태 거절보다 먼저 기존 커밋 intent 재생을 검사**한다. 같은 intent/내용은 철회 후에도 원래 과거 영수증을 반환하되 새 투표를 만들지 않는다. 같은 UUID에 다른 내용은 409, 타인/미존재 intent는 존재 여부를 숨긴다. 타임아웃 후 영수증 조회, 결과 미확정 시 같은 UUID만 재시도한다. 소유자의 과거 투표 삭제는 게시물 철회·만료 이후에도 소유자 행과 최소 tombstone으로 허용한다. 만료·철회 경합에서 허위 성공을 허용하지 않는다. 90일 보존은 법률·개인정보 검토 전 **제안값**이다.
+- 관리자는 개별 회원 목록 없이 정확한 개정별 서로 다른 회원 **20명 이상** 집계만 본다. 단순 k>=20으로는 기간·필터·인접 스냅샷·보완 집계 차분 공격을 막지 못한다. 고정된 큰 구간, 작은 셀 및 보완 셀 동시 억제, 접근 제한·감사를 적용한다. 자유입력 PII, IP/UA, 공개 SEO 평가 스키마 및 비공개 캐시 유출을 금지한다. 로그아웃·계정 전환 시 영수증·intent 캐시를 격리하고 Android 오프라인 intent는 검증 전 UNKNOWN으로 둔다. WCAG 2.2 AA, 키보드·스크린리더·TalkBack, 320px, no-store/noindex. KPI: 영수증 정합성 목표 100%, 허위 성공·타인 유출·구버전 승인·중복 커밋·소수집계 유출 0, 참여율 기준 미확정. WLD·원장·퀘스트 영향 0.
+
+### 개발 인계 백로그 — P0 4건 / P1 6건
+- **P0 ENV1454-01:** 개발/Test/Production 격리, 저장 공간, 암호화된 외부 백업 및 독립 복원 증명.
+- **P0 FIN1454-02:** 19개 분개 보존, 과거 18건 지급·MINT 출처·승인·연결 영수증 검증(#1816). 산술 0은 자금 출처 승인 아님.
+- **P0 SEC1454-03:** 체크섬 불일치 5건, 282 포함 소스 미적용 22건 조사; 과거 앱 직접 쓰기 권한 239개 관계 및 PUBLIC 은행 함수 실행권한 재측정, 세션 결합 소유자·게시 승인 검증.
+- **P0 REL1454-04:** QA #1818 블로그 근거 문제와 최신 main CI, 선행 PR #1815 충돌 해결, 공식 Test 정확 SHA 인증 E2E, 독립 복원 및 승인된 롤백. 운영승격 금지 유지.
+- **P1 HELP1454-05:** 게시 개정 ID·articleVersion·reviewedUntil·본문 contentDigest, 전진형 스키마/FK/인덱스/ACL.
+- **P1 HELP1454-06:** 게시물/intent 잠금 순서, 과거 멱등 재생, 현재값/이벤트/영수증 원자성, 만료·철회 경합, 본인 삭제.
+- **P1 HELP1454-07:** NestJS/Next BFF/Android 동등성, 동의·세션·CSRF·BOLA, no-store 및 실패 시 503.
+- **P1 HELP1454-08:** 비회원/회원 UI, 정확 영수증, 계정 전환·오프라인, 320px/WCAG/TalkBack.
+- **P1 HELP1454-09:** 관리자 k>=20 차분 공격 방어, 보존·삭제, SEO 및 분석.
+- **P1 HELP1454-10:** 격리 PostgreSQL **합성 이벤트 10,001건**, **동시 요청 100건**, **위조 소유자/개정 100건**, **만료·철회 경합 30건**, **차분 탐침 20건**, 예상치 못한 WLD 변동 0, API/Android 회귀, 정확 SHA Test·롤백. **미실행.**
+
+**최종 게이트:** PARTIAL / DRAFT / RELEASE HOLD. 본 문서는 개발 인계이며 배포 승인이 아니다. 런타임 코드·DB 쓰기·Test/Production·WLD·원장·기능 스위치 변경 없이 Gemini/A/B/C/QA의 브랜치를 보존한다.
+
+
+
 ## v1452 / F675-169 — 검증된 도움말 유용성 피드백과 회원 영수증 (기능 추가 / 초안 / 운영 보류)
 
 **연결 DB 읽기 전용 확인(10:15 KST):** `SELECT current_database(), to_regclass(...)` 결과 DB는 `woldeok_moneyverse_dev`, `help_articles`, `help_article_revisions`, `help_article_feedback_current`, `help_article_feedback_events`는 **모두 NULL**이었다. 연결된 DB에 마이그레이션 282 기반 도움말 테이블이 없으므로 코드 존재를 배포로 간주하지 않는다. **운영 DB 스키마 확인 결과는 아니다.**
