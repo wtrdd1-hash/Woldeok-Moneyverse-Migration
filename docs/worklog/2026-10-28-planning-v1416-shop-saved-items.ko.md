@@ -1,0 +1,20 @@
+# 기획 v1416 — 회원 상점 아이템 나중에 보기 (기능 추가)
+
+**상태:** 진행 중 / 초안 / 운영 보류. 이전 보완 v1414 → 현재 추가 v1416 → 다음 보완 v1418(잠정). main d12c948ac454b0762cfb7fb0cddf83703a775172.
+
+## 시작 16:08 KST
+skills 커넥터 목록이 비어 설치된 Superpowers를 직접 읽었다. miniPC·GitHub·AGENTS·README·영문/국문 계획·Next/NestJS/DB·QA v1343 조사 후 별도 브랜치/작업 폴더 생성. 최초 알림 분류 설정은 탐색 후보였다.
+
+## 진행 16:12~16:17 KST
+기존 F675-130/#1353 및 F675-102/103과 중복을 발견해 알림 후보를 폐기하고 상점 저장 목록으로 변경했다. /shop/catalog·상점 API/저장소·071/073/075 마이그레이션에서 본인 저장 API/테이블이 없음을 확인했다. 시드 quantity NULL은 무제한이다. main 변경 없음 재확인. 영문/국문 통합 명세·P0/P1·업데이트 작성, 런타임 미수정. 디스크 96%, QA v1343의 18,000 WLD 불일치·국고 0은 별도 #1706.
+
+## 점검·승격 게이트
+- [x] 최신 main/QA/PR/코드 조사 및 중복 회피.
+- [x] 영문/국문 통합 마스터·계획·기능 검토·로그.
+- [x] GitHub 이슈 #1713·초안 PR #1714 생성, 후보 SHA·CI 확인.
+- [x] 완료 기록·최종 main 재확인.
+P0 ENV1416-01 FIN1416-02 SEC1416-03 REL1416-04; P1 SHOP1416-05 SHOP1416-06 SHOP1416-07 SHOP1416-08 SHOP1416-09 SHOP1416-10.
+합성 10,001/100/100 시험 명세만 작성·미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 공식 Test 정확 SHA·독립 복원·금융 정합성·운영승격 HOLD.
+
+## 완료 16:19 KST — PARTIAL / DRAFT / RELEASE HOLD
+최신 main d12c948ac454b0762cfb7fb0cddf83703a775172 재확인(변경 없음). GitHub 이슈 #1713 OPEN, 초안 PR #1714 OPEN. 최종 기록 전 후보 SHA 998e3f81cf47f6ff9d1a990d7ad280bcdf1fc68f, release-input·verify/classify PASS, classify·policy PENDING. 작업 중 데이터 디스크 사용률이 **97%**로 상승, 삭제/정리 미수행. 영문·국문 7쌍·백로그 10개·문서 diff 검사 PASS. 런타임/DB/WLD/원장/Test/운영 변경 없음. 합성 E2E·공식 Test 정확 SHA·독립 복원·외부 10,000건 게이트 미달. 다음 v1418 기능 보완(잠정), 기존 예약 변경 없음.

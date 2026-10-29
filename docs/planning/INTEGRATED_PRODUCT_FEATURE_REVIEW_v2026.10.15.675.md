@@ -1,7 +1,7 @@
-## v1414 — F675-159 verified inbox hardening (Feature Improvement / DRAFT / RELEASE HOLD)
-- Previous Addition v1412 → Current Improvement v1414 → Next Addition v1416 provisional. Main `9ff388ab608af99b9ccc806c35ebac5c14bd15e9`; A1425 Draft #1698 is unmerged; QA v1342 tested an older main. Planning-only branch, no runtime change.
-- Candidate issues: offset 5000 silently ends browsing despite >5,020 records; concurrent OFFSET drift; global read-all is disabled on empty category and otherwise affects all categories without clear label; no global unread badge; session-switch response fence missing; read-all receipt's second SQL is observational. DB direct grants and untracked notification DDL remain P0.
-- P0 ENV1414-01 SEC1414-02 REL1414-03 NTF1414-04; P1 NTF1414-05 NTF1414-06 NTF1414-07 NTF1414-08 NTF1414-09 NTF1414-10. Full UX, API, DB, ACL, SEO, Android, 10,001/100/100 synthetic acceptance and rollback in integrated master EN/KO. Tests specified NOT RUN; external approved 0, cumulative UNKNOWN/10,000 BLOCKED. Production exact SHA unknown, Test/restore unverified, disk 91%, RELEASE HOLD.
+## v1416 — F675-160 member shop saved-items shortlist (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1414 → Current Addition v1416 → Next Improvement v1418 provisional; main d12c948ac454b0762cfb7fb0cddf83703a775172; QA v1343. Existing /shop/catalog lacks owner saved-item flow. Save for later is NOT purchase, inventory hold, price guarantee or WLD debit. Initial notification-controls proposal rejected as duplicate of F675-130/#1353; new shop scope independent of A/B/C/Gemini/QA runtime.
+- Owner-only GET/POST/DELETE saved items + immutable idempotent receipts, keyset cursor, current shop catalog eligibility, PostgreSQL owner ACL, Next/Android, admin/privacy/SEO/a11y/KPI, default-OFF rollback in integrated master.
+- P0 ENV1416-01 FIN1416-02 SEC1416-03 REL1416-04; P1 SHOP1416-05 SHOP1416-06 SHOP1416-07 SHOP1416-08 SHOP1416-09 SHOP1416-10. Data disk 96%, QA v1343 18,000 WLD dividend without canonical postings and treasury 0 (#1706); synthetic 10,001/100/100 tests NOT RUN; external approved 0, cumulative UNKNOWN/10,000 BLOCKED; finance release HOLD.
 
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
