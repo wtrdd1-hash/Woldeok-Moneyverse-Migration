@@ -1,5 +1,7 @@
 ## 2026-10-29 v1450 — F675-168 블로그 저장 게시 식별·전체 철회 상태 강화
 
+- **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
+
 [기획 PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / 개발 이슈 #1800.
 
 - v1448 추가 이후 v1450 기능 보완, 다음 v1452 추가(잠정). 기준 main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; 선행 PR #1801 병합.

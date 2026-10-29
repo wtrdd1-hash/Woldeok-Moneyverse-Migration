@@ -5,6 +5,8 @@
 **기획 초안 PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — 문서만 변경, 운영승격 보류.
 
 - 이전 v1448 기능 추가 → 현재 v1450 기능 보완 → 다음 v1452 기능 추가(잠정). main `30ef09aa17e33be6104dd97971790f00a427dafc` 시작/중간 확인, QA v1360 FAILED/HOLD. 선행 PR #1801 병합, 개발 이슈 #1800. v265는 사용자 요청에 따른 공유 JSON 글 14건 철회를 기록하며 09:12 KST 공개 `/api/blog`·`/api/v1/blog/verified` 응답은 각각 count=0. 승인 글이 있다고 주장하지 않고 기능 OFF 및 철회 상태를 유지한다.
+
+- **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
 - 코드상 목록은 검증 글 우선이지만 본문·메타데이터·`/api/blog/[slug]`는 정적/기존 글 우선이라 slug 충돌 시 잘못 연결될 수 있다. 마이그레이션 290의 REVISE는 본문 변경에도 receipt를 유지하며 DELETE는 공개 PUBLISHED 목록에서 보이지 않는다. 독립 검수된 불변 게시 ID+언어판+epoch+개정+다이제스트, 출처 권위 조회, 회원 전용 철회/삭제 tombstone 및 안전한 제거를 명세했다. 자동 재게시·클라이언트 임의 성공 금지.
 - 회원 전용 웹/Android 저장(100건, 20건/페이지), UUID+원본 내용 영수증, 서명 커서, 409/410/422/429/503, CSRF/BOLA, noindex/no-store, WCAG 2.2 AA, 관리자 철회/캐시/SEO, WLD 영향 0. P0 ENV1450-01 FIN1450-02 SEC1450-03 REL1450-04, P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 격리 PG 합성 10,001행·동시 100건·권한 음성 100건은 **미실행 수용조건**. QA v1360 18계좌/+18,000 WLD, 앱 쓰기 239개, PUBLIC 은행 함수 3개, 체크섬 5건/미적용 20건, PR 104건 미병합 종료(정확 콘텐츠 동등성 조사 필요), Test SHA 불일치·외부 복원 미확인으로 운영 BLOCKED.
 - QA v1360 당시 루트99%/데이터100%/tmp97%였으나 09:12 재확인 결과 루트59%/데이터76%/tmp27%로 회복. **원인·독립 복원은 미검증**. 외부 독립 중복 제거 승인 근거 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 변경 없음. 상세는 영문·국문 통합 마스터, 개발 인계 [#1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800).

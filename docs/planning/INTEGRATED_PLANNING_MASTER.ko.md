@@ -2,6 +2,8 @@
 
 ## v1450 / F675-168 — 블로그 나중에 읽기 원본 식별·전체 철회·삭제 안전성 강화 (기능 보완 / 초안 / 운영 보류)
 
+- **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
+
 **기획 초안 PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — 문서만 변경, 운영승격 보류.
 
 **기준 및 사이클.** 이전 v1448 기능 추가 → 현재 v1450 기능 보완 → 다음 v1452 기능 추가(잠정). 시작 main `30ef09aa17e33be6104dd97971790f00a427dafc`, QA v1360(08:18–08:26 KST) FAILED/HOLD. 선행 기획 [PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801)은 08:12:52 KST **병합**되었으나 #1790/#1794는 미병합 종료되었다. 개발 인계는 [이슈 #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). 본 문서는 기획 초안이며 기능 구현을 의미하지 않는다.

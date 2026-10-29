@@ -1,5 +1,7 @@
 ## 2026-10-29 v1450 — F675-168 blog queue publication identity and clean-state hardening
 
+- **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
+
 [Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / issue #1800.
 
 - Feature Improvement following v1448 Addition; next v1452 Addition (provisional). Main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; prior PR #1801 MERGED.
