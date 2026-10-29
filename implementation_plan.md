@@ -1089,3 +1089,55 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   3. **데이터베이스 삭제 관련 중요 감사 분석**:
      - 현재 라이브 운영 중인 백엔드(`moneyverse-backend`, `moneyverse-release-v1106-seo-frontend`)가 `woldeok-moneyverse-dev-db-1` (포트 5433)에 실시간 연결되어 트래픽을 처리하고 있음.
      - 임의로 운영 DB를 삭제할 경우 전체 서비스가 즉시 중단되므로, 운영 DB는 안전하게 보존하고 임시/과거 테스트용 도커 컨테이너들만 선별 정리하도록 안내.
+
+---
+## 🚀 [v267 Specification] 데이터 디스크 81GB 대량 소거 및 사용량 33% 최적화 완료
+- **적용 일시**: 2026-10-29 09:55 KST
+- **요구사항**: "데이터디스크 용량 왜많이차지 중이야 확인해봐 필요없는거 삭제해봐"
+- **조치 내역**:
+  1. **/srv/moneyverse-data 디스크 점유 심층 분석**:
+     - 기존 사용량: 142GB / 197GB (76% 점유)
+     - 원인 식별: 과거 임시 릴리즈 및 구버전 복제본, 테스트용 아카이브가 디스크에 잔존.
+  2. **안전 소거 조치**:
+     - 불필요한 임시 빌드 아티팩트 및 과거 테스트 덤프 삭제 (81GB 일괄 확보).
+  3. **결과 검증**:
+     - 현재 사용량: **61GB / 197GB (33% 점유)** ➔ 127GB 여유 공간 확보로 안전 마진 대폭 확충.
+
+---
+## 🚀 [v268 Specification] 피처 브랜치 완전 통합, 원격 브랜치 정리 및 신규 DB 무결성 전수 검증
+- **적용 일시**: 2026-10-29 10:04 KST
+- **요구사항**: "브랜치 통합 및 통합후 삭제 및 통합후 모든 문서 재분석 분석 재분석후 새로운 데이터베이스 연결 기준 데이터 베이스 삭제할것 또한 너도 한번데이터 키 무결성 등 재점검해볼것 데이터베이스 새로운 데이터베이스에 점검할것"
+- **조치 내역**:
+  1. **브랜치 통합 및 원격 삭제 완료**:
+     - feat/database-rebuild-v2026.10.29.1202, fix/ledger-storage-v2026.10.29.1201 브랜치를 main으로 무충돌 머지 완료.
+     - 원격 브랜치 삭제 완료 (origin/main 단일화).
+  2. **신규 격리 DB (mv-db-rebuild-v1202) 키 무결성 전수 검증**:
+     - PK 243개, FK 285개, UNIQUE 110개, CHECK 586개 전수 100% Validated.
+     - 292-financial-schema-integrity.sql 및 293-money-chunk-codec.sql 검증 통과.
+
+---
+## 🚀 [v269 Specification] 구 운영 DB 풀 백업, 18계좌 복식부기 강제 일치, 신규 DB 메인 운영 승격 및 레거시 DB 완전 정리 완료
+- **적용 일시**: 2026-10-29 10:15 KST
+- **요구사항**: "지금 메인 통합 운영에승격시켜줘 옛날 불일치한거 강제로일치하고 예전 데이터베이스 백업용 하고 데이터베이스 삭제하고 지금새로운데이터 베이스와 지금 구조로 잘관리하자"
+- **조치 내역**:
+  1. **기존 운영 DB 풀 백업 및 무결성 검증 완료**:
+     - 경로: `/srv/moneyverse-data/backups/legacy-db-before-cutover-20261029.dump` (101MB, gzip custom format, 2,726 TOC entries 전수 검증 완료).
+  2. **원장 전표-계좌 잔액 불일치 18건 복식부기 강제 보정 분개 발행 완료**:
+     - 원인 분석: 가입 축하금(1,000 WLD) 지급 과정에서 발생한 과거 18개 USER_CASH 계좌의 전표 누락 식별.
+     - 대차평형 보정 트랜잭션(`SYSTEM_LEGACY_RECONCILIATION_V20261029`) 발행:
+       - 18개 USER_CASH 계좌: 각 1,000 WLD debit 전표 생성 (합계 18,000 WLD).
+       - MINT 계좌: 18,000 WLD credit 전표 생성 및 잔액 보정.
+       - 차변 18,000 = 대변 18,000 대차평형 성립.
+     - 결과: 전체 계좌(ESCROW, MINT, SINK, TREASURY, USER_BANK, USER_CASH) 불일치 **0건 (mismatch_count = 0, delta = 0)** 달성.
+  3. **신규 DB 정식 메인 운영 승격 (Cutover/Promotion)**:
+     - 데이터베이스 명칭을 `woldeok_moneyverse_dev`로 공식 변경.
+     - `moneyverse_app` (접속 제한 30, 비밀번호 설정), `moneyverse_status_collector`, `moneyverse_migrator`(슈퍼유저) 계정 활성화.
+     - 메인 컨테이너(`woldeok-moneyverse-dev-db-1`, 포트 5433, 마운트 `/srv/moneyverse-data/db-rebuild-v1202/pgdata`)로 승격 기동.
+     - 백엔드(`moneyverse-backend`) 재기동 및 신규 DB 연동 완료.
+  4. **이전 운영 DB 안전 소거 및 디스크 추가 확보**:
+     - 이전 DB 컨테이너(`woldeok-moneyverse-dev-db-legacy-backup`) 삭제 완료.
+     - 이전 데이터 디렉토리(`/srv/moneyverse-data/postgres`, 1.6GB) 삭제 완료.
+     - 디스크 사용량: **60GB / 197GB (32% 점유, 129GB 가용)** 쾌적화.
+  5. **라이브 서비스 실측 검증**:
+     - `https://easy-scraping.com/api/treasury/overview`: HTTP/2 200 OK (실시간 국고 잔액 220,923,528 WLD 정상 응답).
+     - 전체 서비스(백엔드, 프론트엔드, 봇, DB, Nginx, Docker) active running 확인.
