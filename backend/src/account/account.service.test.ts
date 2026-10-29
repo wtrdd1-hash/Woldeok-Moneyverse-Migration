@@ -47,3 +47,28 @@ describe('linked identity read contract', () => {
     expect(() => requireIdentityProvider('local_email')).toThrow();
   });
 });
+
+describe('unlink receipt and owner readback contract', () => {
+  it('returns the database identity ID and exposes the remaining owner sign-in methods', async () => {
+    const remainingId = '00000000-0000-4000-8000-000000000002';
+    let identities: LinkedIdentityRow[] = [
+      { identity_id: identityId, provider: 'google', display_name: 'Google member', linked_at: linkedAt },
+      { identity_id: remainingId, provider: 'local_email', display_name: 'Local member', linked_at: linkedAt },
+    ];
+    const service = new AccountService({
+      ...fakeRepository([]),
+      linkedIdentities: async () => identities,
+      unlinkIdentity: async ({ actorUserId, identityId: requestedId }) => {
+        expect(actorUserId).toBe(actor);
+        expect(requestedId).toBe(identityId);
+        identities = identities.filter((entry) => entry.identity_id !== requestedId);
+        return { identity_id: identityId };
+      },
+    });
+    await expect(service.unlinkIdentity(actor, { identityId })).resolves.toEqual({ identityId });
+    await expect(service.linkedIdentities(actor)).resolves.toEqual([{
+      identityId: remainingId, provider: 'local_email',
+      displayName: 'Local member', linkedAt: linkedAt.toISOString(),
+    }]);
+  });
+});

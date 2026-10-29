@@ -8,6 +8,7 @@ import { relaySetCookie } from '@/lib/cookie-relay';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
+const UNLINK_IDENTITY_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Begins linking another sign-in method.
@@ -58,14 +59,38 @@ export async function unlinkIdentity(
   formData: FormData,
 ): Promise<ActionState> {
   const identityId = String(formData.get('identityId') ?? '');
-  if (identityId === '') return { status: 'error', message: '해제할 로그인 수단을 확인할 수 없어요.' };
+  if (!UNLINK_IDENTITY_UUID.test(identityId)) return { status: 'error', message: '해제할 로그인 수단을 확인할 수 없어요.' };
 
   try {
-    await mutate(`/api/v1/account/identities/${encodeURIComponent(identityId)}`, {
+    const receipt = await mutate<unknown>(`/api/v1/account/identities/${encodeURIComponent(identityId)}`, {
       method: 'DELETE',
     });
+    if (receipt === null || typeof receipt !== 'object' || Array.isArray(receipt) ||
+        (receipt as Record<string, unknown>).identityId !== identityId) {
+      return { status: 'error', message: '연결 해제 결과를 확인할 수 없어요. 계정의 로그인 수단 목록을 확인해 주세요.' };
+    }
+
+    // The mutation receipt alone cannot prove the owner-facing list changed.
+    let readback: unknown;
+    try {
+      readback = await api<unknown>('/api/v1/account/identities');
+    } catch {
+      return { status: 'error', message: '연결 해제 상태를 다시 확인할 수 없어요. 계정 화면에서 확인해 주세요.' };
+    }
+    const identities = readback !== null && typeof readback === 'object' && !Array.isArray(readback)
+      ? (readback as { identities?: unknown }).identities : null;
+    if (!Array.isArray(identities) || identities.length === 0 ||
+        !identities.every((row: unknown) =>
+          row !== null && typeof row === 'object' && !Array.isArray(row) &&
+          typeof (row as Record<string, unknown>).identityId === 'string' &&
+          UNLINK_IDENTITY_UUID.test((row as { identityId: string }).identityId) &&
+          typeof (row as Record<string, unknown>).provider === 'string' &&
+          (row as { provider: string }).provider.length > 0 &&
+          (row as { identityId: string }).identityId !== identityId)) {
+      return { status: 'error', message: '로그인 수단 목록에서 연결 해제를 확인할 수 없어요. 다시 확인해 주세요.' };
+    }
     revalidatePath('/account');
-    return { status: 'ok', message: '로그인 수단 연결을 해제했어요.' };
+    return { status: 'ok', message: '로그인 수단 연결 해제를 확인했어요.' };
   } catch (error) {
     // 403 here almost always means the reauthentication window has closed,
     // which is a different instruction from "you may not do this".
