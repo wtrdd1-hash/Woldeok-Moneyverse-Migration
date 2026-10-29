@@ -8,6 +8,44 @@ import { relaySetCookie } from '@/lib/cookie-relay';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
+const PRIVACY_REQUEST_TYPES = new Set(['access', 'correction', 'restriction', 'withdrawal', 'deletion']);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+interface PrivacyRequestReceipt {
+  readonly requestId: string;
+  readonly requestType: string;
+  readonly status: 'received';
+  readonly createdAt: string;
+  readonly replayed: boolean;
+}
+
+function verifiedPrivacyReceipt(value: unknown, requestedType: string): PrivacyRequestReceipt | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
+  const receipt = value as Record<string, unknown>;
+  if (
+    typeof receipt.requestId !== 'string' || !UUID.test(receipt.requestId) ||
+    receipt.requestType !== requestedType || receipt.status !== 'received' ||
+    typeof receipt.replayed !== 'boolean' ||
+    typeof receipt.createdAt !== 'string' || !ISO_TIME.test(receipt.createdAt) ||
+    !Number.isFinite(Date.parse(receipt.createdAt)) ||
+    new Date(receipt.createdAt).toISOString() !== receipt.createdAt
+  ) return null;
+  return receipt as unknown as PrivacyRequestReceipt;
+}
+
+function ownerPrivacyReadbackMatches(value: unknown, receipt: PrivacyRequestReceipt): boolean {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const requests = (value as { requests?: unknown }).requests;
+  if (!Array.isArray(requests)) return false;
+  return requests.some((entry: unknown) => {
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) return false;
+    const row = entry as Record<string, unknown>;
+    return row.requestId === receipt.requestId && row.requestType === receipt.requestType &&
+      row.status === receipt.status && row.createdAt === receipt.createdAt;
+  });
+}
+
 
 /**
  * Begins linking another sign-in method.
@@ -80,7 +118,7 @@ export async function createPrivacyRequest(
   const requestType = String(formData.get('requestType') ?? '');
   const detail = String(formData.get('detail') ?? '').trim();
 
-  if (requestType === '') return { status: 'error', message: '요청 종류를 선택해 주세요.' };
+  if (!PRIVACY_REQUEST_TYPES.has(requestType)) return { status: 'error', message: '요청 종류를 다시 선택해 주세요.' };
   if (requestType === 'correction' && detail === '') {
     return { status: 'error', message: '정정 요청은 간단한 설명이 필요해요.' };
   }
@@ -89,13 +127,27 @@ export async function createPrivacyRequest(
   }
 
   try {
-    await mutate('/api/v1/privacy/requests', {
+    const result = await mutate<unknown>('/api/v1/privacy/requests', {
       body: {
         requestType,
         ...(detail === '' ? {} : { detail }),
         idempotencyKey: idempotencyKey(),
       },
     });
+    const receipt = verifiedPrivacyReceipt(result, requestType);
+    if (receipt === null) {
+      return { status: 'error', message: '접수 여부를 확인할 수 없어요. 요청 기록을 확인한 뒤 다시 시도해 주세요.' };
+    }
+    // A mutation receipt alone cannot prove that the owner-facing list exposes the stored row.
+    let readback: unknown;
+    try {
+      readback = await api<unknown>('/api/v1/privacy/requests');
+    } catch {
+      return { status: 'error', message: '접수 여부를 다시 확인할 수 없어요. 요청 기록을 확인해 주세요.' };
+    }
+    if (!ownerPrivacyReadbackMatches(readback, receipt)) {
+      return { status: 'error', message: '접수 기록을 확인할 수 없어요. 요청 기록을 확인해 주세요.' };
+    }
     revalidatePath('/account');
     revalidatePath('/account/privacy');
     return { status: 'ok', message: '요청을 접수 기록으로 남겼어요.' };
