@@ -501,7 +501,7 @@ export class PostgresStockRepository {
     uuid(userId, 'user id');
     const n =
       typeof limit === 'number' && Number.isSafeInteger(limit)
-        ? Math.min(100, Math.max(1, limit))
+        ? Math.min(200, Math.max(1, limit))
         : 50;
     return queryRows<StockHistoryRow>(
       this.pool,
