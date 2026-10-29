@@ -14,8 +14,13 @@
 - [ ] Re-fetch main and integrated plan midway; test isolated source, backend health, no-store/auth contracts, and candidate test server where feasible.
 - [ ] Write versioned internal/GitHub update, register PR and track CI / release evidence.
 
-## FINISHED
-- Pending verified outcome and deployment decision.
+## FINISHED — 2026-10-29 22:35 KST
+- Implemented bounded administrator Treasury evidence-handling fix and added two regression tests in independent branch `fix/treasury-services-v1512-20261029`, GitHub Draft PR [#1905](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1905).
+- Focused 14/14 PASS; complete frontend 2,532 PASS / **61 FAIL** across 21 failing test files; finance QA v1374 baseline **27 FAIL**. Typecheck PASS, changed-file lint PASS, production frontend build PASS, overall lint FAIL (3 unrelated no-empty errors), mobile API contract drift FAIL.
+- Latest main after second fetch: `54b182d2214a15974350701174175f589789613b` (v1511 Telegram release documentation only), no changed-code overlaps or changed integrated plan; rebase and test to be confirmed on final branch head.
+- Read-only Production-connected PostgreSQL BEGIN/ROLLBACK confirmed 552/552 legacy Treasury ledger rows have no canonical transaction reference; canonical Treasury account projects 0 WLD, vault rows total 220,923,528 WLD. Scope not safe for synthetic backfill, new payouts, coupon payments, SWF execution or historical retroactive allocations.
+- Production runtime unchanged, database untouched, Test exact-SHA authorized authenticated treasury finance backend acceptance **NOT DONE**; full recovery and Production promotion **HOLD**. Existing finance reconciliation issue [#1491](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1491) and historical MINT provenance [#1816](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1816) track prerequisites.
+
 
 ### RED checkpoint — 22:24 KST
 - Verified two frontend regressions with local pinned-lockfile Vitest against exact branch: 12 passed, **2 failed as expected**.
@@ -35,3 +40,7 @@
 - Scope of patch: preserve separately verified SWF telemetry when overview fails, correctly represent unavailable audit-ledger reads rather than inventing empty transactions. Existing verified empty ledgers still render as empty. No new money-moving route, no schema migration, no switch changes.
 - **Release HOLD** until full green source gates, exact-SHA isolated Test authenticated admin/mobile validation, finance provenance and zero-downtime Production release acceptance. No claim of full Treasury recovery or Production promotion.
 - Full frontend test run, GitHub PR and final integration status: pending at this checkpoint.
+
+### Full frontend test and release checkpoint — 22:33–22:35 KST
+- Full `NODE_ENV=test pnpm --filter @moneyverse/frontend test`: 2,532 pass / 61 fail (21 failed suites, 455 passed suites), non-green source baseline, including central-bank status route expecting HTTP 200 but receiving 503. Do not attribute all failures to this UI-only patch; no backend finance changes made.
+- GitHub Draft PR #1905 created, **not merged**. Required full lint/API/finance/Test evidence blocks actual release.
