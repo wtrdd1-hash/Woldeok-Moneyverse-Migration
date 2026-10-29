@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1212 — Owner-approved existing finance DML / official Test / Production provenance HOLD
+
+- Owner explicitly accepted and preserved moneyverse_app DML on existing accounts, account_balances and system_treasury_vaults. Do not halt solely on these specific existing privileges. Ledger, checksum, authenticated Test/session and zero-downtime obligations remain separate.
+- PR #1817 merged to main b44ffd0a, exact candidate CI PASS, matching Git trees. Official Test DB restore/291-294 and exact application SHA PASS. Later concurrent QA-only main a1d8de0c not part of this Test app release.
+- Production 23 unapplied SQL rehearsed successfully on private restored second-disk network-isolated clone; 40 accounts/891 ledger transactions/1829 postings and approved DML grants preserved. Five prior migration checksum mismatches remain, 219/220 original blobs not located. Production immutable artifact staged but NOT activated, no live DB/traffic mutation.
+- See v1212 internal/GitHub update documents and worklog under docs/updates and docs/worklog.
+
+
 ## v2026.10.29.1364 — Scheduled QA disposable scratch lifecycle (OPS PATCH CANDIDATE)
 
 - Authority: existing v1317/v1318 scheduled hourly QA and bounded 72-hour QA-owned scratch cleanup; no change to full authenticated QA acceptance or finance system. On 2026-10-29 11:00 KST the scheduled cleanup executed but found zero eligible directories, therefore reclaimed zero bytes. The QA scratch root had no run producer. This is a correctly executed but ineffective reclaim path; do not claim that storage was freed.

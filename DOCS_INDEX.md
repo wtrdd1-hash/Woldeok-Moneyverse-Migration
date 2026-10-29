@@ -1,4 +1,8 @@
 ## v2026.10.29.1364 — Scheduled QA scratch clean-up follow-through
+
+## v2026.10.29.1212 — Owner-accepted existing finance DML, Test verified, Production pending
+- [Internal EN](docs/updates/v2026.10.29.1212-internal.md) / [KO](docs/updates/v2026.10.29.1212-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1212-github.md) / [KO](docs/updates/v2026.10.29.1212-github.ko.md), [Worklog](docs/worklog/2026-10-29-finance-dml-approval-and-release-v1212.md). Existing grants accepted; exact Test passed; Production NOT promoted because historical checksum provenance and final acceptance remain incomplete.
+
 - [EN worklog](docs/worklog/2026-10-29-qa-hygiene-v1364.md) · [KO worklog](docs/worklog/2026-10-29-qa-hygiene-v1364.ko.md) · [Internal EN](docs/updates/2026-10-29-qa-hygiene-v1364-internal.md) · [Internal KO](docs/updates/2026-10-29-qa-hygiene-v1364-internal.ko.md) · [GitHub EN](docs/updates/2026-10-29-qa-hygiene-v1364-github.md) · [GitHub KO](docs/updates/2026-10-29-qa-hygiene-v1364-github.ko.md). Hourly QA disposable summary and 72-hour cleanup, no deletion outside QA-owned scratch. Existing 0-B cleanup is not counted as storage recovery; full authenticated QA remains NOT TESTED.
 
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)

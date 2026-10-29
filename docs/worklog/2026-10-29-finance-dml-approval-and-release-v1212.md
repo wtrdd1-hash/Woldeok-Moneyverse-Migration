@@ -14,3 +14,10 @@
 
 ## FINISHED
 PENDING. This record does not assert that any permissions changed or that a deployment occurred.
+
+## IN PROGRESS / FINISHED — 2026-10-29, v1212
+- [x] Operator-accepted existing DML documented in canonical master/release guide; privileges unchanged.
+- [x] Merged PR #1817 main b44ffd0a; candidate CI PASS and equal Git tree; official Test DB backup/restoration/291-294, exact main Test runtime identity and HTTP/API checks PASS.
+- [x] Production immutable artifact prepared but inactive. Production DB backed up privately and restored in network-isolated PostgreSQL on second disk. All 23 missing SQL rehearsed successfully; 40 accounts/891 ledger transactions/1829 postings unchanged; approved DML grants preserved.
+- [ ] Production NOT promoted: five original checksum mismatches 219/220/221/234/266, 219/220 original bytes not recovered. Session continuity and no-downtime final cutover evidence pending. Do not falsify checksums, alter user funds, or change existing accepted rights.
+- [x] During work another agent advanced main to a1d8de0c via PR #1822. Re-read merged master and used new isolated docs branch. Exact-main Test evidence refers to prior application merge SHA b44ffd0a, not later QA-only main.
