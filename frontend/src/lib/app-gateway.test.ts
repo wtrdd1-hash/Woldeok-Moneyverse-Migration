@@ -26,6 +26,8 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
     expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
     expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');
+    expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide', 'related'])).toBe('/api/v1/help/articles/ko/wallet-guide/related');
+    expect(appGatewayPath(['help', 'articles', 'ko', '../admin', 'related'])).toBeNull();
   });
 
   it('refuses internal and traversal paths', () => {

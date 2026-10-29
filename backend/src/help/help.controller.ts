@@ -37,6 +37,25 @@ export class HelpController {
     }
     return { articles: await repo.search(body.locale, body.category ?? null, body.query ?? '', body.limit ?? 20) };
   }
+  @Get('articles/:locale/:slug/related') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Related currently approved help articles in the same locale and category' })
+  async related(@Param('locale') locale: string, @Param('slug') slug: string) {
+    const repo = this.repo();
+    if (!LOCALES.includes(locale as 'ko'|'en') || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) {
+      throw new NotFoundException('help article not found');
+    }
+    // Never reveal related articles for an expired/retracted/nonexistent source.
+    try {
+      const current = await repo.article(locale, slug);
+      if (!current) throw new NotFoundException('help article not found');
+      // Both functions are existing approved-only SECURITY DEFINER reads (migration 282).
+      const rows = await repo.search(locale, current.category, '', 8);
+      return { articles: rows.filter(row => row.article_id !== current.article_id &&
+        row.locale === locale && row.category === current.category).slice(0, 5) };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new ServiceUnavailableException('verified related help is unavailable');
+    }
+  }
   @Get('articles/:locale/:slug') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Read a verified public help article' })
   async article(@Param('locale') locale: string, @Param('slug') slug: string) {
     const repo = this.repo();

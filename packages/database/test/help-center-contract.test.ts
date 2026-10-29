@@ -26,6 +26,17 @@ describe('help center migration boundary', () => {
   });
 });
 
+describe('approved related-help database fixture', () => {
+  it('uses the same published-only SECURITY DEFINER reads without new grants', () => {
+    const fixture = readFileSync(join(__dirname, 'fixtures/282-help-related.sql'), 'utf8');
+    expect(fixture).toContain('public.help_public_search');
+    expect(fixture).toContain('public.help_public_article');
+    expect(fixture).toContain('SET ROLE moneyverse_app');
+    expect(fixture).toContain('insufficient_privilege');
+    expect(fixture).not.toMatch(/GRANT\s+(?:SELECT|INSERT|UPDATE|DELETE)\s+ON/i);
+  });
+});
+
 describe('independent publication boundary', () => {
   it('requires current console session, independent approver and immutable replay key', () => {
     expect(sql).toMatch(/public\.admin_session_touch\(/);

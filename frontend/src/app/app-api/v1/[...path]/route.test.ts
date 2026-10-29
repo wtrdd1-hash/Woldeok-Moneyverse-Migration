@@ -23,6 +23,21 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+  it('forwards verified help related articles only and never caches Android responses', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ articles: [{ slug: 'wallet' }] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/help/articles/ko/wallet-guide/related'), context('help', 'articles', 'ko', 'wallet-guide', 'related'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/articles/ko/wallet-guide/related');
+    expect(await response.json()).toMatchObject({ articles: [{ slug: 'wallet' }] });
+    const denied = await GET(request('/app-api/v1/help/articles/ko/wallet-guide/preview'), context('help', 'articles', 'ko', 'wallet-guide', 'preview'));
+    expect(denied.status).toBe(404);
+  });
+
   it('forwards the recommended-only member work query without bypassing the authenticated gateway', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ featureState: 'enabled', tasks: [] }), {
