@@ -371,13 +371,9 @@ describe.skipIf(!DATABASE_URL)('the engagement repository against a real databas
     });
 
     /**
-     * `engagement_record_npc_order` shares the receipt table with
-     * `engagement_record_progress` but, unlike it, does not check who the
-     * receipt belongs to before answering a replay. What has to hold either
-     * way is that a stranger holding somebody else's key cannot move that
-     * member's affinity and is not told what it stands at -- so this asserts
-     * the property rather than today's status code, and stays true if 082 is
-     * later tightened to raise 28000 here as its sibling does.
+     * Migration 291 binds an accepted NPC order to its original member, NPC
+     * and outcome. A borrowed key must raise 28000 rather than returning an
+     * ambiguous success with NULL affinity.
      */
     it('does not let a stranger move or read an affinity with a borrowed key', async () => {
       await rolledBack(async (client) => {
@@ -396,11 +392,8 @@ describe.skipIf(!DATABASE_URL)('the engagement repository against a real databas
           attempt.error === null ? 'RELEASE SAVEPOINT borrowed' : 'ROLLBACK TO SAVEPOINT borrowed',
         );
 
-        if (attempt.error === null) {
-          expect(attempt.row?.affinity, 'the owner’s affinity was disclosed').toBeNull();
-        } else {
-          expect(code(attempt.error)).toBe('28000');
-        }
+        expect(attempt.row).toBeNull();
+        expect(code(attempt.error)).toBe('28000');
 
         const { rows } = await client.query<{ affinity: number }>(
           `SELECT relationship.affinity FROM public.npc_relationships AS relationship
@@ -409,6 +402,80 @@ describe.skipIf(!DATABASE_URL)('the engagement repository against a real databas
           [owner],
         );
         expect(rows[0]?.affinity, 'the owner’s affinity moved').toBe(1);
+      });
+    });
+
+    it('refuses the same order key for a different NPC without adding affinity', async () => {
+      await rolledBack(async (client) => {
+        const repository = repositoryIn(client);
+        const actor = await member(client);
+        const key = randomUUID();
+        await repository.recordNpcOrder(key, actor, 'market_keeper');
+        const error = await refusalOf(client, () => repository.recordNpcOrder(key, actor, 'courier'));
+        expect(code(error)).toBe('23505');
+        const { rows } = await client.query<{ count: string }>(
+          'SELECT count(*)::text AS count FROM public.npc_relationships WHERE user_id = $1',
+          [actor],
+        );
+        expect(rows[0]?.count).toBe('1');
+      });
+    });
+
+    it('refuses a generic progress receipt as an NPC order without awarding affinity', async () => {
+      await rolledBack(async (client) => {
+        const repository = repositoryIn(client);
+        const actor = await member(client);
+        const key = randomUUID();
+        await repository.recordProgress(key, actor, 'first_wage', 1);
+        const error = await refusalOf(client, () =>
+          repository.recordNpcOrder(key, actor, 'market_keeper'),
+        );
+        expect(code(error)).toBe('55000');
+        const { rows } = await client.query<{ count: string }>(
+          'SELECT count(*)::text AS count FROM public.npc_relationships WHERE user_id = $1',
+          [actor],
+        );
+        expect(rows[0]?.count).toBe('0');
+      });
+    });
+
+    it('replays the original accepted affinity even after later orders and NPC deactivation', async () => {
+      await rolledBack(async (client) => {
+        const repository = repositoryIn(client);
+        const actor = await member(client);
+        const key = randomUUID();
+        await repository.recordNpcOrder(key, actor, 'market_keeper');
+        await repository.recordNpcOrder(randomUUID(), actor, 'market_keeper');
+        await client.query("UPDATE public.npc_profiles SET active = false WHERE code = 'market_keeper'");
+        const replay = await repository.recordNpcOrder(key, actor, 'market_keeper');
+        expect(replay).toEqual({ npc_code: 'market_keeper', affinity: 1, replayed: true });
+        const error = await refusalOf(client, () =>
+          repository.recordNpcOrder(randomUUID(), actor, 'market_keeper'),
+        );
+        expect(code(error)).toBe('22023');
+      });
+    });
+
+    it('keeps NPC acceptance receipts immutable and unreadable to the application role', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        const key = randomUUID();
+        await repositoryIn(client).recordNpcOrder(key, actor, 'market_keeper');
+        const immutableError = await refusalOf(client, () =>
+          client.query(
+            'UPDATE public.engagement_npc_order_receipts SET accepted_affinity = 999 WHERE idempotency_key = $1',
+            [key],
+          ),
+        );
+        expect(code(immutableError)).toBe('55000');
+
+        await client.query('SAVEPOINT app_role');
+        await client.query('SET LOCAL ROLE moneyverse_app');
+        const denied = await rejectionOf(() =>
+          client.query('SELECT * FROM public.engagement_npc_order_receipts LIMIT 1'),
+        );
+        expect(code(denied)).toBe('42501');
+        await client.query('ROLLBACK TO SAVEPOINT app_role');
       });
     });
 
