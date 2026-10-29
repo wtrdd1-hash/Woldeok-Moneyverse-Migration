@@ -1,15 +1,10 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
-## v2026.10.28.1426 — F675-162 owner-proof hardening (DRAFT/HOLD)
-- Previous Addition v1424 → Improvement v1426 → Addition v1428 provisional. Main 35971c600f25869c96f1c666d4b9f58927202730 checked start/mid, unmerged #1740, QA v1348 FAILED. Migration232 has no `UNIQUE(user_id,id)`; v1424 independent receipt/showcase FKs require composite same-owner constraints. Add issuer-attested source-event recipient slot, immutable sanitized snapshot, current proof/revocation recheck and bearer URL log redaction. Existing seed/localStorage remains UNVERIFIED. PostgreSQL active-link partial index cannot depend on time; use revoked-only predicate and query-time expiry. Post-commit revoke denial is not retroactive recall.
-- P0 ENV1426-01 FIN1426-02 SEC1426-03 REL1426-04; P1 COL1426-05..10. [EN integrated](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md); issue #1739. Docs only; 10,001/100/100 tests proposed, not run. External approved 0 new / UNKNOWN of 10,000; RELEASE HOLD.
-
-
-
-## v2026.10.28.1424 — F675-162 verified member collection showcase (PLANNING DRAFT / RELEASE HOLD)
-- Previous Improvement v1422 → Current Addition v1424 → Next Improvement v1426 provisional. Main 35971c600f25869c96f1c666d4b9f58927202730 checked start/mid; QA v1347 FAILED. Source shows hard-coded /collections?showcase=arch-1063, client DEFAULT_PIECES/localStorage, GET-time four-piece seed and no award proof in migration 232. **Do not present examples as verified ownership.**
-- Plan opt-in verified-only unlisted share, 7-day expiry, five active links, 192-bit bearer token digest, owner/issuer evidence, revoke, no-store/noindex, Android parity and WCAG. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md); [handoff #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740).
-- Disk 98%, backup independent restore UNKNOWN, 18k WLD drift, 235 app DML tables, five migration mismatches/twenty unapplied, Test exact-SHA and full Production BLOCKED. External new approved 0, cumulative accepted UNKNOWN/10,000 BLOCKED. Docs only, no runtime/DB/ledger/Test/Production modifications.
+## F675-163 — v1428 member calendar event watchlist (ADDITION / DRAFT / HOLD)
+- **QA final refresh 22:17 KST:** v1350 FAILED; 68 Draft PRs/3 conflicts, 18 USER_CASH divergences +18,000 WLD and Treasury 0, app UPDATE/DELETE 235/243 tables, PUBLIC bank EXECUTE 3, 5 migration checksum mismatches, 20 unapplied migrations, data disk 98% / 4.1GiB free. Production version unknown, Test not exact current main, independent restore unverified. Public HTTP 50/50 and anonymous mobile 36/36 PASS do not certify authenticated finance or official Test. RELEASE HOLD.
+- Verified main /calendar has season events, shop sale deadlines, daily events and weekly goals but no member-owned saved event list. Only season UUID and shop deadline UUID are eligible v1; daily/weekly lack stable IDs in this page. No overlap with F675-160 merchandise wishlist.
+- Proposed typed FK watch rows, owner-only SECURITY DEFINER, active cap 100 under actor lock, durable idempotency and tombstones, unavailable redaction, no notifications/auto-entry/WLD, Next/Nest/Android parity, a11y, private SEO and exact-SHA rollback gates. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05..10. [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md). [Issue #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748) · [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
+- QA v1349 FAILED; data disk98%, historical 18k WLD, restore and official Test HOLD. External new accepted 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
 
 
 ## F675-06 detailed adoption — v2026.10.15.688

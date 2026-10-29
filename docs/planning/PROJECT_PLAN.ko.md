@@ -1,13 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
 
-## 2026-10-28 v1426 — 수집품 쇼케이스 증빙 개선
-이전 Addition v1424, 현재 Improvement v1426, 다음 Addition v1428. main 35971c600f25869c96f1c666d4b9f58927202730, QA v1348 FAILED. migration232 소유권 복합 FK, 발행기관 원본 사건과 수령 슬롯 검증, 불변 공개 스냅샷, 만료 인덱스, 철회 후 조회 차단, 토큰 로그 비노출을 설계했다. P0 ENV1426-01 FIN1426-02 SEC1426-03 REL1426-04, P1 COL1426-05~COL1426-10. 외부 근거 신규 0건·누적 UNKNOWN/10,000 BLOCKED, Test/Production 승격 보류. 코드·DB·금융 변경 없음.
-
-
-## v2026.10.28.1424 — F675-162 검증 가능한 회원 컬렉션 쇼케이스 (기획 초안 / 운영 보류)
-- 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1347 FAILED. 실제 코드는 고정 /collections?showcase=arch-1063, DEFAULT_PIECES/localStorage, GET 시 4개 예시 INSERT, migration 232의 지급 증빙 부재. **예시를 검증 소유권으로 표시 금지.**
-- 명시적 동의·검증 조각만 비공개 공유, 7일 만료·활성 링크 5개·192비트 토큰 지문·발행 증빙·철회·no-store/noindex·Android 동등성·WCAG 명세. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md); [전달 이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740).
-- 디스크 98%, 독립 백업 복원 UNKNOWN, 18,000 WLD 원장 차이, 앱 계정 DML 235개 테이블, 마이그레이션 체크섬 5개 불일치/미적용 20개, 공식 Test 정확 SHA·전체 운영승격 BLOCKED. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000. 문서만 변경.
+## v2026.10.28.1428 — F675-163 회원 이벤트 캘린더 저장 목록 (기획 초안 / 운영 보류)
+- **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
+- 이전 기능 보완 v1426 → 현재 기능 추가 v1428 → 다음 기능 보완 v1430(잠정). 시작·중간 확인 main 35971c600f25869c96f1c666d4b9f58927202730. QA v1349 FAILED, v1350 중간 시점 진행 중. /calendar는 시즌/오늘/주간/상점 일정 API를 조회하지만 회원별 저장 기능 없음. 시즌 이벤트 UUID·종료시각, 상점 UUID·판매 종료시각을 근거로 1차 대상 설정; 안정 ID가 없는 오늘·주간 카드는 제외. F675-160 상품 찜과 분리.
+- 명시적 저장/해제·내 저장 일정, 실시간 일정·비공개/만료 비식별화, 회원 잠금 100개 상한, 멱등 영수증, 버전, 세션 결합 불투명 키셋 커서, Nest/Next/Android 동등성, noindex/no-store, WCAG 2.2 AA. 자동 참가·WLD 이동·가격 고정·보상·푸시/이메일·알림 발송 보장 없음.
+- P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05 CAL1428-06 CAL1428-07 CAL1428-08 CAL1428-09 CAL1428-10. [영문 통합 명세](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md); [개발 이슈 #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
+- 데이터 볼륨 98%, 과거 원장 차이 18,000 WLD, QA v1349 앱 쓰기 권한 235/243개 테이블·PUBLIC 은행 함수 3개·체크섬 불일치 5건/미적용 20건, 독립 복원, 공식 Test 정확 SHA 미검증으로 RELEASE HOLD. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED / IN PROGRESS. 문서만 변경, 런타임·DB·원장·Test·Production 미변경.
 
 
 ## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)
