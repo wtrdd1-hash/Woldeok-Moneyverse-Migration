@@ -40,8 +40,43 @@ const migratorUrl = process.env.MONEYVERSE_CHAT_REPORT_MIGRATOR_URL;
       reporter_id: actor, conversation_id: conversation, reason: 'fraud_scam',
       details: '사기 의심 메시지', snapshot_size: 1,
     });
-    const audit = await owner.query("SELECT count(*)::integer AS n FROM public.audit_logs WHERE action = 'CHAT_CONVERSATION_REPORTED' AND actor_user_id = $1::uuid", [actor]);
-    expect(audit.rows[0].n).toBeGreaterThanOrEqual(1);
+    const audit = await owner.query(
+      `SELECT action, actor_user_id::text, target_id::text, metadata,
+              sequence, integrity_hash, hash_version
+       FROM public.audit_logs
+       WHERE action = 'chat.conversation.reported' AND target_id = $1::uuid`, [reportId],
+    );
+    expect(audit.rows).toHaveLength(1);
+    expect(audit.rows[0]).toMatchObject({
+      action: 'chat.conversation.reported', actor_user_id: actor, target_id: reportId,
+      hash_version: 2,
+    });
+    expect(audit.rows[0].metadata).toMatchObject({
+      conversationId: conversation, reportedUserId: peer, reason: 'fraud_scam', reportId,
+    });
+    expect(Number(audit.rows[0].sequence)).toBeGreaterThan(0);
+    expect(audit.rows[0].integrity_hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('rolls back the report if the canonical audit append is rejected', async () => {
+    const before = await owner.query(
+      'SELECT count(*)::integer AS n FROM public.private_chat_reports WHERE conversation_id = $1::uuid',
+      [conversation],
+    );
+    // NOT VALID still rejects new audit rows, without altering existing history.
+    await owner.query(`ALTER TABLE public.audit_logs ADD CONSTRAINT chat_report_v638_audit_reject
+      CHECK (action <> 'chat.conversation.reported') NOT VALID`);
+    try {
+      await expect(repo.reportConversation(actor, conversation, 'other', '감사 실패 시 원자성 검증'))
+        .rejects.toMatchObject({ code: '23514' });
+      const after = await owner.query(
+        'SELECT count(*)::integer AS n FROM public.private_chat_reports WHERE conversation_id = $1::uuid',
+        [conversation],
+      );
+      expect(after.rows[0].n).toBe(before.rows[0].n);
+    } finally {
+      await owner.query('ALTER TABLE public.audit_logs DROP CONSTRAINT chat_report_v638_audit_reject');
+    }
   });
 
   it('rejects a non-participant and preserves private table ACLs', async () => {
@@ -49,6 +84,8 @@ const migratorUrl = process.env.MONEYVERSE_CHAT_REPORT_MIGRATOR_URL;
       .rejects.toMatchObject({ code: '42501' });
     await app.query('SET ROLE moneyverse_app');
     await expect(app.query('SELECT * FROM public.private_chat_reports LIMIT 1'))
+      .rejects.toMatchObject({ code: '42501' });
+    await expect(app.query('SELECT * FROM public.audit_logs LIMIT 1'))
       .rejects.toMatchObject({ code: '42501' });
   });
 });
