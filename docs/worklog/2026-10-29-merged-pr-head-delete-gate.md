@@ -13,3 +13,9 @@ Pending.
 
 ## Finished
 Pending validation; no release authorization.
+
+## In progress — 09:26–09:29 KST
+- TDD RED observed: five tests fail with missing guard/workflow; then GREEN: five tests pass. Temp bare Git remote covers exact ancestor, squash merge, moved head, stale main, invalid ref, and verifies no branch mutation.
+- Added `scripts/release/verify-merged-pr-head.sh` (fail-closed exact SHA/branch/main checks, fresh Git fetch, ancestry proof), test in `scripts/release/tests/`, and workflow gate before any destructive push.
+- Broader release Node suite: 87 PASS / 0 FAIL. Shell syntax, Node syntax, diff whitespace PASS. Applied migrations unchanged; no live DB changes.
+- Branch update may require GitHub connector because the miniPC GitHub OAuth token lacks `workflow` scope; keep workflow update isolated and verify remote SHA before PR.
