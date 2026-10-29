@@ -1,7 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { toast } from 'sonner';
+import { adminSupportReply } from './actions';
 import { AdminSupportView, type AdminSupportThread, type AdminSupportMessage } from './admin-support-view';
+
+vi.mock('./actions', () => ({ adminSupportReply: vi.fn(), adminSupportStatus: vi.fn() }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -99,6 +103,44 @@ describe('AdminSupportView component', () => {
     // 일치하지 않는 검색어 입력 시 안내 문구 확인
     fireEvent.change(searchInput, { target: { value: '존재하지않는회원' } });
     expect(screen.getByText('검색 조건과 일치하는 문의가 없습니다.')).toBeDefined();
+  });
+
+  it('reuses the same idempotency key after an uncertain reply acknowledgement', async () => {
+    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'cccccccc-cccc-4ccc-8ccc-cccccccccccc') });
+    vi.mocked(adminSupportReply)
+      .mockRejectedValueOnce(new Error('acknowledgement lost'))
+      .mockResolvedValueOnce(undefined);
+
+    render(<AdminSupportView
+      initialThreads={mockThreads}
+      initialMessages={mockMessages}
+      selectedId="thread-1"
+      initialStatus={null}
+    />);
+    fireEvent.change(screen.getByLabelText('관리자 답장'), { target: { value: 'Retry safely' } });
+    const submit = screen.getByRole('button', { name: '답장' });
+    fireEvent.submit(submit.closest('form')!);
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(toast.success).not.toHaveBeenCalledWith('관리자 답장이 회원에게 전송되었습니다.');
+    fireEvent.submit(submit.closest('form')!);
+    await waitFor(() => expect(adminSupportReply).toHaveBeenCalledTimes(2));
+    const first = vi.mocked(adminSupportReply).mock.calls[0]![0];
+    const second = vi.mocked(adminSupportReply).mock.calls[1]![0];
+    expect(first.get('idempotencyKey')).toBe('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+    expect(second.get('idempotencyKey')).toBe(first.get('idempotencyKey'));
+    vi.unstubAllGlobals();
+  });
+
+  it('exposes accessible support search, polling state and attachment controls', () => {
+    render(<AdminSupportView
+      initialThreads={mockThreads}
+      initialMessages={mockMessages}
+      selectedId="thread-1"
+      initialStatus={null}
+    />);
+    expect(screen.getByRole('textbox', { name: '문의 검색' })).toBeDefined();
+    expect(screen.getByRole('button', { name: '실시간 5초 폴링 ON' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '이미지 파일 첨부' })).toBeDefined();
   });
 
   it('inserts canned response when clicking quick preset buttons', () => {
