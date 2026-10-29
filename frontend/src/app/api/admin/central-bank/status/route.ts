@@ -3,37 +3,44 @@ import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-interface MintBatchRecord {
-  id: string;
-  batchNumber: string;
-  amountWld: string;
-  status: string;
-  mintReason?: string;
+interface MonetaryTelemetry {
+  m_total: string;
+  m_circulating: string;
+  m_treasury: string;
+  m_bank_liquidity: string | null;
+  m_locked: string | null;
+  verified_invariant: boolean;
+  is_issuance_frozen: boolean;
+  active_policy_orders_count: number;
+  total_mint_certificates_count: number;
+  total_retirement_certificates_count: number;
 }
+interface PersistentPolicy { source: 'persistent_monetary_policy' }
 
 export async function GET() {
   try {
-    // These legacy services use process-local state, not the certified economy
-    // ledger. Expose this explicitly and never label it an official monetary state.
-    const [batches, aggregates, policy, reserve] = await Promise.all([
-      api<MintBatchRecord[]>('/api/v1/mint/batches'),
-      api('/api/v1/central-bank/monetary-aggregates'),
-      api('/api/v1/central-bank/base-rate'),
-      api('/api/v1/central-bank/reserve-requirement'),
+    const [monetary, policy, reserve] = await Promise.all([
+      api<MonetaryTelemetry>('/api/v1/admin/economy/monetary/telemetry'),
+      api<PersistentPolicy>('/api/v1/central-bank/base-rate'),
+      api<PersistentPolicy>('/api/v1/central-bank/reserve-requirement'),
     ]);
-
+    if (policy.source !== 'persistent_monetary_policy' ||
+        reserve.source !== 'persistent_monetary_policy' ||
+        monetary.verified_invariant !== false) {
+      // The independent M_total telemetry does not certify every bank/escrow liability.
+      // A missing/incorrect provenance is not an excuse to show a fabricated official total.
+      return NextResponse.json({ error: 'MONETARY_SOURCE_UNVERIFIED' }, { status: 503 });
+    }
     return NextResponse.json({
-      source: 'non_persistent_backend_preview',
-      pendingBatches: batches.filter((batch) => batch.status === 'PENDING_CENTRAL_BANK_ACCEPTANCE'),
-      aggregates,
+      source: 'ledger_partial_and_persistent_policy',
+      monetary,
       policy,
       reserve,
-    }, { headers: { 'Cache-Control': 'no-store' } });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
-    const status = error instanceof ApiError ? error.status : 503;
     return NextResponse.json(
       { error: error instanceof ApiError ? error.code ?? 'CENTRAL_BANK_SOURCE_UNAVAILABLE' : 'CENTRAL_BANK_SOURCE_UNAVAILABLE' },
-      { status, headers: { 'Cache-Control': 'no-store' } },
+      { status: error instanceof ApiError ? error.status : 503, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 }

@@ -315,7 +315,7 @@ export function SwfControlPanel({
                 </Badge>
               </div>
               <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
-                국고 안전 바닥을 보존하며 가상 우량 기업 법인세 자동 징수 및 분산 투자 복리 성장으로 총자산(AUM)을 증식합니다.
+                아래 수치는 기존 포트폴리오 테이블의 평가 기록으로, 거래 원장과 실제 보유 자산이 대사되지 않았습니다. 현금 회수 가능한 국고 자금이나 실현 수익으로 해석하면 안 됩니다.
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
@@ -344,7 +344,7 @@ export function SwfControlPanel({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium flex flex-wrap items-center justify-between gap-1.5">
-                <span className="shrink-0">국부펀드 투자 자산 (AUM)</span>
+                <span className="shrink-0">미검증 포트폴리오 평가액 (참고)</span>
                 {totalAum > 25000000 && (
                   <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">
                     투자 비중 과다 경고
@@ -365,17 +365,17 @@ export function SwfControlPanel({
                 {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
+                정책상 설정된 보존 하한 (실제 금고 잔액 아님)
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>
+              <div className="text-xs text-slate-400 font-medium">미검증 평가 손익 (실현 수익 아님)</div>
               <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
                 +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                평가익 30% 국고 회수 환원 · 70% 자산 재투자
+                평가값은 실제 국고 입금·정산 내역이 아닙니다.
               </div>
             </div>
           </div>
@@ -401,7 +401,7 @@ export function SwfControlPanel({
           <div>
             <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">
               <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>
-              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>
+              <span className="text-xs text-slate-400">실제 매입·세금·원장 증빙 별도 검증 필요</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {portfolios.map((item) => (

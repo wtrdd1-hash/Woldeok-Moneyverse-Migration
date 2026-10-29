@@ -22,12 +22,13 @@ import {
   UpdateReserveRequirementDto,
 } from './central-bank.dto';
 import { CentralBankService } from './central-bank.service';
+import { DurableCentralBankPolicyService } from './durable-policy.service';
 
 @ApiTags('central-bank')
 @Controller('central-bank')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class CentralBankController {
-  constructor(private readonly centralBankService: CentralBankService) {}
+  constructor(private readonly centralBankService: CentralBankService, private readonly durablePolicy: DurableCentralBankPolicyService) {}
 
   @Post('mint-batches/:id/accept')
   @UseGuards(AdminGuard, CsrfGuard)
@@ -50,7 +51,7 @@ export class CentralBankController {
   @Get('base-rate')
   @ApiOperation({ summary: '현재 국가 기준금리(Base Rate) 및 테일러 룰 추정 금리 조회' })
   async getBaseRate() {
-    return this.centralBankService.getBaseRate();
+    return this.durablePolicy.getBaseRate();
   }
 
   @Put('base-rate')
@@ -61,13 +62,13 @@ export class CentralBankController {
     @Req() req: RequestWithSession,
   ) {
     const adminId = requireUserId(req);
-    return this.centralBankService.updateBaseRate(dto, adminId);
+    return this.durablePolicy.updateBaseRate(dto, adminId);
   }
 
   @Get('reserve-requirement')
   @ApiOperation({ summary: '시중 상업은행 법정 지급준비율(Reserve Requirement Ratio) 조회' })
   async getReserveRequirement() {
-    return this.centralBankService.getReserveRequirement();
+    return this.durablePolicy.getReserveRequirement();
   }
 
   @Put('reserve-requirement')
@@ -78,12 +79,19 @@ export class CentralBankController {
     @Req() req: RequestWithSession,
   ) {
     const adminId = requireUserId(req);
-    return this.centralBankService.updateReserveRequirement(dto, adminId);
+    return this.durablePolicy.updateReserveRequirement(dto, adminId);
   }
 
   @Get('commercial-rates')
   @ApiOperation({ summary: '기준금리 및 지급준비율 연동 시중 상업은행 예대금리(대출/적금) 시뮬레이션 조회' })
   async getCommercialRates() {
-    return this.centralBankService.getCommercialBankRates();
+    const [baseRate, reserve] = await Promise.all([
+      this.durablePolicy.getBaseRate(),
+      this.durablePolicy.getReserveRequirement(),
+    ]);
+    return this.centralBankService.getCommercialBankRates(100_000_000n, 40_000_000n, {
+      ratePercent: baseRate.ratePercent,
+      ratioPercent: reserve.ratioPercent,
+    });
   }
 }

@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1503 — Central-bank durable policy source/Test candidate
+- The operator correctly noted that v1502 disabled core treasury/central-bank actions, rather than restoring them. Source v1503 makes bounded central-bank policy decisions persist in PostgreSQL with independent immutable audit rows, CSRF and admin authorization, without modifying money supplies. The partial ledger telemetry replaces fictitious M0/M1/M2 and the SWF legacy valuations are explicitly unverified, nonredeemable estimates.
+- Test DB migration 295 applied after isolated backup; actual rate save 3.75→3.76→3.75 and two audit receipts verified. Production remains v1502; real Mint and SWF cash settlement require idempotent balanced ECSL receipts and asset backing.
+- [Release candidate](../releases/v2026.10.29.1503.md) · [Worklog](../worklog/2026-10-29-finance-operator-functional-recovery-v1503.md).
+
 ## v1452-R1 — First live scheduled news acceptance (2026-10-29 15:30 KST)
 - Production first hourly cycle on the corrected v1502 scheduler: five candidates, one `MYUY` publication, no `CHIMU314` headline. Actual engine recorded as deterministic fallback after a local LLM timeout. Full 24h/7d editorial concentration is not yet measured. [Release record](../releases/v2026.10.29.1452-news-scheduler.md).
 

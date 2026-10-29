@@ -206,9 +206,13 @@ export class CentralBankService {
   /**
    * 중앙은행 기준금리 및 지급준비율 기반 시중 상업은행 예대금리 동적 산출 (Kinked Model 바인딩)
    */
-  getCommercialBankRates(sampleDeposits = 100_000_000n, sampleBorrows = 40_000_000n) {
-    const baseRateBps = Math.round(Number(this.currentBaseRate.ratePercent) * 100);
-    const statutoryReserveRatio = Number(this.currentReserveRequirement.ratioPercent) / 100;
+  getCommercialBankRates(
+    sampleDeposits = 100_000_000n,
+    sampleBorrows = 40_000_000n,
+    persistedPolicy?: { ratePercent: string; ratioPercent: string },
+  ) {
+    const baseRateBps = Math.round(Number(persistedPolicy?.ratePercent ?? this.currentBaseRate.ratePercent) * 100);
+    const statutoryReserveRatio = Number(persistedPolicy?.ratioPercent ?? this.currentReserveRequirement.ratioPercent) / 100;
 
     const kinked = calculateKinkedInterestRate(sampleDeposits, sampleBorrows, {
       baseRateBps,
@@ -219,8 +223,8 @@ export class CentralBankService {
     const baseSupplyRate = kinked.supplyRateBps / 100;
 
     return {
-      centralBankBaseRatePercent: this.currentBaseRate.ratePercent,
-      centralBankReserveRatioPercent: this.currentReserveRequirement.ratioPercent,
+      centralBankBaseRatePercent: persistedPolicy?.ratePercent ?? this.currentBaseRate.ratePercent,
+      centralBankReserveRatioPercent: persistedPolicy?.ratioPercent ?? this.currentReserveRequirement.ratioPercent,
       commercialBorrowRatePercent: baseBorrowRate.toFixed(2),
       commercialSupplyRatePercent: baseSupplyRate.toFixed(2),
       netInterestMarginBps: kinked.borrowRateBps - kinked.supplyRateBps,
