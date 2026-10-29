@@ -8,9 +8,9 @@
 - GitHub issue #1900 created. Independent docs-only branch; no runtime, DB, Test or Production writes.
 
 ## IN PROGRESS
-- [ ] Recheck main and canonical plans mid-run; integrate new feature in existing EN/KO masters and project plans.
-- [ ] Specify owner authorization, UX, API, DB, concurrency, privacy, Android, admin, KPI, regression and rollback.
-- [ ] Verify EN/KO parity, 10 backlog IDs, release classifier and Git diff.
+- [x] Rechecked main `0dffb9396` and EN/KO canonical plans; integrated F675-175 into four existing plans.
+- [x] Specified owner authorization, UX, API, DB, concurrency, privacy, Android, admin, KPI, regression and rollback.
+- [x] EN/KO parity and 10 backlog IDs verified; Node release classifier 17 PASS / 0 FAIL; git diff --check PASS.
 - [ ] Record GitHub PR/CI evidence and finish state without merging/deploying.
 
 ## FINISHED
