@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1490 — F675-178 지갑 북마크 정합성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **주기:** 이전 Addition v1488 → 현재 Improvement v1490 → 다음 Addition v1492(잠정). 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재조회; QA v1380 FAILED/P0. 선행 Draft #1937 미병합, 인계 #1936. 문서만 수정.
+- **실제 소스 근거:** 지갑 거래 커서가 PostgreSQL 마이크로초를 JS Date 밀리초로 변환; Android APP_API_REQUEST_HEADERS에 Idempotency-Key 없음; 지갑 게이트웨이에 private no-store는 있으나 X-Robots-Tag noindex 강제 없음; 북마크 CTA/API 미구현. 기존 Backend B #1935와 독립.
+- **설계:** 본인 거래 최대 100개, 세대(generation) 결속 HMAC 마이크로초 커서 10분, 목록 20/50개, 회원별 잠금과 원자적 저장/삭제. 불변 영수증은 **최초 커밋 결과**이지 현재 저장 상태가 아님. 동일 키 재시도 ≤24시간, 증빙 ≥90일, 만료 410, 목록 세대 변경 409 후 재조회. Nest/Next/Android 엄격 검증, 320px WCAG 2.2 AA, 비공개 no-store/noindex, 관리자 집계만, 기본 OFF. 상세 영문·국문 통합 기획 참조.
+- **P0:** REPO1490-01 과거 참조 462개/브랜치 보호; SEC1490-02 체크섬 5건/개발 DB ACL; FIN1490-03 MINT 18,000 WLD·국고 552행·SWF 6 FAIL; REL1490-04 QA v1380 전체 검증·정확 SHA·외부 복원·루트/데이터 92%/97% 용량. **P1:** BOOKMARK1490-05, BOOKMARK1490-06, BOOKMARK1490-07, BOOKMARK1490-08, BOOKMARK1490-09, BOOKMARK1490-10 SQL/커서·잠금/재시도·Nest/Android 헤더·Next/접근성·개인정보/관리자/KPI·격리 PG 회귀. 총 P0 4 + P1 6 = 10.
+- **수용시험 계획 미실행:** 격리 PostgreSQL 17.11 합성 거래 ≥10,001건, 위조 100, 경합 100, 유실/지연 50, 계정 전환 30, 마이크로초·24시간/90일·원장 변경 0 검증. 외부 독립 근거 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → BLOCKED / IN PROGRESS. 기획 회차는 런타임·DB·WLD·Test·Production을 변경하지 않으며 개발 별도 브랜치·정확 SHA 승격 게이트 유지.
+
+
 ## v2026.10.30.1488 — F675-178 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
 **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
 - **회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작/중간 재조회, 독립 QA v1379 FAILED/P0. [개발 이관 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 문서 전용이며 SQL·런타임·DB·WLD·Test·운영 변경 없음.

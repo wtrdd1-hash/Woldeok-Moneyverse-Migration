@@ -1,5 +1,37 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1490 / F675-178 — 지갑 거래 북마크 정합성·재시도·모바일 개인정보 보호 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 Feature Addition v1488 → 현재 Feature Improvement v1490 → 다음 Feature Addition v1492(잠정). **기준:** main 62c6cd038951d65c94b709302bdaec6e75b080b6, AGENTS.md, README.md, 영문 PROJECT_PLAN.md와 국문 대조 문서; 시작·중간 재조회. **선행:** 미병합 Draft PR #1937, 개발 인계 이슈 #1936. **QA:** 독립 v1380 FAILED/P0. 문서 기획만 수행하며 런타임·SQL·DB·WLD·Test·Production은 변경하지 않는다.
+
+### v1488 설계에서 확인한 구체적 보완점
+1. 현재 backend/src/wallet/wallet-activity-cursor.ts는 PostgreSQL 마이크로초 시각을 JavaScript Date/ISO 밀리초로 직렬화한다. DB의 (created_at,id) 비교에서 같은 밀리초에 속한 서로 다른 거래가 누락·중복될 수 있다. **새 북마크 커서에는 기존 구현을 재사용하지 않는다.** PostgreSQL 6자리 소수 시각 문자열과 UUID를 정밀도 손실 없이 전달하고 (bookmarked_at DESC,transaction_id DESC)로 정렬한다. UTC 형식·UUID를 엄격 검증하고 HMAC-SHA-256 키 ID·회원·세션·조건·limit·상태 세대(generation)를 결속하며 상수시간 비교, 유효기간 10분, 최대 2048바이트를 적용한다. 기존 거래내역 커서 문제는 별도 개발 회귀 과제이며 이번 기획으로 수정됐다고 주장하지 않는다.
+2. frontend/src/lib/app-gateway.ts의 APP_API_REQUEST_HEADERS에는 **Idempotency-Key가 없다.** Android 북마크 저장/삭제의 재시도 키가 상위 서버로 전달되지 않는 위험이다. 북마크 변경 경로에 한정한 UUID 헤더 전달 및 중복·충돌 검증을 추가하고 세션/CSRF와 내부 토큰 경계를 유지한다. 지갑 경로의 private no-store는 존재하지만 **X-Robots-Tag: noindex 강제는 없다.** 성공·오류·304·비정상 상위 응답까지 보강한다. 기존 Backend B 개인정보 이슈 #1935와 코드 변경이 겹치지 않도록 한다.
+3. frontend/src/app/wallet/activity/page.tsx에는 북마크 CTA가 없으며 apiOrNull은 장애와 검증된 빈 목록을 구분한다. 이 구분을 보존하고 서버 확인 전 저장 성공을 표시하지 않으며 로그아웃/계정 변경 시 세션 세대가 다른 비동기 응답을 폐기한다. period.ts의 방향·완전성 보조 함수는 현재 화면에 연결되지 않았으므로 배포된 기능이라고 주장하지 않는다.
+4. 기존 불변 처리 영수증은 Save 성공→Remove→늦게 도착한 Save 응답에서 현재 상태를 잘못 보여줄 수 있다. 재시도 영수증은 **최초 커밋 시점의 결과**일 뿐 현재 저장 상태가 아니다. 최초 operationId·committedGeneration·effectAtCommit을 반환하고 최신 세대가 다르면 상태 API를 다시 조회한다. 동일 키는 24시간 이내에만 재시도 가능, 영수증 증거는 90일 이상 보존하며 24시간 초과 키는 쓰기 없이 410, 보존 중 다른 지문은 409로 거절한다.
+5. 회원당 최대 100개 잠금만으로는 여러 페이지 사이의 추가·삭제에 따른 누락·중복을 막지 못한다. 마지막 북마크 삭제 후에도 초기화되지 않는 **회원별 단조 증가 generation**을 도입한다. 첫 페이지가 generation을 반환하고 커서에 결속한다. 다음 페이지에서 generation이 달라졌다면 409 BOOKMARK_PAGE_CHANGED와 처음부터 다시 보기 CTA를 제공한다. 이는 변경이 없는 동안의 집합 안정성만 보장하며 여러 HTTP 요청 전체의 MVCC 스냅샷은 아니다.
+
+### 목적·사용자·화면·권한·상태
+- 대상은 인증·동의한 회원이며, 본인 WLD 원장 거래 최대 100개를 기기 간 저장·삭제한다. 타인이 보낸 입금 및 동결/종료 계정의 과거 거래도 본인 원장에 기록됐다면 포함한다. 공개 공유, 영수증 인증, 메모·분류, 자동 저장, 송금, 잔액/국고 변경은 제외한다.
+- 기존 /wallet/activity의 거래별 '거래 저장'/'북마크 삭제' 및 '저장한 거래 보기' → 비공개 /wallet/activity/bookmarks의 '이전 저장 기록 보기'/'목록 처음부터'/'거래내역으로 돌아가기'. 상한 도달 시 '기존 항목을 삭제한 후 저장하세요'. UUID를 그대로 노출하지 않는 접근성 이름, 320px·200% 확대·키보드·44px 터치 목표·스크린리더·Android TalkBack·WCAG 2.2 AA.
+- 상태: DISABLED, LOADING, READY, VERIFIED_EMPTY, SAVING, REMOVING, ALREADY_APPLIED, LIMIT_REACHED(409), REPLAY_CONFLICT(409), PAGE_CHANGED(409), CURSOR_EXPIRED(410), REQUEST_KEY_EXPIRED(410), SESSION_EXPIRED(401), FORBIDDEN(403), NOT_OWNER_VISIBLE(404), RATE_LIMITED(429), OFFLINE, UPSTREAM_UNAVAILABLE(503), MALFORMED_RESPONSE(503), ACCOUNT_SWITCHED. 실패·비정상 200을 빈 목록이나 성공으로 표시하지 않는다.
+
+### API·DB·트랜잭션의 실행 가능 계약
+- GET /api/v1/wallet/activity/bookmarks?limit=20&cursor=... → {asOf,generation,items,nextCursor,hasMore,limit}; 기본 20/최대 50. 항목은 transactionId,bookmarkedAt 및 본인 소유 거래 투영(transactionId,occurredAt,label,netAmount/cashDelta/bankDelta 정확한 십진 문자열)만 포함한다. 상대방 신원·전체 posting은 제공하지 않는다. 본인 원장 근거가 소실된 항목은 숨기고 개인정보 없는 내부 경고만 남긴다.
+- POST /api/v1/wallet/activity/bookmarks/status는 중복 없는 UUID 1~50개를 받아 본인에게 보이는 저장 ID와 generation만 반환한다. 타인/없는 거래 존재 여부를 구별할 수 없게 하며 읽기 전용이다.
+- PUT/DELETE /api/v1/wallet/activity/bookmarks/:transactionId는 인증·동의·웹 CSRF·Android 세션과 정규 UUID Idempotency-Key를 요구한다. 최초 커밋의 {operationId,transactionId,action,effectAtCommit,committedGeneration,alreadyApplied,serverTime,currentStateRequiresRefresh}를 불변 영수증으로 반환한다. 400 잘못된 입력, 401 인증, 403 정책, 404 비소유/미존재, 409 상한·키 지문·세대 충돌, 410 키/커서 만료, 429 남용, 503 의존성. 네트워크 응답 유실 시 **동일 키**를 24시간 안에 재시도한다. 410이면 자동 신규 키로 재실행하지 않고 상태를 다시 조회한다.
+- 제안 DB: wallet_bookmark_owner_state(owner_user_id PK, generation bigint≥0), wallet_activity_bookmarks(owner_user_id,transaction_id,bookmarked_at, 복합 PK 및 검토된 FK), wallet_bookmark_operation_receipts(owner_user_id,request_key 복합 PK, action,transaction_id,fingerprint,operation_id,effect_at_commit,committed_generation,created_at,expires_at, 불변 응답). (owner_user_id,bookmarked_at DESC,transaction_id DESC) 및 expires_at 인덱스. 계정 삭제·백업 복원 후 재삭제 증빙을 포함하며 원장 FK의 보존 정책을 검토한다. 체크섬 5건 불일치 해소 전 마이그레이션 번호를 배정하거나 기존 SQL을 수정하지 않는다.
+- 본인 거래 증명은 ledger_postings→accounts에서 owner_user_id=인증 회원, account_type USER_CASH/USER_BANK, currency WLD인 행 존재 여부로 한다. ledger_transactions.actor_user_id나 account.status='active'로 필터링하지 않으며 posting 다수여도 거래 1건만 반환한다. SECURITY DEFINER 고정 search_path, 공개 EXECUTE 철회, moneyverse_app 최소 EXECUTE만 허용하고 신규 테이블 직접 DML/SELECT/TRUNCATE는 금지한다. **DB 함수에 전달하는 actor 인자 자체가 세션 인증은 아니다.** Nest는 검증된 서버 세션에서만 actor를 유도하며 함수 권한·위협 모델을 별도 검증한다.
+- 단일 트랜잭션에서 회원 상태 행 생성·잠금→원장 소유 검증→멱등성 키/지문/시간 검사→100개 상한 확인→저장/삭제→**실제 집합 변경 시에만 generation 증가**→불변 영수증 기록→커밋. 이미 저장/삭제된 no-op은 영수증만 기록하고 세대를 올리지 않는다. 동시 저장 100건이 상한을 넘지 않으며 오래된 Save 영수증 재조회가 삭제를 되돌리지 않는다. 오류 시 전체 롤백. 목록 generation 검증과 조회는 동일 SQL 스냅샷에서 수행하고 PostgreSQL 마이크로초 튜플을 JS Date로 변환하지 않는다.
+
+### 관리자·보안·SEO·모바일·KPI·시험·배포
+- Next/Nest/Android 비공개 응답과 오류에 private no-store/noindex, 사이트맵/공개 공유/제3자 추적 금지. 관리자는 k≥20 집계만 조회하고 회원별 북마크 내용·상대방·원시 ID는 볼 수 없다. 읽기 30회/분·쓰기 10회/분·회원당 동시 쓰기 1회 목표는 부하검증 후 확정. KPI 가설은 누출 0, 거짓 성공 0, p95 목록 <500ms·쓰기 <700ms, 30일 사용 시도 ≥5%이며 **실측치가 아니다**.
+- **계획, 미실행:** 격리 PostgreSQL 17.11에서 합성 원장 ≥10,001건, 같은 밀리초의 서로 다른 마이크로초, 타인 위조 100건, 99개에서 동시 저장 100건, 응답 유실/늦은 재시도 50건, 계정/세션 변경 30건, 세대 변경·24시간/90일 경계·2^53 초과 WLD·비WLD 제외·다중 posting·삭제/복원·비정상 200·Android 헤더/noindex·320px 접근성. 원장/잔액 변경 0, app 직접 권한 0, 회귀·롤백 증거 필요.
+- **P0 4건:** REPO1490-01 과거 참조 462개(비조상 346개)·브랜치 보호; SEC1490-02 적용 체크섬 5건(219/220/221/234/266)·개발 DB 고객문의/감사 DML·함수 ACL; FIN1490-03 MINT 출처 18,000 WLD·국고 미연결 552행·SWF 6 FAIL·Test 합성 200; REL1490-04 QA v1380 FAILED/P0, 전체 lint/test/계약, frontend/backend/edge 정확 SHA, 독립 외부 복원, GitOps, 루트 92%/데이터 97% 용량 안전 확보(타인 작업 삭제 금지).
+- **P1 6건:** BOOKMARK1490-05 마이크로초/세대 커서·소유 SQL/인덱스; BOOKMARK1490-06 회원 잠금·불변 재시도/현재 상태 정합성; BOOKMARK1490-07 Nest 계약·Android Idempotency-Key/noindex; BOOKMARK1490-08 Next CTA·계정 전환·접근성; BOOKMARK1490-09 개인정보·관리자 집계·SEO/KPI·삭제/복원; BOOKMARK1490-10 격리 PG 10,001건/악의적 경합/회귀/롤백·정확 SHA Test. **P0 4 + P1 6 = 총 10건.**
+- 외부 독립 근거 신규 검증 승인 **0건**, 중복 제거·분류된 누적 승인 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 기능 기본 OFF. 개발자는 별도 브랜치에서 RED/GREEN→격리 PG/권한→전체 CI→공식 Test 동일 SHA 인증 E2E→독립 복원→승인된 GitOps·스모크·롤백 순서로 진행한다. 기획 회차는 운영 배포·원장/DB 변경을 하지 않는다.
+
+
 ## v1488 / F675-178 — 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
 **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
 

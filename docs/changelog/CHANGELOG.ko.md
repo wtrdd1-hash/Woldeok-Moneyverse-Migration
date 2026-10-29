@@ -1,5 +1,9 @@
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
 
+## v2026.10.30.1490 — 지갑 북마크 보완 (기획 Draft / HOLD)
+- F675-178 v1488 후속 Feature Improvement: PostgreSQL 마이크로초 커서, 회원별 단조 증가 세대와 목록 재시작, 불변 재시도 영수증/현재 상태 구분, 재시도 24시간·증빙 90일, 100개 상한 잠금, Android Idempotency-Key·noindex 누락 보완. P0 4/P1 6 개발 인계, 영문·국문 동등, 런타임/DB 미변경. QA v1380 FAILED/P0, 데이터 디스크 97%, 외부 근거 신규 0/누적 UNKNOWN·10,000, RELEASE HOLD.
+
+
 ## 2026-10-30 v1488 — F675-178 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
 - 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인. [개발 이관 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 런타임·DB·WLD·Test·운영 변경 없음.
 - 지갑 기록·API·원장 SQL·개발 PostgreSQL 17.11(북마크 테이블 없음, 개발 거래 891건)·QA v1379·열린 GitHub PR 조사. 회원 소유 거래 100개 북마크, 커서, 안정적 멱등 영수증, 소유자 DB 함수/권한, Nest/Next/Android, 접근성·SEO·개인정보·관리자 집계 및 배포 차단 조건을 영문 정본과 국문 통합 기획에 반영.

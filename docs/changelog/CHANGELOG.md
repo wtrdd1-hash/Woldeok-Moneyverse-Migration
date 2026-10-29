@@ -1,5 +1,9 @@
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
+## v2026.10.30.1490 — Wallet Bookmark Hardening (Planning Draft / HOLD)
+- F675-178 Feature Improvement after v1488: PostgreSQL microsecond cursor precision, monotonic owner generation and stale-page reset, immutable replay receipt vs current state, 24h retry/90d audit, owner-locked 100-cap, Android Idempotency-Key and noindex header gap. 4 P0 + 6 P1 handoff, EN/KO parity, no runtime or DB changes. QA v1380 FAILED/P0, disk data 97%, external evidence 0 new / UNKNOWN of 10,000; RELEASE HOLD.
+
+
 ## 2026-10-30 v1488 — F675-178 owner-private wallet transaction bookmarks (Feature Addition; DRAFT / RELEASE HOLD)
 - Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). Latest main `62c6cd038951d65c94b709302bdaec6e75b080b6` rechecked start/mid; [engineering issue #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). No runtime/DB/WLD/Test/Production changes.
 - Read source wallet history/controller, ledger accounts/postings schema, DEV PG 17.11 read-only table existence (bookmark table absent; 891 DEV ledger transactions), QA v1379 and open GitHub PRs. Drafted private owner-visible bookmark 100-cap, cursor, stable idempotency receipts, SQL/ACL, Next/Nest/Android, a11y/SEO/privacy, admin aggregate and fail-closed release gates in bilingual canonical/integrated plan.
