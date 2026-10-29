@@ -1,3 +1,9 @@
+## v2026.10.30.1486 — F675-177 지갑 월별 요약 스냅샷·과거 계정 보완 (기능 보완 / 초안 / 배포 보류)
+- **회차:** 이전 기능 추가 v1484 → 현재 기능 보완 v1486 → 다음 기능 추가 v1488(잠정). 미병합 [Draft #1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) 기반; main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1378 FAILED/P0. 문서 기획만 수행, 운영 인증 아님.
+- **소스 기반 개선:** 풀의 `Queryable.query`만으로는 동일 클라이언트 `REPEATABLE READ READ ONLY`가 보장되지 않으므로 체크아웃 클라이언트+롤백/해제 또는 검증된 단일 SQL 스냅샷 필요. active/frozen/closed 계정의 과거 USER_CASH/USER_BANK WLD 전표 유지, 거래 actor 필터 금지. 회원 순유입/순유출은 총수입·총지출이 아니며 현금↔은행은 순변동 0. 당월 `effectiveEndExclusive`, 한국시간→UTC 반개구간, 정밀 금액 문자열·스냅샷·합계 불변식 강화.
+- **P0:** REPO1486-01 과거 참조, SEC1486-02 직접 DB DML·체크섬 5건, FIN1486-03 18,000 WLD·국고 552건·Test 합성 200, REL1486-04 프론트/엣지 SHA·금융 실패 6건·lint 3건·복원/정확 SHA Test·용량. **P1:** MONTH1486-05 본인 SQL/과거 계정, MONTH1486-06 스냅샷, MONTH1486-07 API/검증, MONTH1486-08 Android/접근성, MONTH1486-09 개인정보/관리자/SEO/KPI, MONTH1486-10 격리 PG 회귀. 합성 10,001건·적대적 시험은 **계획만 수립, 미실행**.
+- **게이트:** 기능 OFF, 런타임/DB/WLD/Test/운영 미변경. 별도 개발 브랜치·정확 SHA 공식 Test·외부 복원·승인된 GitOps 후 승격. 외부 독립·중복 제거·실근거 분류 신규 승인 0건, 누적 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. [통합 상세](INTEGRATED_PLANNING_MASTER.ko.md) 및 [개발 인계 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
+
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
 
 ## v2026.10.30.1484 — F675-177 회원 전용 지갑 월별 활동 요약 (기획 초안 / 배포 보류)
