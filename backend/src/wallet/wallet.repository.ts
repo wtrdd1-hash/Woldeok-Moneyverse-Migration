@@ -255,6 +255,36 @@ export class PostgresWalletRepository {
     );
   }
 
+  /** Owner-scoped keyset read. No ledger writes, new grants or unbounded OFFSET. */
+  async activityTransactionsForUser(userId: string, options: {
+    asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined;
+  }): Promise<WalletTransactionRow[]> {
+    const owner = requireUuid(userId, 'authenticated user id');
+    const afterId = options.after ? requireUuid(options.after.id, 'cursor transaction id') : null;
+    return queryRows<WalletTransactionRow>(
+      this.pool,
+      `SELECT ledger_transaction.id::text AS transaction_id,
+         ledger_transaction.type, ledger_transaction.created_at,
+         COALESCE(SUM(CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END), 0)::text AS net_amount,
+         COALESCE(SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
+           CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS cash_delta,
+         COALESCE(SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
+           CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS bank_delta
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+         AND ledger_transaction.created_at <= $2
+         AND ($3::timestamptz IS NULL OR ledger_transaction.created_at >= $3)
+         AND ($4::timestamptz IS NULL OR (ledger_transaction.created_at, ledger_transaction.id) < ($4, $5::uuid))
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
+       LIMIT $6`,
+      [owner, options.asOf, options.since, options.after?.at ?? null, afterId, 51],
+    );
+  }
+
   /**
    * Recipient resolution deliberately accepts only the internal user UUID.
    * It exposes neither OAuth subjects nor profile data, preventing this query

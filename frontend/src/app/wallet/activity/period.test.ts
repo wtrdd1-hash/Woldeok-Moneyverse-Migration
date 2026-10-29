@@ -31,3 +31,12 @@ describe('wallet activity rolling periods', () => {
     expect(activityPeriodUrl('all')).toBe('/wallet/activity');
   });
 });
+
+import { activityCursorUrl } from './period';
+
+describe('wallet history page navigation', () => {
+  it('encodes opaque signed cursors and retains the period without URL injection', () => {
+    expect(activityCursorUrl('7d', 'a.b+/=')).toBe('/wallet/activity?period=7d&cursor=a.b%2B%2F%3D');
+    expect(activityCursorUrl('all', null)).toBe('/wallet/activity');
+  });
+});

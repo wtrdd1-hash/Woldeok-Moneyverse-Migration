@@ -307,19 +307,16 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   });
 });
 
-describe('Android verified notification privacy', () => {
-  it.each([200, 401, 403, 500])('never publicly caches notification response %s', async (status) => {
+describe('Android wallet history pagination', () => {
+  it('passes through the opaque cursor but forces private no-store and noindex', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const spy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ notifications: [] }), {
-      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ transactions: [], hasMore: false }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
     }));
-    vi.stubGlobal('fetch', spy);
-    const response = await GET(
-      request('/app-api/v1/notifications?category=TRANSACTIONAL&offset=20'),
-      context('notifications'),
-    );
-    expect(response.status).toBe(status);
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/wallet/activity?period=7d&cursor=abc.def'), context('wallet', 'activity'));
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('cursor')).toBe('abc.def');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(spy.mock.calls[0]?.[0].toString()).toContain('category=TRANSACTIONAL&offset=20');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 });

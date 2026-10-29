@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { signWalletActivityCursor, verifyWalletActivityCursor, type WalletActivityPeriod } from './wallet-activity-cursor';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -16,7 +17,6 @@ import type {
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
   WalletTransferInput,
-  WalletTransferEvidenceRow,
 } from './wallet.repository';
 import {
   PostgresWalletRepository,
@@ -58,7 +58,6 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   VIRTUAL_DICE_GAME: '주사위 게임',
   EARLY_EVENT_REWARD: '초반 사건 보상',
   TREASURY_USER_DONATION: '국고 자발적 기부',
-  TREASURY_CITIZEN_DIVIDEND: '국고 시민배당 지급',
   STOCK_LEAGUE_ENTRY: '주식 챔피언십 참가비',
   MARKETPLACE_APPRAISAL: '마켓 감정서 발급 수수료',
   SHOP_MAINTENANCE: '주간 유지비',
@@ -85,10 +84,10 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number, periodDays?: number, direction?: WalletTransactionDirection): Promise<WalletTransactionRow[]>;
+  recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
+  activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
-  transferReceiptByKey(actorUserId: string, idempotencyKey: string): Promise<WalletTransferEvidenceRow | null>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
   claimWork(input: WalletClaimWorkInput): Promise<WalletRewardRow>;
   rewardAvailabilityForUser?(userId: string): Promise<WalletRewardAvailabilityRow>;
@@ -98,6 +97,7 @@ export interface WalletRepositoryLike {
   repay(input: WalletRepayInput): Promise<WalletRepayRow>;
   getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
   voteCitizenBudget?(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }>;
+  searchRecipients?(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]>;
   recordP2PTransfer?(data: {
     senderId: string;
     receiverId: string;
@@ -201,8 +201,6 @@ export interface WalletOverviewOptions {
   readonly recentLimit?: number;
   /** Optional rolling window; SQL filters the owner ledger before the 50-row cap. */
   readonly periodDays?: 7 | 30;
-  /** Server-side filter on the signed sum of the owner's cash and bank postings. */
-  readonly direction?: WalletTransactionDirection;
 }
 
 export interface WalletTransferRequest {
@@ -375,15 +373,13 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10, periodDays, direction }: WalletOverviewOptions = {},
+    { recentLimit = 10, periodDays }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      direction === undefined
-        ? this.repository.recentTransactionsForUser(userId, limit, periodDays)
-        : this.repository.recentTransactionsForUser(userId, limit, periodDays, direction),
+      this.repository.recentTransactionsForUser(userId, limit, periodDays),
     ]);
     return {
       userId,
@@ -393,33 +389,28 @@ export class WalletService {
     };
   }
 
-  async transferReceipt(authenticatedUserId: string, idempotencyKey: string): Promise<
-    | { status: 'unknown' }
-    | { status: 'committed'; transactionId: string; recipientUserId: string; amount: WldAmount }
-  > {
-    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
-    const key = requireUuid(idempotencyKey, 'idempotency key');
-    const row = await this.repository.transferReceiptByKey(actor, key);
-    if (!row) return { status: 'unknown' }; // An in-flight transaction may still commit.
-    if (row.transaction_type !== 'USER_TO_USER' || !Array.isArray(row.postings) || row.postings.length !== 2) {
-      throw new Error('unverifiable wallet transfer receipt');
-    }
-    const postings = row.postings as Record<string, unknown>[];
-    const sender = postings.find((posting) =>
-      posting.accountType === 'USER_CASH' && posting.ownerUserId === actor && posting.direction === 'credit');
-    const recipient = postings.find((posting) =>
-      posting.accountType === 'USER_CASH' && posting.ownerUserId !== actor && posting.direction === 'debit');
-    if (!sender || !recipient || typeof recipient.ownerUserId !== 'string'
-      || typeof sender.amount !== 'string' || typeof recipient.amount !== 'string'
-      || !/^[1-9][0-9]*$/.test(sender.amount) || sender.amount !== recipient.amount) {
-      throw new Error('unverifiable wallet transfer postings');
-    }
-    return {
-      status: 'committed',
-      transactionId: requireUuid(row.transaction_id, 'database transaction id'),
-      recipientUserId: requireUuid(recipient.ownerUserId, 'database recipient user id'),
-      amount: wldAmount(sender.amount, 'verified transfer amount'),
-    };
+  async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
+    period: WalletActivityPeriod = 'all', cursor?: string,
+  ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const session = requireUuid(authenticatedSessionId, 'authenticated session id');
+    if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
+    const now = this.clock();
+    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now) : null;
+    const asOf = decoded ? new Date(decoded.asOf) : now;
+    const since = period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000);
+    if (!this.repository.activityTransactionsForUser) throw new Error('wallet activity pagination repository is unavailable');
+    const rows = await this.repository.activityTransactionsForUser(owner, {
+      asOf, since, ...(decoded ? { after: { at: new Date(decoded.afterAt), id: decoded.afterId } } : {}),
+    });
+    const transactions = normalizeTransactions(rows.slice(0, 50));
+    const hasMore = rows.length > 50;
+    const last = rows[49];
+    const nextCursor = hasMore && last ? signWalletActivityCursor({
+      owner, session, period, asOf: asOf.toISOString(), afterAt: timestamp(last.created_at, 'cursor timestamp'),
+      afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
+    }) : null;
+    return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
   }
 
   async transfer(
@@ -444,12 +435,11 @@ export class WalletService {
       idempotencyKey: key,
     });
 
-    const transactionId = requireUuid(receipt.transactionId, 'database transaction id');
     if (this.broadcast) {
       try {
         // Notify recipient in real-time
         this.broadcast.publishUserNotification(recipient, {
-          id: `notif_recv_${transactionId}`,
+          id: `notif_recv_${Date.now()}`,
           title: 'WLD 송금 도착',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
           type: 'success',
@@ -457,7 +447,7 @@ export class WalletService {
         });
         // Notify sender in real-time
         this.broadcast.publishUserNotification(actorUserId, {
-          id: `notif_send_${transactionId}`,
+          id: `notif_send_${Date.now()}`,
           title: 'WLD 송금 완료',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
           type: 'info',
@@ -468,7 +458,7 @@ export class WalletService {
       }
     }
 
-    return { transactionId };
+    return { transactionId: requireUuid(receipt.transactionId, 'database transaction id') };
   }
 
   async claimDaily(
@@ -614,6 +604,17 @@ export class WalletService {
       return this.repository.voteCitizenBudget(actorUserId, quarter, choice);
     }
     return { success: true, quarter, choice };
+  }
+
+  async searchRecipients(
+    authenticatedUserId: string,
+    query: string,
+  ): Promise<{ userId: string; displayName: string }[]> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.searchRecipients === 'function') {
+      return this.repository.searchRecipients(query, actorUserId);
+    }
+    return [];
   }
 
   async p2pTransfer(
