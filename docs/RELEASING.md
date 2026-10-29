@@ -153,3 +153,9 @@ Before any money/economy/treasury-affecting Production cutover, perform the *rea
 `sudo -n node scripts/release/verify-financial-readiness.mjs --env-file /home/debian/Woldeok-Moneyverse-Migration/backend/.env`
 
 Nonzero exit/`BLOCKED` forbids promotion. 2026-10-16 v717 report shows 5 directly app-writable core financial tables and 19 uncertified ledger/account opening differences. No undocumented waiver, synthetic balancing journal or silent DB corrections. Even a green report is only a narrow prerequisite; certify opening balances, supply/vault, Test parity, v530 authenticated UI and rollback separately. The approved runtime environment file must be confirmed by inspecting current systemd `EnvironmentFiles` before running. [Evidence](worklog/2026-10-16-financial-readiness-v737.md).
+
+### v2026.10.29.1212 — Owner acceptance of existing financial DML (narrow exception)
+
+The owner explicitly accepts existing moneyverse_app DML on accounts, account_balances and system_treasury_vaults. Do not revoke these rights or repeatedly halt work solely because of these three operator-approved privileges. The original read-only financial readiness report continues to identify their risk; classify precisely these existing findings as OPERATOR_ACCEPTED_EXISTING_DML rather than falsely labeling all checks green. No other grants or ledger/security failures are waived.
+
+The unrelated database migration checksum/provenance, DB balance correctness, authenticated session continuity, isolated exact-source Test acceptance, backup restoration and zero-downtime cutover gates still apply. As observed for v1212, the Production restore clone accepted 23 missing SQL migrations and preserved the approved privileges, but 5 earlier migration checksums remain unmatched. The Production release has NOT been activated. See updates/v2026.10.29.1212-internal.md.

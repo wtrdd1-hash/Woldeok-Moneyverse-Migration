@@ -1,4 +1,8 @@
 ## v2026.10.29.1364 — 예약 QA 디스크 정리 실제 수행 보완
+
+## v2026.10.29.1212 — 기존 금융 쓰기 권한 승인·Test 성공 / 운영 이력 확인 대기
+- [내부](updates/v2026.10.29.1212-internal.ko.md) · [GitHub](updates/v2026.10.29.1212-github.ko.md) · [작업 기록](worklog/2026-10-29-finance-dml-approval-and-release-v1212.ko.md). 메인 병합·공식 Test 성공, 승인 쓰기 권한 유지, 운영 체크섬 이력 확인 대기.
+
 - 11:00 KST 정리기는 실행되었지만 QA 전용 임시 자료가 없어 0바이트 삭제한 것을 확인. 매시간 QA 완료 임시 결과를 생성하고 72시간 초과 후 정리하도록 보완. 테스트: 공개 HTTP 24개 통과·로그인 필요 2개·예상 외 실패 0, 테스트 백엔드 `/health` 200, 운영·테스트 서비스 가동. 전용 시험 자료 1MiB만 실제 삭제 검증; 타 자료 제외. 전수 기능 QA는 별개. [국문 기록](worklog/2026-10-29-qa-hygiene-v1364.ko.md), [영문 기록](worklog/2026-10-29-qa-hygiene-v1364.md), [내부](updates/2026-10-29-qa-hygiene-v1364-internal.ko.md), [GitHub](updates/2026-10-29-qa-hygiene-v1364-github.ko.md).
 
 ## v2026.10.29.1211 — 브랜치 통합 후보 / 운영 승격 보류

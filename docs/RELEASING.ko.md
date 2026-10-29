@@ -153,3 +153,9 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 `sudo -n node scripts/release/verify-financial-readiness.mjs --env-file /home/debian/Woldeok-Moneyverse-Migration/backend/.env`
 
 종료코드 비영(非0)·`BLOCKED` 시 승격 금지. v717 운영 2026-10-16 실측: 핵심 5테이블 앱 직접 DML, 미인증 초기 잔액/원장 차이 19계정. 근거 없는 조폐·원장 보정·예외승인 금지. 검사 통과도 오프닝 출처/공급량/금고/Test DB/v530 인증 UI/롤백 별도 승인 필요. [증거](worklog/2026-10-16-financial-readiness-v737.ko.md).
+
+### v2026.10.29.1212 — 운영자가 승인한 기존 금융 쓰기 권한
+
+기존 moneyverse_app의 accounts, account_balances, system_treasury_vaults 쓰기 권한을 운영자가 명시적으로 승인했다. 해당 기존 권한을 철회하거나 이 세 승인 사항만으로 배포 작업을 반복 중단하지 않는다. 읽기 전용 진단 원본 결과는 남기고, 해당 승인 사항만 OPERATOR_ACCEPTED_EXISTING_DML로 구분한다. 다른 보안·원장 문제를 통과했다고 표시하지 않는다.
+
+원장 불일치, 마이그레이션 체크섬, 세션 연속성, 정확한 SHA Test, 백업 복원 및 무중단 운영 승격 검증은 별개로 필수이다. 운영 사본의 누락 SQL 23개 적용 연습 및 기존 권한 보존은 성공했으나 기존 체크섬 불일치 5개로 실제 운영 승격은 하지 않았다. 자세한 기록: updates/v2026.10.29.1212-internal.ko.md.
