@@ -137,8 +137,11 @@ describe('SeoClientView', () => {
         submittedUrls: ['https://easy-scraping.com/stocks/CHIPS'],
         indexNowResponses: [
           { endpoint: 'https://api.indexnow.org/indexnow', status: 200, message: 'Notification received' },
+          { endpoint: 'https://searchadvisor.naver.com/indexnow', status: 503, message: 'Unavailable' },
           { endpoint: 'https://www.bing.com/indexnow', status: 503, message: 'Unavailable' },
         ],
+        googlePingStatus: 410,
+        timestamp: new Date().toISOString(),
       }),
     });
 
@@ -147,7 +150,7 @@ describe('SeoClientView', () => {
     const submitBtn = screen.getByRole('button', { name: /IndexNow URL 변경 통보/i });
     fireEvent.click(submitBtn);
 
-    const feedback = await screen.findByText(/URL 변경 알림 접수: 1\/2개 검색엔진 엔드포인트/);
+    const feedback = await screen.findByText(/URL 변경 알림 접수: 1\/3개 검색엔진 엔드포인트/);
     expect(feedback.textContent).toContain('실제 검색 색인은 보장되지 않습니다.');
   });
 
@@ -259,5 +262,19 @@ describe('SEO refresh evidence integrity', () => {
     fireEvent.click(screen.getByRole('button', { name: '새로고침' }));
     await waitFor(() => expect(screen.queryByText(/SEO 관측값 새로고침에 실패했습니다/)).toBeNull());
     expect(screen.getAllByText('1 / 1').length).toBeGreaterThan(0);
+  });
+});
+
+describe('SEO manual submission receipt verification', () => {
+  afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+  it('does not report a successful IndexNow receipt when no provider accepted it', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, indexNowResponses: [{ status: 503 }] }),
+    });
+    renderKo(<SeoClientView initialData={mockInitialData} initialNowMs={initialNowMs} />);
+    fireEvent.click(screen.getByRole('button', { name: /IndexNow URL 변경 통보/i }));
+    expect(await screen.findByText(/제출 응답을 검증하지 못했습니다/)).toBeTruthy();
+    expect(screen.queryByText(/URL 변경 알림 접수:/)).toBeNull();
   });
 });
