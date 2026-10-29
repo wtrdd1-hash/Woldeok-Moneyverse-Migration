@@ -62,6 +62,8 @@ node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검�
 
 v717부터 이 명령은 immutable 릴리스 manifest의 버전으로 **실제 운영 중인 release 세대별 systemd 서비스**를 선택한다(Prod `moneyverse-release-vNNN-backend/frontend.service`, Test `test-main-backend/frontend.service`). 선택된 서비스의 **실효 EnvironmentFiles 순서에 따라 적용된** `BUILD_ID`, 프론트엔드 `.next/BUILD_ID`, 실제 프로세스 작업 디렉터리, 공개 버전 API를 대조하며 옛 v600 서비스나 고정된 오래된 env 파일을 대신 검사하지 않는다. 읽기 권한 제한된 `/etc/moneyverse/*-release.env`가 있으면 승인된 운영자만 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>` 형태로 읽기 전용 실행할 수 있다. 환경값 자체나 비밀정보는 출력하지 않는다. 항목 하나라도 누락·불일치하면 **승격 차단**이다. 읽기 전용이며 통과시키려고 배포 manifest나 버전 값을 조작해서는 안 된다. 정확한 코드와 빌드를 새 immutable 경로에 재배포해야 한다.
 
+**P0 경계 검증 추가(2026-10-30):** Backend `/api/version`과 별개로 공개 `/frontend-version`을 직접 조회하고 프론트엔드 빌드 ID가 정확한 소스 SHA와 일치해야 한다. 국고 공개 검증이 독립적으로 승인되기 전까지 `/api/treasury/overview`는 HTTP 503, `Cache-Control: private, no-store`, `ok:false`, `PUBLIC_TREASURY_RECONCILIATION_PENDING`, 미검증 잔액, 빈 원장 목록을 반환해야 한다. 가상 200 응답, 오래된 프론트 ID, 증거 누락 및 네트워크 오류는 배포 차단이다. 공개 경계 검사만으로 모든 직접 origin 또는 실제 DB를 인증한 것은 아니므로 활성 origin과 Nginx 라우팅을 별도로 확인해야 한다. QA v1376 이슈 #1917의 Test 가상 200 및 Production 시각형 프론트 ID를 통과시키기 위해 조건을 완화해서는 안 된다.
+
 인증·금융원장·DB 권한·마이그레이션·전체 UI 5회·세션 유지·백업/복구·무중단 canary의 **별도 수용을 모두 통과**한 뒤 운영에 원자적 전환하고, 같은 SHA로 `--channel prod`를 다시 실행한다. 이 버전 확인 자체가 전체 운영 승인을 의미하지 않는다.
 
 ## 3. Main 통합·재검증
