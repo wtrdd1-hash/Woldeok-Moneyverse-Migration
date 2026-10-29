@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1484 / F675-177 — Owner-Private Monthly Wallet Activity Digest (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; unmerged, full CI not certified.
 
 **Authority / scope.** Previous Feature Improvement v1482 → Current Feature Addition v1484 → Next Feature Improvement v1486 (provisional). Main `62c6cd038951d65c94b709302bdaec6e75b080b6` rechecked start/mid; QA v1377 FAILED/P0. v1480/#1916 and v1482/#1920 are unmerged and must not be represented as released. This is a new feature proposal in the existing integrated document, not a runtime or DB implementation. Development issue [#1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). English canonical; Korean equivalent adjacent.
 

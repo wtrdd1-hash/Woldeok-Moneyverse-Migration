@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1484 / F675-177 — 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
+- **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 
 **기준·범위:** 이전 기능 보완 v1482 → 현재 기능 추가 v1484 → 다음 기능 보완 v1486(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 재확인, QA v1377 FAILED/P0. v1480/#1916·v1482/#1920은 미병합 제안이며 구현 완료로 간주하지 않음. [개발 이슈 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). 기존 통합문서에 추가하는 설계이며 런타임/DB 구현이 아님. 영어 문서가 canonical, 본 절은 한국어 동등본.
 

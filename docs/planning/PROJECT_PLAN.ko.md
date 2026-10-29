@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.30.1484 — F675-177 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
+- **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 - **회차:** 이전 기능 보완 v1482 → 현재 기능 추가 v1484 → 다음 기능 보완 v1486(잠정). 시작·중간에 main `62c6cd038951d65c94b709302bdaec6e75b080b6` 확인. v1480/#1916 및 v1482/#1920은 아직 병합되지 않은 제안이며 main의 구현이 아님. 최신 독립 QA v1377 **FAILED/P0**. [개발 인계 이슈 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). 이번 변경은 문서 전용이며 런타임·DB·WLD·Test·Production을 변경하지 않음.
 - **실제 소스 공백:** 비공개 `/wallet/activity`는 전체/7일/30일과 50건씩 기록 조회만 제공. Nest `GET /api/v1/wallet/activity`는 기간·커서만 받음. 저장소 SQL은 USER_CASH+USER_BANK 전표를 거래별 부호 있는 증감으로 계산하며 기존 `export-ledger-csv.tsx`는 전달받은 최근 기록만 CSV로 저장함. 월별 집계 화면/API는 확인되지 않음. 기존 CSV, F675-176 저장 필터, F675-173 개인정보 내보내기와 중복 금지.
 - **회원 흐름:** 비공개 `/wallet/activity` → `월별 활동 요약` → 최근 1~12개월 선택(기본 6개월, Asia/Seoul 달력 기준) → 월별 증가/감소/순변동 없음 **거래 건수**, 증가·감소 WLD 합계, 순증감과 현금·은행 증감 표시. 당월 PARTIAL, VERIFIED_EMPTY, LOADING, UNAVAILABLE, BAD_RESPONSE, SESSION_EXPIRED, DISABLED 상태 구분. 기존 비공개 거래내역으로 이동. 외부 공유·송금·소득/세금 증빙·기초/기말 잔액·순변동 0을 내부 이체로 단정하는 표현 금지.
