@@ -17,6 +17,7 @@ describe('member work duration filter UI', () => {
     expect(container.querySelector('form[action="/work"][method="get"]')).not.toBeNull();
     expect(screen.getByRole('button', { name: '적용' })).toBeDefined();
     expect(screen.getByRole('link', { name: '시간 필터 초기화' }).getAttribute('href')).toBe('/work');
+    expect(screen.getByText('선택한 조건에 맞는 업무가 없어요.')).toBeDefined();
   });
 
   it('keeps the default catalogue when no duration is selected', () => {

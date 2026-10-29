@@ -313,12 +313,14 @@ export default async function WorkPage({ searchParams }: {
             {isEn ? 'The task catalogue is temporarily unavailable.' : '업무 목록을 불러올 수 없습니다.'}
           </p>
         )}
-        <CareerTasksBoard
-          selectedMaxDuration={maxDurationSeconds}
-          tasks={tasks}
-          activeJobType={activeJob?.job_type}
-          quotaBlock={quotaBlock}
-        />
+        {board !== null && (
+          <CareerTasksBoard
+            selectedMaxDuration={maxDurationSeconds}
+            tasks={tasks}
+            activeJobType={activeJob?.job_type}
+            quotaBlock={quotaBlock}
+          />
+        )}
       </section>
 
       {/* 4. 진행 중인 작업 */}
