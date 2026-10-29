@@ -1,3 +1,6 @@
+## v2026.10.29.1164 — Chat report receipt validation (DRAFT/HOLD)
+- [Worklog](worklog/2026-10-29-hourly-c-v1164-chat-report.md) / [KO](worklog/2026-10-29-hourly-c-v1164-chat-report.ko.md), [Internal](updates/v2026.10.29.1164-chat-report-internal.md), [GitHub](updates/v2026.10.29.1164-chat-report-github.md). UI/Backend strict report UUID validation; isolated PostgreSQL revealed P0 #1874 (legacy audit_logs.entity), so release blocked.
+
 ## v2026.10.29.1364 — Scheduled QA disposable disk hygiene (OPS PATCH)
 
 ## v2026.10.29.1213 — LIVE Production promoted, operator DML preserved

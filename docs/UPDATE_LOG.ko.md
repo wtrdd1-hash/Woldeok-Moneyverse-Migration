@@ -1,3 +1,6 @@
+## v2026.10.29.1164 — 쪽지 신고 영수증 검증 (초안/배포 보류)
+- [영문 작업기록](worklog/2026-10-29-hourly-c-v1164-chat-report.md) / [국문](worklog/2026-10-29-hourly-c-v1164-chat-report.ko.md), [내부](updates/v2026.10.29.1164-chat-report-internal.ko.md), [GitHub](updates/v2026.10.29.1164-chat-report-github.ko.md). Frontend/Backend UUID 검증 구현, 격리 PostgreSQL에서 기존 SQL 오류 P0 #1874 발견으로 운영 보류.
+
 ## v2026.10.29.1364 — 예약 QA 디스크 정리 실제 수행 보완
 
 ## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 쓰기 권한 보존
