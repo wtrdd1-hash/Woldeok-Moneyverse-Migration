@@ -9,13 +9,8 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import {
-  groupByCategory,
-  isHeldToTheLimit,
-  maxPurchasable,
-  owesUpkeep,
-  stockCatalogApiPath,
-} from './catalog';
+import { holdingsFilterUrl } from './holdings-filter';
+import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
 /**
@@ -35,20 +30,18 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly stock?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly mine?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery, stock: rawStock } = await searchParams;
-  const stockOnly = rawStock === 'available';
+  const { q: rawQuery, mine: rawMine } = await searchParams;
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
+  const mineStatus = rawMine === 'attention' ? 'attention' : 'all';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>(
-      stockCatalogApiPath(stockOnly ? 'available' : undefined),
-    ),
-    apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
+    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    apiOrNull<{ holdings: HeldItem[] }>(`/api/v1/shop/holdings${mineStatus === 'attention' ? '?status=attention' : ''}`),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
   const marketSaleActive = today?.event?.event_code === 'market_sale' && today.event.claimed;
@@ -110,7 +103,7 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-2xl flex-wrap items-center gap-2" role="search">
+          <form className="flex max-w-md gap-2" role="search">
             <Input
               name="q"
               type="search"
@@ -118,15 +111,6 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
-            <label className="flex min-h-11 items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="stock"
-                value="available"
-                defaultChecked={stockOnly}
-              />
-              재고 있는 상품만
-            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
@@ -196,6 +180,22 @@ export default async function ShopCatalogPage({
           <h2 id="mine-title" className="text-lg">
             내 아이템
           </h2>
+          <nav aria-label="내 아이템 관리 상태" className="flex flex-wrap gap-2">
+            <Link
+              href={holdingsFilterUrl(rawQuery ?? '', 'all')}
+              aria-current={mineStatus === 'all' ? 'page' : undefined}
+              className={`min-h-11 rounded-md border px-4 py-2 text-sm ${mineStatus === 'all' ? 'bg-primary text-primary-foreground' : 'bg-card'} focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+            >
+              전체 아이템
+            </Link>
+            <Link
+              href={holdingsFilterUrl(rawQuery ?? '', 'attention')}
+              aria-current={mineStatus === 'attention' ? 'page' : undefined}
+              className={`min-h-11 rounded-md border px-4 py-2 text-sm ${mineStatus === 'attention' ? 'bg-primary text-primary-foreground' : 'bg-card'} focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+            >
+              관리비 확인 필요
+            </Link>
+          </nav>
           <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
             사용 가능한 아이템은 한 번에 1개씩 써요. 효과가 적용되는 동안에는 같은 아이템을 다시
             쓸 수 없고, 기간이 끝나면 다시 쓸 수 있어요. 기간제 아이템과 관리비가 붙는 아이템은
@@ -210,8 +210,8 @@ export default async function ShopCatalogPage({
           />
         ) : mine.holdings.length === 0 ? (
           <EmptyState
-            title="아직 보유한 아이템이 없어요."
-            description="위에서 아이템을 구입하면 이 자리에 표시돼요."
+            title={mineStatus === 'attention' ? '관리비 확인이 필요한 아이템이 없어요.' : '아직 보유한 아이템이 없어요.'}
+            description={mineStatus === 'attention' ? '미납 관리비나 이용 정지 상태가 확인되지 않았어요.' : '위에서 아이템을 구입하면 이 자리에 표시돼요.'}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">

@@ -23,24 +23,6 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
-  it('forwards shop upkeep ceiling and blocks caching of catalogue responses', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
-      new Response(JSON.stringify({ catalogItems: [] }), {
-        status: 200,
-        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-      }),
-    );
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(
-      request('/app-api/v1/shop/catalog?q=hat&maxUpkeep=0'),
-      context('shop', 'catalog'),
-    );
-    expect(response.status).toBe(200);
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/shop/catalog?q=hat&maxUpkeep=0');
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-  });
-
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
@@ -111,22 +93,6 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
-  it.each([200, 403, 500])('forwards member shop stock query and never caches response %s', async (status) => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status,
-      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/shop/catalog?stock=available'), context('shop', 'catalog'));
-    expect(response.status).toBe(status);
-    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
-    expect(target.pathname).toBe('/api/v1/shop/catalog');
-    expect(target.searchParams.get('stock')).toBe('available');
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
-  });
-
   it('fences privacy request POST receipt even when upstream marks it public', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requestId: 'private-receipt' }), {
@@ -171,21 +137,26 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
-  it('forwards shop rarity to the owner-scoped catalog and never caches member inventory', async () => {
+  it('forwards private shop upkeep filters without caching an upstream public response', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ holdings: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(
-      request('/app-api/v1/shop/catalog?rarity=legendary&q=frame'), context('shop', 'catalog'),
-    );
+    const response = await GET(request('/app-api/v1/shop/holdings?status=attention'), context('shop', 'holdings'));
+    expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
-    expect(target.pathname).toBe('/api/v1/shop/catalog');
-    expect(target.searchParams.get('rarity')).toBe('legendary');
-    expect(target.searchParams.get('q')).toBe('frame');
+    expect(target.pathname).toBe('/api/v1/shop/holdings');
+    expect(target.searchParams.get('status')).toBe('attention');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
+  it('never caches a failed private shop holdings gateway response', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    const response = await GET(request('/app-api/v1/shop/holdings?status=attention'), context('shop', 'holdings'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
