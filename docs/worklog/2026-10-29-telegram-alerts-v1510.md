@@ -18,3 +18,7 @@
 - Read-only Test backend probe: `https://test.easy-scraping.com/health` HTTP 200; no application/DB changes.
 - Read-only actual host snapshot: 13 monitored signals, 2 anomalies: moneyverse-qa.service result=exit-code (CRITICAL), moneyverse-verified-blog-v1419.timer inactive (WARNING). Disk usage below threshold.
 - Telegram delivery not yet claimed: recipient must first complete private code pairing after host credential installation.
+
+## Midpoint production security correction
+- Actual host `/etc/moneyverse` is root:root 0750. A `debian` monitoring service cannot traverse it. Never relax that protected directory; instead move the host-only token to the existing service's private state root `/var/lib/moneyverse-telegram/telegram.env` (owner debian, mode 0600, parent 0700), and keep the service unprivileged.
+- GitHub PR #1898 opened, and this security correction will be pushed to that same isolated feature branch before Production installation.

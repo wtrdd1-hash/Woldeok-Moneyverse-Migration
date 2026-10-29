@@ -11,7 +11,7 @@ The **standalone** bridge scans read-only local systemd state and dual-disk util
 
 ## Private setup (on the authorized host)
 1. Deploy reviewed script to `/usr/local/lib/moneyverse-telegram/telegram_bridge.py`, mode 0755, and copy the service and timer to `/etc/systemd/system/`.
-2. Create `/etc/moneyverse/telegram.env` owned by `debian`, mode 0600, containing only `TELEGRAM_BOT_TOKEN=...` (never commit or log its value). The directory and file must be inaccessible to unrelated accounts.
+2. Create `/var/lib/moneyverse-telegram/telegram.env` owned by `debian`, mode 0600, containing only `TELEGRAM_BOT_TOKEN=...` (never commit or log its value). The directory and file must be inaccessible to unrelated accounts.
 3. The systemd service runs as `debian` with `StateDirectory=moneyverse-telegram`; `/var/lib/moneyverse-telegram` mode 0700 contains the private pair-code, destination chat id and deduplication cursor.
 4. Generate a random pairing code using `sudo -u debian python3 /usr/local/lib/moneyverse-telegram/telegram_bridge.py pair-code`. This action is network-free and does not need the bot token. Alternatively pre-create `pairing_code` in the state directory with a cryptographically random URL-safe string.
 5. Send `/start <code>` in a **private** chat with `@woldeok_moneyverse_bot`. Group messages, wrong codes and other private chats are never registered. A completed registration is not silently re-bound.

@@ -6,11 +6,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
   echo "Must run as root on the approved Moneyverse host" >&2
   exit 2
 fi
-if [[ ! -f /etc/moneyverse/telegram.env ]]; then
-  echo "Host-only /etc/moneyverse/telegram.env is missing" >&2
+if [[ ! -f /var/lib/moneyverse-telegram/telegram.env ]]; then
+  echo "Host-only /var/lib/moneyverse-telegram/telegram.env is missing" >&2
   exit 3
 fi
-if [[ "$(stat -c %a /etc/moneyverse/telegram.env)" != 600 ]]; then
+if [[ "$(stat -c %a /var/lib/moneyverse-telegram/telegram.env)" != 600 ]]; then
   echo "Telegram credential file must be mode 0600" >&2
   exit 4
 fi
