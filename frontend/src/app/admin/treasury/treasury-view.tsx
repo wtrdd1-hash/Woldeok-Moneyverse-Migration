@@ -119,6 +119,32 @@ function coverageBadge(days: number) {
   return <Badge className="bg-destructive hover:bg-destructive/90 text-white text-[11px]">비상 (3일 미만)</Badge>;
 }
 
+// A failed ledger read is not evidence of a zero-flow treasury.
+function TreasuryFlowUnavailable({ kind }: { readonly kind: 'revenue' | 'expenditure' }) {
+  const isRevenue = kind === 'revenue';
+  const title = isRevenue ? '국고 세목별 수입 실적 집계' : '국고 목적별 지출 실적 집계';
+  const label = isRevenue ? '수입 검증 불가' : '지출 검증 불가';
+
+  return (
+    <Card role="region" aria-label={title} data-evidence-state="unavailable" className="border border-amber-500/40 shadow-sm">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base font-semibold">{title}</CardTitle>
+        <CardDescription className="text-xs text-muted-foreground">
+          원장 조회 근거가 확인될 때까지 기간별 합계와 항목을 표시하지 않습니다.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col items-start gap-3 p-4 pt-0 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-0">
+        <p role="status" className="min-w-0 break-words text-sm text-amber-700 dark:text-amber-300">
+          {label} — 현재 데이터를 확인할 수 없습니다. 집계가 비어 있다는 의미가 아닙니다.
+        </p>
+        <Button asChild size="sm" variant="outline" className="min-h-11 shrink-0">
+          <a href="/admin/treasury">다시 조회</a>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 type LedgerFilterType = 'ALL' | 'OUTFLOW' | 'INFLOW' | 'BURN' | 'STOCK';
 
 export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) {
@@ -381,8 +407,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       )}
 
       {/* 4.5. 국고 세목별 수입 흐름 집계 (Treasury Revenue Breakdowns) */}
-      {revenue && (
-        <Card className="border shadow-sm">
+      {revenue ? (
+        <Card role="region" aria-label="국고 세목별 수입 실적 집계" data-evidence-state="verified" className="border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
@@ -449,6 +475,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <TreasuryFlowUnavailable kind="revenue" />
       )}
 
       {/* 5. 국고 목적별 예산 배정 체계 (Budget Envelopes) */}
@@ -524,8 +552,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       )}
 
       {/* 5.5. 국고 목적별 지출 흐름 집계 (Treasury Expenditure Breakdowns) */}
-      {expenditure && (
-        <Card className="border shadow-sm">
+      {expenditure ? (
+        <Card role="region" aria-label="국고 목적별 지출 실적 집계" data-evidence-state="verified" className="border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
               <div>
@@ -598,6 +626,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <TreasuryFlowUnavailable kind="expenditure" />
       )}
 
       {/* 6. 금고별 상세 현황 */}

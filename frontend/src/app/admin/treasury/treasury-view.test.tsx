@@ -1,7 +1,16 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { TreasuryView, isTreasuryOutflow } from './treasury-view';
 import type { AdminTreasuryLedger, AdminTreasuryOverview } from '../types';
+
+// The treasury summary does not exercise server actions or bank dialogs.
+vi.mock('./treasury-budget-dialog', () => ({ TreasuryBudgetDialog: () => null }));
+vi.mock('./treasury-buyback-dialog', () => ({ TreasuryBuybackDialog: () => null }));
+vi.mock('./treasury-disburse-dialog', () => ({ TreasuryDisburseDialog: () => null }));
+vi.mock('./treasury-operations-dialog', () => ({ TreasuryOperationsDialog: () => null }));
+vi.mock('./treasury-wealth-tax-dialog', () => ({ TreasuryWealthTaxDialog: () => null }));
+vi.mock('@/components/admin/national-mint-panel', () => ({ NationalMintPanel: () => null }));
+vi.mock('@/components/admin/central-bank-panel', () => ({ CentralBankPanel: () => null }));
 
 describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
   const mockOverview: AdminTreasuryOverview = {
@@ -128,10 +137,53 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     } as unknown as AdminTreasuryOverview;
     render(<TreasuryView overview={unverified} ledger={[]} />);
     expect(screen.getByText('대사 검증 미완료')).toBeTruthy();
-    expect(screen.getByRole('status').textContent).toContain('일치 여부는 미확인');
+    expect(screen.getAllByRole('status').some((node) => node.textContent?.includes('일치 여부는 미확인'))).toBe(true);
     expect(screen.queryByText('대사 완료 (일치)')).toBeNull();
     expect(screen.queryByText(/정상 0/)).toBeNull();
     expect(screen.queryByText(/Invalid Date/)).toBeNull();
+  });
+
+  it('announces independent unavailable revenue and expenditure evidence instead of hiding the sections', () => {
+    render(<TreasuryView overview={mockOverview} ledger={[]} revenue={null} expenditure={null} />);
+    const revenueSection = screen.getByRole('region', { name: '국고 세목별 수입 실적 집계' });
+    const expenditureSection = screen.getByRole('region', { name: '국고 목적별 지출 실적 집계' });
+    expect(within(revenueSection).getByRole('status').textContent).toContain('수입 검증 불가');
+    expect(within(expenditureSection).getByRole('status').textContent).toContain('지출 검증 불가');
+    expect(within(revenueSection).queryByText(/0 WLD/)).toBeNull();
+    expect(within(expenditureSection).queryByText(/0 WLD/)).toBeNull();
+    expect(revenueSection.querySelector('[class*="sm:p-6"]')).toBeTruthy();
+    expect(expenditureSection.querySelector('[class*="sm:p-6"]')).toBeTruthy();
+    expect(within(revenueSection).getByRole('link', { name: '다시 조회' }).getAttribute('href')).toBe('/admin/treasury');
+    expect(within(expenditureSection).getByRole('link', { name: '다시 조회' }).getAttribute('href')).toBe('/admin/treasury');
+  });
+
+  it('preserves verified empty-ledger zero for revenue while expenditure is unavailable', () => {
+    render(<TreasuryView overview={mockOverview} ledger={[]}
+      revenue={{ items: [], total_24h_wld: '0', total_7d_wld: '0', total_30d_wld: '0' }}
+      expenditure={null} />);
+    expect(screen.getByText('집계된 세입 데이터가 없습니다.')).toBeTruthy();
+    expect(screen.getAllByText('+0 WLD').length).toBeGreaterThanOrEqual(3);
+    expect(screen.queryByText(/수입 검증 불가/)).toBeNull();
+    expect(screen.getByRole('region', { name: '국고 목적별 지출 실적 집계' })).toBeTruthy();
+    expect(screen.getByText(/지출 검증 불가/)).toBeTruthy();
+  });
+
+  it('preserves verified empty-ledger zero for expenditure while revenue is unavailable', () => {
+    render(<TreasuryView overview={mockOverview} ledger={[]}
+      revenue={null}
+      expenditure={{ items: [], total_24h_wld: '0', total_7d_wld: '0', total_30d_wld: '0' }} />);
+    expect(screen.getByText('집계된 세출 데이터가 없습니다.')).toBeTruthy();
+    expect(screen.getAllByText('-0 WLD')).toHaveLength(3);
+    expect(screen.queryByText(/지출 검증 불가/)).toBeNull();
+    expect(screen.getByText(/수입 검증 불가/)).toBeTruthy();
+  });
+
+  it('does not show an unavailable warning for either successful zero-ledger response', () => {
+    const empty = { items: [], total_24h_wld: '0', total_7d_wld: '0', total_30d_wld: '0' };
+    render(<TreasuryView overview={mockOverview} ledger={[]} revenue={empty} expenditure={empty} />);
+    expect(screen.getByText('집계된 세입 데이터가 없습니다.')).toBeTruthy();
+    expect(screen.getByText('집계된 세출 데이터가 없습니다.')).toBeTruthy();
+    expect(screen.queryByText(/검증 불가/)).toBeNull();
   });
 
   it('filters ledger entries by filter chips', () => {
