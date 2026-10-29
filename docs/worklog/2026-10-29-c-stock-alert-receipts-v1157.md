@@ -14,3 +14,9 @@
 
 ## FINISHED
 - Pending verification; do not merge or promote without every required gate.
+
+### MID WORK — 2026-10-29 14:15 KST
+- RED: 8/8 new action regression tests failed against original HTTP-only success behavior.
+- GREEN: 11/11 focused tests pass with exact NestJS create `{alertId}` / delete `{deleted:true}` receipts plus authenticated owner list readback; mismatch and malformed inventory fail closed.
+- Stock ID, condition, exact integer threshold and cooldown are checked; deletion verifies owner-list absence. No backend schema changes.
+- Re-fetched origin/main and canonical English plan during work; check full gate outputs before any merge.
