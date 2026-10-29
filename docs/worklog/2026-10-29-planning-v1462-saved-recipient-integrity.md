@@ -1,0 +1,14 @@
+# Planning v1462 — Saved-recipient integrity
+
+## v1462 / F675-171 — Saved-recipient integrity hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+
+- **Cycle:** Previous Addition v1460 → Current Improvement v1462 → Next Addition v1464 (provisional). Main rechecked through 95a8fdb85f6670cac9e52e16383711ac94924e93; stacked on unmerged Draft #1846/#1837/#1830. QA v1366 HOLD; deployed Test/Production application c2129625aa6629c616fb31ce790950618b8d92b2 is not repository main. [Backlog #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+- **New source findings:** authenticated GET /wallet/recipients/search returns displayName+UUID via member_profiles ILIKE despite the exact-UUID-only wallet UI; active user lookup does not prove active USER_CASH; TransferForm rotates transfer idempotency key on error state, potentially defeating safe replay after an ambiguous commit; transfer notifications lack replay distinction. These are code-path risks, **not proven Production abuse or double payout**.
+- **Hardened contract:** no name-directory reuse; owner-private saved UUID only; ELIGIBLE/UNAVAILABLE/UNKNOWN based on active member + active cash wallet (<=30s); controlled recipient form, explicit full UUID/amount confirmation; retain original transfer key while result UNKNOWN; owner-only receipt lookup, versioned canonical digest, SERIALIZABLE top-level transaction, 40001 same-key retry, signed no-store API, Android parity and default-OFF feature.
+- **Backlog:** P0 REPO1462-01, FIN1462-02, SEC1462-03, REL1462-04; P1 RECIP1462-05..10 (eligibility/DB/API/UI/privacy/regression). Proposed tests: 10,001 synthetic, 100 concurrency, 100 negative owner, 50 lost-response, 30 deactivation races, 30 enumeration; no real acceptance tests run.
+- **Gate:** QA v1366 48/50 HTTP, 36/36 mobile, DEV ledger arithmetic mismatch 0 but 552 unlinked Treasury rows, five checksum mismatches, 216 app-writable relations. Off-host restore, exact-SHA Test and Production authorization unverified for this feature. External independent references newly approved 0, cumulative UNKNOWN/10,000 = BLOCKED/IN PROGRESS. No runtime/DB/WLD/Test/Production change; detailed bilingual contract in PROJECT_PLAN.
+
+
+## Process and verification
+
+Start/middle/finish miniPC records: /srv/moneyverse-data/build-workspaces/planning-v1462-records/. Source-read-only investigation; documentation-only branch stacked on unmerged v1460. GitHub Draft PR and issue handoff recorded separately. No database or runtime changes. Exact-SHA Test/Production, financial E2E and PostgreSQL acceptance remain NOT RUN.
