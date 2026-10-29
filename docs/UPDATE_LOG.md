@@ -1,5 +1,7 @@
-## 2026-10-28 C v1133 — KDIC unverified financial settlement hard stop (DRAFT / HOLD)
-- Three backend admin KDIC POST operations (`assess-premiums`, `liquidity-loan`, `payout`) now fail closed with stable HTTP 503; service and repository entry points reject before any SQL/Discord side effects. Removed legacy unjournaled write implementations, retained verified read-only web/Next/NestJS paths and displayed the server hold to administrators. TDD backend 8/8 and frontend 10/10 focused PASS; full exact-SHA security/CI/isolated PostgreSQL/official Test pending. No financial DB, Production or Test mutation. See `docs/worklog/2026-10-28-kdic-evidence-v1133.md`.
+## 2026-10-28 10:12 KST — Planning v1404 / F675-157 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1402 / Current Addition v1404 / Next Improvement v1406. Latest main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid. GitHub issue #1669. Verified source, DEV aggregate/ACL, QA v1337 and runtime version; no private member content exported.
+- Design: owner-only support new-admin-reply count, explicit read-through-message receipt, ordered sequence, legacy baseline, no GET mutation, Android parity, noindex/no-store, P0/P1 and Test/rollback gates. `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
+- Source-only: no runtime/DB/finance/Test/Production writes. Tests specified not run. QA v1337 and #1663/#1661/#1660 remain HOLD; Test exact SHA, independent restore, Production release unverified. External approved 0 new, cumulative UNKNOWN/10,000 BLOCKED.
 
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
@@ -1246,3 +1248,4 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+- Final GitHub record: planning v1404 Draft PR #1670 OPEN / issue #1669 OPEN, main a28bed9aa40ff74d492824ae12892a7d52132fdd unchanged, PR classify/verify pending. Source-only DRAFT/HOLD, no deployment.

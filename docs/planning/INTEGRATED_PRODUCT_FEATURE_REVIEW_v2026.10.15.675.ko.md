@@ -1,48 +1,10 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
-## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
-
-**개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
-- 이전 기능 보완 v1446 → 현재 기능 추가 v1448 → 다음 기능 보완 v1450(잠정). 시작 main f05efcb5d7c21d9553f68df227f9771217a30671 → 중간 main 8ba355374a2553926f67140febbf85c114f00ba1 변경(implementation_plan.md만 수정, 기획 원본 동일), QA v1359 FAILED/HOLD. 블로그 본문에 공유 버튼만 있고 검증된 회원 저장 기능이 없으며 정적 AI 글과 검증 게시 글은 구분해야 한다. 개발 이슈 #1800, 런타임 변경 없음.
-- 독립 승인된 PUBLISHED 글만 명시적으로 저장/해제·수동 읽음 변경, 회원당 최대 100건, 개인 /account/reading/blog, 불변 게시 UUID·언어·epoch·영수증, 서명 커서·UUID 멱등성, 본인 전용 SECURITY DEFINER, 철회 tombstone. NestJS/Next/Android 동등성, CSRF, WCAG 2.2 AA, noindex/no-store, 관리자 감사·집계 KPI, WLD 영향 0.
-- P0: ENV1448-01(용량/독립 복원), FIN1448-02(18계좌/+18,000 WLD), SEC1448-03(쓰기 239/공개 은행 3/체크섬 5/미적용 20, 블로그 278/279 포함), REL1448-04(정확 SHA Test/배포). P1: BLOG1448-05, BLOG1448-06, BLOG1448-07, BLOG1448-08, BLOG1448-09, BLOG1448-10 게시 근거, 트랜잭션, API, 화면, 관리자·개인정보·SEO, 실제 PG 회귀. 합성 10,001건·동시 100건·위조 100건은 수용 조건이며 미실행. 운영 BLOCKED.
-- 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 독립 기획 파일 추가 없음. 전체 영문·국문 계약은 통합 마스터 및 https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800에 반영.
-
-[Draft PR #1794](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1794) — documentation-only, unmerged, release HOLD.
-
-## v2026.10.29.1446 — F675-167 퀴즈·일일 보상 격리와 영수증 무결성 보완 (기능 보완 / 초안 / 운영 보류)
-- 이전 추가 v1444 → 현재 보완 v1446 → 다음 추가 v1448(잠정). 시작·중간 main `35971c600f25869c96f1c666d4b9f58927202730` 동일, QA v1358 FAILED/HOLD. 미병합 #1790/#1784/#1780 의존, 미구현.
-- **실제 코드 충돌:** 일일 퀘스트 `quest_financial_quiz`는 1,000 WLD 보상과 `/#financial-quiz` 링크를 표시하나 검색한 main에 대응 앵커는 없다. `DopamineRepository.claimDailyQuest`는 퀴즈 완료 증빙을 검사하지 않고 저장소 부재 시 컨트롤러 모의 성공 응답 경로가 있다. 이는 소스상 위험이며 운영 악용 입증이 아니다. 보상 정산은 기존 금융 이슈 [#1321](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1321)이 담당한다.
-- F675-167은 별도 무보상 `glossary_practice`: 일일 보상 API·퀘스트/올클리어 이벤트·WLD/원장 변경 금지. 서버 전용 정답(공개 약한 해시 금지), 문제은행/배포 SHA·독립 검토, 언어별 검수 5문항×4선택지, 본인·지문 결합 영수증, 저장소 부재 503 실패 차단, 409/410/422/429, 24시간 10회, 30분 만료, 90일 보존, 웹·Android·SEO·WCAG/TalkBack·320px 검증. 클라이언트 모의 성공·점수 금지.
-- P0/P1: ENV1446-01 FIN1446-02 SEC1446-03 REL1446-04 QUIZ1446-05 QUIZ1446-06 QUIZ1446-07 QUIZ1446-08 QUIZ1446-09 QUIZ1446-10. 격리 실제 PG 10,001건, 동시 100건, 위조 100건, 정답 유출 방지·퀴즈 원인 WLD 변화 0·정확 SHA Test·롤백 필수. QA v1358 루트98%/데이터99%/tmp97%, 회원 18명 +18,000 WLD, 앱 쓰기239, PUBLIC 은행3, 체크섬5/미적용20, Test SHA 불일치·독립 복원 미검증. 운영 보류.
-- 외부 독립 중복제거·검증 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 문서만 변경, 런타임·DB·금융·Test·Production 변경 없음. 전체 명세는 영문·국문 통합 마스터, 개발 인계 [#1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789).
-
-
-
-## v2026.10.29.1444 — F675-167 검증 가능한 금융 용어 자가점검 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
-- [Draft PR #1790](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1790)는 미병합 #1784를 기반으로 한 문서 전용 기획.
-- 이전 기능 보완 v1442 → 현재 기능 추가 v1444 → 다음 기능 보완 v1446(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1357 FAILED/HOLD. 미병합 #1784/#1780 후속 기획이며 [개발 이슈 #1789](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1789)로 연계.
-- main에는 금융 용어 50개·별도 시스템 용어 12개, 4개 언어 정적 페이지와 86400초 ISR이 있지만 조사 범위에 검증된 퀴즈 문제은행·본인 시도/점수 영수증·대응 DB가 없다. 회원이 선택하는 5문항은 언어별 독립 승인된 서로 다른 용어 5개, 문항당 선택지 4개·정답 1개, 불변 개정·서버 전용 정답·원본 영수증을 요구한다. 자동 읽음·숙련·보상·WLD·원장 변경 없음.
-- 개인 /account/learning/glossary/practice, NestJS/Next/Android 동등성, 본인 전용 PostgreSQL SECURITY DEFINER 시도·문항·영수증, 30분 만료·하루 10회·90일 보존, 작성자/심사자 분리, noindex/no-store, WCAG 2.2 AA·320px/TalkBack·KPI, 동시성 100·권한 음성 100·격리 PG 10,001건을 기획. 화면/API/DB/롤백 상세는 기존 국영문 통합 마스터에 기재.
-- P0/P1: ENV1444-01 FIN1444-02 SEC1444-03 REL1444-04 QUIZ1444-05 QUIZ1444-06 QUIZ1444-07 QUIZ1444-08 QUIZ1444-09 QUIZ1444-10. QA v1357: 루트 98%/데이터 99%, USER_CASH +18,000 WLD, 앱 쓰기 239개 관계, PUBLIC 은행 함수 3개, 마이그레이션 불일치 5·미적용 20, 공식 Test SHA 불일치·독립 복원 미검증으로 운영승격 HOLD.
-- 외부 독립 중복제거 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임/DB/Test/운영 변경 없음.
-
-
-## v2026.10.29.1442 — F675-166 금융 용어 정규 식별자·언어별 읽음 무결성 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
-- GitHub 연계: [Draft PR #1784](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1784)는 미병합 선행 [#1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780)에 의존하며 [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779)를 갱신함. 문서 전용·운영승격 HOLD.
-- 사이클: Previous Addition v1440 → Current Improvement v1442 → Next Addition v1444(잠정). 원격 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, 선행 Draft #1780 미병합. 마지막 확인 가능 QA v1355 FAILED/HOLD, 새 QA 결과는 미인증.
-- 실제 소스: 정규 PSEO 금융 용어 50개, 별도 서비스 용어 ID 12개(교집합 0), 다국어 별칭 5개. volatility → sharpe-ratio는 동의어가 아니다. ko/en/ja/zh 페이지의 86400초 ISR과 언어 변경을 고려하여 불변 term ID·namespace, 검증된 별칭만 허용, 언어별 읽음 revision을 명세했다.
-- 회원만 저장/삭제, 언어별 자발적 읽음/취소, 원본 digest 영수증, 회원·세션·필터·스냅샷 서명 커서, 100개 제한, 409 revision/422 별칭/503 권위 불일치 구분, Android 동등성, 개인정보/noindex/a11y/롤백. 상세 계약은 영문·국문 통합문서. 보상·학습 성취·WLD·원장 효과 없음.
-- P0 ENV1442-01 FIN1442-02 SEC1442-03 REL1442-04; P1 GLOS1442-05 GLOS1442-06 GLOS1442-07 GLOS1442-08 GLOS1442-09 GLOS1442-10. 개발 DB 실측 247개 public 테이블 중 235개 moneyverse_app INSERT/UPDATE/DELETE 가능, 루트 98%·데이터 99%, 이전 QA 18,000 WLD 차이·마이그레이션/복원/정확 SHA 미해결. RELEASE HOLD.
-- 외부 독립 중복제거·검증 승인 신규 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 문서 전용이며 runtime/DB/WLD/Test/Production/main 병합 없음.
-
-
-## v2026.10.29.1440 — F675-166 회원 전용 금융 용어 학습 목록 (기능 추가 / DRAFT / RELEASE HOLD)
-- GitHub 연계: [Draft PR #1780](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1780), [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779). 미병합·운영 보류.
-- 이전 기능 보완 v1438 → 현재 기능 추가 v1440 → 다음 기능 보완 v1442(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회, QA v1355. 실제 main의 GLOSSARY_TERMS 공개 용어 상세는 24시간 ISR이며 본인 전용 용어 저장/읽음 API는 없다. 미병합 F675-165 정정 제안과 별도 기능.
-- 회원 직접 저장/취소 및 자발적 읽음/취소, 비공개 /account/learning/glossary, 실제 배포 slug·개정 검증, 원본 영수증·본인 API·Android 동등성·CAS·100개 제한·409/503·삭제 용어 묘비·SEO/접근성/개인정보/롤백 설계. 읽음은 숙달·보상·WLD 증거가 아니다. [개발 이슈 #1779](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1779); 영문 정본·국문 상세는 통합 기획 참조.
-- P0 ENV1440-01 FIN1440-02 SEC1440-03 REL1440-04; P1 GLOS1440-05 GLOS1440-06 GLOS1440-07 GLOS1440-08 GLOS1440-09 GLOS1440-10. QA: 루트/데이터 ~98%, 18명 18,000 WLD 차이, 앱 쓰기 가능 239개 테이블, PUBLIC 은행 실행 3개, 체크섬 불일치 5/미적용 20, 외부 복원·공식 Test 정확 SHA 미검증. 운영승격 보류.
-- 외부 독립 근거 신규 승인 0, 누적 중복 제거 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 불변.
+## v1404 — F675-157 관리자 문의 새 답변·읽음 영수증 (Feature Addition / 기획 초안 / 배포 보류)
+- 이전 Improvement v1402 → 현재 Addition v1404 → 다음 Improvement v1406(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 이슈 #1669. A/B/C/QA·블로그와 분리한 문서 기획이며 상세 영문 정본·한국어 동등 명세는 `INTEGRATED_PLANNING_MASTER.md` 및 한국어 대조본 참조.
+- 실제 코드의 `/support`·플로팅 위젯에는 회원 읽음 상태가 없고 Migration 196에도 영수증이 없다. `waiting_user`는 읽지 않음의 증거가 아니다. 개발 DB 읽기 전용 3개 문의/6개 메시지, 앱 역할의 문의 UPDATE·메시지 DELETE 권한 확인. 회원 소유 명시적 읽음, 스레드별 원자적 순번, 도입 전 과거 메시지의 읽음 여부 미확인 기준선, 불변 멱등 영수증, GET 부작용 금지, NestJS/Next/Android 동등성, no-store/noindex, WCAG 2.2 AA, 관리자 집계만 설계.
+- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 미병합 PR 대량 닫힘, #1661 블로그 권한, #1660 스모크 실패. 최신 main 전체 QA·공식 Test 정확 SHA·독립 복원·운영 승격 미검증. 기능 기본 OFF, 코드/DB/WLD/Test/Production 미변경, 수용시험 명세만 작성. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- 전체 ID: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
 
 
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
