@@ -20,4 +20,4 @@
 - [x] Run RED test and capture failure.
 - [x] Implement smallest pure verifier and account page readback wiring.
 - [x] Run GREEN test, existing account/backend contract tests and lint/typecheck/build gates.
-- [ ] Re-fetch main and plan, document SHA, failures and release hold; push only independent branch.
+- [x] Re-fetch main and plan, document SHA, failures and release hold; push only independent branch.
