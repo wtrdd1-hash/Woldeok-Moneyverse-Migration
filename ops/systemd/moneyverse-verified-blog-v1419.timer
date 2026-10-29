@@ -1,0 +1,18 @@
+[Unit]
+Description=Every two Seoul-local hours verified auto publication
+
+[Timer]
+# Host timezone Asia/Seoul; a few minutes after the even-hour boundary.
+OnCalendar=*-*-* 00/2:05:00 Asia/Seoul
+# Retry within the SAME period only when the evidence gate or model fails.
+# Existing immutable period receipt causes immediate no-op; NEVER re-publish.
+OnCalendar=*-*-* 00/2:45:00 Asia/Seoul
+OnCalendar=*-*-* 01/2:25:00 Asia/Seoul
+OnCalendar=*-*-* 01/2:55:00 Asia/Seoul
+Persistent=true
+AccuracySec=30s
+RandomizedDelaySec=0
+Unit=moneyverse-verified-blog-v1419.service
+
+[Install]
+WantedBy=timers.target

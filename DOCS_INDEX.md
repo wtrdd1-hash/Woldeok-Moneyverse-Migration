@@ -10,6 +10,10 @@
 
 ## v2026.10.29.1364 — Scheduled QA scratch clean-up follow-through
 
+## v2026.10.29.1419 — Verified two-hour automatic blog publication
+- [Internal](docs/updates/v2026.10.29.1419-internal.md) / [한국어](docs/updates/v2026.10.29.1419-internal.ko.md), [GitHub](docs/updates/v2026.10.29.1419-github.md), [worklog](docs/worklog/2026-10-29-blog-automatic-v1419.ko.md). Isolated systemd worker and source-based DB publication with two-hour country/topic rotation; require real receipts and public check before declaring Production success.
+
+
 ## v2026.10.29.1213 — LIVE Production v1213 (b44ffd0a)
 - [Internal EN](docs/updates/v2026.10.29.1213-internal.md) / [KO](docs/updates/v2026.10.29.1213-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1213-github.md) / [KO](docs/updates/v2026.10.29.1213-github.ko.md), [Worklog](docs/worklog/2026-10-29-production-promotion-v1213.md). Live 23 DB migrations applied, owner-approved DML intact, exact PROD identity and 17/17 smoke PASS; historic checksum and auth-cookie evidence remains open.
 

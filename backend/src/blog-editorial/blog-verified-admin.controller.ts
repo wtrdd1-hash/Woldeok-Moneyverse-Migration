@@ -26,8 +26,12 @@ export class BlogVerifiedAdminController {
     const nextSlot = selectTwoHourBlogSlot(
       new Date(now.getTime() + (koreaHour % 2 === 0 ? 0 : 60 * 60 * 1000)),
     );
-    const schedulerEnabled = process.env.MONEYVERSE_SCHEDULER_ENABLED === 'true'
-      && process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED === 'true';
+    // A dedicated systemd timer may own blog publishing while the global
+    // economy scheduler stays disabled. Both paths still require independent
+    // model/source certification; a config flag alone is not proof of success.
+    const workerEnabled = process.env.BLOG_VERIFIED_WORKER_ENABLED === 'true';
+    const schedulerEnabled = process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED === 'true'
+      && (process.env.MONEYVERSE_SCHEDULER_ENABLED === 'true' || workerEnabled);
     const modelVerified = process.env.BLOG_EDITORIAL_MODEL_VERIFIED === 'true';
     const posts = await this.repo.list();
     return {
@@ -35,6 +39,7 @@ export class BlogVerifiedAdminController {
       automaticEnabled: schedulerEnabled && modelVerified,
       manualEnabled: false, // No authenticated, rate-limited verified manual job is implemented.
       modelVerified,
+      executionMode: workerEnabled ? 'DEDICATED_TIMER' : 'GLOBAL_SCHEDULER',
       verifiedPublishedCount: posts.length,
       nextSlot: nextSlot ? {
         country: nextSlot.country,
