@@ -1,5 +1,13 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1458 / F675-170 — 릴리스 증거 식별·브랜치 보존 (기능 보완 / 초안 / 보류)
+
+- **주기:** 이전 추가 v1456 → 현재 보완 v1458 → 다음 추가 v1460(잠정). main `b84d645a`, 선행 Draft #1830 미병합·의존 브랜치. QA v1364 Test/운영 앱 `b44ffd0a`는 main과 다름. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **P0:** QA v1364 기존 브랜치 이름 462개 누락(조상 118·비조상 344), 검증된 51 MiB 복구 bundle 보존. 소유자·삭제 주체·정책 대조 전 파괴적 정리 보류. 과거 18,000 WLD MINT 출처, 직접 연결 없는 국고 552행, 체크섬 5건, 인증 E2E·외부 독립 복원 미검증. 운영자 승인 금융 DML 유지. 기존 v1213 변조 증거로 단정하지 않음.
+- **설계:** 저장소 HEAD·앱 SHA·이미지 digest·GitOps·DB 지문·정책·신뢰 epoch를 후보 키에 결합. PRE/POST와 REQUIRED/NOT_APPLICABLE을 상태 6종과 분리, PRE 최종 EVIDENCE_COMPLETE 금지. 키 폐기/만료는 불변 기록을 바꾸지 않고 현재 HOLD로 표시. 동일 스냅샷 FK·SERIALIZABLE 서명 수집·멱등 영수증·관리자 읽기/비식별 내보내기 전용·배포 CTA 없음·WCAG/noindex/Android 관리자 미지원.
+- **백로그:** P0 REPO1458-01 FIN1458-02 SEC1458-03 REL1458-04; P1 RELBOARD1458-05~10. 격리 10,001행/동시 100건/권한 부정 100건 미실행. 외부 독립 승인 신규 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 문서만 변경, 영문·국문 상세 PROJECT_PLAN 수록.
+
+
 ## v1456 / F675-170 — 근거 연계형 릴리스 준비도 현황판 (기능 추가 / 초안 / 보류)
 
 - **기준·주기:** 이전 보완 v1454 → 현재 추가 v1456 → 다음 보완 v1458(잠정). 원격 main `b84d645a`와 실제 Test/운영 앱 `b44ffd0a` 구분. QA v1363 HTTP 48/50(양쪽 `/help` 404), 모바일 36/36, Draft PR 113개/충돌 48개. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
