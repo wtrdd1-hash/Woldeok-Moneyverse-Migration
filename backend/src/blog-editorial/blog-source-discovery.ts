@@ -54,7 +54,7 @@ export function isAllowedSourceDocument(
       // about concepts, not isolated status-code error pages. A narrow 421
       // error explainer can otherwise be misrepresented as general HTTP.
       if (slot.topic === 'COMPUTER'
-          && /\/Reference\/Status\/\d{3}(?:\/|$)/i.test(url.pathname)) return false;
+          && /\/Reference\//i.test(url.pathname)) return false;
       const locale = { KR: 'ko', US: 'en-US', JP: 'ja', CN: 'zh-CN' }[slot.country];
       const section = slot.topic === 'CODING' ? 'JavaScript' : 'HTTP';
       return url.hostname === 'developer.mozilla.org'

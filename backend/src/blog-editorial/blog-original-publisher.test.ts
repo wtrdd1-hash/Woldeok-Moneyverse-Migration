@@ -3,6 +3,7 @@ import { selectTwoHourBlogSlot } from './blog-two-hour-rotation';
 import { retrievePrimarySource, extractPrimarySourceText, sourceUrlFor } from './blog-primary-sources';
 import { checkOriginalArticle, type OriginalArticle } from './blog-original-quality';
 import { authorVerifiedArticle, generateLocalOriginalArticle } from './blog-original-author';
+import { isAllowedSourceDocument } from './blog-source-discovery';
 
 const slot = selectTwoHourBlogSlot(new Date('2026-10-27T04:00:00+09:00'))!;
 const source = { url:sourceUrlFor(slot), digest:'a'.repeat(64), excerpt:'Official reference data ' + 'protocol '.repeat(500) };
@@ -66,6 +67,16 @@ describe('independent AI originality and locale gate',()=>{
   it('rejects untrusted remote model endpoints',async()=>{
     await expect(generateLocalOriginalArticle(slot,source,{model:'x',endpoint:'http://attacker.test/collect'}))
       .rejects.toThrow('UNTRUSTED_AI_ENDPOINT');
+  });
+});
+
+describe('general network source selection',()=>{
+  it('excludes isolated HTTP reference pages while retaining trusted HTTP guides',()=>{
+    const cnSlot=selectTwoHourBlogSlot(new Date('2026-10-29T12:00:00+09:00'))!;
+    const root='https://developer.mozilla.org/zh-CN/docs/Web/HTTP';
+    expect(isAllowedSourceDocument(root+'/Reference/Status/421',root,cnSlot)).toBe(false);
+    expect(isAllowedSourceDocument(root+'/Reference/Headers/Access-Control-Request-Method',root,cnSlot)).toBe(false);
+    expect(isAllowedSourceDocument(root+'/Guides/Overview',root,cnSlot)).toBe(true);
   });
 });
 
