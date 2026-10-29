@@ -357,7 +357,7 @@ export default async function AccountSecurityPage({
       <Card className="border-border/80 bg-card/90 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold">최근 보안 활동</CardTitle>
-          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다.</CardDescription>
+          <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다. 최근 최대 20건만 표시하며 전체 보안 기록은 아닙니다.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           {eventData === null ? (
@@ -366,13 +366,20 @@ export default async function AccountSecurityPage({
             <p className="py-3 text-xs text-muted-foreground">최근 보안 활동이 없습니다.</p>
           ) : (
             <div className="divide-y divide-border/60">
-              {events.slice(0, 5).map((event, index) => (
+              {events.map((event, index) => (
                 <div key={event.createdAt + '-' + event.type + '-' + index} className="flex items-center justify-between py-2.5 text-xs">
                   <span className="font-medium text-foreground">{SECURITY_EVENT_LABEL[event.type] ?? '계정 보안 활동'}</span>
                   <span className="text-muted-foreground">{formatMoment(event.createdAt)}</span>
                 </div>
               ))}
             </div>
+          )}
+          {eventData !== null && (
+            <Button asChild variant="outline" size="sm" className="mt-3 min-h-11">
+              <a href="/account/security/events.csv" download="moneyverse-security-events-recent.csv" aria-label="최근 최대 20건의 계정 보안 활동 CSV 다운로드">
+                최근 보안 활동 CSV 다운로드
+              </a>
+            </Button>
           )}
         </CardContent>
       </Card>

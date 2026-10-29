@@ -9,15 +9,15 @@
 **Tech Stack:** NestJS, Next.js App Router, TypeScript, Vitest, PostgreSQL 17.
 
 ## Task 1 — Test-first contract
-- [ ] Add failing tests for all 20 visible items, private download affordance and no false empty state.
-- [ ] Add failing CSV route tests for authenticated owner API, no-store/noindex, strict data, spreadsheet injection and backend failure.
-- [ ] Run RED tests; record failures.
+- [x] Add failing tests for all 20 visible items, private download affordance and no false empty state.
+- [x] Add failing CSV route tests for authenticated owner API, no-store/noindex, strict data, spreadsheet injection and backend failure.
+- [x] Run RED tests; record failures.
 
 ## Task 2 — Minimal implementation
-- [ ] Implement CSV formatter and gated GET route; only type and ISO timestamp, never raw metadata.
-- [ ] Render all 20 verified events and accessible download link; disclose 20-event cap.
-- [ ] Add NestJS privacy response headers for existing JSON API; verify Android route mapping.
-- [ ] Run GREEN tests and review spec, quality, privacy.
+- [x] Implement CSV formatter and gated GET route; only type and ISO timestamp, never raw metadata.
+- [x] Render all 20 verified events and accessible download link; disclose 20-event cap.
+- [x] Add NestJS privacy response headers for existing JSON API; verify Android route mapping.
+- [x] Run GREEN tests and review spec, quality, privacy.
 
 ## Task 3 — Verification and release hold
 - [ ] Verify affected Vitest, Typecheck, Build, Lint, security and real isolated PostgreSQL owner ACL.
