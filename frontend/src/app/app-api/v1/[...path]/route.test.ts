@@ -121,6 +121,21 @@ describe('app API route compatibility', () => {
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
+  it.each(['owned', 'unowned'])('forwards member shop ownership=%s without caching Android responses', async (ownership) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request(`/app-api/v1/shop/catalog?ownership=${ownership}`), context('shop', 'catalog'));
+    expect(response.status).toBe(200);
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/shop/catalog');
+    expect(target.searchParams.get('ownership')).toBe(ownership);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {

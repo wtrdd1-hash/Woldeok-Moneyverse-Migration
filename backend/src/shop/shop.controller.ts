@@ -31,7 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
-import { filterCatalogByStock } from './shop-stock-filter';
+import { filterShopOwnership, parseShopOwnership } from './shop-ownership-filter';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -123,28 +123,32 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q and stock=available' })
-  async publicCatalog(@Query('q') query?: string, @Query('stock') stock?: string) {
+  @ApiOperation({
+    summary: 'The public catalogue; optional q searches code/name/description/category',
+  })
+  async publicCatalog(@Query('q') query?: string) {
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterCatalogByStock(filterShopItems(catalogItems, query), stock) };
+    return { catalogItems: filterShopItems(catalogItems, query) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q and stock=available' })
+  @ApiOperation({ summary: 'The member catalogue; optional q and owned/unowned ownership filter' })
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
-    @Query('stock') stock?: string,
+    @Query('ownership') ownership?: string,
   ) {
+    // Reject invalid filters before touching private actor-scoped DB rows.
+    const mode = parseShopOwnership(ownership);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterCatalogByStock(filterShopItems(catalogItems, query), stock) };
+    return { catalogItems: filterShopOwnership(filterShopItems(catalogItems, query), mode) };
   }
 
   @Get('holdings')

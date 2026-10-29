@@ -1,0 +1,3 @@
+# A0425 — Shop catalogue ownership filter (candidate, release hold)
+
+2026-10-29: Added all/owned/unowned member catalogue filtering through existing actor-scoped PostgreSQL function, NestJS validation, Next.js form and Android app-api query forwarding. Rejected malformed filters before private DB access, enforced private/no-store/noindex for app shop responses, preserved default catalogue ordering and existing purchase semantics. No schema or ledger writes. Local tests, lint, typecheck and resource-limited Next build PASS; canonical exact-SHA CI and official Test/Production gates remain pending. See [worklog](../worklog/2026-10-29-hourly-a-shop-ownership-filter.md).

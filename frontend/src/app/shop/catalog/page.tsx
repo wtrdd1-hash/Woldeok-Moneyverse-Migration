@@ -9,8 +9,9 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import { categoryLabel, filterCatalogByCategory, groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
+import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
+import { memberOwnershipCatalogUrl, normalizedShopOwnership } from './shop-ownership';
 
 /**
  * One member's own shelf, and a catalogue only a member can reach.
@@ -29,20 +30,17 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly category?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly ownership?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery, category: rawCategory } = await searchParams;
+  const { q: rawQuery, ownership: rawOwnership } = await searchParams;
+  const ownership = normalizedShopOwnership(rawOwnership);
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
-  const category = typeof rawCategory === 'string' && /^[a-z][a-z0-9_]{0,39}$/.test(rawCategory)
-    ? rawCategory : '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[]; categories?: string[] }>(
-      `/api/v1/shop/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`,
-    ),
+    apiOrNull<{ catalogItems: CatalogItem[] }>(memberOwnershipCatalogUrl(ownership)),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -54,8 +52,7 @@ export default async function ShopCatalogPage({
   const held = new Map<string, number>(
     (mine?.holdings ?? []).map((item) => [item.catalog_id, item.quantity]),
   );
-  const categories = catalog?.categories ?? [...new Set((catalog?.catalogItems ?? []).map((item) => item.category))];
-  const items = filterCatalogByCategory(catalog?.catalogItems ?? [], category).filter((item) => {
+  const items = (catalog?.catalogItems ?? []).filter((item) => {
     if (query === '') return true;
     return [item.name, item.description, item.code]
       .join(' ')
@@ -78,7 +75,8 @@ export default async function ShopCatalogPage({
             <strong>초보 필수품 10% 할인 적용 중</strong>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            오늘 자정까지 이 페이지에 표시되는 대상 아이템 가격과 실제 결제 금액에 같은 할인이 적용돼요.
+            오늘 자정까지 이 페이지에 표시되는 대상 아이템 가격과 실제 결제 금액에 같은 할인이
+            적용돼요.
           </p>
         </div>
       )}
@@ -106,20 +104,7 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-xl flex-wrap gap-2" role="search">
-            <label htmlFor="shop-category" className="sr-only">아이템 분류</label>
-            <select
-              id="shop-category"
-              name="category"
-              defaultValue={category}
-              className="min-h-11 rounded-md border border-input bg-background px-3 text-sm"
-              aria-label="아이템 분류"
-            >
-              <option value="">전체 분류</option>
-              {categories.map((code) => (
-                <option key={code} value={code}>{categoryLabel(code)}</option>
-              ))}
-            </select>
+          <form className="flex max-w-md gap-2" role="search">
             <Input
               name="q"
               type="search"
@@ -127,6 +112,19 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
+            <label htmlFor="shop-ownership" className="sr-only">
+              보유 여부
+            </label>
+            <select
+              id="shop-ownership"
+              name="ownership"
+              defaultValue={ownership}
+              className="min-h-11 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="all">전체 상품</option>
+              <option value="owned">보유 중</option>
+              <option value="unowned">미보유</option>
+            </select>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
@@ -145,11 +143,15 @@ export default async function ShopCatalogPage({
           // A different fact from the one above: the request worked and the
           // catalogue has nothing on sale right now.
           <EmptyState
-            title={query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
+            title={
+              query === '' && ownership === 'all'
+                ? '지금 판매 중인 아이템이 없어요.'
+                : '조건에 맞는 아이템이 없어요.'
+            }
             description={
-              query === ''
+              query === '' && ownership === 'all'
                 ? '운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요.'
-                : '다른 이름, 설명 또는 아이템 코드로 다시 검색해 주세요.'
+                : '검색어 또는 보유 여부를 바꿔 다시 확인해 주세요.'
             }
           />
         ) : (
@@ -197,8 +199,8 @@ export default async function ShopCatalogPage({
             내 아이템
           </h2>
           <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-            사용 가능한 아이템은 한 번에 1개씩 써요. 효과가 적용되는 동안에는 같은 아이템을 다시
-            쓸 수 없고, 기간이 끝나면 다시 쓸 수 있어요. 기간제 아이템과 관리비가 붙는 아이템은
+            사용 가능한 아이템은 한 번에 1개씩 써요. 효과가 적용되는 동안에는 같은 아이템을 다시 쓸
+            수 없고, 기간이 끝나면 다시 쓸 수 있어요. 기간제 아이템과 관리비가 붙는 아이템은
             사용해서 소모하지 않고 기간 동안 그대로 유지됩니다.
           </p>
         </div>

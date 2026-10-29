@@ -22,15 +22,6 @@
 - 회원 인벤토리/컬렉션
 - 퀘스트 및 성장
 
-## 회원 상점 분류 필터 (A2225 후보, 미배포)
+## 회원 보유 여부 필터 (A0425 후보·미배포)
 
-회원 전용 `/shop/catalog`에서 이름 검색과 분류 선택을 함께 사용합니다.
-`GET /api/v1/shop/catalog?category=vehicle`은 기존 본인 기준
-`shop_catalog_list_v2(actor)` 조회 결과에서 분류 토큰을 정확히 일치시켜
-선택합니다. API의 `categories` 목록도 같은 회원의 조회 결과에서 생성하므로
-새 분류가 추가되어도 선택지에서 누락되지 않습니다. `q`와 `category`는
-조합 가능하며 클라이언트 가격·임의 SQL·신규 권한·원장 쓰기를 사용하지 않습니다.
-잘못된 분류 토큰은 DB 호출 전에 HTTP 400으로 거절합니다. Android
-`/app-api/v1/shop/catalog`은 검색 파라미터를 보존하고 회원 카탈로그·보유
-상품·구매 내역에 `private, no-store` 및 `noindex`를 적용합니다.
-공식 Test의 정확한 SHA 및 릴리스 게이트를 통과하기 전까지 Draft 후보입니다.
+로그인한 회원은 `/shop/catalog`에서 **전체 상품**, **보유 중**, **미보유**를 선택하고 검색어와 함께 사용할 수 있습니다. 회원 API `GET /api/v1/shop/catalog?ownership=all|owned|unowned`는 생략 시 전체를 반환하며, 잘못된 값은 비공개 DB 조회 전에 HTTP 400으로 거부합니다. PostgreSQL `shop_catalog_list_v2(actor)`가 인증된 회원의 `user_owned_quantity`를 직접 반환하므로 사용자 ID나 보유 수량을 클라이언트에서 지정하지 않습니다. 공개 카탈로그는 영향을 받지 않습니다. Android `/app-api/v1/shop/catalog?ownership=...`는 검색 조건을 전달하면서 응답을 비공개·캐시 금지·검색 제외로 처리합니다. 신규 마이그레이션·금융 원장 변경은 없으며, 운영 배포는 승인 게이트 충족 전까지 보류합니다.
