@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.29.1204 — Full database construction and reconstruction procedure
+- [English step-by-step construction runbook](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [한국어 실제 DB 구축 절차](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). Source snapshot, second-disk PostgreSQL, ACL-preserving restore, migrations 292/293, structural/ledger acceptance, and unperformed Production cutover are explicitly separated.
+
+
 ## v2026.10.28.1423 — Treasury dividend Production DB-only containment
 - [EN worklog](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.md) · [KO](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md) · [Internal EN](docs/updates/v2026.10.28.1423-internal.md) · [Internal KO](docs/updates/v2026.10.28.1423-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.28.1423-github.md) · [GitHub KO](docs/updates/v2026.10.28.1423-github.ko.md) · [Release](docs/releases/v2026.10.28.1423.md).
 
