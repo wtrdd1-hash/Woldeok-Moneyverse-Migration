@@ -32,3 +32,8 @@
 **Release decision:** No main merge, no Test/Production deployment, no DB migration on shared environments, no rollback required. P0 #1891 required-check bypass and #1908 support table ACL drift remain open. No PASS evidence for the full gate; HOLD.
 
 **Evidence directory:** `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0425-support-text/` (individual command logs, isolated PostgreSQL proof and branch/PR audit).
+
+## Exact-SHA CI and final branch audit (04:49 KST)
+- Code SHA `fe7265db2772429663be830f9ca0e2cff702a0d0`: GitHub CI #40942664769 **FAIL** and candidate #40942653136 **FAIL** at three pre-existing `stale-tab-notice.tsx` `no-empty` lint errors. Policy/classify PASS; candidate image build SKIPPED. Local exact code SHA with independently installed offline dependencies: typecheck/build PASS; earlier stale shared dependency symlinks caused environment-only resolution failures, not code changes.
+- Remote branches 31 (30 non-main): 27 with unique unmerged commits, 3 included in main. Open PRs 25, conflicts #1901/#1892; no head SHA mismatch or duplicate. No branch/PR cleanup performed because of historical deletion risk and other agents' work.
+- This feature is **targeted verified, full gates FAIL**. Keep Draft PR #1941 and Production HOLD.

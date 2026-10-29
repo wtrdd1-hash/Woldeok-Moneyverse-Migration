@@ -9,3 +9,5 @@
 **실패/차단:** 전체 Lint 오류 3건, Backend 전체 240 FAIL/2354 PASS/493 SKIP, Frontend 전체 554 FAIL/2041 PASS, 모바일 API 생성 문서 3개 불일치(별도 QA #1927 및 신규 엔드포인트 조정 필요), 공식 Test 정확 SHA 인증 E2E 미실행. 04:41 기준 Test/Production Backend SHA는 `c2129625aa6629c616fb31ce790950618b8d92b2`, Production Frontend 식별자는 `1793277134644`. Test 국고 HTTP 200/Production 503 P0 #1917 지속. #1891, #1908도 미해결.
 
 **결론:** 전체 품질·금융·백업 복원·Test 릴리스 게이트 미통과. main 병합, 운영 DB 수정, Test/Production 배포, 롤백, 브랜치 삭제 없음. 근거: `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0425-support-text/`.
+
+**정확 SHA CI(04:49 KST):** 코드 SHA `fe7265db2772429663be830f9ca0e2cff702a0d0`의 CI #40942664769 및 후보 #40942653136 모두 기존 `stale-tab-notice.tsx`의 Lint 오류 3건으로 FAIL. 이미지 빌드 SKIP. 공유 의존성 심볼릭 링크가 사라져 발생한 로컬 모듈 오류는 별도 작업 폴더에서 오프라인 재설치로 복구했고 정확 코드 SHA 타입 검사/빌드는 PASS. 원격 브랜치 31개(비-main 30, 고유 미통합 27), 열린 PR 25개, 충돌 2개(#1901/#1892), 삭제 0건. Draft PR #1941 및 운영 HOLD 유지.
