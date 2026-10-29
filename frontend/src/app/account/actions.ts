@@ -9,6 +9,24 @@ import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
 
+/** A successful HTTP status alone does not prove persistence. */
+function verifiedAccountDeletionReceipt(value: unknown): void {
+  if (typeof value !== 'object' || value === null || !('deletedAt' in value) ||
+      !('revokedSessionCount' in value) || !('replayed' in value)) {
+    throw new Error('missing deletion receipt');
+  }
+  const { deletedAt, revokedSessionCount, replayed } = value;
+  if (typeof deletedAt !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(deletedAt) ||
+      !Number.isFinite(Date.parse(deletedAt)) ||
+      new Date(deletedAt).toISOString() !== deletedAt ||
+      !Number.isSafeInteger(revokedSessionCount) ||
+      (revokedSessionCount as number) < 0 || typeof replayed !== 'boolean') {
+    throw new Error('invalid deletion receipt');
+  }
+}
+
+
 /**
  * Begins linking another sign-in method.
  *
@@ -120,9 +138,10 @@ export async function deleteAccount(
   }
 
   try {
-    await mutate('/api/v1/account', { method: 'DELETE' });
+    const receipt = await mutate<unknown>('/api/v1/account', { method: 'DELETE' });
+    verifiedAccountDeletionReceipt(receipt);
   } catch (error) {
-    return failure(error, '삭제하지 못했어요. 본인 확인을 먼저 완료해 주세요.');
+    return failure(error, '계정 삭제 완료 여부를 확인할 수 없습니다. 다시 삭제 요청하지 말고 로그인 상태를 확인해 주세요.');
   }
 
   try {

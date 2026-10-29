@@ -9,9 +9,14 @@
 - Release safety: production financial reconciliation, restore proof, dependencies and official exact-SHA Test must be independently cleared. No shared DB/financial writes.
 
 ## In progress
-- [ ] RED demonstrated
-- [ ] GREEN and focused regression
+- [x] RED demonstrated
+- [x] GREEN and focused regression
 - [ ] Full validation, CI and exact-SHA Test
 
 ## Finished
 - Pending.
+
+### Midpoint — 2026-10-29 13:48 KST
+- RED: 9 of 12 new frontend tests failed because malformed HTTP success still navigated to deleted-account success. GREEN: 12/12 pass; related account navigation 2/2 pass. Backend deletion receipt mapping 6/6 pass (2 new assertions).
+- Changed only account server action, focused frontend/backend tests. No DB migrations or financial writes.
+- Re-fetched main: see final SHA evidence below. Continue full gates; official Test exact-SHA not yet certified.

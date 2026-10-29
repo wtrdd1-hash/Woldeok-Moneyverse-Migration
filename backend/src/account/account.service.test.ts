@@ -47,3 +47,33 @@ describe('linked identity read contract', () => {
     expect(() => requireIdentityProvider('local_email')).toThrow();
   });
 });
+
+describe('account deletion database receipt contract', () => {
+  it('exposes the authoritative deletion timestamp, session count and replay flag', async () => {
+    const repository = {
+      ...fakeRepository([]),
+      softDelete: async () => ({
+        deleted_at: new Date('2026-10-29T04:00:00.000Z'),
+        revoked_session_count: 3,
+        replayed: false,
+      }),
+    } satisfies AccountRepository;
+    await expect(new AccountService(repository).softDeleteAccount(actor)).resolves.toEqual({
+      deletedAt: '2026-10-29T04:00:00.000Z',
+      revokedSessionCount: 3,
+      replayed: false,
+    });
+  });
+
+  it('refuses a missing database replay flag rather than fabricating deletion', async () => {
+    const repository = {
+      ...fakeRepository([]),
+      softDelete: async () => ({
+        deleted_at: new Date('2026-10-29T04:00:00.000Z'),
+        revoked_session_count: 0,
+        replayed: undefined as unknown as boolean,
+      }),
+    } satisfies AccountRepository;
+    await expect(new AccountService(repository).softDeleteAccount(actor)).rejects.toThrow('invalid account-deletion receipt');
+  });
+});
