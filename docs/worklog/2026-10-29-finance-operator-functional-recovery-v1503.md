@@ -22,3 +22,9 @@
 
 ## AFTER
 - Pending CI, source merge and exact Test/Production release decision; no actual SWF liquidation, autonomous growth, or mint execution claimed.
+
+## Validation checkpoint — 2026-10-29 15:49 KST
+- Exact branch code HEAD 946a5f115a4be2b04f5b844ee71fcc23ea46e302 (a strict test TypeScript annotation correction atop source b5d116577) successfully built all Next 609 routes, confirmed frontend .next/BUILD_ID equals exact HEAD; prior Next run failed on strict TS2532 and was corrected, not counted as a pass.
+- Isolated miniPC Test candidate backend `moneyverse-v1503-test-durable-be` port 3572 using Test DB and all schedulers disabled: health 200, anonymous policy GET 401, no backend ERROR. Its build ID is b5d116577, which has the same application backend source as HEAD but is NOT an exact-HEAD full Test identity.
+- Isolated candidate frontend `moneyverse-v1503-test-durable-fe` port 3573 using backend 3572: admin treasury HTTP 200, anonymous CB GET 401, anonymous policy PUT 403, unsafe SWF POST intentionally 503; zero backend/frontend ERROR logs. Official Test/main and Production were not switched.
+- Official GitHub PR #1862 remains draft, CI for HEAD run #40831340668 in progress at last check. This does not constitute authenticated signed-in Test E2E, genuine SWF cash redemption, minted money or Production approval.
