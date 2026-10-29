@@ -2,10 +2,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { WalletInputError, requireUuid } from './wallet.repository';
 
 export type WalletActivityPeriod = 'all' | '7d' | '30d';
+export type WalletActivityDirection = 'all' | 'in' | 'out' | 'neutral';
 export interface WalletActivityCursor {
   readonly owner: string;
   readonly session: string;
   readonly period: WalletActivityPeriod;
+  readonly direction?: WalletActivityDirection;
   readonly asOf: string;
   readonly afterAt: string;
   readonly afterId: string;
@@ -26,7 +28,7 @@ export function signWalletActivityCursor(cursor: WalletActivityCursor): string {
   return `${body}.${signature(body).toString('base64url')}`;
 }
 
-export function verifyWalletActivityCursor(token: string, owner: string, session: string, period: WalletActivityPeriod, now: Date): WalletActivityCursor {
+export function verifyWalletActivityCursor(token: string, owner: string, session: string, period: WalletActivityPeriod, now: Date, direction: WalletActivityDirection = 'all'): WalletActivityCursor {
   if (typeof token !== 'string' || token.length > 2048 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)) {
     throw new WalletInputError('invalid wallet activity cursor');
   }
@@ -39,9 +41,9 @@ export function verifyWalletActivityCursor(token: string, owner: string, session
   let data: Record<string, unknown>;
   try { data = JSON.parse(Buffer.from(body!, 'base64url').toString('utf8')) as Record<string, unknown>; }
   catch { throw new WalletInputError('invalid wallet activity cursor'); }
-  if (data.v !== 1 || data.owner !== owner || data.session !== session || data.period !== period ||
+  if (data.v !== 1 || data.owner !== owner || data.session !== session || data.period !== period || (data.direction ?? 'all') !== direction ||
       typeof data.asOf !== 'string' || typeof data.afterAt !== 'string' || typeof data.afterId !== 'string') {
-    throw new WalletInputError('wallet activity cursor does not match this session or period');
+    throw new WalletInputError('wallet activity cursor does not match this session, period or direction');
   }
   requireUuid(data.afterId, 'cursor transaction id');
   const asOf = new Date(data.asOf);
@@ -51,5 +53,5 @@ export function verifyWalletActivityCursor(token: string, owner: string, session
       asOf.getTime() > now.getTime() || now.getTime() - asOf.getTime() > 60 * 60 * 1000 || afterAt > asOf) {
     throw new WalletInputError('wallet activity cursor is expired or invalid');
   }
-  return { owner, session, period, asOf: data.asOf, afterAt: data.afterAt, afterId: data.afterId };
+  return { owner, session, period, direction, asOf: data.asOf, afterAt: data.afterAt, afterId: data.afterId };
 }

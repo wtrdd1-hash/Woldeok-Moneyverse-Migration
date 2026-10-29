@@ -108,15 +108,19 @@ export class WalletController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
-  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string) {
+  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string, @Query('direction') direction?: string) {
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
+    }
+    if (direction !== undefined && (typeof direction !== 'string' || !['all', 'in', 'out', 'neutral'].includes(direction))) {
+      throw new BadRequestException('direction must be all, in, out or neutral');
     }
     if (cursor !== undefined && (typeof cursor !== 'string' || cursor.length > 2048)) {
       throw new BadRequestException('invalid wallet activity cursor');
     }
     return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
-      period === '7d' || period === '30d' ? period : 'all', cursor), 'wallet activity is unavailable');
+      period === '7d' || period === '30d' ? period : 'all', cursor,
+      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all'), 'wallet activity is unavailable');
   }
 
   @Get('wallet/recipients/search')

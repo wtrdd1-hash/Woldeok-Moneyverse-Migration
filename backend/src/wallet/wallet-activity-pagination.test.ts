@@ -28,8 +28,8 @@ describe('wallet owner- and session-bound keyset history', () => {
     expect(sql).toContain('ledger_transaction.created_at <= $2');
     expect(sql).toContain('ledger_transaction.created_at >= $3');
     expect(sql).toContain('(ledger_transaction.created_at, ledger_transaction.id) <');
-    expect(sql.indexOf('ledger_transaction.created_at >= $3')).toBeLessThan(sql.indexOf('LIMIT $6'));
-    expect(params).toEqual([ACTOR, new Date('2026-10-28T00:00:00Z'), new Date('2026-10-21T00:00:00Z'), new Date('2026-10-27T00:00:00Z'), row(1).transaction_id, 51]);
+    expect(sql.indexOf('ledger_transaction.created_at >= $3')).toBeLessThan(sql.indexOf('LIMIT $7'));
+    expect(params).toEqual([ACTOR, new Date('2026-10-28T00:00:00Z'), new Date('2026-10-21T00:00:00Z'), new Date('2026-10-27T00:00:00Z'), row(1).transaction_id, null, 51]);
   });
 
   it('returns 50 exact integer strings and a signed next cursor, then pages without overlap', async () => {
@@ -78,7 +78,7 @@ describe('wallet owner- and session-bound keyset history', () => {
     const controller = new WalletController({ activityPage } as unknown as WalletService);
     const request = { session: { id: SESSION, user_id: ACTOR } } as unknown as RequestWithSession;
     await controller.activity(request, '7d', undefined);
-    expect(activityPage).toHaveBeenCalledWith(ACTOR, SESSION, '7d', undefined);
+    expect(activityPage).toHaveBeenCalledWith(ACTOR, SESSION, '7d', undefined, 'all');
     expect(() => controller.activity(request, 'bad', undefined)).toThrow();
   });
 });
