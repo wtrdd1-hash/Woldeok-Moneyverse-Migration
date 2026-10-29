@@ -99,7 +99,7 @@ export default async function AccountSecurityPage({
       {params.email === 'verification-sent' && (
         <Alert className="border-primary/30 bg-primary/5">
           <AlertDescription className="text-xs font-medium">
-            새 로그인 이메일로 확인 링크를 보냈습니다. 링크 확인 완료 시 모든 세션이 종료됩니다.
+            이메일 변경 확인 메일 발송 요청이 접수되었습니다. 새 주소의 받은편지함을 확인해 주세요. 링크 확인 완료 시 모든 세션이 종료됩니다.
           </AlertDescription>
         </Alert>
       )}
