@@ -1,3 +1,6 @@
+## v2026.10.29.1501 — SWF liquidation containment and central-bank console truth (candidate)
+- Block unreceipted SWF cash credits (503), expose backend's transient central-bank state as preview, remove fake mint approvals and running indicators. No ledger writes, real mint issuance, or Production deployment verified. [Release](../releases/v2026.10.29.1501.md).
+
 ## v2026.10.27.3 — Complete branch work inventory (documentation only)
 - 351 web/backend remote branches, 7 Android; 324 diverged / 14 ahead-only / 2 contained / 10 not comparable locally. Bilingual full register plus CSV. No runtime/Test/Production change. [Release](../releases/v2026.10.27.3.md).
 

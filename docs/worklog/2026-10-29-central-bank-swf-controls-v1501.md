@@ -18,5 +18,12 @@
 ## IN PROGRESS
 - Reproducing source/runtime boundary and preparing regression tests.
 
+### MIDPOINT — 2026-10-29 14:10 KST
+- TDD RED: manual liquidation originally opened PG without a mocked transaction; BFF returned 500 rather than 503; central-bank status BFF did not exist.
+- GREEN focused SWF backend 9/9; extra controller route security test 2/2 after correcting actual AdminTreasuryController name. Frontend BFF and central-bank source tests green; browser render tests 2/2 with NODE_ENV=test.
+- Initial full typecheck exposed a UI variable inadvertently removed along with the obsolete handlers; restored floorReserve before rerun. Not misrepresented as passing.
+- Focused ESLint: 0 errors, two warnings (one legacy any, one unused state subsequently corrected); no ledger change.
+- Bilingual worklog, release, internal, GitHub and master plan/indices updated. Full build and independent Test/Production gates remain pending.
+
 ## FINISHED
 - Pending validation and release decision.
