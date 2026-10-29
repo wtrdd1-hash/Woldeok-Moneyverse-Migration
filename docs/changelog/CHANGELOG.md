@@ -1,3 +1,7 @@
+
+## v2026.10.29.1503 — Central-bank durable policy (source/Test candidate)
+- PostgreSQL base-rate and reserve decisions with audits, source-proven partial monetary telemetry, honest SWF legacy estimate labels. Test migration 295 and real update/read/revert succeeded; Production v1502 unchanged, Mint/SWF cash settlement still held. [Release](../releases/v2026.10.29.1503.md).
+
 ## v2026.10.29.1502 — LIVE central-bank/SWF defensive correction
 - PR #1845 integrated, deployed source c2129625a: Production 15/15 public routes 200, SWF cash transfer 503 intentionally held; Test/Production SHA identity, CI, backend 79 and frontend 7 tests PASS. Financial ledger drift zero, three owner-accepted DML grants remain tool blockers. No data writes. [Release](../releases/v2026.10.29.1502.md).
 

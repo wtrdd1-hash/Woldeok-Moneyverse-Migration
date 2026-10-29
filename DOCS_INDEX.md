@@ -1,3 +1,7 @@
+
+## v2026.10.29.1503 — Financial admin durability (source/Test only)
+- [Release EN](docs/releases/v2026.10.29.1503.md) / [KO](docs/releases/v2026.10.29.1503.ko.md) · [Worklog](docs/worklog/2026-10-29-finance-operator-functional-recovery-v1503.md) / [KO](docs/worklog/2026-10-29-finance-operator-functional-recovery-v1503.ko.md) · [Internal EN](docs/updates/v2026.10.29.1503-internal.md) / [KO](docs/updates/v2026.10.29.1503-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1503-github.md) / [KO](docs/updates/v2026.10.29.1503-github.ko.md). Durable policy rate/reserve with audit, real partial ledger view and SWF synthetic valuation disclosure. Test DB migration 295 and actual policy update/read/revert PASS. Production remains v1502.
+
 ## v2026.10.29.1502 — LIVE Production: central-bank preview and SWF fail-closed
 - [Release EN](docs/releases/v2026.10.29.1502.md) / [KO](docs/releases/v2026.10.29.1502.ko.md) · [Worklog EN](docs/worklog/2026-10-29-v1502-operational-promotion.md) / [KO](docs/worklog/2026-10-29-v1502-operational-promotion.ko.md) · [Internal EN](docs/updates/v2026.10.29.1502-internal.md) / [KO](docs/updates/v2026.10.29.1502-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1502-github.md) / [KO](docs/updates/v2026.10.29.1502-github.ko.md). PR #1845 merged; live SHA c2129625a and public 15/15 routes 200, unsafe SWF cash transfer intentionally held 503.
 

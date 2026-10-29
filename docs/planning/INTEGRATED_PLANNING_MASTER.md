@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1503 — Central-bank durable policy source/Test candidate
+- The operator correctly noted that v1502 disabled core treasury/central-bank actions, rather than restoring them. Source v1503 makes bounded central-bank policy decisions persist in PostgreSQL with independent immutable audit rows, CSRF and admin authorization, without modifying money supplies. The partial ledger telemetry replaces fictitious M0/M1/M2 and the SWF legacy valuations are explicitly unverified, nonredeemable estimates.
+- Test DB migration 295 applied after isolated backup; actual rate save 3.75→3.76→3.75 and two audit receipts verified. Production remains v1502; real Mint and SWF cash settlement require idempotent balanced ECSL receipts and asset backing.
+- [Release candidate](../releases/v2026.10.29.1503.md) · [Worklog](../worklog/2026-10-29-finance-operator-functional-recovery-v1503.md).
+
+
 ## v2026.10.29.1502 — Live correction with financial execution still held
 - v1501 central-bank admin truth and SWF containment were promoted to official Test and LIVE Production 2026-10-29. Exact application source c2129625aa6629c616fb31ce790950618b8d92b2, main merged PR #1845 as 679cb5904f779a1b2067f10809fcca83e31dbe91 (identical app source tree).
 - Read-only Production ledger shows no unexplained account drift/unbalanced transactions; the raw financial gate remains BLOCKED only for three owner-accepted existing DML grants. Actual mint acceptance, monetary-policy publication and SWF cash liquidation are NOT restored; explicit 503 is intentional.
