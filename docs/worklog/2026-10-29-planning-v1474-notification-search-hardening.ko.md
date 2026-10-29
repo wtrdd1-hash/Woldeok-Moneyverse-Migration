@@ -15,3 +15,8 @@
 ## 완료·검증
 - 영문 원본·국문 동등 통합 기획서와 프로젝트 계획서 갱신. P0/P1 10건 및 합성 10,001건 수용시험은 **기획이며 미실행**.
 - 최종 diff/분류 테스트/한영 동등성/GitHub PR·이슈 반영 결과는 완료 기록에 추가. 외부 독립 승인 신규 0, 누적 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. RELEASE HOLD.
+
+### 완료 확인
+- Draft PR #1892 OPEN / 미병합, 개발 이슈 #1887 댓글 업데이트. 첫 커밋은 최신 main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5`에 충돌 없이 리베이스.
+- 로컬 release 분류 테스트 17 PASS/0 FAIL, 한영 4개 문서에 10개 식별자 모두 존재, 소스 SQL 304개 번호 중복 0, diff 검사 PASS. GitHub CI policy/classify SUCCESS, runtime-check 문서 전용 SKIPPED.
+- 실제 PG 수용시험·공식 Test 정확 SHA·인증 금융 E2E·외부 백업 복원은 미검증. 릴리스 HOLD, 런타임·DB·WLD·운영 미변경.

@@ -15,3 +15,8 @@
 ## Finished / verification
 - English canonical and Korean equivalent integrated/project plans updated; P0/P1 ten-item backlog and 10,001-row adversarial acceptance are **specifications, not executed tests**.
 - Final git diff, classifier, bilingual parity, GitHub PR and issue update outcomes to be recorded at final checkpoint. External independently approved new 0; cumulative UNKNOWN / 10,000, gate BLOCKED / IN PROGRESS. Release HOLD.
+
+### Final verification
+- Draft PR #1892 OPEN/unmerged and developer issue #1887 updated. First documentation commit rebased without conflicts onto `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5`.
+- Local release classifier 17 PASS/0 FAIL; ten identifiers present in all four bilingual core documents; 304 SQL source migration IDs unique; git diff check PASS. GitHub CI policy/classify SUCCESS, runtime-check SKIPPED (docs-only).
+- Real PG acceptance, official Test exact SHA, authenticated finance E2E and off-host restore NOT CERTIFIED. Release HOLD; no runtime/DB/WLD/Production mutation.

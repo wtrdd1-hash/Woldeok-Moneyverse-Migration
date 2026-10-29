@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1474 / F675-174 — 알림 검색 스냅샷·유니코드·커서 안전성 보완 (기능 보완 / 초안 / 운영 HOLD)
+**GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / 미병합, [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) 업데이트. 최신 main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5` 기준으로 리베이스. 문서 전용 CI policy/classify SUCCESS, runtime-check SKIPPED. 운영 HOLD.
 
 **주기·기준.** 이전 기능 추가 v1472 → 현재 기능 보완 v1474 → 다음 기능 추가 v1476(잠정). 시작·중간 최신 main `f9fd777458b89b3c33593ae0cad46a37b216474b`; 독립 QA v1372 FAILED/P0는 이전 main `69c4867…`을 검사했으며 현재 main 합격 증거가 아니다. v1472 설계 PR #1888은 병합됐지만 기능 코드는 **미구현**이다. Nest 알림 DTO/컨트롤러/서비스와 Next 알림 API·탭을 확인했으며 검색 API·SQL은 발견되지 않았다. 이번 작업은 문서만 수정한다. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 

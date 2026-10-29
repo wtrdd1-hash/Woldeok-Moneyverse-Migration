@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.29.1474 — F675-174 알림 검색 안전성 보완 (기능 보완 / 초안 / 운영 HOLD)
+**GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / 미병합, [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) 업데이트. 최신 main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5` 기준으로 리베이스. 문서 전용 CI policy/classify SUCCESS, runtime-check SKIPPED. 운영 HOLD.
 - 주기: 이전 기능 추가 v1472 → 현재 기능 보완 v1474 → 다음 기능 추가 v1476(잠정). 시작·중간 최신 main `f9fd777458b89b3c33593ae0cad46a37b216474b`. v1472 PR #1888은 기획 문서만 병합, 알림 검색 기능 코드는 **미구현**. QA v1372 FAILED/P0는 이전 SHA 기준이며 최신 main CI/Test 인증은 없다. [개발 인계 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 보완: `asOfUtc`는 요청 간 불변 스냅샷이 아니며 변경되지 않은 집합의 키셋 순서만 보장한다. 읽음 변경은 세대 검증 또는 명시적 새로고침. HMAC 커서는 정규화 유니코드 필터·회원/세션·PostgreSQL 마이크로초 정밀도·앵커·10분 만료에 결속한다. 한글 2글자 검색은 안전한 인덱스 계획을 확인하고 불가 시 422 QUERY_TOO_BROAD 또는 503 SEARCH_UNAVAILABLE. API·화면·DB·권한·관리자·SEO·KPI·회귀·롤백 전체는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조.
 - P0: REPO1474-01 브랜치 보존, SEC1474-02 현재 소스 SQL 304개 번호 중복 0이나 기존 체크섬 불일치 5개·DB 권한 검증, FIN1474-03 MINT 18,000 WLD/국고 552행 출처, REL1474-04 최신 main 검증·외부 복원·공식 Test 정확 SHA. P1: NOTIFSEARCH1474-05 NOTIFSEARCH1474-06 NOTIFSEARCH1474-07 NOTIFSEARCH1474-08 NOTIFSEARCH1474-09 NOTIFSEARCH1474-10 SQL/인덱스·커서·API·접근성·개인정보/KPI·실제 PG 회귀. 합성 10,001건 및 적대적 수용시험은 **미실행**.

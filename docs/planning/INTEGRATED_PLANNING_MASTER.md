@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1474 / F675-174 — Notification Search Snapshot, Unicode and Cursor Safety (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+**GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / unmerged; [development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) updated. Rebasing onto latest main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5`; documentation CI policy/classify SUCCESS, runtime-check SKIPPED. RELEASE HOLD.
 
 **Cycle / authority.** Previous Feature Addition v1472 → Current Feature Improvement v1474 → Next Feature Addition v1476 (provisional). Baseline and mid-run `main` `f9fd777458b89b3c33593ae0cad46a37b216474b`; QA v1372 FAILED/P0 (evidence from its earlier main `69c4867…`, not a test of the present main). v1472 design was merged as PR #1888, but **not implemented**. Source inspection: `backend/src/notification/{notification.dto.ts,notification.controller.ts,notification.service.ts}`, `frontend/src/app/{api/notifications/route.ts,account/notifications/notification-tabs-bar.tsx}`; no new search endpoint/SQL observed. Work remains docs-only; [handoff #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 
