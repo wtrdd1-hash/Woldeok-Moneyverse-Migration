@@ -1,8 +1,9 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import type { NotificationQueryDto } from './notification.dto';
+import { createNotificationSearchCursor, parseNotificationSearchCursor, validateNotificationSearch, type NotificationSearchInput } from './notification-search';
 
 @Injectable()
 export class NotificationService {
@@ -26,6 +27,85 @@ export class NotificationService {
        LIMIT $4 OFFSET $5`,
       [actor, query.category ?? null, unreadOnly, limit, offset],
     );
+  }
+
+  /** Search never mutates notification or ledger state. A single read-only PG
+   * transaction gives a server-derived as-of time and a bounded query timeout.
+   * The existing owner/date B-tree index must be present; otherwise fail closed.
+   */
+  async searchNotifications(actor: string, session: string, input: NotificationSearchInput): Promise<{
+    items: { id: string; category: string; title: string; body: string; link: string | null; isRead: boolean; createdAt: string }[];
+    nextCursor: string | null; hasMore: boolean; asOfUtc: string;
+  }> {
+    if (process.env.NOTIFICATION_SEARCH_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('Notification search is disabled');
+    }
+    const filter = validateNotificationSearch(input);
+    const cursor = input.cursor ? parseNotificationSearchCursor(input.cursor, actor, session, filter) : null;
+    if (!this.pool || !('connect' in this.pool) || typeof this.pool.connect !== 'function') {
+      throw new ServiceUnavailableException('Notification search database is unavailable');
+    }
+    const client = await (this.pool as Queryable & { connect(): Promise<Queryable & { release(): void }> }).connect();
+    let began = false;
+    try {
+      await client.query('BEGIN READ ONLY');
+      began = true;
+      await client.query("SET LOCAL statement_timeout = '2000ms'");
+      await client.query("SET LOCAL lock_timeout = '500ms'");
+      const index = await queryOne<{ available: boolean }>(client, `SELECT EXISTS (
+        SELECT 1 FROM pg_indexes
+        WHERE schemaname = 'public' AND tablename = 'in_app_notifications'
+          AND indexname = 'idx_in_app_notif_user_created'
+          AND indexdef LIKE '%(user_id, created_at DESC)%'
+      ) AS available`);
+      if (index?.available !== true) throw new ServiceUnavailableException('Notification search index unavailable');
+      const time = await queryOne<{ as_of: Date }>(client, 'SELECT clock_timestamp() AS as_of');
+      if (!time?.as_of || !Number.isFinite(new Date(time.as_of).getTime())) {
+        throw new ServiceUnavailableException('Notification search snapshot unavailable');
+      }
+      const asOf = cursor?.asOf ?? new Date(time.as_of).toISOString();
+      const rows = await queryRows<{
+        id: string; category: string; title: string; body: string; link: string | null;
+        is_read: boolean; created_at: Date;
+      }>(client, `SELECT id::text, category, title, body, link, is_read, created_at
+        FROM public.in_app_notifications
+        WHERE user_id = $1::uuid
+          AND ($2::text IS NULL OR category = $2::text)
+          AND ($3::boolean = FALSE OR is_read = FALSE)
+          AND created_at >= $4::timestamptz AND created_at < $5::timestamptz
+          AND created_at <= $6::timestamptz
+          AND (strpos(lower(title), lower($7::text)) > 0 OR strpos(lower(body), lower($7::text)) > 0)
+          AND ($8::timestamptz IS NULL OR (created_at, id) < ($8::timestamptz, $9::uuid))
+        ORDER BY created_at DESC, id DESC LIMIT $10`, [
+        actor, filter.category, filter.unreadOnly, filter.fromUtc, filter.toUtc, asOf,
+        filter.query, cursor?.afterAt ?? null, cursor?.afterId ?? null, filter.limit + 1,
+      ]);
+      await client.query('COMMIT');
+      began = false;
+      const hasMore = rows.length > filter.limit;
+      const page = rows.slice(0, filter.limit);
+      const last = page.at(-1);
+      const nextCursor = hasMore && last ? createNotificationSearchCursor(
+        actor, session, filter, asOf, new Date(last.created_at).toISOString(), last.id,
+      ) : null;
+      return {
+        items: page.map((row) => ({
+          id: row.id, category: row.category, title: row.title, body: row.body,
+          // An untrusted notification URL must not become an external redirect.
+          link: typeof row.link === 'string' && row.link.startsWith('/') && !row.link.startsWith('//') &&
+            !/[\\\u0000-\u001f]/.test(row.link) ? row.link : null,
+          isRead: row.is_read, createdAt: new Date(row.created_at).toISOString(),
+        })),
+        nextCursor, hasMore, asOfUtc: asOf,
+      };
+    } catch (error: unknown) {
+      if (began) await client.query('ROLLBACK').catch(() => undefined);
+      if (error instanceof ServiceUnavailableException || error instanceof ConflictException) throw error;
+      // SQL errors and timeout details must not reveal private notification text.
+      throw new ServiceUnavailableException('Notification search unavailable');
+    } finally {
+      client.release();
+    }
   }
 
   async unreadCount(actor: string): Promise<number> {

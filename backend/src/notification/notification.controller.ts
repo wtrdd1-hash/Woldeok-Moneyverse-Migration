@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Post,
@@ -15,9 +17,9 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
-import { requireUserId } from '../auth/session.context';
+import { requireSession, requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure } from '../core/pg-error';
-import { NotificationQueryDto } from './notification.dto';
+import { NotificationQueryDto, NotificationSearchDto } from './notification.dto';
 import { NotificationService } from './notification.service';
 
 @ApiTags('notifications')
@@ -44,6 +46,16 @@ export class NotificationController {
     return this.guarded(() =>
       this.notificationService.listNotifications(requireUserId(request), query),
     );
+  }
+
+  @Post('search')
+  @UseGuards(CsrfGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Read-only owner-bound notification keyword and date search with signed keyset cursor' })
+  searchNotifications(@Req() request: RequestWithSession, @Body() body: NotificationSearchDto) {
+    const session = requireSession(request);
+    return this.guarded(() => this.notificationService.searchNotifications(requireUserId(request), session.id, body));
   }
 
   @Get('unread-count')

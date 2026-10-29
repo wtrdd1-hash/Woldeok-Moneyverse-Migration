@@ -1,6 +1,6 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export const NOTIFICATION_CATEGORIES = [
   'TRANSACTIONAL', 'PRODUCT_ACTIVITY', 'SEASON_LIVEOPS', 'SECURITY_CRITICAL',
@@ -34,4 +34,43 @@ export class NotificationQueryDto {
   @Min(0)
   @Max(5000)
   offset?: number;
+}
+
+
+/** A read-only POST body keeps private search keywords out of URL logs. */
+export class NotificationSearchDto {
+  @ApiProperty({ description: 'NFC-normalized literal keyword (2–80 code points)' })
+  @IsString()
+  query!: string;
+
+  @ApiProperty({ example: '2026-10-01T00:00:00.000Z' })
+  @IsString()
+  fromUtc!: string;
+
+  @ApiProperty({ example: '2026-10-30T00:00:00.000Z' })
+  @IsString()
+  toUtc!: string;
+
+  @ApiPropertyOptional({ enum: NOTIFICATION_CATEGORIES })
+  @IsOptional()
+  @IsIn(NOTIFICATION_CATEGORIES)
+  category?: (typeof NOTIFICATION_CATEGORIES)[number];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  unreadOnly?: boolean;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 50, default: 20 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  limit?: number;
+
+  @ApiPropertyOptional({ description: 'Opaque owner/session-bound HMAC continuation' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  cursor?: string;
 }

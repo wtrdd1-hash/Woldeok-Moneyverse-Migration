@@ -18,3 +18,9 @@
 
 ## Finished
 - Pending exact-SHA verification and release decision.
+
+## In progress — 22:29 KST
+- RED tests initially failed because the search modules/routes did not exist; implemented backend DTO, owner/session HMAC cursor, read-only indexed PostgreSQL query with 2s statement timeout, Next CSRF BFF, gated responsive member UI and Android app-api no-store/noindex response.
+- Feature is OFF unless `NOTIFICATION_SEARCH_ENABLED=true` is set on both Backend and Frontend. No migrations were written: current `in_app_notifications` DDL lineage is unproven; existing owner/date index was read directly from DEV metadata. No table privilege changes.
+- Backend focused 4 PASS; Frontend focused BFF/parser 5 PASS; existing `app-gateway.test.ts` help-related assertion fails independently. Initial Typecheck failed on a nullable request header; corrected and Frontend typecheck PASS. Full gates and isolated real PostgreSQL still pending.
+- Mid-run origin/main refreshed. Do not merge or promote without exact-SHA full gates and official Test.
