@@ -47,10 +47,6 @@ export class BlogVerifiedRepository {
     return queryRows<PublishedArticleRow>(this.pool(),
       "SELECT slug,country,locale,topic,title,excerpt,content,primary_source_url,receipt,status,published_at,updated_at FROM public.blog_verified_articles WHERE status IN ('PUBLISHED','WITHDRAWN') ORDER BY published_at DESC LIMIT 200");
   }
-  listForAdmin() {
-    return queryRows<PublishedArticleRow>(this.pool(),
-      "SELECT slug,country,locale,topic,title,excerpt,content,primary_source_url,receipt,status,published_at,updated_at FROM public.blog_verified_articles WHERE status IN ('PUBLISHED','WITHDRAWN') ORDER BY published_at DESC LIMIT 200");
-  }
   find(slug: string) {
     return queryOne<PublishedArticleRow>(this.pool(),
       'SELECT * FROM public.blog_verified_public_by_slug($1)',[slug]);

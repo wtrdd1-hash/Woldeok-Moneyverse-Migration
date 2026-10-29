@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Post,
   Put,
   Query,
@@ -143,6 +144,33 @@ export class TreasuryBuybackBurnDto {
 }
 
 import { unverifiedFinanceOperation } from '../../economy/monetary/finance-hold';
+
+/** Public disclosure exposes only the evidence-backed treasury overview projection. */
+@ApiTags('Public Treasury')
+@Controller('treasury')
+export class PublicTreasuryController {
+  constructor(private readonly service: TreasuryService) {}
+
+  @Get('public-overview')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Public treasury overview from verified ledger evidence' })
+  async getPublicOverview() {
+    const overview = await this.service.getOverview();
+    return {
+      success: true,
+      total_treasury_wld: overview.total_treasury_wld,
+      available_wld: overview.available_wld,
+      reserve_wld: overview.reserve_wld,
+      reserve_ratio_pct: overview.reserve_ratio_pct,
+      vaults: overview.vaults.map((vault) => ({
+        code: vault.code,
+        name: vault.name,
+        balance_wld: vault.balance_wld,
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
 
 @ApiTags('Admin Treasury')
 @Controller('admin/treasury')
