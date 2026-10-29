@@ -58,7 +58,7 @@ describe('session revocation persistence receipts', () => {
   it('finishes all-device signout after verified other-session removal', async () => {
     mutate.mockResolvedValue({ revokedSessions: 1 });
     read.mockResolvedValueOnce({ sessions: [current] }).mockResolvedValueOnce({ csrfToken: 'synthetic-test-csrf' });
-    withCookie.mockResolvedValue({ data: null, setCookie: 'synthetic-test-cookie' });
+    withCookie.mockResolvedValue({ payload: null, setCookie: ['mv_session=; Path=/; Max-Age=0; HttpOnly'] });
     await expect(terminateAllSessions()).rejects.toThrow('REDIRECT:/login?signed_out_all=1');
     expect(withCookie).toHaveBeenCalledWith('/api/v1/auth/logout', {
       method: 'POST', csrfToken: 'synthetic-test-csrf',
