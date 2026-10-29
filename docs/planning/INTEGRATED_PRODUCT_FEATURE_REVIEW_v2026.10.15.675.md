@@ -1,3 +1,9 @@
+## v1406 — F675-157 support read-receipt correctness (Feature Improvement / DRAFT / HOLD)
+- Previous Addition v1404 → Current Improvement v1406 → Next Addition v1408 (provisional). Main `a28bed9aa40ff74d492824ae12892a7d52132fdd` verified start/mid; planning stack Draft #1670, developer C admin write receipt #1671 separate. Detailed EN/KO design in `INTEGRATED_PLANNING_MASTER.md`.
+- Migration 196 returns **oldest** 200 messages (`created_at,id ASC`) and 50 threads; reply functions insert before locking the thread. F675-136 (#1415) already planned support read watermarks/display proof, F675-149 (#1562) is separate notification outbox: consolidate, do not duplicate. Require latest keyset pagination, separate all-thread unread aggregate, lock-before-insert, phased forward-only sequence/backfill, signed displayed-message bound, immutable replay receipt with fresh current projection, strict owner/session/CSRF and Android parity.
+- P0 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04`; P1 `SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`. QA v1338 read-only evidence; Production version unknown, Test `6f697e74...`, data volume 85%, Test exact SHA/independent restore/Production unverified. No runtime, DB, WLD, Test or Production changes; acceptance tests specified NOT run. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- Full IDs: `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`.
+
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
 ## v1404 — F675-157 verified member support unread receipts (Feature Addition / DRAFT / RELEASE HOLD)
