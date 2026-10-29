@@ -5,8 +5,19 @@ export function activityPeriod(value: string | undefined): ActivityPeriod {
   return value === '7d' || value === '30d' ? value : 'all';
 }
 
-export function activityPeriodUrl(period: ActivityPeriod): string {
-  return period === 'all' ? '/wallet/activity' : `/wallet/activity?period=${period}`;
+export type ActivityDirection = 'all' | 'in' | 'out' | 'neutral';
+
+export function activityDirection(value: string | undefined): ActivityDirection {
+  return value === 'in' || value === 'out' || value === 'neutral' ? value : 'all';
+}
+
+/** Build only canonical allow-listed query parameters; never echo raw URL input. */
+export function activityPeriodUrl(period: ActivityPeriod, direction: ActivityDirection = 'all'): string {
+  const params = new URLSearchParams();
+  if (period !== 'all') params.set('period', period);
+  if (direction !== 'all') params.set('direction', direction);
+  const query = params.toString();
+  return query ? `/wallet/activity?${query}` : '/wallet/activity';
 }
 
 /** Only a server-proven lookahead can certify whether the bounded list is complete. */

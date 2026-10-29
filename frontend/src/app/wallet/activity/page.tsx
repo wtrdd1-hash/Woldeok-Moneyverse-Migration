@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { Overview } from '../sides';
-import { activityPeriod, activityPeriodUrl, activityCompletenessNotice } from './period';
+import { activityPeriod, activityPeriodUrl, activityDirection, activityCompletenessNotice } from './period';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,13 +32,15 @@ export const metadata: Metadata = {
 export default async function WalletActivityPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ period?: string }>;
+  searchParams?: Promise<{ period?: string; direction?: string }>;
 }) {
   await requireMember();
-  const period = activityPeriod((await searchParams)?.period);
+  const filters = await searchParams;
+  const period = activityPeriod(filters?.period);
+  const direction = activityDirection(filters?.direction);
   // Filtering happens in PostgreSQL before the 50-entry cap, never on a
   // truncated client-side list. The default remains the existing 50 entries.
-  const wallet = await apiOrNull<Overview>(`/api/v1/wallet?recent=50${period === 'all' ? '' : `&period=${period}`}`);
+  const wallet = await apiOrNull<Overview>(`/api/v1/wallet?recent=50${period === 'all' ? '' : `&period=${period}`}${direction === 'all' ? '' : `&direction=${direction}`}`);
 
   return (
     <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
@@ -60,14 +62,28 @@ export default async function WalletActivityPage({
           ['7d', '최근 7일'],
           ['30d', '최근 30일'],
         ] as const).map(([value, label]) => (
-          <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm">
-            <Link href={activityPeriodUrl(value)} aria-current={period === value ? 'page' : undefined}>
+          <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm" className="min-h-11">
+            <Link href={activityPeriodUrl(value, direction)} aria-current={period === value ? 'page' : undefined}>
               {label}
             </Link>
           </Button>
         ))}
       </nav>
-      <p className="text-sm text-muted-foreground">최대 50건의 확정된 원장 기록을 표시합니다. 기간 필터는 서버에서 적용됩니다.</p>
+      <nav aria-label="지갑 기록 입출금" className="flex flex-wrap gap-2">
+        {([
+          ['all', '전체 흐름'],
+          ['in', '들어온 금액'],
+          ['out', '나간 금액'],
+          ['neutral', '잔액 변동 없음'],
+        ] as const).map(([value, label]) => (
+          <Button key={value} asChild variant={direction === value ? 'default' : 'outline'} size="sm" className="min-h-11">
+            <Link href={activityPeriodUrl(period, value)} aria-current={direction === value ? 'page' : undefined}>
+              {label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-sm text-muted-foreground">최대 50건의 확정된 원장 기록을 표시합니다. 기간 필터는 서버에서 적용됩니다. 입출금 분류는 현금과 은행 잔액의 합계 변동을 기준으로 합니다.</p>
       {wallet && activityCompletenessNotice(wallet.recentTransactionsHasMore) && (
         <p role="status" className="text-sm text-amber-700 dark:text-amber-300">
           {activityCompletenessNotice(wallet.recentTransactionsHasMore)}
@@ -79,8 +95,8 @@ export default async function WalletActivityPage({
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : wallet.recentTransactions.length === 0 ? (
             <EmptyState
-              title="아직 기록된 활동이 없어요."
-              description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
+              title={direction === "all" && period === "all" ? "아직 기록된 활동이 없어요." : "선택한 조건의 기록이 없어요."}
+              description={direction === "all" && period === "all" ? "보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다." : "다른 기간이나 입출금 조건을 선택해 확인해 주세요."}
             />
           ) : (
             wallet.recentTransactions.map((entry) => {

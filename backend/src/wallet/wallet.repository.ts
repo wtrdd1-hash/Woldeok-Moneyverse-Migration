@@ -183,11 +183,14 @@ export class PostgresWalletRepository {
     );
   }
 
-  async recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]> {
+  async recentTransactionsForUser(userId: string, limit: number, periodDays?: number, direction?: 'in' | 'out' | 'neutral'): Promise<WalletTransactionRow[]> {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     const recentLimit = requireRecentLimit(limit);
     if (periodDays !== undefined && periodDays !== 7 && periodDays !== 30) {
       throw new WalletInputError('wallet activity period must be 7 or 30 days');
+    }
+    if (direction !== undefined && direction !== 'in' && direction !== 'out' && direction !== 'neutral') {
+      throw new WalletInputError('wallet activity direction must be in, out or neutral');
     }
     return queryRows<WalletTransactionRow>(
       this.pool,
@@ -229,9 +232,19 @@ export class PostgresWalletRepository {
          )
          AND ($3::integer IS NULL OR ledger_transaction.created_at >= CURRENT_TIMESTAMP - ($3::integer * INTERVAL '1 day'))
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
+       HAVING ($4::text IS NULL OR SIGN(COALESCE(SUM(
+         CASE posting.direction
+           WHEN 'debit'::public.posting_direction THEN posting.amount
+           ELSE -posting.amount
+         END
+       ), 0)) = CASE $4::text
+         WHEN 'in' THEN 1
+         WHEN 'out' THEN -1
+         WHEN 'neutral' THEN 0
+       END)
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
-      [ownerUserId, recentLimit + 1, periodDays ?? null],
+      [ownerUserId, recentLimit + 1, periodDays ?? null, direction ?? null],
     );
   }
 

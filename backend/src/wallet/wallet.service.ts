@@ -84,7 +84,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
+  recentTransactionsForUser(userId: string, limit: number, periodDays?: number, direction?: WalletTransactionDirection): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -200,6 +200,8 @@ export interface WalletOverviewOptions {
   readonly recentLimit?: number;
   /** Optional rolling window; SQL filters the owner ledger before the 50-row cap. */
   readonly periodDays?: 7 | 30;
+  /** Server-side filter on the signed sum of the owner's cash and bank postings. */
+  readonly direction?: WalletTransactionDirection;
 }
 
 export interface WalletTransferRequest {
@@ -372,13 +374,15 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10, periodDays }: WalletOverviewOptions = {},
+    { recentLimit = 10, periodDays, direction }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      this.repository.recentTransactionsForUser(userId, limit, periodDays),
+      direction === undefined
+        ? this.repository.recentTransactionsForUser(userId, limit, periodDays)
+        : this.repository.recentTransactionsForUser(userId, limit, periodDays, direction),
     ]);
     return {
       userId,

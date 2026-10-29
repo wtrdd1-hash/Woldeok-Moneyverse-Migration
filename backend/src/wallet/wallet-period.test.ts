@@ -16,7 +16,38 @@ describe('wallet owner-scoped rolling ledger periods', () => {
     expect(sql).toContain('account.owner_user_id = $1');
     expect(sql).toMatch(/ledger_transaction\.created_at\s*>=/);
     expect(sql.indexOf('ledger_transaction.created_at >=')).toBeLessThan(sql.indexOf('LIMIT $2'));
-    expect(params).toEqual([ACTOR, 51, 7]); // one bounded lookahead proves whether results are complete
+    expect(params).toEqual([ACTOR, 51, 7, null]); // one bounded lookahead proves whether results are complete
+  });
+
+  it('filters owner ledger direction in SQL before the 51-row lookahead without floating point conversion', async () => {
+    const query = vi.fn(async () => ({ rows: [] }));
+    const repository = new PostgresWalletRepository({ query } as unknown as Queryable);
+    await repository.recentTransactionsForUser(ACTOR, 50, 30, 'out');
+    const [sql, params] = query.mock.calls[0]!;
+    expect(sql).toContain('account.owner_user_id = $1');
+    expect(sql).toContain('HAVING');
+    expect(sql.indexOf('HAVING')).toBeLessThan(sql.indexOf('LIMIT $2'));
+    expect(sql).toContain('$4::text');
+    expect(params).toEqual([ACTOR, 51, 30, 'out']);
+  });
+
+  it('rejects unknown direction before the database query and keeps neutral movements selectable', async () => {
+    const query = vi.fn(async () => ({ rows: [] }));
+    const repository = new PostgresWalletRepository({ query } as unknown as Queryable);
+    await expect(repository.recentTransactionsForUser(ACTOR, 50, undefined, 'incoming' as 'in')).rejects.toThrow();
+    expect(query).not.toHaveBeenCalled();
+    await repository.recentTransactionsForUser(ACTOR, 50, undefined, 'neutral');
+    expect(query.mock.calls[0]?.[1]).toEqual([ACTOR, 51, null, 'neutral']);
+  });
+
+  it('validates direction at the API boundary and propagates it to the owner service', () => {
+    const overview = vi.fn();
+    const controller = new WalletController({ overview } as unknown as WalletService);
+    const request = { session: { user_id: ACTOR } } as unknown as RequestWithSession;
+    expect(() => controller.overview(request, '50', 'all', 'money-in')).toThrow('direction must be all, in, out or neutral');
+    expect(overview).not.toHaveBeenCalled();
+    controller.overview(request, '50', '7d', 'in');
+    expect(overview).toHaveBeenCalledWith(ACTOR, { recentLimit: 50, periodDays: 7, direction: 'in' });
   });
 
   it('rejects unbounded or malformed periods before any database query', async () => {
@@ -59,7 +90,7 @@ describe('wallet owner-scoped rolling ledger periods', () => {
     expect(overLimit.recentTransactions).toHaveLength(50);
     expect(overLimit.recentTransactionsHasMore).toBe(true);
     expect(overLimit.recentTransactions[0]?.netAmount).toBe('-900719925474099312345');
-    expect(query.mock.calls[0]?.[1]).toEqual([ACTOR, 51, 7]);
+    expect(query.mock.calls[0]?.[1]).toEqual([ACTOR, 51, 7, null]);
     expect(balancesForUser).toHaveBeenCalledWith(ACTOR);
 
     query.mockResolvedValueOnce({ rows: rows.slice(0, 50) });

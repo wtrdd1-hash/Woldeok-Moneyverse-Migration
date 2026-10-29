@@ -213,14 +213,23 @@ describe('app API route compatibility', () => {
       status: 200, headers: { 'content-type': 'application/json' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/wallet?recent=50&period=7d'), context('wallet'));
+    const response = await GET(request('/app-api/v1/wallet?recent=50&period=7d&direction=neutral'), context('wallet'));
     expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.pathname).toBe('/api/v1/wallet');
     expect(target.searchParams.get('recent')).toBe('50');
     expect(target.searchParams.get('period')).toBe('7d');
+    expect(target.searchParams.get('direction')).toBe('neutral');
     expect(response.headers.get('cache-control')).toContain('no-store');
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
+  });
+
+  it('never caches a wallet upstream outage when the direction filter is active', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('backend offline'); }));
+    const response = await GET(request('/app-api/v1/wallet?recent=50&direction=in'), context('wallet'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
