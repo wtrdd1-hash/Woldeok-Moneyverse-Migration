@@ -121,6 +121,21 @@ describe('app API route compatibility', () => {
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
+  it('forwards exact shop minimum price and prevents private catalogue caching on Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/shop/catalog?minPrice=9007199254740993&q=badge'), context('shop', 'catalog'));
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/shop/catalog');
+    expect(target.searchParams.get('minPrice')).toBe('9007199254740993');
+    expect(target.searchParams.get('q')).toBe('badge');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {

@@ -55,7 +55,7 @@ const config: NextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
-    // Cap static workers on 8 GiB hosts; the default 15 workers SIGABRT on 609 routes.
+    // Keep static generation within the small release host memory budget.
     cpus: 2,
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,

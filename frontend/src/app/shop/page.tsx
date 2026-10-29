@@ -11,8 +11,7 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
-import { normalizeShopPriceCeiling } from './shop-price-ceiling';
-import { hasVerifiedVipPass } from './shop-membership-status';
+import { shopMinimumPriceQuery } from './shop-price-floor';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,20 +29,18 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string | string[]; maxPrice?: string | string[] }>;
+  readonly searchParams: Promise<{ q?: string; minPrice?: string }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
-  const query = typeof params.q === 'string' ? params.q.trim().slice(0, 120) : '';
-  const { value: maxPrice, invalid: invalidMaxPrice } = normalizeShopPriceCeiling(params.maxPrice);
-  const queryParams = new URLSearchParams();
-  if (query) queryParams.set('q', query);
-  if (maxPrice) queryParams.set('maxPrice', maxPrice);
-  const querySuffix = queryParams.size > 0 ? `?${queryParams.toString()}` : '';
+  const query = params.q?.trim() ?? '';
+  const priceInput = params.minPrice ?? '';
+  const priceQuery = shopMinimumPriceQuery(query, priceInput);
+  const querySuffix = priceQuery.valid ? priceQuery.query : shopMinimumPriceQuery(query, '').query;
 
-  const [catalogData, walletData, profileData, membershipCatalogData] = await Promise.all([
+  const [catalogData, walletData, profileData] = await Promise.all([
     loggedIn
       ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
       : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
@@ -53,9 +50,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           '/api/v1/profile',
         )
       : null,
-    loggedIn && querySuffix
-      ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog')
-      : null,
   ]);
 
   const items = catalogData?.catalogItems || [];
@@ -63,8 +57,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
-  // Visible filters must not make a member's existing VIP entitlement disappear.
-  const isPlusMember = hasVerifiedVipPass(membershipCatalogData?.catalogItems ?? items);
+  const vipPassItem = items.find(
+    (item) => item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
+  );
+  const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
 
   return (
     <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
@@ -87,32 +83,34 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap items-end" role="search">
           <input
             type="search"
             name="q"
-            maxLength={120}
             defaultValue={query}
             placeholder="상품명, 설명, 카테고리 검색"
             aria-label="상점 검색"
-            className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
+            className="min-w-[10rem] flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            name="maxPrice"
-            maxLength={19}
-            defaultValue={maxPrice}
-            placeholder="최대 WLD 가격"
-            aria-label="최대 WLD 가격"
-            aria-invalid={invalidMaxPrice}
-            className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
-          />
+          <label className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
+            <span>최소 가격 (WLD)</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              name="minPrice"
+              defaultValue={priceInput}
+              maxLength={19}
+              aria-label="최소 WLD 가격"
+              aria-invalid={!priceQuery.valid}
+              aria-describedby={!priceQuery.valid ? 'shop-price-error' : undefined}
+              className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
+            />
+          </label>
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query || maxPrice || invalidMaxPrice ? (
+          {query || priceInput ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -120,12 +118,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {invalidMaxPrice ? (
-          <p role="alert" className="text-sm text-destructive">가격 상한은 0 이상인 정수 WLD로 입력해 주세요.</p>
-        ) : null}
-        {query || maxPrice ? (
-          <p aria-live="polite" className="text-sm text-muted-foreground">
-            {query ? `“${query}” · ` : ''}{maxPrice ? `최대 ${maxPrice} WLD · ` : ''}검색 결과 {items.length}개
+        {!priceQuery.valid ? (
+          <p id="shop-price-error" role="alert" className="text-sm text-destructive">
+            최소 가격은 0부터 9223372036854775807까지의 정수로 입력해 주세요. 필터 없이 상품을 표시합니다.
+          </p>
+        ) : query || priceInput ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            조건에 맞는 상품 {items.length}개
           </p>
         ) : null}
 
