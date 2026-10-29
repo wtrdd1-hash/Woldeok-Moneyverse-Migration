@@ -14,6 +14,6 @@
 - [x] Write Vitest regression for fake 2xx receipts, wrong UUID, absent readback, mismatched media/caption and verified success.
 - [x] Run RED focused test on untouched main-based action.
 - [x] Implement minimal fail-closed receipt validation in `frontend/src/app/gallery/submit/actions.ts`.
-- [ ] Run GREEN focused tests and existing backend photo contract/real PostgreSQL suite.
+- [ ] Run GREEN focused tests and existing backend photo contract/real PostgreSQL suite. (11 focused PASS, 14 real-PostgreSQL/backend PASS, 293 migrations applied)
 - [ ] Run build/lint/typecheck/full tests, security, mobile contract, CI, isolated Test; record exact SHA and unresolved gates.
 - [ ] Re-fetch main, review PR and integration/production gates; preserve unique branch if any gate is not green.

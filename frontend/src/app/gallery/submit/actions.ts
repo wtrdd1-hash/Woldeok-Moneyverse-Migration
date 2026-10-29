@@ -82,6 +82,7 @@ export async function submitPhoto(
     return { status: 'error', message: `설명은 ${CAPTION_MAX}자 이내로 적어 주세요.` };
   }
 
+  let submissionAttempted = false;
   try {
     const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
     const upload = await apiBytes<unknown>(
@@ -95,6 +96,8 @@ export async function submitPhoto(
     }
     const storageKey = upload.storageKey;
     const idempotencyKey = randomUUID();
+    // The request may commit even if the API times out. Never advise blind retries.
+    submissionAttempted = true;
     const receipt = await mutate<unknown>('/api/v1/photos', {
       body: { storageKey, altText, idempotencyKey },
     });
@@ -116,6 +119,7 @@ export async function submitPhoto(
         : '사진을 보냈어요. 운영자가 확인한 뒤 사진 게시판에 올라가요.',
     };
   } catch (error) {
+    if (submissionAttempted) return { status: 'error', message: UNCONFIRMED };
     return failure(
       error,
       '사진 처리 결과를 확인하지 못했어요. 다시 보내기 전에 내 제출 목록을 확인해 주세요. PNG · JPEG · WebP만 지원하며 하루에 5장까지예요.',

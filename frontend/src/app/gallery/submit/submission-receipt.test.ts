@@ -6,7 +6,7 @@ const { read, upload, mutate, revalidate } = vi.hoisted(() => ({
 vi.mock('@/lib/api', () => ({ api: read, apiBytes: upload }));
 vi.mock('@/lib/mutate', () => ({
   mutate,
-  failure: (_error: unknown, message: string) => ({ status: 'error', message }),
+  failure: (error: unknown, message: string) => ({ status: 'error', message: typeof error === 'object' && error !== null && 'status' in error ? '서비스가 일시적으로 불안정해요.' : message }),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: revalidate }));
 
@@ -108,4 +108,22 @@ describe('member gallery submission persistence receipts', () => {
     expect((await submitPhoto({ status: 'idle' }, form())).status).toBe('error');
     expect(mutate).not.toHaveBeenCalled();
   });
+
+  it('preserves duplicate-safe recovery instructions if the POST may have committed before a 503', async () => {
+    mutate.mockRejectedValue(Object.assign(new Error('upstream 503'), { status: 503 }));
+    const result = await submitPhoto({ status: 'idle' }, form());
+    expect(result.status).toBe('error');
+    expect(result.message).toContain('내 제출 목록');
+  });
+
+  it('preserves duplicate-safe recovery instructions if owner readback returns a 503', async () => {
+    read.mockImplementation(async (path: string) => {
+      if (path === '/api/v1/photos/mine') throw Object.assign(new Error('upstream 503'), { status: 503 });
+      return { csrfToken: 'synthetic-csrf' };
+    });
+    const result = await submitPhoto({ status: 'idle' }, form());
+    expect(result.status).toBe('error');
+    expect(result.message).toContain('내 제출 목록');
+  });
+
 });
