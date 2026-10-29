@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   Controller,
@@ -256,10 +256,16 @@ export class AdminTreasuryController {
   @Post('disburse/dividend')
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
   async disburseDividend(
-    @Req() _request: RequestWithSession,
-    @Body() _dto: TreasuryDisburseDividendDto,
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseDividendDto,
   ) {
-    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
+    const adminId = requireUserId(request);
+    return this.service.disburseCitizenDividend(
+      adminId,
+      dto.amountPerCitizenWld,
+      dto.reason,
+      dto.idempotencyKey,
+    );
   }
 
   @Get('disburse/targeted-preview')
@@ -274,10 +280,16 @@ export class AdminTreasuryController {
   @Post('disburse/targeted')
   @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
   async disburseTargetedSubsidy(
-    @Req() _request: RequestWithSession,
-    @Body() _dto: TreasuryDisburseTargetedSubsidyDto,
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseTargetedSubsidyDto,
   ) {
-    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
+    const adminId = requireUserId(request);
+    return this.service.disburseTargetedSubsidy(
+      adminId,
+      dto.amountPerUserWld,
+      dto.maxBalanceCutoffWld,
+      dto.reason,
+    );
   }
 
   @Post('donate')
@@ -305,10 +317,17 @@ export class AdminTreasuryController {
   @Post('disburse/grant')
   @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
   async disburseGrant(
-    @Req() _request: RequestWithSession,
-    @Body() _dto: TreasuryDisburseGrantDto,
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseGrantDto,
   ) {
-    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
+    const adminId = requireUserId(request);
+    return this.service.disburseGrant(
+      adminId,
+      dto.targetUserId || null,
+      dto.amountWld,
+      dto.disbursementType,
+      dto.reason,
+    );
   }
 
   @Post('budget/distribute')
