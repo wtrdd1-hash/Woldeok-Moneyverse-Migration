@@ -24,3 +24,10 @@
 - Feature is OFF unless `NOTIFICATION_SEARCH_ENABLED=true` is set on both Backend and Frontend. No migrations were written: current `in_app_notifications` DDL lineage is unproven; existing owner/date index was read directly from DEV metadata. No table privilege changes.
 - Backend focused 4 PASS; Frontend focused BFF/parser 5 PASS; existing `app-gateway.test.ts` help-related assertion fails independently. Initial Typecheck failed on a nullable request header; corrected and Frontend typecheck PASS. Full gates and isolated real PostgreSQL still pending.
 - Mid-run origin/main refreshed. Do not merge or promote without exact-SHA full gates and official Test.
+
+## In progress — 22:32 KST
+- Rebased on updated main `3a34fe1705875c8999e9ad5761145113e229e44d` without conflict. Other developers' worktrees and uncommitted main changes remain untouched.
+- Isolated PostgreSQL 17.11 (network disabled, disposable tmpfs) loaded 10,001 synthetic notifications (9,001 owner / 1,000 other owner); Korean literal search, owner scope, 2-second read-only transaction, B-tree index plan passed; 0.471ms measured execution on synthetic dataset. Container removed. This is **not** official Test E2E or schema-migration parity.
+- `pnpm typecheck` PASS; Backend search tests 4 PASS; Frontend search/BFF tests 5 PASS. Existing unrelated app-gateway help-path test still fails.
+- Mobile API contract manually added as a new documented endpoint and generated EN/KO schema references. Existing generated `affinity` response type drift is present and is recorded, not silently ignored.
+- The search relies on the existing observed `in_app_notifications` owner/date index and existing app-role SELECT; no new SQL migration or grant due unverified table-creation lineage. The full planned SECURITY DEFINER and distributed rate-budget controls are not certified. Feature remains OFF by default; release HOLD.

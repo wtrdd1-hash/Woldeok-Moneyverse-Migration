@@ -77,7 +77,7 @@ function mac(body: string): Buffer {
   return createHmac('sha256', signingKey()).update(`notification-search-v1:${body}`).digest();
 }
 export function createNotificationSearchCursor(owner: string, session: string, filter: NormalizedNotificationSearch, asOf: string, afterAt: string, afterId: string, now = new Date()): string {
-  const payload: CursorPayload = { v: 1, owner, session, filter: filterHash(filter), asOf, afterAt, afterId, issuedAt: Date.parse(asOf) };
+  const payload: CursorPayload = { v: 1, owner, session, filter: filterHash(filter), asOf, afterAt, afterId, issuedAt: Math.min(now.getTime(), Date.parse(asOf)) };
   const body = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
   return `${body}.${mac(body).toString('base64url')}`;
 }

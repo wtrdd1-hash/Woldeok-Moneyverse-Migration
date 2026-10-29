@@ -25,7 +25,7 @@ export function parseNotificationSearch(payload: unknown): SearchResult {
   return {
     items: items.map((item, index) => {
       const link = (data.items as Record<string, unknown>[])[index]?.link;
-      return { ...item, link: typeof link === 'string' && link.startsWith('/') && !link.startsWith('//') && !/[\\\u0000-\u001f]/.test(link) ? link : null };
+      return { ...item, link: typeof link === 'string' && /^\/(?:account|wallet|shop|work|quests|stocks|banking|businesses|board|help|casino|marketplace|notifications)(?:\/|\?|$)/.test(link) && !/[\\%\u0000-\u001f]/.test(link) ? link : null };
     }),
     hasMore: data.hasMore, nextCursor: data.nextCursor as string | null, asOfUtc: data.asOfUtc,
   };

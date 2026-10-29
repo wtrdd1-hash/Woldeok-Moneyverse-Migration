@@ -45,7 +45,8 @@ export class NotificationService {
     if (!this.pool || !('connect' in this.pool) || typeof this.pool.connect !== 'function') {
       throw new ServiceUnavailableException('Notification search database is unavailable');
     }
-    const client = await (this.pool as Queryable & { connect(): Promise<Queryable & { release(): void }> }).connect();
+    const client = await (this.pool as Queryable & { connect(): Promise<Queryable & { release(): void }> }).connect()
+      .catch(() => { throw new ServiceUnavailableException('Notification search database unavailable'); });
     let began = false;
     try {
       await client.query('BEGIN READ ONLY');
@@ -92,8 +93,8 @@ export class NotificationService {
         items: page.map((row) => ({
           id: row.id, category: row.category, title: row.title, body: row.body,
           // An untrusted notification URL must not become an external redirect.
-          link: typeof row.link === 'string' && row.link.startsWith('/') && !row.link.startsWith('//') &&
-            !/[\\\u0000-\u001f]/.test(row.link) ? row.link : null,
+          link: typeof row.link === 'string' && /^\/(?:account|wallet|shop|work|quests|stocks|banking|businesses|board|help|casino|marketplace|notifications)(?:\/|\?|$)/.test(row.link) &&
+            !/[\\%\u0000-\u001f]/.test(row.link) ? row.link : null,
           isRead: row.is_read, createdAt: new Date(row.created_at).toISOString(),
         })),
         nextCursor, hasMore, asOfUtc: asOf,
