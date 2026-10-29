@@ -1,13 +1,6 @@
-## v1418 — F675-160 상점 저장 목록 무결성 보완 (기능 보완 / 초안 / 운영 보류)
-- Draft PR #1720(#1714 후속), 개발 이슈 #1713, 문서 후보 SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI 확인 당시 PENDING, 공식 Test 미검증.
-- 이전 추가 v1416 → 현재 보완 v1418 → 다음 추가 v1420(잠정). main d12c948ac454b0762cfb7fb0cddf83703a775172, 미병합 Draft #1714(b9b55ea4) 후속, QA v1344 FAILED. 실제 회원 카탈로그는 구형 `shop_catalog_list`가 아니라 `shop_catalog_list_v2`를 호출하며 활성 목록에서 비활성 저장 항목을 찾을 수 없다.
-- P0: 회원 한정 LEFT JOIN 비활성 표시, RESTRICT FK 관리자 삭제 절차, 회원당 500개 직렬화(499→500 경합), 과거 멱등 영수증과 현재 저장 상태 분리, 사용자 결속·정확 SHA·백업 게이트. 신규 백업 순환 사고 #1718, 데이터 볼륨 97%, 배당 원장 18,000 WLD/국고 0/PR #1706 충돌.
-- P0 ENV1418-01 FIN1418-02 SEC1418-03 REL1418-04; P1 SHOP1418-05 SHOP1418-06 SHOP1418-07 SHOP1418-08 SHOP1418-09 SHOP1418-10. 합성 10,001/100/100 및 500개 경합 시험은 명세만, 실행하지 않음. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED. 영한 통합 기획서에 전체 명세, 런타임/DB/WLD/Test/운영 불변.
-
-## v1416 — F675-160 회원 상점 아이템 나중에 보기 (기능 추가 / 초안 / 운영 보류)
-- 이전 보완 v1414 → 현재 추가 v1416 → 다음 보완 v1418(잠정). main d12c948ac454b0762cfb7fb0cddf83703a775172; QA v1343. /shop/catalog에는 회원별 저장 목록이 없다. 저장은 구매·재고 선점·가격 고정·WLD 차감이 아니다. 초기 알림 설정 후보는 기존 F675-130/#1353과 중복되어 폐기. 개발 A/B/C/Gemini/QA와 별도 기획.
-- 본인 GET/POST/DELETE·불변 멱등 영수증·Keyset·실제 상점 적격성·DB 권한·Next/Android·관리자/개인정보/SEO/접근성/KPI·기본 OFF 롤백은 통합 마스터 참조.
-- P0 ENV1416-01 FIN1416-02 SEC1416-03 REL1416-04; P1 SHOP1416-05 SHOP1416-06 SHOP1416-07 SHOP1416-08 SHOP1416-09 SHOP1416-10. 디스크 96%, QA v1343의 원장 없는 18,000 WLD 배당·국고 0은 별도 #1706. 10,001/100/100 미실행, 외부 승인 0·누적 UNKNOWN/10,000 BLOCKED, 금융 운영승격 HOLD.
+## 2026-10-28 v1420 — F675-161 회원 갤러리 제출 철회 (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1418 / Current Addition v1420 / Next Improvement v1422. main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED. 디스크 97%, 백업 사고 #1718, 과거 18,000 WLD 불일치, 정확 SHA Test/복원/운영승격 HOLD. 회원 사진 UI/API, Migration 098/127, Android 계약 대조: 철회 기능 없음.
+- 본인 검토 대기 사진만 확인 후 철회, 불변 표식·영수증, 관리자 승인 행 잠금 경합 차단, 미디어 즉시 접근 차단, 내 제출물 페이지 조회. 파일 즉시 삭제·하루 제출 횟수 환급 허위 약속 금지. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. 영문·국문 통합 명세와 [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726); 코드·DB·배포 없음. 외부 3곳 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
 
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 

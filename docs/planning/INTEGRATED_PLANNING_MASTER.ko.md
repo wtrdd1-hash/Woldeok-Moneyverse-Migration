@@ -1,69 +1,76 @@
-## v1418 / F675-160 — 상점 저장 목록의 정확성·상한·삭제 무결성 보완 (기능 보완 / 초안 / 운영 보류)
-- Draft PR #1720(#1714 후속), 개발 이슈 #1713, 문서 후보 SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI 확인 당시 PENDING, 공식 Test 미검증.
-
-**회차·근거·상태.** 이전 기능 추가 v1416 → 현재 기능 보완 v1418 → 다음 기능 추가 v1420(잠정). 2026-10-28 17:08 KST, 최신 `origin/main` d12c948ac454b0762cfb7fb0cddf83703a775172(작업 중 재확인), 미병합 선행 Draft #1714 SHA b9b55ea4f3dacbe3d0bc4ace5ed053a0ff01f9ea, QA v1344 FAILED/HOLD. v1416의 **문서 전용 후속 보완**으로 main에 구현되지 않았고 독립 병합 불가하다. main의 AGENTS·README·영문 정본·한국어 계획, Next 상점, NestJS 컨트롤러/저장소, SQL 071/075, 열린 PR을 조사했다. 개발 A/B/C·Gemini·QA 브랜치는 변경하지 않는다.
-
-**실제 코드 전제 정정.** 현재 회원 상점 저장소는 과거 v1416에서 지칭한 `shop_catalog_list`가 아닌 `public.shop_catalog_list_v2($1)`을 호출한다(`backend/src/shop/shop.repository.ts:231-255`). 과거 함수는 075 마이그레이션의 구형 조회 모델이다. 회원 페이지는 `/api/v1/shop/catalog`와 `/api/v1/shop/holdings`를 병렬 호출하며, 보유 수량이나 클라이언트 검색으로 저장 여부를 추정하면 안 된다. 075의 활성 카탈로그 조회는 `c.active`와 판매 기간을 필터링하므로 비활성화된 저장 아이템은 활성 목록에서 복원할 수 없다. 기본 카탈로그 ID는 UUID, 재고 `quantity=NULL`은 무제한이고 일반 `REFERENCES shop_catalog(id)`는 강제 삭제 시 기본적으로 RESTRICT/NO ACTION 의미다. 조사한 main의 상점 경로에는 저장 API/테이블이 없으며 운영 악용을 단정하지 않는다.
-
-**P0: 저장 목록 표시·관리자 삭제 정확성.** 회원 소유권을 먼저 제한한 `shop_saved_list(p_actor,before_saved_at,before_catalog_id,limit,as_of)` SECURITY DEFINER 조회에서 저장 행을 카탈로그/재고와 LEFT JOIN한다. 이름·분류·가격은 `shop_catalog_list_v2`와 동일한 활성/기간/권한 조건에서만 표시한다. 비활성·철회·삭제·권한 미확인 아이템은 과거 가격·이름·비공개 코드·재고·내부 사유를 노출하지 않고 `catalogId`, `savedAt`, `canRemove=true` 및 일반 `UNAVAILABLE`/`UNKNOWN` 상태만 반환한다. 기본 RESTRICT FK가 있으면 저장 참조가 남은 카탈로그를 무심코 삭제할 수 없으므로 관리자는 우선 비활성화하고, 영구 삭제는 저장 참조·불변 영수증 보존을 명시적으로 처리하는 감사된 별도 절차로만 진행한다. 구매·잔액·영수증에 CASCADE 금지. 비활성 아이템도 회원의 REMOVE를 허용하고 활성 여부로 제거를 차단하지 않는다. 타인 목록·영수증·제거는 존재 여부를 누설하지 않는 거부를 반환한다.
-
-**P0: 회원당 500개 상한과 과거 영수증 재실행.** (회원,아이템) 잠금만으로는 회원 전체 500개 제한을 보장할 수 없다. 499개일 때 서로 다른 아이템 저장 두 요청이 동시에 통과할 수 있다. 인증 후 회원 단위의 안정적 트랜잭션 잠금(예: `users(id) FOR UPDATE`)을 먼저 획득하고, 카탈로그 `FOR SHARE`, 저장·영수증 작업을 일관된 순서로 실행하여 같은 회원의 저장을 직렬화한다. 그 잠금 안에서 개수를 세어 501번째 신규 저장은 `409 SAVED_LIMIT_REACHED`, 이미 저장된 아이템의 중복 저장은 멱등 성공, 제거는 언제나 허용한다. 동일 UUID Idempotency-Key 재실행은 회원·명령·아이템·요청 지문이 모두 같을 때만 **과거 불변 영수증**을 반환한다. 과거 SAVE 뒤 새로운 REMOVE가 있었다면 SAVE 재실행이 아이템을 다시 저장하거나 현재 저장된 것처럼 화면에 표시해서는 안 된다. `resultingSaved`는 당시 결과이며 현재 상태가 아니다. 화면은 재실행·시간초과·경합 후 서버의 최신 저장 상태를 다시 조회한다. 같은 키 다른 요청은 409, 타인 키는 비열거형 404/403; WLD/구매 함수 호출 없음.
-
-**페이지·화면·모바일.** `/shop/catalog`의 저장/해제, `?saved=1`, 전체 둘러보기, 재시도, Android 동등 기능 유지. `GET /api/v1/shop/saved?limit=20&cursor=`는 회원·세션·필터·크기·만료와 결합된 불투명 AEAD 또는 서버 보관 커서, `(saved_at DESC,catalog_id DESC)` Keyset, LIMIT+1 및 첫 페이지 `asOf` 상한을 사용한다. 첫 페이지 이후 새 저장은 중간 페이지에 끼워 넣지 않는다. 삭제/재저장 시 페이지 구성은 변할 수 있으므로 HTTP 요청 전체가 하나의 스냅샷이라고 주장하지 않는다. 410 커서 만료 시 '목록 새로고침', DB 오류 시 거짓 `hasMore=false` 금지, 계정 전환 시 이전 응답 차단. v1416의 400/401/403/404/409/410/429/503, CSRF, no-store/noindex, 320/390/768px, 키보드·aria-pressed·aria-live·한국어/영어·WCAG 2.2 AA를 유지한다. 표시 가격은 조회 시점 안내이고 결제는 할인·재고·구매 상한을 재검증한다. 저장은 가격 고정·예약·WLD 차감이 아니다.
-
-**API·DB·권한·관리.** `GET /api/v1/shop/saved`, `POST/DELETE /api/v1/shop/saved/:catalogId`, `GET /api/v1/shop/saved/receipts/:key`를 유지하고 세션에서 회원 ID를 결정한다. `shop_saved_items(user_id,catalog_id,saved_at)` 복합 유일키, `(user_id,saved_at DESC,catalog_id DESC)` 인덱스는 EXPLAIN/BUFFERS 후 채택, 회원 FK ON DELETE CASCADE·카탈로그 FK RESTRICT(관리자 삭제 계약 심사 전제). 회원 전체 개수 잠금·아이템 적격성 잠금·명령/지문 유일 영수증을 단일 트랜잭션에서 처리한다. 앱 역할 직접 DML·PUBLIC EXECUTE 금지, search_path 고정, 실제 PostgreSQL 부정 권한 시험. 공유 앱 역할에 넘긴 `p_actor`는 인증 자체가 아니므로 서버-DB 사용자 결속 검증은 P0 차단 조건이다. 관리자는 k<20 억제된 익명 집계만 확인, 회원별 목록 금지; 회원/IP 제한·개인 목록 SEO 제외·외부 분석으로 식별자 전송 금지. 기능 기본 OFF, 마이그레이션 번호/출처 검증 후 전진 변경만 허용한다. 기획 회차에서는 배포하지 않는다.
-
-**수용시험·배포·롤백.** 격리 PostgreSQL 17의 회원별 합성 저장 10,001건, 499개에서 다른 아이템 동시 저장 100건(최종 신규 저장은 정확히 1개), 저장/제거/재실행 100건, 타인 위조·영수증 100건, 동일 시각 Keyset, 만료·계정 전환, 비활성/철회/영구 삭제 FK, 비활성 REMOVE, 재고 NULL/0, 가격·할인·구매 제한, 503/CSRF/no-store/Android/320px 접근성 검증. **원장·지갑·재고·보유 수량 변경이 없음을 명시적으로 검증한다.** 시험은 명세만 작성했고 실행하지 않았다. 기본 OFF → 격리 PG ACL·복원 → 정확 SHA CI → 공식 Test 회원·Android·금융 E2E → 제한 배포·서명 GitOps 승인. OFF 롤백은 저장 설정·불변 영수증을 보존하며 파괴적 다운 마이그레이션 금지.
-
-**긴급 운영 차단.** QA v1344(16:32 KST): 시민배당 18,000 WLD 정규 원장 불일치, 국고 0, 광범위한 앱 DB DML, 금융 PR #1706 충돌, 공식 Test SHA 불일치. 블로그 전용 v1418 운영 성공은 회원/금융 배포 승인이 아니다. 데이터 볼륨 97%(17:08 기준 약 6.1GiB 여유), 암호화 백업의 독립 복원 미검증. 신규 P0 #1718: 16:50 KST 백업 RED 시험이 운영 백업 스크립트를 실행하여 과거 로컬 스냅샷 1개가 순환 삭제됨. 원격 R2 결과·복원 가능성 미확인. 증거 보존, 임의 삭제·복원·백업 실행·런타임/금융 변경 금지. 외부 독립 근거 신규 승인 0건, 중복 제거 누적 승인 UNKNOWN / 목표 10,000건, BLOCKED / IN PROGRESS.
-
-**개발 전달 백로그 (P0 4건 + P1 6건).**
-- P0 ENV1418-01 (운영/QA): 디스크 97%, #1718 백업 순환 사고, 비파괴적 용량 확보·독립 복원, 테스트에서 운영 백업 실행 금지.
-- P0 FIN1418-02 (금융 B/QA): #1706 배당 18,000 WLD·국고 0, 이중분개·중복 지급 방지, 금융 운영승격 보류.
-- P0 SEC1418-03 (백엔드 B/QA): 사용자 결속 SECDEF, 회원별 500개 잠금, 비활성 상태·관리자 삭제/FK, 타인 부정시험.
-- P0 REL1418-04 (QA/운영): 정확 SHA CI·공식 Test 인증 회원/Android/금융, 마이그레이션 출처·PR 보존·서명된 운영 게이트.
-- P1 SHOP1418-05 (백엔드 B): 회원/상품 스키마·RESTRICT 삭제 계약·개수/인덱스 EXPLAIN·불변 영수증.
-- P1 SHOP1418-06 (백엔드 B): 회원 잠금·상품 SHARE·499→500 경합·과거 영수증/현재 상태·비활성 제거.
-- P1 SHOP1418-07 (개발 A): NestJS/Next BFF/Android, 회원·세션·CSRF, 불투명 커서, 오류/no-store 동등성.
-- P1 SHOP1418-08 (개발 C): 저장/해제·필터·비활성 카드·재실행 새로고침·한영/접근성/모바일.
-- P1 SHOP1418-09 (개발 C/QA): 관리자 k<20 익명 집계·개인정보·SEO·남용·KPI·할인 가격 정확성.
-- P1 SHOP1418-10 (QA): 격리 실제 PG 10,001/100/100·500개 경합·삭제·재실행·금융/보유 회귀·복원/롤백.
-
-## v1416 / F675-160 — 회원 상점 아이템 나중에 보기 목록 (기능 추가 / 초안 / 운영 보류)
-
-**회차·근거·중복 회피.** 이전 기능 보완 v1414 → 현재 기능 추가 v1416 → 다음 기능 보완 v1418(잠정). 2026-10-28 16:08~16:17 KST miniPC Debian 13.6, 최신 main d12c948ac454b0762cfb7fb0cddf83703a775172, AGENTS·README·영문 정본·한국어 계획, 실제 Next /shop/catalog, NestJS 상점 컨트롤러/저장소, PostgreSQL 마이그레이션 071/073/075, 열린 PR 및 QA v1343을 확인했다. 초기 알림 분류 설정 후보는 기존 F675-130/#1353 및 F675-102/103과 겹쳐 폐기했다. 현재 조사한 상점 코드·통합 기획에서 회원별 아이템 저장 API/테이블은 발견되지 않았다. 다른 수집품 즐겨찾기와 구분한다. 별도 main 기반 문서 브랜치이며 런타임 변경 없음.
-
-**목적·대상·진입·제외.** 로그인·동의 회원이 /shop/catalog에서 관심 아이템을 나중에 다시 보기 위해 저장하고 기기 간 동기화한다. 카드의 '나중에 보기 저장/해제', '저장한 아이템' 필터 또는 /shop/catalog?saved=1, Android 동등 화면을 제공한다. 저장은 구매·예약·재고 선점·가격 고정·입고/가격 알림·선물·WLD 차감·아이템 보유를 의미하지 않는다. 초기 상점 시드의 quantity는 모두 NULL(수량 제한 없음)이므로 품절/재입고를 허위로 안내하지 않는다. 실제 구매 가능 여부·가격은 기존 shop_catalog_list 및 구매 함수가 최종 결정한다.
-
-**화면·CTA·상태.** 아이템 카드에 키보드 접근 가능한 저장/해제 버튼, 저장 목록에 이름·분류·현재 서버 검증 가격(제공 가능할 때만), '현재 구매 불가/정보 확인 불가', 제거·다시 시도·전체 둘러보기. 서버 영수증 확인 전 성공으로 표시하지 않는다. 검색·분류 필터 유지, 빈 목록 안내. 로딩·저장 중·삭제 중·오프라인·세션 만료·동의 미완료·아이템 비활성·429·503·계정 전환 지연 응답을 구분한다. 비활성 아이템은 비공개 가격을 노출하지 않는 일반 상태로 표시하고 실제 삭제된 아이템은 허위 카드 없이 정합성을 맞춘다. quantity NULL은 무제한, 0은 재입고 보장 아님. 저장한 아이템을 보유 중이라고 표시하지 않는다.
-
-**API·계약·Android.** 본인 전용 GET /api/v1/shop/saved?cursor=&limit=20은 items(catalogId,savedAt,availability,currentItem?), hasMore,nextCursor,observedAt 반환. saved_at DESC,catalog_id DESC Keyset + LIMIT+1, 회원·세션·필터·페이지 크기·TTL에 묶인 불투명 AEAD/서버 토큰 사용, 사용자 UUID가 보이는 단순 서명 토큰 금지. POST /api/v1/shop/saved/:catalogId, DELETE 동일 경로는 UUID Idempotency-Key로 저장/해제하고 receiptId,catalogId,saved,changed,committedAt,replayed를 반환한다. GET /api/v1/shop/saved/receipts/:key로 타임아웃 결과 확인. UUID·1~50 페이지 크기·중복/미지 쿼리 검증, 400/401/403/404/409/410/429/503 구분, 쓰기 CSRF, 세션에서 사용자 ID 결정. Next BFF·Android app-api 동등, 성공/오류 모두 private/no-store·noindex/nofollow·nosniff·no-referrer. 기존 상점 조회/구매 API 변경 없음.
-
-**DB·제약·인덱스·권한.** 실제 마이그레이션 출처 및 금융 PR #1706의 291번 예약 확인 후 전진 마이그레이션, 임의 번호 선점 금지. shop_saved_items(user_id FK users ON DELETE CASCADE,catalog_id FK shop_catalog,saved_at,PRIMARY KEY(user_id,catalog_id)) 제안. 비활성 카탈로그는 공개 불가 메타데이터 없이 상태만 표시한다. 별도 불변 멱등 영수증은 회원+키 유일, 명령·아이템·요청 지문·결과·시각 저장. (user_id,saved_at DESC,catalog_id DESC) 인덱스는 10,001건 EXPLAIN 후 채택. 가격·잔액·구매 영수증 중복 저장 금지. search_path 고정 SECURITY DEFINER, PUBLIC EXECUTE 회수, 최소 EXECUTE·앱 직접 DML 거부. 임의 p_actor가 세션 증명이 아니므로 DB 사용자 결속·위조 100건 부정시험 전 활성화 금지.
-
-**트랜잭션·멱등성·경합.** 한 PostgreSQL 트랜잭션에서 회원·아이템 검증, 회원+아이템 직렬화 잠금, 멱등키+요청 지문 검사, INSERT ON CONFLICT DO NOTHING 또는 본인 DELETE, 불변 영수증 기록 후 커밋한다. 동일 키·동일 요청은 원래 영수증, 다른 요청은 409. 서로 다른 키의 저장/해제 경합도 결정적 최종 상태와 영수증을 유지한다. 비활성화 경합은 재고·가격 보장으로 표시하지 않으며 목록 조회 시 현재 구매 가능성을 투영한다. shop_purchase·지갑·원장 함수를 호출하지 않는다. DB 타임아웃은 같은 키로 조회/재시도하며 가짜 성공 금지.
-
-**관리자·보안·SEO·모바일·KPI.** 관리자는 상품별 익명 저장 집계만 확인(20명 미만 억제), 회원 목록/임의 변경은 별도 역할·사유·감사 없이는 불가. 회원/IP 호출 제한, 최대 저장 500개 제안(실측 후 확정), 봇 대량 저장 방지. 개인 저장 목록은 색인·사이트맵·개인 OG/JSON-LD 제외, 회원 ID/상품 UUID를 외부 분석에 보내지 않는다. 한국어/영어, WCAG 2.2 AA, 320/390/768px, 44px 터치, 키보드·포커스·aria-pressed·aria-live, reduced motion, Android 계정 전환 격리. KPI(미측정): 영수증 정확성, 재방문, 저장→구매 전환(익명 집계), 비활성 비율, p95, 허위 보유/가격 주장, 재실행 충돌, 접근성 회귀.
-
-**수용시험·배포·롤백.** 격리 PostgreSQL 17에서 10,001개 저장 항목·동일 시각, 저장/해제 동시성 100건, 타인 위조 100건, 동일 키 재실행/다른 지문 100건. 페이지 누락·타인 노출, 소프트 비활성/실제 삭제, NULL/0 재고, 가격 미보장, 저장≠보유, 금융/원장/재고 미변경, 401/403/404/409/410/429/503, CSRF·캐시, 계정 전환, Android, 기존 구매·보유·검색 회귀 검증. **시험 명세만 작성, 실행하지 않음.** shop_saved_items 기능 기본 OFF → 읽기 검증 → 공식 Test 정확 SHA → 제한 운영 → 서명된 GitOps 승인. OFF 롤백은 저장 설정·불변 영수증을 삭제하지 않는다. 기획 예약은 런타임 배포하지 않는다.
-
-**긴급 P0.** miniPC Debian 13.6 서비스·개발 DB 연결은 확인되나 데이터 볼륨 **96%** 사용(약 7.6GiB 여유), 독립 백업 복원 미검증. QA v1343은 USER_CASH 18명 × 1,000 WLD = **18,000 WLD** 증가에 대응하는 시민배당 정규 원장 전표가 없고 정규 TREASURY가 **0 WLD**임을 읽기 전용 확인했다. 원장 890거래/1,810전표 자체 차대변 일치로 이 불일치는 해소되지 않는다. 금융 PR #1706에서 수령인별 증거·실제 재원·중복 지급 금지·감사 정정 필요. 블로그 한정 v1418 운영 배포는 금융/회원 정확 SHA 승격 근거가 아니다.
-
-**P0/P1 개발 백로그.**
-- P0 ENV1416-01 (운영/QA): 디스크 96% 안전한 증설·독립 복원, 다른 브랜치/증거 임의 삭제 금지.
-- P0 FIN1416-02 (금융 B/QA): 원장 없는 18,000 WLD 배당·국고 0·수령인별 검증·중복 재지급 방지(#1706).
-- P0 SEC1416-03 (B/QA): 상점 저장 목록 소유권·DB 직접 DML/PUBLIC EXECUTE·위조 사용자·마이그레이션 부정시험.
-- P0 REL1416-04 (QA/운영): PR 보존·정확 SHA 전체 CI·공식 Test 인증 금융/회원/Android E2E·복원·GitOps 승인.
-- P1 SHOP1416-05 (B): 회원/상품 FK·유일 PK·시간 인덱스·불변 영수증 및 10,001건 성능.
-- P1 SHOP1416-06 (B): SECDEF 저장/해제/목록·아이템별 직렬화·멱등성·비활성 처리.
-- P1 SHOP1416-07 (A): NestJS/Next/Android GET/POST/DELETE/영수증 API·CSRF·오류/캐시 동등성.
-- P1 SHOP1416-08 (C): 카드 저장·목록 필터·빈/비활성·한국어/영어·모바일/접근성·계정 격리.
-- P1 SHOP1416-09 (C/QA): 관리자 익명 집계·개인정보·색인 차단·남용 방지·KPI.
-- P1 SHOP1416-10 (QA): 격리 PG 10,001/100/100·가격·위조·재실행·기존 상점 회귀·복원/비파괴 롤백.
-
-**외부 독립 근거 게이트.** 신규 검증 승인 0건, 누적 중복 제거 승인 UNKNOWN / 목표 10,000건, BLOCKED / IN PROGRESS. 내부 QA/기존 문서는 외부 독립 근거로 계산하지 않는다.
-
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v1420 / F675-161 — 회원 검토 대기 사진 제출 철회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**회차:** Previous Feature Improvement v1418 → Current Feature Addition v1420 → Next Feature Improvement v1422(잠정). **기준:** 최신 main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 재확인. QA v1345 FAILED/HOLD. [개발 이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726). 신규 제안이며 이번 회차에서 런타임·DB·WLD·Test·Production·기능 스위치·이미지 파일은 변경하지 않는다.
+
+### 1. 실제 구현 확인 및 문제
+- `frontend/src/app/gallery/submit/page.tsx`는 회원이 `GET /api/v1/photos/mine`으로 제출 사진을 확인하게 하지만 **제출 철회 CTA가 없다**. 업로드 폼은 사진 파일과 메타데이터를 제출할 뿐 제출 후 철회하지 않는다.
+- `backend/src/content/member-photo.controller.ts`에는 `POST /photos/uploads`, `POST /photos`, `GET /photos/mine`만 있으며 세션·인증·동의·CSRF 가드가 적용된다. 저장소는 직접 테이블 DML 대신 DB 함수를 호출한다. Android는 `/app-api/v1/photos/mine` 조회만 문서화되어 있다.
+- Migration `098-member-photo-submissions.sql`: 회원은 비공개 초안을 제출하고 UUID를 제출 멱등 키로 사용한다. `member_my_photo_submissions`는 **최신 30건**만 반환하며 상태는 `published` 불리언뿐이다. 초안은 본인 미리보기 가능, 하루 제출 제한은 **5건**이다. 철회하더라도 이 제한은 환급하지 않는다.
+- Migration `127-fix-member-photo-approval.sql`: 운영자는 동일 사진 행을 `FOR UPDATE`로 잠그고 게시할 수 있다. 철회와 게시 승인이 경합하면 둘 중 하나만 유효해야 한다. 기존 거절/철회 상태나 회원 철회 명령은 확인되지 않았다.
+- **목적:** 잘못된 사진·설명·제3자 초상을 올린 회원이 운영자 검토 전 직접 제출을 철회하도록 하되, 즉시 물리적 삭제나 이미 게시된 사진의 자동 비공개화를 허위 약속하지 않는다.
+
+### 2. 설계 대안과 채택 범위
+사진 행·파일을 바로 DELETE하면 기존 영수증이 소실되고 DB와 파일시스템 사이 원자성이 없어지며 승인 사진 오삭제 위험이 있다. 기존 `content_state` enum을 직접 확장하면 기존 조회·게시 경로 전체 영향이 크다. 따라서 **추가형 불변 `member_photo_withdrawals` 철회 표식(tombstone)**, DB 단일 트랜잭션, 운영자 승인 차단, 미디어 조회 즉시 차단을 채택한다. 파일 정리는 별도 감사·보존 정책에서 처리한다. 새로운 분산 세부기획 파일을 만들지 않고 기존 영문·국문 통합문서에 흡수한다.
+
+### 3. 사용자·권한·화면·CTA·상태
+- **회원:** `/gallery/submit` → 내 제출 사진 → 검토 대기 카드의 **제출 철회** → “검토가 중단되고 목록에서 이미지가 숨겨집니다. 감사 기록 및 원본 파일이 즉시 삭제되는 것은 아닙니다.” 확인 → **철회 확정** / **유지**. `pending` 본인 초안에만 CTA를 노출한다. `published`는 철회 대신 기존 개인정보·신고·운영자 문의 안내로 이동한다. 운영자 소유 사진은 회원이 철회할 수 없다.
+- **상태:** `PENDING`(본인 미리보기 가능), `WITHDRAWING`(버튼 비활성화, 성공 선반영 금지), `WITHDRAWN`(썸네일·대체텍스트·미디어 URL 제거, 시각과 영수증만 표시), `PUBLISHED`(철회 불가), `UNAVAILABLE`(타인 존재 여부 누출 없는 오류), `FAILED_RETRYABLE`(기존 상태 유지·재시도). 존재하지 않는 거절 상태를 꾸며내지 않는다. 빈 목록과 API 오류를 구별한다.
+- **관리자:** 철회된 제출물은 승인 대기열에서 제외하고 최소 감사 메타데이터만 확인한다. 철회 후 재승인/재공개 금지. 게시된 사진의 비공개·신고는 별도 기존 절차다.
+- **비회원·타인:** 제출물/미디어/영수증/저장 키/소유자 정보를 조회할 수 없다. 로그아웃·계정 전환 시 이전 응답 폐기, 개인 캐시와 객체 URL 정리. 한·영 문구, 키보드, 포커스 복귀, `aria-live`, 320px·200% 확대를 지원한다.
+
+### 4. 제안 API 계약(미구현)
+- 기존 `GET /api/v1/photos/mine`, `GET /app-api/v1/photos/mine` 필드는 호환 유지. 추가 `GET /api/v1/photos/mine/page?limit=30&cursor=<opaque>`: limit 정수 1~30, `(created_at,id)` 기준 서명/암호화된 회원·세션 결속 Keyset 커서, LIMIT+1로 `items`, `nextCursor|null`, `hasMore` 반환. 검증된 `status=pending|withdrawn|published`만 반환. 커서에서 사용자/저장 키가 노출되지 않아야 한다. 기존 30건 API는 페이지 기능이 **없다**.
+- 신규 `POST /api/v1/photos/:photoId/withdraw` JSON `{ "idempotencyKey": "UUID" }`, Android `/app-api/v1/photos/:photoId/withdraw` 동등 제공. 로그인·활성 회원·동의·CSRF(쿠키 경로)·UUID 검증·속도 제한. `actor`는 세션에서만 도출하며 클라이언트 `ownerId`, `storageKey`, 게시 상태는 수용하지 않는다.
+- 첫 성공 `200 {"photoId":"UUID","status":"withdrawn","withdrawnAt":"ISO8601","replayed":false}`. 같은 요청 재시도는 원본 영수증 `replayed:true`, 상태 재변경 금지. 타인/미존재는 동일한 404, 본인의 이미 게시된 사진은 409, 잘못된 요청 400, 제한 초과 429, DB 장애 503 및 성공 알림 금지. Next.js 서버 액션은 변경 후 서버 상태 재조회. 회원 페이지·미디어는 noindex, private/no-store.
+- **Android/App API:** 개발 담당자가 계약/스키마·네이티브 확인·오프라인 재시도·계정 전환을 웹과 동등하게 구현해야 한다. 이번 기획 회차에서 코드 수정 금지.
+
+### 5. DB 제약·인덱스·트랜잭션·보존
+- 최신 main에서 마이그레이션 번호를 재확인한 뒤 추가형 `member_photo_withdrawals(photo_id uuid PRIMARY KEY REFERENCES public.photos(id) ON DELETE RESTRICT, actor_user_id uuid NOT NULL REFERENCES public.users(id), request_id uuid NOT NULL UNIQUE, request_digest bytea NOT NULL, withdrawn_at timestamptz NOT NULL DEFAULT clock_timestamp())` 생성. `(actor_user_id,withdrawn_at DESC,photo_id DESC)` 인덱스와 `photos(uploaded_by,created_at DESC,id DESC)` 인덱스는 격리 `EXPLAIN` 후 결정. `moneyverse_app`/PUBLIC에 테이블 직접 DML·SELECT를 부여하지 않는다. `SECURITY DEFINER`, 고정 `search_path`, 앱 계정에 필요한 EXECUTE만 허용한다.
+- `member_withdraw_photo(p_actor uuid,p_photo_id uuid,p_request_id uuid)`는 활성 회원·기능 스위치 확인, **회원+사진+명령** digest로 요청 결속. 요청 키 잠금(또는 영수증 행 잠금) 후 사진 행 `FOR UPDATE`, 소유권·`content_state='draft'`·`visibility='private'`·`published_at IS NULL`·미철회 검증. 표식과 불변 영수증을 한 트랜잭션에 삽입. 타인 UUID/다른 명령 재사용 거부, 과거 제출 UUID 재실행으로 철회 상태 복원 금지. DB/파일 즉시 DELETE 또는 WLD 거래 없음.
+- **필수 경합 차단:** 관리자 `content_set_photo_publication`은 같은 사진 행 잠금 상태에서 철회 표식을 검사하고 `publish=true`를 거부한다. 공개 갤러리/관리자 승인 목록도 철회 표식 제외. `content_storage_key_visible`은 철회된 사진을 본인에게도 제공하지 않으며 썸네일·URL을 반환하지 않는다. 승인 먼저 커밋 시 본인 철회 409, 철회 먼저 커밋 시 승인 거부. 100개 동시 요청·교착·재시도 검증. 기능 OFF여도 기존 철회 표식의 공개/조회 차단은 계속 유효해야 한다.
+- **보존/정리:** 불변 표식·최소 감사 영수증은 검토된 보존 정책을 따르고, 파일은 DB와 원자적으로 삭제할 수 없으므로 즉시 삭제를 약속하지 않는다. 별도 GC는 저장 키 참조·법적 보존·백업/복원·2단계 삭제·dry-run 검증 후 승인한다. 하루 5건 제출 제한은 철회로 환급되지 않는다.
+
+### 6. 관리자·보안·SEO·KPI·수용시험
+- **위협:** 사진 IDOR, 타인 멱등 UUID 재사용, 세션 위조, CSRF, 승인/철회 경합, 미디어 캐시, 남은 썸네일, 메타데이터 노출, 대량 철회, 삭제 오인. DB 소유권 재검증, 프라이빗 no-store/noindex, 최소 PII 감사, 회원당 10회/분 속도 제한(실측 후 조정)을 명세한다.
+- **관리자:** 철회/대기/게시 집계와 익명화 감사만, 무관한 관리자에게 원본 공개 금지. 게시 사진 신고는 기존 절차 유지. `/gallery/submit`·회원 API·철회 미디어는 검색 색인·사이트맵 제외, 공개 갤러리 SEO는 유지한다.
+- **KPI 목표(측정 전 가설):** 철회 후 게시·미디어 허용 0건, 타인 조회 0건, 허위 성공 0건, 웹/Android 계약 100% 동등, 격리 부하 p95 <400ms, 재시도 가능 오류 <1%. `withdraw_intent`, `withdraw_confirm`, `withdraw_success`, `withdraw_conflict`, `withdraw_failure` 이벤트에는 저장 키·설명·개인정보를 넣지 않는다.
+- **수용시험(명세만, 미실행):** 격리 PostgreSQL 마이그레이션·권한 `42501` 음성 시험, 합성 사진 10,001건(실제 5433 DB에 넣지 않음), 30/31 페이지, 철회/승인 동시 100건, 타인·위조 100건, UUID 충돌, 철회 후 원래 제출 재시도, 로그아웃·계정 전환, 모바일 320px·200%·스크린리더, 미디어 캐시 차단, 관리자 목록, 5건/일 비환급, 스위치 OFF/ON/OFF, 독립 복원·롤백. 개인정보 경계 실패는 P0 NO-GO.
+
+### 7. 우선순위 개발 백로그(10개)
+| 우선순위 | ID | 산출물 / 검증 게이트 |
+| --- | --- | --- |
+| P0 | ENV1420-01 | 데이터 디스크 97%, 백업 사고 #1718, 안전한 용량·독립 복원 확인; 타 작업 증거 임의 삭제 금지. |
+| P0 | FIN1420-02 | 과거 18,000 WLD 불일치, 국고 정식 재원 0, 마이그레이션 간극 및 금융 운영승격 HOLD 유지. |
+| P0 | SEC1420-03 | 본인 전용 철회·불변 영수증, 관리자 승인 잠금 경합, 미디어 차단, 최소권한, 개인정보 보호. |
+| P0 | REL1420-04 | QA v1345 FAILED; 공식 Test 정확 SHA·인증 E2E·백업 복원·롤백 및 승인 검증. |
+| P1 | PHOTO1420-05 | 추가형 표식·영수증 DB, 인덱스, 권한·실행계획. |
+| P1 | PHOTO1420-06 | 트랜잭션 잠금 순서, digest/재실행, 게시/미디어 경합 차단. |
+| P1 | PHOTO1420-07 | NestJS·Next.js BFF·Android App API 계약·검증·오류 코드. |
+| P1 | PHOTO1420-08 | 검토 대기 전용 CTA·확인·철회 상태·접근성·계정 격리. |
+| P1 | PHOTO1420-09 | 관리자 목록·감사, 파일 보존/GC 후속, SEO·KPI·악용 방지. |
+| P1 | PHOTO1420-10 | 격리 PostgreSQL 10,001/100/100 회귀, CI·공식 Test 정확 SHA·롤백·OFF 게이트. |
+
+### 8. 배포·롤백·외부 근거
+새 스위치 `member_photo_withdrawal`은 **기본 OFF**. 추가형 DB/권한/미디어 조회 차단 → 관리자 게시 차단 → 회원 CTA 순서로 개발한다. 격리 PostgreSQL 후 공식 Test 정확 SHA, 회원·관리자·Android 인증 E2E, 안전한 백업·독립 복원·릴리스 manifest·승인을 거쳐야 한다. 롤백은 신규 철회 명령만 OFF하며 기존 철회 표식의 공개·미디어 차단은 제거하지 않는다. 런타임 배포는 개발 예약이 담당한다.
+
+외부 독립 발행처 PostgreSQL(행 잠금), OWASP(IDOR), W3C(WCAG 상태 알림) **3곳 검토, 신규 중복 제거 승인 근거 0건, 누적 승인 UNKNOWN / 10,000건**, 게이트 **BLOCKED / IN PROGRESS**. [PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html), [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html), [W3C](https://www.w3.org/TR/WCAG22/#status-messages). Gemini/개발 A/B/C/QA 변경과 분리된 문서 기획만 수행한다.
+
+---
+
+
+## v2026.10.28.1423 — 금융 운영 DB 291 보호 승격 확인 (전체 서버 코드는 기존)
+- 신규 배당 4인자 멱등 복식분개 함수와 구형 무분개 배당 차단을 실제 Production DB에 적용. 신규 암호화 백업 체크섬/운영 스키마 모사시험/운영 app역할 차단/잔액 불변 검증 완료, 서버 다운 없음. PR #1706 코드 main 3c251d93 병합(운영 앱 실행 SHA는 별도). 운영 TREASURY 계정 0 WLD, 과거 18명 18,000 WLD 원장 미대사, 누락 migration269~287, 공식 Test SHA·디스크97%로 **앱 전체 승격은 HOLD**. 권한은 사용자 의사에 따라 변경하지 않음. [국문기록](../worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md).
+
+## v2026.10.28.1422 — 시민배당 내역 표시와 운영 게이트
+- 신규 정식 배당 거래 라벨을 `국고 시민배당 지급`으로 보완, 회귀 29 PASS. 실 운영금융 사전검사 BLOCKED(18,000 원장·초기값 대사), 운영 treasury 원장잔고 0, 과거 배당3건 63,000 WLD 계정별 근거 검증 필요. [기록](../worklog/2026-10-28-treasury-wallet-label-v1422.ko.md).
+
+## v2026.10.28.1421 — 국고배당 복식원장 실제 SQL E2E
+- GitHub 첫 CI의 정책 버전 FK 오류 수정. 격리 PostgreSQL 전체 290개 마이그레이션 후 실제 배당 균형/멱등/권한/재원검사 ROLLBACK PASS. 실 WLD 무변경. 운영 원장 대사·정식 국고 0 WLD 및 정확SHA Test 미인증 상태. [기록](../worklog/2026-10-28-treasury-dividend-release-v1421.ko.md).
+## v2026.10.28.1420 — 국고배당 복식원장 전환 개발 (운영 미적용)
+- 기존 240 배당 함수의 18명×1,000 WLD 실지급/복식분개 누락 재발 방지: 새 마이그레이션 291로 원자분개, UUID 멱등, 감사영수증, 금고/정식 국고 원장 잔고 확인. 기존 지급 재실행이나 근거 없는 원장 조정 금지. DB 역할 권한은 현 사용자 지시에 따라 이번 범위에서 변경하지 않음. [기록](../worklog/2026-10-28-treasury-dividend-ledger-v1420.ko.md). GitHub CI 격리 E2E/운영 적용은 미완료.
+
 
 ## v2026.10.28.1418 — 모바일 블로그 관리자·실제 발행 상태 운영 승격
 - 운영 관리자 화면 사진의 disabled AI 즉시 생성·모바일 제목/배지 줄바꿈 원인 확인. PR #1707 코드 SHA cfb13272beea53c4d8c20eff7f379b6f66343033, CI #40644673371/정식 Test 정확 SHA 통과 후 블로그 전용 운영 백엔드 3483/프론트 3484 무중단 전환, 이전 Next 정적 호환 fallback 유지. 프론트 관리자 API의 구형 3000 연결을 신 3483으로 수정. 관리자 권한 보호된 실제 스케줄·원고 검증·DB 게시 수·다음 회차 상태 조회/새로고침 구현, 허위 즉시 발행 버튼 제거. 공개 4국가·모바일 320~1024 QA 통과, 비인증 관리자 상태 API 403/401, 일반 금융·회원 서버 불변. 로컬 AI 검증 시간초과로 2시간 자동 발행 OFF/검증 게시 0, 옛 JSON 글 관리자 조작은 파일 보호로 제한, 실제 로그인 관리 E2E 미확인. v1418 영한 작업기록 참조.

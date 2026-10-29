@@ -11,6 +11,12 @@
 
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1420 / F675-161 — 갤러리 검토 대기 사진 철회 (ADDITION / DRAFT / HOLD)
+- 실제 `/gallery/submit`은 회원 제출 사진 최신 30건만 보여주며 철회 CTA가 없다. `member-photo.controller.ts`는 업로드/제출/내 목록만, Migration 127은 행 잠금 후 게시할 수 있다. 신규 기능은 **본인 검토 대기 사진 철회**이며 게시 사진 신고·실제 파일 삭제와 구별한다.
+- 확인 후 철회, 불변 영수증, 회원·세션 격리, `member_photo_withdrawals` 표식, 관리자 게시/미디어 조회 경합 차단, 30건 불투명 Keyset, NestJS·Next.js·Android, 관리자 감사, SEO·접근성·기본 OFF 롤백 명세. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. [통합 기획](INTEGRATED_PLANNING_MASTER.ko.md), [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
+- main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED, 디스크 97%, 과거 18,000 WLD 불일치, 백업·Test·Production BLOCKED. 외부 공식 발행처 3곳 검토, 승인 0건, 누적 UNKNOWN/10,000. 문서 전용.
+
+
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
 - [GSC 실제 검색성과·색인 증거 센터 상세기획](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.ko.md) / [영문](F675_06_GSC_SEARCH_EVIDENCE_CANONICAL_ACTION_SPEC.md)을 v675 F675-06의 정식 상세기획으로 채택. 기존 /admin/seo·v685 재사용, GSC 날짜/상위 10개·무행0·크롤러 색인 오인·레거시 제출 성공/Google Indexing API 안내 오류 기록, 기술·제출·Google 색인본·검색 노출 실제 증거 분리, 구글/WCAG 16개 자료·D0~D7. 실제 SEO/GSC 운영 검증이나 코드 배포 아님.

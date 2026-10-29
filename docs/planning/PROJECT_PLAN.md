@@ -1,15 +1,22 @@
-## v1418 — F675-160 shop saved-items integrity hardening (Feature Improvement / DRAFT / RELEASE HOLD)
-- Draft PR #1720 (stacked on #1714), backlog #1713; candidate source SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI PENDING at 17:xx KST, no official Test.
-- Previous Addition v1416 → Current Improvement v1418 → Next Addition v1420 provisional. Main d12c948ac454b0762cfb7fb0cddf83703a775172; stacked on unmerged Draft #1714 (b9b55ea4), QA v1344 FAILED. Actual shop member catalog calls `shop_catalog_list_v2`, not legacy `shop_catalog_list`; active-only catalog cannot supply inactive saved tombstones.
-- P0: owner-scoped LEFT JOIN unavailable projection, RESTRICT-FK admin deletion contract, owner-wide 500-item serialization (499→500 race), historical idempotency receipt ≠ current saved state, actor binding, exact-SHA/backup gates. New backup-rotation incident #1718; data volume 97%; finance 18,000 WLD drift / Treasury 0 / #1706 conflicted.
-- P0 ENV1418-01 FIN1418-02 SEC1418-03 REL1418-04; P1 SHOP1418-05 SHOP1418-06 SHOP1418-07 SHOP1418-08 SHOP1418-09 SHOP1418-10. Synthetic 10,001/100/100 and 500-cap race tests specified NOT RUN; external newly approved 0, cumulative UNKNOWN/10,000 BLOCKED. Full EN/KO implementation contract in integrated master; no runtime/DB/WLD/Test/Production changes.
-
-## v1416 — F675-160 member shop saved-items shortlist (Feature Addition / DRAFT / RELEASE HOLD)
-- Previous Improvement v1414 → Current Addition v1416 → Next Improvement v1418 provisional; main d12c948ac454b0762cfb7fb0cddf83703a775172; QA v1343. Existing /shop/catalog lacks owner saved-item flow. Save for later is NOT purchase, inventory hold, price guarantee or WLD debit. Initial notification-controls proposal rejected as duplicate of F675-130/#1353; new shop scope independent of A/B/C/Gemini/QA runtime.
-- Owner-only GET/POST/DELETE saved items + immutable idempotent receipts, keyset cursor, current shop catalog eligibility, PostgreSQL owner ACL, Next/Android, admin/privacy/SEO/a11y/KPI, default-OFF rollback in integrated master.
-- P0 ENV1416-01 FIN1416-02 SEC1416-03 REL1416-04; P1 SHOP1416-05 SHOP1416-06 SHOP1416-07 SHOP1416-08 SHOP1416-09 SHOP1416-10. Data disk 96%, QA v1343 18,000 WLD dividend without canonical postings and treasury 0 (#1706); synthetic 10,001/100/100 tests NOT RUN; external approved 0, cumulative UNKNOWN/10,000 BLOCKED; finance release HOLD.
-
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.10.28.1420 — F675-161 member pending photo withdrawal (PLANNING DRAFT / RELEASE HOLD)
+- Cycle Previous Improvement v1418 → Current Addition v1420 → Next Improvement v1422 (provisional). Main `35971c600f25869c96f1c666d4b9f58927202730` unchanged start/mid; QA v1345 FAILED/HOLD. Real gallery submission UI and NestJS photo controller have upload/submit/mine but no member withdrawal; migration 098 returns 30 rows and owner draft previews, migration 127 permits operator publish. Design owner-only pending withdrawal tombstone/immutable receipt, `FOR UPDATE` publication race fence, immediate media deny and private status UX. Published photos require separate takedown; no physical deletion guarantee, no daily 5-cap refund, no WLD effects.
+- P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. Complete API/DB/transaction/Android/admin/SEO/WCAG/KPI/10,001+100+100/flag-OFF rollback in [integrated EN master](INTEGRATED_PLANNING_MASTER.md) and [KO](INTEGRATED_PLANNING_MASTER.ko.md). [Handoff issue #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
+- 97% data disk, backup incident #1718, 18,000 WLD historical finance drift, Test exact-SHA, independent restore and full app Production promotion BLOCKED. External families PostgreSQL/OWASP/W3C reviewed 3, newly approved 0, cumulative deduplicated approved UNKNOWN/10,000 => BLOCKED. Docs only; no runtime/DB/WLD/Test/Production change.
+
+
+## v2026.10.28.1423 — Treasury DB-only safety promotion (no app cutover)
+- Applied migration 291 to authority Production PostgreSQL after fresh verified backup and isolated Production-schema rehearsal. Existing unaudited citizen dividend fails closed, four-arg canonical payout registered; account sums/ledger transaction count unchanged and live backend health200. Finance PR #1706 CI PASS merged to main `3c251d93`, not a live frontend/backend code deployment. Historical 18k WLD discrepancy, zero canonical Treasury funding, migrations 269–287 gap, official Test and disk97% leave full app release gated. [Evidence](../worklog/2026-10-28-treasury-db-production-containment-v1423.md).
+
+## v2026.10.28.1422 — Citizen dividend wallet ledger labeling
+- Fixed a failing exact-SHA backend test: `TREASURY_CITIZEN_DIVIDEND` now displays a specific Korean user wallet label (29 tests PASS). Financial readiness and official Test remain BLOCKED. [Evidence](../worklog/2026-10-28-treasury-wallet-label-v1422.md).
+
+## v2026.10.28.1421 — Treasury dividend SQL foreign-key and release acceptance
+- Fixed non-existent policy FK reference, replayed all 290 migrations in isolated PostgreSQL and passed rollback-only canonical payout, balance and authorization test. Production has unresolved historical 18k WLD drift and zero proven Treasury account cash; exact-SHA Test and Production gated. [Evidence](../worklog/2026-10-28-treasury-dividend-release-v1421.md).
+## v2026.10.28.1420 — Canonical citizen dividend payout (SOURCE CANDIDATE / NOT LIVE)
+- v291 introduces stable UUID request-bound all-or-none canonical double-entry, vault and beneficiary receipts, blocking legacy direct-wallet payout. The actual Treasury ledger account has 0 WLD and cannot fund payouts until provenance is certified; historical 18,000 WLD drift remains under investigation, not reissued or fabricated. No change to general app database grants as directed. [Worklog](../worklog/2026-10-28-treasury-dividend-ledger-v1420.md). Actual isolated PostgreSQL CI, official Test and Production promotion not yet verified.
+
 
 ## v2026.10.28.1405 — Blog two-hour multilingual publishing directive (SOURCE CANDIDATE)
 - Latest owner policy overrides mandatory human review. Two-hour KST country×topic rotation, four native languages and ECONOMY/CODING/COMPUTER. Automated independent quality validation gates publication; no verified article auto-unpublishes; administrator may optionally edit/private/delete later. Unverifiable finance/AI claims skipped (not sent for mandatory human review).
