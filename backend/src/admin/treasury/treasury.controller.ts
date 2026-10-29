@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Post,
   Put,
   Query,
@@ -204,12 +205,14 @@ export class AdminTreasuryController {
   }
 
   @Get('revenue')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 세목별 수입 흐름 집계 조회' })
   async getRevenue() {
     return this.service.getRevenue();
   }
 
   @Get('expenditure')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 예산 목적별 지출 흐름 집계 조회' })
   async getExpenditure() {
     return this.service.getExpenditure();

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { decodeMoneyFlowCursor, encodeMoneyFlowCursor, moneyFlowFilterFingerprint } from './treasury-moneyflow-cursor';
@@ -674,7 +674,11 @@ export class TreasuryRepository {
         if (is24h) breakdown24h[targetId] = (breakdown24h[targetId] ?? BigInt(0)) + amt;
       }
     } catch {
-      // fallback
+      // A failed ledger read is not evidence of zero revenue.
+      throw new ServiceUnavailableException({
+        code: 'TREASURY_REVENUE_EVIDENCE_UNAVAILABLE',
+        message: 'Treasury revenue ledger evidence is unavailable',
+      });
     }
 
     const items: TreasuryRevenueSource[] = taxableRates.map((r) => ({
@@ -766,7 +770,11 @@ export class TreasuryRepository {
         if (is24h) breakdown24h[targetCategory] = (breakdown24h[targetCategory] ?? BigInt(0)) + amt;
       }
     } catch {
-      // fallback
+      // A failed ledger read is not evidence of zero expenditure.
+      throw new ServiceUnavailableException({
+        code: 'TREASURY_EXPENDITURE_EVIDENCE_UNAVAILABLE',
+        message: 'Treasury expenditure ledger evidence is unavailable',
+      });
     }
 
     const items: TreasuryExpenditureItem[] = AUTHORITATIVE_BUDGET_ENVELOPES.map((b) => ({
