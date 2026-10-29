@@ -20,6 +20,9 @@ describe('help center migration boundary', () => {
     expect(sql).toMatch(/GRANT EXECUTE ON FUNCTION public\.help_public_search/i);
     expect(sql).not.toMatch(/GRANT (?:INSERT|UPDATE|DELETE|ALL) ON TABLE public\.help_articles TO moneyverse_app/i);
   });
+  it('caps the published-only search at 50 results even when called directly', () => {
+    expect(sql).toMatch(/LIMIT greatest\(1,least\(coalesce\(p_limit,20\),50\)\)/i);
+  });
   it('pins security definer search path and revokes public function execute', () => {
     expect(sql).toMatch(/SECURITY DEFINER\s+SET search_path\s*=\s*pg_catalog,\s*pg_temp/i);
     expect(sql).toMatch(/REVOKE ALL ON FUNCTION public\.help_public_search\([^)]+\) FROM PUBLIC/i);

@@ -17,6 +17,16 @@ describe('public verified help controller', () => {
     await expect(controller.search({ locale: 'ko', query: '😀'.repeat(101) })).rejects.toThrow('invalid');
     expect(search).not.toHaveBeenCalled();
   });
+  it('accepts bounded help result counts and rejects oversized or fractional values', async () => {
+    vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
+    const search = vi.fn().mockResolvedValue([]);
+    const controller = new HelpController({ search } as unknown as HelpRepository);
+    await expect(controller.search({ locale: 'ko', limit: 50 })).resolves.toEqual({ articles: [] });
+    expect(search).toHaveBeenCalledWith('ko', null, '', 50);
+    await expect(controller.search({ locale: 'ko', limit: 51 })).rejects.toThrow('invalid');
+    await expect(controller.search({ locale: 'ko', limit: 1.5 })).rejects.toThrow('invalid');
+    expect(search).toHaveBeenCalledTimes(1);
+  });
   it('returns a genuine empty result only after a successful DB read', async () => {
     vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
     const search = vi.fn().mockResolvedValue([]);

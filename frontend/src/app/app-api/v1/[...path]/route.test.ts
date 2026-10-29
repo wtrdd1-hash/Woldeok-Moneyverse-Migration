@@ -40,6 +40,21 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
+  it('preserves verified help result count for Android and refuses stale public caching', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ articles: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const body = JSON.stringify({ locale: 'ko', query: 'wallet', limit: 50 });
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/help/search', {
+      method: 'POST', headers: { host: 'easy-scraping.com', 'content-type': 'application/json' }, body,
+    }), context('help', 'search'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/search');
+    expect(new TextDecoder().decode(fetchSpy.mock.calls[0]?.[1]?.body as ArrayBuffer)).toBe(body);
+  });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
