@@ -15,6 +15,7 @@ import { ContentService } from './content.service';
 import { AntivirusScannerService } from './antivirus-scanner.service';
 import { ChatImageStorage } from './chat-image-storage';
 import { ChatUploadController } from './chat-upload.controller';
+import { ChatMediaRepository } from './chat-media.repository';
 
 @Module({
   imports: [AuthModule, DiscordAlertModule],
@@ -29,6 +30,11 @@ import { ChatUploadController } from './chat-upload.controller';
   providers: [
     AntivirusScannerService,
     ChatImageStorage,
+    {
+      provide: ChatMediaRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => new ChatMediaRepository(pool),
+    },
     {
       provide: PrivateImageStorage,
       useFactory: () =>
