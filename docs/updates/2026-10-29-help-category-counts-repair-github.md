@@ -1,0 +1,2 @@
+# GitHub update — A help counts repair
+Draft/HOLD. Reconnect `GET /api/v1/help/categories?locale=ko|en` to existing approved-only PostgreSQL count function, preserve integer strings and Android no-store. RED/GREEN HTTP, controller, app-api and isolated PostgreSQL evidence recorded. Full CI and exact-SHA authenticated Test remain blocked by separate integration regressions; do not merge or promote.

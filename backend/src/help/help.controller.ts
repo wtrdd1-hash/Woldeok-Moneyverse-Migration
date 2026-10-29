@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, Query, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { HelpRepository } from './help.repository';
@@ -25,7 +25,30 @@ export class HelpController {
     return this.help;
   }
   @Get('categories') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Public verified help categories' })
-  categories() { this.repo(); return { categories: [...CATEGORIES] }; }
+  categories(@Query('locale') locale?: string) {
+    const repo = this.repo();
+    // Preserve the legacy no-locale Android response while accepting an explicit
+    // locale from web and newer Android clients. Never silently use another locale.
+    if (locale !== undefined && !LOCALES.includes(locale as typeof LOCALES[number])) {
+      throw new BadRequestException('invalid help locale');
+    }
+    const selected = locale ?? 'ko';
+    return repo.categoryCounts(selected).then(rows => {
+      // An incomplete/malformed SQL response is not evidence of zero publications.
+      // Do not display a fabricated count when a migration or DB read is missing.
+      if (rows.length !== CATEGORIES.length) throw new ServiceUnavailableException('verified help category counts unavailable');
+      const counts: Record<string, string> = {};
+      for (const row of rows) {
+        if (!CATEGORIES.includes(row.category as typeof CATEGORIES[number]) ||
+          Object.hasOwn(counts, row.category) ||
+          !/^(0|[1-9][0-9]*)$/.test(row.article_count)) {
+          throw new ServiceUnavailableException('verified help category counts unavailable');
+        }
+        counts[row.category] = row.article_count;
+      }
+      return { categories: [...CATEGORIES], locale: selected, counts };
+    });
+  }
 
   @Post('search') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Search only verified published help articles' })
   async search(@Body() body: SearchHelpDto) {

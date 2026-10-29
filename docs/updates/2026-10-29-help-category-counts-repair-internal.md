@@ -1,0 +1,2 @@
+# Internal update — Help category count API repair, 2026-10-29
+Source candidate only. Fixes missing locale-aware category count response and Android help no-store. Uses existing immutable SECURITY DEFINER function. Targeted and isolated SQL tests PASS; full repository gates FAIL on preexisting integration failures; Draft PR and Production HOLD. Evidence in worklog and `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-29-2025/`.
