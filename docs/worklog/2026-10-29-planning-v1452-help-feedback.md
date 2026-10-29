@@ -11,7 +11,7 @@
 ## IN PROGRESS — 2026-10-29 10:15 KST
 - [x] Rechecked remote main, unchanged at `bd590720...`. Re-read EN canonical and KO plan heads.
 - [x] Integrated predecessor [Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) into this **separate** branch only; preserved both latest main and v1450 entries in `docs/UPDATE_LOG*` conflicts. No changes to predecessor branch or main.
-- [ ] Write bilingual F675-169 full integrated master specification, living plan and portfolio review.
+- [x] Write bilingual F675-169 full integrated master specification, living plan and portfolio review.
 - [ ] Verify bilingual parity, 10 P0/P1 identifiers, no runtime changes and documentation release classification.
 - [ ] Publish Draft PR, log final exact SHA, GitHub CI evidence and blockers.
 

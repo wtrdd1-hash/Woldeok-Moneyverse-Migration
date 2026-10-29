@@ -1,5 +1,13 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v2026.10.29.1452 — Portfolio decision — F675-169 verified help article usefulness feedback (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Handoff:** [Issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814); predecessor [Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) remains unmerged. Previous Improvement v1450 → Current Addition v1452 → Next Improvement v1454 (provisional). Main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` rechecked start/mid; QA v1361 HOLD (historical evidence only). Source: verified `/help/[slug]` offers a support link, not a member helpful Yes/No, exact-revision receipt or feedback admin aggregate. Migration 282 has reviewed revisions but public API omits revision ID; existing help feature gated by `VERIFIED_HELP_CENTER_V1`. **No runtime implementation.**
+- Voluntary Yes/No with optional enum reason, Change/Remove, no free-text PII, no automatic support ticket or publication, owner-only immutable digest-bound intent receipt and CAS; only genuinely approved published exact revision; OFF until independent help/source/10,000 evidence gates. Proposed private NestJS/Next/Android API, strict DB SECURITY DEFINER, unique current+append-only event, CSRF/BOLA/rate, admin k>=20 aggregate, WCAG 2.2 AA/320px/TalkBack, SEO noindex/no-store, KPI and zero WLD.
+- P0 ENV1452-01, FIN1452-02, SEC1452-03, REL1452-04; P1 HELP1452-05, HELP1452-06, HELP1452-07, HELP1452-08, HELP1452-09, HELP1452-10. QA v1361 last documented: 18 accounts/+18,000 WLD, 239 app DML, 3 PUBLIC bank EXECUTE, 5 checksums/20 unapplied; independent restore and official exact-SHA Test unverified. Current main newer, remeasure before claiming fixed/persistent. Real isolated PG 10,001 rows / 100 concurrent / 100 forged acceptance **NOT RUN**. Full contract in bilingual integrated master; no separate spec.
+- External independent deduplicated approved references newly **0**, cumulative **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. DRAFT / RELEASE HOLD; no runtime/DB/finance/Test/Production changes.
+
+
 ## v1450 F675-168 review — clean-state and publication identity hardening (FEATURE IMPROVEMENT / HOLD)
 
 - **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
