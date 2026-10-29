@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { decodeMoneyFlowCursor, encodeMoneyFlowCursor, moneyFlowFilterFingerprint } from './treasury-moneyflow-cursor';
@@ -401,7 +401,7 @@ export interface TreasuryOverview {
   reserve_ratio_pct: number;
   available_wld: string;
   reserve_wld: string;
-  coverage_days: number;
+  coverage_days: number | undefined;
   tax_rates: readonly TreasuryTaxRateItem[];
   budgets: readonly TreasuryBudgetEnvelope[];
   reconciliation: TreasuryReconciliation;
@@ -432,7 +432,7 @@ export class TreasuryRepository {
     }
 
     // 2. Circulating user currency M0/M2 (sum of all user cash and bank balances)
-    let totalCirculating = BigInt(0);
+    let totalCirculating: bigint;
     try {
       const circRes = await this.pool.query<{ total: string }>(`
         SELECT coalesce(sum(ab.available_amount), 0)::bigint::text AS total
@@ -440,18 +440,14 @@ export class TreasuryRepository {
         JOIN public.account_balances ab ON ab.account_id = a.id
         WHERE a.account_type IN ('USER_CASH', 'USER_BANK')
       `);
-      if (circRes.rows[0]?.total) {
-        totalCirculating = BigInt(circRes.rows[0].total);
-      }
+      if (typeof circRes.rows[0]?.total !== 'string') throw new Error('missing circulation evidence');
+      totalCirculating = BigInt(circRes.rows[0].total);
+      if (totalCirculating <= BigInt(0)) throw new Error('undefined reserve ratio');
     } catch {
-      // fallback
+      throw new ServiceUnavailableException('TREASURY_CIRCULATION_UNVERIFIED');
     }
 
-    const reserveRatio =
-      totalCirculating > BigInt(0)
-        ? Number((totalTreasury * BigInt(10000)) / totalCirculating) / 100
-        : 100;
-
+    const reserveRatio = Number((totalTreasury * BigInt(10000)) / totalCirculating) / 100;
     // 3. 24h Stats from ledger
     const statsRes = await this.pool.query<{
       tx_type: string;
@@ -498,22 +494,23 @@ export class TreasuryRepository {
         : BigInt(0);
 
     // 5. 30-day average daily outflow / expense for coverage calculation
-    let dailyOutflow30d = BigInt(10000);
+    let dailyOutflow30d: bigint;
     try {
       const outflowRes = await this.pool.query<{ daily_avg: string }>(`
-        SELECT coalesce(sum(amount_wld::numeric) / 30, 10000)::bigint::text AS daily_avg
+        SELECT coalesce(sum(amount_wld::numeric) / 30, 0)::bigint::text AS daily_avg
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
           AND tx_type IN ('INJECTION', 'STOCK_HALT_SETTLEMENT', 'EMERGENCY_RESERVE_TRANSFER', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'MARKET_BUYBACK_BURN')
       `);
-      if (outflowRes.rows[0]?.daily_avg && BigInt(outflowRes.rows[0].daily_avg) > BigInt(0)) {
-        dailyOutflow30d = BigInt(outflowRes.rows[0].daily_avg);
-      }
+      if (typeof outflowRes.rows[0]?.daily_avg !== 'string') throw new Error('missing outflow evidence');
+      dailyOutflow30d = BigInt(outflowRes.rows[0].daily_avg);
+      if (dailyOutflow30d < BigInt(0)) throw new Error('negative outflow');
     } catch {
-      // fallback safe value
+      throw new ServiceUnavailableException('TREASURY_OUTFLOW_UNVERIFIED');
     }
 
-    const coverageDays = Number(availableWld / dailyOutflow30d);
+    // A verified zero outflow cannot support a finite coverage-days estimate.
+    const coverageDays = dailyOutflow30d === BigInt(0) ? undefined : Number(availableWld / dailyOutflow30d);
 
     // Vault totals alone cannot prove journal completeness or reconciliation.
     // Do not manufacture a ledger total, zero discrepancy, or verification time.
@@ -587,7 +584,7 @@ export class TreasuryRepository {
         settledByCategory[targetCategory] = (settledByCategory[targetCategory] ?? BigInt(0)) + amt;
       }
     } catch {
-      // fallback
+      throw new ServiceUnavailableException('TREASURY_BUDGET_EVIDENCE_UNVERIFIED');
     }
 
     return AUTHORITATIVE_BUDGET_ENVELOPES.map((b) => {

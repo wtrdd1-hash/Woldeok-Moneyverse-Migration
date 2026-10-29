@@ -153,4 +153,11 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(screen.queryByText(/-30,000 WLD/i)).toBeNull();
     expect(screen.getAllByText(/\+1,000,000 WLD/i).length).toBeGreaterThan(0);
   });
+  it('renders unavailable 30-day coverage without inventing days or a success badge', () => {
+    const { coverage_days: _verifiedDays, ...withoutCoverage } = mockOverview;
+    render(<TreasuryView overview={withoutCoverage} ledger={[]} />);
+    expect(screen.queryByText('null일')).toBeNull();
+    const heading = screen.getByText('가용 유동성 & 지출 방어 일수');
+    expect(heading.parentElement?.parentElement?.textContent).toContain('-');
+  });
 });
