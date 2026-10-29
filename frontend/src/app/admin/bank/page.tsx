@@ -18,8 +18,8 @@ import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
-import type { AdminBankOverview, AdminCreditGrade, AdminLoan } from '../types';
 import { BankRiskDashboard } from './bank-risk-dashboard';
+import { validateAdminBankResponse } from './bank-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,11 +48,7 @@ function ratePercent(bps: number): string {
 
 export default async function AdminBankPage() {
   await requireAdminConsole(AREA.href);
-  const console_ = await apiOrNull<{
-    readonly overview: AdminBankOverview;
-    readonly grades: readonly AdminCreditGrade[];
-    readonly loans: readonly AdminLoan[];
-  }>('/api/v1/admin/bank');
+  const console_ = validateAdminBankResponse(await apiOrNull<unknown>('/api/v1/admin/bank'));
 
   return (
     <div data-page="admin-bank" className="mv-page mv-page--admin grid gap-6">
@@ -62,18 +58,22 @@ export default async function AdminBankPage() {
       </PageHeader>
 
       {console_ === null ? (
-        <EmptyState
-          title="은행 현황을 불러오지 못했어요."
-          description="잔액을 추정해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
-        />
+        <div role="alert" className="grid gap-3 rounded-xl border border-destructive/40 p-4">
+          <EmptyState
+            title="은행 현황을 불러오거나 검증하지 못했어요."
+            description="잔액·위험도를 추정하지 않습니다. 다시 조회해 주세요."
+          />
+          <a
+            href="/admin/bank"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 underline underline-offset-4"
+          >
+            다시 조회
+          </a>
+        </div>
       ) : (
         <>
           {/* 실시간 여신 건전성 및 신용등급 리스크 대시보드 */}
-          <BankRiskDashboard
-            overview={console_.overview}
-            grades={console_.grades}
-            loans={console_.loans}
-          />
+          <BankRiskDashboard overview={console_.overview} grades={console_.grades} />
 
           <Card>
             <CardHeader>
@@ -206,8 +206,8 @@ export default async function AdminBankPage() {
               <CardHeader>
                 <CardTitle className="text-base">상환이 끝나지 않은 대출</CardTitle>
                 <CardDescription>
-                  연체가 먼저, 그다음 만기가 가까운 순입니다. 이 화면을 연 것도 감사 기록에
-                  남습니다.
+                  연체가 먼저, 그다음 만기가 가까운 순입니다. 상세 목록은 최대 50건이며, 전체
+                  포트폴리오 집계와 구분됩니다. 이 화면을 연 것도 감사 기록에 남습니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0 sm:p-6">
@@ -216,14 +216,16 @@ export default async function AdminBankPage() {
                   {console_.loans.map((loan) => (
                     <div key={loan.loan_id} className="pt-3 first:pt-0 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-foreground">{loan.display_name}</span>
+                        <span className="font-bold text-sm text-foreground">
+                          {loan.display_name}
+                        </span>
                         <Badge
                           variant={
                             loan.status === 'overdue'
                               ? 'destructive'
                               : loan.status === 'active'
-                              ? 'default'
-                              : 'secondary'
+                                ? 'default'
+                                : 'secondary'
                           }
                           className="text-[11px] font-bold"
                         >
@@ -233,13 +235,17 @@ export default async function AdminBankPage() {
 
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-[11px] text-muted-foreground block mb-0.5">대출 원금</span>
+                          <span className="text-[11px] text-muted-foreground block mb-0.5">
+                            대출 원금
+                          </span>
                           <span className="font-mono font-bold text-foreground">
                             {groupDigits(loan.principal_amount)} WLD
                           </span>
                         </div>
                         <div>
-                          <span className="text-[11px] text-muted-foreground block mb-0.5">누적 이자</span>
+                          <span className="text-[11px] text-muted-foreground block mb-0.5">
+                            누적 이자
+                          </span>
                           <span className="font-mono font-semibold text-rose-600 dark:text-rose-400">
                             {groupDigits(loan.interest_amount)} WLD
                           </span>
@@ -247,8 +253,18 @@ export default async function AdminBankPage() {
                       </div>
 
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/30">
-                        <span>등급: <span className="font-mono font-semibold text-foreground">{loan.credit_grade}</span></span>
-                        <span>만기일: <span className="font-mono">{formatMoment(loan.maturity_at, '만기 없음')}</span></span>
+                        <span>
+                          등급:{' '}
+                          <span className="font-mono font-semibold text-foreground">
+                            {loan.credit_grade}
+                          </span>
+                        </span>
+                        <span>
+                          만기일:{' '}
+                          <span className="font-mono">
+                            {formatMoment(loan.maturity_at, '만기 없음')}
+                          </span>
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -262,61 +278,61 @@ export default async function AdminBankPage() {
                 {/* 데스크톱 뷰: 테이블 (hidden md:block) */}
                 <div className="hidden md:block overflow-x-auto">
                   <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>회원</TableHead>
-                          <TableHead>등급</TableHead>
-                          <TableHead>상태</TableHead>
-                          <TableHead className="text-right">원금</TableHead>
-                          <TableHead className="text-right">이자</TableHead>
-                          <TableHead className="text-right">남은 금액</TableHead>
-                          <TableHead className="text-right">상환액</TableHead>
-                          <TableHead>실행</TableHead>
-                          <TableHead>만기</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {console_.loans.map((loan) => (
-                          <TableRow key={loan.loan_id}>
-                            <TableCell>
-                              <span className="grid gap-0.5">
-                                <b>{loan.display_name}</b>
-                                <span className="font-mono text-xs text-muted-foreground">
-                                  {loan.user_id}
-                                </span>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>회원</TableHead>
+                        <TableHead>등급</TableHead>
+                        <TableHead>상태</TableHead>
+                        <TableHead className="text-right">원금</TableHead>
+                        <TableHead className="text-right">이자</TableHead>
+                        <TableHead className="text-right">남은 금액</TableHead>
+                        <TableHead className="text-right">상환액</TableHead>
+                        <TableHead>실행</TableHead>
+                        <TableHead>만기</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {console_.loans.map((loan) => (
+                        <TableRow key={loan.loan_id}>
+                          <TableCell>
+                            <span className="grid gap-0.5">
+                              <b>{loan.display_name}</b>
+                              <span className="font-mono text-xs text-muted-foreground">
+                                {loan.user_id}
                               </span>
-                            </TableCell>
-                            <TableCell>{loan.credit_grade}</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={loan.status === 'overdue' ? 'destructive' : 'secondary'}
-                              >
-                                {statusLabel(loan.status)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Amount value={loan.principal_amount} />
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Amount value={loan.interest_amount} />
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Amount value={loan.outstanding_amount} />
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Amount value={loan.repaid_amount} />
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap text-muted-foreground">
-                              {formatMoment(loan.issued_at)}
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap text-muted-foreground">
-                              {formatMoment(loan.maturity_at, '만기 없음')}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                            </span>
+                          </TableCell>
+                          <TableCell>{loan.credit_grade}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={loan.status === 'overdue' ? 'destructive' : 'secondary'}
+                            >
+                              {statusLabel(loan.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Amount value={loan.principal_amount} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Amount value={loan.interest_amount} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Amount value={loan.outstanding_amount} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Amount value={loan.repaid_amount} />
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-muted-foreground">
+                            {formatMoment(loan.issued_at)}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-muted-foreground">
+                            {formatMoment(loan.maturity_at, '만기 없음')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </section>
