@@ -18,3 +18,7 @@
 - Full typecheck **FAIL** (five existing backend duplicate/missing-export errors on integration main); full build **FAIL**; full `pnpm test` **FAIL** (mobile API contract generated-doc drift); migration parity **FAIL** (1/6, duplicate IDs). These are explicit release blockers, not claimed as patch passes.
 - Real DEV PostgreSQL read-only inspection: 293 applied migrations; **no DB DML/DDL**. Isolated real PostgreSQL replay and official Test exact-SHA authenticated E2E **BLOCKED** by migration collisions; Production promotion prohibited. Test/Production unchanged by this task. Rollback: revert the unmerged preflight PR; no database rollback required. Any future applied SQL correction must be forward-only.
 - No new user-facing end-to-end feature was delivered; this is P0 containment, not feature completion. Preserve all restored refs and unresolved historical 462-ref recovery evidence.
+
+### Additional independent audit — 18:39 KST
+- Fetched every restored ref into this isolated clone. **All 77/77 original head SHAs are now ancestors of main `76d63a58`**; this cohort has **0 unique commits outside main**. The 14 reopened Draft PRs remain for deliberate review of GitHub's closed-but-unmerged metadata, not as evidence of lost code. This does **not** certify functional/financial acceptance. The older 462-ref incident remains separate.
+- PR #1880 is Draft/HOLD. At 18:38 there were 79 remote refs (main + 77 restored + this repair branch), 15 open Draft PRs, no PR head mismatch. No branch or PR cleanup performed by this task.
