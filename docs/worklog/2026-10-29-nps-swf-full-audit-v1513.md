@@ -15,3 +15,13 @@
 
 ## FINISHED
 - Pending evidence and disposition.
+
+### IN PROGRESS checkpoint — 2026-10-29 23:12 KST
+- Confirmed exact running v1502 application source `c2129625aa66` is the same risky SWF service implementation inspected on freshly fetched main `54b182d22`. Git checkout with unrelated local mutations is untouched.
+- Read-only Production-connected PostgreSQL `BEGIN READ ONLY` / `ROLLBACK`: NPS 2 accounts (1 receiving status), 50,000 WLD principal, 1 contribution, 238 payout rows × 45 = 10,710 WLD (latest 2026-10-15), 0 last-24h payments. Migration 275 present (pension write hold); migration 300 absent. App role SELECT for NPS accounts/contributions/payouts true, prohibited NPS DML absent. Role-scoped authenticated reads still not E2E proven.
+- SWF: config `is_enabled=true`, four portfolios, 270 events, 248 legacy COMPOUND_GROWTH_CYCLE (latest 2026-10-15), five `SWF_REBALANCED` events marked SUCCESS with `amount_wld=0` on October 29 after only timestamp mutations. No ledger ref column on event table; canonical funding/settlement unverified. Main service's manual liquidation also returns success from zero-value event with no authoritative transfer. Public `/pension` HTTP 200 shows transaction hold; anonymous `/api/admin/pension/overview` HTTP 401.
+- Canonical TREASURY cash projected 0 WLD while five text-based legacy vault rows sum to 220,923,528 WLD; 552/552 Treasury legacy rows lack `ledger_transaction_id`.
+- NPS backend focused: 47/47 PASS, frontend 21/21 PASS. SWF backend focused: **7 PASS / 11 FAIL**; frontend 7 PASS / **2 FAIL**. Actual authenticated pension actions weren't exercised, to avoid money movement. These focused results do NOT establish full-suite green or isolated Test finance settlement.
+- Forecast discrepancy: 50,000 WLD Tier-1 × 8 basis points hourly = 40 WLD/hour, 350,400 WLD/8,760-hour year = 700.8% nominal simple annual versus advertised 7%. This is a simulation/contract mismatch, not an actual cash payout report.
+- Findings registered in GitHub P0 issue #1909 (SWF false success) and P1 #1910 (pension annual/hourly mismatch), with prior #1275 (SWF synthetic tax), #1302 (NPS historical read boundary) and #1816 (MINT source) cross-links.
+- No DB writes, service restarts, runtime flag changes, Test dispatch or production promotion.
