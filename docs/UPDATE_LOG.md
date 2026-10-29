@@ -1,3 +1,6 @@
+## v2026.10.29.1205 — Ledger discrepancy evidence registry (isolated TEST_VERIFIED)
+- [EN worklog](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md) / [KO](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md). Corrected earlier sign error; 18 user cash balances each +1,000 WLD vs ledger, total 18,000. Migration 294 captures defensible cases without moving money, preserving approved financial grants; historic corrections remain blocked pending proof.
+
 ## v2026.10.29.1204 — Database construction runbook (isolated rebuild, not Production)
 - [Step-by-step English build](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [Korean](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). PostgreSQL dump, ACL, second disk, container, restoration, schema and ledger verification. User-approved finance DML preserved; live DB unchanged. [Internal](updates/v2026.10.29.1204-database-construction-internal.md) / [GitHub](updates/v2026.10.29.1204-database-construction-github.md).
 

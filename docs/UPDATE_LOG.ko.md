@@ -1,3 +1,6 @@
+## v2026.10.29.1205 — 원장 불일치 증거 기록 체계 (격리 Test 통과)
+- [한국어 진행기록](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md) / [영어](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md). 이전 부호 오류 정정: 18개 사용자 현금 계좌 각 +1,000 WLD 차이, 총 18,000. 294번은 금액 변경 없이 차이 증거 기록, 승인 금융 권한 유지. 역사적 원인 증명·정정은 미완료.
+
 ## v2026.10.29.1204 — DB 실제 구축 절차서 (격리 복원, 운영 미반영)
 - [한국어 명령어 기반 구축 가이드](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md) / [영어 정본](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md). 두 번째 디스크·백업·복원·권한·키·마이그레이션·검증 전 과정 기록. 기존 금융 쓰기 권한 유지·원본 DB 미변경. [내부 기록](updates/v2026.10.29.1204-database-construction-internal.ko.md) / [깃허브 내역](updates/v2026.10.29.1204-database-construction-github.ko.md).
 
