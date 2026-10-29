@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -48,6 +48,19 @@ export class SupportController {
   @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
   async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
     return { messages: await this.repo().messages(requireUserId(req), id) };
+  }
+
+  @Get('threads/:id/messages/:messageId')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Verify an exact message receipt in my support conversation' })
+  async message(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+  ) {
+    const message = await this.repo().exactMessage(requireUserId(req), id, messageId);
+    if (!message) throw new NotFoundException('support message not found');
+    return { message };
   }
 
   @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })

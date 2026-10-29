@@ -20,14 +20,14 @@
 - PUBLIC must not execute the new function.
 
 ### Task 1 — Read-only exact receipt contract
-- [ ] Write failing controller/repository tests.
-- [ ] Verify RED.
-- [ ] Add forward-only 295 SQL and repository/route.
-- [ ] Verify GREEN and check no-store/guard behavior.
-- [ ] Commit checkpoint.
+- [x] Write failing controller/repository tests.
+- [x] Verify RED.
+- [x] Add forward-only 295 SQL and repository/route.
+- [x] Verify GREEN and check no-store/guard behavior.
+- [x] Commit checkpoint (initial worklog).
 
 ### Task 2 — Isolated PostgreSQL and release gates
-- [ ] Verify owner/other-owner/201st-message, direct-table and PUBLIC ACL in disposable PostgreSQL.
-- [ ] Run full workspace tests, typecheck, lint, builds, audit, CI.
-- [ ] Re-fetch main and plans; document remaining blockers.
+- [x] Verify owner/other-owner/201st-message, direct-table and PUBLIC ACL in disposable PostgreSQL.
+- [x] Run full workspace tests, typecheck, lint, backend build, audit; Next build 1GiB OOM, CI pending.
+- [x] Re-fetch main and plans; document remaining blockers.
 - [ ] Push Draft/HOLD PR and C handoff; do not merge without all gates.
