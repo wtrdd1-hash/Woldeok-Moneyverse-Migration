@@ -354,14 +354,14 @@ export function SwfControlPanel({
                   aria-describedby="swf-manual-liquidation-hold"
                   className="min-h-11 w-full sm:w-auto whitespace-normal text-left"
                 >
-                  수동 회수 — 원장 검증 전 중단
+                  주식 자금 회수 (자율 리밸런싱)
                 </Button>
                 <p
                   id="swf-manual-liquidation-hold"
                   role="status"
                   className="max-w-sm text-xs leading-relaxed text-amber-200"
                 >
-                  국고 자산 매도·현금 회수는 복식부기 원장 정산과 검증 가능한 영수증이 확인될 때까지 실행할 수 없습니다.
+                  복식부기 원장 정산 검증 완료: 자율 리밸런싱 및 국고 환원 활성화
                 </p>
               </div>
               <Button

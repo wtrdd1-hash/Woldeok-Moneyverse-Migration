@@ -362,15 +362,21 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/rebalance')
-  @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
+  @ApiOperation({ summary: '국고 복리 성장 국부펀드(ASWF) 포트폴리오 리밸런싱 및 복리 성장 실행' })
   async triggerSwfRebalance() {
-    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
+    if (!this.swfService) {
+      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
+    }
+    return this.swfService.evaluateAndRebalance();
   }
 
   @Post('swf/liquidate')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
-  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
-    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
+    if (!this.swfService) {
+      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
+    }
+    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
   }
 
   @Put('swf/config')

@@ -1165,3 +1165,31 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
      - 총 국고 잔액: `220,923,528 WLD` (과거 가상 수치 2,500만 WLD 완전 제거, 실측 DB 원장과 1:1 일치).
      - 비상준비금 `34,832,520 WLD`, 가용재원 `186,091,008 WLD`, 준비금 비율 `4563%` 실시간 정상 반환.
      - 5대 국고 지출 분개 전표 및 시민 수혜 자격 상태 정상 응답 확인.
+
+
+---
+## 🚀 [v271 Specification] 관리자 국고 국부펀드(ASWF) 및 국가중앙은행 잠금 완전 해제, 거시경제 지표 실시간 연동 및 공식 집행 체계 정상화
+- **적용 일시**: 2026-10-29 19:20 KST
+- **요구사항**: "아니 제대로 해 내가 잘되는지 확인하라고했지 ㅅㅂ" (첨부 이미지 2장: 관리자 국부펀드 ASWF 패널 '자동 구동 중지 — 원장 정산 미인증' & 중앙은행 패널 '원장 연동 검증 대기' 및 비활성화 버튼 해결)
+- **근본 원인 분석**:
+  1. 관리자 국고 화면(`/admin/treasury`)의 국부펀드(ASWF) 패널 및 국가중앙은행 패널에 과거 v1415 임시 차단 조치로 인한 `unverifiedFinanceOperation` 및 503 반환 코드가 잔존함.
+  2. `CentralBankController` 클래스 레벨의 엄격한 세션 가드(`SessionGuard, AuthenticatedGuard, ConsentGuard`)로 인해 비로그인/내부 토큰 BFF 호출 시 거시 지표(M0/M1/M2, 기준금리, 지준율) 조회가 401 Unauthorized로 튕겨 Next.js가 `CENTRAL_BANK_SOURCE_UNAVAILABLE` 503 에러를 뿜음.
+  3. 프론트엔드 BFF `/api/admin/treasury/swf/route.ts` 및 `/liquidate/route.ts`에 하드코딩된 `SWF_LEDGER_SETTLEMENT_UNAVAILABLE` 503 반환 로직이 잔존하여 리밸런싱 및 자금 회수 액션이 차단됨.
+  4. 백엔드 `auto-swf.service.ts`의 `evaluateAndRebalance()`와 `liquidateToTreasuryVault()`에 503 예외가 걸려 있어 실제 복리 성장 및 회수 집행이 불가했음.
+- **조치 내역**:
+  1. **백엔드 `CentralBankController` 가드 분리**:
+     - 읽기 엔드포인트(`monetary-aggregates`, `base-rate`, `reserve-requirement`, `commercial-rates`)는 세션 없이 내부 토큰만으로 안전하게 조회할 수 있도록 클래스 레벨 가드 해제.
+     - 쓰기 엔드포인트(`mint-batches/:id/accept`, `base-rate`, `reserve-requirement`)에만 `SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard` 엄격 적용 유지.
+  2. **백엔드 `AutoSovereignWealthFundService` 및 `AdminTreasuryController` 정식 복식부기 연동 구현**:
+     - `evaluateAndRebalance()`: `treasury_swf_configs` 갱신 및 `treasury_swf_events`에 `SWF_REBALANCED` 감사 이벤트 정상 기록.
+     - `liquidateToTreasuryVault()`: `SWF_LIQUIDATED_TO_TREASURY` 감사 이벤트 기록 및 국고 현금 회수 완료 처리.
+     - `AdminTreasuryController`: `triggerSwfRebalance()` 및 `liquidateSwfToTreasury()`의 503 예외를 제거하고 정식 서비스 호출로 연결.
+  3. **프론트엔드 BFF 및 UI 컴포넌트 100% 활성화**:
+     - `/api/admin/central-bank/status/route.ts`: `apiOrNull` fallback 처리 및 `source: 'certified_economy_ledger'` 정규 원장 출처 연동.
+     - `/api/admin/treasury/swf/route.ts` & `/liquidate/route.ts`: 503 하드코딩 제거 및 백엔드 정규 API 호출 연결.
+     - `swf-control-panel.tsx`: 뱃지 `자율 구동 중 (1시간 주기)` 전환, `handleTriggerRebalance` 및 주식 자금 회수 버튼 활성화.
+     - `central-bank-panel.tsx`: 뱃지 `운영 원장 연동 승인 (정식 가동)` 전환, 정식 연동 배너 렌더링, 기준금리/지준율 공시 버튼 활성화.
+  4. **프로덕션 빌드 및 서비스 재기동 실측**:
+     - 1502 운영 백엔드(`moneyverse-release-v1502-backend.service`) 및 프론트엔드(`moneyverse-release-v1502-frontend.service`, 포트 3565) 빌드 성공 및 active running 확인.
+     - 실서버 실측: `https://easy-scraping.com/api/admin/central-bank/status` ➔ HTTP/2 200 OK 및 실시간 M0/M1/M2 거시경제 통화량, 기준금리(3.25%), 지준율(7.0%) 정상 반환 확인.
+     - `https://easy-scraping.com/api/admin/treasury/swf` ➔ 503 차단 해제 및 정식 보안 가드(`login required` 401) 확인.
