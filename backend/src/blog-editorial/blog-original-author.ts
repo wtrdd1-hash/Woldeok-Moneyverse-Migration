@@ -53,9 +53,9 @@ export async function generateLocalOriginalArticle(
       COMPUTER:'コンピューターの仕組みとネットワーク通信の基本を解説するガイド',
     },
     CN:{
-      ECONOMY:'理解经济学的核心概念与金融机构作用的基础学习指南',
-      CODING:'理解程序设计的关键概念与软件结构的基础学习指南',
-      COMPUTER:'理解计算机系统和网络通信基本原理的详细学习指南',
+      ECONOMY:'从官方基础资料理解经济学的核心概念与金融机构作用的完整学习指南',
+      CODING:'从基础概念到实际设计理解程序开发与软件结构的详细学习指南',
+      COMPUTER:'从通信协议到系统结构深入理解计算机网络运作原理的学习指南',
     },
   };
   const verifiedTitle=countryTitles[slot.country][slot.topic];
