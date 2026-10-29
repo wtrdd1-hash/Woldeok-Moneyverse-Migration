@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1488 / F675-178 — 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
+**Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
 
 **회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). **기준:** main `62c6cd038951d65c94b709302bdaec6e75b080b6`, AGENTS.md·README.md·영문 PROJECT_PLAN.md(정본)·국문 대조. 시작/중간에 main과 기획서 재확인. **개발 이관:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 독립 QA v1379 금융 집중시험 6 FAIL/3 PASS, 전체 lint 오류 3건, 적용 마이그레이션 체크섬 불일치 5건. **기획만 수행**하며 구현·SQL·WLD·Test·운영 배포는 하지 않음.
 

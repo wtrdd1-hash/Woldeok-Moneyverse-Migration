@@ -2,7 +2,7 @@
 
 **2026-10-30 04:05 KST | 기능 추가 | DRAFT / RELEASE HOLD**
 
-**회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). **main:** `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작/중간 확인. **개발 이관:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). Draft PR 주소는 개설 후 GitHub 업데이트 로그에 기록.
+**회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). **main:** `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작/중간 확인. **개발 이관:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — 최신 main 독립 DRAFT/HOLD, 미병합.
 
 ## 시작 조사
 - 미니PC Debian 13.6 백엔드/프론트엔드/Discord/MCP/Nginx/Docker active, 개발 DB 연결. 디스크 root 87%, 데이터 94%; 타인 작업·백업 임의 삭제 금지.

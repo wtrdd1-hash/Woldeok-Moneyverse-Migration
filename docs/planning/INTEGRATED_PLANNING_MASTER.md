@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1488 / F675-178 — Owner-Private Wallet Transaction Bookmarks (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, independent main-based branch (unmerged prior #1926/#1930 preserved).
 
 **Cycle:** Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). **Source authority:** main `62c6cd038951d65c94b709302bdaec6e75b080b6` and `AGENTS.md`, `README.md`, English canonical `PROJECT_PLAN.md` with Korean parity; start and mid main/plan hashes rechecked. **Engineering handoff:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). QA v1379 finance 6 FAIL / 3 PASS, full lint 3 errors, five applied migration checksum mismatches. **Proposal only:** no implementation, DB migration, feature switch activation, WLD movement, Test or Production deployment.
 

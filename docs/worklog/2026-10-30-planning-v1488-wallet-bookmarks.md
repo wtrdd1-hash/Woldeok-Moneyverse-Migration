@@ -2,7 +2,7 @@
 
 **2026-10-30 04:05 KST | Feature Addition | DRAFT / RELEASE HOLD**
 
-**Cycle:** Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). **Main:** `62c6cd038951d65c94b709302bdaec6e75b080b6`, checked at start and mid. **Handoff:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). Draft PR link recorded in GitHub update log after opening.
+**Cycle:** Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). **Main:** `62c6cd038951d65c94b709302bdaec6e75b080b6`, checked at start and mid. **Handoff:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — independent main-based DRAFT/HOLD; no merge.
 
 ## Start evidence
 - MiniPC Debian 13.6 system status: backend/frontend/Discord/MCP/Nginx/Docker active, DEV DB connected. Root 87%, data volume 94%; do not delete others' worktrees or backup data.

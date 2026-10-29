@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.30.1488 — F675-178 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
+**Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
 - **회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작/중간 재조회, 독립 QA v1379 FAILED/P0. [개발 이관 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 문서 전용이며 SQL·런타임·DB·WLD·Test·운영 변경 없음.
 - **확인된 공백:** 지갑 거래내역은 본인 거래 50건/페이지, 전체/7일/30일 조회만 지원하며 북마크 UI/API 없음. 개발 PostgreSQL 17.11에 `wallet_activity_bookmarks` 테이블 없음(개발 거래 891건, 운영 데이터 아님). F675-176 저장 필터·F675-177 월별 요약·F675-03 거래 영수증과 중복되지 않음.
 - **신규 설계:** 회원 본인 WLD 거래(수신 송금 및 동결/종료 계정의 과거 거래 포함) 최대 100개 저장/삭제, 비공개 `/wallet/activity/bookmarks` 20/50건 커서·50개 상태 일괄 조회. 세션 인증 PUT/DELETE, 동일 UUID 멱등 키와 원자적 영수증. 소유자 범위 SECURITY DEFINER 함수·전진형 테이블/인덱스·app-role 직접 DML 금지·금융 원장 변경 금지. 회원/세션 결속 HMAC 커서 10분, no-store/noindex, Nest/Next/Android 동등, 320px/WCAG 2.2 AA, 관리자 집계만, 기능 OFF. 상세 명세는 [국문 통합 기획](INTEGRATED_PLANNING_MASTER.ko.md).
