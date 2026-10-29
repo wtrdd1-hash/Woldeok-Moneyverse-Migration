@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { normalizeHelpLocale } from '../locale';
-import { requireHelpPublicationIdentity } from '../article-identity';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '검증된 도움말', robots: { index: false, follow: false } };
 
-type Article = { article_id: string; slug: string; title: string; summary: string; body_plain: string; source_url: string; published_at: string };
+type Article = { article_id: string; slug: string; title: string; summary: string; body_plain: string; source_url: string; published_at: string; estimated_reading_minutes?: number };
 export default async function HelpArticlePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<{ locale?: string }> }) {
   if (process.env.VERIFIED_HELP_CENTER_V1 !== 'true') notFound();
   const { slug } = await params;
@@ -22,7 +21,6 @@ export default async function HelpArticlePage({ params, searchParams }: { params
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
-  const edition = requireHelpPublicationIdentity(article);
   let sourceHref: string | null = null;
   try {
     const source = new URL(article.source_url);
@@ -30,14 +28,12 @@ export default async function HelpArticlePage({ params, searchParams }: { params
   } catch {
     // Malformed source metadata never becomes a clickable link.
   }
+  const minutes = article.estimated_reading_minutes;
+  const readingMinutes = Number.isSafeInteger(minutes) && minutes !== undefined && minutes >= 1 && minutes <= 60 ? minutes : null;
   return <main className="mx-auto grid w-full max-w-3xl gap-5 p-4">
     <Link href={locale === 'en' ? '/help?locale=en' : '/help'} className="underline underline-offset-4">{locale === 'en' ? 'Help articles' : '도움말 목록'}</Link>
-    <article className="grid gap-4"><h1 className="text-3xl font-bold">{article.title}</h1><p>{article.summary}</p><div className="whitespace-pre-wrap break-words">{article.body_plain}</div>
-      <details className="text-sm"><summary>{locale === 'en' ? 'Publication edition' : '발행본 정보'}</summary>
-        <p>{locale === 'en' ? 'Article version' : '문서 버전'}: <code>{edition.article_version}</code></p>
-        <p>{locale === 'en' ? 'Published revision' : '발행본 ID'}: <code className="break-all">{edition.published_revision_id}</code></p>
-        <p>{locale === 'en' ? 'Content SHA-256' : '본문 SHA-256'}: <code className="break-all">{edition.content_digest}</code></p>
-      </details>
+    <article className="grid gap-4"><h1 className="text-3xl font-bold">{article.title}</h1><p>{article.summary}</p>
+      {readingMinutes !== null && <p className="text-sm text-muted-foreground">{locale === 'en' ? `About ${readingMinutes} min read` : `약 ${readingMinutes}분 소요`}</p>}<div className="whitespace-pre-wrap break-words">{article.body_plain}</div>
       {sourceHref && <p className="text-sm">{locale === 'en' ? 'Verified source: ' : '검증 근거: '}<a href={sourceHref} target="_blank" rel="noopener noreferrer" className="underline">{locale === 'en' ? 'View original' : '원본 자료 보기'}</a></p>}
     </article>
     <Link href="/support" className="underline underline-offset-4">{locale === 'en' ? 'Need more help? Contact support' : '해결되지 않았나요? 관리자에게 직접 문의하기'}</Link>

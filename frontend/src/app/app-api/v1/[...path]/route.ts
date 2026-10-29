@@ -145,10 +145,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
-  // Owner-scoped wallet balances and ledger activity must never inherit an
+  // Owner-scoped data and expiring verified help must not inherit an
   // accidentally cacheable upstream response, including on Android clients.
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'help') headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'privacy' || parts[0] === 'help') headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'privacy') headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -173,9 +173,9 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  // Bank, chat and verified-help responses must not inherit stale public caching,
-  // including errors, retracted help articles and source-review expiry.
-  if (parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || parts[0] === 'help' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  // Bank loan and standing data belong to the viewer, including error paths.
+  // Never trust an upstream cache policy after a session or account change.
+  if (parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
   }
   return response;
