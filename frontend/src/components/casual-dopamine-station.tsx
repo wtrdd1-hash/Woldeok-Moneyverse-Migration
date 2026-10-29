@@ -55,7 +55,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              {t('arcade.desc', locale, '매일 가볍게 즐기는 5대 미니게임과 일일 퀘스트로 WLD 보상을 획득하세요.')}
+              {t('arcade.desc', locale, '5대 미니게임을 연습해보세요. 실제 WLD 지급은 검증된 원장 정산이 필요합니다.')}
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Gift className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30">
-              {t('arcade.pet.badge', locale, 'WLD 먹이주기')}
+              {t('arcade.pet.badge', locale, '로컬 연습')}
             </span>
           </div>
           <div className="mt-3">
@@ -124,7 +124,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.pet.desc', locale, '덕이를 쓰다듬고 먹이를 주어 호감도를 높이고 매일 특별 보상을 받으세요.')}
+              {t('arcade.pet.desc', locale, '덕이를 쓰다듬고 포춘쿠키를 열어보는 연습입니다. WLD 지급은 없습니다.')}
             </p>
           </div>
         </div>
@@ -236,9 +236,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </button>
             </div>
             <DeokiPetStation
-              onClaimFortune={(bonusWld, quote) => {
-                showRewardNotice(`포춘쿠키 보너스 +${bonusWld.toLocaleString()} WLD 수령!`);
-              }}
               onTriggerFever={() => {
                 setActiveModal('fever');
               }}
