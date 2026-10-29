@@ -24,3 +24,13 @@
 - Typecheck: backend/frontend PASS after correcting two strict TS errors; shared base checkout lacked installed `undici`, resolved by a workspace-local symlink to an existing same-version package, without mutating base node_modules. Lint PASS (0 errors, 1,099 pre-existing warnings).
 - Contract generator: 180 Android endpoints generated; member shop catalog query includes q + exact rarity. English and Korean docs updated. SEO public query variants noindex; Android private shop catalog no-store/noindex.
 - Mid-work main `35971c600f25869c96f1c666d4b9f58927202730` unchanged; integrated EN/KO plan hashes `89d03733...` / `ac9f4013...` unchanged. Full tests, build, audit, CI, Test gate pending.
+
+### Repair checkpoint (v3, 03:35 KST)
+- Full root `pnpm test` failed **1/1,875 frontend assertions**: `mobile-responsive-regression.test.ts` expected the existing mobile search layout class string. All 1,874 other frontend assertions passed; database tests 16 files PASS/4 SKIP, backend 238 files PASS/70 SKIP. The failure was caused by this feature's class-token reordering, not an unrelated main regression.
+- Created dedicated repair branch `auto/hourly-a-shop-rarity-repair-20261029-0335` from candidate SHA `171be142cc3e9f7e039df221976d931764c289fd`. Preserved the original branch and changed only class ordering to retain both the mobile regression contract and flex-wrap. All required gates must be rerun on the new SHA.
+
+### Integration preflight (v4, 03:42 KST)
+- Root `pnpm test` on repair SHA `1b68a9062df850e20939c7cc1d7aad35ac978062` PASS: database 16 test files PASS / 4 SKIP, backend 238 PASS / 70 SKIP, frontend 354 PASS / 1,875 assertions PASS. API contract generation/check PASS; no live DB tests or writes.
+- `pnpm build` initially failed under artificial `NODE_OPTIONS=--max-old-space-size=1024` heap cap; rerun with 2048 MiB heap and two CPU affinity PASSED backend+frontend. Resource failure did not justify code change. Root disk now 97%, data 98%; no cleanup of backups or coworkers.
+- Found a membership correctness risk: filtering the shop catalogue can hide an owned VIP pass. TDD RED/GREEN added a separate unfiltered owner catalog read for membership when filters are active; unknown state does not falsely claim non-ownership. New exact SHA and all required gates pending.
+- Existing QA v1354 Production RELEASE HOLD remains authoritative; no Test/Production deployment, financial write, migration or branch deletion.

@@ -11,7 +11,7 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
-import { SHOP_RARITIES, shopFilterQuery } from './shop-rarity';
+import { SHOP_RARITIES, shopFilterQuery, vipMembershipFromCatalog } from './shop-rarity';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,10 +47,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const rarity = params.rarity ?? '';
   const querySuffix = shopFilterQuery({ q: query, rarity });
 
-  const [catalogData, walletData, profileData] = await Promise.all([
+  const [catalogData, membershipCatalogData, walletData, profileData] = await Promise.all([
     loggedIn
       ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
       : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
+    loggedIn && querySuffix ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog') : null,
     loggedIn ? apiOrNull<CanonicalWalletOverview>('/api/v1/wallet') : null,
     loggedIn
       ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
@@ -64,10 +65,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
-  const vipPassItem = items.find(
-    (item) => item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
-  );
-  const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
+  // A filtered catalogue may omit the VIP pass even when the member owns it.
+  // Use an unfiltered owner read for membership; unknown is not "not owned".
+  const membershipItems = loggedIn && querySuffix
+    ? membershipCatalogData?.catalogItems ?? null
+    : catalogData?.catalogItems ?? null;
+  const isPlusMember = vipMembershipFromCatalog(membershipItems);
 
   return (
     <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
@@ -90,7 +93,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl flex-wrap gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap" role="search">
           <input
             type="search"
             name="q"
@@ -148,7 +151,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
-      {catalogData ? <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} /> : null}
+      {catalogData && isPlusMember !== null ? (
+        <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+      ) : null}
 
       {catalogData ? (
         <ShopStoreView

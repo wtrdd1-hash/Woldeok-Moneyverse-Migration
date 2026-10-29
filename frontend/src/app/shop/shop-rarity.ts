@@ -16,3 +16,14 @@ export function shopFilterQuery({ q, rarity }: { readonly q?: string; readonly r
   const query = params.toString();
   return query ? `?${query}` : '';
 }
+
+/** Unknown catalog state must not be mistaken for a confirmed non-member. */
+export function vipMembershipFromCatalog(
+  items: readonly { readonly code: string; readonly user_owned_quantity: number }[] | null,
+): boolean | null {
+  if (items === null) return null;
+  const vipPass = items.find((item) =>
+    item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
+  );
+  return Boolean(vipPass && vipPass.user_owned_quantity > 0);
+}
