@@ -14,3 +14,8 @@
 ## 중간 2 — 2026-10-29 12:16 KST
 - UI 테스트 2건, 액션 테스트 9건, Backend 계약/CSRF 테스트 6건 PASS.
 - 전체 Typecheck PASS, Lint 오류 0건(경고 1,091건), app-api 180개 일치. main b84d645a 재확인, Production v1213 별도 운영 중.
+
+## 중간 3 — 2026-10-29 12:26 KST
+- 전체 Frontend 1,921 PASS, Backend 1,959 PASS / 440 SKIP, Database 46 PASS, Contract 38 PASS, 빌드 PASS. 보안 하한 9 PASS이나 운영 의존성 Moderate 1건, 전체 12건 감사 실패.
+- 최초 SHA CI SUCCESS: 격리 PostgreSQL 마이그레이션 294개 및 Backend 2,546 PASS / 70 SKIP. 로컬 격리 PostgreSQL 실행은 원격 명령 안전 차단으로 미완료, 생성 컨테이너 제거.
+- 신규 실제 PostgreSQL 소유자 검증 테스트를 추가하여 새 SHA CI 재검증 필요. 200개 초과 대화 조회 문제는 #1832 후속 이슈 등록.

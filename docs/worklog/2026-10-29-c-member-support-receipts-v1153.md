@@ -17,3 +17,9 @@
 - New UI tests 2 PASS; member action tests 9 PASS; backend support HTTP controller contract and CSRF guard tests 6 PASS.
 - Full monorepo Typecheck PASS; Lint PASS (0 errors, 1,091 preexisting warnings); app-api contract 180/180 PASS; git diff --check PASS.
 - Production v1213 source b44ffd0a confirmed via immutable release pointer; this candidate is not live. Main refetched unchanged at b84d645a. Existing QA #1818 blog publication P0 remains OPEN.
+
+## MID 3 — 2026-10-29 12:26 KST
+- Local full frontend 1,921 PASS; backend without DB 1,959 PASS / 440 SKIP; database 46 PASS / 4 SKIP; contract 38 PASS. Full build PASS; security-floor 9 PASS; production audit FAIL (moderate 1), full audit FAIL (12: 3 low / 9 moderate).
+- CI at first exact SHA 5556b6523d7b83d34b011b421ab93ae189a204a2 SUCCESS, including 294 isolated PostgreSQL migrations and 2,546 Backend tests / 70 skipped. Candidate image still building at checkpoint.
+- Local isolated PG container was created and safely removed; attempting to run the CI migration runner locally was denied by the remote command safety gate. No local PostgreSQL PASS is claimed; CI remains the authoritative isolated DB environment.
+- Added dedicated real-PostgreSQL owner-receipt/idempotency/ACL regression test for CI. New commit requires fresh exact-SHA CI and candidate image verification. Follow-up issue #1832 tracks exact message-by-id readback beyond the first 200 messages.
