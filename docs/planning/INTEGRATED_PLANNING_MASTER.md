@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.30.1492 / F675-179 — Verified Admin Storage Headroom & Release-HOLD Evidence (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
 
 **Authority and cycle.** Previous Feature Improvement v1490 → Current Feature Addition v1492 → Next Feature Improvement v1494 (provisional). Canonical `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` inspected at start and mid-run. QA v1381 FAILED/P0; GitHub engineering handoff [#1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948); capacity incident [#1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170). This is **planning only**; no runtime, filesystem cleanup, DB, WLD, Test or Production mutation.
 

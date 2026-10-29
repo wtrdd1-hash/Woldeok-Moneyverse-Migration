@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.30.1492 — F675-179 Verified Admin Storage Headroom and Release-HOLD Evidence (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
 - Cycle: Previous Feature Improvement v1490 → Current Feature Addition v1492 → Next Feature Improvement v1494 (provisional). Authoritative `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` checked start/mid; QA v1381 FAILED/P0. [Engineering issue #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), capacity incident #1170.
 - Source-backed gap: existing `/admin/api-health` and guarded Nest `admin/api-health/status` show CPU/memory/DB probe, not host filesystem/inode/rollback headroom. Debian 13.6 at 2026-10-30 06:09 KST: root 92%, data mount 99%, about 3.1 GiB unprivileged free. Do not infer outage; no cleanup authorized.
 - Proposal: private `/admin/operations/storage` and `GET /api/v1/admin/operations/storage`, fixed ROOT/DATA host-statvfs collector with authenticated local channel, namespace/source attestation, exact bytes/inodes, `df`-compatible percentage, 120s freshness, WARN >=80%, CRITICAL >=90%, EMERGENCY >=95% or <5 GiB. UNKNOWN/stale/forged evidence fails closed; Refresh / View evidence / Open #1170 CTAs only; no delete/restart/approval command.

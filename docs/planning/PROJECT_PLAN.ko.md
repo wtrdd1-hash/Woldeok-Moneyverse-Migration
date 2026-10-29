@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.30.1492 — F675-179 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
 - 회차: 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1381 FAILED/P0. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 #1170.
 - 소스 공백: 기존 `/admin/api-health` 및 Nest `admin/api-health/status`는 CPU·메모리·DB 검사를 표시하지만 호스트 파일시스템·inode·롤백 여유 근거는 제공하지 않는다. Debian 13.6 2026-10-30 06:09 KST 실측: 루트 92%, 데이터 99%, 일반 사용자 가용 약 3.1GiB. 서비스 장애로 단정하거나 삭제를 승인하지 않는다.
 - 신규 `/admin/operations/storage`, `GET /api/v1/admin/operations/storage`: ROOT/DATA 고정 허용목록 호스트 statvfs 수집, 인증된 로컬 채널, 출처·마운트 네임스페이스 검증, 정확한 바이트·inode, `df` 호환 사용률, 120초 최신성. 80% 이상 주의, 90% 이상 위험, 95% 이상 또는 가용 <5GiB 긴급. 오래되거나 위조된 근거는 UNKNOWN으로 차단. CTA는 새로고침/근거 보기/#1170 열기뿐이며 삭제·재시작·배포 승인 없음.

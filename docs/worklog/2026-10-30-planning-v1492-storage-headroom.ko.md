@@ -15,3 +15,5 @@
 - 영문·국문 통합 상세 명세, 통합 기획 요약, 변경기록·작업일지·내부/GitHub 업데이트 기록 작성. 별도 분산기획 문서 없음. 문서 diff·영문/국문 백로그·릴리스 분류 검사 후에만 완료를 주장한다.
 - 외부 독립 레퍼런스 신규 승인 0건, 누적 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. 수집기 구현, DB 변경, PostgreSQL 합성 수용시험, 런타임 빌드, 정확 SHA Test, Production 승격 미실행.
 - 다음 v1494 기능 보완. 독립 보안·금융·복원·정확 SHA Test 승인 전 기능 OFF 및 RELEASE HOLD.
+
+**GitHub 확인:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) OPEN/미병합. 문서 전용 릴리스 분류 시험 17 PASS/0 FAIL. GitHub 전체 CI는 최종 판정 전까지 미인증.

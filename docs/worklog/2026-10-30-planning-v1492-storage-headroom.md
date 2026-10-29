@@ -15,3 +15,5 @@
 - Added bilingual full specification and concise canonical project-plan summaries, bilingual changelog, worklog, internal and GitHub update logs. No standalone planning specification. Document-only diff, source and Korean backlog parity and release classifier must be checked before claiming success.
 - External independent references: newly approved 0, cumulative UNKNOWN/10,000 ⇒ BLOCKED/IN PROGRESS. No live collector, DB migration, synthetic PG acceptance, runtime build, exact-SHA Test or Production promotion executed.
 - Next: Feature Improvement v1494; engineering requires independent Test exact-SHA, security, financial and rollback gates. Feature OFF and Production HOLD.
+
+**GitHub verified:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) OPEN/unmerged. Local docs release-classifier 17 PASS/0 FAIL. Final GitHub CI not yet certified.

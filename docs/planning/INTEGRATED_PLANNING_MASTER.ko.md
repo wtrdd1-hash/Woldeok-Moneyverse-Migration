@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.30.1492 / F675-179 — 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
 
 **기준과 회차.** 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 재확인. 독립 QA v1381 FAILED/P0. 개발 이슈 [#1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 [#1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170). **문서 기획만 수행**하며 런타임·파일 삭제·DB·WLD·Test·Production을 변경하지 않는다.
 
