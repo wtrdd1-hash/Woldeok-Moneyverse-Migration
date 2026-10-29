@@ -1,5 +1,7 @@
 # Moneyverse 기획 v1486 — 지갑 월별 활동 요약 보완
 
+**Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930 (stacked on #1926, DRAFT/HOLD). [P0/P1 issue update](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925#issuecomment-6504593949).
+
 **2026-10-30 03:05 KST | 기능 보완 | 초안 / 배포 보류**
 
 이전 기능 추가 v1484 → 현재 기능 보완 v1486 → 다음 기능 추가 v1488(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 재확인. 선행 Draft #1926 미병합으로 누적 제안. QA v1378 FAILED/P0. miniPC Debian 13.6 연결, 시작 시 디스크 루트/데이터 86/92%. 스킬 커넥터 목록이 비어 설치된 Superpowers 관련 스킬을 읽음. GitHub 열린 PR·이슈 확인.

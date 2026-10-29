@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1486 / F675-177 — Monthly Wallet Digest Snapshot and Historical-Account Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 
 **Cycle:** Previous Feature Addition v1484 → Current Feature Improvement v1486 → Next Feature Addition v1488 (provisional). **Authority:** exact main `62c6cd038951d65c94b709302bdaec6e75b080b6` verified at start/mid; preceding [Draft #1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) remains unmerged. Independent QA v1378 **FAILED/P0**. This stacked documentation proposal does not imply an implemented endpoint, database change, Test certification or Production release. [Engineering handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 

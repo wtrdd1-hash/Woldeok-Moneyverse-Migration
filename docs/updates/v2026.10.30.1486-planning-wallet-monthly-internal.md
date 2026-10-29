@@ -1,5 +1,7 @@
 # Moneyverse planning v1486 — Monthly wallet digest hardening
 
+**Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930 (stacked on #1926, DRAFT/HOLD). [P0/P1 issue update](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925#issuecomment-6504593949).
+
 **2026-10-30 03:05 KST | Feature Improvement | DRAFT / RELEASE HOLD**
 
 Previous Feature Addition v1484 → Current Feature Improvement v1486 → Next Feature Addition v1488 (provisional). Main `62c6cd038951d65c94b709302bdaec6e75b080b6` rechecked start/mid. Predecessor Draft #1926 unmerged, so this is a stacked proposal. QA v1378 FAILED/P0. MiniPC Debian 13.6 connected, root/data disk 86/92% at start. Skills plugin list empty; inspected local Superpowers using-superpowers, brainstorming, writing-plans, using-git-worktrees, verification-before-completion. GitHub PRs/issues checked.

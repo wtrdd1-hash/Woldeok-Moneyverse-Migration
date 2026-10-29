@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v1486 / F675-177 — 지갑 월별 요약 스냅샷·과거 계정 조회 보완 (기능 보완 / 초안 / 배포 보류)
+- **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 
 **회차:** 이전 기능 추가 v1484 → 현재 기능 보완 v1486 → 다음 기능 추가 v1488(잠정). **기준:** main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인; 선행 [Draft #1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) 미병합. 독립 QA v1378 **FAILED/P0**. 본 변경은 기존 통합문서에만 반영하는 기획이며 API·DB·Test·운영 구현 완료가 아님. [개발 인계 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 

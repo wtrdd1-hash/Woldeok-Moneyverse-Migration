@@ -1,4 +1,5 @@
 ## v2026.10.30.1486 — F675-177 지갑 월별 요약 스냅샷·과거 계정 보완 (기능 보완 / 초안 / 배포 보류)
+- **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 - **회차:** 이전 기능 추가 v1484 → 현재 기능 보완 v1486 → 다음 기능 추가 v1488(잠정). 미병합 [Draft #1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) 기반; main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1378 FAILED/P0. 문서 기획만 수행, 운영 인증 아님.
 - **소스 기반 개선:** 풀의 `Queryable.query`만으로는 동일 클라이언트 `REPEATABLE READ READ ONLY`가 보장되지 않으므로 체크아웃 클라이언트+롤백/해제 또는 검증된 단일 SQL 스냅샷 필요. active/frozen/closed 계정의 과거 USER_CASH/USER_BANK WLD 전표 유지, 거래 actor 필터 금지. 회원 순유입/순유출은 총수입·총지출이 아니며 현금↔은행은 순변동 0. 당월 `effectiveEndExclusive`, 한국시간→UTC 반개구간, 정밀 금액 문자열·스냅샷·합계 불변식 강화.
 - **P0:** REPO1486-01 과거 참조, SEC1486-02 직접 DB DML·체크섬 5건, FIN1486-03 18,000 WLD·국고 552건·Test 합성 200, REL1486-04 프론트/엣지 SHA·금융 실패 6건·lint 3건·복원/정확 SHA Test·용량. **P1:** MONTH1486-05 본인 SQL/과거 계정, MONTH1486-06 스냅샷, MONTH1486-07 API/검증, MONTH1486-08 Android/접근성, MONTH1486-09 개인정보/관리자/SEO/KPI, MONTH1486-10 격리 PG 회귀. 합성 10,001건·적대적 시험은 **계획만 수립, 미실행**.
