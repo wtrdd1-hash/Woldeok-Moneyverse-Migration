@@ -22,3 +22,20 @@
 
 ## Finished
 - Pending; update with exact SHA, evidence, skipped/failed gates, branch retention, Test/Production/rollback decisions.
+
+## Finished — 21:44 KST (candidate, not released)
+- [x] RED/GREEN tests and real isolated PostgreSQL owner-filter fixture; all disposable containers removed.
+- [x] Rebased on new main `7ba69348350cea054544dd4c17d782ed8dcf19fb` after treasury/mint changes, without editing them. Last source/tested candidate before this report: `a1e7d5991133a658573b8ce94c476074c609cd73`.
+- [x] Web member toggle (accessible pressed state, category combination, refresh/pagination generation fence); same-origin BFF validates explicit true/false and rejects repeated filter keys; existing authenticated NestJS DTO, owner SQL and Android GET contract verified.
+- [x] Changed-code ESLint PASS; typecheck PASS; full build PASS; 33 notification frontend/API/SEO/a11y tests PASS; 10 backend notification tests PASS; 56 database tests PASS / 4 SKIP; isolated PG 17.11 owner/unread fixture PASS; mobile API contract generator PASS; root production-dependency security audit 0 known vulnerabilities; bot 11 PASS after offline bot dependency installation.
+- [ ] Full lint FAIL: 3 untouched `frontend/src/components/stale-tab-notice.tsx` no-empty errors; separate QA Draft #1894 owns the repair. Do not duplicate.
+- [ ] Full backend suite FAIL: 240 FAIL / 2,352 PASS / 493 SKIP, including monetary HTTP boundary validation failures outside this feature.
+- [ ] Full frontend suite FAIL: 61 FAIL / 2,533 PASS (unrelated help/support/header/finance/account tests); all targeted notification tests PASS.
+- [ ] Full fresh-schema SQL replay NOT certified: 304 sequential unique IDs (002–305), but simplified isolated role provisioning failed at migration 020 due Minecraft executor privilege reconciliation; do not count as PASS. Earlier fixture passed and was rolled back.
+- [ ] Exact-SHA GitHub CI FAIL on 3 lint errors; candidate image build SKIPPED; official authenticated Test exact SHA E2E, independent backup restore, applied checksum provenance, finance 18,000 WLD source, GitOps release gate BLOCKED.
+- [x] Test/Production public version APIs HTTP 200 both report `c2129625aa6629c616fb31ce790950618b8d92b2`, not candidate. No Test or Production deployment, no DB writes, no rollback action.
+- [x] Branch audit: started 2 remote branches / 1 open PR; finished inventory 5 remote branches / 4 open Draft PRs. All four non-main heads contain ahead commits and merge-tree had no conflicts; preserve all. Branch deletions 0, PR closures 0, main merges 0.
+- [x] Draft PR #1893 retained. Wider keyword/date/HMAC keyset notification search from v1474 remains unimplemented. Do not claim full planned notification search delivered.
+
+## Release disposition
+**P1 owner-unread partial feature connected and targeted-verified; FULL CI FAIL / OFFICIAL TEST BLOCKED / PRODUCTION HOLD.** No release or rollback permitted without a new exact-SHA full-gate pass and independent approval.
