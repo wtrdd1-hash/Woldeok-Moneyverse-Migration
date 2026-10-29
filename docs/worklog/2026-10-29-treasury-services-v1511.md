@@ -16,3 +16,9 @@
 
 ## FINISHED
 - Pending verified outcome and deployment decision.
+
+### RED checkpoint — 22:24 KST
+- Verified two frontend regressions with local pinned-lockfile Vitest against exact branch: 12 passed, **2 failed as expected**.
+- `AdminTreasuryPage`: a failed `/overview` hides separately valid `/swf` data; user cannot see independent SWF health.
+- `TreasuryView`: null ledger response crashes on `.filter`, and the page currently supplies `[]` on API failure, silently misreporting an unavailable ledger as zero transactions.
+- No production mutation or service restarts. Next step: preserve independent SWF rendering, explicitly display ledger unavailable state, keep verified-empty truth and auth/SEO behavior.
