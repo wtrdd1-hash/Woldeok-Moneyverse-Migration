@@ -21,7 +21,7 @@
 
 ### DB·트랜잭션·권한·만료
 - **제안 스키마이며 미적용**. 기존 적용 마이그레이션과 체크섬 불일치 5건을 먼저 해결하고 신규 고유 번호의 전진형 SQL만 사용. `support_message_drafts`: `owner_id uuid REFERENCES users`, `context_type CHECK('new_thread','reply')`, `context_id uuid NOT NULL`, `ciphertext bytea`, 12바이트 nonce·16바이트 tag, `key_version`, `revision bigint CHECK>0`, `updated_at`, `expires_at`, `PRIMARY KEY(owner_id,context_type,context_id)`. 새 문의는 0 UUID 센티넬, 답장은 실제 본인 소유 `support_threads.id`만 허용하는 CHECK/함수 검증. `(owner_id,expires_at)`, `(expires_at,owner_id)` 인덱스. 평문 검색 인덱스 없음.
-- `support_draft_operation_receipts`: `request_id uuid PRIMARY KEY`, owner/context/operation, `request_hmac bytea`, 결과 리비전, `receipt_id uuid UNIQUE`, 확정 시각. 초안 7일과 별개로 영수증은 30일 보관하여 응답 유실 재시도 보장 후 정책에 따라 파기. 원문 기록 금지. `SECURITY DEFINER` 함수에 고정 search_path·본인 검증; 테이블은 PUBLIC·moneyverse_app 직접 권한 회수, 최소 EXECUTE만 부여. 회원·컨텍스트 행 잠금→리비전·본인 문의 검증→암호문 갱신·만료 설정→불변 영수증 기록을 **단일 트랜잭션**으로 처리. 동일 키 재생은 변경 없이 최초 결과 반환.
+- `support_draft_operation_receipts`: `request_id uuid PRIMARY KEY`, owner/context/operation, `request_hmac bytea`, 결과 리비전, `receipt_id uuid UNIQUE`, 확정 시각. 초안 7일과 별개로 영수증은 30일 보관하여 응답 유실 재시도 보장 후 정책에 따라 파기. 원문 기록 금지. `SECURITY DEFINER` 함수에 고정 search_path·본인 검증; 테이블은 PUBLIC·moneyverse_app 직접 권한 회수, 최소 EXECUTE만 부여. 동시 신규 초안 20개 한도를 지키도록 회원 계정 행을 먼저 잠그고 컨텍스트 행 잠금→리비전·본인 문의 검증→암호문 갱신·만료 설정→불변 영수증 기록을 **단일 트랜잭션**으로 처리. 동일 키 재생은 변경 없이 최초 결과 반환.
 - 삭제·전송 후 정리는 compare-and-swap 리비전 일치 시만 수행. 저장·삭제·전송 경합의 확정 결과를 하나로 제한하고 오래된 요청은 409. 계정 삭제·만료 후 즉시 읽기 금지, 정리 작업은 멱등·건수만 감사·백업 복원 후 재노출 방지. 개인정보 내보내기에 초안을 포함할지는 별도 법적 검토가 필요하며 관리자 내용 조회는 허용하지 않음.
 
 ### 관리자·SEO·접근성·분석·수용시험
