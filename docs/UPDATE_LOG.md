@@ -1,3 +1,12 @@
+## v1464 / F675-172 — Member-private dashboard shortcuts (FEATURE ADDITION / DRAFT / HOLD)
+
+- Previous Improvement v1462 → Current Addition v1464 → Next Improvement v1466 (provisional). Main 9ebc5613845ba2e8179a0051e86db996593c8a19 start/mid; QA v1367 FAILED/P0; deployed Test/Production app c2129625aa6629c616fb31ce790950618b8d92b2 differs. Stacked on Draft #1856/#1846/#1837/#1830. [Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) / [Backlog #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+- Source: /dashboard has four hardcoded Next actions and no owner-editable shortcuts in inspected dashboard/profile/DB. Not the existing F675-160 shop wishlist or pinned announcements. Members can opt into six reorderable allowlisted internal route keys, with explicit Save/Reset and Android parity. No arbitrary URL, admin path, purchase, transfer, reward, notification or WLD effect.
+- Contract: versioned route registry and permissions, owner PK/version/CAS, immutable request-digest receipts, SECURITY DEFINER with direct DML revoked, owner-only GET/PUT/receipt lookup, CSRF, 409/412/422/429/503, 320px/WCAG 2.2 AA, noindex/no-store, >=20-member private admin aggregate, default-OFF flag, non-destructive rollback. Full EN/KO spec in PROJECT_PLAN.
+- P0 REPO1464-01 FIN1464-02 SEC1464-03 REL1464-04; P1 SHORTCUT1464-05, SHORTCUT1464-06, SHORTCUT1464-07, SHORTCUT1464-08, SHORTCUT1464-09, SHORTCUT1464-10. Proposed 10,001 synthetic/100 concurrency/100 unauthorized/50 lost-response/30 route-race tests NOT RUN. Five historical checksum mismatches, 552 Treasury-unlinked rows, MINT 19 adjustments/18,000 WLD and repository branch preservation remain gated.
+- Independent external evidence newly approved 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. Planning only; no runtime/DB/Test/Production mutation or standalone planning spec.
+
+
 ## v1462 / F675-171 — Saved-recipient integrity hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 - **Cycle:** Previous Addition v1460 → Current Improvement v1462 → Next Addition v1464 (provisional). Main rechecked through 95a8fdb85f6670cac9e52e16383711ac94924e93; stacked on unmerged Draft #1846/#1837/#1830. QA v1366 HOLD; deployed Test/Production application c2129625aa6629c616fb31ce790950618b8d92b2 is not repository main. [Backlog #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
