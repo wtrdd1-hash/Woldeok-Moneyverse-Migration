@@ -2,12 +2,37 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { api } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 function id(formData: FormData, field: string): string {
   const value = formData.get(field);
   return typeof value === 'string' ? value.trim() : '';
 }
+
+/** The POST and the owner-only profile GET must agree before claiming a switch. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function confirmsCareerSwitch(receipt: unknown, jobType: string): boolean {
+  return isRecord(receipt)
+    && receipt.job_type === jobType
+    && receipt.is_active === true
+    && typeof receipt.level === 'number'
+    && Number.isSafeInteger(receipt.level)
+    && receipt.level >= 1;
+}
+
+function confirmsOwnerCareer(profile: unknown, jobType: string): boolean {
+  if (!isRecord(profile) || !isRecord(profile.active_job)
+      || profile.active_job.job_type !== jobType
+      || !Array.isArray(profile.all_jobs)) return false;
+  const activeJobs = profile.all_jobs.filter((entry: unknown) => isRecord(entry) && entry.is_active === true);
+  return activeJobs.length === 1 && activeJobs[0].job_type === jobType;
+}
+
+const CAREER_UNVERIFIED = '전직 완료 여부를 확인할 수 없습니다. 새로고침 후 현재 활성 직업을 확인해 주세요.';
 
 export async function switchJobAction(
   _previous: ActionState,
@@ -17,17 +42,24 @@ export async function switchJobAction(
   if (!jobType) return { status: 'error', message: '직업을 선택해 주세요.' };
 
   try {
-    await mutate('/api/v1/work/active-job', {
+    const receipt = await mutate<unknown>('/api/v1/work/active-job', {
       body: { jobType },
     });
+    if (!confirmsCareerSwitch(receipt, jobType)) {
+      return { status: 'error', message: CAREER_UNVERIFIED };
+    }
+    const profile = await api<unknown>('/api/v1/work/profile');
+    if (!confirmsOwnerCareer(profile, jobType)) {
+      return { status: 'error', message: CAREER_UNVERIFIED };
+    }
     revalidatePath('/work');
     revalidatePath('/profile');
     return {
       status: 'ok',
-      message: '활성 직업이 성공적으로 변경되었습니다. 해당 직업의 업무를 수행할 수 있습니다.',
+      message: '서버 프로필에서 활성 직업 변경을 확인했습니다. 해당 직업의 업무를 수행할 수 있습니다.',
     };
   } catch (error) {
-    return failure(error, '직업 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    return failure(error, CAREER_UNVERIFIED);
   }
 }
 
