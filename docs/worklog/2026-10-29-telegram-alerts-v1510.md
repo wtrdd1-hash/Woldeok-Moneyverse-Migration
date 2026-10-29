@@ -11,7 +11,7 @@
 - Initial TDD baseline: expected test import failure before bridge implementation (RED).
 - Five local bridge unit tests GREEN: private-chat pairing rejects group/wrong code; redaction; retry after Telegram failure; transition deduplication/recovery; QA/blog timer alert classification.
 - Source implementation and independent systemd timer prepared. No existing app/process touched; Test/Production evidence still pending.
-- A first security review moved pairing destination and cursor exclusively into the protected systemd state directory, leaving only the read-only bot token in /etc/moneyverse/telegram.env.
+- A first security review moved pairing destination and cursor exclusively into the protected systemd state directory, leaving the host-only bot credential in a private service-state file, never in Git.
 
 ## In progress — isolated Test evidence
 - Unit suite: 5/5 PASS; Python syntax compile PASS; systemd installer syntax PASS.
@@ -22,3 +22,12 @@
 ## Midpoint production security correction
 - Actual host `/etc/moneyverse` is root:root 0750. A `debian` monitoring service cannot traverse it. Never relax that protected directory; instead move the host-only token to the existing service's private state root `/var/lib/moneyverse-telegram/telegram.env` (owner debian, mode 0600, parent 0700), and keep the service unprivileged.
 - GitHub PR #1898 opened, and this security correction will be pushed to that same isolated feature branch before Production installation.
+
+## Finished — code, Test and host staging (2026-10-29 KST)
+- PR #1898 MERGED into main as 608e0d44ac5c782cf1f7d2fb426b9b5043e1ea97; the merged second parent matches the tested feature code.
+- GitHub policy and non-runtime summary checks passed. Runtime build checks were skipped by the classifier; no runtime CI pass is claimed.
+- Five Python unit tests passed. An isolated systemd Test unit returned success/exit 0. Python syntax, installer syntax and unit configuration checks passed. Test and Production health endpoints both returned HTTP 200.
+- The owner-provided bot credential was stored in the authorized miniPC's private service directory with mode 0600 and parent mode 0700. No credential is present in source or GitHub.
+- Exact source hashes matched the staged executable; systemd units were placed on the host and daemon-reload completed. Existing backend/frontend PIDs did not change.
+- **NOT LIVE:** Telegram alert timer remains disabled/inactive, recipient pairing and actual message delivery are unverified. The remote executor blocked credential-bearing network validation; do not label Telegram integration Production ACTIVE.
+- Next external action: owner sends the private pairing command, then an authorized operator activates the timer and verifies a real Telegram send receipt. No database, ledger or existing application process was changed.
