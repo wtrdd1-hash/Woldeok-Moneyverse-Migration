@@ -9,7 +9,7 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
+import { categoryLabel, filterCatalogByCategory, groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
 /**
@@ -29,16 +29,20 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly category?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery } = await searchParams;
+  const { q: rawQuery, category: rawCategory } = await searchParams;
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
+  const category = typeof rawCategory === 'string' && /^[a-z][a-z0-9_]{0,39}$/.test(rawCategory)
+    ? rawCategory : '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    apiOrNull<{ catalogItems: CatalogItem[]; categories?: string[] }>(
+      `/api/v1/shop/catalog${category ? `?category=${encodeURIComponent(category)}` : ''}`,
+    ),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -50,7 +54,8 @@ export default async function ShopCatalogPage({
   const held = new Map<string, number>(
     (mine?.holdings ?? []).map((item) => [item.catalog_id, item.quantity]),
   );
-  const items = (catalog?.catalogItems ?? []).filter((item) => {
+  const categories = catalog?.categories ?? [...new Set((catalog?.catalogItems ?? []).map((item) => item.category))];
+  const items = filterCatalogByCategory(catalog?.catalogItems ?? [], category).filter((item) => {
     if (query === '') return true;
     return [item.name, item.description, item.code]
       .join(' ')
@@ -101,7 +106,20 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-md gap-2" role="search">
+          <form className="flex max-w-xl flex-wrap gap-2" role="search">
+            <label htmlFor="shop-category" className="sr-only">아이템 분류</label>
+            <select
+              id="shop-category"
+              name="category"
+              defaultValue={category}
+              className="min-h-11 rounded-md border border-input bg-background px-3 text-sm"
+              aria-label="아이템 분류"
+            >
+              <option value="">전체 분류</option>
+              {categories.map((code) => (
+                <option key={code} value={code}>{categoryLabel(code)}</option>
+              ))}
+            </select>
             <Input
               name="q"
               type="search"

@@ -11255,10 +11255,17 @@
                 "user_is_equipped"
               ]
             }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "catalogItems"
+          "catalogItems",
+          "categories"
         ]
       },
       "responseCompatibility": {
@@ -12145,10 +12152,17 @@
                 "user_is_equipped"
               ]
             }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "catalogItems"
+          "catalogItems",
+          "categories"
         ]
       },
       "responseCompatibility": {

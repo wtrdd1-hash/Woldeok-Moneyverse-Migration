@@ -3,6 +3,7 @@ import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { ShopCatalogRepository } from './shop.repository';
+import { filterShopItems } from './shop.controller';
 
 /**
  * Migrations 071-075, executed.
@@ -74,6 +75,15 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       // rounds silently once the economy grows past a safe integer.
       expect(typeof gloves?.price, 'price must survive as a string').toBe('string');
       expect(BigInt(gloves?.price ?? '0') > 0n).toBe(true);
+    });
+
+    it('keeps actor-scoped category filtering exact and leaves WLD prices as strings', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      const vehicles = filterShopItems(rows, undefined, 'vehicle');
+      expect(vehicles.length).toBeGreaterThan(0);
+      expect(vehicles.every((row) => row.category === 'vehicle')).toBe(true);
+      expect(vehicles.every((row) => typeof row.price === 'string')).toBe(true);
+      expect(filterShopItems(rows, undefined, 'VEHICLE')).toEqual([]);
     });
 
     it('carries the weekly upkeep 075 attaches to a vehicle', async () => {

@@ -292,3 +292,16 @@ describe('useMessage', () => {
     expect(message).not.toContain('0개');
   });
 });
+
+describe('member catalogue category selection', () => {
+  it('selects only exact categories and preserves bigint WLD strings', async () => {
+    const { filterCatalogByCategory } = await import('./catalog');
+    const items = [
+      item({ category: 'vehicle', price: '9007199254740993' }),
+      item({ category: 'general', price: '40', code: 'gloves' }),
+    ];
+    expect(filterCatalogByCategory(items, 'vehicle')).toEqual([items[0]]);
+    expect(filterCatalogByCategory(items, 'Vehicle')).toEqual([]);
+    expect(filterCatalogByCategory(items, '')).toEqual(items);
+  });
+});

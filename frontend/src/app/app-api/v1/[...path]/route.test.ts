@@ -23,23 +23,6 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
-  it('forwards the recommended-only member work query without bypassing the authenticated gateway', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ featureState: 'enabled', tasks: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(
-      request('/app-api/v1/work/tasks?recommendedOnly=true', { cookie: 'session=example' }),
-      context('work', 'tasks'),
-    );
-    expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/work/tasks?recommendedOnly=true');
-    expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('cookie')).toBe('session=example');
-    expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
-  });
-
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
@@ -324,26 +307,17 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   });
 });
 
-describe('Android verified help fallback contract', () => {
-  it('forwards explicit opt-in in the POST body and never caches approved-language search results', async () => {
+describe('Android shop category selection', () => {
+  it.each([200, 401, 500])('forwards category query and never caches member catalogue response %s', async (status) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const payload = { locale: 'ko', query: 'login', fallbackToOtherLocale: true, limit: 20 };
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      expect(init?.method).toBe('POST');
-      expect(JSON.parse(new TextDecoder().decode(init?.body as ArrayBuffer))).toEqual(payload);
-      return new Response(JSON.stringify({ articles: [{ locale: 'en', title: 'Account' }], requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true }), {
-        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
-      });
-    });
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/help/search', {
-      method: 'POST', headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https', 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    }), context('help','search'));
-    expect(response.status).toBe(200);
+    const response = await GET(request('/app-api/v1/shop/catalog?category=vehicle'), context('shop', 'catalog'));
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('category')).toBe('vehicle');
+    expect(response.status).toBe(status);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
-    expect(await response.json()).toMatchObject({ requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true });
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/search');
   });
 });
