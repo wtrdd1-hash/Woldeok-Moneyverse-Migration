@@ -12,6 +12,7 @@ import {
   Header,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -208,43 +209,29 @@ export class DopamineController {
   }
 
   @Get('vip-chest/status')
-  @ApiOperation({ summary: 'Get Moneyverse Plus VIP Golden Chest claim status and cooldown' })
+  @ApiOperation({ summary: 'Report VIP chest availability without claiming unverified rewards' })
   async getVipChestStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
+    // No verified Plus entitlement, idempotent ledger posting or dice receipt
+    // exists for this reward. A static success response would invent assets.
     return {
       userId,
-      isPlusUser: true, // Supported via Moneyverse Plus tier
-      claimedToday: false,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      nextAvailableAt: midnight.toISOString(),
-      currentServerTime: now.toISOString(),
+      available: false,
+      isPlusUser: null,
+      claimedToday: null,
+      rewardAmount: '0',
+      diceAwarded: 0,
+      nextAvailableAt: null,
+      reason: 'unverified_entitlement_and_ledger_receipt',
     };
   }
 
   @Post('vip-chest')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Moneyverse Plus VIP Golden Chest (2,000 WLD + 1 Lucky Dice)' })
-  async claimVipChest(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-
-    return {
-      success: true,
-      userId,
-      isPlusUser: true,
-      rewardAmount: 2000,
-      diceAwarded: 1,
-      claimedAt: now.toISOString(),
-      nextAvailableAt: midnight.toISOString(),
-      message: 'Moneyverse Plus VIP 일일 황금 상자 수령 완료 (2,000 WLD + VIP 럭키 다이스 1개 지급)',
-    };
+  @ApiOperation({ summary: 'VIP chest claims unavailable pending verified ledger and entitlement' })
+  async claimVipChest(@Req() request: RequestWithSession): Promise<never> {
+    requireUserId(request);
+    throw new ServiceUnavailableException('VIP chest claims require verified entitlement and an atomic ledger receipt.');
   }
 
   @Get('attendance/status')

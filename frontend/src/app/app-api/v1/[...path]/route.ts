@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -14,6 +15,10 @@ import {
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
+
+function isVipChestPath(parts: readonly string[]): boolean {
+  return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
+}
 
 function parseAppVersion(value: string | null): [number, number, number] | null {
   const match = value?.trim().match(/^(\d+)\.(\d+)\.(\d+)$/);
@@ -139,6 +144,23 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  // Older backend images returned HTTP 200 without an actual WLD posting.
+  // Do not let a mobile client interpret that legacy response as a receipt.
+  if (isVipChestPath(parts)) {
+    if (request.method === 'POST' && response.ok) {
+      return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
+    }
+    if (parts[3] === 'status' && request.method === 'GET' && response.ok) {
+      try {
+        if (!parseVipChestStatus(await response.clone().json())) {
+          return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP entitlement and receipt status are unverified');
+        }
+      } catch {
+        return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
+      }
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -178,6 +200,10 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work' || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'work') response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (isVipChestPath(parts)) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
   }
   return response;
 }
