@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { filterShopUpkeep, parseShopUpkeepCap } from './shop-upkeep-cap';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -46,26 +47,6 @@ function filterShopItems<T extends SearchableShopItem>(items: readonly T[], quer
     [item.code, item.name, item.description, item.category]
       .filter((value): value is string => typeof value === 'string')
       .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle)),
-  );
-}
-
-/** Optional member catalogue stock selector. Reject arrays and unknown values before SQL. */
-export function requireShopStockFilter(value: unknown): 'available' | undefined {
-  if (value === undefined) return undefined;
-  if (value === 'available') return 'available';
-  throw new BadRequestException('stock must be available');
-}
-
-/** A listed stock of null is unlimited; zero is sold out, not a price promise. */
-export function filterShopStock<T extends { readonly quantity: number | null }>(
-  items: readonly T[],
-  stock: 'available' | undefined,
-): T[] {
-  if (!stock) return [...items];
-  return items.filter(
-    (item) =>
-      item.quantity === null ||
-      (typeof item.quantity === 'number' && Number.isSafeInteger(item.quantity) && item.quantity > 0),
   );
 }
 
@@ -142,29 +123,34 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
-  async publicCatalog(@Query('q') query?: string) {
+  @ApiOperation({
+    summary: 'The public catalogue; q searches text, maxUpkeep caps weekly WLD maintenance',
+  })
+  async publicCatalog(@Query('q') query?: string, @Query('maxUpkeep') maxUpkeep?: string) {
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: filterShopUpkeep(filterShopItems(catalogItems, query), maxUpkeep) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q and stock=available filters' })
+  @ApiOperation({
+    summary: 'The member catalogue; q searches text, maxUpkeep caps weekly WLD maintenance',
+  })
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
-    @Query('stock') stock?: unknown,
+    @Query('maxUpkeep') maxUpkeep?: string,
   ) {
-    const availability = requireShopStockFilter(stock);
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopStock(filterShopItems(catalogItems, query), availability) };
+    return { catalogItems: filterShopUpkeep(filterShopItems(catalogItems, query), maxUpkeep) };
   }
 
   @Get('holdings')

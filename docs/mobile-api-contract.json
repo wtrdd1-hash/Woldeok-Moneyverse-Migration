@@ -12400,13 +12400,13 @@
                 "symbol": {
                   "type": "string"
                 },
-                "id": {
-                  "type": "string"
-                },
                 "name": {
                   "type": "string"
                 },
                 "description": {
+                  "type": "string"
+                },
+                "id": {
                   "type": "string"
                 },
                 "current_price": {
@@ -12502,9 +12502,9 @@
                 "day_low_price",
                 "halt_status",
                 "symbol",
-                "id",
                 "name",
                 "description",
+                "id",
                 "current_price",
                 "day_open_price",
                 "updated_at",

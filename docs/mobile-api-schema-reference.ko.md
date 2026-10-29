@@ -4127,9 +4127,9 @@ _요청 본문 없음._
 | stocks[].day_low_price | true | string & object |  |
 | stocks[].halt_status | true | string |  |
 | stocks[].symbol | true | string |  |
-| stocks[].id | true | string |  |
 | stocks[].name | true | string |  |
 | stocks[].description | true | string |  |
+| stocks[].id | true | string |  |
 | stocks[].current_price | true | string & object |  |
 | stocks[].day_open_price | true | string & object |  |
 | stocks[].halted_at | false | null \| string (date-time) |  |

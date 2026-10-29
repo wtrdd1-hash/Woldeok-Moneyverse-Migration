@@ -11,23 +11,16 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
-import { SHOP_RARITIES, shopFilterQuery, vipMembershipFromCatalog } from './shop-rarity';
+import { parseShopUpkeepCap, shopCatalogueQuery } from './shop-upkeep-cap';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_METADATA: Metadata = {
+export const metadata: Metadata = {
   title: 'WLD 아이템 상점',
-  description: '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
+  description:
+    '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
   alternates: { canonical: canonicalUrl('/shop') },
 };
-
-export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
-  const { q, rarity } = await searchParams;
-  return {
-    ...BASE_METADATA,
-    ...(q || rarity ? { robots: { index: false, follow: false } } : {}),
-  };
-}
 
 const PRINCIPLES = [
   { ko: '11개 카테고리 78종 상품 완비', en: '11 categories & 78 items' },
@@ -37,26 +30,34 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string; rarity?: string }>;
+  readonly searchParams: Promise<{ q?: string; maxUpkeep?: string }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
-  const rarity = params.rarity ?? '';
-  const querySuffix = shopFilterQuery({ q: query, rarity });
+  const cap = parseShopUpkeepCap(params.maxUpkeep);
+  const querySuffix = shopCatalogueQuery(query, cap.value);
+  const needsUnfilteredMembership = loggedIn && Boolean(query || cap.value || cap.invalid);
 
-  const [catalogData, membershipCatalogData, walletData, profileData] = await Promise.all([
-    loggedIn
-      ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
-      : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
-    loggedIn && querySuffix ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog') : null,
+  const [catalogData, walletData, profileData, membershipData] = await Promise.all([
+    cap.invalid
+      ? null
+      : loggedIn
+        ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
+        : publicApi<{ catalogItems: CatalogItem[] }>(
+            `/api/v1/shop/public-catalog${querySuffix}`,
+            60,
+          ),
     loggedIn ? apiOrNull<CanonicalWalletOverview>('/api/v1/wallet') : null,
     loggedIn
       ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
           '/api/v1/profile',
         )
+      : null,
+    needsUnfilteredMembership
+      ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog')
       : null,
   ]);
 
@@ -65,15 +66,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
-  // A filtered catalogue may omit the VIP pass even when the member owns it.
-  // Use an unfiltered owner read for membership; unknown is not "not owned".
-  const membershipItems = loggedIn && querySuffix
-    ? membershipCatalogData?.catalogItems ?? null
-    : catalogData?.catalogItems ?? null;
-  const isPlusMember = vipMembershipFromCatalog(membershipItems);
+  const vipPassItem = (membershipData?.catalogItems ?? items).find(
+    (item) => item.code === 'item_vip_lounge_pass' || item.code.includes('vip_lounge'),
+  );
+  const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
 
   return (
-    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
+    <div
+      data-page="shop"
+      className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full"
+    >
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           eyebrow="WOLDEOK MARKET · STORE 2.0"
@@ -93,7 +95,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap" role="search">
+        <form
+          action="/shop"
+          method="get"
+          className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap"
+          role="search"
+        >
           <input
             type="search"
             name="q"
@@ -102,21 +109,25 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             aria-label="상점 검색"
             className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
-          <select
-            name="rarity"
-            defaultValue={SHOP_RARITIES.some((option) => option.value === rarity) ? rarity : ''}
-            aria-label="상품 희귀도"
-            className="min-h-11 rounded-md border border-border bg-card px-3 text-sm"
-          >
-            <option value="">전체 희귀도</option>
-            {SHOP_RARITIES.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
+          <label className="flex min-w-0 items-center gap-2 text-sm">
+            <span className="whitespace-nowrap">주간 유지비 상한 (WLD)</span>
+            <input
+              type="text"
+              name="maxUpkeep"
+              defaultValue={cap.value}
+              inputMode="numeric"
+              pattern="(0|[1-9][0-9]*)"
+              maxLength={30}
+              placeholder="제한 없음"
+              aria-invalid={cap.invalid}
+              aria-describedby={cap.invalid ? 'shop-upkeep-error' : undefined}
+              className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base md:text-sm"
+            />
+          </label>
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query || rarity ? (
+          {query || cap.value || cap.invalid ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -124,9 +135,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {query || rarity ? (
+        {cap.invalid ? (
+          <p id="shop-upkeep-error" role="alert" className="text-sm text-destructive">
+            주간 유지비 상한은 0 또는 앞에 0이 없는 최대 30자리 정수여야 합니다. 필터를 수정해
+            주세요.
+          </p>
+        ) : null}
+        {cap.value ? (
           <p className="text-sm text-muted-foreground">
-            검색 조건에 맞는 상품 {catalogData ? items.length : "확인 불가"}개
+            주간 유지비 {cap.value} WLD 이하 상품만 표시합니다.
+          </p>
+        ) : null}
+        {query && !cap.invalid ? (
+          <p className="text-sm text-muted-foreground">
+            “{query}” 검색 결과 {items.length}개
           </p>
         ) : null}
 
@@ -151,22 +173,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
-      {catalogData && isPlusMember !== null ? (
-        <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
-      ) : null}
+      <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
 
-      {catalogData ? (
-        <ShopStoreView
-          items={items}
-          userBalance={userBalance}
-          currentUsername={username}
-          userAvatarUrl={avatarUrl}
-        />
-      ) : (
-        <p role="alert" className="text-sm text-destructive">
-          상점 목록을 확인할 수 없습니다. 검색 조건을 확인하거나 잠시 후 다시 시도해 주세요.
-        </p>
-      )}
+      <ShopStoreView
+        items={items}
+        userBalance={userBalance}
+        currentUsername={username}
+        userAvatarUrl={avatarUrl}
+      />
     </div>
   );
 }
