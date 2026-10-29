@@ -22,7 +22,7 @@ import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorat
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryBondService } from './treasury-bond.service';
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
+import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')
@@ -109,11 +109,15 @@ export class PublicTreasuryBondController {
   }
 
   @Post('subscribe')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiResponse({ status: 503, description: 'Bond subscription is held until balanced ledger settlement is certified' })
-  @ApiOperation({ summary: 'Bond subscription (ledger safety hold)' })
-  async subscribeBond() {
-    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '국채 직접 청약 매수 (덕지갑 차감 -> 국채 발행)' })
+  async subscribeBond(
+    @Req() req: RequestWithSession,
+    @Body('bondId') bondId: string,
+    @Body('units') units: number,
+  ) {
+    const userId = requireUserId(req);
+    return this.service.subscribeBond(userId, bondId, Number(units));
   }
 
   @Get('my-repo-loans')
@@ -125,25 +129,19 @@ export class PublicTreasuryBondController {
   }
 
   @Post('repo-loans/borrow')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '국채 담보 저리 레포 대출 신청 (80% LTV, 연 2.5%)' })
-  async borrowRepoLoan(
-    @Req() req: RequestWithSession,
-    @Body('holdingId') holdingId: string,
-  ) {
-    const userId = requireUserId(req);
-    return this.service.createRepoLoan(userId, holdingId);
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiResponse({ status: 503, description: 'Repo-loan borrowing is held until balanced ledger settlement is certified' })
+  @ApiOperation({ summary: 'Repo-loan borrowing (ledger safety hold)' })
+  async borrowRepoLoan() {
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
   @Post('repo-loans/repay')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '국채 담보 레포 대출 상환 및 담보 잠금 해제' })
-  async repayRepoLoan(
-    @Req() req: RequestWithSession,
-    @Body('loanId') loanId: string,
-  ) {
-    const userId = requireUserId(req);
-    return this.service.repayRepoLoan(userId, loanId);
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiResponse({ status: 503, description: 'Repo-loan repayment is held until balanced ledger settlement is certified' })
+  @ApiOperation({ summary: 'Repo-loan repayment (ledger safety hold)' })
+  async repayRepoLoan() {
+    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
   }
 
   @Put('holdings/:id/rollover')
