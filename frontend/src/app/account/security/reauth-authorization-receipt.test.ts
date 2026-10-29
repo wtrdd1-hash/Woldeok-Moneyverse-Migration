@@ -56,8 +56,7 @@ describe('step-up OAuth authorization receipts', () => {
       .rejects.toThrow('redirect:/account/security?error=reauth-start');
   });
 
-  it.each(['state', 'code_challenge', 'client_id', 'redirect_uri'])
-    ('rejects missing OAuth challenge evidence: %s', async (field) => {
+  it.each(['state', 'code_challenge', 'client_id', 'redirect_uri'])('rejects missing OAuth challenge evidence: %s', async (field) => {
       const url = new URL(validAuthorizationUrl('discord'));
       url.searchParams.delete(field);
       mutate.mockResolvedValue({ authorizationUrl: url.toString() });
