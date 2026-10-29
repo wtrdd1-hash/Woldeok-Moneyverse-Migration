@@ -30,6 +30,13 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['help', 'articles', 'ko', '../admin', 'related'])).toBeNull();
   });
 
+  it('exposes only published help reads to Android, including bounded search', () => {
+    expect(appGatewayPath(['help', 'search'])).toBe('/api/v1/help/search');
+    expect(appGatewayPath(['help', 'categories'])).toBe('/api/v1/help/categories');
+    expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide'])).toBe('/api/v1/help/articles/ko/wallet-guide');
+    expect(appGatewayPath(['help', 'admin', 'publish'])).toBeNull();
+    expect(appGatewayPath(['help', 'drafts'])).toBeNull();
+  });
   it('refuses internal and traversal paths', () => {
     expect(appGatewayPath(['admin', 'me'])).toBe('/api/v1/admin/me');
     expect(appGatewayPath(['integrations', 'discord'])).toBeNull();

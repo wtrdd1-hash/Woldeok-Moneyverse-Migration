@@ -145,8 +145,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
-  // Owner-scoped data and expiring verified help must not inherit an
+  // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
+  // Help approval can expire or be retracted; stale gateway caches must not outlive that decision.
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'help') headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'privacy') headers.set('x-robots-tag', 'noindex');
 

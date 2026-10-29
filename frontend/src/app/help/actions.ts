@@ -11,11 +11,13 @@ export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormD
   const query = data.get('query');
   const category = data.get('category');
   const rawLocale = data.get('locale');
+  const rawLimit = data.get('limit');
+  const limit = rawLimit === null ? 20 : typeof rawLimit === 'string' && /^(10|20|50)$/.test(rawLimit) ? Number(rawLimit) : null;
   if (rawLocale !== null && rawLocale !== 'ko' && rawLocale !== 'en') {
     return { status: 'invalid', articles: [] };
   }
   const locale = normalizeHelpLocale(rawLocale);
-  if (typeof query !== 'string' || Array.from(query).length > 100 ||
+  if (limit === null || typeof query !== 'string' || Array.from(query).length > 100 ||
     (category !== null && (typeof category !== 'string' ||
       (category !== '' && !['account','wallet','shop','community','support'].includes(category))))) {
     return { status: 'invalid', articles: [] };
@@ -23,7 +25,7 @@ export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormD
   if (process.env.VERIFIED_HELP_CENTER_V1 !== 'true') return { status: 'unavailable', articles: [] };
   try {
     const result = await api<{ articles: HelpSummary[] }>('/api/v1/help/search', {
-      method: 'POST', body: { locale, category: category || undefined, query, limit: 20 },
+      method: 'POST', body: { locale, category: category || undefined, query, limit },
     });
     return { status: result.articles.length ? 'results' : 'empty', articles: result.articles };
   } catch {
