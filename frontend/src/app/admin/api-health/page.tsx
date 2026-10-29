@@ -42,6 +42,7 @@ export default async function AdminApiHealthPage() {
       </PageHeader>
 
       <ApiHealthDashboard initialData={liveData} isEn={isEn} />
+      <Button asChild variant="outline" className="w-fit"><Link href="/admin/operations/storage">{isEn ? 'Verified storage headroom (admin)' : '검증된 저장공간 여유량 (관리자)'}</Link></Button>
 
       <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

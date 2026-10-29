@@ -9,8 +9,13 @@
 - Plan: (1) RED parser/attestation tests, (2) signed host collector and Nest guarded endpoint, (3) admin page and negative privacy tests, (4) targeted gates, (5) full gates if capacity permits, (6) PR/HOLD evidence.
 - Release: HOLD until independently provisioned signed host collector, complete CI, exact-SHA Test/auth/DB proof and backup restore pass. No automatic cleanup or release.
 
-## In progress — v2
-- Pending implementation and RED/GREEN evidence.
+## In progress — v2 / IMPLEMENTED CANDIDATE
+- Implemented host-only fixed ROOT/DATA `statfs` collector with Ed25519 private-key signing (private key never shipped to backend), strict Nest public-key signature/freshness/namespace/boot/sequence verifier and generic 503 on missing evidence.
+- Added Session/Authenticated/Consent/Admin/AdminSession guards, private no-store/noindex, existing global 429 tier, Next admin-only proxy and responsive bilingual operator page. Public/member/Android API has no storage route. DB schema, grants, ledger and migrations unchanged.
+- TDD RED→GREEN: backend signature/overflow/alias/stale/replay 5 PASS; controller guards/privacy 2 PASS; privileged host collector 1 PASS; host-signed collector→backend verifier with forged signature 1 PASS; Next schema/precision 2 PASS; private gateway auth/forgery 2 PASS.
+- Initial frontend typecheck failed on optional usedPercent narrowing; corrected and reran PASS. Backend typecheck PASS; changed ESLint PASS. Full gates pending.
+- Current DATA capacity ~980 MiB unprivileged available (df rounds 100%). No cleanup or changes to other workers.
+- Collector/key provisioning is intentionally not performed against Production or Test. Missing host evidence yields 503 and UNKNOWN; it is not an approved release gate.
 
 ## Finished — v3
 - Pending authoritative final SHA, checks, Test/Production/rollback and branch-preservation audit.

@@ -6,7 +6,7 @@
 
 **Architecture:** Host-only collector signs a bounded JSON snapshot using a separately provisioned key. NestJS verifies signature, freshness, host identity and monotonic sequence; Next admin UI displays the verified two-mount read-only result. No SQL or public/Android endpoint is added.
 
-**Tech Stack:** Node 20+, NestJS, Next.js, HMAC SHA-256, fs.statfs BigInt, Vitest.
+**Tech Stack:** Node 20+, NestJS, Next.js, Ed25519 detached signatures, fs.statfs BigInt, Vitest.
 
 **Spec:** Planning Draft #1949, improvement #1954, issue #1948; current release HOLD.
 
@@ -24,8 +24,8 @@
 - Unauthenticated or non-admin access and cache/indexing leakage.
 
 ## Tasks
-- [ ] Write RED tests for signature, source, freshness, byte/inode math, severity and bad inputs.
-- [ ] Implement fixed-path signed host collector and strict backend parser, then GREEN tests.
-- [ ] Write RED controller authorization/privacy tests; implement admin-only read endpoint.
-- [ ] Add Next admin page and link, fail-closed UI tests and no public/mobile exposure.
+- [x] Write RED tests for signature, source, freshness, byte/inode math, severity and bad inputs.
+- [x] Implement fixed-path signed host collector and strict backend parser, then GREEN tests.
+- [x] Write RED controller authorization/privacy tests; implement admin-only read endpoint.
+- [x] Add Next admin page and link, fail-closed UI tests and no public/mobile exposure.
 - [ ] Run exact-HEAD targeted/full gates; record all failures and no deployment.
