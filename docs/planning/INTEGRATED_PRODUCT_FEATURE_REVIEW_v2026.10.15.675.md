@@ -1,5 +1,15 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## v1460 / F675-171 — Verified private saved WLD recipients (FEATURE ADDITION / DRAFT / HOLD)
+
+- **Cycle:** Previous Improvement v1458 → Current Addition v1460 → Next Improvement v1462 (provisional). Main `b84d645a`; stacked on unmerged Draft #1837/#1830, not main. QA v1365 FAILED/P0; deployed Test/Production app `b44ffd0a` distinct. [Engineering backlog #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+- **Source gap:** `/wallet` requires exact manually entered 36-character UUID every transfer; source has recipient search and exact active-ID resolver but no owner-private saved recipient CRUD in inspected wallet code. Avoid name/Discord directory, identity proof or auto-payment.
+- **Product:** member voluntarily saves up to 20 exact UUIDs with a private nickname; owner-only save/list/rename/remove and cross-device web/Android parity. **Use for transfer** preselects only recipient UUID and requires full ID/amount reconfirmation; no stored amount, auto-send, ledger/notification write or recipient discovery. Inactive/deleted targets fail closed.
+- **Architecture:** proposed additive owner+recipient UNIQUE tombstone/version table, immutable request receipt, owner-only SECURITY DEFINER and direct DML denial, SERIALIZABLE count/CAS, same UUID+digest replay, 409/412 conflicts, signed owner cursor, CSRF, no-store/noindex, WCAG 2.2 AA, 320px, privacy 90-day receipt proposal, anonymous admin KPI. Default feature OFF. **NOT IMPLEMENTED.**
+- **P0:** REPO1460-01 (462 missing refs/344 non-ancestors), FIN1460-02 (18,000 WLD/552 Treasury provenance), SEC1460-03 (five checksums/ACL), REL1460-04 (off-host restore/exact-SHA Test/QA/GitOps). **P1:** RECIP1460-05, RECIP1460-06, RECIP1460-07, RECIP1460-08, RECIP1460-09, RECIP1460-10 (DB/atomicity/API/UI/privacy/10,001+100+100 regression). No real acceptance test run.
+- **External independent gate:** 0 newly verified+deduplicated approved, cumulative UNKNOWN/10,000 = BLOCKED/IN PROGRESS. No new standalone planning spec; full bilingual contract in PROJECT_PLAN. Runtime/Test/Production/DB/WLD unchanged.
+
+
 ## v1458 / F675-170 — Evidence identity and repository-ref preservation (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 - **Cycle:** Previous Addition v1456 → Current Improvement v1458 → Next Addition v1460 (provisional). Main `b84d645a`; predecessor Draft #1830 unmerged, this branch stacked. QA v1364 Test/Production app `b44ffd0a` is separate from main. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).

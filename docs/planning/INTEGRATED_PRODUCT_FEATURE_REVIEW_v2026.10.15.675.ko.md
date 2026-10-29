@@ -1,5 +1,15 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1460 / F675-171 — 회원 전용 WLD 수취인 저장 (기능 추가 / 초안 / 배포 보류)
+
+- **주기:** 이전 Improvement v1458 → 현재 Addition v1460 → 다음 Improvement v1462(잠정). main `b84d645a`; 미병합 #1837/#1830에 의존하며 main 반영 아님. QA v1365 FAILED/P0; 운영/Test 앱 `b44ffd0a` 별도. [개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+- **소스 근거:** 지갑 송금 때마다 정확한 36자리 UUID를 입력한다. 수취인 검색·정확 ID 활성 확인 API는 있지만 검사한 지갑 코드에 본인 전용 저장 CRUD는 없다. 이름/Discord 공개 검색·실명 인증·자동 송금은 제외.
+- **기능:** 회원이 공유받은 UUID를 최대 20명까지 개인 별칭으로 저장/조회/변경/삭제, 웹·Android 동등성. **송금에 사용**은 UUID만 채우고 전체 ID·금액 재확인을 거쳐 기존 송금을 수동 실행한다. 금액 저장·자동 지급·원장/알림 변경·사용자 열거 금지. 탈퇴·차단 상대는 사용 불가.
+- **기술:** 추가형 owner+recipient UNIQUE/tombstone/version, 불변 요청 영수증, SECURITY DEFINER 소유자 검사·앱 직접 DML 거부, SERIALIZABLE 한도/CAS, 동일 UUID·해시 재시도, 409/412, 서명 커서, CSRF/no-store/noindex, WCAG 2.2 AA·320px, 영수증 90일 보존 제안, 익명 관리자 KPI. 기능 기본 OFF. **미구현.**
+- **P0:** REPO1460-01(과거 브랜치 462/비조상 344), FIN1460-02(18,000 WLD/국고 552), SEC1460-03(체크섬 5건/권한), REL1460-04(독립 복원/정확 SHA Test/QA/GitOps). **P1:** RECIP1460-05~10(DB/원자성/API/UI/개인정보/합성 10,001+동시 100+권한 100 테스트). 실제 수용시험 미실행.
+- **외부 근거:** 신규 검증·중복 제거 승인 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 신규 분산기획 파일 없음. 런타임·Test·운영·DB·WLD 불변. 세부 영문·국문 계약은 PROJECT_PLAN 참조.
+
+
 ## v1458 / F675-170 — 릴리스 증거 식별·브랜치 보존 (기능 보완 / 초안 / 보류)
 
 - **주기:** 이전 추가 v1456 → 현재 보완 v1458 → 다음 추가 v1460(잠정). main `b84d645a`, 선행 Draft #1830 미병합·의존 브랜치. QA v1364 Test/운영 앱 `b44ffd0a`는 main과 다름. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
