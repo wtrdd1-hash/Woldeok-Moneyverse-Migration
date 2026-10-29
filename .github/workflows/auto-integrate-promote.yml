@@ -8,10 +8,14 @@ on:
     workflows: [Build Test Candidate]
     types: [completed]
 
+# P0 #1663: 352 unmerged PR heads were closed/deleted. Until independent
+# exact-SHA Test/auth/finance/DB/security attestations can be verified,
+# this workflow is an inventory-only release HOLD. A candidate build is NOT
+# an authorization to mutate a PR, branch, or production environment.
 permissions:
-  contents: write
-  pull-requests: write
-  actions: write
+  contents: read
+  pull-requests: read
+  actions: read
 
 concurrency:
   group: auto-integrate-promote
@@ -27,72 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
 
-      - name: Drain, reconcile, retry, and prune managed development branches
+      - name: Inventory ready PRs without changing any branch or PR
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
-
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          merged_count=0
-          validated_count=0
-          validation_dispatched_count=0
-          reconciled_count=0
-          contained_deleted_count=0
-          conflict_count=0
-          failed_validation_reconcile_count=0
-          work_in_progress_skipped_count=0
-          release_gate_blocked_count=0
-
-          reconcile_current_branch() {
-            local reason="$1"
-            echo "reconciling ${branch} against current main: ${reason}"
-
-            git reset --hard HEAD >/dev/null
-            git clean -fd >/dev/null
-            git fetch --prune origin main "$branch"
-            git checkout -B "$branch" "origin/$branch"
-
-            if ! git merge --no-edit -X theirs origin/main; then
-              git merge --abort >/dev/null 2>&1 || true
-              git reset --hard "origin/$branch" >/dev/null
-              echo "::warning::automatic main-authoritative reconciliation failed for ${branch}"
-              return 1
-            fi
-
-            if git diff --quiet origin/main HEAD -- .; then
-              if [[ -n "${pr:-}" ]]; then
-                gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
-              fi
-              gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null 2>&1 || true
-              contained_deleted_count=$((contained_deleted_count + 1))
-              echo "reconciled ${branch} became identical to main; closed stale PR when present and deleted branch"
-              return 0
-            fi
-
-            git push origin HEAD:"refs/heads/${branch}"
-            reconciled_count=$((reconciled_count + 1))
-
-            # Pushes authenticated with GITHUB_TOKEN do not reliably trigger another workflow.
-            # Explicit workflow_dispatch guarantees exact-SHA revalidation of the new head.
-            if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
-              validation_dispatched_count=$((validation_dispatched_count + 1))
-              echo "pushed reconciled head for ${branch}; explicitly dispatched exact-SHA candidate validation"
-            else
-              echo "::warning::reconciled ${branch}, but candidate dispatch failed"
-            fi
-            return 0
-          }
-
-          # Paginate once. A failed/partial API snapshot is a hard BLOCKED gate,
-          # not an empty candidate list (process substitution masked this error).
           snapshot="$(mktemp)"
           candidates="$(mktemp)"
           trap 'rm -f "$snapshot" "$candidates"' EXIT
@@ -106,166 +53,17 @@ jobs:
           fi
           mapfile -t branches < "$candidates"
           open_pr_count="$(jq -s '[.[][]] | length' "$snapshot")"
-          draft_filtered_count="$(jq -s '[.[][] | select(.draft != false)] | length' "$snapshot")"
-          echo "open PRs=${open_pr_count}, drafts/unknown excluded=${draft_filtered_count}, eligible ready heads=${#branches[@]}"
-
+          echo "open PRs=${open_pr_count}, ready candidates=${#branches[@]}"
           for branch in "${branches[@]}"; do
-            case "$branch" in
-              main|production|staging|develop|release/*|planning/*) continue ;;
-              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*|security/*|docs/*) ;;
-              *) continue ;;
-            esac
-
-            encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
-            branch_sha="$(gh api "repos/${REPO}/branches/${encoded}" --jq '.commit.sha' 2>/dev/null || true)"
-            [[ -n "$branch_sha" ]] || continue
-
-            compare="$(gh api "repos/${REPO}/compare/main...${encoded}" 2>/dev/null || true)"
-            [[ -n "$compare" ]] || continue
-            ahead="$(jq -r '.ahead_by // 0' <<<"$compare")"
-
-            pr="$(
-              gh api --method GET "repos/${REPO}/pulls" \
-                -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=10 \
-                --jq '.[0].number // empty'
-            )"
-
-            # A branch without an open PR is treated as active work. Never create an
-            # integration PR automatically: opening a ready-for-review PR is the
-            # completion signal that makes a branch eligible for automatic main merge.
-            if [[ -z "$pr" ]]; then
-              work_in_progress_skipped_count=$((work_in_progress_skipped_count + 1))
-              echo "skip active work branch with no open PR: ${branch}"
-              continue
-            fi
-
-            pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
-            draft="$(jq -r '.draft != false' <<<"$pr_json")"
-            blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$pr_json")"
-            title_blocked="$(jq -r '(.title // "" | ascii_downcase) as $t | ($t | startswith("wip")) or ($t | startswith("draft")) or ($t | startswith("work in progress")) or ($t | startswith("작업중"))' <<<"$pr_json")"
-
-            pr_head="$(jq -r '.head.sha // empty' <<<"$pr_json")"
-            pr_state="$(jq -r '.state // "unknown"' <<<"$pr_json")"
-            if [[ "$pr_head" != "$branch_sha" || "$pr_state" != "open" ]]; then
-              echo "skip PR #${pr}: head/state changed after snapshot (no cleanup or merge)"
-              continue
-            fi
-
-            if [[ "$draft" == "true" || "$blocked_label" == "true" || "$title_blocked" == "true" ]]; then
-              work_in_progress_skipped_count=$((work_in_progress_skipped_count + 1))
-              echo "skip work-in-progress PR #${pr} for ${branch}: draft=${draft}, blocked_label=${blocked_label}, title_blocked=${title_blocked}"
-              continue
-            fi
-
-            # P0 #1088: a successful candidate build is not proof of an actual
-            # isolated-Test deployment, authenticated finance/admin E2E, database
-            # ACL, full security audit, or independent release authorization.
-            # Until a trusted exact-head attestation verifier exists, fail closed
-            # before ANY branch mutation, PR merge, or release dispatch.
-            release_gate_blocked_count=$((release_gate_blocked_count + 1))
-            echo "::warning::BLOCKED: independent isolated-Test and finance/auth/DB/security attestation unavailable for PR #${pr} at ${branch_sha}; no merge, cleanup or promotion"
-            continue
-
-            if [[ "$ahead" -eq 0 ]]; then
-              if [[ -n "$pr" ]]; then
-                gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
-                echo "closed contained PR #${pr} for ${branch}"
-              fi
-              gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null 2>&1 || true
-              contained_deleted_count=$((contained_deleted_count + 1))
-              echo "deleted branch fully contained in main: ${branch}"
-              continue
-            fi
-
-            validated="$(
-              gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
-                -f branch="$branch" -f status=success -f per_page=50 \
-                --jq ".workflow_runs[] | select(.head_sha == \"${branch_sha}\") | .id" \
-                | head -n 1
-            )"
-
-            if [[ -z "$validated" ]]; then
-              failed_count="$(
-                gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
-                  -f branch="$branch" -f status=completed -f per_page=30 \
-                  --jq "[.workflow_runs[] | select(.head_sha == \"${branch_sha}\" and .conclusion == \"failure\")] | length"
-              )"
-
-              if [[ "$failed_count" -ge 2 ]]; then
-                failed_validation_reconcile_count=$((failed_validation_reconcile_count + 1))
-                echo "${branch} has ${failed_count} failed exact-SHA candidate runs; reconcile instead of dispatching the same broken head again"
-                reconcile_current_branch "repeated exact-SHA candidate failure" || true
-              else
-                echo "dispatch validation for ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
-                if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
-                  validation_dispatched_count=$((validation_dispatched_count + 1))
-                else
-                  echo "::warning::failed to dispatch Build Test Candidate for ${branch}"
-                fi
-              fi
-              continue
-            fi
-            validated_count=$((validated_count + 1))
-
-            mergeable="unknown"
-            merge_state="unknown"
-            for _ in $(seq 1 12); do
-              pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
-              mergeable="$(jq -r 'if .mergeable == null then "unknown" else (.mergeable|tostring) end' <<<"$pr_json")"
-              merge_state="$(jq -r '.mergeable_state // "unknown"' <<<"$pr_json")"
-              [[ "$mergeable" != "unknown" ]] && break
-              sleep 5
-            done
-
-            if [[ "$mergeable" == "true" && "$merge_state" =~ ^(clean|unstable|has_hooks)$ ]]; then
-              # A ready PR may become draft/held after enumeration. Recheck
-              # eligibility and exact head immediately before any merge.
-              fresh_pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
-              current_head="$(jq -r '.head.sha // empty' <<<"$fresh_pr_json")"
-              fresh_draft="$(jq -r '.draft != false' <<<"$fresh_pr_json")"
-              fresh_blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$fresh_pr_json")"
-              fresh_title_blocked="$(jq -r '(.title // "" | ascii_downcase) as $t | ($t | startswith("wip")) or ($t | startswith("draft")) or ($t | startswith("work in progress")) or ($t | startswith("작업중"))' <<<"$fresh_pr_json")"
-              fresh_state="$(jq -r '.state // "unknown"' <<<"$fresh_pr_json")"
-              if [[ "$current_head" != "$branch_sha" || "$fresh_state" != "open" || "$fresh_draft" == "true" || "$fresh_blocked_label" == "true" || "$fresh_title_blocked" == "true" ]]; then
-                echo "skip PR #${pr}: head, state or readiness changed before merge"
-                continue
-              fi
-
-              gh pr merge "$pr" --repo "$REPO" --squash --delete-branch --match-head-commit "$branch_sha"
-              merged_count=$((merged_count + 1))
-              echo "merged PR #${pr}; source branch cleanup requested"
-              continue
-            fi
-
-            if [[ "$merge_state" == "dirty" ]]; then
-              conflict_count=$((conflict_count + 1))
-              reconcile_current_branch "merge conflict in PR #${pr}" || true
-            else
-              echo "skip PR #${pr}: mergeable=${mergeable}, state=${merge_state}"
-            fi
+            # Snapshot is only evidence of a candidate, never authorization.
+            # Do not auto-rebase, close, delete, merge, or dispatch a release.
+            echo "::warning::BLOCKED: independent isolated-Test and finance/auth/DB/security attestation unavailable for ${branch}; no merge, cleanup or promotion"
           done
-
-          if [[ "$merged_count" -gt 0 ]]; then
-            final_main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
-            gh workflow run test-candidate.yml --repo "$REPO" --ref main
-            echo "dispatched non-promoting main Build Test Candidate for final main ${final_main_sha}"
-          fi
-
           {
-            echo '## Automatic branch drain and cleanup summary'
-            echo
-            echo "- exact-SHA validated branches observed: ${validated_count}"
-            echo "- candidate validations dispatched: ${validation_dispatched_count}"
-            echo "- branches reconciled against main: ${reconciled_count}"
-            echo "- repeated-failure reconciliations attempted: ${failed_validation_reconcile_count}"
-            echo "- clean branches merged: ${merged_count}"
-            echo "- contained/redundant branches deleted: ${contained_deleted_count}"
-            echo "- conflicted PRs encountered: ${conflict_count}"
+            echo '## Read-only integration inventory — release HOLD'
             echo "- open PRs in snapshot: ${open_pr_count}"
-            echo "- draft/unknown PRs filtered before per-branch REST: ${draft_filtered_count}"
-            echo "- eligible ready heads from snapshot: ${#branches[@]}"
-            echo "- later work-in-progress PRs skipped: ${work_in_progress_skipped_count}"
-            echo "- ready PRs blocked by independent Test/E2E attestation gate: ${release_gate_blocked_count}"
-            echo
-            echo 'P0 #1088: candidate CI is insufficient for merge authorization. Independent exact-SHA Test/finance/auth/DB/security attestation is not yet wired, so all ready PRs remain blocked and Production promotion is manual only.'
+            echo "- ready candidates: ${#branches[@]}"
+            echo '- mutations: 0 (no branch push, PR close/merge, delete, or Production dispatch)'
+            echo '- P0 #1663: preserve 352 unmerged recovered PR heads and review queue.'
+            echo '- P0 #1088: independent exact-SHA Test/auth/finance/DB/security approval is required before enabling integration.'
           } >> "$GITHUB_STEP_SUMMARY"

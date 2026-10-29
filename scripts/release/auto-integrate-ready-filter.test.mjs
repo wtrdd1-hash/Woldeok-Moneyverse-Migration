@@ -43,12 +43,12 @@ test('unknown draft state fails closed, and pagination includes later eligible r
   assert.deepEqual(select(pages), ['security/ready']);
 });
 
-test('workflow fails closed on snapshot API errors and retains exact-head merge guard', () => {
+test('workflow fails closed on snapshot API errors and has no merge authorization', () => {
   const source = readFileSync(workflow, 'utf8');
   assert.match(source, /if ! gh api --paginate/);
   assert.match(source, /select-integration-prs\.jq/);
-  assert.match(source, /--match-head-commit "\$branch_sha"/);
-  assert.match(source, /current_head.*branch_sha|branch_sha.*current_head/);
+  assert.doesNotMatch(source, /gh pr merge|--match-head-commit/);
+  assert.match(source, /contents: read/);
 });
 
 
@@ -81,12 +81,9 @@ test('GitHub 403 snapshot failure exits BLOCKED before any branch REST or merge'
 });
 
 
-test('ready PR must still be ready and same exact head immediately before merge', () => {
+test('ready PR is inventory-only and cannot be automatically merged or pruned', () => {
   const source = readFileSync(workflow, 'utf8');
-  const mergeBlock = source.split('if [[ "$mergeable" == "true"')[1].split('gh pr merge')[0];
-  assert.match(mergeBlock, /fresh_pr_json=/);
-  assert.match(mergeBlock, /fresh_draft=/);
-  assert.match(mergeBlock, /fresh_blocked_label=/);
-  assert.match(mergeBlock, /fresh_title_blocked=/);
-  assert.match(mergeBlock, /current_head.*branch_sha|branch_sha.*current_head/);
+  assert.match(source, /Read-only integration inventory/);
+  assert.doesNotMatch(source, /gh pr merge|gh api --method PATCH|gh api --method DELETE|git push/);
+  assert.match(source, /pull-requests: read/);
 });
