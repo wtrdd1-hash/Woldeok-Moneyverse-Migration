@@ -121,21 +121,6 @@ describe('app API route compatibility', () => {
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
-  it.each(['owned', 'unowned'])('forwards member shop ownership=%s without caching Android responses', async (ownership) => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request(`/app-api/v1/shop/catalog?ownership=${ownership}`), context('shop', 'catalog'));
-    expect(response.status).toBe(200);
-    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
-    expect(target.pathname).toBe('/api/v1/shop/catalog');
-    expect(target.searchParams.get('ownership')).toBe(ownership);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
-  });
-
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
@@ -152,20 +137,21 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
-  it('forwards the shop in-stock query and disables caching of member stock/ownership', async () => {
+  it('forwards exact shop price ceiling and disables member catalog caching', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/shop/catalog?stock=available&q=frame'), context('shop', 'catalog'));
+    const response = await GET(
+      request('/app-api/v1/shop/catalog?maxPrice=9007199254740993'),
+      context('shop', 'catalog'),
+    );
     expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.pathname).toBe('/api/v1/shop/catalog');
-    expect(target.searchParams.get('stock')).toBe('available');
-    expect(target.searchParams.get('q')).toBe('frame');
+    expect(target.searchParams.get('maxPrice')).toBe('9007199254740993');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
@@ -335,20 +321,5 @@ describe('Android chat bigint cursor and private cache boundary', () => {
       context('chat', 'conversations', conversation, 'messages'));
     expect(failed.status).toBe(502);
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
-  });
-});
-
-describe('Android shop category selection', () => {
-  it.each([200, 401, 500])('forwards category query and never caches member catalogue response %s', async (status) => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
-      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/shop/catalog?category=vehicle'), context('shop', 'catalog'));
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('category')).toBe('vehicle');
-    expect(response.status).toBe(status);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 });

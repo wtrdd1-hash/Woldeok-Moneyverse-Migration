@@ -31,7 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
-import { filterShopOwnership, parseShopOwnership } from './shop-ownership-filter';
+import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -83,9 +83,12 @@ export class ShopController {
   }
 
   @Get('items')
-  @ApiOperation({ summary: 'Items currently on sale; optional q searches name/description' })
-  async items(@Query('q') query?: string) {
-    return { items: filterShopItems(await this.service().catalog(), query) };
+  @ApiOperation({ summary: 'Items currently on sale; optional q and maxPrice filters' })
+  async items(@Query('q') query?: string, @Query('maxPrice') maxPrice?: unknown) {
+    return { items: await this.guarded(async () => {
+      const ceiling = parseShopMaxPrice(maxPrice);
+      return filterShopByMaxPrice(filterShopItems(await this.service().catalog(), query), ceiling);
+    }, 'the catalogue is unavailable') };
   }
 
   @Get('purchases')
@@ -123,32 +126,26 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({
-    summary: 'The public catalogue; optional q searches code/name/description/category',
-  })
-  async publicCatalog(@Query('q') query?: string) {
-    const catalogItems = await this.guarded(
-      () => this.repository().catalog(null),
-      'the catalogue is unavailable',
-    );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+  @ApiOperation({ summary: 'The public catalogue; optional q and maxPrice filters' })
+  async publicCatalog(@Query('q') query?: string, @Query('maxPrice') maxPrice?: unknown) {
+    const catalogItems = await this.guarded(async () => {
+      const ceiling = parseShopMaxPrice(maxPrice);
+      const rows = await this.repository().catalog(null);
+      return filterShopByMaxPrice(filterShopItems(rows, query), ceiling);
+    }, 'the catalogue is unavailable');
+    return { catalogItems };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q and owned/unowned ownership filter' })
-  async catalog(
-    @Req() request: RequestWithSession,
-    @Query('q') query?: string,
-    @Query('ownership') ownership?: string,
-  ) {
-    // Reject invalid filters before touching private actor-scoped DB rows.
-    const mode = parseShopOwnership(ownership);
-    const catalogItems = await this.guarded(
-      () => this.repository().catalog(requireUserId(request)),
-      'the catalogue is unavailable',
-    );
-    return { catalogItems: filterShopOwnership(filterShopItems(catalogItems, query), mode) };
+  @ApiOperation({ summary: 'The member catalogue; optional q and maxPrice filters' })
+  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string, @Query('maxPrice') maxPrice?: unknown) {
+    const catalogItems = await this.guarded(async () => {
+      const ceiling = parseShopMaxPrice(maxPrice);
+      const rows = await this.repository().catalog(requireUserId(request));
+      return filterShopByMaxPrice(filterShopItems(rows, query), ceiling);
+    }, 'the catalogue is unavailable');
+    return { catalogItems };
   }
 
   @Get('holdings')

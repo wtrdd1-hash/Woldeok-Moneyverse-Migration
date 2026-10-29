@@ -55,8 +55,7 @@ const config: NextConfig = {
     minimumCacheTTL: 86400,
   },
   experimental: {
-    // Keep static generation below the memory ceiling of the shared build host.
-    // The default fan-out (15 workers here) aborts during the 609-page build.
+    // Cap static workers on 8 GiB hosts; the default 15 workers SIGABRT on 609 routes.
     cpus: 2,
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,
