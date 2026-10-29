@@ -84,7 +84,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
               const actorUserId = process.env.AI_NEWS_AUTO_ACTOR_USER_ID?.trim() || '5f7b8b44-e4aa-40b8-b93a-800ec0151d20';
               const runtimeCredential = aiNewsRuntimeCredentialFrom(process.env);
               const result = await aiNews.autoGenerateAndPublish(actorUserId, runtimeCredential ?? undefined);
-              if (result && !('skipped' in result)) {
+              if (result?.published === true) {
                 await sendDirectAdminAlert({
                   title: '📰 [가상 주식] 실시간 속보 자동 발행 완료',
                   description: `**헤드라인:** ${result.leadHeadline || '신규 시황 속보'}`,

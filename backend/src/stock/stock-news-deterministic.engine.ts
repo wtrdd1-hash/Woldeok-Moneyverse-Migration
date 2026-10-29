@@ -238,8 +238,8 @@ export function generateDeterministicStockNews(context: Record<string, unknown>)
     return changeB - changeA;
   });
 
-  // 타겟 종목들 (상위 2개)
-  const targets = ranked.slice(0, 2);
+  // Offer up to five different companies; publication history selects one eligible story.
+  const targets = ranked.slice(0, 5);
   const proposals: ScenarioProposal[] = [];
 
   for (const stock of targets) {
