@@ -6,11 +6,11 @@
 - Coordination: A #1885 owns SQL migration lineage; B #1886 owns backend typecheck; QA #1883 owns lint parseability. Avoid their files and all unmerged C branches.
 - Release blockers: main #1878 duplicate migration IDs, #1884 typecheck, failing CI, official exact-SHA Test E2E unavailable. Never merge or promote without full PASS.
 ## PLAN
-- [ ] RED: add page-level regression verifying member forms use the verified stateful wrappers.
-- [ ] GREEN: replace direct bindings with existing client wrappers; preserve server auth, responsive layout, accessibility and noindex.
+- [x] RED: add page-level regression verifying member forms use the verified stateful wrappers (2 RED).
+- [x] GREEN: replace direct bindings with existing client wrappers; preserve server auth, responsive layout, accessibility and noindex (17/17 focused PASS with NODE_ENV=test).
 - [ ] Recheck latest main and planning; run focused tests, lint, typecheck, build, API/DB/security/E2E gates; record failures without masking.
 - [ ] Final English/Korean evidence and GitHub update. Hold unmerged branch if any mandatory gate fails.
 ## IN PROGRESS
-- Baseline source, main/PR/QA/A/B review complete. TDD pending.
+- TDD RED: 2 route integration tests failed against direct two-argument form binding. GREEN: 17/17 focused tests passed. Host NODE_ENV=production caused React.act unavailable in existing jsdom test; rerun with NODE_ENV=test resolved the environment-only failure. Re-fetched main and planning. Full gates remain unverified.
 ## FINISHED
 - Pending.

@@ -15,11 +15,11 @@
 - Thread links remain owner-only and non-indexable.
 - No overlap with A/B/QA branches.
 ## Task 1: Route form integration
-- [ ] Write page regression test that fails against direct form actions.
-- [ ] Run RED and capture exit status.
-- [ ] Render NewSupportThreadForm and SupportReplyForm in page.
-- [ ] Run GREEN and existing support tests.
-- [ ] Inspect diff for scope/accessibility.
+- [x] Write page regression test that fails against direct form actions.
+- [x] Run RED and capture exit status.
+- [x] Render NewSupportThreadForm and SupportReplyForm in page.
+- [x] Run GREEN and existing support tests.
+- [x] Inspect diff for scope/accessibility.
 ## Task 2: Verification and handoff
 - [ ] Fetch main/plan and compare.
 - [ ] Run full mandatory gates and report exact failures.
