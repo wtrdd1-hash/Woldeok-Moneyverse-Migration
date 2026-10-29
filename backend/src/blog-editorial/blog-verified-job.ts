@@ -9,9 +9,10 @@ import type { BlogVerifiedRepository } from './blog-verified.repository';
 export function createVerifiedBlogJob(
   repository: Pick<BlogVerifiedRepository,'currentPeriod'|'digests'|'publish'>,
   report: (detail:string)=>void = ()=>{},
+  clock: () => Date = () => new Date(),
 ) {
   return async () => {
-    const slot = selectTwoHourBlogSlot(new Date());
+    const slot = selectTwoHourBlogSlot(clock());
     if (!slot) return { skipped:true, reason:'ODD_HOUR' };
     if (process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED !== 'true')
       return { skipped:true, reason:'PUBLISHER_DISABLED', periodKey:slot.periodKey };

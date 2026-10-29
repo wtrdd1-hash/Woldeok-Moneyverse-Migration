@@ -1,0 +1,16 @@
+[Unit]
+Description=Moneyverse verified country-language blog automatic publisher (v1419)
+After=network-online.target docker.service
+Wants=network-online.target
+# One-shot only: do NOT enable NestJS global economic scheduler.
+[Service]
+Type=oneshot
+User=debian
+WorkingDirectory=/srv/moneyverse-data/releases/blog-worker-current/backend
+EnvironmentFile=/home/debian/Woldeok-Moneyverse-Migration/backend/.env
+EnvironmentFile=/etc/moneyverse/blog-worker-v1419.env
+ExecStart=/usr/bin/node dist/blog-editorial/blog-standalone-worker.js
+TimeoutStartSec=360
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
