@@ -17,5 +17,10 @@
 - main 재조회 결과 기준 SHA 동일. 공유 DB/main/운영 변경 없음.
 
 
+## 검증 중간
+- 전체 빌드·Typecheck·Lint(오류 0/경고 1,089) 통과, app-api 180개 일치.
+- 첫 전체 테스트 Frontend 1,926 PASS/1 FAIL: TypeScript 수정 후 테스트의 옛 문자열 단언이 남아 수정. 새 SHA 재검증 필요.
+- 운영 의존성 Moderate 1건, 전체 보안 감사 Low 3/Moderate 9로 FAIL. 실제 PostgreSQL 신고 42703 P0 #1874 미해결.
+
 ## 종료
 대기. 모든 게이트 PASS 전 배포 금지.

@@ -18,5 +18,10 @@
 - No main or production data writes. Isolated synthetic fixtures only. Base `origin/main` re-fetched mid-run and unchanged at `9ebc5613845ba2e8179a0051e86db996593c8a19`.
 
 
+## Verification checkpoint
+- Full build PASS, Typecheck PASS after optional-message fix, Lint PASS (0 errors / 1,089 warnings), app-api contract 180 PASS.
+- First full `pnpm test` FAILED: 1,926 frontend PASS / 1 FAIL, caused by stale source-text assertion after the TypeScript-safe fallback change. Corrected the assertion; re-run required at new SHA.
+- Production dependency audit 1 moderate (high-severity threshold PASS); full audit FAIL: 12 (3 low, 9 moderate). Isolated PostgreSQL acceptance still FAIL 1 / PASS 1 on pre-existing SQLSTATE 42703, P0 #1874.
+
 ## End
 Pending; release blocked until evidence is complete.

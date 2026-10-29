@@ -49,7 +49,7 @@ describe('private chat abuse report receipt', () => {
   it('keeps failure feedback accessible without closing the report dialog', () => {
     const room = readFileSync('src/app/chat/chat-room.tsx', 'utf8');
     expect(room).toContain('role="alert"');
-    expect(room).toContain('setReportError(res.message)');
+    expect(room).toContain("setReportError(res.message ?? '신고 접수 여부를 확인할 수 없어요.')");
     expect(room).toContain('min-h-11');
   });
 });
