@@ -1,0 +1,28 @@
+# C v1166 — Owner photo withdrawal proof (English canonical)
+
+## Start — 2026-10-29 18:45 KST
+- miniPC Debian 13.6 online; backend/frontend/Discord/MCP/desktop/nginx/docker active, DEV PostgreSQL connected; no shared DB writes authorized.
+- Base `76d63a5840a4a185fcaeb02f8b1132dd145f19e4` from fetched `origin/main`. Branch `auto/hourly-c-photo-withdraw-proof-v1166-20261029-1845`; independent worktree. Main checkout untouched.
+- Reviewed AGENTS.md, README.md, README/README.ko.md, PROJECT_PLAN.md/ko.md, QA v1370, A PR #1880, B PR #1881, all open PRs. No competing active gallery withdrawal PR.
+- P1 proven: `frontend/src/app/gallery/submit/actions.ts` marks withdrawal success for any HTTP-2xx body, without checking `photo_id`, `withdrawn_at`, `replayed` or owner readback. PostgreSQL 292 actually deletes the owner's draft atomically and returns those receipt fields; GET `/api/v1/photos/mine` is an owner-scoped read.
+- Plan: TDD RED for invalid receipts and uncommitted readback; add owner preflight to ensure target is within the 30-row owner list, verify exact backend receipt, then verify absence in owner readback. Keep mobile/a11y/noindex unchanged. Do not alter SQL or production.
+- Release gates: exact-SHA tests/build/lint/typecheck/security/API contract/real PG/official Test; existing main migration duplicate IDs 291-295 (#1878) and typecheck/build regressions are P0 HOLD. No merge/deploy on any failure.
+
+## Mid — 2026-10-29 18:46 KST
+- `origin/main` re-fetched, still `76d63a5840a4a185fcaeb02f8b1132dd145f19e4`; plan files unchanged relative to starting main.
+- RED: 12/14 withdrawal action tests failed (old 2xx-only success). GREEN: 14/14 PASS after owner-scoped preflight, exact receipt validation, and post-commit owner readback. One initial GREEN run failed 2/14 because `validTime` was referenced from another module; diagnosed ReferenceError, replaced with local timestamp check and re-ran 14/14 PASS. No other worker files touched.
+- Backend contract confirmed: SQL migration 292 returns `photo_id`, `withdrawn_at`, `replayed`, deletes pending photo and retains quota tombstone. GET `/api/v1/photos/mine` reads owner-scoped SECURITY DEFINER function, maximum 30 entries. Preflight requires the exact pending photo to be present, preventing truncated lists from silently certifying absence.
+
+## Mid — 2026-10-29 18:46 KST
+- `origin/main` re-fetched, still `76d63a5840a4a185fcaeb02f8b1132dd145f19e4`; plan files unchanged relative to starting main.
+- RED: 12/14 withdrawal action tests failed (old 2xx-only success). GREEN: 14/14 PASS after owner-scoped preflight, exact receipt validation, and post-commit owner readback. One initial GREEN run failed 2/14 because `validTime` was referenced from another module; diagnosed ReferenceError, replaced with local timestamp check and re-ran 14/14 PASS. No other worker files touched.
+- Backend contract confirmed: SQL migration 292 returns `photo_id`, `withdrawn_at`, `replayed`, deletes pending photo and retains quota tombstone. GET `/api/v1/photos/mine` reads owner-scoped SECURITY DEFINER function, maximum 30 entries. Preflight requires the exact pending photo to be present, preventing truncated lists from silently certifying absence.
+
+## End — 2026-10-29 18:54 KST — PARTIAL / RELEASE BLOCKED
+- Final `origin/main` fetched again: `76d63a5840a4a185fcaeb02f8b1132dd145f19e4` (unchanged). No rebase needed. Branch HEAD SHA recorded in external closeout after commit; no main modification.
+- TDD withdrawal action 14/14 PASS; Backend SQL/controller contract 3/3 PASS; DB CI helper 3/3 PASS; scoped ESLint 0 errors. Mobile form already uses `ActionAlert` (screenreader), responsive CSS and confirmation; gallery page remains `robots: noindex`, authenticated and no-store API.
+- Frontend full suite **FAIL**: 2,527 PASS / 57 FAIL (15 files); withdrawal target 14 PASS. Failures in account deletion/privacy, help, admin backup, etc. unrelated to changed files. Frontend Typecheck **FAIL**: pre-existing backup/help/support/work/dopamine TypeScript errors (none in modified gallery paths).
+- Backend full suite attempted but timed out at 70s with multiple existing unrelated failures (no full PASS claimed). Full build **FAIL**: six backend TS errors (duplicate declarations and missing local `undici`). Full ESLint **FAIL**: 1 unrelated error in `frontend/src/app/account/security/reauth-authorization-receipt.test.ts`, 1,047 warnings; changed files ESLint PASS.
+- Database suite **FAIL**: 52 PASS / 1 FAIL / 4 SKIP; migration parity detects duplicate IDs 291×3, 292×3, 293×2, 294×2, 295×4 (#1878). `api:contract:check` **FAIL**: generated 181 endpoints drift from three tracked schema/docs; generated changes restored ONLY inside this independent worktree.
+- Production dependency audit **PASS** (0 known vulnerabilities); full dependency audit **FAIL** (11: 3 low, 8 moderate). Isolated PostgreSQL 17.11 created and removed: replay reached SQL 029 then failed with migrator-owner permission denied on `content_allowed_image_hosts`; no isolated photo mutation E2E PASS claimed. No shared DB or financial writes. Official exact-SHA Test authenticated API/DB/E2E **BLOCKED** because candidate is not deployed and migration lineage is ambiguous.
+- **No PR opened**: previous Draft/HOLD PR #1879 was automatically merged despite failed CI. Publish and preserve unique branch SHA; do not risk another automatic unsafe integration until merge protections are corrected. No main merge, Test/Production deployment, GitOps promotion, rollback, or branch cleanup. Other A/B/QA/Gemini refs/worktrees and all five core schedules preserved.
