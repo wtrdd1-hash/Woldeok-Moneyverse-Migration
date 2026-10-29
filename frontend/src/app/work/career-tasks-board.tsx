@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useActionState } from 'react';
 import { useLocale } from '@/components/locale-provider';
@@ -58,10 +58,14 @@ export function CareerTasksBoard({
   tasks,
   activeJobType,
   quotaBlock,
+  selectedDifficulty,
+  selectedMaxDuration,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
+  readonly selectedDifficulty?: string | null;
+  readonly selectedMaxDuration?: string | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';

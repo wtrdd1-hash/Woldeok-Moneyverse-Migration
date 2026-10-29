@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle, RefreshCw } from 'lucide-react';
@@ -7,6 +7,7 @@ import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle, RefreshCw }
 interface DeokiPetStationProps {
   initialAffection?: number;
   onTriggerFever?: () => void;
+  onClaimFortune?: (bonusWld: number, quote: string) => void;
 }
 
 const QUOTES = [
@@ -20,6 +21,7 @@ const QUOTES = [
 export function DeokiPetStation({
   initialAffection = 20,
   onTriggerFever,
+  onClaimFortune,
 }: DeokiPetStationProps) {
   const [affection, setAffection] = useState<number>(initialAffection);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);

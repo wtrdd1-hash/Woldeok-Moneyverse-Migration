@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Bell,
@@ -476,13 +476,13 @@ export default async function AccountPage({
                     <div className="min-w-0 pr-2">
                       <p className="text-sm font-bold">{PROVIDER_NAME[provider.id] ?? provider.id}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                        {linkedProviders.has(provider.id)
+                        {linkedProviders.has(provider.id as any)
                           ? '이미 계정에 연결되어 있습니다.'
                           : '원클릭으로 소셜 간편 로그인을 추가합니다.'}
                       </p>
                     </div>
                     <div className="shrink-0">
-                      {linkedProviders.has(provider.id) ? (
+                      {linkedProviders.has(provider.id as any) ? (
                         <Badge variant="outline" className="text-xs font-semibold text-muted-foreground rounded-lg">
                           연결 완료
                         </Badge>
