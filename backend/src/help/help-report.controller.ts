@@ -2,7 +2,7 @@ import {
   BadRequestException, Body, ConflictException, Controller, Header, Inject, NotFoundException,
   Param, Post, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -17,10 +17,10 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REASONS = ['outdated', 'incorrect', 'unclear'] as const;
 
 class HelpReportDto {
-  @IsUUID() readonly idempotencyKey!: string;
-  @IsUUID() readonly publishedRevisionId!: string;
-  @IsIn(REASONS) readonly reason!: string;
-  @IsString() @MinLength(10) @MaxLength(600) readonly details!: string;
+  @ApiProperty({ format: 'uuid' }) @IsUUID() readonly idempotencyKey!: string;
+  @ApiProperty({ format: 'uuid' }) @IsUUID() readonly publishedRevisionId!: string;
+  @ApiProperty({ enum: REASONS }) @IsIn(REASONS) readonly reason!: string;
+  @ApiProperty({ minLength: 10, maxLength: 600 }) @IsString() @MinLength(10) @MaxLength(600) readonly details!: string;
 }
 
 @ApiTags('help')

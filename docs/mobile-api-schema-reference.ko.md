@@ -4,7 +4,7 @@
 
 업데이트 버전: **v2026.10.28.1525**
 
-이 문서는 181개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 182개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -2873,7 +2873,7 @@ _요청 본문 없음._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | npc_code | true | string |  |
-| affinity | true | null \| number |  |
+| affinity | true | number |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -5683,6 +5683,44 @@ _요청 본문 없음._
 |---|---|---|---|
 | updatedCount | true | number |  |
 | remainingUnreadCount | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/help/articles/:locale/:slug/report` — Report a problem with an exact currently approved verified-help article revision
+
+- 인증/권한: Member session + current consent + CSRF + published revision identity
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: Open the returned owner-private support thread; on uncertainty check inbox before retry
+- Operation ID: `HelpReportController_report`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| locale | path | true | string | enum="ko","en" |
+| slug | path | true | string | maxLength=100; pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `HelpReportDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| idempotencyKey | true | string (uuid) |  |
+| publishedRevisionId | true | string (uuid) |  |
+| reason | true | string | enum="outdated","incorrect","unclear" |
+| details | true | string | minLength=10; maxLength=600 |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| threadId | true | string |  |
+| status | true | string |  |
+| verified | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

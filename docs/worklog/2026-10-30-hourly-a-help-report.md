@@ -24,3 +24,9 @@
 - Isolated PostgreSQL 17.11 (`--network none`, no host port): all 304 migrations 002–305 applied from immutable current files. Synthetic approved help revision, expired revision, owner-only support thread, replay readback, cross-owner denial and zero ledger imbalance verified. App role has no direct SELECT on help tables or INSERT on support tables. Disposable container removed.
 - First typecheck attempt was blocked by an out-of-date shared dependency tree (`undici` missing). Installed frozen-lockfile dependencies **only in this isolated worktree**; typecheck then PASS. No shared repository dependency mutation.
 - Re-fetched `origin/main` at mid-point: unchanged `62c6cd038951d65c94b709302bdaec6e75b080b6`; integrated English/Korean plans re-read/checksummed. Full lint/build/tests, exact-SHA CI and official Test still pending.
+
+## FINISHED CANDIDATE — 2026-10-30 01:38 KST
+- Implemented frontend, NestJS API, owner-only support DB function reuse and Android app-api contract. Added 6 backend unit + 6 HTTP auth/CSRF + 19 web/Android tests. Stable per-form idempotency key, exact approved edition and persisted-first-message verification.
+- `pnpm typecheck` and `pnpm build` PASS; changed lint PASS; production audit 0 known vulnerabilities; isolated PostgreSQL 304/304 PASS. Full lint FAIL (3 pre-existing errors), backend full 240 FAIL, frontend full 60 FAIL, 4 DB tests SKIP. Code-checkpoint exact-SHA CI FAIL. No false full-PASS claim.
+- Regenerated Android contract EN/KO references for new report endpoint and a pre-existing unrelated NPC affinity type drift. Final committed SHA requires fresh contract/CI verification.
+- Remote branches 20→21, open PRs 14→15, conflicting PRs 2, unique unmerged branches 17; no deletion/closure/merge. Main unchanged at late fetch. Official Test and Production remain at old SHA, no deployment or rollback. See `docs/qa/2026-10-30-a0125-help-report.md` and `docs/releases/2026-10-30-a0125-help-report-HOLD.md`.
