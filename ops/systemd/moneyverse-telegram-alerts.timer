@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Moneyverse Telegram operational monitoring every two minutes
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=2min
+AccuracySec=15s
+Persistent=true
+Unit=moneyverse-telegram-alerts.service
+[Install]
+WantedBy=timers.target
