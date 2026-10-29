@@ -7,6 +7,7 @@ import { api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { consoleReturnPath } from './areas';
+import { verifiedConsoleClose, verifiedConsoleOpen } from './console-session-receipt';
 import { STEP_UP_CODE, spendSecondFactorCode } from './step-up';
 
 /**
@@ -43,10 +44,11 @@ export async function openConsole(
   const next = consoleReturnPath(formData.get('next'));
 
   try {
-    const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
+    const { payload, setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
       method: 'POST',
       csrfToken: await csrfToken(),
     });
+    if (!verifiedConsoleOpen(payload, setCookie)) throw new Error('unverified administrator session rotation');
     await relaySetCookie(setCookie);
     revalidatePath('/admin');
   } catch (error) {
@@ -70,10 +72,11 @@ export async function closeConsole(
   _formData: FormData,
 ): Promise<ActionState> {
   try {
-    const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
+    const { payload, setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
       method: 'DELETE',
       csrfToken: await csrfToken(),
     });
+    if (!verifiedConsoleClose(payload, setCookie)) throw new Error('unverified administrator session clearance');
     await relaySetCookie(setCookie);
     revalidatePath('/admin');
     return { status: 'ok', message: '콘솔을 닫았어요. 다시 로그인해 주세요.' };
