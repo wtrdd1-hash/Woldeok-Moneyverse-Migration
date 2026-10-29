@@ -214,6 +214,21 @@ export class AiNewsRepository {
     return rows[0] ?? null;
   }
 
+  /** Existing operator-gated projection; failure must prevent automatic price events. */
+  async recentMarketEvents(actorUserId: unknown): Promise<readonly {
+    readonly symbol: string | null;
+    readonly headline: string;
+    readonly body: string;
+    readonly starts_at: Date;
+  }[]> {
+    uuid(actorUserId, 'actor user id');
+    return queryRows(this.pool,
+      `SELECT symbol, headline, body, starts_at
+       FROM public.stock_market_events_admin_list($1, $2)`,
+      [actorUserId, 200],
+    );
+  }
+
   /** Starts a run, or hands back the one already going (149). */
   async beginRun(input: {
     readonly idempotencyKey: unknown;

@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1452 — Automated in-world market-news trust repair (implementation candidate)
+Observed CHIMU314 overpublication (143/204 historical, 138 identical titles). News autopublisher candidate uses 7-day normalized-title exclusion, 24-hour per-stock cooling, less-covered-company ranking, five-symbol fallback drafts, accurate fallback source identity and deterministic event idempotency keys. Failed history reads block automatic publication; no existing market events/ledger/money are rewritten. Worklog: [v1452](../worklog/2026-10-29-ai-news-repeat-guard-v1452.ko.md); issue #1848. Keep promotion bound to exact-SHA Test and a zero-downtime Production gate.
+
+
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 
 - **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.
