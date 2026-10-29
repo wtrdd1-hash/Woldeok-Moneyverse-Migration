@@ -26,7 +26,7 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
     expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
     expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');
-    expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide', 'related'])).toBe('/api/v1/help/articles/ko/wallet-guide/related');
+    expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide', 'related'])).toBeNull();
     expect(appGatewayPath(['help', 'articles', 'ko', '../admin', 'related'])).toBeNull();
   });
 
@@ -36,6 +36,9 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide'])).toBe('/api/v1/help/articles/ko/wallet-guide');
     expect(appGatewayPath(['help', 'admin', 'publish'])).toBeNull();
     expect(appGatewayPath(['help', 'drafts'])).toBeNull();
+    expect(appGatewayPath(['help', 'articles', 'ko', 'wallet-guide', 'report'])).toBe('/api/v1/help/articles/ko/wallet-guide/report');
+    expect(appGatewayPath(['help', 'articles', 'ko', '../admin', 'report'])).toBeNull();
+    expect(appGatewayPath(['help', 'articles', 'fr', 'wallet-guide', 'report'])).toBeNull();
   });
   it('refuses internal and traversal paths', () => {
     expect(appGatewayPath(['admin', 'me'])).toBe('/api/v1/admin/me');

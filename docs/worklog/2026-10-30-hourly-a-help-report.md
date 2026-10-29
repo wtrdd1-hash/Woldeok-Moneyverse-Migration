@@ -17,3 +17,10 @@
 ## IN PROGRESS
 - Worktree: `auto/hourly-a-help-report-20261030-0125` from current `origin/main`, no shared-checkout changes.
 - RED/GREEN, verification and final release evidence pending.
+
+## IN PROGRESS — 2026-10-30 01:29 KST
+- RED: backend and web route tests initially failed; Android route allow-list failed as expected. Stable form idempotency key tests were also observed RED before implementation.
+- GREEN: backend 6/6, frontend action/form/Android gateway 19/19. Existing stale Android `related` assertion expected an unimplemented endpoint; corrected test to preserve fail-closed behavior.
+- Isolated PostgreSQL 17.11 (`--network none`, no host port): all 304 migrations 002–305 applied from immutable current files. Synthetic approved help revision, expired revision, owner-only support thread, replay readback, cross-owner denial and zero ledger imbalance verified. App role has no direct SELECT on help tables or INSERT on support tables. Disposable container removed.
+- First typecheck attempt was blocked by an out-of-date shared dependency tree (`undici` missing). Installed frozen-lockfile dependencies **only in this isolated worktree**; typecheck then PASS. No shared repository dependency mutation.
+- Re-fetched `origin/main` at mid-point: unchanged `62c6cd038951d65c94b709302bdaec6e75b080b6`; integrated English/Korean plans re-read/checksummed. Full lint/build/tests, exact-SHA CI and official Test still pending.

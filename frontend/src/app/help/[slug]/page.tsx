@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
+import { randomUUID } from 'node:crypto';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { normalizeHelpLocale } from '../locale';
+import { HelpReportForm } from '../report-form';
+import { requireHelpPublicationIdentity } from '../article-identity';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '검증된 도움말', robots: { index: false, follow: false } };
 
-type Article = { article_id: string; slug: string; title: string; summary: string; body_plain: string; source_url: string; published_at: string; estimated_reading_minutes?: number };
+type Article = { article_id: string; slug: string; title: string; summary: string; body_plain: string; source_url: string; published_at: string; estimated_reading_minutes?: number; published_revision_id?: string; article_version?: string; content_digest?: string };
 export default async function HelpArticlePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<{ locale?: string }> }) {
   if (process.env.VERIFIED_HELP_CENTER_V1 !== 'true') notFound();
   const { slug } = await params;
@@ -28,6 +31,11 @@ export default async function HelpArticlePage({ params, searchParams }: { params
   } catch {
     // Malformed source metadata never becomes a clickable link.
   }
+  let reportRevision: string | null = null;
+  if (process.env.VERIFIED_HELP_REPORT_V1 === 'true') {
+    try { reportRevision = requireHelpPublicationIdentity(article).published_revision_id; }
+    catch { /* Never offer a report for an edition whose identity cannot be proven. */ }
+  }
   const minutes = article.estimated_reading_minutes;
   const readingMinutes = Number.isSafeInteger(minutes) && minutes !== undefined && minutes >= 1 && minutes <= 60 ? minutes : null;
   return <main className="mx-auto grid w-full max-w-3xl gap-5 p-4">
@@ -36,6 +44,7 @@ export default async function HelpArticlePage({ params, searchParams }: { params
       {readingMinutes !== null && <p className="text-sm text-muted-foreground">{locale === 'en' ? `About ${readingMinutes} min read` : `약 ${readingMinutes}분 소요`}</p>}<div className="whitespace-pre-wrap break-words">{article.body_plain}</div>
       {sourceHref && <p className="text-sm">{locale === 'en' ? 'Verified source: ' : '검증 근거: '}<a href={sourceHref} target="_blank" rel="noopener noreferrer" className="underline">{locale === 'en' ? 'View original' : '원본 자료 보기'}</a></p>}
     </article>
+    {reportRevision && <HelpReportForm locale={locale} slug={slug} publishedRevisionId={reportRevision} idempotencyKey={randomUUID()} />}
     <Link href="/support" className="underline underline-offset-4">{locale === 'en' ? 'Need more help? Contact support' : '해결되지 않았나요? 관리자에게 직접 문의하기'}</Link>
   </main>;
 }
