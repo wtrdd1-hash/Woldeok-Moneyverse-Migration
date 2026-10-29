@@ -24,6 +24,10 @@ import { cn } from '@/lib/cn';
 import { eventScope } from '@/app/stocks/market-news';
 import { CancelMarketEventButton, PublishMarketEventDialog } from './market-events';
 import { strengthLabel } from './strengths';
+import {
+  formatMarketGap, formatMarketTrend, formatMarketVolatility, formatStockTrend,
+  hasUnverifiedMarketEvidence, stockTrendDirection,
+} from './market-metrics';
 import { parseMarketStocks, parseMarketDynamics, parseMarketEvents } from './market-evidence';
 import { HaltStockDialog, HaltSettlementStatusDialog } from './admin-market-halt-dialog';
 import { LimitPolicyGuardCard } from './limit-policy-guard-card';
@@ -44,22 +48,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** Basis points a day, written as the percent a day a reader thinks in, signed. */
-function percentPerDay(bps: string): string {
-  const value = Number(bps) / 100;
-  if (!Number.isFinite(value)) return '—';
-  const sign = value > 0 ? '+' : '';
-  return `${sign}${value.toFixed(1)} %/일`;
-}
-
-/** How far the price sits from the fair value, as a signed percent. BigInt: these are prices. */
-function gapPercent(price: string, fair: string): string {
-  if (!/^\d+$/.test(price) || !/^\d+$/.test(fair) || BigInt(fair) === 0n) return '—';
-  const bps = ((BigInt(price) - BigInt(fair)) * 10_000n) / BigInt(fair);
-  const value = Number(bps) / 100;
-  return `${value > 0 ? '+' : ''}${value.toFixed(1)} %`;
-}
-
 export default async function AdminMarketPage() {
   await requireAdminConsole(AREA.href);
   const [rawStocks, rawDynamics, rawEvents] = await Promise.all([
@@ -74,7 +62,9 @@ export default async function AdminMarketPage() {
   const dynamics = dynamicRows === null ? null : { stocks: dynamicRows };
   const events = eventRows === null ? null : { events: eventRows };
   const marketEvidenceReady = stocks !== null && dynamics !== null && events !== null;
-  const marketTrend = dynamics?.stocks[0]?.market_trend_bps ?? null;
+  const marketTrend = formatMarketTrend(dynamics?.stocks ?? null);
+  const hasUnverifiedMetrics = dynamics?.stocks.some(hasUnverifiedMarketEvidence) ||
+    (Boolean(dynamics?.stocks.length) && marketTrend === '—');
 
   return (
     <div data-page="admin-market" className="mv-page mv-page--admin grid gap-5">
@@ -92,13 +82,18 @@ export default async function AdminMarketPage() {
           <p className="text-sm text-muted-foreground">
             시장 전체 추세{' '}
             <b className="tabular text-foreground">
-              {marketTrend === null ? '—' : percentPerDay(marketTrend)}
+              {marketTrend}
             </b>
             . 종목 추세는 몇 시간에 걸쳐 바뀌고, 변동성은 하루 3 % 근처로 돌아오며 오르내려요.
             적정가는 소식과 매매가 쌓여 움직이는 기준점입니다.
           </p>
         </CardHeader>
         <CardContent>
+          {hasUnverifiedMetrics && (
+            <p role="status" className="mb-3 rounded-md border border-amber-500/40 p-3 text-sm">
+              일부 시장지표가 누락되었거나 서로 일치하지 않아 확인되지 않은 값은 —로 표시합니다.
+            </p>
+          )}
           {dynamics === null ? (
             <EmptyState title="시장 상태를 불러오지 못했어요." />
           ) : dynamics.stocks.length === 0 ? (
@@ -124,19 +119,19 @@ export default async function AdminMarketPage() {
                     <TableCell className="tabular text-right text-xs">
                       {groupDigits(row.current_price)} / {groupDigits(row.fair_value)}
                       <span className="block text-muted-foreground">
-                        적정가 대비 {gapPercent(row.current_price, row.fair_value)}
+                        적정가 대비 {formatMarketGap(row.current_price, row.fair_value)}
                       </span>
                     </TableCell>
                     <TableCell
                       className={cn(
                         'tabular text-right text-xs font-bold',
-                        Number(row.trend_bps) > 0 ? 'text-rise' : Number(row.trend_bps) < 0 ? 'text-fall' : '',
+                        stockTrendDirection(row.trend_bps) === 'up' ? 'text-rise' : stockTrendDirection(row.trend_bps) === 'down' ? 'text-fall' : '',
                       )}
                     >
-                      {percentPerDay(row.trend_bps)}
+                      {formatStockTrend(row.trend_bps)}
                     </TableCell>
                     <TableCell className="tabular text-right text-xs">
-                      {(Number(row.vol_bps) / 100).toFixed(1)} %/일
+                      {formatMarketVolatility(row.vol_bps)}
                     </TableCell>
                     <TableCell className="tabular text-right text-xs">{row.live_events}건</TableCell>
                   </TableRow>
@@ -234,7 +229,7 @@ export default async function AdminMarketPage() {
                 <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
                   {stocks.stocks.map((stock) => {
                     const dyn = dynamics?.stocks.find((d) => d.symbol === stock.symbol);
-                    const gap = dyn ? gapPercent(stock.current_price, dyn.fair_value) : '—';
+                    const gap = dyn ? formatMarketGap(stock.current_price, dyn.fair_value) : '—';
 
                     return (
                       <div key={stock.symbol} className="pt-3 first:pt-0 space-y-2.5">

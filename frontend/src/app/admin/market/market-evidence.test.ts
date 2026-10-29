@@ -37,6 +37,13 @@ describe('admin market console read evidence', () => {
       expect(parseMarketDynamics({ stocks: [{ ...dynamic, ...patch }] })).toBeNull();
     }
     expect(parseMarketDynamics({ stocks: [dynamic, dynamic] })).toBeNull();
+    expect(parseMarketDynamics({ stocks: [
+      dynamic, { ...dynamic, stock_id: OTHER, symbol: 'OTHER', market_trend_bps: '1.0' },
+    ] })).toBeNull();
+    expect(parseMarketDynamics({ stocks: [{ ...dynamic, vol_bps: '999999999999999999' }] })).toBeNull();
+    expect(parseMarketDynamics({ stocks: [
+      dynamic, { ...dynamic, stock_id: OTHER, symbol: 'OTHER', market_trend_bps: '0.50' },
+    ] })).toHaveLength(2);
   });
   it('accepts genuine market events with verified timestamps and scopes', () => {
     expect(parseMarketEvents({ events: [event] })?.[0]?.headline).toBe('Verified event');

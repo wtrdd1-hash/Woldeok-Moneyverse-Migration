@@ -301,10 +301,10 @@ export interface StockDynamicsRow {
   readonly symbol: string;
   readonly name: string;
   readonly current_price: WldAmount;
-  readonly fair_value: WldAmount;
-  readonly trend_bps: string;
-  readonly vol_bps: string;
-  readonly market_trend_bps: string;
+  readonly fair_value: WldAmount | null;
+  readonly trend_bps: string | null;
+  readonly vol_bps: string | null;
+  readonly market_trend_bps: string | null;
   readonly live_events: number;
 }
 

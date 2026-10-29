@@ -20,6 +20,9 @@ function money(value: unknown, positive = false): value is string {
 function decimal(value: unknown, nonNegative = false): value is string {
   return typeof value === 'string' && DECIMAL.test(value) && (!nonNegative || !value.startsWith('-'));
 }
+function boundedMarketBps(value: unknown, nonNegative = false): value is string {
+  return decimal(value, nonNegative) && Math.abs(Number(value)) <= 1_000_000;
+}
 function iso(value: unknown): value is string {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false;
   const date = new Date(value);
@@ -62,13 +65,17 @@ export function parseMarketDynamics(value: unknown): AdminStockDynamics[] | null
   const items = rows(value, 'stocks', 5000);
   if (!items) return null;
   const ids = new Set<string>();
+  let commonTrend: number | null = null;
   const parsed: AdminStockDynamics[] = [];
   for (const item of items) {
     if (!record(item) || typeof item.stock_id !== 'string' || !UUID.test(item.stock_id) ||
       !text(item.symbol, 64) || !text(item.name) || !money(item.current_price, true) ||
-      !money(item.fair_value, true) || !decimal(item.trend_bps) ||
-      !decimal(item.vol_bps, true) || !decimal(item.market_trend_bps) ||
+      !money(item.fair_value, true) || !boundedMarketBps(item.trend_bps) ||
+      !boundedMarketBps(item.vol_bps, true) || !boundedMarketBps(item.market_trend_bps) ||
       !integer(item.live_events)) return null;
+    const trend = Number(item.market_trend_bps);
+    if (commonTrend !== null && trend !== commonTrend) return null;
+    commonTrend = trend;
     const id = item.stock_id.toLowerCase();
     if (ids.has(id)) return null;
     ids.add(id);
