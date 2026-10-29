@@ -58,7 +58,17 @@ export class SupportController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('messageId', ParseUUIDPipe) messageId: string,
   ) {
-    const message = await this.repo().exactMessage(requireUserId(req), id, messageId);
+    let message;
+    try {
+      message = await this.repo().exactMessage(requireUserId(req), id, messageId);
+    } catch (error) {
+      const dbError = error as { code?: string; message?: string } | null;
+      // Only an explicit owner refusal is a 404; a missing function GRANT is a 503.
+      if (dbError?.code === '42501' && dbError.message === 'support thread not available') {
+        throw new NotFoundException('support message not found');
+      }
+      throw new ServiceUnavailableException('support message could not be verified');
+    }
     if (!message) throw new NotFoundException('support message not found');
     return { message };
   }

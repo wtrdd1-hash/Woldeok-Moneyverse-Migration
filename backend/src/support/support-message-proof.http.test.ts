@@ -64,6 +64,18 @@ describe('support exact receipt authenticated HTTP contract', () => {
     await request(app!.getHttpServer()).get(route).expect(404);
   });
 
+  it('returns owner-safe 404 when PostgreSQL explicitly refuses a foreign thread', async () => {
+    exactMessage.mockRejectedValue(Object.assign(new Error('support thread not available'), { code: '42501' }));
+    await start();
+    await request(app!.getHttpServer()).get(route).expect(404);
+  });
+
+  it('returns 503 instead of concealing an unexpected database permission regression', async () => {
+    exactMessage.mockRejectedValue(Object.assign(new Error('permission denied for table support_messages'), { code: '42501' }));
+    await start();
+    await request(app!.getHttpServer()).get(route).expect(503);
+  });
+
   it('rejects malformed UUID before querying a support record', async () => {
     await start();
     await request(app!.getHttpServer())
