@@ -1,3 +1,10 @@
+## v1458 / F675-170 — Evidence identity and repository-ref preservation (FEATURE IMPROVEMENT / DRAFT / HOLD)
+
+- **Cycle:** Previous Addition v1456 → Current Improvement v1458 → Next Addition v1460 (provisional). Main `b84d645a`; predecessor Draft #1830 unmerged, this branch stacked. QA v1364 Test/Production app `b44ffd0a` is separate from main. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **P0:** QA v1364 found 462 prior branch names missing (118 main ancestors, 344 non-ancestors), verified 51 MiB recovery bundle preserved; freeze destructive cleanup pending owner/actor/policy reconciliation. Historic 18,000 WLD MINT provenance, 552 Treasury rows, five checksum mismatches, authenticated E2E and off-host restore remain unverified; owner-approved finance DML unchanged. No claim that existing v1213 release was tampered with.
+- **Design:** candidate key binds repo HEAD/app SHA/image digest/GitOps/DB fingerprint/policy/trust epoch; separate PRE/POST and REQUIRED/NOT_APPLICABLE from six observed statuses. PRE cannot produce final EVIDENCE_COMPLETE. Signer expiry/revocation changes effective state to HOLD without rewriting immutable history. Same-snapshot FK, SERIALIZABLE signed ingestion, idempotent receipts, scoped admin read/export, no promotion CTA, WCAG/noindex/Android-admin unsupported.
+- **Backlog:** P0 REPO1458-01 FIN1458-02 SEC1458-03 REL1458-04; P1 RELBOARD1458-05..10. Isolated 10,001 rows/100 concurrent/100 negative auth tests NOT RUN. External independent corpus newly approved 0; cumulative UNKNOWN/10,000 = BLOCKED/IN PROGRESS. Documentation only; full bilingual contract in PROJECT_PLAN.
+
 ## v1456 / F675-170 — Evidence-bound release readiness board (FEATURE ADDITION / DRAFT / HOLD)
 
 - **Authority/cycle:** Previous Improvement v1454 → Current Addition v1456 → Next Improvement v1458 (provisional). Remote main `b84d645a`; actual Test/Production app `b44ffd0a` observed separately. QA v1363 HTTP 48/50 (both `/help` 404), mobile 36/36, 113 Draft PRs/48 conflicts. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
