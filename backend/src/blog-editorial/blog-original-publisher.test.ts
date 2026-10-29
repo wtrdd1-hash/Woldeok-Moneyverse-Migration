@@ -64,28 +64,30 @@ describe('independent AI originality and locale gate',()=>{
   });
 });
 
-describe('native Ollama constrained JSON article generation', () => {
-  it('requires all three fields from the strict local model and never accepts remote endpoints', async () => {
-    const raw = article(slot.country);
-    const client = vi.fn().mockImplementation(async (_endpoint: string, opts: RequestInit) => {
-      const params = JSON.parse(String(opts.body));
-      expect(params.options.num_ctx).toBe(8192);
+describe('native Ollama original prose with grounded metadata', () => {
+  it('uses a single plain-prose request and derives its excerpt from authored content', async () => {
+    const raw=article(slot.country);
+    const client=vi.fn().mockImplementation(async (_endpoint:string, opts:RequestInit) => {
+      const params=JSON.parse(String(opts.body));
       expect(params.stream).toBe(false);
-      const payload=params.format
-        ? JSON.stringify({title:raw.title,excerpt:raw.excerpt})
-        : raw.content;
-      if (params.format) expect(params.format.required).toEqual(['title','excerpt']);
-      return new Response(JSON.stringify({message:{content:payload},done_reason:'stop'}),{
+      expect(params.options.num_ctx).toBe(8192);
+      expect(params.format).toBeUndefined();
+      return new Response(JSON.stringify({message:{content:raw.content},done_reason:'stop'}),{
         status:200,headers:{'content-type':'application/json'},
       });
     });
-    await expect(generateLocalOriginalArticle(slot,source,{model:'gemma3:1b',fetcher:client})).resolves.toEqual(raw);
+    const result=await generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client});
+    expect(result.content).toBe(raw.content);
+    expect(result.excerpt.length).toBeGreaterThanOrEqual(65);
+    expect(result.title.length).toBeGreaterThanOrEqual(25);
     expect(client.mock.calls[0]![0]).toBe('http://127.0.0.1:11434/api/chat');
-    expect(client).toHaveBeenCalledTimes(2);
+    expect(client).toHaveBeenCalledTimes(1);
   });
-  it('refuses incomplete or non-JSON model outputs instead of fabricating article fields', async()=>{
-    const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({message:{content:'not json'},done_reason:'stop'}),{status:200}));
+  it('rejects malformed model outputs without fabricating publication evidence', async()=>{
+    const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      message:{content:null},done_reason:'stop',
+    }),{status:200}));
     await expect(generateLocalOriginalArticle(slot,source,{model:'gemma3:1b',fetcher:client}))
-      .rejects.toThrow('MODEL_JSON_SCHEMA_VIOLATION');
+      .rejects.toThrow('MODEL_OUTPUT_INVALID');
   });
 });
