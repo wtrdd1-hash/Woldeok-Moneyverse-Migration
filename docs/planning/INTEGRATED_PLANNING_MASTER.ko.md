@@ -1,7 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 ## v2026.10.30.1494 / F675-179 — 저장공간 근거 검증·예약 블록·배포 보류 강화 (기능 보완 / 초안 / 배포 보류)
-**GitHub:** [Draft PR PR_PENDING](PR_PENDING); 선행 [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 미병합. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [P0 용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
+**GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954); 선행 [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 미병합. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [P0 용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
 
 **회차·기준.** 이전 기능 추가 v1492 → 현재 기능 보완 v1494 → 다음 기능 추가 v1496(잠정). 시작·중간 원격 main `62c6cd038951d65c94b709302bdaec6e75b080b6`; v1492는 아직 병합되지 않은 선행 기획이다. 독립 QA 최종 확인은 v1381 FAILED/P0이며 이후 회차 최종 판정은 미확인. 본 변경은 **문서 기획만** 수행한다.
 

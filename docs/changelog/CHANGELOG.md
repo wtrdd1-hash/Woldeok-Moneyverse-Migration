@@ -1,6 +1,6 @@
 ## v2026.10.30.1494 — F675-179 storage evidence hardening (planning draft)
 - Read-only Debian host: root 94% (~5.8 GiB available), DATA df-rounded 100% but ~1.1 GiB unprivileged available; reserved ~9.7 GiB not worker headroom. No outage proven, no cleanup.
-- Proposed signed host/mount/sequence proof, BigInt reserved-block arithmetic, fail-closed replay/freshness/restore-headroom, admin all-response no-store/noindex and 10-item P0/P1 backlog. Latest verified QA v1381 FAILED/P0. External evidence new 0, cumulative UNKNOWN/10,000 BLOCKED. Draft PR PR_PENDING stacked on #1949; feature OFF, release HOLD, no runtime change.
+- Proposed signed host/mount/sequence proof, BigInt reserved-block arithmetic, fail-closed replay/freshness/restore-headroom, admin all-response no-store/noindex and 10-item P0/P1 backlog. Latest verified QA v1381 FAILED/P0. External evidence new 0, cumulative UNKNOWN/10,000 BLOCKED. Draft PR https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954 stacked on #1949; feature OFF, release HOLD, no runtime change.
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).

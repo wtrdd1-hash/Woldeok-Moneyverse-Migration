@@ -1,7 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.30.1494 / F675-179 — Fail-closed Storage Evidence and Reserved-Block Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
-**GitHub:** [Draft PR PR_PENDING](PR_PENDING); depends on [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949), which remains unmerged. [Development handoff #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948); [P0 capacity #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
+**GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954); depends on [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949), which remains unmerged. [Development handoff #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948); [P0 capacity #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
 
 **Cycle and authority.** Previous Feature Addition v1492 → Current Feature Improvement v1494 → Next Feature Addition v1496 (provisional). Latest remote main at start/mid: `62c6cd038951d65c94b709302bdaec6e75b080b6`; v1492 is a stacked draft, not merged truth. Latest independently confirmed QA v1381 FAILED/P0; later QA verdict not verified. This is a documentation-only enhancement, not an implemented or approved release.
 
