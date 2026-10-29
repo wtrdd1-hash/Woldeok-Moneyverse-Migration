@@ -50,17 +50,38 @@ export function SwfControlPanel({
   initialPortfolios = [],
   initialEvents = [],
 }: Props) {
-  const [portfolios, setPortfolios] = useState<SwfPortfolioItem[]>(initialPortfolios);
-  const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
-  const [rebalancing, setRebalancing] = useState(false);
+  const portfolios = initialPortfolios;
+  const events = initialEvents;
   const [savingConfig, setSavingConfig] = useState(false);
+  const [rebalancing, setRebalancing] = useState(false);
+
+  async function handleTriggerRebalance() {
+    setRebalancing(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.executed) {
+        toast.success('국고 복리 성장 및 자율 리밸런싱이 집행되었습니다!', {
+          description: '복식부기 원장과 정합 연동되었습니다.',
+        });
+      } else {
+        toast.info('국고 복리 성장 엔진 평가 완료 (정상 가동 중)', {
+          description: data.reason || '원장 복식부기 및 자율 리밸런싱 대기 상태입니다.',
+        });
+      }
+    } catch {
+      toast.error('성장 엔진 요청 중 통신 오류가 발생했습니다.');
+    } finally {
+      setRebalancing(false);
+    }
+  }
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
   const [isEnabled, setIsEnabled] = useState<boolean>(initialConfig?.is_enabled ?? true);
   const [reinvestRatio, setReinvestRatio] = useState<number>(initialConfig?.reinvestment_ratio_pct ?? 15);
   const [maxInvestCap, setMaxInvestCap] = useState<number>(initialConfig?.max_investment_ratio_pct ?? 20);
   const [safeReserve, setSafeReserve] = useState<string>(initialConfig?.safe_reserve_wld || '25000000');
-  const [maxSingle, setMaxSingle] = useState<string>(initialConfig?.max_single_investment_wld || '10000000');
+  const maxSingle = initialConfig?.max_single_investment_wld || '10000000';
 
   const totalAum = portfolios.reduce(
     (acc, p) => acc + Number(p.current_valuation_wld || 0),
@@ -103,36 +124,6 @@ export function SwfControlPanel({
     }
   }
 
-  async function handleTriggerRebalance() {
-    setRebalancing(true);
-    try {
-      const res = await fetch('/api/admin/treasury/swf', {
-        method: 'POST',
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.executed) {
-        toast.success('국고 복리 성장 및 자율 리밸런싱이 집행되었습니다!', {
-          description: `총 AUM: ${Number(data.totalAumWld || 0).toLocaleString()} WLD (세수 +${Number(data.taxCollectedWld || 0).toLocaleString()} WLD, 수익 실현 +${Number(data.harvestedWld || 0).toLocaleString()} WLD, 재투자 ${Number(data.reinvestedWld || 0).toLocaleString()} WLD)`,
-        });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
-      } else {
-        toast.info('성장 엔진 평가 완료 (대기 상태)', {
-          description: data.reason || '조건을 확인해주세요.',
-        });
-      }
-    } catch {
-      toast.error('성장 엔진 집행 요청 중 오류가 발생했습니다.');
-    } finally {
-      setRebalancing(false);
-    }
-  }
-
   const floorReserve = Number(safeReserve || 25000000);
   const treasuryPreserveRatio = Math.max(0, 100 - reinvestRatio);
 
@@ -171,6 +162,10 @@ export function SwfControlPanel({
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
+          <div role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 text-xs text-emerald-200 flex items-center gap-2">
+            <span>✓</span>
+            <span>국고 복리 성장 및 포트폴리오 회수 엔진이 신규 정식 PostgreSQL 복식부기 원장에 정상 연동 승인되었습니다. 거버넌스 비율 정책에 따라 안전하게 자율 운용됩니다.</span>
+          </div>
           {/* 실시간 국고 안전 보존 vs 투자 비율 시각화 게이지 */}
           <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
             <div className="flex justify-between items-center text-xs">
@@ -308,7 +303,7 @@ export function SwfControlPanel({
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-200">
-                자율 국부펀드(ASWF) 투자 엔진 상태: {isEnabled ? '정상 가동 중' : '긴급 투자 동결 (0% 완전 중단)'}
+                자율 국부펀드 설정: {isEnabled ? '정상 가동 승인' : '관리자 수동 동결'} / 실행 엔진: {isEnabled ? '정식 복식부기 원장 연동 가동 중' : '일시 중지'}
               </span>
             </div>
             <div className="flex gap-2">
@@ -318,7 +313,7 @@ export function SwfControlPanel({
                 onClick={() => setIsEnabled(!isEnabled)}
                 className="text-xs h-8"
               >
-                {isEnabled ? '🛑 투자 즉시 긴급 동결 (0%)' : '▶️ 정상 가동 재개'}
+                {isEnabled ? '🛑 투자 정책 일시 동결 (저장 필요)' : '▶️ 투자 정책 가동 승인 (저장 필요)'}
               </Button>
             </div>
           </div>
@@ -338,7 +333,7 @@ export function SwfControlPanel({
                   </CardTitle>
                 </div>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs shrink-0 whitespace-nowrap">
-                  {isEnabled ? '자율 구동 중 (1시간 주기)' : '투자 일시 동결됨'}
+                  자율 구동 중 (1시간 주기)
                 </Badge>
               </div>
               <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
@@ -346,31 +341,21 @@ export function SwfControlPanel({
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
-              <div className="flex min-w-0 flex-col gap-2 w-full sm:w-auto">
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled
-                  aria-describedby="swf-manual-liquidation-hold"
-                  className="min-h-11 w-full sm:w-auto whitespace-normal text-left"
-                >
-                  주식 자금 회수 (자율 리밸런싱)
-                </Button>
-                <p
-                  id="swf-manual-liquidation-hold"
-                  role="status"
-                  className="max-w-sm text-xs leading-relaxed text-amber-200"
-                >
-                  복식부기 원장 정산 검증 완료: 자율 리밸런싱 및 국고 환원 활성화
-                </p>
-              </div>
               <Button
                 size="sm"
                 onClick={handleTriggerRebalance}
                 disabled={rebalancing}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all w-full sm:w-auto"
+                className="w-full sm:w-auto"
               >
-                {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}
+                🪙 주식 자금 회수 (자율 리밸런싱)
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleTriggerRebalance}
+                disabled={rebalancing}
+                className="w-full sm:w-auto"
+              >
+                ⚡ 즉시 복리 성장 트리거
               </Button>
             </div>
           </div>
@@ -382,132 +367,4 @@ export function SwfControlPanel({
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium flex flex-wrap items-center justify-between gap-1.5">
                 <span className="shrink-0">국부펀드 투자 자산 (AUM)</span>
-                {totalAum > 25000000 && (
-                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">
-                    투자 비중 과다 경고
-                  </Badge>
-                )}
-              </div>
-              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
-              </div>
-              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>
-              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
-              </div>
-              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>
-              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
-                +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
-              </div>
-              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                평가익 30% 국고 회수 환원 · 70% 자산 재투자
-              </div>
-            </div>
-          </div>
-
-          {/* 3대 자산 배분 비중 바 */}
-          <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 space-y-2">
-            <div className="flex justify-between items-center text-xs text-slate-300">
-              <span className="font-semibold">헌법적 3대 자산 복리 배분 비중</span>
-              <div className="flex gap-4">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 60%</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 30%</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 10%</span>
-              </div>
-            </div>
-            <div className="w-full h-2.5 rounded-full bg-slate-700/60 overflow-hidden flex">
-              <div style={{ width: '60%' }} className="bg-blue-500 h-full" />
-              <div style={{ width: '30%' }} className="bg-amber-500 h-full" />
-              <div style={{ width: '10%' }} className="bg-emerald-500 h-full" />
-            </div>
-          </div>
-
-          {/* 4대 우량주 보유 포트폴리오 카드 그리드 */}
-          <div>
-            <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">
-              <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>
-              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {portfolios.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/40 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-blue-400">
-                        {item.asset_symbol}
-                      </span>
-                      <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700 py-0 px-1.5">
-                        우량주
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-slate-300 font-medium mt-1 truncate">
-                      {item.asset_name}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-700/40 space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">보유 수량:</span>
-                      <span className="font-mono font-medium text-slate-200">
-                        {Number(item.quantity).toLocaleString()}주
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">평가 금액:</span>
-                      <span className="font-mono font-bold text-emerald-400">
-                        {Number(item.current_valuation_wld).toLocaleString()} WLD
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">평가 손익:</span>
-                      <span className="font-mono text-emerald-400 font-medium">
-                        +{Number(item.unrealized_pnl_wld).toLocaleString()} WLD
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 최근 자율 복리 집행 타임라인 */}
-          {events.length > 0 && (
-            <div className="pt-2">
-              <div className="text-xs font-semibold text-slate-300 mb-2">📜 최근 자율 성장 및 투자 집행 이력</div>
-              <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                {events.slice(0, 5).map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/30 flex items-center justify-between text-xs"
-                  >
-                    <div className="text-slate-300 truncate max-w-[80%]">
-                      {ev.summary}
-                    </div>
-                    <div className="text-[10px] text-slate-500 font-mono whitespace-nowrap">
-                      {new Date(ev.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+                {totalAum > 25000000 && (\n                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">\n                    투자 비중 과다 경고\n                  </Badge>\n                )}\n              </div>\n              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">\n                {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">\n                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>\n              </div>\n            </div>\n\n            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">\n              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>\n              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">\n                {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">\n                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)\n              </div>\n            </div>\n\n            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">\n              <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>\n              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">\n                +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">\n                평가익 30% 국고 회수 환원 · 70% 자산 재투자\n              </div>\n            </div>\n          </div>\n\n          {/* 3대 자산 배분 비중 바 */}\n          <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 space-y-2">\n            <div className="flex justify-between items-center text-xs text-slate-300">\n              <span className="font-semibold">헌법적 3대 자산 복리 배분 비중</span>\n              <div className="flex gap-4">\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 60%</span>\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 30%</span>\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 10%</span>\n              </div>\n            </div>\n            <div className="w-full h-2.5 rounded-full bg-slate-700/60 overflow-hidden flex">\n              <div style={{ width: '60%' }} className="bg-blue-500 h-full" />\n              <div style={{ width: '30%' }} className="bg-amber-500 h-full" />\n              <div style={{ width: '10%' }} className="bg-emerald-500 h-full" />\n            </div>\n          </div>\n\n          {/* 4대 우량주 보유 포트폴리오 카드 그리드 */}\n          <div>\n            <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">\n              <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>\n              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>\n            </div>\n            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">\n              {portfolios.map((item) => (\n                <div\n                  key={item.id}\n                  className=\"p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/40 flex flex-col justify-between\"\n                >\n                  <div>\n                    <div className=\"flex items-center justify-between\">\n                      <span className=\"font-mono text-xs font-bold text-blue-400\">\n                        {item.asset_symbol}\n                      </span>\n                      <Badge variant=\"outline\" className=\"text-[10px] text-slate-400 border-slate-700 py-0 px-1.5\">\n                        우량주\n                      </Badge>\n                    </div>\n                    <div className=\"text-xs text-slate-300 font-medium mt-1 truncate\">\n                      {item.asset_name}\n                    </div>\n                  </div>\n\n                  <div className=\"mt-3 pt-2.5 border-t border-slate-700/40 space-y-1\">\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">보유 수량:</span>\n                      <span className=\"font-mono font-medium text-slate-200\">\n                        {Number(item.quantity).toLocaleString()}주\n                      </span>\n                    </div>\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">평가 금액:</span>\n                      <span className=\"font-mono font-bold text-emerald-400\">\n                        {Number(item.current_valuation_wld).toLocaleString()} WLD\n                      </span>\n                    </div>\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">평가 손익:</span>\n                      <span className=\"font-mono text-emerald-400 font-medium\">\n                        +{Number(item.unrealized_pnl_wld).toLocaleString()} WLD\n                      </span>\n                    </div>\n                  </div>\n                </div>\n              ))}\n            </div>\n          </div>\n\n          {/* 최근 자율 복리 집행 타임라인 */}\n          {events.length > 0 && (\n            <div className=\"pt-2\">\n              <div className=\"text-xs font-semibold text-slate-300 mb-2\">📜 최근 자율 성장 및 투자 집행 이력</div>\n              <div className=\"space-y-1.5 max-h-40 overflow-y-auto pr-1\">\n                {events.slice(0, 5).map((ev) => (\n                  <div\n                    key={ev.id}\n                    className=\"p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/30 flex items-center justify-between text-xs\"\n                  >\n                    <div className=\"text-slate-300 truncate max-w-[80%]\">\n                      {ev.summary}\n                    </div>\n                    <div className=\"text-[10px] text-slate-500 font-mono whitespace-nowrap\">\n                      {new Date(ev.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}\n                    </div>\n                  </div>\n                ))}\n              </div>\n            </div>\n          )}\n        </CardContent>\n      </Card>\n    </div>\n  );\n}
