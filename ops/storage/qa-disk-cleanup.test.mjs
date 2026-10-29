@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync, symlinkSync,
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { cleanupQaScratch } from './qa-disk-cleanup.mjs';
+import { cleanupQaScratch, recordQaRun } from './qa-disk-cleanup.mjs';
 
 const NOW = Date.parse('2026-10-27T06:00:00Z');
 const OLD = new Date(NOW - 5 * 24 * 60 * 60 * 1000);
@@ -74,5 +74,30 @@ test('never deletes unmarked normal temp directories', () => {
     const p = run(f.root, 'production-current', { completed: true });
     assert.equal(cleanupQaScratch(f.root, { now: NOW }).deleted, 0);
     assert.ok(existsSync(p));
+  } finally { f.finish(); }
+});
+
+
+test('scheduled QA creates a completed disposable report and removes it only after 72h', () => {
+  const f = fixture();
+  try {
+    const now = Date.now();
+    const { run: name } = recordQaRun({ httpPass: 24, authGated: 2, failed: 0 }, f.root, { now });
+    const dir = join(f.root, name);
+    assert.ok(existsSync(join(dir, '.qa-complete')));
+    assert.equal(cleanupQaScratch(f.root, { now: now + 71 * 3600_000 }).deleted, 0);
+    const out = cleanupQaScratch(f.root, { now: now + 73 * 3600_000 });
+    assert.equal(out.deleted, 1);
+    assert.ok(out.bytes > 0);
+    assert.ok(!existsSync(dir));
+  } finally { f.finish(); }
+});
+
+test('QA reporter refuses an unmarked root and invalid counts', () => {
+  const f = fixture();
+  try {
+    assert.throws(() => recordQaRun({ httpPass: -1, authGated: 2, failed: 0 }, f.root), /Invalid QA/);
+    writeFileSync(join(f.root, '.moneyverse-qa-disposable-v1'), 'tampered');
+    assert.throws(() => recordQaRun({ httpPass: 24, authGated: 2, failed: 0 }, f.root), /not isolated/);
   } finally { f.finish(); }
 });

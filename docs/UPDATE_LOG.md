@@ -1,3 +1,6 @@
+## v2026.10.29.1364 — Scheduled QA disposable disk hygiene (OPS PATCH)
+- The hourly cleaner already ran, but reclaimed 0 B at 11:00 KST because no QA-owned disposable run existed. A new bounded completed smoke summary is now produced for each QA run and aged out at 72 h. Stage/Test: 24 HTTP 200, 2 login-gated, 0 unexpected failures; Test backend `/health` 200, all Test/Production services active. Isolated 1 MiB canary was deleted; no non-QA artifacts touched. No full functional QA. [EN worklog](worklog/2026-10-29-qa-hygiene-v1364.md) / [KO](worklog/2026-10-29-qa-hygiene-v1364.ko.md), [Internal](updates/2026-10-29-qa-hygiene-v1364-internal.md), [GitHub](updates/2026-10-29-qa-hygiene-v1364-github.md).
+
 ## v2026.10.29.1211 — Branch integration staging / release HOLD
 - [EN worklog](worklog/2026-10-29-branch-integration-v1211.md) / [KO](worklog/2026-10-29-branch-integration-v1211.ko.md); [internal](updates/v2026.10.29.1211-internal.md) / [GitHub](updates/v2026.10.29.1211-github.md); [draft PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). Frontend 1,910 PASS, finance gate BLOCKED; no official Test, main or Production promotion.
 
