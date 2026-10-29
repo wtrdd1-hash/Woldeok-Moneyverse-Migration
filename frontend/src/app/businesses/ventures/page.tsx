@@ -153,7 +153,7 @@ export default function VenturesPage() {
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
             <ShieldCheck className="size-3.5 text-emerald-500 shrink-0" />
-            <span>30% IPO 공모 & 매출 기반 주주 배당 분배 엔진</span>
+            <span>미리보기 전용 · 가상 IPO 및 배당 계산</span>
           </div>
         </div>
 
@@ -169,7 +169,7 @@ export default function VenturesPage() {
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              AI 핀테크, 양자 컴퓨팅, 우주 로보틱스, 바이오 헬스케어, 친환경 스마트 그리드 법인을 설립하고 30% 지분 공모주 청약(IPO)을 통해 자금을 조달하세요. 주주는 매일 자정 기업 매출의 10%~50%를 WLD 배당금으로 수령합니다.
+              AI 핀테크, 양자 컴퓨팅, 우주 로보틱스, 바이오 헬스케어, 친환경 스마트 그리드 법인을 설립하고 30% 지분 공모주 청약(IPO)을 통해 자금을 조달하세요. 이 화면의 배당금은 계산 예시이며 실제 WLD 지급이나 정산이 이루어지지 않습니다.
             </p>
 
             {/* 4대 핵심 VC 지표 */}
@@ -196,7 +196,7 @@ export default function VenturesPage() {
                 <span className="text-[10px] text-muted-foreground/80 mt-0.5 block">법인세 3% 소각</span>
               </div>
               <div className="rounded-xl border border-zinc-800/80 bg-background/50 p-3">
-                <span className="text-[11px] font-medium text-muted-foreground block">진행 중인 IPO 청약</span>
+                <span className="text-[11px] font-medium text-muted-foreground block">예시 IPO 청약</span>
                 <span className="font-mono text-base font-black text-amber-400 block mt-0.5">
                   {ipoCampaigns.filter((c) => c.status === 'ACTIVE').length}개 라운드
                 </span>
@@ -209,9 +209,9 @@ export default function VenturesPage() {
           <div className="rounded-2xl border border-zinc-800/80 bg-background/60 p-4 sm:p-6 lg:col-span-4 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">내 투자 가용 WLD</span>
+                <span className="text-xs font-semibold text-muted-foreground">시뮬레이션 가용 WLD</span>
                 <Badge variant="secondary" className="font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border-none">
-                  실시간 원장
+                  예시 잔액
                 </Badge>
               </div>
               <div className="mt-2 font-mono text-2xl sm:text-3xl font-black text-foreground">
@@ -226,7 +226,7 @@ export default function VenturesPage() {
                 <span className="font-mono font-bold text-foreground">{holdings.length}개사</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">수령 가능한 미수령 배당금</span>
+                <span className="text-muted-foreground">예시 미수령 배당금</span>
                 <span className="font-mono font-bold text-emerald-400">
                   +{groupDigits(totalUnclaimedDividends)} WLD
                 </span>
@@ -524,7 +524,7 @@ export default function VenturesPage() {
                 </Badge>
               </div>
               <CardDescription className="text-xs">
-                현재 지분을 보유 중인 가상 법인 목록과 실시간 누적 배당금입니다.
+                시뮬레이션에 표시된 가상 법인 지분과 배당금 예시입니다. 실제 WLD 정산과 연결되지 않습니다.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -655,7 +655,7 @@ export default function VenturesPage() {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-semibold text-muted-foreground">초기 설립 자본금 (WLD)</span>
-                  <span className="text-muted-foreground text-[11px]">잔고: {groupDigits(userWldBalance)} WLD</span>
+                  <span className="text-muted-foreground text-[11px]">예시 잔고: {groupDigits(userWldBalance)} WLD</span>
                 </div>
                 <input
                   type="text"
