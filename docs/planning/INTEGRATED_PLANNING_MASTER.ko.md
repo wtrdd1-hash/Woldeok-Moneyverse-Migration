@@ -1,54 +1,72 @@
-## v1466 / F675-172 — 바로가기 상태·레지스트리 무결성 보완 (기능 보완 / 초안 / 보류)
-
-- 이전 기능 추가 v1464 → 현재 기능 보완 v1466 → 다음 기능 추가 v1468(잠정). 시작·중간 main `9ebc5613845ba2e8179a0051e86db996593c8a19`, QA v1368 진행 중 / 마지막 완료 v1367 FAILED/P0. 선행 [v1466 Draft PR #1871](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1871) / [Draft #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) 의존, [개발 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865) 인계. 런타임 변경 없음.
-- v1464 모호성 해결: 최초 기본값 세대 0, 저장된 DEFAULT 세대 >0, SAVED_EMPTY와 초기화 구분, 세대 단조 증가로 초기화·편집 ABA 방지. 서버 전용 버전형 경로 레지스트리·권한 검증, 임의 URL 금지, 상점 `/shop` 명시 매핑. 본인 CAS·레지스트리 세대 불일치 412, 해시 결합 불변 영수증은 후속 수정 이후에도 당시 결과 재생; 응답 불명 시 가짜 성공 금지·타인 접근 차단.
-- 비공개 웹·Android 접근성, noindex/no-store, 20명 이상 개인정보 보호 관리자 집계, 기본 OFF·비파괴 롤백. P0 REPO1466-01 FIN1466-02 SEC1466-03 REL1466-04; P1 SHORTCUT1466-05 SHORTCUT1466-06 SHORTCUT1466-07 SHORTCUT1466-08 SHORTCUT1466-09 SHORTCUT1466-10. 합성 10,001·동시 100·위조 100·재시도 50·경로 경합 30·ABA 30·과거 영수증 30 수용시험 **미실행**, WLD 영향 0 필수.
-- 외부 독립 근거 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 상세는 기존 영문 PROJECT_PLAN.md 원본·국문 동등 문서, 기획 전용·운영 보류.
-
-## v1464 / F675-172 — 회원 전용 대시보드 바로가기 (기능 추가 / 초안 / 보류)
-
-- 이전 기능 보완 v1462 → 현재 기능 추가 v1464 → 다음 기능 보완 v1466(잠정). main 9ebc5613845ba2e8179a0051e86db996593c8a19 시작·중간 확인; QA v1367 FAILED/P0; Test·Production 앱 c2129625aa6629c616fb31ce790950618b8d92b2는 main과 다름. Draft #1856/#1846/#1837/#1830 선행 의존. [Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) / [백로그 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
-- /dashboard의 '다음 활동'은 고정 4개 링크이며 확인한 대시보드·프로필·DB에 회원별 편집 기능은 없다. 기존 상점 관심 목록 F675-160이나 공지 고정과 별개. 회원은 최대 6개 allowlist 내부 route key를 선택·순서 변경·저장·초기화하며 Android 동기화. 임의 URL·관리자 경로·송금·구매·보상·알림·WLD 변동 없음.
-- 설계: 버전 있는 경로 레지스트리·권한 재검증, 회원 PK·CAS·본문 해시 불변 영수증, SECURITY DEFINER·앱 직접 DML 금지, 본인 GET/PUT/영수증 조회, CSRF, 409/412/422/429/503, 320px/WCAG 2.2 AA, noindex/no-store, 20명 이상 비식별 관리자 집계, 기본 OFF·비파괴 롤백. 상세 영문·국문 명세는 PROJECT_PLAN에 통합.
-- P0 REPO1464-01 FIN1464-02 SEC1464-03 REL1464-04, P1 SHORTCUT1464-05, SHORTCUT1464-06, SHORTCUT1464-07, SHORTCUT1464-08, SHORTCUT1464-09, SHORTCUT1464-10. 합성 10,001건·동시 100·권한 위조 100·응답 유실 50·경로 경합 30 수용시험 **미실행**. 과거 체크섬 불일치 5건·국고 미연계 552행·MINT 조정 19건/18,000 WLD·브랜치 보존 게이트 유지.
-- 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000건, BLOCKED/IN PROGRESS. 기획만 변경하고 runtime·DB·Test·Production은 그대로 유지. 신규 분산기획 파일 없음.
-
-
 # 월덕 머니버스 — 통합 기획 마스터
 
-## v1462 / F675-171 — 저장 수취인 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+## v1468 / F675-173 — 회원 본인 전용 검증형 개인정보 내보내기 (기능 추가 / 초안 / 운영 보류)
 
-- **주기:** 이전 Addition v1460 → 현재 Improvement v1462 → 다음 Addition v1464(잠정). main 95a8fdb85f6670cac9e52e16383711ac94924e93까지 재조회; 미병합 Draft #1846/#1837/#1830에 의존. QA v1366 HOLD. Test·운영 앱 c2129625aa6629c616fb31ce790950618b8d92b2는 main과 다름. [개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
-- **신규 소스 근거:** UUID만 입력하라는 화면과 달리 인증된 /wallet/recipients/search는 member_profiles ILIKE로 이름·UUID를 반환한다. 활성 회원 확인은 활성 USER_CASH 지갑 확인과 다르다. TransferForm은 오류 상태에서 송금 멱등키를 바꾸며 알림은 재생 여부를 구별하지 않는다. **운영 유출·중복 지급의 실측 증거는 아니다.**
-- **보완 계약:** 이름 검색 재사용 금지, 본인 전용 UUID 저장, 회원+현금 지갑을 확인한 ELIGIBLE/UNAVAILABLE/UNKNOWN(최대 30초), 실제 폼 수취인 값 동기화·전체 UUID/금액 재확인, 미확정 송금의 최초 키 유지, 본인 영수증 조회, 정규화 해시·최상위 SERIALIZABLE·40001 동일 키 재시도, no-store·Android 동등성·기본 OFF.
-- **백로그:** P0 REPO1462-01, FIN1462-02, SEC1462-03, REL1462-04; P1 RECIP1462-05~10(상태/DB/API/UI/개인정보/회귀). 제안 시험: 합성 10,001, 동시 100, 권한 거부 100, 응답 유실 50, 계정 상태 경합 30, 열거 30. 실제 수용시험 미실행.
-- **게이트:** QA v1366 HTTP 48/50, 모바일 36/36, 개발 DB 원장 산술 불일치 0이지만 국고 552행 연결 누락, 체크섬 5건, 앱 쓰기 가능 관계 216개. 독립 복원·정확 SHA Test·신규 기능 운영승격 미인증. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 변경 없음. 세부 영문·국문은 PROJECT_PLAN.
-- **개발 연계:** [P0 #1854](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1854), [P1 #1855](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1855), [백로그 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+**기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (병합·배포 보류).
 
-## v1460 / F675-171 — 회원 전용 WLD 수취인 저장 (기능 추가 / 초안 / 배포 보류)
+**주기:** 이전 기능 보완 v1466 → 현재 기능 추가 v1468 → 다음 기능 보완 v1470(잠정). **기준:** 2026-10-29 18:06 KST 최신 원격 main 9ebc5613845ba2e8179a0051e86db996593c8a19, 완료 QA v1369 FAILED/HOLD. **개발 인계:** GitHub 이슈 #1876. 기획일 뿐 실제 구현·법적 충족·운영 인증이 아니다.
 
-- **주기:** 이전 Improvement v1458 → 현재 Addition v1460 → 다음 Improvement v1462(잠정). main `b84d645a`; 미병합 #1837/#1830에 의존하며 main 반영 아님. QA v1365 FAILED/P0; 운영/Test 앱 `b44ffd0a` 별도. [개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
-- **소스 근거:** 지갑 송금 때마다 정확한 36자리 UUID를 입력한다. 수취인 검색·정확 ID 활성 확인 API는 있지만 검사한 지갑 코드에 본인 전용 저장 CRUD는 없다. 이름/Discord 공개 검색·실명 인증·자동 송금은 제외.
-- **기능:** 회원이 공유받은 UUID를 최대 20명까지 개인 별칭으로 저장/조회/변경/삭제, 웹·Android 동등성. **송금에 사용**은 UUID만 채우고 전체 ID·금액 재확인을 거쳐 기존 송금을 수동 실행한다. 금액 저장·자동 지급·원장/알림 변경·사용자 열거 금지. 탈퇴·차단 상대는 사용 불가.
-- **기술:** 추가형 owner+recipient UNIQUE/tombstone/version, 불변 요청 영수증, SECURITY DEFINER 소유자 검사·앱 직접 DML 거부, SERIALIZABLE 한도/CAS, 동일 UUID·해시 재시도, 409/412, 서명 커서, CSRF/no-store/noindex, WCAG 2.2 AA·320px, 영수증 90일 보존 제안, 익명 관리자 KPI. 기능 기본 OFF. **미구현.**
-- **P0:** REPO1460-01(과거 브랜치 462/비조상 344), FIN1460-02(18,000 WLD/국고 552), SEC1460-03(체크섬 5건/권한), REL1460-04(독립 복원/정확 SHA Test/QA/GitOps). **P1:** RECIP1460-05~10(DB/원자성/API/UI/개인정보/합성 10,001+동시 100+권한 100 테스트). 실제 수용시험 미실행.
-- **외부 근거:** 신규 검증·중복 제거 승인 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 신규 분산기획 파일 없음. 런타임·Test·운영·DB·WLD 불변. 세부 영문·국문 계약은 PROJECT_PLAN 참조.
+### 기존 코드와 설계 판단
+- Next.js account/privacy/page.tsx는 개인정보 권리 요청 접수·목록만 제공한다. NestJS privacy.controller.ts는 privacy/requests GET/POST만 제공하며, privacy.repository.ts의 요청 유형은 열람·정정·처리제한·동의철회·삭제, 상태는 received뿐이다. privacy.service.ts에는 파일 생성·외부 전송·계정 변경을 하지 않는다고 명시되어 있다. 조사한 main에서 검증된 다운로드 파일, 본인 전용 내보내기 작업, Android 동등 기능을 확인하지 못했다.
+- 기존 열람 요청이 자동 내보내기로 법적 처리 완료됐다고 표시하지 않는다. 수동 요청과 관리자 검토는 별도로 유지한다. 자동 파일은 승인된 데이터 일부를 제공하는 선택적 서비스이며 전체 개인정보 열람의 법적 완결성을 보장하지 않는다. WLD·원장·세금·계정·동의 기록을 수정하거나 송금하지 않는다.
+- 브라우저가 여러 API를 직접 조합하는 방식은 타인 정보 유출·출처 누락 위험으로 제외한다. 이메일 첨부 파일은 통제 불가능한 사본을 생성하므로 제외한다. 공개 객체저장소 서명 URL은 본인 재인증·철회 우회를 만들 수 있어 제외한다. 서버가 통제하는 암호화 파일과 짧은 유효기간의 동일 출처 다운로드를 채택한다.
+
+### 목적, 대상, 권한, 진입점, 화면과 상태
+- 목적은 로그인한 적격 회원이 본인 데이터 중 승인된 범위의 사본을 직접 요청하고 포함 범위와 생성 근거를 확인하는 것이다. 비회원은 로그인 안내만 표시한다. 정지·삭제 진행·소유권 미확인 계정은 기존 수동 열람 절차를 이용하며 민감 정보를 부분 노출하지 않는다.
+- 계정 → 개인정보 센터 → 내 데이터 내보내기 → /account/privacy/export. 파일에 포함되는 정보·제외 정보·생성 시간·만료·법적 열람 요청과의 차이를 설명한다. 기본 해제된 명시적 동의 체크 후 '내보내기 요청', '진행 상태 새로고침', READY 상태에서 '본인 확인 후 다운로드', 만료 시 '새로 요청', 오류 시 '개인정보 문의' CTA를 제공한다. 취소된 작업은 되살리지 않는다.
+- 상태는 NOT_REQUESTED, REAUTH_REQUIRED, QUEUED, BUILDING, READY, FAILED, EXPIRED, CANCELLED, HOLD, DOWNLOAD_AUTH_EXPIRED. 대기·생성·보류를 완료로 표시하지 않는다. 응답 유실 시 RECEIPT_UNKNOWN으로 표시하고 원래 멱등 요청 UUID의 영수증을 조회한다. 새 키로 자동 재시도하지 않는다. 로그아웃·계정 전환 시 메모리의 작업 정보와 다운로드 권한을 즉시 폐기한다.
+- 회원당 QUEUED/BUILDING/READY 작업 1개, 최근 24시간 신규 생성 최대 1개, 파일 크기 최대 25MiB, READY 후 최대 7일 보관. 다운로드는 매번 10분 이내 유효한 1회성 인증이 필요하다. 만료·삭제 판단은 서버가 한다.
+
+### 데이터 범위·불변 매니페스트
+- 서버 승인 허용목록 v1: 본인 계정·프로필 공개 필드, 본인 동의 선택·개인정보 요청 영수증, 본인 현금/은행 원장 활동, 본인 업무·퀘스트 수행 이력의 읽기 전용 투영. 화면과 manifest.json에 데이터 종류, 원본 함수/테이블 버전, 기준 시각, 행 수, 포함 필드, 제외 사유, schema_version 및 종류별 SHA-256을 표시한다.
+- 비밀번호 해시·재설정 토큰·인증 쿠키·세션 ID·OAuth 자격증명·내부 보안/관리자 감사 자료·타인 연락처와 신원·비공개 채팅/상담 본문·미승인 제3자 정보·결제 자격증명·출처 불명 데이터는 제외한다. 임의 SELECT *나 사용자 지정 ID 조인은 금지하고 서버 소유권 함수로 투영한다. 공동 기록의 타인 필드는 비식별 처리하고 제외 이유를 남긴다. 소유권/출처를 증명하지 못하면 제외 이유를 남기거나 HOLD로 중단한다.
+- UTF-8 JSON과 manifest.json을 담은 결정적 ZIP 형식, UTC ISO-8601, WLD 금액은 문자열, 파일명은 고정 허용목록, CSV 수식·HTML 실행 콘텐츠 없음. 매니페스트의 파일별 해시와 전체 ZIP SHA-256, 서명키 버전을 기록한다. 해시는 무결성 검증이며 법적 완전성 보증이 아니다. 영수증은 회원·export_id·스키마·데이터 기준 시각·파일 해시·만료·상태에 결합하며 개인정보 본문은 저장하지 않는다.
+
+### API·인증·웹·Android
+- 신규 NestJS 제안 API: POST /api/v1/privacy/exports ({requestId: UUID, selectedClasses: 승인된 enum[]}), GET /api/v1/privacy/exports?limit=20, GET /api/v1/privacy/exports/:exportId, POST /api/v1/privacy/exports/:exportId/cancel, POST /api/v1/privacy/exports/:exportId/download-authorizations, GET /api/v1/privacy/exports/:exportId/download. 실제 경로는 개발자가 계약·route-map을 검증한다.
+- Next.js account/privacy/export의 Server Action/BFF와 동일 출처 인증 스트리밍을 사용한다. INTERNAL_API_TOKEN·저장소 경로·암호화 키를 브라우저·CDN에 전달하지 않는다. Android app-api는 동일 상태와 소유권을 유지하되 브라우저 CSRF 쿠키 대신 앱 전용 인증을 쓴다. 생성/취소/다운로드 권한 발급에는 SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard와 10분 이내 재인증이 필요하다. 다운로드 직전 현재 세션·소유자·계정 상태·재인증·만료·파일 해시·1회성 권한을 원자적으로 재검증한다. 공개 서명 URL은 금지한다.
+- HTTP: 202 대기, 200 기존 멱등 영수증, 400 입력 오류, 401 세션 없음, 403 권한/재인증 불충족, 404 타인/미존재 동일 응답, 409 동일 키 다른 본문 또는 활성 작업 충돌, 410 권한 만료/철회, 413 파일 상한, 429 요청 상한, 503 KMS/저장소/작업자/근거 미확인. Cache-Control private,no-store, X-Robots-Tag noindex, 첨부 다운로드 Content-Disposition, application/zip, nosniff, 민감 리다이렉트 금지. 비소유자 응답은 내용·시간 차이를 최소화한다.
+
+### PostgreSQL 제약·인덱스·트랜잭션·작업자
+- 기존 적용 SQL 수정 없이 연속된 다음 번호의 신규 마이그레이션 제안. privacy_export_jobs(export_id UUID PK, owner_id UUID FK users, request_uuid UUID, request_digest bytea, classes_version integer, selected_classes 검증 jsonb, 상태 enum, created/started/ready/expires/finished, lease_until, attempt_count, artifact_ref 불투명 참조, artifact_sha256, manifest_sha256, failure_code 허용목록, generation bigint). UNIQUE(owner_id,request_uuid), 활성 상태 부분 UNIQUE(owner_id), (owner_id,created_at DESC,export_id) 조회 인덱스, (status,lease_until,created_at) 작업자 인덱스, 상태별 시각·해시 32바이트 CHECK. 개인정보 본문·ZIP 바이트를 DB에 저장하지 않는다.
+- privacy_export_events는 불변 전이·행위자 유형·요청 해시를 저장한다. privacy_export_download_grants는 1회성 토큰 해시·세션 결합 해시·10분 만료·사용 시각·generation을 보관한다. privacy_export_purge_receipts는 파일 삭제 시각·객체 버전 지문·독립 확인 지문을 남긴다. 감사 최소 정보 보존 기간은 별도 검토한다.
+- 본인 전용 SECURITY DEFINER 생성/목록/상태/취소/권한발급/소비 함수만 앱 계정에 EXECUTE를 허용한다. 테이블 직접 읽기/쓰기와 PUBLIC EXECUTE는 명시적으로 회수한다. SQL의 p_actor 매개변수만으로 인증됐다고 간주하지 않으며 서비스에서 검증된 세션·Bearer로 결정한다. (회원,요청 UUID) 자문 트랜잭션 잠금 → 재생 영수증·본문 해시 확인 → 회원 잠금·활성 작업 상한 검증 → 상태 변경 순서를 고정한다. 작업자는 SKIP LOCKED와 만료 임대, generation 비교로 지연 완료가 취소·만료 작업을 READY로 되살리지 못하게 한다. 임시 암호화 객체를 완성·검증한 뒤에만 원자적으로 READY와 해시를 기록한다. KMS/쓰기 실패 시 READY 금지.
+- 만료·취소 후 삭제 작업자가 암호화 객체를 삭제하고 독립 삭제 영수증을 기록한다. 백업·복원 과정에서 만료된 파일이 부활하지 않아야 한다. 법적 보존·삭제 요청 시 해당 내보내기 작업을 보류/취소하며 원본 기록을 자동 삭제하지 않는다.
+
+### 관리자·보안·SEO·모바일 접근성·분석
+- 관리자는 상태별 건수·소요시간·오류 코드·삭제 지연·보류 사유만 확인한다. 파일 내용·다운로드 대리 실행·회원별 파일 링크는 제공하지 않는다. 예외 보존에는 2인 승인과 불변 감사가 필요하다. 분석/로그에 개인정보·토큰·파일명·URL·매니페스트 필드 값을 넣지 않는다. KMS와 접근 로그는 별도 보호한다.
+- 개인 화면 noindex/nofollow, 사이트맵 제외, SSR 공유 캐시 금지, CSP·Referrer-Policy 강화. 320px, 44px 조작부, 키보드 포커스, aria-live 상태 안내, 색상·카운트다운만으로 만료 전달 금지, 한/영 문구 동등, TalkBack/VoiceOver, WCAG 2.2 AA. 공개 SEO는 개인정보 안내문에 한정하며 개인 파일 페이지 색인 금지.
+- KPI는 생성 READY p50/p95, 인증된 다운로드 성공률, 취소율, HOLD/503 비율, 파일 삭제 지연 p95, 타인 접근 성공 0, 유출 URL 0, WLD·원장 변화 0. 회원별 다운로드 행태는 외부 분석에 전송하지 않는다.
+
+### 수용시험·무중단 배포·롤백·백로그
+- 격리 PostgreSQL 17에서 합성 10,001행, 동일 키 동시 100요청은 작업 1개·동일 영수증, 타인 권한 위조 100건 정보 0, 다운로드 중단 50건 다른 권한 소비 0, 만료·취소·작업자 경합 30건 READY 부활 0, 로그아웃·계정 변경 30건 차단, 25MiB 경계, KMS 장애, 해시 불일치, 백업 복원·삭제, 원장 변화 0을 실제 실행해야 한다. 테스트를 기획했다고 통과했다고 주장하지 않는다. 웹/Android·공식 Test exact-SHA 인증 E2E 필요. 운영 개인정보를 테스트 데이터로 사용하지 않는다.
+- 기능 스위치 기본 OFF, 추가형 마이그레이션, 격리 작업자, 파괴적 소급 변경 없음. 데이터 종류·보존 기간의 독립 개인정보/법무 검토, KMS·외부 백업 복원, DB 권한 회귀, 이미지/소스 SHA, 공식 Test E2E 후 GitOps 운영승격. 소수 적격 회원 카나리에서 개인정보 누출을 감시한 뒤 확대한다. 롤백은 신규 요청·다운로드 차단, 발급 권한 취소, 감사 보존, 보류 검토 후 파일 안전 삭제이며 기존 개인정보 요청·원장·테이블을 파괴하지 않는다.
+- P0: REPO1468-01 과거 브랜치 보존(#1663), FIN1468-02 MINT 18,000 WLD·국고 미연결 552행(#1816), SEC1468-03 깨끗한 PG의 채팅 신고 오류(#1874)·마이그레이션 체크섬 5건·운영자 승인 기존 금융 권한, REL1468-04 독립 복원·공식 Test exact-SHA·빌드만으로 자동병합 금지(#1088). P1: EXPORT1468-05 스키마/매니페스트, EXPORT1468-06 작업자/멱등성, EXPORT1468-07 API/웹/Android, EXPORT1468-08 화면/a11y, EXPORT1468-09 관리자/개인정보/KPI, EXPORT1468-10 실제 PG/보안/롤백.
+- QA v1369: HTTP 48/50(의도된 404 2건), 모바일 36/36, 대상 테스트 48/48 및 보안 24/24 PASS, route-ledger CLI 근거 누락 FAIL, 의존성 감사 Moderate 1건, 체크섬 불일치 5건, 개발 원장 산술 차이 0이나 MINT 자금 출처 미검증, 열린 Draft PR 147개·충돌 58개. 기존 Production v1502는 본 기능 배포가 아니다. 외부 독립 중복제거·검증 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 문서 전용 초안, 운영승격 HOLD.
 
 
-## v1458 / F675-170 — 릴리스 증거 식별·브랜치 보존 (기능 보완 / 초안 / 보류)
-
-- **주기:** 이전 추가 v1456 → 현재 보완 v1458 → 다음 추가 v1460(잠정). main `b84d645a`, 선행 Draft #1830 미병합·의존 브랜치. QA v1364 Test/운영 앱 `b44ffd0a`는 main과 다름. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
-- **P0:** QA v1364 기존 브랜치 이름 462개 누락(조상 118·비조상 344), 검증된 51 MiB 복구 bundle 보존. 소유자·삭제 주체·정책 대조 전 파괴적 정리 보류. 과거 18,000 WLD MINT 출처, 직접 연결 없는 국고 552행, 체크섬 5건, 인증 E2E·외부 독립 복원 미검증. 운영자 승인 금융 DML 유지. 기존 v1213 변조 증거로 단정하지 않음.
-- **설계:** 저장소 HEAD·앱 SHA·이미지 digest·GitOps·DB 지문·정책·신뢰 epoch를 후보 키에 결합. PRE/POST와 REQUIRED/NOT_APPLICABLE을 상태 6종과 분리, PRE 최종 EVIDENCE_COMPLETE 금지. 키 폐기/만료는 불변 기록을 바꾸지 않고 현재 HOLD로 표시. 동일 스냅샷 FK·SERIALIZABLE 서명 수집·멱등 영수증·관리자 읽기/비식별 내보내기 전용·배포 CTA 없음·WCAG/noindex/Android 관리자 미지원.
-- **백로그:** P0 REPO1458-01 FIN1458-02 SEC1458-03 REL1458-04; P1 RELBOARD1458-05~10. 격리 10,001행/동시 100건/권한 부정 100건 미실행. 외부 독립 승인 신규 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 문서만 변경, 영문·국문 상세 PROJECT_PLAN 수록.
+## v1452-R1 — 새 뉴스 스케줄러 운영 첫 시간 수용 (2026-10-29 15:30 KST)
+- v1502 수정 스케줄러 첫 자동 주기: 후보 5건, 뮤야 엔터(MYUY) 발행 1건, 치무전자(CHIMU314) 새 중복 0건. 로컬 AI 시간초과에 따라 결정론적 대체 엔진 사용 사실 정확 기록. 24시간/7일 장기 편중 개선은 아직 측정 전. [운영기록](../releases/v2026.10.29.1452-news-scheduler.ko.md).
 
 
-## v1456 / F675-170 — 근거 연계형 릴리스 준비도 현황판 (기능 추가 / 초안 / 보류)
+## v2026.10.29.1452 운영 보정 — 뉴스 스케줄러 리더 최신화
+- 공개 v1502 `c2129625`에 중복 차단 코드는 포함됐으나 뉴스 자동발행 리더는 2026-10-22 구형 포트3000에서 실행되는 문제가 있었음. 10월 29일 15:22 KST 리더만 v1502 불변 백엔드로 교체, 공개 3564/3565와 Nginx 유지. 리더 건강·SHA 검증됨. 기존 활성 기사는 만료까지 유지되며 다음 예약 주기 검증은 별도. [운영기록](../releases/v2026.10.29.1452-news-scheduler.ko.md).
 
-- **기준·주기:** 이전 보완 v1454 → 현재 추가 v1456 → 다음 보완 v1458(잠정). 원격 main `b84d645a`와 실제 Test/운영 앱 `b44ffd0a` 구분. QA v1363 HTTP 48/50(양쪽 `/help` 404), 모바일 36/36, Draft PR 113개/충돌 48개. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
-- **기능:** 권한 제한된 읽기 전용 `/admin/releases/readiness`, 소스/빌드/Test DB/복원/금융/인증 QA/운영 근거 체인, 검증/실패/만료/누락/불가/승인예외 6종 상태와 HOLD/EVIDENCE_COMPLETE. 승인·승격 버튼 금지. 정확 SHA·서명 증빙, 불변 PostgreSQL 스냅샷, 권한 검증 SECURITY DEFINER, 비식별 내보내기, 관리자 감사, Android 정책, noindex, WCAG 2.2 AA.
-- **안전:** v1213 실제 운영 승격과 운영자 승인 기존 금융 DML 존중. 역사적 체크섬 5건·국고 근거·세션 재사용은 별도 미검증. 10,001행/동시 100건/권한 부정 100건 수용시험은 **미실행**. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04, P1 RELBOARD1456-05~10. 상세 영문 정본과 한국어 대조본 PROJECT_PLAN에 수록.
-- **외부 근거 게이트:** 신규 승인 0건, 누적 검증 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. 문서만 변경, 런타임/Test/Production 미변경.
+
+## v2026.10.29.1502 — 실제 운영 승격과 잔존 금융정산 과제
+- v1501 중앙은행 상태 정정·국부펀드 위험 회수 차단을 2026-10-29 Test·운영에 적용. 소스 SHA c2129625aa6629c616fb31ce790950618b8d92b2, 메인 병합 PR #1845(679cb5904f779a1b2067f10809fcca83e31dbe91), 앱 소스 동일.
+- 운영 원장 불일치/불균형 0건. 기존 승인된 3개 금융 직접 DML 때문에 도구 원문은 BLOCKED 유지. 실제 조폐 승인/기준금리 공시/국부펀드 회수는 복식부기 정산이 없어 실행 불가(503), 성공처럼 표시하지 않는다.
+- [상세 릴리스](../releases/v2026.10.29.1502.ko.md) · [운영 작업기록](../worklog/2026-10-29-v1502-operational-promotion.ko.md).
+
+
+## v2026.10.29.1501 — 중앙은행 관리자 정정과 국부펀드 회수 차단 (소스 후보)
+- 운영 v1213 회수 SQL의 42P08(text/numeric 매개변수 충돌)을 확인했다. 형변환만 수정하면 원장 증빙 없는 국고 잔액 증가가 가능하므로 정상 회수로 간주할 수 없다.
+- 소스 후보는 국부펀드 회수를 양쪽 API에서 503으로 중단하고, 중앙은행의 프로세스 메모리 기반 조폐/금리/지준율 값을 비공식 참고 정보로 표시한다. 실제 화폐 인수·공식 정책 공시·자동 성장 기능은 재개되지 않았다.
+- 사용자가 기존에 승인한 DML 권한은 변경하지 않는다. 운영 DB 변경과 우회 승격은 없음. [근거](../worklog/2026-10-29-central-bank-swf-controls-v1501.ko.md).
+
+## v2026.10.29.1452 — 가상시장 AI 뉴스 신뢰도 복구 (구현 후보)
+치무전자 143/204건 편중·동일 기사 138회 실측. 최근 7일 중복 제목 차단, 종목별 24시간 쿨다운, 최근 기사가 적은 종목 우선, fallback 5종목 후보·실제 엔진 표기, 영속 멱등 이벤트 키 적용. 이력 확인 실패시 자동 발행 거부; 기존 뉴스·가격·원장 데이터 직접 수정 없음. [작업기록](../worklog/2026-10-29-ai-news-repeat-guard-v1452.ko.md) / 이슈 #1848. 정확 SHA Test·무중단 운영 승격 검증까지 후보 상태.
+
 
 ## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 권한 승인 유지
 
