@@ -1,0 +1,8 @@
+# 2026-10-30 — Development A / P0 public Treasury and frontend edge attestation
+
+- Status: IN PROGRESS / RELEASE HOLD. Base `62c6cd038951d65c94b709302bdaec6e75b080b6` from latest origin/main at start; isolated branch `auto/hourly-a-treasury-attestation-20261030-0025`.
+- Evidence: QA v1376 issue #1917: Test public Treasury returns synthetic `ok:true` / `disb-*` records, Production public Treasury fails closed, while both backend `/api/version` endpoints report the same source SHA. Test `/frontend-version` reports that SHA, but Production `/frontend-version` reports a 13-digit timestamp. Backend version alone cannot attest frontend edge identity.
+- P0 scope: strengthen existing read-only host release identity gate to require *independent public frontend build ID* and *public Treasury fail-closed disclosure* in both channels; do not change ledger, finance execution, SQL migrations, or live services. Add negative tests for stale/missing frontend ID, synthetic/incorrect Treasury response, unsafe caching and network errors. Public and active-origin routing discrepancy remains a separate release blocker.
+- Planned steps: (1) RED regression tests, (2) fail-closed gate implementation, (3) focused and broad checks, (4) current-main recheck/PR/evidence. Other developers' PRs and branches are untouched.
+- Start: Debian 13.6 and core services active; DEV DB reachable; root repository checkout is dirty from other work and intentionally untouched. Main SHA and open PR/branch/CI inventory saved to `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0025/`.
+- Test: PENDING. Official exact-SHA Test auth E2E: BLOCKED until release gate. Production: HOLD. Rollback: revert gate-only commit; no schema/data migration.
