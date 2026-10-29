@@ -32,6 +32,7 @@ import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { BankPrivacyNotice } from './bank-privacy-notice';
+import { BankStatementDownloadLink } from './bank-statement-link';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
@@ -128,6 +129,9 @@ export default async function BankPage() {
       </div>
 
       <BankPrivacyNotice locale={locale} />
+      <div className="flex justify-end">
+        <BankStatementDownloadLink locale={locale} />
+      </div>
 
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
       <Tabs defaultValue="savings" className="space-y-6">

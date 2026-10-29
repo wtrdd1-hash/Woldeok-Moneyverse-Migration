@@ -36,6 +36,39 @@ export class BankRepository {
     return row?.standing ?? null;
   }
 
+  /** Export a nonbinding owner-only read snapshot; the ledger is not reconciled by this read. */
+  async getStandingSnapshot(actor: unknown): Promise<{
+    currency: 'WLD'; cashBalance: string; depositBalance: string;
+    unclaimedInterest: string; activeLoanOutstanding: string | null;
+    observedAt: string; readOnly: true;
+  }> {
+    const value = await this.getStanding(actor);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw new Error('bank standing unavailable');
+    }
+    const standing = value as Record<string, unknown>;
+    const amount = (field: unknown): string => {
+      if (typeof field !== 'string' || !/^(0|[1-9][0-9]{0,77})$/.test(field)) {
+        throw new Error('invalid bank standing amount');
+      }
+      return field;
+    };
+    const loan = standing['active_loan'];
+    if (loan !== null && loan !== undefined && (typeof loan !== 'object' || Array.isArray(loan))) {
+      throw new Error('invalid active loan');
+    }
+    const outstanding = loan ? amount((loan as Record<string, unknown>)['outstanding_amount']) : null;
+    return {
+      currency: 'WLD',
+      cashBalance: amount(standing['cash_balance']),
+      depositBalance: amount(standing['bank_balance']),
+      unclaimedInterest: amount(standing['unclaimed_interest']),
+      activeLoanOutstanding: outstanding,
+      observedAt: new Date().toISOString(),
+      readOnly: true,
+    };
+  }
+
   /** Read-only, actor-scoped game credit signals; no synthetic activity or repayments. */
   async getCreditFacts(actor: unknown): Promise<{
     accountAgeDays: number;
