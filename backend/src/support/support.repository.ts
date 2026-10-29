@@ -23,7 +23,15 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, limit = 50) {
+  myThreads(actor: string, limit = 50, search?: string) {
+    if (search) {
+      // Search only the latest 100 owner-scoped rows; do not imply all-history coverage.
+      return queryRows<SupportThreadRow>(this.pool,
+        `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
+         FROM public.support_my_threads($1,$2)
+         WHERE pg_catalog.strpos(pg_catalog.lower(subject), pg_catalog.lower($3::text)) > 0`,
+        [actor, 100, search]);
+    }
     return queryRows<SupportThreadRow>(this.pool,
       'SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at FROM public.support_my_threads($1,$2)',
       [actor, limit]);

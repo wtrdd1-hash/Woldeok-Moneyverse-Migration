@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -35,8 +35,16 @@ export class SupportController {
   constructor(@Inject(SupportRepository) private readonly support: SupportRepository | null) {}
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
-  @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
-  async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
+  @Get('threads') @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'My recent administrator support conversations (optional recent-100 subject search)' })
+  async threads(@Req() req: RequestWithSession, @Query('q') q?: string) {
+    if (q !== undefined && typeof q !== 'string') throw new BadRequestException('invalid support search');
+    const search = q?.trim();
+    if (search && (search.length > 80 || /[\x00-\x1f\x7f]/.test(search))) {
+      throw new BadRequestException('support search must be 1-80 printable characters');
+    }
+    return { threads: await this.repo().myThreads(requireUserId(req), 50, search || undefined) };
+  }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {
@@ -48,29 +56,6 @@ export class SupportController {
   @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
   async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
     return { messages: await this.repo().messages(requireUserId(req), id) };
-  }
-
-  @Get('threads/:id/messages/:messageId')
-  @Header('Cache-Control', 'no-store')
-  @ApiOperation({ summary: 'Verify an exact message receipt in my support conversation' })
-  async message(
-    @Req() req: RequestWithSession,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Param('messageId', ParseUUIDPipe) messageId: string,
-  ) {
-    let message;
-    try {
-      message = await this.repo().exactMessage(requireUserId(req), id, messageId);
-    } catch (error) {
-      const dbError = error as { code?: string; message?: string } | null;
-      // Only an explicit owner refusal is a 404; a missing function GRANT is a 503.
-      if (dbError?.code === '42501' && dbError.message === 'support thread not available') {
-        throw new NotFoundException('support message not found');
-      }
-      throw new ServiceUnavailableException('support message could not be verified');
-    }
-    if (!message) throw new NotFoundException('support message not found');
-    return { message };
   }
 
   @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })
