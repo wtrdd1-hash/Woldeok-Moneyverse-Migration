@@ -19,3 +19,10 @@ Verification `verify/294-ledger-discrepancy-registry.sql` executed on isolated r
 
 ## Remaining release gates
 Per-user source issuance provenance, bank/treasury/mint link classification, memory/Redis writers, idempotent concurrent replay, case authorization, authenticated official Test E2E, full migration parity, Production DB binding and final sync remain outstanding. No claim of definitive discrepancy remediation or complete finance integrity.
+
+## 2026-10-29 operator-supplied historical funding attribution — Treasury
+The project operator explicitly states that the **18 USER_CASH differences of +1,000 WLD per account (18,000 WLD aggregate)** originated from **Treasury-funded payments**. Record the historical business classification as **`TREASURY_FUNDED_PAYMENT`**, provenance **`OPERATOR_ATTESTED`**, and ledger-link status **`NOT_YET_CORROBORATED`**. This supersedes the earlier open question of who funded the payments, but is not a database-verifiable transaction receipt or a match to any particular `system_treasury_ledger` row.
+
+Accounting treatment: **historical Treasury-funded payments, already reflected in recipient balances**, not an instruction to pay 1,000 WLD again or mint/burn/offset any funds. Preserve all actual balances and original journal. Before any correcting journal entries, reconcile Treasury's available balance, historical payment receipt/date, Treasury vault record and intended account debit/credit direction; a backfill must not double-charge Treasury or double-credit recipients. If an existing Treasury-side expense already accounts for the funding, any eventual reconciliation must respect that existing expense. Do not create fabricated historical timestamps or claim the missing canonical transaction IDs have been found.
+
+Evidence classification: operator confirmation = received; independent ledger/receipt verification = pending; balance mutation = none; historical journal correction = none. The isolated clone from the earlier session was not available at the time of this addendum, so no new DB execution or claim of validation is made.
