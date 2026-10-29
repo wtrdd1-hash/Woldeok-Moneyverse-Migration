@@ -16,3 +16,4 @@
 - 공식 Test/Production 실행 SHA `c2129625aa6629c616fb31ce790950618b8d92b2`: 실제 읽기 전용 게이트 **모두 BLOCKED**. Test는 가상 국고 200, Production은 프론트 빌드·공개 ID `1793277134644` 불일치. 조건 완화 금지.
 - 원격 브랜치 19개(비-main 18, main 포함 완료 계보 3, 고유/미확정 15), 열린 Draft PR 12, 충돌 2. 삭제 0·강제 종료 0·병합 0. 다른 개발자 변경 모두 보존. 신규 사용자 Full-stack 기능이 아닌 **P0 배포 제어 안전장치** 수정이며 문서 작업만으로 개발 성공 판정하지 않는다.
 - SQL/운영 PostgreSQL/원장/서비스/Test/Production 변경 없음. 실제 PG 종단·공식 Test 정확 SHA 인증 E2E는 CI·금융 출처·백업 복원·활성 origin 확인 전까지 **BLOCKED**. 운영 HOLD. 롤백은 검증기 코드 커밋 되돌리기(DB 영향 없음).
+- GitHub Draft PR #1918 후보 `b523f84b74717846e75d0bd52a555fb4746937f4`: 릴리스 입력·분류·정책·비런타임 요약 **SUCCESS**, 런타임 검사·후보 이미지·운영 배포 **SKIPPED**(제어 코드 변경 분류). 정책 CI 성공을 전체 런타임 CI나 Test 승인으로 간주하지 않는다. Draft/HOLD 유지, 병합 없음. 최종 SHA는 PR 증거 댓글과 호스트 보고서에 기록.
