@@ -34,7 +34,7 @@ describe('administrator console session evidence', () => {
     ['mv_session=token; Path=/; HttpOnly; SameSite=Lax; Max-Age=50; Domain=example.com'],
     ['__Host-mv_session=token; Path=/; HttpOnly; SameSite=Lax; Max-Age=50'],
     [rotated, rotated],
-  ])('rejects unverified rotated browser cookies: %j', (headers) => {
+  ].map((headers) => ({ headers })))('rejects unverified rotated browser cookies: $headers', ({ headers }) => {
     expect(verifiedConsoleOpen(openReceipt, headers)).toBe(false);
   });
 
