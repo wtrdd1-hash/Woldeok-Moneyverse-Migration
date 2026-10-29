@@ -170,22 +170,34 @@ export async function unblockUserAction(targetUserId: string): Promise<ActionSta
   }
 }
 
+const REPORT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const REPORT_REASONS = new Set(['spam_promotional', 'fraud_scam', 'abuse_harassment', 'other']);
+
 export async function reportConversationAction(
   conversationId: string,
   reason: string,
   details: string,
 ): Promise<ActionState & { reportId?: string }> {
   if (!conversationId) return { status: 'error', message: '대화방 정보를 확인할 수 없어요.' };
-  if (!details || details.trim().length < 2) {
-    return { status: 'error', message: '신고 사유를 2자 이상 입력해 주세요.' };
+  if (!REPORT_REASONS.has(reason)) {
+    return { status: 'error', message: '신고 유형을 다시 선택해 주세요.' };
+  }
+  if (!details || details.trim().length < 2 || details.trim().length > 2000) {
+    return { status: 'error', message: '신고 상세 내용을 2~2000자로 입력해 주세요.' };
   }
   try {
-    const res = await mutate<{ reportId: string }>(
+    const res = await mutate<{ ok: boolean; reportId: string }>(
       `/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/report`,
       {
         body: { reason, details: details.trim() },
       },
     );
+    // The PostgreSQL SECURITY DEFINER function inserts the report and audit in one transaction.
+    // An HTTP 2xx alone is not evidence that the immutable report UUID was committed.
+    if (res?.ok !== true || typeof res.reportId !== 'string' ||
+        !REPORT_ID_PATTERN.test(res.reportId) || /^0{8}-0{4}-0{4}-0{4}-0{12}$/i.test(res.reportId)) {
+      return { status: 'error', message: '신고 접수 여부를 확인할 수 없어요. 중복 신고 전에 운영진에게 확인해 주세요.' };
+    }
     revalidatePath('/chat');
     return {
       status: 'ok',

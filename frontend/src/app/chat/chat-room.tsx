@@ -75,6 +75,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState('spam_promotional');
   const [reportDetails, setReportDetails] = useState('');
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -390,6 +391,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   // Report Conversation Action
   const handleReportConversation = () => {
     if (!reportDetails.trim()) {
+      setReportError('신고 사유를 작성해 주세요.');
       toast.error('신고 사유를 작성해 주세요.');
       return;
     }
@@ -401,10 +403,12 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
         reportDetails.trim(),
       );
       if (res.status === 'ok') {
+        setReportError(null);
         setShowReportDialog(false);
         setReportDetails('');
         toast.success(res.message);
       } else {
+        setReportError(res.message ?? '신고 접수 여부를 확인할 수 없어요.');
         toast.error(res.message);
       }
     });
@@ -741,7 +745,10 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       </Dialog>
 
       {/* 3. Report Conversation Modal Dialog */}
-      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+      <Dialog open={showReportDialog} onOpenChange={(open) => {
+        setShowReportDialog(open);
+        if (open) setReportError(null);
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -751,17 +758,22 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
             <DialogDescription className="text-xs text-muted-foreground">
               {localeLabel(
                 locale,
-                '신고 시 최근 대화 내용(최대 10개 메시지)이 증거 스냅샷으로 캡처되어 관리자 안전 센터에 불변 보존됩니다.',
+                '신고 접수가 확인되면 최근 대화 내용(최대 10개 메시지)이 증거 스냅샷으로 관리자 안전 센터에 보존됩니다.',
                 'Upon submission, the latest conversation snapshot (up to 10 messages) is securely logged to the Trust & Safety audit desk.',
                 '通報時、直近の会話履歴（最大10件）が証拠スナップショットとして安全管理センターに保存されます。',
                 '举报时最近的对话内容（最多10条）将作为证据快照保存至安全审核中心。',
               )}
             </DialogDescription>
           </DialogHeader>
+          {reportError && (
+            <p role="alert" aria-live="assertive" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+              {reportError}
+            </p>
+          )}
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label className="text-xs font-bold">{localeLabel(locale, '신고 사유 선택', 'Select Reason', '通報理由の選択', '选择举报原因')}</Label>
-              <RadioGroup value={reportReason} onValueChange={setReportReason} className="space-y-2">
+              <RadioGroup aria-label={localeLabel(locale, '신고 사유 선택', 'Report reason', '通報理由', '举报原因')} value={reportReason} onValueChange={setReportReason} className="space-y-2">
                 <div className="flex items-center space-x-2 rounded-lg border p-2.5 hover:bg-muted/50 cursor-pointer">
                   <RadioGroupItem value="spam_promotional" id="r1" />
                   <Label htmlFor="r1" className="text-xs font-medium cursor-pointer flex-1">
@@ -805,13 +817,14 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowReportDialog(false)}>
+            <Button variant="outline" className="min-h-11" onClick={() => setShowReportDialog(false)}>
               {localeLabel(locale, '취소', 'Cancel', 'キャンセル', '取消')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleReportConversation}
-              disabled={!reportDetails.trim() || isPending}
+              className="min-h-11"
+              disabled={reportDetails.trim().length < 2 || isPending}
             >
               {isPending
                 ? localeLabel(locale, '신고 접수 중...', 'Submitting…', '送信中…', '正在提交…')

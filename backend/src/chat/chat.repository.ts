@@ -300,7 +300,10 @@ export class PostgresChatRepository {
       `SELECT public.private_chat_report($1::uuid, $2::uuid, $3::text, $4::text) AS report_id;`,
       [actorUserId, conversationId, reason, details],
     );
-    if (!row?.report_id) throw new Error('failed to submit chat report');
+    if (typeof row?.report_id !== 'string' || !UUID_REGEX.test(row.report_id) ||
+        row.report_id === '00000000-0000-0000-0000-000000000000') {
+      throw new Error('failed to verify chat report receipt');
+    }
     return { reportId: row.report_id };
   }
 
