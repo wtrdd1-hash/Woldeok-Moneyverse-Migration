@@ -1,69 +1,44 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-## v1434 / F675-164 — 고객지원 임시글 영수증·만료·전송 무결성 보완 (기능 보완 / 초안 / 운영승격 보류)
+## v1436 / F675-165 — 금융 용어사전 정정 제안과 검증 영수증 (기능 추가 / DRAFT / RELEASE HOLD)
 
-주기: 이전 Feature Addition v1432 → 현재 Feature Improvement v1434 → 다음 Feature Addition v1436(잠정). 기준 main `35971c600f25869c96f1c666d4b9f58927202730`; 선행 기획 PR #1759는 미병합이며 본 브랜치의 기반이다. 기획 보완일 뿐 실제 구현·운영 배포가 아니다. 기준 문서는 AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조본이다. 개발 A/B/C/QA 브랜치는 변경하지 않는다.
+**주기:** 이전 기능 보완 v1434 → 현재 기능 추가 v1436 → 다음 기능 보완 v1438(잠정). 기준 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 개발 이슈 #1769. 실제 구현·배포가 아닌 신규 기획이다.
 
-### 실제 소스 근거 및 정정
-1. `196-user-admin-support-chat.sql`의 `support_create_thread(p_actor,p_key,p_subject,p_body)`는 동일 키 재실행 시 회원은 확인하지만 제목과 본문이 원본과 같은지는 비교하지 않는다. **다른 내용의 같은 키로 이전 문의가 반환될 수 있으므로**, 임시글 전송 전 회원·작업·본문·버전의 정규화 해시를 불변 영수증과 비교하고 다르면 409로 거절한다. `support_threads.create_key`와 `support_messages.idempotency_key`는 각각 전역 UNIQUE이며 신규 문의의 첫 메시지는 동일 UUID를 사용하므로 직접 전송·임시 전송 간 키 충돌을 실제 PostgreSQL로 검증해야 한다.
-2. `frontend/src/app/support/actions.ts`의 기존 직접 전송은 호출할 때마다 `randomUUID()`를 새로 만든다. 임시글 Send는 이 액션을 재사용하지 않고 **동일 작업 UUID를 타임아웃·조회·재시도·새로고침 동안 유지**해야 중복 제출을 막을 수 있다. 기존 직접 전송은 이번 기획에서 수정하지 않는다.
-3. `support_add_message`는 상태가 `resolved`인 본인 문의에도 답장을 허용하고 상태를 `open`으로 바꾼다. 답장 임시글 작성 중 문의가 해결되면 변경 사실을 표시하고 전송 전 재확인을 받는다. 삭제되었거나 본인 것이 아닌 문의는 접근 불가로 처리하여 임시글 버리기만 허용한다.
-4. v1432의 `status='active'` 부분 유일 인덱스에는 시간만 지난 만료 임시글도 남는다. GET은 쓰기 없이 조회하며, 쓰기 트랜잭션에서 **회원 행 잠금→기존 만료 활성글을 expired로 전환→신규글 1개/문의별 답장 1개·총 20개 한도 검증** 순서를 지킨다. 본인 만료는 410과 영수증으로 구분한다. 합성 10,001건은 운영 20개 한도를 풀지 않고 격리 테스트 전용 데이터로만 검증한다.
-5. `SECURITY DEFINER` 함수의 `p_actor uuid`는 공용 DB 계정 `moneyverse_app`으로 접속한 호출자가 실제 회원이라는 인증 수단이 아니다. NestJS/Next.js/Android의 신뢰 가능한 세션에서 회원 ID를 도출하고 동의·CSRF를 검증하며, DB 함수의 회원 ID 위조·SQL 인젝션 위협을 별도 시험한다. `WHERE user_id=p_actor`만으로 DB 계정 탈취 상황까지 막는다고 주장하지 않는다. 위조 접근이 차단되지 않으면 P0 HOLD다.
+### 현행 코드와 목적
+frontend/src/app/guide/glossary/[term]/page.tsx는 frontend/src/config/pseo-glossary.config.ts의 용어 목록으로 공개 정적 페이지를 생성한다. generateStaticParams, canonical/DefinedTerm JSON-LD, revalidate=86400을 사용한다. 목록은 frontend/src/app/guide/glossary/page.tsx이고 /admin/help는 별도 관리자 화면이다. 확인한 main에는 용어별 회원 정정 제안·본인 영수증·심사 API가 없다. 최초 게시판 임시글 후보는 기존 이슈 #1102와 중복되어 제외했다. 회원 제안은 사실 오류의 증명, 승인된 정정 또는 WLD 보상이 아니며 공개 문구를 자동 변경하지 않는다.
 
-### 회원 UX·API·데이터 계약
-목적은 미완성 고객지원 문의/답장을 웹·Android에서 이어쓰면서 미제출 원문 유출과 중복 전송을 막는 것이다. 대상은 인증·활성·동의 회원. 진입점 `/support`, `/support?thread=<본인 확인 UUID>`, 선택적 비공개 임시글 목록. CTA: 저장, 이어쓰기, 버리기, 보내기, 처리 상태 재조회, 충돌 해결. 상태: EDITING, SAVING, SAVED_SERVER(버전/시각), FAILED, OFFLINE_UNSAVED, CONFLICT, EXPIRED, THREAD_CHANGED, THREAD_UNAVAILABLE, SUBMIT_UNKNOWN, SENT_RECEIPT, DISCARDED. 기본 수동 저장, 선택한 회원만 1.5초 지연 자동저장. 회원당 활성 최대 20개(신규 문의 1개, 답장 19개), 마지막 서버 저장 후 30일 만료, GET은 기간 연장 금지. 제목 120자·본문 2,000자 이내, 임시글은 미완성 허용하되 제출 시 기존 공백 제거 및 필수값 검사. 브라우저 localStorage에 본문 저장·관리자 원문 열람·WLD 변동 없음.
+### 대상·화면·CTA·상태
+인증·동의·활성 회원이 /guide/glossary/[term]에서 정정 제안 CTA를 선택한다. 비회원은 로그인 안내만 본다. 사유 DEFINITION/FORMULA/TRANSLATION/OUTDATED, 설명 유니코드 20~1000자, 선택적 HTTPS 출처 URL 2048자 이내, 제출·취소 버튼을 제공한다. 비공개 /account/glossary-feedback에서 본인 영수증·심사 상태를 보고 PENDING일 때만 철회한다. EDITING→SUBMITTING→PENDING→UNDER_REVIEW→ACCEPTED/REJECTED/CLOSED, PENDING→WITHDRAWN. CONTENT_CHANGED는 원본 개정 불일치, NETWORK_UNKNOWN은 영수증 재조회가 필요한 결과 불명이다. 심사 중 원본이 바뀌면 STALE_REVIEW_REQUIRED로 재검토한다. ACCEPTED는 PUBLISHED가 아니다. 금융 관련 내용 수정은 독립 2인 검토를 거친다.
 
-API(미구현): `GET /api/v1/support/drafts?limit=20&cursor=<opaque>`는 회원·세션 세대·스냅샷·`(saved_at,id)`에 결합된 HMAC 커서로 본인 메타데이터만 반환. `GET /api/v1/support/drafts/:id`는 본인 본문과 강한 ETag `"v<N>"`. `POST /api/v1/support/drafts`는 안정적인 UUID `Idempotency-Key`로 생성, `PUT /api/v1/support/drafts/:id`는 `If-Match: "v<N>"`와 작업별 고정 키로 수정, `DELETE`는 삭제 영수증, `POST /api/v1/support/drafts/:id/send`는 원문·버전 해시와 동일 전송 키로 원자 제출, `GET /api/v1/support/drafts/receipts/:requestKey`는 타임아웃 후 본인 원본 처리 결과 조회(원문 없음). 같은 키·같은 내용은 원본 결과, 다른 내용은 409. If-Match 누락 428, 버전 충돌 409, 타인/없는 글 동일 404, 본인 만료 410, 한도 429, 결과 미확정 503/SUBMIT_UNKNOWN. 재시도 키는 새로고침 후에도 보존하되 계정 변경 시 제거하고, 응답은 `private, no-store`. URL·분석에 본문/토큰 금지. 기존 직접 전송 API 유지.
+### 원본 개정과 공개 무결성
+정확한 배포 GLOSSARY_TERMS slug 허용 목록, locale, releaseSha, 공개 필드의 명시적 순서·UTF-8·정규화 JSON에 대한 SHA-256 contentRevision을 결합한다. 릴리스 산출물의 불변 개정 매니페스트와 DB 등록부 일치를 기능 활성화 전에 확인한다. 24시간 ISR 시각을 개정번호로 사용하지 않는다. 오래된 개정 제출은 409와 현재 공개 개정 메타데이터를 반환하고 회원 재확인을 요구한다. 심사 ACCEPTED는 별도 콘텐츠 PR 검토만 촉발하며 공개 문구·canonical·JSON-LD·OG·캐시는 승인된 정확 SHA 배포에서만 바뀐다. 기능 OFF·심사 대기에는 공개 용어사전이 변하지 않는다.
 
-DB(추가형): `support_drafts`에 회원 FK, 종류, 원본 문의 FK, 제목/본문, 양의 버전, active/expired/consumed/discarded, 저장·만료시각. 활성 신규글 회원당 1개와 활성 답장 회원/문의당 1개 부분 UNIQUE, 본인 커서 `(user_id,saved_at DESC,id DESC)`, 만료 `(expires_at,id)` 인덱스. `support_draft_receipts`는 `(user_id,request_key)` UNIQUE, 작업·임시글 ID·정규화 SHA-256(작업/회원/문의/원문/예상 버전 포함)·커밋 당시 상태·결과 문의/메시지 ID·시각만 불변 보관하며 원문은 저장하지 않는다. 영수증 최소 90일 보존은 개인정보 정책 승인 전 제안이며, 만료 원문은 법적 보류 감사를 거쳐 별도 정리한다. 단일 PostgreSQL 트랜잭션에서 회원 잠금→쓰기 시 만료글 전환→임시글 잠금→소유권·기한·If-Match 검증→관리자 경로와 일치하는 문의 잠금→변경 상태 확인→기존 지원 함수에 안정적인 UUID 전달→임시글 소비→영수증 기록. 전송 후 늦게 도착한 저장은 소비 상태를 되살리지 못한다. UNIQUE 충돌은 원본 영수증 확인 또는 거부로 처리하며 무작정 INSERT 재시도하지 않는다. 기존 직접 전송 키와 임시글 영수증을 혼동하지 않는다.
+### 제안 API (미구현)
+GET /api/v1/guide/glossary-feedback?limit=20&cursor=opaque: 본인 메타데이터·세션 결합 서명 커서. GET /api/v1/guide/glossary-feedback/:id: 본인 상세. POST /api/v1/guide/glossary-feedback 입력 {termSlug,contentRevision,locale,reason,explanation,sourceUrl?,requestId}, 결과 {feedbackId,receiptId,status,sourceRevision,replayed}. POST /api/v1/guide/glossary-feedback/:id/withdraw 입력 {requestId,expectedVersion}, 불변 철회 영수증. 관리자 GET /api/v1/admin/guide/glossary-feedback, POST /api/v1/admin/guide/glossary-feedback/:id/decision은 심사 권한·사유·expectedVersion·감사 필수. NestJS→Next server-only BFF→Android /app-api/v1/guide/glossary-feedback 계약 동등. 400 형식/URL, 401 비인증, 403 정지/동의/CSRF, 404 타인·부재 동일, 409 원본/CAS/키 본문 불일치, 429 한도, 503 불명. 회원·관리자 응답 private,no-store, 브라우저 세션/동의/CSRF/Origin, Android 별도 인증. INTERNAL_API_TOKEN 노출 금지.
 
-보안·관리·SEO·접근성: 세션·동의·CSRF·Origin/Sec-Fetch-Site·활성 회원·속도·본문 크기 검사, 타인/미존재 동일 404. 관리자 화면·로그·감사·분석·검색·내보내기·알림에는 미제출 원문 금지, 관리자에는 집계 수치만 제공. SECURITY DEFINER는 스키마 한정·안전한 search_path, PUBLIC 및 앱 직접 테이블 DML 회수, 최소 함수 EXECUTE, 위조 `p_actor` 음성시험 필수. Android App API·Next.js BFF·NestJS의 상태/오류/영수증 동등성. WCAG 2.2 AA, 320px/200% 확대, 키보드·포커스·aria-live·TalkBack, 오프라인·계정 변경 응답 차단. noindex/nofollow·사이트맵 제외. 동의 기반 집계 KPI: 저장/이어쓰기/제출, 충돌, 미확정, 만료, 비인가 거절, 중복 전송. 원문 수집 금지.
+### DB·제약·인덱스·트랜잭션
+순방향 glossary_term_registry(slug PK,active,current_revision,release_sha,updated_at)는 검토된 릴리스 매니페스트로만 갱신한다. glossary_feedback(id UUID PK,user_id FK,term_slug FK,source_revision CHAR(64),locale,reason CHECK,explanation 20..1000 CHECK,source_url,status CHECK,version>0,created_at,updated_at,withdrawn_at). glossary_feedback_receipts(id UUID PK,user_id FK,request_id UUID,operation,normalized_payload_sha256,feedback_id FK,committed_status,committed_version,created_at,UNIQUE(user_id,request_id))는 추가 전용. glossary_feedback_reviews는 심사자·결정·사유·전후 버전·시각·콘텐츠 PR을 불변 기록한다. 인덱스 (user_id,created_at DESC,id DESC), (term_slug,status,created_at DESC,id), (status,created_at,id), (user_id,term_slug,created_at DESC). 앱 계정 테이블 직접 DML·PUBLIC EXECUTE 금지, 최소 EXECUTE SECURITY DEFINER, search_path pg_catalog,pg_temp, 스키마 명시와 세션 신원 검증 필수. 공용 DB 역할의 p_actor 인자는 자체 인증 수단이 아니다.
 
-### 개발 백로그(P0 4건 / P1 6건)
-- P0 ENV1434-01: 공용 데이터 디스크·백업 사고 #1718, 외부 독립 복원과 승인 없는 파일 삭제 금지. QA v1352 00:14 KST는 99%/3.3GiB, 01:08 실측은 97%/5.9GiB. 시점 차이이지 복원 완료 증거는 아님.
-- P0 FIN1434-02: QA v1352 개발 DB 회원 계좌 19개 중 18개 총 18,000 WLD 불일치, 정규 국고 0. 근거 없는 잔액 조정·재지급 금지.
-- P0 SEC1434-03: `p_actor` 위조, 구형 신규 문의 키 재실행 원문 불일치, 직접 전송/임시 전송 UUID 충돌, 만료 슬롯 및 앱 권한을 실제 PostgreSQL로 검증.
-- P0 REL1434-04: QA v1352 마이그레이션 체크섬 5건 불일치·소스 미적용 20건, 앱 DML 235/243, PUBLIC 은행 함수 3개. 공식 Test 정확 SHA, 인증 웹/Android/관리자·금융 E2E, 복원 및 승인된 롤백 후에만 운영승격.
-- P1 SUP1434-05: 추가형 DB, expired 상태·인덱스·원문 없는 불변 영수증·보존/정리.
-- P1 SUP1434-06: 회원 잠금·한도·Save/Send 경합·409/410/428·재시도 키·구형 재실행 차단.
-- P1 SUP1434-07: NestJS/Next.js/Android API, 영수증 조회, 인증·동의·CSRF 및 오류 계약 동등성.
-- P1 SUP1434-08: 저장/이어쓰기/버리기/보내기, 해결된 문의 재확인, 오프라인·타임아웃·계정 전환, 모바일 접근성.
-- P1 SUP1434-09: 관리자 집계만, 개인정보·보존·SEO·동의 KPI.
-- P1 SUP1434-10: 격리 실제 PostgreSQL에서 테스트 전용 한도 우회 합성 10,001건, 동시 100건, 타인 권한 음성 100건, 같은 키·다른 본문, 첫 메시지 UUID 충돌, 만료 활성 슬롯, 전송/저장 경합, 해결된 문의 재확인, 두 기기 ETag 충돌, 타임아웃 재시도 문의/메시지/영수증 각각 1건, 스위치 OFF와 WLD 무변화 회귀.
+인증 회원 행을 먼저 잠근 뒤 회원당 활성 제안 최대 10개, 회원·용어당 최근 24시간 3건(철회 포함)을 직렬화 검증한다. 제안과 정규화 본문 해시 영수증을 원자적으로 기록한다. 같은 requestId/같은 본문은 원래 결과 재현, 다른 본문은 409. 철회는 회원→제안 잠금·불변 tombstone, 심사는 제안 잠금·버전 CAS·감사 기록을 같은 트랜잭션에서 수행한다. 심사/철회 경합은 한쪽만 성공한다. 타인 제안 존재 여부를 응답으로 노출하지 않는다. 금융 DB 변경 없음.
 
-수용·배포: `support_private_drafts` 기본 OFF, 별도 개발 브랜치·마이그레이션 번호 충돌 방지·TDD·실제 격리 DB, 공식 Test 정확 SHA 및 웹/Android/관리자·금융·복원 게이트 통과, 승인 후 점진 적용. 롤백은 스위치 OFF·영수증 보존이며 파괴적 스키마 롤백 금지. 이번 기획에서 런타임·DB·금융·Test·Production 미변경. 외부 독립 근거 신규 승인 0건, 중복 제거·검증 승인 누적 UNKNOWN / 목표 10,000건, BLOCKED / IN PROGRESS. 검색 결과와 합성 자료는 승인 근거가 아님.
+### 관리자·보안·SEO·모바일·접근성·KPI
+회원 입력 URL을 서버에서 절대 자동 조회하지 않는다(SSRF·사설망 리다이렉트 방지). HTTPS·호스트·인증정보를 검증하고 안전한 링크만 출력한다. 실행 가능한 HTML/Markdown 금지, 로그·분석에 설명·URL·회원 ID 원문 기록 금지, 계정/IP 속도 제한·CSRF·BOLA·심사 RBAC. 철회 자료 30일, 종결 자료 180일 보존(법적 보존 예외), 개인정보 삭제와 감사 최소화. 관리자 심사는 공개 댓글이 아니고 정적 원본 직접 수정 권한도 아니다. 공개 용어 페이지는 기존 색인·canonical·DefinedTerm 유지, 본인·관리자 페이지 noindex,nofollow 및 사이트맵 제외, 제안은 공개 JSON-LD 제외. WCAG 2.2 AA 키보드/초점 복귀/aria-live, 320px/200% 확대, 모션 감소, Android TalkBack, 로그아웃·계정 변경 시 응답 차단. 오프라인 UNSENT를 SAVED로 표시하지 않는다. KPI는 익명 집계(CTA→확정 영수증, 개정 충돌, 심사 지연, 콘텐츠 PR 반영, 악용·접근성)만 사용한다.
 
+### P0/P1 개발 백로그 — 이슈 #1769
+- P0 ENV1436-01: 02:07 KST 디스크 98%·약 4.5GiB 여유, 암호화 백업 저널은 독립 복원 증거 아님. 외부 복원·보존·안전 공간 확보, 임의 삭제 금지.
+- P0 FIN1436-02: QA v1353 회원 현금 18계정 총 18,000 WLD 원장 차이. 근거 없는 조정·중복 배당 금지.
+- P0 SEC1436-03: 본인/BOLA·심사 권한·SSRF·불변 영수증, 앱 광범위 DML·PUBLIC 은행 함수 3개·체크섬 5건·소스 미적용 20건.
+- P0 REL1436-04: 후보 정확 SHA CI, 격리 실제 PostgreSQL ACL·마이그레이션, 공식 Test 웹·Android·관리자·금융 인증 E2E, 독립 복원, GitOps 승인.
+- P1 GLOS1436-05: 용어 개정 매니페스트·순방향 DB·CHECK/FK/유일 인덱스·불변 영수증/심사 감사.
+- P1 GLOS1436-06: 회원 잠금·한도·본문 해시 멱등성·CAS·원본 개정 경합·불명 결과 복구.
+- P1 GLOS1436-07: NestJS/Next BFF/Android API 동등성·인증/CSRF·오류 변환.
+- P1 GLOS1436-08: 용어 CTA·본인 상태·반응형/접근성·오프라인·계정 분리.
+- P1 GLOS1436-09: 독립 심사·콘텐츠 PR 근거·개인정보·SEO·집계 KPI.
+- P1 GLOS1436-10: 격리 PostgreSQL 합성 10,001건, 생성/재실행/심사·철회 동시 100건, 타인 권한/악성 URL 100건, 24시간 한도, Android·320px/200% 회귀, 기능 OFF 롤백. 시험 명세만 작성, 실행하지 않음.
 
-## v1432 / F675-164 — 회원 고객지원 문의 임시저장·이어쓰기 (기능 추가 / 기획 초안 / 운영승격 보류)
+무중단 배포: 별도 개발 브랜치·test 폴더·격리 DB, 번호 검토한 순방향 마이그레이션, glossary_feedback 기본 OFF, 공식 Test 정확 SHA 인증·금융·보안·독립 복원 게이트, 제한 카나리·모니터링·승인 후 Production. 롤백은 기능 OFF, 영수증·감사 보존, 공개 원본 유지. 파괴적 역마이그레이션 금지. A/B/C/QA/Gemini 작업 불변.
 
-주기: 이전 기능 보완 v1430 → 현재 기능 추가 v1432 → 다음 기능 보완 v1434(잠정). 기준 main 35971c600f25869c96f1c666d4b9f58927202730, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조본. 기획 문서만 변경하며 런타임·DB·WLD·Test·Production은 변경하지 않는다. 기존 F675-157 고객지원 미읽음 영수증과 F675-105 비공개 첨부 보관소는 별개다.
-
-실제 코드: frontend/src/app/support/page.tsx는 새 문의 제목/본문과 답장 입력란을 제공하지만 서버 임시저장·이어쓰기 기능이 없다. frontend/src/app/support/actions.ts는 제출 때 새 UUID를 만들어 즉시 전송한다. backend/src/support/support.controller.ts는 인증된 문의/메시지 조회와 CSRF 보호된 제출 API를 제공한다. support.repository.ts는 DB 함수를 호출한다. 마이그레이션 196-user-admin-support-chat.sql에는 support_threads/messages만 있고 임시저장 테이블이 없다. 운영 데이터 유실이 발생했다는 증거는 아니다. 목적은 인증·활성·동의 회원이 웹과 Android에서 미완성 문의와 답장을 안전하게 저장·이어쓰는 것이다.
-
-진입점: /support 및 /support?thread=<본인 확인 UUID>, 선택적 비공개 /support?view=drafts. 버튼: 임시저장, 이어쓰기, 버리기, 보내기, 충돌 해결. 상태: EDITING, SAVING, SAVED_SERVER(버전·시각), FAILED, OFFLINE_UNSAVED, CONFLICT, EXPIRED, THREAD_UNAVAILABLE, SUBMIT_UNKNOWN, SENT_RECEIPT, DISCARDED. 서버 영수증 전 저장/전송 성공 표시 금지. 기본은 명시적 저장; 1.5초 자동저장은 사전 선택한 회원에게만 허용. 회원당 신규 문의 1개와 답장 19개, 총 20개. 제목 최대 120자, 본문 2,000자; 임시글 부분 입력 허용, 실제 전송에는 공백 제거 후 필수값 검증. 마지막 성공 저장 30일 후 만료, GET은 만료 연장하지 않음. 접근 불가능한 원본 문의는 임시글 버리기만 허용. localStorage에 본문 저장 금지, 자동 전송·메일·푸시 없음. 계정 전환 시 이전 응답과 메모리 내용 격리. 320px·200% 확대·키보드·aria-live·포커스·움직임 감소·Android TalkBack·WCAG 2.2 AA.
-
-API(미구현): GET /api/v1/support/drafts?limit=20&cursor=opaque는 본인 메타데이터만, GET /api/v1/support/drafts/:id는 본인 내용/버전/만료 조회. POST는 new/reply 슬롯 생성, PUT는 If-Match 버전·UUID 멱등키·요청 해시로 저장, DELETE는 삭제 영수증 기록. POST /api/v1/support/drafts/:id/send는 같은 키로 실제 문의/답장을 생성하고 임시글 소비·불변 영수증 기록을 PostgreSQL 한 트랜잭션에서 처리한다. 결과 threadId/messageId, receiptId, replayed, stateAtCommit. 기존 직접 전송 API는 유지하며 임시글을 임의 삭제하지 않는다. 타임아웃은 같은 키로 영수증 확인 후 재시도. 400 입력, 401 미인증, 403 CSRF/동의/회원상태, 404 타인·미존재 구분 없이, 409 버전/키 충돌, 410 만료, 429 한도, 503 미확정. 회원 ID는 세션에서만 취득. NestJS·Next.js BFF·Android App API 응답·오류·비공개 no-store 동등성.
-
-DB: 추가형 support_drafts(UUID PK,회원 FK,유형 new/reply,원본 문의 FK,제목/본문,version>0,상태 active/consumed/discarded,저장/만료시각). new는 thread_id NULL, reply는 NOT NULL CHECK. 활성 신규글 회원당 1개, 활성 답장글 (회원,문의)별 1개 부분 UNIQUE. 본인 목록 (user_id,saved_at DESC,id DESC), 만료 (expires_at,id) 인덱스. support_draft_receipts는 (user_id,request_key) UNIQUE, 작업·정규화 해시·버전·결과 ID·시각만 불변 보관, 원문 제외. 회원 행 잠금→임시글→필요 시 원본 문의→기존 support_create_thread/support_add_message→소비/영수증을 원자 처리. 버전 CAS로 동시 수정 409, 재시도로 삭제/소비한 임시글 부활 금지.
-
-관리자 답장 잠금 순서도 검토. SECURITY DEFINER search_path=pg_catalog,pg_temp, 스키마 명시, 활성 회원·문의 소유권 검사, PUBLIC·앱 직접 DML 회수, 최소 EXECUTE. 적용된 마이그레이션 수정 금지, A/B/C/QA와 번호 충돌 확인. 관리자 /admin/support는 제출된 문의만 열람하고 미제출 원문은 열람 불가. 세션·동의·CSRF·Origin/Sec-Fetch-Site, 계정/IP 속도 제한, 크기·주입 검사. 원문을 로그·분석·알림·URL·관리자 내보내기에 기록하지 않는다. 백업/저장 암호화는 검증 후에만 보장. 30일 삭제·법적 보류 예외 감사, 제출 메시지는 삭제하지 않는다. 비공개 noindex/nofollow·사이트맵 제외·no-store. 동의 기반 집계 KPI: 저장·복원·제출 전환, 충돌, 미확정, 만료, 타인 접근 차단, 중복 문의율.
-
-P0/P1 백로그(총 10건):
-- P0 ENV1432-01: 데이터 디스크 99%, 여유 약 2.6GiB, 백업 사고 #1718, 외부 백업·독립 복원·안전한 용량 확보.
-- P0 FIN1432-02: QA v1351 개발 DB 회원 계좌 18건 총 18,000 WLD 원장 차이 대사, 근거 없는 조정 금지.
-- P0 SEC1432-03: 회원 소유권·DB 권한, 앱 계정 235/243 테이블 직접 DML, PUBLIC 은행 함수 3개, 체크섬 불일치 5·미적용 20건 검증.
-- P0 REL1432-04: 공식 Test 정확 SHA, 인증 고객지원·금융 E2E, 전체 보안·DB·Android·독립 복원 검증.
-- P1 SUP1432-05: 추가형 스키마, 유일 제약·인덱스·불변 영수증.
-- P1 SUP1432-06: 회원 잠금, 20개 한도, 버전 CAS, 원자 전송·재시도·경합.
-- P1 SUP1432-07: NestJS·Next.js BFF·Android App API 동등성.
-- P1 SUP1432-08: 접근성, 저장·이어쓰기·버리기·전송, 계정 격리.
-- P1 SUP1432-09: 관리자 집계만, 개인정보·보존·SEO·KPI.
-- P1 SUP1432-10: 독립 PostgreSQL 합성 10,001건, 동시 100건, 권한 음성 100건, 20개·30일·409/410/503·원장 무변화 회귀(미실행).
-
-수용·배포: 두 기기에서 마지막 서버 확인 버전만 이어쓰기, 동시 수정 409, 타임아웃 재시도에도 문의/메시지 1개와 영수증 1개, 미제출 임시글 관리자 비노출, 타 계정 접근 거부, 만료 글 전송 차단, GET 무부작용을 실제 DB로 검증한다. 개발 별도 브랜치·TDD, 기능 스위치 support_private_drafts 기본 OFF. 추가형 마이그레이션→본인 권한 검증→공식 Test 정확 SHA 웹/Android/관리자 회귀→단계적 활성화→P0 전체 통과 후 승인된 운영승격. 롤백은 스위치 OFF·영수증 보존, 파괴적 스키마 롤백 금지. 기획은 배포하지 않는다.
-
-외부 독립 근거 10,000건 게이트: 신규 승인 0, 누적 중복 제거·검증 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 검색 결과·합성 자료를 승인 건수에 포함하지 않는다.
+외부 독립 근거 10,000건 게이트: 신규 중복 제거 승인 0, 누적 검증 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 회원 URL·출판사 페이지·합성 시험 10,001건은 승인 근거가 아니다. 이번 회차 런타임/DB/WLD/Test/Production 변경 없음.
 
 
 ## v2026.10.28.1423 — 금융 운영 DB 291 보호 승격 확인 (전체 서버 코드는 기존)

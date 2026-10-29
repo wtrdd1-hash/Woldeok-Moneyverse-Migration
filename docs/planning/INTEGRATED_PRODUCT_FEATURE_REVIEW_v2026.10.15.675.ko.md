@@ -1,26 +1,7 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
-## F675-164 / v1434 — 고객지원 임시글 무결성 (FEATURE IMPROVEMENT / HOLD)
-- main 35971c600 시작·중간 동일, 선행 Draft #1759 미병합. 실제 migration196의 신규 문의 키 재실행은 제목/본문을 비교하지 않고 직접 Next.js 전송은 UUID를 매번 재생성. 해결된 문의 답장은 재개방, 만료 활성 임시글은 부분 유일 인덱스 점유, 공용 DB 역할은 p_actor 자체 인증 불가. 정규화 해시 불변 영수증, 안정 전송 키, 쓰기 시 만료 전환, 회원/세션 커서, 해결된 문의 재확인, 위조 회원 DB 시험을 명세. 백로그: ENV1434-01 FIN1434-02 SEC1434-03 REL1434-04 SUP1434-05 SUP1434-06 SUP1434-07 SUP1434-08 SUP1434-09 SUP1434-10. QA v1352: 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 DML 235/243, PUBLIC 은행 함수 3개. 00:14 디스크 99%와 01:08 97%는 해결 증거 아님. 외부 승인 신규 0/누적 UNKNOWN·목표 10,000. 배포 없음.
-
-- Development backlog: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1758
-
-## F675-164 / v1432 — 회원 고객지원 임시저장·이어쓰기 (기능 추가 / HOLD)
-- 이전 보완 v1430, 현재 추가 v1432, 다음 보완 v1434(잠정). main 35971c600; /support 즉시 전송만 확인, 임시글 API·DB 없음. 20개·30일, 원자 전송·불변 영수증·CAS, 회원 소유권, 관리자 미노출, Android·접근성, 기능 OFF. P0/P1: ENV1432-01 FIN1432-02 SEC1432-03 REL1432-04 SUP1432-05 SUP1432-06 SUP1432-07 SUP1432-08 SUP1432-09 SUP1432-10. QA v1351 위험·디스크 99%, 외부 신규 승인 0, 누적 UNKNOWN/10,000. 문서 전용.
-
-
-## F675-163 v1430 — 캘린더 저장 마감 무결성 (기능 보완 / DRAFT / 보류)
-- 이전 기능 추가 v1428 / 현재 기능 보완 v1430 / 다음 기능 추가 v1432(잠정).
-- 최신 main 근거 정정: 캘린더 마감 헬퍼는 파싱 가능한 지난 날짜를 포함하며 테스트에는 시계가 없다. shop_catalog_list_v2는 shop_catalog.sale_ends_at을 사용하고 shop_inventory 노출 기간은 별도이며 시즌 마감은 virtual_seasons.ends_at. v1428 출처 설명 정정.
-- source_revision·불변 저장 마감, 운영자 일정 변경 시 회원 재확인, 변경 후 원복 ABA 방지, 출처 장애 시 차단, 본인 해제 보장. 실제 DB 잠금·권한, Nest/Next/Android, no-store/noindex, 접근성·롤백을 통합 기획에 상세 명세. 자동 알림·참가·WLD 변경 없음.
-- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. 선행 Draft #1749, QA v1350 FAILED, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
-
-
-## F675-163 — v1428 회원 이벤트 캘린더 저장 목록 (기능 추가 / 초안 / 보류)
-- **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
-- 실제 /calendar는 시즌·상점 마감·오늘 사건·주간 목표를 보여주지만 회원별 저장 목록 없음. 시즌 이벤트 UUID와 상점 마감 UUID만 1차 지원, 안정 ID 없는 오늘·주간은 제외. F675-160 상품 찜과 중복되지 않음.
-- 출처별 FK·본인 전용 SECURITY DEFINER·회원 행 잠금 100개 제한·멱등 영수증·제거 이력·비공개 비식별화·Next/Nest/Android·접근성·개인정보·SEO·정확 SHA 배포 게이트. 자동 알림/참가/WLD 없음. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05..10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md). [이슈 #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748) · [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
-- QA v1349 FAILED, 데이터 디스크 98%, 과거 18,000 WLD 원장 차이, 독립 복원·공식 Test 보류. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 문서 전용.
+## F675-165 / v1436 — 검증 가능한 용어사전 정정 제안 (FEATURE ADDITION / HOLD)
+- main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 디스크 98%/4.5GiB, 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 권한/PUBLIC 은행 함수 문제. 정적 용어사전에 회원 정정 영수증 없음. 개정 결합 제안·심사 감사·별도 콘텐츠 PR 기획, 공개 자동 수정 금지. 이슈 #1769. 백로그 ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. 외부 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED, 문서 전용.
 
 
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688

@@ -1,11 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
-## v2026.10.29.1434 — F675-164 고객지원 임시글 무결성 (FEATURE IMPROVEMENT / DRAFT / HOLD)
-- Previous Addition v1432 / Current Improvement v1434 / Next Addition v1436 provisional. main 35971c600 시작·중간 동일, 선행 Draft #1759 미병합. 실제 migration196의 신규 문의 키 재실행은 제목/본문을 비교하지 않고 직접 Next.js 전송은 UUID를 매번 재생성. 해결된 문의 답장은 재개방, 만료 활성 임시글은 부분 유일 인덱스 점유, 공용 DB 역할은 p_actor 자체 인증 불가. 정규화 해시 불변 영수증, 안정 전송 키, 쓰기 시 만료 전환, 회원/세션 커서, 해결된 문의 재확인, 위조 회원 DB 시험을 명세. 백로그: ENV1434-01 FIN1434-02 SEC1434-03 REL1434-04 SUP1434-05 SUP1434-06 SUP1434-07 SUP1434-08 SUP1434-09 SUP1434-10. QA v1352: 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 DML 235/243, PUBLIC 은행 함수 3개. 00:14 디스크 99%와 01:08 97%는 해결 증거 아님. 외부 승인 신규 0/누적 UNKNOWN·목표 10,000. 배포 없음. Details: [EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md).
-
-
-## v2026.10.29.1432 — F675-164 회원 고객지원 임시저장 (기획 초안 / HOLD)
-- 이전 보완 v1430, 현재 추가 v1432, 다음 보완 v1434(잠정). 실제 /support에는 서버 임시저장이 없으며 20개·30일 보존, 원자 전송, 멱등 영수증, Android·접근성·비공개 API를 제안한다. 개발 P0/P1 10건 상세: [통합 영문](INTEGRATED_PLANNING_MASTER.md) / [한국어](INTEGRATED_PLANNING_MASTER.ko.md). QA v1351 위험, 디스크 99%, 공식 Test·복원 미검증, 외부 승인 신규 0/누적 UNKNOWN·목표 10,000. 문서만 변경.
+## v2026.10.29.1436 — F675-165 검증 가능한 용어사전 정정 제안 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Improvement v1434 / Current Addition v1436 / Next Improvement v1438 provisional. main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 동일, QA v1353 FAILED/HOLD, 디스크 98%/4.5GiB, 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 권한/PUBLIC 은행 함수 문제. 정적 용어사전에 회원 정정 영수증 없음. 개정 결합 제안·심사 감사·별도 콘텐츠 PR 기획, 공개 자동 수정 금지. 이슈 #1769. 백로그 ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. 외부 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED, 문서 전용.
+- Full contract in INTEGRATED_PLANNING_MASTER.md and INTEGRATED_PLANNING_MASTER.ko.md.
 
 
 ## v2026.10.28.1423 — 국고배당 운영 DB 보호 승격 (앱 전체는 유지)

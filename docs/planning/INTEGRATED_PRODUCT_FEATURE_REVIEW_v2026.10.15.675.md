@@ -1,26 +1,7 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
-## F675-164 / v1434 — Support draft integrity (FEATURE IMPROVEMENT / HOLD)
-- Main 35971c600 unchanged at start/mid, prior Draft #1759 unmerged. Verified migration196 create-thread replay omits subject/body comparison; direct Next.js sends generate new UUID; resolved replies reopen threads; expired active drafts occupy proposed unique slots; shared DB role cannot authenticate p_actor. Correct with digest-bound immutable receipts, stable send UUID, write-side expiry, member/session cursor, resolved-thread reconfirmation and forged-actor DB tests. Backlog: ENV1434-01 FIN1434-02 SEC1434-03 REL1434-04 SUP1434-05 SUP1434-06 SUP1434-07 SUP1434-08 SUP1434-09 SUP1434-10. QA v1352: 18,000 WLD drift, 5 checksum mismatches/20 unapplied, app DML 235/243 and 3 PUBLIC bank functions. Disk 99% at 00:14 versus 97% at 01:08 is not remediation proof. External approved 0 new/cumulative UNKNOWN of 10,000; no deployment.
-
-- Development backlog: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1758
-
-## F675-164 / v1432 — Verified private support drafts (FEATURE ADDITION / HOLD)
-- Previous Improvement v1430; Current Addition v1432; Next Improvement v1434 provisional. Main 35971c600; /support sends directly and has no draft API/DB. Proposal: 20 slots, 30-day expiry, atomic send, immutable receipt, CAS, owner-only/admin-invisible, Android/a11y, flag OFF. P0/P1: ENV1432-01 FIN1432-02 SEC1432-03 REL1432-04 SUP1432-05 SUP1432-06 SUP1432-07 SUP1432-08 SUP1432-09 SUP1432-10. QA v1351 blockers, disk 99%; independent external newly accepted 0, cumulative UNKNOWN/10,000. Docs only.
-
-
-## F675-163 v1430 — Calendar watch deadline integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
-- Previous Feature Addition v1428 / Current Feature Improvement v1430 / Next Feature Addition v1432 (provisional).
-- Verified main source correction: frontend calendar shop-deadlines helper includes parseable past deadlines; tests have no clock; shop_catalog_list_v2 reads shop_catalog.sale_ends_at while shop_inventory availability is separate, and season deadlines come from virtual_seasons.ends_at. Prior v1428 provenance statement corrected.
-- Proposed source_revision + immutable saved occurrence deadline, explicit confirm after admin reschedule, ABA-safe source revisions, fail-closed unknown source, owner-only removal and no auto-notification/participation/WLD change. Real DB lock order, app ACL, Nest/Next/Android parity, no-store/noindex, a11y and rollback acceptance in integrated master.
-- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. Predecessor Draft #1749; QA v1350 FAILED; external approved 0 new, cumulative UNKNOWN/10,000 BLOCKED. Documentation only.
-
-
-## F675-163 — v1428 member calendar event watchlist (ADDITION / DRAFT / HOLD)
-- **QA final refresh 22:17 KST:** v1350 FAILED; 68 Draft PRs/3 conflicts, 18 USER_CASH divergences +18,000 WLD and Treasury 0, app UPDATE/DELETE 235/243 tables, PUBLIC bank EXECUTE 3, 5 migration checksum mismatches, 20 unapplied migrations, data disk 98% / 4.1GiB free. Production version unknown, Test not exact current main, independent restore unverified. Public HTTP 50/50 and anonymous mobile 36/36 PASS do not certify authenticated finance or official Test. RELEASE HOLD.
-- Verified main /calendar has season events, shop sale deadlines, daily events and weekly goals but no member-owned saved event list. Only season UUID and shop deadline UUID are eligible v1; daily/weekly lack stable IDs in this page. No overlap with F675-160 merchandise wishlist.
-- Proposed typed FK watch rows, owner-only SECURITY DEFINER, active cap 100 under actor lock, durable idempotency and tombstones, unavailable redaction, no notifications/auto-entry/WLD, Next/Nest/Android parity, a11y, private SEO and exact-SHA rollback gates. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05..10. [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md). [Issue #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748) · [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749).
-- QA v1349 FAILED; data disk98%, historical 18k WLD, restore and official Test HOLD. External new accepted 0, cumulative UNKNOWN/10,000 BLOCKED. Docs only.
+## F675-165 / v1436 — Verified glossary correction feedback (FEATURE ADDITION / HOLD)
+- Source main 35971c600f25869c96f1c666d4b9f58927202730 unchanged start/mid, QA v1353 FAILED/HOLD, disk 98%/4.5GiB, 18,000 WLD drift, 5 checksum mismatches, 20 unapplied migrations, app grants and PUBLIC bank functions. Static glossary has no member correction receipts. Proposed revision-bound member feedback, reviewer audit, separate content PR, no direct public mutation. Issue #1769. Backlog ENV1436-01 FIN1436-02 SEC1436-03 REL1436-04 GLOS1436-05 GLOS1436-06 GLOS1436-07 GLOS1436-08 GLOS1436-09 GLOS1436-10. External new accepted 0, cumulative UNKNOWN/10,000, BLOCKED; docs only.
 
 
 ## F675-06 detailed adoption — v2026.10.15.688
