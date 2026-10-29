@@ -121,6 +121,22 @@ export class WalletController {
     return { loans: await this.service().loans(requireUserId(request)) };
   }
 
+  @Get('wallet/transfers/receipts/:idempotencyKey')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Verify a durable owner-scoped transfer receipt by original idempotency key' })
+  async transferReceipt(
+    @Req() request: RequestWithSession,
+    @Param('idempotencyKey', new ParseUUIDPipe()) idempotencyKey: string,
+  ) {
+    try {
+      return await this.service().transferReceipt(requireUserId(request), idempotencyKey);
+    } catch {
+      // A missing or corrupt ledger read must never become a fabricated success,
+      // or a false "not sent" that invites a fresh-key duplicate transfer.
+      throw new ServiceUnavailableException('transfer receipt cannot be verified now');
+    }
+  }
+
   @Post('wallet/transfers')
   @ApiOperation({ summary: 'Send WLD to another member' })
   transfer(@Req() request: RequestWithSession, @Body() body: TransferDto) {
