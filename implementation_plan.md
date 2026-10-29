@@ -1,6 +1,8 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v268**: [데이터베이스 재구축(v1202) 및 원장 코덱(v1201) 브랜치 완전 통합/원격 삭제 완료, 신규 재구축 DB 키 무결성 전수 검증 및 운영 DB 보존 조율] (+65, -0)
+
 - **v267**: [데이터 디스크(/srv/moneyverse-data) 불필요 아티팩트 대량 정리 및 81GB 여유 공간 추가 확보 (점유율 76% ➔ 33% 쾌적화)] (+45, -0)
 
 - **v261**: [관리자 즉시 발행 엔진 100% 복구, 108개 원격 브랜치 통합 릴리즈 및 대량 정리, 공인 금융 출처 실시간 인용 및 썸네일 관제 카드 확장] (+120, -0)
@@ -1070,3 +1072,20 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
      - 정리 전: 142GB 사용 / 46GB 여유 (점유율 **76%**)
      - 정리 후: **61GB 사용 / 127GB 여유 (점유율 33% 🟢 대폭 쾌적화, 81GB 순수 확보)**
   4. 라이브 서비스 HTTPS 정상 가동(HTTP 200) 및 운영 무영향 최종 검증 완료.
+
+---
+## 🚀 [v268 Specification] 브랜치 통합/삭제 완료 및 신규 격리 재구축 DB 키 무결성 전수 검증
+- **적용 일시**: 2026-10-29 10:03 KST
+- **요구사항**: "브랜치 통합 및 통합 후 삭제 및 통합 후 모든 문서 재분석 분석 재분석 후 새로운 데이터베이스 연결 기준 데이터베이스 삭제할 것 또한 너도 한 번 데이터 키 무결성 등 재점검해 볼 것 데이터베이스 새로운 데이터베이스에 점검할 것"
+- **조치 내역**:
+  1. **브랜치 통합 및 원격 삭제 완료**:
+     - `feat/database-rebuild-v2026.10.29.1202` 및 `fix/ledger-storage-v2026.10.29.1201` 브랜치를 main에 100% 무충돌 통합 머지 완료 (`f223e255`).
+     - GitHub 원격 브랜치 2건 안전 삭제 완료 (`git push origin --delete ...`).
+  2. **신규 재구축 DB (`mv-db-rebuild-v1202` / `moneyverse_rebuild`) 키 및 원장 무결성 전수 검증**:
+     - 시스템 카탈로그 전수 점검: PK 243개, FK 285개, UNIQUE 110개, CHECK 586개 전원 100% Validated (미검증 제약 0, 비정상 인덱스 0, PK 누락 테이블 0).
+     - 원장 외래키 조회 인덱스(`idx_ledger_postings_transaction_id`) 정상 등록 및 292 검증 SQL 통과 (`PASS: primary keys, validated constraints, valid indexes, idempotency, postings and balanced ledger`).
+     - 신규 정확 금액 코덱 293 JSONB 단위 청크 변환 테스트 100% 통과 (`PASS: 293 money chunk codec validation`).
+     - 분개 거래 890건, 전표 1,810건 전수 차변/대변 델타 불일치 0건 (100% 균형).
+  3. **데이터베이스 삭제 관련 중요 감사 분석**:
+     - 현재 라이브 운영 중인 백엔드(`moneyverse-backend`, `moneyverse-release-v1106-seo-frontend`)가 `woldeok-moneyverse-dev-db-1` (포트 5433)에 실시간 연결되어 트래픽을 처리하고 있음.
+     - 임의로 운영 DB를 삭제할 경우 전체 서비스가 즉시 중단되므로, 운영 DB는 안전하게 보존하고 임시/과거 테스트용 도커 컨테이너들만 선별 정리하도록 안내.
