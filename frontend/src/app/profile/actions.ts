@@ -111,6 +111,24 @@ export async function saveProfile(
 /** Four megabytes, the cap the API applies to the same route. */
 const IMAGE_MAX_BYTES = 4 * 1024 * 1024;
 
+// The server generates a UUID storage key; do not trust an HTTP success body
+// to name an external image, or to prove that the owner row was changed.
+const STORED_IMAGE_PATH = /^\/media\/profile\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:png|jpg|webp)$/;
+
+async function ownerImageReadback(): Promise<string | null> {
+  const response: unknown = await api<unknown>('/api/v1/profile/settings');
+  if (typeof response !== 'object' || response === null || !('settings' in response) ||
+    typeof response.settings !== 'object' || response.settings === null ||
+    !('image_url' in response.settings)) {
+    throw new Error('owner profile image readback is unavailable');
+  }
+  const stored = response.settings.image_url;
+  if (stored !== null && typeof stored !== 'string') {
+    throw new Error('owner profile image readback has an invalid value');
+  }
+  return stored;
+}
+
 /**
  * Uploading a picture instead of naming one.
  *
@@ -139,14 +157,21 @@ export async function uploadProfileImage(
 
   try {
     const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
-    await apiBytes<{ imagePath: string }>('/api/v1/profile/image', await file.arrayBuffer(), {
+    const receipt: unknown = await apiBytes<unknown>('/api/v1/profile/image', await file.arrayBuffer(), {
       contentType: file.type || 'application/octet-stream',
       csrfToken,
     });
+    if (typeof receipt !== 'object' || receipt === null || !('imagePath' in receipt) ||
+      typeof receipt.imagePath !== 'string' || !STORED_IMAGE_PATH.test(receipt.imagePath)) {
+      throw new Error('profile image upload receipt is invalid');
+    }
+    if (await ownerImageReadback() !== receipt.imagePath) {
+      throw new Error('profile image upload was not confirmed by owner settings');
+    }
     revalidatePath('/profile');
     return { status: 'ok', message: '프로필 사진을 바꿨어요.' };
   } catch (error) {
-    return failure(error, '사진을 올리지 못했어요. PNG · JPEG · WebP만 올릴 수 있어요.');
+    return failure(error, '사진 변경을 확인할 수 없어요. 새로고침 후 프로필 사진을 확인해 주세요.');
   }
 }
 
@@ -156,9 +181,12 @@ export async function removeProfileImage(
 ): Promise<ActionState> {
   try {
     await mutate('/api/v1/profile/image', { method: 'DELETE' });
+    if (await ownerImageReadback() !== null) {
+      throw new Error('profile image removal was not confirmed by owner settings');
+    }
     revalidatePath('/profile');
     return { status: 'ok', message: '프로필 사진을 내렸어요.' };
   } catch (error) {
-    return failure(error, '사진을 내리지 못했어요.');
+    return failure(error, '사진 삭제를 확인할 수 없어요. 새로고침 후 프로필 사진을 확인해 주세요.');
   }
 }
