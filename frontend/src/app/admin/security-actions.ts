@@ -9,6 +9,7 @@ import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { consoleReturnPath } from './areas';
 import { verifiedConsoleClose, verifiedConsoleOpen } from './console-session-receipt';
 import { STEP_UP_CODE, spendSecondFactorCode } from './step-up';
+import { ADMIN_BLOCK_UUID, parseAdminIpBlocks } from './security/security-evidence';
 
 /**
  * Getting into the operations console, and the second factor that costs.
@@ -150,11 +151,22 @@ export async function blockIpAddress(
   if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
   try {
     await spendSecondFactorCode(code);
-    await mutate('/api/v1/admin/security/ip-blocks', {
+    const receipt = await mutate<{ block_id: string; network: string; expires_at: string | null }>('/api/v1/admin/security/ip-blocks', {
       body: { network, reason, idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/admin/security');
-    return { status: 'ok', message: `${network} 차단을 적용했습니다.` };
+    if (!receipt || typeof receipt.block_id !== 'string' || !ADMIN_BLOCK_UUID.test(receipt.block_id)) {
+      return { status: 'error', message: '차단 접수 결과를 확인하지 못했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+    }
+    try {
+      const verified = parseAdminIpBlocks(await api<unknown>('/api/v1/admin/security/ip-blocks'));
+      if (!verified?.some((item) => item.block_id === receipt.block_id && item.active)) {
+        return { status: 'error', message: '차단 후 실제 상태를 확인하지 못했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+      }
+    } catch {
+      return { status: 'error', message: '차단 요청 후 재조회가 실패했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+    }
+    return { status: 'ok', message: `${network} 차단이 기록에서 확인됐습니다.` };
   } catch (error) {
     return failure(error, 'IP 차단을 적용하지 못했어요.');
   }
@@ -167,17 +179,28 @@ export async function liftIpAddressBlock(
   const blockId = text(formData.get('blockId'));
   const reason = text(formData.get('reason'));
   const code = text(formData.get('code'));
-  if (blockId === '') return { status: 'error', message: '차단 기록을 확인할 수 없어요.' };
+  if (!ADMIN_BLOCK_UUID.test(blockId)) return { status: 'error', message: '차단 기록을 확인할 수 없어요.' };
   if (reason.length < 3 || reason.length > 1000) return { status: 'error', message: '해제 사유를 3~1000자로 입력해 주세요.' };
   if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
   try {
     await spendSecondFactorCode(code);
-    await mutate(`/api/v1/admin/security/ip-blocks/${encodeURIComponent(blockId)}`, {
+    const receipt = await mutate<{ block_id: string; lifted: boolean }>(`/api/v1/admin/security/ip-blocks/${encodeURIComponent(blockId)}`, {
       method: 'DELETE',
       body: { reason, idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/admin/security');
-    return { status: 'ok', message: 'IP 차단을 해제했습니다.' };
+    if (!receipt || receipt.block_id !== blockId || receipt.lifted !== true) {
+      return { status: 'error', message: '차단 해제 영수증을 확인하지 못했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+    }
+    try {
+      const verified = parseAdminIpBlocks(await api<unknown>('/api/v1/admin/security/ip-blocks'));
+      if (!verified?.some((item) => item.block_id === blockId && !item.active && item.lifted_at !== null)) {
+        return { status: 'error', message: '차단 해제 후 실제 상태를 확인하지 못했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+      }
+    } catch {
+      return { status: 'error', message: '차단 해제 후 재조회가 실패했습니다. 중복 실행하지 말고 기록을 다시 조회해 주세요.' };
+    }
+    return { status: 'ok', message: 'IP 차단 해제가 기록에서 확인됐습니다.' };
   } catch (error) {
     return failure(error, 'IP 차단을 해제하지 못했어요.');
   }
