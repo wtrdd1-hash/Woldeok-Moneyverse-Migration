@@ -148,8 +148,11 @@ export class TreasuryBuybackBurnDto {
   reason!: string;
 }
 
+import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
+
 @ApiTags('Public Treasury')
 @Controller('treasury')
+@SkipInternalToken()
 export class PublicTreasuryController {
   constructor(private readonly service: TreasuryService) {}
 
