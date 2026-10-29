@@ -102,10 +102,13 @@ export class WalletController {
     return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
   }
 
+  // Legacy nickname discovery exposed unrelated members' profile data.
+  // The supported wallet contract requires a recipient-supplied exact UUID.
   @Get('wallet/recipients/search')
-  @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
-  searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {
-    return this.service().searchRecipients(requireUserId(request), query || '');
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Retired recipient name search; use exact recipient UUID', deprecated: true })
+  searchRecipients(@Req() _request: RequestWithSession, @Query('query') _query?: string): never {
+    throw new GoneException('recipient name search retired; use exact recipient UUID');
   }
 
   @Get('rewards/availability')

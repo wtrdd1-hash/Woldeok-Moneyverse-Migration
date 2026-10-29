@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,25 +13,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits, isPositiveWldInput } from '@/lib/money';
-import { Send, Search, CheckCircle2, User, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 
-interface Recipient {
-  userId: string;
-  displayName: string;
-}
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   const { locale } = useLocale();
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Recipient[]>([]);
-  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
+  const [recipientId, setRecipientId] = useState('');
+  const selectedRecipient = UUID.test(recipientId.trim())
+    ? { userId: recipientId.trim().toLowerCase(), displayName: recipientId.trim().toLowerCase() }
+    : null;
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{
@@ -68,31 +65,6 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
       label: localeLabel(locale, '🍕 맛있는 밥', '🍕 Treat meal', '🍕 美味しいご飯', '🍕 请吃顿饭', '🍕 Bữa ăn ngon'),
     },
   ];
-
-  // 수취인 검색 디바운스
-  useEffect(() => {
-    if (!searchQuery.trim() || selectedRecipient) {
-      setSearchResults([]);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch(`/api/transfers/search?query=${encodeURIComponent(searchQuery)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchResults(data.recipients || []);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedRecipient]);
 
   const handleTransfer = async () => {
     if (!selectedRecipient || !isPositiveWldInput(amount)) {
@@ -142,12 +114,25 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
         return;
       }
 
+      // A successful HTTP response is not proof of a committed transfer unless
+      // it includes the canonical ledger transaction UUID. Never invent one.
+      if (typeof data.transactionId !== 'string' || !UUID.test(data.transactionId)) {
+        setErrorMsg(localeLabel(
+          locale,
+          '원장 영수증을 확인하지 못했습니다. 지갑 거래 내역을 확인하기 전 다시 보내지 마세요.',
+          'Ledger receipt unverified. Check wallet history before trying again.',
+          '台帳の受領証を確認できません。履歴を確認するまで再送しないでください。',
+          '无法验证账本凭证。确认钱包记录前请勿重试。',
+          'Không xác minh được biên nhận. Hãy kiểm tra lịch sử ví trước khi gửi lại.',
+        ));
+        return;
+      }
       setReceipt({
         recipientName: selectedRecipient.displayName,
         amount,
         message: message.trim() || undefined,
         sticker: selectedSticker || undefined,
-        txId: data.transactionId || 'TX-' + Math.random().toString(36).slice(2, 9),
+        txId: data.transactionId,
       });
     } catch (err: any) {
       setErrorMsg(
@@ -167,8 +152,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   };
 
   const handleReset = () => {
-    setSelectedRecipient(null);
-    setSearchQuery('');
+    setRecipientId('');
     setAmount('');
     setMessage('');
     setSelectedSticker(null);
@@ -237,11 +221,11 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
             <p className="text-xs text-muted-foreground mt-1">
               {localeLabel(
                 locale,
-                '수취인에게 실시간 알림이 발송되었습니다.',
-                'Real-time notification delivered to recipient ledger.',
-                '受取人にリアルタイム通知が送信されました。',
-                '已向收款人发送实时账单通知。',
-                'Thông báo thời gian thực đã được gửi đến người nhận.'
+                '원장 거래 번호가 확인되었습니다. 지갑 거래 내역에서도 확인할 수 있습니다.',
+                'Ledger transaction ID verified. You can also check wallet history.',
+                '台帳の取引IDを確認しました。ウォレット履歴でも確認できます。',
+                '已验证账本交易编号，也可在钱包历史记录中查看。',
+                'Đã xác minh mã giao dịch. Bạn cũng có thể xem lịch sử ví.'
               )}
             </p>
 
@@ -283,76 +267,26 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
         ) : (
           /* 송금 폼 */
           <div className="space-y-4 pt-2">
-            {/* 1. 수취인 검색 / 선택 */}
+            {/* 1. Exact recipient UUID only: no nickname enumeration or unverified identity badge. */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                <span>
-                  {localeLabel(locale, '받는 사람 (닉네임)', 'Recipient (Nickname)', '受取人 (ニックネーム)', '收款人（昵称）', 'Người nhận (Biệt danh)')}
-                </span>
-                {selectedRecipient && (
-                  <button
-                    onClick={() => { setSelectedRecipient(null); setSearchQuery(''); }}
-                    className="text-xs text-primary underline"
-                  >
-                    {localeLabel(locale, '변경', 'Change', '変更', '更改', 'Thay đổi')}
-                  </button>
-                )}
+              <label htmlFor="recipientUserId" className="text-xs font-semibold text-foreground">
+                {localeLabel(locale, '받는 사람의 머니버스 ID', 'Recipient Moneyverse ID', '受取人のMoneyverse ID', '收款人Moneyverse ID', 'ID Moneyverse người nhận')}
               </label>
-
-              {selectedRecipient ? (
-                <div className="flex items-center justify-between p-3 rounded-xl border border-primary/40 bg-primary/5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                      <User className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-foreground">{selectedRecipient.displayName}</div>
-                      <div className="text-[10px] text-muted-foreground font-mono">{selectedRecipient.userId.slice(0, 8)}...</div>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-                    {localeLabel(locale, '인증됨', 'Verified', '認証済み', '已认证', 'Đã xác minh')}
-                  </Badge>
-                </div>
-              ) : (
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={localeLabel(
-                      locale,
-                      '수취인 닉네임을 검색하세요...',
-                      'Search recipient by nickname...',
-                      '受取人のニックネームを検索...',
-                      '搜索收款人昵称...',
-                      'Tìm kiếm người nhận theo biệt danh...'
-                    )}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-10 rounded-xl"
-                  />
-                  {/* 검색 결과 드롭다운 */}
-                  {searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 z-30 mt-1 max-h-44 overflow-y-auto rounded-xl border border-border/60 bg-popover/95 p-1 shadow-xl backdrop-blur-md">
-                      {searchResults.map((user) => (
-                        <button
-                          key={user.userId}
-                          type="button"
-                          onClick={() => { setSelectedRecipient(user); setSearchResults([]); }}
-                          className="w-full flex items-center justify-between px-3 py-2 text-left text-sm rounded-lg hover:bg-muted transition-colors"
-                        >
-                          <span className="font-semibold text-foreground">{user.displayName}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">{user.userId.slice(0, 6)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {isSearching && (
-                    <div className="absolute right-3 top-3 text-[11px] text-muted-foreground animate-pulse">
-                      {localeLabel(locale, '검색 중...', 'Searching...', '検索中...', '搜索中...', 'Đang tìm kiếm...')}
-                    </div>
-                  )}
-                </div>
-              )}
+              <Input
+                id="recipientUserId"
+                name="recipientUserId"
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                maxLength={36}
+                placeholder="UUID"
+                value={recipientId}
+                onChange={(event) => setRecipientId(event.target.value)}
+                className="h-11 font-mono text-sm rounded-xl"
+              />
+              <p className="text-xs text-muted-foreground">
+                {localeLabel(locale, '상대방에게 정확한 UUID를 받아 입력해 주세요. 입력 형식만 확인하며 수취인 신원은 인증하지 않습니다.', 'Enter the exact UUID shared by the recipient. Format validation does not verify their identity.', '相手から正確なUUIDを受け取ってください。形式確認は本人確認ではありません。', '请输入收款人提供的准确UUID。格式校验不代表身份认证。', 'Nhập UUID chính xác từ người nhận. Kiểm tra định dạng không xác minh danh tính.')}
+              </p>
             </div>
 
             {/* 2. 금액 입력 */}
