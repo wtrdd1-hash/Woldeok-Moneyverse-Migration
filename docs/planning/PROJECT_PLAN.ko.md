@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1496 — F675-180 관리자 전용 배포 준비 근거 매트릭스 (기획 초안 / 운영 승격 보류)
+- 회차: 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 최신 main 62c6cd038951d65c94b709302bdaec6e75b080b6. QA v1383 금융 6실패/3성공 및 app-api 계약 불일치 **증거만 확인**, 최종 판정 미확인. [개발 인계 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959).
+- 소스 공백: /admin/api-health는 경로별 상태를 미측정으로 표시하며 GitHub CI 정확 SHA·공식 Test 아티팩트·독립 복원·PostgreSQL 권한/마이그레이션·금융 출처·서명된 ROOT/DATA 여유·개인정보/모바일/SEO를 통합 검증하는 관리자 화면이 없다. 저장공간 #1948 및 개발 A #1956의 수집기를 재구현하지 않고 근거만 소비한다.
+- 관리자 전용 /admin/operations/release-readiness 및 엄격한 후보 SHA·환경을 받는 Nest GET /api/v1/admin/operations/release-readiness. PASS/FAIL/UNKNOWN/만료 상태를 보수적으로 판정하며 근거 보기·새로고침·이슈 열기·정제 요약 복사만 제공한다. 자동 승인·배포·강제 통과 없음. v1 DB 테이블·인덱스·마이그레이션·권한·원장 변경 없음. no-store/noindex, 320px/WCAG 2.2 AA, 한국어/영어, SHA·환경·정책·TTL 서명 검증, 공개/Android API 없음. 전체 화면·API·보안·KPI·롤백·수용시험은 [한국어 통합 기획](INTEGRATED_PLANNING_MASTER.ko.md)에 동등하게 명세했다.
+- P0: DISK1496-01(DATA 100% 반올림, 가용 약 663MiB, 자동 삭제 금지), SEC1496-02(권한·체크섬 5건·Git 참조 462개), FIN1496-03(MINT 18,000 WLD·국고 552건·SWF), REL1496-04(전체 CI·독립 복원·공식 Test 정확 SHA/엣지). P1: READINESS1496-05 READINESS1496-06 READINESS1496-07 READINESS1496-08 READINESS1496-09 READINESS1496-10(신뢰 어댑터·판정기·API·화면/접근성·개인정보/KPI·공격 시험). 합성 10,001건·위조 100건·동시성 100건·만료 50건·경계 30건은 **명세만 작성, 실행하지 않음**.
+- 스위치 기본 OFF, 런타임·DB·WLD·Test·Production 변경 없음. DRAFT / RELEASE HOLD. 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 미병합 기획 #1949/#1954는 참조만 하며 해당 브랜치를 변경하지 않는다.
+
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

@@ -1,4 +1,10 @@
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
+
+## v2026.10.30.1496 — F675-180 Verified admin release-readiness evidence matrix (planning only / DRAFT / HOLD)
+- Added a bilingual, administrator-only **read-only evidence matrix** proposal to identify missing/failed/stale proof for a candidate's exact SHA. Separate from existing API-health and the signed storage collector (#1948/#1956); no deploy, approval, override, deletion, WLD or DB mutation.
+- Added P0 DISK1496-01, SEC1496-02, FIN1496-03, REL1496-04 and P1 READINESS1496-05..10 with source trust, policy/TTL, API/UX/a11y, security/SEO, test/rollback contracts. QA v1383 evidence includes finance 6 FAIL/3 PASS and mobile schema drift; final v1383 verdict unverified. DATA rounded 100%, ~663 MiB unprivileged free at 08:00 KST. Synthetic acceptance **specified only**.
+- [Development handoff #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959). External independent references new approved 0, cumulative UNKNOWN/10,000; **BLOCKED / IN PROGRESS**. No runtime/Test/Production change. Cycle: Improvement v1494 → Addition v1496 → Improvement v1498 provisional.
+
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 
 ## v2026.10.29.1510 — Private Telegram operations alert bridge (Production active and paired)

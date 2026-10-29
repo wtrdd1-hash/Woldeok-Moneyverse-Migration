@@ -1,0 +1,9 @@
+# 기획 v1496 — 검증된 배포 준비 근거 매트릭스 (문서 전용)
+
+- **시작 2026-10-30 08:00 KST.** miniPC Debian 13.6 연결. 백엔드·프론트엔드·Discord·MCP·Nginx·Docker 가동, 개발 DB 연결 확인. 스킬 목록은 비어 있어 miniPC 설치 using-superpowers·brainstorming·using-git-worktrees·verification-before-completion을 읽었다. 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 및 AGENTS.md, README.md, 영문/국문 PROJECT_PLAN을 검토했다. ROOT 96%, DATA 반올림 100%, 가용 약 663MiB. 기존 변경 중인 main 작업 디렉터리는 건드리지 않았다.
+- **조사 08:01~08:04.** GitHub 기획 #1949/#1954 및 개발 A #1956을 확인해 서명 저장공간 수집기 중복을 피했다. 관리자 API 상태는 CPU·메모리·DB 검사만 실측하고 API 도메인은 미측정이다. 독립 QA v1383 증거: 금융 6실패/3성공, 계약 41성공, app-api 생성 계약 불일치, Test/Production /help 404. **v1383 최종 판정 미확인**, 이전 확인된 v1381 FAILED/P0. 금융 출처·DB 권한/체크섬·과거 Git 참조·공식 Test 정확 SHA·독립 복원 보류. 개발 인계 이슈 #1959 생성.
+- **중간 08:04:59.** 원격 main SHA 불변. 최신 origin/main에서 별도 sparse Git 작업 트리 auto/planning-v1496-release-readiness-20261030을 생성했다. DATA는 여전히 반올림 100%, 가용 약 662MiB로 루트 파일시스템에 별도 작업 폴더를 배치했다.
+- **기획.** F675-180 관리자 전용 읽기 매트릭스는 정확 SHA/정책/환경과 서명된 출처를 검증하며 실패·미확인·만료를 보수적으로 처리한다. 전체 CI·공식 Test·독립 복원·DB 권한·금융 출처·호스트 여유·개인정보·모바일·SEO를 한눈에 표시한다. 근거 보기·새로고침·이슈 열기·정제 요약 복사만 제공하고 승인·배포·강제 통과는 없다. v1 DB·권한·마이그레이션·원장·WLD 변경 없음. 영어·한국어 기존 통합 문서에 흡수, 새 분산 기획서 없음.
+- **백로그.** P0 DISK1496-01 SEC1496-02 FIN1496-03 REL1496-04, P1 READINESS1496-05~10. 합성 10,001건·위조 100건·동시성 100건·만료 50건·경계 30건은 **시험 명세만 작성**. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
+- **배포 정책.** 기능 스위치 기본 OFF. 기획 브랜치에서 런타임·Test·Production·DB·잔액·원장·Git 참조·파일 정리 변경 없음. Gemini/개발 A/B/C/QA 작업을 보호하고 별도 개발 브랜치·정확 SHA Test·사람 승인 GitOps를 요구한다. **DRAFT / RELEASE HOLD**.
+- **완료 증거:** git diff --check와 영문/국문 일치 검사 결과는 PR 및 완료 기록에 반영 예정. 문서 전용 회차에서 전체 런타임 및 실제 PostgreSQL 수용시험은 실행하지 않는다.
