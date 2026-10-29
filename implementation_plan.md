@@ -1028,3 +1028,14 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   3. 라이브 HTTPS 실측 검증:
      - 대상: https://easy-scraping.com/blog
      - 결과: 블로그 허브 내 전체 14개 아티클 카드에서 고해상도 SVG 인포그래픽 이미지가 **14건 모두 100% 정상 렌더링**됨을 실측 확인.
+---
+## 🚀 [v265 Specification] 공개 블로그 아티클 일괄 철회(비공개/삭제) 및 클린 상태 복원 완료
+- **적용 일시**: 2026-10-29 09:10 KST
+- **요구사항**: "그 그리고 현재 블로그 일단 다 삭제해줘"
+- **조치 내역**:
+  1. /srv/moneyverse-data/shared/blog-posts.json 사전 타임스탬프 백업 완료 (log-posts.json.bak-20261029090841).
+  2. 공개 노출 중이던 테스트 및 이전 발행 아티클 14건 전체를 WITHDRAWN(철회) 상태로 일괄 전환.
+  3. 프론트엔드 서비스 재기동 및 캐시 갱신 완료.
+  4. 라이브 HTTPS 실측 검증:
+     - GET https://easy-scraping.com/api/blog: 잔여 공개 아티클 **0건** (count: 0)
+     - GET https://easy-scraping.com/blog: "검색 조건에 맞는 블로그 글이 없습니다" 클린 상태 정상 노출 확인.
