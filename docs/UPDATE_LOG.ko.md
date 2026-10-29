@@ -1,3 +1,10 @@
+## 2026-10-29 v1450 — F675-168 블로그 저장 게시 식별·전체 철회 상태 강화
+
+- v1448 추가 이후 v1450 기능 보완, 다음 v1452 추가(잠정). 기준 main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; 선행 PR #1801 병합.
+- 09:12 KST 공개 블로그/검증 API count=0; v265에는 사용자 요청으로 기존 공유 JSON 글 14건 철회 기록. 저장 CTA 활성화나 임의 재게시 금지.
+- 실제 소스상 정적 우선 본문/API와 검증 우선 목록의 slug 충돌, 마이그레이션 290의 개정 후 receipt 유지, 삭제 후 공개 조회 불가를 확인. 불변 독립 검수 식별·epoch·tombstone 제거·원본 영수증·본인 권한·웹/Android·접근성·SEO/캐시 철회 설계. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04, P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 실제 PG 시험 미실행.
+- QA v1360 금융 18계좌/+18,000 WLD, 앱 쓰기239, PUBLIC 은행3, 체크섬5/미적용20, PR 104건 미병합 종료의 콘텐츠 동등성 미확인, Test 정확 SHA 불일치로 운영 보류. 09:12 디스크 루트59%/데이터76%/tmp27% 회복했으나 복원 미검증. 외부 독립 근거 신규 0, 누적 UNKNOWN/10,000. 문서만 수정.
+
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

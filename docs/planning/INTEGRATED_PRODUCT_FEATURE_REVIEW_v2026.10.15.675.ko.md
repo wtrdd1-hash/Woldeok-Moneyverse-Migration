@@ -1,5 +1,11 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1450 F675-168 검토 — 공개 글 전체 철회·게시 식별 무결성 강화 (기능 보완 / 보류)
+
+- 이전 추가 v1448 → 현재 보완 v1450 → 다음 추가 v1452, 기준 main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED. 선행 기획 PR #1801 병합, 개발 담당 #1800. v265 사용자 요청으로 공유 JSON 글 14건 철회; 09:12 KST 공개 블로그/검증 API 모두 count=0. 저장 대상 없음, 기능 OFF.
+- 정적/JSON/검증 글 slug 충돌을 분리하고 독립 검수된 불변 게시 ID/언어판/epoch/개정/콘텐츠 다이제스트로 회원 저장을 결합한다. 변경 가능 receipt만으로 승인 판단 금지. 삭제 상태에서도 본인 제거, 영수증 재시도, 웹/Android, SEO/캐시 제거 및 WLD 영향 0. P0 ENV1450-01 FIN1450-02 SEC1450-03 REL1450-04, P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 실제 PG 수용시험 미실행, 공식 Test/운영 BLOCKED. 외부 독립 승인 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 상세는 통합 마스터·#1800.
+
+
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
