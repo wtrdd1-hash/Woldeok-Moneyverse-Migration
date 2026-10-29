@@ -1,4 +1,10 @@
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
+
+## v2026.10.30.1484 — F675-177 owner-private monthly wallet activity digest (planning DRAFT / release HOLD)
+- Feature Addition after v1482 Improvement; next v1486 Improvement (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6`; QA v1377 FAILED/P0. Source-backed gap: existing 50-row private activity history, no calendar-month digest; recent CSV and unmerged saved views are separate.
+- Proposed owner-only 1..12 KST-month read-only summary, exact signed USER_CASH/BANK transaction-first aggregation, server snapshot and partial current month, verified empty vs unavailable, Next/Nest/Android, 320px/WCAG AA, private noindex/no-store and flag OFF. No balance, income/tax, provenance or internal-transfer certification. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [P0/P1 issue #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
+- P0 REPO1484-01 SEC1484-02 FIN1484-03 REL1484-04; P1 MONTH1484-05 MONTH1484-06 MONTH1484-07 MONTH1484-08 MONTH1484-09 MONTH1484-10. QA tests planned not run; external independent newly approved 0, cumulative UNKNOWN/10,000. No runtime/DB/WLD/Test/Production change; official exact-SHA release HOLD.
+
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 
 ## v2026.10.29.1510 — Private Telegram operations alert bridge (Production active and paired)

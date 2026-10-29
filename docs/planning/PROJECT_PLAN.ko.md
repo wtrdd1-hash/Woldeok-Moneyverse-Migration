@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1484 — F675-177 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
+- **회차:** 이전 기능 보완 v1482 → 현재 기능 추가 v1484 → 다음 기능 보완 v1486(잠정). 시작·중간에 main `62c6cd038951d65c94b709302bdaec6e75b080b6` 확인. v1480/#1916 및 v1482/#1920은 아직 병합되지 않은 제안이며 main의 구현이 아님. 최신 독립 QA v1377 **FAILED/P0**. [개발 인계 이슈 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). 이번 변경은 문서 전용이며 런타임·DB·WLD·Test·Production을 변경하지 않음.
+- **실제 소스 공백:** 비공개 `/wallet/activity`는 전체/7일/30일과 50건씩 기록 조회만 제공. Nest `GET /api/v1/wallet/activity`는 기간·커서만 받음. 저장소 SQL은 USER_CASH+USER_BANK 전표를 거래별 부호 있는 증감으로 계산하며 기존 `export-ledger-csv.tsx`는 전달받은 최근 기록만 CSV로 저장함. 월별 집계 화면/API는 확인되지 않음. 기존 CSV, F675-176 저장 필터, F675-173 개인정보 내보내기와 중복 금지.
+- **회원 흐름:** 비공개 `/wallet/activity` → `월별 활동 요약` → 최근 1~12개월 선택(기본 6개월, Asia/Seoul 달력 기준) → 월별 증가/감소/순변동 없음 **거래 건수**, 증가·감소 WLD 합계, 순증감과 현금·은행 증감 표시. 당월 PARTIAL, VERIFIED_EMPTY, LOADING, UNAVAILABLE, BAD_RESPONSE, SESSION_EXPIRED, DISABLED 상태 구분. 기존 비공개 거래내역으로 이동. 외부 공유·송금·소득/세금 증빙·기초/기말 잔액·순변동 0을 내부 이체로 단정하는 표현 금지.
+- **API/DB:** 본인 세션 `GET /api/v1/wallet/activity/monthly-summary?months=6`, 1~12 정수만 허용. 서버가 `asOf`를 정하고 시간대는 `Asia/Seoul`로 고정. 단일 `REPEATABLE READ READ ONLY` 트랜잭션에서 본인 USER_CASH+USER_BANK만 거래 ID별 먼저 집계한 후 월별 합산; 한국시간 월초 포함·다음 월초 미포함 경계를 UTC로 변환. PostgreSQL NUMERIC → 정규 10진 문자열, `순증감=증가-감소=현금증감+은행증감`; 실제 정상 조회 후에만 활동 없는 월을 0으로 채움. 신규 테이블/제약/앱 계정 직접 DML 불필요. 인덱스·읽기 권한은 격리 PostgreSQL에서 확인 후 필요 시 별도 검토된 추가 인덱스. 회원당 분당 10회·동시 1회, 쿼리 2초 제한은 검증할 목표값. 비정상 HTTP 200/소유자·스키마 누락/쿼리 실패는 오류로 처리하고 0으로 위장하지 않음.
+- **보안·SEO·모바일·관리:** 회원/세션 확인 및 동일 출처 CSRF 경계, `private, no-store`와 `noindex`, Android app-api wallet 허용 목록 및 생성 계약 동등성, 계정 전환 시 이전 응답 폐기, 320px/200% 확대/WCAG 2.2 AA·키보드·스크린리더. 관리자는 최소 집단 규모를 충족한 이용률/오류/지연 통계만 조회하며 개인 WLD 금액·ID 접근 불가. 금액·식별자 로그/공개 사이트맵 금지. `wallet_monthly_activity_digest` 기능 스위치 기본 OFF, KPI 개선은 측정 전 가설.
+- **P0:** REPO1484-01 과거 참조 462개 보존; SEC1484-02 고객문의/감사 직접 DML 및 적용 마이그레이션 체크섬 5건; FIN1484-03 SWF·MINT 18,000 WLD 및 국고 552건 출처, Test 국고 합성 200; REL1484-04 프론트/엣지 SHA, lint 3건, app-api 계약 불일치, 전체 CI, 외부 독립 복원, 정확 SHA Test, 루트/데이터 디스크 86%/89%(검토 없는 파괴적 정리 금지). **P1:** MONTH1484-05 SQL·인덱스; MONTH1484-06 Nest 읽기 API; MONTH1484-07 Next 화면; MONTH1484-08 Android 계약; MONTH1484-09 개인정보·관리·SEO·KPI; MONTH1484-10 격리 PG 합성 거래 10,001건, 타인/위조 100건, 월 경계·0 증감 100건, 비정상 응답·시간 초과 50건 및 롤백. 시험은 **명세만 작성, 실행 안 함**. [영문 통합 원본](INTEGRATED_PLANNING_MASTER.md)과 한국어 대응 참조.
+- **게이트:** 외부 독립 근거 신규 검증 승인 **0건**, 누적 **UNKNOWN / 10,000건** → BLOCKED / IN PROGRESS. P0 QA·운영승격 BLOCKED. 개발은 A/B/C의 별도 브랜치에서 전체 CI·격리 PG·프론트/백/엣지 식별 포함 공식 Test 정확 SHA·독립 복원·승인된 운영승격/롤백을 거쳐야 함. 이번 기획은 병합·배포하지 않음.
+
+
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.
