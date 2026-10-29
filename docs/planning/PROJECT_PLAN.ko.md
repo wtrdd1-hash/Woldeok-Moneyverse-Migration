@@ -1,6 +1,6 @@
 ## v2026.10.29.1466 — F675-172 대시보드 바로가기 상태·레지스트리 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 
-**주기:** 이전 기능 추가 v1464 → 현재 기능 보완 v1466 → 다음 기능 추가 v1468(잠정). **기준:** `AGENTS.md`, `README.md`, 시작·중간 최신 main `9ebc5613845ba2e8179a0051e86db996593c8a19`, 영문 `PROJECT_PLAN.md` 원본 및 국문 대조. 미병합 [선행 Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) 및 이전 PR에 의존하며 [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865)로 인계한다. QA v1368 증거는 조사 시 IN PROGRESS, 마지막 완료 QA v1367 FAILED/P0. 운영 검증 완료로 해석하지 않는다.
+**주기:** 이전 기능 추가 v1464 → 현재 기능 보완 v1466 → 다음 기능 추가 v1468(잠정). **기준:** `AGENTS.md`, `README.md`, 시작·중간 최신 main `9ebc5613845ba2e8179a0051e86db996593c8a19`, 영문 `PROJECT_PLAN.md` 원본 및 국문 대조. 미병합 [v1466 Draft PR #1871](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1871) / [선행 Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) 및 이전 PR에 의존하며 [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865)로 인계한다. QA v1368 증거는 조사 시 IN PROGRESS, 마지막 완료 QA v1367 FAILED/P0. 운영 검증 완료로 해석하지 않는다.
 
 ### 소스 기반 공백과 사용자 상태 계약
 - `frontend/src/app/dashboard/page.tsx`의 다음 활동 4개(`/quests`, `/work`, `/wallet`, `/stocks`)는 고정 링크다. v1464 기획은 `{source: DEFAULT|SAVED, version}`를 제안했으나 **저장 행 부재와 사용자가 명시적으로 비운 목록**, 최초 저장 버전, 경로 레지스트리 변경 경합, 이후 수정 뒤 과거 영수증 재생 동작을 확정하지 않았다. 이는 **기획상 모호성**이지 실제 운영 악용 증거가 아니다.
