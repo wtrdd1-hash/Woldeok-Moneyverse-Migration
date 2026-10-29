@@ -114,13 +114,10 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
     })).rejects.toMatchObject({ status: 503 });
   });
 
-  it('디스코드 클럽 & 길드 공성전 엔드포인트 정상 동작', async () => {
+  it('guild warfare refuses invented stronghold, membership and tax receipts', async () => {
     const controller = new WarfareController();
-    const strongholds = await controller.listStrongholds();
-    expect(strongholds.strongholds.length).toBeGreaterThan(0);
-
-    const status = await controller.getWarfareStatus(mockReq);
-    expect(status.myClub.name).toBe('발할라 파이낸스 길드');
+    await expect(controller.listStrongholds()).rejects.toMatchObject({ status: 503 });
+    await expect(controller.getWarfareStatus(mockReq)).rejects.toMatchObject({ status: 503 });
 
     await expect(controller.declareWar(mockReq, {
       strongholdId: 'stronghold-central-bank',

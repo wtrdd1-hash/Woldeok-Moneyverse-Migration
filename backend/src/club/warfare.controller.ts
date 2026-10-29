@@ -2,15 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  Inject,
+  Header,
   Param,
   Post,
-  ServiceUnavailableException,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsIn, IsInt, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsInt, IsPositive, IsString, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -18,15 +18,15 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 
 export class DeclareWarDto {
-  @ApiProperty({ description: '공성 대상 요새 ID', example: 'stronghold-central-bank' })
+  @ApiProperty({ description: '공성 대상 요새 ID' })
   @IsString()
   readonly strongholdId!: string;
 
-  @ApiProperty({ description: '도전 클럽 ID', example: 'club-dragon-guild' })
+  @ApiProperty({ description: '도전 클럽 ID' })
   @IsString()
   readonly clubId!: string;
 
-  @ApiProperty({ description: '선전포고 보증금 WLD (소각/잠금)', example: 1000000 })
+  @ApiProperty({ description: '선전포고 보증금 WLD' })
   @IsInt()
   @IsPositive()
   readonly depositWld!: number;
@@ -37,12 +37,12 @@ export class DeclareWarDto {
 }
 
 export class AttackStrongholdDto {
-  @ApiProperty({ description: '공격 전력/투입 WLD 수치', example: 50000 })
+  @ApiProperty({ description: '공격 전력/투입 WLD 수치' })
   @IsInt()
   @IsPositive()
   readonly attackPowerWld!: number;
 
-  @ApiProperty({ description: '사용할 버프 아이템 ID', required: false, example: 'buff-war-potion-x2' })
+  @ApiProperty({ description: '사용할 버프 아이템 ID', required: false })
   @IsString()
   readonly buffItemId?: string;
 
@@ -52,7 +52,7 @@ export class AttackStrongholdDto {
 }
 
 export class ClaimStrongholdTaxDto {
-  @ApiProperty({ description: '점령 요새 ID', example: 'stronghold-central-bank' })
+  @ApiProperty({ description: '점령 요새 ID' })
   @IsString()
   readonly strongholdId!: string;
 
@@ -61,113 +61,51 @@ export class ClaimStrongholdTaxDto {
   readonly idempotencyKey!: string;
 }
 
-export interface Stronghold {
-  id: string;
-  name: string;
-  description: string;
-  currentOwnerClubName: string;
-  currentOwnerClubId: string;
-  defenseScore: number;
-  maxDefenseScore: number;
-  dailyTaxYieldWld: number;
-  occupancyDays: number;
-  status: 'PEACE' | 'SIEGE_ACTIVE' | 'COOLDOWN';
-}
+const WARFARE_UNAVAILABLE =
+  '공성전 점령 기록과 WLD 배당 원장 영수증을 검증할 수 없어 이 기능은 제공되지 않습니다.';
 
 @ApiTags('warfare')
 @Controller('clubs/warfare')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class WarfareController {
-  private mockStrongholds: Stronghold[] = [
-    {
-      id: 'stronghold-central-bank',
-      name: '월덕 중앙은행 금고 요새',
-      description: '월덕 전체 금융 거래 수수료 0.5%를 독점 징수하는 최고 전략 거점',
-      currentOwnerClubName: '발할라 파이낸스 길드',
-      currentOwnerClubId: 'club-valhalla',
-      defenseScore: 840000,
-      maxDefenseScore: 1000000,
-      dailyTaxYieldWld: 2500000,
-      occupancyDays: 14,
-      status: 'SIEGE_ACTIVE',
-    },
-    {
-      id: 'stronghold-krx-exchange',
-      name: '테헤란 증권거래소 타워',
-      description: '가상 주식 및 파생상품 거래량 비례 거래세 징수 거점',
-      currentOwnerClubName: '퀀트 마피아',
-      currentOwnerClubId: 'club-quant-mafia',
-      defenseScore: 920000,
-      maxDefenseScore: 1000000,
-      dailyTaxYieldWld: 1800000,
-      occupancyDays: 28,
-      status: 'PEACE',
-    },
-    {
-      id: 'stronghold-pangyo-datacenter',
-      name: '판교 퀀트 슈퍼컴 데이터센터',
-      description: '서버 연산 버프 및 퀀트 봇 수수료 감면 특권 제공 요새',
-      currentOwnerClubName: '네오 테크 길드',
-      currentOwnerClubId: 'club-neo-tech',
-      defenseScore: 650000,
-      maxDefenseScore: 1000000,
-      dailyTaxYieldWld: 1200000,
-      occupancyDays: 6,
-      status: 'PEACE',
-    },
-  ];
-
-  @ApiOperation({ summary: '공성전 요새 목록 및 실시간 점령 현황 조회' })
+  @ApiOperation({ summary: '검증된 공성전 데이터가 없으면 조회 거부' })
   @Get('strongholds')
+  @Header('Cache-Control', 'no-store')
   async listStrongholds() {
-    return {
-      strongholds: this.mockStrongholds,
-      currentSeason: 4,
-      seasonEndsAt: new Date(Date.now() + 86400000 * 7).toISOString(),
-    };
+    // The previous hardcoded owners and daily yields were never database records.
+    throw new ServiceUnavailableException(WARFARE_UNAVAILABLE);
   }
 
-  @ApiOperation({ summary: '내 클럽의 공성전 참여 및 점령 상태 조회' })
+  @ApiOperation({ summary: '검증된 클럽 점령·세금 상태가 없으면 조회 거부' })
   @Get('status')
+  @Header('Cache-Control', 'no-store')
   async getWarfareStatus(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    return {
-      myClub: {
-        id: 'club-valhalla',
-        name: '발할라 파이낸스 길드',
-        ownedStrongholds: ['stronghold-central-bank'],
-        accumulatedTaxPoolWld: 4200000,
-        unclaimedTaxWld: 1250000,
-        warfareScoreRank: 1,
-      },
-    };
+    requireUserId(req);
+    throw new ServiceUnavailableException(WARFARE_UNAVAILABLE);
   }
 
-  @ApiOperation({ summary: '요새 공성전 선전포고 (보증금 결제)' })
+  @ApiOperation({ summary: '공성전 선전포고 — 원장 연동 전 비활성화' })
   @Post('declare')
-  async declareWar(
-    @Req() req: RequestWithSession,
-    @Body() dto: DeclareWarDto,
-  ) {
-    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
+  @Header('Cache-Control', 'no-store')
+  async declareWar(@Req() _req: RequestWithSession, @Body() _dto: DeclareWarDto) {
+    throw new ServiceUnavailableException(WARFARE_UNAVAILABLE);
   }
 
-  @ApiOperation({ summary: '공성전 실시간 타격 및 방어벽 공략 (전투력 투입)' })
+  @ApiOperation({ summary: '공성전 공격 — 원장 연동 전 비활성화' })
   @Post(':id/attack')
+  @Header('Cache-Control', 'no-store')
   async attackStronghold(
-    @Req() req: RequestWithSession,
-    @Param('id') strongholdId: string,
-    @Body() dto: AttackStrongholdDto,
+    @Req() _req: RequestWithSession,
+    @Param('id') _strongholdId: string,
+    @Body() _dto: AttackStrongholdDto,
   ) {
-    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
+    throw new ServiceUnavailableException(WARFARE_UNAVAILABLE);
   }
 
-  @ApiOperation({ summary: '점령 요새 누적 통행세/거래세 배당금 수령' })
+  @ApiOperation({ summary: '길드 세금 배당 — 원장 연동 전 비활성화' })
   @Post('claim-tax')
-  async claimStrongholdTax(
-    @Req() req: RequestWithSession,
-    @Body() dto: ClaimStrongholdTaxDto,
-  ) {
-    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
+  @Header('Cache-Control', 'no-store')
+  async claimStrongholdTax(@Req() _req: RequestWithSession, @Body() _dto: ClaimStrongholdTaxDto) {
+    throw new ServiceUnavailableException(WARFARE_UNAVAILABLE);
   }
 }
