@@ -1,5 +1,13 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.29.1211 — Isolated integration review and release hold
+- [EN worklog](docs/worklog/2026-10-29-branch-integration-v1211.md) / [KO](docs/worklog/2026-10-29-branch-integration-v1211.ko.md); [draft PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). PR #1813 staged, unsafe legacy blog publisher restored to fail-closed, frontend 1,910 PASS; official Test/Main/Production not promoted because financial and release gates remain blocked.
+
+
+## v2026.10.29.1205 — Ledger discrepancy evidence-driven workflow
+- [English investigation and repair policy](docs/worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md) / [한국어](docs/worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md). Correct debit-positive accounting reveals 18×1,000 WLD historical cash-account differences, not the prior polarity-flipped 24-account report. Migration 294 creates evidence cases in isolated Test only, no money corrections or financial-grant changes.
+
+
 ## v2026.10.29.1204 — Full database construction and reconstruction procedure
 - [English step-by-step construction runbook](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [한국어 실제 DB 구축 절차](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). Source snapshot, second-disk PostgreSQL, ACL-preserving restore, migrations 292/293, structural/ledger acceptance, and unperformed Production cutover are explicitly separated.
 
