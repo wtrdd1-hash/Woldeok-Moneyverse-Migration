@@ -23,6 +23,7 @@ describe('member support status filter web flow', () => {
     expect(markup).toContain('name="status"');
     expect(markup).toContain('status=resolved');
     expect(markup).toContain('own-resolved');
+    expect(markup).toContain('최근 100건');
   });
 
   it('does not fetch messages for a thread excluded by the active status filter', async () => {

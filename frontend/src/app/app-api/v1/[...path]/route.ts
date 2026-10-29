@@ -197,9 +197,9 @@ async function handle(request: NextRequest, context: Context) {
   const response = await proxy(request, parts);
   // Help publication metadata and member-scoped reads must not inherit a
   // cacheable upstream policy, including when the upstream returns an error.
-  if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work') response.headers.set('x-robots-tag', 'noindex');
+    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support') response.headers.set('x-robots-tag', 'noindex');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

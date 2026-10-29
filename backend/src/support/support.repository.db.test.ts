@@ -46,6 +46,9 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('member support receipts in real Postgre
       expect((await repo.addMessage(owner, replyKey, threadId, '두 번째 답장'))?.message_id).toBe(reply?.message_id);
       expect((await repo.messages(owner, threadId)).some((row) => row.message_id === reply?.message_id && row.body === '두 번째 답장')).toBe(true);
       expect((await repo.myThreads(stranger)).some((row) => row.thread_id === threadId)).toBe(false);
+      expect((await repo.myThreads(owner, 'open')).some((row) => row.thread_id === threadId)).toBe(true);
+      expect((await repo.myThreads(owner, 'resolved')).some((row) => row.thread_id === threadId)).toBe(false);
+      expect((await repo.myThreads(stranger, 'open')).some((row) => row.thread_id === threadId)).toBe(false);
 
       await client.query('SAVEPOINT denied_read');
       const refused = await rejectionOf(() => repo.messages(stranger, threadId));

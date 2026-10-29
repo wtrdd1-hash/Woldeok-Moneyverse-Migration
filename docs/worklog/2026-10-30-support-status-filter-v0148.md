@@ -8,9 +8,14 @@
 - Release preconditions: full lint, typecheck, build, tests, real isolated PostgreSQL, exact SHA CI, official Test authenticated E2E, independent backup restore and finance/ACL gates. Known main lint errors 3 and financial release blockers are not waived.
 
 ## In progress
-- [ ] Backend status validation, read-only privacy headers and existing owner SQL contract.
-- [ ] Web bounded-results disclosure, Android gateway privacy policy and regression tests.
+- [x] Backend status validation, read-only privacy headers and existing owner SQL contract.
+- [x] Web bounded-results disclosure, Android gateway privacy policy and regression tests.
 - [ ] Mid-run main/plan/PR recheck, exact SHA gates and isolated PostgreSQL.
+
+### Checkpoint — 2026-10-30 01:53 KST
+- TDD RED: Backend status filter 2 FAIL/1 PASS; Android/web target 2 FAIL/39 PASS. Existing frontend status filter had no truthful 100-recent disclosure.
+- TDD GREEN: Backend 3 PASS; Android/web 41 PASS. Changed ESLint 0 errors (one pre-existing test warning). No migration, ledger, idempotency or live database mutation.
+- Mid-run remote main unchanged at `62c6cd038951d65c94b709302bdaec6e75b080b6`; both planning languages rechecked.
 
 ## Finished
 - Pending. No main merge, Test/Production deploy, DB mutation, rollback or branch deletion.
