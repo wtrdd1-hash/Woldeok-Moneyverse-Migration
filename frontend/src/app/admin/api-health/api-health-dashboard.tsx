@@ -13,14 +13,13 @@ import {
   HardDrive,
   CloudUpload,
   Clock,
-  Play,
-  Check,
   AlertCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import type { BackupEvidence } from './backup-evidence';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -61,26 +60,6 @@ export interface ApiHealthResponse {
   readonly domains: readonly DomainHealthData[];
 }
 
-export interface BackupFileInfo {
-  readonly fileName: string;
-  readonly sizeBytes: number;
-  readonly sizeMb: number;
-  readonly createdAt: string;
-  readonly status: 'VERIFIED' | 'PENDING';
-}
-
-export interface BackupStatusResponse {
-  readonly backupDir: string;
-  readonly r2Configured: boolean;
-  readonly r2Bucket: string;
-  readonly retentionDays: number;
-  readonly totalBackups: number;
-  readonly totalSizeBytes: number;
-  readonly totalSizeMb: number;
-  readonly files: readonly BackupFileInfo[];
-  readonly lastBackupAt: string | null;
-}
-
 interface ApiHealthDashboardProps {
   readonly initialData: ApiHealthResponse | null;
   readonly isEn: boolean;
@@ -88,11 +67,9 @@ interface ApiHealthDashboardProps {
 
 export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProps) {
   const [data, setData] = useState<ApiHealthResponse | null>(initialData);
-  const [backupData, setBackupData] = useState<BackupStatusResponse | null>(null);
+  const [backupData, setBackupData] = useState<BackupEvidence | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isTriggeringBackup, setIsTriggeringBackup] = useState(false);
-  const [backupFeedback, setBackupFeedback] = useState<string | null>(null);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(initialData ? new Date(initialData.serverTime) : null);
 
   const fetchTelemetry = useCallback(async () => {
@@ -115,14 +92,11 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
 
   const fetchBackupStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/v1/admin/backups');
-      if (res.ok) {
-        const json: BackupStatusResponse = await res.json();
-        setBackupData(json);
-      }
-    } catch {
-      // Ignored
-    }
+      const res = await fetch('/api/admin/api-health/backup-inventory', { cache: 'no-store' });
+      if (!res.ok) { setBackupData(null); return; }
+      const json: BackupEvidence = await res.json();
+      setBackupData(json.source === 'LOCAL_FILES_UNVERIFIED' ? json : null);
+    } catch { setBackupData(null); }
   }, []);
 
   useEffect(() => {
@@ -137,30 +111,6 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
     }, 10000);
     return () => clearInterval(interval);
   }, [autoRefresh, fetchTelemetry, fetchBackupStatus]);
-
-  const handleManualBackup = async () => {
-    setIsTriggeringBackup(true);
-    setBackupFeedback(null);
-    try {
-      const res = await fetch('/api/v1/admin/backups/trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        setBackupFeedback(isEn ? 'Backup triggered in background!' : '백업 파이프라인이 즉시 백그라운드에서 가동되었습니다!');
-        setTimeout(() => {
-          fetchBackupStatus();
-        }, 3000);
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        setBackupFeedback(errJson.message || (isEn ? 'Backup trigger failed' : '백업 실행 요청 실패'));
-      }
-    } catch {
-      setBackupFeedback(isEn ? 'Backup request error' : '백업 요청 통신 에러');
-    } finally {
-      setIsTriggeringBackup(false);
-    }
-  };
 
   const domains = data?.domains ?? [];
   const totalEndpoints = data?.totalEndpoints ?? domains.reduce((acc, d) => acc + d.endpointCount, 0);
@@ -347,80 +297,42 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         </div>
       )}
 
-      {/* Cloudflare R2 DR Backup Card */}
+      {/* Local filesystem inventory is not remote or restore evidence. */}
       <Card className="border-border/80 bg-card/60">
         <CardHeader className="p-4 pb-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <CloudUpload className="size-4 text-sky-500" />
-                <span>{isEn ? 'Cloudflare R2 Free Cloud Automated Backup' : 'Cloudflare R2 무료 클라우드 자동 백업 DR'}</span>
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                {isEn
-                  ? 'Zero-cost disaster recovery pipeline. Daily 04:00 AM snapshot with 30-day retention.'
-                  : 'Cloudflare R2 10GB 무료 티어 및 영구 무과금($0 Egress) 재해 복구 파이프라인 (매일 04:00 자동 스냅샷 / 30일 보관).'}
-              </CardDescription>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleManualBackup}
-              disabled={isTriggeringBackup}
-              className="text-xs h-8 gap-1.5 border-sky-500/40 text-sky-600 hover:bg-sky-500/10"
-            >
-              <Play className="size-3" />
-              <span>{isTriggeringBackup ? (isEn ? 'Triggering...' : '트리거 중...') : (isEn ? 'Trigger Backup Now' : '즉시 백업 실행')}</span>
-            </Button>
-          </div>
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <CloudUpload className="size-4 text-amber-500" />
+            {isEn ? 'Backup inventory — unverified' : '백업 파일 목록 — 검증되지 않음'}
+          </CardTitle>
+          <CardDescription>
+            {isEn ? 'Local files only. Remote copy, checksum, restore test and scheduled retention are not verified. Manual backup is unavailable.'
+              : '로컬 파일 존재만 조회합니다. 원격 복제·체크섬·복원 시험·보관 정책은 검증되지 않았으며 수동 백업 실행은 보류합니다.'}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 pt-1 space-y-3">
-          {backupFeedback && (
-            <div className="p-2.5 rounded-md bg-sky-500/10 border border-sky-500/30 text-xs text-sky-600 dark:text-sky-400 flex items-center gap-2">
-              <Check className="size-3.5" />
-              <span>{backupFeedback}</span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="text-muted-foreground text-[11px]">R2 버킷</div>
-              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Bucket || 'moneyverse-backup'}</div>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="text-muted-foreground text-[11px]">보관 주기</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.retentionDays || 30}일 롤링</div>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="text-muted-foreground text-[11px]">총 백업본 개수</div>
-              <div className="font-mono font-bold mt-0.5">{backupData?.totalBackups ?? 0}개 스냅샷</div>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="text-muted-foreground text-[11px]">총 보관 용량</div>
-              <div className="font-mono font-bold mt-0.5 text-sky-500">{backupData?.totalSizeMb ?? 0} MB</div>
-            </div>
-          </div>
-
-          {backupData?.files && backupData.files.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="text-xs font-semibold text-muted-foreground">
-                {isEn ? 'Recent Backup Snapshots' : '최근 스냅샷 목록 (검증 완료)'}
-              </div>
-              <div className="divide-y divide-border/40 rounded-lg border border-border/60 bg-background/50 overflow-hidden text-xs">
-                {backupData.files.slice(0, 3).map((f) => (
-                  <div key={f.fileName} className="p-2.5 flex items-center justify-between gap-2 font-mono">
-                    <div className="flex items-center gap-2 truncate">
-                      <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-                      <span className="truncate">{f.fileName}</span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0 text-muted-foreground">
-                      <span className="font-bold text-foreground">{f.sizeMb} MB</span>
-                      <span>{new Date(f.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+        <CardContent className="space-y-3 p-4 pt-1" aria-live="polite">
+          {backupData === null ? (
+            <p role="status" className="text-sm text-amber-600">
+              {isEn ? 'Backup inventory unavailable; no backup status can be confirmed.' : '백업 목록을 확인할 수 없습니다. 백업 상태를 판단할 수 없습니다.'}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm font-medium">
+                {isEn ? `Local files observed: ${backupData.totalBackups} (not verified)` : `관측된 로컬 파일 ${backupData.totalBackups}개 (무결성 미검증)`}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isEn ? 'Remote backup verified: No · Restore verified: No' : '원격 백업 검증: 미완료 · 복원 검증: 미완료'}
+              </p>
+              {backupData.files.length > 0 && (
+                <ul className="space-y-2 text-xs" aria-label={isEn ? 'Unverified local backup files' : '미검증 로컬 백업 파일'}>
+                  {backupData.files.slice(0, 3).map((file) => (
+                    <li key={file.fileName} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
+                      <span className="break-all font-mono">{file.fileName}</span>
+                      <span>{Math.round(file.sizeBytes / 1024)} KiB · {isEn ? 'UNVERIFIED' : '미검증'}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
