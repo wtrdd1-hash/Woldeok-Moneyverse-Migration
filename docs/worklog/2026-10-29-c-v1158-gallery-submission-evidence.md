@@ -20,3 +20,4 @@
 - Security advisory floor: 9 PASS; app-api artifact check PASS. Production dependency audit FAIL (1 moderate, qs); full dependency audit FAIL (3 low + 9 moderate).
 - Official Test and Production `/api/version` both b44ffd0af9e2bd6e7c2be7345b72094827078c3d, not this candidate. Official exact-SHA authenticated E2E BLOCKED. No main merge, Test deploy, GitOps change, Production promotion, rollback or branch deletion.
 - The final code SHA CI and Build Test Candidate are pending; report their actual terminal states in PR #1851, not as inferred PASS. Preserve draft PR and worktree. Five core schedules were not modified.
+- 2026-10-29 15:05 KST main advanced to `679cb5904f779a1b2067f10809fcca83e31dbe91` (owner-approved SWF/central-bank v1502). Rebased all three commits without conflicts. No gallery overlap; focused 12 PASS on rebased source. Previous CI candidates are obsolete; fresh exact-SHA CI and Test Candidate required.

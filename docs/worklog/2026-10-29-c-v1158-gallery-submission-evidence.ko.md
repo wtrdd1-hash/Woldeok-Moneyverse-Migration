@@ -20,3 +20,4 @@
 - 공식 Test/Production 실행 SHA b44ffd0a는 개발 SHA와 다름. 인증·API·DB 회원 흐름 공식 exact-SHA E2E BLOCKED.
 - main 병합·공식 Test/운영배포·GitOps·롤백·브랜치 삭제 없음. PR #1851 Draft/HOLD 보존. 핵심 예약 5개 설정 미변경.
 - 최종 GitHub CI 및 후보 빌드의 종료 상태는 PR 댓글에 별도 기록.
+- 2026-10-29 15:05 KST main `679cb5904f779a1b2067f10809fcca83e31dbe91`(SWF/중앙은행 v1502)로 변경되어 전체 커밋을 충돌 없이 rebase. 갤러리 파일과 충돌 없음. 집중 테스트 12건 재통과. 이전 SHA CI는 무효, 새 정확 SHA 검증 필요.
