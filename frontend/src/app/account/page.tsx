@@ -34,6 +34,8 @@ import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
 import { canUnlinkOAuthIdentity, isLinkableOAuthProvider } from './identity-provider';
+import { accountLinkedNotice, accountReauthNotice } from './account-verification-notices';
+import { parseLinkedIdentities } from './security/account-security-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,13 +98,18 @@ export default async function AccountPage({
   await requireMember();
   const { linked, reauth } = await searchParams;
 
-  const [identityData, providerData, profileData] = await Promise.all([
+  const [identityData, providerData, profileData, reauthData] = await Promise.all([
     apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
     apiOrNull<{ providers: { id: string; enabled: boolean }[] }>('/api/v1/auth/providers'),
     apiOrNull<OwnProfileResponse>('/api/v1/profile'),
+    reauth === 'done' ? apiOrNull<unknown>('/api/v1/account/security/sessions') : Promise.resolve(null),
   ]);
 
-  const identities = identityData?.identities ?? [];
+  const verifiedIdentities = parseLinkedIdentities(identityData);
+  const identities = verifiedIdentities ?? [];
+  const hasVerifiedLoginMethod = verifiedIdentities !== null && identities.length > 0;
+  const linkedNotice = accountLinkedNotice(linked, identityData);
+  const reauthNotice = accountReauthNotice(reauth, reauthData, Date.now());
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
   const available = (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
@@ -141,9 +148,9 @@ export default async function AccountPage({
       <div className="flex flex-col gap-3 border-b border-border/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              <ShieldCheck className="size-3.5 shrink-0" />
-              보안 인증 계정
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${hasVerifiedLoginMethod ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+              {hasVerifiedLoginMethod ? <ShieldCheck className="size-3.5 shrink-0" /> : <ShieldAlert className="size-3.5 shrink-0" />}
+              {hasVerifiedLoginMethod ? '로그인 수단 확인됨' : '로그인 수단 확인 불가'}
             </span>
             {userTitle && (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-500">
@@ -176,20 +183,37 @@ export default async function AccountPage({
       </div>
 
       {/* Status Alerts */}
-      {reauth === 'done' && (
+      {reauthNotice === 'confirmed' && (
         <Alert className="border-primary/30 bg-primary/5 rounded-2xl">
           <ShieldCheck className="size-4 text-primary shrink-0" />
           <AlertDescription className="text-xs font-medium">
-            본인 확인이 완료되었습니다. 15분간 중요한 계정 설정을 변경할 수 있습니다.
+            현재 로그인 세션에서 최근 본인 확인 상태를 확인했습니다. 중요한 계정 설정을 변경할 수 있습니다.
           </AlertDescription>
         </Alert>
       )}
 
-      {linked && PROVIDER_NAME[linked] && (
+      {linkedNotice === 'confirmed' && linked && PROVIDER_NAME[linked] && (
         <Alert className="border-emerald-500/30 bg-emerald-500/5 rounded-2xl">
           <UserCheck className="size-4 text-emerald-500 shrink-0" />
           <AlertDescription className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            {PROVIDER_NAME[linked]} 계정이 안전하게 연결되었습니다.
+            {PROVIDER_NAME[linked]} 로그인 수단이 현재 계정에 연결된 것을 확인했습니다.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {reauthNotice === 'unverified' && (
+        <Alert className="border-amber-500/40 bg-amber-500/5">
+          <ShieldAlert className="size-4 text-amber-600" />
+          <AlertDescription role="status" aria-live="polite" className="text-xs font-medium">
+            본인 확인 상태를 확인할 수 없습니다. 보안 설정에서 현재 세션을 확인하거나 다시 인증해 주세요.
+          </AlertDescription>
+        </Alert>
+      )}
+      {linkedNotice === 'unverified' && (
+        <Alert className="border-amber-500/40 bg-amber-500/5">
+          <ShieldAlert className="size-4 text-amber-600" />
+          <AlertDescription role="status" aria-live="polite" className="text-xs font-medium">
+            연결 상태를 확인할 수 없습니다. 연결된 로그인 수단 목록을 다시 확인해 주세요.
           </AlertDescription>
         </Alert>
       )}
@@ -209,10 +233,10 @@ export default async function AccountPage({
                   className="size-20 shadow-md ring-2 ring-border/80"
                 />
                 <div
-                  title="보안 인증 완료"
-                  className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-background"
+                  title={hasVerifiedLoginMethod ? '로그인 수단 확인됨' : '로그인 수단 확인 불가'}
+                  className={`absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full shadow-md ring-2 ring-background ${hasVerifiedLoginMethod ? 'bg-emerald-500 text-white' : 'bg-muted text-muted-foreground'}`}
                 >
-                  <ShieldCheck className="size-3.5 shrink-0" />
+                  {hasVerifiedLoginMethod ? <ShieldCheck className="size-3.5 shrink-0" /> : <ShieldAlert className="size-3.5 shrink-0" />}
                 </div>
               </div>
 
@@ -227,14 +251,14 @@ export default async function AccountPage({
                   </p>
                 )}
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {userJobType ? `${jobLabel(userJobType)} (Lv.${userJobLevel})` : '인증된 커뮤니티 계정'}
+                  {userJobType ? `${jobLabel(userJobType)} (Lv.${userJobLevel})` : '커뮤니티 계정'}
                 </p>
               </div>
 
               {/* Badges & Connected Status */}
               <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-2">
                 <Badge variant="secondary" className="rounded-lg text-[11px] font-semibold">
-                  연결 수단 {identities.length}개
+                  {verifiedIdentities === null ? '연결 수단 확인 불가' : `연결 수단 ${identities.length}개`}
                 </Badge>
                 {joinedDate && (
                   <Badge variant="outline" className="rounded-lg text-[11px] font-medium border-border/80 text-muted-foreground">
@@ -247,11 +271,13 @@ export default async function AccountPage({
               <div className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span className="text-muted-foreground">계정 보안 완성도</span>
-                  <span className="font-mono tabular-nums font-bold text-primary">{securityScore}%</span>
+                  <span className="font-mono tabular-nums font-bold text-primary">{hasVerifiedLoginMethod ? `${securityScore}%` : '확인 불가'}</span>
                 </div>
-                <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />
+                {hasVerifiedLoginMethod && <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />}
                 <p className="mt-1.5 text-[10px] text-muted-foreground">
-                  {securityScore >= 90
+                  {!hasVerifiedLoginMethod
+                    ? '로그인 수단을 확인하지 못해 보안 완성도를 표시할 수 없습니다.'
+                    : securityScore >= 90
                     ? '🛡️ 최고 등급 보안 보호 상태입니다.'
                     : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
                 </p>
@@ -346,12 +372,12 @@ export default async function AccountPage({
                   </CardDescription>
                 </div>
                 <Badge variant="secondary" className="text-xs font-bold px-2.5 py-0.5 rounded-lg shrink-0">
-                  {identities.length}개 활성
+                  {verifiedIdentities === null ? '확인 불가' : `${identities.length}개 활성`}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              {identityData === null ? (
+              {verifiedIdentities === null ? (
                 <EmptyState
                   title="연결된 로그인 수단을 불러올 수 없어요."
                   description="페이지를 새로고침하거나 잠시 후 다시 시도해 주세요."
