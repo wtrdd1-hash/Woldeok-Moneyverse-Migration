@@ -48,32 +48,27 @@ describe('linked identity read contract', () => {
   });
 });
 
-describe('account deletion database receipt contract', () => {
-  it('exposes the authoritative deletion timestamp, session count and replay flag', async () => {
-    const repository = {
+describe('unlink receipt and owner readback contract', () => {
+  it('returns the database identity ID and exposes the remaining owner sign-in methods', async () => {
+    const remainingId = '00000000-0000-4000-8000-000000000002';
+    let identities: LinkedIdentityRow[] = [
+      { identity_id: identityId, provider: 'google', display_name: 'Google member', linked_at: linkedAt },
+      { identity_id: remainingId, provider: 'local_email', display_name: 'Local member', linked_at: linkedAt },
+    ];
+    const service = new AccountService({
       ...fakeRepository([]),
-      softDelete: async () => ({
-        deleted_at: new Date('2026-10-29T04:00:00.000Z'),
-        revoked_session_count: 3,
-        replayed: false,
-      }),
-    } satisfies AccountRepository;
-    await expect(new AccountService(repository).softDeleteAccount(actor)).resolves.toEqual({
-      deletedAt: '2026-10-29T04:00:00.000Z',
-      revokedSessionCount: 3,
-      replayed: false,
+      linkedIdentities: async () => identities,
+      unlinkIdentity: async ({ actorUserId, identityId: requestedId }) => {
+        expect(actorUserId).toBe(actor);
+        expect(requestedId).toBe(identityId);
+        identities = identities.filter((entry) => entry.identity_id !== requestedId);
+        return { identity_id: identityId };
+      },
     });
-  });
-
-  it('refuses a missing database replay flag rather than fabricating deletion', async () => {
-    const repository = {
-      ...fakeRepository([]),
-      softDelete: async () => ({
-        deleted_at: new Date('2026-10-29T04:00:00.000Z'),
-        revoked_session_count: 0,
-        replayed: undefined as unknown as boolean,
-      }),
-    } satisfies AccountRepository;
-    await expect(new AccountService(repository).softDeleteAccount(actor)).rejects.toThrow('invalid account-deletion receipt');
+    await expect(service.unlinkIdentity(actor, { identityId })).resolves.toEqual({ identityId });
+    await expect(service.linkedIdentities(actor)).resolves.toEqual([{
+      identityId: remainingId, provider: 'local_email',
+      displayName: 'Local member', linkedAt: linkedAt.toISOString(),
+    }]);
   });
 });
