@@ -23,6 +23,23 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+
+  it('forwards approved help category counts with locale and never caches public Android responses', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      locale: 'en', categories: ['account', 'wallet', 'shop', 'community', 'support'],
+      counts: { account: '9007199254740993', wallet: '0', shop: '0', community: '0', support: '0' },
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/help/categories?locale=en'), context('help', 'categories'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/help/categories');
+    expect(target.searchParams.get('locale')).toBe('en');
+    expect(await response.json()).toMatchObject({ locale: 'en', counts: { account: '9007199254740993' } });
+  });
+
   it('passes owner session through Android Golden Duck status and preserves no-store', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({
