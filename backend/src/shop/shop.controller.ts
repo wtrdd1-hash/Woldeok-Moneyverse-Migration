@@ -31,6 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+import { filterCatalogByStock } from './shop-stock-filter';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -39,24 +40,13 @@ interface SearchableShopItem {
   readonly category?: unknown;
 }
 
-export function parseShopCategory(value: unknown): string | null {
-  if (value === undefined || value === '') return null;
-  // A category is a database enum-like token, not a user-supplied search expression.
-  if (typeof value !== 'string' || !/^[a-z][a-z0-9_]{0,39}$/.test(value)) {
-    throw new BadRequestException('invalid shop category');
-  }
-  return value;
-}
-
-export function filterShopItems<T extends SearchableShopItem>(
-  items: readonly T[], query?: string, category?: string | null,
-): T[] {
+function filterShopItems<T extends SearchableShopItem>(items: readonly T[], query?: string): T[] {
   const needle = query?.trim().toLocaleLowerCase('ko-KR') ?? '';
+  if (!needle) return [...items];
   return items.filter((item) =>
-    (!category || item.category === category) &&
-    (!needle || [item.code, item.name, item.description, item.category]
+    [item.code, item.name, item.description, item.category]
       .filter((value): value is string => typeof value === 'string')
-      .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle))),
+      .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle)),
   );
 }
 
@@ -133,32 +123,28 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'Public catalogue with optional q and exact category filters' })
-  async publicCatalog(@Query('q') query?: string, @Query('category') category?: string) {
-    const selectedCategory = parseShopCategory(category);
+  @ApiOperation({ summary: 'The public catalogue; optional q and stock=available' })
+  async publicCatalog(@Query('q') query?: string, @Query('stock') stock?: string) {
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return {
-      catalogItems: filterShopItems(catalogItems, query, selectedCategory),
-      categories: [...new Set(catalogItems.map((item) => item.category))],
-    };
+    return { catalogItems: filterCatalogByStock(filterShopItems(catalogItems, query), stock) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'Member catalogue with optional q and exact category filters' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string, @Query('category') category?: string) {
-    const selectedCategory = parseShopCategory(category);
+  @ApiOperation({ summary: 'The member catalogue; optional q and stock=available' })
+  async catalog(
+    @Req() request: RequestWithSession,
+    @Query('q') query?: string,
+    @Query('stock') stock?: string,
+  ) {
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return {
-      catalogItems: filterShopItems(catalogItems, query, selectedCategory),
-      categories: [...new Set(catalogItems.map((item) => item.category))],
-    };
+    return { catalogItems: filterCatalogByStock(filterShopItems(catalogItems, query), stock) };
   }
 
   @Get('holdings')

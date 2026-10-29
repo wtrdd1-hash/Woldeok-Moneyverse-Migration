@@ -11,12 +11,14 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
+import { shopCatalogQuery, shopStockFilter } from './shop-stock';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'WLD 아이템 상점',
-  description: '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
+  description:
+    '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
   alternates: { canonical: canonicalUrl('/shop') },
 };
 
@@ -28,14 +30,15 @@ const PRINCIPLES = [
 ];
 
 interface ShopPageProps {
-  readonly searchParams: Promise<{ q?: string }>;
+  readonly searchParams: Promise<{ q?: string; stock?: string }>;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
-  const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
+  const stock = shopStockFilter(params.stock);
+  const querySuffix = shopCatalogQuery(query, stock);
 
   const [catalogData, walletData, profileData] = await Promise.all([
     loggedIn
@@ -60,7 +63,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const isPlusMember = Boolean(vipPassItem && vipPassItem.user_owned_quantity > 0);
 
   return (
-    <div data-page="shop" className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full">
+    <div
+      data-page="shop"
+      className="mv-page mv-page--gameplay grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16 w-full max-w-full"
+    >
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           eyebrow="WOLDEOK MARKET · STORE 2.0"
@@ -80,7 +86,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
+        <form
+          action="/shop"
+          method="get"
+          className="flex min-w-0 w-full max-w-2xl gap-2 flex-wrap"
+          role="search"
+        >
           <input
             type="search"
             name="q"
@@ -89,10 +100,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             aria-label="상점 검색"
             className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
+          <label className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs">
+            <input
+              type="checkbox"
+              name="stock"
+              value="available"
+              defaultChecked={stock === 'available'}
+              className="size-4 accent-amber-500"
+            />
+            <T korean="재고 있음" english="In stock" />
+          </label>
           <Button type="submit">
             <T korean="검색" english="Search" />
           </Button>
-          {query ? (
+          {query || stock === 'available' ? (
             <Button asChild type="button" variant="outline">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
@@ -100,9 +121,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Button>
           ) : null}
         </form>
-        {query ? (
-          <p className="text-sm text-muted-foreground">
-            “{query}” 검색 결과 {items.length}개
+        {query || stock === 'available' ? (
+          <p className="text-sm text-muted-foreground" role="status">
+            {stock === 'available' ? '재고 있는 상품 · ' : ''}
+            {query ? `“${query}” · ` : ''}검색 결과 {items.length}개
           </p>
         ) : null}
 
