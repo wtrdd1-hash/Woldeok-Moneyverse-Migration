@@ -66,8 +66,13 @@ describe('independent AI originality and locale gate',()=>{
 
 describe('short bounded local prose sections with authoritative metadata', () => {
   it('builds an independently checked article from short native-language sections', async()=>{
-    const chunk=nativeBody[slot.country].repeat(8);
+    let section=0;
     const client=vi.fn().mockImplementation(async (_endpoint:string,opts:RequestInit)=>{
+      section++;
+      const base=nativeBody[slot.country].trim().replace(/[.!?。]$/,'');
+      const chunk=Array.from({length:8},(_,example)=>
+        base+' in a distinct conceptual explanation about topic '+section+
+        ' with an illustrative reasoning point '+(example+1)+'.').join(' ');
       const request=JSON.parse(String(opts.body));
       expect(request.stream).toBe(false);
       expect(request.options.num_predict).toBeLessThanOrEqual(500);
