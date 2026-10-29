@@ -7,6 +7,7 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 
 export interface BackupFileInfo {
   readonly fileName: string;
@@ -30,29 +31,23 @@ export interface BackupStatusResponse {
 
 @ApiTags('admin')
 @Controller('admin/backups')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class AdminBackupController {
   private getBackupDir(): string {
+    // Inventory reads must never create backup directories or silently report
+    // zero snapshots when the expected directory is missing.
     const defaultProd = '/srv/moneyverse-data/backups/daily';
-    if (fs.existsSync(defaultProd)) {
-      return defaultProd;
-    }
+    if (fs.existsSync(defaultProd)) return defaultProd;
     const localFallback = path.resolve(process.cwd(), 'backups/daily');
-    if (!fs.existsSync(localFallback)) {
-      try {
-        fs.mkdirSync(localFallback, { recursive: true });
-      } catch {
-        // Ignored if cannot create
-      }
-    }
-    return localFallback;
+    if (fs.existsSync(localFallback)) return localFallback;
+    throw new ServiceUnavailableException('backup inventory directory unavailable');
   }
 
   @Get()
   @ApiOperation({ summary: 'Get list of automated and manual database backups and R2 storage status' })
   async getBackupStatus(): Promise<BackupStatusResponse> {
     const backupDir = this.getBackupDir();
-    const r2Bucket = process.env.R2_BUCKET || 'moneyverse-backup';
+    const r2Bucket = process.env.R2_BUCKET || '';
     const r2Configured = Boolean(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
 
     let files: BackupFileInfo[] = [];
@@ -71,13 +66,13 @@ export class AdminBackupController {
               sizeBytes: stat.size,
               sizeMb: Math.round((stat.size / (1024 * 1024)) * 100) / 100,
               createdAt: stat.mtime.toISOString(),
-              status: 'PENDING' as const,
+              status: 'PENDING' as const, // File presence is not an integrity or restore proof.
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
-    } catch (err) {
-      // Fallback empty
+    } catch {
+      throw new ServiceUnavailableException('backup inventory cannot be read');
     }
 
     return {
@@ -94,9 +89,13 @@ export class AdminBackupController {
   }
 
   @Post('trigger')
-  @ApiOperation({ summary: 'Manual backup disabled until verified job receipts and restore checks exist' })
+  @ApiOperation({ summary: 'Manual backup disabled pending independently verified safe restore and capacity' })
   async triggerBackup(): Promise<never> {
-    // A detached child PID is not a completed, durable or restorable backup receipt.
-    throw new ServiceUnavailableException('Verified backup execution is not available');
+    // Do not spawn the legacy detached script. It does not provide a durable
+    // backup/restore receipt, safe free-space preflight or operator approval.
+    throw new ServiceUnavailableException({
+      code: 'BACKUP_RESTORE_PROOF_REQUIRED',
+      message: 'Manual backup is disabled until isolated restore and disk-safety gates pass',
+    });
   }
 }

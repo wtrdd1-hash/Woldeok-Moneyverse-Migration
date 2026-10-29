@@ -19,7 +19,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import type { BackupEvidence } from './backup-evidence';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -60,6 +59,26 @@ export interface ApiHealthResponse {
   readonly domains: readonly DomainHealthData[];
 }
 
+export interface BackupFileInfo {
+  readonly fileName: string;
+  readonly sizeBytes: number;
+  readonly sizeMb: number;
+  readonly createdAt: string;
+  readonly status: 'VERIFIED' | 'PENDING';
+}
+
+export interface BackupStatusResponse {
+  readonly backupDir: string;
+  readonly r2Configured: boolean;
+  readonly r2Bucket: string;
+  readonly retentionDays: number;
+  readonly totalBackups: number;
+  readonly totalSizeBytes: number;
+  readonly totalSizeMb: number;
+  readonly files: readonly BackupFileInfo[];
+  readonly lastBackupAt: string | null;
+}
+
 interface ApiHealthDashboardProps {
   readonly initialData: ApiHealthResponse | null;
   readonly isEn: boolean;
@@ -67,7 +86,7 @@ interface ApiHealthDashboardProps {
 
 export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProps) {
   const [data, setData] = useState<ApiHealthResponse | null>(initialData);
-  const [backupData, setBackupData] = useState<BackupEvidence | null>(null);
+  const [backupData, setBackupData] = useState<BackupStatusResponse | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(initialData ? new Date(initialData.serverTime) : null);
@@ -93,10 +112,15 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
   const fetchBackupStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/api-health/backup-inventory', { cache: 'no-store' });
-      if (!res.ok) { setBackupData(null); return; }
-      const json: BackupEvidence = await res.json();
-      setBackupData(json.source === 'LOCAL_FILES_UNVERIFIED' ? json : null);
-    } catch { setBackupData(null); }
+      if (!res.ok) {
+        setBackupData(null);
+        return;
+      }
+      const json: BackupStatusResponse = await res.json();
+      setBackupData(json);
+    } catch {
+      setBackupData(null);
+    }
   }, []);
 
   useEffect(() => {
@@ -297,42 +321,76 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         </div>
       )}
 
-      {/* Local filesystem inventory is not remote or restore evidence. */}
+      {/* Cloudflare R2 DR Backup Card */}
       <Card className="border-border/80 bg-card/60">
         <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <CloudUpload className="size-4 text-amber-500" />
-            {isEn ? 'Backup inventory — unverified' : '백업 파일 목록 — 검증되지 않음'}
-          </CardTitle>
-          <CardDescription>
-            {isEn ? 'Local files only. Remote copy, checksum, restore test and scheduled retention are not verified. Manual backup is unavailable.'
-              : '로컬 파일 존재만 조회합니다. 원격 복제·체크섬·복원 시험·보관 정책은 검증되지 않았으며 수동 백업 실행은 보류합니다.'}
-          </CardDescription>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <CloudUpload className="size-4 text-sky-500" />
+                <span>{isEn ? 'Local backup file inventory (unverified)' : '로컬 백업 파일 후보 (복원 미검증)'}</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                {isEn
+                  ? 'Local file metadata only; R2 delivery, integrity and restore have not been verified.'
+                  : '로컬 파일 메타데이터만 조회합니다. R2 전송·무결성·격리 복원 성공을 증명하지 않습니다.'}
+              </CardDescription>
+            </div>
+            <span className="rounded-md border border-amber-500/40 px-3 py-2 text-xs text-amber-700 dark:text-amber-300" role="status">
+              {isEn ? 'Manual backup disabled — restore safety unverified' : '수동 백업 실행 중단 · 복원 안전성 미검증'}
+            </span>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-3 p-4 pt-1" aria-live="polite">
-          {backupData === null ? (
-            <p role="status" className="text-sm text-amber-600">
-              {isEn ? 'Backup inventory unavailable; no backup status can be confirmed.' : '백업 목록을 확인할 수 없습니다. 백업 상태를 판단할 수 없습니다.'}
+        <CardContent className="p-4 pt-1 space-y-3">
+          {backupData === null && (
+            <p role="alert" className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+              {isEn ? 'Backup status unavailable. Do not infer zero backups or successful restore.' : '백업 상태를 확인할 수 없습니다. 0건 또는 복원 성공으로 판단하지 마세요.'}
             </p>
-          ) : (
-            <>
-              <p className="text-sm font-medium">
-                {isEn ? `Local files observed: ${backupData.totalBackups} (not verified)` : `관측된 로컬 파일 ${backupData.totalBackups}개 (무결성 미검증)`}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {isEn ? 'Remote backup verified: No · Restore verified: No' : '원격 백업 검증: 미완료 · 복원 검증: 미완료'}
-              </p>
-              {backupData.files.length > 0 && (
-                <ul className="space-y-2 text-xs" aria-label={isEn ? 'Unverified local backup files' : '미검증 로컬 백업 파일'}>
-                  {backupData.files.slice(0, 3).map((file) => (
-                    <li key={file.fileName} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
-                      <span className="break-all font-mono">{file.fileName}</span>
-                      <span>{Math.round(file.sizeBytes / 1024)} KiB · {isEn ? 'UNVERIFIED' : '미검증'}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
+          )}
+          {backupData !== null && (
+            <p role="status" className="text-xs text-muted-foreground">
+              {isEn ? 'Local file inventory only — no verified recovery point or R2 receipt.' : '로컬 파일 후보 수만 확인됨 · 복구 지점/R2 수신 영수증 미검증'}
+            </p>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+              <div className="text-muted-foreground text-[11px]">R2 버킷</div>
+              <div className="font-mono font-bold mt-0.5 truncate">{backupData?.r2Bucket || '—'}</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+              <div className="text-muted-foreground text-[11px]">보관 주기</div>
+              <div className="font-mono font-bold mt-0.5">{backupData === null ? '—' : `${backupData.retentionDays}일 (설정)`}</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+              <div className="text-muted-foreground text-[11px]">총 백업본 개수</div>
+              <div className="font-mono font-bold mt-0.5">{backupData === null ? '—' : `${backupData.totalBackups}개 파일 후보`}</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+              <div className="text-muted-foreground text-[11px]">총 보관 용량</div>
+              <div className="font-mono font-bold mt-0.5 text-sky-500">{backupData === null ? '—' : `${backupData.totalSizeMb} MB`}</div>
+            </div>
+          </div>
+
+          {backupData?.files && backupData.files.length > 0 && (
+            <div className="space-y-1.5">
+              <div className="text-xs font-semibold text-muted-foreground">
+                {isEn ? 'Recent local file candidates (unverified)' : '최근 로컬 파일 후보 (검증 미완료)'}
+              </div>
+              <div className="divide-y divide-border/40 rounded-lg border border-border/60 bg-background/50 overflow-hidden text-xs">
+                {backupData.files.slice(0, 3).map((f) => (
+                  <div key={f.fileName} className="p-2.5 flex items-center justify-between gap-2 font-mono">
+                    <div className="flex items-center gap-2 truncate">
+                      <AlertCircle className="size-3.5 text-amber-500 shrink-0" />
+                      <span className="truncate">{f.fileName}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 text-muted-foreground">
+                      <span className="font-bold text-foreground">{f.sizeMb} MB</span>
+                      <span>{new Date(f.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
