@@ -1,5 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1452 — 가상주식 AI 뉴스 반복·편중 차단 (운영 후보)
+- [이슈 #1848](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1848): 치무전자 누적 204건 중 143건·동일 제목 138회 확인. 새 작업 브랜치에서 최근 7일 중복 제목 방지, 종목별 24시간 제한, 미보도 기업 우선, 실제 fallback 모델 기록 및 자동 발행 영속 멱등키 적용.
+- 기존 이벤트 삭제·원장/가격 직접 변경·DB 마이그레이션 없음. [작업기록](../worklog/2026-10-29-ai-news-repeat-guard-v1452.ko.md) 참조. 운영 완료는 동일 SHA 격리 Test·무중단 승격 검증 후에만 표기.
+
+
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

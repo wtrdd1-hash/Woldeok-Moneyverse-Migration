@@ -57,6 +57,7 @@ function fakeRepository(overrides: Partial<AiNewsRepository> = {}): AiNewsReposi
     context: vi.fn(async () => CONTEXT),
     createBatch: vi.fn(async () => ({ batch_id: '33333333-3333-4333-8333-333333333333', replayed: false })),
     latest: vi.fn(async () => null),
+    recentMarketEvents: vi.fn(async () => []),
     beginRun: vi.fn(async () => ({ run_id: '44444444-4444-4444-8444-444444444444', started: true })),
     finishRun: vi.fn(async () => true),
     latestRun: vi.fn(async () => null),
@@ -262,6 +263,136 @@ describe('registered-stock automatic scenarios', () => {
     });
     expect(caller).not.toHaveBeenCalled();
     expect(repository.createBatch).not.toHaveBeenCalled();
+  });
+});
+
+
+// One auto-published item is a price-moving market event, not just editorial content.
+function storedAutoScenario(symbol: 'MYUY' | 'DUCK', headline: string, ordinal = 1) {
+  const stockId = symbol === 'MYUY'
+    ? '66666666-6666-4666-8666-666666666666'
+    : '77777777-7777-4777-8777-777777777777';
+  return {
+    id: '55555555-5555-4555-8555-555555555555',
+    ordinal, stock_id: stockId, stock_symbol: symbol, stock_name: symbol,
+    direction: 'up' as const, strength: 1, hours: 6, headline,
+    body: 'Fictional market news.', rationale: 'Continuity.', status: 'proposed' as const,
+    published_event_id: null, decided_at: null,
+    effects: [{ stock_id: stockId, symbol, name: symbol,
+      direction: 'up' as const, strength: 1 }],
+  };
+}
+
+function storedAutoBatch(...scenarios: ReturnType<typeof storedAutoScenario>[]) {
+  return {
+    batch_id: '33333333-3333-4333-8333-333333333333',
+    created_at: new Date().toISOString(), operator_prompt: 'AUTO', model: 'test-model',
+    scenarios,
+  };
+}
+
+describe('automatic market-news publication safety', () => {
+  const runtime = { apiBaseUrl: 'http://127.0.0.1:11434/v1', model: 'llama3.2:3b', apiKey: '' };
+
+  it('never republishes a headline that moved any stock in the past seven days', async () => {
+    const headline = 'Recently published fictional product launch';
+    const repo = fakeRepository({
+      latest: vi.fn(async () => storedAutoBatch(storedAutoScenario('MYUY', headline))),
+      recentMarketEvents: vi.fn(async () => [{ symbol: 'MYUY', headline,
+        starts_at: new Date(Date.now() - 72 * 60 * 60 * 1000), source: 'ai' }]),
+    } as Partial<AiNewsRepository>);
+    const caller = vi.fn(async () => ({ scenarios: [proposal()] }));
+    const service = new AiNewsService(repo, null, caller);
+    const result = await service.autoGenerateAndPublish(ACTOR, runtime);
+    expect(result).toMatchObject({ published: false, reason: 'no_novel_candidate' });
+    expect(repo.publish).not.toHaveBeenCalled();
+  });
+
+  it('rotates to another eligible stock instead of repeating a recently covered one', async () => {
+    const repo = fakeRepository({
+      latest: vi.fn(async () => storedAutoBatch(
+        storedAutoScenario('MYUY', 'New MYUY story'),
+        storedAutoScenario('DUCK', 'Different DUCK story', 2))),
+      recentMarketEvents: vi.fn(async () => [{ symbol: 'MYUY', headline: 'Old MYUY story',
+        starts_at: new Date(Date.now() - 60 * 60 * 1000), source: 'ai' }]),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => ({ scenarios: [proposal()] })));
+    const result = await service.autoGenerateAndPublish(ACTOR, runtime);
+    expect(result).toMatchObject({ published: true, headline: 'Different DUCK story' });
+    expect(repo.publish).toHaveBeenCalledWith(expect.objectContaining({ headline: 'Different DUCK story' }));
+  });
+
+  it('labels a fallback accurately and may publish only a fresh candidate', async () => {
+    const repo = fakeRepository({
+      context: vi.fn(async () => ({ ...CONTEXT, stocks: [
+        { symbol: 'CHIMU314', price_change_pct: 25 }, { symbol: 'DUCK', price_change_pct: 2 },
+      ] })),
+      latest: vi.fn(async () => storedAutoBatch(storedAutoScenario('DUCK', 'Fallback draft'))),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => { throw new Error('model unavailable'); }));
+    const result = await service.autoGenerateAndPublish(ACTOR, runtime);
+    expect(result).toMatchObject({ published: true, engine: 'deterministic-financial-engine', fallbackReason: 'model_unavailable' });
+    expect(repo.createBatch).toHaveBeenCalledWith(expect.objectContaining({ model: 'deterministic-financial-engine' }));
+    expect(repo.publish).toHaveBeenCalledOnce();
+  });
+
+  it('refuses to publish the deterministic fallback when its headline was already issued', async () => {
+    const headline = '[속보] 치무전자, 차세대 2나노 초저전력 AI 추론 칩 테이프아웃 성공';
+    const repo = fakeRepository({
+      context: vi.fn(async () => ({ ...CONTEXT, stocks: [{ symbol: 'CHIMU314', price_change_pct: 25 }] })),
+      latest: vi.fn(async () => storedAutoBatch(storedAutoScenario('MYUY', headline))),
+      recentMarketEvents: vi.fn(async () => [{ symbol: 'CHIMU314', headline,
+        starts_at: new Date(Date.now() - 60 * 60 * 1000), source: 'ai' }]),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => { throw new Error('no model'); }));
+    expect(await service.autoGenerateAndPublish(ACTOR, runtime)).toMatchObject({ published: false, reason: 'no_novel_candidate' });
+    expect(repo.publish).not.toHaveBeenCalled();
+  });
+
+  it('uses the same database idempotency key for simultaneous identical headlines', async () => {
+    const repo = fakeRepository({
+      latest: vi.fn(async () => storedAutoBatch(storedAutoScenario('MYUY', 'Unique company announcement'))),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => ({ scenarios: [proposal()] })));
+    await service.autoGenerateAndPublish(ACTOR, runtime);
+    await service.autoGenerateAndPublish(ACTOR, runtime);
+    const calls = vi.mocked(repo.publish).mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0]![0].idempotencyKey).toBe(calls[1]![0].idempotencyKey);
+    expect(calls[0]![0].idempotencyKey).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it('never applies repeat events across successive scheduler windows', async () => {
+    const events: Array<{ symbol: string; headline: string; starts_at: Date; source: string }> = [];
+    const repo = fakeRepository({
+      latest: vi.fn(async () => storedAutoBatch(
+        storedAutoScenario('MYUY', 'Myuy first-time launch'),
+        storedAutoScenario('DUCK', 'Duck first-time launch', 2))),
+      recentMarketEvents: vi.fn(async () => [...events]),
+      publish: vi.fn(async (input) => {
+        events.push({
+          symbol: input.headline === 'Myuy first-time launch' ? 'MYUY' : 'DUCK',
+          headline: String(input.headline), starts_at: new Date(), source: 'ai',
+        });
+        return { event_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', published: 1, replayed: false };
+      }),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => ({ scenarios: [proposal()] })));
+    const outcomes = [];
+    for (let i = 0; i < 24; i += 1) outcomes.push(await service.autoGenerateAndPublish(ACTOR, runtime));
+    expect(outcomes.filter((result) => result.published === true)).toHaveLength(2);
+    expect(outcomes.slice(2).every((result) => result.reason === 'no_novel_candidate')).toBe(true);
+    expect(events).toHaveLength(2);
+  });
+
+  it('fails closed if the prior market-event history cannot be verified', async () => {
+    const repo = fakeRepository({
+      latest: vi.fn(async () => storedAutoBatch(storedAutoScenario('MYUY', 'A new story'))),
+      recentMarketEvents: vi.fn(async () => { throw new Error('market history unavailable'); }),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repo, null, vi.fn(async () => ({ scenarios: [proposal()] })));
+    await expect(service.autoGenerateAndPublish(ACTOR, runtime)).rejects.toThrow('market history unavailable');
+    expect(repo.publish).not.toHaveBeenCalled();
   });
 });
 

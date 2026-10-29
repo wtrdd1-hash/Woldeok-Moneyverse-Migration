@@ -5,6 +5,9 @@
 - Source-only candidate disables SWF liquidation in BFF/backend with HTTP 503, and labels all central-bank process-local mint/rate/ratio samples as non-authoritative. No fake mint receipt, official bank policy issuance or autonomous growth is authorized.
 - The user-approved existing finance DML permissions are preserved. No Production DB changes or rollback bypass. [Evidence](../worklog/2026-10-29-central-bank-swf-controls-v1501.md).
 
+## v2026.10.29.1452 — Automated in-world market-news trust repair (implementation candidate)
+Observed CHIMU314 overpublication (143/204 historical, 138 identical titles). News autopublisher candidate uses 7-day normalized-title exclusion, 24-hour per-stock cooling, less-covered-company ranking, five-symbol fallback drafts, accurate fallback source identity and deterministic event idempotency keys. Failed history reads block automatic publication; no existing market events/ledger/money are rewritten. Worklog: [v1452](../worklog/2026-10-29-ai-news-repeat-guard-v1452.ko.md); issue #1848. Keep promotion bound to exact-SHA Test and a zero-downtime Production gate.
+
 
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 

@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1452 — Fictional-stock news repetition containment (runtime candidate)
+- Investigated market-event repeats under issue [#1848](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1848): CHIMU314 143/204 lifetime events; same headline 138 times. In a dedicated branch, added last-7-day normalized-title suppression, per-stock 24-hour cooldown, least-covered-company selection, genuine fallback provenance, and a stable database idempotency key for auto-published events.
+- No historical market event deletion, finance-ledger mutation or migration. See [v1452 worklog](../worklog/2026-10-29-ai-news-repeat-guard-v1452.ko.md) and [release notes](../updates/v2026.10.29.1452-ai-news-repeat-guard-github.md). Production acceptance is recorded only after exact-SHA isolated Test and zero-downtime promotion.
+
+
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 
 - **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.
