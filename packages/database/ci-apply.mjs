@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
@@ -20,10 +20,28 @@ export function requiredDatabaseEnv(env) {
 }
 
 export function listMigrationFiles(dir) {
-  return readdirSync(dir)
+  const names = readdirSync(dir)
     .filter((name) => /^\d{3}-.*\.sql$/.test(name))
-    .sort()
-    .map((name) => join(dir, name));
+    .sort();
+  const seen = new Set();
+  for (const name of names) {
+    const number = Number(name.slice(0, 3));
+    if (seen.has(number)) throw new Error(`duplicate migration number ${number}: ${name}`);
+    seen.add(number);
+  }
+  return names.map((name) => join(dir, name));
+}
+
+/** Abort before any SQL if the source lineage is not exactly 002..N. */
+export function assertContiguousMigrationSequence(files) {
+  if (files.length === 0) throw new Error('missing migration 002: empty migration directory');
+  for (const [index, path] of files.entries()) {
+    const expected = index + 2;
+    const actual = Number(basename(path).slice(0, 3));
+    if (actual !== expected) {
+      throw new Error(`migration sequence gap: expected ${String(expected).padStart(3, '0')}, found ${String(actual).padStart(3, '0')}`);
+    }
+  }
 }
 
 export function sha256File(path) {
@@ -50,8 +68,10 @@ function runPsql(args = [], input) {
 }
 
 export function applyFreshCiDatabase(rootDir = dirname(fileURLToPath(import.meta.url))) {
-  const env = requiredDatabaseEnv(process.env);
   const migrationsDir = join(rootDir, 'migrations');
+  const migrations = listMigrationFiles(migrationsDir);
+  assertContiguousMigrationSequence(migrations);
+  const env = requiredDatabaseEnv(process.env);
   const coreSql = join(rootDir, 'init', '001-economy-core.sql');
 
   runPsql([], `
@@ -69,7 +89,7 @@ CREATE TABLE IF NOT EXISTS public.schema_migrations (
 );
 `);
 
-  for (const migration of listMigrationFiles(migrationsDir)) {
+  for (const migration of migrations) {
     const filename = migration.split('/').pop();
     const checksum = sha256File(migration);
     console.log(`Applying migration: ${filename}`);
