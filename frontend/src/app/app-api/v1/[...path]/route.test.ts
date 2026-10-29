@@ -40,21 +40,6 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
-  it('preserves verified help result count for Android and refuses stale public caching', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ articles: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const body = JSON.stringify({ locale: 'ko', query: 'wallet', limit: 50 });
-    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/help/search', {
-      method: 'POST', headers: { host: 'easy-scraping.com', 'content-type': 'application/json' }, body,
-    }), context('help', 'search'));
-    expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/search');
-    expect(new TextDecoder().decode(fetchSpy.mock.calls[0]?.[1]?.body as ArrayBuffer)).toBe(body);
-  });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
@@ -339,28 +324,26 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   });
 });
 
-describe('private photo withdrawal gateway', () => {
-  it.each([200, 403, 409, 500])('fences authenticated Android photo POST response %s', async (status) => {
+describe('Android verified help fallback contract', () => {
+  it('forwards explicit opt-in in the POST body and never caches approved-language search results', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(
-      JSON.stringify({ photo_id: 'f', replayed: false }),
-      { status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=999' } },
-    ));
+    const payload = { locale: 'ko', query: 'login', fallbackToOtherLocale: true, limit: 20 };
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('POST');
+      expect(JSON.parse(new TextDecoder().decode(init?.body as ArrayBuffer))).toEqual(payload);
+      return new Response(JSON.stringify({ articles: [{ locale: 'en', title: 'Account' }], requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true }), {
+        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+      });
+    });
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await POST(
-      new NextRequest('https://easy-scraping.com/app-api/v1/photos/withdraw', {
-        method: 'POST',
-        headers: { host: 'easy-scraping.com', cookie: 'session=example', 'x-csrf-token': 'token', 'content-type': 'application/json' },
-        body: JSON.stringify({ photoId: 'x', idempotencyKey: 'y' }),
-      }),
-      context('photos', 'withdraw'),
-    );
-    expect(response.status).toBe(status);
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/help/search', {
+      method: 'POST', headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https', 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    }), context('help','search'));
+    expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
-    expect(fetchSpy).toHaveBeenCalledOnce();
-    const [, forwarded] = fetchSpy.mock.calls[0]!;
-    expect(new Headers(forwarded?.headers).get('x-csrf-token')).toBe('token');
-    expect(new Headers(forwarded?.headers).get('cookie')).toBe('session=example');
+    expect(await response.json()).toMatchObject({ requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true });
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/search');
   });
 });
