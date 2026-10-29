@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1364 — Scheduled QA disposable scratch lifecycle (OPS PATCH CANDIDATE)
+
+- Authority: existing v1317/v1318 scheduled hourly QA and bounded 72-hour QA-owned scratch cleanup; no change to full authenticated QA acceptance or finance system. On 2026-10-29 11:00 KST the scheduled cleanup executed but found zero eligible directories, therefore reclaimed zero bytes. The QA scratch root had no run producer. This is a correctly executed but ineffective reclaim path; do not claim that storage was freed.
+- Patch: write a minimal, completed, QA-exclusive smoke summary for each hourly run; the existing 72-hour retention and strict ownership/symlink/size/count rules recycle these disposable records. Report `NO_ELIGIBLE_QA_SCRATCH` separately from actual reclaimed bytes; warn at 90%+ disk utilization without deleting any other data. Keep retained QA evidence, release roots, workers' directories, PostgreSQL/WAL, backups and uploads protected.
+- Gate: new isolated source branch, unit/syntax tests, Test service HTTP probes, read-only backend health, staged scheduler smoke and actual cleanup canary, then immutable scheduler-only release and systemd confirmation. No application/DB deployment or claim of full 5-pass authenticated QA. [Worklog](../worklog/2026-10-29-qa-hygiene-v1364.md) · [Internal](../updates/2026-10-29-qa-hygiene-v1364-internal.md) · [GitHub](../updates/2026-10-29-qa-hygiene-v1364-github.md).
+
 ## v1448 / F675-168 — Verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Development handoff:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

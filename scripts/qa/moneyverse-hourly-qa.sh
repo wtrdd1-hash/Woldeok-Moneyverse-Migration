@@ -6,7 +6,7 @@ set -Eeuo pipefail
 BASE_URL="${MONEYVERSE_QA_URL:-https://easy-scraping.com}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 CLEANER="$SCRIPT_DIR/../../ops/storage/qa-disk-cleanup.mjs"
-LOG_FILE="/var/log/moneyverse-hourly-qa.log"
+LOG_FILE="${MONEYVERSE_QA_LOG_FILE:-/var/log/moneyverse-hourly-qa.log}"
 STAMP="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
 log() {
@@ -76,6 +76,12 @@ if [[ ! "$sessions" =~ ^[0-9]+$ ]]; then
 fi
 
 log "=== [$STAMP] HTTP SMOKE: http_pass=$passed auth_gated_not_tested=$auth_gated failed=$failed session_count=$sessions; full_functional_QA=NOT_TESTED ==="
+# Persist a short-lived, QA-owned disposable summary. Its completed marker
+# makes it eligible for bounded cleanup after 72 hours, never before.
+if ! /usr/bin/node "$CLEANER" --record-run "$passed" "$auth_gated" "$failed"; then
+  log "[QA_SCRATCH_RECORD_FAIL] disposable QA summary could not be recorded"
+  exit 2
+fi
 if ((failed > 0)); then
   exit 1
 fi
