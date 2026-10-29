@@ -31,3 +31,10 @@
 - Exact source hashes matched the staged executable; systemd units were placed on the host and daemon-reload completed. Existing backend/frontend PIDs did not change.
 - **NOT LIVE:** Telegram alert timer remains disabled/inactive, recipient pairing and actual message delivery are unverified. The remote executor blocked credential-bearing network validation; do not label Telegram integration Production ACTIVE.
 - Next external action: owner sends the private pairing command, then an authorized operator activates the timer and verifies a real Telegram send receipt. No database, ledger or existing application process was changed.
+
+## Post-activation verification — 2026-10-29 KST
+- The independent moneyverse-telegram-alerts.timer is active and enabled.
+- Private one-time code pairing completed; chat_id file exists, pairing_code file removed, and update cursor advanced.
+- On the paired scan, the service logged CHECK_OK, recorded all 13 monitored signals and its daily summary state; Telegram sendMessage returned a receipt (the bridge requires message_id before recording success).
+- These observations demonstrate operational system monitoring and Telegram API acceptance, not member read receipt. The standalone stock/news event extension remains undeployed and is not represented as active.
+- Owner's bot credential and chat ID were never written to GitHub.
