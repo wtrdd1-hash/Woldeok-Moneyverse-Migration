@@ -18,5 +18,10 @@
 - [ ] Atomic Nginx switch, public smoke, version identity, background services, finance reconciliation and session continuity. Roll back on critical error.
 - [ ] English/Korean release/internal/GitHub update records and CI/deployment evidence, including any blocked gates.
 
+## RESUMED — 2026-10-29 14:54 KST
+- User reiterated the Production promotion instruction. Refetched main: changed from b84d645a8 to a6284ef43810a7b310dc23565876fd02567fa918 by PR #1849 (AI market-news-repeat guard v1452). Its application changes are independent from SWF/central-bank source. Integrated both versions on isolated existing fix branch, manually retaining BOTH English/Korean integrated planning sections. Reconciled merge source SHA c2129625aa6629c616fb31ce790950618b8d92b2, pushed GitHub without overwriting any main checkout.
+- Prior immutable Test package at aca0ba00e and Next exact-sha build succeeded, but represents superseded source and is **not** promotion evidence for c2129625a. New integrated workspace typecheck, Nest/Next builds, five relevant central-bank/mint/SWF suites, merged v1452 AI-news test suites and Next regression suites are running via mv-task mv-v1502-integrated-c212.
+- Existing Test/Production backends still health 200. Candidate c212 full Test/Prod remain NOT deployed. Concurrent Next build and limited miniPC memory are slowing typecheck; no other worker processes are stopped. Exact-SHA CI #40826166798 running, checks pending. Preserve unrelated v1452 features when reconciling main.
+
 ## FINISHED
 - Pending actual Test and Production evidence. Authorization alone is not deployment success.
