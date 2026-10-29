@@ -32,8 +32,8 @@ describe('v1503 admin durable monetary policy BFF', () => {
       kind: 'base-rate', value: '4.25', rationale: 'Approved stabilization', inflationTarget: '2.00',
     }));
     expect(response.status).toBe(200);
-    expect(api.mock.calls[1][0]).toBe('/api/v1/central-bank/base-rate');
-    expect(api.mock.calls[1][1]).toMatchObject({
+    expect(api.mock.calls[1]![0]).toBe('/api/v1/central-bank/base-rate');
+    expect(api.mock.calls[1]![1]).toMatchObject({
       method: 'PUT', csrfToken: 'csrf-session-token',
       body: { baseRatePercent: '4.25', rateDecisionRationale: 'Approved stabilization', targetInflationPercent: '2.00' },
     });
