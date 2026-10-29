@@ -64,26 +64,27 @@ describe('independent AI originality and locale gate',()=>{
   });
 });
 
-describe('native Ollama original prose with grounded metadata', () => {
-  it('uses a single plain-prose request and derives its excerpt from authored content', async () => {
-    const raw=article(slot.country);
-    const client=vi.fn().mockImplementation(async (_endpoint:string, opts:RequestInit) => {
-      const params=JSON.parse(String(opts.body));
-      expect(params.stream).toBe(false);
-      expect(params.options.num_ctx).toBe(8192);
-      expect(params.format).toBeUndefined();
-      return new Response(JSON.stringify({message:{content:raw.content},done_reason:'stop'}),{
+describe('short bounded local prose sections with authoritative metadata', () => {
+  it('builds an independently checked article from short native-language sections', async()=>{
+    const chunk=nativeBody[slot.country].repeat(8);
+    const client=vi.fn().mockImplementation(async (_endpoint:string,opts:RequestInit)=>{
+      const request=JSON.parse(String(opts.body));
+      expect(request.stream).toBe(false);
+      expect(request.options.num_predict).toBeLessThanOrEqual(500);
+      expect(request.format).toBeUndefined();
+      return new Response(JSON.stringify({message:{content:chunk},done_reason:'stop'}),{
         status:200,headers:{'content-type':'application/json'},
       });
     });
     const result=await generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client});
-    expect(result.content).toBe(raw.content);
+    expect(result.content).toContain(source.url);
+    expect(result.content.length).toBeGreaterThanOrEqual(1400);
     expect(result.excerpt.length).toBeGreaterThanOrEqual(65);
     expect(result.title.length).toBeGreaterThanOrEqual(25);
-    expect(client.mock.calls[0]![0]).toBe('http://127.0.0.1:11434/api/chat');
-    expect(client).toHaveBeenCalledTimes(1);
+    expect(client).toHaveBeenCalled();
+    expect(client.mock.calls.length).toBeLessThanOrEqual(8);
   });
-  it('rejects malformed model outputs without fabricating publication evidence', async()=>{
+  it('fails closed on empty model output',async()=>{
     const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({
       message:{content:null},done_reason:'stop',
     }),{status:200}));
