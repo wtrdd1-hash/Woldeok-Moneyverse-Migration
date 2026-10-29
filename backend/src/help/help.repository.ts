@@ -23,6 +23,10 @@ export class HelpRepository {
       'SELECT article_id::text,locale,slug,category,title,summary,published_at FROM public.help_public_search($1,$2,$3,$4)',
       [locale, category, query, limit]);
   }
+  categoryCounts(locale: string) {
+    return queryRows<{ category: string; article_count: string }>(this.pool,
+      'SELECT category,article_count::text FROM public.help_public_category_counts($1)', [locale]);
+  }
   article(locale: string, slug: string) {
     return queryOne<HelpArticle>(this.pool,
       'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at FROM public.help_public_article($1,$2)',

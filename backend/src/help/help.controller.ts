@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, Query, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { HelpRepository } from './help.repository';
@@ -24,7 +24,14 @@ export class HelpController {
     return this.help;
   }
   @Get('categories') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Public verified help categories' })
-  categories() { this.repo(); return { categories: [...CATEGORIES] }; }
+  async categories(@Query('locale') locale = 'ko') {
+    const repo = this.repo();
+    if (!LOCALES.includes(locale as 'ko'|'en')) throw new BadRequestException('invalid help locale');
+    const rows = await repo.categoryCounts(locale);
+    const counts = Object.fromEntries(CATEGORIES.map(category =>
+      [category, rows.find(row => row.category === category)?.article_count ?? '0']));
+    return { categories: [...CATEGORIES], counts, locale };
+  }
 
   @Post('search') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Search only verified published help articles' })
   async search(@Body() body: SearchHelpDto) {

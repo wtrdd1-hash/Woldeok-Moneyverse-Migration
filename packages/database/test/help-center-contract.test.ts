@@ -36,3 +36,21 @@ describe('independent publication boundary', () => {
     expect(sql).toMatch(/CREATE FUNCTION public\.help_admin_retract/);
   });
 });
+
+
+describe('help category counts migration', () => {
+  const migration = readFileSync(join(__dirname, '../migrations/295-verified-help-category-counts.sql'), 'utf8');
+  it('counts only published, independently approved and unexpired articles', () => {
+    expect(migration).toMatch(/help_public_category_counts/);
+    expect(migration).toMatch(/state\s*=\s*'published'/);
+    expect(migration).toMatch(/approved_by\s+IS NOT NULL/i);
+    expect(migration).toMatch(/approved_by\s*<>\s*r\.author_id/i);
+    expect(migration).toMatch(/reviewed_until\s*>\s*clock_timestamp\(\)/i);
+  });
+  it('keeps the database boundary least-privileged', () => {
+    expect(migration).toMatch(/SECURITY DEFINER\s+SET search_path\s*=\s*pg_catalog,\s*pg_temp/i);
+    expect(migration).toMatch(/REVOKE ALL ON FUNCTION public\.help_public_category_counts\(text\) FROM PUBLIC, moneyverse_app/i);
+    expect(migration).toMatch(/GRANT EXECUTE ON FUNCTION public\.help_public_category_counts\(text\) TO moneyverse_app/i);
+    expect(migration).not.toMatch(/GRANT .* ON TABLE .* TO moneyverse_app/i);
+  });
+});
