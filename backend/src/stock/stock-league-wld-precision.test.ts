@@ -42,6 +42,16 @@ describe('P1 stock league WLD read precision', () => {
     const { repo } = repoFor({ ...baseSubscription, allocated_budget: unsafe });
     await expect(repo.getMySubscriptions('owner')).rejects.toMatchObject({ status: 503 });
   });
+  it('rejects fractional NUMERIC rounded down to a safe integer', async () => {
+    const { repo } = repoFor({ ...baseSeason, entry_fee: '9007199254740991.01' });
+    await expect(repo.getCurrentSeason()).rejects.toMatchObject({ status: 503 });
+  });
+  it('rejects nonzero fractional WLD and accepts PostgreSQL NUMERIC .00', async () => {
+    const { repo: fractional } = repoFor({ ...baseSeason, prize_pool: '100.50' });
+    await expect(fractional.getCurrentSeason()).rejects.toMatchObject({ status: 503 });
+    const { repo: whole } = repoFor({ ...baseSeason, prize_pool: '100.00' });
+    await expect(whole.getCurrentSeason()).resolves.toMatchObject({ prizePool: 100 });
+  });
   it('preserves exact safe integer WLD read values', async () => {
     const { repo } = repoFor({ ...baseSeason, entry_fee: '9007199254740991' });
     await expect(repo.getCurrentSeason()).resolves.toMatchObject({ entryFee: 9007199254740991 });

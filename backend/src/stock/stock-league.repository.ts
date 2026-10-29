@@ -63,21 +63,21 @@ export interface CopyTradingSubscription {
 
 /** PostgreSQL NUMERIC must never be silently rounded in a WLD API response. */
 function safeWld(value: unknown, field: string): number {
-  if ((typeof value !== 'string' && typeof value !== 'number') ||
-      (typeof value === 'string' && value.trim() === '')) {
-    throw new ServiceUnavailableException({
-      code: 'STOCK_LEAGUE_WLD_PRECISION_UNAVAILABLE',
-      message: `stock league WLD safe precision unavailable: ${field}`,
-    });
+  if (typeof value === 'number' && Number.isSafeInteger(value)) return value;
+  if (typeof value === 'string') {
+    // NUMERIC(20,2) commonly returns "100.00"; reject nonzero fractions before
+    // Number() can round them away (including near MAX_SAFE_INTEGER).
+    const decimal = /^(-?\d+)(?:\.0+)?$/.exec(value);
+    if (decimal?.[1]) {
+      const exact = BigInt(decimal[1]);
+      const max = BigInt(Number.MAX_SAFE_INTEGER);
+      if (exact >= -max && exact <= max) return Number(exact);
+    }
   }
-  const amount = Number(value);
-  if (!Number.isSafeInteger(amount)) {
-    throw new ServiceUnavailableException({
-      code: 'STOCK_LEAGUE_WLD_PRECISION_UNAVAILABLE',
-      message: `stock league WLD safe precision unavailable: ${field}`,
-    });
-  }
-  return amount;
+  throw new ServiceUnavailableException({
+    code: 'STOCK_LEAGUE_WLD_PRECISION_UNAVAILABLE',
+    message: `stock league WLD safe precision unavailable: ${field}`,
+  });
 }
 
 export class StockLeagueRepository {
