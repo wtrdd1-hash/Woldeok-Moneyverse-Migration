@@ -13,5 +13,11 @@
 - Mid-run `git fetch origin main` still `4595e8f660cd9646cabcbf2643e5309b9eb9a7b9`; bilingual plan unchanged. Existing profile mobile form, live ActionAlert, private noindex and NestJS/PG contracts retained.
 - Do not conflate successful HTTP status with persisted privacy. If the owner read fails after a possible write, report uncertainty rather than failed write.
 
-## END
-Pending.
+## END / release hold — 2026-10-29 11:52 KST checkpoint
+- TDD 6 RED; 9 GREEN. Complete local frontend 1,919 PASS; backend without DB 1,955 PASS / 440 SKIP; database 46 PASS / 4 SKIP; contract 38 PASS. Lint 0 errors / 1,091 preexisting warnings; typecheck, app-api 180 routes and full local build 609 static pages PASS.
+- Security release gate FAIL: complete pnpm audit 12 advisories, production audit 1 advisory. Do not waive.
+- Initial exact SHA 241cb4eb8 CI #40808240828 in progress; candidate #40808234649 first attempt failed at Next Google Font loader `TypeError: Cannot read properties of null (reading '1')` (local build passed). Same-SHA candidate retry requested.
+- Main advanced docs-only with release v1213 evidence: `b84d645a87e8fa0d544ca3ee17e785e737e477ea`; no app/profile collision. Rebased independent branch to latest main, new HEAD to be verified by fresh CI. Public Test and Production `/api/version` both `b44ffd0af9e2bd6e7c2be7345b72094827078c3d` (not candidate); Production was promoted independently by release owner v1213. This task made NO deployment.
+- Independent local PostgreSQL attempt created only `mv-c-v1152-pg`; startup race was observed and a later migration invocation was blocked by tool safety. The isolated container was removed, and **no local real-PG PASS is claimed**. Exact-SHA GitHub PostgreSQL CI is the remaining authoritative DB gate.
+- DRAFT/HOLD. No merge, Test/Production promotion, rollback, or deletion of unique branches/worktrees. Backup/finance/source-provenance and security gates remain release owner/QA decisions. Final status will be posted on PR after latest-SHA CI review.
+
