@@ -1,5 +1,5 @@
 export const APP_API_VERSION = '1';
-export const APP_API_CONTRACT_VERSION = 'v2026.10.29.1220';
+export const APP_API_CONTRACT_VERSION = 'v2026.10.28.0425';
 
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
@@ -54,7 +54,7 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   if (clean[0] === 'admin' && clean[1] === 'help') return null;
   if (clean[0] === 'help') {
     const publicRead = (clean.length === 2 && (clean[1] === 'categories' || clean[1] === 'search')) ||
-      ((clean.length === 4 || (clean.length === 5 && clean[4] === 'related')) && clean[1] === 'articles' && ['ko', 'en'].includes(clean[2]!) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(clean[3]!));
+      (clean.length === 4 && clean[1] === 'articles' && ['ko', 'en'].includes(clean[2]!) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(clean[3]!));
     if (!publicRead) return null;
   }
 

@@ -177,6 +177,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       <ShopStoreView
         items={items}
+        allowCompare={loggedIn}
         userBalance={userBalance}
         currentUsername={username}
         userAvatarUrl={avatarUrl}

@@ -36,6 +36,29 @@ describe('app API route compatibility', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('does not cache shop comparison failures when the upstream API is unreachable', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network offline')));
+    const response = await GET(request('/app-api/v1/shop/compare?ids=invalid'), context('shop', 'compare'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('forwards member shop comparison to the API but forbids Android caching', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ source: 'shop_catalog_list_v2', items: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const ids = '11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222';
+    const response = await GET(request(`/app-api/v1/shop/compare?ids=${encodeURIComponent(ids)}`), context('shop', 'compare'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain(`/api/v1/shop/compare?ids=${encodeURIComponent(ids)}`);
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ cache: 'no-store' });
+  });
+
   it('returns a stable problem document for paths outside the app allow-list', async () => {
     const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);

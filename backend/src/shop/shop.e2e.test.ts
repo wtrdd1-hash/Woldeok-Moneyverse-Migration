@@ -86,6 +86,14 @@ describe('shop routes', () => {
     );
   });
 
+  it('keeps the verified two-item comparison behind a member session', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/shop/compare?ids=11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+    expect(response.body.detail).not.toBe('shop catalogue is unavailable');
+  });
+
   it('mounts the caller’s held items behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/shop/holdings');
     expect(response.status).not.toBe(404);

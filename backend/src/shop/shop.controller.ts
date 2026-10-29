@@ -5,7 +5,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Header,
   Inject,
   NotFoundException,
   Param,
@@ -32,7 +31,7 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
-import { filterShopHoldings, parseShopHoldingsStatus } from './shop-holdings-filter';
+import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } from './shop-compare';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -144,18 +143,39 @@ export class ShopController {
     return { catalogItems: filterShopItems(catalogItems, query) };
   }
 
+  @Get('compare')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'Compare two current catalogue prices for the authenticated member' })
+  async compare(@Req() request: RequestWithSession, @Query('ids') ids: unknown) {
+    let selected: readonly [string, string];
+    try {
+      selected = parseShopCompareIds(ids);
+    } catch (error: unknown) {
+      if (error instanceof ShopInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
+    const rows = await this.guarded(
+      () => this.repository().catalog(requireUserId(request)),
+      'the catalogue is unavailable',
+    );
+    try {
+      return compareShopCatalog(rows, selected);
+    } catch (error: unknown) {
+      if (error instanceof ShopCompareUnavailableError) throw new NotFoundException('one or more items are unavailable');
+      throw error;
+    }
+  }
+
   @Get('holdings')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Catalogue items the caller holds, optionally limited to upkeep attention' })
-  async holdings(@Req() request: RequestWithSession, @Query('status') status?: string) {
-    const actor = requireUserId(request);
-    const selected = parseShopHoldingsStatus(status);
-    const rows = await this.guarded(
-      () => this.repository().holdings(actor),
-      'held items are unavailable',
-    );
-    return { holdings: filterShopHoldings(rows, selected) };
+  @ApiOperation({ summary: 'Catalogue items the caller holds' })
+  async holdings(@Req() request: RequestWithSession) {
+    return {
+      holdings: await this.guarded(
+        () => this.repository().holdings(requireUserId(request)),
+        'held items are unavailable',
+      ),
+    };
   }
 
   @Post('catalog/:id/purchases')
