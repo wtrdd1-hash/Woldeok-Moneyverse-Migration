@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v1452-R1 — First live scheduled news acceptance (2026-10-29 15:30 KST)
+- Production first hourly cycle on the corrected v1502 scheduler: five candidates, one `MYUY` publication, no `CHIMU314` headline. Actual engine recorded as deterministic fallback after a local LLM timeout. Full 24h/7d editorial concentration is not yet measured. [Release record](../releases/v2026.10.29.1452-news-scheduler.md).
+
+
 ## v2026.10.29.1452 operational correction — activated scheduler leader
 - The deployed v1502 `c2129625` already includes the news deduplication code, but legacy production news scheduling remained on old port-3000 code. On Oct 29 at 15:22 KST the scheduler backend was switched to the v1502 immutable artifact, leaving public Nginx/3564/3565 untouched. Leader health and exact SHA were verified. Pre-existing active headlines remain until expiry, and next scheduled issue observation is outstanding. [Release proof](../releases/v2026.10.29.1452-news-scheduler.md).
 
