@@ -31,3 +31,10 @@
 - `pnpm typecheck` PASS; Backend search tests 4 PASS; Frontend search/BFF tests 5 PASS. Existing unrelated app-gateway help-path test still fails.
 - Mobile API contract manually added as a new documented endpoint and generated EN/KO schema references. Existing generated `affinity` response type drift is present and is recorded, not silently ignored.
 - The search relies on the existing observed `in_app_notifications` owner/date index and existing app-role SELECT; no new SQL migration or grant due unverified table-creation lineage. The full planned SECURITY DEFINER and distributed rate-budget controls are not certified. Feature remains OFF by default; release HOLD.
+
+## In progress — 22:41 KST
+- Generated Android contract `pnpm api:contract:check` PASS (182 endpoints); full Typecheck PASS; changed-file ESLint PASS; Database 56 PASS/4 SKIP; Bot 11 PASS after isolated npm install; pnpm production audit and bot audit 0 known vulnerabilities.
+- Backend full: 2,354 PASS / 240 FAIL / 493 SKIP, mostly pre-existing monetary HTTP boundary failures; Frontend full timed out after 110s with unrelated finance failures observed. Full ESLint FAIL (3 existing `stale-tab-notice.tsx` no-empty errors; QA #1894). Backend build PASS; Frontend production build PASS on retry after initial 45s timeout.
+- Exact candidate CI for SHA `d7d74b0410ce689b5b4ba9e860f43618dd5070eb` FAILED at the same three lint errors; candidate image build SKIPPED. No production action.
+- Test and Production `/api/version` both HTTP 200, `c2129625aa6629c616fb31ce790950618b8d92b2`, not candidate. Official authenticated Test E2E and independent restore remain BLOCKED.
+- Mid-run audit: 13 remote branches, 8 open PRs, 4 ancestor-only branches (including main excluded), remaining unmerged unique commits preserved. No branch/PR deletions.

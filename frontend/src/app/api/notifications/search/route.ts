@@ -46,9 +46,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
   try {
     const result = await mutate<unknown>('/api/v1/notifications/search', { body: filter });
-    if (!result || typeof result !== 'object' || !('items' in result) || !Array.isArray(result.items) ||
+    if (!result || typeof result !== 'object' || !('items' in result) || !Array.isArray(result.items) || result.items.length > 50 ||
         !('hasMore' in result) || typeof result.hasMore !== 'boolean' ||
-        !('nextCursor' in result) || (result.nextCursor !== null && typeof result.nextCursor !== 'string') ||
+        !('nextCursor' in result) || (result.nextCursor !== null && (typeof result.nextCursor !== 'string' || result.nextCursor.length > 2048)) ||
         !('asOfUtc' in result) || typeof result.asOfUtc !== 'string') {
       throw new Error('Invalid search envelope');
     }

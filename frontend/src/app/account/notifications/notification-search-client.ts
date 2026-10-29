@@ -11,8 +11,8 @@ export interface SearchResult {
 export function parseNotificationSearch(payload: unknown): SearchResult {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('Invalid search result');
   const data = payload as Record<string, unknown>;
-  if (!Array.isArray(data.items) || typeof data.hasMore !== 'boolean' ||
-      (data.nextCursor !== null && typeof data.nextCursor !== 'string') ||
+  if (!Array.isArray(data.items) || data.items.length > 50 || typeof data.hasMore !== 'boolean' ||
+      (data.nextCursor !== null && (typeof data.nextCursor !== 'string' || data.nextCursor.length > 2048)) ||
       typeof data.asOfUtc !== 'string' || !Number.isFinite(Date.parse(data.asOfUtc)) ||
       (data.hasMore && (typeof data.nextCursor !== 'string' || data.nextCursor.length === 0)) ||
       (!data.hasMore && data.nextCursor !== null)) throw new Error('Invalid search result');
