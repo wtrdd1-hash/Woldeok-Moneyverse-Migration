@@ -1,6 +1,8 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v267**: [데이터 디스크(/srv/moneyverse-data) 불필요 아티팩트 대량 정리 및 81GB 여유 공간 추가 확보 (점유율 76% ➔ 33% 쾌적화)] (+45, -0)
+
 - **v261**: [관리자 즉시 발행 엔진 100% 복구, 108개 원격 브랜치 통합 릴리즈 및 대량 정리, 공인 금융 출처 실시간 인용 및 썸네일 관제 카드 확장] (+120, -0)
 
 - **v260**: [관리자 블로그 즉시 생성·발행 엔진 가동, 마크다운 표 구분선 누출 원천 박멸 및 9,334자 롱폼·100% 인포그래픽 실측 검증 완료] (+85, -0)
@@ -1051,3 +1053,20 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   2. **프론트엔드 라우트 핸들러 실측 연동**:
      - rontend/src/app/api/treasury/overview/route.ts: 기존 하드코딩된 가상 수치(25,000,000 WLD) 제거.
      - 신규 백엔드 엔드포인트(/api/v1/treasury/public-overview)와 직접 연동하여 실시간 실제 잔액(220,923,528 WLD) 및 안전준비금 비율을 표시하도록 정합성 복구.
+---
+## 🚀 [v267 Specification] 데이터 디스크(/srv/moneyverse-data) 불필요 아티팩트 대량 정리 및 81GB 추가 공간 확보
+- **적용 일시**: 2026-10-29 09:58 KST
+- **요구사항**: "데이터디스크 용량 왜많이차치 중이야 확인해봐 필요없는거 삭제해봐"
+- **원인 분석**:
+  1. `/srv/moneyverse-data/tasks`: 과거 시간별 자동화 작업 브랜치 복사본 및 빌드 아티팩트 (약 30GB)
+  2. `/srv/moneyverse-data/qa-reports`: 과거 QA 검증 리포트 및 임시 테스트 산출물 (약 21GB)
+  3. `/srv/moneyverse-data/worktrees` & `/srv/moneyverse-data/build-workspaces`: 완료된 과거 Git worktree 및 빌드 임시 디렉터리 (약 25GB)
+  4. `/srv/moneyverse-data/qa-preservation`: 과거 임시 백업 보존 폴더 (약 7.3GB)
+  5. `/srv/moneyverse-data/relocated-home`: 현재 웹 서버에서 사용하지 않는 Android SDK 및 Gradle 빌드 툴체인 (약 6.8GB)
+- **조치 내역**:
+  1. 사용자 조율 다지선다 확인 완료 후 상기 5개 대상에 대해 안전 소거 단행.
+  2. `git worktree prune` 실행으로 Git worktree 참조 메타데이터 동기화 완료.
+  3. **디스크 사용량 실측 결과**:
+     - 정리 전: 142GB 사용 / 46GB 여유 (점유율 **76%**)
+     - 정리 후: **61GB 사용 / 127GB 여유 (점유율 33% 🟢 대폭 쾌적화, 81GB 순수 확보)**
+  4. 라이브 서비스 HTTPS 정상 가동(HTTP 200) 및 운영 무영향 최종 검증 완료.
