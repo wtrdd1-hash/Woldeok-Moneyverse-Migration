@@ -13,6 +13,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { SupportRepository } from './support.repository';
+import { formatSupportTranscriptText } from './support-transcript-text';
 
 class NewThreadDto {
   @ApiProperty({ maxLength: 120 }) @IsString() @MinLength(1) @MaxLength(120) readonly subject!: string;
@@ -59,6 +60,17 @@ export class SupportController {
     // A full-history export needs a separate cursor API; do not claim this is complete.
     const messages = await this.repo().messages(requireUserId(req), id, 500);
     return { threadId: id, messages, truncated: messages.length === 500 };
+  }
+
+  @Get('threads/:id/transcript/text')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Downloadable readable text for up to 500 messages in my own support conversation' })
+  async transcriptText(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
+    // The PostgreSQL function checks ownership before returning any message.
+    const messages = await this.repo().messages(requireUserId(req), id, 500);
+    const truncated = messages.length === 500;
+    return { threadId: id, text: formatSupportTranscriptText(messages, truncated), truncated };
   }
 
   @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to my support conversation' })
