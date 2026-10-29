@@ -39,6 +39,19 @@ describe('engagement routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('keeps Golden Duck ledger status private and never exposes a reward receipt offline', async () => {
+    const status = await request(app.getHttpServer()).get('/api/v1/engagement/dopamine/golden-duck/status');
+    expect(status.status).not.toBe(404);
+    expect(status.status).not.toBe(200);
+    expect([401, 403, 428, 503]).toContain(status.status);
+    const claim = await request(app.getHttpServer())
+      .post('/api/v1/engagement/dopamine/golden-duck')
+      .send({ clickCount: 200, comboMultiplier: 2 });
+    expect(claim.status).not.toBe(404);
+    expect(claim.status).not.toBe(200);
+    expect([401, 403, 428, 503]).toContain(claim.status);
+  });
+
   it('mounts the engagement summary behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/engagement');
     expect(response.status).not.toBe(404);

@@ -1,380 +1,124 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, Flame, Trophy, Coins, Shield, X, Zap, Loader2, CheckCircle2, LogIn } from 'lucide-react';
-import Link from 'next/link';
-
-import { claimGoldenDuckAction } from '@/app/actions/dopamine';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Coins, Flame, ShieldCheck, Trophy, X } from 'lucide-react';
+import { getGoldenDuckStatusAction, type GoldenDuckLedgerStatus } from '@/app/actions/dopamine';
 
 interface GoldenDuckFeverProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  onClaimReward?: (totalWld: number, comboMax: number) => void;
-  /**
-   * 화면 내 황금 오리 플로팅 스폰 활성화 여부
-   */
-  enableFloatingSpawn?: boolean;
+  readonly isOpen?: boolean;
+  readonly onClose?: () => void;
+  /** Legacy callback intentionally unused: local practice must never imply a wallet credit. */
+  readonly onClaimReward?: (totalWld: number, comboMax: number) => void;
+  readonly enableFloatingSpawn?: boolean;
 }
 
-export function GoldenDuckFever({
-  isOpen = false,
-  onClose,
-  onClaimReward,
-  enableFloatingSpawn = false,
-}: GoldenDuckFeverProps) {
-  const [internalOpen, setInternalOpen] = useState<boolean>(false);
-  const isFeverActive = isOpen || internalOpen;
+/** A local ten-second skill game. No server-side reward or wallet mutation occurs. */
+export function GoldenDuckFever({ isOpen = false, onClose, enableFloatingSpawn = false }: GoldenDuckFeverProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const active = isOpen || internalOpen;
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [ledger, setLedger] = useState<GoldenDuckLedgerStatus | null>(null);
+  const [floatingVisible, setFloatingVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [floatingVisible, setFloatingVisible] = useState<boolean>(false);
-  const [floatingPos, setFloatingPos] = useState<{ x: number; y: number }>({ x: 20, y: 70 });
-  
-  // Fever gameplay state
-  const [timeLeft, setTimeLeft] = useState<number>(10);
-  const [tapCount, setTapCount] = useState<number>(0);
-  const [earnedWld, setEarnedWld] = useState<number>(0);
-  const [combo, setCombo] = useState<number>(0);
-  const [maxCombo, setMaxCombo] = useState<number>(0);
-  const [isFinished, setIsFinished] = useState<boolean>(false);
-  const [isClaiming, setIsClaiming] = useState<boolean>(false);
-  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
-  const [claimMessage, setClaimMessage] = useState<string>('');
-  const [requiresLogin, setRequiresLogin] = useState<boolean>(false);
-  const [clickParticles, setClickParticles] = useState<{ id: number; x: number; y: number; text: string }[]>([]);
-
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // When fever becomes active, start the 10-second timer
   useEffect(() => {
-    if (isFeverActive) {
-      setTimeLeft(10);
-      setTapCount(0);
-      setEarnedWld(0);
-      setCombo(0);
-      setMaxCombo(0);
-      setIsFinished(false);
-      setIsClaiming(false);
-      setClaimSuccess(false);
-      setClaimMessage('');
-      setRequiresLogin(false);
-      setClickParticles([]);
-
-      if (timerRef.current) clearInterval(timerRef.current);
-
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsFinished(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-
+    if (!active) return;
+    let cancelled = false;
+    setTimeLeft(10);
+    setScore(0);
+    setCombo(0);
+    setFinished(false);
+    setLedger(null);
+    void getGoldenDuckStatusAction()
+      .then((status) => { if (!cancelled) setLedger(status); })
+      .catch(() => { if (!cancelled) setLedger({ state: 'unavailable' }); });
+    timerRef.current = setInterval(() => setTimeLeft((remaining) => Math.max(0, remaining - 1)), 1000);
     return () => {
+      cancelled = true;
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isFeverActive]);
+  }, [active]);
 
-  // Clean timer finish effect (pure state transition without updater side-effects)
   useEffect(() => {
-    if (timeLeft === 0 && !isFinished) {
-      setIsFinished(true);
+    if (timeLeft === 0 && active) {
+      setFinished(true);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
-  }, [timeLeft, isFinished]);
+  }, [active, timeLeft]);
 
-  // Floating duck spawn cycle (every 25s if enabled and not currently in fever)
   useEffect(() => {
-    if (!enableFloatingSpawn || isFeverActive) return;
-
-    const spawnInterval = setInterval(() => {
-      const randomX = Math.floor(Math.random() * 65) + 15;
-      const randomY = Math.floor(Math.random() * 60) + 20;
-      setFloatingPos({ x: randomX, y: randomY });
+    if (!enableFloatingSpawn || active) return;
+    const interval = setInterval(() => {
       setFloatingVisible(true);
+      setTimeout(() => setFloatingVisible(false), 5000);
+    }, 25_000);
+    return () => clearInterval(interval);
+  }, [active, enableFloatingSpawn]);
 
-      setTimeout(() => {
-        setFloatingVisible(false);
-      }, 5000);
-    }, 25000);
+  const tap = useCallback(() => {
+    if (finished || timeLeft === 0) return;
+    setScore((previous) => Math.min(1000, previous + 10));
+    setCombo((previous) => previous + 1);
+  }, [finished, timeLeft]);
 
-    return () => clearInterval(spawnInterval);
-  }, [enableFloatingSpawn, isFeverActive]);
-
-  const startFeverFromFloating = () => {
-    setFloatingVisible(false);
-    setInternalOpen(true);
-  };
-
-  const handleTap = useCallback((e: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>) => {
-    if (isFinished || timeLeft <= 0) return;
-
-    // Extract client coordinates safely before state updaters
-    const target = e.currentTarget;
-    const rect = target?.getBoundingClientRect?.() ?? { left: 0, top: 0, width: 100, height: 100 };
-    const clientX = e.clientX ?? (rect.left + rect.width / 2);
-    const clientY = e.clientY ?? (rect.top + rect.height / 2);
-    const particleX = clientX - rect.left;
-    const particleY = clientY - rect.top;
-
-    setTapCount((prevTap) => prevTap + 1);
-
-    setCombo((prevCombo) => {
-      const nextCombo = prevCombo + 1;
-      setMaxCombo((currentMax) => (nextCombo > currentMax ? nextCombo : currentMax));
-
-      // Multiplier calculation (1.0x to 3.0x based on combo)
-      const multiplier = Math.min(2.0, 1.0 + Math.floor(nextCombo / 10) * 0.2);
-      const baseWld = 10;
-      const addedWld = Math.round(baseWld * multiplier);
-      
-      // Cap at 5,000 WLD per fever session
-      setEarnedWld((currentWld) => Math.min(1000, currentWld + addedWld));
-
-      // Particle effect
-      const newParticle = {
-        id: Date.now() + Math.random(),
-        x: particleX,
-        y: particleY,
-        text: `+${addedWld} WLD`,
-      };
-
-      setClickParticles((prev) => [...prev.slice(-8), newParticle]);
-
-      return nextCombo;
-    });
-  }, [isFinished, timeLeft]);
-
-  const handleClaim = async () => {
-    if (isClaiming || claimSuccess) return;
-    setIsClaiming(true);
-    setRequiresLogin(false);
-
-    const multiplier = Math.min(2.0, 1.0 + Math.floor(maxCombo / 10) * 0.2);
-    try {
-      const res = await claimGoldenDuckAction(tapCount, multiplier);
-      if (res.requiresLogin) {
-        setRequiresLogin(true);
-        setIsClaiming(false);
-        return;
-      }
-
-      if (res.success) {
-        setClaimSuccess(true);
-        setClaimMessage(res.message || `${earnedWld.toLocaleString()} WLD가 지갑에 입금되었습니다!`);
-        
-        // 브라우저 지갑 잔고 갱신 이벤트 전파
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('moneyverse:wallet-updated', { detail: res }));
-        }
-
-        if (onClaimReward) {
-          onClaimReward(res.rewardAmount ?? earnedWld, maxCombo);
-        }
-      } else {
-        setClaimMessage(res.message || '보상 수령 처리에 실패했습니다.');
-      }
-    } catch {
-      setClaimMessage('네트워크 상태를 확인해 주세요.');
-    } finally {
-      setIsClaiming(false);
-    }
-  };
-
-  const handleCloseModal = () => {
+  const close = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setInternalOpen(false);
-    if (onClose) onClose();
+    onClose?.();
   };
 
   return (
     <>
-      {/* 1. Floating Random Golden Duck trigger */}
-      {floatingVisible && !isFeverActive && (
-        <div
-          style={{ top: `${floatingPos.y}%`, left: `${floatingPos.x}%` }}
-          className="fixed z-50 animate-bounce transition-all duration-500"
-        >
-          <button
-            type="button"
-            onClick={startFeverFromFloating}
-            className="group relative flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-2 shadow-2xl shadow-amber-500/50 hover:scale-110 active:scale-95 touch-manipulation"
-            aria-label="황금 오리 피버 타임 잡기"
-          >
-            <Sparkles className="h-7 w-7 text-slate-950 animate-spin" />
-            <span className="absolute -top-3 rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-black tracking-wider text-white shadow-md animate-pulse">
-              FEVER!
-            </span>
-          </button>
-        </div>
+      {floatingVisible && !active && (
+        <button type="button" onClick={() => { setFloatingVisible(false); setInternalOpen(true); }}
+          aria-label="황금 오리 연습 시작" className="fixed bottom-24 right-5 z-50 rounded-full bg-amber-400 p-4 text-slate-950 shadow-xl">
+          <Flame aria-hidden="true" />
+        </button>
       )}
-
-      {/* 2. Fever Time Interactive Modal */}
-      {isFeverActive && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="fever-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-fadeIn"
-        >
-          <div className="relative w-full max-w-md rounded-3xl border border-amber-500/50 bg-slate-900/95 p-6 text-slate-100 shadow-2xl shadow-amber-500/20">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
-                  <Flame className="h-5 w-5 animate-pulse text-amber-400" />
-                </span>
-                <h2 id="fever-title" className="text-base font-black text-amber-300">
-                  황금 오리 광클 피버 타임 (10s Fever)
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-                aria-label="닫기"
-              >
-                <X className="h-5 w-5" />
+      {active && (
+        <div role="dialog" aria-modal="true" aria-labelledby="golden-duck-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4">
+          <section className="w-full max-w-md rounded-3xl border border-amber-500/50 bg-slate-900 p-6 text-slate-100 shadow-2xl">
+            <div className="flex items-center justify-between gap-3">
+              <h2 id="golden-duck-title" className="text-lg font-bold text-amber-300">황금 오리 광클 피버 연습</h2>
+              <button type="button" onClick={close} aria-label="닫기" className="rounded-lg p-2 hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300">
+                <X aria-hidden="true" />
               </button>
             </div>
-
-            {/* Legal & Compliance Badge */}
-            <div className="mt-3 flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-1.5 text-[11px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <Shield className="h-3.5 w-3.5 text-emerald-400" />
-                100% 무료 미니 시뮬레이터 (WLD 리워드)
-              </span>
-              <span className="font-mono text-amber-400 font-bold">최대 1,000 WLD (1일 1회)</span>
+            <p className="mt-4 flex items-center gap-2 rounded-xl border border-amber-600/40 bg-amber-950/40 p-3 text-sm text-amber-200">
+              <ShieldCheck aria-hidden="true" className="size-5 shrink-0" />
+              무료 연습 모드 · WLD 지급 없음 · 지갑 잔고 변동 없음
+            </p>
+            <div role="status" className="mt-3 rounded-lg bg-slate-800 p-3 text-xs text-slate-300">
+              {ledger === null ? '원장 기록 확인 중…' : ledger.state === 'unavailable'
+                ? '원장 기록 조회 불가 — 지급 여부를 추측하지 않습니다.'
+                : `오늘 원장 지급 기록: ${ledger.claimedToday ? '있음' : '없음'}`}
             </div>
-
-            {/* Main Interactive Fever Area */}
-            {!isFinished ? (
-              <div className="mt-4 flex flex-col items-center justify-center py-3 select-none">
-                {/* Timer & Combo Header */}
-                <div className="flex w-full items-center justify-between px-2">
-                  <div className="flex items-center gap-1.5">
-                    <Zap className="h-4 w-4 text-amber-400" />
-                    <span className="text-xs font-bold text-slate-300">
-                      콤보 <span className="font-mono text-sm text-amber-400">{combo}x</span>
-                    </span>
-                  </div>
-                  <div className="rounded-full bg-rose-500/20 border border-rose-500/40 px-3 py-1">
-                    <span className="font-mono text-sm font-black text-rose-400">
-                      ⏱️ {timeLeft}초 남음
-                    </span>
-                  </div>
-                </div>
-
-                {/* Score Counter */}
-                <div className="my-3 text-center">
-                  <span className="text-xs text-slate-400 font-medium">현재 획득 WLD</span>
-                  <div className="text-3xl font-black text-amber-300 font-mono tracking-tight drop-shadow-md">
-                    +{earnedWld.toLocaleString()} <span className="text-sm font-normal text-amber-400">WLD</span>
-                  </div>
-                </div>
-
-                {/* Big Clickable Fever Coin Button (with instant PointerDown for zero touch delay) */}
-                <div className="relative my-2">
-                  <button
-                    type="button"
-                    onPointerDown={handleTap}
-                    aria-label="피버 코인 광클하기"
-                    className="relative flex h-40 w-40 cursor-pointer items-center justify-center rounded-full border-4 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 shadow-2xl shadow-amber-500/50 transition-transform duration-75 active:scale-90 select-none touch-manipulation"
-                    style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
-                  >
-                    <Coins className="h-20 w-20 text-slate-950 drop-shadow-md animate-bounce" />
-                    <span className="absolute bottom-3 rounded-full bg-slate-950/80 px-2.5 py-0.5 text-[11px] font-black text-amber-300 border border-amber-500/40">
-                      광클! TAP!
-                    </span>
-                  </button>
-
-                  {/* Floating Click Particles */}
-                  {clickParticles.map((particle) => (
-                    <div
-                      key={particle.id}
-                      style={{ top: `${particle.y}px`, left: `${particle.x}px` }}
-                      className="pointer-events-none absolute text-xs font-black text-amber-200 animate-floatUp"
-                    >
-                      {particle.text}
-                    </div>
-                  ))}
-                </div>
-
-                <p className="mt-2 text-xs text-slate-400">
-                  시간이 끝나기 전에 화면의 황금 코인을 최대한 빠르게 연타하세요!
-                </p>
+            <div className="mt-5 flex items-center justify-between text-sm">
+              <span>연습 점수: <strong className="text-amber-300">{score.toLocaleString()}점</strong></span>
+              <span>콤보 {combo} · {timeLeft}초 남음</span>
+            </div>
+            {!finished ? (
+              <div className="mt-5 flex flex-col items-center gap-3">
+                <button type="button" onClick={tap} aria-label="오리 탭 연습"
+                  className="flex size-40 touch-manipulation items-center justify-center rounded-full border-4 border-amber-300 bg-amber-400 text-slate-950 shadow-lg transition-transform active:scale-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-white">
+                  <Coins aria-hidden="true" className="size-20" />
+                </button>
+                <p className="text-center text-xs text-slate-300">마우스·터치·Enter·Space로 10초 동안 연습하세요.</p>
               </div>
             ) : (
-              /* Fever Finished Screen */
-              <div className="mt-4 flex flex-col items-center justify-center py-4 text-center animate-fadeIn">
-                <div className="flex h-24 w-24 items-center justify-center rounded-3xl border-2 border-amber-400 bg-amber-500/20 shadow-xl shadow-amber-500/30 animate-pulse">
-                  <Trophy className="h-12 w-12 text-amber-400" />
-                </div>
-
-                <div className="mt-3">
-                  <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
-                    🎉 피버 타임 종료!
-                  </span>
-                  <h3 className="mt-1 text-2xl font-black text-white font-mono">
-                    +{earnedWld.toLocaleString()} WLD 획득
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-400">
-                    총 <span className="text-amber-300 font-bold">{tapCount}회</span> 탭 · 최고 콤보 <span className="text-amber-300 font-bold">{maxCombo}x</span> 달성
-                  </p>
-                </div>
-
-                {/* Claim Status or Feedback */}
-                {claimSuccess ? (
-                  <div className="mt-5 w-full rounded-2xl bg-emerald-950/80 border border-emerald-500/50 p-4 text-emerald-300 animate-fadeIn">
-                    <div className="flex items-center justify-center gap-2 font-bold text-sm">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                      <span>{claimMessage}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleCloseModal}
-                      className="mt-3 w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-500 active:scale-95 transition-all"
-                    >
-                      확인 완료
-                    </button>
-                  </div>
-                ) : requiresLogin ? (
-                  <div className="mt-5 w-full rounded-2xl bg-slate-950/90 border border-amber-500/40 p-4 text-slate-200 animate-fadeIn">
-                    <p className="text-xs text-amber-300 font-semibold mb-3">
-                      획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다.
-                    </p>
-                    <Link
-                      href="/lobby"
-                      onClick={handleCloseModal}
-                      className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-3 text-xs font-bold text-slate-950 shadow-md hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all"
-                    >
-                      <LogIn className="h-4 w-4" />
-                      로그인하고 WLD 수령하기
-                    </Link>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleClaim}
-                    disabled={isClaiming}
-                    className="mt-5 flex items-center justify-center gap-2 w-full rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/30 hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {isClaiming ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                        <span>지갑 입금 처리 중...</span>
-                      </>
-                    ) : (
-                      <span>지갑에 WLD 보상 수령하기</span>
-                    )}
-                  </button>
-                )}
+              <div className="mt-6 flex flex-col items-center gap-3 text-center" role="status">
+                <Trophy aria-hidden="true" className="size-14 text-amber-300" />
+                <h3 className="text-xl font-bold">연습 종료</h3>
+                <p>연습 점수 {score.toLocaleString()}점 · {combo}회 탭</p>
+                <p className="text-xs text-slate-300">이 점수는 기기에만 표시되며 WLD로 지급되지 않습니다.</p>
+                <button type="button" onClick={close} className="w-full rounded-xl bg-amber-400 p-3 font-semibold text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">닫기</button>
               </div>
             )}
-          </div>
+          </section>
         </div>
       )}
     </>

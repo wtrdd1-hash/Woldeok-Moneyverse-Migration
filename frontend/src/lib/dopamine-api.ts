@@ -85,12 +85,9 @@ async function postDopamine<T>(endpoint: string, body: Record<string, unknown>):
 /**
  * 황금 오리 피버 타임 클릭 보상 수령 (최대 5,000 WLD)
  */
-export async function claimGoldenDuckFever(clickCount: number, comboMultiplier: number): Promise<GoldenDuckClaimResult | null> {
-  return postDopamine<GoldenDuckClaimResult>('golden-duck', {
-    clickCount,
-    comboMultiplier,
-    idempotencyKey: `fever_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  });
+export async function claimGoldenDuckFever(_clickCount: number, _comboMultiplier: number): Promise<GoldenDuckClaimResult | null> {
+  // Legacy callers cannot initiate an uncertified financial claim or wallet update.
+  return null;
 }
 
 /**

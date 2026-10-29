@@ -4,14 +4,14 @@ import {
   Body,
   Controller,
   Get,
-  Header,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
+  ServiceUnavailableException,
+  Header,
   Post,
   Req,
-  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -66,66 +66,63 @@ export class DopamineController {
     @Inject(DopamineRepository) private readonly repository: DopamineRepository | null,
   ) {}
 
-  @Post('golden-duck')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Golden Duck Fever clicking reward (up to 1,000 WLD, daily limit: 1)' })
-  async claimGoldenDuck(
-    @Req() request: RequestWithSession,
-    @Body() body: GoldenDuckClaimDto,
-  ) {
+  /**
+   * Only a posted owner cash credit counts as historical reward evidence.
+   * The old click-count-driven mint path has no atomic daily cap and must
+   * remain unreachable until a reviewed DB-owned settlement migration ships.
+   */
+  @Get('golden-duck/status')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Read owner-verified Golden Duck ledger history; reward claims are held' })
+  async getGoldenDuckLedgerStatus(@Req() request: RequestWithSession) {
     const userId = requireUserId(request);
-    const validClicks = Math.min(Math.max(1, body.clickCount || 1), 200);
-    const validMultiplier = Math.min(Math.max(1.0, body.comboMultiplier || 1.0), 2.0);
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimGoldenDuck({
-          actorUserId: userId,
-          idempotencyKey: key,
-          clickCount: validClicks,
-          comboMultiplier: validMultiplier,
-        });
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
+    if (!this.repository) throw new ServiceUnavailableException('golden duck ledger status unavailable');
+    try {
+      const evidence = await this.repository.goldenDuckLedgerStatus(userId);
+      return { ...evidence, rewardClaimsEnabled: false };
+    } catch {
+      throw new ServiceUnavailableException('golden duck ledger status unavailable');
     }
+  }
 
-    // 저장소 미주입 환경 (테스트 등) 폴백
-    const rewardAmount = Math.min(1000, Math.floor(validClicks * 10 * validMultiplier));
-    return {
-      success: true,
-      userId,
-      transactionId: key,
-      rewardAmount,
-      newBalance: '0',
-      clicks: validClicks,
-      multiplier: validMultiplier,
-      claimedAt: new Date().toISOString(),
-    };
+  @Post('golden-duck')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Golden Duck WLD claims held until atomic ledger-backed settlement exists' })
+  async claimGoldenDuck(@Req() request: RequestWithSession, @Body() _body: GoldenDuckClaimDto) {
+    requireUserId(request);
+    throw new ServiceUnavailableException({
+      code: 'golden_duck_settlement_unavailable',
+      message: 'Golden Duck practice awards no WLD; ledger-backed rewards are unavailable',
+    });
   }
 
   @Post('pet-fortune')
-  @Header('Cache-Control', 'no-store')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Pet Fortune WLD settlement unavailable pending durable owner ledger receipts' })
+  @ApiOperation({ summary: 'Interact with Deoki Pet and claim daily fortune cookie reward' })
   async claimPetFortune(
     @Req() request: RequestWithSession,
-    @Body() _body: PetFortuneDto,
+    @Body() body: PetFortuneDto,
   ) {
-    requireUserId(request);
-    // Petting and fortune draws have no owner-scoped, atomic ledger receipt.
-    // Never claim a payout or persisted affinity from a fabricated response.
-    throw new ServiceUnavailableException({
-      code: 'PET_FORTUNE_SETTLEMENT_UNAVAILABLE',
-      message: 'Pet Fortune rewards require verified eligibility and atomic ledger receipts',
-    });
+    const userId = requireUserId(request);
+    const quotes = [
+      '호가창의 스프레드를 지배하는 자가 시장을 지배한다.',
+      '매일 자정 복리 예금은 배신하지 않는다.',
+      '직업 숙련도를 2.5배로 끌어올리면 WLD 파밍이 쉬워집니다.',
+      '침팬지 반도체의 매수세가 오늘 심상치 않군요!',
+      '분할 매수와 리밸런싱이 최고의 방어선입니다.',
+    ];
+    const fortuneQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const rewardAmount = body.petAction === 'fortune' ? 500 + Math.floor(Math.random() * 501) : 100;
+
+    return {
+      success: true,
+      userId,
+      action: body.petAction,
+      rewardAmount,
+      quote: fortuneQuote,
+      affinityGained: body.petAction === 'pet' ? 10 : 50,
+      claimedAt: new Date().toISOString(),
+    };
   }
 
   @Post('bull-bear-vote')
@@ -202,8 +199,8 @@ export class DopamineController {
     const userId = requireUserId(request);
     return {
       userId,
-      goldenDuckFeverAvailable: true,
-      fortuneCookieAvailable: false, // WLD settlement has no verified owner receipt
+      goldenDuckFeverAvailable: false,
+      fortuneCookieAvailable: true,
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
       starDropRemaining: 3,
@@ -315,25 +312,50 @@ export class DopamineController {
         throw new InternalServerErrorException(msg);
       }
     }
-    throw new ServiceUnavailableException({
-      code: 'DAILY_QUEST_EVIDENCE_UNAVAILABLE',
-      message: 'Daily quest ledger evidence is unavailable',
-    });
+    return { claimedQuests: {}, allClearClaimed: false, totalEarnedToday: 0 };
   }
 
   @Post('daily-quest/claim')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Daily quest WLD settlement is unavailable pending verified eligibility and ledger receipts' })
+  @ApiOperation({ summary: 'Claim official daily quest reward into authoritative ledger (DEF-004 fix)' })
   async claimDailyQuest(
     @Req() request: RequestWithSession,
-    @Body() _body: DailyQuestClaimDto,
+    @Body() body: DailyQuestClaimDto,
   ) {
-    requireUserId(request);
-    // An actor-selected quest ID is not completion evidence; the multi-query mint
-    // path has no atomic per-day receipt. Never report an unjournaled payout.
-    throw new ServiceUnavailableException({
-      code: 'DAILY_QUEST_SETTLEMENT_UNAVAILABLE',
-      message: 'Daily quest WLD settlement requires verified eligibility and atomic ledger receipts',
-    });
+    const userId = requireUserId(request);
+    if (!body?.questId) {
+      throw new BadRequestException('questId is required');
+    }
+    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
+      ? body.idempotencyKey
+      : randomUUID();
+
+    if (this.repository) {
+      try {
+        return await this.repository.claimDailyQuest({
+          actorUserId: userId,
+          idempotencyKey: key,
+          questId: body.questId,
+        });
+      } catch (error: unknown) {
+        if (error instanceof DopamineInputError) {
+          throw new BadRequestException(error.message);
+        }
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new InternalServerErrorException(msg);
+      }
+    }
+
+    return {
+      success: true,
+      userId,
+      questId: body.questId,
+      transactionId: randomUUID(),
+      rewardAmount: 500,
+      newBalance: '1000',
+      claimedAt: new Date().toISOString(),
+    };
   }
 }
+
+

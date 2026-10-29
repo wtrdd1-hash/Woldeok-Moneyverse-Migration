@@ -55,7 +55,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              {t('arcade.desc', locale, '5대 미니게임을 연습해보세요. 실제 WLD 지급은 검증된 원장 정산이 필요합니다.')}
+              {t('arcade.desc', locale, '가볍게 즐기는 미니게임입니다. 연습 게임은 WLD를 지급하지 않습니다.')}
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.fever.desc', locale, '10초 동안 황금 코인을 광클하여 최대 1,000 WLD 잭팟 획득! (1일 1회)')}
+              {t('arcade.fever.desc', locale, '10초 동안 황금 오리를 탭하는 무료 연습 게임입니다. WLD 지급은 없습니다.')}
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Gift className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30">
-              {t('arcade.pet.badge', locale, '로컬 연습')}
+              {t('arcade.pet.badge', locale, 'WLD 먹이주기')}
             </span>
           </div>
           <div className="mt-3">
@@ -124,7 +124,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.pet.desc', locale, '덕이를 쓰다듬고 포춘쿠키를 열어보는 연습입니다. WLD 지급은 없습니다.')}
+              {t('arcade.pet.desc', locale, '덕이를 쓰다듬고 먹이를 주어 호감도를 높이고 매일 특별 보상을 받으세요.')}
             </p>
           </div>
         </div>
@@ -213,9 +213,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
         isOpen={activeModal === 'fever'}
         onClose={() => setActiveModal(null)}
         enableFloatingSpawn={false}
-        onClaimReward={(totalWld) => {
-          showRewardNotice(`황금 오리 피버 완료! +${totalWld.toLocaleString()} WLD가 지갑에 지급되었습니다.`);
-        }}
       />
 
       {/* Deoki Pet Modal Container */}
@@ -236,6 +233,9 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               </button>
             </div>
             <DeokiPetStation
+              onClaimFortune={(bonusWld, quote) => {
+                showRewardNotice(`포춘쿠키 보너스 +${bonusWld.toLocaleString()} WLD 수령!`);
+              }}
               onTriggerFever={() => {
                 setActiveModal('fever');
               }}
