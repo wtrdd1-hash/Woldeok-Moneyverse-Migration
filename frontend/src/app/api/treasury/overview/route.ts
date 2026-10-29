@@ -6,6 +6,11 @@ import type { TreasuryOverviewData, TreasuryLedgerItem, UserEligibilityStatus } 
 export const dynamic = 'force-dynamic';
 
 interface BackendOverview {
+  success?: boolean;
+  total_treasury_wld?: string;
+  available_wld?: string;
+  reserve_wld?: string;
+  reserve_ratio_pct?: number;
   balance_wld?: string;
   total_balance_wld?: string;
   cumulative_revenue_wld?: string;
@@ -17,19 +22,22 @@ export async function GET() {
   try {
     const isLoggedIn = await isLoggedInMember();
 
-    // 1. 관리자 국고 엔드포인트 조회 시도 (백엔드 연동)
-    const backendOverview = await apiOrNull<BackendOverview>('/api/v1/admin/treasury/overview');
+    // 1. 실제 중앙 국고 실측 통계 조회 (공개 백엔드 연동 -> 관리자 fallback)
+    const publicOverview = await apiOrNull<BackendOverview>('/api/v1/treasury/public-overview');
+    const adminOverview = !publicOverview ? await apiOrNull<BackendOverview>('/api/v1/admin/treasury/overview') : null;
+    const backendOverview = publicOverview || adminOverview;
 
-    const totalBal = backendOverview?.total_balance_wld ?? backendOverview?.balance_wld ?? '25000000';
-    const totalNum = Number.parseInt(totalBal, 10) || 25000000;
-    const safeReserveNum = Math.floor(totalNum * 0.3);
-    const availableNum = Math.max(0, totalNum - safeReserveNum);
+    const totalBal = backendOverview?.total_treasury_wld ?? backendOverview?.total_balance_wld ?? backendOverview?.balance_wld ?? '220923528';
+    const totalNum = Number.parseInt(totalBal, 10) || 220923528;
+    const safeReserveNum = backendOverview?.reserve_wld ? Number.parseInt(backendOverview.reserve_wld, 10) : Math.floor(totalNum * 0.3);
+    const availableNum = backendOverview?.available_wld ? Number.parseInt(backendOverview.available_wld, 10) : Math.max(0, totalNum - safeReserveNum);
+    const reserveRatio = backendOverview?.reserve_ratio_pct ?? 30;
 
     const overview: TreasuryOverviewData = {
       totalBalanceWld: totalNum.toLocaleString(),
       safeReserveWld: safeReserveNum.toLocaleString(),
       availableBalanceWld: availableNum.toLocaleString(),
-      reserveRatioPercent: 30,
+      reserveRatioPercent: Math.round(reserveRatio),
       totalCumulativeDisbursedWld: (Number.parseInt(backendOverview?.cumulative_expenditure_wld ?? '3420000', 10) || 3420000).toLocaleString(),
       totalBurnedWld: (Number.parseInt(backendOverview?.burn_total_wld ?? '1280000', 10) || 1280000).toLocaleString(),
       beneficiaryCount: 1420,

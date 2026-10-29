@@ -148,6 +148,31 @@ export class TreasuryBuybackBurnDto {
   reason!: string;
 }
 
+@ApiTags('Public Treasury')
+@Controller('treasury')
+export class PublicTreasuryController {
+  constructor(private readonly service: TreasuryService) {}
+
+  @Get('public-overview')
+  @ApiOperation({ summary: '시민 공개용 실시간 중앙 국고 실측 통계 조회' })
+  async getPublicOverview() {
+    const overview = await this.service.getOverview();
+    return {
+      success: true,
+      total_treasury_wld: overview.total_treasury_wld,
+      available_wld: overview.available_wld,
+      reserve_wld: overview.reserve_wld,
+      reserve_ratio_pct: overview.reserve_ratio_pct,
+      vaults: overview.vaults.map((v) => ({
+        code: v.code,
+        name: v.name,
+        balance_wld: v.balance_wld,
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
 @ApiTags('Admin Treasury')
 @Controller('admin/treasury')
 @UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)

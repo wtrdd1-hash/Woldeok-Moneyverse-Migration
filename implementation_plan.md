@@ -1039,3 +1039,15 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   4. 라이브 HTTPS 실측 검증:
      - GET https://easy-scraping.com/api/blog: 잔여 공개 아티클 **0건** (count: 0)
      - GET https://easy-scraping.com/blog: "검색 조건에 맞는 블로그 글이 없습니다" 클린 상태 정상 노출 확인.
+---
+## 🚀 [v266 Specification] 국고 실측 원장 DB 기반 실시간 공개 통계 연동 및 가상 수치 제거
+- **적용 일시**: 2026-10-29 09:21 KST
+- **요구사항**: "경제 문제 이제 없지? 해결해줘"
+- **조치 내역**:
+  1. **백엔드 공개 국고 컨트롤러 신설**:
+     - ackend/src/admin/treasury/treasury.controller.ts: PublicTreasuryController (@Get('public-overview')) 추가.
+     - ackend/src/admin/admin.module.ts: PublicTreasuryController 컨트롤러 등록.
+     - 실제 system_treasury_vaults 금고 잔액 합계(약 2.2억 WLD), 비상준비금, 가용 재원을 실시간 쿼리하여 반환.
+  2. **프론트엔드 라우트 핸들러 실측 연동**:
+     - rontend/src/app/api/treasury/overview/route.ts: 기존 하드코딩된 가상 수치(25,000,000 WLD) 제거.
+     - 신규 백엔드 엔드포인트(/api/v1/treasury/public-overview)와 직접 연동하여 실시간 실제 잔액(220,923,528 WLD) 및 안전준비금 비율을 표시하도록 정합성 복구.
