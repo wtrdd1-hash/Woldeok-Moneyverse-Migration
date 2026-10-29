@@ -1,16 +1,9 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
 
+/** The backend's P0 ledger hold also applies at the browser-facing BFF boundary. */
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/pension/distribute-payouts', {
-      method: 'POST',
-    });
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || '국민연금 일괄 지급 집행에 실패했습니다.' },
-      { status: error?.status || 500 },
-    );
-  }
+  return NextResponse.json({
+    error: 'pension_ledger_settlement_uncertified',
+    message: 'Pension payouts are paused pending funded, balanced ledger settlement.',
+  }, { status: 503, headers: { 'Cache-Control': 'private, no-store' } });
 }
