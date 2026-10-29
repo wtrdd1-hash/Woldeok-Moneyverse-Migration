@@ -63,6 +63,17 @@ export interface ShopCatalogOptions {
 
 export interface ShopPurchasesOptions {
   readonly limit?: unknown;
+  readonly query?: unknown;
+}
+
+function receiptSearchTerm(value: unknown): string | null {
+  if (value === undefined) return null;
+  if (typeof value !== 'string') throw new ShopInputError('purchase search must be text');
+  const term = value.trim();
+  if (Array.from(term).length > 80 || /[\u0000-\u001f\u007f]/.test(term)) {
+    throw new ShopInputError('purchase search must be at most 80 characters without control bytes');
+  }
+  return term ? term.toLocaleLowerCase('ko-KR') : null;
 }
 
 export interface ShopPurchaseRequest {
@@ -156,12 +167,16 @@ export class ShopService {
 
   async myPurchases(
     authenticatedUserId: string,
-    { limit = 30 }: ShopPurchasesOptions = {},
+    { limit = 30, query }: ShopPurchasesOptions = {},
   ): Promise<ShopPurchaseView[]> {
     const userId = requireShopUuid(authenticatedUserId, 'authenticated user id');
-    const purchaseLimit = requireShopLimit(limit, 'purchase limit');
+    const term = receiptSearchTerm(query);
+    // The SECURITY DEFINER read model enforces owner and active-account scope.
+    // Search is intentionally limited to the latest 100 receipts, not full history.
+    const purchaseLimit = requireShopLimit(term ? 100 : limit, 'purchase limit');
     const rows = await this.repository.purchasesForUser(userId, { limit: purchaseLimit });
-    return rows.map(normalizePurchase);
+    const purchases = rows.map(normalizePurchase);
+    return term ? purchases.filter((row) => row.itemName.toLocaleLowerCase('ko-KR').includes(term)) : purchases;
   }
 
   async purchase(
