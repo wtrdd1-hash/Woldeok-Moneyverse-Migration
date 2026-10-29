@@ -15882,8 +15882,20 @@
       "backendRoute": "/api/work/tasks",
       "operationId": "WorkController_tasks",
       "backendOpenApiPath": "/work/tasks",
-      "summary": "Every task on offer, with this member’s standing against each",
-      "parameters": [],
+      "summary": "Member-scoped work tasks, optionally capped by minimum duration",
+      "parameters": [
+        {
+          "name": "maxDurationSeconds",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400,
+            "description": "Inclusive maximum of the authoritative minimum task duration in seconds"
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200

@@ -11,19 +11,23 @@ export class WorkInputError extends Error {
   }
 }
 
-/** Canonical, bounded public query value. Reject arrays, whitespace and alternate spellings. */
-export function parseWorkDifficulty(raw: unknown): number | null {
-  if (raw === undefined || raw === '') return null;
-  if (typeof raw !== 'string' || !/^[1-5]$/.test(raw)) {
-    throw new WorkInputError('difficulty must be a single integer from 1 to 5');
-  }
-  return Number(raw);
-}
-
 function assertUuid(value: unknown, field: string): asserts value is string {
   if (typeof value !== 'string' || !UUID.test(value)) {
     throw new WorkInputError(`${field} must be a UUID`);
   }
+}
+
+/** Optional read-only filter. Never interpolate member-supplied values into SQL. */
+export function parseWorkTaskMaxDuration(value: unknown): number | null {
+  if (value === undefined) return null;
+  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value)) {
+    throw new WorkInputError('maxDurationSeconds must be a whole number from 1 to 86400');
+  }
+  const seconds = Number(value);
+  if (!Number.isSafeInteger(seconds) || seconds > 86400) {
+    throw new WorkInputError('maxDurationSeconds must be a whole number from 1 to 86400');
+  }
+  return seconds;
 }
 
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
@@ -211,14 +215,8 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, difficulty: number | null = null): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, maxDurationSeconds: number | null = null): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
-    if (difficulty !== null && (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 5)) {
-      throw new WorkInputError('difficulty must be a single integer from 1 to 5');
-    }
-    // The existing SECURITY DEFINER function scopes the catalog and member standing.
-    // Filter its rows in PostgreSQL, not after truncating a client-side result.
-    const filterSql = difficulty === null ? '' : ' WHERE task.difficulty = $2::smallint';
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -227,8 +225,9 @@ export class WorkRepository {
               task.daily_limit, task.taken_today, task.reward_preview::text,
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
-       FROM public.work_task_board($1) AS task${filterSql}`,
-      difficulty === null ? [actor] : [actor, difficulty],
+       FROM public.work_task_board($1) AS task
+       WHERE ($2::integer IS NULL OR task.minimum_duration_seconds <= $2::integer)`,
+      [actor, maxDurationSeconds],
     );
     const now = Date.now();
     return rows.map((task) => {

@@ -56,14 +56,14 @@ function QuickCareerSwitchButton({
 
 export function CareerTasksBoard({
   tasks,
+  selectedMaxDuration,
   activeJobType,
   quotaBlock,
-  selectedDifficulty,
 }: {
   readonly tasks: readonly WorkTask[];
+  readonly selectedMaxDuration?: string | null;
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
-  readonly selectedDifficulty?: string | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -76,7 +76,7 @@ export function CareerTasksBoard({
   const myTasks = activeJobType ? tasks.filter((t) => t.job_type === activeJobType) : [];
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
-  const scopedTasks = filter === 'my_job' && activeJobType ? myTasks : tasks;
+  const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
@@ -131,23 +131,27 @@ export function CareerTasksBoard({
           )}
         </div>
 
-        <form action="/work" method="get" className="flex flex-wrap items-end gap-2" aria-label={isEn ? 'Filter tasks by difficulty' : '업무 난이도 필터'}>
-          <label htmlFor="work-difficulty" className="grid gap-1 text-xs text-muted-foreground min-w-0 flex-1 sm:max-w-56">
-            <span>{isEn ? 'Difficulty' : '업무 난이도'}</span>
+        <form action="/work" method="get" className="flex flex-wrap items-end gap-2">
+          <label htmlFor="work-max-duration" className="grid gap-1 text-xs text-muted-foreground">
+            <span>{isEn ? 'Maximum required task time' : '필요 수행시간 상한'}</span>
             <select
-              key={selectedDifficulty ?? 'all'}
-              id="work-difficulty"
-              name="difficulty"
-              defaultValue={selectedDifficulty ?? ''}
-              className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              id="work-max-duration"
+              name="maxDurationSeconds"
+              defaultValue={selectedMaxDuration ?? ''}
+              className="h-9 min-w-44 rounded-md border border-input bg-background px-2 text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="">{isEn ? 'All difficulties' : '전체 난이도'}</option>
-              {[1, 2, 3, 4, 5].map((level) => (
-                <option key={level} value={String(level)}>{difficultyLabel(level, locale)}</option>
-              ))}
+              <option value="">{isEn ? 'Any duration' : '전체 시간'}</option>
+              <option value="60">{isEn ? 'Up to 1 minute' : '1분 이하'}</option>
+              <option value="120">{isEn ? 'Up to 2 minutes' : '2분 이하'}</option>
+              <option value="180">{isEn ? 'Up to 3 minutes' : '3분 이하'}</option>
+              <option value="300">{isEn ? 'Up to 5 minutes' : '5분 이하'}</option>
+              <option value="600">{isEn ? 'Up to 10 minutes' : '10분 이하'}</option>
+              <option value="900">{isEn ? 'Up to 15 minutes' : '15분 이하'}</option>
             </select>
           </label>
-          <Button type="submit" variant="outline" className="min-h-11">{isEn ? 'Apply' : '적용'}</Button>
+          <Button type="submit" size="sm" variant="outline" className="min-h-9">
+            {isEn ? 'Apply duration' : '시간 필터 적용'}
+          </Button>
         </form>
 
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
@@ -167,13 +171,17 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || selectedDifficulty
+            searchQuery.trim()
               ? isEn
                 ? 'No work tasks match your search.'
                 : '검색 조건에 맞는 업무가 없어요.'
-              : isEn
-                ? 'No tasks available in this category.'
-                : '선택한 직업에 등록된 업무가 없어요.'
+              : selectedMaxDuration
+                ? isEn
+                  ? 'No tasks fit the selected time limit.'
+                  : '선택한 수행시간 이내의 업무가 없어요.'
+                : isEn
+                  ? 'No tasks available in this category.'
+                  : '선택한 직업에 등록된 업무가 없어요.'
           }
         />
       ) : (

@@ -5,7 +5,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -15,7 +14,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -30,7 +29,7 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { parseWorkDifficulty, WorkInputError, WorkRepository } from './work.repository';
+import { parseWorkTaskMaxDuration, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -102,20 +101,27 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @Header('Cache-Control', 'private, no-store')
-  @Header('X-Robots-Tag', 'noindex')
-  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
-  async tasks(@Req() request: RequestWithSession, @Query('difficulty') rawDifficulty?: unknown) {
-    return this.guarded(async () => {
-      const difficulty = parseWorkDifficulty(rawDifficulty);
-      const repository = this.repository();
-      const actor = requireUserId(request);
-      const [featureState, tasks] = await Promise.all([
-        repository.featureState(),
-        repository.tasks(actor, difficulty),
-      ]);
-      return { featureState, tasks };
-    }, 'the task board is unavailable');
+  @ApiOperation({ summary: 'Member-scoped work tasks, optionally capped by minimum duration' })
+  @ApiQuery({
+    name: 'maxDurationSeconds',
+    required: false,
+    type: Number,
+    description: 'Positive integer 1–86400; inclusive maximum of authoritative minimum task duration',
+  })
+  async tasks(
+    @Req() request: RequestWithSession,
+    @Query('maxDurationSeconds') rawMaxDuration: unknown,
+  ) {
+    const repository = this.repository();
+    const actor = requireUserId(request);
+    const [featureState, tasks] = await Promise.all([
+      repository.featureState(),
+      this.guarded(
+        () => repository.tasks(actor, parseWorkTaskMaxDuration(rawMaxDuration)),
+        'the task board is unavailable',
+      ),
+    ]);
+    return { featureState, tasks };
   }
 
   @Post('tasks/:id/complete')
