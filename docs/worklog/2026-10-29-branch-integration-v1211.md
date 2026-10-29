@@ -19,3 +19,10 @@
 
 ## FINISHED
 PENDING. No main merge, Test deployment, Production promotion, DB or ledger mutation has occurred in this task at start.
+
+## IN PROGRESS — checkpoint 2, 2026-10-29 10:27 KST
+- Fresh origin/main remained `f018d6300def45572c023c794d909691a2ce9128` on mid-check; isolated integration branch merged PR #1813 exact head `2f03d781c614ec407287f77346b2322d36caf914` via merge commit `63a56d7cd94f3c4c5e4e36ae490057f8d821d00a`, clean conflict resolution (none). This is **branch-only staging, not main integration**.
+- Reproduced GitHub CI 4 failures: frontend 2 passed / 4 failed focused tests, with legacy Next JSON publisher and fabricated active/manual-publisher UI in current main. Regression introduced after earlier merged fix #1695, tracked in git history `8780192fa` and `f05efcb5d`.
+- Restored safe Next legacy-publication retirement and administrator source from previously merged v1415 source commit `4688e84be0f831a3f6e5e16040b3764dff6d78bf`; replaced misleading disabled manual-create button with real authenticated publisher-status refresh and truthful unknown/unavailable response, no active claim. Retains verified backend `blog.rotation_2h` and explicit administrator withdrawal controls; no unsourced file writes.
+- TDD targeted `frontend/src/app/api/blog/generate/route.test.ts` and `admin-blog-client.test.tsx`: first 4 RED; final **6 PASS / 0 FAIL** (log `/srv/moneyverse-data/tasks/v1211-blog-green2.log`). Full runtime tests/build/CI remain to be run.
+- **Read-only finance readiness on actual current moneyverse-backend EnvironmentFile** returned exit 2 BLOCKED: `moneyverse_app` direct financial DML on `account_balances`, `accounts`, `system_treasury_vaults`; measured schema was `woldeok_moneyverse_dev`, 40 balances and 0 discrepant accounts in this snapshot, **NOT a certified Production DB or proof historical 18×1,000 is resolved**. Respect owner-approved grants; do not revoke. Official Test current app SHA still `cfb13272beea53c4d8c20eff7f379b6f66343033`, not this branch. Production promotion blocked.

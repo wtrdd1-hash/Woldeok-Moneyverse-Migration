@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   BookOpen,
   ExternalLink,
@@ -14,19 +13,11 @@ import {
   Globe2,
   Code2,
   TrendingUp,
-  Loader2,
-  PieChart,
-  Percent,
-  Receipt,
-  CandlestickChart,
-  FileText,
-  Clock,
-  Eye,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { BlogPost, BlogCategory, BlogCountry } from '@/app/blog/blog.types';
+import type { BlogPost, BlogCountry } from '@/app/blog/blog.types';
 
 interface Props {
   readonly initialPosts: readonly BlogPost[];
@@ -39,13 +30,9 @@ interface PublishResult {
     readonly slug: string;
     readonly title: string;
     readonly category: string;
-    readonly categoryLabel?: string;
+    readonly categoryLabel: string;
     readonly country?: string;
-    readonly publishedAt?: string;
-    readonly charCount?: number;
-    readonly readTimeMinutes?: number;
-    readonly heroImage?: string;
-    readonly infographicType?: string;
+    readonly publishedAt: string;
     readonly url: string;
   };
 }
@@ -54,92 +41,49 @@ const COUNTRY_OPTIONS: ReadonlyArray<{ id: BlogCountry; label: string; flag: str
   { id: 'KR', label: '대한민국 (KRW)', flag: '🇰🇷' },
   { id: 'US', label: '미국 (USD)', flag: '🇺🇸' },
   { id: 'JP', label: '일본 (JPY)', flag: '🇯🇵' },
-  { id: 'VN', label: '베트남 (VND)', flag: '🇻🇳' },
-];
-
-const CATEGORY_OPTIONS: ReadonlyArray<{ id: BlogCategory; label: string; icon: typeof TrendingUp; color: string }> = [
-  { id: 'MACRO', label: '거시경제 & 외환', icon: TrendingUp, color: 'text-emerald-400' },
-  { id: 'COMPOUND', label: '복리 & 72의법칙', icon: Percent, color: 'text-sky-400' },
-  { id: 'WEALTH', label: '자산배분 로드맵', icon: PieChart, color: 'text-amber-400' },
-  { id: 'STOCKS', label: '가치평가 & DCA', icon: CandlestickChart, color: 'text-purple-400' },
-  { id: 'TAX', label: '비과세 & ISA 절세', icon: Receipt, color: 'text-teal-400' },
-  { id: 'TECH', label: '핀테크 & 분산원장', icon: Code2, color: 'text-indigo-400' },
+  { id: 'CN', label: '중국 (CNY)', flag: '🇨🇳' },
 ];
 
 export function AdminBlogClient({ initialPosts }: Props) {
   const [posts, setPosts] = useState<readonly BlogPost[]>(initialPosts);
   const [selectedCountry, setSelectedCountry] = useState<BlogCountry>('KR');
-  const [selectedCategory, setSelectedCategory] = useState<BlogCategory>('MACRO');
+  const [selectedCategory, setSelectedCategory] = useState<'ECONOMY' | 'TECH'>('ECONOMY');
   const [actionSlug, setActionSlug] = useState<string | null>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [result, setResult] = useState<PublishResult | null>(null);
+  const [publisherState, setPublisherState] = useState<'unverified' | 'responded' | 'unavailable'>('unverified');
+  const [refreshingPublisher, setRefreshingPublisher] = useState(false);
 
-  // 즉시 생성 및 발행
-  const handlePublish = async () => {
-    setIsPublishing(true);
-    setResult(null);
+  // Never infer verified publication or scheduler activation from a public 200 response.
+  // The protected backend owns the authoritative publication and source evidence.
+  const refreshPublisherStatus = async () => {
+    setRefreshingPublisher(true);
+    setPublisherState('unverified');
     try {
-      const res = await fetch('/api/blog/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: selectedCategory,
-          country: selectedCountry,
-        }),
+      const response = await fetch('/api/admin/blog/publisher-status', {
+        method: 'GET',
+        cache: 'no-store',
       });
-      const data = await res.json().catch(() => ({ success: false, message: 'JSON 파싱 실패' }));
-      if (res.ok && data.success && data.post) {
-        const catObj = CATEGORY_OPTIONS.find((c) => c.id === selectedCategory);
-        const newPost: BlogPost = {
-          slug: data.post.slug,
-          title: data.post.title,
-          excerpt: data.post.excerpt || `${data.post.title}에 관한 7,000자+ 학술·수학적 심층 분석 기사입니다.`,
-          content: '',
-          category: data.post.category as BlogCategory,
-          categoryLabel: catObj?.label || data.post.category,
-          author: {
-            name: '덕이 (Deoki)',
-            role: '월덕 금융연구소 수석 AI 애널리스트',
-            badge: 'AI Analyst',
-          },
-          publishedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          readTimeMinutes: data.post.readTimeMinutes || 15,
-          tags: ['거시경제', '복리', '자산배분', '심층분석'],
-          relatedCalculatorHref: '/tools/compound-calculator',
-          relatedCalculatorName: '복리 계산기',
-          isAiGenerated: false,
-          status: 'PUBLISHED',
-          country: selectedCountry,
-          views: 0,
-          heroImage: data.post.heroImage,
-          infographicType: data.post.infographicType as any,
-        };
-        setPosts((prev) => [newPost, ...prev.filter((p) => p.slug !== newPost.slug)]);
-        setResult({
-          success: true,
-          message: `[발행 완료] 7,000자+ 심층 분석 기사와 고해상도 인포그래픽이 성공적으로 생성 및 발행되었습니다.`,
-          post: data.post,
-        });
+      const receipt: unknown = await response.json().catch(() => null);
+      if (response.ok && receipt && typeof receipt === 'object'
+          && 'success' in receipt && receipt.success === true) {
+        setPublisherState('responded');
       } else {
-        setResult({
-          success: false,
-          message: data.message || '발행 생성 실패 (권한 또는 서버 오류)',
-        });
+        setPublisherState('unavailable');
       }
-    } catch (err: unknown) {
-      setResult({
-        success: false,
-        message: err instanceof Error ? err.message : '요청 전송 중 네트워크 에러 발생',
-      });
+    } catch {
+      setPublisherState('unavailable');
     } finally {
-      setIsPublishing(false);
+      setRefreshingPublisher(false);
     }
   };
 
   // 관리자 삭제 및 철회 (소프트 삭제 vs 영구 소거)
   const handleDelete = async (slug: string, purge: boolean) => {
-    if (purge && !window.confirm(`[주의] '${slug}' 글을 디스크에서 완전히 영구 삭제하시겠습니까?`)) {
+    if (purge && !window.confirm(
+      posts.find((post) => post.slug === slug)?.verificationReceipt
+        ? `[주의] '${slug}' 글을 공개 목록에서 삭제하고 복구 불가 상태로 변경합니다. 감사 영수증은 보존됩니다. 계속하시겠습니까?`
+        : `[주의] '${slug}' 글을 디스크에서 완전히 영구 삭제하시겠습니까?`
+    )) {
       return;
     }
     setActionSlug(slug);
@@ -158,7 +102,10 @@ export function AdminBlogClient({ initialPosts }: Props) {
         }
         setResult({
           success: true,
-          message: purge ? '글이 영구 삭제되었습니다.' : '글이 철회(비공개) 처리되었습니다.',
+          message: purge
+            ? (posts.find((post)=>post.slug===slug)?.verificationReceipt
+              ? '공개 게시물이 삭제 처리되었습니다. 감사 기록은 보존됩니다.' : '글이 영구 삭제되었습니다.')
+            : '글이 철회(비공개) 처리되었습니다.',
         });
       } else {
         setResult({
@@ -186,39 +133,35 @@ export function AdminBlogClient({ initialPosts }: Props) {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-sky-400" aria-hidden="true" />
                 <CardTitle className="text-lg">AI 블로그 발행 엔진 관제</CardTitle>
-                <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-300">
-                  실시간 엔진 가동 중
+                <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-300">
+                  {publisherState === 'responded' ? '발행 서버 응답 확인 · 발행 상태 별도 검증' :
+                    publisherState === 'unavailable' ? '발행 서버 상태 확인 실패' : '자동 발행 검증 대기'}
                 </Badge>
               </div>
               <CardDescription className="text-sm mt-1 text-slate-300">
-                AI 금융·공학 롱폼 아티클(7,000자+ 및 공인 ECOS/FRED 금융 출처 인용, 수식 카드, 맞춤 인포그래픽 보장)을 실시간 생성하여 즉시 발행합니다.
+                사람의 사전·사후 승인을 요구하지 않습니다. 한국·미국·일본·중국의 국가별 공식 출처·독창성·언어 검증을 통과한 글만 서버 스케줄러가 공개할 수 있으며, 실제 자동발행은 서버 스위치와 배포 상태에 따릅니다.
               </CardDescription>
             </div>
             <Button
-              disabled={isPublishing}
-              onClick={handlePublish}
-              className="shrink-0 min-h-11 bg-sky-600 hover:bg-sky-500 text-white font-semibold gap-2 shadow-md shadow-sky-600/20 cursor-pointer disabled:cursor-not-allowed"
+              type="button"
+              disabled={refreshingPublisher}
+              onClick={refreshPublisherStatus}
+              aria-label="블로그 발행 서버 상태 새로고침"
+              className="shrink-0 min-h-11 whitespace-normal bg-slate-700 text-slate-200 font-semibold gap-2"
             >
-              {isPublishing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  7,000자 심층 분석 및 그래픽 빌드 중...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 text-sky-200" aria-hidden="true" />
-                  AI 블로그 즉시 생성 및 발행
-                </>
-              )}
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              발행 서버 상태 새로고침
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
-          <div className="rounded-lg border border-sky-500/30 bg-sky-950/30 p-3 text-xs sm:text-sm text-sky-200 flex items-center gap-2">
-            <span className="text-base">💡</span>
-            <span>2시간 주기 자동 크론 및 관리자 즉시 발행이 활성화되어 있습니다. 모든 글은 7,000자 이상의 학술적 심층 분석, 수식 모델링 카드, 고해상도 인포그래픽(1200×630)을 100% 보장합니다.</span>
-          </div>
-
+          <p id="blog-editorial-hold" role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+            {refreshingPublisher ? '발행 서버 상태 재확인 중입니다.' :
+              publisherState === 'unavailable' ? '발행 서버 상태를 확인할 수 없습니다. 안전을 위해 활성으로 표시하지 않습니다.' :
+              publisherState === 'responded' ? '발행 서버가 응답했습니다. 실제 자동 발행 활성화와 콘텐츠 검증은 별도 확인해야 합니다.' :
+              '발행 서버의 실제 상태를 확인하고 있습니다.'}
+            {' '}안전한 관리자 생성 API 구현 전 미제공. 검증 미통과 원고는 게시하지 않습니다. 기존 글의 비공개·삭제는 관리자만 수행합니다.
+          </p>
           {/* 타겟 국가 & 주제 선택 컨트롤 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-lg border border-border/50 bg-card/60 text-xs">
             {/* 국가 선택 */}
@@ -232,10 +175,11 @@ export function AdminBlogClient({ initialPosts }: Props) {
                     key={c.id}
                     type="button"
                     onClick={() => setSelectedCountry(c.id)}
-                    disabled={isPublishing}
-                    className={`px-2.5 py-1 rounded text-xs transition-colors border cursor-pointer ${
+                    disabled
+                    aria-describedby="blog-editorial-hold"
+                    className={`px-2.5 py-1 rounded text-xs transition-colors border ${
                       selectedCountry === c.id
-                        ? 'bg-sky-500/20 border-sky-400 text-sky-200 font-bold shadow-xs'
+                        ? 'bg-sky-500/20 border-sky-400 text-sky-200 font-bold'
                         : 'bg-muted/40 border-border text-muted-foreground hover:bg-muted'
                     }`}
                   >
@@ -250,27 +194,33 @@ export function AdminBlogClient({ initialPosts }: Props) {
               <span className="font-semibold text-foreground flex items-center gap-1.5">
                 <TrendingUp className="h-3.5 w-3.5 text-emerald-400" /> 콘텐츠 도메인:
               </span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {CATEGORY_OPTIONS.map((cat) => {
-                  const Icon = cat.icon;
-                  const isSelected = selectedCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat.id)}
-                      disabled={isPublishing}
-                      className={`py-1 px-2 rounded text-[11px] transition-colors border flex items-center justify-center gap-1 cursor-pointer ${
-                        isSelected
-                          ? 'bg-sky-500/20 border-sky-400 text-sky-100 font-bold shadow-xs'
-                          : 'bg-muted/40 border-border text-muted-foreground hover:bg-muted'
-                      }`}
-                    >
-                      <Icon className={`h-3 w-3 ${cat.color}`} />
-                      <span className="truncate">{cat.label}</span>
-                    </button>
-                  );
-                })}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('ECONOMY')}
+                  disabled
+                  aria-describedby="blog-editorial-hold"
+                  className={`flex-1 py-1 px-3 rounded text-xs transition-colors border flex items-center justify-center gap-1.5 ${
+                    selectedCategory === 'ECONOMY'
+                      ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 font-bold'
+                      : 'bg-muted/40 border-border text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <TrendingUp className="h-3.5 w-3.5" /> 경제 & 금융 분석
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('TECH')}
+                  disabled
+                  aria-describedby="blog-editorial-hold"
+                  className={`flex-1 py-1 px-3 rounded text-xs transition-colors border flex items-center justify-center gap-1.5 ${
+                    selectedCategory === 'TECH'
+                      ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200 font-bold'
+                      : 'bg-muted/40 border-border text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Code2 className="h-3.5 w-3.5" /> 핀테크 & 소프트웨어 공학
+                </button>
               </div>
             </div>
           </div>
@@ -309,10 +259,10 @@ export function AdminBlogClient({ initialPosts }: Props) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs text-muted-foreground border-t border-border/40">
-            <div>• 품질 게이트: <strong>7,000자+ 검증 완료</strong></div>
-            <div>• 수식/인포그래픽: <strong>100% 필수 렌더링</strong></div>
-            <div>• 자동 발행: <strong>2시간 주기 활성</strong></div>
-            <div>• 삭제 정책: <strong>2단계 안전 제어</strong></div>
+            <div>• 품질 게이트: <strong>독립 출처·언어·중복 검사</strong></div>
+            <div>• 출처 검증: <strong>공식 출처 영수증 필수</strong></div>
+            <div>• 자동 발행: <strong>서버 스케줄/스위치 상태 별도 확인</strong></div>
+            <div>• 삭제 정책: <strong>관리자 명시적 조치만 허용</strong></div>
           </div>
         </CardContent>
       </Card>
@@ -334,11 +284,9 @@ export function AdminBlogClient({ initialPosts }: Props) {
             <table className="w-full text-left text-xs">
               <thead className="border-y border-border/60 bg-muted/40 text-muted-foreground">
                 <tr>
-                  <th className="p-3 w-16">썸네일</th>
                   <th className="p-3">제목 / 슬러그</th>
                   <th className="p-3">카테고리</th>
                   <th className="p-3">국가</th>
-                  <th className="p-3">분량 / 읽기시간</th>
                   <th className="p-3">발행일시</th>
                   <th className="p-3">상태</th>
                   <th className="p-3 text-right">관리자 액션</th>
@@ -348,23 +296,8 @@ export function AdminBlogClient({ initialPosts }: Props) {
                 {posts.map((post) => {
                   const isWithdrawn = post.status === 'WITHDRAWN';
                   const isProcessing = actionSlug === post.slug;
-                  const thumb = post.heroImage || '/images/blog/compound-interest-72-rule.svg';
-                  const charEstimate = (post.content && post.content.length > 0)
-                    ? post.content.length
-                    : (post.readTimeMinutes ? post.readTimeMinutes * 500 : 7000);
                   return (
                     <tr key={post.slug} className={`hover:bg-muted/20 ${isWithdrawn ? 'opacity-60 bg-rose-950/10' : ''}`}>
-                      <td className="p-3">
-                        <div className="relative h-9 w-16 overflow-hidden rounded border border-border/60 bg-black/40">
-                          <Image
-                            src={thumb}
-                            alt=""
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        </div>
-                      </td>
                       <td className="p-3 max-w-xs">
                         <Link
                           href={`/blog/${post.slug}`}
@@ -378,23 +311,11 @@ export function AdminBlogClient({ initialPosts }: Props) {
                       </td>
                       <td className="p-3">
                         <Badge variant="outline" className="text-[10px]">
-                          {post.categoryLabel || post.category}
+                          {post.categoryLabel}
                         </Badge>
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         <span className="font-mono text-xs">{post.country || 'KR'}</span>
-                      </td>
-                      <td className="p-3 whitespace-nowrap">
-                        <div className="flex flex-col gap-0.5 text-[11px]">
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <FileText className="h-3 w-3 text-sky-400" />
-                            {charEstimate.toLocaleString()}자
-                          </span>
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <Clock className="h-3 w-3 text-emerald-400" />
-                            약 {post.readTimeMinutes || 15}분
-                          </span>
-                        </div>
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         {new Date(post.publishedAt).toLocaleString('ko-KR', {
@@ -423,7 +344,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
                               size="sm"
                               disabled={isProcessing}
                               onClick={() => handleDelete(post.slug, false)}
-                              className="h-7 px-2 text-[11px] border-amber-500/30 text-amber-300 hover:bg-amber-500/10 cursor-pointer"
+                              className="h-7 px-2 text-[11px] border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
                             >
                               <EyeOff className="h-3 w-3 mr-1" /> 철회
                             </Button>
@@ -433,7 +354,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
                             size="sm"
                             disabled={isProcessing}
                             onClick={() => handleDelete(post.slug, true)}
-                            className="h-7 px-2 text-[11px] border-rose-500/40 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
+                            className="h-7 px-2 text-[11px] border-rose-500/40 text-rose-400 hover:bg-rose-500/20"
                           >
                             <Trash2 className="h-3 w-3 mr-1" /> 영구삭제
                           </Button>
