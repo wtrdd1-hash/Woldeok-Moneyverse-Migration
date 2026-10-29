@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1511 — Owner's private Telegram stock/news and operational alert delivery
+
+- Existing paired v1510 Telegram operations monitoring is LIVE. New independent v1511 two-minute read-only systemd timer is LIVE on the Debian miniPC, verified against isolated Test DB first and the actual virtual stock database.
+- Source: PR #1903 merged at 3a34fe170. AI generated news drafts and actually published market-moving events are separately reported. Significant +/-5% sampled and +/-10% day-open WLD prices, market halts/recoveries, 09:00 KST summaries, sanitized important system journal error counts are monitored.
+- Production evidence: initial historical baseline seeded without replay flood; a later natural market scan recorded one Telegram-acknowledged event, and an explicit private-bot message returned EVENT_SENT. Original web backend/frontend remained active with identical PIDs; Test/Production /health 200, isolated Test worker PASS, 13/13 unit tests PASS, rollback timer disable/enable PASS.
+- Do not overclaim: CI runtime build jobs were skipped; no DB writes, no new stock/news events fabricated, no raw audit/ledger/member data forwarded. Current worker uses existing host Docker permissions; a narrower database reader remains a security-hardening follow-up.
+- [English release](../releases/v2026.10.29.1511.md) / [Korean](../releases/v2026.10.29.1511.ko.md) / [worklog](../worklog/2026-10-29-telegram-market-alerts-v1511.md).
+
 ## v1472 / F675-174 — Verified Member Notification Search & Stable History (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Authority, scope and cycle.** Previous Feature Improvement v1470 → Current Feature Addition v1472 → Next Feature Improvement v1474 (provisional). Authoritative main at start and mid-run: `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`; latest completed independent QA v1371 FAILED/P0; v1372 collecting, not yet a completed verdict. Source and DEV database inspected read-only. This is **documentation only**: no app, database, WLD, feature-switch, Test or Production change. Development handoff: [issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
