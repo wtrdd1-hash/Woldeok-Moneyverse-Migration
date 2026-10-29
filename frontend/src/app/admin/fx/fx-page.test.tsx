@@ -25,6 +25,7 @@ describe('FX administrator server-rendered integration', () => {
     const html = renderToStaticMarkup(await AdminFxPage());
     expect(html).toContain('role="alert"');
     expect(html).toContain('다시 조회');
+    expect(html).toContain('FX 환전·선물환 계약·정산');
     expect(html).not.toContain('1,000,000.00');
     expect(html).not.toContain('99.99%');
     expect(html).not.toContain('정상 개장');
@@ -34,6 +35,8 @@ describe('FX administrator server-rendered integration', () => {
     vi.mocked(api).mockResolvedValueOnce({ success: true, data: status });
     const html = renderToStaticMarkup(await AdminFxPage());
     expect(html).toContain('1,234.00');
+    expect(html).toContain('FX 조회 전용입니다.');
+    expect(html).toContain('role="status"');
     expect(html).toContain('1352.50');
     expect(html).toContain('금융 집행은 검증 전까지 비활성화됩니다');
     expect(html).toContain('disabled=""');

@@ -24,10 +24,17 @@ export default async function AdminFxPage() {
       {statusData === null ? (
         <div role="alert" className="grid gap-3 rounded-xl border border-amber-500/40 p-5 text-sm">
           <strong>가상 외환시장 관측 정보를 확인할 수 없습니다.</strong>
-          <p>관리자 API 또는 데이터베이스 조회가 검증되지 않아 환율·보유액·시장 상태를 표시하지 않습니다. 금융 집행도 중단됩니다.</p>
+          <p>관리자 API 또는 데이터베이스 조회가 검증되지 않아 환율·보유액·시장 상태를 표시하지 않습니다. FX 환전·선물환 계약·정산 및 관리자 집행은 원장 기반 검증 전까지 중단됩니다.</p>
           <a href="/admin/fx" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2">다시 조회</a>
         </div>
-      ) : <FxControlTower initialData={statusData} />}
+      ) : (
+        <>
+          <p role="status" className="mb-4 rounded-lg border border-amber-500/40 p-4 text-sm">
+            FX 조회 전용입니다. 환전·선물환 계약·정산 및 관리자 금융 집행은 원장 검증 전까지 중단됩니다.
+          </p>
+          <FxControlTower initialData={statusData} />
+        </>
+      )}
     </div>
   );
 }
