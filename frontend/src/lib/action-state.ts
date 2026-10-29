@@ -10,7 +10,13 @@ export interface ActionState {
   readonly status: 'idle' | 'ok' | 'error';
   readonly message?: string;
   /** Machine-readable reason for actionable recovery; never infer this from translated copy. */
-  readonly errorCode?: 'reauthentication_required';
+  readonly errorCode?: 'reauthentication_required' | 'transfer_verification_pending';
+  /** The exact transfer command held after an outcome that could have committed. */
+  readonly transferAttempt?: {
+    readonly recipientUserId: string;
+    readonly amount: string;
+    readonly idempotencyKey: string;
+  };
   /** Optional semantic tone for a successfully processed outcome. */
   readonly tone?: 'success' | 'neutral' | 'negative';
 }

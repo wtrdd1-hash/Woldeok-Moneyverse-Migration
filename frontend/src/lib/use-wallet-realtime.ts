@@ -72,11 +72,11 @@ export function useRealtimeWallet(fallbackBalance?: number): {
       if (!notif.title || !notif.message) return;
 
       if (notif.type === 'success') {
-        toast.success(notif.title, { description: notif.message });
+        toast.success(notif.title, { description: notif.message, ...(notif.id ? { id: notif.id } : {}) });
       } else if (notif.type === 'warning' || notif.type === 'alert') {
-        toast.warning(notif.title, { description: notif.message });
+        toast.warning(notif.title, { description: notif.message, ...(notif.id ? { id: notif.id } : {}) });
       } else {
-        toast.info(notif.title, { description: notif.message });
+        toast.info(notif.title, { description: notif.message, ...(notif.id ? { id: notif.id } : {}) });
       }
     };
 
