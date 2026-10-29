@@ -17,7 +17,7 @@
 ## FINISHED — 2026-10-29 22:35 KST
 - Implemented bounded administrator Treasury evidence-handling fix and added two regression tests in independent branch `fix/treasury-services-v1512-20261029`, GitHub Draft PR [#1905](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1905).
 - Focused 14/14 PASS; complete frontend 2,532 PASS / **61 FAIL** across 21 failing test files; finance QA v1374 baseline **27 FAIL**. Typecheck PASS, changed-file lint PASS, production frontend build PASS, overall lint FAIL (3 unrelated no-empty errors), mobile API contract drift FAIL.
-- Latest main after second fetch: `54b182d2214a15974350701174175f589789613b` (v1511 Telegram release documentation only), no changed-code overlaps or changed integrated plan; rebase and test to be confirmed on final branch head.
+- Latest main after second fetch: `54b182d2214a15974350701174175f589789613b` (v1511 Telegram release documentation only), no changed-code overlaps or changed integrated plan; rebase complete and focused 14/14 tests re-passed on the rebased branch.
 - Read-only Production-connected PostgreSQL BEGIN/ROLLBACK confirmed 552/552 legacy Treasury ledger rows have no canonical transaction reference; canonical Treasury account projects 0 WLD, vault rows total 220,923,528 WLD. Scope not safe for synthetic backfill, new payouts, coupon payments, SWF execution or historical retroactive allocations.
 - Production runtime unchanged, database untouched, Test exact-SHA authorized authenticated treasury finance backend acceptance **NOT DONE**; full recovery and Production promotion **HOLD**. Existing finance reconciliation issue [#1491](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1491) and historical MINT provenance [#1816](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1816) track prerequisites.
 
@@ -44,3 +44,7 @@
 ### Full frontend test and release checkpoint — 22:33–22:35 KST
 - Full `NODE_ENV=test pnpm --filter @moneyverse/frontend test`: 2,532 pass / 61 fail (21 failed suites, 455 passed suites), non-green source baseline, including central-bank status route expecting HTTP 200 but receiving 503. Do not attribute all failures to this UI-only patch; no backend finance changes made.
 - GitHub Draft PR #1905 created, **not merged**. Required full lint/API/finance/Test evidence blocks actual release.
+
+### Final exact-main code verification — 22:35 KST
+- Rebased onto `origin/main` 54b182d2214a15974350701174175f589789613b. Updated draft PR #1905 branch using the verified remote ref lease; no unrelated branch force-update.
+- Focused tests rerun on rebased code: **14/14 PASS**, diff whitespace check PASS, clean worktree. Test/frontend build previously passed before documentation-only main advancement; full exact-SHA Test/financial E2E and Production promotion remain explicitly NOT executed.
