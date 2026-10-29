@@ -1,5 +1,9 @@
 ## v2026.10.29.1364 — 예약 QA 디스크 정리 실제 수행 보완
 
+## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 쓰기 권한 보존
+- [내부](updates/v2026.10.29.1213-internal.ko.md) / [GitHub](updates/v2026.10.29.1213-github.ko.md) / [작업 기록](worklog/2026-10-29-production-promotion-v1213.ko.md). 운영 b44ffd0a SHA 검증, 미적용 SQL 23개 실제 반영, 공개 17/17 정상. 기존 체크섬 원본 이슈 별도 유지.
+
+
 ## v2026.10.29.1212 — 기존 금융 쓰기 권한 승인·Test 성공 / 운영 이력 확인 대기
 - [내부](updates/v2026.10.29.1212-internal.ko.md) · [GitHub](updates/v2026.10.29.1212-github.ko.md) · [작업 기록](worklog/2026-10-29-finance-dml-approval-and-release-v1212.ko.md). 메인 병합·공식 Test 성공, 승인 쓰기 권한 유지, 운영 체크섬 이력 확인 대기.
 

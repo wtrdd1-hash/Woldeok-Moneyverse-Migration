@@ -1,5 +1,9 @@
 ## v2026.10.29.1364 — Scheduled QA scratch clean-up follow-through
 
+## v2026.10.29.1213 — LIVE Production v1213 (b44ffd0a)
+- [Internal EN](docs/updates/v2026.10.29.1213-internal.md) / [KO](docs/updates/v2026.10.29.1213-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1213-github.md) / [KO](docs/updates/v2026.10.29.1213-github.ko.md), [Worklog](docs/worklog/2026-10-29-production-promotion-v1213.md). Live 23 DB migrations applied, owner-approved DML intact, exact PROD identity and 17/17 smoke PASS; historic checksum and auth-cookie evidence remains open.
+
+
 ## v2026.10.29.1212 — Owner-accepted existing finance DML, Test verified, Production pending
 - [Internal EN](docs/updates/v2026.10.29.1212-internal.md) / [KO](docs/updates/v2026.10.29.1212-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1212-github.md) / [KO](docs/updates/v2026.10.29.1212-github.ko.md), [Worklog](docs/worklog/2026-10-29-finance-dml-approval-and-release-v1212.md). Existing grants accepted; exact Test passed; Production NOT promoted because historical checksum provenance and final acceptance remain incomplete.
 

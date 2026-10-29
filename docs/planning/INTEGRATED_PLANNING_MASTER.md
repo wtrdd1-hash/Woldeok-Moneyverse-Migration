@@ -1,5 +1,14 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
+
+- **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.
+- Production authoritative DB restored on isolated second disk and 23 missing forward SQL rehearsed, then **applied to live PostgreSQL**: recorded migrations 270->293, latest 294, with 40 accounts, 891 ledger transactions and 1829 postings unchanged. Operator-approved existing financial DML grants preserved. No invented postings or duplicate Treasury disbursement.
+- Old processes retained, new sidecars checked, public Nginx switched after syntax+health, immutable named Production v1213 services started and re-switched without stopping only healthy backend, production-current updated. Exact Production identity checker PASS, 17/17 routes HTTP 200, 1884 auth_sessions persisted, zero service ERROR logs.
+- **Not silently resolved:** five preexisting source/migration checksums 219/220/221/234/266 mismatch (219/220 original bytes not recovered), historic Treasury source receipts and authenticated cookie replay not independently proven. Read-only finance utility still flags ONLY three owner-accepted DML conditions; preserve original report and do not claim its raw status PASS.
+- [Internal](../updates/v2026.10.29.1213-internal.md), [KO](../updates/v2026.10.29.1213-internal.ko.md), [GitHub](../updates/v2026.10.29.1213-github.md), [worklog](../worklog/2026-10-29-production-promotion-v1213.md).
+
+
 ## v2026.10.29.1212 — Owner-approved existing finance DML / official Test / Production provenance HOLD
 
 - Owner explicitly accepted and preserved moneyverse_app DML on existing accounts, account_balances and system_treasury_vaults. Do not halt solely on these specific existing privileges. Ledger, checksum, authenticated Test/session and zero-downtime obligations remain separate.
