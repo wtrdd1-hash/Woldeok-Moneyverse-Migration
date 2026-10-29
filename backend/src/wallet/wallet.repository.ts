@@ -108,6 +108,13 @@ export interface WalletRepayRow {
   readonly replayed: boolean;
 }
 
+/** Durable owner-scoped evidence; unknown does not mean safe to create a new key. */
+export interface WalletTransferEvidenceRow {
+  readonly transaction_id: string;
+  readonly transaction_type: string;
+  readonly postings: unknown;
+}
+
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
@@ -261,6 +268,34 @@ export class PostgresWalletRepository {
       [id],
     );
     return row?.user_id ? { userId: requireUuid(row.user_id, 'database recipient user id') } : null;
+  }
+
+  async transferReceiptByKey(actorUserId: string, idempotencyKey: string): Promise<WalletTransferEvidenceRow | null> {
+    const actor = requireUuid(actorUserId, 'authenticated user id');
+    const key = requireUuid(idempotencyKey, 'idempotency key');
+    // Both predicates are mandatory: an idempotency key is not an authorization token.
+    // The application already has SELECT on these ledger read-model tables;
+    // this path never receives a write grant or mutates the financial ledger.
+    return queryOne<WalletTransferEvidenceRow>(
+      this.pool,
+      `SELECT transaction_row.id::text AS transaction_id,
+              transaction_row.type AS transaction_type,
+              COALESCE((
+                SELECT jsonb_agg(jsonb_build_object(
+                  'ownerUserId', account.owner_user_id::text,
+                  'accountType', account.account_type::text,
+                  'direction', posting.direction::text,
+                  'amount', posting.amount::text
+                ) ORDER BY posting.id)
+                FROM public.ledger_postings AS posting
+                LEFT JOIN public.accounts AS account ON account.id = posting.account_id
+                WHERE posting.transaction_id = transaction_row.id
+              ), '[]'::jsonb) AS postings
+       FROM public.ledger_transactions AS transaction_row
+       WHERE transaction_row.idempotency_key = $1
+         AND transaction_row.actor_user_id = $2`,
+      [key, actor],
+    );
   }
 
   async transfer({

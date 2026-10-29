@@ -48,6 +48,7 @@ describe('wallet routes', () => {
     ['get', '/api/v1/wallet'],
     ['get', '/api/v1/bank/loans'],
     ['get', '/api/v1/rewards/availability'],
+    ['get', '/api/v1/wallet/transfers/receipts/00000000-0000-4000-8000-000000000000'],
     ['post', '/api/v1/wallet/transfers'],
     ['post', '/api/v1/bank/movements'],
     ['post', '/api/v1/bank/loans'],

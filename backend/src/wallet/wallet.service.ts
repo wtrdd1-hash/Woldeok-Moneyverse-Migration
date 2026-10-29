@@ -16,6 +16,7 @@ import type {
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
   WalletTransferInput,
+  WalletTransferEvidenceRow,
 } from './wallet.repository';
 import {
   PostgresWalletRepository,
@@ -87,6 +88,7 @@ export interface WalletRepositoryLike {
   recentTransactionsForUser(userId: string, limit: number, periodDays?: number, direction?: WalletTransactionDirection): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
+  transferReceiptByKey(actorUserId: string, idempotencyKey: string): Promise<WalletTransferEvidenceRow | null>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
   claimWork(input: WalletClaimWorkInput): Promise<WalletRewardRow>;
   rewardAvailabilityForUser?(userId: string): Promise<WalletRewardAvailabilityRow>;
@@ -388,6 +390,35 @@ export class WalletService {
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions.slice(0, limit)),
       recentTransactionsHasMore: transactions.length > limit,
+    };
+  }
+
+  async transferReceipt(authenticatedUserId: string, idempotencyKey: string): Promise<
+    | { status: 'unknown' }
+    | { status: 'committed'; transactionId: string; recipientUserId: string; amount: WldAmount }
+  > {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const key = requireUuid(idempotencyKey, 'idempotency key');
+    const row = await this.repository.transferReceiptByKey(actor, key);
+    if (!row) return { status: 'unknown' }; // An in-flight transaction may still commit.
+    if (row.transaction_type !== 'USER_TO_USER' || !Array.isArray(row.postings) || row.postings.length !== 2) {
+      throw new Error('unverifiable wallet transfer receipt');
+    }
+    const postings = row.postings as Record<string, unknown>[];
+    const sender = postings.find((posting) =>
+      posting.accountType === 'USER_CASH' && posting.ownerUserId === actor && posting.direction === 'credit');
+    const recipient = postings.find((posting) =>
+      posting.accountType === 'USER_CASH' && posting.ownerUserId !== actor && posting.direction === 'debit');
+    if (!sender || !recipient || typeof recipient.ownerUserId !== 'string'
+      || typeof sender.amount !== 'string' || typeof recipient.amount !== 'string'
+      || !/^[1-9][0-9]*$/.test(sender.amount) || sender.amount !== recipient.amount) {
+      throw new Error('unverifiable wallet transfer postings');
+    }
+    return {
+      status: 'committed',
+      transactionId: requireUuid(row.transaction_id, 'database transaction id'),
+      recipientUserId: requireUuid(recipient.ownerUserId, 'database recipient user id'),
+      amount: wldAmount(sender.amount, 'verified transfer amount'),
     };
   }
 
