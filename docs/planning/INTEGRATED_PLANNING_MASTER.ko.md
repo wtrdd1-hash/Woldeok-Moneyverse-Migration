@@ -2,6 +2,8 @@
 
 ## v1450 / F675-168 — 블로그 나중에 읽기 원본 식별·전체 철회·삭제 안전성 강화 (기능 보완 / 초안 / 운영 보류)
 
+**기획 초안 PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — 문서만 변경, 운영승격 보류.
+
 **기준 및 사이클.** 이전 v1448 기능 추가 → 현재 v1450 기능 보완 → 다음 v1452 기능 추가(잠정). 시작 main `30ef09aa17e33be6104dd97971790f00a427dafc`, QA v1360(08:18–08:26 KST) FAILED/HOLD. 선행 기획 [PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801)은 08:12:52 KST **병합**되었으나 #1790/#1794는 미병합 종료되었다. 개발 인계는 [이슈 #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). 본 문서는 기획 초안이며 기능 구현을 의미하지 않는다.
 
 ### 최신 실측과 코드상 충돌

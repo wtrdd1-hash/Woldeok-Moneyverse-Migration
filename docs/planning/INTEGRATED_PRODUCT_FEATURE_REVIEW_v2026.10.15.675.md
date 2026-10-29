@@ -2,6 +2,8 @@
 
 ## v1450 F675-168 review — clean-state and publication identity hardening (FEATURE IMPROVEMENT / HOLD)
 
+**Draft planning PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — documentation only, RELEASE HOLD.
+
 - Previous Addition v1448 → Current Improvement v1450 → Next Addition v1452; source main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED. Prior planning PR #1801 MERGED; #1800 remains engineering owner. User-requested v265 withdrew 14 legacy shared-JSON articles; 09:12 KST public blog and verified endpoints each count=0. No Save eligibility; feature flag OFF.
 - Fix design only: reconcile static/JSON/verified slug resolution; bind member saves to independently reviewed immutable publication ID/edition/epoch/revision/content digest, not slug or mutable receipt; provide deletion-safe tombstones/Remove, receipt replay, owner-only web/Android, SEO/cache purge and no WLD. P0 ENV1450-01 FIN1450-02 SEC1450-03 REL1450-04; P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. Real PG acceptance NOT RUN, official Test/Production BLOCKED. External independent approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. See integrated master and issue #1800.
 

@@ -1,5 +1,7 @@
 ## 2026-10-29 v1450 — F675-168 blog queue publication identity and clean-state hardening
 
+[Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / issue #1800.
+
 - Feature Improvement following v1448 Addition; next v1452 Addition (provisional). Main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; prior PR #1801 MERGED.
 - Live public counts at 09:12 KST: blog 0, verified blog 0; v265 records 14 legacy JSON posts withdrawn on owner request. Do not enable Save or resurrect articles.
 - Source-backed risks: static-first detail/API versus verified-first hub; migration 290 REVISE keeps receipt; DELETE invisible to public PUBLISHED reads. Harden immutable reviewed identity, epoch, tombstone Remove, signed receipts, owner security, web/Android, accessibility and SEO/cache purge. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04; P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. Real PG tests NOT RUN.

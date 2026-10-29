@@ -1,5 +1,7 @@
 ## 2026-10-29 v1450 — F675-168 블로그 저장 게시 식별·전체 철회 상태 강화
 
+[기획 PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / 개발 이슈 #1800.
+
 - v1448 추가 이후 v1450 기능 보완, 다음 v1452 추가(잠정). 기준 main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; 선행 PR #1801 병합.
 - 09:12 KST 공개 블로그/검증 API count=0; v265에는 사용자 요청으로 기존 공유 JSON 글 14건 철회 기록. 저장 CTA 활성화나 임의 재게시 금지.
 - 실제 소스상 정적 우선 본문/API와 검증 우선 목록의 slug 충돌, 마이그레이션 290의 개정 후 receipt 유지, 삭제 후 공개 조회 불가를 확인. 불변 독립 검수 식별·epoch·tombstone 제거·원본 영수증·본인 권한·웹/Android·접근성·SEO/캐시 철회 설계. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04, P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 실제 PG 시험 미실행.
