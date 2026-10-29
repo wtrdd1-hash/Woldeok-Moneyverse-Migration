@@ -2,6 +2,8 @@
 
 ## v1470 / F675-173 — Personal-data export snapshot, identity and download-proof hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**Planning Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1882 (unmerged / RELEASE HOLD).
+
 **Cycle:** Previous Feature Addition v1468 → Current Feature Improvement v1470 → Next Feature Addition v1472 (provisional). **Authority:** remote main 76d63a5840a4a185fcaeb02f8b1132dd145f19e4 checked 2026-10-29 19:09 KST; QA v1370 FAILED/P0. This is a planning specification, not an implementation or release. Previous v1468 specification was merged in Git history (6930c76ac) but its leading integrated-master and project-plan sections are absent from the latest main after v270 consolidation; this change restores those sections without reverting unrelated main edits.
 
 ### Source-backed defects and boundaries

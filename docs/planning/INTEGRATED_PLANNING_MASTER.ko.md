@@ -2,6 +2,8 @@
 
 ## v1470 / F675-173 — 개인정보 내보내기 스냅샷·본인확인·다운로드 증빙 강화 (기능 보완 / 초안 / 운영 보류)
 
+**기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1882 (미병합 / 운영 HOLD).
+
 **주기:** 이전 Feature Addition v1468 → 현재 Feature Improvement v1470 → 다음 Feature Addition v1472(잠정). **기준:** 2026-10-29 19:09 KST 확인한 원격 main 76d63a5840a4a185fcaeb02f8b1132dd145f19e4, 최신 QA v1370 FAILED/P0. 본 내용은 기획 명세이며 구현·운영 배포가 아니다. v1468 기획은 Git 이력(6930c76ac)에 병합되었지만 v270 통합 이후 최신 main의 통합 기획서·프로젝트 계획서 첫 부분에서 사라져, 이번 변경에서는 다른 main 내용을 되돌리지 않고 해당 섹션을 복원한다.
 
 ### 소스 근거 및 차단 조건

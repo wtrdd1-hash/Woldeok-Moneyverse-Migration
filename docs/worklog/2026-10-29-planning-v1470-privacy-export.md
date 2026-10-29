@@ -17,3 +17,5 @@
 - English canonical and Korean equivalent project plan + integrated master, bilingual worklog and internal/GitHub update logs are documentation-only. Verify diff and bilingual 10-ID parity before commit and PR. Main and plan rechecked mid/finish; record actual SHAs, tests and CI separately.
 - Independent externally sourced, deduplicated, actually approved references: newly 0; cumulative UNKNOWN / 10,000, gate BLOCKED / IN PROGRESS.
 - PR remains DRAFT, no merge, no schema numbering, no SQL, no Test/Production release. Development owners must resolve #1878 migration collisions and prove exact-SHA Test, independent restore and privacy/security acceptance.
+
+Draft PR #1882: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1882; developer issue #1876 updated.

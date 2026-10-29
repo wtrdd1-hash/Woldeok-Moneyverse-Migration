@@ -17,3 +17,5 @@
 - 영어 원본·한국어 동등 프로젝트 계획과 통합 마스터, 한영 작업일지 및 내부/GitHub 기록은 문서 전용이다. 커밋·PR 전 diff·양 언어 백로그 10개 일치와 main 변경을 재확인한다.
 - 외부 독립 중복 제거·실제 승인 레퍼런스 신규 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS.
 - PR DRAFT, 병합·SQL 번호 지정·DB 실행·Test/Production 배포 금지. 개발 담당자는 #1878 번호 충돌과 공식 Test 정확 SHA, 독립 복원, 개인정보 보안 시험을 해결해야 한다.
+
+Draft PR #1882: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1882; developer issue #1876 updated.

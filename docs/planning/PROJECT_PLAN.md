@@ -1,6 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.29.1470 — F675-173 personal-data export hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**Planning Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1882 (unmerged / RELEASE HOLD).
 - Previous Addition v1468 → Current Improvement v1470 → Next Addition v1472 (provisional). Remote main 76d63a5840a4a185fcaeb02f8b1132dd145f19e4 at 19:09 KST; QA v1370 FAILED/P0. Merged v1468 privacy-export sections were absent from current integrated/project plan after v270 consolidation; restored prior design without reverting other main changes. Full bilingual contract in INTEGRATED_PLANNING_MASTER and issue #1876.
 - Source-backed mismatch: ReauthGuard is 900s while export requires ≤600s; dedicated server-side owner/session-bound step-up is mandatory. Existing privacy/requests is manual, not an export service. Require class-wise snapshot cutoffs, high-water marks, complete row counts, redaction reasons and signed manifest; no false cross-class atomicity, silent 25MiB truncation or unsupported legal completeness claims.
 - Envelope AES-256-GCM protects stored objects, but downloaded ZIP is plaintext; warn users. One-use grant consumed before first byte, no Range/resume, fresh reauth/grant after interruption; separate server stream completion from client digest verification. Deletion/restriction revokes grants and uses object-version purge tombstones that survive backup restoration.
