@@ -2,7 +2,7 @@
 
 ## v2026.10.30.1496 — F675-180 관리자 전용 검증된 배포 준비 근거 매트릭스 (기능 추가 / 기획 초안 / 운영 승격 보류)
 
-**회차 및 기준.** 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 확인한 최신 main SHA는 **62c6cd038951d65c94b709302bdaec6e75b080b6**. PROJECT_PLAN.md 영어판을 정본으로 하고 한국어판은 의미가 동일한 대조 문서다. 개발 인계 [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959). 본 회차는 **문서 기획만 수행**하며 구현이나 배포 승인이 아니다.
+**회차 및 기준.** 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 확인한 최신 main SHA는 **62c6cd038951d65c94b709302bdaec6e75b080b6**. PROJECT_PLAN.md 영어판을 정본으로 하고 한국어판은 의미가 동일한 대조 문서다. 개발 인계 [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960). 본 회차는 **문서 기획만 수행**하며 구현이나 배포 승인이 아니다.
 
 ### 근거, 문제, 사용자, 기존 기능과의 경계
 - 2026-10-30 08:00 KST Debian 13.6 호스트 ROOT 사용률 96%, DATA /srv/moneyverse-data는 반올림 표시 100%이고 일반 작업자 가용 공간은 약 663MiB였다. 실제 장애 발생 증거는 아니다. 기존 [P0 사고 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170)에 따라 담당자 승인 후 용량을 확보하되, 타 작업자 폴더·백업·Git 참조·롤백 자산을 자동 삭제하지 않는다.

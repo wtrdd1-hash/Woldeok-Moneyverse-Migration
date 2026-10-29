@@ -2,7 +2,7 @@
 
 ## v2026.10.30.1496 — F675-180 Verified Admin Release-Readiness Evidence Matrix (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle and authority.** Previous Feature Improvement v1494 → Current Feature Addition v1496 → Next Feature Improvement v1498 (provisional). Fresh authoritative main SHA at start and middle: **62c6cd038951d65c94b709302bdaec6e75b080b6**. English PROJECT_PLAN.md is canonical; Korean PROJECT_PLAN.ko.md is a meaning-equivalent review copy. Development handoff: [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959). This is a documentation-only proposal, not an implementation or release authorization.
+**Cycle and authority.** Previous Feature Improvement v1494 → Current Feature Addition v1496 → Next Feature Improvement v1498 (provisional). Fresh authoritative main SHA at start and middle: **62c6cd038951d65c94b709302bdaec6e75b080b6**. English PROJECT_PLAN.md is canonical; Korean PROJECT_PLAN.ko.md is a meaning-equivalent review copy. Development handoff: [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960). This is a documentation-only proposal, not an implementation or release authorization.
 
 ### Evidence, problem, intended users, non-duplication
 - On 2026-10-30 08:00 KST, Debian 13.6 ROOT used 96%; DATA /srv/moneyverse-data was rounded to 100% with approximately 663 MiB available to unprivileged workers. These are host observations, not proof of outage. Existing [P0 incident #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170) controls owner-approved remediation; never delete worker worktrees, backups, Git refs or releases automatically.
