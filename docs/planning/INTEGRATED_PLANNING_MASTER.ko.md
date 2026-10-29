@@ -1,5 +1,43 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1488 / F675-178 — 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
+
+**회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). **기준:** main `62c6cd038951d65c94b709302bdaec6e75b080b6`, AGENTS.md·README.md·영문 PROJECT_PLAN.md(정본)·국문 대조. 시작/중간에 main과 기획서 재확인. **개발 이관:** [#1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 독립 QA v1379 금융 집중시험 6 FAIL/3 PASS, 전체 lint 오류 3건, 적용 마이그레이션 체크섬 불일치 5건. **기획만 수행**하며 구현·SQL·WLD·Test·운영 배포는 하지 않음.
+
+### 목적·대상·실제 근거·범위
+- 로그인 회원이 **본인에게 귀속되는 WLD 원장 거래**를 최대 100개 북마크하고 기기를 바꾸어 다시 찾아볼 수 있도록 함. 북마크는 개인 탐색 편의 기능이지 거래 인증서·금융 결산·신고·저장 필터·원장 수정이 아님.
+- `frontend/src/app/wallet/activity/page.tsx`는 기간별 최대 50건/페이지와 커서를 제공하지만 저장 버튼이 없고, `backend/src/wallet/wallet.controller.ts`의 `GET wallet/activity`에도 북마크 CRUD가 없음. DEV PostgreSQL 17.11 읽기 전용 조회에서 `wallet_activity_bookmarks` 테이블 없음, 거래 891건 확인(운영 데이터로 해석 금지). F675-176은 필터 저장, F675-177은 월별 요약, F675-03은 거래 설명 영수증, F675-173은 개인정보 내보내기로 서로 다른 기능임.
+- **제외:** 자유입력 메모, 개인 거래 분류, 자동 저장, 공개 공유, CSV/PDF, 원장·거래 설명·잔액·국고·대출·송금 변경. 근거 없는 정산 완료 표현 금지.
+
+### 회원 화면·CTA·상태·권한
+- 기존 비공개 `/wallet/activity`의 각 **본인 거래**에 `거래 저장`/ `저장 취소` 버튼. `저장한 거래 보기`는 비공개 `/wallet/activity/bookmarks`로 이동. 최신 북마크순 20개 기본, 최대 50개, `이전 저장 내역`/ `전체 거래로 돌아가기`. 100개 도달 시 `기존 북마크를 삭제한 후 저장하세요` 표시. 로그인·동의·세션·CSRF 검증, 클라이언트 owner/userId 입력 불허.
+- 상태: DISABLED, LOADING, READY, VERIFIED_EMPTY(성공 조회에서만), SAVING, REMOVING, ALREADY_SAVED, ALREADY_REMOVED, LIMIT_REACHED(409), SESSION_EXPIRED(401), FORBIDDEN(403), NOT_FOUND(404), CONFLICT(409), CURSOR_EXPIRED(410), RATE_LIMITED(429), OFFLINE, UNAVAILABLE(503), MALFORMED_RESPONSE(503). 실패를 빈 내역이나 저장 성공으로 표시하지 않음. 계정 전환·로그아웃 시 기존 응답과 커서 폐기.
+- 모바일 320px, 200% 확대, 키보드 포커스, 충분한 터치 영역, 버튼 접근성 이름, 상태 라이브 영역, 스크린리더·TalkBack, WCAG 2.2 AA 준수.
+
+### API 및 응답 검증
+- `GET /api/v1/wallet/activity/bookmarks?limit=20&cursor=<opaque>`: `{asOf,items:[{transactionId,bookmarkedAt,transaction:{occurredAt,label,netAmount,postings...}}],nextCursor,hasMore,limit}`. 기존 본인 거래 응답 스키마 재사용, WLD는 정밀도 손실 없는 정수 문자열. limit는 1..50 정수, 커서 최대 2048바이트. HMAC-SHA-256 커서는 회원·세션·limit·발급시각·마지막 시각(마이크로초)·UUID에 결속, 10분 만료. 저장/삭제 후 커서 무효화 및 첫 페이지 재조회. 집합 변경 중 페이지 완전 고정 보장 금지.
+- `POST /api/v1/wallet/activity/bookmarks/status` (읽기 전용): `{transactionIds:[uuid,...]}` 1..50개 중복 없는 UUID → `{bookmarkedTransactionIds:[uuid,...]}`. 타인/없는 거래는 존재 여부를 노출하지 않고 제외. 읽기 POST도 세션·CSRF 및 no-store 적용.
+- `PUT /api/v1/wallet/activity/bookmarks/:transactionId`, `DELETE`는 `Idempotency-Key` UUID 필수, 명시적 저장/삭제만 지원(토글 금지). `{transactionId,bookmarked,bookmarkedAt?,operationId,alreadyApplied,serverTime}` 응답. 동일 키·동일 회원·동일 작업·동일 거래 재요청은 원래 영수증 반환; 다른 요청으로 키 재사용 시 409. 응답 유실 재시도는 **동일 키** 유지. 24시간 지난 요청은 410, 영수증/묘비는 최소 90일 보존(보장 범위 명시).
+- NestJS·Next.js·Android가 UUID, ISO 시각, 응답 필드, WLD 정밀도, 서명 커서, 세션을 검증. 400/401/403/404/409/410/429/503 표준 오류; 형식이 잘못된 HTTP 200은 빈 목록 대신 실패 처리.
+
+### DB·트랜잭션·인덱스·권한
+- 제안 테이블 `wallet_activity_bookmarks(owner_user_id uuid REFERENCES users(id),transaction_id uuid REFERENCES ledger_transactions(id),bookmarked_at timestamptz DEFAULT now(),PRIMARY KEY(owner_user_id,transaction_id))`와 `wallet_bookmark_operation_receipts(owner_user_id,request_key,action,transaction_id,request_fingerprint,response_json,created_at,PRIMARY KEY(owner_user_id,request_key))`. NOT NULL 및 action CHECK('save','remove') 필수. `(owner_user_id,bookmarked_at DESC,transaction_id DESC)` 인덱스와 영수증 보관 정리 인덱스 검토. 금융 원장·잔액·원본 거래에는 쓰기 없음.
+- **본인 거래 판정:** `ledger_postings`→`accounts`의 `owner_user_id=인증된 회원`, `account_type IN ('USER_CASH','USER_BANK')`, `currency='WLD'`인 전표가 `EXISTS`여야 함. 다른 회원이 보낸 수신 거래도 포함하므로 `ledger_transactions.actor_user_id`로 제한하지 않음. 동결/종료 계정의 과거 거래를 잃지 않도록 `accounts.status='active'` 필터 금지. 타인 거래는 존재 여부를 숨긴 404.
+- `SECURITY DEFINER` 함수 `wallet_my_bookmark_page`, `wallet_my_bookmark_status`, `wallet_my_bookmark_apply`를 소유자 범위로 설계하고 `search_path=public,pg_temp` 고정, PUBLIC EXECUTE 회수, `moneyverse_app`에 필요한 EXECUTE만 부여. 북마크/영수증 테이블 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 권한 금지. 클라이언트가 전달한 actor를 신뢰하지 않음. 기존 `economy_post_transaction` 권한 확장 금지.
+- 한 트랜잭션에서 회원 단위 락→본인 거래 검증→기존 멱등 영수증 및 fingerprint 확인→100개 상한 확인→INSERT ON CONFLICT/DELETE→불변 영수증 기록→COMMIT. 실패 시 전체 롤백. 99/100 동시 저장도 100개 초과 금지. 동일 요청은 기존 결과 재사용, 다른 작업은 커밋 순서로 처리. 커서의 시각은 마이크로초 보존.
+- 체크섬 불일치 5건 해결 전 SQL 번호 지정/마이그레이션 실행 금지. 승인된 **전진형** 마이그레이션과 격리 PG 17.11 검증 후 도입. 롤백은 기능 플래그 OFF로 UI/API 비활성화, 북마크 데이터나 원장은 삭제하지 않음.
+
+### 보안·관리·개인정보·SEO·분석
+- 북마크는 개인 행동 메타데이터. 계정 삭제/처리 제한 정책에 맞춰 제거·차단하고 백업 복원 후 재삭제 증빙. 공개 프로필·공유·외부 분석·원시 회원/거래 ID 로깅 금지. `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`, 사이트맵·구조화 데이터 제외.
+- Android app-api allowlist 및 `Idempotency-Key`/세션/CSRF 전달, 생성 EN/KO/JSON 계약 동등성, 프록시도 no-store/noindex 강제. 관리자에게는 k≥20 코호트의 채택률·지연·오류 건수 집계만 제공하며 개인 거래 목록/금액 열람 금지.
+- 제안 제한: 회원당 읽기 30회/분, 쓰기 10회/분, 동시 쓰기 1개, DB 2초 timeout(실측 전 목표). 북마크 100개, 배치 50개, 서명 키 회전·상수시간 비교. 가설 KPI: 30일 내 거래내역 이용자의 5%가 저장 기능 사용, 조회 p95 <500ms/쓰기 <700ms, 타인 정보 노출 0, 허위 성공 0. 실측 성과로 주장 금지.
+
+### 수용시험·백로그·배포 차단
+- **계획만 수립, 미실행:** 격리 PostgreSQL 17.11에서 합성 거래 ≥10,001건(수신 거래·동결/종료 계정·동시각·다중 전표), 타인 권한 위조 100건, 99/100 경계 동시 저장 100건, 응답 유실 동일 키 재시도 50건, 세션/계정 전환 30건, 서명/만료/비정상 200/큰 WLD 정밀도·영수증 정리 경합, 접근성·Android 계약, 기존 기록 회귀 및 롤백. 원장·잔액 변경 0, 직접 app-role DML 0, 타인 노출 0을 검증.
+- **P0:** `REPO1488-01` 과거 참조 462개(비조상 346개)·브랜치 보호; `SEC1488-02` 체크섬 219/220/221/234/266 및 개발 DB 고객문의/감사 DML; `FIN1488-03` MINT 18,000 WLD·국고 552행·SWF 허위 성공·Test 합성 200; `REL1488-04` QA1379 금융 6 FAIL/lint 3, 독립 복원, frontend/backend/edge 정확 SHA, 공식 Test, GitOps, 디스크 root 87%/data 94%(임의 삭제 금지).
+- **P1:** `BOOKMARK1488-05` 소유자 SQL/테이블/인덱스/권한, `BOOKMARK1488-06` 상한·동시성·멱등 영수증, `BOOKMARK1488-07` Nest API, `BOOKMARK1488-08` Next UI/a11y, `BOOKMARK1488-09` Android/관리자/개인정보/SEO/KPI, `BOOKMARK1488-10` 실제 PG 회귀·롤백. **P0 4 + P1 6 = 총 10건**. 개발 A/B/C 별도 브랜치에서 RED/GREEN→CI→격리 DB→공식 Test exact-SHA→독립 복원→승인된 무중단 운영 승격·스모크·롤백을 증빙해야 함.
+- **외부 독립 근거 10,000건 gate:** 신규 취득·중복 제거·근거 분류 **승인 0건**, 누적 **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**. 달성 주장 금지. 기능 플래그 `wallet_activity_bookmarks` 기본 OFF, 운영 승격 **BLOCKED**.
+
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
