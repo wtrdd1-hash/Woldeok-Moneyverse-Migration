@@ -231,3 +231,14 @@ test('ordinary documentation changes remain docs-only, including deletions', () 
     assert.equal(buildReleaseInput({ repo, base: head, head: deleted }).classification, 'DOCS_ONLY');
   });
 });
+
+
+test('NUL-delimited Git diff preserves hostile filenames rather than splitting them into safe paths', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    writeFileSync(join(repo, 'docs', 'safe.md\nREADME.md'), '# Noncanonical path\n');
+    const head = commit('add hostile filename');
+    const evidence = buildReleaseInput({ repo, base, head });
+    assert.deepEqual(evidence.changedPaths, ['docs/safe.md\nREADME.md']);
+    assert.equal(evidence.classification, 'UNKNOWN');
+  });
+});

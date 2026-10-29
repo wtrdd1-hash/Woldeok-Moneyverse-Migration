@@ -12,8 +12,8 @@
 - [x] Reproduce false-green classification with synthetic executable/symlink docs changes (RED): 18 PASS / 3 expected FAIL.
 - [x] Fail closed for executable-like documentation paths and non-regular/non-0644 documentation tree modes, preserving safe Markdown/images (GREEN): classifier 21 PASS.
 - [x] Verify deletes, mixed runtime paths and immutable evidence behavior: release regression 93 PASS, security 17 PASS; rename semantics use `--no-renames` to inspect both paths.
-- [ ] Re-fetch latest main/plans and review concurrent PRs before PR.
-- [ ] Run local tests, lint, CI and isolated Test release gate as applicable.
+- [x] Re-fetch latest main/plans and review concurrent PRs before PR: main unchanged; no classifier PR collision.
+- [x] Run local tests and capture CI/Test release blockers; exact-SHA GitHub CI to be reviewed after final push.
 
 ## MID-RUN — 22:5x KST
 - Exact main rechecked: `54b182d2214a15974350701174175f589789613b` unchanged. Open Draft PRs: 8; no release classifier overlap; 2 PRs conflicting.
@@ -21,5 +21,10 @@
 - Targeted ESLint with `--no-ignore` initially found `no-control-regex`; changed implementation to character-code check rather than suppressing the lint gate.
 - Existing root node_modules is linked read-only for tests; worktree source changes remain isolated.
 
-## FINISHED
-- Pending validation. Release HOLD until all mandatory gates and exact-SHA Test evidence pass.
+## FINISHED — 23:02 KST (candidate only)
+- P0 code guard: `scripts/release/classify-release.mjs` now uses NUL-delimited diff paths and fail-closed documentation file-type/mode checks on both revisions. New tests reproduce the original 3 false-green cases (RED), then pass; 94/94 release tests PASS, 17/17 security tests PASS, changed-file ESLint with `--no-ignore` PASS, TypeScript typecheck PASS, backend build PASS, frontend build PASS with 1536 MiB Node heap (initial 1024 MiB attempt OOM).
+- Full `pnpm lint`: FAIL — 3 pre-existing `no-empty` errors in `frontend/src/components/stale-tab-notice.tsx` (QA PR #1894). Full `pnpm test`: FAIL at generated Android/mobile API contract drift (three docs files; generator output restored). Backend tests 2350 PASS / 240 FAIL / 493 SKIP; frontend test command timed out after 110 seconds with observed failures; database tests 56 PASS / 4 SKIP (no live DB). Initial typecheck missing `undici` was a reused-dependency artifact; fresh offline frozen install corrected it.
+- No real-PostgreSQL schema changes or Test E2E; exact-SHA Test/auth/finance/DB evidence remains BLOCKED. This change only affects release classification; no runtime feature implemented. No Production promotion, DB mutation, PR closure, branch deletion or rollback.
+- Branch audit after new branch: 14 remote branches including main; 13 non-main; 10 have commits not in main, 3 ancestor; 8 open Draft PRs, 2 conflicting; 0 PR SHA mismatches, 0 duplicated PR head SHA. Main still `54b182d2214a15974350701174175f589789613b`.
+- Official Test and Production version APIs both return `c2129625aa6629c616fb31ce790950618b8d92b2`, different from candidate; this is not exact-SHA acceptance.
+- Rollback: revert the classifier/test commit after review if needed; no database migration or stateful rollback. Candidate stays Draft/HOLD until full gates pass.

@@ -123,8 +123,8 @@ function gitNul(repo, args) {
 
 function isSafeDocumentBlob(repo, revision, path) {
   const entries = gitNul(repo, ['ls-tree', '-z', '--full-tree', revision, '--', `:(literal)${path}`]);
-  // A missing entry is a normal addition/deletion; inspect the other revision too.
-  if (entries.length === 0) return true;
+  // Missing on one side is a normal addition/deletion; missing on both is invalid.
+  if (entries.length === 0) return null;
   if (entries.length !== 1) return false;
   const [metadata, actualPath] = entries[0].split('\t');
   // Symlinks, gitlinks, executable files and tree entries must fail closed.
@@ -165,9 +165,12 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
     baseSha,
     repositoryHeadSha,
   ]).sort();
-  const unsafeDocumentBlob = changedPaths.some((path) =>
-    pathKind(path) === 'docs' &&
-    (!isSafeDocumentBlob(root, baseSha, path) || !isSafeDocumentBlob(root, repositoryHeadSha, path)));
+  const unsafeDocumentBlob = changedPaths.some((path) => {
+    if (pathKind(path) !== 'docs') return false;
+    const before = isSafeDocumentBlob(root, baseSha, path);
+    const after = isSafeDocumentBlob(root, repositoryHeadSha, path);
+    return (before === null && after === null) || before === false || after === false;
+  });
   // An unchanged branch ref is a no-op. Unknown paths or unsafe tree modes block release.
   const classification = baseSha === repositoryHeadSha && changedPaths.length === 0
     ? 'NO_CHANGES'
