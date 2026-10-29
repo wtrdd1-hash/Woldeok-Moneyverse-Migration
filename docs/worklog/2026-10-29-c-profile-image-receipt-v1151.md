@@ -15,3 +15,7 @@
 
 ## Finished
 - Pending.
+
+### TDD RED — 10:46 KST
+- Seven new owner-profile image receipt tests failed on the unmodified action (7 FAIL / 0 PASS): missing/foreign upload receipt, mismatched owner readback, false removal success, absent readback. Command: `pnpm --filter @moneyverse/frontend exec vitest run src/app/profile/image-action-receipts.test.ts`. Evidence `/tmp/mv-c-v1151-red.log`.
+- The backend returns 201 `{imagePath}` on upload and 204 on removal, with a separate owner-only GET settings; no DB migration required. Implement only server-side evidence checks and truthful action state.
