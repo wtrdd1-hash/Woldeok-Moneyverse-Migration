@@ -1,5 +1,5 @@
 import {
-  Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
+  BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -35,8 +35,23 @@ export class SupportController {
   constructor(@Inject(SupportRepository) private readonly support: SupportRepository | null) {}
   private repo() { if (!this.support) throw new ServiceUnavailableException('support is unavailable'); return this.support; }
 
-  @Get('threads') @ApiOperation({ summary: 'My administrator support conversations' })
-  async threads(@Req() req: RequestWithSession) { return { threads: await this.repo().myThreads(requireUserId(req)) }; }
+  @Get('threads')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'My recent administrator support conversations, optional status and literal subject search' })
+  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string) {
+    if (status !== undefined && (typeof status !== 'string' || !['open', 'waiting_user', 'resolved'].includes(status))) {
+      throw new BadRequestException('invalid support status');
+    }
+    if (q !== undefined && (typeof q !== 'string' || q.length > 80 || /[\u0000-\u001f\u007f]/.test(q) || !q.trim())) {
+      throw new BadRequestException('invalid support search');
+    }
+    const actor = requireUserId(req);
+    const threads = q === undefined
+      ? await this.repo().myThreads(actor, status ?? null)
+      : await this.repo().myThreads(actor, status ?? null, q.trim());
+    return { threads };
+  }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {
