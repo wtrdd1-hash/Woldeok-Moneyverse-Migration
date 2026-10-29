@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseSupportSummary } from '@/lib/support-summary';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -161,6 +162,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  // A stale backend must not provide invented owner-private support counts.
+  if (parts.length === 3 && parts[0] === 'support' &&
+      parts[1] === 'threads' && parts[2] === 'summary' && request.method === 'GET' && response.ok) {
+    try {
+      if (!parseSupportSummary(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
+          'support status counts are unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
+        'support status counts are unavailable');
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -169,8 +184,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work') headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'privacy' || parts[0] === 'work') headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support') headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support') headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

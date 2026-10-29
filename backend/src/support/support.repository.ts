@@ -37,6 +37,36 @@ export class SupportRepository {
       [actor, 50]);
   }
 
+  /** Owner-scoped recent-100 sample, not an all-time count. */
+  async myThreadSummary(actor: string) {
+    const row = await queryOne<{
+      readonly open: number;
+      readonly waiting_user: number;
+      readonly resolved: number;
+      readonly scanned: number;
+    }>(this.pool, `
+      SELECT
+        count(*) FILTER (WHERE status = 'open')::integer AS open,
+        count(*) FILTER (WHERE status = 'waiting_user')::integer AS waiting_user,
+        count(*) FILTER (WHERE status = 'resolved')::integer AS resolved,
+        count(*)::integer AS scanned
+      FROM public.support_my_threads($1,100)
+    `, [actor]);
+    if (!row || ![row.open, row.waiting_user, row.resolved, row.scanned]
+      .every((value) => Number.isSafeInteger(value) && value >= 0) ||
+      row.open + row.waiting_user + row.resolved !== row.scanned ||
+      row.scanned > 100) {
+      throw new Error('support summary is unavailable');
+    }
+    return {
+      open: row.open,
+      waitingUser: row.waiting_user,
+      resolved: row.resolved,
+      scanned: row.scanned,
+      mayBeIncomplete: row.scanned === 100,
+    };
+  }
+
   createThread(actor: string, key: string, subject: string, body: string) {
     return queryOne<SupportThreadRow>(this.pool,
       'SELECT thread_id::text,status,created_at FROM public.support_create_thread($1,$2,$3,$4)',
