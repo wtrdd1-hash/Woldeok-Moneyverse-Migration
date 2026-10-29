@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { api } from '@/lib/api';
+import { CasinoSelfLimitEvidenceError, verifyCasinoSelfLimit } from '@/lib/casino-self-limit-proof';
 import type { ActionState } from '@/lib/action-state';
 import type { CasinoPlayState } from './casino-state';
 import { canonicalIntegerString, groupDigits } from '@/lib/money';
@@ -158,19 +160,29 @@ export async function setSelfLimit(
         ...(lockedUntil === null ? {} : { lockedUntil }),
       },
     });
+    let persisted: unknown;
+    try {
+      persisted = await api<unknown>('/api/v1/casino/self-limit');
+    } catch {
+      throw new CasinoSelfLimitEvidenceError();
+    }
+    const verified = verifyCasinoSelfLimit({ dailyBetLimit, dailyLossLimit, lockedUntil }, receipt, persisted);
     revalidatePath('/arcade');
     revalidatePath('/casino');
 
     const stored =
-      `하루 이용 한도 ${groupDigits(receipt.daily_bet_limit)} WLD, ` +
-      `하루 손실 보호 한도 ${groupDigits(receipt.daily_loss_limit)} WLD로 저장했어요.`;
+      `하루 이용 한도 ${groupDigits(verified.daily_bet_limit)} WLD, ` +
+      `하루 손실 보호 한도 ${groupDigits(verified.daily_loss_limit)} WLD로 저장했어요.`;
     return {
       status: 'ok',
-      message: receipt.locked_until
+      message: verified.locked_until
         ? `${stored} 잠금이 풀릴 때까지 아케이드 플레이와 한도 변경이 모두 차단돼요.`
         : stored,
     };
   } catch (error) {
+    if (error instanceof CasinoSelfLimitEvidenceError) {
+      return { status: 'error', message: '보호 한도 저장 여부를 확인할 수 없어요. 화면을 새로고침해 실제 설정을 확인해 주세요.' };
+    }
     // A 409 here is most often the lock the member set earlier: the database
     // refuses to loosen a locked limit, which is the entire point of it.
     return closedOr(
