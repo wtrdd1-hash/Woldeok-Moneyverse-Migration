@@ -28,6 +28,6 @@
 
 ### Task 2 — Isolated PostgreSQL and release gates
 - [x] Verify owner/other-owner/201st-message, direct-table and PUBLIC ACL in disposable PostgreSQL.
-- [x] Run full workspace tests, typecheck, lint, backend build, audit; Next build 1GiB OOM, CI pending.
+- [x] Run full workspace tests, typecheck, lint, backend build, audit; Next build 1GiB OOM, 2GiB retry PASS, CI pending.
 - [x] Re-fetch main and plans; document remaining blockers.
 - [ ] Push Draft/HOLD PR and C handoff; do not merge without all gates.
