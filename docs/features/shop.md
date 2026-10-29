@@ -30,6 +30,15 @@ Database-side constraints reject invalid prices or impossible stock states, such
 - member inventory/collections
 - quests and progression
 
-## Member ownership filter (A0425 candidate; not released)
+## Member catalogue exact price order (A2125 source candidate, not live)
 
-Authenticated members can select **All**, **Owned**, or **Not owned** in `/shop/catalog`, combined with the existing text search. The member API accepts `GET /api/v1/shop/catalog?ownership=all|owned|unowned` (omitting the parameter means `all`). Other values return HTTP 400 before a private database read. The PostgreSQL `shop_catalog_list_v2(actor)` function returns the viewer's own `user_owned_quantity`; only this count is used, and invalid counts fail closed. No owner ID, client-submitted count, or direct table read is accepted. The public catalogue does not expose the filter. Android uses `/app-api/v1/shop/catalog?ownership=...`, forwarding the query while forcing private no-store and noindex responses. This candidate has no migration or financial write and is held from Production pending release gates.
+Authenticated `GET /api/v1/shop/catalog?sort=price_asc|price_desc` returns the
+existing actor-scoped `shop_catalog_list_v2` items ordered by the database's
+canonical integer-string prices using `BigInt` (stable code/ID ties).
+An absent `sort` preserves the existing database order; any other value is
+HTTP 400 before reading the catalogue. The member web search form keeps its
+chosen order, and the Android `/app-api/v1/shop/catalog` gateway forwards
+the same query with private/no-store/noindex responses, including failures.
+Ordering is informational only; a purchase still rechecks price, stock and
+eligibility in its existing transaction. No migration, price lock or WLD debit
+is introduced. Draft PR #1745 remains release-gated.

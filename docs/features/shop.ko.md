@@ -22,6 +22,12 @@
 - 회원 인벤토리/컬렉션
 - 퀘스트 및 성장
 
-## 회원 보유 여부 필터 (A0425 후보·미배포)
+## 회원 카탈로그 가격순 정렬 (A2125 코드 후보, 운영 미적용)
 
-로그인한 회원은 `/shop/catalog`에서 **전체 상품**, **보유 중**, **미보유**를 선택하고 검색어와 함께 사용할 수 있습니다. 회원 API `GET /api/v1/shop/catalog?ownership=all|owned|unowned`는 생략 시 전체를 반환하며, 잘못된 값은 비공개 DB 조회 전에 HTTP 400으로 거부합니다. PostgreSQL `shop_catalog_list_v2(actor)`가 인증된 회원의 `user_owned_quantity`를 직접 반환하므로 사용자 ID나 보유 수량을 클라이언트에서 지정하지 않습니다. 공개 카탈로그는 영향을 받지 않습니다. Android `/app-api/v1/shop/catalog?ownership=...`는 검색 조건을 전달하면서 응답을 비공개·캐시 금지·검색 제외로 처리합니다. 신규 마이그레이션·금융 원장 변경은 없으며, 운영 배포는 승인 게이트 충족 전까지 보류합니다.
+로그인 회원은 `/shop/catalog`에서 기본순·낮은 가격순·높은 가격순을 선택할 수 있습니다.
+`GET /api/v1/shop/catalog?sort=price_asc|price_desc`는 기존 회원별 PostgreSQL 조회
+결과의 정수 문자열 가격을 서버에서 `BigInt`로 비교합니다. 동일 가격은 코드/ID로
+안정 정렬하며, 정렬 값이 없으면 기존 순서를 유지하고 잘못된 값은 조회 전 400입니다.
+Android `/app-api/v1/shop/catalog`에서도 같은 쿼리를 전달하며 오류 응답까지
+`private, no-store`와 `noindex`를 적용합니다. 실제 결제 가격·재고는 구매 트랜잭션에서
+다시 확인합니다. 신규 마이그레이션·가격 예약·WLD 변동은 없습니다. PR #1745는 운영 보류입니다.
