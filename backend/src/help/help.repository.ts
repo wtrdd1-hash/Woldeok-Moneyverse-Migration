@@ -13,6 +13,9 @@ export interface HelpSummary {
 export interface HelpArticle extends HelpSummary {
   readonly body_plain: string;
   readonly source_url: string;
+  readonly published_revision_id: string;
+  readonly article_version: string;
+  readonly content_digest: string;
 }
 
 /** Only SECURITY DEFINER published-only reads; no app-table access. */
@@ -25,7 +28,7 @@ export class HelpRepository {
   }
   article(locale: string, slug: string) {
     return queryOne<HelpArticle>(this.pool,
-      'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at FROM public.help_public_article($1,$2)',
+      'SELECT article_id::text,locale,slug,category,title,summary,body_plain,source_url,published_at,published_revision_id::text,article_version::text,content_digest FROM public.help_public_article_revision($1,$2)',
       [locale, slug]);
   }
   async adminCreate(actor: string, session: string, key: string, draft: HelpDraftInput): Promise<string | null> {
