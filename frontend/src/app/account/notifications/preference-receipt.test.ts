@@ -25,6 +25,22 @@ describe('member notification preference persistence', () => {
     expect(mocks.revalidate).toHaveBeenCalledWith('/quests');
   });
 
+  it('confirms enabled preference with matching backend and database-backed readback', async () => {
+    mocks.mutate.mockResolvedValue({ notifications_enabled: true });
+    mocks.read.mockResolvedValue({ notifications_enabled: true });
+    await expect(saveGoalNotifications(preference('true'))).rejects.toThrow('REDIRECT:/account/notifications?saved=1');
+    expect(mocks.mutate).toHaveBeenCalledWith('/api/v1/engagement/preferences', {
+      method: 'PUT', body: { notificationsEnabled: true },
+    });
+  });
+
+  it('does not claim success if the owner dashboard cannot be fetched', async () => {
+    mocks.mutate.mockResolvedValue({ notifications_enabled: true });
+    mocks.read.mockRejectedValue(new Error('dashboard unavailable'));
+    await expect(saveGoalNotifications(preference('true'))).rejects.toThrow('REDIRECT:/account/notifications?error=save');
+    expect(mocks.revalidate).not.toHaveBeenCalled();
+  });
+
   it.each([null, {}, { notifications_enabled: true }, { notifications_enabled: 'false' }])(
     'rejects missing, contradictory or non-boolean PUT receipts: %s', async (receipt) => {
       mocks.mutate.mockResolvedValue(receipt);

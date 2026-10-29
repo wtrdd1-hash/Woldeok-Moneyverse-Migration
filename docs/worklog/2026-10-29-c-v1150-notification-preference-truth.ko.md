@@ -16,3 +16,11 @@
 - RED: 액션 테스트 9건 실패, UI 상태 검증 1건 실패 재현.
 - GREEN: 집중 테스트 12/12 통과. PUT 결과와 서버 GET 재조회가 요청값과 일치해야 성공 표시. 잘못된 상태 응답은 '알림 꺼짐'으로 표시하지 않고 오류 안내.
 - 사용자별 비캐시 API와 기존 PostgreSQL 함수를 그대로 사용. 최신 main/양국어 기획서 재확인.
+
+## 로컬 검증 종료 — 2026-10-29 09:59 KST
+- 집중 Frontend 14/14 PASS, 전체 Frontend 1,916 PASS / 기존 블로그 관련 4 FAIL. Backend 1,955 PASS / 440 SKIP, Database 46 PASS / 4 SKIP, Contract 38 PASS.
+- Typecheck, Lint(오류 0), Frontend/Backend Build, app-api 180개 계약 PASS. 백업 증거 단위검사 6 PASS.
+- 별도 PostgreSQL 17.11 컨테이너에서 마이그레이션 290개 적용, 관련 DB/API 테스트 41 PASS. 앱 계정 금융잔액 직접 UPDATE 거부 확인. 컨테이너/임시 자격증명 제거.
+- 보안 감사 운영 Moderate 1건, 전체 Low 3건/Moderate 9건 FAIL. 블로그 4건도 기존 main 회귀로 남음.
+- 최신 main `2ac90063d45cfab879d4fb36863484d8a423deba` 및 영·한 기획서 재확인. 다른 개발자 브랜치/작업폴더 보존, 삭제 없음.
+- 공식 exact-SHA Test 인증 E2E 미실행, GitOps/Production 배포 및 main 병합 금지. PR/CI 상태는 GitHub에서 별도 기록 예정.
