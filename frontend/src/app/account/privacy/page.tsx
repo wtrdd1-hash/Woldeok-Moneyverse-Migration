@@ -33,9 +33,17 @@ const REQUEST_TYPE_NAME: Readonly<Record<string, string>> = {
   deletion: '개인정보 삭제 요청',
 };
 
-export default async function AccountPrivacyPage() {
+export default async function AccountPrivacyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
   await requireMember();
-  const privacyData = await apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests');
+  const { type } = await searchParams;
+  const selectedType = typeof type === 'string' && Object.hasOwn(REQUEST_TYPE_NAME, type) ? type : null;
+  const privacyData = selectedType
+    ? await apiOrNull<{ requests: PrivacyRequest[] }>(`/api/v1/privacy/requests?type=${selectedType}`)
+    : await apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests');
 
   return (
     <div data-page="account-privacy" className="mv-page mv-page--member grid gap-6">
@@ -61,8 +69,23 @@ export default async function AccountPrivacyPage() {
             <Card>
               <CardHeader><CardTitle className="text-base">내 요청 기록</CardTitle></CardHeader>
               <CardContent>
+                <nav aria-label="개인정보 요청 종류 필터" className="mb-4 flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant={selectedType === null ? 'default' : 'outline'}>
+                    <Link href="/account/privacy" aria-current={selectedType === null ? 'page' : undefined}>전체</Link>
+                  </Button>
+                  {Object.entries(REQUEST_TYPE_NAME).map(([value, label]) => (
+                    <Button asChild size="sm" variant={selectedType === value ? 'default' : 'outline'} key={value}>
+                      <Link href={`/account/privacy?type=${value}`} aria-current={selectedType === value ? 'page' : undefined}>
+                        {label}
+                      </Link>
+                    </Button>
+                  ))}
+                </nav>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  {selectedType ? '최근 100건의 요청 중 선택한 종류를 최대 30건 표시합니다.' : '최근 30건의 요청을 표시합니다.'}
+                </p>
                 {privacyData.requests.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">아직 기록한 개인정보 요청이 없어요.</p>
+                  <p className="text-sm text-muted-foreground">{selectedType ? '최근 100건에서 해당 종류의 요청이 없어요.' : '아직 기록한 개인정보 요청이 없어요.'}</p>
                 ) : (
                   <ul className="grid gap-3">
                     {privacyData.requests.map((request) => (

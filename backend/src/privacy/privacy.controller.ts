@@ -6,11 +6,12 @@ import {
   Header,
   Inject,
   Post,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -61,8 +62,17 @@ export class PrivacyController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Data subject requests the caller has made' })
-  async list(@Req() request: RequestWithSession) {
-    return { requests: await this.service().myRequests(requireUserId(request)) };
+  @ApiQuery({ name: 'type', required: false, enum: PRIVACY_REQUEST_TYPES, description: 'Filter the latest 100 owner-scoped requests by type' })
+  async list(@Req() request: RequestWithSession, @Query('type') type?: unknown) {
+    try {
+      return { requests: await this.service().myRequests(requireUserId(request),
+        type === undefined ? {} : { requestType: type }) };
+    } catch (error: unknown) {
+      if (error instanceof PrivacyRequestInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Post()

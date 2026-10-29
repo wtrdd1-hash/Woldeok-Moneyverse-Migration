@@ -138,6 +138,7 @@ export interface PrivacyRequestCreateDto {
 
 export interface PrivacyRequestListDto {
   readonly limit?: unknown;
+  readonly requestType?: unknown;
 }
 
 /**
@@ -203,10 +204,17 @@ export class PrivacyRequestService {
     input: PrivacyRequestListDto = {},
   ): Promise<PrivacyRequestListedItem[]> {
     const actorUserId = requirePrivacyRequestUuid(authenticatedUserId, 'authenticated user id');
-    const dto = exactObject(input, 'privacy request list', new Set(['limit']));
+    const dto = exactObject(input, 'privacy request list', new Set(['limit', 'requestType']));
     const requestLimit = requirePrivacyRequestLimit(dto.limit ?? 30);
     try {
-      const rows = await this.repository.listMyRequests({ actorUserId, limit: requestLimit });
+      const requestType = dto.requestType === undefined
+        ? undefined
+        : requirePrivacyRequestType(dto.requestType);
+      const rows = await this.repository.listMyRequests({
+        actorUserId,
+        limit: requestLimit,
+        ...(requestType === undefined ? {} : { requestType }),
+      });
       return rows.map(normalizeListedRequest);
     } catch (error) {
       if (accountUnavailable(error)) throw new PrivacyRequestAccountUnavailableError();
