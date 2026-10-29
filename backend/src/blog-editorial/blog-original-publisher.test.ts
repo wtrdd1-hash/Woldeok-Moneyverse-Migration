@@ -69,15 +69,19 @@ describe('native Ollama constrained JSON article generation', () => {
     const raw = article(slot.country);
     const client = vi.fn().mockImplementation(async (_endpoint: string, opts: RequestInit) => {
       const params = JSON.parse(String(opts.body));
-      expect(params.format.required).toEqual(['title','excerpt','content']);
       expect(params.options.num_ctx).toBe(8192);
       expect(params.stream).toBe(false);
-      return new Response(JSON.stringify({message:{content:JSON.stringify(raw)},done_reason:'stop'}),{
+      const payload=params.format
+        ? JSON.stringify({title:raw.title,excerpt:raw.excerpt})
+        : raw.content;
+      if (params.format) expect(params.format.required).toEqual(['title','excerpt']);
+      return new Response(JSON.stringify({message:{content:payload},done_reason:'stop'}),{
         status:200,headers:{'content-type':'application/json'},
       });
     });
     await expect(generateLocalOriginalArticle(slot,source,{model:'gemma3:1b',fetcher:client})).resolves.toEqual(raw);
     expect(client.mock.calls[0]![0]).toBe('http://127.0.0.1:11434/api/chat');
+    expect(client).toHaveBeenCalledTimes(2);
   });
   it('refuses incomplete or non-JSON model outputs instead of fabricating article fields', async()=>{
     const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({message:{content:'not json'},done_reason:'stop'}),{status:200}));
