@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -367,4 +367,132 @@ export function SwfControlPanel({
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium flex flex-wrap items-center justify-between gap-1.5">
                 <span className="shrink-0">국부펀드 투자 자산 (AUM)</span>
-                {totalAum > 25000000 && (\n                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">\n                    투자 비중 과다 경고\n                  </Badge>\n                )}\n              </div>\n              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">\n                {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">\n                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>\n              </div>\n            </div>\n\n            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">\n              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>\n              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">\n                {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">\n                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)\n              </div>\n            </div>\n\n            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">\n              <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>\n              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">\n                +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>\n              </div>\n              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">\n                평가익 30% 국고 회수 환원 · 70% 자산 재투자\n              </div>\n            </div>\n          </div>\n\n          {/* 3대 자산 배분 비중 바 */}\n          <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 space-y-2">\n            <div className="flex justify-between items-center text-xs text-slate-300">\n              <span className="font-semibold">헌법적 3대 자산 복리 배분 비중</span>\n              <div className="flex gap-4">\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 60%</span>\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 30%</span>\n                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 10%</span>\n              </div>\n            </div>\n            <div className="w-full h-2.5 rounded-full bg-slate-700/60 overflow-hidden flex">\n              <div style={{ width: '60%' }} className="bg-blue-500 h-full" />\n              <div style={{ width: '30%' }} className="bg-amber-500 h-full" />\n              <div style={{ width: '10%' }} className="bg-emerald-500 h-full" />\n            </div>\n          </div>\n\n          {/* 4대 우량주 보유 포트폴리오 카드 그리드 */}\n          <div>\n            <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">\n              <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>\n              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>\n            </div>\n            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">\n              {portfolios.map((item) => (\n                <div\n                  key={item.id}\n                  className=\"p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/40 flex flex-col justify-between\"\n                >\n                  <div>\n                    <div className=\"flex items-center justify-between\">\n                      <span className=\"font-mono text-xs font-bold text-blue-400\">\n                        {item.asset_symbol}\n                      </span>\n                      <Badge variant=\"outline\" className=\"text-[10px] text-slate-400 border-slate-700 py-0 px-1.5\">\n                        우량주\n                      </Badge>\n                    </div>\n                    <div className=\"text-xs text-slate-300 font-medium mt-1 truncate\">\n                      {item.asset_name}\n                    </div>\n                  </div>\n\n                  <div className=\"mt-3 pt-2.5 border-t border-slate-700/40 space-y-1\">\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">보유 수량:</span>\n                      <span className=\"font-mono font-medium text-slate-200\">\n                        {Number(item.quantity).toLocaleString()}주\n                      </span>\n                    </div>\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">평가 금액:</span>\n                      <span className=\"font-mono font-bold text-emerald-400\">\n                        {Number(item.current_valuation_wld).toLocaleString()} WLD\n                      </span>\n                    </div>\n                    <div className=\"flex justify-between text-xs\">\n                      <span className=\"text-slate-400\">평가 손익:</span>\n                      <span className=\"font-mono text-emerald-400 font-medium\">\n                        +{Number(item.unrealized_pnl_wld).toLocaleString()} WLD\n                      </span>\n                    </div>\n                  </div>\n                </div>\n              ))}\n            </div>\n          </div>\n\n          {/* 최근 자율 복리 집행 타임라인 */}\n          {events.length > 0 && (\n            <div className=\"pt-2\">\n              <div className=\"text-xs font-semibold text-slate-300 mb-2\">📜 최근 자율 성장 및 투자 집행 이력</div>\n              <div className=\"space-y-1.5 max-h-40 overflow-y-auto pr-1\">\n                {events.slice(0, 5).map((ev) => (\n                  <div\n                    key={ev.id}\n                    className=\"p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/30 flex items-center justify-between text-xs\"\n                  >\n                    <div className=\"text-slate-300 truncate max-w-[80%]\">\n                      {ev.summary}\n                    </div>\n                    <div className=\"text-[10px] text-slate-500 font-mono whitespace-nowrap\">\n                      {new Date(ev.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}\n                    </div>\n                  </div>\n                ))}\n              </div>\n            </div>\n          )}\n        </CardContent>\n      </Card>\n    </div>\n  );\n}
+                {totalAum > 25000000 && (
+                  <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">
+                    투자 비중 과다 경고
+                  </Badge>
+                )}
+              </div>
+              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
+              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>
+              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
+                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
+              <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>
+              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+                +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
+                평가익 30% 국고 회수 환원 · 70% 자산 재투자
+              </div>
+            </div>
+          </div>
+
+          {/* 3대 자산 배분 비중 바 */}
+          <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 space-y-2">
+            <div className="flex justify-between items-center text-xs text-slate-300">
+              <span className="font-semibold">헌법적 3대 자산 복리 배분 비중</span>
+              <div className="flex gap-4">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 60%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 30%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 10%</span>
+              </div>
+            </div>
+            <div className="w-full h-2.5 rounded-full bg-slate-700/60 overflow-hidden flex">
+              <div style={{ width: '60%' }} className="bg-blue-500 h-full" />
+              <div style={{ width: '30%' }} className="bg-amber-500 h-full" />
+              <div style={{ width: '10%' }} className="bg-emerald-500 h-full" />
+            </div>
+          </div>
+
+          {/* 4대 우량주 보유 포트폴리오 카드 그리드 */}
+          <div>
+            <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">
+              <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>
+              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {portfolios.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/40 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-blue-400">
+                        {item.asset_symbol}
+                      </span>
+                      <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700 py-0 px-1.5">
+                        우량주
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-slate-300 font-medium mt-1 truncate">
+                      {item.asset_name}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-700/40 space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">보유 수량:</span>
+                      <span className="font-mono font-medium text-slate-200">
+                        {Number(item.quantity).toLocaleString()}주
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">평가 금액:</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        {Number(item.current_valuation_wld).toLocaleString()} WLD
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">평가 손익:</span>
+                      <span className="font-mono text-emerald-400 font-medium">
+                        +{Number(item.unrealized_pnl_wld).toLocaleString()} WLD
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 최근 자율 복리 집행 타임라인 */}
+          {events.length > 0 && (
+            <div className="pt-2">
+              <div className="text-xs font-semibold text-slate-300 mb-2">📜 최근 자율 성장 및 투자 집행 이력</div>
+              <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                {events.slice(0, 5).map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="p-2.5 rounded-lg bg-slate-800/30 border border-slate-700/30 flex items-center justify-between text-xs"
+                  >
+                    <div className="text-slate-300 truncate max-w-[80%]">
+                      {ev.summary}
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-mono whitespace-nowrap">
+                      {new Date(ev.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
