@@ -6,8 +6,13 @@ export class CollectionService {
   constructor(private readonly repo: PostgresCollectionRepository) {}
 
   async listCollections(userId: string) {
-    const unverifiedRecords = await this.repo.countUnverifiedCollections(userId);
-    return { pieces: [], unverifiedRecords, verificationStatus: 'unavailable' as const };
+    try {
+      const unverifiedRecords = await this.repo.countUnverifiedCollections(userId);
+      return { pieces: [], unverifiedRecords, verificationStatus: 'unavailable' as const };
+    } catch {
+      // Missing schema/privilege evidence must not become a fabricated empty collection.
+      throw new ServiceUnavailableException('collection provenance metadata unavailable');
+    }
   }
 
   async updatePiece(_userId: string, _pieceId: string, _userNote?: string, _isFavorite?: boolean) {

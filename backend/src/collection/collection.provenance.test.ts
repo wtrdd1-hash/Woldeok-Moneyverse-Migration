@@ -27,6 +27,12 @@ describe('P0 collection provenance quarantine', () => {
     expect(query.mock.calls[0]?.[1]).toEqual([actor]);
   });
 
+  it('returns 503 without inventing an empty collection when count proof is unavailable', async () => {
+    const { query, controller } = fixture();
+    query.mockRejectedValueOnce(Object.assign(new Error('permission denied'), { code: '42501' }));
+    await expect(controller.listCollections(request)).rejects.toMatchObject({ status: 503 });
+  });
+
   it('GET curation status does not create progress or claim a verified ladder step', async () => {
     const { query, controller } = fixture();
     const result = await controller.getCurationStatus(request);

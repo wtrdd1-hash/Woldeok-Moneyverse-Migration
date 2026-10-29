@@ -28,3 +28,8 @@ Pending verification. Release HOLD until all gates pass.
 - Full lint FAIL 3 baseline stale-tab errors; backend full 2,353 PASS / 240 FAIL / 494 SKIP; frontend full exceeded 105s and contains existing failures; mobile API contract FAIL generated docs drift (reverted generated artifacts).
 - Frontend Next compilation/TypeScript/607 static pages PASS, but standalone copy ENOSPC on `/srv/moneyverse-data` (197GB 100% used). Safely removed only this worktree's generated `.next`; no other developer files touched.
 - Official Test exact SHA and authenticated E2E, independent restore, release gates remain BLOCKED. No merge or Production deployment.
+
+### Post-review correction (07:17 KST)
+- Additional RED test reproduced a raw `42501` DB failure leaking through GET as 500; backend now returns explicit 503 `collection provenance metadata unavailable`, never an invented empty verified collection. Backend target 7 PASS, typecheck and changed lint PASS.
+- Public Test and Production `/health` HTTP 200 and `/api/version` both report old `c2129625aa6629c616fb31ce790950618b8d92b2`; neither serves this candidate. Read-only only. Official authenticated exact-SHA Test remains BLOCKED.
+- PR #1955 is Draft. No PR/branch deletion, main merge, Test/Production deployment, DB mutation or rollback.

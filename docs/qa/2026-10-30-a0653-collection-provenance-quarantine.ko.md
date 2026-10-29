@@ -6,4 +6,4 @@
 
 신규 306 마이그레이션은 `SECURITY DEFINER` 소유자별 개수 조회 함수만 추가하며 앱 계정에 테이블 접근권한을 부여하지 않는다. 격리 PostgreSQL 17.11에서 총 305개 SQL 적용, 사용자별 2/1/0건 분리 및 무단 UPDATE 거부를 확인했다.
 
-Backend 대상 6건, Frontend/Android 대상 41건 PASS, 전체 Typecheck PASS. 전체 Lint 기존 오류 3건, Backend 전체 240 FAIL, Frontend 전체·API 계약 및 정확 SHA Test 미완료, 로컬 Frontend Build는 스토리지 ENOSPC로 실패했다. **main 병합과 운영 배포 금지.**
+Backend 대상 7건, Frontend/Android 대상 41건 PASS, 전체 Typecheck PASS. 전체 Lint 기존 오류 3건, Backend 전체 240 FAIL, Frontend 전체·API 계약 및 정확 SHA Test 미완료, 로컬 Frontend Build는 스토리지 ENOSPC로 실패했다. **main 병합과 운영 배포 금지.**

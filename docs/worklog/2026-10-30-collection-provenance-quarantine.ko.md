@@ -18,6 +18,10 @@
 
 ### 07:15 중간 검증
 - 신규 마이그레이션 306 포함 총 305개 SQL 적용, 격리 PostgreSQL 사용자별 개수 2/1/0 검증, 앱 계정 직접 테이블 접근 거부.
-- 대상 Backend 6건, Frontend/Android/API 41건 PASS, DB 단위 56건 PASS/4건 SKIP, 전체 Typecheck PASS, 보안 의존성 알려진 취약점 0건.
+- 대상 Backend 7건, Frontend/Android/API 41건 PASS, DB 단위 56건 PASS/4건 SKIP, 전체 Typecheck PASS, 보안 의존성 알려진 취약점 0건.
 - 전체 Lint 기존 오류 3건, Backend 전체 240건 실패, Frontend 전체 105초 초과, 모바일 API 계약 생성문서 불일치. Frontend 빌드는 607개 페이지 생성까지 성공했으나 스토리지 부족으로 최종 복사 실패.
 - 다른 브랜치·운영 DB·서비스·원장 변경 없음. 병합/배포 HOLD.
+
+### 07:17 추가 보완
+- DB 조회권한 오류가 발생하면 기존 500 대신 명시적인 503을 반환하도록 수정. Backend 대상 7건 PASS.
+- 공식 Test/Production의 `/api/version`은 모두 기존 SHA `c2129625aa6629c616fb31ce790950618b8d92b2`; 후보가 배포된 상태가 아님. PR #1955 Draft, 운영 배포 보류.
