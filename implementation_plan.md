@@ -1279,3 +1279,32 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
 - `moneyverse-release-v1502-frontend.service`: active (running), 포트 3565
 - 엔드포인트 `/frontend-version`: `{"id":"1793275423184"}` 최신 빌드 서빙 중
 - Git 메인 커밋: `f9fd7774`
+
+
+---
+
+## 🚀 [v275 Specification] 상단 헤더 네비게이션 UI 정상화 & 모바일 크롬 새로고침 배너 잔존 완전 해결
+
+### 1. 현상 분석 및 원인 규명
+1. **상단 헤더 네비게이션 찌그러짐 및 스크롤바 생성**:
+   - `site-header.tsx` 내 `<nav>`에 `overflow-x-auto` 및 `tabIndex={0}`이 적용되어 있어, 1920px 해상도에서도 Windows Chrome 네이티브 회색 가로 스크롤바 및 포커스 링이 렌더링되고 메뉴가 비정상적으로 압축됨.
+2. **모바일 크롬 새로고침 버튼/배너 무한 잔존 버그**:
+   - `next.config.ts`에서 빌드 시점의 `BUILD_ID`와 런타임 서버의 `GET /frontend-version` 반환값이 서로 다른 타임스탬프로 평가되어 영구 불일치 발생.
+   - 클라이언트 번들의 `mine`과 서버의 `id`가 달라 새로고침을 수행해도 매번 불일치로 판정되어 `캐시에 막혔습니다` 배너가 무한 루프로 잔존함.
+
+### 2. 세부 조치 및 수정 내역
+1. **헤더 네비게이션 UI 정상화 ([site-header.tsx](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/components/site-header.tsx))**:
+   - `<nav>` 컨테이너에서 불필요한 `tabIndex={0}`, `overflow-x-auto`, `overscroll-x-contain`, `min-w-0 flex-1` 완전 제거.
+   - `className="hidden xl:flex items-center gap-1 xl:gap-2 shrink-0"`로 재정의하여 1280px 이상에서 여유롭고 깔끔한 단일 가로 라인 정렬 확보.
+   - 모바일/태블릿 반응형 분기를 `xl:hidden`으로 일치시켜 화면 폭 부족 시 햄버거 메뉴 Sheet로 자연스럽게 전환되도록 최적화.
+2. **빌드 ID 일치성 보장 ([frontend-version/route.ts](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/app/frontend-version/route.ts) & [next.config.ts](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/next.config.ts))**:
+   - 빌드 시 `.build_id` 및 `.next/BUILD_ID`에 단 하나의 불변 빌드 식별자 고정 생성.
+   - `GET /frontend-version` API가 런타임 시 실제 빌드 아티팩트(`.next/BUILD_ID`)를 직접 읽어 클라이언트 번들의 `NEXT_PUBLIC_BUILD_ID`와 100% 동일한 값(`1793276504914`)을 반환하도록 보장.
+3. **새로고침 배너 무한 잔존 해소 및 즉시 강제 리프레시 ([stale-tab-notice.tsx](file:///c:/Users/sds/Desktop/tset/Woldeok-Moneyverse-Migration/frontend/src/components/stale-tab-notice.tsx))**:
+   - 최신 버전 일치 시 `setStale(false)` 및 `sessionStorage.removeItem(REFRESH_KEY)` 즉시 실행하여 배너와 버튼 완전 소멸.
+   - 새 배포 감지 시 사용자가 누를 때까지 기다리지 않고, 로그인 세션을 유지한 채 최신 페이지로 즉시 자동 강제 새로고침(`executeHardRefresh`) 수행.
+
+### 3. 검증 결과 (Verification Evidence)
+- 운영 프론트엔드 최적화 빌드 완료 (`BUILD_ID: 1793276504914`).
+- `GET /frontend-version`: `{"id":"1793276504914"}` ➔ 클라이언트 번들과 100% 일치 실측 확인.
+- `moneyverse-release-v1502-frontend.service`: active (running), 정상 구동 확인.
