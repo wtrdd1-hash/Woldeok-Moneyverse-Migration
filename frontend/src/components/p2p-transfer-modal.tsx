@@ -221,11 +221,11 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
             <p className="text-xs text-muted-foreground mt-1">
               {localeLabel(
                 locale,
-                '원장 거래 번호가 확인되었습니다. 지갑 거래 내역에서도 확인할 수 있습니다.',
-                'Ledger transaction ID verified. You can also check wallet history.',
-                '台帳の取引IDを確認しました。ウォレット履歴でも確認できます。',
-                '已验证账本交易编号，也可在钱包历史记录中查看。',
-                'Đã xác minh mã giao dịch. Bạn cũng có thể xem lịch sử ví.'
+                '서버가 거래번호를 반환했습니다. 지갑 내역에서 실제 반영을 확인해 주세요.',
+                'Server returned a transaction ID. Confirm the posting in wallet history.',
+                'サーバーが取引IDを返しました。ウォレット履歴で記録を確認してください。',
+                '服务器已返回交易编号。请在钱包历史记录中确认。',
+                'Máy chủ đã trả về mã giao dịch. Hãy kiểm tra lịch sử ví để xác nhận.'
               )}
             </p>
 

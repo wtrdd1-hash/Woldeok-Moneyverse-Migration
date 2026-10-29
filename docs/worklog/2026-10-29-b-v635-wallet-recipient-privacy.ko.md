@@ -18,3 +18,4 @@
 - RED: Backend 6건, Frontend 5건, 허위 P2P 영수증 1건. GREEN: Backend 집중 10/10(실제 HTTP 410/no-store 포함), Frontend 집중 5/5.
 - 전체 테스트 PASS: Contract 38, DB 46/4 skip, Backend 1,975/440 skip, Frontend 1,921. Typecheck PASS, Build PASS(609 정적 페이지), Lint 오류 0/경고 1,088.
 - 보안 감사 FAIL: 기존 `qs@6.16.0` Moderate 1건(별도 PR #1687). 실제 PostgreSQL 통합·Android E2E·운영자 정책 승인·공식 Test exact-SHA 미완료. 병합·운영 승격 보류.
+- 추가 RED/GREEN: 서버의 거래번호 반환을 실제 원장 반영 확인과 혼동하지 않도록 문구 수정. 지갑 내역 확인 안내, 별도 영수증 API 구현으로 보고하지 않음.

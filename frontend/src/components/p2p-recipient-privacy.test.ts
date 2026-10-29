@@ -10,5 +10,6 @@ describe('P2P recipient privacy and usable exact-ID transfer', () => {
     expect(source).toContain('recipientUserId');
     expect(source).toContain('UUID');
     expect(source).not.toContain('Math.random().toString(36)');
+    expect(source).not.toContain('Ledger transaction ID verified.');
   });
 });

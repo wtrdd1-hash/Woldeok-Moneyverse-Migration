@@ -21,3 +21,4 @@
 - `pnpm typecheck`: PASS. `pnpm build`: PASS (Next.js 609 static pages). `pnpm lint`: PASS (0 errors, 1,088 preexisting warnings).
 - `pnpm audit --prod`: FAIL, 1 moderate `qs@6.16.0` advisory, owned by separate Draft PR #1687; not silently bypassed.
 - Real PostgreSQL full integration, Android authenticated E2E, owner policy approval, official isolated Test exact-SHA and Production release gates: BLOCKED/HOLD. No financial DB writes.
+- Follow-up RED/GREEN: P2P success copy no longer claims a UUID-shaped response independently verifies ledger posting; members are directed to check their wallet history. This is copy accuracy, not a new receipt API.
