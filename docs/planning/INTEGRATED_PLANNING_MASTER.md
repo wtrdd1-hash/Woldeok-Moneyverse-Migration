@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1452 operational correction — activated scheduler leader
+- The deployed v1502 `c2129625` already includes the news deduplication code, but legacy production news scheduling remained on old port-3000 code. On Oct 29 at 15:22 KST the scheduler backend was switched to the v1502 immutable artifact, leaving public Nginx/3564/3565 untouched. Leader health and exact SHA were verified. Pre-existing active headlines remain until expiry, and next scheduled issue observation is outstanding. [Release proof](../releases/v2026.10.29.1452-news-scheduler.md).
+
+
 ## v2026.10.29.1502 — Live correction with financial execution still held
 - v1501 central-bank admin truth and SWF containment were promoted to official Test and LIVE Production 2026-10-29. Exact application source c2129625aa6629c616fb31ce790950618b8d92b2, main merged PR #1845 as 679cb5904f779a1b2067f10809fcca83e31dbe91 (identical app source tree).
 - Read-only Production ledger shows no unexplained account drift/unbalanced transactions; the raw financial gate remains BLOCKED only for three owner-accepted existing DML grants. Actual mint acceptance, monetary-policy publication and SWF cash liquidation are NOT restored; explicit 503 is intentional.
