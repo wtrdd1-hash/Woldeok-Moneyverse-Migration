@@ -159,7 +159,8 @@ test('automated integration only enumerates open PR branches, not every branch',
 
 test('merged branch cleanup batches PR evidence and uses local ancestry', async () => {
   const workflow = await readFile(new URL('../../.github/workflows/cleanup-merged-branches.yml', import.meta.url), 'utf8');
-  assert.match(workflow, /git for-each-ref --merged/);
+  assert.match(workflow, /git for-each-ref --format/);
   assert.match(workflow, /pulls\?state=closed&base=main&per_page=100/);
-  assert.match(workflow, /--force-with-lease/);
+  assert.doesNotMatch(workflow, /\bgit\s+push\b|--force-with-lease/);
+  assert.match(workflow, /Read-only merged branch retention inventory/);
 });
