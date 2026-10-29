@@ -16,7 +16,7 @@ docker exec -i "$NAME" psql -U postgres -v ON_ERROR_STOP=1 < "$ROOT/migrations/2
 # RED baseline: v288 accidentally grants direct SELECT of withdrawn content.
 printf "SET ROLE moneyverse_app; SELECT has_table_privilege(current_user,'public.blog_verified_articles','SELECT');\n" |
   docker exec -i "$NAME" psql -U postgres -At -v ON_ERROR_STOP=1 | grep -qx t
-docker exec -i "$NAME" psql -U postgres -v ON_ERROR_STOP=1 < "$ROOT/migrations/292-verified-blog-visibility-boundary.sql" >/dev/null
+docker exec -i "$NAME" psql -U postgres -v ON_ERROR_STOP=1 < "$ROOT/migrations/298-verified-blog-visibility-boundary.sql" >/dev/null
 cat <<'SQL' | docker exec -i "$NAME" psql -U postgres -v ON_ERROR_STOP=1 >/dev/null
 INSERT INTO public.blog_verified_articles
 (period_key,slug,country,locale,topic,title,excerpt,content,primary_source_url,source_digest,content_digest,evidence,status)

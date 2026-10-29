@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const migration = 'migrations/292-verified-blog-visibility-boundary.sql';
+const migration = 'migrations/298-verified-blog-visibility-boundary.sql';
 
 describe('QA #1661 verified blog visibility boundary', () => {
   it('revokes app-role direct article SELECT without modifying applied migration 288', () => {
