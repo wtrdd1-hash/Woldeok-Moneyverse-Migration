@@ -59,8 +59,26 @@ describe('ChatUploadController', () => {
 
     const res = await controller.uploadChatImage(req, file);
     expect(res.success).toBe(true);
-    expect(res.storageKey).toBe('chat_123.png');
+    expect(res).not.toHaveProperty('storageKey');
     expect(res.url).toBe('/api/v1/content/chat/media/chat_123.png');
+  });
+
+  it('does not disclose scanner details to the uploader', async () => {
+    const req = { session: { user_id: 'user_1' } } as RequestWithSession;
+    const file = { buffer: Buffer.from('malicious'), originalname: 'bad.png', size: 9, mimetype: 'image/png' };
+    vi.mocked(mockStorage.save!).mockRejectedValue(new AntivirusThreatError('EICAR_TEST_VIRUS', 'private scanner rule and path'));
+    const failure = await controller.uploadChatImage(req, file).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(BadRequestException);
+    expect(JSON.stringify((failure as BadRequestException).getResponse())).not.toContain('private scanner rule and path');
+  });
+
+  it('returns an unavailable error without disclosing filesystem or scanner internals', async () => {
+    const req = { session: { user_id: 'user_1' } } as RequestWithSession;
+    const file = { buffer: Buffer.from('clean'), originalname: 'clean.png', size: 5, mimetype: 'image/png' };
+    vi.mocked(mockStorage.save!).mockRejectedValue(new Error('EACCES /srv/private/chat-secret-path'));
+    const failure = await controller.uploadChatImage(req, file).catch((error: unknown) => error);
+    expect((failure as BadRequestException).getStatus()).toBe(503);
+    expect(JSON.stringify((failure as BadRequestException).getResponse())).not.toContain('/srv/private/chat-secret-path');
   });
 
   it('바이러스 감지(AntivirusThreatError) 시 관리자 디스코드 알림을 트리거하고 BadRequestException을 던진다', async () => {

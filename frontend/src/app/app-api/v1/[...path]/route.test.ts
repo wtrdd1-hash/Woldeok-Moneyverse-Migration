@@ -24,6 +24,28 @@ afterEach(() => {
 
 describe('app API route compatibility', () => {
 
+  it('never forwards internal chat storage keys to Android clients, including legacy upstream images', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      success: true, url: '/api/v1/content/chat/media/chat_123.png', storageKey: 'chat_123.png',
+      mimeType: 'image/png', width: 10, height: 10, size: 128,
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/content/chat/upload', {
+      method: 'POST', headers: { 'content-type': 'application/json', cookie: 'mv_session=owner', 'x-csrf-token': 'csrf' },
+      body: JSON.stringify({ file: 'test-only' }),
+    });
+    const response = await POST(req, context('content', 'chat', 'upload'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toEqual({
+      success: true, url: '/api/v1/content/chat/media/chat_123.png',
+      mimeType: 'image/png', width: 10, height: 10, size: 128,
+    });
+    const [, init] = fetchSpy.mock.calls[0]!;
+    expect(new Headers(init?.headers).get('x-csrf-token')).toBe('csrf');
+  });
+
   it('forwards approved help category counts with locale and never caches public Android responses', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
