@@ -17,6 +17,10 @@ SELECT ('00000000-0000-4000-9000-' || lpad(i::text,12,'0'))::uuid,
  '22222222-2222-4222-8222-222222222222'::uuid,
  'TRANSACTIONAL', 'foreign', 'foreign', '2026-10-28T00:00:00Z'::timestamptz
 FROM generate_series(1,100) i;
+-- Mark 10 owner records as read; the owner unread-only query must return 45, never 55 or foreign rows.
+UPDATE public.in_app_notifications SET is_read = true
+WHERE user_id='11111111-1111-4111-8111-111111111111'::uuid
+  AND id IN (SELECT id FROM public.in_app_notifications WHERE category='TRANSACTIONAL' ORDER BY id LIMIT 10);
 PREPARE notification_owner_list(uuid,text,boolean,int,int) AS
  SELECT id::text, category, title, body, link, dedupe_key, is_read, read_at, created_at
  FROM public.in_app_notifications
@@ -49,6 +53,16 @@ BEGIN
  SELECT count(*) INTO v_foreign FROM public.in_app_notifications
  WHERE user_id='11111111-1111-4111-8111-111111111111'::uuid AND title='foreign';
  IF v_foreign<>0 THEN RAISE EXCEPTION 'foreign owner data leaked'; END IF;
+ SELECT count(*) INTO v_count FROM (
+  SELECT id FROM public.in_app_notifications
+  WHERE user_id='11111111-1111-4111-8111-111111111111'::uuid
+    AND category='TRANSACTIONAL' AND is_read=FALSE
+  ORDER BY created_at DESC,id DESC LIMIT 100
+ ) s;
+ IF v_count<>45 THEN RAISE EXCEPTION 'owner unread filter expected 45, got %',v_count; END IF;
+ SELECT count(*) INTO v_foreign FROM public.in_app_notifications
+ WHERE user_id='22222222-2222-4222-8222-222222222222'::uuid AND is_read=FALSE;
+ IF v_foreign<>100 THEN RAISE EXCEPTION 'fixture foreign owner changed unexpectedly'; END IF;
  RAISE NOTICE 'PASS synthetic PG owner category-before-limit and tie ordering';
 END $$;
 ROLLBACK;

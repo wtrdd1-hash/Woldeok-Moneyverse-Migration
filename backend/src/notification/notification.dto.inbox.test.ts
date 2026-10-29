@@ -11,4 +11,14 @@ describe('notification filter validation', () => {
     const bad = plainToInstance(NotificationQueryDto, { unreadOnly: 'nonsense', category: 'ANY', offset: '5001' });
     expect((await validate(bad)).length).toBeGreaterThanOrEqual(3);
   });
+  it('supports an explicit Android-compatible unread-only query while rejecting malformed values', async () => {
+    const valid = plainToInstance(NotificationQueryDto, { unreadOnly: 'true', category: 'SYSTEM', limit: '21' });
+    expect(valid.unreadOnly).toBe(true);
+    expect(await validate(valid)).toHaveLength(0);
+    for (const value of ['1', 'TRUE', '', 'null']) {
+      const invalid = plainToInstance(NotificationQueryDto, { unreadOnly: value });
+      expect(await validate(invalid)).not.toHaveLength(0);
+    }
+  });
+
 });

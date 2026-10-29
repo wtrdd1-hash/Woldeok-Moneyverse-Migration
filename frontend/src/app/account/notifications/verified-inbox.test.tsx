@@ -51,4 +51,21 @@ describe('real member notification inbox', () => {
     expect(screen.getByRole('button', { name: /실제 송금/ }).getAttribute('aria-label')).toContain('읽지 않음');
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
   });
+  it('offers an accessible unread-only view and combines it with owner category filtering', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ notifications: [] }) });
+    vi.stubGlobal('fetch', fetch);
+    render(<NotificationTabsBar />);
+    const unread = screen.getByRole('button', { name: '읽지 않은 알림만 보기' });
+    expect(unread.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(unread);
+    expect(unread.getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => String(url).includes('unreadOnly=true'))).toBe(true));
+    fireEvent.click(screen.getByRole('button', { name: '거래' }));
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) =>
+      String(url).includes('category=TRANSACTIONAL') && String(url).includes('unreadOnly=true'))).toBe(true));
+    fireEvent.click(unread);
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) =>
+      String(url).includes('category=TRANSACTIONAL') && !String(url).includes('unreadOnly=true'))).toBe(true));
+  });
+
 });

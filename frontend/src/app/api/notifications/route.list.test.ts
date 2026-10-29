@@ -18,4 +18,18 @@ describe('verified notification BFF list', () => {
     }
     expect(api).not.toHaveBeenCalled();
   });
+  it('forwards explicit unread filters for both browser and Android-compatible owner API', async () => {
+    for (const value of ['true', 'false']) {
+      const response = await GET(new Request('https://example.test/api/notifications?unreadOnly=' + value));
+      expect(response.status).toBe(200);
+      expect(api).toHaveBeenCalledWith('/api/v1/notifications?limit=50&offset=0&unreadOnly=' + value);
+    }
+  });
+  it('rejects ambiguous repeated filter parameters without invoking the backend', async () => {
+    for (const query of ['unreadOnly=true&unreadOnly=false', 'category=SYSTEM&category=TRANSACTIONAL', 'limit=20&limit=100']) {
+      expect((await GET(new Request('https://example.test/api/notifications?' + query))).status).toBe(400);
+    }
+    expect(api).not.toHaveBeenCalled();
+  });
+
 });

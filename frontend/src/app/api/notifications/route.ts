@@ -21,6 +21,10 @@ export async function GET(req: Request): Promise<NextResponse> {
     'TRANSACTIONAL', 'PRODUCT_ACTIVITY', 'SEASON_LIVEOPS', 'SECURITY_CRITICAL',
     'BUSINESS', 'BANK', 'SEASON', 'SPACE', 'SECURITY', 'SYSTEM',
   ]);
+  // Reject ambiguous filters rather than letting the first duplicate silently win.
+  if (['unreadOnly', 'category', 'offset', 'limit'].some((key) => searchParams.getAll(key).length > 1)) {
+    return NextResponse.json({ error: 'Ambiguous notification filter' }, { status: 400, headers: privateHeaders });
+  }
   if (!/^[0-9]{1,3}$/.test(limit) || Number(limit) < 1 || Number(limit) > 100 ||
       !/^(0|[1-9][0-9]{0,3})$/.test(offset) || Number(offset) > 5000 ||
       (category !== null && !allowed.has(category)) ||
@@ -29,7 +33,7 @@ export async function GET(req: Request): Promise<NextResponse> {
   }
 
   try {
-    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam === 'true' ? '&unreadOnly=true' : ''}`);
+    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam !== null ? '&unreadOnly=' + unreadParam : ''}`);
     if (!Array.isArray(items)) throw new Error('Invalid feed');
     return NextResponse.json({ notifications: items }, { headers: privateHeaders });
   } catch {
