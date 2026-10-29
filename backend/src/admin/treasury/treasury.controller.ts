@@ -422,6 +422,7 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/liquidate')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
   async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
     if (!this.swfService) {

@@ -50,10 +50,8 @@ export function SwfControlPanel({
   initialPortfolios = [],
   initialEvents = [],
 }: Props) {
-  const [portfolios, setPortfolios] = useState<SwfPortfolioItem[]>(initialPortfolios);
-  const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
-  const [rebalancing, setRebalancing] = useState(false);
-  const [liquidating, setLiquidating] = useState(false);
+  const portfolios = initialPortfolios;
+  const events = initialEvents;
   const [savingConfig, setSavingConfig] = useState(false);
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
@@ -61,7 +59,7 @@ export function SwfControlPanel({
   const [reinvestRatio, setReinvestRatio] = useState<number>(initialConfig?.reinvestment_ratio_pct ?? 15);
   const [maxInvestCap, setMaxInvestCap] = useState<number>(initialConfig?.max_investment_ratio_pct ?? 20);
   const [safeReserve, setSafeReserve] = useState<string>(initialConfig?.safe_reserve_wld || '25000000');
-  const [maxSingle, setMaxSingle] = useState<string>(initialConfig?.max_single_investment_wld || '10000000');
+  const maxSingle = initialConfig?.max_single_investment_wld || '10000000';
 
   const totalAum = portfolios.reduce(
     (acc, p) => acc + Number(p.current_valuation_wld || 0),
@@ -104,69 +102,6 @@ export function SwfControlPanel({
     }
   }
 
-  async function handleTriggerRebalance() {
-    setRebalancing(true);
-    try {
-      const res = await fetch('/api/admin/treasury/swf', {
-        method: 'POST',
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.executed) {
-        toast.success('국고 복리 성장 및 자율 리밸런싱이 집행되었습니다!', {
-          description: `총 AUM: ${Number(data.totalAumWld || 0).toLocaleString()} WLD (세수 +${Number(data.taxCollectedWld || 0).toLocaleString()} WLD, 수익 실현 +${Number(data.harvestedWld || 0).toLocaleString()} WLD, 재투자 ${Number(data.reinvestedWld || 0).toLocaleString()} WLD)`,
-        });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
-      } else {
-        toast.info('성장 엔진 평가 완료 (대기 상태)', {
-          description: data.reason || '조건을 확인해주세요.',
-        });
-      }
-    } catch {
-      toast.error('성장 엔진 집행 요청 중 오류가 발생했습니다.');
-    } finally {
-      setRebalancing(false);
-    }
-  }
-
-  async function handleLiquidateToTreasury() {
-    if (!window.confirm('과도하게 투자된 주식 자금을 매도 회수하여 국고 금고 현금으로 환원(현금 85% : 주식 15% 목표)하시겠습니까?')) {
-      return;
-    }
-    setLiquidating(true);
-    try {
-      const res = await fetch('/api/admin/treasury/swf/liquidate', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.success) {
-        toast.success('국고 자금 정상화 회수가 성공적으로 집행되었습니다!', {
-          description: `회수된 현금: +${Number(data.liquidatedWld || 0).toLocaleString()} WLD | 확보된 국고 현금: ${Number(data.vaultCashAfter || 0).toLocaleString()} WLD | 잔여 포트폴리오: ${Number(data.portfolioAfter || 0).toLocaleString()} WLD`,
-        });
-        const refreshRes = await fetch('/api/admin/treasury/swf');
-        if (refreshRes.ok) {
-          const refreshed = await refreshRes.json();
-          if (refreshed.portfolios) setPortfolios(refreshed.portfolios);
-          if (refreshed.events) setEvents(refreshed.events);
-        }
-      } else {
-        toast.error(data.error || '자금 회수 중 오류가 발생했습니다.');
-      }
-    } catch {
-      toast.error('네트워크 통신 중 오류가 발생했습니다.');
-    } finally {
-      setLiquidating(false);
-    }
-  }
-
   const floorReserve = Number(safeReserve || 25000000);
   const treasuryPreserveRatio = Math.max(0, 100 - reinvestRatio);
 
@@ -205,6 +140,10 @@ export function SwfControlPanel({
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
+          <p role="status" className="rounded-lg border border-amber-600/40 bg-amber-950/30 p-3 text-xs text-amber-200">
+            자동 복리 성장과 포트폴리오 즉시 회수는 영속 복식부기 원장 정산 증빙이 없어 중지되었습니다.
+            아래 설정값의 허용 여부는 실행 중이라는 의미가 아니며, 임의 자산 환원은 수행되지 않습니다.
+          </p>
           {/* 실시간 국고 안전 보존 vs 투자 비율 시각화 게이지 */}
           <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
             <div className="flex justify-between items-center text-xs">
@@ -342,7 +281,7 @@ export function SwfControlPanel({
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-200">
-                자율 국부펀드(ASWF) 투자 엔진 상태: {isEnabled ? '정상 가동 중' : '긴급 투자 동결 (0% 완전 중단)'}
+                자율 국부펀드 설정: {isEnabled ? '정책상 허용' : '정책상 동결'} / 실행 엔진: 원장 정산 인증 전 중지
               </span>
             </div>
             <div className="flex gap-2">
@@ -352,7 +291,7 @@ export function SwfControlPanel({
                 onClick={() => setIsEnabled(!isEnabled)}
                 className="text-xs h-8"
               >
-                {isEnabled ? '🛑 투자 즉시 긴급 동결 (0%)' : '▶️ 정상 가동 재개'}
+                {isEnabled ? '🛑 투자 정책 동결 (저장 필요)' : '▶️ 투자 정책 허용 (저장 필요)'}
               </Button>
             </div>
           </div>
@@ -372,7 +311,7 @@ export function SwfControlPanel({
                   </CardTitle>
                 </div>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs shrink-0 whitespace-nowrap">
-                  {isEnabled ? '자율 구동 중 (1시간 주기)' : '투자 일시 동결됨'}
+                  자동 구동 중지 — 원장 정산 미인증
                 </Badge>
               </div>
               <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
@@ -382,19 +321,19 @@ export function SwfControlPanel({
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
               <Button
                 size="sm"
-                onClick={handleLiquidateToTreasury}
-                disabled={liquidating}
-                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto"
+                disabled
+                title="원장 정산 증빙 없는 가상 투자 회수는 국고 잔액과 복식부기 원장을 불일치시킬 수 있습니다."
+                className="w-full sm:w-auto"
               >
-                {liquidating ? '회수 환원 진행 중...' : '🏦 주식 자금 즉시 회수 (현금 85% 정상화)'}
+                🏦 주식 자금 회수 — 원장 검증 대기
               </Button>
               <Button
                 size="sm"
-                onClick={handleTriggerRebalance}
-                disabled={rebalancing}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md active:scale-95 transition-all w-full sm:w-auto"
+                disabled
+                title="자동 복리 성장 엔진은 정산 원장 미연결로 중지 상태입니다."
+                className="w-full sm:w-auto"
               >
-                {rebalancing ? '성장 평가 및 집행 중...' : '⚡ 즉시 복리 성장 트리거'}
+                ⚡ 복리 성장 — 원장 정산 대기
               </Button>
             </div>
           </div>

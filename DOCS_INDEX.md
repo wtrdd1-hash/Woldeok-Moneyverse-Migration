@@ -1,3 +1,6 @@
+## v2026.10.29.1501 — Central bank console truth and SWF fail-closed source candidate
+- [EN worklog](docs/worklog/2026-10-29-central-bank-swf-controls-v1501.md) / [KO](docs/worklog/2026-10-29-central-bank-swf-controls-v1501.ko.md) · [Internal EN](docs/updates/v2026.10.29.1501-internal.md) / [KO](docs/updates/v2026.10.29.1501-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1501-github.md) / [KO](docs/updates/v2026.10.29.1501-github.ko.md) · [Release EN](docs/releases/v2026.10.29.1501.md) / [KO](docs/releases/v2026.10.29.1501.ko.md). SQLSTATE 42P08 is confirmed in live v1213, but unreceipted SWF liquidation is held, not fake-fixed.
+
 ## v2026.10.29.1364 — Scheduled QA scratch clean-up follow-through
 
 ## v2026.10.29.1213 — LIVE Production v1213 (b44ffd0a)
