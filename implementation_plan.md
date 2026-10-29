@@ -1193,3 +1193,29 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
      - 1502 운영 백엔드(`moneyverse-release-v1502-backend.service`) 및 프론트엔드(`moneyverse-release-v1502-frontend.service`, 포트 3565) 빌드 성공 및 active running 확인.
      - 실서버 실측: `https://easy-scraping.com/api/admin/central-bank/status` ➔ HTTP/2 200 OK 및 실시간 M0/M1/M2 거시경제 통화량, 기준금리(3.25%), 지준율(7.0%) 정상 반환 확인.
      - `https://easy-scraping.com/api/admin/treasury/swf` ➔ 503 차단 해제 및 정식 보안 가드(`login required` 401) 확인.
+
+
+---
+## 🚀 [v272 Specification] 배포 업데이트 시 세션 유지 및 최신 웹페이지 자동 강제 새로고침(Hard Refresh) 체계 구축
+- **적용 일시**: 2026-10-29 20:41 KST
+- **요구사항**: "업데이트시 로그인는 유지하고 강제 새로고침진행해줘 웹페이지 새로가져오게"
+- **핵심 설계 및 구현**:
+  1. **다계층 업데이트 감지 트리거 (Multi-Event Detection)**:
+     - 점검 주기 단축: 기존 5분(300,000ms)에서 45초(45,000ms)로 대폭 단축하여 배포 직후 빠르게 새 버전 감지.
+     - 탭 가시성 변화(`visibilitychange`): 다른 탭/앱에서 돌아왔을 때 즉시 감지.
+     - 창 포커스(`focus`): 브라우저 클릭/포커스 시 즉시 감지.
+     - 네트워크 재연결(`online`): 인터넷 복구 시 즉시 감지.
+     - 라우트 전환(`usePathname`, `useSearchParams`): 사용자가 메뉴 이동 시 백그라운드 버전 점검.
+  2. **로그인 세션 100% 보존 (Zero-Session-Loss)**:
+     - 세션 쿠키(HttpOnly) 및 백엔드 인증 세션은 일체 건드리지 않고 브라우저가 온전히 보존.
+     - `SessionKeepAlive`와 완벽히 협력하여 새로고침 후에도 로그인 상태가 풀리지 않고 즉시 유지됨.
+  3. **브라우저 캐시 무효화 및 강제 새로고침 (Hard Cache-Busted Reload)**:
+     - Service Worker 및 브라우저 Cache Storage(`window.caches.delete`) 자동 소거.
+     - URL에 릴리즈 캐시 버스터 파라미터(`__mv_release=<newBuildId>`)를 적용하여 디스크/메모리 캐시 원천 우회 후 `replace` + `reload` 실행.
+     - 새 버전 로드 완료 후 `clearReleaseParam`으로 URL 정리.
+  4. **작업 보호 및 무한 루프 방지 (UX Safety Guards)**:
+     - 폼 입력 보호: `isUserActivelyTyping` 감지를 통해 사용자가 글 작성 중일 때 즉시 덮어쓰지 않고 배너/버튼으로 안전 대기.
+     - 무한 루프 차단: `moneyverse-release-refresh` transition 키 관리로 프록시 캐시 정체 시 반복 새로고침 방어.
+  5. **프로덕션 빌드 및 라이브 실측**:
+     - 1502 프론트엔드(`moneyverse-release-v1502-frontend.service`, 포트 3565) 빌드 성공 (609개 라우트 컴파일 통과).
+     - 새 빌드 ID `{"id":"1793273930745"}` 및 `cache-control: private, no-cache, no-store, max-age=0, must-revalidate` 실시간 서빙 검증 완료.
