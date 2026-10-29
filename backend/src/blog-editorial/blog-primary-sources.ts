@@ -17,12 +17,23 @@ export function sourceUrlFor(slot: BlogRotationSlot): string {
 }
 
 export function extractPrimarySourceText(html: string): string {
-  return html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+  const clean=(text:string)=>text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
     .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ' ')
     .replace(/<[^>]*>/g, ' ')
     .replace(/&(?:nbsp|amp|quot|lt|gt);/g, ' ')
-    .replace(/\s+/g, ' ').trim();
+    .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  // Prefer authored article/main body to navigation and sitewide boilerplate.
+  // A too-short detected body does not silently become evidence; the
+  // official document is independently length-checked at the call site.
+  for (const tag of ['article','main']) {
+    const body=html.match(new RegExp('<'+tag+'\\b[^>]*>([\\s\\S]*?)<\\/'+tag+'>','i'))?.[1];
+    if (body) {
+      const extracted=clean(body);
+      if (extracted.length>=700) return extracted;
+    }
+  }
+  return clean(html);
 }
 
 export async function retrievePrimarySource(

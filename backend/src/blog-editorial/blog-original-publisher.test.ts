@@ -25,6 +25,11 @@ describe('primary source provenance',()=>{
   it('chooses country and topic constrained first party pages',()=>{
     expect(sourceUrlFor(slot)).toMatch(/^https:\/\//);
     expect(extractPrimarySourceText('<script>evil</script><p>Trusted</p>')).toBe('Trusted');
+    const detail='<article><h1>Official guide</h1><p>'+ 'Trusted concepts '.repeat(70)+'</p></article>';
+    const html='<nav>'+ 'unrelated global menu '.repeat(200)+'</nav>'+detail;
+    const result=extractPrimarySourceText(html);
+    expect(result).toContain('Official guide');
+    expect(result).not.toContain('unrelated global menu');
   });
   it('rejects redirects, errors, suspicious mime types and short text',async()=>{
     const fail=vi.fn().mockResolvedValue(new Response('redirect',{status:302,headers:{'content-type':'text/html'}}));
