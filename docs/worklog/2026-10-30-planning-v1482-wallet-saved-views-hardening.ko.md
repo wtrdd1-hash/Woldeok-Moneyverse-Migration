@@ -11,3 +11,5 @@
 **안전:** 문서만 수정. 런타임·SQL·DB·WLD·Test·운영·기능 스위치 미변경, A/B/C·QA·Gemini 작업 브랜치 보존. GitHub PR/CI 완료 판정은 확인 후 추가.
 
 **개발 DB·app-api 읽기 전용 01:08 KST:** PG 17.11 제안 테이블 3개 없음, 고객문의 app UPDATE/TRUNCATE 직접 권한 잔존. wallet 경로는 허용하지만 If-Match·Idempotency-Key 헤더 미전달, Android 쓰기 동등성은 헤더 수정·거부 시험 전 미인증.
+
+**GitHub 01:10 KST:** 최초 커밋 `6f838d477ad366c3f69f6c63c246e235d8cd7a60` 푸시. [Draft PR #1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) OPEN, 미병합 #1916 기반. 첫 확인 CI 진행 중이며 합격 판정 아님. 이슈 #1915 중간 댓글 ID 6501914367. 영·한 기획서 4개에 동일한 10개 ID, 문서 12개, 분류 시험 17 PASS/0 FAIL, staged diff 검사 PASS. 전체 CI·격리 PG·공식 Test는 미실행 또는 미인증, RELEASE HOLD.

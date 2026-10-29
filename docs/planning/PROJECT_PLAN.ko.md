@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.30.1482 — F675-176 지갑 저장 필터 안전성 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+- **종속 Draft PR:** [#1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) — #1916 기반, 미병합. 첫 확인 시 CI 진행 중이며 릴리스 인증이 아니다.
 - 주기: 이전 기능 추가 v1480 → 현재 기능 보완 v1482 → 다음 기능 추가 v1484(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`; v1480 미병합 Draft #1916 위에 쌓는 문서 제안. QA v1376 FAILED/P0(#1917), C v1172 응답 검증(#1919)은 로컬 전용. [한국어 상세](INTEGRATED_PLANNING_MASTER.ko.md).
 - 확인된 공백: 최근 기록 SQL에는 방향 HAVING이 있지만 페이지 기록에는 없고 UI 방향 헬퍼도 미연결. v1 커서는 60분/밀리초이며 현재 Next 화면은 HTTP 200 응답 구조를 런타임 검증하지 않는다. 소유자 집합 세대/ETag로 삭제→재생성 ABA·기본값 경쟁 차단, 영수증 우선 멱등 처리와 보존 정책, LIMIT 51 이전 SQL 필터, 15분 마이크로초 v2 서명 커서, 잘못된 커서 400/만료 410, 응답 검증, 웹·Android·SEO·접근성·관리자 익명 집계, 기능 OFF 롤백을 명세. 원장 쓰기 없음.
 - 개발 PostgreSQL 17.11 읽기 전용: 저장 필터·집합·영수증 테이블 없음, 고객문의 app 직접 UPDATE/TRUNCATE 권한 잔존. App API 게이트웨이는 wallet 경로를 허용하지만 If-Match·Idempotency-Key를 전달하지 않으므로 VIEW1482-07에서 헤더 전달·Android 거부 시험이 필수. 운영 DB에 대한 주장은 아니다.

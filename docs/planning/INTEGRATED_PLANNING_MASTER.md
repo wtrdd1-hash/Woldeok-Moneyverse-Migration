@@ -1,6 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
 ## v1482 / F675-176 — Wallet Saved Views: Verified History, Monotonic Generation and Replay Safety (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **Stacked Draft PR:** [#1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) — base #1916, unmerged; CI in progress at first check, not release certification.
 
 **Cycle and authority:** Previous Feature Addition v1480 → Current Feature Improvement v1482 → Next Feature Addition v1484 (provisional). Latest main at start `62c6cd038951d65c94b709302bdaec6e75b080b6` (2026-10-30 01:05 KST); v1480 design remains unmerged Draft PR #1916, and this v1482 proposal is stacked on that branch, not an assertion that main implements it. Independent QA v1376 **FAILED/P0** (#1917); C v1172 wallet response validation (#1919) is local-only, not merged. All below is a proposed engineering contract; no runtime/DB/Test/Production change.
 
