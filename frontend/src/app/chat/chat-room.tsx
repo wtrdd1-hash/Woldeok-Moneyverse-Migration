@@ -408,7 +408,7 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
         setReportDetails('');
         toast.success(res.message);
       } else {
-        setReportError(res.message);
+        setReportError(res.message ?? '신고 접수 여부를 확인할 수 없어요.');
         toast.error(res.message);
       }
     });

@@ -14,6 +14,7 @@
 ## Midpoint
 - Implemented strict `{ok:true,reportId:<UUID>}` validation; report form now preserves input and exposes an accessible `role=alert` on uncertain delivery, with 44px touch targets and keyboard-friendly Radix dialog. Backend repository refuses malformed/missing SQL UUID.
 - Fresh isolated PostgreSQL 17.11: 293 migration files (002–294) applied; 1 acceptance PASS (outsider/ACL), 1 FAIL (`42703`: migration 227 inserts obsolete `audit_logs.entity`). Tracked in [P0 issue #1874](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1874). Existing SECURITY DEFINER report cannot complete on clean main. No unsafe migration-number collision: PR #1868 and #1862 both reserve 295. Therefore RELEASE HOLD.
+- First full typecheck FAILED on optional `res.message` in accessible error state; fixed with a safe fallback, then all gates must be re-run on new HEAD. Lint PASS (0 errors, 1,089 existing warnings), app-api contract PASS (180).
 - No main or production data writes. Isolated synthetic fixtures only. Base `origin/main` re-fetched mid-run and unchanged at `9ebc5613845ba2e8179a0051e86db996593c8a19`.
 
 

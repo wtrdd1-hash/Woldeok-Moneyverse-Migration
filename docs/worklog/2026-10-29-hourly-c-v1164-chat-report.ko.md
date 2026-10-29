@@ -13,6 +13,7 @@
 ## 중간
 - API의 `{ok:true,reportId:<UUID>}`를 엄격히 검증하고, 미확인 시 신고 창과 입력값을 유지하며 `role=alert`로 오류 안내. 모바일 최소 44px 버튼과 키보드 조작을 유지함. Backend에서 무효한 SQL 신고 UUID를 거부함.
 - 독립 PostgreSQL 17.11에 293개(002~294) SQL 적용. 실제 회원/외부인/접근권한 테스트 1건 PASS, 신고·감사 원자성 1건 FAIL: 227번 SQL 함수가 없는 `audit_logs.entity` 열을 INSERT함(42703). [P0 #1874](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1874) 등록. 295번 migration을 A/금융 PR이 각각 사용하므로 충돌하는 DB 수정을 진행하지 않음. RELEASE HOLD.
+- 첫 전체 Typecheck에서 오류 1건(`res.message` 선택적 타입) 발견, 안전한 기본 안내로 수정. Lint 오류 0·경고 1,089, app-api 180개 일치. 새 SHA에서 재검증 필요.
 - main 재조회 결과 기준 SHA 동일. 공유 DB/main/운영 변경 없음.
 
 
