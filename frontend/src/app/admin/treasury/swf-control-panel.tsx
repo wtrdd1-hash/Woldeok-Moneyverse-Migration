@@ -53,28 +53,6 @@ export function SwfControlPanel({
   const portfolios = initialPortfolios;
   const events = initialEvents;
   const [savingConfig, setSavingConfig] = useState(false);
-  const [rebalancing, setRebalancing] = useState(false);
-
-  async function handleTriggerRebalance() {
-    setRebalancing(true);
-    try {
-      const res = await fetch('/api/admin/treasury/swf', { method: 'POST' });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.executed) {
-        toast.success('국고 복리 성장 및 자율 리밸런싱이 집행되었습니다!', {
-          description: '복식부기 원장과 정합 연동되었습니다.',
-        });
-      } else {
-        toast.info('국고 복리 성장 엔진 평가 완료 (정상 가동 중)', {
-          description: data.reason || '원장 복식부기 및 자율 리밸런싱 대기 상태입니다.',
-        });
-      }
-    } catch {
-      toast.error('성장 엔진 요청 중 통신 오류가 발생했습니다.');
-    } finally {
-      setRebalancing(false);
-    }
-  }
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
   const [isEnabled, setIsEnabled] = useState<boolean>(initialConfig?.is_enabled ?? true);
@@ -162,9 +140,9 @@ export function SwfControlPanel({
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
-          <div role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 text-xs text-emerald-200 flex items-center gap-2">
-            <span>✓</span>
-            <span>국고 복리 성장 및 포트폴리오 회수 엔진이 신규 정식 PostgreSQL 복식부기 원장에 정상 연동 승인되었습니다. 거버넌스 비율 정책에 따라 안전하게 자율 운용됩니다.</span>
+          <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center gap-2">
+            <span aria-hidden="true">⚠</span>
+            <span>국부펀드 실행은 원장 검증 및 불변 영수증 확인 전까지 중단됩니다. 설정값은 실제 금융 정산 완료 증빙이 아닙니다.</span>
           </div>
           {/* 실시간 국고 안전 보존 vs 투자 비율 시각화 게이지 */}
           <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
@@ -303,7 +281,7 @@ export function SwfControlPanel({
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-200">
-                자율 국부펀드 설정: {isEnabled ? '정상 가동 승인' : '관리자 수동 동결'} / 실행 엔진: {isEnabled ? '정식 복식부기 원장 연동 가동 중' : '일시 중지'}
+                자율 국부펀드 설정: {isEnabled ? '정책상 활성' : '관리자 수동 동결'} / 실행 엔진: 원장 검증 전 중단
               </span>
             </div>
             <div className="flex gap-2">
@@ -341,21 +319,11 @@ export function SwfControlPanel({
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
-              <Button
-                size="sm"
-                onClick={handleTriggerRebalance}
-                disabled={rebalancing}
-                className="w-full sm:w-auto"
-              >
-                🪙 주식 자금 회수 (자율 리밸런싱)
+              <Button size="sm" disabled className="w-full sm:w-auto">
+                수동 회수 · 원장 검증 전 중단
               </Button>
-              <Button
-                size="sm"
-                onClick={handleTriggerRebalance}
-                disabled={rebalancing}
-                className="w-full sm:w-auto"
-              >
-                ⚡ 즉시 복리 성장 트리거
+              <Button size="sm" disabled className="w-full sm:w-auto">
+                리밸런싱 · 원장 검증 전 중단
               </Button>
             </div>
           </div>

@@ -15,14 +15,11 @@ export async function GET() {
 }
 
 export async function POST() {
-  try {
-    const data = await api('/api/v1/admin/treasury/swf/rebalance', { method: 'POST' });
-    return NextResponse.json(data);
-  } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return NextResponse.json({ error: message }, { status });
-  }
+  // Do not forward unverified financial execution to an upstream service.
+  return NextResponse.json(
+    { error: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' },
+    { status: 503, headers: { 'Cache-Control': 'no-store' } },
+  );
 }
 
 export async function PUT(request: Request) {
