@@ -1,3 +1,6 @@
+## v2026.10.29.1204 — DB 실제 구축 절차서 (격리 복원, 운영 미반영)
+- [한국어 명령어 기반 구축 가이드](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md) / [영어 정본](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md). 두 번째 디스크·백업·복원·권한·키·마이그레이션·검증 전 과정 기록. 기존 금융 쓰기 권한 유지·원본 DB 미변경. [내부 기록](updates/v2026.10.29.1204-database-construction-internal.ko.md) / [깃허브 내역](updates/v2026.10.29.1204-database-construction-github.ko.md).
+
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

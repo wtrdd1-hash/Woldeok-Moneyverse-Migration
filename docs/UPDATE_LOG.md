@@ -1,3 +1,6 @@
+## v2026.10.29.1204 — Database construction runbook (isolated rebuild, not Production)
+- [Step-by-step English build](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [Korean](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). PostgreSQL dump, ACL, second disk, container, restoration, schema and ledger verification. User-approved finance DML preserved; live DB unchanged. [Internal](updates/v2026.10.29.1204-database-construction-internal.md) / [GitHub](updates/v2026.10.29.1204-database-construction-github.md).
+
 ## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Development handoff:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.
