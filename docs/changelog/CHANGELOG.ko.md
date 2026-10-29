@@ -1,4 +1,8 @@
 ## v2026.10.30.1480 — F675-176 회원 전용 지갑 기록 저장 필터 (기획 DRAFT / 출시 HOLD)
+
+## v2026.10.30.1482 — F675-176 지갑 저장 필터 정합성 보완 (기획 DRAFT / 운영 HOLD)
+- 소유자 세대 ETag·영수증 우선 멱등성·마이크로초 v2 커서·비정상 응답 차단을 명세. QA v1376 Test 국고 합성 200/프론트 SHA P0는 미해결, C v1172 검증기 미병합. 런타임·DB·Test·운영 변경 없음. [통합 기획](../planning/INTEGRATED_PLANNING_MASTER.ko.md) · [이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). 외부 신규 승인 0, 누적 UNKNOWN/10,000.
+
 - 본인 전용 이름 있는 기간·순변동 필터 최대 8개, CAS·멱등 영수증, 버전형 서명 커서, Nest/Next/Android 동등성 및 기존 50건 기록으로 롤백을 제안한다. 문서 전용이며 원장·DB·런타임·Test·운영 변경 없음. 독립 QA v1375 FAILED/P0, 외부 근거 신규 승인 0·누적 UNKNOWN/10,000. [통합 기획](../planning/INTEGRATED_PLANNING_MASTER.ko.md) · [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915).
 
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
