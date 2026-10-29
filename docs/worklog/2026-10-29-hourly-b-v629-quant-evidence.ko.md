@@ -22,3 +22,8 @@
 - 실제 격리 PostgreSQL, 공식 Test 정확 SHA 인증·API·E2E 및 GitOps 릴리스 검증 미완료. QA v1362는 18,000 WLD MINT 원장 보정의 출처·감사 영수증 미확인으로 금융 승인 불가.
 - 변경 API: 인증된 퀀트 조회·로그·백테스트 3개 경로가 HTTP 503 QUANT_EVIDENCE_UNAVAILABLE 및 no-store 반환. DB·원장·잔액 변경 없음.
 - 병합 없음, Test/Production 배포 없음, 브랜치 정리 없음. 공식 Test SHA cfb13272beea53c4d8c20eff7f379b6f66343033 불일치, Production 버전 unknown. Draft PR/HOLD.
+
+## GitHub 확인 기록
+- 코드 커밋: 438c69170954d22489ac7c64c783ba58aa19bc9a.
+- Draft/HOLD PR #1821: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1821
+- CI #40803334089, Build Test Candidate #40803313625 진행 중 확인. 병합·배포 없음.
