@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   Landmark,
-  FileText,
   CheckCircle2,
   AlertCircle,
   X,
@@ -27,7 +26,6 @@ import {
   type TreasuryOverviewData,
   type TreasuryLedgerItem,
   type UserEligibilityStatus,
-  type TreasuryProgramId,
 } from './treasury.types';
 import { TreasuryReserveGauge } from './treasury-reserve-gauge';
 import { TreasuryProgramCard } from './treasury-program-card';
@@ -263,12 +261,12 @@ export function TreasuryPortalClient({
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 {isEn
-                  ? 'All treasury disbursements are immutably verified and audited'
-                  : '중앙정부 국고에서 집행된 모든 지원금 및 소각 내역을 투명하게 공시합니다.'}
+                  ? 'Only independently verified fiscal disbursements may appear in this feed'
+                  : '검증 완료된 국고 지출만 공개합니다. 현재 독립 원장 대사가 완료되지 않았습니다.'}
               </p>
             </div>
             <Badge variant="outline" className="font-mono text-[11px] text-muted-foreground">
-              블록체인 불변 원장
+              원장 검증 대기
             </Badge>
           </div>
         </CardHeader>
@@ -285,6 +283,11 @@ export function TreasuryPortalClient({
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {ledger.length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="p-5 text-center text-muted-foreground">
+                    {isEn ? 'No independently verified disbursements available.' : '독립 복식원장 검증 전으로 지급 내역을 공개할 수 없습니다.'}
+                  </TableCell></TableRow>
+                )}
                 {ledger.map((item) => (
                   <TableRow key={item.id} className="border-border/30 hover:bg-muted/30">
                     <TableCell className="font-mono text-xs">

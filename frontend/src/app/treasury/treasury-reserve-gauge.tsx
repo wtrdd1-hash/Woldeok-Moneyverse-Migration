@@ -12,6 +12,20 @@ interface TreasuryReserveGaugeProps {
 }
 
 export function TreasuryReserveGauge({ overview, isEn = false }: TreasuryReserveGaugeProps) {
+  if (overview.verified === false) {
+    return (
+      <Card className="moneyverse-card border-border/80 bg-card/75">
+        <CardContent className="p-4 sm:p-6 space-y-2" role="status">
+          <h2 className="font-bold text-foreground">{isEn ? 'Treasury statement not verified' : '국고 재정 대사 검증 전'}</h2>
+          <p className="text-sm text-muted-foreground">
+            {isEn ? 'Balances, reserve coverage, disbursements, burns and beneficiaries are unavailable until independently reconciled.'
+              : '국고잔액, 준비금, 지급·소각 실적과 수혜자 수는 독립 복식원장 대사 완료 전까지 표시하지 않습니다. 30%는 정책 목표이며 실제 준수 여부는 검증되지 않았습니다.'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const reservePct = overview.reserveRatioPercent; // 30%
   const availablePct = 100 - reservePct; // 70%
 
@@ -106,7 +120,7 @@ export function TreasuryReserveGauge({ overview, isEn = false }: TreasuryReserve
           <div>
             <span className="text-muted-foreground/70 block text-[11px]">{isEn ? 'Total Beneficiaries' : '총 수혜 시민 수'}</span>
             <span className="font-bold text-foreground tabular-nums">
-              {overview.beneficiaryCount.toLocaleString()} {isEn ? 'citizens' : '명'}
+              {overview.beneficiaryCount?.toLocaleString() ?? '—'} {isEn ? 'citizens' : '명'}
             </span>
           </div>
           <div>

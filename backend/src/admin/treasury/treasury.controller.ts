@@ -1,15 +1,12 @@
 import {
   BadRequestException,
-  ServiceUnavailableException,
   Body,
   Controller,
   Get,
-  Header,
   Post,
   Put,
   Query,
   Req,
-  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -17,13 +14,11 @@ import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validato
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
-import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
-import { decodeTreasuryLedgerCursor, parseTreasuryLedgerLimit } from './treasury-ledger-cursor';
 
 export class TreasuryOperationDto {
   @ApiProperty({ example: 'VAULT_MAIN', description: '금고 코드' })
@@ -42,10 +37,6 @@ export class TreasuryOperationDto {
 }
 
 export class TreasuryDisburseDividendDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  idempotencyKey!: string;
-
   @ApiProperty({ example: '1000', description: '1인당 지급 배당금 (정수 WLD)' })
   @IsString()
   @Matches(/^\d+$/, { message: 'amountPerUserWld must be an integer string' })
@@ -114,9 +105,9 @@ export class TreasuryDisburseGrantDto {
 export class TreasuryListQueryDto {
   @ApiProperty({ required: false, example: 30 })
   @IsOptional()
-  limit?: string;
+  limit?: number;
 
-  @ApiProperty({ required: false, description: 'Opaque tl1 cursor from the previous page; timestamp-only cursors are not accepted' })
+  @ApiProperty({ required: false, example: '2026-09-21T00:00:00.000Z' })
   @IsOptional()
   cursor?: string;
 }
@@ -151,33 +142,7 @@ export class TreasuryBuybackBurnDto {
   reason!: string;
 }
 
-import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
-
-@ApiTags('Public Treasury')
-@Controller('treasury')
-@SkipInternalToken()
-export class PublicTreasuryController {
-  constructor(private readonly service: TreasuryService) {}
-
-  @Get('public-overview')
-  @ApiOperation({ summary: '시민 공개용 실시간 중앙 국고 실측 통계 조회' })
-  async getPublicOverview() {
-    const overview = await this.service.getOverview();
-    return {
-      success: true,
-      total_treasury_wld: overview.total_treasury_wld,
-      available_wld: overview.available_wld,
-      reserve_wld: overview.reserve_wld,
-      reserve_ratio_pct: overview.reserve_ratio_pct,
-      vaults: overview.vaults.map((v) => ({
-        code: v.code,
-        name: v.name,
-        balance_wld: v.balance_wld,
-      })),
-      timestamp: new Date().toISOString(),
-    };
-  }
-}
+import { unverifiedFinanceOperation } from '../../economy/monetary/finance-hold';
 
 @ApiTags('Admin Treasury')
 @Controller('admin/treasury')
@@ -207,14 +172,12 @@ export class AdminTreasuryController {
   }
 
   @Get('revenue')
-  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 세목별 수입 흐름 집계 조회' })
   async getRevenue() {
     return this.service.getRevenue();
   }
 
   @Get('expenditure')
-  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 예산 목적별 지출 흐름 집계 조회' })
   async getExpenditure() {
     return this.service.getExpenditure();
@@ -229,9 +192,7 @@ export class AdminTreasuryController {
   @Get('transactions')
   @ApiOperation({ summary: '국고 원장 입출금 및 순환 감사 내역 조회' })
   async listTransactions(@Query() query: TreasuryListQueryDto) {
-    const limit = parseTreasuryLedgerLimit(query.limit);
-    if (query.cursor !== undefined) decodeTreasuryLedgerCursor(query.cursor);
-    return this.service.listTransactions(limit, query.cursor);
+    return this.service.listTransactions(query.limit, query.cursor);
   }
 
   @Get('user-money-flows')
@@ -249,31 +210,28 @@ export class AdminTreasuryController {
   @Post('inject')
   @ApiOperation({ summary: '국고 자금 긴급 주입 (Step-Up/Admin)' })
   async injectFunds(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryOperationDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryOperationDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.injectFunds(adminId, dto.vaultCode, dto.amountWld, dto.reason);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('drain')
   @ApiOperation({ summary: '국고 잉여 자금 영구 소각 (Step-Up/Admin)' })
   async absorbFunds(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryOperationDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryOperationDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.absorbFunds(adminId, dto.vaultCode, dto.amountWld, dto.reason);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('disburse/dividend')
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
   async disburseDividend(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryDisburseDividendDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryDisburseDividendDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.disburseCitizenDividend(adminId, dto.amountPerUserWld, dto.reason, dto.idempotencyKey);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Get('disburse/targeted-preview')
@@ -288,26 +246,19 @@ export class AdminTreasuryController {
   @Post('disburse/targeted')
   @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
   async disburseTargetedSubsidy(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryDisburseTargetedSubsidyDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryDisburseTargetedSubsidyDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.disburseTargetedSubsidy(
-      adminId,
-      dto.amountPerUserWld,
-      dto.maxBalanceCutoffWld,
-      dto.reason,
-    );
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('donate')
   @ApiOperation({ summary: '시민 자발적 국고 기부 및 잉여 자금 흡수 (명예 칭호 수여)' })
   async userDonate(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryUserDonateDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryUserDonateDto,
   ) {
-    const userId = requireUserId(request);
-    return this.service.userDonate(userId, dto.amountWld, dto.memo || '국고 자발적 공공 기부', dto.idempotencyKey);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Get('donations/top')
@@ -326,37 +277,28 @@ export class AdminTreasuryController {
   @Post('disburse/grant')
   @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
   async disburseGrant(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryDisburseGrantDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryDisburseGrantDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.disburseGrant(
-      adminId,
-      dto.targetUserId ?? null,
-      dto.amountWld,
-      dto.disbursementType,
-      dto.reason,
-    );
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('budget/distribute')
   @ApiOperation({ summary: '헌법적 4분할 목적별 예산 배정 집행 (복지40/인프라30/비상20/소각10)' })
   async distributeBudget(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryDistributeBudgetDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryDistributeBudgetDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.distributeBudgetRule(adminId, dto.amountWld, dto.reason);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('buyback/burn')
   @ApiOperation({ summary: '룬스케이프형 역매수 영구소각 집행 (장터 덤핑 매물 국고 매입/소각)' })
   async buybackBurn(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryBuybackBurnDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryBuybackBurnDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.executeMarketBuybackBurn(adminId, dto.listingId, dto.reason);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Get('governance/votes')
@@ -377,11 +319,10 @@ export class AdminTreasuryController {
   @Post('tax/wealth')
   @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
   async executeWealthTax(
-    @Req() request: RequestWithSession,
-    @Body() dto: TreasuryExecuteWealthTaxDto,
+    @Req() _request: RequestWithSession,
+    @Body() _dto: TreasuryExecuteWealthTaxDto,
   ) {
-    const adminId = requireUserId(request);
-    return this.service.executeWealthTax(adminId, dto.reason);
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Get('tax/wealth')
@@ -408,29 +349,28 @@ export class AdminTreasuryController {
 
   @Get('swf')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
-  async getSwfStatus(@Req() request: RequestWithSession) {
+  async getSwfStatus() {
     if (!this.swfService) {
-      throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
+      return { config: null, portfolios: [], events: [] };
     }
-    return this.swfService.getAdminSnapshot(requireUserId(request));
+    const [config, portfolios, events] = await Promise.all([
+      this.swfService.getConfig(),
+      this.swfService.getPortfolios(),
+      this.swfService.getRecentEvents(20),
+    ]);
+    return { config, portfolios, events };
   }
 
   @Post('swf/rebalance')
-  @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Autonomous SWF settlement unavailable until canonical ledger certification' })
+  @ApiOperation({ summary: '자율 국부펀드(ASWF) 잉여 세수 시장 재순환 즉시 집행' })
   async triggerSwfRebalance() {
-    // An HTTP 200 with executed:false is not a reliable financial release boundary.
-    throw new ServiceUnavailableException('SWF_LEDGER_SETTLEMENT_UNAVAILABLE');
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Post('swf/liquidate')
-  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
-  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
-    if (!this.swfService) {
-      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
+    return unverifiedFinanceOperation('TREASURY_SETTLEMENT');
   }
 
   @Put('swf/config')

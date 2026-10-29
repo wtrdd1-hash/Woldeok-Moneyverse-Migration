@@ -1,53 +1,7 @@
-
-## v2026.10.29.1503 — Financial admin durability (source/Test only)
-- [Release EN](docs/releases/v2026.10.29.1503.md) / [KO](docs/releases/v2026.10.29.1503.ko.md) · [Worklog](docs/worklog/2026-10-29-finance-operator-functional-recovery-v1503.md) / [KO](docs/worklog/2026-10-29-finance-operator-functional-recovery-v1503.ko.md) · [Internal EN](docs/updates/v2026.10.29.1503-internal.md) / [KO](docs/updates/v2026.10.29.1503-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1503-github.md) / [KO](docs/updates/v2026.10.29.1503-github.ko.md). Durable policy rate/reserve with audit, real partial ledger view and SWF synthetic valuation disclosure. Test DB migration 295 and actual policy update/read/revert PASS. Production remains v1502.
-
-## v2026.10.29.1502 — LIVE Production: central-bank preview and SWF fail-closed
-- [Release EN](docs/releases/v2026.10.29.1502.md) / [KO](docs/releases/v2026.10.29.1502.ko.md) · [Worklog EN](docs/worklog/2026-10-29-v1502-operational-promotion.md) / [KO](docs/worklog/2026-10-29-v1502-operational-promotion.ko.md) · [Internal EN](docs/updates/v2026.10.29.1502-internal.md) / [KO](docs/updates/v2026.10.29.1502-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1502-github.md) / [KO](docs/updates/v2026.10.29.1502-github.ko.md). PR #1845 merged; live SHA c2129625a and public 15/15 routes 200, unsafe SWF cash transfer intentionally held 503.
-
-## v2026.10.29.1501 — Central bank console truth and SWF fail-closed source candidate
-- [EN worklog](docs/worklog/2026-10-29-central-bank-swf-controls-v1501.md) / [KO](docs/worklog/2026-10-29-central-bank-swf-controls-v1501.ko.md) · [Internal EN](docs/updates/v2026.10.29.1501-internal.md) / [KO](docs/updates/v2026.10.29.1501-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.29.1501-github.md) / [KO](docs/updates/v2026.10.29.1501-github.ko.md) · [Release EN](docs/releases/v2026.10.29.1501.md) / [KO](docs/releases/v2026.10.29.1501.ko.md). SQLSTATE 42P08 is confirmed in live v1213, but unreceipted SWF liquidation is held, not fake-fixed.
-
-## v2026.10.29.1364 — Scheduled QA scratch clean-up follow-through
-
-## v2026.10.29.1419 — Verified two-hour automatic blog publication
-- [Internal](docs/updates/v2026.10.29.1419-internal.md) / [한국어](docs/updates/v2026.10.29.1419-internal.ko.md), [GitHub](docs/updates/v2026.10.29.1419-github.md), [worklog](docs/worklog/2026-10-29-blog-automatic-v1419.ko.md). Isolated systemd worker and source-based DB publication with two-hour country/topic rotation; require real receipts and public check before declaring Production success.
-
-
-## v2026.10.29.1213 — LIVE Production v1213 (b44ffd0a)
-- [Internal EN](docs/updates/v2026.10.29.1213-internal.md) / [KO](docs/updates/v2026.10.29.1213-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1213-github.md) / [KO](docs/updates/v2026.10.29.1213-github.ko.md), [Worklog](docs/worklog/2026-10-29-production-promotion-v1213.md). Live 23 DB migrations applied, owner-approved DML intact, exact PROD identity and 17/17 smoke PASS; historic checksum and auth-cookie evidence remains open.
-
-
-## v2026.10.29.1212 — Owner-accepted existing finance DML, Test verified, Production pending
-- [Internal EN](docs/updates/v2026.10.29.1212-internal.md) / [KO](docs/updates/v2026.10.29.1212-internal.ko.md), [GitHub EN](docs/updates/v2026.10.29.1212-github.md) / [KO](docs/updates/v2026.10.29.1212-github.ko.md), [Worklog](docs/worklog/2026-10-29-finance-dml-approval-and-release-v1212.md). Existing grants accepted; exact Test passed; Production NOT promoted because historical checksum provenance and final acceptance remain incomplete.
-
-- [EN worklog](docs/worklog/2026-10-29-qa-hygiene-v1364.md) · [KO worklog](docs/worklog/2026-10-29-qa-hygiene-v1364.ko.md) · [Internal EN](docs/updates/2026-10-29-qa-hygiene-v1364-internal.md) · [Internal KO](docs/updates/2026-10-29-qa-hygiene-v1364-internal.ko.md) · [GitHub EN](docs/updates/2026-10-29-qa-hygiene-v1364-github.md) · [GitHub KO](docs/updates/2026-10-29-qa-hygiene-v1364-github.ko.md). Hourly QA disposable summary and 72-hour cleanup, no deletion outside QA-owned scratch. Existing 0-B cleanup is not counted as storage recovery; full authenticated QA remains NOT TESTED.
-
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-## v2026.10.29.1211 — Isolated integration review and release hold
-- [EN worklog](docs/worklog/2026-10-29-branch-integration-v1211.md) / [KO](docs/worklog/2026-10-29-branch-integration-v1211.ko.md); [draft PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). PR #1813 staged, unsafe legacy blog publisher restored to fail-closed, frontend 1,910 PASS; official Test/Main/Production not promoted because financial and release gates remain blocked.
-
-
-## v2026.10.29.1205 — Ledger discrepancy evidence-driven workflow
-- [English investigation and repair policy](docs/worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md) / [한국어](docs/worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md). Correct debit-positive accounting reveals 18×1,000 WLD historical cash-account differences, not the prior polarity-flipped 24-account report. Migration 294 creates evidence cases in isolated Test only, no money corrections or financial-grant changes.
-
-
-## v2026.10.29.1204 — Full database construction and reconstruction procedure
-- [English step-by-step construction runbook](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [한국어 실제 DB 구축 절차](docs/operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). Source snapshot, second-disk PostgreSQL, ACL-preserving restore, migrations 292/293, structural/ledger acceptance, and unperformed Production cutover are explicitly separated.
-
-
-## v2026.10.28.1423 — Treasury dividend Production DB-only containment
-- [EN worklog](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.md) · [KO](docs/worklog/2026-10-28-treasury-db-production-containment-v1423.ko.md) · [Internal EN](docs/updates/v2026.10.28.1423-internal.md) · [Internal KO](docs/updates/v2026.10.28.1423-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.28.1423-github.md) · [GitHub KO](docs/updates/v2026.10.28.1423-github.ko.md) · [Release](docs/releases/v2026.10.28.1423.md).
-
-## v2026.10.28.1422 — Treasury payout ledger label CI fix
-- [KO evidence](docs/worklog/2026-10-28-treasury-wallet-label-v1422.ko.md) · [EN](docs/worklog/2026-10-28-treasury-wallet-label-v1422.md) · [Internal](docs/updates/v2026.10.28.1422-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1422-github.md).
-
-## v2026.10.28.1421 — Treasury dividend isolated SQL acceptance
-- [Korean record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.ko.md) · [English record](docs/worklog/2026-10-28-treasury-dividend-release-v1421.md) · [Internal update](docs/updates/v2026.10.28.1421-internal.ko.md) · [GitHub update](docs/updates/v2026.10.28.1421-github.md).
-## v2026.10.28.1420 — Treasury dividend canonical ledger candidate
-- [EN worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.md) · [KO worklog](docs/worklog/2026-10-28-treasury-dividend-ledger-v1420.ko.md). Immutable migration291, backend and frontend retry-stable payout identity, CI-only disposable SQL acceptance, no Production data changes.
-
+## v2026.10.28.1415 — Treasury / Mint / Central Bank containment candidate
+- [EN worklog](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.md) / [KO](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.ko.md) · [Internal](docs/updates/v2026.10.28.1415-internal.md) / [KO](docs/updates/v2026.10.28.1415-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1415-github.md) / [KO](docs/updates/v2026.10.28.1415-github.ko.md). Fake finance display removed, uncertified financial mutation 503, SWF SQL type corrected; full canonical settlement & Production finance release remain BLOCKED.
 
 ## v2026.10.28.1412 — Original-country verified AI blog writer and DB publisher source candidate
 - [EN worklog](docs/worklog/2026-10-28-blog-verified-publisher-v1412.md) / [KO](docs/worklog/2026-10-28-blog-verified-publisher-v1412.ko.md), [internal EN](docs/updates/v2026.10.28.1412-blog-verified-internal.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-internal.ko.md), [GitHub EN](docs/updates/v2026.10.28.1412-blog-verified-github.md) / [KO](docs/updates/v2026.10.28.1412-blog-verified-github.ko.md). Source implementation only, no verified live auto-publication or Production deployment.
@@ -419,6 +373,3 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
 
 Read-only findings; not a full browser acceptance, Test deployment, or Production release.
-
-## v2026.10.28.1413 — Verified blog QA candidate
-- [KO worklog](docs/worklog/2026-10-28-blog-publication-qa-v1413.ko.md), [EN worklog](docs/worklog/2026-10-28-blog-publication-qa-v1413.md), [GitHub](docs/updates/v2026.10.28.1413-blog-release-qa-github.md): read-only QA; not deployed.
