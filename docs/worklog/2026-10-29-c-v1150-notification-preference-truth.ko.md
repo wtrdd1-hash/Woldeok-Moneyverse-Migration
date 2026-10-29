@@ -24,3 +24,9 @@
 - 보안 감사 운영 Moderate 1건, 전체 Low 3건/Moderate 9건 FAIL. 블로그 4건도 기존 main 회귀로 남음.
 - 최신 main `2ac90063d45cfab879d4fb36863484d8a423deba` 및 영·한 기획서 재확인. 다른 개발자 브랜치/작업폴더 보존, 삭제 없음.
 - 공식 exact-SHA Test 인증 E2E 미실행, GitOps/Production 배포 및 main 병합 금지. PR/CI 상태는 GitHub에서 별도 기록 예정.
+
+## main 변경·작업폴더 복구 — 2026-10-29 10:02 KST
+- main이 문서 1개만 변경된 `efcbc817bb8c726b78319f3f090e8a23f25cecb4`로 전진하여 별도 브랜치를 충돌 없이 rebase. 영·한 정식 기획서는 동일.
+- 외부 정리 작업이 이 회차의 최초 작업폴더를 삭제했지만 원격 브랜치는 보존됨. `/home/debian/mv-c-v1150-notification-wt`에 본인 작업폴더만 복구. 다른 개발자 작업폴더·브랜치 삭제 없음. Draft/HOLD PR #1811 생성.
+- 공식 Test SHA `cfb13272beea53c4d8c20eff7f379b6f66343033`, Production 버전 `unknown`. 배포하지 않음.
+- 최종 코드 기준 Frontend 1,918 PASS / 기존 블로그 4 FAIL, 집중 14 PASS, 변경 파일 Lint PASS. rebase 후 최종 SHA CI 대기. 운영 배포 금지.

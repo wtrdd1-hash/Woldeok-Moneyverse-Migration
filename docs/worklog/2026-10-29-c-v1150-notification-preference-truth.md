@@ -32,3 +32,9 @@ Pending evidence; no merge or deployment authorized.
 - Latest main and English/Korean plans re-fetched at start/mid/end: main `2ac90063d45cfab879d4fb36863484d8a423deba` unchanged. No overlapping implementation with active A/B/C/QA/Gemini PRs; all unique branches and worktrees preserved, none deleted.
 - **RELEASE HOLD**: official exact-SHA Test authenticated member flow unavailable (Test not running this candidate); no merged SHA. Financial/backup/security QA gates and the 4 baseline blog tests remain unresolved. No main merge, GitOps, Test deployment, Production promotion or rollback. Production SHA not verified.
 - GitHub Draft/HOLD PR and exact-SHA CI evidence will be recorded after push; a CI build is not an official Test promotion.
+
+## FINAL MAIN ADVANCE / RECOVERY — 2026-10-29 10:02 KST
+- `origin/main` advanced to `efcbc817bb8c726b78319f3f090e8a23f25cecb4` (one documentation-only `implementation_plan.md` change); English/Korean canonical plans unchanged. Rebased the isolated feature branch cleanly on this new main; no notification feature conflicts. Exact-SHA checks must follow the rebased head, not earlier superseded CI runs.
+- External host cleanup removed only this task's first build-workspace directory immediately after its last push; GitHub branch retained all commits. Restored the task's own worktree under `/home/debian/mv-c-v1150-notification-wt` without deleting or touching any other developer's worktree. Draft/HOLD PR #1811 created.
+- Official Test `/api/version`: `cfb13272beea53c4d8c20eff7f379b6f66343033`; Production `/api/version`: `unknown`. Neither proves this candidate deployed. No official Test/Production mutation.
+- Exact-SHA Frontend re-run after added tests: **1,918 PASS / 4 existing blog FAIL**, focused **14/14 PASS**, changed-file ESLint PASS. Final CI on rebased head pending. Release remains HOLD.
