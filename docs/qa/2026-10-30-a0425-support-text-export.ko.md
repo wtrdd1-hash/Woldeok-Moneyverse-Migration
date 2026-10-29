@@ -11,3 +11,5 @@
 **결론:** 전체 품질·금융·백업 복원·Test 릴리스 게이트 미통과. main 병합, 운영 DB 수정, Test/Production 배포, 롤백, 브랜치 삭제 없음. 근거: `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0425-support-text/`.
 
 **정확 SHA CI(04:49 KST):** 코드 SHA `fe7265db2772429663be830f9ca0e2cff702a0d0`의 CI #40942664769 및 후보 #40942653136 모두 기존 `stale-tab-notice.tsx`의 Lint 오류 3건으로 FAIL. 이미지 빌드 SKIP. 공유 의존성 심볼릭 링크가 사라져 발생한 로컬 모듈 오류는 별도 작업 폴더에서 오프라인 재설치로 복구했고 정확 코드 SHA 타입 검사/빌드는 PASS. 원격 브랜치 31개(비-main 30, 고유 미통합 27), 열린 PR 25개, 충돌 2개(#1901/#1892), 삭제 0건. Draft PR #1941 및 운영 HOLD 유지.
+
+**추가 NestJS HTTP 테스트:** 3 PASS(소유자 응답·캐시/색인 차단, 잘못된 UUID 400, 인증/동의 거부 403). 저장소·가드 모의 테스트이므로 공식 Test 인증 E2E 증거는 아니다.

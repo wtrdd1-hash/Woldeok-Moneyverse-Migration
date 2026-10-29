@@ -37,3 +37,5 @@
 - Code SHA `fe7265db2772429663be830f9ca0e2cff702a0d0`: GitHub CI #40942664769 **FAIL** and candidate #40942653136 **FAIL** at three pre-existing `stale-tab-notice.tsx` `no-empty` lint errors. Policy/classify PASS; candidate image build SKIPPED. Local exact code SHA with independently installed offline dependencies: typecheck/build PASS; earlier stale shared dependency symlinks caused environment-only resolution failures, not code changes.
 - Remote branches 31 (30 non-main): 27 with unique unmerged commits, 3 included in main. Open PRs 25, conflicts #1901/#1892; no head SHA mismatch or duplicate. No branch/PR cleanup performed because of historical deletion risk and other agents' work.
 - This feature is **targeted verified, full gates FAIL**. Keep Draft PR #1941 and Production HOLD.
+
+**Additional NestJS HTTP route regression:** 3 PASS (authenticated owner response with no-store/noindex, malformed UUID 400 before DB access, denied auth/consent 403 before DB access); test uses mock repository and overridden guards, not official Test E2E.
