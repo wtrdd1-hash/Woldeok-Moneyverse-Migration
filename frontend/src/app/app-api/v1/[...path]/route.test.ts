@@ -46,6 +46,20 @@ describe('app API route compatibility', () => {
     expect(new Headers(init?.headers).get('x-csrf-token')).toBe('csrf');
   });
 
+  it('sanitizes legacy scanner errors before they reach Android clients', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      statusCode: 400, message: 'private scanner rule /srv/secret/path',
+    }), { status: 400, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' } })));
+    const req = new NextRequest('https://easy-scraping.com/app-api/v1/content/chat/upload', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+    });
+    const response = await POST(req, context('content', 'chat', 'upload'));
+    expect(response.status).toBe(400);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(JSON.stringify(await response.json())).not.toContain('/srv/secret/path');
+  });
+
   it('forwards approved help category counts with locale and never caches public Android responses', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async () => new Response(JSON.stringify({

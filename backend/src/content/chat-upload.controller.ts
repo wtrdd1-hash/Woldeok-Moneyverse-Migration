@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Header,
   Inject,
   NotFoundException,
   ServiceUnavailableException,
@@ -38,6 +39,8 @@ export class ChatUploadController {
   ) {}
 
   @Post('upload')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @UseInterceptors(
     FileInterceptor('file', {
@@ -71,7 +74,6 @@ export class ChatUploadController {
       return {
         success: true,
         url: stored.url,
-        storageKey: stored.storageKey,
         mimeType: stored.mimeType,
         width: stored.width,
         height: stored.height,
@@ -98,15 +100,12 @@ export class ChatUploadController {
             .catch(() => {});
         }
 
-        throw new BadRequestException(
-          `보안 검사 결과 악성 시그니처 또는 바이러스가 감지되어 파일이 안전하게 차단되었습니다: [${error.threatType}] ${error.threatDetail}`,
-        );
+        // Scanner signatures, file paths and threat details stay in the operator alert.
+        throw new BadRequestException('업로드한 파일이 보안 검사를 통과하지 못했습니다.');
       }
 
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
+      // Never echo filesystem, scanner or registry internals to the uploader.
+      throw new ServiceUnavailableException('chat image upload unavailable');
     }
   }
 

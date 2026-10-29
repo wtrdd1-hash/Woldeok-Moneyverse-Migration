@@ -10,9 +10,14 @@
 
 ## IN PROGRESS
 - [x] RED: backend 3 expected failures / 7 pass, Android gateway 1 expected failure / 38 pass; tests demonstrate raw key, scanner detail and filesystem error leakage.
-- [ ] GREEN: remove redundant internal key from response and sanitize unknown storage errors.
-- [ ] Verify backend, app-api contract, lint/typecheck/build, security, isolated PG as feasible.
-- [ ] Recheck origin/main and integrated plans; record CI and release HOLD/PASS.
+- [x] GREEN: backend omits raw storageKey, sanitizes scanner and filesystem details, returns 503 for unknown failures; Android BFF strips legacy raw key and masks legacy error bodies; direct and gateway cache/noindex fences retained.
+- [x] Verified: backend target 19 PASS, Android gateway 40 PASS, widget 5 PASS with NODE_ENV=test, DB 56 PASS/4 SKIP, changed ESLint PASS, Typecheck PASS, Build PASS, security 0 known vulnerabilities, isolated PG 295 ACL assertions PASS.
+- [x] Rechecked origin/main and bilingual plans at midpoint: 62c6cd038951d65c94b709302bdaec6e75b080b6 unchanged; 17 remote branches, 10 open PRs before this PR, 2 conflicting, 13 heads with unique commits, 0 duplicate/missing heads. All retained.
 
-## FINISHED
-- Pending.
+## FINISHED — candidate held
+- Full lint FAIL: 3 pre-existing `frontend/src/components/stale-tab-notice.tsx` no-empty errors (QA PR #1894 owns repair). Full test command FAIL on pre-existing mobile contract `affinity` null/number drift; generated contract files restored rather than mixing unrelated contract change.
+- Backend full: 2,353 PASS / 240 FAIL / 493 SKIP. Frontend full: 2,532 PASS / 61 FAIL. Widget 5 tests initially failed under NODE_ENV=production (`React.act`); rerun with NODE_ENV=test 5 PASS.
+- Real PostgreSQL 17.11 isolated network-none container: synthetic migration 295 + owner/recipient/admin/foreign/least-privilege assertions PASS. First synthetic run incorrectly executed migration as postgres, causing owner mismatch; corrected migration executor to moneyverse_migrator and reran PASS. Container removed, no live DB write.
+- Official Test/Production version APIs: both c2129625aa6629c616fb31ce790950618b8d92b2. Candidate not deployed; authenticated exact-SHA Test E2E, independent restore and GitOps gates BLOCKED.
+- No main merge, production change, rollback action, branch deletion, or PR closure. Rollback plan: keep prior API contract and remove candidate patch only after review; no database rollback required.
+- Logs and branch audit: `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-29-2323`. Final SHA and GitHub CI are tracked in Draft PR comments. Release HOLD until every required gate passes.

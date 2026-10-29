@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { GUARDS_METADATA, HEADERS_METADATA } from '@nestjs/common/constants';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import type { Response } from 'express';
@@ -134,6 +134,16 @@ describe('ChatUploadController', () => {
     vi.mocked(mockMedia.register!).mockRejectedValue(new Error('database offline'));
     await expect(controller.uploadChatImage(req, file)).rejects.toThrow(/unavailable/i);
     expect(mockStorage.remove).toHaveBeenCalledWith('chat_123.png');
+  });
+
+  it('marks direct upload receipts private and non-indexable', () => {
+    const headers: Array<{ name: string; value: string }> = Reflect.getMetadata(
+      HEADERS_METADATA, ChatUploadController.prototype.uploadChatImage,
+    );
+    expect(headers).toEqual(expect.arrayContaining([
+      { name: 'Cache-Control', value: 'private, no-store' },
+      { name: 'X-Robots-Tag', value: 'noindex' },
+    ]));
   });
 
   it('requires session and authenticated identity before serving a chat image', () => {

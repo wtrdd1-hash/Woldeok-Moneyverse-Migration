@@ -144,6 +144,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  // A legacy upload backend may echo scanner signatures or filesystem paths.
+  // Preserve the HTTP failure class without exposing its untrusted response body.
+  if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && !response.ok) {
+    const status = response.status >= 500 ? 503 : response.status;
+    return gatewayProblem(status, 'Chat Upload Rejected', 'chat_upload_failed', 'The image upload could not be completed');
+  }
+
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
   if (isVipChestPath(parts)) {
@@ -182,6 +189,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
+          compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
+        // Older backend images returned a redundant internal storage key.
+        // Keep the owner-authorized URL but never expose a second raw key field.
+        const publicReceipt = { ...compatible } as Record<string, unknown>;
+        delete publicReceipt.storageKey;
+        delete publicReceipt.storage_key;
+        return new NextResponse(JSON.stringify(publicReceipt), { status: response.status, headers });
+      }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
       return new NextResponse(bytes, { status: response.status, headers });
@@ -199,7 +215,7 @@ async function handle(request: NextRequest, context: Context) {
   // cacheable upstream policy, including when the upstream returns an error.
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work') response.headers.set('x-robots-tag', 'noindex');
+    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
