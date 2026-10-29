@@ -31,7 +31,7 @@ const malformed = [
   '?limit=', '?limit=%20', '?limit=0', '?limit=00', '?limit=01',
   '?limit=-1', '?limit=1e2', '?limit=0x10', '?limit=1.0',
   '?limit=51', '?limit=999999999999999999999999',
-  '?limit=Infinity', '?limit=2&limit=3', '?limit=1%202',
+  '?limit=Infinity', '?limit=2&limit=3', '?limit=1%202', '?limit=%2B1', '?limit=0001',
 ];
 
 describe('admin monetary listing limits HTTP boundary', () => {
