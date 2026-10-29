@@ -37,8 +37,9 @@ function rows<T>(
   key: string,
   valid: (row: unknown) => boolean,
   identity: (row: RecordValue) => string,
+  maxRows = 100,
 ): T[] | null {
-  if (!object(response) || !Array.isArray(response[key]) || response[key].length > 100) return null;
+  if (!object(response) || !Array.isArray(response[key]) || response[key].length > maxRows) return null;
   const items: unknown[] = response[key];
   if (!items.every(valid)) return null;
   const ids = items.map((row) => identity(row as RecordValue));
@@ -50,7 +51,8 @@ function validVerification(value: unknown): boolean {
   if (!object(value) || !uuid(value.verification_id)
     || !(value.requested_by === null || uuid(value.requested_by))
     || !timestamp(value.started_at) || !timestamp(value.completed_at)
-    || Date.parse(value.started_at) > Date.parse(value.completed_at)) return false;
+    || Date.parse(value.started_at) > Date.parse(value.completed_at)
+    || Date.parse(value.completed_at) > Date.now() + 300000) return false;
   const numeric = [
     'from_sequence', 'to_sequence', 'checked_count', 'verified_count',
     'legacy_count', 'mismatch_count', 'link_break_count', 'column_drift_count',
@@ -59,14 +61,25 @@ function validVerification(value: unknown): boolean {
   const from = BigInt(value.from_sequence as string);
   const to = BigInt(value.to_sequence as string);
   const checked = BigInt(value.checked_count as string);
-  if ((from > to && value.status !== 'empty') || BigInt(value.verified_count as string) > checked
-    || numeric.slice(4).some((key) => BigInt(value[key] as string) > checked)) return false;
+  const verified = BigInt(value.verified_count as string);
+  const legacy = BigInt(value.legacy_count as string);
+  const mismatch = BigInt(value.mismatch_count as string);
+  const linkBreak = BigInt(value.link_break_count as string);
+  const columnDrift = BigInt(value.column_drift_count as string);
+  // SQL migration 064 checks at most 100,000 rows. A passed badge must not
+  // hide contradictory totals, even if each individual count is in range.
+  if ((from > to && value.status !== 'empty') || checked > 100000n
+    || (checked > 0n && checked > to - from + 1n)
+    || verified + legacy + mismatch > checked
+    || linkBreak > checked || columnDrift > checked) return false;
   if (value.first_bad_sequence !== null
     && (!count(value.first_bad_sequence)
       || BigInt(value.first_bad_sequence) < from
       || BigInt(value.first_bad_sequence) > to)) return false;
-  const raised = ['mismatch_count', 'link_break_count', 'column_drift_count']
-    .some((key) => value[key] !== '0');
+  const raised = mismatch > 0n || linkBreak > 0n || columnDrift > 0n;
+  if (raised !== (value.first_bad_sequence !== null)) return false;
+  if (checked === 0n && (verified !== 0n || legacy !== 0n || mismatch !== 0n
+    || linkBreak !== 0n || columnDrift !== 0n)) return false;
   return (value.status === 'failed' && raised)
     || (value.status === 'passed' && !raised && checked > 0n)
     || (value.status === 'empty' && checked === 0n && !raised);
@@ -101,7 +114,7 @@ function validDisposition(value: unknown): boolean {
 
 /** Never render a successful compliance signal or privileged mutation control from unvalidated JSON. */
 export function parseAuditVerifications(response: unknown): ChainVerificationHistory[] | null {
-  return rows(response, 'verifications', validVerification, (row) => row.verification_id as string);
+  return rows(response, 'verifications', validVerification, (row) => row.verification_id as string, 30);
 }
 
 export function parseAuditRetention(response: unknown): AuditRetentionCategory[] | null {
