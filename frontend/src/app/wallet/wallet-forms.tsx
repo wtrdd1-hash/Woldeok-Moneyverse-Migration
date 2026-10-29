@@ -80,7 +80,8 @@ function validTransferAttempt(value: unknown): value is TransferAttempt {
     && typeof attempt.amount === 'string' && /^[1-9][0-9]*$/.test(attempt.amount);
 }
 
-export function TransferForm({ currency }: { readonly currency: string }) {
+export function TransferForm({ currency, userId }: { readonly currency: string; readonly userId: string }) {
+  const storageKey = `${PENDING_TRANSFER_STORAGE}:${userId}`;
   const [state, action] = useActionState(transfer, IDLE);
   const [recipientUserId, setRecipientUserId] = useState('');
   const [amount, setAmount] = useState('');
@@ -90,7 +91,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
 
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem(PENDING_TRANSFER_STORAGE);
+      const stored = sessionStorage.getItem(storageKey);
       const restored: unknown = stored ? JSON.parse(stored) : null;
       if (validTransferAttempt(restored)) {
         setRecipientUserId(restored.recipientUserId);
@@ -98,7 +99,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
         setRequestKey(restored.idempotencyKey);
         setPendingAttempt(restored);
       } else {
-        if (stored) sessionStorage.removeItem(PENDING_TRANSFER_STORAGE);
+        if (stored) sessionStorage.removeItem(storageKey);
         setRequestKey(crypto.randomUUID());
       }
     } catch {
@@ -106,24 +107,24 @@ export function TransferForm({ currency }: { readonly currency: string }) {
       // with a new key after navigation. Fail closed instead.
       setStorageError(true);
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (state.status === 'ok') {
-      try { sessionStorage.removeItem(PENDING_TRANSFER_STORAGE); } catch { setStorageError(true); }
+      try { sessionStorage.removeItem(storageKey); } catch { setStorageError(true); }
       setPendingAttempt(null);
       setRecipientUserId('');
       setAmount('');
       setRequestKey(crypto.randomUUID());
     } else if (state.errorCode === 'transfer_verification_pending' && state.transferAttempt) {
       setPendingAttempt(state.transferAttempt);
-      try { sessionStorage.setItem(PENDING_TRANSFER_STORAGE, JSON.stringify(state.transferAttempt)); }
+      try { sessionStorage.setItem(storageKey, JSON.stringify(state.transferAttempt)); }
       catch { setStorageError(true); }
     } else if (state.status === 'error') {
       setPendingAttempt(null);
-      try { sessionStorage.removeItem(PENDING_TRANSFER_STORAGE); } catch { setStorageError(true); }
+      try { sessionStorage.removeItem(storageKey); } catch { setStorageError(true); }
     }
-  }, [state]);
+  }, [state, storageKey]);
 
   const addAmount = (num: number) => {
     if (pendingAttempt) return;
@@ -144,7 +145,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
     try {
       // Persist before dispatch, not only after an error response: the browser
       // may never receive that response or may be reloaded during the request.
-      sessionStorage.setItem(PENDING_TRANSFER_STORAGE, JSON.stringify(attempt));
+      sessionStorage.setItem(storageKey, JSON.stringify(attempt));
       setPendingAttempt(attempt);
     } catch {
       event.preventDefault();

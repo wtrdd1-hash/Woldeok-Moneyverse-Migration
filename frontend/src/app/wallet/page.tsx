@@ -393,7 +393,7 @@ export default async function WalletPage() {
         {/* 탭 1: P2P 간편 송금 및 은행 창구 */}
         <TabsContent value="transfer" className="space-y-6 focus-visible:outline-none">
           <div id="wallet-transfer" className="scroll-mt-24">
-            <TransferForm currency={balances.currency} />
+            <TransferForm currency={balances.currency} userId={userId} />
           </div>
 
           <BankPanel />

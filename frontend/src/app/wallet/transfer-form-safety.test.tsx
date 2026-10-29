@@ -9,7 +9,9 @@ vi.mock('./actions', () => ({
 
 import { TransferForm } from './wallet-forms';
 
-const STORAGE_KEY = 'moneyverse:wallet:pending-transfer:v1';
+const USER = '11111111-1111-4111-8111-111111111111';
+const OTHER_USER = '66666666-6666-4666-8666-666666666666';
+const STORAGE_KEY = `moneyverse:wallet:pending-transfer:v1:${USER}`;
 const ATTEMPT = {
   recipientUserId: '22222222-2222-4222-8222-222222222222',
   amount: '100',
@@ -22,7 +24,7 @@ beforeEach(() => { sessionStorage.clear(); vi.clearAllMocks(); });
 describe('transfer form uncertain-outcome safety', () => {
   it('restores an uncertain transfer across reload and locks the exact command', async () => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ATTEMPT));
-    const { container } = render(<TransferForm currency="WLD" />);
+    const { container } = render(<TransferForm currency="WLD" userId={USER} />);
     const recipient = container.querySelector<HTMLInputElement>('input[name="recipientUserId"]')!;
     const amount = container.querySelector<HTMLInputElement>('input[name="amount"]')!;
     const key = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')!;
@@ -37,7 +39,7 @@ describe('transfer form uncertain-outcome safety', () => {
   });
 
   it('uses a new key for a changed, not-yet-submitted transfer', async () => {
-    const { container } = render(<TransferForm currency="WLD" />);
+    const { container } = render(<TransferForm currency="WLD" userId={USER} />);
     const key = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')!;
     const amount = container.querySelector<HTMLInputElement>('input[name="amount"]')!;
     await waitFor(() => expect(key.value).toMatch(/^[0-9a-f-]{36}$/i));
@@ -46,7 +48,7 @@ describe('transfer form uncertain-outcome safety', () => {
     expect(key.value).not.toBe(initial);
   });
   it('stores the exact key and payload before dispatch and freezes the form while awaiting a reply', async () => {
-    const { container } = render(<TransferForm currency="WLD" />);
+    const { container } = render(<TransferForm currency="WLD" userId={USER} />);
     const recipient = container.querySelector<HTMLInputElement>('input[name="recipientUserId"]')!;
     const amount = container.querySelector<HTMLInputElement>('input[name="amount"]')!;
     const key = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')!;
@@ -59,6 +61,17 @@ describe('transfer form uncertain-outcome safety', () => {
     expect(saved).toEqual({ ...ATTEMPT, idempotencyKey: submittedKey });
     expect(recipient.readOnly).toBe(true);
     expect(amount.readOnly).toBe(true);
+  });
+
+  it("never restores a previous member's pending recipient or amount in another account", async () => {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(ATTEMPT));
+    const { container } = render(<TransferForm currency="WLD" userId={OTHER_USER} />);
+    const recipient = container.querySelector<HTMLInputElement>('input[name="recipientUserId"]')!;
+    const key = container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')!;
+    await waitFor(() => expect(key.value).toMatch(/^[0-9a-f-]{36}$/i));
+    expect(recipient.value).toBe('');
+    expect(key.value).not.toBe(ATTEMPT.idempotencyKey);
+    expect(container.textContent).not.toContain('동일한 요청');
   });
 
 });
