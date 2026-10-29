@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1502 — Live correction with financial execution still held
+- v1501 central-bank admin truth and SWF containment were promoted to official Test and LIVE Production 2026-10-29. Exact application source c2129625aa6629c616fb31ce790950618b8d92b2, main merged PR #1845 as 679cb5904f779a1b2067f10809fcca83e31dbe91 (identical app source tree).
+- Read-only Production ledger shows no unexplained account drift/unbalanced transactions; the raw financial gate remains BLOCKED only for three owner-accepted existing DML grants. Actual mint acceptance, monetary-policy publication and SWF cash liquidation are NOT restored; explicit 503 is intentional.
+- [Full evidence](../releases/v2026.10.29.1502.md) · [Operational record](../worklog/2026-10-29-v1502-operational-promotion.md).
+
+
 ## v2026.10.29.1501 — Central-bank operator truth and SWF containment (SOURCE ONLY)
 - Reported live v1213 failure: 42P08 text/numeric SQL conflict in legacy SWF liquidation; simply casting the value would hide a deeper unbalanced direct-vault credit. A certified ledger transfer must precede any restored liquidation.
 - Source-only candidate disables SWF liquidation in BFF/backend with HTTP 503, and labels all central-bank process-local mint/rate/ratio samples as non-authoritative. No fake mint receipt, official bank policy issuance or autonomous growth is authorized.

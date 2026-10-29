@@ -1,3 +1,6 @@
+## v2026.10.29.1502 — LIVE central-bank/SWF defensive correction
+- PR #1845 integrated, deployed source c2129625a: Production 15/15 public routes 200, SWF cash transfer 503 intentionally held; Test/Production SHA identity, CI, backend 79 and frontend 7 tests PASS. Financial ledger drift zero, three owner-accepted DML grants remain tool blockers. No data writes. [Release](../releases/v2026.10.29.1502.md).
+
 ## v2026.10.29.1501 — SWF liquidation containment and central-bank console truth (candidate)
 - Block unreceipted SWF cash credits (503), expose backend's transient central-bank state as preview, remove fake mint approvals and running indicators. No ledger writes, real mint issuance, or Production deployment verified. [Release](../releases/v2026.10.29.1501.md).
 

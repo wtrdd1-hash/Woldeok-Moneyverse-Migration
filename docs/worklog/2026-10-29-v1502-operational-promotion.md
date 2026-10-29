@@ -25,3 +25,16 @@
 
 ## FINISHED
 - Pending actual Test and Production evidence. Authorization alone is not deployment success.
+
+## AFTER — 2026-10-29 15:08 KST: LIVE Production confirmed
+- Source refreshed after the user's renewed instruction: main advanced to a6284ef43 with independent AI-news v1452. Reconciled the concurrent main source and preserved both English/Korean master planning entries in candidate c2129625aa6629c616fb31ce790950618b8d92b2.
+- CI #40826166798 SUCCESS; workspace typecheck, Nest/Next production builds, backend 79/79 and frontend 7/7 focused tests PASS. PR #1845 merged into main at 679cb5904f779a1b2067f10809fcca83e31dbe91, application tree identical to c2129625a.
+- Official immutable Test v1502 activated under test-current. Public and effective backend/frontend/build/release manifest SHA identity verifier PASS. Six Test public paths 200, SWF POST 503, anonymous central-bank status 401, Test noindex.
+- Parallel Production v1502 backend/frontend services started on 3564/3565 with existing Production DB credentials, duplicate financial/scheduler/outbox writers disabled. Prior v1213 services remained active on 3492/3493.
+- First Production traffic cutover failed due insufficient read permission for the verifier's protected environment file; automatic rollback recovered exact original nginx configuration, production-current pointer and public v1213 version. No data changed. Changed only verifier execution privilege to authorized root (read-only), retried the cutover successfully.
+- LIVE production-current points to prod-v2026.10.29.1502-c2129625a; nginx routes public to 3564/3565; exact Production identity verifier PASS with zero mismatches. 15/15 public paths 200, SWF POST intentionally 503, anonymous central-bank BFF 401, new v1502 service error logs 0.
+- Read-only finance: Test zero unexplained projection/imbalance, PASS; Production 40 account balances, zero projection drift, delta 0, zero unbalanced transactions and zero transactions without postings. Original Production finance tool remains BLOCKED only by three owner-approved preexisting DML grants; no grant changes, no fake PASS.
+- No schema migration, account balance edit, ledger write or intentional member-session deletion. Authenticated cookie replay and actual canonical transfer/mint approval E2E not independently proven. Old v1213 generation and private nginx pre-cutover backup retained for rollback.
+
+## FINAL
+- Production promotion VERIFIED; actual unsafe finance functionality remains intentionally UNAVAILABLE until audited canonical settlement exists.
