@@ -11,6 +11,12 @@
 
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v2026.10.28.1422 — F675-161 검토 대기 사진 철회 보완 (기획 DRAFT / RELEASE HOLD)
+- Previous Addition v1420 → Current Improvement v1422 → Next Addition v1424(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 재확인, 선행 기획 #1727·개발 A #1730 모두 미병합 Draft. #1730은 기존 기획과 API 경로·응답 snake_case, 사진 행 삭제 vs FK 유지, 철회 이력 30건 조회, 활성 회원·기능 OFF 검증, 재시도 UUID·Android 계약이 불일치. SQL 시험은 DB 환경변수 부재 시 SKIPPED 가능. 운영 유출 증거는 아님.
+- P0 ENV1422-01 FIN1422-02 PHOTO1422-03 REL1422-04; P1 PHOTO1422-05 PHOTO1422-06 PHOTO1422-07 PHOTO1422-08 PHOTO1422-09 PHOTO1422-10. 표식 보존 모델 확정, 본인 비식별 철회 영수증, 게시·미디어·일일 5건 차단, API/Android 동등성, 30/31 키셋, 동시 100건, 격리 PostgreSQL 및 OFF 롤백. [영문 통합문서](INTEGRATED_PLANNING_MASTER.md)·[한국어](INTEGRATED_PLANNING_MASTER.ko.md), [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726), [개발 #1730](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1730).
+- 완료된 최신 QA v1346 FAILED; QA v1347 진행 중(별도 카지노 주사위 시험 P1 #1725, 운영 합격 아님): 데이터 디스크 97%, 백업 #1718, 과거 18,000 WLD 원장 불일치, 마이그레이션 5개 불일치/20개 미적용, 정확 SHA 공식 Test·독립 복원 BLOCKED. 국고 DB 단독 291 조치는 전체 운영승격 승인 아님. 외부 발행처 3곳 검토, 신규 승인 0건, 누적 승인 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+
+
 ## v1420 / F675-161 — 갤러리 검토 대기 사진 철회 (ADDITION / DRAFT / HOLD)
 - 실제 `/gallery/submit`은 회원 제출 사진 최신 30건만 보여주며 철회 CTA가 없다. `member-photo.controller.ts`는 업로드/제출/내 목록만, Migration 127은 행 잠금 후 게시할 수 있다. 신규 기능은 **본인 검토 대기 사진 철회**이며 게시 사진 신고·실제 파일 삭제와 구별한다.
 - 확인 후 철회, 불변 영수증, 회원·세션 격리, `member_photo_withdrawals` 표식, 관리자 게시/미디어 조회 경합 차단, 30건 불투명 Keyset, NestJS·Next.js·Android, 관리자 감사, SEO·접근성·기본 OFF 롤백 명세. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. [통합 기획](INTEGRATED_PLANNING_MASTER.ko.md), [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).

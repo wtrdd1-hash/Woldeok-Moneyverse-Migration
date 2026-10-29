@@ -1,3 +1,6 @@
+## 2026-10-28 v1422 — F675-161 사진 철회 후보 계약 보완 (IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1420 / Current Improvement v1422 / Next Addition v1424. main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인, QA v1346 FAILED. Draft #1730은 사진 행 삭제 후 철회 영수증이 회원 목록에 나오지 않음, API 경로·응답과 v1420 불일치, 활성 회원/OFF·재시도 UUID 미검증, Android 계약 누락. 통합문서에 P0 ENV1422-01 FIN1422-02 PHOTO1422-03 REL1422-04 및 P1 PHOTO1422-05..10 반영. 디스크97%, 독립 복원, 18k WLD, 정확 SHA HOLD. 외부 3곳 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+
 ## 2026-10-28 v1420 — F675-161 회원 갤러리 제출 철회 (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1418 / Current Addition v1420 / Next Improvement v1422. main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED. 디스크 97%, 백업 사고 #1718, 과거 18,000 WLD 불일치, 정확 SHA Test/복원/운영승격 HOLD. 회원 사진 UI/API, Migration 098/127, Android 계약 대조: 철회 기능 없음.
 - 본인 검토 대기 사진만 확인 후 철회, 불변 표식·영수증, 관리자 승인 행 잠금 경합 차단, 미디어 즉시 접근 차단, 내 제출물 페이지 조회. 파일 즉시 삭제·하루 제출 횟수 환급 허위 약속 금지. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. 영문·국문 통합 명세와 [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726); 코드·DB·배포 없음. 외부 3곳 검토, 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
