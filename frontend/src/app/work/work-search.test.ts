@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkTask } from './work';
-import { filterRecommendedWorkTasks, filterWorkTasks } from './work-search';
+import { filterWorkTasks } from './work-search';
 
 function task(overrides: Partial<WorkTask> = {}): WorkTask {
   return {
@@ -49,14 +49,13 @@ describe('filterWorkTasks', () => {
   });
 });
 
-describe('member recommendations', () => {
-  const tasks = [task({ recommended: false }), task({ code: 'recommended', recommended: true })];
-  it('keeps all tasks by default and returns only server-flagged recommendations on demand', () => {
-    expect(filterRecommendedWorkTasks(tasks, false)).toBe(tasks);
-    expect(filterRecommendedWorkTasks(tasks, true).map((item) => item.code)).toEqual(['recommended']);
+describe('selected difficulty query', () => {
+  it.each(['1', '2', '3', '4', '5'])('accepts difficulty %s', async (level) => {
+    const { selectedWorkDifficulty } = await import('./work-search');
+    expect(selectedWorkDifficulty(level)).toBe(level);
   });
-  it('composes with the existing member search without changing the task payload', () => {
-    const recommended = filterRecommendedWorkTasks(tasks, true);
-    expect(filterWorkTasks(recommended, 'recommended')).toEqual([tasks[1]]);
+  it.each([undefined, '', '0', '6', '01', '2.0', ['2']])('ignores invalid web query %j', async (raw) => {
+    const { selectedWorkDifficulty } = await import('./work-search');
+    expect(selectedWorkDifficulty(raw)).toBeNull();
   });
 });

@@ -14,10 +14,7 @@ export function filterWorkTasks(
   );
 }
 
-/** The server computes each member's three daily picks; never guess them from reward values. */
-export function filterRecommendedWorkTasks(
-  tasks: readonly WorkTask[],
-  recommendedOnly: boolean,
-): readonly WorkTask[] {
-  return recommendedOnly ? tasks.filter((task) => task.recommended) : tasks;
+/** Strict URL query parser; never reflect malformed filters into the private API. */
+export function selectedWorkDifficulty(raw: unknown): string | null {
+  return typeof raw === 'string' && /^[1-5]$/.test(raw) ? raw : null;
 }

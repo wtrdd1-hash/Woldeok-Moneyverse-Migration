@@ -307,16 +307,25 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   });
 });
 
-describe('Android wallet history pagination', () => {
-  it('passes through the opaque cursor but forces private no-store and noindex', async () => {
+describe('work task difficulty on Android gateway', () => {
+  it.each([200, 401, 403, 500])('forwards canonical difficulty and never caches member work status %s', async (status) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ transactions: [], hasMore: false }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ tasks: [] }), {
+      status,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/wallet/activity?period=7d&cursor=abc.def'), context('wallet', 'activity'));
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('cursor')).toBe('abc.def');
+    const response = await GET(request('/app-api/v1/work/tasks?difficulty=3'), context('work', 'tasks'));
+    expect(response.status).toBe(status);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/work/tasks?difficulty=3');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('never caches gateway failures', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('down'); }));
+    const response = await GET(request('/app-api/v1/work/tasks?difficulty=2'), context('work', 'tasks'));
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 });

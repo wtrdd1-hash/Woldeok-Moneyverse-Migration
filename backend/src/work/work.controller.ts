@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -14,7 +15,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -29,7 +30,7 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { WorkInputError, WorkRepository } from './work.repository';
+import { parseWorkDifficulty, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -101,19 +102,20 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @ApiOperation({ summary: 'Member task board, optionally limited to today’s recommended tasks' })
-  @ApiQuery({ name: 'recommendedOnly', required: false, enum: ['true', 'false'] })
-  async tasks(
-    @Req() request: RequestWithSession,
-    @Query('recommendedOnly') recommendedOnly?: string,
-  ) {
-    const repository = this.repository();
-    const actor = requireUserId(request);
-    const [featureState, tasks] = await Promise.all([
-      repository.featureState(),
-      this.guarded(() => repository.tasks(actor, recommendedOnly), 'the task board is unavailable'),
-    ]);
-    return { featureState, tasks };
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
+  async tasks(@Req() request: RequestWithSession, @Query('difficulty') rawDifficulty?: unknown) {
+    return this.guarded(async () => {
+      const difficulty = parseWorkDifficulty(rawDifficulty);
+      const repository = this.repository();
+      const actor = requireUserId(request);
+      const [featureState, tasks] = await Promise.all([
+        repository.featureState(),
+        repository.tasks(actor, difficulty),
+      ]);
+      return { featureState, tasks };
+    }, 'the task board is unavailable');
   }
 
   @Post('tasks/:id/complete')
