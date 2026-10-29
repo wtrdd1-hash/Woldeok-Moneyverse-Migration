@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { STEP_UP_CODE, spendSecondFactorCode } from '../../step-up';
 import { AI_NEWS_SENTENCES } from './sentences';
+import { engineLabel, parseAutoGenerateReceipt } from './auto-generate-receipt';
 
 /**
  * The AI newsroom's writes. The model's refusals arrive as 503s with a
@@ -82,38 +83,37 @@ export async function generateAiNews(_previous: ActionState, formData: FormData)
  * 1-Click 자동 AI 주식 뉴스 생성 및 즉시 발행 액션
  */
 export async function autoGenerateAiNews(_previous: ActionState, formData: FormData): Promise<ActionState> {
-  const publishImmediate = formData.get('publishImmediate') === 'true' || formData.get('publishImmediate') === 'on';
+  const publishImmediate = formData.get('publishImmediate') === 'true';
   try {
-    const result = await mutate<{
-      success: boolean;
-      published: boolean;
-      publishedCount?: number;
-      stocksAnalyzed?: number;
-      scenarioCount?: number;
-      scenario?: {
-        headline: string;
-        effects: Array<{ stock_id: string | null; direction: string; strength: number }>;
-      };
-      message?: string;
-    }>('/api/v1/admin/ai-news/auto-generate', {
+    const raw = await mutate<unknown>('/api/v1/admin/ai-news/auto-generate', {
       body: { publishImmediate, idempotencyKey: idempotencyKey() },
     });
-
-    revalidatePath(PAGE);
-    revalidatePath('/admin/market');
-    revalidatePath('/stocks');
-
-    if (result.published && result.scenario) {
-      const effectCount = result.scenario.effects.filter((e) => e.direction !== 'none').length;
+    const receipt = parseAutoGenerateReceipt(raw);
+    if (receipt === null) {
+      return { status: 'error', message: '서버의 생성·발행 결과를 확인할 수 없습니다. 시장 상태를 다시 조회해 주세요.' };
+    }
+    if (receipt.kind === 'skipped') {
       return {
-        status: 'ok',
-        message: `AI 뉴스가 자동 생성되어 즉시 발행되었습니다: "${result.scenario.headline}" (${effectCount}개 종목 시세 반영 중)`,
+        status: 'error',
+        message: receipt.reason === 'no_registered_stocks'
+          ? '활성 상장 종목이 없어 시나리오를 만들지 않았습니다.'
+          : '생성 가능한 시나리오가 없어 발행하지 않았습니다.',
       };
     }
-
+    revalidatePath(PAGE);
+    if (receipt.kind === 'draft') {
+      return publishImmediate
+        ? { status: 'error', message: `${receipt.generated}개 시나리오는 저장되었으나 시장에 발행되지 않았습니다. 검토 후 수동 발행해 주세요.` }
+        : { status: 'ok', message: `${engineLabel(receipt.engine)}으로 시나리오 ${receipt.generated}개를 저장했습니다. 시장에 발행되지 않았습니다.` };
+    }
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+    if (!publishImmediate) {
+      return { status: 'error', message: '즉시 발행에 동의하지 않았지만 서버가 발행 영수증을 반환했습니다. 시장 상태를 확인해 주세요.' };
+    }
     return {
       status: 'ok',
-      message: `활성 상장 종목 분석을 완료하고 AI 뉴스 시나리오가 자동 생성되었습니다. 아래 시나리오 목록을 확인하세요.`,
+      message: `${engineLabel(receipt.engine)}으로 생성한 뉴스가 발행되었습니다: "${receipt.headline}" (${receipt.eventsPublished}개 시장 이벤트 영수증 확인)`,
     };
   } catch (error) {
     return explain(error, 'AI 뉴스 자동 생성을 실행하지 못했습니다.');

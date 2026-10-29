@@ -136,7 +136,7 @@ export function AiNewsAutoGenerateCard({
   readonly ready: boolean;
 }) {
   const [state, action] = useActionState(autoGenerateAiNews, IDLE);
-  const [publishImmediate, setPublishImmediate] = useState(true);
+  const [publishImmediate, setPublishImmediate] = useState(false);
 
   return (
     <Card className="border-primary/30 bg-primary/5">
@@ -151,7 +151,7 @@ export function AiNewsAutoGenerateCard({
         </div>
         <CardDescription>
           현재 DB에 상장 및 활성화된 가상 주식(WDT, WDM, WDB, CHIMU314, WFIN, SPACE 등)의 최근 시세·변동률을 자동으로 조회하고,
-          AI 모델이 시장 상황에 맞는 시나리오를 자동 구성하여 즉시 시장에 발행합니다.
+          AI 모델 또는 규칙 기반 엔진이 시나리오를 구성합니다. 즉시 발행은 별도로 선택해야 시장에 반영됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -169,7 +169,7 @@ export function AiNewsAutoGenerateCard({
               <span className="font-semibold text-foreground">생성 즉시 시장에 뉴스 발행 (시세 변동 즉시 반영)</span>
             </label>
             <span className="text-xs text-muted-foreground">
-              {publishImmediate ? '선정된 1위 시나리오가 즉시 시장에 반영됩니다.' : '시나리오 5개만 생성되고 검토 후 수동 발행합니다.'}
+              {publishImmediate ? '선정된 1위 시나리오가 즉시 시장에 반영됩니다.' : '시나리오만 저장하고 시장에는 발행하지 않습니다.'}
             </span>
           </div>
 

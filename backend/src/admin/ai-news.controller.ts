@@ -18,6 +18,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -78,6 +79,13 @@ export class GenerateAiNewsDto {
   @IsOptional()
   @IsUUID()
   readonly idempotencyKey?: string;
+}
+
+export class AutoGenerateAiNewsDto {
+  @ApiProperty({ required: false, description: 'Explicit operator consent to publish a generated scenario immediately', default: false })
+  @IsOptional()
+  @IsBoolean()
+  readonly publishImmediate?: boolean;
 }
 
 export class AiNewsScenarioEffectDto {
@@ -211,9 +219,9 @@ export class AiNewsController {
   @ApiOperation({
     summary: 'Auto-generate and optionally publish market news based on currently registered active stocks',
   })
-  autoGenerate(@Req() request: RequestWithSession) {
+  autoGenerate(@Req() request: RequestWithSession, @Body() body: AutoGenerateAiNewsDto) {
     return this.guarded(
-      () => this.service().autoGenerateAndPublish(requireUserId(request)),
+      () => this.service().autoGenerateAndPublish(requireUserId(request), undefined, body?.publishImmediate === true),
       'failed to auto-generate AI stock news',
     );
   }

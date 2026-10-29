@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { TotpSealingKey } from '../auth/totp';
 import { openSecret, sealSecret } from '../auth/totp';
@@ -824,21 +824,6 @@ export class AiNewsService {
   }
 
   /**
-   * Automated price-moving news must be genuinely new. This reads the database
-   * rather than a process-local timer, including events from a prior deploy.
-   * An unavailable history is fatal instead of silently approving publication.
-   */
-  private async recentAutoMarketHistory(actorUserId: string) {
-    const events = await this.repository.recentMarketEvents(actorUserId);
-    const now = Date.now();
-    return events.map((event) => {
-      const publishedAt = new Date(event.starts_at).getTime();
-      if (!Number.isFinite(publishedAt)) throw new Error('market-news history has an invalid timestamp');
-      return { ...event, publishedAt, age: now - publishedAt };
-    }).filter((event) => event.age >= 0 && event.age < 7 * 24 * 60 * 60 * 1000);
-  }
-
-  /**
    * Generate one batch and deterministically auto-publish one bounded scenario.
    * AI never writes an absolute price. Existing event publication remains the
    * only path that moves prices, preserving all market safety controls.
@@ -846,6 +831,7 @@ export class AiNewsService {
   async autoGenerateAndPublish(
     actorUserId: string,
     runtimeCredential?: AiNewsRuntimeCredential,
+    publishImmediate = true,
   ): Promise<Record<string, unknown>> {
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);
@@ -855,7 +841,6 @@ export class AiNewsService {
 
     let scenarios: ScenarioProposal[] = [];
     let usedModel = 'deterministic-financial-engine';
-    let fallbackReason: 'model_unavailable' | 'no_valid_scenarios' | undefined;
 
     // 1. Try LLM generation if credentials available
     try {
@@ -875,14 +860,12 @@ export class AiNewsService {
       });
       scenarios = normaliseRegisteredStockAuto(batch, context);
     } catch {
-      // A fixed fallback template can create drafts, but cannot repeatedly move prices.
-      fallbackReason = 'model_unavailable';
+      // The deterministic fallback is not model inference and must be labeled as such.
       usedModel = 'deterministic-financial-engine';
       scenarios = generateDeterministicStockNews(context);
     }
 
     if (scenarios.length === 0) {
-      fallbackReason = fallbackReason ?? 'no_valid_scenarios';
       usedModel = 'deterministic-financial-engine';
       scenarios = generateDeterministicStockNews(context);
     }
@@ -900,52 +883,29 @@ export class AiNewsService {
       scenarios,
     });
 
-    const history = await this.recentAutoMarketHistory(actorUserId);
-    const canonical = (text: string) => text.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
-    const recentHeadlines = new Set(history.map((event) => canonical(event.headline)));
-    const recent24h = history.filter((event) => event.age < 24 * 60 * 60 * 1000);
-    const recentStockCount = (symbols: readonly (string | null)[]) => history.filter((event) =>
-      event.symbol !== null && symbols.includes(event.symbol)).length;
+    if (!publishImmediate) {
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, engine: usedModel };
+    }
 
     const stored = await this.repository.latest(actorUserId);
     const candidates = (stored?.scenarios ?? []).filter((scenario) => {
       const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
-      const symbols = movers.map((effect) => effect.symbol);
       return scenario.status === 'proposed'
         && movers.length >= 1 && movers.length <= 2
-        && movers.every((effect) => effect.stock_id !== null && effect.strength <= 2)
-        && !recentHeadlines.has(canonical(scenario.headline))
-        && !recent24h.some((event) => event.symbol !== null && symbols.includes(event.symbol));
+        && movers.every((effect) => effect.stock_id !== null && effect.strength <= 2);
     });
 
     const selected = [...candidates].sort((a, b) => {
-      const symbolsA = a.effects.filter((effect) => effect.direction !== 'none').map((effect) => effect.symbol);
-      const symbolsB = b.effects.filter((effect) => effect.direction !== 'none').map((effect) => effect.symbol);
       const strengthA = a.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
       const strengthB = b.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
-      return recentStockCount(symbolsA) - recentStockCount(symbolsB)
-        || strengthA - strengthB || a.effects.length - b.effects.length || a.ordinal - b.ordinal;
+      return strengthA - strengthB || a.effects.length - b.effects.length || a.ordinal - b.ordinal;
     })[0];
 
     if (!selected) {
-      return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: 'no_novel_candidate', engine: usedModel };
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: 'no_bounded_candidate' };
     }
 
-    // A repeat can race the history read (manual auto-trigger vs scheduler).
-    // The existing PostgreSQL event-publish function locks and deduplicates this
-    // content-derived UUID, so even concurrent identical headlines cannot apply
-    // the price-moving event twice. Reusing an article title never gets a new key.
-    const fingerprint = createHash('sha256')
-      .update('moneyverse:auto-news:v1452:')
-      .update(canonical(selected.headline))
-      .update(':')
-      .update(selected.effects.filter((effect) => effect.direction !== 'none')
-        .map((effect) => effect.stock_id).sort().join(','))
-      .digest('hex');
-    const idempotencyKey = `${fingerprint.slice(0, 8)}-${fingerprint.slice(8, 12)}-4${fingerprint.slice(13, 16)}-8${fingerprint.slice(17, 20)}-${fingerprint.slice(20, 32)}`;
-
     const receipt = await this.publish({
-      idempotencyKey,
       actorUserId,
       scenarioId: selected.id,
       hours: Math.min(24, selected.hours),
@@ -960,7 +920,7 @@ export class AiNewsService {
       generated: scenarios.length, published: true, batchId: created.batch_id,
       scenarioId: selected.id, headline: selected.headline,
       eventId: receipt.event_id, eventsPublished: receipt.published,
-      engine: usedModel, fallbackReason: fallbackReason ?? null,
+      engine: usedModel,
     };
   }
 
