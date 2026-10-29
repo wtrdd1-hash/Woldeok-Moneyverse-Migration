@@ -30,7 +30,7 @@ import { CentralBankPanel } from '@/components/admin/central-bank-panel';
 
 interface Props {
   readonly overview: AdminTreasuryOverview;
-  readonly ledger: readonly AdminTreasuryLedger[];
+  readonly ledger: readonly AdminTreasuryLedger[] | null;
   readonly revenue?: {
     readonly items: readonly AdminTreasuryRevenueSource[];
     readonly total_24h_wld: string;
@@ -151,7 +151,9 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
   const [filterType, setFilterType] = useState<LedgerFilterType>('ALL');
   const [institutionalTab, setInstitutionalTab] = useState<'TREASURY' | 'MINT' | 'CENTRAL_BANK'>('TREASURY');
 
-  const filteredLedger = ledger.filter((entry) => {
+  const ledgerAvailable = ledger !== null;
+  const ledgerRows = ledger ?? [];
+  const filteredLedger = ledgerRows.filter((entry) => {
     if (filterType === 'ALL') return true;
     if (filterType === 'OUTFLOW') {
       return (
@@ -687,7 +689,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       </Card>
 
       {/* 8. 실시간 국고 회계 감사 원장 (Ledger Table) */}
-      <Card className="border shadow-sm">
+      <Card role="region" aria-label="국고 회계 감사 원장" data-evidence-state={ledgerAvailable ? 'verified' : 'unavailable'} className="border shadow-sm">
         <CardHeader className="p-4 sm:p-6 pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -700,6 +702,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             <div className="flex flex-wrap items-center gap-1 bg-muted/60 p-1 rounded-xl border text-xs">
               <button
                 type="button"
+                disabled={!ledgerAvailable}
                 onClick={() => setFilterType('ALL')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   filterType === 'ALL'
@@ -707,10 +710,11 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                전체 ({ledger.length})
+                {ledgerAvailable ? `전체 (${ledgerRows.length})` : '전체 (조회 불가)'}
               </button>
               <button
                 type="button"
+                disabled={!ledgerAvailable}
                 onClick={() => setFilterType('OUTFLOW')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   filterType === 'OUTFLOW'
@@ -722,6 +726,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               </button>
               <button
                 type="button"
+                disabled={!ledgerAvailable}
                 onClick={() => setFilterType('BURN')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   filterType === 'BURN'
@@ -733,6 +738,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               </button>
               <button
                 type="button"
+                disabled={!ledgerAvailable}
                 onClick={() => setFilterType('INFLOW')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   filterType === 'INFLOW'
@@ -744,6 +750,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               </button>
               <button
                 type="button"
+                disabled={!ledgerAvailable}
                 onClick={() => setFilterType('STOCK')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   filterType === 'STOCK'
@@ -757,6 +764,13 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
           </div>
         </CardHeader>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
+          {!ledgerAvailable && (
+            <div role="status" className="mx-4 my-3 rounded-lg border border-amber-500/50 p-4 text-sm sm:mx-0">
+              <p className="font-semibold">원장 조회 불가</p>
+              <p>국고 원장 조회 근거가 확인되지 않았습니다. 거래 0건으로 해석하지 마세요.</p>
+              <a href="/admin/treasury" className="inline-flex min-h-11 items-center underline">다시 조회</a>
+            </div>
+          )}
           {/* 모바일 뷰: 카드 스택 (md:hidden) */}
           <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
             {filteredLedger.map((entry) => {
@@ -794,7 +808,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             })}
             {filteredLedger.length === 0 && (
               <div className="py-8 text-center text-xs text-muted-foreground">
-                해당 필터 조건의 원장 거래 내역이 없습니다.
+                {ledgerAvailable ? '해당 필터 조건의 원장 거래 내역이 없습니다.' : '원장 조회 불가 — 거래 내역은 검증되지 않았습니다.'}
               </div>
             )}
           </div>
@@ -817,7 +831,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
                 {filteredLedger.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-6 text-xs text-muted-foreground">
-                      기록된 국고 원장 트랜잭션이 없습니다.
+                      {ledgerAvailable ? '기록된 국고 원장 트랜잭션이 없습니다.' : '원장 조회 불가 — 거래 내역은 검증되지 않았습니다.'}
                     </TableCell>
                   </TableRow>
                 ) : (

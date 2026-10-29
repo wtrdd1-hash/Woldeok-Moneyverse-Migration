@@ -54,13 +54,6 @@ export default async function AdminTreasuryPage() {
         {AREA.summary}
       </PageHeader>
 
-      {overview === null ? (
-        <EmptyState
-          title="국고 현황을 불러오지 못했습니다."
-          description="중앙 국고 및 비축금 데이터베이스 연결을 확인해 주세요."
-        />
-      ) : (
-        <>
           {swfEvidence === null ? (
             <section role="alert" className="rounded-xl border border-amber-500/40 p-5 text-sm" aria-label="국부펀드 관측 상태">
               <p className="font-semibold">국부펀드 관측 정보를 검증할 수 없습니다.</p>
@@ -74,9 +67,16 @@ export default async function AdminTreasuryPage() {
               initialEvents={swfEvidence.events}
             />
           )}
+      {overview === null ? (
+        <EmptyState
+          title="국고 현황을 불러오지 못했습니다."
+          description="중앙 국고 및 비축금 데이터베이스 연결을 확인해 주세요."
+        />
+      ) : (
+        <>
           <TreasuryView
             overview={overview}
-            ledger={transactionsRes?.items ?? []}
+            ledger={transactionsRes?.items ?? null}
             revenue={revenueRes}
             expenditure={expenditureRes}
           />
