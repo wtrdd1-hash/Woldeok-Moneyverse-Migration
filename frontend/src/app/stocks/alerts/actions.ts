@@ -78,8 +78,9 @@ export async function createStockAlert(_previous: ActionState, formData: FormDat
       typeof receipt.alertId !== 'string' || !UUID.test(receipt.alertId)) {
       throw new Error('invalid stock alert creation receipt');
     }
+    const createdAlertId = receipt.alertId;
     const alerts = await verifiedOwnerAlerts();
-    const matching = alerts.filter((alert) => alert.alert_id.toLowerCase() === receipt.alertId.toLowerCase());
+    const matching = alerts.filter((alert) => alert.alert_id.toLowerCase() === createdAlertId.toLowerCase());
     if (matching.length !== 1 || matching[0]?.stock_id.toLowerCase() !== stockId.toLowerCase() ||
       matching[0]?.condition_kind !== conditionKind || matching[0]?.cooldown_seconds !== cooldownMinutes * 60 ||
       matching[0]?.threshold_amount !== (thresholdAmount ?? null) ||
