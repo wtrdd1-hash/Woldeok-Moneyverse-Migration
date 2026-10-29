@@ -67,7 +67,7 @@ export class NotificationService {
       const rows = await queryRows<{
         id: string; category: string; title: string; body: string; link: string | null;
         is_read: boolean; created_at: Date;
-      }>(client, `SELECT id::text, category, title, body, link, is_read, created_at
+      }>(client, `SELECT id::text, category, left(title, 200) AS title, left(body, 2000) AS body, link, is_read, created_at
         FROM public.in_app_notifications
         WHERE user_id = $1::uuid
           AND ($2::text IS NULL OR category = $2::text)
