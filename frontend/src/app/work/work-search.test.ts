@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkTask } from './work';
-import { filterWorkTasks } from './work-search';
+import { filterWorkTasks, filterWorkTasksByMinReward } from './work-search';
 
 function task(overrides: Partial<WorkTask> = {}): WorkTask {
   return {
@@ -49,13 +49,17 @@ describe('filterWorkTasks', () => {
   });
 });
 
-describe('selected difficulty query', () => {
-  it.each(['1', '2', '3', '4', '5'])('accepts difficulty %s', async (level) => {
-    const { selectedWorkDifficulty } = await import('./work-search');
-    expect(selectedWorkDifficulty(level)).toBe(level);
+
+describe('work task minimum reward filter', () => {
+  const tasks = [task({ reward_preview: '9007199254740993' }), task({ code: 'low', reward_preview: '25' }), task({ code: 'paused', reward_preview: null })];
+  it('compares integer-string rewards without Number precision loss', () => {
+    expect(filterWorkTasksByMinReward(tasks, '9007199254740993').map((t) => t.code)).toEqual(['farm_care']);
+    expect(filterWorkTasksByMinReward(tasks, '26').map((t) => t.code)).toEqual(['farm_care']);
   });
-  it.each([undefined, '', '0', '6', '01', '2.0', ['2']])('ignores invalid web query %j', async (raw) => {
-    const { selectedWorkDifficulty } = await import('./work-search');
-    expect(selectedWorkDifficulty(raw)).toBeNull();
+  it('preserves the unfiltered list for the all selection', () => {
+    expect(filterWorkTasksByMinReward(tasks, '')).toBe(tasks);
+  });
+  it('does not represent unavailable reward previews as eligible', () => {
+    expect(filterWorkTasksByMinReward(tasks, '0').map((t) => t.code)).toEqual(['farm_care', 'low']);
   });
 });

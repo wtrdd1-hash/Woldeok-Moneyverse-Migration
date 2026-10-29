@@ -14,7 +14,17 @@ export function filterWorkTasks(
   );
 }
 
-/** Strict URL query parser; never reflect malformed filters into the private API. */
-export function selectedWorkDifficulty(raw: unknown): string | null {
-  return typeof raw === 'string' && /^[1-5]$/.test(raw) ? raw : null;
+/** Filter only server-provided payout previews, never base rewards or rounded JS numbers. */
+export function filterWorkTasksByMinReward(
+  tasks: readonly WorkTask[],
+  minReward: string,
+): readonly WorkTask[] {
+  if (!minReward) return tasks;
+  if (!/^(?:0|[1-9][0-9]{0,17})$/.test(minReward)) return [];
+  const minimum = BigInt(minReward);
+  return tasks.filter((task) =>
+    task.reward_preview !== null &&
+    /^(?:0|[1-9][0-9]*)$/.test(task.reward_preview) &&
+    BigInt(task.reward_preview) >= minimum,
+  );
 }
