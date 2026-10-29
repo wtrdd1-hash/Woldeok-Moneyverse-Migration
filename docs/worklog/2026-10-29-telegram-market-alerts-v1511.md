@@ -27,3 +27,6 @@
 - Rollback canary: the new market timer was disabled and became inactive, then re-enabled and returned active, without interrupting app or original Telegram operations timer.
 - No database migrations, market mutations, newly invented real news, private data forwarding or application restarts. Important residual: market data reader uses host Docker group and postgres role within BEGIN READ ONLY; later replace with dedicated read-only database account and grants. Current source is root-owned and immutable by the service.
 - Main docs reconciliation is a documentation-only follow-up to the merged feature, performed according to repository release documentation policy. This entry records observed proof, not an assurance of future delivery during external Telegram outages.
+
+## GitHub Release publication
+- Release tag v2026.10.29.1511 published at https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/releases/tag/v2026.10.29.1511 with target doc reconciliation source 27dab9f121f10c20592b778e8a56e8ec002207e4 and English-first release notes. This tag is metadata for the already-live independent monitor, not a new application redeploy.
