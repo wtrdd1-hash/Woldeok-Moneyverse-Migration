@@ -7,3 +7,4 @@
 - 시작: Debian 13.6 주요 서비스 활성, DEV DB 연결 확인. 공유 기본 체크아웃은 다른 작업으로 수정 중이므로 건드리지 않았다. 감사 증거는 `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-0025/`에 저장.
 - 검증: 대기. 공식 Test 정확 SHA 인증 E2E: BLOCKED. 운영 배포: HOLD. 롤백: 게이트 코드 커밋 되돌리기, DB 변경 없음.
 - RED 검증: 신규 회귀 테스트 4개 그룹이 기존 게이트에서 실패함을 확인했다. 실제 관찰된 운영 프론트엔드의 시각형 ID와 Test 국고 가상 200 응답을 재현했다. 증거: `red-tests.log`. 다음 단계는 배포 없이 읽기 전용 검증기 보완.
+- GREEN 검증: 공개 `/frontend-version` 및 `/api/treasury/overview` 읽기 전용 검증 추가, 503·no-store·미검증·원장 빈 목록을 엄격히 확인한다. 대상 Node 테스트 14/14 PASS. 실제 호스트 게이트에서 Test는 가상 국고 HTTP 200으로, Production은 프론트엔드 빌드 ID 불일치로 차단되었다. 서비스 변경 없음.
