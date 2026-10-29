@@ -4580,7 +4580,9 @@ _요청 본문 없음._
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| status | query | false | string | description="Filters the latest 100 owner-scoped support threads; not complete history"; enum="open","waiting_user","resolved" |
 
 ### 요청 본문
 

@@ -4570,7 +4570,7 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/support/threads` — My administrator support conversations
+## `GET` `/app-api/v1/support/threads` — My administrator support conversations, optionally filtered by status
 
 - Authorization: 로그인 + 최신 동의
 - Success status: 200
@@ -4580,7 +4580,9 @@ _No request body._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| status | query | false | string | description="Filters the latest 100 owner-scoped support threads; not complete history"; enum="open","waiting_user","resolved" |
 
 ### Request body
 

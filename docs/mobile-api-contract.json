@@ -14413,8 +14413,23 @@
       "backendRoute": "/api/v1/support/threads",
       "operationId": "SupportController_threads",
       "backendOpenApiPath": "/support/threads",
-      "summary": "My administrator support conversations",
-      "parameters": [],
+      "summary": "My administrator support conversations, optionally filtered by status",
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "description": "Filters the latest 100 owner-scoped support threads; not complete history",
+            "enum": [
+              "open",
+              "waiting_user",
+              "resolved"
+            ]
+          }
+        }
+      ],
       "successStatuses": [
         200
       ],
