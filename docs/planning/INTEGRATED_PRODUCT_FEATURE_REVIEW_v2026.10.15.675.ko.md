@@ -1,26 +1,9 @@
-## v1418 — F675-160 상점 저장 목록 무결성 보완 (기능 보완 / 초안 / 운영 보류)
-- Draft PR #1720(#1714 후속), 개발 이슈 #1713, 문서 후보 SHA 60ded3774ede210a839e8de9112bf3969a801c3c; PR classify/release-input CI 확인 당시 PENDING, 공식 Test 미검증.
-- 이전 추가 v1416 → 현재 보완 v1418 → 다음 추가 v1420(잠정). main d12c948ac454b0762cfb7fb0cddf83703a775172, 미병합 Draft #1714(b9b55ea4) 후속, QA v1344 FAILED. 실제 회원 카탈로그는 구형 `shop_catalog_list`가 아니라 `shop_catalog_list_v2`를 호출하며 활성 목록에서 비활성 저장 항목을 찾을 수 없다.
-- P0: 회원 한정 LEFT JOIN 비활성 표시, RESTRICT FK 관리자 삭제 절차, 회원당 500개 직렬화(499→500 경합), 과거 멱등 영수증과 현재 저장 상태 분리, 사용자 결속·정확 SHA·백업 게이트. 신규 백업 순환 사고 #1718, 데이터 볼륨 97%, 배당 원장 18,000 WLD/국고 0/PR #1706 충돌.
-- P0 ENV1418-01 FIN1418-02 SEC1418-03 REL1418-04; P1 SHOP1418-05 SHOP1418-06 SHOP1418-07 SHOP1418-08 SHOP1418-09 SHOP1418-10. 합성 10,001/100/100 및 500개 경합 시험은 명세만, 실행하지 않음. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED. 영한 통합 기획서에 전체 명세, 런타임/DB/WLD/Test/운영 불변.
-
-## v1416 — F675-160 회원 상점 아이템 나중에 보기 (기능 추가 / 초안 / 운영 보류)
-- 이전 보완 v1414 → 현재 추가 v1416 → 다음 보완 v1418(잠정). main d12c948ac454b0762cfb7fb0cddf83703a775172; QA v1343. /shop/catalog에는 회원별 저장 목록이 없다. 저장은 구매·재고 선점·가격 고정·WLD 차감이 아니다. 초기 알림 설정 후보는 기존 F675-130/#1353과 중복되어 폐기. 개발 A/B/C/Gemini/QA와 별도 기획.
-- 본인 GET/POST/DELETE·불변 멱등 영수증·Keyset·실제 상점 적격성·DB 권한·Next/Android·관리자/개인정보/SEO/접근성/KPI·기본 OFF 롤백은 통합 마스터 참조.
-- P0 ENV1416-01 FIN1416-02 SEC1416-03 REL1416-04; P1 SHOP1416-05 SHOP1416-06 SHOP1416-07 SHOP1416-08 SHOP1416-09 SHOP1416-10. 디스크 96%, QA v1343의 원장 없는 18,000 WLD 배당·국고 0은 별도 #1706. 10,001/100/100 미실행, 외부 승인 0·누적 UNKNOWN/10,000 BLOCKED, 금융 운영승격 HOLD.
-
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
-## v2026.10.28.1422 — F675-161 검토 대기 사진 철회 보완 (기획 DRAFT / RELEASE HOLD)
-- Previous Addition v1420 → Current Improvement v1422 → Next Addition v1424(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 재확인, 선행 기획 #1727·개발 A #1730 모두 미병합 Draft. #1730은 기존 기획과 API 경로·응답 snake_case, 사진 행 삭제 vs FK 유지, 철회 이력 30건 조회, 활성 회원·기능 OFF 검증, 재시도 UUID·Android 계약이 불일치. SQL 시험은 DB 환경변수 부재 시 SKIPPED 가능. 운영 유출 증거는 아님.
-- P0 ENV1422-01 FIN1422-02 PHOTO1422-03 REL1422-04; P1 PHOTO1422-05 PHOTO1422-06 PHOTO1422-07 PHOTO1422-08 PHOTO1422-09 PHOTO1422-10. 표식 보존 모델 확정, 본인 비식별 철회 영수증, 게시·미디어·일일 5건 차단, API/Android 동등성, 30/31 키셋, 동시 100건, 격리 PostgreSQL 및 OFF 롤백. [영문 통합문서](INTEGRATED_PLANNING_MASTER.md)·[한국어](INTEGRATED_PLANNING_MASTER.ko.md), [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726), [개발 #1730](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1730).
-- 완료된 최신 QA v1346 FAILED; QA v1347 진행 중(별도 카지노 주사위 시험 P1 #1725, 운영 합격 아님): 데이터 디스크 97%, 백업 #1718, 과거 18,000 WLD 원장 불일치, 마이그레이션 5개 불일치/20개 미적용, 정확 SHA 공식 Test·독립 복원 BLOCKED. 국고 DB 단독 291 조치는 전체 운영승격 승인 아님. 외부 발행처 3곳 검토, 신규 승인 0건, 누적 승인 UNKNOWN/10,000 BLOCKED. 문서만 변경.
-
-
-## v1420 / F675-161 — 갤러리 검토 대기 사진 철회 (ADDITION / DRAFT / HOLD)
-- 실제 `/gallery/submit`은 회원 제출 사진 최신 30건만 보여주며 철회 CTA가 없다. `member-photo.controller.ts`는 업로드/제출/내 목록만, Migration 127은 행 잠금 후 게시할 수 있다. 신규 기능은 **본인 검토 대기 사진 철회**이며 게시 사진 신고·실제 파일 삭제와 구별한다.
-- 확인 후 철회, 불변 영수증, 회원·세션 격리, `member_photo_withdrawals` 표식, 관리자 게시/미디어 조회 경합 차단, 30건 불투명 Keyset, NestJS·Next.js·Android, 관리자 감사, SEO·접근성·기본 OFF 롤백 명세. P0 ENV1420-01, FIN1420-02, SEC1420-03, REL1420-04; P1 PHOTO1420-05, PHOTO1420-06, PHOTO1420-07, PHOTO1420-08, PHOTO1420-09, PHOTO1420-10. [통합 기획](INTEGRATED_PLANNING_MASTER.ko.md), [이슈 #1726](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1726).
-- main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 동일, QA v1345 FAILED, 디스크 97%, 과거 18,000 WLD 불일치, 백업·Test·Production BLOCKED. 외부 공식 발행처 3곳 검토, 승인 0건, 누적 UNKNOWN/10,000. 문서 전용.
+## v2026.10.28.1424 — F675-162 검증 가능한 회원 컬렉션 쇼케이스 (기획 초안 / 운영 보류)
+- 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재확인, QA v1347 FAILED. 실제 코드는 고정 /collections?showcase=arch-1063, DEFAULT_PIECES/localStorage, GET 시 4개 예시 INSERT, migration 232의 지급 증빙 부재. **예시를 검증 소유권으로 표시 금지.**
+- 명시적 동의·검증 조각만 비공개 공유, 7일 만료·활성 링크 5개·192비트 토큰 지문·발행 증빙·철회·no-store/noindex·Android 동등성·WCAG 명세. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [영문 통합](INTEGRATED_PLANNING_MASTER.md) / [국문](INTEGRATED_PLANNING_MASTER.ko.md); [전달 이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740).
+- 디스크 98%, 독립 백업 복원 UNKNOWN, 18,000 WLD 원장 차이, 앱 계정 DML 235개 테이블, 마이그레이션 체크섬 5개 불일치/미적용 20개, 공식 Test 정확 SHA·전체 운영승격 BLOCKED. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000. 문서만 변경.
 
 
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
