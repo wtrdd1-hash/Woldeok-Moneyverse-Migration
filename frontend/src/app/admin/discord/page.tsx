@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
+import Link from 'next/link';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,7 @@ import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
-import type { AdminDiscordRoute, AdminOutboxHealth } from '../types';
+import { parseDiscordEvidence } from './discord-evidence';
 
 import { AdminDiscordDmTestButton } from './admin-discord-dm-test-button';
 import { AdminDiscordBroadcastTestButton } from './admin-discord-broadcast-test-button';
@@ -34,16 +35,9 @@ export const metadata: Metadata = {
 
 export default async function AdminDiscordPage() {
   await requireAdminConsole(AREA.href);
-  const console_ = await apiOrNull<{
-    readonly outbox: AdminOutboxHealth;
-    readonly routes: readonly AdminDiscordRoute[];
-    readonly adminAlertInfo?: {
-      readonly adminUserId: string | null;
-      readonly configured: boolean;
-    };
-  }>('/api/v1/admin/discord');
+  const console_ = parseDiscordEvidence(await apiOrNull<unknown>('/api/v1/admin/discord'));
 
-  const stuck = console_ === null ? 0 : Number(console_.outbox.stuck_count);
+  const stuck = console_ !== null && BigInt(console_.outbox.stuck_count) > 0n;
   const { adminUserId, configured: isConfigured } = getAdminDmReadiness(console_?.adminAlertInfo);
 
   return (
@@ -54,10 +48,15 @@ export default async function AdminDiscordPage() {
       </PageHeader>
 
       {console_ === null ? (
-        <EmptyState
-          title="전달 현황을 불러오지 못했어요."
-          description="잠시 후 다시 확인해 주세요."
-        />
+        <div role="alert" className="grid gap-3 rounded-lg border border-amber-500/40 p-4">
+          <EmptyState
+            title="전달 현황을 검증하지 못했어요."
+            description="관리자 API 장애 또는 잘못된 전달 기록입니다. 확인되지 않은 수치와 발송 테스트를 표시하지 않습니다."
+          />
+          <Link href="/admin/discord" className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-fit">
+            다시 조회
+          </Link>
+        </div>
       ) : (
         <>
           <Card className="border-indigo-500/30 bg-gradient-to-r from-indigo-950/20 via-background to-background">
@@ -119,7 +118,7 @@ export default async function AdminDiscordPage() {
                   value={groupDigits(console_.outbox.stuck_count)}
                   plain
                   hint={
-                    stuck > 0
+                    stuck
                       ? `가장 오래된 미전달 ${formatMoment(
                           console_.outbox.oldest_undelivered_at,
                           '없음',

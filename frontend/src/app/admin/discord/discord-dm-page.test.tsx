@@ -9,7 +9,7 @@ vi.mock('./admin-discord-broadcast-test-button', () => ({ AdminDiscordBroadcastT
 import Page from './page';
 
 const outbox = {
-  stuck_count: '0', pending_count: '0', retry_pending_count: '0', delivering_count: '0',
+  stuck_count: '0', pending_count: '0', retry_pending_count: '0', delivering_count: '0', delivered_count: '0',
   delivered_24h_count: '0', dead_letter_count: '0', suppressed_count: '0', unrouted_type_count: '0',
   oldest_undelivered_at: null, last_delivered_at: null, last_failure_at: null,
 };
@@ -25,6 +25,20 @@ describe('Discord administrator console readiness evidence', () => {
     expect(html).toContain('role="status"');
     expect(html).toContain('미확인');
     expect(html).not.toContain('data-testid="dm-test"');
+  });
+
+  it('fails closed with an accessible retry and no send controls on invalid delivery metrics', async () => {
+    read.mockResolvedValue({
+      outbox: { ...outbox, stuck_count: '-1' },
+      routes: [],
+      adminAlertInfo: { configured: true, adminUserId: '123456789012345678' },
+    });
+    const html = renderToStaticMarkup(await Page());
+    expect(html).toContain('role="alert"');
+    expect(html).toContain('전달 현황을 검증하지 못했어요.');
+    expect(html).toContain('href="/admin/discord"');
+    expect(html).not.toContain('data-testid="dm-test"');
+    expect(html).not.toContain('밀린 건');
   });
 
   it('shows the DM test only when the backend confirms explicit configuration', async () => {
