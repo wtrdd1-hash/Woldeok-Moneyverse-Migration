@@ -214,7 +214,7 @@ export function BondControlTower({
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              조회된 정산 기록의 합계이며 실제 지급 인증은 별도 확인이 필요합니다.
+              전체 쿠폰 이자 기록의 합계입니다. 만기 원금 상환은 포함하지 않습니다. 실제 지급 인증은 별도 확인이 필요합니다.
             </p>
           </CardContent>
         </Card>

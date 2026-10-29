@@ -40,6 +40,13 @@ describe('bond admin verified read evidence', () => {
   it('preserves exact large WLD integer strings', () => {
     expect(parseBondEvidence({ overview, bonds: [bond], couponLogs: [log] }).overview.totalFundedWld).toBe('9007199254740993');
   });
+  it('accepts the backend no-active-tenor benchmark sentinel as verified absence, not an outage', () => {
+    const inactive = { ...overview, totalBondsActive: 0, benchmark1YYield: '—', benchmark3YYield: '—', benchmark5YYield: '—' };
+    expect(parseBondEvidence({ overview: inactive, bonds: [], couponLogs: [] }).overview.benchmark1YYield).toBe('—');
+  });
+  it('still rejects unrecognized benchmark evidence', () => {
+    expect(() => parseBondEvidence({ overview: { ...overview, benchmark1YYield: 'NaN%' }, bonds: [bond], couponLogs: [] })).toThrow();
+  });
   it('accepts genuine empty inventory without inventing three offerings', () => {
     expect(parseBondEvidence({ overview: { ...overview, totalBondsActive: 0 }, bonds: [], couponLogs: [] }).bonds).toEqual([]);
   });

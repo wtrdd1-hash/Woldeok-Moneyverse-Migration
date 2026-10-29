@@ -6,6 +6,11 @@ import { BondControlTower } from './bond-control-tower';
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 describe('bond admin fail-closed console', () => {
+  it('labels cumulative coupon interest as all-history interest excluding returned principal', () => {
+    render(<BondControlTower initialOverview={{ totalBondsActive: 0, totalFundedWld: '0', totalHoldersCount: 0, totalCouponsPaidWld: '42', benchmark1YYield: '—', benchmark3YYield: '—', benchmark5YYield: '—' }} initialBonds={[]} initialLogs={[]} />);
+    expect(screen.getByText(/만기 원금 상환은 포함하지 않습니다/)).toBeDefined();
+    expect(screen.getByText('42')).toBeDefined();
+  });
   it('distinguishes unavailable read evidence from zero holdings and offers keyboard retry', () => {
     render(<BondControlTower initialOverview={null} initialBonds={[]} initialLogs={[]} />);
     expect(screen.getByRole('alert').textContent).toContain('조회');
