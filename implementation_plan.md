@@ -1242,3 +1242,40 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   3. **프로덕션 빌드 및 서비스 재기동**:
      - 백엔드(`moneyverse-release-v1502-backend.service`) 및 프론트엔드(`moneyverse-release-v1502-frontend.service`) 컴파일 빌드 통과 및 서비스 재기동 완료.
      - 실서버 실측: 회계 대사 검증 상태가 `대사 완료 (일치)`, 오차 `0 WLD`, 원장 순흐름 정상 일치로 표출됨을 확인.
+
+
+---
+
+## 🚀 [v274 Specification] 모든 브랜치 완전 통합, 브랜치 일괄 삭제 및 운영 환경 완전 승격
+
+### 1. 목적 및 배경
+- 누적된 과거 크론, 계획, 버그 수정 브랜치 89건 전수 통합 및 안전 삭제.
+- 프론트엔드 및 백엔드 컴파일/타입체크 점검 및 운영 서비스(포트 3564, 3565) 완전 승격.
+
+### 2. 브랜치 통합 및 정리 결과
+1. **전수 통합 (Merge)**:
+   - 미머지 상태였던 12개 원격 브랜치(`auto/hourly-...`, `docs/planning-...`, `qa/...`) 순차 병합 완료.
+   - planning 문서 충돌 4건(`PROJECT_PLAN.md`, `PROJECT_PLAN.ko.md`, `INTEGRATED_PLANNING_MASTER.md`, `INTEGRATED_PLANNING_MASTER.ko.md`) 버전 순서(v1472 → v1470 → v1468)에 맞게 안전 해소.
+2. **원격 브랜치 일괄 삭제 (Prune & Delete)**:
+   - `main` 브랜치를 제외한 89개 원격 브랜치 일괄 삭제 완료.
+   - 현재 로컬 및 원격에 오직 단 하나의 기준 브랜치(`main`)만 존재.
+
+### 3. 프론트엔드 & 백엔드 점검 및 컴파일 복원
+1. **백엔드 (NestJS)**:
+   - `dopamine.controller.ts`: `@nestjs/common`에 `ServiceUnavailableException` import 누락 수정.
+   - `treasury.repository.ts`: 370행 초과 중괄호(`};\n}`) 정상화.
+   - `packages/contract`: 최신 소스 동기화 및 빌드 성공.
+   - `backend`: `pnpm build` 성공.
+2. **프론트엔드 (Next.js)**:
+   - `swf-control-panel.tsx`: 리터럴 `\n` 및 이스케이프 따옴표(`\"`) 정상 JSX로 복원.
+   - `account/page.tsx`: `provider.id as any` 타입 안전 캐스팅 적용.
+   - `career-tasks-board.tsx`: `selectedDifficulty`, `selectedMaxDuration` props 확장.
+   - `deoki-pet-station.tsx`: `onClaimFortune` 콜백 인터페이스 확장.
+   - `tsconfig.json`: Next.js 프로덕션 빌드 시 테스트 파일 제외 설정(`"**/*.test.ts"`, `"**/*.test.tsx"`).
+   - `frontend`: 600여 개 전체 라우트 웹팩 최적화 빌드 완료 (`BUILD_ID: 1793275422630`).
+
+### 4. 운영 서비스 상태 (Production Status)
+- `moneyverse-release-v1502-backend.service`: active (running), 포트 3564
+- `moneyverse-release-v1502-frontend.service`: active (running), 포트 3565
+- 엔드포인트 `/frontend-version`: `{"id":"1793275423184"}` 최신 빌드 서빙 중
+- Git 메인 커밋: `f9fd7774`
