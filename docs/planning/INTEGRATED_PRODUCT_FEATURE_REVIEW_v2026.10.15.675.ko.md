@@ -1,5 +1,14 @@
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
+## v1462 / F675-171 — 저장 수취인 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+- **주기:** 이전 Addition v1460 → 현재 Improvement v1462 → 다음 Addition v1464(잠정). main 95a8fdb85f6670cac9e52e16383711ac94924e93까지 재조회; 미병합 Draft #1846/#1837/#1830에 의존. QA v1366 HOLD. Test·운영 앱 c2129625aa6629c616fb31ce790950618b8d92b2는 main과 다름. [개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+- **신규 소스 근거:** UUID만 입력하라는 화면과 달리 인증된 /wallet/recipients/search는 member_profiles ILIKE로 이름·UUID를 반환한다. 활성 회원 확인은 활성 USER_CASH 지갑 확인과 다르다. TransferForm은 오류 상태에서 송금 멱등키를 바꾸며 알림은 재생 여부를 구별하지 않는다. **운영 유출·중복 지급의 실측 증거는 아니다.**
+- **보완 계약:** 이름 검색 재사용 금지, 본인 전용 UUID 저장, 회원+현금 지갑을 확인한 ELIGIBLE/UNAVAILABLE/UNKNOWN(최대 30초), 실제 폼 수취인 값 동기화·전체 UUID/금액 재확인, 미확정 송금의 최초 키 유지, 본인 영수증 조회, 정규화 해시·최상위 SERIALIZABLE·40001 동일 키 재시도, no-store·Android 동등성·기본 OFF.
+- **백로그:** P0 REPO1462-01, FIN1462-02, SEC1462-03, REL1462-04; P1 RECIP1462-05~10(상태/DB/API/UI/개인정보/회귀). 제안 시험: 합성 10,001, 동시 100, 권한 거부 100, 응답 유실 50, 계정 상태 경합 30, 열거 30. 실제 수용시험 미실행.
+- **게이트:** QA v1366 HTTP 48/50, 모바일 36/36, 개발 DB 원장 산술 불일치 0이지만 국고 552행 연결 누락, 체크섬 5건, 앱 쓰기 가능 관계 216개. 독립 복원·정확 SHA Test·신규 기능 운영승격 미인증. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 런타임·DB·WLD·Test·운영 변경 없음. 세부 영문·국문은 PROJECT_PLAN.
+- **개발 연계:** [P0 #1854](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1854), [P1 #1855](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1855), [백로그 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).
+
 ## v1460 / F675-171 — 회원 전용 WLD 수취인 저장 (기능 추가 / 초안 / 배포 보류)
 
 - **주기:** 이전 Improvement v1458 → 현재 Addition v1460 → 다음 Improvement v1462(잠정). main `b84d645a`; 미병합 #1837/#1830에 의존하며 main 반영 아님. QA v1365 FAILED/P0; 운영/Test 앱 `b44ffd0a` 별도. [개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844).

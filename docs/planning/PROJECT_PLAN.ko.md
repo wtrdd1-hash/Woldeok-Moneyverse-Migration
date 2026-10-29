@@ -1,5 +1,45 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v1462 / F675-171 — 저장 수취인의 신원·송금 가능 상태·재시도 무결성 (기능 보완 / 초안 / 운영 보류)
+
+**주기 및 기준:** 이전 Feature Addition v1460 → 현재 Feature Improvement v1462 → 다음 Feature Addition v1464(잠정). 작업 시작 main 679cb5904f779a1b2067f10809fcca83e31dbe91, 중간 main 95a8fdb85f6670cac9e52e16383711ac94924e93. 기획 브랜치는 미병합 Draft #1846 → #1837 → #1830에 의존하며 main 반영이 아니다. 최신 독립 QA v1366(2026-10-29 14:12 KST 근거) HOLD. 15:12 KST Test·Production /api/version은 모두 c2129625aa6629c616fb31ce790950618b8d92b2로 GitHub main과 다르다. 기획 예약은 런타임·DB·WLD·Test·운영을 변경하지 않는다. [기존 개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844), [P2P 부수효과 이슈 #1025](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1025).
+
+**개발 연계:** [P0 송금 응답 미확정 재시도 #1854](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1854), [P1 수취인 검색 개인정보 #1855](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1855).
+
+### 소스에서 확인한 문제와 위험의 경계
+1. **수취인 검색 정책과 실제 API의 불일치:** 지갑 화면은 이름·Discord로 찾을 수 없고 상대가 공유한 정확한 UUID를 입력하라고 안내한다. 반면 backend/src/wallet/wallet.controller.ts의 인증·동의 보호 GET /wallet/recipients/search는 wallet.repository.ts의 member_profiles.display_name ILIKE 부분 문자열 검색으로 최대 10개의 displayName과 userId를 반환하며, 해당 저장소 메서드에는 최소 검색어 길이 검증이 없다. 이는 **소스상 개인정보/UX 불일치**이며 비인증 공개 접근이나 운영 유출이 입증된 것은 아니다. 저장 수취인 선택기에 해당 검색을 재사용하지 않는다. 인증·DB 권한·전역 속도제한·사용자 열거 가능성과 기존 API 축소/폐지는 별도 담당자가 검증한다.
+2. **활성 회원과 송금 가능한 지갑은 다름:** 마이그레이션 010의 wallet_active_recipient_by_id는 users.status='active'만 확인한다. 마이그레이션 005의 economy_transfer는 송금자와 수취인 양쪽의 USER_CASH 계좌가 active인지도 확인한다. 따라서 회원 상태만으로 저장 수취인을 '송금 가능'으로 표시하면 오판할 수 있다. 송금 최종 권한은 기존 DB 함수가 검증하며 기획에서는 변경하지 않는다.
+3. **불확실한 송금 응답에서 멱등키 교체 위험:** frontend/src/app/wallet/wallet-forms.tsx의 TransferForm은 액션 상태 변경마다 requestKey를 재발급하며 오류 상태도 포함한다. actions.ts는 이 키를 POST /api/v1/wallet/transfers로 전달한다. 커밋 후 응답만 유실되면 사용자가 새 키로 재시도하여 원래 요청의 재생이 아닐 수 있다. WalletService.transfer는 재생 여부 없이 트랜잭션 ID 반환 후 실시간 알림을 발행하며, P2P 추가 부수효과는 #1025에서 추적 중이다. **실제 WLD 중복 지급이 발생했다는 실측 증거는 아니다.** 새 저장 기능은 이 위험을 확대하지 않고 A/B/C 별도 금융 수정·검증을 기다린다.
+
+### 회원 흐름·화면·신뢰·개인정보 보완
+- **기능 범위 유지:** 인증·동의한 회원이 상대에게 직접 공유받은 UUID를 최대 20명까지 개인 별칭으로 저장·조회·변경·삭제한다. 웹·Android 동등 제공. 진입은 /wallet → 저장 수취인 → 저장/송금에 사용/별칭 변경/삭제. 이름·Discord 검색, 연락처 그래프, 신원 인증, 금액 자동 입력, 자동 송금, 수취인 알림, WLD 변경은 금지한다. /wallet/recipients는 비공개·noindex다.
+- **송금 가능 상태를 3값으로 표시:** 선택 응답은 ELIGIBLE(가능), UNAVAILABLE(불가), UNKNOWN(검증 불가), checkedAt, 최대 30초 유효기간, 저장 항목 버전을 반환한다. ELIGIBLE은 최소 권한의 본인 범위 함수가 **활성 회원 및 활성 USER_CASH 지갑**을 모두 새로 확인한 경우만 표시하며 일시적 안내일 뿐 송금 보증은 아니다. DB·권한·시간초과는 UNKNOWN으로 송금 선택 CTA를 차단하고 재확인/삭제를 안내한다. 계정 상태 변경 후 기존 캐시를 신뢰하지 않으며 실제 economy_transfer에서 재검증한다. 프로필·잔액 노출 금지.
+- **실제 폼 값 동기화와 명시적 재확인:** 저장 수취인 선택 시 기존 폼이 실제 전송하는 recipientUserId를 제어형 상태로 변경한다(오래된 defaultValue 금지). 과거 검증 상태와 금액을 초기화하고 전체 UUID를 별도 확인 단계에서 표시한다. 사용자가 금액을 다시 입력·확인하고 직접 'WLD 보내기'를 눌러야 한다. 대상 변경·금액 변경·세션 변경·검증 만료 시 기존 확인을 폐기한다. 자동 제출 및 다른 대상의 멱등키 재사용 금지.
+- **송금 결과 미확정 시 새 키 재시도 금지:** 네트워크/시간초과로 송금 결과가 불명확하면 최초 송금 페이로드 지문과 멱등키를 고정하고 '검증 대기'를 표시한다. 별도 본인 전용 송금 영수증/상태 조회 계약을 검토하여 원래 거래 결과를 확인한 후 다음 송금을 허용한다. 실제 PostgreSQL에서 동일 키·동일 페이로드 재생 의미를 검증해야 한다. 다른 페이로드는 기존 결과 확인 뒤 새 사용자 의사표시가 필요하다. 서버에서 재생 증거로 중복 알림/P2P 메타데이터를 막는다(#1025 연계). 확인 전 성공 화면 금지.
+- **저장 CRUD와 송금 멱등키 분리:** 저장용 키는 wallet/transfers에 사용하지 않는다. 정규화 요청 해시에는 소유자·연산·저장 ID·수취인 UUID·정규화 별칭·expectedVersion·정규화 규격 버전을 포함한다. 같은 소유자/키/해시는 기존 불변 영수증을 반환하며 대상 비활성 이후에도 과거 결과는 보존한다. 단, 과거 영수증이 현재 송금 가능 상태를 복구하지는 않는다. 같은 키에 다른 페이로드는 409. 저장 성공 응답 유실 시 새 키가 아닌 GET /api/v1/wallet/saved-recipients/receipts/:requestId 또는 같은 키 재생으로 조회한다. 과거 영수증과 **현재** 송금 가능 상태는 별도 표시한다.
+
+### DB·API·동시성·권한·관리자 계약 (제안, 마이그레이션 미실행)
+- v1460의 소유자+수취인 UNIQUE tombstone·버전 CAS·활성 저장 20명 제한·불변 영수증 및 법무 검토 전제 90일 보존 **제안**을 유지한다. 영수증과 저장 항목은 소유자 일치 복합 FK를 두고 개인 별칭/전체 UUID를 영수증 응답·로그에 넣지 않는다. 해시는 공개 신원 인증 수단이 아니다. UNIQUE(owner_user_id,request_id), 정규화 해시 버전, 불변 연산·대상·결과 버전이 필수다. 소유자별 활성 목록 인덱스 및 수취인 무효화 인덱스 유지. 개인정보 삭제가 금융 원장에 연쇄 삭제를 일으키면 안 된다.
+- 한도와 소유자별 변경은 **쿼리 실행 전 최상위 트랜잭션에서 SERIALIZABLE로 시작**하고 결정적 소유자 advisory lock을 사용한다. SECURITY DEFINER 함수만으로 이미 시작된 트랜잭션의 격리 수준을 사후 변경할 수는 없다. SQLSTATE 40001은 동일 소유자/키/해시로 제한 횟수 서버 재시도하고 새 키를 발급하지 않는다. 커밋 여부 미확정은 UNKNOWN/503이며 성공 응답을 꾸미지 않는다. 저장 행/tombstone·영수증은 원자적으로 기록하며 원장·outbox·알림에 부수효과가 없어야 한다.
+- 본인 전용 송금 가능 상태 함수는 고정 search_path, 최소 EXECUTE만 허용하고 저장/영수증 테이블의 앱 직접 SELECT/INSERT/UPDATE/DELETE를 REVOKE한다. 격리 PostgreSQL에서 거부 시험을 수행한다. 선택기 구현을 위해 member_profiles/accounts의 광범위 SELECT를 부여하지 않는다. 기존 운영자 승인 금융 DML 예외는 별도로 보존·감사한다.
+- NestJS 본인 전용 목록/저장/변경/삭제/선택·서명 커서 계약에 요청 ID별 영수증 조회와 3값 상태를 추가한다. 세션·동의·CSRF, private no-store, 400/403/404/409/412/422/429/503 오류를 명시한다. Android app-api는 소유자·영수증·오류·캐시 정책을 동일하게 적용한다. 공개 색인·사이트맵·프로필 노출 금지. 관리자는 개인정보 임계값을 통과한 집계만 보며 별칭·UUID 관계·개인별 내보내기는 금지한다.
+- UI 수용 조건: 빈 목록/20명 초과/409/412/429/503 UNKNOWN/세션 만료/선택 후 상대 비활성/제어형 입력 동기화/송금 응답 유실/재생/탈퇴. WCAG 2.2 AA, 320·360·390px, 200% 확대, 키보드·포커스·상태 읽기, ko/en/ja/zh. **미측정 목표:** WLD 중복 지급 0, 재생으로 인한 중복 알림 0, 자동 오송금 0, 타인 저장 정보 노출 0, 잘못된 ELIGIBLE 표시 0, 커밋된 저장 영수증 확인율 99.9% 이상.
+
+### 구체적 P0/P1 개발 백로그 (모두 미실행)
+1. **P0 REPO1462-01:** QA v1366 과거 브랜치 462개 누락(기존 비조상 344), 복구 bundle·소유자·행위자 기록 보존. 무단 복구·삭제·강제 push 금지.
+2. **P0 FIN1462-02:** 18,000 WLD MINT 분개 보완 승인·출처, 직접 원장 연결 없는 국고 552행, 송금 미확정 응답/재생 위험을 독립 검증. #1025 연계, 금융 직접 수정 금지.
+3. **P0 SEC1462-03:** 이름/UUID 검색 정책 불일치와 member_profiles 직접 조회, 마이그레이션 체크섬 5건(219/220/221/234/266), QA v1366 앱 쓰기 가능 관계 216개, 수취인 최소 권한 검증. 운영 노출 여부는 별도 측정.
+4. **P0 REL1462-04:** 독립 외부 백업 복원, 후보 정확 SHA 공식 Test DB/API/회원 송금/Android E2E, 권한 거부, QA 승인, 운영자 GitOps 승격·롤백.
+5. **P1 RECIP1462-05:** 활성 회원+활성 USER_CASH 확인하는 본인 전용 3값/TTL 함수와 무효화, 실제 PostgreSQL 권한 거부 시험.
+6. **P1 RECIP1462-06:** 정규화 v1 해시·복합 소유자 FK·최상위 SERIALIZABLE·결정적 lock·40001 재시도·영수증 조회·재생/409/412/tombstone.
+7. **P1 RECIP1462-07:** NestJS·Next.js·Android 본인 CRUD/영수증/선택 동등성, 서명 커서, CSRF/no-store, 실패 시 차단.
+8. **P1 RECIP1462-08:** 실제 수취인 폼 입력 동기화·전체 UUID/금액 재확인·대상 변경 초기화·미확정 송금 키 유지/검증 대기·자동 송금 금지.
+9. **P1 RECIP1462-09:** 기존 검색 API 개인정보/악용 독립 검토, 시간당 10회 변경 제한 제안, 사용자 열거 방지, 삭제·관리자 집계·SEO·접근성·다국어.
+10. **P1 RECIP1462-10:** 격리 실제 PostgreSQL 합성 저장 10,001건, 동시 요청 100건, 타인 권한/잘못된 입력 100건, 응답 유실/40001 50건, 계정·지갑 상태 경합 30건, 검색 열거/동의 30건, 저장 CRUD 원장·중복 알림 0건, 웹·Android 동등성 및 기능 OFF 롤백.
+
+**게이트:** 문서만 수정하며 기능은 기본 OFF. A/B/C 별도 브랜치, 실제 PostgreSQL·인증 금융 회귀·정확 SHA 공식 Test, 독립 QA, 외부 백업 복원, 보안 검토, 운영자 승인 무중단 승격 전까지 HOLD. QA v1366의 HTTP 48/50(/help 양쪽 404), 모바일 36/36, 개발 DB 원장 산술 불일치 0, 국고 직접 연결 누락 552, 체크섬 불일치 5, 앱 쓰기 가능 관계 216은 운영 금융 감사 완료 증거가 아니다. 외부 독립 레퍼런스 신규 검증·중복 제거 승인 **0**, 누적 **UNKNOWN / 10,000** = **BLOCKED / IN PROGRESS**. 신규 분산 기능 기획 파일은 만들지 않는다.
+
+
 ## v1460 / F675-171 — 회원 전용 검증형 WLD 송금 수취인 저장 (기능 추가 / 초안 / 배포 보류)
 
 **주기·기준:** 이전 Feature Improvement v1458 → 현재 Feature Addition v1460 → 다음 Feature Improvement v1462(잠정). 시작 원격 main `b84d645a87e8fa0d544ca3ee17e785e737e477ea`; 본 문서 브랜치는 미병합 v1458 Draft PR #1837(선행 #1830)에 의존한다. QA v1365(2026-10-29 13:15 KST)는 FAILED/P0이며 공식 Test·운영 앱 SHA `b44ffd0af9e2bd6e7c2be7345b72094827078c3d`는 main과 다르다. [개발 이관 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844). 기획은 런타임·DB·WLD·Test·운영을 변경하지 않는다.
