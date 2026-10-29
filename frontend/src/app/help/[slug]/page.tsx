@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { normalizeHelpLocale } from '../locale';
-import { RelatedHelp, type RelatedHelpArticle } from '../help-related';
+import { HelpPublicationDate } from '../help-publication-date';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '검증된 도움말', robots: { index: false, follow: false } };
@@ -22,14 +22,6 @@ export default async function HelpArticlePage({ params, searchParams }: { params
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
-  // Related links are optional: never fabricate them on a backend outage.
-  let related: RelatedHelpArticle[] = [];
-  try {
-    const response = await api<{ articles: RelatedHelpArticle[] }>(`/api/v1/help/articles/${locale}/${encodeURIComponent(slug)}/related`);
-    related = response.articles;
-  } catch {
-    related = [];
-  }
   let sourceHref: string | null = null;
   try {
     const source = new URL(article.source_url);
@@ -39,10 +31,9 @@ export default async function HelpArticlePage({ params, searchParams }: { params
   }
   return <main className="mx-auto grid w-full max-w-3xl gap-5 p-4">
     <Link href={locale === 'en' ? '/help?locale=en' : '/help'} className="underline underline-offset-4">{locale === 'en' ? 'Help articles' : '도움말 목록'}</Link>
-    <article className="grid gap-4"><h1 className="text-3xl font-bold">{article.title}</h1><p>{article.summary}</p><div className="whitespace-pre-wrap break-words">{article.body_plain}</div>
+    <article className="grid gap-4"><h1 className="text-3xl font-bold">{article.title}</h1><p>{article.summary}</p><HelpPublicationDate publishedAt={article.published_at} locale={locale} /><div className="whitespace-pre-wrap break-words">{article.body_plain}</div>
       {sourceHref && <p className="text-sm">{locale === 'en' ? 'Verified source: ' : '검증 근거: '}<a href={sourceHref} target="_blank" rel="noopener noreferrer" className="underline">{locale === 'en' ? 'View original' : '원본 자료 보기'}</a></p>}
     </article>
-    <RelatedHelp locale={locale} articles={related} />
     <Link href="/support" className="underline underline-offset-4">{locale === 'en' ? 'Need more help? Contact support' : '해결되지 않았나요? 관리자에게 직접 문의하기'}</Link>
   </main>;
 }

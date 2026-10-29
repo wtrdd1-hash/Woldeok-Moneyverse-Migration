@@ -20,6 +20,11 @@ describe('help center migration boundary', () => {
     expect(sql).toMatch(/GRANT EXECUTE ON FUNCTION public\.help_public_search/i);
     expect(sql).not.toMatch(/GRANT (?:INSERT|UPDATE|DELETE|ALL) ON TABLE public\.help_articles TO moneyverse_app/i);
   });
+  it('returns actual approved publication timestamps from both public read functions', () => {
+    expect(sql).toMatch(/RETURNS TABLE\(article_id uuid, locale text, slug text, category text, title text, summary text, published_at timestamptz\)/i);
+    expect(sql).toMatch(/RETURNS TABLE\(article_id uuid, locale text, slug text, category text, title text, summary text, body_plain text, source_url text, published_at timestamptz\)/i);
+    expect(sql).toMatch(/r\.approved_by <> r\.author_id AND r\.reviewed_until > clock_timestamp\(\)/);
+  });
   it('pins security definer search path and revokes public function execute', () => {
     expect(sql).toMatch(/SECURITY DEFINER\s+SET search_path\s*=\s*pg_catalog,\s*pg_temp/i);
     expect(sql).toMatch(/REVOKE ALL ON FUNCTION public\.help_public_search\([^)]+\) FROM PUBLIC/i);

@@ -12,13 +12,16 @@ describe('verified help repository', () => {
     expect(sql).not.toMatch(/FROM\s+public\.help_articles/i);
     expect(args).toEqual(['ko', 'account', '로그인', 20]);
   });
-  it('gets category counts through a dedicated published-only function', async () => {
-    const query = vi.fn().mockResolvedValue({ rows: [{ category: 'wallet', article_count: '9007199254740993' }] });
+  it('selects the authoritative published_at from the narrow SQL functions', async () => {
+    const query = vi.fn().mockResolvedValue({ rows: [] });
     const repo = new HelpRepository({ query });
-    expect(await repo.categoryCounts('en')).toEqual([{ category: 'wallet', article_count: '9007199254740993' }]);
-    expect(query.mock.calls[0]?.[0]).toMatch(/public\.help_public_category_counts\(/);
-    expect(query.mock.calls[0]?.[0]).not.toMatch(/FROM\s+public\.help_articles/i);
-    expect(query.mock.calls[0]?.[1]).toEqual(['en']);
+    await repo.search('en', null, 'wallet', 20);
+    await repo.article('en', 'wallet-guide');
+    for (const [sql] of query.mock.calls as [string, unknown[]][]) {
+      expect(sql).toMatch(/published_at/);
+      expect(sql).toMatch(/public\.help_public_(search|article)\(/);
+      expect(sql).not.toMatch(/FROM\s+public\.help_article_revisions/i);
+    }
   });
   it('looks up one public article by locale and slug only', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });

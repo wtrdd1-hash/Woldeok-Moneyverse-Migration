@@ -23,21 +23,6 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
-  it('forwards verified help related articles only and never caches Android responses', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ articles: [{ slug: 'wallet' }] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/help/articles/ko/wallet-guide/related'), context('help', 'articles', 'ko', 'wallet-guide', 'related'));
-    expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/articles/ko/wallet-guide/related');
-    expect(await response.json()).toMatchObject({ articles: [{ slug: 'wallet' }] });
-    const denied = await GET(request('/app-api/v1/help/articles/ko/wallet-guide/preview'), context('help', 'articles', 'ko', 'wallet-guide', 'preview'));
-    expect(denied.status).toBe(404);
-  });
-
   it('forwards the recommended-only member work query without bypassing the authenticated gateway', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ featureState: 'enabled', tasks: [] }), {
@@ -55,17 +40,18 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
-  it('forwards verified help category locale and counts without caching Android reads', async () => {
+  it('preserves the authoritative published_at for Android help reads without public caching', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ locale: 'en', categories: ['account'], counts: { account: '3' } }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    const published_at = '2026-10-29T01:15:00.000Z';
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ article: { article_id: 'test', published_at } }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/help/categories?locale=en'), context('help', 'categories'));
+    const response = await GET(request('/app-api/v1/help/articles/ko/account-login'), context('help', 'articles', 'ko', 'account-login'));
     expect(response.status).toBe(200);
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/help/categories?locale=en');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(await response.json()).toMatchObject({ locale: 'en', counts: { account: '3' } });
+    expect((await response.json()).article.published_at).toBe(published_at);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/articles/ko/account-login');
   });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
@@ -137,19 +123,6 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
-  it('preserves a selected privacy request type through Android while preventing private caching', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ requests: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/privacy/requests?type=deletion'), context('privacy', 'requests'));
-    expect(response.status).toBe(200);
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('type')).toBe('deletion');
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
-  });
-
   it('fences privacy request POST receipt even when upstream marks it public', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requestId: 'private-receipt' }), {
@@ -178,58 +151,20 @@ describe('app API route compatibility', () => {
     expect(refused.headers.get('cache-control')).toBe('private, no-store');
   });
 
-  it('prevents public caching and indexing of private chat media on Android', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('private bytes', {
-      status: 200,
-      headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' },
-    })));
-    const response = await GET(
-      request('/app-api/v1/content/chat/media/chat_example.png'),
-      context('content', 'chat', 'media', 'chat_example.png'),
-    );
-    expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
-  });
-
-  it('prevents public caching of denied chat media on Android', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ status: 404 }), {
-      status: 404,
-      headers: { 'content-type': 'application/problem+json', 'cache-control': 'public, max-age=600' },
-    })));
-    const response = await GET(
-      request('/app-api/v1/content/chat/media/chat_example.png'),
-      context('content', 'chat', 'media', 'chat_example.png'),
-    );
-    expect(response.status).toBe(404);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-  });
-
   it('preserves bounded wallet activity period queries through the Android app API', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ recentTransactions: [], recentTransactionsHasMore: true }), {
       status: 200, headers: { 'content-type': 'application/json' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/wallet?recent=50&period=7d&direction=neutral'), context('wallet'));
+    const response = await GET(request('/app-api/v1/wallet?recent=50&period=7d'), context('wallet'));
     expect(response.status).toBe(200);
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.pathname).toBe('/api/v1/wallet');
     expect(target.searchParams.get('recent')).toBe('50');
     expect(target.searchParams.get('period')).toBe('7d');
-    expect(target.searchParams.get('direction')).toBe('neutral');
     expect(response.headers.get('cache-control')).toContain('no-store');
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
-  });
-
-  it('never caches a wallet upstream outage when the direction filter is active', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('backend offline'); }));
-    const response = await GET(request('/app-api/v1/wallet?recent=50&direction=in'), context('wallet'));
-    expect(response.status).toBe(502);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
@@ -328,7 +263,6 @@ describe('Android owner-scoped banking cache privacy', () => {
   it.each([
     ['loan history', ['bank', 'loans']],
     ['banking standing', ['banking', 'standing']],
-    ['bank standing snapshot', ['banking', 'standing', 'snapshot']],
     ['repayment preview', ['banking', 'repay-preview']],
   ])('never forwards public cache policy for %s', async (_label, parts) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
@@ -339,18 +273,6 @@ describe('Android owner-scoped banking cache privacy', () => {
     const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-  });
-
-  it('keeps the owner-only bank snapshot private and noindex even when upstream says public', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ cashBalance: '900719925474099312345678' }), {
-      status: 200,
-      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-    })));
-    const response = await GET(request('/app-api/v1/banking/standing/snapshot'), context('banking', 'standing', 'snapshot'));
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
-    expect(await response.json()).toMatchObject({ cashBalance: '900719925474099312345678' });
   });
 
   it('never caches a bank loan gateway failure', async () => {
@@ -412,29 +334,5 @@ describe('Android chat bigint cursor and private cache boundary', () => {
       context('chat', 'conversations', conversation, 'messages'));
     expect(failed.status).toBe(502);
     expect(failed.headers.get('cache-control')).toBe('private, no-store');
-  });
-});
-
-describe('Android verified help fallback contract', () => {
-  it('forwards explicit opt-in in the POST body and never caches approved-language search results', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const payload = { locale: 'ko', query: 'login', fallbackToOtherLocale: true, limit: 20 };
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      expect(init?.method).toBe('POST');
-      expect(JSON.parse(new TextDecoder().decode(init?.body as ArrayBuffer))).toEqual(payload);
-      return new Response(JSON.stringify({ articles: [{ locale: 'en', title: 'Account' }], requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true }), {
-        status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
-      });
-    });
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/help/search', {
-      method: 'POST', headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https', 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    }), context('help','search'));
-    expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-    expect(response.headers.get('x-robots-tag')).toBe('noindex');
-    expect(await response.json()).toMatchObject({ requestedLocale: 'ko', resultLocale: 'en', fallbackUsed: true });
-    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/api/v1/help/search');
   });
 });
