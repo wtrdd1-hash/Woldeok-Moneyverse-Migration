@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1480 — F675-176 회원 전용 지갑 기록 저장 필터 (기능 추가 / DRAFT / RELEASE HOLD)
+- 주기: 이전 기능 보완 v1478 → 현재 기능 추가 v1480 → 다음 기능 보완 v1482(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`, 독립 QA v1375 FAILED/P0. [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). 기획 초안이며 미구현.
+- 근거: 현재 `/wallet/activity`·NestJS GET은 전체/7일/30일, 50건 단위 본인·세션 결속 커서를 제공하지만 저장 필터와 SQL 순변동 방향 필터는 확인되지 않았다. F675-176은 본인 전용 이름 있는 필터 최대 8개, 선택적 기본값, ALL/INCREASE/DECREASE/UNCHANGED(0은 내부 이체 단정 금지), 원자적 CAS·멱등 영수증, 본인 검증 SECURITY DEFINER, 15분 서명 커서, 웹·Android 동등성, noindex/no-store, WCAG 2.2 AA/320px, 관리자 익명 집계, 기능 OFF·기존 화면 복원을 제안한다. WLD 쓰기 없음. [영·한 통합 상세](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0: REPO1480-01 브랜치 462개 보존, SEC1480-02 DEV 고객문의·감사 직접 DML·체크섬 5건, FIN1480-03 SWF 허위 성공·MINT 18,000 WLD·국고 552행, REL1480-04 분류기/lint/API/전체 CI/외부 복원/공식 Test 정확 SHA. P1: VIEW1480-05 VIEW1480-06 VIEW1480-07 VIEW1480-08 VIEW1480-09 VIEW1480-10 스키마·SQL 커서·API·UI·개인정보/KPI·격리 PG/롤백. 합성 10,001건/위조 100/동시 CAS 100/응답 유실 50/경계 30건은 **계획이며 미실행**. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 운영승격 BLOCKED.
+
+
+
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

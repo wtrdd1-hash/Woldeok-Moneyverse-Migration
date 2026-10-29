@@ -1,3 +1,6 @@
+## v2026.10.30.1480 — F675-176 회원 전용 지갑 기록 저장 필터 (기획 DRAFT / 출시 HOLD)
+- 본인 전용 이름 있는 기간·순변동 필터 최대 8개, CAS·멱등 영수증, 버전형 서명 커서, Nest/Next/Android 동등성 및 기존 50건 기록으로 롤백을 제안한다. 문서 전용이며 원장·DB·런타임·Test·운영 변경 없음. 독립 QA v1375 FAILED/P0, 외부 근거 신규 승인 0·누적 UNKNOWN/10,000. [통합 기획](../planning/INTEGRATED_PLANNING_MASTER.ko.md) · [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915).
+
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
 - 2분 간격 읽기 전용 뉴스 생성/발행 구분, 직전 5%·시가 10% 변동, 거래정지·09시 요약·오류 건수 알림. PR #1903 병합, Test 및 운영 타이머·Telegram 실제 전송 검증. [릴리스](../releases/v2026.10.29.1511.ko.md).
 
