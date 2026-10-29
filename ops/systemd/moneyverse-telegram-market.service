@@ -1,0 +1,19 @@
+[Unit]
+Description=Moneyverse Telegram stock news, price and critical-log monitor
+Wants=network-online.target
+After=network-online.target docker.service
+[Service]
+Type=oneshot
+User=debian
+Group=debian
+SupplementaryGroups=docker systemd-journal
+WorkingDirectory=/usr/local/lib/moneyverse-telegram
+EnvironmentFile=/var/lib/moneyverse-telegram/telegram.env
+ExecStart=/usr/bin/python3 /usr/local/lib/moneyverse-telegram/market_alerts.py
+TimeoutStartSec=45
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/moneyverse-telegram
