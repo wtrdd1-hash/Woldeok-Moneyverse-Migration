@@ -1,5 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1426 / F675-162 — 수집품 증빙·쇼케이스 무결성 보완 (기능 개선 / 초안 / 운영승격 보류)
+
+**주기:** 이전 추가 v1424 → 현재 개선 v1426 → 다음 추가 v1428(잠정). main `35971c600f25869c96f1c666d4b9f58927202730` 시작·중간 확인, 선행 미병합 PR #1740, QA v1348 FAILED. 배포된 기능이 아닌 기획이다.
+
+**P0 소유권:** 마이그레이션232의 `user_collections`은 `UNIQUE(user_id,code)`만 있다. 영수증의 `(owner_id,piece_id)` → 수집품 `(user_id,id)`, 쇼케이스 항목의 `(owner_id,showcase_id)` 및 `(owner_id,award_receipt_id)` 복합 FK와 대응 유일키를 요구한다. 순서 1~20, 중복 영수증 금지, 기존 데이터 감사 후 전진 마이그레이션. 발행기관 `issuer_id`와 원본 사건·증빙 버전·취소 상태를 독립 확인하고 `UNIQUE(issuer_id,source_kind,source_event_id,recipient_slot)`로 타인에게 동일 수령 증빙 재사용을 막는다. 수령 슬롯은 발행기관이 인증해야 한다. 기본 수집품 4개와 localStorage는 UNVERIFIED.
+
+**P0 공개 무결성:** 검토된 이름·희귀도·일 단위 수여일·공개 출처만 불변 스냅샷·해시로 저장하고 회원 메모·내부 증거·WLD·회원 ID를 제외한다. 공개 조회마다 발행 증빙 취소, 소유권, 스냅샷 해시, 기능 OFF를 재확인한다. 무효이면 안전하게 비공개 처리한다. 수정 가능한 원본 문자열은 불변 스냅샷이 아니다.
+
+**인덱스·경합:** PostgreSQL 부분 인덱스에 시간 의존 `now()` 조건 사용 불가. `(owner_id,expires_at,id) WHERE revoked_at IS NULL`과 조회 시 `expires_at > transaction_timestamp()` 적용. 회원 행 `FOR UPDATE` 잠금으로 미만료·미철회 링크 최대 5개, 검증된 본인 영수증 1~20개, 동의, UUID·본문 해시를 원자적으로 확인한다. 동일 재시도는 메타데이터만, 본문 변경은 409. 최초 응답 유실 시 링크를 철회하고 재생성한다. 철회 커밋 이후 새 조회를 거부하되 이미 전달된 응답·스크린샷은 회수 불가.
+
+**보안·UX:** 최소 192비트 비밀 토큰을 1회만 반환하고 DB에는 다이제스트만 저장. 없음·만료·철회·증빙 무효·OFF는 동일 404. Nginx·Next/Nest·분석·오류 로그의 URL 토큰 삭제, no-store, no-referrer, noindex/nofollow, 외부 스크립트·비공개 OG 금지. 회원 VERIFIED/UNVERIFIED 구분, 동의·철회·계정 전환, Android API 동등성, 관리자 발행기관 감사·별도 권한, 모바일 320px·44px·키보드·스크린리더. SECURITY DEFINER 내부 소유권 검증, 직접 앱 테이블 권한 금지. GET 시 예시 자동 INSERT 제거는 데이터 보존형 별도 작업.
+
+**개발 백로그:** P0 ENV1426-01(디스크/복원), FIN1426-02(18,000 WLD 원장 차이), SEC1426-03(복합 FK/진짜 증빙), REL1426-04(정확 SHA Test/GitOps). P1 COL1426-05(스키마/ACL), COL1426-06(발행 증빙 취소), COL1426-07(토큰/멱등/경합), COL1426-08(웹/Android), COL1426-09(관리자/개인정보/SEO/접근성/KPI), COL1426-10(실제 PostgreSQL 17.11·합성 10,001건·동시 100건·위조 100건·복원/롤백). 시험은 명세만 했고 미실행. 디스크 98%, 독립 복원·공식 Test 미검증으로 RELEASE HOLD. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000건 BLOCKED. 코드·DB·WLD·Test·Production 변경 없음.
+
+
 ## v1424 / F675-162 — 검증 가능한 회원 동의형 컬렉션 쇼케이스 (기능 추가 / 초안 / 운영 보류)
 
 **회차:** 이전 기능 보완 v1422 → 현재 기능 추가 v1424 → 다음 기능 보완 v1426(잠정). **기준 main:** 35971c600f25869c96f1c666d4b9f58927202730 (시작·중간 재확인), AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·국문 PROJECT_PLAN.ko.md 대조. **개발 전달:** [이슈 #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740). QA v1347 FAILED. 문서 설계일 뿐 실제 구현·DB·미디어·WLD·Test·Production 변경 없음.

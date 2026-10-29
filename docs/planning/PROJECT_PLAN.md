@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## 2026-10-28 v1426 — F675-162 verified collection showcase integrity (PLANNING DRAFT / RELEASE HOLD)
+- Previous Addition v1424 / Current Improvement v1426 / Next Addition v1428 provisional. Main `35971c600f25869c96f1c666d4b9f58927202730` checked start/mid; unmerged Draft #1740 dependency; QA v1348 FAILED. Migration232 has `UNIQUE(user_id,code)` only, requiring composite owner/piece, owner/showcase and owner/receipt FKs and matching unique keys to prevent cross-owner proof links.
+- Add independently authenticated issuer event/recipient-slot uniqueness, immutable vetted public snapshot, live proof revocation recheck, token log redaction, precise post-commit read/revoke boundary. Replace impossible time-dependent active partial index with `WHERE revoked_at IS NULL` and query-time expiry. Preserve legacy seeds as UNVERIFIED. [Full design](INTEGRATED_PLANNING_MASTER.md) and [Korean](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 ENV1426-01 FIN1426-02 SEC1426-03 REL1426-04; P1 COL1426-05 through COL1426-10. Disk 98%, restore UNKNOWN, 18k WLD drift, broad app DML, migration parity, exact-SHA Test BLOCKED. External accepted 0 new / UNKNOWN of 10,000. No runtime or deployment; acceptance tests not executed.
+
+
+
 ## v2026.10.28.1424 — F675-162 verified member collection showcase (PLANNING DRAFT / RELEASE HOLD)
 - Previous Improvement v1422 → Current Addition v1424 → Next Improvement v1426 provisional. Main 35971c600f25869c96f1c666d4b9f58927202730 checked start/mid; QA v1347 FAILED. Source shows hard-coded /collections?showcase=arch-1063, client DEFAULT_PIECES/localStorage, GET-time four-piece seed and no award proof in migration 232. **Do not present examples as verified ownership.**
 - Plan opt-in verified-only unlisted share, 7-day expiry, five active links, 192-bit bearer token digest, owner/issuer evidence, revoke, no-store/noindex, Android parity and WCAG. P0 ENV1424-01 FIN1424-02 SEC1424-03 REL1424-04; P1 COL1424-05 COL1424-06 COL1424-07 COL1424-08 COL1424-09 COL1424-10. [Integrated EN](INTEGRATED_PLANNING_MASTER.md) / [KO](INTEGRATED_PLANNING_MASTER.ko.md); [handoff #1739](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1739); [Draft PR #1740](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1740).

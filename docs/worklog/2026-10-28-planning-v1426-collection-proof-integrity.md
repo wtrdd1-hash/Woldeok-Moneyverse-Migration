@@ -1,0 +1,11 @@
+# v1426 Planning — F675-162 Verified Collection Showcase Integrity (EN)
+
+**2026-10-28 KST.** Previous Feature Addition v1424 → Current Feature Improvement v1426 → Next Feature Addition v1428 (provisional). **PARTIAL / DRAFT / RELEASE HOLD.**
+
+Read Superpowers using-superpowers and applicable brainstorming, writing-plans, worktrees and verification instructions on miniPC (skills__list empty). Debian 13.6 service status active and development DB connected. Canonical main `35971c600f25869c96f1c666d4b9f58927202730` rechecked start/mid; prior Draft #1740 `695fc9887c318ac6e416e8bec3058514a275305b`. Reviewed main AGENTS, README, PROJECT_PLAN EN/KO, collection frontend/backend and migration232, GitHub current PR/QA (v1348 FAILED).
+
+**Evidence-backed defects in proposed v1424 design:** migration232's only owner uniqueness is `(user_id,code)`; separate proof FKs do not enforce same-owner membership. Text source/digest alone is not issuer proof; replay across owners needs issuer-signed recipient slot. A time-dependent active partial-index predicate is invalid in PostgreSQL. Mutable live collection text is not an immutable public snapshot. Token paths can leak via edge logs, and revocation cannot retract in-flight responses.
+
+**Design correction:** matching composite unique/FKs, independently attested issuer version and revocation, immutable allowlisted snapshot and digest, valid revoked-only partial index, owner lock quota, one-time token/unknown-commit recovery, log redaction, accurate revoke semantics, web/Android/admin/accessibility/privacy and exact-SHA release gates. P0 ENV1426-01 FIN1426-02 SEC1426-03 REL1426-04; P1 COL1426-05..COL1426-10. Acceptance includes isolated real PostgreSQL 17.11, 10,001 synthetic pieces, 100 concurrent operations, 100 forged actors/tokens, proof/ACL negative cases and rollback. **No acceptance tests executed.**
+
+Data disk 98% (4.4 GiB after worktree), independent restore UNKNOWN, 18,000 WLD historical ledger drift, broad app DML, migration parity and official Test exact-SHA unverified. External new accepted 0, cumulative deduplicated accepted UNKNOWN/10,000: BLOCKED / IN PROGRESS. No deletion of others' work, runtime/DB/WLD/media changes, Test/Production promotion or merge. Feature remains OFF until independent proof and GitOps approval.
