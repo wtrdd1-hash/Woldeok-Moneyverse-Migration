@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const sqlPath = 'migrations/291-npc-order-replay-integrity.sql';
+const sqlPath = 'migrations/296-npc-order-replay-integrity.sql';
 
 describe('NPC order replay integrity migration 291', () => {
   it('adds an immutable actor/NPC/command-bound acceptance receipt', () => {

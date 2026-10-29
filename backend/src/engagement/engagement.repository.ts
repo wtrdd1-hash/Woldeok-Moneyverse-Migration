@@ -136,7 +136,7 @@ export interface EngagementProgressRow {
 
 /**
  * public.engagement_record_npc_order RETURNS TABLE:
- * packages/database/migrations/291-npc-order-replay-integrity.sql
+ * packages/database/migrations/296-npc-order-replay-integrity.sql
  *
  * A successful acceptance persists the original actor, NPC, command and
  * affinity outcome. An exact retry returns that original outcome even if
