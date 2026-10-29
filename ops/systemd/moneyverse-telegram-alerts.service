@@ -1,0 +1,20 @@
+[Unit]
+Description=Moneyverse read-only Telegram pairing and operational alert scan
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=oneshot
+User=debian
+Group=debian
+EnvironmentFile=/etc/moneyverse/telegram.env
+StateDirectory=moneyverse-telegram
+StateDirectoryMode=0700
+ExecStart=/usr/bin/python3 /usr/local/lib/moneyverse-telegram/telegram_bridge.py check
+TimeoutStartSec=35
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/etc/moneyverse
+ReadWritePaths=/var/lib/moneyverse-telegram
