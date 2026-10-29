@@ -7,3 +7,4 @@
 - **백로그.** P0 DISK1496-01 SEC1496-02 FIN1496-03 REL1496-04, P1 READINESS1496-05~10. 합성 10,001건·위조 100건·동시성 100건·만료 50건·경계 30건은 **시험 명세만 작성**. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
 - **배포 정책.** 기능 스위치 기본 OFF. 기획 브랜치에서 런타임·Test·Production·DB·잔액·원장·Git 참조·파일 정리 변경 없음. Gemini/개발 A/B/C/QA 작업을 보호하고 별도 개발 브랜치·정확 SHA Test·사람 승인 GitOps를 요구한다. **DRAFT / RELEASE HOLD**.
 - **완료 증거:** 문서 12개, git diff --check PASS, 영문·국문 통합/프로젝트 문서 각 백로그 10/10, 릴리스 분류 시험 17 PASS/0 FAIL, 실제 경로 DOCS_ONLY. [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960) OPEN. 전체 런타임 및 실제 PostgreSQL 수용시험은 실행하지 않았다.
+- **08:08 KST 읽기 전용 DB/app-api 추가 확인:** 개발 PostgreSQL 17.11에서 moneyverse_app의 public.audit_logs UPDATE 권한이 true(마이그레이션 102의 REVOKE와 불일치). 운영 DB 권한 및 실제 변조 여부는 미확인. Android app-api 경로 허용 목록 소스를 조사했으며 관리자 준비 경로는 없다. SEC1496-02 후속 조사 필요.
