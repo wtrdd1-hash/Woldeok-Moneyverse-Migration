@@ -2,7 +2,7 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.10.28.0425**
+업데이트 버전: **v2026.10.28.1525**
 
 이 문서는 181개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
@@ -2873,7 +2873,7 @@ _요청 본문 없음._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | npc_code | true | string |  |
-| affinity | true | number |  |
+| affinity | true | null \| number |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -3717,10 +3717,7 @@ _요청 본문 없음._
 
 ### 경로/쿼리 파라미터
 
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| q | query | false | string |  |
-| rarity | query | false | string | enum="common","uncommon","rare","epic","legendary","mythic" |
+_None._
 
 ### 요청 본문
 
@@ -3750,47 +3747,6 @@ _요청 본문 없음._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
-| categories[] | true | string[] |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/shop/compare` — 회원별 실제 상점 가격 및 주간 유지비 2개 상품 비교
-
-- 인증/권한: 로그인 + 최신 동의 필요 (읽기 전용, CSRF 불필요)
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 비교 결과는 구매 영수증이 아님; 구매 전 최신 카탈로그/잔액 재조회
-- Operation ID: `ShopController_compare`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| ids | query | true | string | description="Exactly two distinct UUIDs separated by a comma, maximum 80 characters" |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| source | true | string="shop_catalog_list_v2" | const="shop_catalog_list_v2" |
-| items[] | true | object[] |  |
-| items[] | true | object |  |
-| items[].catalog_id | true | string |  |
-| items[].code | true | string |  |
-| items[].name | true | string |  |
-| items[].category | true | string |  |
-| items[].price | true | string |  |
-| items[].maintenance_cost | true | string |  |
-| items[].quantity | true | null \| number |  |
-| items[].purchase_limit | true | string |  |
-| items[].sale_ends_at | true | null \| string (date-time) |  |
-| cheaperCatalogId | true | null \| string |  |
-| priceDifference | true | string |  |
-| weeklyUpkeepDifference | true | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4106,7 +4062,6 @@ _요청 본문 없음._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
-| categories[] | true | string[] |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4167,9 +4122,9 @@ _요청 본문 없음._
 | stocks[].day_low_price | true | string & object |  |
 | stocks[].halt_status | true | string |  |
 | stocks[].symbol | true | string |  |
+| stocks[].id | true | string |  |
 | stocks[].name | true | string |  |
 | stocks[].description | true | string |  |
-| stocks[].id | true | string |  |
 | stocks[].current_price | true | string & object |  |
 | stocks[].day_open_price | true | string & object |  |
 | stocks[].halted_at | false | null \| string (date-time) |  |
@@ -4717,6 +4672,40 @@ _요청 본문 없음._
 | messages[].sender_user_id | false | string |  |
 | messages[].body | true | string |  |
 | messages[].created_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/support/threads/:id/transcript` — 내 관리자 문의 대화 최대 500건 JSON 내보내기
+
+- 인증/권한: 로그인 + 최신 동의 + 문의 소유자 (PostgreSQL SECURITY DEFINER)
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 최대 500건의 대화와 truncated 표시를 확인; 이 응답은 전체 기록 보증이 아님
+- Operation ID: `SupportController_transcript`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| threadId | true | string |  |
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+| truncated | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

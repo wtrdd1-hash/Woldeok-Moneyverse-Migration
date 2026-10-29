@@ -137,20 +137,6 @@ describe('app API route compatibility', () => {
     expect((await response.json()).recentTransactionsHasMore).toBe(true);
   });
 
-  it('forwards owner support recent search and prevents Android public caching', async () => {
-    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ threads: [] }), {
-      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/support/threads?q=%25_%EC%95%88%EB%85%95'), context('support', 'threads'));
-    expect(response.status).toBe(200);
-    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
-    expect(target.pathname).toBe('/api/v1/support/threads');
-    expect(target.searchParams.get('q')).toBe('%_안녕');
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-  });
-
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
     const fetchSpy = vi.fn();
@@ -321,24 +307,35 @@ describe('Android chat bigint cursor and private cache boundary', () => {
   });
 });
 
-describe('Android member support status privacy', () => {
-  it.each([200, 403, 500])('forwards status and fences owner-only support response %s', async (status) => {
+describe('Android member support transcript cache boundary', () => {
+  it.each([200, 403, 404, 500])('never caches support transcript response %s', async (status) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ threads: [] }), {
-      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
-    }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('/app-api/v1/support/threads?status=resolved'), context('support', 'threads'));
-    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('status')).toBe('resolved');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ messages: [{ body: 'private' }] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    })));
+    const parts = ['support', 'threads', 'b0000000-0000-4000-8000-000000000002', 'transcript'];
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
+    expect(response.status).toBe(status);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
+});
 
-  it('fences support errors before upstream responds', async () => {
+describe('support transcript gateway error privacy', () => {
+  const parts = ['support', 'threads', 'b0000000-0000-4000-8000-000000000002', 'transcript'];
+  it('marks app-version denials as private and noindex', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', '99.0.0');
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`, { 'x-moneyverse-app-version': '1.0.0' }), context(...parts));
+    expect(response.status).toBe(426);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('marks private API outages as private and noindex', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('unavailable'); }));
-    const response = await GET(request('/app-api/v1/support/threads?status=open'), context('support', 'threads'));
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+    const response = await GET(request(`/app-api/v1/${parts.join('/')}`), context(...parts));
     expect(response.status).toBe(502);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 });

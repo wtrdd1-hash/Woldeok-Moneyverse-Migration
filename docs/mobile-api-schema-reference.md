@@ -2,7 +2,7 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.28.0425**
+Update version: **v2026.10.28.1525**
 
 This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 181 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
@@ -2873,7 +2873,7 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | npc_code | true | string |  |
-| affinity | true | number |  |
+| affinity | true | null \| number |  |
 | replayed | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
@@ -3717,10 +3717,7 @@ _No request body._
 
 ### Path/query parameters
 
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| q | query | false | string |  |
-| rarity | query | false | string | enum="common","uncommon","rare","epic","legendary","mythic" |
+_None._
 
 ### Request body
 
@@ -3750,47 +3747,6 @@ _No request body._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
-| categories[] | true | string[] |  |
-
-> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
-
-## `GET` `/app-api/v1/shop/compare` — Compare two current catalogue prices for the authenticated member
-
-- Authorization: 로그인 + 최신 동의 필요 (읽기 전용, CSRF 불필요)
-- Success status: 200
-- Response mode: json
-- After success: 비교 결과는 구매 영수증이 아님; 구매 전 최신 카탈로그/잔액 재조회
-- Operation ID: `ShopController_compare`
-
-### Path/query parameters
-
-| Name | In | Required | Type | Constraints |
-|---|---|---|---|---|
-| ids | query | true | string | description="Exactly two distinct UUIDs separated by a comma, maximum 80 characters" |
-
-### Request body
-
-_No request body._
-
-### Success response fields
-
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| source | true | string="shop_catalog_list_v2" | const="shop_catalog_list_v2" |
-| items[] | true | object[] |  |
-| items[] | true | object |  |
-| items[].catalog_id | true | string |  |
-| items[].code | true | string |  |
-| items[].name | true | string |  |
-| items[].category | true | string |  |
-| items[].price | true | string |  |
-| items[].maintenance_cost | true | string |  |
-| items[].quantity | true | null \| number |  |
-| items[].purchase_limit | true | string |  |
-| items[].sale_ends_at | true | null \| string (date-time) |  |
-| cheaperCatalogId | true | null \| string |  |
-| priceDifference | true | string |  |
-| weeklyUpkeepDifference | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
@@ -4106,7 +4062,6 @@ _No request body._
 | catalogItems[].is_limited | true | boolean |  |
 | catalogItems[].user_owned_quantity | true | number |  |
 | catalogItems[].user_is_equipped | true | boolean |  |
-| categories[] | true | string[] |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
@@ -4167,9 +4122,9 @@ _No request body._
 | stocks[].day_low_price | true | string & object |  |
 | stocks[].halt_status | true | string |  |
 | stocks[].symbol | true | string |  |
+| stocks[].id | true | string |  |
 | stocks[].name | true | string |  |
 | stocks[].description | true | string |  |
-| stocks[].id | true | string |  |
 | stocks[].current_price | true | string & object |  |
 | stocks[].day_open_price | true | string & object |  |
 | stocks[].halted_at | false | null \| string (date-time) |  |
@@ -4717,6 +4672,40 @@ _No request body._
 | messages[].sender_user_id | false | string |  |
 | messages[].body | true | string |  |
 | messages[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/support/threads/:id/transcript` — Export up to 500 messages from my own support conversation
+
+- Authorization: 로그인 + 최신 동의 + 문의 소유자 (PostgreSQL SECURITY DEFINER)
+- Success status: 200
+- Response mode: json
+- After success: 최대 500건의 대화와 truncated 표시를 확인; 이 응답은 전체 기록 보증이 아님
+- Operation ID: `SupportController_transcript`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| threadId | true | string |  |
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+| truncated | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

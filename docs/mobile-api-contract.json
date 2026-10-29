@@ -1,6 +1,6 @@
 {
-  "contractVersion": "v2026.10.28.0425",
-  "apiVersion": "v2026.10.27.1925",
+  "contractVersion": "v2026.10.28.1525",
+  "apiVersion": "v2026.10.28.1525",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
     "primary": "en",
@@ -8734,7 +8734,14 @@
             "type": "string"
           },
           "affinity": {
-            "type": "number"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "number"
+              }
+            ]
           },
           "replayed": {
             "type": "boolean"
@@ -11129,32 +11136,7 @@
       "operationId": "ShopController_catalog",
       "backendOpenApiPath": "/shop/catalog",
       "summary": "The catalogue with prices, stock, purchase limits and cosmetics",
-      "parameters": [
-        {
-          "name": "q",
-          "in": "query",
-          "required": false,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "rarity",
-          "in": "query",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "common",
-              "uncommon",
-              "rare",
-              "epic",
-              "legendary",
-              "mythic"
-            ]
-          }
-        }
-      ],
+      "parameters": [],
       "requestBody": null,
       "successStatuses": [
         200
@@ -11280,153 +11262,10 @@
                 "user_is_equipped"
               ]
             }
-          },
-          "categories": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
-          "catalogItems",
-          "categories"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/shop/compare",
-      "purpose": "회원별 실제 상점 가격 및 주간 유지비 2개 상품 비교",
-      "callWhen": "회원이 상점에서 서로 다른 상품 2개를 선택했을 때 (읽기 전용)",
-      "authorization": "로그인 + 최신 동의 필요 (읽기 전용, CSRF 불필요)",
-      "afterSuccess": "비교 결과는 구매 영수증이 아님; 구매 전 최신 카탈로그/잔액 재조회",
-      "backendRoute": "/api/shop/compare",
-      "operationId": "ShopController_compare",
-      "backendOpenApiPath": "/shop/compare",
-      "summary": "Compare two current catalogue prices for the authenticated member",
-      "parameters": [
-        {
-          "name": "ids",
-          "in": "query",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "description": "Exactly two distinct UUIDs separated by a comma, maximum 80 characters"
-          }
-        }
-      ],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "source",
-          "items",
-          "cheaperCatalogId",
-          "priceDifference",
-          "weeklyUpkeepDifference"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "source": {
-            "type": "string",
-            "const": "shop_catalog_list_v2"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "catalog_id": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "category": {
-                  "type": "string"
-                },
-                "price": {
-                  "type": "string"
-                },
-                "maintenance_cost": {
-                  "type": "string"
-                },
-                "quantity": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ]
-                },
-                "purchase_limit": {
-                  "type": "string"
-                },
-                "sale_ends_at": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "catalog_id",
-                "code",
-                "name",
-                "category",
-                "price",
-                "maintenance_cost",
-                "quantity",
-                "purchase_limit",
-                "sale_ends_at"
-              ]
-            }
-          },
-          "cheaperCatalogId": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "priceDifference": {
-            "type": "string"
-          },
-          "weeklyUpkeepDifference": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "source",
-          "items",
-          "cheaperCatalogId",
-          "priceDifference",
-          "weeklyUpkeepDifference"
+          "catalogItems"
         ]
       },
       "responseCompatibility": {
@@ -12313,17 +12152,10 @@
                 "user_is_equipped"
               ]
             }
-          },
-          "categories": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
-          "catalogItems",
-          "categories"
+          "catalogItems"
         ]
       },
       "responseCompatibility": {
@@ -12536,13 +12368,13 @@
                 "symbol": {
                   "type": "string"
                 },
+                "id": {
+                  "type": "string"
+                },
                 "name": {
                   "type": "string"
                 },
                 "description": {
-                  "type": "string"
-                },
-                "id": {
                   "type": "string"
                 },
                 "current_price": {
@@ -12638,9 +12470,9 @@
                 "day_low_price",
                 "halt_status",
                 "symbol",
+                "id",
                 "name",
                 "description",
-                "id",
                 "current_price",
                 "day_open_price",
                 "updated_at",
@@ -14831,6 +14663,101 @@
         },
         "required": [
           "messages"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/support/threads/:id/transcript",
+      "purpose": "내 관리자 문의 대화 최대 500건 JSON 내보내기",
+      "callWhen": "회원이 자신의 문의 대화 내역을 내보내려 할 때",
+      "authorization": "로그인 + 최신 동의 + 문의 소유자 (PostgreSQL SECURITY DEFINER)",
+      "afterSuccess": "최대 500건의 대화와 truncated 표시를 확인; 이 응답은 전체 기록 보증이 아님",
+      "backendRoute": "/api/v1/support/threads/:id/transcript",
+      "operationId": "SupportController_transcript",
+      "backendOpenApiPath": "/support/threads/{id}/transcript",
+      "summary": "Export up to 500 messages from my own support conversation",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "threadId",
+          "messages",
+          "truncated"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string"
+                },
+                "sender_kind": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "user"
+                    },
+                    {
+                      "type": "string",
+                      "const": "admin"
+                    }
+                  ]
+                },
+                "sender_user_id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "message_id",
+                "sender_kind",
+                "body",
+                "created_at"
+              ]
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "threadId",
+          "messages",
+          "truncated"
         ]
       },
       "responseCompatibility": {
