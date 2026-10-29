@@ -43,6 +43,16 @@ export class PhotoSubmissionDto {
   readonly idempotencyKey!: string;
 }
 
+export class PhotoWithdrawDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly photoId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
 /**
  * A member sending a photo to the gallery.
  *
@@ -112,6 +122,16 @@ export class MemberPhotoController {
           body.altText,
         ),
       '오늘 보낼 수 있는 사진을 모두 보냈어요.',
+    );
+  }
+
+  @Post('withdraw')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Withdraw an owned, still-pending photo submission' })
+  withdraw(@Req() request: RequestWithSession, @Body() body: PhotoWithdrawDto) {
+    return this.guarded(
+      () => this.repository().withdraw(requireUserId(request), body.photoId, body.idempotencyKey),
+      '게시된 사진은 직접 철회할 수 없어요. 운영자에게 삭제를 요청해 주세요.',
     );
   }
 

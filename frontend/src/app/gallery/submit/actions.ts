@@ -128,3 +128,32 @@ export async function submitPhoto(
     );
   }
 }
+
+/** Only a pending, owner-submitted photo may be withdrawn. The DB command
+ * serializes operator publication and retains the daily quota as a tombstone. */
+export async function withdrawPendingPhoto(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const photoId = formData.get('photoId');
+  const idempotencyKey = formData.get('idempotencyKey');
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (typeof photoId !== 'string' || !uuid.test(photoId)
+    || typeof idempotencyKey !== 'string' || !uuid.test(idempotencyKey)) {
+    return { status: 'error', message: '사진 요청을 다시 확인해 주세요.' };
+  }
+  try {
+    const receipt = await mutate<{ replayed: boolean }>('/api/v1/photos/withdraw', {
+      body: { photoId, idempotencyKey },
+    });
+    revalidatePath('/gallery/submit');
+    return {
+      status: 'ok',
+      message: receipt.replayed
+        ? '이미 철회한 사진이에요.'
+        : '검토 중인 사진을 철회했어요. 오늘의 제출 횟수는 복원되지 않아요.',
+    };
+  } catch (error) {
+    return failure(error, '검토 중인 사진만 철회할 수 있어요. 게시된 사진은 운영자에게 문의해 주세요.');
+  }
+}
