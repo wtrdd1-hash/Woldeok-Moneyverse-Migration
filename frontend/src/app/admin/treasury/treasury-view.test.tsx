@@ -124,6 +124,15 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(injectAmounts.length).toBeGreaterThan(0);
   });
 
+  it('does not represent failed ledger retrieval as an empty verified ledger', () => {
+    render(<TreasuryView overview={mockOverview} ledger={null} />);
+    const audit = screen.getByRole('region', { name: '국고 회계 감사 원장' });
+    expect(within(audit).getByRole('status').textContent).toContain('원장 조회 불가');
+    expect(within(audit).queryByText('기록된 국고 원장 트랜잭션이 없습니다.')).toBeNull();
+    expect(within(audit).queryByText('해당 필터 조건의 원장 거래 내역이 없습니다.')).toBeNull();
+    expect(within(audit).queryByText('전체 (0)')).toBeNull();
+  });
+
   it('shows unverified reconciliation without a false green success or zero discrepancy', () => {
     const unverified = {
       ...mockOverview,
