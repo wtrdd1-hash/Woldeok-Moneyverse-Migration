@@ -409,22 +409,6 @@ export class PostgresWalletRepository {
     return { success: true, quarter, choice };
   }
 
-  async searchRecipients(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]> {
-    const q = (query || '').trim();
-    if (!q) return [];
-    return queryRows<{ userId: string; displayName: string }>(
-      this.pool,
-      `SELECT profile.user_id::text AS "userId", profile.display_name AS "displayName"
-       FROM public.member_profiles AS profile
-       JOIN public.users AS u ON u.id = profile.user_id
-       WHERE profile.display_name ILIKE $1
-         AND profile.user_id != $2::uuid
-         AND u.status = 'active'::public.user_status
-       LIMIT 10`,
-      [`%${q}%`, currentUserId],
-    );
-  }
-
   async recordP2PTransfer(data: {
     senderId: string;
     receiverId: string;

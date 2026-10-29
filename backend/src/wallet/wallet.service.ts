@@ -96,7 +96,6 @@ export interface WalletRepositoryLike {
   repay(input: WalletRepayInput): Promise<WalletRepayRow>;
   getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
   voteCitizenBudget?(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }>;
-  searchRecipients?(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]>;
   recordP2PTransfer?(data: {
     senderId: string;
     receiverId: string;
@@ -583,17 +582,6 @@ export class WalletService {
       return this.repository.voteCitizenBudget(actorUserId, quarter, choice);
     }
     return { success: true, quarter, choice };
-  }
-
-  async searchRecipients(
-    authenticatedUserId: string,
-    query: string,
-  ): Promise<{ userId: string; displayName: string }[]> {
-    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
-    if (typeof this.repository.searchRecipients === 'function') {
-      return this.repository.searchRecipients(query, actorUserId);
-    }
-    return [];
   }
 
   async p2pTransfer(

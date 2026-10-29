@@ -1,24 +1,12 @@
 import { NextResponse } from 'next/server';
-import { apiOrNull } from '@/lib/api';
-import { viewerOrUnknown } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request): Promise<NextResponse> {
-  const viewer = await viewerOrUnknown();
-
-  if (!viewer || !viewer.signedIn) {
-    return NextResponse.json({ recipients: [] }, { status: 200 });
-  }
-
-  const { searchParams } = new URL(req.url);
-  const query = searchParams.get('query') || '';
-
-  if (!query.trim()) {
-    return NextResponse.json({ recipients: [] });
-  }
-
-  const recipients = await apiOrNull<any[]>(`/api/v1/wallet/recipients/search?query=${encodeURIComponent(query)}`);
-
-  return NextResponse.json({ recipients: recipients ?? [] });
+// Legacy nickname enumeration conflicts with the exact-UUID-only wallet policy.
+// Keep a terminal response for old clients; never proxy a member-profile query.
+export async function GET(_req: Request): Promise<NextResponse> {
+  return NextResponse.json(
+    { error: 'Recipient name search is retired. Ask the recipient for their exact Moneyverse UUID.' },
+    { status: 410, headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }
