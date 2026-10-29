@@ -28,3 +28,10 @@
 - GitHub 기록: 원인 #1848, 코드 PR #1849, 별도 운영완료 문서 PR(후속). 현재 main에 다른 작업자의 v1502가 존재하므로 기존 운영 코드를 v1452 아티팩트로 되돌려 교체하지 않고 이미 검증된 c2129625를 재사용함.
 - 롤백: `/etc/systemd/system/moneyverse-backend.service.d/zzzz-v1452-news-scheduler.conf` 제거, `systemctl daemon-reload`, 기존 리더 restart; 백업 `/srv/moneyverse-data/tasks/v1452-news-scheduler-systemd-backup-20261029-1522`에 보존. **구형 코드 롤백은 뉴스 중복 원인을 재도입할 수 있으므로 운영 심각 장애 시에만** 실행.
 - 미검증: 실제 사용자 쿠키 재사용, 정규 스케줄 1회 이상 결과로 신규 뉴스 중복 0 확증, 누적 7일/24시간 분포 정상화(대기). 현장 기록 `/srv/moneyverse-data/tasks/v2026.10.29.1452-news-scheduler-production-rollout.ko.md`.
+
+## 4. 첫 실운영 정기발행 수용 — 2026-10-29 15:30:41 KST (v1452-R1)
+- `scheduled_job_runs` 운영 DB 실제 period `2026-10-29T15`: `started_at=2026-10-29T06:27:39.880Z`, `finished_at=2026-10-29T06:30:41.823Z`, `status=succeeded`. 새 프로세스가 처리한 첫 시간당 뉴스 작업.
+- 결과 `engine=deterministic-financial-engine`, `fallbackReason=model_unavailable`, `generated=5`, `published=true`, `eventsPublished=1`. 기존 치무전자(CHIMU314)가 아닌 **뮤야 엔터테인먼트(MYUY)** 뉴스 `[단독] 뮤야 엔터, 소속 아티스트 월드투어 30개 도시 전석 매진 신기록`이 새 시장 이벤트로 기록됨.
+- 새 스케줄 이후 치무전자 같은 헤드라인 신규 발행 **0건(첫 회차)**. 앞선 14시 주기 치무전자 반복과 대비. 프로세스별 로컬 AI 응답은 제한시간 180초에 완료되지 않아 deterministic fallback; 오류를 실제로 분류/기록하는 점까지 검증함.
+- `sudo node scripts/release/verify-host-runtime-identity.mjs --channel prod --sha c2129625...` 결과 `ok=true, failures=[]`, 공개 사이트 5개 대표 경로·뉴스 API 모두 200. 운영 코드/프론트/메니페스트의 SHA 일치 확인.
+- 이 수용은 **첫 주기 운영동작과 한 종목 편중 방지가 실제 작동**했다는 증거이고, 24시간 분포/7일 장기재발방지까지 확정한 것은 아님. 오래된 활성 뉴스는 만료까지 보존, 원장·가격 수동 보정 없음. 기록 연계 #1848 / #1849 / #1859.
