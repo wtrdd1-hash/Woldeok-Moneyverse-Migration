@@ -1,5 +1,53 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1464 — F675-172 member-private dashboard shortcuts (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Authority:** latest main 9ebc5613845ba2e8179a0051e86db996593c8a19 verified at start and mid-work; AGENTS.md, README.md, PROJECT_PLAN.md (canonical English) and PROJECT_PLAN.ko.md (parity). Previous Feature Improvement v1462 → Current Feature Addition v1464 → Next Feature Improvement v1466 (provisional). Draft planning depends on #1856/#1846/#1837/#1830. QA v1367 FAILED/P0. Test and Production /api/version both report c2129625aa6629c616fb31ce790950618b8d92b2, not main. Engineering handoff [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+
+**Source findings and full implementation-ready contract:**
+
+## F675-172 / Planning v1464 — Owner-private dashboard shortcuts (DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Improvement v1462 → Current Feature Addition v1464 → Next Feature Improvement v1466 (provisional).
+**Source evidence:** `frontend/src/app/dashboard/page.tsx` currently renders fixed Next actions links (`/quests`, `/work`, `/wallet`, `/stocks`). The inspected `backend/src/profile`, frontend dashboard and migrations do not contain member-owned dashboard route ordering. `mobile-home-view.tsx`'s `isPinned` is for announcements, not member shortcuts. No new runtime code is authorized by this planning issue.
+**Main at start/mid:** `9ebc5613845ba2e8179a0051e86db996593c8a19`. **Deployed Test/Production app:** `c2129625aa6629c616fb31ce790950618b8d92b2` (read-only /api/version). Latest completed QA v1367 FAILED/P0, not a release PASS.
+
+### Product/permissions
+- Members may opt in to choose, remove and order up to **6** internal destination shortcuts from an **allowlisted route-key registry**, initial suggestion `wallet,quests,work,stocks,shop_catalog,inventory,marketplace,support`. Verify each target route and entitlement before implementation; never accept arbitrary URLs, query strings, fragments, `javascript:`, open redirects, admin paths or other users' resources.
+- Entry: private `/dashboard` → "Edit shortcuts" → select/reorder → "Save"; explicit "Reset to defaults" confirmation. Default suggestions: `quests,work,wallet,stocks`. Loading, empty, stale version, unavailable, disabled-route and save-confirmed states; never fabricate persisted success.
+- Read-only navigation only: no purchase, transfer, quest claim, stock order, WLD movement, notifications or implicit background actions. Feature flag default OFF. Android app-api parity; private/noindex/no-store.
+
+### Implementation contract
+- DB: additive `member_shortcut_sets(user_id PK FK users ON DELETE CASCADE, version bigint >0, route_keys text[] CHECK cardinality <=6 and no duplicate keys, updated_at)`; immutable `member_shortcut_mutation_receipts(actor_id, request_uuid, request_digest, prior_version, new_version, route_keys, committed_at)`, UNIQUE(actor_id,request_uuid), 30-day retention after explicit privacy review. Index `(updated_at)` only if required by operator metrics; never public owner index. Enforce registry validity in SECURITY DEFINER transaction, not solely a client validator. No direct app DML; explicit function grants only, fixed search_path, fully qualified objects, actor sourced from authenticated server session.
+- API: `GET /api/v1/me/shortcuts` returns `{routeKeys,version,source:'DEFAULT'|'SAVED',registryVersion}`; `PUT /api/v1/me/shortcuts` body `{requestId:UUID,expectedVersion:int,routeKeys:string[]}` atomically replaces all. Same request UUID + canonical body digest replays original receipt, same UUID + different digest → 409; stale version → 412; invalid/forbidden route → 422; >6 → 422; unauth → 401; rate limit → 429; dependency failure → 503. Mutation uses CSRF for browser and approved Android session protocol; never infer success on network timeout. Optional `GET /api/v1/me/shortcuts/receipts/:requestId` owner-only for ambiguous response reconciliation.
+- SERIALIZABLE or row-level locking + CAS version; concurrent reorder never silently overwrites. Disabled route shown "Unavailable" with removal affordance, never silently redirects; feature OFF hides edit UI and keeps stored preferences unchanged. Route authorization is always re-evaluated on click by target endpoint.
+- UI: accessible up/down keyboard controls (not drag-only), 44px touch targets, screen reader announcements, focus preservation, reduced motion, 320px mobile layout; locale labels from trusted route registry, not member-controlled HTML. Anonymous aggregate admin telemetry only, threshold >=20 distinct users and no raw preferences in admin reports.
+- SEO/analytics: member page noindex, no sitemap, no cache; KPI opt-in/save success, stale-write rate, successful route navigation, D7 shortcut usage, error rate and p95 latency; all values are hypotheses until measured. No SEO benefit claimed for private pages.
+- Rollout: migration additive and separately rehearsed; dark launch OFF → exact-SHA isolated Test with real DB/auth/browser/Android → operator signoff → gradual Production. Rollback flag OFF, no destructive migration; retain receipt evidence, confirm zero WLD and ledger effects.
+
+### P0 backlog
+- **REPO1464-01:** preserve and reconcile historical branch refs (QA v1364 462 names missing, 344 non-main-ancestor SHAs); no destructive cleanup.
+- **FIN1464-02:** audit 19 MINT-funded 18,000 WLD reconciliation and 552 Treasury-unlinked rows; arithmetic mismatch zero ≠ source proof.
+- **SEC1464-03:** resolve or explicitly authorize five migration checksum mismatches; remeasure app ACL/SECURITY DEFINER, prevent direct DML expansion.
+- **REL1464-04:** independent off-host restore, immutable build digest, official Test exact-SHA authenticated E2E, GitOps/public runtime identity and rollback before any Production promotion.
+
+### P1 backlog
+- **SHORTCUT1464-05:** route registry/entitlement map, schema, constraints, ownership and migration.
+- **SHORTCUT1464-06:** atomic replace, CAS, replay receipts, concurrent writers, disabled-route handling.
+- **SHORTCUT1464-07:** NestJS + Next.js + Android app-api contracts, auth, CSRF, quotas, error codes.
+- **SHORTCUT1464-08:** member dashboard edit/reorder/reset and 320px/keyboard/screen-reader states.
+- **SHORTCUT1464-09:** admin privacy aggregates, deletion/retention, audit, noindex, KPIs.
+- **SHORTCUT1464-10:** isolated PostgreSQL regression, Test exact-SHA and non-destructive rollback.
+
+**Acceptance targets (NOT EXECUTED):** 10,001 synthetic records, 100 concurrent CAS updates, 100 cross-user/unauthorized requests, 50 lost-response retries, 30 disabled/withdrawn route races; assert no arbitrary URL navigation, no cross-user read, no false save success, zero WLD/ledger effects. All targets require actual test evidence.
+
+**External independent reference gate:** newly deduplicated/verified/approved **0**, cumulative **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. Do not claim 10,000 achieved. No new standalone planning files. Planning-only; no runtime, DB, Test or Production mutation.
+
+
+**Scope and gate:** English original is authoritative, Korean plan is equivalent. No independent external reference was newly verified, deduplicated and approved (0); cumulative UNKNOWN/10,000 = BLOCKED / IN PROGRESS. Targets are not executed tests. Planning-only; no runtime, DB, Test, Production, WLD or ledger mutation. No additional standalone planning document.
+
+
+
 ## v1462 / F675-171 — Saved-recipient identity, eligibility and retry integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **Cycle / authority:** Previous Feature Addition v1460 → Current Feature Improvement v1462 → Next Feature Addition v1464 (provisional). Main inspected at start 679cb5904f779a1b2067f10809fcca83e31dbe91 and mid 95a8fdb85f6670cac9e52e16383711ac94924e93; planning branch is stacked on unmerged Draft #1846 → #1837 → #1830, **not** merged main. Latest independently available QA v1366 (2026-10-29 14:12 KST evidence) remains HOLD; Test and Production /api/version at 15:12 KST both reported c2129625aa6629c616fb31ce790950618b8d92b2, different from GitHub main. No runtime/DB/WLD/Test/Production change by this planning cycle. [Prior engineering issue #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844); [P2P side-effect issue #1025](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1025).

@@ -1,3 +1,12 @@
+## v1464 / F675-172 — 회원 전용 대시보드 바로가기 (기능 추가 / 초안 / 보류)
+
+- 이전 기능 보완 v1462 → 현재 기능 추가 v1464 → 다음 기능 보완 v1466(잠정). main 9ebc5613845ba2e8179a0051e86db996593c8a19 시작·중간 확인; QA v1367 FAILED/P0; Test·Production 앱 c2129625aa6629c616fb31ce790950618b8d92b2는 main과 다름. Draft #1856/#1846/#1837/#1830 선행 의존. [백로그 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+- /dashboard의 '다음 활동'은 고정 4개 링크이며 확인한 대시보드·프로필·DB에 회원별 편집 기능은 없다. 기존 상점 관심 목록 F675-160이나 공지 고정과 별개. 회원은 최대 6개 allowlist 내부 route key를 선택·순서 변경·저장·초기화하며 Android 동기화. 임의 URL·관리자 경로·송금·구매·보상·알림·WLD 변동 없음.
+- 설계: 버전 있는 경로 레지스트리·권한 재검증, 회원 PK·CAS·본문 해시 불변 영수증, SECURITY DEFINER·앱 직접 DML 금지, 본인 GET/PUT/영수증 조회, CSRF, 409/412/422/429/503, 320px/WCAG 2.2 AA, noindex/no-store, 20명 이상 비식별 관리자 집계, 기본 OFF·비파괴 롤백. 상세 영문·국문 명세는 PROJECT_PLAN에 통합.
+- P0 REPO1464-01 FIN1464-02 SEC1464-03 REL1464-04, P1 SHORTCUT1464-05, SHORTCUT1464-06, SHORTCUT1464-07, SHORTCUT1464-08, SHORTCUT1464-09, SHORTCUT1464-10. 합성 10,001건·동시 100·권한 위조 100·응답 유실 50·경로 경합 30 수용시험 **미실행**. 과거 체크섬 불일치 5건·국고 미연계 552행·MINT 조정 19건/18,000 WLD·브랜치 보존 게이트 유지.
+- 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000건, BLOCKED/IN PROGRESS. 기획만 변경하고 runtime·DB·Test·Production은 그대로 유지. 신규 분산기획 파일 없음.
+
+
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
 
 ## v1462 / F675-171 — 저장 수취인 무결성 보완 (기능 보완 / 초안 / 운영 보류)

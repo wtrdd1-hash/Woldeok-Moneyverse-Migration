@@ -1,5 +1,40 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1464 — F675-172 회원 전용 대시보드 바로가기 (기능 추가 / 초안 / 배포 보류)
+
+**기준 및 주기:** 최신 main 9ebc5613845ba2e8179a0051e86db996593c8a19 시작·중간 재확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 원본·국문 PROJECT_PLAN.ko.md 대조. 이전 기능 보완 v1462 → 현재 기능 추가 v1464 → 다음 기능 보완 v1466(잠정). 기획 Draft #1856/#1846/#1837/#1830 선행 의존성이 있어 독립 병합하지 않는다. QA v1367 FAILED/P0. Test·Production /api/version의 실행 앱 SHA는 c2129625aa6629c616fb31ce790950618b8d92b2이며 main과 다르다. [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865).
+
+### 실제 소스 공백과 목적
+frontend/src/app/dashboard/page.tsx의 '다음 활동'은 /quests, /work, /wallet, /stocks 네 링크가 고정되어 있다. 확인한 대시보드·backend/src/profile·DB 마이그레이션에는 회원별 바로가기 편집 기능이 없다. mobile-home-view.tsx의 isPinned는 공지 속성이지 개인 바로가기가 아니다. 기존 상점 관심 목록 F675-160을 중복 기획하지 않는다. 로그인하고 동의한 회원이 최대 **6개** 내부 화면을 직접 선택·순서 변경하고 Android에서도 동기화하도록 한다. 이 기능은 이동만 지원하며 WLD, 원장, 주문, 퀘스트 보상, 알림을 변경하지 않는다.
+
+### 사용자 흐름, 권한, 상태, CTA
+비공개 /dashboard의 '다음 활동' → '바로가기 편집' → 허용 항목 선택 → 위/아래 순서 변경·제거 → '저장'. '기본값 복원'은 확인 대화상자 후 수행. 초기 제안은 quests/work/wallet/stocks이며 저장 전에는 DEFAULT, 저장 후 SAVED를 반환한다. LOADING, EMPTY, DEFAULT, SAVED, SAVING, SAVED_CONFIRMED, STALE_VERSION, UNAVAILABLE, AUTH_REQUIRED, ERROR를 구분한다. 조회 실패 시 기본 제안을 보여도 저장 성공으로 표시하지 않는다. 응답이 유실되면 영수증 조회로 결과를 확인한다. 화면을 열었다는 이유로 저장·거래하지 않는다.
+
+### 경로 레지스트리 및 악용 방지
+서버 버전 관리 allowlist의 route key만 저장한다. 후보는 wallet, quests, work, stocks, shop_catalog, inventory, marketplace, support이며 구현 전 각 페이지·기능 스위치·회원 권한을 재검증한다. 실제 URL 원문, 쿼리, 해시, 다른 회원 ID, 외부 링크, javascript 스킴, 관리자 경로, 오픈 리다이렉트, 민감한 객체 딥링크는 허용하지 않는다. 비활성 경로는 UNAVAILABLE과 '제거' CTA를 표시하고 다른 경로로 임의 이동하지 않는다. 클릭할 때 실제 목적지의 서버 권한 검사는 항상 유지한다.
+
+### 데이터베이스와 제약
+추가형 member_shortcut_sets(user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, version BIGINT>0, route_keys TEXT[] NOT NULL 길이<=6, updated_at timestamptz) 및 불변 member_shortcut_mutation_receipts(actor_id, request_uuid, request_digest, prior_version, new_version, route_keys, committed_at), UNIQUE(actor_id,request_uuid)를 제안한다. route key 중복 금지·allowlist·권한 검증은 클라이언트가 아니라 DB 서버 함수에서 강제한다. 기본 PK로 소유자 조회하며 필요 없는 인덱스를 추가하지 않는다. 레지스트리 버전과 삭제된 경로의 처리 규칙을 기록한다. 영수증 보존 30일은 개인정보 심사 전 제안값이다.
+
+### 트랜잭션과 보안
+moneyverse_migrator 소유 SECURITY DEFINER 함수, 고정 search_path, 완전한 스키마 지정, moneyverse_app의 필요한 EXECUTE만 허용하며 PUBLIC과 앱 직접 테이블 DML은 거부한다. actor는 검증된 서버 세션에서만 가져오고 요청 본문에 전달된 user ID는 신뢰하지 않는다. SERIALIZABLE 또는 행 잠금과 CAS 단일 트랜잭션에서 expectedVersion·경로 레지스트리를 검증하고 순서 전체 교체 및 불변 영수증을 원자적으로 기록한다. 동일 (회원, 요청 UUID, 정규화 본문 해시)는 원래 영수증 재전달, 같은 UUID·다른 본문은 409, 구버전은 412. 동시 변경을 조용히 덮어쓰지 않는다. DB 미연결 시 503으로 실패 차단한다.
+
+### API와 Android
+GET /api/v1/me/shortcuts → {routeKeys,version,source:DEFAULT|SAVED,registryVersion,unavailableKeys}; PUT /api/v1/me/shortcuts {requestId:UUID,expectedVersion:int,routeKeys:string[]} → {receiptId,version,routeKeys,replayed}; GET /api/v1/me/shortcuts/receipts/:requestId는 소유자만 조회한다. 401 비인증, 403 권한·동의, 409 요청 해시 충돌, 412 버전 충돌, 422 잘못된·중복·6개 초과·금지 경로, 429 남용, 503 장애를 구분한다. 웹은 세션·CSRF, Android는 기존 app-api/v1 인증 게이트웨이 계약을 사용한다. 헤더에 Android라고 적혀 있다는 이유만으로 신뢰하지 않는다. 개인 응답은 private,no-store 및 noindex를 적용한다.
+
+### 관리자, 개인정보, SEO, 접근성, KPI
+회원별 읽기·수정은 본인만 허용한다. 시간당 20회 변경·본문 2KiB 이하(제안), 감사에는 행위·결과·키 개수·불투명 영수증만 기록한다. 관리자는 회원 20명 이상 고정 기간의 비식별 집계만 보고 소수 집계·차분 추론을 억제하며 회원 목록을 대신 수정하지 않는다. 계정 삭제 시 현재 설정을 삭제하고 영수증 삭제 정책을 적용한다. 개인 페이지·API는 noindex, 사이트맵 제외, 공개 JSON-LD 없음. 라벨은 신뢰된 다국어 레지스트리에서 가져온다. 드래그에 의존하지 않는 키보드 위/아래 이동, 포커스 보존, 스크린리더 상태 안내, 44px 이상 터치 영역, 320px 모바일, WCAG 2.2 AA, Android TalkBack, 동작 감소 설정을 검증한다. 선택률·저장 성공률·이동률·7일차 사용·409/412/429/503·p95·비활성 경로·지원 부담은 **실측 전 가설**이며 SEO·WLD·유지율 개선을 실적으로 주장하지 않는다.
+
+### P0/P1 개발 백로그
+**P0 4건:** REPO1464-01 누락 브랜치·main 비조상 SHA 344개 보존; FIN1464-02 19건 MINT 조정/18,000 WLD 및 국고 미연계 552행 출처 검증(산술 불일치 0과 별개); SEC1464-03 과거 마이그레이션 체크섬 불일치 5건 및 소유자가 승인한 앱 권한 재실측; REL1464-04 독립 외부 복원·공식 정확 SHA Test·운영승격 근거. 승인된 금융 DML을 무조건 미승인 취약점으로 단정하지 않는다.
+**P1 6건:** SHORTCUT1464-05 경로 레지스트리·DB 제약, SHORTCUT1464-06 원자적 CAS·멱등 영수증, SHORTCUT1464-07 NestJS/Next.js/Android API, SHORTCUT1464-08 회원 UI·접근성, SHORTCUT1464-09 관리자 비식별 집계·개인정보·SEO·KPI, SHORTCUT1464-10 실제 PostgreSQL 회귀·롤백.
+
+### 시험, 무중단 배포, 롤백 및 외부 근거
+합성 10,001건, 동시 CAS 100건, 타인 권한 위조 100건, 응답 유실 50건, 경로 철회·기능 OFF 경합 30건과 웹 320px·Android 접근성 검증을 수용시험으로 정의했으나 **실행하지 않았다**. 기본 스위치 OFF, 추가형 마이그레이션·독립 복원 예행연습 → 공식 정확 SHA Test의 실제 DB/API/인증/Android 증거 → 승인된 단계적 Production 승격·신원·스모크 → 기능 OFF 비파괴 롤백. 본 회차 runtime·DB·WLD·Test·Production 변경 없음.
+외부 독립 레퍼런스 신규 중복 제거·실제 검증·승인 **0건**, 누적 **UNKNOWN/10,000건**, **BLOCKED / IN PROGRESS**. 소스 조사와 설계 문서는 독립 외부 근거로 계산하지 않는다. 새 분산 기획서를 만들지 않고 통합문서에 반영한다.
+
+
+
 ## v1462 / F675-171 — 저장 수취인의 신원·송금 가능 상태·재시도 무결성 (기능 보완 / 초안 / 운영 보류)
 
 **주기 및 기준:** 이전 Feature Addition v1460 → 현재 Feature Improvement v1462 → 다음 Feature Addition v1464(잠정). 작업 시작 main 679cb5904f779a1b2067f10809fcca83e31dbe91, 중간 main 95a8fdb85f6670cac9e52e16383711ac94924e93. 기획 브랜치는 미병합 Draft #1846 → #1837 → #1830에 의존하며 main 반영이 아니다. 최신 독립 QA v1366(2026-10-29 14:12 KST 근거) HOLD. 15:12 KST Test·Production /api/version은 모두 c2129625aa6629c616fb31ce790950618b8d92b2로 GitHub main과 다르다. 기획 예약은 런타임·DB·WLD·Test·운영을 변경하지 않는다. [기존 개발 이슈 #1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844), [P2P 부수효과 이슈 #1025](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1025).

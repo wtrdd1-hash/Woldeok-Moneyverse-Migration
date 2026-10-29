@@ -1,0 +1,9 @@
+# Moneyverse planning v1464 — F675-172 owner-private dashboard shortcuts
+
+**Status:** DRAFT / RELEASE HOLD, Feature Addition; previous Improvement v1462, next Improvement v1466 (provisional).
+**Source:** main 9ebc5613845ba2e8179a0051e86db996593c8a19 start/mid; Test+Production app c2129625aa6629c616fb31ce790950618b8d92b2; QA v1367 FAILED/P0. Planning branch stacked on Draft #1856; earlier dependencies #1846/#1837/#1830.
+**Discovery:** Dashboard Next actions are fixed quests/work/wallet/stocks links; no owner-managed shortcuts in inspected frontend/backend/migrations. Existing F675-160 shop wishlist was excluded after GitHub issue collision check.
+**Design:** Six member-only allowlisted route keys, opt-in reorder/reset, CAS version, immutable digest-bound receipts, SECURITY DEFINER, owner-only API, Android parity, noindex/no-store, accessible 320px and keyboard controls, default-OFF, no WLD side effects. Full canonical specification is PROJECT_PLAN.md and Korean equivalent.
+**Backlog:** [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865): P0 REPO1464-01 FIN1464-02 SEC1464-03 REL1464-04; P1 SHORTCUT1464-05, SHORTCUT1464-06, SHORTCUT1464-07, SHORTCUT1464-08, SHORTCUT1464-09, SHORTCUT1464-10. 10,001 synthetic, 100 concurrent, 100 negative authorization, 50 lost-response, 30 route-race acceptance targets NOT RUN.
+**Gates:** Five historical checksum mismatches, Treasury 552 unlinked, MINT 19 adjustments/18,000 WLD source proof, branch preservation, independent off-host restore and official exact-SHA Test remain unverified for this feature. Independent external references newly approved 0, cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS.
+**Mutation boundary:** documentation only; no runtime, DB, Test, Production, WLD, ledger, feature switch or merge.
