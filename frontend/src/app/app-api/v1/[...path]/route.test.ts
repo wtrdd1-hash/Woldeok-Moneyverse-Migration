@@ -40,6 +40,18 @@ describe('app API route compatibility', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('x-internal-token')).toHaveLength(32);
   });
 
+  it('forwards verified help category locale and counts without caching Android reads', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ locale: 'en', categories: ['account'], counts: { account: '3' } }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/help/categories?locale=en'), context('help', 'categories'));
+    expect(response.status).toBe(200);
+    expect(String(fetchSpy.mock.calls[0]?.[0])).toContain('/help/categories?locale=en');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(await response.json()).toMatchObject({ locale: 'en', counts: { account: '3' } });
+  });
   it('serves machine-readable contract metadata without touching the private API', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
