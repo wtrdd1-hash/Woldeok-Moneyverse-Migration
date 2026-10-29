@@ -11,16 +11,18 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryBondService } from './treasury-bond.service';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')
@@ -107,15 +109,11 @@ export class PublicTreasuryBondController {
   }
 
   @Post('subscribe')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '국채 직접 청약 매수 (덕지갑 차감 -> 국채 발행)' })
-  async subscribeBond(
-    @Req() req: RequestWithSession,
-    @Body('bondId') bondId: string,
-    @Body('units') units: number,
-  ) {
-    const userId = requireUserId(req);
-    return this.service.subscribeBond(userId, bondId, Number(units));
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiResponse({ status: 503, description: 'Bond subscription is held until balanced ledger settlement is certified' })
+  @ApiOperation({ summary: 'Bond subscription (ledger safety hold)' })
+  async subscribeBond() {
+    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
   }
 
   @Get('my-repo-loans')

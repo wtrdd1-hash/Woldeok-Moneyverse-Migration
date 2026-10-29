@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   TreasuryBondRepository,
   type BondCouponLogRow,
@@ -7,6 +7,7 @@ import {
   type TreasuryBondsOverview,
 } from './treasury-bond.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @Injectable()
 export class TreasuryBondService {
@@ -33,36 +34,9 @@ export class TreasuryBondService {
     return this.repository.listRecentCouponLogs(limit);
   }
 
-  async subscribeBond(userId: string, bondId: string, units: number) {
-    this.logger.log(`User ${userId} subscribing to bond ${bondId} for ${units} units...`);
-    const res = await this.repository.subscribeBond(userId, bondId, units);
-    const bond = await this.repository.getBondById(bondId);
-
-    // 관리자 디스코드 알림 발송
-    if (this.discordAlertService && bond) {
-      try {
-        const title = '📜 [국채 청약] 신규 기획재정국채(KTB) 자금 조달 완료';
-        const description =
-          `투자자로부터 국가 국채 청약이 체결되어 중앙 국고(VAULT_MAIN)로 자금이 전액 납입되었습니다.\n\n` +
-          `• **국채 종목**: ${bond.name} (${bond.symbol})\n` +
-          `• **청약 좌수**: ${units}좌 (총 ${Number(res.totalPriceWld).toLocaleString('ko-KR')} WLD)\n` +
-          `• **확정 표면금리**: 연 ${(bond.annual_coupon_rate_bps / 100).toFixed(2)}% (시간당 ${(bond.hourly_coupon_rate_bps / 100).toFixed(2)}%)\n` +
-          `• **만기 일시**: ${res.maturityAt}`;
-
-        await this.discordAlertService.sendAdminDirectMessage(
-          {
-            title,
-            description,
-            color: 0x3b82f6,
-          },
-          '886478189520637992',
-        );
-      } catch (err) {
-        this.logger.warn(`Failed to send Discord alert for bond subscription: ${String(err)}`);
-      }
-    }
-
-    return res;
+  async subscribeBond(_userId: string, _bondId: string, _units: number) {
+    // Never signal success or notify Discord for an unposted financial debit.
+    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
   }
 
   async processHourlyCouponsAndMaturities() {

@@ -71,16 +71,13 @@ describe('TreasuryBondService Unit Tests', () => {
     expect(overview.totalFundedWld).toBe('50000000');
   });
 
-  it('국채 청약 실행 시 국고 자금 조달 및 관리자 디스코드 알림을 전송한다', async () => {
-    const res = await service.subscribeBond('test-user-id', 'bond-1', 5);
-    expect(res.holdingId).toBe('holding-1');
-    expect(res.totalPriceWld).toBe('50000');
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: expect.stringContaining('국채 청약'),
-      }),
-      '886478189520637992',
-    );
+  it('blocks subscription before repository access or success notification', async () => {
+    const { ServiceUnavailableException } = await import('@nestjs/common');
+    vi.mocked(mockRepo.subscribeBond).mockClear();
+    vi.mocked(mockDiscord.sendAdminDirectMessage).mockClear();
+    await expect(service.subscribeBond('test-user-id', 'bond-1', 5)).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(mockRepo.subscribeBond).not.toHaveBeenCalled();
+    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
   });
 
   it('시간당 쿠폰 이자 정산 시 이자 지급 집행 및 관리자 알림을 전송한다', async () => {
