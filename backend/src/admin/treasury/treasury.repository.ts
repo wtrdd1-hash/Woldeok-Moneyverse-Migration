@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
+﻿import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import { decodeMoneyFlowCursor, encodeMoneyFlowCursor, moneyFlowFilterFingerprint } from './treasury-moneyflow-cursor';
@@ -368,7 +368,6 @@ function verifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliat
     discrepancy_amount_wld: '0',
     last_reconciled_at: new Date().toISOString(),
   };
-};
 }
 
 export interface TreasuryReconciliation {
