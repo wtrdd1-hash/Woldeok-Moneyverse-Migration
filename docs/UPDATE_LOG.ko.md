@@ -1,3 +1,10 @@
+## v2026.10.29.1452 — F675-169 검증 도움말 유용성 피드백 (초안 / 운영 보류)
+- [초안 PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) 미병합, 초기 CI 대기.
+- [개발 이슈 #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814), [영문 통합 정본](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어 대조](planning/INTEGRATED_PLANNING_MASTER.ko.md). 이전 v1450 보완 → 현재 v1452 추가 → 다음 v1454 보완(잠정). 시작·중간 main `bd590720...`; 도움말에 피드백 CTA·영수증이 없고 공개 API가 게시 개정을 반환하지 않음. 명시적 개정별 예/아니요·사유·본인 불변 영수증·CAS·관리자 20명 이상 집계, 웹/Android·WCAG·개인정보·SEO·WLD 0. P0 4/P1 6, 실제 PG 수용시험 미실행. 과거 QA v1361 HOLD이며 최신 main 재검증 필요, 외부 승인 신규 0·누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·Test·운영 미변경. [내부](updates/v2026.10.29.1452-planning-help-feedback-internal.ko.md) / [GitHub](updates/v2026.10.29.1452-planning-help-feedback-github.ko.md).
+
+## v2026.10.29.1204 — DB 실제 구축 절차서 (격리 복원, 운영 미반영)
+- [한국어 명령어 기반 구축 가이드](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md) / [영어 정본](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md). 두 번째 디스크·백업·복원·권한·키·마이그레이션·검증 전 과정 기록. 기존 금융 쓰기 권한 유지·원본 DB 미변경. [내부 기록](updates/v2026.10.29.1204-database-construction-internal.ko.md) / [깃허브 내역](updates/v2026.10.29.1204-database-construction-github.ko.md).
+
 ## 2026-10-29 v1450 — F675-168 블로그 저장 게시 식별·전체 철회 상태 강화
 
 - **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
