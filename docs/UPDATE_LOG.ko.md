@@ -1,12 +1,9 @@
-## 2026-10-28 13:09 KST — 기획 v1410 / F675-158 (기능 보완; 초안/운영 보류)
-- 이전 기능 추가 v1408 → 현재 기능 보완 v1410 → 다음 기능 추가 v1412(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 확인, 실제 Next 지갑 화면·Nest 컨트롤러/서비스/저장소·Migration266·QA v1340·GitHub #1681/#1673 대조. 미병합 #1681 기반.
-- 기존 hasMore/LIMIT+1 오기 정정, 불투명/AEAD 커서 기밀성, 지연 커밋의 페이지 한계, 순변동 0 은행 이동·방향 필터 선적용, SQL 인덱스/권한, Android·접근성·SEO·KPI·배포 게이트 보완. 백로그 ENV1410-01 SEC1410-02 REL1410-03 WAL1410-04 WAL1410-05 WAL1410-06 WAL1410-07 WAL1410-08 WAL1410-09 WAL1410-10.
-- QA v1340 FAILED/HOLD, 루트/데이터 사용률 55%/88%, 운영 SHA unknown, 공식 Test 정확 SHA·독립 복원 미검증. 외부 발행처 2개 검토·신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 시험 명세만 작성·미실행. 문서만 변경, 런타임·DB·WLD·Test·운영 변경 없음.
-## 2026-10-28 12:04 KST — 기획 v1408 / F675-158 (기능 추가; 초안/보류)
-- 이전 기능 보완 v1406 → 현재 기능 추가 v1408 → 다음 기능 보완 v1410(잠정). main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 동일, AGENTS.md·README.md·국영문 계획·지갑 UI/컨트롤러/저장소/CSV/Android 프록시·QA v1339 확인. GitHub 이슈 #1680, 미병합 문의 Draft #1675 미변경.
-- 본인 지갑 거래내역 50건 이후 페이지 조회 기획: 세션 결속 서명 Keyset, 고정 기간, 정직한 asOf/hasMore, 정확한 WLD 정수 문자열, 더 보기/재시도, Android·no-store·noindex·접근성·CSV 일부 행 고지. 원장 변경 없음. 백로그 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. 합성 10,001건/동시 100건/위조 100건은 시험 명세만 작성, 미실행.
-- QA v1339 운영 SHA unknown·Test main 불일치·공식 정확 SHA Test/독립 복원 미검증, 데이터 디스크 87%. 운영 보류. 외부 승인 신규 0·중복 제거 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 쓰기 없음. 스킬 목록 비어 miniPC 설치 Superpowers 직접 확인.
+## 2026-10-28 14:10 KST — 자동 기획 v1412 / F675-159 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 및 AGENTS/README/영문 정본·한국어 기획 확인, 이슈 #1693.
+- 회원 알림 화면의 허구 WLD 수치 포함 6건·로컬 읽음 확인, 기존 API/BFF, 개발 DB 0건·앱 직접 SELECT/UPDATE·추적 DDL 출처 미확인. 실제 본인 알림·분류·페이지·원자적 영수증·보안·Android·모바일·SEO·KPI·롤백을 영문·국문 통합 기획에 명세.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 후보 공식 Test 인증 아님, 운영 HOLD. 10,001/100/100 테스트 명세만·미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·WLD·원장·Test·운영 미변경.
 
+**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
 
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 

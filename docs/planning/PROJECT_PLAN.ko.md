@@ -1,18 +1,11 @@
-## v1410 — F675-158 지갑 페이지 조회 정확성·커서 기밀성 보완 (기능 보완 / 초안 / 운영 보류)
-- 이전 기능 추가 v1408 → 현재 기능 보완 v1410 → 다음 기능 추가 v1412(잠정). main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 동일, QA v1340 FAILED/HOLD, 미병합 Draft #1681 기반·이슈 #1680. 런타임 변경 없음.
-- **코드 사실 정정:** 현재 /wallet/activity는 최대 50건 안내만 있고 hasMore 필드·경고는 없다. 백엔드는 정확히 요청 LIMIT $2를 사용하며 LIMIT+1은 없다. 잔액·거래내역도 별도 조회다. 신규 API에서만 limit+1을 구현하고 HTTP 간 스냅샷 완전성 주장 금지.
-- HMAC 서명 평문은 기밀성을 보장하지 않으므로 서버 저장 192비트 이상 불투명 핸들 또는 AEAD 암호문을 사용하고 회원·세션·기간·방향·만료를 결속, 프록시 로그를 비식별화한다. 거래별 현금/은행 전표를 먼저 합산한 후 방향 필터를 적용하고 페이지 제한한다. net=0 은행 이동은 neutral에 포함. 개발 A 미병합 #1673과 계약만 조율. Migration266 인덱스는 격리 EXPLAIN으로 검증.
-- P0 ENV1410-01 SEC1410-02 REL1410-03 WAL1410-04; P1 WAL1410-05 WAL1410-06 WAL1410-07 WAL1410-08 WAL1410-09 WAL1410-10. 상세 UI/API/SQL/DB/Android/SEO/접근성/KPI/수용조건은 통합 마스터 국영문. QA v1340 앱 DML 235/241, PUBLIC 은행 3, 체크섬 불일치 5, 데이터 볼륨 88%, 공식 정확 SHA Test/독립 복원 미검증. 합성 10,001/동시 100/위조 100은 시험 명세만 작성, 미실행. 외부 발행처 2개 검토·신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 기능 OFF·운영 보류.
-- 백로그 식별자: ENV1410-01 SEC1410-02 REL1410-03 WAL1410-04 WAL1410-05 WAL1410-06 WAL1410-07 WAL1410-08 WAL1410-09 WAL1410-10.
+## v1412 — 본인 검증형 실제 알림함 F675-159 (Feature Addition / DRAFT / RELEASE HOLD)
+- Previous Improvement v1410 → Current Addition v1412 → Next Improvement v1414(잠정). 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 확인, 이슈 #1693, QA v1341 후보 미완료. 최신 main 기반 독립 문서 브랜치.
+- 현재 /account/notifications는 +1,840 WLD 이자·20 WLD 소각 등을 포함한 하드코딩 6건과 로컬 읽음 상태를 표시한다. NestJS 알림 API·Next BFF·개발 DB 객체는 있으나 개발 DB 실수량 0건, BFF 분류/offset 미전달, 동일 시각 정렬 미보장, 앱 계정 직접 SELECT/UPDATE, 추적 마이그레이션 DDL 출처 미확인.
+- 실제 본인 알림 6분류·서버 미읽음·읽음 영수증·이전 알림·재시도·KO/EN·모바일/a11y·noindex/no-store·안전 링크·Android 동등성·SECDEF/최소권한을 명세했다. 가짜 금융 수치·WLD 보상은 금지. 영문 정본·한국어 통합 기획 참조.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. 격리 PG 10,001/100/100은 명세만, 미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED, 공식 Test 정확 SHA·독립 복원 미검증, 운영 HOLD.
+- 백로그 ID: ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
 
-## v1408 — F675-158 본인 검증 지갑 거래내역 페이지 조회 (기능 추가 / 기획 초안 / 운영 보류)
-- 이전 기능 보완 v1406 → 현재 기능 추가 v1408 → 다음 기능 보완 v1410(잠정). 2026-10-28 12:01~12:04 KST main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 동일. AGENTS.md, README.md, 영어 정본·국문 대조 확인. 이슈 #1680. 미병합 문의 기획 Draft #1675 및 개발 A/B/C/QA/Gemini 작업과 독립.
-- 실제 /wallet/activity는 전체/7일/30일 기간을 지원하나 recent=50 한도, 50건 한도 문구만 있고 hasMore 경고나 이전 거래 더 보기가 없다. wallet.controller.ts는 recent<=50, repository는 본인 현금/은행 전표 집계와 created_at/id 정렬 후 LIMIT $2(추가 행 확인 없음). 기존 CSV는 불러온 행만 다운로드한다. 페이지 API는 아직 배포되지 않았다.
-- 본인·세션 결속 GET /api/v1/wallet/activity?period=all|7d|30d&limit=1..50&cursor=opaque 추가 제안. 서명 Keyset, 절대 기간·상한 튜플, 정직한 asOf 관측(HTTP 전체 스냅샷 아님), hasMore/nextCursor, 정확한 WLD 정수 문자열, private no-store/noindex, Android 동등성. /wallet/activity 더 보기/재시도/다시 시작·접근성. 원장 쓰기·자동 전체 다운로드 금지.
-- P0 ENV1408-01 (배포 SHA/데이터 87%/독립 복원), SEC1408-02 (앱 DML 235/241·PUBLIC 은행 3·체크섬 5), REL1408-03 (#1663 PR 보존·정확 SHA Test/GitOps), WAL1408-04 (본인·커서·정밀도·완전성). P1 WAL1408-05 (DB 읽기·ACL·인덱스), WAL1408-06 (커서·일관성), WAL1408-07 (Nest/Next/Android), WAL1408-08 (회원 UX/접근성), WAL1408-09 (관리자·개인정보·SEO·KPI), WAL1408-10 (격리 PG·롤백). 전체 계약·수용 조건은 국영문 INTEGRATED_PLANNING_MASTER에 수록.
-- QA v1339: main CI 분류/정책 PASS이나 런타임 SKIPPED, 운영 버전 unknown, Test 6f697e74...로 main과 다름, 공식 Test 정확 SHA·독립 복원·인증 금융 E2E 미검증. 운영승격 BLOCKED. 합성 거래 10,001건·동시 100건·위조 100건은 **시험 명세만 작성, 미실행**. 기능 기본 OFF·문서만 변경; 런타임·DB·WLD·Test·운영 변경 없음. 외부 독립 근거 신규 승인 0, 누적 중복 제거·검증 UNKNOWN / 10,000건 BLOCKED / IN PROGRESS.
-- 백로그 식별자: ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10.
-
+**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
 
 # 월덕 머니버스 — Living Project Plan
 

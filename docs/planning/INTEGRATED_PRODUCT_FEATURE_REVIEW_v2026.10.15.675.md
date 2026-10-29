@@ -1,12 +1,9 @@
-## v1410 / F675-158 — Wallet pagination hardening (DRAFT/HOLD)
-- Verified legacy /wallet/activity has 50-cap text only, no hasMore indicator; repository uses LIMIT $2, not LIMIT+1. Current balance/history are separately queried. Correct previous planning assumptions; require explicit lookahead and truthful best-effort page semantics.
-- Signed HMAC JSON is not confidential. Require opaque server-side handle or AEAD with actor/session/period/direction/expiry binding and sanitized logs. Filter in/out/neutral after owner-pocket aggregation but before limit+1, preserving zero-net cash/bank transfers. Independent A Draft #1673 remains unmodified. Verify migration266 index plans.
-- P0 ENV1410-01 SEC1410-02 REL1410-03 WAL1410-04; P1 WAL1410-05 WAL1410-06 WAL1410-07 WAL1410-08 WAL1410-09 WAL1410-10. QA v1340 FAILED/Production HOLD; tests specified, not run; external new approved 0, cumulative UNKNOWN/10,000.
-## v1408 / F675-158 — Wallet activity pagination: addition candidate (DRAFT/HOLD)
-- Source-backed opportunity: Next /wallet/activity exposes only recent 50 with all/7d/30d and a 50-row cap notice (no hasMore indicator); NestJS controller recent 1..50; SQL owner cash/bank posting aggregation and deterministic created_at,id order. No Load older or dedicated paginated read. Existing CSV is recent rows only.
-- Proposal: separate owner-bound read-only keyset endpoint and explicit Load older/Retry/Start over; signed session+period+expiry cursor, fixed bounds and honest best-effort asOf; no finance writes or total-history guarantee. Preserve GET /wallet. Android, accessibility, noindex/no-store, admin aggregates, exact BigInt strings and negative ACL tests.
-- P0 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04; P1 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. Detailed design in integrated master; tests specified not run; default OFF; QA v1339/Production BLOCKED; approved external new 0, cumulative UNKNOWN/10,000. Issue #1680. Independent main branch; unmerged #1675 remains untouched.
+## v1412 / F675-159 — Verified notification inbox addition (DRAFT/HOLD)
+- Actual /account/notifications tabs use six hard-coded local-state examples (including fake WLD interest/sink). Existing NestJS/Next notification endpoints and dev DB table exist, but no authoritative inbox is wired to that UI; dev rows 0. Owner-safe category/cursor/real unread/read receipt is proposed, not implemented.
+- Preserve current engagement preference and disabled claim-all. Require DB migration provenance, no direct app-role UPDATE/SELECT, verified actor boundary, Android parity, private SEO/a11y/analytics and exact-SHA release gates.
+- P0 ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04; P1 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10. QA v1341 HOLD; tests specified not run; external approved 0, cumulative UNKNOWN/10,000 BLOCKED.
 
+**Latest independent QA cross-check (14:11 KST).** QA Draft PR #1692 (v1413) reports a separate P0 blog publishing bypass and 500 on verified publisher; its 11-post observations are QA-reported, not independently reproduced in this planning run. Keep this cross-domain Production release blocker with QA ownership; do not expand notification feature scope or claim that #1692 passed official Test. QA v1341 remains the latest inspected hourly evidence set.
 
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 

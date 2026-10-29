@@ -1,65 +1,38 @@
-## v1410 / F675-158 — 지갑 거래내역 페이지 조회의 원천 정확성·커서 기밀성·필터 무결성 보완 (기능 보완 / 기획 초안 / 운영 보류) — 이슈 #1680
+## v1412 / F675-159 — 가상 금융 알림을 제거한 본인 검증형 알림함 (Feature Addition / DRAFT / RELEASE HOLD) — 이슈 #1693
 
-**회차 및 진실 기준.** 이전 기능 추가 v1408 → 현재 기능 보완 v1410 → 다음 기능 추가 v1412(잠정). 2026-10-28 13:06~13:09 KST 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd를 재조회하고 AGENTS.md, README.md, 영어 정본 PROJECT_PLAN.md 및 한국어 문서를 대조했다. 미병합 Draft #1681을 기반으로 하는 기획 문서이며 main에 독립 병합하면 안 된다. QA v1340 최종 FAILED / Production BLOCKED. 개발 A의 지갑 방향 필터 #1673, 개발 B/C/QA/Gemini 작업과 분리한다. 런타임·DB·원장·Test·운영 변경 없음.
+**최신 독립 QA 교차 확인(14:11 KST).** QA Draft PR #1692(v1413)은 별도 P0 블로그 발행 우회 및 검증형 발행 API 500을 보고했다. 공개 게시물 11건은 QA 보고 수치이며 이번 기획에서 독립 재현하지 않았다. 알림 기능 범위에 섞지 않고 QA 담당의 운영승격 차단 사유로 유지한다. 정기 QA v1341은 이번 회차에서 실제 확인한 최신 정기 증거 묶음이다.
 
-**v1408의 실제 코드 근거 정정.** 현재 /wallet/activity는 GET /api/v1/wallet?recent=50 및 전체/7일/30일 필터와 '최대 50건' 문구만 표시한다. 더 보기 CTA도, hasMore 필드나 경고도 없다. backend/src/wallet/wallet.service.ts는 요청 한도를 그대로 전달하고 wallet.repository.ts는 LIMIT $2를 사용한다. **현재 구현에 LIMIT+1은 없다.** 신규 페이지 API가 별도로 limit+1을 구현해야 하며 50건이 반환됐다는 이유만으로 추가 내역을 확정할 수 없다. 기존 잔액과 거래내역은 Promise.all로 별도 조회하므로 원자적 동일 관측 시점도 보장되지 않는다. 현재 SQL은 본인 USER_CASH/USER_BANK 전표를 거래 ID로 묶고 debit/credit 부호를 합산하여 created_at DESC,id DESC로 정렬한다. 현금↔은행 이동의 순변동 0을 거래 부재로 취급하면 안 된다. Migration 266의 실제 인덱스는 idx_ledger_transactions_created_at_id(created_at DESC,id 기본 ASC), idx_ledger_postings_account_created(account_id,created_at DESC)이다. 계정+거래 ID 조인 및 혼합 방향 정렬에 충분하다는 근거는 없으므로 격리 DB EXPLAIN(ANALYZE, BUFFERS)로 측정 후 인덱스를 결정한다.
+**기준·회차.** Previous Feature Improvement v1410 → Current Feature Addition v1412 → Next Feature Improvement v1414(잠정). 2026-10-28 14:04~14:10 KST에 최신 main a28bed9aa40ff74d492824ae12892a7d52132fdd, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md와 한국어 대조본, 열린 PR 및 QA v1341을 확인했다. 최신 main에서 분리된 문서 전용 Draft이며 A/B/C/QA 코드와 충돌시키지 않는다. 운영·금융 데이터 변경 없음.
 
-**P0 커서 기밀성.** v1408의 '본인·세션 정보를 담은 불투명 HMAC 커서'는 불충분하다. HMAC 서명이나 base64url JSON은 위변조만 방지하며 **내용을 암호화하지 않는다**. 회원 UUID, 세션 관련 값, 거래 ID, 기간 등이 노출될 수 있다. 서버 저장소의 192비트 이상 무작위 불투명 핸들 또는 버전·키·nonce 정책이 명확한 AEAD 인증 암호문을 사용한다. 원문 세션 토큰은 포함하지 않으며 서버에서 도출한 세션 지문, 본인, 기간, 선택 방향, 절대 UTC 컷오프, 상·하한(created_at,id), 15분 이내 만료, 스키마·기능 버전, 키 버전을 결속한다. 인증을 커서 조회보다 먼저 수행하고 길이 제한·키 회전·폐기·위조·재사용·만료를 검증한다. 오류는 400/401/403/409/410/429/503으로 구분한다. 커서 원문은 프록시·로그·분석에 기록하지 않으며 Referrer-Policy: no-referrer, no-store, noindex, 사전 가져오기 금지를 적용한다. 로그 비식별화 검증 전에는 URL 쿼리 커서를 출시하지 않는다. 로그아웃·계정 전환 시 기존 응답과 비공개 행을 즉시 폐기한다.
+**목적·대상·진입점·확인된 문제.** 로그인·동의한 회원의 /account/notifications는 서버에 실제 저장된 알림과 읽음 상태만 표시해야 한다. 현재 frontend/src/app/account/notifications/notification-tabs-bar.tsx는 INITIAL_NOTIFICATIONS 6건을 하드코딩하며 +1,840 WLD 이자 및 20 WLD 소각 정산 등 실제 원장 증빙이 없는 예시 문구를 포함한다. 클릭·모두 읽음은 React 로컬 상태만 바꿔 DB 반영 없이 성공처럼 보일 수 있다. 기존 목표·NPC 알림 수신 설정 폼은 실서버 기능이므로 보존한다. 이 사실은 코드에서 확인된 사용자 신뢰 문제이며 운영 사고 발생의 증거는 아니다. 개발 DB의 in_app_notifications는 현재 0건이므로 정직한 빈 상태가 필요하다.
 
-**정확한 페이지 의미.** 제안 API는 본인 전용 GET /api/v1/wallet/activity?period=all|7d|30d&limit=1..50&cursor=opaque이며 아직 구현되지 않았다. 첫 요청에서 절대 UTC 기간과 상한 튜플을 고정한다. PostgreSQL 각 HTTP 조회는 별도 가시성 스냅샷이며 ledger_transactions.created_at DEFAULT now()는 트랜잭션 시작 시각이지 커밋 순서가 아니다. 늦게 커밋된 거래가 이미 지나간 커서 뒤에 삽입되면 누락될 수 있다. 따라서 asOf는 최초 조회 관측 시각이고 completeness는 'PAGED_BEST_EFFORT'이며 전체 원장·동일 시점 스냅샷을 보증하지 않는다. hasMore는 해당 쿼리에서 한 건 더 관측됐다는 뜻이고 false도 '현재 조회 범위에서 이전 항목이 더 반환되지 않음'만 의미한다. 새 커밋 확인용 다시 시작/새로고침을 제공한다. HTTP 간 장기 PostgreSQL 트랜잭션을 유지하지 않으며 완전성 보장은 별도 검증된 불변 커밋 순서 증명이 있을 때만 추가한다.
+**기존 기능 재사용·중복 방지.** NestJS에는 GET /api/v1/notifications, GET /unread-count, POST /:id/read, POST /read-all-receipt 및 409로 차단된 POST /claim-all이 이미 있다. Next.js app/api/notifications/route.ts도 인증된 GET/POST BFF와 no-store를 제공한다. 알림함·미읽음 집계·보상 수령을 중복 생성하지 않는다. 현재 BFF GET은 limit·unreadOnly만 전달하고 offset·category는 전달하지 않는다. DB 조회는 사용자 조건과 created_at DESC만 사용하여 동일 시각 순서가 결정적이지 않다. F675-152 보안 알림, F675-153 잔액 경보, F675-157 문의 답변은 독립 생산 기능으로 유지하고 실제 저장된 레코드만 표시한다. 알림을 금융 원장 정산 증거로 취급하지 않는다.
 
-**SQL·방향 필터·부호.** 본인 현금·은행 계정 전표를 먼저 거래 ID 단위로 모두 집계한 후 순변동 부호에 따라 in/out/neutral 필터를 적용하고, 그 다음 정렬과 limit+1을 수행한다. 50건을 먼저 제한하고 방향을 필터링하면 허위 빈 결과와 잘못된 hasMore가 발생한다. 현금↔은행 이동은 netAmount=0이어도 neutral에 포함하고 cashDelta·bankDelta를 모두 표시한다. 기간·상한·마지막 튜플 조건과 (created_at,id) 엄격한 순서를 동일하게 적용한다. 개발 A의 미병합 #1673은 기존 지갑 API의 방향 필터 후보이므로 계약만 조율하고 A 브랜치를 수정하지 않는다. WLD는 정규 십진수 문자열·BigInt를 유지하며 cashDelta+bankDelta=netAmount, 페이지 간 거래 ID 중복 0을 검증한다. DB 읽기는 고정 search_path·본인 조건·PUBLIC EXECUTE 철회가 있는 SECURITY DEFINER로 제한하고 임의 p_actor를 인증된 회원으로 오인하지 않는다.
+**화면·CTA·상태.** /account/notifications → 전체/사업/은행/시즌/공간/보안/시스템 탭 → 검증된 분류·제목·평문 본문·생성 시각·읽음 상태를 표시한다. CTA는 내부 링크 열기(허용된 상대 경로만), 읽음 처리, 모두 읽음, 이전 알림 더 보기, 재시도, 필터 초기화다. 기존 목표 알림 받기/중단 폼은 보존한다. 로딩·0건·오프라인·로그아웃·동의 미완료·잘못된 분류·만료 커서·429·세션 변경·DB 장애·쓰기 실패를 명시한다. 서버 영수증 확인 전 읽음 성공을 확정하지 않고 낙관적 UI 실패 시 원복한다. 미읽음 배지는 서버 집계만 사용한다. 목록 조회 자체로 읽음 처리하지 않는다. 모두 읽음은 변경 건수와 남은 미읽음을 구분하고 동시성 한계를 표시한다.
 
-**회원·Android·관리자·관측.** 진입 /wallet → /wallet/activity. CTA 이전 기록 더 보기·재시도·새로고침/처음부터·불러온 행만 CSV. 상태 LOADING/HAS_MORE/PARTIAL/END_OF_CURRENT_VIEW/ERROR/OFFLINE/EXPIRED/REAUTH/ACCOUNT_CHANGED. 오류를 빈 기록으로 바꾸거나 50건을 전체로 표현하지 않는다. 기간·방향·계정이 같을 때만 행을 유지하고 변경 시 캐시와 지연 응답을 차단한다. NestJS·Next.js 서버 전용 API·Android app-api는 인증·오류·no-store/noindex·기능 기본 OFF를 일치시킨다. 관리자에게는 지연·오류·커서 거절·중복 행 집계만 제공하고 거래 ID·라벨·세션·커서 원문을 로그/분석/SEO에 남기지 않는다. WCAG 2.2 AA, 키보드 초점, 320px·200% 확대, 44px 터치, 국영문 상태 안내. KPI는 페이지 성공률, 합성 10,001건 p95 DB 지연, 중복 0, 만료/거절 및 새로고침 회복률이며 실측 기준값은 미확인이다.
+**API·권한.** 기존 호환성을 유지하면서 GET /api/v1/notifications?category=BUSINESS|BANK|SEASON|SPACE|SECURITY|SYSTEM&unreadOnly=true|false&limit=1..50&cursor=opaque를 추가 명세한다. 기존 offset 소비자는 전환 전까지 보존한다. 응답은 items[{id,category,title,body,link,isRead,readAt,createdAt}], nextCursor,hasMore,unreadCount,observedAt이며 실제 DTO의 표기법을 통일한다. 400 잘못된 분류, 401 인증 없음, 403 동의·권한 없음, 404 타인/없는 알림, 409 세션·필터 충돌, 410 커서 만료, 429 제한, 503 의존성 장애. GET은 CSRF 불필요, POST 읽음은 기존 CSRF·세션 가드를 유지한다. Next BFF는 허용된 필터·커서만 전달하고 모든 응답에 private/no-store를 적용한다. 503을 빈 목록 성공으로 바꾸지 않는다. Android App API도 인증·DTO·오류·캐시·내부 링크를 동일하게 맞추되 기존 어댑터를 조사한 뒤 연계한다. 사용자 UUID는 서버 세션에서만 확정한다.
 
-**개발용 P0/P1 백로그 (이번 회차는 문서만 변경).**
-- **P0 ENV1410-01:** Nginx→systemd→불변 릴리스 manifest→정확 SHA 대조, 13:06 KST 데이터 볼륨 88%, 타 작업자 파일 보존형 용량 관리, 암호화 백업 독립 복원 및 롤백.
-- **P0 SEC1410-02:** QA v1340 앱 DML 235/241, PUBLIC 은행 EXECUTE 3, 마이그레이션 체크섬 불일치 5건. 넓은 SELECT 권한 없이 본인 읽기 경계와 권한 음성시험 확보.
-- **P0 REL1410-03:** #1663 미병합 고유 PR 보존, 빌드 성공만으로 자동 병합 금지, 전체 CI·공식 Test 정확 SHA·인증 금융/관리자/Android E2E·DB 권한·백업·승인 GitOps.
-- **P0 WAL1410-04:** 기존 hasMore/LIMIT+1 오기 정정, 암호화 또는 진짜 불투명 커서, 타인/이전 세션 차단, 허위 전체 조회·0 순변동 은행 이동 누락·제한 후 필터 금지.
-- **P1 WAL1410-05:** 격리 DB EXPLAIN·실제 인덱스·거래별 집계·튜플 정렬·DB 함수 ACL·체크섬 정리 후 전진 전용 마이그레이션.
-- **P1 WAL1410-06:** AEAD/불투명 핸들, 짧은 TTL·키 회전·세션/기간/방향 결속·만료·재시도·정직한 페이지 의미.
-- **P1 WAL1410-07:** NestJS·Next.js·Android 계약 동등성, 기존 GET /wallet 유지, 개발 A #1673과 분리 협의.
-- **P1 WAL1410-08:** 더 보기/재시도/새로고침, neutral 은행 이동, 허위 빈/완료 금지, CSV 일부 행 고지, 계정 전환 격리·접근성.
-- **P1 WAL1410-09:** 개인정보·프록시 로그·noindex/no-store·관리자 집계·SEO·KPI·비식별 사고 기록.
-- **P1 WAL1410-10:** 격리 PostgreSQL 합성 10,001건, 51·201·10,001번째, 동시 100/위조 100, 동일 시각·복수 계정·순변동 0·지연 커밋·방향 필터 선적용·커서 평문 노출/위조·키 회전·원장 변화 0·기능 OFF·롤백.
+**DB·제약·인덱스·트랜잭션.** 개발 DB 읽기 검사에서 public.in_app_notifications 테이블 0건, notification_unread_count(uuid)·notification_mark_read(uuid,uuid) 존재, moneyverse_app의 테이블 SELECT·UPDATE 권한이 확인되었다. 반면 최신 main의 packages/database 추적 SQL에서는 in_app_notifications DDL을 찾지 못했다. 스키마 출처와 마이그레이션·체크섬 일치 여부를 먼저 규명하며 개발 DB 전용 객체를 이식 가능한 기준으로 가정하지 않는다. 전진 전용 SECURITY DEFINER 본인 범위 조회/읽음 함수, 고정 search_path, PUBLIC EXECUTE 회수, 최소 EXECUTE 권한을 검토한다. 임의 p_actor 인자만으로 DB 본인 인증이 되지 않으므로 세션→DB 주체 결속을 위조시험으로 증명해야 한다. ID 유일성, 소유자 FK, 분류 CHECK, 중복 키의 범위 유일성(존재 시), read_at/is_read 일관성, 링크 제한, 보존 정책을 검증한다. 사용자·분류·미읽음 조건을 LIMIT+1 전에 적용하고 created_at DESC,id DESC의 결정적 Keyset 조회를 사용한다. HTTP 요청 간 영구 스냅샷을 주장하지 않는다. 10,001건 EXPLAIN (ANALYZE, BUFFERS) 확인 후에만 (user_id,category,is_read,created_at DESC,id DESC) 등 인덱스를 결정한다. 기존 markAllReadWithReceipt는 UPDATE와 COUNT가 별도 SQL이므로 단일 트랜잭션 영수증 함수 또는 '처리 후 관측값' 표시가 필요하다. WLD·원장은 변경하지 않으며 claim-all은 계속 차단한다.
 
-**수용·배포.** 위 시험은 명세만 작성했고 실행하지 않았다. QA v1340 FAILED / Production BLOCKED, main CI 분류/정책 SUCCESS이나 runtime SKIPPED; 공식 Test 정확 SHA·인증 금융 E2E·독립 복원 미검증. 외부 독립 발행처 2개 검토: PostgreSQL 트랜잭션 격리(https://www.postgresql.org/docs/current/transaction-iso.html), OWASP 서명 토큰 기밀성(https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html). 신규 승인·중복 제거 근거 0건, 누적 승인 UNKNOWN / 10,000건: BLOCKED / IN PROGRESS. 기능 기본 OFF, 런타임·DB·WLD·Test·운영 변경 없음.
+**관리자·보안·악용 방지.** 제목·본문은 이스케이프하고 javascript:/data:/외부 URL 및 변조된 내부 경로를 거부한다. 본문·사용자 UUID·커서 값을 로그/분석/리퍼러/캐시에 남기지 않는다. 본인 조회·세션 결속·회원/IP 호출 제한·커서 TTL·POST CSRF·멱등성·계정 전환 시 이전 응답 차단을 요구한다. 권한 오류를 직접 테이블 GRANT로 해결하지 않는다. 관리자는 k<20 소규모 집계 억제를 적용한 발송·읽음·실패 합계만 확인하며 회원 메시지 본문 조회나 임의 읽음 처리는 허용하지 않는다. 금융 금액은 실제 원천 영수증이 없으면 확정 정보처럼 표시하지 않고 대기/정산을 구분한다.
 
-**백로그 식별자:** ENV1410-01 SEC1410-02 REL1410-03 WAL1410-04 WAL1410-05 WAL1410-06 WAL1410-07 WAL1410-08 WAL1410-09 WAL1410-10.
+**SEO·모바일·접근성·분석.** 회원 화면·BFF는 noindex,nofollow, private/no-store, Referrer-Policy no-referrer, 개인 데이터 사이트맵/구조화 데이터 금지다. KO/EN 동등 문구, 320/390/768px, 버튼/탭 시맨틱, 키보드·포커스, aria-selected, 오류 상태 음성 안내, 움직임 줄이기, 44px 터치 영역을 검증한다. KPI는 실측 조회 성공률, 서버 읽음 성공률, 오류율, 미읽음 정확도, p95 응답 시간이며 원문/ID는 분석하지 않는다. 실측 전 KPI 달성을 주장하지 않는다.
 
-## v1408 / F675-158 — 본인 원장 검증 기반 지갑 거래내역 50건 이후 페이지 조회 (기능 추가 / 기획 초안 / 운영 보류) — 이슈 #1680
+**수용·배포.** 격리 PostgreSQL 합성 10,001건, 동시 읽기·읽음·삽입 100건, 사용자/세션 위조 100건, 6개 분류, 동일 시각 정렬, 201번째 조회, XSS/악성 링크, 0건 상태, 로그아웃, claim-all 차단, 모두 읽음 경합, 401/403/429/503 no-store, Android·모바일 회귀를 요구한다. **이번 회차는 테스트 명세만 작성했으며 실행하지 않았다.** 기능 기본 OFF, 별도 브랜치 TDD, lint/typecheck/build/보안/DB 회귀, 공식 Test 정확 SHA와 인증 웹·Android E2E, 암호화 백업 독립 복원, Nginx→프로세스→systemd→manifest SHA 대조, 무중단 전환 및 승인된 롤백을 거쳐야 한다. QA v1341 후보 CI는 공식 Test·Production 승인 증거가 아니며 데이터 볼륨 사용률 89%, 운영 정확 SHA 미확인으로 RELEASE HOLD다. 신규 승인 외부 독립 근거 0건, 누적 중복 제거 승인 UNKNOWN/10,000건으로 BLOCKED / IN PROGRESS 유지.
 
-**주기와 정본.** 이전 **기능 보완 v1406** → 현재 **기능 추가 v1408** → 다음 **기능 보완 v1410**(잠정). 2026-10-28 12:01~12:04 KST 시작·중간 main a28bed9aa40ff74d492824ae12892a7d52132fdd 동일. 최신 main AGENTS.md, README.md, 영어 PROJECT_PLAN.md(정본)·국문 대조, 실제 Next.js·NestJS·SQL·Android 프록시, 열린 PR과 QA v1339를 확인했다. 선행 v1406 문의 읽음 영수증 Draft #1675는 미병합 상태이며 이번 지갑 기획은 main에서 독립 분기하여 타 작업자의 변경을 덮어쓰지 않는다. 런타임·DB·WLD·Test·운영 변경은 기획 범위 밖이다.
+**P0/P1 개발 백로그·담당.**
+- P0 ENV1412-01 (Ops/QA): 릴리스 경로·정확 SHA·저장 공간·암호화 백업 독립 복원.
+- P0 SEC1412-02 (B/QA): DB 스키마 출처·마이그레이션·앱 직접 SELECT/UPDATE·사용자 위조·PUBLIC 권한.
+- P0 REL1412-03 (QA/Ops): 미병합 PR 보존·전체 게이트·공식 Test 정확 SHA·승인 운영승격.
+- P0 NTF1412-04 (A/B/C): 허구 알림 6건과 가짜 읽음 성공 제거, 본인·링크·세션 차단.
+- P1 NTF1412-05 (B): SECDEF 조회·분류별 결정적 커서·ACL·인덱스 검증.
+- P1 NTF1412-06 (B): 원자적 또는 정확히 설명된 모두 읽음 영수증·경합·멱등성.
+- P1 NTF1412-07 (A): NestJS·Next BFF·Android DTO/오류/캐시 정합성.
+- P1 NTF1412-08 (C): 실시간 KO/EN 회원 UI·미읽음·모바일·접근성·계정 전환.
+- P1 NTF1412-09 (C/QA): 개인정보·SEO·관리자 집계·안전 KPI.
+- P1 NTF1412-10 (QA): 격리 PG 10,001/100/100·전체 회귀·복원·롤백 증거.
 
-**실제 확인된 사용자 문제.** /wallet/activity는 GET /api/v1/wallet?recent=50 및 선택적 period=7d|30d로 최대 50개 거래만 표시한다. recentTransactionsHasMore 안내는 있으나 다음 페이지로 이동하는 기능은 없다. 기존 지갑 API는 recent를 1~50으로 제한하며 wallet.repository.ts는 거래 전표를 거래 ID로 집계하고 created_at DESC,id DESC 정렬 후 LIMIT recent+1을 사용한다. /wallet의 최근 5건과 기존 GET /wallet 응답은 유지한다. 현재 CSV 버튼은 전달된/불러온 행만 내보내며 전체 원장 다운로드가 아니다. 이번 기능은 **제안**이지 이미 구현되거나 실제 장애가 발생했다는 뜻이 아니다.
-
-**목적·대상·화면·CTA·상태.** 로그인 및 동의가 완료된 회원이 본인 WLD 거래 50건 이후를 확인하도록 /wallet → /wallet/activity에 **이전 거래 더 보기**, **재시도**, **처음부터 다시 보기**를 추가한다. 기간 선택 전체/7일/30일 유지. 거래 시각·유형·설명·거래 ID·현금/은행 증감·정확한 WLD 금액을 표시한다. 상태 INITIAL/LOADING/PARTIAL/HAS_MORE/COMPLETE/EMPTY/ERROR/OFFLINE/CURSOR_EXPIRED/REAUTH/ACCOUNT_CHANGED를 구분하며 실패를 빈 기록이나 전체 조회 완료로 둔갑시키지 않는다. 재시도 중 기존 행을 유지하되 세션·요청 세대·기간으로 응답을 격리하고 로그아웃/계정 변경 시 개인 정보를 즉시 제거한다. CSV 문구는 **현재 불러온 행만 다운로드**로 제한한다.
-
-**API·호환성.** 본인 전용 읽기 API GET /api/v1/wallet/activity?period=all|7d|30d&limit=1..50&cursor=opaque를 추가한다. 응답 {items:[{transactionId,type,label,occurredAt,netAmount,cashDelta,bankDelta,direction}],nextCursor,hasMore,asOf,scope:'OWNER_CASH_BANK',completeness:'PAGED_READ'}. 최초 페이지에서 UTC 기간 하한과 상한 튜플을 고정하고, 후속 페이지는 회원·세션·기간·하한·상한·마지막(created_at,id)·만료·스키마 버전을 결속한 서명형 불투명 커서를 사용한다. 요청에서 회원 UUID를 받지 않는다. 변조·타인·기간 불일치·과도한 길이·만료 커서를 400/401/403/409/410/429/503 계약으로 거절한다. GET에 쓰기용 CSRF는 요구하지 않되 세션/인증/동의·회원/IP 호출 제한은 필수다. 성공·실패 모두 private,no-store 및 noindex. 기존 GET /api/v1/wallet과 1~50 제한은 유지하며 Next.js 서버 전용 API와 Android app-api의 권한·오류·캐시 계약을 동일하게 한다.
-
-**원장·DB·트랜잭션.** 근거는 확정된 ledger_transactions와 ledger_postings, 본인 USER_CASH/USER_BANK 계정 연결이며 브라우저의 추정치로 계산하거나 원장·잔액을 변경하지 않는다. 차변/대변 부호, 현금·은행 증감을 보존하고 BigInt/정수 문자열을 Number로 강제 변환하지 않는다. 본인·계정 유형·절대 기간 하한·상한·엄격한 (created_at,id) 커서 조건을 **GROUP BY/ORDER/LIMIT 전에** SQL에 적용하고 거래 하나에 전표 여러 건이 있어도 정확히 한 행으로 집계한다. limit+1로 hasMore를 결정한다. 실제 인덱스를 먼저 확인하고 격리 PostgreSQL EXPLAIN으로 필요성이 입증된 경우에만 ledger_transactions(created_at DESC,id DESC), ledger_postings(account_id,transaction_id) 후보를 전진 전용 마이그레이션으로 검토한다. 고정 search_path·본인 검증 SECURITY DEFINER 읽기 함수, PUBLIC EXECUTE 차단 및 직접 테이블 권한 확대 금지를 원칙으로 한다. 기존 지갑 읽기의 직접 SELECT를 철회하려면 먼저 모든 호출자 이전·호환성 검증이 필요하다. SQL p_actor 인자만으로 로그인 신원을 증명할 수 없으므로 NestJS 세션과 결속한다.
-
-**관측 시점·경합의 한계.** asOf는 최초 조회 관측 시각이지 HTTP 요청 전체에 걸친 지속 MVCC 스냅샷이 아니다. 오래전에 시작해 뒤늦게 커밋한 거래는 created_at이 과거일 수 있으므로 상한 튜플만으로 정확한 과거 전체 목록을 증명할 수 없다. 지연 커밋 회귀시험을 필수로 하고, 커밋 순서의 독립 증거가 검증되기 전에는 **관측 기준의 최선 노력 페이지 조회**라고 표시하며 새로고침을 제공한다. 커서 만료·스키마 변경 시 혼합 조회하지 않고 다시 시작한다. OFFSET 사용 금지, 시각 동률은 UUID로 안정 정렬. 백그라운드 전체 내보내기·원장 쓰기·정산 우회 없음.
-
-**관리자·보안·SEO·모바일·접근성·지표.** 관리자는 개별 회원 내역 없이 지연·오류·커서 만료 집계만 확인한다. 로그·분석·OpenGraph·사이트맵에 거래 설명·ID·계정·세션·커서를 남기지 않는다. 탈퇴·보존 정책 준수, 깊은 페이지 호출 제한, 단일 10,001건 요청 차단. WCAG 2.2 AA: 키보드 포커스 복귀, 의미 있는 상태/재시도, 확인된 새 행만 aria-live, 320px·200% 확대·44px 터치·국영문 동등 문구. KPI는 페이지 조회 성공률, 중복 거래 0건, 합성 10,001건 기준 DB p95, 다음 페이지 전환, 4xx/5xx·만료율이며 운영 기준값과 목표 달성은 **미측정**이다.
-
-**P0/P1 개발 백로그(이번 회차는 문서만).**
-- **P0 ENV1408-01:** Nginx→프로세스→불변 manifest 정확 SHA 확인, 데이터 볼륨 사용률 87%, 암호화 백업 독립 복원 및 롤백 검증.
-- **P0 SEC1408-02:** QA v1339 앱 역할 241개 중 235개 테이블 DML, PUBLIC 은행 함수 3개, 마이그레이션 체크섬 불일치 5건; 타인·위조자 권한 음성시험, 금융 권한 확대 금지.
-- **P0 REL1408-03:** #1663 미병합 PR 고유 HEAD 보존, 자동 병합 fail-closed, 정확 HEAD CI·실제 격리 Test 로그인/금융/관리자/DB/보안 E2E·승인 GitOps 운영승격.
-- **P0 WAL1408-04:** 타인 커서·회원 위조, 누락/중복 거래, 부호·정밀도 오류, 허위 전체 조회, 계정 변경 중 이전 응답 차단.
-- **P1 WAL1408-05:** 본인 한정 DB 조회 함수·권한·인덱스, 필요한 경우 전진 전용 마이그레이션, 기존 지갑 API 유지.
-- **P1 WAL1408-06:** 서명 Keyset 커서, 기간·상한·마지막 튜플·만료, 관측 한계 공개, 결정적 재시도.
-- **P1 WAL1408-07:** NestJS·Next.js·Android 추가 API, 오류·no-store·소유권 동등성.
-- **P1 WAL1408-08:** 기간/더 보기/재시도 UI, 접근성, 세션 격리, CSV 일부 행 표시.
-- **P1 WAL1408-09:** 관리자 집계, 개인정보·보존·noindex, 안전한 관측 지표·KPI.
-- **P1 WAL1408-10:** 격리 PG 합성 거래 10,001건, 동시 페이지 100건, 위조 100건, 동일 시각·복수 계정 전표·지연 커밋·계정 변경·원장 변화 0·기능 OFF·롤백 회귀.
-
-**수용·배포 게이트.** 안정된 합성 자료에서 51번째·10,001번째 행 접근과 중복 없음, 7/30일 기간 고정, 기간 변경 시 커서 무효, 위조 100건 타인 정보 미노출, 동시 조회 원장 불변, 지연 커밋에도 완전 스냅샷 허위 주장 없음, 기존 GET /wallet 호환, Android·접근성 검증. **시험은 명세만 작성했고 실행하지 않았다.** 기능 기본 OFF. QA v1339에서 main CI 분류/정책 PASS이나 런타임 검사는 SKIPPED, Production /api/version unknown, Test SHA 6f697e74...로 main과 불일치, Test 링크 대상 누락·운영 manifest 누락·독립 복원 미검증이므로 **운영승격 BLOCKED**. 외부 독립 근거 신규 승인 0건, 누적 중복 제거·검증 승인 UNKNOWN / 10,000건, 게이트 BLOCKED / IN PROGRESS. 개발은 별도 브랜치·정확 SHA Test·명시적 승인 이후에만 진행한다.
-
-**백로그 식별자:** ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10.
-
+**백로그 ID:** ENV1412-01 SEC1412-02 REL1412-03 NTF1412-04 NTF1412-05 NTF1412-06 NTF1412-07 NTF1412-08 NTF1412-09 NTF1412-10.
 
 # 월덕 머니버스 — 통합 기획 마스터
 
