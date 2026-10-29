@@ -1,5 +1,7 @@
 ## v2026.10.29.1454 — F675-169 도움말 피드백 게시·재시도·개인정보 보호 개선 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
 - **회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합·충돌 중인 Draft PR #1815에 적층, 개발 이슈 #1814. 시작 시 main b44ffd0af9e2bd6e7c2be7345b72094827078c3d. 런타임·금융 데이터 변경 없음.
 - **QA 최신성(11:12 KST):** v1363 브랜치 감사 IN PROGRESS, 완료 보고서 없음. 마지막 완료 QA v1362 HOLD.
 - **실제 소스 결함:** 마이그레이션 282에는 이미 독립 승인·reviewed_until 만료 검사가 있다. 그러나 help_public_article·NestJS·Next DTO에는 정확한 publishedRevisionId/articleVersion/표시 본문 contentDigest가 없다. source_sha256은 출처 해시이지 본문 해시가 아니다. 11:09 KST DEV DB 읽기 전용 조회에서 도움말/개정/피드백 테이블 4개 모두 NULL, Production 증거 아님. 기능 OFF.

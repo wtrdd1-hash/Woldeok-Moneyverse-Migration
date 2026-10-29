@@ -2,6 +2,8 @@
 
 ## v1454 / F675-169 — Help feedback publication identity, replay and privacy hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
 **Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). This is a documentation-only refinement of unmerged Draft PR #1815 and development issue #1814. At start, latest GitHub main was b44ffd0af9e2bd6e7c2be7345b72094827078c3d; PR #1815 was OPEN and CONFLICTING with main. This proposal is stacked on that exact predecessor, not merged. AGENTS.md, README.md, PROJECT_PLAN.md (English canonical) and PROJECT_PLAN.ko.md govern engineering.
 
 **QA freshness (11:12 KST):** QA v1363 branch-audit evidence has started but no completed independent QA report is available; v1362 remains the last completed HOLD evidence.

@@ -2,6 +2,8 @@
 
 ## v1454 / F675-169 — 도움말 피드백 게시 식별·재시도·개인정보 보호 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
 **회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합 Draft PR #1815 및 개발 이슈 #1814의 문서 전용 보완이다. 시작 시 GitHub main은 b44ffd0af9e2bd6e7c2be7345b72094827078c3d이고 PR #1815는 OPEN이면서 main과 CONFLICTING이었다. 이번 변경은 선행 PR의 정확한 HEAD에 적층하며 main에 병합하지 않는다. AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 한국어 PROJECT_PLAN.ko.md를 기준으로 한다.
 
 **QA 최신성(11:12 KST):** QA v1363 브랜치 감사 증거가 생성됐으나 완료된 독립 QA 보고서는 없다. 마지막 완료 QA는 v1362 HOLD다.

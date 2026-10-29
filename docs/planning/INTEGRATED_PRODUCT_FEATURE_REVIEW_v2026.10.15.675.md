@@ -2,6 +2,8 @@
 
 ## v2026.10.29.1454 — F675-169 verified help feedback publication/replay/privacy improvement (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+
 - **Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). Stacked on unmerged/conflicting Draft PR #1815, engineering issue #1814. Source main b44ffd0af9e2bd6e7c2be7345b72094827078c3d at start; no runtime or finance writes.
 - **QA freshness (11:12 KST):** v1363 branch audit IN PROGRESS, no completed report; last completed QA v1362 HOLD.
 - **Actual source gap:** migration 282 **already checks independent review and reviewed_until expiry**. But help_public_article, NestJS repository and Next DTO omit exact publishedRevisionId/articleVersion/rendered contentDigest; source_sha256 is not a rendered-content digest. DEV DB read-only 11:09 KST: four help/revision/feedback tables NULL, not Production proof. Feature OFF.
