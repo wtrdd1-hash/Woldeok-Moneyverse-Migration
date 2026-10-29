@@ -139,8 +139,7 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
 
   it('노코드 퀀트 봇 스튜디오 엔드포인트 정상 동작', async () => {
     const controller = new QuantController();
-    const strategies = await controller.listStrategies(mockReq);
-    expect(strategies.strategies.length).toBeGreaterThan(0);
+    await expect(controller.listStrategies(mockReq)).rejects.toMatchObject({ status: 503 });
 
     await expect(controller.createStrategy(mockReq, {
       name: 'RSI 퀀트 봇',
@@ -152,18 +151,15 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
       idempotencyKey: 'e1b2c3d4-e5f6-7890-abcd-ef1234567890',
     })).rejects.toMatchObject({ status: 503 });
 
-    const backtestRes = await controller.runBacktest(mockReq, {
+    await expect(controller.runBacktest(mockReq, {
       targetTicker: 'KRX_005930',
       periodDays: 30,
       ruleLogic: { indicator: 'RSI', condition: 'LESS_THAN', value: 30 },
       initialCapitalWld: 10000000,
-    });
-    expect(backtestRes.success).toBe(true);
-    expect(backtestRes.result.winRatePercent).toBe(68.5);
+    })).rejects.toMatchObject({ status: 503 });
 
     await expect(controller.toggleStrategy(mockReq, 'strat-001')).rejects.toMatchObject({ status: 503 });
 
-    const logs = await controller.getStrategyLogs(mockReq, 'strat-001');
-    expect(logs.logs.length).toBeGreaterThan(0);
+    await expect(controller.getStrategyLogs(mockReq, 'strat-001')).rejects.toMatchObject({ status: 503 });
   });
 });

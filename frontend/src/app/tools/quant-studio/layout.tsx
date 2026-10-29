@@ -9,9 +9,9 @@ import {
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '노코드 퀀트 봇 스튜디오 — DCA·그리드·RSI 알고리즘 백테스팅 & 자동 매매 | 월덕 머니버스',
+  title: '노코드 퀀트 전략 연습 — DCA·그리드·RSI 예시 시뮬레이션 | 월덕 머니버스',
   description:
-    '코딩 없이 클릭 몇 번으로 가상 주식 DCA 분할 매수, 20단 그리드 무한 차익, RSI 스윙 퀀트 봇을 설계하고 과거 시세로 수익률을 정밀 백테스팅하세요.',
+    'DCA·그리드·RSI 전략을 가상 예시 가격으로 연습하는 교육용 시뮬레이션입니다. 실제 시세·주문·검증된 수익률을 제공하지 않습니다.',
   keywords: [
     '노코드 퀀트',
     '퀀트 봇 스튜디오',
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: '노코드 퀀트 봇 스튜디오 | 월덕 머니버스',
-    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 실시간 백테스팅 및 가상 주식 자동 매매 툴킷.',
+    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 가상 예시 기반 연습 도구입니다. 실제 거래나 검증된 백테스트가 아닙니다.',
     url: canonicalUrl('/tools/quant-studio'),
     images: [
       {
         url: buildOgImageUrl({
           title: '노코드 퀀트 봇 스튜디오',
-          description: 'DCA · 20단 그리드 · RSI 스윙 봇 실시간 백테스팅 시뮬레이터',
+          description: 'DCA · 그리드 · RSI 전략 예시 시뮬레이터',
           badge: 'Quant Studio',
           type: 'default',
         }),
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: '노코드 퀀트 봇 스튜디오 | 월덕 머니버스',
-    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 실시간 백테스팅 및 가상 주식 자동 매매 툴킷.',
+    description: '코딩 없는 알고리즘 봇 설계, DCA/그리드/RSI 가상 예시 기반 연습 도구입니다. 실제 거래나 검증된 백테스트가 아닙니다.',
   },
 };
 
@@ -54,17 +54,17 @@ const FAQS = [
   {
     question: '노코드 퀀트 봇 스튜디오는 코딩 지식이 없어도 쓸 수 있나요?',
     answer:
-      '네, 파이썬이나 프로그래밍 코드 작성 없이 DCA 분할 매수, 그리드 레벨, 익절/손절 비율을 슬라이더와 입력창으로 손쉽게 조절하여 나만의 알고리즘 봇을 생성할 수 있습니다.',
+      '네, 슬라이더와 입력창으로 DCA·그리드·RSI 조건을 연습할 수 있습니다. 실제 거래 봇은 생성되지 않습니다.',
   },
   {
     question: '백테스팅 시뮬레이션은 어떤 데이터를 기반으로 작동하나요?',
     answer:
-      '침팬지 반도체, 월덕 인더스트리 등 10대 가상 주식의 과거 틱 데이터 및 분봉 차트를 기반으로 승률, 최대 낙폭(MDD), 총 수익률을 1초 만에 정밀 역산합니다.',
+      '교육용 예시 가격과 가정된 수익률로 계산합니다. 실제 과거 틱·분봉 데이터나 검증된 체결 기록을 사용하지 않습니다.',
   },
   {
     question: '생성한 봇을 실전 가상 거래에 투입할 수 있나요?',
     answer:
-      '네, 백테스팅을 통과한 봇을 활성화하면 백그라운드에서 지정된 조건에 맞춰 자동으로 매수/매도 주문을 체결합니다.',
+      '아니요. 실제 자동매매와 WLD 정산은 제공하지 않습니다. 이 화면은 연습용 시뮬레이션입니다.',
   },
 ];
 
@@ -77,14 +77,14 @@ export default function QuantStudioLayout({ children }: { children: React.ReactN
   const faqData = faqPageJsonLd(FAQS);
   const appSchema = softwareApplicationJsonLd({
     name: '노코드 퀀트 봇 스튜디오',
-    description: '코딩 없이 DCA/그리드/RSI 퀀트 전략을 설계하고 백테스팅하는 웹 시뮬레이터',
+    description: '가상 예시 데이터로 DCA/그리드/RSI 전략을 연습하는 교육용 웹 시뮬레이터',
     urlPath: '/tools/quant-studio',
     applicationCategory: 'FinanceApplication',
     features: [
       'DCA 분할매수 / 그리드 차익 / RSI 모멘텀 전략 프리셋',
-      '과거 시세 기반 1초 백테스팅 엔진 (승률, 수익률, MDD)',
-      '10대 가상 종목 실시간 차트 및 호가 연동',
-      '익절 및 손절매 리스크 관리 자동화',
+      '예시 가격 기반 시뮬레이션 (검증된 성과 아님)',
+      '가상 종목 예시 차트',
+      '가상 손절·익절 조건 연습',
     ],
   });
 

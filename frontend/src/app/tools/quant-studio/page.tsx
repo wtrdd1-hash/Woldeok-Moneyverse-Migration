@@ -96,7 +96,7 @@ export default function QuantStudioPage() {
               <span>{localeLabel(locale, '노코드 퀀트 봇 스튜디오', 'No-Code Quant Bot Studio', 'ノーコード クオンツボット スタジオ', '无代码量化机器人工作室', 'Studio bot định lượng không cần mã')}</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-              복잡한 파이썬 코드 없이 클릭만으로 DCA, 그리드, RSI 퀀트 전략을 설계하고 과거 시세로 1초 만에 수익률을 백테스팅하세요.
+              DCA, 그리드, RSI 조건을 가상 예시 가격으로 연습하세요. 계산 결과는 실제 시세나 검증된 백테스트 성과가 아닙니다.
             </p>
           </div>
           <Link
@@ -343,7 +343,7 @@ export default function QuantStudioPage() {
           </div>
           <div className="space-y-1.5">
             <p className="font-semibold text-foreground">Q. 손절매(Stop-Loss)는 어떻게 작동하나요?</p>
-            <p className="leading-relaxed">설정한 손절 비율에 도달하면 시장가로 즉시 전량 매도하여 추가 자산 손실을 차단합니다.</p>
+            <p className="leading-relaxed">연습용 손절 비율을 설정해 가상 결과를 비교합니다. 실제 시장 주문이나 손실 방지 기능은 제공하지 않습니다.</p>
           </div>
         </div>
       </div>
