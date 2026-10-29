@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.10.29.1419 — Independent country-rotation verified blog publishing
+
+Implement a dedicated 2-hour Seoul-local one-shot systemd timer instead of enabling the global monetary scheduler. Rotate KR/US/JP/CN and economy/programming/computers; use verified original article creation and atomic publication receipt, skip on bad sources or fake facts, no mandatory manual approval and no auto-withdrawal. Keep administrator moderation, no Google ads on unreviewed AI articles and no financial DB permission changes. See docs/updates/v2026.10.29.1419-internal.md for execution gates and worklog for actual Production proof.
+
+
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 
 - **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.

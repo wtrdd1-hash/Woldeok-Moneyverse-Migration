@@ -1,5 +1,9 @@
 ## v2026.10.29.1364 — 예약 QA 디스크 정리 실제 수행 보완
 
+## v2026.10.29.1419 — 블로그 국가별 2시간 자동 게시 작업자
+- [내부](updates/v2026.10.29.1419-internal.ko.md) / [GitHub](updates/v2026.10.29.1419-github.ko.md) / [영문](updates/v2026.10.29.1419-internal.md) / [작업기록](worklog/2026-10-29-blog-automatic-v1419.ko.md). 금융 전역 스케줄러를 중복 기동하지 않고 소스 검증·영수증 기반 블로그 전용 예약 작업자 구성.
+
+
 ## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 쓰기 권한 보존
 - [내부](updates/v2026.10.29.1213-internal.ko.md) / [GitHub](updates/v2026.10.29.1213-github.ko.md) / [작업 기록](worklog/2026-10-29-production-promotion-v1213.ko.md). 운영 b44ffd0a SHA 검증, 미적용 SQL 23개 실제 반영, 공개 17/17 정상. 기존 체크섬 원본 이슈 별도 유지.
 

@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.29.1419 — Dedicated verified automatic blog publisher (owner-authorized)
+
+- Existing 2-hour country/locale KR/US/JP/CN and topic economy/coding/computer source-verified author was fully implemented but not running on Production: v1213 disables the global scheduler for financial leadership safety, and legacy active scheduler has blog publication flag OFF; Production verified article table started empty.
+- New independent one-shot worker invokes the existing verified source/AI/locale/originality/SQL receipt workflow and maintains a named PostgreSQL advisory lock across generation; systemd Seoul-local timer retries in the current 2-hour window and is a no-op for existing period receipts. Never turn on unrelated global money scheduler or legacy JSON writer.
+- No human sign-off requirement, no scheduled auto-withdrawal; verified articles public after deterministic gate PASS, admin may revise/withdraw/delete. Unreviewed generated articles are not Google ad inventory. A rejected source/model response remains unpublished, not falsely called successful.
+- [Internal](../updates/v2026.10.29.1419-internal.md) / [Korean](../updates/v2026.10.29.1419-internal.ko.md), [GitHub](../updates/v2026.10.29.1419-github.md), [worklog](../worklog/2026-10-29-blog-automatic-v1419.ko.md).
+
+
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 
 - **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.
