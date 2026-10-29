@@ -14,5 +14,24 @@
 - 백엔드 1,961 PASS, 440 SKIP, 실패 0; 해당 소스 TypeScript 체크/빌드/ESLint PASS. 운영 DB app role 기존 200개 이벤트 읽기 함수 SELECT 성공; 실거래나 금융 DML 없음.
 - main 재확인 (원격 main b84d645a8): 병합/작업 충돌 없음. 운영 exact-SHA 테스트 및 별도 환경 체크 지속.
 
-## 2. 종료 기록
-검증/승격 후 갱신.
+## 2. 운영 배포 중간 점검 — 2026-10-29 15:18~15:22 KST
+- main `a6284ef43810a7b310dc23565876fd02567fa918`에 #1849 병합 및 CI PASS. 이후 다른 개발자의 SWF/중앙은행 v1502 코드가 main으로 통합·승격되어 `origin/main=95a8fdb85...`(기록 전 재확인). 버전 다운그레이드 금지.
+- 실제 운영 Nginx/백엔드 `c2129625aa6629c616fb31ce790950618b8d92b2`는 뉴스 수정 `990be7310`의 자손. 운영 빌드 JS에 `recentAutoMarketHistory`와 `no_novel_candidate`가 있음. v1502 전체 운영/공식 Test 기록은 동시 작업 문서 `2026-10-29-v1502-operational-promotion` 참조.
+- 그러나 구형 `moneyverse-backend.service` 3000이 `prod-v2026.10.22.toss-redesign` 경로에서 scheduler=true/news_auto=true로 뉴스 잡을 실행함을 실측. 최신 운영 public backend 3564는 scheduler=false. 이로 인해 코드 수정만 배포되어도 실제 뉴스 중복 생성이 지속될 수 있었음.
+- 전용 생산 코드 리허설: v1502 코드 + 기존 리더 환경에서 독립 port 3574, scheduler OFF, news_auto OFF; health 200, 정확 SHA, 뉴스 API 200, 관리자 무인증 401, 정상 부팅 확인. 원격 Test에서 v1452 백엔드 3498 (격리 DB) health 200/SHA 990be731 검증. 임시 프로세스는 종료함.
+
+## 3. 작업 종료 — 2026-10-29 15:23 KST
+- 기존 `moneyverse-backend.service` 전체 unit/drop-in 설정을 두 번째 디스크 비공개 디렉터리에 백업한 뒤 새 `zzzz-v1452-news-scheduler.conf`를 추가하여 **실행 경로만 현재 운영 v1502 불변 백엔드로 교체**. `systemctl daemon-reload` 뒤 구형 리더만 restart; 공개 v1502 backend/frontend 및 Nginx 구성은 변경하지 않음.
+- 새 리더 PID 444173 / 실제 cwd `/srv/moneyverse-data/releases/prod-v2026.10.29.1502-c2129625a/backend` / PORT 3000 / MONEYVERSE_SCHEDULER_ENABLED=true / AI_NEWS_AUTO_ENABLED=true / BUILD_ID c2129625. 시스템 로그에 `schedule started`, market ticker running, Nest 부팅 완료, 서비스 ACTIVE.
+- 운영 리더 `/health` 200, `/api/version` c2129625, 공개 `/health` 200, 공개 `/api/version` 동일. `/`, `/newspaper`, `/stocks`, `/status`, 시장뉴스 API(리더 및 공개 API) 모두 HTTP 200. API 관리자 비인증 401. 원장·가격·스키마·DB 쓰기 권한·기존 뉴스 데이터 직접 변경 없음.
+- 현재 활성 뉴스는 과거의 미만료 이벤트 13건(치무전자 12건)이 포함되어 있으므로 **기존 뉴스가 즉시 사라진다고 주장하지 않음**. 새 스케줄러의 다음 정규 시각 실행 후 새 동일 제목/종목 이벤트가 생성되지 않았는지 장기 관찰 필요. 이번 시점 검증은 코드/설정/부팅/공개 응답 및 안전 테스트이며 주기 경과 후 통계는 아직 미검증.
+- GitHub 기록: 원인 #1848, 코드 PR #1849, 별도 운영완료 문서 PR(후속). 현재 main에 다른 작업자의 v1502가 존재하므로 기존 운영 코드를 v1452 아티팩트로 되돌려 교체하지 않고 이미 검증된 c2129625를 재사용함.
+- 롤백: `/etc/systemd/system/moneyverse-backend.service.d/zzzz-v1452-news-scheduler.conf` 제거, `systemctl daemon-reload`, 기존 리더 restart; 백업 `/srv/moneyverse-data/tasks/v1452-news-scheduler-systemd-backup-20261029-1522`에 보존. **구형 코드 롤백은 뉴스 중복 원인을 재도입할 수 있으므로 운영 심각 장애 시에만** 실행.
+- 미검증: 실제 사용자 쿠키 재사용, 정규 스케줄 1회 이상 결과로 신규 뉴스 중복 0 확증, 누적 7일/24시간 분포 정상화(대기). 현장 기록 `/srv/moneyverse-data/tasks/v2026.10.29.1452-news-scheduler-production-rollout.ko.md`.
+
+## 4. 첫 실운영 정기발행 수용 — 2026-10-29 15:30:41 KST (v1452-R1)
+- `scheduled_job_runs` 운영 DB 실제 period `2026-10-29T15`: `started_at=2026-10-29T06:27:39.880Z`, `finished_at=2026-10-29T06:30:41.823Z`, `status=succeeded`. 새 프로세스가 처리한 첫 시간당 뉴스 작업.
+- 결과 `engine=deterministic-financial-engine`, `fallbackReason=model_unavailable`, `generated=5`, `published=true`, `eventsPublished=1`. 기존 치무전자(CHIMU314)가 아닌 **뮤야 엔터테인먼트(MYUY)** 뉴스 `[단독] 뮤야 엔터, 소속 아티스트 월드투어 30개 도시 전석 매진 신기록`이 새 시장 이벤트로 기록됨.
+- 새 스케줄 이후 치무전자 같은 헤드라인 신규 발행 **0건(첫 회차)**. 앞선 14시 주기 치무전자 반복과 대비. 프로세스별 로컬 AI 응답은 제한시간 180초에 완료되지 않아 deterministic fallback; 오류를 실제로 분류/기록하는 점까지 검증함.
+- `sudo node scripts/release/verify-host-runtime-identity.mjs --channel prod --sha c2129625...` 결과 `ok=true, failures=[]`, 공개 사이트 5개 대표 경로·뉴스 API 모두 200. 운영 코드/프론트/메니페스트의 SHA 일치 확인.
+- 이 수용은 **첫 주기 운영동작과 한 종목 편중 방지가 실제 작동**했다는 증거이고, 24시간 분포/7일 장기재발방지까지 확정한 것은 아님. 오래된 활성 뉴스는 만료까지 보존, 원장·가격 수동 보정 없음. 기록 연계 #1848 / #1849 / #1859.
