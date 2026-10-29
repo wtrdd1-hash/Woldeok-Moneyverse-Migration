@@ -20,7 +20,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
-import { AutoSovereignWealthFundService } from './auto-swf.service';
+import { AutoSovereignWealthFundService, swfLedgerUnavailable } from './auto-swf.service';
 
 export class TreasuryOperationDto {
   @ApiProperty({ example: 'VAULT_MAIN', description: '금고 코드' })
@@ -443,19 +443,13 @@ export class AdminTreasuryController {
   @Post('swf/rebalance')
   @ApiOperation({ summary: '국고 복리 성장 국부펀드(ASWF) 포트폴리오 리밸런싱 및 복리 성장 실행' })
   async triggerSwfRebalance() {
-    if (!this.swfService) {
-      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.evaluateAndRebalance();
+    return swfLedgerUnavailable();
   }
 
   @Post('swf/liquidate')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
-  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
-    if (!this.swfService) {
-      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
+    return swfLedgerUnavailable();
   }
 
   @Put('swf/config')
