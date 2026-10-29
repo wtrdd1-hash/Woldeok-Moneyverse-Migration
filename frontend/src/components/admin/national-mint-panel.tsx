@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Coins, Flame, Plus, ShieldCheck, CheckCircle2, Hash, Layers } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/lib/toast';
+import { toast } from 'sonner';
 
 export interface MintBatchItem {
   id: string;
