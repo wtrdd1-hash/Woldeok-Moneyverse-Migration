@@ -129,6 +129,23 @@ export async function submitPhoto(
   }
 }
 
+/** The member-only read function returns up to 30 rows. Validate each row so
+ * an invalid/truncated response cannot masquerade as a successful deletion. */
+async function ownedPhotoIds(): Promise<{ id: string; published: boolean }[] | null> {
+  const result: unknown = await api('/api/v1/photos/mine');
+  if (!isRecord(result) || !Array.isArray(result.submissions)) return null;
+  const rows: { id: string; published: boolean }[] = [];
+  for (const row of result.submissions) {
+    if (!isRecord(row) || typeof row.photo_id !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.photo_id) ||
+        typeof row.published !== 'boolean') return null;
+    rows.push({ id: row.photo_id.toLowerCase(), published: row.published });
+  }
+  return rows;
+}
+
+const WITHDRAW_UNCERTAIN = '사진 철회 여부를 확인하지 못했어요. 다시 요청하기 전에 새로고침하여 내 제출 목록을 확인해 주세요.';
+
 /** Only a pending, owner-submitted photo may be withdrawn. The DB command
  * serializes operator publication and retains the daily quota as a tombstone. */
 export async function withdrawPendingPhoto(
@@ -142,10 +159,29 @@ export async function withdrawPendingPhoto(
     || typeof idempotencyKey !== 'string' || !uuid.test(idempotencyKey)) {
     return { status: 'error', message: '사진 요청을 다시 확인해 주세요.' };
   }
+  let mutationAttempted = false;
   try {
-    const receipt = await mutate<{ replayed: boolean }>('/api/v1/photos/withdraw', {
+    const before = await ownedPhotoIds();
+    if (!before || !before.some((row) => row.id === photoId.toLowerCase() && !row.published)) {
+      return { status: 'error', message: '철회할 검토 중 사진을 내 제출 목록에서 확인하지 못했어요. 새로고침 후 상태를 확인해 주세요.' };
+    }
+    // The request can commit even when the HTTP response is lost. No blind retry.
+    mutationAttempted = true;
+    const receipt: unknown = await mutate<unknown>('/api/v1/photos/withdraw', {
       body: { photoId, idempotencyKey },
     });
+    if (!isRecord(receipt) || receipt.photo_id !== photoId ||
+        typeof receipt.withdrawn_at !== 'string' ||
+        !receipt.withdrawn_at.trim() || !Number.isFinite(Date.parse(receipt.withdrawn_at)) ||
+        typeof receipt.replayed !== 'boolean') {
+      return { status: 'error', message: WITHDRAW_UNCERTAIN };
+    }
+    // SQL 292 deletes the draft atomically; verify through the owner's scoped
+    // SECURITY DEFINER read, not the public gallery or a cached browser state.
+    const after = await ownedPhotoIds();
+    if (!after || after.some((row) => row.id === photoId.toLowerCase())) {
+      return { status: 'error', message: WITHDRAW_UNCERTAIN };
+    }
     revalidatePath('/gallery/submit');
     return {
       status: 'ok',
@@ -154,6 +190,7 @@ export async function withdrawPendingPhoto(
         : '검토 중인 사진을 철회했어요. 오늘의 제출 횟수는 복원되지 않아요.',
     };
   } catch (error) {
-    return failure(error, '검토 중인 사진만 철회할 수 있어요. 게시된 사진은 운영자에게 문의해 주세요.');
+    if (mutationAttempted) return { status: 'error', message: WITHDRAW_UNCERTAIN };
+    return failure(error, '내 제출 목록을 확인하지 못했어요. 새로고침 후 다시 확인해 주세요.');
   }
 }
