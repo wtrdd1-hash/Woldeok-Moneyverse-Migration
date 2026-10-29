@@ -16,3 +16,8 @@ Pending.
 
 ## FINISHED
 Pending. No deployment authorized without every gate PASS.
+
+### RED checkpoint — 15:12 KST
+- Added four regression cases to the existing treasury view suite, mocked unrelated server-action dialogs to avoid browser `node:crypto` import; `NODE_ENV=test` required for React act.
+- Confirmed expected RED: 3 failures for missing independent unavailable sections, 5 PASS. Existing unrelated 200-zero test assertion was adjusted to scope legitimate totals.
+- No production code modified at this checkpoint. Release remains HOLD.
