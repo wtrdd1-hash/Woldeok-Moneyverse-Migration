@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1478 — F675-175 고객문의 초안 권한·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
+- 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 main `54b182d2214a15974350701174175f589789613b`; 선행 Draft #1901 OPEN/CONFLICTING·미병합, QA v1374 Draft #1902 FAILED/HOLD·공식 Test 미인증. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [기획 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
+- 개발 PostgreSQL 17.11 **실측**: 마이그레이션 196/302가 REVOKE를 선언했으나 `moneyverse_app`는 `support_threads`·`support_messages`에 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE(및 REFERENCES/TRIGGER) 보유. 운영 권한 미확인, 문의 본문 조회 없음. 기존 Next 전송 액션은 호출마다 새 UUID를 생성하며 `support_create_thread`는 동일 키의 다른 제목/본문을 비교하지 않고, 메시지 UUID 기반 영수증으로는 키 기반 불명 전송을 조회할 수 없음. **잠재 위험이지 운영 사고 확인은 아님.**
+- F675-139 #1456·F675-164 #1758에 같은 초안 기능이 이미 기획됨. F675-175는 **단일 통합 보완층**이며 세 번째 테이블/API/스위치를 만들지 않음. 과거 30일과 v1476 7일 보관 충돌은 **정책 결정 대기**, 개인정보 최소화 7일 잠정 권고(무단 삭제 금지). 클라이언트 안정 전송 키·회원별 키 조회·동일 키 다른 본문 거부·문의 전송/불변 영수증/초안 CAS tombstone 단일 트랜잭션·늦은 자동저장 차단·AES-GCM 다음 리비전 AAD·Next/Nest/Android 동등·`send_uncertain` 화면을 요구. 상세 명세는 [통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 `REPO1478-01 SEC1478-02 FIN1478-03 REL1478-04`: PR 이력 보존·문의 DB 권한/체크섬·국고/조폐/중앙은행/국부펀드 실행 차단·18,000 WLD/국고 552행·전체 CI/복원/정확 SHA Test/GitOps. P1 `DRAFT1478-05 DRAFT1478-06 DRAFT1478-07 DRAFT1478-08 DRAFT1478-09 DRAFT1478-10`: 중복기획/보관·원자 전송/영수증·API·UI/접근성·개인정보/관리자/KPI·실제 PG 시험. 합성 초안 10,001개·위조 100·경합 100·응답 유실 50·키/본문 30·만료/키 교체 30건 **시험 조건만 명세, 미실행**. 코드·DB·WLD·Test·운영 변경 없음, 기능 OFF/RELEASE HOLD. 외부 검증 신규 승인 0건, 누적 UNKNOWN/10,000건 => BLOCKED / IN PROGRESS.
+
+
 ## v2026.10.29.1476 — F675-175 회원 전용 고객문의 임시저장 (기능 추가 / 기획 초안 / 운영 보류)
 - 이전 기능 보완 v1474 → 현재 기능 추가 v1476 → 다음 기능 보완 v1478(잠정). 시작·중간 main `0dffb939676e6cfd861d19f96208f8929902d1f9`, QA v1373 FAILED/P0. v1474 Draft #1892는 병합된 것으로 간주하지 않음. [개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
 - 실제 새 문의·답장 폼 및 NestJS에는 영구 초안 기능이 없음. 개발 DB 문의 3건/메시지 6건, 초안 테이블 없음(운영 건수 아님). 새 기능은 회원 본인 미전송 초안의 저장·이어쓰기·삭제, 기기 동기화, 선택적 800ms 자동저장(기본 OFF), 최대 20개 컨텍스트·7일 만료. 자동 전송 없음. 320px/WCAG 2.2 AA 및 Android 동등.

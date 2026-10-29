@@ -1,5 +1,35 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
+
+**진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
+
+### 1. 실제 근거·중복기획 통합·책임 범위
+- **개발 DB 실측 P0:** PostgreSQL 17.11 `woldeok_moneyverse_dev`의 문의 3건·메시지 6건, 초안 테이블 없음. `information_schema.role_table_grants`에서 `moneyverse_app`가 **두 테이블** `public.support_threads`, `public.support_messages`에 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER 권한을 보유하고 부여자는 `postgres`로 확인됨. 마이그레이션 196·302의 명시적 `REVOKE ALL`과 불일치. 메시지 본문은 조회하지 않았고 운영 DB 권한·악용·원인은 **미확인**. 임의 SQL 권한 회수 금지; 역할·기본 권한·적용 이력·체크섬을 읽기 전용 보존하고 격리 PostgreSQL에서 전진형 수정과 SECURITY DEFINER 정상 동작을 검증한 후 승인 배포.
+- **실제 전송 경로 문제:** `frontend/src/app/support/actions.ts`의 `createSupportThread`/`replySupportThread`는 매 호출 안에서 새 `randomUUID()`를 생성하므로 응답 유실 뒤 재호출 시 중복 전송 가능성이 있음. 마이그레이션 196의 `support_create_thread`는 동일 키 재사용 시 회원만 확인하고 **제목/본문 일치는 검증하지 않음**. `support_add_message`는 본문을 확인하지만 동시 삽입 유니크 키 경합 시험이 필요. 302의 `support_my_message_receipt`는 메시지 UUID를 알아야 조회하므로 전송 결과 불명 상황의 키 기반 확인 수단이 아님. **운영 중복 전송 발생 증거는 아님**.
+- **기존 세 기획을 하나로 통합:** F675-139/이슈 #1456은 초안 복구·원자적 전송, F675-164/이슈 #1758은 비공개 초안, F675-175/이슈 #1900은 다시 초안 저장을 정의함. 테이블·전송 API·기능 스위치를 3세트 구현하지 않음. F675-175는 기존 설계의 **최신 보완층**이며 F675-139의 원자적 전송과 F675-164의 스키마를 하나의 `support_private_drafts` 기능으로 합침. 과거 보관기간 **30일**과 v1476 **7일**이 충돌함. 개인정보 최소화를 위해 7일을 잠정 권고하되, 정책·고지·기존 초안 전환은 **결정 대기**이며 승인 없이 단축·삭제 금지.
+
+### 2. 회원 화면·CTA·상태·접근성
+- 기존 `/support` 신규 문의와 `/support?thread=<본인 UUID>` 답장에 **임시저장/이어쓰기/삭제/전송**, 전송 불명 시 **전송 상태 확인/동일 요청 재시도** 제공. 800ms 선택형 자동저장은 기본 OFF. 저장되지 않은 수정이 있으면 **저장된 초안 전송** 전에 명시적 저장·리비전 검증이 필요하며, **현재 글 바로 전송**을 선택하면 기존 저장 초안은 자동 삭제하지 않음. 자동저장이 전송으로 바뀌거나 오래된 서버 내용을 몰래 전송해서는 안 됨.
+- `not_saved`, `saving`, `saved(revision,time)`, `conflict`, `expired`, `offline`, `unavailable`, `disabled`, `send_pending`, `send_uncertain`, `send_committed(receipt)`, `send_rejected` 상태를 구분. 409에서는 양측 리비전·시각 비교 후 수동 조정, 타임아웃은 전송 실패/미전송 확정으로 오표시하지 않음. 로그아웃·계정 변경 시 평문 메모리·대기 응답 제거. 320px·44px 터치·키보드·스크린리더 상태 안내·동작 줄이기·WCAG 2.2 AA, 한국어/영어 및 Android 동등, 비공개 noindex/nofollow·no-store.
+
+### 3. API·동일 요청 재생 계약(미구현 제안)
+- 본인 전용 GET/PUT/DELETE `/api/v1/support/drafts`의 `contextType,threadId?,expectedRevision`(십진 문자열 bigint), `requestId`(UUID), 제목·본문 길이·영수증 계약을 유지. 독립 전송 시스템을 또 만들지 말고 **단일** POST `/api/v1/support/drafts/send`에 `{contextType,threadId?,expectedRevision,sendRequestId,subject?,body}`를 받고 GET `/api/v1/support/send-receipts/:sendRequestId`로 회원별 확인. 회원 신원은 검증된 세션에서만 결정, `userId` 입력 금지. Next 동일 출처 BFF와 Android app-api의 DTO·동의·CSRF/베어러·오류 동등. 기존 직접 전송은 동일 영수증 계약에 위임하거나 초안 삭제 없는 별도 경로로 명확히 표시.
+- 사용자가 전송을 확정할 때 **논리적 전송 1회당** `sendRequestId`를 난수 생성하고 회원·세션 세대·컨텍스트·정규화 본문 해시와 결속. 응답 불명 재시도에서는 서버 액션 내부에서 새 UUID를 생성하지 않고 **동일 키·동일 내용**을 재사용. 동일 키·동일 내용은 이후 편집에도 최초 `threadId/messageId/committedAt` 불변 영수증, 동일 키·다른 본문/컨텍스트/회원은 409 또는 타인 존재를 숨기는 404. 회원+키 조회는 메시지 UUID 사전 인지를 요구하지 않음. 요청 진행 중 `NOT_FOUND`는 미전송 증거가 아니며 동일 키로만 재시도. 30일 영수증 만료 후까지 중복 방지를 보장한다고 주장하지 않음.
+- 400 입력 오류, 401 인증, 403 동의/활성 회원, 404 타인·없는 컨텍스트/영수증, 409 리비전·키·본문 충돌, 410 본인 만료 초안, 413 크기, 429 제한, 503 DB/암호키 장애. 허용 필드만 받기, Unicode NFC·공백 정규화와 JS/PostgreSQL 길이 기준 일치, 크기·시간·회원/IP 제한, `private,no-store`, 민감 내용·요청 키 로그 금지. 기존 문의 조회 API 호환 유지.
+
+### 4. DB·암호화·원자성·보관
+- **신규 마이그레이션 번호 미할당**: 개발 DB 적용 체크섬 5건과 #1878 계보 검증 우선. 전진형 스키마는 하나의 `support_message_drafts` 회원+컨텍스트 유일성·단조 증가 BIGINT 리비전·암호문/nonce/tag/key_version·만료 인덱스, 회원별 `UNIQUE(owner_id,send_request_id)` 전송 의도/영수증 저장소·요청 HMAC·불변 결과·30일 영수증 보존. 전역 요청 UUID 단독 PK로 타인 키 존재가 노출되지 않도록 회원 단위 스코프. 회원 행 잠금으로 활성 초안 20개 한도. 전송·삭제·만료 뒤 tombstone/generation을 유지해 늦은 자동저장으로 되살아나는 ABA 현상 차단.
+- 서버 AES-256-GCM(새 96비트 nonce·128비트 tag), AAD는 회원·컨텍스트·**예상 다음 리비전 = expectedRevision+1**에 결속. 암호화 후 DB CAS에서 구버전이면 암호문 폐기, nonce 재사용 금지. 키 유실 시 실패 처리, 키 교체·백업 복원 tombstone 검증. 관리자 복호화/검색 금지, 앱 역할 테이블 직접 SELECT/DML/TRUNCATE 및 PUBLIC EXECUTE 금지, 본인 확인 함수에만 최소 EXECUTE.
+- **저장 초안의 원자적 전송:** 회원 → 컨텍스트/초안 → 전송 의도 행 순서로 잠금, 활성 회원·본인 답장·기대 리비전·본문 해시·요청 키 확인. 기존 문의/메시지 생성, 불변 전송 영수증, 해당 리비전 초안 tombstone을 **단일 DB 트랜잭션**에 확정. 최신 리비전이 다르면 409·전송/삭제 모두 없음; 이미 확정된 키면 새 메시지 없이 최초 영수증 반환. 현재 글 직접 전송은 최신 저장 초안 삭제 금지. 적용된 196을 수정하지 말고 새 전진형 변경에서 `support_create_thread`의 동일 키 다른 제목/본문 문제 및 동시 삽입 경합을 해결·시험. 권한 확대를 임시 해결책으로 쓰지 않음.
+- 만료·동의 철회·비활성 회원은 즉시 평문 조회 차단, 암호문 파기와 복원 후 재노출 방지. 과거 30일 정책에서 7일로 무단 단축 금지. 서버 탈취까지 막는 종단 간 암호화로 오인시키지 않음.
+
+### 5. 관리자·보안·SEO·KPI·시험·운영 게이트
+- 관리자에게는 개인정보 보호 임계치 적용 집계(저장·복구·전송 불명·실패)와 기능 상태만 제공. 초안·회원 식별자·키·영수증·본문 조회 금지. 가설 KPI는 동일 키 중복 전송 0, 타인 초안/영수증 조회 0, 자동 전송 0, 대표 격리 Test p95 저장 <500ms, 전송 불명 감소(실측 전 성과 주장 금지). 로그 비식별, 비공개 SEO/no-store, 접근성 회귀 필수.
+- **수용시험 명세만, 미실행:** 격리 PostgreSQL 17.11 합성 초안 10,001개, 회원 위조/CSRF 100건, 저장·삭제·전송 동시성 100건, 응답 유실 재생 50건, 동일 키 다른 내용·동시 삽입 30건, 만료·키 교체·계정 변경·백업 복원 30건. 이후 리비전 변경 시 원본 영수증, 중복 메시지 0, tombstone 재생 방지, 20개 제한, 타인 존재 비노출, 앱 역할 테이블 권한 DENIED, 관리자 내용 DENIED, WLD/원장 변화 0, Nest/Next/Android·320px 접근성·롤백 검증. 196/302 소스와 개발 DB 권한 차이도 격리 DB 재현·검증.
+- **P0 4건:** `REPO1478-01` 과거 브랜치 보존 및 충돌 선행 PR #1901 비파괴 조정; `SEC1478-02` 고객문의 DB 권한 편차 #1908·체크섬 5건; `FIN1478-03` 국고/조폐 #1895/#1896·중앙은행/국부펀드 #1902 실행 차단, MINT 18,000 WLD·국고 552행 출처; `REL1478-04` 전체 CI·독립 백업 복원·공식 Test 정확 SHA 인증·승인 GitOps·롤백. **P1 6건:** `DRAFT1478-05` F675-139/164/175 통합·7일 대 30일 보관 결정/스키마; `DRAFT1478-06` 원자적 전송·안정 키·본인 영수증·ABA 방지; `DRAFT1478-07` Nest/Next/Android API; `DRAFT1478-08` 회원 충돌/불명 전송 UI·접근성; `DRAFT1478-09` 관리자·개인정보·SEO·KPI; `DRAFT1478-10` 실제 PG 권한·경합·재생·롤백. 개발은 별도 브랜치, 기능 기본 OFF, 공식 정확 SHA Test·승인 운영승격 전 HOLD. 기획 회차에서 런타임·DB 변경 없음. 외부 독립 중복 제거 검증 승인 **신규 0건·누적 UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
+
+
 ## v1476 / F675-175 — 회원 전용 고객문의 임시저장 (기능 추가 / 기획 초안 / 운영 보류)
 
 **주기·근거·한계.** 이전 기능 보완 v1474 → 현재 기능 추가 v1476 → 다음 기능 보완 v1478(잠정). 시작·중간 기준 origin/main `0dffb939676e6cfd861d19f96208f8929902d1f9`; v1474 Draft #1892의 병합은 가정하지 않음. 마지막 완료 독립 QA v1373 FAILED/P0(2026-10-29 21:35 KST), 신규 금융 실행 경로 회귀 #1895. 소스·개발 DB는 읽기 전용 조사. [개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900). **문서 기획만 수행**하며 코드·DB·WLD·기능 스위치·공식 Test·운영은 변경하지 않음.
