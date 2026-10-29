@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1494 — F675-179 저장공간 근거 검증·예약 블록·배포 보류 강화 (기능 보완 / 초안 / 배포 보류)
+**GitHub:** [Draft PR PR_PENDING](PR_PENDING), 선행 미병합 [#1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 기반; [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
+- 회차: 이전 기능 추가 v1492 → 현재 기능 보완 v1494 → 다음 기능 추가 v1496(잠정). 시작·중간 main `62c6cd038951d65c94b709302bdaec6e75b080b6`; 최신 검증 QA v1381 FAILED/P0, 이후 미확인. v1492 미병합. 문서 전용.
+- 07:02~07:05 KST Debian 13.6 읽기 전용 측정: 루트 94%/약 5.8GiB 가용, DATA `df` **반올림 100%**지만 일반 사용자 가용 약 1.1GiB. DATA `stat -f` `f_blocks=51459497,f_bfree=2650519,f_bavail=287189,frsize=4096`; 예약 블록 약 9.7GiB는 일반 작업자가 쓸 수 없다. inode 고갈·고객 장애는 미확인. **P0 긴급/HOLD**, 정리·삭제 없음.
+- v1492 강화: 호스트 전용 고정 ROOT/DATA 수집기 서명, 키·마운트/네임스페이스·부팅/시퀀스 검증, 60초 수집·120초 최신성, 30초 초과 미래·재전송·출처 불일치 거부. 컨테이너 대체·이전 정상값 재사용 금지. BigInt로 사용/일반 가용/예약 블록·inode 계산, 100% 반올림과 실제 가용량 동시 표시. 배포 공간은 대상 마운트의 `f_bavail`과 실측 빌드+복원+롤백+안전 여유를 비교하고 근거 누락 시 HOLD.
+- 최신 main Next 관리자 health 프록시의 성공·오류 응답에는 명시적인 no-store/noindex가 없다(소스 관찰, 유출 확증 아님). 신규 Nest+Next 관리자 경로는 인증·관리자·동의 검증과 **모든 응답** private/no-store/noindex/no-referrer 강제. 경로·키·개인정보 금지. 320px/200% 확대/WCAG 2.2 AA, 영한 동등, 읽기 전용 CTA, 오래됨·UNKNOWN·오류·계정 전환 상태, KPI, 기능 OFF, DB·금융 변경 없음.
+- P0: **DISK1494-01 SEC1494-02 FIN1494-03 REL1494-04** (소유자 승인 용량 복구, ACL/체크섬 5건, MINT 18,000 WLD/국고 552건/SWF, Git 참조 462개·전체 CI·독립 복원·정확 SHA Test). P1: **STORAGE1494-05 STORAGE1494-06 STORAGE1494-07 STORAGE1494-08 STORAGE1494-09 STORAGE1494-10** (서명 호스트 수집기, 예약 블록·inode, Nest/Next 보안·재전송, 화면·접근성, 관리자 KPI·키 교체·롤백, 격리 시험). 합성 10,001건·위조 100·동시 100·오래됨/재전송 50·마운트/경계 30 **기획만 하고 미실행**. [영문 통합 원본](INTEGRATED_PLANNING_MASTER.md)과 동등.
+- 외부 독립 중복제거 검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건** ⇒ **BLOCKED / IN PROGRESS**. 런타임·파일 삭제·DB·WLD·Test·Production 미변경. 초안 / 배포 보류.
+
+
 ## v2026.10.30.1492 — F675-179 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
 **GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
 - 회차: 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1381 FAILED/P0. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 #1170.
