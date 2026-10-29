@@ -1,4 +1,9 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
+- Development backlog: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1758
+
+## F675-164 / v1432 — Verified private support drafts (FEATURE ADDITION / HOLD)
+- Previous Improvement v1430; Current Addition v1432; Next Improvement v1434 provisional. Main 35971c600; /support sends directly and has no draft API/DB. Proposal: 20 slots, 30-day expiry, atomic send, immutable receipt, CAS, owner-only/admin-invisible, Android/a11y, flag OFF. P0/P1: ENV1432-01 FIN1432-02 SEC1432-03 REL1432-04 SUP1432-05 SUP1432-06 SUP1432-07 SUP1432-08 SUP1432-09 SUP1432-10. QA v1351 blockers, disk 99%; independent external newly accepted 0, cumulative UNKNOWN/10,000. Docs only.
+
 
 ## F675-163 v1430 — Calendar watch deadline integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Feature Addition v1428 / Current Feature Improvement v1430 / Next Feature Addition v1432 (provisional).
