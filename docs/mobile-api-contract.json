@@ -8734,14 +8734,7 @@
             "type": "string"
           },
           "affinity": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "type": "number"
           },
           "replayed": {
             "type": "boolean"
