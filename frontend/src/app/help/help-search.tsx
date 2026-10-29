@@ -15,7 +15,7 @@ export function HelpSearch({ initialLocale = 'ko' }: { initialLocale?: HelpLocal
         <option value="ko">한국어</option><option value="en">English</option>
       </select>
       <label htmlFor="help-query" className="font-semibold">도움말 검색</label>
-      <input id="help-query" name="query" maxLength={100} className="rounded-lg border bg-background p-3" placeholder="궁금한 내용을 입력하세요" />
+      <input id="help-query" name="query" maxLength={100} className="rounded-lg border bg-background p-3" placeholder="궁금한 내용을 입력하세요" aria-describedby="help-query-hint" /><p id="help-query-hint" className="text-xs text-muted-foreground">공백이 여러 번 입력되어도 같은 검색어로 찾아드립니다.</p>
       <label htmlFor="help-category">분야</label>
       <select id="help-category" name="category" className="rounded-lg border bg-background p-3">
         <option value="">전체</option><option value="account">계정</option><option value="wallet">지갑</option>

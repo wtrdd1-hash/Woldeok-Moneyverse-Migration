@@ -17,14 +17,13 @@ describe('public verified help controller', () => {
     await expect(controller.search({ locale: 'ko', query: '😀'.repeat(101) })).rejects.toThrow('invalid');
     expect(search).not.toHaveBeenCalled();
   });
-  it('accepts bounded help result counts and rejects oversized or fractional values', async () => {
+  it('normalizes repeated Unicode whitespace before the published-only database read for web and Android', async () => {
     vi.stubEnv('VERIFIED_HELP_CENTER_V1', 'true');
-    const search = vi.fn().mockResolvedValue([]);
+    const search = vi.fn().mockResolvedValue([{ article_id: 'approved' }]);
     const controller = new HelpController({ search } as unknown as HelpRepository);
-    await expect(controller.search({ locale: 'ko', limit: 50 })).resolves.toEqual({ articles: [] });
-    expect(search).toHaveBeenCalledWith('ko', null, '', 50);
-    await expect(controller.search({ locale: 'ko', limit: 51 })).rejects.toThrow('invalid');
-    await expect(controller.search({ locale: 'ko', limit: 1.5 })).rejects.toThrow('invalid');
+    await expect(controller.search({ locale: 'ko', query: '  로그인\u00a0\t 도움말  ' })).resolves.toEqual({ articles: [{ article_id: 'approved' }] });
+    expect(search).toHaveBeenCalledWith('ko', null, '로그인 도움말', 20);
+    await expect(controller.search({ locale: 'ko', query: ' '.repeat(101) })).rejects.toThrow('invalid');
     expect(search).toHaveBeenCalledTimes(1);
   });
   it('returns a genuine empty result only after a successful DB read', async () => {

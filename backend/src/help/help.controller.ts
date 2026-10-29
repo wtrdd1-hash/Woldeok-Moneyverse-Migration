@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, Query, ServiceUnavailableException } from '@nestjs/common';
+import { normalizeVerifiedHelpQuery } from '@moneyverse/contract';
+import { BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, Post, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { HelpRepository } from './help.repository';
-import { estimateHelpReadingMinutes } from './help-reading-time';
 
 const LOCALES = ['ko','en'] as const;
 const CATEGORIES = ['account','wallet','shop','community','support'] as const;
@@ -11,7 +11,6 @@ class SearchHelpDto {
   @IsOptional() @IsIn(CATEGORIES) readonly category?: typeof CATEGORIES[number];
   @IsOptional() @IsString() readonly query?: string;
   @IsOptional() @IsInt() @Min(1) @Max(50) readonly limit?: number;
-  @IsOptional() @IsBoolean() readonly fallbackToOtherLocale?: boolean;
 }
 
 @ApiTags('help')
@@ -26,57 +25,18 @@ export class HelpController {
     return this.help;
   }
   @Get('categories') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Public verified help categories' })
-  async categories(@Query('locale') locale = 'ko') {
-    const repo = this.repo();
-    if (!LOCALES.includes(locale as 'ko'|'en')) throw new BadRequestException('invalid help locale');
-    const rows = await repo.categoryCounts(locale);
-    const counts = Object.fromEntries(CATEGORIES.map(category =>
-      [category, rows.find(row => row.category === category)?.article_count ?? '0']));
-    return { categories: [...CATEGORIES], counts, locale };
-  }
+  categories() { this.repo(); return { categories: [...CATEGORIES] }; }
 
   @Post('search') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Search only verified published help articles' })
   async search(@Body() body: SearchHelpDto) {
     const repo = this.repo();
+    const query = normalizeVerifiedHelpQuery(body?.query ?? '');
     if (!body || !LOCALES.includes(body.locale) ||
-      (body.category && !CATEGORIES.includes(body.category)) ||
-      typeof (body.query ?? '') !== 'string' || Array.from(body.query ?? '').length > 100 ||
-      !Number.isInteger(body.limit ?? 20) || (body.limit ?? 20) < 1 || (body.limit ?? 20) > 50 ||
-      (body.fallbackToOtherLocale !== undefined && typeof body.fallbackToOtherLocale !== 'boolean')) {
+      (body.category && !CATEGORIES.includes(body.category)) || query === null ||
+      !Number.isInteger(body.limit ?? 20) || (body.limit ?? 20) < 1 || (body.limit ?? 20) > 50) {
       throw new BadRequestException('invalid help search parameters');
     }
-    const category = body.category ?? null;
-    const query = body.query ?? '';
-    const limit = body.limit ?? 20;
-    // The database function independently enforces publication, review and expiry.
-    // Do not silently translate, merge languages or fall back on a DB failure.
-    const primary = await repo.search(body.locale, category, query, limit);
-    if (primary.length || body.fallbackToOtherLocale !== true) {
-      return { articles: primary, requestedLocale: body.locale, resultLocale: body.locale, fallbackUsed: false };
-    }
-    const otherLocale = body.locale === 'ko' ? 'en' : 'ko';
-    const alternate = await repo.search(otherLocale, category, query, limit);
-    return { articles: alternate, requestedLocale: body.locale,
-      resultLocale: alternate.length ? otherLocale : body.locale, fallbackUsed: alternate.length > 0 };
-  }
-  @Get('articles/:locale/:slug/related') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Related currently approved help articles in the same locale and category' })
-  async related(@Param('locale') locale: string, @Param('slug') slug: string) {
-    const repo = this.repo();
-    if (!LOCALES.includes(locale as 'ko'|'en') || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100) {
-      throw new NotFoundException('help article not found');
-    }
-    // Never reveal related articles for an expired/retracted/nonexistent source.
-    try {
-      const current = await repo.article(locale, slug);
-      if (!current) throw new NotFoundException('help article not found');
-      // Both functions are existing approved-only SECURITY DEFINER reads (migration 282).
-      const rows = await repo.search(locale, current.category, '', 8);
-      return { articles: rows.filter(row => row.article_id !== current.article_id &&
-        row.locale === locale && row.category === current.category).slice(0, 5) };
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new ServiceUnavailableException('verified related help is unavailable');
-    }
+    return { articles: await repo.search(body.locale, body.category ?? null, query, body.limit ?? 20) };
   }
   @Get('articles/:locale/:slug') @Header('Cache-Control', 'no-store') @ApiOperation({ summary: 'Read a verified public help article' })
   async article(@Param('locale') locale: string, @Param('slug') slug: string) {
@@ -86,6 +46,6 @@ export class HelpController {
     }
     const article = await repo.article(locale, slug);
     if (!article) throw new NotFoundException('help article not found');
-    return { article: { ...article, estimated_reading_minutes: estimateHelpReadingMinutes(article.body_plain, article.locale) } };
+    return { article };
   }
 }
