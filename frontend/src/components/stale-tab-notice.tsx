@@ -5,9 +5,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
-/** 기본 버전 점검 주기: 45초 (가벼운 20바이트 JSON 조회) */
-const EVERY_MS = 45_000;
+/** 기본 버전 점검 주기: 30초 */
+const EVERY_MS = 30_000;
 const RELEASE_PARAM = '__mv_release';
+const REFRESH_KEY = 'moneyverse-release-refresh';
 
 /**
  * 캐시 버스팅 파라미터가 포함된 강제 새로고침 URL 생성
@@ -23,6 +24,7 @@ export function releaseRefreshUrl(href: string, releaseId: string): string {
  */
 function clearReleaseParam(buildId: string): void {
   try {
+    if (typeof window === 'undefined') return;
     const url = new URL(window.location.href);
     if (url.searchParams.get(RELEASE_PARAM) !== buildId) return;
     url.searchParams.delete(RELEASE_PARAM);
@@ -34,7 +36,7 @@ function clearReleaseParam(buildId: string): void {
 
 /**
  * 브라우저 캐시 스토리지(Service Worker / Cache API)를 소거하고 강제 새로고침 실행
- * 세션 쿠키는 브라우저가 관리하므로 안전하게 유지됨.
+ * 세션 쿠키는 브라우저가 관리하므로 로그인 100% 보존.
  */
 async function executeHardRefresh(targetUrl: string, navigate?: (url: string) => void): Promise<void> {
   try {
@@ -49,15 +51,15 @@ async function executeHardRefresh(targetUrl: string, navigate?: (url: string) =>
   if (navigate) {
     navigate(targetUrl);
   } else if (typeof window !== 'undefined') {
+    // 히스토리 잔존 방지를 위해 타임스탬프를 부여한 최신 주소로 교체
     window.location.replace(targetUrl);
-    // 메모리 캐시 잔존 방지를 위한 보조 안전망
     setTimeout(() => {
       try {
         window.location.reload();
       } catch {
         /* fallback */
       }
-    }, 150);
+    }, 100);
   }
 }
 
@@ -102,47 +104,56 @@ export function StaleTabNotice({
       const response = await fetch('/frontend-version', { cache: 'no-store' });
       if (!response.ok) return;
       const body = (await response.json()) as { id?: unknown };
-      if (typeof body.id !== 'string' || body.id === '' || body.id === mine) return;
+      if (typeof body.id !== 'string' || body.id === '' || body.id === mine) {
+        // 이미 최신 버전과 일치하면 배너/버튼 즉시 제거 및 세션 스토리지 정리
+        setStale(false);
+        try {
+          window.sessionStorage.removeItem(REFRESH_KEY);
+        } catch {}
+        return;
+      }
 
       const newVersion = body.id;
       setTargetVersion(newVersion);
 
       const transition = `${mine}->${newVersion}`;
-      const refreshKey = 'moneyverse-release-refresh';
 
-      // 이미 같은 버전으로 새로고침을 시도했으나 캐시 프록시 등으로 구버전이 계속 반환되는 경우 무한 루프 방지
-      if (window.sessionStorage.getItem(refreshKey) === transition) {
+      // 이미 자동 리로드를 시도했으나 브라우저/프록시 캐시로 인해 동일한 구버전이 지속되는 경우
+      if (window.sessionStorage.getItem(REFRESH_KEY) === transition) {
         setStale(true);
         return;
       }
 
-      // 사용자가 본문 글을 작성 중이면 즉시 새로고침하여 글을 날리지 않고 배너로 대기
+      // 사용자가 본문 글을 작성 중이면 작업 보호를 위해 배너로 대기
       if (isUserActivelyTyping()) {
         setStale(true);
         return;
       }
 
-      // 세션은 그대로 유지하면서 새 버전으로 강제 새로고침 실행
+      // 일반 상태: 로그인 세션을 안전하게 보존하며 최신 버전으로 즉시 자동 강제 새로고침 실행
       isRefreshingRef.current = true;
-      window.sessionStorage.setItem(refreshKey, transition);
+      try {
+        window.sessionStorage.setItem(REFRESH_KEY, transition);
+      } catch {}
+
       const targetUrl = releaseRefreshUrl(window.location.href, newVersion);
       await executeHardRefresh(targetUrl, navigate);
     } catch {
-      // 네트워크 일시 오류는 새 버전 배포 증거가 아니므로 무시
+      // 일시적 네트워크 오류 무시
     }
   }, [mine, navigate]);
 
   // 구버전 파라미터 청소
   useEffect(() => {
     if (mine !== '') clearReleaseParam(mine);
-  }, [mine]);
+  }, [mine, pathname, searchParams]);
 
-  // 주기적 체크 및 가시성/포커스/온라인/라우트 변경 시 즉시 검사
+  // 주기적 체크 및 가시성/포커스/온라인 이벤트
   useEffect(() => {
-    if (stale) return;
-
     const timer = setInterval(() => void check(), everyMs);
-    const onVisibilityChange = (): void => void check();
+    const onVisibilityChange = (): void => {
+      if (document.visibilityState === 'visible') void check();
+    };
     const onFocus = (): void => void check();
     const onOnline = (): void => void check();
 
@@ -150,13 +161,15 @@ export function StaleTabNotice({
     window.addEventListener('focus', onFocus);
     window.addEventListener('online', onOnline);
 
+    void check();
+
     return () => {
       clearInterval(timer);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('online', onOnline);
     };
-  }, [check, everyMs, stale]);
+  }, [check, everyMs]);
 
   // 사용자가 페이지를 이동(라우팅)할 때도 새 버전 체크
   useEffect(() => {
@@ -168,18 +181,23 @@ export function StaleTabNotice({
   return (
     <div
       role="status"
-      className="fixed inset-x-0 bottom-0 z-[100] flex flex-wrap items-center justify-between gap-3 border-t border-emerald-500/30 bg-[#090D16]/95 px-5 py-3.5 text-sm text-foreground shadow-2xl backdrop-blur-md transition-all duration-300"
+      className="fixed inset-x-0 bottom-0 z-[100] flex flex-wrap items-center justify-between gap-3 border-t border-emerald-500/40 bg-[#090D16]/98 px-4 sm:px-6 py-3 text-sm text-foreground shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-2 duration-200"
     >
       <div className="flex items-center gap-2.5">
         <Sparkles className="size-4 shrink-0 text-emerald-400 animate-pulse" />
-        <span className="font-medium text-emerald-200 [word-break:keep-all]">
+        <span className="font-semibold text-emerald-200 text-xs sm:text-sm [word-break:keep-all]">
           최신 시스템 업데이트가 배포되었습니다. 새 버전 자동 적용이 이전 브라우저 캐시에 막혔습니다. 로그인은 유지되며 [새로고침]을 누르면 최신 웹페이지를 즉시 불러옵니다.
         </span>
       </div>
       <Button
         size="sm"
-        className="min-h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md flex items-center gap-1.5 px-4"
+        className="min-h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 px-3.5 rounded-lg shrink-0 cursor-pointer"
         onClick={() => {
+          isRefreshingRef.current = true;
+          // 수동 클릭 시 세션 스토리지 플래그를 비워 새로고침 후 루프에 갇히지 않게 함
+          try {
+            window.sessionStorage.removeItem(REFRESH_KEY);
+          } catch {}
           const targetUrl = targetVersion
             ? releaseRefreshUrl(window.location.href, targetVersion)
             : window.location.href;

@@ -1,3 +1,4 @@
+﻿import fs from 'node:fs';
 import path from 'node:path';
 import type { NextConfig } from 'next';
 
@@ -28,7 +29,28 @@ const ADSENSE_CONNECT =
  * of the build it was served by and `/frontend-version` has the id of the
  * frontend build answering now. When they differ, the tab is stale.
  */
-const BUILD_ID = process.env.BUILD_ID ?? String(Date.now());
+function resolveBuildId(): string {
+  if (process.env.BUILD_ID) return process.env.BUILD_ID;
+  if (process.env.NEXT_PUBLIC_BUILD_ID) return process.env.NEXT_PUBLIC_BUILD_ID;
+  const idFile = path.join(import.meta.dirname, '.build_id');
+  if (fs.existsSync(idFile)) {
+    try {
+      const val = fs.readFileSync(idFile, 'utf8').trim();
+      if (val) return val;
+    } catch {
+      /* ignore */
+    }
+  }
+  const newId = String(Date.now());
+  try {
+    fs.writeFileSync(idFile, newId, 'utf8');
+  } catch {
+    /* ignore */
+  }
+  return newId;
+}
+
+const BUILD_ID = resolveBuildId();
 
 const config: NextConfig = {
   generateBuildId: () => BUILD_ID,
