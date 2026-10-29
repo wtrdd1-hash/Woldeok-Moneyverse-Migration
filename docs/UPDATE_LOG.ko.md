@@ -1,3 +1,6 @@
+## v2026.10.29.1211 — 브랜치 통합 후보 / 운영 승격 보류
+- [한국어 작업 기록](worklog/2026-10-29-branch-integration-v1211.ko.md) / [영어](worklog/2026-10-29-branch-integration-v1211.md); [내부](updates/v2026.10.29.1211-internal.ko.md) / [GitHub](updates/v2026.10.29.1211-github.ko.md); [초안 PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). 프론트엔드 전체 1,910개 통과, 금융 승격 검증 차단으로 메인·테스트·운영 미승격.
+
 ## v2026.10.29.1205 — 원장 불일치 증거 기록 체계 (격리 Test 통과)
 - [한국어 진행기록](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md) / [영어](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md). 이전 부호 오류 정정: 18개 사용자 현금 계좌 각 +1,000 WLD 차이, 총 18,000. 294번은 금액 변경 없이 차이 증거 기록, 승인 금융 권한 유지. 역사적 원인 증명·정정은 미완료.
 
