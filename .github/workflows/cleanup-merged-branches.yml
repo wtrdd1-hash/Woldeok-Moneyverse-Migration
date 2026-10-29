@@ -39,6 +39,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # A merged PR is not sufficient deletion evidence after squash or stack merges.
+          # Retain exact uncontained heads even if their PR is marked merged.
+          git fetch --no-tags --quiet origin '+refs/heads/main:refs/remotes/origin/main'
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+          if ! bash scripts/release/verify-merged-pr-head.sh "$HEAD_REF" "$HEAD_SHA" "$main_sha"; then
+            echo "::warning::retain merged PR branch: exact head is not verified in main: $HEAD_REF"
+            exit 0
+          fi
           git push --force-with-lease="refs/heads/${HEAD_REF}:${HEAD_SHA}" origin ":refs/heads/${HEAD_REF}" || {
             echo "branch moved after merge, is already absent, or is protected: $HEAD_REF"
           }
