@@ -2,6 +2,8 @@
 
 ## v1468 / F675-173 — Verified owner-private personal-data export (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
+**Planning Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (unmerged, release HOLD).
+
 **Cycle:** Previous Feature Improvement v1466 → Current Feature Addition v1468 → Next Feature Improvement v1470 (provisional). **Authority:** remote main 9ebc5613845ba2e8179a0051e86db996593c8a19 checked 2026-10-29 18:06 KST; QA v1369 FAILED/HOLD. **Developer handoff:** GitHub issue #1876. Planning only, not a deployed product, legal conclusion, or export certification.
 
 ### Existing source and decision

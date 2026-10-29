@@ -1,6 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.29.1468 — F675-173 회원 전용 검증형 개인정보 내보내기 (기능 추가 / 초안 / 운영 보류)
+
+**기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (병합·배포 보류).
 - 주기: 이전 보완 v1466 → 현재 추가 v1468 → 다음 보완 v1470(잠정). 시작 main 9ebc5613845ba2e8179a0051e86db996593c8a19, 완료 QA v1369 FAILED/HOLD. 개발 인계 이슈 #1876. 문서 기획만 수행, 미배포.
 - 실제 계정 개인정보 센터와 NestJS privacy/requests는 열람·정정·처리제한·동의철회·삭제 요청을 received로 접수할 뿐 파일 생성/전달을 하지 않는다. 신규 /account/privacy/export는 회원 명시 동의·본인 재인증 10분 이내, 승인된 데이터만 암호화 ZIP·서명 매니페스트로 생성, 비밀정보·타인 개인정보 제외, 24시간 1회/활성 1개/25MiB, 7일 만료·10분 1회 다운로드 인증. 기존 수동 열람 요청과 법적 처리 완료를 혼동하지 않는다.
 - NestJS/Next.js/Android 동등, SECURITY DEFINER 본인 함수, 불변 영수증·작업자 경합 차단·삭제 증빙, 관리자 메타데이터만, noindex/no-store, WCAG 2.2 AA/320px, WLD 변화 0, 기능 OFF·비파괴 롤백. P0 REPO1468-01 FIN1468-02 SEC1468-03 REL1468-04; P1 EXPORT1468-05~10. 합성 PG 10,001행·동시 100·권한 위조 100·다운로드 중단 50·경합 30은 수용 조건이며 미실행.

@@ -14,3 +14,5 @@
 **P0:** REPO1468-01 브랜치 보존(#1663), FIN1468-02 MINT·국고 출처(#1816), SEC1468-03 깨끗한 PG 채팅 신고 오류(#1874)·체크섬, REL1468-04 독립 복원·정확 SHA 공식 Test·빌드만으로 자동병합 금지(#1088). **P1:** EXPORT1468-05~10 스키마, 작업자, API/웹/Android, UI, 개인정보/관리자, 실제 PG 회귀. 수용시험은 명세만 작성, 미실행. 외부 독립 중복제거 승인 신규 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 
 **GitHub:** 개발 인계 이슈 #1876, 브랜치 docs/planning-v1468-privacy-export-20261029의 Draft PR 예정. 실제 코드는 개발 예약의 별도 브랜치·공식 Test 정확 SHA·승인된 운영승격에만 연계한다. 병합·배포 미승인.
+
+**기획 Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (병합·배포 보류).

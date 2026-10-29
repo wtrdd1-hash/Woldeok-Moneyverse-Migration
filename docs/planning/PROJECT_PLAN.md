@@ -1,6 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
 ## v2026.10.29.1468 — F675-173 owner-private verified personal-data export (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Planning Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (unmerged, release HOLD).
 - Cycle: Previous Improvement v1466 → Current Addition v1468 → Next Improvement v1470 (provisional). Main 9ebc5613845ba2e8179a0051e86db996593c8a19 start; latest completed QA v1369 FAILED/HOLD. GitHub developer handoff #1876. Documentation only, not deployed.
 - Source: account/privacy UI and NestJS privacy/requests record only access/correction/restriction/withdrawal/deletion, status received; service explicitly excludes file export and delivery. New opt-in /account/privacy/export uses owner-bound queued encrypted ZIP with signed manifest, class allowlist, no secrets/other-user PII, step-up ≤10 min, 1 active/24h, ≤25 MiB, 7-day expiry and 10-min one-use download authorization. Existing manual access request stays separate.
 - Proposed NestJS/Next.js/Android parity, SECURITY DEFINER owner functions, immutable receipts, worker fencing, purge proof, admin metadata-only review, private noindex/no-store, WCAG 2.2 AA/320px, zero WLD effects, feature OFF and non-destructive rollback. P0 REPO1468-01 FIN1468-02 SEC1468-03 REL1468-04; P1 EXPORT1468-05..10. Synthetic PG 10,001 records, concurrency 100, forged owner 100, interrupted downloads 50 and race 30: acceptance proposed, NOT RUN.

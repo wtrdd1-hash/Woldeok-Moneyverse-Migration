@@ -14,3 +14,5 @@
 **P0:** REPO1468-01 historical ref preservation (#1663); FIN1468-02 MINT and treasury provenance (#1816); SEC1468-03 clean PG chat-report failure (#1874) and checksum integrity; REL1468-04 independent restore, official Test exact SHA and build-only merge prevention (#1088). **P1:** EXPORT1468-05..10 schema, worker, API/web/Android, UX, privacy/admin, real PG regression. Acceptance tests are planned but NOT EXECUTED. External independent deduplicated approved evidence new 0; cumulative UNKNOWN/10,000; BLOCKED/IN PROGRESS.
 
 **GitHub:** development issue #1876; proposed Draft PR on branch docs/planning-v1468-privacy-export-20261029. All runtime implementation delegated to independent development branches and exact-SHA Test→authorized Production gates. No merge/deploy authorized.
+
+**Planning Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1877 (unmerged, release HOLD).
