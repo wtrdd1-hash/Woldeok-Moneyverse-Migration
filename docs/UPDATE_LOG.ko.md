@@ -1,13 +1,5 @@
-## 2026-10-28 v1430 — F675-163 캘린더 저장 마감 출처·개정 무결성 (기능 보완 / DRAFT / 보류)
-- Draft PR #1753 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1753) and issue #1748 (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748); base is unmerged #1749; no independent merge.
-- 이전 추가 v1428 / 현재 보완 v1430 / 다음 추가 v1432(잠정); main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인, 선행 #1749 미병합.
-- 마감 출처는 shop_catalog.sale_ends_at이며 shop_inventory.ends_at이 아님을 정정, 과거 마감 필터·시계 테스트 누락 발견, 재고 노출과 구분. 불변 출처 개정·발생 회차, 일정 변경 시 명시적 재확인, 출처 장애 차단, 100개 제한/권한/멱등성/Android/접근성·롤백 명세.
-- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. QA v1350 FAILED, 디스크98%, 과거 18,000 WLD 차이, 마이그레이션·권한·Test·복원 HOLD. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED. 문서 전용.
-
-## 2026-10-28 v1428 — F675-163 회원 이벤트 캘린더 저장 목록 (기능 추가 / 초안 / 보류)
-- **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
-- 이전 기능 보완 v1426 / 현재 기능 추가 v1428 / 다음 기능 보완 v1430(잠정). main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 확인. 기존 /calendar에 회원별 저장 기능 없음. 시즌·상점 마감 UUID만 지원, 오늘·주간 제외. P0 ENV1428-01 FIN1428-02 SEC1428-03 REL1428-04; P1 CAL1428-05 CAL1428-06 CAL1428-07 CAL1428-08 CAL1428-09 CAL1428-10. [Draft PR #1749](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1749), [이슈 #1748](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1748).
-- 본인 저장/해제·100개 제한·영수증·비공개 비식별화·Android·WCAG·noindex/no-store, 자동 알림·금융 변경 없음. QA v1349 FAILED, v1350 중간 진행 중, 디스크98%, 18,000 WLD 원장 차이, Test·복원 보류. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 문서만 변경.
+## v1434 — 고객지원 임시글 무결성 (2026-10-29 KST, DRAFT / HOLD)
+- Previous Addition v1432 / Current Improvement v1434 / Next Addition v1436. main 35971c600 시작·중간 동일, 선행 Draft #1759 미병합. 실제 migration196의 신규 문의 키 재실행은 제목/본문을 비교하지 않고 직접 Next.js 전송은 UUID를 매번 재생성. 해결된 문의 답장은 재개방, 만료 활성 임시글은 부분 유일 인덱스 점유, 공용 DB 역할은 p_actor 자체 인증 불가. 정규화 해시 불변 영수증, 안정 전송 키, 쓰기 시 만료 전환, 회원/세션 커서, 해결된 문의 재확인, 위조 회원 DB 시험을 명세. 백로그: ENV1434-01 FIN1434-02 SEC1434-03 REL1434-04 SUP1434-05 SUP1434-06 SUP1434-07 SUP1434-08 SUP1434-09 SUP1434-10. QA v1352: 18,000 WLD 차이, 체크섬 5건/미적용 20건, 앱 DML 235/243, PUBLIC 은행 함수 3개. 00:14 디스크 99%와 01:08 97%는 해결 증거 아님. 외부 승인 신규 0/누적 UNKNOWN·목표 10,000. 배포 없음.
 
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
