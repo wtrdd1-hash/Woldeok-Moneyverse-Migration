@@ -1,4 +1,5 @@
-﻿import {
+﻿import { randomUUID } from 'node:crypto';
+import {
   BadRequestException,
   Body,
   Controller,
@@ -35,6 +36,11 @@ export class TreasuryOperationDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 export class TreasuryDisburseDividendDto {
@@ -47,6 +53,11 @@ export class TreasuryDisburseDividendDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 export class TreasuryDisburseTargetedSubsidyDto {
@@ -64,6 +75,11 @@ export class TreasuryDisburseTargetedSubsidyDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 export class TreasuryUserDonateDto {
@@ -101,6 +117,11 @@ export class TreasuryDisburseGrantDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 export class TreasuryListQueryDto {
@@ -130,6 +151,11 @@ export class TreasuryDistributeBudgetDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 export class TreasuryBuybackBurnDto {
@@ -141,6 +167,11 @@ export class TreasuryBuybackBurnDto {
   @IsString()
   @MinLength(10, { message: 'reason must be at least 10 characters' })
   reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
 }
 
 import { unverifiedFinanceOperation } from '../../economy/monetary/finance-hold';
@@ -260,11 +291,12 @@ export class AdminTreasuryController {
     @Body() dto: TreasuryDisburseDividendDto,
   ) {
     const adminId = requireUserId(request);
+    const idempotencyKey = dto.idempotencyKey || randomUUID();
     return this.service.disburseCitizenDividend(
       adminId,
-      dto.amountPerCitizenWld,
+      dto.amountPerUserWld,
       dto.reason,
-      dto.idempotencyKey,
+      idempotencyKey,
     );
   }
 
