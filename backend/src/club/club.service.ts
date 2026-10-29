@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ClubInputError, PostgresClubRepository } from './club.repository';
+import { rejectUnjournaledClubSettlement } from './club.ledger-hold';
 
 export interface CreateClubInput {
   readonly tag: string;
@@ -19,26 +20,8 @@ export interface CreateFeedPostInput {
 export class ClubService {
   constructor(private readonly repo: PostgresClubRepository) {}
 
-  async createClub(actorUserId: string, dto: CreateClubInput, idempotencyKey: string) {
-    try {
-      return await this.repo.createClub(
-        actorUserId,
-        dto.tag,
-        dto.name,
-        dto.description || '',
-        dto.charter || '',
-        dto.joinMode || 'public',
-        idempotencyKey,
-      );
-    } catch (err: unknown) {
-      if (err instanceof ClubInputError) throw new BadRequestException(err.message);
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('insufficient balance')) throw new BadRequestException(msg);
-      if (msg.includes('unique') || msg.includes('duplicate')) {
-        throw new BadRequestException('클럽 태그 또는 이름이 이미 사용 중입니다.');
-      }
-      throw err;
-    }
+  async createClub(_actorUserId: string, _dto: CreateClubInput, _idempotencyKey: string) {
+    return rejectUnjournaledClubSettlement();
   }
 
   async listClubs(actorUserId?: string, search?: string, limit = 50, offset = 0) {
@@ -110,21 +93,13 @@ export class ClubService {
   }
 
   async contributeToProject(
-    actorUserId: string,
-    clubId: string,
-    projectId: string,
-    amountWld: number,
-    idempotencyKey: string,
+    _actorUserId: string,
+    _clubId: string,
+    _projectId: string,
+    _amountWld: number,
+    _idempotencyKey: string,
   ) {
-    try {
-      return await this.repo.contributeToProject(actorUserId, clubId, projectId, amountWld, idempotencyKey);
-    } catch (err: unknown) {
-      if (err instanceof ClubInputError) throw new BadRequestException(err.message);
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('not a member')) throw new ForbiddenException('클럽 회원만 프로젝트에 기여할 수 있습니다.');
-      if (msg.includes('insufficient')) throw new BadRequestException('WLD 잔액이 부족합니다.');
-      throw err;
-    }
+    return rejectUnjournaledClubSettlement();
   }
 
   async listClubFeed(clubId: string, limit = 50) {

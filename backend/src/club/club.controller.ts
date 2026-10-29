@@ -21,6 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { ClubService } from './club.service';
+import { rejectUnjournaledClubSettlement } from './club.ledger-hold';
 
 export class CreateClubDto {
   @ApiProperty({ description: '클럽 태그 (2-8자 대문자 영문/숫자)', example: 'ALPHA' })
@@ -140,9 +141,8 @@ export class ClubController {
 
   @ApiOperation({ summary: '신규 클럽 창설 (10,000 WLD 소각)' })
   @Post()
-  async createClub(@Req() req: RequestWithSession, @Body() dto: CreateClubDto) {
-    const actorUserId = requireUserId(req);
-    return this.clubService.createClub(actorUserId, dto, dto.idempotencyKey);
+  async createClub() {
+    return rejectUnjournaledClubSettlement();
   }
 
   @ApiOperation({ summary: '클럽 상세 정보 조회' })
@@ -215,20 +215,8 @@ export class ClubController {
 
   @ApiOperation({ summary: '협동 프로젝트 WLD 펀딩 기여 (영구 소각)' })
   @Post(':id/projects/:projectId/contributions')
-  async contributeToProject(
-    @Req() req: RequestWithSession,
-    @Param('id', ParseUUIDPipe) clubId: string,
-    @Param('projectId', ParseUUIDPipe) projectId: string,
-    @Body() dto: ContributeProjectDto,
-  ) {
-    const actorUserId = requireUserId(req);
-    return this.clubService.contributeToProject(
-      actorUserId,
-      clubId,
-      projectId,
-      dto.amountWld,
-      dto.idempotencyKey,
-    );
+  async contributeToProject() {
+    return rejectUnjournaledClubSettlement();
   }
 
   @ApiOperation({ summary: '클럽 피드 글 목록 조회' })
