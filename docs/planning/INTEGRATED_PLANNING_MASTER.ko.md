@@ -1,5 +1,48 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1468 / F675-173 — 회원 본인 전용 검증형 개인정보 내보내기 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 보완 v1466 → 현재 기능 추가 v1468 → 다음 기능 보완 v1470(잠정). **기준:** 2026-10-29 18:06 KST 최신 원격 main 9ebc5613845ba2e8179a0051e86db996593c8a19, 완료 QA v1369 FAILED/HOLD. **개발 인계:** GitHub 이슈 #1876. 기획일 뿐 실제 구현·법적 충족·운영 인증이 아니다.
+
+### 기존 코드와 설계 판단
+- Next.js account/privacy/page.tsx는 개인정보 권리 요청 접수·목록만 제공한다. NestJS privacy.controller.ts는 privacy/requests GET/POST만 제공하며, privacy.repository.ts의 요청 유형은 열람·정정·처리제한·동의철회·삭제, 상태는 received뿐이다. privacy.service.ts에는 파일 생성·외부 전송·계정 변경을 하지 않는다고 명시되어 있다. 조사한 main에서 검증된 다운로드 파일, 본인 전용 내보내기 작업, Android 동등 기능을 확인하지 못했다.
+- 기존 열람 요청이 자동 내보내기로 법적 처리 완료됐다고 표시하지 않는다. 수동 요청과 관리자 검토는 별도로 유지한다. 자동 파일은 승인된 데이터 일부를 제공하는 선택적 서비스이며 전체 개인정보 열람의 법적 완결성을 보장하지 않는다. WLD·원장·세금·계정·동의 기록을 수정하거나 송금하지 않는다.
+- 브라우저가 여러 API를 직접 조합하는 방식은 타인 정보 유출·출처 누락 위험으로 제외한다. 이메일 첨부 파일은 통제 불가능한 사본을 생성하므로 제외한다. 공개 객체저장소 서명 URL은 본인 재인증·철회 우회를 만들 수 있어 제외한다. 서버가 통제하는 암호화 파일과 짧은 유효기간의 동일 출처 다운로드를 채택한다.
+
+### 목적, 대상, 권한, 진입점, 화면과 상태
+- 목적은 로그인한 적격 회원이 본인 데이터 중 승인된 범위의 사본을 직접 요청하고 포함 범위와 생성 근거를 확인하는 것이다. 비회원은 로그인 안내만 표시한다. 정지·삭제 진행·소유권 미확인 계정은 기존 수동 열람 절차를 이용하며 민감 정보를 부분 노출하지 않는다.
+- 계정 → 개인정보 센터 → 내 데이터 내보내기 → /account/privacy/export. 파일에 포함되는 정보·제외 정보·생성 시간·만료·법적 열람 요청과의 차이를 설명한다. 기본 해제된 명시적 동의 체크 후 '내보내기 요청', '진행 상태 새로고침', READY 상태에서 '본인 확인 후 다운로드', 만료 시 '새로 요청', 오류 시 '개인정보 문의' CTA를 제공한다. 취소된 작업은 되살리지 않는다.
+- 상태는 NOT_REQUESTED, REAUTH_REQUIRED, QUEUED, BUILDING, READY, FAILED, EXPIRED, CANCELLED, HOLD, DOWNLOAD_AUTH_EXPIRED. 대기·생성·보류를 완료로 표시하지 않는다. 응답 유실 시 RECEIPT_UNKNOWN으로 표시하고 원래 멱등 요청 UUID의 영수증을 조회한다. 새 키로 자동 재시도하지 않는다. 로그아웃·계정 전환 시 메모리의 작업 정보와 다운로드 권한을 즉시 폐기한다.
+- 회원당 QUEUED/BUILDING/READY 작업 1개, 최근 24시간 신규 생성 최대 1개, 파일 크기 최대 25MiB, READY 후 최대 7일 보관. 다운로드는 매번 10분 이내 유효한 1회성 인증이 필요하다. 만료·삭제 판단은 서버가 한다.
+
+### 데이터 범위·불변 매니페스트
+- 서버 승인 허용목록 v1: 본인 계정·프로필 공개 필드, 본인 동의 선택·개인정보 요청 영수증, 본인 현금/은행 원장 활동, 본인 업무·퀘스트 수행 이력의 읽기 전용 투영. 화면과 manifest.json에 데이터 종류, 원본 함수/테이블 버전, 기준 시각, 행 수, 포함 필드, 제외 사유, schema_version 및 종류별 SHA-256을 표시한다.
+- 비밀번호 해시·재설정 토큰·인증 쿠키·세션 ID·OAuth 자격증명·내부 보안/관리자 감사 자료·타인 연락처와 신원·비공개 채팅/상담 본문·미승인 제3자 정보·결제 자격증명·출처 불명 데이터는 제외한다. 임의 SELECT *나 사용자 지정 ID 조인은 금지하고 서버 소유권 함수로 투영한다. 공동 기록의 타인 필드는 비식별 처리하고 제외 이유를 남긴다. 소유권/출처를 증명하지 못하면 제외 이유를 남기거나 HOLD로 중단한다.
+- UTF-8 JSON과 manifest.json을 담은 결정적 ZIP 형식, UTC ISO-8601, WLD 금액은 문자열, 파일명은 고정 허용목록, CSV 수식·HTML 실행 콘텐츠 없음. 매니페스트의 파일별 해시와 전체 ZIP SHA-256, 서명키 버전을 기록한다. 해시는 무결성 검증이며 법적 완전성 보증이 아니다. 영수증은 회원·export_id·스키마·데이터 기준 시각·파일 해시·만료·상태에 결합하며 개인정보 본문은 저장하지 않는다.
+
+### API·인증·웹·Android
+- 신규 NestJS 제안 API: POST /api/v1/privacy/exports ({requestId: UUID, selectedClasses: 승인된 enum[]}), GET /api/v1/privacy/exports?limit=20, GET /api/v1/privacy/exports/:exportId, POST /api/v1/privacy/exports/:exportId/cancel, POST /api/v1/privacy/exports/:exportId/download-authorizations, GET /api/v1/privacy/exports/:exportId/download. 실제 경로는 개발자가 계약·route-map을 검증한다.
+- Next.js account/privacy/export의 Server Action/BFF와 동일 출처 인증 스트리밍을 사용한다. INTERNAL_API_TOKEN·저장소 경로·암호화 키를 브라우저·CDN에 전달하지 않는다. Android app-api는 동일 상태와 소유권을 유지하되 브라우저 CSRF 쿠키 대신 앱 전용 인증을 쓴다. 생성/취소/다운로드 권한 발급에는 SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard와 10분 이내 재인증이 필요하다. 다운로드 직전 현재 세션·소유자·계정 상태·재인증·만료·파일 해시·1회성 권한을 원자적으로 재검증한다. 공개 서명 URL은 금지한다.
+- HTTP: 202 대기, 200 기존 멱등 영수증, 400 입력 오류, 401 세션 없음, 403 권한/재인증 불충족, 404 타인/미존재 동일 응답, 409 동일 키 다른 본문 또는 활성 작업 충돌, 410 권한 만료/철회, 413 파일 상한, 429 요청 상한, 503 KMS/저장소/작업자/근거 미확인. Cache-Control private,no-store, X-Robots-Tag noindex, 첨부 다운로드 Content-Disposition, application/zip, nosniff, 민감 리다이렉트 금지. 비소유자 응답은 내용·시간 차이를 최소화한다.
+
+### PostgreSQL 제약·인덱스·트랜잭션·작업자
+- 기존 적용 SQL 수정 없이 연속된 다음 번호의 신규 마이그레이션 제안. privacy_export_jobs(export_id UUID PK, owner_id UUID FK users, request_uuid UUID, request_digest bytea, classes_version integer, selected_classes 검증 jsonb, 상태 enum, created/started/ready/expires/finished, lease_until, attempt_count, artifact_ref 불투명 참조, artifact_sha256, manifest_sha256, failure_code 허용목록, generation bigint). UNIQUE(owner_id,request_uuid), 활성 상태 부분 UNIQUE(owner_id), (owner_id,created_at DESC,export_id) 조회 인덱스, (status,lease_until,created_at) 작업자 인덱스, 상태별 시각·해시 32바이트 CHECK. 개인정보 본문·ZIP 바이트를 DB에 저장하지 않는다.
+- privacy_export_events는 불변 전이·행위자 유형·요청 해시를 저장한다. privacy_export_download_grants는 1회성 토큰 해시·세션 결합 해시·10분 만료·사용 시각·generation을 보관한다. privacy_export_purge_receipts는 파일 삭제 시각·객체 버전 지문·독립 확인 지문을 남긴다. 감사 최소 정보 보존 기간은 별도 검토한다.
+- 본인 전용 SECURITY DEFINER 생성/목록/상태/취소/권한발급/소비 함수만 앱 계정에 EXECUTE를 허용한다. 테이블 직접 읽기/쓰기와 PUBLIC EXECUTE는 명시적으로 회수한다. SQL의 p_actor 매개변수만으로 인증됐다고 간주하지 않으며 서비스에서 검증된 세션·Bearer로 결정한다. (회원,요청 UUID) 자문 트랜잭션 잠금 → 재생 영수증·본문 해시 확인 → 회원 잠금·활성 작업 상한 검증 → 상태 변경 순서를 고정한다. 작업자는 SKIP LOCKED와 만료 임대, generation 비교로 지연 완료가 취소·만료 작업을 READY로 되살리지 못하게 한다. 임시 암호화 객체를 완성·검증한 뒤에만 원자적으로 READY와 해시를 기록한다. KMS/쓰기 실패 시 READY 금지.
+- 만료·취소 후 삭제 작업자가 암호화 객체를 삭제하고 독립 삭제 영수증을 기록한다. 백업·복원 과정에서 만료된 파일이 부활하지 않아야 한다. 법적 보존·삭제 요청 시 해당 내보내기 작업을 보류/취소하며 원본 기록을 자동 삭제하지 않는다.
+
+### 관리자·보안·SEO·모바일 접근성·분석
+- 관리자는 상태별 건수·소요시간·오류 코드·삭제 지연·보류 사유만 확인한다. 파일 내용·다운로드 대리 실행·회원별 파일 링크는 제공하지 않는다. 예외 보존에는 2인 승인과 불변 감사가 필요하다. 분석/로그에 개인정보·토큰·파일명·URL·매니페스트 필드 값을 넣지 않는다. KMS와 접근 로그는 별도 보호한다.
+- 개인 화면 noindex/nofollow, 사이트맵 제외, SSR 공유 캐시 금지, CSP·Referrer-Policy 강화. 320px, 44px 조작부, 키보드 포커스, aria-live 상태 안내, 색상·카운트다운만으로 만료 전달 금지, 한/영 문구 동등, TalkBack/VoiceOver, WCAG 2.2 AA. 공개 SEO는 개인정보 안내문에 한정하며 개인 파일 페이지 색인 금지.
+- KPI는 생성 READY p50/p95, 인증된 다운로드 성공률, 취소율, HOLD/503 비율, 파일 삭제 지연 p95, 타인 접근 성공 0, 유출 URL 0, WLD·원장 변화 0. 회원별 다운로드 행태는 외부 분석에 전송하지 않는다.
+
+### 수용시험·무중단 배포·롤백·백로그
+- 격리 PostgreSQL 17에서 합성 10,001행, 동일 키 동시 100요청은 작업 1개·동일 영수증, 타인 권한 위조 100건 정보 0, 다운로드 중단 50건 다른 권한 소비 0, 만료·취소·작업자 경합 30건 READY 부활 0, 로그아웃·계정 변경 30건 차단, 25MiB 경계, KMS 장애, 해시 불일치, 백업 복원·삭제, 원장 변화 0을 실제 실행해야 한다. 테스트를 기획했다고 통과했다고 주장하지 않는다. 웹/Android·공식 Test exact-SHA 인증 E2E 필요. 운영 개인정보를 테스트 데이터로 사용하지 않는다.
+- 기능 스위치 기본 OFF, 추가형 마이그레이션, 격리 작업자, 파괴적 소급 변경 없음. 데이터 종류·보존 기간의 독립 개인정보/법무 검토, KMS·외부 백업 복원, DB 권한 회귀, 이미지/소스 SHA, 공식 Test E2E 후 GitOps 운영승격. 소수 적격 회원 카나리에서 개인정보 누출을 감시한 뒤 확대한다. 롤백은 신규 요청·다운로드 차단, 발급 권한 취소, 감사 보존, 보류 검토 후 파일 안전 삭제이며 기존 개인정보 요청·원장·테이블을 파괴하지 않는다.
+- P0: REPO1468-01 과거 브랜치 보존(#1663), FIN1468-02 MINT 18,000 WLD·국고 미연결 552행(#1816), SEC1468-03 깨끗한 PG의 채팅 신고 오류(#1874)·마이그레이션 체크섬 5건·운영자 승인 기존 금융 권한, REL1468-04 독립 복원·공식 Test exact-SHA·빌드만으로 자동병합 금지(#1088). P1: EXPORT1468-05 스키마/매니페스트, EXPORT1468-06 작업자/멱등성, EXPORT1468-07 API/웹/Android, EXPORT1468-08 화면/a11y, EXPORT1468-09 관리자/개인정보/KPI, EXPORT1468-10 실제 PG/보안/롤백.
+- QA v1369: HTTP 48/50(의도된 404 2건), 모바일 36/36, 대상 테스트 48/48 및 보안 24/24 PASS, route-ledger CLI 근거 누락 FAIL, 의존성 감사 Moderate 1건, 체크섬 불일치 5건, 개발 원장 산술 차이 0이나 MINT 자금 출처 미검증, 열린 Draft PR 147개·충돌 58개. 기존 Production v1502는 본 기능 배포가 아니다. 외부 독립 중복제거·검증 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 문서 전용 초안, 운영승격 HOLD.
+
+
 ## v1452-R1 — 새 뉴스 스케줄러 운영 첫 시간 수용 (2026-10-29 15:30 KST)
 - v1502 수정 스케줄러 첫 자동 주기: 후보 5건, 뮤야 엔터(MYUY) 발행 1건, 치무전자(CHIMU314) 새 중복 0건. 로컬 AI 시간초과에 따라 결정론적 대체 엔진 사용 사실 정확 기록. 24시간/7일 장기 편중 개선은 아직 측정 전. [운영기록](../releases/v2026.10.29.1452-news-scheduler.ko.md).
 
