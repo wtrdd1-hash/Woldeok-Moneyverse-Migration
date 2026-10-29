@@ -2,6 +2,8 @@
 
 ## v2026.10.29.1452 — F675-169 검증된 도움말 유용성 피드백 (기능 추가 / 초안 / 운영 보류)
 
+**개발 DB 읽기 전용 점검(10:15 KST):** `woldeok_moneyverse_dev`의 `help_articles`, `help_article_revisions`, `help_article_feedback_current`, `help_article_feedback_events`는 `to_regclass` 결과 모두 NULL. 소스 마이그레이션 282는 적용 증빙이 아니며 운영 DB는 별도 확인하지 않음.
+
 **개발 인계:** [이슈 #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814); 선행 [초안 PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806)은 미병합. 이전 보완 v1450 → 현재 추가 v1452 → 다음 보완 v1454(잠정). main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` 시작·중간 재조회, QA v1361 HOLD(과거 증거). 실제 `/help/[slug]`에는 고객지원 링크만 있고 회원 유용성 예/아니요·정확한 개정 영수증·관리자 집계가 없다. 마이그레이션 282에는 검토 개정이 있지만 공개 API는 개정 ID를 반환하지 않고 `VERIFIED_HELP_CENTER_V1`로 기능을 보호한다. **구현되지 않은 기획.**
 - 명시적 예/아니요, 선택 사유 enum, 변경·삭제, 자유 서술 개인정보/자동 문의/자동 게시 금지, 승인된 정확한 개정에만 본인 전용 불변 해시 요청 영수증·CAS. 도움말 원본·독립 10,000건 근거 검증 전 OFF. NestJS·Next·Android 비공개 API, SECURITY DEFINER 최소 권한, 현재 응답 유일성·불변 이벤트, CSRF/BOLA/제한, 관리자 20명 이상 익명 집계, WCAG 2.2 AA/320px/TalkBack, SEO noindex/no-store, KPI, WLD 영향 0.
 - P0 ENV1452-01, FIN1452-02, SEC1452-03, REL1452-04; P1 HELP1452-05, HELP1452-06, HELP1452-07, HELP1452-08, HELP1452-09, HELP1452-10. 마지막 QA v1361: 18계좌/+18,000 WLD, 앱 DML239, PUBLIC 은행3, 체크섬5/미적용20, 독립 복원·정확 SHA Test 미검증. 최신 main에는 후속 변경이 있어 해결/지속 여부 재검증 필요. 격리 PG 합성 10,001건·동시 100건·위조 100건은 **시험 미실행**. 영문·국문 전체 계약은 기존 통합 마스터, 신규 독립 파일 없음.

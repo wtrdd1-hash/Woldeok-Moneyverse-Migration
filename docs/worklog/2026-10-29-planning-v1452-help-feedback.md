@@ -20,3 +20,5 @@
 - Latest independently documented QA v1361 HOLD (not current-main clearance). External independently accepted references newly 0, cumulative UNKNOWN/10,000; gate BLOCKED / IN PROGRESS.
 
 - [Draft PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) OPEN / DRAFT / RELEASE HOLD. GitHub changed-file inventory: 20/20 `docs/` (includes predecessor v1450), zero runtime files. EN/KO each 10 unique P0/P1 identifiers, `git diff --check` PASS, release classifier **17 PASS / 0 FAIL**. Initial GitHub CI QUEUED, **not** a CI PASS. Start/mid/end main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` unchanged. Isolated PG, official Test exact-SHA, 10,000 external evidence unverified; Production promotion blocked. Final exact branch SHA is the PR HEAD, not a self-referential document hash.
+
+- Read-only miniPC PostgreSQL metadata check at 10:15 KST: connected `woldeok_moneyverse_dev`, all four help/article/feedback tables absent (`to_regclass` NULL); Production not queried. Feature prerequisite BLOCKED.

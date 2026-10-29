@@ -2,6 +2,8 @@
 
 ## v1452 / F675-169 — 검증된 도움말 유용성 피드백과 회원 영수증 (기능 추가 / 초안 / 운영 보류)
 
+**연결 DB 읽기 전용 확인(10:15 KST):** `SELECT current_database(), to_regclass(...)` 결과 DB는 `woldeok_moneyverse_dev`, `help_articles`, `help_article_revisions`, `help_article_feedback_current`, `help_article_feedback_events`는 **모두 NULL**이었다. 연결된 DB에 마이그레이션 282 기반 도움말 테이블이 없으므로 코드 존재를 배포로 간주하지 않는다. **운영 DB 스키마 확인 결과는 아니다.**
+
 **주기·기준.** 이전 기능 보완 v1450(미병합 초안 PR #1806) → 현재 기능 추가 v1452 → 다음 기능 보완 v1454(잠정). 최신 main `bd590720237020c2ad329d6f62c3b0db5a95a6c1`을 시작·중간에 재조회하고 `AGENTS.md`, `README.md`, 영어 정본 `PROJECT_PLAN.md` 및 한국어 대조를 확인했다. 개발 인계 [#1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814). 마지막 독립 QA v1361 HOLD는 최신 main의 금융·보안 통과를 증명하지 않는다. **문서 기획만 수행**하며 런타임·DB·WLD·Test·Production·기능 스위치는 변경하지 않는다.
 
 ### 목적, 실제 소스 근거와 중복 방지

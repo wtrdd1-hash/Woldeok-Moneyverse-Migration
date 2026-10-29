@@ -20,3 +20,5 @@
 - 마지막 독립 QA v1361 HOLD는 현재 main 승인 증거가 아님. 외부 독립 승인 신규 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
 
 - [초안 PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) OPEN / DRAFT / RELEASE HOLD. 변경 20개 모두 docs/ 아래(선행 v1450 문서 포함), 새 런타임 파일 0. 영문·국문 P0/P1 각 10개, `git diff --check` PASS, 릴리스 분류 `17 PASS / 0 FAIL`. GitHub 첫 CI는 QUEUED로 아직 PASS가 아니다. 시작·중간·완료 main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` 동일. 독립 PG·정확 SHA Test·외부 근거 10,000건 미검증, 운영승격 차단. 최종 브랜치 SHA는 GitHub PR HEAD 참조.
+
+- Read-only miniPC PostgreSQL metadata check at 10:15 KST: connected `woldeok_moneyverse_dev`, all four help/article/feedback tables absent (`to_regclass` NULL); Production not queried. Feature prerequisite BLOCKED.

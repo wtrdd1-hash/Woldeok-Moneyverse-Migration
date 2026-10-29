@@ -2,6 +2,8 @@
 
 ## v1452 / F675-169 — Verified help article usefulness feedback and owner receipts (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
+**Read-only connected-DB verification (10:15 KST):** `SELECT current_database(), to_regclass(...)` returned `woldeok_moneyverse_dev`; `help_articles`, `help_article_revisions`, `help_article_feedback_current` and `help_article_feedback_events` were **all NULL**. Migration 282 is source-only for this connected DB; do not assert the help center or feedback is deployed. This does **not** establish Production schema state.
+
 **Cycle and authority.** Previous Feature Improvement v1450 (unmerged Draft PR #1806) → Current Feature Addition v1452 → Next Feature Improvement v1454 (provisional). Fresh remote main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` rechecked at start and midpoint, with canonical `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md` and Korean counterpart. Development handoff [#1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814). Last independently documented QA v1361 HOLD, not proof of the latest main's finance/security state. This is a **proposal only**; no runtime, DB, WLD, Test, Production, or feature switch changes.
 
 ### Purpose, source evidence and non-duplication
