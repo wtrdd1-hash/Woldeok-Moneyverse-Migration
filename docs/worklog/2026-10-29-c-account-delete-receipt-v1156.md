@@ -11,10 +11,11 @@
 ## In progress
 - [x] RED demonstrated
 - [x] GREEN and focused regression
-- [ ] Full validation, CI and exact-SHA Test
+- [ ] Full validation, CI and exact-SHA Test — blocked by audit/Test
 
-## Finished
-- Pending.
+## Finished — 2026-10-29 13:57 KST
+- Runtime fix and EN/KO internal/GitHub updates recorded. Focused/full local gates and isolated PostgreSQL passed.
+- Strict audit 12 findings; official Test does not serve candidate SHA. Final CI outcome to be appended to PR #1841. RELEASE HOLD: no merge, Test or Production rollout or rollback.
 
 ### Midpoint — 2026-10-29 13:48 KST
 - RED: 9 of 12 new frontend tests failed because malformed HTTP success still navigated to deleted-account success. GREEN: 12/12 pass; related account navigation 2/2 pass. Backend deletion receipt mapping 6/6 pass (2 new assertions).
