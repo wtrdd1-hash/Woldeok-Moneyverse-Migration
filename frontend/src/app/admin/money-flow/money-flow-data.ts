@@ -41,6 +41,13 @@ function count(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 
+// NestJS returns an opaque versioned keyset cursor, not a timestamp. Keep the
+// envelope bounded; the API verifies its posting tie-breaker and filter digest.
+function moneyFlowCursor(value: unknown): value is string {
+  return typeof value === 'string' && /^mf1\.[A-Za-z0-9_-]{1,480}$/.test(value)
+    && !/[\r\n]/.test(value);
+}
+
 function timestamp(value: unknown): value is string {
   return nonEmpty(value) && Number.isFinite(Date.parse(value));
 }
@@ -63,6 +70,6 @@ export function validateMoneyFlowResponse(value: unknown): UserMoneyFlowResponse
     || (s.all_time_transactions !== undefined && !count(s.all_time_transactions))
     || (s.all_time_users !== undefined && !count(s.all_time_users))
     || (s.last_transaction_at !== undefined && s.last_transaction_at !== null && !timestamp(s.last_transaction_at))
-    || (value.next_cursor !== null && !timestamp(value.next_cursor))) return null;
+    || (value.next_cursor !== null && !moneyFlowCursor(value.next_cursor))) return null;
   return value as unknown as UserMoneyFlowResponse;
 }
