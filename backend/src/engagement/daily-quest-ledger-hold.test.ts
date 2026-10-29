@@ -48,6 +48,7 @@ describe('daily quest ledger settlement hold', () => {
       .send(BODY)
       .expect(503);
     expect(response.body.code).toBe('DAILY_QUEST_SETTLEMENT_UNAVAILABLE');
+    expect(response.headers['cache-control']).toContain('no-store');
     expect(claimDailyQuest).not.toHaveBeenCalled();
   });
 
@@ -59,6 +60,13 @@ describe('daily quest ledger settlement hold', () => {
 
   it('does not expose a fabricated empty reward history when the repository is absent', async () => {
     const controller = new DopamineController(null);
+    await expect(controller.getDailyQuestStatus(requestWithSession))
+      .rejects.toMatchObject({ status: 503 });
+  });
+
+  it('fails closed with 503 if ledger status query fails', async () => {
+    const repository = { getDailyQuestStatus: vi.fn().mockRejectedValue(new Error('DB unavailable')) };
+    const controller = new DopamineController(repository as unknown as DopamineRepository);
     await expect(controller.getDailyQuestStatus(requestWithSession))
       .rejects.toMatchObject({ status: 503 });
   });
