@@ -1,129 +1,34 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-## v1454 / F675-169 — 도움말 피드백 게시 식별·재시도·개인정보 보호 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+## v1456 / F675-170 — 근거 연계형 릴리스 준비도 현황판 (기능 추가 / 초안 / 보류)
 
-**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+- **기준·주기:** 이전 보완 v1454 → 현재 추가 v1456 → 다음 보완 v1458(잠정). 원격 main `b84d645a`와 실제 Test/운영 앱 `b44ffd0a` 구분. QA v1363 HTTP 48/50(양쪽 `/help` 404), 모바일 36/36, Draft PR 113개/충돌 48개. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **기능:** 권한 제한된 읽기 전용 `/admin/releases/readiness`, 소스/빌드/Test DB/복원/금융/인증 QA/운영 근거 체인, 검증/실패/만료/누락/불가/승인예외 6종 상태와 HOLD/EVIDENCE_COMPLETE. 승인·승격 버튼 금지. 정확 SHA·서명 증빙, 불변 PostgreSQL 스냅샷, 권한 검증 SECURITY DEFINER, 비식별 내보내기, 관리자 감사, Android 정책, noindex, WCAG 2.2 AA.
+- **안전:** v1213 실제 운영 승격과 운영자 승인 기존 금융 DML 존중. 역사적 체크섬 5건·국고 근거·세션 재사용은 별도 미검증. 10,001행/동시 100건/권한 부정 100건 수용시험은 **미실행**. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04, P1 RELBOARD1456-05~10. 상세 영문 정본과 한국어 대조본 PROJECT_PLAN에 수록.
+- **외부 근거 게이트:** 신규 승인 0건, 누적 검증 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. 문서만 변경, 런타임/Test/Production 미변경.
 
-**회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합 Draft PR #1815 및 개발 이슈 #1814의 문서 전용 보완이다. 시작 시 GitHub main은 b44ffd0af9e2bd6e7c2be7345b72094827078c3d이고 PR #1815는 OPEN이면서 main과 CONFLICTING이었다. 이번 변경은 선행 PR의 정확한 HEAD에 적층하며 main에 병합하지 않는다. AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 한국어 PROJECT_PLAN.ko.md를 기준으로 한다.
+## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 권한 승인 유지
 
-**QA 최신성(11:12 KST):** QA v1363 브랜치 감사 증거가 생성됐으나 완료된 독립 QA 보고서는 없다. 마지막 완료 QA는 v1362 HOLD다.
-
-
-### 확인된 근거와 검증 한계
-- 마이그레이션 282의 공개 도움말 함수에는 이미 독립 승인자 검증과 reviewed_until > clock_timestamp() 만료 검사가 있다. **해당 검사가 없다고 주장하지 않는다.** 그러나 help_public_article, NestJS HelpRepository.article, Next.js 도움말 DTO에는 정확한 published_revision_id, article.version, 화면에 표시한 본문 해시가 없다. 기존 source_sha256은 출처 근거 자료의 해시이며 표시된 제목·본문 해시와 같다는 보장이 없다. 따라서 회원 피드백을 실제 승인된 개정에 정확히 연결할 수 없다.
-- 11:09 KST miniPC 개발 DB woldeok_moneyverse_dev 읽기 전용 조회에서 help_articles, help_article_revisions, help_article_feedback_current, help_article_feedback_events가 모두 NULL이었다. QA v1362에서 마이그레이션 282를 포함한 **소스 기준 미적용 22개**, 체크섬 불일치 5건이 확인됐다. 개발 DB 증거이며 Production DB 상태나 도움말 운영 여부를 증명하지 않는다.
-- QA v1362에서 기존 18명/18,000 WLD의 **원장 산술 차이**는 19개 분개(18 USER_CASH 차변, 1 MINT 대변) 후 **0**으로 측정됐다. 그러나 과거 지급 자금 출처, MINT와 운영자가 주장한 TREASURY의 불일치, 승인 및 연결 감사·아웃박스·재무 영수증은 **미검증**이다(이슈 #1816). 추가 임의 역분개·재지급을 금지하며 산술 0을 감사 완료로 표시하지 않는다. QA #1818은 근거 미검증 JSON 블로그 발행도 지적했다. main b44ffd0a에 블로그 안전성 병합이 있지만 시작 시 정확 SHA CI는 IN PROGRESS였다. 전체 릴리스 HOLD.
-- 외부 독립 근거 신규 승인 **0건**, 중복 제거·분류 후 누적 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 피드백만으로 자동 게시·수정·고객지원 문의 생성·WLD 지급을 하지 않고 이 게이트를 우회하지 않는다.
-
-### 회원 흐름 및 API 계약 보완
-- 실제 승인된 /help/[slug]?locale=ko|en 응답은 **원자적 게시 설명자**를 제공해야 한다: articleId UUID, publishedRevisionId UUID, articleVersion bigint, locale, publishedAt, reviewedUntil, 정규 contentDigest SHA-256. 해시는 언어·제목·요약·본문·출처 URL·출처 해시를 버전 지정한 정규 인코딩으로 계산한다. 가변 slug·발행시각·source_sha256만으로 본문을 식별하지 않는다. SSR·NestJS·Next BFF·Android는 같은 설명자를 사용하고 클라이언트가 제출한 개정·해시를 권위로 인정하지 않는다.
-- 인증 및 동의된 회원은 도움됨/도움되지 않음, 부정 응답의 제한된 사유 코드, 변경·삭제·고객지원 연결을 선택한다. 비회원은 로그인 안내만 본다. 상태: FEATURE_OFF, NO_VERIFIED_PUBLICATION, AUTH_REQUIRED, READY, SUBMITTING, SAVED_VERIFIED, REVISION_CHANGED_409, RETRACTED_OR_EXPIRED_410, RATE_LIMITED_429, UNKNOWN_COMMIT, UNAVAILABLE_503, REMOVING, REMOVED_VERIFIED. HTTP 2xx·리다이렉트·타임아웃만으로 저장 성공을 표시하지 않는다. 영수증의 소유자·intent UUID·게시물/개정·언어·선택/작업·커밋 버전을 확인한다. 철회 후 과거 영수증은 HISTORICAL_NOT_CURRENT로 표시한다.
-- 제안 API: GET /api/v1/help/articles/:id/feedback/me?revisionId=, PUT /api/v1/help/articles/:id/feedback (revisionId, articleVersion, contentDigest, locale, choice, reasonCode?, intentId, expectedVersion), 동일 리소스 DELETE, GET /api/v1/help/feedback/receipts/:intentId. Next BFF·Android /app-api/v1에서 401/403/404/409/410/422/429/503 및 private,no-store를 동일하게 적용한다. ownerId나 SQL p_actor만으로 인증하지 않는다.
-
-### DB·보안·관리자·롤백
-- 체크섬·최신 마이그레이션 순서·격리 DB 검토 후 **전진형 추가 마이그레이션**만 허용한다. 기존 282를 수정하거나 앱 계정에 직접 테이블 DML을 부여하지 않는다. DB 트랜잭션에서 게시물 행을 잠그고 같은 게시 개정·버전·해시, 독립 심사, DB clock_timestamp() 시점의 유효성을 검사한 다음 (owner,intentId) 및 현재 피드백 행을 일정 순서로 잠근다. 현재값·변경 불가 이벤트·영수증을 원자적으로 커밋한다. UNIQUE(owner,intentId), 정규 요청 해시, SECURITY DEFINER 고정 search_path, 세션 결합 소유자 검증, PUBLIC EXECUTE 및 앱 직접 DML 철회가 필수다.
-- 인증된 소유자 확인 후 **현재 게시 상태 거절보다 먼저 기존 커밋 intent 재생을 검사**한다. 같은 intent/내용은 철회 후에도 원래 과거 영수증을 반환하되 새 투표를 만들지 않는다. 같은 UUID에 다른 내용은 409, 타인/미존재 intent는 존재 여부를 숨긴다. 타임아웃 후 영수증 조회, 결과 미확정 시 같은 UUID만 재시도한다. 소유자의 과거 투표 삭제는 게시물 철회·만료 이후에도 소유자 행과 최소 tombstone으로 허용한다. 만료·철회 경합에서 허위 성공을 허용하지 않는다. 90일 보존은 법률·개인정보 검토 전 **제안값**이다.
-- 관리자는 개별 회원 목록 없이 정확한 개정별 서로 다른 회원 **20명 이상** 집계만 본다. 단순 k>=20으로는 기간·필터·인접 스냅샷·보완 집계 차분 공격을 막지 못한다. 고정된 큰 구간, 작은 셀 및 보완 셀 동시 억제, 접근 제한·감사를 적용한다. 자유입력 PII, IP/UA, 공개 SEO 평가 스키마 및 비공개 캐시 유출을 금지한다. 로그아웃·계정 전환 시 영수증·intent 캐시를 격리하고 Android 오프라인 intent는 검증 전 UNKNOWN으로 둔다. WCAG 2.2 AA, 키보드·스크린리더·TalkBack, 320px, no-store/noindex. KPI: 영수증 정합성 목표 100%, 허위 성공·타인 유출·구버전 승인·중복 커밋·소수집계 유출 0, 참여율 기준 미확정. WLD·원장·퀘스트 영향 0.
-
-### 개발 인계 백로그 — P0 4건 / P1 6건
-- **P0 ENV1454-01:** 개발/Test/Production 격리, 저장 공간, 암호화된 외부 백업 및 독립 복원 증명.
-- **P0 FIN1454-02:** 19개 분개 보존, 과거 18건 지급·MINT 출처·승인·연결 영수증 검증(#1816). 산술 0은 자금 출처 승인 아님.
-- **P0 SEC1454-03:** 체크섬 불일치 5건, 282 포함 소스 미적용 22건 조사; 과거 앱 직접 쓰기 권한 239개 관계 및 PUBLIC 은행 함수 실행권한 재측정, 세션 결합 소유자·게시 승인 검증.
-- **P0 REL1454-04:** QA #1818 블로그 근거 문제와 최신 main CI, 선행 PR #1815 충돌 해결, 공식 Test 정확 SHA 인증 E2E, 독립 복원 및 승인된 롤백. 운영승격 금지 유지.
-- **P1 HELP1454-05:** 게시 개정 ID·articleVersion·reviewedUntil·본문 contentDigest, 전진형 스키마/FK/인덱스/ACL.
-- **P1 HELP1454-06:** 게시물/intent 잠금 순서, 과거 멱등 재생, 현재값/이벤트/영수증 원자성, 만료·철회 경합, 본인 삭제.
-- **P1 HELP1454-07:** NestJS/Next BFF/Android 동등성, 동의·세션·CSRF·BOLA, no-store 및 실패 시 503.
-- **P1 HELP1454-08:** 비회원/회원 UI, 정확 영수증, 계정 전환·오프라인, 320px/WCAG/TalkBack.
-- **P1 HELP1454-09:** 관리자 k>=20 차분 공격 방어, 보존·삭제, SEO 및 분석.
-- **P1 HELP1454-10:** 격리 PostgreSQL **합성 이벤트 10,001건**, **동시 요청 100건**, **위조 소유자/개정 100건**, **만료·철회 경합 30건**, **차분 탐침 20건**, 예상치 못한 WLD 변동 0, API/Android 회귀, 정확 SHA Test·롤백. **미실행.**
-
-**최종 게이트:** PARTIAL / DRAFT / RELEASE HOLD. 본 문서는 개발 인계이며 배포 승인이 아니다. 런타임 코드·DB 쓰기·Test/Production·WLD·원장·기능 스위치 변경 없이 Gemini/A/B/C/QA의 브랜치를 보존한다.
+- **운영 적용 완료:** easy-scraping.com, 불변 릴리스 v2026.10.29.1213, 코드 SHA b44ffd0af9e2bd6e7c2be7345b72094827078c3d. PR #1817 병합·원본 후보 CI 성공·정확한 SHA 공식 Test 검증. 이후 다른 작업자가 올린 main QA/문서 코드는 이번 실행 앱 SHA와 구별.
+- 운영 DB를 격리 복원하고 누락된 23개 SQL 전부 리허설한 다음 **실제 PostgreSQL에 적용**. 기록 270→293개(최신 294), 계정 40·원장 거래 891·분개 1,829 불변. 승인된 기존 금융 핵심 3개 쓰기 권한 유지, 임의 분개/국고 중복 지급 없음.
+- 기존 서비스 계속 실행하면서 새 서비스 검증→Nginx 전환→정식 불변 v1213 서비스 재전환, production-current 적용. 정확한 운영 SHA 식별 검사 PASS, 운영 17/17 경로 HTTP 200, 로그인 세션 1884건 유지, 최근 서비스 ERROR 0.
+- **잔존 이력:** 기존 SQL 체크섬 5개(219/220/221/234/266), 특히 219/220 원본 미확보. 과거 국고 지급 영수증·실제 브라우저 인증 쿠키 재사용은 이번 검사로 독립 입증하지 못함. 금융 진단기 원본 BLOCKED의 세 항목은 운영자 승인 기존 DML 권한이며 사실 그대로 기록.
+- [내부 기록](../updates/v2026.10.29.1213-internal.ko.md), [영어](../updates/v2026.10.29.1213-internal.md), [GitHub](../updates/v2026.10.29.1213-github.ko.md), [작업 로그](../worklog/2026-10-29-production-promotion-v1213.ko.md).
 
 
+## v2026.10.29.1212 — 기존 금융 쓰기 권한 운영자 승인 / 공식 Test 성공 / 운영 이력 확인 대기
 
-## v1452 / F675-169 — 검증된 도움말 유용성 피드백과 회원 영수증 (기능 추가 / 초안 / 운영 보류)
+- 기존 accounts, account_balances, system_treasury_vaults에 부여된 쓰기 권한은 운영자가 명시적으로 승인하여 유지한다. 해당 세 권한만으로 반복 중단하지 않음. 원장·체크섬·인증 Test/세션·무중단 승격은 별도 검증.
+- PR #1817을 main b44ffd0a에 통합, 동일 트리 후보 CI 성공, 공식 Test 291~294 및 정확한 앱 SHA 검증 성공. 이후 QA 작업자가 갱신한 main a1d8de0c는 이전 Test 인증과 구별.
+- 운영 DB 사본에서 누락된 SQL 23개 모두 시험 적용 성공, 계정 40·거래 891·분개 1,829 및 승인 금융 권한 유지. 기존 체크섬 5건 불일치(219/220 원본 미확보). 운영용 파일 준비만 완료, 실제 운영 DB/서비스 미변경.
+- 세부 기록: docs/updates/v2026.10.29.1212-internal.ko.md 및 docs/worklog/2026-10-29-finance-dml-approval-and-release-v1212.ko.md.
 
-**연결 DB 읽기 전용 확인(10:15 KST):** `SELECT current_database(), to_regclass(...)` 결과 DB는 `woldeok_moneyverse_dev`, `help_articles`, `help_article_revisions`, `help_article_feedback_current`, `help_article_feedback_events`는 **모두 NULL**이었다. 연결된 DB에 마이그레이션 282 기반 도움말 테이블이 없으므로 코드 존재를 배포로 간주하지 않는다. **운영 DB 스키마 확인 결과는 아니다.**
 
-**주기·기준.** 이전 기능 보완 v1450(미병합 초안 PR #1806) → 현재 기능 추가 v1452 → 다음 기능 보완 v1454(잠정). 최신 main `bd590720237020c2ad329d6f62c3b0db5a95a6c1`을 시작·중간에 재조회하고 `AGENTS.md`, `README.md`, 영어 정본 `PROJECT_PLAN.md` 및 한국어 대조를 확인했다. 개발 인계 [#1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814). 마지막 독립 QA v1361 HOLD는 최신 main의 금융·보안 통과를 증명하지 않는다. **문서 기획만 수행**하며 런타임·DB·WLD·Test·Production·기능 스위치는 변경하지 않는다.
+## v2026.10.29.1364 — 예약 QA 전용 임시 산출물 수명주기 보완 (운영 패치 후보)
 
-### 목적, 실제 소스 근거와 중복 방지
-- **문제·대상:** 회원이 독립 검토된 도움말을 읽어도 해당 개정이 실제로 문제 해결에 도움이 됐는지 표현할 수 없다. 관리자는 정확한 개정별 익명 집계가 없어 설명 개선 우선순위를 정하기 어렵다. 공개 별점이나 편집 승인 대체가 아닌 자발적·최소 개인정보 피드백을 제공한다.
-- **확인된 소스:** `frontend/src/app/help/[slug]/page.tsx`는 검증된 글과 `/support` 링크만 표시한다. `backend/src/help/help.controller.ts`는 카테고리·검색·글 조회만 제공하고 `help.repository.ts`에는 회원 피드백 기능이 없다. 마이그레이션 `282-verified-help-center.sql`에는 `help_articles.published_revision_id` 및 독립 승인된 `help_article_revisions`가 있지만 `help_public_article`과 Next DTO는 불변 개정 ID/해시를 반환하지 않는다. 조사한 main에 피드백 테이블·Android 계약도 없다. 기존 도움말은 `VERIFIED_HELP_CENTER_V1`로 보호되며 코드 존재만으로 운영 활성화나 외부 근거 승인을 증명하지 않는다.
-- **중복 확인:** GitHub 이슈 검색에서 도움말 유용성 피드백 동일 항목은 발견되지 않았다. F675-145 검증 도움말(#1513)은 선행 의존성이며, F675-104/105/164 고객지원 업무는 별개다. 해결되지 않으면 기존 고객지원 링크로 이동하며 피드백 제출만으로 문의를 생성하지 않는다. 자유 서술 설문, localStorage 전용 응답, 공개 추천사, 자동 본문 수정은 제외한다.
-- **외부 근거 10,000건 게이트:** 독립 자료 확보·출처 분류·중복 제거·승인 실수량 신규 **0건**, 누적 **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. 출처 URL이나 마이그레이션 존재를 달성 증빙으로 간주하지 않는다. 도움말의 검증된 게시 근거와 이 게이트가 확인되기 전에는 피드백을 OFF로 유지한다.
-
-### 권한, 진입점, 화면 CTA·상태
-- **비회원:** 검증된 게시 도움말을 열람할 수 있으나 제출 대신 `로그인 후 의견 남기기` 표시. **회원:** 유효 세션·동의와 서버가 확인한 게시 개정이 있을 때 `/help/[slug]?locale=ko|en`에서 `도움이 되었나요?` → `예` / `아니요`, 아니요인 경우 선택 사유 `unclear(설명 어려움)|outdated(정보 오래됨)|incorrect(내용 오류)|missing_steps(절차 부족)`, `응답 변경`, `응답 삭제`, `고객지원 문의`를 제공한다. 자유 서술·자동 투표·학습 성취 추정·WLD 보상 없음. 회원·글·개정당 현재 응답은 최대 1개이며 본인 응답만 변경·삭제한다.
-- **관리자:** `/admin/help/feedback`은 개정별 **서로 다른 회원 20명 이상**일 때만 익명 집계를 제공한다. 회원별 응답·IP·기기·원본 증거 메모를 보여주지 않는다. 관리자는 개선 필요성을 확인하고 기존 도움말 편집 흐름에 별도 초안을 생성할 수 있으나 피드백만으로 공개·철회·수정·정확성 인증을 하지 못한다. 작성자와 승인자는 분리한다.
-- **상태:** FEATURE_OFF, UNVERIFIED_SOURCE, AUTH_REQUIRED, READY, SUBMITTING, SAVED_VERIFIED, CHANGE_PENDING, STALE_REVISION, RETRACTED, RATE_LIMITED, CONFLICT, UNKNOWN_COMMIT, UNAVAILABLE. 서버 영수증의 회원·요청 UUID·글·정확한 개정·선택·증가 버전이 일치할 때만 저장 완료로 표시한다. HTTP 2xx/리다이렉트만으로 성공 표시 금지. 타임아웃 후 영수증 조회, 동일 요청 UUID로 재시도. 철회·검토기한 만료 시 새 응답/변경 차단, 과거 본인 응답 삭제는 허용한다.
-
-### API·DB 제약·트랜잭션 (제안, 미구현)
-- **공개 원본:** 검증된 도움말 조회에 불변 `publishedRevisionId`와 서버가 검증할 수 있는 콘텐츠 해시·게시 epoch를 포함하도록 확장한다. 클라이언트 개정 ID를 게시 권한의 진실로 사용하지 않는다. 확인 가능한 구버전은 409, 검증 원본이 없으면 503. 미존재·타인 자원은 구분되지 않는 404. 철회된 글은 검색·색인에 재노출하지 않는다.
-- **회원 API:** `GET /api/v1/help/articles/:id/feedback/me?revisionId=UUID`; `PUT /api/v1/help/articles/:id/feedback` `{revisionId,locale,choice:'yes'|'no',reasonCode?,intentId:UUID,expectedVersion:string}`; `DELETE /api/v1/help/articles/:id/feedback` `{revisionId,intentId:UUID,expectedVersion:string}`; `GET /api/v1/help/feedback/receipts/:intentId`. 모든 응답 `Cache-Control: private, no-store`, 본인 결과·글·개정·이벤트·요청 ID·정확한 버전·서버 시각 포함. 401 미인증, 403 동의 거부, 404 미존재/타인, 409 구버전·CAS·요청 UUID 내용 불일치, 410 이미 인가된 철회, 422 잘못된 사유/언어, 429 제한, 503 DB/영수증/게시 근거 불가를 구분한다. Next 서버 액션/BFF·Android `/app-api/v1`은 같은 상태·멱등성·본인 확인·CSRF 동등 방어를 보장하고 `INTERNAL_API_TOKEN`을 브라우저에 노출하지 않는다.
-- **PostgreSQL 전진 마이그레이션:** 현재 마이그레이션 끝번호·체크섬·환경 격리 검증 후에만 작성. `help_article_feedback_current` PK `(user_id,article_id,revision_id)`, `help_article_revisions(article_id,id)` 복합 FK, 언어·선택·사유 CHECK, 양의 `version`, `created_at/updated_at`; 불변 `help_article_feedback_events`에는 `(user_id,intent_id)` UNIQUE, 정규 SHA-256 요청 해시, 본인·글·개정·선택·작업·결과 버전·시각과 FK. 인덱스 `(user_id,updated_at DESC,article_id)`, `(article_id,revision_id,updated_at DESC)` 및 조회·집계 상한. 기존 게시·개정 테이블을 덮어쓰지 않고 **적용된 마이그레이션 282를 수정하지 않는다.**
-- **원자적 처리:** 신뢰된 세션+DB 본인 검증, 현재 게시·독립 승인·유효기한·언어·동의 확인 → `(회원,요청 UUID)` 트랜잭션 advisory lock을 **재시도 조회 전에** 획득 → 기존 영수증 해시·소유권 확인 → 현재 응답 행 잠금과 expectedVersion CAS → 현재 행+불변 이벤트+영수증 원자 기록. 동일 UUID/동일 본문은 최초 결과 재생, 다른 본문·타인 사용은 409 또는 비노출 거부. 동시 100건도 현재 응답/영수증 중복 없음. 삭제는 별도 안정 UUID와 tombstone 이벤트. 임의 `p_actor` UUID만으로 인증했다고 보지 않는다. `SECURITY DEFINER SET search_path = pg_catalog, pg_temp`, 함수 소유자는 migrator, 앱/PUBLIC 직접 테이블 DML·PUBLIC 함수 EXECUTE 회수, 검토된 최소 함수 실행만 허용한다.
-
-### 보안·개인정보·모바일·SEO·분석·배포
-- IP·User-Agent·자유 서술 개인정보·잔액·거래 상대·관리자 근거 자료를 피드백/로그/분석에 저장하지 않는다. 회원당 시간당 쓰기 **20건 제안**, 글 개정당 현재 응답 1개. 게이트웨이·DB 양쪽 요청 제한, CSRF·BOLA·본문 크기·엄격 enum 검증. 비공개 API/BFF/관리자 `noindex,nofollow,no-store`, 공개 도움말은 독립 콘텐츠·색인 심사 전 `noindex` 유지. 별점 구조화 데이터·가짜 리뷰·검색맵 추가·20명 미만 소집단 노출 금지. 계정 전환 시 개인 캐시 공유 금지.
-- WCAG 2.2 AA, 키보드, 스크린리더 상태 안내, 320px 리플로, 모션 감소, Android TalkBack·오프라인 동일 UUID 재시도. 오프라인 의도는 OS 전용 저장소에만 보관하고 서버 영수증 전 성공 표시 금지. 관리 집계는 필터·기간을 바꿔 20명 미만 집단을 추론하지 못하도록 억제한다. 보존기간 **90일 제안**은 개인정보·법무 검토 후 확정하며, 삭제 시 회원 현재 응답을 익명화하고 법정 감사 처분 최소 기록만 보존한다.
-- KPI: 영수증 일치율 목표 100%, 거짓 성공 0, 자발적 응답률 기준선 미확정, 구버전 거절, 승인 개정별 도움됨 비율(20명 이상만), 고객지원 이동, 관리자 검토 지연, 타인 유출 0, API p95 지연 기준선 추후 측정. WLD·금융 원장·지갑·퀘스트·금융 outbox 영향 **0**.
-- **무중단·롤백:** 기본 OFF. F675-145 독립 검증·실제 운영 승인, 외부 10,000건 실증, 마이그레이션·권한·외부 백업 복원, 전체 CI/보안, 격리 PostgreSQL 및 **정확 SHA 공식 Test 회원 E2E**, 운영승격 승인 후에만 확장형 스키마→보호 API→웹/Android 점진 공개. 오류·중복·거부율 관측. 롤백 시 피드백 쓰기 OFF, 불변 영수증·감사 유지, 기존 도움말 읽기 보존, 일시 권한 회수, 콘텐츠 자동 재게시·철회 금지. 이 문서는 배포 승인이 아니다.
-
-### P0/P1 개발 백로그·정량 수용
-- **P0 ENV1452-01:** 운영/개발/Test DB 정체성 격리, 용량, 암호화 독립 백업·외부 복원 확인. 운영 연결 DB에 쓰기 시험 금지.
-- **P0 FIN1452-02:** QA v1361의 과거 USER_CASH 18계좌/+18,000 WLD 불일치를 정본 복식부기와 재검증. 근거 없는 잔액 보정 금지.
-- **P0 SEC1452-03:** 앱 직접 DML·PUBLIC 은행 함수 3개·체크섬 5개/소스 미적용 20개, 도움말 게시 근거·회원 권한 재검증 및 차단.
-- **P0 REL1452-04:** 전체 main/PR CI·보안 감사, 공식 격리 Test 정확 SHA 인증 E2E, 독립 복원·롤백·승인된 GitOps 운영승격. 증거 전까지 RELEASE HOLD.
-- **P1 HELP1452-05:** 검증된 불변 게시 개정 API와 신규 스키마·FK·인덱스, 독립 출처 승인 및 10,000건 게이트.
-- **P1 HELP1452-06:** 본인 전용 현재 상태+이벤트+영수증 원자성, CAS, 해시 기반 재시도·동시 변경/삭제.
-- **P1 HELP1452-07:** NestJS·Next BFF·Android API 동등성, 오류·세션·CSRF·503 실패 차단.
-- **P1 HELP1452-08:** 비회원/회원 CTA·동의·검증 저장·구버전/철회/오프라인/계정전환·WCAG 2.2 AA/320px/TalkBack.
-- **P1 HELP1452-09:** 관리자 20명 이상 익명 집계·개인정보 보존·SEO/noindex·KPI·독립 편집 검토.
-- **P1 HELP1452-10:** 격리 PG 합성 **10,001건**, 동시 **100건** 동일/상이 요청 UUID 투표·변경·삭제, 타인/개정 위조 **100건**, 철회·만료·장애 재시도, WLD 변화 0, 정확 SHA Test·롤백. **실제 시험 미실행.**
-
-**업무 분리:** 기획 문서만 수정. 구현은 개발 예약의 별도 브랜치와 정확 SHA Test 게이트를 거쳐야 한다. Gemini·개발 A/B/C·QA·DB 데이터·금융·배포 설정 변경 금지. v1450의 가치 있는 세부 내용은 기존 통합문서에 유지하며 선행 초안 #1806은 미병합이다.
-
-## v1450 / F675-168 — 블로그 나중에 읽기 원본 식별·전체 철회·삭제 안전성 강화 (기능 보완 / 초안 / 운영 보류)
-
-- **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
-
-**기획 초안 PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — 문서만 변경, 운영승격 보류.
-
-**기준 및 사이클.** 이전 v1448 기능 추가 → 현재 v1450 기능 보완 → 다음 v1452 기능 추가(잠정). 시작 main `30ef09aa17e33be6104dd97971790f00a427dafc`, QA v1360(08:18–08:26 KST) FAILED/HOLD. 선행 기획 [PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801)은 08:12:52 KST **병합**되었으나 #1790/#1794는 미병합 종료되었다. 개발 인계는 [이슈 #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). 본 문서는 기획 초안이며 기능 구현을 의미하지 않는다.
-
-### 최신 실측과 코드상 충돌
-- main의 `implementation_plan.md` v265에는 09:10 KST 사용자 요청에 따라 기존 공개 블로그 글을 정리하고 공유 JSON 기반 글 14건을 WITHDRAWN으로 전환했다고 기록되어 있다. 09:12 KST 읽기 전용 공개 확인: `GET /api/blog`은 `success=true,count=0`, `GET /api/v1/blog/verified`도 `success=true,count=0`. 이는 **해당 시점의 공개 응답**이며 모든 저장소·과거 캐시·향후 배포에 글이 전혀 없다는 증명은 아니다. 테스트를 위해 허위 승인 글을 만들거나 철회 글을 재게시하거나 저장 버튼을 켜서는 안 된다. 별도 게시 승인 전까지 사용자 요청에 따른 비공개 상태를 보존한다.
-- `frontend/src/app/blog/blog-page-server.tsx`의 메타데이터/본문(55/126행)과 `frontend/src/app/api/blog/[slug]/route.ts`는 정적·공유 JSON 글을 검증 DB 글보다 먼저 조회하지만 목록은 검증 글을 먼저 합친다. 향후 slug가 겹치면 목록·본문·API가 서로 다른 출처를 가리킬 **코드상 위험**이 있다. 실제 운영에서 충돌이 발생했다는 뜻은 아니다. slug는 저장 글의 불변 식별자가 될 수 없다.
-- 마이그레이션 288은 `period_key`, 고유 slug 및 receipt를 사용하지만 290의 `REVISE`는 제목/본문/다이제스트를 변경해도 기존 receipt를 유지한다. `DELETE`는 DELETED로 표시하고 공개 API는 PUBLISHED만 조회한다. 따라서 공개 404/빈 목록만으로 미게시·철회·삭제를 구별할 수 없고 receipt만으로 검수된 개정을 증명할 수도 없다. 발행자의 `humanReviewRequired:false` 역시 독립 검수 증명이 아니다. QA v1360에서 278/279 마이그레이션 미적용 및 체크섬 불일치 5건이 남았다.
-- v265의 14건 철회는 공유 JSON에 대한 것이며 검증 PostgreSQL 저장소와는 별개다. 향후 관리자 삭제·공유 JSON 철회·정적 경로·검증 DB 철회를 모두 서버의 동일한 게시 권위 모델로 판정해야 한다. 승인된 게시 글이 0건이거나 출처를 증명할 수 없으면 신규 기능은 **OFF**를 유지한다.
-
-### 채택 설계와 사용자 흐름
-- localStorage 전용 저장과 slug/기존 receipt만으로 저장하는 방식을 제외하고, 독립 검수된 불변 게시 레지스트리+회원 소유 저장 서비스+빈 콘텐츠 상태를 채택한다. 신규 승인 게시에는 `publication_id`, `edition`, `publication_epoch`, `revision`, `content_sha256`, 검수 증빙을 부여한다. 정적/공유 JSON 글은 자동으로 저장 대상이 되지 않으며, 이전 콘텐츠를 가져오려면 독립 검수와 별도 승인 개정이 필요하다.
-- 공개 `/blog/[slug]`(ko/en/ja/zh)에는 실제 표시한 글과 권위 레지스트리의 식별자가 정확히 일치할 때만 **나중에 읽기 저장**을 표시한다. 비회원은 변경 없는 로그인 CTA만 본다. 현재 검증 글 0건 상태에서는 저장 CTA를 숨기고 빈 목록/철회 상태를 표시한다. 비공개 `/account/reading/blog`은 **저장 가능한 검증 글 없음**을 보여 주되, 기존 저장 기록이 존재할 경우 원본이 철회·삭제되어도 **목록에서 제거**할 수 있어야 한다. 그 외 CTA는 **열기·읽음·읽지 않음·변경된 판 확인·제거**이며 읽음 표시는 학습 성취 증명이 아니다.
-- 상태: NO_ELIGIBLE_PUBLICATIONS, GUEST_SIGN_IN_REQUIRED, SOURCE_UNVERIFIED_503, ELIGIBLE_UNSAVED, SAVING, RECEIPT_UNKNOWN, SAVED_VERIFIED, READ_MARKING, EDITION_CHANGED_409, WITHDRAWN_410, DELETED_410, OWNER_CONFLICT_409, RATE_LIMIT_429, EMPTY, ERROR. 응답 타임아웃은 성공이 아니며 동일 UUID로 영수증을 조회한다. 로그아웃/계정 변경 시 요청과 개인 캐시·커서를 무효화한다.
-- 정규 조회 결과는 `{publicationId,edition,epoch,revision,contentDigest,status,sourceType,reviewProof}`이며 목록·메타데이터·본문·API·Android가 동일한 식별자를 사용한다. slug 충돌은 명시적으로 처리하고 철회/삭제된 검증 글 대신 같은 주소의 정적 글을 조용히 노출하지 않는다. 출처 확인 실패는 다른 글로 대체하지 않고 503/사용 불가로 처리한다. 삭제/철회 본문이 캐시·JSON·메타데이터·사이트맵·OG·구 링크로 재노출되지 않아야 하며, 공개 404/410은 승인된 삭제·개인정보 정책에 따라 결정한다. 회원 전용 tombstone은 최소 정보만 제공한다.
-
-### DB·트랜잭션·API·운영 계약
-- 개발자가 별도 추가형 마이그레이션으로 `(publication_id,edition,epoch,revision)` 고유 불변 개정, epoch별 현재 승인 개정 1개, 콘텐츠 SHA-256, 작성자/독립 검수자 구분, PUBLISHED|WITHDRAWN|DELETED|REVOKED, 출처 증빙 및 불변 감사기록을 구현한다. DELETED를 같은 epoch에서 임의 PUBLISHED로 되돌릴 수 없다. 재게시에는 별도 승인과 새로운 epoch/영수증이 필요하다.
-- 저장 PK `(owner_id,publication_id,edition)`, 불변 게시 FK, 승인 revision+epoch, CAS 버전과 읽음 시각, 회원/저장일/UUID 커서 인덱스를 둔다. 영수증은 `(owner_id,request_uuid)` 고유 및 요청 작업·정규 페이로드 SHA·원본 결과 불변. 글 본문·비공개 원천 인증정보·원본 URL 전체는 저장하지 않는다. 회원당 활성 100건, 페이지당 20건, 회원·세션·필터·스냅샷·만료 서명 커서. 원본 410 상태에서도 회원의 제거를 허용하고 계정 삭제 시 개인 저장·영수증을 정리한다.
-- 잠금 순서는 회원 → 게시 식별자 → 저장 행 → 영수증. 웹 세션/Android bearer로 검증된 회원만 허용하며 클라이언트 userId나 SQL `p_actor`만 신뢰하지 않는다. 고정 search_path의 `SECURITY DEFINER`, 최소 EXECUTE만 부여, 앱 직접 DML·PUBLIC EXECUTE 금지. 웹 CSRF·Android bearer·회원/IP 제한과 멱등성 필수. 동일 UUID+내용은 원래 영수증, 같은 UUID 다른 내용은 409, 개정/epoch 충돌 409, 신규 저장의 철회/삭제 410, 없는 글 404, 잘못된 언어/커서 422, 출처/DB 불명 503, 제한 429. WLD·일일 퀘스트·광고·추천·알림 효과는 0.
-- 인증된 `GET /api/v1/blog/reading-queue/availability`는 `{eligibleCount,canSave,reason,authorityRevision}` 반환; 승인 글 0건이면 `canSave=false,reason=NO_ELIGIBLE_PUBLICATIONS`이며 비공개 글 제목은 노출하지 않는다. `GET /items?cursor&limit<=20`, `POST /items`, `DELETE /items/:publicationId`, `PATCH /items/:publicationId/read`, `GET /operations/:requestId`는 v1448 본인·영수증 계약을 따른다. Next.js BFF와 Android `/app-api/v1`은 인증/오류/no-store 동등성을 지킨다. 저장소 부재 시 성공을 꾸미지 않는다. 관리자 철회/삭제는 감사 영수증과 버전된 캐시 무효화를 기록하고 공개/개인 읽기 모델의 일관성이 확인되지 않으면 실패 차단한다.
-- 개인 목록은 `noindex,nofollow`, 사이트맵 제외, `private,no-store`; 철회/삭제 공개 글은 승인 정책에 따라 404/410 및 canonical/hreflang/JSON-LD/OG 제거, 캐시 재노출 금지. 4개 언어·키보드·320px·200% 확대·TalkBack·WCAG 2.2 AA에서 포커스 복귀, aria-pressed, 상태 알림, 빈 목록/410/503 문구 및 tombstone 제거 접근성을 시험한다. KPI는 승인 글 수·빈 상태 노출·검증 저장 성공·409/410/503·캐시 누출·철회 반영 시간·수동 읽음·개인정보 삭제 완료를 익명 집계하며 실측 전 수치는 목표로만 기록한다.
-
-### 배포 차단 조건과 P0/P1 개발 인계
-- **P0 ENV1450-01:** QA v1360 당시 루트 99%/데이터 100%/tmp 97%였으나 09:12 읽기 전용 `df`는 루트 59%/데이터 76%/tmp 27%. 공간은 회복됐지만 원인·지속성·외부 암호화 백업 독립 복원은 **미검증**. 타 작업 자료 임의 삭제 금지.
-- **P0 FIN1450-02:** QA v1360의 USER_CASH 18계좌 총 +18,000 WLD 불일치 미해결. 임의 조정 금지, 신규 기능 금융 변화 0을 별도 입증.
-- **P0 SEC1450-03:** QA v1360 앱 쓰기 239개 관계, PUBLIC 은행 함수 3개, 체크섬 불일치 5건, 미적용 20건(278/279 포함). 격리 PostgreSQL에서 권한·출처·마이그레이션 순서를 검증해야 신규 저장 가능.
-- **P0 REL1450-04:** QA v1360은 PR 104건 미병합 종료를 보고했으며 **코드 소실 확증은 아니다**. [#1663](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1663)에서 정확 SHA/콘텐츠 동등성을 조사한다. 운영 런타임 SHA 불명, 공식 Test `cfb13272...`는 main과 불일치. 정확 SHA Test 및 승인된 운영승격·롤백 필수.
-- **P1 BLOG1450-05:** 출처별 정규 식별 조회·불변 언어판/epoch/개정 레지스트리·slug 충돌/철회 제약.
-- **P1 BLOG1450-06:** 회원 전용 저장/CAS/불변 영수증·100건 제한·서명 커서·삭제 상태 제거.
-- **P1 BLOG1450-07:** Next/NestJS/Android DTO·인증 가용성·영수증 재조회·409/410/422/429/503·no-store 동등성.
-- **P1 BLOG1450-08:** 빈 상태·로그인·개정·철회·삭제 UI, WCAG/TalkBack 및 계정 전환 보호.
-- **P1 BLOG1450-09:** 관리자 철회/삭제·캐시/SEO 제거·개인정보 보존/삭제·안전 집계·감사.
-- **P1 BLOG1450-10:** 격리 실제 PG 합성 10,001행, 동시 100건, BOLA/CSRF/재사용 위조 100건; 공유 JSON 철회 14건+검증 게시 0건의 빈 상태, slug 충돌, 동일 receipt REVISE, DELETE/철회/새 epoch 재게시, 서버 장애, 웹/Android, 정확 SHA Test·롤백 시험. **모두 수용 조건이며 실제 시험 미실행.**
-- 기능 스위치 기본 OFF, 추가형 확장/축소 마이그레이션·기존 읽기 호환·그림자 적격성 검증, 빈 상태 우선, 공식 정확 SHA Test, 독립 승인 게시가 생긴 뒤에만 승인된 단계적 활성화. 오류 시 신규 쓰기를 즉시 차단하고 기존 tombstone/영수증 보존, 롤백으로 자동 재게시 금지. 외부 독립 중복 제거·승인 근거 신규 0건, 누적 UNKNOWN/10,000건, **BLOCKED / IN PROGRESS**. 기획에서는 런타임·DB·금융·Test·운영을 변경하지 않는다.
-
+- 2026-10-29 11:00 KST 예약 정리 실행은 성공했지만 대상 폴더 0개, 삭제량 0바이트였습니다. 기존 예약 QA가 정리 대상 폴더에 산출물을 생성하지 않아 실제 용량을 회수하지 못하는 구조입니다. 이전 작업을 실제 용량 확보로 표시하지 않습니다.
+- 매시간 QA에서 민감정보 없는 임시 결과를 QA 전용 디렉터리 안에 완료 표시와 함께 기록합니다. 기존 72시간 보존·소유자/심볼릭링크·실행당 20건/2GiB 제한을 그대로 적용하며 0개 대상과 실제 삭제량을 구분해서 보고합니다. 디스크가 90% 이상이면 경고만 표시하며 타인의 작업물, QA 영구 증적, 데이터베이스, WAL, 백업, 릴리스, 업로드는 삭제하지 않습니다.
+- 독립 브랜치 단위 테스트, 테스트 서버, 백엔드 읽기 전용 확인, QA 스케줄러 스테이징, 실제 삭제 검증 이후 예약 QA 스크립트만 교체합니다. 전수 로그인/금융 기능 QA 완료로 간주하지 않습니다. [작업기록](../worklog/2026-10-29-qa-hygiene-v1364.ko.md).
 
 ## v1448 / F675-168 — 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 

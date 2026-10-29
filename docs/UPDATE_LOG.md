@@ -1,32 +1,29 @@
-## v2026.10.29.1454 — F675-169 verified help feedback publication/replay/privacy improvement (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+## v1456 / F675-170 — Evidence-bound release readiness board (FEATURE ADDITION / DRAFT / HOLD)
 
-**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+- **Authority/cycle:** Previous Improvement v1454 → Current Addition v1456 → Next Improvement v1458 (provisional). Remote main `b84d645a`; actual Test/Production app `b44ffd0a` observed separately. QA v1363 HTTP 48/50 (both `/help` 404), mobile 36/36, 113 Draft PRs/48 conflicts. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **Product:** restricted read-only `/admin/releases/readiness`, evidence chain for source/build/Test DB/restore/finance/authenticated QA/Production, six explicit VERIFIED/FAILED/STALE/MISSING/UNVERIFIABLE/WAIVED_WITH_AUTHORITY gate states and HOLD/EVIDENCE_COMPLETE; never an approval or promotion CTA. Exact-SHA build/attestation, signed evidence, immutable PostgreSQL snapshots, scoped SECURITY DEFINER read, redacted export, admin audit, Android policy, noindex, WCAG 2.2 AA.
+- **Safety:** v1213 Production app promotion and owner-approved existing finance DML are facts; five historical migration checksum mismatches, treasury source receipts and session replay remain separate HOLD items. Proposed 10,001-row/100-concurrency/100-authorization tests NOT RUN. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04; P1 RELBOARD1456-05 through RELBOARD1456-10. Full technical contract in canonical PROJECT_PLAN.md and Korean counterpart.
+- **External gate:** newly approved 0; cumulative deduplicated verified UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Documentation-only, no runtime/Test/Production change.
 
-- **Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). Stacked on unmerged/conflicting Draft PR #1815, engineering issue #1814. Source main b44ffd0af9e2bd6e7c2be7345b72094827078c3d at start; no runtime or finance writes.
-- **QA freshness (11:12 KST):** v1363 branch audit IN PROGRESS, no completed report; last completed QA v1362 HOLD.
-- **Actual source gap:** migration 282 **already checks independent review and reviewed_until expiry**. But help_public_article, NestJS repository and Next DTO omit exact publishedRevisionId/articleVersion/rendered contentDigest; source_sha256 is not a rendered-content digest. DEV DB read-only 11:09 KST: four help/revision/feedback tables NULL, not Production proof. Feature OFF.
-- **Improvement:** bind Yes/No/Change/Remove to exact approved revision and canonical content SHA-256; DB publication lock, stale 409/retracted 410/unavailable 503, owner intent receipts and original historical replay after retraction, safe owner removal, anti-BOLA/CSRF, mobile parity, WCAG 2.2 AA, 320px, noindex/no-store and zero WLD. Admin k>=20 is insufficient without filter/time/complement differencing protection.
-- **Backlog:** P0 ENV1454-01, FIN1454-02, SEC1454-03, REL1454-04; P1 HELP1454-05, HELP1454-06, HELP1454-07, HELP1454-08, HELP1454-09, HELP1454-10. QA v1362: ledger arithmetic mismatch **0 after 19-posting MINT backfill**, but funding authority/receipts **UNVERIFIED** (#1816); 5 checksum mismatches, **22** source-unapplied migrations including 282, historical 239 app-writable relations, blog publisher provenance #1818; latest main CI initially IN PROGRESS. RELEASE HOLD. Proposed isolated PG 10,001 rows / 100 concurrency / 100 forged / 30 expiry races / 20 differencing probes **NOT RUN**.
-- **External independent evidence gate:** new approved 0, cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS. Full bilingual contract in integrated planning master, no new distributed planning spec.
+## v2026.10.29.1364 — Scheduled QA disposable disk hygiene (OPS PATCH)
+
+## v2026.10.29.1213 — LIVE Production promoted, operator DML preserved
+- [Internal](updates/v2026.10.29.1213-internal.md) / [GitHub](updates/v2026.10.29.1213-github.md) / [Worklog](worklog/2026-10-29-production-promotion-v1213.md). Official prod runtime b44ffd0a SHA matches, 23 new recorded migrations, 17/17 public smoke PASS; prior checksum anomalies still tracked.
 
 
-## v2026.10.29.1452 — F675-169 verified help article usefulness feedback (DRAFT / RELEASE HOLD)
-- [Draft PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) remains unmerged, initial CI queued.
-- [Development issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) and bilingual integrated [master](planning/INTEGRATED_PLANNING_MASTER.md) / [Korean](planning/INTEGRATED_PLANNING_MASTER.ko.md). Previous v1450 Improvement → Current v1452 Addition → Next v1454 Improvement (provisional). Main `bd590720...` start/mid; help article lacks feedback CTA/receipt, published revision omitted from API. Consent-only exact-revision Yes/No, optional reason, immutable owner receipt, CAS, admin k>=20, web/Android, WCAG, privacy/SEO, zero WLD. P0 4 / P1 6, isolated PG acceptance NOT RUN. QA v1361 historical HOLD, current main remeasure needed; external approved new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/Test/Production change. [Internal](updates/v2026.10.29.1452-planning-help-feedback-internal.md) / [GitHub](updates/v2026.10.29.1452-planning-help-feedback-github.md).
+## v2026.10.29.1212 — Explicit owner acceptance of existing finance DML; Test PASS / Production HOLD
+- [Internal](updates/v2026.10.29.1212-internal.md) · [GitHub](updates/v2026.10.29.1212-github.md) · [Worklog](worklog/2026-10-29-finance-dml-approval-and-release-v1212.md). Main merged, isolated Test verified, owner-approved privileges unchanged; original Production checksum provenance remains unresolved.
+
+- The hourly cleaner already ran, but reclaimed 0 B at 11:00 KST because no QA-owned disposable run existed. A new bounded completed smoke summary is now produced for each QA run and aged out at 72 h. Stage/Test: 24 HTTP 200, 2 login-gated, 0 unexpected failures; Test backend `/health` 200, all Test/Production services active. Isolated 1 MiB canary was deleted; no non-QA artifacts touched. No full functional QA. [EN worklog](worklog/2026-10-29-qa-hygiene-v1364.md) / [KO](worklog/2026-10-29-qa-hygiene-v1364.ko.md), [Internal](updates/2026-10-29-qa-hygiene-v1364-internal.md), [GitHub](updates/2026-10-29-qa-hygiene-v1364-github.md).
+
+## v2026.10.29.1211 — Branch integration staging / release HOLD
+- [EN worklog](worklog/2026-10-29-branch-integration-v1211.md) / [KO](worklog/2026-10-29-branch-integration-v1211.ko.md); [internal](updates/v2026.10.29.1211-internal.md) / [GitHub](updates/v2026.10.29.1211-github.md); [draft PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). Frontend 1,910 PASS, finance gate BLOCKED; no official Test, main or Production promotion.
+
+## v2026.10.29.1205 — Ledger discrepancy evidence registry (isolated TEST_VERIFIED)
+- [EN worklog](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md) / [KO](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md). Corrected earlier sign error; 18 user cash balances each +1,000 WLD vs ledger, total 18,000. Migration 294 captures defensible cases without moving money, preserving approved financial grants; historic corrections remain blocked pending proof.
 
 ## v2026.10.29.1204 — Database construction runbook (isolated rebuild, not Production)
 - [Step-by-step English build](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md) / [Korean](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md). PostgreSQL dump, ACL, second disk, container, restoration, schema and ledger verification. User-approved finance DML preserved; live DB unchanged. [Internal](updates/v2026.10.29.1204-database-construction-internal.md) / [GitHub](updates/v2026.10.29.1204-database-construction-github.md).
-
-## 2026-10-29 v1450 — F675-168 blog queue publication identity and clean-state hardening
-
-- **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
-
-[Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / issue #1800.
-
-- Feature Improvement following v1448 Addition; next v1452 Addition (provisional). Main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; prior PR #1801 MERGED.
-- Live public counts at 09:12 KST: blog 0, verified blog 0; v265 records 14 legacy JSON posts withdrawn on owner request. Do not enable Save or resurrect articles.
-- Source-backed risks: static-first detail/API versus verified-first hub; migration 290 REVISE keeps receipt; DELETE invisible to public PUBLISHED reads. Harden immutable reviewed identity, epoch, tombstone Remove, signed receipts, owner security, web/Android, accessibility and SEO/cache purge. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04; P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. Real PG tests NOT RUN.
-- QA v1360 finance +18,000 WLD/18 accounts, app DML239, PUBLIC bank3, checksum5/unapplied20, 104 PRs closed unmerged with content parity unverified, Test exact-SHA mismatch; release HOLD. 09:12 disk recovered to root59%/data76%/tmp27% but restore unverified. External independent references 0 new, cumulative UNKNOWN/10,000. Documentation only; no deployment.
 
 ## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

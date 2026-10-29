@@ -1,32 +1,29 @@
-## v2026.10.29.1454 — F675-169 도움말 피드백 게시·재시도·개인정보 보호 개선 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+## v1456 / F675-170 — 근거 연계형 릴리스 준비도 현황판 (기능 추가 / 초안 / 보류)
 
-**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
+- **기준·주기:** 이전 보완 v1454 → 현재 추가 v1456 → 다음 보완 v1458(잠정). 원격 main `b84d645a`와 실제 Test/운영 앱 `b44ffd0a` 구분. QA v1363 HTTP 48/50(양쪽 `/help` 404), 모바일 36/36, Draft PR 113개/충돌 48개. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **기능:** 권한 제한된 읽기 전용 `/admin/releases/readiness`, 소스/빌드/Test DB/복원/금융/인증 QA/운영 근거 체인, 검증/실패/만료/누락/불가/승인예외 6종 상태와 HOLD/EVIDENCE_COMPLETE. 승인·승격 버튼 금지. 정확 SHA·서명 증빙, 불변 PostgreSQL 스냅샷, 권한 검증 SECURITY DEFINER, 비식별 내보내기, 관리자 감사, Android 정책, noindex, WCAG 2.2 AA.
+- **안전:** v1213 실제 운영 승격과 운영자 승인 기존 금융 DML 존중. 역사적 체크섬 5건·국고 근거·세션 재사용은 별도 미검증. 10,001행/동시 100건/권한 부정 100건 수용시험은 **미실행**. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04, P1 RELBOARD1456-05~10. 상세 영문 정본과 한국어 대조본 PROJECT_PLAN에 수록.
+- **외부 근거 게이트:** 신규 승인 0건, 누적 검증 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. 문서만 변경, 런타임/Test/Production 미변경.
 
-- **회차:** 이전 Feature Addition v1452 → 현재 Feature Improvement v1454 → 다음 Feature Addition v1456(잠정). 미병합·충돌 중인 Draft PR #1815에 적층, 개발 이슈 #1814. 시작 시 main b44ffd0af9e2bd6e7c2be7345b72094827078c3d. 런타임·금융 데이터 변경 없음.
-- **QA 최신성(11:12 KST):** v1363 브랜치 감사 IN PROGRESS, 완료 보고서 없음. 마지막 완료 QA v1362 HOLD.
-- **실제 소스 결함:** 마이그레이션 282에는 이미 독립 승인·reviewed_until 만료 검사가 있다. 그러나 help_public_article·NestJS·Next DTO에는 정확한 publishedRevisionId/articleVersion/표시 본문 contentDigest가 없다. source_sha256은 출처 해시이지 본문 해시가 아니다. 11:09 KST DEV DB 읽기 전용 조회에서 도움말/개정/피드백 테이블 4개 모두 NULL, Production 증거 아님. 기능 OFF.
-- **개선:** 도움됨/도움되지 않음/변경/삭제를 승인된 정확 개정·본문 SHA-256에 결합, DB 게시 잠금, 구버전 409·철회 410·근거 부재 503, 소유자 intent 영수증 및 철회 이후 원본 과거 영수증 재생, 본인 삭제, CSRF/BOLA, 모바일 동등성, WCAG 2.2 AA·320px, noindex/no-store, WLD 영향 0. 관리자 k>=20만으로는 부족하므로 기간·필터·보완집계 차분 공격 방지.
-- **백로그:** P0 ENV1454-01, FIN1454-02, SEC1454-03, REL1454-04; P1 HELP1454-05, HELP1454-06, HELP1454-07, HELP1454-08, HELP1454-09, HELP1454-10. QA v1362: 19개 MINT 상계 분개 후 원장 **산술 차이 0**이나 자금 출처·영수증 **미검증**(#1816). 체크섬 5건/소스 미적용 **22건**(282 포함), 과거 앱 직접 쓰기 239개 관계, 블로그 근거 #1818, 최신 main CI 초기 IN PROGRESS. RELEASE HOLD. 격리 PG 합성 10,001건/동시 100건/위조 100건/만료 경합 30건/차분 탐침 20건 **미실행**.
-- **외부 독립 근거 게이트:** 신규 승인 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 영문·국문 상세 계약은 통합 기획서에 반영하며 새 분산기획 문서는 만들지 않는다.
+## v2026.10.29.1364 — 예약 QA 디스크 정리 실제 수행 보완
+
+## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 쓰기 권한 보존
+- [내부](updates/v2026.10.29.1213-internal.ko.md) / [GitHub](updates/v2026.10.29.1213-github.ko.md) / [작업 기록](worklog/2026-10-29-production-promotion-v1213.ko.md). 운영 b44ffd0a SHA 검증, 미적용 SQL 23개 실제 반영, 공개 17/17 정상. 기존 체크섬 원본 이슈 별도 유지.
 
 
-## v2026.10.29.1452 — F675-169 검증 도움말 유용성 피드백 (초안 / 운영 보류)
-- [초안 PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815) 미병합, 초기 CI 대기.
-- [개발 이슈 #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814), [영문 통합 정본](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어 대조](planning/INTEGRATED_PLANNING_MASTER.ko.md). 이전 v1450 보완 → 현재 v1452 추가 → 다음 v1454 보완(잠정). 시작·중간 main `bd590720...`; 도움말에 피드백 CTA·영수증이 없고 공개 API가 게시 개정을 반환하지 않음. 명시적 개정별 예/아니요·사유·본인 불변 영수증·CAS·관리자 20명 이상 집계, 웹/Android·WCAG·개인정보·SEO·WLD 0. P0 4/P1 6, 실제 PG 수용시험 미실행. 과거 QA v1361 HOLD이며 최신 main 재검증 필요, 외부 승인 신규 0·누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·Test·운영 미변경. [내부](updates/v2026.10.29.1452-planning-help-feedback-internal.ko.md) / [GitHub](updates/v2026.10.29.1452-planning-help-feedback-github.ko.md).
+## v2026.10.29.1212 — 기존 금융 쓰기 권한 승인·Test 성공 / 운영 이력 확인 대기
+- [내부](updates/v2026.10.29.1212-internal.ko.md) · [GitHub](updates/v2026.10.29.1212-github.ko.md) · [작업 기록](worklog/2026-10-29-finance-dml-approval-and-release-v1212.ko.md). 메인 병합·공식 Test 성공, 승인 쓰기 권한 유지, 운영 체크섬 이력 확인 대기.
+
+- 11:00 KST 정리기는 실행되었지만 QA 전용 임시 자료가 없어 0바이트 삭제한 것을 확인. 매시간 QA 완료 임시 결과를 생성하고 72시간 초과 후 정리하도록 보완. 테스트: 공개 HTTP 24개 통과·로그인 필요 2개·예상 외 실패 0, 테스트 백엔드 `/health` 200, 운영·테스트 서비스 가동. 전용 시험 자료 1MiB만 실제 삭제 검증; 타 자료 제외. 전수 기능 QA는 별개. [국문 기록](worklog/2026-10-29-qa-hygiene-v1364.ko.md), [영문 기록](worklog/2026-10-29-qa-hygiene-v1364.md), [내부](updates/2026-10-29-qa-hygiene-v1364-internal.ko.md), [GitHub](updates/2026-10-29-qa-hygiene-v1364-github.ko.md).
+
+## v2026.10.29.1211 — 브랜치 통합 후보 / 운영 승격 보류
+- [한국어 작업 기록](worklog/2026-10-29-branch-integration-v1211.ko.md) / [영어](worklog/2026-10-29-branch-integration-v1211.md); [내부](updates/v2026.10.29.1211-internal.ko.md) / [GitHub](updates/v2026.10.29.1211-github.ko.md); [초안 PR #1817](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1817). 프론트엔드 전체 1,910개 통과, 금융 승격 검증 차단으로 메인·테스트·운영 미승격.
+
+## v2026.10.29.1205 — 원장 불일치 증거 기록 체계 (격리 Test 통과)
+- [한국어 진행기록](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.ko.md) / [영어](worklog/2026-10-29-ledger-discrepancy-resolution-v1205.md). 이전 부호 오류 정정: 18개 사용자 현금 계좌 각 +1,000 WLD 차이, 총 18,000. 294번은 금액 변경 없이 차이 증거 기록, 승인 금융 권한 유지. 역사적 원인 증명·정정은 미완료.
 
 ## v2026.10.29.1204 — DB 실제 구축 절차서 (격리 복원, 운영 미반영)
 - [한국어 명령어 기반 구축 가이드](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.ko.md) / [영어 정본](operations/DATABASE_REBUILD_CONSTRUCTION_RUNBOOK_v2026.10.29.1204.md). 두 번째 디스크·백업·복원·권한·키·마이그레이션·검증 전 과정 기록. 기존 금융 쓰기 권한 유지·원본 DB 미변경. [내부 기록](updates/v2026.10.29.1204-database-construction-internal.ko.md) / [깃허브 내역](updates/v2026.10.29.1204-database-construction-github.ko.md).
-
-## 2026-10-29 v1450 — F675-168 블로그 저장 게시 식별·전체 철회 상태 강화
-
-- **최신 QA v1361 진행 중 증거(09:17 KST):** `branch-restoration.json`은 **104개 브랜치 끝 SHA 그대로 복원, 변경 SHA 0, 아직 없음 5, 신규 1**을 기록한다. 최종 QA 요약은 아직 없다. 브랜치 소실 위험은 줄었으나 **종료된 PR 104건이 다시 열리거나 main에 병합되었다는 뜻은 아니며 운영 HOLD도 해제되지 않는다**. 금융·마이그레이션·디스크 읽기 전용 수치는 v1360과 동일; v1361은 PASS가 아니라 IN PROGRESS로 표기한다.
-
-[기획 PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) / 개발 이슈 #1800.
-
-- v1448 추가 이후 v1450 기능 보완, 다음 v1452 추가(잠정). 기준 main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED/HOLD; 선행 PR #1801 병합.
-- 09:12 KST 공개 블로그/검증 API count=0; v265에는 사용자 요청으로 기존 공유 JSON 글 14건 철회 기록. 저장 CTA 활성화나 임의 재게시 금지.
-- 실제 소스상 정적 우선 본문/API와 검증 우선 목록의 slug 충돌, 마이그레이션 290의 개정 후 receipt 유지, 삭제 후 공개 조회 불가를 확인. 불변 독립 검수 식별·epoch·tombstone 제거·원본 영수증·본인 권한·웹/Android·접근성·SEO/캐시 철회 설계. P0 ENV1450-01/FIN1450-02/SEC1450-03/REL1450-04, P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. 실제 PG 시험 미실행.
-- QA v1360 금융 18계좌/+18,000 WLD, 앱 쓰기239, PUBLIC 은행3, 체크섬5/미적용20, PR 104건 미병합 종료의 콘텐츠 동등성 미확인, Test 정확 SHA 불일치로 운영 보류. 09:12 디스크 루트59%/데이터76%/tmp27% 회복했으나 복원 미검증. 외부 독립 근거 신규 0, 누적 UNKNOWN/10,000. 문서만 수정.
 
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 

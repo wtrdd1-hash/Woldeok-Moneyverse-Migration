@@ -1,37 +1,11 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
-## v2026.10.29.1454 — F675-169 verified help feedback publication/replay/privacy improvement (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+## v1456 / F675-170 — Evidence-bound release readiness board (FEATURE ADDITION / DRAFT / HOLD)
 
-**GitHub:** [Draft PR #1823](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1823) / [engineering issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814) / predecessor [PR #1815](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1815).
-
-- **Cycle:** Previous Feature Addition v1452 → Current Feature Improvement v1454 → Next Feature Addition v1456 (provisional). Stacked on unmerged/conflicting Draft PR #1815, engineering issue #1814. Source main b44ffd0af9e2bd6e7c2be7345b72094827078c3d at start; no runtime or finance writes.
-- **QA freshness (11:12 KST):** v1363 branch audit IN PROGRESS, no completed report; last completed QA v1362 HOLD.
-- **Actual source gap:** migration 282 **already checks independent review and reviewed_until expiry**. But help_public_article, NestJS repository and Next DTO omit exact publishedRevisionId/articleVersion/rendered contentDigest; source_sha256 is not a rendered-content digest. DEV DB read-only 11:09 KST: four help/revision/feedback tables NULL, not Production proof. Feature OFF.
-- **Improvement:** bind Yes/No/Change/Remove to exact approved revision and canonical content SHA-256; DB publication lock, stale 409/retracted 410/unavailable 503, owner intent receipts and original historical replay after retraction, safe owner removal, anti-BOLA/CSRF, mobile parity, WCAG 2.2 AA, 320px, noindex/no-store and zero WLD. Admin k>=20 is insufficient without filter/time/complement differencing protection.
-- **Backlog:** P0 ENV1454-01, FIN1454-02, SEC1454-03, REL1454-04; P1 HELP1454-05, HELP1454-06, HELP1454-07, HELP1454-08, HELP1454-09, HELP1454-10. QA v1362: ledger arithmetic mismatch **0 after 19-posting MINT backfill**, but funding authority/receipts **UNVERIFIED** (#1816); 5 checksum mismatches, **22** source-unapplied migrations including 282, historical 239 app-writable relations, blog publisher provenance #1818; latest main CI initially IN PROGRESS. RELEASE HOLD. Proposed isolated PG 10,001 rows / 100 concurrency / 100 forged / 30 expiry races / 20 differencing probes **NOT RUN**.
-- **External independent evidence gate:** new approved 0, cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS. Full bilingual contract in integrated planning master, no new distributed planning spec.
-
-
-
-## v2026.10.29.1452 — Portfolio decision — F675-169 verified help article usefulness feedback (FEATURE ADDITION / DRAFT / RELEASE HOLD)
-
-**Actual connected development DB (read-only 10:15 KST):** `woldeok_moneyverse_dev` `to_regclass` reports all four help/revision/feedback tables absent (NULL); Production not queried. Source migration 282 is not live proof.
-
-**Handoff:** [Issue #1814](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1814); predecessor [Draft PR #1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) remains unmerged. Previous Improvement v1450 → Current Addition v1452 → Next Improvement v1454 (provisional). Main `bd590720237020c2ad329d6f62c3b0db5a95a6c1` rechecked start/mid; QA v1361 HOLD (historical evidence only). Source: verified `/help/[slug]` offers a support link, not a member helpful Yes/No, exact-revision receipt or feedback admin aggregate. Migration 282 has reviewed revisions but public API omits revision ID; existing help feature gated by `VERIFIED_HELP_CENTER_V1`. **No runtime implementation.**
-- Voluntary Yes/No with optional enum reason, Change/Remove, no free-text PII, no automatic support ticket or publication, owner-only immutable digest-bound intent receipt and CAS; only genuinely approved published exact revision; OFF until independent help/source/10,000 evidence gates. Proposed private NestJS/Next/Android API, strict DB SECURITY DEFINER, unique current+append-only event, CSRF/BOLA/rate, admin k>=20 aggregate, WCAG 2.2 AA/320px/TalkBack, SEO noindex/no-store, KPI and zero WLD.
-- P0 ENV1452-01, FIN1452-02, SEC1452-03, REL1452-04; P1 HELP1452-05, HELP1452-06, HELP1452-07, HELP1452-08, HELP1452-09, HELP1452-10. QA v1361 last documented: 18 accounts/+18,000 WLD, 239 app DML, 3 PUBLIC bank EXECUTE, 5 checksums/20 unapplied; independent restore and official exact-SHA Test unverified. Current main newer, remeasure before claiming fixed/persistent. Real isolated PG 10,001 rows / 100 concurrent / 100 forged acceptance **NOT RUN**. Full contract in bilingual integrated master; no separate spec.
-- External independent deduplicated approved references newly **0**, cumulative **UNKNOWN/10,000**, **BLOCKED / IN PROGRESS**. DRAFT / RELEASE HOLD; no runtime/DB/finance/Test/Production changes.
-
-
-## v1450 F675-168 review — clean-state and publication identity hardening (FEATURE IMPROVEMENT / HOLD)
-
-- **Fresh QA v1361 in-progress checkpoint (09:17 KST):** `branch-restoration.json` reports **104 branch tips restored at exact original SHA, 0 changed SHA, 5 still absent and 1 new**; no final QA summary yet. This reduces risk of branch-tip loss but **does not reopen the 104 closed PRs, prove their changes reached main, or clear release HOLD**. Finance/migration and disk read-only evidence remain unchanged from v1360; classify v1361 as IN PROGRESS, not PASS.
-
-**Draft planning PR:** [#1806](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1806) — documentation only, RELEASE HOLD.
-
-- Previous Addition v1448 → Current Improvement v1450 → Next Addition v1452; source main 30ef09aa17e33be6104dd97971790f00a427dafc, QA v1360 FAILED. Prior planning PR #1801 MERGED; #1800 remains engineering owner. User-requested v265 withdrew 14 legacy shared-JSON articles; 09:12 KST public blog and verified endpoints each count=0. No Save eligibility; feature flag OFF.
-- Fix design only: reconcile static/JSON/verified slug resolution; bind member saves to independently reviewed immutable publication ID/edition/epoch/revision/content digest, not slug or mutable receipt; provide deletion-safe tombstones/Remove, receipt replay, owner-only web/Android, SEO/cache purge and no WLD. P0 ENV1450-01 FIN1450-02 SEC1450-03 REL1450-04; P1 BLOG1450-05 BLOG1450-06 BLOG1450-07 BLOG1450-08 BLOG1450-09 BLOG1450-10. Real PG acceptance NOT RUN, official Test/Production BLOCKED. External independent approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. See integrated master and issue #1800.
-
+- **Authority/cycle:** Previous Improvement v1454 → Current Addition v1456 → Next Improvement v1458 (provisional). Remote main `b84d645a`; actual Test/Production app `b44ffd0a` observed separately. QA v1363 HTTP 48/50 (both `/help` 404), mobile 36/36, 113 Draft PRs/48 conflicts. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **Product:** restricted read-only `/admin/releases/readiness`, evidence chain for source/build/Test DB/restore/finance/authenticated QA/Production, six explicit VERIFIED/FAILED/STALE/MISSING/UNVERIFIABLE/WAIVED_WITH_AUTHORITY gate states and HOLD/EVIDENCE_COMPLETE; never an approval or promotion CTA. Exact-SHA build/attestation, signed evidence, immutable PostgreSQL snapshots, scoped SECURITY DEFINER read, redacted export, admin audit, Android policy, noindex, WCAG 2.2 AA.
+- **Safety:** v1213 Production app promotion and owner-approved existing finance DML are facts; five historical migration checksum mismatches, treasury source receipts and session replay remain separate HOLD items. Proposed 10,001-row/100-concurrency/100-authorization tests NOT RUN. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04; P1 RELBOARD1456-05 through RELBOARD1456-10. Full technical contract in canonical PROJECT_PLAN.md and Korean counterpart.
+- **External gate:** newly approved 0; cumulative deduplicated verified UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Documentation-only, no runtime/Test/Production change.
 
 ## v2026.10.29.1448 — F675-168 verified member blog reading queue (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
