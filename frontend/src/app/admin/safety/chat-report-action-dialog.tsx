@@ -52,10 +52,10 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
         <DialogHeader>
           <DialogTitle className="text-base font-semibold flex items-center gap-2">
             <ShieldAlertIcon action={action} />
-            신고 심사 및 조치 결정
+            신고 심사 결정 기록
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            피신고자 <span className="font-semibold text-destructive">{item.reported_nickname}</span>(@{item.reported_username})에 대한 모더레이션 조치를 선택하고 영구 감사 사유를 입력합니다.
+            피신고자 <span className="font-semibold text-destructive">{item.reported_nickname}</span>(@{item.reported_username})에 대한 심사 결정 기록을 선택하고 감사 사유를 입력합니다. 실제 계정 차단이나 경고 알림 발송은 자동 실행되지 않습니다.
           </DialogDescription>
         </DialogHeader>
 
@@ -77,7 +77,7 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
             )}
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium">조치 유형 선택</Label>
+              <Label className="text-xs font-medium">심사 기록 유형 선택</Label>
               <RadioGroup
                 value={action}
                 onValueChange={(v) => setAction(v as typeof action)}
@@ -93,8 +93,8 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
                 >
                   <RadioGroupItem value="ACTIONED_WARNED" id="r-warn" className="mt-0.5" />
                   <div className="grid gap-0.5 text-xs">
-                    <span className="font-semibold text-foreground">공식 경고 발송 (Warned)</span>
-                    <span className="text-muted-foreground">경미한 위반 시 이용자에게 주의 및 경고를 부여합니다.</span>
+                    <span className="font-semibold text-foreground">경고 결정 기록 (발송 아님)</span>
+                    <span className="text-muted-foreground">경고 필요성을 심사 기록에 남깁니다. 이용자에게 경고 알림을 보내지 않습니다.</span>
                   </div>
                 </label>
 
@@ -108,8 +108,8 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
                 >
                   <RadioGroupItem value="ACTIONED_BLOCKED" id="r-block" className="mt-0.5" />
                   <div className="grid gap-0.5 text-xs">
-                    <span className="font-semibold text-destructive">피신고자 계정 제재 / 차단 (Blocked)</span>
-                    <span className="text-muted-foreground">악의적 괴롭힘/사기 행위로 인정되어 즉시 이용을 제한합니다.</span>
+                    <span className="font-semibold text-destructive">계정 차단 결정 기록 (차단 아님)</span>
+                    <span className="text-muted-foreground">차단 필요성을 심사 기록에 남깁니다. 실제 계정 접근을 제한하지 않습니다.</span>
                   </div>
                 </label>
 
@@ -161,7 +161,7 @@ export function ChatReportActionDialog({ item }: { item: ChatReportItem }) {
                 variant={action === 'ACTIONED_BLOCKED' ? 'destructive' : 'default'}
                 disabled={isPending}
               >
-                {isPending ? '처리 중...' : '조치 확정 및 기록'}
+                {isPending ? '처리 중...' : '심사 결정만 기록'}
               </Button>
             </DialogFooter>
           </form>

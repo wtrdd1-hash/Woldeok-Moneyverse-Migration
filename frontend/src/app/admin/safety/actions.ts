@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, mutate } from '@/lib/mutate';
 import { apiOrNull } from '@/lib/api';
+import { verifyChatModerationReceipt } from './chat-moderation-receipt';
 
 export interface EvidenceMessage {
   id: string;
@@ -95,19 +96,22 @@ export async function actionChatReport(
   }
 
   try {
-    await mutate(`/api/v1/admin/safety/chat-reports/${encodeURIComponent(reportId)}/action`, {
+    const receipt = await mutate<unknown>(`/api/v1/admin/safety/chat-reports/${encodeURIComponent(reportId)}/action`, {
       method: 'POST',
       body: {
         action,
         note: note || undefined,
       },
     });
+    if (!verifyChatModerationReceipt(receipt, reportId, action)) {
+      return { status: 'error', message: '신고 심사 기록 영수증을 검증하지 못했습니다. 현재 상태를 다시 조회해 주세요.' };
+    }
 
     revalidatePath('/admin');
     revalidatePath('/admin/safety');
     return {
       status: 'ok',
-      message: `신고 건 조치('${action}')가 정상 완료되었습니다.`,
+      message: `신고 건의 '${action}' 심사 결정만 기록했습니다. 계정 차단이나 경고 알림은 실행되지 않았습니다.`,
     };
   } catch (error) {
     return failure(error, '신고 건 조치 처리에 실패했습니다.');

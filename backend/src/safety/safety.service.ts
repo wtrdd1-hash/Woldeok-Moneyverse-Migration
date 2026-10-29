@@ -89,6 +89,9 @@ export class SafetyService {
       success: true,
       reportId,
       newStatus: dto.action,
+      effect: 'report_status_only' as const,
+      enforcementApplied: false,
+      notificationSent: false,
     };
   }
 }
