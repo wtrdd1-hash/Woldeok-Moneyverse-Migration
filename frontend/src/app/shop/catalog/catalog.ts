@@ -405,3 +405,9 @@ export function settlementMessage(receipt: SettlementReceipt): string {
     ? `이미 처리된 납부예요. 결제된 금액은 ${amount} WLD였어요.`
     : `밀린 관리비 ${amount} WLD를 냈어요. 이제 이 아이템을 다시 쓸 수 있어요.`;
 }
+
+
+/** Keep member stock filtering server-authoritative; unknown URL values are ignored by the UI. */
+export function stockCatalogApiPath(stock?: string): string {
+  return stock === 'available' ? '/api/v1/shop/catalog?stock=available' : '/api/v1/shop/catalog';
+}

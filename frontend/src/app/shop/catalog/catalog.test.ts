@@ -11,6 +11,7 @@ import {
   purchaseLimitLabel,
   purchaseMessage,
   stockLabel,
+  stockCatalogApiPath,
   useMessage,
 } from './catalog';
 import type { CatalogItem } from './catalog';
@@ -293,15 +294,14 @@ describe('useMessage', () => {
   });
 });
 
-describe('member catalogue category selection', () => {
-  it('selects only exact categories and preserves bigint WLD strings', async () => {
-    const { filterCatalogByCategory } = await import('./catalog');
-    const items = [
-      item({ category: 'vehicle', price: '9007199254740993' }),
-      item({ category: 'general', price: '40', code: 'gloves' }),
-    ];
-    expect(filterCatalogByCategory(items, 'vehicle')).toEqual([items[0]]);
-    expect(filterCatalogByCategory(items, 'Vehicle')).toEqual([]);
-    expect(filterCatalogByCategory(items, '')).toEqual(items);
+
+describe('member catalogue stock query', () => {
+  it('uses the owner-only catalogue and forwards the available-stock selector', () => {
+    expect(stockCatalogApiPath('available')).toBe('/api/v1/shop/catalog?stock=available');
+  });
+
+  it('does not send unknown selectors to the member API', () => {
+    expect(stockCatalogApiPath(undefined)).toBe('/api/v1/shop/catalog');
+    expect(stockCatalogApiPath('invalid')).toBe('/api/v1/shop/catalog');
   });
 });

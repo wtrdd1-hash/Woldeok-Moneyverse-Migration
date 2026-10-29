@@ -9,9 +9,14 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
+import {
+  groupByCategory,
+  isHeldToTheLimit,
+  maxPurchasable,
+  owesUpkeep,
+  stockCatalogApiPath,
+} from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
-import { SHOP_RARITIES, shopFilterQuery } from '../shop-rarity';
 
 /**
  * One member's own shelf, and a catalogue only a member can reach.
@@ -30,18 +35,19 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly rarity?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly stock?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery, rarity: rawRarity } = await searchParams;
-  const rarity = rawRarity ?? '';
-  const querySuffix = shopFilterQuery({ q: rawQuery ?? '', rarity });
+  const { q: rawQuery, stock: rawStock } = await searchParams;
+  const stockOnly = rawStock === 'available';
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`),
+    apiOrNull<{ catalogItems: CatalogItem[] }>(
+      stockCatalogApiPath(stockOnly ? 'available' : undefined),
+    ),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -104,7 +110,7 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-xl flex-wrap gap-2" role="search">
+          <form className="flex max-w-2xl flex-wrap items-center gap-2" role="search">
             <Input
               name="q"
               type="search"
@@ -112,17 +118,15 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
-            <select
-              name="rarity"
-              defaultValue={SHOP_RARITIES.some((option) => option.value === rarity) ? rarity : ''}
-              aria-label="아이템 희귀도"
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm"
-            >
-              <option value="">전체 희귀도</option>
-              {SHOP_RARITIES.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
+            <label className="flex min-h-11 items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="stock"
+                value="available"
+                defaultChecked={stockOnly}
+              />
+              재고 있는 상품만
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
@@ -141,9 +145,9 @@ export default async function ShopCatalogPage({
           // A different fact from the one above: the request worked and the
           // catalogue has nothing on sale right now.
           <EmptyState
-            title={query === '' && rarity === '' ? '지금 판매 중인 아이템이 없어요.' : '검색 조건에 맞는 아이템이 없어요.'}
+            title={query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
             description={
-              query === '' && rarity === ''
+              query === ''
                 ? '운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요.'
                 : '다른 이름, 설명 또는 아이템 코드로 다시 검색해 주세요.'
             }

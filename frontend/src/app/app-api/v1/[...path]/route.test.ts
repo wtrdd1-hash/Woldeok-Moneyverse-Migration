@@ -93,6 +93,22 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
+  it.each([200, 403, 500])('forwards member shop stock query and never caches response %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ catalogItems: [] }), {
+      status,
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/shop/catalog?stock=available'), context('shop', 'catalog'));
+    expect(response.status).toBe(status);
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/shop/catalog');
+    expect(target.searchParams.get('stock')).toBe('available');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
   it('fences privacy request POST receipt even when upstream marks it public', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requestId: 'private-receipt' }), {
