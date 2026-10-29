@@ -9,12 +9,12 @@ UNION ALL SELECT 'ledger_postings',count(*)::text FROM public.ledger_postings
 UNION ALL SELECT 'treasury_records',count(*)::text FROM public.system_treasury_ledger
 UNION ALL SELECT 'treasury_records_without_ledger_link',count(*)::text FROM public.system_treasury_ledger WHERE ledger_transaction_id IS NULL;
 WITH journal AS (
- SELECT t.id, count(p.id) AS postings,coalesce(sum(CASE WHEN p.direction::text='credit' THEN p.amount ELSE -p.amount END),0) AS delta
+ SELECT t.id, count(p.id) AS postings,coalesce(sum(CASE WHEN p.direction::text='debit' THEN p.amount ELSE -p.amount END),0) AS delta
  FROM public.ledger_transactions t LEFT JOIN public.ledger_postings p ON p.transaction_id=t.id GROUP BY t.id
 )
 SELECT count(*) FILTER (WHERE delta<>0 OR postings<2) AS malformed_or_unbalanced_transactions FROM journal;
 WITH diffs AS (
- SELECT a.account_type::text account_type,coalesce(b.available_amount,0) - coalesce(sum(CASE WHEN p.direction::text='credit' THEN p.amount ELSE -p.amount END),0) delta
+ SELECT a.account_type::text account_type,coalesce(b.available_amount,0) - coalesce(sum(CASE WHEN p.direction::text='debit' THEN p.amount ELSE -p.amount END),0) delta
  FROM public.accounts a LEFT JOIN public.account_balances b ON b.account_id=a.id LEFT JOIN public.ledger_postings p ON p.account_id=a.id
  GROUP BY a.id,a.account_type,b.available_amount
 )
