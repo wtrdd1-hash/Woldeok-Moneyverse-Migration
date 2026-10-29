@@ -1,5 +1,9 @@
 ## v2026.10.29.1364 — Scheduled QA disposable disk hygiene (OPS PATCH)
 
+## v2026.10.29.1213 — LIVE Production promoted, operator DML preserved
+- [Internal](updates/v2026.10.29.1213-internal.md) / [GitHub](updates/v2026.10.29.1213-github.md) / [Worklog](worklog/2026-10-29-production-promotion-v1213.md). Official prod runtime b44ffd0a SHA matches, 23 new recorded migrations, 17/17 public smoke PASS; prior checksum anomalies still tracked.
+
+
 ## v2026.10.29.1212 — Explicit owner acceptance of existing finance DML; Test PASS / Production HOLD
 - [Internal](updates/v2026.10.29.1212-internal.md) · [GitHub](updates/v2026.10.29.1212-github.md) · [Worklog](worklog/2026-10-29-finance-dml-approval-and-release-v1212.md). Main merged, isolated Test verified, owner-approved privileges unchanged; original Production checksum provenance remains unresolved.
 
