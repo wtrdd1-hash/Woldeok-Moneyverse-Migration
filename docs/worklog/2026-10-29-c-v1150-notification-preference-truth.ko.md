@@ -1,0 +1,32 @@
+# 개발 C v1150 — 회원 알림 수신 설정 저장 증거 검증
+
+## 시작 — 2026-10-29 09:50 KST
+- 최신 main `2ac90063d45cfab879d4fb36863484d8a423deba` 기반 별도 브랜치/작업 폴더.
+- 미니PC 7개 서비스 정상. AGENTS, README, 영문/한국어 기획서, QA v1361, A/B/C PR 확인.
+- 알림 수신 설정 PUT이 HTTP 성공만으로 완료 처리되고, 저장 결과 및 서버 재조회가 검증되지 않는 P1 문제 발견.
+- 실제 DB 함수 유지, 영수증/재조회 검증과 UI의 미확인 상태를 수정. 운영·공유 DB 변경 금지.
+
+## 진행
+- RED 테스트 → GREEN 구현 → exact-SHA 검증 → PR 기록. 미완료.
+
+## 종료
+- 모든 릴리스 게이트 확인 전 병합/배포 금지.
+
+## 중간 — 09:51 KST
+- RED: 액션 테스트 9건 실패, UI 상태 검증 1건 실패 재현.
+- GREEN: 집중 테스트 12/12 통과. PUT 결과와 서버 GET 재조회가 요청값과 일치해야 성공 표시. 잘못된 상태 응답은 '알림 꺼짐'으로 표시하지 않고 오류 안내.
+- 사용자별 비캐시 API와 기존 PostgreSQL 함수를 그대로 사용. 최신 main/양국어 기획서 재확인.
+
+## 로컬 검증 종료 — 2026-10-29 09:59 KST
+- 집중 Frontend 14/14 PASS, 전체 Frontend 1,916 PASS / 기존 블로그 관련 4 FAIL. Backend 1,955 PASS / 440 SKIP, Database 46 PASS / 4 SKIP, Contract 38 PASS.
+- Typecheck, Lint(오류 0), Frontend/Backend Build, app-api 180개 계약 PASS. 백업 증거 단위검사 6 PASS.
+- 별도 PostgreSQL 17.11 컨테이너에서 마이그레이션 290개 적용, 관련 DB/API 테스트 41 PASS. 앱 계정 금융잔액 직접 UPDATE 거부 확인. 컨테이너/임시 자격증명 제거.
+- 보안 감사 운영 Moderate 1건, 전체 Low 3건/Moderate 9건 FAIL. 블로그 4건도 기존 main 회귀로 남음.
+- 최신 main `2ac90063d45cfab879d4fb36863484d8a423deba` 및 영·한 기획서 재확인. 다른 개발자 브랜치/작업폴더 보존, 삭제 없음.
+- 공식 exact-SHA Test 인증 E2E 미실행, GitOps/Production 배포 및 main 병합 금지. PR/CI 상태는 GitHub에서 별도 기록 예정.
+
+## main 변경·작업폴더 복구 — 2026-10-29 10:02 KST
+- main이 문서 1개만 변경된 `efcbc817bb8c726b78319f3f090e8a23f25cecb4`로 전진하여 별도 브랜치를 충돌 없이 rebase. 영·한 정식 기획서는 동일.
+- 외부 정리 작업이 이 회차의 최초 작업폴더를 삭제했지만 원격 브랜치는 보존됨. `/home/debian/mv-c-v1150-notification-wt`에 본인 작업폴더만 복구. 다른 개발자 작업폴더·브랜치 삭제 없음. Draft/HOLD PR #1811 생성.
+- 공식 Test SHA `cfb13272beea53c4d8c20eff7f379b6f66343033`, Production 버전 `unknown`. 배포하지 않음.
+- 최종 코드 기준 Frontend 1,918 PASS / 기존 블로그 4 FAIL, 집중 14 PASS, 변경 파일 Lint PASS. rebase 후 최종 SHA CI 대기. 운영 배포 금지.
