@@ -21,6 +21,6 @@
 - [x] Run GREEN and existing support tests.
 - [x] Inspect diff for scope/accessibility.
 ## Task 2: Verification and handoff
-- [ ] Fetch main/plan and compare.
-- [ ] Run full mandatory gates and report exact failures.
-- [ ] Write EN/KO final worklog and GitHub update; hold if not green.
+- [x] Fetch main/plan and compare.
+- [x] Run full mandatory gates and report exact failures.
+- [x] Write EN/KO final worklog and GitHub update; hold if not green.
