@@ -63,3 +63,25 @@ describe('independent AI originality and locale gate',()=>{
       .rejects.toThrow('UNTRUSTED_AI_ENDPOINT');
   });
 });
+
+describe('native Ollama constrained JSON article generation', () => {
+  it('requires all three fields from the strict local model and never accepts remote endpoints', async () => {
+    const raw = article(slot.country);
+    const client = vi.fn().mockImplementation(async (_endpoint: string, opts: RequestInit) => {
+      const params = JSON.parse(String(opts.body));
+      expect(params.format.required).toEqual(['title','excerpt','content']);
+      expect(params.options.num_ctx).toBe(8192);
+      expect(params.stream).toBe(false);
+      return new Response(JSON.stringify({message:{content:JSON.stringify(raw)},done_reason:'stop'}),{
+        status:200,headers:{'content-type':'application/json'},
+      });
+    });
+    await expect(generateLocalOriginalArticle(slot,source,{model:'gemma3:1b',fetcher:client})).resolves.toEqual(raw);
+    expect(client.mock.calls[0]![0]).toBe('http://127.0.0.1:11434/api/chat');
+  });
+  it('refuses incomplete or non-JSON model outputs instead of fabricating article fields', async()=>{
+    const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({message:{content:'not json'},done_reason:'stop'}),{status:200}));
+    await expect(generateLocalOriginalArticle(slot,source,{model:'gemma3:1b',fetcher:client}))
+      .rejects.toThrow('MODEL_JSON_SCHEMA_VIOLATION');
+  });
+});
