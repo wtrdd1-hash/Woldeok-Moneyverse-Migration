@@ -3,11 +3,9 @@
 import React, { useState } from 'react';
 import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle, RefreshCw } from 'lucide-react';
 
-import { claimPetFortune } from '@/lib/dopamine-api';
 
 interface DeokiPetStationProps {
   initialAffection?: number;
-  onClaimFortune?: (wldBonus: number, quote: string) => void;
   onTriggerFever?: () => void;
 }
 
@@ -21,14 +19,13 @@ const QUOTES = [
 
 export function DeokiPetStation({
   initialAffection = 20,
-  onClaimFortune,
   onTriggerFever,
 }: DeokiPetStationProps) {
   const [affection, setAffection] = useState<number>(initialAffection);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [dialogue, setDialogue] = useState<string>('안녕! 오늘도 열심히 WLD 모아보자 꽥! 🐥');
+  const [dialogue, setDialogue] = useState<string>('안녕! 오늘도 즐겁게 연습해보자 꽥! 🐥');
   const [isCookieCracked, setIsCookieCracked] = useState<boolean>(false);
-  const [fortuneData, setFortuneData] = useState<{ quote: string; target: string; wld: number } | null>(null);
+  const [fortuneData, setFortuneData] = useState<{ quote: string; target: string } | null>(null);
   const [cookieClaimed, setCookieClaimed] = useState<boolean>(false);
 
   const level = Math.min(5, Math.floor(affection / 25) + 1);
@@ -38,8 +35,7 @@ export function DeokiPetStation({
     const nextAffection = affection + 2;
     setAffection(nextAffection);
 
-    // Call backend API for pet interaction
-    void claimPetFortune('pet');
+    // Affection is local practice only; no persisted affinity or WLD claim.
 
     // Dynamic dialogue
     const dialogues = [
@@ -67,25 +63,14 @@ export function DeokiPetStation({
     if (cookieClaimed) return;
 
     const randomFortune = QUOTES[Math.floor(Math.random() * QUOTES.length)]!;
-    const bonusWld = Math.floor(Math.random() * 500) + 500; // 500 ~ 1,000 WLD
 
     setFortuneData({
       quote: randomFortune.text,
       target: randomFortune.target,
-      wld: bonusWld,
     });
     setIsCookieCracked(true);
     setCookieClaimed(true);
 
-    try {
-      await claimPetFortune('fortune');
-    } catch {
-      // Offline fallback
-    }
-
-    if (onClaimFortune) {
-      onClaimFortune(bonusWld, randomFortune.text);
-    }
   };
 
   return (
@@ -98,12 +83,12 @@ export function DeokiPetStation({
           </span>
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-              컴패니언 오리 &apos;덕이&apos; 펫 스테이션
+              컴패니언 오리 &apos;덕이&apos; 펫 연습 스테이션
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black text-amber-300 border border-amber-500/30">
                 Lv.{level}
               </span>
             </h3>
-            <p className="text-[11px] text-slate-400">쓰다듬어 친밀도를 올리고 일일 포춘쿠키를 쪼개보세요</p>
+            <p className="text-[11px] text-slate-400">쓰다듬기·포춘쿠키 연습 (WLD 지급 및 친밀도 저장 없음)</p>
           </div>
         </div>
 
@@ -157,7 +142,7 @@ export function DeokiPetStation({
           {/* Affection Progress Bar */}
           <div className="mt-3 w-full">
             <div className="flex justify-between text-[10px] text-slate-400 mb-1">
-              <span>친밀도 (Affection)</span>
+              <span>연습 친밀도 (로컬)</span>
               <span className="font-mono text-amber-400 font-bold">{affection} pts</span>
             </div>
             <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
@@ -174,17 +159,17 @@ export function DeokiPetStation({
           <div className="flex items-center justify-between border-b border-slate-800/60 pb-2">
             <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <Gift className="h-3.5 w-3.5 text-amber-400" />
-              1일 1회 행운의 포춘쿠키
+              연습용 행운의 포춘쿠키
             </span>
             <span className="text-[10px] font-mono text-slate-400">
-              {cookieClaimed ? '오늘 수령 완료' : '무료 개봉 가능'}
+              {cookieClaimed ? '이번 화면에서 열람 완료' : '연습 가능'}
             </span>
           </div>
 
           {!isCookieCracked ? (
             <div className="my-auto flex flex-col items-center justify-center py-3 text-center">
               <div className="text-4xl mb-2 animate-bounce">🥠</div>
-              <p className="text-xs text-slate-300 font-medium">쿠키를 쪼개 오늘의 투자 점괘와 보너스 WLD를 받으세요!</p>
+              <p className="text-xs text-slate-300 font-medium">연습용 점괘를 열어보세요. 실제 WLD 보상은 지급되지 않습니다.</p>
               <button
                 type="button"
                 aria-label="포춘쿠키 쪼개기"
@@ -199,7 +184,7 @@ export function DeokiPetStation({
             <div className="my-auto flex flex-col items-center justify-center py-2 text-center animate-fadeIn">
               <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold mb-1">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                +{fortuneData?.wld.toLocaleString()} WLD 즉시 지급!
+                연습용 점괘 열람 완료 · WLD 지급 없음
               </div>
               <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-xs text-slate-200 leading-relaxed">
                 &quot;{fortuneData?.quote}&quot;
@@ -214,9 +199,9 @@ export function DeokiPetStation({
           <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-800/60 pt-2">
             <span className="flex items-center gap-1">
               <Shield className="h-3 w-3 text-emerald-400" />
-              100% 무료 가상 리워드
+              연습용 콘텐츠 · 원장 거래 없음
             </span>
-            <span>매일 00:00 KST 초기화</span>
+            <span>화면을 새로고침하면 초기화</span>
           </div>
         </div>
       </div>

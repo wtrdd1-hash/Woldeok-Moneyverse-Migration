@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Inject,
@@ -111,32 +112,20 @@ export class DopamineController {
   }
 
   @Post('pet-fortune')
+  @Header('Cache-Control', 'no-store')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Interact with Deoki Pet and claim daily fortune cookie reward' })
+  @ApiOperation({ summary: 'Pet Fortune WLD settlement unavailable pending durable owner ledger receipts' })
   async claimPetFortune(
     @Req() request: RequestWithSession,
-    @Body() body: PetFortuneDto,
+    @Body() _body: PetFortuneDto,
   ) {
-    const userId = requireUserId(request);
-    const quotes = [
-      '호가창의 스프레드를 지배하는 자가 시장을 지배한다.',
-      '매일 자정 복리 예금은 배신하지 않는다.',
-      '직업 숙련도를 2.5배로 끌어올리면 WLD 파밍이 쉬워집니다.',
-      '침팬지 반도체의 매수세가 오늘 심상치 않군요!',
-      '분할 매수와 리밸런싱이 최고의 방어선입니다.',
-    ];
-    const fortuneQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const rewardAmount = body.petAction === 'fortune' ? 500 + Math.floor(Math.random() * 501) : 100;
-
-    return {
-      success: true,
-      userId,
-      action: body.petAction,
-      rewardAmount,
-      quote: fortuneQuote,
-      affinityGained: body.petAction === 'pet' ? 10 : 50,
-      claimedAt: new Date().toISOString(),
-    };
+    requireUserId(request);
+    // Petting and fortune draws have no owner-scoped, atomic ledger receipt.
+    // Never claim a payout or persisted affinity from a fabricated response.
+    throw new ServiceUnavailableException({
+      code: 'PET_FORTUNE_SETTLEMENT_UNAVAILABLE',
+      message: 'Pet Fortune rewards require verified eligibility and atomic ledger receipts',
+    });
   }
 
   @Post('bull-bear-vote')
@@ -214,7 +203,7 @@ export class DopamineController {
     return {
       userId,
       goldenDuckFeverAvailable: true,
-      fortuneCookieAvailable: true,
+      fortuneCookieAvailable: false, // WLD settlement has no verified owner receipt
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
       starDropRemaining: 3,

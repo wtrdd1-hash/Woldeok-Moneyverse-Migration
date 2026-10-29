@@ -37,6 +37,12 @@ describe('CasualDopamineStation', () => {
     expect(screen.getAllByText(/주식 여론 잭팟/).length).toBeGreaterThan(0);
   });
 
+  it('labels pet fortune as local practice rather than a WLD payout', () => {
+    renderKo(<CasualDopamineStation />);
+    expect(screen.getByText('로컬 연습')).toBeDefined();
+    expect(screen.queryByText('WLD 먹이주기')).toBeNull();
+  });
+
   it('opens star drop modal when star drop card is clicked', () => {
     renderKo(<CasualDopamineStation />);
 
