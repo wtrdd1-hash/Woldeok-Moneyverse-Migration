@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
-import { deleteBlogPost } from '@/app/blog/blog-data';
+import { deleteBlogPost, getBlogPostBySlug, getAllBlogPostsForAdmin } from '@/app/blog/blog-data';
 import { verifiedArticleBySlug } from '@/app/blog/blog-verified-client';
 import { mutate } from '@/lib/mutate';
 

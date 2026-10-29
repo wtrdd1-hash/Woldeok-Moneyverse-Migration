@@ -7,7 +7,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { requireUserId, type RequestWithSession } from '../auth/session.context';
 import { BlogVerifiedRepository } from './blog-verified.repository';
-import { selectTwoHourBlogSlot } from './blog-two-hour-rotation';
 
 @Controller('admin/blog-verified')
 @UseGuards(SessionGuard,AuthenticatedGuard,ConsentGuard,AdminGuard,AdminSessionGuard)
@@ -16,39 +15,6 @@ export class BlogVerifiedAdminController {
   @Get()
   async list() {
     return {posts: await this.repo.listForAdmin()};
-  }
-
-  /** Administrator-only operational truth. No fake model or scheduler readiness. */
-  @Get('publisher-status')
-  async publisherStatus() {
-    const now = new Date();
-    const koreaHour = new Date(now.getTime() + 9 * 60 * 60 * 1000).getUTCHours();
-    const nextSlot = selectTwoHourBlogSlot(
-      new Date(now.getTime() + (koreaHour % 2 === 0 ? 0 : 60 * 60 * 1000)),
-    );
-    // A dedicated systemd timer may own blog publishing while the global
-    // economy scheduler stays disabled. Both paths still require independent
-    // model/source certification; a config flag alone is not proof of success.
-    const workerEnabled = process.env.BLOG_VERIFIED_WORKER_ENABLED === 'true';
-    const schedulerEnabled = process.env.BLOG_TWO_HOUR_PUBLISHER_ENABLED === 'true'
-      && (process.env.MONEYVERSE_SCHEDULER_ENABLED === 'true' || workerEnabled);
-    const modelVerified = process.env.BLOG_EDITORIAL_MODEL_VERIFIED === 'true';
-    const posts = await this.repo.list();
-    return {
-      success: true,
-      automaticEnabled: schedulerEnabled && modelVerified,
-      manualEnabled: false, // No authenticated, rate-limited verified manual job is implemented.
-      modelVerified,
-      executionMode: workerEnabled ? 'DEDICATED_TIMER' : 'GLOBAL_SCHEDULER',
-      verifiedPublishedCount: posts.length,
-      nextSlot: nextSlot ? {
-        country: nextSlot.country,
-        topic: nextSlot.topic,
-        periodKey: nextSlot.periodKey,
-      } : null,
-      reason: !modelVerified ? 'MODEL_VERIFICATION_PENDING'
-        : !schedulerEnabled ? 'VERIFIED_SCHEDULER_DISABLED' : 'AUTOMATIC_SCHEDULER_CONFIGURED',
-    };
   }
 
   @Post(':slug/moderate')
