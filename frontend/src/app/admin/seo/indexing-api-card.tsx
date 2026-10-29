@@ -83,7 +83,8 @@ export function IndexingApiCard() {
         body: JSON.stringify({ sitemapUrl: fullUrl }),
       });
       const data = await res.json();
-      if (res.ok && data.success === true && data.isGscSubmitted === true) {
+      if (res.ok && data.success === true && data.isGscSubmitted === true &&
+          data.indexingConfirmed === false && data.sitemapUrl === fullUrl) {
         setFeedbackStatus('success');
         setGscConsoleUrl(typeof data.directConsoleUrl === 'string' ? data.directConsoleUrl : null);
         setFeedback(`🌐 [${sitemapPath}] ${data.gscMessage} (GSC 제출 접수·실제 색인 미확인)`);
@@ -135,6 +136,7 @@ export function IndexingApiCard() {
             <div className="flex flex-wrap items-center gap-2 pt-1.5">
               <span className="text-xs text-slate-400 font-semibold">제출 대상:</span>
               <select
+                aria-label="제출할 사이트맵 선택"
                 value={selectedSitemap}
                 onChange={(e) => setSelectedSitemap(e.target.value)}
                 className="min-h-11 bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1 outline-none focus:border-blue-500"

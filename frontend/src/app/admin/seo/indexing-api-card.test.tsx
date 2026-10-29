@@ -27,6 +27,18 @@ describe('SEO operator submission evidence', () => {
     expect(document.body.textContent).not.toMatch(/2개 URL 색인 요청 완료/);
   });
 
+  it('does not record a mismatched GSC sitemap as a confirmed submission', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ success: true, isGscSubmitted: true, indexingConfirmed: false,
+        sitemapUrl: 'https://easy-scraping.com/sitemap-board.xml', gscMessage: 'accepted' }),
+    })));
+    render(<IndexingApiCard />);
+    fireEvent.click(screen.getByRole('button', { name: /선택 사이트맵 구글 등록/ }));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/GSC 사이트맵 제출 실패/));
+    expect(document.body.textContent).not.toMatch(/GSC 사이트맵 1개 제출 접수/);
+  });
+
   it('does not show success styling on a failed submission', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false,
       json: async () => ({ success: false, message: '권한 없음' }) })));

@@ -24,6 +24,58 @@ function allowedSitemapUrl(input: unknown): string | null {
   }
 }
 
+type VerifiedGscReceipt = {
+  readonly sitemapUrl: string;
+  readonly propertyUrl: string;
+  readonly message: string | null;
+  readonly directConsoleUrl: string | null;
+};
+
+/** A successful backend flag alone cannot prove which sitemap Google accepted. */
+function verifiedGscReceipt(input: unknown, requestedSitemap: string): VerifiedGscReceipt | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const receipt = input as Record<string, unknown>;
+  if (receipt.success !== true || receipt.sitemapUrl !== requestedSitemap) return null;
+
+  const site = new URL(requestedSitemap);
+  const property = receipt.propertyUrl;
+  if (typeof property !== 'string' || property.length > 512) return null;
+  if (property !== `sc-domain:${site.hostname}`) {
+    try {
+      const prefix = new URL(property);
+      if (prefix.origin !== site.origin || prefix.pathname !== '/' ||
+          prefix.username || prefix.password || prefix.search || prefix.hash) return null;
+    } catch {
+      return null;
+    }
+  }
+
+  const consoleUrl = receipt.directConsoleUrl;
+  if (consoleUrl !== undefined && consoleUrl !== null) {
+    if (typeof consoleUrl !== 'string' || consoleUrl.length > 1024) return null;
+    try {
+      const url = new URL(consoleUrl);
+      const params = [...url.searchParams.keys()];
+      if (url.origin !== 'https://search.google.com' ||
+          url.pathname !== '/search-console/sitemaps' ||
+          url.username || url.password || url.hash ||
+          params.some((key) => key !== 'resource_id') ||
+          (url.searchParams.has('resource_id') &&
+           (params.length !== 1 || url.searchParams.get('resource_id') !== property))) return null;
+    } catch {
+      return null;
+    }
+  }
+
+  return {
+    sitemapUrl: requestedSitemap,
+    propertyUrl: property,
+    directConsoleUrl: typeof consoleUrl === 'string' ? consoleUrl : null,
+    message: typeof receipt.message === 'string' && receipt.message.length <= 500
+      ? receipt.message : null,
+  };
+}
+
 /** Delegate the actual GSC submission to the authenticated+CSRF-protected Nest endpoint. */
 export async function POST(req: Request) {
   const wrongOrigin = verifySeoWriteOrigin(req);
@@ -44,7 +96,8 @@ export async function POST(req: Request) {
       sitemapUrl?: string;
       propertyUrl?: string;
     }>('/api/v1/seo/gsc/submit-sitemap', { body: { sitemapUrl } });
-    if (receipt.success !== true) {
+    const verified = verifiedGscReceipt(receipt, sitemapUrl);
+    if (!verified) {
       return seoResponse(
         { success: false, error: 'gsc_not_confirmed', indexingConfirmed: false },
         502,
@@ -55,11 +108,11 @@ export async function POST(req: Request) {
       isGscSubmitted: true,
       indexingConfirmed: false,
       gscMessage:
-        receipt.message ||
+        verified.message ||
         'Google Search Console가 사이트맵 제출 요청을 접수했습니다. 검색 색인은 별도 확인이 필요합니다.',
-      directConsoleUrl: receipt.directConsoleUrl || null,
+      directConsoleUrl: verified.directConsoleUrl,
       sitemapUrl,
-      propertyUrl: receipt.propertyUrl || null,
+      propertyUrl: verified.propertyUrl,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
