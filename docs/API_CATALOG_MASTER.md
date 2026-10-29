@@ -112,16 +112,21 @@
 ## Domain 06: Virtual Derivatives & 10x Leverage Futures
 
 ### `GET /api/v1/stocks/derivatives/markets`
-- **Summary**: List futures markets (Samsung 10x, NAVER 5x, Index100 10x) & 8h funding rates
+- **Current contract**: HTTP 503 `DERIVATIVES_DATA_UNVERIFIED` until a verified market feed exists. The web derivatives screen is an explicitly labeled simulation, not a live market.
 
 ### `GET /api/v1/stocks/derivatives/positions`
-- **Summary**: List active long/short leveraged positions with real-time unrealized PnL
+- **Current contract**: HTTP 503 `DERIVATIVES_DATA_UNVERIFIED` until a member-bound canonical derivatives ledger exists; never return synthetic collateral or PnL as a member balance.
 
 ### `POST /api/v1/stocks/derivatives/open`
-- **Summary**: Open leveraged futures position with collateral lock
+- **Current contract**: HTTP 503 (financial settlement unavailable); no collateral is locked.
 
 ### `POST /api/v1/stocks/derivatives/:id/close`
-- **Summary**: Market settlement and payout of collateral + realized PnL
+- **Current contract**: HTTP 503 (financial settlement unavailable); no payout occurs.
+
+---
+
+### `GET /api/v1/stocks/derivatives/history`
+- **Current contract**: HTTP 503 `DERIVATIVES_DATA_UNVERIFIED` until authoritative member settlement history is available.
 
 ---
 
