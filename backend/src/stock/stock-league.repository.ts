@@ -61,6 +61,25 @@ export interface CopyTradingSubscription {
   readonly createdAt: string;
 }
 
+/** PostgreSQL NUMERIC must never be silently rounded in a WLD API response. */
+function safeWld(value: unknown, field: string): number {
+  if ((typeof value !== 'string' && typeof value !== 'number') ||
+      (typeof value === 'string' && value.trim() === '')) {
+    throw new ServiceUnavailableException({
+      code: 'STOCK_LEAGUE_WLD_PRECISION_UNAVAILABLE',
+      message: `stock league WLD safe precision unavailable: ${field}`,
+    });
+  }
+  const amount = Number(value);
+  if (!Number.isSafeInteger(amount)) {
+    throw new ServiceUnavailableException({
+      code: 'STOCK_LEAGUE_WLD_PRECISION_UNAVAILABLE',
+      message: `stock league WLD safe precision unavailable: ${field}`,
+    });
+  }
+  return amount;
+}
+
 export class StockLeagueRepository {
   constructor(private readonly db: Queryable) {}
 
@@ -107,9 +126,9 @@ export class StockLeagueRepository {
       title: row.title,
       startsAt: row.starts_at,
       endsAt: row.ends_at,
-      entryFee: Number(row.entry_fee),
-      prizePool: Number(row.prize_pool),
-      treasurySubsidy: Number(row.treasury_subsidy),
+      entryFee: safeWld(row.entry_fee, 'entry_fee'),
+      prizePool: safeWld(row.prize_pool, 'prize_pool'),
+      treasurySubsidy: safeWld(row.treasury_subsidy, 'treasury_subsidy'),
       status: row.status,
       winnerId: row.winner_id,
       winnerName: row.winner_name,
@@ -135,8 +154,8 @@ export class StockLeagueRepository {
       seasonId: row.season_id,
       userId: row.user_id,
       userName: row.user_name,
-      initialAsset: Number(row.initial_asset),
-      currentAsset: Number(row.current_asset),
+      initialAsset: safeWld(row.initial_asset, 'initial_asset'),
+      currentAsset: safeWld(row.current_asset, 'current_asset'),
       roiRate: Number(row.roi_rate),
       rankPosition: index + 1,
       tier: row.tier,
@@ -161,16 +180,8 @@ export class StockLeagueRepository {
     );
     const row = res.rows[0];
     if (!row) return null;
-    const initialAsset = Number(row.initial_asset);
-    const currentAsset = Number(row.current_asset);
-    if (![initialAsset, currentAsset].every((value) =>
-      Number.isFinite(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER
-    )) {
-      throw new ServiceUnavailableException({
-        code: 'STOCK_LEAGUE_ASSET_PRECISION_UNAVAILABLE',
-        message: 'league assets exceed safe precision',
-      });
-    }
+    const initialAsset = safeWld(row.initial_asset, 'initial_asset');
+    const currentAsset = safeWld(row.current_asset, 'current_asset');
     return {
       id: row.id,
       seasonId: row.season_id,
@@ -206,8 +217,8 @@ export class StockLeagueRepository {
       seasonId: row.season_id,
       userId: row.user_id,
       userName: row.user_name,
-      initialAsset: Number(row.initial_asset),
-      currentAsset: Number(row.current_asset),
+      initialAsset: safeWld(row.initial_asset, 'initial_asset'),
+      currentAsset: safeWld(row.current_asset, 'current_asset'),
       roiRate: Number(row.roi_rate),
       rankPosition: Number(row.rank_position),
       tier: row.tier,
@@ -305,8 +316,8 @@ export class StockLeagueRepository {
         seasonId: row.season_id,
         userId: row.user_id,
         userName: row.user_name,
-        initialAsset: Number(row.initial_asset),
-        currentAsset: Number(row.current_asset),
+        initialAsset: safeWld(row.initial_asset, 'initial_asset'),
+        currentAsset: safeWld(row.current_asset, 'current_asset'),
         roiRate: Number(row.roi_rate),
         rankPosition: Number(row.rank_position),
         tier: row.tier,
@@ -373,10 +384,10 @@ export class StockLeagueRepository {
       followerName: row.follower_name,
       whaleId: row.whale_id,
       whaleName: row.whale_name,
-      allocatedBudget: Number(row.allocated_budget),
-      usedBudget: Number(row.used_budget),
+      allocatedBudget: safeWld(row.allocated_budget, 'allocated_budget'),
+      usedBudget: safeWld(row.used_budget, 'used_budget'),
       copyRatio: Number(row.copy_ratio),
-      totalProfitShared: Number(row.total_profit_shared),
+      totalProfitShared: safeWld(row.total_profit_shared, 'total_profit_shared'),
       status: row.status,
       createdAt: row.created_at,
     }));
