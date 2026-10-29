@@ -1,0 +1,2 @@
+# Internal update A1425 — verified member inbox
+Main baseline a28bed9a; independent auto/hourly-a-verified-notification-inbox-20261028-1425. Replaced synthetic notification tab rows with real owner-scoped backend/BFF/DB/Android flows. No ledger/DB migration or runtime change. QA and security gates remain HOLD; see docs/worklog/2026-10-28-hourly-a-verified-notification-inbox.md and /srv/moneyverse-data/reports/Moneyverse-A-2026-10-28-1425.

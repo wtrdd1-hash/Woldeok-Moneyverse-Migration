@@ -13,12 +13,23 @@ export async function GET(req: Request): Promise<NextResponse> {
   if (!viewer.signedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: privateHeaders });
 
   const { searchParams } = new URL(req.url);
-  const unreadOnly = searchParams.get('unreadOnly') === 'true';
-  const limit = searchParams.get('limit') || '50';
-  if (!/^[0-9]{1,3}$/.test(limit) || Number(limit) < 1 || Number(limit) > 100) return NextResponse.json({ error: 'Invalid limit' }, { status: 400, headers: privateHeaders });
+  const unreadParam = searchParams.get('unreadOnly');
+  const category = searchParams.get('category');
+  const offset = searchParams.get('offset') ?? '0';
+  const limit = searchParams.get('limit') ?? '50';
+  const allowed = new Set([
+    'TRANSACTIONAL', 'PRODUCT_ACTIVITY', 'SEASON_LIVEOPS', 'SECURITY_CRITICAL',
+    'BUSINESS', 'BANK', 'SEASON', 'SPACE', 'SECURITY', 'SYSTEM',
+  ]);
+  if (!/^[0-9]{1,3}$/.test(limit) || Number(limit) < 1 || Number(limit) > 100 ||
+      !/^(0|[1-9][0-9]{0,3})$/.test(offset) || Number(offset) > 5000 ||
+      (category !== null && !allowed.has(category)) ||
+      (unreadParam !== null && unreadParam !== 'true' && unreadParam !== 'false')) {
+    return NextResponse.json({ error: 'Invalid notification filter' }, { status: 400, headers: privateHeaders });
+  }
 
   try {
-    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}${unreadOnly ? '&unreadOnly=true' : ''}`);
+    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam === 'true' ? '&unreadOnly=true' : ''}`);
     if (!Array.isArray(items)) throw new Error('Invalid feed');
     return NextResponse.json({ notifications: items }, { headers: privateHeaders });
   } catch {
