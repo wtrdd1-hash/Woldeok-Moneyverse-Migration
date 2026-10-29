@@ -1,5 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1430 / F675-163 — 일정 출처·개정번호·저장 무결성 보완 (기능 보완 / DRAFT / 운영 보류)
+
+**주기와 기준.** 이전 기능 추가 v1428 → 현재 기능 보완 v1430 → 다음 기능 추가 v1432(잠정). 최신 main 35971c600f25869c96f1c666d4b9f58927202730 시작·중간 재조회. 선행 Draft PR #1749(e65a654ddad4defaacb8bcd03bdfb4f5e7204f74)는 미병합. AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본 및 국문 PROJECT_PLAN.ko.md 기준. 문서 전용 독립 브랜치이며 런타임·DB·잔액·미디어·공식 Test·Production 변경 없음. 최신 완료 QA v1350 FAILED, 전체 운영승격 HOLD.
+
+**실제 코드 근거 정정(운영 사고 증거 아님).** frontend/src/app/calendar/shop-deadlines.ts는 sale_ends_at이 유효한 날짜인지 확인하고 최대 6개를 정렬할 뿐, 현재 시각보다 미래인지 검사하지 않는다. shop-deadlines.test.ts는 2026-10-28 현재 과거 날짜를 사용하고 시계를 주입하지 않아 미래 마감만 표시된다는 검증이 아니다. backend/src/shop/shop.repository.ts는 shop_catalog_list_v2(actor)를 호출한다. Migration 165에서 sale_ends_at의 실제 출처는 shop_catalog.sale_ends_at이며 shop_inventory.starts_at/ends_at은 별도로 상품 노출 가능 기간을 제어한다. 기존 v1428의 '마감 시각은 shop_inventory.ends_at에서 온다'는 설명은 잘못됐다. 시즌 이벤트 ID는 virtual_consumption_events.id, 종료는 virtual_seasons.ends_at(037)이다. 상품/이벤트 UUID가 같아도 운영자 수정 후 마감은 바뀔 수 있다. main에는 회원 저장 목록이 아직 없다. 이번 문서는 개발 요구사항이지 수정 코드가 아니다.
+
+**마감 출처와 유효성.** 저장 가능한 일정은 서버 DB 기준 시각에 활성·회원 노출 가능·유효한 미래 마감인 경우뿐이다. 상점은 catalogue.active, inventory 노출 기간, catalogue.sale_ends_at > server_now, 실제 조회 자격을 모두 확인한다. 시즌은 event.active, season.active, starts_at <= server_now < ends_at을 검증한다. catalogue.sale_ends_at(광고 마감)과 inventory.ends_at(실제 판매 노출 종료)을 혼동하지 않는다. 재고 노출이 먼저 종료되면 두 시각 중 더 이른 실질 종료를 표시하고 출처를 명시하며 이후 구매 가능하다고 약속하지 않는다. 출처를 검증할 수 없으면 저장 버튼을 제공하지 않는다. 화면의 6개 제한은 표시용일 뿐 저장 목록 조회 한도가 아니다. timestamptz와 동일한 DB 서버 시각을 사용하고 [시작, 종료) 경계를 적용하며 KST/UTC 오프셋을 표시한다. 브라우저 시각으로 권한을 결정하지 않는다.
+
+**마감 발생 회차와 변경 동의.** 저장은 영구적인 상품/이벤트 구독이 아니라 특정 마감 발생 회차에 대한 회원의 명시적 선택이다. 관련 원본 변경(shop_catalog.sale_ends_at/active, shop_inventory.starts_at/ends_at/노출, virtual_seasons.starts_at/ends_at/active, virtual_consumption_events.active/season_id)마다 동일 트랜잭션에서 단조 증가 source_revision을 기록하고 기존 관리자 변경 경로를 모두 포괄한다. 저장 시 source_type, source_id, source_revision, effective_deadline_at, deadline_origin을 스냅샷으로 남기고 원본 영수증은 불변으로 보존한다. 마감 연장·단축·비공개·삭제 시 기존 저장을 새 회차로 자동 이전하지 않으며 CHANGED/UNAVAILABLE로 표시한다. 새로운 회차를 저장하려면 회원이 검증된 새 마감을 확인하고 새 키·버전으로 승인해야 한다. 과거 SAVE 영수증 재실행은 과거 결과만 반환하고 삭제된 현재 상태를 되살리지 않는다. 수정 후 원래 시각으로 되돌리는 ABA 사례 때문에 시각 비교만으로는 부족하다. 신뢰 가능한 source_revision이 없으면 저장·변경확인을 차단한다. WLD·이벤트 참여·보상은 변경하지 않는다.
+
+**화면·CTA·상태.** /calendar에는 자격을 충족하는 카드만 '이 마감 저장', /calendar?view=watched에는 화면 6개 제한과 독립된 본인 서버 저장 목록을 제공한다. AVAILABLE, CHANGED(재확인 필요), EXPIRED(저장 회차 종료), UNAVAILABLE(비활성/숨김), SOURCE_UNKNOWN(출처 조회 실패), REMOVED, PENDING_WRITE_UNKNOWN을 구분한다. 출처 장애를 만료로 오표시하지 않는다. CHANGED에서는 개인정보가 허용되는 범위에서 저장 당시 날짜(과거 기록 표시), 검증된 새 날짜, '새 마감 확인' 및 '저장 해제' CTA를 제공한다. 숨김·삭제된 출처는 제목/가격/ID 없이 일반적인 해제만 허용한다. 응답 불확실 시 '현재 상태 확인' 및 기존 키 재조회만 제공하고 성공을 추측하지 않는다. 비회원은 로그인 CTA; 로그아웃·계정 전환 후 이전 비동기 응답을 차단한다. 키보드·스크린리더 상태, 320px/200% 확대, 움직임 감소, 명시적 시간대 적용.
+
+**제안 API·DB 계약(미구현).** GET /api/v1/calendar/watch?limit=20&cursor=opaque는 본인 항목의 watchId, savedOccurrenceRevision, savedDeadlineAt, 권한 확인된 경우에만 currentDeadlineAt, sourceStatus, watchVersion, watchedAt, serverNow, hasMore, nextCursor 반환. POST /api/v1/calendar/watch는 {sourceType,sourceId,expectedSourceRevision,expectedDeadlineAt} 및 UUID Idempotency-Key, POST /api/v1/calendar/watch/:watchId/confirm-revision은 If-Match watchVersion과 새 source_revision, DELETE /api/v1/calendar/watch/:watchId는 출처 삭제 후에도 본인 해제 가능. 원본 요청 지문과 결합된 불변 영수증(receiptId, replayed, stateAtCommit, 현재 상태 조회 링크)을 반환한다. 400 입력 오류, 401 비로그인, 403 CSRF/권한, 404 타인/미존재 동일 응답, 409 버전/키 재사용 충돌, 429 회원 100개 제한, 503 출처/DB 불확실. NestJS·Next.js BFF·Android App API 계약과 정확한 문자열 타임스탬프를 일치시키며 클라이언트 제공 user_id는 사용하지 않는다.
+
+**스키마·잠금·인덱스·권한.** calendar_event_watches에 source_revision bigint NOT NULL CHECK>0, saved_effective_deadline_at timestamptz NOT NULL, deadline_origin('catalog_sale','inventory_window','season_end'), 별도 watch version을 명시한다. 영수증은 actor, source revision, 정규화된 요청 해시, 작업, 당시 결과·시각을 불변 기록한다. 모든 관리자 변경을 포괄하는 버전 칼럼/트리거 또는 불변 개정 원장을 전진 마이그레이션으로 추가하고 이미 적용된 SQL 파일은 수정하지 않는다. 회원·출처 FK, 고유키, 삭제 표식, 회원별 100개 상한을 회원 행 FOR UPDATE로 보장한다. (user_id,watched_at DESC,id DESC) 활성 목록 인덱스, source revision 조회 인덱스, receipt UNIQUE(actor,idempotency_key) 적용. 트랜잭션 잠금 순서는 회원 → 원본 상위 → inventory/season 하위 → 저장 행 → 영수증으로 통일하고 관리자 변경과의 경합을 검증한다. SECURITY DEFINER, search_path=pg_catalog,pg_temp, 완전 수식 이름, PUBLIC/앱 계정 테이블 DML REVOKE, 필요한 함수 EXECUTE만 허용하고 실제 앱 계정으로 검증한다. 삭제된 출처라도 본인 해제는 가능해야 한다. 암호화된 불투명 Keyset 커서는 회원·세션·필터에 결합, LIMIT+1을 사용하고 다중 HTTP 요청의 완전 동일 시점 스냅샷을 주장하지 않는다.
+
+**관리·보안·개인정보·SEO·지표.** 관리자가 마감/노출을 수정하면 같은 트랜잭션에서 source_revision을 증가시키고 변경 전후·사유를 감사 기록하되 회원별 목록은 기본적으로 공개하지 않는다. 사용자 HTML, 비공개 출처 ID의 분석 수집, HMAC만 적용한 읽을 수 있는 커서, 공개 캐시·사이트맵·색인을 금지한다. 개인 API/BFF no-store, 페이지 noindex,nofollow, 계정/IP 속도 제한, 조회 limit 1..50(기본20). KPI는 개정 충돌률, CHANGED 비율, SOURCE_UNKNOWN, 만료 정리, 회원이 확인한 새 회차, 권한 차단, 불확실 쓰기, 실제 저장 성공률이며 동의된 집계만 기록한다.
+
+**P0/P1 실행 백로그(고유 ID 10개).**
+- P0 ENV1430-01: 데이터 디스크 98%/여유 약 4.0GiB의 안전 공간 확보, 타 작업 백업 임의 삭제 금지, 외부 백업·독립 복원·롤백 공간 증명.
+- P0 FIN1430-02: USER_CASH 18건 +18,000 WLD 과거 차이를 정규 원장과 대조하고 국고 재원 입증, 근거 없는 재지급·보정 금지.
+- P0 SEC1430-03: 상점 마감 출처 정정·미래 필터 누락, 관리자 개정 경로·회원 ACL·앱 DML 최소권한·마이그레이션 정합성 검증. 변경된 마감을 현재 유효하다고 표시 금지.
+- P0 REL1430-04: QA v1350 FAILED, 공식 Test 정확 SHA의 로그인·금융 E2E, 독립 복원, CI/보안·승인된 롤백 완료 전 Production 차단.
+- P1 CAL1430-05: 전진형 source revision·불변 발생 스냅샷·FK/CHECK/UNIQUE/인덱스, 변경 후 원복 ABA 시험.
+- P1 CAL1430-06: 회원·출처·재고 잠금, 100개 상한, 멱등성 영수증, 개정 확인 CAS, 409·과거 재시도 구현.
+- P1 CAL1430-07: NestJS·Next.js BFF·Android App API의 타입·no-store·CSRF·오류 계약, 6개 표시 목록과 저장 조회 분리.
+- P1 CAL1430-08: 접근 가능한 AVAILABLE/CHANGED/EXPIRED/UNAVAILABLE/UNKNOWN/REMOVED UI, 새 마감 확인 CTA, 계정 전환 차단·시간대 표시.
+- P1 CAL1430-09: 관리자 개정 감사, 개인정보·SEO·동의형 KPI·악용 방지.
+- P1 CAL1430-10: 독립 실제 PostgreSQL의 합성 10,001건 커서, 동시 100건 상한·재시도, 타인 위조 100건, 시각 경계/ABA/관리자 경합, 롤백 및 원장 변화 0 검증. DB 테스트 SKIP은 PASS 아님.
+
+**수용·배포·롤백.** 먼저 RED: now=2026-10-28T14:00:00Z일 때 과거 마감 제외, 미래만 포함, 동일 시각 제외, null/비정상 날짜 제외, 입력 배열 불변·정렬 안정성 시험. GREEN은 별도 개발 예약의 런타임 변경 후에만 판정. inventory.end가 catalogue.sale_ends_at보다 빠른 경우, 운영자 마감 변경/원복(ABA), 시즌 종료 변경, 출처 조회 실패, 계정 전환, 관리자 경합, 삭제 후 영수증 재시도, Android 동등성 검증. 기능 스위치 calendar_event_watchlist 기본 OFF. 전진 스키마 → shadow read → 실제 DB·웹·Android 공식 Test 정확 SHA → 제한적 관찰 배포 → 모든 P0 통과 후 사람 승인 Production. 롤백은 기능 OFF, 기록·영수증 보존, 파괴적 DB 롤백 금지. 기획 예약은 코드 배포하지 않는다.
+
+**외부 독립 근거 게이트.** 출처·중복 제거·실제 근거 분류를 통과한 10,000건 필요. 이번 신규 승인 0건, 누적 승인 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 기존 PostgreSQL·OWASP·W3C 발행처는 검토 후보일 뿐 승인 근거 건수에 포함하지 않는다.
+
+
 ## v1428 / F675-163 — 회원 이벤트 캘린더 나중에 보기 (기능 추가 / 기획 초안 / 운영 보류)
 - **QA 최종 갱신 22:17 KST:** v1350 FAILED; Draft PR 68개/충돌 3개, USER_CASH 18개 +18,000 WLD 차이·국고 0, 앱 UPDATE/DELETE 235/243개 테이블, PUBLIC 은행 함수 3개, 체크섬 불일치 5건·미적용 20건, 데이터 디스크 98%/여유 4.1GiB. Production 버전 unknown, Test는 현재 main 정확 SHA 불일치, 독립 복원 미검증. 공개 HTTP 50/50·비인증 모바일 36/36 PASS는 인증 금융·공식 Test 인증이 아님. 운영 보류.
 

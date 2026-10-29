@@ -1,5 +1,12 @@
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
 
+## F675-163 v1430 — Calendar watch deadline integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Feature Addition v1428 / Current Feature Improvement v1430 / Next Feature Addition v1432 (provisional).
+- Verified main source correction: frontend calendar shop-deadlines helper includes parseable past deadlines; tests have no clock; shop_catalog_list_v2 reads shop_catalog.sale_ends_at while shop_inventory availability is separate, and season deadlines come from virtual_seasons.ends_at. Prior v1428 provenance statement corrected.
+- Proposed source_revision + immutable saved occurrence deadline, explicit confirm after admin reschedule, ABA-safe source revisions, fail-closed unknown source, owner-only removal and no auto-notification/participation/WLD change. Real DB lock order, app ACL, Nest/Next/Android parity, no-store/noindex, a11y and rollback acceptance in integrated master.
+- P0 ENV1430-01 FIN1430-02 SEC1430-03 REL1430-04; P1 CAL1430-05 CAL1430-06 CAL1430-07 CAL1430-08 CAL1430-09 CAL1430-10. Predecessor Draft #1749; QA v1350 FAILED; external approved 0 new, cumulative UNKNOWN/10,000 BLOCKED. Documentation only.
+
+
 ## F675-163 — v1428 member calendar event watchlist (ADDITION / DRAFT / HOLD)
 - **QA final refresh 22:17 KST:** v1350 FAILED; 68 Draft PRs/3 conflicts, 18 USER_CASH divergences +18,000 WLD and Treasury 0, app UPDATE/DELETE 235/243 tables, PUBLIC bank EXECUTE 3, 5 migration checksum mismatches, 20 unapplied migrations, data disk 98% / 4.1GiB free. Production version unknown, Test not exact current main, independent restore unverified. Public HTTP 50/50 and anonymous mobile 36/36 PASS do not certify authenticated finance or official Test. RELEASE HOLD.
 - Verified main /calendar has season events, shop sale deadlines, daily events and weekly goals but no member-owned saved event list. Only season UUID and shop deadline UUID are eligible v1; daily/weekly lack stable IDs in this page. No overlap with F675-160 merchandise wishlist.
