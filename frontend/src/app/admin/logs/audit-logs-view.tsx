@@ -36,6 +36,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { AuditSearchRow } from '../types';
+import { auditCsvDocument } from './audit-export-csv';
 
 type CategoryFilter = 'all' | 'error' | 'economy' | 'security' | 'content' | 'moderation';
 type ViewMode = 'timeline' | 'compact';
@@ -167,15 +168,12 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
       e.transaction_id ?? '',
       e.integrity_hash ?? '',
     ]);
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(',')),
-    ].join('\n');
+    const csvContent = auditCsvDocument(headers, rows);
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `audit_logs_current_page_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -186,7 +184,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `audit_logs_current_page_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -264,7 +262,8 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               onClick={handleExportCsv}
               disabled={filteredEvents.length === 0}
               className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs font-medium"
-              title="현재 필터링된 감사 로그를 CSV 파일로 내보냅니다."
+              title="현재 페이지에서 불러온 감사 로그만 CSV 파일로 내보냅니다."
+              aria-label="현재 페이지 감사 로그 CSV 내보내기"
             >
               <Download className="size-3" />
               CSV
@@ -276,7 +275,8 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
               onClick={handleExportJson}
               disabled={filteredEvents.length === 0}
               className="min-h-[44px] sm:min-h-7 h-auto sm:h-7 gap-1 px-2.5 text-xs font-medium"
-              title="현재 필터링된 감사 로그를 JSON 파일로 내보냅니다."
+              title="현재 페이지에서 불러온 감사 로그만 JSON 파일로 내보냅니다."
+              aria-label="현재 페이지 감사 로그 JSON 내보내기"
             >
               <Download className="size-3" />
               JSON
@@ -336,7 +336,7 @@ export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
           조회 결과 <strong className="text-foreground">{filteredEvents.length}</strong>건
           {category !== 'all' && ` (필터: ${category})`}
         </span>
-        <span className="text-[0.7rem]">카드 또는 [상세] 클릭 시 무결성 해시 및 원본 JSON 열람 가능</span>
+        <span className="text-[0.7rem]" role="status" aria-live="polite">내보내기는 현재 페이지의 {filteredEvents.length}건만 포함하며, 다른 페이지는 포함하지 않습니다.</span>
       </div>
 
       {/* 3. 본문 뷰 렌더링 */}
