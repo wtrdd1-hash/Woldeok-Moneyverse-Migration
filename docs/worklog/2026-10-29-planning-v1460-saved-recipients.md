@@ -18,5 +18,11 @@
 - [x] 4 P0 + 6 P1 concrete tasks and acceptance gates in both languages. No real PostgreSQL acceptance or official Test E2E performed by planning.
 
 ## Finish (verification/PR evidence appended after checks)
-- [ ] Check bilingual 10-ID parity, docs-only file scope, Git diff, release classifier and final remote SHA.
-- [ ] Push independent branch, open Draft PR stacked on #1837, inspect CI, post GitHub status, save finish record.
+- [x] Check bilingual 10-ID parity, docs-only file scope, Git diff, release classifier and final remote SHA.
+- [x] Push independent branch, open Draft PR stacked on #1837, inspect initial CI; final CI remains pending. GitHub status and finish record follow final commit.
+
+## Finish (2026-10-29 14:10–14:12 KST)
+- [x] New Draft PR [#1846](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1846) opened against unmerged v1458 branch, engineering issue [#1844](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1844). No main merge.
+- [x] 14 docs-only changed files / 7 bilingual pairs; 4 P0 + 6 P1 exact IDs per canonical EN/KO. `git diff --check` PASS; local release classifier 17 PASS / 0 FAIL. Real PostgreSQL acceptance, full CI, authenticated Test/Android E2E and off-host restore NOT RUN by planning.
+- [x] GitHub initial commit `b3a5290657036ae228df7f1da8de2544745ec4cb` pushed and remote SHA matched. Initial CI: release-input SUCCESS; classify and verify/classify IN_PROGRESS at 14:10 KST. Final commit checks must be independently inspected; no CI certification asserted.
+- [x] Main `b84d645a87e8fa0d544ca3ee17e785e737e477ea` unchanged at start, middle and PR creation. Previous v1456/v1458 drafts preserved. No runtime, database, WLD, feature flag, Test, Production or branch cleanup. External corpus 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
