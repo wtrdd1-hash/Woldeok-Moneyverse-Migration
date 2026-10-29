@@ -43,7 +43,8 @@ export interface NationalPensionOverview {
   totalSubscribersCount: number;
   totalRetiredReceiversCount: number;
   totalPensionPaidWld: string;
-  benchmarkAnnualPayoutRate: string;
+  benchmarkAnnualPayoutRate: string | null;
+  annualPayoutRateCertified?: boolean;
   vaultMainBalanceWld: string;
 }
 
@@ -111,15 +112,15 @@ export function PensionPortalClient({
   const getTierInfo = (tier: string) => {
     switch (tier) {
       case 'TIER_5_HONOR':
-        return { name: 'Tier 5 · 명예원로형', rate: '연 10.5%', hourly: '0.12%', color: 'text-amber-300 border-amber-500/40 bg-amber-500/10' };
+        return { name: 'Tier 5 · 명예원로형', color: 'text-amber-300 border-amber-500/40 bg-amber-500/10' };
       case 'TIER_4_PLATINUM':
-        return { name: 'Tier 4 · 플래티넘형', rate: '연 9.6%', hourly: '0.11%', color: 'text-violet-300 border-violet-500/40 bg-violet-500/10' };
+        return { name: 'Tier 4 · 플래티넘형', color: 'text-violet-300 border-violet-500/40 bg-violet-500/10' };
       case 'TIER_3_GOLD':
-        return { name: 'Tier 3 · 골드은퇴형', rate: '연 8.7%', hourly: '0.10%', color: 'text-yellow-300 border-yellow-500/40 bg-yellow-500/10' };
+        return { name: 'Tier 3 · 골드은퇴형', color: 'text-yellow-300 border-yellow-500/40 bg-yellow-500/10' };
       case 'TIER_2_CITIZEN':
-        return { name: 'Tier 2 · 표준국민형', rate: '연 7.8%', hourly: '0.09%', color: 'text-blue-300 border-blue-500/40 bg-blue-500/10' };
+        return { name: 'Tier 2 · 표준국민형', color: 'text-blue-300 border-blue-500/40 bg-blue-500/10' };
       default:
-        return { name: 'Tier 1 · 청년적립형', rate: '연 7.0%', hourly: '0.08%', color: 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10' };
+        return { name: 'Tier 1 · 청년적립형', color: 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10' };
     }
   };
 
@@ -176,7 +177,7 @@ export function PensionPortalClient({
     const isCurrentlyReceiving = account.status === 'RETIRED_RECEIVING';
     const confirmMsg = isCurrentlyReceiving
       ? '기초연금 수령을 중단하고 기여금 추가 적립 모드로 전환하시겠습니까?'
-      : '은퇴 기초연금 수령을 개시하시겠습니까? 매시간 확정 연금이 지갑으로 평생 자동 입금됩니다.';
+      : '연금 정산 검증 완료 전에는 수령을 개시할 수 없습니다.';
 
     if (!confirm(confirmMsg)) return;
 
@@ -188,7 +189,7 @@ export function PensionPortalClient({
 
       toast.success(
         data.status === 'RETIRED_RECEIVING'
-          ? '은퇴 기초연금 수령이 개시되었습니다! 매시간 자동 입금됩니다.'
+          ? '은퇴 기초연금 수령이 개시되었습니다! 지급 상태는 원장 검증 후 다시 확인해 주세요.'
           : '기여금 추가 적립 모드로 정상 전환되었습니다.',
       );
       setAccount(data);
@@ -253,7 +254,7 @@ export function PensionPortalClient({
               국가 국민연금공단 (National Pension Service)
             </h1>
             <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10">
-              NPS 복리 적립 기금
+              NPS 기존 기록 조회
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
@@ -263,16 +264,16 @@ export function PensionPortalClient({
 
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="px-3 py-1 text-xs font-mono">
-            {PENSION_LEDGER_SETTLEMENT_PAUSED ? '정산 검증 중 · 거래 중단' : '중앙 국고 100% 지급보증 (AAA)'}
+            {PENSION_LEDGER_SETTLEMENT_PAUSED ? '정산 검증 중 · 거래 중단' : '정산 증빙 검증 필요'}
           </Badge>
         </div>
       </div>
 
       {PENSION_LEDGER_SETTLEMENT_PAUSED && (
         <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
-          <strong>국민연금 거래 임시 중단</strong>
+          <strong>국민연금 거래 및 연 지급률 검증 중</strong>
           <p className="mt-1">{PENSION_HOLD_NOTICE}</p>
-          <p className="mt-1 text-muted-foreground">표시되는 수령 예상액은 참고용 계산이며 실제 지급을 보증하지 않습니다.</p>
+          <p className="mt-1 text-muted-foreground">기존 시간당 지급 산식은 표기된 연간 수익률과 일치하지 않습니다. 아래 계산은 구형 산식의 참고값이며 실제 지급을 보증하지 않습니다.</p>
         </div>
       )}
 
@@ -302,11 +303,11 @@ export function PensionPortalClient({
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
             <Percent className="h-3.5 w-3.5 text-violet-400" />
-            기준 연간 기초연금율
+            연 지급률 검증 상태
           </div>
           <div className="text-xl font-bold mt-1 text-foreground">
-            {overview.benchmarkAnnualPayoutRate}
-            <span className="text-xs font-normal text-muted-foreground ml-1">(연 7~10%)</span>
+            연 지급률 미검증
+            <span className="block text-xs font-normal text-muted-foreground mt-1">기존 시간당 산식과 연간 표기가 불일치합니다.</span>
           </div>
         </div>
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
@@ -339,14 +340,14 @@ export function PensionPortalClient({
                       : ''
                   }
                 >
-                  {account?.status === 'RETIRED_RECEIVING' ? '🟢 평생 기초연금 수령 중' : '🔵 기여금 적립 중'}
+                  {account?.status === 'RETIRED_RECEIVING' ? '수령 등록 기록 · 지급 중단' : '🔵 기여금 적립 중'}
                 </Badge>
               </div>
               <CardTitle className="text-xl font-bold mt-2">
                 나의 국민연금 적립 증서
               </CardTitle>
               <CardDescription>
-                중앙 국고(VAULT_MAIN)와 연동되어 국부펀드의 복리 운용 레버리지로 보증되는 평생 공적 연금입니다.
+                기존 납입·수령 기록을 조회하는 서비스입니다. 연 지급률과 정산 재원은 검증 중입니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -359,7 +360,7 @@ export function PensionPortalClient({
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">시간당 예상 연금</div>
+                  <div className="text-xs text-muted-foreground">구형 산식 참고값 (시간당)</div>
                   <div className="text-lg font-bold text-emerald-400 mt-0.5">
                     +{groupDigits(hourlyPayout)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD/h</span>
@@ -378,7 +379,7 @@ export function PensionPortalClient({
               <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-xs flex items-center justify-between">
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-emerald-400" />
-                  은퇴 수령 시 환산 연금액:
+                  구형 산식 참고 환산액 (미지급):
                 </span>
                 <span className="font-semibold text-foreground">
                   하루 약 <span className="text-emerald-400">+{groupDigits(dailyPayout)} WLD</span> ·
@@ -405,7 +406,7 @@ export function PensionPortalClient({
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-1.5" />
-                      평생 기초연금 수령 개시하기
+                      연금 수령 신청 (검증 중)
                     </>
                   )}
                 </Button>
@@ -436,7 +437,7 @@ export function PensionPortalClient({
                 국민연금 기여금 납입하기
               </CardTitle>
               <CardDescription>
-                {PENSION_LEDGER_SETTLEMENT_PAUSED ? PENSION_HOLD_NOTICE : '지갑에서 기여금을 납입하여 연금 적립액과 평생 연금율을 높이세요.'}
+                {PENSION_LEDGER_SETTLEMENT_PAUSED ? PENSION_HOLD_NOTICE : '연금 정산 계약이 승인되기 전에는 납입할 수 없습니다.'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -513,7 +514,7 @@ export function PensionPortalClient({
               </Button>
 
               <div className="p-2.5 rounded bg-muted/30 border border-border/40 text-[11px] text-muted-foreground space-y-1">
-                <p>• 납입된 금액은 중앙 국고(VAULT_MAIN)로 편입되어 국가 국부펀드로 복리 운용됩니다.</p>
+                <p>• 기존 납입·국고 기록은 확인 중이며 새로운 납입은 중단됐습니다.</p>
                 <p>• 정기 지급은 현재 원장 정산 검증이 끝날 때까지 중단됩니다.</p>
               </div>
             </CardContent>
@@ -547,7 +548,7 @@ export function PensionPortalClient({
                 국민연금 은퇴 수령액 모의 시뮬레이터
               </CardTitle>
               <CardDescription>
-                원하는 목표 적립금을 설정하고 은퇴 후 평생 수령할 수 있는 시간당/월간 연금액을 미리 계산해 보세요.
+                기존 시간당 계산식의 결과를 참고용으로 확인합니다. 연 지급률·재원·실제 지급은 검증되지 않았습니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -581,12 +582,12 @@ export function PensionPortalClient({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 <div className="rounded-xl border border-border/70 p-4 bg-muted/20">
-                  <div className="text-xs text-muted-foreground">시간당 확정 수령액</div>
+                  <div className="text-xs text-muted-foreground">시간당 구형 산식 참고액</div>
                   <div className="text-2xl font-bold text-emerald-400 mt-1">
                     +{simHourly.toLocaleString()}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1">24시간 연속 입금</div>
+                  <div className="text-[11px] text-muted-foreground mt-1">지급 중단 · 가정상 24회/일</div>
                 </div>
                 <div className="rounded-xl border border-border/70 p-4 bg-muted/20">
                   <div className="text-xs text-muted-foreground">하루(24h) 수령액</div>
@@ -594,7 +595,7 @@ export function PensionPortalClient({
                     +{simDaily.toLocaleString()}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1">일일 정기 복리</div>
+                  <div className="text-[11px] text-muted-foreground mt-1">단순 24시간 환산 (복리 아님)</div>
                 </div>
                 <div className="rounded-xl border border-border/70 p-4 bg-muted/20">
                   <div className="text-xs text-muted-foreground">한 달(30일) 수령액</div>
@@ -602,7 +603,7 @@ export function PensionPortalClient({
                     +{simMonthly.toLocaleString()}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1">월 환산 평생 연금</div>
+                  <div className="text-[11px] text-muted-foreground mt-1">30일 환산 · 지급 보장 아님</div>
                 </div>
               </div>
             </CardContent>

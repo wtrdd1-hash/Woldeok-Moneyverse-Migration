@@ -4,7 +4,7 @@ export function calculatePensionForecast(principalWld: string, hourlyRateBps: nu
   if (!Number.isSafeInteger(hourlyRateBps) || hourlyRateBps < 1) throw new TypeError('invalid pension rate');
   const principal = BigInt(principalWld);
   const due = principal * BigInt(hourlyRateBps) / 10000n;
-  const hourly = due > 0n ? due : 1n;
+  const hourly = principal === 0n ? 0n : due > 0n ? due : 1n;
   const refund = principal * 95n / 100n;
   return {
     hourly: hourly.toString(),

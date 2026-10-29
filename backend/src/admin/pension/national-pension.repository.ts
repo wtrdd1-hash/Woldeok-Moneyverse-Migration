@@ -8,7 +8,8 @@ export interface NationalPensionOverview {
   totalSubscribersCount: number;
   totalRetiredReceiversCount: number;
   totalPensionPaidWld: string;
-  benchmarkAnnualPayoutRate: string;
+  benchmarkAnnualPayoutRate: null;
+  annualPayoutRateCertified: false;
   vaultMainBalanceWld: string;
 }
 
@@ -152,23 +153,20 @@ export class NationalPensionRepository {
       `SELECT balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN' LIMIT 1`,
     );
 
-    const configRes = await this.pool.query(
-      `SELECT benchmark_annual_payout_rate_bps FROM public.national_pension_configs LIMIT 1`,
-    );
-
     const totalAum = aumRes.rows[0]?.total_aum || '0';
     const totalSubscribers = Number(aumRes.rows[0]?.total_subscribers || 0);
     const totalReceivers = Number(aumRes.rows[0]?.total_receivers || 0);
     const totalPensionPaid = aumRes.rows[0]?.total_pension_paid || '0';
     const vaultBal = vaultRes.rows[0]?.balance_wld || '0';
-    const benchmarkBps = configRes.rows[0]?.benchmark_annual_payout_rate_bps || 800;
 
     return {
       totalAumWld: totalAum.toString(),
       totalSubscribersCount: totalSubscribers,
       totalRetiredReceiversCount: totalReceivers,
       totalPensionPaidWld: totalPensionPaid.toString(),
-      benchmarkAnnualPayoutRate: `${(benchmarkBps / 100).toFixed(1)}%`,
+      // No funded annual rate is certified: legacy 8bps/hour implies 700.8% nominal/year.
+      benchmarkAnnualPayoutRate: null,
+      annualPayoutRateCertified: false,
       vaultMainBalanceWld: vaultBal.toString(),
     };
   }

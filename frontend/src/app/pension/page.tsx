@@ -12,8 +12,8 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '국가 국민연금공단 (NPS) 대국민 포털 | 평생 기초연금 적립 & 수령',
-  description: '중앙 국고(VAULT_MAIN)와 연동되어 국부펀드의 복리 운용 레버리지로 평생 시간당 기초연금을 확정 지급하는 월덱 국민연금 공식 포털입니다.',
+  title: '국가 국민연금공단 (NPS) 대국민 포털 | 기존 납입·수령 기록 조회 (정산 중)',
+  description: '가상경제 국민연금의 기존 납입·수령 기록을 조회하는 포털입니다. 연 지급률과 금융 원장 정산 검증이 완료될 때까지 신규 거래 및 지급은 중단됩니다.',
 };
 
 export default async function PublicPensionPage() {
@@ -24,7 +24,8 @@ export default async function PublicPensionPage() {
     totalSubscribersCount: 0,
     totalRetiredReceiversCount: 0,
     totalPensionPaidWld: '0',
-    benchmarkAnnualPayoutRate: '8.0%',
+    benchmarkAnnualPayoutRate: null,
+    annualPayoutRateCertified: false,
     vaultMainBalanceWld: '25000000',
   };
 
