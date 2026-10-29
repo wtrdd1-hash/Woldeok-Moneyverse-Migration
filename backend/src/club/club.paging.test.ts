@@ -12,8 +12,31 @@ const request = { session: { user_id: actor } } as unknown as RequestWithSession
 const invalid: unknown[] = ['', '2junk', '1e2', '2.5', '-1', '+2', ' 2', '02', '9999999999999999999999', 'Infinity', ['1', '2'], { limit: '2' }];
 
 describe('ClubController roster and feed paging', () => {
-  const service = { listClubMembers: vi.fn().mockResolvedValue([]), listClubFeed: vi.fn().mockResolvedValue([]) };
+  const service = { listClubs: vi.fn().mockResolvedValue([]), listClubMembers: vi.fn().mockResolvedValue([]), listClubFeed: vi.fn().mockResolvedValue([]) };
   const controller = new ClubController(service as unknown as ClubService);
+
+  for (const value of [...invalid, '0', '101', '10001']) {
+    it('rejects invalid club directory limit before service access: ' + JSON.stringify(value), async () => {
+      service.listClubs.mockClear();
+      await expect(controller.listClubs(request, undefined, value as string, undefined)).rejects.toThrow(BadRequestException);
+      expect(service.listClubs).not.toHaveBeenCalled();
+    });
+  }
+
+  for (const value of [...invalid.filter((v) => v !== '0'), '-1', '10001']) {
+    it('rejects invalid club directory offset before service access: ' + JSON.stringify(value), async () => {
+      service.listClubs.mockClear();
+      await expect(controller.listClubs(request, undefined, undefined, value as string)).rejects.toThrow(BadRequestException);
+      expect(service.listClubs).not.toHaveBeenCalled();
+    });
+  }
+
+  it('preserves club directory defaults and upper bounds', async () => {
+    await controller.listClubs(request);
+    expect(service.listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0);
+    await controller.listClubs(request, 'ALPHA', '100', '10000');
+    expect(service.listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000);
+  });
 
   for (const value of invalid) {
     it(`rejects invalid roster limit ${JSON.stringify(value)} before SQL`, async () => {
@@ -54,6 +77,26 @@ describe('ClubController roster and feed paging', () => {
 describe('PostgresClubRepository direct-call paging', () => {
   const query = vi.fn().mockResolvedValue({ rows: [] });
   const repo = new PostgresClubRepository({ query } as unknown as Queryable);
+  for (const value of [NaN, Infinity, -Infinity, 0, -1, 1.5, 101, 1e20]) {
+    it('rejects invalid club directory limit before SQL: ' + String(value), async () => {
+      query.mockClear();
+      await expect(repo.listClubs(actor, undefined, value, 0)).rejects.toThrow(ClubInputError);
+      expect(query).not.toHaveBeenCalled();
+    });
+  }
+  for (const value of [NaN, Infinity, -Infinity, -1, 1.5, 10001, 1e20]) {
+    it('rejects invalid club directory offset before SQL: ' + String(value), async () => {
+      query.mockClear();
+      await expect(repo.listClubs(actor, undefined, 50, value)).rejects.toThrow(ClubInputError);
+      expect(query).not.toHaveBeenCalled();
+    });
+  }
+  it('binds valid club directory paging values', async () => {
+    query.mockClear();
+    await repo.listClubs(actor, 'ALPHA', 100, 10000);
+    expect(query).toHaveBeenLastCalledWith(expect.any(String), [actor, 'ALPHA', 100, 10000]);
+  });
+
   for (const value of [NaN, Infinity, -Infinity, 0, -1, 1.5, 101, 1e20]) {
     it(`rejects invalid roster limit ${String(value)}`, async () => {
       query.mockClear();

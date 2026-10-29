@@ -117,8 +117,12 @@ export class PostgresClubRepository {
     limit = 50,
     offset = 0,
   ): Promise<ClubSummaryRow[]> {
-    const safeLimit = Math.min(Math.max(1, limit), 100);
-    const safeOffset = Math.max(0, offset);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new ClubInputError('limit must be an integer between 1 and 100');
+    }
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
+      throw new ClubInputError('offset must be an integer between 0 and 10000');
+    }
 
     return queryRows<ClubSummaryRow>(
       this.client,
@@ -144,7 +148,7 @@ export class PostgresClubRepository {
          AND ($2::text IS NULL OR c.name ILIKE ('%' || $2::text || '%') OR c.tag ILIKE ('%' || $2::text || '%'))
        ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC
        LIMIT $3 OFFSET $4;`,
-      [actorUserId ?? null, search ? search.trim() : null, safeLimit, safeOffset],
+      [actorUserId ?? null, search ? search.trim() : null, limit, offset],
     );
   }
 
