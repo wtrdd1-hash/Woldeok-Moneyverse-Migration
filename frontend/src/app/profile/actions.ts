@@ -19,6 +19,37 @@ import {
   savedSentence,
 } from './profile';
 
+/** A success response is not proof that privacy controls were stored. */
+function matchesProfileSettings(
+  value: unknown,
+  expected: ProfileSettings,
+): value is ProfileSettings {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const actual = value as Record<string, unknown>;
+  if (
+    actual.visibility !== expected.visibility ||
+    actual.display_name !== expected.display_name ||
+    actual.image_url !== expected.image_url ||
+    actual.featured_title !== expected.featured_title
+  )
+    return false;
+  const fields = actual.field_visibility;
+  if (typeof fields !== 'object' || fields === null || Array.isArray(fields)) return false;
+  const map = fields as Record<string, unknown>;
+  const keys = Object.keys(map);
+  return (
+    keys.length === Object.keys(expected.field_visibility).length &&
+    keys.every(
+      (key) =>
+        Object.hasOwn(expected.field_visibility, key) &&
+        map[key] === expected.field_visibility[key],
+    )
+  );
+}
+
+const UNVERIFIED_PROFILE_SAVE =
+  '프로필 공개 설정의 저장 결과를 확인하지 못했어요. 새로고침 후 실제 공개 범위를 확인해 주세요.';
+
 /**
  * The profile's one write.
  *
@@ -83,7 +114,14 @@ export async function saveProfile(
   }
 
   try {
-    const { settings } = await mutate<{ settings: ProfileSettings }>('/api/v1/profile', {
+    const expected: ProfileSettings = {
+      visibility,
+      display_name: displayName || null,
+      image_url: imageUrl || null,
+      field_visibility: fieldVisibility,
+      featured_title: featuredTitle === NO_TITLE ? null : featuredTitle,
+    };
+    const receipt = await mutate<{ settings: unknown }>('/api/v1/profile', {
       method: 'PUT',
       body: {
         visibility,
@@ -95,8 +133,22 @@ export async function saveProfile(
         ...(featuredTitle === NO_TITLE ? {} : { featuredTitle }),
       },
     });
+    if (!matchesProfileSettings(receipt?.settings, expected)) {
+      return { status: 'error', message: UNVERIFIED_PROFILE_SAVE };
+    }
+    // This owner-only read is served by member_profile_settings, not the
+    // public profile view, which intentionally hides the per-field controls.
+    let persisted: { settings: unknown };
+    try {
+      persisted = await api<{ settings: unknown }>('/api/v1/profile/settings');
+    } catch {
+      return { status: 'error', message: UNVERIFIED_PROFILE_SAVE };
+    }
+    if (!matchesProfileSettings(persisted?.settings, expected)) {
+      return { status: 'error', message: UNVERIFIED_PROFILE_SAVE };
+    }
     revalidatePath('/profile');
-    return { status: 'ok', message: savedSentence(settings) };
+    return { status: 'ok', message: savedSentence(persisted.settings) };
   } catch (error) {
     // A 409 here is almost always the title: 080 refuses one the member has
     // never been awarded, and no granted function lists the ones they have,
