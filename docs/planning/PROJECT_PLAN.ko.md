@@ -1,3 +1,25 @@
+## v2026.10.29.1466 — F675-172 대시보드 바로가기 상태·레지스트리 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 추가 v1464 → 현재 기능 보완 v1466 → 다음 기능 추가 v1468(잠정). **기준:** `AGENTS.md`, `README.md`, 시작·중간 최신 main `9ebc5613845ba2e8179a0051e86db996593c8a19`, 영문 `PROJECT_PLAN.md` 원본 및 국문 대조. 미병합 [v1466 Draft PR #1871](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1871) / [선행 Draft PR #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) 및 이전 PR에 의존하며 [개발 이슈 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865)로 인계한다. QA v1368 증거는 조사 시 IN PROGRESS, 마지막 완료 QA v1367 FAILED/P0. 운영 검증 완료로 해석하지 않는다.
+
+### 소스 기반 공백과 사용자 상태 계약
+- `frontend/src/app/dashboard/page.tsx`의 다음 활동 4개(`/quests`, `/work`, `/wallet`, `/stocks`)는 고정 링크다. v1464 기획은 `{source: DEFAULT|SAVED, version}`를 제안했으나 **저장 행 부재와 사용자가 명시적으로 비운 목록**, 최초 저장 버전, 경로 레지스트리 변경 경합, 이후 수정 뒤 과거 영수증 재생 동작을 확정하지 않았다. 이는 **기획상 모호성**이지 실제 운영 악용 증거가 아니다.
+- `DEFAULT`(미가입·행 없음, `generation=0`, 기본 제안 4개), `SAVED_EMPTY`(저장된 빈 배열, `generation>=1`, 빈 상태와 편집 CTA), `SAVED`(저장된 비어 있지 않은 배열), `UNAVAILABLE`(조회 장애, 권위 있는 기본 설정인 척하지 않음), `FEATURE_DISABLED`(편집 숨김, 기존 저장값 보존)를 구분한다. '기본값 복원'은 별도 확인 후 **DEFAULT 모드로 원자적으로 변경하고 단조 증가 generation을 유지**한다. 행을 삭제하여 generation을 0으로 되돌리면 구버전 클라이언트의 ABA 경합을 허용하므로 금지한다. 빈 배열 저장은 초기화가 아니다.
+- DB: 회원별 단일 행 `(user_id PK/FK, mode DEFAULT|SAVED, generation bigint >0, route_keys text[] NOT NULL, registry_version, updated_at)`. 행이 없는 상태만 최초 generation 0. 기본값 복원은 행 삭제가 아닌 mode DEFAULT 저장과 generation 증가. `SAVED` 빈 배열 허용, `DEFAULT`는 빈 배열만 허용, 배열 길이 6 이하 CHECK와 NULL 원소·중복·허용 키 서버 함수 검증. 앱 계정 직접 DML 금지, `SECURITY DEFINER` 고정 search_path 및 본인 인증 세션 검증.
+
+### 레지스트리·권한·동시성
+- 서버 소유 버전형 레지스트리 `(route_key, canonical_path, enabled, entitlement_policy, registry_version)`에 불변 route key를 등록한다. 후보별 실제 프론트 경로와 백엔드 접근권한을 구현 전에 검증한다. `shop_catalog`는 추측 URL이 아니라 `/shop`으로 명시 매핑. 사용자 제공 URL, 외부/관리자 경로, 쿼리·fragment 금지. 정책 변경 시 저장 키는 유지하고 `AVAILABLE|DISABLED|NOT_ENTITLED|UNKNOWN` 상태 및 안전한 제거 CTA를 제공한다. 다른 계정의 제한 사유는 노출하지 않고 자동 치환·리다이렉트·설정 변경 금지. 실제 이동 대상에서도 권한 재검증, 레지스트리 장애 시 503 실패 차단.
+- `GET /api/v1/me/shortcuts` → `{mode,routeKeys,generation,registryVersion,items:[{key,availability,labelKey}]}` 및 `Cache-Control: private, no-store`. `PUT` → `{requestId,expectedGeneration,expectedRegistryVersion,mode,routeKeys}`. `SAVED`는 최대 6개 고유 키, `DEFAULT`는 빈 키만 허용. 세대/레지스트리 불일치 412+본인 최신 스냅샷, 같은 UUID·다른 본문 해시 409, 잘못된 키 422, 미인증/권한 401/403, 제한 429, DB·레지스트리 장애 503. 웹 CSRF 및 승인된 Android 인증 계약 필수.
+- 회원 행 잠금·CAS 트랜잭션 내에서 권한·레지스트리 버전 검증 → generation 증가 → `(actor_id,request_uuid)` UNIQUE 불변 영수증 기록. 본문 해시는 actor, requestId, expectedGeneration, expectedRegistryVersion, mode, **순서 포함 키 목록**으로 계산한다. 동일 요청 재시도는 이후 설정이 바뀌었더라도 **당시 원본 영수증과 과거 generation**을 반환하고 `isCurrent`를 별도로 계산하며 재쓰기 금지. 본인만 영수증 조회, 30일 보존은 개인정보 검토 조건. 응답 불명 시 동일 requestId/본문을 보존하고 영수증 확인 전 신규 쓰기 금지.
+- 브라우저 탭 2개·Android 동시 변경은 같은 CAS로 처리하고 오래된 화면은 새로고침·비교 CTA 제공, 마지막 쓰기 우선 금지. 레지스트리 검증과 commit 사이 변경은 412. 기능 OFF는 PUT 성공 위장이나 저장값 삭제를 허용하지 않는다. 사용 불가 경로는 접근성 설명과 함께 이동 비활성, 금융 화면으로 임의 우회 금지.
+
+### UX·관리·보안·배포
+- 비공개 `/dashboard` → 편집 → 키보드 위/아래 이동·삭제 → 저장 또는 초기화 확인. 포커스 유지, 순번 스크린리더·TalkBack 안내, 44px 터치, 320px·동작 감소·안전한 다국어 라벨. 로딩/오류/빈 목록/기본값/충돌/영수증 확인 중 구분, 서버 영수증 없이 저장 성공 표시 금지. noindex/no-store·사이트맵 제외, 관리자·로그에 회원별 원본 목록 금지. 관리자 20명 이상 비식별 집계·차분 추론 방지·감사. KPI: 충돌률·경로 사용불가율·응답 불명 해소율·이동 성공률·p95·오류율, 출시 후 실측.
+- P0: **REPO1466-01** 과거 누락 브랜치 및 main 비조상 SHA 보존; **FIN1466-02** MINT 19개 조정/18,000 WLD 출처 및 국고 미연계 552행; **SEC1466-03** 체크섬 5건·앱 권한·SECURITY DEFINER 검증; **REL1466-04** 독립 외부 복원·정확 SHA 공식 Test/인증 금융 E2E·배포/롤백 증명.
+- P1: **SHORTCUT1466-05** 모드·세대·레지스트리 스키마; **SHORTCUT1466-06** 본인 CAS/초기화/영수증 재생; **SHORTCUT1466-07** NestJS·Next.js·Android API/인증/CSRF; **SHORTCUT1466-08** 빈 화면·장애·경합·접근성 UI; **SHORTCUT1466-09** 관리자 개인정보·SEO·KPI·보존; **SHORTCUT1466-10** 실제 격리 PostgreSQL 회귀·무손실 롤백.
+- **수용 조건이며 미실행:** 합성 10,001건, 동시 수정 100건, 타인 접근·위조 100건, 응답 유실 재시도 50건, 경로·권한 변경 경합 30건, 초기화·편집 ABA 30건, 후속 변경 이후 영수증 재생 30건. 타인 정보 노출 0, 무단 이동 0, 가짜 저장 성공 0, 중복 영수증 0, WLD·원장·금융 변화 0. 기능 스위치 기본 OFF, 추가형 마이그레이션·정확 SHA Test·승인 후 단계별 운영승격·비파괴 롤백. 기획 예약은 코드 배포 금지.
+- **외부 독립 근거 게이트:** 신규 중복제거·검증·승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 새로운 분산기획 파일 없음. 기존 통합 영문 원본과 국문 동등 문서에 반영.
+
 # 월덕 머니버스 — Living Project Plan
 
 ## v2026.10.29.1464 — F675-172 회원 전용 대시보드 바로가기 (기능 추가 / 초안 / 배포 보류)
