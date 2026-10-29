@@ -32,16 +32,16 @@ export class BlogVerifiedRepository {
   }
   currentPeriod(period: string) {
     return queryOne<{receipt:string;content_digest:string;status:string}>(this.pool(),
-      'SELECT receipt,content_digest,status FROM public.blog_verified_articles WHERE period_key=$1',[period]);
+      'SELECT receipt,content_digest,status FROM public.blog_verified_period_receipt($1)',[period]);
   }
   async digests(): Promise<ReadonlySet<string>> {
     const rows = await queryRows<{content_digest:string}>(this.pool(),
-      'SELECT content_digest FROM public.blog_verified_articles ORDER BY published_at DESC LIMIT 1000');
+      'SELECT content_digest FROM public.blog_verified_recent_digests()');
     return new Set(rows.map(row => row.content_digest));
   }
   list() {
     return queryRows<PublishedArticleRow>(this.pool(),
-      "SELECT slug,country,locale,topic,title,excerpt,content,primary_source_url,receipt,status,published_at,updated_at FROM public.blog_verified_articles WHERE status='PUBLISHED' ORDER BY published_at DESC LIMIT 150");
+      'SELECT * FROM public.blog_verified_public_list()');
   }
   listForAdmin() {
     return queryRows<PublishedArticleRow>(this.pool(),
@@ -49,7 +49,7 @@ export class BlogVerifiedRepository {
   }
   find(slug: string) {
     return queryOne<PublishedArticleRow>(this.pool(),
-      "SELECT slug,country,locale,topic,title,excerpt,content,primary_source_url,receipt,status,published_at,updated_at FROM public.blog_verified_articles WHERE slug=$1 AND status='PUBLISHED'",[slug]);
+      'SELECT * FROM public.blog_verified_public_by_slug($1)',[slug]);
   }
   moderate(input:{actor:string;slug:string;action:string;reason:string;
      title?:string;excerpt?:string;content?:string}) {
