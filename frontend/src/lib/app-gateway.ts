@@ -1,5 +1,5 @@
 export const APP_API_VERSION = '1';
-export const APP_API_CONTRACT_VERSION = 'v2026.10.28.1525';
+export const APP_API_CONTRACT_VERSION = 'v2026.10.30.0125';
 
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',

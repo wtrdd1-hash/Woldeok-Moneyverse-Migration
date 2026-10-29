@@ -2,7 +2,7 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.28.1525**
+Update version: **v2026.10.30.0125**
 
 This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 182 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 

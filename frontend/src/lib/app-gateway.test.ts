@@ -94,6 +94,7 @@ describe('app API compatibility contract', () => {
   it('stamps every app response with stable API and contract versions', () => {
     const headers = appendAppContractHeaders(new Headers());
     expect(headers.get('x-moneyverse-api-version')).toBe('1');
+    expect(APP_API_CONTRACT_VERSION).toBe('v2026.10.30.0125');
     expect(headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
     expect(headers.get('x-content-type-options')).toBe('nosniff');
   });

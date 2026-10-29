@@ -22,3 +22,6 @@
 - 웹·Backend·PostgreSQL 기존 보안 함수·Android 연결 및 회귀테스트 추가. 변경 파일 Lint·타입·빌드·격리 DB PASS.
 - 전체 Lint 기존 오류 3건, Backend 240 FAIL, Frontend 60 FAIL, CI 실패. 공식 Test 정확 SHA E2E 차단, 운영 HOLD.
 - 브랜치 20→21, 열린 PR 14→15, 충돌 2개, 미통합 고유 브랜치 17개. 삭제·강제 종료·병합·배포 0건. 자세한 결과는 한영 QA·Release 문서 참조.
+
+## Android API 계약 버전 (01:39)
+- 신규 오류 신고 API를 반영하여 계약 버전을 `v2026.10.30.0125`로 변경, 한영 참조 문서 재생성. RED/GREEN 확인. 기능은 기본 OFF.

@@ -30,3 +30,6 @@
 - `pnpm typecheck` and `pnpm build` PASS; changed lint PASS; production audit 0 known vulnerabilities; isolated PostgreSQL 304/304 PASS. Full lint FAIL (3 pre-existing errors), backend full 240 FAIL, frontend full 60 FAIL, 4 DB tests SKIP. Code-checkpoint exact-SHA CI FAIL. No false full-PASS claim.
 - Regenerated Android contract EN/KO references for new report endpoint and a pre-existing unrelated NPC affinity type drift. Final committed SHA requires fresh contract/CI verification.
 - Remote branches 20→21, open PRs 14→15, conflicting PRs 2, unique unmerged branches 17; no deletion/closure/merge. Main unchanged at late fetch. Official Test and Production remain at old SHA, no deployment or rollback. See `docs/qa/2026-10-30-a0125-help-report.md` and `docs/releases/2026-10-30-a0125-help-report-HOLD.md`.
+
+## App API contract version checkpoint — 2026-10-30 01:39 KST
+- RED/GREEN verified the new Android report route changes the public app contract; bumped the declared contract from `v2026.10.28.1525` to `v2026.10.30.0125` and regenerated both language references. Version assertion and app gateway tests PASS. This is backward-compatible and remains feature-OFF.
