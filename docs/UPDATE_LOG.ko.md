@@ -1,12 +1,8 @@
-## 2026-10-28 11:13 KST — 기획 v1406 / F675-157 (기능 보완·초안·배포 보류)
-- 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, Migration 196/NestJS/Next 문의 코드, QA v1338, 개발 C Draft #1671, 기존 F675-136/#1415·F675-149/#1562 검토. 선행 기획 Draft #1670 위에 분리 작성.
-- 가장 오래된 200개 조회/최신 페이지 차이, 50개 목록/전체 배지 차이, INSERT 전 잠금, 단계적 순번/백필, 서명 표시 증명, 불변 영수증과 최신 상태 분리, 중복 기획 통합, P0/P1 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10` 반영. 수용시험 명세만 작성, 미실행.
-- 서비스 ACTIVE/데이터 볼륨 85%, 운영 버전 unknown/Test `6f697e74...`; 공식 정확 SHA Test·복원·운영 승인 미검증. 런타임/DB/금융/스위치/Test/운영 변경 없음. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+## 2026-10-28 12:04 KST — 기획 v1408 / F675-158 (기능 추가; 초안/보류)
+- 이전 기능 보완 v1406 → 현재 기능 추가 v1408 → 다음 기능 보완 v1410(잠정). main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 동일, AGENTS.md·README.md·국영문 계획·지갑 UI/컨트롤러/저장소/CSV/Android 프록시·QA v1339 확인. GitHub 이슈 #1680, 미병합 문의 Draft #1675 미변경.
+- 본인 지갑 거래내역 50건 이후 페이지 조회 기획: 세션 결속 서명 Keyset, 고정 기간, 정직한 asOf/hasMore, 정확한 WLD 정수 문자열, 더 보기/재시도, Android·no-store·noindex·접근성·CSV 일부 행 고지. 원장 변경 없음. 백로그 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. 합성 10,001건/동시 100건/위조 100건은 시험 명세만 작성, 미실행.
+- QA v1339 운영 SHA unknown·Test main 불일치·공식 정확 SHA Test/독립 복원 미검증, 데이터 디스크 87%. 운영 보류. 외부 승인 신규 0·중복 제거 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경, 런타임·DB·WLD·Test·운영 쓰기 없음. 스킬 목록 비어 miniPC 설치 Superpowers 직접 확인.
 
-## 2026-10-28 10:12 KST — 자동 기획 v1404 / F675-157 (기능 추가·초안·배포 보류)
-- 이전 Improvement v1402 / 현재 Addition v1404 / 다음 Improvement v1406. 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, GitHub #1669. 실제 소스·개발 DB 집계/권한·QA v1337·런타임 버전을 읽기 전용 확인했으며 회원 본문은 반출하지 않음.
-- 회원 본인 문의 새 관리자 답변 수, 명시적 읽음 영수증, 스레드 순번·과거 기준선, GET 부작용 금지, Android 동등성, noindex/no-store, P0/P1·정확 SHA Test·롤백 게이트 설계. `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
-- 코드/DB/금융/Test/운영 미변경, 테스트는 명세만 작성. QA v1337 및 #1663/#1661/#1660 보류, 공식 Test 정확 SHA·독립 복원·운영승격 미검증. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
 
 ## 2026-10-24 v1206 — F675-108 접근성 계정·동기화 무결성 (기능 보완 / 초안 / 운영 보류)
 
@@ -1306,4 +1302,3 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
-- 최종 GitHub 기록: 기획 v1404 Draft PR #1670 OPEN / 이슈 #1669 OPEN, main a28bed9aa40ff74d492824ae12892a7d52132fdd 유지, PR 분류·정책 검사 진행 중. 문서 초안·배포 보류.

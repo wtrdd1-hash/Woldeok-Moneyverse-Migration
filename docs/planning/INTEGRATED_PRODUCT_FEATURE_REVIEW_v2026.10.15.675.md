@@ -1,17 +1,10 @@
-## v1406 — F675-157 support read-receipt correctness (Feature Improvement / DRAFT / HOLD)
-- Previous Addition v1404 → Current Improvement v1406 → Next Addition v1408 (provisional). Main `a28bed9aa40ff74d492824ae12892a7d52132fdd` verified start/mid; planning stack Draft #1670, developer C admin write receipt #1671 separate. Detailed EN/KO design in `INTEGRATED_PLANNING_MASTER.md`.
-- Migration 196 returns **oldest** 200 messages (`created_at,id ASC`) and 50 threads; reply functions insert before locking the thread. F675-136 (#1415) already planned support read watermarks/display proof, F675-149 (#1562) is separate notification outbox: consolidate, do not duplicate. Require latest keyset pagination, separate all-thread unread aggregate, lock-before-insert, phased forward-only sequence/backfill, signed displayed-message bound, immutable replay receipt with fresh current projection, strict owner/session/CSRF and Android parity.
-- P0 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04`; P1 `SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`. QA v1338 read-only evidence; Production version unknown, Test `6f697e74...`, data volume 85%, Test exact SHA/independent restore/Production unverified. No runtime, DB, WLD, Test or Production changes; acceptance tests specified NOT run. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- Full IDs: `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`.
+## v1408 / F675-158 — Wallet activity pagination: addition candidate (DRAFT/HOLD)
+- Source-backed opportunity: Next /wallet/activity exposes only recent 50 with all/7d/30d and truncation notice; NestJS controller recent 1..50; SQL owner cash/bank posting aggregation and deterministic created_at,id order. No Load older or dedicated paginated read. Existing CSV is recent rows only.
+- Proposal: separate owner-bound read-only keyset endpoint and explicit Load older/Retry/Start over; signed session+period+expiry cursor, fixed bounds and honest best-effort asOf; no finance writes or total-history guarantee. Preserve GET /wallet. Android, accessibility, noindex/no-store, admin aggregates, exact BigInt strings and negative ACL tests.
+- P0 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04; P1 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. Detailed design in integrated master; tests specified not run; default OFF; QA v1339/Production BLOCKED; approved external new 0, cumulative UNKNOWN/10,000. Issue #1680. Independent main branch; unmerged #1675 remains untouched.
+
 
 # Integrated Product and Feature Portfolio Re-review — v2026.10.15.675
-
-## v1404 — F675-157 verified member support unread receipts (Feature Addition / DRAFT / RELEASE HOLD)
-- Previous Improvement v1402 → Current Addition v1404 → Next Improvement v1406 (provisional). Canonical main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid; issue #1669. Docs only, independent of A/B/C/QA and blog work. Full implementation-ready EN/KO design in `INTEGRATED_PLANNING_MASTER.md` and companion.
-- Source-backed gap: `/support` and floating support widget show administrator messages without persistent member read state; migration 196 has no support read receipt, and `waiting_user` does not mean unread. Read-only DEV 3 threads/6 messages; app role can UPDATE support_threads and DELETE support_messages. Design explicit owner-only mark-read, atomic per-thread sequence, legacy cutover baseline (not a claim of past read), immutable replay receipts, no GET side effects, NestJS/Next/Android parity, private no-store/noindex, WCAG 2.2 AA, aggregate-only admin KPI.
-- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 PR mass-closure, #1661 blog ACL, #1660 smoke failure; current main full QA, official Test exact-SHA, independent restore and Production promotion NOT verified. Feature OFF, no code/DB/WLD/Test/Production writes, acceptance tests specified not run. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- Full IDs: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
-
 
 ## F675-06 detailed adoption — v2026.10.15.688
 

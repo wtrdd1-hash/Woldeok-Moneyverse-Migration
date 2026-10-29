@@ -1,12 +1,8 @@
-## 2026-10-28 11:13 KST — Planning v1406 / F675-157 (Feature Improvement; DRAFT/HOLD)
-- Main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid; source migration 196, NestJS support controller/repository, Next support, QA v1338 evidence, developer C Draft #1671, earlier F675-136/#1415 and F675-149/#1562 examined. Prior v1404 Draft #1670 is the stack base.
-- Improvements: oldest-200/latest-page mismatch, 50-thread/global unread distinction, lock-before-insert, online seq/backfill, signed display proof, immutable replay vs current projection, duplicate plan reconciliation, P0/P1 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`. Detailed master EN/KO updated; acceptance tests specified NOT run.
-- Services active; data volume 85%; public Production /api/version unknown, Test `6f697e74...`; no exact-SHA official Test, restore or Production approval. No runtime/DB/financial/feature-switch/Test/Production changes. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+## 2026-10-28 12:04 KST — Planning v1408 / F675-158 (Feature Addition; DRAFT/HOLD)
+- Previous Improvement v1406 → Current Addition v1408 → Next Improvement v1410 provisional. Main a28bed9aa40ff74d492824ae12892a7d52132fdd start/mid; canonical AGENTS.md, README.md, EN/KO project plan, real wallet UI/controller/repository/CSV/Android gateway and QA v1339 checked. GitHub issue #1680; open unmerged support Draft #1675 untouched.
+- New verified owner-only wallet activity pagination beyond 50: signed session-bound keyset cursor, fixed period, honest asOf/hasMore, exact WLD strings, Load older/Retry, Android/no-store/noindex/a11y and CSV loaded-only disclaimer. No ledger mutation. Backlog ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. Synthetic 10,001/100 concurrency/100 forgery acceptance specified, NOT run.
+- QA v1339 Production SHA unknown, Test SHA not main, exact-SHA official Test and restore unverified; data disk 87%. Release HOLD. External approved new 0, deduplicated cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only, no runtime/DB/WLD/Test/Production writes. Skill plugin list empty; installed Superpowers skills read on miniPC.
 
-## 2026-10-28 10:12 KST — Planning v1404 / F675-157 (Feature Addition; DRAFT/HOLD)
-- Previous Improvement v1402 / Current Addition v1404 / Next Improvement v1406. Latest main `a28bed9aa40ff74d492824ae12892a7d52132fdd` start/mid. GitHub issue #1669. Verified source, DEV aggregate/ACL, QA v1337 and runtime version; no private member content exported.
-- Design: owner-only support new-admin-reply count, explicit read-through-message receipt, ordered sequence, legacy baseline, no GET mutation, Android parity, noindex/no-store, P0/P1 and Test/rollback gates. `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
-- Source-only: no runtime/DB/finance/Test/Production writes. Tests specified not run. QA v1337 and #1663/#1661/#1660 remain HOLD; Test exact SHA, independent restore, Production release unverified. External approved 0 new, cumulative UNKNOWN/10,000 BLOCKED.
 
 ## 2026-10-24 v1206 — F675-108 accessibility identity/sync integrity (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
@@ -1253,4 +1249,3 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
-- Final GitHub record: planning v1404 Draft PR #1670 OPEN / issue #1669 OPEN, main a28bed9aa40ff74d492824ae12892a7d52132fdd unchanged, PR classify/verify pending. Source-only DRAFT/HOLD, no deployment.

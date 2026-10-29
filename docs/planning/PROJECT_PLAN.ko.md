@@ -1,17 +1,13 @@
-## v1406 — F675-157 문의 읽음 영수증 정합성 보완 (Feature Improvement / 기획 초안 / 배포 보류)
-- 이전 추가 v1404 → 현재 보완 v1406 → 다음 추가 v1408(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 선행 기획 Draft #1670, 별도 개발 C 관리자 쓰기 영수증 #1671. 상세 영문/한국어 설계는 `INTEGRATED_PLANNING_MASTER.md`와 대응 문서 참조.
-- Migration 196은 **가장 오래된** 200개 메시지(`created_at,id ASC`)와 50개 스레드만 조회하고 답변 함수는 스레드 잠금 전에 INSERT. 기존 F675-136(#1415) 읽음 커서/표시 증명을 통합하고 F675-149(#1562) 알림 Outbox와 중복 금지. 최신 키셋 페이지, 전체 스레드 미읽음 집계, INSERT 전 잠금, 단계적 순번/백필, 서명 표시 범위, 불변 재시도 영수증·최신 상태 분리, 본인 세션/CSRF/Android 동등성 명세.
-- P0 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04`; P1 `SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`. QA v1338 자료 확인, 운영 버전 unknown/Test `6f697e74...`, 데이터 볼륨 85%, 공식 정확 SHA Test·독립 복원·운영 미검증. 런타임/DB/WLD/Test/운영 미변경, 수용시험 미실행. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- 전체 ID: `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`.
+## v1408 — F675-158 본인 검증 지갑 거래내역 페이지 조회 (기능 추가 / 기획 초안 / 운영 보류)
+- 이전 기능 보완 v1406 → 현재 기능 추가 v1408 → 다음 기능 보완 v1410(잠정). 2026-10-28 12:01~12:04 KST main a28bed9aa40ff74d492824ae12892a7d52132fdd 시작·중간 동일. AGENTS.md, README.md, 영어 정본·국문 대조 확인. 이슈 #1680. 미병합 문의 기획 Draft #1675 및 개발 A/B/C/QA/Gemini 작업과 독립.
+- 실제 /wallet/activity는 전체/7일/30일 기간을 지원하나 recent=50 한도, hasMore 경고만 있고 이전 거래 더 보기가 없다. wallet.controller.ts는 recent<=50, repository는 본인 현금/은행 전표 집계와 created_at/id 정렬 후 LIMIT+1. 기존 CSV는 불러온 행만 다운로드한다. 페이지 API는 아직 배포되지 않았다.
+- 본인·세션 결속 GET /api/v1/wallet/activity?period=all|7d|30d&limit=1..50&cursor=opaque 추가 제안. 서명 Keyset, 절대 기간·상한 튜플, 정직한 asOf 관측(HTTP 전체 스냅샷 아님), hasMore/nextCursor, 정확한 WLD 정수 문자열, private no-store/noindex, Android 동등성. /wallet/activity 더 보기/재시도/다시 시작·접근성. 원장 쓰기·자동 전체 다운로드 금지.
+- P0 ENV1408-01 (배포 SHA/데이터 87%/독립 복원), SEC1408-02 (앱 DML 235/241·PUBLIC 은행 3·체크섬 5), REL1408-03 (#1663 PR 보존·정확 SHA Test/GitOps), WAL1408-04 (본인·커서·정밀도·완전성). P1 WAL1408-05 (DB 읽기·ACL·인덱스), WAL1408-06 (커서·일관성), WAL1408-07 (Nest/Next/Android), WAL1408-08 (회원 UX/접근성), WAL1408-09 (관리자·개인정보·SEO·KPI), WAL1408-10 (격리 PG·롤백). 전체 계약·수용 조건은 국영문 INTEGRATED_PLANNING_MASTER에 수록.
+- QA v1339: main CI 분류/정책 PASS이나 런타임 SKIPPED, 운영 버전 unknown, Test 6f697e74...로 main과 다름, 공식 Test 정확 SHA·독립 복원·인증 금융 E2E 미검증. 운영승격 BLOCKED. 합성 거래 10,001건·동시 100건·위조 100건은 **시험 명세만 작성, 미실행**. 기능 기본 OFF·문서만 변경; 런타임·DB·WLD·Test·운영 변경 없음. 외부 독립 근거 신규 승인 0, 누적 중복 제거·검증 UNKNOWN / 10,000건 BLOCKED / IN PROGRESS.
+- 백로그 식별자: ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10.
+
 
 # 월덕 머니버스 — Living Project Plan
-
-## v1404 — F675-157 관리자 문의 새 답변·읽음 영수증 (Feature Addition / 기획 초안 / 배포 보류)
-- 이전 Improvement v1402 → 현재 Addition v1404 → 다음 Improvement v1406(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 이슈 #1669. A/B/C/QA·블로그와 분리한 문서 기획이며 상세 영문 정본·한국어 동등 명세는 `INTEGRATED_PLANNING_MASTER.md` 및 한국어 대조본 참조.
-- 실제 코드의 `/support`·플로팅 위젯에는 회원 읽음 상태가 없고 Migration 196에도 영수증이 없다. `waiting_user`는 읽지 않음의 증거가 아니다. 개발 DB 읽기 전용 3개 문의/6개 메시지, 앱 역할의 문의 UPDATE·메시지 DELETE 권한 확인. 회원 소유 명시적 읽음, 스레드별 원자적 순번, 도입 전 과거 메시지의 읽음 여부 미확인 기준선, 불변 멱등 영수증, GET 부작용 금지, NestJS/Next/Android 동등성, no-store/noindex, WCAG 2.2 AA, 관리자 집계만 설계.
-- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 미병합 PR 대량 닫힘, #1661 블로그 권한, #1660 스모크 실패. 최신 main 전체 QA·공식 Test 정확 SHA·독립 복원·운영 승격 미검증. 기능 기본 OFF, 코드/DB/WLD/Test/Production 미변경, 수용시험 명세만 작성. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- 전체 ID: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
-
 
 ## v2026.10.28.1405 — 2시간 국가·주제 자동 블로그 최신 사용자 지시(코드 후보)
 - 사람의 필수 사전·사후 검토는 없애고, KR/US/JP/CN 원어·경제/코딩/컴퓨터 소재를 KST 2시간마다 순환. 사실·원문 출처·중복·권리 자동검증 적합 글만 바로 공개, 관리자만 나중에 선택적 수정/비공개/삭제. 미검토 경과 시간에 따른 자동 비공개·삭제 전면 금지. 검증 실패 글은 공개 건너뜀.

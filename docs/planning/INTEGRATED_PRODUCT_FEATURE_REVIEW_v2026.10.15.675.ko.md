@@ -1,17 +1,10 @@
-## v1406 — F675-157 문의 읽음 영수증 정합성 보완 (Feature Improvement / 기획 초안 / 배포 보류)
-- 이전 추가 v1404 → 현재 보완 v1406 → 다음 추가 v1408(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 선행 기획 Draft #1670, 별도 개발 C 관리자 쓰기 영수증 #1671. 상세 영문/한국어 설계는 `INTEGRATED_PLANNING_MASTER.md`와 대응 문서 참조.
-- Migration 196은 **가장 오래된** 200개 메시지(`created_at,id ASC`)와 50개 스레드만 조회하고 답변 함수는 스레드 잠금 전에 INSERT. 기존 F675-136(#1415) 읽음 커서/표시 증명을 통합하고 F675-149(#1562) 알림 Outbox와 중복 금지. 최신 키셋 페이지, 전체 스레드 미읽음 집계, INSERT 전 잠금, 단계적 순번/백필, 서명 표시 범위, 불변 재시도 영수증·최신 상태 분리, 본인 세션/CSRF/Android 동등성 명세.
-- P0 `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04`; P1 `SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`. QA v1338 자료 확인, 운영 버전 unknown/Test `6f697e74...`, 데이터 볼륨 85%, 공식 정확 SHA Test·독립 복원·운영 미검증. 런타임/DB/WLD/Test/운영 미변경, 수용시험 미실행. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- 전체 ID: `ENV1406-01 SEC1406-02 REL1406-03 SUP1406-04 SUP1406-05 SUP1406-06 SUP1406-07 SUP1406-08 SUP1406-09 SUP1406-10`.
+## v1408 / F675-158 — 지갑 거래내역 페이지 조회 기능 추가 후보 (초안/보류)
+- 실제 Next /wallet/activity는 최근 50건과 전체/7일/30일·잘림 안내만 지원한다. NestJS recent 한도 1~50, SQL은 본인 현금/은행 전표 집계와 created_at,id 순서. 더 보기 및 별도 페이지 API는 없다. CSV도 최근 불러온 행만 포함한다.
+- 본인 전용 읽기 Keyset API, 명시적 더 보기/재시도/다시 시작, 세션·기간·만료 서명 커서, 고정 범위·정직한 최선 노력 asOf, 원장 쓰기 없음, 전체 기록 보장 주장 금지. 기존 GET /wallet 유지, Android·접근성·noindex/no-store·관리자 집계·BigInt·권한 음성시험.
+- P0 ENV1408-01 SEC1408-02 REL1408-03 WAL1408-04; P1 WAL1408-05 WAL1408-06 WAL1408-07 WAL1408-08 WAL1408-09 WAL1408-10. 상세는 통합 마스터. 시험 미실행·기능 기본 OFF·QA v1339/운영 BLOCKED·외부 승인 신규 0 누적 UNKNOWN/10,000. 이슈 #1680. 독립 main 브랜치이며 미병합 #1675 미변경.
+
 
 # 머니버스 통합 제품·기능 포트폴리오 재검토 — v2026.10.15.675
-
-## v1404 — F675-157 관리자 문의 새 답변·읽음 영수증 (Feature Addition / 기획 초안 / 배포 보류)
-- 이전 Improvement v1402 → 현재 Addition v1404 → 다음 Improvement v1406(잠정). 시작·중간 main `a28bed9aa40ff74d492824ae12892a7d52132fdd`, 이슈 #1669. A/B/C/QA·블로그와 분리한 문서 기획이며 상세 영문 정본·한국어 동등 명세는 `INTEGRATED_PLANNING_MASTER.md` 및 한국어 대조본 참조.
-- 실제 코드의 `/support`·플로팅 위젯에는 회원 읽음 상태가 없고 Migration 196에도 영수증이 없다. `waiting_user`는 읽지 않음의 증거가 아니다. 개발 DB 읽기 전용 3개 문의/6개 메시지, 앱 역할의 문의 UPDATE·메시지 DELETE 권한 확인. 회원 소유 명시적 읽음, 스레드별 원자적 순번, 도입 전 과거 메시지의 읽음 여부 미확인 기준선, 불변 멱등 영수증, GET 부작용 금지, NestJS/Next/Android 동등성, no-store/noindex, WCAG 2.2 AA, 관리자 집계만 설계.
-- P0 `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04`; P1 `SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`. QA v1337 #1663 미병합 PR 대량 닫힘, #1661 블로그 권한, #1660 스모크 실패. 최신 main 전체 QA·공식 Test 정확 SHA·독립 복원·운영 승격 미검증. 기능 기본 OFF, 코드/DB/WLD/Test/Production 미변경, 수용시험 명세만 작성. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
-- 전체 ID: `ENV1404-01 SEC1404-02 REL1404-03 SUP1404-04 SUP1404-05 SUP1404-06 SUP1404-07 SUP1404-08 SUP1404-09 SUP1404-10`.
-
 
 ## F675-06 개별 상세기획 채택 — v2026.10.15.688
 
