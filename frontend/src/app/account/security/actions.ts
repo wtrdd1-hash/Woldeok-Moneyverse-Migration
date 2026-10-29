@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
+import { publicUrlForHost } from '@/lib/public-url';
 import { mutate } from '@/lib/mutate';
 import { isVerifiedCredentialReceipt } from './credential-receipts';
 import { parseSecuritySessions } from './account-security-evidence';
@@ -44,10 +45,12 @@ function verifiedReauthenticationUrl(receipt: unknown, provider: string): string
   const isLocalHttp = callback.protocol === 'http:' &&
     (callback.hostname === 'localhost' || callback.hostname === '127.0.0.1');
   if ((callback.protocol !== 'https:' && !isLocalHttp) || callback.username || callback.password ||
-      callback.search || callback.hash || callback.pathname !== `/auth/${provider}/callback`) {
+      callback.search || callback.hash || callback.pathname !== `/auth/${provider}/callback` ||
+      callback.toString() !== publicUrlForHost(`/auth/${provider}/callback`, callback.host)) {
+    // Only a configured public origin may receive the OAuth code and session cookie.
     throw new Error('invalid OAuth callback');
   }
-  return receipt.authorizationUrl;
+  return url.toString();
 }
 
 async function verifiedSessionReadback() {

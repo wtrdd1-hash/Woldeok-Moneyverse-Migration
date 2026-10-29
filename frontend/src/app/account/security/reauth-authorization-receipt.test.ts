@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mutate } = vi.hoisted(() => ({ mutate: vi.fn() }));
 vi.mock('@/lib/mutate', () => ({ mutate }));
@@ -30,7 +30,8 @@ function validAuthorizationUrl(provider: 'discord' | 'google'): string {
   return url.toString();
 }
 
-beforeEach(() => mutate.mockReset());
+beforeEach(() => { mutate.mockReset(); vi.stubEnv('APP_BASE_URL', 'https://test.example'); });
+afterEach(() => vi.unstubAllEnvs());
 
 describe('step-up OAuth authorization receipts', () => {
   it('does not navigate when HTTP 200 omits the provider authorization URL', async () => {
@@ -56,8 +57,7 @@ describe('step-up OAuth authorization receipts', () => {
       .rejects.toThrow('redirect:/account/security?error=reauth-start');
   });
 
-  it.each(['state', 'code_challenge', 'client_id', 'redirect_uri'])
-    ('rejects missing OAuth challenge evidence: %s', async (field) => {
+  it.each(['state', 'code_challenge', 'client_id', 'redirect_uri'])('rejects missing OAuth challenge evidence: %s', async (field) => {
       const url = new URL(validAuthorizationUrl('discord'));
       url.searchParams.delete(field);
       mutate.mockResolvedValue({ authorizationUrl: url.toString() });
@@ -71,6 +71,23 @@ describe('step-up OAuth authorization receipts', () => {
     mutate.mockResolvedValue({ authorizationUrl: url.toString() });
     await expect(beginSecurityReauthentication(form('discord')))
       .rejects.toThrow('redirect:/account/security?error=reauth-start');
+  });
+
+  it('rejects a callback at an unregistered origin even when its path is correct', async () => {
+    const url = new URL(validAuthorizationUrl('discord'));
+    url.searchParams.set('redirect_uri', 'https://evil.example/auth/discord/callback');
+    mutate.mockResolvedValue({ authorizationUrl: url.toString() });
+    await expect(beginSecurityReauthentication(form('discord')))
+      .rejects.toThrow('redirect:/account/security?error=reauth-start');
+  });
+
+  it('allows a registered alternate callback origin', async () => {
+    vi.stubEnv('OAUTH_ALLOWED_REDIRECT_URIS', 'https://alternate.example');
+    const url = new URL(validAuthorizationUrl('discord'));
+    url.searchParams.set('redirect_uri', 'https://alternate.example/auth/discord/callback');
+    mutate.mockResolvedValue({ authorizationUrl: url.toString() });
+    await expect(beginSecurityReauthentication(form('discord')))
+      .rejects.toThrow(`redirect:${url.toString()}`);
   });
 
   it('rejects a non-PKCE authorization request', async () => {
