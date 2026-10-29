@@ -15,11 +15,14 @@
 - [x] GitHub 개발 이슈 #1829 생성.
 
 ## 중간
-- [ ] main·영문/국문 정본 재조회.
-- [ ] 기존 통합 기획 문서에 F675-170 명세 통합(신규 분산 기획서 없음).
-- [ ] P0/P1 백로그·내부/GitHub 로그 갱신.
+- [x] main·영문/국문 정본 재조회.
+- [x] 기존 통합 기획 문서에 F675-170 명세 통합(신규 분산 기획서 없음).
+- [x] P0/P1 백로그·내부/GitHub 로그 갱신.
 - [ ] 한영 대응·백로그 10건·릴리스 분류·diff 검증.
 
 ## 완료
 - [ ] 커밋/푸시·Draft PR·CI 상태 기록. main/Test/Production 변경 없음.
 - [ ] miniPC 및 GitHub에 시작·중간·완료 기록.
+
+## Middle (12:04–12:06 KST) / 중간 기록
+- Main and both canonical plan hashes re-checked unchanged at 12:04; GitHub issue #1829 opened. F675-170 added to existing English/Korean canonical, master and portfolio; 4 P0/6 P1 handoff. Production v1213 and accepted finance DML explicitly preserved. No runtime changes.

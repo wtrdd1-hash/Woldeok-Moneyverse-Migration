@@ -1,5 +1,12 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1456 / F675-170 — 근거 연계형 릴리스 준비도 현황판 (기능 추가 / 초안 / 보류)
+
+- **기준·주기:** 이전 보완 v1454 → 현재 추가 v1456 → 다음 보완 v1458(잠정). 원격 main `b84d645a`와 실제 Test/운영 앱 `b44ffd0a` 구분. QA v1363 HTTP 48/50(양쪽 `/help` 404), 모바일 36/36, Draft PR 113개/충돌 48개. [개발 백로그 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **기능:** 권한 제한된 읽기 전용 `/admin/releases/readiness`, 소스/빌드/Test DB/복원/금융/인증 QA/운영 근거 체인, 검증/실패/만료/누락/불가/승인예외 6종 상태와 HOLD/EVIDENCE_COMPLETE. 승인·승격 버튼 금지. 정확 SHA·서명 증빙, 불변 PostgreSQL 스냅샷, 권한 검증 SECURITY DEFINER, 비식별 내보내기, 관리자 감사, Android 정책, noindex, WCAG 2.2 AA.
+- **안전:** v1213 실제 운영 승격과 운영자 승인 기존 금융 DML 존중. 역사적 체크섬 5건·국고 근거·세션 재사용은 별도 미검증. 10,001행/동시 100건/권한 부정 100건 수용시험은 **미실행**. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04, P1 RELBOARD1456-05~10. 상세 영문 정본과 한국어 대조본 PROJECT_PLAN에 수록.
+- **외부 근거 게이트:** 신규 승인 0건, 누적 검증 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. 문서만 변경, 런타임/Test/Production 미변경.
+
 ## v2026.10.29.1213 — 실제 운영 승격 완료 / 금융 권한 승인 유지
 
 - **운영 적용 완료:** easy-scraping.com, 불변 릴리스 v2026.10.29.1213, 코드 SHA b44ffd0af9e2bd6e7c2be7345b72094827078c3d. PR #1817 병합·원본 후보 CI 성공·정확한 SHA 공식 Test 검증. 이후 다른 작업자가 올린 main QA/문서 코드는 이번 실행 앱 SHA와 구별.

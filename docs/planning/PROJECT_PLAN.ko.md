@@ -1,5 +1,55 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v1456 / F675-170 — 근거 연계형 관리자 릴리스 준비도 현황판 (기능 추가 / 초안 / 배포 보류)
+
+**주기·진실 기준:** 이전 Feature Improvement v1454 → 현재 Feature Addition v1456 → 다음 Feature Improvement v1458(잠정). 시작·12:04 KST 재확인한 원격 `main=b84d645a87e8fa0d544ca3ee17e785e737e477ea`는 저장소·문서 기준이며 **실제 배포된 앱 SHA와 다르다**. Test와 Production의 공개 `GET /api/version`은 12:03 KST 모두 `b44ffd0af9e2bd6e7c2be7345b72094827078c3d`를 반환했다. QA v1363(11:14~11:17 KST): 공개 HTTP 48/50(양쪽 `/help` 404), 모바일 HTTP 36/36, 열린 Draft PR 113개(충돌 48개·독립 병합 가능 65개). 이는 로그인 사용자 전체 E2E 인증이 아니다. 개발 이관 [#1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829). 기획 예약은 런타임·금융 데이터에 손대지 않는다.
+
+### 1. 실제 근거, 대안과 경계
+- `frontend/src/app/admin/api-health`, `frontend/src/app/admin/logs`, `backend/src/admin/api-health.controller.ts`, `backend/src/admin/operations.controller.ts`, 마이그레이션 및 연결된 **개발** PostgreSQL 17.11 확인. API 헬스·감사 화면은 소스→빌드→공식 Test→DB/금융→Production 신원 증빙을 연결하는 릴리스 증거 체계가 아니다. 제안한 `release_readiness_snapshots`, `release_evidence_artifacts`, `release_gate_observations` 테이블은 개발 DB에서 0개. 운영 DB 전체 상태를 의미하지 않는다.
+- 최신 main에는 앱 SHA `b44ffd0a...`의 실제 v1213 운영 승격, 정확 SHA Test 검증 및 기존 `accounts`·`account_balances`·`system_treasury_vaults` 금융 DML에 대한 운영자 명시 승인이 기록되어 있다. **승인된 세 권한을 미승인 취약점으로 다시 분류하지 않는다.** 기존 체크섬 5건(219/220/221/234/266), 과거 Treasury/MINT 출처 영수증, 인증 세션 재사용 검증은 별도의 미해결 조건이다.
+- 배제: (A) CI green/최신 main/`/api/version`만으로 녹색 판정, (B) 현황판에서 직접 승격·금융 권한 변경, (C) 브라우저 제공 URL을 임의 수집. 채택: **읽기 전용·추가 기록형 관리자 증거 현황판**, 승격은 별도 승인된 운영 절차만 수행.
+
+### 2. 대상, 진입점, 화면·CTA·상태
+- 대상은 `release.readiness.read` 권한과 최근 관리자 재인증을 가진 superadmin/릴리스 감사자. 기존 세션·동의·관리자 검사 필수. 일반 회원·권한 없는 관리자·비로그인 방문자는 403/인증 화면, 세부 근거 비공개.
+- `/admin/releases/readiness`(관리→운영→릴리스 근거). 후보 선택 시 `repositoryHeadSha`, `applicationSourceSha`, 환경, 빌드 digest, 관측시각 표시. CTA: **근거 보기**, **Test/운영 비교**, **비식별 보고서 내보내기**, **검증 결과 새로고침**(조회만). 승인·배포·롤백·마이그레이션 실행 버튼 금지.
+- 개별 상태 `VERIFIED`, `FAILED`, `STALE`, `MISSING`, `UNVERIFIABLE`, `WAIVED_WITH_AUTHORITY`; 전체 `HOLD` 또는 `EVIDENCE_COMPLETE`. 후자는 **배포 승인과 다름**. 결측·만료·출처 불명은 HOLD. 예외 승인은 승인자·사유·기한·정책 버전과 원래 실패를 함께 표시하며, 공식 Test 신원·금융 출처·보안 실패를 VERIFIED로 바꿀 수 없다.
+- 로딩 스켈레톤, `NO_SIGNED_EVIDENCE` 빈 화면, 관측시각/TTL 포함 만료, 부분 미확인, `VERIFICATION_UNAVAILABLE` 오류, 403, 재인증 만료를 구분. 후보 필터 후 포커스 복원, 상태를 색상 외 텍스트·아이콘으로 알림. `DEPLOYED_BUT_UNCERTIFIED`, `CERTIFIED_TEST_ONLY`, `NOT_DEPLOYED` 보조 표시로 배포 사실과 증거 인증 구별.
+
+### 3. DB·제약·인덱스·트랜잭션 (설계만, 미적용)
+- `release_readiness_snapshots(id uuid PK, repository_head_sha char(40), application_source_sha char(40), environment TEST|PRODUCTION, generation bigint>0, computed_state HOLD|EVIDENCE_COMPLETE, policy_version, observed_at, created_at, UNIQUE(environment,application_source_sha,generation))`. SHA 40자리 16진수 CHECK, `(environment,created_at DESC,id DESC)`, `(application_source_sha,created_at DESC)` 인덱스. 저장소 HEAD와 실제 앱 SHA는 달라도 정상이며 반드시 따로 표시.
+- `release_evidence_artifacts(id uuid PK, snapshot_id uuid FK ON DELETE RESTRICT, gate_key, source_kind, subject_sha256 char(64), signer_identity, builder_id, immutable_uri, verified_at, expires_at, payload_redacted jsonb, UNIQUE(snapshot_id,gate_key,subject_sha256))`. digest CHECK, 출처 종류 allowlist, 유한 만료시간, `(snapshot_id,gate_key)`·`(expires_at)` 인덱스. 토큰·세션 쿠키·SQL 덤프·원문 개인정보 금지.
+- `release_gate_observations(id uuid PK, snapshot_id uuid FK ON DELETE RESTRICT, gate_key, status 6종 CHECK, evidence_id uuid FK ON DELETE RESTRICT, reason_code, policy_version, observed_at, UNIQUE(snapshot_id,gate_key))`. 복합 FK/제약 트리거로 동일 스냅샷 증거만 연결. `(status,observed_at DESC)` 인덱스. 기록 UPDATE/DELETE 금지, 변경은 새 generation.
+- 신뢰된 수집기는 웹앱 계정과 분리된 최소권한 전용 역할로 서명자/빌더 허용 목록, in-toto/SLSA 대상 digest, 소스 SHA, 발급자·시각·정책을 검증. SERIALIZABLE 단일 트랜잭션에서 근거·상태·스냅샷·감사 마커 원자 기록. 환경+앱SHA+세대 advisory lock, 같은 멱등키/동일 digest 재시도는 기존 영수증, 다른 digest는 409, 오류는 전체 롤백. 관리자 읽기는 DB 측 권한을 확인하는 SECURITY DEFINER 함수에 EXECUTE만 부여.
+- 필수 gate: `SOURCE_AND_CLASSIFIER`, `BUILD_PROVENANCE`, `OFFICIAL_TEST_RUNTIME`, `TEST_DB_MIGRATION_PARITY`, `ISOLATED_BACKUP_RESTORE`, `FINANCE_PROVENANCE_AND_APPROVED_EXCEPTIONS`, `AUTHENTICATED_TEST_USER_FLOW`, `PRODUCTION_RUNTIME_IDENTITY`, `POST_PROMOTION_SMOKE_AND_ROLLBACK`. 운영 전 단계에서 운영 전용 항목은 미적용/미배포로 구분하고 검증 완료로 간주하지 않는다.
+
+### 4. API·보안·Android 동등성
+- NestJS `GET /api/v1/admin/releases/readiness?candidateSha=<40-hex>&environment=TEST|PRODUCTION&limit=1..50&cursor=<signed>` 응답 `{items:[{snapshotId,repositoryHeadSha,applicationSourceSha,environment,overallState,observedAt,policyVersion,gates:[{key,status,reasonCode,evidenceId,verifiedAt,expiresAt}]}],nextCursor}`. 잘못된 SHA/커서/한도 400, 권한 없음 403, 데이터 없음 404/빈 결과, 진실 기준 장애 503(가짜 성공 금지). 커서는 관리자·필터·세대·만료에 HMAC 결속.
+- `GET /api/v1/admin/releases/readiness/:snapshotId/evidence/:evidenceId`는 비식별·용량 제한된 서명 근거 요약만 반환. 보고서 JSON/CSV도 같은 권한 조회에서 서버 생성. 요청 파라미터로 외부 URL 가져오기·업로드·공개 원문 API 금지.
+- Next.js 서버 전용 API/액션, 동일 출처 HttpOnly 세션·CSRF, `Cache-Control: private,no-store`, `X-Robots-Tag: noindex`, 사이트맵 제외. Android 관리자 권한은 기존 정책 허용 및 재인증·안전 저장이 검증될 때만 동등 구현; 아니면 `ADMIN_MOBILE_UNSUPPORTED` 명시. 일반 회원 Android API 변경 없음.
+- BOLA/BFLA, 역할 강등, 세션 만료, CSRF, 잘못된 SHA/커서/UUID 100건, 관리자 간/일반 사용자 권한 위조 100건, 재시도·서명 위조·만료·Test/Production 경합·악성 URL·로그 비식별·429를 검증. 실제 런타임 신원 근거 TTL은 15분 이하(제안), 역사적 빌드 증명은 원본 불변이나 서명자 신뢰 철회 가능. 검증키·발급자 장애는 UNVERIFIABLE/HOLD.
+- 참고한 독립 공개 표준(10,000건 검증 승인 수량에는 **미산입**): SLSA v1.1(https://slsa.dev/spec/v1.1/provenance), OWASP API Security Top 10 2023(https://api-security.owasp.org/editions/2023/en/0x11-t10/).
+
+### 5. 관리자·개인정보·SEO·모바일·분석·배포
+- 관리자 기능은 보기/비교/비식별 내보내기만 허용. 수집·예외 승인 권한은 현황판과 분리하고 별도 감사. 조회/내보내기는 행위자·시각·후보·목적 감사 기록, 호스트 주소·회원 정보·토큰 제거. 비식별 요약 180일 보존(제안), 암호학적 원본은 승인된 릴리스/사고 보존정책과 법적 보존을 따름. 공개 분석으로 근거 원문 전송 금지.
+- 관리자 페이지는 `noindex,nofollow,no-store`, 사이트맵 제외. 320/360/390px 반응형, 키보드만으로 사용, 포커스 순서, 200% 확대, WCAG 2.2 AA, `aria-live` 갱신, 색상 이외 상태 라벨.
+- KPI(실측 아님): 근거 없는 녹색 0건, 미서명 근거 승인 0건, 무권한 조회 0건, 만료 후 15분 이내 STALE 반영, 장애 원인 확인 p95 <60초, 인증 후보 근거 체인 완전성 95% 이상, 중대 접근성 회귀 0건. 관리자 감사/내보내기는 일반 사용자 행동 분석과 분리.
+- 수용시험(모두 **제안·미실행**): PostgreSQL 합성 10,001행, 동시 수집/재시도 100건, 권한·잘못된 입력 100건, 서명 변조·폐기·TTL, 404/503/429, 같은 앱 SHA와 다른 문서 HEAD, 문서만 바뀐 main, 운영자 승인 DML 예외, 체크섬 5건, 국고 근거 부재, 운영/Test drift, 독립 복원 실패, 인증 세션 재사용 실패, 이전 호환 불변 digest로 롤백.
+- 개발 절차: 별도 브랜치 → DB/보안/API/UI RED-GREEN → 독립 복원·마이그레이션 리허설 → 정확 후보 SHA CI → 공식 Test 앱·DB·인증 E2E → 별도 운영 승인 → main 병합 → 불변 운영 승격 → 운영 SHA/digest·스모크·롤백 근거. expand-only 마이그레이션, 근거·승인 전 기능 플래그 OFF. 롤백은 UI/수집 비활성화 및 증거 보존, 금융 분개 수정·근거 삭제 금지. 기획 예약은 직접 배포하지 않는다.
+
+### 6. P0/P1 개발 이관(총 10건, 미완료)
+1. **P0 ENV1456-01:** 독립 장애영역 암호화 백업 복원, Test/운영 출처, 용량·롤백 보관. 백업 목록이 아닌 실제 격리 복원 checksum/앱·DB 신원 증명.
+2. **P0 FIN1456-02:** 과거 18,000 WLD 조정·MINT·Treasury 출처/승인 영수증 확인. 원장·운영자 승인 기존 DML 변경 금지, 증빙 없으면 HOLD.
+3. **P0 SEC1456-03:** 체크섬 5건, DB 권한·SECURITY DEFINER·서명자 신뢰 검증. 운영자 승인 권한을 임의 위반으로 판정하지 않음.
+4. **P0 REL1456-04:** 공식 정확 SHA Test, 인증 E2E, 운영 앱 digest, 스모크·롤백 및 문서 전용 main 구분. 실패 차단형 운영승격 증빙.
+5. **P1 RELBOARD1456-05:** 불변 스키마/인덱스·서명 검증·안전 조회 함수, 마이그레이션 동등성·권한 부정 시험.
+6. **P1 RELBOARD1456-06:** 신뢰된 원자 수집·재시도/충돌·스냅샷 FK·서명 영수증, PostgreSQL 동시 100건.
+7. **P1 RELBOARD1456-07:** NestJS/Next.js API·커서·503 및 Android 관리자 지원정책, 계약 시험.
+8. **P1 RELBOARD1456-08:** 관리자 6종 상태·빈/만료/오류/403·비교·읽기 전용 내보내기, 모바일·키보드·접근성.
+9. **P1 RELBOARD1456-09:** 비식별·보호 감사·보존·비공개 SEO·실측 KPI, 개인정보 누출 0건.
+10. **P1 RELBOARD1456-10:** 실제 PostgreSQL 10,001행/동시 100건/권한 부정 100건·서명 변조·배포 롤백 리허설 및 운영자 승인.
+
+**외부 독립 레퍼런스 게이트:** 신규 중복 제거·검증 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 공개 표준 2개 참고는 승인 수량에 포함하지 않음. **릴리스 상태:** DRAFT/HOLD. v1213 앱은 실제 배포 신원이 관측됐으나 F675-170은 미구현·공식 Test/Production 미인증. 별도 분산 기획 파일은 만들지 않고 영어 정본·한국어 대조 및 기존 통합문서에 명세 통합.
+
 ## v2026.10.29.1448 — F675-168 검증된 블로그 글 회원 전용 나중에 읽기 (기능 추가 / 초안 / 운영 보류)
 
 **개발 인계:** [Draft PR #1801](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1801) / [Issue #1800](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1800). Documentation only, RELEASE HOLD.

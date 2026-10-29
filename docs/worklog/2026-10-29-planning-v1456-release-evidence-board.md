@@ -15,11 +15,14 @@
 - [x] GitHub engineering issue #1829 created.
 
 ## Middle
-- [ ] Re-query remote main and canonical English/Korean plan before finalizing.
-- [ ] Integrate F675-170 design into existing English/Korean master and portfolio documents; no new standalone planning file.
-- [ ] Update P0/P1 implementation handoff and internal/GitHub logs.
+- [x] Re-query remote main and canonical English/Korean plan before finalizing.
+- [x] Integrate F675-170 design into existing English/Korean master and portfolio documents; no new standalone planning file.
+- [x] Update P0/P1 implementation handoff and internal/GitHub logs.
 - [ ] Run bilingual parity, 10-backlog-ID, release-classifier and diff verification.
 
 ## Finish
 - [ ] Commit/push exact SHA, open Draft PR, record CI state; leave main/Production/Test untouched.
 - [ ] Record start/middle/finish in miniPC records and GitHub issue/PR.
+
+## Middle (12:04–12:06 KST) / 중간 기록
+- Main and both canonical plan hashes re-checked unchanged at 12:04; GitHub issue #1829 opened. F675-170 added to existing English/Korean canonical, master and portfolio; 4 P0/6 P1 handoff. Production v1213 and accepted finance DML explicitly preserved. No runtime changes.

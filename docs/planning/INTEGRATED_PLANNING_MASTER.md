@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v1456 / F675-170 — Evidence-bound release readiness board (FEATURE ADDITION / DRAFT / HOLD)
+
+- **Authority/cycle:** Previous Improvement v1454 → Current Addition v1456 → Next Improvement v1458 (provisional). Remote main `b84d645a`; actual Test/Production app `b44ffd0a` observed separately. QA v1363 HTTP 48/50 (both `/help` 404), mobile 36/36, 113 Draft PRs/48 conflicts. [Engineering backlog #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829).
+- **Product:** restricted read-only `/admin/releases/readiness`, evidence chain for source/build/Test DB/restore/finance/authenticated QA/Production, six explicit VERIFIED/FAILED/STALE/MISSING/UNVERIFIABLE/WAIVED_WITH_AUTHORITY gate states and HOLD/EVIDENCE_COMPLETE; never an approval or promotion CTA. Exact-SHA build/attestation, signed evidence, immutable PostgreSQL snapshots, scoped SECURITY DEFINER read, redacted export, admin audit, Android policy, noindex, WCAG 2.2 AA.
+- **Safety:** v1213 Production app promotion and owner-approved existing finance DML are facts; five historical migration checksum mismatches, treasury source receipts and session replay remain separate HOLD items. Proposed 10,001-row/100-concurrency/100-authorization tests NOT RUN. P0 ENV1456-01 FIN1456-02 SEC1456-03 REL1456-04; P1 RELBOARD1456-05 through RELBOARD1456-10. Full technical contract in canonical PROJECT_PLAN.md and Korean counterpart.
+- **External gate:** newly approved 0; cumulative deduplicated verified UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Documentation-only, no runtime/Test/Production change.
+
 ## v2026.10.29.1213 — Live Production promoted with exact SHA and owner-approved finance grants
 
 - **LIVE RELEASE DONE:** Public easy-scraping.com, immutable host release v2026.10.29.1213 at source b44ffd0af9e2bd6e7c2be7345b72094827078c3d. Merged app PR #1817, source CI 40803483298 green and exact-SHA Test verified. Current main additionally includes independent QA/docs changes; not misreported as running app source.
