@@ -15,3 +15,9 @@
 
 ## FINISHED
 Pending evidence; no merge or deployment authorized.
+
+## IN PROGRESS — 09:51 KST
+- RED reproduced: 9/10 action tests failed because HTTP success was accepted without a mutation receipt or persisted readback; 1 UI static test failed on missing unknown-state guard.
+- GREEN: 12/12 focused tests passed. The PUT must return the requested boolean, and a fresh owner-scoped GET must match before revalidation or success. Invalid dashboard evidence now displays an alert rather than an invented OFF state.
+- `api` uses no-store per-caller requests and the backend reads via `member_engagement_dashboard(actor)`; no DB/API contract changes required.
+- Midpoint main and both planning docs re-fetched; full verification and PR pending.

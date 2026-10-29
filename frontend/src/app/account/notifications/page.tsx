@@ -17,6 +17,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
   await requireMember();
   const params = await searchParams;
   const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
+  const preferenceVerified = typeof board?.notifications_enabled === 'boolean';
   const enabled = board?.notifications_enabled === true;
   return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
     <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 센터 & 설정">중요한 비즈니스 수급, 금융 이자, 목표와 소식을 확인하고 수신 여부를 직접 정할 수 있습니다.</PageHeader>
@@ -33,7 +34,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
           <div><CardTitle>게임 진행 알림</CardTitle><CardDescription className="mt-1">목표 달성 기회와 NPC 주문 변화를 놓치지 않도록 알려드립니다.</CardDescription></div>
         </CardHeader>
         <CardContent className="grid gap-5 pt-6">
-          {board === null ? <Alert variant="destructive"><AlertDescription>현재 설정을 불러오지 못했습니다. 설정을 바꾸지 않았으니 잠시 후 다시 확인해 주세요.</AlertDescription></Alert> : <>
+          {!preferenceVerified ? <Alert variant="destructive" role="alert"><AlertDescription>현재 설정을 불러오지 못했습니다. 설정을 바꾸지 않았으니 잠시 후 다시 확인해 주세요.</AlertDescription></Alert> : <>
             <div className="flex items-start gap-3 rounded-xl border p-4"><Goal className="mt-0.5 size-5 shrink-0" aria-hidden="true"/><div><p className="font-medium">목표·NPC 주문</p><p className="mt-1 text-sm text-muted-foreground">현재 상태: <strong className="text-foreground">{enabled ? '알림 받는 중' : '알림 꺼짐'}</strong></p></div></div>
             <form action={saveGoalNotifications} className="grid gap-3 sm:grid-cols-2" aria-label="목표 및 NPC 주문 알림 설정">
               <Button name="notificationsEnabled" value="true" type="submit" aria-pressed={enabled} variant={enabled ? 'default' : 'outline'} className="min-h-12 w-full">알림 받기</Button>

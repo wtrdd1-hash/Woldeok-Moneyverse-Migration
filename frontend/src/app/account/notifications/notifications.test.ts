@@ -16,6 +16,8 @@ describe('account notification settings', () => {
     expect(page).toContain("enabled ? '알림 받는 중' : '알림 꺼짐'");
     expect(page.match(/className="min-h-12 w-full"/g)).toHaveLength(2);
     expect(page).toContain('설정을 바꾸지 않았으니');
+    expect(page).toContain('preferenceVerified');
+    expect(page).toContain("typeof board?.notifications_enabled === 'boolean'");
   });
   it('writes through the existing member preference API and refreshes quests', () => {
     expect(actions).toContain("'/api/v1/engagement/preferences'");
