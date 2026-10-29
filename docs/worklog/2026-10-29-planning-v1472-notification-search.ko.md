@@ -7,3 +7,5 @@
 **결정:** F675-174 본인 읽기 전용 POST 검색, 최대 90일, 한국어 검색 인덱스 검증, HMAC 10분 키셋 커서, Next/Nest/Android, 개인정보·접근성·관리자·SEO·KPI·롤백 설계. 상세 명세와 P0/P1은 기존 국영문 통합 마스터에 흡수, 새 분산 기획 파일 없음. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 
 **승격:** P0 4건(브랜치 보존·마이그레이션·금융 출처·QA 정확 SHA/복원), P1 6건. 합성 10,001건 및 공격 수용시험은 계획만 수립하고 미실행. 기능 OFF, 런타임·DB·WLD·Test·운영 변경 없음. 외부 독립 근거 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 = BLOCKED/IN PROGRESS.
+
+**Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1888 — open, not merged, no runtime/Production promotion.

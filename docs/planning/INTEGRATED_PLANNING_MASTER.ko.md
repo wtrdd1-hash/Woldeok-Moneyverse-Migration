@@ -33,6 +33,7 @@
 - **P1 6건:** NOTIFSEARCH1472-05 소유자 전용 함수·안전 인덱스, NOTIFSEARCH1472-06 HMAC 키셋 커서, NOTIFSEARCH1472-07 Nest/Next/Android 계약, NOTIFSEARCH1472-08 접근성 UI, NOTIFSEARCH1472-09 개인정보·관리자·KPI, NOTIFSEARCH1472-10 실제 PG·보안·회귀·롤백.
 - **수용시험은 정의만 했고 실행하지 않았다.** PostgreSQL 17.11 격리 데이터 10,001건(회원 편중·한글/영문 포함), 타인 조회/위조 커서 100건, 동시 알림 생성·읽음 100건, 응답 유실/만료/재생 50건, 시간대/DST 30건, Unicode 이상값, 인덱스 누락 시 실패 처리, 실행 계획·타임아웃, Next/Nest/Android 계약, 320px·키보드·스크린리더, 비공개 SEO, 기존 읽음 처리 회귀, 원장 무변경, 실제 DB 권한 거부를 검증한다.
 - 기능 스위치 기본 **OFF**. 개발 A/B/C는 별도 브랜치, QA/Gemini와 변경 중첩 금지. 마이그레이션 무결성, 정확 SHA 전체 CI, 공식 Test 인증·금융 E2E, 독립 백업 복원, 승인된 GitOps, 무중단 smoke·롤백 근거 없이는 main 병합/Production 승격 **BLOCKED**. 외부 독립 근거 신규 검증 승인 **0건**, 누적 중복 제거·승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**.
+**GitHub:** [Draft PR #1888](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1888) OPEN / unmerged; [P0/P1 issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887). Documentation only, release HOLD.
 
 
 ## v2026.10.29.1419 — 검증된 블로그 전용 2시간 자동 발행

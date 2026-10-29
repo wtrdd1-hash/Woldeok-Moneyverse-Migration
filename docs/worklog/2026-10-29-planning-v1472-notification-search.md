@@ -7,3 +7,5 @@
 **Decision:** Add F675-174 member-only read-only search with safe POST JSON, 90-day bounded period, Korean-aware verified index gate, HMAC 10-minute keyset cursor, Next/Nest/Android parity, privacy/a11y/admin/SEO/KPI/rollback. All detailed acceptance and P0/P1 backlog in existing bilingual integrated master; no new standalone planning spec. [Development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 
 **Release:** Four P0 gates (historic refs, migration checksum/lineage, finance provenance, QA exact-SHA/restore) and six P1 feature tasks. 10,001 synthetic data and attack cases are planned NOT executed. Feature OFF; no runtime, DB, WLD, Test or Production changes. External independent evidence new approved 0; cumulative deduplicated approved UNKNOWN/10,000 = BLOCKED/IN PROGRESS.
+
+**Draft PR:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1888 — open, not merged, no runtime/Production promotion.

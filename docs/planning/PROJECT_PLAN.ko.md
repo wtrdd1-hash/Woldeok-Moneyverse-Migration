@@ -5,6 +5,7 @@
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.
 - 본인 전용 POST 검색(키워드/분류/읽음/최대 90일), HMAC 본인/세션/필터 결속 10분 키셋 커서, 기본 20/최대 50개, 인덱스 미검증 시 실패 처리, Android, 320px/WCAG 2.2 AA, noindex/no-store, 익명 관리자 집계, 기존 알림함 롤백. 발송·보상 청구·자동 읽음·금융 변경 없음. 화면·API·DB·수용시험 전체: [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
 - P0: REPO1472-01 브랜치 보존, SEC1472-02 마이그레이션 291~295·체크섬·스키마, FIN1472-03 MINT 18,000 WLD/국고 552행 출처, REL1472-04 QA 타입/린트·복원·공식 Test 정확 SHA. P1: NOTIFSEARCH1472-05 NOTIFSEARCH1472-06 NOTIFSEARCH1472-07 NOTIFSEARCH1472-08 NOTIFSEARCH1472-09 NOTIFSEARCH1472-10 DB/인덱스·서명 커서·API/Android·접근성·개인정보/KPI·격리 PG 회귀. 합성 10,001건 수용시험 **미실행**. 기능 기본 OFF, 런타임·DB·Test·운영 미변경. 외부 승인 신규 0·누적 UNKNOWN/10,000 → BLOCKED/IN PROGRESS.
+**GitHub:** [Draft PR #1888](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1888) OPEN / unmerged; [P0/P1 issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887). Documentation only, release HOLD.
 
 
 ## v2026.10.28.1415 — 국고·중앙은행·조폐국 금융 진실성 안정화 (코드 후보 / 운영 HOLD)
