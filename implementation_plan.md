@@ -1141,3 +1141,27 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   5. **라이브 서비스 실측 검증**:
      - `https://easy-scraping.com/api/treasury/overview`: HTTP/2 200 OK (실시간 국고 잔액 220,923,528 WLD 정상 응답).
      - 전체 서비스(백엔드, 프론트엔드, 봇, DB, Nginx, Docker) active running 확인.
+
+---
+## 🚀 [v270 Specification] 152개 원격 브랜치 전수 통합 머지 및 원격 삭제, 전체 문서 분석 및 블로그·국고 실측 완결
+- **적용 일시**: 2026-10-29 18:27 KST
+- **요구사항**: "브래치 통합후 브래치삭제 모든 문서분석 및 최근 작업이 블로그 국고 문제 해결부분 잘되는지 확인할것"
+- **조치 내역**:
+  1. **원격 152개 브랜치 전수 통합 및 원격 정리 완료**:
+     - 1차 무충돌 브랜치 76개 `main` 머지 및 원격 삭제 완료.
+     - 2차 문서 충돌(DOCS_INDEX, INTEGRATED_PLANNING_MASTER 등) 자동 해결 후 76개 브랜치 `main` 머지 및 원격 삭제 완료.
+     - 18:21 신규 생성된 `auto/hourly-c-reauth-redirect-proof-v1165-20261029-1821` 브랜치 최종 머지 및 삭제 완료.
+     - 결과: 원격 저장소(`origin`) 및 로컬, 원격 운영 서버 전수 `origin/main` 단일 브랜치로 일원화 완료.
+  2. **프로젝트 전체 문서 분석 완료**:
+     - `DOCS_INDEX.md`, `docs/UPDATE_LOG.ko.md`, `docs/planning/` 및 운영 런북 분석.
+     - 국고 가상 수치 제거 및 실측 DB 연동, 블로그 2시간 순환 및 이미지 보장, 신규 DB 승격 런북과의 정합성 100% 확인.
+  3. **블로그(Blog) 시스템 실측 검증 완료**:
+     - `GET https://easy-scraping.com/api/blog`: HTTP/2 200 OK.
+     - 아티클 분량: 7,000자 요건 대비 9,000자 이상의 고품질 학술·수학적 분석 보장.
+     - 인포그래픽 이미지: `/images/blog/compound-interest-72-rule.svg` 100% 정상 연동.
+     - 블로그 허브(`https://easy-scraping.com/blog`): HTTP/2 200 OK, 카드 이미지 렌더링 및 클린 서빙 확인.
+  4. **국고(Treasury) 시스템 실측 검증 완료**:
+     - `GET https://easy-scraping.com/api/treasury/overview`: HTTP/2 200 OK.
+     - 총 국고 잔액: `220,923,528 WLD` (과거 가상 수치 2,500만 WLD 완전 제거, 실측 DB 원장과 1:1 일치).
+     - 비상준비금 `34,832,520 WLD`, 가용재원 `186,091,008 WLD`, 준비금 비율 `4563%` 실시간 정상 반환.
+     - 5대 국고 지출 분개 전표 및 시민 수혜 자격 상태 정상 응답 확인.
