@@ -258,3 +258,9 @@ assert viewer.signedIn == true
 7. 로그아웃/재로그인
 8. Google/Discord authorize 경로의 BFF 응답
 9. 앱 번들에 서버 secret이 없는지 확인
+
+## 검증된 도움말 — 선택적 언어 대체 검색 (v2026.10.29.1220)
+
+Android 앱은 `POST /app-api/v1/help/search`에 JSON 본문 `{"locale":"ko","query":"로그인","limit":20,"fallbackToOtherLocale":true}`를 보낼 수 있습니다. 이 필드는 선택적 boolean이며 기본값은 `false`입니다. 기본 언어에서 검증된 결과가 없을 때만 다른 언어의 **승인·게시·유효기간 내 문서**를 조회합니다. 번역을 생성하거나 결과를 섞지 않습니다.
+
+응답은 `articles`, `requestedLocale`, `resultLocale`, `fallbackUsed`를 포함합니다. `fallbackUsed=true`라면 화면에 다른 언어의 원문임을 명확히 표시하고 각 문서의 `locale`에 맞는 링크를 사용해야 합니다. 검색어는 URL이 아닌 POST 본문에만 넣습니다. 응답은 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`이며, 기능 스위치가 꺼졌거나 DB가 불가하면 결과를 조작하지 않고 오류를 표시합니다. Android에는 관리자 도움말 경로가 열리지 않습니다.

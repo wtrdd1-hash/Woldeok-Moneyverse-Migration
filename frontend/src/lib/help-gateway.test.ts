@@ -10,3 +10,11 @@ describe('verified help Android app API boundary', () => {
     expect(appGatewayPath(['admin','help','articles'])).toBeNull();
   });
 });
+
+describe('Android verified bilingual help contract', () => {
+  it('keeps public POST help search allowlisted for opt-in fallback without exposing private routes', () => {
+    expect(appGatewayPath(['help','search'])).toBe('/api/v1/help/search');
+    expect(appGatewayPath(['help','feedback','receipts'])).toBeNull();
+    expect(appGatewayPath(['help','admin','feedback'])).toBeNull();
+  });
+});

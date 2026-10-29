@@ -266,3 +266,9 @@ Before a mobile release, verify against the exact test-server SHA:
 7. logout and relogin;
 8. Google/Discord authorize entry points still respond through the BFF;
 9. no app bundle contains server-only secrets.
+
+## Verified help — opt-in alternate-language search (v2026.10.29.1220)
+
+Android may send `POST /app-api/v1/help/search` with JSON body `{"locale":"ko","query":"login","limit":20,"fallbackToOtherLocale":true}`. The optional boolean defaults to `false`. Only when the requested locale has zero verified results does the server search the other locale using the same approved, published and unexpired PostgreSQL read function. It never translates or mixes languages.
+
+The response contains `articles`, `requestedLocale`, `resultLocale` and `fallbackUsed`. When fallback is true, display a clear original-language notice and link to each article using its actual locale. Search text stays in the POST body, never a URL. Android gateway responses enforce `Cache-Control: private, no-store` and `X-Robots-Tag: noindex`; feature-off and database failures are errors, not fabricated empty results. Administrative help endpoints remain blocked.
