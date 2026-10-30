@@ -30,6 +30,28 @@ function isWalletDetailPath(parts: readonly string[]): boolean {
     parts[2] === 'transactions';
 }
 
+function isVerifiedOldestSupportThreads(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const rows = (payload as { threads?: unknown }).threads;
+  if (!Array.isArray(rows) || rows.length > 50) return false;
+  let previousTime = -Infinity;
+  const ids = new Set<string>();
+  for (const row of rows) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+    const item = row as Record<string, unknown>;
+    if (typeof item.thread_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.thread_id) || ids.has(item.thread_id)) return false;
+    if (typeof item.subject !== 'string' || item.subject.length > 120 ||
+        !['open', 'waiting_user', 'resolved'].includes(String(item.status))) return false;
+    if (typeof item.last_message_at !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(item.last_message_at)) return false;
+    const time = Date.parse(item.last_message_at);
+    // PostgreSQL Date serialization may lose sub-millisecond ordering.
+    if (!Number.isFinite(time) || time < previousTime) return false;
+    previousTime = time;
+    ids.add(item.thread_id);
+  }
+  return true;
+}
+
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
 }
@@ -227,6 +249,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       } catch {
         return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
       }
+    }
+  }
+
+  // A stale backend can ignore an optional order parameter while returning HTTP 200.
+  if (parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads' &&
+      request.method === 'GET' && request.nextUrl.searchParams.get('sort') === 'oldest' && response.ok) {
+    try {
+      if (!isVerifiedOldestSupportThreads(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
+          'support conversation order could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
+        'support conversation order could not be verified');
     }
   }
 

@@ -1,4 +1,4 @@
-﻿import {
+import {
   BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
@@ -40,15 +40,20 @@ export class SupportController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'My recent administrator support conversations, optional status and literal subject search' })
-  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string) {
+  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string, @Query('sort') sort?: string) {
     if (status !== undefined && (typeof status !== 'string' || !['open', 'waiting_user', 'resolved'].includes(status))) {
       throw new BadRequestException('invalid support status');
     }
     if (q !== undefined && (typeof q !== 'string' || q.length > 80 || /[\u0000-\u001f\u007f]/.test(q) || !q.trim())) {
       throw new BadRequestException('invalid support search');
     }
+    if (sort !== undefined && sort !== 'oldest') {
+      throw new BadRequestException('invalid support order');
+    }
     const actor = requireUserId(req);
-    const threads = q === undefined
+    const threads = sort === 'oldest'
+      ? await this.repo().myThreads(actor, status ?? null, q?.trim(), 'oldest')
+      : q === undefined
       ? await this.repo().myThreads(actor, status ?? null)
       : await this.repo().myThreads(actor, status ?? null, q.trim());
     return { threads };

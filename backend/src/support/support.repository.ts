@@ -23,7 +23,19 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, status: string | null = null, q?: string) {
+  myThreads(actor: string, status: string | null = null, q?: string, sort?: 'oldest') {
+    if (sort === 'oldest') {
+      // Reorder the latest 100 owner-scoped conversations; never claim an all-time oldest search.
+      const clauses: string[] = [];
+      const params: unknown[] = [actor, 100];
+      if (q !== undefined) { params.push(q); clauses.push(`strpos(lower(subject), lower($${params.length})) > 0`); }
+      if (status !== null) { params.push(status); clauses.push(`status = $${params.length}`); }
+      const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : '';
+      return queryRows<SupportThreadRow>(this.pool,
+        `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
+         FROM public.support_my_threads($1,$2)${where}
+         ORDER BY last_message_at ASC,thread_id ASC LIMIT 50`, params);
+    }
     if (q !== undefined) {
       // Restrict to the newest 100 owner-scoped rows *before* matching; never
       // widen access to another member or interpret %/_ as LIKE wildcards.
