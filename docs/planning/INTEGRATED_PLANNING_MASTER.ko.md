@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 
 **진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
@@ -63,6 +64,38 @@
 - **P0 4건:** REPO1476-01 브랜치/PR 보존; FIN1476-02 금융 fail-closed·출처; SEC1476-03 체크섬·권한·스키마 계보; REL1476-04 전체 CI·복원·정확 SHA Test·GitOps. **P1 6건:** DRAFT1476-05 DB/권한/TTL, DRAFT1476-06 경합·불변 영수증, DRAFT1476-07 Nest/Next/Android API, DRAFT1476-08 회원 UI·접근성, DRAFT1476-09 개인정보·관리자·KPI, DRAFT1476-10 격리 PG·보안·롤백. 양 언어 10개 식별자 동일. 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
 
 =======
+=======
+## v1482 / F675-176 — 지갑 저장 필터: 검증된 거래내역·단조 증가 세대·안전한 재시도 (기능 보완 / DRAFT / RELEASE HOLD)
+- **종속 Draft PR:** [#1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) — #1916 기반, 미병합. 첫 확인 시 CI 진행 중이며 릴리스 인증이 아니다.
+
+**주기·기준:** 이전 기능 추가 v1480 → 현재 기능 보완 v1482 → 다음 기능 추가 v1484(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`(2026-10-30 01:05 KST). v1480은 아직 미병합 Draft PR #1916이며 이번 문서는 해당 브랜치 위에 쌓는 제안이다. 독립 QA v1376 **FAILED/P0**(#1917). C v1172 응답 검증 후보(#1919)는 로컬 전용으로 main 미반영. **구현·DB·Test·운영 변경이 아닌 기획 계약**이다.
+
+### 소스 근거와 설계 오류 보완
+- `backend/src/wallet/wallet.repository.ts`의 `recentTransactionsForUser`에는 이미 `in/out/neutral` SQL `HAVING` 필터가 있으나, **페이지네이션용** `activityTransactionsForUser`에는 방향 필터가 없다. `frontend/src/app/wallet/activity/period.ts`의 방향 URL 헬퍼도 현재 페이지와 Nest 조회 API에 연결되지 않았다. 실 PostgreSQL 테스트로 부호를 검증해 기존 의미를 재사용하되, LIMIT 이후 메모리 필터나 이미 기능이 구현됐다는 주장은 금지한다.
+- 기존 `wallet-activity-cursor.ts` v1은 세션 관련 키로 서명하고 **60분** 유효하며 `Date.toISOString()`을 써 밀리초까지만 보존한다. 새 저장 필터용 v2는 **15분**, 목적별 독립 서명 키와 PostgreSQL 마이크로초 보존을 요구한다. 기존 페이지의 `apiOrNull<WalletHistoryPage>`는 런타임 구조 검증을 하지 않는다. C v1172(#1919)에서 별도로 검증기를 개발했으나 아직 main에 병합되지 않았으므로 작업 브랜치를 건드리지 않고 계약만 연계한다.
+- 01:08 KST 개발 PostgreSQL 17.11 **읽기 전용** 조회에서 제안한 저장 필터·집합·영수증 테이블 3개는 모두 **없었으며**, `moneyverse_app`에는 `support_threads` UPDATE/TRUNCATE 직접 권한이 남아 있었다. 운영 DB 상태를 의미하지 않는다. `frontend/src/lib/app-gateway.ts`는 `wallet` 경로를 허용하지만 `APP_API_REQUEST_HEADERS`에 `If-Match`·`Idempotency-Key`가 없어 Android 저장 필터 쓰기 계약이 전달되지 않는다. 헤더 허용 목록·CSRF/인증·거부 시험을 개발에 명시하고 경로 존재만으로 모바일 동등성을 주장하지 않는다.
+- QA v1376 P0: Test 공개 `/api/treasury/overview`가 합성 `disb-*` 항목으로 HTTP 200을 반환한 반면 운영 **공개** 경로는 안전하게 503이었다. 백엔드 SHA 일치만으로 프론트엔드·엣지 배포 증명이 불가능하다(#1917, 대응 Draft #1918). 실제 WLD 이동이나 운영 공개 합성 응답을 입증한 것은 아니다.
+
+### 소유자 세대·원자적 변경·멱등성
+- 신규 제안 `member_wallet_activity_view_sets`: 회원별 `owner_user_id UUID PK`, `generation BIGINT >0`, `updated_at`. SECURITY DEFINER 트랜잭션에서 없으면 생성한다. 생성·이름 변경·필터 변경·정렬·기본값 지정·삭제·전체 초기화 **모든 성공한 변경마다 세대 증가**, 마지막 필터 삭제 후에도 초기값으로 되돌리지 않는다. 필터별 `revision`은 유지하고 회원 집합 ETag `"wv-g<generation>"`을 모든 변경(생성·기본값 포함)의 `If-Match`로 요구한다. 누락 428, 오래된 값 409.
+- 처리 순서: 인증 세션에서 소유자 결정 → 현재 세대 검사 **전에** `(owner,idempotency_key)` 영수증 조회 → 동일 정규화 요청·예상 세대면 원본 불변 영수증 반환, 다른 내용이면 409 → 소유자 집합 행 `FOR UPDATE` 잠금 → 세대/필터 revision 확인 → 최대 8개·이름 유일·기본값 최대 하나 검증 → 이전 기본값 해제와 새 기본값 지정 → 세대 증가·필터/삭제 표식·영수증을 **단일 커밋**. 실패하면 전부 롤백. 지연 요청으로 삭제된 필터를 되살리거나 최신 기본값을 덮어쓰면 안 된다.
+- 영수증을 삭제한 후에도 무기한 멱등성을 보장한다고 주장하지 않는다. 삭제 표식·영수증 보존 기간은 **정책 미확정**(v1480의 7일은 잠정). 서버가 서명한 유효기간 있는 작업 토큰으로 영수증 정리 후 오래된 재생도 거부하고, 허용된 재시도 기간에 필요한 증빙을 먼저 삭제하지 않는다. 저장 필터 영수증은 금융 거래 영수증이 아니다.
+- SECURITY DEFINER 함수는 search_path 고정·SQL 내부 소유권 확인·PUBLIC EXECUTE 금지·app 역할의 테이블 직접 SELECT/DML/TRUNCATE 금지, 필요한 EXECUTE만 허용. 금융 원장 쓰기·기존 적용 마이그레이션 수정 금지. 체크섬 5건과 DEV 권한 불일치 해결 전 신규 마이그레이션 번호 확정 금지.
+
+### SQL·커서·API 검증
+- 본인 USER_CASH+USER_BANK 원장 차변/대변을 거래별 합산하고 **SQL에서 방향 조건을 적용한 뒤** `(created_at,id) DESC LIMIT 51`. 양수=증가, 음수=감소, 0=순변동 없음(내부 이체 단정 금지). 격리 실제 PostgreSQL로 부호와 기존 전체 기록 결과를 대조한다. WLD는 정규 십진 문자열/BigInt로만 다루며 `cashDelta + bankDelta = netAmount`를 검증한다.
+- v2 HMAC-SHA-256 커서는 버전·키 ID·목적·회원·인증 세션/세대·필터 해시·viewId/리비전과 **집합 세대**·DB `asOf`·기간 `since`·마지막 거래의 **마이크로초 6자리** 시각/UUID·발급/만료(15분 이내)에 결속한다. PostgreSQL 파라미터에서 6자리 정밀도를 유지하고 **JS Date를 거쳐 마지막 시각을 반올림하지 않는다**. 크기·인코딩·상수시간 서명 검증·키 교체를 DB 접근 전에 검사. 필터/기본값 변경·로그아웃·계정 전환·409/410이면 이유를 표시하고 첫 페이지부터 다시 시작. 잘못된/초과 커서는 400, 만료는 410이며 **커서를 조용히 버리고 첫 페이지를 다음 페이지인 것처럼 표시하지 않는다**. 기능 OFF에서는 기존 60분 v1 계약 그대로 유지.
+- Nest/Next/Android의 거래내역 응답을 `unknown`에서 런타임 검증: 거래 배열 최대 50, UUID 중복 없음, 유효·범위 제한 시각, 정확한 WLD 정수 문자열과 현금+은행 합계, `hasMore` 불리언, `hasMore`가 참일 때만 `nextCursor`가 null이 아님, `asOf`·적용 필터·리비전 일치. 구조가 잘못된 HTTP 200은 **불가/503**으로 처리하고 빈 내역으로 꾸미지 않는다. 검증된 빈 목록/검색 결과 없음/만료/장애/저장 결과 불명을 구분한다. 금액·필터명·커서·회원 ID는 로그·분석에 남기지 않는다.
+- Next 동일 출처 세션/CSRF/server-only API와 Android `/app-api/v1/[...path]`는 동일 오류 계약을 제공한다. 생성 API 문서 영·한·JSON 일치가 릴리스 조건. viewId와 기간/방향 혼합, 임의 userId, 공개 캐시·검색 색인 금지.
+
+### 수용시험·배포·KPI·개발 백로그
+- **계획이며 미실행:** 격리 PostgreSQL 17.11 합성 원장 10,001건, 타인 접근·위조 커서 100건, 기본값 경쟁·전체 삭제→재생성 ABA 포함 동시 수정 100건, 후속 세대 변경 뒤 응답 유실 재시도 50건, 마이크로초·UTC·0 순변동·만료·삭제 표식 30건, 잘못된 HTTP 200·중복/과대 커서 100건. LIMIT 이전 SQL 필터, 50+1 페이지, v1 기능 OFF 회귀, 실제 앱 역할 직접 접근 거부, 원장 쓰기 0, 320px/200% WCAG 2.2 AA, noindex/no-store, 웹·Android 동등성, 기능 OFF 롤백 검증. p95 <500ms는 격리 대표 데이터에서 검증할 **목표치**이지 실측 성과가 아니다.
+- 관리자에게는 최소 표본 기준을 충족한 익명 집계·오류·지연만 제공한다. 개인 필터명·원장·금액·영수증 키 금지. 저장 성공·7일 재사용·409/410·비정상 응답 차단·타인 조회 0·중복 변경 0을 개인정보 없이 측정. 기본 OFF, 전진형 스키마와 별도 개발 A/B/C 브랜치, 전체 CI·독립 외부 백업 복원·공식 Test 인증 E2E·**프론트/백엔드 각각의 정확 SHA 및 엣지 검증** 이후 승인된 GitOps만 허용. 롤백은 기존 내역으로 돌아가며 금융 원장과 개인 필터를 삭제하지 않는다.
+- **P0:** REPO1482-01 과거 Git 참조 462개 보존; SEC1482-02 DEV 고객문의·감사 앱 직접 DML 및 체크섬 5건 해결; FIN1482-03 SWF 허위 성공·MINT 18,000 WLD 출처·국고 552행; REL1482-04 Test 합성 국고 200/프론트 SHA 검증(#1917/#1918), 분류기·lint·app-api·전체 CI·외부 복원·공식 Test 정확 SHA. 모두 **BLOCKED/HOLD**.
+- **P1:** VIEW1482-05 소유자 세대/스키마/ACL; VIEW1482-06 SQL 방향 필터·마이크로초 v2 커서; VIEW1482-07 Nest/Next/Android 런타임 응답·오류 검증과 게이트웨이 If-Match/Idempotency-Key 전달; VIEW1482-08 회원 충돌 UI·320px 접근성; VIEW1482-09 관리자 익명 집계·개인정보·SEO·KPI; VIEW1482-10 격리 PG·공격적 회귀·롤백. C v1172(#1919)는 별도 후보로 연계하고 타 작업 브랜치는 변경하지 않는다.
+- 외부 독립 근거 신규 중복 제거·분류·검증 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**. Gate **BLOCKED / IN PROGRESS**. 기존 v1480 상세기획을 유지·보완하며 새 독립 기능 기획 파일은 만들지 않는다.
+
+>>>>>>> origin/auto/planning-v1482-wallet-saved-views-hardening-20261030-0105
 ## v1480 / F675-176 — 회원 전용 지갑 기록 저장 필터 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **주기·기준:** 이전 기능 보완 v1478 → 현재 기능 추가 v1480 → 다음 기능 보완 v1482(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`(2026-10-30 00:10 KST), 독립 QA v1375 FAILED/P0. [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). **기획 초안이며 구현·검증·배포 완료가 아니다.**

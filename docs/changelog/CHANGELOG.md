@@ -9,6 +9,10 @@
 - Recover a silent active/elapsed market timer with a calendar schedule, monitor real next trigger and prevent stale two-minute price alerts. [Release](../releases/v2026.10.30.1.md).
 =======
 ## v2026.10.30.1480 — F675-176 owner-private wallet activity saved views (planning DRAFT / release HOLD)
+
+## v2026.10.30.1482 — F675-176 wallet saved-view correctness hardening (planning DRAFT / release HOLD)
+- Specify monotonic owner-set ETag, receipt-first idempotency, v2 microsecond cursor and strict malformed-response validation. QA v1376 Test Treasury synthetic 200 / frontend SHA P0 hold remains; C v1172 validator unmerged. No runtime/DB/Test/Production changes. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [Issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). External approved new 0, cumulative UNKNOWN/10,000.
+
 - Proposed up to 8 named owner-only period/net-movement filters, CAS/idempotent receipts, versioned signed cursor, Nest/Next/Android parity and rollback to existing 50-row wallet history. Documentation only; no ledger, DB, runtime, Test or Production change. Independent QA v1375 FAILED/P0; external approved 0, cumulative UNKNOWN/10,000. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [Development issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915).
 >>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
