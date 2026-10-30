@@ -11,3 +11,10 @@ Pending RED test reproduction. No shared DB, service, financial or release chang
 
 ## Finished
 Pending validation. RELEASE HOLD.
+
+## In progress — TDD and isolated PostgreSQL
+- [x] RED: three focused tests failed on existing raw table queries/invalid input acceptance.
+- [x] GREEN: three focused tests passed after switching repository to owner-scoped functions.
+- [x] Added immutable forward-only migration 309; explicit REVOKE on both receipt tables, definer function owner, PUBLIC EXECUTE revoked.
+- [x] Isolated PostgreSQL 17.11: direct SELECT/DML denied, scoped reads succeed, large integer exact, invalid inputs denied, historical rows unchanged; container removed.
+- [ ] Full build, lint/typecheck, contract/database/security, Backend/Frontend full, exact-SHA CI/Test pending.

@@ -489,17 +489,28 @@ export class NationalPensionRepository {
     }
   }
 
+  /** Read historical receipts only through owner-scoped DB functions, never raw table grants. */
+  private assertOwnerReceiptQuery(userId: string, limit: number): void {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId) ||
+        userId === '00000000-0000-0000-0000-000000000000' ||
+        !Number.isSafeInteger(limit) || limit < 1 || limit > 50) {
+      throw new BadRequestException('Invalid pension owner or receipt limit');
+    }
+  }
+
   async listContributions(userId: string, limit = 20): Promise<NationalPensionContributionRow[]> {
+    this.assertOwnerReceiptQuery(userId, limit);
     const res = await this.pool.query<NationalPensionContributionRow>(
-      `SELECT * FROM public.national_pension_contributions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+      'SELECT * FROM public.pension_owner_contributions($1::uuid, $2::integer)',
       [userId, limit],
     );
     return res.rows;
   }
 
   async listPayoutLogs(userId: string, limit = 20): Promise<NationalPensionPayoutLogRow[]> {
+    this.assertOwnerReceiptQuery(userId, limit);
     const res = await this.pool.query<NationalPensionPayoutLogRow>(
-      `SELECT * FROM public.national_pension_payout_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+      'SELECT * FROM public.pension_owner_payout_logs($1::uuid, $2::integer)',
       [userId, limit],
     );
     return res.rows;
