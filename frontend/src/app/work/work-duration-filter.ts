@@ -12,12 +12,24 @@ export function normalizedWorkRewardCeiling(raw: unknown): string | null {
 }
 
 export function normalizedWorkAvailableOnly(raw: unknown): boolean {
+  if (Array.isArray(raw)) return false;
   return raw === '1' || raw === true;
 }
 
-export function workTasksApiPath(selected: string | null, maxReward: string | null = null, availableOnly = false): string {
+export function workTasksApiPath(
+  selected: string | null,
+  maxRewardOrAvailableOnly?: string | boolean | null,
+  availableOnlyRaw = false,
+): string {
   const duration = normalizedWorkDuration(selected);
-  const ceiling = normalizedWorkRewardCeiling(maxReward);
+  let ceiling: string | null = null;
+  let availableOnly = false;
+  if (typeof maxRewardOrAvailableOnly === 'boolean') {
+    availableOnly = maxRewardOrAvailableOnly;
+  } else {
+    ceiling = normalizedWorkRewardCeiling(maxRewardOrAvailableOnly);
+    availableOnly = Boolean(availableOnlyRaw);
+  }
   const params = new URLSearchParams();
   if (duration !== null) params.set('maxDurationSeconds', duration);
   if (ceiling !== null) params.set('maxReward', ceiling);

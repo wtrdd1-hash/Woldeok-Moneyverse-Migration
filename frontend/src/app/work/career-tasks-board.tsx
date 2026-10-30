@@ -237,7 +237,11 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
+            selectedDifficulty
+              ? isEn
+                ? 'No work tasks match your search.'
+                : '검색 조건에 맞는 업무가 없어요.'
+              : searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'

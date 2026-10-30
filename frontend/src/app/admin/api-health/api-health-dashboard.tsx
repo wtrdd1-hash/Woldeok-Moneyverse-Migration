@@ -328,7 +328,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
             <div>
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <CloudUpload className="size-4 text-sky-500" />
-                <span>{isEn ? 'Local backup file inventory (unverified)' : '로컬 백업 파일 후보 (복원 미검증)'}</span>
+                <span>{isEn ? 'Local backup file inventory (unverified)' : '로컬 백업 파일 후보 (복원 검증되지 않음)'}</span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 {isEn

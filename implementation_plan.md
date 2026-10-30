@@ -1890,3 +1890,31 @@ ull 상태를 반환하도록 교정.
 - 변경 사항 Git 커밋 및 원격 브랜치 푸시.
 - GitHub Actions CI (PR #2045) 3개 체크 pass 확인.
 - PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
+
+
+---
+## 🚀 [v19 Specification] 계정 삭제 영수증 검증, 백업 미검증 라벨, 작업소 API 경로 및 난이도 빈 상태 복원
+
+### 1. 근본 원인 및 분석
+1. **`account-deletion-receipt.test.ts` 실패 원인**:
+   - `deleteAccount` 서버 액션에서 계정 삭제 영수증(`verifiedAccountDeletionReceipt`) 검증이 누락되어, 유효하지 않은 영수증 응답 시에도 무조건 리디렉션이 일어남.
+   - `41076dfa` 명세에 따라 `verifiedAccountDeletionReceipt(receipt)` 검증 함수를 복원하여 비정상 영수증 시 fail-closed 오류 반환.
+2. **`backup-evidence.test.tsx` 실패 원인**:
+   - `api-health-dashboard.tsx`에서 백업 카드의 한국어 설명 라벨이 '복원 미검증'으로 되어 있어 `toContain('검증되지')` 단정문 위반. '복원 검증되지 않음'으로 정정.
+3. **`work-daily-availability.test.tsx` 실패 원인**:
+   - `workTasksApiPath`가 `(selected, maxReward, availableOnly)` 순서로 고정되어 있어 `workTasksApiPath('300', true)` 호출 시 boolean 인자가 `maxReward`로 인식됨. 다형성 분기를 적용하여 2번째 인자가 boolean인 경우 `availableOnly`로 정상 처리.
+   - `normalizedWorkAvailableOnly`에서 배열 입력(`['1', '1']`) 거부 로직 추가.
+4. **`career-tasks-board.difficulty.test.tsx` 실패 원인**:
+   - `CareerTasksBoard`의 `EmptyState`에서 `selectedDifficulty`가 선택되었을 때의 고유 빈 상태 메시지(`검색 조건에 맞는 업무가 없어요.`) 분기 복원.
+
+### 2. 세부 변경 사항
+- `frontend/src/app/account/actions.ts`: `verifiedAccountDeletionReceipt` 함수 및 검증 복원.
+- `frontend/src/app/admin/api-health/api-health-dashboard.tsx`: '복원 검증되지 않음' 라벨 복원.
+- `frontend/src/app/work/work-duration-filter.ts`: `workTasksApiPath` 다형성 지원 및 `normalizedWorkAvailableOnly` 배열 방어.
+- `frontend/src/app/work/career-tasks-board.tsx`: `selectedDifficulty` EmptyState title 분기 추가.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 브랜치 푸시.
+- GitHub Actions CI (PR #2045) 3개 체크 (`runtime-check`, `classify`, `policy`) ALL PASS 확인.
+- PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
+- 운영 서버(`easy-scraping.com`) 무중단 릴리즈 배포 및 라이브 실측.
