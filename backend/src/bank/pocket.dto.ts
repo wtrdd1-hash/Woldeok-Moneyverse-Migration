@@ -60,6 +60,10 @@ export class TransferPocketDto {
 }
 
 export class CustomizePocketDto {
+  @ApiProperty({ description: 'Unique UUIDv4 for this paid customization intent' })
+  @IsUUID('4')
+  idempotencyKey!: string;
+
   @ApiPropertyOptional({ description: '저금통 이름', example: '내집마련 통장' })
   @IsOptional()
   @IsString()
