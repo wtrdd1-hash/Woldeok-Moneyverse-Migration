@@ -22,6 +22,15 @@ describe('Android Work receipt export proof', () => {
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
+  it('rejects unsupported query parameters before contacting the backend', async () => {
+    setup({ scope: 'recent_20', currency: 'WLD', receipts: [] });
+    const fetchSpy = vi.mocked(globalThis.fetch);
+    const response = await GET(new NextRequest(`${base}?owner=another-user`, { headers }), {
+      params: Promise.resolve({ path: ['work', 'receipts', 'export'] }),
+    });
+    expect(response.status).toBe(400);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
   it('fails closed on forged upstream success', async () => {
     setup({ scope: 'all_time', currency: 'WLD', receipts: [] });
     const response = await GET(new NextRequest(base, { headers }), { params: Promise.resolve({ path: ['work', 'receipts', 'export'] }) });

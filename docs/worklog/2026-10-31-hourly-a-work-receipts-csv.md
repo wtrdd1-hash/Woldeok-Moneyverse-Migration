@@ -13,12 +13,16 @@
 - [x] Backend proof and endpoint (3 targeted PASS; source max 20 owner function)
 - [x] Frontend CSV and CTA (BOM/CRLF/formula neutralization; 5 targeted PASS)
 - [x] Android gateway proof (2 targeted PASS; forged 200 -> 503)
-- [ ] Test and CI (in progress; initial typechecks PASS, lint fixed, PostgreSQL 311 migration PASS)
+- [x] Test and CI executed; mandatory full gates FAILED, therefore release HOLD
 
 ## Mid-work checkpoint (00:29 KST)
 - Isolated PostgreSQL 17.11: 311 migrations applied, `moneyverse_app` function EXECUTE=true, direct receipt SELECT/INSERT=false; two synthetic actors, exact 9007199254740993 WLD, foreign/unknown actor zero, ROLLBACK removed all synthetic users; container deleted.
 - Backend 3 PASS, frontend 7 PASS; backend/frontend TypeScript PASS, changed ESLint PASS; generated Android contract now 185 endpoints (was 184). `api:contract:check` compares generated files with HEAD and is expected to fail until the generated artifacts are committed.
 - Main fetched again and unchanged; no Test/Production writes, no migration changes, no other branch touched.
 
-## Finished
-- Pending; no deployment permitted without exact-SHA full gate and official Test evidence.
+## Finished (00:37 KST; release HOLD)
+- Targeted: backend HTTP/authorization and proof 33 PASS, frontend/Android/CSV/a11y/SEO 10 PASS. Both TypeScript checks PASS, backend and frontend local build PASS, changed ESLint PASS, Android generated contract 185 endpoints PASS, production dependency audit 0 known vulnerabilities, security advisory tests PASS.
+- Full baseline: backend 2,656 PASS / 126 FAIL / 501 SKIP; frontend 2,708 PASS / 55 FAIL; failure identifiers equal prior Development A's 126/55 baseline, but full gate remains FAIL. Full lint 1 ERROR (pre-existing `frontend/src/app/api/shop/purchases/route.search.test.ts:99`, parse error) / 1,043 WARNING. GitHub first exact SHA CI runtime FAIL and candidate FAIL; final SHA CI pending, no merge allowed.
+- Isolated PostgreSQL 17.11 applied 311 migrations, owner-scoped function proof PASS, `moneyverse_app` direct receipt SELECT/INSERT false, BigInt exact, rollback zero; isolated container removed. No migration/ledger write in product code. Independent DB actor identity binding beyond Nest session is not separately proven.
+- Read-only official Test SHA `c2129625...`, Treasury HTTP 200 while unverified; Production SHA `bf8d0d48...`, Treasury HTTP 503 UNVERIFIED; both Production processes still run from deleted v1515 directories (#1984). Official exact-SHA Test auth E2E, independent restore, GitOps promotion and Production smoke BLOCKED.
+- Integration conflict risk: Draft #2043 overlaps Work controller/page and mobile API contract files; preserve its unique changes. Remote branches 24→25, open PRs 20→21, deleted 0, merged 0. No Test/Production deploy, service restart, production DB changes, or rollback. Keep Draft PR and HOLD until every mandatory gate passes.

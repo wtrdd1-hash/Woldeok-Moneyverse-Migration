@@ -22,6 +22,7 @@ import { CareerTasksBoard } from './career-tasks-board';
 import { normalizedWorkAvailableOnly, normalizedWorkDuration, normalizedWorkRewardCeiling, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
+import { WorkReceiptsExportLink } from './work-receipts-export-link';
 import { WorkQuotaDashboard } from './work-quota-card';
 import { LiveHotTimeBanner } from '@/components/live-hot-time-banner';
 
@@ -404,12 +405,7 @@ export default async function WorkPage({ searchParams }: {
           <h2 id="receipts-title" className="text-base sm:text-lg font-semibold">
             {isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
           </h2>
-          <p className="text-xs text-muted-foreground">
-            {isEn ? 'Export covers only your 20 most recent reward receipts, not lifetime earnings or settlement proof.' : 'CSV는 본인의 최근 보상 영수증 최대 20건만 포함하며 전체 누적 수익이나 정산 증빙이 아닙니다.'}
-          </p>
-          <a href="/work/receipts/export.csv" download className="inline-flex min-h-11 w-fit items-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-            {isEn ? 'Download recent receipts CSV' : '최근 보상 영수증 CSV 다운로드'}
-          </a>
+          <WorkReceiptsExportLink isEn={isEn} />
           <TruncatedList
             title={isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
             visibleCount={RECEIPTS_ON_WORK}
