@@ -29,7 +29,7 @@ describe('owner-private bounded support conversation ordering', () => {
     const repo = new SupportRepository({ query });
     await repo.myThreads('owner-one', 'resolved', 'billing', 'oldest');
     const [sql, params] = query.mock.calls[0] as unknown as [string, unknown[]];
-    expect(sql).toContain('FROM public.support_my_threads($1,100)');
+    expect(sql).toContain('FROM public.support_my_threads($1,$2)');
     expect(sql).toContain('strpos(lower(subject), lower($3)) > 0');
     expect(sql).toContain('status = $4');
     expect(sql).toMatch(/ORDER BY last_message_at ASC,\s*thread_id ASC LIMIT 50/);

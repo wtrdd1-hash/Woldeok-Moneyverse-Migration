@@ -33,7 +33,7 @@ export class SupportRepository {
       const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : '';
       return queryRows<SupportThreadRow>(this.pool,
         `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
-         FROM public.support_my_threads($1,100)${where}
+         FROM public.support_my_threads($1,$2)${where}
          ORDER BY last_message_at ASC,thread_id ASC LIMIT 50`, params);
     }
     if (q !== undefined) {
