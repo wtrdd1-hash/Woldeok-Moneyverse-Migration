@@ -2,6 +2,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 
 **진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
@@ -133,6 +134,37 @@
 
 >>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
+=======
+## v1484 / F675-177 — 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
+- **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
+
+**기준·범위:** 이전 기능 보완 v1482 → 현재 기능 추가 v1484 → 다음 기능 보완 v1486(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 재확인, QA v1377 FAILED/P0. v1480/#1916·v1482/#1920은 미병합 제안이며 구현 완료로 간주하지 않음. [개발 이슈 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). 기존 통합문서에 추가하는 설계이며 런타임/DB 구현이 아님. 영어 문서가 canonical, 본 절은 한국어 동등본.
+
+### 목적·근거·중복 회피
+- **문제:** 로그인 회원은 `/wallet/activity`에서 전체/7일/30일 기준 최대 50건씩만 조회함. `backend/src/wallet/wallet.controller.ts`는 회원/세션 기반 기간+커서 API를 제공하며 `wallet.repository.ts`는 USER_CASH와 USER_BANK 전표를 거래별 부호 있는 증감으로 이미 집계함. 달력 월별 요약 API·화면은 확인되지 않음. `frontend/src/app/wallet/export-ledger-csv.tsx`는 전달된 최근 행만 저장하므로 완전한 거래 명세서가 아님. 소스 확인이 Production 이용 통계는 아님.
+- **대상·가치:** 여러 페이지를 넘기지 않고 가상 WLD의 월별 증감을 살펴보려는 회원. 목표는 탐색 단계 감소와 월별 이해 향상이라는 가설이며 실제 소득/세금 증빙이 아님. F675-176 저장 필터(#1915/#1920), F675-173 개인정보 내보내기(#1876), 기존 최근 CSV와 구분. 공유 링크·투자 권유·송금·잔액 변경·새 금융 승인·관리자 개인 원장 접근 없음.
+
+### 회원 화면·CTA·상태
+- **진입:** 기존 비공개 `/wallet/activity`의 기능 스위치 기반 `월별 활동 요약` 버튼. 당월 포함 최근 **6개월** 기본, **1~12개월** 정수 선택. `월별 요약 보기`로 비공개 결과 갱신; `거래내역 보기`는 기존 기록 화면으로 이동하되 현재 화면이 임의의 월 필터를 지원하지 않는다는 점을 표시함. 별도 계약 없이 지원하지 않는 월 파라미터를 붙여서는 안 됨.
+- **월별 응답:** Asia/Seoul 기준 `month` YYYY-MM, UTC ISO `periodStart` 포함·`periodEnd` 미포함, `status=PARTIAL|COMPLETE`, `incomingCount`, `outgoingCount`, `zeroNetCount`, 정규 10진 문자열 `inflowWld`, `outflowWld`, `netWld`, `cashDeltaWld`, `bankDeltaWld`. 서버 `asOf`, `sourceStatus=VERIFIED_READ` 필수. 당월은 PARTIAL. 이전 월도 과거 시각 거래가 추가되면 바뀔 수 있어 영구 확정 결산으로 표현 금지. 거래 건수는 회원 전표를 합친 후 **서로 다른 거래 ID** 기준이며 전표 행 수가 아님.
+- **상태:** LOADING, VERIFIED_EMPTY(정상 조회 후 해당 기간 활동 없음), READY, PARTIAL_CURRENT_MONTH, 401 SESSION_EXPIRED, 403 OWNER_FORBIDDEN, 400 INVALID_MONTHS, 429 RATE_LIMITED, 503 SOURCE_UNAVAILABLE, 503 MALFORMED_UPSTREAM, OFFLINE/UNKNOWN, FEATURE_DISABLED. 원본 불가 시 0 WLD로 표시 금지. 순변동 0은 내부 이체와 동의어가 아님. 기초/기말 잔액, 투자 수익률, 소득·세금·공인 명세서로 표기 금지.
+- **모바일/접근성:** 320px 한 열 배치, 반응형 월별 목록/표, 200% 확대 시 잘림 방지, 44px 터치 영역, 명확한 포커스·제목·키보드, 중복 없는 aria-live 오류/당월 안내, 동작 줄이기, WCAG 2.2 AA, 한영 UI 동등. 색상만으로 증감 구분 금지. 로그아웃·계정 전환 시 이전 요청 결과 폐기.
+
+### API·권한·트랜잭션·DB 불변식
+- **API:** NestJS `GET /api/v1/wallet/activity/monthly-summary?months=6`; 서버 세션에서 회원을 확인하고 userId 입력을 받지 않음. 클라이언트 `asOf`나 임의 시간대/미래 월 금지. 1~12 정규 정수(기본 6), 중복·배열·공백·소수·음수·초대형 쿼리는 400. 응답 `{asOf,timezone:'Asia/Seoul',monthsRequested,sourceStatus:'VERIFIED_READ',months:[...]}`로 정확히 1~12개 월을 최신순 반환. Next/Android는 알 수 없는 데이터 구조·금액·시각을 런타임 검증하며 실패를 빈 내역으로 표현하지 않음.
+- **조회 절차:** PostgreSQL 단일 `REPEATABLE READ READ ONLY` 트랜잭션에서 `asOf` 생성. 한국시간 월초 포함·다음 월초 미포함 경계를 UTC로 변환(브라우저 로컬 시간이나 최근 30일 구간 사용 금지). 거래 생성 시각을 `[가장 오래된 월초 UTC, asOf]`로 제한, 회원 소유 USER_CASH/USER_BANK 전표만 JOIN, **거래 ID·시각별 선집계 후 월별 재집계**. 저장소의 부호 규칙(회원 계정 debit 양수, credit 음수)을 격리 PG로 검증. 거래별 `net=cashDelta+bankDelta`; 양수 증가, 음수 감소, 0 순변동 없음. 월별 증가 합은 양수 net의 합, 감소 합은 음수 net의 절댓값 합, 순증감=증가-감소. 현금·은행 증감을 별도로 더해 동일함을 정확하게 검증. NUMERIC과 정규 부호 있는 정수 문자열 사용, JS Number/부동소수점 금지. **정상 조회 이후에만** 활동 없는 월을 0으로 채움. 원장 산술 일치는 거래 자금 출처의 적법성 증명이 아님.
+- **DB·인덱스:** 기존 원장 읽기 모델과 회원 소유 범위 재사용. 초기 버전은 **신규 테이블·스키마 제약·앱 계정 쓰기 권한 불필요**. `(account.owner_user_id,account_type)`, `ledger_postings(account_id,transaction_id)`, `ledger_transactions(created_at,id)`의 실제 인덱스·실행계획을 합성 10,001건으로 확인하며 인덱스 존재를 추정하지 않음. 필요 시 적용 마이그레이션 체크섬·권한 P0 해결 후 별도 추가 인덱스/락/롤백 심사. `moneyverse_app` 직접 DML/TRUNCATE 확대 금지. SECURITY DEFINER 도입 시 search_path 고정·PUBLIC EXECUTE 회수·최소 EXECUTE 부여·SQL 내부 소유권 검사. 읽기 중 DB 쓰기 없음. 쿼리 2초 제한·회원당 분당 10회·동시 1회는 실측 검증할 목표값.
+- **API·Android:** Next 동일 출처 세션과 Nest 인증. Android `/app-api/v1/[...path]` wallet 허용 경로에서 인증 유지, 임의 userId/비밀·미승인 헤더 전달 금지. GET 응답 및 401/403/429/503 부정 사례를 EN/KO/JSON 생성 계약에 반영. 각 경계에서 `unknown` 응답을 검증: 월 수·순서·유일성, ISO asOf/경계, 정규 금액 문자열, 0 이상 건수, `net=증가-감소=현금+은행`, 미래 자료 금지, VERIFIED_READ. 비정상 HTTP 200은 503, 빈 기록 위장 금지. `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`, CDN/ISR 캐시·사이트맵·공개 구조화 데이터 없음.
+- **보안·남용·개인정보:** 인증·SQL 양쪽에서 본인 소유 범위 검증. 타인 회원 위조, 세션 전환, 계정 간 캐시 유출 거부. 금액·계정 ID·원장 영수증·원문 쿼리를 로그/분석에 남기지 않음. 관리자에는 최소 표본 수를 충족한 채택률·지연·오류 집계만 제공하고 회원별 월별 금액은 제공하지 않음. 요청량, p95 지연, 시간 초과, 비정상 응답 거부, 401/403/429, 타인 조회 **0**, 합계 불일치 **0** 측정. p95 <500ms 및 7일 이용률은 **시험 목표/가설**이며 실측 KPI가 아님. 비공개 페이지 SEO 유입 가치는 없음.
+
+### 시험·배포·롤백·백로그
+- **시험 계획만 작성, 미실행:** 격리 PostgreSQL 17.11에서 현금↔은행 순변동 0과 거래별 다중 전표를 포함한 편중 합성 거래 10,001건; 타인/위조 100건; 한국시간/UTC 경계·윤년 2월·월말·과거 시각 추가·순변동 0 사례 100건; 비정상 HTTP 200·시간 초과·네트워크 장애 50건; 2^53 초과 정밀도·중복 거래·12개월 제한·429·320px/200% 확대·Android 동등성. 월별 합을 독립 원시 전표 합계와 비교하고 정상 조회 후에만 활동 0 판정. 앱 계정 직접 DML 금지, 원장 쓰기 없음.
+- **출시:** `wallet_monthly_activity_digest` 기본 OFF. 초기 버전은 스키마·데이터 마이그레이션이 없으므로 롤백 시 CTA·API만 비활성화하고 원장·기존 기록·CSV 유지. 추후 인덱스 필요 시 별도 호환 마이그레이션과 롤백. 개발 A/B/C 별도 브랜치, 전체 lint/test/build/app-api 계약, 공식 정확 SHA Test 인증 흐름, 프론트/백/엣지 개별 아티팩트 검증, 외부 독립 암호화 백업 복원, 사용자 승인 운영승격·스모크·롤백 필수. P0 전부 통과 전 배포 HOLD.
+- **P0:** REPO1484-01 과거 참조 462개; SEC1484-02 DEV 고객문의/감사 직접 DML/TRUNCATE 및 적용 체크섬 219/220/221/234/266 5건; FIN1484-03 SWF 합성 성공·MINT 18,000 WLD 출처·국고 552건 직접 원장 연결 누락·Test 공개 국고 합성 200; REL1484-04 프론트/엣지 SHA(#1917/#1918), lint 3건/app-api 계약·전체 CI·정확 SHA Test·외부 복원·루트/데이터 디스크 86%/89%. 검증된 보관·백업 정책 없이 파괴적 정리 금지.
+- **P1:** MONTH1484-05 본인 SQL·인덱스 검증; MONTH1484-06 Nest 엄격한 읽기 API; MONTH1484-07 Next 화면/접근성; MONTH1484-08 Android 계약; MONTH1484-09 관리·개인정보·SEO·KPI; MONTH1484-10 격리 PostgreSQL 적대적 회귀·롤백 증거. 개발 인계만 수행. 외부 독립·중복 제거·실제 근거 분류 신규 승인 **0건**, 누적 **UNKNOWN/10,000건**, 게이트 **BLOCKED/IN PROGRESS**. 새로운 독립 기획 파일·런타임·DB·WLD·Test·Production 변경 없음.
+
+
+>>>>>>> origin/auto/planning-v1484-wallet-monthly-summary-20261030-0205
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
