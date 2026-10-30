@@ -13,7 +13,7 @@
 - [x] Recheck main mid-run and reconcile source/QA changes.
 - [x] Add full EN/KO design to existing integrated planning masters and concise canonical project plans.
 - [x] Refresh P0/P1 10-item handoff, EN/KO changelogs and internal/GitHub updates.
-- [ ] Verify documentation, diff and GitHub CI; keep runtime, DB and Production unchanged.
+- [x] Verify documentation parity and diff; GitHub CI final status remains pending; runtime, DB and Production unchanged.
 
 ## Finished
-PENDING. No completion or deployment claim until evidence is recorded.
+**Documentation stage complete / DRAFT / RELEASE HOLD (2026-10-30 KST).** Fresh verification: release classifier 22 PASS / 0 FAIL; 12 docs-only changed files; EN/KO each contain exactly 4 P0 + 6 P1 IDs; git diff --check PASS; working tree clean after push. First parity probe failed because the compact project summary abbreviated RANGE IDs; fixed both languages and reran successfully. QA v1385 finance suite collection missing undici, lint 3 errors, mobile contract drift and recovery provenance remain BLOCKED. Final GitHub CI not yet certified (checks pending on last observation); no merge, runtime, DB, WLD, Test or Production change. External approved 0 new, cumulative UNKNOWN / 10,000. Next Feature Improvement v1502 (provisional).
