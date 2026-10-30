@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   NotFoundException,
   Param,
@@ -96,6 +97,21 @@ export class ShopController {
       () => this.service().myPurchasesWithSummary(requireUserId(request), { query }),
       'purchase history is unavailable',
     );
+  }
+
+  @Get('purchases/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'Export up to the latest 100 purchases belonging to the caller' })
+  async purchasesExport(@Req() request: RequestWithSession, @Query('q') query?: unknown) {
+    return {
+      scope: 'recent100' as const,
+      purchases: await this.guarded(
+        () => this.service().myPurchases(requireUserId(request), { limit: 100, query }),
+        'purchase export is unavailable',
+      ),
+    };
   }
 
   @Post('items/:id/purchases')

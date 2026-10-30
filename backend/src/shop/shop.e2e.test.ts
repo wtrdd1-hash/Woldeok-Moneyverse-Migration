@@ -52,6 +52,13 @@ describe('shop routes', () => {
     expect([401, 428, 503]).toContain(response.status);
   });
 
+  it('keeps recent purchase export behind a member session', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/shop/purchases/export');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+    expect(response.body.detail).not.toBe('shop service is unavailable');
+  });
+
   it('mounts the purchase command', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/shop/items/00000000-0000-4000-8000-000000000000/purchases')
