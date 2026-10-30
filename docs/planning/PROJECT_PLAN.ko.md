@@ -3,6 +3,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.1490 — F675-178 지갑 북마크 정합성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Addition v1488 → 현재 Improvement v1490 → 다음 Addition v1492(잠정). 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재조회; QA v1380 FAILED/P0. 선행 Draft #1937 미병합, 인계 #1936. 문서만 수정.
 - **실제 소스 근거:** 지갑 거래 커서가 PostgreSQL 마이크로초를 JS Date 밀리초로 변환; Android APP_API_REQUEST_HEADERS에 Idempotency-Key 없음; 지갑 게이트웨이에 private no-store는 있으나 X-Robots-Tag noindex 강제 없음; 북마크 CTA/API 미구현. 기존 Backend B #1935와 독립.
@@ -103,6 +104,15 @@
 - 스위치 기본 OFF, 런타임·DB·WLD·Test·Production 변경 없음. DRAFT / RELEASE HOLD. 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 미병합 기획 #1949/#1954는 참조만 하며 해당 브랜치를 변경하지 않는다.
 
 >>>>>>> origin/auto/planning-v1496-release-readiness-20261030
+=======
+## v2026.10.29.1474 — F675-174 알림 검색 안전성 보완 (기능 보완 / 초안 / 운영 HOLD)
+**GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / 미병합, [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) 업데이트. 최신 main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5` 기준으로 리베이스. 문서 전용 CI policy/classify SUCCESS, runtime-check SKIPPED. 운영 HOLD.
+- 주기: 이전 기능 추가 v1472 → 현재 기능 보완 v1474 → 다음 기능 추가 v1476(잠정). 시작·중간 최신 main `f9fd777458b89b3c33593ae0cad46a37b216474b`. v1472 PR #1888은 기획 문서만 병합, 알림 검색 기능 코드는 **미구현**. QA v1372 FAILED/P0는 이전 SHA 기준이며 최신 main CI/Test 인증은 없다. [개발 인계 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
+- 보완: `asOfUtc`는 요청 간 불변 스냅샷이 아니며 변경되지 않은 집합의 키셋 순서만 보장한다. 읽음 변경은 세대 검증 또는 명시적 새로고침. HMAC 커서는 정규화 유니코드 필터·회원/세션·PostgreSQL 마이크로초 정밀도·앵커·10분 만료에 결속한다. 한글 2글자 검색은 안전한 인덱스 계획을 확인하고 불가 시 422 QUERY_TOO_BROAD 또는 503 SEARCH_UNAVAILABLE. API·화면·DB·권한·관리자·SEO·KPI·회귀·롤백 전체는 [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md) 참조.
+- P0: REPO1474-01 브랜치 보존, SEC1474-02 현재 소스 SQL 304개 번호 중복 0이나 기존 체크섬 불일치 5개·DB 권한 검증, FIN1474-03 MINT 18,000 WLD/국고 552행 출처, REL1474-04 최신 main 검증·외부 복원·공식 Test 정확 SHA. P1: NOTIFSEARCH1474-05 NOTIFSEARCH1474-06 NOTIFSEARCH1474-07 NOTIFSEARCH1474-08 NOTIFSEARCH1474-09 NOTIFSEARCH1474-10 SQL/인덱스·커서·API·접근성·개인정보/KPI·실제 PG 회귀. 합성 10,001건 및 적대적 수용시험은 **미실행**.
+- 외부 독립 승인 신규 0, 누적 UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. 기능 기본 OFF, 런타임·DB·WLD·Test·운영 미변경, 운영승격 HOLD. 별도 문서 PR만 작성하며 병합·배포하지 않는다.
+
+>>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

@@ -3,6 +3,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.1490 — F675-178 Wallet Bookmark Consistency Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1488 → Current Improvement v1490 → Next Addition v1492 (provisional). Authority main 62c6cd038951d65c94b709302bdaec6e75b080b6 rechecked start/mid; QA v1380 FAILED/P0; predecessor Draft #1937 unmerged; handoff #1936. Documentation-only.
 - **Source-backed gaps:** existing wallet activity cursor round-trips PostgreSQL microseconds through JS Date milliseconds; Android APP_API_REQUEST_HEADERS omits Idempotency-Key; wallet gateway forces private no-store but not X-Robots-Tag noindex; no bookmark CTA/API. These are proposals, not deployed fixes. Keep Backend B issue #1935 independent.
@@ -103,6 +104,15 @@
 - Feature OFF; no runtime, DB, WLD, Test or Production changes; DRAFT / RELEASE HOLD. External independent sources newly approved 0, cumulative verified/deduplicated UNKNOWN/10,000, gate BLOCKED/IN PROGRESS. Unmerged planning v1492/v1494 PRs #1949/#1954 referenced without overwriting their branches.
 
 >>>>>>> origin/auto/planning-v1496-release-readiness-20261030
+=======
+## v2026.10.29.1474 — F675-174 Notification Search Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+**GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / unmerged; [development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) updated. Rebasing onto latest main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5`; documentation CI policy/classify SUCCESS, runtime-check SKIPPED. RELEASE HOLD.
+- Cycle: Previous Feature Addition v1472 → Current Feature Improvement v1474 → Next Feature Addition v1476 (provisional). Latest main at start/mid `f9fd777458b89b3c33593ae0cad46a37b216474b`; v1472 PR #1888 merged (documentation only), current notification search runtime **not implemented**. QA v1372 FAILED/P0 on older SHA; current-main CI/Test not certified. [Developer handoff #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
+- Corrected guarantees: as-of timestamp is **not** an immutable cross-request snapshot; stable-set keyset only, unread/read races need change-epoch fencing or explicit refresh. HMAC cursor binds canonical Unicode filters, owner/session generation, full-precision PostgreSQL tuple, anchor, 10-minute expiry; reject oversized/forged/stale cursor. Short Hangul/2-character queries require proven indexed plan, else 422 QUERY_TOO_BROAD or 503 SEARCH_UNAVAILABLE. Exact API/UX/DB/ACL/admin/SEO/KPI/regression/rollback: [EN integrated master](INTEGRATED_PLANNING_MASTER.md).
+- P0: REPO1474-01 historic refs; SEC1474-02 source 304 unique SQL IDs but 5 existing DEV checksum mismatches, migration lineage/ACL; FIN1474-03 18,000 WLD MINT provenance/552 Treasury links; REL1474-04 fresh main lint/typecheck/real PG/off-host restore/official Test exact SHA. P1: NOTIFSEARCH1474-05 NOTIFSEARCH1474-06 NOTIFSEARCH1474-07 NOTIFSEARCH1474-08 NOTIFSEARCH1474-09 NOTIFSEARCH1474-10 owner SQL/index, cursor, APIs, UX/a11y, privacy/KPI, PG regression. 10,001 synthetic rows and adversarial tests **proposed, NOT RUN**.
+- External independent approved new 0, cumulative UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. Feature OFF; no runtime/DB/WLD/Test/Production changes; release HOLD. Worktree-only documentation PR, no merge or deployment.
+
+>>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
 ## v2026.10.29.1472 — F675-174 Verified Member Notification Search & Stable History (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1470 → Current Feature Addition v1472 → Next Feature Improvement v1474 (provisional). Start/mid main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`; latest completed QA v1371 FAILED/P0, v1372 in progress. [Development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - Source gap: existing notification tabs use 20-row offset pagination capped at 5,000; Nest DTO has category/unread/limit/offset but no keyword/date/keyset search. DEV PG has notification table with 0 rows, owner/created indexes, app-role SELECT/INSERT; pg_trgm absent, defining migration provenance unverified. Do not infer Production data or approve ACL changes.
