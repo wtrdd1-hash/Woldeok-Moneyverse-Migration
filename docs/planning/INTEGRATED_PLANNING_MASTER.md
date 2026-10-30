@@ -1,5 +1,46 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1530 F675-188 expiry radar integrity / issue #2060 / Draft #2066 (stack after #2061) / RELEASE HOLD; incident #2031.
+## v2026.10.31.1532 — F675-189 Owner Equipped-Item Expiry Impact Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Improvement v1530 → Current Feature Addition v1532 → Next Feature Improvement v1534 (provisional). Remote main `bf8d0d48f810932b43783d8605dce53954c60cff` checked at start/mid; predecessor Draft #2066 → #2061; engineering issue #2074; P0 #2031. English is canonical, Korean is meaning-equivalent. Planning-only, NOT implemented or release-authorized.
+
+### Product purpose, independent source proof and non-duplication
+- **User/need:** A signed-in, consented member who has cosmetics equipped needs to see which CURRENTLY equipped slots are associated with holdings due to expire within 7 or 30 elapsed days, rather than scanning every holding. Existing `/inventory` displays equipped frame/background/effect/nameplate/title/badges but no expiry-impact summary; the separate F675-188 upcoming-expiry list (#2060) is NOT an equipment-specific impact summary and is still unmerged Draft. Existing calendar/ICS watchlist (#1267), loadout presets (#1142), and Development A inventory outage truth (#2056) own different scopes. Do not duplicate them.
+- **Schema facts:** Migration 071 creates `public.user_items` with PK (user_id,catalog_id), quantity >=0 and nullable `expires_at`. Migration 114 adds `is_equipped`, `equipped_slot` with allowed frame/background/effect/nameplate/title/badge_1/badge_2/badge_3 and an index on (user_id,is_equipped) WHERE is_equipped. Migration 123 `shop_my_items_v2` exposes both equipment fields, filters holding expiry via `clock_timestamp()`, and separately derives effect receipt expiry. Existing Nest `GET /api/v1/shop/holdings` is guarded and owner-scoped; the Next inventory page's `apiOrNull` can mask an outage as empty (A #2056). Do not infer that a holding expiry automatically unequips a slot, that an effect is active, that upkeep is paid, or that a refund exists. Current catalog name is not a purchase-time snapshot.
+- **Options:** (A) client-filter existing unbounded holdings (reject: mixed clock, outage-to-empty and no snapshot proof); (B) owner-scoped one-shot SQL read + guarded API (selected); (C) scheduled reminders/auto-replacement (reject: privacy and mutation scope). No new user table, push/email/ICS, money mutation, auto-equip or background worker.
+
+### User flow, precise UI and CTA
+1. `/inventory` → existing F675-188 `/inventory/expiring?withinDays=7|30` → **장착 영향 확인** CTA → private `/inventory/expiring/equipped-impact?withinDays=7|30` (7 default). If F675-188 is still OFF/unimplemented, keep this feature OFF and do not publish a dead link. An optional direct inventory CTA may be added only after integration verifies the route exists.
+2. Each impacted row shows `equippedSlot` (Korean slot label), **현재 상품명**, quantity, exact **보유 만료 시각 (KST)**, and **보관함에서 확인** navigation to the existing inventory; it must NOT present an auto-unequip prediction or claim an actual effect will stop. Keep the full inventory/equipped counts separate; no replacement of existing holdings state.
+3. Distinguish loading, verified-empty (only after verified DB success), impacted rows, stale at `validUntilUtc` with **새로고침**, 401/403 login/consent, 409 inconsistent equipment/source, 429 rate limit, 503 upstream failure with Retry. Never render a 503 as an empty shelf. Account/horizon change cancels in-flight reads and rejects stale response application. No color-only meaning; keyboard/focus/aria-live, 320px and 200% zoom, WCAG 2.2 AA.
+
+### API and PostgreSQL contract
+- Nest `GET /api/v1/shop/holdings/expiring/equipped-impact?withinDays=7|30`, Next same-origin `GET /api/shop/holdings/expiring/equipped-impact`, Android `GET /app-api/v1/shop/holdings/expiring/equipped-impact`. `SessionGuard,AuthenticatedGuard,ConsentGuard` with server-derived `requireUserId(request)` and actual `requireSession(request).id`. Reject client actor UUID and unknown query keys. Response `{asOfUtc:string,validUntilUtc:string,withinDays:7|30,items:[{catalogId:string,currentName:string,equippedSlot:string,quantity:number,holdingExpiresAtUtc:string}],sourceStatus:'VERIFIED'}`. No cursor/pagination: eight allowed slot names; fail closed rather than silently truncate anomalous >50 rows.
+- New forward-only `public.shop_my_equipped_expiry_impact_v1(p_actor uuid,p_within_days integer)` SECURITY DEFINER function; fixed `SET search_path=pg_catalog,pg_temp`, schema-qualified tables, owner predicate inside SQL, explicit `REVOKE EXECUTE FROM PUBLIC` and narrow `GRANT EXECUTE TO moneyverse_app` only. No direct table grants, no change to applied migrations 071/114/123. Coordinate any new migration number with Backend B/DB owner. Read-only `REPEATABLE READ` transaction on ONE PoolClient; one DB `statement_timestamp()` as asOf; `quantity>0 AND is_equipped=true AND equipped_slot IS NOT NULL AND asOf<expires_at<=asOf+withinDays*interval '24 hours'`, UTC instant comparisons, inactive catalog included, order (expires_at ASC,equipped_slot ASC,catalog_id ASC). NULL expiry is UNKNOWN, not permanent; effect expiry/arrears are distinct.
+- Detect malformed equipment: equipped=true with NULL/unrecognized slot, duplicate equipped slot for the same actor, >50 impacted rows, missing catalog join, or inconsistent result => fail closed 409 `EQUIPMENT_SOURCE_CONFLICT` or 503 `EQUIPMENT_SOURCE_UNAVAILABLE` as appropriate; never silently return partial success. A successful empty result requires successful invariant checks. `validUntilUtc=min(asOf+60 seconds, earliest impacted expires_at)` (or asOf+60 seconds if none). At the boundary the UI marks STALE and refreshes; no cross-request snapshot guarantee. No HMAC cursor because there is no pagination. Strict errors 400/401/403/409/429/503, no exposure of foreign IDs.
+- Existing migration 114 equipped partial index may suffice; any extra `(user_id,expires_at)` partial index needs isolated `EXPLAIN (ANALYZE,BUFFERS)` at 10,001 synthetic holdings and DB owner approval. No writes to user_items, WLD, ledger, outbox or Test/Production.
+
+### Privacy, admin, KPI, tests and release
+- Default-OFF `inventory_equipped_expiry_impact` flag. Private `Cache-Control: private, no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer` on 200/4xx/5xx at Nest/Next/Android AND actual Nginx edge. Same-login account switch clears state. Session/IP rate limits. No owner IDs, catalog IDs, item names, raw request tokens or dates in telemetry; aggregate only page opens, verified impact counts, stale/error rates and p95. Admin cannot bypass member detail; cohorts >=20 only.
+- **Proposed, NOT RUN:** isolated PostgreSQL 17.11 replay with owner/foreign actor and direct-table privilege negatives, 10,001 synthetic holdings, eight slot labels, inactive catalog, NULL expiry, malformed and duplicate slots, exact UTC/KST/one-microsecond boundaries, time-only expiry without DB writes, account switching, 429/503, Android/edge private headers, 320px/200% a11y; assert no partial success and zero financial mutations; p95 <=500ms, bounded memory. Full CI and official Test E2E at exact candidate SHA, immutable rollback digest, independent restore, explicit Production approval. Last verified QA v1400: backend 2,653 PASS/126 FAIL/501 SKIP, frontend 2,701 PASS/55 FAIL, lint parser error 1; overall FAILED. #2031 Draft/HOLD merge incident, #993 DB least privilege, #1984 runtime provenance remain P0. Release HOLD.
+- **External independent reference gate:** newly verified 0, cumulative verified/deduplicated/classified UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. Synthetic/internal GitHub items do not count.
+
+### P0/P1 development backlog — P0 4, P1 6
+| Priority | ID | Verifiable acceptance |
+|---|---|---|
+| P0 | OPS1532-01 | Production process SHA, rollback digest, independent restore and audit #1984. |
+| P0 | SEC1532-02 | DEV app role excessive direct grants and migration checksum parity #993; owner/foreign role-negative. |
+| P0 | FIN1532-03 | Treasury/MINT/SWF/bond ledger reconciliation; no invented payment or effect proof. |
+| P0 | REL1532-04 | #2031 Draft/HOLD merge audit, QA failures, exact-SHA official Test and signed promotion. |
+| P1 | IMPACT1532-05 | New owner SQL read, DB clock, equipped-slot invariants, 10,001-row EXPLAIN, EXECUTE-only. |
+| P1 | IMPACT1532-06 | Nest guarded endpoint, one-client read-only snapshot, strict DTO and 400/409/503 behavior. |
+| P1 | IMPACT1532-07 | Next CTA and view, stale/verified-empty/error separation, KST, account switch, WCAG. |
+| P1 | IMPACT1532-08 | Android gateway contract, cache/privacy and actor-switch parity. |
+| P1 | IMPACT1532-09 | Public Nginx privacy/SEO, default-OFF flag, aggregate-only admin KPI >=20. |
+| P1 | IMPACT1532-10 | Isolated DB+E2E+security+performance+rollback exact-SHA tests; no release before PASS. |
+
+**Status:** DOCUMENTATION PROPOSAL / DRAFT / RELEASE HOLD. All acceptance tests above are NOT EXECUTED; no runtime/DB/WLD/ledger/Test/Production change.
+
+**Current planning:** v1532 F675-189 equipped expiry impact / issue #2074 / Draft pending (stack after #2066) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.31.1530 — F675-188 Owner Inventory Expiry Radar Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

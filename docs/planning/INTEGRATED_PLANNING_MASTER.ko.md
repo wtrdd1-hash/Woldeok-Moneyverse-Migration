@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1530 F675-188 만료 예정 조회 정합성 / 이슈 #2060 / Draft #2066(선행 #2061) / 운영 보류; 사고 #2031.
+## v2026.10.31.1532 — F675-189 회원 장착 아이템 만료 영향 미리보기 (기능 추가 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 보완 v1530 → 현재 기능 추가 v1532 → 다음 기능 보완 v1534(잠정). 원격 main `bf8d0d48f810932b43783d8605dce53954c60cff` 시작·중간 확인. 선행 Draft #2066 → #2061, 개발 이슈 #2074, 배포 사고 #2031. 영어 원본과 한국어 동등 명세이며 **기획만 작성**, 기능 구현·운영 승인 아님.
+
+### 목적·실제 소스 근거·기존 기획과의 차이
+- **대상/문제:** 로그인·동의를 완료한 회원이 현재 장착한 치장 슬롯 중 **보유 만료가 7일 또는 30일 이내인 아이템**만 빠르게 확인한다. 기존 `/inventory`는 장착 프레임·배경·효과·이름표·칭호·배지를 보여주지만 장착 상태와 보유 만료를 결합한 영향 요약은 없다. F675-188 만료 예정 목록(#2060)은 별도이며 아직 미병합 Draft. 기존 캘린더/ICS(#1267), 장착 프리셋(#1142), 개발 A의 인벤토리 장애 표시(#2056)를 중복 구현하지 않는다.
+- **근거:** 마이그레이션 071 `user_items`는 (user_id,catalog_id) PK, quantity>=0, NULL 가능한 expires_at. 마이그레이션 114는 is_equipped, equipped_slot(프레임/배경/효과/이름표/칭호/배지 1~3) 및 장착 부분 인덱스를 추가한다. 123의 `shop_my_items_v2`는 장착 필드를 반환하되 보유 만료에 여러 clock_timestamp()를 사용하며 효과 만료는 별개다. 현재 Nest 보유 조회는 인증·동의·본인 조건을 적용하지만 Next의 apiOrNull은 장애를 빈 목록으로 보일 위험이 있어 개발 A #2056과 연계한다. 보유 만료가 자동 장착 해제를 뜻한다거나 효과가 종료·유지비가 완납·환불된다고 주장하지 않는다. 상품명은 현재 이름이며 구매 당시 이름이 아니다.
+- **대안:** 기존 무제한 보유 조회를 클라이언트에서 필터링(시각·오류 정합성 문제로 제외), 본인 전용 단일 DB 스냅샷 조회(선정), 자동 알림·대체 장착(개인정보·변경 위험으로 제외). 신규 사용자 테이블·푸시·메일·ICS·금융 거래·자동 장착 없음.
+
+### 사용자 흐름·화면·CTA
+1. `/inventory` → F675-188의 `/inventory/expiring?withinDays=7|30` → **장착 영향 확인** → 비공개 `/inventory/expiring/equipped-impact?withinDays=7|30`(기본 7). 선행 F675-188이 미구현·OFF면 신규 기능도 OFF로 유지하고 동작하지 않는 링크를 노출하지 않는다. 직접 진입은 실제 연동 검증 후에만 허용한다.
+2. 영향 카드에 장착 슬롯 한글명, **현재 상품명**, 수량, **정확한 보유 만료 시각(KST)**, **보관함에서 확인** 링크를 표시한다. 자동 해제·효과 종료를 예측하는 문구는 금지한다. 기존 전체 보유 목록·장착 수·아바타 상태를 영향 결과로 덮어쓰지 않는다.
+3. 로딩·검증된 빈 결과·영향 목록·validUntilUtc 도달 후 **새로고침**·인증/동의 실패 401/403·장착 데이터 충돌 409·요청 제한 429·원본 장애 503 재시도를 구분한다. 503을 빈 보관함으로 표시하지 않는다. 계정/기간 변경 시 진행 중 요청을 취소하고 늦게 온 응답을 폐기한다. 키보드·초점·aria-live·320px·200% 확대·WCAG 2.2 AA.
+
+### API·DB·트랜잭션
+- Nest `GET /api/v1/shop/holdings/expiring/equipped-impact?withinDays=7|30`, Next `GET /api/shop/holdings/expiring/equipped-impact`, Android `GET /app-api/v1/shop/holdings/expiring/equipped-impact`. SessionGuard·AuthenticatedGuard·ConsentGuard, 서버의 requireUserId(request)와 **실제** requireSession(request).id 사용. 클라이언트 회원 UUID/알 수 없는 쿼리 거부. 응답 `{asOfUtc,validUntilUtc,withinDays,items:[{catalogId,currentName,equippedSlot,quantity,holdingExpiresAtUtc}],sourceStatus:'VERIFIED'}`. 슬롯은 스키마상 8종이므로 페이지네이션·커서 없음. 이상 데이터 50건 초과를 조용히 자르지 않고 오류 처리.
+- 전방 마이그레이션으로 `public.shop_my_equipped_expiry_impact_v1(p_actor uuid,p_within_days integer)` 본인 제한 SECURITY DEFINER 함수. search_path=pg_catalog,pg_temp 고정, 테이블 스키마 명시, PUBLIC EXECUTE 회수·moneyverse_app 함수 EXECUTE만 허용. 기존 071/114/123 수정·직접 테이블 GRANT 금지. 개발 B와 마이그레이션 번호 충돌 방지. PoolClient 하나에서 READ ONLY REPEATABLE READ 트랜잭션, DB statement_timestamp() 한 번을 asOf로 사용. `quantity>0 AND is_equipped=true AND equipped_slot IS NOT NULL AND asOf<expires_at<=asOf+withinDays*24시간`, UTC 절대시각 비교, 비활성 상품 보유분도 포함, expires_at ASC/slot ASC/catalogId ASC. NULL 만료는 영구가 아니라 UNKNOWN이며 효과 만료·체납·납부는 별개.
+- is_equipped=true인데 슬롯 NULL/허용 목록 외 값, 동일 회원 중복 장착 슬롯, 50건 초과, 상품 JOIN 누락 등은 409 EQUIPMENT_SOURCE_CONFLICT 또는 503 EQUIPMENT_SOURCE_UNAVAILABLE로 실패 폐쇄. 원본 검증 성공일 때만 200 빈 결과. `validUntilUtc=min(asOf+60초, 영향 대상 중 가장 빠른 만료)`; 대상이 없으면 asOf+60초. 만료 시 화면을 STALE로 바꿔 재조회한다. HTTP 요청 사이 스냅샷을 유지한다고 주장하지 않는다. 커서가 없으므로 HMAC 불필요. 400/401/403/409/429/503을 구분하며 타인 식별자 노출 금지.
+- 마이그레이션 114의 기존 장착 부분 인덱스를 우선 사용하고, 추가 인덱스는 합성 10,001건 EXPLAIN(ANALYZE,BUFFERS)와 DB 담당 승인 후 결정. 아이템·WLD·원장·outbox·Test/Production 쓰기 없음.
+
+### 개인정보·관리자·KPI·시험·배포
+- 기능 스위치 `inventory_equipped_expiry_impact` 기본 OFF. Nest/Next/Android/실제 Nginx edge의 성공·오류 응답 모두 private/no-store, noindex/nofollow, no-referrer. 로그인 유지 계정 전환 시 화면 상태 초기화. 세션/IP별 요청 제한. 분석은 방문·검증된 영향 건수·오류율·p95만, 회원/아이템/원시 요청·날짜 로그 금지. 관리자는 회원 상세 우회 불가, 20명 이상 집계만.
+- **미실행 수용시험 설계:** 격리 PostgreSQL 17.11 마이그레이션 재현, 본인/타인·직접 권한 거부, 합성 보유 10,001건, 슬롯 8종, 비활성 상품, NULL 만료, 비정상/중복 슬롯, UTC/KST·1마이크로초 경계, DB 쓰기 없는 시간 만료, 계정 전환, 429/503, Android/edge 캐시 헤더, 320px/200% 접근성, p95<=500ms·메모리 상한·금융 쓰기 0. 전체 CI·정확 SHA 공식 Test E2E·불변 롤백 digest·독립 복원·운영 승인 필수. 마지막 확인 QA v1400: 백엔드 2,653 PASS/126 FAIL/501 SKIP, 프론트 2,701 PASS/55 FAIL, lint 구문 오류 1건으로 전체 FAILED. Draft/HOLD 병합 #2031, DB 권한 #993, 실행 SHA #1984는 P0 미해결. 운영 보류.
+- **외부 독립 근거:** 신규 검증 승인 0건, 누적 중복 제거·분류 UNKNOWN/10,000건 → BLOCKED / IN PROGRESS. 합성 데이터·내부 GitHub 파일은 외부 근거에 포함하지 않는다.
+
+### 개발 백로그 — P0 4건 / P1 6건
+| 우선순위 | ID | 검증 가능한 완료 조건 |
+|---|---|---|
+| P0 | OPS1532-01 | Production 실행 SHA·롤백 digest·독립 복원·#1984 증빙. |
+| P0 | SEC1532-02 | 개발 DB 앱 계정 직접 권한·마이그레이션 체크섬 #993, 타인 접근 부정시험. |
+| P0 | FIN1532-03 | 국고/MINT/SWF/채권 원장 대조, 납부·효과 근거 조작 금지. |
+| P0 | REL1532-04 | #2031 Draft/HOLD 병합 조사, QA 실패 해결, 정확 SHA 공식 Test·승인. |
+| P1 | IMPACT1532-05 | 본인 전용 SQL, DB 기준 시각, 슬롯 무결성, 10,001건 EXPLAIN, EXECUTE만. |
+| P1 | IMPACT1532-06 | Nest 인증 API, 단일 읽기 전용 스냅샷, DTO, 400/409/503 처리. |
+| P1 | IMPACT1532-07 | Next CTA·화면, 만료/빈 결과/장애 구분, KST·계정 전환·접근성. |
+| P1 | IMPACT1532-08 | Android 게이트웨이 계약·개인정보·계정 전환 동등성. |
+| P1 | IMPACT1532-09 | Nginx 개인정보·SEO, 기본 OFF, 관리자 20명 이상 집계 KPI. |
+| P1 | IMPACT1532-10 | 격리 DB·E2E·보안·성능·롤백·정확 SHA 시험, 통과 전 배포 금지. |
+
+**상태:** 기획 문서 / DRAFT / RELEASE HOLD. 위 수용시험은 모두 미실행, 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+**현재 기획:** v1532 F675-189 장착 만료 영향 / 이슈 #2074 / Draft 생성 대기(선행 #2066) / 운영 보류; 사고 #2031.
 
 ## v2026.10.31.1530 — F675-188 회원 보유 아이템 만료 예정 조회 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
