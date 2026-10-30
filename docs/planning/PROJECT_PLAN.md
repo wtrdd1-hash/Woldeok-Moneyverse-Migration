@@ -8,7 +8,7 @@
 - **Backlog:** P0 OPS1536-01 SEC1536-02 FIN1536-03 REL1536-04; P1 REPLACE1536-05 REPLACE1536-06 REPLACE1536-07 REPLACE1536-08 REPLACE1536-09 REPLACE1536-10 (4+6). Independent QA v1402 backend 126 FAIL, frontend 55 FAIL, lint parser error, exact-SHA Test/restore BLOCKED. RELEASE HOLD.
 - **External refs:** newly verified 0; cumulative verified/deduplicated/classified UNKNOWN/10,000; BLOCKED/IN PROGRESS. Full EN/KO spec in integrated master and issue #2088. No new separate planning file, main merge, runtime/DB/WLD/Test/Production change.
 
-**Current planning:** v1536 F675-190 owner-held replacement candidate preview / engineering #2088 / Draft PR pending / RELEASE HOLD.
+**Current planning:** v1536 F675-190 owner-held replacement candidate preview / engineering #2088 / Draft PR #2089 OPEN / RELEASE HOLD.
 
 ## v2026.10.31.1534 — F675-189 Equipped Expiry Boundary and Slot Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1532 → Current Feature Improvement v1534 → Next Feature Addition v1536 (provisional). Main bf8d0d48f810932b43783d8605dce53954c60cff checked; Draft #2075 parent, engineering #2074, QA v1402 FAILED/P0.

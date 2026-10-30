@@ -49,4 +49,4 @@
 **External independent reference gate:** newly approved 0; cumulative independently verified/deduplicated/classified UNKNOWN/10,000; BLOCKED / IN PROGRESS. Internal GitHub and synthetic tests do not count.
 **Status:** DOCUMENTATION PROPOSAL / DRAFT / RELEASE HOLD. No runtime/DB/WLD/ledger/Test/Production change or main merge. No new separate planning document.
 
-**Current planning:** v1536 F675-190 owner-held replacement candidate preview; engineering #2088; Draft PR pending stacked on #2080; RELEASE HOLD.
+**Current planning:** v1536 F675-190 owner-held replacement candidate preview; engineering #2088; Draft PR #2089 OPEN stacked on #2080; RELEASE HOLD.
