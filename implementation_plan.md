@@ -1728,3 +1728,47 @@ ull 상태를 반환하도록 교정.
 - 로컬 `git diff` 점검.
 - 원격 푸시 후 GitHub Actions CI 통과 확인.
 - PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.
+
+
+---
+## 🚀 [v13 Specification] 다중 브랜치 다형성 필터 조화, 소유자 영수증 복원 및 Fail-Closed 경계 방어 (+추가, -0 삭제)
+
+### 1. 배경 및 원인 분석
+- GitHub Actions CI `runtime-check` 단계에서 20개 테스트 파일 실패 원인 정밀 규명:
+  1. **지갑(Wallet) 계약 파편화**:
+     - `wallet-transfer-receipt.test.ts` & `http.test.ts`: `transferReceipt` 서비스 메서드 및 컨트롤러 엔드포인트 누락.
+     - `wallet.service.precision.test.ts`: 재전송 푸시 알림 ID가 `Date.now()`로 변질되어 중복 방지 계약 위반.
+     - `wallet-recipient-privacy.test.ts` & `http.test.ts`: 닉네임 검색 은닉/폐기 정책(`410 GoneException`) 누락.
+     - `wallet-period.test.ts`: `overview`의 `direction` 쿼리 파라미터 검증 누락.
+     - `wallet-calendar-range.test.ts`: `activity`의 `from`/`to` 캘린더 파라미터 누락 및 `WalletActivityCursorExpired` 410 매핑 누락.
+  2. **작업소(Work) 다형성 파라미터 충돌**:
+     - `work-difficulty-filter.test.ts`, `work-recommended-filter.test.ts`, `work-daily-availability-filter.test.ts`, `work-board.db.test.ts`: hourly 브랜치들이 서로 다른 시그니처(`recommended`, `difficulty`, `minReward`, `maxDuration`, `availableOnly`)로 호출하던 충돌 해결.
+  3. **상점(Shop) 사전 검증 및 유지비 필터 분기**:
+     - `shop-catalog-order.test.ts`, `shop-price-ceiling.controller.test.ts`, `shop-price-floor.controller.test.ts`, `shop-stock-filter.test.ts`, `shop-rarity-controller.test.ts`, `shop-ownership-controller.test.ts`: DB 조회 전에 사전 검증(`validateShopFilter`)을 수행하지 않아 `expect(catalog).not.toHaveBeenCalled()` 단정문 위반.
+     - `shop-upkeep-cap.controller.test.ts`: `maintenance_cost`만 존재하는 아이템에 대해 가격 천장 필터가 호출되어 발생한 에러 해결.
+
+### 2. 세부 변경 사항
+- `backend/src/wallet/wallet.controller.ts`:
+  - `WalletActivityCursorExpired` 410 매핑 복원.
+  - `overview`: `direction` 검증(`all`, `in`, `out`, `neutral`) 및 옵션 전달.
+  - `activity`: `from`, `to` 파라미터 수신 및 캘린더 범위 전달.
+  - `searchRecipients`: 410 GoneException throw 복원.
+  - `transferReceipt`: `@Get('transfers/receipts/:key')` 엔드포인트 복원.
+- `backend/src/wallet/wallet.service.ts`:
+  - `WalletRepositoryLike`: `transferReceiptByKey?` 인터페이스 추가.
+  - `transferReceipt`: 소유자 전용 전송 영수증 확인 및 fail-closed 검증 복원.
+  - `transfer`: 영속 트랜잭션 ID 기반 알림 식별자(`notif_recv_${transactionId}`) 복원.
+- `backend/src/work/work.repository.ts`:
+  - `parseWorkDifficulty`, `parseWorkTaskAvailableOnly` export.
+  - `tasks`: recommended, difficulty, minReward/maxDuration/availableOnly 다형성 SQL 분기 지원.
+- `backend/src/work/work.controller.ts`:
+  - `tasks`: 다형성 쿼리 사전 유효성 검증 및 레포지토리 연동.
+- `backend/src/shop/shop.controller.ts`:
+  - `requireShopStockFilter`: 'available'만 허용하고 엄격 검증.
+  - `validateShopFilter`: DB 조회 전 파라미터 사전 유효성 검증 적용.
+  - `applyGenericShopFilter`: 유지비 전용 아이템 식별 및 `filterShopUpkeep` 연동.
+
+### 3. 검증 계획
+- 로컬 `git diff` 자가 점검 완료.
+- 원격 저장소 푸시 후 GitHub Actions CI PR #2045 3개 체크 pass 확인.
+- PR #2045 스쿼시 머지 및 운영 서버 무중단 배포 실측.
