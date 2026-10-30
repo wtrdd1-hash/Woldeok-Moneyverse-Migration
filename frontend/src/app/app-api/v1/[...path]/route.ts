@@ -1,4 +1,4 @@
-﻿import type { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { NextResponse } from 'next/server';
@@ -112,6 +112,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
+  const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
+  if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
+    return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -180,6 +186,26 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
         'support status counts are unavailable');
+    }
+  }
+
+  if (workAvailability && availabilityValues.length === 1 && response.ok) {
+    try {
+      const payload: unknown = await response.clone().json();
+      if (typeof payload !== 'object' || payload === null || !('tasks' in payload) ||
+          !Array.isArray(payload.tasks) || !payload.tasks.every((task: unknown) => {
+            if (typeof task !== 'object' || task === null ||
+                !('daily_limit' in task) || !('taken_today' in task)) return false;
+            const limit = task.daily_limit;
+            const taken = task.taken_today;
+            return Number.isSafeInteger(limit) && Number.isSafeInteger(taken) &&
+              (limit as number) >= 0 && (taken as number) >= 0 &&
+              ((limit as number) === 0 || (taken as number) < (limit as number));
+          })) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
     }
   }
 

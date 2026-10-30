@@ -5,7 +5,15 @@ export function normalizedWorkDuration(raw: unknown): string | null {
   return typeof raw === 'string' && PRESETS.has(raw) ? raw : null;
 }
 
-export function workTasksApiPath(selected: string | null): string {
+export function normalizedWorkAvailableOnly(raw: unknown): boolean {
+  return raw === '1';
+}
+
+export function workTasksApiPath(selected: string | null, availableOnly = false): string {
   const valid = normalizedWorkDuration(selected);
-  return valid === null ? '/api/v1/work/tasks' : `/api/v1/work/tasks?maxDurationSeconds=${valid}`;
+  const query = new URLSearchParams();
+  if (valid !== null) query.set('maxDurationSeconds', valid);
+  if (availableOnly) query.set('availableOnly', '1');
+  const params = query.toString();
+  return params ? `/api/v1/work/tasks?${params}` : '/api/v1/work/tasks';
 }

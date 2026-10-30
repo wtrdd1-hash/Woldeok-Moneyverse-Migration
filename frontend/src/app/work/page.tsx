@@ -18,7 +18,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
-import { normalizedWorkDuration, workTasksApiPath } from './work-duration-filter';
+import { normalizedWorkAvailableOnly, normalizedWorkDuration, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
@@ -59,16 +59,18 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage({ searchParams }: {
-  readonly searchParams?: Promise<{ maxDurationSeconds?: string }>;
+  readonly searchParams?: Promise<{ maxDurationSeconds?: string; availableOnly?: string }>;
 }) {
   await requireMember();
-  const maxDurationSeconds = normalizedWorkDuration((await searchParams)?.maxDurationSeconds);
+  const filters = await searchParams;
+  const maxDurationSeconds = normalizedWorkDuration(filters?.maxDurationSeconds);
+  const availableOnly = normalizedWorkAvailableOnly(filters?.availableOnly);
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
   const [board, fullBoard, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
-    apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds)),
-    maxDurationSeconds ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
+    apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds, availableOnly)),
+    maxDurationSeconds || availableOnly ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
@@ -84,7 +86,7 @@ export default async function WorkPage({ searchParams }: {
   const paid = receipts?.receipts ?? [];
   const now = Date.now();
   // A filtered board must not erase server-provided durations for active assignments.
-  const durationTasks = maxDurationSeconds ? (fullBoard?.tasks ?? []) : tasks;
+  const durationTasks = maxDurationSeconds || availableOnly ? (fullBoard?.tasks ?? []) : tasks;
   const durations = new Map(durationTasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
 
   const activeJob = profile?.active_job;
@@ -316,6 +318,7 @@ export default async function WorkPage({ searchParams }: {
         {board !== null && (
           <CareerTasksBoard
             selectedMaxDuration={maxDurationSeconds}
+            selectedAvailableOnly={availableOnly}
             tasks={tasks}
             activeJobType={activeJob?.job_type}
             quotaBlock={quotaBlock}

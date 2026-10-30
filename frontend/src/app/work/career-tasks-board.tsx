@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useActionState } from 'react';
 import Link from 'next/link';
@@ -61,12 +61,14 @@ export function CareerTasksBoard({
   quotaBlock,
   selectedDifficulty,
   selectedMaxDuration,
+  selectedAvailableOnly = false,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
   readonly selectedDifficulty?: string | null;
   readonly selectedMaxDuration?: string | null;
+  readonly selectedAvailableOnly?: boolean;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -151,6 +153,11 @@ export function CareerTasksBoard({
               ))}
             </select>
           </label>
+          <label className="inline-flex min-h-10 items-center gap-2 text-xs text-foreground">
+            <input type="checkbox" name="availableOnly" value="1" defaultChecked={selectedAvailableOnly}
+              className="size-4 accent-primary focus-visible:ring-2 focus-visible:ring-ring" />
+            {isEn ? 'Only tasks available today' : '오늘 수행 가능한 업무만 보기'}
+          </label>
           <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
           <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
             {isEn ? 'Reset duration filter' : '시간 필터 초기화'}
@@ -187,7 +194,7 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || minReward || selectedMaxDuration
+            searchQuery.trim() || minReward || selectedMaxDuration || selectedAvailableOnly
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'

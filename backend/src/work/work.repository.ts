@@ -28,6 +28,13 @@ export function parseWorkTaskMaxDuration(raw: unknown): number | null {
   throw new WorkInputError('maxDurationSeconds must be an integer between 1 and 86400');
 }
 
+/** Explicit opt-in only; absent means the legacy complete board. */
+export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
+  if (raw === undefined) return false;
+  if (raw === '1') return true;
+  throw new WorkInputError('availableOnly must be 1 when provided');
+}
+
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
 export interface WorkAssignmentRow {
@@ -213,12 +220,13 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, availableOnly?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     if (minReward !== undefined && (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
       throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
     const maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+    const availability = parseWorkTaskAvailableOnly(availableOnly === true ? '1' : availableOnly);
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -228,7 +236,7 @@ export class WorkRepository {
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task
-       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${maxDuration === null ? '' : '\n         AND task.minimum_duration_seconds <= $3::integer'}`,
+       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${maxDuration === null ? '' : '\n         AND task.minimum_duration_seconds <= $3::integer'}${availability ? '\n         AND (task.daily_limit <= 0 OR task.taken_today < task.daily_limit)' : ''}`,
       maxDuration === null ? [actor, minReward ?? null] : [actor, minReward ?? null, maxDuration],
     );
     const now = Date.now();
