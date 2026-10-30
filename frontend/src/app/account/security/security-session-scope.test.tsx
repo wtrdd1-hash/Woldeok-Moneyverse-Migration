@@ -48,6 +48,12 @@ describe('member session scope', () => {
     expect(html).toContain('세션 정보를 확인할 수 없습니다');
     expect(html).not.toContain('Other Android');
   });
+  it('shows an explicit empty-other-devices state without claiming all sessions are empty', async () => {
+    read.mockImplementation(async (path: string) => path.includes('/sessions')
+      ? { sessions: [] } : path.includes('/identities') ? { identities: [] } : { events: [] });
+    const html = await render('other');
+    expect(html).toContain('다른 활성 세션이 없습니다');
+  });
   it('rejects duplicate scope values without silently querying all sessions', async () => {
     const html = await render(['all', 'other']);
     expect(html).toContain('올바르지 않은 기기 필터');

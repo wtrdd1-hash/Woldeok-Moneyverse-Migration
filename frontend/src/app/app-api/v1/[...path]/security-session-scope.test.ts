@@ -40,6 +40,15 @@ describe('Android owner session other-only filter', () => {
       { status: 200, headers: { 'content-type': 'application/json' } }));
     expect((await GET(request('?scope=other'), ctx)).status).toBe(503);
   });
+  it('rejects non-JSON successful session responses rather than passing private text through', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('sessionToken=secret',
+      { status: 200, headers: { 'content-type': 'text/plain' } })));
+    const response = await GET(request('?scope=other'), ctx);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(JSON.stringify(await response.json())).not.toContain('sessionToken');
+  });
   it('rejects duplicate and invalid scope before upstream proxy', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
     const upstream = vi.fn();

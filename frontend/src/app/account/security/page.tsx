@@ -188,7 +188,7 @@ export default async function AccountSecurityPage({
           {sessionData === null ? (
             <p className="py-6 text-center text-xs text-muted-foreground">세션 정보를 확인할 수 없습니다. 새로고침 후 다시 시도해 주세요.</p>
           ) : sessions.length === 0 ? (
-            <p className="py-6 text-center text-xs text-muted-foreground">활성 세션이 없습니다.</p>
+            <p className="py-6 text-center text-xs text-muted-foreground">{sessionScope === 'other' ? '다른 활성 세션이 없습니다.' : '활성 세션이 없습니다.'}</p>
           ) : (
             <div className="divide-y divide-border/60 rounded-xl border border-border/70 bg-background/60">
               {sessions.map((session) => {
