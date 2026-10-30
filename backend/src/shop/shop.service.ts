@@ -78,7 +78,6 @@ function receiptMinimumAmount(value: unknown): bigint | null {
   }
   return BigInt(value);
 }
-}
 
 function receiptSearchTerm(value: unknown): string | null {
   if (value === undefined) return null;

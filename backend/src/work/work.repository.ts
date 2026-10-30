@@ -41,7 +41,6 @@ export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
   if (raw === '1' || raw === true) return true;
   throw new WorkInputError('availableOnly must be 1 when provided');
 }
-}
 
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
