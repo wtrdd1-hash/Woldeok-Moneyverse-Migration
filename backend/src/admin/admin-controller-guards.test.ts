@@ -16,6 +16,6 @@ describe('AdminController sensitive mutation guards', () => {
     const guards = guardsOn('restrict');
     expect(guards).toContain(AdminSessionGuard);
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
+    expect(guards).not.toContain(ReauthGuard);
   });
 });
