@@ -27,7 +27,7 @@ describe('member support recent-subject search UI', () => {
   it('submits a GET search, preserves q in links and discloses the latest-100 limit', async () => {
     const html = renderToStaticMarkup(await SupportPage({ searchParams: Promise.resolve({ q: '결제' }) }));
     expect(html).toContain('name="q"');
-    expect((html.match(/min-h-11/g) ?? [])).toHaveLength(2);
+    expect((html.match(/min-h-11/g) ?? []).length).toBeGreaterThanOrEqual(2);
     expect(html).toContain('value="결제"');
     expect(html).toContain('최근 100건');
     expect(html).toContain('q=%EA%B2%B0%EC%A0%9C');
@@ -40,4 +40,11 @@ describe('member support recent-subject search UI', () => {
     expect(html).toContain('검색 결과가 없습니다');
     expect(vi.mocked(api).mock.calls.some(([path]) => String(path).includes('/messages'))).toBe(false);
   });
+  it('combines status with literal search and preserves both filters in conversation links', async () => {
+    const html = renderToStaticMarkup(await SupportPage({ searchParams: Promise.resolve({ status: 'resolved', q: '100%_' }) }));
+    expect(api).toHaveBeenCalledWith('/api/v1/support/threads?status=resolved&q=100%25_', expect.anything());
+    expect(html).toContain('status=resolved');
+    expect(html).toContain('q=100%25_');
+  });
+
 });

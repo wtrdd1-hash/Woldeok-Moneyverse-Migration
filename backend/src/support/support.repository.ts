@@ -23,7 +23,19 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, status: string | null = null) {
+  myThreads(actor: string, status: string | null = null, q?: string) {
+    if (q !== undefined) {
+      // Restrict to the newest 100 owner-scoped rows *before* matching; never
+      // widen access to another member or interpret %/_ as LIKE wildcards.
+      const statusSql = status === null ? '' : ' AND status = $4';
+      const params: unknown[] = [actor, 100, q];
+      if (status !== null) params.push(status);
+      return queryRows<SupportThreadRow>(this.pool,
+        `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
+         FROM public.support_my_threads($1,$2)
+         WHERE strpos(lower(subject), lower($3)) > 0${statusSql}
+         ORDER BY last_message_at DESC,thread_id DESC LIMIT 50`, params);
+    }
     if (status !== null) {
       return queryRows<SupportThreadRow>(this.pool,
         `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at

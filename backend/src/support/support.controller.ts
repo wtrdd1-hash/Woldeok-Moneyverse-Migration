@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException, Body, Controller, Get, Header, Inject, NotFoundException, Param, ParseUUIDPipe, Post,
   Put, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
@@ -38,14 +38,20 @@ export class SupportController {
   @Get('threads')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
-  @ApiOperation({ summary: 'My administrator support conversations, optionally filtered by status' })
-  async threads(@Req() req: RequestWithSession, @Query('status') status?: unknown) {
+  @ApiOperation({ summary: 'My recent administrator support conversations, optional status and literal subject search' })
+  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string) {
     if (status !== undefined && (typeof status !== 'string' || !['open', 'waiting_user', 'resolved'].includes(status))) {
       throw new BadRequestException('invalid support status');
     }
-    // The SECURITY DEFINER read function limits the owner-scoped candidate set to 100.
-    // Filtering is intentionally bounded, not a claim to search complete support history.
-    return { threads: await this.repo().myThreads(requireUserId(req), typeof status === 'string' ? status : null) };
+    if (q !== undefined && (typeof q !== 'string' || q.length > 80 || /[\u0000-\u001f\u007f]/.test(q) || !q.trim())) {
+      throw new BadRequestException('invalid support search');
+    }
+    const actor = requireUserId(req);
+    const threads = q === undefined
+      ? await this.repo().myThreads(actor, status ?? null)
+      : await this.repo().myThreads(actor, status ?? null, q.trim());
+    return { threads };
+  }
   }
 
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })

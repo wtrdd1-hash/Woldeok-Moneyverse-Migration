@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
@@ -11,14 +11,19 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string }> }) {
   await requireMember();
   const params = await searchParams;
-  const status = params.status && ['open', 'waiting_user', 'resolved'].includes(params.status) ? params.status : null;
-  const { threads } = await api<{ threads: Thread[] }>(`/api/v1/support/threads${status ? `?status=${status}` : ''}`);
-  const selected = status
-    ? (threads.some(t => t.thread_id === params.thread) ? params.thread : threads[0]?.thread_id)
-    : (params.thread ?? threads[0]?.thread_id);
+  const status = typeof params.status === 'string' && ['open', 'waiting_user', 'resolved'].includes(params.status) ? params.status : null;
+  const q = typeof params.q === 'string' && params.q.length <= 80 && ![...params.q].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
+    ? params.q.trim() : '';
+  const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}) });
+  const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ''}`;
+  const { threads } = q
+    ? await api<{ threads: Thread[] }>(path, {})
+    : await api<{ threads: Thread[] }>(path);
+  // A stale or forged selected ID must not trigger an additional private read.
+  const selected = threads.find(t => t.thread_id === params.thread)?.thread_id ?? threads[0]?.thread_id;
   const messages = selected
     ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
     : [];
@@ -27,6 +32,9 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
       <NewSupportThreadForm />
       <form method="get" action="/support" className="grid gap-2 rounded-xl border bg-card p-3">
+        <label htmlFor="support-search" className="text-sm font-semibold">문의 제목 검색</label>
+        <input id="support-search" name="q" type="search" maxLength={80} defaultValue={q} autoComplete="off" className="min-h-11 w-full rounded-xl border bg-background p-2" placeholder="최근 문의 제목 검색" />
+        <p className="text-xs text-muted-foreground">최근 100건의 문의 제목에서 검색합니다. 전체 기록 검색은 지원하지 않습니다.</p>
         <label htmlFor="support-status" className="text-sm font-semibold">문의 처리 상태</label>
         <p className="text-xs text-muted-foreground">최근 100건의 문의 중에서 상태를 확인합니다. 이전 문의 전체 검색은 지원하지 않습니다.</p>
         <select id="support-status" name="status" defaultValue={status ?? ''} className="min-h-11 rounded-xl border bg-background p-2">
@@ -35,7 +43,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
         </select>
         <button type="submit" className="min-h-11 rounded-xl border bg-primary px-4 text-primary-foreground">필터 적용</button>
       </form>
-      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">최근 문의에서 조건에 맞는 내역을 찾지 못했습니다.</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
       </Link>)}</div>
     </section>

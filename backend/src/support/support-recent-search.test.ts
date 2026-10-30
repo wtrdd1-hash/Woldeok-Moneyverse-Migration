@@ -13,7 +13,7 @@ describe('member support recent-subject search', () => {
   it('uses only the owner-bound DB function, searches literal substrings after the latest-100 boundary', async () => {
     const query = vi.fn(async () => ({ rows: [] }));
     const repo = new SupportRepository({ query } as unknown as Queryable);
-    await repo.myThreads(ACTOR, 50, '%_urgent');
+    await repo.myThreads(ACTOR, null, '%_urgent');
     const [sql, params] = query.mock.calls[0]!;
     expect(sql).toContain('public.support_my_threads($1,$2)');
     expect(sql).toContain('strpos(');
@@ -30,12 +30,23 @@ describe('member support recent-subject search', () => {
   it('trims a bounded search term and rejects malformed queries before DB access', async () => {
     const myThreads = vi.fn(async () => []);
     const controller = new SupportController({ myThreads } as unknown as SupportRepository);
-    await controller.threads(request, '  문의 %_  ');
-    expect(myThreads).toHaveBeenCalledWith(ACTOR, 50, '문의 %_');
-    await expect(controller.threads(request, 'x'.repeat(81))).rejects.toBeInstanceOf(BadRequestException);
-    await expect(controller.threads(request, ['wrong'] as unknown as string)).rejects.toBeInstanceOf(BadRequestException);
-    await expect(controller.threads(request, 'bad\u0001term')).rejects.toBeInstanceOf(BadRequestException);
-    await expect(controller.threads(request, 'bad\u007fterm')).rejects.toBeInstanceOf(BadRequestException);
+    await controller.threads(request, undefined, '  문의 %_  ');
+    expect(myThreads).toHaveBeenCalledWith(ACTOR, null, '문의 %_');
+    await expect(controller.threads(request, undefined, 'x'.repeat(81))).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.threads(request, undefined, ['wrong'] as unknown as string)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.threads(request, undefined, 'bad\u0001term')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.threads(request, undefined, 'bad\u007fterm')).rejects.toBeInstanceOf(BadRequestException);
     expect(myThreads).toHaveBeenCalledTimes(1);
   });
+  it('combines status and literal subject search within owner latest-100', async () => {
+    const query = vi.fn(async () => ({ rows: [] }));
+    const repo = new SupportRepository({ query } as unknown as Queryable);
+    await repo.myThreads(ACTOR, 'resolved', '100%_');
+    const [sql, params] = query.mock.calls[0]!;
+    expect(sql).toContain('public.support_my_threads($1,$2)');
+    expect(sql).toContain('strpos(');
+    expect(sql).toMatch(/status\s*=\s*\$4/);
+    expect(params).toEqual([ACTOR, 100, '100%_', 'resolved']);
+  });
+
 });
