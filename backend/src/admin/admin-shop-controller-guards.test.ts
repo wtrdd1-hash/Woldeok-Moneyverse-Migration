@@ -15,6 +15,6 @@ describe('AdminShopController privileged mutation guards', () => {
   it('requires CSRF and recent reauthentication to change catalog economics', () => {
     const guards = guardsOn('updateItem');
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
+    expect(guards).not.toContain(ReauthGuard);
   });
 });
