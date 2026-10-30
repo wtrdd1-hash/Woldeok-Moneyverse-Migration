@@ -33,7 +33,7 @@ describe('SpaceService', () => {
 
   it('throws NotFoundException when space is not found', async () => {
     vi.mocked(mockRepo.getSpaceById).mockResolvedValueOnce(null);
-    await expect(service.getSpaceById('99999999-9999-9999-9999-999999999999')).rejects.toThrow(NotFoundException);
+    await expect(service.getSpaceById('11111111-1111-4111-8111-111111111111', '99999999-9999-9999-9999-999999999999')).rejects.toThrow(NotFoundException);
   });
 
   it('successfully contributes WLD to a city project', async () => {

@@ -142,15 +142,16 @@ export class PostgresSpaceRepository {
     );
   }
 
-  async getSpaceById(spaceId: string): Promise<UserSpaceRow | null> {
+  async getSpaceById(actorUserId: string, spaceId: string): Promise<UserSpaceRow | null> {
+    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(spaceId)) throw new SpaceInputError('spaceId must be a valid UUID');
 
     return queryOne<UserSpaceRow>(
       this.client,
       `SELECT id, user_id, space_type, name, privacy, layout, created_at, updated_at
        FROM public.user_spaces
-       WHERE id = $1::uuid;`,
-      [spaceId],
+       WHERE id = $1::uuid AND (user_id = $2::uuid OR privacy = 'public');`,
+      [spaceId, actorUserId],
     );
   }
 
@@ -164,8 +165,8 @@ export class PostgresSpaceRepository {
 
     const space = await queryOne<{ user_id: string }>(
       this.client,
-      `SELECT user_id FROM public.user_spaces WHERE id = $1::uuid;`,
-      [spaceId],
+      `SELECT user_id FROM public.user_spaces WHERE id = $1::uuid AND user_id = $2::uuid;`,
+      [spaceId, actorUserId],
     );
     if (!space) throw new SpaceInputError('space not found');
     if (space.user_id !== actorUserId) throw new SpaceInputError('not your space');
@@ -209,7 +210,8 @@ export class PostgresSpaceRepository {
     throw new SpaceFinanceLedgerHoldError();
   }
 
-  async getSpaceTaxStatus(spaceId: string): Promise<SpaceTaxStatusResult> {
+  async getSpaceTaxStatus(actorUserId: string, spaceId: string): Promise<SpaceTaxStatusResult> {
+    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(spaceId)) throw new SpaceInputError('spaceId must be a valid UUID');
 
     const row = await queryOne<{
@@ -222,8 +224,8 @@ export class PostgresSpaceRepository {
       this.client,
       `SELECT id, space_type, name, tax_paid_until, created_at
        FROM public.user_spaces
-       WHERE id = $1::uuid;`,
-      [spaceId],
+       WHERE id = $1::uuid AND user_id = $2::uuid;`,
+      [spaceId, actorUserId],
     );
 
     if (!row) throw new SpaceInputError('space not found');
@@ -280,16 +282,14 @@ export class PostgresSpaceRepository {
       `SELECT
          s.id AS space_id,
          s.user_id AS owner_user_id,
-         COALESCE(i.display_name, '시민') AS owner_display_name,
+         '비공개'::text AS owner_display_name,
          s.space_type,
          s.name AS space_name,
          s.tax_paid_until,
          s.created_at
        FROM public.user_spaces s
-       LEFT JOIN LATERAL (
-         SELECT display_name FROM public.identities WHERE user_id = s.user_id ORDER BY linked_at LIMIT 1
-       ) i ON true
-       WHERE (COALESCE(s.tax_paid_until, s.created_at + interval '1 day') < pg_catalog.clock_timestamp())
+       WHERE s.privacy = 'public'
+         AND (COALESCE(s.tax_paid_until, s.created_at + interval '1 day') < pg_catalog.clock_timestamp())
        ORDER BY s.tax_paid_until ASC
        LIMIT 100;`,
       [],
