@@ -26,6 +26,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
+import { WalletActivityCursorExpired } from './wallet-activity-cursor';
 import { WalletRecipientError, WalletService, WalletTransactionNotFoundError, type WalletOverviewOptions } from './wallet.service';
 
 /**
@@ -62,6 +63,7 @@ export class WalletController {
     try {
       return await work();
     } catch (error: unknown) {
+      if (error instanceof WalletActivityCursorExpired) throw new GoneException('wallet activity cursor expired');
       if (error instanceof WalletInputError) throw new BadRequestException(error.message);
       if (error instanceof WalletRecipientError) {
         throw new NotFoundException('recipient is unavailable');
@@ -88,13 +90,22 @@ export class WalletController {
     @Req() request: RequestWithSession,
     @Query('recent') recent?: string,
     @Query('period') period?: string,
+    @Query('direction') direction?: string,
   ) {
+    if (direction !== undefined && direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') {
+      throw new BadRequestException('direction must be all, in, out or neutral');
+    }
+    const filteredDirection = direction === 'in' ? 'in' : direction === 'out' ? 'out' : direction === 'neutral' ? 'neutral' : undefined;
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
     }
     const periodDays: 7 | 30 | undefined = period === '7d' ? 7 : period === '30d' ? 30 : undefined;
+    const filters: WalletOverviewOptions = {
+      ...(periodDays ? { periodDays } : {}),
+      ...(filteredDirection ? { direction: filteredDirection } : {}),
+    };
     if (recent === undefined) {
-      return this.service().overview(requireUserId(request), periodDays ? { periodDays } : {});
+      return this.service().overview(requireUserId(request), filters);
     }
     // Reject coercible non-decimal and duplicate query values before any DB read.
     // The service/repository enforce the same 1..50 bound for direct callers.
@@ -105,14 +116,21 @@ export class WalletController {
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
+    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...filters });
   }
 
   @Get('wallet/activity')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
-  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string, @Query('direction') direction?: string) {
+  activity(
+    @Req() request: RequestWithSession,
+    @Query('period') period?: string,
+    @Query('cursor') cursor?: string,
+    @Query('direction') direction?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
     }
@@ -124,7 +142,8 @@ export class WalletController {
     }
     return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
       period === '7d' || period === '30d' ? period : 'all', cursor,
-      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all'), 'wallet activity is unavailable');
+      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all',
+      ...(from !== undefined || to !== undefined ? [{ from, to }] : [])), 'wallet activity is unavailable');
   }
 
   @Get('wallet/activity/transactions/:transactionId')
@@ -149,10 +168,27 @@ export class WalletController {
     }
   }
 
+  @Get('wallet/transfers/receipts/:key')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Fetch durable owner-only transfer receipt evidence by idempotency key' })
+  async transferReceipt(
+    @Req() request: RequestWithSession,
+    @Param('key', new ParseUUIDPipe({ version: '4' })) idempotencyKey: string,
+  ) {
+    try {
+      return await this.service().transferReceipt(requireUserId(request), idempotencyKey);
+    } catch {
+      // A missing/invalid ledger projection is not a failed transfer and must
+      // not expose DB errors or induce a duplicate retry with a fresh key.
+      throw new ServiceUnavailableException('transfer receipt evidence is unavailable');
+    }
+  }
+
   @Get('wallet/recipients/search')
-  @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
-  searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {
-    return this.service().searchRecipients(requireUserId(request), query || '');
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Retired recipient name search; use exact recipient UUID', deprecated: true })
+  searchRecipients(@Req() _request: RequestWithSession, @Query('query') _query?: string): never {
+    throw new GoneException('recipient name search retired; use exact recipient UUID');
   }
 
   @Get('rewards/availability')

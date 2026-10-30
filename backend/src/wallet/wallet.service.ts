@@ -107,6 +107,7 @@ export class WalletRecipientError extends Error {
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   transactionDetailForUser?(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null>;
+  transferReceiptByKey?(actorUserId: string, idempotencyKey: string): Promise<{ transaction_id: string; transaction_type: string; postings: unknown } | null>;
   recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
   activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined; direction?: WalletActivityDirection }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
@@ -473,6 +474,57 @@ export class WalletService {
     return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
   }
 
+  /**
+   * Reconcile a previously submitted transfer key using durable, owner-scoped
+   * ledger evidence. UNKNOWN is not proof that replay with a different key is
+   * safe: the original command may still be in flight or its read unavailable.
+   */
+  async transferReceipt(authenticatedUserId: string, idempotencyKey: string): Promise<
+    | { status: 'unknown' }
+    | { status: 'committed'; transactionId: string; recipientUserId: string; amount: WldAmount }
+  > {
+    const actor = requireUuid(authenticatedUserId, 'authenticated user id');
+    const key = requireUuid(idempotencyKey, 'idempotency key');
+    if (!this.repository.transferReceiptByKey) throw new Error('transfer receipt evidence is unavailable');
+    const evidence = await this.repository.transferReceiptByKey(actor, key);
+    if (evidence === null) return { status: 'unknown' };
+
+    const unverifiable = () => new Error('transfer receipt ledger evidence is unverifiable');
+    if (evidence.transaction_type !== 'USER_TO_USER' ||
+        typeof evidence.transaction_id !== 'string' ||
+        !Array.isArray(evidence.postings) || evidence.postings.length !== 2) {
+      throw unverifiable();
+    }
+    let transactionId: string;
+    try { transactionId = requireUuid(evidence.transaction_id, 'ledger transaction id'); }
+    catch { throw unverifiable(); }
+
+    const [sender, recipient] = evidence.postings as unknown[];
+    if (!sender || !recipient || typeof sender !== 'object' || typeof recipient !== 'object') {
+      throw unverifiable();
+    }
+    const postings = [sender, recipient] as Record<string, unknown>[];
+    const from = postings.find((p) => p.direction === 'credit');
+    const to = postings.find((p) => p.direction === 'debit');
+    if (!from || !to || from === to || from.accountType !== 'USER_CASH' ||
+        to.accountType !== 'USER_CASH' || from.currency !== 'WLD' ||
+        to.currency !== 'WLD' || from.ownerUserId !== actor ||
+        typeof to.ownerUserId !== 'string' || to.ownerUserId === actor ||
+        typeof from.amount !== 'string' || typeof to.amount !== 'string') {
+      throw unverifiable();
+    }
+    let recipientUserId: string;
+    let amount: WldAmount;
+    let recipientAmount: WldAmount;
+    try {
+      recipientUserId = requireUuid(to.ownerUserId, 'ledger recipient user id');
+      amount = positiveWldAmount(from.amount, 'ledger sender amount');
+      recipientAmount = positiveWldAmount(to.amount, 'ledger recipient amount');
+    } catch { throw unverifiable(); }
+    if (amount !== recipientAmount) throw unverifiable();
+    return { status: 'committed', transactionId, recipientUserId, amount };
+  }
+
   async transfer(
     authenticatedUserId: string,
     { recipientUserId, amount, idempotencyKey }: WalletTransferRequest = {},
@@ -495,11 +547,12 @@ export class WalletService {
       idempotencyKey: key,
     });
 
+    const transactionId = requireUuid(receipt.transactionId, 'database transaction id');
     if (this.broadcast) {
       try {
         // Notify recipient in real-time
         this.broadcast.publishUserNotification(recipient, {
-          id: `notif_recv_${Date.now()}`,
+          id: `notif_recv_${transactionId}`,
           title: 'WLD 송금 도착',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD가 도착했습니다.`,
           type: 'success',
@@ -507,7 +560,7 @@ export class WalletService {
         });
         // Notify sender in real-time
         this.broadcast.publishUserNotification(actorUserId, {
-          id: `notif_send_${Date.now()}`,
+          id: `notif_send_${transactionId}`,
           title: 'WLD 송금 완료',
           message: `${BigInt(transferAmount).toLocaleString('ko-KR')} WLD 송금이 완료되었습니다.`,
           type: 'info',
@@ -517,6 +570,8 @@ export class WalletService {
         // Non-blocking broadcast
       }
     }
+
+    return { transactionId };
 
     return { transactionId: requireUuid(receipt.transactionId, 'database transaction id') };
   }

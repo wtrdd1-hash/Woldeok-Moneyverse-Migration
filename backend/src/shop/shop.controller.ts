@@ -36,6 +36,7 @@ import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } 
 import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './shop-catalog-order';
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
+import { filterShopUpkeep } from './shop-upkeep-cap';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -58,7 +59,7 @@ export function parseShopCategory(value: unknown): string | null {
 }
 
 export function requireShopStockFilter(value: unknown): string | null {
-  if (value === undefined || value === null) return null;
+  if (value === undefined) return null;
   if (value === 'available') return 'available';
   throw new BadRequestException('invalid stock filter');
 }
@@ -85,6 +86,38 @@ export function filterShopItems<T extends SearchableShopItem>(
   );
 }
 
+function validateShopFilter(arg: unknown): void {
+  if (arg === undefined || arg === null || arg === '') return;
+  if (Array.isArray(arg)) {
+    throw new BadRequestException('invalid shop catalog filter parameter: arrays not allowed');
+  }
+  if (typeof arg !== 'string') {
+    throw new BadRequestException('invalid shop catalog filter parameter');
+  }
+  if (/^-\d+$/.test(arg)) {
+    throw new BadRequestException('price/upkeep cannot be negative');
+  }
+  if (/^\d+\.\d+$/.test(arg)) {
+    throw new BadRequestException('price/upkeep must be integer');
+  }
+  if (arg === 'available' || arg === 'all' || arg === 'owned' || arg === 'unowned') {
+    return;
+  }
+  if (['common', 'uncommon', 'rare', 'epic', 'legendary'].includes(arg)) {
+    return;
+  }
+  if (arg === 'price_asc' || arg === 'price_desc') {
+    return;
+  }
+  if (/^(0|[1-9][0-9]{0,29})$/.test(arg)) {
+    return;
+  }
+  if (/^[a-z][a-z0-9_]{0,39}$/.test(arg)) {
+    return;
+  }
+  throw new BadRequestException('invalid shop catalog filter parameter: ' + arg);
+}
+
 function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[], arg: unknown): T[] {
   if (arg === undefined || arg === null || arg === '') return [...items];
   if (Array.isArray(arg) || typeof arg !== 'string') {
@@ -92,6 +125,9 @@ function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[
   }
   if (arg === 'available') {
     return filterShopStock(items, 'available');
+  }
+  if (arg === 'all') {
+    return [...items];
   }
   if (arg === 'sold_out') {
     throw new BadRequestException('sold_out stock filter is unsupported');
@@ -112,6 +148,10 @@ function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[
     throw new BadRequestException('price cannot be negative');
   }
   if (/^(0|[1-9][0-9]*)$/.test(arg)) {
+    const sample = items[0] as any;
+    if (sample && sample.maintenance_cost !== undefined && sample.price === undefined) {
+      return filterShopUpkeep(items as any, arg) as unknown as T[];
+    }
     const amount = BigInt(arg);
     if (amount >= 9000000000000000n) {
       return filterShopMinimumPrice(items as any, amount) as unknown as T[];
@@ -228,6 +268,9 @@ export class ShopController {
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
   ) {
+    validateShopFilter(filter1);
+    validateShopFilter(filter2);
+    validateShopFilter(filter3);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
@@ -249,6 +292,9 @@ export class ShopController {
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
   ) {
+    validateShopFilter(filter1);
+    validateShopFilter(filter2);
+    validateShopFilter(filter3);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
