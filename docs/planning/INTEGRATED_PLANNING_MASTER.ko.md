@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1524 F675-187 본인 구매 영수증 원장 증빙 / 이슈 #2046 / Draft #2048(선행 #2042 → #2036) / 운영 보류; 사고 #2031.
+**현재 기획:** v1526 F675-187 구매 원장 증빙 정확성 보완 / 이슈 #2046 / Draft/HOLD(선행 #2048 → #2042 → #2036) / 운영 보류; 사고 #2031.
+
+## v2026.10.30.1526 — F675-187 본인 상점 구매 원장 증빙 정확성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 추가 v1524 → 현재 기능 보완 v1526 → 다음 기능 추가 v1528(잠정). 원본 main bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간 재확인, 선행 Draft #2048(#2042, #2036 순서). 개발 #2046, 배포 P0 #2031. 문서 전용이며 v1524에 정의된 V1 범위와 아래의 기존 요구사항을 유지한다.
+
+### 실제 소스 정정 — 마이그레이션 001/003/009
+1. shop_purchase의 request_hash는 digest(jsonb_build_object('actorUserId', actor::text, 'itemId', item::text)::text,'sha256')이다. purchases.idempotency_key와 ledger_transactions.idempotency_key는 같은 요청 키에서 유래한다. 32바이트 해시의 존재만 확인하지 말고 키 일치와 PostgreSQL 표현으로 재계산한 해시까지 검증한다. JavaScript JSON 직렬화로 해시하거나 가격/영수증 ID를 해시하면 오판할 수 있다. 거래자·상품·해시·키 불일치는 인증 금지.
+2. economy_post_transaction의 outbox_events.aggregate_id는 영수증 UUID가 아니라 원장 거래 UUID이다. 이벤트 유형은 shop.purchase.completed, payload는 userId/itemId/amount이고 purchaseId는 없다. 영수증 ID로 JOIN하거나 purchaseId를 필수로 요구하면 정상 거래를 오판한다. 거래·유형·거래자·상품·정확한 금액에 대응하는 이벤트가 정확히 1건인지 확인한다. delivered_at=NULL은 이벤트 미전달 상태이지 미납 증거가 아니다. 이벤트 누락/중복/불일치는 미검증, 원천 접근 실패는 503.
+3. purchases.created_at과 ledger_transactions.created_at은 별도 생성 시각이므로 동일성을 요구하지 않는다. shop_items.name은 현재 카탈로그 이름이며 구매 당시 이름의 스냅샷이 아니다. 화면에 '현재 상품명'으로 명시하고 현재 가격으로 과거 WLD를 추정하지 않는다. 과거 계정이 현재 closed여도 과거 전표가 무효가 되는 것은 아니다. 계정 소유자·종류·sink system_key와 기록된 전표를 검증한다.
+4. frontend/src/app/shop/my-receipts.tsx는 viewer?.signedIn만으로 개인정보 조회를 갱신하고 사용자 식별자 변경에 직접 의존하지 않는다. 로그인 상태가 유지된 계정 전환 시 이전 사용자 응답이 화면 상태에 남을 수 있다. 새 상세·목록 CTA·Android는 계정/세션 세대 변경 시 개인정보 즉시 초기화, 진행 중 요청 취소, 응답 반영 전 신원 재검증을 수행해야 한다. 클라이언트 방어는 Nest 본인 전용 DB 권한을 대체하지 않는다.
+5. 009는 과거 영수증의 paid_amount/idempotency_key/request_hash NULL을 허용한다. 거래 FK만 존재한다고 납부 인증을 해서는 안 된다. LEGACY_INCOMPLETE와 실제 불일치 RECEIPT_RECORDED_UNVERIFIED, 원천 장애 503을 구분하고 금액 UNKNOWN을 0 또는 현재 상품 가격으로 대체하지 않는다. v1524 개발 DB 실측 구매 0건이므로 실제 영수증 기반 검증은 미완료다.
+
+### 증빙 판정 및 사용자·API·DB 명세
+- VERIFIED_LEDGER_POSTINGS는 단일 일관된 DB 조회에서 본인 구매, 양수 BIGINT WLD, 영수증/원장 거래 UUID 일치, SHOP_PURCHASE 거래자, idempotency 및 재계산 request_hash, 정확히 2개 균형 전표(USER_CASH credit 소유자 / SINK debit system_key sink), 대응 outbox 1건까지 모두 통과할 때만 허용한다. 이는 가상 WLD 원장 전표 검증이며 현재 소유·환불·실물 결제·이벤트 전달 완료를 의미하지 않는다.
+- RECEIPT_RECORDED_UNVERIFIED는 기록은 완전하나 원장/거래자/전표/키/해시/outbox 조건 불일치, LEGACY_INCOMPLETE는 필수 불변 필드 부재·오류다. 장애·권한 거부·시간 초과는 503으로 처리하고 결제 실패로 단정하지 않는다. 타인/미존재는 동일 404, UUID 오류 400, 미인증 401, 동의 미충족 403, 과다 조회 429. 오류를 정상 빈 결과로 바꾸지 않는다.
+- 목적/대상/진입점: 인증·동의한 본인 /shop → 내 구매 기록 → 원장 증빙 보기 → /shop/purchases/:receiptId. 기능 플래그 shop_purchase_ledger_detail 기본 OFF. 현재 상품명(구매 당시 이름 아님), 영수증 ID, 확인 가능한 정확한 WLD 문자열, KST 구매 시각, 상태·재시도·목록 복귀. 로딩/검증/미검증/레거시/오프라인/계정 전환/400·401·403·404·429·503/플래그 OFF 각각 별도 상태. 320px/200% 확대 WCAG 2.2 AA, 키보드·스크린리더·텍스트 상태·오류 포커스.
+- Nest GET /api/v1/shop/purchases/:receiptId/evidence는 SessionGuard/AuthenticatedGuard/ConsentGuard/ParseUUIDPipe, Next 비공개 BFF GET /api/shop/purchases/:receiptId/evidence, Android /app-api/v1/shop/purchases/:receiptId/evidence는 동등한 타입·상태·오류를 제공한다. 요청 경로/쿼리의 사용자 ID를 인증 신원으로 신뢰하지 않으며 관리자 타인 조회 우회 금지. BIGINT는 10진수 문자열, 시각은 ISO, verifiedLedgerAtUtc는 VERIFIED일 때만. 원장/계정 원시 ID 외부 노출 금지, GET은 금융/영수증/아이템 쓰기 0건.
+- DB: 최신 마이그레이션 이후 전방 추가만 허용, 적용된 001/003/009 수정 금지. 본인 전용 public.shop_my_purchase_evidence_v1(actor uuid,purchase uuid) SECURITY DEFINER, search_path=pg_catalog,pg_temp, 스키마 명시·제한된 JOIN·동적 SQL 금지, PUBLIC 권한 철회·앱 EXECUTE만 허용. 전달된 actor UUID 자체는 인증이 아니므로 Nest 세션과 결속한다. 과도한 앱 직접 SELECT/DML은 별도 P0 교정. 영수증/원장/전표/outbox는 일관된 스냅샷으로 조회. 격리 PostgreSQL 17.11 합성 영수증 10,001건 EXPLAIN(ANALYZE,BUFFERS) 후 중복 없는 인덱스만 검토.
+- 개인정보/SEO/악용방지: Next HTML/BFF·Nest·Android·실제 공개 Nginx의 성공/오류/리다이렉트에 Cache-Control private,no-store, X-Robots-Tag noindex,nofollow, Referrer-Policy no-referrer. 비공개 sitemap/canonical/OG 제외, 영수증 UUID·금액·계정/사용자 ID·outbox payload 로그/분석 금지. UUID 탐색 rate limit, 웹·Android 로그인 유지 계정 전환 응답 세대 검사·지연 응답 폐기. 관리자는 20명 이상 집단의 상태별 건수·p95·404/429/503·거짓 인증 경보만 조회. KPI 목표: 거짓 VERIFIED 0, 타인 노출 0, WLD 쓰기 0, 캐시 누출 0, p95<300ms(측정 아님).
+
+### QA·무중단 배포·롤백·담당
+**수용시험 정의만, 미실행:** 합성 구매 10,001건; 타인/미존재/레거시 NULL 100건; idempotency/해시 불일치(JSONB/JS 직렬화 포함) 100건; 거래자/유형/금액/방향/추가 전표 100건; outbox 누락/중복/잘못된 aggregate/payload/delivered_at NULL 정상 사례 100건; 과거 계정 폐쇄 100건; 웹·Android 로그인 유지 계정 전환/지연 응답 100건; 공개 edge 200/4xx/5xx 헤더 50건; 동시 조회 100건. 기존 최근 30/100 목록 유지, 앱 직접 DML·금융 쓰기 0건 검증. 전체 런타임 CI, 독립 백업 복원, 정확 SHA 공식 Test 인증/API/DB/금융/UI 및 실제 공개 edge 인증 후 승인된 무중단 기능 OFF→ON. 롤백은 기능 OFF·코드 되돌리기, 원장 소급 수정 금지.
+**개발 백로그 P0 4 / P1 6:**
+- P0 OPS1526-01 (#1984/#2031): 공개 Nginx SHA/이미지·롤백 자산·독립 복원, 별도 v1515 레거시와 공개 v1935 혼동 금지.
+- P0 SEC1526-02 (#993/#2000): 개발 앱 계정 과도한 DELETE/UPDATE·기존 체크섬 불일치 5건·신규 DB ACL 정합성.
+- P0 FIN1526-03 (#1976/#1151): 국고/MINT/SWF/채권 원장과 SHOP_PURCHASE 키/해시/전표/outbox 증빙.
+- P0 REL1526-04 (#2031/#1088): Draft/HOLD 대량 병합 감사·브랜치 보호·정확 SHA 런타임 CI·공식 Test·복원.
+- P1 PURCHASE1526-05 (Backend B): 본인 SQL/ACL·해시/outbox 판정·503·EXPLAIN/10,001건.
+- P1 PURCHASE1526-06 (Backend B): Nest 가드/타입 API·동일 404·쿼터·음성 시험.
+- P1 PURCHASE1526-07 (개발 A): Next BFF/상세·현재 상품명·접근성·로그인 유지 계정 전환 차단.
+- P1 PURCHASE1526-08 (개발 C): Android 비공개 헤더·계정 세대·디스크 캐시 금지·오류 동등.
+- P1 PURCHASE1526-09 (A/B/C): 공개 edge 개인정보/SEO/no-referrer·관리자 20명 이상 KPI·기본 OFF.
+- P1 PURCHASE1526-10 (QA): 격리 PG17.11·10,001건·음성 시험·전체 CI·정확 SHA Test·복원·롤백.
+
+**QA 근거:** 마지막 독립 v1396 런타임 검사 2건 실패·프론트 lint 구문 오류, 정확 SHA 공식 Test/독립 복원 미인증. 이번 회차 전체 QA 재실행 없음. 이전 개발 DB 구매 0건(실제 납부 검증 아님). 외부 독립 근거 신규 승인 0, 누적 중복 제거·실제 근거 분류 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. DRAFT / RELEASE HOLD.
+
 
 ## v2026.10.30.1524 — F675-187 회원 전용 상점 구매 영수증 원장 증빙 상세 (기능 추가 / 초안 / 운영 보류)
 
