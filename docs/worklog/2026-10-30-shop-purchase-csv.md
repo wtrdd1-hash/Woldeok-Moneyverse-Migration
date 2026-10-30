@@ -8,8 +8,13 @@
 - Design: authenticated/consented Nest GET /api/v1/shop/purchases/export -> existing SECURITY DEFINER shop_list_my_purchases owner read -> strict Next CSV BFF -> private Android JSON app-api. Escape spreadsheet formula payloads; preserve decimal integer strings. No DB DDL, mutation, new grant or ledger change.
 ## In progress
 - [ ] RED regression tests; [ ] Backend and Next/API implementation; [ ] app-api and browser access; [ ] exact-SHA target tests; [ ] real isolated PostgreSQL owner/ACL proof; [ ] full gates and CI; [ ] PR + release HOLD evidence.
-## Finished
-- Pending. No main integration, Test or Production deployment without full gates.
+## Finished — 12:49 KST (version 3: candidate completed, release blocked)
+- Feature code commit 7379f1635a7ad0aa68b1a048e8a25fe0fb88abb5; Draft PR #1991. Code is end-to-end but **not released**.
+- Backend regression 21 PASS, frontend receipt/SEO 17 PASS; full lint 0 errors/1043 warnings; typecheck PASS; build PASS; app-api contract PASS; security 17 PASS; production audit 0 known vulnerabilities; isolated PG 305 migrations, DB 5 PASS, owner/ACL/rollback PASS.
+- Full backend 2567 PASS / 119 FAIL / 495 SKIP, full frontend 2615 PASS / 53 FAIL. QA v1388 on unchanged main had the same 119/53 failures. **Full gates FAIL**.
+- Exact-SHA GitHub CI #40998581810 and candidate #40998561840 policy/classify PASS, runtime-check PENDING at last read. Official Test exact SHA/auth E2E and independent restore BLOCKED; Production P0 cwd/link mismatch and Test Treasury HTTP 200 synthetic data persist.
+- Remote branches 6->7, open Draft PRs 5->6, unique unmerged work retained. Deleted 0, main merges 0, Test/Production deploy 0, DB changes 0, rollback 0. Rollback path is code-only revert after future approval. **PRODUCTION HOLD**.
+
 
 ### In progress — 12:39 KST (version 2)
 - TDD RED reproduced missing Nest export and missing CSV parser, then GREEN: backend 2 tests, frontend 8 tests. Authenticated Nest route e2e 14 tests; additional privacy decorator RED reproduced and patched.
