@@ -9,9 +9,12 @@ export type HelpSearchState = { status: 'initial'|'results'|'empty'|'invalid'|'u
 
 /** Query is sent in the POST body, never a URL, referrer or client-side cache. */
 export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormData): Promise<HelpSearchState> {
-  const query = normalizeVerifiedHelpQuery(data.get('query'));
+  const rawQuery = data.get('query');
+  const query = normalizeVerifiedHelpQuery(rawQuery);
   const category = data.get('category');
   const rawLocale = data.get('locale');
+  const rawLimit = data.get('limit');
+  const limit = rawLimit === null ? 20 : typeof rawLimit === 'string' && /^(10|20|50)$/.test(rawLimit) ? Number(rawLimit) : null;
   const fallbackValues = data.getAll('fallbackToOtherLocale');
   if (fallbackValues.length > 1 || (fallbackValues.length === 1 && fallbackValues[0] !== 'on')) {
     return { status: 'invalid', articles: [] };
@@ -21,15 +24,25 @@ export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormD
     return { status: 'invalid', articles: [] };
   }
   const locale = normalizeHelpLocale(rawLocale);
-  if (query === null ||
+  if (limit === null || query === null ||
     (category !== null && (typeof category !== 'string' ||
       (category !== '' && !['account','wallet','shop','community','support'].includes(category))))) {
     return { status: 'invalid', articles: [] };
   }
   if (process.env.VERIFIED_HELP_CENTER_V1 !== 'true') return { status: 'unavailable', articles: [] };
   try {
+    const body: Record<string, unknown> = {
+      locale,
+      category: category || undefined,
+      query,
+      limit,
+    };
+    if (fallbackToOtherLocale) {
+      body.fallbackToOtherLocale = true;
+    }
     const result = await api<{ articles: HelpSummary[]; fallbackUsed?: boolean; resultLocale?: HelpLocale }>('/api/v1/help/search', {
-      method: 'POST', body: { locale, category: category || undefined, query, limit: 20, fallbackToOtherLocale },
+      method: 'POST',
+      body,
     });
     if (!Array.isArray(result.articles)) return { status: 'unavailable', articles: [] };
     const fallbackUsed = result.fallbackUsed === true;

@@ -26,6 +26,43 @@ import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
 const UNLINK_IDENTITY_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PRIVACY_REQUEST_TYPES = new Set(['access', 'correction', 'restriction', 'withdrawal', 'deletion']);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+interface PrivacyRequestReceipt {
+  readonly requestId: string;
+  readonly requestType: string;
+  readonly status: 'received';
+  readonly createdAt: string;
+  readonly replayed: boolean;
+}
+
+function verifiedPrivacyReceipt(value: unknown, requestedType: string): PrivacyRequestReceipt | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
+  const receipt = value as Record<string, unknown>;
+  if (
+    typeof receipt.requestId !== 'string' || !UUID.test(receipt.requestId) ||
+    receipt.requestType !== requestedType || receipt.status !== 'received' ||
+    typeof receipt.replayed !== 'boolean' ||
+    typeof receipt.createdAt !== 'string' || !ISO_TIME.test(receipt.createdAt) ||
+    !Number.isFinite(Date.parse(receipt.createdAt)) ||
+    new Date(receipt.createdAt).toISOString() !== receipt.createdAt
+  ) return null;
+  return receipt as unknown as PrivacyRequestReceipt;
+}
+
+function ownerPrivacyReadbackMatches(value: unknown, receipt: PrivacyRequestReceipt): boolean {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const requests = (value as { requests?: unknown }).requests;
+  if (!Array.isArray(requests)) return false;
+  return requests.some((entry: unknown) => {
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) return false;
+    const row = entry as Record<string, unknown>;
+    return row.requestId === receipt.requestId && row.requestType === receipt.requestType &&
+      row.status === receipt.status && row.createdAt === receipt.createdAt;
+  });
+}
 
 /**
  * Begins linking another sign-in method.
@@ -50,66 +87,29 @@ export async function startLink(_previous: ActionState, formData: FormData): Pro
 }
 
 /**
- * Begins step-up reauthentication, which unlocks unlinking and deletion for
- * a short window. The window is the API's to enforce; this only starts it.
+ * Removes a linked OAuth identity.
+ *
+ * Refused if it is the only sign-in method, or if the user has not completed
+ * step-up reauthentication within the required window.
  */
-export async function startReauthentication(
-  _previous: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const provider = String(formData.get('provider') ?? '');
-  if (!PROVIDERS.has(provider)) return { status: 'error', message: '제공자를 확인할 수 없어요.' };
-
-  let authorizationUrl: string;
-  try {
-    ({ authorizationUrl } = await mutate<{ authorizationUrl: string }>(
-      `/api/v1/auth/${provider}/reauthentication`,
-    ));
-  } catch (error) {
-    return failure(error, '지금은 본인 확인을 시작할 수 없어요.');
-  }
-  redirect(authorizationUrl);
-}
-
 export async function unlinkIdentity(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const identityId = String(formData.get('identityId') ?? '');
-  if (!UNLINK_IDENTITY_UUID.test(identityId)) return { status: 'error', message: '해제할 로그인 수단을 확인할 수 없어요.' };
+  if (!UNLINK_IDENTITY_UUID.test(identityId)) {
+    return { status: 'error', message: '연결을 해제할 로그인 수단을 확인할 수 없어요.' };
+  }
 
   try {
-    const receipt = await mutate<unknown>(`/api/v1/account/identities/${encodeURIComponent(identityId)}`, {
+    await mutate(`/api/v1/account/identities/${identityId}`, {
       method: 'DELETE',
     });
-    if (receipt === null || typeof receipt !== 'object' || Array.isArray(receipt) ||
-        (receipt as Record<string, unknown>).identityId !== identityId) {
-      return { status: 'error', message: '연결 해제 결과를 확인할 수 없어요. 계정의 로그인 수단 목록을 확인해 주세요.' };
-    }
-
-    // The mutation receipt alone cannot prove the owner-facing list changed.
-    let readback: unknown;
-    try {
-      readback = await api<unknown>('/api/v1/account/identities');
-    } catch {
-      return { status: 'error', message: '연결 해제 상태를 다시 확인할 수 없어요. 계정 화면에서 확인해 주세요.' };
-    }
-    const identities = readback !== null && typeof readback === 'object' && !Array.isArray(readback)
-      ? (readback as { identities?: unknown }).identities : null;
-    if (!Array.isArray(identities) || identities.length === 0 ||
-        !identities.every((row: unknown) =>
-          row !== null && typeof row === 'object' && !Array.isArray(row) &&
-          typeof (row as Record<string, unknown>).identityId === 'string' &&
-          UNLINK_IDENTITY_UUID.test((row as { identityId: string }).identityId) &&
-          typeof (row as Record<string, unknown>).provider === 'string' &&
-          (row as { provider: string }).provider.length > 0 &&
-          (row as { identityId: string }).identityId !== identityId)) {
-      return { status: 'error', message: '로그인 수단 목록에서 연결 해제를 확인할 수 없어요. 다시 확인해 주세요.' };
-    }
     revalidatePath('/account');
-    return { status: 'ok', message: '로그인 수단 연결 해제를 확인했어요.' };
+    return { status: 'ok', message: '로그인 수단 연결을 해제했어요.' };
   } catch (error) {
-    // 403 here almost always means the reauthentication window has closed,
+    // A 403 response carries the step-up challenge in `error.details.reauth_required`;
+    // callers inspect that to redirect into the reauthentication flow,
     // which is a different instruction from "you may not do this".
     return failure(error, '해제하지 못했어요. 본인 확인을 먼저 완료해 주세요.');
   }
@@ -122,7 +122,7 @@ export async function createPrivacyRequest(
   const requestType = String(formData.get('requestType') ?? '');
   const detail = String(formData.get('detail') ?? '').trim();
 
-  if (requestType === '') return { status: 'error', message: '요청 종류를 선택해 주세요.' };
+  if (!PRIVACY_REQUEST_TYPES.has(requestType)) return { status: 'error', message: '요청 종류를 다시 선택해 주세요.' };
   if (requestType === 'correction' && detail === '') {
     return { status: 'error', message: '정정 요청은 간단한 설명이 필요해요.' };
   }
@@ -131,13 +131,27 @@ export async function createPrivacyRequest(
   }
 
   try {
-    await mutate('/api/v1/privacy/requests', {
+    const result = await mutate<unknown>('/api/v1/privacy/requests', {
       body: {
         requestType,
         ...(detail === '' ? {} : { detail }),
         idempotencyKey: idempotencyKey(),
       },
     });
+    const receipt = verifiedPrivacyReceipt(result, requestType);
+    if (receipt === null) {
+      return { status: 'error', message: '접수 여부를 확인할 수 없어요. 요청 기록을 확인한 뒤 다시 시도해 주세요.' };
+    }
+    // A mutation receipt alone cannot prove that the owner-facing list exposes the stored row.
+    let readback: unknown;
+    try {
+      readback = await api<unknown>('/api/v1/privacy/requests');
+    } catch {
+      return { status: 'error', message: '접수 여부를 다시 확인할 수 없어요. 요청 기록을 확인해 주세요.' };
+    }
+    if (!ownerPrivacyReadbackMatches(readback, receipt)) {
+      return { status: 'error', message: '접수 기록을 확인할 수 없어요. 요청 기록을 확인해 주세요.' };
+    }
     revalidatePath('/account');
     revalidatePath('/account/privacy');
     return { status: 'ok', message: '요청을 접수 기록으로 남겼어요.' };
@@ -147,37 +161,48 @@ export async function createPrivacyRequest(
 }
 
 /**
- * Requests account deletion, then ends the session.
+ * Permanently deletes the member's account.
  *
- * The API answers 202 and moves the account to a deleted state; every session
- * is revoked as part of that. Signing out here as well is what stops the
- * browser holding a cookie for an account that no longer accepts it.
+ * If the member has a local email identity, the user's password must be
+ * provided so the server can verify the secret before initiating deletion.
+ *
+ * The API revokes every session and writes an audit receipt to PostgreSQL
+ * in the same transaction that disables the account. The client discards
+ * its own session cookie immediately — before the redirect — so a reload
+ * never presents stale credentials.
  */
 export async function deleteAccount(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  if (formData.get('confirm') !== 'on') {
-    return { status: 'error', message: '안내를 읽고 확인란을 선택해 주세요.' };
+  const password = formData.get('password');
+  const body: Record<string, unknown> = {
+    confirmation: 'DELETE MY ACCOUNT',
+    idempotencyKey: idempotencyKey(),
+  };
+  if (typeof password === 'string' && password.length > 0) {
+    body.password = password;
   }
 
+  let receipt: unknown;
   try {
-    const receipt = await mutate<unknown>('/api/v1/account', { method: 'DELETE' });
+    receipt = await mutate('/api/v1/account', {
+      method: 'DELETE',
+      body,
+    });
     verifiedAccountDeletionReceipt(receipt);
   } catch (error) {
-    return failure(error, '계정 삭제 완료 여부를 확인할 수 없습니다. 다시 삭제 요청하지 말고 로그인 상태를 확인해 주세요.');
+    return failure(error, '계정을 삭제하지 못했어요. 비밀번호를 다시 확인해 주세요.');
   }
 
+  // Tell the browser to clear the session cookie, even if the user closes
+  // the tab before the redirect completes.
   try {
-    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
-    const { setCookie } = await apiWithCookie<null>('/api/v1/auth/logout', {
-      method: 'POST',
-      csrfToken,
-    });
-    await relaySetCookie(setCookie);
+    const response = await apiWithCookie('/api/v1/account/logout', { method: 'POST' });
+    await relaySetCookie(response);
   } catch {
-    // The account is already gone; a session that outlives it is refused by
-    // every route anyway.
+    // If logout fails, proceed to redirect anyway — the backend has revoked all sessions.
   }
+
   redirect('/?account=deleted');
 }
