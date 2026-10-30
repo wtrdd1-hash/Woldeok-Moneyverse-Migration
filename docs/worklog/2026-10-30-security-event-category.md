@@ -11,8 +11,15 @@
 ## In progress
 - Planned RED→GREEN Nest, web and Android regression; isolated PostgreSQL least-privilege proof; exact-SHA gates.
 
-## Finished
-- PENDING. No merge, production deployment, service restart, DB change, branch deletion or rollback authorized by this candidate.
+## Finished (2026-10-30 13:14 KST; DRAFT / RELEASE HOLD)
+- Draft PR #1996 created. Feature code/contract SHA `5b9d46a9d476c9c2a6b602ae98bfa27fd747df28`; final documentation SHA recorded on PR after commit. Latest origin/main rechecked unchanged `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` at start, middle and pre-integration; English/Korean plans re-read. No merge.
+- Changed files: backend controller/repository/test; frontend security page/filter helper/test; Android gateway/test; machine-readable mobile API contract and EN/KO references; EN/KO feature/mobile guides; plan and EN/KO worklogs (18 files in candidate).
+- Fresh final local: typecheck PASS, build PASS, changed ESLint PASS, full lint PASS (0 errors, 1,043 warnings), Android API contract PASS, Backend target 10 PASS, Frontend target 68 PASS, DB unit 56 PASS/4 SKIP, security/release 26 PASS, production dependency audit no known vulnerabilities, isolated PostgreSQL 305 migrations and owner/ACL/rollback PASS.
+- Full Backend FAIL (2,567 PASS / 119 FAIL / 495 SKIP); full Frontend FAIL (2,614 PASS / 54 FAIL). These are not waived by target passes. Exact code SHA Build Test Candidate #41001065886 FAIL: generated mobile contract classified UNKNOWN while separate repair Draft #1986 remains unmerged. Runtime CI pending when PR opened.
+- Official Test version `c2129625...` differs from candidate and main; Treasury public API still HTTP 200 unverified. Production `/api/version` `94d38f476...`, Treasury 503 UNVERIFIED; backend/frontend PIDs still run from deleted v1515 while release symlink is v1523. Independent backup restore, official authenticated Test E2E, GitOps and rollback rehearsal BLOCKED.
+- Branch audit: start 7 open PRs, end 9 open Draft PRs. End 59 origin branches (58 non-main; 49 fully merged into main, 9 unique unmerged). Initial local `git branch -r` count 1,109 included 1,054 historical `pr/*` snapshot refs, not 1,109 GitHub branches. No branch deleted or closed; preserve every unique commit and other agents' work.
+- No Test/Production deploy, no production DB/ledger changes, no service restart, no Docker prune, no main merge and no rollback. Owned isolated PostgreSQL container stopped after verified fixture rollback. Future rollback, if approved release ever occurs: revert code-only feature; no migration to reverse.
+- Final decision: **P1 TARGETED PASS / FULL GATES FAIL / OFFICIAL TEST BLOCKED / PRODUCTION HOLD**.
 
 ## In-progress checkpoint (2026-10-30 13:00 KST)
 - RED: backend 3 failing tests, frontend 3 failing tests; second RED for stale/malformed Android upstream responses; media-type RED confirmed.
