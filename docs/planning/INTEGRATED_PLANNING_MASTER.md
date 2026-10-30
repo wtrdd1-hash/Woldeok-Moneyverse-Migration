@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1516 F675-185 member inventory lifecycle transparency / issue #2024 / Draft PR PR_PENDING / RELEASE HOLD; stacked on #2018.
+**Current planning:** v1516 F675-185 member inventory lifecycle transparency / issue #2024 / Draft PR #2025 / RELEASE HOLD; stacked on #2018.
 
 ## v2026.10.30.1516 — F675-185 Member Inventory Lifecycle and Upkeep Transparency (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
