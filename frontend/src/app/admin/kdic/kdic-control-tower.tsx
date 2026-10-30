@@ -293,7 +293,7 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
             className="px-4 py-2 min-h-11 rounded-lg border border-slate-700 bg-slate-800 text-xs font-medium text-slate-400 cursor-not-allowed flex items-center gap-2"
           >
             <span>🛡️</span>
-            <span>대위변제 대상 부실 기관 없음 (금융망 정상)</span>
+            <span>대위변제금 즉시 환급 (부실 금융기관 없음)</span>
           </button>
         </div>
       </div>
