@@ -37,7 +37,7 @@ export function MyReceipts() {
     setHistory(null);
     setFailed(false);
     if (invalidMinAmount) {
-      setReceipts([]);
+      setHistory({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
       return;
     }
     const timer = setTimeout(() => {
