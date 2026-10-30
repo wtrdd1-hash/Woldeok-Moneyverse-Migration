@@ -57,7 +57,8 @@ class MarketTests(unittest.TestCase):
         t=datetime(2026,10,29,0,2,tzinfo=timezone.utc)
         state,_=propose({},snapshot(),[],t-timedelta(hours=2))
         state,m=propose(state,snapshot("102"),[],t)
-        self.assertEqual(len(m),1);self.assertIn("일일",m[0][1])
+        self.assertTrue(any("일일" in message for _,message in m))
+        self.assertTrue(any("감시 중단" in message for _,message in m))
         self.assertFalse(propose(state,snapshot("102"),[],t+timedelta(minutes=2))[1])
     def test_error_logs_are_count_only(self):
         s,_=propose({},snapshot(),[{"unit":"moneyverse-backend.service","cursor":"a","MESSAGE":"private"}],NOW)
@@ -95,6 +96,26 @@ class MarketTests(unittest.TestCase):
         self.assertEqual(len(messages),30)
         self.assertIn("추가 중요 이벤트",messages[-1][1])
         self.assertIn("41건",messages[-1][1])
+    def test_stale_snapshot_warns_without_false_two_minute_movement(self):
+        old=datetime(2026,10,29,12,0,tzinfo=timezone.utc)
+        state,_=propose({},snapshot(),[],old)
+        _,messages=propose(state,snapshot("109","108"),[],old+timedelta(hours=11))
+        self.assertEqual(len(messages),1)
+        self.assertIn("감시 중단",messages[0][1])
+        self.assertNotIn("주가 급변",messages[0][1])
+
+    def test_late_morning_digest_after_timer_outage(self):
+        old=datetime(2026,10,29,12,0,tzinfo=timezone.utc)
+        state,_=propose({},snapshot(),[],old)
+        _,messages=propose(state,snapshot(),[],datetime(2026,10,30,2,0,tzinfo=timezone.utc))
+        self.assertTrue(any("일일 요약" in msg for _,msg in messages))
+
+    def test_explicit_calendar_timer_survives_service_restart(self):
+        timer=Path(__file__).resolve().parents[1]/"systemd"/"moneyverse-telegram-market.timer"
+        source=timer.read_text()
+        self.assertIn("OnCalendar=*-*-* *:00/2:00",source)
+        self.assertNotIn("OnBootSec=",source)
+
     def test_unknown_journal_unit_filtered(self):
         s,_=propose({},snapshot(),[],NOW)
         _,m=propose(s,snapshot(),[{"unit":"secret.service","cursor":"xy"}],NOW+timedelta(minutes=2))

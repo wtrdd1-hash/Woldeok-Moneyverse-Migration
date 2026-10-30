@@ -1,3 +1,6 @@
+## v2026.10.30.1 — Telegram market recurring schedule and watchdog (candidate)
+- Recover a silent active/elapsed market timer with a calendar schedule, monitor real next trigger and prevent stale two-minute price alerts. [Release](../releases/v2026.10.30.1.md).
+
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 

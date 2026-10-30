@@ -22,6 +22,7 @@ DB_NAME = os.environ.get("MONEYVERSE_MARKET_DB_NAME", "woldeok_moneyverse_dev")
 WINDOW_PCT = Decimal("5")
 DAY_PCT = Decimal("10")
 COOLDOWN = 20 * 60
+MAX_OBSERVATION_GAP = 10 * 60
 MAX_MESSAGE_BATCH = 30
 LOG_UNITS = ("moneyverse-backend.service", "moneyverse-frontend.service",
              "moneyverse-qa.service", "moneyverse-verified-blog-v1419.service",
@@ -106,6 +107,31 @@ def propose(previous: dict, market: dict, errors: list[dict], now: datetime) -> 
     day=now.astimezone(KST).date().isoformat()
     state=dict(previous)
     messages=[]
+    last_seen = previous.get("observed_at")
+    gap_seconds = None
+    if isinstance(last_seen, str):
+        try:
+            then = datetime.fromisoformat(last_seen)
+            if then.tzinfo is not None:
+                gap_seconds = (now - then).total_seconds()
+        except ValueError:
+            pass
+    stale = bool(previous.get("prices")) and (
+        gap_seconds is None or gap_seconds > MAX_OBSERVATION_GAP
+    )
+    if stale:
+        duration = (
+            f"{gap_seconds / 3600:.1f}시간" if gap_seconds is not None
+            else "이전 관측 시간 미기록"
+        )
+        messages.append((
+            "monitor-gap:" + str(last_seen) + ":" + day,
+            "⚠️ [주식시장 감시 중단·복구]\n"
+            + f"이전 관측과의 간격: {duration}\n"
+            + "감시 중단 중 일부 뉴스·오류가 누락될 수 있습니다. "
+              "오래된 가격은 2분 급변으로 계산하지 않습니다."
+        ))
+    state["observed_at"] = now.isoformat()
     for field,title in (("batches","📰 [AI 주식 뉴스 생성]"),("events","📣 [주식 뉴스 시장 반영]")):
         entries=market[field]
         old_ids=set(previous.get(field,[])) if field in previous else None
@@ -148,7 +174,8 @@ def propose(previous: dict, market: dict, errors: list[dict], now: datetime) -> 
             digest.append(f"{redact(symbol)}: {price} WLD ({daily:+.2f}%)")
         if symbol not in previous_prices: continue
         cooldown=float(cooldowns.get(symbol,0) or 0)
-        short=(movement is not None and abs(movement)>=WINDOW_PCT and now.timestamp()-cooldown>=COOLDOWN)
+        short=(not stale and movement is not None and abs(movement)>=WINDOW_PCT
+               and now.timestamp()-cooldown>=COOLDOWN)
         day_signal=(daily is not None and abs(daily)>=DAY_PCT and seen_days.get(symbol)!=day)
         if short or day_signal:
             change=movement if short else daily
@@ -162,7 +189,10 @@ def propose(previous: dict, market: dict, errors: list[dict], now: datetime) -> 
             if day_signal:seen_days[symbol]=day
     state["cooldowns"]=cooldowns
     state["daily_flags"]=seen_days
-    if now.astimezone(KST).hour==9 and previous.get("digest_day")!=day:
+    # Send at 09:00–11:59 KST with a recovery grace window. Never send a
+    # synthetic daily recap on a brand-new baseline or late in the evening.
+    if (previous.get("prices") and 9 <= now.astimezone(KST).hour < 12
+            and previous.get("digest_day") != day):
         messages.append(("digest:"+day,"📊 [머니버스 가상 주식시장 일일 요약]\n"
                          +"\n".join(digest[:25])+"\n가격 단위: 가상경제 WLD"))
         state["digest_day"]=day
