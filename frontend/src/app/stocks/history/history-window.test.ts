@@ -18,3 +18,18 @@ describe('member stock history recent window', () => {
     expect(stockHistoryApiPath(200)).toBe('/api/v1/stocks/history?limit=200');
   });
 });
+
+describe('exact WLD stock history gross minimum', () => {
+  it('validates canonical large integer strings and includes only explicit filter', async () => {
+    const { normalizeStockHistoryGrossFloor } = await import('./history-window');
+    expect(normalizeStockHistoryGrossFloor('900719925474099312345')).toBe('900719925474099312345');
+    expect(stockHistoryApiPath(200, '900719925474099312345')).toBe('/api/v1/stocks/history?limit=200&minGross=900719925474099312345');
+    expect(stockHistoryApiPath(50)).toBe('/api/v1/stocks/history?limit=50');
+  });
+  it.each(['0', '01', '-1', '1.1', '1e3', '', ' '.repeat(3), ['1', '2'], '9'.repeat(31)])(
+    'rejects malformed gross floor %s', async (raw) => {
+      const { normalizeStockHistoryGrossFloor } = await import('./history-window');
+      expect(normalizeStockHistoryGrossFloor(raw)).toBeNull();
+    },
+  );
+});
