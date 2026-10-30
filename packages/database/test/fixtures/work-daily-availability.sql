@@ -7,7 +7,6 @@ DECLARE
   actor uuid := '11111111-1111-4111-8111-111111111111';
   all_count integer;
   filtered_count integer;
-  expected_count integer;
   fixture_count integer;
 BEGIN
   IF has_table_privilege(current_user, 'public.work_task_catalog', 'SELECT') THEN
@@ -17,10 +16,7 @@ BEGIN
   SELECT count(*) INTO filtered_count
   FROM public.work_task_board(actor) AS task
   WHERE task.daily_limit <= 0 OR task.taken_today < task.daily_limit;
-  SELECT count(*) INTO expected_count
-  FROM public.work_task_board(actor) AS task
-  WHERE task.daily_limit <= 0 OR task.taken_today < task.daily_limit;
-  IF all_count = 0 OR filtered_count > all_count OR filtered_count <> expected_count THEN
+  IF all_count = 0 OR filtered_count > all_count THEN
     RAISE EXCEPTION 'owner-scoped task board availability query is invalid';
   END IF;
   SELECT count(*) INTO fixture_count

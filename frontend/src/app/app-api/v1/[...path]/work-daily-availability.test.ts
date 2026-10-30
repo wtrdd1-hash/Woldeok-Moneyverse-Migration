@@ -23,8 +23,8 @@ describe('Android work task daily availability', () => {
           JSON.stringify({
             featureState: 'enabled',
             tasks: [
-              { daily_limit: 3, taken_today: 1 },
-              { daily_limit: 0, taken_today: 10 },
+              { task_id: '11111111-1111-4111-8111-111111111111', daily_limit: 3, taken_today: 1 },
+              { task_id: '22222222-2222-4222-8222-222222222222', daily_limit: 0, taken_today: 10 },
             ],
           }),
           {
@@ -57,7 +57,9 @@ describe('Android work task daily availability', () => {
           new Response(
             JSON.stringify({
               featureState: 'enabled',
-              tasks: [{ daily_limit: 2, taken_today: 2 }],
+              tasks: [
+                { task_id: '33333333-3333-4333-8333-333333333333', daily_limit: 2, taken_today: 2 },
+              ],
             }),
             { status: 200, headers: { 'content-type': 'application/json' } },
           ),

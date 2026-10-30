@@ -24,7 +24,7 @@ describe('member work task daily availability filter', () => {
       <CareerTasksBoard tasks={[]} selectedAvailableOnly selectedMaxDuration="300" />,
     );
     const checkbox = screen.getByRole('checkbox', {
-      name: '오늘 수행 가능한 업무만 보기',
+      name: '일일 수행 한도가 남은 업무만 보기',
     }) as HTMLInputElement;
     expect(checkbox.checked).toBe(true);
     expect(checkbox.name).toBe('availableOnly');

@@ -156,7 +156,7 @@ export function CareerTasksBoard({
           <label className="inline-flex min-h-10 items-center gap-2 text-xs text-foreground">
             <input type="checkbox" name="availableOnly" value="1" defaultChecked={selectedAvailableOnly}
               className="size-4 accent-primary focus-visible:ring-2 focus-visible:ring-ring" />
-            {isEn ? 'Only tasks available today' : '오늘 수행 가능한 업무만 보기'}
+            {isEn ? 'Only tasks with daily quota remaining' : '일일 수행 한도가 남은 업무만 보기'}
           </label>
           <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
           <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
