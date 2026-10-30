@@ -34,7 +34,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -285,7 +284,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/market-events')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Publish a market event: news that leans the market' })
   publishMarketEvent(@Req() request: RequestWithSession, @Body() body: PublishMarketEventDto) {
     return this.guarded(
@@ -295,7 +294,7 @@ export class GameCatalogController {
   }
 
   @Delete('stocks/market-events/:id')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'End a market event now' })
   cancelMarketEvent(
     @Req() request: RequestWithSession,
@@ -336,7 +335,7 @@ export class GameCatalogController {
    * walk clamps to a band around that open — see migration 053.
    */
   @Post('stocks/:id/price')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Set a stock price by hand' })
   setStockPrice(
     @Req() request: RequestWithSession,
@@ -368,7 +367,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/halt')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Halt stock trading and auto-settle all holdings into cost-basis WLD' })
   haltStock(
     @Req() request: RequestWithSession,
@@ -394,7 +393,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/halt-settlement/retry')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Retry failed or quarantined stock halt settlements' })
   retryHaltSettlement(
     @Req() request: RequestWithSession,
@@ -407,7 +406,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/corporate-actions')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Apply a split or reverse split' })
   corporateAction(
     @Req() request: RequestWithSession,
@@ -452,7 +451,7 @@ export class GameCatalogController {
   }
 
   @Post('season-events')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Create a season event in the active season' })
   createSeasonEvent(@Req() request: RequestWithSession, @Body() body: CreateSeasonEventDto) {
     return this.guarded(
@@ -462,7 +461,7 @@ export class GameCatalogController {
   }
 
   @Patch('season-events/:id')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Retitle, redescribe or deactivate a season event' })
   updateSeasonEvent(
     @Req() request: RequestWithSession,
