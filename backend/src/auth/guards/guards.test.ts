@@ -164,6 +164,34 @@ describe('AdminGuard', () => {
 });
 
 describe('ReauthGuard', () => {
+  it('accepts an authenticated open admin console without repeating identity verification', async () => {
+    let called = false;
+    const guard = new ReauthGuard({
+      hasRecentReauthentication: async () => { called = true; return false; },
+    } as never);
+    const context = contextFor({
+      session: { id: 'session-id', user_id: 'admin-id' } as never,
+      adminRoles: ['operator'],
+      adminSession: { state: 'open' } as never,
+    });
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(called).toBe(false);
+  });
+
+  it('does not waive recent verification for non-admin requests or locked consoles', async () => {
+    const guard = new ReauthGuard({ hasRecentReauthentication: async () => false } as never);
+    for (const extra of [
+      { adminRoles: ['operator'] },
+      { adminSession: { state: 'open' } },
+      { adminRoles: ['operator'], adminSession: { state: 'idle_locked' } },
+    ]) {
+      await expect(guard.canActivate(contextFor({
+        session: { id: 'session-id', user_id: 'user-id' } as never,
+        ...extra,
+      } as never))).rejects.toMatchObject({ status: 401 });
+    }
+  });
+
   it('rejects when the last reauthentication is older than the window', async () => {
     const guard = new ReauthGuard({ hasRecentReauthentication: async () => false } as never);
     const context = contextFor({ session: { id: 'session-id', user_id: 'user-id' } as never });
