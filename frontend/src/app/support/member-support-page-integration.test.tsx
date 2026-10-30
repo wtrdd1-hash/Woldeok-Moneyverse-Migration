@@ -37,6 +37,7 @@ describe('member support page verified action integration', () => {
     expect(html).toContain('data-testid="verified-reply-support"');
     expect(html).toContain(`data-thread-id="${threadId}"`);
     expect(html).not.toContain('name="threadId"');
+    expect(html).toContain(`/support/transcript/${threadId}/text`);
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 
