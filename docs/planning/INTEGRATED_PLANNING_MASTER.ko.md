@@ -1,5 +1,5 @@
 ﻿# 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / 이슈 #1973 / 초안 / 운영 보류. v1500 PR #1974 병합, 기능 런타임 미구현.
+**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / Draft PR #1983 / 이슈 #1973 / 초안 / 운영 보류. v1500 PR #1974 병합, 기능 런타임 미구현.
 
 ## v2026.10.30.1502 — F675-181 지갑 날짜 범위 조회 근거·커서 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
@@ -36,6 +36,8 @@
 - 신규 분산 기획 파일 없음. 런타임·DB·Test·운영 미변경. 개발 별도 브랜치·RED-GREEN·실제 PG/보안/모바일/접근성·전체 CI·공식 Test 프론트/백엔드/엣지 정확 SHA·독립 복원·사용자 승인·기능 OFF 롤백 필수. 외부 독립 중복 제거·실제 근거 분류 승인 **신규 0건, 누적 UNKNOWN / 10,000건 — BLOCKED / IN PROGRESS**.
 
 
+
+**최종 재조회(11:13 KST):** main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`로 진행(implementation_plan.md 문서만 변경). 공개 Production `/api/version`은 `94d38f47603e99aabc42fc8f292b89441afb9663`(v1523 릴리스), 공식 Test는 구버전 `c2129625aa6629c616fb31ce790950618b8d92b2`. v1523의 정확 SHA CI/Test 통과는 이 회차에서 확인하지 못했으므로 P0 배포 게이트 보류. PR #1983 초안이며 운영 승격 권한 없음.
 ## v2026.10.30.1500 — F675-181 회원 전용 지갑 거래내역 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
 
 **주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). **기준:** 2026-10-30 시작·중간 재확인한 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. **GitHub:** [초안 PR #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [개발 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). **설계 제안만 수행:** 런타임·DB·WLD·Test·Production 변경 없음. v1498 초안 #1964는 미병합 CLOSED이며 통합 문서의 가치 있는 기존 요구사항은 보존.

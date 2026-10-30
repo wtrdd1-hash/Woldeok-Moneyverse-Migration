@@ -1,5 +1,5 @@
 ﻿# Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1502 F675-181 wallet calendar-range hardening / issue #1973 / DRAFT / RELEASE HOLD; v1500 PR #1974 merged, runtime not implemented.
+**Current planning:** v1502 F675-181 wallet calendar-range hardening / Draft PR #1983 / issue #1973 / DRAFT / RELEASE HOLD; v1500 PR #1974 merged, runtime not implemented.
 **Historical draft pointer (superseded):** **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
 
@@ -11,6 +11,8 @@
 - **Acceptance PLANNED, NOT RUN:** 10,001 synthetic rows; 100 cross-owner, 100 cursor forgeries, 100 concurrent, 50 microsecond/KST, 30 leap/account switches, 50 malformed responses, 30 late postings, zero ledger/WLD writes. No exact-SHA Test, independent restore or Production approval. External independent deduplicated classified approvals **new 0; cumulative UNKNOWN / 10,000 — BLOCKED / IN PROGRESS**.
 
 
+
+**Final recheck (11:13 KST):** main advanced to `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` (documentation-only implementation_plan.md change). Public Production `/api/version` reports `94d38f47603e99aabc42fc8f292b89441afb9663` (v1523 release); official Test remains `c2129625aa6629c616fb31ce790950618b8d92b2`. No v1523 exact-source CI/Test PASS was independently attested here; P0 release gate remains HOLD. Draft PR #1983 is not release authorization.
 ## v2026.10.30.1500 — F675-181 Wallet Activity KST Calendar Range (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Improvement v1498 → Current Addition v1500 → Next Improvement v1502 (provisional). Latest origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf checked start/mid; [Draft #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [P0/P1 handoff #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). Previous v1498 Draft #1964 closed without merge; integrated requirements preserved. English is canonical, Korean meaning-equivalent.
 - **Observed gap:** wallet period.ts, Next page, Nest controller and repository support all/7d/30d, direction and owner-scoped 50+1 cursor pages, but no explicit calendar dates. F675-176 saved filters, F675-177 monthly summary, F675-178 bookmarks and existing CSV/privacy exports are separate. No runtime implementation.

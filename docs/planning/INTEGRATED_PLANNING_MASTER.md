@@ -1,5 +1,5 @@
 ﻿# Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1502 F675-181 wallet calendar-range hardening / issue #1973 / DRAFT / RELEASE HOLD. v1500 PR #1974 merged; feature runtime not implemented.
+**Current planning:** v1502 F675-181 wallet calendar-range hardening / Draft PR #1983 / issue #1973 / DRAFT / RELEASE HOLD. v1500 PR #1974 merged; feature runtime not implemented.
 
 ## v2026.10.30.1502 — F675-181 Wallet Calendar-Range Evidence and Cursor Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
@@ -36,6 +36,8 @@
 - No new distributed planning file, no runtime/DB/Test/Production change or direct deployment. Separate developer branch, RED-GREEN tests, real PG/security/mobile/a11y, complete CI, official Test exact frontend/backend/edge SHA, independently verified restore, human-authorized promotion and reversible feature OFF are mandatory. External independent deduplicated classified reference approvals **new 0; cumulative UNKNOWN / 10,000 — BLOCKED / IN PROGRESS**.
 
 
+
+**Final recheck (11:13 KST):** main advanced to `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` (documentation-only implementation_plan.md change). Public Production `/api/version` reports `94d38f47603e99aabc42fc8f292b89441afb9663` (v1523 release); official Test remains `c2129625aa6629c616fb31ce790950618b8d92b2`. No v1523 exact-source CI/Test PASS was independently attested here; P0 release gate remains HOLD. Draft PR #1983 is not release authorization.
 ## v2026.10.30.1500 — F675-181 Owner-Private Wallet Calendar Range (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Cycle:** Previous Feature Improvement v1498 → Current Feature Addition v1500 → Next Feature Improvement v1502 (provisional). **Authority:** origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, rechecked start/mid on 2026-10-30; AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity. **GitHub:** [Draft #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [handoff #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). Documentation-only proposal; no runtime/DB/WLD/Test/Production mutation. Prior v1498 Draft #1964 CLOSED without merge; preserve its integrated historical requirements.

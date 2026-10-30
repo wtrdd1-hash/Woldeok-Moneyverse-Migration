@@ -1,5 +1,5 @@
 ﻿# 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / 이슈 #1973 / 초안 / 운영 보류; v1500 PR #1974 병합, 런타임 미구현.
+**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / Draft PR #1983 / 이슈 #1973 / 초안 / 운영 보류; v1500 PR #1974 병합, 런타임 미구현.
 **Historical draft pointer (superseded):** **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
 
@@ -11,6 +11,8 @@
 - **수용시험 계획 미실행:** 합성 원장 10,001건, 타인 100·커서 위조 100·동시 100·마이크로초/한국시간 50·윤년/계정 전환 30·비정상 응답 50·지연 거래 30, 원장/WLD 변경 0. 공식 정확 SHA Test·독립 복원·운영 승인 없음. 외부 독립 중복 제거·실제 근거 분류 승인 **신규 0건, 누적 UNKNOWN / 10,000 — BLOCKED / IN PROGRESS**.
 
 
+
+**최종 재조회(11:13 KST):** main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`로 진행(implementation_plan.md 문서만 변경). 공개 Production `/api/version`은 `94d38f47603e99aabc42fc8f292b89441afb9663`(v1523 릴리스), 공식 Test는 구버전 `c2129625aa6629c616fb31ce790950618b8d92b2`. v1523의 정확 SHA CI/Test 통과는 이 회차에서 확인하지 못했으므로 P0 배포 게이트 보류. PR #1983 초안이며 운영 승격 권한 없음.
 ## v2026.10.30.1500 — F675-181 지갑 거래내역 한국시간 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
 - **주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). 기준 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf 시작·중간 재확인; [초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [P0/P1 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). 이전 v1498 초안 #1964는 미병합 CLOSED, 통합된 기존 요구사항 보존. 영문 정본과 의미 동등.
 - **실제 문제:** 기간 선택·Nest·원장 SQL은 all/7d/30d, 방향, 본인 50+1 페이지를 지원하나 달력 시작일·종료일 지정은 없음. 저장 필터 F675-176, 월별 요약 F675-177, 북마크 F675-178, 기존 CSV·개인정보 내보내기와 구분. 런타임 미구현.
