@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
 - Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
 
@@ -33,6 +34,11 @@
 - Recorded QA v1384 **DEV-only** effective moneyverse_app privileges: 211 UPDATE, 211 DELETE, 233 TRUNCATE of 253 base tables; P0 investigation, no Production/exploit claim.
 - Updated P0/P1 backlog, bilingual master/project plans, logs and external 10,000 reference HOLD. Documentation only; no runtime or financial changes.
 >>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
+=======
+## v2026.10.30.1494 — F675-179 storage evidence hardening (planning draft)
+- Read-only Debian host: root 94% (~5.8 GiB available), DATA df-rounded 100% but ~1.1 GiB unprivileged available; reserved ~9.7 GiB not worker headroom. No outage proven, no cleanup.
+- Proposed signed host/mount/sequence proof, BigInt reserved-block arithmetic, fail-closed replay/freshness/restore-headroom, admin all-response no-store/noindex and 10-item P0/P1 backlog. Latest verified QA v1381 FAILED/P0. External evidence new 0, cumulative UNKNOWN/10,000 BLOCKED. Draft PR https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954 stacked on #1949; feature OFF, release HOLD, no runtime change.
+>>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
@@ -64,6 +70,11 @@
 >>>>>>> origin/auto/planning-v1496-release-readiness-20261030
 
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
+
+## v2026.10.30.1492 — F675-179 Operator-only verified storage headroom (planning draft)
+- Added bilingual integrated specification for read-only host filesystem/inode headroom, authenticated source/freshness, strict admin API and no-delete UX. Observed Debian root 92%, data 99% (~3.1 GiB free) at 06:09 KST; no cleanup performed.
+- P0 DISK1492-01 SEC1492-02 FIN1492-03 REL1492-04; P1 STORAGE1492-05..10. QA v1381 FAILED/P0; exact-SHA Test and independent restore unverified. External evidence 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED. Draft/HOLD, feature OFF, no runtime/DB/WLD/Test/Production mutation. Issue #1948.
+
 
 ## v2026.10.29.1510 — Private Telegram operations alert bridge (Production active and paired)
 - Read-only service/QA/blog/backup/disk changes with private pairing, safe redaction, deduplicated dispatch and daily summary. No account events or monetary data are forwarded. Test/Production evidence pending. [Release](../releases/v2026.10.29.1510.md).

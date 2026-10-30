@@ -4,6 +4,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.1490 — F675-178 지갑 북마크 정합성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Addition v1488 → 현재 Improvement v1490 → 다음 Addition v1492(잠정). 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재조회; QA v1380 FAILED/P0. 선행 Draft #1937 미병합, 인계 #1936. 문서만 수정.
 - **실제 소스 근거:** 지갑 거래 커서가 PostgreSQL 마이크로초를 JS Date 밀리초로 변환; Android APP_API_REQUEST_HEADERS에 Idempotency-Key 없음; 지갑 게이트웨이에 private no-store는 있으나 X-Robots-Tag noindex 강제 없음; 북마크 CTA/API 미구현. 기존 Backend B #1935와 독립.
@@ -113,6 +114,29 @@
 - 외부 독립 승인 신규 0, 누적 UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. 기능 기본 OFF, 런타임·DB·WLD·Test·운영 미변경, 운영승격 HOLD. 별도 문서 PR만 작성하며 병합·배포하지 않는다.
 
 >>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
+=======
+## v2026.10.30.1494 — F675-179 저장공간 근거 검증·예약 블록·배포 보류 강화 (기능 보완 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954), 선행 미병합 [#1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 기반; [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
+- 회차: 이전 기능 추가 v1492 → 현재 기능 보완 v1494 → 다음 기능 추가 v1496(잠정). 시작·중간 main `62c6cd038951d65c94b709302bdaec6e75b080b6`; 최신 검증 QA v1381 FAILED/P0, 이후 미확인. v1492 미병합. 문서 전용.
+- 07:02~07:05 KST Debian 13.6 읽기 전용 측정: 루트 94%/약 5.8GiB 가용, DATA `df` **반올림 100%**지만 일반 사용자 가용 약 1.1GiB. DATA `stat -f` `f_blocks=51459497,f_bfree=2650519,f_bavail=287189,frsize=4096`; 예약 블록 약 9.7GiB는 일반 작업자가 쓸 수 없다. inode 고갈·고객 장애는 미확인. **P0 긴급/HOLD**, 정리·삭제 없음.
+- **07:08:30 KST** 추가 읽기 전용 측정: DATA 일반 사용자 가용량 **233,713,664바이트(약 223MiB)**. 앞선 1.1GiB는 과거 시점 값이며 빠르게 변한다. P0 긴급, 자동 삭제 금지.
+- v1492 강화: 호스트 전용 고정 ROOT/DATA 수집기 서명, 키·마운트/네임스페이스·부팅/시퀀스 검증, 60초 수집·120초 최신성, 30초 초과 미래·재전송·출처 불일치 거부. 컨테이너 대체·이전 정상값 재사용 금지. BigInt로 사용/일반 가용/예약 블록·inode 계산, 100% 반올림과 실제 가용량 동시 표시. 배포 공간은 대상 마운트의 `f_bavail`과 실측 빌드+복원+롤백+안전 여유를 비교하고 근거 누락 시 HOLD.
+- 최신 main Next 관리자 health 프록시의 성공·오류 응답에는 명시적인 no-store/noindex가 없다(소스 관찰, 유출 확증 아님). 신규 Nest+Next 관리자 경로는 인증·관리자·동의 검증과 **모든 응답** private/no-store/noindex/no-referrer 강제. 경로·키·개인정보 금지. 320px/200% 확대/WCAG 2.2 AA, 영한 동등, 읽기 전용 CTA, 오래됨·UNKNOWN·오류·계정 전환 상태, KPI, 기능 OFF, DB·금융 변경 없음.
+- P0: **DISK1494-01 SEC1494-02 FIN1494-03 REL1494-04** (소유자 승인 용량 복구, ACL/체크섬 5건, MINT 18,000 WLD/국고 552건/SWF, Git 참조 462개·전체 CI·독립 복원·정확 SHA Test). P1: **STORAGE1494-05 STORAGE1494-06 STORAGE1494-07 STORAGE1494-08 STORAGE1494-09 STORAGE1494-10** (서명 호스트 수집기, 예약 블록·inode, Nest/Next 보안·재전송, 화면·접근성, 관리자 KPI·키 교체·롤백, 격리 시험). 합성 10,001건·위조 100·동시 100·오래됨/재전송 50·마운트/경계 30 **기획만 하고 미실행**. [영문 통합 원본](INTEGRATED_PLANNING_MASTER.md)과 동등.
+- 외부 독립 중복제거 검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건** ⇒ **BLOCKED / IN PROGRESS**. 런타임·파일 삭제·DB·WLD·Test·Production 미변경. 초안 / 배포 보류.
+
+
+## v2026.10.30.1492 — F675-179 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
+- 회차: 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인, QA v1381 FAILED/P0. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 #1170.
+- 소스 공백: 기존 `/admin/api-health` 및 Nest `admin/api-health/status`는 CPU·메모리·DB 검사를 표시하지만 호스트 파일시스템·inode·롤백 여유 근거는 제공하지 않는다. Debian 13.6 2026-10-30 06:09 KST 실측: 루트 92%, 데이터 99%, 일반 사용자 가용 약 3.1GiB. 서비스 장애로 단정하거나 삭제를 승인하지 않는다.
+- 신규 `/admin/operations/storage`, `GET /api/v1/admin/operations/storage`: ROOT/DATA 고정 허용목록 호스트 statvfs 수집, 인증된 로컬 채널, 출처·마운트 네임스페이스 검증, 정확한 바이트·inode, `df` 호환 사용률, 120초 최신성. 80% 이상 주의, 90% 이상 위험, 95% 이상 또는 가용 <5GiB 긴급. 오래되거나 위조된 근거는 UNKNOWN으로 차단. CTA는 새로고침/근거 보기/#1170 열기뿐이며 삭제·재시작·배포 승인 없음.
+- 관리자 세션·동의·관리자 세션 가드, 관리자당 분당 6회·IP당 30회, 2초 제한, private/no-store/noindex, 한국어·영어 WCAG 2.2 AA/320px, 민감 경로 없는 집계 KPI·감사. v1 **DB 테이블·인덱스·권한·마이그레이션 추가 없음**. 향후 이력 테이블은 용량·체크섬 복구 후 별도 승인. 기능 OFF, 코드 롤백, WLD·금융 영향 없음. 전체 명세는 [한국어 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 **DISK1492-01 SEC1492-02 FIN1492-03 REL1492-04**: 소유권·백업·롤백 보존 안전 용량 복구, DB 체크섬 5건·ACL, MINT 18,000 WLD·국고 552건·SWF Test 진실성, Git 참조 462개·전체 CI·독립 복원·정확 SHA Test. P1 **STORAGE1492-05 STORAGE1492-06 STORAGE1492-07 STORAGE1492-08 STORAGE1492-09 STORAGE1492-10**: 수집기, 계산·최신성, 관리자 API, 화면·접근성, 개인정보·KPI·롤백, 격리 수용시험. 합성 10,001건, 위조 100건, 동시 100건, 오래됨 50건, 네임스페이스·임계값 30건 **기획만 하고 미실행**.
+- 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, 게이트 **BLOCKED / IN PROGRESS**. 문서 전용, 런타임·DB·원장·Test·Production 변경 없음. DRAFT / RELEASE HOLD.
+
+
+>>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

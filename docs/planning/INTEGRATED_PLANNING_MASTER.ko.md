@@ -4,6 +4,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v1490 / F675-178 — 지갑 거래 북마크 정합성·재시도·모바일 개인정보 보호 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 Feature Addition v1488 → 현재 Feature Improvement v1490 → 다음 Feature Addition v1492(잠정). **기준:** main 62c6cd038951d65c94b709302bdaec6e75b080b6, AGENTS.md, README.md, 영문 PROJECT_PLAN.md와 국문 대조 문서; 시작·중간 재조회. **선행:** 미병합 Draft PR #1937, 개발 인계 이슈 #1936. **QA:** 독립 v1380 FAILED/P0. 문서 기획만 수행하며 런타임·SQL·DB·WLD·Test·Production은 변경하지 않는다.
@@ -370,6 +371,85 @@
 - **외부 독립 근거:** 신규 중복제거·검증 승인 0건, 누적 UNKNOWN / 10,000건, `BLOCKED / IN PROGRESS`. 확보를 주장하지 않는다. **DRAFT / RELEASE HOLD.** 런타임·DB·WLD·Test·Production·기능 스위치 미변경. 개발 A/B/C는 별도 브랜치에서 구현하고 공식 Test 정확 SHA를 증명한 뒤 승인된 운영승격만 진행한다.
 
 >>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
+=======
+## v2026.10.30.1494 / F675-179 — 저장공간 근거 검증·예약 블록·배포 보류 강화 (기능 보완 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954); 선행 [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 미병합. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [P0 용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
+
+**회차·기준.** 이전 기능 추가 v1492 → 현재 기능 보완 v1494 → 다음 기능 추가 v1496(잠정). 시작·중간 원격 main `62c6cd038951d65c94b709302bdaec6e75b080b6`; v1492는 아직 병합되지 않은 선행 기획이다. 독립 QA 최종 확인은 v1381 FAILED/P0이며 이후 회차 최종 판정은 미확인. 본 변경은 **문서 기획만** 수행한다.
+
+### 실측 용량과 기존 설계 보완
+- 2026-10-30 07:02~07:05 KST Debian 13.6 읽기 전용 측정: 루트 **94%**, 일반 사용자 가용 약 **5.8GiB**; DATA `/srv/moneyverse-data`는 `df` 반올림 표시 **100%**지만 실제 일반 사용자 가용 약 **1.1GiB**다. DATA `stat -f`: `f_blocks=51459497`, `f_bfree=2650519`, `f_bavail=287189`, 단편 크기 4096바이트, 가용 inode 약 915만 개. 약 9.7GiB의 예약 블록은 일반 작업자·백업이 쓸 수 있는 공간이 아니다. 100% 표시를 실제 0바이트로, `f_bfree`를 가용량으로 오해하지 않는다. 루트와 DATA는 별도 ext4이며 inode 고갈은 관측되지 않았다.
+- v1492의 루트 92%/DATA 99%/약 3.1GiB는 당시 측정이며 현재 값이 아니다. 현재 **P0 긴급 / 배포 보류**. 고객 장애가 발생했다고 단정하지 않고 파일 삭제·자동 정리도 수행하지 않았다. 모든 작업 폴더, Git 참조, 백업, 롤백 파일과 소유권을 보호하며 실제 복원 가능성을 독립 검증한다.
+- 최신 main의 `backend/src/admin/api-health.controller.ts`는 CPU·메모리·DB만 측정한다. `frontend/src/app/api/admin/api-health/status/route.ts`의 `NextResponse.json` 성공·실패 응답에는 명시적인 private/no-store/noindex 헤더가 없다. 이는 **소스에서 확인한 누락**이지 실제 캐시 유출의 증거는 아니다. 신규 저장공간 프록시는 모든 응답에 헤더를 강제하며 개발 C의 공개 상태 기능과 변경 범위를 분리한다.
+
+- **빠른 용량 변화:** 2026-10-30 **07:08:30 KST** 추가 읽기 전용 `df -B1`에서 DATA 일반 사용자 가용량은 **233,713,664바이트(약 223MiB)**였다. 이전 약 1.1GiB는 보장된 여유가 아니다. P0 긴급 사고이며 자동 삭제를 허용하지 않는다.
+
+### 수집기·보안·정확성·배포 조건
+- 응답의 `sourceVerified:true` 자체는 증거가 아니다. 호스트에서만 실행되는 비root 읽기 전용 수집기가 고정 ROOT/DATA 마운트만 측정하고, 호스트 부팅 식별자·단조 증가 시퀀스·UTC 측정시각을 포함한 정규화 메시지를 수집기 전용 보호 키(예: Ed25519)로 서명한다. 서버는 고정 공개키, 키 ID, 서명, ROOT/DATA 중복 여부, 호스트·마운트 네임스페이스와 운영자 승인 마운트 ID/장치를 검증한다. 컨테이너 측정치, DATA 마운트 이탈, 장치 변경, 서명 실패는 **503 UNKNOWN / HOLD**. 원본 장치·경로·호스트 ID는 클라이언트에 노출하지 않는다.
+- 60초 수집, 120초 이내 최신성, 미래시각 30초 초과·시계 오류·같은 부팅 세대의 중복/역행 시퀀스·재전송 거부. 수집기/서버 재시작 후 새로운 서명 측정이 도착하기 전까지 UNKNOWN. 로컬 채널 2초 제한, 관리자당 6회/분·IP당 30회/분; 임의 경로, 셸, 탐색, 삭제, 전체 DATA 볼륨에 대한 영속 기록 금지. 실패 시 컨테이너 statfs나 이전 정상값으로 대체하지 않는다.
+- 임의 정밀도 정수로 `usedBytes=(f_blocks-f_bfree)*f_frsize`, `availableBytes=f_bavail*f_frsize`, `reservedBytes=(f_bfree-f_bavail)*f_frsize`, `totalBytes=f_blocks*f_frsize`를 계산한다. `0<=f_bavail<=f_bfree<=f_blocks`, `f_frsize>0`, 양의 사용률 분모를 검증한다. `usedPercent=100*usedBytes/(usedBytes+availableBytes)`이며 바이트·inode는 정확한 10진 문자열로 반환한다. `f_favail=0`은 inode 긴급, 지원되지 않는 inode 값은 UNKNOWN/HOLD. 화면에는 **반올림 100%지만 0이 아닌 가용량**과 **예약 블록(일반 사용자 사용 불가)**을 구분한다.
+- **측정 위험도와 배포 승인 여부를 분리**한다. 사용률 95% 이상 또는 일반 사용자 가용량 5GiB 미만이면 EMERGENCY. 출처·마운트·계산 미검증이면 UNKNOWN/HOLD. 배포 용량 게이트는 대상 파일시스템별 실측 빌드 최대치 + 독립 복원 작업 공간 + 롤백 아티팩트 크기 + 운영자 승인 안전 여유를 `f_bavail`과 비교한다. 어떤 근거든 누락되면 0으로 간주하지 않고 HOLD. 용량 정상만으로 금융·DB ACL/체크섬·전체 CI·독립 복원·프론트/엣지 신원·공식 Test 정확 SHA·승인된 운영승격을 우회할 수 없다.
+- `GET /api/v1/admin/operations/storage`와 Next 프록시에서 서버 측 관리자·세션·동의·관리자 세션을 확인한다. 응답은 `storage-v1` ROOT/DATA 허용 필드와 서버 검증 위험도만 포함한다. 200/401/403/429/503/기능 OFF **모든 응답**에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, 쿠키 사용 시 `Vary: Cookie`, `Referrer-Policy: no-referrer`를 적용한다. 경로·장치·키·회원정보 금지, 공개/Android 회원 API·사이트맵 제외. 오류를 정상 빈 상태로 표시하지 않는다.
+- 기존 CTA **근거 새로고침 / 읽기 전용 근거 보기 / 이슈 #1170 열기**만 유지. 로딩·정상·긴급·UNKNOWN·오프라인·401/403/429/503·오래된 근거·계정 전환·늦게 도착한 응답을 구별한다. 320px, 200% 확대, 44px 터치, 키보드·aria-live·문자+아이콘, WCAG 2.2 AA, 영한 동등 문구. 관리자 감사에는 이벤트 유형·최신성·위험 등급만 남기고 경로·비밀·원본 ID는 기록하지 않는다. KPI는 가설: 거짓 정상 0, 위조·오래된 증거 수락 0, 무단 접근 0, 긴급 인지 지연 및 p95 최신성.
+- v1은 **실시간 임시 읽기 전용**으로 SQL 테이블·인덱스·마이그레이션·GRANT·WLD/원장 변경이 없다. 장기 이력 DB는 별도 승인 후에만 고려한다. `admin_storage_headroom` 기본 OFF; 롤백은 수집기·API·UI 비활성화만 수행하고 파일을 변경하지 않는다.
+
+### 개발 인계: P0 4건 + P1 6건
+- **P0 DISK1494-01:** #1170 소유자·보존기한·백업·롤백 자산 인벤토리, 명시 승인 후 안전한 용량 확보, DATA `f_bavail` 재측정 및 독립 복원. 임의 삭제 금지.
+- **P0 SEC1494-02:** 고객문의·감사 ACL 불일치, 적용 마이그레이션 체크섬 5건 격리 검증 및 순방향 수정·권한 부정 시험.
+- **P0 FIN1494-03:** MINT 18,000 WLD 출처, 국고 552건 연결, SWF 실제 영수증, Test 합성 200 진실성 확인 전 금융 변경 보류.
+- **P0 REL1494-04:** 과거 Git 참조 462개 보존, 전체 CI, 프론트/백엔드/엣지 신원, 독립 복원, 공식 Test 정확 SHA 및 운영자 승인.
+- **P1 STORAGE1494-05:** 호스트 전용 비root 수집기, 고정 마운트·서명·출처 검증, 컨테이너 대체 금지.
+- **P1 STORAGE1494-06:** BigInt 계산, 예약 블록·일반 사용자 가용량·inode·100% 반올림·배포 필요 공간 검증.
+- **P1 STORAGE1494-07:** Nest 관리자 API·Next 프록시, 서명·재전송·최신성, 모든 응답 no-store/noindex, 제한·개인정보.
+- **P1 STORAGE1494-08:** 영한 관리자 화면, 100%/비영(非零) 가용량·UNKNOWN/HOLD·오류·경합·접근성·SEO.
+- **P1 STORAGE1494-09:** 최소 감사·KPI·키 교체·공개/Android 비노출·기능 OFF·무스키마 롤백.
+- **P1 STORAGE1494-10:** 격리 호스트 읽기 전용 시험 + 합성 10,001건, 출처·권한 위조 100건, 동시 100건, 오래됨·재전송 50건, 예약 블록·마운트·임계값 30건; 독립 복원·정확 SHA Test. **시험은 기획만 하고 미실행**.
+- 외부 독립 근거 신규 검증 승인 **0건**, 중복 제거 후 누적 **UNKNOWN / 10,000건** ⇒ **BLOCKED / IN PROGRESS**. Gemini·개발 A/B/C·QA 브랜치와 변경 겹침 방지. 문서 외 런타임·DB·Test·Production 미변경.
+
+
+## v2026.10.30.1492 / F675-179 — 관리자 전용 검증형 저장공간 여유 및 배포 보류 근거 (기능 추가 / 초안 / 배포 보류)
+**GitHub:** [Draft PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) — OPEN / unmerged / RELEASE HOLD.
+
+**기준과 회차.** 이전 기능 보완 v1490 → 현재 기능 추가 v1492 → 다음 기능 보완 v1494(잠정). 최신 `main` `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 재확인. 독립 QA v1381 FAILED/P0. 개발 이슈 [#1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), 용량 사고 [#1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170). **문서 기획만 수행**하며 런타임·파일 삭제·DB·WLD·Test·Production을 변경하지 않는다.
+
+### 실제 소스 기반 공백과 목표
+- 2026-10-30 06:09 KST Debian 13.6 미니PC의 읽기 전용 `df -h` 결과 루트 92%, 데이터 `/srv/moneyverse-data` 99%, 이용 가능한 공간 약 3.1GiB. 이는 특정 시점의 호스트 측정이며 실제 고객 장애나 미래 고갈을 입증하지 않는다. 다른 작업자의 워크트리·Git 참조·백업·롤백 릴리스를 임의 삭제하지 않는다.
+- 기존 `frontend/src/app/admin/api-health/page.tsx`와 `backend/src/admin/api-health.controller.ts`는 CPU·메모리·DB ping만 측정하고 도메인별 API 측정 여부를 구분한다. 호스트 파일시스템의 가용 공간·inode·롤백 여유를 검증해 관리자에게 제공하는 기능은 확인되지 않았다. 신규 기능은 관리자 읽기 전용 화면이며 공개 상태 페이지, 회원 알림, 자동 정리·배포 승인, SSH 콘솔과 구별한다. 개발 C의 공개 상태 응답 검증 이슈 #1947과 변경 범위를 분리한다.
+- 대상은 빌드·복원·승격 가능성을 판단하는 운영 관리자다. 성공 조건은 **실제 호스트 출처와 최신성 검증**, 임계 용량의 정상 오표시 0건, 위험 파일 삭제 없이 사고 이슈로 연결하는 것이다.
+
+### 진입점·화면·CTA·상태
+- 관리자 전용 `/admin/operations/storage`를 기존 `/admin/api-health`와 관리자 메뉴에서 연결한다. 마운트는 고정 별칭 `ROOT`, `DATA` 두 개만 표시한다. 실제 경로·장치 식별자·작업 폴더·백업명·회원정보는 노출하지 않는다. 카드에는 호스트 측정 출처, 측정시각·경과시간, 총량·사용량·일반 사용자 가용 바이트, 사용률, 남은 inode, 심각도, 독립적인 롤백 여유 정책 충족 여부를 표시한다.
+- CTA는 **근거 새로고침**, **읽기 전용 측정 근거 보기**, **용량 이슈 #1170 열기**만 제공한다. 삭제·정리·재시작·서비스 중지·명령 실행·마이그레이션·파일 탐색·배포 승인 버튼은 없다. 용량 정상은 금융·CI·복원·정확 SHA Test·GitOps 등 별도 배포 게이트를 통과했다는 뜻이 아니다.
+- 상태: 로딩, 정상, 주의, 위험, 긴급, 수집기 미연결, 오래된 근거, 출처·서명 검증 실패, 호스트/컨테이너 네임스페이스 불일치, inode 부족, 401, 403, 429, 503, 기능 OFF, 오프라인 재시도. 검증 실패는 **UNKNOWN / RELEASE HOLD**이며 0% 또는 초록색으로 표시하지 않는다. 오래된 값은 반드시 '이전 측정'으로 구별한다.
+- 한국어·영어 동등 문구, 320px 단일 열·768px 이상 그리드, 44px 터치, 키보드 초점, aria-live, 색 외 문자·아이콘 표시, 스크린리더 단위, 200% 확대, 모션 감소, WCAG 2.2 AA. 비공개 페이지는 사이트맵 제외·noindex.
+
+### 수집기·API·권한·정확성
+- 호스트의 제한된 읽기 전용 수집기가 고정 마운트 식별자만 `statvfs`/`statfs`로 측정한다. 사용자 입력 경로나 명령을 받지 않고 심볼릭 링크 추적·백업 디렉터리 스캔·root 명령 실행을 하지 않는다. 실제 호스트 마운트 네임스페이스와 신뢰 출처를 검증하고 인증된 로컬 Unix 소켓 또는 동등한 서명 채널로 전달한다. 컨테이너 마운트 측정치가 호스트 측정으로 둔갑하면 거부한다. ROOT/DATA 2건, 수집 주기 60초, 최신성 120초 이내. 수집기는 파일 쓰기·삭제·압축·변경 권한이 없다.
+- `GET /api/v1/admin/operations/storage`에 `SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard`를 적용한다. 클라이언트 플래그로 관리자 권한을 판단하지 않는다. 응답은 `{schemaVersion:'storage-v1',observedAt,sourceKind:'HOST',sourceVerified:true,mounts:[{alias:'ROOT'|'DATA',totalBytes,usedBytes,availableBytes,usedPercent,inodeAvailable,inodeTotal,severity,headroomPolicyStatus}],freshness:'FRESH'}`. 바이트·inode 정수는 JS 안전 정밀도를 위해 10진 문자열, 백분율은 유한한 범위 숫자, 시간은 ISO UTC, 마운트는 정확히 2개·중복 금지. 실제 경로·장치·토큰·자유 형식 진단 정보 금지. 공개 API와 Android 회원 게이트웨이에는 노출하지 않는다.
+- 오류는 401/403 인증, 429(제안: 관리자당 분당 6회·IP당 30회), 503 출처·최신성·수집기 실패, 상류 제한시간 2초. `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`; 실패를 정상 응답으로 위장하지 않는다. `admin_storage_headroom` 기능 스위치는 기본 OFF이며 코드만 되돌릴 수 있다.
+- `df` 호환 사용률: `used=f_blocks-f_bfree`, `available=f_bavail`, `usedPercent=100*used/(used+available)`(분모 양수). `totalBytes=f_blocks*f_frsize`, `availableBytes=f_bavail*f_frsize`; 예약 블록을 구분하고 오버플로를 방지한다. inode는 가능할 때 `f_favail` 기준, 측정 불가를 '100% 가용'으로 간주하지 않는다. 제안 임계값: 80% 이상 주의, 90% 이상 위험, 95% 이상 또는 가용 <5GiB 긴급. 정확히 95%도 긴급이며 inode 고갈은 독립적으로 긴급. 미확인 데이터는 UNKNOWN. 임계값은 운영 승인 전 잠정값이다.
+- v1은 실시간 호스트 측정이므로 **신규 DB 테이블·인덱스·권한·마이그레이션·WLD 원장 변경 없음**. 기존 감사 시스템에는 경로·원시 데이터 없는 접근·설정 메타데이터만 허용한다. 이후 이력 저장이 별도로 승인되고 디스크·체크섬 문제가 해결된 경우에만 새 정방향 마이그레이션으로 `(mount_alias,observed_at)` 유일성, `0<=available<=total` CHECK, `(mount_alias,observed_at DESC)` B-tree, 30일 제한 보관, 앱 계정 직접 DML 금지를 검토한다. **이 기획으로 미래 테이블 생성을 승인하지 않는다.**
+
+### 보안·운영·분석·배포
+- 임의 경로 열람·파일 목록·파일 내용·삭제 토큰·백업명·호스트 비밀·셸 접근 금지. 출처 위조, 서명 재전송, 시각 변조, SSRF, 관리자 사칭, 오래된 응답 경쟁, 과도한 요청, 단위 변조를 방어한다. 관리자 접근은 민감 정보 없이 감사하고 일반 회원·비로그인에게는 노출하지 않는다.
+- KPI(실측 아님): 예약 수집의 최신 증빙 비율 >=99%, 오래되거나 위조된 값의 정상 오표시 0건, 긴급 관찰부터 사고 확인까지 걸린 시간. 로그에는 건수·지연·검증 결과·심각도 범주만 기록한다. v1에는 이메일·푸시 전송 기능이 없다.
+- P0 용량 회복은 소유권·백업·롤백 보존 검증과 별도 운영 승인 후 수행한다. 대시보드는 공간을 확보하지 않는다. 전체 CI, 실제 호스트 수집기 격리 시험, 독립 복원, 공식 Test 정확 SHA 인증 E2E, GitOps 승인 전 Production 승격 금지. 롤백은 기능 OFF 및 UI/API/수집기 코드 복구, 기존 API-health 유지, RELEASE HOLD 유지, DB 다운마이그레이션 없음.
+
+### P0/P1 구체 백로그 및 수용시험
+- **P0 DISK1492-01:** #1170 읽기 전용 용량·소유권·백업·롤백 조사, 승인된 안전 복구. 자동 삭제 금지.
+- **P0 SEC1492-02:** 앱 DB 직접 권한과 적용 마이그레이션 체크섬 불일치 5건, 정방향 보안 보완 및 부정 권한 시험.
+- **P0 FIN1492-03:** MINT 18,000 WLD 출처, 국고 552건 연결, SWF 금융 실패, Test 합성 200 진실성 게이트.
+- **P0 REL1492-04:** 과거 Git 참조 462개, 전체 lint/계약/CI, 독립 복원, 공식 Test 정확 SHA 및 승인된 운영 승격.
+- **P1 STORAGE1492-05:** 고정 허용목록 읽기 전용 호스트 수집기, 출처·네임스페이스 검증, 셸/변경 권한 금지.
+- **P1 STORAGE1492-06:** 바이트·inode·임계값·최신성·응답 스키마 검증 실패 시 차단.
+- **P1 STORAGE1492-07:** Nest 관리자 API, 제한시간·호출량·개인정보 헤더, SQL 권한 추가 없음.
+- **P1 STORAGE1492-08:** Next 관리자 화면·메뉴·모든 상태/CTA·모바일 접근성.
+- **P1 STORAGE1492-09:** 감사·비공개 SEO·집계 KPI·Android/공개 경로 부정 시험·기능 OFF·롤백.
+- **P1 STORAGE1492-10:** 수집기 격리·계약 시험, 오프라인 합성 측정 10,001건, 권한/출처 위조 100건, 동시 조회 100건, 오래됨/연결 실패 50건, 네임스페이스/경계 30건, 복원·정확 SHA Test 수용시험. **모두 기획된 시험이며 실제 실행하지 않았다.**
+- 외부 독립 레퍼런스 신규 중복 제거·검증 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 달성으로 표시하지 않는다. 개발 A/B/C·Gemini·QA의 작업 브랜치는 건드리지 않는다.
+
+
+>>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
