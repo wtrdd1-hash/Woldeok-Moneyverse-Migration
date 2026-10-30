@@ -34,12 +34,13 @@ export class AdminNationalPensionController {
 
   @Get('recent-payouts')
   @ApiOperation({ summary: '최근 정기 기초연금 지급 로그 조회' })
-  async getRecentPayouts(@Query('limit') limit?: string) {
-    if (limit === undefined) return this.service.listRecentPayoutLogs(20);
+  async getRecentPayouts(@Req() req: RequestWithSession, @Query('limit') limit?: string) {
+    const adminUserId = requireUserId(req);
+    if (limit === undefined) return this.service.listRecentPayoutLogs(adminUserId, 20);
     if (typeof limit !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit)) {
       throw new BadRequestException('limit must be an integer between 1 and 100');
     }
-    return this.service.listRecentPayoutLogs(Number(limit));
+    return this.service.listRecentPayoutLogs(adminUserId, Number(limit));
   }
 
   @Post('distribute-payouts')

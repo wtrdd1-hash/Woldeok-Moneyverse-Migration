@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
-import type { INestApplication } from '@nestjs/common';
+import type { INestApplication, ExecutionContext } from '@nestjs/common';
 import request from 'supertest';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
@@ -18,7 +18,10 @@ describe('Admin pension payout history HTTP boundary', () => {
       controllers: [AdminNationalPensionController],
       providers: [{ provide: NationalPensionService, useValue: { listRecentPayoutLogs } }],
     })
-      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(SessionGuard).useValue({ canActivate: (ctx: ExecutionContext) => {
+        ctx.switchToHttp().getRequest().session = { id: 'session-1', user_id: '11111111-1111-4111-8111-111111111111' };
+        return true;
+      } })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
@@ -41,6 +44,9 @@ describe('Admin pension payout history HTTP boundary', () => {
     listRecentPayoutLogs.mockClear();
     await request(app.getHttpServer()).get('/admin/pension/recent-payouts').expect(200);
     await request(app.getHttpServer()).get('/admin/pension/recent-payouts?limit=100').expect(200);
-    expect(listRecentPayoutLogs.mock.calls).toEqual([[20], [100]]);
+    expect(listRecentPayoutLogs.mock.calls).toEqual([
+      ['11111111-1111-4111-8111-111111111111', 20],
+      ['11111111-1111-4111-8111-111111111111', 100],
+    ]);
   });
 });
