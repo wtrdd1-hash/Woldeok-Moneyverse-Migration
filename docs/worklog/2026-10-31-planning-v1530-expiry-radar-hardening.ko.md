@@ -11,10 +11,12 @@
 - [x] 영어·한국어 정본/통합문서·P0/P1·로그 보완.
 - [x] main/충돌 재조회, 문서 분류·동등성·diff 검사.
 - [x] Draft PR #2066·이슈 #2060 갱신.
-- [ ] 최종 SHA CI 확인 및 서버 완료 기록.
+- [x] 이전 후보 SHA 170ad274eec38d826e4384281aac0f59b59a0056의 문서 CI 확인, 마지막 기록 커밋 SHA는 별도 확인.
 
 **외부 근거:** 신규 검증 0건, 누적 검증·중복제거·분류 UNKNOWN/10,000건 — BLOCKED / IN PROGRESS. 런타임·DB·WLD·Test·Production·예약 변경 없음.
 
 **진행 — 2026-10-31 01:05 KST.** 원격 main·선행 PR SHA 재확인(변경 없음). DB 쓰기 없는 만료 기한, 상품 변경 포함 전체 지문, 실제 세션 ID, 단일 읽기 전용 반복 읽기 트랜잭션 명세 반영. QA v1400 백엔드 126건·프론트 55건 실패 및 lint 구문 오류. 운영 보류.
 
 **GitHub 중간 기록 — 2026-10-31 01:06 KST:** Draft #2066 OPEN, 이슈 #2060 댓글 반영. 문서 분류 시험 24/24 PASS, diff 및 한·영 동등성 PASS. 최종 SHA CI는 대기.
+
+**완료 — 2026-10-31 01:08 KST.** 문서 12개, 영·한 기획서 4개 동등성 PASS, 로컬 분류 24 PASS/0 FAIL, git diff --check PASS. Draft PR #2066 OPEN, 이슈 #2060 업데이트. 이전 후보 SHA 170ad274eec38d826e4384281aac0f59b59a0056에서 CI/Build Test Candidate SUCCESS(런타임/공식 Test/Production SKIPPED). 이번 완료 기록 커밋의 최종 SHA CI는 별도 확인. QA v1400 실패, 운영 보류 유지.
