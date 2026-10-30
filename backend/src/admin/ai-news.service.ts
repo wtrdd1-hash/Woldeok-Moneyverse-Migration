@@ -848,7 +848,7 @@ export class AiNewsService {
   async autoGenerateAndPublish(
     actorUserId: string,
     runtimeCredential?: AiNewsRuntimeCredential,
-    _publishImmediate = true,
+    publishImmediate = true,
   ): Promise<Record<string, unknown>> {
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);
@@ -902,6 +902,10 @@ export class AiNewsService {
       context,
       scenarios,
     });
+
+    if (!publishImmediate) {
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, engine: usedModel };
+    }
 
     const history = await this.recentAutoMarketHistory(actorUserId);
     const canonical = (text: string) => text.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();

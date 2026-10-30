@@ -83,6 +83,36 @@ export class SupportController {
     return { messages: await this.repo().messages(requireUserId(req), id) };
   }
 
+  @Get('threads/:id/messages/:messageId')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Verified receipt for an individual support message' })
+  async message(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+  ) {
+    const actor = requireUserId(req);
+    try {
+      const message = await this.repo().exactMessage(actor, id, messageId);
+      if (!message) {
+        throw new NotFoundException('support message not found');
+      }
+      return { message };
+    } catch (err: unknown) {
+      if (err instanceof NotFoundException || err instanceof ServiceUnavailableException || err instanceof BadRequestException) {
+        throw err;
+      }
+      const e = err as { code?: string; message?: string };
+      if (e?.code === '42501' && /support thread not available/i.test(e?.message ?? '')) {
+        throw new NotFoundException('support thread not found');
+      }
+      if (e?.code === '42501') {
+        throw new ServiceUnavailableException('support permission regression');
+      }
+      throw err;
+    }
+  }
+
   @Get('threads/:id/transcript')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')

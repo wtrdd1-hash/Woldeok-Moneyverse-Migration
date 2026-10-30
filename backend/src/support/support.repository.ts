@@ -103,6 +103,13 @@ export class SupportRepository {
       [actor, thread, limit]);
   }
 
+  exactMessage(actor: string, thread: string, messageId: string) {
+    return queryOne<SupportMessageRow>(this.pool,
+      `SELECT message_id::text,sender_kind,body,created_at
+       FROM public.support_my_message_receipt($1,$2,$3)`,
+      [actor, thread, messageId]);
+  }
+
   addMessage(actor: string, key: string, thread: string, body: string) {
     return queryOne<SupportMessageRow>(this.pool,
       'SELECT message_id::text,sender_kind,body,created_at FROM public.support_add_message($1,$2,$3,$4)',

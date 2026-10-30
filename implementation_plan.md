@@ -1637,3 +1637,27 @@ ull 상태를 반환하도록 교정.
 ### 3. 검증 및 배포 계획
 - 최신 커밋 푸시 후 GitHub Actions CI 통과 대기.
 - 통과 즉시 PR #2045 main 브랜치 병합 및 운영 무중단 배포 진행.
+
+
+---
+## 🚀 [v9 Specification] CI 전역 테스트 복원 및 트랜잭션 라벨 무결성 확보 (+추가, -0 삭제)
+
+### 1. 배경 및 원인 분석
+- GitHub Actions CI `runtime-check` 단계에서 발생한 3건의 실패 원인 정밀 규명:
+  1. `src/wallet/ledger-labels.test.ts`: 마이그레이션 `291-ledger-first-citizen-dividend.sql`에서 도입된 `TREASURY_CITIZEN_DIVIDEND` 트랜잭션 타입이 `wallet.service.ts`의 `TRANSACTION_LABELS`에 누락되어 기본값인 '경제 활동'으로 폴백되던 현상.
+  2. `src/support/support-message-proof.test.ts` & `support-message-proof.http.test.ts`: 마이그레이션 `302-support-exact-message-receipt.sql`의 `support_my_message_receipt` 단일 메시지 영수증 RPC를 바인딩하는 `SupportRepository.exactMessage` 및 `SupportController.message`(`GET /api/v1/support/threads/:id/messages/:messageId`, `Cache-Control: no-store`) 엔드포인트 누락.
+  3. `src/admin/ai-news-consent.test.ts`: `AiNewsService.autoGenerateAndPublish` 메서드에서 운영자의 즉시 게시 동의(`publishImmediate`)가 `false`일 때 draft 상태로 즉시 반환하지 않고 후속 게시 평가(`this.repository.latest`)를 실행하던 조건 누락.
+  4. 린트 경고: `national-pension.repository.ts`의 `let accRes` (`const` 변환) 및 `treasury-bond.repository.ts`의 미사용 예외 클래스 정리.
+
+### 2. 세부 변경 사항
+- `backend/src/wallet/wallet.service.ts`: `TREASURY_CITIZEN_DIVIDEND: '국고 시민 배당'` 라벨 추가.
+- `backend/src/support/support.repository.ts`: `exactMessage(actor, thread, messageId)` 메서드 구현 (`public.support_my_message_receipt($1,$2,$3)` 쿼리).
+- `backend/src/support/support.controller.ts`: `@Get('threads/:id/messages/:messageId')` 및 `@Header('Cache-Control', 'no-store')` 엔드포인트 복원.
+- `backend/src/admin/ai-news.service.ts`: `autoGenerateAndPublish`에 `if (!publishImmediate)` 조기 반환 분기 복원.
+- `backend/src/admin/pension/national-pension.repository.ts`: `let accRes` -> `const accRes`.
+- `backend/src/admin/bonds/treasury-bond.repository.ts`: 미사용 `NotFoundException`, `ConflictException` 제거.
+
+### 3. 검증 계획
+- 로컬 `git diff`를 통한 변경점 무결성 검증.
+- 커밋 및 GitHub 푸시 후 GitHub Actions CI `runtime-check` 통과 확인.
+- PR #2045 스쿼시 머지 및 운영 서버 무중단 배포 진행.

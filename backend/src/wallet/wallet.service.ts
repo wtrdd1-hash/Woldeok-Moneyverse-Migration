@@ -66,6 +66,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   VIRTUAL_STOCK_BUY: '주식 매수',
   VIRTUAL_STOCK_SELL: '주식 매도',
   VIRTUAL_STOCK_HALT_REFUND: '거래정지 원가환급',
+  TREASURY_CITIZEN_DIVIDEND: '국고 시민 배당',
   BOND_PURCHASE: '국채 매입',
   BOND_REDEEM: '국채 만기 상환',
 });
