@@ -12,8 +12,8 @@
 ### Mid — 2026-10-30 22:10 KST
 - [x] Inspect actual legacy shop SQL, source-level ledger direction, Next/Nest/Android routes, prior QA v1396 and release P0 #2031.
 - [x] Recheck remote main bf8d0d48f810932b43783d8605dce53954c60cff and planning Draft #2042; create issue #2046; draft 4+6 engineering backlog.
-### Complete — pending final CI review
-- [ ] Verify docs parity, local DOCS_ONLY classifier and remote CI; update Draft PR and worklog with actual outcomes.
-- [ ] Confirm no runtime/DB/WLD/Test/Production changes. External independent references 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+### Complete — 2026-10-30 22:15 KST
+- [x] EN/KO plan parity for 10 backlog IDs, diff --check, 24/24 classifier tests, 12 DOCS_ONLY paths; first PR head 684115b9 initial GitHub document CI SUCCESS (runtime/build/Production SKIPPED). Final follow-up SHA CI is independently checked after push.
+- [x] Draft PR #2048 OPEN on #2042; engineering issue #2046 and release #2031 linked; main remained bf8d0d48; no runtime/DB/WLD/Test/Production changes. External independent references 0 newly approved, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 
 - **Fresh read-only DEV DB evidence (2026-10-30 22:13 KST):** PostgreSQL 17.11, BEGIN READ ONLY/ROLLBACK, legacy public.purchases row count **0**. Effective moneyverse_app privileges: purchases SELECT=true, DELETE=true; ledger_postings SELECT=true, DELETE=false; account_balances UPDATE=true; shop_list_my_purchases(uuid,integer) EXECUTE=true. This contradicts function-only least privilege; escalate P0 SEC1524-02/#993. DEV-only, not proof of Production access or any real receipt/payment. Android gateway currently sets private/no-store/noindex for shop/purchases, but nested detail error/edge behavior and Referrer-Policy still require tests.

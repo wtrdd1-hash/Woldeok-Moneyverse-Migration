@@ -12,8 +12,8 @@
 ### 중간 — 2026-10-30 22:10 KST
 - [x] 과거 상점 SQL·원장 방향·Next/Nest/Android·QA v1396·P0 #2031 확인.
 - [x] 원격 main bf8d0d48f810932b43783d8605dce53954c60cff·기획 Draft #2042 재조회, 개발 이슈 #2046·P0 4/P1 6 인계.
-### 완료 — 최종 CI 확인 대기
-- [ ] 문서 동등성·DOCS_ONLY 분류·원격 CI·Draft PR 결과 기록.
-- [ ] 런타임/DB/WLD/Test/Production 무변경 확인. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+### 완료 — 2026-10-30 22:15 KST
+- [x] 영문/국문 백로그 10개 동등, diff --check, 분류 시험 24/24, 문서 12개 DOCS_ONLY. 최초 PR head 684115b9 문서 CI SUCCESS(런타임/빌드/운영 SKIPPED), 최종 후속 SHA는 푸시 후 별도 확인.
+- [x] Draft PR #2048 OPEN(선행 #2042), 개발 #2046·배포 #2031 인계, main bf8d0d48 불변, 런타임/DB/WLD/Test/Production 미변경. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 
 - **신규 개발 DB 읽기 전용 실측(2026-10-30 22:13 KST):** PostgreSQL 17.11, BEGIN READ ONLY/ROLLBACK, 과거형 public.purchases **0건**. moneyverse_app 유효 권한: purchases SELECT=true, DELETE=true; ledger_postings SELECT=true, DELETE=false; account_balances UPDATE=true; shop_list_my_purchases(uuid,integer) EXECUTE=true. 함수 전용 최소 권한 정책과 충돌하여 P0 SEC1524-02/#993에 반영한다. 개발 DB만 확인했으며 운영 권한·실제 구매/결제 증빙을 의미하지 않는다. Android 게이트웨이는 shop/purchases 경로에 private/no-store/noindex를 적용하지만 중첩 상세·오류·공개 edge·Referrer-Policy는 별도 검증이 필요하다.
