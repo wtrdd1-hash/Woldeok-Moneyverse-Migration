@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
-export const CLASSIFIER_VERSION = 'release-path-v1';
+export const CLASSIFIER_VERSION = 'release-path-v2';
 
 const DOC_PATHS = [
   /^docs\//,
@@ -49,6 +49,7 @@ const RUNTIME_PATHS = [
 ];
 
 const RUNTIME_GIT_PATHS = [
+  'docs/mobile-api-contract.json',
   'backend',
   'frontend',
   'bot',
@@ -84,6 +85,9 @@ function pathKind(path) {
     return code < 32 || code === 127 || character === '\\';
   });
   if (!path || path.startsWith('/') || path.split('/').includes('..') || unsafeCharacter) return 'unknown';
+  // The exact generated API schema is runtime input, never a docs-only bypass.
+  // Every other JSON file under docs remains UNKNOWN/fail-closed.
+  if (path === 'docs/mobile-api-contract.json') return 'runtime';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
     if (path.startsWith('docs/') && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf)$/.test(path)) return 'unknown';
@@ -166,7 +170,7 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
     repositoryHeadSha,
   ]).sort();
   const unsafeDocumentBlob = changedPaths.some((path) => {
-    if (pathKind(path) !== 'docs') return false;
+    if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json') return false;
     const before = isSafeDocumentBlob(root, baseSha, path);
     const after = isSafeDocumentBlob(root, repositoryHeadSha, path);
     return (before === null && after === null) || before === false || after === false;

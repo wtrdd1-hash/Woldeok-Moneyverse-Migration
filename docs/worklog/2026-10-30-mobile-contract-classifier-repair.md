@@ -1,0 +1,3 @@
+# 2026-10-30 — generated mobile API schema release classification repair (Draft/HOLD)
+
+P0 CI classifier deadlock: the mandatory generated `docs/mobile-api-contract.json` is classified UNKNOWN, while `pnpm api:contract:check` requires it committed when a runtime API response changes. A standalone repair branch from main allows **only that exact generated JSON** into the runtime verification lane; arbitrary JSON and unsafe file modes remain blocked. Classifier version v2 and Production verifier v2 prevent stale release evidence reuse. This is a policy proposal; do not merge or deploy until independent review and official Test/restore gates pass. Related feature Draft #1985.
