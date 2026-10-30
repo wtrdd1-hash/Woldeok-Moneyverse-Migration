@@ -1,5 +1,12 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1516 F675-185 inventory lifecycle transparency / issue #2024 / Draft PR #2025 / RELEASE HOLD; stacked on #2018.
+**Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+
+## v2026.10.30.1518 — F675-185 Inventory Lifecycle Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **Cycle:** Previous Addition v1516 → Current Improvement v1518 → Next Addition v1520 (provisional). Canonical origin/main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` checked start/mid; stacked on Draft #2025; issue #2024; Draft #2029. Docs-only.
+- **Source correction:** migration 123 computes weekly_cost and arrears_cap from current catalog rate*quantity*(grace weeks), while stored arrears_due/unpaid_weeks/suspended coalesce missing row to 0/0/false. These are *reported values*, not proof of paid upkeep or executed weekly billing; migration 104 uses KST Monday 04:30 receipts. Policy changes may make current cap lower than stored arrears: do not clamp or assert due<=cap. durable is not permanent or maintenance-applicable; effect_expires_at is max future receipt expiry, not proof of active/equipped effect; independent clock_timestamp boundaries prevent atomic status claim.
+- **V1:** Existing authenticated owner GET /api/v1/shop/holdings; no new DB/API/payment. Accurate labels, BigInt WLD strings, UNKNOWN and verified-empty distinction (#1977), expiry and effect separately, edge no-store/noindex (#1994/#2012), Android session fencing, 320px WCAG 2.2 AA, aggregated admin KPI cohort>=20, flag OFF. No WLD/item writes.
+- **Backlog:** P0 OPS1518-01 SEC1518-02 FIN1518-03 REL1518-04; P1 LIFECYCLE1518-05 through -10 (4+6=10). QA v1394 FAILED/P0: backend 119 FAIL/2563 PASS/495 SKIP, frontend 53 FAIL/2607 PASS, Treasury 2 FAIL, bond 2 FAIL, DB ACL/checksums, Production provenance mismatch, official exact-SHA Test and independent restore BLOCKED. Synthetic 10,001/100 null-clock/100 policy-drift/100 account/100 concurrency/50 receipt/50 Android tests **PROPOSED NOT RUN**. External newly approved 0; cumulative UNKNOWN / 10,000 BLOCKED/IN PROGRESS. DRAFT / RELEASE HOLD.
+
 
 ## v2026.10.30.1516 — F675-185 Inventory Lifecycle/Upkeep Transparency (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1514 → Current Feature Addition v1516 → Next Feature Improvement v1518 (provisional). Authority origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef checked start/mid; stacked on Draft #2018, handoff #2024, Draft #2025. English canonical; Korean parity. Docs only.
