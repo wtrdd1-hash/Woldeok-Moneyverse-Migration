@@ -1,6 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
+<<<<<<< HEAD
 ## v2026.10.30.1490 — F675-178 지갑 북마크 정합성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Addition v1488 → 현재 Improvement v1490 → 다음 Addition v1492(잠정). 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재조회; QA v1380 FAILED/P0. 선행 Draft #1937 미병합, 인계 #1936. 문서만 수정.
 - **실제 소스 근거:** 지갑 거래 커서가 PostgreSQL 마이크로초를 JS Date 밀리초로 변환; Android APP_API_REQUEST_HEADERS에 Idempotency-Key 없음; 지갑 게이트웨이에 private no-store는 있으나 X-Robots-Tag noindex 강제 없음; 북마크 CTA/API 미구현. 기존 Backend B #1935와 독립.
@@ -77,6 +78,16 @@
 - **차단 조건:** 외부 독립 근거 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. SEC 검증 전 SQL 번호 지정 금지. 개발 별도 브랜치→CI→격리 PG→공식 Test exact-SHA→독립 복원→승인된 GitOps→운영 스모크·롤백. RELEASE HOLD.
 
 >>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
+=======
+## v2026.10.30.1496 — F675-180 관리자 전용 배포 준비 근거 매트릭스 (기획 초안 / 운영 승격 보류)
+- 회차: 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 최신 main 62c6cd038951d65c94b709302bdaec6e75b080b6. QA v1383 금융 6실패/3성공 및 app-api 계약 불일치 **증거만 확인**, 최종 판정 미확인. [개발 인계 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960).
+- 소스 공백: /admin/api-health는 경로별 상태를 미측정으로 표시하며 GitHub CI 정확 SHA·공식 Test 아티팩트·독립 복원·PostgreSQL 권한/마이그레이션·금융 출처·서명된 ROOT/DATA 여유·개인정보/모바일/SEO를 통합 검증하는 관리자 화면이 없다. 저장공간 #1948 및 개발 A #1956의 수집기를 재구현하지 않고 근거만 소비한다.
+- 관리자 전용 /admin/operations/release-readiness 및 엄격한 후보 SHA·환경을 받는 Nest GET /api/v1/admin/operations/release-readiness. PASS/FAIL/UNKNOWN/만료 상태를 보수적으로 판정하며 근거 보기·새로고침·이슈 열기·정제 요약 복사만 제공한다. 자동 승인·배포·강제 통과 없음. v1 DB 테이블·인덱스·마이그레이션·권한·원장 변경 없음. no-store/noindex, 320px/WCAG 2.2 AA, 한국어/영어, SHA·환경·정책·TTL 서명 검증, 공개/Android API 없음. 전체 화면·API·보안·KPI·롤백·수용시험은 [한국어 통합 기획](INTEGRATED_PLANNING_MASTER.ko.md)에 동등하게 명세했다.
+- 08:08 KST 개발 PostgreSQL 17.11 읽기 전용 권한 검사에서 moneyverse_app의 public.audit_logs UPDATE 권한이 true로 확인됐다. 마이그레이션 102의 REVOKE 선언과 불일치하며 **개발 DB만의 관찰, Production 미확인, 변조 증거 아님**. Android app-api 실제 게이트웨이는 경로 허용 목록을 사용하며 관리자 배포 준비 경로가 없다. SEC1496-02에서 조사한다.
+- P0: DISK1496-01(DATA 100% 반올림, 가용 약 663MiB, 자동 삭제 금지), SEC1496-02(권한·체크섬 5건·Git 참조 462개), FIN1496-03(MINT 18,000 WLD·국고 552건·SWF), REL1496-04(전체 CI·독립 복원·공식 Test 정확 SHA/엣지). P1: READINESS1496-05 READINESS1496-06 READINESS1496-07 READINESS1496-08 READINESS1496-09 READINESS1496-10(신뢰 어댑터·판정기·API·화면/접근성·개인정보/KPI·공격 시험). 합성 10,001건·위조 100건·동시성 100건·만료 50건·경계 30건은 **명세만 작성, 실행하지 않음**.
+- 스위치 기본 OFF, 런타임·DB·WLD·Test·Production 변경 없음. DRAFT / RELEASE HOLD. 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 미병합 기획 #1949/#1954는 참조만 하며 해당 브랜치를 변경하지 않는다.
+
+>>>>>>> origin/auto/planning-v1496-release-readiness-20261030
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

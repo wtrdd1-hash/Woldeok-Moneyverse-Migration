@@ -1,6 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
+<<<<<<< HEAD
 ## v1490 / F675-178 — 지갑 거래 북마크 정합성·재시도·모바일 개인정보 보호 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 Feature Addition v1488 → 현재 Feature Improvement v1490 → 다음 Feature Addition v1492(잠정). **기준:** main 62c6cd038951d65c94b709302bdaec6e75b080b6, AGENTS.md, README.md, 영문 PROJECT_PLAN.md와 국문 대조 문서; 시작·중간 재조회. **선행:** 미병합 Draft PR #1937, 개발 인계 이슈 #1936. **QA:** 독립 v1380 FAILED/P0. 문서 기획만 수행하며 런타임·SQL·DB·WLD·Test·Production은 변경하지 않는다.
@@ -264,6 +265,44 @@
 - **외부 독립 근거 10,000건 gate:** 신규 취득·중복 제거·근거 분류 **승인 0건**, 누적 **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**. 달성 주장 금지. 기능 플래그 `wallet_activity_bookmarks` 기본 OFF, 운영 승격 **BLOCKED**.
 
 >>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
+=======
+## v2026.10.30.1496 — F675-180 관리자 전용 검증된 배포 준비 근거 매트릭스 (기능 추가 / 기획 초안 / 운영 승격 보류)
+
+**회차 및 기준.** 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 확인한 최신 main SHA는 **62c6cd038951d65c94b709302bdaec6e75b080b6**. PROJECT_PLAN.md 영어판을 정본으로 하고 한국어판은 의미가 동일한 대조 문서다. 개발 인계 [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960). 본 회차는 **문서 기획만 수행**하며 구현이나 배포 승인이 아니다.
+
+### 근거, 문제, 사용자, 기존 기능과의 경계
+- 2026-10-30 08:00 KST Debian 13.6 호스트 ROOT 사용률 96%, DATA /srv/moneyverse-data는 반올림 표시 100%이고 일반 작업자 가용 공간은 약 663MiB였다. 실제 장애 발생 증거는 아니다. 기존 [P0 사고 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170)에 따라 담당자 승인 후 용량을 확보하되, 타 작업자 폴더·백업·Git 참조·롤백 자산을 자동 삭제하지 않는다.
+- 소스 확인: frontend/src/app/admin/api-health/page.tsx와 backend/src/admin/api-health.controller.ts는 CPU·메모리·읽기 전용 DB 연결 검사만 실측하며 도메인 API 상태는 **미측정**으로 표시한다. 조사한 관리자 경로에는 시스템 전반의 검증된 배포 근거를 합산하는 화면이 없었다. [저장공간 기획 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948)과 [개발 A 초안 #1956](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1956)은 서명된 호스트 용량 근거를 담당한다. F675-180은 이를 **소비**할 뿐 수집기를 중복 구현하지 않는다.
+- **08:08 KST 개발 DB 권한 실측:** woldeok_moneyverse_dev PostgreSQL 17.11에서 moneyverse_migrator로 읽기 전용 권한 함수를 조회한 결과 has_table_privilege(moneyverse_app, public.audit_logs, UPDATE)=true였다. 마이그레이션 102의 REVOKE 선언과 불일치한다. **개발 DB 권한 위험**이며 Production 권한이나 실제 변조의 증거는 아니다. SEC1496-02에서 원인을 조사하고 기록을 보존한다. 실제 app-api 게이트웨이 frontend/src/app/app-api/v1/[...path]/route.ts는 경로 허용 목록을 사용하며 조사한 코드에 관리자 배포 준비 경로는 없다.
+- 독립 QA v1383의 07:22~07:24 수집 증거에서는 금융 집중 시험 6실패/3성공, 계약 시험 41성공, Android API 생성 계약 불일치, 공개 50경로 중 48경로 접근 가능 및 Test/Production /help 404가 확인됐다. **v1383 최종 판정은 확인되지 않았다.** 이전에 확인된 v1381은 FAILED/P0이다. 과거 미해결 지적사항인 적용 마이그레이션 체크섬 5건, 과거 Git 참조 462개, MINT 출처 18,000 WLD, 국고 연결 552건, SWF 정산 증명, 독립 복원 및 공식 정확 SHA Test는 이번 회차에서 해결·재감사했다고 주장하지 않는다.
+- 대상은 특정 후보 커밋의 **미충족 배포 근거**를 확인하는 인증된 운영 관리자다. 읽기 전용 증빙 조회 기능이며 자동 배포·CI 실행·금융 인증·컴플라이언스 보증·배포 승인 기능이 아니다. 기대 가치는 거짓 정상 표시 없이 장애 원인을 빠르게 찾는 것이다.
+
+### 진입점·화면·CTA·상태
+- 관리자 콘솔 → **/admin/operations/release-readiness**. 후보 SHA는 40자리 16진수만 허용하고 소문자로 정규화한다. Test/Production 환경 선택은 조회 조건일 뿐 환경을 전환하지 않는다. 게이트별 필수 여부, 정책 버전, 출처, 범위, 증빙 해시, 측정·만료 시각, 정확한 후보 SHA, 판정 및 연계 근거를 표시한다. 브랜치명이나 과거 후보를 기본값으로 삼지 않는다.
+- CTA는 **근거 보기**(허용된 메타데이터만), **새로고침**(읽기 전용 재검증), **이슈/PR 열기**(서버 허용 목록의 GitHub 링크만), **민감정보 제거된 요약 복사**로 한정한다. 승인·배포·병합·강제 통과·삭제·셸·재시작·데이터 보정·WLD 이체 버튼은 없다.
+- 후보 미입력·형식 오류·로딩·검증된 성공·실패·UNKNOWN·만료·근거 충돌·출처 장애·401/403/409/429/503·오프라인·로그아웃·계정 전환 시 오래된 응답 차단을 구분한다. 누락은 빈 녹색이 아니라 **UNKNOWN/HOLD**다. 여러 시스템 간 전역 원자적 스냅샷을 주장하지 않는다.
+- 320px 모바일 관리자, 768px/데스크톱, 키보드 초점·텍스트 상태·44px 터치·스크린리더 실시간 알림·동작 줄이기·WCAG 2.2 AA, 한국어·영어 동등 표시. 공개 사이트맵과 검색 색인, 구조화 데이터 제외.
+
+### 근거 계약 및 판정 규칙
+- 필수 검증 범주: ① 최신 main·보호 브랜치 정책 ② **정확한 후보 SHA**의 전체 필수 GitHub CI와 워크플로 신원 ③ 공식 인증 Test의 프론트엔드·백엔드·app-api 아티팩트 해시 및 DB 마이그레이션 계보 ④ 외부 독립 백업 복원·무결성·롤백 시험 ⑤ PostgreSQL 애플리케이션 권한과 적용 마이그레이션 체크섬 ⑥ MINT·SWF·국고 정산 출처와 음성 시험 ⑦ 서명된 호스트 ROOT/DATA 가용 바이트·inode·롤백 여유 ⑧ 보안·개인정보·접근성·SEO·모바일 API 계약 ⑨ 정책상 해당되는 경우에만 독립 외부 근거 10,000건 게이트. 비적용 시에도 서명된 정책 근거로 NOT_APPLICABLE을 표시하고 조용히 생략하지 않는다.
+- 게이트별 필드: gateId, policyVersion, required, environment, candidateSha, sourceKind, sourceIdentity, evidenceDigest(sha256), capturedAt, expiresAt, sourceRunId, sourceArtifactSha, signatureVerification, verdict(PASS/FAIL/UNKNOWN), reasonCode, incidentRefs. 검증기는 SHA·환경·정책·발행자 허용 목록·서명·키 교체·실행 결과·시각·nonce·재전송·해시·불변 아티팩트 존재를 검증한다. 사용자 제출 JSON, 브랜치명, 녹색 화면, HTTP 200, 다른 SHA의 캐시, 스크린샷, 문서 전용 CI만으로 PASS 처리하지 않는다.
+- 판정: 필수 항목에 FAIL이 하나라도 있으면 HOLD/FAIL; 그렇지 않더라도 누락·만료·서명 불일치·SHA 불일치·상충·미측정이면 HOLD/UNKNOWN; **모든 필수 항목의 검증된 PASS**만 EVIDENCE_READY다. EVIDENCE_READY도 운영 배포 승인이 아니며 별도의 사람 승인과 GitOps 절차가 필요하다. 새 QA 실패·근거 철회는 기존 녹색 결과를 무효화한다. 호스트 근거 유효기간 최대 120초, GitHub 실행 상태 재검증 최대 15분, 나머지는 출처별 명시된 TTL. 시계 오차 30초 초과·검증 불가는 UNKNOWN.
+- 응답에는 서버 observedAt과 항목별 시각을 함께 표시한다. GitHub·DB·Test·호스트·백업을 가로지르는 전역 MVCC 일관성을 보장하지 않는다. 확인 중 출처 신원이 바뀌면 보수적으로 차단한다. 금융 결과는 화면 성공 문구가 아니라 실제 원장 영수증과 출처 증명이 필요하다.
+
+### API·권한·DB·트랜잭션·보안
+- 제안 Nest **GET /api/v1/admin/operations/release-readiness?candidateSha=40hex&environment=test|production**. 응답 {candidateSha,environment,policyVersion,observedAt,overall:HOLD_FAIL|HOLD_UNKNOWN|EVIDENCE_READY,gates:[...],nextReviewAt}. 400 형식 오류, 401 비인증, 403 권한 없음, 409 후보·정책 세대 충돌, 429 속도 제한, 503 검증 불가. 응답 예산 2초, 요청자가 임의 URL·파일경로·명령어·외부 요청 대상을 지정할 수 없다. Next 동일 출처 프록시는 허용된 입력과 인증 문맥만 전달한다. 공개·Android 회원 API는 만들지 않는다.
+- 기존 SessionGuard·AuthenticatedGuard·ConsentGuard·AdminGuard·AdminSessionGuard 및 관리자 콘솔 세션/CSRF 보호를 준수한다. 민감 아티팩트 메타데이터 열람은 재인증을 요구한다. 관리자 세션별 응답 격리, 서명 발행자 위조·재전송 차단, 관리자/IP 속도 제한, 최대 64KiB 응답, 오류 메시지 정제 및 서명 비교의 시간차 방지를 적용한다.
+- **v1 DB 변경 없음.** 새 테이블·인덱스·마이그레이션·권한·SECURITY DEFINER 함수·원장 변경이 없다. 검증된 기존 증빙을 최소 권한 읽기 어댑터로 조회한다. 장래 이력 저장이 필요하면 체크섬 5건을 해결한 뒤 별도 전진형 마이그레이션과 unique(candidateSha,environment,policyVersion,gateId,artifactDigest), 만료 인덱스를 심사한다. 앱 계정에 광범위한 테이블 권한을 부여하지 않는다.
+- 조회 전용 집계이므로 쓰기 트랜잭션이나 허위 전역 스냅샷이 없다. 감사/분석에는 회원 잔액·세션 ID·토큰·호스트 절대경로·서명키·백업 전문·임의 비공개 GitHub 내용을 저장하지 않는다. 승인된 기존 감사 경로로 접근 거부 및 정책 변경의 정제된 메타데이터만 기록한다. 정상·오류 응답과 Next 프록시 모두 Cache-Control: private, no-store, X-Robots-Tag: noindex. CSP 유지, 외부 링크 허용 목록 검증.
+- SEO: 관리자 화면 noindex/nofollow, 사이트맵·JSON-LD 제외. KPI 가설: 거짓 정상 **0건**, 통제 시험의 누락 근거 탐지율 **100%**, 격리 데이터에서 p95 표시 2초 이내, P0 원인 파악 시간, 검증된 출처 비율, 접근 거부 건수. 실제 측정 전에는 달성했다고 표현하지 않는다.
+
+### 시험·무중단 배포·롤백·개발 인계
+- **시험 명세만 작성, 실제 실행하지 않음:** 합성 근거 10,001건, 위조 서명/권한/다른 SHA 100건, 동시 새로고침·후보 전환 100건, 만료·시간 초과·응답 유실 50건, 마운트·시계·롤백 경계 30건. 출처 철회·main 변경·CI 미완료·가짜 녹색 화면·Test 프론트 SHA 불일치·위조된 저장공간·금융 실패·/help 404·백업 누락·app-api 불일치가 모두 HOLD로 이어져야 한다. 실제 PostgreSQL 권한 음성 시험, Next/Nest 계약, 관리자 401/403, 모바일 접근성, 개인정보/SEO 헤더, 공개/Android API 부재 및 기존 /admin/api-health 회귀를 검증한다.
+- 기능 스위치 **기본 OFF**, 개발은 별도 브랜치, 기획 예약에서 런타임 배포 금지. 격리 Test의 **정확한 후보 SHA**, 전체 CI, DB 계보, 독립 복원, 금융 출처, 보안 검토와 사람의 승인 이후에만 통제된 승격 가능. 롤백은 UI/API 스위치 OFF로 처리하고 기존 관리자 API 상태 화면과 불변 근거·감사를 보존한다. EVIDENCE_READY라도 자동 승격하지 않는다.
+- P0 **DISK1496-01** 용량 보호·승인된 복구(#1170), **SEC1496-02** DB 권한·체크섬·Git 참조, **FIN1496-03** MINT/SWF/국고 정산 증명, **REL1496-04** 전체 CI·독립 복원·공식 Test 정확 SHA·엣지/Android·GitOps. P1 **READINESS1496-05** 신뢰 어댑터, **READINESS1496-06** SHA/TTL/판정기, **READINESS1496-07** Nest/Next API, **READINESS1496-08** UI/접근성/다국어, **READINESS1496-09** 개인정보/관리자/SEO/KPI, **READINESS1496-10** 격리 공격·롤백 수용시험. 10개 모두 **개발 인계**이며 구현된 것이 아니다.
+- 외부 독립 레퍼런스 이번 회차 신규 승인 **0건**, 누적 중복 제거·검증 승인 **UNKNOWN / 10,000건**, 분류 게이트 **BLOCKED / IN PROGRESS**. GitHub CI 성공 수와 혼동하지 않는다. 기존 저장공간 기획을 연결·재사용하고 새 분산 기획서를 생성하지 않는다. Gemini/개발 A/B/C/QA 브랜치·런타임 코드·DB·WLD·스위치·Test·Production은 변경하지 않는다. **DRAFT / RELEASE HOLD**.
+
+>>>>>>> origin/auto/planning-v1496-release-readiness-20261030
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).

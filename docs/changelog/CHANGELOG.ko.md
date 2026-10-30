@@ -29,6 +29,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.1484 — F675-177 회원 전용 지갑 월별 활동 요약 (기획 초안 / 배포 보류)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 - v1482 기능 보완 이후 기능 추가, 다음 v1486 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6`, QA v1377 FAILED/P0. 기존 50건 단위 비공개 거래내역에 달력 월별 요약이 없으며 최근 CSV 및 미병합 저장 필터와 구분.
@@ -46,6 +47,12 @@
 - 지갑 기록·API·원장 SQL·개발 PostgreSQL 17.11(북마크 테이블 없음, 개발 거래 891건)·QA v1379·열린 GitHub PR 조사. 회원 소유 거래 100개 북마크, 커서, 안정적 멱등 영수증, 소유자 DB 함수/권한, Nest/Next/Android, 접근성·SEO·개인정보·관리자 집계 및 배포 차단 조건을 영문 정본과 국문 통합 기획에 반영.
 - P0 REPO1488-01 SEC1488-02 FIN1488-03 REL1488-04, P1 BOOKMARK1488-05..10. 합성 거래 10,001건 및 악용 시험은 계획만 수립(미실행). QA v1379 금융 6 FAIL, lint 오류 3, 체크섬 불일치 5건; 디스크 root 87%/data 94%. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 운영 승격 HOLD.
 >>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
+=======
+## v2026.10.30.1496 — F675-180 관리자 전용 배포 준비 근거 매트릭스 (문서 기획 / 초안 / 보류)
+- 특정 후보의 정확한 SHA에 대해 누락·실패·만료된 근거를 확인하는 **관리자 전용 읽기 화면**을 영어·한국어로 기획했다. 기존 API 상태 화면 및 서명된 저장공간 수집기(#1948/#1956)와 분리하며 배포·승인·강제 통과·삭제·WLD·DB 변경은 없다.
+- P0 DISK1496-01, SEC1496-02, FIN1496-03, REL1496-04와 P1 READINESS1496-05..10에 출처 신뢰·정책/TTL·API/화면/접근성·보안/SEO·시험/롤백을 명세했다. QA v1383 금융 6실패/3성공 및 모바일 계약 불일치 **증거**를 확인했으나 최종 판정은 미확인이다. 08:00 KST DATA 사용률 반올림 100%, 일반 작업자 가용 약 663MiB. 합성 수용시험은 **명세만 작성**했다.
+- [개발 인계 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959). 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000, **BLOCKED / IN PROGRESS**. 런타임·Test·Production 변경 없음. 회차: 보완 v1494 → 추가 v1496 → 보완 v1498(잠정).
+>>>>>>> origin/auto/planning-v1496-release-readiness-20261030
 
 - 2분 간격 읽기 전용 뉴스 생성/발행 구분, 직전 5%·시가 10% 변동, 거래정지·09시 요약·오류 건수 알림. PR #1903 병합, Test 및 운영 타이머·Telegram 실제 전송 검증. [릴리스](../releases/v2026.10.29.1511.ko.md).
 
