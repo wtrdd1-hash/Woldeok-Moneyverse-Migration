@@ -66,6 +66,18 @@ export interface ShopPurchasesOptions {
   readonly query?: unknown;
   readonly from?: unknown;
   readonly to?: unknown;
+  readonly minAmount?: unknown;
+}
+
+function receiptMinimumAmount(value: unknown): bigint | null {
+  if (value === undefined) return null;
+  if (typeof value !== 'string' || !/^[1-9][0-9]{0,29}$/.test(value)) {
+    throw new ShopInputError(
+      'minimum purchase WLD must be a canonical positive integer of at most 30 digits',
+    );
+  }
+  return BigInt(value);
+}
 }
 
 function receiptSearchTerm(value: unknown): string | null {
@@ -189,19 +201,25 @@ export class ShopService {
 
   async myPurchases(
     authenticatedUserId: string,
-    { limit = 30, query, from, to }: ShopPurchasesOptions = {},
+    { limit = 30, query, from, to, minAmount }: ShopPurchasesOptions = {},
   ): Promise<ShopPurchaseView[]> {
     const userId = requireShopUuid(authenticatedUserId, 'authenticated user id');
     const term = receiptSearchTerm(query);
     const range = receiptKstRange(from, to);
+    const minimum = receiptMinimumAmount(minAmount);
     // The SECURITY DEFINER read model enforces owner and active-account scope.
     // Search is intentionally limited to the latest 100 receipts, not full history.
-    const purchaseLimit = requireShopLimit(term || range ? 100 : limit, 'purchase limit');
+    const purchaseLimit = requireShopLimit(
+      term || range || minimum !== null ? 100 : limit,
+      'purchase limit',
+    );
     const rows = await this.repository.purchasesForUser(userId, { limit: purchaseLimit });
     const purchases = rows.map(normalizePurchase);
-    return purchases.filter((row) =>
-      (!term || row.itemName.toLocaleLowerCase('ko-KR').includes(term)) &&
-      (!range || (Date.parse(row.purchasedAt) >= range.start && Date.parse(row.purchasedAt) < range.end)),
+    return purchases.filter(
+      (row) =>
+        (!term || row.itemName.toLocaleLowerCase('ko-KR').includes(term)) &&
+        (!range || (Date.parse(row.purchasedAt) >= range.start && Date.parse(row.purchasedAt) < range.end)) &&
+        (minimum === null || BigInt(row.amount) >= minimum),
     );
   }
 
@@ -213,6 +231,7 @@ export class ShopService {
     const purchases = await this.myPurchases(authenticatedUserId, options);
     const totalSpent = purchases.reduce((total, receipt) => total + BigInt(receipt.amount), 0n);
     return { purchases, summary: { count: purchases.length, totalSpent: totalSpent.toString(), scope: 'displayed' } };
+  }
   }
 
   async purchase(

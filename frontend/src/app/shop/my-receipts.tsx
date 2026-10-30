@@ -27,6 +27,8 @@ export function MyReceipts() {
   const [draftTo, setDraftTo] = useState('');
   const [appliedRange, setAppliedRange] = useState<{ from: string; to: string } | null>(null);
   const [rangeError, setRangeError] = useState(false);
+  const [minAmount, setMinAmount] = useState('');
+  const invalidMinAmount = minAmount.length > 0 && !/^[1-9][0-9]{0,29}$/.test(minAmount);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -34,11 +36,16 @@ export function MyReceipts() {
     let cancelled = false;
     setHistory(null);
     setFailed(false);
+    if (invalidMinAmount) {
+      setReceipts([]);
+      return;
+    }
     const timer = setTimeout(() => {
       const term = search.trim();
       const params = new URLSearchParams();
       if (term) params.set('q', term);
       if (appliedRange) { params.set('from', appliedRange.from); params.set('to', appliedRange.to); }
+      if (minAmount) params.set('minAmount', minAmount);
       const url = `/api/shop/purchases${params.size ? `?${params.toString()}` : ''}`;
       void fetch(url, { cache: 'no-store' })
         .then(async (response) => {
@@ -52,7 +59,7 @@ export function MyReceipts() {
         .catch(() => { if (!cancelled) setFailed(true); });
     }, 250);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [viewer?.signedIn, search, appliedRange]);
+  }, [viewer?.signedIn, search, appliedRange, minAmount, invalidMinAmount]);
 
   if (!viewer?.signedIn) return null;
   const receipts = history?.purchases ?? null;
@@ -71,7 +78,9 @@ export function MyReceipts() {
       />
 
       <div className="grid gap-1">
-        <label htmlFor="receipt-search" className="text-sm font-medium">구매 상품명 검색</label>
+        <label htmlFor="receipt-search" className="text-sm font-medium">
+          구매 상품명 검색
+        </label>
         <input
           id="receipt-search"
           name="receiptSearch"
@@ -83,7 +92,7 @@ export function MyReceipts() {
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:max-w-sm"
           placeholder="상품명을 입력하세요"
         />
-        <p className="text-xs text-muted-foreground">검색·날짜 필터는 최근 100건의 본인 구매 기록만 대상으로 합니다. 필터가 없을 때는 최근 30건을 표시합니다.</p>
+        <p className="text-xs text-muted-foreground">검색·날짜·금액 필터는 최근 100건의 본인 구매 기록만 대상으로 합니다. 필터가 없을 때는 최근 30건을 표시합니다.</p>
         <a
           href={`/api/shop/purchases/export${search.trim() ? `?q=${encodeURIComponent(search.trim())}` : ''}`}
           className="w-fit rounded-md border border-input px-3 py-2 text-sm font-semibold underline underline-offset-2"
@@ -91,6 +100,31 @@ export function MyReceipts() {
         >
           구매 기록 CSV 다운로드
         </a>
+        <label htmlFor="receipt-min-amount" className="text-sm font-medium mt-2">
+          최소 구매 금액 (WLD)
+        </label>
+        <input
+          id="receipt-min-amount"
+          name="receiptMinAmount"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={30}
+          autoComplete="off"
+          value={minAmount}
+          onChange={(event) => {
+            if (/^[0-9]{0,30}$/.test(event.target.value)) setMinAmount(event.target.value);
+          }}
+          aria-invalid={invalidMinAmount}
+          aria-describedby="receipt-amount-help"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:max-w-sm"
+          placeholder="예: 100"
+        />
+        {invalidMinAmount && (
+          <p role="alert" className="text-sm text-destructive">
+            최소 금액은 0보다 큰 정수여야 합니다.
+          </p>
+        )}
       </div>
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">
         <div className="grid gap-1">
@@ -127,12 +161,14 @@ export function MyReceipts() {
         </p>
       )}
       {failed ? (
-        <p role="alert" className="text-sm text-destructive">구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.</p>
+        <p role="alert" className="text-sm text-destructive">
+          구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+        </p>
       ) : receipts === null ? (
         <Skeleton className="h-24 w-full" />
       ) : receipts.length === 0 ? (
         <EmptyState
-          title={search.trim() || appliedRange ? "검색 결과가 없어요." : "아직 구매 기록이 없어요."}
+          title={search.trim() || appliedRange || minAmount ? "검색 결과가 없어요." : "아직 구매 기록이 없어요."}
           description="구매하면 영수증과 원장 기록이 함께 남습니다."
         />
       ) : (

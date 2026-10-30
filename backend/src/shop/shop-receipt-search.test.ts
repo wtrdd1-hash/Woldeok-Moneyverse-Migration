@@ -7,12 +7,37 @@ import { ShopService } from './shop.service';
 const owner = '00000000-0000-4000-8000-000000000001';
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const rows = [
-  { purchase_id: id(1), item_id: id(11), item_name: 'Blue Gloves', transaction_id: id(21), paid_amount: '9007199254740993', purchased_at: new Date('2026-10-30T00:00:00Z') },
-  { purchase_id: id(2), item_id: id(12), item_name: 'Red Gloves', transaction_id: id(22), paid_amount: '40', purchased_at: new Date('2026-10-29T00:00:00Z') },
-  { purchase_id: id(3), item_id: id(13), item_name: 'Bicycle', transaction_id: id(23), paid_amount: '70', purchased_at: new Date('2026-10-28T00:00:00Z') },
+  {
+    purchase_id: id(1),
+    item_id: id(11),
+    item_name: 'Blue Gloves',
+    transaction_id: id(21),
+    paid_amount: '9007199254740993',
+    purchased_at: new Date('2026-10-30T00:00:00Z'),
+  },
+  {
+    purchase_id: id(2),
+    item_id: id(12),
+    item_name: 'Red Gloves',
+    transaction_id: id(22),
+    paid_amount: '40',
+    purchased_at: new Date('2026-10-29T00:00:00Z'),
+  },
+  {
+    purchase_id: id(3),
+    item_id: id(13),
+    item_name: 'Bicycle',
+    transaction_id: id(23),
+    paid_amount: '70',
+    purchased_at: new Date('2026-10-28T00:00:00Z'),
+  },
 ];
 const purchasesForUser = vi.fn(async () => rows);
-const service = new ShopService({ purchasesForUser, listActiveItems: vi.fn(), purchase: vi.fn() } as unknown as ConstructorParameters<typeof ShopService>[0]);
+const service = new ShopService({
+  purchasesForUser,
+  listActiveItems: vi.fn(),
+  purchase: vi.fn(),
+} as unknown as ConstructorParameters<typeof ShopService>[0]);
 
 describe('owner-private recent purchase receipt search', () => {
   it('searches item names within the owner-scoped latest 100, preserving integer-string amounts', async () => {
@@ -37,9 +62,30 @@ describe('owner-private recent purchase receipt search', () => {
     expect(response.purchases).toHaveLength(1);
     expect(response.summary).toEqual({ count: 1, totalSpent: '9007199254740993', scope: 'displayed' });
     expect(purchasesForUser).toHaveBeenCalledWith(owner, { limit: 100 });
-    await expect(controller.purchases(request, ['Blue', 'Red'])).rejects.toThrow(BadRequestException);
+    await expect(controller.purchases(request, ['Blue', 'Red'])).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
+  it('filters the latest owner-scoped 100 by exact integer-string minimum WLD', async () => {
+    purchasesForUser.mockClear();
+    const result = await service.myPurchases(owner, { minAmount: '9007199254740993' });
+    expect(purchasesForUser).toHaveBeenCalledWith(owner, { limit: 100 });
+    expect(result.map((row) => row.purchaseId)).toEqual([id(1)]);
+    const combined = await service.myPurchases(owner, { query: 'gloves', minAmount: '41' });
+    expect(combined.map((row) => row.purchaseId)).toEqual([id(1)]);
+  });
+  it('rejects invalid/duplicate minimum WLD without reading the database', async () => {
+    const controller = new ShopController(service, null);
+    const request = { session: { user_id: owner } } as unknown as RequestWithSession;
+    for (const minAmount of [['1', '2'], '0', '01', '-1', '1.1', '1e4', '9'.repeat(31)]) {
+      purchasesForUser.mockClear();
+      await expect(controller.purchases(request, undefined, minAmount)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(purchasesForUser).not.toHaveBeenCalled();
+    }
+  });
   it('keeps existing latest-30 behavior without a search term', async () => {
     purchasesForUser.mockClear();
     await service.myPurchases(owner);

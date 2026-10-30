@@ -177,6 +177,25 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
   }
 
+  const receiptAmountFilter =
+    parts.length === 2 &&
+    parts[0] === 'shop' &&
+    parts[1] === 'purchases' &&
+    request.method === 'GET';
+  const minAmounts = receiptAmountFilter ? request.nextUrl.searchParams.getAll('minAmount') : [];
+  if (
+    minAmounts.length > 1 ||
+    (minAmounts.length === 1 && !/^[1-9][0-9]{0,29}$/.test(minAmounts[0]!))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'shop_receipt_minimum_invalid',
+      'minimum WLD must be a canonical positive integer',
+    );
+
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -280,6 +299,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+
   // The Android receipt summary is valid only if it matches the exact owner-scoped rows.
   // Reject legacy/forged HTTP 200 responses rather than inventing spending totals.
   if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
@@ -325,6 +345,45 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+    }
+  }
+
+
+
+
+  if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
+    try {
+      const payload: unknown = await response.clone().json();
+      if (
+        !payload ||
+        typeof payload !== 'object' ||
+        !('purchases' in payload) ||
+        !Array.isArray(payload.purchases) ||
+        payload.purchases.length > 100 ||
+        !payload.purchases.every((row: unknown) => {
+          if (!row || typeof row !== 'object' || !('amount' in row)) return false;
+          const amount = row.amount;
+          return (
+            typeof amount === 'string' &&
+            /^[1-9][0-9]{0,29}$/.test(amount) &&
+            BigInt(amount) >= BigInt(minAmounts[0]!)
+          );
+        })
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'shop_receipt_amount_unverified',
+          'purchase amount evidence is unavailable',
+        );
+      }
+    } catch {
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'shop_receipt_amount_unverified',
+        'purchase amount evidence is unavailable',
+      );
     }
   }
 
