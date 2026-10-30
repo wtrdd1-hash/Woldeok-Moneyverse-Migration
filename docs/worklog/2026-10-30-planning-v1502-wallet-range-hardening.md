@@ -20,4 +20,4 @@
 - [x] Draft PR #1983 OPEN and planning issue #1973 updated; 12 documentation files.
 - [x] Local release-classifier tests 22 PASS/0 FAIL, four EN/KO planning docs each list all 10 backlog IDs, git diff --check PASS.
 - [x] Final main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`; Production v1523 SHA `94d38f47603e99aabc42fc8f292b89441afb9663`; official Test stale `c2129625aa6629c616fb31ce790950618b8d92b2`.
-- [ ] Recheck GitHub CI on final commit. Runtime/real-PG acceptance NOT RUN, official Test exact-SHA and independent restore NOT ATTESTED, Production RELEASE HOLD. External gate new 0, cumulative UNKNOWN/10,000.
+- [x] GitHub docs-only CI on preceding head 892ff104: classify/policy/release-input/verify/classify/verify/policy/non-runtime-summary SUCCESS; runtime checks SKIPPED. Completion-log commit needs fresh CI. Runtime/real-PG acceptance NOT RUN, official Test exact-SHA and independent restore NOT ATTESTED, Production RELEASE HOLD. External gate new 0, cumulative UNKNOWN/10,000.
