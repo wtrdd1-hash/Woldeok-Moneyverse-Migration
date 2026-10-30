@@ -12,3 +12,5 @@ Midpoint: 12:04 KST — main unchanged; Production symlink v1523 94d38f4, live b
 
 
 Final verification pending: docs diff, GitHub Draft PR and CI recorded separately. Acceptance tests NOT RUN.
+
+**GitHub:** Draft PR #1990 (stacked on unmerged #1983); engineering issue #1988. Docs-only, RELEASE HOLD.

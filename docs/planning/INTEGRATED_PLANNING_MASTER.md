@@ -1,5 +1,5 @@
 ﻿# Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1504 F675-182 owner-private wallet transaction detail / handoff #1988 / DRAFT / RELEASE HOLD; stacked on unmerged v1502 Draft #1983.
+**Current planning:** v1504 F675-182 owner-private wallet transaction detail / Draft PR #1990 / handoff #1988 / DRAFT / RELEASE HOLD; stacked on unmerged v1502 Draft #1983.
 
 ## v2026.10.30.1504 — F675-182 Owner-Private Wallet Transaction Detail (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

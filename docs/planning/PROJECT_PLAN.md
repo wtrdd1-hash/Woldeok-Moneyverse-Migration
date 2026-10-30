@@ -1,5 +1,5 @@
 ﻿# Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1504 F675-182 owner-private wallet transaction detail / handoff #1988 / DRAFT / RELEASE HOLD; stacked on v1502 Draft #1983.
+**Current planning:** v1504 F675-182 owner-private wallet transaction detail / Draft PR #1990 / handoff #1988 / DRAFT / RELEASE HOLD; stacked on v1502 Draft #1983.
 
 ## v2026.10.30.1504 — F675-182 Owner-Private Wallet Transaction Detail (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Improvement v1502 → Current Addition v1504 → Next Improvement v1506 (provisional). `origin/main` `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` checked start/mid; stacked on unmerged v1502 Draft #1983; [P0/P1 handoff #1988](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1988). English canonical; Korean equivalent.
