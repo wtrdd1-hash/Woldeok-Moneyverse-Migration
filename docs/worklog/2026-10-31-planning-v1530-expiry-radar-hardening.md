@@ -8,10 +8,13 @@
 
 **Checklist:**
 - [x] Inspect installed Superpowers skills, latest remote main, PR #2061, QA and real sources.
-- [ ] Strengthen English/Korean canonical and integrated plans, P0/P1 backlog, logs.
-- [ ] Recheck main and PR collision, run documentation classifier, parity and diff checks.
-- [ ] Push final draft, create stacked PR, update #2060, verify exact-SHA CI.
+- [x] Strengthen English/Korean canonical and integrated plans, P0/P1 backlog, logs.
+- [x] Recheck main and PR collision, run documentation classifier, parity and diff checks.
+- [x] Push final draft, create stacked PR #2066, update #2060.
+- [ ] Verify final exact-SHA CI and close out host records.
 
 **External reference gate:** new verified 0; cumulative verified/deduplicated/classified UNKNOWN/10,000 — BLOCKED / IN PROGRESS. No runtime, database, WLD, Test, Production, or automation changes.
 
 **In progress — 2026-10-31 01:05 KST.** Main and parent PR head rechecked unchanged. Source-based corrections documented: no-write expiry deadline, complete fingerprint with catalog mutations, actual session ID, single read-only repeatable-read DB transaction. QA v1400 126 backend and 55 frontend failures; lint parser error. No release.
+
+**GitHub checkpoint — 2026-10-31 01:06 KST:** Draft #2066 OPEN, issue #2060 comment posted. Release classifier 24/24 PASS, diff check and bilingual parity PASS. CI on final SHA remains pending.

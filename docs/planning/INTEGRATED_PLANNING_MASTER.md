@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1530 F675-188 expiry radar integrity / issue #2060 / Draft pending (stack after #2061) / RELEASE HOLD; incident #2031.
+**Current planning:** v1530 F675-188 expiry radar integrity / issue #2060 / Draft #2066 (stack after #2061) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.31.1530 — F675-188 Owner Inventory Expiry Radar Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
