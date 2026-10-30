@@ -51,19 +51,23 @@ function optionalMoment(value: Date | string | null): string | null {
 
 function count(value: string | number | undefined): number {
   const parsed = Number(value ?? 0);
-  if (!Number.isSafeInteger(parsed) || parsed < 0) throw new Error('database returned an invalid comment count');
+  if (!Number.isSafeInteger(parsed) || parsed < 0)
+    throw new Error('database returned an invalid comment count');
   return parsed;
 }
 
 function mapped(row: StockTaggedRow) {
-  const stock = row.primary_stock_id === null ? null : {
-    stockId: row.primary_stock_id,
-    symbol: row.stock_symbol ?? '',
-    name: row.stock_name ?? '',
-    category: row.category ?? 'general',
-    stance: row.stance ?? 'none',
-    positionDisclosure: row.position_disclosure ?? 'undisclosed',
-  };
+  const stock =
+    row.primary_stock_id === null
+      ? null
+      : {
+          stockId: row.primary_stock_id,
+          symbol: row.stock_symbol ?? '',
+          name: row.stock_name ?? '',
+          category: row.category ?? 'general',
+          stance: row.stance ?? 'none',
+          positionDisclosure: row.position_disclosure ?? 'undisclosed',
+        };
   return {
     postId: row.post_id,
     title: boardText(row.title, 'title', 120),
@@ -85,15 +89,28 @@ export class StockCommunityService {
   }
 
   async create(input: StockTaggedPostInput) {
-    if (!UUID.test(input.actorUserId) || !UUID.test(input.idempotencyKey)) throw new Error('invalid board identity');
+    if (!UUID.test(input.actorUserId) || !UUID.test(input.idempotencyKey))
+      throw new Error('invalid board identity');
     if (!STOCK_SYMBOL.test(input.stockSymbol)) throw new Error('invalid stock symbol');
-    if (input.imageStorageKey && !STORAGE_KEY.test(input.imageStorageKey)) throw new Error('invalid board image');
-    const row = await queryOne<StockTaggedRow>(this.pool,
+    if (input.imageStorageKey && !STORAGE_KEY.test(input.imageStorageKey))
+      throw new Error('invalid board image');
+    const row = await queryOne<StockTaggedRow>(
+      this.pool,
       `SELECT post_id::text,title,body,author_name,created_at,updated_at,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_create_stock_tagged($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [input.actorUserId,input.title,input.body,input.idempotencyKey,input.imageStorageKey ?? null,
-       input.imageAltText ?? null,input.stockSymbol,input.category,input.stance,input.positionDisclosure],
+      [
+        input.actorUserId,
+        input.title,
+        input.body,
+        input.idempotencyKey,
+        input.imageStorageKey ?? null,
+        input.imageAltText ?? null,
+        input.stockSymbol,
+        input.category,
+        input.stance,
+        input.positionDisclosure,
+      ],
     );
     if (!row) throw new Error('stock-tagged board post was not returned');
     return mapped(row);
@@ -101,20 +118,27 @@ export class StockCommunityService {
 
   async publicList(stockSymbol?: string, titleQuery?: string) {
     const normalized = stockSymbol?.trim() || null;
-    if (normalized !== null && !STOCK_SYMBOL.test(normalized)) throw new Error('invalid stock symbol');
-    if (titleQuery !== undefined &&
-        (typeof titleQuery !== 'string' || !titleQuery.trim() || titleQuery.trim().length > 80 ||
-         /[<>\u0000-\u001f\u007f]/.test(titleQuery))) {
+    if (normalized !== null && !STOCK_SYMBOL.test(normalized))
+      throw new Error('invalid stock symbol');
+    if (
+      titleQuery !== undefined &&
+      (typeof titleQuery !== 'string' ||
+        !titleQuery.trim() ||
+        titleQuery.trim().length > 80 ||
+        /[<>\u0000-\u001f\u007f]/.test(titleQuery))
+    ) {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
-    const rows = await queryRows<StockTaggedRow>(this.pool,
+    const rows = await queryRows<StockTaggedRow>(
+      this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
           AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title]);
+      [50, normalized, title],
+    );
     return rows.map(mapped);
   }
 }

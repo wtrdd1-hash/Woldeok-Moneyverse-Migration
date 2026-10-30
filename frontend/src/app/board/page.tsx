@@ -17,11 +17,14 @@ export const revalidate = 60;
 
 const boardMetadata = {
   title: '커뮤니티 광장 — 공략 및 자유 토론',
-  description: '월덕 머니버스 이용자들의 가상경제 팁, 공략과 자유 토론을 누구나 읽을 수 있는 커뮤니티 게시판입니다.',
+  description:
+    '월덕 머니버스 이용자들의 가상경제 팁, 공략과 자유 토론을 누구나 읽을 수 있는 커뮤니티 게시판입니다.',
   alternates: { canonical: canonicalUrl('/board') },
 };
 
-export async function generateMetadata({ searchParams }: {
+export async function generateMetadata({
+  searchParams,
+}: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
@@ -67,10 +70,9 @@ export default async function BoardPage({
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid ? null : await publicApi<{ posts: PostSummary[] }>(
-    `/api/v1/board/public/stock-posts${suffix}`,
-    60,
-  );
+  const data = search.invalid
+    ? null
+    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -84,8 +86,8 @@ export default async function BoardPage({
         dangerouslySetInnerHTML={{ __html: jsonLd(boardBreadcrumb) }}
       />
       <PageHeader eyebrow="COMMUNITY" title="커뮤니티 광장">
-        게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에
-        동의한 회원만 가능합니다.
+        게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에 동의한
+        회원만 가능합니다.
       </PageHeader>
 
       {stock ? (
@@ -104,22 +106,52 @@ export default async function BoardPage({
 
       <Card>
         <CardContent className="pt-6">
-          <form role="search" method="get" action="/board" className="flex flex-wrap items-end gap-3">
+          <form
+            role="search"
+            method="get"
+            action="/board"
+            className="flex flex-wrap items-end gap-3"
+          >
             {stock ? <input type="hidden" name="stock" value={stock} /> : null}
-            <label htmlFor="board-title-query" className="grid min-w-0 flex-1 gap-1 text-sm font-semibold">
+            <label
+              htmlFor="board-title-query"
+              className="grid min-w-0 flex-1 gap-1 text-sm font-semibold"
+            >
               게시글 제목 검색
-              <input id="board-title-query" name="q" type="search" maxLength={80}
-                defaultValue={search.query ?? (typeof params.q === 'string' ? params.q.slice(0, 80) : '')}
-                placeholder="검색할 제목" className="min-h-11 rounded-md border border-input bg-background px-3"
-                aria-describedby="board-search-scope" />
+              <input
+                id="board-title-query"
+                name="q"
+                type="search"
+                maxLength={80}
+                defaultValue={
+                  search.query ?? (typeof params.q === 'string' ? params.q.slice(0, 80) : '')
+                }
+                placeholder="검색할 제목"
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+                aria-describedby="board-search-scope"
+              />
             </label>
-            <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">검색</button>
-            <Link href={stock ? `/board?stock=${encodeURIComponent(stock)}` : '/board'} className="inline-flex min-h-11 items-center underline underline-offset-4">검색 초기화</Link>
+            <button
+              type="submit"
+              className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
+            >
+              검색
+            </button>
+            <Link
+              href={stock ? `/board?stock=${encodeURIComponent(stock)}` : '/board'}
+              className="inline-flex min-h-11 items-center underline underline-offset-4"
+            >
+              검색 초기화
+            </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
             최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? <p role="alert" className="mt-2 text-sm text-destructive">검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.</p> : null}
+          {search.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+            </p>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -135,7 +167,13 @@ export default async function BoardPage({
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
-            title={search.query ? '최근 게시글 50건에서 일치하는 제목이 없어요.' : stock ? `${stock} 토론 글이 아직 없어요.` : '아직 작성된 글이 없어요.'}
+            title={
+              search.query
+                ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
+                : stock
+                  ? `${stock} 토론 글이 아직 없어요.`
+                  : '아직 작성된 글이 없어요.'
+            }
             description="회원의 첫 이야기를 기다리고 있어요."
           />
         ) : (

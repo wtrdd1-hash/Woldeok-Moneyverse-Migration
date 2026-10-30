@@ -11,8 +11,12 @@ describe('public board title query HTTP validation', () => {
     expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
   });
   it.each([
-    { q: ['a', 'b'] }, { q: '' }, { q: 'x'.repeat(81) },
-    { q: 'hello', page: '2' }, { stock: ['WDX', 'AAA'] }, { stock: '<bad>' },
+    { q: ['a', 'b'] },
+    { q: '' },
+    { q: 'x'.repeat(81) },
+    { q: 'hello', page: '2' },
+    { stock: ['WDX', 'AAA'] },
+    { stock: '<bad>' },
   ])('rejects ambiguous or invalid query %j as HTTP 400', async (query) => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });

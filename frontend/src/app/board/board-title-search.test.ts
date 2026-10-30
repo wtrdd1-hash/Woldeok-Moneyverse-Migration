@@ -7,9 +7,12 @@ describe('public board title search', () => {
     expect(parseBoardTitleQuery(undefined)).toEqual({ query: null, invalid: false });
     expect(parseBoardTitleQuery('  제주  ')).toEqual({ query: '제주', invalid: false });
   });
-  it.each(['', '   ', ['one', 'two'], 'x'.repeat(81), 'a\nb', '<script>'])('rejects invalid query %j', (value) => {
-    expect(parseBoardTitleQuery(value).invalid).toBe(true);
-  });
+  it.each(['', '   ', ['one', 'two'], 'x'.repeat(81), 'a\nb', '<script>'])(
+    'rejects invalid query %j',
+    (value) => {
+      expect(parseBoardTitleQuery(value).invalid).toBe(true);
+    },
+  );
   it('renders accessible GET search and states the latest-50 scope, without indexing filtered results', () => {
     const page = readFileSync('src/app/board/page.tsx', 'utf8');
     expect(page).toContain('role="search"');

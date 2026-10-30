@@ -30,7 +30,6 @@ describe('StockCommunityService public discovery', () => {
   });
 });
 
-
 describe('StockCommunityService recent public title search', () => {
   it('filters the latest 50 public rows in PostgreSQL using a literal case-insensitive title', async () => {
     const database = pool();
@@ -42,9 +41,14 @@ describe('StockCommunityService recent public title search', () => {
     expect(values).toEqual([50, 'wdx', 'WLD %_']);
   });
 
-  it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])('rejects invalid title query %j before DB access', async (value) => {
-    const database = pool();
-    await expect(new StockCommunityService(database).publicList(undefined, value)).rejects.toThrow('invalid title search');
-    expect(database.query).not.toHaveBeenCalled();
-  });
+  it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
+    'rejects invalid title query %j before DB access',
+    async (value) => {
+      const database = pool();
+      await expect(
+        new StockCommunityService(database).publicList(undefined, value),
+      ).rejects.toThrow('invalid title search');
+      expect(database.query).not.toHaveBeenCalled();
+    },
+  );
 });

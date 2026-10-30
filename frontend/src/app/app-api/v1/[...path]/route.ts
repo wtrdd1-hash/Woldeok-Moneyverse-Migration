@@ -239,6 +239,12 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
+  // Query-specific public board results are not stable crawlable pages.
+  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
+      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
