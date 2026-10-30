@@ -1,10 +1,6 @@
-# 월덕 머니버스 — 통합 기획 마스터
+﻿# 월덕 머니버스 — 통합 기획 마스터
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## v1490 / F675-178 — 지갑 거래 북마크 정합성·재시도·모바일 개인정보 보호 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 Feature Addition v1488 → 현재 Feature Improvement v1490 → 다음 Feature Addition v1492(잠정). **기준:** main 62c6cd038951d65c94b709302bdaec6e75b080b6, AGENTS.md, README.md, 영문 PROJECT_PLAN.md와 국문 대조 문서; 시작·중간 재조회. **선행:** 미병합 Draft PR #1937, 개발 인계 이슈 #1936. **QA:** 독립 v1380 FAILED/P0. 문서 기획만 수행하며 런타임·SQL·DB·WLD·Test·Production은 변경하지 않는다.
@@ -37,11 +33,6 @@
 - 외부 독립 근거 신규 검증 승인 **0건**, 중복 제거·분류된 누적 승인 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 기능 기본 OFF. 개발자는 별도 브랜치에서 RED/GREEN→격리 PG/권한→전체 CI→공식 Test 동일 SHA 인증 E2E→독립 복원→승인된 GitOps·스모크·롤백 순서로 진행한다. 기획 회차는 운영 배포·원장/DB 변경을 하지 않는다.
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 
 **진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
@@ -103,8 +94,10 @@
 - **운영 보류:** QA v1373 금융 #1895/#1896의 미검증 국고·조폐 실행, 기존 중앙은행·국부펀드 실패, MINT 18,000 WLD 출처, 국고 552행 연결, 개발 DB 체크섬 불일치 5건과 audit_logs 앱 권한, 브랜치 보존 #1663, 독립 백업 복원·공식 Test 정확 SHA. 새 코드는 별도 개발 브랜치·전체 CI·실제 PG 보안/금융 회귀·공식 Test 인증 E2E·승인 GitOps 이후에만 승격. 기능 기본 OFF, 롤백 시 UI/API 숨김·암호화 데이터는 정책적 파기까지 보존.
 - **P0 4건:** REPO1476-01 브랜치/PR 보존; FIN1476-02 금융 fail-closed·출처; SEC1476-03 체크섬·권한·스키마 계보; REL1476-04 전체 CI·복원·정확 SHA Test·GitOps. **P1 6건:** DRAFT1476-05 DB/권한/TTL, DRAFT1476-06 경합·불변 영수증, DRAFT1476-07 Nest/Next/Android API, DRAFT1476-08 회원 UI·접근성, DRAFT1476-09 개인정보·관리자·KPI, DRAFT1476-10 격리 PG·보안·롤백. 양 언어 10개 식별자 동일. 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
 
-=======
-=======
+
+
+
+
 ## v1482 / F675-176 — 지갑 저장 필터: 검증된 거래내역·단조 증가 세대·안전한 재시도 (기능 보완 / DRAFT / RELEASE HOLD)
 - **종속 Draft PR:** [#1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) — #1916 기반, 미병합. 첫 확인 시 CI 진행 중이며 릴리스 인증이 아니다.
 
@@ -135,7 +128,6 @@
 - **P1:** VIEW1482-05 소유자 세대/스키마/ACL; VIEW1482-06 SQL 방향 필터·마이크로초 v2 커서; VIEW1482-07 Nest/Next/Android 런타임 응답·오류 검증과 게이트웨이 If-Match/Idempotency-Key 전달; VIEW1482-08 회원 충돌 UI·320px 접근성; VIEW1482-09 관리자 익명 집계·개인정보·SEO·KPI; VIEW1482-10 격리 PG·공격적 회귀·롤백. C v1172(#1919)는 별도 후보로 연계하고 타 작업 브랜치는 변경하지 않는다.
 - 외부 독립 근거 신규 중복 제거·분류·검증 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**. Gate **BLOCKED / IN PROGRESS**. 기존 v1480 상세기획을 유지·보완하며 새 독립 기능 기획 파일은 만들지 않는다.
 
->>>>>>> origin/auto/planning-v1482-wallet-saved-views-hardening-20261030-0105
 ## v1480 / F675-176 — 회원 전용 지갑 기록 저장 필터 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **주기·기준:** 이전 기능 보완 v1478 → 현재 기능 추가 v1480 → 다음 기능 보완 v1482(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`(2026-10-30 00:10 KST), 독립 QA v1375 FAILED/P0. [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). **기획 초안이며 구현·검증·배포 완료가 아니다.**
@@ -171,10 +163,11 @@
 - 외부 독립 중복 제거·검증 승인 근거 신규 **0건**, 누적 **UNKNOWN / 10,000건**. Gate **BLOCKED / IN PROGRESS**. 새 분산 세부기획 파일은 생성하지 않는다.
 
 
->>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
-=======
-=======
+
+
+
+
 ## v1486 / F675-177 — 지갑 월별 요약 스냅샷·과거 계정 조회 보완 (기능 보완 / 초안 / 배포 보류)
 - **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 
@@ -196,7 +189,6 @@
 - **P1 개발 백로그:** `MONTH1486-05` 과거 계정 포함 본인 WLD SQL·인덱스; `MONTH1486-06` 동일 클라이언트 스냅샷·반개구간·effectiveEnd; `MONTH1486-07` Nest/Next API 및 합계 검증; `MONTH1486-08` Android 계약·세션 격리·접근성; `MONTH1486-09` 개인정보·관리자 집계·SEO·KPI; `MONTH1486-10` 격리 PG 경합·정밀도·동결 계정·회귀·롤백. **P0 4건 + P1 6건 = 10건**, 수용시험은 정의만 했으며 미실행.
 - **외부 근거 게이트:** 독립 획득·중복 제거·실제 근거 분류 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 운영 승격 **HOLD**. 기획 회차에서 런타임·DB·WLD·Test·Production 변경 없음.
 
->>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
 ## v1484 / F675-177 — 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 
@@ -226,8 +218,8 @@
 - **P1:** MONTH1484-05 본인 SQL·인덱스 검증; MONTH1484-06 Nest 엄격한 읽기 API; MONTH1484-07 Next 화면/접근성; MONTH1484-08 Android 계약; MONTH1484-09 관리·개인정보·SEO·KPI; MONTH1484-10 격리 PostgreSQL 적대적 회귀·롤백 증거. 개발 인계만 수행. 외부 독립·중복 제거·실제 근거 분류 신규 승인 **0건**, 누적 **UNKNOWN/10,000건**, 게이트 **BLOCKED/IN PROGRESS**. 새로운 독립 기획 파일·런타임·DB·WLD·Test·Production 변경 없음.
 
 
->>>>>>> origin/auto/planning-v1484-wallet-monthly-summary-20261030-0205
-=======
+
+
 ## v1488 / F675-178 — 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
 **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
 
@@ -267,9 +259,10 @@
 - **P1:** `BOOKMARK1488-05` 소유자 SQL/테이블/인덱스/권한, `BOOKMARK1488-06` 상한·동시성·멱등 영수증, `BOOKMARK1488-07` Nest API, `BOOKMARK1488-08` Next UI/a11y, `BOOKMARK1488-09` Android/관리자/개인정보/SEO/KPI, `BOOKMARK1488-10` 실제 PG 회귀·롤백. **P0 4 + P1 6 = 총 10건**. 개발 A/B/C 별도 브랜치에서 RED/GREEN→CI→격리 DB→공식 Test exact-SHA→독립 복원→승인된 무중단 운영 승격·스모크·롤백을 증빙해야 함.
 - **외부 독립 근거 10,000건 gate:** 신규 취득·중복 제거·근거 분류 **승인 0건**, 누적 **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**. 달성 주장 금지. 기능 플래그 `wallet_activity_bookmarks` 기본 OFF, 운영 승격 **BLOCKED**.
 
->>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
-=======
-=======
+
+
+
+
 ## v2026.10.30.1498 — F675-180 관리자 배포 준비 근거 매트릭스: 중복 기획 통합·신뢰 경계 강화 (기능 보완 / 초안 / 운영 승격 보류)
 
 **GitHub 인계:** [Draft PR #1964](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1964)(#1960 종속), [기획 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959), [기존 중복 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829), [개발 DB 권한 P0 #993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993). **최초 확인 CI 진행 중, 최종 성공 주장 금지.**
@@ -306,7 +299,6 @@
 - P1 **READINESS1498-10**: 격리 PostgreSQL·API·공격·엣지·롤백 시험 및 정확 SHA 승격 게이트.
 - 외부 독립 근거 신규 검증 승인 **0건**, 누적 중복 제거·검증 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 분산 기획 파일 추가 없음. Gemini·개발 A/B/C·QA 브랜치와 런타임·DB·Test·Production 변경 없음. **DRAFT / RELEASE HOLD**.
 
->>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
 ## v2026.10.30.1496 — F675-180 관리자 전용 검증된 배포 준비 근거 매트릭스 (기능 추가 / 기획 초안 / 운영 승격 보류)
 
 **회차 및 기준.** 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 확인한 최신 main SHA는 **62c6cd038951d65c94b709302bdaec6e75b080b6**. PROJECT_PLAN.md 영어판을 정본으로 하고 한국어판은 의미가 동일한 대조 문서다. 개발 인계 [#1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960). 본 회차는 **문서 기획만 수행**하며 구현이나 배포 승인이 아니다.
@@ -343,8 +335,8 @@
 - P0 **DISK1496-01** 용량 보호·승인된 복구(#1170), **SEC1496-02** DB 권한·체크섬·Git 참조, **FIN1496-03** MINT/SWF/국고 정산 증명, **REL1496-04** 전체 CI·독립 복원·공식 Test 정확 SHA·엣지/Android·GitOps. P1 **READINESS1496-05** 신뢰 어댑터, **READINESS1496-06** SHA/TTL/판정기, **READINESS1496-07** Nest/Next API, **READINESS1496-08** UI/접근성/다국어, **READINESS1496-09** 개인정보/관리자/SEO/KPI, **READINESS1496-10** 격리 공격·롤백 수용시험. 10개 모두 **개발 인계**이며 구현된 것이 아니다.
 - 외부 독립 레퍼런스 이번 회차 신규 승인 **0건**, 누적 중복 제거·검증 승인 **UNKNOWN / 10,000건**, 분류 게이트 **BLOCKED / IN PROGRESS**. GitHub CI 성공 수와 혼동하지 않는다. 기존 저장공간 기획을 연결·재사용하고 새 분산 기획서를 생성하지 않는다. Gemini/개발 A/B/C/QA 브랜치·런타임 코드·DB·WLD·스위치·Test·Production은 변경하지 않는다. **DRAFT / RELEASE HOLD**.
 
->>>>>>> origin/auto/planning-v1496-release-readiness-20261030
-=======
+
+
 ## v1474 / F675-174 — 알림 검색 스냅샷·유니코드·커서 안전성 보완 (기능 보완 / 초안 / 운영 HOLD)
 **GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / 미병합, [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) 업데이트. 최신 main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5` 기준으로 리베이스. 문서 전용 CI policy/classify SUCCESS, runtime-check SKIPPED. 운영 HOLD.
 
@@ -370,8 +362,8 @@
 - **P1 NOTIFSEARCH1474-05:** 회원 전용 SQL·인덱스 계보·한글 2글자 실행 계획; **P1 NOTIFSEARCH1474-06:** 필터 정규화·HMAC 커서·시각 정밀도·읽음 경합; **P1 NOTIFSEARCH1474-07:** Nest/Next/Android 인증·API 오류; **P1 NOTIFSEARCH1474-08:** 회원 UI·접근성·오류 복구; **P1 NOTIFSEARCH1474-09:** 개인정보·관리자·SEO·KPI·악용 방지; **P1 NOTIFSEARCH1474-10:** 실제 PG 적대적 회귀·기능 OFF 롤백·정확 SHA Test 인계.
 - **외부 독립 근거:** 신규 중복제거·검증 승인 0건, 누적 UNKNOWN / 10,000건, `BLOCKED / IN PROGRESS`. 확보를 주장하지 않는다. **DRAFT / RELEASE HOLD.** 런타임·DB·WLD·Test·Production·기능 스위치 미변경. 개발 A/B/C는 별도 브랜치에서 구현하고 공식 Test 정확 SHA를 증명한 뒤 승인된 운영승격만 진행한다.
 
->>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
-=======
+
+
 ## v2026.10.30.1494 / F675-179 — 저장공간 근거 검증·예약 블록·배포 보류 강화 (기능 보완 / 초안 / 배포 보류)
 **GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954); 선행 [v1492 PR #1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949) 미병합. [개발 이슈 #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [P0 용량 #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
 
@@ -449,7 +441,6 @@
 - 외부 독립 레퍼런스 신규 중복 제거·검증 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 달성으로 표시하지 않는다. 개발 A/B/C·Gemini·QA의 작업 브랜치는 건드리지 않는다.
 
 
->>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).

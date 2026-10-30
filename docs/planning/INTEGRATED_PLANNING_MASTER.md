@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-﻿# Woldeok Moneyverse — Integrated Planning Master
+﻿﻿# Woldeok Moneyverse — Integrated Planning Master
 
 ## v2026.10.30.3 — Telegram watchdog running-state false-positive correction LIVE
 
@@ -130,7 +129,8 @@
 - **Rollout:** `wallet_monthly_activity_digest` OFF by default; no schema or data migration in baseline, so rollback hides CTA and endpoint without changing ledger or existing history/CSV. If later index is needed, separate migration and backward-compatible rollback reviewed. Separate developer A/B/C branch, full lint/test/build/app-api contract, official exact-SHA authenticated Test and separate frontend/backend/edge artifact proof, off-host encrypted backup restore, owner-approved Production promotion and smoke/rollback. Release HOLD until P0 all pass.
 - **P0:** REPO1484-01 historic 462 missing refs; SEC1484-02 DEV app direct support/audit DML/TRUNCATE + five applied migration checksum mismatches 219/220/221/234/266; FIN1484-03 SWF synthetic success, 18,000 WLD MINT provenance and 552 Treasury direct-link gaps plus Test public synthetic 200; REL1484-04 frontend/edge SHA (#1917/#1918), lint 3 errors/app-api contract drift/full CI, exact-SHA Test, off-host restore and disk capacity 86% root/89% data. No destructive cleanup without reviewed retention/backup proof.
 - **P1:** MONTH1484-05 owner SQL/index proof; MONTH1484-06 strict Nest read-only API; MONTH1484-07 Next UI/a11y; MONTH1484-08 Android contract; MONTH1484-09 admin/privacy/SEO/KPI; MONTH1484-10 isolated PostgreSQL adversarial/rollback evidence. All are engineering handoff only. External independent deduplicated classified evidence **0 newly approved**, cumulative **UNKNOWN/10,000**, gate **BLOCKED/IN PROGRESS**. No new standalone planning file, runtime, database, WLD, Test or Production change.
-=======
+
+
 # Woldeok Moneyverse — Integrated Planning Master
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
@@ -168,7 +168,6 @@
 - P0 backlog: REPO1490-01 preserve 462 missing historic refs (346 nonancestor) and enforce branch protection; SEC1490-02 reconcile five applied checksums (219/220/221/234/266), DEV support/audit app DML and owner-function ACL; FIN1490-03 resolve 18,000 WLD MINT provenance, 552 unlinked Treasury rows, SWF fail-closed 6 FAIL and Test synthetic 200; REL1490-04 QA v1380 FAILED/P0, full lint/test/contract, exact backend/frontend/edge SHA, independent off-host restore, GitOps and disk root 92%/data 97% capacity safety without deleting other work.
 - P1 backlog: BOOKMARK1490-05 microsecond owner/generation keyset and SQL indexes; BOOKMARK1490-06 owner-row serialization/receipt replay/current-state reconciliation; BOOKMARK1490-07 Nest contract/strict UUID and Android Idempotency-Key/noindex forwarding; BOOKMARK1490-08 Next owner UX, account-switch fencing and accessible error recovery; BOOKMARK1490-09 privacy/admin aggregate/SEO/analytics and retention/restore; BOOKMARK1490-10 isolated PG 10,001-row adversarial tests, regression, rollback and exact-SHA Test. **P0 4 + P1 6 = 10**.
 - External independently acquired/deduplicated/classified references: newly approved **0**, cumulative **UNKNOWN / 10,000**; gate **BLOCKED / IN PROGRESS**. Feature OFF. Developer work only on separate branch after P0 resolution; RED/GREEN → reviewed SQL/isolated PG → full CI → official authenticated Test exact-SHA → off-host restore → approved GitOps promotion/smoke/rollback. This planning change never deploys or changes WLD, ledger, shared DB or Production.
->>>>>>> origin/auto/planning-v1490-wallet-bookmarks-hardening-20261030-0505
 
 
 ## v1488 / F675-178 — Owner-Private Wallet Transaction Bookmarks (FEATURE ADDITION / DRAFT / RELEASE HOLD)

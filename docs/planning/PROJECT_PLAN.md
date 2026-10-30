@@ -1,10 +1,6 @@
-# Woldeok Moneyverse — Living Project Plan
+﻿# Woldeok Moneyverse — Living Project Plan
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), stacked on unmerged [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937); [handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD; no independent merge.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## v2026.10.30.1490 — F675-178 Wallet Bookmark Consistency Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1488 → Current Improvement v1490 → Next Addition v1492 (provisional). Authority main 62c6cd038951d65c94b709302bdaec6e75b080b6 rechecked start/mid; QA v1380 FAILED/P0; predecessor Draft #1937 unmerged; handoff #1936. Documentation-only.
 - **Source-backed gaps:** existing wallet activity cursor round-trips PostgreSQL microseconds through JS Date milliseconds; Android APP_API_REQUEST_HEADERS omits Idempotency-Key; wallet gateway forces private no-store but not X-Robots-Tag noindex; no bookmark CTA/API. These are proposals, not deployed fixes. Keep Backend B issue #1935 independent.
@@ -13,11 +9,6 @@
 - **Acceptance:** isolated PostgreSQL 17.11 ≥10,001 synthetic ledger rows, 100 forged, 100 races, 50 lost/late replies, 30 account switches, microsecond tie, 24h/90d boundary, zero WLD mutation — **NOT RUN**. External independently deduplicated classified approvals new **0**, cumulative **UNKNOWN / 10,000** → BLOCKED / IN PROGRESS. No merge, Test/Production promotion or runtime/DB/WLD changes; exact-SHA developer release gates required.
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## v2026.10.29.1478 — F675-175 Support Draft ACL and Verified Send Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous Feature Addition v1476 → Current Feature Improvement v1478 → Next Feature Addition v1480 (provisional). Main `54b182d2214a15974350701174175f589789613b` start/mid; predecessor Draft #1901 OPEN/CONFLICTING, not merged; QA v1374 Draft #1902 FAILED/HOLD, not official Test. [P0 support ACL #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [planning issue #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
 - DEV PG 17.11 **actual** grants: `moneyverse_app` directly has SELECT/INSERT/UPDATE/DELETE/TRUNCATE (plus REFERENCES/TRIGGER) on `support_threads` and `support_messages`, despite 196/302 REVOKE in source; Production unknown, no support content read. Existing Next send action generates a new UUID per invocation; `support_create_thread` same-key replay does not compare subject/body, and existing message-ID receipt cannot resolve unknown sends by key. **Potential risks, not verified Production incidents.**
@@ -31,8 +22,10 @@
 - Nest GET/PUT/DELETE `/api/v1/support/drafts`, Next BFF and Android app-api, verified actor, CSRF, 0→monotonic revision decimal strings, UUID idempotency and immutable 30-day receipt; 409 conflicts, fail-closed 503, owner-only 404. Forward-only encrypted draft schema, owner/context uniqueness with zero-UUID sentinel, SECURITY DEFINER owner functions, no direct app table DML, TTL purge, CAS send cleanup, no admin draft access, noindex/no-store and aggregate-only KPI. Full specification: [integrated master](INTEGRATED_PLANNING_MASTER.md).
 - P0 REPO1476-01 FIN1476-02 SEC1476-03 REL1476-04: historic refs; QA #1895 Treasury/Mint fail-open, Central Bank/SWF, 18,000 WLD/552 Treasury; five checksum mismatches/audit_logs ACL; independent restore/exact-SHA Test/GitOps. P1 DRAFT1476-05 DRAFT1476-06 DRAFT1476-07 DRAFT1476-08 DRAFT1476-09 DRAFT1476-10: DB/ACL, transactions/receipts, API, UX, privacy/KPI, isolated PG tests. 10,001 synthetic rows/100 forged/100 races/50 losses/30 expiry tests **proposed, not run**. No runtime/DB/WLD/Test/Production change. Feature OFF; RELEASE HOLD. External approved new 0, cumulative UNKNOWN/10,000 => BLOCKED / IN PROGRESS.
 
-=======
-=======
+
+
+
+
 ## v2026.10.30.1482 — F675-176 Saved Wallet Views Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Stacked Draft PR:** [#1920](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1920) — base #1916, unmerged; CI in progress at first check, not release certification.
 - Cycle: Previous Feature Addition v1480 → Current Feature Improvement v1482 → Next Feature Addition v1484 (provisional). Start main `62c6cd038951d65c94b709302bdaec6e75b080b6`; v1480 unmerged Draft #1916, this is a stacked docs-only proposal. QA v1376 FAILED/P0 (#1917); C v1172 validator (#1919) local-only. [Detailed EN design](INTEGRATED_PLANNING_MASTER.md).
@@ -40,17 +33,17 @@
 - DEV PostgreSQL 17.11 read-only: saved-view/set/receipt tables absent, support_threads app-role UPDATE/TRUNCATE still allowed. App gateway allows wallet routes but does **not** forward If-Match or Idempotency-Key: VIEW1482-07 must add reviewed header forwarding and Android negative tests before parity claims. This is DEV/source evidence, not Production proof.
 - P0: REPO1482-01 historic refs; SEC1482-02 DEV support/audit ACL and 5 applied checksums; FIN1482-03 SWF/MINT 18,000 WLD and Treasury 552 links; REL1482-04 Test synthetic Treasury 200 and missing frontend/edge SHA attestation (#1917/#1918), classifier/lint/app-api/full CI/off-host restore/official Test exact-SHA. P1: VIEW1482-05 VIEW1482-06 VIEW1482-07 VIEW1482-08 VIEW1482-09 VIEW1482-10 owner schema, SQL/cursor, APIs, UI, privacy/KPI, isolated PG/rollback. Planned 10,001/100 forged/100 concurrent/50 retries/30 boundaries/100 malformed-response tests **NOT RUN**. External newly approved 0, cumulative UNKNOWN/10,000: BLOCKED/IN PROGRESS; Production promotion BLOCKED.
 
->>>>>>> origin/auto/planning-v1482-wallet-saved-views-hardening-20261030-0105
 ## v2026.10.30.1480 — F675-176 Owner-private Wallet Activity Saved Views (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1478 → Current Feature Addition v1480 → Next Feature Improvement v1482 (provisional). Start main `62c6cd038951d65c94b709302bdaec6e75b080b6`; independent QA v1375 FAILED/P0. [P0/P1 issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). Docs-only proposal, not implemented.
 - Source gap: `/wallet/activity` and NestJS GET support `all/7d/30d` with 50-row owner/session-bound cursor, not named saved views or SQL movement filters. F675-176 proposes up to 8 owner-only named views and optional default, signed net movement ALL/INCREASE/DECREASE/UNCHANGED (zero means zero net, **not** necessarily internal transfer), atomic CAS/idempotent receipts, owner-only SECURITY DEFINER, versioned 15-minute view-bound cursor, web/Android parity, noindex/no-store, WCAG 2.2 AA/320px, admin aggregates, feature OFF and rollback to legacy history. No WLD writes. Full contracts in [integrated master](INTEGRATED_PLANNING_MASTER.md).
 - P0: REPO1480-01 historic 462 refs; SEC1480-02 DEV support/audit direct app DML and five checksum mismatches; FIN1480-03 SWF synthetic SUCCESS, MINT 18,000 WLD provenance, 552 Treasury links; REL1480-04 classifier/lint/app-api drift/full CI/off-host restore/official Test exact-SHA. P1: VIEW1480-05 VIEW1480-06 VIEW1480-07 VIEW1480-08 VIEW1480-09 VIEW1480-10 schema, SQL cursor, APIs, UI, privacy/KPI, isolated PG/rollback. Synthetic 10,001/100 forged/100 CAS/50 lost response/30 edge cases **planned, not run**. External approved new 0, cumulative UNKNOWN/10,000 => BLOCKED/IN PROGRESS; Production promotion BLOCKED.
 
 
->>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
-=======
-=======
+
+
+
+
 ## v2026.10.30.1486 — F675-177 Monthly Wallet Digest Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 - **Cycle:** Previous Feature Addition v1484 → Current Feature Improvement v1486 → Next Feature Addition v1488 (provisional). Stacked on unmerged Draft [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926); main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked start/mid. QA v1378 FAILED/P0. Documentation only; no release certification.
@@ -58,7 +51,6 @@
 - **P0:** REPO1486-01 historic refs; SEC1486-02 app-role DML and five checksum mismatches; FIN1486-03 18,000 WLD provenance, 552 Treasury links, Test synthetic 200; REL1486-04 frontend/edge identity, 6 finance failures, lint 3, restore/exact-SHA Test, disk capacity. **P1:** MONTH1486-05 owner SQL/history, MONTH1486-06 snapshot, MONTH1486-07 API/validation, MONTH1486-08 Android/a11y, MONTH1486-09 privacy/admin/SEO/KPI, MONTH1486-10 isolated PG regression. 10,001 synthetic transactions and adversarial tests PLANNED NOT RUN.
 - **Release gates:** feature OFF; no runtime/DB/WLD/Test/Production mutation; separate development branches and official exact-SHA Test/backup restore/approved GitOps before promotion. External independent deduplicated evidence new approved 0, cumulative UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Full [integrated contract](INTEGRATED_PLANNING_MASTER.md) and [handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 
->>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
 ## v2026.10.30.1484 — F675-177 Owner-Private Monthly Wallet Activity Digest (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; unmerged, full CI not certified.
 - **Cycle:** Previous Feature Improvement v1482 → Current Feature Addition v1484 → Next Feature Improvement v1486 (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked at start and mid; v1480/#1916 and v1482/#1920 are unmerged proposals, not main. Latest independent QA v1377 **FAILED/P0**. [Engineering handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). This is a new docs-only proposal; no runtime/DB/WLD/Test/Production changes.
@@ -70,8 +62,8 @@
 - **Gates:** External independent deduplicated classified references newly approved **0**, cumulative **UNKNOWN / 10,000** → BLOCKED / IN PROGRESS. P0 QA and Production promotion BLOCKED. Code belongs to separate A/B/C branch with full CI, isolated PG, official Test exact application SHA including frontend/backend/edge proof, independent restore, approved promotion and rollback. No merge/deploy in this planning run.
 
 
->>>>>>> origin/auto/planning-v1484-wallet-monthly-summary-20261030-0205
-=======
+
+
 ## v2026.10.30.1488 — F675-178 Owner-Private Wallet Transaction Bookmarks (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 **Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, independent main-based branch (unmerged prior #1926/#1930 preserved).
 - **Cycle:** Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked start/mid, latest independent QA v1379 FAILED/P0. [P0/P1 engineering handoff #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). Documentation-only; no SQL/runtime/DB/WLD/Test/Production mutation.
@@ -80,9 +72,10 @@
 - **P0:** REPO1488-01 historic refs/branch protection; SEC1488-02 five applied migration checksum mismatches and DEV ACL; FIN1488-03 18,000 WLD MINT, 552 Treasury links, SWF/Test synthetic; REL1488-04 QA1379 finance 6 FAIL/lint 3, independent restore, exact frontend/backend/edge SHA, disk root 87%/data 94%. **P1:** BOOKMARK1488-05, BOOKMARK1488-06, BOOKMARK1488-07, BOOKMARK1488-08, BOOKMARK1488-09, BOOKMARK1488-10 DB, idempotency, Nest, Next, Android/privacy/admin, real PG regression. Proposed 10,001 synthetic transactions, 100 forged, 100 races, 50 lost responses, 30 account switches: **NOT RUN**. P0 4 + P1 6 = 10.
 - **Gates:** External independent deduplicated classified references newly approved **0**, cumulative **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**. No migration number until SEC gate; developer branch→CI→isolated PG→official exact-SHA Test→independent restore→approved GitOps→Production smoke/rollback. RELEASE HOLD.
 
->>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
-=======
-=======
+
+
+
+
 ## v2026.10.30.1498 — F675-180 Release-Readiness Matrix Hardening (DRAFT / RELEASE HOLD)
 
 **GitHub handoff:** [Draft PR #1964](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1964) (dependent on #1960); [planning issue #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959), historical duplicate [#1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829), DEV ACL P0 [#993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993). **CI in progress at initial check; no final CI success claim.**
@@ -95,7 +88,6 @@
 - **Backlog P0:** DISK1498-01 safe capacity (#1170); SEC1498-02 DEV ACL 211/211/233 + migration/ref lineage; FIN1498-03 MINT 18,000 WLD, Treasury 552, SWF, synthetic Test split (#1917); REL1498-04 full CI, exact-SHA Test, off-host restore and post-release attestation. **P1:** READINESS1498-05 duplicate consolidation; READINESS1498-06 stage-aware signed reducer; READINESS1498-07 Nest/Next private API; READINESS1498-08 EN/KO/a11y UI; READINESS1498-09 privacy/SEO/KPI/policy; READINESS1498-10 isolated regression/rollback. Synthetic 10,001 + 100 forged + 100 concurrent + 50 stale + 30 boundaries **specified, not run**.
 - External independent references: new approved 0; cumulative verified/deduplicated UNKNOWN / 10,000; gate BLOCKED / IN PROGRESS. No code deploy or Production promotion.
 
->>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
 ## v2026.10.30.1496 — F675-180 Verified Admin Release-Readiness Evidence Matrix (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1494 → Current Feature Addition v1496 → Next Feature Improvement v1498 (provisional). Fresh main 62c6cd038951d65c94b709302bdaec6e75b080b6 at start/mid; QA v1383 finance 6 FAIL/3 PASS and app-api drift evidence, **final v1383 verdict unverified**. [Development handoff #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960).
 - Source gap: /admin/api-health labels route metrics UNMEASURED; no inspected admin UI combines exact-SHA GitHub CI, official Test artifact identity, independent restore, real PostgreSQL ACL/migration lineage, financial provenance, signed ROOT/DATA headroom and privacy/mobile/SEO gates. Storage #1948 / Dev A #1956 owns collector; F675-180 only consumes signed evidence.
@@ -104,8 +96,8 @@
 - P0: DISK1496-01 (DATA 100% rounded, ~663 MiB free, no automatic cleanup); SEC1496-02 (ACL, five checksums, 462 refs); FIN1496-03 (MINT 18,000 WLD, 552 Treasury links, SWF); REL1496-04 (full CI, independent restore, official Test exact SHA/edge). P1: READINESS1496-05 READINESS1496-06 READINESS1496-07 READINESS1496-08 READINESS1496-09 READINESS1496-10 (trusted adapters, reducer, API, UI/a11y, privacy/KPI, adversarial tests). Synthetic 10,001 + 100 forged + 100 concurrency + 50 stale + 30 boundaries **specified, not executed**.
 - Feature OFF; no runtime, DB, WLD, Test or Production changes; DRAFT / RELEASE HOLD. External independent sources newly approved 0, cumulative verified/deduplicated UNKNOWN/10,000, gate BLOCKED/IN PROGRESS. Unmerged planning v1492/v1494 PRs #1949/#1954 referenced without overwriting their branches.
 
->>>>>>> origin/auto/planning-v1496-release-readiness-20261030
-=======
+
+
 ## v2026.10.29.1474 — F675-174 Notification Search Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 **GitHub:** [Draft PR #1892](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1892) OPEN / unmerged; [development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887) updated. Rebasing onto latest main `ba18116a0f94ee4c2018cbb37fc7e161b1cd97c5`; documentation CI policy/classify SUCCESS, runtime-check SKIPPED. RELEASE HOLD.
 - Cycle: Previous Feature Addition v1472 → Current Feature Improvement v1474 → Next Feature Addition v1476 (provisional). Latest main at start/mid `f9fd777458b89b3c33593ae0cad46a37b216474b`; v1472 PR #1888 merged (documentation only), current notification search runtime **not implemented**. QA v1372 FAILED/P0 on older SHA; current-main CI/Test not certified. [Developer handoff #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
@@ -113,8 +105,8 @@
 - P0: REPO1474-01 historic refs; SEC1474-02 source 304 unique SQL IDs but 5 existing DEV checksum mismatches, migration lineage/ACL; FIN1474-03 18,000 WLD MINT provenance/552 Treasury links; REL1474-04 fresh main lint/typecheck/real PG/off-host restore/official Test exact SHA. P1: NOTIFSEARCH1474-05 NOTIFSEARCH1474-06 NOTIFSEARCH1474-07 NOTIFSEARCH1474-08 NOTIFSEARCH1474-09 NOTIFSEARCH1474-10 owner SQL/index, cursor, APIs, UX/a11y, privacy/KPI, PG regression. 10,001 synthetic rows and adversarial tests **proposed, NOT RUN**.
 - External independent approved new 0, cumulative UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. Feature OFF; no runtime/DB/WLD/Test/Production changes; release HOLD. Worktree-only documentation PR, no merge or deployment.
 
->>>>>>> origin/docs/planning-v1474-notification-search-hardening-20261029
-=======
+
+
 ## v2026.10.30.1494 — F675-179 Fail-closed Host Storage Evidence (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 **GitHub:** [Draft PR #1954](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954) stacked on unmerged [#1949](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1949); [P0/P1 handoff #1948](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1948), [capacity #1170](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1170).
 - Cycle: Previous Addition v1492 → Current Improvement v1494 → Next Addition v1496 (provisional). Start/mid main `62c6cd038951d65c94b709302bdaec6e75b080b6`; latest verified QA v1381 FAILED/P0, later QA unknown. Parent v1492 unmerged. Docs-only.
@@ -136,7 +128,6 @@
 - External independent deduplicated evidence new approved **0**, cumulative **UNKNOWN / 10,000**, gate **BLOCKED / IN PROGRESS**. Documentation only; no runtime/DB/ledger/Test/Production change. DRAFT / RELEASE HOLD.
 
 
->>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 ## v2026.10.29.1472 — F675-174 Verified Member Notification Search & Stable History (PLANNING DRAFT / RELEASE HOLD)
 - Cycle: Previous Feature Improvement v1470 → Current Feature Addition v1472 → Next Feature Improvement v1474 (provisional). Start/mid main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`; latest completed QA v1371 FAILED/P0, v1372 in progress. [Development issue #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - Source gap: existing notification tabs use 20-row offset pagination capped at 5,000; Nest DTO has category/unread/limit/offset but no keyword/date/keyset search. DEV PG has notification table with 0 rows, owner/created indexes, app-role SELECT/INSERT; pg_trgm absent, defining migration provenance unverified. Do not infer Production data or approve ACL changes.

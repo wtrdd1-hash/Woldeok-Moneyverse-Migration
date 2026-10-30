@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
+﻿## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
 - Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
 
 ## v2026.10.30.2 — Accurate Telegram disk critical severity (Production LIVE)
@@ -10,64 +6,61 @@
 
 ## v2026.10.30.1 — Telegram market recurring schedule and watchdog (Production LIVE)
 - Recover a silent active/elapsed market timer with a calendar schedule, monitor real next trigger and prevent stale two-minute price alerts. [Release](../releases/v2026.10.30.1.md).
-=======
+
+
 ## v2026.10.30.1480 — F675-176 owner-private wallet activity saved views (planning DRAFT / release HOLD)
 
 ## v2026.10.30.1482 — F675-176 wallet saved-view correctness hardening (planning DRAFT / release HOLD)
 - Specify monotonic owner-set ETag, receipt-first idempotency, v2 microsecond cursor and strict malformed-response validation. QA v1376 Test Treasury synthetic 200 / frontend SHA P0 hold remains; C v1172 validator unmerged. No runtime/DB/Test/Production changes. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [Issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). External approved new 0, cumulative UNKNOWN/10,000.
 
 - Proposed up to 8 named owner-only period/net-movement filters, CAS/idempotent receipts, versioned signed cursor, Nest/Next/Android parity and rollback to existing 50-row wallet history. Documentation only; no ledger, DB, runtime, Test or Production change. Independent QA v1375 FAILED/P0; external approved 0, cumulative UNKNOWN/10,000. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [Development issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915).
->>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
-=======
+
+
 ## v2026.10.30.1486 — F675-177 Monthly Wallet Digest Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
 - **Cycle:** Previous Feature Addition v1484 → Current Feature Improvement v1486 → Next Feature Addition v1488 (provisional). Stacked on unmerged Draft [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926); main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked start/mid. QA v1378 FAILED/P0. Documentation only; no release certification.
 - **Verified gaps:** `Queryable.query` on a pool does not establish a same-client `REPEATABLE READ READ ONLY` transaction; require a checked-out client with rollback/release or explicitly verified one-statement snapshot. Frozen/closed account history and inbound transfers must remain included, not filtered by status/transaction actor. Owner-net inflow/outflow is not gross income/spending; cash↔bank is zero net. Add `effectiveEndExclusive` for current-month partial snapshot; half-open KST→UTC intervals, exact signed WLD strings, server snapshot and arithmetic invariants.
 - **P0:** REPO1486-01 historic refs; SEC1486-02 app-role DML and five checksum mismatches; FIN1486-03 18,000 WLD provenance, 552 Treasury links, Test synthetic 200; REL1486-04 frontend/edge identity, six finance failures, lint 3, restore/exact-SHA Test, disk capacity. **P1:** MONTH1486-05 owner SQL/history, MONTH1486-06 snapshot, MONTH1486-07 API/validation, MONTH1486-08 Android/a11y, MONTH1486-09 privacy/admin/SEO/KPI, MONTH1486-10 isolated PG regression. 10,001 synthetic transactions and adversarial tests PLANNED NOT RUN.
 - **Release gates:** feature OFF; no runtime/DB/WLD/Test/Production mutation; separate development branches and official exact-SHA Test/backup restore/approved GitOps before promotion. External independent deduplicated evidence new approved 0, cumulative UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Full [integrated contract](INTEGRATED_PLANNING_MASTER.md) and [handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
->>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
-=======
+
+
 ## v2026.10.30.1498 — Planning: release readiness trust-boundary hardening (DRAFT / HOLD)
 
 - Consolidated duplicate F675-170 (#1829) and F675-180 (#1959) into one proposed read-only V1; deferred V2 evidence tables and prohibited hard-gate waivers.
 - Separated PREFLIGHT exact-SHA Test attestation from POST_RELEASE Production artifact verification; prevented circular pre-deployment Production proof.
 - Recorded QA v1384 **DEV-only** effective moneyverse_app privileges: 211 UPDATE, 211 DELETE, 233 TRUNCATE of 253 base tables; P0 investigation, no Production/exploit claim.
 - Updated P0/P1 backlog, bilingual master/project plans, logs and external 10,000 reference HOLD. Documentation only; no runtime or financial changes.
->>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
-=======
+
+
 ## v2026.10.30.1494 — F675-179 storage evidence hardening (planning draft)
 - Read-only Debian host: root 94% (~5.8 GiB available), DATA df-rounded 100% but ~1.1 GiB unprivileged available; reserved ~9.7 GiB not worker headroom. No outage proven, no cleanup.
 - Proposed signed host/mount/sequence proof, BigInt reserved-block arithmetic, fail-closed replay/freshness/restore-headroom, admin all-response no-store/noindex and 10-item P0/P1 backlog. Latest verified QA v1381 FAILED/P0. External evidence new 0, cumulative UNKNOWN/10,000 BLOCKED. Draft PR https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1954 stacked on #1949; feature OFF, release HOLD, no runtime change.
->>>>>>> origin/docs/planning-v1494-storage-hardening-20261030
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## v2026.10.30.1484 — F675-177 owner-private monthly wallet activity digest (planning DRAFT / release HOLD)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; unmerged, full CI not certified.
 - Feature Addition after v1482 Improvement; next v1486 Improvement (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6`; QA v1377 FAILED/P0. Source-backed gap: existing 50-row private activity history, no calendar-month digest; recent CSV and unmerged saved views are separate.
 - Proposed owner-only 1..12 KST-month read-only summary, exact signed USER_CASH/BANK transaction-first aggregation, server snapshot and partial current month, verified empty vs unavailable, Next/Nest/Android, 320px/WCAG AA, private noindex/no-store and flag OFF. No balance, income/tax, provenance or internal-transfer certification. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [P0/P1 issue #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 - P0 REPO1484-01 SEC1484-02 FIN1484-03 REL1484-04; P1 MONTH1484-05 MONTH1484-06 MONTH1484-07 MONTH1484-08 MONTH1484-09 MONTH1484-10. QA tests planned not run; external independent newly approved 0, cumulative UNKNOWN/10,000. No runtime/DB/WLD/Test/Production change; official exact-SHA release HOLD.
-=======
-=======
+
+
+
+
 ## v2026.10.30.1490 — Wallet Bookmark Hardening (Planning Draft / HOLD)
 - F675-178 Feature Improvement after v1488: PostgreSQL microsecond cursor precision, monotonic owner generation and stale-page reset, immutable replay receipt vs current state, 24h retry/90d audit, owner-locked 100-cap, Android Idempotency-Key and noindex header gap. 4 P0 + 6 P1 handoff, EN/KO parity, no runtime or DB changes. QA v1380 FAILED/P0, disk data 97%, external evidence 0 new / UNKNOWN of 10,000; RELEASE HOLD.
 
 
->>>>>>> origin/auto/planning-v1490-wallet-bookmarks-hardening-20261030-0505
 ## 2026-10-30 v1488 — F675-178 owner-private wallet transaction bookmarks (Feature Addition; DRAFT / RELEASE HOLD)
 - Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). Latest main `62c6cd038951d65c94b709302bdaec6e75b080b6` rechecked start/mid; [engineering issue #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). No runtime/DB/WLD/Test/Production changes.
 - Read source wallet history/controller, ledger accounts/postings schema, DEV PG 17.11 read-only table existence (bookmark table absent; 891 DEV ledger transactions), QA v1379 and open GitHub PRs. Drafted private owner-visible bookmark 100-cap, cursor, stable idempotency receipts, SQL/ACL, Next/Nest/Android, a11y/SEO/privacy, admin aggregate and fail-closed release gates in bilingual canonical/integrated plan.
 - Backlog P0 REPO1488-01 SEC1488-02 FIN1488-03 REL1488-04 and P1 BOOKMARK1488-05..10. Planned 10,001 synthetic ledger rows and adversarial cases NOT RUN. QA v1379 finance 6 FAIL, lint 3 errors, 5 applied migration mismatches; disk root 87% / data 94%. External independent approved newly 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. Draft only, Production HOLD.
->>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
-=======
+
+
 ## v2026.10.30.1496 — F675-180 Verified admin release-readiness evidence matrix (planning only / DRAFT / HOLD)
 - Added a bilingual, administrator-only **read-only evidence matrix** proposal to identify missing/failed/stale proof for a candidate's exact SHA. Separate from existing API-health and the signed storage collector (#1948/#1956); no deploy, approval, override, deletion, WLD or DB mutation.
 - Added P0 DISK1496-01, SEC1496-02, FIN1496-03, REL1496-04 and P1 READINESS1496-05..10 with source trust, policy/TTL, API/UX/a11y, security/SEO, test/rollback contracts. QA v1383 evidence includes finance 6 FAIL/3 PASS and mobile schema drift; final v1383 verdict unverified. DATA rounded 100%, ~663 MiB unprivileged free at 08:00 KST. Synthetic acceptance **specified only**.
 - [Development handoff #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959). External independent references new approved 0, cumulative UNKNOWN/10,000; **BLOCKED / IN PROGRESS**. No runtime/Test/Production change. Cycle: Improvement v1494 → Addition v1496 → Improvement v1498 provisional.
->>>>>>> origin/auto/planning-v1496-release-readiness-20261030
 
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 
