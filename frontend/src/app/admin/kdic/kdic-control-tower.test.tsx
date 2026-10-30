@@ -21,6 +21,20 @@ describe('KDIC admin truthful observation and unsafe action hold', () => {
     expect((screen.getByRole('button', { name: /대위변제금.*환급/ }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getAllByRole('status').map((node) => node.textContent).join(' ')).toContain('서버에서도 집행 요청을 HTTP 503으로 차단');
   });
+  it('exposes real ledger counters to admins but does not unlock financial execution', () => {
+    render(<KdicControlTower initialData={fixture.data} initialLedger={{
+      checkedAt: '2026-10-30T01:00:00.000Z', transactionCount: '891',
+      postingCount: '1829', accountCount: '40', unbalancedTransactionCount: '0',
+      mismatchedAccountCount: '0', absoluteDifferenceWld: '0',
+      unlinkedTreasuryCount: '552', treasuryRecordCount: '552',
+      numericBalanced: true, state: 'BLOCKED', settlementReady: false,
+      blockers: ['KDIC_WRITERS_UNVERIFIED', 'TREASURY_ROWS_WITHOUT_CANONICAL_LINK'],
+    }} />);
+    expect(screen.getByRole('region', { name: 'KDIC 원장 검증' }).textContent).toContain('552 / 552건');
+    expect(screen.getByRole('region', { name: 'KDIC 원장 검증' }).textContent).toContain('금융 집행 승인 아님');
+    expect((screen.getByRole('button', { name: /예보료.*징수/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it('refreshes via same-origin authenticated Next endpoint and discards stale observations on failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));
     render(<KdicControlTower initialData={fixture.data} />);

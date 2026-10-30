@@ -60,9 +60,48 @@ export interface KdicPayoutRecord {
   createdAt: string;
 }
 
+export interface KdicLedgerSnapshot {
+  checkedAt: string;
+  transactionCount: string;
+  postingCount: string;
+  accountCount: string;
+  unbalancedTransactionCount: string;
+  mismatchedAccountCount: string;
+  absoluteDifferenceWld: string;
+  unlinkedTreasuryCount: string;
+  treasuryRecordCount: string;
+}
+
 @Injectable()
 export class KdicRepository {
   constructor(private readonly pool: Pool) {}
+
+  /** One PostgreSQL statement = one MVCC snapshot; no settlement or diagnostic writes. */
+  async getLedgerIntegrity(): Promise<KdicLedgerSnapshot> {
+    const sql = [
+      'WITH per_account AS (',
+      'SELECT a.id, b.available_amount AS stored,',
+      "coalesce(sum(CASE WHEN p.direction::text = 'debit' THEN p.amount ELSE -p.amount END),0) AS journal",
+      'FROM public.accounts a LEFT JOIN public.account_balances b ON b.account_id=a.id',
+      'LEFT JOIN public.ledger_postings p ON p.account_id=a.id GROUP BY a.id,b.available_amount',
+      '), broken_transactions AS (',
+      'SELECT t.id FROM public.ledger_transactions t LEFT JOIN public.ledger_postings p ON p.transaction_id=t.id',
+      "GROUP BY t.id HAVING count(p.id)<2 OR coalesce(sum(CASE WHEN p.direction::text='debit' THEN p.amount ELSE -p.amount END),0)<>0",
+      ') SELECT statement_timestamp() AS "checkedAt",',
+      '(SELECT count(*)::text FROM public.ledger_transactions) AS "transactionCount",',
+      '(SELECT count(*)::text FROM public.ledger_postings) AS "postingCount",',
+      '(SELECT count(*)::text FROM per_account) AS "accountCount",',
+      '(SELECT count(*)::text FROM broken_transactions) AS "unbalancedTransactionCount",',
+      '(SELECT count(*)::text FROM per_account WHERE stored IS DISTINCT FROM journal) AS "mismatchedAccountCount",',
+      '(SELECT coalesce(sum(CASE WHEN stored IS NULL THEN 0 ELSE abs(stored-journal) END),0)::text FROM per_account WHERE stored IS DISTINCT FROM journal) AS "absoluteDifferenceWld",',
+      '(SELECT count(*)::text FROM public.system_treasury_ledger WHERE ledger_transaction_id IS NULL) AS "unlinkedTreasuryCount",',
+      '(SELECT count(*)::text FROM public.system_treasury_ledger) AS "treasuryRecordCount"',
+    ].join(' ');
+    const result = await this.pool.query(sql);
+    if (result.rows.length !== 1) throw new Error('Invalid ledger diagnostic result');
+    const row = result.rows[0] as KdicLedgerSnapshot & { checkedAt: Date | string };
+    return { ...row, checkedAt: new Date(row.checkedAt).toISOString() };
+  }
 
   async getFundStatus(): Promise<KdicFundStatus> {
     const res = await this.pool.query(`

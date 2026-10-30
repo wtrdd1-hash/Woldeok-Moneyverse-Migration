@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.30.1521 — KDIC administrator ledger visibility (BRANCH VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.md) / [KO](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.ko.md) · [Internal EN](docs/updates/v2026.10.30.1521-kdic-internal.md) / [KO](docs/updates/v2026.10.30.1521-kdic-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.30.1521-kdic-github.md) / [KO](docs/updates/v2026.10.30.1521-kdic-github.ko.md). Production process read-only ledger projection balanced (40/40), 552 Treasury links unresolved. Admin GET diagnostics only; financial POST HTTP 503 unchanged. No official Test/Production release.
+
+
 ## v2026.10.28.1415 — Treasury / Mint / Central Bank containment candidate
 - [EN worklog](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.md) / [KO](docs/worklog/2026-10-28-sovereign-finance-truth-v1415.ko.md) · [Internal](docs/updates/v2026.10.28.1415-internal.md) / [KO](docs/updates/v2026.10.28.1415-internal.ko.md) · [GitHub](docs/updates/v2026.10.28.1415-github.md) / [KO](docs/updates/v2026.10.28.1415-github.ko.md). Fake finance display removed, uncertified financial mutation 503, SWF SQL type corrected; full canonical settlement & Production finance release remain BLOCKED.
 

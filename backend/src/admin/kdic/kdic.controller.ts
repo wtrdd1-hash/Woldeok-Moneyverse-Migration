@@ -32,6 +32,13 @@ export class AdminKdicController {
     return { success: true, data };
   }
 
+  @Get('ledger-integrity')
+  @ApiOperation({ summary: 'Read-only canonical ledger projection, journal imbalance and Treasury link audit' })
+  async getLedgerIntegrity() {
+    const data = await this.kdicService.getLedgerIntegrity();
+    return { success: true, data };
+  }
+
   @Post('assess-premiums')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })

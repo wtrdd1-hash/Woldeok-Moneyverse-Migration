@@ -3,6 +3,7 @@ import { requireAdminConsole } from '@/lib/session';
 import { api } from '@/lib/api';
 import { KdicControlTower } from './kdic-control-tower';
 import { parseKdicOverview } from './kdic-evidence';
+import { parseKdicLedgerIntegrity } from './kdic-ledger-evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,9 +20,13 @@ export default async function AdminKdicPage() {
     await api<unknown>('/api/v1/admin/kdic/overview').catch(() => null),
   );
 
+  const ledgerData = parseKdicLedgerIntegrity(
+    await api<unknown>('/api/v1/admin/kdic/ledger-integrity').catch(() => null),
+  );
+
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <KdicControlTower initialData={overviewData} />
+      <KdicControlTower initialData={overviewData} initialLedger={ledgerData} />
     </div>
   );
 }
