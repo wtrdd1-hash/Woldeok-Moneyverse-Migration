@@ -17,31 +17,6 @@ function assertUuid(value: unknown, field: string): asserts value is string {
   }
 }
 
-/** A strict read-only filter; never reinterpret a reward floor as a duration. */
-export function parseWorkTaskMaxDuration(raw: unknown): number | null {
-  if (raw === undefined) return null;
-  if (typeof raw === 'number' && Number.isInteger(raw) && raw >= 1 && raw <= 86400) return raw;
-  if (typeof raw === 'string' && /^[1-9][0-9]{0,4}$/.test(raw)) {
-    const seconds = Number(raw);
-    if (seconds <= 86400) return seconds;
-  }
-  throw new WorkInputError('maxDurationSeconds must be an integer between 1 and 86400');
-}
-
-/** Read-only preview ceiling. Keep large WLD values as exact decimal strings. */
-export function parseWorkTaskMaxReward(raw: unknown): string | null {
-  if (raw === undefined) return null;
-  if (typeof raw === 'string' && /^(?:0|[1-9][0-9]{0,17})$/.test(raw)) return raw;
-  throw new WorkInputError('maxReward must be a non-negative integer string with at most 18 digits');
-}
-
-/** Explicit opt-in only; absent means the legacy complete board. */
-export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
-  if (raw === undefined) return false;
-  if (raw === '1' || raw === true) return true;
-  throw new WorkInputError('availableOnly must be 1 when provided');
-}
-
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
 export interface WorkAssignmentRow {
@@ -227,30 +202,12 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, maxReward?: unknown, availableOnly?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, recommendedOnly?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
-    if (minReward !== undefined && (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
-      throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
+    if (recommendedOnly !== undefined && recommendedOnly !== 'true' && recommendedOnly !== 'false') {
+      throw new WorkInputError('recommendedOnly must be true or false');
     }
-    const maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
-    const ceiling = parseWorkTaskMaxReward(maxReward);
-    const availability = parseWorkTaskAvailableOnly(availableOnly === true ? '1' : availableOnly);
-    if (ceiling !== null && typeof minReward === 'string' && BigInt(minReward) > BigInt(ceiling)) {
-      throw new WorkInputError('minReward cannot exceed maxReward');
-    }
-    const params: unknown[] = [actor, minReward ?? null];
-    let extraFilters = '';
-    if (maxDuration !== null) {
-      params.push(maxDuration);
-      extraFilters += `\r\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
-    }
-    if (ceiling !== null) {
-      params.push(ceiling);
-      extraFilters += `\r\n         AND task.reward_preview <= $${params.length}::numeric`;
-    }
-    if (availability) {
-      extraFilters += '\r\n         AND (task.daily_limit <= 0 OR task.taken_today < task.daily_limit)';
-    }
+    const recommended = recommendedOnly === 'true';
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -260,8 +217,8 @@ export class WorkRepository {
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task
-       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${extraFilters}`,
-      params,
+       WHERE ($2::boolean = false OR task.recommended)`,
+      [actor, recommended],
     );
     const now = Date.now();
     return rows.map((task) => {

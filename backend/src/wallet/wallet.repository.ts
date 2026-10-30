@@ -43,24 +43,9 @@ export interface WalletTransactionRow {
   readonly transaction_id: string;
   readonly type: string;
   readonly created_at: Date;
-  readonly cursor_at?: string;
   readonly net_amount: string;
   readonly cash_delta?: string;
   readonly bank_delta?: string;
-}
-
-/** Owner projection, read-only; a future numbered SECURITY DEFINER migration must
- * replace direct ledger SELECT after B's pending 307/308 migrations merge. */
-export interface WalletTransactionDetailRow {
-  readonly transaction_id: string;
-  readonly transaction_type: string;
-  readonly occurred_at_utc_micros: string;
-  readonly cash_delta: string;
-  readonly bank_delta: string;
-  readonly net_delta: string;
-  readonly currency: string;
-  readonly posting_count: string;
-  readonly invalid_posting_count: string;
 }
 
 /** public.wallet_active_recipient_by_id return column: packages/database/migrations/010-account-lifecycle.sql */
@@ -123,13 +108,6 @@ export interface WalletRepayRow {
   readonly replayed: boolean;
 }
 
-/** Durable owner-scoped evidence; unknown does not mean safe to create a new key. */
-export interface WalletTransferEvidenceRow {
-  readonly transaction_id: string;
-  readonly transaction_type: string;
-  readonly postings: unknown;
-}
-
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
@@ -182,42 +160,6 @@ export class PostgresWalletRepository {
     if (!pool || typeof pool.query !== 'function')
       throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
-  }
-
-  async transactionDetailForUser(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null> {
-    const owner = requireUuid(userId, 'authenticated user id');
-    const id = requireUuid(transactionId, 'transaction id');
-    // One statement and one MVCC snapshot; group owner pocket legs before
-    // projection. Do not derive a recipient or a settlement assertion.
-    return queryOne<WalletTransactionDetailRow>(
-      this.pool,
-      `SELECT ledger_transaction.id::text AS transaction_id,
-              ledger_transaction.type AS transaction_type,
-              to_char(ledger_transaction.created_at AT TIME ZONE 'UTC',
-                      'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS occurred_at_utc_micros,
-              SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type
-                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
-                  THEN posting.amount::numeric ELSE -posting.amount::numeric END
-                ELSE 0::numeric END)::text AS cash_delta,
-              SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type
-                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
-                  THEN posting.amount::numeric ELSE -posting.amount::numeric END
-                ELSE 0::numeric END)::text AS bank_delta,
-              SUM(CASE posting.direction WHEN 'debit'::public.posting_direction
-                THEN posting.amount::numeric ELSE -posting.amount::numeric END)::text AS net_delta,
-              CASE WHEN COUNT(*) FILTER (WHERE account.currency <> 'WLD') = 0
-                THEN 'WLD' ELSE 'INVALID' END AS currency,
-              COUNT(*)::text AS posting_count,
-              COUNT(*) FILTER (WHERE account.currency <> 'WLD')::text AS invalid_posting_count
-       FROM public.ledger_transactions AS ledger_transaction
-       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
-       JOIN public.accounts AS account ON account.id = posting.account_id
-       WHERE account.owner_user_id = $1
-         AND ledger_transaction.id = $2
-         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
-       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at`,
-      [owner, id],
-    );
   }
 
   async balancesForUser(userId: string): Promise<WalletBalanceRow[]> {
@@ -306,47 +248,6 @@ export class PostgresWalletRepository {
     );
   }
 
-  /** Owner-scoped keyset read. No ledger writes, new grants or unbounded OFFSET. */
-  async activityTransactionsForUser(userId: string, options: {
-    asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined;
-    direction?: 'all' | 'in' | 'out' | 'neutral';
-  }): Promise<WalletTransactionRow[]> {
-    const owner = requireUuid(userId, 'authenticated user id');
-    const afterId = options.after ? requireUuid(options.after.id, 'cursor transaction id') : null;
-    if (options.direction !== undefined && !['all', 'in', 'out', 'neutral'].includes(options.direction)) {
-      throw new WalletInputError('invalid wallet activity direction');
-    }
-    return queryRows<WalletTransactionRow>(
-      this.pool,
-      `SELECT ledger_transaction.id::text AS transaction_id,
-         ledger_transaction.type, ledger_transaction.created_at,
-         to_char(ledger_transaction.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at,
-         COALESCE(SUM(CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END), 0)::text AS net_amount,
-         COALESCE(SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
-           CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS cash_delta,
-         COALESCE(SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type THEN
-           CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS bank_delta
-       FROM public.ledger_transactions AS ledger_transaction
-       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
-       JOIN public.accounts AS account ON account.id = posting.account_id
-       WHERE account.owner_user_id = $1
-         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
-         AND ledger_transaction.created_at <= $2
-         AND ($3::timestamptz IS NULL OR ledger_transaction.created_at >= $3)
-         AND ($4::timestamptz IS NULL OR (ledger_transaction.created_at, ledger_transaction.id) < ($4, $5::uuid))
-         ${options.before ? 'AND ledger_transaction.created_at < $8::timestamptz' : ''}
-       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
-       HAVING ($6::text IS NULL OR SIGN(COALESCE(SUM(
-         CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END
-       ), 0)) = CASE $6::text WHEN 'in' THEN 1 WHEN 'out' THEN -1 WHEN 'neutral' THEN 0 END)
-       ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
-       LIMIT $7`,
-      [owner, options.asOf, options.since, options.after?.at ?? null, afterId,
-        options.direction && options.direction !== 'all' ? options.direction : null, 51,
-        ...(options.before ? [options.before] : [])],
-    );
-  }
-
   /**
    * Recipient resolution deliberately accepts only the internal user UUID.
    * It exposes neither OAuth subjects nor profile data, preventing this query
@@ -360,34 +261,6 @@ export class PostgresWalletRepository {
       [id],
     );
     return row?.user_id ? { userId: requireUuid(row.user_id, 'database recipient user id') } : null;
-  }
-
-  async transferReceiptByKey(actorUserId: string, idempotencyKey: string): Promise<WalletTransferEvidenceRow | null> {
-    const actor = requireUuid(actorUserId, 'authenticated user id');
-    const key = requireUuid(idempotencyKey, 'idempotency key');
-    // Both predicates are mandatory: an idempotency key is not an authorization token.
-    // The application already has SELECT on these ledger read-model tables;
-    // this path never receives a write grant or mutates the financial ledger.
-    return queryOne<WalletTransferEvidenceRow>(
-      this.pool,
-      `SELECT transaction_row.id::text AS transaction_id,
-              transaction_row.type AS transaction_type,
-              COALESCE((
-                SELECT jsonb_agg(jsonb_build_object(
-                  'ownerUserId', account.owner_user_id::text,
-                  'accountType', account.account_type::text,
-                  'direction', posting.direction::text,
-                  'amount', posting.amount::text
-                ) ORDER BY posting.id)
-                FROM public.ledger_postings AS posting
-                LEFT JOIN public.accounts AS account ON account.id = posting.account_id
-                WHERE posting.transaction_id = transaction_row.id
-              ), '[]'::jsonb) AS postings
-       FROM public.ledger_transactions AS transaction_row
-       WHERE transaction_row.idempotency_key = $1
-         AND transaction_row.actor_user_id = $2`,
-      [key, actor],
-    );
   }
 
   async transfer({
@@ -534,6 +407,22 @@ export class PostgresWalletRepository {
     );
     if (row?.success !== true) throw new Error('database did not record treasury budget vote');
     return { success: true, quarter, choice };
+  }
+
+  async searchRecipients(query: string, currentUserId: string): Promise<{ userId: string; displayName: string }[]> {
+    const q = (query || '').trim();
+    if (!q) return [];
+    return queryRows<{ userId: string; displayName: string }>(
+      this.pool,
+      `SELECT profile.user_id::text AS "userId", profile.display_name AS "displayName"
+       FROM public.member_profiles AS profile
+       JOIN public.users AS u ON u.id = profile.user_id
+       WHERE profile.display_name ILIKE $1
+         AND profile.user_id != $2::uuid
+         AND u.status = 'active'::public.user_status
+       LIMIT 10`,
+      [`%${q}%`, currentUserId],
+    );
   }
 
   async recordP2PTransfer(data: {
