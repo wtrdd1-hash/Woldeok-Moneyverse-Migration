@@ -1574,3 +1574,25 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
 2. 사용 완료된 원격 및 로컬 피처 브랜치 `fix/admin-control-tower-telemetry-and-modals` 삭제.
 3. 운영 서버(/home/debian/Woldeok-Moneyverse-Migration)에서 최신 `main` 무중단 릴리즈 빌드 및 심볼릭 링크 교체 배포.
 4. 브라우저 실측 및 엔드포인트 응답 상태 최종 확인.
+
+---
+## 🚀 [v6 Specification] 국고 금융 원장 무결성 및 SWF 회수 계약 복원 완료
+### 1. 배경 및 근본 원인 분석
+- GitHub Actions CI untime-check 런 중 국고 관련 3개 단위/계약 테스트 실패 발생:
+  1. swf-liquidation-sql-v1415.test.ts: uto-swf.service.ts의 SWF 포트폴리오 회수(liquidateToTreasuryVault) 구현체가 누락되어 감사 이벤트 SQL(PORTFOLIO_LIQUIDATED_TO_VAULT, $1::numeric, $4::jsonb) 불일치.
+  2. 	reasury-ledger-cursor-v619.test.ts: 	reasury.controller.ts의 listTransactions에서 parseTreasuryLedgerLimit 및 decodeTreasuryLedgerCursor 유효성 검증(400 반환) 누락.
+  3. 	reasury-reconciliation-truth-v572.test.ts: 	reasury.repository.ts의 erifiedTreasuryReconciliation이 임의로 status: 'RECONCILED'를 거짓 생성하던 결함을 원래의 금융 원장 무결성 규칙(UNVERIFIED)으로 복원.
+
+### 2. 반영 내역
+- ackend/src/admin/treasury/auto-swf.service.ts:
+  - liquidateToTreasuryVault 원본 구현체 및 완벽한 파라미터 타입 캐스팅 SQL 복원.
+- ackend/src/admin/treasury/treasury.controller.ts:
+  - parseTreasuryLedgerLimit 및 decodeTreasuryLedgerCursor 호출 추가 및 쿼리 DTO 정규화.
+- ackend/src/admin/treasury/treasury.repository.ts:
+  - unverifiedTreasuryReconciliation 함수로 원복하여 인증된 원장 대사 전까지 정직하게 UNVERIFIED 및 
+ull 상태를 반환하도록 교정.
+
+### 3. 검증 및 배포 계획
+- 최신 커밋 efd5c94 푸시 완료 후 GitHub Actions CI 통과 대기.
+- PR #2045 main 브랜치 Squash 머지 및 피처 브랜치 정리.
+- 운영 서버(/home/debian/Woldeok-Moneyverse-Migration) 최신 main 풀 및 프로덕션 무중단 릴리즈 배포.
