@@ -110,7 +110,7 @@ export class NationalPensionService {
     return this.repository.listPayoutLogs(userId, limit);
   }
 
-  async listRecentPayoutLogs(limit = 20): Promise<NationalPensionPayoutLogRow[]> {
-    return this.repository.listRecentPayoutLogs(limit);
+  async listRecentPayoutLogs(adminUserId: string, limit = 20): Promise<NationalPensionPayoutLogRow[]> {
+    return this.repository.listRecentPayoutLogs(adminUserId, limit);
   }
 }

@@ -516,13 +516,15 @@ export class NationalPensionRepository {
     return res.rows;
   }
 
-  async listRecentPayoutLogs(limit = 20): Promise<NationalPensionPayoutLogRow[]> {
-    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
-      throw new BadRequestException('limit must be an integer between 1 and 100');
+  async listRecentPayoutLogs(adminUserId: string, limit = 20): Promise<NationalPensionPayoutLogRow[]> {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(adminUserId) ||
+        adminUserId === '00000000-0000-0000-0000-000000000000' ||
+        !Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('Invalid administrator or pension payout limit');
     }
     const res = await this.pool.query<NationalPensionPayoutLogRow>(
-      `SELECT * FROM public.national_pension_payout_logs ORDER BY created_at DESC LIMIT $1`,
-      [limit],
+      'SELECT * FROM public.pension_admin_recent_payouts($1::uuid, $2::integer)',
+      [adminUserId, limit],
     );
     return res.rows;
   }
