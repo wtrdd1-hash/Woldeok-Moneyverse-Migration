@@ -1,5 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+<<<<<<< HEAD
 ## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 
 **진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
@@ -61,6 +62,43 @@
 - **운영 보류:** QA v1373 금융 #1895/#1896의 미검증 국고·조폐 실행, 기존 중앙은행·국부펀드 실패, MINT 18,000 WLD 출처, 국고 552행 연결, 개발 DB 체크섬 불일치 5건과 audit_logs 앱 권한, 브랜치 보존 #1663, 독립 백업 복원·공식 Test 정확 SHA. 새 코드는 별도 개발 브랜치·전체 CI·실제 PG 보안/금융 회귀·공식 Test 인증 E2E·승인 GitOps 이후에만 승격. 기능 기본 OFF, 롤백 시 UI/API 숨김·암호화 데이터는 정책적 파기까지 보존.
 - **P0 4건:** REPO1476-01 브랜치/PR 보존; FIN1476-02 금융 fail-closed·출처; SEC1476-03 체크섬·권한·스키마 계보; REL1476-04 전체 CI·복원·정확 SHA Test·GitOps. **P1 6건:** DRAFT1476-05 DB/권한/TTL, DRAFT1476-06 경합·불변 영수증, DRAFT1476-07 Nest/Next/Android API, DRAFT1476-08 회원 UI·접근성, DRAFT1476-09 개인정보·관리자·KPI, DRAFT1476-10 격리 PG·보안·롤백. 양 언어 10개 식별자 동일. 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
 
+=======
+## v1480 / F675-176 — 회원 전용 지갑 기록 저장 필터 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기·기준:** 이전 기능 보완 v1478 → 현재 기능 추가 v1480 → 다음 기능 보완 v1482(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`(2026-10-30 00:10 KST), 독립 QA v1375 FAILED/P0. [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). **기획 초안이며 구현·검증·배포 완료가 아니다.**
+
+### 소스 근거·목적·중복 방지
+- `frontend/src/app/wallet/activity/page.tsx`는 전체/최근 7일/최근 30일과 50건 커서 조회만 제공한다. `backend/src/wallet/wallet.controller.ts`는 period/cursor만 수신하며, 서비스 커서는 회원·세션·기간에 결속된다. DB 조회는 본인의 USER_CASH/USER_BANK 원장 기록을 집계하지만 순변동 방향 필터나 이름 있는 저장 필터는 확인되지 않았다. 별도 CSV 내보내기와 중복하지 않는다. 운영 사용자 수요를 실측했다는 뜻은 아니다.
+- 대상은 반복해서 자신의 WLD 거래 기록을 확인하는 로그인 회원. **최대 8개**의 개인 필터(기간·순변동 방향)를 이름 붙여 저장하고 기본 필터를 하나 선택해 웹·Android에서 이어 쓴다. F675-171 수취인, F675-172 바로가기, F675-173 개인정보 내보내기, F675-174 알림 검색, F675-175 고객문의 초안과 별개다. 거래·송금·보상·매수·출금·원장 수정은 수행하지 않는다. 기능 스위치 `wallet_activity_saved_views`는 기본 **OFF**.
+- 기존 원장이 유일한 금융 근거다. 저장 필터 및 그 처리 영수증은 금융 거래 영수증이 아니다.
+
+### 회원 화면·CTA·상태·접근성
+- 진입점: 기존 비공개 `/wallet/activity`. 기간 ALL/LAST_7_DAYS/LAST_30_DAYS, 순변동 ALL/INCREASE/DECREASE/UNCHANGED를 선택하고 `필터 적용`, `이 필터 저장`, `저장 필터 사용`, `이름 변경`, `기본으로 설정`, `삭제`, `전체 기록으로 초기화`를 제공한다. 이름은 공백 정리 후 NFC 1~40 코드포인트, HTML로 해석하지 않고 텍스트로만 표시한다.
+- 순변동은 회원 소유 USER_CASH+USER_BANK 계정의 거래별 **부호 있는 WLD 순변동**을 뜻한다. 실제 PostgreSQL 테스트로 차변/대변 부호를 검증한 후 양수=증가, 음수=감소, 0=순변동 없음으로 표시한다. **0을 내부 이체라고 단정하지 않는다.** 세금·소득 증빙도 아니다. 금액에 JavaScript Number를 사용하지 않는다.
+- 기본/미저장 미리보기/저장 중/저장 성공·리비전 영수증/적용/결과 없음/원장 자체 없음/다음 페이지/오래된 커서·리비전/이름 충돌/8개 초과/동일 요청 재생/401·403·409·410·429·503/오프라인·응답 유실/기능 OFF/로그아웃·계정 전환 시 낡은 응답 폐기를 구분한다. 필터나 세션이 바뀌면 첫 페이지부터 다시 조회한다. 실패를 성공으로 표시하지 않는다.
+- 320px 단일 열, 200% 확대, 터치 44px, 키보드 포커스·스크린리더 상태 알림·모션 감소, WCAG 2.2 AA. 기존 한국어 화면 문구를 임의로 변경하지 않는다. 비공개 페이지는 `noindex,nofollow`, sitemap 제외, 응답은 `private,no-store`.
+
+### API·인증·악용 방지·Android
+- 제안 NestJS: `GET /api/v1/wallet/activity/views` 목록, `POST` 생성, `PATCH /api/v1/wallet/activity/views/:id` 수정·기본·순서, `DELETE` 논리 삭제. 쓰기는 UUID 멱등성 키와 `If-Match` 리비전 필요. 기록 조회는 `GET /api/v1/wallet/activity?period=...&movement=...` 미저장 필터 또는 `?viewId=...&cursor=...` 저장 필터. viewId와 period/movement 혼합은 거부한다. 기능 OFF일 때 기존 period+cursor 계약을 그대로 보존한다. 응답은 `transactions,hasMore,nextCursor,asOf,appliedFilters,viewRevision?`; 쓰기 영수증은 `receiptId,viewId,revision,outcome`.
+- Next.js 서버 액션은 인증된 세션·CSRF와 server-only API 경로를 사용한다. Android는 기존 `/app-api/v1/[...path]` 인증·프록시 계약과 생성 API 문서(영·한·JSON)를 함께 검증한다. 본인 ID는 서버 세션에서만 결정하며 요청 본문 userId는 거부한다. 저장 ID 자체는 접근 권한이 아니다.
+- 회원당 읽기 분당 30회, 쓰기 분당 10회와 IP 상한(실측 후 조정), 이름 40자·저장 8개·DB 2초 제한. 400 잘못된 입력, 401 미인증, 403 타인 접근, 409 리비전·이름·키 충돌, 410 삭제·만료, 429 속도 제한, 503 DB/권한 미검증. 파라미터 SQL, 엄격한 DTO enum. 이름·원장 금액·회원 ID·커서·토큰을 로그/분석에 남기지 않는다.
+
+### DB 제약·트랜잭션·서명 커서
+- **체크섬/ACL 게이트 해결 후** 신규 순번의 전진형 마이그레이션으로 `member_wallet_activity_views`(UUID PK, owner_user_id FK, name/normalized_name, period, movement, sort_position, is_default, revision BIGINT>0, created_at/updated_at/deleted_at)를 제안한다. 활성 회원별 정규화 이름 유일, 활성 기본 필터 최대 1개, owner+position 인덱스, 길이·열거형·위치 CHECK. 현재 SQL 소스 304개 번호 중복 0이더라도 적용 DB 293건 중 체크섬 5건 불일치가 남아 있어 **신규 마이그레이션 번호는 아직 부여하지 않는다**.
+- `member_wallet_activity_view_receipts`는 (owner_user_id,idempotency_key) 유일, 요청 SHA-256·결과·리비전·시각을 불변 저장한다. 동일 키·동일 요청은 최초 영수증을 반환하며, 다른 요청은 409. 회원 행 잠금→8개 제한/기본값/이름 검사→CAS 리비전 확인→저장 또는 tombstone→영수증을 단일 트랜잭션으로 처리한다. 삭제 이후 늦은 요청이 복원하지 못하도록 세대·리비전을 단조 증가시킨다.
+- SECURITY DEFINER 함수 내부에서 p_actor 소유권 확인, 고정 search_path, PUBLIC EXECUTE 금지, 승인된 app-role에만 EXECUTE. 새 테이블 직접 SELECT/DML/TRUNCATE 권한 부여 금지. 실제 DEV 고객문의·감사 권한 불일치가 있으므로 소스 REVOKE 선언만 신뢰하지 않는다. 금융 테이블과 기존 적용 SQL 수정 금지.
+- 원장 기록은 **SQL에서 방향 조건을 적용한 후 LIMIT 51**, `(created_at,id)` 내림차순 키셋, DB asOf 상한, PostgreSQL 마이크로초 정밀도 보존. 별도 HMAC-SHA-256 v2 커서는 회원·세션 세대·필터 해시·viewId+리비전·asOf·마지막 튜플·15분 만료·키 ID에 결속하며 상수 시간 비교/키 교체를 지원한다. 기존 v1 커서는 기존 경로에서 유지한다. 과거 시각 삽입·원장 정정으로 페이지 멤버십이 바뀔 수 있어 영구 MVCC 스냅샷을 주장하지 않는다. 0원장 거래·계좌 간 상쇄도 별도 검증한다.
+
+### 관리자·개인정보·SEO·KPI·시험·배포
+- 관리자는 익명 집계(기능 사용량, 오류, 지연시간)만 조회한다. 개인 필터 이름·잔액·원장 내역·커서·회원 ID는 열람하지 않는다. 삭제 tombstone 보관은 **잠정 7일, 정책 확정 전 미결정**이며 개인정보 삭제 증빙 필요. 검색엔진 노출·푸시/메일 전송·외부 공유 없음.
+- 제안 KPI(측정 전): 저장 성공률, 7일 재사용, 대표 격리 PG p95 <500ms, 타인 행 노출 0, 중복 변경 0, 원장 쓰기 0, 접근성 과업 완료. `EXPLAIN (ANALYZE, BUFFERS)`는 격리 합성 DB에서만 수행한다.
+- **수용시험 계획, 실행하지 않음:** PostgreSQL 17.11 합성 원장 10,001건, 타인·커서 위조 100건, 동시 CAS 100건, 응답 유실 50건, 순변동 0·부호·UTC/DST·마이크로초 경계 30건. SQL 필터가 LIMIT 이전인지 확인하고 기존 커서·송금·원장 회귀, ACL 거부/EXECUTE, 웹·Android·320px/200% 접근성, noindex/no-store, 기능 OFF 롤백을 검증한다. DEV/운영 DB에 파괴적 SQL을 실행하지 않는다.
+- **P0:** REPO1480-01 과거 브랜치 462개(비조상 346) 보존; SEC1480-02 고객문의·감사 테이블 앱 직접 DML(#1908) 및 적용 마이그레이션 219/220/221/234/266 불일치; FIN1480-03 SWF 허위 SUCCESS(#1909), MINT 18,000 WLD 출처·국고 552행; REL1480-04 배포 분류기 #1907, lint, app-api affinity, 전체 CI, 독립 외부 복원, 공식 Test 정확 SHA E2E.
+- **P1:** VIEW1480-05 스키마·본인 함수; VIEW1480-06 원장 SQL 필터·서명 커서; VIEW1480-07 Nest/Next/Android API; VIEW1480-08 접근성 회원 화면; VIEW1480-09 개인정보·관리자·SEO·KPI; VIEW1480-10 격리 PG·회귀·롤백·정확 SHA. 개발 A/B/C 별도 브랜치·승인된 Test 동일 SHA 이후에만 운영 GitOps 검토. 기획에서는 런타임·DB·WLD·Test·운영 **변경 없음**.
+- 외부 독립 중복 제거·검증 승인 근거 신규 **0건**, 누적 **UNKNOWN / 10,000건**. Gate **BLOCKED / IN PROGRESS**. 새 분산 세부기획 파일은 생성하지 않는다.
+
+
+>>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 

@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 
+<<<<<<< HEAD
 ## v2026.10.29.1478 — F675-175 고객문의 초안 권한·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 - 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 main `54b182d2214a15974350701174175f589789613b`; 선행 Draft #1901 OPEN/CONFLICTING·미병합, QA v1374 Draft #1902 FAILED/HOLD·공식 Test 미인증. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [기획 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
 - 개발 PostgreSQL 17.11 **실측**: 마이그레이션 196/302가 REVOKE를 선언했으나 `moneyverse_app`는 `support_threads`·`support_messages`에 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE(및 REFERENCES/TRIGGER) 보유. 운영 권한 미확인, 문의 본문 조회 없음. 기존 Next 전송 액션은 호출마다 새 UUID를 생성하며 `support_create_thread`는 동일 키의 다른 제목/본문을 비교하지 않고, 메시지 UUID 기반 영수증으로는 키 기반 불명 전송을 조회할 수 없음. **잠재 위험이지 운영 사고 확인은 아님.**
@@ -13,6 +14,14 @@
 - Nest GET/PUT/DELETE `/api/v1/support/drafts`, Next BFF·Android 앱 API, 검증된 회원·CSRF, 십진 문자열 단조 증가 리비전, UUID 멱등 키·30일 불변 영수증, 충돌 409·장애 503·타인 문의 404. 암호화 초안 전진형 스키마, 0 UUID 센티넬·회원/컨텍스트 유일 제약, SECURITY DEFINER 본인 함수, 앱 직접 테이블 권한 금지, 만료 파기, 전송 후 CAS 정리, 관리자 초안 접근 금지, noindex/no-store, 익명 KPI. 전체 명세: [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
 - P0 REPO1476-01 FIN1476-02 SEC1476-03 REL1476-04: 과거 브랜치, QA #1895 국고/조폐 미검증 실행·중앙은행/국부펀드·18,000 WLD/국고 552행, 체크섬 5건/audit_logs 권한, 독립 복원·정확 SHA Test·GitOps. P1 DRAFT1476-05 DRAFT1476-06 DRAFT1476-07 DRAFT1476-08 DRAFT1476-09 DRAFT1476-10: DB/권한·트랜잭션/영수증·API·UI·개인정보/KPI·격리 PG. 합성 10,001행·위조 100건·경합 100건·응답 유실 50건·만료 30건 **시험 조건만 명세, 미실행**. 코드·DB·WLD·Test·운영 미변경, 기능 기본 OFF·운영 보류. 외부 검증 승인 신규 0건·누적 UNKNOWN/10,000건 → BLOCKED / IN PROGRESS.
 
+=======
+## v2026.10.30.1480 — F675-176 회원 전용 지갑 기록 저장 필터 (기능 추가 / DRAFT / RELEASE HOLD)
+- 주기: 이전 기능 보완 v1478 → 현재 기능 추가 v1480 → 다음 기능 보완 v1482(잠정). 시작 main `62c6cd038951d65c94b709302bdaec6e75b080b6`, 독립 QA v1375 FAILED/P0. [개발 이슈 #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915). 기획 초안이며 미구현.
+- 근거: 현재 `/wallet/activity`·NestJS GET은 전체/7일/30일, 50건 단위 본인·세션 결속 커서를 제공하지만 저장 필터와 SQL 순변동 방향 필터는 확인되지 않았다. F675-176은 본인 전용 이름 있는 필터 최대 8개, 선택적 기본값, ALL/INCREASE/DECREASE/UNCHANGED(0은 내부 이체 단정 금지), 원자적 CAS·멱등 영수증, 본인 검증 SECURITY DEFINER, 15분 서명 커서, 웹·Android 동등성, noindex/no-store, WCAG 2.2 AA/320px, 관리자 익명 집계, 기능 OFF·기존 화면 복원을 제안한다. WLD 쓰기 없음. [영·한 통합 상세](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0: REPO1480-01 브랜치 462개 보존, SEC1480-02 DEV 고객문의·감사 직접 DML·체크섬 5건, FIN1480-03 SWF 허위 성공·MINT 18,000 WLD·국고 552행, REL1480-04 분류기/lint/API/전체 CI/외부 복원/공식 Test 정확 SHA. P1: VIEW1480-05 VIEW1480-06 VIEW1480-07 VIEW1480-08 VIEW1480-09 VIEW1480-10 스키마·SQL 커서·API·UI·개인정보/KPI·격리 PG/롤백. 합성 10,001건/위조 100/동시 CAS 100/응답 유실 50/경계 30건은 **계획이며 미실행**. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 운영승격 BLOCKED.
+
+
+>>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).

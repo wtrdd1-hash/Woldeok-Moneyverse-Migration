@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
 - Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
 
@@ -6,6 +7,10 @@
 
 ## v2026.10.30.1 — Telegram market recurring schedule and watchdog (Production LIVE)
 - Recover a silent active/elapsed market timer with a calendar schedule, monitor real next trigger and prevent stale two-minute price alerts. [Release](../releases/v2026.10.30.1.md).
+=======
+## v2026.10.30.1480 — F675-176 owner-private wallet activity saved views (planning DRAFT / release HOLD)
+- Proposed up to 8 named owner-only period/net-movement filters, CAS/idempotent receipts, versioned signed cursor, Nest/Next/Android parity and rollback to existing 50-row wallet history. Documentation only; no ledger, DB, runtime, Test or Production change. Independent QA v1375 FAILED/P0; external approved 0, cumulative UNKNOWN/10,000. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [Development issue #1915](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1915).
+>>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
