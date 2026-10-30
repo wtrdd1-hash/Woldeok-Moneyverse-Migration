@@ -8,6 +8,7 @@
 ### 실제 소스에서 확인한 공백·대안·중복 방지
 - `frontend/src/app/inventory/page.tsx`는 `requireMember()` 이후 `apiOrNull('/api/v1/shop/holdings')`을 호출하고 null을 빈 배열로 바꾼다(장애를 빈 보관함으로 오인할 위험은 별도 #1977). `inventory-view.tsx`는 이름·설명·희귀도·수량·일련번호·장착 여부만 표시하고 보유 만료, 효과 만료, 유지비 체납, 정지 상태를 보여주지 않는다. 프론트의 `HeldItem`에도 해당 필드가 빠져 있다.
 - 반면 Nest `GET /api/v1/shop/holdings`는 SessionGuard·AuthenticatedGuard·ConsentGuard를 요구하며, `shop.repository.ts`는 이미 `durable`, `weekly_cost::text`, `effect_expires_at`, `unpaid_weeks`, `arrears_due::text`, `arrears_cap::text`, `suspended`를 반환한다. 마이그레이션 123의 본인 범위 `shop_my_items_v2(p_actor)`가 기존 보유·카탈로그·효과 영수증·체납 데이터를 읽는다. 이는 **소스 확인 결과이지 운영 데이터의 정산 인증이 아니다.**
+- 대안 A 기존 본인 조회를- **추가 확인한 개인정보 헤더 공백:** frontend/src/app/app-api/v1/[...path]/route.ts는 wallet/privacy/work/support/collections/notifications/account-security와 shop/purchases에는 private no-store/noindex를 강제하지만 **shop/holdings는 제외**한다. 상위 서버 Cache-Control/X-Robots-Tag를 전달하므로 상위 서버가 public 캐시 헤더를 보내면 보유내역 경로에서 강제 차단하지 못할 가능성이 있다. 이는 조건부 노출 위험이지 실제 운영 캐시·색인 사고의 증거가 아니다. frontend/src/app/inventory/page.tsx에도 명시적 robots noindex 메타데이터가 없다. Android/app-api 보유 조회의 성공 및 400/401/403/503에 상위 public,max-age=3600 헤더를 주입하는 회귀시험으로 최종 HTTP 엣지 private no-store/noindex를 입증해야 한다(#2012, LIFECYCLE1516-08/-09).
 - 대안 A 기존 본인 조회를 재사용하여 검증된 상태를 카드에 표시(선택한 V1), B 별도 생애주기 테이블·알림 스케줄러(상태 중복·마이그레이션 위험으로 제외), C 자동 유지비 결제 CTA(금융 게이트 미완료로 제외). F675-184 검색·정렬, #1977 빈 화면 오류 수정, 구매·결제·유지비 정산 기능과 별개이다. V1에서는 새 테이블·엔드포인트·SQL 마이그레이션·인덱스·푸시 알림·금융 쓰기를 만들지 않는다.
 
 ### 목적·회원 흐름·화면·상태

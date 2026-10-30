@@ -7,6 +7,7 @@
 - [x] 기획: 기존 GET 재사용/새 테이블/결제 CTA 비교 후 읽기 전용 V1 선택. P0 4+P1 6, API·DB·보안·접근성·모바일·SEO·관리자·KPI·시험·롤백을 영문/국문 통합 문서에 반영.
 - [x] 검증: 문서 전용 분류 22 PASS/0 FAIL, staged diff --check 통과, 12개 문서 전용 경로, 영문/국문 기획서 4개에서 P0 4+P1 6 ID 확인. 최종 GitHub CI는 별도 추적(런타임 인증 아님).
 - [x] GitHub: 격리 브랜치 푸시, #2018 종속 초안 PR #2025 생성, 이슈 #2024 생성. 병합 없음.
+- [x] 추가 소스 조사: app-api shop/holdings 강제 private/noindex 누락(구매 영수증 경로는 적용), 보관함 robots noindex 명시 없음. 실제 노출 확정이 아닌 조건부 위험으로 영문/국문 회귀 게이트 반영.
 - [x] 완료: 최종 SHA·검증 결과를 miniPC 기록과 PR #2025에 보존, RELEASE HOLD. 런타임·DB·WLD·Test·Production 변경 없음.
 
 **이전/현재/다음:** 기능 보완 v1514 / 기능 추가 v1516 / 기능 보완 v1518(잠정). 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN / 10,000건 BLOCKED/IN PROGRESS. 수용시험은 제안이며 실행하지 않았다. 소스·QA 관측을 운영 침해 증거로 해석하지 않는다.

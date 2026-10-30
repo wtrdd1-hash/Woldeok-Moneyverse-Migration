@@ -1,5 +1,6 @@
 ## v2026.10.30.1516 — F675-185 Inventory Lifecycle and Upkeep Transparency (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1514 → Current Addition v1516 → Next Improvement v1518 (provisional); main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef checked start/mid; stacked on #2018; issue #2024; PR #2025. Source: frontend inventory page/view, Nest shop controller/repository and migration 123. Existing API exposes expiry/upkeep/suspended fields but UI omits them. Reuse owner GET; no new DB/API/payment. Explicit UNKNOWN/null, separate holding/effect expiry, no false paid/permanent, privacy/a11y/Android parity, flag OFF.
+- App-api source delta: shop/holdings lacks the unconditional private/noindex override that shop/purchases has; source-level conditional cache risk, not a confirmed Production incident. Add adversarial upstream-public header tests to P1 LIFECYCLE1516-08/-09 and P0 REL1516-04.
 - P0 OPS1516-01 SEC1516-02 FIN1516-03 REL1516-04; P1 LIFECYCLE1516-05 through -10 (4+6=10). QA v1392 final UNKNOWN; v1391 failing. Synthetic 10,001/100 malformed/100 session/100 concurrency/50 upkeep/50 Android acceptance PROPOSED NOT RUN. External approved new 0, cumulative UNKNOWN / 10,000 BLOCKED. DOCS_ONLY / RELEASE HOLD.
 
 ## v2026.10.30.1514 — F675-184 Inventory Search Source-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
