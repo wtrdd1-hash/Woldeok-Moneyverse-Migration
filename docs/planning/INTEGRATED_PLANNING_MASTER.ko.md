@@ -1,5 +1,52 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1522 F675-186 유지비 원장 증빙·납부 범위 보완 / 이슈 #2035 / Draft #2042(선행 #2036) / 운영 보류; 사고 #2031.
+**현재 기획:** v1524 F675-187 본인 구매 영수증 원장 증빙 / 이슈 #2046 / Draft/HOLD(선행 #2042 → #2036) / 운영 보류; 사고 #2031.
+
+## v2026.10.30.1524 — F675-187 회원 전용 상점 구매 영수증 원장 증빙 상세 (기능 추가 / 초안 / 운영 보류)
+
+**이전 / 현재 / 다음 회차:** 기능 보완 v1522 → 기능 추가 v1524 → 기능 보완 v1526(잠정). **기술 정본:** 시작·중간에 재조회한 `origin/main` `bf8d0d48f810932b43783d8605dce53954c60cff`, `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md`(영어 정본) 및 `PROJECT_PLAN.ko.md`(한국어 대조). 기획 Draft #2036 → #2042 → 이번 회차의 순차 관계, 개발 이슈 **#2046**, 배포 통제 사고 #2031. 이번 변경은 **문서 전용 초안**이며 기능 구현·병합·운영 배포 승인이 아니다.
+
+### 실제 소스 근거, 기능 범위와 대안
+- `frontend/src/app/shop/my-receipts.tsx`는 본인 구매 기록에 상품명 검색·한국시간 날짜 범위·WLD 최소 금액 필터를 제공하지만 거래별 원장 증빙 상세는 없다. `frontend/src/lib/shop-purchase-history.ts`는 구매 ID·상품명·금액·시각을 검증하나 전표를 검증하지 않는다. Nest `GET /api/v1/shop/purchases`는 SessionGuard·AuthenticatedGuard·ConsentGuard와 마이그레이션 009의 `shop_list_my_purchases`를 사용한다. 목록은 **기본 최근 30건, 필터 검색은 최근 100건 안에서만** 수행하며 전체 구매 이력 조회가 아니다.
+- `packages/database/migrations/009-shop-hardening.sql`의 과거형 `public.purchases`에는 기존 프로토타입 레코드를 보존하기 위한 nullable `idempotency_key`, `request_hash`, `paid_amount`가 있다. 신규 `shop_purchase`는 `SHOP_PURCHASE` 거래, 사용자 `USER_CASH credit`(잔액 감소), 시스템 `SINK debit`(잔액 증가), `shop.purchase.completed` outbox를 생성한다. `packages/database/init/001-economy-core.sql`의 실제 원장 방향을 기준으로 한다. 영수증 FK나 양수 금액만으로는 결제 전표 검증이 아니다.
+- 과거형 `public.purchases`/`shop_items`와 별도의 `public.shop_purchases`/`shop_catalog`(마이그레이션 072, `SHOP_CATALOG_PURCHASE`) 및 유지비 영수증(F675-186)을 **절대 혼동하지 않는다**. 보유 아이템은 합산·만료·소모될 수 있으므로 구매 영수증만으로 현재 소유를 증명하지 않는다.
+- 대안 A 원장 테이블 직접 노출은 개인정보·최소 권한 위반으로 기각. 대안 B 영수증 금액·거래 FK만으로 납부 완료 판단은 거짓 금융 증빙이므로 기각. **선정안 V1:** 본인만 조회하는 읽기 전용 증빙 프로젝션, VERIFIED/UNVERIFIED 명확한 구분, 신규 테이블·금융/아이템 쓰기 없음.
+
+### 목적·대상·진입점·화면 및 상태
+- **목적:** 인증 및 최신 동의를 완료한 회원이 **과거형 상점 구매 1건**에 대응하는 WLD 원장 이동을 확인하도록 한다. 현금 결제 증빙·세금계산서·환불 상태·현재 소유·구독·전체 거래 이력 인증은 범위 밖이다.
+- **진입:** `/shop` → `내 구매 기록` → 각 행의 `결제 원장 근거 보기` CTA → 비공개 `/shop/purchases/:receiptId` 상세. 영수증 ID(복사 시 개인정보 안내), 상품명, `기록된 금액(WLD)`, 한국시간 결제 기록 시각, `원장 증빙 상태`, 검증된 경우에만 원장 거래 시각을 표시한다. 뒤로 가기에서 기존 목록 필터 상태를 유지하고 장애 시 다시 시도 제공. 최근 100건 밖의 과거 본인 영수증도 UUID로 직접 조회할 수 있으나 이를 전체 검색 목록으로 광고하지 않는다.
+- **상태:** 로딩, `VERIFIED_LEDGER_POSTINGS`(해당 거래의 전표만 검증, 현재 소유 미확인), `RECEIPT_RECORDED_UNVERIFIED`(영수증은 있으나 전표 근거 누락/불일치), `LEGACY_INCOMPLETE`(과거 기록의 필수 금액·멱등성 등 불완전), 타인/미존재 구별 불가능한 404, 비로그인 401, 동의 만료 403, 과다 요청 429, DB/증빙 원천 장애 503, 오프라인, 계정 전환, 기능 OFF. 오류를 0 WLD·완납 배지·정상 빈 객체로 바꾸지 않는다. 원천 미확인은 영수증 없음과 다르다.
+- **권한:** 검증된 서버 세션의 actor만 사용하고 URL·쿼리·Android 본문에서 회원 ID를 받지 않는다. 타인 구매 기록의 존재 여부를 누설하지 않는다. GET은 구매·보유·원장·outbox·잔액·관리자 상태를 변경하지 않는다. 기존 구매 POST의 CSRF·멱등성 규칙은 그대로 유지한다. V1 관리자 개인 영수증 우회 조회 없음.
+
+### API·DB·금융 정확성
+- Nest `GET /api/v1/shop/purchases/:receiptId/evidence`: SessionGuard + AuthenticatedGuard + ConsentGuard, UUID 검증, 요청률 제한. 타입 응답 `{receiptId,itemName,recordedAmountWld?:string,purchasedAt,ledgerTransactionId?:string,evidenceStatus:'VERIFIED_LEDGER_POSTINGS'|'RECEIPT_RECORDED_UNVERIFIED'|'LEGACY_INCOMPLETE',verifiedLedgerAtUtc?:string,sourceStatus:'VERIFIED_READ'}`. 원본 금액 누락/오류면 `recordedAmountWld`를 생략하고 0을 만들지 않는다. `verifiedLedgerAtUtc`는 모든 증빙 검증을 통과한 경우만 제공한다. 오류: 잘못된 UUID 400, 세션 401, 동의 403, 미존재/타인 404, 요청률 429, DB/검증 원천 장애 503. 증빙 불일치가 확인된 경우 UNVERIFIED, 원천 자체를 안전하게 읽을 수 없으면 503으로 구분한다.
+- Next `GET /api/shop/purchases/:receiptId/evidence` 비공개 BFF는 세션과 허용된 UUID만 전달하고 응답을 검증하며 400/401/403/404/429/503을 보존한다. `apiOrNull`로 장애를 빈 데이터로 만들지 않는다. Android `/app-api/v1/shop/purchases/:receiptId/evidence`는 같은 상태 enum·오류 계약을 사용하며 디스크 캐시 금지, 로그아웃/계정 전환 시 이전 요청 취소 및 응답 폐기. WLD는 정확한 정수 문자열만 사용하고 JavaScript Number 금액 연산 금지.
+- PostgreSQL 전방 추가 함수 `public.shop_my_purchase_evidence_v1(p_actor uuid,p_purchase uuid)`: `SECURITY DEFINER`, `SET search_path=pg_catalog,pg_temp`, 스키마 완전 지정, `purchase.user_id=p_actor`, 기존 `shop_list_my_purchases`의 활성 회원 정책과 동등. PUBLIC 함수 EXECUTE 회수, 앱 역할에 함수 EXECUTE만 허용하고 `purchases`·`ledger_transactions`·`ledger_postings`·`accounts`·`outbox_events`·`audit_logs` 직접 SELECT/UPDATE/DELETE/TRUNCATE 금지 재검증. 함수의 UUID 인자만으로 DB 호출자 인증이 되지 않으므로 Nest 세션·동의 경계가 필수다. 실제 마이그레이션 최신 번호(현재 312) 뒤에 협의된 전방 마이그레이션을 사용하고 009를 수정하거나 번호를 미리 점유하지 않는다.
+- **원장 검증 조건(읽기 전용 REPEATABLE READ 한 요청):** 영수증 소유자 및 양수 BIGINT 금액, `ledger_transactions.type='SHOP_PURCHASE'` 및 `actor_user_id=p_actor`, 존재하는 경우 멱등성 키 일치, 전표 **정확히 2개**, 각 금액=영수증 금액, 사용자 소유 `USER_CASH credit`, 시스템 `system_key='sink'`인 `SINK debit`, 합계 균형, `outbox_events`의 거래 aggregate·`shop.purchase.completed` 유형 및 가능한 경우 상품/회원/금액 payload 일치. `SHOP_CATALOG_PURCHASE`는 다른 거래이므로 수용하지 않는다. 필수 증빙 누락·추가 전표·반대 방향·타인 계정·금액 불일치는 UNVERIFIED 또는 LEGACY_INCOMPLETE이며 녹색 표시 금지. 안전한 조회가 불가능하면 광범위 권한을 주지 않고 503. 계정의 현재 활성 상태와 거래 당시 출처는 구분하여 나중에 닫힌 계정 때문에 정상 과거 거래를 자동 무효화하지 않는다.
+- **제약·인덱스:** 기존 `purchases.id` PK, `ledger_postings.transaction_id` 조회 인덱스를 격리 PG17.11 합성 영수증 10,001건에서 EXPLAIN/BUFFERS로 확인하고 필요한 경우에만 중복 없는 인덱스를 협의된 전방 마이그레이션에 추가한다. 사용자별 쿼터, 짧은 statement timeout, 동적 SQL·임의 JOIN 금지. GET은 멱등성 키나 쓰기 트랜잭션이 필요 없고 HTTP 요청 간 동일 스냅샷을 주장하지 않는다. 신규 테이블·금융 거래 없음.
+
+### 개인정보·SEO·모바일·관리자·검증 및 배포
+- 비공개 HTML·Next BFF·Android 게이트웨이·실제 공개 edge의 200/4xx/5xx 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer`를 상위 응답과 무관하게 강제한다. sitemap·소셜 미리보기·canonical 색인에서 제외. UUID·금액·전표 payload·커서를 분석/로그에 기록하지 않는다. 타인 영수증의 응답·시간 차이로 존재 여부 노출 방지. UUID 추측 대량 요청·계정 전환 경합·오래된 hydration 결과를 차단한다.
+- 320px·200% 확대, 터치 대상 44px, 의미 있는 정의 목록, 색상만으로 상태 구별 금지, 키보드/스크린리더 포커스 복귀, aria-live 오류, reduced motion, 한국어·영어 동등 안내, WCAG 2.2 AA. 불확실성 문구: “이 구매의 원장 전표만 검증되었습니다. 현재 소유·환불 여부는 확인하지 않았습니다.” 또는 “구매 영수증은 기록되어 있으나 원장 결제 근거는 검증되지 않았습니다.”
+- 관리자에는 증빙 상태별 건수, 404/429/503, p95 지연, 증빙 불일치 경고 등 **20명 이상 집계**만 제공하고 개인 기록 접근은 금지한다. KPI·수용 기준(실측 아님): 타인 영수증 0, 거짓 VERIFIED 0, WLD 쓰기 0, 비공개 캐시·색인 누출 0, 합성 10,001건 p95 <300ms는 **TEST TARGET**. 상세 열람→근거 확인율, 오류/재시도율, 문의 감소를 측정하되 관측되지 않은 매출·유지율 효과를 사실로 쓰지 않는다.
+- QA **정의만 하고 미실행:** 격리 PostgreSQL 17.11 전체 마이그레이션 동등성·합성 과거 영수증 10,001건, 타인/미존재/잘못된 UUID/과거 null 100건, 거래자·유형·방향·금액·추가 전표·outbox 누락·다른 구매 유형 100건, 동시 요청/과거 계정 상태 100건, 웹·Android 계정 전환 100건, 실제 edge 캐시/robots 오류 50건. 직접 테이블 권한 및 금융 쓰기 0 검증, 기존 목록 최근 30/100 동작 보존, 기본 OFF 확인. 전체 CI·독립 백업 복원·정확 SHA 공식 Test 인증/DB/API/UI·공개 edge digest 통과 전 Production 승격 금지. 롤백은 기능 OFF 및 코드 되돌리기, 과거 원장 재작성 금지.
+
+### 개발 인계 — P0 4건 / P1 6건
+- **P0 OPS1524-01** (#1984/#2031): 공개 Production 실제 upstream 이미지·SHA·독립 롤백 자산·격리 복원 확인. QA v1396 정정에 따라 공개 v1935 bf8d0d48(3564/3565)과 삭제된 경로의 별도 레거시 v1515를 혼동하지 않는다.
+- **P0 SEC1524-02** (#993/#2000): 개발 DB 앱 역할 과도한 직접 DML, 체크섬 불일치 5건, 깨끗한 DB 스키마/ACL 동등성. 임시 광범위 GRANT 금지.
+- **P0 FIN1524-03** (#1976/#1151): 국고/MINT/SWF/채권 정합성, `SHOP_PURCHASE` 전표·outbox 증빙, 거짓 납부 표시 금지.
+- **P0 REL1524-04** (#2031/#1088): Draft/HOLD 대량 병합 사고, 보호된 main 필수 검사, 전체 정확 SHA 런타임 CI·공식 Test E2E·독립 복원·승격/롤백 통제.
+- **P1 PURCHASE1524-05** (개발 B): 본인 SQL/ACL·과거 null·전표 oracle·EXPLAIN/BUFFERS·마이그레이션 동등성.
+- **P1 PURCHASE1524-06** (개발 B): Nest 타입 API·인증/동의·증빙 상태/503 구분·요청률·음성 시험.
+- **P1 PURCHASE1524-07** (개발 A): Next 비공개 BFF·상세 화면·정확 WLD·접근성·불확실/오류/복귀 흐름.
+- **P1 PURCHASE1524-08** (개발 C): Android 게이트웨이 동등성·no-store/noindex·세션 세대별 응답 폐기.
+- **P1 PURCHASE1524-09** (A/B/C): 공개 edge 개인정보·SEO 제외·관리자 익명 KPI·기본 OFF 기능 스위치.
+- **P1 PURCHASE1524-10** (QA): 격리 PG17.11 합성 10,001건·타인/과거/전표/동시성/계정 전환, 전체 CI·정확 SHA Test·롤백 증거.
+
+**최신 독립 QA:** 이전 회차에서 확인된 v1396(2026-10-30 20:20~20:22 KST)에서 main bf8d0d48의 런타임 검사 2건 실패, 프론트엔드 lint 구문 오류, 공식 Test c2129625, 공개 Production v1935 bf8d0d48(정확 SHA Test/복원 증거 미인증). 이번 회차에서 전체 QA를 **재실행하지 않았다**. 2026-10-30 22:03 KST GitHub Build Test Candidate 실패는 다른 head `7d0ae820...`에 대한 것이며 main 통과/실패 증거로 혼동하지 않는다. **DRAFT / RELEASE HOLD.** 외부 독립 레퍼런스 신규 검증 승인 **0건**, 누적 중복 제거·근거 분류 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 기획 예약에서 런타임·DB·WLD·공식 Test·Production·기존 예약 설정 변경 없음.
+
+
+
+- **신규 개발 DB 읽기 전용 실측(2026-10-30 22:13 KST):** PostgreSQL 17.11, BEGIN READ ONLY/ROLLBACK, 과거형 public.purchases **0건**. moneyverse_app 유효 권한: purchases SELECT=true, DELETE=true; ledger_postings SELECT=true, DELETE=false; account_balances UPDATE=true; shop_list_my_purchases(uuid,integer) EXECUTE=true. 함수 전용 최소 권한 정책과 충돌하여 P0 SEC1524-02/#993에 반영한다. 개발 DB만 확인했으며 운영 권한·실제 구매/결제 증빙을 의미하지 않는다. Android 게이트웨이는 shop/purchases 경로에 private/no-store/noindex를 적용하지만 중첩 상세·오류·공개 edge·Referrer-Policy는 별도 검증이 필요하다.
 
 ## v2026.10.30.1522 — F675-186 아이템 유지비 영수증 원장 증빙·납부 범위 정확성 보완 (기능 보완 / 초안 / 운영 보류)
 
