@@ -1,5 +1,38 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1508 F675-183 주간 퀘스트 근거 상세 / 인계 #2002 / 초안 PR #2003 / 운영 보류; #1995 종속.
+**현재 기획:** v1510 F675-183 원본 집계 동등성 보완 / 인계 #2002 / 초안 PR 준비 / 운영 보류; #2003 종속.
+
+## v2026.10.30.1510 — F675-183 주간 퀘스트 원본 집계 동등성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**이전/현재/다음:** 기능 추가 v1508 / 기능 보완 v1510 / 기능 추가 v1512(잠정). main SHA 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef 시작·중간 재확인. #2003의 후속 문서, #1995 → #1990 → #1983 종속, 기존 개발 인계 #2002. 기준은 main의 AGENTS.md·README.md·영문 PROJECT_PLAN.md이며 본 문서는 동등한 한국어 대조본. 별도 분산 기획 없음.
+
+### 마이그레이션 101에서 확인한 정합성 위험
+- packages/database/migrations/101-early-game-progress.sql:437–566의 public.early_game_weekly_goals(p_actor)는 한국시간 clock_timestamp()로 주 시작을 정하지만 영수증·원장에는 **created_at >= v_from 하한만 적용**한다. 다음 월요일 상한과 공통 asOf 시각은 없다. v1508의 [월요일, 다음 월요일) 상세는 미래 시각·소급 입력·주 경계에서 원본과 달라질 수 있다. 같은 DB 트랜잭션에서 4개 지표를 원본 101과 대조하기 전에는 검증으로 표시 금지. 상한 변경은 기존 101 수정 없이 원본·상세를 함께 전방 마이그레이션으로 처리.
+- 직업 목표는 현재 user_job_progress의 **최고 레벨 직업**을 level DESC, job_type 열거형 순으로 선택한다. selected_at 직업이나 영수증 당시 직업이 아니다. 서로 다른 작업은 DISTINCT assignment.task_id, 직업 작업은 그 직업에 해당하는 보상 영수증 행 수다. 작업별 묶음 한 행을 영수증 한 건으로 합산하면 안 되며 직업 순위만 바뀌어도 주간 수치가 변할 수 있다.
+- 소비는 USER_CASH credit 전표 중 SHOP_CATALOG_PURCHASE, SHOP_PURCHASE, BUSINESS_PURCHASE, CONSUMPTION_EVENT 네 유형만 포함한다. 저축은 USER_BANK에서 BANK_DEPOSIT/BANK_WITHDRAW의 debit-credit 순액을 GREATEST(net,0)으로 제한한다. 원본 101에는 accounts.currency='WLD' 명시 필터가 없어 신규 상세에만 추가하면 불일치할 수 있다. 일부 50건 페이지의 합계를 전체 진행률로 사용하지 않는다.
+- NPC는 이번 주가 아닌 평생 MAX(npc_relationships.affinity), self_reported=true다. 주문 버튼 입력은 배달 확인 영수증이 아니므로 AGGREGATE_ONLY / SELF_REPORTED, 가짜 개별 기록·시각·검증 배지 금지.
+
+### 보완한 본인 전용 V1 계약
+- **목적·진입·권한:** 회원이 본인 목표 진행의 실제 근거를 이해하도록 한다. /quests의 근거 보기 → /quests/weekly-evidence?goal=<활성코드>&week=<현재 KST 월요일>. 인증·동의 회원 본인만 조회, 기능 quest_weekly_evidence 기본 OFF. NPC의 week는 게시판 기준이며 실제 범위는 lifetime을 명확히 표시. 과거 내역·보상 청구·정산 인증·원장 쓰기·상대방 노출 금지.
+- **단일 스냅샷:** Nest가 DB KST 주·asOfUtc를 한 번 결정하고 읽기 전용 REPEATABLE READ에서 원본 101과 상세의 목표 코드·지표·범위·목표값·진행률·자기신고 여부를 대조한다. 완전 일치할 때만 sourceStatus=CANONICAL_MATCHED, 불일치는 성공형 0/목록 없이 503 PARITY_UNVERIFIED. 월요일 변경은 409 WEEK_CHANGED와 새로고침. HTTP 요청 사이 MVCC 스냅샷 재사용 불가.
+- **커서·동시성:** 버전·목적 분리 HMAC-SHA256(15분)에 회원·세션 세대·목표·KST 주·집계/카탈로그 버전·최고 레벨 직업·UTC 마이크로초 기준시각·전체 적격 원천 집합 지문·마지막 (시각,UUID/묶음키)·만료를 결속한다. 50+1/최대 50, 안정 정렬. 보이는 페이지가 아닌 **전체 원천** 지문 재검증. 소급·삭제·직업 변경은 409 EVIDENCE_CHANGED, 만료는 410. 합성 10,001건 이상에서 p95 300ms 목표를 넘으면 성능 보류·재설계.
+- **API·화면:** Nest GET /api/v1/engagement/early-game/weekly-evidence 및 Android /app-api/v1/...; {goalCode,weekStartKst,windowKind,weekEndExclusiveUtc,metric,target,progress,selfReported,sourceStatus,evidenceStatus,asOfUtcMicros,rows,nextCursor}. BIGINT/WLD는 정확한 10진 문자열, 시각 마이크로초 보존, 목록은 부분 근거이지 합산 총계가 아니다. NPC는 목록·다음 커서 없음. 400 잘못된 값, 401 인증, 404 타인/없음 동일, 409 변경, 410 만료, 429 제한, 503 원본/DB 불가. 로딩·검증된 빈 목록·집계 전용·변경·재시도·장애를 구분하며 가짜 달성 금지.
+- **DB·보안:** 고정 search_path, 명시적 스키마, PUBLIC EXECUTE 회수, 최소 앱 EXECUTE의 본인 전용 SECURITY DEFINER 읽기. **p_actor 인자만으로 DB 호출자의 신원을 증명할 수 없다.** Nest 세션·동의·회원 결속, 직접 DML/SELECT 권한 음성 시험, EXPLAIN/BUFFERS 후 인덱스 판단. V1 신규 테이블 불필요. 개인정보 ID 로그 제거, 웹·Android 모든 상태 no-store/noindex/no-referrer, 계정 전환 취소·디스크 캐시 금지, 320px/200% 확대·44px·WCAG 2.2 AA·키보드·초점 복원.
+- **관리·배포:** 관리자는 회원 개별 근거를 볼 수 없고 익명 20명 이상 집단의 조회·NPC·정합성 오류·변경·503·p95만 본다. p95 <300ms는 실측이 아닌 목표. 별도 브랜치/테스트 Docker, 전체 CI·공식 Test 정확 SHA 인증 E2E·독립 복원·금융/보안 게이트 통과 후 기본 OFF→제한 공개→관찰→OFF 롤백. 기획 예약은 배포 금지.
+
+### P0 4건 + P1 6건 개발 인계
+1. **P0 OPS1510-01** — Production 엣지 94d38f4와 #1984의 삭제된 v1515 프로세스 경로 불일치. 바이너리·링크·매니페스트·엣지·독립 복원 가능한 롤백 자산 보존 후 재시작 판단.
+2. **P0 SEC1510-02** — 적용 체크섬 5건, 개발 DB 광범위 DML #993, 깨끗한 DB 은행 포켓 #2000, 알림 DDL #1693, B 마이그레이션 307–310 종속 관계 조사. 임의 GRANT/기존 SQL 변경 금지.
+3. **P0 FIN1510-03** — 국고 미연계 552건, MINT/SWF 출처, 탐색 잔액 24건과 정규 0건을 동일 범위·스냅샷에서 독립 대조. 퀘스트 조회를 정산 인증으로 사용 금지.
+4. **P0 REL1510-04** — QA v1390 백엔드 119 FAIL / 2,563 PASS / 495 SKIP, 프론트엔드 기존 53 FAIL, 계약 41 PASS는 배포 인증 아님. 전체 CI·공식 Test 정확 SHA·독립 복원·금융/인증/보안/엣지 게이트.
+5. **P1 QUEST1510-05** — B/QA가 격리 PostgreSQL 동일 REPEATABLE READ에서 상세 4종과 원본 101 비교. 주간 상한/통화 의미 변경 시 원본과 함께 전방 마이그레이션.
+6. **P1 QUEST1510-06** — B가 본인 EXECUTE 전용 SQL, 활성 카탈로그, 최고 레벨 직업 동률, 소비 허용 목록·은행 순저축, 작업 묶음, 전체 지문, 권한 음성·EXPLAIN 구현.
+7. **P1 QUEST1510-07** — A/B Nest 세션·회원·동의 결속, 엄격 DTO, KST 현재 주, 서명 커서와 400/401/404/409/410/429/503 정합성 실패 차단.
+8. **P1 QUEST1510-08** — A/C Next CTA·상세, 주간/평생 NPC 구분, 일부 페이지/비가산 합계 설명, 로딩/오류/재시도, 320px/200%/WCAG AA·키보드·초점.
+9. **P1 QUEST1510-09** — C Android 응답·헤더 동등성, 계정 전환 취소·디스크 캐시 금지, 관리자 익명 20명 이상 KPI·개인정보·기본 OFF.
+10. **P1 QUEST1510-10** — QA 격리 PostgreSQL 17.11 합성 10,001건 이상, 타인 100, 커서 위조 100, 동시 100, 소급/직업 변경 50, KST 경계 30, 비정상/장애 50; 원본 대조·원장 쓰기 0·정확 SHA Test/롤백.
+
+**수용시험 계획만 작성, 미실행:** 미래 시각 행·최고 레벨 직업 동률·은행 순인출·타 통화·평생 NPC·일부 페이지 합계 검증 포함. 외부 독립 레퍼런스 신규 승인 0, 누적 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. QA v1390은 운영 인증 아님. DRAFT / RELEASE HOLD.
+
 
 ## v2026.10.30.1508 — F675-183 회원 주간 퀘스트 달성 근거 상세 (기능 추가 / 초안 / 운영 보류)
 
