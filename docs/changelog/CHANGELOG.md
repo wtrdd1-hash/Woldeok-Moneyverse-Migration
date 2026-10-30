@@ -1,4 +1,7 @@
-﻿## v2026.10.30.1500 — Owner-only wallet calendar range (planning DRAFT / RELEASE HOLD)
+﻿## v2026.10.30.1504 — Owner-only wallet transaction detail planning (DRAFT / RELEASE HOLD)
+- F675-182 read-only owner ledger detail, strict permission/precision/Android privacy contract; P0 release identity split QA v1387, app-role ACL and finance provenance. P0 4/P1 6 in #1988. No runtime deployment.
+
+## v2026.10.30.1500 — Owner-only wallet calendar range (planning DRAFT / RELEASE HOLD)
 
 ## v2026.10.30.1502 — Wallet calendar-range planning hardening (docs-only, DRAFT/HOLD)
 - Rechecked merged v1500 plan, QA v1386 P0 release-gate breach, DEV PostgreSQL ACL/indexes and actual Nest/Next/Android paths. Specified DB-clock KST half-open bounds, microsecond HMAC cursor, typed failure states, existing app-api query/noindex behavior and 4 P0 + 6 P1 backlog. No runtime/DB/WLD/Test/Production changes; tests proposed, not run. External gate new 0 / cumulative UNKNOWN of 10,000.
