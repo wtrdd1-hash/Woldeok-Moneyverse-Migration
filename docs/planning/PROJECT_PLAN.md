@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1506 F675-182 detail hardening / Draft PR pending / handoff #1988 / DRAFT / RELEASE HOLD; stacked on #1990/#1983.
+**Current planning:** v1506 F675-182 detail hardening / Draft PR #1995 / handoff #1988 / DRAFT / RELEASE HOLD; stacked on #1990/#1983.
 
 ## v2026.10.30.1506 — F675-182 Wallet Detail Evidence Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

@@ -29,3 +29,5 @@
 
 
 **Start 13:08 KST:** miniPC and GitHub. skills__list no URI; local Superpowers skills read. **Mid 13:15 KST:** main and QA v1388 rechecked. **End:** pending PR/CI.
+
+**GitHub update:** Draft #1995 OPEN on #1990, issue #1988 comment 6514797065; 12 docs. Classifier 22 PASS/0 FAIL; runtime acceptance NOT RUN; Production RELEASE HOLD.
