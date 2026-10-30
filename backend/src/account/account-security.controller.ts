@@ -39,14 +39,19 @@ export class AccountSecurityController {
   }
 
   @Get('sessions')
-  @ApiOperation({ summary: 'Active sessions belonging to the caller' })
-  async sessions(@Req() request: RequestWithSession) {
-    return {
-      sessions: await this.repository().activeSessions(
-        requireUserId(request),
-        requireSession(request).id,
-      ),
-    };
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiQuery({ name: 'scope', required: false, enum: ['all', 'other'] })
+  @ApiOperation({ summary: 'Active owner sessions, optionally showing other devices only' })
+  async sessions(@Req() request: RequestWithSession, @Query('scope') scope?: unknown) {
+    if (scope !== undefined && (typeof scope !== 'string' || !['all', 'other'].includes(scope))) {
+      throw new BadRequestException('invalid session scope');
+    }
+    const sessions = await this.repository().activeSessions(
+      requireUserId(request),
+      requireSession(request).id,
+    );
+    return { sessions: scope === 'other' ? sessions.filter((session) => !session.current) : sessions };
   }
 
   @Get('events')

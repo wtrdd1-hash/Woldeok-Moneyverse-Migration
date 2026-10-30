@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseSecuritySessionScope } from '@/lib/security-session-scope';
 import { requireMember } from '@/lib/session';
 import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
 import {
@@ -50,6 +51,9 @@ export default async function AccountSecurityPage({
 }) {
   await requireMember();
   const params = await searchParams;
+  const parsedScope = parseSecuritySessionScope(params.scope);
+  const scopeInvalid = parsedScope === null;
+  const sessionScope = parsedScope ?? 'all';
   const parsedCategory = parseSecurityEventCategory(params.category);
   const categoryInvalid = parsedCategory === null;
   const eventCategory = parsedCategory ?? 'all';
@@ -57,11 +61,12 @@ export default async function AccountSecurityPage({
     ? '/api/v1/account/security/events'
     : `/api/v1/account/security/events?category=${eventCategory}`;
   const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
-    apiOrNull<unknown>('/api/v1/account/security/sessions'),
+    scopeInvalid ? Promise.resolve(null) : apiOrNull<unknown>(sessionScope === 'other'
+      ? '/api/v1/account/security/sessions?scope=other' : '/api/v1/account/security/sessions'),
     apiOrNull<unknown>('/api/v1/account/identities'),
     categoryInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
   ]);
-  const sessionData = parseSecuritySessions(rawSessions);
+  const sessionData = scopeInvalid ? null : parseSecuritySessions(rawSessions, sessionScope);
   const identityData = parseLinkedIdentities(rawIdentities);
   const parsedEvents = parseSecurityEvents(rawEvents);
   const eventData = parsedEvents !== null && !categoryInvalid &&
@@ -167,6 +172,19 @@ export default async function AccountSecurityPage({
           </div>
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
+          <nav aria-label="로그인 기기 필터" className="flex flex-wrap gap-2">
+            {([
+              { value: 'all', label: '모든 기기', href: '/account/security' },
+              { value: 'other', label: '다른 기기만', href: '/account/security?scope=other' },
+            ] as const).map((option) => (
+              <Link key={option.value} href={option.href}
+                aria-current={!scopeInvalid && sessionScope === option.value ? 'page' : undefined}
+                className="inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">
+                {option.label}
+              </Link>
+            ))}
+          </nav>
+          {scopeInvalid && <p role="alert" className="text-xs text-destructive">올바르지 않은 기기 필터입니다. 모든 기기를 선택해 주세요.</p>}
           {sessionData === null ? (
             <p className="py-6 text-center text-xs text-muted-foreground">세션 정보를 확인할 수 없습니다. 새로고침 후 다시 시도해 주세요.</p>
           ) : sessions.length === 0 ? (

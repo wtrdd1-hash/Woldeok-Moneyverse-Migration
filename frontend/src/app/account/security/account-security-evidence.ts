@@ -40,7 +40,7 @@ function uuid(value: unknown): value is string {
   return typeof value === 'string' && UUID.test(value);
 }
 
-export function parseSecuritySessions(value: unknown): readonly VerifiedSecuritySession[] | null {
+export function parseSecuritySessions(value: unknown, scope: 'all' | 'other' = 'all'): readonly VerifiedSecuritySession[] | null {
   if (!record(value) || !Array.isArray(value.sessions) || value.sessions.length > 100) return null;
   const ids = new Set<string>();
   const sessions: VerifiedSecuritySession[] = [];
@@ -70,7 +70,7 @@ export function parseSecuritySessions(value: unknown): readonly VerifiedSecurity
     });
   }
   // The authenticated caller must not see two current sessions or an ambiguous all-other list.
-  if (sessions.length > 0 && currentCount !== 1) return null;
+  if (sessions.length > 0 && currentCount !== (scope === 'other' ? 0 : 1)) return null;
   return sessions;
 }
 

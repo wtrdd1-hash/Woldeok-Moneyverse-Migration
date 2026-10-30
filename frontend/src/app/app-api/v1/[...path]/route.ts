@@ -3,7 +3,8 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
-import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseSecurityEvents, parseSecuritySessions } from '@/app/account/security/account-security-evidence';
+import { parseSecuritySessionScope } from '@/lib/security-session-scope';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -107,6 +108,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const securitySessionPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'sessions';
+  const scopeValues = securitySessionPath ? request.nextUrl.searchParams.getAll('scope') : [];
+  const sessionScope = securitySessionPath
+    ? parseSecuritySessionScope(scopeValues.length > 1 ? scopeValues : scopeValues[0])
+    : 'all';
+  if (securitySessionPath && sessionScope === null) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_session_scope', 'session scope must be all or other');
+  }
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -330,6 +340,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (securitySessionPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'security_sessions_unverified', 'active session evidence is unavailable');
+  }
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -411,6 +424,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (securitySessionPath && response.ok && (sessionScope === null ||
+          parseSecuritySessions(compatible, sessionScope) === null)) {
+        return gatewayProblem(503, 'Service Unavailable', 'security_sessions_unverified', 'active session evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -431,6 +448,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (securitySessionPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'security_sessions_unverified', 'active session evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
