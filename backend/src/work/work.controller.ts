@@ -1,4 +1,4 @@
-﻿import {
+import {
   BadRequestException,
   Body,
   ConflictException,
@@ -29,7 +29,7 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { WorkInputError, WorkRepository } from './work.repository';
+import { parseWorkTaskMaxDuration, parseWorkTaskMaxReward, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')

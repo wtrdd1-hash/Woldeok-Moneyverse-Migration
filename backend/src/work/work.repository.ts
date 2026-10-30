@@ -1,4 +1,4 @@
-﻿import type { Queryable } from '../core/db';
+import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
@@ -219,12 +219,26 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, recommendedOnly?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, maxReward?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
-    if (recommendedOnly !== undefined && recommendedOnly !== 'true' && recommendedOnly !== 'false') {
-      throw new WorkInputError('recommendedOnly must be true or false');
+    if (minReward !== undefined && (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
+      throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
-    const recommended = recommendedOnly === 'true';
+    const maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+    const ceiling = parseWorkTaskMaxReward(maxReward);
+    if (ceiling !== null && typeof minReward === 'string' && BigInt(minReward) > BigInt(ceiling)) {
+      throw new WorkInputError('minReward cannot exceed maxReward');
+    }
+    const params: unknown[] = [actor, minReward ?? null];
+    let extraFilters = '';
+    if (maxDuration !== null) {
+      params.push(maxDuration);
+      extraFilters += `\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
+    }
+    if (ceiling !== null) {
+      params.push(ceiling);
+      extraFilters += `\n         AND task.reward_preview <= $${params.length}::numeric`;
+    }
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -234,8 +248,8 @@ export class WorkRepository {
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task
-       WHERE ($2::boolean = false OR task.recommended)`,
-      [actor, recommended],
+       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${extraFilters}`,
+      params,
     );
     const now = Date.now();
     return rows.map((task) => {
