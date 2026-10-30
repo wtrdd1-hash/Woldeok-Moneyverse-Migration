@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -7,11 +8,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -20,6 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import { AccountSecurityRepository } from './account-security.repository';
+import type { SecurityEventCategory } from './account-security.repository';
 
 @ApiTags('account')
 @Controller('account/security')
@@ -49,9 +52,23 @@ export class AccountSecurityController {
   @Get('events')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
-  @ApiOperation({ summary: 'Recent security events belonging to the caller' })
-  async events(@Req() request: RequestWithSession) {
-    return { events: await this.repository().recentEvents(requireUserId(request)) };
+  @ApiQuery({ name: 'category', required: false, enum: ['all', 'login', 'settings'] })
+  @ApiOperation({
+    summary: 'Recent owner-only security events, optionally filtered within the latest 20',
+  })
+  async events(@Req() request: RequestWithSession, @Query('category') category?: unknown) {
+    if (
+      category !== undefined &&
+      (typeof category !== 'string' || !['all', 'login', 'settings'].includes(category))
+    ) {
+      throw new BadRequestException('invalid security event category');
+    }
+    return {
+      events: await this.repository().recentEvents(
+        requireUserId(request),
+        (category ?? 'all') as SecurityEventCategory,
+      ),
+    };
   }
 
   @Delete('sessions/:id')

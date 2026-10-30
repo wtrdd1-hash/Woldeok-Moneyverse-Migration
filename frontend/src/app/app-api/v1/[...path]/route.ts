@@ -3,6 +3,8 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -73,6 +75,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
+  const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
+  const securityCategory = securityEventPath
+    ? parseSecurityEventCategory(categoryValues.length > 1 ? categoryValues : categoryValues[0])
+    : 'all';
+  if (securityEventPath && securityCategory === null) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
@@ -213,6 +224,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+  }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -235,6 +251,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (securityEventPath && response.ok) {
+        const verified = parseSecurityEvents(compatible);
+        if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
+          return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+        }
+      }
       if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
           compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
         // Older backend images returned a redundant internal storage key.
@@ -246,6 +268,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (securityEventPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+      }
       return new NextResponse(bytes, { status: response.status, headers });
     }
   }

@@ -127,12 +127,14 @@ _요청 본문 없음._
 - 인증/권한: 로그인 및 최신 동의 필요
 - 성공 상태: 200
 - 응답 모드: json
-- 성공 후 동기화: 최근 보안 활동 목록을 서버 기준 상태로 교체
+- 성공 후 동기화: 본인 최근 20건 내 선택한 유형의 보안 활동 목록을 검증된 서버 응답으로 교체
 - Operation ID: `AccountSecurityController_events`
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| category | query | false | string | enum="all","login","settings" |
 
 ### 요청 본문
 

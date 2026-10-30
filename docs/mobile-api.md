@@ -1,4 +1,4 @@
-# Mobile / External App API & Developer Portal Guide
+﻿# Mobile / External App API & Developer Portal Guide
 
 [English](mobile-api.md) | [한국어](mobile-api.ko.md) | [Document Index](INDEX.md) | [Developer Portal](/developer)
 
@@ -46,3 +46,6 @@ Based on OpenAPI 3.0 tags and App Gateway route groups. Standard application cli
 ## Owner-private recent purchase CSV (Development A candidate; not released)
 
 Authenticated, consented members can request `GET /api/v1/shop/purchases/export` or Android `GET /app-api/v1/shop/purchases/export` with optional `q` (up to 80 Unicode characters, no control bytes). The response is `{ scope: "recent100", purchases: [...] }`, containing only the caller's most recent 100 purchases from the existing PostgreSQL `shop_list_my_purchases` owner-checked function. The optional item-name filter runs inside those recent 100. All WLD amounts remain canonical integer strings. The same-origin web download `GET /api/shop/purchases/export` produces UTF-8 CSV with a BOM and spreadsheet-formula escaping. All surfaces are private, no-store and noindex. Invalid or unverified reads fail closed; an empty list is valid only after a successful authoritative read. This is **not** a lifetime purchase statement or a certified financial document. Draft feature; Test/Production promotion remains on HOLD.
+### Owner-private recent security activity category (P1 candidate; HOLD)
+
+`GET /app-api/v1/account/security/events?category=all|login|settings` forwards the signed-in Android session to the guarded NestJS endpoint. Omitted category defaults to `all`; duplicate or invalid values return HTTP 400. The backend reads the owner's latest 20 events using `account_recent_security_events` before filtering. This is not all-time history. `login` is successful local sign-in; `settings` covers known password/email request and change types. Unknown event types appear only under `all`. Successful responses are strictly validated as `{events:[{type,createdAt}]}` and rejected with 503 if malformed or inconsistent with the selected category. All success/error responses use `private, no-store` and `noindex`; no IP, token, or audit metadata is returned. Candidate is not deployed.

@@ -278,14 +278,28 @@
       "method": "GET",
       "path": "/app-api/v1/account/security/events",
       "purpose": "현재 계정의 최근 보안 활동 조회",
-      "callWhen": "계정 보안 화면 진입/새로고침",
+      "callWhen": "계정 보안 화면 진입/새로고침 또는 최근 보안 활동 유형 필터 변경",
       "authorization": "로그인 및 최신 동의 필요",
-      "afterSuccess": "최근 보안 활동 목록을 서버 기준 상태로 교체",
+      "afterSuccess": "본인 최근 20건 내 선택한 유형의 보안 활동 목록을 검증된 서버 응답으로 교체",
       "backendRoute": "/api/account/security/events",
       "operationId": "AccountSecurityController_events",
       "backendOpenApiPath": "/account/security/events",
-      "summary": "Recent security events belonging to the caller",
-      "parameters": [],
+      "summary": "Recent owner-only security events, optionally filtered within the latest 20",
+      "parameters": [
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "all",
+              "login",
+              "settings"
+            ]
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200

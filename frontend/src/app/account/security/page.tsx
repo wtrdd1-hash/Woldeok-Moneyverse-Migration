@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
+import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { requireMember } from '@/lib/session';
 import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
 import {
@@ -49,14 +50,20 @@ export default async function AccountSecurityPage({
 }) {
   await requireMember();
   const params = await searchParams;
+  const parsedCategory = parseSecurityEventCategory(params.category);
+  const categoryInvalid = parsedCategory === null;
+  const eventCategory = parsedCategory ?? 'all';
+  const eventPath = `/api/v1/account/security/events${eventCategory === 'all' ? '' : `?category=${eventCategory}`}`;
   const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
     apiOrNull<unknown>('/api/v1/account/security/sessions'),
     apiOrNull<unknown>('/api/v1/account/identities'),
-    apiOrNull<unknown>('/api/v1/account/security/events'),
+    categoryInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
   ]);
   const sessionData = parseSecuritySessions(rawSessions);
   const identityData = parseLinkedIdentities(rawIdentities);
-  const eventData = parseSecurityEvents(rawEvents);
+  const parsedEvents = parseSecurityEvents(rawEvents);
+  const eventData = parsedEvents !== null && !categoryInvalid &&
+    securityEventsMatchCategory(parsedEvents, eventCategory) ? parsedEvents : null;
   const sessions = sessionData ?? [];
   const identities = identityData ?? [];
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
@@ -360,7 +367,23 @@ export default async function AccountSecurityPage({
           <CardDescription className="text-xs">계정 접근 및 주요 보안 설정 변경 이력입니다. 최근 최대 20건만 표시하며 전체 보안 기록은 아닙니다.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          {eventData === null ? (
+          <nav aria-label="보안 활동 유형" className="mb-3 flex flex-wrap gap-2">
+            {[
+              { value: 'all', label: '전체', href: '/account/security' },
+              { value: 'login', label: '로그인', href: '/account/security?category=login' },
+              { value: 'settings', label: '설정 변경', href: '/account/security?category=settings' },
+            ].map((option) => (
+              <Link key={option.value} href={option.href}
+                aria-current={!categoryInvalid && eventCategory === option.value ? 'page' : undefined}
+                className="inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">
+                {option.label}
+              </Link>
+            ))}
+          </nav>
+          <p className="mb-3 text-xs text-muted-foreground">필터는 본인의 최근 20건에만 적용됩니다. 전체 기록 검색이 아닙니다.</p>
+          {categoryInvalid ? (
+            <p role="alert" className="py-3 text-xs text-destructive">올바르지 않은 보안 활동 필터입니다. 전체를 선택해 주세요.</p>
+          ) : eventData === null ? (
             <p className="py-3 text-xs text-muted-foreground">보안 활동을 확인할 수 없습니다. 다시 조회해 주세요.</p>
           ) : events.length === 0 ? (
             <p className="py-3 text-xs text-muted-foreground">최근 보안 활동이 없습니다.</p>
@@ -374,10 +397,10 @@ export default async function AccountSecurityPage({
               ))}
             </div>
           )}
-          {eventData !== null && (
+          {!categoryInvalid && eventData !== null && (
             <Button asChild variant="outline" size="sm" className="mt-3 min-h-11">
-              <a href="/account/security/events.csv" download="moneyverse-security-events-recent.csv" aria-label="최근 최대 20건의 계정 보안 활동 CSV 다운로드">
-                최근 보안 활동 CSV 다운로드
+              <a href="/account/security/events.csv" download="moneyverse-security-events-recent.csv" aria-label="필터와 관계없이 전체 최근 최대 20건의 계정 보안 활동 CSV 다운로드">
+                전체 보안 활동 CSV 다운로드
               </a>
             </Button>
           )}

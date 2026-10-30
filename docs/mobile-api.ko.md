@@ -1,4 +1,4 @@
-# 모바일 / 외부 앱 API 및 개발자 포털 가이드
+﻿# 모바일 / 외부 앱 API 및 개발자 포털 가이드
 
 [English](mobile-api.md) | **한국어** | [문서 색인](INDEX.ko.md) | [개발자 포털](/developer)
 
@@ -46,3 +46,6 @@ OpenAPI 3.0 태그 및 App Gateway 라우트 그룹 기준입니다. 일반 앱 
 ## 회원 전용 최근 구매 CSV (개발 A 후보·미배포)
 
 로그인 및 동의를 완료한 회원은 `GET /api/v1/shop/purchases/export` 또는 Android `GET /app-api/v1/shop/purchases/export`로 최근 본인 구매 기록 최대 100건을 JSON으로 조회할 수 있습니다. `q` 상품명 검색은 최대 80자이며 최근 100건 안에서만 적용됩니다. 금액은 정밀도를 유지하는 정수 문자열입니다. 웹 `GET /api/shop/purchases/export`는 UTF-8 CSV를 다운로드하며 스프레드시트 수식 주입을 차단합니다. 응답은 개인 전용·캐시 금지·검색 색인 방지로 제공되며 오류를 빈 기록으로 위장하지 않습니다. **전체 누적 구매액 또는 금융 증명서가 아닙니다.** Draft 후보이며 Test/Production 배포는 보류합니다.
+### 본인 최근 보안 활동 유형 (P1 후보·배포 보류)
+
+`GET /app-api/v1/account/security/events?category=all|login|settings`는 로그인된 Android 세션을 NestJS 보호 API로 전달합니다. 생략하면 `all`이며 중복·잘못된 유형은 HTTP 400입니다. 기존 `account_recent_security_events`로 본인 최근 20건을 조회한 후 필터링하므로 전체 기간 조회가 아닙니다. `login`은 로컬 로그인 성공, `settings`는 비밀번호·이메일 변경/요청이며 기타 유형은 `all`에서만 표시합니다. 성공 응답은 `{events:[{type,createdAt}]}` 형식을 검증하고 잘못된 데이터 또는 필터 불일치 시 503으로 거부합니다. 성공/오류 모두 `private, no-store`·`noindex`를 적용하며 IP·토큰·감사 원본 메타데이터를 공개하지 않습니다. 아직 배포하지 않았습니다.

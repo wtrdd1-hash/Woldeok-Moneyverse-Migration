@@ -122,17 +122,19 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/account/security/events` — Recent security events belonging to the caller
+## `GET` `/app-api/v1/account/security/events` — Recent owner-only security events, optionally filtered within the latest 20
 
 - Authorization: 로그인 및 최신 동의 필요
 - Success status: 200
 - Response mode: json
-- After success: 최근 보안 활동 목록을 서버 기준 상태로 교체
+- After success: 본인 최근 20건 내 선택한 유형의 보안 활동 목록을 검증된 서버 응답으로 교체
 - Operation ID: `AccountSecurityController_events`
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| category | query | false | string | enum="all","login","settings" |
 
 ### Request body
 
