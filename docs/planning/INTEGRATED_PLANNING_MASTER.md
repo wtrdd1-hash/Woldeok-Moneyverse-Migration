@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.30.1–2 — Telegram alert reliability audited and repaired LIVE
+
+- Authoritative operational audit at 2026-10-30 09:00 KST found v1511 market timer active/enabled but elapsed with no next trigger, silently missing 10+ hours of fictional-stock news, price and critical-log scans. New calendar scheduling every two minutes is LIVE, proven by separate automatic MARKET_OK calls at 09:10:02 and 09:12:01 and 09:14; a finite next trigger remains scheduled. Existing v1510 operations alert checks this next trigger, raising CRITICAL for active/elapsed or unscheduled and reporting recovery. Production Test DB was accessed read-only; no finance mutations, market/news fabrication or app restarts.
+- Version v2026.10.30.1 PR #1965 merge 0d5c84230, 24/24 tests PASS, isolated systemd Test worker/real DB and Test/Production health PASS. An overnight observation gap is disclosed and no old price is mislabeled as a two-minute spike. 09:00 KST digest has a bounded recovery period.
+- Secondary audit: root and second disk had only about 3 GB and 6 GB available (df ~97–98% full) but original bot reported WARNING 93% from raw used/total. Version v2026.10.30.2 PR #1966 merge 209fb65b, 25/25 tests PASS, critical severity now based on actually available bytes. Telegram bot acknowledged new CRITICAL 97% root and 98% data alerts. **Actual disk cleanup was NOT performed**; filesystem exhaustion remains P0.
+- Both original website app processes remained active with identical PIDs, rollback timer stop/start canary PASS, chat pairing intact. Runtime CI JS builds were SKIPPED by classifier, not reported as passed.
+- [v1 English](../releases/v2026.10.30.1.md) / [v1 Korean](../releases/v2026.10.30.1.ko.md) / [v1 worklog](../worklog/2026-10-30-telegram-alert-reliability-v1.md); [v2 English](../releases/v2026.10.30.2.md) / [v2 Korean](../releases/v2026.10.30.2.ko.md) / [v2 worklog](../worklog/2026-10-30-telegram-disk-alert-v2.md).
+
 ## v2026.10.29.1511 — Owner's private Telegram stock/news and operational alert delivery
 
 - Existing paired v1510 Telegram operations monitoring is LIVE. New independent v1511 two-minute read-only systemd timer is LIVE on the Debian miniPC, verified against isolated Test DB first and the actual virtual stock database.
