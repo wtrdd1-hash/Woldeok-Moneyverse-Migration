@@ -71,7 +71,7 @@ export class PublicNationalPensionController {
   }
 
   @Post('contribute')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '국민연금 기여금 납입 (지갑 차감 -> 국고 편입)' })
   async contribute(
     @Req() req: RequestWithSession,
@@ -91,7 +91,7 @@ export class PublicNationalPensionController {
   }
 
   @Post('liquidate')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '국민연금 중도 해지 및 원금 95% 환급 청구' })
   async liquidate(@Req() req: RequestWithSession) {
     const userId = requireUserId(req);
