@@ -1,3 +1,7 @@
+## v2026.10.30.1514 — F675-184 Inventory Search Source-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1512 → Current Improvement v1514 → Next Addition v1516 (provisional); origin/main 9da6545c4 start/mid, stacked on #2014, handoff #2013. Exact legacy sort acquired_at DESC/catalog_id ASC; two clock_timestamp() expiry reads; user_items composite PK. Bounded search must not truncate equipped avatar or misstate total counts; introduce separately verified owner equipped summary, controlled DB asOf, microsecond cursor and expiry/source-change 409. No runtime changes.
+- P0 OPS1514-01 SEC1514-02 FIN1514-03 REL1514-04; P1 INVENTORY1514-05..10. QA v1392 final UNKNOWN, last inspected v1391 failing. Tests proposed NOT RUN; external approved new 0/cumulative UNKNOWN of 10,000 BLOCKED. Release HOLD; exact-SHA Test/independent restore required.
+
 ## v2026.10.30.1512 — F675-184 Inventory Find & Sort (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1510 → Current Addition v1512 → Next Improvement v1514 (provisional). Main 9da6545c4 rechecked start/mid; stacked on Draft #2008; handoff #2013.
 - Verified /inventory has category-only filtering and apiOrNull false-empty risk; new owner-only bounded keyword/rarity/equipped/sort read with SECURITY DEFINER, 20/50 keyset and 15m HMAC, no money writes or new tables. New migration number coordinated after B 311; feature OFF.

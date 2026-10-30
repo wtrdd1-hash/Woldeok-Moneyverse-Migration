@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1512 F675-184 inventory find/sort / handoff #2013 / Draft PR #2014 / RELEASE HOLD; stacked on #2008.
+**Current planning:** v1514 F675-184 inventory source-equivalence hardening / handoff #2013 / Draft PR #2018 / RELEASE HOLD; stacked on #2014.
+
+## v2026.10.30.1514 — F675-184 Inventory Source-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous Addition v1512 → Current Improvement v1514 → Next Addition v1516 (provisional). Authority origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef start/mid; parent Draft #2014, handoff #2013. No new inventory feature, table or endpoint; English canonical/Korean parity.
+- **Confirmed source issue:** /inventory derives equipped showcase and counts from entire holdings array, so replacing it with a 20-row search page would hide equipped items and misstate totals. Existing apiOrNull -> [] false-empty persists behind OFF; coordinate #1977. SQL migration 123 uses acquired_at DESC, catalog_id ASC and separate clock_timestamp() calls for holding/effect expiry. Migration 071 defines user_items PK(user_id,catalog_id), acquired_at NOT NULL. New search needs controlled asOf parity, separate bounded equipped summary, truthful counts, exact microsecond comparator, source-set fingerprint and expiry boundary 409; never claim a stable snapshot across HTTP. Full EN/KO contract in integrated masters.
+- P0 4: OPS1514-01 Production executable/rollback #1984; SEC1514-02 DEV ACL/checksum/schema #993/#2000; FIN1514-03 Treasury/MINT/SWF provenance; REL1514-04 failing QA/full CI/private headers/exact-SHA Test/restore. P1 6: INVENTORY1514-05 through INVENTORY1514-10 owner SQL/oracle, typed API/cursor, Next showcase/a11y, Android, privacy/KPI, isolated PG tests. QA v1392 final UNKNOWN; v1391 failures remain last inspected baseline. Tests proposed, NOT RUN. External newly approved 0, cumulative UNKNOWN/10,000 → BLOCKED / IN PROGRESS. Feature OFF, docs only, no merge or runtime/DB/WLD/Test/Production changes.
 
 ## v2026.10.30.1512 — F675-184 Member Inventory Find & Sort (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
