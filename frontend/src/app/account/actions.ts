@@ -87,6 +87,28 @@ export async function startLink(_previous: ActionState, formData: FormData): Pro
 }
 
 /**
+ * Begins step-up reauthentication, which unlocks unlinking and deletion for
+ * a short window. The window is the API's to enforce; this only starts it.
+ */
+export async function startReauthentication(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const provider = String(formData.get('provider') ?? '');
+  if (!PROVIDERS.has(provider)) return { status: 'error', message: '제공자를 확인할 수 없어요.' };
+
+  let authorizationUrl: string;
+  try {
+    ({ authorizationUrl } = await mutate<{ authorizationUrl: string }>(
+      `/api/v1/auth/${provider}/reauthentication`,
+    ));
+  } catch (error) {
+    return failure(error, '지금은 본인 확인을 시작할 수 없어요.');
+  }
+  redirect(authorizationUrl);
+}
+
+/**
  * Removes a linked OAuth identity.
  *
  * Refused if it is the only sign-in method, or if the user has not completed
@@ -198,8 +220,12 @@ export async function deleteAccount(
   // Tell the browser to clear the session cookie, even if the user closes
   // the tab before the redirect completes.
   try {
-    const response = await apiWithCookie('/api/v1/account/logout', { method: 'POST' });
-    await relaySetCookie(response);
+    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+    const { setCookie } = await apiWithCookie<null>('/api/v1/auth/logout', {
+      method: 'POST',
+      csrfToken,
+    });
+    await relaySetCookie(setCookie);
   } catch {
     // If logout fails, proceed to redirect anyway — the backend has revoked all sessions.
   }

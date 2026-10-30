@@ -1982,3 +1982,22 @@ ull 상태를 반환하도록 교정.
 - GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
+---
+## 🚀 [v22 Specification] 계정 액션 startReauthentication 및 로그아웃 setCookie 타입 정합성 교정
+
+### 1. 근본 원인 및 분석
+1. **src/app/account/account-forms.tsx 타입 에러**:
+   - startReauthentication 함수가 ctions.ts에서 누락되어 TS2305 에러 발생.
+   - 계정 재인증 시작 함수(startReauthentication) 원본 복원.
+2. **src/app/account/actions.ts 타입 에러**:
+   - deleteAccount 내부의 elaySetCookie(response) 호출 시 esponse 객체 전체가 전달되어 TS2345 (Argument of type ... is not assignable to parameter of type 'readonly string[]') 발생.
+   - piWithCookie<null>('/api/v1/auth/logout', ...) 호출 후 { setCookie }를 분해하여 elaySetCookie(setCookie)로 올바른 타입 배열 전달 복원.
+
+### 2. 세부 변경 사항
+- rontend/src/app/account/actions.ts: startReauthentication export 복원 및 deleteAccount 내 setCookie 분해 바인딩 복원.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 피처 브랜치(ix/admin-control-tower-telemetry-and-modals) 푸시.
+- GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
+- PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
+- 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
