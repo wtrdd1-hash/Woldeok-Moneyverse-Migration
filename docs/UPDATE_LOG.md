@@ -1,3 +1,7 @@
+## v2026.10.30.1506 — F675-182 Wallet Detail Evidence Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Previous v1504 Addition / Current v1506 Improvement / Next v1508 Addition. Main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef, QA v1388, actor trust, exact WLD/UTC, ledger read not reconciliation, web/Android privacy, P0 release hold.
+- P0: OPS1506-01, SEC1506-02, FIN1506-03, REL1506-04. P1: DETAIL1506-05, DETAIL1506-06, DETAIL1506-07, DETAIL1506-08, DETAIL1506-09, DETAIL1506-10. Tests not run; external 0 new, UNKNOWN/10,000 BLOCKED; no runtime/DB/Production writes.
+
 ## v1466 / F675-172 — Shortcut state and registry hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 
 - Previous Addition v1464 → Current Improvement v1466 → Next Addition v1468 (provisional); main `9ebc5613845ba2e8179a0051e86db996593c8a19` start/mid, QA v1368 IN PROGRESS / v1367 last completed FAILED/P0. Stacked on [v1466 Draft PR #1871](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1871) / [Draft #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866); handoff [#1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865). No runtime change.
