@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -89,7 +90,7 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } },
+    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' } },
   );
 }
 
@@ -227,6 +228,31 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Bank standing is an owner-only observation; a legacy success-shaped response
+  // must not become a verified Android balance or leak extra upstream fields.
+  if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
+      parts[2] === 'snapshot' && request.method === 'GET') {
+    const privateHeaders = {
+      'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex',
+      'referrer-policy': 'no-referrer',
+    };
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Bank Snapshot Unavailable', 'bank_snapshot_unavailable',
+        'The owner bank snapshot could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON bank snapshot');
+      const snapshot = parseBankStandingSnapshot(await response.clone().json());
+      if (!snapshot) throw new Error('unverified bank snapshot');
+      return contractJson(snapshot, { status: 200, headers: privateHeaders });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bank_snapshot_unverified',
+        'The owner bank snapshot could not be verified');
+    }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
