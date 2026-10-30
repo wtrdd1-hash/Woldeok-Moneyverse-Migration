@@ -29,3 +29,8 @@
 - BLOCKED: official Test runs `c2129625aa6629c616fb31ce790950618b8d92b2`, not the candidate; production runs `94d38f47603e99aabc42fc8f292b89441afb9663`. No exact-SHA Test login/E2E, independent backup restore, full CI, release policy certification, or GitOps gate. Production HOLD.
 - Rechecked main and English/Korean planning at integration decision: `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`, unchanged. No merge, Test/Production deploy, operational DB change, service restart, branch deletion, PR closure or production rollback.
 - Recovery: code is an opt-in filter and has no schema change. Revert this branch/PR to restore legacy full task board; no data migration rollback needed. Preserve every branch with unique unintegrated commits. Existing unrelated full-suite failures belong to separate QA/Backend workstreams and are not waived.
+
+### Final review hardening (17:44 KST)
+- Independent code review found a stale-backend mismatch risk on the Next.js page: a backend returning HTTP 200 while ignoring `availableOnly=1` could display exhausted tasks. Introduced a shared strict `isVerifiedAvailableWorkBoard` response validator used by both web and Android gateway; an unverified response is shown as unavailable, never as an authoritative empty/available board.
+- RED reproduced for the missing validator, then 20 frontend/Android focused tests PASS, changed-file ESLint 0 errors, full typecheck PASS. This is a code change, not a documentation-only checkpoint.
+- Rechecked main and canonical EN/KO plans again before push; no source main advance. The new commit must undergo fresh exact-SHA CI; prior CI evidence is not reused as a PASS.

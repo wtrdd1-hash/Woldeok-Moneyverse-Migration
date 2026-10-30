@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
@@ -81,7 +82,9 @@ export default async function WorkPage({ searchParams }: {
     }>('/api/v1/work/qualifications'),
   ]);
 
-  const tasks = board?.tasks ?? [];
+  // Fail closed if a stale backend ignores the opt-in filter and returns an exhausted task.
+  const verifiedBoard = availableOnly && !isVerifiedAvailableWorkBoard(board) ? null : board;
+  const tasks = verifiedBoard?.tasks ?? [];
   const open = (assignments?.assignments ?? []).filter(isOpen);
   const paid = receipts?.receipts ?? [];
   const now = Date.now();
@@ -310,12 +313,12 @@ export default async function WorkPage({ searchParams }: {
           </p>
         </div>
 
-        {board === null && (
+        {verifiedBoard === null && (
           <p role="alert" className="text-sm text-destructive">
             {isEn ? 'The task catalogue is temporarily unavailable.' : '업무 목록을 불러올 수 없습니다.'}
           </p>
         )}
-        {board !== null && (
+        {verifiedBoard !== null && (
           <CareerTasksBoard
             selectedMaxDuration={maxDurationSeconds}
             selectedAvailableOnly={availableOnly}
