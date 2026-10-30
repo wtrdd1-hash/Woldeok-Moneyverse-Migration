@@ -17284,10 +17284,18 @@
       "backendRoute": "/api/v1/notifications",
       "operationId": "NotificationController_listNotifications",
       "backendOpenApiPath": "/notifications",
-      "summary": "List in-app notifications for current user with unread filter and pagination",
+      "summary": "List owner notifications with read/unread filters and pagination",
       "parameters": [
         {
           "name": "unreadOnly",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "readOnly",
           "in": "query",
           "required": false,
           "schema": {

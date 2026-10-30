@@ -5607,7 +5607,7 @@ _None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/notifications` — List in-app notifications for current user with unread filter and pagination
+## `GET` `/app-api/v1/notifications` — List owner notifications with read/unread filters and pagination
 
 - Authorization: 로그인 + 최신 동의
 - Success status: 200
@@ -5620,6 +5620,7 @@ _None._
 | Name | In | Required | Type | Constraints |
 |---|---|---|---|---|
 | unreadOnly | query | false | boolean |  |
+| readOnly | query | false | boolean |  |
 | limit | query | false | integer |  |
 | offset | query | false | integer |  |
 

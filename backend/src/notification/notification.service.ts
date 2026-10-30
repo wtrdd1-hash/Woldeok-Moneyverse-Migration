@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -13,7 +13,11 @@ export class NotificationService {
     if (!this.pool) throw new Error('database pool unavailable');
     const limit = query.limit ?? 50;
     const offset = query.offset ?? 0;
+    if (query.unreadOnly === true && query.readOnly === true) {
+      throw new BadRequestException('Read and unread filters cannot be combined');
+    }
     const unreadOnly = query.unreadOnly ? true : null;
+    const readOnly = query.readOnly ? true : null;
 
     return queryRows(
       this.pool,
@@ -23,9 +27,10 @@ export class NotificationService {
        WHERE user_id = $1
          AND ($2::text IS NULL OR category = $2::text)
          AND ($3::boolean IS NULL OR is_read = FALSE)
+         AND ($4::boolean IS NULL OR is_read = TRUE)
        ORDER BY created_at DESC, id DESC
-       LIMIT $4 OFFSET $5`,
-      [actor, query.category ?? null, unreadOnly, limit, offset],
+       LIMIT $5 OFFSET $6`,
+      [actor, query.category ?? null, unreadOnly, readOnly, limit, offset],
     );
   }
 

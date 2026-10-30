@@ -5620,6 +5620,7 @@ _None._
 | 이름 | 위치 | 필수 | 타입 | 제약 |
 |---|---|---|---|---|
 | unreadOnly | query | false | boolean |  |
+| readOnly | query | false | boolean |  |
 | limit | query | false | integer |  |
 | offset | query | false | integer |  |
 

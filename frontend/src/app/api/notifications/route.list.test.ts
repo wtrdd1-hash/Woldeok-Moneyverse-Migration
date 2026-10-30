@@ -31,5 +31,17 @@ describe('verified notification BFF list', () => {
     }
     expect(api).not.toHaveBeenCalled();
   });
+  it('forwards readOnly and rejects conflicting or duplicate read status flags', async () => {
+    const response = await GET(new Request('https://example.test/api/notifications?readOnly=true&category=SYSTEM'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(api).toHaveBeenCalledWith('/api/v1/notifications?limit=50&offset=0&category=SYSTEM&readOnly=true');
+    api.mockClear();
+    for (const query of ['readOnly=true&unreadOnly=true', 'readOnly=true&readOnly=false', 'readOnly=invalid']) {
+      expect((await GET(new Request('https://example.test/api/notifications?' + query))).status).toBe(400);
+    }
+    expect(api).not.toHaveBeenCalled();
+  });
+
 
 });
