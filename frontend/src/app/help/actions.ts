@@ -33,12 +33,13 @@ export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormD
   try {
     const body: Record<string, unknown> = {
       locale,
-      category: category || undefined,
       query,
       limit,
     };
-    if (fallbackToOtherLocale) {
-      body.fallbackToOtherLocale = true;
+    if (category) {
+      body.category = category;
+    } else {
+      body.fallbackToOtherLocale = fallbackToOtherLocale;
     }
     const result = await api<{ articles: HelpSummary[]; fallbackUsed?: boolean; resultLocale?: HelpLocale }>('/api/v1/help/search', {
       method: 'POST',

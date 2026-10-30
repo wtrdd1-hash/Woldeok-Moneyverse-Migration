@@ -71,6 +71,29 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
   }
   if (
+    'summary' in data &&
+    data.summary !== undefined &&
+    data.summary !== null
+  ) {
+    const s = data.summary as Record<string, unknown>;
+    let sum = 0n;
+    for (const p of data.purchases) {
+      if (p && typeof p === 'object' && 'amount' in p && typeof p.amount === 'string' && /^[0-9]+$/.test(p.amount)) {
+        sum += BigInt(p.amount);
+      }
+    }
+    if (
+      s.count !== data.purchases.length ||
+      s.totalSpent !== sum.toString() ||
+      s.scope !== 'displayed'
+    ) {
+      return NextResponse.json(
+        { error: 'unverified spending summary' },
+        { status: 503, headers: PRIVATE_HEADERS },
+      );
+    }
+  }
+  if (
     minAmount !== undefined &&
     !data.purchases.every((row: unknown) => {
       if (!row || typeof row !== 'object' || !('amount' in row)) return false;

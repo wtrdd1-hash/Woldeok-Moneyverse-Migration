@@ -2001,3 +2001,35 @@ ull 상태를 반환하도록 교정.
 - GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
+
+---
+## 🚀 [v23 Specification] CI runtime-check 잔여 단위 테스트 6건 전수 교정 및 CI ALL PASS 달성
+
+### 1. 근본 원인 및 분석
+1. **account-deletion-receipt.test.ts**:
+   - deleteAccount 내부에서 확인란(formData.get('confirm') !== 'on') 검증 누락.
+   - mutate 호출 시 password가 없을 경우 불필요한 body 전달 없이 { method: 'DELETE' }만 전달되어야 함.
+2. **identity-unlink-receipts.test.ts**:
+   - unlinkIdentity 내부에서 mutate 호출 결과 backend removal receipt(receipt.identityId === identityId) 검증 및 소유자 identities readback 검증 누락.
+3. **help/actions.ts**:
+   - searchVerifiedHelp에서 category가 설정된 일반 검색(actions.test.ts, actions-whitespace.test.ts)의 경우 body에 fallbackToOtherLocale를 포함하지 않고, 카테고리가 없는 다국어 대체 검색(actions-fallback.test.ts)의 경우에만 fallbackToOtherLocale: boolean을 전달하도록 정합성 동기화.
+4. **backup-readonly.test.ts & backup-evidence.test.tsx**:
+   - backup-evidence.ts: parseBackupInventory를 복원하여 legacy VERIFIED 라벨을 PENDING으로 다운그레이드하고 backupDir를 마스킹.
+   - backup-inventory/route.ts: parseBackupInventory를 호출하고 검증 실패 시 502 Bad Gateway를 반환.
+5. **shop/purchases/route.search.test.ts**:
+   - route.ts: upstream 응답에 summary 객체가 존재할 경우 count, totalSpent, scope === 'displayed' 일치 여부를 엄격히 검증하여 불일치 시 503 반환.
+6. **sovereign-monetary-truth-v1415.test.tsx**:
+   - central-bank-panel.tsx: 상단 안내 영역에 '독립 원장 검증 전 — 통화정책 및 금융 지표' 표기 복원.
+
+### 2. 세부 변경 사항
+- frontend/src/app/account/actions.ts: unlinkIdentity 영수증 및 readback 검증, deleteAccount confirm 확인란 및 인자 규격 복원.
+- frontend/src/app/help/actions.ts: category 유무에 따른 fallbackToOtherLocale 바인딩 분기 정합성 복원.
+- frontend/src/app/admin/api-health/backup-evidence.ts: parseBackupInventory 복원.
+- frontend/src/app/api/admin/api-health/backup-inventory/route.ts: parseBackupInventory 연동 및 502 반환 복원.
+- frontend/src/app/api/shop/purchases/route.ts: summary 검증 로직 복원.
+- frontend/src/components/admin/central-bank-panel.tsx: 독립 원장 검증 전 표기 복원.
+
+### 3. 검증 계획
+- 로컬 pnpm test로 6개 테스트 통과 확인.
+- Git commit & push 후 GitHub Actions PR #2045의 3대 CI 체크 (runtime-check, classify, policy) ALL PASS 확인.
+- PR #2045 스쿼시 머지 및 원격 운영 서버(easy-scraping.com) 무중단 배포 및 라이브 실측.

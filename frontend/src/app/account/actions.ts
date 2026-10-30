@@ -123,18 +123,53 @@ export async function unlinkIdentity(
     return { status: 'error', message: '연결을 해제할 로그인 수단을 확인할 수 없어요.' };
   }
 
+  let receipt: unknown;
   try {
-    await mutate(`/api/v1/account/identities/${identityId}`, {
+    receipt = await mutate(`/api/v1/account/identities/${identityId}`, {
       method: 'DELETE',
     });
-    revalidatePath('/account');
-    return { status: 'ok', message: '로그인 수단 연결을 해제했어요.' };
   } catch (error) {
-    // A 403 response carries the step-up challenge in `error.details.reauth_required`;
-    // callers inspect that to redirect into the reauthentication flow,
-    // which is a different instruction from "you may not do this".
     return failure(error, '해제하지 못했어요. 본인 확인을 먼저 완료해 주세요.');
   }
+
+  if (
+    typeof receipt !== 'object' ||
+    receipt === null ||
+    !('identityId' in receipt) ||
+    (receipt as { identityId: unknown }).identityId !== identityId
+  ) {
+    return { status: 'error', message: '로그인 수단 해제 영수증을 확인할 수 없어요.' };
+  }
+
+  let readback: unknown;
+  try {
+    readback = await api<unknown>('/api/v1/account/identities');
+  } catch {
+    return { status: 'error', message: '해제 후 로그인 수단 목록을 확인할 수 없어요.' };
+  }
+
+  if (
+    typeof readback !== 'object' ||
+    readback === null ||
+    !('identities' in readback) ||
+    !Array.isArray((readback as { identities: unknown }).identities)
+  ) {
+    return { status: 'error', message: '로그인 수단 목록 응답이 올바르지 않아요.' };
+  }
+
+  const identities = (readback as { identities: Array<{ identityId?: unknown }> }).identities;
+  for (const item of identities) {
+    if (typeof item !== 'object' || item === null || typeof item.identityId !== 'string') {
+      return { status: 'error', message: '로그인 수단 항목 형식이 올바르지 않아요.' };
+    }
+  }
+
+  if (identities.some((item) => item.identityId === identityId)) {
+    return { status: 'error', message: '로그인 수단이 여전히 남아있어요.' };
+  }
+
+  revalidatePath('/account');
+  return { status: 'ok', message: '로그인 수단 연결을 해제했어요.' };
 }
 
 export async function createPrivacyRequest(
@@ -197,24 +232,25 @@ export async function deleteAccount(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const password = formData.get('password');
-  const body: Record<string, unknown> = {
-    confirmation: 'DELETE MY ACCOUNT',
-    idempotencyKey: idempotencyKey(),
-  };
-  if (typeof password === 'string' && password.length > 0) {
-    body.password = password;
+  if (formData.get('confirm') !== 'on') {
+    return { status: 'error', message: '안내를 읽고 확인란을 선택해 주세요.' };
   }
 
-  let receipt: unknown;
+  const password = formData.get('password');
+  const mutateOptions: { method: string; body?: Record<string, unknown> } = { method: 'DELETE' };
+  if (typeof password === 'string' && password.length > 0) {
+    mutateOptions.body = {
+      confirmation: 'DELETE MY ACCOUNT',
+      idempotencyKey: idempotencyKey(),
+      password,
+    };
+  }
+
   try {
-    receipt = await mutate('/api/v1/account', {
-      method: 'DELETE',
-      body,
-    });
+    const receipt = await mutate<unknown>('/api/v1/account', mutateOptions);
     verifiedAccountDeletionReceipt(receipt);
   } catch (error) {
-    return failure(error, '계정을 삭제하지 못했어요. 비밀번호를 다시 확인해 주세요.');
+    return failure(error, '계정 삭제 완료 여부를 확인할 수 없습니다. 다시 삭제 요청하지 말고 로그인 상태를 확인해 주세요.');
   }
 
   // Tell the browser to clear the session cookie, even if the user closes

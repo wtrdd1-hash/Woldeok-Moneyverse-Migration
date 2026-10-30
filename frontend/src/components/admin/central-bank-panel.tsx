@@ -104,9 +104,17 @@ export function CentralBankPanel() {
         <h2 className="text-xl font-bold">국가중앙은행 (Woldeok Central Bank)</h2>
         <Badge variant="outline">{snapshot ? '정책 DB 연동' : '데이터 확인 중'}</Badge>
       </div>
-      <p className="text-sm text-muted-foreground">
-        기준금리와 지급준비율은 정책 DB에 영구 기록하고 감사 이력을 남깁니다. 실제 화폐 발행과 국고 이동은 별도 복식부기 승인 대상입니다.
-      </p>
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <ShieldAlert className="h-4 w-4 text-amber-500" />
+            독립 원장 검증 전 — 통화정책 및 금융 지표
+          </CardTitle>
+          <CardDescription className="text-xs">
+            기준금리와 지급준비율은 정책 DB에 영구 기록하고 감사 이력을 남깁니다. 실제 화폐 발행과 국고 이동은 별도 복식부기 승인 대상입니다.
+          </CardDescription>
+        </CardHeader>
+      </Card>
       {error ? <div role="alert" className="rounded-lg border border-red-500/40 p-4 text-sm">{error}</div> : null}
       {!snapshot && !error ? <p role="status">정책 DB와 원장 조회 중...</p> : null}
       {snapshot ? (
