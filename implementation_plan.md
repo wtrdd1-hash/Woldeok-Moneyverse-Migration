@@ -1356,3 +1356,34 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   - `moneyverse-release-v1502-backend.service`: active (running)
   - `moneyverse-release-v1502-frontend.service`: active (running)
 
+
+---
+## 🚀 [v278 Specification] 원격 브랜치 43개 전수 통합·원격 브랜치 일괄 삭제 및 운영 실서버 승격 배포 완료 (+85, -0)
+
+### 1. 작업 개요 및 핵심 요구사항 달성
+- **43개 원격 브랜치 무손실 전수 통합**:
+  - hourly-a, hourly-b, hourly-c, docs/, uto/ 등 43개 원격 브랜치를 main에 100% 충돌 없이 병합 완료.
+  - 라우트 캐시 차단(oute.ts), 고객지원 검색/요약(support.controller.ts), 국고 SWF 거버넌스(uto-swf.service.ts)의 충돌을 완전 해소.
+- **원격 잔여 브랜치 전수 삭제**:
+  - git push origin --delete를 통해 43개 원격 브랜치를 완전히 소거하고, 원격에는 오직 origin/main과 origin/HEAD만 보존.
+- **운영 실서버(Production) 승격 배포 완료**:
+  - 불변 릴리즈 디렉터리: /srv/moneyverse-data/releases/prod-v2026.10.30.1515-0669f0f64fea
+  - 애플리케이션 소스 커밋 SHA:  669f0f64fea1c70235760d1949f90446b6964f7
+  - 심볼릭 링크 동기화: /srv/moneyverse-data/releases/production-current -> prod-v2026.10.30.1515-0669f0f64fea
+  - Systemd 운영 서비스:
+    - 백엔드: moneyverse-live-prod-backend.service (포트 3564, Active: running)
+    - 프론트엔드: moneyverse-live-prod-frontend.service (포트 3565, Active: running)
+
+### 2. 라이브 실측 검증 데이터
+- **라이브 백엔드 헬스체크 (Port 3564)**: curl http://127.0.0.1:3564/health -> {"status":"ok"}
+- **공개 도메인 헬스체크**: curl https://easy-scraping.com/health -> {"status":"ok"}
+- **공개 프론트엔드 버전/BUILD_ID**: curl https://easy-scraping.com/frontend-version -> {"id":"0669f0f64fea1c70235760d1949f90446b6964f7"} (신규 커밋 일치)
+- **주요 페이지 HTTP 응답 코드**:
+  - 메인 루트 (/): HTTP 200
+  - 지갑 (/wallet): HTTP 200
+  - 고객지원 (/support): HTTP 307 (비로그인 리다이렉트 정상 동작)
+  - 관리자 마켓 뉴스 (/admin/market/ai-news): HTTP 200
+- **디스크 사용량 (180.2 GB 정리 후 쾌적 유지)**:
+  - 루트 파티션 (/): 39GB / 99GB (42%, 여유 56GB)
+  - 데이터 디스크 (/srv/moneyverse-data): 67GB / 197GB (36%, 여유 121GB)
+  - 임시 파티션 (/tmp): 2.2GB / 6.7GB (32%, 여유 4.6GB)
