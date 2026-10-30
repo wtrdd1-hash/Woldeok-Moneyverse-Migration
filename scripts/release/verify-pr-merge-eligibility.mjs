@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const blockedLabel = /\b(?:hold|blocked|wip)\b|\bdo[-_ ]?not[-_ ]?merge\b/i;
-const blockedTitle = /(?:^|[\s\[(/:])(?:draft|hold|wip|do[-_ ]?not[-_ ]?merge)(?=$|[\s\])/:])/i;
+const blockedTitle = /(?:^|[^a-z0-9])(?:draft|hold|wip|do[-_ ]?not[-_ ]?merge)(?=$|[^a-z0-9])/i;
 
 export function verifyPrMergeEligibility(event) {
   const pr = event?.pull_request;

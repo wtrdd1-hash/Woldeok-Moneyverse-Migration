@@ -15,16 +15,24 @@
 - [x] Enable `enforce_admins` on main and independently re-read protection.
 - [x] RED tests for draft/HOLD PR admission and main-protection validation.
 - [x] GREEN minimal policy implementation and CI event coverage.
-- [ ] Recheck latest main and plan, review changes, run local/remote gates.
-- [ ] Draft/HOLD PR with evidence; no merge or Test/Production promotion.
+- [x] Recheck latest main and plan, review changes, run local/remote gates (failures retained).
+- [x] Draft/HOLD PR #2033 with evidence; no merge or Test/Production promotion.
 
 ## In progress
 
 GitHub main branch protection now reports `enforce_admins=true`, `strict=true`, required `classify`, `policy`, `runtime-check`. PR merge admission code pending TDD.
 
-## Finished
+## Finished — 2026-10-30 19:48 KST
 
-Pending.
+- Draft/HOLD PR #2033, branch `auto/hourly-b-v664-pr-merge-hold-gate-20261030-1935`; remote candidate created through GitHub connector because miniPC OAuth credential lacks workflow-write scope. Local and remote trees were compared byte-for-byte by tree SHA.
+- GitHub Actions exact remote candidate SHA verified the new policy step rejects the Draft/HOLD PR with `BLOCKED: draft or unknown readiness` (expected failure; NOT an overall CI pass).
+- Release regression tests 129/129 PASS; changed-source ESLint with `--no-ignore` PASS; CI YAML parsed by Prettier. Live main branch protection PASS: admins enforced, strict, classify/policy/runtime-check required.
+- Offline install PASS, typecheck PASS, backend build PASS, API contract 184 endpoints PASS, contract 41 PASS, database static 62 PASS/4 SKIP, security 17 PASS, production dependency audit no known vulnerabilities.
+- Full lint FAIL: one pre-existing frontend receipt-search test parse error (plus 1,043 warnings). Frontend build FAIL: Node 1024 MiB heap OOM. Backend full 2,653 PASS/126 FAIL/501 SKIP. Frontend full 2,701 PASS/55 FAIL. No real PostgreSQL execution or official Test exact-SHA E2E for this control-plane-only change. All required release gates NOT satisfied.
+- Additional P0 #1984 read-only finding: public Production version and current symlink advertise main `bf8d0d48...` while backend/frontend processes still run from deleted `prod-v2026.10.30.1515-0669f0f64fea` directories (started 09:52 KST). Test public version remains `c2129625...`. Version endpoint is not executable provenance; actor not attributed. Evidence posted to #1984 and #2031.
+- Residual governance: required PR reviews are not configured; owners can still alter protection settings. Independent audit provenance and protected review policy need separate approval.
+- No main merge, Test deployment, Production restart/promotion, shared DB or ledger mutation, other developer branch cleanup, or A/B/C/planning/QA reservation changes. RELEASE HOLD remains.
+
 
 ### Midpoint evidence — 2026-10-30 19:42 KST
 
