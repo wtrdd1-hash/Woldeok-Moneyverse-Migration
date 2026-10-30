@@ -227,7 +227,7 @@ export class NationalPensionRepository {
       const newVaultBalance = vaultRes.rows[0]?.balance_wld || '0';
 
       // 3. 연금 계좌 조회/생성
-      let accRes = await client.query<NationalPensionAccountRow>(
+      const accRes = await client.query<NationalPensionAccountRow>(
         `SELECT * FROM public.national_pension_accounts WHERE user_id = $1 FOR UPDATE`,
         [userId],
       );

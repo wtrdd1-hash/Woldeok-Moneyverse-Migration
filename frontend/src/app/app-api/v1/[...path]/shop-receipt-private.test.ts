@@ -15,28 +15,6 @@ describe('Android owner-private shop receipt search', () => {
       purchaseId: '00000000-0000-4000-8000-000000000001', amount: '9007199254740993', itemName: 'Blue Gloves', purchasedAt: '2026-10-30T00:00:00.000Z',
     }], summary: { count: 1, totalSpent: '9007199254740993', scope: 'displayed' } }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' } }));
 
-
-    const fetchSpy = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            purchases: [
-              {
-                purchaseId: 'owner-receipt',
-                amount: '9007199254740993',
-                itemName: 'Blue Gloves',
-              },
-            ],
-          }),
-          {
-            headers: {
-              'content-type': 'application/json',
-              'cache-control': 'public, max-age=86400',
-            },
-          },
-        ),
-    );
-
     vi.stubGlobal('fetch', fetchSpy);
     const request = new NextRequest(
       'https://easy-scraping.com/app-api/v1/shop/purchases?q=Blue%20Gloves',

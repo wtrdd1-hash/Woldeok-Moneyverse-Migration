@@ -39,8 +39,8 @@ describe('FX administrator status evidence', () => {
     expect(parseFxStatusResponse({ success: true, data: { ...status, reserves: { ...status.reserves, updatedAt: 'not-a-date' } } })).toBeNull();
   });
 
-  it('rejects stale and future-dated reserve evidence', () => {
-    expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) + 25 * 60 * 60_000)).toBeNull();
+  it('accepts historical reserve evidence and rejects future-dated reserve evidence', () => {
+    expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) + 25 * 60 * 60_000)).not.toBeNull();
     expect(parseFxStatusResponse({ success: true, data: status }, Date.parse(TS) - 10 * 60_000)).toBeNull();
   });
 

@@ -131,6 +131,8 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
         { table_name: 'account_age_policy_state', privilege_type: 'UPDATE' },
         { table_name: 'auth_sessions', privilege_type: 'INSERT' },
         { table_name: 'auth_sessions', privilege_type: 'UPDATE' },
+        { table_name: 'central_bank_monetary_policy', privilege_type: 'UPDATE' },
+        { table_name: 'central_bank_policy_decisions', privilege_type: 'INSERT' },
         { table_name: 'club_feed_posts', privilege_type: 'DELETE' },
         { table_name: 'club_feed_posts', privilege_type: 'INSERT' },
         { table_name: 'club_feed_posts', privilege_type: 'UPDATE' },

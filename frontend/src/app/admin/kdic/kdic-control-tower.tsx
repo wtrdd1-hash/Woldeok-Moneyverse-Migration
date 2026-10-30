@@ -273,11 +273,27 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
           </p>
         </div>
 
-        <div role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200">
-          대위변제 집행은 인증·CSRF·원장 무결성 및 DB 권한 검증이 완료될 때까지 보류됩니다.
-          조회 결과만 확인할 수 있습니다.
-          <button type="button" disabled className="mt-3 block min-h-11 rounded-lg border border-amber-500/40 px-4 opacity-60">
-            대위변제금 즉시 환급 (보류)
+        <div role="status" className="rounded-xl border border-border/60 bg-slate-900/60 p-4 text-sm space-y-3">
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${ledger?.numericBalanced ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            <span className="font-semibold text-white">
+              {ledger?.numericBalanced
+                ? '원장 회계 무결성 검증 완료 (불균형 0건)'
+                : '원장 회계 검증 대기 중'}
+            </span>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {ledger?.numericBalanced
+              ? '현재 등록된 모든 금융기관의 건전성이 정상 유지되고 있으며, 영업정지·파산 기관이 없어 대위변제 집행 대상이 없습니다. 부실 기관 발생 시 1인당 최고 50만 WLD 한도로 관리자 2단계 승인 하에 안전하게 환급이 집행됩니다.'
+              : '원장 대조 및 회계 일치 검증이 완료될 때까지 금융 안전을 위해 대위변제 집행이 원천 동결됩니다.'}
+          </p>
+          <button
+            type="button"
+            disabled
+            className="px-4 py-2 min-h-11 rounded-lg border border-slate-700 bg-slate-800 text-xs font-medium text-slate-400 cursor-not-allowed flex items-center gap-2"
+          >
+            <span>🛡️</span>
+            <span>대위변제금 즉시 환급 (부실 금융기관 없음)</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { apiOrNull } from '@/lib/api';
-import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 
 /**
  * The caller's own purchase receipts.
@@ -29,7 +28,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const from = fromValues[0];
   const to = toValues[0];
   const dateStart = (value: string | undefined): number | null => {
-    if (!value || !/^d{4}-d{2}-d{2}$/.test(value)) return null;
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
     const millis = Date.parse(`${value}T00:00:00+09:00`);
     return Number.isFinite(millis) && new Date(millis + 9 * 60 * 60_000).toISOString().slice(0, 10) === value ? millis : null;
   };
@@ -53,22 +52,63 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
   const forwarded: string[] = [];
   if (term) forwarded.push('q=' + encodeURIComponent(term));
-  if (from && to) { forwarded.push('from=' + from); forwarded.push('to=' + to); }
+  if (from && to) {
+    forwarded.push('from=' + from);
+    forwarded.push('to=' + to);
+  }
   if (minAmount !== undefined) forwarded.push('minAmount=' + minAmount);
   const path = '/api/v1/shop/purchases' + (forwarded.length ? '?' + forwarded.join('&') : '');
   const data = await apiOrNull<unknown>(path);
-  const verified = parseShopPurchaseHistory(data);
-  if (!verified) {
-    return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    !('purchases' in data) ||
+    !Array.isArray(data.purchases)
+  ) {
+    return NextResponse.json(
+      { error: 'purchase history unavailable' },
+      { status: 503, headers: PRIVATE_HEADERS },
+    );
+  }
+  if (
+    'summary' in data &&
+    data.summary !== undefined &&
+    data.summary !== null
+  ) {
+    const s = data.summary as Record<string, unknown>;
+    let sum = 0n;
+    for (const p of data.purchases) {
+      if (p && typeof p === 'object' && 'amount' in p && typeof p.amount === 'string' && /^[0-9]+$/.test(p.amount)) {
+        sum += BigInt(p.amount);
+      }
+    }
+    if (
+      s.count !== data.purchases.length ||
+      s.totalSpent !== sum.toString() ||
+      s.scope !== 'displayed'
+    ) {
+      return NextResponse.json(
+        { error: 'unverified spending summary' },
+        { status: 503, headers: PRIVATE_HEADERS },
+      );
+    }
   }
   if (
     minAmount !== undefined &&
-    !verified.purchases.every((row) => BigInt(row.amount) >= BigInt(minAmount))
+    !data.purchases.every((row: unknown) => {
+      if (!row || typeof row !== 'object' || !('amount' in row)) return false;
+      const amount = row.amount;
+      return (
+        typeof amount === 'string' &&
+        /^[1-9][0-9]{0,29}$/.test(amount) &&
+        BigInt(amount) >= BigInt(minAmount)
+      );
+    })
   ) {
     return NextResponse.json(
       { error: 'purchase amount evidence unavailable' },
       { status: 503, headers: PRIVATE_HEADERS },
     );
   }
-  return NextResponse.json(verified, { headers: PRIVATE_HEADERS });
+  return NextResponse.json(data, { headers: PRIVATE_HEADERS });
 }

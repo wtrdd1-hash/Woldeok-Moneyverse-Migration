@@ -20,7 +20,7 @@ import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TakeButton } from './work-forms';
 import { dailyQuotaLabel } from './work-quota';
-import { filterWorkTasks, filterWorkTasksByMinReward } from './work-search';
+import { filterRecommendedWorkTasks, filterWorkTasks, filterWorkTasksByMinReward } from './work-search';
 import {
   boardOrder,
   difficultyLabel,
@@ -77,6 +77,7 @@ export function CareerTasksBoard({
 
   const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [recommendedOnly, setRecommendedOnly] = useState(false);
   const [minReward, setMinReward] = useState('');
 
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
@@ -85,7 +86,7 @@ export function CareerTasksBoard({
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
   const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
-  const displayTasks = boardOrder(filterWorkTasksByMinReward(filterWorkTasks(scopedTasks, searchQuery), minReward), activeJobType);
+  const displayTasks = boardOrder(filterWorkTasksByMinReward(filterWorkTasks(filterRecommendedWorkTasks(scopedTasks, recommendedOnly), searchQuery), minReward), activeJobType);
 
   return (
     <div className="grid gap-4 w-full max-w-full min-w-0">
@@ -139,7 +140,33 @@ export function CareerTasksBoard({
           )}
         </div>
 
+        <Button
+          type="button"
+          variant={recommendedOnly ? 'default' : 'outline'}
+          size="sm"
+          aria-pressed={recommendedOnly}
+          onClick={() => setRecommendedOnly((current) => !current)}
+          className="self-start min-h-9 gap-2 text-xs"
+        >
+          <Star aria-hidden="true" className="size-3.5" />
+          {isEn ? "Today's picks only" : '오늘의 추천만 보기'}
+        </Button>
         <form action="/work" method="get" className="flex flex-col gap-2 sm:flex-row sm:items-end min-w-0">
+          <label htmlFor="work-difficulty" className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
+            <span>{isEn ? 'Difficulty' : '업무 난이도'}</span>
+            <select
+              key={selectedDifficulty ?? 'all'}
+              id="work-difficulty"
+              name="difficulty"
+              defaultValue={selectedDifficulty ?? ''}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{isEn ? 'All difficulties' : '전체 난이도'}</option>
+              {[1, 2, 3, 4, 5].map((level) => (
+                <option key={level} value={String(level)}>{difficultyLabel(level, locale)}</option>
+              ))}
+            </select>
+          </label>
           <label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
             <span>{isEn ? 'Maximum task duration' : '최대 업무 수행시간'}</span>
             <select
@@ -210,7 +237,11 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
+            selectedDifficulty
+              ? isEn
+                ? 'No work tasks match your search.'
+                : '검색 조건에 맞는 업무가 없어요.'
+              : searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'

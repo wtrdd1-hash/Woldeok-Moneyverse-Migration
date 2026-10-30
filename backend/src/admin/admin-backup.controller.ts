@@ -91,7 +91,7 @@ export class AdminBackupController {
   @Post('trigger')
   @ApiOperation({ summary: 'Manual backup disabled pending independently verified safe restore and capacity' })
   async triggerBackup(): Promise<never> {
-    // Do not spawn the legacy detached script. It does not provide a durable
+    // Do not invoke the legacy detached script. It does not provide a durable
     // backup/restore receipt, safe free-space preflight or operator approval.
     throw new ServiceUnavailableException({
       code: 'BACKUP_RESTORE_PROOF_REQUIRED',

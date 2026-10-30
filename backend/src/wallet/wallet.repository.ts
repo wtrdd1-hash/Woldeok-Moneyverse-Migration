@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 
@@ -563,7 +563,7 @@ export class PostgresWalletRepository {
       `SELECT display_name FROM public.member_profiles WHERE user_id = $1::uuid`,
       [data.senderId],
     );
-    const senderName = sender?.display_name ?? '익명의 머니버스 시민';
+    const senderName = sender?.display_name ?? '?듬챸??癒몃땲踰꾩뒪 ?쒕?';
 
     await queryOne(
       this.pool,
@@ -571,10 +571,11 @@ export class PostgresWalletRepository {
        VALUES ($1::uuid, 'TRANSACTIONAL', $2, $3, '/wallet')`,
       [
         data.receiverId,
-        `💸 [P2P 송금] ${senderName}님으로부터 ${data.amount} WLD가 입금되었습니다!`,
-        `${data.message ? `메모: "${data.message}"` : '안전하게 송금되었습니다.'} ${data.sticker ? `(스티커: ${data.sticker})` : ''}`,
+        `?뮯 [P2P ?↔툑] ${senderName}?섏쑝濡쒕???${data.amount} WLD媛 ?낃툑?섏뿀?듬땲??`,
+        `${data.message ? `硫붾え: "${data.message}"` : '?덉쟾?섍쾶 ?↔툑?섏뿀?듬땲??'} ${data.sticker ? `(?ㅽ떚而? ${data.sticker})` : ''}`,
       ],
     );
   }
 }
+
 

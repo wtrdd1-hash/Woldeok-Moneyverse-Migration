@@ -4,7 +4,7 @@ import { requireAdminConsole } from '@/lib/session';
 import { parseBackupInventory } from '@/app/admin/api-health/backup-evidence';
 
 export const dynamic = 'force-dynamic';
-const HEADERS = { 'Cache-Control': 'private, no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow' };
+const HEADERS = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' };
 
 /** Read-only Next gateway: no browser-to-Nest token and no manual backup POST. */
 export async function GET() {
@@ -14,7 +14,11 @@ export async function GET() {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401, headers: HEADERS });
   }
   try {
-    const inventory = parseBackupInventory(await api<unknown>('/api/v1/admin/backups'));
+    const raw = await api<unknown>('/api/v1/admin/backups');
+    if (raw && typeof raw === 'object' && 'totalBackups' in raw && typeof (raw as { totalBackups?: unknown }).totalBackups === 'number' && ((raw as { totalBackups: number }).totalBackups < 0)) {
+      return NextResponse.json({ error: 'backup inventory unavailable' }, { status: 503, headers: HEADERS });
+    }
+    const inventory = parseBackupInventory(raw);
     if (inventory === null) {
       return NextResponse.json({ error: 'invalid backup inventory evidence' }, { status: 502, headers: HEADERS });
     }

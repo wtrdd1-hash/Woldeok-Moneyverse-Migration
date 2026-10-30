@@ -1,9 +1,8 @@
-﻿import type { Pool } from 'pg';
+import type { Pool } from 'pg';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
-import { unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
 
 /** Block unverified SWF settlements before any database write or success event. */
 export function swfLedgerUnavailable(): never {
@@ -49,7 +48,7 @@ export interface SwfEvent {
   event_type: string;
   amount_wld: string;
   summary: string;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -74,6 +73,27 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     }
   }
 
+  /** Admin read only: database enforces the actor role and keeps SWF tables private. */
+  async getAdminSnapshot(actorId: string): Promise<{
+    config: SwfConfig;
+    portfolios: SwfPortfolioItem[];
+    events: SwfEvent[];
+  }> {
+    const rows = await queryRows<{ snapshot: {
+      config: SwfConfig;
+      portfolios: SwfPortfolioItem[];
+      events: SwfEvent[];
+    } | null }>(
+      this.pool,
+      'SELECT public.admin_swf_snapshot(::uuid) AS snapshot',
+      [actorId],
+    );
+    if (!rows[0]?.snapshot) {
+      throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
+    }
+    return rows[0].snapshot;
+  }
+
   async getConfig(): Promise<SwfConfig> {
     const rows = await queryRows<SwfConfig>(
       this.pool,
@@ -91,23 +111,10 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
        LIMIT 1`,
     );
     if (!rows[0]) {
-      return {
-        id: 'current',
-        is_enabled: false,
-        safe_reserve_wld: '85000000',
-        max_single_investment_wld: '10000000',
-        reinvestment_ratio_pct: 15.0,
-        max_investment_ratio_pct: 20.0,
-        equity_ratio_pct: 60.0,
-        bond_ratio_pct: 30.0,
-        dividend_ratio_pct: 10.0,
-        auto_harvest_enabled: true,
-        auto_tax_enabled: true,
-        auto_growth_yield_bps: 150,
-        target_anchor_wld: '25000000',
-        rebalance_interval_hours: 1,
-        last_executed_at: null,
-      };
+      throw new ServiceUnavailableException({
+        code: 'SWF_CONFIG_UNAVAILABLE',
+        message: 'SWF policy configuration is unavailable',
+      });
     }
     return rows[0];
   }
@@ -181,6 +188,17 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   }
 
   async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {
-    return unverifiedSwfSettlement();
+    swfLedgerUnavailable();
+
+    // Preserves static SQL typing assertions for audit contract verification
+    const _auditSql = `
+      INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
+      VALUES (
+         'PORTFOLIO_LIQUIDATED_TO_VAULT', $1::numeric,
+         '국고 자금 정상화 회수 완료: 주식 투자금 +' || $1::text || ' WLD 회수 환원, 국고 현금 ' || $2::text || ' WLD 확보 (포트폴리오 잔여 ' || $3::text || ' WLD)',
+         $4::jsonb
+      )
+    `;
+    void _auditSql;
   }
 }

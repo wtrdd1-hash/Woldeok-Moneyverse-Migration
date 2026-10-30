@@ -53,7 +53,9 @@ export default async function AccountSecurityPage({
   const parsedCategory = parseSecurityEventCategory(params.category);
   const categoryInvalid = parsedCategory === null;
   const eventCategory = parsedCategory ?? 'all';
-  const eventPath = `/api/v1/account/security/events${eventCategory === 'all' ? '' : `?category=${eventCategory}`}`;
+  const eventPath = eventCategory === 'all'
+    ? '/api/v1/account/security/events'
+    : `/api/v1/account/security/events?category=${eventCategory}`;
   const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
     apiOrNull<unknown>('/api/v1/account/security/sessions'),
     apiOrNull<unknown>('/api/v1/account/identities'),

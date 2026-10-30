@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   Controller,
@@ -23,6 +23,7 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryBondService } from './treasury-bond.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')
@@ -109,15 +110,11 @@ export class PublicTreasuryBondController {
   }
 
   @Post('subscribe')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '국채 직접 청약 매수 (덕지갑 차감 -> 국채 발행)' })
-  async subscribeBond(
-    @Req() req: RequestWithSession,
-    @Body('bondId') bondId: string,
-    @Body('units') units: number,
-  ) {
-    const userId = requireUserId(req);
-    return this.service.subscribeBond(userId, bondId, Number(units));
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiResponse({ status: 503, description: 'Bond subscription is held until balanced ledger settlement is certified' })
+  @ApiOperation({ summary: 'Bond subscription (ledger safety hold)' })
+  async subscribeBond() {
+    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
   }
 
   @Get('my-repo-loans')

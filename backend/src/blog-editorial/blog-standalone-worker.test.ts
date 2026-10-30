@@ -35,7 +35,7 @@ describe('standalone verified blog job and local two-hour catch-up', () => {
     vi.stubEnv('BLOG_TWO_HOUR_PUBLISHER_ENABLED', 'true');
     const query = vi.fn().mockImplementation(async (sql: string) => {
       if (sql.includes('pg_try_advisory_lock')) return {rows:[{locked:true}]};
-      if (sql.includes('FROM public.blog_verified_articles WHERE period_key')) return {rows:[{receipt:'r',content_digest:'d',status:'PUBLISHED'}]};
+      if (sql.includes('blog_verified_period_receipt') || sql.includes('FROM public.blog_verified_articles WHERE period_key')) return {rows:[{receipt:'r',content_digest:'d',status:'PUBLISHED'}]};
       if (sql.includes('pg_advisory_unlock')) return {rows:[{pg_advisory_unlock:true}]};
       throw Error('unexpected query');
     });

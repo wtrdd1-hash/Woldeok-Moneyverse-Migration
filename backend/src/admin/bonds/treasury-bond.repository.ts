@@ -1,7 +1,9 @@
-import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+﻿import { BadRequestException, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
+import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -233,123 +235,13 @@ export class TreasuryBondRepository {
   }
 
   async subscribeBond(
-    userId: string,
-    bondId: string,
-    units: number,
-  ): Promise<{
-    holdingId: string;
-    totalPriceWld: string;
-    maturityAt: string;
-  }> {
-    if (!Number.isSafeInteger(units) || units <= 0) {
-      throw new BadRequestException('청약 좌수는 1 이상의 정수여야 합니다.');
-    }
-
-    const client: PoolClient = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      const bondRes = await client.query<TreasuryBondRow>(`
-        SELECT * FROM public.treasury_bonds WHERE id = $1 FOR UPDATE
-      `, [bondId]);
-      const bond = bondRes.rows[0];
-      if (!bond) throw new NotFoundException('존재하지 않는 국채입니다.');
-      if (bond.status !== 'OPEN_SUBSCRIPTION' && bond.status !== 'TRADING') {
-        throw new ConflictException('현재 청약이 마감되었거나 일시 정지된 국채입니다.');
-      }
-      if (BigInt(bond.available_units) < BigInt(units)) {
-        throw new ConflictException(`청약 잔여 좌수가 부족합니다. (잔여: ${bond.available_units}좌)`);
-      }
-
-      const parValue = BigInt(bond.par_value_wld);
-      const totalPrice = parValue * BigInt(units);
-
-      // 계좌 확인 및 잔액 조회
-      const accountId = await this.ensureUserCashAccount(client, userId);
-      const balRes = await client.query<{ available_amount: string }>(`
-        SELECT available_amount::text FROM public.account_balances WHERE account_id = $1 FOR UPDATE
-      `, [accountId]);
-      const currentBal = BigInt(balRes.rows[0]?.available_amount ?? '0');
-      if (currentBal < totalPrice) {
-        throw new ConflictException('국채 청약에 필요한 WLD 잔액이 부족합니다.');
-      }
-
-      // 잔액 차감
-      await client.query(`
-        UPDATE public.account_balances
-        SET available_amount = available_amount - $1, updated_at = now()
-        WHERE account_id = $2
-      `, [totalPrice.toString(), accountId]);
-
-      // 중앙 국고(VAULT_MAIN) 자금 증액
-      const vaultRes = await client.query<{ id: string; balance_wld: string }>(`
-        SELECT id, balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN' FOR UPDATE
-      `);
-      const mainVault = vaultRes.rows[0];
-      if (mainVault) {
-        const prevBal = BigInt(mainVault.balance_wld);
-        const nextBal = prevBal + totalPrice;
-
-        await client.query(`
-          UPDATE public.system_treasury_vaults
-          SET balance_wld = $1, updated_at = now()
-          WHERE id = $2
-        `, [nextBal.toString(), mainVault.id]);
-
-        await client.query(`
-          INSERT INTO public.system_treasury_ledger (
-            vault_id, tx_type, amount_wld, actor_id, reason, balance_before, balance_after
-          ) VALUES (
-            $1, 'TAX_COLLECTION', $2, $3, $4, $5, $6
-          )
-        `, [
-          mainVault.id,
-          totalPrice.toString(),
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId) ? userId : null,
-          `[국채 청약 자금 조달] ${bond.name} (${bond.symbol}) ${units}좌 청약 국고 귀속`,
-          prevBal.toString(),
-          nextBal.toString(),
-        ]);
-      }
-
-      // 국채 발행 잔여량 차감
-      await client.query(`
-        UPDATE public.treasury_bonds
-        SET
-          available_units = available_units - $1,
-          total_funded_wld = total_funded_wld + $2,
-          updated_at = now()
-        WHERE id = $3
-      `, [units, totalPrice.toString(), bondId]);
-
-      // 국채 보유 원장 등록
-      const maturityInterval = `${bond.maturity_hours} hours`;
-      const holdingRes = await client.query<{ id: string; maturity_at: string }>(`
-        INSERT INTO public.treasury_bond_holdings (
-          user_id, bond_id, units, purchase_price_total_wld, accrued_interest_wld, maturity_at
-        ) VALUES (
-          $1, $2, $3, $4, 0, now() + interval '${maturityInterval}'
-        ) RETURNING id, maturity_at::text
-      `, [userId, bondId, units, totalPrice.toString()]);
-
-      await client.query('COMMIT');
-
-      const created = holdingRes.rows[0];
-      if (!created) throw new Error('국채 보유 원장 등록에 실패했습니다.');
-
-      return {
-        holdingId: created.id,
-        totalPriceWld: totalPrice.toString(),
-        maturityAt: created.maturity_at,
-      };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    _userId: string,
+    _bondId: string,
+    _units: number,
+  ): Promise<{ holdingId: string; totalPriceWld: string; maturityAt: string }> {
+    // Defense in depth: internal callers must not bypass the HTTP safety hold.
+    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
   }
-
   async createRepoLoan(
     _userId: string,
     _holdingId: string,
@@ -381,139 +273,10 @@ export class TreasuryBondRepository {
     holdingsProcessed: number;
     maturedCount: number;
   }> {
-    const client: PoolClient = await this.pool.connect();
-    let totalCoupons = BigInt(0);
-    let totalMaturities = BigInt(0);
-    let holdingsProcessed = 0;
-    let maturedCount = 0;
-
-    try {
-      await client.query('BEGIN');
-
-      const holdings = await client.query<{
-        holding_id: string;
-        user_id: string;
-        bond_id: string;
-        bond_symbol: string;
-        bond_name: string;
-        units: string;
-        par_value_wld: string;
-        hourly_coupon_rate_bps: number;
-        auto_rollover: boolean;
-        collateral_locked: boolean;
-        maturity_at: string;
-        maturity_hours: number;
-        is_matured: boolean;
-      }>(`
-        SELECT
-          h.id AS holding_id,
-          h.user_id,
-          h.bond_id,
-          b.symbol AS bond_symbol,
-          b.name AS bond_name,
-          h.units::text,
-          b.par_value_wld::text,
-          b.hourly_coupon_rate_bps,
-          b.maturity_hours,
-          h.auto_rollover,
-          h.collateral_locked,
-          h.maturity_at::text,
-          (h.maturity_at <= now()) AS is_matured
-        FROM public.treasury_bond_holdings h
-        JOIN public.treasury_bonds b ON b.id = h.bond_id
-        WHERE h.status = 'HOLDING'
-        FOR UPDATE
-      `);
-
-      for (const h of holdings.rows) {
-        holdingsProcessed++;
-        const units = BigInt(h.units);
-        const par = BigInt(h.par_value_wld);
-        const principal = units * par;
-
-        // 쿠폰 이자
-        const coupon = (principal * BigInt(h.hourly_coupon_rate_bps)) / BigInt(10000);
-
-        if (coupon > BigInt(0)) {
-          totalCoupons += coupon;
-
-          const accountId = await this.ensureUserCashAccount(client, h.user_id);
-          await client.query(`
-            UPDATE public.account_balances
-            SET available_amount = available_amount + $1, updated_at = now()
-            WHERE account_id = $2
-          `, [coupon.toString(), accountId]);
-
-          await client.query(`
-            UPDATE public.treasury_bond_holdings
-            SET accrued_interest_wld = accrued_interest_wld + $1, updated_at = now()
-            WHERE id = $2
-          `, [coupon.toString(), h.holding_id]);
-
-          await client.query(`
-            INSERT INTO public.treasury_bond_coupon_logs (
-              holding_id, user_id, bond_id, event_type, amount_wld
-            ) VALUES (
-              $1, $2, $3, 'COUPON_INTEREST', $4
-            )
-          `, [h.holding_id, h.user_id, h.bond_id, coupon.toString()]);
-        }
-
-        // 만기 도달 시 상환 또는 자동 롤오버
-        if (h.is_matured) {
-          maturedCount++;
-
-          if (h.auto_rollover && !h.collateral_locked) {
-            // 자동 재투자: 만기 연장
-            const rolloverInterval = `${h.maturity_hours} hours`;
-            await client.query(`
-              UPDATE public.treasury_bond_holdings
-              SET maturity_at = now() + interval '${rolloverInterval}', updated_at = now()
-              WHERE id = $1
-            `, [h.holding_id]);
-          } else {
-            // 원금 상환
-            totalMaturities += principal;
-            const accountId = await this.ensureUserCashAccount(client, h.user_id);
-            await client.query(`
-              UPDATE public.account_balances
-              SET available_amount = available_amount + $1, updated_at = now()
-              WHERE account_id = $2
-            `, [principal.toString(), accountId]);
-
-            await client.query(`
-              UPDATE public.treasury_bond_holdings
-              SET status = 'MATURED', updated_at = now()
-              WHERE id = $1
-            `, [h.holding_id]);
-
-            await client.query(`
-              INSERT INTO public.treasury_bond_coupon_logs (
-                holding_id, user_id, bond_id, event_type, amount_wld
-              ) VALUES (
-                $1, $2, $3, 'MATURITY_REDEMPTION', $4
-              )
-            `, [h.holding_id, h.user_id, h.bond_id, principal.toString()]);
-          }
-        }
-      }
-
-      await client.query('COMMIT');
-
-      return {
-        couponsDistributedWld: totalCoupons.toString(),
-        maturitiesRedeemedWld: totalMaturities.toString(),
-        holdingsProcessed,
-        maturedCount,
-      };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    // Fail before obtaining a DB client. Legacy code credited USER_CASH without
+    // economy_post_transaction postings and could replay coupons each invocation.
+    throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
   }
-
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number): Promise<boolean> {
     const params: (string | number)[] = [status, bondId];
     let query = `UPDATE public.treasury_bonds SET status = $1, updated_at = now()`;

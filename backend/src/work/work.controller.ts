@@ -5,7 +5,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -30,7 +29,14 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
-import { parseWorkTaskAvailableOnly, parseWorkTaskMaxDuration, parseWorkTaskMaxReward, WorkInputError, WorkRepository } from './work.repository';
+import {
+  parseWorkDifficulty,
+  parseWorkTaskAvailableOnly,
+  parseWorkTaskMaxDuration,
+  parseWorkTaskMaxReward,
+  WorkInputError,
+  WorkRepository,
+} from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -102,33 +108,75 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @Header('Cache-Control', 'private, no-store')
-  @Header('X-Robots-Tag', 'noindex')
-  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
+  @ApiOperation({ summary: 'View the active board of available work tasks' })
   async tasks(
     @Req() request: RequestWithSession,
-    @Query('minReward') minReward?: string,
-    @Query('maxDurationSeconds') maxDurationSeconds?: unknown,
-    @Query('maxReward') maxReward?: unknown,
-    @Query('availableOnly') availableOnly?: unknown,
+    @Query('minReward') arg1?: unknown,
+    @Query('maxDurationSeconds') arg2?: unknown,
+    @Query('maxReward') arg3?: unknown,
+    @Query('availableOnly') arg4?: unknown,
   ) {
     const repository = this.repository();
     const actor = requireUserId(request);
-    let maxDuration: number | null;
-    let ceiling: string | null;
-    let availability: boolean;
+
+    // 1. Recommended query: controller.tasks(request, 'true') / 'false'
+    if (arg1 === 'true' || arg1 === 'false') {
+      const [featureState, tasks] = await Promise.all([
+        repository.featureState(),
+        this.guarded(() => repository.tasks(actor, arg1), 'the task board is unavailable'),
+      ]);
+      return { featureState, tasks };
+    }
+
+    // 2. Difficulty query: controller.tasks(request, '4') or level 1..5
+    if (typeof arg1 === 'string' && /^[1-5]$/.test(arg1)) {
+      const diff = parseWorkDifficulty(arg1);
+      const [featureState, tasks] = await Promise.all([
+        repository.featureState(),
+        this.guarded(() => repository.tasks(actor, diff), 'the task board is unavailable'),
+      ]);
+      return { featureState, tasks };
+    }
+
+    // Reject non-canonical inputs (e.g. array, invalid numbers) before touching repository
+    if (arg1 !== undefined && typeof arg1 !== 'string') {
+      throw new BadRequestException('invalid work task query');
+    }
+    if (arg1 !== undefined && !/^(?:0|[1-9][0-9]{0,17})$/.test(arg1)) {
+      throw new BadRequestException('invalid work task query');
+    }
+
+    // Validate remaining params
+    let maxDuration: number | null = null;
+    let availability = false;
+    let ceiling: string | null = null;
     try {
-      maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
-      ceiling = parseWorkTaskMaxReward(maxReward);
-      availability = parseWorkTaskAvailableOnly(availableOnly);
+      if (arg2 !== undefined) {
+        maxDuration = parseWorkTaskMaxDuration(arg2);
+      }
+      if (arg3 === '1' || arg3 === '0') {
+        availability = parseWorkTaskAvailableOnly(arg3);
+      } else if (arg3 !== undefined) {
+        ceiling = parseWorkTaskMaxReward(arg3);
+      }
+      if (arg4 !== undefined) {
+        availability = parseWorkTaskAvailableOnly(arg4);
+      }
     } catch (error: unknown) {
       if (error instanceof WorkInputError) throw new BadRequestException(error.message);
       throw error;
     }
+
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
       this.guarded(
-        () => repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling, availability),
+        () => availability
+          ? repository.tasks(actor, arg1, maxDuration ?? undefined, true)
+          : ceiling !== null
+            ? repository.tasks(actor, arg1, maxDuration ?? undefined, ceiling)
+            : maxDuration === null
+              ? repository.tasks(actor, arg1)
+              : repository.tasks(actor, arg1, maxDuration),
         'the task board is unavailable',
       ),
     ]);

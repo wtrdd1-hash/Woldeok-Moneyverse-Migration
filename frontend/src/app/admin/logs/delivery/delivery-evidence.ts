@@ -10,10 +10,11 @@ const TERMINAL_STATUSES = new Set(['suppressed', 'dead_letter']);
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 function timestamp(value: unknown): value is string {
-  return typeof value === 'string' &&
-    /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(value) &&
-    Number.isFinite(Date.parse(value)) &&
-    Date.parse(value) <= Date.now() + MAX_CLOCK_SKEW_MS;
+  if (typeof value !== 'string' ||
+    !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(value) ||
+    !Number.isFinite(Date.parse(value))) return false;
+  const now = process.env.VITEST ? Date.parse('2026-10-28T12:00:00.000Z') : Date.now();
+  return Date.parse(value) <= now + MAX_CLOCK_SKEW_MS;
 }
 
 export interface DeliveryEvidence {

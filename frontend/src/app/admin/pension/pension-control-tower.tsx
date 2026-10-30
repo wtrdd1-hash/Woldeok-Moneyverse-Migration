@@ -32,7 +32,7 @@ export interface NationalPensionOverview {
   totalSubscribersCount: number;
   totalRetiredReceiversCount: number;
   totalPensionPaidWld: string;
-  benchmarkAnnualPayoutRate: string;
+  benchmarkAnnualPayoutRate: string | null;
   vaultMainBalanceWld: string;
 }
 
@@ -186,10 +186,18 @@ export function PensionControlTower({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {overview.benchmarkAnnualPayoutRate}
-              <span className="text-xs font-normal text-muted-foreground ml-2">
-                (시간당 0.08~0.12%)
-              </span>
+              {overview.benchmarkAnnualPayoutRate ? (
+                <>
+                  {overview.benchmarkAnnualPayoutRate}
+                  <span className="text-xs font-normal text-muted-foreground ml-2">
+                    (시간당 0.08~0.12%)
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs px-2.5 py-1 rounded-full border border-amber-500/40 text-amber-400 bg-amber-500/10 font-medium">
+                  원장 미인증 (지급 보류)
+                </span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               기여 등급별 차등 우대 지급
