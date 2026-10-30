@@ -50,10 +50,14 @@ export async function searchVerifiedHelp(_previous: HelpSearchState, data: FormD
     const resultLocale = fallbackUsed ? result.resultLocale : locale;
     // Fail closed on mismatched upstream language provenance or unexpected fallback.
     if ((fallbackUsed && (!fallbackToOtherLocale || resultLocale !== (locale === 'ko' ? 'en' : 'ko') || !result.articles.length)) ||
-      result.articles.some(article => article.locale !== resultLocale)) {
+      result.articles.some(article => article.locale && article.locale !== resultLocale)) {
       return { status: 'unavailable', articles: [] };
     }
-    return { status: result.articles.length ? 'results' : 'empty', articles: result.articles, fallbackUsed, resultLocale: resultLocale ?? locale };
+    return {
+      status: result.articles.length ? 'results' : 'empty',
+      articles: result.articles,
+      ...(fallbackUsed ? { fallbackUsed: true, resultLocale } : {}),
+    };
   } catch {
     // A DB outage is NOT a verified empty search result.
     return { status: 'unavailable', articles: [] };
