@@ -11,8 +11,14 @@
 ## IN PROGRESS
 - Worktree `auto/hourly-a-20261030-1425-notification-read-filter` created from clean main. Tests first, implementation second.
 
-## FINISHED
-- Pending verification. Do not infer release readiness from targeted tests.
+## FINISHED — Draft / release HOLD
+- First implementation commit `f4a97786c2e5a607087be1a0a83c56ce3490c1aa`; Draft PR #2006.
+- Exact SHA local API contract, typecheck, lint, build and targeted 18+43 tests PASS. Full suites FAIL (119 backend / 53 frontend), identical failure names to QA v1389.
+- GitHub exact-SHA CI classify FAIL and release-input FAIL: generated `docs/mobile-api-contract.json` is `UNKNOWN` under current classifier. Existing separate repair Draft #1986 owns this scope; do not duplicate or merge around it.
+- Read-only official Test `/api/version` is `c2129625aa6629c616fb31ce790950618b8d92b2` (not candidate); Treasury overview HTTP 200. Production `/api/version` is `94d38f47603e99aabc42fc8f292b89441afb9663`, Treasury HTTP 503. No authenticated exact-SHA E2E.
+- Fresh canonical PG migration schema lacks `in_app_notifications`; evidence added to existing P0/P1 issue #1693. No user data read or mutation.
+- 15 remote branches/13 PRs at start; finish counts recorded in external release log. No branch deleted, no main merge, no Test/Production deploy, no rollback. Preserve all unique work.
+
 
 ### Mid-run verification and blockers
 - TDD RED confirmed (backend 3 expected failures; frontend 2 expected failures) before implementation; subsequent targeted tests GREEN.
