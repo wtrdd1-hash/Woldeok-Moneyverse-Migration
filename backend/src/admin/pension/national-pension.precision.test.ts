@@ -30,14 +30,16 @@ describe('pension monetary exactness', () => {
 
 describe('P1 pension annual rate truth #1910', () => {
   it('does not publish an uncertified annual yield from unrelated configuration', async () => {
-    const query = vi.fn()
-      .mockResolvedValueOnce({ rows: [{ total_aum: '50000', total_subscribers: '1', total_receivers: '1', total_pension_paid: '0' }] })
-      .mockResolvedValueOnce({ rows: [{ balance_wld: '25000000' }] });
+    const query = vi.fn().mockResolvedValue({ rows: [{
+      total_aum_wld: '50000', total_subscribers_count: '1',
+      total_retired_receivers_count: '1', total_pension_paid_wld: '0',
+      vault_main_balance_wld: '25000000',
+    }] });
     const repo = new NationalPensionRepository({ query } as never);
     const result = await repo.getOverview();
     expect(result.benchmarkAnnualPayoutRate).toBeNull();
     expect(result.annualPayoutRateCertified).toBe(false);
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls.flat().join(' ')).not.toContain('benchmark_annual_payout_rate_bps');
   });
 
