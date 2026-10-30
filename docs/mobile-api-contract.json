@@ -16035,61 +16035,138 @@
         ]
       },
       "responseSchema": {
-        "type": "object",
-        "properties": {
-          "receipts": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "receipt_id": {
-                  "type": "string"
-                },
-                "assignment_id": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "reward_amount": {
-                  "type": "string"
-                },
-                "experience_amount": {
-                  "type": "string"
-                },
-                "transaction_id": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "receipts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "receipt_id": {
                       "type": "string"
+                    },
+                    "assignment_id": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "reward_amount": {
+                      "type": "string"
+                    },
+                    "experience_amount": {
+                      "type": "string"
+                    },
+                    "transaction_id": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
                     }
+                  },
+                  "required": [
+                    "receipt_id",
+                    "assignment_id",
+                    "code",
+                    "name",
+                    "reward_amount",
+                    "experience_amount",
+                    "transaction_id",
+                    "created_at"
                   ]
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
                 }
               },
-              "required": [
-                "receipt_id",
-                "assignment_id",
-                "code",
-                "name",
-                "reward_amount",
-                "experience_amount",
-                "transaction_id",
-                "created_at"
-              ]
-            }
+              "scope": {
+                "type": "never"
+              },
+              "minReward": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "receipts"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "scope": {
+                "type": "string",
+                "const": "recent20"
+              },
+              "minReward": {
+                "type": "string"
+              },
+              "receipts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "receipt_id": {
+                      "type": "string"
+                    },
+                    "assignment_id": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "reward_amount": {
+                      "type": "string"
+                    },
+                    "experience_amount": {
+                      "type": "string"
+                    },
+                    "transaction_id": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "receipt_id",
+                    "assignment_id",
+                    "code",
+                    "name",
+                    "reward_amount",
+                    "experience_amount",
+                    "transaction_id",
+                    "created_at"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "scope",
+              "minReward",
+              "receipts"
+            ]
           }
-        },
-        "required": [
-          "receipts"
         ]
       },
       "responseCompatibility": {

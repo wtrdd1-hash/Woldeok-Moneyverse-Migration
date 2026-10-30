@@ -9,6 +9,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
+import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -175,6 +176,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
+  }
+
+  const workReceiptPath = parts.length === 2 && parts[0] === 'work' && parts[1] === 'receipts' && request.method === 'GET';
+  const workRewardValues = workReceiptPath ? request.nextUrl.searchParams.getAll('minReward') : [];
+  if (workRewardValues.length > 1 ||
+      (workRewardValues.length === 1 && normalizeWorkReceiptFloor(workRewardValues[0]) === null)) {
+    return gatewayProblem(400, 'Bad Request', 'work_receipt_reward_invalid',
+      'minimum reward must be a canonical non-negative WLD integer');
   }
 
   const receiptAmountFilter =
@@ -350,6 +359,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 
 
+  if (workReceiptPath && workRewardValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseFilteredWorkReceipts(await response.clone().json(), workRewardValues[0]!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
+          'work receipt reward evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
+        'work receipt reward evidence is unavailable');
+    }
+  }
+
   if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
     try {
       const payload: unknown = await response.clone().json();
@@ -457,6 +479,7 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
+  if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
