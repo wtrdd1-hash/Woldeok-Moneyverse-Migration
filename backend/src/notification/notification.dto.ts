@@ -19,6 +19,12 @@ export class NotificationQueryDto {
   @IsBoolean()
   unreadOnly?: boolean;
 
+  @ApiPropertyOptional({ description: '읽음 처리된 알림만 필터 여부', example: true })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => value === 'true' ? true : value === 'false' ? false : value)
+  @IsBoolean()
+  readOnly?: boolean;
+
   @ApiPropertyOptional({ description: '결과 제한 수', example: 50 })
   @IsOptional()
   @Type(() => Number)

@@ -67,5 +67,24 @@ describe('real member notification inbox', () => {
     await waitFor(() => expect(fetch.mock.calls.some(([url]) =>
       String(url).includes('category=TRANSACTIONAL') && !String(url).includes('unreadOnly=true'))).toBe(true));
   });
+  it('switches between read and unread owner filters without combining contradictory flags', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ notifications: [] }) });
+    vi.stubGlobal('fetch', fetch);
+    render(<NotificationTabsBar />);
+    const read = screen.getByRole('button', { name: '읽은 알림만 보기' });
+    const unread = screen.getByRole('button', { name: '읽지 않은 알림만 보기' });
+    fireEvent.click(read);
+    expect(read.getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => String(url).includes('readOnly=true'))).toBe(true));
+    fireEvent.click(screen.getByRole('button', { name: '거래' }));
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) =>
+      String(url).includes('category=TRANSACTIONAL') && String(url).includes('readOnly=true'))).toBe(true));
+    fireEvent.click(unread);
+    expect(read.getAttribute('aria-pressed')).toBe('false');
+    expect(unread.getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) =>
+      new URL(String(url), 'https://example.test').searchParams.get('unreadOnly') === 'true' &&
+      new URL(String(url), 'https://example.test').searchParams.get('readOnly') === null)).toBe(true));
+  });
 
 });

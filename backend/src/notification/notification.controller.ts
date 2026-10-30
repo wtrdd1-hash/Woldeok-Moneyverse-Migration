@@ -38,7 +38,9 @@ export class NotificationController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List in-app notifications for current user with unread filter and pagination' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'List owner notifications with read/unread filters and pagination' })
   listNotifications(
     @Req() request: RequestWithSession,
     @Query() query: NotificationQueryDto,

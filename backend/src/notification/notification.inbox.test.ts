@@ -13,7 +13,7 @@ describe('verified owner notification listing', () => {
     expect(sql).toContain('user_id = $1');
     expect(sql).toContain('category = $2');
     expect(sql).toContain('ORDER BY created_at DESC, id DESC');
-    expect(params).toEqual(['11111111-1111-4111-8111-111111111111', 'TRANSACTIONAL', true, 20, 40]);
+    expect(params).toEqual(['11111111-1111-4111-8111-111111111111', 'TRANSACTIONAL', true, null, 20, 40]);
   });
   it('uses owner-scoped SQL for explicit unread true and false with category filters', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [] });
@@ -24,8 +24,8 @@ describe('verified owner notification listing', () => {
       });
     }
     expect(query).toHaveBeenCalledTimes(2);
-    expect(query.mock.calls[0]![1]).toEqual(['11111111-1111-4111-8111-111111111111', 'SYSTEM', true, 21, 0]);
-    expect(query.mock.calls[1]![1]).toEqual(['11111111-1111-4111-8111-111111111111', 'SYSTEM', null, 21, 0]);
+    expect(query.mock.calls[0]![1]).toEqual(['11111111-1111-4111-8111-111111111111', 'SYSTEM', true, null, 21, 0]);
+    expect(query.mock.calls[1]![1]).toEqual(['11111111-1111-4111-8111-111111111111', 'SYSTEM', null, null, 21, 0]);
     expect(query.mock.calls[0]![0]).toContain('user_id = $1');
     expect(query.mock.calls[0]![0]).toContain('is_read = FALSE');
   });

@@ -13,3 +13,12 @@
 
 ## FINISHED
 - Pending verification. Do not infer release readiness from targeted tests.
+
+### Mid-run verification and blockers
+- TDD RED confirmed (backend 3 expected failures; frontend 2 expected failures) before implementation; subsequent targeted tests GREEN.
+- Backend notification suite: 18 PASS. Frontend notification suite: 43 PASS with `NODE_ENV=test`; a prior `NODE_ENV=production` run failed in React.act, not feature behavior. Android app-api GET query forwarding/private/noindex tested.
+- Fresh disposable PostgreSQL 17.11: 305 contiguous source migrations 002..306 applied, hashes recorded in isolated `schema_migrations`. Synthetic notification fixture 60 owner + 100 foreign rows passed read/unread/category-before-limit/tie-order/owner isolation; transaction ROLLBACK and fixture absent afterwards. App ledger INSERT/UPDATE and audit DELETE are false in isolated DB.
+- **P0 schema blocker:** after all 305 canonical migrations, `to_regclass('public.in_app_notifications')` is NULL. The fixture tests SQL behavior only, not availability of a real notification inbox in a fresh deployment. Existing planning issue #1693 documents this lineage gap. No unreviewed migration or direct app-role grant added.
+- `pnpm typecheck` PASS; `pnpm lint` 0 errors/1043 warnings; full `pnpm build` PASS after fixing an initially duplicated import; `pnpm audit --prod --audit-level=high` no known vulnerabilities. Initial Prettier check on legacy edited files fails baseline formatting; new test files formatted.
+- Full backend 2566 PASS / 119 FAIL / 495 SKIP; full frontend 2611 PASS / 53 FAIL. Failure names exactly match QA v1389 for both suites (0 candidate-only failures). Database unit 56 PASS / 4 SKIP. No claim of full gates PASS.
+- No official Test exact candidate SHA, authenticated E2E, independent backup restore, GitOps authorization, or Production smoke; no merge, DB/ledger mutation, Test/Production deploy or rollback. Release HOLD.

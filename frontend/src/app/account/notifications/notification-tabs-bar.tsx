@@ -25,6 +25,7 @@ const actionHeaders = { 'Content-Type': 'application/json', 'X-Moneyverse-Notifi
 export function NotificationTabsBar() {
   const [selectedCat, setSelectedCat] = useState<Category>('ALL');
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -36,13 +37,14 @@ export function NotificationTabsBar() {
   const generation = useRef(0);
   const mutationPending = useRef(false);
 
-  async function load(category: Category, unread: boolean, nextOffset: number, append: boolean, requestId: number) {
+  async function load(category: Category, unread: boolean, read: boolean, nextOffset: number, append: boolean, requestId: number) {
     setLoading(true);
     setError(false);
     try {
       const params = new URLSearchParams({ limit: String(PAGE_SIZE + 1), offset: String(nextOffset) });
       if (category !== 'ALL') params.set('category', category);
       if (unread) params.set('unreadOnly', 'true');
+      if (read) params.set('readOnly', 'true');
       const response = await fetch('/api/notifications?' + params.toString(), { cache: 'no-store' });
       if (!response.ok) throw new Error('feed unavailable');
       const rows = parseNotificationFeed(await response.json());
@@ -66,16 +68,16 @@ export function NotificationTabsBar() {
     setHasMore(false);
     setReceipt(null);
     setActionError(false);
-    void load(selectedCat, unreadOnly, 0, false, id);
+    void load(selectedCat, unreadOnly, readOnly, 0, false, id);
     return () => { generation.current += 1; };
-  }, [selectedCat, unreadOnly]);
+  }, [selectedCat, unreadOnly, readOnly]);
 
   const refresh = () => {
     const id = ++generation.current;
     setItems([]);
     setOffset(0);
     setHasMore(false);
-    void load(selectedCat, unreadOnly, 0, false, id);
+    void load(selectedCat, unreadOnly, readOnly, 0, false, id);
   };
 
   const markRead = async (notificationId: string) => {
@@ -135,13 +137,21 @@ export function NotificationTabsBar() {
 
   return (
     <section aria-label="서버 확인 알림 내역" className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 border-b pb-3" role="group" aria-label="알림 분류">
+      <div className="flex flex-wrap items-center gap-2 border-b pb-3" role="group" aria-label="알림 읽음 상태 및 분류">
         <button type="button" aria-pressed={unreadOnly} onClick={() => {
           // Fence any in-flight page before changing the owner-visible filter.
           generation.current += 1;
+          setReadOnly(false);
           setUnreadOnly((current) => !current);
         }} className={`min-h-11 rounded-xl border px-3 text-sm ${unreadOnly ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>
           읽지 않은 알림만 보기
+        </button>
+        <button type="button" aria-pressed={readOnly} onClick={() => {
+          generation.current += 1;
+          setUnreadOnly(false);
+          setReadOnly((current) => !current);
+        }} className={`min-h-11 rounded-xl border px-3 text-sm ${readOnly ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>
+          읽은 알림만 보기
         </button>
         {CATEGORIES.map(({ id, label }) => (
           <button key={id} type="button" aria-pressed={selectedCat === id}
@@ -150,7 +160,7 @@ export function NotificationTabsBar() {
             {id === 'ALL' ? <Bell className="mr-1 inline size-4" aria-hidden="true" /> : null}{label}
           </button>
         ))}
-        <button type="button" onClick={() => void markAll()} disabled={busy || loading || error || items.length === 0}
+        <button type="button" onClick={() => void markAll()} disabled={busy || loading || error || items.length === 0 || readOnly}
           className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-sm disabled:opacity-50">
           <CheckCheck className="size-4" aria-hidden="true" />모두 읽음 처리
         </button>
@@ -187,7 +197,7 @@ export function NotificationTabsBar() {
       {hasMore && !error ? (
         <button type="button" disabled={busy || loading} onClick={() => {
           const id = ++generation.current;
-          void load(selectedCat, unreadOnly, offset, true, id);
+          void load(selectedCat, unreadOnly, readOnly, offset, true, id);
         }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm disabled:opacity-50">
           <RefreshCw className="size-4" aria-hidden="true" />이전 알림 더 보기
         </button>

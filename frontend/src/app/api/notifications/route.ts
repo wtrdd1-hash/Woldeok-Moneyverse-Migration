@@ -4,7 +4,7 @@ import { mutate } from '@/lib/mutate';
 import { viewerOrUnknown } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
-const privateHeaders = { 'cache-control': 'private, no-store' };
+const privateHeaders = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
 
 export async function GET(req: Request): Promise<NextResponse> {
   const viewer = await viewerOrUnknown().catch(() => null);
@@ -14,6 +14,7 @@ export async function GET(req: Request): Promise<NextResponse> {
 
   const { searchParams } = new URL(req.url);
   const unreadParam = searchParams.get('unreadOnly');
+  const readParam = searchParams.get('readOnly');
   const category = searchParams.get('category');
   const offset = searchParams.get('offset') ?? '0';
   const limit = searchParams.get('limit') ?? '50';
@@ -22,18 +23,20 @@ export async function GET(req: Request): Promise<NextResponse> {
     'BUSINESS', 'BANK', 'SEASON', 'SPACE', 'SECURITY', 'SYSTEM',
   ]);
   // Reject ambiguous filters rather than letting the first duplicate silently win.
-  if (['unreadOnly', 'category', 'offset', 'limit'].some((key) => searchParams.getAll(key).length > 1)) {
+  if (['unreadOnly', 'readOnly', 'category', 'offset', 'limit'].some((key) => searchParams.getAll(key).length > 1)) {
     return NextResponse.json({ error: 'Ambiguous notification filter' }, { status: 400, headers: privateHeaders });
   }
   if (!/^[0-9]{1,3}$/.test(limit) || Number(limit) < 1 || Number(limit) > 100 ||
       !/^(0|[1-9][0-9]{0,3})$/.test(offset) || Number(offset) > 5000 ||
       (category !== null && !allowed.has(category)) ||
-      (unreadParam !== null && unreadParam !== 'true' && unreadParam !== 'false')) {
+      (unreadParam !== null && unreadParam !== 'true' && unreadParam !== 'false') ||
+      (readParam !== null && readParam !== 'true' && readParam !== 'false') ||
+      (unreadParam === 'true' && readParam === 'true')) {
     return NextResponse.json({ error: 'Invalid notification filter' }, { status: 400, headers: privateHeaders });
   }
 
   try {
-    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam !== null ? '&unreadOnly=' + unreadParam : ''}`);
+    const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam !== null ? '&unreadOnly=' + unreadParam : ''}${readParam !== null ? '&readOnly=' + readParam : ''}`);
     if (!Array.isArray(items)) throw new Error('Invalid feed');
     return NextResponse.json({ notifications: items }, { headers: privateHeaders });
   } catch {
