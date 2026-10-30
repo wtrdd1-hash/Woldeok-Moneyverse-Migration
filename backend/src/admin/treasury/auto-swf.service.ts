@@ -48,7 +48,7 @@ export interface SwfEvent {
   event_type: string;
   amount_wld: string;
   summary: string;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 

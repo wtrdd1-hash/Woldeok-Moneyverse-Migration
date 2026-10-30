@@ -1710,3 +1710,21 @@ ull 상태를 반환하도록 교정.
 - 로컬 `git diff` 점검.
 - 원격 푸시 후 GitHub Actions CI 통과 확인.
 - PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.
+
+
+---
+## 🚀 [v12 Specification] 상점 필터 제네릭 타입 캐스팅 및 SWF 메타데이터 타입 명시 (+추가, -0 삭제)
+
+### 1. 배경 및 원인 분석
+- GitHub Actions CI `runtime-check`의 `pnpm typecheck` 단계 타입 불일치 해결:
+  1. `shop.controller.ts`: `applyGenericShopFilter` 내부의 `orderShopCatalog`, `filterShopMinimumPrice`, `filterShopByMaxPrice` 반환 배열이 제네릭 `T[]`로 엄격하게 추론되지 않아 발생한 TS2322 에러(`Type '{ readonly price: unknown; }[]' is not assignable to type 'T[]'`)를 `as unknown as T[]`로 명시적 단언하여 해결.
+  2. `auto-swf.service.ts`: `SwfEvent.metadata`의 `any` 타입을 `Record<string, unknown> | null`로 구체화하여 린트 경고 제거.
+
+### 2. 세부 변경 사항
+- `backend/src/shop/shop.controller.ts`: `applyGenericShopFilter`의 반환 타입 안전성 보장.
+- `backend/src/admin/treasury/auto-swf.service.ts`: `SwfEvent.metadata` 타입 선언 구체화.
+
+### 3. 검증 계획
+- 로컬 `git diff` 점검.
+- 원격 푸시 후 GitHub Actions CI 통과 확인.
+- PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.

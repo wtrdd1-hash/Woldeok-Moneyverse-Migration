@@ -106,7 +106,7 @@ function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[
     return items.filter((item) => Number(item.user_owned_quantity ?? 0) === 0);
   }
   if (arg === 'price_asc' || arg === 'price_desc') {
-    return orderShopCatalog(items as any, arg);
+    return orderShopCatalog(items as any, arg) as unknown as T[];
   }
   if (/^-\d+$/.test(arg)) {
     throw new BadRequestException('price cannot be negative');
@@ -114,9 +114,9 @@ function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[
   if (/^(0|[1-9][0-9]*)$/.test(arg)) {
     const amount = BigInt(arg);
     if (amount >= 9000000000000000n) {
-      return filterShopMinimumPrice(items as any, amount);
+      return filterShopMinimumPrice(items as any, amount) as unknown as T[];
     }
-    return filterShopByMaxPrice(items as any, amount);
+    return filterShopByMaxPrice(items as any, amount) as unknown as T[];
   }
   if (/^[a-z][a-z0-9_]{0,39}$/.test(arg)) {
     return filterShopItems(items, undefined, arg);
