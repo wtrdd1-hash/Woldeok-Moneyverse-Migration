@@ -5,7 +5,7 @@ import { GET } from './route';
 
 describe('private shop receipt search route', () => {
   it('forwards bounded query and prevents caches and indexing', async () => {
-    apiOrNull.mockResolvedValueOnce({ purchases: [] });
+    apiOrNull.mockResolvedValueOnce({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
     const response = await GET(new Request('https://example.test/api/shop/purchases?q=Blue%20Gloves'));
     expect(apiOrNull).toHaveBeenCalledWith('/api/v1/shop/purchases?q=Blue%20Gloves');
     expect(response.status).toBe(200);
@@ -17,6 +17,10 @@ describe('private shop receipt search route', () => {
     expect((await GET(new Request('https://example.test/api/shop/purchases?q=a&q=b'))).status).toBe(400);
     expect((await GET(new Request(`https://example.test/api/shop/purchases?q=${'a'.repeat(81)}`))).status).toBe(400);
     expect(apiOrNull).not.toHaveBeenCalled();
+  });
+  it('rejects an upstream 200 with unverified spending summary', async () => {
+    apiOrNull.mockResolvedValueOnce({ purchases: [], summary: { count: 1, totalSpent: '10', scope: 'displayed' } });
+    expect((await GET(new Request('https://example.test/api/shop/purchases'))).status).toBe(503);
   });
   it('fails closed rather than inventing an empty purchase history', async () => {
     apiOrNull.mockResolvedValueOnce(null);

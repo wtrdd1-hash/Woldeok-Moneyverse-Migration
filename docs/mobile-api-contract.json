@@ -12246,10 +12246,31 @@
                 "purchasedAt"
               ]
             }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "number"
+              },
+              "totalSpent": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string",
+                "const": "displayed"
+              }
+            },
+            "required": [
+              "count",
+              "totalSpent",
+              "scope"
+            ]
           }
         },
         "required": [
-          "purchases"
+          "purchases",
+          "summary"
         ]
       },
       "responseCompatibility": {

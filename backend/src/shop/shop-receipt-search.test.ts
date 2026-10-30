@@ -22,12 +22,20 @@ describe('owner-private recent purchase receipt search', () => {
     expect(result.map((r) => r.purchaseId)).toEqual([id(1), id(2)]);
     expect(result[0]?.amount).toBe('9007199254740993');
   });
+  it('sums only displayed receipts as exact integer strings, never lifetime totals', async () => {
+    purchasesForUser.mockClear();
+    const summary = await service.myPurchasesWithSummary(owner, { query: 'Gloves' });
+    expect(summary.summary).toEqual({ count: 2, totalSpent: '9007199254741033', scope: 'displayed' });
+    expect(summary.purchases).toHaveLength(2);
+    expect(purchasesForUser).toHaveBeenCalledWith(owner, { limit: 100 });
+  });
   it('forwards the authenticated owner and rejects duplicate q arrays at the HTTP controller boundary', async () => {
     const controller = new ShopController(service, null);
     const request = { session: { user_id: owner } } as unknown as RequestWithSession;
     purchasesForUser.mockClear();
     const response = await controller.purchases(request, 'Blue');
     expect(response.purchases).toHaveLength(1);
+    expect(response.summary).toEqual({ count: 1, totalSpent: '9007199254740993', scope: 'displayed' });
     expect(purchasesForUser).toHaveBeenCalledWith(owner, { limit: 100 });
     await expect(controller.purchases(request, ['Blue', 'Red'])).rejects.toThrow(BadRequestException);
   });

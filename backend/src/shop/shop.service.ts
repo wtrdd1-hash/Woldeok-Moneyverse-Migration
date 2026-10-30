@@ -179,6 +179,16 @@ export class ShopService {
     return term ? purchases.filter((row) => row.itemName.toLocaleLowerCase('ko-KR').includes(term)) : purchases;
   }
 
+  /** Exact sum of the *returned* receipts, not a lifetime spending figure. */
+  async myPurchasesWithSummary(
+    authenticatedUserId: string,
+    options: ShopPurchasesOptions = {},
+  ): Promise<{ purchases: ShopPurchaseView[]; summary: { count: number; totalSpent: string; scope: 'displayed' } }> {
+    const purchases = await this.myPurchases(authenticatedUserId, options);
+    const totalSpent = purchases.reduce((total, receipt) => total + BigInt(receipt.amount), 0n);
+    return { purchases, summary: { count: purchases.length, totalSpent: totalSpent.toString(), scope: 'displayed' } };
+  }
+
   async purchase(
     authenticatedUserId: string,
     { itemId, idempotencyKey }: ShopPurchaseRequest = {},

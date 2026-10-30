@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { apiOrNull } from '@/lib/api';
+import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 
 /**
  * The caller's own purchase receipts.
@@ -22,8 +23,9 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
   const path = `/api/v1/shop/purchases${term ? `?q=${encodeURIComponent(term)}` : ''}`;
   const data = await apiOrNull<unknown>(path);
-  if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
+  const verified = parseShopPurchaseHistory(data);
+  if (!verified) {
     return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
   }
-  return NextResponse.json(data, { headers: PRIVATE_HEADERS });
+  return NextResponse.json(verified, { headers: PRIVATE_HEADERS });
 }

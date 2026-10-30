@@ -9,13 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatMoment } from '@/lib/money';
 import { useViewer } from '@/lib/use-viewer';
-
-interface Receipt {
-  readonly purchaseId: string;
-  readonly itemName: string;
-  readonly amount: string;
-  readonly purchasedAt: string;
-}
+import { parseShopPurchaseHistory, type ShopPurchaseHistory } from '@/lib/shop-purchase-history';
 
 /**
  * The member's own receipts, loaded in the browser.
@@ -27,14 +21,14 @@ interface Receipt {
  */
 export function MyReceipts() {
   const viewer = useViewer();
-  const [receipts, setReceipts] = useState<readonly Receipt[] | null>(null);
+  const [history, setHistory] = useState<ShopPurchaseHistory | null>(null);
   const [search, setSearch] = useState('');
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!viewer?.signedIn) return;
     let cancelled = false;
-    setReceipts(null);
+    setHistory(null);
     setFailed(false);
     const timer = setTimeout(() => {
       const term = search.trim();
@@ -43,18 +37,18 @@ export function MyReceipts() {
         .then(async (response) => {
           if (!response.ok) throw new Error('purchase history unavailable');
           const data: unknown = await response.json();
-          if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
-            throw new Error('invalid purchase history');
-          }
-          return data.purchases as Receipt[];
+          const verified = parseShopPurchaseHistory(data);
+          if (!verified) throw new Error('invalid purchase history');
+          return verified;
         })
-        .then((purchases) => { if (!cancelled) setReceipts(purchases); })
+        .then((verified) => { if (!cancelled) setHistory(verified); })
         .catch(() => { if (!cancelled) setFailed(true); });
     }, 250);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [viewer?.signedIn, search]);
 
   if (!viewer?.signedIn) return null;
+  const receipts = history?.purchases ?? null;
 
   return (
     <section aria-labelledby="purchase-title" className="grid gap-3">
@@ -84,6 +78,12 @@ export function MyReceipts() {
         />
         <p className="text-xs text-muted-foreground">검색은 최근 100건의 본인 구매 기록만 대상으로 합니다. 검색하지 않을 때는 최근 30건을 표시합니다.</p>
       </div>
+      {!failed && history && (
+        <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+          현재 표시된 구매 {history.summary.count}건의 합계: <Amount value={history.summary.totalSpent} currency />
+          <span className="block text-xs">최근 기록만 계산한 금액이며 전체 누적 구매액은 아닙니다.</span>
+        </p>
+      )}
       {failed ? (
         <p role="alert" className="text-sm text-destructive">구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.</p>
       ) : receipts === null ? (
