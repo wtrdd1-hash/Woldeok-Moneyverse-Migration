@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { generateKeyPairSync } from 'node:crypto';
-import { chmodSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -8,9 +8,8 @@ import { readVerifiedStorageSnapshot } from './storage-evidence-reader';
 
 function hostPrivilegedCollectorAvailable(): boolean {
   try {
-    const fs = require('node:fs');
     return process.platform === 'linux' &&
-      fs.existsSync('/srv/moneyverse-data') &&
+      existsSync('/srv/moneyverse-data') &&
       execFileSync('sudo', ['-n', 'readlink', '/proc/1/ns/mnt'], { timeout: 1000 }).toString().startsWith('mnt:');
   } catch {
     return false;
