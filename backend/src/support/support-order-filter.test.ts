@@ -12,7 +12,9 @@ describe('owner-private bounded support conversation ordering', () => {
     const myThreads = vi.fn(async () => []);
     const controller = new SupportController({ myThreads } as unknown as SupportRepository);
     for (const value of ['asc', '', 'newest', ['oldest', 'oldest']]) {
-      await expect(controller.threads(request, undefined, undefined, value as string)).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        controller.threads(request, undefined, undefined, value as string),
+      ).rejects.toBeInstanceOf(BadRequestException);
     }
     expect(myThreads).not.toHaveBeenCalled();
   });
