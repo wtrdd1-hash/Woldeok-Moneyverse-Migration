@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseCasinoHistoryGame, parseVerifiedCasinoHistory } from '@/lib/casino-history-proof';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -106,6 +107,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const casinoHistoryPath = parts.length === 2 && parts[0] === 'casino' && parts[1] === 'history' && request.method === 'GET';
+  const gameValues = casinoHistoryPath ? request.nextUrl.searchParams.getAll('game') : [];
+  const casinoGame = casinoHistoryPath ? parseCasinoHistoryGame(gameValues.length > 1 ? gameValues : gameValues[0]) : 'all';
+  if (casinoHistoryPath && casinoGame === null) {
+    return gatewayProblem(400, 'Bad Request', 'casino_history_game_invalid', 'game must be a single supported casino game');
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -328,6 +336,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (casinoHistoryPath && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          casinoGame === null || !parseVerifiedCasinoHistory(await response.clone().json(), casinoGame)) {
+        return gatewayProblem(503, 'Service Unavailable', 'casino_history_unverified', 'casino play history evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'casino_history_unverified', 'casino play history evidence is unavailable');
+    }
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -396,6 +415,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
+  if (parts[0] === 'casino' && parts[1] === 'history') { headers.set('cache-control', 'private, no-store'); headers.set('x-robots-tag', 'noindex'); headers.set('referrer-policy', 'no-referrer'); }
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
 
@@ -446,6 +466,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'casino' && parts[1] === 'history') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

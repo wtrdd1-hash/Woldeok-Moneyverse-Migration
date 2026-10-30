@@ -1,0 +1,5 @@
+# Owner Arcade Recent-History Game Filter Implementation Plan
+**Goal:** Add a bounded, owner-scoped game filter to recent arcade play history without claiming full historical coverage.
+**Architecture:** Reuse `public.member_casino_history(actor,20)` via Nest's existing authenticated repository; validate optional `game` enum and duplicates; apply filter to only the most recent 20 plays. Next server page renders GET form and verified results. Android gateway validates filter and source payload; fail closed on invalid successful responses. No DB mutation/migration.
+**Tasks:** (1) RED backend controller/repository tests; (2) RED frontend filter/parser and gateway tests; (3) backend implementation; (4) frontend UI and app-api implementation; (5) focused GREEN; (6) build/lint/typecheck/unit/security/real PG; (7) exact SHA CI and Test/Production release decision.
+**Safety:** Session/consent guards unchanged; exact integer WLD strings; no user ID query; no cross-owner SQL; no unverified zero/total claims; private headers; rollback by reverting branch; never deploy without full green.

@@ -9,6 +9,7 @@ import {
   Inject,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -29,6 +30,7 @@ import {
   CasinoThemePlayDto,
 } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
+import { parseCasinoHistoryGame } from './casino-history-game-filter';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 /**
@@ -414,8 +416,14 @@ export class CasinoController {
 
   @Get('history')
   @ApiOperation({ summary: "Read the current member's recent casino plays" })
-  async history(@Req() request: RequestWithSession) {
-    return this.guarded(() => this.repository().history(requireUserId(request)), {
+  async history(@Req() request: RequestWithSession, @Query('game') game: unknown) {
+    const selected = parseCasinoHistoryGame(game);
+    if (selected === null) throw new BadRequestException('game must be a supported single casino game');
+    return this.guarded(async () => {
+      // This filters the owner's latest 20 plays, not all historical plays.
+      const rows = await this.repository().history(requireUserId(request));
+      return selected === 'all' ? rows : rows.filter((row) => row.game === selected);
+    }, {
       conflict: 'the casino history is unavailable',
       forbidden: 'an active membership is required to read casino history',
     });

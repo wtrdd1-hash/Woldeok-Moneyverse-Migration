@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, apiOrNull } from '@/lib/api';
+import { CASINO_HISTORY_GAMES, parseCasinoHistoryGame, parseVerifiedCasinoHistory } from '@/lib/casino-history-proof';
+import type { CasinoHistoryEntry } from '@/lib/casino-history-proof';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember, isLoggedInMember } from '@/lib/session';
 import { CasinoGuestView } from './casino-guest-view';
@@ -135,17 +137,6 @@ interface CoinFairness {
   readonly created_at: string | null;
 }
 
-interface CasinoHistoryEntry {
-  readonly play_id: string;
-  readonly game: 'coin' | 'dice_parity' | 'dice_number';
-  readonly choice: string;
-  readonly outcome: string;
-  readonly stake_amount: string;
-  readonly net_amount: string;
-  readonly transaction_id: string;
-  readonly played_at: string;
-}
-
 interface SelfLimit {
   readonly daily_bet_limit: string;
   readonly daily_loss_limit: string;
@@ -183,18 +174,23 @@ async function loadCasino<T>(path: string): Promise<Loaded<T>> {
 
 const RECENT_GAMES = 20;
 
-export default async function CasinoPage() {
+export default async function CasinoPage({ searchParams }: {
+  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const isMember = await isLoggedInMember();
   if (!isMember) {
     return <CasinoGuestView />;
   }
   await requireMember();
+  const params = await searchParams;
+  const selectedGame = parseCasinoHistoryGame(params?.game);
+  const historyPath = `/api/v1/casino/history${selectedGame && selectedGame !== 'all' ? `?game=${selectedGame}` : ''}`;
 
-  const [terms, fairness, games, history, selfLimit, gameClock, jackpot] = await Promise.all([
+  const [terms, fairness, games, rawHistory, selfLimit, gameClock, jackpot] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
-    apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
+    selectedGame === null ? Promise.resolve(null) : apiOrNull<unknown>(historyPath),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
     apiOrNull<ServerGameClock>('/api/v1/casino/clock'),
     apiOrNull<CasinoJackpotData>('/api/v1/casino/jackpot'),
@@ -208,6 +204,7 @@ export default async function CasinoPage() {
   const gemGame = dice.find((g) => g.game === 'gem_5');
   const wheelGame = dice.find((g) => g.game === 'wheel_20');
 
+  const history = selectedGame === null ? null : parseVerifiedCasinoHistory(rawHistory, selectedGame);
   const plays = history ?? [];
 
   const closure: CasinoClosure | null =
@@ -769,11 +766,27 @@ export default async function CasinoPage() {
             <T korean="최근 게임 기록" english="Recent Gaming History" />
           </CardTitle>
           <CardDescription>
-            다른 지갑 거래와 관계없이 서버에 기록된 최근 {RECENT_GAMES}판을 보여줍니다.
+            지갑 거래와 별도로 기록된 동전·주사위 최근 {RECENT_GAMES}판만 보여줍니다. 테마 게임 기록은 포함되지 않습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {history === null ? (
+          <form action="/arcade" method="get" className="mb-4 flex flex-wrap items-end gap-3">
+            <div className="grid gap-1.5">
+              <label htmlFor="casino-history-game" className="text-sm font-medium">게임별 최근 기록</label>
+              <select id="casino-history-game" name="game" defaultValue={selectedGame ?? 'all'}
+                className="min-h-11 rounded-lg border border-border bg-background px-3 text-sm">
+                <option value="all">모든 게임</option>
+                {CASINO_HISTORY_GAMES.map((game) => (
+                  <option key={game} value={game}>{casinoGameLabel(game)}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="min-h-11 rounded-lg border border-border px-4 text-sm font-semibold">조회</button>
+            <p className="w-full text-xs text-muted-foreground">동전·주사위 기록 중 최근 20판만 검색합니다. 테마 게임은 이 기록에 포함되지 않으며, 전체 누적 기록이나 정산 증명이 아닙니다.</p>
+          </form>
+          {selectedGame === null ? (
+            <EmptyState title="올바른 게임 종류를 선택해 주세요." />
+          ) : history === null ? (
             <EmptyState title="기록을 불러오지 못했어요." />
           ) : plays.length === 0 ? (
             <EmptyState
@@ -898,11 +911,12 @@ function casinoGameLabel(game: CasinoHistoryEntry['game']): string {
 function casinoChoiceLabel(game: CasinoHistoryEntry['game'], choice: string): string {
   if (game === 'coin') return faceLabel(choice);
   if (game === 'dice_parity') return choice === 'odd' ? '홀' : choice === 'even' ? '짝' : choice;
-  return `${choice}번`;
+  return game === 'dice_number' ? `${choice}번` : choice;
 }
 
 function casinoOutcomeLabel(game: CasinoHistoryEntry['game'], outcome: string): string {
   if (game === 'coin') return faceLabel(outcome);
+  if (game !== 'dice_parity' && game !== 'dice_number') return outcome;
   const face = Number.parseInt(outcome, 10);
   if (!Number.isInteger(face) || face < 1 || face > 6) return outcome;
   if (game === 'dice_parity') return `${face} (${face % 2 === 1 ? '홀' : '짝'})`;
