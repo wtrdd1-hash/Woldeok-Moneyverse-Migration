@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1514 F675-184 inventory source-equivalence hardening / handoff #2013 / Draft PR PENDING / RELEASE HOLD; stacked on #2014.
+**Current planning:** v1514 F675-184 inventory source-equivalence hardening / handoff #2013 / Draft PR #2018 / RELEASE HOLD; stacked on #2014.
 
 ## v2026.10.30.1514 — F675-184 Inventory Source-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous Addition v1512 → Current Improvement v1514 → Next Addition v1516 (provisional). Authority origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef start/mid; parent Draft #2014, handoff #2013. No new inventory feature, table or endpoint; English canonical/Korean parity.
