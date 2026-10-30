@@ -12,3 +12,5 @@ Main rechecked. Read AGENTS, README, canonical EN/KO plans, Next inventory page/
 EN/KO integrated masters, living plans, UPDATE_LOG, internal/GitHub updates and bilingual worklogs; P0 4 + P1 6. New F675-184 bounded inventory search/sort with owner-only SQL, Nest/Next/Android, cursor, security, SEO, a11y, KPI and rollout/rollback. Acceptance proposed NOT EXECUTED. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime, shared DB, WLD, ledger, Docker, Test, Production, services, other workers or automation settings modified. Final SHA/PR/CI in miniPC run record.
 
 Draft PR #2014: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2014 (OPEN/DRAFT, not merged). Handoff #2013.
+
+DEV read-only SQL follow-up: shop_my_items_v2 present, app EXECUTE true, user_items SELECT/DELETE true (6 DEV rows aggregate). Added P0 #993 comment; QA v1392 evidence directory present but empty, v1391 latest completed inspected.

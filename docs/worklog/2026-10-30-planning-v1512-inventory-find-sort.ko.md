@@ -12,3 +12,5 @@ main 재확인. AGENTS·README·영문 원본/국문 대조·Next 보관함·Nes
 영문·국문 통합/프로젝트 기획, UPDATE_LOG, 내부/GitHub 업데이트, 작업일지. P0 4·P1 6. F675-184 본인 전용 검색/정렬의 SQL·Nest/Next/Android·커서·보안·SEO·접근성·KPI·단계적 공개·롤백 명세. 수용시험 계획만 작성·미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·공유 DB·WLD·원장·Docker·Test·Production·서비스·타 작업자·예약 설정 미변경. 최종 SHA/PR/CI는 miniPC 기록.
 
 Draft PR #2014: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2014 (OPEN/DRAFT, not merged). Handoff #2013.
+
+개발 DB 읽기 전용 재확인: shop_my_items_v2 존재, 앱 EXECUTE true, user_items 직접 SELECT/DELETE true(개발 6행 집계). P0 #993에 댓글 추가. QA v1392 증거 폴더는 있으나 비어 있어 최종 확인 QA는 v1391.

@@ -7,7 +7,7 @@
 
 ### 실제 소스에서 확인한 기능 공백과 설계 선택
 - frontend/src/app/inventory/page.tsx는 회원 인증 후 GET /api/v1/shop/holdings를 apiOrNull로 호출한다. inventory-view.tsx에는 카테고리 탭만 있으며 키워드·희귀도·장착 여부 필터와 획득일·이름 정렬은 없다. API 실패 시 null을 빈 배열로 처리해 실제 장애를 '보유 아이템 없음'으로 잘못 표시할 수 있다. 기존 장착 POST는 별개이며 본 기능에 포함하지 않는다.
-- Nest ShopController.holdings는 인증된 회원 UUID를 ShopCatalogRepository.holdings에 전달하고, 이는 마이그레이션 123의 public.shop_my_items_v2(actor)를 호출한다. SECURITY DEFINER 함수는 회원 본인·수량>0·미만료 아이템만 반환하고 acquired_at DESC, catalog_id 순으로 정렬하며 희귀도·장착·만료·연체·중단 상태를 포함한다. 앱 역할의 함수 EXECUTE는 원본 테이블 직접 SELECT 권한이 아니다. actor UUID 인자만으로 DB 호출자 신원이 인증되는 것은 아니므로 Nest 세션·동의 결속이 필수다. 이 사실은 Production 아이템 수량을 증명하지 않는다.
+- Nest ShopController.holdings는 인증된 회원 UUID를 ShopCatalogRepository.holdings에 전달하고, 이는 마이그레이션 123의 public.shop_my_items_v2(actor)를 호출한다. SECURITY DEFINER 함수는 회원 본인·수량>0·미만료 아이템만 반환하고 acquired_at DESC, catalog_id 순으로 정렬하며 희귀도·장착·만료·연체·중단 상태를 포함한다. 앱 역할의 함수 EXECUTE는 원본 테이블 직접 SELECT 권한이 아니다. actor UUID 인자만으로 DB 호출자 신원이 인증되는 것은 아니므로 Nest 세션·동의 결속이 필수다. 이 사실은 Production 아이템 수량을 증명하지 않는다. 추가 읽기 전용 DEV PostgreSQL 17.11 실측에서 moneyverse_app의 public.user_items 직접 SELECT와 DELETE 유효 권한이 모두 true였으며, shop_my_items_v2 함수 EXECUTE도 true였다(DEV 6행 집계). 의도한 최소 권한과 충돌하므로 P0 #993을 해소하기 전 기능 공개 금지. Production 권한이나 침해 사실을 의미하지 않는다.
 - 대안 A: 현재 전체 목록을 브라우저에서 필터링하면 쉽지만 10,001건 이상의 네트워크·메모리·CPU 사용을 제한하지 못하고 거짓 빈 목록 문제를 유지한다. 대안 B: 별도 검색 테이블·물리화 인덱스는 동기화 및 마이그레이션 위험이 과도하다. **V1 제안은 신규 테이블·금융 쓰기 없이, 제한된 본인 전용 SQL 읽기 함수와 형식 검증 API를 추가하는 것**이다. Backend B의 307–311 마이그레이션 스택 뒤에 번호를 조율하며 이번 기획은 번호를 예약하지 않는다.
 
 ### 목적·대상·권한·진입·화면·상태
