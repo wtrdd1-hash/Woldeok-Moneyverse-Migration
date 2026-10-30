@@ -81,6 +81,35 @@ jobs:
           echo "id=$run_id" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout exact candidate release gate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.run.outputs.head_sha }}
+          persist-credentials: false
+
+      - name: Require exact main push CI runtime-check SUCCESS
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ steps.run.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          if [[ "$current_main" != "$EXPECTED_HEAD_SHA" ]]; then
+            echo '::error::candidate is not current main; Production release remains blocked'
+            exit 1
+          fi
+          evidence_dir="$(mktemp -d)"
+          trap 'rm -rf "$evidence_dir"' EXIT
+          gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${EXPECTED_HEAD_SHA}&branch=main&event=push&per_page=100" > "$evidence_dir/runs.json"
+          ci_run_id="$(jq -r --arg sha "$EXPECTED_HEAD_SHA" '[.workflow_runs[] | select(.name == "CI" and .head_sha == $sha and .head_branch == "main" and .event == "push")] | if length > 0 then max_by(.id).id else empty end' "$evidence_dir/runs.json")"
+          if [[ ! "$ci_run_id" =~ ^[0-9]+$ ]]; then
+            echo '::error::no exact-main push CI run; Production release remains blocked'
+            exit 1
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}/jobs?per_page=100" > "$evidence_dir/jobs.json"
+          node scripts/release/verify-exact-runtime-ci.mjs "$EXPECTED_HEAD_SHA" "$ci_run_id" "$evidence_dir/runs.json" "$evidence_dir/jobs.json"
+
       - name: Download immutable release input from candidate run
         uses: actions/download-artifact@v4
         with:
@@ -256,6 +285,18 @@ jobs:
           echo "::error::isolated Test never served attested application source $APPLICATION_SOURCE_SHA"
           exit 1
 
+      - name: Reconfirm exact main SHA before Test attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          if [[ "$current_main" != "$REPOSITORY_HEAD_SHA" ]]; then
+            echo '::error::main advanced during isolated Test verification; release candidate is stale'
+            exit 1
+          fi
+
       - name: Mark isolated-Test deployment attested
         env:
           GH_TOKEN: ${{ github.token }}
@@ -305,6 +346,18 @@ jobs:
       BACKEND_CANDIDATE_DIGEST: ${{ needs.prepare.outputs.backend_candidate_digest }}
       FRONTEND_CANDIDATE_DIGEST: ${{ needs.prepare.outputs.frontend_candidate_digest }}
     steps:
+      - name: Reconfirm current main before Production registry access
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          if [[ "$current_main" != "$REPOSITORY_HEAD_SHA" ]]; then
+            echo '::error::main advanced after Test attestation; Production image build blocked'
+            exit 1
+          fi
+
       - name: Checkout attested application source after isolated-Test gate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
