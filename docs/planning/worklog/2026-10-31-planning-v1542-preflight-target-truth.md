@@ -11,3 +11,5 @@
 **Evidence:** QA v1405 main 2778 backend PASS/501 SKIP, 2770 frontend PASS, lint/typecheck/build PASS, dependency audit FAIL. B Draft #2103 notes QA v1406 exact-SHA route-ledger evidence missing. No exact-SHA official Test, DB ACL/checksum remediation or independent restore attested. Synthetic 10,001-row acceptance tests PROPOSED NOT RUN. External independent refs newly approved 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS.
 
 **Changes:** PROJECT_PLAN EN/KO, INTEGRATED_PLANNING_MASTER EN/KO, UPDATE_LOG EN/KO, this bilingual worklog and bilingual internal/GitHub update notes. No runtime/DB/WLD/ledger/Test/Production/main changes. Final GitHub PR/CI evidence recorded separately; keep Draft/HOLD.
+
+**GitHub linkage:** Draft/HOLD PR #2105 (parent #2101), issue #2100 updated; initial SHA ad503bf4756d3308203c7d735ab5c0a16fd62fa4 docs CI #41136736297 and Build Test Candidate #41136717130 succeeded. Final docs commit CI requires separate verification. Not a runtime or release approval.

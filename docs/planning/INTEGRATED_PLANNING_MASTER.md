@@ -1,7 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1542 — F675-191 Preflight: Bind the Affected Target and Reject Stale Evidence (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle:** Previous Feature Addition v1540 → Current Feature Improvement v1542 → Next Feature Addition v1544 (provisional). **Authority:** origin/main 761a55a094fb9dd383d213e817305e68c79fa23c rechecked at start and mid, AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity; stacked after Draft #2101, handoff #2100. Docs only. No implementation, merge or release.
+**Cycle:** Previous Feature Addition v1540 → Current Feature Improvement v1542 → Next Feature Addition v1544 (provisional). **Authority:** origin/main 761a55a094fb9dd383d213e817305e68c79fa23c rechecked at start and mid, AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity; Draft #2105 stacked after Draft #2101, handoff #2100. Docs only. No implementation, merge or release.
 
 ### Source-grounded defect and design alternatives
 - v1540's preflight request includes only candidateId and slot. The parent F675-190 preview is expressly for an equipped item **expiring within 7 or 30 days**, but without expectedTargetCatalogId and withinDays the preflight cannot prove it is reviewing that affected item. An owner may submit a valid candidate for an unrelated slot, or the slot occupant may have changed between screens; a generic REVIEWABLE would be misleading. This is a **design-contract omission**, not a confirmed exploit.

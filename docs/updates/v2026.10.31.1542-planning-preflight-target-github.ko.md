@@ -11,3 +11,5 @@
 **근거:** QA v1405 main 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 전체 의존성 감사 FAIL. B Draft #2103은 QA v1406 정확 SHA 경로 증빙 누락을 언급. 공식 Test·DB 권한/체크섬·독립 복원 미증명. 합성 10,001개 수용시험 미실행. 외부 독립 근거 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 
 **변경:** 영문/국문 통합 기획서·업데이트 로그·회차 일지·내부/GitHub 기록만 변경. 런타임/DB/WLD/원장/Test/Production/main 변경 없음. 최종 PR/CI는 별도 기록, Draft/HOLD 유지.
+
+**GitHub 연결 기록:** Draft/HOLD PR #2105(선행 #2101), 개발 이슈 #2100 댓글 갱신, 첫 커밋 ad503bf4756d3308203c7d735ab5c0a16fd62fa4의 문서 CI #41136736297 및 Build Test Candidate #41136717130 성공. 최종 문서 커밋의 CI는 별도 확인. 실제 기능·운영 승인 아님.
