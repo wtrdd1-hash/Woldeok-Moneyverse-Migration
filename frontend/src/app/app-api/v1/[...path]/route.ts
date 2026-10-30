@@ -335,7 +335,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
-  }
 
 
   if (workAvailability && availabilityValues.length === 1 && response.ok) {
@@ -419,7 +418,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
       }
-      }
       if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
           compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
         // Older backend images returned a redundant internal storage key.
@@ -436,7 +434,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       if (walletRange && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
-      }
       }
       return new NextResponse(bytes, { status: response.status, headers });
     }

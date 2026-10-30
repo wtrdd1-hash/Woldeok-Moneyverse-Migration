@@ -25,4 +25,3 @@ export function workTasksApiPath(selected: string | null, maxReward: string | nu
   const query = params.toString();
   return query ? `/api/v1/work/tasks?${query}` : '/api/v1/work/tasks';
 }
-}

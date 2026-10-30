@@ -174,7 +174,6 @@ export function CareerTasksBoard({
               className="size-4 accent-primary focus-visible:ring-2 focus-visible:ring-ring" />
             {isEn ? 'Only tasks with daily quota remaining' : '일일 수행 한도가 남은 업무만 보기'}
           </label>
-          </label>
           <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
           <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
             {isEn ? 'Reset server filters' : '서버 필터 초기화'}

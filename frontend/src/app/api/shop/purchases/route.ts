@@ -70,6 +70,5 @@ export async function GET(request: Request): Promise<NextResponse> {
       { status: 503, headers: PRIVATE_HEADERS },
     );
   }
-  }
   return NextResponse.json(verified, { headers: PRIVATE_HEADERS });
 }
