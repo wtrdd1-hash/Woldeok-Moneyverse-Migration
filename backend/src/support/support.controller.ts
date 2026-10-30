@@ -54,6 +54,18 @@ export class SupportController {
   }
   }
 
+  @Get('threads/summary')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Status counts among my latest 100 support conversations (not all-time totals)' })
+  async summary(@Req() req: RequestWithSession) {
+    try {
+      return await this.repo().myThreadSummary(requireUserId(req));
+    } catch {
+      throw new ServiceUnavailableException('support summary is unavailable');
+    }
+  }
+
   @Post('threads') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Open an administrator support conversation' })
   async create(@Req() req: RequestWithSession, @Body() body: NewThreadDto) {
     const thread = await this.repo().createThread(requireUserId(req), body.idempotencyKey, body.subject, body.body);

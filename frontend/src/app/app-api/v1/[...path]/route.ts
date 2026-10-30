@@ -1,5 +1,6 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseSupportSummary } from '@/lib/support-summary';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -165,6 +166,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       } catch {
         return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
       }
+    }
+  }
+
+  // A stale backend must not provide invented owner-private support counts.
+  if (parts.length === 3 && parts[0] === 'support' &&
+      parts[1] === 'threads' && parts[2] === 'summary' && request.method === 'GET' && response.ok) {
+    try {
+      if (!parseSupportSummary(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
+          'support status counts are unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
+        'support status counts are unavailable');
     }
   }
 

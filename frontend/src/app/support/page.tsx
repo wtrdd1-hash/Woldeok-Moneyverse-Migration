@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import { parseSupportSummary } from '@/lib/support-summary';
 import { NewSupportThreadForm, SupportReplyForm } from './member-support-forms';
 
 export const dynamic = 'force-dynamic';
@@ -18,10 +19,13 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const q = typeof params.q === 'string' && params.q.length <= 80 && ![...params.q].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
     ? params.q.trim() : '';
   const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}) });
-  const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ''}`;
+  const path = /api/v1/support/threads${filters.size ? ?${filters}` : ''};
   const { threads } = q
     ? await api<{ threads: Thread[] }>(path, {})
     : await api<{ threads: Thread[] }>(path);
+  const summary = parseSupportSummary(
+    await api<unknown>('/api/v1/support/threads/summary').catch(() => null),
+  );
   // A stale or forged selected ID must not trigger an additional private read.
   const selected = threads.find(t => t.thread_id === params.thread)?.thread_id ?? threads[0]?.thread_id;
   const messages = selected
@@ -30,6 +34,25 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
+      <section aria-label="최근 문의 상태 요약" className="rounded-xl border bg-card p-3">
+        <h2 className="text-sm font-bold">최근 최대 100건 기준 문의 현황</h2>
+        {!summary ? (
+          <p role="status" className="text-sm text-muted-foreground">문의 현황을 확인할 수 없습니다.</p>
+        ) : (
+          <>
+            <dl className="mt-2 grid grid-cols-3 gap-2 text-center text-sm">
+              <div><dt>관리자 답변 대기</dt><dd className="font-bold">{summary.open}건</dd></div>
+              <div><dt>내 답변 대기</dt><dd className="font-bold">{summary.waitingUser}건</dd></div>
+              <div><dt>처리 완료</dt><dd className="font-bold">{summary.resolved}건</dd></div>
+            </dl>
+            {summary.mayBeIncomplete && (
+              <p role="status" className="mt-2 text-xs text-muted-foreground">
+                최근 100건만 집계했습니다. 전체 문의 건수와 다를 수 있습니다.
+              </p>
+            )}
+          </>
+        )}
+      </section>
       <NewSupportThreadForm />
       <form method="get" action="/support" className="grid gap-2 rounded-xl border bg-card p-3">
         <label htmlFor="support-search" className="text-sm font-semibold">문의 제목 검색</label>
