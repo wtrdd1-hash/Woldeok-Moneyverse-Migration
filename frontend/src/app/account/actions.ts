@@ -9,6 +9,35 @@ import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 const PROVIDERS = new Set(['discord', 'google']);
 const UNLINK_IDENTITY_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PRIVACY_REQUEST_TYPES = new Set(['access', 'correction', 'restriction', 'withdrawal', 'deletion']);
+
+// A parsed date alone is not proof: Date silently normalizes impossible calendar days.
+function canonicalUtcTimestamp(value: unknown): value is string {
+  return typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
+    !Number.isNaN(Date.parse(value)) && new Date(value).toISOString() === value;
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown> : null;
+}
+
+function privacyReceipt(value: unknown, requestType: string): Record<string, unknown> | null {
+  const receipt = record(value);
+  return receipt && typeof receipt.requestId === 'string' &&
+    UNLINK_IDENTITY_UUID.test(receipt.requestId) && receipt.requestType === requestType &&
+    receipt.status === 'received' && canonicalUtcTimestamp(receipt.createdAt) &&
+    typeof receipt.replayed === 'boolean' ? receipt : null;
+}
+
+function accountDeletionReceipt(value: unknown): boolean {
+  const receipt = record(value);
+  return !!receipt && canonicalUtcTimestamp(receipt.deletedAt) &&
+    typeof receipt.revokedSessionCount === 'number' &&
+    Number.isSafeInteger(receipt.revokedSessionCount) && receipt.revokedSessionCount >= 0 &&
+    typeof receipt.replayed === 'boolean';
+}
 
 /**
  * Begins linking another sign-in method.
@@ -105,7 +134,7 @@ export async function createPrivacyRequest(
   const requestType = String(formData.get('requestType') ?? '');
   const detail = String(formData.get('detail') ?? '').trim();
 
-  if (requestType === '') return { status: 'error', message: '요청 종류를 선택해 주세요.' };
+  if (!PRIVACY_REQUEST_TYPES.has(requestType)) return { status: 'error', message: '요청 종류를 확인해 주세요.' };
   if (requestType === 'correction' && detail === '') {
     return { status: 'error', message: '정정 요청은 간단한 설명이 필요해요.' };
   }
@@ -114,13 +143,32 @@ export async function createPrivacyRequest(
   }
 
   try {
-    await mutate('/api/v1/privacy/requests', {
+    const receipt = privacyReceipt(await mutate<unknown>('/api/v1/privacy/requests', {
       body: {
         requestType,
         ...(detail === '' ? {} : { detail }),
         idempotencyKey: idempotencyKey(),
       },
-    });
+    }), requestType);
+    if (!receipt) {
+      return { status: 'error', message: '요청 결과를 확인할 수 없어요. 개인정보 요청 기록을 확인해 주세요.' };
+    }
+    // Only a fresh owner-scoped readback can prove that the request is recorded.
+    let readback: unknown;
+    try {
+      readback = await api<unknown>('/api/v1/privacy/requests');
+    } catch {
+      return { status: 'error', message: '접수 기록을 다시 확인할 수 없어요. 개인정보 센터에서 확인해 주세요.' };
+    }
+    const requests = record(readback)?.requests;
+    if (!Array.isArray(requests) || !requests.some((row: unknown) => {
+      const listed = record(row);
+      return listed && listed.requestId === receipt.requestId &&
+        listed.requestType === requestType && listed.status === receipt.status &&
+        listed.createdAt === receipt.createdAt;
+    })) {
+      return { status: 'error', message: '접수 기록이 확인되지 않았어요. 개인정보 센터에서 확인해 주세요.' };
+    }
     revalidatePath('/account');
     revalidatePath('/account/privacy');
     return { status: 'ok', message: '요청을 접수 기록으로 남겼어요.' };
@@ -145,7 +193,10 @@ export async function deleteAccount(
   }
 
   try {
-    await mutate('/api/v1/account', { method: 'DELETE' });
+    const receipt = await mutate<unknown>('/api/v1/account', { method: 'DELETE' });
+    if (!accountDeletionReceipt(receipt)) {
+      return { status: 'error', message: '계정 삭제 결과를 확인할 수 없어요. 계정 상태를 확인해 주세요.' };
+    }
   } catch (error) {
     return failure(error, '삭제하지 못했어요. 본인 확인을 먼저 완료해 주세요.');
   }
