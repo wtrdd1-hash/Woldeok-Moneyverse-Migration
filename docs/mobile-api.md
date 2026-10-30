@@ -42,3 +42,7 @@ Based on OpenAPI 3.0 tags and App Gateway route groups. Standard application cli
 | **`privacy` / `content` / `activity`** | Data Subject Requests (DSR), public announcements, system status, telemetry |
 
 > ⚠️ The `admin` and `discord` groups are not public app-client APIs and remain strictly protected for authorized administrators.
+
+### Owner-private recent security activity category (P1 candidate; HOLD)
+
+`GET /app-api/v1/account/security/events?category=all|login|settings` forwards the signed-in Android session to the guarded NestJS endpoint. Omitted category defaults to `all`; duplicate or invalid values return HTTP 400. The backend reads the owner's latest 20 events using `account_recent_security_events` before filtering. This is not all-time history. `login` is successful local sign-in; `settings` covers known password/email request and change types. Unknown event types appear only under `all`. Successful responses are strictly validated as `{events:[{type,createdAt}]}` and rejected with 503 if malformed or inconsistent with the selected category. All success/error responses use `private, no-store` and `noindex`; no IP, token, or audit metadata is returned. Candidate is not deployed.

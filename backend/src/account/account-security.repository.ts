@@ -33,6 +33,16 @@ export interface MemberSecurityEventView {
   readonly createdAt: string;
 }
 
+export type SecurityEventCategory = 'all' | 'login' | 'settings';
+
+const SECURITY_SETTINGS_EVENTS = new Set([
+  'local_password_reset_requested',
+  'local_password_reset_completed',
+  'local_password_changed',
+  'local_email_change_requested',
+  'local_email_changed',
+]);
+
 interface RevokedCountRow {
   readonly revoked_sessions: number;
 }
@@ -63,13 +73,25 @@ export class AccountSecurityRepository {
     }));
   }
 
-  async recentEvents(userId: string): Promise<MemberSecurityEventView[]> {
+  async recentEvents(
+    userId: string,
+    category: SecurityEventCategory = 'all',
+  ): Promise<MemberSecurityEventView[]> {
+    // Always fetch the owner's latest 20 first. Filtering must not imply full-history coverage.
     const rows = await queryRows<SecurityEventRow>(
       this.pool,
       `SELECT event_type, created_at FROM account_recent_security_events($1::uuid, 20)`,
       [userId],
     );
-    return rows.map((row) => ({ type: row.event_type, createdAt: row.created_at.toISOString() }));
+    const events = rows.map((row) => ({
+      type: row.event_type,
+      createdAt: row.created_at.toISOString(),
+    }));
+    if (category === 'login')
+      return events.filter((event) => event.type === 'local_login_succeeded');
+    if (category === 'settings')
+      return events.filter((event) => SECURITY_SETTINGS_EVENTS.has(event.type));
+    return events;
   }
 
   async revokeOtherSession(

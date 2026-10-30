@@ -13,3 +13,10 @@
 
 ## Finished
 - PENDING. No merge, production deployment, service restart, DB change, branch deletion or rollback authorized by this candidate.
+
+## In-progress checkpoint (2026-10-30 13:00 KST)
+- RED: backend 3 failing tests, frontend 3 failing tests; second RED for stale/malformed Android upstream responses; media-type RED confirmed.
+- GREEN: backend repository/controller/privacy 9 PASS; web + Android gateway + existing app gateway regression 62 PASS; app gateway media guard 52 PASS.
+- Added strict owner category validation, 20-event post-read filtering, web selection and fail-closed mismatch handling, Android proxy schema/category validation, EN/KO feature and mobile API docs.
+- Re-fetched origin/main mid-task: unchanged `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`.
+- Remaining: typecheck, lint, build, database/ACL proof, full suites, exact-SHA CI, release HOLD decision.

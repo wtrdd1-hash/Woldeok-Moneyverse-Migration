@@ -1,6 +1,11 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import {
+  parseSecurityEventCategory,
+  securityEventsMatchCategory,
+} from '@/lib/security-event-category';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -27,7 +32,10 @@ function parseAppVersion(value: string | null): [number, number, number] | null 
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
-function isVersionBelow(current: [number, number, number], minimum: [number, number, number]): boolean {
+function isVersionBelow(
+  current: [number, number, number],
+  minimum: [number, number, number],
+): boolean {
   for (let i = 0; i < 3; i += 1) {
     if (current[i]! !== minimum[i]!) return current[i]! < minimum[i]!;
   }
@@ -37,7 +45,10 @@ function isVersionBelow(current: [number, number, number], minimum: [number, num
 function looksLikeOfficialAndroid(request: NextRequest): boolean {
   const client = request.headers.get('x-moneyverse-client')?.toLowerCase();
   const userAgent = request.headers.get('user-agent') ?? '';
-  return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
+  return (
+    client === 'android' &&
+    /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent)
+  );
 }
 
 function internalToken(): string {
@@ -54,33 +65,90 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } },
+    {
+      status,
+      headers: {
+        'content-type': 'application/problem+json',
+        'cache-control': 'private, no-store',
+        'x-robots-tag': 'noindex',
+      },
+    },
   );
 }
 
 async function proxy(request: NextRequest, parts: readonly string[]): Promise<NextResponse> {
   if (parts.length === 2 && parts[0] === 'meta' && parts[1] === 'contract') {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return gatewayProblem(405, 'Method Not Allowed', 'app_gateway_method_not_allowed', 'contract metadata is read-only');
+      return gatewayProblem(
+        405,
+        'Method Not Allowed',
+        'app_gateway_method_not_allowed',
+        'contract metadata is read-only',
+      );
     }
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
-    const response = contractJson(appApiContract(origin), { status: 200, headers: { 'cache-control': 'public, max-age=300' } });
-    return request.method === 'HEAD' ? new NextResponse(null, { status: response.status, headers: response.headers }) : response;
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
+    const response = contractJson(appApiContract(origin), {
+      status: 200,
+      headers: { 'cache-control': 'public, max-age=300' },
+    });
+    return request.method === 'HEAD'
+      ? new NextResponse(null, { status: response.status, headers: response.headers })
+      : response;
   }
 
   const path = appGatewayPath(parts);
-  if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  if (!path)
+    return gatewayProblem(
+      404,
+      'Not Found',
+      'app_gateway_path',
+      'this path is not part of the public app API',
+    );
+
+  const securityEventPath =
+    parts.length === 3 &&
+    parts[0] === 'account' &&
+    parts[1] === 'security' &&
+    parts[2] === 'events';
+  const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
+  const securityCategory = securityEventPath
+    ? parseSecurityEventCategory(categoryValues.length > 1 ? categoryValues : categoryValues[0])
+    : 'all';
+  if (securityEventPath && securityCategory === null) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'invalid_security_category',
+      'security event category must be all, login or settings',
+    );
+  }
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
     if (!minimumVersion) {
-      return gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'app_gateway_version_policy_invalid',
+        'the app compatibility policy is unavailable',
+      );
     }
     const currentVersion = parseAppVersion(request.headers.get('x-moneyverse-app-version'));
     if (!currentVersion || isVersionBelow(currentVersion, minimumVersion)) {
-      const response = gatewayProblem(426, 'Upgrade Required', 'app_upgrade_required', `app version ${minimumVersionRaw} or newer is required`);
+      const response = gatewayProblem(
+        426,
+        'Upgrade Required',
+        'app_upgrade_required',
+        `app version ${minimumVersionRaw} or newer is required`,
+      );
       response.headers.set('x-moneyverse-min-app-version', minimumVersionRaw);
       return response;
     }
@@ -106,7 +174,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     request.nextUrl.searchParams.get('client') === 'mobile'
   ) {
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
     return contractJson({
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
@@ -140,47 +214,100 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   } catch (error: unknown) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'TimeoutError' || name === 'AbortError') {
-      return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
+      return gatewayProblem(
+        504,
+        'Gateway Timeout',
+        'app_gateway_timeout',
+        'the private API did not answer within 15 seconds',
+      );
     }
-    return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+    return gatewayProblem(
+      502,
+      'Bad Gateway',
+      'app_gateway_unavailable',
+      'the private API could not be reached',
+    );
   }
 
   // A legacy upload backend may echo scanner signatures or filesystem paths.
   // Preserve the HTTP failure class without exposing its untrusted response body.
   if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && !response.ok) {
     const status = response.status >= 500 ? 503 : response.status;
-    return gatewayProblem(status, 'Chat Upload Rejected', 'chat_upload_failed', 'The image upload could not be completed');
+    return gatewayProblem(
+      status,
+      'Chat Upload Rejected',
+      'chat_upload_failed',
+      'The image upload could not be completed',
+    );
   }
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
-      return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'vip_chest_unverified',
+        'VIP reward receipts are unavailable',
+      );
     }
     if (parts[3] === 'status' && request.method === 'GET' && response.ok) {
       try {
         if (!parseVipChestStatus(await response.clone().json())) {
-          return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP entitlement and receipt status are unverified');
+          return gatewayProblem(
+            503,
+            'Service Unavailable',
+            'vip_chest_unverified',
+            'VIP entitlement and receipt status are unverified',
+          );
         }
       } catch {
-        return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'vip_chest_unverified',
+          'VIP status response is invalid',
+        );
       }
     }
   }
 
   // A stale backend must not provide invented owner-private support counts.
-  if (parts.length === 3 && parts[0] === 'support' &&
-      parts[1] === 'threads' && parts[2] === 'summary' && request.method === 'GET' && response.ok) {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'support' &&
+    parts[1] === 'threads' &&
+    parts[2] === 'summary' &&
+    request.method === 'GET' &&
+    response.ok
+  ) {
     try {
       if (!parseSupportSummary(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
-          'support status counts are unavailable');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'support_summary_unverified',
+          'support status counts are unavailable',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
-        'support status counts are unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'support_summary_unverified',
+        'support status counts are unavailable',
+      );
     }
+  }
+
+  if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(
+      503,
+      'Service Unavailable',
+      'security_events_unverified',
+      'security activity evidence is unavailable',
+    );
   }
 
   const headers = appendAppContractHeaders(new Headers());
@@ -192,8 +319,28 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  if (
+    parts[0] === 'wallet' ||
+    parts[0] === 'privacy' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    parts[0] === 'notifications' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    privateShopReceipts
+  )
+    headers.set('cache-control', 'private, no-store');
+  if (
+    parts[0] === 'wallet' ||
+    parts[0] === 'privacy' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    parts[0] === 'notifications' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    privateShopReceipts
+  )
+    headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -205,17 +352,50 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
-      if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
-          compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
+      if (securityEventPath && response.ok) {
+        const verified = parseSecurityEvents(compatible);
+        if (
+          verified === null ||
+          securityCategory === null ||
+          !securityEventsMatchCategory(verified, securityCategory)
+        ) {
+          return gatewayProblem(
+            503,
+            'Service Unavailable',
+            'security_events_unverified',
+            'security activity evidence is unavailable',
+          );
+        }
+      }
+      if (
+        parts[0] === 'content' &&
+        parts[1] === 'chat' &&
+        parts[2] === 'upload' &&
+        response.ok &&
+        compatible !== null &&
+        typeof compatible === 'object' &&
+        !Array.isArray(compatible)
+      ) {
         // Older backend images returned a redundant internal storage key.
         // Keep the owner-authorized URL but never expose a second raw key field.
         const publicReceipt = { ...compatible } as Record<string, unknown>;
         delete publicReceipt.storageKey;
         delete publicReceipt.storage_key;
-        return new NextResponse(JSON.stringify(publicReceipt), { status: response.status, headers });
+        return new NextResponse(JSON.stringify(publicReceipt), {
+          status: response.status,
+          headers,
+        });
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (securityEventPath && response.ok) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'security_events_unverified',
+          'security activity evidence is unavailable',
+        );
+      }
       return new NextResponse(bytes, { status: response.status, headers });
     }
   }
@@ -229,9 +409,28 @@ async function handle(request: NextRequest, context: Context) {
   const response = await proxy(request, parts);
   // Help publication metadata and member-scoped reads must not inherit a
   // cacheable upstream policy, including when the upstream returns an error.
-  if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  if (
+    parts[0] === 'help' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    parts[0] === 'bank' ||
+    parts[0] === 'banking' ||
+    parts[0] === 'chat' ||
+    (parts[0] === 'content' && parts[1] === 'chat')
+  ) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+    if (
+      parts[0] === 'help' ||
+      parts[0] === 'work' ||
+      parts[0] === 'support' ||
+      parts[0] === 'collections' ||
+      (parts[0] === 'account' && parts[1] === 'security') ||
+      parts[0] === 'chat' ||
+      (parts[0] === 'content' && parts[1] === 'chat')
+    )
+      response.headers.set('x-robots-tag', 'noindex');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

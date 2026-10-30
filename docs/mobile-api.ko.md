@@ -42,3 +42,7 @@ OpenAPI 3.0 태그 및 App Gateway 라우트 그룹 기준입니다. 일반 앱 
 | **`privacy` / `content` / `activity`** | 개인정보 열람/삭제 DSR 신청, 공지사항/시스템 상태 조회, 활동 텔레메트리 |
 
 > ⚠️ `admin` 및 `discord` 그룹은 일반 앱 클라이언트용 공개 API가 아니며 내부 권한자 전용으로 보호됩니다.
+
+### 본인 최근 보안 활동 유형 (P1 후보·배포 보류)
+
+`GET /app-api/v1/account/security/events?category=all|login|settings`는 로그인된 Android 세션을 NestJS 보호 API로 전달합니다. 생략하면 `all`이며 중복·잘못된 유형은 HTTP 400입니다. 기존 `account_recent_security_events`로 본인 최근 20건을 조회한 후 필터링하므로 전체 기간 조회가 아닙니다. `login`은 로컬 로그인 성공, `settings`는 비밀번호·이메일 변경/요청이며 기타 유형은 `all`에서만 표시합니다. 성공 응답은 `{events:[{type,createdAt}]}` 형식을 검증하고 잘못된 데이터 또는 필터 불일치 시 503으로 거부합니다. 성공/오류 모두 `private, no-store`·`noindex`를 적용하며 IP·토큰·감사 원본 메타데이터를 공개하지 않습니다. 아직 배포하지 않았습니다.
