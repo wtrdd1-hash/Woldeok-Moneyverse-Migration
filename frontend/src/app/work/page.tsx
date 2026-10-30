@@ -13,12 +13,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
-import { normalizedWorkDuration, normalizedWorkRewardCeiling, workTasksApiPath } from './work-duration-filter';
+import { normalizedWorkAvailableOnly, normalizedWorkDuration, normalizedWorkRewardCeiling, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
@@ -59,18 +60,19 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage({ searchParams }: {
-  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string }>;
+  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string; availableOnly?: string }>;
 }) {
   await requireMember();
   const filters = await searchParams;
   const maxDurationSeconds = normalizedWorkDuration(filters?.maxDurationSeconds);
   const maxReward = normalizedWorkRewardCeiling(filters?.maxReward);
+  const availableOnly = normalizedWorkAvailableOnly(filters?.availableOnly);
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
   const [board, fullBoard, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
-    apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds, maxReward)),
-    (maxDurationSeconds || maxReward) ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
+    apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds, maxReward, availableOnly)),
+    (maxDurationSeconds || maxReward || availableOnly) ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
@@ -81,12 +83,14 @@ export default async function WorkPage({ searchParams }: {
     }>('/api/v1/work/qualifications'),
   ]);
 
-  const tasks = board?.tasks ?? [];
+  // Fail closed if a stale backend ignores the opt-in filter and returns an exhausted task.
+  const verifiedBoard = availableOnly && !isVerifiedAvailableWorkBoard(board) ? null : board;
+  const tasks = verifiedBoard?.tasks ?? [];
   const open = (assignments?.assignments ?? []).filter(isOpen);
   const paid = receipts?.receipts ?? [];
   const now = Date.now();
   // A filtered board must not erase server-provided durations for active assignments.
-  const durationTasks = maxDurationSeconds || maxReward ? (fullBoard?.tasks ?? []) : tasks;
+  const durationTasks = (maxDurationSeconds || maxReward || availableOnly) ? (fullBoard?.tasks ?? []) : tasks;
   const durations = new Map(durationTasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
 
   const activeJob = profile?.active_job;
@@ -310,15 +314,16 @@ export default async function WorkPage({ searchParams }: {
           </p>
         </div>
 
-        {board === null && (
+        {verifiedBoard === null && (
           <p role="alert" className="text-sm text-destructive">
             {isEn ? 'The task catalogue is temporarily unavailable.' : '업무 목록을 불러올 수 없습니다.'}
           </p>
         )}
-        {board !== null && (
+        {verifiedBoard !== null && (
           <CareerTasksBoard
             selectedMaxDuration={maxDurationSeconds}
           selectedMaxReward={maxReward}
+          selectedAvailableOnly={availableOnly}
             tasks={tasks}
             activeJobType={activeJob?.job_type}
             quotaBlock={quotaBlock}

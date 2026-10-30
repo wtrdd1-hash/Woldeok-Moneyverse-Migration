@@ -1,4 +1,4 @@
-﻿import type { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -8,6 +8,7 @@ import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/s
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -148,6 +149,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
+  const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
+  if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
+    return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -273,6 +280,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
   }
+
+
+  if (workAvailability && availabilityValues.length === 1 && response.ok) {
+    try {
+      if (!isVerifiedAvailableWorkBoard(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+    }
+  }
+
 
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {

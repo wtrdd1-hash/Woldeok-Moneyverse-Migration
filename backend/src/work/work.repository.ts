@@ -35,6 +35,14 @@ export function parseWorkTaskMaxReward(raw: unknown): string | null {
   throw new WorkInputError('maxReward must be a non-negative integer string with at most 18 digits');
 }
 
+/** Explicit opt-in only; absent means the legacy complete board. */
+export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
+  if (raw === undefined) return false;
+  if (raw === '1' || raw === true) return true;
+  throw new WorkInputError('availableOnly must be 1 when provided');
+}
+}
+
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
 export interface WorkAssignmentRow {
@@ -220,13 +228,14 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, maxReward?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, maxReward?: unknown, availableOnly?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     if (minReward !== undefined && (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
       throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
     const maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
     const ceiling = parseWorkTaskMaxReward(maxReward);
+    const availability = parseWorkTaskAvailableOnly(availableOnly === true ? '1' : availableOnly);
     if (ceiling !== null && typeof minReward === 'string' && BigInt(minReward) > BigInt(ceiling)) {
       throw new WorkInputError('minReward cannot exceed maxReward');
     }
@@ -234,11 +243,14 @@ export class WorkRepository {
     let extraFilters = '';
     if (maxDuration !== null) {
       params.push(maxDuration);
-      extraFilters += `\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
+      extraFilters += `\r\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
     }
     if (ceiling !== null) {
       params.push(ceiling);
-      extraFilters += `\n         AND task.reward_preview <= $${params.length}::numeric`;
+      extraFilters += `\r\n         AND task.reward_preview <= $${params.length}::numeric`;
+    }
+    if (availability) {
+      extraFilters += '\r\n         AND (task.daily_limit <= 0 OR task.taken_today < task.daily_limit)';
     }
     const rows = await queryRows<WorkTaskRow>(
       this.pool,

@@ -30,7 +30,11 @@ import {
   WorkCompletionDto,
   WorkDashboardResponseDto,
 } from './work.dto';
+<<<<<<< ours
 import { parseWorkTaskMaxDuration, parseWorkTaskMaxReward, WorkInputError, WorkRepository } from './work.repository';
+=======
+import { parseWorkTaskAvailableOnly, parseWorkTaskMaxDuration, WorkInputError, WorkRepository } from './work.repository';
+>>>>>>> theirs
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
 @ApiTags('work')
@@ -109,15 +113,26 @@ export class WorkController {
     @Req() request: RequestWithSession,
     @Query('minReward') minReward?: string,
     @Query('maxDurationSeconds') maxDurationSeconds?: unknown,
+<<<<<<< ours
     @Query('maxReward') maxReward?: unknown,
+=======
+    @Query('availableOnly') availableOnly?: unknown,
+>>>>>>> theirs
   ) {
     const repository = this.repository();
     const actor = requireUserId(request);
     let maxDuration: number | null;
+<<<<<<< ours
     let ceiling: string | null;
     try {
       maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
       ceiling = parseWorkTaskMaxReward(maxReward);
+=======
+    let availability: boolean;
+    try {
+      maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+      availability = parseWorkTaskAvailableOnly(availableOnly);
+>>>>>>> theirs
     } catch (error: unknown) {
       if (error instanceof WorkInputError) throw new BadRequestException(error.message);
       throw error;
@@ -125,8 +140,13 @@ export class WorkController {
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
       this.guarded(
+<<<<<<< ours
         () => ceiling !== null
           ? repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling)
+=======
+        () => availability
+          ? repository.tasks(actor, minReward, maxDuration ?? undefined, true)
+>>>>>>> theirs
           : maxDuration === null
             ? repository.tasks(actor, minReward)
             : repository.tasks(actor, minReward, maxDuration),

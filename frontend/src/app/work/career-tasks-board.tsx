@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useActionState } from 'react';
 import Link from 'next/link';
@@ -62,6 +62,7 @@ export function CareerTasksBoard({
   selectedDifficulty,
   selectedMaxDuration,
   selectedMaxReward,
+  selectedAvailableOnly = false,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
@@ -69,6 +70,7 @@ export function CareerTasksBoard({
   readonly selectedDifficulty?: string | null;
   readonly selectedMaxDuration?: string | null;
   readonly selectedMaxReward?: string | null;
+  readonly selectedAvailableOnly?: boolean;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -153,7 +155,7 @@ export function CareerTasksBoard({
               ))}
             </select>
           </label>
-          <label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
+<label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
             <span>{isEn ? 'Maximum preview WLD reward' : '최대 예상 WLD 보상'}</span>
             <select
               name="maxReward"
@@ -166,6 +168,12 @@ export function CareerTasksBoard({
                 <option key={value} value={value}>{isEn ? `Up to ${value} WLD` : `${value} WLD 이하`}</option>
               ))}
             </select>
+          </label>
+          <label className="inline-flex min-h-10 items-center gap-2 text-xs text-foreground">
+            <input type="checkbox" name="availableOnly" value="1" defaultChecked={selectedAvailableOnly}
+              className="size-4 accent-primary focus-visible:ring-2 focus-visible:ring-ring" />
+            {isEn ? 'Only tasks with daily quota remaining' : '일일 수행 한도가 남은 업무만 보기'}
+          </label>
           </label>
           <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
           <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
@@ -203,7 +211,7 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward
+            searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'
