@@ -2,6 +2,8 @@
 
 ## v2026.10.30.1498 — F675-180 배포 준비 매트릭스 중복 통합·신뢰 경계 강화 (기획 초안 / 운영 승격 보류)
 
+**GitHub 인계:** [Draft PR #1964](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1964)(#1960 종속), [기획 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959), [기존 중복 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829), [개발 DB 권한 P0 #993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993). **최초 확인 CI 진행 중, 최종 성공 주장 금지.**
+
 - 사이클: 이전 Feature Addition v1496 → 현재 Feature Improvement v1498 → 다음 Feature Addition v1500(잠정). 원격 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 확인. 미병합 Draft #1960의 문서 전용 후속이다.
 - **중복 제거:** F675-170/#1829(v1456 관리자 배포 준비 보드)는 F675-180/#1959와 중복된다. 과거 요구사항은 보존하되 **읽기 전용 V1 하나만** /admin/operations/release-readiness와 Nest 관리자 GET으로 구현한다. 구형 경로 별칭·두 번째 판정 엔진·V1 DB 테이블은 만들지 않는다. 불변 증거 테이블/수집은 별도 승인된 V2 마이그레이션으로 보류한다. 금융·권한·공식 Test·독립 복원·서명된 용량의 필수 게이트는 면제 불가; 선택 NOT_APPLICABLE은 서명된 정책 필요.
 - **QA v1384 개발 DB 권한 P0:** 08:19 KST 수집 증거에서 기본 테이블 253개, moneyverse_app 유효 UPDATE=211, DELETE=211, TRUNCATE=233개. SET ROLE에서 account_balances UPDATE/TRUNCATE와 audit_logs/users DELETE가 true다. 개발 DB의 권한 증거일 뿐 운영 침해나 WLD 이동의 증거는 아니다. 권한 출처·기본 권한·마이그레이션·역할을 격리 PostgreSQL에서 조사하며 실서버 무분별한 REVOKE 금지. QA v1384 최종 판정 미확인. ROOT 97%, DATA 97~98%(가용 5.7→5.4GiB)로 용량 HOLD.

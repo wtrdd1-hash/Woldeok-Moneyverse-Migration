@@ -1,3 +1,5 @@
 # Planning v1498 worklog (2026-10-30 KST)
 
 Start 09:01; Debian 13.6; ROOT 97%, DATA 97→98%; main 62c6cd038951d65c94b709302bdaec6e75b080b6. Feature Improvement following v1496 Addition. Read AGENTS, README, canonical EN/KR plans, installed Superpowers skills, actual admin API and app-api source, GitHub open PR/issues and QA v1384 read-only evidence. Found previously unmerged overlapping F675-170 #1829 and F675-180 #1959; preserved both and proposed one V1. QA v1384 DEV role privilege breadth 211 UPDATE, 211 DELETE, 233 TRUNCATE across 253 base tables; no Production claim. Documented stage-aware preflight/post-release, waiver non-bypass, policy/SHA/issuer attestation, P0 4/P1 6. No code/DB/Production changes. Acceptance tests planned only. External refs 0 new, cumulative UNKNOWN/10,000, BLOCKED. Release HOLD.
+
+GitHub 09:06 KST: Draft PR #1964 OPEN (base #1960), existing issues #1959/#1829/#993/#1170 updated with non-destructive comments. GitHub CI run #40977609776 initially IN_PROGRESS, final result not yet attested. Initial commit 257245fb7bc93f05bbcb73826a5da4481b478bcd; release classifier DOCS_ONLY, 17 PASS/0 FAIL. No merge/deploy.

@@ -2,6 +2,8 @@
 
 ## v2026.10.30.1498 — F675-180 Release-Readiness Evidence Matrix: Duplicate-Plan Reconciliation and Trust-Boundary Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**GitHub handoff:** [Draft PR #1964](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1964) (dependent on #1960); [planning issue #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959), historical duplicate [#1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829), DEV ACL P0 [#993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993). **CI in progress at initial check; no final CI success claim.**
+
 **Cycle:** Previous Feature Addition v1496 → Current Feature Improvement v1498 → Next Feature Addition v1500 (provisional). **Authority:** latest remote main 62c6cd038951d65c94b709302bdaec6e75b080b6 rechecked at start and mid-work; this is a dependent, docs-only successor to Draft PR #1960, not an implementation or merge authorization. English PROJECT_PLAN.md is canonical; Korean counterpart is equivalent.
 
 ### New source-backed P0 and duplicate-plan discovery

@@ -2,6 +2,8 @@
 
 ## v2026.10.30.1498 — F675-180 관리자 배포 준비 근거 매트릭스: 중복 기획 통합·신뢰 경계 강화 (기능 보완 / 초안 / 운영 승격 보류)
 
+**GitHub 인계:** [Draft PR #1964](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1964)(#1960 종속), [기획 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959), [기존 중복 #1829](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1829), [개발 DB 권한 P0 #993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993). **최초 확인 CI 진행 중, 최종 성공 주장 금지.**
+
 **사이클:** 이전 Feature Addition v1496 → 현재 Feature Improvement v1498 → 다음 Feature Addition v1500(잠정). **기준:** 최신 원격 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재확인. Draft PR #1960에 종속된 문서 전용 후속 기획이며 구현·병합·배포 승인이 아니다. 영문 PROJECT_PLAN.md가 정본이고 본 문서는 의미상 동등하다.
 
 ### 새 P0 증거 및 중복 기획 통합
