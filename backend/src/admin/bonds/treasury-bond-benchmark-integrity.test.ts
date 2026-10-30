@@ -8,14 +8,16 @@ describe('virtual treasury bond benchmarks', () => {
     expect(bondBenchmarkYield([{ symbol: 'KTB-01Y', status: 'FROZEN', annual_coupon_rate_bps: 450 }], 'KTB-01Y')).toBe('—');
   });
   it('publishes no synthetic missing yields in the actual repository overview', async () => {
-    const pool = { query: vi.fn().mockResolvedValue({ rows: [{ count: '1', total_funded: '10000', total: '0' }] }) };
+    const pool = { query: vi.fn(async (sql: string) => sql.includes('bond_public_read_totals')
+      ? { rows: [{ holders_count: '0', coupons_paid_wld: '0', repo_active_principal_wld: '0' }] }
+      : { rows: [{ count: '1', total_funded: '10000' }] }) };
     const repository = new TreasuryBondRepository(pool as unknown as Pool);
     vi.spyOn(repository, 'listBonds').mockResolvedValue([{ symbol: 'KTB-01Y', status: 'OPEN_SUBSCRIPTION', annual_coupon_rate_bps: 475 }] as never);
     const overview = await repository.getOverview();
     expect(overview.benchmark1YYield).toBe('4.75%');
     expect(overview.benchmark3YYield).toBe('—');
     expect(overview.benchmark5YYield).toBe('—');
-    expect(pool.query).toHaveBeenCalledTimes(4);
+    expect(pool.query).toHaveBeenCalledTimes(2);
   });
   it('uses the current listed rate only for open or trading virtual bonds', () => {
     expect(bondBenchmarkYield([{ symbol: 'KTB-01Y', status: 'OPEN_SUBSCRIPTION', annual_coupon_rate_bps: 475 }], 'KTB-01Y')).toBe('4.75%');

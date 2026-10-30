@@ -142,7 +142,7 @@ export class TreasuryBondRepository {
         total_funded_wld::text,
         status, description,
         created_at::text, updated_at::text
-      FROM public.treasury_bonds
+      FROM public.bond_public_catalog()
       ORDER BY maturity_hours ASC
     `);
     return res.rows;
@@ -159,43 +159,39 @@ export class TreasuryBondRepository {
         total_funded_wld::text,
         status, description,
         created_at::text, updated_at::text
-      FROM public.treasury_bonds
+      FROM public.bond_public_catalog()
       WHERE id = $1
     `, [id]);
     return res.rows[0] ?? null;
   }
 
   async getOverview(): Promise<TreasuryBondsOverview> {
-    const [bondsRes, holdingsRes, couponsRes, repoRes] = await Promise.all([
+    const [bondsRes, totalsRes] = await Promise.all([
       this.pool.query<{ count: string; total_funded: string }>(`
         SELECT COUNT(*)::text as count, COALESCE(SUM(total_funded_wld), 0)::text as total_funded
-        FROM public.treasury_bonds
+        FROM public.bond_public_catalog()
         WHERE status = 'OPEN_SUBSCRIPTION' OR status = 'TRADING'
       `),
-      this.pool.query<{ count: string }>(`
-        SELECT COUNT(DISTINCT user_id)::text as count
-        FROM public.treasury_bond_holdings
-        WHERE status = 'HOLDING'
-      `),
-      this.pool.query<{ total: string }>(`
-        SELECT COALESCE(SUM(amount_wld), 0)::text as total
-        FROM public.treasury_bond_coupon_logs
-      `),
-      this.pool.query<{ total: string }>(`
-        SELECT COALESCE(SUM(principal_wld), 0)::text as total
-        FROM public.treasury_bond_repo_loans
-        WHERE status = 'ACTIVE'
+      this.pool.query<{ holders_count: string; coupons_paid_wld: string; repo_active_principal_wld: string }>(`
+        SELECT * FROM public.bond_public_read_totals()
       `),
     ]);
+    const totals = totalsRes.rows[0];
+    if (!totals || !/^(0|[1-9][0-9]*)$/.test(totals.holders_count)
+      || !Number.isSafeInteger(Number(totals.holders_count))
+      || !/^(0|[1-9][0-9]*)$/.test(totals.coupons_paid_wld)
+      || !/^(0|[1-9][0-9]*)$/.test(totals.repo_active_principal_wld)) {
+      throw new ServiceUnavailableException('Bond market aggregate evidence unavailable');
+    }
 
     const bonds = await this.listBonds();
 
     return {
       totalBondsActive: Number(bondsRes.rows[0]?.count ?? '0'),
       totalFundedWld: bondsRes.rows[0]?.total_funded ?? '0',
-      totalHoldersCount: Number(holdingsRes.rows[0]?.count ?? '0'),
-      totalCouponsPaidWld: couponsRes.rows[0]?.total ?? '0',
-      totalRepoLoansWld: repoRes.rows[0]?.total ?? '0',
+      totalHoldersCount: Number(totals.holders_count),
+      totalCouponsPaidWld: totals.coupons_paid_wld,
+      totalRepoLoansWld: totals.repo_active_principal_wld,
       benchmark1YYield: bondBenchmarkYield(bonds, 'KTB-01Y'),
       benchmark3YYield: bondBenchmarkYield(bonds, 'KTB-03Y'),
       benchmark5YYield: bondBenchmarkYield(bonds, 'KTB-05Y'),
@@ -204,43 +200,14 @@ export class TreasuryBondRepository {
 
   async listUserHoldings(userId: string): Promise<BondHoldingRow[]> {
     const res = await this.pool.query<BondHoldingRow>(`
-      SELECT
-        h.id, h.user_id, h.bond_id,
-        b.symbol AS bond_symbol,
-        b.name AS bond_name,
-        h.units::text,
-        b.par_value_wld::text,
-        h.purchase_price_total_wld::text,
-        h.accrued_interest_wld::text,
-        b.hourly_coupon_rate_bps,
-        b.annual_coupon_rate_bps,
-        h.purchased_at::text,
-        h.maturity_at::text,
-        h.status,
-        h.auto_rollover,
-        h.collateral_locked,
-        GREATEST(0, ROUND(EXTRACT(EPOCH FROM (h.maturity_at - now())) / 3600))::int AS hours_left
-      FROM public.treasury_bond_holdings h
-      JOIN public.treasury_bonds b ON b.id = h.bond_id
-      WHERE h.user_id = $1
-      ORDER BY h.purchased_at DESC
+      SELECT * FROM public.bond_owner_holdings($1::uuid)
     `, [userId]);
     return res.rows;
   }
 
   async listUserRepoLoans(userId: string): Promise<BondRepoLoanRow[]> {
     const res = await this.pool.query<BondRepoLoanRow>(`
-      SELECT
-        l.id, l.holding_id, l.user_id,
-        b.name AS bond_name, b.symbol AS bond_symbol,
-        l.principal_wld::text, l.annual_interest_rate_bps,
-        l.accrued_interest_wld::text, l.ltv_percent,
-        l.status, l.created_at::text
-      FROM public.treasury_bond_repo_loans l
-      JOIN public.treasury_bond_holdings h ON h.id = l.holding_id
-      JOIN public.treasury_bonds b ON b.id = h.bond_id
-      WHERE l.user_id = $1
-      ORDER BY l.created_at DESC
+      SELECT * FROM public.bond_owner_repo_loans($1::uuid)
     `, [userId]);
     return res.rows;
   }

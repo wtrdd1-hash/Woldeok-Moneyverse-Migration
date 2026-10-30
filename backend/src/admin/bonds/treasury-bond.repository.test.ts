@@ -17,9 +17,8 @@ describe('TreasuryBondRepository subscription ledger containment', () => {
 describe('TreasuryBondRepository coupon-interest overview accounting', () => {
   it('excludes maturity principal repayments from cumulative coupon interest', async () => {
     const query = vi.fn(async (statement: string) => {
-      if (statement.includes('SUM(amount_wld)')) {
-        // The real event ledger contains both interest and principal payouts.
-        return { rows: [{ total: statement.includes("event_type = 'COUPON_INTEREST'") ? '42' : '10042' }] };
+      if (statement.includes('bond_public_read_totals')) {
+        return { rows: [{ holders_count: '0', coupons_paid_wld: '42', repo_active_principal_wld: '0' }] };
       }
       if (statement.includes('COUNT(*)::text')) return { rows: [{ count: '0', total_funded: '0' }] };
       if (statement.includes('COUNT(DISTINCT')) return { rows: [{ count: '0' }] };
@@ -29,6 +28,6 @@ describe('TreasuryBondRepository coupon-interest overview accounting', () => {
     const repository = new TreasuryBondRepository({ query } as unknown as Pool);
     const overview = await repository.getOverview();
     expect(overview.totalCouponsPaidWld).toBe('42');
-    expect(query.mock.calls.some(([sql]) => sql.includes("event_type = 'COUPON_INTEREST'"))).toBe(true);
+    expect(query.mock.calls.some(([sql]) => sql.includes('bond_public_read_totals'))).toBe(true);
   });
 });
