@@ -28,6 +28,13 @@ export function parseWorkTaskMaxDuration(raw: unknown): number | null {
   throw new WorkInputError('maxDurationSeconds must be an integer between 1 and 86400');
 }
 
+/** Read-only preview ceiling. Keep large WLD values as exact decimal strings. */
+export function parseWorkTaskMaxReward(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (typeof raw === 'string' && /^(?:0|[1-9][0-9]{0,17})$/.test(raw)) return raw;
+  throw new WorkInputError('maxReward must be a non-negative integer string with at most 18 digits');
+}
+
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
 
 export interface WorkAssignmentRow {
@@ -213,12 +220,26 @@ export class WorkRepository {
     );
   }
 
-  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, minReward?: unknown, maxDurationSeconds?: unknown, maxReward?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     if (minReward !== undefined && (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
       throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
     const maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+    const ceiling = parseWorkTaskMaxReward(maxReward);
+    if (ceiling !== null && typeof minReward === 'string' && BigInt(minReward) > BigInt(ceiling)) {
+      throw new WorkInputError('minReward cannot exceed maxReward');
+    }
+    const params: unknown[] = [actor, minReward ?? null];
+    let extraFilters = '';
+    if (maxDuration !== null) {
+      params.push(maxDuration);
+      extraFilters += `\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
+    }
+    if (ceiling !== null) {
+      params.push(ceiling);
+      extraFilters += `\n         AND task.reward_preview <= $${params.length}::numeric`;
+    }
     const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -228,8 +249,8 @@ export class WorkRepository {
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task
-       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${maxDuration === null ? '' : '\n         AND task.minimum_duration_seconds <= $3::integer'}`,
-      maxDuration === null ? [actor, minReward ?? null] : [actor, minReward ?? null, maxDuration],
+       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${extraFilters}`,
+      params,
     );
     const now = Date.now();
     return rows.map((task) => {

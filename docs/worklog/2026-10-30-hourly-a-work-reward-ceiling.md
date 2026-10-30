@@ -10,11 +10,14 @@ Status: **STARTED / IN PROGRESS / DRAFT / RELEASE HOLD**.
 - Required: RED/GREEN backend, frontend, app-api tests; isolated PostgreSQL; typecheck/lint/build/security/a11y/SEO/full suites; exact SHA CI/Test gate. No PASS without evidence.
 
 ## In progress
-- [ ] RED tests
-- [ ] Backend/DB read filter
-- [ ] Frontend form and server query
-- [ ] Android app-api proof
+- [x] RED tests (backend 15 failed, frontend 14 failed; before implementation)
+- [x] Backend/DB read filter (bound numeric ceiling over actor-scoped function)
+- [x] Frontend form and server query
+- [x] Android app-api test added; GREEN pending
 - [ ] QA/release evidence
 
 ## Finished
 Pending; no merge or deployment without complete release proof.
+
+## Mid-work checkpoint (16:32 KST)
+- Fresh main check unchanged. Implemented strict maxReward parser (0..18 decimal digits), actor-scoped PostgreSQL predicate, combined minReward/duration bounds, and UI/app-api forwarding. Existing work assignment and payout paths untouched.
