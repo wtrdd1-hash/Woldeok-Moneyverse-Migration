@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -38,8 +38,20 @@ export class StockCommunityController {
 export class PublicStockCommunityController {
   constructor(@Inject(StockCommunityService) private readonly community: StockCommunityService | null) {}
   @Get()
-  async list(@Query('stock') stock?: string) {
+  async list(@Query() query: Record<string, unknown>) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+      throw new BadRequestException('invalid board search');
+    }
+    const stock = query.stock;
+    const q = query.q;
+    if (stock !== undefined && (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))) {
+      throw new BadRequestException('invalid stock symbol');
+    }
+    if (q !== undefined && (typeof q !== 'string' || !q.trim() || q.trim().length > 80 ||
+        /[<>\u0000-\u001f\u007f]/.test(q))) {
+      throw new BadRequestException('invalid board search');
+    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return { posts: await this.community.publicList(stock) };
+    return { posts: await this.community.publicList(stock as string | undefined, q as string | undefined) };
   }
 }
