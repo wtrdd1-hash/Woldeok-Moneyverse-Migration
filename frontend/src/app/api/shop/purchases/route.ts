@@ -20,7 +20,29 @@ export async function GET(request: Request): Promise<NextResponse> {
   if (queries.length > 1 || Array.from(term).length > 80 || /[\u0000-\u001f\u007f]/.test(term)) {
     return NextResponse.json({ error: 'invalid purchase search' }, { status: 400, headers: PRIVATE_HEADERS });
   }
-  const path = `/api/v1/shop/purchases${term ? `?q=${encodeURIComponent(term)}` : ''}`;
+  const fromValues = params.getAll('from');
+  const toValues = params.getAll('to');
+  const from = fromValues[0];
+  const to = toValues[0];
+  const dateStart = (value: string | undefined): number | null => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const millis = Date.parse(`${value}T00:00:00+09:00`);
+    return Number.isFinite(millis) && new Date(millis + 9 * 60 * 60_000).toISOString().slice(0, 10) === value ? millis : null;
+  };
+  if (fromValues.length > 1 || toValues.length > 1 || (from === undefined) !== (to === undefined)) {
+    return NextResponse.json({ error: 'invalid purchase date range' }, { status: 400, headers: PRIVATE_HEADERS });
+  }
+  if (from !== undefined && to !== undefined) {
+    const start = dateStart(from);
+    const last = dateStart(to);
+    if (start === null || last === null || last < start || (last - start) / 86_400_000 >= 366) {
+      return NextResponse.json({ error: 'invalid purchase date range' }, { status: 400, headers: PRIVATE_HEADERS });
+    }
+  }
+  const path = `/api/v1/shop/purchases${term || from ? `?${[
+    ...(term ? [`q=${encodeURIComponent(term)}`] : []),
+    ...(from && to ? [`from=${from}`, `to=${to}`] : []),
+  ].join('&')}` : ''}`;
   const data = await apiOrNull<unknown>(path);
   if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
     return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });

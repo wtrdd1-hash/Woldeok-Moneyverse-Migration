@@ -12,3 +12,14 @@ describe('shop receipt search accessibility', () => {
     expect(html).toContain('최근 100건');
   });
 });
+
+describe('shop receipt date range accessibility', () => {
+  it('renders two labelled date inputs and explicit apply and clear controls', () => {
+    const html = renderToStaticMarkup(<MyReceipts />);
+    expect(html).toContain('name="receiptFrom"');
+    expect(html).toContain('name="receiptTo"');
+    expect(html).toContain('날짜 적용');
+    expect(html).toContain('날짜 초기화');
+    expect(html).toContain('한국시간');
+  });
+});

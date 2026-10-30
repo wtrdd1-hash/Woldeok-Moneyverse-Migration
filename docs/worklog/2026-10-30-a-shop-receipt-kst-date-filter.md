@@ -1,0 +1,11 @@
+# Development A — owner-private shop receipt KST date range (2026-10-30)
+
+Status: **DRAFT / RELEASE HOLD**. English canonical; [Korean record](2026-10-30-a-shop-receipt-kst-date-filter.ko.md).
+
+Baseline main: `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`. Isolated `auto/hourly-a-20261030-1500-shop-receipt-dates` worktree. QA v1390 and the English/Korean living project plans reviewed before coding and at midpoint. No other worktree or unmerged commit was modified.
+
+Member-only shop purchase receipts now accept paired `from`/`to` ISO calendar dates, inclusive in `Asia/Seoul`, up to 366 days. Name and date filters combine **only over the owner's latest 100 purchases**. With no filter the legacy latest-30 response remains. The existing `shop_list_my_purchases` SECURITY DEFINER function enforces owner scope. Invalid, duplicate, partial or reversed dates are rejected before querying; the Next BFF and Android gateway retain private/no-store/noindex. Web has labelled native date inputs and explicit Apply/Clear and error states. No new DB migration, grant, ledger mutation or money arithmetic.
+
+Evidence: TDD RED then target GREEN (backend 8, frontend/Android 9); full TypeScript and build PASS; lint 0 errors/1043 pre-existing warnings; mobile API contract PASS (183 endpoints); DB unit 56 PASS/4 SKIP; isolated PostgreSQL 17.11 applied 305 numbered migrations, synthetic 108 balanced transactions, owner 30/100 bounds, KST day boundary, direct purchase SELECT/INSERT denied, transaction rollback PASS; security policy tests 11 PASS and production audit 0 known vulnerabilities. Existing full suites remain RED (backend 119 FAIL; frontend 53 FAIL). Prettier of existing files remains nonconformant. Official Test exact-SHA authenticated E2E, off-host restore and GitOps release gate not certified.
+
+**No main merge, official Test or Production deployment, service restart, production DB change, rollback or branch deletion.** Rollback is to omit date query parameters and controls, retaining existing search/30/100 behavior. Branch must remain unmerged until all required gates and exact-SHA official Test pass. The isolated fixture was rolled back; its dedicated test container remains for controlled cleanup, not used by production.

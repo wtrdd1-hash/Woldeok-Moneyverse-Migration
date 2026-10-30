@@ -24,3 +24,20 @@ describe('Android owner-private shop receipt search', () => {
     expect((await response.json()).purchases[0].amount).toBe('9007199254740993');
   });
 });
+
+describe('Android owner-private KST shop receipt date filter', () => {
+  it('forwards from/to and session with private headers', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ purchases: [] }), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const request = new NextRequest('https://easy-scraping.com/app-api/v1/shop/purchases?from=2026-10-29&to=2026-10-30', { headers: { cookie: 'moneyverse_session=owner-session' } });
+    const response = await GET(request, { params: Promise.resolve({ path: ['shop', 'purchases'] }) });
+    expect(response.status).toBe(200);
+    const [target, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(new URL(String(target)).searchParams.get('from')).toBe('2026-10-29');
+    expect(new URL(String(target)).searchParams.get('to')).toBe('2026-10-30');
+    expect(new Headers(init.headers).get('cookie')).toBe('moneyverse_session=owner-session');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+});

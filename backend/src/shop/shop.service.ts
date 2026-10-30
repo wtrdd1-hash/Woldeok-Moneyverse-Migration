@@ -64,6 +64,8 @@ export interface ShopCatalogOptions {
 export interface ShopPurchasesOptions {
   readonly limit?: unknown;
   readonly query?: unknown;
+  readonly from?: unknown;
+  readonly to?: unknown;
 }
 
 function receiptSearchTerm(value: unknown): string | null {
@@ -74,6 +76,26 @@ function receiptSearchTerm(value: unknown): string | null {
     throw new ShopInputError('purchase search must be at most 80 characters without control bytes');
   }
   return term ? term.toLocaleLowerCase('ko-KR') : null;
+}
+
+/** Inclusive Korean calendar days, translated to a UTC half-open interval. */
+function receiptKstRange(from: unknown, to: unknown): { start: number; end: number } | null {
+  if (from === undefined && to === undefined) return null;
+  const dayStart = (value: unknown): number => {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new ShopInputError('purchase dates require YYYY-MM-DD');
+    }
+    const start = Date.parse(`${value}T00:00:00+09:00`);
+    if (!Number.isFinite(start) || new Date(start + 9 * 60 * 60_000).toISOString().slice(0, 10) !== value) {
+      throw new ShopInputError('purchase date is not a real calendar day');
+    }
+    return start;
+  };
+  const start = dayStart(from);
+  const last = dayStart(to);
+  const days = (last - start) / 86_400_000 + 1;
+  if (days < 1 || days > 366) throw new ShopInputError('purchase date range must be 1 to 366 days');
+  return { start, end: last + 86_400_000 };
 }
 
 export interface ShopPurchaseRequest {
@@ -167,16 +189,20 @@ export class ShopService {
 
   async myPurchases(
     authenticatedUserId: string,
-    { limit = 30, query }: ShopPurchasesOptions = {},
+    { limit = 30, query, from, to }: ShopPurchasesOptions = {},
   ): Promise<ShopPurchaseView[]> {
     const userId = requireShopUuid(authenticatedUserId, 'authenticated user id');
     const term = receiptSearchTerm(query);
+    const range = receiptKstRange(from, to);
     // The SECURITY DEFINER read model enforces owner and active-account scope.
     // Search is intentionally limited to the latest 100 receipts, not full history.
-    const purchaseLimit = requireShopLimit(term ? 100 : limit, 'purchase limit');
+    const purchaseLimit = requireShopLimit(term || range ? 100 : limit, 'purchase limit');
     const rows = await this.repository.purchasesForUser(userId, { limit: purchaseLimit });
     const purchases = rows.map(normalizePurchase);
-    return term ? purchases.filter((row) => row.itemName.toLocaleLowerCase('ko-KR').includes(term)) : purchases;
+    return purchases.filter((row) =>
+      (!term || row.itemName.toLocaleLowerCase('ko-KR').includes(term)) &&
+      (!range || (Date.parse(row.purchasedAt) >= range.start && Date.parse(row.purchasedAt) < range.end)),
+    );
   }
 
   async purchase(
