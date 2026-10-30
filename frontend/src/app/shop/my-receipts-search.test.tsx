@@ -10,5 +10,7 @@ describe('shop receipt search accessibility', () => {
     expect(html).toContain('name="receiptSearch"');
     expect(html).toContain('maxLength="80"');
     expect(html).toContain('최근 100건');
+    expect(html).toContain('name="receiptMinAmount"');
+    expect(html).toContain('inputMode="numeric"');
   });
 });

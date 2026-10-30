@@ -112,6 +112,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const receiptAmountFilter =
+    parts.length === 2 &&
+    parts[0] === 'shop' &&
+    parts[1] === 'purchases' &&
+    request.method === 'GET';
+  const minAmounts = receiptAmountFilter ? request.nextUrl.searchParams.getAll('minAmount') : [];
+  if (
+    minAmounts.length > 1 ||
+    (minAmounts.length === 1 && !/^[1-9][0-9]{0,29}$/.test(minAmounts[0]!))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'shop_receipt_minimum_invalid',
+      'minimum WLD must be a canonical positive integer',
+    );
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -180,6 +198,42 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
         'support status counts are unavailable');
+    }
+  }
+
+  if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
+    try {
+      const payload: unknown = await response.clone().json();
+      if (
+        !payload ||
+        typeof payload !== 'object' ||
+        !('purchases' in payload) ||
+        !Array.isArray(payload.purchases) ||
+        payload.purchases.length > 100 ||
+        !payload.purchases.every((row: unknown) => {
+          if (!row || typeof row !== 'object' || !('amount' in row)) return false;
+          const amount = row.amount;
+          return (
+            typeof amount === 'string' &&
+            /^[1-9][0-9]{0,29}$/.test(amount) &&
+            BigInt(amount) >= BigInt(minAmounts[0]!)
+          );
+        })
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'shop_receipt_amount_unverified',
+          'purchase amount evidence is unavailable',
+        );
+      }
+    } catch {
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'shop_receipt_amount_unverified',
+        'purchase amount evidence is unavailable',
+      );
     }
   }
 

@@ -18,12 +18,51 @@ export async function GET(request: Request): Promise<NextResponse> {
   const queries = params.getAll('q');
   const term = queries[0]?.trim() ?? '';
   if (queries.length > 1 || Array.from(term).length > 80 || /[\u0000-\u001f\u007f]/.test(term)) {
-    return NextResponse.json({ error: 'invalid purchase search' }, { status: 400, headers: PRIVATE_HEADERS });
+    return NextResponse.json(
+      { error: 'invalid purchase search' },
+      { status: 400, headers: PRIVATE_HEADERS },
+    );
   }
-  const path = `/api/v1/shop/purchases${term ? `?q=${encodeURIComponent(term)}` : ''}`;
+  const amounts = params.getAll('minAmount');
+  const minAmount = amounts[0];
+  if (amounts.length > 1 || (minAmount !== undefined && !/^[1-9][0-9]{0,29}$/.test(minAmount))) {
+    return NextResponse.json(
+      { error: 'invalid minimum purchase WLD' },
+      { status: 400, headers: PRIVATE_HEADERS },
+    );
+  }
+  const forwarded: string[] = [];
+  if (term) forwarded.push('q=' + encodeURIComponent(term));
+  if (minAmount !== undefined) forwarded.push('minAmount=' + minAmount);
+  const path = '/api/v1/shop/purchases' + (forwarded.length ? '?' + forwarded.join('&') : '');
   const data = await apiOrNull<unknown>(path);
-  if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
-    return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    !('purchases' in data) ||
+    !Array.isArray(data.purchases)
+  ) {
+    return NextResponse.json(
+      { error: 'purchase history unavailable' },
+      { status: 503, headers: PRIVATE_HEADERS },
+    );
+  }
+  if (
+    minAmount !== undefined &&
+    !data.purchases.every((row: unknown) => {
+      if (!row || typeof row !== 'object' || !('amount' in row)) return false;
+      const amount = row.amount;
+      return (
+        typeof amount === 'string' &&
+        /^[1-9][0-9]{0,29}$/.test(amount) &&
+        BigInt(amount) >= BigInt(minAmount)
+      );
+    })
+  ) {
+    return NextResponse.json(
+      { error: 'purchase amount evidence unavailable' },
+      { status: 503, headers: PRIVATE_HEADERS },
+    );
   }
   return NextResponse.json(data, { headers: PRIVATE_HEADERS });
 }

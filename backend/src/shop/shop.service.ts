@@ -64,6 +64,17 @@ export interface ShopCatalogOptions {
 export interface ShopPurchasesOptions {
   readonly limit?: unknown;
   readonly query?: unknown;
+  readonly minAmount?: unknown;
+}
+
+function receiptMinimumAmount(value: unknown): bigint | null {
+  if (value === undefined) return null;
+  if (typeof value !== 'string' || !/^[1-9][0-9]{0,29}$/.test(value)) {
+    throw new ShopInputError(
+      'minimum purchase WLD must be a canonical positive integer of at most 30 digits',
+    );
+  }
+  return BigInt(value);
 }
 
 function receiptSearchTerm(value: unknown): string | null {
@@ -167,16 +178,24 @@ export class ShopService {
 
   async myPurchases(
     authenticatedUserId: string,
-    { limit = 30, query }: ShopPurchasesOptions = {},
+    { limit = 30, query, minAmount }: ShopPurchasesOptions = {},
   ): Promise<ShopPurchaseView[]> {
     const userId = requireShopUuid(authenticatedUserId, 'authenticated user id');
     const term = receiptSearchTerm(query);
+    const minimum = receiptMinimumAmount(minAmount);
     // The SECURITY DEFINER read model enforces owner and active-account scope.
     // Search is intentionally limited to the latest 100 receipts, not full history.
-    const purchaseLimit = requireShopLimit(term ? 100 : limit, 'purchase limit');
+    const purchaseLimit = requireShopLimit(
+      term || minimum !== null ? 100 : limit,
+      'purchase limit',
+    );
     const rows = await this.repository.purchasesForUser(userId, { limit: purchaseLimit });
     const purchases = rows.map(normalizePurchase);
-    return term ? purchases.filter((row) => row.itemName.toLocaleLowerCase('ko-KR').includes(term)) : purchases;
+    return purchases.filter(
+      (row) =>
+        (!term || row.itemName.toLocaleLowerCase('ko-KR').includes(term)) &&
+        (minimum === null || BigInt(row.amount) >= minimum),
+    );
   }
 
   async purchase(
