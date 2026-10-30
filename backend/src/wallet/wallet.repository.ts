@@ -320,6 +320,7 @@ export class PostgresWalletRepository {
       this.pool,
       `SELECT ledger_transaction.id::text AS transaction_id,
          ledger_transaction.type, ledger_transaction.created_at,
+         to_char(ledger_transaction.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at,
          COALESCE(SUM(CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END), 0)::text AS net_amount,
          COALESCE(SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type THEN
            CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END ELSE 0 END), 0)::text AS cash_delta,

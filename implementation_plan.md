@@ -1830,3 +1830,20 @@ ull 상태를 반환하도록 교정.
 - 변경 사항 Git 커밋 및 원격 브랜치 푸시.
 - GitHub Actions CI (PR #2045) 전역 체크 pass 확인.
 - PR #2045 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
+
+
+---
+## 🚀 [v16 Specification] 지갑 activityTransactionsForUser에 cursor_at 프로젝션 바인딩 정밀 추가
+
+### 1. 근본 원인 및 분석
+- `backend/src/wallet/wallet.repository.ts`의 `activityTransactionsForUser` 쿼리에 `to_char(ledger_transaction.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at` 프로젝션 라인이 누락되어 `src/wallet/wallet-calendar-range.test.ts:97:17`의 `expect(sql).toContain('cursor_at')` 단정문 위반.
+- `activityTransactionsForUser` SQL 프로젝션에 `cursor_at` 문자열 변환 식을 복원 완료하여 캘린더 커서 검증 단정문을 100% 만족.
+
+### 2. 세부 변경 사항
+- `backend/src/wallet/wallet.repository.ts`:
+  - `activityTransactionsForUser` SQL 쿼리에 `to_char(ledger_transaction.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_at,` 바인딩 복원.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 브랜치 푸시.
+- GitHub Actions CI (PR #2045) 3개 체크 pass 확인.
+- PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
