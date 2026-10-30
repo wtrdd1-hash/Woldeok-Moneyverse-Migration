@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { KdicRepository, UserInsuredCoverage } from './kdic.repository';
 import { rejectUnverifiedKdicSettlement } from './kdic-ledger-hold';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -6,6 +6,33 @@ import type { DiscordAlertService } from '../../discord/discord-alert.service';
 @Injectable()
 export class KdicService {
   constructor(private readonly repo: KdicRepository, _discordAlertService?: DiscordAlertService) {}
+
+  async getLedgerIntegrity() {
+    const row = await this.repo.getLedgerIntegrity().catch(() => {
+      throw new ServiceUnavailableException({ code: 'KDIC_LEDGER_DIAGNOSTICS_UNAVAILABLE' });
+    });
+    const fields = [
+      'transactionCount', 'postingCount', 'accountCount', 'unbalancedTransactionCount',
+      'mismatchedAccountCount', 'absoluteDifferenceWld', 'unlinkedTreasuryCount', 'treasuryRecordCount',
+    ] as const;
+    for (const field of fields) {
+      if (typeof row[field] !== 'string' || !/^(0|[1-9][0-9]{0,63})$/.test(row[field])) {
+        throw new ServiceUnavailableException({ code: 'KDIC_LEDGER_DIAGNOSTICS_UNAVAILABLE' });
+      }
+    }
+    if (BigInt(row.mismatchedAccountCount) > BigInt(row.accountCount) ||
+        BigInt(row.unlinkedTreasuryCount) > BigInt(row.treasuryRecordCount) ||
+        !Number.isFinite(Date.parse(row.checkedAt))) {
+      throw new ServiceUnavailableException({ code: 'KDIC_LEDGER_DIAGNOSTICS_UNAVAILABLE' });
+    }
+    const balanced = row.accountCount !== '0' && row.mismatchedAccountCount === '0' &&
+      row.unbalancedTransactionCount === '0' && row.absoluteDifferenceWld === '0';
+    const blockers: string[] = ['KDIC_WRITERS_UNVERIFIED'];
+    if (row.unlinkedTreasuryCount !== '0') blockers.push('TREASURY_ROWS_WITHOUT_CANONICAL_LINK');
+    if (row.unbalancedTransactionCount !== '0') blockers.push('UNBALANCED_JOURNAL');
+    if (row.mismatchedAccountCount !== '0' || row.absoluteDifferenceWld !== '0') blockers.push('BALANCE_PROJECTION_MISMATCH');
+    return { ...row, numericBalanced: balanced, settlementReady: false as const, state: 'BLOCKED' as const, blockers };
+  }
 
   async getFundOverview() {
     const [fund, institutions, recentPremiums, recentPayouts] = await Promise.all([

@@ -17,3 +17,15 @@ Status: IN PROGRESS / source branch, no financial settlement authorization.
 - [ ] Malformed/unavailable/safe-only tests, existing containment regression.
 - [ ] Mid-work refresh origin/main, verification and exact SHA Test/Production outcome.
 - [ ] Internal/GitHub EN+KO update notes and PR. Hold Production until verified financial/release gates.
+
+
+## MID / FINISH — source candidate, release hold
+- Mid-work origin/main SHA: a7f8730b9838b9324b6ece25e394dfcc8709aadf (unchanged from task start); main worktree never modified.
+- Added app-role executable one-statement read-only projection and explicit constant settlementReady=false, guarded Admin GET, strict Next parser/no-store/noindex, frontend diagnostic and unavailable display. Unauthorized endpoint cannot bypass AdminGuard/AdminSessionGuard; all three financial POST methods remain unconditional 503.
+- RED tests observed before implementation. GREEN: backend KDIC 12 tests/4 files PASS; frontend KDIC 11 tests/3 files PASS; both typechecks PASS, targeted ESLint no errors, Nest build and Next build artifacts confirmed; compiled service ran successfully via the actual Production backend DB connection in read-only REPEATABLE READ transaction followed by ROLLBACK.
+- Production evidence timestamp 2026-10-30T01:04:45Z: 891 tx / 1829 postings / 40 accounts / 0 unbalanced / 0 mismatches / 0 WLD difference / 552 unlinked Treasury rows.
+- Test main remains a different release (test-current= test-v2026.10.29.1502-c2129625a), not this candidate; exact source SHA official Test, authenticated E2E, session-continuity, full financial QA, migration checksum and finance provenance gates remain UNVERIFIED/P0. No Test/Production cutover, no DB or WLD mutation.
+- Conclusion: backend and frontend diagnostics are SOURCE_VERIFIED in isolated branch. Financial settlement still BLOCKED until approved canonical ledger-backed writes and evidence. Do not present this as full financial repair.
+- [x] Read-only admin API/UI, regression tests, actual runtime read-only SQL.
+- [x] Mid-work GitHub main check and bilingual internal/GitHub/changelog records.
+- [ ] Official exact-SHA Test and Production promotion (BLOCKED: release gates/finance provenance).

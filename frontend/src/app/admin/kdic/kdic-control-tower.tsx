@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { parseKdicOverview } from './kdic-evidence';
+import { parseKdicLedgerIntegrity, type KdicLedgerEvidence } from './kdic-ledger-evidence';
 import { toast } from 'sonner';
 
 export interface KdicOverviewData {
@@ -57,19 +58,28 @@ export interface KdicOverviewData {
   }>;
 }
 
-export function KdicControlTower({ initialData }: { initialData: KdicOverviewData | null }) {
+export function KdicControlTower({ initialData, initialLedger = null }: { initialData: KdicOverviewData | null; initialLedger?: KdicLedgerEvidence | null }) {
   const [data, setData] = useState<KdicOverviewData | null>(initialData);
+  const [ledger, setLedger] = useState<KdicLedgerEvidence | null>(initialLedger);
   const [loading, setLoading] = useState(false);
   const refreshData = async () => {
     setLoading(true);
     setData(null); // Never present stale monetary observations as fresh while refreshing.
+    setLedger(null);
     try {
-      const response = await fetch('/api/admin/kdic/overview', { cache: 'no-store' });
+      const [response, ledgerResponse] = await Promise.all([
+        fetch('/api/admin/kdic/overview', { cache: 'no-store' }),
+        fetch('/api/admin/kdic/ledger-integrity', { cache: 'no-store' }),
+      ]);
       const verified = response.ok ? parseKdicOverview(await response.json()) : null;
+      const verifiedLedger = ledgerResponse.ok ? parseKdicLedgerIntegrity(await ledgerResponse.json()) : null;
       setData(verified);
+      setLedger(verifiedLedger);
       if (!verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
+      if (!verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
     } catch {
       setData(null);
+      setLedger(null);
       toast.error('KDIC 관제 데이터를 다시 조회하지 못했습니다.');
     } finally {
       setLoading(false);
@@ -90,6 +100,26 @@ export function KdicControlTower({ initialData }: { initialData: KdicOverviewDat
         </div>
       )}
       <p role="status" className="text-xs text-amber-300">금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.</p>
+      <section aria-label="KDIC 원장 검증" className="rounded-2xl border border-amber-500/30 bg-slate-900/70 p-4 space-y-3">
+        <h3 className="font-semibold text-white">관리자 원장 진단 · 읽기 전용</h3>
+        {!ledger ? (
+          <p role="status" className="text-sm text-amber-300">실시간 원장 증거를 확인하지 못했습니다. 원장 상태를 정상으로 판단하지 마세요.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+              <div><span className="block text-slate-400">원장 거래</span><strong className="text-white">{BigInt(ledger.transactionCount).toLocaleString('ko-KR')}건</strong></div>
+              <div><span className="block text-slate-400">불균형 거래</span><strong className="text-white">{BigInt(ledger.unbalancedTransactionCount).toLocaleString('ko-KR')}건</strong></div>
+              <div><span className="block text-slate-400">잔액 불일치</span><strong className="text-white">{BigInt(ledger.mismatchedAccountCount).toLocaleString('ko-KR')} / {BigInt(ledger.accountCount).toLocaleString('ko-KR')}계좌</strong></div>
+              <div><span className="block text-slate-400">원장 차이</span><strong className="text-white">{BigInt(ledger.absoluteDifferenceWld).toLocaleString('ko-KR')} WLD</strong></div>
+              <div><span className="block text-slate-400">국고 거래 미연결</span><strong className="text-amber-300">{BigInt(ledger.unlinkedTreasuryCount).toLocaleString('ko-KR')} / {BigInt(ledger.treasuryRecordCount).toLocaleString('ko-KR')}건</strong></div>
+              <div><span className="block text-slate-400">조회 시각</span><span className="text-slate-200">{new Date(ledger.checkedAt).toLocaleString('ko-KR')}</span></div>
+            </div>
+            <p role="status" className="text-xs text-amber-300">
+              {ledger.numericBalanced ? '현재 계좌·전표 수치 일치' : '원장 차이 또는 전표 불균형 감지'} · 금융 집행 승인 아님. 기존 KDIC 정산 경로의 원장·멱등성 검증과 국고 지급 증빙이 완료되기 전까지 집행은 차단됩니다.
+            </p>
+          </>
+        )}
+      </section>
       {/* 1. 상단 브리핑 헤더 & 정기 징수 액션 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl backdrop-blur-md">
         <div>
