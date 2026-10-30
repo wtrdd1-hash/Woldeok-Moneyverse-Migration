@@ -1387,3 +1387,36 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   - 루트 파티션 (/): 39GB / 99GB (42%, 여유 56GB)
   - 데이터 디스크 (/srv/moneyverse-data): 67GB / 197GB (36%, 여유 121GB)
   - 임시 파티션 (/tmp): 2.2GB / 6.7GB (32%, 여유 4.6GB)
+---
+## 🚀 [v279 Specification] 5개 신규 원격 브랜치 전수 통합·원격 브랜치 소거 및 v1523 운영 승격 완료 (+58, -0)
+
+### 1. 작업 개요 및 핵심 요구사항 달성
+- **5개 신규 원격 브랜치 무손실 전수 병합**:
+  - origin/auto/hourly-a-release-proof-20261030-1025: 격리된 테스트 프론트엔드 및 국고 증명 검증 게이트 통합.
+  - origin/auto/hourly-b-v655-exact-ci-release-gate-20261030-1035: 런타임 CI 게이트 및 배포 릴리즈 파이프라인 검증 통합.
+  - origin/auto/planning-v1500-wallet-calendar-range-20261030: v1500 지갑 캘린더 날짜 범위 설계 및 기획 문서 통합.
+  - origin/fix/kdic-ledger-admin-20261030: 예금보험공사(KDIC) 관리자 읽기 전용 원장 무결성 진단 API 및 프론트엔드 통합.
+  - origin/qa/v1386-mobile-api-schema-count-20261030-1026: 183개 모바일 API 엔드포인트 스키마 카운트 동기화 통합.
+- **원격 잔여 브랜치 5개 일괄 삭제**:
+  - git push origin --delete를 통해 5개 브랜치를 완전 소거하여, 원격에는 오직 origin/main과 origin/HEAD만 존재함을 확인.
+- **운영 실서버(Production) 승격 배포 완료**:
+  - 신규 불변 릴리즈 디렉터리: /srv/moneyverse-data/releases/prod-v2026.10.30.1523-94d38f47603e
+  - 애플리케이션 소스 커밋 SHA: 94d38f47603e99aabc42fc8f292b89441afb9663
+  - 심볼릭 링크 동기화: /srv/moneyverse-data/releases/production-current -> prod-v2026.10.30.1523-94d38f47603e
+  - Systemd 운영 서비스:
+    - 백엔드: moneyverse-live-prod-backend.service (포트 3564, Active: running)
+    - 프론트엔드: moneyverse-live-prod-frontend.service (포트 3565, Active: running)
+
+### 2. 라이브 실측 검증 데이터
+- **라이브 백엔드 헬스체크 (Port 3564)**: curl http://127.0.0.1:3564/health -> {"status":"ok"}
+- **공개 도메인 헬스체크**: curl https://easy-scraping.com/health -> {"status":"ok"}
+- **공개 프론트엔드 BUILD_ID 실측**: curl https://easy-scraping.com/frontend-version -> {"id":"94d38f47603e99aabc42fc8f292b89441afb9663"} (v1523 커밋 일치)
+- **주요 서비스 페이지 HTTP 상태 코드**:
+  - 메인 홈 (/): HTTP 200
+  - 자산 지갑 (/wallet): HTTP 200
+  - 관리자 예금보험공사 (/admin/kdic): HTTP 200
+  - 관리자 마켓 뉴스 (/admin/market/ai-news): HTTP 200
+- **디스크 사용 현황**:
+  - 루트 파티션 (/): 41GB / 99GB (43%, 여유 54GB)
+  - 데이터 디스크 (/srv/moneyverse-data): 79GB / 197GB (42%, 여유 110GB)
+  - 임시 파티션 (/tmp): 2.2GB / 6.7GB (33%, 여유 4.5GB)
