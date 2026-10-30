@@ -35,3 +35,10 @@ Status: IN PROGRESS / source branch, no financial settlement authorization.
 - Source implementation commit 3a0668c0fedfe6cb8f2ff76a6ad534f846c191db, isolated clean branch.
 - GitHub reports mergeable with main but CI workflow 40984414672 was IN_PROGRESS when checked; merge/official Test/Production not performed.
 - Nginx live public routes currently point to production v1515 services at ports 3564/3565 with public backend and frontend version both 0669f0f64fea1c70235760d1949f90446b6964f7. Both live backend instances use the audited DB connection.
+
+## v2026.10.30.1522 — requested Production promotion preflight and CI repair
+- Owner requested Production promotion. Rechecked origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, authoritative documentation and current release guide.
+- PR #1975 CI run #40984573003 FAILED only at api:contract:check: generated mobile schema reference EN/KO drift due to additional admin KDIC controller method (673 method scan).
+- Regenerated both mobile API schema reference artifacts using the official generator; check passes locally. No DB/money changes.
+- Production currently serves SHA 0669f0f64fea1c70235760d1949f90446b6964f7; Test serves c2129625aa6629c616fb31ce790950618b8d92b2; neither serves this candidate. No cutover attempted prior to gates.
+- Remaining: CI passing at exact candidate SHA, isolated exact-SHA Test validation, authoritative DB+public version and signed-in flow, continuity and rollback checks before any Production traffic switch.
