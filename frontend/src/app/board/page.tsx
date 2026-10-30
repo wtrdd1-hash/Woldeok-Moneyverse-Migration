@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardCategory } from './board-category-filter';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.category !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,11 +67,13 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const category = parseBoardCategory(params.category);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (category.category) query.set('category', category.category);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const data = search.invalid || category.invalid
     ? null
     : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
 
@@ -131,6 +134,23 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-category" className="grid gap-1 text-sm font-semibold">
+              주식 토론 분류
+              <select
+                id="board-category"
+                name="category"
+                defaultValue={category.category ?? ''}
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+                aria-describedby="board-search-scope"
+              >
+                <option value="">전체 분류</option>
+                <option value="analysis">분석</option>
+                <option value="question">질문</option>
+                <option value="journal">투자 기록</option>
+                <option value="business">기업</option>
+                <option value="system">시스템</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,11 +165,11 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건에서만 검색합니다. 분류 필터는 주식 연관 글에만 적용되며 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? (
+          {search.invalid || category.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
-              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+              검색어 또는 분류를 확인해 주세요. 검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
             </p>
           ) : null}
         </CardContent>
@@ -161,8 +181,8 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
+        {search.invalid || category.invalid ? (
+          <EmptyState title="검색 조건을 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (

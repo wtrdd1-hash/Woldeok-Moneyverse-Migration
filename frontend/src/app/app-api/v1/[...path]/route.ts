@@ -107,6 +107,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const publicBoardCategoryPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardCategoryValues = publicBoardCategoryPath ? request.nextUrl.searchParams.getAll('category') : [];
+  if (boardCategoryValues.length > 1 ||
+      (boardCategoryValues.length === 1 &&
+        !['analysis', 'question', 'journal', 'business', 'system'].includes(boardCategoryValues[0] ?? ''))) {
+    return gatewayProblem(400, 'Bad Request', 'board_category_invalid', 'invalid public board category');
+  }
+
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -448,6 +457,26 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // A public board category filter must not turn a stale/forged HTTP 200
+  // into verified Android results. The public list is bounded to 50 posts.
+  const boardCategory = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts'
+    ? request.nextUrl.searchParams.get('category') : null;
+  if (boardCategory !== null && response.status === 200) {
+    let valid = false;
+    try {
+      const payload: unknown = await response.clone().json();
+      if (typeof payload === 'object' && payload !== null && 'posts' in payload) {
+        const posts = payload.posts;
+        valid = Array.isArray(posts) && posts.length <= 50 && posts.every((post: unknown) =>
+          typeof post === 'object' && post !== null && 'stock' in post &&
+          typeof post.stock === 'object' && post.stock !== null &&
+          'category' in post.stock && post.stock.category === boardCategory);
+      }
+    } catch { /* Invalid upstream JSON is not a verified category result. */ }
+    if (!valid) return gatewayProblem(503, 'Service Unavailable',
+      'board_category_unverified', 'public board category results are unavailable');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
@@ -461,13 +490,8 @@ async function handle(request: NextRequest, context: Context) {
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' &&
+      (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
