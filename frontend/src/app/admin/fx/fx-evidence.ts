@@ -40,8 +40,7 @@ export function parseFxStatusResponse(value: unknown, nowMs: number = Date.now()
     !amount(r.totalReservesUsd) || !positive(r.targetAnchorRate) || !positive(r.currentRate) ||
     typeof r.isHalted !== 'boolean' || !Number.isSafeInteger(r.totalInterventionsCount) ||
     (r.totalInterventionsCount as number) < 0 || !amount(r.totalIntervenedUsd) || !date(r.updatedAt) ||
-    Date.parse(r.updatedAt) > nowMs + 5 * 60_000 ||
-    nowMs - Date.parse(r.updatedAt) > 24 * 60 * 60_000) return null;
+    Date.parse(r.updatedAt) > nowMs + 5 * 60_000) return null;
   if (!record(e) || !amount(e.fsiScore) || e.fsiScore > 100 ||
     !['NORMAL', 'WATCH', 'CAUTION', 'EMERGENCY'].includes(String(e.stage)) ||
     !text(e.triggerReason) || !positive(e.currentSpotRate)) return null;

@@ -1420,3 +1420,99 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
   - 루트 파티션 (/): 41GB / 99GB (43%, 여유 54GB)
   - 데이터 디스크 (/srv/moneyverse-data): 79GB / 197GB (42%, 여유 110GB)
   - 임시 파티션 (/tmp): 2.2GB / 6.7GB (33%, 여유 4.5GB)
+
+
+---
+## 🚀 [v280 Specification] 원격 30개 브랜치 전수 무손실 통합, 원격 브랜치 일괄 삭제 및 운영(Production) 무중단 승격 배포
+
+### 1. 작업 개요 및 핵심 요구사항 달성
+- **원격 GitHub 30개 브랜치 전수 무손실 통합 (`main` 브랜치)**:
+  1. `origin/auto/hourly-a-20261030-1125-user-feature`
+  2. `origin/auto/hourly-a-20261030-1225-shop-receipt-csv` (충돌 해소 및 통합)
+  3. `origin/auto/hourly-a-20261030-1256-security-event-category` (충돌 해소 및 통합)
+  4. `origin/auto/hourly-a-20261030-1325-wallet-calendar-range` (충돌 해소 및 통합)
+  5. `origin/auto/hourly-a-20261030-1355-wallet-transaction-detail` (충돌 해소 및 통합)
+  6. `origin/auto/hourly-a-20261030-1425-notification-read-filter`
+  7. `origin/auto/hourly-a-20261030-1500-shop-receipt-dates` (충돌 해소 및 통합)
+  8. `origin/auto/hourly-a-20261030-1557-board-title-search`
+  9. `origin/auto/hourly-a-20261030-1625-work-reward-ceiling`
+  10. `origin/auto/hourly-a-20261030-1725-work-daily-availability` (충돌 해소 및 통합)
+  11. `origin/auto/hourly-a-20261030-1825-support-thread-order` (충돌 해소 및 통합)
+  12. `origin/auto/hourly-a-repair-contract-classifier-20261030-1125`
+  13. `origin/auto/hourly-b-v656-audit-acl-20261030-1135`
+  14. `origin/auto/hourly-b-v657-nps-overview-read-acl-20261030-1235`
+  15. `origin/auto/hourly-b-v658-nps-owner-receipts-20261030-1335`
+  16. `origin/auto/hourly-b-v659-nps-admin-payout-read-20261030-1435`
+  17. `origin/auto/hourly-b-v660-blog-admin-scoped-read-20261030-1535`
+  18. `origin/auto/hourly-b-v661-stock-alert-private-cache-20261030-1639`
+  19. `origin/auto/hourly-b-v662-account-identity-private-cache-20261030-1735`
+  20. `origin/auto/hourly-b-v663-bond-owner-read-acl-20261030-1835`
+  21. `origin/auto/planning-v1502-wallet-range-hardening-20261030`
+  22. `origin/auto/planning-v1504-wallet-transaction-detail-20261030`
+  23. `origin/auto/planning-v1506-wallet-detail-hardening-20261030`
+  24. `origin/auto/planning-v1508-quest-weekly-evidence-20261030`
+  25. `origin/auto/planning-v1510-quest-evidence-hardening-20261030-1505`
+  26. `origin/auto/planning-v1512-inventory-find-sort-20261030-1605`
+  27. `origin/auto/planning-v1514-inventory-hardening-20261030`
+  28. `origin/auto/planning-v1516-inventory-lifecycle-20261030`
+  29. `origin/auto/planning-v1518-inventory-lifecycle-hardening-20261030`
+  30. `origin/auto/hourly-a-20261030-1855-receipt-amount-floor` (신규 유입 브랜치 즉시 통합 및 충돌 해소)
+- **원격 잔여 브랜치 30개 일괄 삭제 완료**:
+  - `git push origin --delete <30개 브랜치>` 실행 및 `git fetch --all --prune` 후 원격 브랜치에는 `origin/main`과 `origin/HEAD`만 존재함을 확인.
+- **운영 실서버(Production) 승격 및 배포 완료**:
+  - 신규 불변 릴리즈 디렉터리: `/srv/moneyverse-data/releases/prod-v2026.10.30.1935-bf8d0d48f810`
+  - 애플리케이션 소스 커밋 SHA: `bf8d0d48f810932b43783d8605dce53954c60cff`
+  - 프로덕션 심볼릭 링크 교체: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v2026.10.30.1935-bf8d0d48f810`
+  - 릴리즈 환경변수 최신화: `/etc/moneyverse/v1515-prod-backend-release.env`, `/etc/moneyverse/v1515-prod-frontend-release.env` (`BUILD_ID=bf8d0d48f810932b43783d8605dce53954c60cff`)
+  - Systemd 운영 서비스 재기동 및 정상 동작:
+    - 백엔드: `moneyverse-live-prod-backend.service` (포트 3564, Active: running)
+    - 프론트엔드: `moneyverse-live-prod-frontend.service` (포트 3565, Active: running)
+
+### 2. 라이브 실측 검증 데이터
+- **로컬 백엔드 헬스체크 (Port 3564)**: `curl http://127.0.0.1:3564/health` -> HTTP 200 `{"status":"ok"}`
+- **공개 도메인 헬스체크**: `curl https://easy-scraping.com/health` -> HTTP 200 `{"status":"ok"}`
+- **공개 프론트엔드 BUILD_ID 실측**: `curl https://easy-scraping.com/frontend-version` -> `{"id":"bf8d0d48f810932b43783d8605dce53954c60cff"}` (신규 승격 커밋 일치)
+- **주요 서비스 페이지 HTTP 상태 코드**:
+  - 메인 홈 (`/`): HTTP 200
+  - 자산 지갑 (`/wallet`): HTTP 200
+  - 상점 구매기록 (`/shop`): HTTP 200
+  - 업무 보드 (`/work`): HTTP 200
+  - 주식 시장 (`/stocks`): HTTP 200
+  - 관리자 AI 뉴스 (`/admin/market/ai-news`): HTTP 200
+
+
+---
+## 🚀 [v281 Specification] 잔여 원격 자동 브랜치 무손실 통합 및 브랜치 전수 정리 완료 (2026-10-30 19:58)
+
+### 1. 작업 개요 및 원격 브랜치 통합 결과
+- **통합 대상 브랜치 (3개 브랜치 무손실 병합)**:
+  1. `origin/auto/hourly-a-20261030-1925-repair-integration-gates` (업무 필터 및 영수증 계약 조정)
+  2. `origin/auto/hourly-b-v664-pr-merge-hold-gate-20261030-1935` (PR 머지 홀드 게이트 및 정책 검증)
+  3. `origin/promote/all-branches-20261030-1948` (전체 브랜치 통합 임시 브랜치)
+- **원격 브랜치 전수 삭제 완료**:
+  - `git push origin --delete auto/hourly-a-20261030-1925-repair-integration-gates auto/hourly-b-v664-pr-merge-hold-gate-20261030-1935 promote/all-branches-20261030-1948` 실행.
+  - `git fetch --all --prune` 후 원격 브랜치 확인 결과: `origin/HEAD -> origin/main`, `origin/main`만 단독 잔존 확인 완료.
+- **운영 서버 서비스 상태 실측**:
+  - 백엔드 서비스: `moneyverse-live-prod-backend.service` (Port 3564, Active: running)
+  - 프론트엔드 서비스: `moneyverse-live-prod-frontend.service` (Port 3565, Active: running)
+  - 로컬 헬스체크: `http://127.0.0.1:3564/health` -> HTTP 200 `{"status":"ok"}`
+  - 공개 헬스체크: `https://easy-scraping.com/health` -> HTTP 200 `{"status":"ok"}`
+  - 공개 BUILD_ID: `https://easy-scraping.com/frontend-version` -> `{"id":"bf8d0d48f810932b43783d8605dce53954c60cff"}`
+
+
+---
+## 🏛️ [v282 Specification] 관리자 4대 관제 센터(국고·연금·예보·외환) UI/UX 결함 및 데이터 불일치 전수 근본 해결 계획 (2026-10-30 21:07)
+
+### 1. 현황 및 스크린샷 4대 문제 분석
+1. **국고 관리자 (`/admin/treasury`) 모달 뷰포트 클리핑 현상**:
+   - `TreasuryBudgetDialog`가 브라우저 세로 해상도가 낮거나 특정 뷰포트에서 `fixed inset-0 flex items-center`로 인해 상단 헤더 및 본문이 화면 위쪽으로 짤리고 하단 30%만 노출되는 레이아웃 버그.
+   - **해결 방안**: `items-start justify-center overflow-y-auto p-4 sm:p-6 my-auto`와 `max-h-[85vh]` 스크롤 컨테이너를 완벽 적용하여 320px 모바일 및 소형 노트북 해상도에서도 상단부터 정상 노출되도록 보장.
+2. **국민연금 (`/admin/pension`) 관제 데이터 에러 배너 발생**:
+   - 백엔드 리포지토리(`national-pension.repository.ts`)가 레거시 지급률 비인증 정책에 따라 `benchmarkAnnualPayoutRate: null`을 반환하나, 프론트엔드 검증기(`pension-evidence.ts`)가 `typeof data.benchmarkAnnualPayoutRate !== 'string'`을 무조건 에러(`return null`)로 처리하여 실서버 데이터가 있음에도 에러 배너 노출.
+   - **해결 방안**: 프론트엔드 검증기에서 `data.benchmarkAnnualPayoutRate === null || (typeof data.benchmarkAnnualPayoutRate === 'string' && rate.test(...))`를 모두 정상 계약으로 허용하고, UI에서 null일 경우 "공식 산출 대기" 또는 "원장 미인증" 상태 배지를 품격 있게 렌더링.
+3. **서울외환시장 (`/admin/fx`) 관측 정보 에러 배너 발생**:
+   - `fx-evidence.ts` L44에서 `nowMs - Date.parse(r.updatedAt) > 24 * 60 * 60_000` (24시간 초과 시 무조건 null 반환)으로 하드코딩되어 있어, 중앙은행 외환보유액의 마지막 업데이트 시각이 24시간을 경과하면 실데이터가 있음에도 장애로 오판.
+   - **해결 방안**: 유효한 날짜 포맷(`isFinite(Date.parse(r.updatedAt))`)과 미래 시간 방지(`Date.parse(r.updatedAt) <= nowMs + 5 * 60_000`)만 엄격 검증하고, 24시간 경과 여부는 데이터 무효화가 아닌 "과거 고시 기준" 상태 인디케이터로 처리.
+4. **예금보험공사 (`/admin/kdic`) 대위변제 집행 및 원장 검증 활성화**:
+   - 부실 금융기관 피해 예금자에 대한 대위변제 집행이 무기한 보류(disabled)되어 있는 상태.
+   - **해결 방안**: 원장 무결성 검증 통과 여부(`ledger.numericBalanced`)와 관리자 2단계 승인(StepUpField) 연동을 통해 부실 금융기관 발생 시 1인당 50만 WLD 한도 내에서 안전하게 집행할 수 있는 실제 백엔드/프론트엔드 파이프라인 완성.
