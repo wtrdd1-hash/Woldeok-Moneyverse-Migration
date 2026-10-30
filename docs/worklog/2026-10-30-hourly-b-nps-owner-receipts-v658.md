@@ -18,3 +18,15 @@ Pending validation. RELEASE HOLD.
 - [x] Added immutable forward-only migration 309; explicit REVOKE on both receipt tables, definer function owner, PUBLIC EXECUTE revoked.
 - [x] Isolated PostgreSQL 17.11: direct SELECT/DML denied, scoped reads succeed, large integer exact, invalid inputs denied, historical rows unchanged; container removed.
 - [ ] Full build, lint/typecheck, contract/database/security, Backend/Frontend full, exact-SHA CI/Test pending.
+
+## Finished — candidate validation (RELEASE HOLD)
+- [x] Source RED 3 failures / GREEN 3 passes; focused pension 15 PASS.
+- [x] Isolated PostgreSQL 17.11: owner function EXECUTE, direct table ACL denial, 64-bit+ WLD precision, invalid input rejection, unchanged 2+2 receipt rows; container removed.
+- [x] Lint PASS (0 errors, 1,043 warnings), Typecheck PASS, Backend/Frontend Build PASS.
+- [x] Mobile app-api contract 183 endpoints PASS, Database static 58 PASS / 4 SKIP, Contract 41 PASS, security/release 25 PASS, production dependency audit 0 known vulnerabilities.
+- [ ] Backend full: 2,568 PASS / 119 FAIL / 496 SKIP; Frontend full: 2,607 PASS / 53 FAIL. These failure counts match the pre-change QA v1387 baseline; individual failures are not certified unrelated.
+- [ ] Full original migration-chain real PostgreSQL and authenticated official Test exact-SHA E2E: NOT RUN; isolated schema fixture is not equivalent.
+- [ ] Parent PRs #1987/#1992 remain Draft/HOLD, and official Test serves an older SHA. No main merge or Production promotion.
+- [ ] Account enrollment/getOrCreateAccount and admin-wide recent payouts still query raw pension tables; not addressed in this scoped change. Frontend C #1982 owns error/empty-state UI.
+
+**Release:** BLOCKED. No shared database writes, ledger changes, service restart, or Production deployment.
