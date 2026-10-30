@@ -15,3 +15,5 @@
 - Document-only EN canonical + KO equivalent integrated masters, living plans, bilingual worklogs and internal/GitHub update logs. No new distributed planning spec.
 - P0 4 + P1 6 and proposed acceptance, not executed. External evidence 0 new, cumulative UNKNOWN/10,000 BLOCKED.
 - Final git/CI details recorded in the companion miniPC run log after verification. No runtime, database, ledger, WLD, Test, Production or automation changes.
+
+- Draft PR #2003: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2003 (stacked on #1995; no merge).

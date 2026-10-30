@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1508 F675-183 weekly quest evidence / handoff #2002 / Draft pending / RELEASE HOLD; stacked on #1995.
+**Current planning:** v1508 F675-183 weekly quest evidence / handoff #2002 / Draft PR #2003 / RELEASE HOLD; stacked on #1995.
 
 ## v2026.10.30.1508 — F675-183 Member Weekly Quest Evidence Breakdown (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

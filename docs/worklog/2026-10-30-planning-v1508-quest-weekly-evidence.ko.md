@@ -15,3 +15,5 @@
 - 영문 canonical·동등 국문 통합 기획서, 프로젝트 기획서, 작업일지, 내부/GitHub 업데이트 기록만 반영. 별도 분산 기획서 생성 없음.
 - P0 4건·P1 6건, 수용시험은 제안만 했으며 미실행. 외부 신규 검증 0건, 누적 UNKNOWN/10,000 BLOCKED.
 - 검증·GitHub CI 결과는 miniPC 완료 기록에 별도 기록. 런타임·DB·원장·WLD·Test·Production·예약 변경 없음.
+
+- Draft PR #2003: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2003 (stacked on #1995; no merge).
