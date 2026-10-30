@@ -10,9 +10,9 @@
 
 ## In progress
 - [x] Inspect latest main, open PRs, actual wallet frontend/backend and QA evidence.
-- [ ] Recheck main mid-run and reconcile source/QA changes.
-- [ ] Add full EN/KO design to existing integrated planning masters and concise canonical project plans.
-- [ ] Refresh P0/P1 10-item handoff, EN/KO changelogs and internal/GitHub updates.
+- [x] Recheck main mid-run and reconcile source/QA changes.
+- [x] Add full EN/KO design to existing integrated planning masters and concise canonical project plans.
+- [x] Refresh P0/P1 10-item handoff, EN/KO changelogs and internal/GitHub updates.
 - [ ] Verify documentation, diff and GitHub CI; keep runtime, DB and Production unchanged.
 
 ## Finished

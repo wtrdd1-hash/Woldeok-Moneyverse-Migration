@@ -1,4 +1,7 @@
-﻿## v2026.10.30.3 — 주식 타이머 실행 중 중대 장애 오탐 수정 (운영 완료)
+﻿## v2026.10.30.1500 — 회원 지갑 기록 날짜 직접 지정 (기획 초안 / 운영 보류)
+- 한국시간 시작·종료일, 본인 NUMERIC 원장 조회, 마이크로초 서명 커서, Next/Android 개인정보 보호 동등성 설계. 런타임 배포 없음. P0 4건·P1 6건, [초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). 외부 승인 신규 0건/누적 UNKNOWN·목표 10,000건, 운영 보류.
+
+## v2026.10.30.3 — 주식 타이머 실행 중 중대 장애 오탐 수정 (운영 완료)
 - 정상 running 상태 인식, 다음 실행 없는 타이머 장애 감시 유지, 주식시장 작업 실패를 별도 CRITICAL로 감지. [릴리스](../releases/v2026.10.30.3.ko.md).
 
 ## v2026.10.30.2 — 디스크 용량 중대 위험 알림 정확도 (운영 적용)

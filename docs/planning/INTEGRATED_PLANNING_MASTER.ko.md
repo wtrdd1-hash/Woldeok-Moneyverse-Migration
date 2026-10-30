@@ -1,4 +1,51 @@
 ﻿# 월덕 머니버스 — 통합 기획 마스터
+**현재 기획:** v1500 F675-181 / 초안 #1974 / 이슈 #1973 / 운영 승격 보류. 이전 기획은 과거 제안으로 보존.
+
+## v2026.10.30.1500 — F675-181 회원 전용 지갑 거래내역 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). **기준:** 2026-10-30 시작·중간 재확인한 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. **GitHub:** [초안 PR #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [개발 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). **설계 제안만 수행:** 런타임·DB·WLD·Test·Production 변경 없음. v1498 초안 #1964는 미병합 CLOSED이며 통합 문서의 가치 있는 기존 요구사항은 보존.
+
+### 확인된 문제·대상·중복 방지
+- 실제 소스: frontend/src/app/wallet/activity/period.ts는 all/7d/30d 및 all/in/out/neutral만 지원, page.tsx는 본인 원장 50건씩 표시. backend/src/wallet/wallet.controller.ts는 해당 기간만 허용, wallet.service.ts는 이동 일수 계산, wallet.repository.ts는 본인 CASH/BANK 거래를 합산하고 방향을 SQL에서 제한. 달력 시작일/종료일 필터는 해당 경로에 없음. 이는 코드 조사이지 사용자 수요나 운영 이용량 조사 결과가 아님.
+- 인증·동의 회원이 원하는 두 한국시간 날짜 사이의 본인 WLD 거래를 조회하도록 함. 개인용 탐색이지 정산 증명·세금 증빙·내보내기·원장 변경·자동 재무 조언이 아님.
+- F675-176 저장 필터, F675-177 월별 요약, F675-178 북마크, F675-173 개인정보 내보내기, 기존 export-ledger-csv.tsx와 별개. 중복 테이블·영수증·내보내기 API를 생성하지 않음.
+
+### 진입·화면·CTA·상태
+- 진입점 /wallet/activity, 기존 기간 선택 옆 “기간 지정” 추가. 비공개 정규 URL /wallet/activity?period=custom&from=YYYY-MM-DD&to=YYYY-MM-DD&direction=all. 기존 all/7d/30d 의미 불변.
+- “시작일”, “종료일” 날짜 입력, “기간 적용”, “초기화”, 기존 방향 필터, “이전 기록 50건”, “처음부터 다시 보기”. 기본 입력값으로 한국시간 오늘 및 29일 전 제안하되 적용 전에는 조회하지 않음. 날짜·방향 변경 시 이전 커서 폐기, 뒤로 가기에서 정규 범위 복원.
+- 최초·편집·입력 오류·로딩·정상 결과·정상 빈 결과·다음 페이지·커서 만료·미인증·동의 필요·요청 제한·서버 장애·지연 응답 폐기 상태. 구조 검증된 HTTP 200/0건에서만 빈 결과; 네트워크 오류·비정상 200·503을 빈 거래내역으로 표시 금지. 한국시간 양끝 포함, 서버 조회 기준시각, 과거 거래 지연 반영 시 재조회 변경 가능성을 명시.
+- 엄격한 그레고리력 YYYY-MM-DD(윤년 검증), 시작일<=종료일, 양끝 포함 1~366개 달력 날짜, 종료일<=한국시간 오늘. 불가능한 날짜, 배열·중복·미허용 매개변수, custom이 아닌 기간의 from/to, 날짜 누락 custom은 400. 범위 자동 잘라내기 금지. 366일 상한은 부하 시험 전 제안값.
+
+### API·DB·트랜잭션·인덱스·커서
+- 기존 Nest GET /api/v1/wallet/activity에 period=custom, from, to, direction=all|in|out|neutral, cursor 선택값 추가. 기존 transactions,hasMore,nextCursor,asOf 유지, custom에 한해 range:{from,to,timezone:'Asia/Seoul',startInclusiveUtc,endExclusiveUtc} 추가. Next/Android에서 금액 문자열·시각·배열·커서·오류 코드 런타임 검증. 정상 빈 응답은 hasMore=false,nextCursor=null.
+- 한국시간 시작일 00:00 포함부터 종료일 다음 날 00:00 미포함까지를 date::timestamp AT TIME ZONE 'Asia/Seoul' 등 시간대 인지 방식으로 UTC 변환. created_at>=startUtc AND created_at<endExclusiveUtc AND created_at<=serverAsOf. 브라우저 시간대·고정 24시간 계산·30일 이동기간 대체 금지. 서버 asOf는 조회 상한이며 서로 다른 HTTP 페이지 간 동일 DB 스냅샷 보장 아님.
+- 소유자 USER_CASH/USER_BANK 포스팅을 거래 ID별 NUMERIC으로 합산, net=cashDelta+bankDelta. 방향은 집계 후 HAVING SIGN(net), 정렬 created_at DESC,id DESC LIMIT 51에서 최대 50건 반환. CASH↔BANK 이동은 순변동 0, 동결·종료 계정의 과거 본인 거래 보존. WLD를 JS Number로 변환하거나 원장 쓰기 금지.
+- 신규 영속 테이블 없음. 격리 PostgreSQL EXPLAIN으로 ledger_transactions(created_at,id), ledger_postings(transaction_id,account_id), accounts(owner_user_id,account_type,id) 인덱스 적합성 확인. 추가 인덱스가 필요할 때만 별도 검토된 전진형 마이그레이션, 체크섬 불변·앱 직접 DML 권한 확대 금지. SQL 2초 제한은 부하 측정 후 확정할 제안.
+- 별도 목적 HMAC 커서 wallet-activity-custom-v1에 ownerId,sessionId,from,to,direction,asOf,afterCreatedAtUs,afterTransactionId,issuedAt,expiresAt,version 결속. 15분 TTL, 최대 2048바이트, 상수시간 서명 비교, 제한된 키 교체. PostgreSQL 마이크로초 원본 정밀도를 텍스트 정렬키로 보존, JS Date 밀리초 반올림 금지. 기존 커서를 custom에 재사용 금지. 위조·형식 오류·범위 불일치 400, 만료 410 및 안전한 처음부터 재조회 안내. 단일 읽기 SQL 우선, 다중 SQL 시 동일 PG 클라이언트의 READ ONLY REPEATABLE READ 및 실패 시 롤백/반환.
+
+### 권한·악용 방지·SEO·관리자·Android·KPI
+- SessionGuard→AuthenticatedGuard→ConsentGuard→CsrfGuard 순서 유지. 회원 ID는 서버 세션에서만 취득, SQL 또는 검토된 SECURITY DEFINER 함수에서 본인 소유 강제. 타인 거래 추측·위조 커서에 존재 여부 누설 금지. 안전한 401/403/429/503, SQL 오류 노출 금지. wallet_activity_calendar_range 기능 스위치 사전 등록 후 기본 OFF.
+- 회원당 분당 10회, 동시 1회, DB 2초, 엄격한 매개변수 허용목록은 부하 시험 전 제안 기준. Cache-Control private,no-store, X-Robots-Tag noindex, Next robots noindex/nofollow, sitemap·공개 구조화 데이터 제외. URL 원문·회원 ID·금액·거래 ID·세션·커서 로그 금지. QA v1385 MCP URL 민감정보 로그 [#1972](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1972) 참조.
+- 관리자에게 최소 집단 20명 이상의 익명 집계(사용률·7일 재이용·200/400/410/429/503 비율·p50/p95·타임아웃)만 제공, 회원별 원장·날짜 조회 API 없음. 목표(미실측): 타인 조회 0, 거짓 빈 결과 0, 커서 범위 우회 0, 합의된 부하에서 p95<500ms. 위반 시 기능 중지.
+- 320px·200% 확대·WCAG 2.2 AA, 명확한 입력 레이블/오류, 키보드 적용·초기화, 오류 후 초점, aria-live 결과 건수, 44px 이상 터치 영역. Android app-api는 custom 매개변수와 응답 스키마 검증, 계정 전환 지연 응답 폐기, 400/410/429 동등 처리, 영문/국문/JSON 모바일 계약 재생성 및 음성 시험.
+
+### P0 4건·P1 6건 개발 인계
+- **P0 OPS1500-01:** QA v1385 [#1968](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1968) Docker 볼륨·작업공간 대량 제거의 실행 주체·승인·누락 자산·Test/백업/롤백 복원성 조사와 독립 복원. 현재 ROOT/DATA 42%/37%는 복구 안전성 입증이 아님.
+- **P0 SEC1500-02:** 개발 DB 앱 계정 UPDATE 211/253, DELETE 211/253, TRUNCATE 233/253, account_balances UPDATE·audit_logs DELETE, 체크섬 [#993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993), MCP 민감정보 로그 #1972 조사. 운영 DB 권한·악용 여부 미확인, 비밀값 출력 금지.
+- **P0 FIN1500-03:** Test 국고 합성 응답 [#1917](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1917), MINT/SWF/국고 출처, QA v1385 undici 누락으로 금융 시험 수집 실패 해결 후 전체 재검증. 최근 금융 병합만으로 PASS 주장 금지.
+- **P0 REL1500-04:** QA v1385 lint 오류 3건·모바일 생성 계약 드리프트·금융 시험 의존성 해결, 독립 백업 복원, 공식 Test 프론트/백엔드/엣지 정확 SHA, 승인된 GitOps 운영 승격. 문서 CI만으로 운영 배포 금지.
+- **P1 RANGE1500-05:** 본인 SQL·한국시간 반개구간·NUMERIC·과거 계정·EXPLAIN/인덱스.
+- **P1 RANGE1500-06:** Nest 입력 검증·마이크로초 HMAC 커서·응답 계약·위조/만료/키 교체.
+- **P1 RANGE1500-07:** Next 날짜 UI 적용/초기화·빈 결과/오류/만료·320px 접근성.
+- **P1 RANGE1500-08:** Android app-api 매개변수·스키마·계정 전환·영문/국문/JSON 계약.
+- **P1 RANGE1500-09:** 개인정보·속도 제한·관리자 익명 KPI·noindex·안전 로그.
+- **P1 RANGE1500-10:** 격리 PostgreSQL 17.11 회귀·기능 스위치·무중단 롤백·개발 A/B/C/QA 정확 SHA 인계.
+
+### 수용시험·승격·외부 근거 게이트
+- **계획만 수립, 미실행:** 합성 원장 10,001건 이상, 타인 접근 100건, HMAC/범위 위조 100건, 동시 조회 100건, 날짜/마이크로초 경계 50건, 윤년·시계·계정 전환 30건, 비정상 API 50건, WLD/원장 쓰기 0건, 50+1 페이지 정확성, 거짓 빈 결과 0. 기존 기간·방향·커서 회귀 필수.
+- 개발자 별도 브랜치·테스트 우선 구현, 필요 시 승인된 전진형 인덱스 마이그레이션, 실제 PG·보안·모바일·접근성·CI, 독립 백업 복원, 공식 Test 프론트/백엔드/엣지 정확 SHA, 운영자 승인 후 제한적 활성화. 기본 OFF, 장애 시 OFF로 롤백하되 원장·환경설정 삭제 금지. 기획 예약은 배포하지 않음.
+- 외부 독립 중복 제거·검증·분류 승인: **신규 0건, 누적 UNKNOWN / 10,000건 → BLOCKED / IN PROGRESS**. 10,000건 달성·기능 구현 완료 주장 금지.
+
 **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
 ## v1490 / F675-178 — 지갑 거래 북마크 정합성·재시도·모바일 개인정보 보호 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)

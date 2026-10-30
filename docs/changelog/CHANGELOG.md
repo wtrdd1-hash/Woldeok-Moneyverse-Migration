@@ -1,4 +1,7 @@
-﻿## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
+﻿## v2026.10.30.1500 — Owner-only wallet calendar range (planning DRAFT / RELEASE HOLD)
+- Proposed explicit KST start/end dates on wallet activity, strict owner-only NUMERIC ledger query, signed microsecond cursor and Android/Next privacy parity; no runtime deployment. Four P0 and six P1 handoffs, [Draft #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [issue #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). External approved 0 new / cumulative UNKNOWN of 10,000; release HOLD.
+
+## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
 - Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
 
 ## v2026.10.30.2 — Accurate Telegram disk critical severity (Production LIVE)
