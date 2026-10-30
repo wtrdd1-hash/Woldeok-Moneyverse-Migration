@@ -11,7 +11,7 @@
 - [x] Real isolated PostgreSQL least-privilege tests; backend focused HTTP and unit tests.
 
 ## Finished
-- [ ] Final SHA, changed files, gate results, upstream main check, PR and release decision.
+- [x] Final SHA, changed files, gate results, upstream main check, PR and release decision.
 
 **Scope:** Public NPS aggregate only. Member account reads and protected writes are not claimed fixed. Never mutate balances, pensions, ledger or shared DB.
 
@@ -27,3 +27,12 @@
 - Isolated PostgreSQL 17.11: PASS with network-disabled disposable container; direct table SELECT denied, PUBLIC EXECUTE denied, app EXECUTE allowed, huge NUMERIC exact, LIQUIDATED excluded, missing vault null, account row count unchanged. Test container removed.
 - Focused pension tests: 15/15 PASS. Database static suite: 56 PASS / 4 SKIP; new migration contract tests 2/2 PASS. API mobile contract: PASS (183 endpoints). Full Typecheck: PASS. Backend build: PASS. Frontend build: PASS on 2048MB heap after first 1024MB OOM and second 49s timeout. Full Lint: 0 errors / 1043 warnings; changed-file Lint: 0 errors / 1 warning. Production dependency audit: no known vulnerabilities.
 - Full backend and frontend tests running separately in mv-task; not release certified. Official Test exact-SHA and full migration chain E2E not run; Production remains HOLD.
+
+### Final gate results (2026-10-30 12:50 KST)
+- Exact candidate code SHA `62a6206c50838c192ac55ca707bb94f77cbcfc3d`; branch `auto/hourly-b-v657-nps-overview-read-acl-20261030-1235`; base `8b70ddc421016a13141e0c05ec355b4773ae0898` (Draft #1987), starting/latest main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`.
+- Draft/HOLD PR #1992: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1992. Parent PR #1987 runtime CI failing; this PR is not independently mergeable to main until migration 307 is reviewed/merged.
+- Frontend Build PASS with 2048MB heap; Backend Build PASS; Typecheck PASS; Lint 0 errors/1043 warnings; mobile API contract PASS 183 endpoints; security/release tests 22/22 PASS; production dependency audit PASS.
+- Final database static suite **58 PASS / 4 SKIP**; isolated PostgreSQL 17.11 read-only ACL script PASS; focused pension 15 PASS; precision 7 PASS.
+- Full Backend **2,565 PASS / 119 FAIL / 496 SKIP**. Full Frontend **2,607 PASS / 53 FAIL**. These are blocking failures, not certified gates. The full Test/Production exact-SHA checks and full applied migration chain E2E are NOT verified.
+- No main merge, no shared DB migration, no Test or Production deployment, no branch deletion. Existing pension write hold remains intact. Other A/C/QA/planning tasks and reservations untouched.
+- Release decision **PARTIAL / BLOCKED**. No promotion or user-facing completion claim.
