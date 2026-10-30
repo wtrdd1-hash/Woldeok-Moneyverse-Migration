@@ -26,3 +26,32 @@ describe('pension monetary exactness', () => {
     expect(contribute).toHaveBeenCalledWith('user', '9007199254740993123', undefined);
   });
 });
+
+
+describe('P1 pension annual rate truth #1910', () => {
+  it('does not publish an uncertified annual yield from unrelated configuration', async () => {
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [{ total_aum: '50000', total_subscribers: '1', total_receivers: '1', total_pension_paid: '0' }] })
+      .mockResolvedValueOnce({ rows: [{ balance_wld: '25000000' }] });
+    const repo = new NationalPensionRepository({ query } as never);
+    const result = await repo.getOverview();
+    expect(result.benchmarkAnnualPayoutRate).toBeNull();
+    expect(result.annualPayoutRateCertified).toBe(false);
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(query.mock.calls.flat().join(' ')).not.toContain('benchmark_annual_payout_rate_bps');
+  });
+
+  it('exposes the 700.8% nominal annual mismatch without floating-point money math', () => {
+    const principal = 50000n;
+    const hourly = BigInt(pensionHourlyPayout(principal.toString(), 8));
+    expect(hourly).toBe(40n);
+    expect(hourly * 8760n).toBe(350400n);
+    expect(hourly * 8760n * 10000n / principal).toBe(70080n); // 700.8% in bps
+    for (const [amount, bps] of [[100000n, 9], [500000n, 10], [2000000n, 11], [10000000n, 12]] as const) {
+      const perHour = BigInt(pensionHourlyPayout(amount.toString(), bps));
+      expect(perHour).toBe(amount * BigInt(bps) / 10000n);
+      expect(perHour * 8760n * 3n).toBe(amount * BigInt(bps) / 10000n * 26280n);
+    }
+    expect(BigInt(pensionHourlyPayout('1', 8))).toBe(1n); // min-1 rounding amplifies small principals
+  });
+});

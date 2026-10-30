@@ -7,3 +7,11 @@ export function unverifiedFinanceOperation(scope: 'LEGACY_MONETARY_AUTHORITY' | 
     message: 'Financial settlement and immutable journal evidence are not verified; operation is temporarily unavailable.',
   });
 }
+
+/** Manual SWF actions cannot claim settlement without a canonical ledger receipt. */
+export function unverifiedSwfSettlement(): never {
+  throw new ServiceUnavailableException({
+    code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
+    message: 'SWF settlement and immutable ledger evidence are unavailable.',
+  });
+}

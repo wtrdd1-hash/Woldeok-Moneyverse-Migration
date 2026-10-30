@@ -61,9 +61,10 @@ describe('AutoSovereignWealthFundService', () => {
   it('fails closed when the SWF policy row is missing', async () => {
     mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
 
-    const config = await service.getConfig();
-
-    expect(config.is_enabled).toBe(false);
+    await expect(service.getConfig()).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SWF_CONFIG_UNAVAILABLE' },
+    });
   });
 
   it('updates governance configuration correctly', async () => {

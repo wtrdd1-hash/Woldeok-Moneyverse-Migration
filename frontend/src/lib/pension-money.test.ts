@@ -14,5 +14,6 @@ describe('exact pension forecasting and liquidation', () => {
   });
   it('keeps the minimum positive hourly stipend for small principals', () => {
     expect(calculatePensionForecast('1', 8).hourly).toBe('1');
+    expect(calculatePensionForecast('0', 8).hourly).toBe('0'); // no principal, no projected payout
   });
 });

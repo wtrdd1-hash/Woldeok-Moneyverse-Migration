@@ -174,7 +174,7 @@ export class TreasuryBuybackBurnDto {
   idempotencyKey?: string;
 }
 
-import { unverifiedFinanceOperation } from '../../economy/monetary/finance-hold';
+import { unverifiedFinanceOperation, unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
 
 /** Public disclosure exposes only the evidence-backed treasury overview projection. */
 @ApiTags('Public Treasury')
@@ -441,21 +441,17 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/rebalance')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 복리 성장 국부펀드(ASWF) 포트폴리오 리밸런싱 및 복리 성장 실행' })
   async triggerSwfRebalance() {
-    if (!this.swfService) {
-      return { executed: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.evaluateAndRebalance();
+    return unverifiedSwfSettlement();
   }
 
   @Post('swf/liquidate')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
-  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') targetPortfolioAumWld?: string) {
-    if (!this.swfService) {
-      return { success: false, reason: 'SWF_SERVICE_UNAVAILABLE' };
-    }
-    return this.swfService.liquidateToTreasuryVault(targetPortfolioAumWld);
+  async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
+    return unverifiedSwfSettlement();
   }
 
   @Put('swf/config')
