@@ -24,6 +24,21 @@ describe('Android owner support date-range parity', () => {
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
+  it('rejects forged HTTP 200 payloads that omit owner rows', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ success: true }), {
+      headers: { 'content-type': 'application/json' },
+    })));
+    const response = await GET(request('from=2026-10-30&to=2026-10-31'), context);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('rejects out-of-order oldest rows instead of trusting the upstream flag', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ threads: [
+      { thread_id: '11111111-1111-4111-8111-111111111111', subject: 'First', status: 'open', last_message_at: '2026-10-30T11:00:00.000Z' },
+      { thread_id: '22222222-2222-4222-8222-222222222222', subject: 'Second', status: 'open', last_message_at: '2026-10-30T10:00:00.000Z' },
+    ] }), { headers: { 'content-type': 'application/json' } })));
+    expect((await GET(request('from=2026-10-30&to=2026-10-31&sort=oldest'), context)).status).toBe(503);
+  });
   it('forwards validated date filters, preserves private headers, and accepts in-window rows', async () => {
     const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ threads: [{
       thread_id: '11111111-1111-4111-8111-111111111111', subject: 'Billing', status: 'resolved',

@@ -13,6 +13,11 @@ beforeEach(() => vi.mocked(api).mockImplementation(async (path) => String(path).
 }] } as never));
 
 describe('owner support date search UI', () => {
+  it('does not send malformed or partial dates to the owner backend', async () => {
+    const html = renderToStaticMarkup(await SupportPage({ searchParams: Promise.resolve({ from: '2026-02-30' }) }));
+    expect(html).toContain('role="alert"');
+    expect(api).toHaveBeenCalledWith('/api/v1/support/threads');
+  });
   it('shows accessible KST start/end inputs and preserves both filters in owner links', async () => {
     const html = renderToStaticMarkup(await SupportPage({ searchParams: Promise.resolve({
       from: '2026-10-30', to: '2026-10-31', status: 'resolved',
