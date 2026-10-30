@@ -29,7 +29,8 @@ CRITICAL_SERVICES = ("moneyverse-backend.service", "moneyverse-frontend.service"
 TIMERS = ("moneyverse-qa.timer", "moneyverse-backup.timer",
           "moneyverse-verified-blog-v1419.timer", "moneyverse-telegram-market.timer")
 ONESHOT = ("moneyverse-qa.service", "moneyverse-backup.service",
-           "moneyverse-verified-blog-v1419.service")
+           "moneyverse-verified-blog-v1419.service",
+           "moneyverse-telegram-market.service")
 
 
 def redact(value: str) -> str:
@@ -184,6 +185,12 @@ def unit_snapshot() -> dict[str, tuple[str, str]]:
             real = data.get("NextElapseUSecRealtime", "")
             phase = data.get("SubState", "")
             has_next = any(x and x != "infinity" for x in (mono, real))
+            # During a legitimate dispatch, systemd temporarily reports
+            # running with no next event. The worker's Result is monitored
+            # independently and TimeoutStartSec bounds the operation.
+            if phase == "running":
+                results[unit] = ("OK", "running")
+                continue
             if phase != "waiting" or not has_next:
                 results[unit] = ("CRITICAL", "unscheduled:" + phase)
                 continue

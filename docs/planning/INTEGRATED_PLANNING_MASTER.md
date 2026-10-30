@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.10.30.3 — Telegram watchdog running-state false-positive correction LIVE
+
+- During v2026.10.30.1 production scheduling recheck, market timer active/running while executing its healthy oneshot could temporarily lose a next-trigger field. The base watchdog mistakenly sent CRITICAL unscheduled:running, despite later market.service MARKET_OK and valid next 2-minute calendar schedule. v2026.10.30.3 PR #1969 (source merge 7c4919d) correctly accepts transient active/running but separately monitors market.service Result as CRITICAL when the worker fails; active/elapsed and genuinely unscheduled failures remain CRITICAL.
+- Test: TDD RED 2 cases, GREEN 27/27 Python tests, isolated systemd Test exit 0, GitHub policy CI PASS (runtime JS build skipped), Test/Production /health 200. Production Telegram bridge source hash matched merged GitHub source, market timer waiting with valid next 09:26 and market worker Result success, base bot CHECK_OK. Existing backend/frontend PIDs unchanged; no finance/database writes, no economic scheduler changes.
+- [English release](../releases/v2026.10.30.3.md) / [Korean](../releases/v2026.10.30.3.ko.md) / [worklog](../worklog/2026-10-30-telegram-watchdog-race-v3.md).
+
 ## v2026.10.30.1–2 — Telegram alert reliability audited and repaired LIVE
 
 - Authoritative operational audit at 2026-10-30 09:00 KST found v1511 market timer active/enabled but elapsed with no next trigger, silently missing 10+ hours of fictional-stock news, price and critical-log scans. New calendar scheduling every two minutes is LIVE, proven by separate automatic MARKET_OK calls at 09:10:02 and 09:12:01 and 09:14; a finite next trigger remains scheduled. Existing v1510 operations alert checks this next trigger, raising CRITICAL for active/elapsed or unscheduled and reporting recovery. Production Test DB was accessed read-only; no finance mutations, market/news fabrication or app restarts.
