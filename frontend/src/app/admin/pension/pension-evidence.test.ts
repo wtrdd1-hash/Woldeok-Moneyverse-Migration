@@ -22,6 +22,7 @@ describe('verified NPS admin evidence', () => {
   it('preserves exact large WLD strings without Number conversion', () => {
     expect(parsePensionOverview(overview)?.totalAumWld).toBe('9007199254740993');
     expect(parsePensionPayoutLogs([payout])?.[0]?.payout_amount_wld).toBe('9007199254740993');
+    expect(parsePensionOverview({ ...overview, benchmarkAnnualPayoutRate: null })?.benchmarkAnnualPayoutRate).toBeNull();
   });
   it('distinguishes a valid empty payout list from unavailable data', () => {
     expect(parsePensionPayoutLogs([])).toEqual([]);

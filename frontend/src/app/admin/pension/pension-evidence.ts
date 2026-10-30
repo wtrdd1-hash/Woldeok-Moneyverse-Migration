@@ -1,4 +1,4 @@
-import type { NationalPensionOverview, PayoutLogItem } from './pension-control-tower';
+﻿import type { NationalPensionOverview, PayoutLogItem } from './pension-control-tower';
 
 const unsignedWld = /^(0|[1-9]\d{0,37})$/;
 const signedWld = /^-?(0|[1-9]\d{0,37})$/;
@@ -26,8 +26,7 @@ export function parsePensionOverview(value: unknown): NationalPensionOverview | 
     !count(data.totalSubscribersCount) ||
     !count(data.totalRetiredReceiversCount) ||
     data.totalRetiredReceiversCount > data.totalSubscribersCount ||
-    typeof data.benchmarkAnnualPayoutRate !== 'string' ||
-    !rate.test(data.benchmarkAnnualPayoutRate)
+    !(data.benchmarkAnnualPayoutRate === null || (typeof data.benchmarkAnnualPayoutRate === 'string' && rate.test(data.benchmarkAnnualPayoutRate)))
   ) return null;
   return {
     totalAumWld: data.totalAumWld,

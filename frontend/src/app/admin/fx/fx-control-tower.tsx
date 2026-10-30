@@ -163,9 +163,16 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 외환보유액 잔고 */}
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-          <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-            가상 외환보유액 (FX Reserves)
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+              가상 외환보유액 (FX Reserves)
+            </span>
+            {Date.now() - Date.parse(reserves.updatedAt) > 24 * 60 * 60_000 && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full border border-blue-500/30 text-blue-400 bg-blue-500/10 font-medium">
+                최근 고시 기준
+              </span>
+            )}
+          </div>
           <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
             ${reserves.totalReservesUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
