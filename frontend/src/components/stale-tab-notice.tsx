@@ -109,7 +109,9 @@ export function StaleTabNotice({
         setStale(false);
         try {
           window.sessionStorage.removeItem(REFRESH_KEY);
-        } catch {}
+        } catch {
+          // Session storage can be unavailable; keep the refresh path usable.
+        }
         return;
       }
 
@@ -134,7 +136,9 @@ export function StaleTabNotice({
       isRefreshingRef.current = true;
       try {
         window.sessionStorage.setItem(REFRESH_KEY, transition);
-      } catch {}
+      } catch {
+        // Session storage can be unavailable; still attempt the refresh.
+      }
 
       const targetUrl = releaseRefreshUrl(window.location.href, newVersion);
       await executeHardRefresh(targetUrl, navigate);
@@ -197,7 +201,9 @@ export function StaleTabNotice({
           // 수동 클릭 시 세션 스토리지 플래그를 비워 새로고침 후 루프에 갇히지 않게 함
           try {
             window.sessionStorage.removeItem(REFRESH_KEY);
-          } catch {}
+          } catch {
+            // Storage access may be blocked; manual refresh must still work.
+          }
           const targetUrl = targetVersion
             ? releaseRefreshUrl(window.location.href, targetVersion)
             : window.location.href;
