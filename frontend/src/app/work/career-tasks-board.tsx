@@ -61,12 +61,14 @@ export function CareerTasksBoard({
   quotaBlock,
   selectedDifficulty,
   selectedMaxDuration,
+  selectedMaxReward,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
   readonly quotaBlock?: WorkQuotaBlock | null;
   readonly selectedDifficulty?: string | null;
   readonly selectedMaxDuration?: string | null;
+  readonly selectedMaxReward?: string | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -151,9 +153,23 @@ export function CareerTasksBoard({
               ))}
             </select>
           </label>
+          <label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
+            <span>{isEn ? 'Maximum preview WLD reward' : '최대 예상 WLD 보상'}</span>
+            <select
+              name="maxReward"
+              defaultValue={selectedMaxReward ?? ''}
+              aria-label={isEn ? 'Maximum preview WLD reward' : '최대 예상 WLD 보상'}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">{isEn ? 'Any reward' : '전체 보상'}</option>
+              {['100', '200', '500', '1000', '2000', '5000', '10000'].map((value) => (
+                <option key={value} value={value}>{isEn ? `Up to ${value} WLD` : `${value} WLD 이하`}</option>
+              ))}
+            </select>
+          </label>
           <Button type="submit" size="sm" className="min-h-10">{isEn ? 'Apply' : '적용'}</Button>
           <Link href="/work" className="inline-flex min-h-10 items-center justify-center rounded-md border border-input px-3 text-xs font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
-            {isEn ? 'Reset duration filter' : '시간 필터 초기화'}
+            {isEn ? 'Reset server filters' : '서버 필터 초기화'}
           </Link>
         </form>
         <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
@@ -187,7 +203,7 @@ export function CareerTasksBoard({
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            searchQuery.trim() || minReward || selectedMaxDuration
+            searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'

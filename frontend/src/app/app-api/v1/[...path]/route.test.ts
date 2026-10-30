@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from './route';
 import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
@@ -295,6 +295,23 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('cache-control')).toContain('no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
     expect((await response.json()).tasks).toEqual([]);
+  });
+
+  it.each([200, 400, 401, 503])('forwards Android work maxReward without rounding and with private headers %s', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ featureState: 'enabled', tasks: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/work/tasks?maxReward=9007199254740993&maxDurationSeconds=300&minReward=100'), context('work', 'tasks'));
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.pathname).toBe('/api/v1/work/tasks');
+    expect(target.searchParams.get('maxReward')).toBe('9007199254740993');
+    expect(target.searchParams.get('minReward')).toBe('100');
+    expect(target.searchParams.get('maxDurationSeconds')).toBe('300');
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 
   it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
