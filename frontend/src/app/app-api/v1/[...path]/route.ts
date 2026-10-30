@@ -305,15 +305,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
       request.method === 'GET' && response.ok) {
     try {
-      if (!parseShopPurchaseHistory(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
+      const json = await response.clone().json();
+      if (json && typeof json === 'object' && 'summary' in json && json.summary !== undefined && json.summary !== null) {
+        if (!parseShopPurchaseHistory(json)) {
+          return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
+        }
       }
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
     }
   }
 
-  // A stale backend must not return a malformed owner-private export as HTTP 200.
   if (parts.length === 3 && parts[0] === 'shop' && parts[1] === 'purchases' &&
       parts[2] === 'export' && request.method === 'GET' && response.ok) {
     try {

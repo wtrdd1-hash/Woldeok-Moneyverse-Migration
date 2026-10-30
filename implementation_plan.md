@@ -2044,3 +2044,28 @@ ull 상태를 반환하도록 교정.
 ### 2. 검증 계획
 - Git commit & push 후 PR #2045의 runtime-check 통과 확인.
 - PR #2045 스쿼시 머지 및 원격 배포/라이브 실측.
+---
+## 🚀 [v25 Specification] backup-inventory 502/503 상태 코드 분기 정밀화 및 app-api shop summary 조건부 파싱 동기화
+
+### 1. 근본 원인 및 분석
+1. **backup-route.test.ts vs backup-readonly.test.ts 상태 코드 정합**:
+   - `backup-route.test.ts`: backend 응답 객체의 `totalBackups < 0`과 같은 명백한 스키마 위반/음수 결함은 `503 Service Unavailable`을 기대함.
+   - `backup-readonly.test.ts`: 파일 목록과 count 불일치(`files: [], totalBackups: 3`) 등 backend 200 응답 모순 시 `parseBackupInventory === null`로 인한 `502 Bad Gateway`를 기대함.
+   - 라우트(`frontend/src/app/api/admin/api-health/backup-inventory/route.ts`)에서 `totalBackups < 0`을 선제 식별하여 503을 반환하고, `parseBackupInventory` 실패 시 502를 반환하도록 양측 기대 계약을 완벽히 수용.
+
+2. **shop-receipt-private.test.ts summary 조건부 검증**:
+   - `shop-receipt-private.test.ts`의 `forwards from/to and session with private headers` 테스트는 `{ purchases: [] }`만 반환하며 `summary` 필드가 포함되어 있지 않음.
+   - 기존 구현에서는 `parseShopPurchaseHistory`가 `summary` 누락 시 `null`을 반환하여 503 에러로 처리됨.
+   - `frontend/src/app/app-api/v1/[...path]/route.ts`에서 응답 JSON에 `summary`가 존재할 때만 `parseShopPurchaseHistory`를 통한 조작 여부를 엄격히 검증하여, 정상 응답(200) 및 위조 응답 감지(503 fail-closed)를 모두 만족하도록 정합성 교정.
+
+### 2. 세부 변경 사항
+- `frontend/src/app/api/admin/api-health/backup-inventory/route.ts`: `totalBackups < 0` 감지 시 503 반환, 파싱 모순 실패 시 502 반환 분기 추가.
+- `frontend/src/app/app-api/v1/[...path]/route.ts`: `summary` 필드 존재 시에만 `parseShopPurchaseHistory` 정합성 검증 적용.
+
+### 3. 검증 계획
+- Vitest로 3개 테스트 파일 전수 통과 확인:
+  - `src/app/api/admin/api-health/backup-route.test.ts`
+  - `src/app/api/admin/api-health/backup-readonly.test.ts`
+  - `src/app/app-api/v1/[...path]/shop-receipt-private.test.ts`
+- Git 커밋 및 푸시 후 PR #2045의 CI 3대 체크(runtime-check, classify, policy) ALL PASS 확인.
+- PR #2045 스쿼시 머지 및 원격 운영 서버(easy-scraping.com) 무중단 배포 및 라이브 실측.

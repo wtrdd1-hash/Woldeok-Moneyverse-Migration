@@ -15,6 +15,9 @@ export async function GET() {
   }
   try {
     const raw = await api<unknown>('/api/v1/admin/backups');
+    if (raw && typeof raw === 'object' && 'totalBackups' in raw && typeof (raw as { totalBackups?: unknown }).totalBackups === 'number' && ((raw as { totalBackups: number }).totalBackups < 0)) {
+      return NextResponse.json({ error: 'backup inventory unavailable' }, { status: 503, headers: HEADERS });
+    }
     const inventory = parseBackupInventory(raw);
     if (inventory === null) {
       return NextResponse.json({ error: 'invalid backup inventory evidence' }, { status: 502, headers: HEADERS });
