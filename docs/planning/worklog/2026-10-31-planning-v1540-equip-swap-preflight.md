@@ -1,5 +1,6 @@
 # Planning v1540 — Feature Addition / Draft / Release Hold
 ## v2026.10.31.1540 — F675-191 Owner Equipment Swap Readiness Preflight (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **Review:** Draft PR #2101 / engineering issue #2100 / parent Draft #2093 / RELEASE HOLD. Not implemented or deployed.
 
 **Cycle:** Previous Feature Improvement v1538 → Current Feature Addition v1540 → Next Feature Improvement v1542 (provisional). **Authority:** latest origin/main `761a55a094fb9dd383d213e817305e68c79fa23c` verified at start/mid; AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity reviewed. Stacked on Draft #2093 (itself on #2089), no merge; independent engineering handoff for F675-191. This is a proposed, not implemented, owner-only read feature. No additional scattered planning specification.
 
