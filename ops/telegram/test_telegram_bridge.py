@@ -103,6 +103,19 @@ class BridgeTests(unittest.TestCase):
                            "NextElapseUSecRealtime":"Fri 2026-10-30 09:12:00 KST"}
         self.assertEqual(unit_snapshot()["moneyverse-telegram-market.timer"][0],"OK")
 
+    @patch("telegram_bridge.shutil.disk_usage")
+    @patch("telegram_bridge.systemctl")
+    def test_disk_critical_when_only_three_percent_available(self, show, disk):
+        from types import SimpleNamespace
+        show.return_value={"ActiveState":"active","Result":"success","LoadState":"loaded",
+                           "SubState":"waiting","NextElapseUSecRealtime":"Fri 2026-10-30 09:20 KST"}
+        # Linux reserved blocks are not available to the service account.
+        # used / total = 93% looks like WARNING but only 3% free is CRITICAL.
+        disk.return_value=SimpleNamespace(total=100, used=93, free=3)
+        current=unit_snapshot()
+        self.assertEqual(current["disk:/"],("CRITICAL","97%"))
+        self.assertEqual(current["disk:/srv/moneyverse-data"],("CRITICAL","97%"))
+
     @patch("telegram_bridge.systemctl")
     def test_snapshot_flags_qa_failure_and_blog_timer_disabled(self, show):
         show.side_effect = lambda unit: {

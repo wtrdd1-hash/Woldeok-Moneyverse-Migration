@@ -196,7 +196,10 @@ def unit_snapshot() -> dict[str, tuple[str, str]]:
     for disk in ("/", "/srv/moneyverse-data"):
         try:
             usage = shutil.disk_usage(disk)
-            percent = round(usage.used * 100 / usage.total)
+            # Linux reserved blocks can be unavailable to this worker even
+            # when used / total appears below a critical threshold.
+            # Use total minus actually available free bytes, like df's Use%.
+            percent = round((usage.total - usage.free) * 100 / usage.total)
             severity = "CRITICAL" if percent >= 95 else "WARNING" if percent >= 90 else "OK"
             results["disk:" + disk] = (severity, str(percent) + "%")
         except OSError:
