@@ -360,13 +360,13 @@ export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] =
  * Until a separately certified journal baseline and verification receipt exist,
  * never assert a zero discrepancy or a last verification timestamp.
  */
-function verifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliation {
+function unverifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliation {
   return {
-    status: 'RECONCILED',
+    status: 'UNVERIFIED',
     total_vaults_balance_wld: vaultTotal,
-    total_ledger_net_flow_wld: vaultTotal,
-    discrepancy_amount_wld: '0',
-    last_reconciled_at: new Date().toISOString(),
+    total_ledger_net_flow_wld: null,
+    discrepancy_amount_wld: null,
+    last_reconciled_at: null,
   };
 }
 
@@ -514,7 +514,7 @@ export class TreasuryRepository {
 
     // Vault totals alone cannot prove journal completeness or reconciliation.
     // Do not manufacture a ledger total, zero discrepancy, or verification time.
-    const reconciliation = verifiedTreasuryReconciliation(totalTreasury.toString());
+    const reconciliation = unverifiedTreasuryReconciliation(totalTreasury.toString());
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -893,7 +893,7 @@ export class TreasuryRepository {
     `);
     const totalVaults = vaultsRes.rows[0]?.total ?? '0';
 
-    return verifiedTreasuryReconciliation(totalVaults);
+    return unverifiedTreasuryReconciliation(totalVaults);
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {
