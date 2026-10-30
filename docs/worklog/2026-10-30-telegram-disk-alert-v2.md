@@ -23,3 +23,8 @@
 - The two-minute base Telegram worker observes transitions and will notify recovery as the current state changes. The stored status can trail the instantaneous df figure for up to a polling interval; do not report stale CRITICAL levels as the current physical state.
 - Further disk-space incident response should verify the origin, protected PostgreSQL/uploads/backups and QA retention, without deleting additional data solely to satisfy alarm severity.
 - Additional security follow-up: some unrelated host gateway request journal entries were observed containing credential-like query values. No such raw journal text is forwarded by the Telegram notifier, which reports aggregate counts only. Review the gateway's request-log redaction and rotate any affected credentials under a separately authorized security task; do not place actual credentials in project docs.
+
+## Later observation 2026-10-30 09:19 KST
+- df changed further to root 79% / data 33% after independent ongoing space reclamation. The notifier is state-dependent and its recorded alerts correctly transition at successive two-minute polls. Storage cause not attributed to this task.
+- Live PostgreSQL read-only aggregate sanity check returned 40 accounts, 891 ledger transactions and 1,829 postings; these are unchanged from the prior documented baseline but do not constitute a full financial integrity certification.
+- Private Telegram explicit post-audit send test returned EVENT_SENT (Telegram API accepted message). No disk deletion, DB changes or app restart from this audit.
