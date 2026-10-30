@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from '../sides';
 import type { WalletHistoryPage } from './types';
-import { activityPeriod, activityPeriodUrl, activityCursorUrl } from './period';
+import { activityPeriod, activityPeriodUrl, activityCursorUrl, activityDirection } from './period';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,14 +32,15 @@ export const metadata: Metadata = {
 export default async function WalletActivityPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ period?: string; cursor?: string }>;
+  searchParams?: Promise<{ period?: string; cursor?: string; direction?: string }>;
 }) {
   await requireMember();
   const params = await searchParams;
   const period = activityPeriod(params?.period);
+  const direction = activityDirection(params?.direction);
   // The API verifies the opaque cursor against the current owner and session.
   const cursor = typeof params?.cursor === 'string' && params.cursor.length <= 2048 ? params.cursor : undefined;
-  const history = await apiOrNull<WalletHistoryPage>(`/api/v1/wallet/activity?period=${period}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`);
+  const history = await apiOrNull<WalletHistoryPage>(`/api/v1/wallet/activity?period=${period}&direction=${direction}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`);
 
 
   return (
@@ -63,15 +64,24 @@ export default async function WalletActivityPage({
           ['30d', '최근 30일'],
         ] as const).map(([value, label]) => (
           <Button key={value} asChild variant={period === value ? 'default' : 'outline'} size="sm">
-            <Link href={activityPeriodUrl(value)} aria-current={period === value ? 'page' : undefined}>
+            <Link href={activityPeriodUrl(value, direction)} aria-current={period === value ? 'page' : undefined}>
               {label}
             </Link>
           </Button>
         ))}
       </nav>
-      <p className="text-sm text-muted-foreground">확정된 본인 원장 기록을 한 번에 최대 50건씩 표시합니다. 기간과 이전 기록은 서버에서 조회합니다.</p>
+      <nav aria-label="지갑 기록 입출금 방향" className="flex flex-wrap gap-2">
+        {([
+          ['all', '전체 방향'], ['in', '입금'], ['out', '출금'], ['neutral', '순변동 없음'],
+        ] as const).map(([value, label]) => (
+          <Button key={value} asChild variant={direction === value ? 'default' : 'outline'} size="sm">
+            <Link href={activityPeriodUrl(period, value)} aria-current={direction === value ? 'page' : undefined}>{label}</Link>
+          </Button>
+        ))}
+      </nav>
+      <p className="text-sm text-muted-foreground">확정된 본인 원장 기록을 한 번에 최대 50건씩 표시합니다. 입출금은 내 현금·은행 계정의 합계 순변동 기준이며, 계정 간 이동은 순변동 없음에 표시됩니다. 필터는 서버에서 이전 기록까지 적용됩니다.</p>
       {history?.hasMore && <p role="status" className="text-sm text-muted-foreground">이전 기록이 더 있습니다.</p>}
-      {cursor && <Button asChild variant="outline" size="sm" className="w-fit"><Link href={activityPeriodUrl(period)}>처음부터 다시 보기</Link></Button>}
+      {cursor && <Button asChild variant="outline" size="sm" className="w-fit"><Link href={activityPeriodUrl(period, direction)}>처음부터 다시 보기</Link></Button>}
       <Card>
         <CardContent>
           {!history ? (
@@ -100,7 +110,7 @@ export default async function WalletActivityPage({
       </Card>
       {history?.hasMore && history.nextCursor && (
         <Button asChild variant="outline" className="w-fit">
-          <Link href={activityCursorUrl(period, history.nextCursor)}>이전 기록 50건 보기</Link>
+          <Link href={activityCursorUrl(period, history.nextCursor, direction)}>이전 기록 50건 보기</Link>
         </Button>
       )}
       {history && <p className="text-xs text-muted-foreground">조회 기준: {formatMoment(history.asOf)} · 이전 페이지로 이동하면 현재 50건을 대체합니다. 전체 기록을 내려받은 것은 아닙니다.</p>}

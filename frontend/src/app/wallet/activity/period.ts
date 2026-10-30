@@ -28,9 +28,10 @@ export function activityCompletenessNotice(hasMore: boolean | undefined): string
 }
 
 /** Opaque cursor never becomes an unescaped URL fragment. */
-export function activityCursorUrl(period: ActivityPeriod, cursor: string | null): string {
+export function activityCursorUrl(period: ActivityPeriod, cursor: string | null, direction: ActivityDirection = 'all'): string {
   const params = new URLSearchParams();
   if (period !== 'all') params.set('period', period);
+  if (direction !== 'all') params.set('direction', direction);
   if (cursor) params.set('cursor', cursor);
   const query = params.toString();
   return `/wallet/activity${query ? `?${query}` : ''}`;

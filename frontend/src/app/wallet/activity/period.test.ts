@@ -38,5 +38,6 @@ describe('wallet history page navigation', () => {
   it('encodes opaque signed cursors and retains the period without URL injection', () => {
     expect(activityCursorUrl('7d', 'a.b+/=')).toBe('/wallet/activity?period=7d&cursor=a.b%2B%2F%3D');
     expect(activityCursorUrl('all', null)).toBe('/wallet/activity');
+    expect(activityCursorUrl('30d', 'a.b', 'out')).toBe('/wallet/activity?period=30d&direction=out&cursor=a.b');
   });
 });
