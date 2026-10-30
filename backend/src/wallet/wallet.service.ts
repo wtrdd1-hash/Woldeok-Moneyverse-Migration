@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { parseWalletCalendarRange } from './wallet-calendar-range';
 import { signWalletActivityCursor, verifyWalletActivityCursor, type WalletActivityDirection, type WalletActivityPeriod } from './wallet-activity-cursor';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
@@ -107,7 +108,7 @@ export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
   transactionDetailForUser?(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null>;
   recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
-  activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined; direction?: WalletActivityDirection }): Promise<WalletTransactionRow[]>;
+  activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined; direction?: WalletActivityDirection }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -440,25 +441,34 @@ export class WalletService {
 
   async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
     period: WalletActivityPeriod = 'all', cursor?: string, direction: WalletActivityDirection = 'all',
+    rangeInput?: { from?: unknown; to?: unknown },
   ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
     const owner = requireUuid(authenticatedUserId, 'authenticated user id');
     const session = requireUuid(authenticatedSessionId, 'authenticated session id');
     if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
     if (direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') throw new WalletInputError('invalid wallet activity direction');
     const now = this.clock();
-    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now, direction) : null;
+    const range = parseWalletCalendarRange(rangeInput?.from, rangeInput?.to, now);
+    if (range && period !== 'all') throw new WalletInputError('rolling period and calendar range cannot be combined');
+    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now, direction, range ?? undefined) : null;
     const asOf = decoded ? new Date(decoded.asOf) : now;
-    const since = period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000);
+    const since = range?.since ?? (period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000));
     if (!this.repository.activityTransactionsForUser) throw new Error('wallet activity pagination repository is unavailable');
     const rows = await this.repository.activityTransactionsForUser(owner, {
-      asOf, since, direction, ...(decoded ? { after: { at: new Date(decoded.afterAt), id: decoded.afterId } } : {}),
+      asOf, since, direction, ...(range ? { before: range.before } : {}),
+      ...(decoded ? { after: { at: range ? decoded.afterAt : new Date(decoded.afterAt), id: decoded.afterId } } : {}),
     });
     const transactions = normalizeTransactions(rows.slice(0, 50));
     const hasMore = rows.length > 50;
     const last = rows[49];
+    const exactAfter = range ? (last as any)?.cursor_at : undefined;
+    if (range && hasMore && (!exactAfter || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(exactAfter))) {
+      throw new Error('wallet activity microsecond cursor evidence is unavailable');
+    }
     const nextCursor = hasMore && last ? signWalletActivityCursor({
-      owner, session, period, direction, asOf: asOf.toISOString(), afterAt: timestamp(last.created_at, 'cursor timestamp'),
+      owner, session, period, direction, asOf: asOf.toISOString(), afterAt: range ? exactAfter! : timestamp(last.created_at, 'cursor timestamp'),
       afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
+      ...(range ? { rangeFrom: range.from, rangeTo: range.to } : {}),
     }) : null;
     return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
   }

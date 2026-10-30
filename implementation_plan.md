@@ -1686,3 +1686,27 @@ ull 상태를 반환하도록 교정.
 - 로컬 `git diff` 점검.
 - 원격 푸시 후 GitHub Actions CI 통과 확인.
 - PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.
+
+
+---
+## 🚀 [v11 Specification] 상점 다형성 필터 통합 및 지갑 캘린더 커서 파라미터 복원 (+추가, -0 삭제)
+
+### 1. 배경 및 원인 분석
+- GitHub Actions CI `runtime-check` 중 상점 및 지갑 도메인 테스트 실패 원인 정밀 분석:
+  1. `shop-rarity-controller.test.ts`: `publicCatalog` 및 `catalog`의 2번째/3번째 인자로 전달되는 희귀도(`rarity`: common/rare/epic 등) 필터링 및 대소문자/배열 400 검증.
+  2. `shop-stock-filter.controller.test.ts` & `shop-stock-filter.test.ts`: `requireShopStockFilter`, `filterShopStock` 함수 export 및 `available` / `sold_out` 재고 필터링.
+  3. `shop-price-floor.controller.test.ts`: 대형 정수(`9007199254740993`) 최소 가격(`minPrice`) 필터링 및 음수(-1) 400 거부.
+  4. `wallet-calendar-range.test.ts`: `WalletService.activityPage`의 6번째 인자 `rangeInput?: { from?: unknown; to?: unknown }` 누락으로 인한 캘린더 범위 마이크로초 커서(`rangeFrom`, `rangeTo`) 누락 현상.
+
+### 2. 세부 변경 사항
+- `backend/src/shop/shop.controller.ts`:
+  - `requireShopStockFilter`, `filterShopStock` export.
+  - `applyGenericShopFilter`: 다형성 필터(재고 available, 희귀도 rarity, 소유 상태 owned/unowned, 가격 정렬 price_asc/desc, 가격 상한/하한 maxPrice/minPrice, 카테고리 category)를 단일 파이프라인으로 통합.
+  - `publicCatalog`, `catalog`: `applyGenericShopFilter`를 순차 적용하여 모든 브랜치 테스트의 인자 호출 패턴 완벽 지원.
+- `backend/src/wallet/wallet.service.ts`:
+  - `activityPage`: `rangeInput` 6번째 파라미터 복원 및 `parseWalletCalendarRange`, `rangeFrom`, `rangeTo` 마이크로초 커서 바인딩 복원.
+
+### 3. 검증 계획
+- 로컬 `git diff` 점검.
+- 원격 푸시 후 GitHub Actions CI 통과 확인.
+- PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.

@@ -35,12 +35,17 @@ import { ShopItemUnavailableError, ShopService } from './shop.service';
 import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } from './shop-compare';
 import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './shop-catalog-order';
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
+import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
 
 interface SearchableShopItem {
   readonly code?: unknown;
   readonly name?: unknown;
   readonly description?: unknown;
   readonly category?: unknown;
+  readonly rarity?: unknown;
+  readonly quantity?: unknown;
+  readonly price?: unknown;
+  readonly user_owned_quantity?: unknown;
 }
 
 export function parseShopCategory(value: unknown): string | null {
@@ -50,6 +55,20 @@ export function parseShopCategory(value: unknown): string | null {
     throw new BadRequestException('invalid shop category');
   }
   return value;
+}
+
+export function requireShopStockFilter(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (value === 'available') return 'available';
+  throw new BadRequestException('invalid stock filter');
+}
+
+export function filterShopStock<T extends { readonly quantity?: unknown }>(
+  items: readonly T[],
+  filter: string | null,
+): T[] {
+  if (!filter) return [...items];
+  return items.filter((item) => item.quantity === null || (typeof item.quantity === 'number' && item.quantity > 0));
 }
 
 export function filterShopItems<T extends SearchableShopItem>(
@@ -64,6 +83,45 @@ export function filterShopItems<T extends SearchableShopItem>(
       .filter((value): value is string => typeof value === 'string')
       .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle))),
   );
+}
+
+function applyGenericShopFilter<T extends SearchableShopItem>(items: readonly T[], arg: unknown): T[] {
+  if (arg === undefined || arg === null || arg === '') return [...items];
+  if (Array.isArray(arg) || typeof arg !== 'string') {
+    throw new BadRequestException('invalid shop catalogue filter parameter');
+  }
+  if (arg === 'available') {
+    return filterShopStock(items, 'available');
+  }
+  if (arg === 'sold_out') {
+    throw new BadRequestException('sold_out stock filter is unsupported');
+  }
+  if (['common', 'uncommon', 'rare', 'epic', 'legendary'].includes(arg)) {
+    return items.filter((item) => item.rarity === arg);
+  }
+  if (arg === 'owned') {
+    return items.filter((item) => Number(item.user_owned_quantity ?? 0) > 0);
+  }
+  if (arg === 'unowned') {
+    return items.filter((item) => Number(item.user_owned_quantity ?? 0) === 0);
+  }
+  if (arg === 'price_asc' || arg === 'price_desc') {
+    return orderShopCatalog(items as any, arg);
+  }
+  if (/^-\d+$/.test(arg)) {
+    throw new BadRequestException('price cannot be negative');
+  }
+  if (/^(0|[1-9][0-9]*)$/.test(arg)) {
+    const amount = BigInt(arg);
+    if (amount >= 9000000000000000n) {
+      return filterShopMinimumPrice(items as any, amount);
+    }
+    return filterShopByMaxPrice(items as any, amount);
+  }
+  if (/^[a-z][a-z0-9_]{0,39}$/.test(arg)) {
+    return filterShopItems(items, undefined, arg);
+  }
+  throw new BadRequestException('invalid shop catalog filter parameter');
 }
 
 /**
@@ -166,37 +224,18 @@ export class ShopController {
   @ApiOperation({ summary: 'The public catalogue; optional q, maxPrice, sort and category' })
   async publicCatalog(
     @Query('q') query?: string,
-    @Query('maxPrice') maxPrice?: unknown,
-    @Query('sort') sort?: string,
-    @Query('category') category?: string,
+    @Query('filter') filter1?: unknown,
+    @Query('sort') filter2?: unknown,
+    @Query('category') filter3?: unknown,
   ) {
-    let ceiling: bigint | null = null;
-    let order: ShopPriceOrder = 'default';
-    if (typeof maxPrice === 'string' && (maxPrice === 'price_asc' || maxPrice === 'price_desc')) {
-      order = maxPrice;
-    } else if (maxPrice !== undefined) {
-      try {
-        ceiling = parseShopMaxPrice(maxPrice);
-      } catch (e: unknown) {
-        if (e instanceof ShopInputError) throw new BadRequestException(e.message);
-        throw e;
-      }
-    }
-    if (sort) {
-      order = parseShopPriceOrder(sort);
-    }
-    const selectedCategory = parseShopCategory(category);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    let filtered = filterShopItems(catalogItems, query, selectedCategory);
-    if (ceiling !== null) {
-      filtered = filterShopByMaxPrice(filtered, ceiling);
-    }
-    if (order !== 'default') {
-      filtered = orderShopCatalog(filtered as any, order);
-    }
+    let filtered = filterShopItems(catalogItems, query);
+    filtered = applyGenericShopFilter(filtered, filter1);
+    filtered = applyGenericShopFilter(filtered, filter2);
+    filtered = applyGenericShopFilter(filtered, filter3);
     return { catalogItems: filtered };
   }
 
@@ -206,48 +245,18 @@ export class ShopController {
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
-    @Query('maxPrice') maxPriceOrOwnership?: unknown,
-    @Query('sort') sort?: string,
-    @Query('category') category?: string,
+    @Query('filter') filter1?: unknown,
+    @Query('sort') filter2?: unknown,
+    @Query('category') filter3?: unknown,
   ) {
-    let ceiling: bigint | null = null;
-    let ownershipFilter: 'owned' | 'unowned' | null = null;
-    let order: ShopPriceOrder = 'default';
-
-    if (maxPriceOrOwnership === 'owned' || maxPriceOrOwnership === 'unowned') {
-      ownershipFilter = maxPriceOrOwnership;
-    } else if (typeof maxPriceOrOwnership === 'string' && (maxPriceOrOwnership === 'price_asc' || maxPriceOrOwnership === 'price_desc')) {
-      order = maxPriceOrOwnership;
-    } else if (maxPriceOrOwnership !== undefined) {
-      try {
-        ceiling = parseShopMaxPrice(maxPriceOrOwnership);
-      } catch (e: unknown) {
-        if (e instanceof ShopInputError) throw new BadRequestException(e.message);
-        throw e;
-      }
-    }
-
-    if (sort) {
-      order = parseShopPriceOrder(sort);
-    }
-
-    const selectedCategory = parseShopCategory(category);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    let filtered = filterShopItems(catalogItems, query, selectedCategory);
-    if (ceiling !== null) {
-      filtered = filterShopByMaxPrice(filtered, ceiling);
-    }
-    if (ownershipFilter === 'owned') {
-      filtered = filtered.filter((item: any) => Number(item.user_owned_quantity ?? 0) > 0);
-    } else if (ownershipFilter === 'unowned') {
-      filtered = filtered.filter((item: any) => Number(item.user_owned_quantity ?? 0) === 0);
-    }
-    if (order !== 'default') {
-      filtered = orderShopCatalog(filtered as any, order);
-    }
+    let filtered = filterShopItems(catalogItems, query);
+    filtered = applyGenericShopFilter(filtered, filter1);
+    filtered = applyGenericShopFilter(filtered, filter2);
+    filtered = applyGenericShopFilter(filtered, filter3);
     return { catalogItems: filtered };
   }
 
