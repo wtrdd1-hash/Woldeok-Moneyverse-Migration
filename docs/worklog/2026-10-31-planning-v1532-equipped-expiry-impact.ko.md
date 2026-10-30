@@ -4,7 +4,7 @@
 - **회차:** 이전 기능 보완 v1530 → 현재 기능 추가 v1532 → 다음 기능 보완 v1534(잠정). 원격 main bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간 확인. 선행 Draft #2066, 개발 #2074, P0 #2031.
 - **신규 기능:** 본인 전용 `/inventory/expiring/equipped-impact?withinDays=7|30`에서 현재 장착한 슬롯의 보유 만료 예정 영향만 표시. 114의 슬롯 8종, 071의 NULL 만료, 123의 별도 효과 만료를 구분. 자동 해제·납부·환불·과거 상품명을 추정하지 않는다. F675-188 선행 의존, 캘린더/ICS(#1267)·프리셋(#1142) 중복 금지.
 - **계약:** Nest/Next/Android 인증 GET, DB 단일 READ ONLY REPEATABLE READ·statement_timestamp, `quantity>0 AND is_equipped AND asOf<expires_at<=asOf+N*24시간`, 본인 SECURITY DEFINER 함수 EXECUTE만, 페이지네이션 없음, 슬롯 중복/NULL은 오류, validUntilUtc는 가장 빠른 만료 또는 60초, 400/401/403/409/429/503. private/no-store/noindex/no-referrer, 계정 전환 초기화, WCAG AA, 관리자 20명 이상 집계, 기본 OFF. DB/금융 쓰기 없음.
-- **백로그:** P0 OPS1532-01 SEC1532-02 FIN1532-03 REL1532-04, P1 IMPACT1532-05~10 총 4+6건. QA v1400 백엔드 2,653 PASS/126 FAIL/501 SKIP, 프론트 2,701 PASS/55 FAIL. 정확 SHA Test·독립 복원 BLOCKED. 합성 10,001건 시험 미실행, 운영 보류.
+- **백로그:** P0 OPS1532-01 SEC1532-02 FIN1532-03 REL1532-04, P1 IMPACT1532-05 IMPACT1532-06 IMPACT1532-07 IMPACT1532-08 IMPACT1532-09 IMPACT1532-10 총 4+6건. QA v1400 백엔드 2,653 PASS/126 FAIL/501 SKIP, 프론트 2,701 PASS/55 FAIL. 정확 SHA Test·독립 복원 BLOCKED. 합성 10,001건 시험 미실행, 운영 보류.
 - **외부 근거:** 신규 검증 0, 누적 중복 제거·분류 UNKNOWN/10,000, BLOCKED / IN PROGRESS. 상세는 통합 마스터와 #2074. 문서 전용, 병합·배포 없음.
 
 **시작:** miniPC Debian 13.6, 서비스 7개 활성·개발 DB 연결. 스킬 커넥터 URI 없음, 로컬 using-superpowers/brainstorming/writing-plans/worktrees/verification 읽음. main·선행 SHA 확인.
