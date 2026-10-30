@@ -183,6 +183,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     parts[1] === 'purchases' &&
     request.method === 'GET';
   const minAmounts = receiptAmountFilter ? request.nextUrl.searchParams.getAll('minAmount') : [];
+  const maxAmounts = receiptAmountFilter ? request.nextUrl.searchParams.getAll('maxAmount') : [];
   if (
     minAmounts.length > 1 ||
     (minAmounts.length === 1 && !/^[1-9][0-9]{0,29}$/.test(minAmounts[0]!))
@@ -193,7 +194,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       'shop_receipt_minimum_invalid',
       'minimum WLD must be a canonical positive integer',
     );
-
+  }
+  if (
+    maxAmounts.length > 1 ||
+    (maxAmounts.length === 1 && !/^[1-9][0-9]{0,29}$/.test(maxAmounts[0]!)) ||
+    (minAmounts.length === 1 && maxAmounts.length === 1 &&
+      BigInt(minAmounts[0]!) > BigInt(maxAmounts[0]!))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'shop_receipt_maximum_invalid',
+      'maximum WLD must be canonical and no lower than minimum WLD',
+    );
   }
 
   const outgoing = new Headers({
@@ -352,7 +365,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 
 
-  if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
+  if (receiptAmountFilter && (minAmounts.length === 1 || maxAmounts.length === 1) && response.ok) {
     try {
       const payload: unknown = await response.clone().json();
       if (
@@ -367,7 +380,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
           return (
             typeof amount === 'string' &&
             /^[1-9][0-9]{0,29}$/.test(amount) &&
-            BigInt(amount) >= BigInt(minAmounts[0]!)
+            (minAmounts.length === 0 || BigInt(amount) >= BigInt(minAmounts[0]!)) &&
+            (maxAmounts.length === 0 || BigInt(amount) <= BigInt(maxAmounts[0]!))
           );
         })
       ) {

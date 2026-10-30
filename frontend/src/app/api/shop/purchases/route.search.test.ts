@@ -59,6 +59,23 @@ describe('private shop receipt search route', () => {
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
+  it('forwards exact maximum WLD and rejects a forged amount above the ceiling', async () => {
+    apiOrNull.mockResolvedValueOnce({ purchases: [{ amount: '70' }] });
+    const valid = await GET(new Request('https://example.test/api/shop/purchases?minAmount=41&maxAmount=70'));
+    expect(valid.status).toBe(200);
+    expect(apiOrNull).toHaveBeenLastCalledWith('/api/v1/shop/purchases?minAmount=41&maxAmount=70');
+    apiOrNull.mockResolvedValueOnce({ purchases: [{ amount: '9007199254740993' }] });
+    const forged = await GET(new Request('https://example.test/api/shop/purchases?maxAmount=70'));
+    expect(forged.status).toBe(503);
+    expect(forged.headers.get('cache-control')).toBe('private, no-store');
+  });
+  it('rejects duplicate, noncanonical and inverted maximum amounts before upstream', async () => {
+    apiOrNull.mockClear();
+    for (const suffix of ['maxAmount=1&maxAmount=2', 'maxAmount=0', 'maxAmount=01', 'maxAmount=-1', 'maxAmount=1.5', 'maxAmount=' + '9'.repeat(31), 'minAmount=71&maxAmount=70']) {
+      expect((await GET(new Request('https://example.test/api/shop/purchases?' + suffix))).status).toBe(400);
+    }
+    expect(apiOrNull).not.toHaveBeenCalled();
+  });
   it('fails closed rather than inventing an empty purchase history', async () => {
     apiOrNull.mockResolvedValueOnce(null);
     const response = await GET(new Request('https://example.test/api/shop/purchases'));

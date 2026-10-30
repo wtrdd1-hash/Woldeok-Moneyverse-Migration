@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatMoment } from '@/lib/money';
 import { useViewer } from '@/lib/use-viewer';
 import { parseShopPurchaseHistory, type ShopPurchaseHistory } from '@/lib/shop-purchase-history';
+import { receiptAmountRangeError } from '@/lib/shop-receipt-amount-range';
 
 /**
  * The member's own receipts, loaded in the browser.
@@ -28,7 +29,8 @@ export function MyReceipts() {
   const [appliedRange, setAppliedRange] = useState<{ from: string; to: string } | null>(null);
   const [rangeError, setRangeError] = useState(false);
   const [minAmount, setMinAmount] = useState('');
-  const invalidMinAmount = minAmount.length > 0 && !/^[1-9][0-9]{0,29}$/.test(minAmount);
+  const [maxAmount, setMaxAmount] = useState('');
+  const amountRangeError = receiptAmountRangeError(minAmount, maxAmount);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -36,16 +38,14 @@ export function MyReceipts() {
     let cancelled = false;
     setHistory(null);
     setFailed(false);
-    if (invalidMinAmount) {
-      setHistory({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
-      return;
-    }
+    if (amountRangeError) return;
     const timer = setTimeout(() => {
       const term = search.trim();
       const params = new URLSearchParams();
       if (term) params.set('q', term);
       if (appliedRange) { params.set('from', appliedRange.from); params.set('to', appliedRange.to); }
       if (minAmount) params.set('minAmount', minAmount);
+      if (maxAmount) params.set('maxAmount', maxAmount);
       const url = `/api/shop/purchases${params.size ? `?${params.toString()}` : ''}`;
       void fetch(url, { cache: 'no-store' })
         .then(async (response) => {
@@ -59,7 +59,7 @@ export function MyReceipts() {
         .catch(() => { if (!cancelled) setFailed(true); });
     }, 250);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [viewer?.signedIn, search, appliedRange, minAmount, invalidMinAmount]);
+  }, [viewer?.signedIn, search, appliedRange, minAmount, maxAmount, amountRangeError]);
 
   if (!viewer?.signedIn) return null;
   const receipts = history?.purchases ?? null;
@@ -115,15 +115,36 @@ export function MyReceipts() {
           onChange={(event) => {
             if (/^[0-9]{0,30}$/.test(event.target.value)) setMinAmount(event.target.value);
           }}
-          aria-invalid={invalidMinAmount}
+          aria-invalid={Boolean(amountRangeError)}
           aria-describedby="receipt-amount-help"
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:max-w-sm"
           placeholder="예: 100"
         />
-        {invalidMinAmount && (
-          <p role="alert" className="text-sm text-destructive">
-            최소 금액은 0보다 큰 정수여야 합니다.
-          </p>
+        <label htmlFor="receipt-max-amount" className="text-sm font-medium mt-2">
+          최대 구매 금액 (WLD)
+        </label>
+        <input
+          id="receipt-max-amount"
+          name="receiptMaxAmount"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={30}
+          autoComplete="off"
+          value={maxAmount}
+          onChange={(event) => {
+            if (/^[0-9]{0,30}$/.test(event.target.value)) setMaxAmount(event.target.value);
+          }}
+          aria-invalid={Boolean(amountRangeError)}
+          aria-describedby="receipt-amount-help"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:max-w-sm"
+          placeholder="예: 1000"
+        />
+        <p id="receipt-amount-help" className="text-xs text-muted-foreground">
+          금액을 비워두면 해당 제한을 적용하지 않습니다. 입력한 최대 금액도 포함합니다.
+        </p>
+        {amountRangeError && (
+          <p role="alert" className="text-sm text-destructive">{amountRangeError}</p>
         )}
       </div>
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">
@@ -160,7 +181,9 @@ export function MyReceipts() {
           <span className="block text-xs">최근 기록만 계산한 금액이며 전체 누적 구매액은 아닙니다.</span>
         </p>
       )}
-      {failed ? (
+      {amountRangeError ? (
+        <p role="status" className="text-sm text-muted-foreground">금액 조건을 수정하면 검색합니다.</p>
+      ) : failed ? (
         <p role="alert" className="text-sm text-destructive">
           구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
         </p>
@@ -168,7 +191,7 @@ export function MyReceipts() {
         <Skeleton className="h-24 w-full" />
       ) : receipts.length === 0 ? (
         <EmptyState
-          title={search.trim() || appliedRange || minAmount ? "검색 결과가 없어요." : "아직 구매 기록이 없어요."}
+          title={search.trim() || appliedRange || minAmount || maxAmount ? "검색 결과가 없어요." : "아직 구매 기록이 없어요."}
           description="구매하면 영수증과 원장 기록이 함께 남습니다."
         />
       ) : (

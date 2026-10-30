@@ -50,6 +50,18 @@ export async function GET(request: Request): Promise<NextResponse> {
       { status: 400, headers: PRIVATE_HEADERS },
     );
   }
+  const ceilings = params.getAll('maxAmount');
+  const maxAmount = ceilings[0];
+  if (
+    ceilings.length > 1 ||
+    (maxAmount !== undefined && !/^[1-9][0-9]{0,29}$/.test(maxAmount)) ||
+    (minAmount !== undefined && maxAmount !== undefined && BigInt(minAmount) > BigInt(maxAmount))
+  ) {
+    return NextResponse.json(
+      { error: 'invalid maximum purchase WLD' },
+      { status: 400, headers: PRIVATE_HEADERS },
+    );
+  }
   const forwarded: string[] = [];
   if (term) forwarded.push('q=' + encodeURIComponent(term));
   if (from && to) {
@@ -57,6 +69,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     forwarded.push('to=' + to);
   }
   if (minAmount !== undefined) forwarded.push('minAmount=' + minAmount);
+  if (maxAmount !== undefined) forwarded.push('maxAmount=' + maxAmount);
   const path = '/api/v1/shop/purchases' + (forwarded.length ? '?' + forwarded.join('&') : '');
   const data = await apiOrNull<unknown>(path);
   if (
@@ -94,14 +107,15 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
   }
   if (
-    minAmount !== undefined &&
+    (minAmount !== undefined || maxAmount !== undefined) &&
     !data.purchases.every((row: unknown) => {
       if (!row || typeof row !== 'object' || !('amount' in row)) return false;
       const amount = row.amount;
       return (
         typeof amount === 'string' &&
         /^[1-9][0-9]{0,29}$/.test(amount) &&
-        BigInt(amount) >= BigInt(minAmount)
+        (minAmount === undefined || BigInt(amount) >= BigInt(minAmount)) &&
+        (maxAmount === undefined || BigInt(amount) <= BigInt(maxAmount))
       );
     })
   ) {

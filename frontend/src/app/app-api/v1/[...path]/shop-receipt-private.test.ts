@@ -69,9 +69,30 @@ describe('Android owner-private KST shop receipt date filter', () => {
         params: Promise.resolve({ path: ['shop', 'purchases'] }),
       });
       expect(response.status).toBe(400);
+      expect((await response.json()).code).toBe('shop_receipt_minimum_invalid');
       expect(response.headers.get('cache-control')).toBe('private, no-store');
     }
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+  it('rejects invalid or inverted ceiling before Android upstream', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    for (const suffix of ['maxAmount=1&maxAmount=2', 'maxAmount=0', 'maxAmount=01', 'minAmount=71&maxAmount=70']) {
+      const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/shop/purchases?' + suffix), { params: Promise.resolve({ path: ['shop', 'purchases'] }) });
+      expect(response.status).toBe(400);
+      expect(response.headers.get('cache-control')).toBe('private, no-store');
+    }
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+  it('forwards ceiling and rejects Android upstream HTTP 200 above ceiling', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ purchases: [{ amount: '9007199254740993' }] }), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/shop/purchases?maxAmount=70', { headers: { cookie: 'moneyverse_session=owner-session' } }), { params: Promise.resolve({ path: ['shop', 'purchases'] }) });
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('maxAmount')).toBe('70');
+    expect(response.status).toBe(503);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
   it('forwards minimum amount and fails closed if an upstream 200 violates the amount floor', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));

@@ -86,6 +86,28 @@ describe('owner-private recent purchase receipt search', () => {
       expect(purchasesForUser).not.toHaveBeenCalled();
     }
   });
+  it('filters owner receipts by inclusive maximum WLD with BigInt and combines bounds', async () => {
+    purchasesForUser.mockClear();
+    const ceiling = await service.myPurchases(owner, { maxAmount: '70' });
+    expect(purchasesForUser).toHaveBeenCalledWith(owner, { limit: 100 });
+    expect(ceiling.map((row) => row.purchaseId)).toEqual([id(2), id(3)]);
+    const bounded = await service.myPurchases(owner, { minAmount: '41', maxAmount: '70' });
+    expect(bounded.map((row) => row.purchaseId)).toEqual([id(3)]);
+    const huge = await service.myPurchases(owner, { maxAmount: '9007199254740993' });
+    expect(huge.map((row) => row.purchaseId)).toEqual([id(1), id(2), id(3)]);
+  });
+  it('rejects malformed, duplicate and inverted maximum WLD before database access', async () => {
+    const controller = new ShopController(service, null);
+    const request = { session: { user_id: owner } } as unknown as RequestWithSession;
+    for (const maxAmount of [['1', '2'], '0', '01', '-1', '1.5', '9'.repeat(31)]) {
+      purchasesForUser.mockClear();
+      await expect(controller.purchases(request, undefined, undefined, undefined, undefined, maxAmount)).rejects.toThrow(BadRequestException);
+      expect(purchasesForUser).not.toHaveBeenCalled();
+    }
+    purchasesForUser.mockClear();
+    await expect(controller.purchases(request, undefined, undefined, undefined, '71', '70')).rejects.toThrow(BadRequestException);
+    expect(purchasesForUser).not.toHaveBeenCalled();
+  });
   it('keeps existing latest-30 behavior without a search term', async () => {
     purchasesForUser.mockClear();
     await service.myPurchases(owner);

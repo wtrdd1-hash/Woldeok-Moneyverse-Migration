@@ -1,0 +1,2 @@
+# Release gate — A0625 purchase receipt ceiling
+**HOLD.** Local targeted/full tests, builds, lint, typecheck, app-api contract, security and isolated PostgreSQL are PASS as recorded in QA; the exact final SHA must be independently checked. Official Test candidate SHA authenticated E2E, independent backup restore, Production executable provenance (#1984), DEV least privilege/checksum (#993) and edge privacy (#2012) remain unresolved or unverified. Never merge or promote on local PASS alone. No Test/Production changes. Rollback: revert candidate code, no SQL migration.

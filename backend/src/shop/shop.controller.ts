@@ -224,9 +224,10 @@ export class ShopController {
     @Query('from') from?: unknown,
     @Query('to') to?: unknown,
     @Query('minAmount') minAmount?: unknown,
+    @Query('maxAmount') maxAmount?: unknown,
   ) {
     return this.guarded(
-      () => this.service().myPurchasesWithSummary(requireUserId(request), { query, from, to, minAmount }),
+      () => this.service().myPurchasesWithSummary(requireUserId(request), { query, from, to, minAmount, maxAmount }),
       'purchase history is unavailable',
     );
   }
