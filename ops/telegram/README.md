@@ -24,3 +24,7 @@ The **standalone** bridge scans read-only local systemd state and dual-disk util
 - No existing production app service needs a restart or database migration. Disable via `systemctl disable --now moneyverse-telegram-alerts.timer`; stop the oneshot if it is still running. Existing Moneyverse services are unaffected.
 - Token is already exposed in the originating chat: rotate via BotFather when practicable, update only the host credential file and restart the notification timer. This version uses the owner-approved token despite the exposure.
 - Run `python3 -m unittest discover -s ops/telegram -p 'test_telegram_bridge.py' -v` before deployment.
+
+## v2026.10.30.1 — Market timer reliability
+
+Use an explicit recurring wall-clock calendar schedule every two minutes. The base operations alert bot flags active/elapsed market timers with no real next trigger and emits recovery once scheduled. Market snapshots now include a last-observed time. Observations separated by more than ten minutes disclose a gap without a false two-minute price alarm; the 09:00 KST digest can recover until 11:59. The standalone market timer can be disabled without restarting application services. Do not forward secrets, private accounts or raw financial data.
