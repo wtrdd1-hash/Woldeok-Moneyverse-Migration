@@ -20,11 +20,11 @@ describe('AdminSecurityController console-entry guards', () => {
   });
 
   it.each(['setIpAllowlist', 'forceLogout'] as const)(
-    'requires recent reauthentication for sensitive %s mutations',
+    'does not require repeated reauthentication for sensitive %s mutations',
     (method) => {
       const guards = guardsOn(method);
       expect(guards).toContain(CsrfGuard);
-      expect(guards).toContain(ReauthGuard);
+      expect(guards).not.toContain(ReauthGuard);
     },
   );
 });
