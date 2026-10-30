@@ -28,22 +28,31 @@ interface Receipt {
 export function MyReceipts() {
   const viewer = useViewer();
   const [receipts, setReceipts] = useState<readonly Receipt[] | null>(null);
+  const [search, setSearch] = useState('');
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!viewer?.signedIn) return;
     let cancelled = false;
-    void fetch('/api/shop/purchases', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : { purchases: [] }))
-      .then((data: { purchases?: Receipt[] }) => {
-        if (!cancelled) setReceipts(data.purchases ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setReceipts([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [viewer?.signedIn]);
+    setReceipts(null);
+    setFailed(false);
+    const timer = setTimeout(() => {
+      const term = search.trim();
+      const url = `/api/shop/purchases${term ? `?q=${encodeURIComponent(term)}` : ''}`;
+      void fetch(url, { cache: 'no-store' })
+        .then(async (response) => {
+          if (!response.ok) throw new Error('purchase history unavailable');
+          const data: unknown = await response.json();
+          if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
+            throw new Error('invalid purchase history');
+          }
+          return data.purchases as Receipt[];
+        })
+        .then((purchases) => { if (!cancelled) setReceipts(purchases); })
+        .catch(() => { if (!cancelled) setFailed(true); });
+    }, 250);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [viewer?.signedIn, search]);
 
   if (!viewer?.signedIn) return null;
 
@@ -60,11 +69,28 @@ export function MyReceipts() {
         }
       />
 
-      {receipts === null ? (
+      <div className="grid gap-1">
+        <label htmlFor="receipt-search" className="text-sm font-medium">구매 상품명 검색</label>
+        <input
+          id="receipt-search"
+          name="receiptSearch"
+          type="search"
+          maxLength={80}
+          autoComplete="off"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:max-w-sm"
+          placeholder="상품명을 입력하세요"
+        />
+        <p className="text-xs text-muted-foreground">검색은 최근 100건의 본인 구매 기록만 대상으로 합니다. 검색하지 않을 때는 최근 30건을 표시합니다.</p>
+      </div>
+      {failed ? (
+        <p role="alert" className="text-sm text-destructive">구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.</p>
+      ) : receipts === null ? (
         <Skeleton className="h-24 w-full" />
       ) : receipts.length === 0 ? (
         <EmptyState
-          title="아직 구매 기록이 없어요."
+          title={search.trim() ? "검색 결과가 없어요." : "아직 구매 기록이 없어요."}
           description="구매하면 영수증과 원장 기록이 함께 남습니다."
         />
       ) : (

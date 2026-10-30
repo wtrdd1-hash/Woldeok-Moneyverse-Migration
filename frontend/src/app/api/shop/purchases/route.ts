@@ -11,9 +11,19 @@ import { apiOrNull } from '@/lib/api';
  */
 export const dynamic = 'force-dynamic';
 
-export async function GET(): Promise<NextResponse> {
-  const data = await apiOrNull<unknown>('/api/v1/shop/purchases');
-  return NextResponse.json(data ?? { purchases: [] }, {
-    headers: { 'cache-control': 'private, no-store' },
-  });
+const PRIVATE_HEADERS = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
+
+export async function GET(request: Request): Promise<NextResponse> {
+  const params = new URL(request.url).searchParams;
+  const queries = params.getAll('q');
+  const term = queries[0]?.trim() ?? '';
+  if (queries.length > 1 || Array.from(term).length > 80 || /[\u0000-\u001f\u007f]/.test(term)) {
+    return NextResponse.json({ error: 'invalid purchase search' }, { status: 400, headers: PRIVATE_HEADERS });
+  }
+  const path = `/api/v1/shop/purchases${term ? `?q=${encodeURIComponent(term)}` : ''}`;
+  const data = await apiOrNull<unknown>(path);
+  if (!data || typeof data !== 'object' || !('purchases' in data) || !Array.isArray(data.purchases)) {
+    return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
+  }
+  return NextResponse.json(data, { headers: PRIVATE_HEADERS });
 }
