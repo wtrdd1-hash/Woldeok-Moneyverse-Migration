@@ -1,7 +1,7 @@
-## v2026.10.30.2 — Accurate Telegram disk critical severity (candidate)
+## v2026.10.30.2 — Accurate Telegram disk critical severity (Production LIVE)
 - Alert effective disk fullness, including unavailable reserved blocks; 97%/98% on current host must be CRITICAL, not misleading 93% WARNING. No cleanup performed. [Release](../releases/v2026.10.30.2.md).
 
-## v2026.10.30.1 — Telegram market recurring schedule and watchdog (candidate)
+## v2026.10.30.1 — Telegram market recurring schedule and watchdog (Production LIVE)
 - Recover a silent active/elapsed market timer with a calendar schedule, monitor real next trigger and prevent stale two-minute price alerts. [Release](../releases/v2026.10.30.1.md).
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)

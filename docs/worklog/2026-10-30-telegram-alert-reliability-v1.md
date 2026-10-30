@@ -22,3 +22,12 @@
 - GREEN: 24/24 Python unit tests passed; py_compile passed; valid every-two-minute calendar future times confirmed.
 - Isolated Test: read-only PostgreSQL snapshot from mv-v1212-prodrehearsal showed 9 stocks, 100 recent batches and 100 market events. Independent sandboxed systemd-run Test passed, exit 0; Test /health HTTP 200. No database mutations or Telegram mock events written.
 - Original base Telegram timer is paired and executes normally. No secrets surfaced.
+
+## Finished — Production and rollback
+- Candidate commit f680b0e2a6212041b4e39a684c672a1df887a0c6, PR #1965, merged main code SHA 0d5c84230ca37b7045ed823d4beb78668d14d89a. Exact installed timer/bridge/market Python hashes matched merged source prior to installation.
+- CI policy and non-runtime summary PASS; runtime JS builds classified SKIPPED. Python tests 24/24 and isolated Test DB/systemd worker PASS.
+- Archived preceding Telegram script, timer and market checkpoint under /srv/moneyverse-data/backups/telegram-alert-audit-v2026.10.30.1 with private permissions. Installed only standalone alarm scripts and timer; daemon-reload, timer restart.
+- First recovery call at 09:09:10 KST, MARKET_OK candidate_messages=3 (long gap, daily summary and an additional market event) with Telegram-acknowledged hashes. Two fully automatic systemd calendar events at 09:10:02 and 09:12:01 KST each MARKET_OK, plus 09:14:00; future 09:16:00 scheduled. Market state observed_at populated, digest_day=2026-10-30. Base bot market timer now OK among 14 tracked signals.
+- Enabled timer disable/re-enable rollback probe PASS. Production and Test HTTP 200. Existing backend/frontend PIDs 1018225 / 2041338 remained active. No financial writes, no application deployment.
+- Remaining: earlier monitoring outage is not retroactively recoverable for every news/error entry. The actual available disk capacity is P0 and addressed as severity fix v2026.10.30.2, not space cleanup.
+- FINISHED: operational schedule repaired, verified as recurring and backstopped by base timer watchdog.
