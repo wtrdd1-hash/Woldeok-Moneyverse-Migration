@@ -4,13 +4,17 @@
 - [x] Read local Superpowers using-superpowers, brainstorming, writing-plans, using-git-worktrees and verification-before-completion skills; skills connector listed no available URI.
 - [x] Check miniPC Debian 13.6 services and dev DB connection; inspect latest GitHub main and merged v1500 #1974, QA v1386 P0 #1979.
 - [x] Review canonical AGENTS.md, README.md, PROJECT_PLAN.md and Korean counterpart; review v1500 integrated master and actual Nest/Next/app-api code.
-- [ ] Recheck main at midpoint, define source-backed hardening, update EN canonical and KO equivalent integrated documents, P0/P1 backlog and release hold.
+- [x] Recheck main at midpoint, define source-backed hardening, update EN canonical and KO equivalent integrated documents, P0/P1 backlog and release hold.
 - [ ] Verify documentation-only diff, bilingual parity, release classifier, GitHub CI; publish Draft PR and handoff issue.
 
 **Cycle:** Previous Addition v1500 → Current Improvement v1502 → Next Addition v1504 (provisional). Scope: documentation only. No runtime/DB/WLD/Test/Production changes. External independently verified approvals new 0; cumulative UNKNOWN / 10,000 — BLOCKED / IN PROGRESS.
 
-## IN PROGRESS
-Pending source-backed design and validation.
+## IN PROGRESS — 2026-10-30 11:10 KST
+- [x] Midpoint main `94d38f47603e99aabc42fc8f292b89441afb9663` unchanged; v1500 PR #1974 and QA #1978 are MERGED.
+- [x] Source-backed v1502 corrections: DB asOf/KST bounds, PostgreSQL microsecond cursor, strict Next error taxonomy and validated JSON, app-api already forwards query and noindex.
+- [x] DEV PG read-only: 10 relevant indexes, app-role direct account_balances UPDATE and audit_logs DELETE (P0 DEV-only).
+- [x] Update bilingual canonical/integrated plans and changelogs; 4 P0 + 6 P1 backlog, 10,001-row acceptance **proposed only**.
+- [ ] Push reviewed documentation, update GitHub handoff and PR, verify CI.
 
 ## FINISHED
 Pending final verification; no success claimed yet.
