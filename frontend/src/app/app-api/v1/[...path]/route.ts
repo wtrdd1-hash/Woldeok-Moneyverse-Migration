@@ -1,6 +1,8 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
+import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -71,6 +73,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+    (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
+  let walletRange: ActivityCalendarRange | null = null;
+  if (walletRangeRequest) {
+    const query = request.nextUrl.searchParams;
+    if (query.getAll('from').length !== 1 || query.getAll('to').length !== 1 ||
+        query.getAll('period').length > 1 || query.getAll('direction').length > 1 ||
+        (query.has('period') && query.get('period') !== 'all') ||
+        (query.has('direction') && !['all', 'in', 'out', 'neutral'].includes(query.get('direction')!))) {
+      return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters');
+    }
+    try { walletRange = activityCalendarRange(query.get('from'), query.get('to')); }
+    catch { return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters'); }
+  }
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
@@ -183,6 +200,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -205,6 +226,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+      }
       if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
           compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
         // Older backend images returned a redundant internal storage key.
@@ -216,6 +240,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (walletRange && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+      }
       return new NextResponse(bytes, { status: response.status, headers });
     }
   }

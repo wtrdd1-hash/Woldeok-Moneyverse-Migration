@@ -11,11 +11,31 @@ export function activityDirection(value: string | undefined): ActivityDirection 
   return value === 'in' || value === 'out' || value === 'neutral' ? value : 'all';
 }
 
+export interface ActivityCalendarRange { readonly from: string; readonly to: string }
+
+/** Validate KST calendar bounds before rendering or constructing any owner-private URL. */
+export function activityCalendarRange(from: unknown, to: unknown, now: Date = new Date()): ActivityCalendarRange | null {
+  if (from === undefined && to === undefined) return null;
+  const parse = (value: unknown): { text: string; utc: number } => {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('날짜는 YYYY-MM-DD 형식이어야 합니다.');
+    const utc = Date.parse(`${value}T00:00:00.000Z`);
+    if (!Number.isFinite(utc) || Number(value.slice(0, 4)) < 1 || new Date(utc).toISOString().slice(0, 10) !== value) throw new Error('유효하지 않은 날짜입니다.');
+    return { text: value, utc };
+  };
+  const start = parse(from);
+  const end = parse(to);
+  const days = Math.round((end.utc - start.utc) / 86_400_000) + 1;
+  const todayKst = new Date(now.getTime() + 9 * 3_600_000).toISOString().slice(0, 10);
+  if (days < 1 || days > 366 || end.text > todayKst) throw new Error('날짜 범위는 1~366일이며 미래 날짜를 포함할 수 없습니다.');
+  return { from: start.text, to: end.text };
+}
+
 /** Build only canonical allow-listed query parameters; never echo raw URL input. */
-export function activityPeriodUrl(period: ActivityPeriod, direction: ActivityDirection = 'all'): string {
+export function activityPeriodUrl(period: ActivityPeriod, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null): string {
   const params = new URLSearchParams();
-  if (period !== 'all') params.set('period', period);
+  if (!range && period !== 'all') params.set('period', period);
   if (direction !== 'all') params.set('direction', direction);
+  if (range) { params.set('from', range.from); params.set('to', range.to); }
   const query = params.toString();
   return query ? `/wallet/activity?${query}` : '/wallet/activity';
 }
@@ -28,10 +48,11 @@ export function activityCompletenessNotice(hasMore: boolean | undefined): string
 }
 
 /** Opaque cursor never becomes an unescaped URL fragment. */
-export function activityCursorUrl(period: ActivityPeriod, cursor: string | null, direction: ActivityDirection = 'all'): string {
+export function activityCursorUrl(period: ActivityPeriod, cursor: string | null, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null): string {
   const params = new URLSearchParams();
-  if (period !== 'all') params.set('period', period);
+  if (!range && period !== 'all') params.set('period', period);
   if (direction !== 'all') params.set('direction', direction);
+  if (range) { params.set('from', range.from); params.set('to', range.to); }
   if (cursor) params.set('cursor', cursor);
   const query = params.toString();
   return `/wallet/activity${query ? `?${query}` : ''}`;

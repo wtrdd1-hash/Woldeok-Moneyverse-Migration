@@ -26,6 +26,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
+import { WalletActivityCursorExpired } from './wallet-activity-cursor';
 import { WalletRecipientError, WalletService } from './wallet.service';
 
 /**
@@ -62,6 +63,7 @@ export class WalletController {
     try {
       return await work();
     } catch (error: unknown) {
+      if (error instanceof WalletActivityCursorExpired) throw new GoneException('wallet activity cursor expired');
       if (error instanceof WalletInputError) throw new BadRequestException(error.message);
       if (error instanceof WalletRecipientError) {
         throw new NotFoundException('recipient is unavailable');
@@ -108,7 +110,7 @@ export class WalletController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
-  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string, @Query('direction') direction?: string) {
+  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string, @Query('direction') direction?: string, @Query('from') from?: string, @Query('to') to?: string) {
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
     }
@@ -120,7 +122,8 @@ export class WalletController {
     }
     return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
       period === '7d' || period === '30d' ? period : 'all', cursor,
-      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all'), 'wallet activity is unavailable');
+      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all',
+      ...(from !== undefined || to !== undefined ? [{ from, to }] : [])), 'wallet activity is unavailable');
   }
 
   @Get('wallet/recipients/search')
