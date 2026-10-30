@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { verifiedSupportMessageKeywordResponse } from '@/lib/support-message-keyword';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -114,6 +115,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     : 'all';
   if (securityEventPath && securityCategory === null) {
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
+
+  const supportMessageKeywordPath = request.method === 'GET' && parts.length === 4 &&
+    parts[0] === 'support' && parts[1] === 'threads' && parts[3] === 'messages';
+  const messageKeywords = supportMessageKeywordPath ? request.nextUrl.searchParams.getAll('q') : [];
+  const messageKeyword = messageKeywords.length === 1 ? messageKeywords[0]!.trim() : null;
+  if (supportMessageKeywordPath && (messageKeywords.length > 1 ||
+      (messageKeywords.length === 1 && (messageKeywords[0]!.length > 80 ||
+        messageKeyword!.length < 2 || /[\u0000-\u001f\u007f]/.test(messageKeywords[0]!))))) {
+    return gatewayProblem(400, 'Bad Request', 'support_message_keyword_invalid', 'invalid support message search');
   }
 
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
@@ -282,6 +293,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
         'support conversation order could not be verified');
+    }
+  }
+
+  // A stale backend may ignore q and leak unrelated private conversation text.
+  if (supportMessageKeywordPath && messageKeyword && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedSupportMessageKeywordResponse(await response.clone().json(), messageKeyword)) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_message_keyword_unverified',
+          'support message search could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_message_keyword_unverified',
+        'support message search could not be verified');
     }
   }
 

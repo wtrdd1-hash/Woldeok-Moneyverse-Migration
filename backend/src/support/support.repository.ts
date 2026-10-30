@@ -97,7 +97,17 @@ export class SupportRepository {
       [actor, key, subject, body]);
   }
 
-  messages(actor: string, thread: string, limit = 200) {
+  messages(actor: string, thread: string, limit = 200, q?: string) {
+    // Filter only the first 200 owner-scoped messages. The SECURITY DEFINER
+    // function checks thread ownership before any message can be returned.
+    if (q !== undefined) {
+      return queryRows<SupportMessageRow>(this.pool,
+        `SELECT message_id::text,sender_kind,body,created_at
+         FROM public.support_thread_messages($1,$2,$3)
+         WHERE strpos(lower(body),lower($4)) > 0
+         ORDER BY created_at ASC,message_id ASC`,
+        [actor, thread, limit, q]);
+    }
     return queryRows<SupportMessageRow>(this.pool,
       'SELECT message_id::text,sender_kind,body,created_at FROM public.support_thread_messages($1,$2,$3)',
       [actor, thread, limit]);

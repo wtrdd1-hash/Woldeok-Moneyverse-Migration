@@ -78,9 +78,19 @@ export class SupportController {
     return { thread };
   }
 
-  @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
-  async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
-    return { messages: await this.repo().messages(requireUserId(req), id) };
+  @Get('threads/:id/messages')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'First 200 messages in my support conversation, optional literal body search' })
+  async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Query('q') q?: string) {
+    if (q !== undefined && (typeof q !== 'string' || q.trim().length < 2 ||
+        q.length > 80 || /[\u0000-\u001f\u007f]/.test(q))) {
+      throw new BadRequestException('invalid support message search');
+    }
+    const actor = requireUserId(req);
+    return { messages: q === undefined
+      ? await this.repo().messages(actor, id)
+      : await this.repo().messages(actor, id, 200, q.trim()) };
   }
 
   @Get('threads/:id/messages/:messageId')
