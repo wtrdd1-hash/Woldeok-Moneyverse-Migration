@@ -29,7 +29,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const from = fromValues[0];
   const to = toValues[0];
   const dateStart = (value: string | undefined): number | null => {
-    if (!value || !/^d{4}-d{2}-d{2}$/.test(value)) return null;
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
     const millis = Date.parse(`${value}T00:00:00+09:00`);
     return Number.isFinite(millis) && new Date(millis + 9 * 60 * 60_000).toISOString().slice(0, 10) === value ? millis : null;
   };

@@ -38,7 +38,7 @@ export function parseWorkTaskMaxReward(raw: unknown): string | null {
 /** Explicit opt-in only; absent means the legacy complete board. */
 export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
   if (raw === undefined) return false;
-  if (raw === '1' || raw === true) return true;
+  if (raw === '1') return true;
   throw new WorkInputError('availableOnly must be 1 when provided');
 }
 

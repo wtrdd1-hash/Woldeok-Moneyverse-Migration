@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { SectionHeader } from '@/components/page-header';
 import { useEffect, useState } from 'react';
@@ -37,7 +37,7 @@ export function MyReceipts() {
     setHistory(null);
     setFailed(false);
     if (invalidMinAmount) {
-      setHistory({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
+      setFailed(true);
       return;
     }
     const timer = setTimeout(() => {

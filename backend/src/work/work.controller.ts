@@ -128,7 +128,13 @@ export class WorkController {
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
       this.guarded(
-        () => repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling, availability),
+        () => availability
+          ? repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling ?? undefined, '1')
+          : ceiling !== null
+            ? repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling)
+            : maxDuration === null
+              ? repository.tasks(actor, minReward)
+              : repository.tasks(actor, minReward, maxDuration),
         'the task board is unavailable',
       ),
     ]);

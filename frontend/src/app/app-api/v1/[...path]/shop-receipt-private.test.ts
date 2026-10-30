@@ -16,27 +16,6 @@ describe('Android owner-private shop receipt search', () => {
     }], summary: { count: 1, totalSpent: '9007199254740993', scope: 'displayed' } }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' } }));
 
 
-    const fetchSpy = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            purchases: [
-              {
-                purchaseId: 'owner-receipt',
-                amount: '9007199254740993',
-                itemName: 'Blue Gloves',
-              },
-            ],
-          }),
-          {
-            headers: {
-              'content-type': 'application/json',
-              'cache-control': 'public, max-age=86400',
-            },
-          },
-        ),
-    );
-
     vi.stubGlobal('fetch', fetchSpy);
     const request = new NextRequest(
       'https://easy-scraping.com/app-api/v1/shop/purchases?q=Blue%20Gloves',
@@ -67,7 +46,7 @@ describe('Android owner-private shop receipt search', () => {
 describe('Android owner-private KST shop receipt date filter', () => {
   it('forwards from/to and session with private headers', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
-    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ purchases: [] }), { headers: { 'content-type': 'application/json' } }));
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } }), { headers: { 'content-type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchSpy);
     const request = new NextRequest('https://easy-scraping.com/app-api/v1/shop/purchases?from=2026-10-29&to=2026-10-30', { headers: { cookie: 'moneyverse_session=owner-session' } });
     const response = await GET(request, { params: Promise.resolve({ path: ['shop', 'purchases'] }) });

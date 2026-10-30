@@ -16,7 +16,7 @@ describe.skipIf(!url)('daily task availability on isolated PostgreSQL', () => {
       await client.query('SET LOCAL ROLE moneyverse_app');
       const repo = new WorkRepository(client);
       const all = await repo.tasks(actor);
-      const available = await repo.tasks(actor, undefined, undefined, true);
+      const available = await repo.tasks(actor, undefined, undefined, undefined, true);
       expect(all.length).toBeGreaterThan(0);
       expect(available.map((task) => task.task_id)).toEqual(
         all

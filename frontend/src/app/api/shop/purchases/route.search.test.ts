@@ -10,10 +10,6 @@ describe('private shop receipt search route', () => {
     const response = await GET(new Request('https://example.test/api/shop/purchases?q=Blue%20Gloves'));
 
 
-    apiOrNull.mockResolvedValueOnce({ purchases: [] });
-    const response = await GET(
-      new Request('https://example.test/api/shop/purchases?q=Blue%20Gloves'),
-    );
 
     expect(apiOrNull).toHaveBeenCalledWith('/api/v1/shop/purchases?q=Blue%20Gloves');
     expect(response.status).toBe(200);
@@ -35,10 +31,10 @@ describe('private shop receipt search route', () => {
   it('rejects an upstream 200 with unverified spending summary', async () => {
     apiOrNull.mockResolvedValueOnce({ purchases: [], summary: { count: 1, totalSpent: '10', scope: 'displayed' } });
     expect((await GET(new Request('https://example.test/api/shop/purchases'))).status).toBe(503);
-
+  });
 
   it('forwards exact minimum WLD without numeric coercion', async () => {
-    apiOrNull.mockResolvedValueOnce({ purchases: [] });
+    apiOrNull.mockResolvedValueOnce({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
     const response = await GET(
       new Request('https://example.test/api/shop/purchases?q=Gloves&minAmount=9007199254740993'),
     );
@@ -68,7 +64,6 @@ describe('private shop receipt search route', () => {
     const response = await GET(new Request('https://example.test/api/shop/purchases?minAmount=41'));
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
-
   });
   it('fails closed rather than inventing an empty purchase history', async () => {
     apiOrNull.mockResolvedValueOnce(null);
@@ -80,7 +75,7 @@ describe('private shop receipt search route', () => {
 
 describe('private KST receipt date route', () => {
   it('forwards validated dates with search and keeps privacy headers', async () => {
-    apiOrNull.mockResolvedValueOnce({ purchases: [] });
+    apiOrNull.mockResolvedValueOnce({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
     const response = await GET(new Request('https://example.test/api/shop/purchases?q=Gloves&from=2026-10-29&to=2026-10-30'));
     expect(apiOrNull).toHaveBeenLastCalledWith('/api/v1/shop/purchases?q=Gloves&from=2026-10-29&to=2026-10-30');
     expect(response.status).toBe(200);
