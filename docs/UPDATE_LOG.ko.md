@@ -1,3 +1,7 @@
+## v2026.10.30.1506 — F675-182 회원 거래 상세 근거 보완 (기능 보완 / 초안 / 운영 보류)
+- Previous v1504 Addition / Current v1506 Improvement / Next v1508 Addition. Main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef, QA v1388, actor trust, exact WLD/UTC, ledger read not reconciliation, web/Android privacy, P0 release hold.
+- P0: OPS1506-01, SEC1506-02, FIN1506-03, REL1506-04. P1: DETAIL1506-05, DETAIL1506-06, DETAIL1506-07, DETAIL1506-08, DETAIL1506-09, DETAIL1506-10. Tests not run; external 0 new, UNKNOWN/10,000 BLOCKED; no runtime/DB/Production writes.
+
 ## v1466 / F675-172 — 바로가기 상태·레지스트리 무결성 보완 (기능 보완 / 초안 / 보류)
 
 - 이전 기능 추가 v1464 → 현재 기능 보완 v1466 → 다음 기능 추가 v1468(잠정). 시작·중간 main `9ebc5613845ba2e8179a0051e86db996593c8a19`, QA v1368 진행 중 / 마지막 완료 v1367 FAILED/P0. 선행 [v1466 Draft PR #1871](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1871) / [Draft #1866](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1866) 의존, [개발 #1865](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1865) 인계. 런타임 변경 없음.
