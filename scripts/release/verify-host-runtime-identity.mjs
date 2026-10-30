@@ -108,8 +108,24 @@ export function verifyHostRuntimeIdentity(snapshot) {
     ['frontendReleaseSha', 'frontend_env_sha_mismatch'],
     ['frontendBuildSha', 'frontend_artifact_sha_mismatch'],
     ['publicVersionSha', 'public_version_sha_mismatch'],
+    ['publicFrontendVersionSha', 'public_frontend_sha_mismatch'],
   ]) {
     if (snapshot?.[field] !== expected) fail(code);
+  }
+
+  // A backend /api/version match alone cannot attest the frontend route served
+  // by the public edge. In particular, stale Test builds used to return invented
+  // disbursement receipts while the backend advertised the expected SHA.
+  const treasury = snapshot?.publicTreasury;
+  const cacheDirectives = (treasury?.cacheControl ?? '').toLowerCase().split(',').map((part) => part.trim());
+  const body = treasury?.body;
+  if (treasury?.status !== 503 || !cacheDirectives.includes('private') ||
+      !cacheDirectives.includes('no-store') || body?.ok !== false ||
+      body?.status !== 'UNVERIFIED' ||
+      body?.code !== 'PUBLIC_TREASURY_RECONCILIATION_PENDING' ||
+      body?.overview?.verified !== false || body?.overview?.totalBalanceWld !== '—' ||
+      !Array.isArray(body?.recentLedger) || body.recentLedger.length !== 0) {
+    fail('public_treasury_not_fail_closed');
   }
 
   const root = snapshot?.releasePath;
@@ -138,14 +154,24 @@ async function collectSnapshot(channel, expectedSha) {
   const backendService = serviceForRelease(channel, manifest, 'backend');
   const frontendService = serviceForRelease(channel, manifest, 'frontend');
 
-  const response = await fetch(cfg.versionUrl, {
+  // Independently probe backend, frontend and the public financial disclosure
+  // through the actual external edge. These are read-only GETs; a local .next
+  // BUILD_ID is not proof that the edge routed to that frontend artifact.
+  const publicUrl = new URL(cfg.versionUrl);
+  const probe = (pathname) => fetch(new URL(pathname, publicUrl), {
     redirect: 'error',
     cache: 'no-store',
     signal: AbortSignal.timeout(7000),
     headers: { 'cache-control': 'no-cache' },
   });
-  if (response.status !== 200) throw new Error('public version request failed: HTTP ' + response.status);
-  const version = await response.json();
+  const [versionResponse, frontendResponse, treasuryResponse] = await Promise.all([
+    probe('/api/version'), probe('/frontend-version'), probe('/api/treasury/overview'),
+  ]);
+  if (versionResponse.status !== 200) throw new Error('public backend version request failed: HTTP ' + versionResponse.status);
+  if (frontendResponse.status !== 200) throw new Error('public frontend version request failed: HTTP ' + frontendResponse.status);
+  const [version, frontendVersion, treasuryBody] = await Promise.all([
+    versionResponse.json(), frontendResponse.json(), treasuryResponse.json(),
+  ]);
 
   return {
     channel,
@@ -156,6 +182,12 @@ async function collectSnapshot(channel, expectedSha) {
     frontendReleaseSha: activeServiceBuildId(frontendService),
     frontendBuildSha: readFileSync(path.join(releasePath, 'frontend/.next/BUILD_ID'), 'utf8').trim(),
     publicVersionSha: version?.id,
+    publicFrontendVersionSha: frontendVersion?.id,
+    publicTreasury: {
+      status: treasuryResponse.status,
+      cacheControl: treasuryResponse.headers.get('cache-control'),
+      body: treasuryBody,
+    },
     backendCwd: systemdProcessDirectory(backendService),
     frontendCwd: systemdProcessDirectory(frontendService),
   };
@@ -177,6 +209,9 @@ export async function main(args = process.argv.slice(2)) {
     channel,
     expectedSha,
     publicVersionSha: snapshot.publicVersionSha,
+    publicFrontendVersionSha: snapshot.publicFrontendVersionSha,
+    publicTreasuryStatus: snapshot.publicTreasury.status,
+    publicTreasuryCode: snapshot.publicTreasury.body?.code ?? null,
     releaseManifestSha: snapshot.manifest.applicationSourceSha,
     backendReleaseSha: snapshot.backendReleaseSha,
     frontendReleaseSha: snapshot.frontendReleaseSha,
