@@ -4,7 +4,7 @@
 - **V1:** member CTA → `/inventory/expiring?withinDays=7|30`, default 7; owner-only Nest/Next/Android, 20/50 page, `asOf<expires_at<=asOf+N*24h`, KST display, stable `expires_at,catalog_id` cursor, HMAC actor/session/asOf/source fingerprint, 409/410/503 fail-closed. Read-only SECURITY DEFINER with EXECUTE-only grant; no direct table grant; optional partial index after 10,001-row EXPLAIN. Real edge private/no-store/noindex/no-referrer, 320px WCAG AA, admin aggregates >=20, flag OFF, no push/auto-charge/finance writes.
 - **Backlog:** P0 OPS1528-01 SEC1528-02 FIN1528-03 REL1528-04; P1 EXPIRY1528-05, EXPIRY1528-06, EXPIRY1528-07, EXPIRY1528-08, EXPIRY1528-09, EXPIRY1528-10 (4+6=10). QA v1399 backend 126 FAIL/2653 PASS/501 SKIP, frontend 55 FAIL/2701 PASS, lint parser error; official exact-SHA Test/restore BLOCKED. 10,001 synthetic and boundary tests PROPOSED NOT RUN. Docs-only, no merge or release.
 - **External reference gate:** new approved 0; cumulative verified/deduplicated/classified UNKNOWN / 10,000; BLOCKED / IN PROGRESS. Full spec in integrated master and #2060.
-- **GitHub:** engineering issue #2060 OPEN; Draft PR PENDING, final-head CI not yet checked; DOCS_ONLY candidate.
+- **GitHub:** engineering issue #2060 OPEN; Draft PR #2061 OPEN, final-head CI not yet checked; DOCS_ONLY candidate.
 
 
 ## v2026.10.30.1526 — F675-187 Owner Purchase Proof Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)

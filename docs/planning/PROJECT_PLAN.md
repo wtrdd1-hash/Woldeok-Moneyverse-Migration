@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1528 F675-188 owner upcoming-expiry radar / issue #2060 / Draft PENDING (stack after #2055) / RELEASE HOLD; incident #2031.
+**Current planning:** v1528 F675-188 owner upcoming-expiry radar / issue #2060 / Draft #2061 (stack after #2055) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.31.1528 — F675-188 Owner Inventory Upcoming Expiry Radar (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1526 → Current Feature Addition v1528 → Next Feature Improvement v1530 (provisional). Remote main `bf8d0d48f810932b43783d8605dce53954c60cff` checked start/mid; stack after Draft #2055; engineering #2060; release incident #2031.
