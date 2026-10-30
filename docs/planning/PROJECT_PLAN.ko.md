@@ -1,8 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1522 F675-186 유지비 원장 증빙·납부 범위 보완 / 이슈 #2035 / Draft/HOLD(선행 #2036) / 운영 보류; 사고 #2031.
+**현재 기획:** v1522 F675-186 유지비 원장 증빙·납부 범위 보완 / 이슈 #2035 / Draft #2042(선행 #2036) / 운영 보류; 사고 #2031.
 
 ## v2026.10.30.1522 — F675-186 유지비 영수증 원장 증빙·납부 범위 정확성 보완 (기능 보완 / 초안 / 운영 보류)
-- **회차:** 이전 추가 v1520 → 현재 보완 v1522 → 다음 추가 v1524(잠정). `origin/main` bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간 확인, 선행 Draft #2036, 개발 이슈 #2035, 배포 P0 #2031. 문서 전용·운영 승인 아님.
+- **회차:** 이전 추가 v1520 → 현재 보완 v1522 → 다음 추가 v1524(잠정). `origin/main` bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간 확인, 신규 Draft #2042(선행 #2036), 개발 이슈 #2035, 배포 P0 #2031. 문서 전용·운영 승인 아님.
 - **핵심 소스 정정:** `001-economy-core.sql`에서 `debit`는 잔액 **증가**, `credit`는 **감소**다. `104-item-lifecycle.sql`의 유지비 두 경로 모두 `USER_CASH credit` / `SINK debit`를 기록한다. 거래자·유형·현금 계정 소유자·sink·전표 개수/균형·영수증 금액·outbox 증거가 일치해야 VERIFIED, 반대 방향이나 누락은 UNVERIFIED.
 - **기준 주차 정정:** 자동 청구는 **현재** `maintenance_week`에 과거 체납을 포함한 금액을 기록할 수 있고 수동 정산은 **최초 미납 주차**에 체납 합계를 기록한다. 주차별 배분·결제 시각 컬럼은 없다. `referenceWeek`, `recordedAmountWld`, `coveredWeeks=UNKNOWN`으로 표시하고 VERIFIED여도 '전체 주차 완납' 주장 금지. 영수증 없음·체납 0도 납부 증거 아님.
 - **API/UI/보안:** 본인 전용 /inventory·/shop GET, Session/Authenticated/Consent, 전방 SECURITY DEFINER, 기본 12주/최대 366일·20/50건, 15분 이하 actor/세션/필터/원본 지문 HMAC 커서, 400/401/403/409/410/429/503, 실제 edge 전 상태 no-store/noindex, Android 계정 전환, 320px·200% WCAG AA, 20명 이상 관리자 집계, 기본 OFF. 직접 테이블 권한·WLD 쓰기 금지.

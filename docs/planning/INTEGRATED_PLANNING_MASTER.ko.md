@@ -1,9 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1522 F675-186 유지비 원장 증빙·납부 범위 보완 / 이슈 #2035 / Draft/HOLD(선행 #2036) / 운영 보류; 사고 #2031.
+**현재 기획:** v1522 F675-186 유지비 원장 증빙·납부 범위 보완 / 이슈 #2035 / Draft #2042(선행 #2036) / 운영 보류; 사고 #2031.
 
 ## v2026.10.30.1522 — F675-186 아이템 유지비 영수증 원장 증빙·납부 범위 정확성 보완 (기능 보완 / 초안 / 운영 보류)
 
-**Previous / Current / Next Cycle Type:** 기능 추가 v1520 → 기능 보완 v1522 → 기능 추가 v1524(잠정). **정본:** 2026-10-30 21:00~21:05 KST `origin/main` `bf8d0d48f810932b43783d8605dce53954c60cff` 재확인, `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md`(영어 정본), `PROJECT_PLAN.ko.md`(동등 대조). 선행 Draft #2036 위에 분리된 기획 변경, 개발 이슈 #2035, 배포 통제 P0 #2031. 이번 회차는 **문서만 변경**하며 런타임 구현·병합 승인·배포 승인이 아니다.
+**Previous / Current / Next Cycle Type:** 기능 추가 v1520 → 기능 보완 v1522 → 기능 추가 v1524(잠정). **정본:** 2026-10-30 21:00~21:05 KST `origin/main` `bf8d0d48f810932b43783d8605dce53954c60cff` 재확인, `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md`(영어 정본), `PROJECT_PLAN.ko.md`(동등 대조). Draft #2042는 선행 Draft #2036 위에 분리된 기획 변경, 개발 이슈 #2035, 배포 통제 P0 #2031. 이번 회차는 **문서만 변경**하며 런타임 구현·병합 승인·배포 승인이 아니다.
 
 ### 원장 방향과 납부 범위의 실제 근거 — 필수 수정
 - `packages/database/init/001-economy-core.sql:25-40`의 실제 잔액 계산은 `direction='debit'`일 때 **+amount**, `direction='credit'`일 때 **-amount**이다. 따라서 이 프로젝트에서 현금이 빠져나가는 유지비 거래는 **`USER_CASH credit`**, 소각 계정으로 들어가는 전표는 **`SINK debit`**이다. 일반 회계 관례를 적용해 현금 debit/소각 credit을 요구하면 오판한다. 기존 기획·이슈에서 방향이 뒤집힌 표현보다 이 소스가 우선한다.

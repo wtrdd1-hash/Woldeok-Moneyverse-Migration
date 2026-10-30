@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1522 F675-186 upkeep ledger proof/coverage hardening / issue #2035 / Draft/HOLD (stack #2036) / RELEASE HOLD; incident #2031.
+**Current planning:** v1522 F675-186 upkeep ledger proof/coverage hardening / issue #2035 / Draft #2042 (stack #2036) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.30.1522 — F675-186 Upkeep Receipt Ledger-Proof & Coverage Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Previous / Current / Next Cycle Type:** Feature Addition v1520 → Feature Improvement v1522 → Feature Addition v1524 (provisional). **Canonical source:** `origin/main` `bf8d0d48f810932b43783d8605dce53954c60cff` rechecked 2026-10-30 21:00–21:05 KST; `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md` (English authority), `PROJECT_PLAN.ko.md` (equivalent). Work is stacked on Draft #2036, issue #2035; release incident #2031. This is a DOCUMENTATION-ONLY refinement, not runtime implementation, merge authorization or deployment approval.
+**Previous / Current / Next Cycle Type:** Feature Addition v1520 → Feature Improvement v1522 → Feature Addition v1524 (provisional). **Canonical source:** `origin/main` `bf8d0d48f810932b43783d8605dce53954c60cff` rechecked 2026-10-30 21:00–21:05 KST; `AGENTS.md`, `README.md`, `docs/planning/PROJECT_PLAN.md` (English authority), `PROJECT_PLAN.ko.md` (equivalent). Draft #2042 is Draft #2042 stacked on Draft #2036, issue #2035; release incident #2031. This is a DOCUMENTATION-ONLY refinement, not runtime implementation, merge authorization or deployment approval.
 
 ### Source-corrected ledger semantics — critical acceptance change
 - `packages/database/init/001-economy-core.sql:25-40` computes account balance delta as `+amount` for **`direction='debit'`** and `-amount` for **`direction='credit'`**. Thus this project's actual cash outflow uses `USER_CASH credit`, while the `SINK debit` increases the sink balance. **Do not import conventional accounting terminology or require USER_CASH debit / SINK credit.** This correction supersedes any earlier backlog or issue wording that inverted directions.

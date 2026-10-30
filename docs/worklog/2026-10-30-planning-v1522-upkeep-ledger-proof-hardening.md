@@ -17,7 +17,7 @@
 ## Finished — verification and handoff
 - [x] English/Korean integrated plan, canonical plan, update logs, GitHub logs and this worklog validated.
 - [x] DOCS_ONLY release classifier 24/24 and git diff checks passed.
-- [ ] Draft PR and engineering issue #2035 updated, release P0 #2031 cross-referenced.
-- [ ] Final SHA and CI status recorded after GitHub verification.
+- [x] Draft PR #2042 created on #2036; engineering issue #2035 updated, release P0 #2031 cross-referenced.
+- [x] Final SHA recorded on miniPC; GitHub CI status checked separately (not a runtime approval).
 
 **Acceptance is documentation-only.** Synthetic PostgreSQL 10,001-row and negative suites are specified but **not executed**; no claims of full runtime CI, Test exact-SHA, Production authorization, independent restore or 10,000 external reference approval. Newly approved independent references 0, cumulative UNKNOWN/10,000 (BLOCKED / IN PROGRESS). No runtime, DB, WLD, Test, Production, or main mutation.
