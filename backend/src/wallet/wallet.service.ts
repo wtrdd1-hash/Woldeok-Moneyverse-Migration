@@ -17,6 +17,7 @@ import type {
   WalletRewardRow,
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
+  WalletTransactionDetailRow,
   WalletTransferInput,
 } from './wallet.repository';
 import {
@@ -70,6 +71,25 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   BOND_REDEEM: '국채 만기 상환',
 });
 
+export class WalletTransactionNotFoundError extends Error {
+  constructor() {
+    super('wallet transaction not found');
+    this.name = 'WalletTransactionNotFoundError';
+  }
+}
+
+export interface WalletTransactionDetailView {
+  readonly transactionId: string;
+  readonly typeLabel: string;
+  readonly occurredAtUtcMicros: string;
+  readonly cashDelta: WldAmount;
+  readonly bankDelta: WldAmount;
+  readonly netDelta: WldAmount;
+  readonly currency: 'WLD';
+  readonly readStatus: 'READ_OK';
+  readonly reconciliationStatus: 'NOT_ASSESSED';
+}
+
 export class WalletRecipientError extends Error {
   constructor() {
     super('recipient is unavailable');
@@ -85,6 +105,7 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
+  transactionDetailForUser?(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null>;
   recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
   activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined; direction?: WalletActivityDirection }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
@@ -370,6 +391,33 @@ export class WalletService {
     this.repository = repository;
     this.clock = clock;
     this.broadcast = broadcast;
+  }
+
+  async transactionDetail(authenticatedUserId: string, transactionId: string): Promise<WalletTransactionDetailView> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const id = requireUuid(transactionId, 'transaction id');
+    if (!this.repository.transactionDetailForUser) throw new Error('wallet detail repository is unavailable');
+    const row = await this.repository.transactionDetailForUser(owner, id);
+    if (!row) throw new WalletTransactionNotFoundError();
+    const canonical = (value: string, field: string) => wldAmount(value, field);
+    const cashDelta = canonical(row.cash_delta, 'cash delta');
+    const bankDelta = canonical(row.bank_delta, 'bank delta');
+    const netDelta = canonical(row.net_delta, 'net delta');
+    if (row.transaction_id !== id || row.currency !== 'WLD' ||
+        row.invalid_posting_count !== '0' || !/^[1-9][0-9]*$/.test(row.posting_count) ||
+        BigInt(cashDelta) + BigInt(bankDelta) !== BigInt(netDelta) ||
+        typeof row.occurred_at_utc_micros !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(row.occurred_at_utc_micros) ||
+        (!Number.isFinite(Date.parse(row.occurred_at_utc_micros)) ||
+         new Date(row.occurred_at_utc_micros).toISOString().slice(0, 19) !== row.occurred_at_utc_micros.slice(0, 19))) {
+      throw new Error('wallet detail projection is unavailable');
+    }
+    return {
+      transactionId: id, typeLabel: transactionLabel(row.transaction_type),
+      occurredAtUtcMicros: row.occurred_at_utc_micros,
+      cashDelta, bankDelta, netDelta, currency: 'WLD',
+      readStatus: 'READ_OK', reconciliationStatus: 'NOT_ASSESSED',
+    };
   }
 
   async overview(

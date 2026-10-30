@@ -15271,6 +15271,189 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/activity/transactions/:transactionId",
+      "purpose": "본인 WLD 거래의 현금·은행 변동 상세 조회 (정산 증명 아님)",
+      "callWhen": "회원 지갑 거래 상세 보기 (기본 OFF 기능 활성화 시)",
+      "authorization": "로그인 + 최신 동의 + 세션 기반 본인 확인",
+      "afterSuccess": "READ_OK는 원장 행 조회만 뜻하며 지급 완료 또는 대사를 보증하지 않음",
+      "backendRoute": "/api/wallet/activity/transactions/:transactionId",
+      "operationId": "WalletController_transactionDetail",
+      "backendOpenApiPath": "/wallet/activity/transactions/{transactionId}",
+      "summary": "Read a single owner wallet transaction (not settlement evidence)",
+      "parameters": [
+        {
+          "name": "transactionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "transactionId",
+          "typeLabel",
+          "occurredAtUtcMicros",
+          "cashDelta",
+          "bankDelta",
+          "netDelta",
+          "currency",
+          "readStatus",
+          "reconciliationStatus"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string"
+          },
+          "occurredAtUtcMicros": {
+            "type": "string"
+          },
+          "cashDelta": {
+            "allOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "__wld": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "oneOf": [
+                          {
+                            "type": "undefined"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  }
+                },
+                "required": [
+                  "__wld"
+                ]
+              }
+            ]
+          },
+          "bankDelta": {
+            "allOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "__wld": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "oneOf": [
+                          {
+                            "type": "undefined"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  }
+                },
+                "required": [
+                  "__wld"
+                ]
+              }
+            ]
+          },
+          "netDelta": {
+            "allOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "__wld": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "oneOf": [
+                          {
+                            "type": "undefined"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "description"
+                    ]
+                  }
+                },
+                "required": [
+                  "__wld"
+                ]
+              }
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "const": "WLD"
+          },
+          "readStatus": {
+            "type": "string",
+            "const": "READ_OK"
+          },
+          "reconciliationStatus": {
+            "type": "string",
+            "const": "NOT_ASSESSED"
+          }
+        },
+        "required": [
+          "transactionId",
+          "typeLabel",
+          "occurredAtUtcMicros",
+          "cashDelta",
+          "bankDelta",
+          "netDelta",
+          "currency",
+          "readStatus",
+          "reconciliationStatus"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/wallet/transfers",
       "purpose": "다른 사용자에게 WLD 송금",

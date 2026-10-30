@@ -4,7 +4,7 @@
 
 Update version: **v2026.10.30.0125**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 183 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 184 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4798,6 +4798,40 @@ _No request body._
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
 | recentTransactionsHasMore | true | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/activity/transactions/:transactionId` — Read a single owner wallet transaction (not settlement evidence)
+
+- Authorization: 로그인 + 최신 동의 + 세션 기반 본인 확인
+- Success status: 200
+- Response mode: json
+- After success: READ_OK는 원장 행 조회만 뜻하며 지급 완료 또는 대사를 보증하지 않음
+- Operation ID: `WalletController_transactionDetail`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| transactionId | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| transactionId | true | string |  |
+| typeLabel | true | string |  |
+| occurredAtUtcMicros | true | string |  |
+| cashDelta | true | string & object |  |
+| bankDelta | true | string & object |  |
+| netDelta | true | string & object |  |
+| currency | true | string="WLD" | const="WLD" |
+| readStatus | true | string="READ_OK" | const="READ_OK" |
+| reconciliationStatus | true | string="NOT_ASSESSED" | const="NOT_ASSESSED" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

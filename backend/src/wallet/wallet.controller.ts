@@ -1,4 +1,4 @@
-import {
+﻿import {
   Query,
   BadRequestException,
   Body,
@@ -27,7 +27,7 @@ import { requireSession, requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
 import { WalletActivityCursorExpired } from './wallet-activity-cursor';
-import { WalletRecipientError, WalletService } from './wallet.service';
+import { WalletRecipientError, WalletService, WalletTransactionNotFoundError } from './wallet.service';
 
 /**
  * Guard order is semantic, not cosmetic. SessionGuard resolves the session
@@ -124,6 +124,28 @@ export class WalletController {
       period === '7d' || period === '30d' ? period : 'all', cursor,
       direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all',
       ...(from !== undefined || to !== undefined ? [{ from, to }] : [])), 'wallet activity is unavailable');
+  }
+
+  @Get('wallet/activity/transactions/:transactionId')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Read a single owner wallet transaction (not settlement evidence)' })
+  async transactionDetail(@Req() request: RequestWithSession, @Param('transactionId') transactionId: string) {
+    if (process.env.WALLET_TRANSACTION_DETAIL_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('wallet transaction detail is unavailable');
+    }
+    if (typeof transactionId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(transactionId)) {
+      throw new BadRequestException('invalid transaction id');
+    }
+    try {
+      return await this.service().transactionDetail(requireUserId(request), transactionId);
+    } catch (error: unknown) {
+      if (error instanceof WalletTransactionNotFoundError) throw new NotFoundException('transaction not found');
+      if (error instanceof BadRequestException) throw error;
+      throw new ServiceUnavailableException('wallet transaction detail is unavailable');
+    }
   }
 
   @Get('wallet/recipients/search')
