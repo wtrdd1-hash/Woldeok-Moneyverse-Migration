@@ -1,4 +1,8 @@
 ﻿## v2026.10.30.1500 — 회원 지갑 기록 날짜 직접 지정 (기획 초안 / 운영 보류)
+
+## v2026.10.30.1502 — 지갑 날짜 범위 기획 보완 (문서 전용, 초안/운영 보류)
+- 병합된 v1500 기획, QA v1386 P0 배포 게이트 사고, 개발 DB 권한·인덱스 및 Nest/Next/Android 실제 소스 재검토. DB 기준 한국시간 반개구간, 마이크로초 HMAC 커서, 오류 상태 분리, 기존 app-api 쿼리/noindex 동작과 P0 4건·P1 6건 명세. 런타임·DB·WLD·Test·운영 변경 없음; 수용시험 미실행. 외부 근거 신규 0건 / 누적 UNKNOWN·목표 10,000건.
+
 - 한국시간 시작·종료일, 본인 NUMERIC 원장 조회, 마이크로초 서명 커서, Next/Android 개인정보 보호 동등성 설계. 런타임 배포 없음. P0 4건·P1 6건, [초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). 외부 승인 신규 0건/누적 UNKNOWN·목표 10,000건, 운영 보류.
 
 ## v2026.10.30.3 — 주식 타이머 실행 중 중대 장애 오탐 수정 (운영 완료)

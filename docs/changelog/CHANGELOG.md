@@ -1,4 +1,8 @@
 ﻿## v2026.10.30.1500 — Owner-only wallet calendar range (planning DRAFT / RELEASE HOLD)
+
+## v2026.10.30.1502 — Wallet calendar-range planning hardening (docs-only, DRAFT/HOLD)
+- Rechecked merged v1500 plan, QA v1386 P0 release-gate breach, DEV PostgreSQL ACL/indexes and actual Nest/Next/Android paths. Specified DB-clock KST half-open bounds, microsecond HMAC cursor, typed failure states, existing app-api query/noindex behavior and 4 P0 + 6 P1 backlog. No runtime/DB/WLD/Test/Production changes; tests proposed, not run. External gate new 0 / cumulative UNKNOWN of 10,000.
+
 - Proposed explicit KST start/end dates on wallet activity, strict owner-only NUMERIC ledger query, signed microsecond cursor and Android/Next privacy parity; no runtime deployment. Four P0 and six P1 handoffs, [Draft #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [issue #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). External approved 0 new / cumulative UNKNOWN of 10,000; release HOLD.
 
 ## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)

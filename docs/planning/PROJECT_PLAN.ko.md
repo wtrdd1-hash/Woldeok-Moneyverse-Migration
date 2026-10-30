@@ -1,8 +1,18 @@
 ﻿# 월덕 머니버스 — Living Project Plan
-**현재 기획:** [v1500 초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [개발 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973); 초안 / 운영 보류.
+**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / Draft PR #1983 / 이슈 #1973 / 초안 / 운영 보류; v1500 PR #1974 병합, 런타임 미구현.
 **Historical draft pointer (superseded):** **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
 
 
+## v2026.10.30.1502 — F675-181 지갑 날짜 범위 조회 정합성 보완 (기능 보완 / 초안 / 운영 보류)
+- **주기:** 이전 추가 v1500 → 현재 보완 v1502 → 다음 추가 v1504(잠정). 기준 main `94d38f47603e99aabc42fc8f292b89441afb9663` 시작·중간 확인. v1500 PR #1974는 **병합**, 기능 런타임은 미구현. QA v1386 [P0 #1979](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1979): 운영 v1515가 정확 SHA CI/Test PASS 전에 승격되고 공식 Test SHA는 구버전. 런타임·DB·WLD·Test·운영 변경 없음.
+- **실제 소스:** 지갑 SQL은 본인 CASH/BANK 거래별 합산·방향 HAVING·LIMIT 51 지원하나 날짜 종료 상한 없음. 서비스의 `Date.toISOString()`이 마이크로초 손실. Next `apiOrNull`은 400/410/429/503을 null로 합치고 잘못된 기간은 all로 조용히 바뀌며 200 응답 검증 없음. Android app-api는 **이미 쿼리 전달·no-store/noindex 지원**. 개발 PG 17.11 관련 인덱스 10개, 앱 계정 `account_balances UPDATE` / `audit_logs DELETE` P0 잔존(개발 한정).
+- **보완 계약:** 동일 DB SQL에서 한국시간 오늘·asOf·양끝 포함 날짜의 UTC 반개구간 산출, 동결·종료 계정 포함 본인 조회, 원본 마이크로초 정밀도 커서와 목적·세션·범위 결속 HMAC 15분, 400/410 구분, 서로 다른 페이지의 스냅샷 보장 없음·지연 거래 경고. Next/Android 응답 엄격 검증, 정상 빈 결과와 400/410/429/503 분리, 320px/WCAG 2.2 AA, no-store/noindex, 익명 관리자 KPI, 기능 기본 OFF. 상세 영문·국문 통합 마스터 참조.
+- **P0 4건:** OPS1502-01 #1968 볼륨·백업 복원; SEC1502-02 #993 개발 DB 권한·체크섬/#1972 MCP 로그; FIN1502-03 #1917 Test 합성 국고·MINT 18,000 WLD·552건·전체 금융 시험; REL1502-04 #1979 정확 SHA 배포 게이트(#1978 스키마 수정 병합, 전체 승인 아님). **P1 6건:** RANGE1502-05 DB 날짜/인덱스, RANGE1502-06 HMAC 정밀도, RANGE1502-07 Next 오류 UX, RANGE1502-08 Android 계약, RANGE1502-09 개인정보/KPI, RANGE1502-10 실제 PG·회귀·롤백. 합계 **P0 4 + P1 6**.
+- **수용시험 계획 미실행:** 합성 원장 10,001건, 타인 100·커서 위조 100·동시 100·마이크로초/한국시간 50·윤년/계정 전환 30·비정상 응답 50·지연 거래 30, 원장/WLD 변경 0. 공식 정확 SHA Test·독립 복원·운영 승인 없음. 외부 독립 중복 제거·실제 근거 분류 승인 **신규 0건, 누적 UNKNOWN / 10,000 — BLOCKED / IN PROGRESS**.
+
+
+
+**최종 재조회(11:13 KST):** main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`로 진행(implementation_plan.md 문서만 변경). 공개 Production `/api/version`은 `94d38f47603e99aabc42fc8f292b89441afb9663`(v1523 릴리스), 공식 Test는 구버전 `c2129625aa6629c616fb31ce790950618b8d92b2`. v1523의 정확 SHA CI/Test 통과는 이 회차에서 확인하지 못했으므로 P0 배포 게이트 보류. PR #1983 초안이며 운영 승격 권한 없음.
 ## v2026.10.30.1500 — F675-181 지갑 거래내역 한국시간 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
 - **주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). 기준 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf 시작·중간 재확인; [초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [P0/P1 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). 이전 v1498 초안 #1964는 미병합 CLOSED, 통합된 기존 요구사항 보존. 영문 정본과 의미 동등.
 - **실제 문제:** 기간 선택·Nest·원장 SQL은 all/7d/30d, 방향, 본인 50+1 페이지를 지원하나 달력 시작일·종료일 지정은 없음. 저장 필터 F675-176, 월별 요약 F675-177, 북마크 F675-178, 기존 CSV·개인정보 내보내기와 구분. 런타임 미구현.

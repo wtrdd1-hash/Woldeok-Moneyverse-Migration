@@ -1,0 +1,21 @@
+# 기획 v1502 — 지갑 날짜 범위 조회 보완 (국문)
+
+## 시작 전 — 2026-10-30 11:09 KST
+- [x] miniPC Debian 13.6, Superpowers 스킬, 최신 main·병합된 v1500 PR #1974, QA v1386 P0 #1979 및 기존 기획·소스 확인.
+- [x] 작업 중 main 재확인, 영문 정본과 국문 동등 문서·P0/P1 백로그 갱신.
+- [x] 문서 전용 변경 검증, GitHub Draft PR·개발 인계, 완료 결과 기록.
+
+**주기:** 이전 추가 v1500 → 현재 보완 v1502 → 다음 추가 v1504(잠정). 런타임·DB·WLD·Test·운영 변경 금지. 외부 독립 검증 신규 승인 0건, 누적 UNKNOWN / 10,000 — BLOCKED / IN PROGRESS.
+
+## 진행 중 — 2026-10-30 11:10 KST
+- [x] 중간 main `94d38f47603e99aabc42fc8f292b89441afb9663` 변화 없음; v1500 #1974·QA #1978 병합.
+- [x] DB 기준 한국시간/asOf, 마이크로초 커서, Next 오류 구분·응답 검증, Android 기존 쿼리/noindex 지원 확인.
+- [x] 개발 PG 읽기 전용 인덱스 10개 및 계정 직접 DML 권한 위험 확인.
+- [x] 영문·국문 통합/프로젝트 기획 및 변경일지 갱신, P0 4건·P1 6건, 합성 시험은 명세만.
+- [ ] GitHub 인계·PR 및 CI 검증.
+
+## 완료 — 2026-10-30 11:13 KST
+- [x] Draft PR #1983 OPEN, 개발 이슈 #1973 업데이트, 문서 12개.
+- [x] 로컬 릴리스 분류 시험 22 PASS/0 FAIL, 영문·국문 4개 문서 각각 백로그 10개 일치, git diff --check 통과.
+- [x] 최종 main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`, 운영 v1523 SHA `94d38f47603e99aabc42fc8f292b89441afb9663`, 공식 Test 구버전 `c2129625aa6629c616fb31ce790950618b8d92b2` 확인.
+- [x] 직전 커밋 892ff104 문서 CI classify/policy/release-input/verify/classify/verify/policy/non-runtime-summary SUCCESS, 런타임 검증 SKIPPED. 완료 기록 커밋은 재검증 필요. 전체 런타임·실제 PG 수용시험 미실행, Test 정확 SHA/독립 복원 미인증, 운영 HOLD. 외부 근거 신규 0건·누적 UNKNOWN/10,000.

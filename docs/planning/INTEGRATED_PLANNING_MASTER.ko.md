@@ -1,6 +1,43 @@
 ﻿# 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1500 F675-181 / 초안 #1974 / 이슈 #1973 / 운영 승격 보류. 이전 기획은 과거 제안으로 보존.
+**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / Draft PR #1983 / 이슈 #1973 / 초안 / 운영 보류. v1500 PR #1974 병합, 기능 런타임 미구현.
 
+## v2026.10.30.1502 — F675-181 지갑 날짜 범위 조회 근거·커서 정합성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기와 기준:** 이전 기능 추가 v1500 → 현재 기능 보완 v1502 → 다음 기능 추가 v1504(잠정). 최신 `origin/main` `94d38f47603e99aabc42fc8f292b89441afb9663` 2026-10-30 11:08~11:10 KST 시작·중간 재조회. v1500 PR #1974는 11:08에 **병합**되었지만 날짜 범위 기능의 런타임은 **미구현**. AGENTS.md, README.md, 영문 PROJECT_PLAN.md, 국문 대조, Nest/Next/app-api, 개발 PostgreSQL 17.11 및 QA v1386 조사. 문서만 변경하며 런타임·DB·원장·WLD·Test·운영 변경 금지.
+
+### 실제 소스에서 확인한 보완사항
+- `wallet.repository.ts:259–293`은 본인 CASH/BANK 거래를 합산하고 방향 HAVING을 LIMIT 51보다 먼저 적용하며 `(created_at,id) DESC`로 정렬하지만, 날짜 종료일의 **배타적 상한은 없음**. `wallet.service.ts:393–414`의 `Date.toISOString()`은 PostgreSQL 마이크로초를 밀리초로 줄임. 기존 커서 v1은 60분 만료이며 신규 날짜 지정용이 아님.
+- `period.ts`는 잘못된 기간을 조용히 all로 바꾸고, `page.tsx`는 `apiOrNull<WalletHistoryPage>`로 HTTP 오류를 null로 통합하며 응답을 실제 검증하지 않고 타입으로 간주함. 현재 화면은 null 장애와 0건을 구분하지만 **400/410/429/503 원인별 처리가 불가능**하고 비정상 200에 취약함. 신규 기간 지정에서는 오류 유형별 검증이 필요.
+- 현재 Android app-api 프록시는 이미 `target.search=request.nextUrl.search`로 쿼리를 전달하고, 지갑 응답에 `private, no-store`와 `X-Robots-Tag: noindex`를 적용함. 없는 문제로 중복 프록시를 기획하지 않고 허용 매개변수 검증·오류 계약·세션 격리를 강화.
+- 개발 PostgreSQL 17.11 읽기 전용 조사에서 계정·거래·포스팅 테이블 인덱스 10개, `idx_ledger_transactions_created_at_id` 및 `idx_ledger_postings_transaction_id` 확인. `moneyverse_app`는 원장 SELECT 권한과 함께 `account_balances` UPDATE, `audit_logs` DELETE 유효 권한도 보유(개발 DB 한정 P0). 기존 허가된 조회 또는 검토된 SECURITY DEFINER 함수를 활용하며 앱 계정 권한 확대·기존 마이그레이션 수정 금지. 기존 v1500 설계에 통합하는 보완이며 별도 기능·테이블을 만들지 않음.
+
+### API·DB 시각·SQL·커서 실행 계약
+- 회원 전용 `GET /api/v1/wallet/activity?period=custom&from=YYYY-MM-DD&to=YYYY-MM-DD&direction=all|in|out|neutral&cursor=...`를 기존 50+1 페이지 및 all/7d/30d 동작과 분리해 확장. 중복·배열·미허용 쿼리, 그레고리력 오류, 날짜 누락/혼합, 역전, 양끝 포함 366일 초과, **같은 DB 한국시간 오늘**보다 미래 종료일을 명시적으로 거부. 잘못된 요청을 all로 바꾸지 않음. 날짜·방향 변경 시 커서 제거.
+- **첫 페이지**에서 DB `statement_timestamp()` 한 번으로 마이크로초 `asOf`, DB 한국시간 현재 날짜, 한국시간 시작일 00:00 이상·종료일 다음 날 00:00 미만의 UTC 경계를 동일 SQL 문장으로 산출(다중 쿼리면 동일 클라이언트 READ ONLY REPEATABLE READ). 이후 페이지는 서명된 첫 페이지 `asOf`와 동일한 경계를 재사용. `created_at>=startUtc AND created_at<endExclusiveUtc AND created_at<=asOf`. JS Date를 커서 경계로 변환하거나 로컬 24시간 덧셈 금지. 동결·종료된 본인 계정의 과거 거래도 조회.
+- CASH/BANK 포스팅을 거래 ID별 정확한 NUMERIC 합산 후 방향 HAVING, 키셋 및 `created_at DESC,id DESC LIMIT 51` 적용. PostgreSQL 원본 마이크로초를 별도 커서용 문자열(예: UTC `to_char(...,'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`)로 보존하고 SQL 비교도 원본 시각으로 수행. 화면 시각의 밀리초 표시와 커서 정밀도 분리. 순변동 0은 neutral이지 내부 이체 확정 증거가 아님. 중복 계산·원장 쓰기 금지.
+- 신규 목적별 HMAC `wallet-activity-custom-v1`은 본인 UUID, 인증 세션, 날짜 범위, 방향, DB asOf, 마이크로초 정렬키·거래 UUID, 버전, 발급·만료, 키 ID를 결속. 15분 TTL, 2048바이트 제한, 상수시간 서명 비교, 제한적 키 교체. 위조·범위/세션 불일치·기존 커서는 400, 만료는 410. 커서는 인증 수단이 아님. 서로 다른 HTTP 페이지에 동일 DB 스냅샷을 보장한다고 주장하지 않음. 뒤늦게 입력된 과거 거래는 페이지 결과를 바꿀 수 있으므로 사용자에게 알리고 처음부터 재조회 제공.
+- Next BFF는 `string|string[]|undefined` 형태의 searchParams를 엄격히 파싱해 중복을 거부. 신규 기간 지정은 `apiOrNull` 대신 유형별 오류 처리, HTTP 200 JSON의 거래 UUID 중복·최대 50건·정확한 정수 문자열·cash+bank=net·시각·hasMore·nextCursor·범위/asOf 검증. **검증된 200/0건에서만 빈 결과**. 400 입력 오류, 410 커서 만료, 429 요청 제한, 503 장애, 비정상 200, 이전 세션 지연 응답을 각각 처리. 장애를 잔액 0 또는 기록 없음으로 표시 금지. Android 생성 EN/KO/JSON 계약과 계정 전환 취소 동등성 필수.
+- `/wallet/activity`의 날짜 적용·초기화·다음 50건·처음부터 보기, 방향 유지, 한국시간 양끝 포함 표기, DB asOf, 편집 중 자동 조회 금지. 320px·200% 확대·WCAG 2.2 AA, 키보드 포커스·aria-live·44px 터치. 기능 스위치 `wallet_activity_calendar_range` 기본 OFF, 성공·오류 모두 no-store/noindex, 사이트맵 제외. 회원당 분당 10회·DB 2초 제한은 부하 시험 후 확정할 제안. 관리자는 20명 이상 익명 집계·7일 재사용·오류율·p95만 조회하며 개별 날짜·금액은 볼 수 없음.
+
+### P0/P1 개발 인계 (4 + 6 = 10)
+- **P0 OPS1502-01:** QA v1385 Docker 볼륨·작업공간 대량 삭제 [#1968] 원인·독립 외부 복원·롤백 자산 조사. ROOT 43% / DATA 42% 여유는 복원 증명이 아님.
+- **P0 SEC1502-02:** 개발 DB `account_balances` UPDATE·`audit_logs` DELETE [#993], 마이그레이션 체크섬 5건, MCP SSE 민감 URL 로그 [#1972] 범위 조사 및 최소 권한 복구. 운영 침해 증거 아님.
+- **P0 FIN1502-03:** Test 국고 합성 200 [#1917], 과거 미검증 MINT 18,000 WLD·국고 552건, SWF 출처 및 전체 금융 시험. QA v1386 금융 **선별 21건 PASS**는 전체 금융·운영 승인 아님.
+- **P0 REL1502-04:** QA v1386 [#1979]에서 운영 v1515가 09:52 정확 SHA CI/Test PASS 이전에 승격됐고 공식 Test SHA는 구버전. 앱 API 스키마 건수 수정 #1978은 **main 병합**됐으나 전체 CI·인증 E2E·독립 복원·프론트/백엔드/엣지 SHA 및 승인된 GitOps는 미입증. **운영 승격 보류**. 기획에서 임의 배포·롤백 금지.
+- **P1 RANGE1502-05:** DB 한국시간 경계/asOf, 본인·종료 계정 SQL, 50+1, 기존 인덱스 EXPLAIN 및 권한 회귀.
+- **P1 RANGE1502-06:** 마이크로초 HMAC 커서, 목적·세션·범위 결속, 400/410·키 교체·지연 거래 의미.
+- **P1 RANGE1502-07:** Next 엄격 쿼리 및 200/400/410/429/503/비정상/빈 결과 분리, 반응형 접근성.
+- **P1 RANGE1502-08:** Android 쿼리·응답 동등, 계정 전환 취소, EN/KO/JSON 생성 계약·정확 SHA.
+- **P1 RANGE1502-09:** 성공·오류 no-store/noindex, 남용 제한, 익명 관리자 KPI·개인정보 안전 로그.
+- **P1 RANGE1502-10:** 격리 PostgreSQL 17.11 시험, 테스트 우선 구현, OFF/ON 검증, 정확 SHA Test, 독립 복원·승인된 무중단 배포/롤백.
+
+### 수용시험·외부 근거·배포 게이트
+- **명세만 작성, 미실행:** 합성 원장 10,001건 이상, 타인 접근 100건, HMAC 위조/범위 불일치 100건, 동시 페이지 100건, 동일 밀리초의 다른 마이크로초·한국시간 경계 50건, 윤년·시계·계정 전환 30건, 비정상 API 50건, 지연·소급 거래 30건, WLD/원장 변경 0. 고정 데이터에서 50+1 페이지 중복·누락 없음, 동시 변경 시 스냅샷 보장 없음 안내, 거짓 빈 결과 없음, 앱 계정 DML 권한 확대 없음, 기존 기간 회귀 확인.
+- 신규 분산 기획 파일 없음. 런타임·DB·Test·운영 미변경. 개발 별도 브랜치·RED-GREEN·실제 PG/보안/모바일/접근성·전체 CI·공식 Test 프론트/백엔드/엣지 정확 SHA·독립 복원·사용자 승인·기능 OFF 롤백 필수. 외부 독립 중복 제거·실제 근거 분류 승인 **신규 0건, 누적 UNKNOWN / 10,000건 — BLOCKED / IN PROGRESS**.
+
+
+
+**최종 재조회(11:13 KST):** main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`로 진행(implementation_plan.md 문서만 변경). 공개 Production `/api/version`은 `94d38f47603e99aabc42fc8f292b89441afb9663`(v1523 릴리스), 공식 Test는 구버전 `c2129625aa6629c616fb31ce790950618b8d92b2`. v1523의 정확 SHA CI/Test 통과는 이 회차에서 확인하지 못했으므로 P0 배포 게이트 보류. PR #1983 초안이며 운영 승격 권한 없음.
 ## v2026.10.30.1500 — F675-181 회원 전용 지갑 거래내역 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
 
 **주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). **기준:** 2026-10-30 시작·중간 재확인한 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. **GitHub:** [초안 PR #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [개발 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). **설계 제안만 수행:** 런타임·DB·WLD·Test·Production 변경 없음. v1498 초안 #1964는 미병합 CLOSED이며 통합 문서의 가치 있는 기존 요구사항은 보존.
