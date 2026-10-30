@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -70,12 +71,16 @@ export class StockAlertController {
   }
 
   @Get()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Conditional virtual-stock alerts belonging to the caller' })
   async list(@Req() request: RequestWithSession) {
     return { alerts: await this.repository().list(requireUserId(request)) };
   }
 
   @Get('events')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Recent virtual-stock alert events belonging to the caller' })
   async events(@Req() request: RequestWithSession, @Query('limit') limit?: unknown) {
     // Reject noncanonical wire values before querying the owner's event history.
@@ -87,6 +92,8 @@ export class StockAlertController {
   }
 
   @Post()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Create a server-evaluated virtual-stock alert' })
   async create(@Req() request: RequestWithSession, @Body() body: CreateStockAlertDto) {
@@ -99,6 +106,8 @@ export class StockAlertController {
   }
 
   @Delete(':id')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Delete one virtual-stock alert belonging to the caller' })
   async remove(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) alertId: string) {
