@@ -1,8 +1,7 @@
-import { ServiceUnavailableException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import type { RequestWithSession } from '../auth/session.context';
-import { BankRepository, BankInputError } from './bank.repository';
+import { BankRepository, BankInputError, BankFeeContractUnavailableError } from './bank.repository';
 import { PocketController } from './pocket.controller';
 
 const key = '11111111-1111-4111-8111-111111111111';
@@ -22,7 +21,7 @@ describe('bank pocket fee-contract release hold', () => {
     const query = vi.fn().mockResolvedValue({ rows: [{ cost_wld: '100' }] });
     const repo = new BankRepository({ query } as unknown as Queryable);
     await expect(repo.customizePocket(key, actor, pocket, theme, icon))
-      .rejects.toBeInstanceOf(ServiceUnavailableException);
+      .rejects.toBeInstanceOf(BankFeeContractUnavailableError);
     expect(query).not.toHaveBeenCalled();
   });
 

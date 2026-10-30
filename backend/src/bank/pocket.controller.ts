@@ -22,7 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { BankInputError, BankRepository } from './bank.repository';
+import { BankFeeContractUnavailableError, BankInputError, BankRepository } from './bank.repository';
 import {
   ArchivePocketDto,
   CreatePocketDto,
@@ -46,6 +46,9 @@ export class PocketController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof BankInputError) throw new BadRequestException(error.message);
+      if (error instanceof BankFeeContractUnavailableError) {
+        throw new ServiceUnavailableException('bank pocket customization is temporarily unavailable');
+      }
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
       if (isExpectedCommandFailure(error)) {
         const msg = error instanceof Error && error.message ? error.message : conflictMessage;

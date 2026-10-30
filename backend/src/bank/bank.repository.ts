@@ -10,6 +10,14 @@ export class BankInputError extends Error {
   }
 }
 
+/** P0 #2070: no financial mutation before a DB-authoritative atomic fee quote exists. */
+export class BankFeeContractUnavailableError extends Error {
+  constructor() {
+    super('bank pocket customization fee contract is not verified');
+    this.name = 'BankFeeContractUnavailableError';
+  }
+}
+
 function assertUuid(value: unknown, field: string): asserts value is string {
   if (typeof value !== 'string' || !UUID.test(value)) {
     throw new BankInputError(`${field} must be a UUID`);
@@ -310,19 +318,18 @@ export class BankRepository {
     key: unknown,
     actor: unknown,
     pocketId: unknown,
-    themeColor?: string,
-    iconCode?: string,
+    _themeColor?: string,
+    _iconCode?: string,
   ): Promise<unknown> {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(pocketId, 'pocket id');
 
-    return queryOne(
-      this.pool,
-      `SELECT pocket_id::text, theme_color, icon_code, cost_wld::text, remaining_cash::text
-       FROM public.bank_customize_pocket($1::uuid, $2::uuid, $3::uuid, $4::text, $5::text)`,
-      [key, actor, pocketId, themeColor || 'sky', iconCode || 'piggy-bank'],
-    );
+    // P0 #2070: UI advertises 100/300/400 WLD while the historical DEV
+    // function always charges 100. No verified, atomic quote+charge contract
+    // exists. Do not call any fee-bearing SQL until that contract is deployed
+    // and independently tested. A feature flag must not bypass this hold.
+    throw new BankFeeContractUnavailableError();
   }
 
   async archivePocket(key: unknown, actor: unknown, pocketId: unknown): Promise<unknown> {
