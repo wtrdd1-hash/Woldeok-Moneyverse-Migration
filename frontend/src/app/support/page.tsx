@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
@@ -19,7 +19,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const q = typeof params.q === 'string' && params.q.length <= 80 && ![...params.q].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
     ? params.q.trim() : '';
   const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}) });
-  const path = /api/v1/support/threads${filters.size ? ?${filters}` : ''};
+  const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ""}`;
   const { threads } = q
     ? await api<{ threads: Thread[] }>(path, {})
     : await api<{ threads: Thread[] }>(path);
