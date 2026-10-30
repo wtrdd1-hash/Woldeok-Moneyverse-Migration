@@ -249,6 +249,12 @@ describe('registered-stock automatic scenarios', () => {
     expect(out[0]?.effects).toEqual([{ stock_symbol: 'MYUY', direction: 'up', strength: 2 }]);
   });
 
+  it('blocks CHIMU314 model-generated positive news during incident containment', () => {
+    const context = { stocks: [{ symbol: 'CHIMU314', price_change_pct: 7 }] };
+    const batch = { scenarios: [{ headline: '치무전자 초대형 호재', body: '치무전자에서 개발 성과를 발표했습니다.', rationale: '호재', hours: 12, effects: [{ stock_symbol: 'CHIMU314', direction: 'up', strength: 2 }] }] };
+    expect(normaliseRegisteredStockAuto(batch as any, context)).toEqual([]);
+  });
+
   it('returns no automatic scenario when no registered stock exists', () => {
     expect(normaliseRegisteredStockAuto({ scenarios: [proposal()] }, { ...CONTEXT, stocks: [] })).toEqual([]);
   });

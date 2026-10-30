@@ -377,3 +377,6 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
 
 Read-only findings; not a full browser acceptance, Test deployment, or Production release.
+
+## v2026.10.30.2158 — CHIMU314 market news recurrence incident (SOURCE CANDIDATE / LIVE EVENTS CANCELLED)
+[Worklog EN](docs/worklog/2026-10-30-chimu-news-incident-v2026.10.30.2158.md) · [Internal EN](docs/updates/v2026.10.30.2158-chimu-internal.md) / [KO](docs/updates/v2026.10.30.2158-chimu-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.30.2158-chimu-github.md) / [KO](docs/updates/v2026.10.30.2158-chimu-github.ko.md). Production live events cancelled 12/12 and verified 0 active; source promotion pending.

@@ -244,6 +244,8 @@ export function generateDeterministicStockNews(context: Record<string, unknown>)
 
   for (const stock of targets) {
     const symbol = stock.symbol.toUpperCase();
+    // Incident containment: omit CHIMU314 from fabricated fallback reports.
+    if (symbol === 'CHIMU314') continue;
     const template = SECTOR_NEWS_TEMPLATES[symbol] ?? {
       sector: '가상경제 기업',
       bullishEvents: [

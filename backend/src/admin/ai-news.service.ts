@@ -999,6 +999,10 @@ export function normaliseRegisteredStockAuto(
   const listed = registeredStockSymbols(context);
   if (listed.size === 0) return [];
   return normalise(batch, context)
+    // Incident containment: suppress all CHIMU314 stories, even when model mentions it
+    // without assigning a price-moving effect. Prevents auto-republication.
+    .filter((scenario) => !/치무전자|CHIMU314/i.test(`${scenario.headline} ${scenario.body} ${scenario.rationale}`)
+      && scenario.effects.every((effect) => effect.stock_symbol !== 'CHIMU314'))
     .map((scenario) => ({
       ...scenario,
       hours: Math.min(24, scenario.hours),

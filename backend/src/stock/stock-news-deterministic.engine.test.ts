@@ -11,8 +11,12 @@ describe('stock-news-deterministic.engine', () => {
     const stocks = ['CHIMU314', 'DUCK', 'MYUY', 'SPACE', 'WDB', 'WDG', 'WFIN']
       .map((symbol, index) => ({ symbol, price_change_pct: 10 - index }));
     const proposals = generateDeterministicStockNews({ stocks });
-    expect(proposals).toHaveLength(5);
-    expect(new Set(proposals.map((one) => one.effects[0]?.stock_symbol)).size).toBe(5);
+    expect(proposals).toHaveLength(4);
+    expect(new Set(proposals.map((one) => one.effects[0]?.stock_symbol)).size).toBe(4);
+  });
+
+  it('does not fabricate CHIMU314 market news', () => {
+    expect(generateDeterministicStockNews({ stocks: [{ symbol: 'CHIMU314', price_change_pct: 55 }] })).toEqual([]);
   });
 
   it('generates high quality proposals based on stock momentum and sectors', () => {
