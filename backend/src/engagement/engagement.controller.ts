@@ -8,6 +8,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   Put,
   Req,
   ServiceUnavailableException,
@@ -170,7 +171,13 @@ export class EngagementController {
    */
   @Get('early-game')
   @ApiOperation({ summary: 'The early-game weekly goals and collection books' })
-  async earlyGame(@Req() request: RequestWithSession) {
+  async earlyGame(
+    @Req() request: RequestWithSession,
+    @Query('completedOnly') completedOnly?: string | string[],
+  ) {
+    if (completedOnly !== undefined && completedOnly !== '1') {
+      throw new BadRequestException('completedOnly must be 1 when provided');
+    }
     const actor = requireUserId(request);
     const [goals, collections] = await this.guarded(
       () =>
@@ -180,6 +187,12 @@ export class EngagementController {
         ]),
       'the early game summary is unavailable',
     );
-    return { goals, collections };
+    if (completedOnly === '1' && goals.some((goal) => typeof goal.goal_completed !== 'boolean')) {
+      throw new ServiceUnavailableException('weekly goal completion evidence is unavailable');
+    }
+    return {
+      goals: completedOnly === '1' ? goals.filter((goal) => goal.goal_completed === true) : goals,
+      collections,
+    };
   }
 }

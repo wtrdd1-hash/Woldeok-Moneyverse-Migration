@@ -9,6 +9,7 @@ import type { FirstDayStep, TodayEvent } from './early-events';
 import { firstDaySummary } from './early-events';
 import { FirstDayFlow, TodayEventCard } from './early-events-parts';
 import type { EarlyGameBoard } from './early-game';
+import { isVerifiedCompletedGoalsBoard } from './weekly-completed-filter';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
 import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
@@ -60,22 +61,29 @@ export const metadata: Metadata = {
  * records the activity; until that caller exists this section reports and
  * does not grant.
  */
-export default async function QuestsPage() {
+export default async function QuestsPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<{ completedOnly?: string | string[] }>;
+}) {
   await requireMember();
+  const completedOnly = (await searchParams)?.completedOnly === '1';
 
   // Two requests, issued together. `member_engagement_dashboard` assembles
   // today's goals, the next unlock and the preference in one function; the
   // early-game read is separate because it is a different kind of answer --
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
-  const [board, earlyGame, today, firstDay, rawVipChest] = await Promise.all([
+  const [board, earlyGameRaw, today, firstDay, rawVipChest] = await Promise.all([
     apiOrNull<EngagementBoard>('/api/v1/engagement'),
-    apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
+    apiOrNull<EarlyGameBoard>(completedOnly ? '/api/v1/engagement/early-game?completedOnly=1' : '/api/v1/engagement/early-game'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
     apiOrNull<unknown>('/api/v1/engagement/dopamine/vip-chest/status'),
   ]);
 
+  const earlyGame = completedOnly && earlyGameRaw !== null && !isVerifiedCompletedGoalsBoard(earlyGameRaw)
+    ? null : earlyGameRaw;
   const vipChest = parseVipChestStatus(rawVipChest);
 
   return (
@@ -190,9 +198,19 @@ export default async function QuestsPage() {
           These four are counted from work receipts, shop purchases and ledger
           postings, so each one carries a target and a real figure. */}
       <section aria-labelledby="weekly-title" className="grid gap-3">
-        <h2 id="weekly-title" className="text-lg">
-          이번 주 목표
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="weekly-title" className="text-lg">이번 주 목표</h2>
+          <nav aria-label="주간 목표 보기" className="flex flex-wrap gap-2">
+            <Link href="/quests" aria-current={!completedOnly ? 'page' : undefined}
+              className="rounded-md border px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+              전체 목표
+            </Link>
+            <Link href="/quests?completedOnly=1" aria-current={completedOnly ? 'page' : undefined}
+              className="rounded-md border px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+              달성한 목표만
+            </Link>
+          </nav>
+        </div>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
           주간 목표는 월요일마다 새로 시작하고, 따로 기록하지 않아도 작업·구매·저축 기록에서
           자동으로 계산돼요. 지난주에 쌓은 진행은 이번 주로 넘어오지 않아요.
@@ -205,8 +223,8 @@ export default async function QuestsPage() {
           />
         ) : earlyGame.goals.length === 0 ? (
           <EmptyState
-            title="이번 주에 열린 목표가 없어요."
-            description="새 주간 목표가 열리면 이 자리에 표시돼요."
+            title={completedOnly ? '달성한 주간 목표가 아직 없어요.' : '이번 주에 열린 목표가 없어요.'}
+            description={completedOnly ? '전체 목표를 선택해 다른 목표를 확인할 수 있어요.' : '새 주간 목표가 열리면 이 자리에 표시돼요.'}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
