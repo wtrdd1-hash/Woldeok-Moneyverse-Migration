@@ -237,7 +237,7 @@ export async function deleteAccount(
   }
 
   const password = formData.get('password');
-  const mutateOptions: { method: string; body?: Record<string, unknown> } = { method: 'DELETE' };
+  const mutateOptions: { method: 'DELETE'; body?: Record<string, unknown> } = { method: 'DELETE' };
   if (typeof password === 'string' && password.length > 0) {
     mutateOptions.body = {
       confirmation: 'DELETE MY ACCOUNT',

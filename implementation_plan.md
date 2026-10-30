@@ -2033,3 +2033,14 @@ ull 상태를 반환하도록 교정.
 - 로컬 pnpm test로 6개 테스트 통과 확인.
 - Git commit & push 후 GitHub Actions PR #2045의 3대 CI 체크 (runtime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 운영 서버(easy-scraping.com) 무중단 배포 및 라이브 실측.
+
+---
+## 🚀 [v24 Specification] deleteAccount mutateOptions 타입 엄격화 ('DELETE') 및 CI ALL PASS 최종 수렴
+
+### 1. 변경 사항
+- frontend/src/app/account/actions.ts: mutateOptions의 method 타입을 'DELETE' 리터럴로 엄격화하여 Next mutate 함수 제네릭 인자 타입 불일치 해소.
+- 원격 서버 pnpm typecheck (tsc --noEmit) 100% 무오류 통과 검증 완료.
+
+### 2. 검증 계획
+- Git commit & push 후 PR #2045의 runtime-check 통과 확인.
+- PR #2045 스쿼시 머지 및 원격 배포/라이브 실측.
