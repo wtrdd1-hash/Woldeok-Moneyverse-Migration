@@ -1,3 +1,9 @@
+## v2026.10.30.1512 — F675-184 Inventory Find & Sort (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1510 → Current Addition v1512 → Next Improvement v1514 (provisional). Main 9da6545c4 rechecked start/mid; stacked on Draft #2008; handoff #2013.
+- Verified /inventory has category-only filtering and apiOrNull false-empty risk; new owner-only bounded keyword/rarity/equipped/sort read with SECURITY DEFINER, 20/50 keyset and 15m HMAC, no money writes or new tables. New migration number coordinated after B 311; feature OFF.
+- P0 OPS1512-01 SEC1512-02 FIN1512-03 REL1512-04; P1 INVENTORY1512-05 INVENTORY1512-06 INVENTORY1512-07 INVENTORY1512-08 INVENTORY1512-09 INVENTORY1512-10. QA v1391 full suites failed, private SEO header #2012 and runtime provenance #1984 remain HOLD.
+- Acceptance proposed NOT RUN. External newly approved 0, cumulative UNKNOWN/10,000 BLOCKED / IN PROGRESS. No runtime/DB/WLD/Test/Production changes.
+
 ## v2026.10.30.1510 — F675-183 Canonical-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
 - Previous Addition v1508 → Current Improvement v1510 → Next Addition v1512 (provisional). main 9da6545c4 rechecked start/mid; stacked #2003; handoff #2002.
 - SQL 101 uses created_at lower bound only, highest-level job, exact spending allowlist, bank net clamp and lifetime/self-reported NPC. New detail must prove same-snapshot parity; 503 on mismatch, no invented 50-row totals.
