@@ -1,4 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1536 — F675-190 장착 만료 대비 보유 대체 후보 미리보기 (기능 추가 / 초안 / 운영 보류)
+- **회차:** 이전 기능 보완 v1534 → 현재 기능 추가 v1536 → 다음 기능 보완 v1538(잠정). 최신 main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2080, 개발 #2088, 독립 QA v1402 FAILED/P0.
+- **신규 기능:** 회원 장착 만료 영향 화면(F675-189, 아직 Draft/OFF)에서 같은 분류의 **본인 보유·미장착** 아이템을 수동 검토 후보로 조회. 자동 장착·구매·유지비 납부·효과 보장·WLD 쓰기 없음. /inventory/expiring/equipped-impact/replacements, Nest/Next/Android 인증·동의 GET. 직접 장착은 기존 /inventory에서만.
+- **원천/DB:** 071 만료 NULL, 114 장착 슬롯 8개(동일 슬롯 UNIQUE 없음), 123 본인 보유 조회. 전진 전용 SECURITY DEFINER 본인 읽기 함수·앱 EXECUTE만 제안, 테이블 직접 권한 없음. 전체 장착 집합과 영향받는 슬롯을 먼저 검증. NULL 만료 UNKNOWN, 판매 중단 상품도 보유 후보에 포함, 상태 REVIEW_ONLY.
+- **정합성:** SQL 단일 statement_timestamp, 필요 시 읽기 전용 REPEATABLE READ; (이름 C 정렬,UUID) 키셋·회원/세션/슬롯/기간/원천지문 HMAC 커서 최대 15분, validUntil=min(60초, 후보 만료, 장착 만료, 기간 창 진입). 409 변경/경계, 410 커서 만료, 503 장애; 정상 빈 목록 오인 금지.
+- **화면/운영:** 선행 기능 의존·기본 OFF, 20/50 페이지, 320px WCAG 2.2 AA, 계정 전환 보호, 실제 엣지 private/no-store/noindex, 관리자 20명 이상 집계·비식별 KPI. 합성 10,001개/회원 2명/슬롯 8개/권한/Android/성능 시험은 **명세만 작성·미실행**. DB DDL·배포 없음.
+- **백로그:** P0 OPS1536-01 SEC1536-02 FIN1536-03 REL1536-04; P1 REPLACE1536-05 REPLACE1536-06 REPLACE1536-07 REPLACE1536-08 REPLACE1536-09 REPLACE1536-10 (4+6). QA v1402 백엔드 126 FAIL, 프론트 55 FAIL, lint 파서 오류, 공식 Test 정확 SHA·독립 복원 BLOCKED. 운영 보류.
+- **외부 근거:** 신규 검증 승인 0건, 누적 검증·중복 제거·분류 승인 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 영어 정본·한국어 통합 상세와 #2088 참조. 새 분산 기획 파일·main 병합·런타임/DB/WLD/Test/Production 변경 없음.
+
+**현재 기획:** v1536 F675-190 보유 대체 후보 / 개발 #2088 / Draft PR 예정 / 운영 보류.
+
 ## v2026.10.31.1534 — F675-189 장착 만료 시간 경계·슬롯 정합성 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 기능 추가 v1532 → 현재 기능 보완 v1534 → 다음 기능 추가 v1536(잠정). main bf8d0d48f810932b43783d8605dce53954c60cff 확인, 선행 Draft #2075, 개발 #2074, QA v1402 FAILED/P0.
 - **시간만 흐르는 진입 누락 수정:** v1532 TTL은 DB 수정 없이 7/30일 범위로 새로 들어오는 장착 아이템을 놓쳤다. validUntilUtc=min(asOf+60초, 기존 대상 중 최초 만료, 범위 밖 아이템의 최초 expires_at-기간)으로 계산하고 정상 빈 목록도 경계에서 stale 처리.
