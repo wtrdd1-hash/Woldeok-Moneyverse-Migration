@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1526 F675-187 purchase proof hardening / issue #2046 / Draft #2055 (stack #2048 → #2042 → #2036) / RELEASE HOLD; incident #2031.
+**Current planning:** v1528 F675-188 owner upcoming-expiry radar / issue #2060 / Draft PENDING (stack after #2055) / RELEASE HOLD; incident #2031.
+
+## v2026.10.31.1528 — F675-188 Owner Inventory Upcoming Expiry Radar (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **Cycle:** Previous Feature Improvement v1526 → Current Feature Addition v1528 → Next Feature Improvement v1530 (provisional). Remote main `bf8d0d48f810932b43783d8605dce53954c60cff` checked start/mid; stack after Draft #2055; engineering #2060; release incident #2031.
+- **Gap/source:** `/inventory` has no expiry-focused list. Migration 071 user_items expiry nullable; migration 123 owner-scoped `shop_my_items_v2` filters active holdings with independently evaluated clocks and separate effect expiry. New 7/30-day upcoming **holding** expiry list must not claim permanent ownership, effect activation, upkeep payment or refund. Existing A #2056 owns false-empty/lifecycle repair; coordinate, don't duplicate.
+- **V1:** member CTA → `/inventory/expiring?withinDays=7|30`, default 7; owner-only Nest/Next/Android, 20/50 page, `asOf<expires_at<=asOf+N*24h`, KST display, stable `expires_at,catalog_id` cursor, HMAC actor/session/asOf/source fingerprint, 409/410/503 fail-closed. Read-only SECURITY DEFINER with EXECUTE-only grant; no direct table grant; optional partial index after 10,001-row EXPLAIN. Real edge private/no-store/noindex/no-referrer, 320px WCAG AA, admin aggregates >=20, flag OFF, no push/auto-charge/finance writes.
+- **Backlog:** P0 OPS1528-01 SEC1528-02 FIN1528-03 REL1528-04; P1 EXPIRY1528-05, EXPIRY1528-06, EXPIRY1528-07, EXPIRY1528-08, EXPIRY1528-09, EXPIRY1528-10 (4+6=10). QA v1399 backend 126 FAIL/2653 PASS/501 SKIP, frontend 55 FAIL/2701 PASS, lint parser error; official exact-SHA Test/restore BLOCKED. 10,001 synthetic and boundary tests PROPOSED NOT RUN. Docs-only, no merge or release.
+- **External reference gate:** new approved 0; cumulative verified/deduplicated/classified UNKNOWN / 10,000; BLOCKED / IN PROGRESS. Full spec in integrated master and #2060.
+
 
 ## v2026.10.30.1526 — F675-187 Owner Purchase Proof Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1524 → Current Improvement v1526 → Next Addition v1528 (provisional). Main bf8d0d48f810932b43783d8605dce53954c60cff start/mid, stacked on Draft #2048; engineering #2046, P0 release #2031.

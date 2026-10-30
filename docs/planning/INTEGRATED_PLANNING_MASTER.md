@@ -1,5 +1,53 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1526 F675-187 purchase proof hardening / issue #2046 / Draft #2055 (stack #2048 → #2042 → #2036) / RELEASE HOLD; incident #2031.
+**Current planning:** v1528 F675-188 owner upcoming-expiry radar / issue #2060 / Draft PENDING (stack after #2055) / RELEASE HOLD; incident #2031.
+
+## v2026.10.31.1528 — F675-188 Owner Inventory Upcoming Expiry Radar (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Improvement v1526 → Current Feature Addition v1528 → Next Feature Improvement v1530 (provisional). Canonical origin/main `bf8d0d48f810932b43783d8605dce53954c60cff` rechecked start/mid; stacked after Draft #2055 (after #2048 → #2042 → #2036); engineering handoff #2060; release P0 #2031. This is a proposal, not implementation or Production authorization.
+
+### Product problem, source truth and alternatives
+- **Who/why:** authenticated and consented inventory owners need to identify holdings that will expire soon without manually opening every item. The existing `frontend/src/app/inventory/page.tsx` loads all holdings via `apiOrNull`; `inventory-view.tsx` offers category tabs and equip toggles, but no chronological expiry radar. A separate Development A Draft #2056 already addresses false-empty and lifecycle detail; coordinate rather than overwrite it.
+- **Database oracle:** migration 071 creates `user_items` PK `(user_id,catalog_id)`, `quantity>0` for current holdings and nullable `expires_at timestamptz`. Migration 123 `shop_my_items_v2(p_actor)` filters `expires_at > clock_timestamp()`, uses `acquired_at DESC`, and independently calculates `effect_expires_at` from effect receipts. This does NOT mean holding expiry equals effect expiry or weekly upkeep due; neither is proof of payment or permanent ownership.
+- **Options:** (A) client filter the existing unbounded holdings response (quick but no server-side pagination or consistent asOf); (B) new owner-filtered bounded read function and paginated API (selected); (C) background reminder worker (rejected for V1: delivery/privacy and scheduled job scope). No push/email, renewal, auto-charge, or mutation CTA in V1.
+
+### User journeys, navigation and screen states
+1. Authenticated member opens `/inventory` → **“만료 예정 보기”** CTA → private `/inventory/expiring?withinDays=7`; selector **7일 / 30일**, default 7. Preserve original inventory grid, equipped showcase and full count; do not replace the full holdings array with the 20-row result.
+2. Each card displays **현재 상품명**, quantity, exact **보유 만료 시각** in Asia/Seoul with timezone label, and a return-to-inventory link. Only `quantity>0` and `expires_at IS NOT NULL` and `asOfUtc < expires_at <= asOfUtc + N*24h` are included. N is 7 or 30; the interval is absolute elapsed days, not KST calendar-day bucketing. At exactly asOf, an item is already expired and excluded; exactly at upper bound, included.
+3. Distinguish skeleton/loading, verified-empty **“선택 기간에 만료 예정인 보유 아이템이 확인되지 않았습니다”**, result rows, stale/expired during viewing with Refresh CTA, auth/consent denial, and upstream unavailable Retry. A failed read is NEVER an empty shelf. Null `expires_at` means **미지정/UNKNOWN**, not perpetual; not included in upcoming results. Do not infer current active effect, upkeep settlement or refund.
+4. Pagination has accessible next-page CTA; no global item count unless independently verified. A changed source or cursor yields a refresh notice without claiming that items were deleted. Keyboard focus, ARIA live announcements, no color-only states, 320px/200% zoom and WCAG 2.2 AA. Date localization is presentation only; backend comparisons use UTC instants.
+
+### API contract and privacy
+- Nest `GET /api/v1/shop/holdings/expiring?withinDays=7|30&cursor=<opaque>`, guarded by `SessionGuard,AuthenticatedGuard,ConsentGuard`, derives actor from server session. Next same-origin BFF `GET /api/shop/holdings/expiring`; Android `GET /app-api/v1/shop/holdings/expiring` must preserve identical authorization/error semantics.
+- Strict success: `{asOfUtc:string,withinDays:7|30,items:[{catalogId:string,code:string,currentName:string,quantity:number,holdingExpiresAtUtc:string}],nextCursor?:string,sourceStatus:'VERIFIED'}`. Page size 20 default, hard maximum 50; no client-provided actor ID, no raw table rows or maintenance fields. Exact timestamp precision retained internally. No WLD values or money transfers in this read.
+- Errors: 400 invalid horizon/cursor syntax, 401 unauthenticated, 403 consent, 409 source-set fingerprint drift, 410 cursor age>15m, 429 quota, 503 DB/query/contract failure; 200 verified-empty only after authoritative query. HMAC cursor binds actor/session generation, horizon, `asOfUtc`, last `(expires_at,catalog_id)` key, schema version and canonical result-set fingerprint. Reject tampering and cross-account reuse; rotate keys safely. Stable sort `expires_at ASC,catalog_id ASC`; preserve PostgreSQL microseconds in the opaque cursor.
+- Privacy at Nest, Next, Android and real public Nginx edge: `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer` for success and error responses; route metadata noindex; account-switch clears state and aborts in-flight responses; avoid PII, item IDs and query contents in logs/analytics. Rate limit per actor and IP. Admin access is NOT a bypass to member detail.
+
+### PostgreSQL, transactions, index and least privilege
+- Implement a forward-only owner-scoped `SECURITY DEFINER` read function (proposed `public.shop_my_expiring_holdings_v1`) with fixed `SET search_path=pg_catalog,pg_temp`, qualified table names, bounded `withinDays IN (7,30)` and `limit<=50`. Use a **single** DB `statement_timestamp()` for the first page; continuation cursor carries that asOf, with bounded age and explicit no-future guard. Query a consistent READ ONLY REPEATABLE READ snapshot when validating result fingerprint and page, not separate uncoordinated clocks. Server must bind actor from authenticated session; SQL always filters `user_id=p_actor`.
+- Revoke EXECUTE from PUBLIC; grant only narrow function EXECUTE to `moneyverse_app`. **Never grant direct SELECT/DELETE/UPDATE on user_items** to make the feature work. Proposed optional partial index `user_items(user_id,expires_at,catalog_id) WHERE quantity>0 AND expires_at IS NOT NULL`, only if isolated `EXPLAIN (ANALYZE,BUFFERS)` on 10,001 synthetic rows shows benefit; coordinate with DB migration owners and 5 historical checksum mismatches; do not edit applied migration 071/123.
+- This is a read-only operation; no WLD postings, financial transaction, outbox, audit mutation, item expiration worker, scheduled notification or migration deployed by planning. Read snapshot consistency is not a promise that an item remains owned after response. Optional fingerprint validation may be expensive: benchmark p95 <500ms and enforce timeout/fail-closed, otherwise revise design before release.
+
+### Operations, security, analytics and release
+- Feature switch `inventory_expiring_radar` **OFF by default**. No SEO indexing of owner pages; link to public catalogue only through separate explicit navigation, never share owner query state. Android screen parity, accessibility at 320px and 200%, KST text and UTC comparisons. Admin can view only privacy-safe aggregate `expiry_radar_opened`, `horizon_selected`, `refresh_required`, `source_unavailable` metrics at cohort >=20, never per-user holdings. KPI: feature use per eligible owner, verified query success %, 409 rate, 503 rate, latency p95, accessible task completion; baseline UNKNOWN until measured.
+- Release sequence: independent feature branch → review → forward migration on isolated PG17 → fresh clean-schema chain and app-role negative tests → full backend/frontend/security/a11y/Android checks → official Test at **exact candidate SHA** with authenticated owner/foreign and Nginx edge assertions → independent backup restore → approved GitOps canary and rollback. Never interpret docs-only CI or candidate image build as promotion approval. Rollback via feature OFF and prior immutable image, leave forward migration intact; no Production restart by planning. Existing Draft/HOLD merge incident #2031 and DB ACL #993 are P0 blockers.
+- Proposed acceptance (NOT RUN): 10,001 synthetic holdings across two owners, 100 exact expiry/UTC/KST/DST-like boundaries, 100 foreign owner/session switch, 100 forged/expired/drift cursors, 100 concurrent updates/requests, 50 Android/private-header/320px tests; verify no direct table grants, no false empty, no duplicate/missing rows at equal timestamps, no false financial status. Actual QA v1399 evidence: backend 126 FAIL / 2,653 PASS / 501 SKIP, frontend 55 FAIL / 2,701 PASS, lint 1 parse error / 1,043 warnings; build/typecheck passed separately but full gates failed. Exact-SHA Test/restore BLOCKED.
+
+### Development backlog — P0 4 / P1 6 (10 total)
+| Priority | ID | Deliverable and acceptance |
+|---|---|---|
+| P0 | OPS1528-01 | Verify Production process/image SHA, rollback artifacts and independent restore (#1984/#2031); no unsafe restart. |
+| P0 | SEC1528-02 | Repair DEV app-role direct privileges and 5 migration checksum discrepancies via forward-only clean-schema tests (#993/#2000); negative app/PUBLIC access PASS. |
+| P0 | FIN1528-03 | Reconcile Treasury/MINT/SWF/bond WLD ledger and prove no expiry label implies upkeep payment; no false green proof. |
+| P0 | REL1528-04 | Investigate Draft/HOLD merge #2031, failing QA v1399, full exact-SHA CI/Test E2E/edge/privacy/restore and approved GitOps gate. |
+| P1 | EXPIRY1528-05 | Owner-only PG SQL, stable asOf, keyset/index, fingerprint and 10,001-row EXPLAIN, no direct grants. |
+| P1 | EXPIRY1528-06 | Nest DTO/guard, HMAC cursor and 400/401/403/409/410/429/503 contract, no false empty. |
+| P1 | EXPIRY1528-07 | Next CTA, expiring list, accurate KST timestamps, source states, 320px/a11y, preserve full equipped/count. |
+| P1 | EXPIRY1528-08 | Android app-api owner/cache/error/session parity; no stale account data. |
+| P1 | EXPIRY1528-09 | Actual edge no-store/noindex/no-referrer and admin cohort>=20 KPI/no PII logs. |
+| P1 | EXPIRY1528-10 | Isolated PG and contract regressions, exact-SHA Test and OFF-switch rollback proof. |
+
+**External reference gate:** independently acquired/deduplicated/classified approvals **new 0; cumulative UNKNOWN / 10,000; BLOCKED / IN PROGRESS**. This gate is not satisfied by synthetic rows, repository files or search hits. **Status: DRAFT / RELEASE HOLD.**
+
 
 ## v2026.10.30.1526 — F675-187 Owner Shop Purchase Ledger Proof Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

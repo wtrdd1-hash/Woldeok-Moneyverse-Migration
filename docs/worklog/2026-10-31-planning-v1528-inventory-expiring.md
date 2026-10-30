@@ -1,0 +1,6 @@
+# Planning v1528 — Owner inventory upcoming expiry radar (2026-10-31)
+**Previous:** Feature Improvement v1526; **Current:** Feature Addition v1528; **Next:** Feature Improvement v1530 (provisional). **Status:** DRAFT / RELEASE HOLD.
+**Authority:** remote main `bf8d0d48f810932b43783d8605dce53954c60cff`, AGENTS.md, README.md, PROJECT_PLAN.md canonical and Korean parity; parent Draft #2055; engineering #2060.
+**Evidence:** migration 071 nullable holding expiry and PK, 123 owner-only function and separate effect receipt expiry, Nest guarded GET /shop/holdings, Next /inventory lacks upcoming-expiry navigation; coordinate A #2056. QA v1399 backend 126 FAIL/2653 PASS/501 SKIP, frontend 55 FAIL/2701 PASS; lint parser error; Test/restore unverified.
+**Decision:** bounded 7/30-day member-only holding-expiry radar, server keyset/HMAC, stable asOf, no financial claims, private/no-store/noindex, Android/a11y, admin aggregates >=20, flag OFF. Full EN/KO design and 4 P0 + 6 P1 in integrated master. No new distributed feature planning document.
+**Gate:** synthetic 10,001 and negative tests PROPOSED NOT RUN. External newly verified 0; cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. No code, DB, WLD, Test, Production or automation changes. GitHub PR/CI recorded separately when available.

@@ -1,3 +1,12 @@
+## v2026.10.31.1528 — F675-188 본인 보유 아이템 만료 예정 목록 (기능 추가 / 초안 / 운영 보류)
+- **회차:** 이전 기능 보완 v1526 → 현재 기능 추가 v1528 → 다음 기능 보완 v1530(잠정). 원격 main `bf8d0d48f810932b43783d8605dce53954c60cff` 시작·중간 확인, 선행 Draft #2055, 개발 #2060, 배포 사고 #2031.
+- **근거/차별점:** 현재 `/inventory`에는 만료 예정 집중 목록이 없다. 071의 보유 만료는 NULL 가능하며 123의 본인 함수는 현재 유효한 보유분만 반환하고 효과 영수증 만료는 별도 계산한다. 보유 만료·효과·유지비·납부를 혼동하지 않는다. 개발 A #2056의 장애/빈 목록 개선과 중복하지 않고 연계한다.
+- **V1:** 회원 `/inventory` → `/inventory/expiring?withinDays=7|30`(기본 7일), `asOf<expires_at<=asOf+N*24시간`, 20/50건, KST 만료 일시, 본인 Nest/Next/Android, 서명된 회원/세션/원천 지문 커서, 409/410/503 실패 구분. SECURITY DEFINER 함수 EXECUTE만, 직접 테이블 권한 금지, 필요 시 10,001건 EXPLAIN 이후 부분 인덱스. 실제 edge private/no-store/noindex/no-referrer, 320px WCAG AA, 관리자 20명 이상 집계, 기능 OFF, 알림/자동청구/금융 쓰기 없음.
+- **백로그:** P0 OPS1528-01 SEC1528-02 FIN1528-03 REL1528-04; P1 EXPIRY1528-05, EXPIRY1528-06, EXPIRY1528-07, EXPIRY1528-08, EXPIRY1528-09, EXPIRY1528-10 총 10건. QA v1399 백엔드 2,653 PASS/126 FAIL/501 SKIP, 프론트 2,701 PASS/55 FAIL, lint 구문 오류. 정확 SHA Test/독립 복원 BLOCKED. 합성 10,001건 등 시험은 정의만 하고 미실행. 문서 전용, 병합/배포 없음.
+- **외부 근거:** 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 상세는 통합 마스터·#2060.
+- **GitHub:** 개발 이슈 #2060 OPEN, Draft PR 생성 대기, 최종 SHA CI 미확인. 문서 전용 후보.
+
+
 ## v2026.10.30.1526 — F675-187 본인 구매 증빙 정확성 보완 (기능 보완 / 초안 / 운영 보류)
 - **회차:** 이전 추가 v1524 → 현재 보완 v1526 → 다음 추가 v1528(잠정). main bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간, 선행 Draft #2048, 개발 #2046, 배포 P0 #2031.
 - **정정:** 009 request_hash는 PostgreSQL JSONB actorUserId+itemId SHA256, 구매·원장 idempotency 키 일치 필수. outbox aggregate_id는 거래 UUID, payload userId/itemId/amount, purchaseId 없음, delivered_at NULL은 미납 증거 아님. 현재 상품명은 과거 스냅샷 아님, 시각은 서로 다를 수 있음. MyReceipts signedIn 의존성에 로그인 유지 계정 전환 방어 필요.
