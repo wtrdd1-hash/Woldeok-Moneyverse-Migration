@@ -231,7 +231,6 @@ export class ShopService {
     const totalSpent = purchases.reduce((total, receipt) => total + BigInt(receipt.amount), 0n);
     return { purchases, summary: { count: purchases.length, totalSpent: totalSpent.toString(), scope: 'displayed' } };
   }
-  }
 
   async purchase(
     authenticatedUserId: string,
