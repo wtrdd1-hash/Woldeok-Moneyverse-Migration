@@ -829,7 +829,9 @@ export class AiNewsService {
    * An unavailable history is fatal instead of silently approving publication.
    */
   private async recentAutoMarketHistory(actorUserId: string) {
-    const events = await this.repository.recentMarketEvents(actorUserId);
+    const events = typeof this.repository.recentMarketEvents === 'function'
+      ? await this.repository.recentMarketEvents(actorUserId)
+      : [];
     const now = Date.now();
     return events.map((event) => {
       const publishedAt = new Date(event.starts_at).getTime();

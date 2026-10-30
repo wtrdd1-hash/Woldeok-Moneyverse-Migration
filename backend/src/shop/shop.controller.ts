@@ -33,6 +33,7 @@ import {
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
 import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } from './shop-compare';
+import { orderShopCatalog, parseShopPriceOrder } from './shop-catalog-order';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -159,13 +160,20 @@ export class ShopController {
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
-  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+  @ApiOperation({ summary: 'The member catalogue; q searches and sort orders exact price asc/desc' })
+  async catalog(
+    @Req() request: RequestWithSession,
+    @Query('q') query?: string,
+    @Query('sort') sort?: string,
+  ) {
+    // Validate before reading the actor-scoped catalogue; invalid sort requests
+    // must not trigger an unnecessary private database read.
+    const order = parseShopPriceOrder(sort);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    return { catalogItems: orderShopCatalog(filterShopItems(catalogItems, query), order) };
   }
 
   @Get('compare')
