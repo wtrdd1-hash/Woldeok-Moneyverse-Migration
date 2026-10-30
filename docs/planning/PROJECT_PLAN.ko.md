@@ -1,5 +1,14 @@
 ﻿# 월덕 머니버스 — Living Project Plan
-**Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
+**현재 기획:** [v1500 초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [개발 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973); 초안 / 운영 보류.
+**Historical draft pointer (superseded):** **Draft PR:** [#1943](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1943), 미병합 [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) 기반; [개발 인계 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936#issuecomment-6507404176). DRAFT / RELEASE HOLD, 독립 병합 금지.
+
+
+## v2026.10.30.1500 — F675-181 지갑 거래내역 한국시간 날짜 직접 지정 (기능 추가 / 초안 / 운영 보류)
+- **주기:** 이전 기능 보완 v1498 → 현재 기능 추가 v1500 → 다음 기능 보완 v1502(잠정). 기준 origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf 시작·중간 재확인; [초안 #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [P0/P1 인계 #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). 이전 v1498 초안 #1964는 미병합 CLOSED, 통합된 기존 요구사항 보존. 영문 정본과 의미 동등.
+- **실제 문제:** 기간 선택·Nest·원장 SQL은 all/7d/30d, 방향, 본인 50+1 페이지를 지원하나 달력 시작일·종료일 지정은 없음. 저장 필터 F675-176, 월별 요약 F675-177, 북마크 F675-178, 기존 CSV·개인정보 내보내기와 구분. 런타임 미구현.
+- **설계:** 회원 전용 /wallet/activity custom 한국시간 양끝 포함 1~366일, 미래 종료일 금지, 그레고리력 엄격 검증·잘못된 조합 400, 적용/초기화/오류 상태, 기존 방향 유지, UTC 반개구간, 본인 NUMERIC 포스팅 거래별 합산 후 LIMIT 51, 신규 테이블 없음·EXPLAIN/인덱스 검토. 소유자/세션/범위/방향 결속 마이크로초 HMAC 커서 15분, 400/410 차단. Next/Android 엄격 계약, 320px WCAG 2.2 AA, no-store/noindex, 관리자 익명 KPI, 속도 제한, 기본 OFF. 상세 영문/국문 통합 문서 참조.
+- **P0 4건:** OPS1500-01 QA v1385 볼륨·작업공간 삭제 #1968/독립 복원, SEC1500-02 개발 DB 권한 #993/MCP 민감정보 로그 #1972, FIN1500-03 Test 국고 합성 응답 #1917/MINT·SWF 출처/undici 시험 오류, REL1500-04 lint 오류 3건·모바일 계약 드리프트·전체 CI·정확 SHA Test·백업 복원. ROOT/DATA 42%/37%는 복원 안전성 증거 아님. **P1 6건:** RANGE1500-05 SQL/날짜/인덱스, RANGE1500-06 Nest/HMAC, RANGE1500-07 Next/접근성, RANGE1500-08 Android, RANGE1500-09 개인정보/관리자/KPI, RANGE1500-10 격리 PG/회귀/롤백.
+- **수용시험 계획 미실행:** 합성 거래 10,001건, 타인 접근 100, 커서 위조 100, 동시 조회 100, 날짜/마이크로초 50, 윤년/계정 전환 30, 비정상 API 50, WLD 변경 0. 외부 독립 검증 승인 신규 0건·누적 UNKNOWN / 10,000 → BLOCKED / IN PROGRESS. 병합·Test/Production 배포·금융 변경 없음; 개발 별도 브랜치와 공식 Test 정확 SHA 게이트 필수.
 
 ## v2026.10.30.1490 — F675-178 지갑 북마크 정합성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Addition v1488 → 현재 Improvement v1490 → 다음 Addition v1492(잠정). 기준 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 재조회; QA v1380 FAILED/P0. 선행 Draft #1937 미병합, 인계 #1936. 문서만 수정.

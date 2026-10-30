@@ -1,4 +1,51 @@
-﻿﻿# Woldeok Moneyverse — Integrated Planning Master
+﻿# Woldeok Moneyverse — Integrated Planning Master
+**Current planning:** v1500 F675-181 / Draft #1974 / issue #1973 / RELEASE HOLD. Earlier plans retained as historical proposals.
+
+## v2026.10.30.1500 — F675-181 Owner-Private Wallet Calendar Range (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Improvement v1498 → Current Feature Addition v1500 → Next Feature Improvement v1502 (provisional). **Authority:** origin/main a7f8730b9838b9324b6ece25e394dfcc8709aadf, rechecked start/mid on 2026-10-30; AGENTS.md, README.md, canonical PROJECT_PLAN.md and Korean parity. **GitHub:** [Draft #1974](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1974), [handoff #1973](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1973). Documentation-only proposal; no runtime/DB/WLD/Test/Production mutation. Prior v1498 Draft #1964 CLOSED without merge; preserve its integrated historical requirements.
+
+### Problem, target and non-duplication
+- Verified: frontend/src/app/wallet/activity/period.ts supports all/7d/30d and direction all/in/out/neutral; page.tsx displays owner ledger in pages of 50; backend/src/wallet/wallet.controller.ts rejects custom periods; wallet.service.ts computes rolling days; wallet.repository.ts aggregates owner CASH/BANK postings with SQL direction filter before LIMIT 51. The inspected path has no explicit calendar from/to. Source inspection is not a Production usage survey.
+- Authenticated, consented members should inspect their own WLD transactions between two KST calendar dates. Private navigation only; not settlement certification, tax proof, export, financial mutation or automatic budget advice.
+- Separate from F675-176 saved period presets, F675-177 monthly aggregation, F675-178 bookmarks, F675-173 privacy export and existing export-ledger-csv.tsx. No duplicate table, receipt, export or endpoint family.
+
+### Entry, screen, CTAs and state machine
+- Entry /wallet/activity; add “Custom dates / 기간 지정” beside existing periods. Canonical private deep link /wallet/activity?period=custom&from=YYYY-MM-DD&to=YYYY-MM-DD&direction=all. Existing all/7d/30d semantics remain unchanged.
+- Native Start date/End date inputs, Apply range, Clear range, existing direction chips, Next 50, Restart from first. Suggest KST today and previous 29 calendar days, but do not query until Apply. Date/direction changes discard cursor; browser back restores canonical range.
+- States: initial, editing, invalid, loading, verified-results, verified-empty, more-pages, expired-cursor, unauthenticated, consent-required, throttled, unavailable, stale-response-discarded. Empty only after schema-verified 200 with zero rows; network errors, malformed 200 or 503 must not masquerade as empty. Show inclusive KST dates, server as-of cutoff and warning that late/backdated postings can alter later reads.
+- Strict Gregorian YYYY-MM-DD including leap days; start<=end, 1..366 inclusive calendar dates, end<=today KST. Invalid dates, arrays, duplicate or unknown params, non-custom with from/to and custom missing either date return 400. Do not silently truncate invalid ranges; 366 days is a proposed load cap.
+
+### API, DB, transaction, index and cursor
+- Extend guarded Nest GET /api/v1/wallet/activity with period=custom, from, to, direction=all|in|out|neutral and optional cursor. Preserve existing transactions,hasMore,nextCursor,asOf fields; custom adds range:{from,to,timezone:'Asia/Seoul',startInclusiveUtc,endExclusiveUtc}. Strict Next/Android runtime validation of amount strings, timestamps, arrays and cursor; verified empty has hasMore=false,nextCursor=null.
+- Convert KST calendar days into UTC half-open [start 00:00 KST, day-after-end 00:00 KST) using timezone-aware database conversion (date::timestamp AT TIME ZONE 'Asia/Seoul'). Query created_at>=startUtc AND created_at<endExclusiveUtc AND created_at<=serverAsOf. Never use browser timezone or naive 24h offsets. Server asOf is a cutoff, not a fixed PostgreSQL snapshot across multiple HTTP pages.
+- Reuse owner-scoped USER_CASH/USER_BANK joins and NUMERIC signed posting aggregation by transaction ID; net=cashDelta+bankDelta. Direction HAVING SIGN(net) before ORDER BY created_at DESC,id DESC LIMIT 51; return at most 50, derive hasMore from row 51. CASH↔BANK internal movement is neutral. Preserve historical postings on frozen/closed accounts. No JS Number for WLD, no ledger writes.
+- No new persistent tables. EXPLAIN on isolated PostgreSQL checks indexes for ledger_transactions(created_at,id), ledger_postings(transaction_id,account_id), accounts(owner_user_id,account_type,id). Any extra index requires separately reviewed forward-only immutable-checksum migration, no new app-role direct DML grants. Proposed 2s statement timeout, subject to load evidence.
+- Purpose-separated HMAC cursor wallet-activity-custom-v1 binds ownerId,sessionId,from,to,direction,asOf,afterCreatedAtUs,afterTransactionId,issuedAt,expiresAt,version; TTL 15m, <=2048 bytes, constant-time MAC, bounded key rotation. Preserve PostgreSQL microsecond timestamp text through keyset SQL; do not round via JavaScript Date milliseconds. Legacy cursor rejected for custom; malformed/forged/scope-changed 400, expired 410, UI restart offered. One read-only SQL statement preferred; if multi-statement, pin one PG client in READ ONLY REPEATABLE READ with rollback/release.
+
+### Authorization, abuse, SEO, admin, Android and KPI
+- Keep SessionGuard → AuthenticatedGuard → ConsentGuard → CsrfGuard. Owner identity only from server session, owner predicate inside SQL or reviewed SECURITY DEFINER function. No cross-owner existence oracle or raw SQL errors. Feature switch wallet_activity_calendar_range seeded disabled before gate; no automatic enable.
+- Proposed 10 requests/minute/member, one in-flight custom query/member, 2s DB timeout, strict query allowlist. Cache-Control private,no-store, X-Robots-Tag noindex, Next robots noindex/nofollow, no sitemap/structured data. Do not log query strings, owner IDs, amounts, transaction IDs, raw cursors or sessions; consider QA v1385 MCP gateway URL logging [#1972](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1972).
+- Admin sees aggregate-only cohort>=20 adoption, 7-day reuse, 200/400/410/429/503 rates, p50/p95 latency and timeouts; no member ledger or date drill-down. Proposed, not observed: zero cross-owner reads, zero false-empty, zero cursor scope bypass, p95<500ms under agreed load; rollback on violations.
+- 320px, 200% zoom, WCAG 2.2 AA, explicit labels/errors, keyboard date Apply/Clear, error focus, aria-live result count, >=44px touch targets. Android app-api preserves custom query and strict schema, fences account switches and matches 400/410/429; regenerate EN/KO/JSON mobile API contract with negative tests.
+
+### Four P0 and six P1 engineering tasks
+- **P0 OPS1500-01:** QA v1385 [#1968](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1968) bulk Docker-volume/workspace deletion: identify principal, authorization, missing assets, Test/backup/rollback recoverability, independent restore. Root/data 42%/37% observed 10:01 KST is NOT recovery proof.
+- **P0 SEC1500-02:** DEV PG app-role UPDATE 211/253, DELETE 211/253, TRUNCATE 233/253, account_balances UPDATE, audit_logs DELETE, migration checksums [#993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993); investigate MCP credential/location logs #1972. Production permissions/misuse unknown; no secrets in logs.
+- **P0 FIN1500-03:** Test synthetic Treasury [#1917](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1917), MINT/SWF/Treasury provenance and complete finance suite after QA v1385 missing-undici collection failure. Recent finance merge is not full finance PASS.
+- **P0 REL1500-04:** Repair QA v1385 lint 3 errors, generated mobile contract drift and finance dependency; independent backup restore; exact frontend/backend/edge SHA in official Test; owner-approved GitOps Production promotion. Docs CI cannot waive this.
+- **P1 RANGE1500-05:** Owner SQL, KST half-open bounds, NUMERIC, historical accounts, EXPLAIN/index and large-range tests.
+- **P1 RANGE1500-06:** Nest strict validation, microsecond purpose-bound HMAC cursor, response contract and expiry/forgery/rotation tests.
+- **P1 RANGE1500-07:** Next date UI Apply/Clear, empty/error/expired/pagination, 320px and a11y.
+- **P1 RANGE1500-08:** Android app-api parameter/schema parity, account-switch fencing and EN/KO/JSON generated contract.
+- **P1 RANGE1500-09:** Privacy/rate limiting, admin cohort-only KPI, noindex and safe logs.
+- **P1 RANGE1500-10:** Isolated PostgreSQL 17.11 acceptance, regression, OFF/ON canary, rollback and exact-SHA developer A/B/C/QA handoff.
+
+### Acceptance, zero-downtime release and external gate
+- **PLANNED, NOT RUN:** >=10,001 synthetic ledger rows; 100 cross-owner probes; 100 HMAC/scope forgeries; 100 concurrent queries; 50 date/microsecond boundaries; 30 leap/clock/account-switch cases; 50 malformed API responses; zero ledger/WLD writes; correct 50+1 pages, no false-empty. Old period/direction/cursor regression mandatory.
+- Separate developer branch, test-first implementation, reviewed forward-only index migration only if justified, real PG/security/mobile/a11y/CI, independent backup restore, official Test exact frontend/backend/edge SHA, operator-authorized canary and Production. Feature OFF by default, rollback OFF without deleting ledger/preferences. Planning never deploys.
+- External independent deduplicated/classified approved references: **new 0, cumulative UNKNOWN / 10,000 → BLOCKED / IN PROGRESS**. No claim of meeting gate or implementing feature.
+
 
 ## v2026.10.30.3 — Telegram watchdog running-state false-positive correction LIVE
 
