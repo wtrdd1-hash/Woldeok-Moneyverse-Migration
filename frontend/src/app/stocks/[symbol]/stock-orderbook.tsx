@@ -247,10 +247,10 @@ export function StockOrderbook({
   return (
     <Card className="toss-card border-border/80 shadow-sm overflow-hidden select-none">
       <CardHeader className="p-3.5 sm:p-4 pb-2 border-b border-border/60 bg-muted/20">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-bold flex items-center gap-1.5">
+        <div className="flex min-w-0 flex-col items-start gap-3" data-testid="orderbook-header-layout">
+          <CardTitle className="flex max-w-full min-w-0 items-center gap-1.5 text-sm font-bold">
             <Scale className="size-4 text-primary" />
-            <span>
+            <span className="min-w-0">
               {viewMode === 'depth'
                 ? (isEn ? 'Market Depth Chart' : '실시간 호가 심도 (Depth)')
                 : (isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`)}
@@ -266,7 +266,7 @@ export function StockOrderbook({
               </span>
             )}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2" data-testid="orderbook-header-controls">
             {/* 호가 ↔ 심도 뷰 세그먼트 스위처 */}
             <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
               <button

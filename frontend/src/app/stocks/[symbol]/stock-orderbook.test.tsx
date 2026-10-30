@@ -22,6 +22,10 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
       />
     );
 
+    // Header and controls occupy separate rows and controls wrap inside narrow cards.
+    expect(screen.getByTestId('orderbook-header-layout').className).toContain('flex-col');
+    expect(screen.getByTestId('orderbook-header-controls').className).toContain('flex-wrap');
+
     // 체결강도 배지 렌더링 검증
     expect(screen.getByText(/체결강도/i)).toBeDefined();
     // 호가창 단계 타이틀 검증 (5단계 실시간 호가)
