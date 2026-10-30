@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
+## v2026.10.31.1540 — F675-191 Owner Equipment Swap Readiness Preflight (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **Cycle:** Previous Improvement v1538 → Current Addition v1540 → Next Improvement v1542 (provisional). Main `761a55a094fb9dd383d213e817305e68c79fa23c` rechecked start/mid; stacked after Draft #2093, F675-190; EN canonical/KO parity. Docs-only, not implemented.
+- **Source:** migration 114 equip function checks quantity and slot allowlist but not holding expiry/category-slot or per-owner serialization; current inventory POST always chooses badge_1 for badges; migration 123 holdings and public profile may disagree on expired/zero-quantity equipment. No proven exploit.
+- **New feature:** owner-only read-only comparison of selected held replacement vs current slot, `/inventory/expiring/equipped-impact/replacements/preflight`, guarded Nest GET and private Next/Android parity. `REVIEWABLE` means manual review only, not equip authorization. Full owner equipped-set validation, 30-second/time-bound evidence, 400/401/403/404/409/410/429/503 fail-closed, no auto-equip or WLD/DB writes. Forward-only SECURITY DEFINER owner read, no direct app table grants; 320px WCAG AA, edge no-store/noindex, admin cohorts>=20, flag OFF.
+- **Backlog:** P0 OPS1540-01 SEC1540-02 FIN1540-03 REL1540-04; P1 PREFLIGHT1540-05 through -10 (4+6). Proposed 10,001 synthetic/2-owner/8-slot/ACL/Android/concurrency tests **NOT RUN**. QA v1405 main: backend 2,778 PASS/501 SKIP, frontend 2,770 PASS, lint/typecheck/build PASS, full dependency audit FAIL; official Test exact SHA, independent restore, DEV ACL/checksums BLOCKED. DRAFT / RELEASE HOLD.
+- **External refs:** new independently verified 0; cumulative deduplicated/classified UNKNOWN/10,000; BLOCKED/IN PROGRESS. Full design in integrated master; no new distributed planning file, no main merge/runtime/DB/WLD/Test/Production mutation.
+
 ## v2026.10.31.1538 — F675-190 Equip and Profile Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1536 → Current Improvement v1538 → Next Addition v1540 (provisional). Main 761a55a094fb9dd383d213e817305e68c79fa23c checked start/mid, parent Draft #2089, engineering #2088. English canonical, Korean parity; docs only.
 - **Source contradiction:** migration 114 inventory_equip_item validates quantity/slot but not category-slot coherence or expiry; profile_get_cosmetics (PUBLIC EXECUTE) does not filter expired/zero-quantity equipped rows and LIMIT 1 hides duplicate slots. Migration 123 shop_my_items_v2 filters expired and zero quantity; public profile and owner inventory may disagree. This is a source-level gap, not confirmed exploitation. No equip guarantee from preview.
@@ -7,7 +14,7 @@
 - **QA v1404 (04:25 KST):** main backend 2,778 PASS/501 SKIP, frontend 2,770 PASS, lint 0 errors/1,049 warnings, build PASS, isolated migrations 311/311 PASS; DEV ACL drift/5 checksums, official Test stale SHA, independent restore and exact-SHA authenticated E2E BLOCKED. PR #2045 merged before head build completion. Historical main QA ≠ branch acceptance; RELEASE HOLD.
 - **External refs:** newly approved 0, cumulative independently verified/deduplicated/classified UNKNOWN/10,000 → BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production/main mutation. Full EN/KO detail in integrated master and #2088.
 
-**Current planning:** v1538 F675-190 source truth hardening / engineering #2088 / Draft #2093 (parent #2089) / RELEASE HOLD.
+**Current planning:** v1540 F675-191 swap preflight / engineering #2100 / Draft pending (parent #2093) / RELEASE HOLD.
 
 ## v2026.10.31.1536 — F675-190 Owner-Held Replacement Candidate Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1534 → Current Feature Addition v1536 → Next Feature Improvement v1538 (provisional). Latest main 761a55a094fb9dd383d213e817305e68c79fa23c rechecked; stacked on Draft #2080; engineering #2088; QA v1402 FAILED/P0.
