@@ -1596,3 +1596,25 @@ ull 상태를 반환하도록 교정.
 - 최신 커밋 efd5c94 푸시 완료 후 GitHub Actions CI 통과 대기.
 - PR #2045 main 브랜치 Squash 머지 및 피처 브랜치 정리.
 - 운영 서버(/home/debian/Woldeok-Moneyverse-Migration) 최신 main 풀 및 프로덕션 무중단 릴리즈 배포.
+---
+## 🚀 [v7 Specification] 국채 청약/이자 정산 금융 안전 방어 및 SWF 관리자 스냅샷 복원
+### 1. 배경 및 원인 분석
+- GitHub Actions CI untime-check 런 중 국채 및 SWF 관련 4개 테스트 실패 식별:
+  1. uto-swf-admin-read.test.ts: AutoSovereignWealthFundService에 getAdminSnapshot 메서드 누락.
+  2. 	reasury-bond-subscription-hold.http.test.ts: 국채 청약 엔드포인트(subscribeBond)에 Consent/CSRF 가드 누락 및 미인증 청약 방어 홀드(503) 누락.
+  3. 	reasury-bond.repository.test.ts: 리포지토리 레이어 국채 청약 방어 홀드(503) 누락.
+  4. 	reasury-bond.service.test.ts: 서비스 레이어 청약 및 시간당 이자/만기 정산 방어 홀드(503) 누락.
+
+### 2. 반영 내역
+- ackend/src/admin/treasury/auto-swf.service.ts:
+  - getAdminSnapshot 메서드 복원 (public.admin_swf_snapshot(::uuid) 호출).
+- ackend/src/admin/bonds/treasury-bond.controller.ts:
+  - subscribeBond에 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard) 적용 및 	hrow new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON) fail-closed 보호.
+- ackend/src/admin/bonds/treasury-bond.repository.ts:
+  - subscribeBond에 BOND_SUBSCRIPTION_HOLD_REASON 방어 홀드 적용.
+- ackend/src/admin/bonds/treasury-bond.service.ts:
+  - subscribeBond 및 processHourlyCouponsAndMaturities에 방어 홀드 적용.
+
+### 3. 검증 및 배포 계획
+- 최신 커밋 푸시 후 GitHub Actions CI 통과 대기.
+- 통과 즉시 PR #2045 main 브랜치 병합 및 운영 무중단 배포 진행.

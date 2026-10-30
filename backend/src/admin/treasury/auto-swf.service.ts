@@ -74,6 +74,27 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     }
   }
 
+  /** Admin read only: database enforces the actor role and keeps SWF tables private. */
+  async getAdminSnapshot(actorId: string): Promise<{
+    config: SwfConfig;
+    portfolios: SwfPortfolioItem[];
+    events: SwfEvent[];
+  }> {
+    const rows = await queryRows<{ snapshot: {
+      config: SwfConfig;
+      portfolios: SwfPortfolioItem[];
+      events: SwfEvent[];
+    } | null }>(
+      this.pool,
+      'SELECT public.admin_swf_snapshot(::uuid) AS snapshot',
+      [actorId],
+    );
+    if (!rows[0]?.snapshot) {
+      throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
+    }
+    return rows[0].snapshot;
+  }
+
   async getConfig(): Promise<SwfConfig> {
     const rows = await queryRows<SwfConfig>(
       this.pool,
