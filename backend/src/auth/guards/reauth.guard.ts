@@ -28,6 +28,17 @@ export class ReauthGuard implements CanActivate {
     if (!this.sessions) throw new ServiceUnavailableException('session store unavailable');
     const request = context.switchToHttp().getRequest<RequestWithSession>();
     const sessionId = request.session?.id;
+    // A verified, open administrator console session is sufficient for admin
+    // operations: do not prompt the operator every 15 minutes. AdminGuard and
+    // AdminSessionGuard must both have run successfully on this request.
+    // Account-security routes still require fresh identity verification.
+    if (
+      sessionId &&
+      request.adminRoles?.length &&
+      request.adminSession?.state === 'open'
+    ) {
+      return true;
+    }
     const recent =
       sessionId !== undefined &&
       (await this.sessions.hasRecentReauthentication(sessionId, REAUTHENTICATION_WINDOW_SECONDS));
