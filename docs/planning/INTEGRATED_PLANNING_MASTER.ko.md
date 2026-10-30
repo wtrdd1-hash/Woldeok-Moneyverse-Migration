@@ -1,4 +1,44 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1542 — F675-191 장착 교체 사전 검토의 대상 결속·증빙 시간 정합성 (기능 보완 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 추가 v1540 → 현재 기능 보완 v1542 → 다음 기능 추가 v1544(잠정). **정본:** origin/main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md·한국어 대조 확인. 선행 Draft #2101, 개발 #2100. 문서만 변경, 미구현·미병합·미배포.
+
+### 실제 코드와 설계 공백·대안
+- v1540 사전 검토 요청에는 candidateId와 slot만 있다. 그러나 선행 F675-190은 **7일 또는 30일 내 만료 예정인 기존 장착 아이템**의 대체 후보 기능이다. expectedTargetCatalogId와 withinDays가 없으면 사전 검토가 실제 영향 대상인지 증명할 수 없다. 슬롯 장착자가 중간에 바뀌거나 관계없는 본인 후보/슬롯을 요청해도 REVIEWABLE로 잘못 보일 수 있다. **계약상 누락이지 실제 악용 증거는 아니다.**
+- 마이그레이션 114의 inventory_equip_item은 보유 수량과 슬롯 8종을 검사하지만 보유 만료·분류/슬롯 호환성·회원별 슬롯 UNIQUE·명시적 직렬화를 보장하지 않는다. 공개 profile_get_cosmetics는 123의 shop_my_items_v2에서 제외되는 만료/수량 0 장착행을 표시할 수 있다. 현재 프론트의 배지 장착은 badge_1 고정이다. 실제 피해가 발생했다고 단정하지 않는다.
+- 대안 A(기존 화면만 신뢰)는 원천 변경과 임의 슬롯을 감지하지 못해 제외한다. 대안 B(클라이언트 증빙을 장착 허가로 사용)는 재사용·TOCTOU 위험으로 제외한다. **채택 C:** 읽기 전용 본인 SQL에서 원본 장착자를 다시 확인하고 예상 대상 UUID와 7/30일 기간에 결속한다. 자동 장착·구매·유지비 납부·WLD·원장 변경 없음.
+
+### 회원 흐름·권한·화면·상태
+- 인증 및 최신 동의를 완료한 본인만 /inventory → 만료 예정(7/30일) → 장착 영향 → 대체 후보 → 교체 사전 검토로 진입한다. 비공개 화면 /inventory/expiring/equipped-impact/replacements/preflight, 공개 딥링크·색인 없음. 선행 기능과 본 기능은 승인 전 모두 기본 OFF.
+- 요청 필수 필드: candidateId UUID, expectedTargetCatalogId UUID, slot(frame/background/effect/nameplate/title/badge_1/2/3), withinDays=7 또는 30. 회원 UUID는 클라이언트에서 받지 않고 서버 세션에서 결정한다. 중복/미등록 필드·잘못된 UUID/슬롯/기간은 400. 배지 슬롯을 임의로 badge_1로 바꾸지 않는다.
+- 하나의 DB 일관 스냅샷에서 (1) 전체 본인 장착 원본의 중복 슬롯·NULL/유령 슬롯·수량 0·만료 플래그·분류 불일치 검사, (2) 지정 슬롯의 현재 장착자가 정확히 1명인지 확인, (3) 그 catalog_id가 expectedTargetCatalogId와 일치하는지 확인, (4) target.expires_at이 NULL이 아니고 asOfUtc < expires_at <= asOfUtc+withinDays*24시간인지 확인, (5) 후보가 본인 보유·수량>0·미장착·대상과 다른 상품·동일 슬롯 분류·유효한 보유기간인지 확인한다. NULL 만료는 영구 소유 증명이 아니며 체납 0은 납부 증명이 아니다.
+- 대상 부재/교체·기간 밖은 409 TARGET_CHANGED/TARGET_NOT_IMPACTED, 이미 만료는 409 TARGET_ALREADY_EXPIRED, 전체 장착 원천 오류는 409 EQUIPMENT_SOURCE_CONFLICT. 타인 후보와 존재하지 않는 후보는 구별 없는 404. 미인증 401, 동의 403, 제한 429, DB/상위 장애 503. 503이나 잘못된 200을 정상 빈 결과 또는 REVIEWABLE로 바꾸지 않는다.
+- 정상 검증된 본인 원천에서만 200 REVIEWABLE(**수동 검토 가능, 장착 성공/허가 아님**), 200 BLOCKED_EXPIRED/BLOCKED_SLOT_MISMATCH/BLOCKED_ALREADY_EQUIPPED 또는 200 UNKNOWN_POLICY(정책·효과·유지비 증빙 부족)를 반환한다. v1540의 200 BLOCKED_NOT_OWNED는 폐기하고 타인/미존재 후보를 404로 통일한다. 대상 불일치는 반드시 409이며 정상 빈 대상 표시 금지.
+- 현재 상품명은 구매 당시 이름이 아님을 표시하고 대상/후보 보유 만료 KST 및 원본 UTC, '다시 확인'·'후보로 돌아가기' CTA를 제공한다. 신규 화면에는 '지금 장착' CTA 없음. 320px/200% 확대/44px 버튼/WCAG 2.2 AA, 키보드·스크린리더 비교, 초점 유지·aria-live, 한/영 동등. 계정·세션·동의·슬롯·기간 변경과 오프라인 시 이전 결과를 삭제하고 요청 취소 및 응답 반영 차단.
+
+### API·DB·트랜잭션·보안·분석
+- 내부 Nest GET /api/v1/shop/holdings/equip-preflight는 candidateId, expectedTargetCatalogId, slot, withinDays만 허용하고 SessionGuard/AuthenticatedGuard/ConsentGuard, 회원/IP 제한을 적용한다. 서버에서 requireUserId(request), requireSession(request).id로 본인/세션을 결속한다. 기존 장착 POST는 증빙 ID를 장착 허가로 받아서는 안 된다. 16KiB 이하 응답과 안정된 오류 코드, 로그의 민감 식별자 제거.
+- 브라우저 공개 요청은 UUID가 URL·브라우저 기록·엣지 질의 로그에 남지 않도록 **CSRF·Origin 검사 있는 POST-for-read Next BFF**를 우선 설계한다. 서버 전용 BFF가 내부 Nest GET을 호출하며 자격증명을 브라우저에 노출하지 않는다. Android는 현 app-api 게이트웨이의 비공개 POST-for-read 지원을 실제 검증한 뒤 동등 계약으로 확정한다. 불가하면 GET의 URL/질의 로그 마스킹을 검증할 때까지 BLOCKED로 기록한다. POST 전송이어도 DB/상태 변경과 캐시 금지.
+- 새 전진형 public.inventory_equip_preflight_v1(p_actor uuid,p_candidate uuid,p_expected_target uuid,p_slot text,p_within_days integer) SECURITY DEFINER를 제안한다. search_path pg_catalog,pg_temp 고정, 테이블 스키마 명시, 모든 user_items 조회에 owner 조건, PUBLIC EXECUTE 철회·moneyverse_app EXECUTE만 부여, 테이블 직접 권한 부여 금지. 마이그레이션 번호는 예약하지 않고 B와 조율, 이미 적용한 114/123 수정 금지. 기존 PK/FK 검토, 합성 10,001개 EXPLAIN 전 새 인덱스 추가 금지.
+- 동일 SQL 문장의 statement_timestamp()를 한 번 기준으로 전체 원본/대상/후보/상품 분류·이름·활성·수량·슬롯·만료(마이크로초) 지문과 asOfUtc/validUntilUtc를 계산한다. 다중 SQL이면 동일 PoolClient의 READ ONLY REPEATABLE READ 트랜잭션 사용. 별도 clock_timestamp로 원자성 주장 금지.
+- validUntilUtc=min(asOfUtc+30초, 대상 만료, 확인된 후보 만료, 대상 7/30일 기간 진입/이탈의 가장 이른 경계). DB now>=validUntil이면 데이터 수정이 없어도 409 STALE_PREFLIGHT, 증빙 자체 연령 만료는 410, 지문·세션 변경은 409/새 인증 요청. 증빙은 쓰기 권한이 아니며 장착 POST와 GET 사이 원자성은 없다. B는 별도 쓰기 트랜잭션에서 분류/수량/만료/대상/슬롯을 재검증하고 회원별 직렬화해야 한다.
+- 실제 Nginx/Next/app-api의 200/400/401/403/404/409/410/429/503/리다이렉트 모두 Cache-Control private,no-store, X-Robots-Tag noindex,nofollow, Referrer-Policy no-referrer; sitemap·분석·추적 로그에 UUID/상품명/정확 시각 금지. 관리자 KPI는 회원 20명 이상 집단의 REVIEWABLE/UNKNOWN/409/410/429/503 비율, 새로고침, p95만 집계. 목표(미측정): 타인 노출 0, 장착/WLD/원장 쓰기 0, 합성 10,001건 p95<300ms.
+
+### 구체적 개발 백로그 (P0 4건 + P1 6건)
+1. **P0 OPS1542-01 (Ops)** — #1984/#2097 실제 Production 실행 SHA·이미지 다이제스트·불변 롤백 자산·외부 독립 복원 증명. 기획은 재시작·정리 금지.
+2. **P0 SEC1542-02 (DB/보안)** — #993/#2094 개발 앱 계정 과도한 직접 DML/TRUNCATE 권한, 체크섬 불일치 5건·미적용 18건 정합성 복구. 적용된 SQL 편집 금지, 격리 311/311과 EXECUTE 전용 부정 시험.
+3. **P0 FIN1542-03 (B/QA)** — #1507/#1854 국고/MINT/SWF/잭팟 원장 근거 유지. 장착 검토를 WLD·납부·구매·환불 증거로 표시 금지.
+4. **P0 REL1542-04 (Ops/QA)** — #2031/#1088/#2012/#2103 Draft/HOLD 병합 차단, 의존성 감사, 정확 SHA 공식 Test 인증 E2E/Android/엣지·경로 증빙, 독립 복원·서명 승인.
+5. **P1 PREFLIGHT1542-05 (B/DB)** — 예상 장착 대상+기간을 묶은 본인 SQL, 전체 원천 불변조건·단일 시각·지문·부정 권한·10,001 EXPLAIN. 쓰기 보강은 B 별도 브랜치.
+6. **P1 PREFLIGHT1542-06 (B/API)** — Nest 엄격한 DTO·400/401/403/404/409/410/429/503·본인 세션·민감 로그 제거, 증빙을 장착 허가로 사용 금지.
+7. **P1 PREFLIGHT1542-07 (A/Next)** — CSRF 보호 POST 읽기 BFF, URL UUID 노출 방지, 읽기 전용 접근성 비교·오류/불명/오래됨 구분·계정 전환 방어.
+8. **P1 PREFLIGHT1542-08 (C/Android)** — 게이트웨이 메서드 실제 확인, 요청/응답·오류 동등, 디스크 캐시·UUID 로그 금지, 계정 전환·비정상 200 차단.
+9. **P1 PREFLIGHT1542-09 (A/Ops/QA)** — 모든 응답 edge 비공개/색인 금지/리퍼러 차단, 로그 보호·기본 OFF 의존성·관리자 20명 이상 집계·악용 방지.
+10. **P1 PREFLIGHT1542-10 (QA/B)** — **명세만 작성, 미실행:** 격리 PostgreSQL 17.11 합성 보유 10,001개/회원 2명/슬롯 8개, 대상 교체·부재·만료·기간 밖 100건, 타인·잘못된 후보 100건, 무수정 시간 경계 100건, 동시 검토/장착 100건, Android/edge/CSRF/URL 마스킹 50건, 쓰기 0·정확 SHA Test·플래그 OFF 롤백.
+
+**수용·배포:** inventory_equip_swap_preflight와 선행 F675-188/189/190 기본 OFF. 개발 별도 브랜치·격리 Docker Test 정확 SHA, 전체 CI·DB 부정 권한·Android·엣지·독립 복원·GitOps 운영 승인 전 승격 금지. 롤백은 플래그 OFF 및 기존 읽기 UI 복구, 데이터 삭제 없음. QA v1405(main, 05:22–05:32 KST) 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 전체 의존성 감사 FAIL. B Draft #2103은 QA v1406 정확 SHA 경로 증빙 누락을 언급하며 v1542 전체 QA를 뜻하지 않는다. DEV 권한·체크섬·공식 Test·복원 BLOCKED. **RELEASE HOLD.**
+**외부 독립 근거 게이트:** 신규 승인 0, 누적 실제 검증·중복 제거·분류 승인 UNKNOWN/10,000 → BLOCKED / IN PROGRESS. 런타임/DB/WLD/원장/Test/Production/main·분산 세부기획 파일 변경 없음.
+
 ## v2026.10.31.1540 — F675-191 회원 장착 교체 사전 검토 (기능 추가 / 초안 / 배포 보류)
 - **검토:** Draft PR #2101 / 개발 이슈 #2100 / 선행 Draft #2093 / RELEASE HOLD. 실제 기능 미구현·미배포.
 
