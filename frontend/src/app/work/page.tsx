@@ -66,8 +66,9 @@ export default async function WorkPage({ searchParams }: {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [board, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
+  const [board, fullBoard, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds)),
+    maxDurationSeconds ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
@@ -82,7 +83,9 @@ export default async function WorkPage({ searchParams }: {
   const open = (assignments?.assignments ?? []).filter(isOpen);
   const paid = receipts?.receipts ?? [];
   const now = Date.now();
-  const durations = new Map(tasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
+  // A filtered board must not erase server-provided durations for active assignments.
+  const durationTasks = maxDurationSeconds ? (fullBoard?.tasks ?? []) : tasks;
+  const durations = new Map(durationTasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
 
   const activeJob = profile?.active_job;
   const activeLevel = activeJob?.level ?? 1;
@@ -305,12 +308,19 @@ export default async function WorkPage({ searchParams }: {
           </p>
         </div>
 
-        <CareerTasksBoard
-          selectedMaxDuration={maxDurationSeconds}
-          tasks={tasks}
-          activeJobType={activeJob?.job_type}
-          quotaBlock={quotaBlock}
-        />
+        {board === null && (
+          <p role="alert" className="text-sm text-destructive">
+            {isEn ? 'The task catalogue is temporarily unavailable.' : '업무 목록을 불러올 수 없습니다.'}
+          </p>
+        )}
+        {board !== null && (
+          <CareerTasksBoard
+            selectedMaxDuration={maxDurationSeconds}
+            tasks={tasks}
+            activeJobType={activeJob?.job_type}
+            quotaBlock={quotaBlock}
+          />
+        )}
       </section>
 
       {/* 4. 진행 중인 작업 */}
@@ -321,11 +331,12 @@ export default async function WorkPage({ searchParams }: {
           </h2>
           <div className="grid gap-3 w-full min-w-0">
             {open.map((assignment) => {
-              const wait = secondsUntilSubmittable(
+              const durationKnown = durations.has(assignment.task_id);
+              const wait = durationKnown ? secondsUntilSubmittable(
                 assignment.assigned_at,
-                durations.get(assignment.task_id) ?? 0,
+                durations.get(assignment.task_id)!,
                 now,
-              );
+              ) : 0;
               const expired = hasExpired(assignment.expires_at, now);
               return (
                 <Card key={assignment.assignment_id} className="w-full min-w-0 overflow-hidden">
@@ -357,9 +368,11 @@ export default async function WorkPage({ searchParams }: {
                     <CardFooter>
                       <SubmitTaskButton
                         assignmentId={assignment.assignment_id}
-                        disabled={wait > 0}
+                        disabled={!durationKnown || wait > 0}
                         label={
-                          wait > 0
+                          !durationKnown
+                            ? isEn ? 'Task duration unavailable' : '업무 수행시간 확인 불가'
+                            : wait > 0
                             ? isEn
                               ? `Submittable in ${durationLabel(wait, locale)}`
                               : `${durationLabel(wait)} 후 제출 가능`

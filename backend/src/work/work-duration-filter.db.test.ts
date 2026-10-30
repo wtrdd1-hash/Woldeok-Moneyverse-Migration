@@ -16,7 +16,7 @@ describe.skipIf(!url)('work duration filter on isolated real PostgreSQL', () => 
       await client.query('SET LOCAL ROLE moneyverse_app');
       const repository = new WorkRepository(client);
       const all = await repository.tasks(actor);
-      const filtered = await repository.tasks(actor, 60);
+      const filtered = await repository.tasks(actor, undefined, 60);
       expect(all.length).toBeGreaterThan(0);
       expect(filtered.length).toBeGreaterThan(0);
       expect(filtered.length).toBeLessThan(all.length);

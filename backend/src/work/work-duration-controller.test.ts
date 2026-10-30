@@ -14,8 +14,8 @@ describe('work duration API authorization and input', () => {
       featureState: async () => 'enabled',
       tasks,
     } as unknown as WorkRepository);
-    expect(await controller.tasks(request, '900')).toEqual({ featureState: 'enabled', tasks: [] });
-    expect(tasks).toHaveBeenCalledWith(actor, 900);
+    expect(await controller.tasks(request, undefined, '900')).toEqual({ featureState: 'enabled', tasks: [] });
+    expect(tasks).toHaveBeenCalledWith(actor, undefined, 900);
   });
 
   it('rejects invalid and repeated filters without querying tasks', async () => {
@@ -24,10 +24,17 @@ describe('work duration API authorization and input', () => {
       featureState: async () => 'enabled',
       tasks,
     } as unknown as WorkRepository);
-    await expect(controller.tasks(request, ['300', '900'])).rejects.toBeInstanceOf(
+    await expect(controller.tasks(request, undefined, ['300', '900'])).rejects.toBeInstanceOf(
       BadRequestException,
     );
-    await expect(controller.tasks(request, '-1')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.tasks(request, undefined, '-1')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.tasks(request, undefined, '86401')).rejects.toBeInstanceOf(BadRequestException);
     expect(tasks).not.toHaveBeenCalled();
+  });
+  it('supports reward floor and duration together without changing actor identity', async () => {
+    const tasks = vi.fn(async () => []);
+    const controller = new WorkController({ featureState: async () => 'enabled', tasks } as unknown as WorkRepository);
+    await controller.tasks(request, '9007199254740993', '300');
+    expect(tasks).toHaveBeenCalledWith(actor, '9007199254740993', 300);
   });
 });
