@@ -5591,6 +5591,53 @@ _None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
+## `POST` `/app-api/v1/notifications/search` — Read-only owner-bound notification keyword and date search with signed keyset cursor
+
+- Authorization: 로그인 + 최신 동의 + 유효한 세션 및 CSRF 토큰
+- Success status: 200
+- Response mode: json
+- After success: 검색 결과를 표시하고 hasMore가 참이면 nextCursor로 이어서 조회. 읽음/보상/잔액 변경 없음
+- Operation ID: `NotificationController_searchNotifications`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `NotificationSearchDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| query | true | string | minLength=2; maxLength=80 |
+| fromUtc | true | string (date-time) |  |
+| toUtc | true | string (date-time) |  |
+| category | false | string | enum="TRANSACTIONAL","PRODUCT_ACTIVITY","SEASON_LIVEOPS","SECURITY_CRITICAL","BUSINESS","BANK","SEASON","SPACE","SECURITY","SYSTEM" |
+| unreadOnly | false | boolean |  |
+| limit | false | integer | minimum=1; maximum=50 |
+| cursor | false | string | maxLength=2048 |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| items[] | true | object[] |  |
+| items[] | true | object |  |
+| items[].id | true | string |  |
+| items[].category | true | string |  |
+| items[].title | true | string |  |
+| items[].body | true | string |  |
+| items[].link | true | null \| string |  |
+| items[].isRead | true | boolean |  |
+| items[].createdAt | true | string |  |
+| nextCursor | true | null \| string |  |
+| hasMore | true | boolean |  |
+| asOfUtc | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
 ## `GET` `/app-api/v1/notifications/unread-count` — Get total unread in-app notification count for current user
 
 - Authorization: 로그인 + 최신 동의

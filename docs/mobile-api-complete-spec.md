@@ -1,5 +1,10 @@
 # Woldeok Moneyverse Mobile App — Complete API Implementation Specification
 
+## 2026-10-29 — Notification search candidate (DRAFT / disabled by default)
+
+A new authenticated read-only `POST /app-api/v1/notifications/search` forwards `{query,fromUtc,toUtc,category?,unreadOnly?,limit?,cursor?}` with CSRF. Returns `{items,nextCursor,hasMore,asOfUtc}` and private/no-store/noindex headers. Query 2–80 NFC characters, <=90-day UTC range, <=50 items, signed owner/session/filter-bound cursor (10 minutes). This is a candidate behind `NOTIFICATION_SEARCH_ENABLED`, **not a deployed feature**. Existing notification GET/read actions remain unchanged. The machine contract contains 182 endpoints at this candidate SHA.
+
+
 **English canonical** | [한국어](mobile-api-complete-spec.ko.md)
 
 > Version: v2026.09.23.388

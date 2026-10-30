@@ -17098,6 +17098,168 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/app-api/v1/notifications/search",
+      "purpose": "본인 전용 알림 제목/내용·기간 검색 (읽기 전용)",
+      "callWhen": "로그인 회원이 알림 검색 버튼을 명시적으로 누르거나 서명된 다음 페이지를 요청할 때",
+      "authorization": "로그인 + 최신 동의 + 유효한 세션 및 CSRF 토큰",
+      "afterSuccess": "검색 결과를 표시하고 hasMore가 참이면 nextCursor로 이어서 조회. 읽음/보상/잔액 변경 없음",
+      "backendRoute": "/api/v1/notifications/search",
+      "operationId": "NotificationController_searchNotifications",
+      "backendOpenApiPath": "/notifications/search",
+      "summary": "Read-only owner-bound notification keyword and date search with signed keyset cursor",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/NotificationSearchDto"
+        },
+        "schemaName": "NotificationSearchDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 80
+            },
+            "fromUtc": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "toUtc": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "TRANSACTIONAL",
+                "PRODUCT_ACTIVITY",
+                "SEASON_LIVEOPS",
+                "SECURITY_CRITICAL",
+                "BUSINESS",
+                "BANK",
+                "SEASON",
+                "SPACE",
+                "SECURITY",
+                "SYSTEM"
+              ]
+            },
+            "unreadOnly": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "cursor": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          "required": [
+            "query",
+            "fromUtc",
+            "toUtc"
+          ]
+        }
+      },
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "items",
+          "nextCursor",
+          "hasMore",
+          "asOfUtc"
+        ],
+        "note": "Owner-only private results, signed cursor, no total-count claim, no financial receipt"
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "link": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isRead": {
+                  "type": "boolean"
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "category",
+                "title",
+                "body",
+                "link",
+                "isRead",
+                "createdAt"
+              ]
+            }
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "asOfUtc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "hasMore",
+          "asOfUtc"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "GET",
       "path": "/app-api/v1/notifications/unread-count",
       "purpose": "미확인 알림 개수 조회",

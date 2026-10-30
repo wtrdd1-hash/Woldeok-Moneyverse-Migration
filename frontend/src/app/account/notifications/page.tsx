@@ -9,6 +9,7 @@ import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { saveGoalNotifications } from './actions';
 import { NotificationTabsBar } from './notification-tabs-bar';
+import { NotificationSearchPanel } from './notification-search-panel';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '알림 설정', robots: { index: false, follow: false } };
@@ -26,6 +27,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
 
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
     <NotificationTabsBar />
+    {process.env.NOTIFICATION_SEARCH_ENABLED === 'true' ? <NotificationSearchPanel /> : null}
 
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <Card className="overflow-hidden">

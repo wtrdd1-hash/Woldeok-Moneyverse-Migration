@@ -1,5 +1,10 @@
 # 월덕 머니버스 모바일 앱 전체 API 통합 구현 명세서
 
+## 2026-10-29 — 알림 검색 후보 (초안 / 기본 비활성)
+
+로그인·동의·CSRF가 필요한 읽기 전용 `POST /app-api/v1/notifications/search`는 `{query,fromUtc,toUtc,category?,unreadOnly?,limit?,cursor?}`를 전달합니다. 응답은 `{items,nextCursor,hasMore,asOfUtc}`이며 비공개 캐시 금지 및 검색엔진 제외 헤더를 적용합니다. NFC 검색어 2~80자, UTC 최대 90일, 페이지 최대 50건, 본인·세션·필터에 결속된 10분 서명 커서를 사용합니다. `NOTIFICATION_SEARCH_ENABLED` 기본 OFF인 **미배포 후보**입니다. 기존 알림 GET/읽음 처리 기능은 변경하지 않습니다. 후보 SHA의 기계 계약은 182개 엔드포인트입니다.
+
+
 > 버전: v2026.09.23.388
 > 기준일: 2026-09-23
 > 운영 기본 주소: `https://easy-scraping.com`

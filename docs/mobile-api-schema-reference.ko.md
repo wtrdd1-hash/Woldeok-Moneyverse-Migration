@@ -5591,6 +5591,53 @@ _None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `POST` `/app-api/v1/notifications/search` — 본인 전용 알림 제목/내용·기간 검색 (읽기 전용)
+
+- 인증/권한: 로그인 + 최신 동의 + 유효한 세션 및 CSRF 토큰
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 검색 결과를 표시하고 hasMore가 참이면 nextCursor로 이어서 조회. 읽음/보상/잔액 변경 없음
+- Operation ID: `NotificationController_searchNotifications`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `NotificationSearchDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| query | true | string | minLength=2; maxLength=80 |
+| fromUtc | true | string (date-time) |  |
+| toUtc | true | string (date-time) |  |
+| category | false | string | enum="TRANSACTIONAL","PRODUCT_ACTIVITY","SEASON_LIVEOPS","SECURITY_CRITICAL","BUSINESS","BANK","SEASON","SPACE","SECURITY","SYSTEM" |
+| unreadOnly | false | boolean |  |
+| limit | false | integer | minimum=1; maximum=50 |
+| cursor | false | string | maxLength=2048 |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| items[] | true | object[] |  |
+| items[] | true | object |  |
+| items[].id | true | string |  |
+| items[].category | true | string |  |
+| items[].title | true | string |  |
+| items[].body | true | string |  |
+| items[].link | true | null \| string |  |
+| items[].isRead | true | boolean |  |
+| items[].createdAt | true | string |  |
+| nextCursor | true | null \| string |  |
+| hasMore | true | boolean |  |
+| asOfUtc | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `GET` `/app-api/v1/notifications/unread-count` — 미확인 알림 개수 조회
 
 - 인증/권한: 로그인 + 최신 동의
