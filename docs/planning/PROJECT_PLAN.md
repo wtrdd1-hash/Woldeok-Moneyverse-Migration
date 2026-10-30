@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1510 F675-183 canonical parity hardening / handoff #2002 / Draft PR pending / RELEASE HOLD; stacked on #2003.
+**Current planning:** v1510 F675-183 canonical parity hardening / handoff #2002 / Draft PR #2008 / RELEASE HOLD; stacked on #2003.
 
 ## v2026.10.30.1510 — F675-183 Weekly Quest Evidence Canonical-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Previous / Current / Next:** Feature Addition v1508 / Feature Improvement v1510 / Feature Addition v1512 (provisional). Main SHA 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef rechecked start/mid. Docs-only successor to Draft #2003, stacked on #1995 → #1990 → #1983; existing handoff #2002. Authority main AGENTS.md, README.md, English canonical and Korean equivalent. No separate feature planning file.
+**Previous / Current / Next:** Feature Addition v1508 / Feature Improvement v1510 / Feature Addition v1512 (provisional). Main SHA 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef rechecked start/mid. Docs-only successor to Draft #2003, stacked on #1995 → #1990 → #1983; existing handoff #2002; Draft #2008. Authority main AGENTS.md, README.md, English canonical and Korean equivalent. No separate feature planning file.
 
 ### Verified gaps against migration 101 — parity gate before implementation
 - The canonical public.early_game_weekly_goals(p_actor) in packages/database/migrations/101-early-game-progress.sql:437–566 computes the KST week with clock_timestamp(), but applies only created_at >= v_from to receipts and ledger transactions: **no next-Monday upper bound and no shared asOf cutoff**. The proposed [Monday, next Monday) detail can disagree for future-dated/backfilled rows or week rollover. Require same-transaction oracle equality for all four metrics; if the stricter bound is desired, update canonical and detail together through a separately reviewed forward-only migration. Never rewrite applied 101.
