@@ -2,6 +2,7 @@
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -232,7 +233,6 @@ export class TreasuryBondRepository {
     return res.rows;
   }
 
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
   async subscribeBond(
     _userId: string,
     _bondId: string,
