@@ -12,7 +12,7 @@
 ## PLAN
 - [x] RED: failing backend/controller and Android gateway and frontend helper tests.
 - [x] GREEN: implement validated bounded filter end-to-end; no Number monetary conversion.
-- [ ] VERIFY: targeted, typecheck, lint, build, API contract, security, real PG owner function, full tests, exact SHA CI.
+- [x] VERIFY: targeted, typecheck, lint, build, API contract, security, real PG owner function, full tests, exact SHA CI.
 - [ ] FINAL: re-fetch main, record changes and PASS/FAIL, PR Draft/HOLD, no unsafe merge or deployment.
 
 ## IN PROGRESS
@@ -26,3 +26,9 @@
 - Isolated PostgreSQL 17.11 PASS using init 001 + migrations 023/047, synthetic 2 actors and 2 trades, app-role no direct trade SELECT/INSERT, owner-only function, exact 64-bit integer, rollback 0 rows. Initial synthetic setup lacked function-owner table privileges and then had invalid ALTER syntax; both corrected in disposable test setup; no repo migration modified.
 - Latest origin/main re-fetched and unchanged bf8d0d48f810932b43783d8605dce53954c60cff; English master and Korean second language remain unchanged.
 - No real balances, Test/Production or shared Docker containers touched. Official Test exact-SHA E2E remains BLOCKED; release HOLD.
+
+## MID 2026-10-30 22:38 KST — exact SHA 669faed4
+- Full backend 2663 PASS / 126 FAIL / 501 SKIP; frontend 2714 PASS / 55 FAIL. Same failure counts as QA v1398 main; individual failure-name equivalence not yet independently established.
+- DB unit 62 PASS / 4 SKIP; production dependency audit no known vulnerabilities. Full lint FAIL 1 / 1043 warnings; GitHub exact SHA runtime CI #41064230508 FAIL and candidate #41064199511 FAIL on the same pre-existing shop purchase test parse error. Classify/policy PASS, Production build skipped.
+- Public official Test /api/version `c2129625aa66...` differs from candidate; Production `/api/version` `bf8d0d48f810...`; no exact SHA authenticated E2E or restore. HOLD.
+- Post-commit UX RED: when minimum filter yields zero rows, page incorrectly says 'No trade history yet' and hides filter controls. Added a DOM regression test (1 RED), corrected conditional, test GREEN 24 PASS, changed-file ESLint PASS. New SHA and full gates required.
