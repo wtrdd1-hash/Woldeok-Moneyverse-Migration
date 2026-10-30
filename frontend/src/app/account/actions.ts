@@ -1,3 +1,5 @@
+'use server';
+
 /** A successful HTTP status alone does not prove persistence. */
 function verifiedAccountDeletionReceipt(value: unknown): void {
   if (typeof value !== 'object' || value === null || !('deletedAt' in value) ||
@@ -14,8 +16,6 @@ function verifiedAccountDeletionReceipt(value: unknown): void {
     throw new Error('invalid deletion receipt');
   }
 }
-
-'use server';
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';

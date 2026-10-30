@@ -1918,3 +1918,23 @@ ull 상태를 반환하도록 교정.
 - GitHub Actions CI (PR #2045) 3개 체크 (`runtime-check`, `classify`, `policy`) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(`easy-scraping.com`) 무중단 릴리즈 배포 및 라이브 실측.
+
+---
+## 🚀 [v20 Specification] Next.js Server Actions 'use server' 최상단 배치 및 ESLint 정합성 교정
+
+### 1. 근본 원인 및 분석
+1. **Next.js Server Actions 지시어 위치 규칙**:
+   - rontend/src/app/account/actions.ts에 영수증 검증 헬퍼 함수(erifiedAccountDeletionReceipt)를 배치하는 과정에서 'use server'; 선언이 18행으로 밀려남.
+   - Next.js 번들러 및 ESLint 규칙 상 'use server';는 반드시 파일 최상단(1행)에 위치해야만 유효한 파일 레벨 서버 액션 지시어로 인식됨.
+   - 18행에 위치할 경우 단순 표현식(expression statement)으로 오인되어 Expected an assignment or function call and instead saw an expression 에러 발생.
+2. **해결 방안**:
+   - 'use server';를 파일 맨 첫 번째 줄(1행)로 이동하고, 그 하단에 헬퍼 함수 및 import 구문을 배치하여 번들러 및 ESLint 정합성을 100% 만족시킴.
+
+### 2. 세부 변경 사항
+- rontend/src/app/account/actions.ts: 'use server';를 파일 1행으로 재배치.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 피처 브랜치(ix/admin-control-tower-telemetry-and-modals) 푸시.
+- GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
+- PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
+- 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
