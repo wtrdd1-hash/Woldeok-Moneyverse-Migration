@@ -105,11 +105,11 @@ describe('private chat bigint cursor integrity', () => {
 
   it('passes exact bigint strings to PostgreSQL query bindings', async () => {
     await repo.listMessages(actorId, conversationId, 50, '9007199254740993');
-    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('m.sequence < $3::bigint'),
-      [actorId, conversationId, '9007199254740993', 50]);
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('private_chat_list_messages'),
+      [actorId, conversationId, '9007199254740993', 50, 'before']);
     await repo.syncMessages(actorId, conversationId, '9007199254740993', 100);
-    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('m.sequence > $3::bigint'),
-      [actorId, conversationId, '9007199254740993', 100]);
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('private_chat_list_messages'),
+      [actorId, conversationId, '9007199254740993', 100, 'after']);
   });
 });
 
