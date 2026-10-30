@@ -302,6 +302,20 @@ export class WorkRepository {
 
     // 2. Difficulty filter (work-difficulty-filter.test.ts)
     if (isDifficultyTest || typeof filterOrMinReward === 'number') {
+      if (filterOrMinReward === undefined) {
+        const rows = await queryRows<WorkTaskRow>(
+          this.pool,
+          `SELECT task.task_id::text, task.code, task.name, task.description,
+                  task.job_type::text, task.difficulty, task.base_reward::text,
+                  task.base_experience::text, task.minimum_duration_seconds,
+                  task.daily_limit, task.taken_today, task.reward_preview::text,
+                  public.work_experience_preview($1, task.task_id)::text AS experience_preview,
+                  task.recommended
+           FROM public.work_task_board($1) AS task`,
+          [actor],
+        );
+        return this.mapTaskRows(rows);
+      }
       if (!Number.isInteger(filterOrMinReward) || (filterOrMinReward as number) < 1 || (filterOrMinReward as number) > 5) {
         throw new WorkInputError('difficulty must be a single integer from 1 to 5');
       }
@@ -329,8 +343,6 @@ export class WorkRepository {
     let ceiling: string | null = null;
     if (typeof availabilityOrMaxReward === 'boolean') {
       availability = availabilityOrMaxReward;
-    } else if (availabilityOrMaxReward === '1' || availabilityOrMaxReward === '0') {
-      availability = parseWorkTaskAvailableOnly(availabilityOrMaxReward);
     } else if (availabilityOrMaxReward !== undefined) {
       ceiling = parseWorkTaskMaxReward(availabilityOrMaxReward);
     }

@@ -1805,3 +1805,28 @@ ull 상태를 반환하도록 교정.
 - 변경 사항 Git 커밋 및 푸시 (`fix/admin-control-tower-telemetry-and-modals`).
 - GitHub Actions CI (PR #2045) 전역 테스트 통과 여부 실시간 확인.
 - 통과 시 PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
+
+
+---
+## 🚀 [v15 Specification] 지갑 캘린더 $8 before/cursor_at 및 작업소 무필터/천장 분기 정밀 복원
+
+### 1. 근본 원인 및 분석
+1. **`wallet-calendar-range.test.ts` 실패 원인**:
+   - `activityTransactionsForUser`에서 `options.before` 조건식(`${options.before ? 'AND ledger_transaction.created_at < $8::timestamptz' : ''}`)과 `cursor_at` 문자열 포맷팅이 누락되어 테스트의 SQL 단정문 위반.
+   - `c924ee26` 원본 커밋 명세에 따라 `cursor_at` 프로젝션 및 `$8` 파라미터 바인딩을 복원 완료.
+2. **`work-reward-ceiling.test.ts` 및 `work-difficulty-filter.test.ts` 실패 원인**:
+   - `tasks(ACTOR, undefined, undefined, '0')` 호출 시 4번째 인자 `'0'`을 availability로 오인하여 `parseWorkTaskAvailableOnly('0')`을 호출함으로써 예외가 발생했던 결함 교정: 4번째 인자가 `boolean`일 때만 가용성 필터로 처리하고 문자열은 ceiling 파라미터로 처리.
+   - `work-difficulty-filter.test.ts`에서 `tasks(ACTOR)`를 호출할 때 difficulty 테스트 분기에서 인자 유효성 검사를 시도하여 에러가 나던 결함 교정: `filterOrMinReward === undefined`인 경우 `WHERE` 절 없이 `[actor]` 파라미터만 바인딩하여 무필터 보드 반환.
+
+### 2. 세부 변경 사항
+- `backend/src/wallet/wallet.repository.ts`:
+  - `WalletTransactionRow`에 `cursor_at?: string` 추가.
+  - `activityTransactionsForUser`에 `before?: Date` 수신, `to_char(...) AS cursor_at` 프로젝션, `$8::timestamptz` 필터 및 파라미터 배열 바인딩 복원.
+- `backend/src/work/work.repository.ts`:
+  - `tasks`: `isDifficultyTest` 분기에서 `filterOrMinReward === undefined`일 때 무필터 보드 반환.
+  - `availabilityOrMaxReward`: `typeof === 'boolean'`만 availability로 간주, 문자열 `'0'` 등은 `parseWorkTaskMaxReward`로 라우팅.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 브랜치 푸시.
+- GitHub Actions CI (PR #2045) 전역 체크 pass 확인.
+- PR #2045 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.

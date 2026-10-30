@@ -43,6 +43,7 @@ export interface WalletTransactionRow {
   readonly transaction_id: string;
   readonly type: string;
   readonly created_at: Date;
+  readonly cursor_at?: string;
   readonly net_amount: string;
   readonly cash_delta?: string;
   readonly bank_delta?: string;
@@ -307,7 +308,7 @@ export class PostgresWalletRepository {
 
   /** Owner-scoped keyset read. No ledger writes, new grants or unbounded OFFSET. */
   async activityTransactionsForUser(userId: string, options: {
-    asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined;
+    asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined;
     direction?: 'all' | 'in' | 'out' | 'neutral';
   }): Promise<WalletTransactionRow[]> {
     const owner = requireUuid(userId, 'authenticated user id');
@@ -332,6 +333,7 @@ export class PostgresWalletRepository {
          AND ledger_transaction.created_at <= $2
          AND ($3::timestamptz IS NULL OR ledger_transaction.created_at >= $3)
          AND ($4::timestamptz IS NULL OR (ledger_transaction.created_at, ledger_transaction.id) < ($4, $5::uuid))
+         ${options.before ? 'AND ledger_transaction.created_at < $8::timestamptz' : ''}
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        HAVING ($6::text IS NULL OR SIGN(COALESCE(SUM(
          CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END
@@ -339,7 +341,8 @@ export class PostgresWalletRepository {
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $7`,
       [owner, options.asOf, options.since, options.after?.at ?? null, afterId,
-        options.direction && options.direction !== 'all' ? options.direction : null, 51],
+        options.direction && options.direction !== 'all' ? options.direction : null, 51,
+        ...(options.before ? [options.before] : [])],
     );
   }
 
