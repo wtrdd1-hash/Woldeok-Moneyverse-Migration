@@ -77,3 +77,20 @@ describe('AccountSecurityRepository recent events', () => {
     await expect(repository.recentEvents('user')).resolves.toEqual([{ type: 'local_login_succeeded', createdAt: '2026-09-19T10:00:00.000Z' }]);
   });
 });
+
+describe('account security event owner boundary', () => {
+  it('passes the authenticated owner to the bounded security-definer function without metadata reads', async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const repository = new AccountSecurityRepository(db((sql, values) => {
+      calls.push({ sql, values });
+      return [{ event_type: 'local_login_succeeded', created_at: new Date('2026-10-30T00:00:00.000Z'), metadata: { ip: 'not-for-client' } }];
+    }));
+    const events = await repository.recentEvents('00000000-0000-4000-8000-000000000011');
+    expect(calls).toEqual([{
+      sql: expect.stringContaining('account_recent_security_events($1::uuid, 20)'),
+      values: ['00000000-0000-4000-8000-000000000011'],
+    }]);
+    expect(events).toEqual([{ type: 'local_login_succeeded', createdAt: '2026-10-30T00:00:00.000Z' }]);
+    expect(JSON.stringify(events)).not.toContain('not-for-client');
+  });
+});

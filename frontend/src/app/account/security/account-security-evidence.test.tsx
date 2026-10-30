@@ -74,3 +74,20 @@ describe('account security API evidence', () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 });
+
+describe('complete recent security activity view', () => {
+  it('renders all 20 verified events and an accessible private CSV download, not just five', async () => {
+    const events = Array.from({ length: 20 }, (_, index) => ({
+      type: 'local_login_succeeded',
+      createdAt: `2026-10-30T00:${String(index).padStart(2, '0')}:00.000Z`,
+    }));
+    const page = await html({ sessions: [validSession] }, { identities: [localIdentity] }, { events });
+    expect(page.match(/이메일 계정 로그인/g)).toHaveLength(20);
+    expect(page).toContain('/account/security/events.csv');
+    expect(page).toContain('최근 최대 20건');
+  });
+  it('does not offer a misleading CSV download when security evidence is invalid', async () => {
+    const page = await html({ sessions: [validSession] }, { identities: [localIdentity] }, { events: [{ type: '=malicious', createdAt: '2026-10-30T00:00:00.000Z' }] });
+    expect(page).not.toContain('/account/security/events.csv');
+  });
+});

@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -46,6 +47,8 @@ export class AccountSecurityController {
   }
 
   @Get('events')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Recent security events belonging to the caller' })
   async events(@Req() request: RequestWithSession) {
     return { events: await this.repository().recentEvents(requireUserId(request)) };
