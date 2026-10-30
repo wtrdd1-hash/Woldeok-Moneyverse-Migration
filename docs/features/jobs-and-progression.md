@@ -64,3 +64,8 @@ Career level is derived consistently from cumulative career EXP. Legacy paths th
 - `/profile`
 
 See also [Quests](quests.md) and [Request Flow](../architecture/request-flow.md).
+
+
+### Recent Work reward receipt CSV (candidate; release HOLD)
+
+The authenticated Work screen offers a read-only UTF-8 CSV export of the member's **20 most recent** Work reward receipts. It is neither an all-time earnings statement nor proof of ledger settlement. The export reads the existing `work_my_receipts(actor)` PostgreSQL `SECURITY DEFINER` function, validates canonical bigint WLD strings and owner receipt identity, and refuses malformed or unavailable responses. Android clients can read the same verified JSON envelope from `GET /app-api/v1/work/receipts/export`. The web download is `GET /work/receipts/export.csv` with private/no-store/noindex/no-referrer headers. This candidate remains disabled in Production until exact-SHA release gates pass.

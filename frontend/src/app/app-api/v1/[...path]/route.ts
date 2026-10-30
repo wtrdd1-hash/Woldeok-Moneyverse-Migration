@@ -9,6 +9,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
+import { parseWorkReceiptExport } from '@/app/work/work-receipts-export';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -171,6 +172,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const workReceiptExport = parts.length === 3 && parts[0] === 'work' &&
+    parts[1] === 'receipts' && parts[2] === 'export';
+  if (workReceiptExport && (request.method !== 'GET' || request.nextUrl.searchParams.size > 0)) {
+    return gatewayProblem(400, 'Bad Request', 'work_receipt_export_invalid', 'export is a read-only unfiltered recent-20 view');
+  }
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
@@ -336,6 +342,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
 
+
+  if (workReceiptExport && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseWorkReceiptExport(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_receipt_export_unverified', 'Work receipt export is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_export_unverified', 'Work receipt export is unavailable');
+    }
+  }
 
   if (workAvailability && availabilityValues.length === 1 && response.ok) {
     try {

@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.30.0125**
+Update version: **v2026.10.31.0025**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 184 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 185 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5084,6 +5084,41 @@ _No request body._
 | receipts[].experience_amount | true | string |  |
 | receipts[].transaction_id | true | null \| string |  |
 | receipts[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/work/receipts/export` — Verified owner-only recent 20 Work reward receipts for export
+
+- Authorization: Authenticated member session and current consent required
+- Success status: 200
+- Response mode: json
+- After success: Treat as read-only recent-20 evidence, not settlement or lifetime totals
+- Operation ID: `WorkController_exportReceipts`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| scope | true | string="recent_20" | const="recent_20" |
+| currency | true | string="WLD" | const="WLD" |
+| receipts[] | true | object[] |  |
+| receipts[] | true | object |  |
+| receipts[].receipt_id | true | string |  |
+| receipts[].assignment_id | true | string |  |
+| receipts[].code | true | string |  |
+| receipts[].name | true | string |  |
+| receipts[].reward_amount | true | string |  |
+| receipts[].experience_amount | true | string |  |
+| receipts[].transaction_id | true | null \| string |  |
+| receipts[].created_at | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

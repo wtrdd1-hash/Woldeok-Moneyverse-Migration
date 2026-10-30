@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.10.30.0125",
+  "contractVersion": "v2026.10.31.0025",
   "apiVersion": "v2026.10.28.1525",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -16089,6 +16089,105 @@
           }
         },
         "required": [
+          "receipts"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/work/receipts/export",
+      "purpose": "Export verified owner-only recent 20 Work reward receipts (not full ledger)",
+      "callWhen": "Member opens recent Work reward receipt export",
+      "authorization": "Authenticated member session and current consent required",
+      "afterSuccess": "Treat as read-only recent-20 evidence, not settlement or lifetime totals",
+      "backendRoute": "/api/work/receipts/export",
+      "operationId": "WorkController_exportReceipts",
+      "backendOpenApiPath": "/work/receipts/export",
+      "summary": "Verified owner-only recent 20 Work reward receipts for export",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "scope",
+          "currency",
+          "receipts"
+        ],
+        "note": "Only recent 20 owner-scoped rows; canonical integer-string WLD and nullable transaction ID. Never infer ledger settlement."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "recent_20"
+          },
+          "currency": {
+            "type": "string",
+            "const": "WLD"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "receipt_id": {
+                  "type": "string"
+                },
+                "assignment_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "reward_amount": {
+                  "type": "string"
+                },
+                "experience_amount": {
+                  "type": "string"
+                },
+                "transaction_id": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "receipt_id",
+                "assignment_id",
+                "code",
+                "name",
+                "reward_amount",
+                "experience_amount",
+                "transaction_id",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "currency",
           "receipts"
         ]
       },

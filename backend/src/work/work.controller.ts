@@ -32,6 +32,7 @@ import {
 } from './work.dto';
 import { parseWorkTaskAvailableOnly, parseWorkTaskMaxDuration, parseWorkTaskMaxReward, WorkInputError, WorkRepository } from './work.repository';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
+import { verifyWorkReceiptExportRows } from './work-receipts-export';
 
 @ApiTags('work')
 @Controller('work')
@@ -146,6 +147,20 @@ export class WorkController {
       message:
         'Direct paid completion is disabled. Create an assignment, wait for the server-authoritative minimum duration, submit it, then verify the reward.',
     });
+  }
+
+  @Get('receipts/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Verified owner-only recent 20 Work reward receipts for export' })
+  async exportReceipts(@Req() request: RequestWithSession) {
+    const receipts = await this.guarded(
+      () => this.repository().receipts(requireUserId(request)),
+      'Work receipt export is unavailable',
+    );
+    return { scope: 'recent_20' as const, currency: 'WLD' as const,
+      receipts: verifyWorkReceiptExportRows(receipts) };
   }
 
   @Get('receipts')
