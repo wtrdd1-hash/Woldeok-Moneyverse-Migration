@@ -21,4 +21,4 @@
 2. [x] Implement Nest parser and bounded BigInt filter, run GREEN.
 3. [x] Add failing frontend input/API-path tests and implement accessible minGross field and clear action.
 4. [x] Add failing Android gateway tests, validate minGross response and privacy headers; run GREEN.
-5. [ ] Run target and complete gates, verify read-only PG ACL/owner function; document HOLD/rollback and PR.
+5. [x] Run target and complete gates, verify read-only PG ACL/owner function; document HOLD/rollback and PR.
