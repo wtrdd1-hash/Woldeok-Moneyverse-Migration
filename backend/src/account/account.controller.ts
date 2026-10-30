@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Inject,
   NotFoundException,
@@ -48,12 +49,16 @@ export class AccountController {
   }
 
   @Get('identities')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Sign-in methods linked to the caller' })
   async identities(@Req() request: RequestWithSession) {
     return { identities: await this.service().linkedIdentities(requireUserId(request)) };
   }
 
   @Delete('identities/:id')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Unlink a sign-in method' })
   async unlink(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) identityId: string) {
@@ -76,6 +81,8 @@ export class AccountController {
   }
 
   @Delete()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @HttpCode(202)
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Delete the caller account' })
