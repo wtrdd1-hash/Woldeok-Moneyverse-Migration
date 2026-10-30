@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { TotpSealingKey } from '../auth/totp';
 import { openSecret, sealSecret } from '../auth/totp';
@@ -841,6 +841,7 @@ export class AiNewsService {
 
     let scenarios: ScenarioProposal[] = [];
     let usedModel = 'deterministic-financial-engine';
+    let fallbackReason: string | undefined;
 
     // 1. Try LLM generation if credentials available
     try {
@@ -862,6 +863,7 @@ export class AiNewsService {
     } catch {
       // The deterministic fallback is not model inference and must be labeled as such.
       usedModel = 'deterministic-financial-engine';
+      fallbackReason = 'model_unavailable';
       scenarios = generateDeterministicStockNews(context);
     }
 
@@ -871,7 +873,7 @@ export class AiNewsService {
     }
 
     if (scenarios.length === 0) {
-      return { skipped: true, reason: 'no_scenarios_generated' };
+      return { generated: 0, published: false, reason: 'no_novel_candidate' };
     }
 
     const created = await this.repository.createBatch({
@@ -888,6 +890,10 @@ export class AiNewsService {
     }
 
     const stored = await this.repository.latest(actorUserId);
+    // Fail closed if the auditable market event history is unavailable.
+    const recent = await this.repository.recentMarketEvents(actorUserId);
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const freshHistory = recent.filter((event) => new Date(event.starts_at).getTime() >= cutoff);
     const candidates = (stored?.scenarios ?? []).filter((scenario) => {
       const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
       return scenario.status === 'proposed'
@@ -895,19 +901,29 @@ export class AiNewsService {
         && movers.every((effect) => effect.stock_id !== null && effect.strength <= 2);
     });
 
-    const selected = [...candidates].sort((a, b) => {
+    const novel = candidates.filter((scenario) => {
+      const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
+      return !freshHistory.some((event) =>
+        event.headline.trim().toLocaleLowerCase() === scenario.headline.trim().toLocaleLowerCase()
+        || movers.some((effect) => effect.symbol === event.symbol));
+    });
+    const selected = [...novel].sort((a, b) => {
       const strengthA = a.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
       const strengthB = b.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
       return strengthA - strengthB || a.effects.length - b.effects.length || a.ordinal - b.ordinal;
     })[0];
 
     if (!selected) {
-      return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: 'no_bounded_candidate' };
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: candidates.length ? 'no_novel_candidate' : 'no_bounded_candidate' };
     }
 
     const receipt = await this.publish({
       actorUserId,
       scenarioId: selected.id,
+      idempotencyKey: (() => {
+        const hash = createHash('sha256').update(`${selected.headline.trim().toLowerCase()}|${selected.effects.map((e) => e.stock_id).sort().join(',')}`).digest('hex');
+        return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+      })(),
       hours: Math.min(24, selected.hours),
       headline: selected.headline,
       body: selected.body,
@@ -920,7 +936,7 @@ export class AiNewsService {
       generated: scenarios.length, published: true, batchId: created.batch_id,
       scenarioId: selected.id, headline: selected.headline,
       eventId: receipt.event_id, eventsPublished: receipt.published,
-      engine: usedModel,
+      engine: usedModel, ...(fallbackReason ? { fallbackReason } : {}),
     };
   }
 
