@@ -8,6 +8,7 @@ import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/s
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { verifiedNotificationReadSearch } from '@/lib/notification-read-search-proof';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { NextResponse } from 'next/server';
 import {
@@ -106,6 +107,25 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const notificationSearch = request.method === 'POST' && parts.length === 2 &&
+    parts[0] === 'notifications' && parts[1] === 'search';
+  let notificationReadOnly = false;
+  let notificationUnreadOnly = false;
+  if (notificationSearch) {
+    try {
+      const body: unknown = await request.clone().json();
+      if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('Invalid body');
+      const filter = body as Record<string, unknown>;
+      if ((filter.readOnly !== undefined && typeof filter.readOnly !== 'boolean') ||
+          (filter.unreadOnly !== undefined && typeof filter.unreadOnly !== 'boolean') ||
+          (filter.readOnly === true && filter.unreadOnly === true)) throw new Error('Invalid read filter');
+      notificationReadOnly = filter.readOnly === true;
+      notificationUnreadOnly = filter.unreadOnly === true;
+    } catch {
+      return gatewayProblem(400, 'Bad Request', 'notification_search_read_filter_invalid', 'invalid notification read-state filter');
+    }
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -328,6 +348,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (notificationSearch && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'notification_search_unverified', 'notification search evidence is unavailable');
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -409,6 +433,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (notificationSearch && response.ok &&
+          !verifiedNotificationReadSearch(compatible, notificationReadOnly, notificationUnreadOnly)) {
+        return gatewayProblem(503, 'Service Unavailable', 'notification_search_unverified',
+          'notification read-state evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -429,6 +458,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (notificationSearch && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'notification_search_unverified', 'notification search evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }

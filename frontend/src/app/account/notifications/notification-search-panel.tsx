@@ -19,6 +19,7 @@ export function NotificationSearchPanel() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('ALL');
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [fromDay, setFromDay] = useState(() => new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10));
   const [toDay, setToDay] = useState(() => new Date().toISOString().slice(0, 10));
   const [result, setResult] = useState<SearchResult | null>(null);
@@ -40,7 +41,7 @@ export function NotificationSearchPanel() {
       if (Date.parse(toUtc) - Date.parse(fromUtc) > 90 * 86_400_000 || fromUtc >= toUtc) {
         throw new Error('조회 기간은 최대 90일이며 시작일은 종료일보다 빨라야 합니다.');
       }
-      const body = { query: normalized, fromUtc, toUtc, limit: 20, unreadOnly,
+      const body = { query: normalized, fromUtc, toUtc, limit: 20, unreadOnly, readOnly,
         ...(category === 'ALL' ? {} : { category }), ...(cursor ? { cursor } : {}) };
       const response = await fetch('/api/notifications/search', { method: 'POST', headers, body: JSON.stringify(body), cache: 'no-store' });
       if (!response.ok) {
@@ -78,11 +79,14 @@ export function NotificationSearchPanel() {
         </select>
       </label>
       <label className="flex min-h-11 items-center gap-2 text-sm">
-        <input type="checkbox" checked={unreadOnly} onChange={(event) => setUnreadOnly(event.target.checked)} />읽지 않은 알림만
+        <input type="checkbox" checked={unreadOnly} onChange={(event) => { setUnreadOnly(event.target.checked); if (event.target.checked) setReadOnly(false); }} />읽지 않은 알림만
+      </label>
+      <label className="flex min-h-11 items-center gap-2 text-sm">
+        <input type="checkbox" checked={readOnly} onChange={(event) => { setReadOnly(event.target.checked); if (event.target.checked) setUnreadOnly(false); }} />읽은 알림만
       </label>
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <button type="submit" disabled={busy} className="min-h-11 rounded-lg border bg-primary px-4 text-primary-foreground disabled:opacity-50">검색</button>
-        <button type="button" className="min-h-11 rounded-lg border px-4" onClick={() => { requestGeneration.current += 1; setResult(null); setError(''); setQuery(''); }}>검색 초기화</button>
+        <button type="button" className="min-h-11 rounded-lg border px-4" onClick={() => { requestGeneration.current += 1; setResult(null); setError(''); setQuery(''); setReadOnly(false); setUnreadOnly(false); }}>검색 초기화</button>
       </div>
     </form>
     <div role="status" aria-live="polite" className="text-sm">

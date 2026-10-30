@@ -67,6 +67,11 @@ export class NotificationSearchDto {
   @IsBoolean()
   unreadOnly?: boolean;
 
+  @ApiPropertyOptional({ description: 'Search only notifications already marked read' })
+  @IsOptional()
+  @IsBoolean()
+  readOnly?: boolean;
+
   @ApiPropertyOptional({ minimum: 1, maximum: 50, default: 20 })
   @IsOptional()
   @IsInt()

@@ -11,6 +11,7 @@ export interface NotificationSearchInput {
   readonly query: string;
   readonly category?: string;
   readonly unreadOnly?: boolean;
+  readonly readOnly?: boolean;
   readonly fromUtc: string;
   readonly toUtc: string;
   readonly limit?: number;
@@ -20,6 +21,7 @@ export interface NormalizedNotificationSearch {
   readonly query: string;
   readonly category: string | null;
   readonly unreadOnly: boolean;
+  readonly readOnly: boolean;
   readonly fromUtc: string;
   readonly toUtc: string;
   readonly limit: number;
@@ -57,12 +59,14 @@ export function validateNotificationSearch(input: NotificationSearchInput, now =
     throw new BadRequestException('Invalid notification category');
   }
   if (input.unreadOnly !== undefined && typeof input.unreadOnly !== 'boolean') throw new BadRequestException('Invalid unread filter');
+  if (input.readOnly !== undefined && typeof input.readOnly !== 'boolean') throw new BadRequestException('Invalid read filter');
+  if (input.unreadOnly === true && input.readOnly === true) throw new BadRequestException('Read and unread filters cannot be combined');
   const limit = input.limit ?? 20;
   if (!Number.isInteger(limit) || limit < 1 || limit > 50) throw new BadRequestException('Invalid notification search page size');
   if (input.cursor !== undefined && (typeof input.cursor !== 'string' || input.cursor.length > 2048)) {
     throw new BadRequestException('Invalid notification search cursor');
   }
-  return { query, category: input.category ?? null, unreadOnly: input.unreadOnly === true, fromUtc: input.fromUtc, toUtc: input.toUtc, limit };
+  return { query, category: input.category ?? null, unreadOnly: input.unreadOnly === true, readOnly: input.readOnly === true, fromUtc: input.fromUtc, toUtc: input.toUtc, limit };
 }
 
 function signingKey(): string {

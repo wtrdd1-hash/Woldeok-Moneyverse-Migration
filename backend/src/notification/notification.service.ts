@@ -78,14 +78,20 @@ export class NotificationService {
         WHERE user_id = $1::uuid
           AND ($2::text IS NULL OR category = $2::text)
           AND ($3::boolean = FALSE OR is_read = FALSE)
+          AND ($11::boolean = FALSE OR is_read = TRUE)
           AND created_at >= $4::timestamptz AND created_at < $5::timestamptz
           AND created_at <= $6::timestamptz
           AND (strpos(lower(title), lower($7::text)) > 0 OR strpos(lower(body), lower($7::text)) > 0)
           AND ($8::timestamptz IS NULL OR (created_at, id) < ($8::timestamptz, $9::uuid))
         ORDER BY created_at DESC, id DESC LIMIT $10`, [
         actor, filter.category, filter.unreadOnly, filter.fromUtc, filter.toUtc, asOf,
-        filter.query, cursor?.afterAt ?? null, cursor?.afterId ?? null, filter.limit + 1,
+        filter.query, cursor?.afterAt ?? null, cursor?.afterId ?? null, filter.limit + 1, filter.readOnly,
       ]);
+      // Do not return success-shaped rows if an upstream read-state contract is violated.
+      if (rows.some((row) => typeof row.is_read !== 'boolean' ||
+        (filter.readOnly && !row.is_read) || (filter.unreadOnly && row.is_read))) {
+        throw new ServiceUnavailableException('Notification search read state unavailable');
+      }
       await client.query('COMMIT');
       began = false;
       const hasMore = rows.length > filter.limit;

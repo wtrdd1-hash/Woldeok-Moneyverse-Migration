@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
 import { viewerOrUnknown } from '@/lib/viewer';
+import { verifiedNotificationReadSearch } from '@/lib/notification-read-search-proof';
 
 export const dynamic = 'force-dynamic';
 const privateHeaders = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
-const allowed = new Set(['query', 'category', 'unreadOnly', 'fromUtc', 'toUtc', 'limit', 'cursor']);
+const allowed = new Set(['query', 'category', 'unreadOnly', 'readOnly', 'fromUtc', 'toUtc', 'limit', 'cursor']);
 const categories = new Set([
   'TRANSACTIONAL', 'PRODUCT_ACTIVITY', 'SEASON_LIVEOPS', 'SECURITY_CRITICAL',
   'BUSINESS', 'BANK', 'SEASON', 'SPACE', 'SECURITY', 'SYSTEM',
@@ -40,6 +41,8 @@ export async function POST(req: Request): Promise<NextResponse> {
       typeof filter.fromUtc !== 'string' || typeof filter.toUtc !== 'string' ||
       (filter.category !== undefined && !categories.has(String(filter.category))) ||
       (filter.unreadOnly !== undefined && typeof filter.unreadOnly !== 'boolean') ||
+      (filter.readOnly !== undefined && typeof filter.readOnly !== 'boolean') ||
+      (filter.readOnly === true && filter.unreadOnly === true) ||
       (filter.limit !== undefined && (!Number.isInteger(filter.limit) || (filter.limit as number) < 1 || (filter.limit as number) > 50)) ||
       (filter.cursor !== undefined && (typeof filter.cursor !== 'string' || filter.cursor.length > 2048))) {
     return NextResponse.json({ error: 'Invalid search request' }, { status: 400, headers: privateHeaders });
@@ -51,6 +54,9 @@ export async function POST(req: Request): Promise<NextResponse> {
         !('nextCursor' in result) || (result.nextCursor !== null && (typeof result.nextCursor !== 'string' || result.nextCursor.length > 2048)) ||
         !('asOfUtc' in result) || typeof result.asOfUtc !== 'string') {
       throw new Error('Invalid search envelope');
+    }
+    if (!verifiedNotificationReadSearch(result, filter.readOnly === true, filter.unreadOnly === true)) {
+      throw new Error('Notification read state is unverified');
     }
     return NextResponse.json(result, { headers: privateHeaders });
   } catch (error: unknown) {
