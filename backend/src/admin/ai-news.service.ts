@@ -846,7 +846,7 @@ export class AiNewsService {
   async autoGenerateAndPublish(
     actorUserId: string,
     runtimeCredential?: AiNewsRuntimeCredential,
-    publishImmediate = true,
+    _publishImmediate = true,
   ): Promise<Record<string, unknown>> {
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);

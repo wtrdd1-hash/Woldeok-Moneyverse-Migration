@@ -88,22 +88,13 @@ export class WalletController {
     @Req() request: RequestWithSession,
     @Query('recent') recent?: string,
     @Query('period') period?: string,
-    @Query('direction') direction?: string,
   ) {
-    if (direction !== undefined && direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') {
-      throw new BadRequestException('direction must be all, in, out or neutral');
-    }
-    const filteredDirection = direction === 'in' ? 'in' : direction === 'out' ? 'out' : direction === 'neutral' ? 'neutral' : undefined;
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
     }
     const periodDays: 7 | 30 | undefined = period === '7d' ? 7 : period === '30d' ? 30 : undefined;
-    const filters: WalletOverviewOptions = {
-      ...(periodDays ? { periodDays } : {}),
-      ...(filteredDirection ? { direction: filteredDirection } : {}),
-    };
     if (recent === undefined) {
-      return this.service().overview(requireUserId(request), filters);
+      return this.service().overview(requireUserId(request), periodDays ? { periodDays } : {});
     }
     // Reject coercible non-decimal and duplicate query values before any DB read.
     // The service/repository enforce the same 1..50 bound for direct callers.
@@ -114,7 +105,7 @@ export class WalletController {
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
-    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...filters });
+    return this.service().overview(requireUserId(request), { recentLimit: parsed, ...(periodDays ? { periodDays } : {}) });
   }
 
   @Get('wallet/activity')

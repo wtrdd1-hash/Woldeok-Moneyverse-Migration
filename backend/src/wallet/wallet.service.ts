@@ -421,15 +421,13 @@ export class WalletService {
 
   async overview(
     authenticatedUserId: string,
-    { recentLimit = 10, periodDays, direction }: WalletOverviewOptions = {},
+    { recentLimit = 10, periodDays }: WalletOverviewOptions = {},
   ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
-      direction === undefined
-        ? this.repository.recentTransactionsForUser(userId, limit, periodDays)
-        : this.repository.recentTransactionsForUser(userId, limit, periodDays, direction),
+      this.repository.recentTransactionsForUser(userId, limit, periodDays),
     ]);
     return {
       userId,
