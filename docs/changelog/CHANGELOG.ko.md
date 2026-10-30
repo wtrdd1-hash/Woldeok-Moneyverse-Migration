@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.3 — 주식 타이머 실행 중 중대 장애 오탐 수정 (운영 완료)
 - 정상 running 상태 인식, 다음 실행 없는 타이머 장애 감시 유지, 주식시장 작업 실패를 별도 CRITICAL로 감지. [릴리스](../releases/v2026.10.30.3.ko.md).
 
@@ -24,6 +25,14 @@
 - **P0:** REPO1486-01 과거 참조, SEC1486-02 직접 DB DML·체크섬 5건, FIN1486-03 18,000 WLD·국고 552건·Test 합성 200, REL1486-04 프론트/엣지 SHA·금융 실패 6건·lint 3건·복원/정확 SHA Test·용량. **P1:** MONTH1486-05 본인 SQL/과거 계정, MONTH1486-06 스냅샷, MONTH1486-07 API/검증, MONTH1486-08 Android/접근성, MONTH1486-09 개인정보/관리자/SEO/KPI, MONTH1486-10 격리 PG 회귀. 합성 10,001건·적대적 시험은 **계획만 수립, 미실행**.
 - **게이트:** 기능 OFF, 런타임/DB/WLD/Test/운영 미변경. 별도 개발 브랜치·정확 SHA 공식 Test·외부 복원·승인된 GitOps 후 승격. 외부 독립·중복 제거·실근거 분류 신규 승인 0건, 누적 UNKNOWN/10,000 → BLOCKED/IN PROGRESS. [통합 상세](INTEGRATED_PLANNING_MASTER.ko.md) 및 [개발 인계 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 >>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
+=======
+## v2026.10.30.1498 — 기획: 배포 준비 근거 신뢰 경계 강화 (초안 / HOLD)
+
+- 중복 F675-170(#1829)과 F675-180(#1959)을 읽기 전용 V1 하나로 통합, V2 증빙 테이블 보류 및 필수 안전 게이트 면제 금지.
+- 배포 전 PREFLIGHT 정확 SHA Test와 배포 후 POST_RELEASE 실제 운영 아티팩트 검증 분리, 배포 전 미래 운영 신원 요구 순환 조건 제거.
+- QA v1384 **개발 DB 한정** moneyverse_app 유효 권한: 기본 테이블 253개 중 UPDATE 211, DELETE 211, TRUNCATE 233개. P0 조사, 운영 침해/악용 추정 금지.
+- P0/P1 개발 인계와 영문·국문 통합 기획/기록 및 외부 10,000건 근거 HOLD 반영. 문서 전용, 런타임·금융 변경 없음.
+>>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
 
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
 

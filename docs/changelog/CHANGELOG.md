@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.30.3 — Market timer running false-positive repair (Production LIVE)
 - Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
 
@@ -24,6 +25,14 @@
 - **P0:** REPO1486-01 historic refs; SEC1486-02 app-role DML and five checksum mismatches; FIN1486-03 18,000 WLD provenance, 552 Treasury links, Test synthetic 200; REL1486-04 frontend/edge identity, six finance failures, lint 3, restore/exact-SHA Test, disk capacity. **P1:** MONTH1486-05 owner SQL/history, MONTH1486-06 snapshot, MONTH1486-07 API/validation, MONTH1486-08 Android/a11y, MONTH1486-09 privacy/admin/SEO/KPI, MONTH1486-10 isolated PG regression. 10,001 synthetic transactions and adversarial tests PLANNED NOT RUN.
 - **Release gates:** feature OFF; no runtime/DB/WLD/Test/Production mutation; separate development branches and official exact-SHA Test/backup restore/approved GitOps before promotion. External independent deduplicated evidence new approved 0, cumulative UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Full [integrated contract](INTEGRATED_PLANNING_MASTER.md) and [handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 >>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
+=======
+## v2026.10.30.1498 — Planning: release readiness trust-boundary hardening (DRAFT / HOLD)
+
+- Consolidated duplicate F675-170 (#1829) and F675-180 (#1959) into one proposed read-only V1; deferred V2 evidence tables and prohibited hard-gate waivers.
+- Separated PREFLIGHT exact-SHA Test attestation from POST_RELEASE Production artifact verification; prevented circular pre-deployment Production proof.
+- Recorded QA v1384 **DEV-only** effective moneyverse_app privileges: 211 UPDATE, 211 DELETE, 233 TRUNCATE of 253 base tables; P0 investigation, no Production/exploit claim.
+- Updated P0/P1 backlog, bilingual master/project plans, logs and external 10,000 reference HOLD. Documentation only; no runtime or financial changes.
+>>>>>>> origin/auto/planning-v1498-readiness-hardening-20261030
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
