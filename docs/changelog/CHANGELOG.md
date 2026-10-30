@@ -1,3 +1,10 @@
+## v2026.10.30.1498 — Planning: release readiness trust-boundary hardening (DRAFT / HOLD)
+
+- Consolidated duplicate F675-170 (#1829) and F675-180 (#1959) into one proposed read-only V1; deferred V2 evidence tables and prohibited hard-gate waivers.
+- Separated PREFLIGHT exact-SHA Test attestation from POST_RELEASE Production artifact verification; prevented circular pre-deployment Production proof.
+- Recorded QA v1384 **DEV-only** effective moneyverse_app privileges: 211 UPDATE, 211 DELETE, 233 TRUNCATE of 253 base tables; P0 investigation, no Production/exploit claim.
+- Updated P0/P1 backlog, bilingual master/project plans, logs and external 10,000 reference HOLD. Documentation only; no runtime or financial changes.
+
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
 ## v2026.10.30.1496 — F675-180 Verified admin release-readiness evidence matrix (planning only / DRAFT / HOLD)

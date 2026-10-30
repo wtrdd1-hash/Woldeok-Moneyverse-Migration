@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.30.1498 — F675-180 배포 준비 매트릭스 중복 통합·신뢰 경계 강화 (기획 초안 / 운영 승격 보류)
+
+- 사이클: 이전 Feature Addition v1496 → 현재 Feature Improvement v1498 → 다음 Feature Addition v1500(잠정). 원격 main 62c6cd038951d65c94b709302bdaec6e75b080b6 시작·중간 확인. 미병합 Draft #1960의 문서 전용 후속이다.
+- **중복 제거:** F675-170/#1829(v1456 관리자 배포 준비 보드)는 F675-180/#1959와 중복된다. 과거 요구사항은 보존하되 **읽기 전용 V1 하나만** /admin/operations/release-readiness와 Nest 관리자 GET으로 구현한다. 구형 경로 별칭·두 번째 판정 엔진·V1 DB 테이블은 만들지 않는다. 불변 증거 테이블/수집은 별도 승인된 V2 마이그레이션으로 보류한다. 금융·권한·공식 Test·독립 복원·서명된 용량의 필수 게이트는 면제 불가; 선택 NOT_APPLICABLE은 서명된 정책 필요.
+- **QA v1384 개발 DB 권한 P0:** 08:19 KST 수집 증거에서 기본 테이블 253개, moneyverse_app 유효 UPDATE=211, DELETE=211, TRUNCATE=233개. SET ROLE에서 account_balances UPDATE/TRUNCATE와 audit_logs/users DELETE가 true다. 개발 DB의 권한 증거일 뿐 운영 침해나 WLD 이동의 증거는 아니다. 권한 출처·기본 권한·마이그레이션·역할을 격리 PostgreSQL에서 조사하며 실서버 무분별한 REVOKE 금지. QA v1384 최종 판정 미확인. ROOT 97%, DATA 97~98%(가용 5.7→5.4GiB)로 용량 HOLD.
+- **단계 분리:** PREFLIGHT는 정확 SHA CI, 공식 Test frontend/backend/app-api/edge·DB 신원, 금융 음성 QA, 권한/체크섬, 독립 복원, 서명된 ROOT/DATA, 개인정보/접근성/SEO/모바일을 검사한다. 기존 운영은 비교 기준이며 미래 후보의 운영 아티팩트를 사전 필수 조건으로 삼지 않는다. POST_RELEASE는 별도 승인된 GitOps 후 실제 운영 후보·엣지/원본·스모크·롤백을 확인한다. EVIDENCE_READY는 배포 승인이 아니다. 필수 누락·만료·폐기·불일치는 HOLD_UNKNOWN, 검증된 실패는 HOLD_FAIL, 필수 안전 게이트 면제 불가. 집계 중 발급자 리비전 변경 시 409/HOLD.
+- **API/보안:** 정확한 SHA·단계·환경·불변 정책 digest·서명 발급자, 관리자 인증/민감 근거 재인증, 최대 64KiB 읽기 전용 Nest/Next, 공개/Android 경로 금지, 200/4xx/5xx private no-store/noindex, 영/한 WCAG 2.2 AA·320px. DB 객체·인덱스·GRANT·트랜잭션·WLD/원장 변경 없음. 기능 기본 OFF, 롤백 시 UI/API만 비활성화하고 증거 보존.
+- **P0:** DISK1498-01 안전한 용량(#1170), SEC1498-02 개발 DB 권한 211/211/233·체크섬/참조, FIN1498-03 MINT 18,000 WLD·국고 552건·SWF·Test 가짜 응답(#1917), REL1498-04 전체 CI·공식 Test 정확 SHA·오프호스트 복원·배포 후 신원. **P1:** READINESS1498-05 중복 통합, READINESS1498-06 단계별 서명 판정기, READINESS1498-07 Nest/Next 비공개 API, READINESS1498-08 영/한 접근성 화면, READINESS1498-09 개인정보·SEO·KPI·정책, READINESS1498-10 격리 회귀·롤백. 합성 10,001건+위조 100건+동시 100건+만료 50건+경계 30건은 **명세만 작성, 미실행**.
+- 외부 독립 근거 신규 승인 0, 누적 중복 제거·검증 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 코드 배포·운영 승격 없음.
+
 ## v2026.10.30.1496 — F675-180 관리자 전용 배포 준비 근거 매트릭스 (기획 초안 / 운영 승격 보류)
 - 회차: 이전 Feature Improvement v1494 → 현재 Feature Addition v1496 → 다음 Feature Improvement v1498(잠정). 시작·중간 최신 main 62c6cd038951d65c94b709302bdaec6e75b080b6. QA v1383 금융 6실패/3성공 및 app-api 계약 불일치 **증거만 확인**, 최종 판정 미확인. [개발 인계 #1959](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1959); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960); [Draft PR #1960](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1960).
 - 소스 공백: /admin/api-health는 경로별 상태를 미측정으로 표시하며 GitHub CI 정확 SHA·공식 Test 아티팩트·독립 복원·PostgreSQL 권한/마이그레이션·금융 출처·서명된 ROOT/DATA 여유·개인정보/모바일/SEO를 통합 검증하는 관리자 화면이 없다. 저장공간 #1948 및 개발 A #1956의 수집기를 재구현하지 않고 근거만 소비한다.
