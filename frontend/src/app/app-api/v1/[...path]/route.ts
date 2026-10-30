@@ -1,6 +1,7 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -180,6 +181,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
         'support status counts are unavailable');
+    }
+  }
+
+  // The Android receipt summary is valid only if it matches the exact owner-scoped rows.
+  // Reject legacy/forged HTTP 200 responses rather than inventing spending totals.
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
+      request.method === 'GET' && response.ok) {
+    try {
+      if (!parseShopPurchaseHistory(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
     }
   }
 

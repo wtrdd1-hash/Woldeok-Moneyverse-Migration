@@ -1,0 +1,9 @@
+# 2026-10-30 — Member shop receipt displayed total (Draft / release HOLD)
+
+- Base main at start and mid: `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`; isolated branch `auto/hourly-a-20261030-1125-user-feature`.
+- The signed-in member can now see the **count and exact WLD sum of the displayed receipts** (latest 30 without search, or matching items among latest 100 with search). This is **not** a lifetime total or a tax statement.
+- NestJS reads existing owner-scoped `shop_list_my_purchases` through the service; amounts remain canonical integer strings and are added with `BigInt`. No new SQL migration, grants, ledger writes or mutable financial state.
+- Next.js private BFF and Android app-api reject malformed HTTP 200, forged totals, duplicate receipt IDs and missing summaries; `private, no-store` and `noindex` are enforced. The web UI has an accessible live status and explicit window limitation.
+- TDD RED observed 2 failing backend tests; GREEN backend targeted 5 PASS and frontend targeted 9 PASS, UI integration 3 PASS. Fresh isolated PostgreSQL 17.11: 305 migrations applied, owner 2 receipts/190 WLD, stranger 0, app direct purchase read/write false, transaction rolled back. Real DB shop tests 12 PASS/13 SKIP.
+- Global lint 0 errors/1043 existing warnings, typecheck PASS, local build generated all 608 static pages. Mobile API schema references regenerated for the additive response. Full `pnpm test` cannot pass before generated contract files are committed (the check compares against Git HEAD). Re-run after commit and exact-SHA CI.
+- Existing independent QA v1387 reports P0 Production symlink/live PID mismatch and stale official Test synthetic Treasury HTTP 200. No Test/Production deployment, DB writes, service restarts, backup deletion, or other branch changes; release HOLD until independent exact-SHA official Test, auth/E2E, restore and GitOps gates PASS.

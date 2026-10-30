@@ -92,10 +92,10 @@ export class ShopController {
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Purchases made by the caller' })
   async purchases(@Req() request: RequestWithSession, @Query('q') query?: unknown) {
-    return { purchases: await this.guarded(
-      () => this.service().myPurchases(requireUserId(request), { query }),
+    return this.guarded(
+      () => this.service().myPurchasesWithSummary(requireUserId(request), { query }),
       'purchase history is unavailable',
-    ) };
+    );
   }
 
   @Post('items/:id/purchases')

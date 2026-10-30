@@ -28,6 +28,7 @@ describe.skipIf(!DATABASE_URL)('shop against a real database', () => {
 
   it('calls shop_list_my_purchases with the declared signature', async () => {
     await expect(service.myPurchases(UNKNOWN_USER)).resolves.toEqual([]);
+    await expect(service.myPurchasesWithSummary(UNKNOWN_USER)).resolves.toEqual({ purchases: [], summary: { count: 0, totalSpent: '0', scope: 'displayed' } });
   });
 
   it('refuses a purchase of an item that does not exist', async () => {

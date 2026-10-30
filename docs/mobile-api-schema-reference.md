@@ -4093,6 +4093,10 @@ _No request body._
 | purchases[].transactionId | true | string |  |
 | purchases[].amount | true | string & object |  |
 | purchases[].purchasedAt | true | string |  |
+| summary | true | object |  |
+| summary.count | true | number |  |
+| summary.totalSpent | true | string |  |
+| summary.scope | true | string="displayed" | const="displayed" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
