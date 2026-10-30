@@ -3,6 +3,7 @@ import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
+import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -272,139 +273,10 @@ export class TreasuryBondRepository {
     holdingsProcessed: number;
     maturedCount: number;
   }> {
-    const client: PoolClient = await this.pool.connect();
-    let totalCoupons = BigInt(0);
-    let totalMaturities = BigInt(0);
-    let holdingsProcessed = 0;
-    let maturedCount = 0;
-
-    try {
-      await client.query('BEGIN');
-
-      const holdings = await client.query<{
-        holding_id: string;
-        user_id: string;
-        bond_id: string;
-        bond_symbol: string;
-        bond_name: string;
-        units: string;
-        par_value_wld: string;
-        hourly_coupon_rate_bps: number;
-        auto_rollover: boolean;
-        collateral_locked: boolean;
-        maturity_at: string;
-        maturity_hours: number;
-        is_matured: boolean;
-      }>(`
-        SELECT
-          h.id AS holding_id,
-          h.user_id,
-          h.bond_id,
-          b.symbol AS bond_symbol,
-          b.name AS bond_name,
-          h.units::text,
-          b.par_value_wld::text,
-          b.hourly_coupon_rate_bps,
-          b.maturity_hours,
-          h.auto_rollover,
-          h.collateral_locked,
-          h.maturity_at::text,
-          (h.maturity_at <= now()) AS is_matured
-        FROM public.treasury_bond_holdings h
-        JOIN public.treasury_bonds b ON b.id = h.bond_id
-        WHERE h.status = 'HOLDING'
-        FOR UPDATE
-      `);
-
-      for (const h of holdings.rows) {
-        holdingsProcessed++;
-        const units = BigInt(h.units);
-        const par = BigInt(h.par_value_wld);
-        const principal = units * par;
-
-        // 쿠폰 이자
-        const coupon = (principal * BigInt(h.hourly_coupon_rate_bps)) / BigInt(10000);
-
-        if (coupon > BigInt(0)) {
-          totalCoupons += coupon;
-
-          const accountId = await this.ensureUserCashAccount(client, h.user_id);
-          await client.query(`
-            UPDATE public.account_balances
-            SET available_amount = available_amount + $1, updated_at = now()
-            WHERE account_id = $2
-          `, [coupon.toString(), accountId]);
-
-          await client.query(`
-            UPDATE public.treasury_bond_holdings
-            SET accrued_interest_wld = accrued_interest_wld + $1, updated_at = now()
-            WHERE id = $2
-          `, [coupon.toString(), h.holding_id]);
-
-          await client.query(`
-            INSERT INTO public.treasury_bond_coupon_logs (
-              holding_id, user_id, bond_id, event_type, amount_wld
-            ) VALUES (
-              $1, $2, $3, 'COUPON_INTEREST', $4
-            )
-          `, [h.holding_id, h.user_id, h.bond_id, coupon.toString()]);
-        }
-
-        // 만기 도달 시 상환 또는 자동 롤오버
-        if (h.is_matured) {
-          maturedCount++;
-
-          if (h.auto_rollover && !h.collateral_locked) {
-            // 자동 재투자: 만기 연장
-            const rolloverInterval = `${h.maturity_hours} hours`;
-            await client.query(`
-              UPDATE public.treasury_bond_holdings
-              SET maturity_at = now() + interval '${rolloverInterval}', updated_at = now()
-              WHERE id = $1
-            `, [h.holding_id]);
-          } else {
-            // 원금 상환
-            totalMaturities += principal;
-            const accountId = await this.ensureUserCashAccount(client, h.user_id);
-            await client.query(`
-              UPDATE public.account_balances
-              SET available_amount = available_amount + $1, updated_at = now()
-              WHERE account_id = $2
-            `, [principal.toString(), accountId]);
-
-            await client.query(`
-              UPDATE public.treasury_bond_holdings
-              SET status = 'MATURED', updated_at = now()
-              WHERE id = $1
-            `, [h.holding_id]);
-
-            await client.query(`
-              INSERT INTO public.treasury_bond_coupon_logs (
-                holding_id, user_id, bond_id, event_type, amount_wld
-              ) VALUES (
-                $1, $2, $3, 'MATURITY_REDEMPTION', $4
-              )
-            `, [h.holding_id, h.user_id, h.bond_id, principal.toString()]);
-          }
-        }
-      }
-
-      await client.query('COMMIT');
-
-      return {
-        couponsDistributedWld: totalCoupons.toString(),
-        maturitiesRedeemedWld: totalMaturities.toString(),
-        holdingsProcessed,
-        maturedCount,
-      };
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
+    // Fail before obtaining a DB client. Legacy code credited USER_CASH without
+    // economy_post_transaction postings and could replay coupons each invocation.
+    throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
   }
-
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number): Promise<boolean> {
     const params: (string | number)[] = [status, bondId];
     let query = `UPDATE public.treasury_bonds SET status = $1, updated_at = now()`;

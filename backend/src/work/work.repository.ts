@@ -1,4 +1,4 @@
-import type { Queryable } from '../core/db';
+﻿import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { refuseUnjournaledQualification } from './work-qualification-hold';
 
@@ -15,6 +15,23 @@ function assertUuid(value: unknown, field: string): asserts value is string {
   if (typeof value !== 'string' || !UUID.test(value)) {
     throw new WorkInputError(`${field} must be a UUID`);
   }
+}
+
+export function parseWorkTaskMaxDuration(raw: unknown): number | null {
+  if (raw === undefined) return null;
+  if (typeof raw === 'number' && Number.isSafeInteger(raw) && raw >= 1 && raw <= 86400) return raw;
+  if (typeof raw === 'string' && /^[1-9][0-9]*$/.test(raw)) {
+    const parsed = Number(raw);
+    if (Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= 86400) return parsed;
+  }
+  throw new WorkInputError('maxDurationSeconds must be an integer between 1 and 86400');
+}
+
+/** Read-only preview ceiling. Keep large WLD values as exact decimal strings. */
+export function parseWorkTaskMaxReward(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (typeof raw === 'string' && /^(?:0|[1-9][0-9]{0,17})$/.test(raw)) return raw;
+  throw new WorkInputError('maxReward must be a non-negative integer string with at most 18 digits');
 }
 
 export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';

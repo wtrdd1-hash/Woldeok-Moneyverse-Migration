@@ -1618,3 +1618,22 @@ ull 상태를 반환하도록 교정.
 ### 3. 검증 및 배포 계획
 - 최신 커밋 푸시 후 GitHub Actions CI 통과 대기.
 - 통과 즉시 PR #2045 main 브랜치 병합 및 운영 무중단 배포 진행.
+---
+## 🚀 [v8 Specification] 업무 보드 보상 필터링 계약 및 국채 시간당 정산 안전 홀드 복원
+### 1. 배경 및 원인 분석
+- GitHub Actions CI untime-check 런 중 업무 및 국채 리포지토리 관련 3개 테스트 실패 식별:
+  1. 	reasury-bond-hourly-ledger-hold.test.ts: TreasuryBondRepository.processHourlyCouponsAndMaturities에서 DB 커넥션 획득 전 503 방어 홀드(BOND_COUPON_SETTLEMENT_HOLD_REASON) 누락.
+  2. work-reward-ceiling.test.ts & work-reward-floor.test.ts: work.repository.ts 및 work.controller.ts의 	asks 엔드포인트에서 minReward, maxDurationSeconds, maxReward 파라미터 유효성 검증 및 쿼리 조건 누락.
+
+### 2. 반영 내역
+- ackend/src/admin/bonds/treasury-bond.repository.ts:
+  - processHourlyCouponsAndMaturities에서 DB 커넥션을 열기 전 	hrow new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON) 방어 홀드 적용.
+- ackend/src/work/work.repository.ts:
+  - parseWorkTaskMaxDuration 및 parseWorkTaskMaxReward 복원.
+  - 	asks 메서드에서 ctor, minReward, maxDurationSeconds, maxReward 유효성 검증 및 동적 쿼리 바인딩 복원.
+- ackend/src/work/work.controller.ts:
+  - 	asks 컨트롤러에서 minReward, maxDurationSeconds, maxReward 쿼리 파라미터 파싱 및 예외 매핑(HTTP 400) 복원.
+
+### 3. 검증 및 배포 계획
+- 최신 커밋 푸시 후 GitHub Actions CI 통과 대기.
+- 통과 즉시 PR #2045 main 브랜치 병합 및 운영 무중단 배포 진행.

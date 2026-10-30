@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   ConflictException,
@@ -101,16 +101,34 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @ApiOperation({ summary: 'Member task board, optionally limited to today’s recommended tasks' })
+  @ApiOperation({ summary: 'View the active board of available work tasks' })
   async tasks(
     @Req() request: RequestWithSession,
-    @Query('recommendedOnly') recommendedOnly?: string,
+    @Query('minReward') minReward?: string,
+    @Query('maxDurationSeconds') maxDurationSeconds?: unknown,
+    @Query('maxReward') maxReward?: unknown,
   ) {
     const repository = this.repository();
     const actor = requireUserId(request);
+    let maxDuration: number | null;
+    let ceiling: string | null;
+    try {
+      maxDuration = parseWorkTaskMaxDuration(maxDurationSeconds);
+      ceiling = parseWorkTaskMaxReward(maxReward);
+    } catch (error: unknown) {
+      if (error instanceof WorkInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
-      this.guarded(() => repository.tasks(actor, recommendedOnly), 'the task board is unavailable'),
+      this.guarded(
+        () => ceiling !== null
+          ? repository.tasks(actor, minReward, maxDuration ?? undefined, ceiling)
+          : maxDuration === null
+            ? repository.tasks(actor, minReward)
+            : repository.tasks(actor, minReward, maxDuration),
+        'the task board is unavailable',
+      ),
     ]);
     return { featureState, tasks };
   }
