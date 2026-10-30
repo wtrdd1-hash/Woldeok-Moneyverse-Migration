@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -106,6 +107,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
+  const supportQuery = request.nextUrl.searchParams;
+  const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
+  const supportRange = supportDateRequested && supportQuery.getAll('from').length === 1 && supportQuery.getAll('to').length === 1
+    ? parseSupportDateRange(supportQuery.get('from'), supportQuery.get('to')) : null;
+  if (supportDateRequested && (!supportRange || supportQuery.getAll('status').length > 1 ||
+    supportQuery.getAll('q').length > 1 || supportQuery.getAll('sort').length > 1 ||
+    (supportQuery.has('sort') && supportQuery.get('sort') !== 'oldest') ||
+    (supportQuery.has('status') && !['open', 'waiting_user', 'resolved'].includes(supportQuery.get('status')!)) ||
+    (supportQuery.has('q') && (!supportQuery.get('q')?.trim() || supportQuery.get('q')!.length > 80)))) {
+    return gatewayProblem(400, 'Bad Request', 'support_date_invalid', 'invalid support date window');
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -268,6 +282,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       } catch {
         return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
       }
+    }
+  }
+
+  // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
+  if (supportRange && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedSupportDateRows(await response.clone().json(), supportRange,
+            supportQuery.get('status'), supportQuery.get('q')?.trim() ?? null, supportQuery.get('sort'))) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
     }
   }
 

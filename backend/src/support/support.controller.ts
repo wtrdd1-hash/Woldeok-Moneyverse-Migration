@@ -14,6 +14,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { SupportRepository } from './support.repository';
 import { formatSupportTranscriptText } from './support-transcript-text';
+import { parseSupportKstRange } from './support-date-range';
 
 class NewThreadDto {
   @ApiProperty({ maxLength: 120 }) @IsString() @MinLength(1) @MaxLength(120) readonly subject!: string;
@@ -40,7 +41,7 @@ export class SupportController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'My recent administrator support conversations, optional status and literal subject search' })
-  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string, @Query('sort') sort?: string) {
+  async threads(@Req() req: RequestWithSession, @Query('status') status?: string, @Query('q') q?: string, @Query('sort') sort?: string, @Query('from') from?: string, @Query('to') to?: string) {
     if (status !== undefined && (typeof status !== 'string' || !['open', 'waiting_user', 'resolved'].includes(status))) {
       throw new BadRequestException('invalid support status');
     }
@@ -50,8 +51,11 @@ export class SupportController {
     if (sort !== undefined && sort !== 'oldest') {
       throw new BadRequestException('invalid support order');
     }
+    const range = parseSupportKstRange(from, to);
     const actor = requireUserId(req);
-    const threads = sort === 'oldest'
+    const threads = range
+      ? await this.repo().myThreads(actor, status ?? null, q?.trim(), sort === 'oldest' ? 'oldest' : undefined, range)
+      : sort === 'oldest'
       ? await this.repo().myThreads(actor, status ?? null, q?.trim(), 'oldest')
       : q === undefined
       ? await this.repo().myThreads(actor, status ?? null)
