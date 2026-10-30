@@ -18,13 +18,27 @@ describe.skipIf(!url)('work reward ceiling on isolated real PostgreSQL', () => {
       const all = await repository.tasks(actor);
       const ceiling = '9007199254740993';
       const filtered = await repository.tasks(actor, undefined, undefined, ceiling);
-      const eligible = all.filter((task) => task.reward_preview !== null && BigInt(task.reward_preview) <= BigInt(ceiling));
+      const eligible = all.filter(
+        (task) => task.reward_preview !== null && BigInt(task.reward_preview) <= BigInt(ceiling),
+      );
       expect(all.length).toBeGreaterThan(0);
       expect(filtered.map((task) => task.task_id)).toEqual(eligible.map((task) => task.task_id));
       const exactZero = await repository.tasks(actor, undefined, undefined, '0');
-      expect(exactZero.every((task) => task.reward_preview !== null && BigInt(task.reward_preview) === 0n)).toBe(true);
+      expect(
+        exactZero.every(
+          (task) => task.reward_preview !== null && BigInt(task.reward_preview) === 0n,
+        ),
+      ).toBe(true);
       const combined = await repository.tasks(actor, '1', 300, ceiling);
-      expect(combined.every((task) => task.reward_preview !== null && BigInt(task.reward_preview) >= 1n && BigInt(task.reward_preview) <= BigInt(ceiling) && task.minimum_duration_seconds <= 300)).toBe(true);
+      expect(
+        combined.every(
+          (task) =>
+            task.reward_preview !== null &&
+            BigInt(task.reward_preview) >= 1n &&
+            BigInt(task.reward_preview) <= BigInt(ceiling) &&
+            task.minimum_duration_seconds <= 300,
+        ),
+      ).toBe(true);
       const acl = await client.query<{ allowed: boolean }>(
         `SELECT has_table_privilege(current_user, 'public.work_task_catalog', 'SELECT') AS allowed`,
       );

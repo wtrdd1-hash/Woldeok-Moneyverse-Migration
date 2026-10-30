@@ -30,16 +30,25 @@ describe('member work preview-reward ceiling', () => {
     expect(params).toEqual([ACTOR, '100', 300, '9007199254740993']);
   });
 
-  it.each(['-1', '01', '1.5', '1e3', ' 100', '100 ', '', '9999999999999999999', 'NaN', 'Infinity'])('rejects malformed ceiling %s before querying', async (raw) => {
-    const { query, repository } = mockDb();
-    await expect(repository.tasks(ACTOR, undefined, undefined, raw)).rejects.toBeInstanceOf(WorkInputError);
-    expect(query).not.toHaveBeenCalled();
-  });
+  it.each(['-1', '01', '1.5', '1e3', ' 100', '100 ', '', '9999999999999999999', 'NaN', 'Infinity'])(
+    'rejects malformed ceiling %s before querying',
+    async (raw) => {
+      const { query, repository } = mockDb();
+      await expect(repository.tasks(ACTOR, undefined, undefined, raw)).rejects.toBeInstanceOf(
+        WorkInputError,
+      );
+      expect(query).not.toHaveBeenCalled();
+    },
+  );
 
   it('rejects a contradictory range and duplicate query params', async () => {
     const { query, repository } = mockDb();
-    await expect(repository.tasks(ACTOR, '101', undefined, '100')).rejects.toBeInstanceOf(WorkInputError);
-    await expect(repository.tasks(ACTOR, undefined, undefined, ['100', '200'])).rejects.toBeInstanceOf(WorkInputError);
+    await expect(repository.tasks(ACTOR, '101', undefined, '100')).rejects.toBeInstanceOf(
+      WorkInputError,
+    );
+    await expect(
+      repository.tasks(ACTOR, undefined, undefined, ['100', '200']),
+    ).rejects.toBeInstanceOf(WorkInputError);
     expect(query).not.toHaveBeenCalled();
   });
 
@@ -56,7 +65,12 @@ describe('member work preview-reward ceiling', () => {
     const featureState = vi.fn(async () => 'enabled');
     const controller = new WorkController({ tasks, featureState } as unknown as WorkRepository);
     const request = { session: { user_id: ACTOR } };
-    await expect(controller.tasks(request as Parameters<WorkController['tasks']>[0], undefined, undefined, ['100', '200'])).rejects.toMatchObject({ status: 400 });
+    await expect(
+      controller.tasks(request as Parameters<WorkController['tasks']>[0], undefined, undefined, [
+        '100',
+        '200',
+      ]),
+    ).rejects.toMatchObject({ status: 400 });
     await controller.tasks(request as Parameters<WorkController['tasks']>[0], '10', '300', '200');
     expect(tasks).toHaveBeenCalledWith(ACTOR, '10', 300, '200');
   });
