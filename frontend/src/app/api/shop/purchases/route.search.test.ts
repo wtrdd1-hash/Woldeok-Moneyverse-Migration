@@ -29,3 +29,22 @@ describe('private shop receipt search route', () => {
     expect(await response.json()).not.toEqual({ purchases: [] });
   });
 });
+
+describe('private KST receipt date route', () => {
+  it('forwards validated dates with search and keeps privacy headers', async () => {
+    apiOrNull.mockResolvedValueOnce({ purchases: [] });
+    const response = await GET(new Request('https://example.test/api/shop/purchases?q=Gloves&from=2026-10-29&to=2026-10-30'));
+    expect(apiOrNull).toHaveBeenLastCalledWith('/api/v1/shop/purchases?q=Gloves&from=2026-10-29&to=2026-10-30');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('rejects incomplete, invalid, duplicated and reversed dates before upstream', async () => {
+    apiOrNull.mockClear();
+    for (const query of ['from=2026-10-29', 'from=2026-02-30&to=2026-03-01', 'from=2026-10-30&to=2026-10-29', 'from=2026-10-29&from=2026-10-30&to=2026-10-30']) {
+      const response = await GET(new Request(`https://example.test/api/shop/purchases?${query}`));
+      expect(response.status).toBe(400);
+    }
+    expect(apiOrNull).not.toHaveBeenCalled();
+  });
+});

@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   ConflictException,
@@ -92,9 +92,14 @@ export class ShopController {
   @Get('purchases')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Purchases made by the caller' })
-  async purchases(@Req() request: RequestWithSession, @Query('q') query?: unknown) {
+  async purchases(
+    @Req() request: RequestWithSession,
+    @Query('q') query?: unknown,
+    @Query('from') from?: unknown,
+    @Query('to') to?: unknown,
+  ) {
     return this.guarded(
-      () => this.service().myPurchasesWithSummary(requireUserId(request), { query }),
+      () => this.service().myPurchasesWithSummary(requireUserId(request), { query, from, to }),
       'purchase history is unavailable',
     );
   }
