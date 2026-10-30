@@ -9,7 +9,13 @@ import test from 'node:test';
 import { CLASSIFIER_VERSION, buildReleaseInput, classifyPaths } from './classify-release.mjs';
 
 test('classifier version is explicit', () => {
-  assert.equal(CLASSIFIER_VERSION, 'release-path-v1');
+  assert.equal(CLASSIFIER_VERSION, 'release-path-v2');
+});
+
+test('Production release evidence verifier requires the current classifier version', async () => {
+  const deploy = await readFile(new URL('../../.github/workflows/deploy.yml', import.meta.url), 'utf8');
+  assert.match(deploy, new RegExp(`classifierVersion == \"${CLASSIFIER_VERSION}\"`));
+  assert.doesNotMatch(deploy, /classifierVersion == \"release-path-v1\"/);
 });
 
 test('documentation-only paths do not enter a runtime lane', () => {
@@ -190,7 +196,7 @@ test('executable and contract-like documentation paths fail closed', () => {
     'docs/embedded-script.sh',
     'docs/embedded-script.mjs',
     'docs/embedded-script.py',
-    'docs/mobile-api-contract.json',
+    'docs/arbitrary-payload.json',
     'docs/unsafe.html',
     'docs/guide.md\nbackend/src/unsafe.ts',
   ]) {
@@ -198,6 +204,23 @@ test('executable and contract-like documentation paths fail closed', () => {
   }
   assert.equal(classifyPaths(['docs/guide.md', 'docs/images/safe.png']), 'DOCS_ONLY');
   assert.equal(classifyPaths(['docs/embedded-script.sh', 'backend/src/app.module.ts']), 'UNKNOWN');
+});
+
+test('only the generated mobile API JSON contract enters the runtime lane, never docs-only', () => {
+  assert.equal(classifyPaths(['docs/mobile-api-contract.json']), 'RUNTIME_RELEVANT');
+  assert.equal(classifyPaths(['docs/mobile-api-contract.json', 'backend/src/shop/shop.controller.ts']), 'RUNTIME_RELEVANT');
+  assert.equal(classifyPaths(['docs/unknown.json']), 'UNKNOWN');
+  withDocumentFixture(({ repo, commit, base }) => {
+    const path = join(repo, 'docs', 'mobile-api-contract.json');
+    writeFileSync(path, '{\"schemaVersion\":1}\n');
+    const head = commit('add generated contract');
+    const input = buildReleaseInput({ repo, base, head });
+    assert.equal(input.classification, 'RUNTIME_RELEVANT');
+    assert.equal(input.applicationSourceSha, head);
+    chmodSync(path, 0o755);
+    const executable = commit('make generated contract executable');
+    assert.equal(buildReleaseInput({ repo, base: head, head: executable }).classification, 'UNKNOWN');
+  });
 });
 
 test('executable documentation mode cannot bypass release classification', () => {
