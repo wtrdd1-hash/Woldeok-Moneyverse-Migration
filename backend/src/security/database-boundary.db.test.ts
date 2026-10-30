@@ -62,6 +62,28 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.public_execute).toBe(false);
     });
 
+    it('denies direct audit table access, including TRUNCATE, to the application role', async () => {
+      const result = await app.query<{
+        can_select: boolean;
+        can_insert: boolean;
+        can_update: boolean;
+        can_delete: boolean;
+        can_truncate: boolean;
+      }>(`SELECT
+          pg_catalog.has_table_privilege(current_user, 'public.audit_logs', 'SELECT') AS can_select,
+          pg_catalog.has_table_privilege(current_user, 'public.audit_logs', 'INSERT') AS can_insert,
+          pg_catalog.has_table_privilege(current_user, 'public.audit_logs', 'UPDATE') AS can_update,
+          pg_catalog.has_table_privilege(current_user, 'public.audit_logs', 'DELETE') AS can_delete,
+          pg_catalog.has_table_privilege(current_user, 'public.audit_logs', 'TRUNCATE') AS can_truncate`);
+      expect(result.rows[0]).toEqual({
+        can_select: false,
+        can_insert: false,
+        can_update: false,
+        can_delete: false,
+        can_truncate: false,
+      });
+    });
+
     it('denies raw application ledger posting after migration 269', async () => {
       const result = await app.query<{ allowed: boolean }>(
         `SELECT pg_catalog.has_function_privilege(
