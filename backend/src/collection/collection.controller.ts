@@ -27,8 +27,7 @@ export class CollectionController {
   @Get()
   async listCollections(@Req() req: RequestWithSession) {
     const userId = requireUserId(req);
-    const pieces = await this.collectionService.listCollections(userId);
-    return { pieces };
+    return this.collectionService.listCollections(userId);
   }
 
   @ApiOperation({ summary: '수집품 유저 메모 및 즐겨찾기 수정' })
@@ -52,8 +51,7 @@ export class CollectionController {
   @Get('curation/status')
   async getCurationStatus(@Req() req: RequestWithSession) {
     const userId = requireUserId(req);
-    const status = await this.collectionService.getCurationStatus(userId);
-    return { status };
+    return this.collectionService.getCurationStatus(userId);
   }
 
   @ApiOperation({ summary: '소유권 큐레이션 사다리 단계 진척' })
