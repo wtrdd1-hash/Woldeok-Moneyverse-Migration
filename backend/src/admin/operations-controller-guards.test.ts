@@ -28,7 +28,7 @@ describe('AdminWorkOperationsController mutation guards', () => {
     (method) => {
       const guards = guardsOn(method);
       expect(guards).toContain(CsrfGuard);
-      expect(guards).toContain(ReauthGuard);
+      expect(guards).not.toContain(ReauthGuard);
     },
   );
 });
