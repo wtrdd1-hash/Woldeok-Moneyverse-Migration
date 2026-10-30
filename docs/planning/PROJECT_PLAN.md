@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1520 F675-186 upkeep receipt evidence history / issue #2035 / Draft PR_PENDING / RELEASE HOLD; mass-merge P0 #2031.
+**Current planning:** v1520 F675-186 upkeep receipt evidence history / issue #2035 / Draft #2036 / RELEASE HOLD; mass-merge P0 #2031.
 
 ## v2026.10.30.1520 — F675-186 Member Upkeep Receipt & Ledger Evidence History (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Improvement v1518 → Current Addition v1520 → Next Improvement v1522 (provisional). Main bf8d0d48f810932b43783d8605dce53954c60cff rechecked start/mid; engineering #2035; P0 mass-merge incident #2031. All changes docs-only; no main merge or Production authorization.

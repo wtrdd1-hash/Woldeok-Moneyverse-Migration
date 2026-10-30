@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1520 F675-186 upkeep receipt evidence history / issue #2035 / Draft PR_PENDING / RELEASE HOLD; mass-merge P0 #2031.
+**Current planning:** v1520 F675-186 upkeep receipt evidence history / issue #2035 / Draft #2036 / RELEASE HOLD; mass-merge P0 #2031.
 
 ## v2026.10.30.1520 — F675-186 Member Upkeep Receipt & Ledger Evidence History (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
