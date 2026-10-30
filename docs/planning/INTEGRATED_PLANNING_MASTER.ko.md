@@ -1,5 +1,37 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v1476 / F675-175 — 회원 전용 고객문의 임시저장 (기능 추가 / 기획 초안 / 운영 보류)
+
+**주기·근거·한계.** 이전 기능 보완 v1474 → 현재 기능 추가 v1476 → 다음 기능 보완 v1478(잠정). 시작·중간 기준 origin/main `0dffb939676e6cfd861d19f96208f8929902d1f9`; v1474 Draft #1892의 병합은 가정하지 않음. 마지막 완료 독립 QA v1373 FAILED/P0(2026-10-29 21:35 KST), 신규 금융 실행 경로 회귀 #1895. 소스·개발 DB는 읽기 전용 조사. [개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900). **문서 기획만 수행**하며 코드·DB·WLD·기능 스위치·공식 Test·운영은 변경하지 않음.
+
+### 실제 소스 공백·대상·목적
+- `frontend/src/app/support/member-support-forms.tsx`의 새 문의/답장 `useActionState` 폼에는 영구 임시저장 동작이 없음. `backend/src/support/support.controller.ts`는 전송·조회·대화 내역을 제공하지만 임시저장 API는 없음. 마이그레이션 `196-user-admin-support-chat.sql`은 실제 제출된 문의/메시지만 저장. 개발 PostgreSQL의 문의 3건·메시지 6건, 임시저장 테이블 없음은 **운영 건수나 수요 증거가 아님**.
+- 대상은 모바일·여러 기기에서 민감한 관리자 문의를 작성하는 로그인 회원. 새 문의와 본인 소유 문의 답장의 **미전송 초안**만 저장. 기존 전송된 문의, F675-104 사건 에스컬레이션, F675-105 증빙 보관함, F675-173 개인정보 내보내기와 구분. 관리자 초안 조회, 첨부파일, 자동 전송·에스컬레이션·알림·잔액 변경·환불·청구 없음.
+- 대안 비교: 브라우저 localStorage만 사용하면 기기 동기화가 안 되고 공용 기기 잔존 위험, 서버 평문 저장은 민감정보 노출 범위 증가. **권고안**은 회원 소유권 함수와 서버 암호화를 결합한 교차 기기 임시저장. 키 관리가 검증되기 전 기능은 OFF.
+
+### 화면·CTA·상태
+- 진입점은 기존 `/support` 새 문의 및 `/support?thread=<본인-uuid>` 답장. **임시저장**, **이어쓰기**, **초안 삭제**, 기존 **전송** 버튼을 분리. 800ms 지연 자동저장은 명시적 선택 시에만 켜며 기본 OFF. 저장은 전송이 아님. 회원당 활성 초안 최대 20개, 새 문의 1개 및 본인 소유 문의별 답장 1개, 최종 확인된 저장부터 7일 만료. 본문 1~2,000자, 새 문의 제목 1~120자. 빈 입력은 명시적으로 삭제하며 자동 업로드 금지.
+- 상태: 미저장/저장 중/서버 확인 저장(시각·리비전)/충돌/만료/오프라인/서비스 불가/기능 OFF/전송 중/전송 검증 완료/전송 결과 불명. 타임아웃을 저장·전송 성공으로 표시하지 않고 로컬 입력을 유지하며 동일 요청 UUID로 재시도. 401 로그인, 403 본인·동의 거부, 404 타인·삭제된 문의, 409 구버전, 410 만료, 413 크기 초과, 429 제한, 503 서버·암호키 장애를 구별. 로그아웃·계정 전환 시 민감한 메모리와 미완료 응답을 폐기.
+- 여러 기기 충돌은 서버 수정 시각을 표시하고 **서버 초안 검토** 또는 **로컬 내용 유지**를 사용자가 명시적으로 선택하도록 함. 자동 덮어쓰기 금지. 전송 확인 후에도 전송에 사용한 리비전과 일치할 때만 초안을 삭제하여 다른 기기에서 작성한 최신 내용을 보존. 전송 결과 불명일 때 기존 메시지 불변 영수증으로 확인 전까지 초안 유지.
+
+### API·인증·암호화·악용 방지
+- NestJS `GET /api/v1/support/drafts?contextType=new_thread|reply&threadId=<uuid>`, `PUT /api/v1/support/drafts` 본문 `{contextType,threadId?,subject?,body,expectedRevision,requestId}`, `DELETE /api/v1/support/drafts` 본문 `{contextType,threadId?,expectedRevision,requestId}`. 리비전은 JS 정밀도 손실 방지를 위해 십진 **문자열**이며 최초 저장은 `"0"`. 응답 `contextType,threadId?,revision,updatedAt,expiresAt,receiptId`; GET은 본인만 복호화된 제목/본문 추가. 사용자 ID는 입력받지 않고 검증된 세션에서 결정. DTO 미허용 필드·잘못된 UUID·초과 문자열·제어문자 거부. Next 동일 출처 `/api/support/drafts` 쓰기는 세션·동의·CSRF, Android `/app-api/v1/support/drafts`는 검증된 bearer 신원 사용. 경로맵·앱 API 계약 동등성 검증.
+- 동일 `requestId`·본문 재요청은 이후 리비전이 바뀌어도 최초 불변 영수증을 반환하며, 동일 키에 다른 본문은 409. 타인 문의 존재를 누설하지 않는 404, 본인 초안 만료 시 권한 확인 후 410. 제안 제한: 회원별 분당 쓰기 30/읽기 60, IP별 추가 제한, 요청 크기·처리시간 상한(실측 후 조정). 모든 응답 `private,no-store`; 페이지 noindex/nofollow, 사이트맵 제외. 평문·암호문·요청 키·토큰·메시지 내용 로그 금지.
+- NestJS가 UTF-8 JSON `{subject?,body}`를 AES-256-GCM(무작위 96비트 nonce, 128비트 tag)으로 암호화하고 키 버전을 참조. 키는 DB·브라우저에 저장하지 않음. 추가 인증 데이터에 회원·컨텍스트·리비전을 결속. 키 장애 시 실패 처리, 키 교체·유실·만료 데이터 파기 절차를 명세. 서버 탈취에도 안전한 종단 간 암호화라고 주장하지 않음.
+
+### DB·트랜잭션·권한·만료
+- **제안 스키마이며 미적용**. 기존 적용 마이그레이션과 체크섬 불일치 5건을 먼저 해결하고 신규 고유 번호의 전진형 SQL만 사용. `support_message_drafts`: `owner_id uuid REFERENCES users`, `context_type CHECK('new_thread','reply')`, `context_id uuid NOT NULL`, `ciphertext bytea`, 12바이트 nonce·16바이트 tag, `key_version`, `revision bigint CHECK>0`, `updated_at`, `expires_at`, `PRIMARY KEY(owner_id,context_type,context_id)`. 새 문의는 0 UUID 센티넬, 답장은 실제 본인 소유 `support_threads.id`만 허용하는 CHECK/함수 검증. `(owner_id,expires_at)`, `(expires_at,owner_id)` 인덱스. 평문 검색 인덱스 없음.
+- `support_draft_operation_receipts`: `request_id uuid PRIMARY KEY`, owner/context/operation, `request_hmac bytea`, 결과 리비전, `receipt_id uuid UNIQUE`, 확정 시각. 초안 7일과 별개로 영수증은 30일 보관하여 응답 유실 재시도 보장 후 정책에 따라 파기. 원문 기록 금지. `SECURITY DEFINER` 함수에 고정 search_path·본인 검증; 테이블은 PUBLIC·moneyverse_app 직접 권한 회수, 최소 EXECUTE만 부여. 동시 신규 초안 20개 한도를 지키도록 회원 계정 행을 먼저 잠그고 컨텍스트 행 잠금→리비전·본인 문의 검증→암호문 갱신·만료 설정→불변 영수증 기록을 **단일 트랜잭션**으로 처리. 동일 키 재생은 변경 없이 최초 결과 반환.
+- 삭제·전송 후 정리는 compare-and-swap 리비전 일치 시만 수행. 저장·삭제·전송 경합의 확정 결과를 하나로 제한하고 오래된 요청은 409. 계정 삭제·만료 후 즉시 읽기 금지, 정리 작업은 멱등·건수만 감사·백업 복원 후 재노출 방지. 개인정보 내보내기에 초안을 포함할지는 별도 법적 검토가 필요하며 관리자 내용 조회는 허용하지 않음.
+
+### 관리자·SEO·접근성·분석·수용시험
+- 관리자는 익명 집계된 저장 실패/지연/만료 건수와 기능 스위치만 확인. 개인 초안 조회·검색·대리 열람·내용 내보내기·자동 사건 생성 금지. 가설 KPI: 임시저장 복구 후 문의 완료율, 대표 Test에서 p95 저장 <500ms, 충돌·429·503 비율, 타인 조회 0, 원치 않는 전송 0. 제목/본문·암호문 분석 수집 금지.
+- 웹 320px 단일 열·44px 터치 영역·키보드 포커스·스크린리더 저장/충돌 상태 알림·만료 안내·동작 줄이기·WCAG 2.2 AA. Android는 전송 대기 중 최소한의 로컬 안전 저장만 허용하며 로그아웃 시 폐기. 로그아웃 후 브라우저 뒤로가기로 초안 재노출 금지.
+- **수용시험은 명세만 했고 미실행**: 격리 PostgreSQL 17.11 합성 10,001개, 타인/위조/CSRF 100건, 동시 저장·삭제·전송 100건, 응답 유실·멱등 재생 50건, 만료·계정 전환·키 교체 30건. 앱 역할 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 금지, 관리자 조회 금지, WLD·원장 영향 0, Nest/Next/Android 계약, 접근성·SEO, 영수증 재생, 백업 복원, 기능 OFF 롤백. #1878·적용 체크섬 계보 검증 전 마이그레이션 번호 할당 금지.
+- **운영 보류:** QA v1373 금융 #1895/#1896의 미검증 국고·조폐 실행, 기존 중앙은행·국부펀드 실패, MINT 18,000 WLD 출처, 국고 552행 연결, 개발 DB 체크섬 불일치 5건과 audit_logs 앱 권한, 브랜치 보존 #1663, 독립 백업 복원·공식 Test 정확 SHA. 새 코드는 별도 개발 브랜치·전체 CI·실제 PG 보안/금융 회귀·공식 Test 인증 E2E·승인 GitOps 이후에만 승격. 기능 기본 OFF, 롤백 시 UI/API 숨김·암호화 데이터는 정책적 파기까지 보존.
+- **P0 4건:** REPO1476-01 브랜치/PR 보존; FIN1476-02 금융 fail-closed·출처; SEC1476-03 체크섬·권한·스키마 계보; REL1476-04 전체 CI·복원·정확 SHA Test·GitOps. **P1 6건:** DRAFT1476-05 DB/권한/TTL, DRAFT1476-06 경합·불변 영수증, DRAFT1476-07 Nest/Next/Android API, DRAFT1476-08 회원 UI·접근성, DRAFT1476-09 개인정보·관리자·KPI, DRAFT1476-10 격리 PG·보안·롤백. 양 언어 10개 식별자 동일. 외부 독립 중복 제거·검증 승인 신규 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
+
+
 ## v1472 / F675-174 — 회원 전용 검증형 알림 검색·안정적 내역 조회 (기능 추가 / 초안 / 운영 HOLD)
 
 **기준·범위·주기.** 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 최신 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`. 마지막 완료 독립 QA v1371 FAILED/P0, v1372는 증거 수집 중으로 최종 판정 없음. 소스·개발 DB 읽기 전용 조사. **기획 문서만 변경**, 런타임·DB·WLD·기능 스위치·Test·Production 미변경. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).

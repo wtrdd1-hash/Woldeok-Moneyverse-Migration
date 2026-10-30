@@ -1,5 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.10.29.1476 — F675-175 회원 전용 고객문의 임시저장 (기능 추가 / 기획 초안 / 운영 보류)
+- 이전 기능 보완 v1474 → 현재 기능 추가 v1476 → 다음 기능 보완 v1478(잠정). 시작·중간 main `0dffb939676e6cfd861d19f96208f8929902d1f9`, QA v1373 FAILED/P0. v1474 Draft #1892는 병합된 것으로 간주하지 않음. [개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
+- 실제 새 문의·답장 폼 및 NestJS에는 영구 초안 기능이 없음. 개발 DB 문의 3건/메시지 6건, 초안 테이블 없음(운영 건수 아님). 새 기능은 회원 본인 미전송 초안의 저장·이어쓰기·삭제, 기기 동기화, 선택적 800ms 자동저장(기본 OFF), 최대 20개 컨텍스트·7일 만료. 자동 전송 없음. 320px/WCAG 2.2 AA 및 Android 동등.
+- Nest GET/PUT/DELETE `/api/v1/support/drafts`, Next BFF·Android 앱 API, 검증된 회원·CSRF, 십진 문자열 단조 증가 리비전, UUID 멱등 키·30일 불변 영수증, 충돌 409·장애 503·타인 문의 404. 암호화 초안 전진형 스키마, 0 UUID 센티넬·회원/컨텍스트 유일 제약, SECURITY DEFINER 본인 함수, 앱 직접 테이블 권한 금지, 만료 파기, 전송 후 CAS 정리, 관리자 초안 접근 금지, noindex/no-store, 익명 KPI. 전체 명세: [국문 통합 마스터](INTEGRATED_PLANNING_MASTER.ko.md).
+- P0 REPO1476-01 FIN1476-02 SEC1476-03 REL1476-04: 과거 브랜치, QA #1895 국고/조폐 미검증 실행·중앙은행/국부펀드·18,000 WLD/국고 552행, 체크섬 5건/audit_logs 권한, 독립 복원·정확 SHA Test·GitOps. P1 DRAFT1476-05 DRAFT1476-06 DRAFT1476-07 DRAFT1476-08 DRAFT1476-09 DRAFT1476-10: DB/권한·트랜잭션/영수증·API·UI·개인정보/KPI·격리 PG. 합성 10,001행·위조 100건·경합 100건·응답 유실 50건·만료 30건 **시험 조건만 명세, 미실행**. 코드·DB·WLD·Test·운영 미변경, 기능 기본 OFF·운영 보류. 외부 검증 승인 신규 0건·누적 UNKNOWN/10,000건 → BLOCKED / IN PROGRESS.
+
+
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.
