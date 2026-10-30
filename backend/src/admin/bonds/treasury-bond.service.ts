@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   TreasuryBondRepository,
   type BondCouponLogRow,
@@ -8,6 +8,8 @@ import {
 } from './treasury-bond.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
+import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
+import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
 
 @Injectable()
 export class TreasuryBondService {
