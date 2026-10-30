@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.10.28.1525",
+  "contractVersion": "v2026.10.30.0125",
   "apiVersion": "v2026.10.28.1525",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -8734,14 +8734,7 @@
             "type": "string"
           },
           "affinity": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "type": "number"
           },
           "replayed": {
             "type": "boolean"
@@ -17230,6 +17223,118 @@
         "required": [
           "updatedCount",
           "remainingUnreadCount"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/help/articles/:locale/:slug/report",
+      "purpose": "Report a problem with an exact currently approved verified-help article revision",
+      "callWhen": "An authenticated member explicitly submits a private correction report",
+      "authorization": "Member session + current consent + CSRF + published revision identity",
+      "afterSuccess": "Open the returned owner-private support thread; on uncertainty check inbox before retry",
+      "backendRoute": "/api/v1/help/articles/:locale/:slug/report",
+      "operationId": "HelpReportController_report",
+      "backendOpenApiPath": "/help/articles/{locale}/{slug}/report",
+      "summary": "Report a problem with an exact currently approved help revision",
+      "parameters": [
+        {
+          "name": "locale",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ko",
+              "en"
+            ]
+          }
+        },
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/HelpReportDto"
+        },
+        "schemaName": "HelpReportDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "idempotencyKey": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "publishedRevisionId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "outdated",
+                "incorrect",
+                "unclear"
+              ]
+            },
+            "details": {
+              "type": "string",
+              "minLength": 10,
+              "maxLength": 600
+            }
+          },
+          "required": [
+            "idempotencyKey",
+            "publishedRevisionId",
+            "reason",
+            "details"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "threadId",
+          "status",
+          "verified"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "threadId",
+          "status",
+          "verified"
         ]
       },
       "responseCompatibility": {

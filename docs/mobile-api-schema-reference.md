@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.28.1525**
+Update version: **v2026.10.30.0125**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 181 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 182 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -2873,7 +2873,7 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | npc_code | true | string |  |
-| affinity | true | null \| number |  |
+| affinity | true | number |  |
 | replayed | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
@@ -5683,6 +5683,44 @@ _No request body._
 |---|---|---|---|
 | updatedCount | true | number |  |
 | remainingUnreadCount | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/help/articles/:locale/:slug/report` — Report a problem with an exact currently approved help revision
+
+- Authorization: Member session + current consent + CSRF + published revision identity
+- Success status: 201
+- Response mode: json
+- After success: Open the returned owner-private support thread; on uncertainty check inbox before retry
+- Operation ID: `HelpReportController_report`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| locale | path | true | string | enum="ko","en" |
+| slug | path | true | string | maxLength=100; pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `HelpReportDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| idempotencyKey | true | string (uuid) |  |
+| publishedRevisionId | true | string (uuid) |  |
+| reason | true | string | enum="outdated","incorrect","unclear" |
+| details | true | string | minLength=10; maxLength=600 |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| threadId | true | string |  |
+| status | true | string |  |
+| verified | true | boolean |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
