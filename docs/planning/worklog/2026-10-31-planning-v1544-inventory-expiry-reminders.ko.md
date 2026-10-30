@@ -1,5 +1,5 @@
 # 기획 v1544 — 회원 보유 아이템 만료 알림 선택(F675-192)
-**상태:** DRAFT/RELEASE HOLD/문서 전용. **주기:** 이전 보완 v1542, 현재 추가 v1544, 다음 보완 v1546(잠정). **main:** 761a55a094fb9dd383d213e817305e68c79fa23c; **선행:** #2105; **개발 인계:** #2112; **Draft:** PR_PENDING.
+**상태:** DRAFT/RELEASE HOLD/문서 전용. **주기:** 이전 보완 v1542, 현재 추가 v1544, 다음 보완 v1546(잠정). **main:** 761a55a094fb9dd383d213e817305e68c79fa23c; **선행:** #2105; **개발 인계:** #2112; **Draft:** #2113.
 
 ## 시작
 설치된 Superpowers using-superpowers, brainstorming, worktrees, writing-plans, verification 스킬을 읽음. skills 커넥터 목록이 비어 URI가 없었음. miniPC Debian 13.6·서비스·GitHub PR·AGENTS.md·README.md·영문 기준/국문 대조 문서 확인. 별도 브랜치와 작업 폴더 생성. 런타임/DB 변경 없음.

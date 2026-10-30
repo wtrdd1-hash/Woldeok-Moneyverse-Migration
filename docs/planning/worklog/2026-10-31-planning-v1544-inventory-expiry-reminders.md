@@ -1,5 +1,5 @@
 # Planning v1544 — Owner Inventory Expiry Reminder Opt-In (F675-192)
-**Status:** DRAFT / RELEASE HOLD / docs only. **Cycle:** Previous Improvement v1542; Current Addition v1544; Next Improvement v1546 (provisional). **Main:** 761a55a094fb9dd383d213e817305e68c79fa23c; **parent:** #2105; **handoff:** #2112; **Draft:** PR_PENDING.
+**Status:** DRAFT / RELEASE HOLD / docs only. **Cycle:** Previous Improvement v1542; Current Addition v1544; Next Improvement v1546 (provisional). **Main:** 761a55a094fb9dd383d213e817305e68c79fa23c; **parent:** #2105; **handoff:** #2112; **Draft:** #2113.
 
 ## Start
 Read installed Superpowers using-superpowers plus brainstorming, worktrees, writing-plans, verification; skills connector returned an empty list, so no skill URI was available. Checked miniPC Debian 13.6, service health, GitHub PRs, AGENTS.md, README.md, canonical English and Korean plans. Created separate branch and worktree. No runtime/DB changes.
