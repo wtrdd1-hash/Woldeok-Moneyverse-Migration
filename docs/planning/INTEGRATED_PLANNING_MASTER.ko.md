@@ -1,4 +1,47 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1544 — F675-192 회원 보유 아이템 만료 알림 선택 (기능 추가 / 초안 / 배포 보류)
+
+**주기:** 이전 기능 보완 v1542 → 현재 기능 추가 v1544 → 다음 기능 보완 v1546(잠정). **기준:** origin/main `761a55a094fb9dd383d213e817305e68c79fa23c`, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 및 국문 대조 문서 시작·중간 확인. Draft PR_PENDING는 #2105 후속, 개발 인계 #2112. 제안 문서이며 기능 구현·배포 승인 아님.
+
+### 1. 근거·목적·대안
+- **문제:** 회원 보관함에는 보유 만료 전 알림을 명시적으로 신청하는 기능이 없음. `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패를 []로 처리할 수 있어 정상 빈 목록과 장애를 구분하지 못함. 마이그레이션 123 `shop_my_items_v2`는 수량 0·보유 만료 항목을 제외하고 `clock_timestamp()`를 여러 번 호출하며 효과 만료·유지비는 별개. Nest 알림함은 인증·동의 기반이지만 `NotificationService`가 `public.in_app_notifications`를 직접 조회함. 이번 소스 검색에서 번호가 있는 마이그레이션의 해당 테이블 CREATE를 찾지 못했으므로 실제 클린 스키마·권한·운영 존재 여부를 **미검증**으로 기록. 실제 피해나 전송 실적을 입증한 것은 아님.
+- **대안:** A 브라우저 타이머(오프라인 불가), B 이메일·푸시(외부 동의·전달 위험), **C 채택: 기존 앱 내 알림함에 사전 신청 기반으로 안전하게 중복 제거 발송**. 개발 C의 회원 캘린더(#2096)와 분리하고 외부 제공자를 사용하지 않음.
+- **대상/KPI:** 인증·동의된 보유자. 실제 측정 전 목표 가설은 신청률, 적격 창 내 발송률, 중복 0건, p95 지연 60분 이하, 타인 정보 노출 0건. 측정 결과라고 주장하지 않음.
+
+### 2. 사용자 흐름·상태·접근성
+- `/inventory/expiring` → ‘만료 알림 설정’ → `/inventory/expiring/reminders`. 로그인·동의 필수. 7일·1일 체크박스, 전체 활성화/비활성화, 저장·취소·새로고침 CTA. 기본 OFF·사전 선택 없음. 보유 만료 알림이며 효과 만료·체납·자동 장착 해제·영구 소유·갱신·결제 약속이 아님. 7×24시간/1×24시간은 DB UTC 기준, KST 표기. 검증된 경우에만 기준시각·다음 검사시각 표시.
+- 로딩, 설정 없음/비활성, 저장됨, 미저장, 저장 중, 실제 적격 대상 없음, 만료시각 UNKNOWN, 503 원천 장애, 401 인증, 403 동의, 409 수정 충돌, 429 제한, 오프라인·시간초과·재시도, 계정 전환·로그아웃 시 상태 초기화와 오래된 응답 무시. 장애를 ‘만료 아이템 없음’으로 바꾸거나 알림 커밋 전 ‘전송됨’으로 표시하지 않음.
+- 320px 반응형, 명확한 토글 레이블·상태 문자, 키보드·초점·ARIA, 대비·44px 터치 목표, WCAG 2.2 AA, 한국어/영어 일관된 시간·금융 표현.
+
+### 3. 인증·API·Android
+- Nest `GET /api/v1/shop/expiry-reminders/preferences` → `{enabled,remind7d,remind1d,revision,updatedAtUtc,asOfUtc}`. 동일 경로 `PUT`은 불리언만 허용, `expectedRevision` 정수 필수, CSRF 및 SessionGuard/AuthenticatedGuard/ConsentGuard, 회원 ID는 세션에서만 추출. 낡은 수정 버전은 409 후 재조회; 재시도 시 중복 수정 방지. 알 수 없는 필드·형식·과대 본문·가능한 경우 중복 JSON 키 거부. 400/401/403/409/429/503; DB 검증 실패는 503.
+- Next 동일 출처 비공개 BFF `/api/inventory/expiry-reminders/preferences` GET/PUT, 내부 토큰은 서버 전용. URL·로컬스토리지·분석·로그에 회원 UUID 금지. Android `/app-api/v1/shop/expiry-reminders/preferences` GET/PUT 동등성, 세션·동의·CSRF 대응, 응답 필드 제한, 디스크·오프라인 캐시 금지. 게이트웨이 PUT 지원 여부 사전 검증. 공개 API 예외 추가 금지.
+- 2xx/4xx/5xx/리다이렉트 모두 `private,no-store`·`noindex,nofollow`·`no-referrer`; 공유 CDN 캐시 금지. 타인 리소스 접근(BOLA)·권한 부여·세션 취소 검증.
+
+### 4. DB·제약·인덱스·트랜잭션
+- **선행 게이트:** 실제 `in_app_notifications` 클린 스키마·권한·컬럼·category·dedupe_key·FK·인덱스를 측정. 테스트 fixture만으로 운영 테이블 존재를 가정하지 않음. 누락 시 검토된 순방향 마이그레이션을 명시적으로 추가. 앱 계정에 보관함/알림함 직접 SELECT/INSERT/UPDATE/DELETE 권한 부여 금지.
+- 제안 `inventory_expiry_reminder_preferences`: `user_id uuid PRIMARY KEY`, `enabled boolean NOT NULL DEFAULT false`, `remind_7d boolean NOT NULL DEFAULT false`, `remind_1d boolean NOT NULL DEFAULT false`, `revision bigint NOT NULL DEFAULT 1 CHECK(revision>0)`, `updated_at timestamptz NOT NULL`. 계정 삭제 정책·고아 데이터 방지. 고정 search_path의 본인 전용 SECURITY DEFINER 조회/수정 함수만 `moneyverse_app` EXECUTE 허용.
+- 제안 `inventory_expiry_reminder_deliveries`: `user_id,catalog_id,holding_expires_at,threshold_days,notification_id,delivered_at`. `threshold_days IN (1,7)` 및 (`user_id,catalog_id,holding_expires_at,threshold_days`) UNIQUE, 실제 알림함 스키마 확인 후 notification_id UNIQUE/FK 결정. 만료 연장 후에도 과거 알림은 당시 사실만 기록. 보관기간·탈퇴 삭제는 기존 정책 검토 후 결정. `user_items(expires_at,user_id,catalog_id)` 조건부 인덱스는 10,001건 EXPLAIN 후 온라인 생성 가능성 검토, 운영 차단 DDL 금지.
+- 전용 최소권한 로그인+NOLOGIN 실행 역할, 앱 계정의 테이블 INSERT 금지. 검토된 SECURITY DEFINER 배치 함수는 트랜잭션당 최대 200건, 설정 행 잠금 및 발송 직전 수신 동의·수량·만료를 단일 DB UTC `statement_timestamp` 기준으로 재검증. 중복 영수증 `ON CONFLICT DO NOTHING RETURNING`과 앱 내 알림 INSERT는 **동일 트랜잭션**으로 커밋 또는 전체 롤백. 실행자 2개 동시 수행도 최대 1회 커밋. 잠금·SKIP LOCKED·timeout·작업 예산·진행 지표 설정. 이메일·푸시·WLD/금융 원장 기록 생성 금지.
+- 적격: 본인 보유 수량>0, `expires_at` 존재, 아직 미만료, 발송 시 활성. 7일 창 `만료−7일 <= 현재 < 만료−6일`, 1일 창 `만료−1일 <= 현재 < 만료`. 창이 지난 소급 발송 금지, 창 안에서 늦게 신청하면 최대 1회. 수신 거부와 발송은 설정 행 잠금으로 순서화; 이미 커밋된 알림은 회수할 수 없음. 만료시각 변경 시 새로운 시각에 대한 별도 알림은 해당 창에서만 가능하며 과거 기록을 최신 상태처럼 표시하지 않음.
+
+### 5. 관리자·악용방지·SEO·운영
+- 관리자에게 개별 회원 설정·알림 문구를 노출하지 않음. 기준별 일간 적격·시도·커밋·중복 억제·수신거부 억제·원천 오류·p95 지연 집계만 제공하고 코호트 20명 미만 비공개. 과도한 세부 필터로 재식별 금지. 설정 쓰기 rate limit, CSRF, 세션 재생·권한 철회·비정상 본문·봇 요청 방어. 로그·분석에서 회원·상품 식별자와 알림 본문 제거. 상품명은 escape, 링크는 동일 출처 보관함 경로만 허용.
+- 기능 플래그 `inventory_expiry_reminders_enabled` 기본 OFF. 스키마 증빙 → 격리 DB 시험 → 정확 SHA 공식 Test → 소규모 신청 코호트 → 발송률·롤백 관찰 → 별도 Production 승인. OFF는 이후 발송을 중단하고 기존 알림함·잔액은 보존. 순방향 안전 마이그레이션, 실패 시 작업 지연 경고를 보내고 ‘발송 완료’로 표시하지 않음. Android·비공개 SEO 검증 필수.
+
+### 6. P0/P1 실행 백로그·수용 기준
+- **P0 OPS1544-01:** 운영 frontend/backend 실행 SHA·아티팩트 해시·스키마/설정·롤백 신원 및 최신 백업 격리 복원·RPO/RTO 증명(#1984). BLOCKED.
+- **P0 SEC1544-02:** 311개 클린 스키마·DEV 체크섬 불일치·알림함 테이블 출처·앱 계정 과도한 권한 검증(#993). BLOCKED.
+- **P0 FIN1544-03:** 국고/MINT/SWF·복식부기 불변조건, 알림 실행자의 경제 변경 함수 접근 차단 증명(#1976). BLOCKED.
+- **P0 REL1544-04:** Draft/HOLD 병합 통제·의존성 감사·정확 SHA Test·QA 경로 증빙(#2103)·Test FX ACL 500(#2111)·비공개 공간 권한(#2109)·SEO·독립 복원. BLOCKED.
+- **P1 REMIND1544-05:** 본인 전용 SQL 설정/적격 함수, 마이그레이션·인덱스·ACL 실 DB 시험. PROPOSED.
+- **P1 REMIND1544-06:** 별도 스케줄러·알림/영수증 원자성·중복방지·수신거부 잠금·지표. PROPOSED.
+- **P1 REMIND1544-07:** Nest DTO·가드·CSRF·수정 버전 PUT, Next 화면/BFF 상태·오류 처리. PROPOSED.
+- **P1 REMIND1544-08:** Android GET/PUT·계정 전환·오프라인 개인정보·캐시 방지. PROPOSED.
+- **P1 REMIND1544-09:** 엣지 no-store/noindex, a11y·번역·관리자 코호트·요청 제한. PROPOSED.
+- **P1 REMIND1544-10:** 격리 PostgreSQL 17에서 합성 보유 10,001개·회원 2명·실행자 2개·7일/6일/1일/만료 경계·NULL/변경 만료·수신거부 경합·롤백 후 재시도·401/403/409/429/503·Android·크롤러·복원 시험. **정의만, 미실행**.
+- 과거 QA v1405 백엔드 2778 PASS/501 SKIP, 프론트 2770 PASS, lint/typecheck/build PASS, 전체 의존성 감사 FAIL. 이후 정확 SHA 경로 증빙 미완(#2103), 신규 #2111 Test FX 500/운영 오래된 참고 시세 보고. 본 기능 시험·운영 승인 증거가 아님. 외부 독립 레퍼런스 신규 승인 **0**, 누적 검증·중복제거·분류 승인 **UNKNOWN/10,000**, **BLOCKED/IN PROGRESS**. **DRAFT/RELEASE HOLD**.
+
 ## v2026.10.31.1542 — F675-191 장착 교체 사전 검토의 대상 결속·증빙 시간 정합성 (기능 보완 / 초안 / 운영 보류)
 
 **회차:** 이전 기능 추가 v1540 → 현재 기능 보완 v1542 → 다음 기능 추가 v1544(잠정). **정본:** origin/main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md·한국어 대조 확인. Draft #2105, 선행 Draft #2101, 개발 #2100. 문서만 변경, 미구현·미병합·미배포.
