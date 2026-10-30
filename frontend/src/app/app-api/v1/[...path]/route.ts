@@ -9,6 +9,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
+import { normalizedReceiptCeiling, verifiedReceiptCeiling } from '@/app/work/work-receipt-ceiling';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -175,6 +176,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
+  }
+
+  const workReceiptFilter = parts.length === 2 && parts[0] === 'work' &&
+    parts[1] === 'receipts' && request.method === 'GET';
+  const receiptCeilings = workReceiptFilter ? request.nextUrl.searchParams.getAll('maxReceiptReward') : [];
+  if (receiptCeilings.length > 1 ||
+      (receiptCeilings.length === 1 && normalizedReceiptCeiling(receiptCeilings[0]) === null)) {
+    return gatewayProblem(400, 'Bad Request', 'work_receipt_ceiling_invalid',
+      'maxReceiptReward must be a canonical non-negative integer of at most 18 digits');
   }
 
   const receiptAmountFilter =
@@ -350,6 +360,22 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 
 
+  if (workReceiptFilter && receiptCeilings.length === 1 && response.ok) {
+    if (!isJsonMediaType(response.headers.get('content-type'))) {
+      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_ceiling_unverified',
+        'work reward receipts are unverified');
+    }
+    try {
+      if (!verifiedReceiptCeiling(await response.clone().json(), receiptCeilings[0]!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_receipt_ceiling_unverified',
+          'work reward receipts are unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_ceiling_unverified',
+        'work reward receipts are unverified');
+    }
+  }
+
   if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
     try {
       const payload: unknown = await response.clone().json();
@@ -455,6 +481,7 @@ async function handle(request: NextRequest, context: Context) {
   // cacheable upstream policy, including when the upstream returns an error.
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
+    if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.

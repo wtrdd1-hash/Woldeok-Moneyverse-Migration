@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { normalizedReceiptCeiling, verifiedReceiptCeiling, workReceiptsApiPath } from './work-receipt-ceiling';
+import { WorkReceiptCeilingForm } from './work-receipt-filter-form';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
@@ -60,13 +62,15 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage({ searchParams }: {
-  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string; availableOnly?: string }>;
+  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string; availableOnly?: string; maxReceiptReward?: string }>;
 }) {
   await requireMember();
   const filters = await searchParams;
   const maxDurationSeconds = normalizedWorkDuration(filters?.maxDurationSeconds);
   const maxReward = normalizedWorkRewardCeiling(filters?.maxReward);
   const availableOnly = normalizedWorkAvailableOnly(filters?.availableOnly);
+  const maxReceiptReward = normalizedReceiptCeiling(filters?.maxReceiptReward);
+  const receiptFilterInvalid = filters?.maxReceiptReward !== undefined && maxReceiptReward === null;
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
@@ -74,7 +78,7 @@ export default async function WorkPage({ searchParams }: {
     apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds, maxReward, availableOnly)),
     (maxDurationSeconds || maxReward || availableOnly) ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
-    apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
+    apiOrNull<{ receipts: readonly WorkReceipt[] }>(workReceiptsApiPath(maxReceiptReward)),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
     apiOrNull<WorkSummary>('/api/v1/work'),
     apiOrNull<{
@@ -87,7 +91,8 @@ export default async function WorkPage({ searchParams }: {
   const verifiedBoard = availableOnly && !isVerifiedAvailableWorkBoard(board) ? null : board;
   const tasks = verifiedBoard?.tasks ?? [];
   const open = (assignments?.assignments ?? []).filter(isOpen);
-  const paid = receipts?.receipts ?? [];
+  const verifiedReceipts = maxReceiptReward === null || verifiedReceiptCeiling(receipts, maxReceiptReward);
+  const paid = receiptFilterInvalid || !verifiedReceipts ? [] : (receipts?.receipts ?? []);
   const now = Date.now();
   // A filtered board must not erase server-provided durations for active assignments.
   const durationTasks = (maxDurationSeconds || maxReward || availableOnly) ? (fullBoard?.tasks ?? []) : tasks;
@@ -398,12 +403,23 @@ export default async function WorkPage({ searchParams }: {
         </section>
       )}
 
-      {/* 5. 최근 수령 영수증 */}
-      {paid.length > 0 && (
-        <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
-          <h2 id="receipts-title" className="text-base sm:text-lg font-semibold">
-            {isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
-          </h2>
+      {/* 5. 최근 수령 영수증: only the latest 20 owner-scoped receipts, never a lifetime total. */}
+      <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
+        <h2 id="receipts-title" className="text-base sm:text-lg font-semibold">
+          {isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          {isEn ? 'Search only your latest 20 receipts, not your lifetime rewards.' : '본인의 최근 영수증 20건만 검색합니다. 전체 누적 보상이 아닙니다.'}
+        </p>
+        <WorkReceiptCeilingForm isEn={isEn} selected={maxReceiptReward}
+          maxDurationSeconds={maxDurationSeconds} maxReward={maxReward} availableOnly={availableOnly} />
+        {receiptFilterInvalid ? (
+          <p role="alert">{isEn ? 'Enter a canonical WLD integer of at most 18 digits.' : '18자리 이하의 올바른 WLD 정수를 입력하세요.'}</p>
+        ) : maxReceiptReward !== null && !verifiedReceipts ? (
+          <p role="alert">{isEn ? 'Receipt evidence is unavailable. Try again later.' : '영수증 확인에 실패했습니다. 잠시 후 다시 시도하세요.'}</p>
+        ) : paid.length === 0 ? (
+          <p role="status">{isEn ? 'No recent receipts match this selection.' : '선택한 조건에 맞는 최근 영수증이 없습니다.'}</p>
+        ) : (
           <TruncatedList
             title={isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
             visibleCount={RECEIPTS_ON_WORK}
@@ -428,8 +444,8 @@ export default async function WorkPage({ searchParams }: {
               </div>
             ))}
           />
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 }

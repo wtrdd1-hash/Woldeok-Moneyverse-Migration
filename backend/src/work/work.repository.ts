@@ -36,6 +36,13 @@ export function parseWorkTaskMaxReward(raw: unknown): string | null {
 }
 
 /** Explicit opt-in only; absent means the legacy complete board. */
+/** Exact non-negative WLD ceiling on the already owner-scoped latest 20 receipts. */
+export function parseWorkReceiptMaxReward(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (typeof raw === 'string' && /^(?:0|[1-9][0-9]{0,17})$/.test(raw)) return raw;
+  throw new WorkInputError('maxReceiptReward must be a canonical integer string with at most 18 digits');
+}
+
 export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
   if (raw === undefined) return false;
   if (raw === '1' || raw === true) return true;
@@ -299,15 +306,17 @@ export class WorkRepository {
     });
   }
 
-  receipts(actor: unknown): Promise<WorkReceiptRow[]> {
+  receipts(actor: unknown, maxReceiptReward?: unknown): Promise<WorkReceiptRow[]> {
     assertUuid(actor, 'actor');
+    const ceiling = parseWorkReceiptMaxReward(maxReceiptReward);
     return queryRows<WorkReceiptRow>(
       this.pool,
       `SELECT receipt.receipt_id::text, receipt.assignment_id::text, receipt.code,
               receipt.name, receipt.reward_amount::text, receipt.experience_amount::text,
               receipt.transaction_id::text, receipt.created_at
-       FROM public.work_my_receipts($1) AS receipt`,
-      [actor],
+       FROM public.work_my_receipts($1) AS receipt
+       WHERE ($2::numeric IS NULL OR receipt.reward_amount <= $2::numeric)`,
+      [actor, ceiling],
     );
   }
 

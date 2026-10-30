@@ -150,10 +150,13 @@ export class WorkController {
 
   @Get('receipts')
   @ApiOperation({ summary: 'What the work paid, and the ledger transaction it paid through' })
-  async receipts(@Req() request: RequestWithSession) {
+  async receipts(
+    @Req() request: RequestWithSession,
+    @Query('maxReceiptReward') maxReceiptReward?: string,
+  ) {
     return {
       receipts: await this.guarded(
-        () => this.repository().receipts(requireUserId(request)),
+        () => this.repository().receipts(requireUserId(request), maxReceiptReward),
         'work receipts are unavailable',
       ),
     };
