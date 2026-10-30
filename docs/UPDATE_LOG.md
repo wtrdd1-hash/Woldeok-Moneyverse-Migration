@@ -1,3 +1,9 @@
+## v2026.10.30.1508 — F675-183 Weekly Quest Evidence (FEATURE ADDITION / DRAFT / HOLD)
+- Previous Improvement v1506 → Current Addition v1508 → Next Improvement v1510 (provisional). main 9da6545c4 rechecked start/mid; Draft stacked on #1995; handoff #2002.
+- Source: /quests shows 101 weekly goal aggregate without contributing receipts. New owner-only current-week drilldown, exact SQL metric parity, no invented NPC receipts, signed snapshot fingerprint cursor, strict privacy/Android/SEO/a11y and default-OFF rollout. No runtime code.
+- P0 OPS1508-01 SEC1508-02 FIN1508-03 REL1508-04; P1 QUEST1508-05 QUEST1508-06 QUEST1508-07 QUEST1508-08 QUEST1508-09 QUEST1508-10. QA v1389 119 backend and 53 frontend failures; five checksum mismatches, DEV ACL, Production/Test SHA and clean-schema bank-pocket drift BLOCK release.
+- Proposed acceptance NOT RUN. External independently approved new 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. No runtime/DB/WLD/Test/Production modification.
+
 ## v2026.10.30.1506 — F675-182 Wallet Detail Evidence Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous v1504 Addition / Current v1506 Improvement / Next v1508 Addition. Main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef, QA v1388, actor trust, exact WLD/UTC, ledger read not reconciliation, web/Android privacy, P0 release hold.
 - P0: OPS1506-01, SEC1506-02, FIN1506-03, REL1506-04. P1: DETAIL1506-05, DETAIL1506-06, DETAIL1506-07, DETAIL1506-08, DETAIL1506-09, DETAIL1506-10. Tests not run; external 0 new, UNKNOWN/10,000 BLOCKED; no runtime/DB/Production writes.
