@@ -1661,3 +1661,28 @@ ull 상태를 반환하도록 교정.
 - 로컬 `git diff`를 통한 변경점 무결성 검증.
 - 커밋 및 GitHub 푸시 후 GitHub Actions CI `runtime-check` 통과 확인.
 - PR #2045 스쿼시 머지 및 운영 서버 무중단 배포 진행.
+
+
+---
+## 🚀 [v10 Specification] 상점(Shop) 카테고리/가격상한/소유필터 및 린트 무결성 복원 (+추가, -0 삭제)
+
+### 1. 배경 및 원인 분석
+- GitHub Actions CI `runtime-check` 중 상점(`src/shop/`) 도메인 테스트 실패 분석:
+  1. `shop-category-filter.test.ts`: `parseShopCategory` 및 `filterShopItems(items, query, category)` 누락 및 export 부재.
+  2. `shop-price-ceiling.controller.test.ts`: `publicCatalog` 및 `catalog`에서 `maxPrice` 파싱 및 `filterShopByMaxPrice` 적용 누락.
+  3. `shop-ownership-controller.test.ts`: `catalog`의 3번째 인자로 전달되는 `'owned'` / `'unowned'` 필터링 누락 및 `sort` 오인으로 인한 `BadRequestException` 오작동.
+  4. `shop-holdings-controller.test.ts`: `holdings` 엔드포인트에서 `filter !== 'attention'` 유효성 검증(400) 및 `suspended / unpaid_weeks` 필터링 누락.
+  5. 린트 경고: `auto-swf.service.ts`의 미사용 `unverifiedSwfSettlement` import 제거.
+
+### 2. 세부 변경 사항
+- `backend/src/shop/shop.controller.ts`:
+  - `parseShopCategory`, `filterShopItems` 함수 정의 및 export.
+  - `publicCatalog`: `maxPrice`, `sort`, `category` 파라미터 수용 및 파이프라인 필터 적용.
+  - `catalog`: `maxPriceOrOwnership`, `sort`, `category` 수용, `owned`/`unowned` 및 `maxPrice` 복합 분기 처리.
+  - `holdings`: `filter` 쿼리 파라미터 수용, `attention` 외 400 거부 및 미납/정지 필터링 복원.
+- `backend/src/admin/treasury/auto-swf.service.ts`: 미사용 `unverifiedSwfSettlement` import 정리.
+
+### 3. 검증 계획
+- 로컬 `git diff` 점검.
+- 원격 푸시 후 GitHub Actions CI 통과 확인.
+- PR #2045 스쿼시 머지 및 운영 서버 무중단 배포.

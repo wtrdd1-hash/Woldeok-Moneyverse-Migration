@@ -1,9 +1,8 @@
-﻿import type { Pool } from 'pg';
+import type { Pool } from 'pg';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
-import { unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
 
 /** Block unverified SWF settlements before any database write or success event. */
 export function swfLedgerUnavailable(): never {

@@ -1,4 +1,4 @@
-﻿import {
+import {
   BadRequestException,
   Body,
   ConflictException,
@@ -33,7 +33,8 @@ import {
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
 import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } from './shop-compare';
-import { orderShopCatalog, parseShopPriceOrder } from './shop-catalog-order';
+import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './shop-catalog-order';
+import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -42,13 +43,26 @@ interface SearchableShopItem {
   readonly category?: unknown;
 }
 
-function filterShopItems<T extends SearchableShopItem>(items: readonly T[], query?: string): T[] {
+export function parseShopCategory(value: unknown): string | null {
+  if (value === undefined || value === '') return null;
+  // A category is a database enum-like token, not a user-supplied search expression.
+  if (typeof value !== 'string' || !/^[a-z][a-z0-9_]{0,39}$/.test(value)) {
+    throw new BadRequestException('invalid shop category');
+  }
+  return value;
+}
+
+export function filterShopItems<T extends SearchableShopItem>(
+  items: readonly T[],
+  query?: string,
+  category?: string | null,
+): T[] {
   const needle = query?.trim().toLocaleLowerCase('ko-KR') ?? '';
-  if (!needle) return [...items];
   return items.filter((item) =>
-    [item.code, item.name, item.description, item.category]
+    (!category || item.category === category) &&
+    (!needle || [item.code, item.name, item.description, item.category]
       .filter((value): value is string => typeof value === 'string')
-      .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle)),
+      .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle))),
   );
 }
 
@@ -59,84 +73,91 @@ function filterShopItems<T extends SearchableShopItem>(items: readonly T[], quer
 @Controller('shop')
 export class ShopController {
   constructor(
-    @Inject(ShopService) private readonly shop: ShopService | null,
-    @Inject(ShopCatalogRepository) private readonly catalogue: ShopCatalogRepository | null,
+    @Inject(ShopService) private readonly shopService: ShopService | null,
+    @Inject(ShopCatalogRepository) private readonly catalogRepository: ShopCatalogRepository | null,
   ) {}
 
   private service(): ShopService {
-    if (!this.shop) throw new ServiceUnavailableException('shop service is unavailable');
-    return this.shop;
+    if (!this.shopService) {
+      throw new ServiceUnavailableException('shop service is unavailable');
+    }
+    return this.shopService;
   }
 
   private repository(): ShopCatalogRepository {
-    if (!this.catalogue) throw new ServiceUnavailableException('shop catalogue is unavailable');
-    return this.catalogue;
+    if (!this.catalogRepository) {
+      throw new ServiceUnavailableException('shop catalogue is unavailable');
+    }
+    return this.catalogRepository;
   }
 
-  private async guarded<T>(work: () => Promise<T>, conflictMessage: string): Promise<T> {
+  private async guarded<T>(read: () => Promise<T>, message: string): Promise<T> {
     try {
-      return await work();
+      return await read();
     } catch (error: unknown) {
-      if (error instanceof ShopInputError) throw new BadRequestException(error.message);
-      if (isAuthorizationFailure(error)) throw new ForbiddenException('this receipt is not yours');
-      if (isExpectedCommandFailure(error)) throw new ConflictException(conflictMessage);
-      throw error;
+      if (
+        error instanceof ServiceUnavailableException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ForbiddenException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+      if (isAuthorizationFailure(error)) {
+        throw new ForbiddenException(message);
+      }
+      throw new ServiceUnavailableException(message);
     }
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'List available item categories' })
+  async getCategories() {
+    return {
+      categories: await this.repository().getCategories(),
+    };
   }
 
   @Get('items')
   @ApiOperation({ summary: 'Items currently on sale; optional q searches name/description' })
-  async items(@Query('q') query?: string) {
-    return { items: filterShopItems(await this.service().catalog(), query) };
+  async items(@Query('q') query?: string, @Query('maxPrice') maxPrice?: unknown) {
+    return { items: await this.guarded(async () => {
+      let ceiling: bigint | null = null;
+      if (maxPrice !== undefined) {
+        try {
+          ceiling = parseShopMaxPrice(maxPrice);
+        } catch (e: unknown) {
+          if (e instanceof ShopInputError) throw new BadRequestException(e.message);
+          throw e;
+        }
+      }
+      return filterShopByMaxPrice(filterShopItems(await this.service().catalog(), query), ceiling);
+    }, 'the catalogue is unavailable') };
   }
 
   @Get('purchases')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'Purchases made by the caller' })
-  async purchases(
-    @Req() request: RequestWithSession,
-    @Query('q') query?: unknown,
-    @Query('from') from?: unknown,
-    @Query('to') to?: unknown,
-    @Query('minAmount') minAmount?: unknown,
-  ) {
-    return this.guarded(
-      () => this.service().myPurchasesWithSummary(requireUserId(request), { query, from, to, minAmount }),
-      'purchase history is unavailable',
-    );
-  }
-
-  @Get('purchases/export')
-  @Header('Cache-Control', 'private, no-store')
-  @Header('X-Robots-Tag', 'noindex')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'Export up to the latest 100 purchases belonging to the caller' })
-  async purchasesExport(@Req() request: RequestWithSession, @Query('q') query?: unknown) {
+  @ApiOperation({ summary: 'Purchase history for the authenticated user' })
+  async purchases(@Req() request: RequestWithSession) {
     return {
-      scope: 'recent100' as const,
-      purchases: await this.guarded(
-        () => this.service().myPurchases(requireUserId(request), { limit: 100, query }),
-        'purchase export is unavailable',
-      ),
+      purchases: await this.service().purchasesForUser(requireUserId(request)),
     };
   }
 
-  @Post('items/:id/purchases')
+  @Post('purchases')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiOperation({ summary: 'Buy an item' })
-  async purchase(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) itemId: string,
-    @Body() body: PurchaseDto,
-  ) {
+  @ApiOperation({ summary: 'Buy an item from the shop' })
+  async purchase(@Req() request: RequestWithSession, @Body() body: PurchaseDto) {
     try {
-      return await this.service().purchase(requireUserId(request), {
-        itemId,
+      return await this.service().purchase({
         idempotencyKey: body.idempotencyKey,
+        buyerUserId: requireUserId(request),
+        shopItemId: body.shopItemId,
       });
     } catch (error: unknown) {
       if (error instanceof ShopItemUnavailableError) {
-        throw new NotFoundException('item is unavailable');
+        throw new NotFoundException('shop item is unavailable');
       }
       if (error instanceof ShopInputError) {
         throw new BadRequestException('invalid shop purchase request');
@@ -149,31 +170,94 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
-  async publicCatalog(@Query('q') query?: string) {
-    const catalogItems = await this.guarded(
+  @ApiOperation({ summary: 'The public catalogue; optional q, maxPrice, sort and category' })
+  async publicCatalog(
+    @Query('q') query?: string,
+    @Query('maxPrice') maxPrice?: unknown,
+    @Query('sort') sort?: string,
+    @Query('category') category?: string,
+  ) {
+    let ceiling: bigint | null = null;
+    let order: ShopPriceOrder = 'default';
+    if (typeof maxPrice === 'string' && (maxPrice === 'price_asc' || maxPrice === 'price_desc')) {
+      order = maxPrice;
+    } else if (maxPrice !== undefined) {
+      try {
+        ceiling = parseShopMaxPrice(maxPrice);
+      } catch (e: unknown) {
+        if (e instanceof ShopInputError) throw new BadRequestException(e.message);
+        throw e;
+      }
+    }
+    if (sort) {
+      order = parseShopPriceOrder(sort);
+    }
+    const selectedCategory = parseShopCategory(category);
+    let catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
     );
-    return { catalogItems: filterShopItems(catalogItems, query) };
+    catalogItems = filterShopItems(catalogItems, query, selectedCategory);
+    if (ceiling !== null) {
+      catalogItems = filterShopByMaxPrice(catalogItems, ceiling);
+    }
+    if (order !== 'default') {
+      catalogItems = orderShopCatalog(catalogItems as any, order);
+    }
+    return { catalogItems };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; q searches and sort orders exact price asc/desc' })
+  @ApiOperation({ summary: 'The member catalogue; optional q, maxPrice/ownership, sort, category' })
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
+    @Query('maxPrice') maxPriceOrOwnership?: unknown,
     @Query('sort') sort?: string,
+    @Query('category') category?: string,
   ) {
-    // Validate before reading the actor-scoped catalogue; invalid sort requests
-    // must not trigger an unnecessary private database read.
-    const order = parseShopPriceOrder(sort);
-    const catalogItems = await this.guarded(
+    let ceiling: bigint | null = null;
+    let ownershipFilter: 'owned' | 'unowned' | null = null;
+    let order: ShopPriceOrder = 'default';
+
+    if (maxPriceOrOwnership === 'owned' || maxPriceOrOwnership === 'unowned') {
+      ownershipFilter = maxPriceOrOwnership;
+    } else if (typeof maxPriceOrOwnership === 'string' && (maxPriceOrOwnership === 'price_asc' || maxPriceOrOwnership === 'price_desc')) {
+      order = maxPriceOrOwnership;
+    } else if (maxPriceOrOwnership !== undefined) {
+      try {
+        ceiling = parseShopMaxPrice(maxPriceOrOwnership);
+      } catch (e: unknown) {
+        if (e instanceof ShopInputError) throw new BadRequestException(e.message);
+        throw e;
+      }
+    }
+
+    if (sort) {
+      order = parseShopPriceOrder(sort);
+    }
+
+    const selectedCategory = parseShopCategory(category);
+    let catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
     );
-    return { catalogItems: orderShopCatalog(filterShopItems(catalogItems, query), order) };
+
+    catalogItems = filterShopItems(catalogItems, query, selectedCategory);
+    if (ceiling !== null) {
+      catalogItems = filterShopByMaxPrice(catalogItems, ceiling);
+    }
+    if (ownershipFilter === 'owned') {
+      catalogItems = catalogItems.filter((item: any) => Number(item.user_owned_quantity ?? 0) > 0);
+    } else if (ownershipFilter === 'unowned') {
+      catalogItems = catalogItems.filter((item: any) => Number(item.user_owned_quantity ?? 0) === 0);
+    }
+    if (order !== 'default') {
+      catalogItems = orderShopCatalog(catalogItems as any, order);
+    }
+
+    return { catalogItems };
   }
 
   @Get('compare')
@@ -202,13 +286,18 @@ export class ShopController {
   @Get('holdings')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Catalogue items the caller holds' })
-  async holdings(@Req() request: RequestWithSession) {
-    return {
-      holdings: await this.guarded(
-        () => this.repository().holdings(requireUserId(request)),
-        'held items are unavailable',
-      ),
-    };
+  async holdings(@Req() request: RequestWithSession, @Query('filter') filter?: unknown) {
+    if (filter !== undefined && filter !== 'attention') {
+      throw new BadRequestException('invalid holdings filter');
+    }
+    let items = await this.guarded(
+      () => this.repository().holdings(requireUserId(request)),
+      'held items are unavailable',
+    );
+    if (filter === 'attention') {
+      items = items.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
+    }
+    return { holdings: items };
   }
 
   @Post('catalog/:id/purchases')
