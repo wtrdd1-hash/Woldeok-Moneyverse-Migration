@@ -38,7 +38,7 @@
 
 **Status:** DOCUMENTATION PROPOSAL / DRAFT / RELEASE HOLD. No runtime/DB/WLD/ledger/Test/Production changes or main merge. No new distributed planning file.
 
-**Current planning:** v1534 F675-189 horizon-entry and slot-integrity hardening; engineering #2074; planning Draft stacked on #2075; RELEASE HOLD.
+**Current planning:** v1534 F675-189 horizon-entry and slot-integrity hardening; engineering #2074; planning Draft #2080 stacked on #2075; RELEASE HOLD.
 
 ## v2026.10.31.1532 — F675-189 Owner Equipped-Item Expiry Impact Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

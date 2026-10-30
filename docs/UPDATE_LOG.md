@@ -5,7 +5,7 @@
 - **Backlog:** P0 OPS1534-01 SEC1534-02 FIN1534-03 REL1534-04; P1 IMPACT1534-05 IMPACT1534-06 IMPACT1534-07 IMPACT1534-08 IMPACT1534-09 IMPACT1534-10 (4+6). QA v1402 backend 2653 PASS/126 FAIL/501 SKIP, frontend 2701 PASS/55 FAIL, lint 1 error, exact-SHA Test/restore BLOCKED. Proposed 10,001 synthetic and no-write entry/exit tests NOT RUN. RELEASE HOLD.
 - **External references:** newly verified 0, cumulative independently verified/deduplicated/classified UNKNOWN/10,000, BLOCKED/IN PROGRESS. Docs-only; no runtime/DB/WLD/Test/Production change or main merge. Full EN/KO details in integrated master and #2074.
 
-**Current planning:** v1534 F675-189 horizon-entry and equipped-slot integrity / engineering #2074 / Draft stacked on #2075 / RELEASE HOLD.
+**Current planning:** v1534 F675-189 horizon-entry and equipped-slot integrity / engineering #2074 / Draft #2080 stacked on #2075 / RELEASE HOLD.
 
 ## v2026.10.31.1532 — F675-189 Owner Equipped Expiry Impact Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1530 → Current Feature Addition v1532 → Next Feature Improvement v1534 (provisional). Remote main bf8d0d48f810932b43783d8605dce53954c60cff start/mid; stacked after Draft #2066; engineering #2074, P0 #2031.
