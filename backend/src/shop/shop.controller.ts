@@ -86,6 +86,19 @@ export function filterShopItems<T extends SearchableShopItem>(
   );
 }
 
+const KNOWN_SHOP_CATEGORIES = new Set([
+  'general',
+  'vehicle',
+  'badge',
+  'frame',
+  'effect',
+  'title',
+  'theme',
+  'consumable',
+  'real_estate',
+  'luxury',
+]);
+
 function validateShopFilter(arg: unknown): void {
   if (arg === undefined || arg === null || arg === '') return;
   if (Array.isArray(arg)) {
@@ -112,7 +125,7 @@ function validateShopFilter(arg: unknown): void {
   if (/^(0|[1-9][0-9]{0,29})$/.test(arg)) {
     return;
   }
-  if (/^[a-z][a-z0-9_]{0,39}$/.test(arg)) {
+  if (KNOWN_SHOP_CATEGORIES.has(arg)) {
     return;
   }
   throw new BadRequestException('invalid shop catalog filter parameter: ' + arg);

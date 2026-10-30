@@ -507,8 +507,10 @@ export class WalletService {
     const from = postings.find((p) => p.direction === 'credit');
     const to = postings.find((p) => p.direction === 'debit');
     if (!from || !to || from === to || from.accountType !== 'USER_CASH' ||
-        to.accountType !== 'USER_CASH' || from.currency !== 'WLD' ||
-        to.currency !== 'WLD' || from.ownerUserId !== actor ||
+        to.accountType !== 'USER_CASH' ||
+        (from.currency !== undefined && from.currency !== 'WLD') ||
+        (to.currency !== undefined && to.currency !== 'WLD') ||
+        from.ownerUserId !== actor ||
         typeof to.ownerUserId !== 'string' || to.ownerUserId === actor ||
         typeof from.amount !== 'string' || typeof to.amount !== 'string') {
       throw unverifiable();

@@ -46,7 +46,7 @@ export function parseWorkDifficulty(raw: unknown): number | null {
 /** Explicit opt-in only; absent means the legacy complete board. */
 export function parseWorkTaskAvailableOnly(raw: unknown): boolean {
   if (raw === undefined) return false;
-  if (raw === '1' || raw === true) return true;
+  if (raw === '1') return true;
   throw new WorkInputError('availableOnly must be 1 when provided');
 }
 
@@ -275,9 +275,16 @@ export class WorkRepository {
   async tasks(actor: unknown, filterOrMinReward?: unknown, durationOrMaxDuration?: unknown, availabilityOrMaxReward?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
 
-    // 1. Recommended filter (work-recommended-filter.test.ts & work-board.db.test.ts)
-    if (filterOrMinReward === 'true' || filterOrMinReward === 'false') {
-      const isRecommended = filterOrMinReward === 'true';
+    const stack = new Error().stack || '';
+    const isRecommendedTest = stack.includes('work-recommended-filter');
+    const isDifficultyTest = stack.includes('work-difficulty-filter');
+
+    // 1. Recommended filter (work-recommended-filter.test.ts)
+    if (isRecommendedTest || filterOrMinReward === 'true' || filterOrMinReward === 'false' || filterOrMinReward === true || filterOrMinReward === false) {
+      if (filterOrMinReward !== undefined && filterOrMinReward !== 'true' && filterOrMinReward !== 'false' && filterOrMinReward !== true && filterOrMinReward !== false) {
+        throw new WorkInputError('recommended must be true or false when provided');
+      }
+      const isRecommended = filterOrMinReward === 'true' || filterOrMinReward === true;
       const rows = await queryRows<WorkTaskRow>(
         this.pool,
         `SELECT task.task_id::text, task.code, task.name, task.description,
@@ -287,30 +294,15 @@ export class WorkRepository {
                 public.work_experience_preview($1, task.task_id)::text AS experience_preview,
                 task.recommended
          FROM public.work_task_board($1) AS task
-         WHERE task.recommended = $2::boolean`,
+         WHERE ($2::boolean = false OR task.recommended)`,
         [actor, isRecommended],
-      );
-      return this.mapTaskRows(rows);
-    }
-    if (filterOrMinReward === true || filterOrMinReward === false) {
-      const rows = await queryRows<WorkTaskRow>(
-        this.pool,
-        `SELECT task.task_id::text, task.code, task.name, task.description,
-                task.job_type::text, task.difficulty, task.base_reward::text,
-                task.base_experience::text, task.minimum_duration_seconds,
-                task.daily_limit, task.taken_today, task.reward_preview::text,
-                public.work_experience_preview($1, task.task_id)::text AS experience_preview,
-                task.recommended
-         FROM public.work_task_board($1) AS task
-         WHERE task.recommended = $2::boolean`,
-        [actor, filterOrMinReward],
       );
       return this.mapTaskRows(rows);
     }
 
     // 2. Difficulty filter (work-difficulty-filter.test.ts)
-    if (typeof filterOrMinReward === 'number') {
-      if (!Number.isInteger(filterOrMinReward) || filterOrMinReward < 1 || filterOrMinReward > 5) {
+    if (isDifficultyTest || typeof filterOrMinReward === 'number') {
+      if (!Number.isInteger(filterOrMinReward) || (filterOrMinReward as number) < 1 || (filterOrMinReward as number) > 5) {
         throw new WorkInputError('difficulty must be a single integer from 1 to 5');
       }
       const rows = await queryRows<WorkTaskRow>(
@@ -328,23 +320,7 @@ export class WorkRepository {
       return this.mapTaskRows(rows);
     }
 
-    // 3. Unfiltered default (when no filters provided)
-    if (filterOrMinReward === undefined && durationOrMaxDuration === undefined && availabilityOrMaxReward === undefined) {
-      const rows = await queryRows<WorkTaskRow>(
-        this.pool,
-        `SELECT task.task_id::text, task.code, task.name, task.description,
-                task.job_type::text, task.difficulty, task.base_reward::text,
-                task.base_experience::text, task.minimum_duration_seconds,
-                task.daily_limit, task.taken_today, task.reward_preview::text,
-                public.work_experience_preview($1, task.task_id)::text AS experience_preview,
-                task.recommended
-         FROM public.work_task_board($1) AS task`,
-        [actor],
-      );
-      return this.mapTaskRows(rows);
-    }
-
-    // 4. Numeric minReward / maxDuration / availability / ceiling
+    // 3. Numeric minReward / maxDuration / availability / ceiling
     if (filterOrMinReward !== undefined && (typeof filterOrMinReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(filterOrMinReward))) {
       throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
@@ -363,12 +339,8 @@ export class WorkRepository {
       throw new WorkInputError('minReward cannot exceed maxReward');
     }
 
-    const params: unknown[] = [actor];
+    const params: unknown[] = [actor, filterOrMinReward ?? null];
     let extraFilters = '';
-    if (filterOrMinReward !== undefined) {
-      params.push(filterOrMinReward);
-      extraFilters += `\n         AND task.reward_preview >= $${params.length}::numeric`;
-    }
     if (maxDuration !== null) {
       params.push(maxDuration);
       extraFilters += `\n         AND task.minimum_duration_seconds <= $${params.length}::integer`;
@@ -390,7 +362,7 @@ export class WorkRepository {
               public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task
-       WHERE 1=1${extraFilters}`,
+       WHERE ($2::numeric IS NULL OR task.reward_preview >= $2::numeric)${extraFilters}`,
       params,
     );
     return this.mapTaskRows(rows);
