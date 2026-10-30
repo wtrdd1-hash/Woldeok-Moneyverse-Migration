@@ -5,6 +5,7 @@ import { detectCrawlerBot } from '@/lib/bot-detector';
 import { getLocalizedCompoundRedirect } from '@/lib/seo-locale-alternates';
 
 const INTERNAL_REWRITE_LOCALE_PARAM = '__mv_path_locale';
+const isPrivateInventoryPath = (pathname: string) => /^\/(?:[a-z]{2}\/)?inventory$/i.test(pathname);
 
 const API_ORIGIN = process.env.API_ORIGIN ?? (process.env.NODE_ENV === 'production' ? 'http://127.0.0.1:3000' : 'http://127.0.0.1:3020');
 
@@ -51,7 +52,13 @@ export function proxy(request: NextRequest) {
   const testOrigin = process.env.TEST_FRONTEND_ORIGIN?.trim().replace(/\/$/, '');
   const requestHost = request.headers.get('host')?.split(':', 1)[0]?.toLowerCase();
   if (testOrigin && requestHost === 'test.easy-scraping.com') {
-    return NextResponse.rewrite(new URL(`${pathname}${request.nextUrl.search}`, `${testOrigin}/`));
+    const response = NextResponse.rewrite(new URL(`${pathname}${request.nextUrl.search}`, `${testOrigin}/`));
+    if (isPrivateInventoryPath(pathname)) {
+      response.headers.set('cache-control', 'private, no-store');
+      response.headers.set('x-robots-tag', 'noindex, nofollow');
+      response.headers.set('referrer-policy', 'no-referrer');
+    }
+    return response;
   }
 
   // Local health check endpoint for internal probes (Zero latency, no redirect)
@@ -220,6 +227,12 @@ export function proxy(request: NextRequest) {
   }
 
   response.headers.set('x-moneyverse-locale', finalLocale);
+
+  if (isPrivateInventoryPath(pathname) || targetPath === '/inventory') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
 
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');

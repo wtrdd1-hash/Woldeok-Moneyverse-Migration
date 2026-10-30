@@ -4,28 +4,20 @@ import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
+import {
+  AvatarWithCosmetics,
+  NameplateWithTitle,
+  type UserCosmetics,
+} from '@/components/profile-cosmetics';
 
-export interface HeldItem {
-  readonly catalog_id: string;
-  readonly code: string;
-  readonly name: string;
-  readonly description: string;
-  readonly category: string;
-  readonly quantity: number;
-  readonly acquired_at: string;
-  readonly expires_at: string | null;
-  readonly effect_kind: string;
-  readonly rarity: string;
-  readonly animation_css: string | null;
-  readonly preview_data: Record<string, unknown>;
-  readonly is_equipped: boolean;
-  readonly equipped_slot: string | null;
-  readonly serial_number: number | null;
-}
+import type { InventoryHolding } from '@/lib/inventory-holdings';
+import { InventoryCondition } from './inventory-condition';
+
+export type HeldItem = InventoryHolding;
 
 interface InventoryViewProps {
-  readonly holdings: HeldItem[];
+  readonly holdings: HeldItem[] | null;
+  readonly showConditionDetails?: boolean;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
 }
@@ -48,11 +40,34 @@ export function InventoryView({
   holdings,
   currentUsername = '모험가',
   userAvatarUrl,
+  showConditionDetails = false,
 }: InventoryViewProps) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  if (holdings === null) {
+    return (
+      <section
+        role="status"
+        aria-live="polite"
+        className="rounded-2xl border border-amber-500/40 bg-card p-6"
+      >
+        <h2 className="font-bold">보관함 정보를 확인할 수 없습니다.</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          보유 수량이나 장착 상태를 추정하지 않습니다. 잠시 후 다시 확인해 주세요.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.refresh()}
+          className="mt-4 min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-bold"
+        >
+          다시 확인
+        </button>
+      </section>
+    );
+  }
 
   const filtered = holdings.filter((h) => {
     if (selectedCategory === 'all') return true;
@@ -65,7 +80,9 @@ export function InventoryView({
   const equippedEffect = holdings.find((h) => h.is_equipped && h.equipped_slot === 'effect');
   const equippedNameplate = holdings.find((h) => h.is_equipped && h.equipped_slot === 'nameplate');
   const equippedTitle = holdings.find((h) => h.is_equipped && h.equipped_slot === 'title');
-  const equippedBadges = holdings.filter((h) => h.is_equipped && h.equipped_slot?.startsWith('badge_'));
+  const equippedBadges = holdings.filter(
+    (h) => h.is_equipped && h.equipped_slot?.startsWith('badge_'),
+  );
 
   const activeCosmetics: UserCosmetics = {
     frame: equippedFrame || null,
@@ -136,8 +153,12 @@ export function InventoryView({
             </div>
             <NameplateWithTitle cosmetics={activeCosmetics} username={currentUsername} />
             <p className="text-xs text-muted-foreground mt-2">
-              보유 중인 치장 아이템: <strong className="text-foreground">{holdings.length}</strong>개 · 
-              장착 중: <strong className="text-amber-500">{holdings.filter((h) => h.is_equipped).length}</strong>개
+              보유 중인 치장 아이템: <strong className="text-foreground">{holdings.length}</strong>
+              개 · 장착 중:{' '}
+              <strong className="text-amber-500">
+                {holdings.filter((h) => h.is_equipped).length}
+              </strong>
+              개
             </p>
           </div>
         </div>
@@ -211,7 +232,9 @@ export function InventoryView({
               key={item.catalog_id}
               className={cn(
                 'rounded-2xl border p-4 bg-card flex flex-col justify-between transition-all duration-300 relative',
-                item.is_equipped ? 'border-amber-500 shadow-lg shadow-amber-500/10' : 'border-border/40',
+                item.is_equipped
+                  ? 'border-amber-500 shadow-lg shadow-amber-500/10'
+                  : 'border-border/40',
                 `rarity-${item.rarity}`,
               )}
             >
@@ -238,6 +261,7 @@ export function InventoryView({
                 </p>
               </div>
 
+              {showConditionDetails && <InventoryCondition item={item} />}
               <div className="pt-3 border-t border-border/40 flex items-center justify-between gap-2">
                 <span className="text-[11px] text-muted-foreground">보유: {item.quantity}개</span>
                 {['frame', 'background', 'effect', 'nameplate', 'title', 'badge'].includes(

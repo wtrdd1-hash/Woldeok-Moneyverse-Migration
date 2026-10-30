@@ -190,7 +190,17 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    // Member inventory must override the global public indexing policy.
+    const privateInventoryHeaders = [
+      { key: 'cache-control', value: 'private, no-store' },
+      { key: 'x-robots-tag', value: 'noindex, nofollow' },
+      { key: 'referrer-policy', value: 'no-referrer' },
+    ];
+    return [
+      { source: '/:path*', headers: security },
+      { source: '/inventory', headers: privateInventoryHeaders },
+      { source: '/:locale/inventory', headers: privateInventoryHeaders },
+    ];
   },
 
   async redirects() {

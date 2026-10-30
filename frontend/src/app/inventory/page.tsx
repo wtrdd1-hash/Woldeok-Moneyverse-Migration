@@ -2,26 +2,32 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
+import { api, apiOrNull } from '@/lib/api';
+import { parseInventoryHoldings } from '@/lib/inventory-holdings';
 import { requireMember } from '@/lib/session';
-import { InventoryView, type HeldItem } from './inventory-view';
+import { InventoryView } from './inventory-view';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
   await requireMember();
 
   const [holdingsData, profileData] = await Promise.all([
-    apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
-    apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile'),
+    api<unknown>('/api/v1/shop/holdings')
+      .then(parseInventoryHoldings)
+      .catch(() => null),
+    apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
+      '/api/v1/profile',
+    ),
   ]);
 
-  const holdings = holdingsData?.holdings || [];
+  const holdings = holdingsData?.holdings ?? null;
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
@@ -47,6 +53,7 @@ export default async function InventoryPage() {
 
       <InventoryView
         holdings={holdings}
+        showConditionDetails={process.env.INVENTORY_LIFECYCLE_DETAILS_ENABLED === 'true'}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
       />

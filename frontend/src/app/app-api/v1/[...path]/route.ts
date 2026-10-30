@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
+import { parseInventoryHoldings } from '@/lib/inventory-holdings';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
@@ -313,6 +314,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  // Owner inventory must be verified; a malformed 200 must never become an empty shelf.
+  const privateInventory = parts[0] === 'shop' && parts[1] === 'holdings';
+  if (privateInventory && parts.length === 2 && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseInventoryHoldings(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'inventory_unverified',
+          'owner inventory evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'inventory_unverified',
+        'owner inventory evidence is unavailable');
+    }
+  }
+
   // A stale backend must not return a malformed owner-private export as HTTP 200.
   if (parts.length === 3 && parts[0] === 'shop' && parts[1] === 'purchases' &&
       parts[2] === 'export' && request.method === 'GET' && response.ok) {
@@ -396,8 +412,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateInventory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateInventory) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -446,6 +462,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'shop' && parts[1] === 'holdings') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
