@@ -29,19 +29,21 @@ export async function GET(request: Request): Promise<NextResponse> {
   const from = fromValues[0];
   const to = toValues[0];
   const dateStart = (value: string | undefined): number | null => {
-    if (!value || !/^d{4}-d{2}-d{2}$/.test(value)) return null;
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
     const millis = Date.parse(`${value}T00:00:00+09:00`);
     return Number.isFinite(millis) && new Date(millis + 9 * 60 * 60_000).toISOString().slice(0, 10) === value ? millis : null;
   };
   if (fromValues.length > 1 || toValues.length > 1 || (from === undefined) !== (to === undefined)) {
     return NextResponse.json({ error: 'invalid purchase date range' }, { status: 400, headers: PRIVATE_HEADERS });
   }
+  let dateRange: { start: number; end: number } | null = null;
   if (from !== undefined && to !== undefined) {
     const start = dateStart(from);
     const last = dateStart(to);
     if (start === null || last === null || last < start || (last - start) / 86_400_000 >= 366) {
       return NextResponse.json({ error: 'invalid purchase date range' }, { status: 400, headers: PRIVATE_HEADERS });
     }
+    dateRange = { start, end: last + 86_400_000 };
   }
   const amounts = params.getAll('minAmount');
   const minAmount = amounts[0];
@@ -60,6 +62,12 @@ export async function GET(request: Request): Promise<NextResponse> {
   const verified = parseShopPurchaseHistory(data);
   if (!verified) {
     return NextResponse.json({ error: 'purchase history unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
+  }
+  if (dateRange && !verified.purchases.every((row) => {
+    const at = Date.parse(row.purchasedAt);
+    return at >= dateRange.start && at < dateRange.end;
+  })) {
+    return NextResponse.json({ error: 'purchase date evidence unavailable' }, { status: 503, headers: PRIVATE_HEADERS });
   }
   if (
     minAmount !== undefined &&

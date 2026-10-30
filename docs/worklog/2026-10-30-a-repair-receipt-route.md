@@ -11,3 +11,9 @@
 
 ## FINISHED
 - Pending; Production HOLD.
+
+## MID 20:16 KST
+- TDD RED: targeted ESLint 1 parsing error at route.search.test.ts:99, Vitest transform failed. After test syntax repair, RED functional tests exposed valid KST date being rejected HTTP 400 and out-of-window backend HTTP 200 not being rejected.
+- GREEN: repaired duplicate declarations/missing closures and fixtures; Next route now accepts canonical Gregorian KST dates and fails closed on out-of-window owner receipts. Focused route tests 10 PASS; full repo lint PASS (0 errors, 1043 warnings), typecheck PASS, mobile API contract 184/675 PASS.
+- Related React component tests still FAIL due React.act unavailable under current test environment; not caused by this repair. Other global suite failures and exact-SHA Test remain blocked.
+- No migrations, ledger, DB writes, service restarts, Production or Test deployment. Main and plans will be rechecked before PR.
