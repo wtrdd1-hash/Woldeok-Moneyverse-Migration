@@ -53,6 +53,7 @@ import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
 import { AutoSovereignWealthFundService } from './treasury/auto-swf.service';
 import { ApiHealthController } from './api-health.controller';
+import { StorageHeadroomController } from './storage-headroom.controller';
 import { AdminEnterpriseController, PublicEnterpriseController } from './enterprises/enterprise.controller';
 import { EnterpriseRepository } from './enterprises/enterprise.repository';
 import { EnterpriseService } from './enterprises/enterprise.service';
@@ -74,6 +75,7 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
   imports: [AuthModule, StockModule, ChatModule],
   controllers: [
     ApiHealthController,
+    StorageHeadroomController,
     AdminBackupController,
     AdminTreasuryController,
     PublicTreasuryController,
