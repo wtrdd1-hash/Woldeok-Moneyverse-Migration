@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1528 F675-188 owner upcoming-expiry radar / issue #2060 / Draft #2061 (stack after #2055) / RELEASE HOLD; incident #2031.
+**Current planning:** v1530 F675-188 expiry radar integrity / issue #2060 / Draft pending (stack after #2061) / RELEASE HOLD; incident #2031.
+
+## v2026.10.31.1530 — F675-188 Owner Expiry Radar Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **Cycle:** Previous Feature Addition v1528 → Current Feature Improvement v1530 → Next Feature Addition v1532 (provisional). Remote main bf8d0d48f810932b43783d8605dce53954c60cff rechecked; stacked after Draft #2061; engineering #2060; P0 #2031.
+- **Source truth:** migration 071 user_items has nullable expires_at and mutable quantity; migration 123 shop_my_items_v2 uses independent clock_timestamp() and includes owned inactive-catalog items. Nest owner session is requireSession(request).id, NOT an assumed generation. Existing pool.query holdings does not establish a multi-statement snapshot.
+- **Fix to plan:** Source fingerprint alone misses time-only expiry between pages. Add validUntilUtc=min(first DB asOf+15m, earliest eligible expiry) and 409 STALE_EXPIRY_WINDOW on DB-clock crossing; 410 for cursor age. Full-set fingerprint includes membership, quantity, expiry microseconds, current catalog code/name; changed source 409. Each request uses ONE PoolClient READ ONLY REPEATABLE READ snapshot for DB clock, fingerprint, keyset and validUntil; cross-request fingerprint comparison. Preserve UTC bounds and KST display, active=false owned rows, strict owner/session HMAC, private edge and flag OFF.
+- **Backlog:** P0 OPS1530-01 SEC1530-02 FIN1530-03 REL1530-04; P1 EXPIRY1530-05 through -10 (4+6=10). QA v1400 backend 126 FAIL/2653 PASS/501 SKIP, frontend 55 FAIL/2701 PASS, lint 1 parser error; typecheck/build PASS. Exact-SHA official Test and independent restore BLOCKED; synthetic 10,001 and time-only expiry tests PROPOSED NOT RUN. No runtime/DB/WLD/Test/Production changes.
+- **External evidence:** newly verified 0; cumulative deduplicated/classified UNKNOWN/10,000, BLOCKED / IN PROGRESS. Full acceptance criteria in integrated master and issue #2060.
+
 
 ## v2026.10.31.1528 — F675-188 Owner Inventory Upcoming Expiry Radar (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1526 → Current Feature Addition v1528 → Next Feature Improvement v1530 (provisional). Remote main `bf8d0d48f810932b43783d8605dce53954c60cff` checked start/mid; stack after Draft #2055; engineering #2060; release incident #2031.

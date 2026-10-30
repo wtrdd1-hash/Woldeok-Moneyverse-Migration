@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1528 F675-188 본인 보유 만료 예정 조회 / 이슈 #2060 / Draft #2061(선행 #2055) / 운영 보류; 사고 #2031.
+**현재 기획:** v1530 F675-188 만료 예정 조회 정합성 / 이슈 #2060 / Draft 생성 대기(선행 #2061) / 운영 보류; 사고 #2031.
+
+## v2026.10.31.1530 — F675-188 회원 보유 아이템 만료 예정 조회 정합성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**회차:** 이전 기능 추가 v1528 → 현재 기능 보완 v1530 → 다음 기능 추가 v1532(잠정). 원격 main bf8d0d48f810932b43783d8605dce53954c60cff 시작·중간 확인. Draft #2061 후속 스택, 개발 이슈 #2060, 독립 QA v1400, 배포 사고 #2031. 문서 전용이며 기능 구현·운영 승인 아님.
+
+### 실제 소스 근거와 정합성 보완
+- 마이그레이션 071의 user_items는 (user_id,catalog_id) 기본키, quantity>=0, NULL 가능한 expires_at을 갖는다. shop_catalog의 code/name/active는 변할 수 있다. 마이그레이션 123의 shop_my_items_v2는 clock_timestamp()를 여러 차례 평가하고, 소유 아이템을 catalogue.active=false라는 이유만으로 제외하지 않으며 효과 만료를 별도로 계산한다. Nest /api/v1/shop/holdings는 SessionGuard·AuthenticatedGuard·ConsentGuard와 본인 조회 함수를 사용하지만 ShopCatalogRepository.holdings의 단일 pool 쿼리는 페이지 간 일관된 스냅샷을 보장하지 않는다.
+- **시간 경과만으로 발생하는 만료:** 첫 페이지 조회 후 DB 행이 수정되지 않아도 다음 페이지 전에 보유 아이템이 만료될 수 있다. 원본 지문만 비교하면 만료된 아이템을 여전히 ‘만료 예정’으로 잘못 표시한다. 모든 성공 응답에 asOfUtc와 validUntilUtc를 제공한다. validUntilUtc는 첫 조회 시각+15분과 asOf 기준 전체 대상 중 가장 빠른 expires_at의 최소값이다. 다음 페이지 요청 당시 DB 시각이 validUntilUtc에 도달했다면 409 STALE_EXPIRY_WINDOW와 새로고침을 반환한다. 15분 커서 만료는 410 CURSOR_EXPIRED로 구분한다. UI도 validUntilUtc가 지나면 기존 목록을 STALE로 바꾸며 갱신 CTA를 표시한다.
+- **상품명·원본 변경:** 지문은 현재 페이지 20건이 아니라 asOf 기준 본인 전체 대상 집합의 catalogId, quantity, expires_at(마이크로초), 현재 상품 code/name, 대상 포함·제외 변경을 포함한다. expires_at ASC,catalog_id ASC 정렬, 길이 접두 정규 인코딩, SHA-256, 지문 버전으로 충돌·모호성을 방지한다. 상품 활성 여부가 false여도 보유 조건을 충족하면 포함한다. 현재 상품명은 구매 당시 이름이 아니다. 신규 보유·삭제·수량 0·만료 변경·이름 변경 등은 다음 페이지에서 409 SOURCE_CHANGED, 이전 페이지 결과와 합치지 않는다.
+- **트랜잭션:** HTTP 페이지 요청마다 pg PoolClient 하나를 확보해 BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY로 시작한다. DB statement_timestamp()를 한 번 조회해 dbNow로 사용하고, 최초 페이지 asOf 또는 서명된 이어보기 asOf, 전체 지문, validUntil, 정렬 페이지를 **같은 트랜잭션 스냅샷**에서 계산한다. 성공 COMMIT, 실패 ROLLBACK. 여러 pool.query 호출이나 JS Date.now()만으로 스냅샷이 성립하지 않는다. 서로 다른 HTTP 요청 간 트랜잭션을 유지하지 않으며 매 요청 지문을 재검증한다. 10,001건 이상에서는 제한된 메모리로 지문을 계산하거나 검증된 동등 방식을 사용하고 p95 500ms·메모리 상한을 충족하지 못하면 기능 OFF를 유지한다.
+- **커서·신원:** 실제 requireSession(request).id와 requireUserId(request)를 사용한다. 존재하지 않는 ‘session generation’ 필드를 가정하지 않는다. HMAC에는 회원 UUID, 실제 세션 UUID, 7/30일 기간, 마이크로초 asOf, 마지막 (expires_at,catalog_id), 전체 지문, validUntil, 발급시각, 스키마 버전, 키 ID를 결속한다. 일정 시간 서명 비교와 승인된 키 회전 정책을 적용한다. 계정 전환·세션 폐기·타인 재사용·위조를 거부하고 400/401/403/409/410/429/503을 원인에 맞게 구분한다.
+- **경계:** quantity>0, expires_at IS NOT NULL, asOfUtc < expires_at <= asOfUtc+N*24시간. UTC 절대 시각을 비교하며 한국시간 달력 날짜로 반올림하지 않는다. asOf와 동일하면 제외, 상한과 동일하면 포함. 커서는 PostgreSQL 마이크로초 정밀도를 보존하며 화면은 KST/시간대를 명시한다. NULL 만료는 영구가 아닌 UNKNOWN. 보유·효과 만료·유지비·체납·납부 증빙은 별개다.
+- **DB 권한:** 본인 조건이 SQL 내부에 있는 SECURITY DEFINER 함수, search_path=pg_catalog,pg_temp, 명시적 테이블 경로, PUBLIC EXECUTE 회수, moneyverse_app 함수 EXECUTE만 허용. user_items나 금융 테이블 직접 SELECT/DELETE/UPDATE 권한 추가 금지. 부분 인덱스 (user_id,expires_at,catalog_id)는 합성 10,001건 EXPLAIN (ANALYZE,BUFFERS)과 DB 담당자 협의 후 검토한다. 적용된 071/123 수정 금지, 필요 시 전방 마이그레이션. 조회는 WLD·아이템·원장·outbox 변경 없음.
+
+### 사용자 흐름, API, 개인정보, 검증
+- /inventory의 “만료 예정 보기” → /inventory/expiring?withinDays=7|30 (기본 7). Nest GET /api/v1/shop/holdings/expiring, Next /api/shop/holdings/expiring, Android /app-api/v1/shop/holdings/expiring. 응답 {asOfUtc,validUntilUtc,withinDays,items:[{catalogId,code,currentName,quantity,holdingExpiresAtUtc}],nextCursor?,sourceStatus:'VERIFIED'}, 기본 20·최대 50건. 클라이언트 회원 UUID 받지 않음. 로딩·검증된 빈 목록·결과·만료/변경 후 새로고침·인증 거부·503 재시도를 구분. 기존 전체 인벤토리·장착·수량을 페이지 결과로 덮어쓰지 않으며 개발 A #2056의 장애/상태 표시 변경과 충돌시키지 않는다.
+- validUntilUtc 도달 시 데이터 변경이 없어도 목록을 STALE로 표시한다. 409/410이면 모든 누적 페이지를 폐기하고 첫 페이지부터 재조회한다. 계정·기간 변경 시 진행 요청 취소와 늦은 응답 차단. Nest/Next/Android/실제 Nginx edge의 성공·오류 응답 모두 private/no-store, noindex/nofollow, no-referrer. 기능 스위치 inventory_expiring_radar 기본 OFF. 관리자 집계는 20명 이상 그룹만, 개인별 우회 조회 없음. KPI는 진입·검증 성공·409/503·p95 집계만, 회원/아이템/커서 로그 금지. 320px·200% 확대·키보드·aria-live·WCAG 2.2 AA.
+- **실행하지 않은 수용시험 설계:** 격리 PostgreSQL 17.11 전체 마이그레이션 재현, 본인/타인·직접 테이블 권한 부정 시험, 합성 보유 10,001건과 동일 만료시각·catalog.active=false, UTC/KST·1마이크로초 경계 100건, 커서 위조·세션·키 회전 100건, 추가/수정/삭제·상품명 변경 100건, DB 쓰기 없는 시간 만료 100건, 동시성 100건, Android/edge/접근성 50건. 만료만으로 409, TTL 초과 410, DB 장애 503, 정상 빈 목록에서만 200, 중복·누락 없음, p95<=500ms·금융 쓰기 0을 검증한다.
+- 독립 QA v1400(2026-10-31 00:20~00:27 KST): 백엔드 **2,653 PASS / 126 FAIL / 501 SKIP**, 프론트엔드 **2,701 PASS / 55 FAIL**, 전체 lint 구문 오류 1건·경고 1,043건, 타입검사/빌드 PASS이나 전체 QA 실패. 정확 SHA 공식 Test·독립 복원·Production 실행 출처·GitOps 승인 미확인. Draft/HOLD 병합 #2031, DB 최소 권한 #993, 실행 출처 #1984는 별도 P0. 기획 예약은 runtime/DB/Test/Production 변경·병합·배포 금지.
+- **외부 독립 레퍼런스:** 신규 검증 승인 0건, 누적 중복 제거·근거 분류 승인 UNKNOWN/10,000건, BLOCKED / IN PROGRESS. 합성 데이터·내부 GitHub 파일을 외부 근거로 집계하지 않는다.
+
+### 개발 백로그 — P0 4건 / P1 6건
+| 우선순위 | ID | 완료 기준 |
+|---|---|---|
+| P0 | OPS1530-01 | 실제 Production 프로세스·이미지 SHA, 불변 롤백 자산, 독립 복원(#1984/#2031). |
+| P0 | SEC1530-02 | DEV 앱 계정 직접 권한 축소, 체크섬·새 DB 재현·권한 부정 시험(#993/#2000). |
+| P0 | FIN1530-03 | 국고/MINT/SWF/채권 원장 증빙; 만료 정보로 유지비 납부를 추정하지 않음. |
+| P0 | REL1530-04 | Draft/HOLD 병합 사고·QA v1400 실패·정확 SHA 공식 Test·edge·승인된 배포 게이트(#2031). |
+| P1 | EXPIRY1530-05 | 본인 SQL·DB 시각·전체 지문·validUntil·인덱스 EXPLAIN. |
+| P1 | EXPIRY1530-06 | Nest 단일 클라이언트 읽기 전용 반복 읽기 트랜잭션, 실제 세션 HMAC, 409/410/503/429·p95. |
+| P1 | EXPIRY1530-07 | Next 시간 만료 STALE, KST/마이크로초 경계, 계정·기간 전환, 320px 접근성. |
+| P1 | EXPIRY1530-08 | Android API 검증·세션 전환·캐시·상태코드 동등성. |
+| P1 | EXPIRY1530-09 | 공개 edge 비공개 헤더, PII 없는 분석, 관리자 20명 집계, 기능 기본 OFF. |
+| P1 | EXPIRY1530-10 | 격리 PostgreSQL 10,001건·시간 만료/변경/커서/동시성 각 100건·Android 50건, 정확 SHA·롤백 검증. |
+
+**상태:** DRAFT / RELEASE HOLD. 위 수용시험은 기획 단계이며 실제 실행하지 않았다.
 
 ## v2026.10.31.1528 — F675-188 회원 전용 보유 아이템 만료 예정 조회 (기능 추가 / 초안 / 운영 보류)
 
