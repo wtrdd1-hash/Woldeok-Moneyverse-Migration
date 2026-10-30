@@ -53,7 +53,6 @@ export class SupportController {
       : await this.repo().myThreads(actor, status ?? null, q.trim());
     return { threads };
   }
-  }
 
   @Get('threads/summary')
   @Header('Cache-Control', 'private, no-store')

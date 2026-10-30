@@ -140,8 +140,6 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     }
     return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
   }
-    return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
-  }
 
   async updateConfig(params: Partial<SwfConfig>): Promise<SwfConfig> {
     await queryRows(
@@ -184,6 +182,5 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
   async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {
     return unverifiedSwfSettlement();
-  }
   }
 }
