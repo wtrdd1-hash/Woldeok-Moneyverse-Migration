@@ -25,8 +25,8 @@
 ### Task 1: Deterministic font loader
 - [x] Add regression tests that fail with `next/font/google` and missing local imports.
 - [x] Run RED tests.
-- [ ] Install pinned packages and switch layout/CSS to local font CSS.
-- [ ] Run GREEN tests and verify asset paths.
+- [x] Install pinned packages and switch layout/CSS to local font CSS.
+- [x] Run GREEN tests and verify asset paths.
 
 ### Task 2: Candidate release proof
 - [ ] Build contract, typecheck, lint, unit tests.
