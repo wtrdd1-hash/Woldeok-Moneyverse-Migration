@@ -20,7 +20,7 @@ describe.skipIf(!URL)('wallet transfer receipt: isolated real PostgreSQL least-p
     await expect(service.transferReceipt(ACTOR, KEY)).resolves.toEqual({
       status: 'committed', transactionId: '55555555-5555-4555-8555-555555555555',
       recipientUserId: '22222222-2222-4222-8222-222222222222',
-      amount: '900719925474099312345678901234567890',
+      amount: '9007199254740993', // > Number.MAX_SAFE_INTEGER but within PostgreSQL bigint
     });
   });
   it('never reveals another owner receipt even when the key is known', async () => {

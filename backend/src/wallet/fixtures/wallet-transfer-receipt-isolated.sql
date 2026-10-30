@@ -1,0 +1,22 @@
+-- TEST-ONLY fixture. Apply ONLY to a fresh disposable isolated PostgreSQL database.
+-- Never run on shared DEV, Test, Production or any member-finance database.
+-- WLD 9007199254740993 exceeds JS safe integer yet fits PostgreSQL bigint.
+BEGIN;
+INSERT INTO public.users(id) VALUES
+ ('11111111-1111-4111-8111-111111111111'),
+ ('22222222-2222-4222-8222-222222222222'),
+ ('33333333-3333-4333-8333-333333333333');
+INSERT INTO public.accounts(id,account_type,owner_user_id) VALUES
+ ('77777777-7777-4777-8777-777777777777','USER_CASH','11111111-1111-4111-8111-111111111111'),
+ ('99999999-9999-4999-8999-999999999999','USER_CASH','22222222-2222-4222-8222-222222222222');
+INSERT INTO public.account_balances(account_id) VALUES
+ ('77777777-7777-4777-8777-777777777777'),
+ ('99999999-9999-4999-8999-999999999999');
+INSERT INTO public.ledger_transactions(id,idempotency_key,type,actor_user_id,request_hash) VALUES
+ ('55555555-5555-4555-8555-555555555555','44444444-4444-4444-8444-444444444444','USER_TO_USER','11111111-1111-4111-8111-111111111111',decode(repeat('00',32),'hex')),
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','88888888-8888-4888-8888-888888888888','USER_TO_USER','11111111-1111-4111-8111-111111111111',decode(repeat('11',32),'hex'));
+INSERT INTO public.ledger_postings(transaction_id,account_id,amount,direction) VALUES
+ ('55555555-5555-4555-8555-555555555555','77777777-7777-4777-8777-777777777777',9007199254740993,'credit'),
+ ('55555555-5555-4555-8555-555555555555','99999999-9999-4999-8999-999999999999',9007199254740993,'debit'),
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','77777777-7777-4777-8777-777777777777',100,'credit');
+COMMIT;

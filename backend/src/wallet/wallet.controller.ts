@@ -148,6 +148,25 @@ export class WalletController {
     }
   }
 
+  @Get('wallet/transfers/receipts/:idempotencyKey')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Read owner-only durable transfer evidence; unknown is not proof of failure' })
+  async transferReceipt(@Req() request: RequestWithSession, @Param('idempotencyKey') idempotencyKey: string) {
+    if (typeof idempotencyKey !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+      throw new BadRequestException('invalid idempotency key');
+    }
+    try {
+      return await this.service().transferReceipt(requireUserId(request), idempotencyKey);
+    } catch {
+      // A missing/invalid ledger projection is not a failed transfer and must
+      // not expose DB errors or induce a duplicate retry with a fresh key.
+      throw new ServiceUnavailableException('transfer receipt evidence is unavailable');
+    }
+  }
+
   @Get('wallet/recipients/search')
   @ApiOperation({ summary: 'Search active member recipients by display name for wire transfer' })
   searchRecipients(@Req() request: RequestWithSession, @Query('query') query?: string) {

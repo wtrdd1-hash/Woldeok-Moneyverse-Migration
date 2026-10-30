@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.10.30.0125",
+  "contractVersion": "v2026.10.31.0035",
   "apiVersion": "v2026.10.28.1525",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -15516,6 +15516,119 @@
         },
         "required": [
           "transactionId"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/wallet/transfers/receipts/:idempotencyKey",
+      "purpose": "본인 송금 멱등성 키의 원장 확정 증빙 조회 (미확인은 실패 또는 재시도 가능 증거 아님)",
+      "callWhen": "송금 응답 유실·타임아웃 후 기존 멱등성 키의 처리 상태를 조회할 때",
+      "authorization": "로그인 + 최신 동의 + 세션 기반 송금자 본인 확인 (GET, CSRF 쓰기 없음)",
+      "afterSuccess": "committed는 동일 키·송금자·원장 두 전표 검증 결과; unknown은 처리 실패가 아니며 새로운 키 재시도 금지",
+      "backendRoute": "/api/wallet/transfers/receipts/:idempotencyKey",
+      "operationId": "WalletController_transferReceipt",
+      "backendOpenApiPath": "/wallet/transfers/receipts/{idempotencyKey}",
+      "summary": "Read owner-only durable transfer evidence; unknown is not proof of failure",
+      "parameters": [
+        {
+          "name": "idempotencyKey",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "status",
+          "transactionId",
+          "recipientUserId",
+          "amount"
+        ],
+        "note": "status=unknown returns only status; status=committed includes transactionId, recipientUserId, exact WLD amount string. No failed/retryable state."
+      },
+      "responseSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "unknown"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "committed"
+              },
+              "transactionId": {
+                "type": "string"
+              },
+              "recipientUserId": {
+                "type": "string"
+              },
+              "amount": {
+                "allOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "__wld": {
+                        "type": "object",
+                        "properties": {
+                          "description": {
+                            "oneOf": [
+                              {
+                                "type": "undefined"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "description"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "__wld"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "transactionId",
+              "recipientUserId",
+              "amount"
+            ]
+          }
         ]
       },
       "responseCompatibility": {

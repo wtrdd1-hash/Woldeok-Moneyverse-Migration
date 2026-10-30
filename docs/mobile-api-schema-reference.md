@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.30.0125**
+Update version: **v2026.10.31.0035**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 184 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 185 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4864,6 +4864,30 @@ _None._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | transactionId | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/wallet/transfers/receipts/:idempotencyKey` — Read owner-only durable transfer evidence; unknown is not proof of failure
+
+- Authorization: 로그인 + 최신 동의 + 세션 기반 송금자 본인 확인 (GET, CSRF 쓰기 없음)
+- Success status: 200
+- Response mode: json
+- After success: committed는 동일 키·송금자·원장 두 전표 검증 결과; unknown은 처리 실패가 아니며 새로운 키 재시도 금지
+- Operation ID: `WalletController_transferReceipt`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| idempotencyKey | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

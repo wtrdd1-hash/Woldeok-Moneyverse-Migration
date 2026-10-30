@@ -376,6 +376,7 @@ export class PostgresWalletRepository {
                 SELECT jsonb_agg(jsonb_build_object(
                   'ownerUserId', account.owner_user_id::text,
                   'accountType', account.account_type::text,
+                  'currency', account.currency::text,
                   'direction', posting.direction::text,
                   'amount', posting.amount::text
                 ) ORDER BY posting.id)

@@ -2,9 +2,9 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.10.30.0125**
+업데이트 버전: **v2026.10.31.0035**
 
-이 문서는 184개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 185개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -4864,6 +4864,30 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | transactionId | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/wallet/transfers/receipts/:idempotencyKey` — 본인 송금 멱등성 키의 원장 확정 증빙 조회 (미확인은 실패 또는 재시도 가능 증거 아님)
+
+- 인증/권한: 로그인 + 최신 동의 + 세션 기반 송금자 본인 확인 (GET, CSRF 쓰기 없음)
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: committed는 동일 키·송금자·원장 두 전표 검증 결과; unknown은 처리 실패가 아니며 새로운 키 재시도 금지
+- Operation ID: `WalletController_transferReceipt`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| idempotencyKey | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

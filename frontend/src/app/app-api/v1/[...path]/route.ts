@@ -30,6 +30,23 @@ function isWalletDetailPath(parts: readonly string[]): boolean {
     parts[2] === 'transactions';
 }
 
+function isWalletTransferReceiptPath(parts: readonly string[]): boolean {
+  return parts.length === 4 && parts[0] === 'wallet' && parts[1] === 'transfers' &&
+    parts[2] === 'receipts';
+}
+
+function verifiedWalletTransferReceipt(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const row = payload as Record<string, unknown>;
+  if (row.status === 'unknown') return Object.keys(row).length === 1;
+  if (row.status !== 'committed' || Object.keys(row).length !== 4) return false;
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (typeof row.transactionId !== 'string' || !uuid.test(row.transactionId) ||
+      typeof row.recipientUserId !== 'string' || !uuid.test(row.recipientUserId) ||
+      typeof row.amount !== 'string' || !/^[1-9][0-9]*$/.test(row.amount)) return false;
+  return BigInt(row.amount) <= 9223372036854775807n;
+}
+
 function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
   const rows = (payload as { threads?: unknown }).threads;
@@ -332,6 +349,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
 
+  if (isWalletTransferReceiptPath(parts) && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'wallet_transfer_receipt_unverified', 'transfer receipt evidence is unavailable');
+  }
   if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
@@ -409,6 +429,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (isWalletTransferReceiptPath(parts) && response.ok && !verifiedWalletTransferReceipt(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_transfer_receipt_unverified', 'transfer receipt evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -429,6 +452,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (isWalletTransferReceiptPath(parts) && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_transfer_receipt_unverified', 'transfer receipt evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -446,7 +472,7 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  if (isWalletDetailPath(parts)) {
+  if (isWalletDetailPath(parts) || isWalletTransferReceiptPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');

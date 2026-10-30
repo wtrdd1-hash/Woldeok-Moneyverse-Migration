@@ -10,7 +10,7 @@ const TX = '55555555-5555-4555-8555-555555555555';
 const AMOUNT = '900719925474099312345678901234567890';
 
 function posting(ownerUserId: string, direction: string, amount = AMOUNT) {
-  return { ownerUserId, accountType: 'USER_CASH', direction, amount };
+  return { ownerUserId, accountType: 'USER_CASH', currency: 'WLD', direction, amount };
 }
 function row(postings: unknown = [posting(ACTOR, 'credit'), posting(RECIPIENT, 'debit')]) {
   return { transaction_id: TX, transaction_type: 'USER_TO_USER', postings };
@@ -56,6 +56,7 @@ describe('wallet transfer receipt — durable owner-only evidence', () => {
     ['missing posting', row([posting(ACTOR, 'credit')])],
     ['wrong owner', row([posting(OTHER, 'credit'), posting(RECIPIENT, 'debit')])],
     ['wrong destination', row([posting(ACTOR, 'credit'), posting(ACTOR, 'debit')])],
+    ['wrong currency', row([{ ...posting(ACTOR, 'credit'), currency: 'USD' }, posting(RECIPIENT, 'debit')])],
     ['unbalanced amount', row([posting(ACTOR, 'credit'), posting(RECIPIENT, 'debit', '100')])],
     ['non-integer amount', row([posting(ACTOR, 'credit'), posting(RECIPIENT, 'debit', '1.5')])],
     ['extra posting', row([posting(ACTOR, 'credit'), posting(RECIPIENT, 'debit'), posting(OTHER, 'debit')])],
