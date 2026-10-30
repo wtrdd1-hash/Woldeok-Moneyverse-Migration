@@ -14,6 +14,17 @@ export const PROTECTED_FINANCIAL_TABLES = Object.freeze([
   'ledger_postings', 'system_treasury_vaults',
 ]);
 
+// These tables are owner-private or security-sensitive. No direct app-role
+// table read/write is an acceptable substitute for actor-scoped DB functions.
+// Do not include auth_sessions/oauth_challenges: their documented session
+// layer legitimately has limited direct writes and needs a separate policy.
+export const PROTECTED_PRIVATE_TABLES = Object.freeze([
+  'audit_logs', 'users', 'identities', 'user_consents', 'user_items', 'shop_catalog',
+]);
+export const PROTECTED_CORE_TABLES = Object.freeze([
+  ...PROTECTED_FINANCIAL_TABLES, ...PROTECTED_PRIVATE_TABLES, 'outbox_events',
+]);
+
 export function evaluateFinancialReadiness({ grants, ledger, identity }) {
   const blockers = [];
   // A truncated or malformed operator query is never evidence of a safe database.
@@ -22,21 +33,33 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
   if (!Array.isArray(grants)) blockers.push('unverified_financial_grants');
   const byTable = new Map();
   for (const row of validGrants) {
-    if (!row || typeof row.name !== 'string' || !PROTECTED_FINANCIAL_TABLES.includes(row.name)) {
-      blockers.push('invalid_financial_grant_row');
+    if (!row || typeof row.name !== 'string' || !PROTECTED_CORE_TABLES.includes(row.name)) {
+      blockers.push('invalid_protected_grant_row');
       continue;
     }
     if (byTable.has(row.name)) blockers.push('duplicate_financial_grant_row:' + row.name);
     byTable.set(row.name, row);
   }
-  for (const name of PROTECTED_FINANCIAL_TABLES) {
+  for (const name of PROTECTED_CORE_TABLES) {
     const row = byTable.get(name);
+    const financial = PROTECTED_FINANCIAL_TABLES.includes(name);
     if (!row) {
-      blockers.push('missing_core_table:' + name);
-    } else if (['can_insert', 'can_update', 'can_delete'].some(key => typeof row[key] !== 'boolean')) {
-      blockers.push('unverified_financial_grant_flags:' + name);
-    } else if (row.can_insert || row.can_update || row.can_delete) {
-      blockers.push('direct_application_financial_dml:' + name);
+      blockers.push((financial ? 'missing_core_table:' : 'missing_protected_table:') + name);
+      continue;
+    }
+    if (['can_select', 'can_insert', 'can_update', 'can_delete', 'can_truncate']
+      .some(key => typeof row[key] !== 'boolean')) {
+      blockers.push((financial ? 'unverified_financial_grant_flags:' : 'unverified_protected_grant_flags:') + name);
+      continue;
+    }
+    if (row.can_insert || row.can_update || row.can_delete) {
+      blockers.push((financial ? 'direct_application_financial_dml:' : 'direct_application_protected_dml:') + name);
+    }
+    // TRUNCATE is not covered by DELETE grants. A compromised app could erase
+    // whole financial/audit tables despite all three DML flags being false.
+    if (row.can_truncate) blockers.push('direct_application_protected_truncate:' + name);
+    if (PROTECTED_PRIVATE_TABLES.includes(name) && row.can_select) {
+      blockers.push('direct_application_private_select:' + name);
     }
   }
   if (!identity || typeof identity.database !== 'string' || !identity.database.trim() ||
@@ -89,6 +112,10 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       transactionsWithoutPostings: ledger?.transactions_without_postings ?? null,
       coreTablesWithAppDml: validGrants.filter(x => x && (x.can_insert === true || x.can_update === true || x.can_delete === true))
         .map(x => x.name),
+      protectedTablesWithAppTruncate: validGrants.filter(x => x && x.can_truncate === true)
+        .map(x => x.name),
+      privateTablesWithAppSelect: validGrants.filter(x => x && PROTECTED_PRIVATE_TABLES.includes(x.name) && x.can_select === true)
+        .map(x => x.name),
     },
     caveat: 'Opening-balance provenance and treasury/money-supply reconciliation are separate mandatory gates. A zero count here is not approval for Production.',
   };
@@ -96,9 +123,11 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
 
 const GRANTS_SQL = `
 SELECT c.relname AS name,
+       has_table_privilege('moneyverse_app', c.oid, 'SELECT') AS can_select,
        has_table_privilege('moneyverse_app', c.oid, 'INSERT') AS can_insert,
        has_table_privilege('moneyverse_app', c.oid, 'UPDATE') AS can_update,
-       has_table_privilege('moneyverse_app', c.oid, 'DELETE') AS can_delete
+       has_table_privilege('moneyverse_app', c.oid, 'DELETE') AS can_delete,
+       has_table_privilege('moneyverse_app', c.oid, 'TRUNCATE') AS can_truncate
 FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public' AND c.relkind IN ('r','p')
@@ -150,7 +179,7 @@ export async function readFinancialSnapshot(client) {
   try {
     await client.query("SET LOCAL statement_timeout = '10000ms'");
     const identity = (await client.query('SELECT current_database() AS database, current_user AS role')).rows[0];
-    const grants = (await client.query(GRANTS_SQL, [PROTECTED_FINANCIAL_TABLES])).rows;
+    const grants = (await client.query(GRANTS_SQL, [PROTECTED_CORE_TABLES])).rows;
     const ledger = (await client.query(LEDGER_SQL)).rows[0];
     return { grants, ledger, identity };
   } finally {

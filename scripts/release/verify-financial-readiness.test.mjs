@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { evaluateFinancialReadiness, readFinancialSnapshot, PROTECTED_FINANCIAL_TABLES } from './verify-financial-readiness.mjs';
+import { evaluateFinancialReadiness, readFinancialSnapshot, PROTECTED_FINANCIAL_TABLES, PROTECTED_CORE_TABLES } from './verify-financial-readiness.mjs';
 
 const good = Object.freeze({
   identity:{database:'moneyverse_test',role:'moneyverse_app'},
-  grants:PROTECTED_FINANCIAL_TABLES.map(name=>({name,can_insert:false,can_update:false,can_delete:false})),
+  grants:PROTECTED_CORE_TABLES.map(name=>({name,
+    can_select:PROTECTED_FINANCIAL_TABLES.includes(name)||name==='outbox_events',
+    can_insert:false,can_update:false,can_delete:false,can_truncate:false})),
   ledger:{
     balance_rows:3,unexplained_account_count:0,unexplained_delta_wld:'0',
     unexplained_without_postings_count:0,unexplained_without_postings_delta_wld:'0',
