@@ -27,7 +27,7 @@ CATEGORIES = ("system", "website", "database", "qa", "blog", "finance",
 CRITICAL_SERVICES = ("moneyverse-backend.service", "moneyverse-frontend.service",
                      "moneyverse-discord-bot.service", "nginx.service", "docker.service")
 TIMERS = ("moneyverse-qa.timer", "moneyverse-backup.timer",
-          "moneyverse-verified-blog-v1419.timer")
+          "moneyverse-verified-blog-v1419.timer", "moneyverse-telegram-market.timer")
 ONESHOT = ("moneyverse-qa.service", "moneyverse-backup.service",
            "moneyverse-verified-blog-v1419.service")
 
@@ -155,7 +155,8 @@ def scan_pairing(bridge: Bridge) -> bool:
 def systemctl(unit: str) -> dict[str, str]:
     try:
         proc = subprocess.run(
-            ["systemctl", "show", unit, "--property=ActiveState,Result,LoadState",
+            ["systemctl", "show", unit,
+              "--property=ActiveState,Result,LoadState,SubState,NextElapseUSecMonotonic,NextElapseUSecRealtime",
              "--no-pager"],
             text=True, capture_output=True, timeout=5, check=False,
         )
@@ -177,6 +178,15 @@ def unit_snapshot() -> dict[str, tuple[str, str]]:
     for unit in TIMERS:
         data = systemctl(unit)
         state = data.get("ActiveState", "unknown")
+        if unit == "moneyverse-telegram-market.timer" and state == "active":
+            # systemd can report active/elapsed with no next trigger: a silent outage.
+            mono = data.get("NextElapseUSecMonotonic", "")
+            real = data.get("NextElapseUSecRealtime", "")
+            phase = data.get("SubState", "")
+            has_next = any(x and x != "infinity" for x in (mono, real))
+            if phase != "waiting" or not has_next:
+                results[unit] = ("CRITICAL", "unscheduled:" + phase)
+                continue
         results[unit] = ("OK" if state == "active" else "WARNING", state)
     for unit in ONESHOT:
         data = systemctl(unit)
@@ -186,7 +196,10 @@ def unit_snapshot() -> dict[str, tuple[str, str]]:
     for disk in ("/", "/srv/moneyverse-data"):
         try:
             usage = shutil.disk_usage(disk)
-            percent = round(usage.used * 100 / usage.total)
+            # Linux reserved blocks can be unavailable to this worker even
+            # when used / total appears below a critical threshold.
+            # Use total minus actually available free bytes, like df's Use%.
+            percent = round((usage.total - usage.free) * 100 / usage.total)
             severity = "CRITICAL" if percent >= 95 else "WARNING" if percent >= 90 else "OK"
             results["disk:" + disk] = (severity, str(percent) + "%")
         except OSError:
