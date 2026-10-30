@@ -1,5 +1,47 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+**현재 기획:** v1520 F675-186 유지비 영수증·원장 근거 조회 / 이슈 #2035 / 초안 PR_PENDING / 운영 보류; 대량 병합 P0 #2031.
+
+## v2026.10.30.1520 — F675-186 회원 전용 아이템 유지비 영수증·원장 근거 조회 (기능 추가 / 초안 / 운영 보류)
+
+**이전 / 현재 / 다음:** 기능 보완 v1518 / 기능 추가 v1520 / 기능 보완 v1522(잠정). **정본:** 2026-10-30 시작·중간에 origin/main bf8d0d48f810932b43783d8605dce53954c60cff 확인, AGENTS.md, README.md, 영문 PROJECT_PLAN.md와 한국어 대조. 개발 이슈 #2035, 별도 P0 병합 통제 #2031. 이번 회차는 기획 문서만 변경한다. 19:23~19:25 KST에 런타임 검사 실패 상태의 Draft/HOLD PR이 대량 병합된 정황이 확인됐으므로, main에 존재한다는 이유로 승인된 기능이라고 판단하지 않는다. 대량 병합 이후 main의 독립적인 정확 SHA 전체 런타임 검증은 확인되지 않았다.
+
+### 목적·기존 소스·대안 및 범위
+- **회원 문제:** 현재 인벤토리는 유지비 추정액과 기록된 체납액을 보여주지만, 어떤 주차의 유지비 영수증이 기록됐고 그 영수증이 실제 원장 전표와 일치하는지 확인할 수 없다. 체납액 0은 주간 청구 실행이나 과거 모든 주차의 납부 완료를 증명하지 않는다. 새로운 청구 없이 기록의 근거를 투명하게 조회하도록 한다.
+- **실제 스키마:** 마이그레이션 075의 shop_maintenance_receipts는 id UUID PK, idempotency_key UUID UNIQUE, user_id UUID 사용자 FK, catalog_id UUID 카탈로그 FK, maintenance_week DATE, amount BIGINT 양수, transaction_id UUID 원장 거래 FK, UNIQUE(user_id,catalog_id,maintenance_week)를 가진다. 마이그레이션 104는 한국시간 월요일 04:30 자동 청구 또는 수동 체납 정산에서 economy_post_transaction과 같은 트랜잭션으로 영수증을 기록한다. 수동 정산 영수증의 maintenance_week는 **최초 미납 주차(first_missed_week)**이며 실제 정산일이 아니다. charged_at 컬럼이 없으므로 maintenance_week를 결제 시각이라고 표기하지 않는다. 원장 이벤트 shop.maintenance.charged와 shop.maintenance.settled의 구분은 실제 스키마·원장 검증을 전제로 한다. 원장 거래 FK가 있다는 사실만으로 현금/소각 계정 전표, 출처, 전체 납부 여부를 인증하지 않는다.
+- **현행 화면/API:** backend/src/shop/shop.controller.ts에는 GET /api/v1/shop/holdings와 POST /api/v1/shop/holdings/:id/upkeep-settlements가 있다. GET /api/v1/shop/purchases는 **구매** 이력이며 유지비 납부 이력이 아니다. frontend/src/app/inventory와 frontend/src/app/shop/my-receipts.tsx도 유지비 영수증의 독립적인 본인 조회를 제공한다는 증거가 아니다. 구매 영수증을 유지비 영수증으로 재사용하거나 체납 기록이 없다는 이유로 납부를 추정하지 않는다.
+- **대안 비교:** A 구매 이력 재활용은 데이터 출처가 달라 기각. B 별도 영수증/청구 테이블 신설은 중복과 금융 마이그레이션 위험으로 기각. **선택:** 기존 영수증·원장 전표를 본인 권한으로 제한해 읽는 SQL 함수, 인증된 Nest GET, 비공개 Next·Android 화면. 신규 테이블·금융 쓰기·기존 적용 마이그레이션 수정 없음.
+
+### 대상·권한·진입점·화면·CTA·상태
+- 인증·동의가 유효한 회원 본인만 접근. /inventory 아이템 카드의 '유지비 영수증 보기', /shop의 '내 유지비 영수증'에서 진입한다. 기존 구매 영수증·장착/해제·체납 정산 POST 및 F675-184/F675-185 기능을 유지한다. 아이템이 만료·제거되어도 과거 본인 영수증은 조회할 수 있지만 타인의 영수증은 절대 반환하지 않는다. URL/쿼리에서 회원 UUID를 받지 않으며 공개 공유 링크를 만들지 않는다. 기본 최근 12개 유지비 주차, 한국시간 fromWeek/toWeek 양끝 포함, 최대 366일, 선택 catalogId UUID, 기본 페이지 20건·최대 50건.
+- 항목별 표시: 신뢰 가능한 카탈로그 아이템명, **유지비 대상 주차(실제 납부일 아님)**, 기록된 정확한 WLD 금액(BIGINT 문자열), 원장 근거 상태, 검증 가능한 경우에만 원장 거래 시각. 문구는 '영수증과 원장 전표 일치 확인', '영수증 기록은 있으나 원장 검증 미완료', '조건에 맞는 영수증 기록 없음—체납이 없다는 뜻은 아님', '원천 장애로 납부 여부 확인 불가'로 구분한다. 기록이 없다고 '납부 완료'를 표시하지 않으며, 전체 주차가 모두 청구됐다고 추정하지 않는다.
+- 초기/로딩/검증된 결과/VERIFIED_EMPTY/RECEIPT_RECORDED_UNVERIFIED/잘못된 필터/인증 만료/동의 만료/원천 변경(409)/커서 만료(410)/요청 제한(429)/원천 장애(503)/오프라인/계정 전환 상태를 구분한다. 새로고침·재시도·필터 초기화 CTA를 제공하고 복구 가능한 오류에는 입력 날짜를 유지한다. 접근성은 의미 있는 표·카드, 키보드 페이지 이동, aria-live 상태, 오류 후 초점 복귀, 색상 외 상태 표현, 모션 감소, 320px·200% 확대·44px 터치, WCAG 2.2 AA, 한·영 동등 문구를 적용한다.
+
+### API·DB·트랜잭션·정합성·악용 방지
+- 제안 Nest GET /api/v1/shop/upkeep/receipts?catalogId=&fromWeek=&toWeek=&limit=&cursor=; SessionGuard·AuthenticatedGuard·ConsentGuard를 적용하고 검증된 세션에서만 actor를 얻는다. DTO는 {items:[{receiptId,catalogId,itemName,maintenanceWeek,amountWld,ledgerTransactionId,evidenceStatus,verifiedLedgerAtUtc?}],hasMore,nextCursor,asOfUtc,sourceStatus:'VERIFIED'|'PARTIAL_UNVERIFIED'} 형태. UUID 형식, WLD 금액의 십진 정수 문자열, UTC RFC3339 시각을 엄격히 검증하며 JS Number 부동소수로 금액 계산 금지. 잘못된/중복/과도한 날짜·limit은 400, 인증 만료 401, 동의 403, 원천 변경 409, 커서 만료 410, 제한 429, DB·원장 장애 503. 장애를 정상적인 빈 목록으로 바꾸지 않는다. 다른 회원의 catalogId는 소유 존재 여부를 유출하지 않는 빈 결과로 처리한다.
+- 별도 전방 마이그레이션에서 public.shop_my_upkeep_receipts_v1(p_actor uuid, p_catalog uuid, p_from_week date, p_to_week date, p_limit integer, p_after_week date, p_after_receipt uuid) SECURITY DEFINER 읽기 전용 함수를 설계한다. search_path pg_catalog,pg_temp 고정, 테이블 완전 수식, receipt.user_id=p_actor 필수, PUBLIC EXECUTE 회수, moneyverse_app에 함수 EXECUTE만 허용. 영수증·원장·감사 테이블에 애플리케이션 계정의 직접 SELECT/DML 권한을 부여하지 않으며 실제 PostgreSQL에서 유효 권한을 재측정한다. 기존 PK/UNIQUE/FK는 유지한다. (user_id,maintenance_week DESC,id DESC), (user_id,catalog_id,maintenance_week DESC,id DESC) 인덱스는 10,001개 합성 영수증으로 EXPLAIN ANALYZE/BUFFERS 측정 후 중복되지 않을 때만 제안하며 다른 개발자의 마이그레이션 번호를 선점하지 않는다.
+- 영수증의 원장 근거는 거래 ID, 사용자, SHOP_MAINTENANCE 유형, 금액, 프로젝트 전표 방향에 따른 실제 현금 차감·sink 적립, 차변/대변 균형과 커밋 상태를 **같은 읽기 전용 REPEATABLE READ 스냅샷**에서 검증해야 한다. 불일치·권한 부족·시간 초과는 RECEIPT_RECORDED_UNVERIFIED이며 납부 확인이 아니다. 이 조회는 정산·청구 트랜잭션이 아니므로 idempotency key나 POST를 만들지 않는다. 기존 스키마로 전표 의미를 입증하지 못하면 전체를 UNVERIFIED로 낮추고 VERIFIED 문구 출시를 차단한다. 대상 주차와 실제 정산 시각을 구분하고 결제 시각을 임의 생성하지 않는다.
+- 페이지네이션은 (maintenance_week DESC, receipt.id DESC) 결정적 키셋과 HMAC-SHA256 커서 사용. actor·세션 세대·정규화 필터·asOf·마지막 키·원천 지문을 묶고 TTL 최대 15분. 원천 변경 시 409 또는 미검증 상태로 처리하며 HTTP 요청 간 MVCC 스냅샷을 보장한다고 주장하지 않는다. DB timeout, 회원별 rate limit, 50+1 조회, 응답 크기 제한, 쿼리·커서·UUID·금액의 민감 로그 금지.
+
+### 개인정보·모바일·관리자·KPI·검증·배포
+- 비공개 페이지와 API의 **실제 외부 응답** 성공/실패 모두 Cache-Control private,no-store, X-Robots-Tag noindex,nofollow, Referrer-Policy no-referrer. 사이트맵·공개 SEO·소셜 미리보기·색인 가능한 개인 검색 URL 제외. Next 서버 전용 BFF와 Android /app-api/v1/shop/upkeep/receipts 계약 동등성, 디스크 캐시 금지, 로그아웃·계정 전환 시 이전 응답 폐기, 오프라인/재시도 일치. 전역 Next 헤더 덮어쓰기 문제 #1994/#2012를 실제 HTTP로 검증한다.
+- 관리자에게 개인별 영수증 조회 기능은 추가하지 않는다. 20명 미만 코호트를 숨기는 익명 집계만 제공: 기능 사용, VERIFIED/UNVERIFIED 비율, 원장 불일치, 400/409/410/429/503, p95 지연, 접근성·개인정보 오류. UUID·금액·idempotency key·커서·원장 전표는 분석 로그에 기록하지 않는다. 목표(실측 아님): 타인 조회 0, 거짓 납부 확인 0, WLD·영수증 쓰기 0, 합성 10,001건에서 p95 <300ms.
+- 수용시험 **정의만 함, 미실행**: 격리 PostgreSQL 17.11 정확 마이그레이션, 합성 영수증 10,001건, 타인 접근 100, 커서 변조·만료 100, 월요일 04:30·최초 미납 주차·날짜 경계 100, 동시 조회 100, 누락·불일치 원장 50, Android 계정 전환·오프라인 50, 실제 HTTP 200/400/401/403/429/503 캐시·색인 헤더, 320px·200%·스크린리더, 금융 쓰기 0, 스위치 OFF 복구. 동일 주차 중복 영수증 방지, 아이템 만료 이후 기록, 자동·수동 정산 혼합 회귀 포함.
+- **배포:** shop_upkeep_receipt_history 스위치 기본 OFF. A/B/C/QA는 독립 브랜치와 별도 Test Docker에서 구현·검증, 전방 마이그레이션 번호 조정. 공식 격리 Test의 **정확 후보 SHA**와 전체 CI·실제 PostgreSQL ACL·금융·인증 E2E·Android·실제 edge·접근성·외부 독립 백업 복원 및 승인된 GitOps 무중단 승격이 모두 충족되기 전 운영 금지. 직원 한정 카나리 후 거짓 확인·개인정보 노출·원천 불일치·성능 저하·기존 흐름 장애 시 즉시 스위치 OFF 및 검증된 불변 이전 SHA로 롤백. 과거 원장·마이그레이션 수정 금지.
+
+### 구체적 개발 백로그 P0 4건 + P1 6건
+- P0 OPS1520-01 (#1984): Production 실제 실행 SHA와 심볼릭 링크·삭제된 작업 디렉터리 차이 확인, 재시작 전 프로세스·독립 롤백 아티팩트 보존.
+- P0 SEC1520-02 (#993/#2000): 개발 DB moneyverse_app 과도한 권한, 마이그레이션 체크섬 불일치 5건, 신규 설치 스키마 동등성 및 타인 조회 거부 실DB 검증. 운영 DB 권한은 UNKNOWN.
+- P0 FIN1520-03 (#1976/#1151): 국고/MINT/SWF·채권 fail-open 정합성, 유지비 영수증과 원장 전표·멱등성 대조. 납부 확인 배지의 근거가 될 때까지 보류.
+- P0 REL1520-04 (#2031/#1088): 19:23~19:25 Draft/HOLD 대량 병합과 런타임 검사 실패의 감사 주체·브랜치 보호·증거 보존 조사, 최신 main 전체 CI와 공식 Test 정확 SHA 금융·인증·DB·edge·독립 복원. 자동 승격 금지.
+- P1 UPKEEP1520-05 (B/QA): 본인 SQL 조회, 원장 근거 oracle, 정확한 주차 의미, 인덱스, 전방 마이그레이션.
+- P1 UPKEEP1520-06 (B): 인증 Nest GET, 엄격한 DTO·HMAC 커서·오류·원천 지문.
+- P1 UPKEEP1520-07 (A): 접근성 있는 Next 비공개 영수증 목록, BigInt, 기록·검증·빈 결과 구분.
+- P1 UPKEEP1520-08 (C): Android app-api 동등성, 비공개 캐시, 계정 전환·오프라인.
+- P1 UPKEEP1520-09 (A/B): 실제 edge no-store/noindex, 요청 제한, 익명 관리자 KPI, 스위치 OFF.
+- P1 UPKEEP1520-10 (QA): 격리 PostgreSQL/원장 부정시험, 합성 10,001건, E2E·접근성·정확 SHA Test·롤백 근거.
+
+**QA v1395 (2026-10-30 19:21 KST 확인):** 백엔드 119 FAIL / 2,563 PASS / 495 SKIP, 프론트엔드 53 FAIL / 2,607 PASS, 국고 회귀 및 채권 보류 시험 FAIL(exit 1). 이 QA는 대량 병합 **이전** 결과이므로 최신 main을 검증한 증거가 아니다. 운영 표시 SHA와 실제 실행 불일치 #1984, 공식 Test 정확 SHA 및 외부 독립 복원 미입증. **초안 / 운영 보류**. 외부 독립 레퍼런스 신규 검증 승인 0건, 누적 중복 제거·근거 분류 승인 UNKNOWN / 10,000건: **BLOCKED / IN PROGRESS**. 이번 기획 회차의 런타임/DB/WLD/Test/Production 쓰기 및 main 병합 없음.
+
 
 ## v2026.10.30.1518 — F675-185 회원 보관함 상태·유지비 근거 정확성 강화 (기능 보완 / 초안 / 운영 보류)
 
