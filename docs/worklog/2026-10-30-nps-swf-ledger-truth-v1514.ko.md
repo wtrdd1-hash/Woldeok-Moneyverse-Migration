@@ -34,3 +34,4 @@
 - GitHub Draft PR **#1967** (`fix/nps-swf-ledger-truth-v1514-20261030`): 작업 브랜치 코드/테스트/영문·국문 업데이트 기록까지 푸시. 초기 2026-10-30 기준 main 병합은 하지 않음.
 - **운영 승격 HOLD**: 공식 `test-main-*` 및 Production은 모두 기존 **v1502**를 실행하며, 빌드 결과를 공식 Test v1514로 교체하지 않음. 확대 재무 QA 실패 13건 및 18 skip, DB migration 300 미적용·NPS Test SELECT 42501, Treasury 552개 거래 원장 키 미연결, canonical Treasury 계정 0 WLD와 구형 vault 220,923,528 WLD 간 정합성·실지급 재원 불인증, 인증 세션 연속성 및 원장 복구/롤백 게이트 미통과. 금융 변경·Production DB DML·금액 보정·메인/운영 코드 적용 없음. 실패 조건이 있는 한 무중단 승격도 진행하지 않음.
 - 후속 처리: Test NPS SELECT는 최소 권한/소유자 Scoped read 설계와 마이그레이션 300 Test 적용 전 승인 및 테스트 필요; 원장 소급 분개 금지. 최신 메인 소스 동일성 및 검증된 원장·권한·Test 정확한 SHA·인증 QA/세션 유지 증거가 있을 때만 PR 승인 및 무중단 배포 가능.
+- 마지막 Github 이슈/PR 기록: Test 연금 개요 조회 권한 오류 추적 **#1970** (https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1970) 생성, 기존 Draft PR **#1967**에 검증 결과·운영 차단 사유 댓글 기록.
