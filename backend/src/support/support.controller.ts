@@ -79,8 +79,13 @@ export class SupportController {
   }
 
   @Get('threads/:id/messages') @ApiOperation({ summary: 'Messages in my support conversation' })
-  async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string) {
-    return { messages: await this.repo().messages(requireUserId(req), id) };
+  async messages(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Query('sender') sender?: string) {
+    if (sender !== undefined && (typeof sender !== 'string' || !['admin', 'user'].includes(sender))) {
+      throw new BadRequestException('invalid support message sender');
+    }
+    return { messages: sender === undefined
+      ? await this.repo().messages(requireUserId(req), id)
+      : await this.repo().messages(requireUserId(req), id, 200, sender as 'admin' | 'user') };
   }
 
   @Get('threads/:id/transcript')

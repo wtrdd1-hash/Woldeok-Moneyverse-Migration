@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSupportSenderMessages, type SupportSender } from '@/lib/support-message-sender';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -106,6 +107,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const supportSenderPath = parts.length === 4 && parts[0] === 'support' &&
+    parts[1] === 'threads' && parts[3] === 'messages' && request.method === 'GET';
+  const supportSenderValues = supportSenderPath ? request.nextUrl.searchParams.getAll('sender') : [];
+  if (supportSenderValues.length > 1 || (supportSenderValues.length === 1 &&
+      !['admin', 'user'].includes(supportSenderValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'support_sender_invalid', 'sender must be admin or user');
+  }
+  const supportSender = supportSenderValues[0] as SupportSender | undefined;
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -282,6 +292,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
         'support conversation order could not be verified');
+    }
+  }
+
+  // Never show a stale backend's unfiltered HTTP 200 as a verified sender search.
+  if (supportSenderPath && supportSender && response.ok) {
+    try {
+      if (parseSupportSenderMessages(await response.clone().json(), supportSender) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_sender_unverified',
+          'support message sender search could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_sender_unverified',
+        'support message sender search could not be verified');
     }
   }
 

@@ -97,10 +97,13 @@ export class SupportRepository {
       [actor, key, subject, body]);
   }
 
-  messages(actor: string, thread: string, limit = 200) {
+  messages(actor: string, thread: string, limit = 200, sender?: 'admin' | 'user') {
+    // The owner-bound SQL function applies the limit before sender filtering.
+    // Never read support_messages directly or claim this covers all history.
     return queryRows<SupportMessageRow>(this.pool,
-      'SELECT message_id::text,sender_kind,body,created_at FROM public.support_thread_messages($1,$2,$3)',
-      [actor, thread, limit]);
+      `SELECT message_id::text,sender_kind,body,created_at
+       FROM public.support_thread_messages($1,$2,$3)${sender ? ' WHERE sender_kind = $4' : ''}`,
+      sender ? [actor, thread, limit, sender] : [actor, thread, limit]);
   }
 
   addMessage(actor: string, key: string, thread: string, body: string) {

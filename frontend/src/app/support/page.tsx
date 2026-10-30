@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSupportSenderMessages } from '@/lib/support-message-sender';
 import { NewSupportThreadForm, SupportReplyForm } from './member-support-forms';
 
 export const dynamic = 'force-dynamic';
@@ -12,13 +13,14 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string; sort?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string; sort?: string; sender?: string }> }) {
   await requireMember();
   const params = await searchParams;
   const status = typeof params.status === 'string' && ['open', 'waiting_user', 'resolved'].includes(params.status) ? params.status : null;
   const q = typeof params.q === 'string' && params.q.length <= 80 && ![...params.q].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
     ? params.q.trim() : '';
   const sort = params.sort === 'oldest' ? 'oldest' : null;
+  const sender = params.sender === 'admin' || params.sender === 'user' ? params.sender : null;
   const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}) });
   const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ""}`;
   const { threads } = q
@@ -29,9 +31,12 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   );
   // A stale or forged selected ID must not trigger an additional private read.
   const selected = threads.find(t => t.thread_id === params.thread)?.thread_id ?? threads[0]?.thread_id;
-  const messages = selected
-    ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
-    : [];
+  const messagePayload = selected
+    ? await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages${sender ? `?sender=${sender}` : ''}`)
+    : { messages: [] };
+  const verifiedMessages = sender ? parseSupportSenderMessages(messagePayload, sender) : messagePayload.messages;
+  const messageUnavailable = verifiedMessages === null;
+  const messages = verifiedMessages ?? [];
   return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
@@ -72,7 +77,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
         <p className="text-xs text-muted-foreground">오래된 순서도 최근 최대 100건 안에서만 정렬합니다. 전체 기간의 오래된 문의를 검색하지 않습니다.</p>
         <button type="submit" className="min-h-11 rounded-xl border bg-primary px-4 text-primary-foreground">필터 적용</button>
       </form>
-      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(sender ? { sender } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
       </Link>)}</div>
     </section>
@@ -83,6 +88,22 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
           <a href={`/support/transcript/${encodeURIComponent(selected)}`} download className="inline-flex min-h-11 items-center rounded-xl border px-4 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" aria-label="선택한 관리자 문의의 대화 내역 CSV 다운로드">대화 내역 CSV 다운로드</a>
           <a href={`/support/transcript/${encodeURIComponent(selected)}/text`} download className="inline-flex min-h-11 items-center rounded-xl border px-4 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" aria-label="선택한 관리자 문의의 대화 내역 텍스트 다운로드">대화 내역 TXT 다운로드</a>
         </div>
+        <form method="get" action="/support" className="mb-3 flex flex-wrap items-end gap-2">
+          <input type="hidden" name="thread" value={selected} />
+          {status && <input type="hidden" name="status" value={status} />}
+          {q && <input type="hidden" name="q" value={q} />}
+          {sort && <input type="hidden" name="sort" value={sort} />}
+          <div className="grid min-w-0 flex-1 gap-1">
+            <label htmlFor="support-message-sender" className="text-sm font-semibold">대화 발신자 필터</label>
+            <select id="support-message-sender" name="sender" defaultValue={sender ?? ''} className="min-h-11 rounded-xl border bg-background p-2">
+              <option value="">모든 메시지</option><option value="admin">관리자 메시지만</option><option value="user">내 메시지만</option>
+            </select>
+          </div>
+          <button type="submit" className="min-h-11 rounded-xl border px-4">메시지 필터 적용</button>
+          <p className="w-full text-xs text-muted-foreground">이 대화의 처음 최대 200개 메시지 안에서만 필터링합니다. 전체 대화 검색은 아닙니다.</p>
+        </form>
+        {messageUnavailable && <p role="alert" className="text-sm text-destructive">메시지 검색 결과를 검증할 수 없습니다. 다시 시도해 주세요.</p>}
+        {!messageUnavailable && sender && messages.length === 0 && <p role="status" className="text-sm text-muted-foreground">선택한 발신자의 메시지가 없습니다(처음 200개 기준).</p>}
         <div className="flex-1 space-y-3 overflow-y-auto">{messages.map(m => <div key={m.message_id} className={`max-w-[85%] rounded-2xl p-3 ${m.sender_kind==='admin'?'bg-primary text-primary-foreground':'ml-auto bg-muted'}`}>
           <div className="mb-1 text-xs font-bold">{m.sender_kind==='admin'?'관리자':'나'}</div><p className="whitespace-pre-wrap break-words">{m.body}</p>
         </div>)}</div>
