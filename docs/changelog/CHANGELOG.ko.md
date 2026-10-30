@@ -27,11 +27,18 @@
 
 ## v2026.10.29.1511 — 텔레그램 주식 뉴스·주가·중요 오류 (운영 가동)
 
+<<<<<<< HEAD
 ## v2026.10.30.1484 — F675-177 회원 전용 지갑 월별 활동 요약 (기획 초안 / 배포 보류)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 - v1482 기능 보완 이후 기능 추가, 다음 v1486 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6`, QA v1377 FAILED/P0. 기존 50건 단위 비공개 거래내역에 달력 월별 요약이 없으며 최근 CSV 및 미병합 저장 필터와 구분.
 - 본인만 최근 1~12개 한국시간 월별 순증감 조회, 거래별 선집계, 정확한 WLD 문자열, 서버 스냅샷·당월 부분 집계, 정상 빈 결과와 원본 장애 구분, Next/Nest/Android·320px/WCAG AA·noindex/no-store·기능 OFF. 잔액·소득/세금·출처·내부 이체를 증명하지 않음. [통합 기획](../planning/INTEGRATED_PLANNING_MASTER.ko.md) · [P0/P1 이슈 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 - P0 REPO1484-01 SEC1484-02 FIN1484-03 REL1484-04; P1 MONTH1484-05 MONTH1484-06 MONTH1484-07 MONTH1484-08 MONTH1484-09 MONTH1484-10. 시험 명세만 작성, 미실행. 외부 신규 승인 0건·누적 UNKNOWN/10,000건. 런타임/DB/WLD/Test/Production 변경 없고 정확 SHA 배포 보류.
+=======
+## 2026-10-30 v1488 — F675-178 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
+- 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인. [개발 이관 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 런타임·DB·WLD·Test·운영 변경 없음.
+- 지갑 기록·API·원장 SQL·개발 PostgreSQL 17.11(북마크 테이블 없음, 개발 거래 891건)·QA v1379·열린 GitHub PR 조사. 회원 소유 거래 100개 북마크, 커서, 안정적 멱등 영수증, 소유자 DB 함수/권한, Nest/Next/Android, 접근성·SEO·개인정보·관리자 집계 및 배포 차단 조건을 영문 정본과 국문 통합 기획에 반영.
+- P0 REPO1488-01 SEC1488-02 FIN1488-03 REL1488-04, P1 BOOKMARK1488-05..10. 합성 거래 10,001건 및 악용 시험은 계획만 수립(미실행). QA v1379 금융 6 FAIL, lint 오류 3, 체크섬 불일치 5건; 디스크 root 87%/data 94%. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 운영 승격 HOLD.
+>>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
 
 - 2분 간격 읽기 전용 뉴스 생성/발행 구분, 직전 5%·시가 10% 변동, 거래정지·09시 요약·오류 건수 알림. PR #1903 병합, Test 및 운영 타이머·Telegram 실제 전송 검증. [릴리스](../releases/v2026.10.29.1511.ko.md).
 

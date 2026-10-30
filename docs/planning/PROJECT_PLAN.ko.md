@@ -4,6 +4,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.29.1478 — F675-175 고객문의 초안 권한·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 - 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 main `54b182d2214a15974350701174175f589789613b`; 선행 Draft #1901 OPEN/CONFLICTING·미병합, QA v1374 Draft #1902 FAILED/HOLD·공식 Test 미인증. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [기획 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
 - 개발 PostgreSQL 17.11 **실측**: 마이그레이션 196/302가 REVOKE를 선언했으나 `moneyverse_app`는 `support_threads`·`support_messages`에 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE(및 REFERENCES/TRIGGER) 보유. 운영 권한 미확인, 문의 본문 조회 없음. 기존 Next 전송 액션은 호출마다 새 UUID를 생성하며 `support_create_thread`는 동일 키의 다른 제목/본문을 비교하지 않고, 메시지 UUID 기반 영수증으로는 키 기반 불명 전송을 조회할 수 없음. **잠재 위험이지 운영 사고 확인은 아님.**
@@ -57,6 +58,16 @@
 
 
 >>>>>>> origin/auto/planning-v1484-wallet-monthly-summary-20261030-0205
+=======
+## v2026.10.30.1488 — F675-178 회원 전용 지갑 거래 북마크 (기능 추가 / 기획 초안 / 운영 HOLD)
+**Draft PR:** [#1937](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1937) — OPEN / DRAFT / RELEASE HOLD, 최신 main 독립 브랜치(선행 미병합 #1926/#1930 보존).
+- **회차:** 이전 v1486 기능 보완 → 현재 v1488 기능 추가 → 다음 v1490 기능 보완(잠정). main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작/중간 재조회, 독립 QA v1379 FAILED/P0. [개발 이관 #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). 문서 전용이며 SQL·런타임·DB·WLD·Test·운영 변경 없음.
+- **확인된 공백:** 지갑 거래내역은 본인 거래 50건/페이지, 전체/7일/30일 조회만 지원하며 북마크 UI/API 없음. 개발 PostgreSQL 17.11에 `wallet_activity_bookmarks` 테이블 없음(개발 거래 891건, 운영 데이터 아님). F675-176 저장 필터·F675-177 월별 요약·F675-03 거래 영수증과 중복되지 않음.
+- **신규 설계:** 회원 본인 WLD 거래(수신 송금 및 동결/종료 계정의 과거 거래 포함) 최대 100개 저장/삭제, 비공개 `/wallet/activity/bookmarks` 20/50건 커서·50개 상태 일괄 조회. 세션 인증 PUT/DELETE, 동일 UUID 멱등 키와 원자적 영수증. 소유자 범위 SECURITY DEFINER 함수·전진형 테이블/인덱스·app-role 직접 DML 금지·금융 원장 변경 금지. 회원/세션 결속 HMAC 커서 10분, no-store/noindex, Nest/Next/Android 동등, 320px/WCAG 2.2 AA, 관리자 집계만, 기능 OFF. 상세 명세는 [국문 통합 기획](INTEGRATED_PLANNING_MASTER.ko.md).
+- **P0:** REPO1488-01 과거 참조·브랜치 보호; SEC1488-02 체크섬 5건·개발 DB 권한; FIN1488-03 MINT 18,000 WLD·국고 552건·SWF/Test 합성; REL1488-04 QA1379 금융 6 FAIL/lint 3·독립 복원·frontend/backend/edge 정확 SHA·디스크 root 87%/data 94%. **P1:** BOOKMARK1488-05, BOOKMARK1488-06, BOOKMARK1488-07, BOOKMARK1488-08, BOOKMARK1488-09, BOOKMARK1488-10 DB·멱등성·Nest·Next·Android/개인정보/관리·실제 PG 시험. 합성 거래 10,001건/권한 위조 100건/동시성 100건/응답 유실 50건/계정 전환 30건은 **계획, 미실행**. P0 4 + P1 6 = 총 10건.
+- **차단 조건:** 외부 독립 근거 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. SEC 검증 전 SQL 번호 지정 금지. 개발 별도 브랜치→CI→격리 PG→공식 Test exact-SHA→독립 복원→승인된 GitOps→운영 스모크·롤백. RELEASE HOLD.
+
+>>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
 ## v2026.10.29.1472 — F675-174 회원 전용 알림 검색·안정적 내역 조회 (기획 초안 / 운영 HOLD)
 - 이전 기능 보완 v1470 → 현재 기능 추가 v1472 → 다음 기능 보완 v1474(잠정). 시작·중간 main `69c486777d023ee45a216528e7a0c8b7dd1d7ea7`, 마지막 완료 QA v1371 FAILED/P0, v1372 수집 중. [개발 이슈 #1887](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1887).
 - 실제 소스: 알림 분류 탭은 20개 오프셋·5,000 상한, Nest DTO는 분류/읽음/limit/offset만 지원하여 키워드·기간·키셋 검색이 없다. 개발 PG 알림 테이블 0행·소유자 인덱스·앱 SELECT/INSERT 관찰, pg_trgm 미설치·생성 SQL 계보 미확인. 운영 DB 상태로 일반화하거나 권한 변경 승인으로 해석 금지.

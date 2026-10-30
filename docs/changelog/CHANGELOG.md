@@ -27,11 +27,18 @@
 
 ## v2026.10.29.1511 — Telegram market news, prices and critical logs (Production active)
 
+<<<<<<< HEAD
 ## v2026.10.30.1484 — F675-177 owner-private monthly wallet activity digest (planning DRAFT / release HOLD)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; unmerged, full CI not certified.
 - Feature Addition after v1482 Improvement; next v1486 Improvement (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6`; QA v1377 FAILED/P0. Source-backed gap: existing 50-row private activity history, no calendar-month digest; recent CSV and unmerged saved views are separate.
 - Proposed owner-only 1..12 KST-month read-only summary, exact signed USER_CASH/BANK transaction-first aggregation, server snapshot and partial current month, verified empty vs unavailable, Next/Nest/Android, 320px/WCAG AA, private noindex/no-store and flag OFF. No balance, income/tax, provenance or internal-transfer certification. [Integrated plan](../planning/INTEGRATED_PLANNING_MASTER.md) · [P0/P1 issue #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
 - P0 REPO1484-01 SEC1484-02 FIN1484-03 REL1484-04; P1 MONTH1484-05 MONTH1484-06 MONTH1484-07 MONTH1484-08 MONTH1484-09 MONTH1484-10. QA tests planned not run; external independent newly approved 0, cumulative UNKNOWN/10,000. No runtime/DB/WLD/Test/Production change; official exact-SHA release HOLD.
+=======
+## 2026-10-30 v1488 — F675-178 owner-private wallet transaction bookmarks (Feature Addition; DRAFT / RELEASE HOLD)
+- Previous Feature Improvement v1486 → Current Feature Addition v1488 → Next Feature Improvement v1490 (provisional). Latest main `62c6cd038951d65c94b709302bdaec6e75b080b6` rechecked start/mid; [engineering issue #1936](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1936). No runtime/DB/WLD/Test/Production changes.
+- Read source wallet history/controller, ledger accounts/postings schema, DEV PG 17.11 read-only table existence (bookmark table absent; 891 DEV ledger transactions), QA v1379 and open GitHub PRs. Drafted private owner-visible bookmark 100-cap, cursor, stable idempotency receipts, SQL/ACL, Next/Nest/Android, a11y/SEO/privacy, admin aggregate and fail-closed release gates in bilingual canonical/integrated plan.
+- Backlog P0 REPO1488-01 SEC1488-02 FIN1488-03 REL1488-04 and P1 BOOKMARK1488-05..10. Planned 10,001 synthetic ledger rows and adversarial cases NOT RUN. QA v1379 finance 6 FAIL, lint 3 errors, 5 applied migration mismatches; disk root 87% / data 94%. External independent approved newly 0, cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. Draft only, Production HOLD.
+>>>>>>> origin/auto/planning-v1488-wallet-bookmarks-20261030-0405
 
 - Read-only two-minute virtual stock news draft/publication, 5% sampled/10% day-open move, halts, 09:00 KST digest and error count notifications. PR #1903 merged; Test passed; independent Production timer and Telegram receipt verified. [Release](../releases/v2026.10.29.1511.md).
 
