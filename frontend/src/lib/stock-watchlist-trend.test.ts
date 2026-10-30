@@ -23,6 +23,8 @@ describe('owner stock watchlist response proof', () => {
     expect(parseVerifiedStockWatchlist({ stocks: [stock('10', '9')] }, 'down')).toBeNull();
     expect(parseVerifiedStockWatchlist({ stocks: [stock('1e2', '9')] }, 'all')).toBeNull();
     expect(parseVerifiedStockWatchlist({ stocks: [stock('10', '9'), stock('10', '9')] }, 'all')).toBeNull();
+    expect(parseVerifiedStockWatchlist({ stocks: [{ ...stock('10', '9'), stock_id: 'abcdefab-0000-4000-8000-000000000012' }, { ...stock('10', '9'), stock_id: 'ABCDEFAB-0000-4000-8000-000000000012' }] }, 'all')).toBeNull();
+    expect(parseVerifiedStockWatchlist({ stocks: [{ ...stock('10', '9'), created_at: '2026-10-30' }] }, 'all')).toBeNull();
     expect(parseVerifiedStockWatchlist({ stocks: 'not-array' }, 'all')).toBeNull();
     expect(parseVerifiedStockWatchlist({ stocks: [] }, 'up')).toEqual({ stocks: [] });
   });

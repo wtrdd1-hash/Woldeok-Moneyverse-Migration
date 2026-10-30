@@ -10,6 +10,7 @@ export interface VerifiedWatchlistRow {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const INTEGER = /^(0|[1-9][0-9]*)$/;
+const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
 const MAX_BIGINT = 9223372036854775807n;
 
 export function parseStockWatchlistTrend(value: unknown): StockWatchlistTrend | null {
@@ -35,15 +36,15 @@ export function parseVerifiedStockWatchlist(
   for (const raw of stocks) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
     const stock = raw as Record<string, unknown>;
-    if (typeof stock.stock_id !== 'string' || !UUID.test(stock.stock_id) || ids.has(stock.stock_id)) return null;
+    if (typeof stock.stock_id !== 'string' || !UUID.test(stock.stock_id) || ids.has(stock.stock_id.toLowerCase())) return null;
     if (typeof stock.symbol !== 'string' || stock.symbol.length < 1 || stock.symbol.length > 40 ||
         typeof stock.name !== 'string' || stock.name.length < 1 || stock.name.length > 200 ||
-        typeof stock.created_at !== 'string' || !Number.isFinite(Date.parse(stock.created_at))) return null;
+        typeof stock.created_at !== 'string' || !ISO_TIMESTAMP.test(stock.created_at) || !Number.isFinite(Date.parse(stock.created_at))) return null;
     const price = exactAmount(stock.current_price);
     const open = exactAmount(stock.day_open_price);
     if (price === null || open === null) return null;
     if (trend !== 'all' && (open === 0n || !(trend === 'up' ? price > open : trend === 'down' ? price < open : price === open))) return null;
-    ids.add(stock.stock_id);
+    ids.add(stock.stock_id.toLowerCase());
   }
   return { stocks: stocks as VerifiedWatchlistRow[] };
 }

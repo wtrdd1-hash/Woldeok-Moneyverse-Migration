@@ -31,10 +31,9 @@ import type {
 } from './stock.repository';
 import type { LivePriceRow } from './market-broadcast';
 
-// StockService adds no validation of its own — every check lives in
-// PostgresStockRepository, which owns the SQL and the money-shaped
-// invariants (see postgres-stock-repository.ts). This interface exists so
-// the service can be constructed with a test double without importing pg.
+// The repository owns SQL authorization and money mutation checks.
+// StockService only filters the owner-scoped watchlist read model and
+// validates its price evidence. This interface permits isolated test doubles.
 export interface StockRepository {
   list(): Promise<readonly StockMarketRow[]>;
   candles(
