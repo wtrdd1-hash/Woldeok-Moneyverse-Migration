@@ -9,4 +9,4 @@
 
 **시작:** miniPC Debian 13.6, 서비스 7개 활성·개발 DB 연결. 스킬 커넥터 URI 없음, 로컬 using-superpowers/brainstorming/writing-plans/worktrees/verification 읽음. main·선행 SHA 확인.
 **중간:** main/기획서 재조회, DB 071/114/123, Next 인벤토리, Nest 보유 조회, Android edge, PR 확인. 개발 이슈 #2074 생성. QA v1400은 마지막 확인 보고이며 재실행하지 않음.
-**완료:** 문서 검증·PR/CI/SHA 확인 후 갱신. 런타임/DB/WLD/운영 변경 없음.
+**완료:** 문서 검증·Draft PR #2075 OPEN; 최종 SHA·CI는 miniPC complete.log에서 별도 검증. 런타임/DB/WLD/운영 변경 없음.

@@ -40,7 +40,7 @@
 
 **Status:** DOCUMENTATION PROPOSAL / DRAFT / RELEASE HOLD. All acceptance tests above are NOT EXECUTED; no runtime/DB/WLD/ledger/Test/Production change.
 
-**Current planning:** v1532 F675-189 equipped expiry impact / issue #2074 / Draft pending (stack after #2066) / RELEASE HOLD; incident #2031.
+**Current planning:** v1532 F675-189 equipped expiry impact / issue #2074 / Draft #2075 (stack after #2066) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.31.1530 — F675-188 Owner Inventory Expiry Radar Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

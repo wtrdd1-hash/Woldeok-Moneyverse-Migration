@@ -6,7 +6,7 @@
 - **Backlog:** P0 OPS1532-01 SEC1532-02 FIN1532-03 REL1532-04; P1 IMPACT1532-05..10 (4+6). QA v1400 backend 126 FAIL/2653 PASS/501 SKIP, frontend 55 FAIL/2701 PASS; official exact-SHA Test/independent restore BLOCKED. Proposed 10,001-row and boundary tests NOT RUN; release HOLD.
 - **External independent evidence:** new verified 0, cumulative deduplicated/classified UNKNOWN/10,000, BLOCKED / IN PROGRESS. Full criteria in integrated master and #2074. Documentation-only; no merge/deploy.
 
-**Current planning:** v1532 F675-189 equipped expiry impact / issue #2074 / Draft pending (stack after #2066) / RELEASE HOLD; incident #2031.
+**Current planning:** v1532 F675-189 equipped expiry impact / issue #2074 / Draft #2075 (stack after #2066) / RELEASE HOLD; incident #2031.
 
 ## v2026.10.31.1530 — F675-188 Owner Expiry Radar Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1528 → Current Feature Improvement v1530 → Next Feature Addition v1532 (provisional). Remote main bf8d0d48f810932b43783d8605dce53954c60cff rechecked; stacked after Draft #2061; engineering #2060; P0 #2031.
