@@ -1,3 +1,9 @@
+## v2026.10.30.1510 — F675-183 Canonical-Parity Hardening (FEATURE IMPROVEMENT / DRAFT / HOLD)
+- Previous Addition v1508 → Current Improvement v1510 → Next Addition v1512 (provisional). main 9da6545c4 rechecked start/mid; stacked #2003; handoff #2002.
+- SQL 101 uses created_at lower bound only, highest-level job, exact spending allowlist, bank net clamp and lifetime/self-reported NPC. New detail must prove same-snapshot parity; 503 on mismatch, no invented 50-row totals.
+- Signed 15m full-source fingerprint cursor, 409 change, 410 expiry; web/Android privacy/a11y/admin cohort. P0 OPS1510-01 SEC1510-02 FIN1510-03 REL1510-04; P1 QUEST1510-05 QUEST1510-06 QUEST1510-07 QUEST1510-08 QUEST1510-09 QUEST1510-10. QA v1390 backend 119 FAIL; release HOLD.
+- Acceptance proposed NOT RUN. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime/DB/WLD/Test/Production change.
+
 ## v2026.10.30.1508 — F675-183 Weekly Quest Evidence (FEATURE ADDITION / DRAFT / HOLD)
 - Previous Improvement v1506 → Current Addition v1508 → Next Improvement v1510 (provisional). main 9da6545c4 rechecked start/mid; Draft stacked on #1995; handoff #2002.
 - Source: /quests shows 101 weekly goal aggregate without contributing receipts. New owner-only current-week drilldown, exact SQL metric parity, no invented NPC receipts, signed snapshot fingerprint cursor, strict privacy/Android/SEO/a11y and default-OFF rollout. No runtime code.

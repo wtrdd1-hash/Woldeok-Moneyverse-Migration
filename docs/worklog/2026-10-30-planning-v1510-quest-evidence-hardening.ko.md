@@ -1,0 +1,14 @@
+# 기획 v1510 — F675-183 원본 집계 동등성 보완
+
+**상태:** DRAFT / RELEASE HOLD. 이전 추가 v1508 → 현재 보완 v1510 → 다음 추가 v1512(잠정).
+
+## 시작 — 2026-10-30 15:02 KST
+miniPC Debian 13.6, 주요 서비스 가동, 개발 DB 연결; ROOT 45%, DATA 55%. GitHub 초안 #2003–#2006 및 이슈 #2007 확인. main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef. skills__list URI 없어 설치 Superpowers 스킬 직접 읽음. #2003 기반 격리 워크트리.
+
+## 중간 — 소스/QA 조사
+git ls-remote로 main 불변 확인. AGENTS·README·영문 원본·국문 대조·SQL 101 437–566행·Nest/Next/DB·Android 연계·QA v1390 조사. 원본 주간 상한/asOf 부재, 최고 레벨 직업, 소비 4종, 순저축, 평생 NPC 확인. QA v1390 백엔드 119 FAIL / 2563 PASS / 495 SKIP, 체크섬 5건 불일치, 운영 엣지 94d38f4와 백엔드 포트 unknown. 공식 Test 인증 없음.
+
+## 완료 — 문서 전용
+영문·국문 통합/프로젝트 기획, UPDATE_LOG, 내부/GitHub 업데이트, 작업일지. P0 4·P1 6; 수용시험 계획만 작성·미실행. 외부 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED / IN PROGRESS. 런타임·공유 DB·WLD·원장·Docker·Test·Production·예약 설정 미변경. 최종 SHA/PR/CI는 miniPC 기록.
+
+- GitHub Draft PR #2008: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2008; P0/P1 handoff #2002 updated. No merge.
