@@ -139,35 +139,32 @@ export class NationalPensionRepository {
   }
 
   async getOverview(): Promise<NationalPensionOverview> {
-    const aumRes = await this.pool.query(
-      `SELECT 
-         COALESCE(SUM(accumulated_contribution_wld), 0) AS total_aum,
-         COUNT(id) AS total_subscribers,
-         COUNT(id) FILTER (WHERE status = 'RETIRED_RECEIVING') AS total_receivers,
-         COALESCE(SUM(total_payout_received_wld), 0) AS total_pension_paid
-       FROM public.national_pension_accounts
-       WHERE status != 'LIQUIDATED'`,
-    );
-
-    const vaultRes = await this.pool.query(
-      `SELECT balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN' LIMIT 1`,
-    );
-
-    const totalAum = aumRes.rows[0]?.total_aum || '0';
-    const totalSubscribers = Number(aumRes.rows[0]?.total_subscribers || 0);
-    const totalReceivers = Number(aumRes.rows[0]?.total_receivers || 0);
-    const totalPensionPaid = aumRes.rows[0]?.total_pension_paid || '0';
-    const vaultBal = vaultRes.rows[0]?.balance_wld || '0';
-
+    const result = await this.pool.query<{
+      total_aum_wld: string;
+      total_subscribers_count: string;
+      total_retired_receivers_count: string;
+      total_pension_paid_wld: string;
+      vault_main_balance_wld: string | null;
+    }>('SELECT * FROM public.pension_public_overview()');
+    const row = result.rows[0];
+    if (!row || row.vault_main_balance_wld === null) {
+      throw new ServiceUnavailableException('Pension treasury evidence unavailable');
+    }
+    const amounts = [row.total_aum_wld, row.total_pension_paid_wld, row.vault_main_balance_wld];
+    const counts = [row.total_subscribers_count, row.total_retired_receivers_count];
+    if (amounts.some((amount) => !/^(?:0|[1-9]\d*)$/.test(amount)) ||
+        counts.some((count) => !/^(?:0|[1-9]\d*)$/.test(count) || BigInt(count) > BigInt(Number.MAX_SAFE_INTEGER))) {
+      throw new ServiceUnavailableException('Pension aggregate evidence invalid');
+    }
     return {
-      totalAumWld: totalAum.toString(),
-      totalSubscribersCount: totalSubscribers,
-      totalRetiredReceiversCount: totalReceivers,
-      totalPensionPaidWld: totalPensionPaid.toString(),
-      // No funded annual rate is certified: legacy 8bps/hour implies 700.8% nominal/year.
+      totalAumWld: row.total_aum_wld,
+      totalSubscribersCount: Number(row.total_subscribers_count),
+      totalRetiredReceiversCount: Number(row.total_retired_receivers_count),
+      totalPensionPaidWld: row.total_pension_paid_wld,
+      // Legacy hourly payouts remain uncertified against the canonical ledger.
       benchmarkAnnualPayoutRate: null,
       annualPayoutRateCertified: false,
-      vaultMainBalanceWld: vaultBal.toString(),
+      vaultMainBalanceWld: row.vault_main_balance_wld,
     };
   }
 
