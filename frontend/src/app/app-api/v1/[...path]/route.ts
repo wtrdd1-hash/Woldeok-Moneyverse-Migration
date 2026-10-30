@@ -5,6 +5,8 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
+import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -83,6 +85,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     : 'all';
   if (securityEventPath && securityCategory === null) {
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
+
+  const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+    (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
+  let walletRange: ActivityCalendarRange | null = null;
+  if (walletRangeRequest) {
+    const query = request.nextUrl.searchParams;
+    if (query.getAll('from').length !== 1 || query.getAll('to').length !== 1 ||
+        query.getAll('period').length > 1 || query.getAll('direction').length > 1 ||
+        (query.has('period') && query.get('period') !== 'all') ||
+        (query.has('direction') && !['all', 'in', 'out', 'neutral'].includes(query.get('direction')!))) {
+      return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters');
+    }
+    try { walletRange = activityCalendarRange(query.get('from'), query.get('to')); }
+    catch { return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters'); }
   }
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
@@ -227,6 +244,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
+
+  if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+  }
   }
 
   const headers = appendAppContractHeaders(new Headers());
@@ -257,6 +278,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
           return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
         }
       }
+      if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+      }
+      }
       if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
           compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
         // Older backend images returned a redundant internal storage key.
@@ -270,6 +295,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+      }
+      if (walletRange && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+      }
       }
       return new NextResponse(bytes, { status: response.status, headers });
     }
