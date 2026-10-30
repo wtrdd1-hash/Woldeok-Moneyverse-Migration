@@ -78,7 +78,7 @@ export interface PayoutLog {
 }
 
 interface PensionPortalClientProps {
-  overview: NationalPensionOverview;
+  overview: NationalPensionOverview | null;
   myAccount: MyPensionAccount | null;
   contributions: ContributionLog[];
   payouts: PayoutLog[];
@@ -277,6 +277,13 @@ export function PensionPortalClient({
         </div>
       )}
 
+      {!overview && (
+        <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
+          <strong>연금 통계 조회 불가</strong>
+          <p className="mt-1">기금 및 가입자 현황의 조회가 실패했습니다. 확인되지 않은 금액이나 건수를 0으로 표시하지 않습니다.</p>
+        </div>
+      )}
+
       {/* 대국민 기금 운용 현황 배너 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
@@ -285,7 +292,7 @@ export function PensionPortalClient({
             총 기금 운용자산 (AUM)
           </div>
           <div className="text-xl font-bold mt-1 text-foreground">
-            {groupDigits(overview.totalAumWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+            {overview ? <>{groupDigits(overview.totalAumWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span></> : '조회 불가'}
           </div>
         </div>
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
@@ -294,10 +301,11 @@ export function PensionPortalClient({
             가입 국민 / 은퇴 수령자
           </div>
           <div className="text-xl font-bold mt-1 text-foreground">
-            {overview.totalSubscribersCount.toLocaleString()}명
-            <span className="text-xs font-normal text-emerald-400 ml-1.5">
-              (은퇴 {overview.totalRetiredReceiversCount}명)
-            </span>
+            {overview ? <>{overview.totalSubscribersCount.toLocaleString()}명
+              <span className="text-xs font-normal text-emerald-400 ml-1.5">
+                (은퇴 {overview.totalRetiredReceiversCount}명)
+              </span>
+            </> : '조회 불가'}
           </div>
         </div>
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
@@ -316,7 +324,7 @@ export function PensionPortalClient({
             누적 지급 기초연금
           </div>
           <div className="text-xl font-bold mt-1 text-foreground">
-            {groupDigits(overview.totalPensionPaidWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+            {overview ? <>{groupDigits(overview.totalPensionPaidWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span></> : '조회 불가'}
           </div>
         </div>
       </div>

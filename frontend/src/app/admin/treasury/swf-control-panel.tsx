@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { groupDigits } from '@/lib/money';
+import { formatSwfQuantity, swfPortfolioTotals } from './swf-evidence';
 
 export interface SwfPortfolioItem {
   id: string;
@@ -61,14 +63,8 @@ export function SwfControlPanel({
   const [safeReserve, setSafeReserve] = useState<string>(initialConfig?.safe_reserve_wld || '25000000');
   const maxSingle = initialConfig?.max_single_investment_wld || '10000000';
 
-  const totalAum = portfolios.reduce(
-    (acc, p) => acc + Number(p.current_valuation_wld || 0),
-    0,
-  );
-  const totalProfit = portfolios.reduce(
-    (acc, p) => acc + Number(p.unrealized_pnl_wld || 0),
-    0,
-  );
+  // PostgreSQL numeric(38,0) amounts are never rounded through IEEE-754 numbers.
+  const { aumWld, pnlWld } = swfPortfolioTotals(portfolios);
 
   async function handleSaveGovernanceConfig() {
     setSavingConfig(true);
@@ -89,7 +85,7 @@ export function SwfControlPanel({
 
       if (res.ok) {
         toast.success('국고 자금 투자 비율 및 안전 보존 정책이 저장되었습니다!', {
-          description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${Number(safeReserve).toLocaleString()} WLD`,
+          description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${groupDigits(safeReserve)} WLD`,
         });
       } else {
         const errorMsg = data.error || data.detail || '설정 저장 중 오류가 발생했습니다.';
@@ -102,7 +98,7 @@ export function SwfControlPanel({
     }
   }
 
-  const floorReserve = Number(safeReserve || 25000000);
+  const floorReserve = safeReserve;
   const treasuryPreserveRatio = Math.max(0, 100 - reinvestRatio);
 
   return (
@@ -335,14 +331,14 @@ export function SwfControlPanel({
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium flex flex-wrap items-center justify-between gap-1.5">
                 <span className="shrink-0">국부펀드 투자 자산 (AUM)</span>
-                {totalAum > 25000000 && (
+                {BigInt(aumWld) > 25000000n && (
                   <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 shrink-0 whitespace-nowrap">
                     투자 비중 과다 경고
                   </Badge>
                 )}
               </div>
               <div className="text-2xl font-bold font-mono text-emerald-400 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                {totalAum.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+                {groupDigits(aumWld)} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                 <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>
@@ -352,7 +348,7 @@ export function SwfControlPanel({
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>
               <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                {floorReserve.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+                {groupDigits(floorReserve)} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
                 설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
@@ -362,7 +358,7 @@ export function SwfControlPanel({
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
               <div className="text-xs text-slate-400 font-medium">누적 운용 평가 손익 (PnL)</div>
               <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
-                +{totalProfit.toLocaleString()} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
+                {pnlWld.startsWith('-') ? groupDigits(pnlWld) : `+${groupDigits(pnlWld)}`} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
                 평가익 30% 국고 회수 환원 · 70% 자산 재투자
@@ -417,19 +413,19 @@ export function SwfControlPanel({
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">보유 수량:</span>
                       <span className="font-mono font-medium text-slate-200">
-                        {Number(item.quantity).toLocaleString()}주
+                        {formatSwfQuantity(item.quantity)}주
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">평가 금액:</span>
                       <span className="font-mono font-bold text-emerald-400">
-                        {Number(item.current_valuation_wld).toLocaleString()} WLD
+                        {groupDigits(item.current_valuation_wld)} WLD
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-400">평가 손익:</span>
                       <span className="font-mono text-emerald-400 font-medium">
-                        +{Number(item.unrealized_pnl_wld).toLocaleString()} WLD
+                        {item.unrealized_pnl_wld.startsWith('-') ? groupDigits(item.unrealized_pnl_wld) : `+${groupDigits(item.unrealized_pnl_wld)}`} WLD
                       </span>
                     </div>
                   </div>

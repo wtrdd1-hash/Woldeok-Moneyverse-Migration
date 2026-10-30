@@ -19,15 +19,7 @@ export const metadata: Metadata = {
 export default async function PublicPensionPage() {
   const overviewData = await publicApi<NationalPensionOverview>('/api/v1/pension/overview', 30);
 
-  const overview: NationalPensionOverview = overviewData ?? {
-    totalAumWld: '0',
-    totalSubscribersCount: 0,
-    totalRetiredReceiversCount: 0,
-    totalPensionPaidWld: '0',
-    benchmarkAnnualPayoutRate: null,
-    annualPayoutRateCertified: false,
-    vaultMainBalanceWld: '25000000',
-  };
+  const overview = overviewData ?? null;
 
   let myAccount: MyPensionAccount | null = null;
   let contributions: ContributionLog[] = [];
