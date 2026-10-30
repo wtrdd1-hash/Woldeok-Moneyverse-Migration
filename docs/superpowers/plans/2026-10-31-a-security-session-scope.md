@@ -24,15 +24,18 @@
 - Invalid filter does not silently display all sessions.
 
 ## Tasks
-- [ ] Add RED backend controller/repository tests for all/other/invalid/duplicate and owner-bound SQL.
-- [ ] Add RED web parser and page tests for other-only, invalid scope and no false all-list.
-- [ ] Add RED Android gateway tests for duplicate/invalid, stale upstream, malformed 200, cache/noindex.
-- [ ] Implement smallest backend read filter and query validation; GREEN.
-- [ ] Implement scope-aware parser and accessible web filter links; GREEN.
-- [ ] Implement Android gateway response validation; GREEN.
-- [ ] Verify full test/build/lint/typecheck, SQL role/owner function, exact SHA CI, Test/Production gates.
-- [ ] Update English/Korean worklogs, QA/Release HOLD, PR and branch audit; preserve unmerged work.
+- [x] Add RED backend controller/repository tests for all/other/invalid/duplicate and owner-bound SQL.
+- [x] Add RED web parser and page tests for other-only, invalid scope and no false all-list.
+- [x] Add RED Android gateway tests for duplicate/invalid, stale upstream, malformed 200, cache/noindex.
+- [x] Implement smallest backend read filter and query validation; GREEN.
+- [x] Implement scope-aware parser and accessible web filter links; GREEN.
+- [x] Implement Android gateway response validation; GREEN.
+- [x] Verify full test/build/lint/typecheck, SQL role/owner function, exact SHA CI, Test/Production gates.
+- [x] Update English/Korean worklogs, QA/Release HOLD, PR and branch audit; preserve unmerged work.
 
 ## Execution evidence
 - TDD RED and GREEN logs in `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-31-0425-security-session-scope/`.
 - Test fixtures cover stale backend, duplicate query, valid owner-only other session, noindex/no-store and SQL owner arguments.
+
+## Release decision
+Implementation and local gates verified, but exact candidate Test authentication/identity, independent restore and Production authority are not verified. Draft PR HOLD; no merge or deploy.
