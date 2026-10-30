@@ -1847,3 +1847,29 @@ ull 상태를 반환하도록 교정.
 - 변경 사항 Git 커밋 및 원격 브랜치 푸시.
 - GitHub Actions CI (PR #2045) 3개 체크 pass 확인.
 - PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
+
+
+---
+## 🚀 [v17 Specification] 프론트엔드 반응형 헤더 복원, 작업소 추천/난이도 UI 및 도움말·고객지원 테스트 동기화
+
+### 1. 근본 원인 및 분석
+1. **`site-header.tsx` 반응형 클래스 회귀 및 UTF-8 BOM 제거**:
+   - `dfbd8ab7` 커밋에서 헤더 내비게이션 클래스가 `xl:flex` 등으로 축소되고 모바일 메뉴 버튼이 `xl:hidden`으로 변경되면서 `brand-responsive.test.ts` 및 `site-header-responsive.test.tsx`의 1024~1535px 반응형 단정문 위반 및 BOM 포함 오류 발생.
+   - `2xl:flex min-w-0 flex-1 overflow-x-auto overscroll-x-contain` 및 `size-11 rounded-[10px] 2xl:hidden shrink-0` 복원 및 BOM 제거.
+2. **`career-tasks-board.tsx` 추천 토글 및 난이도 셀렉트 복원**:
+   - 머지 누락으로 빠져있던 `오늘의 추천만 보기` 토글 버튼(`recommendedOnly`)과 `업무 난이도` 셀렉트(`selectedDifficulty`) 폼을 복원하여 `career-tasks-board.recommended.test.tsx` 및 `career-tasks-board.difficulty.test.tsx` 완전 통과.
+3. **`help-search.tsx` 표시할 결과 수(limit) 셀렉트 복원**:
+   - `help-search.test.tsx`의 요구사항에 맞추어 `limit` 10/20/50(기본값 20) 드롭다운을 복원하여 접근성 검증 통과.
+4. **`member-support-page-integration.test.tsx` 요약 API 카운트 동기화**:
+   - `804bee09`에서 최근 100건 문의 현황 요약(`summary`) 엔드포인트 조회가 추가됨에 따라 테스트 단정문을 호출 횟수 2회로 동기화.
+
+### 2. 세부 변경 사항
+- `frontend/src/components/site-header.tsx`: 네비게이션 및 메뉴 버튼 반응형 클래스 원복, BOM 제거.
+- `frontend/src/app/work/career-tasks-board.tsx`: `recommendedOnly` 및 `work-difficulty` 폼 추가.
+- `frontend/src/app/help/help-search.tsx`: `limit` 셀렉트 추가.
+- `frontend/src/app/support/member-support-page-integration.test.tsx`: 호출 횟수 단정 동기화.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 브랜치 푸시.
+- GitHub Actions CI (PR #2045) 전역 체크 pass 확인.
+- PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.

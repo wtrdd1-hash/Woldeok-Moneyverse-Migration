@@ -46,6 +46,6 @@ describe('member support page verified action integration', () => {
     const html = renderToStaticMarkup(await SupportPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain('data-testid="verified-create-support"');
     expect(html).not.toContain('data-testid="verified-reply-support"');
-    expect(api).toHaveBeenCalledTimes(1);
+    expect(api).toHaveBeenCalledTimes(2);
   });
 });
