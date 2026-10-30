@@ -6,7 +6,7 @@
 - **QA v1404 (04:25 KST):** main backend 2,778 PASS/501 SKIP, frontend 2,770 PASS, lint 0 errors/1,049 warnings, build PASS, isolated migrations 311/311 PASS; DEV ACL drift/5 checksums, official Test stale SHA, independent restore and exact-SHA authenticated E2E BLOCKED. PR #2045 merged before head build completion. Historical main QA ≠ branch acceptance; RELEASE HOLD.
 - **External refs:** newly approved 0, cumulative independently verified/deduplicated/classified UNKNOWN/10,000 → BLOCKED/IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production/main mutation. Full EN/KO detail in integrated master and #2088.
 
-**Current planning:** v1538 F675-190 source truth hardening / engineering #2088 / parent Draft #2089 / RELEASE HOLD.
+**Current planning:** v1538 F675-190 source truth hardening / engineering #2088 / Draft #2093 (parent #2089) / RELEASE HOLD.
 
 ## v2026.10.31.1536 — F675-190 Owner-Held Replacement Candidate Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1534 → Current Feature Addition v1536 → Next Feature Improvement v1538 (provisional). Latest main 761a55a094fb9dd383d213e817305e68c79fa23c rechecked; stacked on Draft #2080; engineering #2088; QA v1402 FAILED/P0.

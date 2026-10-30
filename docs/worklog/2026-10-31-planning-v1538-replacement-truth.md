@@ -43,4 +43,4 @@
 **External independent reference gate:** newly verified 0, cumulative independently acquired/deduplicated/classified UNKNOWN / 10,000, BLOCKED / IN PROGRESS; internal GitHub, synthetic tests and duplicates do not count.
 **Status:** DESIGN ONLY / DRAFT / RELEASE HOLD. No runtime, DB, WLD, ledger, Test, Production, main merge or automation change. No new standalone planning file.
 
-**Current planning:** v1538 F675-190 equip-path/public-profile truth hardening; engineering #2088; Draft #2089 predecessor; RELEASE HOLD.
+**Current planning:** v1538 F675-190 equip-path/public-profile truth hardening; engineering #2088; Draft #2093 (parent #2089); RELEASE HOLD.
