@@ -28,3 +28,11 @@ export function filterWorkTasksByMinReward(
     BigInt(task.reward_preview) >= minimum,
   );
 }
+
+/** The server computes each member's three daily picks; never guess them from reward values. */
+export function filterRecommendedWorkTasks(
+  tasks: readonly WorkTask[],
+  recommendedOnly: boolean,
+): readonly WorkTask[] {
+  return recommendedOnly ? tasks.filter((task) => task.recommended) : tasks;
+}

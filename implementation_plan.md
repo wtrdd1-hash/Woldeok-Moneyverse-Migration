@@ -1873,3 +1873,20 @@ ull 상태를 반환하도록 교정.
 - 변경 사항 Git 커밋 및 원격 브랜치 푸시.
 - GitHub Actions CI (PR #2045) 전역 체크 pass 확인.
 - PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
+
+
+---
+## 🚀 [v18 Specification] 작업소 추천 필터 유틸리티(filterRecommendedWorkTasks) export 복원
+
+### 1. 근본 원인 및 분석
+- `career-tasks-board.tsx`에서 import하는 `filterRecommendedWorkTasks` 함수가 `frontend/src/app/work/work-search.ts`에 export되어 있지 않아 `pnpm typecheck` 컴파일 오류 발생 (`Module '"./work-search"' has no exported member 'filterRecommendedWorkTasks'`).
+- `4e901384` 명세에 따라 `filterRecommendedWorkTasks(tasks, recommendedOnly)` 함수를 정확히 export하여 타입체크 및 린트 오류 원천 해결.
+
+### 2. 세부 변경 사항
+- `frontend/src/app/work/work-search.ts`:
+  - `export function filterRecommendedWorkTasks(tasks: readonly WorkTask[], recommendedOnly: boolean): readonly WorkTask[]` 추가.
+
+### 3. 검증 계획
+- 변경 사항 Git 커밋 및 원격 브랜치 푸시.
+- GitHub Actions CI (PR #2045) 3개 체크 pass 확인.
+- PR #2045 스쿼시 머지 및 운영 서버(`easy-scraping.com`) 무중단 배포 및 라이브 실측.
