@@ -23,6 +23,24 @@ afterEach(() => {
 });
 
 describe('app API route compatibility', () => {
+  it('keeps owner support status responses private on Android even if upstream is cacheable', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ threads: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/support/threads?status=resolved', {
+      cookie: 'moneyverse_session=owner-session',
+    }), context('support', 'threads'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    const [target, options] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
+    expect(new URL(String(target)).pathname).toBe('/api/v1/support/threads');
+    expect(new URL(String(target)).searchParams.get('status')).toBe('resolved');
+    expect(new Headers(options.headers).get('cookie')).toContain('owner-session');
+  });
+
 
   it('never forwards internal chat storage keys to Android clients, including legacy upstream images', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
