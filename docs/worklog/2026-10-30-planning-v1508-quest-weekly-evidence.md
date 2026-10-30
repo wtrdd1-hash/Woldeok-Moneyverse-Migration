@@ -1,0 +1,19 @@
+# Planning v1508 — Member Weekly Quest Evidence (F675-183)
+
+**Status:** DRAFT / RELEASE HOLD. Previous Improvement v1506 → Current Addition v1508 → Next Improvement v1510 (provisional).
+
+## Start (2026-10-30 14:04 KST)
+- miniPC Debian 13.6, services active and DEV DB connected. root 45%, DATA 51%.
+- origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef; base Draft #1995 at 7781403b8. Read AGENTS/README/canonical EN+KO plans, actual quests frontend, Nest engagement, migration 101, Android gateway, QA v1389 and open PRs.
+- Superpowers skills__list returned no URI, installed using-superpowers, brainstorming, worktrees, writing-plans and verification read locally. Design is a proposal; no code implementation approval.
+
+## Mid-run
+- Re-fetched main unchanged; inspected QA v1389 complete: backend 119 FAIL, frontend 53 FAIL, five migration checksum mismatches, DEV app role direct DML; official Production /api/version 94d38f4 and Test c2129625; P0 runtime #1984 and P1 clean migration pocket #2000. Handoff https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2002.
+- Chosen V1: owner-only weekly evidence breakdown with NPC aggregate-only and stable snapshot fingerprint, separate from wallet/bank/NPS concurrent workers.
+
+## Finish
+- Document-only EN canonical + KO equivalent integrated masters, living plans, bilingual worklogs and internal/GitHub update logs. No new distributed planning spec.
+- P0 4 + P1 6 and proposed acceptance, not executed. External evidence 0 new, cumulative UNKNOWN/10,000 BLOCKED.
+- Final git/CI details recorded in the companion miniPC run log after verification. No runtime, database, ledger, WLD, Test, Production or automation changes.
+
+- Draft PR #2003: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2003 (stacked on #1995; no merge).

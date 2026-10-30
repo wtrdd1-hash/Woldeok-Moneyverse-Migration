@@ -1,5 +1,46 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1506 F675-182 거래 상세 보완 / 초안 PR #1995 / 인계 #1988 / 운영 보류; #1990/#1983 종속.
+**현재 기획:** v1508 F675-183 주간 퀘스트 근거 상세 / 인계 #2002 / 초안 PR #2003 / 운영 보류; #1995 종속.
+
+## v2026.10.30.1508 — F675-183 회원 주간 퀘스트 달성 근거 상세 (기능 추가 / 초안 / 운영 보류)
+
+**이전/현재/다음 주기:** 기능 보완 v1506 / 기능 추가 v1508 / 기능 보완 v1510(잠정). 시작·중간 확인한 origin/main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`. 미병합 초안 #1995 → #1990 → #1983에 문서만 누적. [P0/P1 개발 인계 #2002](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2002). 기술 기준은 AGENTS.md, README.md, 영문 PROJECT_PLAN.md 원본이며 본 문서는 동등한 국문 대조본이다.
+
+### 목적, 기존 소스 근거 및 범위 구분
+- **확인된 공백:** `frontend/src/app/quests/page.tsx`는 `GET /api/v1/engagement/early-game`의 주간 목표 4개를 표시하지만 어떤 작업 보상 영수증·허용된 원장 전표가 수치에 기여했는지 상세 화면은 없다. `packages/database/migrations/101-early-game-progress.sql`이 집계한다. 지갑 거래 상세 F675-182, 날짜 지정 F675-181, 저장 필터, Android 은행 포켓 개선과 별도 기능이며 이번 회차 런타임 구현은 없다.
+- **대상/성과:** 인증 및 동의한 회원이 자기 주간 퀘스트 수치의 출처를 읽기 전용으로 확인한다. 직접 보상을 생성하거나 금융 잔액을 별도로 계산하지 않는다. 근거가 없다는 사실과 API 장애를 구분하고, 실제 없는 수령·정산 완료를 표시하지 않는다.
+- **V1:** 한국시간 월요일~일요일의 현재 주간만 제공. 과거 아카이브·내보내기·보상 청구·거래 수정·타인 정보·관리자 개인별 조회는 제외. 지표는 `distinct_work_tasks`(영수증 건수가 아닌 고유 작업 종류), `job_work_completions`(선정 직업의 검증 작업 영수증), `spend_or_save`(허용된 현금 소비 + max(0, 은행 입금-출금), 정확한 WLD 정수), `npc_affinity`(관계도 현재 집계만 제공)이다. 101번 마이그레이션의 거래 유형 허용 목록을 보존하며 주식 매수·카지노 손실·임의 출금을 소비로 분류하지 않는다.
+
+### 권한·진입점·화면·CTA·상태
+- **진입:** `/quests` 주간 목표 카드에 ‘근거 보기’ 버튼을 추가해 `/quests/weekly-evidence?goal=<목표코드>&week=<YYYY-MM-DD>`로 이동. 서버의 `requireMember` 및 세션·동의 검증 후에만 조회. `quest_weekly_evidence` 기능 스위치 기본 OFF. 목표 코드는 등록된 카탈로그 값만 허용하고 SQL 식별자나 임의 날짜 입력은 거부.
+- **화면:** 목표명·한국시간 주간·정확한 목표/진행 문자열·집계 규칙·근거 출처/한계·최대 50개 기여 행·뒤로/재시도/다음 페이지를 제공한다. 고유 작업 목표는 작업별 그룹으로 보여주고 화면 행의 합계를 총진행으로 오인하지 않는다. 소비·저축은 허용된 소비, 부호 있는 입출금, 순저축 0 하한을 설명하며 상대방 신원을 노출하지 않는다. NPC 관계도는 `AGGREGATE_ONLY` 상태로 행 목록 없이 ‘개별 근거가 제공되지 않음’을 표시한다.
+- **상태:** LOADING, READY_WITH_ROWS, VERIFIED_EMPTY, AGGREGATE_ONLY, EVIDENCE_CHANGED(새로고침 필요), INVALID_REQUEST, UNAUTHENTICATED, UNAVAILABLE, RATE_LIMITED. 실패를 0건/달성/지급 완료로 대체하지 않는다. 커서 만료 시 필터를 유지한 새로고침. 모바일 320px, 의미 있는 목록·키보드·초점 복귀·44px 조작부·스크린리더 상태 안내, WCAG 2.2 AA.
+
+### API·DB·정합성·트랜잭션
+- **API:** `GET /api/v1/engagement/early-game/weekly-evidence?goal=<code>&week=<date>&cursor=<opaque>` 및 Android `GET /app-api/v1/engagement/early-game/weekly-evidence`. 200 응답은 `{goalCode, weekStartKst, weekEndExclusiveUtc, metric, target, progress, sourceStatus, evidenceStatus, asOfUtc, rows, nextCursor}`. 금액/횟수는 정규 10진 문자열, 시각은 PostgreSQL 마이크로초 유지. 400 잘못된 값, 401 미인증, 404 타인/미존재 동일 응답, 409 근거 변경, 410 커서 만료, 429 제한, 503 장애를 구분. 실패 시 성공처럼 보이는 기본값을 반환하지 않으며 GET 외 변경 메서드 거부.
+- **DB:** 필요한 경우에만 검토된 회원 범위 `SECURITY DEFINER` 조회 함수를 추가한다. 테이블 완전 수식·고정 search_path·PUBLIC EXECUTE 회수·앱 계정의 필요한 함수 EXECUTE만 부여, 테이블 직접 DML/SELECT 권한 완화 금지. `p_actor` 인자만으로 DB 호출자 신원을 독립 인증할 수 없으므로 Nest 세션 결속과 최소 권한 별도 검증 필수. V1 신규 테이블 없음. 기존 인덱스를 먼저 확인하고 폐기 가능한 DB에서 `EXPLAIN (ANALYZE, BUFFERS)`로 필요성이 입증된 경우에만 인덱스 추가: work_reward_receipts(user_id,created_at,id), work_assignments(id,task_id), ledger_transactions(created_at,id), ledger_postings(account_id,transaction_id), accounts 소유자/유형 등 후보.
+- **일관성:** 첫 페이지 요약과 근거는 단일 READ ONLY REPEATABLE READ 트랜잭션에서 계산한다. 이후 페이지는 회원·목표·주간·UTC 기준시각·마지막 키·만료시각·정렬된 원본 근거의 정규 지문을 HMAC 서명 커서(15분)에 묶는다. 페이지마다 지문을 다시 검증하여 소급 입력·삭제·직업 선정·NPC 관계도 변화 시 409를 반환한다. HTTP 사이에 장기 DB 트랜잭션을 유지하지 않는다. `created_at DESC, UUID` 키셋 정렬과 50+1 조회(최대 50개). 전체 지문 계산이 비싸면 성능 게이트를 실패 처리하고 재설계하며 안정성 미검증을 성공으로 주장하지 않는다.
+- **정확성·보안:** 한국시간 월요일 00:00 포함~다음 월요일 00:00 제외, 서버/DB 시계 기준. 101번의 직업 선정·원장 유형·입출금 부호와 집계 범위를 일치시킨다. BIGINT/NUMERIC을 JS Number로 변환하지 않는다. 세션/IP별 제한, SQL 타임아웃, 타인 조회 차단, 개인 식별자 로그 제외, 조회 전용, 성공·실패 모두 private no-store/noindex/no-referrer. Android 계정 전환 시 요청 취소 및 디스크 캐시 금지.
+
+### 관리자·KPI·배포·롤백
+- **관리자:** 20명 이상 집단만 통계 공개, 개인 퀘스트/원장 행·회원 ID 검색 금지. `quest_evidence_open_total`, `quest_evidence_verified_empty_total`, `quest_evidence_aggregate_only_total`, `quest_evidence_changed_total`, `quest_evidence_api_error_total`, `quest_evidence_p95_ms` 측정. p95 300ms 미만은 제안 목표이며 실측값 아님. 개인 화면은 SEO 색인 금지.
+- **배포:** 스위치 기본 OFF, 독립 PostgreSQL·권한·계약·접근성·모바일 테스트, 정확 SHA의 공식 Test 프론트/백엔드/엣지/인증 및 독립 복원 통과 후에만 별도 승인. 개발 예약에서 별도 브랜치·test 폴더·Test Docker를 사용하고 필요 시 전진 전용 마이그레이션만 허용(기존 체크섬 수정 금지). 단계적 공개 및 409/503/p95 감시, 실패 시 스위치 OFF·검증된 SHA로 복귀하며 영수증/원장 삭제 금지. 기획 예약은 운영 배포 금지.
+- **제안된 수용시험(미실행):** 합성 영수증/전표 10,001건 이상, 타인 접근 100건, 커서 위조 100건, 동시 요청 100건, 스냅샷/소급 입력 50건, 한국시간 주 경계·윤년·연말 30건, 비정상 응답·타임아웃 50건, NPC 집계만 제공, 고유 작업 비가산성, 순출금 0 하한, WLD/원장 변경 0건, 전체 회귀·실제 Android 계약 검증. 합격 실적이 아닌 시험 설계 수치다.
+
+### P0 4건 + P1 6건 개발 백로그
+1. **P0 OPS1508-01** — Production v1523 표시 SHA 94d38f4와 삭제된 v1515 경로의 실행 프로세스 불일치 #1984. 재시작/승격 전 프로세스·독립 복원 가능한 롤백 자산 보존.
+2. **P0 SEC1508-02** — QA v1389 개발 DB의 audit_logs DELETE·account_balances UPDATE 허용 #993, 마이그레이션 체크섬 불일치 5건, 깨끗한 305개 마이그레이션에서 은행 포켓 스키마 누락 #2000. 개발 B와 전진 전용 권한·스키마 조정, 임의 GRANT 금지.
+3. **P0 FIN1508-03** — 국고 미연계 552건·MINT/SWF 출처, 탐색 불일치 24건 대 정규 검사 0건의 동일 범위/스냅샷 대조. 금융 손상 단정 금지.
+4. **P0 REL1508-04** — QA v1389 백엔드 119 FAIL/2563 PASS/495 SKIP, 프론트엔드 53 FAIL/2607 PASS, 전체 의존성 경고 11건. 전체 CI·정확 SHA 공식 Test·독립 복원·GitOps/엣지/금융/인증 게이트 필요. 14:04 KST Production /api/version 94d38f4, Test c2129625.
+5. **P1 QUEST1508-05** — 회원 범위 DB 조회 함수·부정 권한 시험·101번 집계 동등성·인덱스 EXPLAIN.
+6. **P1 QUEST1508-06** — 스냅샷 지문·안정적인 HMAC 커서·한국시간 범위·정확한 금액·409 변경 감지.
+7. **P1 QUEST1508-07** — NestJS 인증·DTO·허용 목록·오류/요청 제한 및 실패 시 거짓 성공 방지.
+8. **P1 QUEST1508-08** — Next.js 근거 보기 CTA·상세·모바일 접근성·빈 목록/집계 전용/만료/재시도.
+9. **P1 QUEST1508-09** — Android app-api 계약, 개인정보 헤더·SEO·로그 제거, 관리자 20명 이상 KPI, 기본 OFF 스위치.
+10. **P1 QUEST1508-10** — 독립 PostgreSQL 17.11 합성/부정/동시성/성능/회귀 시험, 정확 SHA Test 및 비파괴 롤백 검증.
+
+**외부 독립 근거 게이트:** 이번 신규 중복 제거·실근거 검증 승인 **0건**, 누적 고유 승인 **UNKNOWN / 10,000건**. **BLOCKED / IN PROGRESS**이며 달성 주장 금지. QA v1389 실패 증거는 배포 인증이 아니다. 런타임·DB·원장·WLD·Test·Production·예약·다른 개발자 자산 변경 없음.
+
+**이전 기획:** v1506 F675-182 거래 상세 보완 / 초안 PR #1995 / 인계 #1988 / 운영 보류; #1990/#1983 종속.
 
 ## v2026.10.30.1506 — F675-182 회원 거래 상세 근거 보완 (기능 보완 / 초안 / 운영 보류)
 

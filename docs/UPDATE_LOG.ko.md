@@ -1,3 +1,9 @@
+## v2026.10.30.1508 — F675-183 주간 퀘스트 근거 상세 (기능 추가 / 초안 / 보류)
+- 이전 기능 보완 v1506 → 현재 기능 추가 v1508 → 다음 기능 보완 v1510(잠정). main 9da6545c4 시작·중간 재조회, #1995 종속, 개발 인계 #2002.
+- /quests 주간 목표는 101번 DB 집계만 표시한다. 회원 본인 현재 주간의 실제 기여 근거 상세, SQL 지표 동등성, NPC 허위 영수증 금지, 서명 스냅샷 커서, 개인정보/Android/SEO/접근성, 스위치 기본 OFF를 기획했다. 런타임 구현 없음.
+- P0 OPS1508-01 SEC1508-02 FIN1508-03 REL1508-04; P1 QUEST1508-05 QUEST1508-06 QUEST1508-07 QUEST1508-08 QUEST1508-09 QUEST1508-10. QA v1389 백엔드 실패 119건·프론트 실패 53건, 체크섬 불일치 5건, 개발 DB 권한, Production/Test SHA 및 은행 포켓 깨끗한 스키마 불일치로 배포 보류.
+- 수용시험 미실행. 외부 독립 검증 신규 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임/DB/WLD/Test/Production 변경 없음.
+
 ## v2026.10.30.1506 — F675-182 회원 거래 상세 근거 보완 (기능 보완 / 초안 / 운영 보류)
 - Previous v1504 Addition / Current v1506 Improvement / Next v1508 Addition. Main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef, QA v1388, actor trust, exact WLD/UTC, ledger read not reconciliation, web/Android privacy, P0 release hold.
 - P0: OPS1506-01, SEC1506-02, FIN1506-03, REL1506-04. P1: DETAIL1506-05, DETAIL1506-06, DETAIL1506-07, DETAIL1506-08, DETAIL1506-09, DETAIL1506-10. Tests not run; external 0 new, UNKNOWN/10,000 BLOCKED; no runtime/DB/Production writes.
