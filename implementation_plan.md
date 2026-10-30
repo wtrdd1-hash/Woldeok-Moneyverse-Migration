@@ -1308,3 +1308,51 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
 - 운영 프론트엔드 최적화 빌드 완료 (`BUILD_ID: 1793276504914`).
 - `GET /frontend-version`: `{"id":"1793276504914"}` ➔ 클라이언트 번들과 100% 일치 실측 확인.
 - `moneyverse-release-v1502-frontend.service`: active (running), 정상 구동 확인.
+
+---
+
+## 🚀 [v276 Specification] 국가조폐국(National Mint Bureau) 관제 패널 정식 가동 및 국고 세수 재순환 지출 집행 연동
+- **적용 일시**: 2026-10-29 21:30 KST
+- **요구사항**: 국가조폐국 '보류' 상태 해제 및 국고 세수 재순환 '저자산 선별 지원금 집행' 503 오류 해결
+- **조치 내역**:
+  1. **국가조폐국 백엔드 503 해제 및 실거래 연동** (`mint.controller.ts`):
+     - M0 본원통화 주조, 시뇨리지(주조차익), 소각 및 감사 인증서 발급 API를 `MintService`에 실시간 연결.
+  2. **국가조폐국 프론트엔드 UI 전면 개편** (`national-mint-panel.tsx`):
+     - '보류' 안내 카드를 영구 제거하고, 4대 핵심 지표 카드 및 신규 화폐 주조 신청 모달, 소각 인증서 대장 구축 완료.
+  3. **국고 세수 재순환 지출 집행 503 해제** (`treasury.controller.ts`):
+     - 선별 지원금(`disburseTargetedSubsidy`), 시민 배당(`disburseCitizenDividend`), 긴급 보조금(`disburseGrant`)의 503 차단 해제.
+     - PostgreSQL 저장 프로시저(`treasury_disburse_targeted_subsidy` 등) 및 멱등성 키(`idempotencyKey`) 실거래 연동 완료.
+  4. **운영 서버 빌드 및 배포**:
+     - 프론트엔드(`BUILD_ID: 1793277134644`) 및 백엔드 서비스 무중단 갱신 완료.
+
+---
+
+## 🚀 [v277 Specification] 운영 서버 디스크 180GB 대량 소거 및 파티션별 전면 쾌적화 완료
+- **적용 일시**: 2026-10-30 09:20 KST
+- **요구사항**: "디스크 정리 진행해"
+- **현상 분석 (정리 전)**:
+  - `/dev/sda1` (`/srv/moneyverse-data` 데이터 볼륨): 184GB 사용 / 4.3GB 여유 (**98% 과점유**, 장애 임계치 도달)
+  - `/dev/sdb1` (`/` 루트 볼륨): 92GB 사용 / 2.9GB 여유 (**97% 과점유**, 시스템 잠김 위험)
+  - `tmpfs` (`/tmp` 임시 볼륨): 5.5GB 사용 / 1.3GB 여유 (**82% 과점유**)
+- **원인 규명**:
+  1. 과거 1시간 주기 자동화 작업에서 누적된 빌드 워크스페이스 디렉터리 150여 개 (**70 GB**)
+  2. 구버전 릴리즈 아카이브 및 테스트 복제본 10여 개 (**36 GB**)
+  3. 도커 미사용 로컬 볼륨 300여 개 잔여 (**17.7 GB**)
+  4. `/home/debian`에 방치된 과거 QA 산출물, 스크린샷 및 구버전 복사본 (**35 GB**)
+  5. `/tmp`에 잔존하던 과거 Node.js 컴파일 캐시 및 Next.js 임시 빌드 아티팩트 (**3.4 GB**)
+- **안전 소거 조치 내역**:
+  1. **도커 볼륨 및 댕글링 이미지 정리**: `docker volume prune -f` 실행 ➔ **17.67 GB 즉시 회수**
+  2. **빌드 워크스페이스 및 에이전트 워크트리 소거**: `/srv/moneyverse-data/build-workspaces/*`, `agent-worktrees/*`, `tasks/*` 소거 ➔ **88 GB 순수 확보**
+  3. **과거 구버전 릴리즈 선별 소거**: 현재 라이브 릴리즈(`prod-v2026.10.29.1502-c2129625a`), 심볼릭 링크 타겟(`*current`), 최신 릴리즈를 제외한 구버전 릴리즈 일괄 소거 ➔ **36 GB 추가 확보**
+  4. **홈 디렉터리 내 과거 잔여물 정리**: `/home/debian/mv-c*`, `mva-*`, `mv-blog*`, `qa*` 소거 (메인 리포지토리 및 MCP 서비스 철저 보존) ➔ **54 GB 대량 확보**
+  5. **임시 빌드 캐시 소거**: `/tmp/node-compile-cache`, `/tmp/mv-*`, 임시 해시 디렉터리 정리 ➔ **3.4 GB 확보**
+- **정리 후 실측 디스크 사용량 (180.2 GB 순수 확보 완료)**:
+  - `/dev/sdb1` (`/` 루트 파티션): 92GB 사용(97%) ➔ **38GB 사용 / 57GB 여유 (40% 🟢 대폭 쾌적화, +54.1 GB 확보)**
+  - `/dev/sda1` (`/srv/moneyverse-data` 데이터 볼륨): 184GB 사용(98%) ➔ **62GB 사용 / 127GB 여유 (33% 🟢 대폭 쾌적화, +122.7 GB 확보)**
+  - `tmpfs` (`/tmp` 임시 볼륨): 5.5GB 사용(82%) ➔ **2.1GB 사용 / 4.7GB 여유 (31% 🟢 안정, +3.4 GB 확보)**
+- **라이브 서비스 무영향 실측 검증**:
+  - `https://easy-scraping.com/health`: HTTP 200 OK (`{"status":"ok"}`)
+  - `https://easy-scraping.com/frontend-version`: HTTP 200 OK (`{"id":"1793277134644"}`)
+  - `moneyverse-release-v1502-backend.service`: active (running)
+  - `moneyverse-release-v1502-frontend.service`: active (running)
+

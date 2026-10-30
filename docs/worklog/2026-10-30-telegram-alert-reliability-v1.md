@@ -31,3 +31,12 @@
 - Enabled timer disable/re-enable rollback probe PASS. Production and Test HTTP 200. Existing backend/frontend PIDs 1018225 / 2041338 remained active. No financial writes, no application deployment.
 - Remaining: earlier monitoring outage is not retroactively recoverable for every news/error entry. The actual available disk capacity is P0 and addressed as severity fix v2026.10.30.2, not space cleanup.
 - FINISHED: operational schedule repaired, verified as recurring and backstopped by base timer watchdog.
+
+## Post-release observation
+- Natural market runs continued at 09:14:00 and 09:16:01 KST, both MARKET_OK, while the next 09:18 calendar event remained scheduled. Existing base operations timer continued CHECK_OK. Repository-installed code hashes matched merged main on 2026-10-30.
+- Filesystem metrics changed rapidly due to an independently occurring space reclamation event. This telegram task never performed disk pruning or cleanup.
+
+## Final independent Telegram and heartbeat verification, 2026-10-30 09:19 KST
+- A separately executed unprivileged systemd-run private Telegram send returned EVENT_SENT and exit 0; Telegram message_id receipt is required by the base sender. No bot token, private recipient ID, or raw log was printed.
+- Market timer continued automatic MARKET_OK at 09:18:00 with a finite next 09:20:00 scheduled. Base operations timer remained active/waiting. Test and Production /health both HTTP 200.
+- Additional recurrence and end-to-end delivery verification completed without restarting either web service.
