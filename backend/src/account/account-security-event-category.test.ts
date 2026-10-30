@@ -65,4 +65,19 @@ describe('owner-private security activity category filter', () => {
     );
     expect(query).toHaveBeenCalledWith(expect.any(String), [owner]);
   });
+  it('publishes the optional category enum in the generated mobile API contract', () => {
+    const metadata = Reflect.getMetadata(
+      'swagger/apiParameters',
+      AccountSecurityController.prototype.events,
+    ) as readonly { name: string; required?: boolean; schema?: { enum?: string[] } }[] | undefined;
+    expect(metadata).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'category',
+          required: false,
+          schema: expect.objectContaining({ enum: ['all', 'login', 'settings'] }),
+        }),
+      ]),
+    );
+  });
 });

@@ -20,3 +20,9 @@
 - Added strict owner category validation, 20-event post-read filtering, web selection and fail-closed mismatch handling, Android proxy schema/category validation, EN/KO feature and mobile API docs.
 - Re-fetched origin/main mid-task: unchanged `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef`.
 - Remaining: typecheck, lint, build, database/ACL proof, full suites, exact-SHA CI, release HOLD decision.
+
+## In-progress checkpoint (2026-10-30 13:07 KST)
+- Full workspace typecheck PASS; lint PASS with 0 errors / 1,043 pre-existing warnings; exact source local build PASS.
+- Database package 56 PASS / 4 SKIP; Backend owner category and privacy 9 PASS; Frontend/web/app gateway evidence 68 PASS. Additional OpenAPI query enum test 4 PASS.
+- Isolated PostgreSQL 17.11: all 305 migrations (002..306) applied from source with checksums; synthetic owner-1 latest-20, owner-2 isolation, excluded older setting event, direct app-role table read/update denial, owner-function EXECUTE, and fixture rollback to 0 PASS. No production DB touched; owned test container stopped.
+- Machine-readable mobile API contract and EN/KO schema references updated to reflect optional `category` query. Pending fresh generated contract check after commit and full suites.
