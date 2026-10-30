@@ -60,4 +60,21 @@ describe('StockAlertRepository', () => {
     await expect(repository.evaluateDue()).resolves.toBe(2);
     expect(calls[0]).toEqual([USER, 100]);
   });
+
+  it('applies category filtering only after the owner-scoped bounded SECURITY DEFINER function', async () => {
+    const calls: Array<{ text: string; values: readonly unknown[] }> = [];
+    const repository = new StockAlertRepository(db((text, values) => {
+      calls.push({ text, values });
+      return [];
+    }));
+    await repository.events(USER, 30, 'price');
+    await repository.events(USER, 30, 'change');
+    expect(calls).toHaveLength(2);
+    expect(calls[0]?.text).toContain('FROM public.stock_alert_events_list($1,$2)');
+    expect(calls[0]?.text).toContain('condition_kind LIKE');
+    expect(calls[0]?.values).toEqual([USER, 30, 'price']);
+    expect(calls[1]?.values).toEqual([USER, 30, 'change']);
+    expect(calls[0]?.text).not.toContain('FROM public.member_stock_alert_events');
+  });
+
 });

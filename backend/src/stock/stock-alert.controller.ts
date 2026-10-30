@@ -82,13 +82,19 @@ export class StockAlertController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Recent virtual-stock alert events belonging to the caller' })
-  async events(@Req() request: RequestWithSession, @Query('limit') limit?: unknown) {
+  async events(@Req() request: RequestWithSession, @Query('limit') limit?: unknown, @Query('kind') kind?: unknown) {
     // Reject noncanonical wire values before querying the owner's event history.
     if (limit !== undefined && (typeof limit !== 'string' || !/^(?:[1-9]|[1-9][0-9]|100)$/.test(limit))) {
       throw new BadRequestException('limit must be a decimal integer between 1 and 100');
     }
+    if (kind !== undefined && kind !== 'price' && kind !== 'change') {
+      throw new BadRequestException('kind must be price or change when provided');
+    }
     const parsed = limit === undefined ? 20 : Number(limit);
-    return { events: await this.repository().events(requireUserId(request), parsed) };
+    const owner = requireUserId(request);
+    return { events: await (kind === undefined
+      ? this.repository().events(owner, parsed)
+      : this.repository().events(owner, parsed, kind)) };
   }
 
   @Post()

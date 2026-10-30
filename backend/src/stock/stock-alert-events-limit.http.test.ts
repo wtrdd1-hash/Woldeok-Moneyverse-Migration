@@ -59,4 +59,18 @@ describe('member stock-alert event history HTTP limit boundary', () => {
     }
     expect(events.mock.calls).toEqual([[USER, 20], [USER, 1], [USER, 100]]);
   });
+
+  it('filters only canonical owner trigger categories and rejects duplicates before SQL', async () => {
+    events.mockClear();
+    for (const suffix of ['?kind=price', '?kind=change', '?kind=price&limit=30']) {
+      await request(app.getHttpServer()).get('/stocks/alerts/events' + suffix).expect(200);
+    }
+    expect(events.mock.calls).toEqual([[USER, 20, 'price'], [USER, 20, 'change'], [USER, 30, 'price']]);
+    events.mockClear();
+    for (const suffix of ['?kind=', '?kind=all', '?kind=PRICE', '?kind=price&kind=change', '?kind=price&kind=price']) {
+      await request(app.getHttpServer()).get('/stocks/alerts/events' + suffix).expect(400);
+    }
+    expect(events).not.toHaveBeenCalled();
+  });
+
 });

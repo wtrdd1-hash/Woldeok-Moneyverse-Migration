@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { parseStockAlertEvents, type StockAlertEventKind } from '@/lib/stock-alert-event-proof';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -116,6 +117,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
   }
 
+  const stockAlertEventPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'stocks' && parts[1] === 'alerts' && parts[2] === 'events';
+  const stockKinds = stockAlertEventPath ? request.nextUrl.searchParams.getAll('kind') : [];
+  const stockLimits = stockAlertEventPath ? request.nextUrl.searchParams.getAll('limit') : [];
+  if (stockAlertEventPath &&
+      (stockKinds.length > 1 || (stockKinds.length === 1 && !['price', 'change'].includes(stockKinds[0]!)) ||
+       stockLimits.length > 1 || (stockLimits.length === 1 && !/^(?:[1-9]|[1-9][0-9]|100)$/.test(stockLimits[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'stock_alert_events_invalid', 'invalid owner trigger category or window');
+  }
+  const stockKind = (stockKinds[0] ?? 'all') as StockAlertEventKind;
+  const stockLimit = stockLimits.length === 1 ? Number(stockLimits[0]) : 20;
+
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
   let walletRange: ActivityCalendarRange | null = null;
@@ -227,6 +240,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (stockAlertEventPath && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseStockAlertEvents(await response.clone().json(), stockKind, stockLimit)) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_alert_events_unverified',
+          'owner stock alert trigger evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'stock_alert_events_unverified',
+        'owner stock alert trigger evidence is unavailable');
+    }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
@@ -448,7 +474,7 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  if (isWalletDetailPath(parts)) {
+  if (isWalletDetailPath(parts) || (parts.length === 3 && parts[0] === 'stocks' && parts[1] === 'alerts' && parts[2] === 'events')) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');

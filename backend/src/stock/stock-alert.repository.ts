@@ -74,17 +74,23 @@ export class StockAlertRepository {
     );
   }
 
-  events(userId: unknown, limit: unknown = 20): Promise<readonly StockAlertEventRow[]> {
+  events(userId: unknown, limit: unknown = 20, kind?: 'price' | 'change'): Promise<readonly StockAlertEventRow[]> {
     const actor = uuid(userId, 'user id');
     const requested = typeof limit === 'number' && Number.isSafeInteger(limit) ? limit : 20;
     const bounded = Math.min(100, Math.max(1, requested));
+    if (kind !== undefined && kind !== 'price' && kind !== 'change') {
+      throw new StockAlertInputError('unsupported trigger category');
+    }
     return queryRows<StockAlertEventRow>(
       this.pool,
       `SELECT event_id::text, alert_id::text, stock_id::text, symbol, name, condition_kind,
         threshold_amount::text, threshold_bps, trigger_price::text,
         trigger_day_change_bps, triggered_at
-       FROM public.stock_alert_events_list($1,$2)`,
-      [actor, bounded],
+       FROM public.stock_alert_events_list($1,$2)
+       ${kind === undefined ? '' : `WHERE ($3::text = 'price' AND condition_kind LIKE 'price_%')
+          OR ($3::text = 'change' AND condition_kind LIKE 'day_change_%')
+       ORDER BY triggered_at DESC, event_id DESC`}`,
+      kind === undefined ? [actor, bounded] : [actor, bounded, kind],
     );
   }
 
