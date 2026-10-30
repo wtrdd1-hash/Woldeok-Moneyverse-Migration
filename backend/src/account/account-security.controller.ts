@@ -23,6 +23,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import { AccountSecurityRepository } from './account-security.repository';
 import type { SecurityEventCategory } from './account-security.repository';
+import { parseSecurityEventDateRange } from './account-security-event-date';
 
 @ApiTags('account')
 @Controller('account/security')
@@ -53,20 +54,40 @@ export class AccountSecurityController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiQuery({ name: 'category', required: false, enum: ['all', 'login', 'settings'] })
+  @ApiQuery({
+    name: 'from',
+    required: false,
+    type: String,
+    description: 'Inclusive YYYY-MM-DD in Korea time; requires to',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: false,
+    type: String,
+    description: 'Inclusive YYYY-MM-DD in Korea time; requires from; max 366 days',
+  })
   @ApiOperation({
     summary: 'Recent owner-only security events, optionally filtered within the latest 20',
   })
-  async events(@Req() request: RequestWithSession, @Query('category') category?: unknown) {
+  async events(
+    @Req() request: RequestWithSession,
+    @Query('category') category?: unknown,
+    @Query('from') from?: unknown,
+    @Query('to') to?: unknown,
+  ) {
     if (
       category !== undefined &&
       (typeof category !== 'string' || !['all', 'login', 'settings'].includes(category))
     ) {
       throw new BadRequestException('invalid security event category');
     }
+    const range = parseSecurityEventDateRange(from, to);
+    if (range === null) throw new BadRequestException('invalid security event date range');
     return {
       events: await this.repository().recentEvents(
         requireUserId(request),
         (category ?? 'all') as SecurityEventCategory,
+        range,
       ),
     };
   }

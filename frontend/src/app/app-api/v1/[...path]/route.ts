@@ -5,6 +5,7 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseSecurityEventDateRange, securityEventsMatchDateRange } from '@/lib/security-event-date';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
@@ -114,6 +115,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     : 'all';
   if (securityEventPath && securityCategory === null) {
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
+
+  const fromValues = securityEventPath ? request.nextUrl.searchParams.getAll('from') : [];
+  const toValues = securityEventPath ? request.nextUrl.searchParams.getAll('to') : [];
+  const securityRange = securityEventPath && fromValues.length <= 1 && toValues.length <= 1
+    ? parseSecurityEventDateRange(fromValues[0], toValues[0]) : null;
+  if (securityEventPath && securityRange === null) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_security_date_range', 'security event dates must be a valid paired KST range up to 366 days');
   }
 
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
@@ -411,7 +420,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const compatible = addAppJsonCompatibility(parsed);
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
-        if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
+        if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory) || !securityEventsMatchDateRange(verified, securityRange ?? undefined)) {
           return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
         }
       }

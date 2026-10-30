@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import type { SecurityEventDateRange } from './account-security-event-date';
 
 interface ActiveSessionRow {
   readonly session_id: string;
@@ -76,6 +77,7 @@ export class AccountSecurityRepository {
   async recentEvents(
     userId: string,
     category: SecurityEventCategory = 'all',
+    range?: SecurityEventDateRange,
   ): Promise<MemberSecurityEventView[]> {
     // Always fetch the owner's latest 20 first. Filtering must not imply full-history coverage.
     const rows = await queryRows<SecurityEventRow>(
@@ -83,10 +85,17 @@ export class AccountSecurityRepository {
       `SELECT event_type, created_at FROM account_recent_security_events($1::uuid, 20)`,
       [userId],
     );
-    const events = rows.map((row) => ({
-      type: row.event_type,
-      createdAt: row.created_at.toISOString(),
-    }));
+    const events = rows
+      .map((row) => ({
+        type: row.event_type,
+        createdAt: row.created_at.toISOString(),
+      }))
+      .filter(
+        (event) =>
+          !range ||
+          (Date.parse(event.createdAt) >= range.startMs &&
+            Date.parse(event.createdAt) < range.endMs),
+      );
     if (category === 'login')
       return events.filter((event) => event.type === 'local_login_succeeded');
     if (category === 'settings')

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseSecurityEventDateRange, securityEventsMatchDateRange } from '@/lib/security-event-date';
 import { requireMember } from '@/lib/session';
 import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
 import {
@@ -53,17 +54,22 @@ export default async function AccountSecurityPage({
   const parsedCategory = parseSecurityEventCategory(params.category);
   const categoryInvalid = parsedCategory === null;
   const eventCategory = parsedCategory ?? 'all';
-  const eventPath = `/api/v1/account/security/events${eventCategory === 'all' ? '' : `?category=${eventCategory}`}`;
+  const eventRange = parseSecurityEventDateRange(params.from, params.to);
+  const dateInvalid = eventRange === null;
+  const eventQuery = new URLSearchParams();
+  if (eventCategory !== 'all') eventQuery.set('category', eventCategory);
+  if (eventRange) { eventQuery.set('from', eventRange.from); eventQuery.set('to', eventRange.to); }
+  const eventPath = `/api/v1/account/security/events${eventQuery.size ? `?${eventQuery.toString()}` : ''}`;
   const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
     apiOrNull<unknown>('/api/v1/account/security/sessions'),
     apiOrNull<unknown>('/api/v1/account/identities'),
-    categoryInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
+    categoryInvalid || dateInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
   ]);
   const sessionData = parseSecuritySessions(rawSessions);
   const identityData = parseLinkedIdentities(rawIdentities);
   const parsedEvents = parseSecurityEvents(rawEvents);
-  const eventData = parsedEvents !== null && !categoryInvalid &&
-    securityEventsMatchCategory(parsedEvents, eventCategory) ? parsedEvents : null;
+  const eventData = parsedEvents !== null && !categoryInvalid && !dateInvalid &&
+    securityEventsMatchCategory(parsedEvents, eventCategory) && securityEventsMatchDateRange(parsedEvents, eventRange ?? undefined) ? parsedEvents : null;
   const sessions = sessionData ?? [];
   const identities = identityData ?? [];
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
@@ -373,16 +379,25 @@ export default async function AccountSecurityPage({
               { value: 'login', label: '로그인', href: '/account/security?category=login' },
               { value: 'settings', label: '설정 변경', href: '/account/security?category=settings' },
             ].map((option) => (
-              <Link key={option.value} href={option.href}
+              <Link key={option.value} href={eventRange ? `${option.href}${option.href.includes('?') ? '&' : '?'}from=${eventRange.from}&to=${eventRange.to}` : option.href}
                 aria-current={!categoryInvalid && eventCategory === option.value ? 'page' : undefined}
                 className="inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">
                 {option.label}
               </Link>
             ))}
           </nav>
-          <p className="mb-3 text-xs text-muted-foreground">필터는 본인의 최근 20건에만 적용됩니다. 전체 기록 검색이 아닙니다.</p>
+          <form action="/account/security" method="get" className="mb-3 flex flex-wrap items-end gap-3">
+            {eventCategory !== 'all' && <input type="hidden" name="category" value={eventCategory} />}
+            <label className="grid gap-1 text-xs">시작일 (한국시간)<input name="from" type="date" defaultValue={eventRange?.from ?? ''} required className="min-h-11 rounded-md border border-input bg-background px-2" /></label>
+            <label className="grid gap-1 text-xs">종료일 (한국시간)<input name="to" type="date" defaultValue={eventRange?.to ?? ''} required className="min-h-11 rounded-md border border-input bg-background px-2" /></label>
+            <Button type="submit" size="sm" className="min-h-11">날짜 적용</Button>
+            <Link href={eventCategory === 'all' ? '/account/security' : `/account/security?category=${eventCategory}`} className="inline-flex min-h-11 items-center rounded-md border px-3 text-xs">날짜 초기화</Link>
+          </form>
+          <p className="mb-3 text-xs text-muted-foreground">날짜는 한국시간 기준 양끝 포함, 최대 366일입니다. 필터는 본인의 최근 20건에만 적용됩니다. 전체 기록 검색이 아닙니다.</p>
           {categoryInvalid ? (
             <p role="alert" className="py-3 text-xs text-destructive">올바르지 않은 보안 활동 필터입니다. 전체를 선택해 주세요.</p>
+          ) : dateInvalid ? (
+            <p role="alert" className="py-3 text-xs text-destructive">올바르지 않은 보안 활동 날짜입니다. 시작일과 종료일을 함께 선택해 주세요.</p>
           ) : eventData === null ? (
             <p className="py-3 text-xs text-muted-foreground">보안 활동을 확인할 수 없습니다. 다시 조회해 주세요.</p>
           ) : events.length === 0 ? (
@@ -397,7 +412,7 @@ export default async function AccountSecurityPage({
               ))}
             </div>
           )}
-          {!categoryInvalid && eventData !== null && (
+          {!categoryInvalid && !dateInvalid && eventData !== null && (
             <Button asChild variant="outline" size="sm" className="mt-3 min-h-11">
               <a href="/account/security/events.csv" download="moneyverse-security-events-recent.csv" aria-label="필터와 관계없이 전체 최근 최대 20건의 계정 보안 활동 CSV 다운로드">
                 전체 보안 활동 CSV 다운로드
