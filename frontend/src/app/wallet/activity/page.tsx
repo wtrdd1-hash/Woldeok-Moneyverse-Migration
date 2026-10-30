@@ -95,14 +95,21 @@ export default async function WalletActivityPage({
             history.transactions.map((entry) => {
               const { debit, credit } = sides(entry);
               return (
+                <div key={entry.transactionId} className="grid gap-1">
                 <PostingStrip
-                  key={entry.transactionId}
                   debit={debit}
                   credit={credit}
                   amount={entry.netAmount}
                   label={entry.label}
                   at={formatMoment(entry.occurredAt)}
                 />
+                {process.env.WALLET_TRANSACTION_DETAIL_ENABLED === 'true' &&
+                  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(entry.transactionId) && (
+                    <Link className="min-h-11 w-fit px-3 py-2 text-sm underline underline-offset-4" href={`/wallet/activity/transactions/${entry.transactionId}`}>
+                      거래 상세 보기
+                    </Link>
+                  )}
+                </div>
               );
             })
           )}

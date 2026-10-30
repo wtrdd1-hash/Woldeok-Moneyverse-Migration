@@ -1,6 +1,7 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -16,6 +17,11 @@ import {
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
+
+function isWalletDetailPath(parts: readonly string[]): boolean {
+  return parts.length === 4 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+    parts[2] === 'transactions';
+}
 
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
@@ -145,6 +151,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  if (isWalletDetailPath(parts) && request.method === 'GET') {
+    if (!response.ok) {
+      const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Wallet Detail Unavailable', 'wallet_detail_unavailable',
+        'The owner transaction detail could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseWalletTransactionDetail(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
+          'The owner transaction detail could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
+        'The owner transaction detail could not be verified');
+    }
+  }
+
   // A legacy upload backend may echo scanner signatures or filesystem paths.
   // Preserve the HTTP failure class without exposing its untrusted response body.
   if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && !response.ok) {
@@ -227,6 +251,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (isWalletDetailPath(parts)) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   // Help publication metadata and member-scoped reads must not inherit a
   // cacheable upstream policy, including when the upstream returns an error.
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {

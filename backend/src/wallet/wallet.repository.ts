@@ -48,6 +48,20 @@ export interface WalletTransactionRow {
   readonly bank_delta?: string;
 }
 
+/** Owner projection, read-only; a future numbered SECURITY DEFINER migration must
+ * replace direct ledger SELECT after B's pending 307/308 migrations merge. */
+export interface WalletTransactionDetailRow {
+  readonly transaction_id: string;
+  readonly transaction_type: string;
+  readonly occurred_at_utc_micros: string;
+  readonly cash_delta: string;
+  readonly bank_delta: string;
+  readonly net_delta: string;
+  readonly currency: string;
+  readonly posting_count: string;
+  readonly invalid_posting_count: string;
+}
+
 /** public.wallet_active_recipient_by_id return column: packages/database/migrations/010-account-lifecycle.sql */
 export interface WalletActiveRecipientRow {
   readonly user_id: string | null;
@@ -167,6 +181,42 @@ export class PostgresWalletRepository {
     if (!pool || typeof pool.query !== 'function')
       throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
+  }
+
+  async transactionDetailForUser(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null> {
+    const owner = requireUuid(userId, 'authenticated user id');
+    const id = requireUuid(transactionId, 'transaction id');
+    // One statement and one MVCC snapshot; group owner pocket legs before
+    // projection. Do not derive a recipient or a settlement assertion.
+    return queryOne<WalletTransactionDetailRow>(
+      this.pool,
+      `SELECT ledger_transaction.id::text AS transaction_id,
+              ledger_transaction.type AS transaction_type,
+              to_char(ledger_transaction.created_at AT TIME ZONE 'UTC',
+                      'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS occurred_at_utc_micros,
+              SUM(CASE WHEN account.account_type = 'USER_CASH'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount::numeric ELSE -posting.amount::numeric END
+                ELSE 0::numeric END)::text AS cash_delta,
+              SUM(CASE WHEN account.account_type = 'USER_BANK'::public.account_type
+                THEN CASE posting.direction WHEN 'debit'::public.posting_direction
+                  THEN posting.amount::numeric ELSE -posting.amount::numeric END
+                ELSE 0::numeric END)::text AS bank_delta,
+              SUM(CASE posting.direction WHEN 'debit'::public.posting_direction
+                THEN posting.amount::numeric ELSE -posting.amount::numeric END)::text AS net_delta,
+              CASE WHEN COUNT(*) FILTER (WHERE account.currency <> 'WLD') = 0
+                THEN 'WLD' ELSE 'INVALID' END AS currency,
+              COUNT(*)::text AS posting_count,
+              COUNT(*) FILTER (WHERE account.currency <> 'WLD')::text AS invalid_posting_count
+       FROM public.ledger_transactions AS ledger_transaction
+       JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
+       JOIN public.accounts AS account ON account.id = posting.account_id
+       WHERE account.owner_user_id = $1
+         AND ledger_transaction.id = $2
+         AND account.account_type IN ('USER_CASH'::public.account_type, 'USER_BANK'::public.account_type)
+       GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at`,
+      [owner, id],
+    );
   }
 
   async balancesForUser(userId: string): Promise<WalletBalanceRow[]> {
