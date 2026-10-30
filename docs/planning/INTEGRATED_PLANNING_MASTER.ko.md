@@ -1,5 +1,44 @@
 ﻿# 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1502 F675-181 지갑 날짜 범위 보완 / Draft PR #1983 / 이슈 #1973 / 초안 / 운영 보류. v1500 PR #1974 병합, 기능 런타임 미구현.
+**현재 기획:** v1504 F675-182 회원 전용 지갑 거래 상세 / 초안 PR #1990 / 개발 인계 #1988 / 초안 / 운영 보류; 미병합 v1502 초안 #1983 기반.
+
+## v2026.10.30.1504 — F675-182 회원 전용 지갑 거래 상세 (기능 추가 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 보완 v1502 → 현재 기능 추가 v1504 → 다음 기능 보완 v1506(잠정). 최신 `origin/main` `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` 시작·중간 재조회. `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`와 한국어 동등 문서를 기준으로 한다. v1502 초안 #1983은 미병합이므로 이번 문서 제안은 기획 이력 보존을 위해 그 위에 쌓되 독립 병합하지 않는다. [개발 인계 #1988](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1988). 런타임·DB·WLD·Test·운영 변경 없음.
+
+### 이용자 문제·범위·대안
+- **실제 소스:** `frontend/src/app/wallet/activity/page.tsx`는 최대 50건의 `PostingStrip`만 보여주고 거래 상세 CTA가 없다. Nest `wallet.controller.ts`에는 `GET wallet/activity`는 있지만 `wallet/activity/transactions/:id`는 없다. 저장소는 본인 현금/은행 전표를 합산해 거래 UUID를 반환하고, 송금 완료 액션도 거래 UUID를 반환한다. F675-176 저장 필터·177 월별 요약·178 북마크·181 날짜 지정과는 별개이며 main에서 중복 상세 API는 확인되지 않았다.
+- **대안:** (A) 행 확장형은 직접 이동·모바일 사용성이 낮음, (B) 전체 원장 내보내기는 과다 노출, **(C) 회원 전용 읽기 전용 거래 상세 화면을 채택**. 실제 돈을 변경하거나 검증되지 않은 금융 증명서를 만들지 않는다.
+- **목적·대상:** 인증·약관 동의한 회원이 본인 거래 1건의 현금/은행 WLD 증감을 정확히 확인한다. 현금↔은행 이동의 전체 순변동은 0이다. 세금 증명·결제 확인서·현재 잔액·감사 증명으로 오인하지 않도록 명시한다.
+- **진입·CTA:** `/wallet/activity` 각 행에 키보드 접근 가능한 ‘거래 상세 보기’ → `/wallet/activity/transactions/{uuid}`. 향후 북마크/날짜 지정 목록에서도 같은 경로 사용. 이전 목록으로 돌아갈 때 검증된 필터만 보존하고 임의 외부 리다이렉트는 금지한다. 송금 성공 시 검증된 영수증 UUID로 이동 가능하나 공개 공유 기능은 없다.
+
+### 화면 상태·표시 계약
+- 로딩 → 검증된 거래 상세. 존재하지 않거나 타인 소유면 동일한 404 ‘거래를 찾을 수 없습니다’. UUID 형식 오류 400, 미인증 401, 요청 제한 429(제한된 재시도), DB·상위 응답 장애 503(재시도). **장애를 거래 0건·잔액 0 또는 VERIFIED로 표시하지 않는다.** 계정 전환 시 이전 회원 데이터를 즉시 폐기한다.
+- 거래 UUID, 복사 버튼·접근성 피드백, 안전한 유형명, 한국시간 시각(시간대 명시), 정확한 부호 있는 십진 WLD `cashDelta`·`bankDelta`·`netDelta`, 실제 DB 조회 근거 상태 `LEDGER_READ_VERIFIED`/`UNVERIFIED`/`UNAVAILABLE`만 노출한다. 상대방 이름·수수료·세금·송금인 정보를 추정하지 않는다. 자체 계정 간 이동 시 순변동 0 안내. 미정의 유형은 중립적인 현지화 라벨 사용.
+- 상대방 회원 ID·이름, 시스템 계정 ID, 전표 ID, 정책 페이로드, 멱등 키, 요청 토큰, outbox·감사 로그 메타데이터는 반환하지 않는다. 조회 시점 원장 기록일 뿐 현재 잔액이 아니다. DB 원본 마이크로초 시각을 보존하고 화면에서만 한국시간으로 변환한다.
+
+### API·DB·트랜잭션·권한
+- **Nest:** `GET /api/v1/wallet/activity/transactions/:transactionId`에 엄격한 UUID·세션·동의 검증. 200 DTO `{transactionId,typeLabel,occurredAt,cashDelta,bankDelta,netDelta,currency:'WLD',evidenceStatus}`를 런타임 검증. 금액은 정확한 십진 문자열, NUMERIC으로 `netDelta=cashDelta+bankDelta` 확인, JS 부동소수점 금지. 잘못된 ID 400, 미인증 401, 타인/없음 404 동일 응답, 제한 429, DB 장애 503. 실패에 200 금지.
+- **PostgreSQL:** 개발 예약이 별도 마이그레이션으로 검토된 `SECURITY DEFINER` 본인 전용 읽기 함수를 추가한다. 고정 `search_path`, `REVOKE ALL FROM PUBLIC`, 앱 역할에는 `EXECUTE`만 부여. `actor_user_id`가 아니라 CASH/BANK 계정의 `owner_user_id`로 본인 전표를 필터링하고 동결·종료 계정의 과거 기록도 유지한다. 거래 1건의 본인 전표를 먼저 합산한다. 원장 테이블 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 권한을 새로 주지 않는다. 단일 SQL/함수 호출의 동일 문장 스냅샷을 사용하므로 다중 쿼리 트랜잭션 불필요. 신규 기능 테이블은 만들지 않는다. 기존 거래 PK·전표 transaction_id·계정 소유자 인덱스를 활용하고 인덱스 추가는 격리 DB EXPLAIN 후 판단. WLD 통화·NUMERIC 정밀도·합계 불변식 검증.
+- **보안 실측:** 2026-10-30 개발 PostgreSQL 17.11 읽기 전용 조회에서 `moneyverse_app`의 `ledger_transactions SELECT` 및 `audit_logs DELETE`가 허용됨을 확인했다. AGENTS.md 최소 권한 선언과 불일치하므로 P0 #993에서 선행 해결한다. **운영 DB의 동일 권한이나 실제 변조를 입증하지 않는다.**
+- **웹·Android:** Next SSR `/wallet/activity/transactions/[transactionId]`, `apiOrNull<T>` 대신 HTTP 상태와 응답 스키마를 실제 검증, 실패 차단·재시도, force-dynamic/no-store/noindex. Android `/app-api/v1/wallet/activity/transactions/:id`는 인증 세션·상태 코드·헤더·오류를 동일하게 전달한다. 기존 app-api는 지갑 private/no-store/noindex를 이미 지원하므로 중복 구현 대신 회귀시험. 오프라인/서비스워커 캐시·공개 URL 미리보기 금지. GET에 CSRF 토큰은 불필요하지만 Origin/CORS·세션 경계·UUID 추측 요청 제한을 적용한다. 거래 ID·개인 데이터를 로그·분석에 저장하지 않는다.
+- **모바일·접근성:** 320px, 200% 확대, 최소 44px 터치 영역, WCAG 2.2 AA, 포커스 표시, 정의 목록, 복사·오류 상태 aria-live, 키보드·스크린리더 테스트, 한국어 및 현지화 키.
+- **관리자·SEO·KPI:** 관리자는 익명 일별 `detail_open`/`detail_unavailable`/`detail_retry` 집계만(최소 코호트 ≥20), 회원별 거래 조회 권한 없음. 성공·거부·장애 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`; 사이트맵·검색 인덱스 제외, referrer/로그 유출 금지. 건강한 Test에서 상세 조회 성공률 ≥99%, 무단 노출 0, WLD 변경 0 목표. 실제 측정 전 달성 주장 금지.
+- **배포·롤백:** `wallet_transaction_detail_v1` 기능 스위치 기본 OFF. 개발 예약의 별도 브랜치에서 TDD RED→GREEN→REFACTOR, 호환 가능한 DB 함수·권한 회귀, 공식 Test의 프론트/백엔드/엣지 정확 SHA 및 실제 PG·인증 E2E, 독립 백업 복원 후 점진 활성화. P0 해결·소유자 승인 GitOps 전 운영 활성화/자동 승격 금지. 롤백 시 스위치 OFF로 CTA·화면 숨김, 함수는 검토된 마이그레이션 롤백 전까지 비활성 유지; 원장·백업 삭제 금지.
+
+### P0 4건 / P1 6건 개발 인계
+1. **P0 OPS1504-01:** QA v1387 [#1984](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1984) — Production v1523 심볼릭 링크는 `94d38f4...`를 표시하지만 실제 백엔드/프론트 PID 2608302/2608303은 삭제된 v1515 경로에서 실행. 증거 보존·독립 롤백 복원·재시작/정리/승격 금지.
+2. **P0 SEC1504-02:** 개발 DB 원장 직접 SELECT·감사 DELETE [#993](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/993), 마이그레이션 체크섬 불일치 5건, MCP 민감 URL 로그 [#1972](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1972). 운영 권한 단정 금지.
+3. **P0 FIN1504-03:** MINT 18,000 WLD 출처, 국고 원장 연결 552건, SWF 금융 시험 및 Test 국고 합성 200 [#1917](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1917) 검증 전 정상 판정 금지.
+4. **P0 REL1504-04:** 전체 CI·lint·Android 계약, 공식 Test 정확 프론트/백엔드/엣지 SHA, 실제 PG/인증 E2E, 독립 복원 및 승인 GitOps [#1979](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1979).
+5. **P1 DETAIL1504-05:** SECURITY DEFINER 본인 SQL·권한/인덱스·정확한 십진 연산.
+6. **P1 DETAIL1504-06:** Nest API/DTO·UUID·본인 404·오류/속도 제한.
+7. **P1 DETAIL1504-07:** Next 상세 화면·목록 CTA·응답 검증·접근성/복귀.
+8. **P1 DETAIL1504-08:** Android 동등성·계정 전환·no-store/noindex·로그.
+9. **P1 DETAIL1504-09:** 개인정보·관리자 익명 KPI·SEO·위협 모델·보존.
+10. **P1 DETAIL1504-10:** 격리 PostgreSQL 수용·회귀·정확 SHA Test·스위치 OFF 롤백.
+
+**수용시험은 계획이며 미실행:** 합성 원장 ≥10,001건, 타인·위조 ID ≥100, 동시 ≥100, 누락/동결/종료 ≥50, 현금↔은행 순변동 0 ≥30, 비정상/503 ≥50, 계정/세션 전환 ≥30. 타인 노출 0, WLD/원장 쓰기 0, 허위 VERIFIED 0. 외부 독립·중복 제거·실근거 분류 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 운영 승격 보류.
+
 
 ## v2026.10.30.1502 — F675-181 지갑 날짜 범위 조회 근거·커서 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
