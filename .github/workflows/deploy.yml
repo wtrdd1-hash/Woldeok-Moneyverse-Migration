@@ -130,7 +130,7 @@ jobs:
           test -s "$file"
           jq -e \
             --arg head "$EXPECTED_HEAD_SHA" \
-            '.schemaVersion == 1 and .classifierVersion == "release-path-v2" and .repositoryHeadSha == $head and (.classification == "DOCS_ONLY" or .classification == "CONTROL_PLANE_ONLY" or .classification == "RUNTIME_RELEVANT" or .classification == "MIXED")' \
+            '.schemaVersion == 1 and .classifierVersion == "release-path-v1" and .repositoryHeadSha == $head and (.classification == "DOCS_ONLY" or .classification == "CONTROL_PLANE_ONLY" or .classification == "RUNTIME_RELEVANT" or .classification == "MIXED")' \
             "$file" >/dev/null || {
               echo '::error::release input is missing, stale, unknown, or does not belong to the selected candidate run'
               exit 1
