@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v1478 / F675-175 — 고객문의 초안 권한·중복기획·검증형 전송 보완 (기능 보완 / 초안 / 운영 HOLD)
 
 **진실 기준·주기·협업.** 이전 기능 추가 v1476 → 현재 기능 보완 v1478 → 다음 기능 추가 v1480(잠정). 시작·중간 origin/main `54b182d2214a15974350701174175f589789613b`. 선행 v1476 Draft PR #1901은 **OPEN / CONFLICTING**, 미병합. QA v1374 후보 PR #1902는 **DRAFT / FAILED-HOLD**(금융 시험 15 FAIL / 135 PASS / 18 SKIP)이며 공식 Test 정확 SHA 인증이 아님. v1476을 보완하는 문서 작업으로 코드·SQL·DB·WLD·Test·운영 변경 없음. [P0 문의 권한 #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [v1476 개발 이슈 #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
@@ -135,6 +136,29 @@
 >>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
 =======
+=======
+## v1486 / F675-177 — 지갑 월별 요약 스냅샷·과거 계정 조회 보완 (기능 보완 / 초안 / 배포 보류)
+- **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
+
+**회차:** 이전 기능 추가 v1484 → 현재 기능 보완 v1486 → 다음 기능 추가 v1488(잠정). **기준:** main `62c6cd038951d65c94b709302bdaec6e75b080b6` 시작·중간 확인; 선행 [Draft #1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) 미병합. 독립 QA v1378 **FAILED/P0**. 본 변경은 기존 통합문서에만 반영하는 기획이며 API·DB·Test·운영 구현 완료가 아님. [개발 인계 #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
+
+### 실제 소스에서 확인한 설계 공백
+1. `backend/src/wallet/wallet.repository.ts:259+`의 기존 활동 조회는 주입된 풀의 `Queryable.query`를 사용함. v1484에서 요구한 `REPEATABLE READ READ ONLY`는 풀에 BEGIN/SELECT/COMMIT를 각각 보내는 방식으로 **보장되지 않음**. 여러 SQL을 사용할 경우 반드시 동일 `pg.PoolClient`를 체크아웃하고 격리수준·읽기 전용·시간 제한을 설정하여 스냅샷/집계를 수행한 뒤 오류 시 `ROLLBACK`, `finally`에서 `release()` 처리. 대안은 `asOf`, 월 경계, 본인 전표와 집계를 단일 SQL 문장 MVCC 스냅샷으로 계산하는 방식이며 이 경우 실제로 열지 않은 REPEATABLE READ 트랜잭션을 주장하지 않음.
+2. `packages/database/init/001-economy-core.sql`에 회원 계정 상태 active/frozen/closed, 통화 char(3), 거래 생성 시각 및 전표 bigint 금액이 정의됨. 기존 활동 조회는 회원 USER_CASH/USER_BANK의 **모든 상태**를 포함하므로 월별 요약에서 `account.status='active'`를 추가하면 동결·종료 계정의 과거 거래가 사라지는 결함이 발생함. 회원 소유 WLD 계정만 포함하되 상태로 과거 이력을 지우지 않음. `ledger_transactions.actor_user_id`로 제한하지 않음(타인이 송금한 입금도 본인 계정 전표임).
+3. 월별 '유입/유출'은 경제 전체의 총 거래량이 아닌 **회원 순증감 기준**임을 명확히 함. 먼저 회원의 거래 ID별 USER_CASH+USER_BANK 부호 전표를 합치고 net>0 증가, net<0 감소, net=0 순변동 없음으로 분류. 현금↔은행 이체는 현금·은행 증감은 남지만 회원 순유입/순유출 0, 거래 건수는 1건으로 처리. 같은 거래의 다중 전표를 중복 집계하지 않음. 화면에는 '내 WLD 순증가/순감소'를 표기하고 총수입·총지출·소득으로 오해시키지 않음. `netWld=inflowWld-outflowWld=cashDeltaWld+bankDeltaWld`를 월별·전체 기간에서 검증. 산술 일치는 MINT/국고/SWF 자금 출처나 정산 승인 증거가 아님.
+4. `asOf`와 한국시간 월 경계는 **동일 DB 스냅샷**에서 도출. `[월초UTC, min(다음 월초UTC,asOf))` 반개구간을 적용하고 asOf 이후·미래 거래 제외. 화면용 `periodEnd`는 다음 월초 UTC로 유지하되 당월 부분 집계의 실제 끝은 `effectiveEndExclusive`로 별도 제공(항상 periodEnd 이하). 월 순서·연속성·서버 시각을 검증. 과거 시각으로 거래가 추가되면 과거 월 합계도 바뀔 수 있으므로 확정 결산으로 표시 금지.
+
+### 구현 가능한 API·DB·화면 계약
+- **진입·CTA·상태:** 기존 비공개 `/wallet/activity` → `월별 활동 요약`(스위치 `wallet_monthly_activity_digest` 기본 OFF) → 최근 1~12개월(기본 6) 선택 → `월별 요약 보기` → 결과와 기존 `거래내역 보기` 링크(지원하지 않는 월 필터 딥링크 생성 금지). LOADING, READY, VERIFIED_EMPTY(정상 DB 조회 시에만), PARTIAL, INVALID_MONTHS(400), SESSION_EXPIRED(401), FORBIDDEN(403), RATE_LIMITED(429), UNAVAILABLE(503), BAD_RESPONSE(503), OFFLINE, DISABLED 구분. 장애 시 0원 위장·이전 회원 결과 노출 금지. 로그아웃·세션 변경·계정 전환 시 오래된 응답 폐기.
+- **API:** 회원 인증 `GET /api/v1/wallet/activity/monthly-summary?months=6`; 사용자 ID·임의 asOf·시간대·날짜 입력 불허. Nest/Next/Android가 `{asOf,timezone:'Asia/Seoul',monthsRequested,sourceStatus:'VERIFIED_READ',months:[{month,periodStart,periodEnd,effectiveEndExclusive,status,incomingCount,outgoingCount,zeroNetCount,inflowWld,outflowWld,netWld,cashDeltaWld,bankDeltaWld}]}` 검증. WLD는 정확한 부호 있는 정규 정수 문자열, 건수는 안전한 0 이상 정수, 월 중복 없음·최신순 연속·월별/전체 합계 불변식 충족. DB NUMERIC은 문자열로 직렬화, WLD를 JS Number로 변환 금지. 필드 누락·비정상 HTTP 200·불가능한 월 경계·합계 불일치는 503(정상 빈 결과로 전환 금지).
+- **SQL·권한:** 서버 인증 세션의 회원만 필터링, WLD 통화·USER_CASH/USER_BANK 계정만 사용, 거래 ID·created_at 기준 선집계 후 월별 합산. 회원 전표 debit +금액 / credit -금액. 상태·거래 actor 필터 금지. 격리 PostgreSQL에서 인덱스·실행계획을 검증하며 JS 무제한 페이지 조회로 집계하지 않음. 신규 테이블·직접 앱 계정 DML 권한·원장 쓰기·금융 변경 없음. 본인 읽기 SECURITY DEFINER 함수가 필요하면 search_path 고정, PUBLIC EXECUTE 회수, 최소 EXECUTE만 부여, SQL 소유권 검사 및 마이그레이션 출처 확인 후 별도 정방향 변경.
+- **오류·남용·개인정보:** 회원당 분당 10회, 동시 1회, DB 2초 제한은 실측 전 목표. 400/401/403/429/503을 명확히 구분하고 개인정보를 응답 오류에 넣지 않음. CDN/ISR 캐시 금지, `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`, 사이트맵·구조화 데이터 제외. 금액·원장 거래 ID·회원 ID·영수증 원문 로그/분석 금지. 관리자는 최소 집단 규모를 충족한 이용·지연·오류 집계만 조회. 320px·200% 확대·키보드·스크린리더·WCAG 2.2 AA·Android EN/KO/JSON 생성 계약 동등. p95 500ms 및 접근성 완료율은 미측정 시험 목표.
+- **시험·배포·롤백(계획, 미실행):** 격리 PG 17.11 편중 합성 거래 10,001건, 타인/actor 위조 100건, 한국시간·UTC·윤년 경계 100건, 동결/종료 계정·다중 전표 100건, 과거 시각 삽입·동시 스냅샷 경합 100건, 시간초과·비정상 응답·망 중단 50건, 2^53 초과 금액 정확성. 원시 본인 전표와 독립 대조, 현금↔은행 순변동 0, 과거 계정 이력 유지, 동일 클라이언트 트랜잭션 또는 단일 SQL 스냅샷, 앱 직접 DML·원장 변경 없음, Next/Nest/Android 동등성·기능 OFF 회귀 검증. 스위치 OFF 시 신규 CTA/API만 숨기고 기존 기록·CSV 보존. 인덱스는 P0 해결 후 별도 승인된 정방향 마이그레이션. 전체 CI·외부 백업 복원·프론트/백/엣지 정확 SHA 공식 Test·승인된 GitOps 운영승격·스모크·롤백 증거 필요.
+- **P0 개발 백로그:** `REPO1486-01` 과거 브랜치 참조 462개/비조상 커밋 346개 보존; `SEC1486-02` DEV 고객문의/감사 DML/TRUNCATE와 적용 체크섬 219/220/221/234/266 5건(소스 SQL 304개 중복 0, 적용 293) 조사; `FIN1486-03` SWF/MINT/국고 미인증 성공 차단, 조정 19건/18,000 WLD·국고 552건 연결 누락·Test 합성 200 검증; `REL1486-04` 프론트/엣지 SHA, 금융 시험 실패 6건·lint 3건·계약 드리프트·외부 복원·정확 SHA Test·디스크(시작 시 루트 86%/데이터 92%) 해결. 승인 없이 파괴적 정리 금지.
+- **P1 개발 백로그:** `MONTH1486-05` 과거 계정 포함 본인 WLD SQL·인덱스; `MONTH1486-06` 동일 클라이언트 스냅샷·반개구간·effectiveEnd; `MONTH1486-07` Nest/Next API 및 합계 검증; `MONTH1486-08` Android 계약·세션 격리·접근성; `MONTH1486-09` 개인정보·관리자 집계·SEO·KPI; `MONTH1486-10` 격리 PG 경합·정밀도·동결 계정·회귀·롤백. **P0 4건 + P1 6건 = 10건**, 수용시험은 정의만 했으며 미실행.
+- **외부 근거 게이트:** 독립 획득·중복 제거·실제 근거 분류 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 운영 승격 **HOLD**. 기획 회차에서 런타임·DB·WLD·Test·Production 변경 없음.
+
+>>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
 ## v1484 / F675-177 — 회원 전용 지갑 월별 활동 요약 (기능 추가 / 초안 / 배포 보류)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; main 미병합, CI 전체 미인증.
 

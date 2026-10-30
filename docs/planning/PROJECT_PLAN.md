@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## v2026.10.29.1478 — F675-175 Support Draft ACL and Verified Send Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - Previous Feature Addition v1476 → Current Feature Improvement v1478 → Next Feature Addition v1480 (provisional). Main `54b182d2214a15974350701174175f589789613b` start/mid; predecessor Draft #1901 OPEN/CONFLICTING, not merged; QA v1374 Draft #1902 FAILED/HOLD, not official Test. [P0 support ACL #1908](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1908), [planning issue #1900](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1900).
 - DEV PG 17.11 **actual** grants: `moneyverse_app` directly has SELECT/INSERT/UPDATE/DELETE/TRUNCATE (plus REFERENCES/TRIGGER) on `support_threads` and `support_messages`, despite 196/302 REVOKE in source; Production unknown, no support content read. Existing Next send action generates a new UUID per invocation; `support_create_thread` same-key replay does not compare subject/body, and existing message-ID receipt cannot resolve unknown sends by key. **Potential risks, not verified Production incidents.**
@@ -35,6 +36,15 @@
 >>>>>>> origin/auto/planning-v1480-wallet-saved-views-20261030-0005
 
 =======
+=======
+## v2026.10.30.1486 — F675-177 Monthly Wallet Digest Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **Draft PR:** [#1930](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1930) — OPEN / DRAFT / RELEASE HOLD; stacked on unmerged #1926, not independently mergeable.
+- **Cycle:** Previous Feature Addition v1484 → Current Feature Improvement v1486 → Next Feature Addition v1488 (provisional). Stacked on unmerged Draft [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926); main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked start/mid. QA v1378 FAILED/P0. Documentation only; no release certification.
+- **Verified defects:** `Queryable.query` on a pool does not establish a same-client `REPEATABLE READ READ ONLY` transaction; use a checked-out client and guaranteed rollback/release, or explicitly verified one-statement snapshot. Account status active/frozen/closed must not erase historical USER_CASH/USER_BANK WLD postings; do not filter by transaction actor. Owner-net inflow/outflow is not gross income/spending; cash↔bank is zero net. Add `effectiveEndExclusive` for current-month partial snapshot; half-open KST→UTC intervals, exact signed WLD strings, server-snapshot and response arithmetic invariants.
+- **P0:** REPO1486-01 historic refs; SEC1486-02 app-role DML and five checksum mismatches; FIN1486-03 18,000 WLD provenance, 552 Treasury links, Test synthetic 200; REL1486-04 frontend/edge identity, 6 finance failures, lint 3, restore/exact-SHA Test, disk capacity. **P1:** MONTH1486-05 owner SQL/history, MONTH1486-06 snapshot, MONTH1486-07 API/validation, MONTH1486-08 Android/a11y, MONTH1486-09 privacy/admin/SEO/KPI, MONTH1486-10 isolated PG regression. 10,001 synthetic transactions and adversarial tests PLANNED NOT RUN.
+- **Release gates:** feature OFF; no runtime/DB/WLD/Test/Production mutation; separate development branches and official exact-SHA Test/backup restore/approved GitOps before promotion. External independent deduplicated evidence new approved 0, cumulative UNKNOWN/10,000 → BLOCKED/IN PROGRESS. Full [integrated contract](INTEGRATED_PLANNING_MASTER.md) and [handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925).
+
+>>>>>>> origin/auto/planning-v1486-wallet-monthly-hardening-20261030-0305
 ## v2026.10.30.1484 — F675-177 Owner-Private Monthly Wallet Activity Digest (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Draft PR:** [#1926](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1926) — OPEN / DRAFT / RELEASE HOLD; unmerged, full CI not certified.
 - **Cycle:** Previous Feature Improvement v1482 → Current Feature Addition v1484 → Next Feature Improvement v1486 (provisional). Source main `62c6cd038951d65c94b709302bdaec6e75b080b6` checked at start and mid; v1480/#1916 and v1482/#1920 are unmerged proposals, not main. Latest independent QA v1377 **FAILED/P0**. [Engineering handoff #1925](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/1925). This is a new docs-only proposal; no runtime/DB/WLD/Test/Production changes.
