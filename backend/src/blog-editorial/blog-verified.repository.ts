@@ -43,9 +43,9 @@ export class BlogVerifiedRepository {
     return queryRows<PublishedArticleRow>(this.pool(),
       'SELECT * FROM public.blog_verified_public_list()');
   }
-  listForAdmin() {
+  listForAdmin(actor: string) {
     return queryRows<PublishedArticleRow>(this.pool(),
-      "SELECT slug,country,locale,topic,title,excerpt,content,primary_source_url,receipt,status,published_at,updated_at FROM public.blog_verified_articles WHERE status IN ('PUBLISHED','WITHDRAWN') ORDER BY published_at DESC LIMIT 200");
+      'SELECT * FROM public.blog_verified_admin_list($1::uuid)', [actor]);
   }
   find(slug: string) {
     return queryOne<PublishedArticleRow>(this.pool(),

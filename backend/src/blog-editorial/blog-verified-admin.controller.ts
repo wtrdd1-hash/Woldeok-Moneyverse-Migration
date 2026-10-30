@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Inject, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -13,8 +13,10 @@ import { BlogVerifiedRepository } from './blog-verified.repository';
 export class BlogVerifiedAdminController {
   constructor(@Inject(BlogVerifiedRepository) private readonly repo:BlogVerifiedRepository) {}
   @Get()
-  async list() {
-    return {posts: await this.repo.listForAdmin()};
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  async list(@Req() req: RequestWithSession) {
+    return {posts: await this.repo.listForAdmin(requireUserId(req))};
   }
 
   @Post(':slug/moderate')
