@@ -23,3 +23,10 @@ Status: **branch candidate — NOT TESTED, NOT DEPLOYED**.
 
 ## 한국어 요약
 관리자 기능 반복 본인확인 요청을 없애기 위한 변경입니다. 기존 관리자 세션이 열려 있고 권한 검사를 통과한 요청만 재인증을 생략합니다. 일반 사용자 계정 보안 재인증은 유지합니다. 테스트 및 운영 배포 완료 상태가 아닙니다.
+
+## v2026.10.30.2 — Scope clarified / 범위 재지정
+- User expressly requires **administrator login kept**, while per-operation 15-minute identity verification is removed across administrator functionality.
+- Removed method-level `ReauthGuard` decorators in eleven administrator backend controllers (market, economy, controls, operations, abuse security, audit, shop, AI news, KDIC, member administration and admin security). Each existing `CsrfGuard`, `AdminGuard`, `AdminSessionGuard` decorator is preserved.
+- Updated relevant guard metadata tests; shared `ReauthGuard` continues to protect non-admin account actions, so ordinary login and account-security protections do not regress.
+- No production promotion or runtime test was possible with the registered mini-PC devices offline. Existing frontend legacy reauthentication help text can still exist, but the changed admin endpoints are no longer wired to this backend requirement.
+- **Verification needed:** backend test suite and build, broader app API coverage, authenticated end-to-end Test deployment, production after verified gates. No deployment or runtime success claim.
