@@ -27,4 +27,3 @@
 - Read-only official Test `/frontend-version` = `c2129625aa6629c616fb31ce790950618b8d92b2`, Production = `94d38f47603e99aabc42fc8f292b89441afb9663`, neither candidate. Test `/api/treasury/overview` HTTP 200 while Production HTTP 503; official exact-SHA authenticated Test E2E, independent backup restore and GitOps promotion not certified.
 - Branch audit: 27 remote branches/26 open PRs at start, 28 remote branches/27 open PRs after this PR; 27 non-main branches with unique commits, none safe to delete. No merge, deletion, force close, Production/Test deployment, service restart, operational DB changes or rollback. PR #2026 remains DRAFT/HOLD.
 - Rollback if needed: remove optional sort parameter or revert the isolated feature PR; no persistent state changes to reverse. Production promotion is prohibited until full CI, exact-SHA official Test, auth/DB/privacy/E2E and GitOps gates PASS.
-
