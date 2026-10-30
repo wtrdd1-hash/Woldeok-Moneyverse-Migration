@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1512 F675-184 inventory find/sort / handoff #2013 / Draft PR pending / RELEASE HOLD; stacked on #2008.
+**Current planning:** v1512 F675-184 inventory find/sort / handoff #2013 / Draft PR #2014 / RELEASE HOLD; stacked on #2008.
 
 ## v2026.10.30.1512 — F675-184 Member Inventory Find & Sort (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Previous / Current / Next:** Feature Improvement v1510 / Feature Addition v1512 / Feature Improvement v1514 (provisional). Authority origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef rechecked at start and mid; stacked after planning Draft #2008 (which follows #2003/#1995/#1990/#1983); development handoff #2013. English canonical; Korean meaning-equivalent. Documentation-only proposal, not an implemented or approved design. No separate distributed feature plan.
+**Previous / Current / Next:** Feature Improvement v1510 / Feature Addition v1512 / Feature Improvement v1514 (provisional). Authority origin/main 9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef rechecked at start and mid; stacked after planning Draft #2008 (which follows #2003/#1995/#1990/#1983); development handoff #2013; Draft PR #2014. English canonical; Korean meaning-equivalent. Documentation-only proposal, not an implemented or approved design. No separate distributed feature plan.
 
 ### Verified product gap, source and design alternatives
 - Current frontend/src/app/inventory/page.tsx requires a member and fetches GET /api/v1/shop/holdings through apiOrNull. The client inventory-view.tsx has only category tabs, no keyword/rarity/equipped filter or acquisition/name sorting. It displays an empty inventory when the upstream returns null; this can misrepresent an outage as a genuine empty holding set. Current equip POST remains separate and is not part of this feature.
