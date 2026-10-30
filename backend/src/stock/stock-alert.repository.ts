@@ -87,8 +87,8 @@ export class StockAlertRepository {
         threshold_amount::text, threshold_bps, trigger_price::text,
         trigger_day_change_bps, triggered_at
        FROM public.stock_alert_events_list($1,$2)
-       ${kind === undefined ? '' : `WHERE ($3::text = 'price' AND condition_kind LIKE 'price_%')
-          OR ($3::text = 'change' AND condition_kind LIKE 'day_change_%')
+       ${kind === undefined ? '' : `WHERE ($3::text = 'price' AND condition_kind IN ('price_at_or_above','price_at_or_below'))
+          OR ($3::text = 'change' AND condition_kind IN ('day_change_at_or_above','day_change_at_or_below'))
        ORDER BY triggered_at DESC, event_id DESC`}`,
       kind === undefined ? [actor, bounded] : [actor, bounded, kind],
     );

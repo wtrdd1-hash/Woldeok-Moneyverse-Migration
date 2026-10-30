@@ -25,6 +25,7 @@ describe('verified bounded owner stock-alert trigger categories', () => {
     expect(parseStockAlertEvents({ events: [] }, 'price', 30)).not.toBeNull();
     expect(parseStockAlertEvents({ events: Array(31).fill(price) }, 'price', 30)).toBeNull();
     expect(parseStockAlertEvents({ events: [{ ...price, trigger_price: 1 }] }, 'price', 30)).toBeNull();
+    expect(parseStockAlertEvents({ events: [{ ...price, trigger_price: '9223372036854775808' }] }, 'price', 30)).toBeNull();
     expect(parseStockAlertEvents({ events: [{ ...price, triggered_at: 'yesterday' }] }, 'price', 30)).toBeNull();
     expect(parseStockAlertEvents({ events: [{ ...price, condition_kind: 'invented' }] }, 'all', 30)).toBeNull();
     expect(parseStockAlertEvents({ events: [{ ...price, event_id: 'not-uuid' }] }, 'all', 30)).toBeNull();

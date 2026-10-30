@@ -71,7 +71,8 @@ describe('StockAlertRepository', () => {
     await repository.events(USER, 30, 'change');
     expect(calls).toHaveLength(2);
     expect(calls[0]?.text).toContain('FROM public.stock_alert_events_list($1,$2)');
-    expect(calls[0]?.text).toContain('condition_kind LIKE');
+    expect(calls[0]?.text).toContain("condition_kind IN ('price_at_or_above'");
+    expect(calls[0]?.text).not.toContain('condition_kind LIKE');
     expect(calls[0]?.values).toEqual([USER, 30, 'price']);
     expect(calls[1]?.values).toEqual([USER, 30, 'change']);
     expect(calls[0]?.text).not.toContain('FROM public.member_stock_alert_events');
