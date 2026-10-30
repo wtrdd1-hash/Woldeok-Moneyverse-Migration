@@ -360,13 +360,13 @@ export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] =
  * Until a separately certified journal baseline and verification receipt exist,
  * never assert a zero discrepancy or a last verification timestamp.
  */
-function verifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliation {
+function unverifiedTreasuryReconciliation(vaultTotal: string): TreasuryReconciliation {
   return {
-    status: 'RECONCILED',
+    status: 'UNVERIFIED',
     total_vaults_balance_wld: vaultTotal,
-    total_ledger_net_flow_wld: vaultTotal,
-    discrepancy_amount_wld: '0',
-    last_reconciled_at: new Date().toISOString(),
+    total_ledger_net_flow_wld: null,
+    discrepancy_amount_wld: null,
+    last_reconciled_at: null,
   };
 }
 
@@ -514,7 +514,7 @@ export class TreasuryRepository {
 
     // Vault totals alone cannot prove journal completeness or reconciliation.
     // Do not manufacture a ledger total, zero discrepancy, or verification time.
-    const reconciliation = verifiedTreasuryReconciliation(totalTreasury.toString());
+    const reconciliation = unverifiedTreasuryReconciliation(totalTreasury.toString());
 
     const liveBudgets = await this.calculateLiveBudgets();
 
@@ -891,9 +891,12 @@ export class TreasuryRepository {
       SELECT coalesce(sum(balance_wld::numeric), 0)::bigint::text AS total
       FROM public.system_treasury_vaults
     `);
-    const totalVaults = vaultsRes.rows[0]?.total ?? '0';
+    const totalVaults = vaultsRes.rows[0]?.total;
+    if (typeof totalVaults !== 'string' || !/^(?:0|[1-9][0-9]*)$/.test(totalVaults)) {
+      throw new ServiceUnavailableException('TREASURY_VAULT_TOTAL_UNVERIFIED');
+    }
 
-    return verifiedTreasuryReconciliation(totalVaults);
+    return unverifiedTreasuryReconciliation(totalVaults);
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {
