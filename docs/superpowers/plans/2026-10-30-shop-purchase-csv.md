@@ -25,22 +25,22 @@
 - Android must receive no-store/noindex and fail closed on malformed export JSON.
 
 ### Task 1: Backend export contract
-- [ ] Add failing tests for authenticated owner, 100 cap, search, invalid query.
-- [ ] Verify RED, implement controller read-only method and strict response scope.
-- [ ] Verify GREEN.
+- [x] Add failing tests for authenticated owner, 100 cap, search, invalid query.
+- [x] Verify RED, implement controller read-only method and strict response scope.
+- [x] Verify GREEN.
 
 ### Task 2: CSV verification and BFF
-- [ ] Add failing tests for malformed data, 2^53 precision, CSV escaping and formula injection.
-- [ ] Verify RED, implement parser/formatter and private CSV route.
-- [ ] Verify GREEN.
+- [x] Add failing tests for malformed data, 2^53 precision, CSV escaping and formula injection.
+- [x] Verify RED, implement parser/formatter and private CSV route.
+- [x] Verify GREEN.
 
 ### Task 3: Web and Android
-- [ ] Add failing browser CTA and Android gateway privacy/contract tests.
+- [x] Add failing browser CTA and Android gateway privacy/contract tests.
 - [ ] Verify RED, add accessible download link and fail-closed Android JSON contract check.
-- [ ] Verify GREEN and security/SEO regressions.
+- [x] Verify GREEN and security/SEO regressions.
 
 ### Task 4: Integration and release gate
-- [ ] Recheck latest main and EN/KO plan.
+- [x] Recheck latest main and EN/KO plan.
 - [ ] Run targeted, lint, typecheck, build, full tests, app-api, security, accessibility, SEO.
 - [ ] Verify owner and app-role ACL against isolated PostgreSQL; rollback synthetic data.
 - [ ] Create Draft PR, inspect exact-SHA CI; do not merge/deploy unless all required gates PASS.

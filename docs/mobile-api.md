@@ -42,3 +42,7 @@ Based on OpenAPI 3.0 tags and App Gateway route groups. Standard application cli
 | **`privacy` / `content` / `activity`** | Data Subject Requests (DSR), public announcements, system status, telemetry |
 
 > ⚠️ The `admin` and `discord` groups are not public app-client APIs and remain strictly protected for authorized administrators.
+
+## Owner-private recent purchase CSV (Development A candidate; not released)
+
+Authenticated, consented members can request `GET /api/v1/shop/purchases/export` or Android `GET /app-api/v1/shop/purchases/export` with optional `q` (up to 80 Unicode characters, no control bytes). The response is `{ scope: "recent100", purchases: [...] }`, containing only the caller's most recent 100 purchases from the existing PostgreSQL `shop_list_my_purchases` owner-checked function. The optional item-name filter runs inside those recent 100. All WLD amounts remain canonical integer strings. The same-origin web download `GET /api/shop/purchases/export` produces UTF-8 CSV with a BOM and spreadsheet-formula escaping. All surfaces are private, no-store and noindex. Invalid or unverified reads fail closed; an empty list is valid only after a successful authoritative read. This is **not** a lifetime purchase statement or a certified financial document. Draft feature; Test/Production promotion remains on HOLD.

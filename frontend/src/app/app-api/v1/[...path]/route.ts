@@ -1,6 +1,7 @@
 ﻿import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -180,6 +181,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
         'support status counts are unavailable');
+    }
+  }
+
+  // A stale backend must not return a malformed owner-private export as HTTP 200.
+  if (parts.length === 3 && parts[0] === 'shop' && parts[1] === 'purchases' &&
+      parts[2] === 'export' && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseShopPurchaseExport(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_export_unverified',
+          'Shop purchase export is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_export_unverified',
+        'Shop purchase export is unavailable');
     }
   }
 

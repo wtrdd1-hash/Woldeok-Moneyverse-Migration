@@ -25,3 +25,7 @@
 ## 희귀도 필터 (개발 A 후보)
 
 공개 `/shop` 및 회원 `/shop/catalog`에서 데이터베이스 희귀도(`common`, `uncommon`, `rare`, `epic`, `legendary`, `mythic`)를 정확히 선택할 수 있습니다. 서버는 `shop_catalog_list_v2`에서 권한 검증을 거친 결과만 필터링하며, 잘못된 희귀도는 400을 반환합니다. 검색어와 함께 사용할 수 있고 가격은 정수 문자열로 유지합니다. Android 앱은 로그인 세션으로 `GET /app-api/v1/shop/catalog?rarity=rare`를 사용합니다. 아직 배포되지 않은 Draft PR 후보입니다.
+
+## 회원 전용 최근 구매 CSV (개발 A 후보·미배포)
+
+로그인 및 동의를 완료한 회원은 `GET /api/v1/shop/purchases/export` 또는 Android `GET /app-api/v1/shop/purchases/export`로 최근 본인 구매 기록 최대 100건을 JSON으로 조회할 수 있습니다. `q` 상품명 검색은 최대 80자이며 최근 100건 안에서만 적용됩니다. 금액은 정밀도를 유지하는 정수 문자열입니다. 웹 `GET /api/shop/purchases/export`는 UTF-8 CSV를 다운로드하며 스프레드시트 수식 주입을 차단합니다. 응답은 개인 전용·캐시 금지·검색 색인 방지로 제공되며 오류를 빈 기록으로 위장하지 않습니다. **전체 누적 구매액 또는 금융 증명서가 아닙니다.** Draft 후보이며 Test/Production 배포는 보류합니다.

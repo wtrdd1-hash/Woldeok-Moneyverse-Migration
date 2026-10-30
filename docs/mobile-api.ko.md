@@ -42,3 +42,7 @@ OpenAPI 3.0 태그 및 App Gateway 라우트 그룹 기준입니다. 일반 앱 
 | **`privacy` / `content` / `activity`** | 개인정보 열람/삭제 DSR 신청, 공지사항/시스템 상태 조회, 활동 텔레메트리 |
 
 > ⚠️ `admin` 및 `discord` 그룹은 일반 앱 클라이언트용 공개 API가 아니며 내부 권한자 전용으로 보호됩니다.
+
+## 회원 전용 최근 구매 CSV (개발 A 후보·미배포)
+
+로그인 및 동의를 완료한 회원은 `GET /api/v1/shop/purchases/export` 또는 Android `GET /app-api/v1/shop/purchases/export`로 최근 본인 구매 기록 최대 100건을 JSON으로 조회할 수 있습니다. `q` 상품명 검색은 최대 80자이며 최근 100건 안에서만 적용됩니다. 금액은 정밀도를 유지하는 정수 문자열입니다. 웹 `GET /api/shop/purchases/export`는 UTF-8 CSV를 다운로드하며 스프레드시트 수식 주입을 차단합니다. 응답은 개인 전용·캐시 금지·검색 색인 방지로 제공되며 오류를 빈 기록으로 위장하지 않습니다. **전체 누적 구매액 또는 금융 증명서가 아닙니다.** Draft 후보이며 Test/Production 배포는 보류합니다.

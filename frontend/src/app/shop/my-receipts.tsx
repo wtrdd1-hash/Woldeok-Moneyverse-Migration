@@ -83,6 +83,13 @@ export function MyReceipts() {
           placeholder="상품명을 입력하세요"
         />
         <p className="text-xs text-muted-foreground">검색은 최근 100건의 본인 구매 기록만 대상으로 합니다. 검색하지 않을 때는 최근 30건을 표시합니다.</p>
+        <a
+          href={`/api/shop/purchases/export${search.trim() ? `?q=${encodeURIComponent(search.trim())}` : ''}`}
+          className="w-fit rounded-md border border-input px-3 py-2 text-sm font-semibold underline underline-offset-2"
+          aria-label="최근 최대 100건의 내 구매 기록 CSV 다운로드"
+        >
+          구매 기록 CSV 다운로드
+        </a>
       </div>
       {failed ? (
         <p role="alert" className="text-sm text-destructive">구매 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.</p>

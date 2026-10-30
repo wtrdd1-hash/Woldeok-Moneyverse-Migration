@@ -8,3 +8,9 @@
 - 테스트 RED → 기능 구현 → 정확 SHA 검증 → 격리 DB 검증 → CI·PR.
 ## 완료
 - 검증 후 기재.
+
+### 작업 중 — 12:39 KST (v2)
+- RED→GREEN 대상 테스트, Nest 인증 경계, 웹 CSV·Android 응답 검증 구현.
+- 전체 Typecheck, Lint(오류 0·기존 경고 1,043), API 계약, DB 단위테스트 56 PASS/4 SKIP, 보안 의존성 감사 PASS.
+- 격리 PostgreSQL 17.11 마이그레이션 305개, DB 5 PASS, 본인 2건/190 WLD·타인 0건·앱 계정 직접 접근 차단·ROLLBACK 확인.
+- 정확 SHA CI·전체 빌드·공식 Test 인증 E2E 미완료로 배포 보류.
