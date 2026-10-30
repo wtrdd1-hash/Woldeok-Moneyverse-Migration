@@ -97,6 +97,28 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(unit_snapshot()["moneyverse-telegram-market.timer"][0],"OK")
 
     @patch("telegram_bridge.systemctl")
+    def test_running_market_dispatch_is_not_a_stalled_timer(self, show):
+        def healthy(unit):
+            if unit == "moneyverse-telegram-market.timer":
+                return {"ActiveState":"active","Result":"success","LoadState":"loaded",
+                        "SubState":"running","NextElapseUSecRealtime":"",
+                        "NextElapseUSecMonotonic":"infinity"}
+            return {"ActiveState":"active","Result":"success","LoadState":"loaded",
+                    "SubState":"waiting","NextElapseUSecRealtime":"Fri 2026-10-30 09:24 KST"}
+        show.side_effect=healthy
+        self.assertEqual(unit_snapshot()["moneyverse-telegram-market.timer"][0],"OK")
+
+    @patch("telegram_bridge.systemctl")
+    def test_failed_market_worker_is_critical_even_when_timer_is_waiting(self, show):
+        def worker_failed(unit):
+            if unit == "moneyverse-telegram-market.service":
+                return {"Result":"exit-code","ActiveState":"failed","LoadState":"loaded"}
+            return {"ActiveState":"active","Result":"success","LoadState":"loaded",
+                    "SubState":"waiting","NextElapseUSecRealtime":"Fri 2026-10-30 09:24 KST"}
+        show.side_effect=worker_failed
+        self.assertEqual(unit_snapshot()["moneyverse-telegram-market.service"][0],"CRITICAL")
+
+    @patch("telegram_bridge.systemctl")
     def test_calendar_market_timer_uses_next_realtime_not_infinite_monotonic(self, show):
         show.return_value={"ActiveState":"active","Result":"success","LoadState":"loaded",
                            "SubState":"waiting","NextElapseUSecMonotonic":"infinity",
