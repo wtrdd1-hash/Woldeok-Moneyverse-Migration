@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { signWalletActivityCursor, verifyWalletActivityCursor, type WalletActivityDirection, type WalletActivityPeriod } from './wallet-activity-cursor';
 import type { WldAmount } from '@moneyverse/contract';
 import { wldAmount } from '@moneyverse/contract';
 import type {
@@ -15,6 +16,7 @@ import type {
   WalletRewardRow,
   WalletRewardAvailabilityRow,
   WalletTransactionRow,
+  WalletTransactionDetailRow,
   WalletTransferInput,
 } from './wallet.repository';
 import {
@@ -68,6 +70,25 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   BOND_REDEEM: '국채 만기 상환',
 });
 
+export class WalletTransactionNotFoundError extends Error {
+  constructor() {
+    super('wallet transaction not found');
+    this.name = 'WalletTransactionNotFoundError';
+  }
+}
+
+export interface WalletTransactionDetailView {
+  readonly transactionId: string;
+  readonly typeLabel: string;
+  readonly occurredAtUtcMicros: string;
+  readonly cashDelta: WldAmount;
+  readonly bankDelta: WldAmount;
+  readonly netDelta: WldAmount;
+  readonly currency: 'WLD';
+  readonly readStatus: 'READ_OK';
+  readonly reconciliationStatus: 'NOT_ASSESSED';
+}
+
 export class WalletRecipientError extends Error {
   constructor() {
     super('recipient is unavailable');
@@ -83,7 +104,9 @@ export class WalletRecipientError extends Error {
  */
 export interface WalletRepositoryLike {
   balancesForUser(userId: string): Promise<WalletBalanceRow[]>;
-  recentTransactionsForUser(userId: string, limit: number, periodDays?: number, direction?: WalletTransactionDirection): Promise<WalletTransactionRow[]>;
+  transactionDetailForUser?(userId: string, transactionId: string): Promise<WalletTransactionDetailRow | null>;
+  recentTransactionsForUser(userId: string, limit: number, periodDays?: number): Promise<WalletTransactionRow[]>;
+  activityTransactionsForUser?(userId: string, options: { asOf: Date; since: Date | null; after?: { at: Date; id: string } | undefined; direction?: WalletActivityDirection }): Promise<WalletTransactionRow[]>;
   activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null>;
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
@@ -199,8 +222,6 @@ export interface WalletOverviewOptions {
   readonly recentLimit?: number;
   /** Optional rolling window; SQL filters the owner ledger before the 50-row cap. */
   readonly periodDays?: 7 | 30;
-  /** Server-side filter on the signed sum of the owner's cash and bank postings. */
-  readonly direction?: WalletTransactionDirection;
 }
 
 export interface WalletTransferRequest {
@@ -371,6 +392,33 @@ export class WalletService {
     this.broadcast = broadcast;
   }
 
+  async transactionDetail(authenticatedUserId: string, transactionId: string): Promise<WalletTransactionDetailView> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const id = requireUuid(transactionId, 'transaction id');
+    if (!this.repository.transactionDetailForUser) throw new Error('wallet detail repository is unavailable');
+    const row = await this.repository.transactionDetailForUser(owner, id);
+    if (!row) throw new WalletTransactionNotFoundError();
+    const canonical = (value: string, field: string) => wldAmount(value, field);
+    const cashDelta = canonical(row.cash_delta, 'cash delta');
+    const bankDelta = canonical(row.bank_delta, 'bank delta');
+    const netDelta = canonical(row.net_delta, 'net delta');
+    if (row.transaction_id !== id || row.currency !== 'WLD' ||
+        row.invalid_posting_count !== '0' || !/^[1-9][0-9]*$/.test(row.posting_count) ||
+        BigInt(cashDelta) + BigInt(bankDelta) !== BigInt(netDelta) ||
+        typeof row.occurred_at_utc_micros !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(row.occurred_at_utc_micros) ||
+        (!Number.isFinite(Date.parse(row.occurred_at_utc_micros)) ||
+         new Date(row.occurred_at_utc_micros).toISOString().slice(0, 19) !== row.occurred_at_utc_micros.slice(0, 19))) {
+      throw new Error('wallet detail projection is unavailable');
+    }
+    return {
+      transactionId: id, typeLabel: transactionLabel(row.transaction_type),
+      occurredAtUtcMicros: row.occurred_at_utc_micros,
+      cashDelta, bankDelta, netDelta, currency: 'WLD',
+      readStatus: 'READ_OK', reconciliationStatus: 'NOT_ASSESSED',
+    };
+  }
+
   async overview(
     authenticatedUserId: string,
     { recentLimit = 10, periodDays, direction }: WalletOverviewOptions = {},
@@ -389,6 +437,31 @@ export class WalletService {
       recentTransactions: normalizeTransactions(transactions.slice(0, limit)),
       recentTransactionsHasMore: transactions.length > limit,
     };
+  }
+
+  async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
+    period: WalletActivityPeriod = 'all', cursor?: string, direction: WalletActivityDirection = 'all',
+  ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
+    const owner = requireUuid(authenticatedUserId, 'authenticated user id');
+    const session = requireUuid(authenticatedSessionId, 'authenticated session id');
+    if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
+    if (direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') throw new WalletInputError('invalid wallet activity direction');
+    const now = this.clock();
+    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now, direction) : null;
+    const asOf = decoded ? new Date(decoded.asOf) : now;
+    const since = period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000);
+    if (!this.repository.activityTransactionsForUser) throw new Error('wallet activity pagination repository is unavailable');
+    const rows = await this.repository.activityTransactionsForUser(owner, {
+      asOf, since, direction, ...(decoded ? { after: { at: new Date(decoded.afterAt), id: decoded.afterId } } : {}),
+    });
+    const transactions = normalizeTransactions(rows.slice(0, 50));
+    const hasMore = rows.length > 50;
+    const last = rows[49];
+    const nextCursor = hasMore && last ? signWalletActivityCursor({
+      owner, session, period, direction, asOf: asOf.toISOString(), afterAt: timestamp(last.created_at, 'cursor timestamp'),
+      afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
+    }) : null;
+    return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
   }
 
   async transfer(

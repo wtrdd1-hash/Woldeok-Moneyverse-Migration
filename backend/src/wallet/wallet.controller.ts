@@ -23,10 +23,10 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
-import { requireUserId } from '../auth/session.context';
+import { requireSession, requireUserId } from '../auth/session.context';
 import { BankMovementDto, BorrowDto, ClaimDto, P2PTransferDto, RepayDto, TransferDto } from './wallet.dto';
 import { WalletInputError } from './wallet.repository';
-import { WalletRecipientError, WalletService, type WalletOverviewOptions } from './wallet.service';
+import { WalletRecipientError, WalletService, WalletTransactionNotFoundError, type WalletOverviewOptions } from './wallet.service';
 
 /**
  * Guard order is semantic, not cosmetic. SessionGuard resolves the session
@@ -105,11 +105,57 @@ export class WalletController {
     if (recent === undefined) {
       return this.service().overview(requireUserId(request), filters);
     }
+    // Reject coercible non-decimal and duplicate query values before any DB read.
+    // The service/repository enforce the same 1..50 bound for direct callers.
+    if (typeof recent !== 'string' || !/^(?:[1-9]|[1-4][0-9]|50)$/.test(recent)) {
+      throw new BadRequestException('recent must be a decimal integer between 1 and 50');
+    }
     const parsed = Number(recent);
     if (!Number.isSafeInteger(parsed)) {
       throw new BadRequestException('recent must be a whole number');
     }
     return this.service().overview(requireUserId(request), { recentLimit: parsed, ...filters });
+  }
+
+  @Get('wallet/activity')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
+  activity(@Req() request: RequestWithSession, @Query('period') period?: string, @Query('cursor') cursor?: string, @Query('direction') direction?: string) {
+    if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
+      throw new BadRequestException('period must be all, 7d or 30d');
+    }
+    if (direction !== undefined && (typeof direction !== 'string' || !['all', 'in', 'out', 'neutral'].includes(direction))) {
+      throw new BadRequestException('direction must be all, in, out or neutral');
+    }
+    if (cursor !== undefined && (typeof cursor !== 'string' || cursor.length > 2048)) {
+      throw new BadRequestException('invalid wallet activity cursor');
+    }
+    return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
+      period === '7d' || period === '30d' ? period : 'all', cursor,
+      direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all'), 'wallet activity is unavailable');
+  }
+
+  @Get('wallet/activity/transactions/:transactionId')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Read a single owner wallet transaction (not settlement evidence)' })
+  async transactionDetail(@Req() request: RequestWithSession, @Param('transactionId') transactionId: string) {
+    if (process.env.WALLET_TRANSACTION_DETAIL_ENABLED !== 'true') {
+      throw new ServiceUnavailableException('wallet transaction detail is unavailable');
+    }
+    if (typeof transactionId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(transactionId)) {
+      throw new BadRequestException('invalid transaction id');
+    }
+    try {
+      return await this.service().transactionDetail(requireUserId(request), transactionId);
+    } catch (error: unknown) {
+      if (error instanceof WalletTransactionNotFoundError) throw new NotFoundException('transaction not found');
+      if (error instanceof BadRequestException) throw error;
+      throw new ServiceUnavailableException('wallet transaction detail is unavailable');
+    }
   }
 
   @Get('wallet/recipients/search')
