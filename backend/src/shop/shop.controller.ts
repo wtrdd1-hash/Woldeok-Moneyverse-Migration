@@ -104,9 +104,6 @@ export class ShopController {
       'purchase history is unavailable',
     );
   }
-      'purchase history is unavailable',
-    );
-  }
 
   @Get('purchases/export')
   @Header('Cache-Control', 'private, no-store')
