@@ -1,3 +1,6 @@
+## v2026.10.30.3 — Market timer running false-positive repair (candidate)
+- Accept healthy active/running dispatch, retain unscheduled timer checks and monitor actual market worker failures as independent CRITICAL events. [Release](../releases/v2026.10.30.3.md).
+
 ## v2026.10.30.2 — Accurate Telegram disk critical severity (Production LIVE)
 - Alert effective disk fullness, including unavailable reserved blocks; 97%/98% on current host must be CRITICAL, not misleading 93% WARNING. No cleanup performed. [Release](../releases/v2026.10.30.2.md).
 
