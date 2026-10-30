@@ -13,7 +13,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsPositive, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -25,6 +25,7 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { StockInputError, isCandleInterval } from './stock.repository';
 import { StockService } from './stock.service';
+import { parseWatchlistTrend } from './stock-watchlist-trend';
 
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
@@ -85,8 +86,11 @@ export class StockController {
   @Get('watchlist')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Stocks watched by the caller' })
-  async watchlist(@Req() request: RequestWithSession) {
-    return { stocks: await this.service().watchlist(requireUserId(request)) };
+  @ApiQuery({ name: 'trend', required: false, enum: ['all', 'up', 'down', 'flat'] })
+  async watchlist(@Req() request: RequestWithSession, @Query('trend') trendValue?: unknown) {
+    const trend = parseWatchlistTrend(trendValue);
+    if (trend === null) throw new BadRequestException('trend must be all, up, down or flat');
+    return { stocks: await this.service().watchlist(requireUserId(request), trend) };
   }
 
   @Post(':id/watchlist')

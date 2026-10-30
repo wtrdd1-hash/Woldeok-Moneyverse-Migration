@@ -5,6 +5,7 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseStockWatchlistTrend, parseVerifiedStockWatchlist } from '@/lib/stock-watchlist-trend';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
@@ -107,6 +108,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const watchlistPath = request.method === 'GET' && parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'watchlist';
+  const trendValues = watchlistPath ? request.nextUrl.searchParams.getAll('trend') : [];
+  const watchlistTrend = watchlistPath ? parseStockWatchlistTrend(trendValues.length > 1 ? trendValues : trendValues[0]) : 'all';
+  if (watchlistPath && [...request.nextUrl.searchParams.keys()].some((key) => key !== 'trend')) {
+    return gatewayProblem(400, 'Bad Request', 'watchlist_trend_invalid', 'unsupported watchlist query parameter');
+  }
+  if (watchlistPath && watchlistTrend === null) {
+    return gatewayProblem(400, 'Bad Request', 'watchlist_trend_invalid', 'trend must be all, up, down or flat');
+  }
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -271,6 +281,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (watchlistPath && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) || watchlistTrend === null ||
+          !parseVerifiedStockWatchlist(await response.clone().json(), watchlistTrend)) {
+        return gatewayProblem(503, 'Service Unavailable', 'watchlist_trend_unverified', 'watchlist price trend could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'watchlist_trend_unverified', 'watchlist price trend could not be verified');
+    }
+  }
+
   // A stale backend can ignore an optional order parameter while returning HTTP 200.
   if (parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads' &&
       request.method === 'GET' && request.nextUrl.searchParams.get('sort') === 'oldest' && response.ok) {
@@ -397,6 +418,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
+  if (watchlistPath) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex');
+    headers.set('referrer-policy', 'no-referrer');
+  }
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
@@ -448,6 +474,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'watchlist') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

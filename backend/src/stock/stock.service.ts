@@ -69,6 +69,7 @@ export interface StockRepository {
 }
 
 import { MarketBroadcast } from './market-broadcast';
+import { filterWatchlistTrend, type WatchlistTrend } from './stock-watchlist-trend';
 
 @Injectable()
 export class StockService {
@@ -109,8 +110,9 @@ export class StockService {
     return this.repository.adminList(actorUserId);
   }
 
-  watchlist(userId: unknown): Promise<readonly StockWatchlistRow[]> {
-    return this.repository.watchlist(userId);
+  async watchlist(userId: unknown, trend: WatchlistTrend = 'all'): Promise<readonly StockWatchlistRow[]> {
+    const rows = await this.repository.watchlist(userId);
+    return filterWatchlistTrend(rows, trend);
   }
 
   setWatchlist(userId: unknown, stockId: unknown, watching: unknown): Promise<{ readonly watching: boolean }> {
