@@ -31,3 +31,7 @@
 - Enabled timer disable/re-enable rollback probe PASS. Production and Test HTTP 200. Existing backend/frontend PIDs 1018225 / 2041338 remained active. No financial writes, no application deployment.
 - Remaining: earlier monitoring outage is not retroactively recoverable for every news/error entry. The actual available disk capacity is P0 and addressed as severity fix v2026.10.30.2, not space cleanup.
 - FINISHED: operational schedule repaired, verified as recurring and backstopped by base timer watchdog.
+
+## Post-release observation
+- Natural market runs continued at 09:14:00 and 09:16:01 KST, both MARKET_OK, while the next 09:18 calendar event remained scheduled. Existing base operations timer continued CHECK_OK. Repository-installed code hashes matched merged main on 2026-10-30.
+- Filesystem metrics changed rapidly due to an independently occurring space reclamation event. This telegram task never performed disk pruning or cleanup.
