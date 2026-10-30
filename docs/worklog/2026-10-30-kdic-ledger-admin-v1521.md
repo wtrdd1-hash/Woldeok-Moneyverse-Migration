@@ -29,3 +29,9 @@ Status: IN PROGRESS / source branch, no financial settlement authorization.
 - [x] Read-only admin API/UI, regression tests, actual runtime read-only SQL.
 - [x] Mid-work GitHub main check and bilingual internal/GitHub/changelog records.
 - [ ] Official exact-SHA Test and Production promotion (BLOCKED: release gates/finance provenance).
+
+## GitHub handoff checkpoint
+- Draft PR #1975: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1975
+- Source implementation commit 3a0668c0fedfe6cb8f2ff76a6ad534f846c191db, isolated clean branch.
+- GitHub reports mergeable with main but CI workflow 40984414672 was IN_PROGRESS when checked; merge/official Test/Production not performed.
+- Nginx live public routes currently point to production v1515 services at ports 3564/3565 with public backend and frontend version both 0669f0f64fea1c70235760d1949f90446b6964f7. Both live backend instances use the audited DB connection.

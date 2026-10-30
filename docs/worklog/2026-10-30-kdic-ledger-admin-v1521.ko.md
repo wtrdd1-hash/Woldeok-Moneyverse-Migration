@@ -29,3 +29,9 @@
 - [x] 읽기 전용 API/UI·회귀 테스트·운영 DB 읽기 전용 조회
 - [x] 중간 main 재조회 및 국영문 내부·GitHub·변경 기록
 - [ ] 공식 동일 SHA 테스트 및 운영 승격(금융·릴리스 관문 미해결)
+
+## GitHub 인계 체크포인트
+- Draft PR #1975: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/1975
+- 개발 소스 커밋 3a0668c0fedfe6cb8f2ff76a6ad534f846c191db, 독립 작업 브랜치.
+- GitHub 병합 충돌 없음. 확인 시 CI 40984414672 진행 중, 병합/공식 테스트/운영 배포는 수행하지 않음.
+- 실제 Nginx 외부 도메인은 v1515 3564/3565 포트로 전달되며 프론트·백엔드 버전은 0669f0f64fea1c70235760d1949f90446b6964f7. 공개 운영 백엔드 인스턴스 모두 대조한 DB 연결 사용.
