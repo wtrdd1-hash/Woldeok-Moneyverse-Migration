@@ -32,7 +32,6 @@ import { WheelGame } from './wheel-game';
 import { MinesGame } from './mines-game';
 import { PlinkoGame } from './plinko-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
-import type { CasinoJackpotData } from './casino-jackpot-ticker';
 import { CasinoAudioControls } from '@/components/casino-audio-controls';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 
@@ -190,14 +189,13 @@ export default async function CasinoPage() {
   }
   await requireMember();
 
-  const [terms, fairness, games, history, selfLimit, gameClock, jackpot] = await Promise.all([
+  const [terms, fairness, games, history, selfLimit, gameClock] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
     apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
     apiOrNull<ServerGameClock>('/api/v1/casino/clock'),
-    apiOrNull<CasinoJackpotData>('/api/v1/casino/jackpot'),
   ]);
 
   const dice = games.state === 'ok' ? games.data.filter((row) => row.game !== 'coin') : [];
@@ -336,7 +334,7 @@ export default async function CasinoPage() {
       </Alert>
 
       <CasinoVisualHero />
-      <CasinoJackpotTicker data={jackpot} />
+      <CasinoJackpotTicker data={null} />
 
       {gameClock ? (
         <CasinoClock
