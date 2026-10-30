@@ -227,6 +227,12 @@ jobs:
               exit 1
             }
 
+      - name: Checkout exact candidate source for Test public-edge verification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.prepare.outputs.repository_head_sha }}
+          persist-credentials: false
+
       - name: Wait for attested application source on isolated Test and verify backend/database path
         id: verify
         shell: bash
@@ -239,6 +245,8 @@ jobs:
                 | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
               headers="$(curl -fsSI --max-time 10 https://test.easy-scraping.com/ || true)"
               grep -Eiq '^x-robots-tag:.*noindex' <<<"$headers"
+              # Backend version alone cannot attest the edge-served frontend or Treasury.
+              node scripts/release/verify-isolated-test-public.mjs --sha "$APPLICATION_SOURCE_SHA"
               echo "observed_application_sha=$version" >> "$GITHUB_OUTPUT"
               echo "isolated Test verified attested application source $APPLICATION_SOURCE_SHA for repository head $REPOSITORY_HEAD_SHA"
               exit 0
