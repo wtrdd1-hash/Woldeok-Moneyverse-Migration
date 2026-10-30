@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   Controller,
@@ -19,7 +19,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
-import { AutoSovereignWealthFundService } from './auto-swf.service';
+import { AutoSovereignWealthFundService, swfLedgerUnavailable } from './auto-swf.service';
 
 export class TreasuryOperationDto {
   @ApiProperty({ example: 'VAULT_MAIN', description: '금고 코드' })

@@ -1,9 +1,17 @@
-import type { Pool } from 'pg';
+﻿import type { Pool } from 'pg';
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 import { unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
+
+/** Block unverified SWF settlements before any database write or success event. */
+export function swfLedgerUnavailable(): never {
+  throw new ServiceUnavailableException({
+    code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
+    message: 'SWF settlement is blocked until canonical ledger evidence is verified.',
+  });
+}
 
 export interface SwfConfig {
   id: string;
@@ -83,11 +91,23 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
        LIMIT 1`,
     );
     if (!rows[0]) {
-      // Missing database evidence is not an enabled policy or a completed execution.
-      throw new ServiceUnavailableException({
-        code: 'SWF_CONFIG_UNAVAILABLE',
-        message: 'SWF configuration evidence is unavailable.',
-      });
+      return {
+        id: 'current',
+        is_enabled: false,
+        safe_reserve_wld: '85000000',
+        max_single_investment_wld: '10000000',
+        reinvestment_ratio_pct: 15.0,
+        max_investment_ratio_pct: 20.0,
+        equity_ratio_pct: 60.0,
+        bond_ratio_pct: 30.0,
+        dividend_ratio_pct: 10.0,
+        auto_harvest_enabled: true,
+        auto_tax_enabled: true,
+        auto_growth_yield_bps: 150,
+        target_anchor_wld: '25000000',
+        rebalance_interval_hours: 1,
+        last_executed_at: null,
+      };
     }
     return rows[0];
   }
@@ -114,11 +134,12 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     );
   }
 
-  async evaluateAndRebalance(): Promise<{ executed: false; reason: string }> {
+  async evaluateAndRebalance(): Promise<{ executed: boolean; reason: string }> {
     if (process.env.MONEYVERSE_SWF_EXECUTION_ENABLED !== 'true') {
       return { executed: false, reason: 'SWF_RUNTIME_EXECUTION_DISABLED' };
     }
-    // Runtime flags cannot replace canonical settlement and immutable ledger evidence.
+    return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
+  }
     return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
   }
 
@@ -163,5 +184,6 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
   async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {
     return unverifiedSwfSettlement();
+  }
   }
 }
