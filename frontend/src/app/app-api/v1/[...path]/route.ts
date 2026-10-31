@@ -9,6 +9,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
+import { isVerifiedWorkExperienceFloor } from '@/lib/work-experience-floor';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -173,6 +174,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
+  const experienceValues = workAvailability ? request.nextUrl.searchParams.getAll('minExperience') : [];
+  if (experienceValues.length > 1 || (experienceValues.length === 1 && !/^(?:0|[1-9][0-9]{0,17})$/.test(experienceValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'work_experience_invalid', 'minExperience must be a canonical nonnegative integer');
+  }
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
   }
@@ -338,6 +343,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
 
+
+  if (workAvailability && experienceValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedWorkExperienceFloor(await response.clone().json(), experienceValues[0]!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_experience_unverified', 'preview EXP evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_experience_unverified', 'preview EXP evidence is unavailable');
+    }
+  }
 
   if (workAvailability && availabilityValues.length === 1 && response.ok) {
     try {

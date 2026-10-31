@@ -34,6 +34,13 @@ export function parseWorkTaskMaxReward(raw: unknown): string | null {
   throw new WorkInputError('maxReward must be a non-negative integer string with at most 18 digits');
 }
 
+/** Preview EXP is an integer-string read filter, never an amount settled by the client. */
+export function parseWorkTaskMinExperience(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (typeof raw === 'string' && /^(?:0|[1-9][0-9]{0,17})$/.test(raw)) return raw;
+  throw new WorkInputError('minExperience must be a non-negative integer string with at most 18 digits');
+}
+
 /** Canonical, bounded public query value. Reject arrays, whitespace and alternate spellings. */
 export function parseWorkDifficulty(raw: unknown): number | null {
   if (raw === undefined || raw === '') return null;
@@ -272,8 +279,12 @@ export class WorkRepository {
     });
   }
 
-  async tasks(actor: unknown, filterOrMinReward?: unknown, durationOrMaxDuration?: unknown, availabilityOrMaxReward?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, filterOrMinReward?: unknown, durationOrMaxDuration?: unknown, availabilityOrMaxReward?: unknown, minExperienceRaw?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
+    const minExperience = parseWorkTaskMinExperience(minExperienceRaw);
+    if (minExperience !== null && (typeof filterOrMinReward === 'boolean' || typeof filterOrMinReward === 'number' || filterOrMinReward === 'true' || filterOrMinReward === 'false')) {
+      throw new WorkInputError('minExperience cannot be combined with legacy recommended or difficulty filters');
+    }
 
     const stack = new Error().stack || '';
     const isRecommendedTest = stack.includes('work-recommended-filter');
@@ -363,6 +374,10 @@ export class WorkRepository {
     }
     if (availability) {
       extraFilters += `\n         AND (task.daily_limit <= 0 OR task.taken_today < task.daily_limit)`;
+    }
+    if (minExperience !== null) {
+      params.push(minExperience);
+      extraFilters += `\n         AND public.work_experience_preview($1, task.task_id) >= $${params.length}::numeric`;
     }
 
     const rows = await queryRows<WorkTaskRow>(

@@ -34,6 +34,7 @@ import {
   parseWorkTaskAvailableOnly,
   parseWorkTaskMaxDuration,
   parseWorkTaskMaxReward,
+  parseWorkTaskMinExperience,
   WorkInputError,
   WorkRepository,
 } from './work.repository';
@@ -115,12 +116,22 @@ export class WorkController {
     @Query('maxDurationSeconds') arg2?: unknown,
     @Query('maxReward') arg3?: unknown,
     @Query('availableOnly') arg4?: unknown,
+    @Query('minExperience') arg5?: unknown,
   ) {
+    let minExperience: string | null;
+    try { minExperience = parseWorkTaskMinExperience(arg5); }
+    catch (error: unknown) {
+      if (error instanceof WorkInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
+    if (minExperience !== null && (arg1 === 'true' || arg1 === 'false')) {
+      throw new BadRequestException('minExperience cannot be combined with legacy recommended filter');
+    }
     const repository = this.repository();
     const actor = requireUserId(request);
 
     // 1. Recommended query: controller.tasks(request, 'true') / 'false'
-    if (arg1 === 'true' || arg1 === 'false') {
+    if (minExperience === null && (arg1 === 'true' || arg1 === 'false')) {
       const [featureState, tasks] = await Promise.all([
         repository.featureState(),
         this.guarded(() => repository.tasks(actor, arg1), 'the task board is unavailable'),
@@ -129,7 +140,7 @@ export class WorkController {
     }
 
     // 2. Difficulty query: controller.tasks(request, '4') or level 1..5
-    if (typeof arg1 === 'string' && /^[1-5]$/.test(arg1)) {
+    if (minExperience === null && typeof arg1 === 'string' && /^[1-5]$/.test(arg1)) {
       const diff = parseWorkDifficulty(arg1);
       const [featureState, tasks] = await Promise.all([
         repository.featureState(),
@@ -154,7 +165,10 @@ export class WorkController {
       if (arg2 !== undefined) {
         maxDuration = parseWorkTaskMaxDuration(arg2);
       }
-      if (arg3 === '1' || arg3 === '0') {
+      if (minExperience !== null && arg3 !== undefined) {
+        // With the new explicit filter, maxReward=0/1 remains a numeric ceiling.
+        ceiling = parseWorkTaskMaxReward(arg3);
+      } else if (arg3 === '1' || arg3 === '0') {
         availability = parseWorkTaskAvailableOnly(arg3);
       } else if (arg3 !== undefined) {
         ceiling = parseWorkTaskMaxReward(arg3);
@@ -170,8 +184,10 @@ export class WorkController {
     const [featureState, tasks] = await Promise.all([
       repository.featureState(),
       this.guarded(
-        () => availability
-          ? repository.tasks(actor, arg1, maxDuration ?? undefined, true)
+        () => minExperience !== null
+          ? repository.tasks(actor, arg1, maxDuration ?? undefined, availability ? true : ceiling ?? undefined, minExperience)
+          : availability
+            ? repository.tasks(actor, arg1, maxDuration ?? undefined, true)
           : ceiling !== null
             ? repository.tasks(actor, arg1, maxDuration ?? undefined, ceiling)
             : maxDuration === null

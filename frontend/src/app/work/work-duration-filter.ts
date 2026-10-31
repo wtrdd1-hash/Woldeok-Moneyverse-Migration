@@ -11,6 +11,12 @@ export function normalizedWorkRewardCeiling(raw: unknown): string | null {
   return typeof raw === 'string' && REWARD_PRESETS.has(raw) ? raw : null;
 }
 
+const EXPERIENCE_PRESETS = new Set(['10', '25', '50', '100', '250', '500']);
+
+export function normalizedWorkExperienceFloor(raw: unknown): string | null {
+  return typeof raw === 'string' && EXPERIENCE_PRESETS.has(raw) ? raw : null;
+}
+
 export function normalizedWorkAvailableOnly(raw: unknown): boolean {
   if (Array.isArray(raw)) return false;
   return raw === '1' || raw === true;
@@ -20,6 +26,7 @@ export function workTasksApiPath(
   selected: string | null,
   maxRewardOrAvailableOnly?: string | boolean | null,
   availableOnlyRaw = false,
+  minExperienceRaw?: string | null,
 ): string {
   const duration = normalizedWorkDuration(selected);
   let ceiling: string | null = null;
@@ -34,6 +41,8 @@ export function workTasksApiPath(
   if (duration !== null) params.set('maxDurationSeconds', duration);
   if (ceiling !== null) params.set('maxReward', ceiling);
   if (availableOnly) params.set('availableOnly', '1');
+  const minExperience = normalizedWorkExperienceFloor(minExperienceRaw);
+  if (minExperience !== null) params.set('minExperience', minExperience);
   const query = params.toString();
   return query ? `/api/v1/work/tasks?${query}` : '/api/v1/work/tasks';
 }

@@ -62,6 +62,7 @@ export function CareerTasksBoard({
   selectedDifficulty,
   selectedMaxDuration,
   selectedMaxReward,
+  selectedMinExperience,
   selectedAvailableOnly = false,
 }: {
   readonly tasks: readonly WorkTask[];
@@ -70,6 +71,7 @@ export function CareerTasksBoard({
   readonly selectedDifficulty?: string | null;
   readonly selectedMaxDuration?: string | null;
   readonly selectedMaxReward?: string | null;
+  readonly selectedMinExperience?: string | null;
   readonly selectedAvailableOnly?: boolean;
 }) {
   const { locale } = useLocale();
@@ -196,6 +198,16 @@ export function CareerTasksBoard({
               ))}
             </select>
           </label>
+          <label className="grid flex-1 gap-1 text-xs text-muted-foreground min-w-0">
+            <span>{isEn ? 'Minimum preview EXP' : '최소 예상 경험치(EXP)'}</span>
+            <select name="minExperience" defaultValue={selectedMinExperience ?? ''}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="">{isEn ? 'Any EXP' : '전체 경험치'}</option>
+              {['10', '25', '50', '100', '250', '500'].map((value) => (
+                <option key={value} value={value}>{value} EXP+</option>
+              ))}
+            </select>
+          </label>
           <label className="inline-flex min-h-10 items-center gap-2 text-xs text-foreground">
             <input type="checkbox" name="availableOnly" value="1" defaultChecked={selectedAvailableOnly}
               className="size-4 accent-primary focus-visible:ring-2 focus-visible:ring-ring" />
@@ -241,7 +253,7 @@ export function CareerTasksBoard({
               ? isEn
                 ? 'No work tasks match your search.'
                 : '검색 조건에 맞는 업무가 없어요.'
-              : searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedAvailableOnly
+              : searchQuery.trim() || minReward || selectedMaxDuration || selectedMaxReward || selectedMinExperience || selectedAvailableOnly
               ? isEn
                 ? 'No work tasks match your filters.'
                 : '선택한 조건에 맞는 업무가 없어요.'
