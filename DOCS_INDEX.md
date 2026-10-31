@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1534 — Active Production release identity service detection (CURRENT PROD VERIFIED / NEW RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-v1534.md) / [KO](docs/worklog/2026-10-31-production-identity-v1534.ko.md) · [Internal](docs/updates/v2026.10.31.1534-release-internal.md) / [KO](docs/updates/v2026.10.31.1534-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1534-release-github.md) / [KO](docs/updates/v2026.10.31.1534-release-github.ko.md). TDD RED 1, related release 30 GREEN; existing live public release 95485a... now read-only attested through actual active services and invariant SHA checks. This is NOT a new Test/Production deployment or finance release.
+
+
 ## v2026.10.31.1532 — Admin bond read ACL 42501 source fix (BRANCH VERIFIED / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-bond-coupon-read-v1532.md) / [KO](docs/worklog/2026-10-31-bond-coupon-read-v1532.ko.md) · [Internal EN](docs/updates/v2026.10.31.1532-bonds-internal.md) / [KO](docs/updates/v2026.10.31.1532-bonds-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1532-bonds-github.md) / [KO](docs/updates/v2026.10.31.1532-bonds-github.ko.md). Existing app-role restricted catalog replaces protected-table JOIN; real 42501 repro and corrected SQL proven, 66 bond tests + monorepo typecheck + lint/backend build PASS. Treasury 552 unlinked rows and financial 503 unresolved. Official Test/Production HOLD.
 
