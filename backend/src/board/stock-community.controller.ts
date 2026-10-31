@@ -62,9 +62,6 @@ export class StockCommunityController {
     @Inject(StockCommunityService) private readonly community: StockCommunityService | null,
   ) {}
   private service() {
-    if (replies !== undefined && replies !== 'all' && replies !== 'with' && replies !== 'without') {
-      throw new BadRequestException('invalid reply filter');
-    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return this.community;
   }
@@ -122,6 +119,9 @@ export class PublicStockCommunityController {
         /[<>\u0000-\u001f\u007f]/.test(q))
     ) {
       throw new BadRequestException('invalid board search');
+    }
+    if (replies !== undefined && replies !== 'all' && replies !== 'with' && replies !== 'without') {
+      throw new BadRequestException('invalid reply filter');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
