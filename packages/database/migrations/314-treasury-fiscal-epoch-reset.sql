@@ -81,6 +81,7 @@ CREATE OR REPLACE FUNCTION public.treasury_fiscal_guard_event()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
 SET search_path=pg_catalog,pg_temp AS $body$
 DECLARE began timestamptz; tx uuid; posting_count integer; balance numeric; treasury_count integer;
+DECLARE receipt_amount numeric; treasury_posted numeric;
 BEGIN
  SELECT opened_at INTO began FROM public.treasury_fiscal_epochs WHERE id=1;
  IF began IS NULL THEN
@@ -90,18 +91,26 @@ BEGIN
   RAISE EXCEPTION 'TREASURY_EPOCH_ARCHIVED_SOURCE_IMMUTABLE' USING ERRCODE='23514';
  END IF;
  -- INSERT is always a new event, even when a caller tries to backdate created_at.
- IF TG_TABLE_NAME='system_treasury_ledger' THEN tx:=NEW.ledger_transaction_id;
- ELSE tx:=NEW.ledger_tx_id; END IF;
+ IF TG_TABLE_NAME='system_treasury_ledger' THEN
+  tx:=NEW.ledger_transaction_id; receipt_amount:=NEW.amount_wld::numeric;
+ ELSE
+  tx:=NEW.ledger_tx_id; receipt_amount:=NEW.dividend_amount_wld;
+ END IF;
+ IF receipt_amount IS NULL OR receipt_amount<=0 THEN
+  RAISE EXCEPTION 'TREASURY_EPOCH_INVALID_SOURCE_AMOUNT' USING ERRCODE='23514';
+ END IF;
  IF tx IS NULL THEN
   RAISE EXCEPTION 'TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE' USING ERRCODE='23514';
  END IF;
  SELECT count(*)::int,
  coalesce(sum(CASE WHEN p.direction::text='debit' THEN p.amount
  WHEN p.direction::text='credit' THEN -p.amount ELSE 0 END),0),
- count(*) FILTER(WHERE a.account_type='TREASURY' AND a.system_key='treasury')::int
- INTO posting_count,balance,treasury_count FROM public.ledger_postings p
+ count(*) FILTER(WHERE a.account_type='TREASURY' AND a.system_key='treasury')::int,
+ coalesce(sum(p.amount) FILTER(WHERE a.account_type='TREASURY' AND a.system_key='treasury'),0)
+ INTO posting_count,balance,treasury_count,treasury_posted FROM public.ledger_postings p
  JOIN public.accounts a ON a.id=p.account_id WHERE p.transaction_id=tx;
  IF posting_count<2 OR balance<>0 OR treasury_count<1
+ OR treasury_posted IS DISTINCT FROM receipt_amount
  OR NOT EXISTS(SELECT 1 FROM public.ledger_transactions WHERE id=tx AND created_at>=began) THEN
   RAISE EXCEPTION 'TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE' USING ERRCODE='23514';
  END IF;
