@@ -11,3 +11,12 @@ export function parseBoardTitleQuery(value: unknown): { query: string | null; in
   }
   return { query: value.trim(), invalid: false };
 }
+
+/** Reply filtering applies to the same latest 50 public posts as title search. */
+export function parseBoardRepliesFilter(
+  value: unknown,
+): { replies: 'all' | 'with' | 'without'; invalid: boolean } {
+  if (value === undefined) return { replies: 'all', invalid: false };
+  if (value === 'with' || value === 'without') return { replies: value, invalid: false };
+  return { replies: 'all', invalid: true };
+}
