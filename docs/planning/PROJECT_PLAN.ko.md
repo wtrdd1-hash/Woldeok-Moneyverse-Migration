@@ -1,4 +1,10 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1562 — F675-196 고정 09시 판단·설정 전환 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
+- **회차:** 이전 추가 v1560 → 현재 보완 v1562 → 다음 추가 v1564(잠정). main `bc8cd8a6c654af0336f550643f23049a58ee1d16` 시작/중간, 선행 Draft #2167 (`e866814b173fc526f3f41be233e12a695fde115f`), 이슈 #2166. F675-192~196 미구현, 문서만.
+- **보완:** v1560 잠금 후 실행시각으로 09시 KST 판단을 하면 지연 워커·재시도 시 기간이 달라짐. DB가 정한 회원/KST 날짜의 고정 `slotAtUtc`를 기준으로, 현재 DB 시각은 원천 확인 및 [09:00,09:15) 실행 제한(15분은 미측정 제안)에만 사용. 7일 `144h < E-S <=168h`, 1일 `0 < E-S <=24h`, PostgreSQL 마이크로초, 소급 발송 금지. 09:07 워커도 09:00 기간 사용. 워커 증거 없음은 UNKNOWN이지 확인된 누락이 아님.
+- **경합:** 슬롯 이전부터 연속 ON이어야 포함. 09시 이후 ON/재ON·신규 획득·만료 변경·제외 해제는 다음 날, 커밋 전 OFF/제외는 즉시 차단. 모든 쓰기 경로의 DB 전이시각 증명 불가 시 BLOCK. 전체 보유 집합 공통 영수증+배치+알림함 원자 처리, 부분 알림/가짜 SENT 금지, 워커 2개 회원/일 UNIQUE. 본인 CSRF POST 판단상태 최근 7일, COMMITTED/NO_ELIGIBLE/MISSED/UNKNOWN 구분, Next/Android 비공개·WCAG·관리자 20명 이상·플래그 OFF.
+- **백로그:** P0 OPS1562-01 #2144/#2171 운영 SHA/cgroup EAGAIN, SEC1562-02 #993 ACL/체크섬/알림함 DDL, FIN1562-03 #2153 금융 증빙, REL1562-04 전체 QA/정확 SHA Test/복원. P1 SLOT1562-05~10 SQL/워커/API/Next·Android/개인정보/PG17 10,001건 경계·경합 시험. 이전 QA v1411만, v1560 로컬 121 PASS/1 FAIL은 기획 변경과 무관; 신규 수용시험 미실행. 외부 신규 0/누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·WLD·원장·Test·Production·main 변경 없음. RELEASE HOLD.
+
 ## v2026.10.31.1560 — F675-196 회원 만료 알림 일일 통합 알림 (기능 추가 / DRAFT / RELEASE HOLD)
 - **GitHub v1560:** Draft PR #2167 OPEN/HOLD, 선행 #2157, 이슈 #2166. 초기 SHA `59052ec3842d14557c17e4b36dcddb3c700e11db` 문서 전용 CI·Build Test Candidate SUCCESS, 최종 기록 SHA 검증 전. 병합·운영 승격 없음.
 - **회차:** 이전 보완 v1558 → 현재 추가 v1560 → 다음 보완 v1562(잠정). 기준 main `1a3625f3c5e426c857e2b44a412d7949ac4a6257` 시작/중간 확인, 선행 미병합 Draft #2157 (`ced5ee5e0a8f58b58c8f183807b4e246974c05ba`), 개발 이슈 #2166. F675-192/193/194/195는 모두 미구현 Draft 선행 조건. 코드·배포 없음.

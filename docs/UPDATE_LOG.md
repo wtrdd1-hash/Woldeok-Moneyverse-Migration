@@ -1,3 +1,6 @@
+## Planning v1562 — 2026-10-31 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- F675-196 digest decision slot fixed at DB-computed 09:00 KST rather than delayed worker clock, proposed [09:00,09:15) bounded execution; no catch-up. ON/re-ON, holding generation, expiry mutation and unmute after slot defer; OFF/mute before commit suppress. Audited worker status distinguishes UNKNOWN from verified missed. English/Korean integrated design, P0 4/P1 6, 10,001 holdings/two workers acceptance proposed not run. Main `bc8cd8a6c654af0336f550643f23049a58ee1d16` checked; parent Draft #2167; issue #2166; #2171 cgroup EAGAIN blocks full local QA. External new 0/cumulative UNKNOWN of 10,000 BLOCKED. No runtime/DB/WLD/ledger/Test/Production/main writes; RELEASE HOLD.
+
 ## Planning v1560 — 2026-10-31 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #2167 OPEN/HOLD, issue #2166, initial SHA `59052ec3842d14557c17e4b36dcddb3c700e11db` docs-only CI and candidate SUCCESS; final SHA pending. Parent #2157 unmerged; no deployment.
 - F675-196 owner opt-in 09:00 KST daily consolidated in-app expiry reminder, preserving individual default; previous Improvement v1558 → current Addition v1560 → next Improvement v1562. Main `1a3625f3c5e426c857e2b44a412d7949ac4a6257` start/mid; stacked Draft #2157; issue #2166. Parent reminder features unimplemented.
