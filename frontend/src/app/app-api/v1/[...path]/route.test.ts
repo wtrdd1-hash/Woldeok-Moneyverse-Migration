@@ -542,3 +542,44 @@ describe('public announcement Android feed', () => {
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
 });
+
+describe('public announcement Android safety', () => {
+  it('rejects non-GET methods before proxying', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await POST(new NextRequest('https://easy-scraping.com/app-api/v1/announcements', {
+      method: 'POST', body: '{}',
+    }), context('announcements'));
+    expect(response.status).toBe(405);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not forward unexpected internal announcement fields to Android', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const row = {
+      announcementId: '9adca849-7b28-4dd2-b2df-5f1b77a70001', title: 'Published', body: 'Notice',
+      imageUrl: null, imageAltText: null, isPinned: false,
+      publishedAt: '2026-10-31T10:00:00.000Z',
+    };
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      announcements: [{ ...row, storageKey: '/srv/private/secret' }],
+    }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' } })));
+    const response = await GET(request('/app-api/v1/announcements'), context('announcements'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('public, max-age=60');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(await response.json()).toEqual({ announcements: [row] });
+  });
+
+  it('returns a noncacheable 503 when the published source fails', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('internal details', {
+      status: 500, headers: { 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(request('/app-api/v1/announcements'), context('announcements'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(JSON.stringify(await response.json())).not.toContain('internal details');
+  });
+});

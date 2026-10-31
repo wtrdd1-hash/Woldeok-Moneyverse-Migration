@@ -30,6 +30,7 @@ export function parsePublicAnnouncements(payload: unknown): PublicAnnouncementFe
   if (!Array.isArray(announcements) || announcements.length > 20) return null;
 
   const seen = new Set<string>();
+  const verified: PublicAnnouncement[] = [];
   for (const item of announcements) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
     const row = item as Record<string, unknown>;
@@ -46,6 +47,16 @@ export function parsePublicAnnouncements(payload: unknown): PublicAnnouncementFe
     if (row.publishedAt !== null &&
         (typeof row.publishedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(row.publishedAt) ||
           !Number.isFinite(Date.parse(row.publishedAt)))) return null;
+    // Never forward unexpected upstream fields (storage keys, editorial metadata).
+    verified.push({
+      announcementId: row.announcementId as string,
+      title: row.title as string,
+      body: row.body as string,
+      imageUrl: row.imageUrl as string | null,
+      imageAltText: row.imageAltText as string | null,
+      isPinned: row.isPinned as boolean,
+      publishedAt: row.publishedAt as string | null,
+    });
   }
-  return { announcements: announcements as PublicAnnouncement[] };
+  return { announcements: verified };
 }

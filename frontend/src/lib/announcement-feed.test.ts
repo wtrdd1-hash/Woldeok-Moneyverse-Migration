@@ -17,6 +17,10 @@ describe('published announcement feed evidence', () => {
   it('accepts a bounded, valid published feed', () => {
     expect(parsePublicAnnouncements({ announcements: [row] })).toEqual({ announcements: [row] });
   });
+  it('does not forward unexpected internal or editorial fields', () => {
+    expect(parsePublicAnnouncements({ announcements: [{ ...row, storageKey: '/srv/private/secret', draft: true }] }))
+      .toEqual({ announcements: [row] });
+  });
   it('rejects duplicate IDs, oversized feeds and malformed rows', () => {
     expect(parsePublicAnnouncements({ announcements: [row, row] })).toBeNull();
     expect(parsePublicAnnouncements({ announcements: Array.from({ length: 21 }, () => row) })).toBeNull();

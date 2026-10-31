@@ -84,3 +84,25 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('ContentService published announcement pin truth', () => {
+  const announcement = {
+    announcement_id: '9adca849-7b28-4dd2-b2df-5f1b77a70001',
+    title: 'Published notice', body: 'Body',
+    image_url: null, image_alt_text: null,
+    published_at: new Date('2026-10-31T10:00:00.000Z'),
+  };
+  it('does not coerce string false into a pinned announcement', async () => {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repository.publishedAnnouncements = vi.fn().mockResolvedValue([{ ...announcement, is_pinned: 'false' }]);
+    await expect(new ContentService(repository).publicAnnouncements()).rejects.toThrow(
+      'invalid announcement pin state',
+    );
+  });
+  it('preserves a real database boolean false', async () => {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repository.publishedAnnouncements = vi.fn().mockResolvedValue([{ ...announcement, is_pinned: false }]);
+    await expect(new ContentService(repository).publicAnnouncements()).resolves.toEqual([
+      expect.objectContaining({ isPinned: false }),
+    ]);
+  });
+});

@@ -109,11 +109,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
   const announcementCollection = parts.length === 1 && parts[0] === 'announcements';
-  if (announcementCollection && request.method !== 'GET' && request.method !== 'HEAD') {
+  if (announcementCollection && request.method !== 'GET') {
     return gatewayProblem(405, 'Method Not Allowed', 'announcements_read_only',
       'Published announcements are read-only');
   }
-  const publicAnnouncementsPath = announcementCollection && (request.method === 'GET' || request.method === 'HEAD');
+  const publicAnnouncementsPath = announcementCollection && request.method === 'GET';
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -234,6 +234,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (announcementCollection && !response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcements_unavailable',
+      'Published announcements are unavailable');
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
@@ -406,6 +411,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (value) headers.set(name, value);
   }
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
+  if (announcementCollection) {
+    headers.set('cache-control', 'public, max-age=60');
+    headers.set('x-robots-tag', 'noindex');
+  }
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
@@ -422,9 +431,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
-      if (publicAnnouncementsPath && response.ok && parsePublicAnnouncements(compatible) === null) {
-        return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
-          'Published announcements are unavailable');
+      if (publicAnnouncementsPath && response.ok) {
+        const verified = parsePublicAnnouncements(compatible);
+        if (verified === null) {
+          return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
+            'Published announcements are unavailable');
+        }
+        return new NextResponse(JSON.stringify(verified), { status: response.status, headers });
       }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);

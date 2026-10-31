@@ -18,3 +18,10 @@
 - RED: frontend 5 failures (missing parser, wrong Nest path, false empty and missing Android route); Backend boundary 2 PASS.
 - GREEN: frontend targeted 60 PASS, Backend boundary 2 PASS. Backend read remains on the existing SECURITY DEFINER function; no migration.
 - Added Android path allowlist and method restrictions, fail-closed 503 on malformed 200. Awaiting full gates and isolated PostgreSQL.
+
+## In progress (20:13 KST) — full-gate root cause and repair
+- First combined pnpm test: EPIPE due to shared MCP cgroup process pressure, not a passing run. Backend limited-workers attempt also encountered a worker process error; frontend full suite found one genuine regression: the app group allowlist test had not been updated for announcements.
+- Updated the allowlist contract test. Added a server-side strict boolean pin check (no coercion of string "false"), plus regression tests.
+- Security review found that a structurally valid upstream object could carry untrusted extra fields. Both Next BFF and Android now return only explicitly verified published fields; Android enforces 60-second public cache maximum and noindex on success, 503 no-store on unavailable upstream, GET-only collection.
+- Final targeted GREEN: frontend/Android 80 PASS, Backend 8 PASS. First local full build PASS, production-only dependency audit PASS. Exact final SHA full gates will be rerun after this commit.
+- Development PostgreSQL 17.11 read-only function execution PASS (1 published result counted, ROLLBACK). Existing DEV app-role direct DML privileges remain P0 #993; no changes to grants or migration.

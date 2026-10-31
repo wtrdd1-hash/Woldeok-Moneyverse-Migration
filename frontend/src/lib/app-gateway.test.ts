@@ -76,10 +76,15 @@ describe('appGatewayOrigin', () => {
 describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
-      'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
+      'account', 'activity', 'admin', 'announcements', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
       'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
       'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
+  });
+
+  it('limits the Android announcement feed to the published collection path', () => {
+    expect(appGatewayPath(['announcements'])).toBe('/api/v1/announcements');
+    expect(appGatewayPath(['announcements', 'drafts'])).toBeNull();
   });
 
   it('declares request and response headers native clients rely on', () => {

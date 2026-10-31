@@ -76,6 +76,9 @@ export interface ContentAnnouncement {
 }
 
 function normalizeAnnouncement(row: ContentAnnouncementRow): ContentAnnouncement {
+  if (typeof row?.is_pinned !== 'boolean') {
+    throw new Error('database returned an invalid announcement pin state');
+  }
   return {
     announcementId: receiptId(row, 'announcement_id'),
     title: databasePlainText(row?.title, 'announcement title', 160),
@@ -92,7 +95,7 @@ function normalizeAnnouncement(row: ContentAnnouncementRow): ContentAnnouncement
       row?.image_alt_text === null
         ? null
         : databasePlainText(row.image_alt_text, 'announcement image alt text', 300),
-    isPinned: Boolean(row?.is_pinned),
+    isPinned: row.is_pinned,
     publishedAt: timestamp(row?.published_at, 'announcement published timestamp'),
   };
 }
