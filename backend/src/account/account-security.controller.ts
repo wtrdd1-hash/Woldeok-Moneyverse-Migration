@@ -22,7 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import { AccountSecurityRepository } from './account-security.repository';
-import type { SecurityEventCategory } from './account-security.repository';
+import type { SecurityEventCategory, SecurityEventOrder } from './account-security.repository';
 
 @ApiTags('account')
 @Controller('account/security')
@@ -53,20 +53,32 @@ export class AccountSecurityController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiQuery({ name: 'category', required: false, enum: ['all', 'login', 'settings'] })
+  @ApiQuery({ name: 'sort', required: false, enum: ['recent', 'oldest'] })
   @ApiOperation({
     summary: 'Recent owner-only security events, optionally filtered within the latest 20',
   })
-  async events(@Req() request: RequestWithSession, @Query('category') category?: unknown) {
+  async events(
+    @Req() request: RequestWithSession,
+    @Query('category') category?: unknown,
+    @Query('sort') sort?: unknown,
+  ) {
     if (
       category !== undefined &&
       (typeof category !== 'string' || !['all', 'login', 'settings'].includes(category))
     ) {
       throw new BadRequestException('invalid security event category');
     }
+    if (
+      sort !== undefined &&
+      (typeof sort !== 'string' || !['recent', 'oldest'].includes(sort))
+    ) {
+      throw new BadRequestException('invalid security event sort');
+    }
     return {
       events: await this.repository().recentEvents(
         requireUserId(request),
         (category ?? 'all') as SecurityEventCategory,
+        (sort ?? 'recent') as SecurityEventOrder,
       ),
     };
   }

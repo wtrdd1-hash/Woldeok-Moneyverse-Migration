@@ -34,6 +34,7 @@ export interface MemberSecurityEventView {
 }
 
 export type SecurityEventCategory = 'all' | 'login' | 'settings';
+export type SecurityEventOrder = 'recent' | 'oldest';
 
 const SECURITY_SETTINGS_EVENTS = new Set([
   'local_password_reset_requested',
@@ -76,6 +77,7 @@ export class AccountSecurityRepository {
   async recentEvents(
     userId: string,
     category: SecurityEventCategory = 'all',
+    sort: SecurityEventOrder = 'recent',
   ): Promise<MemberSecurityEventView[]> {
     // Always fetch the owner's latest 20 first. Filtering must not imply full-history coverage.
     const rows = await queryRows<SecurityEventRow>(
@@ -87,11 +89,13 @@ export class AccountSecurityRepository {
       type: row.event_type,
       createdAt: row.created_at.toISOString(),
     }));
-    if (category === 'login')
-      return events.filter((event) => event.type === 'local_login_succeeded');
-    if (category === 'settings')
-      return events.filter((event) => SECURITY_SETTINGS_EVENTS.has(event.type));
-    return events;
+    const filtered = category === 'login'
+      ? events.filter((event) => event.type === 'local_login_succeeded')
+      : category === 'settings'
+        ? events.filter((event) => SECURITY_SETTINGS_EVENTS.has(event.type))
+        : events;
+    // Reverse only the verified owner latest-20 window; never change the SQL LIMIT.
+    return sort === 'oldest' ? [...filtered].reverse() : filtered;
   }
 
   async revokeOtherSession(
