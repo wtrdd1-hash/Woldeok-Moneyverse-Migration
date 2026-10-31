@@ -12,6 +12,7 @@ const COUNT_KEYS = Object.freeze([
   'invalid_wld', 'canonical_transactions', 'canonical_postings',
 ]);
 const CANDIDATE_KEYS = Object.freeze(['no_candidate', 'one_candidate', 'multiple_candidates']);
+const DIVIDEND_KEYS = Object.freeze(['enterprise_dividend_total', 'unlinked', 'dangling_canonical_id', 'linked_to_canonical']);
 const VALID_IDENTITY = Object.freeze({
   database: 'woldeok_moneyverse_dev', role: 'moneyverse_app',
 });
@@ -28,23 +29,28 @@ export function evaluateTreasuryProvenance(input) {
       input.identity.role !== VALID_IDENTITY.role || !input.summary ||
       !COUNT_KEYS.every(k => validCount(input.summary[k])) ||
       !input.correlation || !CANDIDATE_KEYS.every(k => validCount(input.correlation[k])) ||
+      !input.sourceDividends || !DIVIDEND_KEYS.every(k => validCount(input.sourceDividends[k])) ||
       !Array.isArray(input.types) ||
       !input.types.every(x => x && typeof x.type === 'string' &&
         /^[A-Z][A-Z0-9_]{0,63}$/.test(x.type) && validCount(x.count)) ||
       new Set(input.types.map(x => x.type)).size !== input.types.length) {
     return deny();
   }
-  const s = input.summary, c = input.correlation;
+  const s = input.summary, c = input.correlation, d = input.sourceDividends;
   const totalByType = input.types.reduce((v, x) => v + x.count, 0);
   if (!Number.isSafeInteger(totalByType) || s.legacy_unlinked + s.legacy_linked !== s.legacy_total ||
       c.no_candidate + c.one_candidate + c.multiple_candidates !== s.legacy_unlinked ||
-      totalByType !== s.legacy_total || s.invalid_wld > s.legacy_total) {
+      totalByType !== s.legacy_total || s.invalid_wld > s.legacy_total ||
+      d.unlinked + d.dangling_canonical_id + d.linked_to_canonical !== d.enterprise_dividend_total) {
     return deny();
   }
   if (s.invalid_wld > 0) return deny();
   const unresolved = s.legacy_unlinked > 0;
+  const sourceUnresolved = d.unlinked > 0 || d.dangling_canonical_id > 0;
   return {
-    status: unresolved ? 'BLOCKED_LEGACY_TREASURY_PROVENANCE' : 'INDEPENDENT_RECONCILIATION_CERTIFICATION_REQUIRED',
+    status: unresolved ? 'BLOCKED_LEGACY_TREASURY_PROVENANCE' :
+      sourceUnresolved ? 'BLOCKED_SOURCE_DIVIDEND_PROVENANCE' :
+      'INDEPENDENT_RECONCILIATION_CERTIFICATION_REQUIRED',
     monetaryReleaseAuthorized: false,
     database: input.identity.database,
     legacyTotalCount: s.legacy_total,
@@ -57,6 +63,12 @@ export function evaluateTreasuryProvenance(input) {
       noCandidate: c.no_candidate,
       oneCandidate: c.one_candidate,
       multipleCandidates: c.multiple_candidates,
+    },
+    enterpriseDividendProvenance: {
+      total: d.enterprise_dividend_total,
+      unlinked: d.unlinked,
+      danglingCanonicalId: d.dangling_canonical_id,
+      linkedToCanonical: d.linked_to_canonical,
     },
     warning: 'Same amount and time are not evidence of source, posting, beneficiary, or idempotency. This is a legacy event inventory, not a Treasury balance or payment certification. Do not create synthetic links or replay payments.',
   };
@@ -96,6 +108,15 @@ const CORRELATION_SQL = [
   ' FROM coincidences',
 ].join('\n');
 
+const DIVIDEND_SOURCE_SQL = [
+  'SELECT COUNT(*)::int AS enterprise_dividend_total,',
+  ' COUNT(*) FILTER (WHERE d.ledger_tx_id IS NULL)::int AS unlinked,',
+  ' COUNT(*) FILTER (WHERE d.ledger_tx_id IS NOT NULL AND t.id IS NULL)::int AS dangling_canonical_id,',
+  ' COUNT(*) FILTER (WHERE d.ledger_tx_id IS NOT NULL AND t.id IS NOT NULL)::int AS linked_to_canonical',
+  ' FROM public.state_enterprise_dividend_logs d',
+  ' LEFT JOIN public.ledger_transactions t ON t.id=d.ledger_tx_id',
+].join('\n');
+
 export async function readTreasuryProvenanceSnapshot(client) {
   await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
   try {
@@ -104,7 +125,8 @@ export async function readTreasuryProvenanceSnapshot(client) {
     const summary = (await client.query(SUMMARY_SQL)).rows[0];
     const types = (await client.query(TYPE_SQL)).rows;
     const correlation = (await client.query(CORRELATION_SQL)).rows[0];
-    return { identity, summary, types, correlation };
+    const sourceDividends = (await client.query(DIVIDEND_SOURCE_SQL)).rows[0];
+    return { identity, summary, types, correlation, sourceDividends };
   } finally {
     await client.query('ROLLBACK');
   }
