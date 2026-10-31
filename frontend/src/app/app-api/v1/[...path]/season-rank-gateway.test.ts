@@ -41,9 +41,18 @@ describe('Android season leaderboard rank windows', () => {
     expect(new Headers(fetchSpy.mock.calls[0]?.[1]?.headers).get('cookie')).toContain('member');
   });
 
+  it('blocks unverified private fields even on HTTP 200', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ entries: [
+      { rank: 1, points: '1', entries: '1', display_name: 'Member', user_id: 'private' },
+    ] }), { headers: { 'content-type': 'application/json' } })));
+    const response = await GET(request('?limit=3'), context);
+    expect(response.status).toBe(503);
+    expect(JSON.stringify(await response.json())).not.toContain('private');
+  });
+
   it('does not pass malformed success data as a valid leaderboard', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ entries: [
-      { rank: 1, points: 9007199254740993, entries: '1', display_name: 'Member' },
+      { rank: 1, points: Number('9007199254740993'), entries: '1', display_name: 'Member' },
     ] }), { headers: { 'content-type': 'application/json' } })));
     const response = await GET(request('?limit=3'), context);
     expect(response.status).toBe(503);
