@@ -105,7 +105,11 @@ describe('authenticated profile HTTP privacy', () => {
 
   it.each(['/api/v1/profile', '/api/v1/profile/settings'])(
     'protects successful owner-only response %s', async (path) => {
-      const response = await request(app.getHttpServer()).get(path);
+      // The production-mode app graph enforces the internal API boundary even
+      // when member/session guards are overridden for this privacy test.
+      const response = await request(app.getHttpServer())
+        .get(path)
+        .set('x-internal-token', 'x'.repeat(32));
       expect(response.status).toBe(200);
       expect(response.headers['cache-control']).toBe('private, no-store');
       expect(response.headers['x-robots-tag']).toBe('noindex');
