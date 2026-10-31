@@ -116,6 +116,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
   }
 
+  const boardReplyPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardReplies = boardReplyPath ? request.nextUrl.searchParams.getAll('replies') : [];
+  if (boardReplies.length > 1 ||
+      (boardReplies.length === 1 && !['all', 'with', 'without'].includes(boardReplies[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_replies_invalid',
+      'reply filter must be all, with or without');
+  }
+
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
   let walletRange: ActivityCalendarRange | null = null;
@@ -330,6 +339,29 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  // The Android public list must not treat a stale backend that ignores the
+  // reply filter as a successful search. It is still limited to 50 published rows.
+  if (boardReplyPath && (boardReplies[0] === 'with' || boardReplies[0] === 'without') && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('invalid media type');
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || !('posts' in payload) ||
+          !Array.isArray(payload.posts) || payload.posts.length > 50 ||
+          !payload.posts.every((row: unknown) => {
+            if (!row || typeof row !== 'object') return false;
+            const item = row as Record<string, unknown>;
+            return typeof item.postId === 'string' &&
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.postId) &&
+              typeof item.commentCount === 'number' &&
+              Number.isSafeInteger(item.commentCount) && item.commentCount >= 0 &&
+              (boardReplies[0] === 'with' ? item.commentCount > 0 : item.commentCount === 0);
+          })) throw new Error('unverified reply-filtered board');
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_replies_unverified',
+        'public board reply counts could not be verified');
+    }
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -459,15 +491,10 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
-  // Query-specific public board results are not stable crawlable pages.
+  // Filtered public results have no stable canonical URL or crawler snapshot.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' &&
+      (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('replies'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
