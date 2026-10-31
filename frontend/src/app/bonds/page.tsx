@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { verifyBondMarkets } from './market-integrity';
 import { canonicalUrl } from '@/lib/seo';
 import { publicApi, api } from '@/lib/api';
+import { verifyOwnerBondHoldings, verifyOwnerRepoLoans } from './owner-source';
 import {
   BondsPortalClient,
   type UserHoldingItem,
+  type UserRepoLoanItem,
 } from './bonds-portal-client';
 
 export const dynamic = 'force-dynamic';
@@ -37,26 +39,41 @@ export default async function PublicBondsPage() {
 
   const { overview, bonds } = market;
 
-  // 로그인 상태인 경우 내 보유 채권 및 레포 대출 조회 시도
-  let holdings: UserHoldingItem[] = [];
-  let repoLoans: any[] = [];
+  // The session endpoint distinguishes a guest from a signed-in member whose
+  // private bond read is unavailable. Neither failure may be rendered as zero.
   let isLoggedIn = false;
-
+  let holdingsStatus: 'guest' | 'verified' | 'unavailable' = 'unavailable';
+  let repoStatus: 'guest' | 'verified' | 'unavailable' = 'unavailable';
+  let holdings: UserHoldingItem[] = [];
+  let repoLoans: UserRepoLoanItem[] = [];
   try {
-    const [userHoldings, userRepoLoans] = await Promise.all([
-      api<UserHoldingItem[]>('/api/v1/bonds/my-holdings'),
-      api<any[]>('/api/v1/bonds/my-repo-loans').catch(() => []),
-    ]);
-    if (Array.isArray(userHoldings)) {
-      holdings = userHoldings;
+    const session = await api<unknown>('/api/v1/auth/session');
+    if (session && typeof session === 'object' && 'csrfToken' in session &&
+        typeof session.csrfToken === 'string' && session.csrfToken.length > 0) {
       isLoggedIn = true;
+      const [holdingRead, repoRead] = await Promise.allSettled([
+        api<unknown>('/api/v1/bonds/my-holdings'),
+        api<unknown>('/api/v1/bonds/my-repo-loans'),
+      ]);
+      const verifiedHoldings = holdingRead.status === 'fulfilled'
+        ? verifyOwnerBondHoldings(holdingRead.value) : null;
+      const verifiedLoans = repoRead.status === 'fulfilled'
+        ? verifyOwnerRepoLoans(repoRead.value) : null;
+      if (verifiedHoldings !== null) {
+        holdings = verifiedHoldings;
+        holdingsStatus = 'verified';
+      }
+      if (verifiedLoans !== null) {
+        repoLoans = verifiedLoans;
+        repoStatus = 'verified';
+      }
     }
-    if (Array.isArray(userRepoLoans)) {
-      repoLoans = userRepoLoans;
+  } catch (error) {
+    // Only an explicit 401 establishes a guest; 403/428/5xx are not logout evidence.
+    if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+      holdingsStatus = 'guest';
+      repoStatus = 'guest';
     }
-  } catch {
-    // 비로그인 방문자
-    isLoggedIn = false;
   }
 
   return (
@@ -68,6 +85,8 @@ export default async function PublicBondsPage() {
         initialRepoLoans={repoLoans}
         overview={overview}
         isLoggedIn={isLoggedIn}
+        holdingsStatus={holdingsStatus}
+        repoStatus={repoStatus}
       />
 
       <section aria-label="국고 공공 기부 & 명예의 전당">
