@@ -30,6 +30,23 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
 
+function isVerifiedAvailableShopCatalog(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const rows = (payload as { catalogItems?: unknown }).catalogItems;
+  if (!Array.isArray(rows) || rows.length > 5000) return false;
+  const ids = new Set<string>();
+  for (const item of rows) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    const row = item as Record<string, unknown>;
+    if (typeof row.catalog_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.catalog_id) || ids.has(row.catalog_id)) return false;
+    if (typeof row.code !== 'string' || row.code.length === 0 || row.code.length > 120 ||
+        typeof row.price !== 'string' || !/^(0|[1-9][0-9]{0,29})$/.test(row.price)) return false;
+    if (row.quantity !== null && (!Number.isSafeInteger(row.quantity) || (row.quantity as number) <= 0)) return false;
+    ids.add(row.catalog_id);
+  }
+  return true;
+}
+
 function isWalletDetailPath(parts: readonly string[]): boolean {
   return parts.length === 4 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     parts[2] === 'transactions';
@@ -209,6 +226,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       (workRewardValues.length === 1 && normalizeWorkReceiptFloor(workRewardValues[0]) === null)) {
     return gatewayProblem(400, 'Bad Request', 'work_receipt_reward_invalid',
       'minimum reward must be a canonical non-negative WLD integer');
+  }
+
+  const shopCatalogPath = request.method === 'GET' && parts.length === 2 && parts[0] === 'shop' &&
+    (parts[1] === 'catalog' || parts[1] === 'public-catalog');
+  const shopStockValues = shopCatalogPath ? request.nextUrl.searchParams.getAll('stock') : [];
+  if (shopStockValues.length > 1 ||
+      (shopStockValues.length === 1 && shopStockValues[0] !== 'available')) {
+    return gatewayProblem(400, 'Bad Request', 'shop_stock_invalid', 'stock must be available when provided');
   }
 
   const receiptAmountFilter =
@@ -396,6 +421,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  // The backend must apply the stock predicate; a successful HTTP status alone is insufficient.
+  if (shopCatalogPath && shopStockValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedAvailableShopCatalog(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_stock_unverified', 'available stock cannot be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_stock_unverified', 'available stock cannot be verified');
+    }
+  }
+
   // The Android receipt summary is valid only if it matches the exact owner-scoped rows.
   // Reject legacy/forged HTTP 200 responses rather than inventing spending totals.
   if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
@@ -507,9 +544,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
+  const privateShopCatalog = parts[0] === 'shop' && parts[1] === 'catalog';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -582,7 +620,7 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
-  if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  if (parts[0] === 'work' || (parts[0] === 'shop' && parts[1] === 'catalog')) response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {

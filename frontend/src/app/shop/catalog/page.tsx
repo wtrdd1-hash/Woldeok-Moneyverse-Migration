@@ -10,7 +10,7 @@ import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
 import { holdingsFilterUrl } from './holdings-filter';
-import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
+import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep, stockCatalogApiPath } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
 /**
@@ -30,17 +30,18 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly mine?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly mine?: string; readonly stock?: string }>;
 }) {
   await requireMember();
-  const { q: rawQuery, mine: rawMine } = await searchParams;
+  const { q: rawQuery, mine: rawMine, stock: rawStock } = await searchParams;
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
   const mineStatus = rawMine === 'attention' ? 'attention' : 'all';
+  const stockStatus = rawStock === 'available' ? 'available' : 'all';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    apiOrNull<{ catalogItems: CatalogItem[] }>(stockCatalogApiPath(stockStatus)),
     apiOrNull<{ holdings: HeldItem[] }>(`/api/v1/shop/holdings${mineStatus === 'attention' ? '?status=attention' : ''}`),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -103,7 +104,8 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-md gap-2" role="search">
+          <form className="flex max-w-2xl flex-wrap items-center gap-3" role="search">
+            {mineStatus === 'attention' ? <input type="hidden" name="mine" value="attention" /> : null}
             <Input
               name="q"
               type="search"
@@ -111,6 +113,10 @@ export default async function ShopCatalogPage({
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
             />
+            <label className="inline-flex min-h-11 items-center gap-2 text-sm">
+              <input type="checkbox" name="stock" value="available" defaultChecked={stockStatus === 'available'} className="size-4 accent-primary" />
+              재고 있는 아이템만
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
@@ -129,9 +135,11 @@ export default async function ShopCatalogPage({
           // A different fact from the one above: the request worked and the
           // catalogue has nothing on sale right now.
           <EmptyState
-            title={query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
+            title={stockStatus === 'available' ? '재고 있는 아이템을 찾지 못했어요.' : query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
             description={
-              query === ''
+              stockStatus === 'available'
+                ? '재고 조건을 해제하거나 다른 이름으로 검색해 주세요.'
+                : query === ''
                 ? '운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요.'
                 : '다른 이름, 설명 또는 아이템 코드로 다시 검색해 주세요.'
             }
@@ -182,14 +190,14 @@ export default async function ShopCatalogPage({
           </h2>
           <nav aria-label="내 아이템 관리 상태" className="flex flex-wrap gap-2">
             <Link
-              href={holdingsFilterUrl(rawQuery ?? '', 'all')}
+              href={holdingsFilterUrl(rawQuery ?? '', 'all', stockStatus)}
               aria-current={mineStatus === 'all' ? 'page' : undefined}
               className={`min-h-11 rounded-md border px-4 py-2 text-sm ${mineStatus === 'all' ? 'bg-primary text-primary-foreground' : 'bg-card'} focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
             >
               전체 아이템
             </Link>
             <Link
-              href={holdingsFilterUrl(rawQuery ?? '', 'attention')}
+              href={holdingsFilterUrl(rawQuery ?? '', 'attention', stockStatus)}
               aria-current={mineStatus === 'attention' ? 'page' : undefined}
               className={`min-h-11 rounded-md border px-4 py-2 text-sm ${mineStatus === 'attention' ? 'bg-primary text-primary-foreground' : 'bg-card'} focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
             >

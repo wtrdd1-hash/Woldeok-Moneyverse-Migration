@@ -280,7 +280,9 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('stock') stock?: unknown,
   ) {
+    const stockFilter = requireShopStockFilter(stock);
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
@@ -292,7 +294,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopStock(filtered, stockFilter) };
   }
 
   @Get('catalog')
@@ -304,7 +306,9 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('stock') stock?: unknown,
   ) {
+    const stockFilter = requireShopStockFilter(stock);
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
@@ -316,7 +320,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopStock(filtered, stockFilter) };
   }
 
   @Get('compare')
