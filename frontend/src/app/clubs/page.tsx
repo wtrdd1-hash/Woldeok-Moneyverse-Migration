@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '클럽·협동조합',
-  description: '회원들과 협동조합을 결성하고, WLD 협동 펀딩으로 거점 랜드마크와 아카이브를 구축하세요.',
+  description: '회원 전용 실제 클럽 목록과 소속 정보를 확인하세요. 신규 클럽 창설은 원장 영수증 검증 전까지 중단됩니다.',
   robots: { index: false, follow: false },
 };
 

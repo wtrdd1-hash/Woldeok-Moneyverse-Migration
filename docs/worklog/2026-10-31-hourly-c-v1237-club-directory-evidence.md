@@ -15,5 +15,11 @@
 - Mid-run `origin/main` and canonical EN/KO plan rechecked: `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`, unchanged. Open Drafts #2216/#2217/#2218 preserved.
 
 
+## Backend/DB integration discovery — 2026-10-31 23:21 KST
+- Additional RED: original `PostgresClubRepository.listClubs` joins `public.users u` and reads `u.display_name`, a column absent from the real `users` schema. The app role also cannot SELECT `public.users` or `public.identities` (confirmed in fresh PostgreSQL 17.11). Thus an HTML-only fix would leave the directory nonfunctional.
+- Migration **318** adds a narrowly callable `SECURITY DEFINER` directory read with an authenticated actor parameter, bounded paging, deterministic ordering and owner display names from `public.identities` (not `users`). Backend repository now calls that function, preserving the existing Nest API contract. No broad new table grants, money writes or changes to applied migrations.
+- Backend TDD RED 1/1; GREEN 113 focused backend controller/repository tests. Fresh isolated PostgreSQL 17.11 migration chain **317/317 PASS** (002–318), actor membership, outsider non-membership, exact bigint experience, owner display name, empty search and page checks PASS. App role `users` SELECT=false, `identities` SELECT=false, new function EXECUTE=true. Existing `clubs` direct SELECT/INSERT/UPDATE/DELETE privileges remain true from migration 222 — **P0 least-privilege release blocker**, not fixed by this read-only feature.
+- Final exact-SHA full gates, CI, official Test E2E and Production release gate remain pending. Keep Draft/HOLD.
+
 ## Finished
 - Pending final evidence; no deployment authorized.

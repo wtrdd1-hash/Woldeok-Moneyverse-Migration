@@ -115,28 +115,7 @@ export class PostgresClubRepository {
 
     return queryRows<ClubSummaryRow>(
       this.client,
-      `SELECT
-         c.id,
-         c.tag,
-         c.name,
-         c.description,
-         c.owner_id,
-         COALESCE(u.display_name, '클럽장') AS owner_name,
-         c.join_mode,
-         c.status,
-         c.level,
-         c.experience::text AS experience,
-         c.member_count,
-         c.created_at,
-         ($1::uuid IS NOT NULL AND cm_actor.user_id IS NOT NULL) AS is_my_club,
-         cm_actor.role AS my_role
-       FROM public.clubs c
-       JOIN public.users u ON u.id = c.owner_id
-       LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = $1::uuid
-       WHERE c.status = 'active'
-         AND ($2::text IS NULL OR c.name ILIKE ('%' || $2::text || '%') OR c.tag ILIKE ('%' || $2::text || '%'))
-       ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC
-       LIMIT $3 OFFSET $4;`,
+      `SELECT * FROM public.club_directory_page($1::uuid, $2::text, $3::integer, $4::integer)`,
       [actorUserId ?? null, search ? search.trim() : null, limit, offset],
     );
   }
