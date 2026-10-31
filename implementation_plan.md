@@ -2132,3 +2132,30 @@ ull 상태를 반환하도록 교정.
   - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 유지**
   - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 45GB 사용 (48%), 50GB 여유 공간 유지**
   - 로컬 Git 브랜치: 오직 `* main` 단일화 유지
+
+---
+## 🚀 [v271 Specification] 업데이트 새로고침 배너 무한 노출 버그 원천 해결 및 CI 전수 통과
+
+### 1. 작업 개요 및 사용자 요구사항
+- **현상**: 브라우저에서 '새로고침'을 눌러도 화면 상단의 '업데이트 새로고침' 배너(StaleTabNotice)가 사라지지 않고 계속 노출되는 현상.
+- **근본 원인**:
+  1. /etc/moneyverse/v1515-prod-frontend-release.env에 과거 고정값 BUILD_ID=666d7f6c011865f6cdb490daf5e71667d9a17327가 하드코딩되어 있어, 서버의 /frontend-version API는 영구히 666d7f...를 반환한 반면, 실제 클라이언트 번들은 .build_id 타임스탬프(179342...)를 가지고 있어 빌드 ID 불일치가 영구 발생함.
+  2. 수동 새로고침 클릭 시 setStale(false) 즉시 해제 및 세션 스토리지 쿨다운(Backoff) 처리가 부재하여 새로고침 직후에도 배너가 잔류함.
+  3. CI 테스트 중 5대 관리자 관제 타워 테스트 4개 파일에서 useRouter 모킹 누락으로 인한 App Router 마운트 예외 발생.
+
+### 2. 세부 해결 내역
+1. **서버-클라이언트 빌드 ID 동기화 (frontend/src/app/frontend-version/route.ts)**:
+   - process.env.NEXT_PUBLIC_BUILD_ID 및 .next/required-server-files.json / .build_id를 최우선으로 읽도록 보장하여 클라이언트 번들과 100% 일치.
+   - /etc/moneyverse/v1515-prod-frontend-release.env의 하드코딩된 BUILD_ID 삭제.
+2. **배너 UX 및 백오프 보완 (frontend/src/components/stale-tab-notice.tsx)**:
+   - 닫기(X) 버튼 추가 및 세션 스토리지 기반 닫힘 상태 유지.
+   - 수동 새로고침 클릭 시 setStale(false) 즉각 실행 및 60초간 재노출 억제 쿨다운(Backoff) 적용.
+3. **CI 단위 테스트 결함 전수 해결**:
+   - src/app/admin/bank/bank-page.test.tsx, src/app/admin/blog/admin-blog-client.test.tsx, src/app/admin/enterprises/enterprise-dividend-hold.test.tsx: next/navigation의 useRouter 모킹 추가.
+   - src/app/admin/economy/monetary-bureau-card.tsx: P1 불변식 fetch 무효화 계약으로 복원하여 monetary-bureau-truth.test.tsx 3개 테스트 100% PASS 달성.
+   - finance-execution-hold-v1415.test.ts: 백엔드 CentralBankController의 mockDurableService 주입 결함 해결.
+
+### 3. 검증 결과
+- 프론트엔드 단위 테스트 전수 통과: 4개 대상 파일 12개 테스트 PASS 및 전체 단위 테스트 통과.
+- pnpm typecheck 및 pnpm lint: 에러 0건.
+- 프로덕션 서빙 실측: curl https://easy-scraping.com/frontend-version -> {"id":"1793422036848"} 정상 서빙 확인.
