@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub v1550:** Draft PR #2128 OPEN/HOLD (선행 #2123), 개발 이슈 #2122 갱신; 정확 SHA 원격 CI 대기, main 병합·배포 없음.
 - **GitHub v1548:** Draft PR #2123 OPEN/HOLD (선행 #2119), 개발 이슈 #2122 OPEN; main 병합·런타임·운영 변경 없음.
 
 ## v2026.10.31.1550 — F675-193 만료 알림 이력의 스냅샷·알림함 생명주기·보존 정합성 (기능 보완 / DRAFT / RELEASE HOLD)

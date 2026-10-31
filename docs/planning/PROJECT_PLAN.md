@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub v1550:** Draft PR #2128 OPEN/HOLD (stacked on #2123), engineering issue #2122 updated; exact-SHA remote CI pending, no main merge or deployment.
 - **GitHub v1548:** Draft PR #2123 OPEN/HOLD (stacked on #2119), engineering issue #2122 OPEN; no main merge, runtime or Production change.
 
 ## v2026.10.31.1550 — F675-193 Reminder Activity Snapshot, Inbox Lifecycle and Retention Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)

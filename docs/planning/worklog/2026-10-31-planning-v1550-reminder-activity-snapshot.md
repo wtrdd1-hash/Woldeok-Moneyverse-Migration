@@ -12,3 +12,6 @@
 ## Handoff and release
 - P0 OPS1550-01 SEC1550-02 FIN1550-03 REL1550-04; P1 HISTORY1550-05 through -10, fully specified in EN/KO integrated master. No overlap with A wallet/gallery, B Production provenance, C derivatives, QA runtime. All implementation assigned to separate development branches with exact-SHA isolated Test and release gate; feature flag remains OFF.
 - Independent external references: newly approved 0, cumulative deduplicated/classified UNKNOWN/10,000; BLOCKED/IN PROGRESS. No code, SQL migration, DB, WLD, ledger, official Test or Production writes; no main merge. Final commit/PR/CI to be appended after independent verification.
+
+## GitHub handoff / GitHub 인계
+Draft PR #2128 OPEN/HOLD stacked on #2123, engineering issue #2122 updated with P0/P1; final exact-SHA CI status to be recorded outside this commit. No merge/deploy.

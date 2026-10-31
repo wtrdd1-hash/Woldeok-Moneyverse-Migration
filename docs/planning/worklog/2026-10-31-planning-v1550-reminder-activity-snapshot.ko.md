@@ -12,3 +12,6 @@
 ## 개발 인계·배포
 - P0 OPS1550-01 SEC1550-02 FIN1550-03 REL1550-04, P1 HISTORY1550-05~10 영문·국문 통합 명세. 개발 A 지갑/갤러리, B 운영 출처, C 파생상품, QA 런타임과 수정 중복 회피. 별도 개발 브랜치·정확 SHA 격리 Test·배포 승인 전까지 기능 OFF.
 - 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 코드/SQL/DB/WLD/원장/Test/Production/main 변경 없음. 최종 커밋·PR·CI는 별도 검증 후 기록.
+
+## GitHub handoff / GitHub 인계
+Draft PR #2128 OPEN/HOLD stacked on #2123, engineering issue #2122 updated with P0/P1; final exact-SHA CI status to be recorded outside this commit. No merge/deploy.
