@@ -25,4 +25,9 @@
 - Main advanced during work from `ed401215a...` to `5bccda44d...` (Treasury audit only, no touched-path overlap); rebase and exact-SHA retest required. Official Test and Production both report `bc8cd8a6c654af0336f550643f23049a58ee1d16` on 2026-10-31 18:02 KST; neither runs this candidate.
 - P0/P1 release blockers: no ledger-backed auction settlement or bid receipt, missing scoped read function/grant, full dependency audit 13 findings, exact-SHA CI, official authenticated Test E2E, full-route QA, backup/restore and GitOps release gate. No Test/Production deployment, merge, financial write or rollback.
 
-## END — IN PROGRESS: final SHA, remote CI and Draft PR pending
+## END — 2026-10-31 18:03 KST — PARTIAL / RELEASE BLOCKED
+- Main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` fetched and integrated by clean rebase. Implementation source tree preserved; initial rebased HEAD `b7a2f0f30529452fc46d4b9d4a1f8802e6018743`. Final documentation commit and CI HEAD are linked from Draft PR #2181.
+- Draft PR #2181 created and pushed; main remains unchanged by this task. No merge, official Test deployment, GitOps change, Production promotion or rollback. No financial, shared database, or release-symlink mutation.
+- All local source gates listed above passed before final documentation-only commit; CI is pending and official exact-SHA Test/auth E2E, release inventory, independent restore, complete security audit and scoped auction read are not certified. Release HOLD is mandatory regardless of source unit pass.
+- Related existing P0 #1269 (ledger-first auction settlement) and P1 #1239 (fabricated auction fallback) are not replaced by a claim of working auction settlement. Backend B must implement owner-scoped read function and ledger-first durable escrow receipt with concurrency/idempotency, then run isolated Test and migration parity.
+- Isolated PG test container must be removed after verification. Preserve all unrelated A/B/Gemini/QA worktrees, branches, PRs and core scheduled tasks; no cleanup of shared resources.
