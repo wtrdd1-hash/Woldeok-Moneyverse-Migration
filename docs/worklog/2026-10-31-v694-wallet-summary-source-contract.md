@@ -17,3 +17,5 @@
 
 ## Finished
 - Pending.
+- 18:38: RED reproduced: 7 invalid wallet projections failed (including TypeError for missing balances); 3 baseline behavior tests passed when header assertions isolated. Full header tests initially 10 failed.
+- 18:38: GREEN: 10/10 focused tests pass after exact WLD/currency validation and private noindex/no-referrer response headers.
