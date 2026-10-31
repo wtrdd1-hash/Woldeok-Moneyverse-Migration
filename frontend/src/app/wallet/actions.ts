@@ -102,6 +102,7 @@ export async function borrow(_previous: ActionState, formData: FormData): Promis
       body: { principalAmount, idempotencyKey: clientKey || idempotencyKey() },
     });
     revalidatePath('/wallet');
+    revalidatePath('/wallet/loans');
     return { status: 'ok', message: '대출을 실행했어요. 원금에 5% 이자가 더해집니다.' };
   } catch (error) {
     return failure(error, '대출 신청이 거절되었어요.');
@@ -121,6 +122,7 @@ export async function repay(_previous: ActionState, formData: FormData): Promise
       body: { amount, idempotencyKey: clientKey || idempotencyKey() },
     });
     revalidatePath('/wallet');
+    revalidatePath('/wallet/loans');
     return { status: 'ok', message: '상환을 기록했어요.' };
   } catch (error) {
     return failure(error, '상환이 거절되었어요.');

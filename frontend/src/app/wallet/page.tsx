@@ -397,12 +397,14 @@ export default async function WalletPage() {
           </div>
 
           <BankPanel />
+          <Button asChild variant="outline" size="sm" className="min-h-11 w-fit"><Link href="/wallet/loans">내 대출 상태별 조회</Link></Button>
 
           {/* 대출 현황 (진행 중일 경우만 노출) */}
           {loans.length > 0 && (
             <div className="toss-card p-6 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                <h3 className="font-bold text-sm text-foreground">진행 중인 가상 대출</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/50">
+                <h3 className="font-bold text-sm text-foreground">최근 가상 대출</h3>
+                <Button asChild variant="outline" size="sm"><Link href="/wallet/loans">상태별 내역 보기</Link></Button>
                 <span className="text-xs text-muted-foreground">{loans.length}건</span>
               </div>
               <LoanList loans={loans} />

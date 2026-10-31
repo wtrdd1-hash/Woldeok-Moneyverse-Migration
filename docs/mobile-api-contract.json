@@ -3038,11 +3038,11 @@
                     },
                     {
                       "type": "string",
-                      "const": "repaid"
+                      "const": "overdue"
                     },
                     {
                       "type": "string",
-                      "const": "overdue"
+                      "const": "repaid"
                     }
                   ]
                 },

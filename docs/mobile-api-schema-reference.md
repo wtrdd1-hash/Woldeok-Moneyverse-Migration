@@ -1111,7 +1111,7 @@ _No request body._
 | loans[].principalAmount | true | string & object |  |
 | loans[].interestAmount | true | string & object |  |
 | loans[].outstandingAmount | true | string & object |  |
-| loans[].status | true | string="active" \| string="repaid" \| string="overdue" |  |
+| loans[].status | true | string="active" \| string="overdue" \| string="repaid" |  |
 | loans[].issuedAt | true | string |  |
 | loans[].repaidAt | true | null \| string |  |
 

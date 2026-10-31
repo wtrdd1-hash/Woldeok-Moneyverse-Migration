@@ -8,6 +8,7 @@ import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/s
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { parseBankLoans, bankLoanStatus } from '@/lib/bank-loan-status';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { NextResponse } from 'next/server';
 import {
@@ -106,6 +107,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const loanStatusPath = parts.length === 2 && parts[0] === 'bank' && parts[1] === 'loans' && request.method === 'GET';
+  const loanStatusValues = loanStatusPath ? request.nextUrl.searchParams.getAll('status') : [];
+  if (loanStatusPath && (
+    [...request.nextUrl.searchParams.keys()].some((key) => key !== 'status') ||
+    loanStatusValues.length > 1 ||
+    (loanStatusValues.length === 1 && !['all', 'active', 'overdue', 'repaid'].includes(loanStatusValues[0]!))
+  )) {
+    return gatewayProblem(400, 'Bad Request', 'loan_status_invalid', 'invalid bank loan status');
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -227,6 +238,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (loanStatusPath) {
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Bank Loans Unavailable', 'bank_loans_unavailable', 'The owner loan status could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          parseBankLoans(await response.clone().json(), bankLoanStatus(loanStatusValues[0])) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'bank_loans_unverified', 'The owner loan status could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bank_loans_unverified', 'The owner loan status could not be verified');
+    }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
@@ -399,7 +425,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || loanStatusPath || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -457,7 +483,7 @@ async function handle(request: NextRequest, context: Context) {
   // cacheable upstream policy, including when the upstream returns an error.
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&

@@ -16,7 +16,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -199,9 +199,13 @@ export class WalletController {
 
   @Get('bank/loans')
   @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Outstanding loans for the caller' })
-  async loans(@Req() request: RequestWithSession) {
-    return { loans: await this.service().loans(requireUserId(request)) };
+  @ApiOperation({ summary: 'Latest 20 owner bank loans, optionally filtered by status' })
+  @ApiQuery({ name: 'status', required: false, enum: ['all', 'active', 'overdue', 'repaid'], description: 'Filter within the latest 20 owner loans' })
+  async loans(@Req() request: RequestWithSession, @Query('status') status?: unknown) {
+    if (status !== undefined && (typeof status !== 'string' || !['all', 'active', 'overdue', 'repaid'].includes(status))) {
+      throw new BadRequestException('status must be all, active, overdue or repaid');
+    }
+    return { loans: await this.guarded(() => this.service().loans(requireUserId(request), status === undefined ? 'all' : status), 'loan status is unavailable') };
   }
 
   @Post('wallet/transfers')

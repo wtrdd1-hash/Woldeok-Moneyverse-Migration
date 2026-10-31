@@ -470,12 +470,17 @@ export class PostgresWalletRepository {
     return row;
   }
 
-  async loansForUser(userId: string): Promise<WalletLoanRow[]> {
+  async loansForUser(userId: string, status: string = 'all'): Promise<WalletLoanRow[]> {
     const actor = requireUuid(userId, 'authenticated user id');
+    if (!['all', 'active', 'overdue', 'repaid'].includes(status)) throw new WalletInputError('invalid loan status');
+    // The owner-scoped SQL function caps the source at the latest 20 loans.
+    // Filter its bounded result, never the global loan table or a new unbounded source.
     return queryRows<WalletLoanRow>(
       this.pool,
-      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, status, issued_at, repaid_at FROM public.bank_my_loans($1)`,
-      [actor],
+      status === 'all'
+        ? `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, status, issued_at, repaid_at FROM public.bank_my_loans($1)`
+        : `SELECT loan.loan_id::text, loan.principal_amount::text, loan.interest_amount::text, loan.outstanding_amount::text, loan.status, loan.issued_at, loan.repaid_at FROM public.bank_my_loans($1) AS loan WHERE loan.status = $2 ORDER BY loan.issued_at DESC, loan.loan_id DESC`,
+      status === 'all' ? [actor] : [actor, status],
     );
   }
 

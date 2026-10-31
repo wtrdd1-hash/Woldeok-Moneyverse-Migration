@@ -116,7 +116,7 @@ export interface WalletRepositoryLike {
   claimWork(input: WalletClaimWorkInput): Promise<WalletRewardRow>;
   rewardAvailabilityForUser?(userId: string): Promise<WalletRewardAvailabilityRow>;
   moveBankBalance(input: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow>;
-  loansForUser?(userId: string): Promise<WalletLoanRow[]>;
+  loansForUser?(userId: string, status?: string): Promise<WalletLoanRow[]>;
   borrow(input: WalletBorrowInput): Promise<WalletBorrowRow>;
   repay(input: WalletRepayInput): Promise<WalletRepayRow>;
   getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
@@ -645,20 +645,24 @@ export class WalletService {
     return { transactionId: requireUuid(receipt.transaction_id, 'database transaction id') };
   }
 
-  async loans(authenticatedUserId: string): Promise<WalletLoanView[]> {
+  async loans(authenticatedUserId: string, status: string = 'all'): Promise<WalletLoanView[]> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
-    if (typeof this.repository.loansForUser !== 'function') return [];
-    const rows = await this.repository.loansForUser(actorUserId);
-    if (!Array.isArray(rows)) throw new Error('database returned invalid loans');
-    return rows.map((row) => ({
-      loanId: requireUuid(row.loan_id, 'loan id'),
-      principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
-      interestAmount: wldAmount(row.interest_amount, 'loan interest'),
-      outstandingAmount: wldAmount(row.outstanding_amount, 'loan outstanding'),
-      status: loanStatus(row.status),
-      issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
-      repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
-    }));
+    if (!['all', 'active', 'overdue', 'repaid'].includes(status)) throw new WalletInputError('invalid loan status');
+    if (typeof this.repository.loansForUser !== 'function') throw new Error('loan read is unavailable');
+    const rows = await this.repository.loansForUser(actorUserId, status);
+    if (!Array.isArray(rows) || rows.length > 20) throw new Error('database returned invalid loans');
+    return rows.map((row) => {
+      if (status !== 'all' && row.status !== status) throw new Error('database returned a mismatched loan status');
+      return {
+        loanId: requireUuid(row.loan_id, 'loan id'),
+        principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
+        interestAmount: wldAmount(row.interest_amount, 'loan interest'),
+        outstandingAmount: wldAmount(row.outstanding_amount, 'loan outstanding'),
+        status: loanStatus(row.status),
+        issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
+        repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
+      };
+    });
   }
 
   async borrow(
