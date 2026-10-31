@@ -11,13 +11,21 @@
 
 ## IN PROGRESS
 
-- [ ] Write failing regression tests and observe RED.
-- [ ] Add forward migration and verify GREEN.
-- [ ] Validate isolated PostgreSQL, workspace gates, CI, and latest main.
+- [x] Write failing regression tests and observe RED.
+- [x] Add forward migration and verify GREEN.
+- [x] Validate isolated PostgreSQL and workspace gates; remote CI and release checks remain tracked below.
 
 ## FINISHED
 
-Pending verification; not approved for release.
+- Verified code commit `e3d941899f9847365d78731217c21b293151efff` on baseline main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; origin/main unchanged at mid/final recheck.
+- Focused regression 7 PASS; isolated PostgreSQL 17.11 replay 317 files PASS. Additional Production-like privilege-drift simulation: injected 24 app financial DML privileges and three app EXECUTE grants after migration 317, applied migration 318, then verified all removed; migrator function calls all SQLSTATE 55000. Both disposable containers removed.
+- Local lint PASS (0 errors, 1,016 existing warnings), typecheck PASS, full build PASS, backend 2,944 PASS / 517 SKIP, database 69 PASS / 4 SKIP, contract 41 PASS, mobile API contract 184 PASS, security/release 22 PASS, production dependency audit PASS.
+- Frontend first run exceeded 210-second single-worker budget (EXIT 124), then rerun with two workers 2,901 PASS / 0 FAIL (EXIT 0).
+- Full dependency audit at low threshold FAIL: 9 advisories (8 moderate, 1 low); high threshold exit 0 does not override this.
+- Remote CI classify/policy/runtime/verify-runtime passed on code SHA; build and final SHA CI pending at last checkpoint. No official Test exact-SHA deployment, authenticated cross-user E2E, independent restore or GitOps approval.
+- Public Test `/api/version` still `bc8cd8a6...`, Production `/api/version` `353c6d5d...` (read-only 2026-11-01 00:55 KST), neither equals candidate. No main merge or Test/Production deployment.
+- No API surface changes; marketplace monetary SQL functions now explicitly unavailable (55000 to privileged caller, 42501 to app role). Existing NestJS 503 hold is separate Draft #2221; coordinate UI unavailability with A/C. No historical reconciliation or direct SQL role grant cleanup beyond six listed tables.
+- **Final decision: PARTIAL / RELEASE HOLD.** PR remains Draft. Never apply migration to shared environments without release review and exact-SHA Test verification.
 
 ### Checkpoint 1 — isolated implementation
 
