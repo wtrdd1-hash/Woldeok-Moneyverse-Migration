@@ -1,4 +1,29 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1554 — F675-194 회원 만료 알림 미리보기의 판단기간·집계 정합성 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기·기준:** 이전 Feature Addition v1552 → 현재 Feature Improvement v1554 → 다음 Feature Addition v1556(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 재조회. AGENTS.md·README.md·영어 PROJECT_PLAN.md 정본·국문 대조를 적용했다. 미병합 초안 #2135에만 종속되며 개발 이슈 #2134, 미구현 선행 F675-192(신청)·F675-193(이력)를 전제한다. 문서 전용이며 실제 기능은 없다.
+
+### 기존 v1552 설계에서 발견한 오류와 결정
+- v1552는 **향후 7/30일의 알림 판단기간**을 보여준다고 정의했으나 expires_at <= asOf + 조회기간으로 필터링했다. 만료가 조회기간 밖이어도 알림 판단기간은 안에 들어올 수 있다. 예: 현재 T에서 7.5일 후 만료되는 아이템의 7일 전 판단기간은 T+0.5일에 시작하지만 기존 필터는 제외한다. 30일 조회에서 T+36.5일 만료 아이템도 7일 전 판단기간이 T+29.5일에 시작하므로 포함돼야 한다. 이는 **미구현 설계의 모순**이지 운영 장애가 확인된 것은 아니다.
+- v1552는 24시간 기준의 7/30일을 약속하면서 PostgreSQL interval '7 days'·'1 day'를 사용했다. timestamptz의 일 단위 연산은 DB 세션 시간대의 서머타임 전환에 영향을 받을 수 있다. 판단은 **UTC 절대시각과 168·144·24·720시간 고정 구간**으로 계산하고 KST는 화면 표시만 담당한다.
+- 마이그레이션 071의 public.user_items는 PRIMARY KEY(user_id,catalog_id), quantity>=0, nullable expires_at이다. 동일 상품 5개를 보유해도 만료시각은 **상품 보유 행당 하나**이지 개별 수량당 하나가 아니다. 한 보유 행에서 7일·1일 판단기간 2개가 나올 수 있으므로 보유 종류 수·판단기간 수·화면 카드 수를 구분해야 한다.
+
+### 수정한 시간·집계·API 명세
+- 인증·동의 완료 회원 본인만, 단일 PostgreSQL REPEATABLE READ READ ONLY 스냅샷에서 DB asOfUtc 한 번을 기준으로 계산한다. 신청 OFF면 신청 CTA만 보이고 **개별 보유 아이템 조회·로그는 하지 않는다**. quantity>0, NULL이 아닌 expires_at>asOf, 활성화한 기준일만 판단한다. NULL 만료는 영구가 아닌 UNKNOWN이다. 마이그레이션 123의 shop_my_items_v2는 만료·수량 필터와 별도 clock_timestamp 호출이 있어 단독 근거로 사용하지 않는다.
+- 만료 E의 7일 전 기간은 [E-168시간,E-144시간), 1일 전 기간은 [E-24시간,E)이다. 조회기간 H는 [asOf,asOf+168시간) 또는 [asOf,asOf+720시간). **포함 조건은 windowStart < horizonEnd AND windowEnd > asOf AND E > asOf**이다. 시작=조회기간 끝은 제외, 종료=현재·만료=현재는 제외, 시작=현재는 종료 전이면 포함한다. 소급 발송은 없으며 7일 전 기간이 지나도 1일 전 기간은 미래일 수 있다. 이미 지난 기간은 예정 건수에서 제외하고, 별도 과거 정보로 표시하려면 근거 확인과 명확한 표기가 필요하다.
+- 기존 CSRF 보호 POST /api/v1/shop/expiry-reminders/preview 본문 {withinDays:7|30,limit:1..50}(기본 7/20)을 유지한다. Next·Android app-api 동등성 필수. 모호한 totalQualifying 대신 **qualifyingHoldingCount**(중복 없는 상품 보유 행 수), **qualifyingWindowCount**(보유 행×기준일 수), **thresholdWindowCounts**(7·1별 기간 수), **unknownExpiryHoldingCount**(별도 UNKNOWN), **detailsReturned**(카드 수), **hiddenDetailCount=qualifyingHoldingCount-detailsReturned**를 사용한다. 동일 상품의 두 기간은 카드 하나에 묶고 quantity=5를 카드 다섯 개로 계산하지 않는다. 전체 집계와 최대 50개 상세는 반드시 **같은 전체 본인 스냅샷**에서 계산하며 LIMIT 50 결과만으로 전체 건수를 만들지 않는다. SQL 성공으로 전체 집계가 확인된 경우에만 complete:true 및 200 빈 결과가 가능하다. 불완전한 근거는 503이다.
+- 카드는 가장 이른 현재/미래 판단기간 시작→만료→catalog UUID 순으로 정렬하고 UTC 시작·종료 및 OPEN_NOW/UPCOMING을 표시한다. “판단 가능 기간이며 예약·발송·수신 보장 아님”을 고지한다. 이미 발송했는지는 본인 소유 원자적 영수증이 확인될 때만 TRUE, 출처 불명은 NULL이며 FALSE를 추정하지 않는다. 아이템명과 보관함 이동은 본인 권한 확인이 필요하다. 타인 ID와 민감 UUID를 URL·쿼리·로그에 노출하지 않는다.
+- **시간만 지나도 조회 범위에 새 항목이 진입할 수 있다.** 최초 조회에서 제외된 미래 기간과 51번째 이후 항목까지 전체 보유 후보에서 windowStart-조회기간(조회범위 진입), windowStart, windowEnd, 만료, asOf+30초의 **양수 미래 경계 중 최솟값**으로 validUntilUtc를 계산한다. 과거 경계는 제외하고 asOf보다 이르게 만들지 않는다. 경계에 도달하면 새로고침 또는 STALE을 표시한다. 스냅샷은 향후 30초 동안 상태 불변을 보증하지 않으며 신청 변경·보유 변경 시 워커가 잠금 후 재검증해야 한다. 브라우저·Android 저장 캐시 금지, 성공/오류/리다이렉트 모두 private,no-store/noindex/no-referrer 적용.
+
+### 개발 인계·보안·검증
+- **P0 4건:** OPS1554-01 운영 PID·실행 아티팩트 SHA·삭제된 작업 디렉터리·롤백·독립 백업 복원 증빙(#1984); SEC1554-02 클린 PG17, 개발 DB 최소 권한·체크섬 5건, 신청/알림함/영수증 스키마 출처(#993); FIN1554-03 미리보기 및 롤백의 WLD·원장·국고/MINT/SWF 쓰기 0건 증명(#1976); REL1554-04 Draft/HOLD 병합 통제, 공식 Test 정확 SHA, 인증 E2E·보안 감사·운영 승인(#2031/#1088/#2127/#2111). user_items 직접 SELECT 권한 추가 금지, 본인 전용 SECURITY DEFINER EXECUTE만 허용하고 안전한 search_path·행위자/동의 검증 적용.
+- **P1 6건:** PREVIEW1554-05 UTC 고정 시간대·기간 교집합 SQL/권한·인덱스 EXPLAIN; PREVIEW1554-06 전체 스냅샷에서 보유 종류·기간·UNKNOWN 집계 및 20/50 카드 제한; PREVIEW1554-07 조회범위 진입을 포함한 전역 최소 시간 경계·신청 변경 시 STALE 처리; PREVIEW1554-08 Nest CSRF POST DTO·400/401/403/409/429/503·비공개 헤더 및 Android 게이트웨이; PREVIEW1554-09 Next 320px/WCAG 2.2 AA·44px 터치·초점·한영 문구·SEO·20명 이상 익명 관리자 KPI; PREVIEW1554-10 격리 PG17에서 10,001개 보유/2회원/2기준일/2워커/50건 제한, 시간대 DST·UTC, 만료 7.5/14/36.5/37일, 정확한 경계 ±1마이크로초, quantity=5, 두 기간 한 카드, NULL/수량0, 51번째 이후의 진입 경계, 신청 OFF 경쟁, DB 권한, Android 계정 전환 시험. **수용시험은 명세만 작성했고 실행하지 않았다.**
+- 기능 스위치 EXPIRY_REMINDER_PREVIEW_ENABLED 기본 OFF. 개발 A/B/C 별도 브랜치와 Test 정확 SHA 게이트 필수. 기존 PK와 (user_id,expires_at) 후보 인덱스를 EXPLAIN/BUFFERS로 검증하고 필요한 경우에만 별도 순방향 마이그레이션을 제안한다. 초기 속도 제한 30회/회원/분·60회/IP/분, SQL 2초 제한은 실제 부하 시험으로 확정한다. 영구 미리보기 큐·대량 내보내기 없음. 관리자 지표는 20명 이상 집단만, 소수 셀 숨김·원천 장애/만료 스냅샷 비율만 제공한다.
+
+### 근거·QA·운영 보류
+- 마이그레이션 071의 PK/수량/NULL 만료, 123의 필터·다중 clock_timestamp, Nest 알림 서비스 및 프론트 보관함/app-api 경로를 조사했다. main 재조회, 선행 #2135 Draft 유지. 2026-10-31 13:09 KST 공개 /fx 경로가 HTTP 200이었지만 **인증 후 FX 정상 동작이나 과거 HTTP 500 해결을 증명하지 않는다**. 이번 회차에서 상세 확인한 마지막 전체 QA는 v1411: 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 격리 PG17 311/311; 전체 보안 감사 FAIL(13건), 공식 Test 정확 SHA·경로 장부 FAIL, 개발 DB 권한/체크섬 문제, 독립 복원 BLOCKED. v1554 신규 기능 수용시험은 미실행.
+- **RELEASE HOLD:** 운영 실행 출처, DB 권한, Test 정확 SHA, 독립 복원, 보안 감사 및 사용자 승인이 증명되지 않았다. 외부 독립 레퍼런스 신규 승인 **0건**, 누적 검증·중복 제거·근거 분류 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 영문 정본·국문 동등 통합문서와 작업/업데이트 로그만 변경한다. main 병합·런타임·DB·WLD·원장·Test·Production 변경 없음.
+
 - **GitHub v1552:** Draft PR #2135 OPEN/HOLD (선행 #2128), 개발 이슈 #2134 OPEN; 정확 SHA CI 별도 확인, 병합·배포 없음.
 ## v2026.10.31.1552 — F675-194 회원 보유 아이템 만료 알림 대상 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 

@@ -1,3 +1,6 @@
+## Planning v1554 — 2026-10-31 (DRAFT / RELEASE HOLD)
+Previous Feature Addition v1552 → Current Feature Improvement v1554 → Next Feature Addition v1556 (provisional). Source-checked main 761a55a094fb9dd383d213e817305e68c79fa23c; parent Draft #2135; engineering issue #2134. Corrected F675-194 reminder preview for expiry T+7.5d and T+36.5d to intersect 7/30-day rolling horizons with 7d/1d **decision windows**, not expiry dates. Explicit UTC fixed-hour intervals, distinct catalog-holding versus window counts, 20/50 capped cards with complete owner counts, and time-only horizon-entry invalidation across all 10,001 holdings. P0 4/P1 6; synthetic acceptance NOT RUN. QA v1411 previously inspected, audit/exact-SHA/restore/DB gate still HOLD. External new verified 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs only; no runtime, financial or deployment change.
+
 - **GitHub v1552:** Draft PR #2135 OPEN/HOLD, engineering issue #2134 OPEN; no merge or deployment.
 - **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
 ## v2026.10.31.1552 — F675-194 Owner Expiry Reminder Eligibility Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)

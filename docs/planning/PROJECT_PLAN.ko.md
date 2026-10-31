@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1554 — F675-194 만료 알림 미리보기 기간·집계 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
+- **주기:** 이전 Feature Addition v1552 → 현재 Feature Improvement v1554 → 다음 Feature Addition v1556(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2135, 개발 #2134. 문서만 변경, 기능 미구현.
+- **설계 수정:** 기존 expires_at<=asOf+조회기간 필터는 만료 T+7.5일(7일 전 기간 T+0.5일)과 T+36.5일(30일 조회에서 7일 전 기간 T+29.5일)을 잘못 제외한다. 만료시각이 아닌 활성 기준별 반열린 **알림 판단기간**이 조회기간과 교차하는지 windowStart<horizonEnd AND windowEnd>asOf AND expiry>asOf로 판정한다. UTC 고정 168/144/24/720시간으로 DST 영향을 제거한다. 소급 발송·실제 수신 보장 없음.
+- **집계 정합성:** 마이그레이션 071의 user_items PK(user_id,catalog_id), quantity=5여도 보유 행 만료 하나. qualifyingHoldingCount(보유 종류), qualifyingWindowCount(기준일 기간), 기준별 건수, unknownExpiryHoldingCount, detailsReturned, hiddenDetailCount를 단일 전체 본인 스냅샷에서 계산한다. 같은 보유 행의 두 기준일은 카드 하나·기간 둘. 상세 20/50 제한, 전체 집계 불확실하면 503. 신청 OFF는 개별 조회 없음.
+- **시간 경계:** 현재 제외된 미래 기간과 51번째 이후 보유 항목까지 전부 고려해 조회범위 진입(windowStart-조회기간), 기간 시작/종료, 만료, asOf+30초 중 가장 이른 미래 경계로 validUntil을 산출한다. STALE 새로고침, 워커 잠금 후 재검증. CSRF POST /api/v1/shop/expiry-reminders/preview, 본인 전용 SECURITY DEFINER, 비공개/no-store/noindex, Next/Android 동등, 320px WCAG AA, 관리자 20명 이상 집단 KPI, 기본 OFF.
+- **백로그:** P0 OPS1554-01 SEC1554-02 FIN1554-03 REL1554-04; P1 PREVIEW1554-05~10(4+6). 격리 PG17 10,001건/2회원/2기준일, DST, 7.5/14/36.5/37일, ±1마이크로초, 수량5, 51번째 이후 시간 경계, 권한·Android·롤백 시험은 **명세만 작성, 미실행**. 기존 QA v1411 백엔드 2778 PASS/501 SKIP, 프론트 2770 PASS, 격리 PG17 311/311; 감사 FAIL 13, 공식 Test 정확 SHA·경로 장부 FAIL, 개발 DB 권한/체크섬·독립 복원 BLOCKED. 13:09 KST 공개 /fx HTTP 200은 인증 FX 정상 증거가 아님. RELEASE HOLD.
+- **외부 근거:** 신규 승인 0, 누적 독립 검증·중복 제거·분류 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 상세는 영문·국문 통합 마스터. 런타임·DB·WLD·원장·Test·Production·main 변경 없음.
+
 - **GitHub v1552:** Draft PR #2135 OPEN/HOLD (선행 #2128), 개발 이슈 #2134 OPEN; main 병합·런타임 배포 없음.
 ## v2026.10.31.1552 — F675-194 회원 만료 알림 대상 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 보완 v1550 → 현재 추가 v1552 → 다음 보완 v1554(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2128·개발 #2112/#2122. 알림 관련 선행 기능 모두 미구현·초안. 문서 전용.
