@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { publicApi } from '@/lib/api';
 import GalleryPage, { generateMetadata } from './page';
