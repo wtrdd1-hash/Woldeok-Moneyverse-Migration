@@ -36,7 +36,7 @@ test('Vite, fast-uri and brace-expansion lock entries meet patched floors', () =
   const versions = (name) => [...lock.matchAll(new RegExp('^  ' + name + '@(\\d+\\.\\d+\\.\\d+):', 'gm'))].map((match) => match[1]);
   for (const [name, floor] of [
     ['vite', [7, 3, 7]],
-    ['fast-uri', [3, 1, 8]],
+    ['fast-uri', [3, 1, 9]],
   ]) {
     const found = versions(name);
     assert.ok(found.length > 0, name + ' must be locked');
