@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedExpiryHoldings } from '@/lib/inventory-expiry';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
@@ -196,6 +197,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   }
 
+  const ownerHoldingsPath = request.method === 'GET' && parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings';
+  const ownerHoldingsFilters = ownerHoldingsPath ? request.nextUrl.searchParams.getAll('filter') : [];
+  if (ownerHoldingsPath && (ownerHoldingsFilters.length > 1 ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'filter') ||
+      (ownerHoldingsFilters.length === 1 && !['attention', 'expiring_7d', 'expiring_30d'].includes(ownerHoldingsFilters[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'shop_holdings_filter_invalid', 'invalid owner holdings filter');
+  }
+  const ownerExpiryFilter = ownerHoldingsFilters[0] === 'expiring_7d' || ownerHoldingsFilters[0] === 'expiring_30d'
+    ? ownerHoldingsFilters[0] : null;
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -227,6 +238,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (ownerExpiryFilter && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedExpiryHoldings(await response.clone().json(), ownerExpiryFilter)) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_expiry_unverified',
+          'owner inventory expiry evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_expiry_unverified',
+        'owner inventory expiry evidence is unavailable');
+    }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
@@ -448,6 +472,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

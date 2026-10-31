@@ -20,10 +20,20 @@ describe('shop holdings owner-scoped API', () => {
     ]);
   });
 
+  it('uses an owner-scoped SQL expiry window for 7 and 30 days', async () => {
+    const holdings = vi.fn().mockResolvedValue([{ catalog_id: 'item', expires_at: '2026-11-02T00:00:00Z' }]);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    expect(await controller.holdings(request, 'expiring_7d')).toMatchObject({ filter: 'expiring_7d', holdings: [{ catalog_id: 'item' }] });
+    expect(await controller.holdings(request, 'expiring_30d')).toMatchObject({ filter: 'expiring_30d' });
+    expect(holdings).toHaveBeenNthCalledWith(1, actor, 7);
+    expect(holdings).toHaveBeenNthCalledWith(2, actor, 30);
+  });
+
   it('rejects an unsupported filter before reading any private data', async () => {
     const holdings = vi.fn();
     const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
     await expect(controller.holdings(request, 'everyone')).rejects.toMatchObject({ status: 400 });
+    await expect(controller.holdings(request, ['expiring_7d'])).rejects.toMatchObject({ status: 400 });
     expect(holdings).not.toHaveBeenCalled();
   });
 });

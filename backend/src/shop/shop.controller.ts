@@ -346,17 +346,20 @@ export class ShopController {
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Catalogue items the caller holds' })
   async holdings(@Req() request: RequestWithSession, @Query('filter') filter?: unknown) {
-    if (filter !== undefined && filter !== 'attention') {
+    if (filter !== undefined && (typeof filter !== 'string' || !['attention', 'expiring_7d', 'expiring_30d'].includes(filter))) {
       throw new BadRequestException('invalid holdings filter');
     }
+    const days = filter === 'expiring_7d' ? 7 : filter === 'expiring_30d' ? 30 : null;
     let holdings = await this.guarded(
-      () => this.repository().holdings(requireUserId(request)),
+      () => days === null
+        ? this.repository().holdings(requireUserId(request))
+        : this.repository().holdings(requireUserId(request), days),
       'held items are unavailable',
     );
     if (filter === 'attention') {
       holdings = holdings.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
     }
-    return { holdings };
+    return days === null ? { holdings } : { holdings, filter };
   }
 
   @Post('catalog/:id/purchases')

@@ -12,3 +12,9 @@
 
 ## FINISHED — v3
 - Pending exact-SHA gate evidence; no merge or deployment without required PASS.
+
+### MIDPOINT v2 — 22:28 KST
+- TDD RED: Backend controller 1 FAIL/2 PASS; frontend Android/expiry 2 FAIL/3 PASS. GREEN: Backend 3/3 and frontend 5/5 PASS. Contract build, backend and frontend typecheck PASS. Main rechecked unchanged `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`.
+- Implemented parameterized owner SECURITY DEFINER expiry predicate (7/30 rolling days, database transaction clock), strict Nest query, Next SSR filter + verified-empty/unavailable and all-holdings equipped showcase, Android fail-closed proof and private/noindex/no-referrer. No migration/ledger writes.
+- DEV PostgreSQL 17.11 role audit: `shop_my_items_v2` SECURITY DEFINER and app EXECUTE=true, but direct `public.user_items` SELECT=true and DELETE=true (P0 #993 persists; DEV-only observation). No Production conclusion.
+- Integration and deployment remain HOLD pending full gates, exact-SHA CI, official Test auth/E2E, independent restore, P0 ACL and release provenance.

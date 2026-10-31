@@ -2,6 +2,8 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import type { InventoryExpiryWindow } from '@/lib/inventory-expiry';
 import { Check, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
@@ -26,6 +28,8 @@ export interface HeldItem {
 
 interface InventoryViewProps {
   readonly holdings: HeldItem[];
+  readonly expiryWindow?: InventoryExpiryWindow | null;
+  readonly expiryHoldings?: HeldItem[] | null;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
 }
@@ -46,6 +50,8 @@ const CATEGORIES = [
 
 export function InventoryView({
   holdings,
+  expiryWindow = null,
+  expiryHoldings = null,
   currentUsername = '모험가',
   userAvatarUrl,
 }: InventoryViewProps) {
@@ -54,7 +60,8 @@ export function InventoryView({
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const filtered = holdings.filter((h) => {
+  const visibleHoldings = expiryWindow ? (expiryHoldings ?? []) : holdings;
+  const filtered = visibleHoldings.filter((h) => {
     if (selectedCategory === 'all') return true;
     return h.category === selectedCategory;
   });
@@ -171,14 +178,34 @@ export function InventoryView({
         </div>
       )}
 
+      <nav aria-label="만료 예정 아이템 조회" className="flex flex-wrap gap-2 text-sm">
+        {([
+          { href: '/inventory', window: null, label: '전체 보유품' },
+          { href: '/inventory?expiry=7d', window: '7d', label: '7일 이내 만료' },
+          { href: '/inventory?expiry=30d', window: '30d', label: '30일 이내 만료' },
+        ] as const).map((option) => (
+          <Link key={option.href} href={option.href} aria-current={expiryWindow === option.window ? 'page' : undefined}
+            className={cn('rounded-xl border px-4 py-2 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
+              expiryWindow === option.window ? 'border-amber-500 bg-amber-500 text-black' : 'border-border bg-card text-foreground')}>
+            {option.label}
+          </Link>
+        ))}
+        {expiryWindow && <p className="w-full text-xs text-muted-foreground">조회 시점부터 24시간 단위의 기간입니다. 효과 만료일과는 다를 수 있습니다.</p>}
+      </nav>
+      {expiryWindow && expiryHoldings === null && (
+        <div role="alert" className="rounded-xl border border-amber-500/40 p-4 text-sm">
+          만료 예정 아이템 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.
+        </div>
+      )}
+
       {/* Category Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
           const count =
             cat.id === 'all'
-              ? holdings.length
-              : holdings.filter((h) => h.category === cat.id).length;
+              ? visibleHoldings.length
+              : visibleHoldings.filter((h) => h.category === cat.id).length;
 
           return (
             <button
@@ -199,10 +226,10 @@ export function InventoryView({
       </div>
 
       {/* Holdings Grid */}
-      {filtered.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border/60 p-12 text-center text-muted-foreground bg-card/30">
-          <p className="text-sm font-bold">보유한 아이템이 없습니다.</p>
-          <p className="text-xs mt-1">상점 2.0에서 마음에 드는 아이템을 둘러보세요!</p>
+      {expiryWindow && expiryHoldings === null ? null : filtered.length === 0 ? (
+        <div role="status" className="rounded-3xl border border-dashed border-border/60 p-12 text-center text-muted-foreground bg-card/30">
+          <p className="text-sm font-bold">{expiryWindow ? '해당 기간에 만료 예정인 아이템이 없습니다.' : '보유한 아이템이 없습니다.'}</p>
+          {!expiryWindow && <p className="text-xs mt-1">상점 2.0에서 마음에 드는 아이템을 둘러보세요!</p>}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

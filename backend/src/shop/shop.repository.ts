@@ -255,8 +255,11 @@ export class ShopCatalogRepository {
     );
   }
 
-  async holdings(actor: unknown): Promise<ShopHoldingRow[]> {
+  async holdings(actor: unknown, expiryDays?: 7 | 30): Promise<ShopHoldingRow[]> {
     const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    if (expiryDays !== undefined && expiryDays !== 7 && expiryDays !== 30) {
+      throw new ShopInputError('invalid expiry window');
+    }
     return queryRows<ShopHoldingRow>(
       this.pool,
       `SELECT holding.catalog_id::text AS catalog_id,
@@ -281,8 +284,11 @@ export class ShopCatalogRepository {
               holding.arrears_due::text AS arrears_due,
               holding.arrears_cap::text AS arrears_cap,
               holding.suspended
-       FROM public.shop_my_items_v2($1) AS holding`,
-      [actorUserId],
+       FROM public.shop_my_items_v2($1) AS holding${expiryDays === undefined ? '' : `
+       WHERE holding.expires_at IS NOT NULL
+         AND holding.expires_at > transaction_timestamp()
+         AND holding.expires_at <= transaction_timestamp() + ($2::integer * INTERVAL '1 day')`}`,
+      expiryDays === undefined ? [actorUserId] : [actorUserId, expiryDays],
     );
   }
 
