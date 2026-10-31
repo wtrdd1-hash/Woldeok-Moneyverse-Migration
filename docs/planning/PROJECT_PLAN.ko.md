@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub v1552:** Draft PR #2135 OPEN/HOLD (선행 #2128), 개발 이슈 #2134 OPEN; main 병합·런타임 배포 없음.
 ## v2026.10.31.1552 — F675-194 회원 만료 알림 대상 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 보완 v1550 → 현재 추가 v1552 → 다음 보완 v1554(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2128·개발 #2112/#2122. 알림 관련 선행 기능 모두 미구현·초안. 문서 전용.
 - **목적:** 인증·동의 회원이 /inventory/expiring/reminders → /inventory/expiring/reminders/preview에서 향후 7/30일 내 보유 아이템의 7일 전/1일 전 **알림 판단 가능 기간** 확인. OFF면 신청 CTA만, 아이템별 조회·로그 없음. 판단 가능은 큐 등록·발송·수신 보증 아님. 이메일·푸시·자동 갱신·장착·결제·WLD 쓰기 없음.

@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub v1552:** Draft PR #2135 OPEN/HOLD (stacked on #2128), engineering issue #2134 OPEN; no main merge or runtime deployment.
 ## v2026.10.31.1552 — F675-194 Owner Expiry Reminder Eligibility Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1550 → Current Feature Addition v1552 → Next Feature Improvement v1554 (provisional). Canonical GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c checked start/mid; parent Draft #2128 and related #2112/#2122. All prerequisite reminder features remain Draft/unimplemented. Documentation only.
 - **Purpose:** authenticated, consent-current owner /inventory/expiring/reminders → /inventory/expiring/reminders/preview to see potential 7-day/1-day in-app reminder decision windows within rolling 7/30 days. OFF shows settings CTA only; no item-level query/logging. Window is **not** a queued/sent/delivered notice. No email/push, renewal, auto-equip, upkeep, payment or WLD mutation.

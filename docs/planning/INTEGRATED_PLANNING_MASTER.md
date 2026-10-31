@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **GitHub v1552:** Draft PR #2135 OPEN/HOLD (stacked on #2128), engineering issue #2134 OPEN; exact-SHA remote CI to be checked, no merge or deployment.
 ## v2026.10.31.1552 — F675-194 Owner Expiry Reminder Eligibility Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Cycle:** Previous Feature Improvement v1550 → Current Feature Addition v1552 → Next Feature Improvement v1554 (provisional). **Authority:** GitHub main SHA 761a55a094fb9dd383d213e817305e68c79fa23c; AGENTS.md, README.md, English PROJECT_PLAN.md canonical and Korean counterpart, checked at start and mid. **Dependencies:** F675-188 inventory expiry radar, F675-192 opt-in and F675-193 history are all Draft/unimplemented; parent planning Draft #2128, related engineering #2112/#2122. This is a design proposal, not an operational capability.

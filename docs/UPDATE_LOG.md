@@ -1,3 +1,4 @@
+- **GitHub v1552:** Draft PR #2135 OPEN/HOLD, engineering issue #2134 OPEN; no merge or deployment.
 - **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
 ## v2026.10.31.1552 — F675-194 Owner Expiry Reminder Eligibility Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1550 → Current Feature Addition v1552 → Next Feature Improvement v1554 (provisional). Canonical GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c checked start/mid; parent Draft #2128 and related #2112/#2122. All prerequisite reminder features remain Draft/unimplemented. Documentation only.
