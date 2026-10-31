@@ -1,4 +1,40 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1560 — F675-196 회원 보유 아이템 만료 알림 일일 통합 알림 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 기능 보완 v1558 → 현재 기능 추가 v1560 → 다음 기능 보완 v1562(잠정). **기준:** main `1a3625f3c5e426c857e2b44a412d7949ac4a6257` 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 원본·국문 동등 문서. 미병합 Draft #2157 (`ced5ee5e0a8f58b58c8f183807b4e246974c05ba`) 이후 스택, 개발 이슈 #2166. F675-192/193/194/195는 모두 **미구현 Draft**이며 실제 발송 기능이라고 주장하지 않음. 별도 분산 기획 파일 생성 없음.
+
+### 목적·대안·회원 흐름
+- 여러 보유 아이템의 7일 전·1일 전 알림이 알림함에 과다 생성되는 문제를 줄이기 위한 **선택형 앱 내 일일 통합 알림**. 기존 개별 알림이 기본값이며 회원이 명시적으로 전환·복구 가능. 클라이언트만 묶는 방식은 실제 알림함 폭주를 막지 못하고, 이메일·푸시는 검증된 채널·동의가 없어 제외. 7일·1일 판단기간을 지나면 발송을 보장하거나 소급하지 않음. 선행 F675-192 설정·영수증, 193 이력, 194 미리보기, 195 보유 세대·개별 제외, 실제 알림함 DDL/권한 및 안전한 내부 링크가 검증되지 않으면 OFF/503.
+- 대상은 로그인·동의가 유효한 **본인**. `/inventory/expiring/reminders` → '일일 통합 알림' → `/inventory/expiring/reminders/digest`. 전체 알림 설정, 개별/매일 09:00 KST 라디오 선택, 7일·1일 기준, 실제 증거가 있는 최근 통합 알림, 대상 미리보기, 저장/되돌리기, `/inventory/expiring/reminders/activity` 이동을 제공. 전체 OFF이면 개별 보유 아이템을 조회·기록하지 않음. 관리자 대리설정·타인 조회·공개 페이지 없음.
+- 상태 INITIAL/LOADING, GLOBAL_OFF(설정으로 이동), INDIVIDUAL_ACTIVE, DIGEST_ACTIVE, VERIFIED_EMPTY, UNKNOWN_EXPIRY, PREVIEW_POTENTIAL(발송 확정 아님), SAVING/SAVED, STALE_REVISION(새로고침), AUTH/CONSENT_REQUIRED, RATE_LIMITED, SOURCE_UNAVAILABLE(재시도), ACCOUNT_SWITCHED(이전 응답 폐기), MISSED_WINDOW(발송 안 됨). 저장은 리비전 동시성 검사, 되돌리기는 새 검증 요청. 실제 알림함 기록과 공통 기준별 영수증이 원자적으로 확정되지 않으면 발송 완료 표시 금지. 자동 연장·구매·장착·보상·WLD·원장 작업 없음.
+- **발송 의미:** 매일 09:00 한국시간 = UTC 00:00에 판단하며, 검증된 대상이 1개 이상이고 DB 트랜잭션이 성공한 경우에만 회원·KST 판단일당 앱 내 알림 1건. 본문에는 검증된 집계 건수만 표시하고 이름·UUID·만료 마이크로초·비공개 URL은 포함하지 않음. '알림함 기록됨'은 기기 푸시·이메일·읽음·실제 수신을 의미하지 않음. 대상 0건이면 발송·가짜 영수증 없음. 실행 누락이나 당일 확정 후 새 대상 발생 시 두 번째 알림·기간 지난 소급 발송을 하지 않으며 확인 가능한 이력만 정확히 표시.
+
+### API·DB·정합성
+- **Nest:** 인증·동의·CSRF 보호 `POST /api/v1/shop/expiry-reminders/digest/preview` `{withinDays:7|30,limit?:1..50}`(기본 20), `POST /api/v1/shop/expiry-reminders/digest/settings` `{mode:'individual'|'daily_digest',expectedRevision:string,idempotencyKey:UUID}`. 회원·세션은 서버에서 결정, 본인 ID 입력·중복/알 수 없는 필드·위조 리비전·동일 키 다른 본문 거부. 미리보기 `{asOfUtc,sourceStatus:'VERIFIED',mode,globalEnabled,eligibleHoldingCount,eligibleThresholdCount,rows,nextBoundaryUtc}`; 상세 기본 20/최대 50, 전체 건수는 동일 읽기 스냅샷으로 산출. 설정 응답은 실제 확정된 모드·리비전. Android `/app-api/v1/shop/expiry-reminders/digest/...` 동일 세션/CSRF 상당 보호·개인정보 헤더. 오류 400·401·403·409·429·503, 정상 원천 읽기 성공 시에만 빈 결과 200.
+- **SQL 제안:** 선행 F675-192의 설정·영수증 스키마가 구현되면 재사용, 중복 테이블 금지. 필요시 `shop_expiry_digest_preferences` 회원 PK·모드 CHECK·양수 리비전, `shop_expiry_digest_batches` 회원+KST 판단일 UNIQUE·확정된 알림함 FK·대상 수>0, `shop_expiry_digest_members` 배치+상품+세대+기준 UNIQUE 및 공통 기준별 영수증 UNIQUE(회원, 상품, 보유세대, DB 만료 마이크로초, 기준일수). FK·보존·계정삭제 정책은 실제 알림함 스키마와 대조; SENT 고아 영수증 금지. 인덱스는 회원+판단일 UNIQUE, 배치+상품, 영수증 회원+세대+만료+기준 후보를 EXPLAIN/BUFFERS로 검증해 중복 없이 적용. 최신 main 마이그레이션 313 이후 **구현 시** Backend B와 번호 조정, 기존 적용 SQL 수정 금지.
+- **권한:** 고정 search_path·스키마 한정 SECURITY DEFINER 본인 전용 함수, PUBLIC 및 moneyverse_app 직접 테이블 SELECT/DML 차단, 필요한 함수 EXECUTE만 부여. p_actor 인자 자체가 신원 검증은 아니므로 Nest 세션·동의와 결속. 직접 접근 거부 테스트, 금융 원장·Treasury 호출 0. 회원·상품·토큰·아이템명은 로그/분석/URL/알림 본문에 기록하지 않음. 계정 삭제 정책을 준수하되 활성 판단/재시도 기간의 중복 방지 증거는 조기 삭제 금지.
+- **시간·동시성:** 잠금 획득 **후** DB UTC 기준시각을 한 번 확정, 7일 전 `[E−168시간,E−144시간)`, 1일 전 `[E−24시간,E)` 및 PostgreSQL 마이크로초 정밀도. KST 날짜는 클라이언트 Date가 아닌 DB에서 계산. 회원+판단일 → 전체 설정 → 상품 UUID 정렬 보유 행 → 보유세대/개별 제외 → 공통 영수증/배치/알림함 순서로 잠금; 기존 획득 함수와 v1558 트리거 순서를 검증. 전체 대상 집합을 하나의 트랜잭션에서 계산하고 첫 50건만 사용하지 않음. 개별/통합 모드 전환에도 동일 기준별 UNIQUE 영수증으로 중복 방지. 이미 확정된 알림은 설정 변경으로 취소되지 않음. 두 워커/재시도도 하루 알림 1건으로 수렴. DB 시간초과·데드락·세대 미확인·일부 삽입 실패 시 영수증·배치·알림함 모두 롤백, 발송 완료로 기록하지 않음. 10,001건 부하/잠금 실패 시 기능 차단 후 별도 검증 가능한 단계적 배치 설계; 부분 통합 알림 금지.
+
+### 개인정보·SEO·접근성·관리자·배포
+- 모든 2xx/3xx/4xx/5xx와 Android 게이트웨이에서 `private,no-store,noindex,no-referrer`. 현재 알림 검색 내부 링크 허용 목록에 `/inventory`가 없으므로 B #2130과 충돌 없이 안전한 경로 검증 후 이동 버튼 활성화. 사이트맵·공개 canonical 제외, SEO_INDEXING_ENABLED=true와 상위 캐시 헤더를 포함한 **실제 HTTP 응답** 테스트. 원문 알림 로그 금지. 회원당 설정 변경 시간당 20회, 미리보기 분당 60회, IP 제한, 최대 50건, SQL 읽기 2초는 **잠정 목표**이며 부하 시험 필요.
+- 모바일 320px·200% 확대·44px 터치·WCAG 2.2 AA, 라디오 설명·키보드 포커스 복구·aria-live·동작 감소·색상 외 상태 구분·KST/UTC 안내. Android 로그아웃/계정 전환 시 진행 중 요청 취소, 이전 세션 응답 폐기, 개인 통합 알림 디스크 캐시 금지.
+- 관리자는 **서로 다른 회원 20명 이상 집단**만 집계하고 작은 셀은 비공개. 선택률, 실제 검증 대상, 확정 통합 알림, 중복 차단, 판단기간 누락, 409/429/503, p95 읽기·워커 시간. 회원/아이템 상세 조회 없음. p95 미리보기 <300ms 및 중복 알림/원장 쓰기 0은 **목표이며 미측정**.
+- 플래그 `EXPIRY_REMINDER_DAILY_DIGEST_ENABLED` 기본 OFF. 선행 설정·개별 제외·미리보기·이력 기능의 구현/검증 필수. 개발별 별도 브랜치/Test Docker, SQL 순번 조정, **정확 SHA** 공식 Test에서 본인 인증 E2E·Android 동등성, 전체 CI·보안감사·경로장부·독립 백업 복원·운영 실행 SHA/롤백·금융 정합성 검증 후 승인된 단계적 배포. OFF 롤백 시 기존 개별 모드로 복귀하며 확정 영수증·알림함·세대 삭제/재발송 금지. 기획 예약은 배포하지 않음.
+
+### 개발 백로그 P0 4건 + P1 6건
+1. **P0 OPS1560-01** #2144/#1984 운영 PID/CWD·바이너리·프론트/백엔드/엣지 SHA·불변 롤백·독립 복원 확인. 삭제된 릴리스 경로에서 재시작 금지.
+2. **P0 SEC1560-02** #993 개발 DB 체크섬 5건·앱 계정 권한, 클린 PG17 알림함 DDL·보유세대 트리거·마이그레이션 순서·직접 권한 거부 검증.
+3. **P0 FIN1560-03** #2153 Test Treasury HTTP 200의 미검증 60,000,000 WLD와 Production 503 UNVERIFIED 정합성 증빙; 통합 알림의 금융 쓰기 0 보장.
+4. **P0 REL1560-04** 전체 QA·보안감사·HTTP 개인정보 헤더·경로장부·정확 SHA 공식 Test·독립 복원·롤백 증빙 전 Draft/병합/운영 승격 HOLD.
+5. **P1 DIGEST1560-05** 개발 B: 설정·배치·구성원·기준 영수증 SQL, FK/UNIQUE/보존·권한 거부·EXPLAIN.
+6. **P1 DIGEST1560-06** 개발 B: 매일 09시 워커, 전체 대상 DB 스냅샷, 잠금 순서, 설정/제외/세대 우선순위, 2워커 원자성·재시도.
+7. **P1 DIGEST1560-07** 개발 B: Nest POST API·CSRF·동의·멱등성·리비전·400/401/403/409/429/503.
+8. **P1 DIGEST1560-08** 개발 A/C: Next 접근성 UI·Android app-api 동등성·저장/되돌리기·오류/검증된 빈 상태·계정 전환.
+9. **P1 DIGEST1560-09** 개발 A/C: 실제 HTTP 개인정보/SEO, 안전한 알림함 링크, 20명 이상 관리자 KPI·악용 방지·보존.
+10. **P1 DIGEST1560-10** QA: 격리 PG17 10,001개 보유·회원 2명·워커 2개·UTC/KST 경계·DST 독립 시간·동일 만료 재획득·제외/모드 경합·중복 재시도·롤백·타인 거부·503·Android·정확 SHA Test.
+
+**검증/차단:** 이번 v1560 로컬 릴리스 시험 122건 중 121 PASS / 1 FAIL: `verify-merged-pr-head.test.mjs`는 삭제 push를 기대하지만 현재 main의 정리 워크플로는 의도적으로 읽기 전용. 테스트/워크플로 내용이 main과 동일하므로 이번 문서 변경의 원인이 아님. REL1560-04 BLOCKED.  이전 QA v1411은 백엔드 2,778 PASS/501 SKIP, 프론트엔드 2,770 PASS, 격리 PG 311/311, 전체 의존성 감사 13건 FAIL, 공식 Test 정확 SHA·경로장부·개발 DB 권한/체크섬·독립 복원 미해결로 보고됐음. **v1560 수용시험 결과가 아님.** 최신 main에는 313 마이그레이션이 있으므로 승격 전 최신 QA 재검증 필요. 10,001건 시험·p95는 **제안/미실행**. 외부 독립 레퍼런스 신규 승인 **0건**, 누적 중복 제거·근거 분류 검증 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. DRAFT / RELEASE HOLD, 런타임·DB·WLD·원장·Test·Production·main 변경 없음.
+
 - **GitHub v1558:** Draft PR #2157 OPEN/HOLD (상위 #2149), 개발 이슈 #2148 갱신, 원격 CI 진행 중. 병합·배포·런타임 변경 없음.
 ## v2026.10.31.1558 — F675-195 보유 세대값·정밀 만료시각 기반 개별 알림 제외 검증 (기능 보완 / DRAFT / RELEASE HOLD)
 

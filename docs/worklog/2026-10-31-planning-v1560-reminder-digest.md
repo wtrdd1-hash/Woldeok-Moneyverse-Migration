@@ -12,5 +12,10 @@
 ## IN PROGRESS
 - Pending canonical design and risk/QA review. No runtime or database changes permitted.
 
+- **Midpoint:** main unchanged at `1a3625f3c5e426c857e2b44a412d7949ac4a6257`; issue #2166 created. Source confirmed: notification search currently omits `/inventory` from safe links; migration 071 PK and nullable expiry; 123 filters expired/zero holdings; current app-api private header allowlist omits `shop/holdings`; `in_app_notifications` DDL not located in numbered migrations (does NOT prove live table absence). Newer main has migrations through 313. Design follows existing read/owner function security and Draft dependencies.
+- [x] EN/KO canonical and integrated design. [x] P0/P1 4+6. [ ] Final CI and PR.
+
+- **Fresh local release test:** 121/122 PASS, 1 FAIL: cleanup workflow test expects destructive push but main workflow is read-only; unchanged from main. Do not claim green. P0 REL1560-04 BLOCKED.
+
 ## FINISHED
 - Pending final verification. RELEASE HOLD.
