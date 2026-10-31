@@ -16,7 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -175,10 +175,11 @@ export class ContentController {
 
   @Get('photos')
   @ApiOperation({ summary: 'Published gallery photos' })
+  @ApiQuery({ name: 'q', required: false, type: String, description: 'Optional 2-40 character caption search in the latest 24 published photos' })
   async photos(@Query('q') raw?: unknown) {
     const query = await this.guarded(async () => normalizeGalleryCaptionQuery(raw), 'invalid gallery query');
     const photos = await this.service().publicPhotos({ limit: 24, query });
-    return query === null ? { photos } : { photos, query, scope: 'latest_24_published' as const };
+    return { photos, query, scope: 'latest_24_published' as const };
   }
 
   @Get('status')

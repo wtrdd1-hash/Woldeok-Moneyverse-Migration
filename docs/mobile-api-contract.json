@@ -9039,10 +9039,26 @@
                 "publishedAt"
               ]
             }
+          },
+          "query": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "const": "latest_24_published"
           }
         },
         "required": [
-          "photos"
+          "photos",
+          "query",
+          "scope"
         ]
       },
       "responseCompatibility": {

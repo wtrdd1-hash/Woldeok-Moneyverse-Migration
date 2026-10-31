@@ -13,7 +13,7 @@ export interface GalleryPhoto {
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MEDIA = /^\/media\/[0-9a-f-]{36}\.(png|jpg|webp)$/i;
-const HTTPS = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}\/[A-Za-z0-9._~%/@:+,;=!-]+$/;
+const HTTPS = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}(?::443)?\/[A-Za-z0-9._~%/@:+,;=!-]+$/;
 export function parseGalleryCaptionSearch(payload: unknown, query: string): GalleryPhoto[] | null {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
   const value = payload as Record<string, unknown>;

@@ -3013,6 +3013,8 @@ _No request body._
 | photos[].imageUrl | true | string |  |
 | photos[].altText | true | string |  |
 | photos[].publishedAt | true | null \| string |  |
+| query | true | null \| string |  |
+| scope | true | string="latest_24_published" | const="latest_24_published" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

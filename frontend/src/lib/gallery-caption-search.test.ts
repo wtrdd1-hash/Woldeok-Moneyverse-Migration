@@ -6,6 +6,7 @@ describe('gallery proof', () => {
   it('rejects stale response, mismatched caption and unsafe media', () => {
     const good = { photos: [row], query: '제주', scope: 'latest_24_published' };
     expect(parseGalleryCaptionSearch(good,'제주')).toEqual(good.photos);
+    expect(parseGalleryCaptionSearch({ ...good, photos: [{ ...row, imageUrl: 'https://images.example.com:443/a.jpg' }] }, '제주')).not.toBeNull();
     expect(parseGalleryCaptionSearch({ ...good, query:'서울' },'제주')).toBeNull();
     expect(parseGalleryCaptionSearch({ ...good, photos:[{ ...row, altText:'서울' }] },'제주')).toBeNull();
     expect(parseGalleryCaptionSearch({ ...good, photos:[{ ...row, imageUrl:'javascript:alert(1)' }] },'제주')).toBeNull();

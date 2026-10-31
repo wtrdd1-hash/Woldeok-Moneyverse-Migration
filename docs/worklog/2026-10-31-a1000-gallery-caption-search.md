@@ -1,0 +1,6 @@
+# Full-stack A — 2026-10-31 09:54–10:xx KST
+
+1. Checked miniPC Debian 13.6 services, Docker, dev PostgreSQL; read GitHub main/AGENTS/README/English+Korean plans/QA/PRs/CI. Initial main `761a55a`; remote branches 59, open PRs 55, conflicting 6. Separate original worktree created, RED tests recorded.
+2. Implemented bounded approved-photo caption search across PostgreSQL function → NestJS → Next.js → Android app-api. TDD GREEN and typecheck passed. External worktree cleanup at 09:59:47 erased uncommitted files. Recovery branch and worktree created from origin/main; code committed `7ef03e1f` and RED/GREEN tests rerun. Restore script preserved in `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-31-0954-gallery-caption-search/restore-gallery.py`.
+3. Fresh PostgreSQL 17.11: 311 migrations applied, 3 synthetic rows, only published/approved row visible, app table SELECT denied, rollback left no data. Full backend/frontend tests, lint and build run. API contract regenerated for optional q and stable search response; final exact SHA and CI must be checked independently.
+4. Release HOLD: no main merge, Test or Production deployment, DB mutation or service restart. Test SHA `c2129625`, Production SHA `95485a299` not candidate. Preserve all unique PR branches and rollback via branch revert only if future release approved.
