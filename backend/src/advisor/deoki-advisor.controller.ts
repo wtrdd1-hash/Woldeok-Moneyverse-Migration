@@ -3,11 +3,19 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Post,
   Req,
+  ServiceUnavailableException,
+  UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { DeokiAdvisorRepository } from './deoki-advisor.repository';
 
@@ -17,20 +25,24 @@ export interface AskDeokiDto {
 
 @ApiTags('advisor')
 @Controller('advisor/deoki')
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class DeokiAdvisorController {
   constructor(
     @Inject(DeokiAdvisorRepository) private readonly repository: DeokiAdvisorRepository | null,
   ) {}
 
   @Get('diagnose')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'AI 금융 비서 덕이 포트폴리오 실시간 PR-Index 종합 진단' })
   async getDiagnosis(@Req() req: RequestWithSession) {
     if (!this.repository) {
-      throw new BadRequestException('AI 금융 비서 덕이 서비스가 현재 점검 중입니다.');
+      throw new ServiceUnavailableException('advisor source unavailable');
     }
 
-    // 비로그인 상태이거나 데모 유저일 경우를 위한 폴백 처리
-    const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
+    // Never substitute a guest actor for an owner-scoped financial read.
+    const userId = req.session?.user_id;
+    if (!userId) throw new UnauthorizedException('login required');
 
     try {
       const diagnosis = await this.repository.diagnoseUserPortfolio(userId);
@@ -38,17 +50,20 @@ export class DeokiAdvisorController {
         success: true,
         diagnosis,
       };
-    } catch (err: any) {
-      console.error('[DeokiAdvisorController] Error in getDiagnosis:', err);
-      throw new BadRequestException(err?.message || '진단 생성에 실패했습니다.');
+    } catch {
+      // A DB permission error must never become a client error or leak SQL.
+      throw new ServiceUnavailableException('advisor source unavailable');
     }
   }
 
   @Post('ask')
+  @UseGuards(CsrfGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'AI 금융 비서 덕이 실시간 핀테크 자산 상담 및 질의응답' })
   async askDeoki(@Req() req: RequestWithSession, @Body() body: AskDeokiDto) {
     if (!this.repository) {
-      throw new BadRequestException('AI 금융 비서 덕이 서비스가 현재 점검 중입니다.');
+      throw new ServiceUnavailableException('advisor source unavailable');
     }
 
     const question = body.question;
@@ -56,7 +71,8 @@ export class DeokiAdvisorController {
       throw new BadRequestException('상담 질문을 입력해주세요.');
     }
 
-    const userId = req.session?.user_id || '00000000-0000-0000-0000-000000000000';
+    const userId = req.session?.user_id;
+    if (!userId) throw new UnauthorizedException('login required');
 
     try {
       const advice = await this.repository.askDeoki(userId, question);
@@ -64,9 +80,8 @@ export class DeokiAdvisorController {
         success: true,
         ...advice,
       };
-    } catch (err: any) {
-      console.error('[DeokiAdvisorController] Error in askDeoki:', err);
-      throw new BadRequestException(err?.message || '상담 처리에 실패했습니다.');
+    } catch {
+      throw new ServiceUnavailableException('advisor source unavailable');
     }
   }
 }
