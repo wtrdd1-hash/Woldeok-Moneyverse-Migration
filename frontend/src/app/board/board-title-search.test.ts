@@ -25,10 +25,11 @@ describe('public board title search', () => {
 describe('public board reply-presence filter', () => {
   it('accepts only the two explicit reply filters and defaults to all', () => {
     expect(parseBoardRepliesFilter(undefined)).toEqual({ replies: 'all', invalid: false });
+    expect(parseBoardRepliesFilter('all')).toEqual({ replies: 'all', invalid: false });
     expect(parseBoardRepliesFilter('with')).toEqual({ replies: 'with', invalid: false });
     expect(parseBoardRepliesFilter('without')).toEqual({ replies: 'without', invalid: false });
   });
-  it.each(['', 'all', 'yes', ['with', 'without'], 'with\n'])('rejects invalid replies %j', (value) => {
+  it.each(['', 'yes', ['with', 'without'], 'with\n'])('rejects invalid replies %j', (value) => {
     expect(parseBoardRepliesFilter(value).invalid).toBe(true);
   });
   it('renders a labeled reply filter and keeps filtered board results unindexed', () => {
