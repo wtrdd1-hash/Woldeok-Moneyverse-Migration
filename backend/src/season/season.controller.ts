@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Query,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -23,6 +24,7 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { SeasonInputError, SeasonRewardLedgerHoldError } from './season.repository';
 import { SeasonService } from './season.service';
+import { filterSeasonDeadlineEvents, parseSeasonDeadlineFilter } from './season-deadline';
 
 export class ConsumeDto {
   @ApiProperty({ type: Number, minimum: 1 })
@@ -65,8 +67,14 @@ export class SeasonController {
 
   @Get('events')
   @ApiOperation({ summary: 'Active season events' })
-  async events() {
-    return { events: await this.service().events() };
+  async events(@Query('endingWithin') endingWithin?: unknown, asOf = new Date()) {
+    const deadline = parseSeasonDeadlineFilter(endingWithin);
+    const rows = await this.service().events();
+    const result: { events: typeof rows; asOfUtc?: string } = {
+      events: deadline ? filterSeasonDeadlineEvents(rows, asOf) : rows,
+    };
+    if (deadline) result.asOfUtc = asOf.toISOString();
+    return result;
   }
 
   @Get('events/:id/leaderboard')
