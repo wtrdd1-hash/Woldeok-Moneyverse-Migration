@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { filterSeasonEventsByCost } from '@moneyverse/contract';
 import { SeasonInputError } from './season.repository';
 import type { WldAmount } from '@moneyverse/contract';
 
@@ -127,8 +128,12 @@ export class SeasonService {
     this.repository = repository;
   }
 
-  events(): Promise<readonly SeasonEventRow[]> {
-    return this.repository.events();
+  async events(maxCost?: string): Promise<readonly SeasonEventRow[]> {
+    const events = await this.repository.events();
+    if (maxCost === undefined) return events;
+    const filtered = filterSeasonEventsByCost(events, maxCost);
+    if (filtered === null) throw new ServiceUnavailableException('season event cost evidence unavailable');
+    return filtered;
   }
 
   leaderboard(eventId: unknown): Promise<readonly SeasonLeaderboardRow[]> {

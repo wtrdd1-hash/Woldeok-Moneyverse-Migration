@@ -3639,6 +3639,7 @@ _No request body._
 | events[].cost_wld | true | string & object |  |
 | events[].points_per_entry | true | number |  |
 | events[].ends_at | true | unknown |  |
+| maxCost | false | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
