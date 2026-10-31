@@ -20,7 +20,7 @@ describe('P0 marketplace service financial hold at Nest HTTP boundary', () => {
   const query = vi.fn().mockResolvedValue({ rows: [] });
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [MarketplaceController],
       providers: [{ provide: MarketplaceService, useValue: new MarketplaceService({ query } as unknown as Queryable) }],
     })
@@ -29,7 +29,7 @@ describe('P0 marketplace service financial hold at Nest HTTP boundary', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
