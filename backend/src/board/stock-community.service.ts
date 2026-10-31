@@ -116,7 +116,7 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, replies?: 'with' | 'without') {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -129,6 +129,9 @@ export class StockCommunityService {
     ) {
       throw new Error('invalid title search');
     }
+    if (replies !== undefined && replies !== 'with' && replies !== 'without') {
+      throw new Error('invalid reply filter');
+    }
     const title = titleQuery?.trim() ?? null;
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
@@ -136,8 +139,9 @@ export class StockCommunityService {
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+          AND ($4::text IS NULL OR ($4 = 'with' AND comment_count > 0) OR ($4 = 'without' AND comment_count = 0))`,
+      [50, normalized, title, replies ?? null],
     );
     return rows.map(mapped);
   }
