@@ -24,6 +24,14 @@ describe('member stock availability control', () => {
     expect(html).toContain('value="available"');
     expect(html).toContain('재고 있는');
   });
+  it('does not show a stale backend sold-out item as available on HTTP 200', async () => {
+    mocks.apiOrNull.mockImplementation(async (path: string) => path.includes('/shop/catalog')
+      ? { catalogItems: [{ catalog_id: '11111111-1111-4111-8111-111111111111', code: 'sold', name: 'Sold item', description: 'none', category: 'general', price: '1', quantity: 0, purchase_limit: 'unlimited', effect_kind: 'decoration', maintenance_cost: '0', sale_ends_at: null }] }
+      : path.includes('/shop/holdings') ? { holdings: [] } : { event: null });
+    const html = renderToStaticMarkup(await ShopCatalogPage({ searchParams: Promise.resolve({ stock: 'available' }) }));
+    expect(html).toContain('상점 목록을 불러오지 못했어요.');
+    expect(html).not.toContain('Sold item');
+  });
   it('does not forward unknown stock selectors to the API', async () => {
     await ShopCatalogPage({ searchParams: Promise.resolve({ stock: 'sold_out' }) });
     expect(mocks.apiOrNull).toHaveBeenCalledWith('/api/v1/shop/catalog');

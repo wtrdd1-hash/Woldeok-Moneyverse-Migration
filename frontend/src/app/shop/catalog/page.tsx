@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { apiOrNull } from '@/lib/api';
+import { isVerifiedAvailableShopCatalog } from '@/lib/shop-stock-availability';
 import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
@@ -45,6 +46,7 @@ export default async function ShopCatalogPage({
     apiOrNull<{ holdings: HeldItem[] }>(`/api/v1/shop/holdings${mineStatus === 'attention' ? '?status=attention' : ''}`),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
+  const verifiedCatalog = stockStatus === 'available' && !isVerifiedAvailableShopCatalog(catalog) ? null : catalog;
   const marketSaleActive = today?.event?.event_code === 'market_sale' && today.event.claimed;
 
   // How many of each the member holds right now. A failed shelf read leaves
@@ -53,7 +55,7 @@ export default async function ShopCatalogPage({
   const held = new Map<string, number>(
     (mine?.holdings ?? []).map((item) => [item.catalog_id, item.quantity]),
   );
-  const items = (catalog?.catalogItems ?? []).filter((item) => {
+  const items = (verifiedCatalog?.catalogItems ?? []).filter((item) => {
     if (query === '') return true;
     return [item.name, item.description, item.code]
       .join(' ')
@@ -126,7 +128,7 @@ export default async function ShopCatalogPage({
           </form>
         </div>
 
-        {catalog === null ? (
+        {verifiedCatalog === null ? (
           <EmptyState
             title="상점 목록을 불러오지 못했어요."
             description="가격이나 재고를 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
