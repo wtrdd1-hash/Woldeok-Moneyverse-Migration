@@ -1,6 +1,6 @@
 'use client';
 
-import { RefreshCw, Sparkles } from 'lucide-react';
+import { RefreshCw, Sparkles, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 const EVERY_MS = 30_000;
 const RELEASE_PARAM = '__mv_release';
 const REFRESH_KEY = 'moneyverse-release-refresh';
+const DISMISSED_KEY = 'moneyverse-release-dismissed';
+const MANUAL_REFRESH_TIME_KEY = 'moneyverse-manual-refresh-time';
 
 /**
  * 캐시 버스팅 파라미터가 포함된 강제 새로고침 URL 생성
@@ -118,6 +120,28 @@ export function StaleTabNotice({
       const newVersion = body.id;
       setTargetVersion(newVersion);
 
+      // 사용자가 이 버전에 대해 명시적으로 '닫기(X)'를 눌렀다면 노출하지 않음
+      try {
+        const dismissedVersion = window.sessionStorage.getItem(DISMISSED_KEY);
+        if (dismissedVersion === newVersion) {
+          setStale(false);
+          return;
+        }
+      } catch {
+        /* ignore */
+      }
+
+      // 사용자가 최근 1분 이내에 수동 새로고침을 실행했다면 반복 루프 방지를 위해 일시적 억제
+      try {
+        const lastRefreshTime = window.sessionStorage.getItem(MANUAL_REFRESH_TIME_KEY);
+        if (lastRefreshTime && Date.now() - Number(lastRefreshTime) < 60_000) {
+          setStale(false);
+          return;
+        }
+      } catch {
+        /* ignore */
+      }
+
       const transition = `${mine}->${newVersion}`;
 
       // 이미 자동 리로드를 시도했으나 브라우저/프록시 캐시로 인해 동일한 구버전이 지속되는 경우
@@ -193,26 +217,47 @@ export function StaleTabNotice({
           최신 시스템 업데이트가 배포되었습니다. 새 버전 자동 적용이 이전 브라우저 캐시에 막혔습니다. 로그인은 유지되며 [새로고침]을 누르면 최신 웹페이지를 즉시 불러옵니다.
         </span>
       </div>
-      <Button
-        size="sm"
-        className="min-h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 px-3.5 rounded-lg shrink-0 cursor-pointer"
-        onClick={() => {
-          isRefreshingRef.current = true;
-          // 수동 클릭 시 세션 스토리지 플래그를 비워 새로고침 후 루프에 갇히지 않게 함
-          try {
-            window.sessionStorage.removeItem(REFRESH_KEY);
-          } catch {
-            // Storage access may be blocked; manual refresh must still work.
-          }
-          const targetUrl = targetVersion
-            ? releaseRefreshUrl(window.location.href, targetVersion)
-            : window.location.href;
-          void executeHardRefresh(targetUrl, navigate);
-        }}
-      >
-        <RefreshCw className="size-3.5 animate-spin" />
-        최신 페이지 새로고침
-      </Button>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button
+          size="sm"
+          className="min-h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 px-3.5 rounded-lg shrink-0 cursor-pointer"
+          onClick={() => {
+            isRefreshingRef.current = true;
+            // 배너 즉시 숨김
+            setStale(false);
+            try {
+              window.sessionStorage.removeItem(REFRESH_KEY);
+              window.sessionStorage.setItem(MANUAL_REFRESH_TIME_KEY, String(Date.now()));
+            } catch {
+              // Storage access may be blocked; manual refresh must still work.
+            }
+            const targetUrl = targetVersion
+              ? releaseRefreshUrl(window.location.href, targetVersion)
+              : window.location.href;
+            void executeHardRefresh(targetUrl, navigate);
+          }}
+        >
+          <RefreshCw className="size-3.5" />
+          최신 페이지 새로고침
+        </Button>
+        <button
+          type="button"
+          aria-label="닫기"
+          className="p-1.5 text-zinc-400 hover:text-white rounded-md hover:bg-white/10 transition-colors"
+          onClick={() => {
+            setStale(false);
+            try {
+              if (targetVersion) {
+                window.sessionStorage.setItem(DISMISSED_KEY, targetVersion);
+              }
+            } catch {
+              /* ignore */
+            }
+          }}
+        >
+          <X className="size-4" />
+        </button>
+      </div>
     </div>
   );
 }
