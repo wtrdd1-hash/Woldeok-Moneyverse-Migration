@@ -1,8 +1,8 @@
 import {
+  ServiceUnavailableException,
   Controller,
   Get,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -14,8 +14,6 @@ import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
-import type { RequestWithSession } from '../../auth/session.context';
-import { requireUserId } from '../../auth/session.context';
 import { KdicService } from './kdic.service';
 import { rejectUnverifiedKdicSettlement } from './kdic-ledger-hold';
 
@@ -72,38 +70,19 @@ export class PublicKdicController {
 
   @Get('portal')
   @SkipInternalToken()
-  @ApiOperation({ summary: '대국민 예금자보호 제도 및 예보기금 공개 조회' })
-  async getPublicPortalData() {
-    const data = await this.kdicService.getFundOverview();
-    return {
-      success: true,
-      data: {
-        fund: {
-          fundName: data.fund.fundName,
-          totalFundWld: data.fund.totalFundWld,
-          protectionLimitPerUser: data.fund.protectionLimitPerUser,
-          totalInsuredDepositsWld: data.fund.totalInsuredDepositsWld,
-          isEmergencyMode: data.fund.isEmergencyMode,
-          updatedAt: data.fund.updatedAt,
-        },
-        institutions: data.institutions.map(i => ({
-          institutionName: i.institutionName,
-          institutionType: i.institutionType,
-          bisRatioPct: i.bisRatioPct,
-          soundnessGrade: i.soundnessGrade,
-          status: i.status,
-        })),
-        summary: data.summary,
-      },
-    };
+  @ApiResponse({ status: 503, description: 'KDIC_COVERAGE_UNVERIFIED: no certified insurance fund or payout guarantee' })
+  @ApiOperation({ summary: 'Public insurance portal unavailable until ledger-backed coverage can be verified' })
+  async getPublicPortalData(): Promise<never> {
+    // The legacy fund and institution tables do not certify an enforceable payout.
+    throw new ServiceUnavailableException({ code: 'KDIC_COVERAGE_UNVERIFIED' });
   }
 
   @Get('my-coverage')
   @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '내 계좌별 예금자보호 한도 및 보호금액 조회' })
-  async getMyCoverage(@Req() req: RequestWithSession) {
-    const userId = requireUserId(req);
-    const coverage = await this.kdicService.getUserCoverage(userId);
-    return { success: true, data: coverage };
+  @ApiResponse({ status: 503, description: 'KDIC_COVERAGE_UNVERIFIED: owner payout coverage cannot be certified' })
+  @ApiOperation({ summary: 'Member coverage unavailable until owner-scoped ledger proof exists' })
+  async getMyCoverage(): Promise<never> {
+    // A wallet/cash/escrow sum is not a bank deposit insurance receipt.
+    throw new ServiceUnavailableException({ code: 'KDIC_COVERAGE_UNVERIFIED' });
   }
 }
