@@ -32,7 +32,7 @@ describe('owner wallet glance source contract', () => {
   });
 
   it.each([
-    ['numeric rounded amount', wallet(9007199254740993)],
+    ['numeric rounded amount', wallet(Number.MAX_SAFE_INTEGER + 2)],
     ['noncanonical leading zero', wallet('00012')],
     ['scientific notation', wallet('1e9')],
     ['invalid currency', wallet('500', 'USD')],
