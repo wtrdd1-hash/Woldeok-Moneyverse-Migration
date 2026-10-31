@@ -22,21 +22,14 @@ describe('Virtual Real Estate & Land Leasing System (/spaces/real-estate)', () =
     expect(tax.weeklyPropertyTaxWld).toBe(392500);
   });
 
-  it('implements Bento Grid layout and responsive design standards', () => {
-    expect(combinedSource).toContain('PersonalSpacesView');
-    expect(combinedSource).toContain('가상 부동산');
-    expect(combinedSource).toContain('font-mono');
-  });
-
-  it('provides passive rent claim and room expansion interactions', () => {
-    expect(combinedSource).toContain('handleCollectYield');
-    expect(combinedSource).toContain('handleExpandRoom');
-    expect(combinedSource).toContain('부동산 임대료');
-  });
-
-  it('mounts RealEstateAuctionClient with landmark auctions and rent yield claim', () => {
-    expect(pageSource).toContain('RealEstateAuctionClient');
-    expect(pageSource).toContain('가상 부동산 메가시티 랜드마크 경매 & 월세 배당 거래소');
+  it('shows an accessible non-indexable unavailable state instead of fabricated auction metrics', () => {
+    expect(pageSource).toContain('robots: { index: false, follow: false }');
+    expect(pageSource).toContain('requireMember');
+    expect(pageSource).toContain('role="status"');
+    expect(pageSource).toContain('aria-live="polite"');
+    expect(pageSource).toContain('min-h-11');
+    expect(pageSource).not.toContain('RealEstateAuctionClient');
+    expect(pageSource).not.toContain('PersonalSpacesView');
+    expect(pageSource).not.toContain('연 13.4%');
   });
 });
-
