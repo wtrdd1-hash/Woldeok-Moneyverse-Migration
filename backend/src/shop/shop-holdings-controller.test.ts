@@ -27,3 +27,11 @@ describe('shop holdings owner-scoped API', () => {
     expect(holdings).not.toHaveBeenCalled();
   });
 });
+
+describe('shop holdings fail-closed source evidence', () => {
+  it('rejects malformed repository output rather than responding with success', async () => {
+    const holdings = vi.fn().mockResolvedValue(null);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    await expect(controller.holdings(request)).rejects.toMatchObject({ status: 503 });
+  });
+});

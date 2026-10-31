@@ -192,6 +192,12 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Owner inventory must override the global public indexing policy at the HTTP edge.
+      { source: '/app-api/v1/shop/holdings', headers: [
+        { key: 'cache-control', value: 'private, no-store' },
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+      ] },
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
