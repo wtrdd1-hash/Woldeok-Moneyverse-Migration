@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
@@ -9,7 +9,9 @@ const conversation = '22222222-2222-4222-8222-222222222222';
 
 describe('private chat read least privilege', () => {
   it('defines owner-scoped read functions with revoked raw-table access', () => {
-    const migration = readFileSync(resolve(__dirname, '../../../packages/database/migrations/313-private-chat-owner-read-acl.sql'), 'utf8');
+    const migrationsDir = resolve(__dirname, '../../../packages/database/migrations');
+    const migrationFile = readdirSync(migrationsDir).find((f) => f.endsWith('-private-chat-owner-read-acl.sql'))!;
+    const migration = readFileSync(resolve(migrationsDir, migrationFile), 'utf8');
     for (const fn of ['private_chat_list_conversations', 'private_chat_list_messages', 'private_chat_total_unread', 'private_chat_archive']) {
       expect(migration).toContain('FUNCTION public.' + fn + '(');
     }

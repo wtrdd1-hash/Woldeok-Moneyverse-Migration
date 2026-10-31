@@ -77,6 +77,7 @@ BEGIN
  RETURN NULL;
 END;
 $body$;
+REVOKE ALL ON FUNCTION public.treasury_fiscal_guard_vault() FROM PUBLIC;
 CREATE CONSTRAINT TRIGGER fiscal_vault_backing_guard
  AFTER INSERT OR UPDATE OR DELETE ON public.system_treasury_vaults
  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
@@ -130,4 +131,5 @@ CREATE CONSTRAINT TRIGGER fiscal_dividend_source_guard
  AFTER INSERT OR UPDATE ON public.state_enterprise_dividend_logs
  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
  EXECUTE FUNCTION public.treasury_fiscal_guard_event();
+REVOKE ALL ON FUNCTION public.treasury_fiscal_guard_event() FROM PUBLIC;
 COMMIT;
