@@ -31,3 +31,10 @@
 - 같은 운영 앱 계정 금융 사전검사: `READY_FOR_OTHER_RELEASE_GATES`, 잔액 행 40·불균형 0·설명되지 않은 잔액차 0. 기존 승인된 세 금융 DML은 `OPERATOR_ACCEPTED_EXISTING_DML` 경고로 분리되고 차단 안 됨. 이 결과는 국고 출처 승인이 아님.
 - 공개 `/treasury` 페이지 HTTP 200 확인. 이 페이지 상태 코드만으로 실제 국고 지급/정산 API 503 차단 해제를 주장하지 않음.
 - 이번 추가 확인에서 운영 DB 변경, 백엔드/프론트 릴리스 교체, 운영 Nginx 변경 없음. 현재 적용중인 운영 웹 서비스 v1550 유지. 원장 출처가 검증되지 않은 금전 집행은 열지 않음.
+
+## 후속 진행 — 운영 신원·공개 국고 경계 확인
+- 2026-10-31 19:49 KST 전용 @미니pc홍 MCP 정상, 백엔드·프론트·Nginx·Docker active, 원격 main 재확인 `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`.
+- Production 및 Test 공개 `/api/treasury/overview` 각각 HTTP 503, `PUBLIC_TREASURY_RECONCILIATION_PENDING`, `verified:false`, `recentLedger:[]`. 이는 국고 출처 미확인에 대한 기존 안전 차단이다.
+- Production 공개 `/api/version`, `/frontend-version` 모두 `bc8cd8a6c654af0336f550643f23049a58ee1d16`.
+- 권한 부족을 보호 설정에 대한 무리한 변경으로 처리하지 않고, 문서화된 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel prod --sha bc8cd8a6c654af0336f550643f23049a58ee1d16` 실행: `ok:true`, 실패 0, 서비스 릴리스 manifest·백/프론트·빌드 SHA 모두 일치. 이는 **기존 v1550 운영 신원 검사 PASS**이며 신규 버전 승격 또는 국고 지급 승인 아님.
+- 과거 원장 552건·배당 744건에 대한 독립 출처 영수증 부재가 남아 금융 기능 차단 유지. 이번에도 금전 쓰기·원장 보정·데이터 초기화·Nginx 절체·신규 웹 서비스 승격은 실행하지 않음.
