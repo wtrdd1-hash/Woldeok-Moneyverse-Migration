@@ -17,3 +17,7 @@
 
 ## Finished
 Pending.
+
+### 08:48–08:51 KST — TDD RED/GREEN implementation
+- RED verified: backend source tests 2 failed (query returned sample rows / generic DB unavailable), frontend page tests 3 failed (old client-only demo and missing metadata). Captured `/tmp/mv-c1253-{backend,frontend}-red.log`.
+- Implemented service-level `503 marketplace_auction_source_unverified` before SQL, and authenticated noindex member page with no seeded amounts, bidding or live ticker. B #2221's write containment unchanged.
