@@ -30,6 +30,9 @@ describe('Android exact owner wallet WLD minimum', () => {
     { ...page, transactions: [{ ...row, netAmount: Number('-900719925474099312345') }] },
     { ...page, transactions: [{ ...row, direction: 'in' }] },
     { ...page, hasMore: true, nextCursor: 'a.b' },
+    { ...page, transactions: [{ ...row, type: 123 }] },
+    { ...page, transactions: [{ ...row, label: null }] },
+    { ...page, transactions: [{ ...row, netAmount: '9'.repeat(200), cashDelta: '9'.repeat(200) }] },
   ])('fails closed on forged successful upstream payload', async (payload) => {
     setup(payload);
     const response = await GET(request(), context);

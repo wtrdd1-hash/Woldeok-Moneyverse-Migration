@@ -11,7 +11,8 @@ export function verifiedWalletAmountPage(value: unknown, minAmount: string, dire
   for (const row of page.transactions) {
     if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
     const item = row as Record<string, unknown>;
-    if (typeof item.transactionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.transactionId) || seen.has(item.transactionId) ||
+    if (typeof item.type !== 'string' || item.type.length > 120 || typeof item.label !== 'string' || item.label.length > 240 ||
+        typeof item.transactionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.transactionId) || seen.has(item.transactionId) ||
         typeof item.netAmount !== 'string' || !/^(0|[1-9][0-9]*|-[1-9][0-9]*)$/.test(item.netAmount) ||
         typeof item.cashDelta !== 'string' || typeof item.bankDelta !== 'string' ||
         !/^(0|[1-9][0-9]*|-[1-9][0-9]*)$/.test(item.cashDelta) ||
