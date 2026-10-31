@@ -17,9 +17,9 @@ function captureNotificationMiddleware() {
       return { forRoutes: (controller: unknown) => { mappedController = controller; } };
     },
   };
-  const module = new NotificationModule() as NotificationModule & { configure?: (consumer: unknown) => void };
-  expect(module.configure).toBeTypeOf('function');
-  module.configure!(consumer);
+  const notificationModule = new NotificationModule() as NotificationModule & { configure?: (consumer: unknown) => void };
+  expect(notificationModule.configure).toBeTypeOf('function');
+  notificationModule.configure!(consumer);
   expect(mappedController).toBe(NotificationController);
   expect(handler).toBeTypeOf('function');
   return handler!;
