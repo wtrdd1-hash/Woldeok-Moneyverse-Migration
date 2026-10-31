@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1556 — F675-195 보유 아이템별 만료 알림 제외 (기능 추가 / DRAFT / RELEASE HOLD)
+- **주기:** 이전 기능 보완 v1554 → 현재 기능 추가 v1556 → 다음 기능 보완 v1558(잠정). main 761a55a094fb9dd383d213e817305e68c79fa23c 재확인, Draft #2141 위 적층, 개발 #2148. F675-192/193/194는 미구현 Draft; 문서만 변경.
+- **목적/진입:** 본인 `/inventory/expiring/reminders/items`에서 전체 신청을 유지하면서 특정 보유 상품의 7일·1일 전 앱 내 알림을 개별 제외·복구. 전체 OFF 우선, 저장/실행취소·만료 불명/오래된 상태/검증된 빈 목록, Next/Android 비공개, 플래그 OFF. 제외는 갱신이나 이미 기록된 알림 취소가 아니다.
+- **세대 안전:** 마이그레이션 071 PK(user_id,catalog_id), 만료 NULL 허용. 제외는 정확한 만료시각과 지속적인 보유 세대값에 결속. 같은 만료시각으로 재획득하는 경우 모든 획득·갱신 경로의 단조 세대값 증빙 전에는 구현 BLOCKED; acquired_at만 믿지 않는다. 전체 설정→보유 행→개별 제외 순 잠금, 잠금 후 DB 시각, 영수증+알림함 원자 기록, 소급 취소·발송 금지.
+- **API/DB:** CSRF POST mutes/search·mutes/set, 본인 한정 SECURITY DEFINER, 순방향 스키마·실측 인덱스, moneyverse_app 직접 테이블 권한 금지. 400/401/403/404/409/429/503, no-store/noindex/no-referrer, 상세 20/50, Android 동등성, WCAG AA, 관리자 20명 이상 코호트만, WLD·원장 변경 없음.
+- **백로그:** P0 OPS1556-01 SEC1556-02 FIN1556-03 REL1556-04, P1 MUTE1556-05..10(4+6). 보유 10,001개·회원 2명·워커 2개·세대·경합·권한·롤백 시험은 **명세만 작성, 미실행**. QA v1411 과거 결과, 신규 운영 SHA 혼합 P0 #2144, Draft #2147은 미배포. 공식 Test 정확 SHA·감사·독립 복원·DB 권한/체크섬 BLOCKED, RELEASE HOLD.
+- **외부 독립 근거:** 신규 검증 0건, 누적 검증·중복제거·분류 UNKNOWN/10,000건, BLOCKED/IN PROGRESS. 기존 영문·국문 통합문서에만 명세, 분산기획 신규 파일 없음.
+
 - **GitHub v1554:** 초안 PR #2141 OPEN/HOLD (선행 #2135), 개발 이슈 #2134 갱신; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1554 — F675-194 만료 알림 미리보기 기간·집계 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Feature Addition v1552 → 현재 Feature Improvement v1554 → 다음 Feature Addition v1556(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2135, 개발 #2134. 문서만 변경, 기능 미구현.

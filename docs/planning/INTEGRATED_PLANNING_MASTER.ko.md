@@ -1,4 +1,28 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1556 — F675-195 회원 보유 아이템별 만료 알림 제외 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 보완 v1554 → 현재 기능 추가 v1556 → 다음 기능 보완 v1558(잠정). **기준:** main `761a55a094fb9dd383d213e817305e68c79fa23c` 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md 원본 및 한국어 대조본. 미병합 Draft #2141 위에 적층, 개발 이슈 #2148. F675-192 신청·F675-193 처리내역·F675-194 미리보기는 모두 미구현 Draft 선행 기능이며 실제 서비스 기능이 아니다.
+
+### 사용자 목적, 대안 및 제품 동작
+- **문제:** 회원은 전체 만료 알림을 켜면서 특정 보유 아이템의 반복 알림만 제외하고 싶을 수 있다. 전체 OFF는 모든 아이템을 차단하고 기존 미리보기에는 개별 설정이 없다. **선택:** 보유 아이템별 7일 전·1일 전 앱 내 알림을 독립적으로 제외하고 복구할 수 있는 기능. **기각:** 향후 모든 재구매에 영구 적용되는 상품 종류별 제외(오래된 동의 전파), 알림함 읽음/삭제(향후 발송을 막지 못함), 브라우저 localStorage만 사용(워커·Android에서 강제 불가).
+- **대상/권한:** 인증·최신 동의 완료 회원의 본인 `public.user_items`만. 관리자 대리 조작·타인 조회·임의 userId 입력 금지. 기능 플래그 `EXPIRY_REMINDER_ITEM_MUTE_ENABLED` 기본 OFF; 전체 신청·워커 기능의 별도 게이트도 통과해야 한다. 전체 OFF가 개별 설정보다 우선한다.
+- **화면:** `/inventory/expiring/reminders` → '아이템별 알림 관리' → `/inventory/expiring/reminders/items`; 본인 보관함 카드에서 진입 가능. 아이템 이름, UTC 기준 만료시각의 현지화 표시, 전체 7일·1일 설정, '7일 전 알림 제외'·'1일 전 알림 제외' 토글, 저장·실행취소 CTA, 확인된 리비전과 데이터 신선도. 상태 LOADING, INHERITED_ON, MUTED_FOR_THIS_EXPIRY, GLOBAL_OFF, UNKNOWN_EXPIRY, EXPIRED, STALE_TARGET, VERIFIED_EMPTY, SOURCE_UNAVAILABLE, SAVING, SAVED. 제외는 만료 연장·갱신·장착 변경·이미 기록된 알림 취소가 아니다. 전체 OFF에는 설정 CTA만 표시하고 개별 아이템 조회·기록 금지. 정상 SQL 결과만 빈 목록으로 인정하며 `apiOrNull` 오류를 빈 목록으로 취급하지 않는다.
+- **만료 세대:** 마이그레이션 071은 `(user_id,catalog_id)`당 보유 행 하나, `quantity>=0`, `expires_at` NULL 허용이다. 제외 설정은 저장 당시 마이크로초 정밀 만료시각과 결속하고, 만료 변경·수량 0·보유 해제 시 과거 제외 설정을 적용하지 않는다. NULL 만료는 UNKNOWN이며 신규 제외 불가. 재획득 후 우연히 동일 만료시각이 될 경우 현재 스키마만으로 세대 구분이 불확실하므로, 기존에 지속적인 세대 식별자가 있는지 검증하거나 모든 획득·갱신 쓰기 경로가 원자적으로 증가시키는 세대값을 별도 승인 마이그레이션으로 마련해야 한다. 이를 증명하기 전에는 409/503으로 차단하고 `acquired_at`만으로 세대 변경을 가정하지 않는다.
+
+### API·DB·동시성·보안
+- **비공개 API:** CSRF POST `/api/v1/shop/expiry-reminders/mutes/search` 본문 `{limit?:1..50}` 기본 20; POST `/api/v1/shop/expiry-reminders/mutes/set` 본문 `{catalogId:UUID,expectedExpiresAtUtc:ISO8601,expectedHoldingGeneration:string,expectedRevision:string,muteSevenDay:boolean,muteOneDay:boolean}`. 행위자는 검증된 서버 세션·동의에서만 결정, 알 수 없는/중복 필드·클라이언트 actor ID 거부. URL·쿼리·리퍼러에 민감 UUID/커서 노출 금지. Android `/app-api/v1/shop/expiry-reminders/mutes/search|set`은 동등한 인증·앱 토큰·비공개 헤더·응답 검증 필수이며 기존 라우트 지원을 추정하지 않는다.
+- **응답:** search `{asOfUtc,complete:true,globalEnabled,rows:[{catalogId,name,expiresAtUtc,holdingGeneration,revision,muteSevenDay,muteOneDay,effectiveSevenDay,effectiveOneDay}],detailsReturned,hiddenDetailCount}`. 전체 보유 건수는 하나의 일관된 스냅샷에서 집계하고 상세 최대 50개. set은 서버에서 확인된 설정·리비전을 반환하고 동일 멱등키 재시도는 안전하게, 오래된 리비전은 409 처리. 400 입력 오류, 401 비로그인, 403 동의 누락, 404 타인/없는 보유 정보 은닉, 409 만료·세대·리비전 변경, 429 과다 호출, 503 스키마·권한·DB 불확실성. 200 빈 결과는 성공한 본인 SQL만 인정한다.
+- **향후 DB(적용하지 않음):** 소유자·상품·임계일별 복합키, 전체 정밀 만료시각·검증된 세대·단조 리비전·수정시각과 최소 감사정보를 갖는 `shop_expiry_reminder_item_mutes` 제안. 보유 행 FK와 삭제·보존 정책 명시, 알림함/영수증 이력 연쇄 삭제 금지. 후보 고유 인덱스 `(user_id,catalog_id,threshold_days)` 및 수정시각 인덱스는 실제 EXPLAIN/BUFFERS 후 결정. 고정 search_path·완전 수식 테이블을 쓰는 본인 한정 SECURITY DEFINER 조회/수정 함수, PUBLIC EXECUTE 철회 및 moneyverse_app EXECUTE만 허용; 직접 테이블 권한 부여 금지. 클린 PG17·실제 앱 계정 ACL·모든 획득 경로 검증 후 순방향 마이그레이션 별도 심사.
+- **경합:** 설정 쓰기·알림 워커 모두 전체 회원 설정 → 해당 보유 행 → 개별 제외 행 순으로 잠금, 잠금 후 새 문장에서 DB `clock_timestamp()`를 판정 기준으로 사용. 전체 OFF > 현재 세대 개별 제외 > 정확한 UTC 반열림 7일 [E−168시간,E−144시간)/1일 [E−24시간,E) 기간 > 영수증 중복방지 순서로 검사한 뒤 영수증+알림함을 하나의 트랜잭션으로 기록한다. 제외 행이 없어도 보유 행 잠금으로 경합을 제어한다. 워커가 먼저 커밋한 알림은 나중에 제외해도 취소되지 않음을 명시. 잠금 실패·기간 경과·권한 불확실 시 허위 발송 증거 없이 차단, 제외 해제 후 지난 기간 소급 발송 금지. WLD·원장·국고·구매 함수 변경 없음.
+- **보호·관리:** 임시 호출 한도 회원당 쓰기 시간당 20회, 읽기 분당 60회·IP 제한, SQL 2초 타임아웃은 부하 검증 후 확정. 상세 최대 50, 본인 인덱스, 분석·오류 로그에 회원/상품 원문 UUID 금지. 모든 성공·오류·리다이렉트에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex`, `Referrer-Policy: no-referrer`; sitemap·공개 canonical 제외. 계정 전환 시 요청 취소·상태 초기화. 320px WCAG 2.2 AA, 토글 레이블·44px 터치·키보드·초점·상태 음성 안내·동작 감소·색상 외 상태 표기. 관리자는 20명 이상 코호트 집계만, 소규모 셀 억제. 신청→개별 제외율, 409 비율, 워커 제외 건수, 제외 후 예상 밖 알림, p95 SQL, 503 KPI; 개인 보유 내역 노출 금지.
+
+### 개발 백로그 및 검증 게이트
+- **P0 4건:** OPS1556-01 운영 PID·백엔드/프론트/공개 경로/매니페스트/불변 빌드 SHA·롤백·독립 복원 검증(#2144/#1984); SEC1556-02 클린 PG17·알림 스키마·개발 DB 체크섬 5건·최소권한(#993); FIN1556-03 제외·워커 경로의 WLD·원장·국고/MINT/SWF 변경 0 증명, 미검증 국고 HTTP 503 유지(#1976); REL1556-04 Draft/HOLD 병합 차단, 공식 Test 정확 SHA·회원/관리자 E2E·보안 감사·경로 장부·독립 복원·승인된 무중단 승격(#2031/#2144).
+- **P1 6건:** MUTE1556-05 세대 안전한 본인 SQL·제약/인덱스·ACL; MUTE1556-06 잠금 후 워커 우선순위·원자 영수증/알림함·경합; MUTE1556-07 Nest CSRF POST·검증·비공개 오류·멱등성; MUTE1556-08 Next·Android 동등성·저장/실행취소·계정 전환·접근성; MUTE1556-09 관리 집계 KPI·SEO·남용 방지·개인정보; MUTE1556-10 격리 PG17 및 HTTP/UI/Android 수용시험·롤백.
+- **수용시험은 명세만, 실행하지 않음:** 보유 10,001개·회원 2명·워커 2개, 7일/1일 독립 제외·전체 OFF·수량 0·NULL 만료·만료 1µs 변경·동일 만료 재획득·세대 증빙 부재·리비전 충돌·제외/발송 경합·잠금 대기·서머타임·중복 요청·타인 UUID 404·계정 전환·20/50 상세와 전체 건수·401/403/409/429/503·오류 no-store·Android·원장 변경 0·플래그 OFF 롤백. 세대 식별이 입증되지 않으면 구현 BLOCKED.
+- **QA/배포:** 직전 독립 상세 QA v1411 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, 격리 PG17 마이그레이션 311/311, lint/typecheck/build PASS; 전체 보안 감사 13건 FAIL, 공식 Test 정확 SHA·경로 장부 FAIL, 개발 DB ACL·체크섬 및 독립 복원 미해결. 신규 P0 #2144는 2026-10-31 13:44 KST 운영 백엔드/프론트 SHA 불일치 증거이며 #2147은 Draft 코드 게이트일 뿐 운영 해결 증거가 아니다. 기존 QA는 F675-195 수용시험이 아니다. RELEASE HOLD; 기획 작업에서 런타임·DB·WLD·원장·Test·Production·main 변경 없음.
+- **외부 독립 근거:** 신규 검증 승인 0건, 누적 검증·중복제거·근거분류 UNKNOWN/10,000건, BLOCKED / IN PROGRESS. 달성 주장 금지.
+
 - **GitHub v1554:** 초안 PR #2141 OPEN/HOLD (선행 #2135), 개발 이슈 #2134 갱신; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1554 — F675-194 회원 만료 알림 미리보기의 판단기간·집계 정합성 강화 (기능 보완 / DRAFT / RELEASE HOLD)
 
