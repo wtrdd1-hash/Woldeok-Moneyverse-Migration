@@ -18,3 +18,19 @@
 
 ## FINISHED / RELEASE HOLD
 - To be filled from exact-SHA gates, CI, Test E2E, security and release evidence. No main merge or Production promotion without complete proof.
+
+### Exact candidate gate evidence (03:35 KST)
+- Code SHA `b5c6506665909cd81ce7aea41fbaeaf8ab376baa`, Draft PR #2249.
+- `pnpm test` exit 0: root/security 41 PASS; DB 62 PASS/4 SKIP; Backend 2,953 PASS/517 SKIP; Frontend 2,908 PASS.
+- Android contract check PASS for 184 endpoints; production dependency audit 0 known vulnerabilities.
+- Dev PG 17.11 app role can EXECUTE approved-photo function, cannot directly SELECT `public.photos`; query returns 2 approved recent rows. No migrations, ledger writes or privilege changes.
+- Public Test SHA `bc8cd8a6...` differs from candidate. Production backend SHA `353c6d5d...` and frontend timestamp build ID `1793450413898` disagree; exact source identity and rollback are not proven. No Test/Production deploy.
+- Remote refs 30 including main, 29 non-main; 28 ahead/unmerged; open PRs 27, 0 conflicting. All branches preserved, 0 deletions. Previous QA PR #2248 independently addresses bot CI rate limit; no overlap.
+- Build and exact-SHA CI final status: pending; see later final entry. Main remains `f13bbce273ffc65e8576170992d82ea00c27a1c9`.
+- Exact code SHA `b5c6506665909cd81ce7aea41fbaeaf8ab376baa`: full build PASS at 03:36 KST (2 GiB heap, one Next worker, 603 static pages); post-build typecheck PASS.
+
+### FINISHED — local development, NOT released (03:37 KST)
+- Exact code SHA local gates: full test, full build, typecheck, lint and generated Android contract **all exit 0**. Lint 0 errors / 1,022 warnings. Production dependency audit 0 known vulnerabilities.
+- GitHub CI #41229826782 and candidate build #41229822414 IN PROGRESS, not PASS; PR #2249 remains Draft. Official exact-SHA Test authenticated E2E, cross-table DB ACL P0, Production executable/rollback provenance and independent backup restore remain BLOCKED.
+- Re-fetched main and reviewed latest unmerged planning v1582; unchanged `f13bbce273ffc65e8576170992d82ea00c27a1c9`. Changed 19 unique tracked files in code candidate, 0 migrations. Zero main merges, deletions, Production/Test deploys, service restarts, DB writes or rollback actions.
+- All non-main branches preserved: 28 with unmerged commits, 1 ancestor-only retained because another scheduled task may own it; do not infer safe deletion from ancestry alone. Existing core automations untouched.
