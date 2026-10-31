@@ -7,6 +7,10 @@ describe('member holdings attention links', () => {
       '/shop/catalog?q=%EC%A4%91%EA%B3%A0+%EC%9E%90%EC%A0%84%EA%B1%B0&mine=attention',
     );
   });
+  it('preserves available-stock filtering when switching between the owner shelf views', () => {
+    expect(holdingsFilterUrl('hat', 'attention', 'available')).toBe('/shop/catalog?q=hat&mine=attention&stock=available');
+    expect(holdingsFilterUrl('', 'all', 'available')).toBe('/shop/catalog?stock=available');
+  });
   it('removes only the shelf filter when returning to all holdings', () => {
     expect(holdingsFilterUrl('bicycle', 'all')).toBe('/shop/catalog?q=bicycle');
     expect(holdingsFilterUrl('', 'attention')).toBe('/shop/catalog?mine=attention');

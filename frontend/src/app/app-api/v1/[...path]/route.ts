@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
+import { isVerifiedAvailableShopCatalog } from '@/lib/shop-stock-availability';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -211,6 +212,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       'minimum reward must be a canonical non-negative WLD integer');
   }
 
+  const shopCatalogPath = request.method === 'GET' && parts.length === 2 && parts[0] === 'shop' &&
+    (parts[1] === 'catalog' || parts[1] === 'public-catalog');
+  const shopStockValues = shopCatalogPath ? request.nextUrl.searchParams.getAll('stock') : [];
+  if (shopStockValues.length > 1 ||
+      (shopStockValues.length === 1 && shopStockValues[0] !== 'available')) {
+    return gatewayProblem(400, 'Bad Request', 'shop_stock_invalid', 'stock must be available when provided');
+  }
+
   const receiptAmountFilter =
     parts.length === 2 &&
     parts[0] === 'shop' &&
@@ -396,6 +405,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  // The backend must apply the stock predicate; a successful HTTP status alone is insufficient.
+  if (shopCatalogPath && shopStockValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedAvailableShopCatalog(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_stock_unverified', 'available stock cannot be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_stock_unverified', 'available stock cannot be verified');
+    }
+  }
+
   // The Android receipt summary is valid only if it matches the exact owner-scoped rows.
   // Reject legacy/forged HTTP 200 responses rather than inventing spending totals.
   if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
@@ -507,9 +528,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
+  const privateShopCatalog = parts[0] === 'shop' && parts[1] === 'catalog';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -582,7 +604,7 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
-  if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  if (parts[0] === 'work' || (parts[0] === 'shop' && parts[1] === 'catalog')) response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
