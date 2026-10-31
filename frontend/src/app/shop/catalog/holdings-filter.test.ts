@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { holdingsFilterUrl } from './holdings-filter';
+import { holdingsFilterUrl, holdingsApiUrl, isVerifiedAttentionHoldings } from './holdings-filter';
 
 describe('member holdings attention links', () => {
   it('preserves the separate catalogue query when viewing overdue holdings', () => {
@@ -11,5 +11,23 @@ describe('member holdings attention links', () => {
     expect(holdingsFilterUrl('bicycle', 'all')).toBe('/shop/catalog?q=bicycle');
     expect(holdingsFilterUrl('', 'attention')).toBe('/shop/catalog?mine=attention');
     expect(holdingsFilterUrl('', 'all')).toBe('/shop/catalog');
+  });
+});
+
+
+describe('verified attention-only member shelf', () => {
+  it('uses the Nest filter token, not an ignored status query', () => {
+    expect(holdingsApiUrl('attention')).toBe('/api/v1/shop/holdings?filter=attention');
+    expect(holdingsApiUrl('all')).toBe('/api/v1/shop/holdings');
+  });
+  it('rejects an unfiltered or malformed successful payload', () => {
+    expect(isVerifiedAttentionHoldings({ holdings: [
+      { catalog_id: 'a', suspended: false, unpaid_weeks: 0, arrears_due: '0' },
+    ] })).toBe(false);
+    expect(isVerifiedAttentionHoldings({ holdings: [
+      { catalog_id: 'b', suspended: false, unpaid_weeks: 0, arrears_due: '9007199254740993' },
+    ] })).toBe(true);
+    expect(isVerifiedAttentionHoldings({ holdings: [] })).toBe(true);
+    expect(isVerifiedAttentionHoldings({ holdings: [{ suspended: false, unpaid_weeks: 0, arrears_due: 0 }] })).toBe(false);
   });
 });

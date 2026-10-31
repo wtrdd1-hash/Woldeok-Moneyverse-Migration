@@ -20,6 +20,25 @@ describe('shop holdings owner-scoped API', () => {
     ]);
   });
 
+  it('includes positive bigint arrears even if unpaid weeks are zero', async () => {
+    const holdings = vi.fn().mockResolvedValue([
+      { code: 'clear', arrears_due: '0', unpaid_weeks: 0, suspended: false },
+      { code: 'due', arrears_due: '9007199254740993', unpaid_weeks: 0, suspended: false },
+    ]);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    const result = await controller.holdings(request, 'attention');
+    expect(result.holdings.map((item: { code: string }) => item.code)).toEqual(['due']);
+    expect(holdings).toHaveBeenCalledWith(actor);
+  });
+
+  it('accepts explicit all and rejects duplicate filters before owner SQL', async () => {
+    const holdings = vi.fn().mockResolvedValue([]);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    expect((await controller.holdings(request, 'all')).holdings).toEqual([]);
+    await expect(controller.holdings(request, ['all', 'attention'])).rejects.toMatchObject({ status: 400 });
+    expect(holdings).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects an unsupported filter before reading any private data', async () => {
     const holdings = vi.fn();
     const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);

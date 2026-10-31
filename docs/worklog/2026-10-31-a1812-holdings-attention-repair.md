@@ -3,8 +3,8 @@
 ## Before work (2026-10-31 18:12 KST)
 - Baseline origin/main: 5bccda44d6db56aff05fa5623ef7f72b2ec0263c. Isolated worktree: /srv/moneyverse-data/tasks/mv-a-20261031-1812-holdings-attention/repo; branch auto/hourly-a-20261031-1812-holdings-attention-repair.
 - Start inventory: 108 remote branches including main, 94 open PRs. Recent QA v1417 inspected; exact-SHA release evidence must be revalidated.
-- Source gap: member shop/catalog sends  but Nest shop/holdings accepts only ; the backend ignores , so the screen can falsely label all holdings as overdue. Backend filtering also omits positive  with zero unpaid weeks, despite an existing bigint-safe helper. Android app-api does not independently validate this filter or enforce private response headers on shop/holdings.
-- Constraints: use existing actor-scoped  PostgreSQL function; no migration, no direct table GRANT, no ledger writes. Avoid B #2136 (owner holdings privacy) duplication where possible; maintain separate PR and preserve their branch.
+- Source gap: member shop/catalog sends `status=attention` but Nest shop/holdings accepts only `filter=attention`; the backend ignores `status`, so the screen can falsely label all holdings as overdue. Backend filtering also omits positive `arrears_due` with zero unpaid weeks, despite an existing bigint-safe helper. Android app-api does not independently validate this filter or enforce private response headers on shop/holdings.
+- Constraints: use existing actor-scoped `shop_my_items_v2` PostgreSQL function; no migration, no direct table GRANT, no ledger writes. Avoid B #2136 (owner holdings privacy) duplication where possible; maintain separate PR and preserve their branch.
 
 ## In progress
 - [ ] RED: backend and frontend/app-api regression tests reproduce mismatch and stale HTTP 200.
