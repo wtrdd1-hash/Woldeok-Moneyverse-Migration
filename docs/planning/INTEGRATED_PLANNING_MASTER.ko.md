@@ -1,4 +1,27 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1558 — F675-195 보유 세대값·정밀 만료시각 기반 개별 알림 제외 검증 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기 및 기준:** 이전 기능 추가 v1556 → 현재 기능 보완 v1558 → 다음 기능 추가 v1560(잠정). 시작·중간 main 30cbbe02f0c27a13630aedf4a39190972d890f02, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 원본 및 국문 대조. 상위 Draft #2149, 개발 #2148. F675-192/193/194는 미구현 초안이며 이번 내용은 운영 결함 발생 증거가 아닌 기획 개선이다.
+
+### 확인한 원천 쓰기 경로와 선택한 설계
+- **근거:** 마이그레이션 071의 public.user_items는 (user_id,catalog_id) 복합 기본키, quantity>=0, expires_at NULL 허용, acquired_at 기본값을 사용한다. 072·165의 구매 UPSERT는 수량만 더하고 acquired_at을 바꾸지 않지만, 103 이벤트 지급은 충돌 시 acquired_at을 갱신한다. 074·104는 수량을 차감한다. 따라서 acquired_at이나 만료시각만으로 모든 재획득을 구분할 수 없다. 수량 0→양수 재획득은 같은 만료시각이어도 새 세대이며, 양수→양수 추가 구매는 기존 제외 설정을 임의로 초기화해서는 안 된다.
+- **대안:** (A) acquired_at/만료시각 추론은 경로별 동작이 달라 폐기, (B) Nest/Android에서만 세대 부여는 DB 함수 우회로 폐기, (C) **선택 조건부 설계**: PostgreSQL이 관리하는 회원·상품별 지속 세대 테이블과 행 단위 트리거. 모든 획득·갱신 경로 및 격리 PG17 검증 전에는 구현/활성화 BLOCKED.
+- **세대 원장:** 순방향 전용 private public.shop_holding_epochs(user_id,catalog_id,generation bigint>0,changed_at), PK(user_id,catalog_id). 보유 행이 삭제돼도 회원 계정 존속 중 세대 묘비(tombstone)를 유지하여 같은 만료시각으로 재삽입해도 재사용하지 않는다. 회원 탈퇴 시 검증된 개인정보 삭제 정책으로 연계하고 알림함 삭제에 연쇄 삭제되지 않는다. 기존 보유분은 동시 쓰기 차단·검증된 이관 절차에서 세대 1로 초기화한 뒤 트리거 활성화, 누락·경합 발생 시 중단한다.
+- **행 전이 규칙:** public.user_items의 AFTER ROW INSERT/UPDATE/DELETE 트리거가 삽입·삭제·만료시각 변경(NULL 포함)·수량 양수→0·0→양수일 때만 세대를 원자 증가한다. 양수→양수 추가 구매와 관련 없는 속성 수정은 증가하지 않는다. UPSERT 충돌 시 실제 행 INSERT 또는 UPDATE 결과로만 1회 증가시키며 statement 트리거로 중복 증가시키지 않는다. 세대 테이블 UPSERT 증가를 잠금 하에 수행하고 오버플로·권한·기록 실패는 즉시 중단한다. 072/074/103/104/114/115/165 및 이후 쓰기 경로를 검증한다.
+- **잠금/발송:** 회원 전체 설정 → 보유 행 → 세대 행 → 개별 제외 행 순서, 짧은 READ COMMITTED 트랜잭션과 잠금 후 DB clock_timestamp(). 기존 구매 경로가 보유 행을 먼저 잠근 뒤 AFTER 트리거로 세대 행을 잠그는 순서와 충돌하지 않는지 교착 분석이 필수다. 전체 OFF 우선, 세대·정확한 만료·수량·7일/1일 UTC 판단기간을 잠금 후 재검사하고 영수증+알림함은 원자 커밋한다. 불확실하면 알림·영수증 생성 없이 차단하며 지난 기간 소급 발송은 없다.
+
+### API·동시성·보안·사용자 경험
+- **v1556 계약 보완:** 브라우저 JavaScript Date는 밀리초 정밀도지만 PostgreSQL timestamptz는 마이크로초까지 가능하므로 expectedExpiresAtUtc를 Date로 왕복해 동시성 증거로 쓰면 안 된다. 검색 응답은 화면 표시용 expiresAtUtc와 서버 서명 expectedHoldingToken을 함께 제공한다. 토큰은 정확한 DB 세대·만료시각, 회원/세션 결속 다이제스트, 상품, 발급시각, 스키마 버전을 HMAC으로 결속하고 최대 120초 유효하며 본문에서만 전달한다. 토큰 자체는 권한 증명이 아니므로 서버 세션·동의를 재검증하고 DB 원본을 잠금 후 정밀 비교한다.
+- **저장 계약:** POST /api/v1/shop/expiry-reminders/mutes/set 본문 {catalogId,expectedHoldingToken,expectedRevision,muteSevenDay,muteOneDay,idempotencyKey}. 같은 회원+멱등키+동일 요청은 원래 결과 반환, 동일 키+다른 요청은 409 IDEMPOTENCY_CONFLICT. 7일/1일 제외 설정은 한 명령으로 원자 저장한다. 타인/없는 보유 404, 무효 400, 미인증 401, 동의 없음 403, 상태 충돌 409, 남용 429, DB/세대 불명 503. 읽기 기본 20/최대 50, 전체 수량은 동일 스냅샷에서 검증; 전체 OFF면 아이템별 조회·기록 금지.
+- **화면·모바일:** Next.js·Android 모두 인증/CSRF 동등 보호, 2xx/4xx/5xx·리다이렉트 private/no-store/noindex/no-referrer, URL·쿼리·referrer에 토큰/회원 정보 금지. 저장·실행취소·상태 갱신, 409 시 새로고침(무단 덮어쓰기 금지), 계정 변경 시 토큰·요청 폐기. 320px/WCAG 2.2 AA 키보드·초점·44px 터치·스크린리더 상태. SEO_INDEXING_ENABLED=true의 실제 빌드 HTTP 헤더 우선순위를 검사한다(#1994). 관리자는 20명 이상 집계만 제공, 작은 셀 억제; 세대 불일치·409/503·발송 억제·예상치 못한 발송·p95를 측정한다.
+
+### 개발 백로그·수용시험·배포 보류
+- **P0 4건:** OPS1558-01 운영 backend/frontend/PID CWD/불변 아티팩트 SHA 일치·독립 복원/롤백(#2144/#1984), SEC1558-02 클린 PG17 알림 스키마/권한·DEV 체크섬 5건·트리거 최소권한(#993/#828), FIN1558-03 WLD/원장/Treasury/MINT/SWF 쓰기 0 및 Test의 미검증 6천만 WLD 공개 200 차단(#2153), REL1558-04 Draft/HOLD 병합 통제·보안 감사·공식 Test 정확 SHA·인증 E2E·승인된 무중단 운영승격(#1088/#2031).
+- **P1 6건:** MUTE1558-05 세대 테이블·트리거·이관·본인 SQL·인덱스, MUTE1558-06 잠금 후 워커·중복 영수증·교착 검증, MUTE1558-07 Nest 서명 토큰·멱등키·오류/CSRF, MUTE1558-08 Next/Android UI·개인정보·접근성, MUTE1558-09 관리자 집계 KPI·보존/탈퇴·남용/SEO, MUTE1558-10 격리 PG17 및 정확 SHA Test·롤백.
+- **수용시험 명세만 작성, 미실행:** 합성 보유 10,001개·회원 2명·워커 2개, 양수→양수 유지, 양수→0→양수 세대 증가, 같은 만료시각 삭제/재삽입, 만료 +1마이크로초, NULL 전이, 072/103/165 UPSERT 중복 증가 방지, 구매·제외·워커 경합, 멱등 재시도·다른 요청 충돌, HMAC 변조/만료/계정 변경, JS Date 정밀도, UTC/DST·7일/1일 경계, 20/50 집계, 401/403/404/409/429/503, DB ACL 부정 테스트, 원장 쓰기 0, 플래그 OFF 및 롤백. 증거 부족 시 BLOCKED.
+- **15시대 운영 확인:** miniPC Debian 13 서비스 활성, main 30cbbe02...; 공개 Test Treasury GET 200에 60,000,000 WLD가 표시되나 검증 증거 없음, Production은 503 UNVERIFIED로 차단 중(#2153). Test 200은 금융 QA 통과가 아니다. 과거 QA v1411 백엔드 2778 PASS/501 SKIP, 프론트 2770 PASS, 격리 마이그레이션 311/311; 의존성 감사 13건 FAIL, 공식 Test 정확 SHA·경로 장부 FAIL, DEV 권한/체크섬 및 독립 복원 미해결. 신규 기능 시험 미실행. RELEASE HOLD.
+- **외부 독립 근거:** 신규 검증 승인 0건, 누적 검증·중복 제거·분류 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 통합 영문·국문 문서만 보완하며 신규 분산 기능 기획서는 생성하지 않는다. 런타임·DB·WLD·원장·Test·Production·main 변경 없음.
+
 - **GitHub v1556:** Draft PR #2149 OPEN/HOLD (상위 #2141), 개발 이슈 #2148 OPEN; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1556 — F675-195 회원 보유 아이템별 만료 알림 제외 (기능 추가 / DRAFT / RELEASE HOLD)
 

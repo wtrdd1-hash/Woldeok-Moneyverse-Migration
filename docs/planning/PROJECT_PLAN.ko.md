@@ -1,4 +1,11 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1558 — F675-195 보유 세대·정밀 만료시각 알림 제외 (기능 보완 / DRAFT / RELEASE HOLD)
+- **주기:** 이전 기능 추가 v1556 → 현재 기능 보완 v1558 → 다음 기능 추가 v1560(잠정). main 30cbbe02f0c27a13630aedf4a39190972d890f02 시작·중간 확인, 상위 Draft #2149, 개발 #2148. F675-192/193/194/195 모두 미구현.
+- **원천 확인:** 071은 회원+상품 기본키와 NULL 만료를 사용한다. 072/165 구매 UPSERT는 수량만, 103 이벤트 UPSERT는 acquired_at도 갱신하며 074/104는 수량 차감. acquired_at/만료만으로 같은 만료시각 재획득을 구분할 수 없다. DB 소유 지속 세대 묘비와 AFTER ROW 트리거를 설계하고 INSERT/DELETE, 만료 변경, 양수↔0 때 증가, 양수→양수 추가 구매는 유지. 순방향 이관·권한·경합 검증 전 구현 BLOCKED.
+- **정밀도:** JavaScript Date 밀리초와 PostgreSQL 마이크로초 차이를 고려해 v1556 expectedExpiresAtUtc 저장 전제 대신 정확한 DB 만료·세대·회원/세션을 결속한 HMAC expectedHoldingToken(120초)과 멱등키를 사용. DB 잠금 후 비교, 409/503 안전 처리, 7일/1일 원자 저장, 알림 영수증+알림함 원자 커밋, 소급 발송 금지.
+- **백로그:** P0 OPS1558-01..04(운영 SHA/복원, PG17/권한, 금융 진실 #2153, Test 정확 SHA/승격), P1 MUTE1558-05..10(세대 SQL/트리거, 워커, Nest, Next/Android, 관리자/SEO, 회귀). 합성 10,001개/2회원/2워커·UPSERT·0→양수·같은 만료 재삽입·+1µs·멱등/ACL/롤백 시험 명세만 작성, 미실행.
+- **신규 P0:** 2026-10-31 15시대 공개 Test Treasury 200에 미검증 60,000,000 WLD 표시, Production은 503 UNVERIFIED(#2153). QA v1411은 과거 검사; 감사·Test 정확 SHA·DB 권한/체크섬·독립 복원 BLOCKED, RELEASE HOLD. 외부 신규 검증 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경, 런타임·DB·WLD·원장·Test·Production·main 변경 없음. 영문 원본/국문 동등 상세는 통합 문서에 있다.
+
 - **GitHub v1556:** Draft PR #2149 OPEN/HOLD (상위 #2141), 개발 이슈 #2148 OPEN; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1556 — F675-195 보유 아이템별 만료 알림 제외 (기능 추가 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 기능 보완 v1554 → 현재 기능 추가 v1556 → 다음 기능 보완 v1558(잠정). main 761a55a094fb9dd383d213e817305e68c79fa23c 재확인, Draft #2141 위 적층, 개발 #2148. F675-192/193/194는 미구현 Draft; 문서만 변경.
