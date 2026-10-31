@@ -1,11 +1,12 @@
-import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { TelegramAlertService } from '../../telegram/telegram-alert.service';
+import { BadRequestException, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { TreasuryOverview, TreasuryRepository } from './treasury.repository';
 
 export class TreasuryInputError extends BadRequestException {}
 
 @Injectable()
 export class TreasuryService {
-  constructor(private readonly repository: TreasuryRepository) {}
+  constructor(private readonly repository: TreasuryRepository, @Optional() private readonly telegram?: TelegramAlertService) {}
 
   async getOverview(): Promise<TreasuryOverview> {
     return this.repository.getOverview();
@@ -101,12 +102,22 @@ export class TreasuryService {
       throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
     }
     try {
-      return await this.repository.disburseTargetedSubsidy(
+      const result = await this.repository.disburseTargetedSubsidy(
         adminId,
         amountPerUserWld,
         maxBalanceCutoffWld,
         reason,
       );
+      if (this.telegram) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'TARGETED_SUBSIDY',
+          amountWld: (result as any)?.total_disbursed_wld || amountPerUserWld,
+          targetUser: `대상자 ${(result as any)?.eligible_users_count || 0}명 (1인당 ${amountPerUserWld} WLD)`,
+          adminId,
+          reason,
+        }).catch(() => undefined);
+      }
+      return result;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new TreasuryInputError(msg);
@@ -146,7 +157,17 @@ export class TreasuryService {
       throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
     }
     try {
-      return await this.repository.disburseGrant(adminId, targetUserId, amountWld, disbursementType, reason);
+      const result = await this.repository.disburseGrant(adminId, targetUserId, amountWld, disbursementType, reason);
+      if (this.telegram) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'DISBURSED',
+          amountWld,
+          targetUser: targetUserId ?? '공공/기관 수혜',
+          adminId,
+          reason,
+        }).catch(() => undefined);
+      }
+      return result;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new TreasuryInputError(msg);
@@ -184,7 +205,17 @@ export class TreasuryService {
       throw new TreasuryInputError('예산 배정 감사 사유는 최소 10자 이상 입력해야 합니다.');
     }
     try {
-      return await this.repository.distributeBudgetRule(adminId, amountWld, reason);
+      const result = await this.repository.distributeBudgetRule(adminId, amountWld, reason);
+      if (this.telegram) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'BUDGET_DISTRIBUTION',
+          amountWld,
+          targetUser: '각 부문별 예산 금고',
+          adminId,
+          reason,
+        }).catch(() => undefined);
+      }
+      return result;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       throw new TreasuryInputError(msg);

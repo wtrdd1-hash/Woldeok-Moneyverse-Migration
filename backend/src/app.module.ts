@@ -1,3 +1,4 @@
+import { TelegramAlertModule } from './telegram/telegram-alert.module';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -99,6 +100,7 @@ const ONE_MINUTE_MS = 60_000;
     SchedulerModule,
     MintModule,
     CentralBankModule,
+    TelegramAlertModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared

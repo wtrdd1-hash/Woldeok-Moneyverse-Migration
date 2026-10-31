@@ -1,3 +1,4 @@
+import { TelegramAlertService } from '../telegram/telegram-alert.service';
 import { Injectable } from '@nestjs/common';
 import { parseWalletCalendarRange } from './wallet-calendar-range';
 import { signWalletActivityCursor, verifyWalletActivityCursor, type WalletActivityDirection, type WalletActivityPeriod } from './wallet-activity-cursor';
@@ -365,6 +366,7 @@ import { MarketBroadcast } from '../stock/market-broadcast';
 export interface WalletServiceOptions {
   readonly clock?: (() => Date) | undefined;
   readonly broadcast?: MarketBroadcast | undefined;
+  readonly telegramAlert?: TelegramAlertService | undefined;
 }
 
 @Injectable()
@@ -372,10 +374,11 @@ export class WalletService {
   readonly repository: WalletRepositoryLike;
   readonly clock: () => Date;
   readonly broadcast?: MarketBroadcast | undefined;
+  readonly telegramAlert?: TelegramAlertService | undefined;
 
   constructor(
     repository: WalletRepositoryLike,
-    { clock = () => new Date(), broadcast }: WalletServiceOptions = {},
+    { clock = () => new Date(), broadcast, telegramAlert }: WalletServiceOptions = {},
   ) {
     const requiredMethods: readonly (keyof WalletRepositoryLike)[] = [
       'balancesForUser',
@@ -394,6 +397,7 @@ export class WalletService {
     this.repository = repository;
     this.clock = clock;
     this.broadcast = broadcast;
+    this.telegramAlert = telegramAlert;
   }
 
   async transactionDetail(authenticatedUserId: string, transactionId: string): Promise<WalletTransactionDetailView> {

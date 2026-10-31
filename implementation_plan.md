@@ -2159,3 +2159,55 @@ ull 상태를 반환하도록 교정.
 - 프론트엔드 단위 테스트 전수 통과: 4개 대상 파일 12개 테스트 PASS 및 전체 단위 테스트 통과.
 - pnpm typecheck 및 pnpm lint: 에러 0건.
 - 프로덕션 서빙 실측: curl https://easy-scraping.com/frontend-version -> {"id":"1793422036848"} 정상 서빙 확인.
+
+---
+## 🚀 [v273 Specification] 텔레그램 국고·유저로그인·금융·카지노 다각도 알림 및 초단위 정밀 타임스탬프 고도화
+
+### 1. 작업 개요 및 사용자 요구사항
+- **요구사항**: 
+  - "텔레그램 알람 기능에 국고 및 유저 로그인 알림등 기능 더 많은 알림기능추가해줘"
+  - "텔레그램 보내는 시간 정확하게 표시해줘 초단위까지 알겠지? 제대로 해줘"
+  - "다시 브랜치 통합 후 삭제 후 운영승격까지 할것 디스크 정리도 진행할것 물론 운영승격후에"
+- **확정된 조율 사양**:
+  1. **실행 아키텍처**: 하이브리드(Hybrid) 방식
+     - 중요 즉시성 이벤트(로그인, 국고 보조금, 잭팟 등): 백엔드 NestJS 서비스 내 `TelegramAlertService`에서 실시간 즉시 발송.
+     - 시스템/주기 감시(주식 시장 시황, 배치 뉴스, 시스템 리소스): `ops/telegram/` 파이썬 워커가 전담 감시.
+  2. **국고(Treasury) 알림 이벤트**:
+     - 국고 보조금(Grant) 신청 및 지급 승인/반려 알림 (신청자, 승인 금액, 지원 사유)
+     - 국부펀드(SWF) 자동 자산 매수/청산 및 배당금 국고 유입 알림
+  3. **유저 로그인 & 가입 알림 이벤트**:
+     - 관리자(Admin) 콘솔 로그인 및 2FA/TOTP 인증 성공 알림 (접속자 ID, 클라이언트 IP, 사용자 에이전트 환경)
+     - 신규 회원 가입(Register) 발생 알림 (유저 닉네임, 가입 경로)
+  4. **추가 경제 및 게이밍 알림**:
+     - 카지노 대박 잭팟(Jackpot) 및 고액 당첨 알림 (슬롯/하이로우/다이스/룰렛 고액 승리)
+     - 고액 금융 트랜잭션 알림 (P2P 고액 송금, 대규모 환전 등 1,000 WLD 이상)
+  5. **초단위 정밀 타임스탬프 헤더 규격**:
+     - 모든 텔레그램 메시지 최상단에 `［YYYY-MM-DD HH:MM:SS KST］` 굵은 글씨로 초 단위까지 정확히 표기.
+  6. **작업 완료 후 승격 및 정리 파이프라인**:
+     - PR 생성 및 GitHub Actions CI ALL PASS 통과.
+     - `main` 브랜치 머지 및 기능 브랜치 원격/로컬 일괄 삭제.
+     - 최신 코드 빌드 및 무중단 운영 승격 (Production Promotion).
+     - 승격 완료 후 오래된 릴리즈/도커 캐시/임시 파일 디스크 정리 수행.
+
+### 2. 세부 구현 대상 파일
+1. **백엔드 텔레그램 알림 서비스**:
+   - `backend/src/telegram/telegram-alert.service.ts`: 안전한 텔레그램 봇 API 클라이언트 및 초단위 KST 타임스탬프 포맷터 구현.
+   - `backend/src/telegram/telegram-alert.module.ts`: NestJS 모듈 등록.
+   - `backend/src/telegram/telegram-alert.service.test.ts`: 전송 및 포맷팅 단위 테스트 작성.
+2. **이벤트 트리거 연동**:
+   - `backend/src/admin/treasury/treasury.service.ts`: 국고 보조금 신청/승인/반려 시 텔레그램 알림 호출.
+   - `backend/src/admin/treasury/auto-swf.service.ts`: SWF 자산 매수/청산/배당금 유입 시 텔레그램 알림 호출.
+   - `backend/src/admin/admin.service.ts` 또는 `backend/src/security/`: 관리자 콘솔 로그인 & 2FA 통과 시 텔레그램 알림 호출.
+   - `backend/src/auth/auth.service.ts`: 신규 회원 가입(Register) 시 텔레그램 알림 호출.
+   - `backend/src/casino/casino.service.ts`: 고액 잭팟/승리 시 텔레그램 알림 호출.
+   - `backend/src/wallet/wallet.service.ts`: 고액 이체/환전 시 텔레그램 알림 호출.
+3. **파이썬 워커 메시지 타임스탬프 표준화**:
+   - `ops/telegram/telegram_bridge.py`: 시스템 및 운영 알림 메시지 헤더에 `［YYYY-MM-DD HH:MM:SS KST］` 초단위 타임스탬프 적용.
+   - `ops/telegram/market_alerts.py`: 주식 시황 및 시장 이벤트 헤더에 `［YYYY-MM-DD HH:MM:SS KST］` 초단위 타임스탬프 적용.
+
+### 3. 검증 계획 (Verification Plan)
+- 백엔드 텔레그램 모듈 단위 테스트 100% 통과 확인 (`pnpm --filter backend test`).
+- 파이썬 텔레그램 워커 단위 테스트 실행 (`python3 -m unittest ops/telegram/test_*.py`).
+- 텔레그램 실제 테스트 전송 스크립트 실행 및 영수증(message_id) 실측 확인.
+- 전체 빌드(`pnpm build`) 및 린트(`pnpm lint`), 타입체크(`pnpm typecheck`) 통과 확인.
+- GitHub Actions CI ALL PASS 확인 및 `main` 머지 후 운영 승격 & 디스크 정리.

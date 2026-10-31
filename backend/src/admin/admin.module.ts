@@ -70,6 +70,7 @@ import { AdminKdicController, PublicKdicController } from './kdic/kdic.controlle
 import { KdicRepository } from './kdic/kdic.repository';
 import { KdicService } from './kdic/kdic.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
+import { TelegramAlertService } from '../telegram/telegram-alert.service';
 
 @Module({
   imports: [AuthModule, StockModule, ChatModule],
@@ -163,8 +164,9 @@ import { DiscordAlertService } from '../discord/discord-alert.service';
     },
     {
       provide: TreasuryService,
-      inject: [TreasuryRepository],
-      useFactory: (repo: TreasuryRepository | null) => (repo ? new TreasuryService(repo) : null),
+      inject: [TreasuryRepository, TelegramAlertService],
+      useFactory: (repo: TreasuryRepository | null, telegram: TelegramAlertService | null) =>
+        repo ? new TreasuryService(repo, telegram ?? undefined) : null,
     },
     AutoSovereignWealthFundService,
     {

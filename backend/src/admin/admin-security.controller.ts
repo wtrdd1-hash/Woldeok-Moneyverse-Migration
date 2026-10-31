@@ -1,3 +1,4 @@
+import { TelegramAlertService } from '../telegram/telegram-alert.service';
 import { createHash } from 'node:crypto';
 import {
   BadRequestException,
@@ -17,6 +18,7 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
   UseGuards,
+  Optional,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import {
@@ -106,6 +108,7 @@ export class AdminSecurityController {
     @Inject(CONFIG) private readonly config: AppConfig,
     @Inject(AdminSecurityService) private readonly security: AdminSecurityService | null,
     @Inject('ADMIN_DEVICE_PEPPER') private readonly devicePepper: string,
+    @Optional() private readonly telegram?: TelegramAlertService,
   ) {}
 
   private service(): AdminSecurityService {
@@ -211,7 +214,7 @@ export class AdminSecurityController {
     // that passing it is not optional.
     const context = await service.evaluateLoginContext({
       userId: actor,
-      ipAddress: this.clientAddress(request),
+      ipAddress: this.clientAddress(request) ?? 'unknown',
       deviceHash: this.deviceHash(request),
     });
     if (context.decision === 'block') throw new ForbiddenException(context.reason);
@@ -221,6 +224,14 @@ export class AdminSecurityController {
       'the console session could not be opened',
     );
     response.setHeader('set-cookie', sessionCookie(opened.token, this.config));
+    if (this.telegram) {
+      this.telegram.notifyAdminLogin({
+        adminId: actor,
+        ipAddress: this.clientAddress(request) ?? 'unknown',
+        userAgent: String(request.headers['user-agent'] ?? 'unknown'),
+        stepUpVerified: true,
+      }).catch(() => undefined);
+    }
     return {
       state: opened.state,
       expiresAt: opened.expiresAt,

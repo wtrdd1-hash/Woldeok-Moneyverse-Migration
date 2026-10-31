@@ -109,8 +109,14 @@ class Bridge:
             raise RuntimeError("Telegram private chat not paired; send /start <pairing-code> first")
         if self.api is None:
             raise RuntimeError("Telegram API unavailable")
+        now_str = datetime.now(KST).strftime("［%Y-%m-%d %H:%M:%S KST］")
+        clean_msg = message.strip()
+        if not clean_msg.startswith("［"):
+            formatted_message = now_str + "\n" + clean_msg
+        else:
+            formatted_message = clean_msg
         result = self.api.call("sendMessage", {
-            "chat_id": chat_id, "text": redact(message),
+            "chat_id": chat_id, "text": redact(formatted_message),
             "disable_web_page_preview": "true",
         })
         if not result.get("result", {}).get("message_id"):

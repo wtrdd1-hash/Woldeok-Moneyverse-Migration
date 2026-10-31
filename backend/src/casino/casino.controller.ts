@@ -30,6 +30,7 @@ import {
 } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoJackpotProofUnavailableError, CasinoRepository } from './casino.repository';
 import { DiscordAlertService } from '../discord/discord-alert.service';
+import { TelegramAlertService } from '../telegram/telegram-alert.service';
 
 /**
  * What a member is told when the casino's switch is not 'enabled'.
@@ -97,6 +98,7 @@ export class CasinoController {
   constructor(
     @Inject(CasinoRepository) private readonly casino: CasinoRepository | null,
     @Optional() private readonly discordAlert?: DiscordAlertService,
+    @Optional() private readonly telegramAlert?: TelegramAlertService,
   ) {}
 
   private repository(): CasinoRepository {
@@ -222,16 +224,27 @@ export class CasinoController {
         body.stake,
       );
 
-      if (this.discordAlert && Number(res.net_amount) >= 1_000_000) {
+      if (Number(res.net_amount) >= 1_000_000) {
         const uId = request.session?.user_id;
         const displayName = uId ? `유저(${uId.slice(0, 8)})` : '익명의 승부사';
-        this.discordAlert.broadcastCasinoJackpot({
-          game: '동전 던지기 (Coin Flip)',
-          userName: displayName,
-          betAmount: body.stake,
-          winAmount: res.net_amount,
-          multiplier: 2,
-        }).catch(() => {});
+        if (this.discordAlert) {
+          this.discordAlert.broadcastCasinoJackpot({
+            game: '동전 던지기 (Coin Flip)',
+            userName: displayName,
+            betAmount: body.stake,
+            winAmount: res.net_amount,
+            multiplier: 2,
+          }).catch(() => {});
+        }
+        if (this.telegramAlert) {
+          this.telegramAlert.notifyCasinoJackpot({
+            gameName: '동전 던지기 (Coin Flip)',
+            userName: displayName,
+            betAmountWld: body.stake,
+            winAmountWld: res.net_amount,
+            multiplier: '2.00x',
+          }).catch(() => {});
+        }
       }
 
       return res;
