@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
-import { parseBuildId, verifyHostRuntimeIdentity, serviceForRelease, parseEnvironmentFileLocations, mergeServiceBuildIds } from './verify-host-runtime-identity.mjs';
+import { parseBuildId, verifyHostRuntimeIdentity, serviceForRelease, parseEnvironmentFileLocations, mergeServiceBuildIds, systemdProcessDirectory } from './verify-host-runtime-identity.mjs';
 
 const sha = 'a'.repeat(40);
 const root = '/srv/moneyverse-data/releases/test-v123-aaaaaaaaaaaa';
@@ -227,4 +227,14 @@ test('rejects missing and non-finite process start evidence', () => {
   state.frontendStartedAtMs = NaN;
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('backend_process_predates_release_files'));
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('frontend_process_predates_release_files'));
+});
+
+
+test('resolves active service process directory through PID without an undefined collector', () => {
+  const seen = [];
+  const actual = systemdProcessDirectory('moneyverse-live-prod-backend.service',
+    (unit) => { seen.push(unit); return 4242; },
+    (pid) => { seen.push(pid); return '/srv/releases/v1/backend'; });
+  assert.equal(actual, '/srv/releases/v1/backend');
+  assert.deepEqual(seen, ['moneyverse-live-prod-backend.service', 4242]);
 });
