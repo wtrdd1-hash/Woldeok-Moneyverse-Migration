@@ -7,6 +7,7 @@ import { parseSecurityEvents } from '@/app/account/security/account-security-evi
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
+import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
@@ -464,6 +465,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
           return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
         }
+      }
+      if (request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+          response.ok && compatible && typeof compatible === 'object' && 'pageSummary' in compatible &&
+          (compatible as { pageSummary?: unknown }).pageSummary !== null &&
+          !verifiedWalletPageSummary(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_page_summary_unverified', 'wallet page totals could not be verified');
       }
       if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
