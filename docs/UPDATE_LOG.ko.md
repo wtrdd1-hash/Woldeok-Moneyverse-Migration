@@ -1,4 +1,4 @@
-## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD)
+## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD); Draft #2203 / issue #2195.
 v1570 F675-198 일시중지·통합 알림 판정 펜스; QA1420 P0, P0 4/P1 6, 문서만 HOLD.
 
 ## v2026.10.31.1568 — F675-198 회원 만료 알림 일시중지·자동 재개 (기능 추가 / DRAFT / RELEASE HOLD)

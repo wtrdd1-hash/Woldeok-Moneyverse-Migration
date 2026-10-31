@@ -1,4 +1,4 @@
-## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD)
+## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD); Draft #2203 / issue #2195.
 v1570 F675-198 pause/digest decision fence; QA1420 P0, 4 P0/6 P1, docs-only HOLD.
 
 ## v2026.10.31.1568 — F675-198 Owner Temporary Pause/Automatic Resume (FEATURE ADDITION / DRAFT / RELEASE HOLD)
