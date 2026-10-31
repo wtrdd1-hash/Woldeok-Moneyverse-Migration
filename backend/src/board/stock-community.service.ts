@@ -116,7 +116,7 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, authorQuery?: string) {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -129,6 +129,11 @@ export class StockCommunityService {
     ) {
       throw new Error('invalid title search');
     }
+    if (
+      authorQuery !== undefined &&
+      (typeof authorQuery !== 'string' || !authorQuery.trim() || authorQuery.trim().length > 40 || /[<>\u0000-\u001f\u007f]/.test(authorQuery))
+    ) throw new Error('invalid author search');
+    const author = authorQuery?.trim() ?? null;
     const title = titleQuery?.trim() ?? null;
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
@@ -136,8 +141,9 @@ export class StockCommunityService {
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+          AND ($4::text IS NULL OR strpos(lower(author_name), lower($4::text)) > 0)`,
+      [50, normalized, title, author],
     );
     return rows.map(mapped);
   }
