@@ -75,7 +75,7 @@ function parseAccount(value: unknown): MyPensionAccount | null {
 type ReceiptKind = 'contributions' | 'payouts';
 
 function parseReceipts<T extends ReceiptKind>(
-  value: unknown, kind: T, account: MyPensionAccount | null,
+  value: unknown, kind: T, account: MyPensionAccount | null, expectedOwner: string | null,
 ): (T extends 'contributions' ? ContributionLog[] : PayoutLog[]) | null {
   if (!Array.isArray(value) || value.length > 20) return null;
   const seen = new Set<string>();
@@ -88,6 +88,7 @@ function parseReceipts<T extends ReceiptKind>(
     if (owner !== null && row.user_id !== owner) return null;
     if (accountId !== null && row.account_id !== accountId) return null;
     if (account && (row.user_id !== account.user_id || row.account_id !== account.id)) return null;
+    if (expectedOwner !== null && row.user_id !== expectedOwner) return null;
     seen.add(row.id);
     owner = row.user_id;
     accountId = row.account_id;
@@ -105,9 +106,17 @@ function parseReceipts<T extends ReceiptKind>(
   return output as T extends 'contributions' ? ContributionLog[] : PayoutLog[];
 }
 
-function parseWallet(value: unknown): string | null {
-  if (!record(value)) return null;
-  return money(value.cashBalance ?? value.balance);
+function parseWallet(value: unknown): { ownerId: string; cashBalance: string } | null {
+  if (!record(value) || !id(value.userId) || !record(value.balances) ||
+      value.balances.currency !== 'WLD' || !record(value.balances.cash) ||
+      !record(value.balances.bank) || !time(value.balances.cash.updatedAt) ||
+      !time(value.balances.bank.updatedAt)) return null;
+  const cash = money(value.balances.cash.availableAmount);
+  const bank = money(value.balances.bank.availableAmount);
+  const total = money(value.balances.totalAvailableAmount);
+  if (cash === null || bank === null || total === null ||
+      BigInt(cash) + BigInt(bank) !== BigInt(total)) return null;
+  return { ownerId: value.userId, cashBalance: cash };
 }
 
 export function parsePensionOverview(value: unknown): NationalPensionOverview | null {
@@ -135,17 +144,25 @@ export async function loadPensionMemberEvidence(
     '/api/v1/pension/my-account',
     '/api/v1/pension/my-contributions',
     '/api/v1/pension/my-payouts',
-    '/api/v1/wallet/summary',
+    '/api/v1/wallet?recent=1',
   ] as const;
   const [accountResult, contributionResult, payoutResult, walletResult] =
     await Promise.allSettled([
       read(paths[0]), read(paths[1]), read(paths[2]), read(paths[3]),
     ]);
-  const account = accountResult.status === 'fulfilled' ? parseAccount(accountResult.value) : null;
+  const wallet = walletResult.status === 'fulfilled' ? parseWallet(walletResult.value) : null;
+  let account = accountResult.status === 'fulfilled' ? parseAccount(accountResult.value) : null;
+  const ownerConflict = wallet !== null && account !== null && wallet.ownerId !== account.user_id;
+  if (ownerConflict) account = null;
+  const expectedOwner = wallet?.ownerId ?? account?.user_id ?? null;
   let contributions = contributionResult.status === 'fulfilled'
-    ? parseReceipts(contributionResult.value, 'contributions', account) : null;
+    ? parseReceipts(contributionResult.value, 'contributions', account, expectedOwner) : null;
   let payouts = payoutResult.status === 'fulfilled'
-    ? parseReceipts(payoutResult.value, 'payouts', account) : null;
+    ? parseReceipts(payoutResult.value, 'payouts', account, expectedOwner) : null;
+  if (ownerConflict) {
+    contributions = null;
+    payouts = null;
+  }
   // The session-bound SQL functions are authoritative; cross-list agreement
   // also prevents rendering conflicting owner evidence when the account read fails.
   if (!account && contributions && payouts && contributions.length && payouts.length &&
@@ -158,7 +175,7 @@ export async function loadPensionMemberEvidence(
       payouts = null;
     }
   }
-  const cashBalance = walletResult.status === 'fulfilled' ? parseWallet(walletResult.value) : null;
+  const cashBalance = wallet?.cashBalance ?? null;
   const sourceEvidence = {
     account: account !== null,
     contributions: contributions !== null,

@@ -20,7 +20,10 @@ const payout = {
   payout_amount_wld: '45', snapshot_accumulated_wld: '9007199254740993',
   created_at: '2026-10-30T00:00:00.000Z',
 };
-const paths = ['/api/v1/pension/my-account', '/api/v1/pension/my-contributions', '/api/v1/pension/my-payouts', '/api/v1/wallet/summary'];
+const wallet = (amount: unknown, userId = owner) => ({
+  userId, balances: { currency: 'WLD', cash: { availableAmount: amount, updatedAt: '2026-10-30T00:00:00.000Z' }, bank: { availableAmount: '0', updatedAt: '2026-10-30T00:00:00.000Z' }, totalAvailableAmount: amount }, recentTransactions: [],
+});
+const paths = ['/api/v1/pension/my-account', '/api/v1/pension/my-contributions', '/api/v1/pension/my-payouts', '/api/v1/wallet?recent=1'];
 
 describe('P1 pension member source evidence', () => {
   it('preserves owner receipts when the account and wallet endpoints fail', async () => {
@@ -45,7 +48,7 @@ describe('P1 pension member source evidence', () => {
       if (path === paths[0]) return account;
       if (path === paths[1]) return [];
       if (path === paths[2]) throw new Error('502');
-      return { cashBalance: '0' };
+      return wallet('0');
     });
     expect(result.sourceEvidence).toEqual({ account: true, contributions: true, payouts: false, wallet: true });
     expect(result.contributions).toEqual([]);
@@ -63,7 +66,7 @@ describe('P1 pension member source evidence', () => {
       if (path === paths[0]) return account;
       if (path === paths[1]) return bad;
       if (path === paths[2]) return [payout];
-      return { cashBalance: '9007199254740993' };
+      return wallet('9007199254740993');
     });
     expect(result.sourceEvidence.contributions).toBe(false);
     expect(result.contributions).toEqual([]);
@@ -73,10 +76,10 @@ describe('P1 pension member source evidence', () => {
 
   it('rejects mismatched owners across independent receipt lists when account evidence is unavailable', async () => {
     const result = await loadPensionMemberEvidence(async (path) => {
-      if (path === paths[0]) throw new Error('503');
+      if (path === paths[0] || path === paths[3]) throw new Error('503');
       if (path === paths[1]) return [contribution];
       if (path === paths[2]) return [{ ...payout, user_id: '55555555-5555-4555-8555-555555555555' }];
-      return { cashBalance: '0' };
+      throw new Error('unexpected');
     });
     expect(result.sourceEvidence.contributions).toBe(false);
     expect(result.sourceEvidence.payouts).toBe(false);
@@ -86,11 +89,23 @@ describe('P1 pension member source evidence', () => {
     const result = await loadPensionMemberEvidence(async (path) => {
       if (path === paths[0]) return { ...account, accumulated_contribution_wld: '9e20' };
       if (path === paths[1] || path === paths[2]) return [];
-      return { cashBalance: Number('9007199254740993') };
+      return wallet(Number('9007199254740993'));
     });
     expect(result.sourceEvidence.account).toBe(false);
     expect(result.sourceEvidence.wallet).toBe(false);
     expect(result.cashBalance).toBeNull();
+  });
+
+  it('rejects a wallet with a different authenticated owner even when its amount is valid', async () => {
+    const result = await loadPensionMemberEvidence(async (path) => {
+      if (path === paths[0]) return account;
+      if (path === paths[1]) return [contribution];
+      if (path === paths[2]) return [payout];
+      return wallet('45', '55555555-5555-4555-8555-555555555555');
+    });
+    expect(result.sourceEvidence.account).toBe(false);
+    expect(result.sourceEvidence.contributions).toBe(false);
+    expect(result.sourceEvidence.payouts).toBe(false);
   });
 
   it('does not authenticate a caller when all member endpoints reject', async () => {
