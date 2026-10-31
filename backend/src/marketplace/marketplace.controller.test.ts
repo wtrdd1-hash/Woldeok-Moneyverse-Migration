@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { MarketplaceController } from './marketplace.controller';
 import { MarketplaceService } from './marketplace.service';
 import type { RequestWithSession } from '../auth/session.context';
@@ -97,15 +98,15 @@ describe('MarketplaceController', () => {
     expect(cancelRes).toBe(true);
   });
 
-  it('listAppraisals and requestAppraisal work properly', async () => {
+  it('lists server records but blocks appraisal issuance without ownership proof', async () => {
     const list = await controller.listAppraisals(mockReq);
     expect(list).toHaveLength(1);
-
-    const cert = await controller.requestAppraisal(mockReq, {
+    vi.mocked(mockService.requestAppraisal).mockClear();
+    expect(() => controller.requestAppraisal(mockReq, {
       itemId: 'item_1',
       itemName: '골드 메달',
       rarity: 'LEGENDARY',
-    });
-    expect(cert).toEqual(expect.objectContaining({ certId: 'CERT-2026-NEW1' }));
+    })).toThrow(ServiceUnavailableException);
+    expect(mockService.requestAppraisal).not.toHaveBeenCalled();
   });
 });

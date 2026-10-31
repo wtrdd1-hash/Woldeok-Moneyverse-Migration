@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     '기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 간 아이템 거래소 및 재료 조합 제작대',
   alternates: { canonical: canonicalUrl('/marketplace') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function MarketplacePage() {

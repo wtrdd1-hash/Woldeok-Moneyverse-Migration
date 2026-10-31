@@ -190,7 +190,26 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // Member appraisal records are private even when global SEO indexing is enabled.
+      {
+        source: '/marketplace',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      },
+      {
+        source: '/api/v1/marketplace/appraisals',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      },
+    ];
   },
 
   async redirects() {

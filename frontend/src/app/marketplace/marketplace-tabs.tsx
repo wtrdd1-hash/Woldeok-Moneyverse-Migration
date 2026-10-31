@@ -280,7 +280,7 @@ export function MarketplaceTabs({
         </TabsContent>
 
         <TabsContent value="appraisal" className="pt-4">
-          <AppraisalView holdings={holdings} userBalanceWld={currentBalance} />
+          <AppraisalView />
         </TabsContent>
 
         <TabsContent value="crafting" className="pt-4">

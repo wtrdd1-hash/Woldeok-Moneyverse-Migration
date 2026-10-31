@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -215,10 +216,11 @@ export class MarketplaceController {
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Request system provenance appraisal for collectible with fee burn' })
   requestAppraisal(@Req() request: RequestWithSession, @Body() body: RequestAppraisalDto) {
-    return this.guarded(
-      () => this.marketplaceService.requestAppraisal(requireUserId(request), body),
-      'failed to request appraisal',
-    );
+    requireUserId(request);
+    void body;
+    // Migration 276 accepts caller-supplied item identity without owner-held proof.
+    // Do not charge a real WLD fee or issue a provenance certificate until that is fixed.
+    throw new ServiceUnavailableException('appraisal ownership verification unavailable');
   }
 }
 
