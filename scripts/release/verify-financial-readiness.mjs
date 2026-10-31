@@ -14,6 +14,10 @@ export const PROTECTED_FINANCIAL_TABLES = Object.freeze([
   'ledger_postings', 'system_treasury_vaults',
 ]);
 
+const ACCEPTED_EXISTING_DML_TABLES = Object.freeze(['account_balances', 'accounts', 'system_treasury_vaults']);
+const DML_KEYS = Object.freeze(['can_insert', 'can_update', 'can_delete']);
+
+// Owner approval v2026.10.29.1212 covers only the exact pre-existing grants.
 export function evaluateFinancialReadiness({ grants, ledger, identity }) {
   const blockers = [];
   // A truncated or malformed operator query is never evidence of a safe database.
@@ -29,6 +33,13 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
     if (byTable.has(row.name)) blockers.push('duplicate_financial_grant_row:' + row.name);
     byTable.set(row.name, row);
   }
+  const exactApprovedShape = identity?.database === 'woldeok_moneyverse_dev'
+    && identity?.role === 'moneyverse_app'
+    && ACCEPTED_EXISTING_DML_TABLES.every(name => {
+      const row = byTable.get(name);
+      return row && DML_KEYS.every(key => row[key] === true);
+    });
+  const warnings = [];
   for (const name of PROTECTED_FINANCIAL_TABLES) {
     const row = byTable.get(name);
     if (!row) {
@@ -36,7 +47,11 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
     } else if (['can_insert', 'can_update', 'can_delete'].some(key => typeof row[key] !== 'boolean')) {
       blockers.push('unverified_financial_grant_flags:' + name);
     } else if (row.can_insert || row.can_update || row.can_delete) {
-      blockers.push('direct_application_financial_dml:' + name);
+      if (exactApprovedShape && ACCEPTED_EXISTING_DML_TABLES.includes(name)) {
+        warnings.push('OPERATOR_ACCEPTED_EXISTING_DML:' + name);
+      } else {
+        blockers.push('direct_application_financial_dml:' + name);
+      }
     }
   }
   if (!identity || typeof identity.database !== 'string' || !identity.database.trim() ||
@@ -77,6 +92,7 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
     ok: blockers.length === 0,
     status: blockers.length === 0 ? 'READY_FOR_OTHER_RELEASE_GATES' : 'BLOCKED',
     blockers,
+    warnings,
     summary: {
       database: identity?.database ?? null,
       role: identity?.role ?? null,
