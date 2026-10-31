@@ -1,0 +1,13 @@
+# v2026.10.31.1538 — Active Production identity drift incident / hardening
+
+**State: START / source-only branch / production deployment HOLD.**
+
+## Authority / concurrency
+- User requests investigation and actual remediation using `@미니pc홍`. Reviewed `AGENTS.md`, `DOCS_INDEX.md`, `docs/DOCUMENTATION_POLICY.md`, `docs/planning/PROJECT_PLAN.md`, `docs/planning/INTEGRATED_PLANNING_MASTER.md`, `docs/RELEASING.md`, prior v1534 and production P0 issue #2144. Documentation authority: PROJECT_PLAN → INTEGRATED_PLANNING_MASTER → adopted plans; older worklogs are evidence only.
+- Remote origin/main checked `761a55a094fb9dd383d213e817305e68c79fa23c`. Host local main is `6ceffb7d51c0a51df394a5c08612e1bd6e39c745` plus uncommitted changes from another developer; NEVER touch main/that worktree. Branch `fix/prod-runtime-integrity-v20261031-1538` stacks on tested PR #2131 SHA `4c6fcf2ffe530b84f619f55cc40ce2ca7b2165fc`. Other agent actively running Next build; avoid extra simultaneous production builds.
+- Live backend port 3564 returns `95485a299885693e3becb694dfc36ad45e832f97`; public frontend reports `1793422036848` (timestamp build). Active release symlink: `prod-v2026.10.31.0950-761a55a094fb`. Its mutable manifest was rewritten around 13:36 KST to declare app SHA `666d7f6c011865f6cdb490daf5e71667d9a17327` (`v2026.10.31.1336`), yet backend process began 09:58 KST and stays the prior binary. Frontend `.next/BUILD_ID` & required-server-files.json have `1793422036848`, written at 13:47/13:48, and frontend systemd restarted 13:48. Effective frontend/backend release env values were changed to 666. This is an in-place build/relabel, NOT independently attested immutable release. Public Treasury still 503 `PUBLIC_TREASURY_RECONCILIATION_PENDING`; do not mask it.
+- A known older release dir `prod-v2026.10.30.1935-bf8d0d48f810` exists, but rolling back an old finance binary without schema/session checks is unsafe. A clean exact-SHA `95485...` source commit exists in Git object store. No verified exact old frontend bundle backup found. Concurrent other developer build and limited available RAM require canary resource gating before any rebuild.
+- Engineering plan: strengthen source-level production release validator to detect artifact files changed *after* immutable manifest was created and compiled Next ID != SHA, with TDD negative and positive cases; protect against future in-place hotpatches. Then run read-only host gate against live and retain the existing fail-closed result. Keep EN/KO docs/internal/GitHub updates and separate PR. Do not apply release or financial DB writes merely to suppress mismatch.
+
+## MID / FINISH
+PENDING.
