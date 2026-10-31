@@ -88,7 +88,7 @@ export class SupportController {
   }
 
   @Get('threads/:id/messages/:messageId')
-  @Header('Cache-Control', 'no-store')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Verified receipt for an individual support message' })
   async message(
     @Req() req: RequestWithSession,

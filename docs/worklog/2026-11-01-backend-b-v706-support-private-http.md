@@ -15,3 +15,10 @@ Existing support routes return owner conversation content, text transcripts and 
 
 ## Finished
 Pending.
+
+## Mid-work checkpoint
+- RED: seven real Nest HTTP tests failed on missing private/noindex/no-referrer headers; first fixture dependency failures corrected before counting RED.
+- GREEN: 7/7 new HTTP tests and 6/6 existing support receipt HTTP tests passed.
+- Scope: module middleware covers both owner and administrator support controllers before guards, including 401, successful GET, POST and HEAD. Existing exact-receipt Cache-Control strengthened from no-store to private, no-store.
+- No schema, migration, authorization, CSRF, monetary balance, or ledger changes.
+- Remaining: full gates, candidate CI, official Test exact-SHA and authenticated E2E.
