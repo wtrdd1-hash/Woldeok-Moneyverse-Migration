@@ -1,5 +1,6 @@
 ﻿import {
   BadRequestException,
+  ServiceUnavailableException,
   Body,
   Controller,
   Get,
@@ -382,16 +383,17 @@ export class AdminTreasuryController {
 
   @Get('swf')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
-  async getSwfStatus() {
+  async getSwfStatus(@Req() request: RequestWithSession) {
+    // The application role cannot SELECT private SWF base tables. Database
+    // function admin_swf_snapshot checks the signed-in actor's admin role.
+    const actorId = requireUserId(request);
     if (!this.swfService) {
-      return { config: null, portfolios: [], events: [] };
+      throw new ServiceUnavailableException({
+        code: 'SWF_EVIDENCE_UNAVAILABLE',
+        message: 'Administrator SWF snapshot service is unavailable',
+      });
     }
-    const [config, portfolios, events] = await Promise.all([
-      this.swfService.getConfig(),
-      this.swfService.getPortfolios(),
-      this.swfService.getRecentEvents(20),
-    ]);
-    return { config, portfolios, events };
+    return this.swfService.getAdminSnapshot(actorId);
   }
 
   @Post('swf/rebalance')
@@ -410,11 +412,15 @@ export class AdminTreasuryController {
 
   @Put('swf/config')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
-  async updateSwfConfig(@Body() body: Record<string, unknown>) {
+  async updateSwfConfig(
+    @Req() request: RequestWithSession,
+    @Body() body: Record<string, unknown>,
+  ) {
+    const actorId = requireUserId(request);
     if (!this.swfService) {
-      return { success: false };
+      throw new ServiceUnavailableException({ code: 'SWF_GOVERNANCE_UNAVAILABLE' });
     }
-    return this.swfService.updateConfig(body);
+    return this.swfService.updateConfig(body, actorId);
   }
 }
 

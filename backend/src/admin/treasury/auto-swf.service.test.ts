@@ -67,36 +67,26 @@ describe('AutoSovereignWealthFundService', () => {
     });
   });
 
-  it('updates governance configuration correctly', async () => {
-    mockPool.query = vi.fn().mockResolvedValue({ rows: [] });
-    const getConfigSpy = vi.spyOn(service, 'getConfig').mockResolvedValue({
+  it('updates governance configuration through an audited actor-scoped DB function', async () => {
+    const config = {
       id: 'current',
       is_enabled: true,
       safe_reserve_wld: '30000000',
       max_single_investment_wld: '5000000',
       reinvestment_ratio_pct: 10,
       max_investment_ratio_pct: 15,
-      equity_ratio_pct: 60,
-      bond_ratio_pct: 30,
-      dividend_ratio_pct: 10,
-      auto_harvest_enabled: true,
-      auto_tax_enabled: true,
-      auto_growth_yield_bps: 150,
-      target_anchor_wld: '30000000',
-      rebalance_interval_hours: 1,
-      last_executed_at: null,
-    });
-
-    const updated = await service.updateConfig({
+    };
+    mockPool.query = vi.fn().mockResolvedValue({ rows: [{ config }] });
+    const changes = {
       reinvestment_ratio_pct: 10,
       max_investment_ratio_pct: 15,
       safe_reserve_wld: '30000000',
-    });
-
-    expect(updated.reinvestment_ratio_pct).toBe(10);
-    expect(updated.max_investment_ratio_pct).toBe(15);
-    expect(updated.safe_reserve_wld).toBe('30000000');
-    expect(mockPool.query).toHaveBeenCalled();
-    getConfigSpy.mockRestore();
+    };
+    const actor = '11111111-1111-4111-8111-111111111111';
+    expect(await service.updateConfig(changes, actor)).toEqual(config);
+    expect(mockPool.query).toHaveBeenCalledExactlyOnceWith(
+      'SELECT public.admin_swf_update_policy($1::uuid, $2::jsonb) AS config',
+      [actor, JSON.stringify(changes)],
+    );
   });
 });
