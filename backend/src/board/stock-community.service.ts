@@ -116,7 +116,7 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string, replies?: 'with' | 'without') {
+  async publicList(stockSymbol?: string, titleQuery?: string, replies?: 'all' | 'with' | 'without') {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -129,7 +129,7 @@ export class StockCommunityService {
     ) {
       throw new Error('invalid title search');
     }
-    if (replies !== undefined && replies !== 'with' && replies !== 'without') {
+    if (replies !== undefined && replies !== 'all' && replies !== 'with' && replies !== 'without') {
       throw new Error('invalid reply filter');
     }
     const title = titleQuery?.trim() ?? null;
@@ -141,7 +141,7 @@ export class StockCommunityService {
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
           AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
           AND ($4::text IS NULL OR ($4 = 'with' AND comment_count > 0) OR ($4 = 'without' AND comment_count = 0))`,
-      [50, normalized, title, replies ?? null],
+      [50, normalized, title, replies === 'all' ? null : replies ?? null],
     );
     return rows.map(mapped);
   }
