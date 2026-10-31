@@ -5,6 +5,7 @@ import { evaluateFinancialReadiness, readFinancialSnapshot, PROTECTED_FINANCIAL_
 const good = Object.freeze({
   identity:{database:'moneyverse_test',role:'moneyverse_app'},
   grants:PROTECTED_FINANCIAL_TABLES.map(name=>({name,can_insert:false,can_update:false,can_delete:false})),
+  legacyTables:[],
   ledger:{
     balance_rows:3,unexplained_account_count:0,unexplained_delta_wld:'0',
     unexplained_without_postings_count:0,unexplained_without_postings_delta_wld:'0',
@@ -104,7 +105,7 @@ test('empty and missing balance projection is not ready',()=>{
 
 test('snapshot is repeatable read-only and always rolled back',async()=>{
   const calls=[];
-  const c={async query(sql,args){calls.push({sql,args});if(sql.includes('current_database()'))return{rows:[good.identity]};if(sql.includes('has_table_privilege'))return{rows:good.grants};if(sql.includes('account_net AS'))return{rows:[good.ledger]};return{rows:[]};}};
+  const c={async query(sql,args){calls.push({sql,args});if(sql.includes('current_database()'))return{rows:[good.identity]};if(sql.includes('TRUNCATE'))return{rows:[]};if(sql.includes('has_table_privilege'))return{rows:good.grants};if(sql.includes('account_net AS'))return{rows:[good.ledger]};return{rows:[]};}};
   assert.deepEqual(await readFinancialSnapshot(c),good);
   assert.equal(calls[0].sql,'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
   assert.equal(calls.at(-1).sql,'ROLLBACK');
@@ -115,7 +116,7 @@ test('snapshot rolls back on failed financial query',async()=>{
   const calls=[];
   const c={async query(sql){calls.push(sql);if(sql.includes('account_net AS'))throw Error('query interrupted');
     if(sql.includes('current_database()'))return{rows:[good.identity]};
-    if(sql.includes('has_table_privilege'))return{rows:good.grants};return{rows:[]}}};
+    if(sql.includes('TRUNCATE'))return{rows:[]};if(sql.includes('has_table_privilege'))return{rows:good.grants};return{rows:[]}}};
   await assert.rejects(()=>readFinancialSnapshot(c),/query interrupted/);
   assert.equal(calls.at(-1),'ROLLBACK');
 });
@@ -158,4 +159,51 @@ test('invalid or contradictory signed-WLD totals are blocked without lossy Numbe
     }
     assert.equal(evaluateFinancialReadiness({...good,ledger:{...good.ledger,[key]:'9007199254740993'}}).ok,false);
   }
+});
+
+test('release preflight fails closed when legacy schema evidence is omitted', () => {
+  const report = evaluateFinancialReadiness({...good, legacyTables: undefined});
+  assert.equal(report.ok, false);
+  assert(report.blockers.includes('unverified_legacy_schema_grants'));
+});
+
+test('all nine production-only tables block release even if their direct grants are revoked', () => {
+  const names = [
+    'daily_attendance_logs', 'economic_hot_time_events', 'in_app_notifications',
+    'marketplace_purchases', 'notification_preferences', 'p2p_wire_transfers',
+    'user_inventory_items', 'user_notifications', 'virtual_casino_theme_plays',
+  ];
+  for (const name of names) {
+    const row = {name, can_insert:false, can_update:false, can_delete:false, can_truncate:false};
+    const report = evaluateFinancialReadiness({...good, legacyTables:[row]});
+    assert.equal(report.ok, false, name);
+    assert(report.blockers.includes('unreconciled_production_only_table:' + name), name);
+  }
+});
+
+test('production-only table grants and malformed evidence are independently blocked', () => {
+  const name = 'p2p_wire_transfers';
+  const writable = {name,can_insert:false,can_update:true,can_delete:true,can_truncate:true};
+  const report = evaluateFinancialReadiness({...good,legacyTables:[writable]});
+  assert(report.blockers.includes('legacy_table_direct_app_dml:' + name));
+  assert.equal(report.ok, false);
+  for (const legacyTables of [null, [writable,writable], [{name,can_insert:'false'}], [{name:'unknown'}]]) {
+    assert.equal(evaluateFinancialReadiness({...good,legacyTables}).ok,false);
+  }
+});
+
+test('legacy table snapshot is queried in the same read-only transaction', async () => {
+  const calls=[];
+  const client={async query(sql,args){calls.push({sql,args});
+    if (sql.includes('current_database()')) return {rows:good.identity?[good.identity]:[]};
+    if (sql.includes('has_table_privilege') && sql.includes('TRUNCATE')) return {rows:[]};
+    if (sql.includes('has_table_privilege')) return {rows:good.grants};
+    if (sql.includes('account_net AS')) return {rows:[good.ledger]};
+    return {rows:[]};
+  }};
+  const snapshot=await readFinancialSnapshot(client);
+  assert.deepEqual(snapshot.legacyTables,[]);
+  assert(calls.some(call => call.sql.includes('TRUNCATE') && call.args?.[0]?.includes('in_app_notifications')));
+  assert.equal(calls[0].sql,'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+  assert.equal(calls.at(-1).sql,'ROLLBACK');
 });
