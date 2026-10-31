@@ -16,7 +16,7 @@ export function parseBoardTitleQuery(value: unknown): { query: string | null; in
 export function parseBoardRepliesFilter(
   value: unknown,
 ): { replies: 'all' | 'with' | 'without'; invalid: boolean } {
-  if (value === undefined) return { replies: 'all', invalid: false };
+  if (value === undefined || value === 'all') return { replies: 'all', invalid: false };
   if (value === 'with' || value === 'without') return { replies: value, invalid: false };
   return { replies: 'all', invalid: true };
 }
