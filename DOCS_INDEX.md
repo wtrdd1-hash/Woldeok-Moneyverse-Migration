@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1549 — Canonical SWF main CSRF/proxy reconciliation (ISOLATED SQL VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-swf-proxy-csrf-reconcile-v1549.md) / [KO](docs/worklog/2026-10-31-swf-proxy-csrf-reconcile-v1549.ko.md) · [Internal](docs/updates/v2026.10.31.1549-swf-internal.md) / [KO](docs/updates/v2026.10.31.1549-swf-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1549-swf-github.md) / [KO](docs/updates/v2026.10.31.1549-swf-github.ko.md). Main #2163 already includes canonical 313; do not merge conflicting draft #2162. Next policy BFF canonical HTTPS origin and one-use CSRF, backend PUT CsrfGuard, private/no-store. Isolated main 313 app-role audit and rollback PASS; BE 144/FE 31/release 122 PASS. No official Test or Production release yet.
+
+
 ## v2026.10.31.1546 — SWF admin actor-scoped read and audited policy (SOURCE VERIFIED / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-swf-admin-read-v1546.md) / [KO](docs/worklog/2026-10-31-swf-admin-read-v1546.ko.md) · [Internal EN](docs/updates/v2026.10.31.1546-swf-internal.md) / [KO](docs/updates/v2026.10.31.1546-swf-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1546-swf-github.md) / [KO](docs/updates/v2026.10.31.1546-swf-github.ko.md). Actor-scoped GET fixes production SWF permission error, new additive migration 313 replaces raw policy SQL with approver-only atomic audit. Production role read and Test-only role write/rollback verified. Targeted 13+144+22+122 PASS; full CI and Test/Production promotion pending. Treasury 552 unlinked rows remain fail-closed.
 
