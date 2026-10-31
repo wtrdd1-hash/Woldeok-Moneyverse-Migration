@@ -16,6 +16,6 @@
 - [x] Run GREEN and re-audit; 0 fast-uri advisories.
 
 ## Task 2
-- [ ] Run all applicable build/lint/typecheck/unit/contract/security gates.
-- [ ] Re-fetch main, check CI and overlapping PR #2115.
-- [ ] Open Draft/HOLD PR, no merge/deployment until official Test exact-SHA gates pass.
+- [x] Run applicable build/lint/typecheck/unit/contract/security gates (PASS; full audit still FAIL).
+- [x] Re-fetch main, check CI (Next font loader FAIL) and overlapping PR #2115.
+- [x] Open Draft/HOLD PR #2120; no merge/deployment until official Test exact-SHA gates pass.
