@@ -2095,3 +2095,40 @@ ull 상태를 반환하도록 교정.
 - **최종 디스크 상태**:
   - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 확보 (초기 87% 대비 54%p 대폭 절감)**
   - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 44GB 사용 (47%), 51GB 여유 공간 확보**
+
+---
+## 🚀 [v28 Specification] 업데이트/새로고침 기능 전체 점검 및 5대 관제 타워 결함 보수 완료
+
+### 1. 전사 업데이트/새로고침 기능 점검 개요
+전사 관리자 콘솔 및 대국민 포털의 새로고침(`refreshData`, `router.refresh()`, `reload()`, SWR 캐시) 동작 메커니즘을 전수 점검하여, 브라우저-BFF 간 인증 토큰 불일치, 화면 플리커링, 수동 갱신 UI 부재 문제를 종합 식별하고 보수 완료함.
+
+### 2. 세부 결함 보수 및 개선 내역
+1. **경제/통화청 관제 (`/admin/economy`) - 브라우저 직접 fetch 결함 해결**:
+   - `monetary-bureau-card.tsx` 내부에서 브라우저가 직접 호출하던 백엔드 내부 경로(`/api/v1/admin/economy/monetary/...`)를 제거.
+   - Next.js App Router의 `router.refresh()`와 `isRefreshing` 로딩 스피너 애니메이션으로 전환하여, 서버 컴포넌트(`AdminEconomyPage`)가 안전한 내부 토큰(`INTERNAL_API_TOKEN`)을 통해 최신 경제 지표를 원자적으로 동기화하도록 전면 개선.
+2. **예금보험공사 관제 (`/admin/kdic`) - 깜빡임(Flickering) 및 에러 배너 튐 방지**:
+   - `kdic-control-tower.tsx`의 `refreshData` 실행 시 데이터를 사전에 `null`로 비우던 동작을 제거.
+   - 기존 데이터를 화면에 안전하게 유지한 채 `RotateCw` 스피너를 회전시키고, 새 검증 데이터 도착 시에만 원자적으로 교체하도록 개선하여 새로고침 시 깜빡임 원천 차단.
+3. **국가중앙은행 관제 (`/admin/bank` / `CentralBankPanel`) - 통합 새로고침 버튼 연동**:
+   - `central-bank-panel.tsx` 헤더에 `RefreshCw` 아이콘 및 수동 새로고침 버튼 신설.
+   - 클릭 시 `reload()` 호출, `isRefreshing` 스피너 회전 및 실시간 토스트 피드백 연동 완료.
+4. **국유기업 관제 (`/admin/enterprises`) - 통합 새로고침 버튼 연동**:
+   - `enterprise-control-tower.tsx` 상단 툴바에 `RefreshCw` 새로고침 버튼 신설.
+   - `router.refresh()`를 통한 공기업 경영평가 및 배당 지표 즉각 동기화 완비.
+5. **AI 블로그 관제 (`/admin/blog`) - 통합 새로고침 버튼 연동**:
+   - `admin-blog-client.tsx` 아티클 관리 테이블 헤더에 `RefreshCw` 새로고침 버튼 신설.
+   - 철회/삭제 후 최신 서버 발행 상태 동기화 지원.
+6. **은행 여신 관제 (`/admin/bank`) - 통합 새로고침 버튼 연동**:
+   - `bank-risk-dashboard.tsx` 여신 리스크 카드 헤더에 `RefreshCw` 새로고침 버튼 신설.
+   - 최신 대출 연체율(NPL) 및 신용등급별 포트폴리오 즉시 갱신 지원.
+
+### 3. 빌드 무결성 및 운영 배포 실측 검증
+- **Next.js 전체 빌드**: 608개 라우트 전수 컴파일 및 정적 최적화 완료 (TypeScript 오류 제로).
+- **단위 테스트**: `kdic`, `central-bank` 관련 6개 테스트 파일 17개 테스트 100% PASS.
+- **운영 서비스 실측**:
+  - `curl -s https://easy-scraping.com/frontend-version` ➔ `{"id":"666d7f6c011865f6cdb490daf5e71667d9a17327"}`
+  - `https://easy-scraping.com/` (200 OK), `/health` (200 OK)
+- **미니PC 디스크 상태**:
+  - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 유지**
+  - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 45GB 사용 (48%), 50GB 여유 공간 유지**
+  - 로컬 Git 브랜치: 오직 `* main` 단일화 유지
