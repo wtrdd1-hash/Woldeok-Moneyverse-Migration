@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub v1554:** 초안 PR #2141 OPEN/HOLD (선행 #2135), 개발 이슈 #2134 갱신; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1554 — F675-194 만료 알림 미리보기 기간·집계 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 Feature Addition v1552 → 현재 Feature Improvement v1554 → 다음 Feature Addition v1556(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2135, 개발 #2134. 문서만 변경, 기능 미구현.
 - **설계 수정:** 기존 expires_at<=asOf+조회기간 필터는 만료 T+7.5일(7일 전 기간 T+0.5일)과 T+36.5일(30일 조회에서 7일 전 기간 T+29.5일)을 잘못 제외한다. 만료시각이 아닌 활성 기준별 반열린 **알림 판단기간**이 조회기간과 교차하는지 windowStart<horizonEnd AND windowEnd>asOf AND expiry>asOf로 판정한다. UTC 고정 168/144/24/720시간으로 DST 영향을 제거한다. 소급 발송·실제 수신 보장 없음.

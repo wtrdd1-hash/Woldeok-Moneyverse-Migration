@@ -1,4 +1,5 @@
 # 기획 v1554 — F675-194 알림 판단기간·집계 정합성
+- **GitHub v1554:** 초안 PR #2141 OPEN/HOLD (선행 #2135), 개발 이슈 #2134 갱신; main 병합·런타임·운영 배포 없음.
 **2026-10-31 | Feature Improvement | DRAFT / RELEASE HOLD**
 **이전:** Feature Addition v1552. **현재:** Feature Improvement v1554. **다음:** Feature Addition v1556(잠정).
 **정본 main:** 761a55a094fb9dd383d213e817305e68c79fa23c; AGENTS.md, README.md, 영어 PROJECT_PLAN.md 정본과 국문 동등 문서. 미병합 Draft #2135 종속, 개발 #2134. 별도 브랜치·작업 폴더, 문서 전용.

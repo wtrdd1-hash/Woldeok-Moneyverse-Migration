@@ -1,4 +1,5 @@
 # Planning v1554 — F675-194 Decision-Window Horizon and Count Integrity
+- **GitHub v1554:** Draft PR #2141 OPEN/HOLD stacked on #2135; engineering issue #2134 updated; no main merge, runtime or Production deployment.
 **2026-10-31 | Feature Improvement | DRAFT / RELEASE HOLD**
 **Previous:** Feature Addition v1552. **Current:** Feature Improvement v1554. **Next:** Feature Addition v1556 (provisional).
 **Canonical main:** 761a55a094fb9dd383d213e817305e68c79fa23c; AGENTS.md, README.md, PROJECT_PLAN.md (EN canonical), PROJECT_PLAN.ko.md (parity). Stacked on unmerged Draft #2135, engineering #2134. Independent branch and worktree; documentation only.

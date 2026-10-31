@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub v1554:** Draft PR #2141 OPEN/HOLD stacked on #2135; engineering issue #2134 updated; no main merge, runtime or Production deployment.
 ## v2026.10.31.1554 — F675-194 Reminder Preview Horizon/Count Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1552 → Current Feature Improvement v1554 → Next Feature Addition v1556 (provisional). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c start/mid rechecked; dependent Draft #2135, engineering #2134. Docs only, feature unimplemented.
 - **Correction:** v1552's expires_at<=asOf+horizon wrongly excludes a 7-day reminder window starting within 7 days for expiry T+7.5d, and within 30 days for expiry T+36.5d. Qualify each enabled half-open **decision window** by windowStart<horizonEnd AND windowEnd>asOf AND expiry>asOf, not expiry within horizon. Fixed UTC hours 168/144/24/720 avoid DST-dependent interval 'days' semantics. No catch-up or delivery guarantee.

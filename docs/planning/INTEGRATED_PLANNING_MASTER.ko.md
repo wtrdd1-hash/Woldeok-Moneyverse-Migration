@@ -1,4 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
+- **GitHub v1554:** 초안 PR #2141 OPEN/HOLD (선행 #2135), 개발 이슈 #2134 갱신; main 병합·런타임·운영 배포 없음.
 ## v2026.10.31.1554 — F675-194 회원 만료 알림 미리보기의 판단기간·집계 정합성 강화 (기능 보완 / DRAFT / RELEASE HOLD)
 
 **주기·기준:** 이전 Feature Addition v1552 → 현재 Feature Improvement v1554 → 다음 Feature Addition v1556(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 재조회. AGENTS.md·README.md·영어 PROJECT_PLAN.md 정본·국문 대조를 적용했다. 미병합 초안 #2135에만 종속되며 개발 이슈 #2134, 미구현 선행 F675-192(신청)·F675-193(이력)를 전제한다. 문서 전용이며 실제 기능은 없다.
