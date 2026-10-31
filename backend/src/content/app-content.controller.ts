@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
+import { parseGalleryCaptionQuery } from './gallery-alt-search';
 
 @ApiTags('content')
 @Controller('content')
@@ -20,8 +21,14 @@ export class AppContentController {
 
   @Get('photos')
   @ApiOperation({ summary: 'App API: published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiQuery({ name: 'q', required: false, type: String, description: 'Caption substring, 2-40 printable characters; searches the newest 24 approved photos only' })
+  async photos(@Query('q') raw?: unknown) {
+    const query = parseGalleryCaptionQuery(raw);
+    return {
+      photos: await this.service().publicPhotos({ query }),
+      searchScope: 'latest_24' as const,
+      ...(query ? { searchApplied: true } : {}),
+    };
   }
 
   @Get('status')
