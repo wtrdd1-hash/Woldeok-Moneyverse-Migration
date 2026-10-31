@@ -223,13 +223,8 @@ export class LocalAuthController {
     });
 
     if (accepted) {
-      if (this.telegram) {
-        this.telegram.notifyUserRegistered({
-          userId: '신규 신청',
-          displayName: body.displayName,
-          email,
-        }).catch(() => undefined);
-      }
+      // Registration is not verified yet. Do not disclose unverified member data
+      // to an external alert destination; verification remains email-only.
       try {
         await this.verificationEmails.send({ to: email, token, baseUrl: this.config.baseUrl });
       } catch (error) {
@@ -391,16 +386,10 @@ export class LocalAuthController {
       );
       response.setHeader('set-cookie', sessionCookie(login.token, this.config));
       const consentCurrent = await this.sessionStore().hasCurrentUserConsent(login.session_id);
-      if (this.telegram) {
-        const reqAny: any = request;
-        const forwardedHeader = reqAny && reqAny.get ? reqAny.get('x-forwarded-for') : '';
-        const clientIp = (String(forwardedHeader || reqAny?.ip || 'unknown').split(',')[0] ?? 'unknown').trim();
-        const userAgent = String(reqAny && reqAny.get ? reqAny.get('user-agent') || 'unknown' : 'unknown');
-        this.telegram.notifyUserLogin({
-          userId: credential.user_id,
-          ipAddress: clientIp,
-          userAgent,
-        }).catch(() => undefined);
+      if (consentCurrent && this.telegram) {
+        // No forwarded IP, user-agent, account identifier or email leaves this
+        // boundary. The alert service separately requires operator approval.
+        this.telegram.notifyUserLogin({ consentCurrent: true }).catch(() => undefined);
       }
       return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };
     } catch {

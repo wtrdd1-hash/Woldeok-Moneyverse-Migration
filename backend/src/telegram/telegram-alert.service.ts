@@ -64,7 +64,8 @@ export interface AdminLoginAlertPayload {
 }
 
 export interface UserLoginAlertPayload {
-  userId: string;
+  consentCurrent?: boolean;
+  userId?: string;
   displayName?: string;
   email?: string;
   ip?: string;
@@ -350,40 +351,26 @@ export class TelegramAlertService {
 
   // 4. 일반 유저 로그인 알림
   async notifyUserLogin(payload: UserLoginAlertPayload): Promise<boolean> {
-    const ip = payload.ipAddress ?? payload.ip ?? 'unknown';
-    const lines = [
-      `• 유저 ID: ${payload.userId}`,
-      payload.displayName ? `• 닉네임: ${payload.displayName}` : '',
-      `• 접속 IP: ${ip}`,
-      payload.userAgent ? `• 클라이언트: ${payload.userAgent.slice(0, 80)}` : '',
-    ].filter(Boolean);
-
+    // Member alerts are OFF until the destination and legal basis have been
+    // explicitly approved. This is independent of Telegram bot configuration.
+    if (process.env.TELEGRAM_MEMBER_LOGIN_ALERTS_APPROVED !== 'true' || payload.consentCurrent !== true) {
+      return false;
+    }
+    // Never serialize caller-controlled or identifying payload fields to a
+    // third-party transport, including IPs and user agents.
     return this.sendAlert({
       category: 'security',
       severity: 'INFO',
       title: '👤 회원 로그인 감지',
-      lines,
+      lines: ['• 개인정보를 포함하지 않는 로그인 이벤트'],
     });
   }
 
   // 5. 신규 회원 가입 알림
-  async notifyUserRegister(payload: UserRegisterAlertPayload): Promise<boolean> {
-    const name = payload.displayName ?? payload.username ?? '신규 회원';
-    const ip = payload.ipAddress ?? payload.ip ?? 'unknown';
-    const lines = [
-      payload.userId ? `• 유저 ID: ${payload.userId}` : '',
-      `• 닉네임: ${name}`,
-      payload.email ? `• 이메일: ${payload.email}` : '',
-      payload.provider ? `• 가입 방식: ${payload.provider}` : '',
-      `• 접속 IP: ${ip}`,
-    ].filter(Boolean);
-
-    return this.sendAlert({
-      category: 'security',
-      severity: 'INFO',
-      title: '🎉 신규 회원 가입 환영',
-      lines,
-    });
+  async notifyUserRegister(_payload: UserRegisterAlertPayload): Promise<boolean> {
+    // No approved post-verification registration event exists yet. A pending
+    // email verification must never trigger an external notification.
+    return false;
   }
 
   async notifyUserRegistered(payload: UserRegisterAlertPayload): Promise<boolean> {
