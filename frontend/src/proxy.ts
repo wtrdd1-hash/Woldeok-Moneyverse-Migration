@@ -204,6 +204,14 @@ export function proxy(request: NextRequest) {
   const rewriteTarget = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
   if (explicitPrefixLocale && targetPath !== pathname) {
     rewriteTarget.searchParams.set(INTERNAL_REWRITE_LOCALE_PARAM, explicitPrefixLocale);
+    // TLS terminates at the public edge. Next can reconstruct a loopback
+    // request URL as HTTPS from forwarded headers even though its local
+    // listener speaks HTTP; proxying that rewrite back over TLS yields EPROTO.
+    // Only normalize literal loopback hosts, never a public HTTPS origin.
+    if (rewriteTarget.protocol === 'https:' &&
+        ['localhost', '127.0.0.1', '[::1]'].includes(rewriteTarget.hostname)) {
+      rewriteTarget.protocol = 'http:';
+    }
   }
   const response = explicitPrefixLocale && targetPath !== pathname
     ? NextResponse.rewrite(rewriteTarget, { request: { headers: requestHeaders } })
