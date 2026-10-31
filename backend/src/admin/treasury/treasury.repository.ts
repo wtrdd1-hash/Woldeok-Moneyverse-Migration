@@ -891,7 +891,10 @@ export class TreasuryRepository {
       SELECT coalesce(sum(balance_wld::numeric), 0)::bigint::text AS total
       FROM public.system_treasury_vaults
     `);
-    const totalVaults = vaultsRes.rows[0]?.total ?? '0';
+    const totalVaults = vaultsRes.rows[0]?.total;
+    if (typeof totalVaults !== 'string' || !/^(?:0|[1-9][0-9]*)$/.test(totalVaults)) {
+      throw new ServiceUnavailableException('TREASURY_VAULT_TOTAL_UNVERIFIED');
+    }
 
     return unverifiedTreasuryReconciliation(totalVaults);
   }
