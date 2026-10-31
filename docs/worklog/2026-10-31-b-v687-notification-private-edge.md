@@ -16,3 +16,7 @@ No migration, schema, ledger, or production mutations are authorized.
 - RED: 2 failed, 1 passed; NotificationModule.configure absent.
 - GREEN: 3/3 pass after pre-guard middleware added to NotificationController routes.
 - Contract: no new endpoint/DTO/DB; all notification responses receive Cache-Control private,no-store; X-Robots-Tag noindex; Referrer-Policy no-referrer, including pre-guard rejection.
+
+## HTTP checkpoint
+- Real Nest HTTP regression: authenticated 200 and unauthenticated 401 both carry private, no-store / noindex / no-referrer; 2/2 PASS.
+- Focused total 5/5 PASS. No changes to session, consent or CSRF guards.
