@@ -190,7 +190,19 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // A member calendar carries private schedule and reward status. A route-specific
+      // rule must override the global public crawler policy on actual HTTP responses.
+      {
+        source: '/calendar',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      },
+    ];
   },
 
   async redirects() {

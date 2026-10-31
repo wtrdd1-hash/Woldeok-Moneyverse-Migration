@@ -5,11 +5,10 @@ import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { verifyCalendarSeasons, verifyCalendarToday, verifyCalendarWeeklyGoals, verifyCalendarShop } from './calendar-evidence';
 import { formatDay, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import type { TodayEvent } from '../quests/early-events';
-import type { EarlyGameBoard } from '../quests/early-game';
-import { upcomingShopDeadlines, type ShopDeadlineItem } from './shop-deadlines';
+import { upcomingShopDeadlines } from './shop-deadlines';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,17 +17,6 @@ export const metadata: Metadata = {
   description: '시즌 이벤트와 오늘의 사건, 주간 목표 일정을 한곳에서 확인하세요.',
   robots: { index: false, follow: false },
 };
-
-interface SeasonEvent {
-  readonly event_id: string;
-  readonly season_id: string;
-  readonly season_name: string;
-  readonly title: string;
-  readonly description: string;
-  readonly cost_wld: string;
-  readonly points_per_entry: number;
-  readonly ends_at: string;
-}
 
 function nextWeekStart(weekStart: string): string | null {
   const value = new Date(`${weekStart}T00:00:00+09:00`);
@@ -41,18 +29,21 @@ export default async function CalendarPage() {
   await requireMember();
 
   const [seasonData, todayData, earlyGame, shopData] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
-    apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
-    apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
-    apiOrNull<{ catalogItems: ShopDeadlineItem[] }>('/api/v1/shop/catalog'),
+    apiOrNull<unknown>('/api/v1/seasons/events'),
+    apiOrNull<unknown>('/api/v1/early-game/today'),
+    apiOrNull<unknown>('/api/v1/engagement/early-game'),
+    apiOrNull<unknown>('/api/v1/shop/catalog'),
   ]);
 
-  const seasonEvents = seasonData?.events ?? [];
-  const today = todayData?.event ?? null;
-  const weeklyGoals = earlyGame?.goals ?? [];
-  const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
+  const seasonEvents = verifyCalendarSeasons(seasonData);
+  const today = verifyCalendarToday(todayData);
+  const weeklyGoals = verifyCalendarWeeklyGoals(earlyGame);
+  const weekStart = weeklyGoals?.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
   const nextReset = weekStart ? nextWeekStart(weekStart) : null;
-  const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? []);
+  const shopItems = verifyCalendarShop(shopData);
+  const shopDeadlines = shopItems === null ? null : upcomingShopDeadlines(shopItems);
+
+  const hasUnavailableSource = seasonEvents === null || today === undefined || weeklyGoals === null || shopDeadlines === null;
 
   return (
     <div data-page="calendar" className="mv-page mv-page--gameplay grid gap-8">
@@ -70,6 +61,17 @@ export default async function CalendarPage() {
         보상·가격·상태는 각 기능의 서버 기록이 기준입니다.
       </PageHeader>
 
+      <p className="text-sm text-muted-foreground" role="status">
+        일정 정보는 조회 시점의 서버 기록이며, 확인할 수 없는 자료는 빈 일정으로 표시하지 않습니다.
+      </p>
+      {hasUnavailableSource && (
+        <div role="alert" className="rounded-lg border border-amber-400/40 bg-amber-500/10 p-4 text-sm">
+          <p>일부 일정을 확인할 수 없습니다. 서버 상태를 확인한 후 다시 조회해 주세요.</p>
+          <Link href="/calendar" className="mt-2 inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4">
+            일정 다시 조회하기
+          </Link>
+        </div>
+      )}
       <section className="grid gap-3" aria-labelledby="today-calendar-title">
         <SectionHeader eyebrow="TODAY" title="오늘의 일정" id="today-calendar-title" />
         <div className="grid gap-3 md:grid-cols-2">
@@ -79,7 +81,7 @@ export default async function CalendarPage() {
               <CardTitle className="text-base">오늘의 사건</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {todayData === null ? (
+              {today === undefined ? (
                 <p className="text-sm text-muted-foreground">오늘의 사건을 불러오지 못했어요.</p>
               ) : today === null ? (
                 <p className="text-sm text-muted-foreground">오늘 열려 있는 사건이 없어요.</p>
@@ -110,7 +112,7 @@ export default async function CalendarPage() {
               <CardTitle className="text-base">주간 목표 갱신</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {earlyGame === null ? (
+              {weeklyGoals === null ? (
                 <p className="text-sm text-muted-foreground">주간 목표 일정을 불러오지 못했어요.</p>
               ) : weekStart === null ? (
                 <p className="text-sm text-muted-foreground">현재 주간 목표가 없어요.</p>
@@ -145,7 +147,7 @@ export default async function CalendarPage() {
           title="판매 종료 예정 상품"
           id="shop-calendar-title"
         />
-        {shopData === null ? (
+        {shopDeadlines === null ? (
           <EmptyState
             title="상점 판매 일정을 불러오지 못했어요."
             description="판매 종료 시각을 추측하지 않고 서버 카탈로그가 제공하는 일정만 표시합니다."
@@ -187,7 +189,7 @@ export default async function CalendarPage() {
           title="종료 예정 시즌 이벤트"
           id="season-calendar-title"
         />
-        {seasonData === null ? (
+        {seasonEvents === null ? (
           <EmptyState
             title="시즌 이벤트 일정을 불러오지 못했어요."
             description="일정을 추측해서 표시하지 않습니다. 잠시 후 다시 확인해 주세요."

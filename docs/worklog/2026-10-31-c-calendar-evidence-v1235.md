@@ -14,3 +14,5 @@
 
 ## Finished
 - Pending validation; release HOLD until all gates pass.
+
+- Midpoint: four authenticated API payload validators distinguish malformed/unavailable sources from verified empty; accessible retry and route-specific private/noindex headers. RED reproduced (missing parser and missing header), GREEN focused tests 8/8 PASS. Full gates pending.
