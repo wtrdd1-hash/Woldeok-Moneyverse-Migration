@@ -86,7 +86,10 @@ BEGIN
  IF began IS NULL THEN
   RAISE EXCEPTION 'TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE' USING ERRCODE='23514';
  END IF;
- IF NEW.created_at<began THEN RETURN NULL; END IF;
+ IF TG_OP='UPDATE' AND NEW.created_at<began THEN
+  RAISE EXCEPTION 'TREASURY_EPOCH_ARCHIVED_SOURCE_IMMUTABLE' USING ERRCODE='23514';
+ END IF;
+ -- INSERT is always a new event, even when a caller tries to backdate created_at.
  IF TG_TABLE_NAME='system_treasury_ledger' THEN tx:=NEW.ledger_transaction_id;
  ELSE tx:=NEW.ledger_tx_id; END IF;
  IF tx IS NULL THEN
