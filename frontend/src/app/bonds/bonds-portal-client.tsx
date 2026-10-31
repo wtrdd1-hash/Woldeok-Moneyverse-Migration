@@ -25,6 +25,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { groupDigits } from '@/lib/money';
 
+// Nest explicitly returns 503 until ledger-backed subscription and repo settlement are certified.
+const BOND_SETTLEMENT_ENABLED = false;
+type OwnerReadStatus = 'guest' | 'verified' | 'unavailable';
+
 export interface PublicBondItem {
   id: string;
   symbol: string;
@@ -86,6 +90,8 @@ interface BondsPortalClientProps {
     benchmark5YYield: string;
   };
   isLoggedIn: boolean;
+  holdingsStatus: OwnerReadStatus;
+  repoStatus: OwnerReadStatus;
 }
 
 export function BondsPortalClient({
@@ -94,6 +100,8 @@ export function BondsPortalClient({
   initialRepoLoans = [],
   overview,
   isLoggedIn,
+  holdingsStatus,
+  repoStatus,
 }: BondsPortalClientProps) {
   const [bonds, setBonds] = useState<PublicBondItem[]>(initialBonds);
   const [holdings, setHoldings] = useState<UserHoldingItem[]>(initialHoldings);
@@ -104,7 +112,7 @@ export function BondsPortalClient({
   const [isProcessingLoan, setIsProcessingLoan] = useState(false);
 
   const handleSubscribe = async () => {
-    if (!selectedBond) return;
+    if (!selectedBond || !BOND_SETTLEMENT_ENABLED || holdingsStatus !== 'verified') return;
     if (selectedBond.status !== 'OPEN_SUBSCRIPTION' || BigInt(selectedBond.available_units) === BigInt(0)) {
       toast.error('현재 청약 가능한 가상 채권 상품이 아닙니다.');
       return;
@@ -149,8 +157,8 @@ export function BondsPortalClient({
   };
 
   const handleBorrowRepo = async (holdingId: string, bondName: string) => {
-    if (!isLoggedIn) {
-      toast.error('로그인이 필요합니다.');
+    if (!isLoggedIn || holdingsStatus !== 'verified' || !BOND_SETTLEMENT_ENABLED) {
+      toast.error('담보 대출은 원장 정산 검증 전까지 이용할 수 없습니다.');
       return;
     }
     setIsProcessingLoan(true);
@@ -175,6 +183,7 @@ export function BondsPortalClient({
   };
 
   const handleRepayRepo = async (loanId: string) => {
+    if (repoStatus !== 'verified' || !BOND_SETTLEMENT_ENABLED) return;
     setIsProcessingLoan(true);
     try {
       const res = await fetch('/api/bonds/repo-loans/repay', {
@@ -197,6 +206,7 @@ export function BondsPortalClient({
   };
 
   const handleToggleRollover = async (holdingId: string, current: boolean) => {
+    if (holdingsStatus !== 'verified') return;
     try {
       const res = await fetch('/api/bonds/rollover', {
         method: 'PUT',
@@ -204,15 +214,17 @@ export function BondsPortalClient({
         body: JSON.stringify({ holdingId, enabled: !current }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '변경 실패');
+      if (!res.ok || data?.success !== true || data?.holdingId !== holdingId || data?.autoRollover !== !current) {
+        throw new Error('서버에서 설정 변경을 확인할 수 없습니다.');
+      }
 
       setHoldings((prev) =>
         prev.map((h) => (h.id === holdingId ? { ...h, auto_rollover: !current } : h)),
       );
       toast.success(
         !current
-          ? '만기 시 원금 자동 롤오버 재투자(복리)가 활성화되었습니다.'
-          : '자동 롤오버가 해제되었습니다. 만기 시 원금이 지갑으로 입금됩니다.',
+          ? '서버에서 자동 롤오버 설정을 확인했습니다. 실제 재투자는 별도 검증 대상입니다.'
+          : '자동 롤오버 설정이 해제되었습니다. 실제 만기 정산은 별도 확인이 필요합니다.',
       );
     } catch (err: any) {
       toast.error(err.message || '설정 변경 중 오류가 발생했습니다.');
@@ -370,11 +382,11 @@ export function BondsPortalClient({
 
                   <Button
                     onClick={() => setSelectedBond(bond)}
-                    disabled={bond.status !== 'OPEN_SUBSCRIPTION' || available === BigInt(0)}
+                    disabled={!BOND_SETTLEMENT_ENABLED || holdingsStatus !== 'verified' || bond.status !== 'OPEN_SUBSCRIPTION' || available === BigInt(0)}
                     className="min-h-11 w-full bg-sky-600 hover:bg-sky-700 text-white font-medium gap-1.5 mt-2"
                   >
                     <Coins className="h-4 w-4" />
-                    {bond.status === 'OPEN_SUBSCRIPTION' && available > BigInt(0) ? '가상 채권 청약하기' : '현재 청약 불가'}
+                    {!BOND_SETTLEMENT_ENABLED ? '원장 검증 전 청약 중단' : bond.status === 'OPEN_SUBSCRIPTION' && available > BigInt(0) ? '가상 채권 청약하기' : '현재 청약 불가'}
                   </Button>
                 </CardContent>
               </Card>
@@ -437,7 +449,7 @@ export function BondsPortalClient({
               <Button
                 size="sm"
                 onClick={handleSubscribe}
-                disabled={isSubscribing}
+                disabled={isSubscribing || !BOND_SETTLEMENT_ENABLED || holdingsStatus !== 'verified'}
                 className="bg-sky-600 hover:bg-sky-700 text-white font-medium"
               >
                 {isSubscribing ? '처리 중...' : '국채 매수 확정'}
@@ -446,6 +458,10 @@ export function BondsPortalClient({
           </div>
         </Card>
       )}
+
+      <p role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+        가상 채권 청약·담보대출·상환은 실제 WLD 원장 정산이 검증되기 전까지 중단되어 있습니다. 표시된 수치는 서버 조회값이며 지급 보장이 아닙니다.
+      </p>
 
       {/* 3. User Holdings, Repo Loans & Information Tabs */}
       <Tabs defaultValue="holdings" className="w-full">
@@ -461,18 +477,23 @@ export function BondsPortalClient({
             <div>
               <h3 className="text-lg font-bold text-foreground">내 보유 국채 현황</h3>
               <p className="text-xs text-muted-foreground">
-                매시간 확정 쿠폰 이자가 자동으로 적립되며, 긴급 유동성 필요 시 80% 담보 대출을 신청할 수 있습니다.
+                  보유·만기·이자 수치는 서버 조회값입니다. 이자 지급과 담보대출은 원장 검증 전까지 보장되지 않습니다.
               </p>
             </div>
           </div>
 
-          {holdings.length === 0 ? (
+          {holdingsStatus !== 'verified' ? (
+            <div role="status" className="rounded-xl border border-amber-500/40 p-5 text-sm space-y-3">
+              <p>{holdingsStatus === 'guest' ? '보유 채권은 로그인 후 확인할 수 있습니다.' : '보유 채권 조회를 확인할 수 없습니다. 빈 보유 목록으로 판단하지 않습니다.'}</p>
+              <a href={holdingsStatus === 'guest' ? '/login' : '/bonds'} className="inline-flex min-h-11 items-center rounded-lg border px-4 underline underline-offset-4">{holdingsStatus === 'guest' ? '로그인' : '다시 조회하기'}</a>
+            </div>
+          ) : holdings.length === 0 ? (
             <Card className="border-border/80">
               <CardContent className="text-center py-12 text-muted-foreground space-y-2">
                 <ShieldCheck className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
                 <p className="text-sm font-medium">현재 보유 중인 국채가 없습니다.</p>
                 <p className="text-xs text-muted-foreground">
-                  상단의 국채 청약 라인업에서 원하는 국채를 선택하여 안전한 확정 이자를 수취해보세요.
+                  실제 원장 정산 검증 전에는 신규 채권 청약을 이용할 수 없습니다.
                 </p>
               </CardContent>
             </Card>
@@ -494,7 +515,7 @@ export function BondsPortalClient({
                               : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
                           }
                         >
-                          {h.status === 'HOLDING' ? '보유중 (이자수령)' : '만기상환 완료'}
+                          {h.status === 'HOLDING' ? '보유 중 (지급 미확인)' : h.status === 'MATURED' ? '만기 상태' : '매도 상태'}
                         </Badge>
                         {h.collateral_locked && (
                           <Badge variant="outline" className="border-rose-500/40 text-rose-600 font-mono text-[10px]">
@@ -503,7 +524,7 @@ export function BondsPortalClient({
                         )}
                       </div>
                       <div className="text-xs font-mono text-muted-foreground">
-                        잔여 {h.hours_left ?? 0}시간
+                        잔여 {h.hours_left === undefined ? '확인 불가' : `${h.hours_left}시간`}
                       </div>
                     </div>
                     <CardTitle className="text-base font-bold text-foreground mt-1">
@@ -529,7 +550,7 @@ export function BondsPortalClient({
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-muted-foreground">누적 수취 이자:</span>{' '}
+                        <span className="text-muted-foreground">누적 발생 이자 (지급 미확인):</span>{' '}
                         <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                           +{groupDigits(h.accrued_interest_wld)} WLD
                         </span>
@@ -552,7 +573,7 @@ export function BondsPortalClient({
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={isProcessingLoan}
+                          disabled={isProcessingLoan || !BOND_SETTLEMENT_ENABLED || holdingsStatus !== 'verified'}
                           onClick={() => handleBorrowRepo(h.id, h.bond_name)}
                           className="text-xs h-7 gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
                         >
@@ -579,13 +600,18 @@ export function BondsPortalClient({
             </div>
           </div>
 
-          {repoLoans.length === 0 ? (
+          {repoStatus !== 'verified' ? (
+            <div role="status" className="rounded-xl border border-amber-500/40 p-5 text-sm space-y-3">
+              <p>{repoStatus === 'guest' ? '담보대출 내역은 로그인 후 확인할 수 있습니다.' : '담보대출 조회를 확인할 수 없습니다. 대출이 없다고 판단하지 않습니다.'}</p>
+              <a href={repoStatus === 'guest' ? '/login' : '/bonds'} className="inline-flex min-h-11 items-center rounded-lg border px-4 underline underline-offset-4">{repoStatus === 'guest' ? '로그인' : '다시 조회하기'}</a>
+            </div>
+          ) : repoLoans.length === 0 ? (
             <Card className="border-border/80">
               <CardContent className="text-center py-12 text-muted-foreground space-y-2">
                 <Landmark className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
                 <p className="text-sm font-medium">현재 이용 중인 국채 담보 대출이 없습니다.</p>
                 <p className="text-xs text-muted-foreground">
-                  '내 보유 채권' 탭에서 보유 중인 국채의 '80% 담보대출 신청' 버튼을 눌러 즉시 신청할 수 있습니다.
+                  실제 원장 정산 검증 전까지 담보대출 신청은 중단되어 있습니다.
                 </p>
               </CardContent>
             </Card>
@@ -606,7 +632,7 @@ export function BondsPortalClient({
                             : 'border-emerald-500/40 text-emerald-600'
                         }
                       >
-                        {loan.status === 'ACTIVE' ? '대출 이용중' : '상환 완료'}
+                        {loan.status === 'ACTIVE' ? '대출 이용 중' : loan.status === 'REPAID' ? '상환 상태' : '청산 상태'}
                       </Badge>
                     </div>
                     <CardTitle className="text-base font-bold text-foreground mt-1">
@@ -622,7 +648,7 @@ export function BondsPortalClient({
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-muted-foreground">초저리 대출 금리:</span>{' '}
+                        <span className="text-muted-foreground">표시된 연 이자율:</span>{' '}
                         <span className="font-mono text-sky-600 font-semibold">
                           연 {(loan.annual_interest_rate_bps / 100).toFixed(2)}%
                         </span>
@@ -643,7 +669,7 @@ export function BondsPortalClient({
                       <div className="pt-2 border-t border-border/60 flex justify-end">
                         <Button
                           size="sm"
-                          disabled={isProcessingLoan}
+                          disabled={isProcessingLoan || !BOND_SETTLEMENT_ENABLED || repoStatus !== 'verified'}
                           onClick={() => handleRepayRepo(loan.id)}
                           className="min-h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs"
                         >

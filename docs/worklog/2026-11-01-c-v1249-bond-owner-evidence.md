@@ -9,7 +9,13 @@
 - Guardrails: do not touch other A/B/QA/Gemini worktrees, dirty main `implementation_plan.md`, existing schedules, shared DB, Test or Production.
 
 ## IN PROGRESS
-- Pending tests and implementation.
+- RED reproduced: 3 failing SSR assertions plus unresolved `owner-source` module before implementation.
+- GREEN: 17 focused tests across four suites after implementation. Owner payload validation covers UUID, canonical WLD, rate, date, status, duplicate, 500-row cap, and verified-empty distinction.
+- SSR now independently resolves auth session, holdings and repo reads; only explicit session 401 is guest. Independent owner failures are UNAVAILABLE, not zero.
+- Accessible retry/login states, 44px targets, private noindex metadata, accurate unpaid coupon/loan labels; backend-held bond subscription and repo settlement controls are disabled. Rollover success requires matching backend receipt.
+- Mid-run `origin/main` refetched and remained `f13bbce273ffc65e8576170992d82ea00c27a1c9`.
+- Isolated network-disabled PostgreSQL 17.11: 316/316 forward migrations applied on a fresh migrator-owned schema; app role EXECUTE on owner holdings/repo functions true, raw holdings SELECT false, ledger INSERT false. First isolated harness attempt failed at migration 029 due to mismatched object ownership (postgres vs migrator); recreated clean with the migration principal and passed. Containers removed.
+- Focused ESLint 0 errors (16 pre-existing warnings), Frontend typecheck PASS before final label changes. Full exact-SHA gates pending.
 
 ## FINISHED
 - Pending evidence and release decision.

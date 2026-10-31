@@ -17,7 +17,7 @@ describe('public bond UI provenance and accessibility', () => {
     expect(client).toContain('bonds.length');
   });
   it('does not enable subscription for closed, frozen or sold-out bonds', () => {
-    expect(client).toContain("disabled={bond.status !== 'OPEN_SUBSCRIPTION' || available === BigInt(0)}");
+    expect(client).toContain("disabled={!BOND_SETTLEMENT_ENABLED || holdingsStatus !== 'verified' || bond.status !== 'OPEN_SUBSCRIPTION' || available === BigInt(0)}");
     expect(client).not.toContain('AAA 국가 원리금 전액 보증');
     expect(client).not.toContain('무위험 국채');
   });

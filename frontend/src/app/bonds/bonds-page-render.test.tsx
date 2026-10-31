@@ -4,8 +4,8 @@ import { createElement } from 'react';
 
 const mocks = vi.hoisted(() => ({ publicApi: vi.fn(), api: vi.fn() }));
 vi.mock('@/lib/api', () => ({ publicApi: mocks.publicApi, api: mocks.api }));
-vi.mock('./bonds-portal-client', () => ({ BondsPortalClient: ({ initialBonds }: { initialBonds: unknown[] }) =>
-  createElement('div', { 'data-testid': 'verified-bonds' }, `${initialBonds.length} verified bonds`) }));
+vi.mock('./bonds-portal-client', () => ({ BondsPortalClient: ({ initialBonds, isLoggedIn, holdingsStatus, repoStatus }: { initialBonds: unknown[]; isLoggedIn: boolean; holdingsStatus: string; repoStatus: string }) =>
+  createElement('div', { 'data-testid': 'verified-bonds', 'data-authenticated': isLoggedIn, 'data-holdings-status': holdingsStatus, 'data-repo-status': repoStatus }, `${initialBonds.length} verified bonds`) }));
 vi.mock('@/components/treasury-donation-card', () => ({ TreasuryDonationCard: () => createElement('div') }));
 import PublicBondsPage from './page';
 
@@ -36,5 +36,53 @@ describe('bond market SSR and real API integration', () => {
     expect(markup).toContain('1 verified bonds');
     expect(markup).toContain('서버 조회');
     expect(mocks.publicApi).toHaveBeenCalledWith('/api/v1/bonds/markets', 30);
+  });
+});
+
+const market = { disclosed_at: new Date().toISOString(), overview: {
+  totalBondsActive: 1, totalFundedWld: '100000', totalHoldersCount: 1,
+  totalCouponsPaidWld: '0', benchmark1YYield: '4.50%', benchmark3YYield: '5.20%', benchmark5YYield: '6.50%',
+}, bonds: [bond] };
+
+describe('bond owner SSR outage and guest differentiation', () => {
+  beforeEach(() => { mocks.publicApi.mockReset().mockResolvedValue(market); mocks.api.mockReset(); });
+  it('does not mistake authenticated owner holdings failure for a guest or verified empty holdings', async () => {
+    mocks.api.mockImplementation(async (path: string) => {
+      if (path === '/api/v1/auth/session') return { csrfToken: 'token' };
+      if (path === '/api/v1/bonds/my-holdings') throw new Error('db offline');
+      return [];
+    });
+    const html = renderToStaticMarkup(await PublicBondsPage());
+    expect(html).toContain('data-authenticated="true"');
+    expect(html).toContain('data-holdings-status="unavailable"');
+    expect(html).toContain('data-repo-status="verified"');
+  });
+  it('distinguishes a verified empty owner portfolio from an outage', async () => {
+    mocks.api.mockImplementation(async (path: string) => path === '/api/v1/auth/session' ? { csrfToken: 'token' } : []);
+    const html = renderToStaticMarkup(await PublicBondsPage());
+    expect(html).toContain('data-holdings-status="verified"');
+    expect(html).toContain('data-repo-status="verified"');
+  });
+  it('labels a proven 401 session as guest, not a verified empty portfolio', async () => {
+    mocks.api.mockRejectedValue(Object.assign(new Error('signed out'), { status: 401 }));
+    const html = renderToStaticMarkup(await PublicBondsPage());
+    expect(html).toContain('data-holdings-status="guest"');
+    expect(html).toContain('data-repo-status="guest"');
+  });
+  it('rejects invalid owner rows independently of a verified repo read', async () => {
+    mocks.api.mockImplementation(async (path: string) => {
+      if (path === '/api/v1/auth/session') return { csrfToken: 'token' };
+      if (path === '/api/v1/bonds/my-holdings') return [{ id: 'invalid' }];
+      return [];
+    });
+    const html = renderToStaticMarkup(await PublicBondsPage());
+    expect(html).toContain('data-holdings-status="unavailable"');
+    expect(html).toContain('data-repo-status="verified"');
+  });
+  it('does not treat an auth-service failure as a logged-out member', async () => {
+    mocks.api.mockRejectedValue(new Error('auth service offline'));
+    const html = renderToStaticMarkup(await PublicBondsPage());
+    expect(html).toContain('data-holdings-status="unavailable"');
+    expect(html).toContain('data-repo-status="unavailable"');
   });
 });
