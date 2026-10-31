@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 ## v2026.10.31.1572 — F675-199 회원 보유 아이템 만료 달력 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub record:** Draft PR #2212 OPEN / DRAFT / RELEASE HOLD, stacked on unmerged #2203; engineering issue #2211; initial SHA b218653f3d9fd2ffb6618d6213204d996bb778f0. Final exact-SHA CI pending; no merge or deployment.
 
 **회차·진실 기준:** 이전 Feature Improvement v1570 → 현재 Feature Addition v1572 → 다음 Feature Improvement v1574(잠정). 최신 main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c 시작·중간 확인, 미병합 기획 Draft #2203 계승, 개발 이슈 #2211. 본 문서는 설계안이며 구현·배포가 아니다. 영문 PROJECT_PLAN.md가 원본이고 본 문서는 동등한 한국어 대조본이다. F675-192~198 역시 미병합 기획이므로 달력 V1은 해당 기능의 실제 배포를 전제로 하지 않는다.
 

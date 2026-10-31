@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1572 — F675-199 Owner Inventory Expiry Calendar (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub record:** Draft PR #2212 OPEN / DRAFT / RELEASE HOLD, stacked on unmerged #2203; engineering issue #2211; initial SHA b218653f3d9fd2ffb6618d6213204d996bb778f0. Final exact-SHA CI pending; no merge or deployment.
 
 **Cycle/authority:** Previous Feature Improvement v1570 → Current Feature Addition v1572 → Next Feature Improvement v1574 (provisional). Canonical main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c checked at start and midpoint; unmerged planning parent Draft #2203; development handoff issue #2211. This is a proposed design, not implemented or deployed. English canonical, Korean equivalent. F675-192–198 are also unmerged proposals; calendar V1 must not depend on their runtime existence.
 
