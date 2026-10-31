@@ -28,3 +28,9 @@
 
 ## 최종 테스트 모듈 보정
 CsrfGuard 추가로 기존 국고 HTTP 테스트 모듈 3개가 SessionRepository 없는 목업 환경에서 컴파일 실패했으나, CSRF 자체가 대상이 아닌 해당 테스트에서만 가드를 모킹해 해결. 운영 CSRF는 그대로 필수. 최종 국고 BE 144 PASS, 실 DB 관련 18 SKIP, 실패 0. 국고 FE 30 PASS, 릴리스 122 PASS, 전체 타입·대상 lint 오류 0. 신규 SHA CI·공식 Test·운영 승격은 아직 수행 전이다.
+
+## 추가 E2E 발견 / v1546.1
+- 완전히 별도인 Test DB에 임시 승인 관리자·세션을 만들어 로그인 API 검증. 백엔드 SWF GET 200, 프론트 BFF GET 200, CSRF 없는 변경 403, 백엔드 감사 정책 저장 200 확인. 다만 프론트 BFF PUT는 Nginx TLS 종료 후 외부 HTTPS Origin과 Next 내부 HTTP URL을 비교해 SWF_ORIGIN_DENIED 403 발생.
+- 브라우저/프록시 임의 헤더 대신 서버의 정식 APP_BASE_URL(HTTPS) 기준으로 동일 출처를 검사하도록 수정. 프록시 환경 회귀 테스트 포함 7/7 PASS. 이전 빌드 SHA 248ab는 무효화되므로 새 Git SHA 전체 빌드 필요.
+- 시험용 DB를 --no-privileges 복원하면서 원본 Test의 auth_sessions SELECT 권한이 빠져 실제 로그인 호출 500 발생. 실제 공식 Test의 ACL/default 권한 600개 항목을 보존한 백업에서 격리 시험 및 현재 복제 Test에만 원자 복원. 앱 세션 SELECT 허용, SWF 원본 테이블 조회 금지 및 313 정책 함수 실행 허용 검증. 원본 Test/Production ACL은 불변.
+- 테스트 actor가 남긴 audit_logs는 삭제 금지 트리거와 FK가 있으므로 수정/삭제하지 않음. 전체 E2E 검증 후 시험용 DB 자체를 제거해야 하며 실 운영 관리자 인증 성공으로 오인하지 말 것.

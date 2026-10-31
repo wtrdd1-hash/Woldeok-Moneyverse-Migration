@@ -34,8 +34,13 @@ export async function PUT(request: Request) {
   // A server-side CSRF token must never be sent to the browser. The BFF only
   // accepts same-origin requests and mutate() performs one-token-one-write.
   const origin = request.headers.get('origin');
-  const target = new URL(request.url).origin;
-  if (!origin || origin !== target) {
+  // Next's internal URL can be http:// behind a TLS-terminating Nginx proxy.
+  // Compare with the server-configured canonical public origin, not a
+  // client-provided forwarded header or the private loopback scheme.
+  const canonical = process.env.APP_BASE_URL
+    ? new URL(process.env.APP_BASE_URL).origin
+    : new URL(request.url).origin;
+  if (!origin || origin !== canonical) {
     return NextResponse.json({ code: 'SWF_ORIGIN_DENIED' }, {
       status: 403, headers: { 'Cache-Control': 'private, no-store' },
     });

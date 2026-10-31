@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ mutate: vi.fn(), api: vi.fn() }));
 vi.mock('@/lib/mutate', () => ({ mutate: mocks.mutate }));
@@ -19,11 +19,28 @@ function req(origin: string | null) {
   });
 }
 beforeEach(() => vi.clearAllMocks());
+afterEach(() => vi.unstubAllEnvs());
 describe('SWF configuration gateway actor/CSRF fencing', () => {
   it('denies missing-origin and cross-origin submissions without any mutation', async () => {
     expect((await PUT(req(null))).status).toBe(403);
     expect((await PUT(req('https://attacker.invalid'))).status).toBe(403);
     expect(mocks.mutate).not.toHaveBeenCalled();
+  });
+  it('accepts canonical HTTPS origin when the internal reverse proxy request URL is HTTP', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://test.easy-scraping.com');
+    mocks.mutate.mockResolvedValueOnce(config);
+    const behindProxy = new Request('http://127.0.0.1:3935/api/admin/treasury/swf', {
+      method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+        origin: 'https://test.easy-scraping.com',
+        host: 'test.easy-scraping.com',
+        'x-forwarded-proto': 'https',
+      },
+      body: JSON.stringify(config),
+    });
+    expect((await PUT(behindProxy)).status).toBe(200);
+    expect(mocks.mutate).toHaveBeenCalledTimes(1);
   });
   it('uses server-only one-use CSRF mutation and validates returned evidence', async () => {
     mocks.mutate.mockResolvedValueOnce(config);
