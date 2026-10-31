@@ -64,7 +64,7 @@ describe('stock halt settlement receipt evidence', () => {
   });
   it('fails closed on missing, duplicate or invented refund receipts', async () => {
     const { parseStockHaltReceipts } = await import('./portfolio-source');
-    for (const payload of [null, {}, { receipts: [receipt, receipt] }, { receipts: [{ ...receipt, refund_amount: '1001' }] }, { receipts: [{ ...receipt, status: 'quarantined' }] }]) {
+    for (const payload of [null, {}, { receipts: [receipt, receipt] }, { receipts: [{ ...receipt, refund_amount: '1001' }] }, { receipts: [{ ...receipt, quantity: '0', basis_unit_amount: '0', refund_amount: '0' }] }, { receipts: [{ ...receipt, status: 'quarantined' }] }]) {
       expect(parseStockHaltReceipts(payload)).toBeNull();
     }
   });

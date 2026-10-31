@@ -32,3 +32,9 @@
 - Official authenticated exact-SHA Test E2E, independent restore, required remote CI and release gates remain pending/BLOCKED. No main merge, Test deployment, Production promotion or rollback.
 - Existing issue #1928 describes an earlier unmerged local C v1174 attempt at this same bug. This independent latest-main implementation is a replacement candidate; preserve the earlier unique work until equivalence and merge are proven.
 - No modification to A/B/QA/Gemini worktrees, shared databases, GitOps or automation schedules.
+
+### Review-driven hardening and complete local gate rerun
+- First candidate HEAD `0af1aade90b6ea210eea84a3b9b3869424529acb` (before the final regression) passed full lint (0 errors, 1,017 warnings), typecheck, build, API contract, all unit/integration suites: frontend 2,910 PASS; backend 2,950 PASS / 517 SKIP; contract 41 PASS; database 62 PASS / 4 SKIP.
+- Review found an additional edge: a zero-quantity/zero-refund record marked `settled` would still be presented as paid. RED 1 failure reproduced, GREEN verified after rejecting non-positive settled quantity/basis/refund.
+- Added four server-rendered authenticated-page integration regressions covering unavailable vs empty sources, independent receipt errors, halted-trading controls, quarantined refunds, and settled positive refund.
+- Final commit requires exact-HEAD rerun of all local gates; release remains HOLD regardless of local success because audit, route-ledger, private HTTP headers, official Test E2E and independent restore remain unresolved.

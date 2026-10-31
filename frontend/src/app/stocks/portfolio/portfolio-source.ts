@@ -93,7 +93,8 @@ export function parseStockHaltReceipts(payload: unknown): StockHaltReceipt[] | n
       if (parsed > MAX_DB_BIGINT) return null;
       amounts[key] = parsed;
     }
-    if (row.status === 'settled' && amounts.quantity! * amounts.basis_unit_amount! !== amounts.refund_amount) return null;
+    if (row.status === 'settled' && (amounts.quantity === 0n || amounts.basis_unit_amount === 0n || amounts.refund_amount === 0n ||
+        amounts.quantity! * amounts.basis_unit_amount! !== amounts.refund_amount)) return null;
     if (row.status !== 'settled' && amounts.refund_amount !== 0n) return null;
     seen.add(row.id.toLowerCase());
     result.push(row as unknown as StockHaltReceipt);
