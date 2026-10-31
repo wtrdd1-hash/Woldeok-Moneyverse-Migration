@@ -1,6 +1,6 @@
 ## v2026.11.01.1592 — F675-204 Verified Inventory Expiry Urgency Drill-down (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle / authority:** Previous **Feature Improvement v1590** → Current **Feature Addition v1592** → Next **Feature Improvement v1594 (provisional)**. Remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` rechecked at start and midpoint; English canonical, Korean meaning-equivalent. Prior planning Draft **#2275 OPEN/UNMERGED** is carried forward in this isolated documentation branch, not present in main or Production. Developer handoff **#2282**. **DRAFT / RELEASE HOLD**; F675-199–204 are specifications, not verified runtime features.
+**Cycle / authority:** Previous **Feature Improvement v1590** → Current **Feature Addition v1592** → Next **Feature Improvement v1594 (provisional)**. Remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` rechecked at start and midpoint; English canonical, Korean meaning-equivalent. Prior planning Draft **#2275 OPEN/UNMERGED** is carried forward in this isolated documentation branch, not present in main or Production. Developer handoff **#2282**, Draft **#2283**. **DRAFT / RELEASE HOLD**; F675-199–204 are specifications, not verified runtime features.
 
 ### User value, alternatives, scope and entry points
 

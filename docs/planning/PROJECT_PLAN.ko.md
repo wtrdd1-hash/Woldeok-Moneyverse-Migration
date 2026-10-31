@@ -1,9 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1592 F675-204 검증형 만료 임박 상세 목록 / 이슈 #2282 / 초안 TBD / 운영 보류; 선행 #2275 미병합.
+**현재 기획:** v1592 F675-204 검증형 만료 임박 상세 목록 / 이슈 #2282 / 초안 #2283 / 운영 보류; 선행 #2275 미병합.
 
 ## v2026.11.01.1592 — F675-204 회원 보관함 만료 임박 아이템 검증형 상세 목록 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**주기 / 기준:** 이전 **Feature Improvement v1590** → 현재 **Feature Addition v1592** → 다음 **Feature Improvement v1594(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`을 시작·중간에 재확인했다. 영문이 canonical이며 국문은 의미 동등 문서다. 선행 기획 Draft **#2275 OPEN/UNMERGED**의 유효한 내용을 독립 문서 브랜치에서 이어받았으나 main이나 Production에 반영된 것으로 간주하지 않는다. 개발 이관 **#2282**. **DRAFT / RELEASE HOLD**. F675-199~204는 검증된 런타임 기능이 아닌 기획 명세다.
+**주기 / 기준:** 이전 **Feature Improvement v1590** → 현재 **Feature Addition v1592** → 다음 **Feature Improvement v1594(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`을 시작·중간에 재확인했다. 영문이 canonical이며 국문은 의미 동등 문서다. 선행 기획 Draft **#2275 OPEN/UNMERGED**의 유효한 내용을 독립 문서 브랜치에서 이어받았으나 main이나 Production에 반영된 것으로 간주하지 않는다. 개발 이관 **#2282**, 초안 **#2283**. **DRAFT / RELEASE HOLD**. F675-199~204는 검증된 런타임 기능이 아닌 기획 명세다.
 
 ### 사용자 가치, 대안, 범위 및 진입점
 
