@@ -9,8 +9,13 @@
 ## 진행
 - 테스트 우선 작성 및 실패 재현, 코드 수정, 정확한 SHA 검증, 최신 main 재확인, PR 보존.
 
-## 종료
-검증 후 기록.
+## 종료 — 2026-11-01 08:59 KST (일부 완료 / 운영 보류)
+- 경매 화면의 가상 거래·잔액·입찰 제거, Nest 조회 HTTP 503 차단. 집중 테스트 Frontend 3, Backend 서비스 2 및 HTTP 1 PASS.
+- 전체 Lint 오류 0/경고 1,017, Typecheck/Build PASS, 프론트 2,901 PASS, 백엔드 2,952 PASS/517 SKIP, 계약 41 PASS, DB 단위 62 PASS/4 SKIP, app-api 184 PASS. 최종 문서 커밋 SHA에서 재검증 예정.
+- 격리 PostgreSQL 17.11에서 CI 동등 소유자로 316/316 마이그레이션 PASS, 앱 역할의 금융 원장 INSERT 및 경매 테이블 SELECT 차단. 초기 두 번의 실험은 DB 역할 설정 오류로 실패했고 세 번째 성공. 격리 컨테이너 삭제.
+- 전체 의존성 감사 9건 취약점, 전체 경로 QA 증빙 원장 누락, 실제 HTTP robots/referrer 정책 오류(#2225), 독립 Next의 인증 Backend 연결 실패로 HTTP 500, 공식 인증 E2E 미실행, CI 진행 중. 릴리스 조건 불충족.
+- 최신 main 불변, 공식 Test `bc8cd8a6...`, Production `353c6d5d6...`로 후보와 불일치. Draft PR #2287, 독립 브랜치 보존, main/운영/예약 변경 없음. 배포가 없어 롤백 불필요.
+
 
 ### 08:48–08:51 KST — 테스트 선행 및 구현
 - Backend 2건, Frontend 3건 실패 재현. 서비스의 미검증 경매 조회를 SQL 전에 HTTP 503으로 차단하고, 회원 페이지에서 가짜 거래·잔액·실시간 호가·입찰 버튼 제거.
