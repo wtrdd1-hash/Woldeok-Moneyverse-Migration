@@ -5,10 +5,10 @@ import { StockCommunityService } from './stock-community.service';
 const community = { publicList: vi.fn(async () => []) } as unknown as StockCommunityService;
 
 describe('public board title query HTTP validation', () => {
-  it('accepts only q and stock, passes q to the service', async () => {
+  it('accepts q and stock without an optional reply filter', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
-    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
+    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ', undefined);
   });
   it.each([
     { q: ['a', 'b'] },
