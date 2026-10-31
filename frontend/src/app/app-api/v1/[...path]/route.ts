@@ -448,9 +448,9 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  // Pension responses carry member-specific account and receipt information;
-  // override even gateway-generated failures before upstream headers can escape.
-  if (parts[0] === 'pension') {
+  // Public pension overview is deliberately cacheable; only owner account,
+  // receipt and mutation routes must override unsafe upstream headers.
+  if (parts[0] === 'pension' && !(parts.length === 2 && parts[1] === 'overview')) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');

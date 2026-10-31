@@ -30,7 +30,7 @@ afterEach(() => {
 
 describe('Android pension owner data privacy boundary', () => {
   for (const status of [200, 401, 503, 204]) {
-    it(`overrides public upstream headers for pension overview HTTP ${status}`, async () => {
+    it(`overrides public upstream headers for pension owner account HTTP ${status}`, async () => {
       vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
       const fetchSpy = vi.fn(async () => new Response(status === 204 ? null : JSON.stringify({ status }), {
         status,
@@ -42,11 +42,11 @@ describe('Android pension owner data privacy boundary', () => {
         },
       }));
       vi.stubGlobal('fetch', fetchSpy);
-      const response = await GET(request('pension/overview'), context('pension', 'overview'));
+      const response = await GET(request('pension/my-account'), context('pension', 'my-account'));
       expect(response.status).toBe(status);
       assertPrivate(response);
       const [target, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
-      expect(new URL(String(target)).pathname).toBe('/api/v1/pension/overview');
+      expect(new URL(String(target)).pathname).toBe('/api/v1/pension/my-account');
       expect(new Headers(init.headers).get('cookie')).toContain('owner-session');
     });
   }
@@ -69,7 +69,7 @@ describe('Android pension owner data privacy boundary', () => {
       headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' },
     }));
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await POST(request('pension/enroll', 'POST'), context('pension', 'enroll'));
+    const response = await POST(request('pension/contribute', 'POST'), context('pension', 'contribute'));
     assertPrivate(response);
     expect(response.status).toBe(503);
     const [, init] = fetchSpy.mock.calls[0] as unknown as [URL, RequestInit];
@@ -80,10 +80,25 @@ describe('Android pension owner data privacy boundary', () => {
     vi.stubEnv('APP_API_MIN_VERSION', '2.0.0');
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
-    const response = await GET(request('pension/overview'), context('pension', 'overview'));
+    const response = await GET(request('pension/my-account'), context('pension', 'my-account'));
     expect(response.status).toBe(426);
     assertPrivate(response);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('preserves intentionally public pension overview cache and indexing', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ verified: false }), {
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'public, max-age=30',
+        'x-robots-tag': 'index, follow',
+      },
+    })));
+    const response = await GET(request('pension/overview'), context('pension', 'overview'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('public, max-age=30');
+    expect(response.headers.get('x-robots-tag')).toBeNull();
   });
 
   it('does not privatize public stock catalogue', async () => {
