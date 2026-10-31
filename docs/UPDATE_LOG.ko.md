@@ -1,3 +1,7 @@
+## 2026-11-01 개발 C v1242 — 조건부 주식 알림 근거 검증 (초안 / 배포 보류)
+- 기준 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`, Draft PR #2237. 실제 API의 종목·회원 알림·발생 기록을 검증하고 비정상 200 응답의 허위 빈 상태/발생 표시 및 검증되지 않은 변경 폼 차단. 접근성 재조회 제공, 기존 Nest/DB 읽기 계약 재사용, 원장·스키마 변경 없음.
+- TDD 11 PASS, Next 합성 HTTP E2E PASS, 프론트 2,912 PASS, 격리 DB 백엔드 3,570 PASS/118 SKIP, 계약 41, DB 62/4 SKIP, 보안 34, PostgreSQL 마이그레이션 316 PASS, app-api/Lint/Typecheck/Build PASS. 전체 보안 취약점 9건, 경로 QA 증빙 누락, 실제 비공개 HTTP robots `index, follow`, 공식 정확 SHA 인증 E2E·CI 미완료. **병합·운영 배포 보류.**
+
 ## 2026-10-31 개발 C v1233 — 쪽지 원천 조회 및 안전한 재조회 (초안 / 배포 보류)
 - 기준 main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`. 쪽지/대화 목록 조회 실패·비정상 응답을 실제 빈 목록으로 표시하지 않고, 조회 실패 중 신규 대화 자동 생성 금지. UUID·정확한 bigint·시각·중복·다른 대화 메시지 검증, 접근성 재조회 안내. 기존 Nest 계약 재사용, 금융/DB 쓰기 없음.
 - 집중 9 PASS, 프론트 2,785 PASS, 백엔드 2,786 PASS/501 SKIP, 계약 41 PASS, DB 62 PASS/4 SKIP, Lint/Typecheck/Build/API 184 PASS. 격리 PostgreSQL 17.11 마이그레이션 312 PASS지만 앱 역할의 쪽지 원본 테이블 SELECT 거부 확인(B v668 연계). 전체 보안 취약점 13건, QA `--inventory` 누락, 공식 인증 E2E 및 원격 CI 미완료. **운영 배포 보류**.
