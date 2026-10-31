@@ -196,6 +196,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   }
 
+  const memberShopBudget = parts.length === 2 && parts[0] === 'shop' &&
+    parts[1] === 'catalog' && request.method === 'GET';
+  const shopBudgetValues = memberShopBudget ? request.nextUrl.searchParams.getAll('maxPrice') : [];
+  if (shopBudgetValues.length > 1 || (shopBudgetValues.length === 1 &&
+      (!/^(0|[1-9][0-9]{0,18})$/.test(shopBudgetValues[0]!) ||
+       BigInt(shopBudgetValues[0]!) > 9223372036854775807n))) {
+    return gatewayProblem(400, 'Bad Request', 'shop_budget_invalid',
+      'maxPrice must be a canonical WLD bigint');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -389,6 +399,26 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  // A stale backend may ignore maxPrice while returning HTTP 200. Never
+  // advertise an unverified price ceiling to an Android member.
+  if (memberShopBudget && shopBudgetValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-json');
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || !('catalogItems' in payload) ||
+          !Array.isArray(payload.catalogItems) || !payload.catalogItems.every((item: unknown) => {
+            if (!item || typeof item !== 'object' || !('price' in item)) return false;
+            const price = item.price;
+            return typeof price === 'string' && /^(0|[1-9][0-9]{0,18})$/.test(price) &&
+              BigInt(price) <= BigInt(shopBudgetValues[0]!) &&
+              BigInt(price) <= 9223372036854775807n;
+          })) throw new Error('unverified prices');
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_budget_unverified',
+        'member catalogue price ceiling could not be verified');
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -398,8 +428,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateShopCatalog = parts[0] === 'shop' && parts[1] === 'catalog';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -448,6 +479,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'shop' && parts[1] === 'catalog') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

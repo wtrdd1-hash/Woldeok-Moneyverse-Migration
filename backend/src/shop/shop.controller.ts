@@ -297,14 +297,22 @@ export class ShopController {
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; q searches and sort orders exact price asc/desc' })
+  @ApiOperation({ summary: 'The member catalogue; optional exact maxPrice WLD ceiling' })
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('maxPrice') maxPrice?: unknown,
   ) {
+    let ceiling: bigint | null;
+    try {
+      ceiling = parseShopMaxPrice(maxPrice);
+    } catch (error: unknown) {
+      if (error instanceof ShopInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
@@ -316,6 +324,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
+    filtered = filterShopByMaxPrice(filtered, ceiling);
     return { catalogItems: filtered };
   }
 

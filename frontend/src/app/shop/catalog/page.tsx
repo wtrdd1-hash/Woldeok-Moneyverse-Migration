@@ -10,6 +10,7 @@ import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
 import { holdingsFilterUrl } from './holdings-filter';
+import { memberShopBudgetUrl, parseMemberShopBudget } from './shop-budget';
 import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
@@ -30,17 +31,20 @@ export const metadata: Metadata = {
 export default async function ShopCatalogPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string; readonly mine?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string; readonly mine?: string; readonly maxPrice?: string | string[] }>;
 }) {
   await requireMember();
-  const { q: rawQuery, mine: rawMine } = await searchParams;
+  const { q: rawQuery, mine: rawMine, maxPrice: rawMaxPrice } = await searchParams;
+  const budget = parseMemberShopBudget(rawMaxPrice);
   const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
   const mineStatus = rawMine === 'attention' ? 'attention' : 'all';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
   const [catalog, mine, today] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    budget.valid
+      ? apiOrNull<{ catalogItems: CatalogItem[] }>(memberShopBudgetUrl(budget.amount))
+      : Promise.resolve(null),
     apiOrNull<{ holdings: HeldItem[] }>(`/api/v1/shop/holdings${mineStatus === 'attention' ? '?status=attention' : ''}`),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
@@ -103,13 +107,24 @@ export default async function ShopCatalogPage({
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
-          <form className="flex max-w-md gap-2" role="search">
+          <form className="flex max-w-xl flex-wrap gap-2" role="search">
             <Input
               name="q"
               type="search"
               defaultValue={rawQuery ?? ''}
               placeholder="아이템 이름, 설명 또는 코드 검색"
               aria-label="아이템 검색"
+            />
+            <Input
+              name="maxPrice"
+              type="text"
+              inputMode="numeric"
+              pattern="(0|[1-9][0-9]*)"
+              maxLength={19}
+              defaultValue={typeof rawMaxPrice === 'string' ? rawMaxPrice : ''}
+              placeholder="최대 WLD"
+              aria-label="최대 아이템 가격 (WLD)"
+              className="min-w-0 w-36"
             />
             <button
               type="submit"
@@ -120,7 +135,9 @@ export default async function ShopCatalogPage({
           </form>
         </div>
 
-        {catalog === null ? (
+        {!budget.valid ? (
+          <EmptyState title="가격 상한이 올바르지 않아요." description="0 이상 9,223,372,036,854,775,807 이하의 정수 WLD를 입력해 주세요." />
+        ) : catalog === null ? (
           <EmptyState
             title="상점 목록을 불러오지 못했어요."
             description="가격이나 재고를 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
