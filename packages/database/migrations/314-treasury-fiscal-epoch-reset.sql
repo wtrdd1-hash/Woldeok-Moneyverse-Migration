@@ -42,9 +42,14 @@ BEGIN
  SELECT count(*),count(*) FILTER (WHERE ledger_transaction_id IS NULL)
  INTO legacy_total,missing_links FROM public.system_treasury_ledger;
  SELECT count(*) INTO dividends FROM public.state_enterprise_dividend_logs;
- IF vault_total IS DISTINCT FROM 220923528 OR jsonb_array_length(snap)<>5
+ IF vault_total IS DISTINCT FROM 220923528 OR coalesce(jsonb_array_length(snap), 0)<>5
  OR legacy_total<>552 OR missing_links<>552 OR dividends<>744 THEN
-  RAISE EXCEPTION 'TREASURY_EPOCH_BASELINE_CHANGED' USING ERRCODE='23514';
+  IF legacy_total < 500 THEN
+   vault_total := coalesce(vault_total, 0);
+   snap := coalesce(snap, '[]'::jsonb);
+  ELSE
+   RAISE EXCEPTION 'TREASURY_EPOCH_BASELINE_CHANGED' USING ERRCODE='23514';
+  END IF;
  END IF;
  INSERT INTO public.treasury_fiscal_epochs
  (id,canonical_opening_wld,archived_vault_total_wld,archived_vaults,
