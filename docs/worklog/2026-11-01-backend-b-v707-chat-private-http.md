@@ -17,3 +17,14 @@
 - RED: 6/7 real Nest HTTP tests fail because private cache header is absent; 1 public-route control passes. Initial fixture PG_POOL injection error corrected before authoritative RED.
 - GREEN: 7/7 real HTTP tests pass after ChatModule pre-guard middleware. GET list/unread/messages/sync, 401 denied, POST, HEAD, unrelated public endpoint tested.
 - No SQL, actor/consent, ledger, DB migration, or response body changes.
+
+## Finished — 2026-11-01 04:55 KST
+- Final source check: `origin/main` remained `f13bbce273ffc65e8576170992d82ea00c27a1c9`; EN/KO planning documents unchanged. Implementation code SHA `0eb2e2900172836cced90ce91e22a3e221381585`.
+- **TDD** RED: 6 failed privacy HTTP tests + 1 passing public control. GREEN: 7/7 passing; expanded chat regression 151 PASS/8 SKIP.
+- **Full repository `pnpm test` exit 0** on code SHA: backend 2,957 PASS / 517 SKIP, frontend 2,901 PASS, database package 62 PASS / 4 SKIP, contract 41 PASS, preflight security/backup/release 34 PASS; mobile API contract 184 endpoints PASS. Initial 175s run timed out in frontend; a later complete rerun exited 0.
+- `pnpm lint` PASS with 0 errors/1,022 pre-existing warnings; `pnpm typecheck` PASS; `pnpm build` PASS; `git diff --check` PASS.
+- Isolated PostgreSQL 17.11: 316 forward migrations applied; `moneyverse_app` UPDATE account_balances, DELETE ledger_postings, SELECT identities, DELETE audit_logs denied. Test container stopped and removed; no shared DB changes. Chat DB integration suites skipped without a connected isolated test DATABASE_URL (8 skipped in focused chat suite).
+- `pnpm audit --prod --audit-level=high` PASS, no known production vulnerabilities; all dependency audit reports 9 advisories (1 low, 8 moderate) and high-severity threshold exit 0. Treat as outstanding review, not zero advisories.
+- GitHub Draft/HOLD PR #2255. At 04:55 KST code SHA CI classify, policy, release-input, build, runtime-check and verify checks PASS; dispatch-production-gate SKIPPED (not approval). New worklog-only commit requires fresh CI review.
+- **RELEASE HOLD**: official Test exact-SHA, authenticated user E2E, independently proven restore, production executable provenance and full GitOps release gate are NOT VERIFIED. No main merge, Test deploy, Production deploy, DB or financial mutation. No branch cleanup; all A/C/QA/planning reservations untouched.
+- Scope is Nest ChatController only. Frontend/App API edge privacy should be independently verified; no assertion of end-to-end protection or actual prior leakage.
