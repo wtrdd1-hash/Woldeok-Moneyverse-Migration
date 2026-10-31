@@ -322,13 +322,16 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
-    ContentAnnouncement[]
-  > {
+  async publicAnnouncements({
+    limit = 20,
+    pinnedOnly = false,
+  }: { limit?: number; pinnedOnly?: boolean } = {}): Promise<ContentAnnouncement[]> {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
-      normalizeAnnouncement,
-    );
+    const announcements = (
+      await this.repository.publishedAnnouncements({ limit: contentLimit })
+    ).map(normalizeAnnouncement);
+    // SQL enforces publication and the 20-row window; this only narrows that safe window.
+    return pinnedOnly ? announcements.filter((notice) => notice.isPinned) : announcements;
   }
 
   async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {

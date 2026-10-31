@@ -23,3 +23,12 @@
 
 ## Finished
 - Pending. All releases HOLD until authoritative gates pass.
+
+### Checkpoint — 2026-11-01 06:34 KST
+- TDD RED: Backend 2/2 expected failures; frontend 4/5 expected failures before implementation.
+- TDD GREEN: Backend 2/2 PASS; frontend 7/7 PASS, plus a real DOM click/toggle regression 3/3 PASS.
+- Implemented public Nest + app-content query parsing, service post-SQL pinned filter, public ISR web toggle, verified Next public gateway and Android app-api response validation.
+- `pnpm typecheck` PASS; `pnpm lint` PASS (0 errors, 1,022 pre-existing warnings); `pnpm api:contract:check` retry PASS (184 endpoints). Initial contract attempt hit transient `spawn sh EAGAIN` during concurrent QA load; no bypass or policy changes.
+- Actual development PostgreSQL 17.11 read-only transaction: `content_list_published_announcements(integer)` SECURITY DEFINER, `search_path=pg_catalog, pg_temp`, EXECUTE granted to moneyverse_app; latest 20 published count=1, pinned=0; ROLLBACK. No shared DB writes, and no positive pinned SQL fixture claim.
+- Midpoint `origin/main` still `f13bbce273ffc65e8576170992d82ea00c27a1c9`; English and Korean plans unchanged in this worktree. Latest planning Draft v1588 still unrelated.
+- Full test/build/CI and official exact-SHA Test gates remain pending. Production HOLD.
