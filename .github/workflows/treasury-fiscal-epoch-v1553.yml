@@ -1,0 +1,67 @@
+name: Treasury Fiscal Reset - Isolated PostgreSQL v1553
+on:
+  pull_request:
+    paths:
+      - 'packages/database/migrations/314-treasury-fiscal-epoch-reset.sql'
+      - 'scripts/release/fixtures/treasury-fiscal-epoch-v1553.*.sql'
+      - 'scripts/release/treasury-fiscal-epoch-v1553.test.mjs'
+      - '.github/workflows/treasury-fiscal-epoch-v1553.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: epoch-only-test-secret
+          POSTGRES_DB: epoch_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d epoch_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGPASSWORD: epoch-only-test-secret
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGDATABASE: epoch_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SQL test client
+        run: |
+          command -v psql || { sudo apt-get update -qq && sudo apt-get install -y postgresql-client; }
+      - name: TDD static migration safety checks
+        run: node --test scripts/release/treasury-fiscal-epoch-v1553.test.mjs
+      - name: Seed isolated synthetic historical Treasury
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/release/fixtures/treasury-fiscal-epoch-v1553.seed.sql
+      - name: Apply exactly one fiscal reset migration in Test
+        run: psql -X -v ON_ERROR_STOP=1 -f packages/database/migrations/314-treasury-fiscal-epoch-reset.sql
+      - name: Assert archive retained and no user/canonical money edits
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/release/fixtures/treasury-fiscal-epoch-v1553.verify.sql
+      - name: Verify old and forged operations fail closed without money movement
+        shell: bash
+        run: |
+          set -euo pipefail
+          expect_error() {
+            local expected="$1"; shift
+            if psql -X -v ON_ERROR_STOP=1 -c "$*" > /tmp/fiscal-denied.log 2>&1; then
+              echo "::error::Financial command incorrectly accepted"; exit 1
+            fi
+            grep -q "$expected" /tmp/fiscal-denied.log || { cat /tmp/fiscal-denied.log; exit 1; }
+          }
+          expect_error TREASURY_EPOCH_UNBACKED "UPDATE public.system_treasury_vaults SET balance_wld='1' WHERE code='VAULT_MAIN'"
+          expect_error TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE "INSERT INTO public.system_treasury_ledger(amount_wld,created_at) VALUES('3',now())"
+          expect_error TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE "INSERT INTO public.system_treasury_ledger(amount_wld,created_at) VALUES('3',now()-INTERVAL '2 years')"
+          expect_error TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE "INSERT INTO public.state_enterprise_dividend_logs(ledger_tx_id,created_at) VALUES(NULL,now())"
+          expect_error TREASURY_EPOCH_ARCHIVED_SOURCE_IMMUTABLE "UPDATE public.system_treasury_ledger SET amount_wld='9' WHERE id=(SELECT id FROM public.system_treasury_ledger LIMIT 1)"
+          psql -X -v ON_ERROR_STOP=1 -f scripts/release/fixtures/treasury-fiscal-epoch-v1553.verify.sql
+      - name: Never promote from this workflow
+        run: echo "ISOLATED_TEST_ONLY. Production migration requires independent backup, lock audit and operator run."
