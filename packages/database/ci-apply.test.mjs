@@ -70,3 +70,20 @@ test('requires all CI database credentials without exposing values', () => {
     PGDATABASE: 'ci', APP_DB_PASSWORD: 'app-secret',
   });
 });
+
+test('refuses a stale CI migrator target before touching PostgreSQL', () => {
+  const root = mkdtempSync(join(tmpdir(), 'moneyverse-ci-target-'));
+  const previous = { DATABASE_URL: process.env.DATABASE_URL, MIGRATOR_DATABASE_URL: process.env.MIGRATOR_DATABASE_URL };
+  try {
+    mkdirSync(join(root, 'migrations'));
+    writeFileSync(join(root, 'migrations', '002-init.sql'), 'select 1;\n');
+    process.env.DATABASE_URL = 'postgresql://app:secret@localhost:5432/ci';
+    process.env.MIGRATOR_DATABASE_URL = 'postgresql://migrator:secret@localhost:5433/old';
+    assert.throws(() => applyFreshCiDatabase(root), /database_target_port_mismatch,database_target_database_mismatch/);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+    rmSync(root, { recursive: true, force: true });
+  }
+});

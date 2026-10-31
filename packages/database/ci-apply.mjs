@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { verifyDatabaseTargetParity } from '../../scripts/release/verify-test-migrator-target.mjs';
 
 const REQUIRED = ['PGHOST', 'PGPORT', 'PGUSER', 'PGPASSWORD', 'PGDATABASE', 'APP_DB_PASSWORD'];
 
@@ -71,6 +72,12 @@ export function applyFreshCiDatabase(rootDir = dirname(fileURLToPath(import.meta
   const migrationsDir = join(rootDir, 'migrations');
   const migrations = listMigrationFiles(migrationsDir);
   assertContiguousMigrationSequence(migrations);
+  // Check before ANY SQL: an accidentally stale migrator URL must not target another DB.
+  const parity = verifyDatabaseTargetParity(process.env, {
+    host: process.env.PGHOST, port: process.env.PGPORT,
+    database: process.env.PGDATABASE, role: process.env.PGUSER,
+  });
+  if (!parity.ok) throw new Error('CI database target parity BLOCKED: ' + parity.failures.join(','));
   const env = requiredDatabaseEnv(process.env);
   const coreSql = join(rootDir, 'init', '001-economy-core.sql');
 
