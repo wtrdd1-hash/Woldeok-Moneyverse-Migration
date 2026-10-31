@@ -1,5 +1,5 @@
 import type { Pool } from 'pg';
-import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -79,15 +79,23 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     portfolios: SwfPortfolioItem[];
     events: SwfEvent[];
   }> {
-    const rows = await queryRows<{ snapshot: {
+    let rows: Array<{ snapshot: {
       config: SwfConfig;
       portfolios: SwfPortfolioItem[];
       events: SwfEvent[];
-    } | null }>(
-      this.pool,
-      'SELECT public.admin_swf_snapshot(::uuid) AS snapshot',
-      [actorId],
-    );
+    } | null }>;
+    try {
+      rows = await queryRows(this.pool,
+        'SELECT public.admin_swf_snapshot($1::uuid) AS snapshot',
+        [actorId]);
+    } catch (error) {
+      // The SECURITY DEFINER function rejects non-approvers with SQLSTATE 42501.
+      // This is an authorization failure, not a fabricated zero balance or 500.
+      if ((error as { code?: string })?.code === '42501') {
+        throw new ForbiddenException('Administrator SWF evidence access denied');
+      }
+      throw error;
+    }
     if (!rows[0]?.snapshot) {
       throw new ServiceUnavailableException('Administrator SWF evidence unavailable');
     }
@@ -148,43 +156,38 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
   }
 
-  async updateConfig(params: Partial<SwfConfig>): Promise<SwfConfig> {
-    await queryRows(
-      this.pool,
-      `UPDATE public.treasury_swf_configs
-       SET is_enabled = COALESCE($1, is_enabled),
-           safe_reserve_wld = COALESCE($2, safe_reserve_wld),
-           max_single_investment_wld = COALESCE($3, max_single_investment_wld),
-           reinvestment_ratio_pct = COALESCE($4, reinvestment_ratio_pct),
-           max_investment_ratio_pct = COALESCE($5, max_investment_ratio_pct),
-           updated_at = clock_timestamp()
-       WHERE id = 'current'`,
-      [
-        params.is_enabled,
-        params.safe_reserve_wld,
-        params.max_single_investment_wld,
-        params.reinvestment_ratio_pct,
-        params.max_investment_ratio_pct,
-      ],
-    );
-
-    await queryRows(
-      this.pool,
-      `INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
-       VALUES (
-          'GOVERNANCE_CONFIG_UPDATED', 0,
-          '관리자가 국고 자금 거버넌스 정책(투자비율 ' || COALESCE($1, 15) || '%, 투자상한 ' || COALESCE($2, 20) || '%, 안전보존금 ' || COALESCE($3, 85000000) || ' WLD)을 변경하였습니다.',
-          $4
-       )`,
-      [
-        params.reinvestment_ratio_pct,
-        params.max_investment_ratio_pct,
-        params.safe_reserve_wld,
-        JSON.stringify(params),
-      ],
-    ).catch(() => {});
-
-    return this.getConfig();
+  async updateConfig(params: Record<string, unknown>, actorId: string): Promise<SwfConfig> {
+    const enabled = params.is_enabled;
+    const floor = params.safe_reserve_wld;
+    const maxSingle = params.max_single_investment_wld;
+    const reinvestRatio = params.reinvestment_ratio_pct;
+    const investmentCap = params.max_investment_ratio_pct;
+    const integerWld = (value: unknown): value is string =>
+      typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value) && value.length <= 38;
+    const finitePercent = (value: unknown, low: number, high: number): value is number =>
+      typeof value === 'number' && Number.isFinite(value) &&
+      value >= low && value <= high && Number.isInteger(value * 100);
+    if (typeof enabled !== 'boolean' || !integerWld(floor) || !integerWld(maxSingle) ||
+        !finitePercent(reinvestRatio, 0, 50) || !finitePercent(investmentCap, 5, 30)) {
+      throw new BadRequestException({ code: 'SWF_POLICY_INVALID', message: 'Invalid SWF policy bounds' });
+    }
+    try {
+      const rows = await queryRows<{ config: SwfConfig }>(
+        this.pool,
+        'SELECT public.admin_swf_update_config($1::uuid,$2::boolean,$3::numeric,$4::numeric,$5::numeric,$6::numeric) AS config',
+        [actorId, enabled, floor, maxSingle, reinvestRatio, investmentCap],
+      );
+      if (!rows[0]?.config) throw new ServiceUnavailableException('SWF policy update evidence unavailable');
+      return rows[0].config;
+    } catch (error) {
+      if ((error as { code?: string })?.code === '42501') {
+        throw new ForbiddenException('SWF policy changes require an approver role');
+      }
+      if ((error as { code?: string })?.code === '22023') {
+        throw new BadRequestException('Invalid SWF policy bounds');
+      }
+      throw error;
+    }
   }
 
   async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1546 — SWF admin read and audited policy update (ISOLATED TEST PASS / PRODUCTION CODE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-admin-swf-actor-snapshot-v1546.md) / [KO](docs/worklog/2026-10-31-admin-swf-actor-snapshot-v1546.ko.md) · [Internal](docs/updates/v2026.10.31.1546-admin-swf-internal.md) / [KO](docs/updates/v2026.10.31.1546-admin-swf-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1546-admin-swf-github.md) / [KO](docs/updates/v2026.10.31.1546-admin-swf-github.ko.md). Fixed revoked-table SWF GET, restored approver actor-scoped snapshot, 403/503 and exact WLD; added 313 scoped policy-only writer with atomic zero-WLD audit and same-origin server-only CSRF. Real Production read: 4 SWF holdings/20 recent events. Test-only restored DB accepted policy mutation and rollback; denied unauthorized/invalid. No real money mutations. CI/official Test/Production release pending.
+
+
 ## v2026.10.31.1543 — Reconcile newly advanced remote main (ISOLATED MERGE / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-main-reconcile-v1543.md) / [KO](docs/worklog/2026-10-31-main-reconcile-v1543.ko.md) · [Internal](docs/updates/v2026.10.31.1543-main-internal.md) / [KO](docs/updates/v2026.10.31.1543-main-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1543-main-github.md) / [KO](docs/updates/v2026.10.31.1543-main-github.ko.md). Remote main moved 30cbbe02, two code conflicts resolved preserving safe central-bank 503 and compact notice; numeric tracked frontend/.build_id excluded. Fresh Test DB 311 source migrations passed. New SHA CI/official Test/Production HOLD.
 

@@ -1,5 +1,6 @@
 ﻿import {
   BadRequestException,
+  ServiceUnavailableException,
   Body,
   Controller,
   Get,
@@ -15,11 +16,12 @@ import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validato
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
-import { AutoSovereignWealthFundService, swfLedgerUnavailable } from './auto-swf.service';
+import { AutoSovereignWealthFundService } from './auto-swf.service';
 import { decodeTreasuryLedgerCursor, parseTreasuryLedgerLimit } from './treasury-ledger-cursor';
 
 export class TreasuryOperationDto {
@@ -381,17 +383,19 @@ export class AdminTreasuryController {
   }
 
   @Get('swf')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
-  async getSwfStatus() {
+  async getSwfStatus(@Req() request: RequestWithSession) {
+    const actorId = requireUserId(request);
     if (!this.swfService) {
-      return { config: null, portfolios: [], events: [] };
+      throw new ServiceUnavailableException({
+        code: 'SWF_EVIDENCE_UNAVAILABLE',
+        message: 'Administrator SWF evidence is unavailable',
+      });
     }
-    const [config, portfolios, events] = await Promise.all([
-      this.swfService.getConfig(),
-      this.swfService.getPortfolios(),
-      this.swfService.getRecentEvents(20),
-    ]);
-    return { config, portfolios, events };
+    // The moneyverse_app role has no direct SELECT on SWF base tables.
+    // SECURITY DEFINER validates the active actor's approver role before reading.
+    return this.swfService.getAdminSnapshot(actorId);
   }
 
   @Post('swf/rebalance')
@@ -409,12 +413,15 @@ export class AdminTreasuryController {
   }
 
   @Put('swf/config')
+  @UseGuards(CsrfGuard)
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
-  async updateSwfConfig(@Body() body: Record<string, unknown>) {
+  async updateSwfConfig(@Req() request: RequestWithSession, @Body() body: Record<string, unknown>) {
+    const actorId = requireUserId(request);
     if (!this.swfService) {
-      return { success: false };
+      throw new ServiceUnavailableException({ code: 'SWF_POLICY_UNAVAILABLE' });
     }
-    return this.swfService.updateConfig(body);
+    return this.swfService.updateConfig(body, actorId);
   }
 }
 
