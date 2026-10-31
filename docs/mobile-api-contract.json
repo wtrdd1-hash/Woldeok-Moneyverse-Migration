@@ -7902,6 +7902,9 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "searchApplied": {
+            "type": "boolean"
+          },
           "photos": {
             "type": "array",
             "items": {
@@ -7934,10 +7937,15 @@
                 "publishedAt"
               ]
             }
+          },
+          "searchScope": {
+            "type": "string",
+            "const": "latest_24"
           }
         },
         "required": [
-          "photos"
+          "photos",
+          "searchScope"
         ]
       },
       "responseCompatibility": {
@@ -9007,6 +9015,9 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "searchApplied": {
+            "type": "boolean"
+          },
           "photos": {
             "type": "array",
             "items": {
@@ -9039,10 +9050,15 @@
                 "publishedAt"
               ]
             }
+          },
+          "searchScope": {
+            "type": "string",
+            "const": "latest_24"
           }
         },
         "required": [
-          "photos"
+          "photos",
+          "searchScope"
         ]
       },
       "responseCompatibility": {
