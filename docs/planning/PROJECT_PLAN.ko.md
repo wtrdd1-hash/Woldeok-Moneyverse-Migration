@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 ## v2026.10.31.1568 — F675-198 회원 만료 알림 일시중지·자동 재개 (기능 추가 / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2197 OPEN/HOLD, 개발 이슈 #2195, 초기 SHA 346b6b1ad658559995896a28c31dca1be7ba8aef; 최종 정확 SHA CI 대기, 병합·배포 없음.
 - **회차:** 이전 기능 보완 v1566 → 현재 기능 추가 v1568 → 다음 기능 보완 v1570(잠정). main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` 확인, 미병합 Draft #2189 후속·개발 #2195. F675-192~198 미구현 기획.
 - **화면:** 본인 /inventory/expiring/reminders/pause, UTC 경과 24/72/168시간 중지·검토·확인·지금 재개, DB 상태/남은시간, 별도 재개 잡 없음. 보유 아이템 만료 앱 내 알림만 억제, 놓친 기간 소급 발송·금융/아이템 쓰기 없음, 플래그 OFF.
 - **API/DB:** CSRF 본인 POST pause/status·set·resume·receipt-status, 예상 리비전·UUID 멱등키, 불변 영수증만 200 VERIFIED_COMMITTED, 미확정 202 UNKNOWN, 충돌 409. 설정 pause_until/revision+불변 전이 증거, 회원+키 UNIQUE, 고정 search_path SECURITY DEFINER·앱 계정 EXECUTE만. 설정 잠금 후 DB 시각, now<pause_until 중지. 09시 통합 알림은 전이 이력 필수, 09:07 재개로 09시 누락 소급 금지. 중복 영수증 금지.

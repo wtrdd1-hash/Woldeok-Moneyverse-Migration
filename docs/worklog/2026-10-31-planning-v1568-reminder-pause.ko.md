@@ -1,6 +1,7 @@
 # 기획 v1568 — F675-198 회원 알림 일시중지
 
 ## v2026.10.31.1568 — F675-198 회원 만료 알림 일시중지·자동 재개 (기능 추가 / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2197 OPEN/HOLD, 개발 이슈 #2195, 초기 SHA 346b6b1ad658559995896a28c31dca1be7ba8aef; 최종 정확 SHA CI 대기, 병합·배포 없음.
 
 **회차·기준:** 이전 기능 보완 v1566 → 현재 기능 추가 v1568 → 다음 기능 보완 v1570(잠정). 기준 GitHub main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 대조 확인. 미병합 Draft #2189(HEAD `12253ef39aaddbf866c4fcdaa7b7f742ccb26c0f`) 후속, 개발 이슈 #2195. F675-192~197과 신규 기능은 모두 미구현 기획이다. 배포 없음.
 
