@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1590 F675-203 urgency source/actor/freshness hardening / issue #2268 / Draft PR pending / RELEASE HOLD; prior #2269 OPEN UNMERGED.
+**Current planning:** v1590 F675-203 urgency source/actor/freshness hardening / issue #2268 / Draft #2275 / RELEASE HOLD; prior #2269 OPEN UNMERGED.
 
 ## v2026.11.01.1590 — F675-203 Expiry Urgency Source Integrity, Actor Boundary and Freshness (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle / authority:** Previous **Feature Addition v1588** → Current **Feature Improvement v1590** → Next **Feature Addition v1592 (provisional)**. Latest remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` rechecked at start and mid-run; English is canonical and Korean meaning-equivalent. Prior planning Draft **#2269 remains OPEN/UNMERGED**, so the valid F675-199–203 design is carried on an isolated documentation branch, **not** represented as deployed. Development handoff **#2268**. **DRAFT / RELEASE HOLD**.
+**Cycle / authority:** Previous **Feature Addition v1588** → Current **Feature Improvement v1590** → Next **Feature Addition v1592 (provisional)**. Latest remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` rechecked at start and mid-run; English is canonical and Korean meaning-equivalent. Prior planning Draft **#2269 remains OPEN/UNMERGED**, so the valid F675-199–203 design is carried on an isolated documentation branch, **not** represented as deployed. Development handoff **#2268**; Draft **#2275**. **DRAFT / RELEASE HOLD**.
 
 ### Source-grounded defects and decision
 

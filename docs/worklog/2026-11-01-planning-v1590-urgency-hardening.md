@@ -1,6 +1,6 @@
 # Planning v1590 — F675-203 Feature Improvement (documentation only)
 
-**Previous:** Feature Addition v1588. **Current:** Feature Improvement v1590. **Next:** Feature Addition v1592 (provisional). **DRAFT / RELEASE HOLD**.
+**Previous:** Feature Addition v1588. **Current:** Feature Improvement v1590. **Next:** Feature Addition v1592 (provisional). **Draft #2275 / DRAFT / RELEASE HOLD**.
 
 ## Source and findings
 - Latest origin/main `f13bbce273ffc65e8576170992d82ea00c27a1c9` checked at start/mid; #2269 OPEN/UNMERGED; inherited v1588 proposal only, no deployment.
