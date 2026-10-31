@@ -4,7 +4,7 @@ const CANONICAL_UPKEEP = /^(0|[1-9][0-9]{0,29})$/;
 const DATABASE_UPKEEP = /^(0|[1-9][0-9]*)$/;
 
 /** Validate before reading the catalogue so invalid queries never hit PostgreSQL. */
-export function parseShopUpkeepCap(maxUpkeep?: string): bigint | null {
+export function parseShopUpkeepCap(maxUpkeep?: unknown): bigint | null {
   if (maxUpkeep === undefined || maxUpkeep === '') return null;
   if (typeof maxUpkeep !== 'string' || !CANONICAL_UPKEEP.test(maxUpkeep)) {
     throw new BadRequestException(
@@ -17,7 +17,7 @@ export function parseShopUpkeepCap(maxUpkeep?: string): bigint | null {
 /** Apply a user-supplied weekly upkeep ceiling without losing bigint precision. */
 export function filterShopUpkeep<T extends { readonly maintenance_cost?: unknown }>(
   items: readonly T[],
-  maxUpkeep?: string,
+  maxUpkeep?: unknown,
 ): T[] {
   const ceiling = parseShopUpkeepCap(maxUpkeep);
   if (ceiling === null) return [...items];
