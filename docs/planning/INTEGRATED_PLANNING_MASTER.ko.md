@@ -1,4 +1,30 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1552 — F675-194 회원 보유 아이템 만료 알림 대상 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 보완 v1550 → 현재 기능 추가 v1552 → 다음 기능 보완 v1554(잠정). **기준:** GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 및 AGENTS.md, README.md, 영문 PROJECT_PLAN 정본과 국문 대조를 시작·중간 확인. 선행 F675-188 만료 목록, F675-192 알림 신청, F675-193 처리 이력은 모두 Draft·미구현. 선행 기획 #2128, 개발 인계 #2112/#2122. 실제 서비스 기능이 아닌 설계안이다.
+
+### 목적·대안·회원 흐름
+- 알림을 신청한 회원이 어떤 아이템이 현재 7일 전/1일 전 알림 판단 기간에 있거나 앞으로 진입할 수 있는지 알 수 없다. 기존 만료 목록은 신청 설정·정확한 판단 기간을 반영하지 않고 F675-193은 과거 처리 증거만 다룬다. **선택:** 실제 발송을 약속하지 않는 본인 전용 읽기 미리보기. **기각:** 예약/발송 대기열로 표시(예약 증거 없음), 대상이면 발송 완료로 간주(영수증·알림함 증거 없음), 버전 없는 다중 페이지 예측(시간 변화로 결과 불일치). 단일 DB 스냅샷, 상세 상한 및 정확한 초과 건수 집계를 사용한다.
+- **대상·진입:** 인증·동의가 유효한 회원이 /inventory/expiring/reminders → '알림 대상 미리보기' → /inventory/expiring/reminders/preview. 7/30일 범위(기본 7일), 7일 전/1일 전 설정별 판단 가능성·UTC 증거/KST 표시, 새로고침·설정·권한 검증된 보관함 이동 CTA. 설정 OFF면 '알림 신청하기'만 표시하고 개별 보유 아이템을 조회·기록하지 않는다. 문구 '예정 여부는 변경될 수 있습니다'. 이메일·푸시·자동 장착·구매·갱신·유지비·WLD 거래 없음.
+- **상태:** OFF, LOADING, VERIFIED_EMPTY, ELIGIBLE_WINDOW_NOW('현재 알림 판단 기간'), UPCOMING_WINDOW('향후 판단 기간'), WINDOW_PASSED('해당 기준 기간 지남; 소급 알림 없음'), UNKNOWN_EXPIRY('만료시각 정보 없음'), SOURCE_UNAVAILABLE, STALE_SNAPSHOT, TRUNCATED_DETAILS. 판단 기간 진입은 큐 등록·실제 발송·알림함 기록·미래 실행 보장이 아니다. 중복 방지 영수증이 이미 있다면 두 번째 알림을 약속하지 않는다. NULL 만료는 영구 소유가 아니라 UNKNOWN, 효과 만료/유지비는 보유기간과 구분. 실제 본인 DB 조회 성공 후에만 VERIFIED_EMPTY, 장애를 []로 처리 금지.
+- **규모·정렬:** 해당 회원 전체 보유 아이템을 집계하되 상세는 기본 20/최대 50건만 반환한다. 다음 관련 판단 기간 시작→만료→상품 UUID 순으로 정렬하고 totalQualifying, detailsReturned, hiddenDetailCount로 '추가 N건'을 정확하게 표시한다. 페이지 커서는 제공하지 않으며 집계가 불완전하면 503으로 실패 폐쇄한다. 10,001건 실제 PostgreSQL 성능·인덱스 증빙이 구현 선행 조건이다.
+
+### 정확한 시간·API·응답
+- **Nest POST /api/v1/shop/expiry-reminders/preview**, CSRF 보호 본문 {withinDays:7|30,limit:1..50}, 기본 7/20. 회원 ID는 서버 세션에서만 도출하고 중복·알 수 없는 키/비정규 값 거부. Next 동일 출처 BFF, Android POST /app-api/v1/shop/expiry-reminders/preview의 경로·비공개 헤더·응답 검증을 구현 전 확인한다. 현재 Android 게이트웨이 shop 비공개 처리는 purchases 중심이므로 새 경로가 자동 보호된다고 추정 금지. UUID를 브라우저 URL·쿼리·로그·리퍼러에 노출하지 않는다. 응답 {asOfUtc,validUntilUtc,withinDays,enabledThresholds,totalQualifying,detailsReturned,hiddenDetailCount,complete:true,items:[{catalogId,name,expiresAtUtc,thresholdDays,windowStartUtc,windowEndUtc,windowState,alreadyCommitted?:boolean|null}],disclaimer}. complete는 **해당 시점의 전체 집계**만 의미하고 미래 발송·전체 역사 보증이 아니다. 영수증 출처 불명은 false가 아닌 null.
+- **원천:** 마이그레이션 071의 public.user_items 회원·상품 복합 PK, 수량 0 이상, NULL 허용 expires_at과 검증된 상품/신청 설정. 마이그레이션 123의 shop_my_items_v2는 만료·수량 0을 사전 필터하고 clock_timestamp를 여러 번 사용하므로 원본 전체 정합성의 단독 근거가 아니다. quantity>0, expires_at>asOf, 활성화된 기준일만 판단; NULL 만료는 UNKNOWN 집계이며 발송 대상으로 표시 금지. 7일 전 기간 [만료−7일,만료−6일), 1일 전 [만료−1일,만료), 모두 **시작 포함·끝 제외**, PostgreSQL timestamptz 마이크로초 정밀도. 7일 전 기간이 지나면 소급 알림 없음. 조회 범위는 asOf 기준 향후 7/30×24시간 이내 만료 아이템. 동일 상품의 7일/1일 판단 기간은 서로 별도이며 아이템 수와 기간 수 집계 정의를 분리한다.
+- **일관성:** 제한된 REPEATABLE READ READ ONLY 트랜잭션에서 DB 기준시각 하나를 샘플링하여 전체 필터·집계·상세에 동일하게 적용한다. JS 시계로 만료 판정 금지. 읽기에서 쓰기 잠금이나 미래 예약을 주장하지 않으며 설정 OFF·만료 변경이 조회 직후 발생할 수 있다. 실제 발송 워커는 v1546대로 잠금 후 재검증한다. validUntilUtc=min(asOf+30초, 가장 빠른 향후 판단 기간 진입/이탈, 실제 만료), 음수 TTL 금지, 경계 시 새로고침. 30초 발송 예약/보증이 아니다. 계정·세션 변경 시 이전 응답 폐기.
+- **HTTP:** 400 입력, 401 비로그인, 403 동의 없음, 409 설정 리비전/원본 변경 검증 실패, 429 남용, 503 스키마·함수·권한·인덱스·DB 타임아웃·불완전 집계·영수증 정합성 장애. 플래그 OFF는 private 503이며 오래된 데이터를 보여주지 않는다. 성공·오류·리다이렉트 모두 private/no-store, noindex, no-referrer. 사이트맵·공개 정규 URL 제외.
+
+### SQL·권한·운영·보안
+- 미리보기 전용 영속 테이블·스케줄러 큐를 추가하지 않는다. F675-192 신청 스키마를 검증한 뒤 전진형 SECURITY DEFINER public.shop_expiry_reminder_preview(p_actor uuid,p_within_days int,p_limit int) 조회 함수를 추가한다. 고정 안전 search_path, 스키마 명시, PUBLIC EXECUTE 철회, moneyverse_app EXECUTE만 허용, 원본 테이블 직접 권한 확대 금지. PG17 클린 311/311, 개발 DB 체크섬 5건·앱 역할 권한 문제를 먼저 해결한다. 기존 (user_id,catalog_id) PK와 (user_id,expires_at) 인덱스의 EXPLAIN 실측 후 필요한 인덱스만 검토. 적용된 마이그레이션 수정 금지. 조회는 알림 영수증·알림함·이력·금융 원장을 변경하지 않는다.
+- 중복 방지 영수증이 본인 전용 검증 함수로 확인될 때만 이미 기록된 사실을 표시하고 아니면 alreadyCommitted:null/UNKNOWN. 타 회원 아이템·알림 본문 노출 금지. 인증·동의·세션을 Nest/Next/Android 모두에서 검증, 회원 30회/분·IP 60회/분 초기 제한, 상세 50건, DB 조회 2초 목표, 요청 본문 로그 마스킹. 관리자는 회원 20명 이상 집단만 집계하고 작은 셀 억제: 미리보기 이용률, 신청→판단기간→알림함 기록 전환, p95, 장애·새로고침 비율. 개인별 내역·발송 약속 금지. 320px, 터치 44px, 포커스 복원·스크린리더 라이브 안내·키보드·동작 감소, WCAG 2.2 AA.
+
+### 개발 백로그·시험·배포 보류
+- **P0 4건:** OPS1552-01 운영 실제 PID/아티팩트 SHA·삭제 릴리스·롤백 자산·독립 복원 #1984; SEC1552-02 PG17 311개·개발 체크섬 5건·최소 권한·신청/알림함 DDL 출처 #993; FIN1552-03 WLD/원장/MINT/SWF/국고 쓰기 0건 증명 #1976; REL1552-04 Draft/HOLD 병합 차단, 공식 Test 정확 SHA 인증/금융 E2E, 보안 감사·GitOps 승인 #2031/#1088, 운영 공개 SHA 불일치 #2127, Test FX 500 #2111, 비공개 공간 권한 #2109.
+- **P1 6건:** PREVIEW1552-05 본인 SQL·인덱스/EXPLAIN·권한 부정시험·DB 시각; PREVIEW1552-06 기간·집계·상한·영수증 UNKNOWN 검증; PREVIEW1552-07 Nest CSRF POST/DTO/제한·오류·엣지 헤더; PREVIEW1552-08 Next 화면·Android 동등성·계정 전환; PREVIEW1552-09 관리자 20명 집계·SEO/비공개 헤더·접근성/번역; PREVIEW1552-10 격리 PG17 TDD: 보유 10,001건·회원 2명·7일/1일·7/30일 범위·마이크로초 경계·NULL/수량0·동시 OFF·만료 변경·영수증 불명/중복·인덱스 누락·20/50건·320px·401/403/409/429/503·세션 전환·플래그 롤백. **수용시험 명세만 완료, 미실행**.
+- **배포:** EXPIRY_REMINDER_PREVIEW_ENABLED 기본 OFF, F675-192/193 선행 확인 필수. 추가형 SQL만, 비파괴 롤백은 UI/API 플래그 OFF로 기존 보유·영수증 보존. 개발 A/B/C 별도 브랜치와 정확 SHA·격리 DB·공식 Test 인증 E2E 후 승인된 무중단 GitOps만 운영 승격 가능. 기획 회차에서 코드·DB·WLD·원장·Test·Production 변경 없음.
+- **QA v1411(2026-10-31 11:20 KST):** 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 격리 PG17 311/311 PASS. 전체 보안 감사 FAIL(중간 10·낮음 3건), 공식 Test 정확 SHA FAIL, 경로 장부 검사 FAIL, 개발 DB 권한·체크섬 5건 미해결, Test FX HTTP 500. 공개 Production SHA 95485a..., Test SHA c2129625...와 main 761a55a094fb9dd383d213e817305e68c79fa23c 불일치. 신규 기능 실제 수용·독립 복원·운영 승인 없음. DRAFT/RELEASE HOLD. 외부 독립 검증·중복 제거·분류 신규 승인 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
 - **GitHub v1550:** Draft PR #2128 OPEN/HOLD (선행 #2123), 개발 이슈 #2122 갱신; 정확 SHA 원격 CI 대기, main 병합·배포 없음.
 - **GitHub v1548:** Draft PR #2123 OPEN/HOLD (선행 #2119), 개발 이슈 #2122 OPEN; main 병합·런타임·운영 변경 없음.
 

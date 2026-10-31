@@ -1,4 +1,12 @@
 - **GitHub:** Draft PR #2119 OPEN/HOLD, 선행 #2113, 개발 이슈 #2112 갱신; 병합·배포 없음.
+## v2026.10.31.1552 — F675-194 회원 만료 알림 대상 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
+- **주기:** 이전 보완 v1550 → 현재 추가 v1552 → 다음 보완 v1554(잠정). GitHub main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 확인, 선행 Draft #2128·개발 #2112/#2122. 알림 관련 선행 기능 모두 미구현·초안. 문서 전용.
+- **목적:** 인증·동의 회원이 /inventory/expiring/reminders → /inventory/expiring/reminders/preview에서 향후 7/30일 내 보유 아이템의 7일 전/1일 전 **알림 판단 가능 기간** 확인. OFF면 신청 CTA만, 아이템별 조회·로그 없음. 판단 가능은 큐 등록·발송·수신 보증 아님. 이메일·푸시·자동 갱신·장착·결제·WLD 쓰기 없음.
+- **원천·시각:** 마이그레이션 071 user_items PK와 NULL 허용 expires_at, 123 보관함 조회의 만료/수량 필터·시각 차이 확인. 원본 보유+검증된 설정을 단일 제한된 READ ONLY REPEATABLE READ DB 시각으로 판단. 7일 전 [만료−7일,만료−6일), 1일 전 [만료−1일,만료), 소급 없음; NULL은 UNKNOWN. 유효시각은 30초/다음 기간 경계/만료 중 최소, 실제 워커는 잠금 후 재검증.
+- **API·화면:** CSRF POST /api/v1/shop/expiry-reminders/preview 본문 {withinDays:7|30,limit:1..50}, Next·Android 동등성. 본인 전체 정확한 집계와 상세 기본20/최대50, hiddenDetailCount, 커서 없음. 400/401/403/409/429/503 실패 폐쇄, no-store/noindex/no-referrer, 320px WCAG AA, 관리자 20명 이상 익명 집계. 본인 SECURITY DEFINER EXECUTE만 허용, 신규 영속 미리보기 테이블 없음, 플래그 기본 OFF.
+- **백로그:** P0 OPS1552-01 SEC1552-02 FIN1552-03 REL1552-04, P1 PREVIEW1552-05~10(4+6). 격리 PG17 보유 10,001건·회원 2명·기간 경계·영수증·권한·Android·SEO 시험 **명세만 작성, 미실행**. QA v1411 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 격리 마이그레이션 311/311. 전체 보안 감사 13건 FAIL, 공식 Test 정확 SHA·경로 장부 FAIL, 개발 권한/체크섬 및 Test FX 500 미해결. 운영/Test 공개 SHA는 main과 다름, 독립 복원·승격 BLOCKED. RELEASE HOLD.
+- **외부 독립 근거:** 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 상세 영문 정본·국문 동등 문서, 코드/DB/WLD/원장/Test/운영/main 변경 없음.
+
 - **GitHub v1550:** Draft PR #2128 OPEN/HOLD (선행 #2123), 개발 이슈 #2122 갱신; 정확 SHA 원격 CI 대기, main 병합·배포 없음.
 
 ## 2026-10-31 v1550 — F675-193 회원 알림 이력 스냅샷 정합성 (기능 보완, DRAFT/HOLD)
