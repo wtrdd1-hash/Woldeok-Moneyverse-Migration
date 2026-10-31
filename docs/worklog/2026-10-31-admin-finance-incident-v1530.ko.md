@@ -21,3 +21,19 @@
 
 ## 중간·종료 기록
 대기.
+
+## 중간 — 지정 MCP 재접속 및 실제 운영 추적 (2026-10-31 12:06–12:12 KST)
+- 최초 미니PC 접속 불가 보고는 **오류**: 별개 Desktop Commander만 오프라인이었음. 사용자 지정 `@미니pc홍`으로 Debian 13, 시스템 서비스, PostgreSQL 17.11, 원격 명령에 정상 접근. 앞으로 이 연결을 우선 사용.
+- 서버 로컬 main `d1f1d4494d14c2ab3dbf2c029fd9d161de8a5a92`는 GitHub 원격 main `761a55a094fb9dd383d213e817305e68c79fa23c`보다 로컬 커밋 2개 앞섬. 작업 전·중 원격 메인 재조회: `761a55a` 유지, 타 작업자 브랜치·워크트리 불변.
+- 운영 실제 프로세스 `moneyverse-live-prod-{backend,frontend}.service` CWD는 `prod-v2026.10.31.0950-761a55a...`이지만 공개 `/frontend-version`, `/api/version` 및 `.next/BUILD_ID`는 `95485a299...` 표시. 릴리스 폴더 식별자와 빌드 식별자 차이는 배포 출처 검증 대상이며 '브라우저 캐시 원인'의 증거는 아님.
+- 운영 SHA 검증 도구는 `moneyverse-release-v0950-backend.service`의 환경 파일이 없다고 하여 EXIT 1/BLOCKED. 공식 Test 공개 SHA는 `c2129625...`로 불일치.
+- 실제 DB 조회: 원장 거래 891/분개 1,829/계좌 40; 과거 국고 기록 552개 모두 정식 원장 거래 ID NULL. `ledger_reconciliation_runs` 0개, 과거 국고 금고 합계 **220,923,528 WLD**. 활성 국채 3건, 연금 계좌 2개 적립합 **50,000 WLD**, 과거 연금 지급 로그 238건, 국채 쿠폰 로그 0건. 과거 지급 로그는 완결된 복식원장 증빙과 다름.
+- 공개 국고 API는 실제 HTTP 503 및 `PUBLIC_TREASURY_RECONCILIATION_PENDING`. 정식 증빙 없이 성공으로 변경 금지. DB/WLD/설정 변경 없음.
+
+## 종료 — 소스 UI 개선, 검증 및 남은 장애
+- `NODE_ENV=test` 기준 개선 전 RED: 3건 실패/6건 통과. 최초 환경 미지정 테스트는 React production act 오류여서 진짜 RED가 아니며 환경 수정 후 정상 재검증.
+- `stale-tab-notice.tsx`에서 검증되지 않은 '캐시가 원인'과 '로그인 보장' 문구 삭제. 화면 하단 전체 폭 배너를 모바일 친화적 max-w-md 알림으로 축소, 접근 가능한 닫기 버튼, 같은 릴리스 전환에 한한 세션 알림 닫기 기억, 이후 신규 버전 검사·수동 새로고침 유지.
+- 개선 후 GREEN: 집중 테스트 **9/9**, 전체 작업공간 `pnpm typecheck`, 해당 파일 ESLint, Git diff check **PASS**. 1GB 제한 Next 빌드는 OOM, 1.75GB 재시도 전체 Next 빌드 PASS (두 워커).
+- 격리 프론트 미리보기 3891 포트 HTTP 확인: 홈/버전/국채/연금 200. 그러나 `INTERNAL_API_TOKEN`이 없어 관리자 인증 실기능 E2E는 **검증되지 않음**. 미리보기 종료. 공식 Test 변경·운영 배포 없음.
+- 금융 503, 과거 국고 552건 대사, 공식 검증 기록, 실제 운영 SHA 출처, 인증 사용자 QA, 국채 API 상세 원인, 정책 7일 규칙은 **미해결**. 모든 금융 서비스 복구 완료로 보고하지 않음.
+- 별도 작업 브랜치의 Draft PR #2131. 상태 **소스 검증 / 공식 Test 및 Production 보류**. DB 금액 변경 없음.

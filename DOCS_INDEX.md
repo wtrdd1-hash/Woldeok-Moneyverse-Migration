@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+
+## v2026.10.31.1530 — Persistent release notice source repair; finance incident verified (BRANCH ONLY / RELEASE HOLD)
+- [EN worklog](docs/worklog/2026-10-31-admin-finance-incident-v1530.md) / [KO](docs/worklog/2026-10-31-admin-finance-incident-v1530.ko.md); [internal](docs/updates/v2026.10.31.1530-admin-finance-internal.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1530-admin-finance-github.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-github.ko.md). Owner-specified miniPC MCP confirmed; TDD 9/9, typecheck, lint and Next build PASS for compact dismissible stale-release banner. Finance remains 503; 552/552 historical Treasury links absent, no persisted reconciliation, official Test/Production release HOLD. Draft #2131.
+
+
 ## v2026.10.30.1521 — KDIC administrator ledger visibility (BRANCH VERIFIED / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.md) / [KO](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.ko.md) · [Internal EN](docs/updates/v2026.10.30.1521-kdic-internal.md) / [KO](docs/updates/v2026.10.30.1521-kdic-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.30.1521-kdic-github.md) / [KO](docs/updates/v2026.10.30.1521-kdic-github.ko.md). Production process read-only ledger projection balanced (40/40), 552 Treasury links unresolved. Admin GET diagnostics only; financial POST HTTP 503 unchanged. No official Test/Production release.
 
