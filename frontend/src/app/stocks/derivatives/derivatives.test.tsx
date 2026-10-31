@@ -1,15 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 import {
   calculateLiquidationPrice,
   calculateDerivativesPnL,
   calculateFundingFee,
   calculateLiquidationSettlement,
   generateLiquidationHeatmap,
-  DERIVATIVES_MARKET_SYMBOLS,
 } from '@moneyverse/contract';
 import DerivativesPage from './page';
+import { vi } from 'vitest';
+vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn(async () => null) }));
+vi.mock('@/lib/session', () => ({ requireMember: vi.fn(async () => undefined) }));
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: vi.fn(async () => 'ko') }));
 
 describe('가상 파생상품 10x 레버리지 선물 거래소 계약 & 계산 엔진 테스트', () => {
   it('1. 격리 마진 롱/숏 청산가(Liquidation Price)를 정확히 계산해야 한다', () => {
@@ -73,10 +75,9 @@ describe('가상 파생상품 10x 레버리지 선물 거래소 계약 & 계산 
     expect(heatmap.some((c) => c.type === 'SHORT_LIQUIDATION')).toBe(true);
   });
 
-  it('5. 프론트엔드 파생상품 거래소 화면이 정상 렌더링되어야 한다', () => {
-    render(<DerivativesPage />);
-    expect(screen.getByText(/10X 레버리지 파생상품 선물 거래소/i)).toBeDefined();
-    expect(screen.getByText(/실시간 청산 히트맵/i)).toBeDefined();
-    expect(screen.getByText(/선물 주문 콘솔/i)).toBeDefined();
+  it('5. The authenticated derivatives page refuses to render a trading console without a ledger', async () => {
+    render(await DerivativesPage());
+    expect(screen.getByText(/현재 파생상품 거래를 이용할 수 없습니다/)).toBeDefined();
+    expect(screen.queryByText(/선물 주문 콘솔/)).toBeNull();
   });
 });
