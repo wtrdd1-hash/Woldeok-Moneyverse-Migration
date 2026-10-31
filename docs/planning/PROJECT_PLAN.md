@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub v1556:** Draft PR #2149 OPEN/HOLD stacked on #2141; engineering issue #2148 OPEN; no main merge, runtime or Production deployment.
 ## v2026.10.31.1556 — F675-195 Per-Holding Reminder Mute (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Improvement v1554 → Current Feature Addition v1556 → Next Feature Improvement v1558 (provisional). Canonical main 761a55a094fb9dd383d213e817305e68c79fa23c rechecked; stacked on Draft #2141, engineering #2148. Existing F675-192/193/194 remain unimplemented Drafts; docs only.
 - **Purpose/entry:** owner-only `/inventory/expiring/reminders/items` lets consent-current member mute/unmute 7-day and 1-day in-app expiry alerts for a specific catalog holding without turning off global opt-in. Full global OFF dominates. UI Save/Undo, stale/unknown/verified-empty states, private Next/Android, flag OFF. A mute is not renewal or cancellation of already committed inbox evidence.

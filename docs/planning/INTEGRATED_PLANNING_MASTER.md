@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
+- **GitHub v1556:** Draft PR #2149 OPEN/HOLD stacked on #2141; engineering issue #2148 OPEN; no main merge, runtime or Production deployment.
 ## v2026.10.31.1556 — F675-195 Owner Per-Holding Expiry Reminder Mute (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Cycle:** Previous Feature Improvement v1554 → Current Feature Addition v1556 → Next Feature Improvement v1558 (provisional). **Authority:** main `761a55a094fb9dd383d213e817305e68c79fa23c` start/mid checked; AGENTS.md, README.md, English PROJECT_PLAN.md canonical, Korean counterpart equivalent. Stacked on unmerged Draft #2141; engineering issue #2148. F675-192 opt-in, F675-193 activity and F675-194 eligibility preview are unimplemented Draft dependencies. This is a design, not a live capability.
