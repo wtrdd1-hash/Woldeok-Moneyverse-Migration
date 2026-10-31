@@ -1,5 +1,6 @@
 import { TelegramAlertService } from '../telegram/telegram-alert.service';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -22,4 +23,16 @@ import { MarketBroadcast } from '../stock/market-broadcast';
   ],
   exports: [WalletService],
 })
-export class WalletModule {}
+export class WalletModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Financial balances, transaction receipts, and reward/bank responses must
+    // remain private even when session, consent, or CSRF guards reject early.
+    // Method decorators cannot protect a response rejected before its handler.
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(WalletController);
+  }
+}
