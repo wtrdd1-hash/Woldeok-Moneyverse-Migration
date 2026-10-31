@@ -199,6 +199,8 @@ export class WalletController {
 
   @Get('bank/loans')
   @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiOperation({ summary: 'Latest 20 owner bank loans, optionally filtered by status' })
   @ApiQuery({ name: 'status', required: false, enum: ['all', 'active', 'overdue', 'repaid'], description: 'Filter within the latest 20 owner loans' })
   async loans(@Req() request: RequestWithSession, @Query('status') status?: unknown) {

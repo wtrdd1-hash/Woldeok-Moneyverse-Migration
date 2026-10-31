@@ -21,6 +21,7 @@ describe('Android bank loan status proof', () => {
     expect(result.status).toBe(200);
     expect(result.headers.get('cache-control')).toBe('private, no-store');
     expect(result.headers.get('x-robots-tag')).toBe('noindex');
+    expect(result.headers.get('referrer-policy')).toBe('no-referrer');
     expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('status')).toBe('active');
   });
   it('rejects a forged success payload with a mismatched status', async () => {

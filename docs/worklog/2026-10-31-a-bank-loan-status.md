@@ -14,7 +14,9 @@
 ## In progress
 - [x] RED confirmed: Backend 3 failures; Frontend 3 missing modules and Android forged-payload failures; corrected contract build before asserting Backend RED.
 - [x] Backend owner SQL-function filter, service/controller strict status, Next member page and Android fail-closed validation implemented; targeted 3 Backend + 8 Frontend PASS.
-- [ ] Exact full gates and CI pending; first full test blocked by generated API contract drift (regenerated), first lint error in test numeric literal fixed; build and typecheck PASS. Independent PostgreSQL 17.11: 311/311 migrations and owner filter PASS; ROLLBACK 0/0/0. PostgreSQL 17.11 clean migrations 311 PASS; synthetic 21 owner/1 foreign loan rollback proof PASS (0 users/loans/ledger afterwards). Initial fixture oversized principal failed existing DB constraint; corrected to 500000; large-number precision covered by unit tests.
+- [x] Initial exact SHA local gates PASS: full pnpm test (backend 2781 PASS / 502 SKIP; frontend 2778 PASS; contract 41 PASS; DB unit 62 PASS / 4 SKIP), lint 0 ERROR / 1049 WARN, typecheck/build, mobile contract 184 endpoints, production audit no known vulnerabilities. Regenerated mobile API contract after initial drift; corrected unsafe numeric test literal.
+- [x] Independent PostgreSQL 17.11: 311/311 migrations and owner filter PASS; ROLLBACK 0 users / 0 loans / 0 ledger.
+- [ ] Final exact SHA full gates and GitHub CI pending after private header hardening. PostgreSQL 17.11 clean migrations 311 PASS; synthetic 21 owner/1 foreign loan rollback proof PASS (0 users/loans/ledger afterwards). Initial fixture oversized principal failed existing DB constraint; corrected to 500000; large-number precision covered by unit tests.
 
 ## Finished
-- Pending final exact SHA verification and CI.
+- Implementation and isolated SQL verification complete. Release remains HOLD until final exact SHA CI, official Test authenticated E2E, independent restore, Production provenance and app-role ACL are independently verified. No main merge, Production change, or branch deletion. See private QA/release reports and PR validation comments for final exact-SHA results.
