@@ -11,10 +11,17 @@
 - [x] RED: reproduce missing headers in real Nest HTTP test.
 - [x] GREEN: minimal scoped middleware.
 - [x] Run focused and full project gates; record PostgreSQL and exact-SHA blockers.
-- [ ] Re-fetch main/plan, review, push draft PR with HOLD.
+- [x] Re-fetch main/plan, review, push Draft PR #2277 with HOLD.
 
-## Finished
-- Pending evidence; no release authorization.
+## Finished — 2026-11-01 07:20 KST
+- Code commit: `a478be54c85e29b1b3ed3444ddaa8e91b1a52fd8` on `auto/hourly-b-v710-admin-activity-private-http-20261101-0700`. Draft/HOLD PR #2277 created.
+- API: `GET /api/v1/admin/activity/logs` and `/traffic` now carry private/no-store, noindex, no-referrer on 200/401/403/HEAD; `POST /api/v1/activity/events` remains unaffected.
+- DB/migration/ledger: no schema, data, permissions, migration or WLD modifications. Disposable PostgreSQL full replay BLOCKED by fixture role privilege setup at migration 020; container removed. No real DB pass claimed.
+- Full gates: Backend 2,958 PASS / 517 SKIP; Frontend 2,901 PASS; Contract 41 PASS; DB static 62 PASS / 4 SKIP; security/release 34 PASS; focused HTTP 8 PASS plus 2 guard PASS. Lint, typecheck, build, app-api 184 endpoints and production audit PASS. Full dependency audit FAIL: 9 vulnerabilities (1 low, 8 moderate).
+- Runtime identity observed: official Test `bc8cd8a6c654af0336f550643f23049a58ee1d16`, Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`. Neither executes this candidate. Official Test exact-SHA/authenticated E2E NOT VERIFIED.
+- Remote CI: pending at final documentation checkpoint. No approval, merge, Test deploy or Production deploy. RELEASE HOLD. No other branch or schedule modified.
+- Source main SHA unchanged at re-fetch: `f13bbce273ffc65e8576170992d82ea00c27a1c9`. No PR merge attempted; branch retained because it has unique code.
+
 
 ### TDD evidence (07:02 KST)
 - RED: six actual Nest HTTP 200/401/403 cases failed on absent `Cache-Control` (`red.log`); public ingestion control passed.
