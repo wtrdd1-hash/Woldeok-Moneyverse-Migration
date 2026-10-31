@@ -9,8 +9,10 @@
 
 | 환경 | 공개 주소 | 현재 런타임 | Backend / frontend |
 |---|---|---|---|
-| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 3000 / 3001 |
+| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 4164 / 4165 (v1550) |
 | Isolated Test | `https://test.easy-scraping.com` | Debian 13 host systemd + Nginx | 3100 / 3101 |
+
+**2026-10-31 v1550 운영 확인:** PR #2165 병합 main SHA bc8cd8a6c654af0336f550643f23049a58ee1d16. 새 영구 운영 backend:4164/frontend:4165 가동 및 Nginx 트래픽 연결, production-current는 불변 v1550. 기존 3564/3565는 롤백·스케줄러용으로 옛 릴리스에 고정. Test와 Production 신원 검사 모두 ok:true. 과거 국고 552건 원장 연결 미검증은 공개 503 차단 유지. [기록](worklog/2026-10-31-swf-operational-promotion-v1550.ko.md).
 
 현재 Production 데이터 권위는 Debian 호스트의 PostgreSQL이다. 관측된 Production PostgreSQL runtime은 Docker PostgreSQL 17.11이다.
 

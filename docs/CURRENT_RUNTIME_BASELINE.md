@@ -1,4 +1,12 @@
 # Current Runtime Baseline
+
+## 2026-10-31 v1550 — latest observed live deployment
+- Production public https://easy-scraping.com runs immutable prod-v2026.10.31.1550-bc8cd8a6c654, applicationSourceSha bc8cd8a6c654af0336f550643f23049a58ee1d16. Nginx routes Production API/backend to 127.0.0.1:4164 (moneyverse-release-v1550-backend.service) and frontend to 127.0.0.1:4165 (moneyverse-release-v1550-frontend.service). Both services are enabled for boot.
+- Public backend /api/version and frontend /frontend-version match SHA. Host verify-host-runtime-identity --channel prod passed with no failures. Official Test independently serves matching SHA on 3100/3101 and passed its identity check.
+- Prior stable Production 3564/3565 web processes remain active, pinned to the previous immutable release for rollback and existing background jobs. New v1550 backend disables duplicate schedulers. The previously deployed historical 3000/3001 and 3213/3214 snapshots below are retained as historical evidence and are NOT today's Production public upstream.
+- Production PostgreSQL is Docker PostgreSQL on 5433 and database woldeok_moneyverse_dev. Canonical SWF governance migration 313 was applied with backup and checksum. 552 historical Treasury ledger entries remain unlinked, so public Treasury report HTTP 503 and unverified settlements stay fail-closed.
+- Evidence: docs/worklog/2026-10-31-swf-operational-promotion-v1550.md.
+
 ## v701 LIVE PUBLIC EXECUTE result — 2026-10-16 observed
 - Runtime app remains immutable v697 (backend/frontend 3213/3214) and current release source SHA `a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73`.
 - Privilege-only DB hotfix from `ops/security/v701-revoke-public-definer-execute.sql` applied to Production: publicly executable SECURITY DEFINER routines reduced 11→0; explicit app rights retained 11. Role retains unsafe direct financial table DML grants; no data/schema migration performed.

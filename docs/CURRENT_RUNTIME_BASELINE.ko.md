@@ -4,6 +4,14 @@
 
 # 현재 런타임 기준선
 
+## 2026-10-31 v1550 — 최신 실제 운영 관측
+- 공개 Production https://easy-scraping.com 은 불변 prod-v2026.10.31.1550-bc8cd8a6c654, 정확한 코드 SHA bc8cd8a6c654af0336f550643f23049a58ee1d16. Nginx 운영 API/백엔드는 127.0.0.1:4164, 프론트엔드는 127.0.0.1:4165이며 새 moneyverse-release-v1550 systemd 서비스는 부팅 시 자동 시작.
+- 공개 백/프론트 버전 일치, 실제 Production 신원 검사 실패 0. 공식 Test 역시 동일 코드 SHA로 3100/3101 제공 및 신원 검사 통과.
+- 이전 운영 3564/3565는 이전 불변 릴리스에 고정해 롤백 및 기존 백그라운드 작업용으로 가동. 새 v1550 백엔드는 중복 스케줄러 실행 금지. 아래의 3000/3001·3213/3214 기록은 당시 관측으로만 유지하며 현재 공개 포트가 아님.
+- 운영 데이터 권위는 Docker PostgreSQL 호스트 5433, DB woldeok_moneyverse_dev. 정식 국부펀드 정책 마이그레이션 313 백업/체크섬 후 적용. 과거 국고 원장 552건 미연결로 공개 국고 503 및 미검증 지급 차단은 계속.
+- 근거: docs/worklog/2026-10-31-swf-operational-promotion-v1550.ko.md.
+
+
 ## 2026-10-15 v697 실제 운영 환경 변경
 - 운영 백엔드 moneyverse-release-v697-backend.service :3213, 프론트 moneyverse-release-v697-frontend.service :3214. Nginx 공개 라우팅, 정확한 코드 SHA a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73, production-current v697. 구 백엔드 :3000 및 v635 프론트 :3203 롤백 보존. 남은 금전 DB 권한 문제는 [릴리스](releases/v2026.10.15.697.ko.md) 참조.
 
