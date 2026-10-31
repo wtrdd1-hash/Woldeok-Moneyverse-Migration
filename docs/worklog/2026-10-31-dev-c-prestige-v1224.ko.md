@@ -11,3 +11,12 @@
 - 실패 테스트 확인: 기존 클라이언트 환생 구현과 비색인 설정 부재로 프론트 2건 실패. 백엔드는 독립 worktree 계약 패키지 미빌드로 최초 실행 불가.
 - 구현: 회원 인증된 읽기 전용 안내, 임의 WLD·등급·보험·유물·성공 메시지 제거. Nest GET/POST 인증·동의·CSRF 보호 아래 HTTP 503. DB/원장 변경 없음.
 - main 중간 재확인 `30cbbe02f`.
+
+## 검증 및 종료 준비 — 2026-10-31 15:22 KST (최종 이전)
+- 검증 기준 `a5519c747...`: 프론트 집중 2, 백엔드 HTTP 11·거절 2, 프론트 전체 2,768 PASS, 백엔드 전체 2,781 PASS/501 SKIP, DB 단위 62 PASS/4 SKIP, 릴리스 보안 14 PASS.
+- 전체 Lint 0 오류/1,044 경고, Typecheck·Backend/Frontend Build·app-api 184개 PASS. Next 동시 중복 빌드 1회 잠금 실패했으나 최초 빌드 정상 완료.
+- 격리 PostgreSQL 17.11 마이그레이션 311/311 PASS, 앱 원장 DML 불허, 프레스티지 SQL 함수 0개, 원장 거래 0건. 격리 컨테이너 제거, 공유 DB 미변경.
+- 운영 의존성 감사 취약점 0, 전체 감사 13건(낮음 3·보통 10) FAIL. 보호 경로 실제 HTTP X-Robots index/follow 문제 잔존. 로컬 익명 HTTP 200은 백엔드 연결 실패 스트리밍 오류이므로 인증 E2E PASS 아님.
+- 공식 Test `c2129625`, Production Backend `95485a299`, Frontend 숫자 빌드 ID `1793422036848`; 최신 main/후보 SHA 불일치. PR #2158 DRAFT/HOLD, CI 진행 중. 병합·배포·롤백·타인 브랜치 삭제 없음.
+- 백엔드 메서드 주석 배치만 정정. 최종 커밋 SHA에서 게이트 재실행 예정.
+- 체크리스트: [x] RED/GREEN·구현·1차 게이트·실제 PostgreSQL·main 재확인·초안 PR; [ ] 최종 SHA 재검증 및 GitHub 종료 기록.

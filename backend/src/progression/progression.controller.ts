@@ -114,19 +114,6 @@ export class ProgressionController {
   }
 
   /**
-   * The grade and the loans in one request. Two round trips to the database,
-   * issued together: the screen renders them side by side, and a second
-   * endpoint would be a second thing to keep in step with this one.
-   *
-   * `ladder` is what a grade buys: the limit, the rate, the term and the
-   * minimum repayment, for every grade rather than only the caller's. It could
-   * not be served before 096, because `bank_credit_policies` is revoked from
-   * `moneyverse_app` and no function exposed it -- and, more to the point,
-   * because until 096 `bank_borrow` ignored both the limit and the rate, so
-   * any screen quoting them would have been describing a policy the database
-   * did not keep.
-   */
-  /**
    * No prestige burn, multiplier, insurance or relic receipt exists in the
    * ledger contract. Refuse both discovery and mutation rather than fabricate
    * an account-specific prestige snapshot or accept a phantom WLD burn.
@@ -146,6 +133,19 @@ export class ProgressionController {
     throw new ServiceUnavailableException('prestige settlement is unavailable');
   }
 
+  /**
+   * The grade and the loans in one request. Two round trips to the database,
+   * issued together: the screen renders them side by side, and a second
+   * endpoint would be a second thing to keep in step with this one.
+   *
+   * `ladder` is what a grade buys: the limit, the rate, the term and the
+   * minimum repayment, for every grade rather than only the caller's. It could
+   * not be served before 096, because `bank_credit_policies` is revoked from
+   * `moneyverse_app` and no function exposed it -- and, more to the point,
+   * because until 096 `bank_borrow` ignored both the limit and the rate, so
+   * any screen quoting them would have been describing a policy the database
+   * did not keep.
+   */
   @Get('credit')
   @ApiOperation({ summary: 'The caller’s credit grade, what each grade buys, and their loans' })
   async credit(@Req() request: RequestWithSession) {

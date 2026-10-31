@@ -11,3 +11,12 @@
 - RED: old frontend test 2 FAIL (hook misuse on server and missing metadata), verified source gap. Backend initial run blocked by fresh worktree contract package not built; package install completed offline, contract build required.
 - GREEN implementation: replace fictional client-only rebirth with authenticated member-only read-only page and unindexable metadata. Nest guarded GET prestige and POST prestige/rebirths explicitly reject with 503, no ledger/DB calls. No fabricated WLD, rank, insurance, relic, or success UI.
 - `origin/main` still `30cbbe02f` at midpoint. Planning EN/KO unchanged in working tree.
+
+## VALIDATION AND FINISH — 2026-10-31 15:22 KST (pre-final checkpoint)
+- Checkpoint source `a5519c7472229378b4fbb3c61f075458c45849d8`: focused frontend 2 PASS; progression HTTP e2e 11 PASS; direct controller refusal 2 PASS; complete frontend 2,768 PASS (526 files); complete backend 2,781 PASS, 501 SKIP (372 passed files, 97 skipped); database unit 62 PASS, 4 SKIP; release/security subset 14 PASS.
+- Full lint PASS (0 errors / 1,044 warnings); typecheck PASS; backend build PASS; frontend build PASS (one concurrent duplicate Next build rejected by lock; surviving first build completed); app-api contract 184 endpoints PASS.
+- Isolated, network-disabled PostgreSQL 17.11: 311/311 migrations PASS, app-role ledger DML false, prestige SQL functions 0, ledger transactions 0. Ephemeral container removed; no shared database mutations.
+- Production dependency audit PASS (0 known vulnerabilities); full dependency audit FAIL (13 vulnerabilities: 3 low, 10 moderate). The known protected-route X-Robots-Tag index/follow edge defect remains; local anonymous HTTP produced HTTP 200 with streaming backend connection failure, NOT authenticated E2E PASS.
+- Official Test backend/frontend `c2129625`, Production backend `95485a299` / frontend numeric build id `1793422036848`; neither is this candidate or latest main. Production release identity and exact-SHA Test gates BLOCKED. Remote PR #2158 is DRAFT/HOLD, CI pending at checkpoint. No merge, Test/Production deploy, rollback, branch deletion or runtime restart.
+- Source review: moved prestige method comment before the existing credit route documentation; no behavioral change. Final SHA must be revalidated after this log-only/code-comment checkpoint.
+- Checklist: [x] RED/GREEN; [x] implementation; [x] initial exact-SHA local gates; [x] independent PostgreSQL; [x] main recheck; [x] draft PR; [ ] final exact-SHA rerun; [ ] final PR update.
