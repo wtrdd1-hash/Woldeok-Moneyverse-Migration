@@ -126,6 +126,26 @@ export class ProgressionController {
    * any screen quoting them would have been describing a policy the database
    * did not keep.
    */
+  /**
+   * No prestige burn, multiplier, insurance or relic receipt exists in the
+   * ledger contract. Refuse both discovery and mutation rather than fabricate
+   * an account-specific prestige snapshot or accept a phantom WLD burn.
+   * Existing session, consent and CSRF guards apply to both routes.
+   */
+  @Get('prestige')
+  @ApiOperation({ summary: 'Prestige ledger evidence (unavailable until verified)' })
+  prestigeStatus(@Req() request: RequestWithSession): never {
+    requireUserId(request);
+    throw new ServiceUnavailableException('prestige ledger evidence is unavailable');
+  }
+
+  @Post('prestige/rebirths')
+  @ApiOperation({ summary: 'Prestige rebirth (disabled until ledger settlement is implemented)' })
+  prestigeRebirth(@Req() request: RequestWithSession): never {
+    requireUserId(request);
+    throw new ServiceUnavailableException('prestige settlement is unavailable');
+  }
+
   @Get('credit')
   @ApiOperation({ summary: 'The caller’s credit grade, what each grade buys, and their loans' })
   async credit(@Req() request: RequestWithSession) {
