@@ -1,0 +1,13 @@
+# QA — A 2026-10-30 23:54 Bank Snapshot CSV Proof (RELEASE HOLD)
+
+- **Authority:** `origin/main` bf8d0d48f810932b43783d8605dce53954c60cff at start, mid and pre-integration; English `docs/planning/PROJECT_PLAN.md` and Korean `.ko.md` read. No concurrent plan edits.
+- **Scope:** existing authenticated member bank snapshot CSV repaired (real UTF-8 BOM and CRLF) and Android app-api bank snapshot validated. Nest actor-scoped `bank_get_my_standing` read reused; no migration, grant, balance or ledger mutation.
+- **RED/GREEN:** 7 FAIL / 4 PASS before implementation; after fix bank frontend/Android/link 13 PASS, Nest bank snapshot 3 PASS, app gateway contract 15 PASS, database unit 62 PASS / 4 SKIP, security advisory 7 PASS. Exact integer WLD strings and malformed/fabricated upstream rejection verified.
+- **Typecheck:** PASS. Backend build PASS. Frontend build PASS. Changed-file ESLint PASS. `pnpm audit --prod --audit-level high`: 0 known vulnerabilities.
+- **Real isolated PostgreSQL 17.11:** 311 migrations (002–312) applied; two synthetic member balances (one >2^53) read via `moneyverse_app` EXECUTE on actor-scoped `bank_get_my_standing`. Loan table direct SELECT and ledger INSERT denied. ROLLBACK left 0 synthetic users; only own test container removed. Actor argument is authenticated by Nest session/consent, not independently by the DB.
+- **Full suites:** Backend 2,653 PASS / 126 FAIL / 501 SKIP; all 126 failed identifiers identical to previous A 23:25 baseline. Frontend 2,707 PASS / 55 FAIL; all 55 failed identifiers identical to previous A 22:25 baseline. This is NOT a full PASS.
+- **Full lint:** FAIL, 1 existing parsing error at `frontend/src/app/api/shop/purchases/route.search.test.ts:99` and 1,043 warnings; separate Draft PR #2038 owns this repair. Do not bypass.
+- **Official Test:** public SHA c2129625aa6629c616fb31ce790950618b8d92b2, not candidate; treasury overview returns HTTP 200 with unverified/sample-like data. Exact-SHA authenticated E2E BLOCKED.
+- **Production:** public SHA bf8d0d48f810932b43783d8605dce53954c60cff; treasury HTTP 503 UNVERIFIED. `production-current` points at prod-v2026.10.30.1935, but backend/frontend systemd MainPID cwd point at deleted prod-v2026.10.30.1515. P0 #1984 unresolved at this observation; do not restart without rollback/restore proof.
+- **Release:** no main merge, Test/Production deploy, runtime restart, production DB change or rollback. Accessibility browser audit, independent restore, full CI, official Test exact SHA and GitOps gate not PASS. HOLD.
+- **Evidence:** `/srv/moneyverse-data/reports/Moneyverse-A-2026-10-30-2354-bank-statement-proof/` (red/green/full tests/build/typecheck/lint/PG/security/public smoke). No private user data recorded.
