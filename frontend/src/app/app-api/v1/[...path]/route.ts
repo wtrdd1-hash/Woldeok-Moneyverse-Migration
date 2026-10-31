@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { normalizeGalleryCaptionQuery, parseGalleryCaptionSearch } from '@/lib/gallery-caption-search';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -107,7 +108,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
-  const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
+  const gallerySearchPath = request.method === 'GET' && parts.length === 1 && parts[0] === 'photos' && request.nextUrl.searchParams.has('q');
+  let galleryQuery: string | null = null;
+  if (gallerySearchPath) {
+    try { galleryQuery = normalizeGalleryCaptionQuery(request.nextUrl.searchParams.getAll('q').length === 1 ? request.nextUrl.searchParams.get('q') : request.nextUrl.searchParams.getAll('q')); }
+    catch { return gatewayProblem(400, 'Bad Request', 'gallery_query_invalid', 'gallery search requires one safe 2-40 character query'); }
+  }
+  const securityEventPath = parts.length === 3 && parts[0] === 'account'  && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
     ? parseSecurityEventCategory(categoryValues.length > 1 ? categoryValues : categoryValues[0])
@@ -330,6 +337,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (galleryQuery !== null && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) || !parseGalleryCaptionSearch(await response.clone().json(), galleryQuery)) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_search_unverified', 'published gallery search is unavailable');
+      }
+    } catch { return gatewayProblem(503, 'Service Unavailable', 'gallery_search_unverified', 'published gallery search is unavailable'); }
+  }
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -397,6 +411,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
+  if (gallerySearchPath) { headers.set('cache-control', 'no-store'); headers.set('x-robots-tag', 'noindex'); }
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');

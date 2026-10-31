@@ -24,6 +24,16 @@ import {
   requireExternalImageUrl,
 } from './content.repository';
 
+export function normalizeGalleryCaptionQuery(raw: unknown): string | null {
+  if (raw === undefined) return null;
+  if (typeof raw !== 'string') throw new ContentInputError('gallery query must be text');
+  const query = raw.trim();
+  if (Array.from(query).length < 2 || Array.from(query).length > 40 || /[<>\u0000-\u001f\u007f]/u.test(query)) {
+    throw new ContentInputError('gallery query must contain 2 to 40 safe characters');
+  }
+  return query;
+}
+
 const STATUS_STATES = new Set(['operational', 'degraded', 'outage', 'maintenance', 'unknown']);
 const SOURCE_KEY_PATTERN = /^[a-z][a-z0-9_-]{2,63}$/;
 const STATUS_POLICY_VERSION = 'status-v1';
@@ -331,9 +341,10 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, query = null }: { limit?: number; query?: string | null } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    const photos = (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    return query === null ? photos : photos.filter((photo) => photo.altText.toLocaleLowerCase('ko-KR').includes(query.toLocaleLowerCase('ko-KR')));
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {

@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -30,7 +31,7 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
-import { ContentService } from './content.service';
+import { ContentService, normalizeGalleryCaptionQuery } from './content.service';
 import { PrivateImageStorage } from './private-image-storage';
 
 export class SaveAnnouncementDto {
@@ -174,8 +175,10 @@ export class ContentController {
 
   @Get('photos')
   @ApiOperation({ summary: 'Published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  async photos(@Query('q') raw?: unknown) {
+    const query = await this.guarded(async () => normalizeGalleryCaptionQuery(raw), 'invalid gallery query');
+    const photos = await this.service().publicPhotos({ limit: 24, query });
+    return query === null ? { photos } : { photos, query, scope: 'latest_24_published' as const };
   }
 
   @Get('status')
