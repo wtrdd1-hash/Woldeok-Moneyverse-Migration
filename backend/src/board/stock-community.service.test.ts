@@ -62,6 +62,7 @@ describe('public board reply-presence discovery', () => {
     const database = pool();
     await expect(new StockCommunityService(database).publicList(undefined, undefined, replies)).resolves.toEqual([]);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('WITH recent AS MATERIALIZED');
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain(predicate);
     expect(values).toEqual([50, null, null, replies]);
