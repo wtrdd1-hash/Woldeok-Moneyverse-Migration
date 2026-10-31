@@ -1,76 +1,27 @@
 'use client';
 
-import { Sparkles, Trophy, ShieldCheck, Flame, TrendingUp } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { groupDigits } from '@/lib/money';
 
+/** Legacy success-shaped data is not an audited jackpot proof. */
 export interface CasinoJackpotData {
   readonly house_reserve: string;
   readonly jackpot_amount: string;
   readonly total_plays_today: string;
 }
 
-export function CasinoJackpotTicker({
-  data,
-}: {
+export function CasinoJackpotTicker({ data: _data }: {
   readonly data: CasinoJackpotData | null;
 }) {
-  const jackpot = data?.jackpot_amount ?? '74500000';
-  const reserve = data?.house_reserve ?? '12845000';
-  const plays = data?.total_plays_today ?? '0';
-
   return (
-    <Card className="rounded-2xl border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-purple-500/10 to-blue-500/15 p-1 shadow-md mb-6 overflow-hidden">
-      <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:px-6">
-        {/* 좌측: 잭팟 풀 메인 */}
-        <div className="flex items-center gap-2.5 min-[380px]:gap-3.5 w-full sm:w-auto min-w-0">
-          <div className="flex size-11 min-[380px]:size-12 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-500 shadow-inner">
-            <Trophy className="size-5 sm:size-7 animate-bounce" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 truncate">
-              <Sparkles className="size-3.5 shrink-0" />
-              <span className="truncate">실시간 아케이드 슈퍼 잭팟 풀 (Live Arcade Jackpot)</span>
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-0.5 min-w-0">
-              <span className="text-xl min-[360px]:text-2xl sm:text-3xl font-black font-mono tracking-tight text-foreground truncate">
-                {groupDigits(jackpot)}
-              </span>
-              <span className="text-xs sm:text-sm font-black text-amber-500 font-mono shrink-0">
-                WLD
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 우측: 서브 리저브 및 오늘 통계 */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50 text-xs">
-          <div>
-            <span className="block text-[11px] font-semibold text-muted-foreground">
-              아케이드 준비금 (Reserve)
-            </span>
-            <span className="font-mono font-bold text-foreground">
-              {groupDigits(reserve)} WLD
-            </span>
-          </div>
-
-          <div className="h-8 w-px bg-border/60 hidden min-[400px]:block" />
-
-          <div>
-            <span className="block text-[11px] font-semibold text-muted-foreground">
-              오늘 누적 플레이
-            </span>
-            <span className="font-mono font-bold text-primary">
-              {groupDigits(plays)} 판
-            </span>
-          </div>
-
-          <div className="h-8 w-px bg-border/60 hidden min-[400px]:block" />
-
-          <div className="hidden min-[480px]:flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck className="size-4" />
-            <span>RNG 불변 검증</span>
-          </div>
+    <Card className="mb-6 overflow-hidden rounded-2xl border-amber-500/40 bg-amber-500/10 shadow-md">
+      <CardContent className="flex items-center gap-4 p-4 sm:p-6" role="status" aria-live="polite">
+        <Trophy className="size-7 shrink-0 text-amber-600" aria-hidden="true" />
+        <div className="min-w-0">
+          <p className="text-sm font-bold">아케이드 잭팟 · 증빙 확인 불가</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            잭팟 잔액, 준비금 및 오늘 플레이 건수의 독립적인 원장 증빙이 확인되지 않아 표시하지 않습니다.
+          </p>
         </div>
       </CardContent>
     </Card>
