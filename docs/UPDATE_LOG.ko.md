@@ -1451,3 +1451,8 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+
+## 2026-11-01 — 개발 C v1252 (초안/배포 보류)
+- 원장 근거 없는 랜드마크 입찰·임대료 지급 성공 응답을 차단하고 HTTP 503과 개인정보 보호 헤더 적용.
+- 허위 소유·수익 화면을 접근 가능한 한국어/영어 상태 안내로 변경. WLD·DB 변경 없음.
+- 최종 SHA 검증과 공식 Test·보안 게이트 통과 전 병합·운영배포 금지.

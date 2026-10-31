@@ -14,3 +14,10 @@
 
 ## END
 - Pending final SHA and evidence.
+
+## MID — 2026-11-01 07:51 KST
+- TDD RED: five focused HTTP assertions failed against origin/main. GET exposed synthetic auctions and WLD rent, authenticated POST accepted a fake bid, and rent-claim POST returned HTTP 200 for unledgered 4,990 WLD; unknown authentication was incorrectly 401.
+- TDD GREEN: eight focused tests PASS after replacing mock API success with explicit 503 source-unverified contracts and retaining signed-out 401/unknown-auth 503. Private/no-store/noindex/no-referrer headers asserted.
+- Removed synthetic in-memory landmark auction array, invented bids/Discord broadcast and fabricated rent claim success. The member-facing page now shows accessible bilingual source-unavailable status with keyboard-friendly navigation and noindex metadata; no fake ownership, yield or localStorage state is displayed.
+- Mid-fetch origin/main unchanged at f13bbce273ffc65e8576170992d82ea00c27a1c9; planning documents reviewed again. Backend real-estate endpoints still include synthetic land contracts, so those are explicitly out of scope and not certified by this PR.
+- Remaining: full gates, isolated PostgreSQL, HTTP edge, security audit, remote CI, official Test. No merge or deployment authorized.

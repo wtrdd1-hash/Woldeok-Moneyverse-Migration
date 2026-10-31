@@ -1,63 +1,61 @@
 import type { Metadata } from 'next';
-import { Building2, ShieldCheck, Sparkles } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getServerLocale } from '@/lib/locale-server';
-import { lookupText } from '@/lib/i18n-dictionary';
-import { PersonalSpacesView } from '@/components/personal-spaces-view';
-import { RealEstateAuctionClient } from './real-estate-auction-client';
+import { requireMember } from '@/lib/session';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getServerLocale();
-  const title = lookupText('가상 부동산 메가시티 랜드마크 경매 & 월세 배당 거래소', locale);
-  const desc = lookupText(
-    '강남, 여의도, 판교, 한남 등 머니버스 4대 프라임 랜드마크 지분 경매에 참여하고 일일 임대료 월세 배당을 실시간으로 수령하세요.',
-    locale
-  );
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-  return {
-    title: `${title} | Woldeok Moneyverse`,
-    description: desc,
-    openGraph: {
-      title,
-      description: desc,
-      type: 'website',
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: 'Virtual real estate source status | Woldeok Moneyverse',
+  description: 'Virtual landmark auctions and rental payouts are unavailable until verified ledger evidence exists.',
+  robots: { index: false, follow: false },
+};
 
 export default async function RealEstatePage() {
+  await requireMember();
+  const isEn = (await getServerLocale()) === 'en';
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="border-indigo-500/50 bg-indigo-500/10 text-indigo-500 text-xs font-bold flex items-center gap-1">
-            <Sparkles className="size-3.5" />
-            <span>메가시티 랜드마크 경매</span>
-          </Badge>
-          <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono flex items-center gap-1">
-            <ShieldCheck className="size-3.5" />
-            <span>실시간 임대료 원자적 배당</span>
-          </Badge>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
-          <Building2 className="size-7 text-indigo-500" />
-          <span>가상 부동산 메가시티 랜드 (Virtual Real Estate & Auctions)</span>
+    <main data-page="real-estate" className="mx-auto grid max-w-4xl gap-6 px-4 py-8 sm:px-6">
+      <header className="space-y-2">
+        <h1 className="text-2xl font-bold sm:text-3xl">
+          {isEn ? 'Virtual real estate' : '가상 부동산'}
         </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
-          4대 핵심 프라임 랜드마크 지분 경매에 참여하여 건물주가 되고, 상권 거래량에 비례하여 적립되는 일일 임대료(월세)를 실시간으로 수령하세요.
+        <p className="text-sm leading-7 text-muted-foreground">
+          {isEn ? 'Landmark auction and rental settlement source status' : '랜드마크 경매 및 임대료 정산 출처 확인'}
         </p>
-      </div>
-
-      {/* 랜드마크 경매 & 월세 배당 인터랙티브 클라이언트 */}
-      <RealEstateAuctionClient />
-
-      <hr className="border-border/40" />
-
-      {/* 개인 공간 및 토지 분양 관리 뷰 */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-foreground">내 개인 스페이스 & 랜드 분양 포트폴리오</h2>
-        <PersonalSpacesView />
-      </div>
-    </div>
+      </header>
+      <Card role="status" aria-live="polite" className="border-amber-500/40">
+        <CardHeader className="flex flex-row items-start gap-3">
+          <AlertTriangle aria-hidden="true" className="mt-1 size-6 shrink-0 text-amber-600" />
+          <CardTitle className="text-lg leading-relaxed">
+            {isEn ? 'Auction and rent claims are unavailable' : '경매 입찰과 임대료 수령을 이용할 수 없습니다'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm leading-7">
+          <p>
+            {isEn
+              ? 'The service cannot verify member ownership, live bids, unclaimed rent or a completed WLD payout against an authoritative ledger. No balance or earnings are shown as confirmed.'
+              : '현재 원장에서 회원별 소유 지분, 실시간 입찰, 미수령 임대료 및 WLD 지급 완료 내역을 검증할 수 없습니다. 확인되지 않은 잔액이나 수익은 표시하지 않습니다.'}
+          </p>
+          <p className="text-muted-foreground">
+            {isEn
+              ? 'The earlier landmark auction was a local simulation, not an actual transaction. No bid, purchase or rent claim can be submitted here until a verified backend contract is available.'
+              : '기존 랜드마크 경매는 실제 거래가 아닌 로컬 시뮬레이션이었습니다. 검증된 서버 계약이 마련되기 전까지 이 화면에서 입찰·구매·임대료 수령을 처리하지 않습니다.'}
+          </p>
+          <nav aria-label={isEn ? 'Real estate navigation' : '부동산 화면 이동'} className="flex flex-wrap gap-3">
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href="/wallet"><ArrowLeft aria-hidden="true" className="size-4" />{isEn ? 'Verified wallet' : '지갑 확인'}</Link>
+            </Button>
+            <Button asChild variant="secondary" className="min-h-11">
+              <Link href="/spaces/real-estate"><RefreshCw aria-hidden="true" className="size-4" />{isEn ? 'Check again' : '상태 다시 확인'}</Link>
+            </Button>
+          </nav>
+        </CardContent>
+      </Card>
+    </main>
   );
 }

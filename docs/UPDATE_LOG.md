@@ -1398,3 +1398,8 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+
+## 2026-11-01 — C v1252 (DRAFT/HOLD)
+- Replaced synthetic landmark auction and rent-claim success responses with explicit source-unverified HTTP 503 and private headers.
+- Replaced fabricated ownership/yield UI with an accessible bilingual unavailable state; no WLD, DB or schema mutation.
+- Release remains HOLD pending exact-SHA validation, official Test and security gates.
