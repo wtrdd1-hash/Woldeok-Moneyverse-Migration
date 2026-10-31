@@ -62,6 +62,8 @@ describe('loadConfig', () => {
         ...MINIMAL,
         NODE_ENV: 'production',
         APP_BASE_URL: 'https://easy-scraping.com',
+        DATABASE_URL: 'postgresql://app@db.internal/woldeok_moneyverse_prod',
+        PRODUCTION_DATABASE_NAME: 'woldeok_moneyverse_prod',
         LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED: 'true',
       }).localAuthTestVerificationTokenEnabled,
     ).toBe(false);
@@ -264,6 +266,9 @@ describe('multiple registered origins', () => {
     DISCORD_CLIENT_ID: 'id',
     DISCORD_CLIENT_SECRET: 'secret',
     APP_BASE_URL: 'https://easy-scraping.com',
+    NODE_ENV: 'production',
+    DATABASE_URL: 'postgresql://app@db.internal/woldeok_moneyverse_prod',
+    PRODUCTION_DATABASE_NAME: 'woldeok_moneyverse_prod',
     DISCORD_REDIRECT_URI: 'https://easy-scraping.com/auth/discord/callback',
     INTERNAL_API_TOKEN: 'x'.repeat(32),
   };
@@ -311,8 +316,10 @@ describe('multiple registered origins', () => {
   });
 
   it('never registers an origin nobody named', () => {
-    const uris = discordOf({ ...base, OAUTH_ALLOWED_REDIRECT_URIS: 'https://weoldeog.com' })
-      .redirectUris;
+    const uris = discordOf({
+      ...base,
+      OAUTH_ALLOWED_REDIRECT_URIS: 'https://weoldeog.com',
+    }).redirectUris;
     expect(uris).not.toContain('https://test.easy-scraping.com/auth/discord/callback');
   });
 });
@@ -340,5 +347,142 @@ describe('selectRedirectUri', () => {
 
   it('falls back when no origin was relayed at all', () => {
     expect(selectRedirectUri(provider, undefined)).toBe(provider.redirectUri);
+  });
+});
+
+describe('loadConfig: public production database identity', () => {
+  const production = {
+    ...MINIMAL,
+    NODE_ENV: 'production',
+    APP_BASE_URL: 'https://easy-scraping.com',
+  } satisfies NodeJS.ProcessEnv;
+  const correctUrl =
+    'postgresql://moneyverse_app@db.internal:5432/woldeok_moneyverse_prod?sslmode=require';
+  const expected = 'woldeok_moneyverse_prod';
+
+  it('rejects the public production host without an independently configured database name', () => {
+    expect(() => loadConfig({ ...production, DATABASE_URL: correctUrl })).toThrow(
+      /PRODUCTION_DATABASE_NAME/,
+    );
+  });
+
+  it('rejects the public production host without a database URL', () => {
+    expect(() => loadConfig({ ...production, PRODUCTION_DATABASE_NAME: expected })).toThrow(
+      /DATABASE_URL/,
+    );
+  });
+
+  it('rejects a live production origin accidentally pointing at a dev database', () => {
+    expect(() =>
+      loadConfig({
+        ...production,
+        DATABASE_URL: correctUrl.replace('_prod?', '_dev?'),
+        PRODUCTION_DATABASE_NAME: expected,
+      }),
+    ).toThrow(/production database/);
+  });
+
+  it('refuses even an explicitly approved test or dev database name', () => {
+    for (const suffix of ['dev', 'test', 'staging', 'restore']) {
+      expect(() =>
+        loadConfig({
+          ...production,
+          DATABASE_URL: correctUrl.replace('_prod?', `_${suffix}?`),
+          PRODUCTION_DATABASE_NAME: `woldeok_moneyverse_${suffix}`,
+        }),
+      ).toThrow(/production database/);
+    }
+  });
+
+  it('rejects malformed database URLs and names without disclosing credentials', () => {
+    const secret = 'sensitive-password-must-not-appear';
+    const userInfo = `user:${secret}@`;
+    for (const databaseUrl of [
+      `postgresql://${userInfo}db.internal/`,
+      `https://${userInfo}db.internal/woldeok_moneyverse_prod`,
+      `postgresql://${userInfo}db.internal/woldeok_moneyverse%2Fprod`,
+      `not-a-url:${secret}`,
+    ]) {
+      let message = '';
+      try {
+        loadConfig({
+          ...production,
+          DATABASE_URL: databaseUrl,
+          PRODUCTION_DATABASE_NAME: expected,
+        });
+      } catch (error) {
+        message = String(error);
+      }
+      expect(message).toMatch(/DATABASE_URL|production database/);
+      expect(message).not.toContain(secret);
+    }
+  });
+
+  it('rejects query parameters that can override the database selected by the path', () => {
+    for (const override of [
+      'dbname=woldeok_moneyverse_dev',
+      'database=woldeok_moneyverse_dev',
+      'options=-c%20search_path%3Dpublic',
+    ]) {
+      expect(() =>
+        loadConfig({
+          ...production,
+          DATABASE_URL: `${correctUrl}&${override}`,
+          PRODUCTION_DATABASE_NAME: expected,
+        }),
+      ).toThrow(/production database/);
+    }
+  });
+
+  it('also guards the public www alias', () => {
+    expect(() =>
+      loadConfig({
+        ...production,
+        APP_BASE_URL: 'https://www.easy-scraping.com',
+        DATABASE_URL: correctUrl,
+      }),
+    ).toThrow(/PRODUCTION_DATABASE_NAME/);
+  });
+
+  it('requires an exact match rather than prefix or case-insensitive equality', () => {
+    for (const name of [
+      'woldeok_moneyverse',
+      'Woldeok_moneyverse_prod',
+      'woldeok_moneyverse_prod2',
+    ]) {
+      expect(() =>
+        loadConfig({ ...production, DATABASE_URL: correctUrl, PRODUCTION_DATABASE_NAME: name }),
+      ).toThrow(/production database/);
+    }
+  });
+
+  it('allows a correctly bound public production database without exposing the connection string', () => {
+    const config = loadConfig({
+      ...production,
+      DATABASE_URL: correctUrl,
+      PRODUCTION_DATABASE_NAME: expected,
+    });
+    expect(config.production).toBe(true);
+    expect(config.databaseUrl).toBe(correctUrl);
+  });
+
+  it('refuses NODE_ENV bypass on the public production origin', () => {
+    expect(() =>
+      loadConfig({
+        ...production,
+        NODE_ENV: 'development',
+        DATABASE_URL: correctUrl,
+        PRODUCTION_DATABASE_NAME: expected,
+      }),
+    ).toThrow(/NODE_ENV/);
+  });
+
+  it('does not require production DB attestation on the isolated Test origin', () => {
+    const testConfig = loadConfig({
+      ...production,
+      APP_BASE_URL: 'https://test.easy-scraping.com',
+      DATABASE_URL: 'postgresql://user@db.internal/woldeok_moneyverse_test',
+    });
+    expect(testConfig.databaseUrl).toContain('woldeok_moneyverse_test');
   });
 });
