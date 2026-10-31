@@ -3,6 +3,7 @@ import { MintController } from '../../mint/mint.controller';
 import { MintService } from '../../mint/mint.service';
 import { CentralBankController } from '../../central-bank/central-bank.controller';
 import { CentralBankService } from '../../central-bank/central-bank.service';
+import { DurableCentralBankPolicyService } from '../../central-bank/durable-policy.service';
 import { MonetaryController } from './monetary.controller';
 import { AdminTreasuryController } from '../../admin/treasury/treasury.controller';
 import { TreasuryService } from '../../admin/treasury/treasury.service';
@@ -17,12 +18,23 @@ describe('v1415 unsafe finance operations fail closed', () => {
       await expect(call()).rejects.toMatchObject(unavailable);
     }
   });
-  it('legacy central bank cannot publish in-memory rates or accept synthetic mint', async () => {
-    const c = new CentralBankController({} as CentralBankService);
-    for (const call of [() => c.getMonetaryAggregates(), () => c.getBaseRate(), () => c.getReserveRequirement(),
-      () => c.getCommercialRates(), () => c.acceptMintBatch('x', {} as never, {} as never),
-      () => c.updateBaseRate({} as never, {} as never), () => c.updateReserveRequirement({} as never, {} as never)]) {
+  it('legacy central bank cannot publish synthetic monetary aggregates or accept synthetic mint', async () => {
+    const c = new CentralBankController({} as CentralBankService, new DurableCentralBankPolicyService(null));
+    for (const call of [() => c.getMonetaryAggregates(), () => c.getCommercialRates(),
+      () => c.acceptMintBatch('x', {} as never, {} as never)]) {
       await expect(call()).rejects.toMatchObject(unavailable);
+    }
+  });
+  it('durable central bank GET and audited PUT fail closed when the canonical policy database is unavailable', async () => {
+    const c = new CentralBankController({} as CentralBankService, new DurableCentralBankPolicyService(null));
+    const req = { session: { user_id: '00000000-0000-4000-8000-000000000001' } } as never;
+    const rate = { baseRatePercent: '4.00', targetInflationPercent: '2.00',
+      rateDecisionRationale: 'Insufficient reconciled banking evidence' } as never;
+    const reserve = { reserveRatioPercent: '8.00',
+      regulationRationale: 'Insufficient reconciled banking evidence' } as never;
+    for (const call of [() => c.getBaseRate(), () => c.getReserveRequirement(),
+      () => c.updateBaseRate(rate, req), () => c.updateReserveRequirement(reserve, req)]) {
+      await expect(call()).rejects.toMatchObject({ status: 503 });
     }
   });
   it('database mint and unsupported auto-regulation cannot execute on admin API', async () => {

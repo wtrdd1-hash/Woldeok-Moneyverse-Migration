@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1541 — Monetary CI contract fix (SOURCE VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-ci-monetary-contract-v1541.md) / [KO](docs/worklog/2026-10-31-ci-monetary-contract-v1541.ko.md) · [Internal](docs/updates/v2026.10.31.1541-ci-internal.md) / [KO](docs/updates/v2026.10.31.1541-ci-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1541-ci-github.md) / [KO](docs/updates/v2026.10.31.1541-ci-github.ko.md). Exact 8d74 CI FAILED due to stale v1415 test after v954 durable policy; updated test preserves 503 without canonical DB. Targeted 12 PASS, typecheck and lint PASS. Full new exact SHA CI/Test/Production HOLD.
+
+
 ## v2026.10.31.1540 — Unified admin/finance candidate (SOURCE VERIFIED / PROD HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-integrated-finance-release-v1540.md) / [KO](docs/worklog/2026-10-31-integrated-finance-release-v1540.ko.md) · [Internal EN](docs/updates/v2026.10.31.1540-unified-internal.md) / [KO](docs/updates/v2026.10.31.1540-unified-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1540-unified-github.md) / [KO](docs/updates/v2026.10.31.1540-unified-github.ko.md). Committed admin v666/central-bank v954 merged with v1530–v1539 patches, 9+66+122 tests, workspace typecheck, targeted lint, backend build PASS. Official exact-SHA Test and production HOLD; Treasury 552 records and P0 #2144 unresolved.
 
