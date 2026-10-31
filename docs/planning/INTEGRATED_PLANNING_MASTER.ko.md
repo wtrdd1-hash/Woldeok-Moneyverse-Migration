@@ -1,4 +1,29 @@
 # 월덕 머니버스 — 통합 기획 마스터
+
+## v2026.10.31.1548 — F675-193 회원 만료 알림 처리 내역 및 근거 기반 예외 조회 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 보완 v1546 → 현재 기능 추가 v1548 → 다음 기능 보완 v1550(잠정). **기준:** 원격 main 761a55a094fb9dd383d213e817305e68c79fa23c, AGENTS.md, README.md, 영문 정본과 한국어 대조 문서 시작/중간 확인. 선행 F675-188·F675-192, Draft #2119/#2113, 개발 인계 #2122. 기획 문서만 변경하며 실제 기능·DB·배포는 변경하지 않음.
+
+### 목적·대상·화면 및 상태
+- **문제:** 스케줄러 실행·중복 차단·작업 큐 성공은 실제 알림함 기록의 증거가 아님. 이용자가 확인 가능한 처리 이력과 검증된 예외를 구분하도록 설계하며, 운영 중 누락이 발생했다고 단정하지 않음.
+- **선택:** 본인에게 실제 기록된 최근 30일의 알림함 반영 내역과 영속적으로 기록된 예외만 조회. 큐 등록을 발송 성공으로 추정하거나, 기록 부재를 미발송으로 단정하거나, 알림 OFF 중 개별 아이템을 추적하는 방식은 채택하지 않음. 과거 이력 소급 생성 금지.
+- **진입:** 인증·동의 회원 /inventory/expiring → /inventory/expiring/reminders → '알림 처리 내역' → /inventory/expiring/reminders/activity. 7일·30일 선택(기본 7일), 새로고침, 실제 알림함 UUID가 확인된 경우에만 '알림함에서 보기', '알림 설정' 이동. 선행 기능과 스키마 검증 전 플래그 기본 OFF.
+- **표시 상태:** COMMITTED_INBOX=알림함에 기록됨(영수증과 알림함 행이 함께 커밋), ELIGIBLE_RETRY=재시도 대기(실제 시도 기록이 있을 때만), SUPPRESSED_WINDOW=발송 기간 지남(실제 판정 기록이 있을 때만), SOURCE_UNAVAILABLE=확인 불가, VERIFIED_EMPTY=권한 있는 조회 성공 후 확인된 내역 없음, UNKNOWN=기록 없거나 검증 불가. OFF 중 개별 미발송 행을 만들지 않음. 읽은 알림도 이미 기록된 알림이며 중복 차단은 두 번째 발송 아님.
+- **보호:** 제목·본문·잔액 저장 금지. 최소 식별자·정확한 만료시각·기준일·판정시각·사유코드·알림함 UUID만 기록. 회원 조회 30일 제한, 감사된 보존 정책 후 정리. 기록 부재는 미발송 증거가 아니라는 문구를 명시.
+
+### API·DB·동시성·보안
+- **GET** /api/v1/shop/expiry-reminders/activity?days=7|30&limit=1..50&cursor=... (기본 7일·20건). 세션·인증·동의 필수. 응답 items(eventId,kind,thresholdDays,expiresAtUtc,decidedAtUtc,inboxNotificationId?,reasonCode?),asOfUtc,nextCursor,hasMore,coverageStartsAtUtc,complete:false. 회원 UUID는 서버 세션에서만 도출. HMAC 커서는 회원·세션·필터·조회 기준에 결속, 15분 TTL, (decidedAtUtc DESC,eventId DESC) 키셋. 중복·미지원 쿼리 거부.
+- **오류:** 400 잘못된 입력, 401 미인증, 403 동의 없음, 409 원천 변경, 410 커서 만료, 429 요청 제한, 503 스키마·권한·증거 조회 장애 또는 기능 OFF. 정상적인 빈 목록은 권한 있는 조회가 성공한 경우만. Next BFF·Android app-api도 동일 오류와 본인 제한을 적용하며 실제 라우트 매핑을 구현 전 확인.
+- **DB 선행 검증:** 격리 PostgreSQL 17 전체 마이그레이션에서 in_app_notifications 실제 생성 구문·제약·인덱스·권한·소유자를 확인. 현재 알림 서비스는 직접 SELECT하며 번호가 붙은 마이그레이션의 CREATE TABLE 출처는 미확인(운영 테이블 부재 증거는 아님). 이후에만 전진형 이벤트 테이블 설계: event UUID PK, owner FK, catalog UUID, 정확한 timestamptz 만료시각, threshold 1/7 CHECK, kind/reason CHECK, decided_at, 선택적 inbox UUID FK, created_at; (owner,decided_at DESC,id DESC) 인덱스와 inbox_id 비NULL 고유 인덱스. 선행 영수증의 (회원,상품,정밀 만료시각,기준일) 유일성 유지. 앱 역할의 직접 테이블 권한 금지, SECURITY DEFINER 본인 조회와 제한된 워커 EXECUTE, 고정 search_path, PUBLIC 권한 회수.
+- **트랜잭션:** 실제 영수증+알림함 INSERT가 같은 트랜잭션에서 성공한 경우만 COMMITTED_INBOX 이벤트를 연결. 두 워커의 충돌은 두 번째 성공 기록을 생성하지 않음. 예외는 회원·아이템·기준일·시간창·사유별 제한된 멱등 기록만 허용, 매 스캔 로그 금지, OFF 중 개별 기록 금지. v1546의 선호 설정→보유 행 잠금 순서와 잠금 후 DB clock_timestamp를 유지. 30일 이력 정리는 영구 중복 방지 영수증이나 실제 알림함 행을 삭제하지 않음.
+- **개인정보·접근성·SEO:** 분당 회원 30회/IP 60회 초기 제한, 최대 50건, 비공개/no-store/noindex/no-referrer(성공·오류·리다이렉트 포함), 계정 전환 시 캐시 폐기, URL·분석 로그에 식별자 배제. 320px, 44px 터치, 키보드·스크린리더·포커스 복구·동작 줄이기, 한국어/영어, UTC 근거·KST 표기. 관리자에는 20명 이상 집단의 집계 KPI(알림함 반영 지연·중복 차단·재시도·원천 장애)만 제공.
+
+### 개발 인계·검증·배포
+- **P0 4건:** OPS1548-01 실제 운영 SHA·아티팩트·독립 복원/롤백(#1984), SEC1548-02 311개 마이그레이션·DEV 체크섬/권한·알림 테이블 출처(#993), FIN1548-03 원장/국고/MINT/SWF 무변경 증명(#1976), REL1548-04 Draft/HOLD·정확 SHA Test·보안 감사·FX ACL(#2111)·본인 권한(#2109)·QA 증빙(#2103)·병합 통제(#2031).
+- **P1 6건:** HISTORY1548-05 전진형 SQL·인덱스·본인 조회·보존 정책, -06 영수증/알림함/이벤트 원자성·2워커 중복 차단, -07 Nest API·Next 화면, -08 Android 동등성·세션 전환, -09 개인정보·SEO·접근성·관리자 집계, HISTORY1548-10 격리 PG17 10,001건·회원 2명·워커 2개·시간 경계·동의 철회·만료 변경·커서 위변조·30일 보존·권한·롤백 회귀.
+- **승인 조건:** 합성 수용시험은 정의만 했고 실행하지 않음. 최소 권한, 스키마·원천 근거, 정확 SHA 공식 Test, 독립 복원, 별도 Production 승격 승인 전까지 RELEASE HOLD. 기능 OFF 시 기존 UI/API에 영향 없도록 설계, DB는 전진형으로 파괴적 롤백 금지. KPI는 신청→대상→알림함 반영→열람, p95 지연·재시도·민원이며 미측정 수치는 추정하지 않음.
+- **근거:** NotificationService·Controller·DTO·Android 게이트웨이·영문 정본·GitHub #2112/#2111 확인. 과거 QA v1405 백엔드 2,778 PASS/501 SKIP, 프론트엔드 2,770 PASS, 보안 감사 FAIL; 최신 정확 SHA Test/독립 복원 BLOCKED. 신규 독립 외부 근거 승인 0건, 누적 검증·중복 제거·분류 UNKNOWN/10,000 = BLOCKED/IN PROGRESS. 실제 구현·배포 아님.
+
 - **GitHub:** Draft PR #2119 OPEN/HOLD, 선행 #2113, 개발 이슈 #2112 갱신; 병합·배포 없음.
 ## v2026.10.31.1546 — F675-192 만료 알림: 잠금 이후 시각·안전한 알림함 이동·원자적 증빙 (기능 보완 / 초안 / 배포 보류)
 

@@ -1,4 +1,9 @@
 - **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
+
+## 2026-10-31 v1548 — F675-193 owner reminder activity (FEATURE ADDITION, DRAFT/HOLD)
+- Previous Improvement v1546 → Current Addition v1548 → Next Improvement v1550 (provisional). Remote main 761a55a094fb9dd383d213e817305e68c79fa23c checked start/mid. Engineering #2122; dependent Draft #2119/#2113.
+- Added evidence-backed private 7/30-day reminder activity and exception timeline; committed inbox ≠ queued job; unknown ≠ missing delivery. Authenticated owner SQL/API, bounded event data, 30-day retention, mobile/SEO/WCAG/admin metrics, P0 4 + P1 6 and release gates specified in EN/KO integrated plans.
+- Historical QA v1405 tests pass, dependency audit FAIL; exact-SHA official Test, DEV ACL/schema provenance, independent restore and release remain BLOCKED. Synthetic acceptance NOT RUN. External refs newly approved 0, cumulative UNKNOWN/10,000. Documentation-only, no runtime/DB/WLD/ledger/Test/Production changes.
 ## v2026.10.31.1546 — Reminder Lock-Time/Inbox Navigation Planning (DOCS_ONLY / DRAFT / RELEASE HOLD)
 - Previous Feature Addition v1544 → Current Feature Improvement v1546 → Next Feature Addition v1548 (provisional). Main `761a55a094fb9dd383d213e817305e68c79fa23c` rechecked start/mid; parent Draft #2113; issue #2112.
 - Source finding: notification search strips `/inventory/expiring` link; PRODUCT_ACTIVITY already allowed; inbox schema/ACL still unverified. Replace pre-lock `statement_timestamp()` with locked post-read DB decision time and exact-precision atomic inbox+receipt, safe allowlisted CTA. No claim of actual exploit.
