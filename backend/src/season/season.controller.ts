@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   ParseUUIDPipe,
+  Query,
   Post,
   Req,
   ServiceUnavailableException,
@@ -71,8 +72,14 @@ export class SeasonController {
 
   @Get('events/:id/leaderboard')
   @ApiOperation({ summary: 'Leaderboard for one event' })
-  async leaderboard(@Param('id', ParseUUIDPipe) eventId: string) {
-    return { entries: await this.service().leaderboard(eventId) };
+  async leaderboard(
+    @Param('id', ParseUUIDPipe) eventId: string,
+    @Query('limit') rawLimit?: string | string[],
+  ) {
+    const limit = rawLimit === undefined ? 20
+      : rawLimit === '3' ? 3 : rawLimit === '10' ? 10 : rawLimit === '20' ? 20 : null;
+    if (limit === null) throw new BadRequestException('limit must be 3, 10 or 20');
+    return { entries: await this.service().leaderboard(eventId, limit) };
   }
 
   @Post('events/:id/consumptions')

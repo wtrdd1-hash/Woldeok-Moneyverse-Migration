@@ -98,7 +98,7 @@ interface SeasonConsumeRepositoryInput {
 
 export interface SeasonRepository {
   events(): Promise<readonly SeasonEventRow[]>;
-  leaderboard(eventId: string): Promise<readonly SeasonLeaderboardRow[]>;
+  leaderboard(eventId: string, limit?: number): Promise<readonly SeasonLeaderboardRow[]>;
   consume(input: SeasonConsumeRepositoryInput): Promise<SeasonConsumeRow>;
   current(userId: string): Promise<CurrentSeasonStatus>;
   hallOfFame(): Promise<readonly HallOfFameSeason[]>;
@@ -131,8 +131,11 @@ export class SeasonService {
     return this.repository.events();
   }
 
-  leaderboard(eventId: unknown): Promise<readonly SeasonLeaderboardRow[]> {
-    return this.repository.leaderboard(id(eventId, 'event id'));
+  leaderboard(eventId: unknown, limit = 20): Promise<readonly SeasonLeaderboardRow[]> {
+    if (limit !== 3 && limit !== 10 && limit !== 20) {
+      throw new SeasonInputError('unsupported season leaderboard limit');
+    }
+    return this.repository.leaderboard(id(eventId, 'event id'), limit);
   }
 
   async consume(userId: unknown, input?: SeasonConsumeInput): Promise<SeasonConsumeResult> {

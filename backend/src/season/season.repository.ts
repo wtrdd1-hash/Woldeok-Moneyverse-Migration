@@ -67,7 +67,10 @@ export class PostgresSeasonRepository implements SeasonRepository {
   // query's parameter array) becomes a rejected promise rather than a
   // synchronous exception at the call site — see the matching note in
   // postgres-stock-repository.ts.
-  async leaderboard(eventId: unknown): Promise<readonly SeasonLeaderboardRow[]> {
+  async leaderboard(eventId: unknown, limit = 20): Promise<readonly SeasonLeaderboardRow[]> {
+    if (limit !== 3 && limit !== 10 && limit !== 20) {
+      throw new SeasonInputError('unsupported season leaderboard limit');
+    }
     // season_event_leaderboard() returns `rank` as a bigint (see the
     // migration): uncast, node-postgres parses bigint/int8 columns as
     // strings, not numbers, to avoid precision loss above 2^53. That
@@ -76,8 +79,8 @@ export class PostgresSeasonRepository implements SeasonRepository {
     // for int4, so cast it explicitly instead of trusting the wire format.
     return queryRows<SeasonLeaderboardRow>(
       this.pool,
-      'SELECT rank::int,points::text,entries::text,display_name FROM public.season_event_leaderboard($1,20)',
-      [id(eventId, 'event id')],
+      'SELECT rank::int,points::text,entries::text,display_name FROM public.season_event_leaderboard($1,$2::integer)',
+      [id(eventId, 'event id'), limit],
     );
   }
 

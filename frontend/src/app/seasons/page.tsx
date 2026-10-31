@@ -10,6 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { EnterButton } from './enter-button';
+import { parseSeasonRankWindow, seasonRankHref, type SeasonRankLimit } from './rank-window';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
 import { SeasonPassTrack } from './season-pass-track';
@@ -85,10 +86,11 @@ function getRankBadge(rank: number) {
 export default async function SeasonsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly event?: string }>;
+  readonly searchParams: Promise<{ readonly event?: string; readonly limit?: string | string[] }>;
 }) {
   await requireMember();
-  const { event: requested } = await searchParams;
+  const { event: requested, limit: rawLimit } = await searchParams;
+  const rankWindow = parseSeasonRankWindow(rawLimit);
 
   const [data, currentStatus] = await Promise.all([
     apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
@@ -97,9 +99,9 @@ export default async function SeasonsPage({
 
   const events = data?.events ?? [];
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
-  const board = selected
+  const board = selected && !rankWindow.invalid
     ? await apiOrNull<{ entries: LeaderboardEntry[] }>(
-        `/api/v1/seasons/events/${selected.event_id}/leaderboard`,
+        `/api/v1/seasons/events/${selected.event_id}/leaderboard?limit=${rankWindow.limit}`,
       )
     : null;
 
@@ -180,7 +182,7 @@ export default async function SeasonsPage({
                   <CardFooter className="pt-3 border-t flex items-center justify-between gap-2">
                     <EnterButton eventId={event.event_id} />
                     <Link
-                      href={`/seasons?event=${event.event_id}`}
+                      href={seasonRankHref(event.event_id, rankWindow.limit)}
                       scroll={false}
                       className="min-h-11 px-4 inline-flex items-center text-xs font-bold text-primary hover:underline"
                     >
@@ -210,7 +212,25 @@ export default async function SeasonsPage({
           </CardHeader>
 
           <CardContent>
-            {board === null ? (
+            <nav aria-label="순위 표시 범위" className="mb-4 flex flex-wrap items-center gap-2">
+              {([3, 10, 20] as const satisfies readonly SeasonRankLimit[]).map((limit) => (
+                <Link
+                  key={limit}
+                  href={seasonRankHref(selected.event_id, limit)}
+                  aria-current={!rankWindow.invalid && rankWindow.limit === limit ? 'page' : undefined}
+                  className={`inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold ${
+                    !rankWindow.invalid && rankWindow.limit === limit
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-foreground hover:bg-muted'
+                  }`}
+                >
+                  상위 {limit}명
+                </Link>
+              ))}
+            </nav>
+            {rankWindow.invalid ? (
+              <EmptyState title="순위 표시 범위가 올바르지 않아요." description="상위 3명, 10명 또는 20명을 선택해 주세요." />
+            ) : board === null ? (
               <EmptyState title="순위를 불러오지 못했어요." />
             ) : board.entries.length === 0 ? (
               <EmptyState

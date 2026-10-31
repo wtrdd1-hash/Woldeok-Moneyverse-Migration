@@ -8,6 +8,7 @@ import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/s
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { verifiedSeasonLeaderboard } from '@/lib/season-leaderboard-proof';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { NextResponse } from 'next/server';
 import {
@@ -107,6 +108,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const seasonRankPath = parts.length === 4 && parts[0] === 'seasons' &&
+    parts[1] === 'events' && parts[3] === 'leaderboard';
+  const seasonLimitValues = seasonRankPath ? request.nextUrl.searchParams.getAll('limit') : [];
+  const seasonRankLimit = seasonLimitValues.length === 0 ? 20 : seasonLimitValues[0] === '3' ? 3
+    : seasonLimitValues[0] === '10' ? 10 : seasonLimitValues[0] === '20' ? 20 : null;
+  if (seasonRankPath && (seasonLimitValues.length > 1 || seasonRankLimit === null ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'limit'))) {
+    return gatewayProblem(400, 'Bad Request', 'season_rank_limit_invalid',
+      'season leaderboard limit must be 3, 10 or 20');
+  }
+  if (seasonRankPath && request.method !== 'GET' && request.method !== 'HEAD') {
+    return gatewayProblem(405, 'Method Not Allowed', 'season_rank_read_only',
+      'season leaderboard is read-only');
+  }
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -229,6 +244,23 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  if (seasonRankPath && !response.ok) {
+    const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
+    return gatewayProblem(status, 'Season Leaderboard Unavailable', 'season_rank_unavailable',
+      'season ranking evidence is unavailable');
+  }
+  if (seasonRankPath && request.method === 'GET') {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedSeasonLeaderboard(await response.clone().json(), seasonRankLimit as 3 | 10 | 20)) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_rank_unverified',
+          'season ranking evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'season_rank_unverified',
+        'season ranking evidence is unavailable');
+    }
+  }
   if (isWalletDetailPath(parts) && request.method === 'GET') {
     if (!response.ok) {
       const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
@@ -448,6 +480,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'seasons') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

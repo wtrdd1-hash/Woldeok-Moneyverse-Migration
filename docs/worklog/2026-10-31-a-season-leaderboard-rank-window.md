@@ -13,3 +13,9 @@
 
 ## FINISHED
 - Pending.
+
+### IN PROGRESS — 2026-10-31 20:31 KST
+- Test-first RED: backend 14 failures; frontend 6 failures and missing modules before implementation. GREEN: backend 14/14 PASS, frontend rank/parser/proof/Android 28/28 PASS.
+- `pnpm typecheck` exit 0 across contract, database, backend and frontend. Backend now binds rank cap 3/10/20 into the existing SQL function; no new migration or direct table access. Android verifies exact string scores and refuses malformed HTTP 200; private no-store/noindex/no-referrer enforced on all season gateway responses.
+- Midpoint `origin/main` remains `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`; English/Korean project plan and integrated master hashes unchanged. QA v1420 final FAILED/P0 (DEV ACL, Treasury, exact-SHA official Test, independent restore). No release authorization.
+- Next: full gates, real PostgreSQL read-only privilege/function proof, CI, final release decision.
