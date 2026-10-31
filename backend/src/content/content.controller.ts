@@ -10,12 +10,13 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -180,8 +181,13 @@ export class ContentController {
 
   @Get('status')
   @ApiOperation({ summary: 'Server status board' })
-  async status() {
-    return { status: await this.service().serviceStatus() };
+  @ApiQuery({ name: 'attentionOnly', required: false, enum: ['1'], description: 'Only non-operational or unverified source statuses' })
+  async status(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'attentionOnly') ||
+        (query.attentionOnly !== undefined && query.attentionOnly !== '1')) {
+      throw new BadRequestException('attentionOnly must be 1 when provided');
+    }
+    return { status: await this.service().serviceStatus({ attentionOnly: query.attentionOnly === '1' }) };
   }
 
   @Post('admin/announcements')

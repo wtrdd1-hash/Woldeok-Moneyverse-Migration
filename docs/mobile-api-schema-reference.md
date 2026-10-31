@@ -2,7 +2,7 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.30.0125**
+Update version: **v2026.11.01.0525**
 
 This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 184 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
@@ -2638,7 +2638,7 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/content/status` — Server status board
+## `GET` `/app-api/v1/status` — Server status board
 
 - Authorization: 공개: 로그인 불필요
 - Success status: 200
@@ -2648,7 +2648,9 @@ _No request body._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| attentionOnly | query | false | string | enum="1" |
 
 ### Request body
 
