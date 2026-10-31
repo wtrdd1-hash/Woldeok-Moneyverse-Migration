@@ -31,4 +31,3 @@
 - GitHub Actions on Draft #2250: classify/policy/release-input PASS, runtime-check pending as of 03:56 KST. Authenticated official Test exact candidate SHA E2E, independent restore and Production release gates **BLOCKED**.
 - Last public `/api/version`: Test `bc8cd8a6c654af0336f550643f23049a58ee1d16`; Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; neither matches candidate. No Test/Production rollout, GitOps update, ledger write, rollback or branch deletion. Preserve A/B/Gemini/QA and all five active schedules.
 - Source main re-fetched at start/mid/end: `f13bbce273ffc65e8576170992d82ea00c27a1c9` unchanged. PR #2250 DRAFT/HOLD. Overall PARTIAL / RELEASE BLOCKED; docs-only does not count as a development success.
-
