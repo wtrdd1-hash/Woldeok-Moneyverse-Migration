@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub v1558:** Draft PR #2157 OPEN/HOLD stacked on #2149; engineering issue #2148 updated; remote CI pending; no merge, deployment or runtime changes.
 ## v2026.10.31.1558 — F675-195 Durable Holding Generation and Exact-Precision Mute (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1556 → Current Feature Improvement v1558 → Next Feature Addition v1560 (provisional). Main 30cbbe02f0c27a13630aedf4a39190972d890f02 checked start/mid; parent Draft #2149; engineering #2148. F675-192/193/194/195 are NOT implemented.
 - **Verified source:** migration 071 PK(user_id,catalog_id), nullable expiry; 072/165 purchase UPSERT changes quantity without acquired_at, 103 event UPSERT changes acquired_at, 074/104 consume. acquired_at and expiry alone cannot prove same-expiry reacquisition. Plan persistent DB-owned owner+catalog generation tombstone with AFTER ROW transition trigger; bump on INSERT/DELETE, expiry change, positive↔zero, not positive→positive top-up. Forward-only backfill, privilege and concurrency proofs REQUIRED before implementation.

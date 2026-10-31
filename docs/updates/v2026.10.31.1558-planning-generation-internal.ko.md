@@ -6,3 +6,5 @@
 신규 P0: 공개 Test Treasury 200에 미검증 6천만 WLD 표시, Production은 503 UNVERIFIED(#2153). 과거 QA v1411은 신규 기능 수용시험이 아니다. 공식 Test 정확 SHA·감사·DB 권한/체크섬·독립 복원 BLOCKED, RELEASE HOLD.
 P0 4/P1 6; 합성 10,001건/회원 2명/워커 2개 수용시험은 명세만, 미실행. 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 기존 영문 원본·국문 통합문서에만 상세 기획을 추가했고 별도 분산 기획 파일은 만들지 않았다. GitHub PR/CI 결과는 완료 시 반영한다.
+
+GitHub Draft PR #2157 OPEN/HOLD(상위 #2149), 개발 이슈 #2148 갱신. 원격 CI 진행 중, 병합/배포 없음.
