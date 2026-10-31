@@ -1,19 +1,14 @@
-import React from 'react';
 import type { Metadata } from 'next';
-import { RoadmapView } from './roadmap-view';
-import { jsonLd } from '@/lib/json-ld';
+import Link from 'next/link';
+import { publicApi } from '@/lib/api';
+import { parseRoadmapMarketEvidence } from './roadmap-evidence';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '초반·중반·후반 실전 성장 로드맵 | 실제 화면 영상 시뮬레이터 & 완벽 입문 가이드',
-  description: '머니버스 처음 시작자부터 억대 건물주까지! 1일차 럭키 룰렛 시드 모으기부터 7일차 복리·주식 굴리기, 30일차 가상 부동산 패시브 임대료 수령까지 실제 작동 영상과 단계별 가이드로 3분 만에 마스터하세요.',
-  keywords: [
-    '머니버스 초보자 가이드',
-    '머니버스 하는법',
-    '머니버스 공략',
-    '가상 주식 하는법',
-    '복리 예금 이자 수령법',
-    '가상 부동산 분양 공략',
-  ],
+  title: '머니버스 시작 가이드 | 가입·직업·가상 주식 탐색',
+  description: '월덕 머니버스의 가입, 직업과 가상 주식 시장을 탐색하는 입문 안내입니다. 보상, 금리, 거래 가능 여부는 각 기능의 실제 서버 상태를 확인하세요.',
   alternates: {
     canonical: 'https://easy-scraping.com/roadmap',
     languages: {
@@ -24,53 +19,77 @@ export const metadata: Metadata = {
       'x-default': 'https://easy-scraping.com/roadmap',
     },
   },
-  openGraph: {
-    title: '머니버스 초반·중반·후반 실전 성장 로드맵 & 비디오 시뮬레이터',
-    description: '무자본 시드머니부터 가상 부동산 건물주까지! 실제 화면 영상과 단계별 튜토리얼로 3분 만에 마스터하세요.',
-    url: 'https://easy-scraping.com/roadmap',
-    siteName: 'Woldeok Moneyverse',
-    locale: 'ko_KR',
-    type: 'article',
-  },
 };
 
-export default function RoadmapPage() {
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: '머니버스 초반·중반·후반 실전 성장 및 플레이 방법 3단계 완벽 가이드',
-    description: '1일차 시드머니 형성부터 7일차 복리 주식 투자, 30일차 가상 부동산 건물주 등극까지의 실전 공략 로드맵',
-    step: [
-      {
-        '@type': 'HowToStep',
-        name: '초반 1~3일차: 무자본 종잣돈 10만 WLD 시드 모으기',
-        text: '일일 무료 럭키 룰렛 스핀과 인턴 직업 업무 수행, 웰컴 퀘스트 3종 보상을 통해 종잣돈 10만 WLD를 형성합니다.',
-        url: 'https://easy-scraping.com/casino',
-      },
-      {
-        '@type': 'HowToStep',
-        name: '중반 4~14일차: 복리 예금과 주식 분할 매수로 1,000만 WLD 굴리기',
-        text: '중앙은행 30일 스마트 복리 포켓(연 7.2%)에 시드 50%를 예치하고, 나머지 50%로 WDX 대장주를 10-Depth 호가창에서 분할 매수합니다.',
-        url: 'https://easy-scraping.com/bank',
-      },
-      {
-        '@type': 'HowToStep',
-        name: '후반 15~30일차+: 가상 부동산 건물주 & 패시브 임대료 제국 완성',
-        text: '강남·판교 8대 상권 가상 랜드/오피스를 분양받아 소유하고, 매일 자정에 자동으로 입금되는 패시브 임대료를 수령하며 프레스티지 환생을 달성합니다.',
-        url: 'https://easy-scraping.com/spaces/real-estate',
-      },
-    ],
-  };
+const STEPS = [
+  {
+    number: '01',
+    title: '계정 만들기',
+    detail: '이용 약관과 개인정보 안내를 확인한 뒤 회원가입을 진행하세요. 가입만으로 특정 WLD 보상이 보장되지는 않습니다.',
+    href: '/register',
+    label: '회원가입 안내 열기',
+  },
+  {
+    number: '02',
+    title: '직업과 과제 알아보기',
+    detail: '현재 제공되는 직업과 과제의 참여 조건을 확인하세요. 지급 금액과 완료 여부는 실제 서버 영수증이 기준입니다.',
+    href: '/work',
+    label: '직업 화면 열기',
+  },
+  {
+    number: '03',
+    title: '가상 주식 시장 살펴보기',
+    detail: '시장 화면에서 종목과 거래 조건을 확인하세요. 예시 수익률이나 특정 기간 내 자산 증식을 약속하지 않습니다.',
+    href: '/stocks',
+    label: '가상 주식 화면 열기',
+  },
+] as const;
+
+export default async function RoadmapPage() {
+  // Nest GET /api/v1/stocks reads the scoped stock_market_overview() SQL function.
+  // This is public, read-only evidence; no session or financial write is required.
+  const evidence = parseRoadmapMarketEvidence(await publicApi<unknown>('/api/v1/stocks', 0));
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
-      />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <RoadmapView />
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">Woldeok Moneyverse · Quickstart</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">머니버스 시작 가이드</h1>
+        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          가입부터 직업, 가상 주식 시장 탐색까지 순서대로 알아보세요. 이 안내는 게임 내 기능의 이용 경로를 설명하며
+          일정 기간의 WLD 수익, 무료 보상, 예금 금리 또는 부동산 임대료를 보장하지 않습니다.
+        </p>
+      </header>
+
+      <section aria-labelledby="roadmap-market-source" className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+        <h2 id="roadmap-market-source" className="text-lg font-semibold">가상 주식 시장 자료 확인</h2>
+        <div role="status" aria-live="polite" className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {evidence.kind === 'unavailable'
+            ? '시장 정보를 확인할 수 없습니다. 서버 연결 또는 응답 형식을 다시 확인해야 합니다. 종목이 0개라는 뜻은 아닙니다.'
+            : evidence.count === 0
+              ? '서버 응답은 확인했지만 현재 표시할 종목이 없습니다.'
+              : `서버 응답에서 ${evidence.count}개 종목을 확인했습니다. 시세 갱신 시각과 거래 가능 여부는 이 안내에서 검증되지 않습니다.`}
+        </div>
+        <Link href="/stocks" className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          시장 화면에서 다시 확인하기 →
+        </Link>
+      </section>
+
+      <nav aria-label="머니버스 시작 순서">
+        <ol className="grid gap-4 md:grid-cols-3">
+          {STEPS.map((step) => (
+            <li key={step.number} className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card p-5">
+              <span className="text-xs font-bold text-primary">STEP {step.number}</span>
+              <h2 className="text-lg font-bold">{step.title}</h2>
+              <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{step.detail}</p>
+              <Link href={step.href} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                {step.label} →
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </nav>
+      <p className="text-xs leading-relaxed text-muted-foreground">WLD는 서비스 안에서만 사용하는 가상 재화입니다. 실제 화폐·예금·증권이 아니며, 게임의 기능 제공 여부와 보상 정책은 변경될 수 있습니다.</p>
+    </div>
   );
 }
