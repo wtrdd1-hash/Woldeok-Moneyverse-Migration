@@ -1,5 +1,38 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1576 F675-200 회원 만료 달력 iCalendar 일회성 내보내기 / 이슈 #2223 / 초안 / 운영 보류; 선행 #2218 미병합.
+**현재 기획:** v1578 F675-200 iCalendar 불변 스냅샷 식별·원자적 전달 / 이슈 #2223 / 초안 / 운영 보류; 선행 Draft #2224 미병합.
+
+## v2026.11.01.1578 — F675-200 iCalendar 스냅샷 식별·원자적 다운로드 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 추가 v1576 → 현재 기능 보완 v1578 → 다음 기능 추가 v1580(잠정). 최신 `origin/main` `f13bbce273ffc65e8576170992d82ea00c27a1c9` 시작·중간 확인. AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 한국어 대조. main 기획 표제는 여전히 v1518이며, 미병합 Draft #2224의 F675-199/200 설계를 독립 브랜치의 기존 문서에 보존한 것이다. 이슈 #2223 인계. 문서 기획만 수행, 기능 OFF, 운영 보류.
+
+### 설계상 문제, 대안과 결정
+- **문제 A(운영 장애 확인이 아닌 제안 계약의 위험):** v1576의 `VEVENT.UID`는 회원+날짜에 대해 고정되지만, 저장된 이벤트 리비전이나 단조 증가 `SEQUENCE`가 없다. 수량 변경 후 파일을 재가져오면 캘린더 앱마다 이전 항목 무시·덮어쓰기·중복 생성이 가능해 안전한 갱신을 약속할 수 없다. 외부 앱에 가져간 파일은 머니버스가 삭제할 수 없다.
+- **대안:** A) 고정 UID+SEQUENCE는 회원/날짜별 영속 리비전과 추가 트랜잭션이 필요하므로 일회성 V1에 부적합; B) OAuth/webcal 동기화는 외부 인증·삭제·보관 부담이 커 제외; **C) 채택:** 다운로드마다 서버 CSPRNG로 128비트 난수를 생성하고, 날짜별 `UID = HMAC-SHA256(key, 길이구분('mv-ics-snapshot-v2',회원UUID,난수,KST날짜))`를 제한된 소문자 16진수+`@moneyverse.invalid`로 표기한다. 같은 **파일**을 재가져오면 UID가 같고, **새 다운로드**는 같은 수량이어도 다른 UID다. `SEQUENCE:0`, 예약 초대와 무관한 선택 항목 `METHOD` 생략, `RECURRENCE-ID`/`ORGANIZER`/`ATTENDEE`/`VALARM` 없음. 회원·난수·비밀키·키 ID를 파일에 직접 쓰지 않는다. 키 교체 후 다른 다운로드 UID의 일치도 보장하지 않는다. 매 다운로드 확인창에 **“다운로드마다 별도 스냅샷입니다. 다시 가져오면 일정이 중복될 수 있습니다. 기존 일정은 캘린더 앱에서 직접 삭제해야 하며 머니버스는 갱신·회수할 수 없습니다.”** 표시. 자동 중복 제거·동기화 주장은 금지.
+- **문제 B:** Nest의 200 파일이 중간에서 잘리거나 JSON 오류·리다이렉트·예상 밖 압축·공개 캐시 헤더로 변형되어도 BFF가 그대로 첨부할 위험이 있다. 실제 `frontend/src/app/app-api/v1/[...path]/route.ts`는 일부 경로만 무조건 private/no-store로 처리하며 신규 달력 내보내기 경로를 보장하지 않는다. 이는 소스상 조건부 위험이지 운영 노출 확정이 아니다.
+- **결정:** Nest가 64KiB 이하 전체 RFC5545 바이트를 완성·검증한 후에만 200 응답. Next·Android 게이트웨이는 원본 바이트의 크기·해시·형식을 모두 검증한 후 공개 응답/파일 저장. 부분 200, 실패 시 빈 파일, 다른 회원의 바이트 재사용, 브라우저 자체 재생성 금지. 기존 7/30 KST 날짜·최대 30개 VEVENT·본인 DB 집계는 유지. 새 테이블·예약 작업·금융/아이템 변경 없음.
+
+### API·바이트 무결성·상태 계약
+- **회원 흐름:** `/inventory` → 예정 `/inventory/expiry-calendar` → 7/30일 선택 → 외부 저장·중복 안내 확인 → Download once/Cancel. IDLE/CONFIRMING/GENERATING/VERIFIED_READY(200)/VERIFIED_EMPTY(204)/INVALID(400)/UNAUTHENTICATED(401)/CONSENT(403)/SESSION_CHANGED(409)/RATE_LIMITED(429)/UNVERIFIED_SOURCE(503)/OFFLINE/CANCELLED 구분. 204는 본인 DB 조회 성공으로 대상 날짜가 0건일 때만 인정하며 빈 `.ics` 생성 금지. 파일 생성시각은 앞서 조회한 달력 화면의 시각과 다를 수 있음을 표시.
+- **Nest:** `POST /api/v1/shop/expiry-calendar/export` 요청은 `{windowDays:7|30}`만 허용, 본문 2KiB 제한. 서버 세션에서 회원·동의·세대 결속, Next 동일 출처 CSRF, 제안 제한 회원별 3회/분·10회/일 및 동시 1건. DB 단일 읽기 문장에서 `asOfUtc`를 한 번 정하고 같은 시각의 KST 경계를 사용. 보유 수량>0·미래 `expires_at`·null 제외. `SUM(quantity::numeric)`을 정확한 정수 문자열로 직렬화하고 음수·소수·비정상·`9223372036854775807` 초과 합계는 JS Number 변환이나 오버플로 없이 차단. 회원/UID/파일명/조회시각/날짜/시간대는 요청자가 지정할 수 없다. VEVENT 1개 이상인 경우만 200, 검증된 0건 204, 원천/권한/스키마/시간초과는 503. 보관함·영수증·WLD·원장 쓰기 0.
+- **인코더:** RFC5545 UTF-8·CRLF, 실제 물리 행 75 **바이트** 이하, UTF-8 코드포인트를 분할하지 않고 CRLF+공백으로 접기. TEXT의 역슬래시·쉼표·세미콜론·개행 이스케이프, NUL/CRLF 주입 거부. KST 하루 종일 DATE `DTSTART`, 다음날 배타적 `DTEND`, UTC 초단위 `DTSTAMP`, `UID`, `SEQUENCE:0`, `TRANSP:TRANSPARENT`, 고정 `PRODID`, `VERSION:2.0`, `CALSCALE:GREGORIAN`, 검증된 종류·수량을 표시하는 고정 한국어 `SUMMARY`/`DESCRIPTION`과 스냅샷 경고. 상품명·회원UUID·이메일·외부URL·토큰 없음. `BEGIN:VCALENDAR`부터 마지막 `END:VCALENDAR`까지 정확한 닫힘, `VEVENT` 시작/종료 개수 일치·최대 30개, 인코딩된 총 바이트 65536 이하를 200 이전 검증. 204/오류에 파일 없음.
+- **전송 무결성:** Nest는 최종 **비압축** UTF-8 바이트의 SHA-256과 실제 바이트 수를 계산한다. 내부 Nest→Next/app-api 계약은 정확한 `Content-Type: text/calendar; charset=utf-8`, `Content-Length`, `X-Moneyverse-Internal-Export-SHA256`(소문자 16진수 64자)을 포함한다. 게이트웨이는 리다이렉트 금지, `Content-Encoding` 없음/identity만 허용, 최대 65537바이트까지 제한해 읽고 실제 길이·다이제스트·RFC 프레이밍·1~30 이벤트를 확인한다. 길이/해시 누락·불일치, 200 JSON 오류, 잘린 본문, 비정상 UTF-8·상태코드는 **공개 헤더 확정 및 Android 파일 저장 전** 503으로 거부. 내부 다이제스트 헤더는 외부 노출·로그 금지. 체크섬은 전송 손상 검증이지 인증 수단이 아니며 세션·동의·TLS/사설 연결이 필수. 204는 본문 0바이트일 때만 전달. 오류는 제한된 문제 JSON만 반환하고 외부 출처 30x를 따라가지 않는다.
+- **공개 엣지:** 200에 서버 KST 날짜로 정한 고정 `moneyverse-expiry-YYYYMMDD.ics` 첨부·정확한 Content-Length; 204에는 첨부 없음. 모든 200/204/400/401/403/409/429/503에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, 세션 종속 시 `Vary: Cookie` 강제. 상위 공개 캐시 헤더 덮어쓰기, 검증 전 스트리밍·캐싱 금지, GET/webcal·사이트맵·사용자 파일명 반영 금지. 계정/세션 세대 변경 시 바이트 폐기·409. 웹은 객체 URL 회수, Android는 일시적 scoped URI 사용 후 앱 보유 바이트를 제거하되 외부 앱이 읽는 중에는 조기 권한 철회 금지. 자동 업로드 없음. 외부 앱은 파일을 무기한 보관할 수 있음.
+- **DB·보안·관리:** 선행 F675-199 본인 전용 SECURITY DEFINER, 고정 search_path, PUBLIC EXECUTE 취소·앱 EXECUTE만, 직접 테이블 SELECT/DML 금지와 BOLA 검증. #993 권한·체크섬 문제 해결 전 운영 불가. 신규 마이그레이션 번호 선점 없음. 관리자는 20명 이상 익명 주간 집계로 시도/검증된 200·204/무결성 거부/중복 경고 확인/409·429·503/p95만 확인, 개인 수량·파일·UID 기록 금지. 비공개 SEO, 320px/200% WCAG2.2 AA 키보드·스크린리더·한영 동등성. `INVENTORY_EXPIRY_CALENDAR_EXPORT_ENABLED` 기본 OFF, F675-199 구현·독립 수용시험 선행.
+
+### 개발 백로그 및 수용 게이트 (모두 제안, 미실행)
+1. **P0 OPS1578-01:** #1984/#2144/#2171 운영 backend/frontend/edge 실행 SHA·불변 매니페스트·cgroup 여유·독립 복원/롤백 검증; 공개 버전 문자열만으로 승인 금지.
+2. **P0 SEC1578-02:** #993/#828/#2111 앱 역할 직접 보관함/금융 권한, 적용 마이그레이션 체크섬 5건 및 신규 스키마 정합성 해소; 우회 권한·기존 마이그레이션 재작성 금지.
+3. **P0 FIN1578-03:** #1976/#2191 국고·마켓플레이스 원장 출처 및 무원장 정산 차단; 내보내기 DB/금융 쓰기 0.
+4. **P0 REL1578-04:** #1088/#2144, QA Draft #2220, 필수 CI/보안 감사, 공식 Test **새 최종 SHA** 전체 서비스·인증 엣지/Android E2E, 독립 복원 및 운영자 GitOps 승인; 이전 QA는 오래된 Test SHA만 검증. RELEASE HOLD.
+5. **P1 EXPORT1578-05 Backend B:** DB 단일문장 본인/KST 기준시각 집계, `SUM(quantity::numeric)` 상한, 204/503 분리, SECURITY DEFINER, 합성 보유 10,001건 EXPLAIN, 금융 쓰기 없음.
+6. **P1 EXPORT1578-06 Backend B:** RFC5545 인코더, 다운로드별 CSPRNG/HMAC UID·`SEQUENCE:0`, 정확한 SHA-256·길이, UTF-8 접기·64KiB·부분 파일 금지; 테스트에서만 고정 난수 주입.
+7. **P1 EXPORT1578-07 Backend B:** Nest 인증 POST·2KiB/속도 제한·CSRF 경계, 완성된 200/204/4xx/503, 내부 검증 헤더·리다이렉트/압축 차단.
+8. **P1 EXPORT1578-08 개발 A/C:** Next/Android 바이트 전체 검증·계정 세대 펜스, 외부 보관/중복 경고, 계정 전환 취소, 비공개 다운로드/공유, 320px WCAG2.2 AA.
+9. **P1 EXPORT1578-09 개발 A/C:** 엣지 모든 상태 헤더 강제·내부 다이제스트 제거·고정 파일명, 익명 20명 집계 KPI, 기본 OFF·비파괴 롤백.
+10. **P1 EXPORT1578-10 QA:** 격리 PG17 보유 10,001건/회원 2명/동시 2건; KST 자정 ±1µs, 7/30일, 204/503/409, 이벤트 30/31개, 바이트 65536/65537, 한국어 접기 75/76바이트, RFC 파서 왕복, 다운로드별 UID 차이/같은 파일 내 안정성/수량 변경/키 교체, 위조 회원·CSRF, 잘린 파일·해시 불일치·200 JSON·302·압축·공개 캐시 상위 응답, Android 공유 중단, 원장 쓰기 0, 정확 SHA Test·복원. 목표는 비정상/부분 파일 0, 타인 파일 0, 미검증 200 0, 10,001건 p95<500ms(미측정).
+
+**운영·외부 근거:** 개발 A/B/C/QA 각각 별도 브랜치, 필요한 경우에만 전진 마이그레이션, Test Docker 정확 SHA 후 모든 P0 및 기능 시험 통과·운영자 승인 시 GitOps 승격. 롤백은 기능 OFF, DB 파괴 금지; 외부 캘린더 일정은 원격 회수 불가. 외부 독립 근거 신규 승인 **0건**, 누적 검증·중복제거·분류 승인 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. IETF RFC5545·OWASP는 참고 규격이지 승인 근거 건수가 아니다. 기존 영문/국문 통합 문서·일지 6개만 수정; 런타임·DB·원장·WLD·Test·Production·main 병합 없음.
+
 
 ## v2026.11.01.1576 — F675-200 회원 보유 아이템 만료 달력 iCalendar 파일 내보내기 (기능 추가 / 초안 / 운영 보류)
 
