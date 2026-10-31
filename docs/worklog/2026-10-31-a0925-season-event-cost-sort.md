@@ -13,3 +13,10 @@
 
 ## Finished — v3
 - Pending verification.
+
+## In progress — v2 (09:31 KST)
+- Failing regression reproduced: Backend 3/3 RED, frontend utility/Android 2/4 RED. Initial missing `vitest` was environment-only; installed locked dependencies offline before authoritative RED.
+- Implemented backend exact BigInt sort and invalid query rejection, web sort controls with selected-event context, Android no-store/noindex and verified HTTP 200 ordering.
+- GREEN targeted Backend 3/3 and frontend 4/4. Full workspace typecheck PASS. No migration, privileges or ledger writes.
+- Main SHA rechecked unchanged `761a55a094fb9dd383d213e817305e68c79fa23c`; planning Draft #2113 remains unmerged. All other branches retained.
+- Next: full regression, lint, builds, real isolated PostgreSQL 312 migrations, CI, exact-SHA Test and release proof. Release remains HOLD.

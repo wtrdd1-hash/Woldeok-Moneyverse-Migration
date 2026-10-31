@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseSeasonCostSort, verifiedSeasonCostEvents } from '@/lib/season-event-cost-sort';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -114,6 +115,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     : 'all';
   if (securityEventPath && securityCategory === null) {
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
+
+  const seasonEventsPath = parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events';
+  const seasonSortValues = seasonEventsPath ? request.nextUrl.searchParams.getAll('sort') : [];
+  const seasonSort = seasonEventsPath
+    ? parseSeasonCostSort(seasonSortValues.length > 1 ? seasonSortValues : seasonSortValues[0])
+    : 'default';
+  if (seasonEventsPath && seasonSort === null) {
+    return gatewayProblem(400, 'Bad Request', 'season_sort_invalid', 'sort must be cost_asc or cost_desc');
   }
 
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
@@ -330,6 +340,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (seasonEventsPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'season_events_unverified', 'season event evidence is unavailable');
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -398,8 +412,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateSeason = parts[0] === 'seasons';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateSeason) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateSeason) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -411,6 +426,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (seasonEventsPath && response.ok &&
+          (seasonSort === null || verifiedSeasonCostEvents(compatible, seasonSort) === null)) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_events_unverified', 'season event ordering could not be verified');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -431,6 +450,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (seasonEventsPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_events_unverified', 'season event evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }

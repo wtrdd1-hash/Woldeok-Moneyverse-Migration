@@ -5,10 +5,12 @@ import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { parseSeasonCostSort, verifiedSeasonCostEvents } from '@/lib/season-event-cost-sort';
 import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
@@ -85,17 +87,20 @@ function getRankBadge(rank: number) {
 export default async function SeasonsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly event?: string }>;
+  readonly searchParams: Promise<{ readonly event?: string; readonly sort?: string | string[] }>;
 }) {
   await requireMember();
-  const { event: requested } = await searchParams;
+  const { event: requested, sort: rawSort } = await searchParams;
+  const sort = parseSeasonCostSort(rawSort);
+  const sortQuery = sort && sort !== 'default' ? `?sort=${sort}` : '';
 
-  const [data, currentStatus] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
+  const [rawData, currentStatus] = await Promise.all([
+    sort === null ? Promise.resolve(null) : apiOrNull<unknown>(`/api/v1/seasons/events${sortQuery}`),
     apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
   ]);
 
-  const events = data?.events ?? [];
+  const events = sort === null ? [] : (verifiedSeasonCostEvents(rawData, sort) ?? []);
+  const dataVerified = sort !== null && verifiedSeasonCostEvents(rawData, sort) !== null;
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
   const board = selected
     ? await apiOrNull<{ entries: LeaderboardEntry[] }>(
@@ -131,8 +136,13 @@ export default async function SeasonsPage({
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">
           <Calendar className="size-5 text-primary" /> 진행 중인 시즌 이벤트
         </h2>
-        {data === null ? (
-          <EmptyState title="이벤트를 불러오지 못했어요." />
+        <nav aria-label="시즌 이벤트 참가비 정렬" className="flex flex-wrap gap-2">
+          <Button asChild variant={sort === 'default' ? 'default' : 'outline'} size="sm"><Link href="/seasons">기본 순서</Link></Button>
+          <Button asChild variant={sort === 'cost_asc' ? 'default' : 'outline'} size="sm"><Link href="/seasons?sort=cost_asc">참가비 낮은 순</Link></Button>
+          <Button asChild variant={sort === 'cost_desc' ? 'default' : 'outline'} size="sm"><Link href="/seasons?sort=cost_desc">참가비 높은 순</Link></Button>
+        </nav>
+        {!dataVerified ? (
+          <EmptyState title="참가비 순서 또는 이벤트 정보를 확인할 수 없어요." />
         ) : events.length === 0 ? (
           <EmptyState title="진행 중인 이벤트가 없습니다." />
         ) : (
@@ -180,7 +190,7 @@ export default async function SeasonsPage({
                   <CardFooter className="pt-3 border-t flex items-center justify-between gap-2">
                     <EnterButton eventId={event.event_id} />
                     <Link
-                      href={`/seasons?event=${event.event_id}`}
+                      href={`/seasons?event=${event.event_id}${sortQuery ? `&sort=${sort}` : ''}`}
                       scroll={false}
                       className="min-h-11 px-4 inline-flex items-center text-xs font-bold text-primary hover:underline"
                     >

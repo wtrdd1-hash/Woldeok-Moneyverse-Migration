@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Query,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -65,8 +66,11 @@ export class SeasonController {
 
   @Get('events')
   @ApiOperation({ summary: 'Active season events' })
-  async events() {
-    return { events: await this.service().events() };
+  async events(@Query('sort') sort?: string | string[]) {
+    if (sort !== undefined && sort !== 'cost_asc' && sort !== 'cost_desc') {
+      throw new BadRequestException('sort must be cost_asc or cost_desc');
+    }
+    return { events: await this.service().events(sort ?? 'default') };
   }
 
   @Get('events/:id/leaderboard')

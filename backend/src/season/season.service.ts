@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { SeasonInputError } from './season.repository';
 import type { WldAmount } from '@moneyverse/contract';
 
@@ -127,8 +127,22 @@ export class SeasonService {
     this.repository = repository;
   }
 
-  events(): Promise<readonly SeasonEventRow[]> {
-    return this.repository.events();
+  async events(sort: 'default' | 'cost_asc' | 'cost_desc' = 'default'): Promise<readonly SeasonEventRow[]> {
+    const events = await this.repository.events();
+    if (sort === 'default') return events;
+    const values = events.map((event) => {
+      const amount = event.cost_wld;
+      if (typeof amount !== 'string' || !/^(0|[1-9]\d{0,18})$/.test(amount) ||
+          BigInt(amount) > 9223372036854775807n) {
+        throw new ServiceUnavailableException('season event cost evidence unavailable');
+      }
+      return { event, cost: BigInt(amount) };
+    });
+    values.sort((a, b) => {
+      const result = a.cost < b.cost ? -1 : a.cost > b.cost ? 1 : 0;
+      return sort === 'cost_asc' ? result : -result;
+    });
+    return values.map(({ event }) => event);
   }
 
   leaderboard(eventId: unknown): Promise<readonly SeasonLeaderboardRow[]> {
