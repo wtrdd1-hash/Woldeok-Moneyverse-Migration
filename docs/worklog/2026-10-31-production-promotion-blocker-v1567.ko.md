@@ -21,3 +21,13 @@
 
 ## 종료 상태
 **이번 세션에서 실제 수정한 것은 GitHub 작업 기록뿐. 코드 수정 0, 테스트 실행 0, Test 반영 0, 운영 승격 0, DB 변경 0.** 현재 원격 접속 및 원장 근거 부족 때문에 운영 승격을 완료했다고 보고하지 않는다. 기존 승인된 금융 세 테이블 권한 자체를 차단 사유로 삼지 않는다.
+
+## 추가 중간 확인 — @미니pc홍 원격 MCP 실제 연결 성공 (2026-10-31 19:36 KST 이후)
+- 이전 Remote Desktop Commander 장치 OFFLINE 판단은 전체 미니PC 연결 실패를 뜻하지 않았다. 전용 `@미니pc홍` MCP의 `system_exec_command`와 `moneyverse_get_system_status`가 정상 동작했음을 확인. 호스트 debian13, 백엔드·프론트·Nginx·Docker 정상 active, DB connected.
+- 로컬 main은 `30cbbe02f0c27a13630aedf4a39190972d890f02`였고 `git fetch origin main` 후 원격 `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`로 재확인. 기존 로컬 main을 덮어쓰지 않고 별도 detached 검증 워크트리 `/home/debian/mv-verify-v1567-20261031` 생성.
+- 실제 운영·Test `/api/version` 모두 `bc8cd8a6c654af0336f550643f23049a58ee1d16`. `production-current`와 `test-current`는 각각 `prod-v2026.10.31.1550-bc8cd8a6c654`, `test-v2026.10.31.1550-bc8cd8a6c654`를 가리킴.
+- 정확한 원격 main SHA에서 원장 증빙 감사 테스트 5/5 PASS, 금융 사전검사 테스트 18/18 PASS (실제 node --test 실행).
+- 실제 운영 moneyverse_app DB 읽기전용 감사: 종료 2 `BLOCKED_LEGACY_TREASURY_PROVENANCE`; 과거 국고 552/552 미연결, 정식 거래 891/분개 1829, 시간·금액 우연 후보 없음 551/1건 1개, 기업 배당 744건 중 NULL 738·유령 ID 6·정상 연결 0.
+- 같은 운영 앱 계정 금융 사전검사: `READY_FOR_OTHER_RELEASE_GATES`, 잔액 행 40·불균형 0·설명되지 않은 잔액차 0. 기존 승인된 세 금융 DML은 `OPERATOR_ACCEPTED_EXISTING_DML` 경고로 분리되고 차단 안 됨. 이 결과는 국고 출처 승인이 아님.
+- 공개 `/treasury` 페이지 HTTP 200 확인. 이 페이지 상태 코드만으로 실제 국고 지급/정산 API 503 차단 해제를 주장하지 않음.
+- 이번 추가 확인에서 운영 DB 변경, 백엔드/프론트 릴리스 교체, 운영 Nginx 변경 없음. 현재 적용중인 운영 웹 서비스 v1550 유지. 원장 출처가 검증되지 않은 금전 집행은 열지 않음.
