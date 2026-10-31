@@ -4,9 +4,10 @@ import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { describeInventoryCondition, type InventoryCondition } from './inventory-condition';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 
-export interface HeldItem {
+export interface HeldItem extends InventoryCondition {
   readonly catalog_id: string;
   readonly code: string;
   readonly name: string;
@@ -238,6 +239,20 @@ export function InventoryView({
                 </p>
               </div>
 
+              <details className="mb-3 rounded-xl border border-border/40 bg-surface/30 p-3 text-xs">
+                <summary className="cursor-pointer font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
+                  상태 자세히 · 만료 및 유지비 근거
+                </summary>
+                <dl className="mt-3 grid gap-2">
+                  {describeInventoryCondition(item).map(({ label, value }) => (
+                    <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-2">
+                      <dt className="text-muted-foreground">{label}</dt>
+                      <dd className="break-words text-foreground">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-3 text-muted-foreground">표시값은 조회 시점의 원본 정보이며 결제 완료·현재 효력의 증빙이 아닙니다.</p>
+              </details>
               <div className="pt-3 border-t border-border/40 flex items-center justify-between gap-2">
                 <span className="text-[11px] text-muted-foreground">보유: {item.quantity}개</span>
                 {['frame', 'background', 'effect', 'nameplate', 'title', 'badge'].includes(
