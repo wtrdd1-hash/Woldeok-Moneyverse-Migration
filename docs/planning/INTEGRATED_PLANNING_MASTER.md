@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1562 — F675-196 Fixed Decision Slot, Opt-In Cutover and No-False-Digest Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2174 OPEN/HOLD stacked on #2167; issue #2166 updated; initial SHA `dd71a7edcd422d80a7901f6e65427c0bea9c82f7`; exact-head remote CI pending, no merge/deploy.
 
 **Cycle:** Previous Feature Addition v1560 → Current Feature Improvement v1562 → Next Feature Addition v1564 (provisional). **Authority:** origin/main `bc8cd8a6c654af0336f550643f23049a58ee1d16` checked at start/mid against AGENTS.md, README.md, PROJECT_PLAN.md (English canonical), PROJECT_PLAN.ko.md. Documentation branch stacked on unmerged Draft #2167 (`e866814b173fc526f3f41be233e12a695fde115f`); engineering #2166. All F675-192–196 reminder features remain DRAFT/UNIMPLEMENTED. No feature or Production release claim.
 

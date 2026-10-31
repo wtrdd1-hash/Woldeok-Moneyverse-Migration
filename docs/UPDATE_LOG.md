@@ -1,4 +1,5 @@
 ## Planning v1562 — 2026-10-31 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2174 OPEN/HOLD stacked on #2167; issue #2166 updated; initial SHA `dd71a7edcd422d80a7901f6e65427c0bea9c82f7`; exact-head remote CI pending, no merge/deploy.
 - F675-196 digest decision slot fixed at DB-computed 09:00 KST rather than delayed worker clock, proposed [09:00,09:15) bounded execution; no catch-up. ON/re-ON, holding generation, expiry mutation and unmute after slot defer; OFF/mute before commit suppress. Audited worker status distinguishes UNKNOWN from verified missed. English/Korean integrated design, P0 4/P1 6, 10,001 holdings/two workers acceptance proposed not run. Main `bc8cd8a6c654af0336f550643f23049a58ee1d16` checked; parent Draft #2167; issue #2166; #2171 cgroup EAGAIN blocks full local QA. External new 0/cumulative UNKNOWN of 10,000 BLOCKED. No runtime/DB/WLD/ledger/Test/Production/main writes; RELEASE HOLD.
 
 ## Planning v1560 — 2026-10-31 (FEATURE ADDITION / DRAFT / RELEASE HOLD)

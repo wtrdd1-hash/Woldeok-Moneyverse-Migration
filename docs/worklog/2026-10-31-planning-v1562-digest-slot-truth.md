@@ -1,4 +1,5 @@
 # v1562 Planning Worklog — F675-196
+- **GitHub:** Draft PR #2174 OPEN/HOLD stacked on #2167; issue #2166 updated; initial SHA `dd71a7edcd422d80a7901f6e65427c0bea9c82f7`; exact-head remote CI pending, no merge/deploy.
 
 ## v2026.10.31.1562 — F675-196 Fixed Decision Slot, Opt-In Cutover and No-False-Digest Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
