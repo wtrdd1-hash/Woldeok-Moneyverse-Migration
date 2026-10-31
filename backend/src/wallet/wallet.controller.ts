@@ -122,6 +122,7 @@ export class WalletController {
   @Get('wallet/activity')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiOperation({ summary: 'Read the caller wallet ledger in owner-bound cursor pages' })
   activity(
     @Req() request: RequestWithSession,
@@ -130,6 +131,7 @@ export class WalletController {
     @Query('direction') direction?: string,
     @Query('from') from?: string,
     @Query('to') to?: string,
+    @Query('minAmount') minAmount?: string,
   ) {
     if (period !== undefined && period !== 'all' && period !== '7d' && period !== '30d') {
       throw new BadRequestException('period must be all, 7d or 30d');
@@ -137,13 +139,17 @@ export class WalletController {
     if (direction !== undefined && (typeof direction !== 'string' || !['all', 'in', 'out', 'neutral'].includes(direction))) {
       throw new BadRequestException('direction must be all, in, out or neutral');
     }
+    if (minAmount !== undefined && (typeof minAmount !== 'string' || !/^[1-9][0-9]{0,29}$/.test(minAmount))) {
+      throw new BadRequestException('minAmount must be a canonical positive WLD integer');
+    }
     if (cursor !== undefined && (typeof cursor !== 'string' || cursor.length > 2048)) {
       throw new BadRequestException('invalid wallet activity cursor');
     }
     return this.guarded(() => this.service().activityPage(requireUserId(request), requireSession(request).id,
       period === '7d' || period === '30d' ? period : 'all', cursor,
       direction === 'in' || direction === 'out' || direction === 'neutral' ? direction : 'all',
-      ...(from !== undefined || to !== undefined ? [{ from, to }] : [])), 'wallet activity is unavailable');
+      ...(from !== undefined || to !== undefined ? [{ from, to }] : minAmount ? [undefined] : []),
+      ...(minAmount ? [minAmount] : [])), 'wallet activity is unavailable');
   }
 
   @Get('wallet/activity/transactions/:transactionId')

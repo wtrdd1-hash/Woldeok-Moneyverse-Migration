@@ -442,21 +442,22 @@ export class WalletService {
 
   async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
     period: WalletActivityPeriod = 'all', cursor?: string, direction: WalletActivityDirection = 'all',
-    rangeInput?: { from?: unknown; to?: unknown },
+    rangeInput?: { from?: unknown; to?: unknown }, minAmount?: string,
   ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
     const owner = requireUuid(authenticatedUserId, 'authenticated user id');
     const session = requireUuid(authenticatedSessionId, 'authenticated session id');
     if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
     if (direction !== 'all' && direction !== 'in' && direction !== 'out' && direction !== 'neutral') throw new WalletInputError('invalid wallet activity direction');
+    if (minAmount !== undefined && (typeof minAmount !== 'string' || !/^[1-9][0-9]{0,29}$/.test(minAmount))) throw new WalletInputError('invalid minimum WLD movement');
     const now = this.clock();
     const range = parseWalletCalendarRange(rangeInput?.from, rangeInput?.to, now);
     if (range && period !== 'all') throw new WalletInputError('rolling period and calendar range cannot be combined');
-    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now, direction, range ?? undefined) : null;
+    const decoded = cursor ? verifyWalletActivityCursor(cursor, owner, session, period, now, direction, range ?? undefined, minAmount) : null;
     const asOf = decoded ? new Date(decoded.asOf) : now;
     const since = range?.since ?? (period === 'all' ? null : new Date(asOf.getTime() - (period === '7d' ? 7 : 30) * 86400000));
     if (!this.repository.activityTransactionsForUser) throw new Error('wallet activity pagination repository is unavailable');
     const rows = await this.repository.activityTransactionsForUser(owner, {
-      asOf, since, direction, ...(range ? { before: range.before } : {}),
+      asOf, since, direction, ...(minAmount ? { minAmount } : {}), ...(range ? { before: range.before } : {}),
       ...(decoded ? { after: { at: range ? decoded.afterAt : new Date(decoded.afterAt), id: decoded.afterId } } : {}),
     });
     const transactions = normalizeTransactions(rows.slice(0, 50));
@@ -467,7 +468,7 @@ export class WalletService {
       throw new Error('wallet activity microsecond cursor evidence is unavailable');
     }
     const nextCursor = hasMore && last ? signWalletActivityCursor({
-      owner, session, period, direction, asOf: asOf.toISOString(), afterAt: range ? exactAfter! : timestamp(last.created_at, 'cursor timestamp'),
+      owner, session, period, direction, ...(minAmount ? { minAmount } : {}), asOf: asOf.toISOString(), afterAt: range ? exactAfter! : timestamp(last.created_at, 'cursor timestamp'),
       afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
       ...(range ? { rangeFrom: range.from, rangeTo: range.to } : {}),
     }) : null;

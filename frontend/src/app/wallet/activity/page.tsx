@@ -10,15 +10,17 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
+import { verifiedWalletAmountPage } from '@/lib/wallet-amount-proof';
 import { sides } from '../sides';
 import type { WalletHistoryPage } from './types';
-import { activityPeriod, activityPeriodUrl, activityCursorUrl, activityDirection, activityCalendarRange } from './period';
+import { activityPeriod, activityPeriodUrl, activityCursorUrl, activityDirection, activityCalendarRange, activityMinAmount } from './period';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '내 지갑 기록',
   robots: { index: false, follow: false },
+  referrer: 'no-referrer',
 };
 
 /**
@@ -33,12 +35,16 @@ export const metadata: Metadata = {
 export default async function WalletActivityPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ period?: string; cursor?: string; direction?: string; from?: string | string[]; to?: string | string[] }>;
+  searchParams?: Promise<{ period?: string; cursor?: string; direction?: string; from?: string | string[]; to?: string | string[]; minAmount?: string | string[] }>;
 }) {
   await requireMember();
   const params = await searchParams;
   const period = activityPeriod(params?.period);
   const direction = activityDirection(params?.direction);
+  let minAmount: string | null = null;
+  let amountError: string | null = null;
+  try { minAmount = activityMinAmount(params?.minAmount); }
+  catch { amountError = '최소 금액은 1~30자리의 양의 WLD 정수로 입력해 주세요.'; }
   let range: ReturnType<typeof activityCalendarRange> = null;
   let rangeError: string | null = null;
   try {
@@ -49,10 +55,11 @@ export default async function WalletActivityPage({
   }
   // The API verifies the opaque cursor against the current owner and session.
   const cursor = typeof params?.cursor === 'string' && params.cursor.length <= 2048 ? params.cursor : undefined;
-  const unverifiedHistory = rangeError ? null : await apiOrNull<WalletHistoryPage>(
-    `/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? `&from=${range.from}&to=${range.to}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+  const unverifiedHistory = rangeError || amountError ? null : await apiOrNull<WalletHistoryPage>(
+    `/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? `&from=${range.from}&to=${range.to}` : ''}${minAmount ? `&minAmount=${encodeURIComponent(minAmount)}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
   );
-  const history = range && !verifiedWalletCalendarPage(unverifiedHistory, range, direction) ? null : unverifiedHistory;
+  const history = (range && !verifiedWalletCalendarPage(unverifiedHistory, range, direction)) ||
+    (minAmount && !verifiedWalletAmountPage(unverifiedHistory, minAmount, direction)) ? null : unverifiedHistory;
 
 
   return (
@@ -76,7 +83,7 @@ export default async function WalletActivityPage({
           ['30d', '최근 30일'],
         ] as const).map(([value, label]) => (
           <Button key={value} asChild variant={!range && period === value ? 'default' : 'outline'} size="sm">
-            <Link href={activityPeriodUrl(value, direction)} aria-current={!range && period === value ? 'page' : undefined}>
+            <Link href={activityPeriodUrl(value, direction, null, minAmount)} aria-current={!range && period === value ? 'page' : undefined}>
               {label}
             </Link>
           </Button>
@@ -87,12 +94,13 @@ export default async function WalletActivityPage({
           ['all', '전체 방향'], ['in', '입금'], ['out', '출금'], ['neutral', '순변동 없음'],
         ] as const).map(([value, label]) => (
           <Button key={value} asChild variant={direction === value ? 'default' : 'outline'} size="sm">
-            <Link href={activityPeriodUrl(period, value, range)} aria-current={direction === value ? 'page' : undefined}>{label}</Link>
+            <Link href={activityPeriodUrl(period, value, range, minAmount)} aria-current={direction === value ? 'page' : undefined}>{label}</Link>
           </Button>
         ))}
       </nav>
       <form action="/wallet/activity" method="get" aria-label="한국 시간 날짜 범위" className="flex flex-wrap items-end gap-3">
         <input type="hidden" name="direction" value={direction} />
+        {minAmount && <input type="hidden" name="minAmount" value={minAmount} />}
         <label className="grid gap-1 text-sm" htmlFor="wallet-activity-from">시작 날짜 (한국 시간)
           <input id="wallet-activity-from" type="date" name="from" required defaultValue={range?.from ?? ''} className="rounded-md border bg-background px-3 py-2" />
         </label>
@@ -100,17 +108,29 @@ export default async function WalletActivityPage({
           <input id="wallet-activity-to" type="date" name="to" required defaultValue={range?.to ?? ''} className="rounded-md border bg-background px-3 py-2" />
         </label>
         <Button type="submit" variant="secondary">날짜 적용</Button>
-        <Button asChild variant="outline"><Link href={activityPeriodUrl('all', direction)}>날짜 지우기</Link></Button>
+        <Button asChild variant="outline"><Link href={activityPeriodUrl('all', direction, null, minAmount)}>날짜 지우기</Link></Button>
       </form>
+      <form action="/wallet/activity" method="get" aria-label="지갑 최소 WLD 순변동 검색" className="flex flex-wrap items-end gap-3">
+        <input type="hidden" name="direction" value={direction} />
+        {!range && period !== 'all' && <input type="hidden" name="period" value={period} />}
+        {range && <><input type="hidden" name="from" value={range.from} /><input type="hidden" name="to" value={range.to} /></>}
+        <label className="grid gap-1 text-sm" htmlFor="wallet-min-amount">최소 순변동 금액 (WLD, 절댓값)
+          <input id="wallet-min-amount" name="minAmount" type="text" inputMode="numeric" pattern="[1-9][0-9]{0,29}" maxLength={30} defaultValue={minAmount ?? ''} className="rounded-md border bg-background px-3 py-2" />
+        </label>
+        <Button type="submit" variant="secondary">금액 적용</Button>
+        <Button asChild variant="outline"><Link href={activityPeriodUrl(period, direction, range)}>금액 지우기</Link></Button>
+      </form>
+      {amountError && <p role="alert" className="text-sm text-destructive">{amountError}</p>}
+      {minAmount && <p className="text-sm text-muted-foreground">순변동 절댓값 {minAmount} WLD 이상만 표시합니다. 현금↔은행 이동의 순변동 0은 제외됩니다.</p>}
       {range && <p className="text-sm text-muted-foreground">선택한 한국 시간 날짜: {range.from} ~ {range.to} (양 끝 날짜 포함)</p>}
       {rangeError && <p role="alert" className="text-sm text-destructive">{rangeError}</p>}
       <p className="text-sm text-muted-foreground">확정된 본인 원장 기록을 한 번에 최대 50건씩 표시합니다. 입출금은 내 현금·은행 계정의 합계 순변동 기준이며, 계정 간 이동은 순변동 없음에 표시됩니다. 필터는 서버에서 이전 기록까지 적용됩니다.</p>
       {history?.hasMore && <p role="status" className="text-sm text-muted-foreground">이전 기록이 더 있습니다.</p>}
-      {cursor && <Button asChild variant="outline" size="sm" className="w-fit"><Link href={activityPeriodUrl(period, direction, range)}>처음부터 다시 보기</Link></Button>}
+      {cursor && <Button asChild variant="outline" size="sm" className="w-fit"><Link href={activityPeriodUrl(period, direction, range, minAmount)}>처음부터 다시 보기</Link></Button>}
       <Card>
         <CardContent>
-          {rangeError ? (
-            <EmptyState title="날짜 범위를 다시 확인해 주세요." />
+          {rangeError || amountError ? (
+            <EmptyState title="검색 조건을 다시 확인해 주세요." />
           ) : !history ? (
             <EmptyState title="지금은 기록을 불러올 수 없어요." />
           ) : history.transactions.length === 0 ? (
@@ -144,7 +164,7 @@ export default async function WalletActivityPage({
       </Card>
       {history?.hasMore && history.nextCursor && (
         <Button asChild variant="outline" className="w-fit">
-          <Link href={activityCursorUrl(period, history.nextCursor, direction, range)}>이전 기록 50건 보기</Link>
+          <Link href={activityCursorUrl(period, history.nextCursor, direction, range, minAmount)}>이전 기록 50건 보기</Link>
         </Button>
       )}
       {history && <p className="text-xs text-muted-foreground">조회 기준: {formatMoment(history.asOf)} · 이전 페이지로 이동하면 현재 50건을 대체합니다. 전체 기록을 내려받은 것은 아닙니다.</p>}

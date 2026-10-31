@@ -310,12 +310,14 @@ export class PostgresWalletRepository {
   async activityTransactionsForUser(userId: string, options: {
     asOf: Date; since: Date | null; before?: Date; after?: { at: Date | string; id: string } | undefined;
     direction?: 'all' | 'in' | 'out' | 'neutral';
+    minAmount?: string;
   }): Promise<WalletTransactionRow[]> {
     const owner = requireUuid(userId, 'authenticated user id');
     const afterId = options.after ? requireUuid(options.after.id, 'cursor transaction id') : null;
     if (options.direction !== undefined && !['all', 'in', 'out', 'neutral'].includes(options.direction)) {
       throw new WalletInputError('invalid wallet activity direction');
     }
+    if (options.minAmount !== undefined && !/^[1-9][0-9]{0,29}$/.test(options.minAmount)) throw new WalletInputError('invalid minimum WLD movement');
     return queryRows<WalletTransactionRow>(
       this.pool,
       `SELECT ledger_transaction.id::text AS transaction_id,
@@ -339,11 +341,14 @@ export class PostgresWalletRepository {
        HAVING ($6::text IS NULL OR SIGN(COALESCE(SUM(
          CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END
        ), 0)) = CASE $6::text WHEN 'in' THEN 1 WHEN 'out' THEN -1 WHEN 'neutral' THEN 0 END)
+       ${options.minAmount ? `AND ABS(COALESCE(SUM(
+         CASE posting.direction WHEN 'debit'::public.posting_direction THEN posting.amount ELSE -posting.amount END
+       ), 0)) >= $${options.before ? 9 : 8}::numeric` : ''}
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $7`,
       [owner, options.asOf, options.since, options.after?.at ?? null, afterId,
         options.direction && options.direction !== 'all' ? options.direction : null, 51,
-        ...(options.before ? [options.before] : [])],
+        ...(options.before ? [options.before] : []), ...(options.minAmount ? [options.minAmount] : [])],
     );
   }
 

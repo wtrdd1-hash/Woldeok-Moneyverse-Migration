@@ -15,6 +15,7 @@ export interface WalletActivityCursor {
   readonly afterId: string;
   readonly rangeFrom?: string;
   readonly rangeTo?: string;
+  readonly minAmount?: string;
 }
 
 function key(): string {
@@ -23,17 +24,20 @@ function key(): string {
   return value;
 }
 
-function signature(body: string, range: boolean): Buffer {
-  return createHmac('sha256', key()).update(`${range ? 'wallet-history-range-v2' : 'wallet-history-v1'}:${body}`).digest();
+function signature(body: string, range: boolean, amount: boolean = false): Buffer {
+  const purpose = amount ? (range ? 'wallet-history-amount-range-v4' : 'wallet-history-amount-v3')
+    : (range ? 'wallet-history-range-v2' : 'wallet-history-v1');
+  return createHmac('sha256', key()).update(`${purpose}:${body}`).digest();
 }
 
 export function signWalletActivityCursor(cursor: WalletActivityCursor): string {
   const range = cursor.rangeFrom !== undefined || cursor.rangeTo !== undefined;
-  const body = Buffer.from(JSON.stringify({ v: range ? 2 : 1, ...cursor }), 'utf8').toString('base64url');
-  return `${body}.${signature(body, range).toString('base64url')}`;
+  const amount = cursor.minAmount !== undefined;
+  const body = Buffer.from(JSON.stringify({ v: amount ? (range ? 4 : 3) : (range ? 2 : 1), ...cursor }), 'utf8').toString('base64url');
+  return `${body}.${signature(body, range, amount).toString('base64url')}`;
 }
 
-export function verifyWalletActivityCursor(token: string, owner: string, session: string, period: WalletActivityPeriod, now: Date, direction: WalletActivityDirection = 'all', range?: { from: string; to: string }): WalletActivityCursor {
+export function verifyWalletActivityCursor(token: string, owner: string, session: string, period: WalletActivityPeriod, now: Date, direction: WalletActivityDirection = 'all', range?: { from: string; to: string }, minAmount?: string): WalletActivityCursor {
   if (typeof token !== 'string' || token.length > 2048 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)) {
     throw new WalletInputError('invalid wallet activity cursor');
   }
@@ -42,11 +46,11 @@ export function verifyWalletActivityCursor(token: string, owner: string, session
   try { data = JSON.parse(Buffer.from(body!, 'base64url').toString('utf8')) as Record<string, unknown>; }
   catch { throw new WalletInputError('invalid wallet activity cursor'); }
   const actual = Buffer.from(mac!, 'base64url');
-  const expected = signature(body!, range !== undefined);
+  const expected = signature(body!, range !== undefined, minAmount !== undefined);
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
     throw new WalletInputError('invalid wallet activity cursor');
   }
-  if (data.v !== (range ? 2 : 1) || data.owner !== owner || data.session !== session || data.period !== period || (data.direction ?? 'all') !== direction ||
+  if (data.v !== (minAmount ? (range ? 4 : 3) : (range ? 2 : 1)) || data.minAmount !== minAmount || data.owner !== owner || data.session !== session || data.period !== period || (data.direction ?? 'all') !== direction ||
       data.rangeFrom !== range?.from || data.rangeTo !== range?.to ||
       typeof data.asOf !== 'string' || typeof data.afterAt !== 'string' || typeof data.afterId !== 'string') {
     throw new WalletInputError('wallet activity cursor does not match this session, period, direction or calendar range');
@@ -67,5 +71,5 @@ export function verifyWalletActivityCursor(token: string, owner: string, session
     throw new WalletInputError('wallet activity cursor is expired or invalid');
   }
   return { owner, session, period, direction, asOf: data.asOf, afterAt: data.afterAt, afterId: data.afterId,
-    ...(range ? { rangeFrom: range.from, rangeTo: range.to } : {}) };
+    ...(range ? { rangeFrom: range.from, rangeTo: range.to } : {}), ...(minAmount ? { minAmount } : {}) };
 }

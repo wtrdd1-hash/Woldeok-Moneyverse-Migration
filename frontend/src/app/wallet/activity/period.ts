@@ -11,6 +11,13 @@ export function activityDirection(value: string | undefined): ActivityDirection 
   return value === 'in' || value === 'out' || value === 'neutral' ? value : 'all';
 }
 
+/** Reject duplicate, fractional, exponent, negative and unsafe amount inputs without coercion. */
+export function activityMinAmount(value: unknown): string | null {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !/^[1-9][0-9]{0,29}$/.test(value)) throw new Error('최소 금액은 1~30자리의 양의 WLD 정수여야 합니다.');
+  return value;
+}
+
 export interface ActivityCalendarRange { readonly from: string; readonly to: string }
 
 /** Validate KST calendar bounds before rendering or constructing any owner-private URL. */
@@ -31,11 +38,12 @@ export function activityCalendarRange(from: unknown, to: unknown, now: Date = ne
 }
 
 /** Build only canonical allow-listed query parameters; never echo raw URL input. */
-export function activityPeriodUrl(period: ActivityPeriod, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null): string {
+export function activityPeriodUrl(period: ActivityPeriod, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null, minAmount?: string | null): string {
   const params = new URLSearchParams();
   if (!range && period !== 'all') params.set('period', period);
   if (direction !== 'all') params.set('direction', direction);
   if (range) { params.set('from', range.from); params.set('to', range.to); }
+  if (minAmount) params.set('minAmount', minAmount);
   const query = params.toString();
   return query ? `/wallet/activity?${query}` : '/wallet/activity';
 }
@@ -48,11 +56,12 @@ export function activityCompletenessNotice(hasMore: boolean | undefined): string
 }
 
 /** Opaque cursor never becomes an unescaped URL fragment. */
-export function activityCursorUrl(period: ActivityPeriod, cursor: string | null, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null): string {
+export function activityCursorUrl(period: ActivityPeriod, cursor: string | null, direction: ActivityDirection = 'all', range?: ActivityCalendarRange | null, minAmount?: string | null): string {
   const params = new URLSearchParams();
   if (!range && period !== 'all') params.set('period', period);
   if (direction !== 'all') params.set('direction', direction);
   if (range) { params.set('from', range.from); params.set('to', range.to); }
+  if (minAmount) params.set('minAmount', minAmount);
   if (cursor) params.set('cursor', cursor);
   const query = params.toString();
   return `/wallet/activity${query ? `?${query}` : ''}`;

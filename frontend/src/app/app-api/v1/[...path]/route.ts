@@ -7,6 +7,8 @@ import { parseSecurityEvents } from '@/app/account/security/account-security-evi
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
+import { verifiedWalletAmountPage } from '@/lib/wallet-amount-proof';
+import { activityMinAmount } from '@/app/wallet/activity/period';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { NextResponse } from 'next/server';
@@ -116,6 +118,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
   }
 
+  const walletAmountRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' && request.nextUrl.searchParams.has('minAmount');
+  let walletMinAmount: string | null = null;
+  if (walletAmountRequest) {
+    const values = request.nextUrl.searchParams.getAll('minAmount');
+    if (values.length !== 1) return gatewayProblem(400, 'Bad Request', 'wallet_amount_invalid', 'one canonical WLD minimum is required');
+    try { walletMinAmount = activityMinAmount(values[0]); }
+    catch { return gatewayProblem(400, 'Bad Request', 'wallet_amount_invalid', 'one canonical WLD minimum is required'); }
+    if (!walletMinAmount) return gatewayProblem(400, 'Bad Request', 'wallet_amount_invalid', 'one canonical WLD minimum is required');
+  }
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
   let walletRange: ActivityCalendarRange | null = null;
@@ -334,7 +345,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
 
-  if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+  if ((walletRange || walletMinAmount) && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
   }
 
@@ -417,6 +428,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
           return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
         }
       }
+      if (walletMinAmount && response.ok && !verifiedWalletAmountPage(compatible, walletMinAmount, request.nextUrl.searchParams.get('direction') ?? 'all')) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_amount_unverified', 'wallet WLD movement evidence is unavailable');
+      }
       if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
       }
@@ -434,6 +448,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
+      if (walletMinAmount && response.ok) return gatewayProblem(503, 'Service Unavailable', 'wallet_amount_unverified', 'wallet WLD movement evidence is unavailable');
       if (walletRange && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
       }
@@ -448,7 +463,7 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  if (isWalletDetailPath(parts)) {
+  if (isWalletDetailPath(parts) || (parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity')) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');
