@@ -1,0 +1,14 @@
+# Planning v1550 — F675-193 Activity Revision, Inbox Retention and Stable-or-Restart Pages
+**Status:** DOCUMENTATION PROPOSED / DRAFT / RELEASE HOLD. **Cycle:** Feature Addition v1548 → Feature Improvement v1550 → Feature Addition v1552 (provisional). **Canonical main:** `761a55a094fb9dd383d213e817305e68c79fa23c`. **Parent Draft:** #2123. **Engineering issue:** #2122.
+
+## Start (2026-10-31 11:02 KST)
+- miniPC Debian 13.6; seven core services active; development DB connected (status reports `moneyverse_migrator`). skills__list returned no URI; installed using-superpowers, brainstorming, writing-plans, using-git-worktrees and verification-before-completion read directly. Isolated new worktree from clean v1548 parent; no other agent branch touched.
+- GitHub connector searched current PRs, issues and main commits. Source authority main AGENTS.md, README.md, canonical EN PROJECT_PLAN.md and KO parity checked; remote main remained `761a55a094fb9dd383d213e817305e68c79fa23c`. Parent planning work is Draft/HOLD, not in main.
+
+## Midpoint: verified evidence and design
+- `backend/src/notification/notification.service.ts` uses a per-request `BEGIN READ ONLY`, DB asOf, `(created_at,id)` keyset and signed HMAC; `notification-search.ts` lacks a source revision across HTTP requests. This is not the unimplemented F675-193; it demonstrates the risk in v1548's proposed asOf-only cursor. Designed owner monotonic revision + 409 restart, 410 retention/TTL and durable receipt/inbox evidence with live CTA recheck. No claim of actual Production reminder-history incident.
+- Source scan found `in_app_notifications` CREATE TABLE only in test fixtures, not numbered migrations; actual clean schema/ACL unverified. Re-read main SHA and canonical plan at midpoint. Latest QA v1410 evidence from `/srv/moneyverse-data/qa-reports/qa1410-evidence`: backend 2,778 PASS/501 SKIP; frontend 2,770 PASS; lint/typecheck/build PASS; isolated PG17 311/311; 5 DEV checksum mismatches; full audit FAIL; public exact-SHA Test gate FAIL; Test FX 500. Public Test `c2129625...`, Production `95485a...` vs main `761a55a...`. Independent restore unverified. No new acceptance tests run.
+
+## Handoff and release
+- P0 OPS1550-01 SEC1550-02 FIN1550-03 REL1550-04; P1 HISTORY1550-05 through -10, fully specified in EN/KO integrated master. No overlap with A wallet/gallery, B Production provenance, C derivatives, QA runtime. All implementation assigned to separate development branches with exact-SHA isolated Test and release gate; feature flag remains OFF.
+- Independent external references: newly approved 0, cumulative deduplicated/classified UNKNOWN/10,000; BLOCKED/IN PROGRESS. No code, SQL migration, DB, WLD, ledger, official Test or Production writes; no main merge. Final commit/PR/CI to be appended after independent verification.

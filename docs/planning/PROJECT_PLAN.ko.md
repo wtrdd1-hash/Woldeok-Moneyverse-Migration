@@ -1,6 +1,16 @@
 # 월덕 머니버스 — Living Project Plan
 - **GitHub v1548:** Draft PR #2123 OPEN/HOLD (선행 #2119), 개발 이슈 #2122 OPEN; main 병합·런타임·운영 변경 없음.
 
+## v2026.10.31.1550 — F675-193 만료 알림 이력의 스냅샷·알림함 생명주기·보존 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
+- **주기:** 이전 기능 추가 v1548 → 현재 기능 보완 v1550 → 다음 기능 추가 v1552(잠정). 정본 main `761a55a094fb9dd383d213e817305e68c79fa23c` 시작·중간 확인, 선행 Draft #2123·개발 #2122. 미구현 F675-193의 문서 보완이며 실제 운영 장애 확정이 아니다.
+- **소스·설계 공백:** 기존 알림 검색은 페이지마다 별도 READ ONLY 트랜잭션과 asOf·(created_at,id) 키셋을 쓰지만 페이지 간 MVCC 스냅샷·원본 리비전 검증은 없다. v1548도 유사한 방식을 제안했다. 판정 시각이 과거인 늦은 커밋, 보존 삭제, 알림함 변경 시 HMAC 커서가 정상이어도 결과는 달라질 수 있다. HMAC은 위변조만 검증한다. 번호형 마이그레이션에서 알림함 CREATE TABLE은 찾지 못했고 테스트 fixture만 확인했으므로 실제 스키마·권한은 미검증이지 운영 테이블 부재 확정이 아니다.
+- **수정된 페이지 계약:** 이벤트 생성·수정·보존 삭제와 동일 트랜잭션에서 회원별 단조 증가 `activity_revision`을 갱신한다. 첫 페이지는 제한된 REPEATABLE READ READ ONLY 스냅샷에서 DB asOfUtc·리비전·보존 시작·행을 함께 확정한다. v1548의 GET 쿼리 커서는 CSRF 보호 POST `/api/v1/shop/expiry-reminders/activity/search` 비공개 본문 `{days,limit,cursor?}`으로 대체한다. Next·Android POST 동등성과 shop/expiry-reminders 비공개 헤더 보완이 선행이다. 커서 v2는 원본 UUID가 아닌 HMAC 파생 회원·세션 결속값, 7·30일/limit/정책 버전/asOf/리비전/보존 시작/(recorded_at,event_id)/15분을 결속한다. 다음 페이지에서 리비전 변경 409 새로고침, 만료 또는 보존 경계 무효 410, 원천·권한·인덱스 실패 503. 최초 DB 시각에 고정한 7·30일 범위를 사용하고 정상 원천 조회 후에만 빈 목록을 확정한다. `complete:false` 및 UNKNOWN 표기를 유지한다.
+- **알림함 생명주기:** COMMITTED_INBOX는 당시 영수증·실제 알림함·이력의 원자적 커밋을 뜻할 뿐 현재 알림함 존재·읽음 여부를 보증하지 않는다. 불변 `inbox_id_at_commit`과 영수증 증거를 알림함 보존과 독립 유지하고 알림함 삭제 시 CASCADE로 이력을 지우지 않는다. 이동 CTA는 현재 회원 권한으로 재조회하며 알림함 행이 없으면 '알림함 항목을 열 수 없음'으로 표시하고 전송 실패라 추정하지 않는다. 원자적 영수증 연결이 손상되면 503·비공개 운영 경보, 읽음 변경으로 이력 수정 금지, 알림 OFF 기간 개별 추적 금지.
+- **백로그:** P0 OPS1550-01 운영 SHA·복원 #1984, SEC1550-02 클린 311·개발 체크섬 5건·알림함 DDL/ACL #993, FIN1550-03 원장/WLD 무변경, REL1550-04 Draft/HOLD 병합·정확 SHA Test·보안 감사·운영 SHA 불일치 #2031/#2127. P1 HISTORY1550-05 회원 리비전/보존 SQL·인덱스·최소 권한, HISTORY1550-06 원자적 기록·알림함 증거, HISTORY1550-07 Nest CSRF POST 커서 v2/오류, HISTORY1550-08 Next·Android 개인정보·세션·접근성, HISTORY1550-09 관리자 집계 KPI·SEO, HISTORY1550-10 격리 PG17 지연 커밋·보존·회원2·보유 10,001건 회귀. P0 4건+P1 6건. 합성 수용시험 미실행.
+- **최신 QA v1410(2026-10-31 10:20 KST):** 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 격리 PG17 마이그레이션 311/311 PASS. 개발 DB 체크섬 불일치 5건, 전체 의존성 감사 FAIL, 공식 Test 정확 SHA 게이트 FAIL, Test FX HTTP 500. Production 공개 SHA `95485a...`는 정본 main `761a55a...`와 다름. 과거 main 검사이지 신규 기능 수용시험은 아니다. 정확 SHA Test·독립 복원·운영 승격 BLOCKED / RELEASE HOLD.
+- **외부 근거:** 신규 독립 승인 0건, 누적 실제 검증·중복 제거·분류 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 영문 정본·국문 동등 통합 문서, 분산 기능기획서·런타임/DB/금융/Test/Production/main 변경 없음.
+
+
 ## v2026.10.31.1548 — F675-193 만료 알림 처리 내역·근거 기반 예외 조회 (기능 추가 / DRAFT / RELEASE HOLD)
 - **주기:** 이전 기능 보완 v1546 → 현재 기능 추가 v1548 → 다음 기능 보완 v1550(잠정). 원격 main 761a55a094fb9dd383d213e817305e68c79fa23c 시작·중간 재확인, 선행 Draft #2119/#2113, 개발 이슈 #2122. 문서 전용, 구현·병합 없음.
 - **목적·화면:** 인증·동의 회원 /inventory/expiring/reminders → /inventory/expiring/reminders/activity. 최근 7일·30일(기본 7일)의 실제 알림함 기록과 증거가 있는 예외만 조회. 새로고침·실제 알림함 이동·설정 이동. 선행 기능 검증 전 기본 OFF. 과거 소급 생성·이메일·푸시·자동 갱신·장착·WLD 거래 없음. 기록 부재는 누락 증거가 아닌 UNKNOWN.

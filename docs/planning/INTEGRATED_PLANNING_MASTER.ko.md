@@ -1,6 +1,32 @@
 # 월덕 머니버스 — 통합 기획 마스터
 - **GitHub v1548:** Draft PR #2123 OPEN/HOLD (선행 #2119), 개발 이슈 #2122 OPEN; main 병합·런타임·운영 변경 없음.
 
+## v2026.10.31.1550 — F675-193 회원 알림 처리 이력: 페이지 스냅샷·알림함 증거 보존 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 기능 추가 v1548 → 현재 기능 보완 v1550 → 다음 기능 추가 v1552(잠정). **정본:** GitHub main `761a55a094fb9dd383d213e817305e68c79fa23c`, AGENTS.md·README.md·영문 PROJECT_PLAN 및 국문 대조; 시작·중간 확인. 선행 Draft #2123/#2119, 개발 #2122. 문서만 변경, 실제 기능 미구현·미배포.
+
+### 확인한 소스 공백과 선택한 정합성 모델
+- 기존 `notification.service.ts` 검색은 요청마다 `BEGIN READ ONLY` 트랜잭션, `clock_timestamp()` asOf, `(created_at,id)` 키셋을 사용한다. `notification-search.ts` HMAC 커서는 회원·세션·필터·asOf만 결속하고 HTTP 페이지 사이 MVCC 스냅샷이나 원본 리비전은 보장하지 않는다. 이것은 기존 알림 검색 코드의 구조이며 F675-193의 운영 오류를 입증한 것이 아니다. v1548에서 제안한 이력 커서에도 유사한 위험이 있다. 첫 페이지 뒤 과거 판정시각의 늦은 커밋·보존 삭제가 발생하면 HMAC이 유효해도 목록이 바뀔 수 있다.
+- **기각 A:** asOf·키셋만 신뢰(원본 변경 미감지). **기각 B:** HTTP 15분 동안 DB MVCC 스냅샷 유지(연결·vacuum 부담). **선택 C:** 회원별 단조 증가 `activity_revision`과 변경 시 재조회. 첫 페이지는 제한된 `REPEATABLE READ READ ONLY`에서 DB asOf·회원 리비전·보존 시작·행을 동일 스냅샷으로 읽는다. 이벤트 추가·정정·보존 삭제는 같은 트랜잭션에서 리비전을 증가시킨다. 다음 페이지의 리비전이 다르면 409 `ACTIVITY_CHANGED`와 새로고침 CTA를 표시한다. 읽음 상태 변경·타 회원 변경은 이력 리비전을 바꾸지 않는다.
+
+### 회원 화면·상태·개인정보
+- 기존 비공개 `/inventory/expiring/reminders/activity`에서 최근 7/30일, 새로고침, 설정, 검증된 알림함 이동을 제공한다. F675-188/F675-192 선행 게이트와 기능 스위치 기본 OFF 유지. 이메일·푸시·자동 갱신·장착·결제·WLD 거래 없음. 인증·동의된 본인만 접근, 계정/세션 변경 시 페이지·비동기 응답 폐기. LOADING, VERIFIED_EMPTY, COMMITTED_INBOX, ELIGIBLE_RETRY, SUPPRESSED_WINDOW, SOURCE_UNAVAILABLE, UNKNOWN, ACTIVITY_CHANGED, INBOX_LINK_UNAVAILABLE를 명시한다. 근거 없는 누락/발송 추정 금지, 설정 OFF 기간 개별 아이템 억제 기록 금지.
+- COMMITTED_INBOX는 **당시 영수증·알림함·이력의 원자적 커밋**을 의미하며 현재 알림함 행 존재·기기 전달·읽음 상태를 보증하지 않는다. 불변 `inbox_id_at_commit`·`receipt_id`를 알림함 보존과 독립 보관하고 알림함 삭제 CASCADE로 이력을 삭제하지 않는다. '알림함에서 보기' CTA는 본인 권한으로 현재 행을 재조회한 뒤에만 제공한다. 행이 없으면 '알림함 항목을 열 수 없음'으로 중립 표시하고 NOT_SENT로 오판하지 않는다. 영수증 누락·불가능한 링크·중복 전달 이벤트·리비전 손상은 503·비식별 운영 경보로 실패 폐쇄하며 빈 목록으로 바꾸지 않는다. 읽음 변경은 이력 불변.
+- 성공·오류·리다이렉트 모두 private/no-store/noindex/no-referrer, 사이트맵 제외, URL/로그/분석에 회원·상품 UUID 금지. Next BFF·Android app-api에서 동일 본인·세션·동의 검증, 변조된 HTTP 200 거부, 오래된 응답 폐기. 320px/44px/WCAG 2.2 AA, 키보드·포커스·라이브 알림, UTC 증거와 KST 표시. 관리자에게는 20명 이상 집단의 집계만 허용하고 작은 셀 억제, 개별 조회 금지.
+
+### API·DB·시간·트랜잭션 계약
+- **Nest** `POST /api/v1/shop/expiry-reminders/activity/search`에 CSRF 보호 비공개 본문 `{days:7|30,limit:1..50,cursor?}` (기본 7,20). v1548의 GET 쿼리 계약은 URL·접근 로그에 커서/식별정보가 남지 않도록 **대체**한다. Next 동일 출처 BFF와 Android app-api POST는 인증·세션·동의 후 전달한다. 현재 app-api 일반 프록시는 POST 본문을 지원하지만 `shop`의 비공개 헤더 허용목록은 `purchases`만 포함하므로 expiry-reminders 경로를 추가·검증해야 한다. 커서 v2는 목적 분리 HMAC, **원본 UUID가 없는** HMAC 파생 회원+세션 결속값, 기간/limit/정책버전/최초 asOfUtc/리비전/보존시작/마지막 `(recorded_at,event_id)`/발급시각을 포함하고 TTL 최대 15분. 본문·커서 로그 마스킹 필수. 중복·알 수 없는 쿼리, 비정규 숫자, 잘못된 시각, 긴 커서, 다른 세션 차단. 클라이언트 회원 ID 입력 금지. 400 입력, 401 인증, 403 동의, 409 리비전·세션·원본 변경, 410 만료·보존 경계, 429 남용, 503 스키마·권한·인덱스·증거 장애. 오류에 식별정보 미포함.
+- **SQL 선행:** 실제 PostgreSQL 17 클린 마이그레이션과 앱 계정의 `in_app_notifications` DDL/CHECK/인덱스/ACL을 검증한다. 현재 번호형 마이그레이션의 CREATE TABLE은 미확인이고 테스트 fixture에서만 확인했으므로 운영 테이블 부재로 단정하지 않는다. 검증 후 전진형 회원별 `shop_expiry_reminder_activity_revision(owner_id PK,revision bigint CHECK(revision>=0),coverage_start timestamptz)` 및 불변 이벤트 테이블을 제안한다. `(owner_id,receipt_id,kind)` 전달 유일성, 예외 멱등성, `(owner_id,recorded_at DESC,event_id DESC)`·보존 인덱스, 만료시각 마이크로초 정밀도. 알림함과 연결은 생성 트랜잭션에서 검증하되 활동 증거에 ON DELETE CASCADE 금지. SECURITY DEFINER 회원 조회·제한된 워커 실행, 안전한 고정 search_path/스키마 한정, PUBLIC 및 앱 역할 직접 테이블 권한 금지, 적용된 마이그레이션 수정 금지.
+- **원자적 쓰기:** 설정 잠금→보유 잠금→멱등 영수증→알림함→이력→회원 리비전 갱신을 제한된 단일 트랜잭션에서 수행한다. 예외 기록·리비전도 원자적이고 OFF 중 개별 기록은 없다. 첫 페이지 DB asOf에 고정한 `[max(보존시작,asOf-7/30일),asOf]` 범위와 `(recorded_at,event_id)` 역순 키셋 사용. 늦은 커밋·보존 삭제 시 리비전 변경으로 409, 보존 시작이 원래 범위를 훼손하면 410. 실제 본인 조회 성공 후에만 VERIFIED_EMPTY, 응답 `{items,asOfUtc,coverageStartsAtUtc,coverageStatus,nextCursor,hasMore,complete:false}`로 전체 역사 완전성 주장 금지.
+- **배포·성능:** 플래그 OFF로 읽기/새 쓰기 중단, 기존 영수증·이력 보존, 전진형 DB 마이그레이션 삭제 롤백 금지. 조회 2초·잠금 500ms는 시험 목표, 페이지 최대 50건, 초기 제한 회원당 30/분·IP당 60/분, 회원 가시 이력 30일·멱등 영수증은 독립 보존. `activity_cursor_restart_total`, `activity_retention_invalidation_total`, `activity_receipt_integrity_error_total`, `activity_inbox_link_unavailable_total`, p95·수신 신청→알림함 기록→열람 KPI, 개인 식별 라벨 금지. 정합성 장애 시 플래그 OFF.
+
+### P0/P1 인계·수용시험·증거
+- **P0 4:** OPS1550-01 실제 운영 프로세스/이미지 SHA·삭제된 릴리스·독립 복원 #1984; SEC1550-02 클린 311/311·개발 체크섬 5건·알림함 DDL/ACL·최소 권한 #993; FIN1550-03 원장/WLD/국고 쓰기 0건; REL1550-04 Draft/HOLD 병합·공식 Test 정확 SHA 인증/금융 E2E·보안 감사·공개 운영 SHA 불일치 #2031/#2127.
+- **P1 6:** HISTORY1550-05 회원 리비전·보존·이벤트 SQL/인덱스/권한 부정시험, HISTORY1550-06 영수증↔알림함↔이력/리비전 원자적 기록·알림함 삭제, HISTORY1550-07 Nest CSRF POST 커서 v2·GET 405·409/410/503, HISTORY1550-08 Next·Android 계정 전환·접근성, HISTORY1550-09 개인정보/SEO·관리자 20명 집계 KPI, HISTORY1550-10 격리 PG17 보유 10,001건·회원 2명·워커 2개·지연 커밋·동시 보존·읽음/삭제·리비전 오버플로·7/30일 경계·15분 TTL·변조·권한·401/403/409/410/429/503·320px·롤백 TDD. 실제 합성 수용시험 미실행, 신규 기능 정확 SHA Test 증거 없음.
+- **증거:** QA v1410(2026-10-31 10:20 KST) 백엔드 2,778 PASS/501 SKIP, 프론트 2,770 PASS, lint/typecheck/build PASS, 격리 PG17 311/311 PASS, 개발 체크섬 5건 불일치, 전체 보안 감사 FAIL, Test 공개 정확 SHA 게이트 FAIL, Test FX HTTP 500. 공개 Test `c2129625...`, Production `95485a...`, GitHub main `761a55a...` 불일치. 공식 Test·독립 복원·운영 승인 없음. DRAFT / RELEASE HOLD. 외부 독립 근거 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
+
 ## v2026.10.31.1548 — F675-193 회원 만료 알림 처리 내역 및 근거 기반 예외 조회 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 기능 보완 v1546 → 현재 기능 추가 v1548 → 다음 기능 보완 v1550(잠정). **기준:** 원격 main 761a55a094fb9dd383d213e817305e68c79fa23c, AGENTS.md, README.md, 영문 정본과 한국어 대조 문서 시작/중간 확인. 선행 F675-188·F675-192, Draft #2119/#2113, 개발 인계 #2122. 기획 문서만 변경하며 실제 기능·DB·배포는 변경하지 않음.
