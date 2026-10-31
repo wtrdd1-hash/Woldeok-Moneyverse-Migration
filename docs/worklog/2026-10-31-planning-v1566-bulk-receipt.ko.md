@@ -2,7 +2,7 @@
 
 시작: Debian 13.6 miniPC·GitHub main·설치 Superpowers 스킬 확인(skills__list 빈 목록).
 중간: v1564 토큰/영수증 모순 및 조회 API 누락, PR #2183·이슈 #2182 확인; main 중간 재조회 5bccda44d6db56aff05fa5623ef7f72b2ec0263c 완료.
-완료: 최종 SHA·CI 확인 후 추가; RELEASE HOLD.
+완료 중간 기록: Draft PR #2189, 개발 이슈 #2182 업데이트, 초기 SHA 28cedeaea8faac85434f6176875d2350393a93d1; 로컬 릴리스 117/117·분류 24/24·영한 대조 6/6 PASS; 최종 정확 SHA CI 확인 전, RELEASE HOLD.
 
 ## v2026.10.31.1566 — F675-197 영수증 우선 재확인 (기능 보완 / DRAFT / RELEASE HOLD)
 - **회차:** 이전 추가 v1564 → 현재 보완 v1566 → 다음 추가 v1568(잠정). main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c, 미병합 Draft #2183 후속, 개발 #2182; F675-192~197 미구현.

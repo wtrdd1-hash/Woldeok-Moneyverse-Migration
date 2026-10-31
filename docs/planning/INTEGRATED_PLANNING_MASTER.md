@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1566 — F675-197 Receipt-First Bulk Mute Reconciliation (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2189 OPEN/HOLD stacked on unmerged #2183, engineering issue #2182 updated, initial SHA 28cedeaea8faac85434f6176875d2350393a93d1; final exact-SHA CI pending; no merge/deploy.
 
 **Cycle/authority:** Previous Feature Addition v1564 → Current Feature Improvement v1566 → Next Feature Addition v1568 (provisional). Start main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c; checked AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity. Stacked on unmerged Draft #2183, engineering #2182. F675-192–197 remain design-only, not runtime.
 

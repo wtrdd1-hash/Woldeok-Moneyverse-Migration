@@ -1,5 +1,6 @@
 # 월덕 머니버스 — 통합 기획 마스터
 ## v2026.10.31.1566 — F675-197 일괄 제외 영수증 우선 재확인 (기능 보완 / DRAFT / RELEASE HOLD)
+- **GitHub:** 미병합 #2183 후속 Draft PR #2189 OPEN/HOLD, 개발 이슈 #2182 업데이트, 초기 SHA 28cedeaea8faac85434f6176875d2350393a93d1; 최종 정확 SHA CI 확인 전, 병합·배포 없음.
 
 **회차·기준:** 이전 기능 추가 v1564 → 현재 기능 보완 v1566 → 다음 기능 추가 v1568(잠정). 시작 main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c, AGENTS.md/README.md/영문 정본 PROJECT_PLAN.md/한국어 대조 확인. 미병합 Draft #2183 후속, 개발 이슈 #2182. F675-192~197은 미구현 기획이다.
 

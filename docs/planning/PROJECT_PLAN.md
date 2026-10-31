@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Living Project Plan
 ## v2026.10.31.1566 — F675-197 Receipt-First Reconciliation (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2189 OPEN/HOLD stacked on unmerged #2183, engineering issue #2182 updated, initial SHA 28cedeaea8faac85434f6176875d2350393a93d1; final exact-SHA CI pending; no merge/deploy.
 - **Cycle:** Previous Addition v1564 → Current Improvement v1566 → Next Addition v1568 (provisional); main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c; unmerged parent Draft #2183, engineering #2182; F675-192–197 UNIMPLEMENTED.
 - **Fix:** committed apply followed by lost response and T+121s replay must return owner receipt, not reject expired 120s preview. Stable domain-separated canonical SHA-256 intent excludes HMAC/issuedAt/session nonce; receipt-first same-key replay, new writes still require fresh preview/current state. Different-intent same-key 409, uncertain commit UNKNOWN, not false failure.
 - **API/UI:** new read-only authenticated/CSRF owner POST /api/v1/shop/expiry-reminders/mutes/bulk/receipt-status {idempotencyKey}; 200 VERIFIED_COMMITTED with immutable receipt, 202 UNKNOWN when no authoritative proof, 400/401/403/429/503; Next/Android VERIFYING_RESULT and Check result CTA; private/no-store/noindex/no-referrer all statuses.

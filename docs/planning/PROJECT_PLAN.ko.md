@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 ## v2026.10.31.1566 — F675-197 영수증 우선 재확인 (기능 보완 / DRAFT / RELEASE HOLD)
+- **GitHub:** 미병합 #2183 후속 Draft PR #2189 OPEN/HOLD, 개발 이슈 #2182 업데이트, 초기 SHA 28cedeaea8faac85434f6176875d2350393a93d1; 최종 정확 SHA CI 확인 전, 병합·배포 없음.
 - **회차:** 이전 추가 v1564 → 현재 보완 v1566 → 다음 추가 v1568(잠정). main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c, 미병합 Draft #2183 후속, 개발 #2182; F675-192~197 미구현.
 - **보완:** 첫 적용 커밋 후 응답 유실·121초 재시도는 120초 토큰 만료가 아니라 본인 영수증을 우선 반환해야 한다. HMAC·발급시각·세션 난수를 제외한 안정적 정규 SHA-256 다이제스트, 신규 쓰기만 유효 토큰·현재 상태 요구. 동일키 다른 요청 409, 미확정 UNKNOWN.
 - **API/화면:** 본인 인증·CSRF 읽기 전용 POST /api/v1/shop/expiry-reminders/mutes/bulk/receipt-status {idempotencyKey}; 200 VERIFIED_COMMITTED, 미증명 202 UNKNOWN, 400/401/403/429/503. Next/Android VERIFYING_RESULT·결과 확인 CTA, 전체 상태 private/no-store/noindex/no-referrer.

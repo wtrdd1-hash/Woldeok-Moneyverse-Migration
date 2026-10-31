@@ -2,7 +2,7 @@
 
 START: Debian 13.6 miniPC, GitHub main, installed Superpowers skills (skills__list returned empty).
 MID: v1564 token/receipt conflict and missing reconciliation API, reviewed PR #2183 and issue #2182; main rechecked 5bccda44d6db56aff05fa5623ef7f72b2ec0263c.
-FINISH: exact SHA and CI to be appended after verification; RELEASE HOLD.
+FINISH checkpoint: Draft PR #2189, engineering #2182 updated, initial SHA 28cedeaea8faac85434f6176875d2350393a93d1; local release 117/117, classifier 24/24, bilingual markers 6/6 PASS; final exact-SHA CI pending, RELEASE HOLD.
 
 ## v2026.10.31.1566 — F675-197 Receipt-First Reconciliation (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1564 → Current Improvement v1566 → Next Addition v1568 (provisional); main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c; unmerged parent Draft #2183, engineering #2182; F675-192–197 UNIMPLEMENTED.
