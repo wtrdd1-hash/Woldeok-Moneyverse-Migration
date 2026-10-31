@@ -23,17 +23,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-interface SeasonEvent {
-  readonly event_id: string;
-  readonly season_id: string;
-  readonly season_name: string;
-  readonly title: string;
-  readonly description: string;
-  readonly cost_wld: string;
-  readonly points_per_entry: number;
-  readonly ends_at: string | null;
-}
-
 interface CurrentSeasonStatus {
   readonly seasonId: string;
   readonly seasonName: string;
@@ -99,8 +88,9 @@ export default async function SeasonsPage({
     apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
   ]);
 
-  const events = sort === null ? [] : (verifiedSeasonCostEvents(rawData, sort) ?? []);
-  const dataVerified = sort !== null && verifiedSeasonCostEvents(rawData, sort) !== null;
+  const verifiedEvents = sort === null ? null : verifiedSeasonCostEvents(rawData, sort);
+  const events = verifiedEvents ?? [];
+  const dataVerified = verifiedEvents !== null;
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
   const board = selected
     ? await apiOrNull<{ entries: LeaderboardEntry[] }>(
@@ -137,9 +127,15 @@ export default async function SeasonsPage({
           <Calendar className="size-5 text-primary" /> 진행 중인 시즌 이벤트
         </h2>
         <nav aria-label="시즌 이벤트 참가비 정렬" className="flex flex-wrap gap-2">
-          <Button asChild variant={sort === 'default' ? 'default' : 'outline'} size="sm"><Link href="/seasons">기본 순서</Link></Button>
-          <Button asChild variant={sort === 'cost_asc' ? 'default' : 'outline'} size="sm"><Link href="/seasons?sort=cost_asc">참가비 낮은 순</Link></Button>
-          <Button asChild variant={sort === 'cost_desc' ? 'default' : 'outline'} size="sm"><Link href="/seasons?sort=cost_desc">참가비 높은 순</Link></Button>
+          <Button asChild variant={sort === 'default' ? 'default' : 'outline'} size="sm">
+            <Link href="/seasons" aria-current={sort === 'default' ? 'page' : undefined}>기본 순서</Link>
+          </Button>
+          <Button asChild variant={sort === 'cost_asc' ? 'default' : 'outline'} size="sm">
+            <Link href="/seasons?sort=cost_asc" aria-current={sort === 'cost_asc' ? 'page' : undefined}>참가비 낮은 순</Link>
+          </Button>
+          <Button asChild variant={sort === 'cost_desc' ? 'default' : 'outline'} size="sm">
+            <Link href="/seasons?sort=cost_desc" aria-current={sort === 'cost_desc' ? 'page' : undefined}>참가비 높은 순</Link>
+          </Button>
         </nav>
         {!dataVerified ? (
           <EmptyState title="참가비 순서 또는 이벤트 정보를 확인할 수 없어요." />
