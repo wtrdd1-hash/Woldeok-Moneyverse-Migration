@@ -45,6 +45,6 @@ describe('support exact-message receipt boundary', () => {
     const classGuards = Reflect.getMetadata(GUARDS_METADATA, SupportController) ?? [];
     expect(classGuards).toEqual(expect.arrayContaining([SessionGuard, AuthenticatedGuard, ConsentGuard]));
     const headers = Reflect.getMetadata(HEADERS_METADATA, SupportController.prototype.message) ?? [];
-    expect(headers).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'Cache-Control', value: 'no-store' })]));
+    expect(headers).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'Cache-Control', value: 'private, no-store' })]));
   });
 });
