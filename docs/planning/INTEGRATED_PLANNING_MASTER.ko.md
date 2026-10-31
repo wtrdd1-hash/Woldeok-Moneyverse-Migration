@@ -1,4 +1,49 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.10.31.1546 — F675-192 만료 알림: 잠금 이후 시각·안전한 알림함 이동·원자적 증빙 (기능 보완 / 초안 / 배포 보류)
+
+**주기:** 이전 기능 추가 v1544 → 현재 기능 보완 v1546 → 다음 기능 추가 v1548(잠정). **기준:** origin/main `761a55a094fb9dd383d213e817305e68c79fa23c` 시작·중간 확인, AGENTS.md·README.md·영문 PROJECT_PLAN.md·국문 대조, 선행 Draft #2113·이슈 #2112. v1544의 시간·CTA 규칙만 정정하며 나머지 요구사항은 유지한다. 런타임·금융 데이터 변경 없음.
+
+### 실제 근거·대안·사용자 영향
+1. **소스 확인:** `backend/src/notification/notification.service.ts` 검색 결과 링크는 /account, /wallet, /shop, /work, /quests, /stocks, /banking, /businesses, /board, /help, /casino, /marketplace, /notifications만 허용하고 `/inventory/expiring`은 허용하지 않는다. 이 경로로 발송한 알림은 검색 화면에서 링크가 null로 표시될 설계상 공백이다. `notification.dto.ts`의 허용 분류에는 이미 `PRODUCT_ACTIVITY`가 있다. 아직 구현되지 않은 알림이 실제 발송됐다는 뜻은 아니다.
+2. **시간 경합:** PostgreSQL `statement_timestamp()`는 문장 시작 시각이므로 선호 설정 잠금을 기다리는 동안 7일/6일/1일/만료 경계를 넘어도 이전 시각이 유지된다. 잠금 이전 스냅샷의 수신 동의·보유 정보를 사용하면 오판할 수 있다. 잠금 전 시각과 앱 서버 시각을 버리고 **잠금 후 DB 단일 판정 시각**을 채택한다.
+3. **선행 차단 조건:** 번호형 마이그레이션에서 `in_app_notifications`의 생성 근거를 확인하지 못했다. 실제 테이블·카테고리 CHECK·`dedupe_key`·인덱스·소유자·`moneyverse_app` 권한과 클린 스키마를 먼저 확인한다. 테스트용 CREATE TABLE을 운영 근거로 간주하지 않는다.
+
+### 사용자 화면·상태
+- v1544의 본인 인증·최신 동의, `/inventory/expiring/reminders`, 기본 OFF, 7일·1일 개별 선택, 저장/취소/새로고침을 유지한다. 이메일·푸시·자동 장착·갱신·결제·WLD 변경 없음. 선행 만료 조회 기능이 Draft이면 직접 링크도 안전하게 차단하고 기능 플래그 OFF.
+- 실제 알림함에 커밋된 알림은 검증된 `/inventory/expiring`으로 “만료 예정 확인” 이동을 제공할 수 있다. 클릭 시 다시 인증·원천 보유 조회하여 이미 만료·삭제·변경된 아이템은 현재 보유라고 표시하지 않는다. 미구현/미검증 경로는 링크 없이 안내 문구만 표시.
+- 상태는 DISABLED, SAVED, UNSAVED, SCANNING(발송 아님), COMMITTED_INBOX(알림+영수증 커밋), SUPPRESSED_OPT_OUT, SUPPRESSED_WINDOW, DUPLICATE_SUPPRESSED, SOURCE_UNAVAILABLE, AUTH_REQUIRED, CONSENT_REQUIRED, CONFLICT, RATE_LIMITED로 구분. 계정·세션 전환 시 진행 중 응답 폐기. 320px·44px 터치·WCAG 2.2 AA·한영 동등성·DB UTC/화면 KST.
+
+### DB 잠금·정밀도·권한
+- **잠금 순서:** 시간 제한 READ COMMITTED 트랜잭션에서 회원 선호 설정 행(없으면 선호 생성과 일치하는 회원별 advisory lock) → 해당 `user_items` 행을 `FOR SHARE` 또는 동등한 쓰기 충돌 잠금으로 획득. 모든 선호 변경과 실행자가 같은 순서를 지키며 기존 상점 업데이트와의 교착은 격리 동시성 시험으로 확인. 대기 초과는 재시도/보류로 처리.
+- **잠금 이후 판정:** 잠금 후 새로운 SQL 문장으로 최신 enabled/threshold/revision, 회원·상품·수량·마이크로초 정밀 `expires_at`를 재조회하고 단일 DB `clock_timestamp()`를 `decisionAtUtc`로 얻는다. SECURITY DEFINER PL/pgSQL 함수는 VOLATILE이어야 하며 잠금 이전 STABLE 스냅샷을 재사용하지 않는다. 수량>0, 만료시각 존재, 판정시각<만료시각 및 7일 [만료−7일,만료−6일) / 1일 [만료−1일,만료) 반열린 구간을 검사한다. 지난 구간은 소급 발송하지 않는다.
+- **판정과 커밋 구분:** “커밋 시점 자격” 대신 “잠금으로 직렬화한 판정 시점 자격 + 원자적 커밋”을 사용한다. 커밋은 시계 경계를 지난 뒤 이뤄질 수도 있으므로 커밋 시각의 만료 자격을 약속하지 않는다. 잠금·문장·트랜잭션 시간 제한과 알림 삽입 직전 경계 재검사를 적용한다. `decisionAtUtc`·`committedAtUtc`·지연시간은 구분한다. 수신거부가 선호 행 잠금 이전에 커밋되면 발송 억제; 이후 커밋된 수신거부는 이미 커밋된 과거 알림을 취소하지 못한다.
+- **정확히 하나의 알림:** (회원 UUID, 상품 UUID, PostgreSQL 원본 만료시각 `timestamptz`, 기준 1/7일) 고유 영수증을 `ON CONFLICT DO NOTHING RETURNING`으로 확보한 경우에만 같은 트랜잭션에서 알림함 행을 삽입하고 실제 알림 ID를 영수증에 연결한다. 실패 시 둘 다 롤백; 충돌 시 새 알림 0건. JS 밀리초 변환으로 만료시각 정밀도를 잃지 않는다. 변경된 만료시각은 새로운 사건이며 과거 영수증을 고치지 않는다. `dedupe_key`는 실제 고유 제약 확인 전 재사용하지 않는다.
+- **보안:** 사용자 ID는 서버 세션에서만 추출; 선호 변경 CSRF·expectedRevision 필수. 별도 최소 권한 실행자에게 검토된 함수 EXECUTE만 부여하고 앱 계정에 보유/알림 테이블 직접 권한 부여 금지. 금융 함수 호출 금지. 알림 본문은 이스케이프하고 링크·로그·분석에 회원/상품 UUID 노출 금지.
+
+### 알림함 이동·API·SEO·모바일
+- 기존 검색/목록 모두 검증된 `/inventory/expiring` 및 승인된 하위 경로만 정규화 후 허용한다. `//evil`, `/inventoryevil`, `/inventory/../admin`, 인코딩된 슬래시·역슬래시·제어문자, URL 자격정보·외부 스킴·fragment·오픈리다이렉트 쿼리 거부. 불확실하면 링크 null. 기존 `PRODUCT_ACTIVITY`는 실제 DB CHECK와 UI 필터가 허용할 때만 사용한다.
+- Nest `GET/PUT /api/v1/shop/expiry-reminders/preferences`, Next 비공개 BFF, Android app-api 동등성, 본인·동의 검증, 엄격 DTO·revision, 400/401/403/409/429/503, 모든 상태·리다이렉트의 private/no-store/noindex/no-referrer 유지. 워커 공개 API 없음. 알림 클릭으로 구매·장착·유지비·금융 거래 금지.
+
+### 관리자·지표·시험·배포
+- 대상·잠금 성공·대기 초과·구간 이탈·커밋·중복 억제·수신거부·원천 장애·판정→커밋 p95·스캔 지연을 집계. 서로 다른 회원 20명 미만 코호트 숨김, 회원·상품 식별정보 표시 금지. 미측정 목표: 커밋 중복 0, 타인 노출 0, 자격 발생→알림함 p95 60분 이내. 1시간 초과 적체·잠금 기아·스키마/권한 장애 경고.
+- `inventory_expiry_reminders_enabled` 기본 OFF. 실제 스키마·ACL 확인→클린 PostgreSQL 17/10,001건 EXPLAIN→정확 SHA Test·본인/Android/엣지 QA→제한적 동의 코호트→독립 운영승격. 롤백은 플래그 OFF, 과거 영수증/알림 삭제 금지. 이번 기획에서는 DB·런타임 미변경.
+
+**최신 읽기 전용 런타임 확인(2026-10-31 09:10 KST):** Test 공개 FX 포털 HTTP 500, Production 공개 FX 포털 HTTP 200, Test /inventory 리다이렉트 미추적 HTTP 307. 정확 SHA·인증 사용자 흐름 증빙은 아니며 #2111 배포 보류가 재현됨.
+
+### 개발 인계 — P0 4건 / P1 6건
+1. **P0 OPS1546-01:** Production 실제 실행 SHA·이미지 digest·롤백 자산, 독립 암호화 백업 복원과 원장/보유/알림 대사 (#1984). BLOCKED.
+2. **P0 SEC1546-02:** 개발 DB 과도한 앱 권한·체크섬 정합성, 클린 311/311, 알림 스키마·카테고리·중복키·ACL 및 최소 권한 실행자 (#993). BLOCKED.
+3. **P0 FIN1546-03:** 국고/MINT/SWF 복식부기 불변조건과 알림 실행자의 WLD/원장 쓰기 권한 부재 검증 (#1976). BLOCKED.
+4. **P0 REL1546-04:** Draft/HOLD 병합 차단 (#2031), 의존성 감사, Test FX ACL (#2111), 비공개 공간 권한 (#2109), 정확 SHA 경로 증빙 (#2103), 독립 복원·운영 승인. BLOCKED.
+5. **P1 REMIND1546-05:** 본인 선호/영수증 스키마·함수, 선호 행 부재 잠금, 잠금 후 시각·마이크로초 고유키, 부정 ACL·10,001건 EXPLAIN. PROPOSED.
+6. **P1 REMIND1546-06:** 실행자 2개 동시성, 알림+영수증 원자성, 수신거부/만료 변경, 잠금 대기 중 시간 경계, 실패 롤백·지표. PROPOSED.
+7. **P1 REMIND1546-07:** Nest 인증·revision GET/PUT, Next CSRF·상태·세션 전환, 가짜 발송 완료 표시 방지. PROPOSED.
+8. **P1 REMIND1546-08:** Android 비공개 app-api 동등성, 수신거부·계정 전환·오프라인 캐시 차단·안전한 링크. PROPOSED.
+9. **P1 REMIND1546-09:** 알림 검색/목록 안전한 CTA 경로·악성 URL 시험, PRODUCT_ACTIVITY 호환, 엣지 noindex/no-store, 관리자 코호트≥20. PROPOSED.
+10. **P1 REMIND1546-10:** 격리 PostgreSQL 17·합성 보유 10,001건·회원 2명·실행자 2개·잠금 대기 경계 100건·수신거부/만료 경합 100건·롤백/중복 100건·악성 링크/Android/엣지 50건·금융 변경 0건, 정확 SHA Test·플래그 롤백. PROPOSED, NOT RUN.
+
+**검증 경계:** 과거 QA v1405 백엔드 2,778 PASS/501 SKIP·프론트 2,770 PASS·lint/typecheck/build PASS·의존성 감사 FAIL. #2103 실제 인증 경로의 정확 SHA 증빙 부족, #2111 Test FX 500, #2031 병합 사고 미해결. v1546 런타임 QA/신규 수용시험 미실행. **DRAFT / RELEASE HOLD.** 외부 독립 근거 신규 승인 0, 누적 중복 제거·분류 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS.
+
 ## v2026.10.31.1544 — F675-192 회원 보유 아이템 만료 알림 선택 (기능 추가 / 초안 / 배포 보류)
 
 **주기:** 이전 기능 보완 v1542 → 현재 기능 추가 v1544 → 다음 기능 보완 v1546(잠정). **기준:** origin/main `761a55a094fb9dd383d213e817305e68c79fa23c`, AGENTS.md, README.md, 영문 PROJECT_PLAN.md 및 국문 대조 문서 시작·중간 확인. Draft #2113는 #2105 후속, 개발 인계 #2112. 제안 문서이며 기능 구현·배포 승인 아님.
