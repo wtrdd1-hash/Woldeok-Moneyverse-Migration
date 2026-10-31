@@ -2069,3 +2069,29 @@ ull 상태를 반환하도록 교정.
   - `src/app/app-api/v1/[...path]/shop-receipt-private.test.ts`
 - Git 커밋 및 푸시 후 PR #2045의 CI 3대 체크(runtime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 운영 서버(easy-scraping.com) 무중단 배포 및 라이브 실측.
+
+---
+## 🚀 [v27 Specification] 4대 관제 센터(국채/연금/중앙은행/국유기업/블로그) 복구, 최신 릴리즈 승격 및 사후 2차 디스크 대량 회수 완료
+
+### 1. 문제 분석 및 근본 원인 해결 (Root Cause Resolution)
+1. **데이터베이스 미반영 마이그레이션 (18개)**:
+   - 프로덕션 DB에 `295-chat-media-ownership.sql`부터 `312-treasury-bond-owner-read-acl.sql`까지 총 18개 마이그레이션이 누락되어 `bond_public_catalog()`, `bond_public_read_totals()`, `pension_public_overview()` 함수 부재로 국채 및 연금 관제 페이지 조회 에러 발생.
+   - ➔ `packages/database/migrations` 18개 스크립트 전수를 Postgres DB(`woldeok_moneyverse_dev`)에 일괄 적용 완료.
+2. **중앙은행 기준금리/지준율 엔드포인트 503 차단 해제**:
+   - `CentralBankController`의 `getBaseRate()` 및 `getReserveRequirement()`가 `unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY')`로 하드코딩되어 503 에러를 반환하던 문제 해결.
+   - ➔ `DurableCentralBankPolicyService`를 컨트롤러에 직접 주입하여 영속적 통화 정책 테이블(`public.central_bank_monetary_policy`)과 연동 완료 (기준금리 3.75%, 지준율 7.00% 정상 반환).
+3. **운영 릴리즈 심볼릭 링크 및 BUILD_ID 최신 승격**:
+   - `/srv/moneyverse-data/releases/production-current`가 어제 구버전(`prod-v2026.10.30.1935-bf8d0d48f810`)에 고착되어 있던 문제 해결.
+   - ➔ 최신 커밋 `95485a299885693e3becb694dfc36ad45e832f97` 기반 신규 릴리즈 디렉터리(`/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb`) 생성, 불변 매니페스트 배포, `production-current` 심볼릭 링크 원자적 교체 완료.
+   - ➔ `https://easy-scraping.com/api/version` 및 `/frontend-version` 모두 `95485a299885693e3becb694dfc36ad45e832f97`로 완전 일치 동기화.
+
+### 2. 브랜치 및 워크트리 전수 소거 (Clean Slate)
+- 백그라운드 자동화 러너가 생성했던 4개 워크트리 및 임시 브랜치(`auto/hourly-a-*`, `auto/hourly-b-*`, `auto/hourly-c-*`) 강제 해제 및 완전 삭제.
+- `git gc --prune=now` 실행으로 로컬에는 오직 `* main` 브랜치만 단일화 유지.
+
+### 3. 승격 후 2차 디스크 정리 (Post-Promotion Disk Cleanup)
+- `/srv/moneyverse-data/releases` 내 구버전 아카이브 3개(`prod-v2026.10.29.1502`, `prod-v2026.10.30.1523`, `test-v2026.10.29.1502`) 선별 소거 (직전 롤백용 1개만 안전 보존).
+- `/home/debian/moneyverse-a-*`, `/home/debian/moneyverse-c-*` 잔여 디렉터리 완전 소거.
+- **최종 디스크 상태**:
+  - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 확보 (초기 87% 대비 54%p 대폭 절감)**
+  - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 44GB 사용 (47%), 51GB 여유 공간 확보**
