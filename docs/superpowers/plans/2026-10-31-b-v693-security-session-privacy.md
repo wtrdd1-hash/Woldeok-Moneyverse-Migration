@@ -23,10 +23,10 @@
 - Public unrelated endpoints retain their existing policies.
 
 ## Task 1 — TDD and implementation
-- [ ] Extend `backend/src/account/account-security-events-privacy.test.ts` to assert three headers on four owner handlers.
-- [ ] Run focused test and capture expected failure.
-- [ ] Add missing NestJS `@Header` metadata to handlers.
-- [ ] Run focused test and verify PASS.
+- [x] Add dedicated metadata regression tests for all four owner handlers.
+- [x] Capture metadata RED (4 fails) and HTTP guard-denial RED (1 fail).
+- [x] Add route metadata plus pre-auth privacy guard to cover guard-denied responses.
+- [x] Focused 10/10 PASS including actual HTTP 403 privacy headers.
 
 ## Task 2 — Verification and handoff
 - [ ] Run repository gates and report actual pass/skip/failure.

@@ -21,12 +21,13 @@ import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
+import { AccountSecurityPrivateResponseGuard } from './account-security-private-response.guard';
 import { AccountSecurityRepository } from './account-security.repository';
 import type { SecurityEventCategory } from './account-security.repository';
 
 @ApiTags('account')
 @Controller('account/security')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(new AccountSecurityPrivateResponseGuard(), SessionGuard, AuthenticatedGuard, ConsentGuard)
 export class AccountSecurityController {
   constructor(
     @Inject(AccountSecurityRepository)
@@ -39,6 +40,9 @@ export class AccountSecurityController {
   }
 
   @Get('sessions')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiOperation({ summary: 'Active sessions belonging to the caller' })
   async sessions(@Req() request: RequestWithSession) {
     return {
@@ -52,6 +56,7 @@ export class AccountSecurityController {
   @Get('events')
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiQuery({ name: 'category', required: false, enum: ['all', 'login', 'settings'] })
   @ApiOperation({
     summary: 'Recent owner-only security events, optionally filtered within the latest 20',
@@ -72,6 +77,9 @@ export class AccountSecurityController {
   }
 
   @Delete('sessions/:id')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Revoke one other active session belonging to the caller' })
   async revokeSession(
@@ -88,6 +96,9 @@ export class AccountSecurityController {
   }
 
   @Post('sessions/revoke-others')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Revoke every other active session belonging to the caller' })
   async revokeOtherSessions(@Req() request: RequestWithSession) {
