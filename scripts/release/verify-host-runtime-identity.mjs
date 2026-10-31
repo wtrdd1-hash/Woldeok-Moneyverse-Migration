@@ -213,6 +213,12 @@ function systemdProcessEvidence(service) {
   return { pid, cwd, startedAtMs: epoch * 1000 };
 }
 
+/** Resolve the actual systemd process CWD for immutable release selection. */
+export function systemdProcessDirectory(service, readPid = systemdMainPid, readCwd = (pid) =>
+  realpathSync(readlinkSync('/proc/' + pid + '/cwd'))) {
+  return readCwd(readPid(service));
+}
+
 async function collectSnapshot(channel, expectedSha) {
   const cfg = CHANNELS[channel];
   const releasePath = realpathSync(cfg.releaseRoot);
