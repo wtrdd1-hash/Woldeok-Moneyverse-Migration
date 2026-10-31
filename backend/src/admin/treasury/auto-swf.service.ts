@@ -1,5 +1,5 @@
 import type { Pool } from 'pg';
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, Optional, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
@@ -61,7 +61,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   constructor(
     @Inject(PG_POOL) private readonly pool: Pool,
     private readonly discordAlert: DiscordAlertService,
-    private readonly telegramAlert?: TelegramAlertService,
+    @Optional() private readonly telegramAlert?: TelegramAlertService,
   ) {}
 
   onModuleInit() {

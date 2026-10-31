@@ -1,12 +1,12 @@
 import { TelegramAlertService } from '../../telegram/telegram-alert.service';
-import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { TreasuryOverview, TreasuryRepository } from './treasury.repository';
 
 export class TreasuryInputError extends BadRequestException {}
 
 @Injectable()
 export class TreasuryService {
-  constructor(private readonly repository: TreasuryRepository, private readonly telegram?: TelegramAlertService) {}
+  constructor(private readonly repository: TreasuryRepository, @Optional() private readonly telegram?: TelegramAlertService) {}
 
   async getOverview(): Promise<TreasuryOverview> {
     return this.repository.getOverview();
