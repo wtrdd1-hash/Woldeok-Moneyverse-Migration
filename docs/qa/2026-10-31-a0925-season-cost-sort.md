@@ -22,3 +22,8 @@
 ## Final gates
 - Targeted: PASS (9/9). Real PostgreSQL targeted: PASS. Full lint, full unit/integration, local frontend build, exact SHA CI and candidate image: see final PR comment/worklog for authoritative results.
 - Integration: HOLD until full required gates, exact-SHA authenticated Test, security/ACL, independent restore and GitOps release proof pass.
+
+### Gate snapshot 09:46 KST
+- Full ESLint: exit 0, 0 errors / 1,049 warnings. Security/policy script 41 PASS; API contract 184 endpoints verified; DB unit 62 PASS / 4 SKIP; backend full 2,781 PASS / 501 SKIP.
+- Full `pnpm test`: exit 124 (190-second timeout) during frontend; **not PASS**. Local frontend build 52-second attempt exit 124; longer build and GitHub exact-SHA gates were still in progress. Do not infer PASS.
+- Test public Treasury remains unsafe HTTP 200, Production 503; official Test SHA differs from candidate. GitHub issue #1917 and #1984 updated. Release HOLD.
