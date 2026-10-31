@@ -12,6 +12,7 @@ const overview = {
   reserve_ratio_pct: 100,
   vaults: [{ code: 'VAULT_MAIN', name: 'Main', balance_wld: '9007199254740993', secret: 'never public' }],
   internal_reconciliation: 'never public',
+  reconciliation: { status: 'RECONCILED', total_vaults_balance_wld: '9007199254740993', total_ledger_net_flow_wld: '9007199254740993', discrepancy_amount_wld: '0', last_reconciled_at: '2026-10-30T20:00:00.000Z' },
 };
 
 async function appFor(service: { getOverview: () => Promise<unknown> }) {
@@ -35,6 +36,8 @@ describe('P1 public treasury route restored after integrated controller loss', (
       expect(response.body).toMatchObject({ success: true, total_treasury_wld: overview.total_treasury_wld });
       expect(response.body.vaults).toEqual([{ code: 'VAULT_MAIN', name: 'Main', balance_wld: overview.total_treasury_wld }]);
       expect(response.body).not.toHaveProperty('internal_reconciliation');
+      expect(response.body).not.toHaveProperty('reconciliation');
+      expect(response.body.timestamp).toBe(overview.reconciliation.last_reconciled_at);
     } finally { await app.close(); }
   });
 

@@ -9,6 +9,7 @@
   Put,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -148,6 +149,27 @@ export class TreasuryBuybackBurnDto {
 
 import { unverifiedFinanceOperation, unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
 
+/** A public WLD disclosure requires a reconciled journal, not merely vault rows. */
+function hasCertifiedTreasuryProof(overview: Awaited<ReturnType<TreasuryService['getOverview']>>): boolean {
+  const proof = overview.reconciliation;
+  if (proof?.status !== 'RECONCILED' || proof.discrepancy_amount_wld !== '0') return false;
+  if (!/^\d+$/.test(proof.total_vaults_balance_wld ?? '') ||
+      !/^\d+$/.test(proof.total_ledger_net_flow_wld ?? '') ||
+      !/^\d+$/.test(overview.total_treasury_wld ?? '')) return false;
+  if (proof.total_vaults_balance_wld !== overview.total_treasury_wld ||
+      proof.total_ledger_net_flow_wld !== overview.total_treasury_wld) return false;
+  if (typeof proof.last_reconciled_at !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(proof.last_reconciled_at)) return false;
+  const verifiedAt = Date.parse(proof.last_reconciled_at);
+  if (!Number.isFinite(verifiedAt) || verifiedAt > Date.now()) return false;
+  try {
+    const vaultTotal = overview.vaults.reduce((sum, vault) => sum + BigInt(vault.balance_wld), BigInt(0));
+    return vaultTotal === BigInt(overview.total_treasury_wld);
+  } catch {
+    return false;
+  }
+}
+
 /** Public disclosure exposes only the evidence-backed treasury overview projection. */
 @ApiTags('Public Treasury')
 @Controller('treasury')
@@ -158,7 +180,17 @@ export class PublicTreasuryController {
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Public treasury overview from verified ledger evidence' })
   async getPublicOverview() {
-    const overview = await this.service.getOverview();
+    let overview: Awaited<ReturnType<TreasuryService['getOverview']>>;
+    try {
+      overview = await this.service.getOverview();
+    } catch (error) {
+      // A revoked DB read must not become an opaque 500 or expose SQL details.
+      if (error instanceof ServiceUnavailableException) throw error;
+      throw new ServiceUnavailableException('PUBLIC_TREASURY_RECONCILIATION_PENDING');
+    }
+    if (!hasCertifiedTreasuryProof(overview)) {
+      throw new ServiceUnavailableException('PUBLIC_TREASURY_RECONCILIATION_PENDING');
+    }
     return {
       success: true,
       total_treasury_wld: overview.total_treasury_wld,
@@ -170,7 +202,7 @@ export class PublicTreasuryController {
         name: vault.name,
         balance_wld: vault.balance_wld,
       })),
-      timestamp: new Date().toISOString(),
+      timestamp: overview.reconciliation.last_reconciled_at,
     };
   }
 }
