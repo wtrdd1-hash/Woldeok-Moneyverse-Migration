@@ -5,6 +5,16 @@ import { PG_POOL } from '../core/pool.provider';
 import type { NotificationQueryDto } from './notification.dto';
 import { createNotificationSearchCursor, parseNotificationSearchCursor, validateNotificationSearch, type NotificationSearchInput } from './notification-search';
 
+/** Only known same-origin application paths may leave the notification API.
+ * A notification row is data, never authority to navigate to an arbitrary URL.
+ * The expiry-reminder subroute is deliberately not enabled until it exists.
+ */
+function safeNotificationLink(link: unknown): string | null {
+  return typeof link === 'string' &&
+    /^\/(?:account|wallet|shop|work|quests|stocks|banking|businesses|board|help|casino|marketplace|notifications)(?:\/|\?|$)/.test(link) &&
+    !/[\\%\u0000-\u001f]/.test(link) ? link : null;
+}
+
 @Injectable()
 export class NotificationService {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable | null) {}
@@ -19,7 +29,7 @@ export class NotificationService {
     const unreadOnly = query.unreadOnly ? true : null;
     const readOnly = query.readOnly ? true : null;
 
-    return queryRows(
+    const rows = await queryRows<{ link: string | null }>(
       this.pool,
       `SELECT id::text, category, title, body, link, dedupe_key,
               is_read, read_at, created_at
@@ -32,6 +42,7 @@ export class NotificationService {
        LIMIT $5 OFFSET $6`,
       [actor, query.category ?? null, unreadOnly, readOnly, limit, offset],
     );
+    return rows.map((row) => ({ ...row, link: safeNotificationLink(row.link) }));
   }
 
   /** Search never mutates notification or ledger state. A single read-only PG
@@ -98,8 +109,7 @@ export class NotificationService {
         items: page.map((row) => ({
           id: row.id, category: row.category, title: row.title, body: row.body,
           // An untrusted notification URL must not become an external redirect.
-          link: typeof row.link === 'string' && /^\/(?:account|wallet|shop|work|quests|stocks|banking|businesses|board|help|casino|marketplace|notifications)(?:\/|\?|$)/.test(row.link) &&
-            !/[\\%\u0000-\u001f]/.test(row.link) ? row.link : null,
+          link: safeNotificationLink(row.link),
           isRead: row.is_read, createdAt: new Date(row.created_at).toISOString(),
         })),
         nextCursor, hasMore, asOfUtc: asOf,
