@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
+import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
 import { CurrencyProvider } from '@/components/currency-context';
@@ -30,16 +31,42 @@ import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
 // Global Bootstrap utilities use !important (for example .bg-primary/.text-primary)
 // and collide with this Tailwind theme, so the application shell must not import it.
-// Fontsource files are locked with the application dependencies. Google CSS
-// responses can change independently and break clean release-image builds.
-import '@fontsource/nanum-myeongjo/700.css';
-import '@fontsource/nanum-myeongjo/800.css';
-import '@fontsource-variable/noto-sans-kr/wght.css';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
 import './globals.css';
 import './cosmetics.css';
 import './redesign.css';
+
+/**
+ * The product's own pairing, kept: a Korean serif for display and a Korean
+ * sans for body. The original named Iropke Batang and Pretendard, neither of
+ * which Google Fonts serves; Nanum Myeongjo and Noto Sans KR are the closest
+ * available faces and were the original's own declared fallbacks.
+ *
+ * Self-hosted through next/font, so the files come from this origin: no
+ * third-party request on any page load, no layout shift while a face
+ * arrives, and no font host to admit in the content security policy.
+ */
+const myeongjo = Nanum_Myeongjo({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+  variable: '--font-myeongjo',
+  display: 'swap',
+  preload: false,
+});
+
+const notoKr = Noto_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-noto-kr',
+  display: 'swap',
+  preload: false,
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-plex-mono',
+  display: 'swap',
+});
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
@@ -299,6 +326,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       // is the whole point of them; React is told not to report the
       // difference it will find.
       suppressHydrationWarning
+      className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
       <body className="bg-[#090A0F] text-[#F9FAFB] min-h-screen antialiased selection:bg-[#00F59B]/20 selection:text-[#00F59B]">
         <AdProviderBootstrap />
