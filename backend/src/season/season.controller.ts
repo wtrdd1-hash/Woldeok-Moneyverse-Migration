@@ -7,12 +7,13 @@ import {
   Inject,
   Param,
   ParseUUIDPipe,
+  Query,
   Post,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsPositive, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -23,6 +24,8 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { SeasonInputError, SeasonRewardLedgerHoldError } from './season.repository';
 import { SeasonService } from './season.service';
+import type { SeasonEventRow } from './season.service';
+import { normalizeSeasonMaxCost } from '@moneyverse/contract';
 
 export class ConsumeDto {
   @ApiProperty({ type: Number, minimum: 1 })
@@ -65,8 +68,15 @@ export class SeasonController {
 
   @Get('events')
   @ApiOperation({ summary: 'Active season events' })
-  async events() {
-    return { events: await this.service().events() };
+  @ApiQuery({ name: 'maxCost', required: false, type: String, description: 'Optional maximum WLD entry fee (canonical signed-int64 decimal string)' })
+  async events(@Query() query: Record<string, unknown> = {}): Promise<{ events: readonly SeasonEventRow[]; maxCost?: string }> {
+    if (Object.keys(query).some((key) => key !== 'maxCost')) {
+      throw new BadRequestException('unsupported season event filter');
+    }
+    if (query.maxCost === undefined || query.maxCost === '') return { events: await this.service().events() };
+    const maxCost = normalizeSeasonMaxCost(query.maxCost);
+    if (maxCost === null) throw new BadRequestException('maxCost must be a canonical nonnegative WLD integer');
+    return { events: await this.service().events(maxCost), maxCost };
   }
 
   @Get('events/:id/leaderboard')

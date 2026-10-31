@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { isVerifiedSeasonCostResponse, normalizeSeasonMaxCost } from '@moneyverse/contract';
+import { SeasonCostForm } from './season-cost-form';
 import Link from 'next/link';
 import { Trophy, Calendar, Sparkles } from 'lucide-react';
 import { Amount } from '@/components/amount';
@@ -85,16 +87,22 @@ function getRankBadge(rank: number) {
 export default async function SeasonsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly event?: string }>;
+  readonly searchParams: Promise<{ readonly event?: string; readonly maxCost?: string | string[] }>;
 }) {
   await requireMember();
-  const { event: requested } = await searchParams;
+  const { event: requested, maxCost: rawMaxCost } = await searchParams;
+  const maxCost = rawMaxCost === undefined || rawMaxCost === '' ? undefined : normalizeSeasonMaxCost(rawMaxCost);
+  const invalidCost = rawMaxCost !== undefined && rawMaxCost !== '' && maxCost === null;
 
-  const [data, currentStatus] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
+  const [rawData, currentStatus] = await Promise.all([
+    invalidCost ? Promise.resolve(null) : apiOrNull<{ events: SeasonEvent[]; maxCost?: string }>(
+      maxCost === undefined ? '/api/v1/seasons/events' : `/api/v1/seasons/events?maxCost=${maxCost}`,
+    ),
     apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
   ]);
 
+  // A legacy backend ignoring maxCost must never render a misleading success list.
+  const data = typeof maxCost === 'string' && !isVerifiedSeasonCostResponse(rawData, maxCost) ? null : rawData;
   const events = data?.events ?? [];
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
   const board = selected
@@ -128,13 +136,16 @@ export default async function SeasonsPage({
       <SeasonPassTrack />
 
       <section aria-labelledby="events-title" className="grid gap-4">
+        <SeasonCostForm {...(typeof maxCost === 'string' ? { maxCost } : {})} />
+        {invalidCost && <p role="alert" className="text-sm text-destructive">참가비 상한이 올바르지 않습니다. 필터를 초기화하고 다시 시도하세요.</p>}
+        {typeof maxCost === 'string' && <p role="status" className="text-sm text-muted-foreground">참가비 {maxCost} WLD 이하인 활성 이벤트만 표시합니다. 참가비는 서버의 정수 문자열을 기준으로 비교합니다.</p>}
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">
           <Calendar className="size-5 text-primary" /> 진행 중인 시즌 이벤트
         </h2>
         {data === null ? (
-          <EmptyState title="이벤트를 불러오지 못했어요." />
+          <EmptyState title={invalidCost ? "잘못된 참가비 검색 조건입니다." : "이벤트를 검증하지 못했어요. 다시 시도해 주세요."} />
         ) : events.length === 0 ? (
-          <EmptyState title="진행 중인 이벤트가 없습니다." />
+          <EmptyState title={maxCost === undefined ? "진행 중인 이벤트가 없습니다." : "참가비 조건에 맞는 활성 이벤트가 없습니다."} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {events.map((event) => {

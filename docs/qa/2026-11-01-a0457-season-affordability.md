@@ -1,0 +1,13 @@
+# QA — A0457 Season Event Affordability (2026-11-01)
+
+**Disposition: P1 code implemented, local gates PASS, Production HOLD.**
+
+- Source: main `f13bbce273ffc65e8576170992d82ea00c27a1c9`; code SHA `b9b066790d1a31c95c31f17a6f19a66282ef6ec0`; Draft PR #2259. No migration, DML, ledger or grant changes.
+- RED→GREEN: contract 3, backend 3, Android 4, web form 2 targeted PASS. Contract parser rejects duplicate/malformed/overflow input, uses exact BigInt; backend reads only `public.season_active_events()`; app-api rejects forged/legacy HTTP 200 and forces private/no-store, noindex/nofollow, no-referrer.
+- Root Node security/release/QA tests: 34 PASS; contract: 44 PASS; database: 62 PASS / 4 SKIP; backend: 2,953 PASS / 517 SKIP; frontend: 2,907 PASS. Full `pnpm test` PASS under separate transient systemd scope. **517 skipped backend DB tests and 4 skipped database tests are not database integration PASS.**
+- Typecheck PASS after fixing 2 nullability/optional property errors; lint 0 errors/1,022 warnings; backend+frontend build PASS; `pnpm audit --prod --audit-level high` reports 0 known vulnerabilities. API contract generated and checked after committing source.
+- Earlier full-test attempts: (1) generated mobile API docs were not yet committed, so HEAD drift check failed; (2) a child Node test had `spawnSync.status=null` under the shared MCP TasksMax=1027 cgroup. Isolated scope (`systemd-run --scope --uid=debian -p TasksMax=2048`) completed full suite without changing any shared service limits or stopping other tasks.
+- Real DEV PostgreSQL 17.11 read-only: `season_active_events()` SECURITY DEFINER, app EXECUTE true; active rows 0; app direct SELECT on `virtual_consumption_events` **true** (P0 #993). No live nonempty filter proof, no Production privilege inference. Synthetic precision tests are not a substitute for authenticated exact-SHA PostgreSQL E2E.
+- Official Test read-only: backend/frontend SHA `bc8cd8a6c654af0336f550643f23049a58ee1d16`, health 200. Production backend SHA `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`, frontend build ID `1793450413898` (not a verified SHA), health 200. Neither environment runs this candidate.
+- Existing Draft C #2234 touches `frontend/src/app/seasons/page.tsx`; preserve and rebase/review before integration. Latest main unchanged at last check; other worktrees untouched.
+- **Blocked:** exact-SHA official Test auth/consent/user flow, real nonempty PostgreSQL filter with app role, independent restore, production executable provenance, GitOps release gate, all CI checks. No merge, deployment, restart, rollback or branch deletion. Rollback strategy: revert Draft PR, no DB/data effects.
