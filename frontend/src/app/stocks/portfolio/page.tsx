@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, PieChart, ExternalLink, ShieldCheck, Activity } from 'lucide-react';
+import { PieChart, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -13,14 +13,12 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
-import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
+import { analyzePortfolio } from './analysis';
+import { parsePortfolioResponse, parseStockHaltReceipts, type StockHaltReceipt } from './portfolio-source';
 import { PortfolioDonutChart } from './portfolio-donut-chart';
 import { SectorDiversificationCard } from '@/components/sector-diversification-card';
 import { PortfolioShareTrigger } from '@/components/portfolio-share-trigger';
 
-const WeeklyFinancialReceipt = dynamicImport(
-  () => import('@/components/weekly-financial-receipt').then((mod) => mod.WeeklyFinancialReceipt),
-);
 const TradeDialog = dynamicImport(
   () => import('../trade-dialog').then((mod) => mod.TradeDialog),
 );
@@ -29,24 +27,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '가상 주식 포트폴리오 분석 — 자산 비중 및 실시간 손익',
+  title: '가상 주식 포트폴리오 분석 — 자산 비중 및 평가 손익',
   description: '보유 중인 게임 전용 가상 주식의 평가금액, 자산 구성 비중과 미실현 손익을 확인하고 리밸런싱을 수행합니다.',
   robots: { index: false, follow: false },
 };
 
-interface StockHaltReceipt {
-  readonly id: string;
-  readonly halt_event_id: string;
-  readonly stock_id: string;
-  readonly stock_symbol: string;
-  readonly stock_name: string;
-  readonly quantity: string;
-  readonly basis_method: string;
-  readonly basis_unit_amount: string;
-  readonly refund_amount: string;
-  readonly status: string;
-  readonly created_at: string;
-}
 
 function signedPercent(bpsText: string): string {
   const bps = Number(bpsText);
@@ -60,21 +45,25 @@ export default async function PortfolioAnalysisPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
   const [response, receiptsResult] = await Promise.all([
-    apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
-    apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
+    apiOrNull<unknown>('/api/v1/stocks/portfolio'),
+    apiOrNull<unknown>('/api/v1/stocks/halt-receipts'),
   ]);
-  const haltReceipts = receiptsResult?.receipts ?? [];
+  const haltReceipts = parseStockHaltReceipts(receiptsResult);
+  const holdings = parsePortfolioResponse(response);
 
   let analysis: ReturnType<typeof analyzePortfolio> | null = null;
-  let invalid = false;
-  if (response) {
+  if (holdings !== null) {
     try {
-      analysis = analyzePortfolio(response.holdings ?? []);
+      analysis = analyzePortfolio(holdings);
     } catch {
-      invalid = true;
+      analysis = null;
     }
   }
 
+  const shareable = analysis !== null && [analysis.total_market_value, analysis.total_unrealized_gain_loss, analysis.total_gain_loss_bps].every((value) => {
+    const n = BigInt(value);
+    return n <= BigInt(Number.MAX_SAFE_INTEGER) && n >= -BigInt(Number.MAX_SAFE_INTEGER);
+  });
   const isTotalProfit = analysis ? BigInt(analysis.total_unrealized_gain_loss) > 0n : false;
   const isTotalLoss = analysis ? BigInt(analysis.total_unrealized_gain_loss) < 0n : false;
 
@@ -86,10 +75,10 @@ export default async function PortfolioAnalysisPage() {
             <p className="text-xs sm:text-sm text-muted-foreground">
               {isEn
                 ? 'Review valuation, allocation and unrealized gain/loss for your game-only virtual-stock holdings.'
-                : '게임 전용 가상 주식 10개 종목의 보유량, 자산 구성 비중과 실시간 미실현 손익을 정밀 분석합니다.'}
+                : '게임 전용 가상 주식 보유량과 자산 구성 비중 및 서버가 제공한 마지막 가격 기준 미실현 손익을 확인합니다.'}
             </p>
             <div className="flex items-center gap-2">
-              {analysis && analysis.holdings.length > 0 && (
+              {shareable && analysis && analysis.holdings.length > 0 && (
                 <PortfolioShareTrigger
                   totalAssetValue={Number(analysis.total_market_value) || 0}
                   totalProfitAmount={Number(analysis.total_unrealized_gain_loss) || 0}
@@ -98,7 +87,7 @@ export default async function PortfolioAnalysisPage() {
                   holdingCount={analysis.holdings.length}
                 />
               )}
-              <Button asChild variant="outline" size="sm" className="min-h-9 text-xs font-semibold">
+              <Button asChild variant="outline" size="sm" className="min-h-11 text-xs font-semibold">
                 <Link href="/stocks">
                   {isEn ? 'Browse market' : '거래소 종목 목록'}
                 </Link>
@@ -107,11 +96,17 @@ export default async function PortfolioAnalysisPage() {
           </div>
         </PageHeader>
 
-        {response === null || invalid || analysis === null ? (
-          <EmptyState
+        {analysis === null ? (
+          <div className="grid gap-3" role="status" aria-live="polite">
+            <EmptyState
             title={isEn ? 'Portfolio analysis is unavailable.' : '포트폴리오 분석을 불러오지 못했어요.'}
-            description={isEn ? 'Authoritative holding data could not be validated. Please try again later.' : '서버 기준 보유 데이터를 검증하지 못했습니다. 잠시 후 다시 시도해 주세요.'}
-          />
+            description={isEn ? 'Owner holding data could not be verified. This does not mean you have no holdings.' : '보유 데이터 확인에 실패했습니다. 보유 종목이 없다는 뜻은 아닙니다.'}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="min-h-11"><Link href="/stocks/portfolio">{isEn ? 'Retry portfolio' : '포트폴리오 다시 조회'}</Link></Button>
+            </div>
+            <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
+          </div>
         ) : analysis.holdings.length === 0 ? (
           <div className="grid gap-6">
             <EmptyState
@@ -134,7 +129,7 @@ export default async function PortfolioAnalysisPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-5 pb-4 pt-0 text-xs text-muted-foreground font-mono">
-                  {isEn ? 'Based on latest execution prices' : '10개 가상 종목 실시간 평가 합계'}
+                  {isEn ? 'Based on last server-provided prices, not guaranteed live' : '서버가 제공한 마지막 가격 기준 평가 합계 (실시간 보장 아님)'}
                 </CardContent>
               </Card>
 
@@ -232,13 +227,13 @@ export default async function PortfolioAnalysisPage() {
             </Card>
 
             {/* 2.5. 3섹터 분산 투자 & 포트폴리오 건전성 진단 (Section 5.7) */}
-            <SectorDiversificationCard holdings={response?.holdings ?? []} />
+            <SectorDiversificationCard holdings={holdings ?? []} />
 
             {/* 3. 종목별 보유 상세 및 원터치 리밸런싱 주문 카드 목록 */}
             <Card className="border-border/80 bg-card/60 shadow-xs">
               <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 bg-muted/15">
                 <CardTitle className="text-sm font-bold">
-                  {isEn ? 'Holding Positions & Quick Rebalancing' : '10대 가상 종목 보유 상세 및 원터치 리밸런싱'}
+                  {isEn ? 'Holding Positions & Quick Rebalancing' : '가상 종목 보유 상세 및 매수·매도'}
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
                   {isEn
@@ -325,6 +320,8 @@ export default async function PortfolioAnalysisPage() {
 
                         {/* 원터치 리밸런싱 모달 및 종목 허브 링크 버튼군 */}
                         <div className="flex items-center gap-1.5 shrink-0">
+                          {holding.halt_status !== 'ACTIVE' && <Badge variant="destructive">{isEn ? 'Trading halted' : '거래정지'}</Badge>}
+                          {holding.halt_status === 'ACTIVE' && (<>
                           {/* 추가 매수 다이얼로그 */}
                           <TradeDialog
                             stockId={holding.stock_id}
@@ -334,7 +331,7 @@ export default async function PortfolioAnalysisPage() {
                             side="buy"
                             triggerLabel={isEn ? 'Buy More' : '추가 매수'}
                             triggerVariant="default"
-                            triggerClassName="min-h-9 px-3 text-xs font-bold font-mono active:scale-95"
+                            triggerClassName="min-h-11 px-3 text-xs font-bold font-mono active:scale-95"
                           />
 
                           {/* 차익 실현 / 분할 매도 다이얼로그 */}
@@ -347,12 +344,13 @@ export default async function PortfolioAnalysisPage() {
                             side="sell"
                             triggerLabel={isEn ? 'Sell' : '매도'}
                             triggerVariant="outline"
-                            triggerClassName="min-h-9 px-3 text-xs font-bold font-mono active:scale-95 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                            triggerClassName="min-h-11 px-3 text-xs font-bold font-mono active:scale-95 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                           />
 
+                          </>)}
                           {/* 종목 허브 딥링크 */}
-                          <Button asChild variant="ghost" size="sm" className="min-h-9 px-2 text-xs text-muted-foreground hover:text-foreground">
-                            <Link href={`/stocks/${encodeURIComponent(holding.symbol)}`} title={isEn ? 'Open stock hub' : '종목 허브로 이동'}>
+                          <Button asChild variant="ghost" size="sm" className="min-h-11 min-w-11 px-2 text-xs text-muted-foreground hover:text-foreground">
+                            <Link href={`/stocks/${encodeURIComponent(holding.symbol)}`} title={isEn ? 'Open stock hub' : '종목 허브로 이동'} aria-label={isEn ? `Open ${holding.symbol} stock hub` : `${holding.symbol} 종목 허브로 이동`}>
                               <ExternalLink className="size-3.5" />
                             </Link>
                           </Button>
@@ -363,39 +361,6 @@ export default async function PortfolioAnalysisPage() {
                 })}
               </CardContent>
             </Card>
-
-            {/* 3.5. 주간 금융 결산 영수증 & 인포그래픽 카드 (Weekly Financial Digest) */}
-            {(() => {
-              const topHolding = analysis.holdings[0];
-              const gainBpsNum = Number(analysis.total_gain_loss_bps);
-              const returnPctStr = (gainBpsNum / 100).toFixed(1);
-              const topGainBps = topHolding ? Number(topHolding.gain_loss_bps) : 0;
-              const topReturnPct = (topGainBps / 100).toFixed(1);
-              return (
-                <WeeklyFinancialReceipt
-                  data={{
-                    weekNumber: 41,
-                    periodLabel: isEn
-                      ? `As of ${new Date().toISOString().slice(0, 10)}`
-                      : `${new Date().toLocaleDateString('ko-KR')} 실시간 보유 기준`,
-                    totalTurnoverWld: groupDigits(analysis.total_market_value),
-                    realizedGainWld: `${analysis.total_unrealized_gain_loss.startsWith('-') ? '' : '+'}${groupDigits(analysis.total_unrealized_gain_loss)}`,
-                    returnRatePct: `${gainBpsNum >= 0 ? '+' : ''}${returnPctStr}%`,
-                    topStockSymbol: topHolding?.symbol ?? 'WDG',
-                    topStockReturnPct: `${topGainBps >= 0 ? '+' : ''}${topReturnPct}%`,
-                    tradeCount: analysis.holdings.length,
-                    feeBurnContributionWld: groupDigits(
-                      String(Math.floor(Math.max(1, Number(analysis.total_market_value) * 0.002))),
-                    ),
-                    diversificationScore:
-                      analysis.holdings.length >= 3 ? 95 : analysis.holdings.length === 2 ? 80 : 60,
-                    traderPersona: isEn
-                      ? `Active Virtual Investor (${topHolding?.name ?? 'Diversified'})`
-                      : `가상 주식 투자자 (${topHolding?.name ?? '분산 포트폴리오'} 중심)`,
-                  }}
-                />
-              );
-            })()}
 
             {/* 4. 거래정지 원가환급 영수증 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC) */}
             <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
@@ -416,10 +381,11 @@ function HaltReceiptsCard({
   receipts,
   isEn,
 }: {
-  readonly receipts: readonly StockHaltReceipt[];
+  readonly receipts: readonly StockHaltReceipt[] | null;
   readonly isEn: boolean;
 }) {
-  if (receipts.length === 0) return null;
+  if (receipts === null) return <div role="status" className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><p>{isEn ? 'Stock halt receipts are unavailable; no settlement status is inferred.' : '거래정지 정산 영수증을 확인할 수 없습니다. 정산 여부를 추정하지 않습니다.'}</p><Button asChild variant="outline" className="min-h-11"><Link href="/stocks/portfolio">{isEn ? 'Retry receipts' : '영수증 다시 조회'}</Link></Button></div>;
+  if (receipts.length === 0) return <p role="status" className="text-sm text-muted-foreground">{isEn ? 'No stock halt settlement records were returned.' : '확인된 거래정지 정산 기록이 없습니다.'}</p>;
 
   return (
     <Card className="border-border/80 bg-card/70 shadow-xs">
@@ -431,14 +397,14 @@ function HaltReceiptsCard({
               {isEn ? 'Stock Halt Settlement Receipts' : '종목 거래정지 원가환급 영수증'}
             </CardTitle>
           </div>
-          <Badge variant="outline" className="text-xs font-mono text-emerald-600 border-emerald-500/40">
-            {isEn ? `${receipts.length} Settled` : `${receipts.length}건 정산완료`}
+          <Badge variant="outline" className="text-xs font-mono text-muted-foreground">
+            {isEn ? `${receipts.filter((row) => row.status === 'settled').length} settled / ${receipts.length} records` : `정산완료 ${receipts.filter((row) => row.status === 'settled').length}건 / 전체 ${receipts.length}건`}
           </Badge>
         </div>
         <CardDescription className="text-xs text-muted-foreground leading-relaxed pt-1">
           {isEn
-            ? 'Authoritative server-side cost basis refund receipts. All holdings were automatically settled into WLD with zero fees or taxes.'
-            : '운영 정책에 의해 거래정지된 종목의 매수원가(Cost Basis) 자동환급 영수증입니다. 시장가가 아닌 취득 원가 전액이 지갑으로 환급되었으며 수수료와 세금은 면제되었습니다.'}
+            ? 'Server settlement records for halted stocks. Only settled records confirm a WLD refund; quarantined records are not paid.'
+            : '거래정지 종목의 서버 정산 기록입니다. 정산완료 건만 WLD 환급을 확인하며 격리 또는 처리 중인 건은 지급 완료로 표시하지 않습니다.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-4 sm:px-5 pb-4 pt-0">
@@ -457,7 +423,7 @@ function HaltReceiptsCard({
                     {receipt.stock_name}
                   </span>
                 </div>
-                <Badge variant="destructive" className="text-[10px] py-0 px-1.5">
+                <Badge variant={receipt.status === 'settled' ? 'outline' : 'destructive'} className="text-[10px] py-0 px-1.5">
                   {receipt.status}
                 </Badge>
               </div>
@@ -471,9 +437,9 @@ function HaltReceiptsCard({
                   <span className="font-mono font-medium text-foreground">{groupDigits(receipt.basis_unit_amount)} WLD</span>
                 </div>
                 <div className="col-span-2 flex items-center justify-between pt-1 border-t border-border/40">
-                  <span className="text-foreground font-semibold">총 환급액:</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                    +{groupDigits(receipt.refund_amount)} WLD
+                  <span className="text-foreground font-semibold">{receipt.status === 'settled' ? '총 환급액:' : '환급 보류:'}</span>
+                  <span className={receipt.status === 'settled' ? 'font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm' : 'font-mono font-bold text-muted-foreground text-sm'}>
+                    {receipt.status === 'settled' ? `+${groupDigits(receipt.refund_amount)} WLD` : '—'}
                   </span>
                 </div>
                 <div className="col-span-2 flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
