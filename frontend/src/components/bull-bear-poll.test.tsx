@@ -1,49 +1,27 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import React from 'react';
 import { BullBearPoll } from './bull-bear-poll';
+import { voteBullBear } from '@/lib/dopamine-api';
 
-vi.mock('@/lib/dopamine-api', () => ({
-  voteBullBear: vi.fn().mockResolvedValue({ success: true, poolEligible: true }),
-}));
+vi.mock('@/lib/dopamine-api', () => ({ voteBullBear: vi.fn() }));
 
-describe('BullBearPoll Component', () => {
-  afterEach(() => {
-    cleanup();
-  });
+describe('BullBearPoll source-of-truth hold', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-  it('renders poll and calculates percentages properly', () => {
-    render(
-      <BullBearPoll
-        symbol="CHIPS"
-        stockName="침팬지 반도체"
-        initialBullCount={100}
-        initialBearCount={100}
-      />
-    );
-
+  it('does not show invented votes, jackpot amounts, or participation controls', () => {
+    render(<BullBearPoll symbol="CHIPS" stockName="침팬지 반도체" />);
     expect(screen.getByText(/침팬지 반도체/)).toBeDefined();
-    expect(screen.getByText(/상승 \(Bull\) 50%/)).toBeDefined();
-    expect(screen.getByText(/하락 \(Bear\) 50%/)).toBeDefined();
+    expect(screen.getByRole('status').textContent).toMatch(/검증된 투표 기록이 없어/);
+    expect(screen.queryByText(/10,000 WLD/)).toBeNull();
+    expect(screen.queryByText(/142/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /투표/ })).toBeNull();
+    expect(voteBullBear).not.toHaveBeenCalled();
   });
 
-  it('handles user vote and increments selected option', async () => {
-    const onVoteMock = vi.fn();
-    render(
-      <BullBearPoll
-        symbol="CHIPS"
-        initialBullCount={100}
-        initialBearCount={100}
-        onVote={onVoteMock}
-      />
-    );
-
-    const bullBtn = screen.getByRole('button', { name: '상승 투표 떡상 가자' });
-    fireEvent.click(bullBtn);
-
-    await waitFor(() => {
-      expect(onVoteMock).toHaveBeenCalledWith('bull');
-      expect(screen.getByText(/101표/)).toBeDefined();
-    });
+  it('never treats caller-provided counts as verified vote evidence', () => {
+    render(<BullBearPoll symbol="CHIPS" initialBullCount={100} initialBearCount={200} />);
+    expect(screen.queryByText(/100표|200표|33%|67%/)).toBeNull();
+    expect(screen.getByRole('status').textContent).toMatch(/이용할 수 없습니다/);
   });
 });

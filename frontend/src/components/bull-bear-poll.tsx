@@ -1,153 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, Users, Shield, Gift, CheckCircle2 } from 'lucide-react';
-
-import { voteBullBear } from '@/lib/dopamine-api';
+import { TrendingUp, ShieldAlert } from 'lucide-react';
 
 interface BullBearPollProps {
   symbol?: string;
   stockName?: string;
+  /** Legacy caller values are intentionally ignored: they are not verified vote receipts. */
   initialBullCount?: number;
   initialBearCount?: number;
   onVote?: (direction: 'bull' | 'bear') => void;
 }
 
-export function BullBearPoll({
-  symbol = 'CHIPS',
-  stockName = '침팬지 반도체',
-  initialBullCount = 142,
-  initialBearCount = 88,
-  onVote,
-}: BullBearPollProps) {
-  const [voted, setVoted] = useState<'bull' | 'bear' | null>(null);
-  const [bullVotes, setBullVotes] = useState<number>(initialBullCount);
-  const [bearVotes, setBearVotes] = useState<number>(initialBearCount);
-
-  const totalVotes = bullVotes + bearVotes;
-  const bullPercentage = totalVotes > 0 ? Math.round((bullVotes / totalVotes) * 100) : 50;
-  const bearPercentage = 100 - bullPercentage;
-
-  const handleVote = async (direction: 'bull' | 'bear') => {
-    if (voted) return;
-
-    if (direction === 'bull') {
-      setBullVotes((prev) => prev + 1);
-    } else {
-      setBearVotes((prev) => prev + 1);
-    }
-    setVoted(direction);
-
-    try {
-      await voteBullBear(direction, symbol);
-    } catch {
-      // Offline fallback
-    }
-
-    if (onVote) {
-      onVote(direction);
-    }
-  };
-
+/**
+ * The vote endpoint has no durable, owner-bound vote receipt or jackpot settlement.
+ * Never turn guessed counts, a network failure, or a 200-shaped mock into a vote.
+ */
+export function BullBearPoll({ symbol = 'CHIPS', stockName = '침팬지 반도체' }: BullBearPollProps) {
   return (
-    <div className="w-full rounded-3xl border border-slate-800 bg-slate-900/90 p-5 text-slate-100 shadow-xl backdrop-blur-md">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400">
-            <Users className="h-4 w-4" />
-          </span>
-          <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-              실시간 1클릭 여론 잭팟 ({stockName})
-              <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-bold text-cyan-300 border border-cyan-500/30">
-                {symbol}
-              </span>
-            </h3>
-            <p className="text-[11px] text-slate-400">오늘 종가 방향을 예측하고 10,000 WLD 잭팟 풀에 참여하세요</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400">
-          <Users className="h-3.5 w-3.5 text-slate-400" />
-          <span>{totalVotes.toLocaleString()}명 참여</span>
+    <section
+      aria-label={`${stockName} 시장 방향 투표 안내`}
+      className="w-full min-w-0 rounded-3xl border border-slate-700 bg-slate-900/90 p-4 sm:p-5 text-slate-100 shadow-xl"
+    >
+      <div className="flex items-center gap-3 border-b border-slate-700 pb-3">
+        <TrendingUp aria-hidden="true" className="size-6 shrink-0 text-cyan-400" />
+        <div className="min-w-0">
+          <h3 className="break-words text-sm font-bold">시장 방향 투표 · {stockName}</h3>
+          <p className="break-all text-xs text-slate-400">{symbol}</p>
         </div>
       </div>
-
-      {/* Main Ratio Visual Bar */}
-      <div className="mt-4 space-y-2">
-        <div className="flex justify-between text-xs font-bold">
-          <span className="flex items-center gap-1 text-emerald-400">
-            <TrendingUp className="h-4 w-4" />
-            상승 (Bull) {bullPercentage}% ({bullVotes}표)
-          </span>
-          <span className="flex items-center gap-1 text-rose-400">
-            하락 (Bear) {bearPercentage}% ({bearVotes}표)
-            <TrendingDown className="h-4 w-4" />
-          </span>
-        </div>
-
-        {/* Dynamic Dual Progress Bar */}
-        <div className="flex h-3.5 w-full overflow-hidden rounded-full bg-slate-800 p-0.5 border border-slate-700/80">
-          <div
-            className="h-full rounded-l-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-            style={{ width: `${bullPercentage}%` }}
-          />
-          <div
-            className="h-full rounded-r-full bg-gradient-to-r from-rose-500 to-red-600 transition-all duration-500"
-            style={{ width: `${bearPercentage}%` }}
-          />
-        </div>
+      <div role="status" className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm leading-relaxed text-amber-100">
+        <ShieldAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+        <p>현재 검증된 투표 기록이 없어 투표와 보상을 이용할 수 없습니다. 투표 내역 및 지급 영수증이 확인될 때까지 참여를 받지 않습니다.</p>
       </div>
-
-      {/* Vote Action Buttons */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          aria-label="상승 투표 떡상 가자"
-          onClick={() => handleVote('bull')}
-          disabled={voted !== null}
-          className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold transition-all duration-200 ${
-            voted === 'bull'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400'
-              : voted !== null
-              ? 'border border-slate-800 bg-slate-950/40 text-slate-500'
-              : 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 active:scale-95'
-          }`}
-        >
-          <TrendingUp className="h-4 w-4" />
-          <span>🚀 떡상 가자! (상승)</span>
-        </button>
-
-        <button
-          type="button"
-          aria-label="하락 투표 숏이 정배"
-          onClick={() => handleVote('bear')}
-          disabled={voted !== null}
-          className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold transition-all duration-200 ${
-            voted === 'bear'
-              ? 'bg-rose-500 text-slate-950 shadow-lg shadow-rose-500/30 ring-2 ring-rose-400'
-              : voted !== null
-              ? 'border border-slate-800 bg-slate-950/40 text-slate-500'
-              : 'border border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 active:scale-95'
-          }`}
-        >
-          <TrendingDown className="h-4 w-4" />
-          <span>🐻 숏이 정배! (하락)</span>
-        </button>
-      </div>
-
-      {/* Reward & Policy Notice */}
-      <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-[11px] text-slate-400">
-        <span className="flex items-center gap-1.5 text-amber-400">
-          <Gift className="h-3.5 w-3.5" />
-          매일 자정 종가 적중자 전원에게 10,000 WLD 잭팟 에어드랍
-        </span>
-        <span className="flex items-center gap-1 text-slate-500">
-          <Shield className="h-3 w-3 text-emerald-400" />
-          무료 투표 (0 WLD)
-        </span>
-      </div>
-    </div>
+      <p className="mt-3 text-xs leading-relaxed text-slate-400">
+        표시할 수 있는 확정 투표 수나 지급 가능한 잭팟 금액이 없습니다. 이 화면은 투표 완료 또는 보상 지급을 보증하지 않습니다.
+      </p>
+    </section>
   );
 }

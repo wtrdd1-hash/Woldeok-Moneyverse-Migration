@@ -103,11 +103,10 @@ export async function claimPetFortune(action: 'pet' | 'fortune'): Promise<PetFor
 /**
  * 상승(Bull) / 하락(Bear) 일일 여론 잭팟 풀 투표
  */
-export async function voteBullBear(vote: 'bull' | 'bear', stockSymbol = 'MARKET_OVERALL'): Promise<BullBearVoteResult | null> {
-  return postDopamine<BullBearVoteResult>('bull-bear-vote', {
-    vote,
-    stockSymbol,
-  });
+export async function voteBullBear(_vote: 'bull' | 'bear', _stockSymbol = 'MARKET_OVERALL'): Promise<BullBearVoteResult | null> {
+  // The endpoint has no durable owner vote receipt or verified WLD payout.
+  // Legacy clients must not optimistically claim participation or refresh a wallet.
+  return null;
 }
 
 /**

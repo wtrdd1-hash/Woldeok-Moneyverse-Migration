@@ -34,7 +34,7 @@ describe('CasualDopamineStation', () => {
     expect(screen.getAllByText(/덕이 펫 인터랙션/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/럭키 스타드롭/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/1:1 주사위 쇼다운/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/주식 여론 잭팟/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/시장 방향 투표/).length).toBeGreaterThan(0);
   });
 
   it('labels pet fortune as local practice rather than a WLD payout', () => {
@@ -50,6 +50,14 @@ describe('CasualDopamineStation', () => {
     fireEvent.click(starDropCard);
 
     expect(screen.getByText(/스타 드롭/)).toBeDefined();
+  });
+
+  it('opens the unavailable poll with keyboard and never claims a vote or reward', () => {
+    renderKo(<CasualDopamineStation />);
+    const card = screen.getByRole('button', { name: '시장 방향 투표 이용 불가 안내 열기' });
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(screen.getByRole('status').textContent).toMatch(/검증된 투표 기록이 없어/);
+    expect(screen.queryByText(/투표 완료! 자정/)).toBeNull();
   });
 
   it('opens mini showdown modal when showdown card is clicked', () => {
