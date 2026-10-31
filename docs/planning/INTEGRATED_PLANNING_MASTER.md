@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1588 F675-203 owner expiry urgency summary / issue #2268 / Draft PENDING / DRAFT / RELEASE HOLD; previous Draft #2258 OPEN UNMERGED.
+**Current planning:** v1588 F675-203 owner expiry urgency summary / issue #2268 / Draft #2269 / DRAFT / RELEASE HOLD; previous Draft #2258 OPEN UNMERGED.
 
 ## v2026.11.01.1588 — F675-203 Owner Inventory Expiry Urgency Summary (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle / authority:** Previous **Feature Improvement v1586** → Current **Feature Addition v1588** → Next **Feature Improvement v1590 (provisional)**. Origin/main `f13bbce273ffc65e8576170992d82ea00c27a1c9` verified at start and before documentation; English canonical, Korean meaning-equivalent. Previous planning Draft **#2258** remains OPEN/UNMERGED; valid F675-199–202 proposals were carried from that isolated documentation branch, **not** merged into main. Developer handoff **#2268**; Draft PR **PENDING**. **DRAFT / RELEASE HOLD**, not an implementation or authorization.
+**Cycle / authority:** Previous **Feature Improvement v1586** → Current **Feature Addition v1588** → Next **Feature Improvement v1590 (provisional)**. Origin/main `f13bbce273ffc65e8576170992d82ea00c27a1c9` verified at start and before documentation; English canonical, Korean meaning-equivalent. Previous planning Draft **#2258** remains OPEN/UNMERGED; valid F675-199–202 proposals were carried from that isolated documentation branch, **not** merged into main. Developer handoff **#2268**; Draft PR **#2269**. **DRAFT / RELEASE HOLD**, not an implementation or authorization.
 
 ### User need, verified source gap, choices
 - **Audience and purpose:** authenticated, consent-current members need a quick, trustworthy answer to “Which owned items are nearing their holding expiration?” without reading an unbounded inventory or first implementing the proposed expiry calendar. Display next 24h, following 24–72h, and following 72–168h as **disjoint elapsed-time** bands, distinct catalog-item kinds, total owned units, and nearest holding expiration. No reminder delivery, payment, upkeep settlement, equip, item consumption or WLD transfer is inferred or initiated.
