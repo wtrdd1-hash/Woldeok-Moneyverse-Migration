@@ -340,8 +340,10 @@ export class ContentService {
     return this.repository.isPublicStorageKey(storageKey);
   }
 
-  async serviceStatus(): Promise<ContentStatus[]> {
-    return (await this.repository.publicStatus()).map((row) => normalizeStatus(row));
+  async serviceStatus({ attentionOnly = false }: { attentionOnly?: boolean } = {}): Promise<ContentStatus[]> {
+    const rows = (await this.repository.publicStatus()).map((row) => normalizeStatus(row));
+    // Filter only after normalization: stale successes are unknown, never healthy.
+    return attentionOnly ? rows.filter((row) => row.state !== 'operational') : rows;
   }
 
   async publicPage({

@@ -17,6 +17,7 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
+    expect(appGatewayPath(['status'])).toBe('/api/v1/status');
     expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
     expect(appGatewayPath(['newspaper', 'pulse'])).toBe('/api/v1/newspaper/pulse');
     expect(appGatewayPath(['crafting', 'recipes'])).toBe('/api/v1/crafting/recipes');
@@ -78,7 +79,7 @@ describe('app API compatibility contract', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
       'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
-      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
+      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'status', 'support', 'wallet', 'work',
     ]);
   });
 
@@ -95,7 +96,7 @@ describe('app API compatibility contract', () => {
   it('stamps every app response with stable API and contract versions', () => {
     const headers = appendAppContractHeaders(new Headers());
     expect(headers.get('x-moneyverse-api-version')).toBe('1');
-    expect(APP_API_CONTRACT_VERSION).toBe('v2026.10.30.0125');
+    expect(APP_API_CONTRACT_VERSION).toBe('v2026.11.01.0525');
     expect(headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
     expect(headers.get('x-content-type-options')).toBe('nosniff');
   });

@@ -62,3 +62,8 @@ export function parseStatusRows(value: unknown): VerifiedStatusRow[] | null {
   }
   return rows;
 }
+
+/** Only normalized, evidence-backed current health can be omitted from attention. */
+export function attentionStatusRows(rows: readonly VerifiedStatusRow[]): VerifiedStatusRow[] {
+  return rows.filter((row) => row.freshnessState !== 'fresh' || row.state !== 'operational');
+}
