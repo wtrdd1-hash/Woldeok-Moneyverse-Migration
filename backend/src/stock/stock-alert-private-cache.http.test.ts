@@ -47,7 +47,7 @@ describe('owner stock alert HTTP privacy headers', () => {
   it('prevents shared caching and indexing of owner alert definitions', async () => {
     const response = await request(app.getHttpServer()).get('/stocks/alerts').expect(200);
     expectPrivate(response);
-    expect(repo.list).toHaveBeenCalledWith(OWNER);
+    expect(repo.list).toHaveBeenCalledWith(OWNER, 'all');
   });
   it('prevents shared caching and indexing of owner alert event history', async () => {
     const response = await request(app.getHttpServer()).get('/stocks/alerts/events?limit=20').expect(200);

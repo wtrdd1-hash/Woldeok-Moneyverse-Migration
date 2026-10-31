@@ -1,3 +1,4 @@
+import { stockAlertStatusQuery, isVerifiedStockAlertStatusList } from './stock-alert-status';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -106,6 +107,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const stockAlertList = request.method === 'GET' && parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'alerts';
+  const stockAlertFilter = stockAlertList ? stockAlertStatusQuery(request.nextUrl.searchParams) : 'all';
+  if (stockAlertList && stockAlertFilter === null) {
+    return gatewayProblem(400, 'Bad Request', 'stock_alert_status_invalid', 'status must be all, met or watching');
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -268,6 +275,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       } catch {
         return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
       }
+    }
+  }
+
+  if (stockAlertList && stockAlertFilter !== 'all' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedStockAlertStatusList(await response.clone().json(), stockAlertFilter!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_alert_status_unverified',
+          'the member alert condition filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'stock_alert_status_unverified',
+        'the member alert condition filter could not be verified');
     }
   }
 
@@ -448,6 +468,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'stocks' && parts[1] === 'alerts') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

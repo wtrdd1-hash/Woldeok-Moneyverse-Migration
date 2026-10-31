@@ -61,3 +61,26 @@ describe('StockAlertRepository', () => {
     expect(calls[0]).toEqual([USER, 100]);
   });
 });
+
+describe('owner stock alert condition filter', () => {
+  it('filters actor-scoped SECURITY DEFINER rows with parameterized condition status', async () => {
+    const observed: Array<{ sql: string; args: readonly unknown[] }> = [];
+    const repository = new StockAlertRepository(db((sql, args) => {
+      observed.push({ sql, args });
+      return [];
+    }));
+    await repository.list(USER, 'all');
+    await repository.list(USER, 'met');
+    await repository.list(USER, 'watching');
+    expect(observed.map(call => call.args)).toEqual([[USER, 'all'], [USER, 'met'], [USER, 'watching']]);
+    for (const call of observed) {
+      expect(call.sql).toContain('public.stock_alert_rules_list($1)');
+      expect(call.sql).toMatch(/condition_met\s*=\s*\(\$2::text\s*=\s*'met'\)/);
+      expect(call.sql).not.toMatch(/FROM\s+public\.member_stock_alert_rules/i);
+    }
+  });
+  it('refuses unsupported statuses before touching the database', async () => {
+    const repository = new StockAlertRepository(db(() => { throw Error('DB must not be called'); }));
+    expect(() => repository.list(USER, 'active')).toThrow(StockAlertInputError);
+  });
+});

@@ -74,8 +74,12 @@ export class StockAlertController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Conditional virtual-stock alerts belonging to the caller' })
-  async list(@Req() request: RequestWithSession) {
-    return { alerts: await this.repository().list(requireUserId(request)) };
+  async list(@Req() request: RequestWithSession, @Query('status') status?: unknown) {
+    if (status !== undefined && (typeof status !== 'string' ||
+        !['all', 'met', 'watching'].includes(status))) {
+      throw new BadRequestException('status must be all, met or watching');
+    }
+    return { alerts: await this.repository().list(requireUserId(request), status ?? 'all') };
   }
 
   @Get('events')

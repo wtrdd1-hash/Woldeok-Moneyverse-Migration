@@ -61,16 +61,21 @@ export class StockAlertRepository {
     if (!pool?.query) throw new TypeError('a PostgreSQL pool is required');
   }
 
-  list(userId: unknown): Promise<readonly StockAlertRuleRow[]> {
+  list(userId: unknown, status: unknown = 'all'): Promise<readonly StockAlertRuleRow[]> {
     const actor = uuid(userId, 'user id');
+    if (status !== 'all' && status !== 'met' && status !== 'watching') {
+      throw new StockAlertInputError('invalid stock alert condition filter');
+    }
     return queryRows<StockAlertRuleRow>(
       this.pool,
       `SELECT alert_id::text, stock_id::text, symbol, name, condition_kind,
         threshold_amount::text, threshold_bps, cooldown_seconds,
         current_price::text, day_open_price::text, current_day_change_bps,
         condition_met, last_evaluated_at, last_triggered_at, created_at
-       FROM public.stock_alert_rules_list($1)`,
-      [actor],
+       FROM public.stock_alert_rules_list($1)
+       WHERE ($2::text = 'all' OR condition_met = ($2::text = 'met'))
+       ORDER BY created_at DESC, alert_id`,
+      [actor, status],
     );
   }
 

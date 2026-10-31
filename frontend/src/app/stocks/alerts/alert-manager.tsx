@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { IDLE } from '@/lib/action-state';
 import { createStockAlert, deleteStockAlert } from './actions';
+import type { AlertStatus } from './alert-status';
 
 export interface AlertStock { readonly id: string; readonly symbol: string; readonly name: string }
 export interface AlertRule {
@@ -33,7 +34,7 @@ function thresholdText(rule: AlertThreshold): string {
   return `${bps >= 0 ? '+' : ''}${(bps / 100).toFixed(2)}%`;
 }
 
-export function AlertManager({ stocks, alerts, events, isEn, initialStockId }: { readonly stocks: readonly AlertStock[]; readonly alerts: readonly AlertRule[]; readonly events: readonly AlertEvent[]; readonly isEn: boolean; readonly initialStockId?: string | undefined }) {
+export function AlertManager({ stocks, alerts, events, isEn, initialStockId, status = 'all', stockSymbol }: { readonly stocks: readonly AlertStock[]; readonly alerts: readonly AlertRule[]; readonly events: readonly AlertEvent[]; readonly isEn: boolean; readonly initialStockId?: string | undefined; readonly status?: AlertStatus; readonly stockSymbol?: string | undefined }) {
   const [createState, createAction] = useActionState(createStockAlert, IDLE);
   return (
     <div className="grid gap-5">
@@ -53,7 +54,7 @@ export function AlertManager({ stocks, alerts, events, isEn, initialStockId }: {
         </CardContent>
       </Card>
 
-      <section className="grid gap-3" aria-labelledby="active-alerts"><h2 id="active-alerts" className="text-lg font-semibold">{isEn ? 'Active alerts' : '활성 알림'}</h2>{alerts.length === 0 ? <p className="text-sm text-muted-foreground">{isEn ? 'No conditional alerts yet.' : '아직 조건부 알림이 없습니다.'}</p> : <div className="grid gap-3 md:grid-cols-2">{alerts.map((rule) => <AlertRuleCard key={rule.alert_id} rule={rule} isEn={isEn} />)}</div>}</section>
+      <section className="grid gap-3" aria-labelledby="active-alerts"><h2 id="active-alerts" className="text-lg font-semibold">{isEn ? 'Active alerts' : '활성 알림'}</h2><form method="GET" action="/stocks/alerts" className="flex flex-wrap items-end gap-3"><label htmlFor="stock-alert-status" className="grid gap-1 text-sm"><span>{isEn ? 'Current condition' : '현재 조건'}</span><select id="stock-alert-status" name="status" defaultValue={status} className="min-h-11 rounded-md border bg-background px-3"><option value="all">{isEn ? 'All' : '전체'}</option><option value="met">{isEn ? 'Condition met' : '조건 충족'}</option><option value="watching">{isEn ? 'Watching' : '감시 중'}</option></select></label>{stockSymbol && <input type="hidden" name="stock" value={stockSymbol} />}<button type="submit" className="min-h-11 rounded-md border px-4 text-sm font-semibold">{isEn ? 'Apply' : '적용'}</button></form>{alerts.length === 0 ? <p className="text-sm text-muted-foreground">{status === 'all' ? (isEn ? 'No conditional alerts yet.' : '아직 조건부 알림이 없습니다.') : (isEn ? 'No alerts match this condition.' : '이 조건에 해당하는 알림이 없습니다.')}</p> : <div className="grid gap-3 md:grid-cols-2">{alerts.map((rule) => <AlertRuleCard key={rule.alert_id} rule={rule} isEn={isEn} />)}</div>}</section>
 
       <Card><CardHeader><CardTitle>{isEn ? 'Recent triggers' : '최근 발생 알림'}</CardTitle><CardDescription>{isEn ? 'Stored server-side trigger history. Repeated triggers are suppressed until the condition resets; cooldown also protects rapid re-entry.' : '서버에서 발생한 조건 기록입니다. 조건이 해제되기 전에는 반복 발생하지 않으며 재진입에도 cooldown이 적용됩니다.'}</CardDescription></CardHeader><CardContent className="grid gap-3">{events.length === 0 ? <p className="text-sm text-muted-foreground">{isEn ? 'No alerts have triggered yet.' : '아직 발생한 알림이 없습니다.'}</p> : events.map((event) => <div key={event.event_id} className="rounded-md border p-3 text-sm"><div className="font-medium">{event.symbol} · {event.name}</div><div className="text-muted-foreground">{conditionLabel[event.condition_kind] ?? event.condition_kind} {thresholdText(event)} · {isEn ? 'trigger price' : '발생 가격'} {event.trigger_price} WLD · {event.trigger_day_change_bps >= 0 ? '+' : ''}{(event.trigger_day_change_bps / 100).toFixed(2)}%</div><time className="text-xs text-muted-foreground" dateTime={event.triggered_at}>{new Date(event.triggered_at).toLocaleString()}</time></div>)}</CardContent></Card>
     </div>
