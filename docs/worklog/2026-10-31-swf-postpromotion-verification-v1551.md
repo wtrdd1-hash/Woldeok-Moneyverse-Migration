@@ -3,7 +3,14 @@
 ## START — 2026-10-31 KST
 Owner requested repeated promotion and full related fixes. Current origin/main SHA 6cd731c068fb25097c5b717a93c285bf8d31edcc includes documentation-only history over promoted application SHA bc8cd8a6c654af0336f550643f23049a58ee1d16. Reviewed AGENTS, DOCS_INDEX, DOCUMENTATION_POLICY, PROJECT_PLAN, INTEGRATED_PLANNING_MASTER, ADMIN_TREASURY_MANAGEMENT_SPEC, RELEASING, and v1550 EN/KO release notes. Repeating successful traffic cutover or forward-only DB migration is unsafe and unnecessary. Independently verify existing Production/Test source IDs, Nginx/systemd routing, HTTP security behavior, migration and backup integrity, explicit ledger holds. No real member identity or money mutations.
 ## MID — pending
-## FINISH — pending
+## FINISH — 2026-10-31 KST
+- Result: existing Production v1550 was ALREADY promoted successfully before this verification. Revalidated authoritative runtime and live database evidence with no fresh code rollout or redundant financial migration. Actual public code remains bc8cd8a6; GitHub main 6cd731c0 is docs-only.
+- v1550 persistent Production new services active/enabled on 4164/4165 with live Nginx routing; production-current immutable v1550. Old 3564/3565 left alive, pinned to old immutable root for rollback, not mixed public deployment. Public Production and Test SHA exact. Prod+Test host release identity scripts ok true / failures empty. New release journals no error-level entries in checked interval.
+- Public smoke and security negative requests PASS; role-approved SWF DB view of 4 assets/20 events PASS; original tables restricted; migration 313 checksum and backup PASS. All unchanged by v1551.
+- Outstanding NOT fixed: 552/552 historic Treasury ledger rows have no canonical transaction link, and there is no row-by-row independent evidence to reclassify/repost money. Public Treasury 503 and dependent financial payouts/settlements must remain held. Recovery prerequisites: verified legacy source-event-to-canonical mapping for each row; balanced double-entry and idempotency proofs; no duplicated payouts; signed opening-balance and supply/vault reconciliation; fresh immutable backup and isolated Test recovery; canonical ledger gate and authenticated user financial E2E. Never invent balances or disable safety guards to obtain HTTP 200.
+- No Production member session used, no real policy mutation, no new database or web routing changes, no new runtime release, no financial payouts, and no original Test changes. v1551 commits are DOCUMENTATION / VERIFICATION ONLY and must not be relabeled as application source.
+- GitHub branch docs/swf-promotion-readback-v20261031-1551 tracks start/mid/finish records. Internal/GitHub update and changelog EN/KO in same branch; v1550 original operational evidence remains authoritative.
+
 
 ## MID — repeatable read-only live evidence, 2026-10-31 KST
 - Actual Production and Test public /api/version and /frontend-version each show exactly bc8cd8a6c654af0336f550643f23049a58ee1d16. GitHub main 6cd731c0 adds v1550 documentation only, NOT a new application binary.
