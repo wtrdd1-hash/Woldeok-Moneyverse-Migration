@@ -30,3 +30,8 @@ Pending.
 
 ## Finished — release decision
 - No merge or Test/Production promotion without all gates. Exact SHA, skipped suites and release blockers are documented in the Draft PR and host evidence logs. No WLD, database, other agent branch or scheduled-task changes.
+
+## SEO edge correction — 2026-10-31 18:54 KST
+- Isolated Next.js HTTP 200 confirmed the safe KDIC content, but actual `X-Robots-Tag` was `index, follow` despite page metadata. Root cause: global `frontend/next.config.ts` public indexing rule overrides page-level robots metadata (existing #2012 class).
+- Added a narrow `/kdic` header override to `noindex, nofollow`, preserving all other routes' existing indexing behavior. New security-header regression demonstrated RED 1 FAIL, then GREEN 9/9 plus KDIC page 2/2.
+- Rebuild and HTTP readback required for the new exact HEAD; no Production or shared runtime modification.

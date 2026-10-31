@@ -190,7 +190,11 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    return [
+      { source: '/:path*', headers: security },
+      // The public indexing default must not override the unverified KDIC page's robots metadata.
+      { source: '/kdic', headers: [{ key: 'x-robots-tag', value: 'noindex, nofollow' }] },
+    ];
   },
 
   async redirects() {

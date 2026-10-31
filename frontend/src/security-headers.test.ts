@@ -106,6 +106,15 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('keeps unverified KDIC insurance claims unindexable even on a public indexing build', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const kdic = groups.find((group) => group.source === '/kdic');
+    expect(kdic?.headers).toEqual(expect.arrayContaining([
+      { key: 'x-robots-tag', value: 'noindex, nofollow' },
+    ]));
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');

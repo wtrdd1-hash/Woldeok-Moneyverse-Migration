@@ -14,3 +14,8 @@
 ## 종료 판정
 - 릴리스 검증 미완료 시 Draft/HOLD. 금융 원장·DB 스키마·공유 DB·Test·Production 변경 없음.
 - 최종 exact-SHA 테스트/CI/운영 상태는 연결된 Draft PR의 검증 기록을 기준으로 확인.
+
+## SEO 실제 HTTP 헤더 보완 (18:54 KST)
+- 독립 Next.js 서버에서 /kdic HTTP 200을 확인했지만 공통 X-Robots-Tag가 index, follow를 반환하는 문제를 발견.
+- /kdic 경로에 한정한 noindex, nofollow 헤더 규칙을 추가. 테스트 1건 실패 재현 후 보안 헤더 9건 및 KDIC 화면 2건 통과. 다른 경로의 공통 정책은 변경하지 않음.
+- 최종 SHA 재빌드 및 HTTP 확인 전까지 운영 반영 금지.
