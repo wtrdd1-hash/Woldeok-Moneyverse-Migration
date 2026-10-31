@@ -6,3 +6,9 @@
 - Plan implement a deterministic operator-only read-only evidence audit and explicit finance release hold without fake source linkage, WLD mutation, payout or direct base-table grants. CI, official Test and Production gates are independent of narrow ledger QA.
 ## MID — pending
 ## FINISH — pending
+## MID — actual operational verification
+- Added operator-only audit scripts/release/audit-treasury-provenance.mjs with strict production DB/role binding, repeatable-read read-only transaction, 10-second statement timeout, aggregate-only privacy-preserving by-type and time/amount coincidence checks; all conditions require no synthetic links or money, including zero missing links.
+- RED test failed because audited functions not yet implemented, then GREEN focused tests 5/5. Entire release suite 127/127 PASS, monorepo typecheck PASS; script ESLint matches repository ignore patterns and is not falsely reported as lint-verified.
+- Actual immutable current Production backend DB env read as moneyverse_app / woldeok_moneyverse_dev. Production script returned expected exit code 2 and status BLOCKED_LEGACY_TREASURY_PROVENANCE. Exact counts 552 historical, 552 NULL canonical links, zero linked; 891 canonical transactions / 1829 postings; 551 without same amount/time candidate, one coincidental candidate (not evidence). No personal IDs output. The legacy sums are NOT current Treasury balances.
+- Background scheduler flags checked on both old and current Production backends: SWF execution and SWF scheduler false, no new legacy rows in the past 24 hours; public Treasury overview still HTTP 503. No DB changes/grants, member sessions or live routing changes.
+- Main unchanged at mid: ed401215a4c47db9bb1ddeb88840ffb703fe4e93. Code operator audit is separate from application release and does not certify historical payouts.
