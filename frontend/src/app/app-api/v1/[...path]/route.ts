@@ -1,3 +1,4 @@
+import { verifiedSeasonDeadlinePayload } from '@/lib/season-deadline';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -111,6 +112,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const seasonDeadlinePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events';
+  const seasonDeadlineValues = seasonDeadlinePath ? request.nextUrl.searchParams.getAll('endingWithin') : [];
+  const seasonDeadlineRequested = seasonDeadlineValues.length > 0;
+  if (seasonDeadlinePath && seasonDeadlineRequested &&
+      (seasonDeadlineValues.length !== 1 || seasonDeadlineValues[0] !== '7d' ||
+       [...request.nextUrl.searchParams.keys()].some((key) => key !== 'endingWithin'))) {
+    return gatewayProblem(400, 'Bad Request', 'season_deadline_invalid', 'endingWithin must be 7d exactly once');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -521,6 +531,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (seasonDeadlineRequested && response.ok && !verifiedSeasonDeadlinePayload(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_deadline_unverified', 'verified seven-day event deadlines are unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +562,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (seasonDeadlineRequested && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_deadline_unverified', 'verified seven-day event deadlines are unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -559,6 +575,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (seasonDeadlineRequested && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'season_deadline_unverified', 'verified seven-day event deadlines are unavailable');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 
@@ -566,6 +585,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events' && request.nextUrl.searchParams.has('endingWithin')) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

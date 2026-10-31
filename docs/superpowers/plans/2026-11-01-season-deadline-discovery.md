@@ -1,0 +1,9 @@
+# P1: verified seven-day season event deadlines
+
+Source of truth: existing read-only `public.season_active_events()` SECURITY DEFINER function; no schema, permission, financial or migration change. Member calendar users need to distinguish events ending within seven days from all currently active season events. This is a bounded filter of the existing read set, not a global event search or promise of a stable cross-request snapshot.
+
+Design: optional `endingWithin=7d` on authenticated GET `/api/v1/seasons/events`. Reject duplicates and other values (400). Capture server `asOfUtc` before the DB read; for this filter return only events whose verified `ends_at` is strictly after asOf and at or before asOf + 7 * 24h, with the asOfUtc evidence. Invalid source rows fail closed 503. Default GET remains backwards-compatible. Web calendar offers labelled full/7-day links, shows verified empty vs unavailable distinctly. Android app-api validates upstream 200 evidence and forces private no-store/noindex/referrer-policy; malformed, missing or unfiltered payload fails 503. Do not log private data, write balances, or grant table permissions. Rollback: remove optional query/UI while keeping default route unchanged.
+
+Plan / TDD: (1) RED backend parser/filter/controller tests; (2) implement narrow read-only backend helper and controller; (3) RED frontend evidence and app-api tests; (4) implement shared validation, gateway and calendar view; (5) run targeted tests, typecheck, lint, builds, security and app contract, read-only DEV PG ACL/function check, CI; (6) re-fetch main and plans, document QA and hold, draft PR only. Official Test exact-SHA authenticated E2E and independent restore remain mandatory before merge/release.
+
+Coordination: A #2272 pinned notices and #2265 repair, B/C and planning work remain untouched. Noninteractive execution uses this written design as a provisional assumption; no production rollout or irreversible change is authorized.
