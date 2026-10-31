@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
@@ -9,6 +10,7 @@ import { localeLabel } from '@/lib/locale';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatView } from './chat-view';
+import { isChatUuid, verifyChatConversations, verifyChatMessages } from './chat-evidence';
 import { ComposeMessageDialog } from './compose-message-dialog';
 
 export const dynamic = 'force-dynamic';
@@ -45,23 +47,28 @@ export default async function ChatPage({
   const listResult = await apiOrNull<{ conversations: ChatConversation[] }>(
     '/api/v1/chat/conversations',
   );
-  const conversations = listResult?.conversations ?? [];
+  const conversations = verifyChatConversations(listResult);
+  if (conversations === null) {
+    return <ChatSourceUnavailable locale={locale} />;
+  }
   let selectedId = params.conversationId;
 
   // 2. If peer query param is passed, find or open conversation
-  if (params.peer) {
+  if (isChatUuid(params.peer)) {
     const existing = conversations.find((c) => c.peer_user_id === params.peer);
     if (existing) {
       selectedId = existing.conversation_id;
     } else {
+      let openedId: string | null = null;
       try {
         const opened = await mutate<{ conversation_id: string }>('/api/v1/chat/conversations', {
           body: { peerUserId: params.peer },
         });
-        redirect(`/chat?conversationId=${encodeURIComponent(opened.conversation_id)}`);
+        if (isChatUuid(opened.conversation_id)) openedId = opened.conversation_id;
       } catch {
-        // If peer open fails (e.g. self chat or blocked), proceed
+        // Failed opens must not be treated as successful conversation creation.
       }
+      if (openedId) redirect(`/chat?conversationId=${encodeURIComponent(openedId)}`);
     }
   }
 
@@ -76,9 +83,11 @@ export default async function ChatPage({
     const msgResult = await apiOrNull<{ messages: ChatMessage[] }>(
       `/api/v1/chat/conversations/${encodeURIComponent(activeConversation.conversation_id)}/messages?limit=50`,
     );
-    if (msgResult?.messages) {
-      initialMessages = msgResult.messages;
+    const verifiedMessages = verifyChatMessages(msgResult, activeConversation.conversation_id);
+    if (verifiedMessages === null) {
+      return <ChatSourceUnavailable locale={locale} />;
     }
+    initialMessages = verifiedMessages;
   }
 
   return (
@@ -104,5 +113,28 @@ export default async function ChatPage({
         isAdmin={isAdmin}
       />
     </div>
+  );
+}
+
+function ChatSourceUnavailable({ locale }: { readonly locale: Awaited<ReturnType<typeof getServerLocale>> }) {
+  return (
+    <main className="mv-page mv-page--member mx-auto grid max-w-3xl gap-5 px-4 py-8">
+      <PageHeader
+        eyebrow={localeLabel(locale, '메시지', 'MESSAGES', 'メッセージ', '私信')}
+        title={localeLabel(locale, '쪽지함', 'Direct Messages', 'メッセージ', '私信箱')}
+      />
+      <section role="alert" aria-live="assertive" className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-5">
+        <h2 className="text-lg font-semibold">{localeLabel(locale, '쪽지 기록을 확인할 수 없습니다', 'Message history is unavailable', 'メッセージ履歴を確認できません', '无法确认消息记录')}</h2>
+        <p className="mt-2 text-sm">{localeLabel(locale,
+          '서버에서 대화 기록을 검증하지 못했습니다. 쪽지가 없다는 의미가 아니며, 확인 전에는 새 대화나 메시지를 보내지 않습니다.',
+          'The server could not verify your conversations. This does not mean your inbox is empty. Sending is paused until the source is verified.',
+          'サーバーで会話履歴を確認できません。メッセージがないという意味ではありません。確認まで送信を停止します。',
+          '服务器未能验证对话记录。这并不表示没有消息，验证前暂停发送。',
+        )}</p>
+        <Link href="/chat" className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+          {localeLabel(locale, '다시 확인', 'Retry', '再試行', '重试')}
+        </Link>
+      </section>
+    </main>
   );
 }
