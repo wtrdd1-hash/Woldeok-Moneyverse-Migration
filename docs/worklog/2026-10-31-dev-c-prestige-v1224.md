@@ -20,3 +20,8 @@
 - Official Test backend/frontend `c2129625`, Production backend `95485a299` / frontend numeric build id `1793422036848`; neither is this candidate or latest main. Production release identity and exact-SHA Test gates BLOCKED. Remote PR #2158 is DRAFT/HOLD, CI pending at checkpoint. No merge, Test/Production deploy, rollback, branch deletion or runtime restart.
 - Source review: moved prestige method comment before the existing credit route documentation; no behavioral change. Final SHA must be revalidated after this log-only/code-comment checkpoint.
 - Checklist: [x] RED/GREEN; [x] implementation; [x] initial exact-SHA local gates; [x] independent PostgreSQL; [x] main recheck; [x] draft PR; [ ] final exact-SHA rerun; [ ] final PR update.
+
+## MAIN INTEGRATION — 2026-10-31 15:27 KST
+- While running final exact-SHA checks, origin/main advanced from `30cbbe02f` to `65193a094` (finance/admin integration v1544). Source-path comparison showed no overlap with this prestige fix. To protect concurrent QA under <250 MiB available memory, stopped **only this task's** obsolete-SHA frontend test at 262/526 files; QA/A/B processes untouched. Interrupted test is NOT PASS.
+- Clean rebase of both own commits onto `65193a0940778ac659e4d4952589ee49c291c30f`; no conflicts. No main mutation. New exact-SHA full validation required; previous 646ea local passes and isolated PG 311/311 remain historical only, not final-head certification.
+- English/Korean canonical planning documents rechecked, no changes made to them. Release HOLD remains mandatory; Production and Test runtime unchanged.
