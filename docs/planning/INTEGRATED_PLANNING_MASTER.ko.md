@@ -1,5 +1,41 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1578 F675-200 iCalendar 불변 스냅샷 식별·원자적 전달 / 이슈 #2223 / 초안 / 운영 보류; 선행 Draft #2224 미병합.
+**현재 기획:** v1580 F675-201 회원 만료 달력 카테고리 저장 보기 / 초안 / 출시 보류; 이전 Draft #2230 미병합.
+
+## v2026.11.01.1580 — F675-201 회원 만료 달력 카테고리별 저장 보기 (기능 추가 / 초안 / 출시 보류)
+
+**회차·근거:** 이전 기능 보완 v1578 → 현재 기능 추가 v1580 → 다음 기능 보완 v1582(잠정). 시작·중간에 origin/main f13bbce273ffc65e8576170992d82ea00c27a1c9, AGENTS.md, README.md, 영문 원본과 국문 대조. main 기획 표제는 v1518이며 미병합 Draft #2230과 이전 제안은 기획만 복구한 상태로 구현 완료가 아니다. QA v1425 FAILED/P0. 문서 전용, 기능 OFF, RELEASE HOLD. 개발 인계 이슈 #2240.
+
+### 목적·대안·사용자 흐름
+- **F675-201:** 만료 예정 보유 아이템이 많은 회원이 카테고리·조회기간 조합을 이름 붙여 최대 **5개** 저장하고 로그인한 다른 기기에서 다시 선택한다. 대상은 인증 및 최신 동의가 확인된 보유 회원이다. 기존 /inventory에는 카테고리 탭이 있지만 만료 달력 저장 보기는 없다. F675-199 달력 및 F675-200 iCalendar 내보내기는 아직 미구현 기획이다.
+- **대안:** localStorage만 사용하면 계정 전환 시 정보 혼합과 기기 간 미동기화가 발생한다. 공개 쿼리 URL 공유는 비공개 선택 상태를 노출한다. **선택안:** 서버에 회원 본인 전용 필터 정의만 저장한다. 아이템 ID·수량·만료 결과를 저장하지 않고, 아이템·알림·구매·WLD·외부 .ics를 변경하지 않는다.
+- **화면·CTA:** /inventory → 예정 /inventory/expiry-calendar → 카테고리(전체 또는 허용값 하나), 7/30일 → 미리보기 → 보기 저장 → 이름 1~40자 → 저장/취소. 저장 보기 목록 최대 5개에서 선택·이름/조건 수정·삭제 확인을 제공한다. 6번째 저장은 비활성화하고 사유를 표시한다. 계정 간 기본 보기는 공유하지 않고 선택 상태는 현재 세션에만 둔다. 공개 공유·구독 기능은 제외한다.
+- **상태:** DISABLED, 401 미인증, 403 동의 필요, LOADING, 정상 빈 저장 목록(200), READY, SAVING, 저장 성공(201), 기존 커밋 재확인(200), 정상 빈 만료 결과(200), 리비전 충돌(409), 5개 제한(409), 요청 제한(429), 변경 결과 불명(202), 원천 장애(503), 오프라인, 취소. API 장애를 빈 보기나 빈 보유함으로 표시하지 않는다. 달력 예측값은 실제 만료 확정 또는 알림 발송 영수증이 아니다.
+
+### 데이터·API·트랜잭션 명세(모두 미구현 제안)
+- **정확한 필터:** 마이그레이션 071의 shop_catalog.category 허용값은 general/job/business/vehicle/season/luxury 6개이며 NULL은 전체를 뜻한다. 123의 shop_my_items_v2는 category·quantity·expires_at을 반환하지만 서로 다른 clock_timestamp 호출로 이미 만료된 보유분을 제외하므로 과거 만료 원장의 완전한 근거가 아니다. F675-199는 DB의 단일 asOfUtc 및 KST 날짜 경계를 사용해야 한다. inventory-view.tsx의 치장 아이템 탭 명칭을 DB 카테고리 enum으로 잘못 재사용하지 않는다. V1은 카테고리 하나 또는 전체와 windowDays 7|30만 저장하며 희귀도·자유검색·사용자 지정 기간·공유·알림 변경은 제외한다.
+- **추가형 DB 테이블, 번호 미선점:** QA #2233에서 318 마이그레이션 중복이 확인됐으므로 개발 B/C와 번호 조정 전 번호를 예약하지 않는다. inventory_expiry_calendar_views: id UUID PK, user_id UUID FK users, slot SMALLINT 1..5, display_name TEXT, name_key TEXT, category TEXT NULL 또는 6개 허용값, window_days SMALLINT 7|30, revision BIGINT >=1, deleted_at TIMESTAMPTZ NULL, created_at/updated_at. 이름은 공백 제거 후 NFC 정규화한 유니코드 1~40자, 제어문자·양방향 제어문자 거부. 서버가 name_key=lower(NFC(trim(display_name))) 계산. 활성 행에 한해 UNIQUE(user_id,slot), UNIQUE(user_id,name_key); 인덱스(user_id,deleted_at,slot). 아이템 ID·수량·금융정보는 저장하지 않는다.
+- **변경 영수증:** inventory_expiry_calendar_view_receipts: (user_id,idempotency_key) PK, action(create/update/delete), canonical_request_sha256 CHAR(64), view_id, committed_revision, result_code, committed_at, expires_at. 만료 배치 인덱스. 이름·세션·보유 스냅샷·요청 원문·잔액 저장 금지. 영수증 30일, 삭제 tombstone 90일 보존(제안값, 정리 시험 필요). 영수증 보존기간 이후 재시도는 실패 확정이 아닌 UNKNOWN. 기존 데이터 파괴형 마이그레이션 금지.
+- **DB 권한:** 본인 전용 SECURITY DEFINER 조회/생성/수정/삭제/영수증 상태 함수, 고정 pg_catalog,pg_temp search_path, 테이블 완전 수식, PUBLIC EXECUTE 회수, app role에는 EXECUTE만 허용한다. 직접 테이블 SELECT/DML 부여 금지. API는 검증된 세션에서 회원 ID를 얻고 요청에서 user_id를 받지 않는다. p_actor 필터 자체가 세션 인증의 증명은 아니므로 서버 검증 및 타인 UUID 거부 시험이 필수다. #993의 기존 권한 이상은 P0 출시 차단이다.
+- **원자성·경합:** 변경 시 회원별 트랜잭션 advisory lock을 획득하고 (user_id,idempotency_key) 영수증을 **먼저** 확인한다. 동일 키·동일 action/길이 접두 SHA-256 정규 요청이면 과거 COMMITTED 영수증 반환 후 목록 재조회, 동일 키·다른 요청이면 409. 신규 생성은 1~5 중 가장 낮은 빈 slot을 사용하며 잠금 안에서 5개 제한과 정규화 이름 유일성을 검사한다. 수정·삭제는 expectedRevision >=1 비교 후 정확히 1 증가; 삭제는 soft tombstone으로 재시도 시 부활시키지 않는다. 변경과 불변 영수증은 단일 PostgreSQL 트랜잭션으로 커밋한다. 타임아웃·영수증 부재는 UNKNOWN이며 상태 조회 전 성공/실패 단정 금지. 정리 배치는 제한량만 처리하고 유효 영수증을 지우지 않는다.
+- **Nest API:** GET /api/v1/shop/expiry-calendar/views(활성 최대 5개), POST 같은 경로 {name,category:null|허용값,windowDays:7|30}, PATCH /:viewId {name?,category?,windowDays?,expectedRevision}, DELETE /:viewId {expectedRevision}, GET /views/mutations/:idempotencyKey는 200 VERIFIED_COMMITTED 또는 202 UNKNOWN. 쓰기에는 UUIDv4 Idempotency-Key 헤더, 2KiB 이하 엄격 JSON, 동일 출처 CSRF, 인증·최신 동의, 회원당 분당 5회·하루 30회 제한(제안)을 적용한다. 상태 200/201/202/400/401/403/409/429/503. user_id·slot·영수증·생성시각·리비전 강제 지정 금지.
+- **달력·내보내기 결속:** 저장 보기를 선택하면 F675-199 요약/상세에 동일 category/windowDays를 전달하고 서버 HMAC 토큰에 카테고리·asOf·회원/세션 epoch·보기 revision을 결속한다. 보기 수정/삭제 또는 보유 변경 시 오래된 커서는 409로 거부해 서로 다른 페이지를 혼합하지 않는다. F675-200 내보내기도 같은 카테고리 필터를 검증하고 선택 범위를 명시적으로 확인해야 한다. 필터 내보내기가 검증되기 전에는 해당 CTA를 숨기며 전체 보유분을 몰래 내보내지 않는다. .ics는 일회성 집계 스냅샷으로 자동 동기화·수정·회수하지 않는다.
+- **보안·SEO·모바일·접근성:** Next 동일 출처 BFF와 Android app-api의 모든 상태에 private/no-store/noindex/no-referrer/nosniff, 상위 공개 캐시 제거. 저장 이름을 공개 URL·로그·분석 라벨·사이트맵에 포함하지 않는다. 로그아웃/계정 변경 시 진행 요청 취소·버퍼 폐기, 영구 오프라인 캐시 금지. 320px·200% 확대, 키보드·스크린리더 상태 안내·초점 표시·삭제 확인·한영 동등성·WCAG 2.2 AA. 관리자는 주간 20명 이상 집계 코호트에서 생성/선택/삭제/충돌/429/503/p95만 확인하며 개인 이름·아이템 수량은 보지 않는다.
+- **KPI 목표(미측정):** 타인 정보 노출 0, 30일 이내 재전송 중복 생성 0, 오래된 토큰의 잘못된 200 응답 0, 장애의 가짜 빈 결과 0, 10,001개 합성 보유분 기준 목록 p95 300ms 미만·필터 달력 p95 500ms 미만, 정상 요청 저장 성공률 99.5% 이상. 개인정보 검토 이후 집계 계측하며 실측 성과로 주장하지 않는다.
+
+### 개발 인계 백로그 — P0 4건 + P1 6건 = 10건, 모두 제안/미실행
+1. **P0 OPS1580-01:** #1984/#2144/#2171 Production 백엔드·프론트·엣지 불변 실행 SHA/manifest, cgroup 여유, 독립 백업 복원 및 롤백 증빙. 공개 버전 문자열만으로 실행 동일성 주장 금지.
+2. **P0 SEC1580-02:** #993/#828/#2233 DEV/Production 직접 테이블 권한, 마이그레이션 체크섬 불일치 5건 및 318 번호 충돌 해소. 기존 적용 SQL 수정·광범위 GRANT 금지.
+3. **P0 FIN1580-03:** #1976/#2191/#2232 Treasury/마켓플레이스/클럽의 복식부기 원장 출처 검증과 미기장 금융 SQL 차단. 보기 CRUD의 WLD·원장 변경 0건 입증.
+4. **P0 REL1580-04:** QA v1425 FAILED/P0(백엔드 main 2949 PASS/1 FAIL/517 SKIP, 프론트 2901 PASS, 격리 PG 316/316 PASS, 전체 감사 취약점 9건), #2231 Telegram 개인정보, #2235 SSRF 시험 후보, 최신 정확 SHA 공식 Test·로그인 E2E·독립 복원 후 운영승격. RELEASE HOLD.
+5. **P1 VIEW1580-05 Backend B:** 두 개의 본인 전용 추가형 테이블·부분 유일 인덱스·영수증 TTL·90일 tombstone, 번호 318 선점 금지, 실제 app-role 권한 음성 시험·EXPLAIN.
+6. **P1 VIEW1580-06 Backend B:** 회원 잠금+생성/수정/삭제/영수증 상태 단일 트랜잭션 SECURITY DEFINER, 요청 다이제스트·5개 제한·CAS·영수증 우선 처리·제한 배치 정리. 동시 6번째 생성 차단 시험.
+7. **P1 VIEW1580-07 Backend B:** Nest DTO·인증·동의·CSRF·2KiB 본문·UUIDv4 멱등키·200/201/202/409/429/503·회원별 제한·타인 ID 거부 계약 시험.
+8. **P1 VIEW1580-08 Dev A/C:** Next 저장 보기 선택/수정/삭제/확인·빈 결과/오프라인/UNKNOWN·세션 펜스, Android app-api 동등성·WCAG 2.2 AA.
+9. **P1 VIEW1580-09 Dev A/C:** F675-199 HMAC 토큰과 F675-200 필터 내보내기에 카테고리+revision 결속, 엣지 비공개 헤더, 미지원 필터 내보내기 CTA 숨김, 20명 이상 관리자 KPI·기능 OFF.
+10. **P1 VIEW1580-10 QA:** 격리 PG17 합성 보유 10,001개/회원 2명/동시 작성 2개, 5/6개 한도, 유니코드 NFC/대소문자 중복·제어문자, DB 카테고리와 UI 탭 차이, KST 자정 ±1µs/7·30일, 타인 UUID, 오래된 revision, 동일·다른 키 재시도, 타임아웃/202/영수증, 30일 TTL·90일 정리, 필터 변경 커서 409, 정상 빈 결과/503, 웹·Android 계정 변경·엣지 헤더·WLD/원장 변경 0건, 정확 SHA Test·복원·롤백. 모두 시험 설계일 뿐 실제 실행하지 않음.
+
+**배포·외부 근거 게이트:** 개발 B/A/C/QA 별도 브랜치, 충돌 없는 신규 번호의 순방향 SQL, 정확 후보 SHA Test Docker·인증 웹/Android E2E·백업 복원 및 모든 P0 통과 후 운영자 승인 GitOps 무중단 승격. 롤백은 기능 OFF·기존 바이너리 유지, 추가형 테이블은 보존하며 파괴적 다운마이그레이션 금지. 외부 독립 근거 신규 승인 **0건**, 누적 검증·중복 제거·분류 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 기존 영문·국문 통합 문서만 변경하고 runtime·DB·WLD·원장·Test·Production·main은 변경하지 않는다.
+
 
 ## v2026.11.01.1578 — F675-200 iCalendar 스냅샷 식별·원자적 다운로드 보완 (기능 보완 / 초안 / 운영 보류)
 
