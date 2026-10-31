@@ -1,4 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
+- **GitHub:** Draft PR #2119 OPEN/HOLD, 선행 #2113, 개발 이슈 #2112 갱신; 병합·배포 없음.
 ## v2026.10.31.1546 — F675-192 알림 잠금 이후 시각·알림함 이동·중복방지 증빙 개선 (기능 보완 / 초안 / 배포 보류)
 - **주기:** 이전 기능 추가 v1544 → 현재 기능 보완 v1546 → 다음 기능 추가 v1548(잠정). 기준 origin/main `761a55a094fb9dd383d213e817305e68c79fa23c` 시작·중간 확인; 선행 Draft #2113, 개발 이슈 #2112. 문서만 변경하며 구현·병합·배포 승인 아님.
 - **소스에서 확인:** `backend/src/notification/notification.service.ts` 알림 검색의 링크 허용 목록에 `/inventory`가 없어 `/inventory/expiring` 알림 이동 링크가 검색 결과에서 제거된다. `notification.dto.ts`는 `PRODUCT_ACTIVITY` 분류를 이미 허용하므로 임의의 새 분류를 도입하지 않는다. `public.in_app_notifications`의 번호형 마이그레이션 생성 근거·실제 권한은 미검증이며 운영 장애가 입증된 것은 아니다.

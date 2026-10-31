@@ -1,4 +1,5 @@
 # Planning v1546 — F675-192 Reminder Post-Lock Time and Safe Inbox Navigation
+- **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
 **State:** DOCS_ONLY / DRAFT / RELEASE HOLD. **Cycle:** Improvement v1542 → Addition v1544 → Improvement v1546 → Addition v1548 (provisional). **Base:** v1544 Draft #2113. **Handoff:** #2112. **Main authority:** `761a55a094fb9dd383d213e817305e68c79fa23c`.
 
 ## Start

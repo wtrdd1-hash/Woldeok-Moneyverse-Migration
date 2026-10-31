@@ -1,4 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
+- **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
 ## v2026.10.31.1546 — F675-192 Reminder Lock-Time Truth, Inbox Navigation and Idempotent Receipt (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Feature Addition v1544 → Current Feature Improvement v1546 → Next Feature Addition v1548 (provisional). Canonical authority origin/main `761a55a094fb9dd383d213e817305e68c79fa23c` checked at start and mid; parent Draft #2113; engineering issue #2112. Documentation-only; implementation, merge and release remain unapproved.
 - **Verified source gaps:** `backend/src/notification/notification.service.ts` search link allowlist accepts `/shop` and other paths but rejects `/inventory`; a reminder linking to `/inventory/expiring` loses its CTA in notification search. `notification.dto.ts` already permits `PRODUCT_ACTIVITY`, so do not invent a new category without a migration. Numbered migration provenance/ACL for `public.in_app_notifications` is still UNVERIFIED. These are source/design findings, not confirmed Production failures.

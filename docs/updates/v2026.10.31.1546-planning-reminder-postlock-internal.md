@@ -1,3 +1,4 @@
+- **GitHub:** Draft PR #2119 OPEN/HOLD, parent #2113, engineering issue #2112 updated; no merge or deployment.
 ## v2026.10.31.1546 — Reminder Lock-Time/Inbox Navigation Planning (DOCS_ONLY / DRAFT / RELEASE HOLD)
 - Previous Feature Addition v1544 → Current Feature Improvement v1546 → Next Feature Addition v1548 (provisional). Main `761a55a094fb9dd383d213e817305e68c79fa23c` rechecked start/mid; parent Draft #2113; issue #2112.
 - Source finding: notification search strips `/inventory/expiring` link; PRODUCT_ACTIVITY already allowed; inbox schema/ACL still unverified. Replace pre-lock `statement_timestamp()` with locked post-read DB decision time and exact-precision atomic inbox+receipt, safe allowlisted CTA. No claim of actual exploit.
