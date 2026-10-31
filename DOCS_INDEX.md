@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1532 — Admin bond read ACL 42501 source fix (BRANCH VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-bond-coupon-read-v1532.md) / [KO](docs/worklog/2026-10-31-bond-coupon-read-v1532.ko.md) · [Internal EN](docs/updates/v2026.10.31.1532-bonds-internal.md) / [KO](docs/updates/v2026.10.31.1532-bonds-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1532-bonds-github.md) / [KO](docs/updates/v2026.10.31.1532-bonds-github.ko.md). Existing app-role restricted catalog replaces protected-table JOIN; real 42501 repro and corrected SQL proven, 66 bond tests + monorepo typecheck + lint/backend build PASS. Treasury 552 unlinked rows and financial 503 unresolved. Official Test/Production HOLD.
+
+
 
 ## v2026.10.31.1530 — Persistent release notice source repair; finance incident verified (BRANCH ONLY / RELEASE HOLD)
 - [EN worklog](docs/worklog/2026-10-31-admin-finance-incident-v1530.md) / [KO](docs/worklog/2026-10-31-admin-finance-incident-v1530.ko.md); [internal](docs/updates/v2026.10.31.1530-admin-finance-internal.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1530-admin-finance-github.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-github.ko.md). Owner-specified miniPC MCP confirmed; TDD 9/9, typecheck, lint and Next build PASS for compact dismissible stale-release banner. Finance remains 503; 552/552 historical Treasury links absent, no persisted reconciliation, official Test/Production release HOLD. Draft #2131.
