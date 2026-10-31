@@ -1,4 +1,12 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.10.31.1564 — F675-197 회원 만료 알림 일괄 제외·복구 (기능 추가 / DRAFT / RELEASE HOLD)
+- **회차:** 이전 보완 v1562 → 현재 추가 v1564 → 다음 보완 v1566(잠정). main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` 시작·중간 확인; 미병합 Draft #2174 후속, 인계 #2182. F675-192~196 미구현 초안.
+- **목적·화면:** 본인 인증·동의 회원이 /inventory/expiring/reminders/items/bulk에서 보이는 1~50개만 명시 선택해 7일/1일/둘 다 제외·복구를 검토→확인, 단일 원자 트랜잭션. 숨겨진 전체 검색 결과 선택·WLD·보유 변경 금지. 전체 알림 OFF면 쓰기 차단, 장애는 503/UNKNOWN.
+- **API·DB:** 세션/동의/CSRF POST /api/v1/shop/expiry-reminders/mutes/bulk/preview 및 /apply, 16KiB·중복 없는 UUID 50개, 회원/세션/보유세대/DB 만료 마이크로초/리비전 결속 HMAC 120초, 멱등 UUID. SECURITY DEFINER·상품 UUID 정렬 잠금·회원+키 UNIQUE 영수증·409 전체 롤백, 분당 5배치. Android 동일 규약, 모든 상태 private/no-store/noindex/no-referrer.
+- **선행:** F675-195 보유세대·제외 DB와 통합 워커 잠금 미구현. 마이그레이션 071 복합 PK, 123 필터 조회, inventory apiOrNull 거짓 빈 목록. 마이그레이션 번호 임의 지정·앱 테이블 GRANT 금지.
+- **백로그:** P0 OPS1564-01/SEC1564-02/FIN1564-03/REL1564-04 (운영 출처/cgroup, 권한/스키마, 금융, 전체 QA/정확 SHA Test/복원); P1 BULK1564-05~10 (SQL, 원자성/워커, Nest, Next/Android, 개인정보/관리자, PG17 회귀). QA1417 프론트 2776 PASS, 전체 시험 exit124 시간초과, 취약점 13건. 10,001개/회원2/워커2 수용시험은 설계만·미실행.
+- **게이트:** 외부 신규 승인 0, 누적 검증·중복 제거·분류 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기본 OFF, DRAFT/RELEASE HOLD, 병합·런타임·DB·WLD·원장·Test·Production 변경 없음.
+
 ## v2026.10.31.1562 — F675-196 고정 09시 판단·설정 전환 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #2174 OPEN/HOLD(선행 #2167), 이슈 #2166 업데이트, 초기 SHA `dd71a7edcd422d80a7901f6e65427c0bea9c82f7`, 최종 SHA 원격 CI 확인 전, 병합/배포 없음.
 - **회차:** 이전 추가 v1560 → 현재 보완 v1562 → 다음 추가 v1564(잠정). main `bc8cd8a6c654af0336f550643f23049a58ee1d16` 시작/중간, 선행 Draft #2167 (`e866814b173fc526f3f41be233e12a695fde115f`), 이슈 #2166. F675-192~196 미구현, 문서만.
