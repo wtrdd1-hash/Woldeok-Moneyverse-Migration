@@ -1,3 +1,6 @@
+## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD)
+v1570 F675-198 pause/digest decision fence; QA1420 P0, 4 P0/6 P1, docs-only HOLD.
+
 ## v2026.10.31.1568 — F675-198 Owner Temporary Pause/Automatic Resume (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #2197 OPEN/HOLD, engineering issue #2195, initial SHA 346b6b1ad658559995896a28c31dca1be7ba8aef; final exact-SHA CI pending; no merge/deploy.
 - **Cycle:** Previous Feature Improvement v1566 → Current Feature Addition v1568 → Next Feature Improvement v1570 (provisional). Main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` checked; unmerged Draft #2189 parent; issue #2195. F675-192–198 remain design-only.

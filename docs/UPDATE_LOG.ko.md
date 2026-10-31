@@ -1,3 +1,6 @@
+## 2026-10-31 21:04 KST — Planning v1570 (DRAFT / RELEASE HOLD)
+v1570 F675-198 일시중지·통합 알림 판정 펜스; QA1420 P0, P0 4/P1 6, 문서만 HOLD.
+
 ## v2026.10.31.1568 — F675-198 회원 만료 알림 일시중지·자동 재개 (기능 추가 / DRAFT / RELEASE HOLD)
 - **GitHub:** Draft PR #2197 OPEN/HOLD, 개발 이슈 #2195, 초기 SHA 346b6b1ad658559995896a28c31dca1be7ba8aef; 최종 정확 SHA CI 대기, 병합·배포 없음.
 - **회차:** 이전 기능 보완 v1566 → 현재 기능 추가 v1568 → 다음 기능 보완 v1570(잠정). main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` 확인, 미병합 Draft #2189 후속·개발 #2195. F675-192~198 미구현 기획.
