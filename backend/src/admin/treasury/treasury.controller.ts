@@ -9,7 +9,6 @@
   Put,
   Query,
   Req,
-  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
