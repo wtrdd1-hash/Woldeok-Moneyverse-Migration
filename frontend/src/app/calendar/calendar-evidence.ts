@@ -41,7 +41,8 @@ function nonnegativeWld(value: unknown): value is string {
 }
 
 function instant(value: unknown): value is string {
-  return typeof value === 'string' && ISO_INSTANT.test(value) && Number.isFinite(Date.parse(value));
+  return typeof value === 'string' && ISO_INSTANT.test(value) &&
+    day(value.slice(0, 10)) && Number.isFinite(Date.parse(value));
 }
 
 function day(value: unknown): value is string {

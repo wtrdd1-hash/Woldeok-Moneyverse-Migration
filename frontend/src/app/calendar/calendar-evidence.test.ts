@@ -55,6 +55,7 @@ describe('calendar server evidence', () => {
     expect(verifyCalendarSeasons({ events: [{ ...season, cost_wld: 100 }] })).toBeNull();
     expect(verifyCalendarSeasons({ events: [{ ...season, cost_wld: '-1' }] })).toBeNull();
     expect(verifyCalendarSeasons({ events: [{ ...season, ends_at: 'tomorrow' }] })).toBeNull();
+    expect(verifyCalendarSeasons({ events: [{ ...season, ends_at: '2026-02-30T00:00:00.000Z' }] })).toBeNull();
     expect(verifyCalendarSeasons({ events: [{ ...season, points_per_entry: Infinity }] })).toBeNull();
     expect(verifyCalendarSeasons({ events: [{ ...season, event_id: 'bad' }] })).toBeNull();
     expect(verifyCalendarSeasons({ events: [season, season] })).toBeNull();
