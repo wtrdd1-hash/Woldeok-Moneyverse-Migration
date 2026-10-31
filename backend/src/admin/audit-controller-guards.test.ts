@@ -10,9 +10,10 @@ function guardsOn(method: keyof AdminAuditController): unknown[] {
 
 describe('AdminAuditController privileged mutation guards', () => {
   it.each(['reveal', 'setRetention', 'recordDisposition'] as const)(
-    'requires recent reauthentication for %s',
+    'does not require repeated reauthentication for %s',
     (method) => {
-      expect(guardsOn(method)).toEqual(expect.arrayContaining([CsrfGuard, ReauthGuard]));
+      expect(guardsOn(method)).toEqual(expect.arrayContaining([CsrfGuard]));
+      expect(guardsOn(method)).not.toContain(ReauthGuard);
     },
   );
 

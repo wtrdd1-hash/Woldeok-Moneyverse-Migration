@@ -19,7 +19,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -98,7 +97,7 @@ export class AbuseSecurityController {
   }
 
   @Post('ip-blocks')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Block an IP address or CIDR until manually lifted' })
   blockAddress(@Req() request: RequestWithSession, @Body() body: AddressBlockDto) {
     return this.guarded(() =>
@@ -112,7 +111,7 @@ export class AbuseSecurityController {
   }
 
   @Delete('ip-blocks/:id')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Lift a service IP block' })
   liftAddress(
     @Req() request: RequestWithSession,
@@ -130,7 +129,7 @@ export class AbuseSecurityController {
   }
 
   @Post('users/:id/permanent-suspension')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Permanently restrict a member and revoke all live sessions' })
   suspendMember(
     @Req() request: RequestWithSession,
