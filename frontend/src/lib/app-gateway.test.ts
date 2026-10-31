@@ -21,6 +21,7 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['newspaper', 'pulse'])).toBe('/api/v1/newspaper/pulse');
     expect(appGatewayPath(['crafting', 'recipes'])).toBe('/api/v1/crafting/recipes');
     expect(appGatewayPath(['marketplace', 'listings'])).toBe('/api/v1/marketplace/listings');
+    expect(appGatewayPath(['announcements'])).toBe('/api/v1/announcements');
     expect(appGatewayPath(['notifications', 'search'])).toBe('/api/v1/notifications/search');
     expect(appGatewayPath(['notifications', 'unread-count'])).toBe('/api/v1/notifications/unread-count');
     expect(appGatewayPath(['notifications', 'read-all-receipt'])).toBe('/api/v1/notifications/read-all-receipt');
@@ -76,7 +77,7 @@ describe('appGatewayOrigin', () => {
 describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
-      'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
+      'account', 'activity', 'admin', 'announcements', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
       'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
       'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
