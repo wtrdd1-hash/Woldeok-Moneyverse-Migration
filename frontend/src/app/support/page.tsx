@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSupportDateRange } from '@/lib/support-date-range';
 import { NewSupportThreadForm, SupportReplyForm } from './member-support-forms';
 
 export const dynamic = 'force-dynamic';
@@ -12,14 +13,17 @@ type Thread = { thread_id: string; subject: string; status: string; created_at: 
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string; sort?: string }> }) {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string; sort?: string; from?: string; to?: string }> }) {
   await requireMember();
   const params = await searchParams;
   const status = typeof params.status === 'string' && ['open', 'waiting_user', 'resolved'].includes(params.status) ? params.status : null;
   const q = typeof params.q === 'string' && params.q.length <= 80 && ![...params.q].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
     ? params.q.trim() : '';
   const sort = params.sort === 'oldest' ? 'oldest' : null;
-  const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}) });
+  const range = parseSupportDateRange(params.from, params.to);
+  const from = range ? params.from! : null;
+  const to = range ? params.to! : null;
+  const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from, to } : {}) } as Record<string, string>);
   const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ""}`;
   const { threads } = q
     ? await api<{ threads: Thread[] }>(path, {})
@@ -70,9 +74,15 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
           <option value="">최근 문의부터</option><option value="oldest">최근 100건 중 오래된 문의부터</option>
         </select>
         <p className="text-xs text-muted-foreground">오래된 순서도 최근 최대 100건 안에서만 정렬합니다. 전체 기간의 오래된 문의를 검색하지 않습니다.</p>
+        <label htmlFor="support-date-from" className="text-sm font-semibold">마지막 답변 날짜 시작 (한국시간)</label>
+        <input id="support-date-from" name="from" type="date" defaultValue={from ?? ''} className="min-h-11 w-full rounded-xl border bg-background p-2" />
+        <label htmlFor="support-date-to" className="text-sm font-semibold">마지막 답변 날짜 종료 (한국시간)</label>
+        <input id="support-date-to" name="to" type="date" defaultValue={to ?? ''} className="min-h-11 w-full rounded-xl border bg-background p-2" />
+        <p className="text-xs text-muted-foreground">한국시간 양끝 날짜 포함, 최대 366일. 최근 100건의 문의만 검색합니다. 날짜를 검색하려면 시작일과 종료일을 모두 입력하세요.</p>
+        {(params.from || params.to) && !range && <p role="alert" className="text-sm text-destructive">유효한 시작일과 종료일을 함께 입력하세요 (최대 366일).</p>}
         <button type="submit" className="min-h-11 rounded-xl border bg-primary px-4 text-primary-foreground">필터 적용</button>
       </form>
-      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from: from!, to: to! } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
       </Link>)}</div>
     </section>
