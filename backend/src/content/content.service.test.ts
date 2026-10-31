@@ -84,3 +84,25 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('ContentService published announcement title search', () => {
+  it('filters only the canonical latest published rows by literal case-insensitive title', async () => {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repository.publishedAnnouncements = vi.fn().mockResolvedValue([
+      {
+        announcement_id: 'c42c6218-8907-4eb1-94b9-53e2bfc97a0c',
+        title: '월덕 공지', body: '안내', image_url: null, image_alt_text: null,
+        is_pinned: true, published_at: new Date('2026-10-31T02:00:00Z'),
+      },
+      {
+        announcement_id: '11a72b77-b15b-4d36-a44f-0b4f2d51e702',
+        title: '월덕 업데이트', body: '안내', image_url: null, image_alt_text: null,
+        is_pinned: false, published_at: new Date('2026-10-31T01:00:00Z'),
+      },
+    ]);
+    const service = new ContentService(repository);
+    const result = await service.publicAnnouncements({ q: '공지' });
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ title: '월덕 공지', isPinned: true });
+    expect(repository.publishedAnnouncements).toHaveBeenCalledWith({ limit: 20 });
+  });
+});

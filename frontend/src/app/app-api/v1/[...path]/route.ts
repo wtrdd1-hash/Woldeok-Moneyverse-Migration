@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { announcementSearchMatches, normalizeAnnouncementSearch } from '@/lib/announcement-search';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -106,6 +107,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const announcementSearchPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  let announcementQuery: string | null = null;
+  if (announcementSearchPath) {
+    try {
+      if ([...request.nextUrl.searchParams.keys()].some((key) => key !== 'q') ||
+          request.nextUrl.searchParams.getAll('q').length > 1) {
+        throw new Error('invalid announcement query');
+      }
+      announcementQuery = normalizeAnnouncementSearch(
+        request.nextUrl.searchParams.has('q') ? request.nextUrl.searchParams.get('q') : undefined,
+      );
+    } catch {
+      return gatewayProblem(400, 'Bad Request', 'announcement_search_invalid',
+        'announcement title search must be 2–40 characters and may appear once');
+    }
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -330,6 +349,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (announcementSearchPath && announcementQuery !== null && response.ok &&
+      !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+      'published announcement title search is unavailable');
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -411,6 +436,22 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (announcementSearchPath && announcementQuery !== null && response.ok) {
+        const rows = compatible && typeof compatible === 'object' && !Array.isArray(compatible)
+          ? (compatible as { announcements?: unknown }).announcements : null;
+        if (!Array.isArray(rows) || rows.length > 20 || !rows.every((row: unknown) =>
+          row && typeof row === 'object' && !Array.isArray(row) &&
+          typeof (row as { announcementId?: unknown }).announcementId === 'string' &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test((row as { announcementId: string }).announcementId) &&
+          typeof (row as { body?: unknown }).body === 'string' &&
+          typeof (row as { isPinned?: unknown }).isPinned === 'boolean' &&
+          typeof (row as { publishedAt?: unknown }).publishedAt === 'string' &&
+          Number.isFinite(Date.parse((row as { publishedAt: string }).publishedAt)) &&
+          announcementSearchMatches((row as { title?: unknown }).title, announcementQuery!))) {
+          return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+            'published announcement title search is unavailable');
+        }
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -431,6 +472,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (announcementSearchPath && announcementQuery !== null && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+          'published announcement title search is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -458,6 +503,11 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&

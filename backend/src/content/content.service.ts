@@ -322,13 +322,17 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, q }: { limit?: number; q?: string } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
+    const published = (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
       normalizeAnnouncement,
     );
+    if (q === undefined) return published;
+    const needle = q.toLocaleLowerCase('ko-KR');
+    // Deliberately filter AFTER the canonical SQL limit. This is not archive search.
+    return published.filter((item) => item.title.normalize('NFC').toLocaleLowerCase('ko-KR').includes(needle));
   }
 
   async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {

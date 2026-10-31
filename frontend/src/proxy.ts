@@ -224,6 +224,12 @@ export function proxy(request: NextRequest) {
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');
   }
+  // Search URLs are ephemeral subsets of the public recent-20 page, not canonical documents.
+  // Override the global indexing header on the actual HTTP response.
+  if (targetPath === '/announcements' && request.nextUrl.searchParams.has('q')) {
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('cache-control', 'no-store');
+  }
 
   if (botInfo.isBot) {
     recordCrawlerHitAsync(request, botInfo.botName, 200);

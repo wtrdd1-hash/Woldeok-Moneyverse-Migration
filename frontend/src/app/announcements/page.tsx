@@ -6,17 +6,28 @@ import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
+import { announcementSearchResponseMatches, normalizeAnnouncementSearch } from '@/lib/announcement-search';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
 };
+
+type SearchProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export async function generateMetadata({ searchParams }: SearchProps): Promise<Metadata> {
+  const query = await searchParams;
+  return {
+    ...baseMetadata,
+    ...(Object.keys(query).length > 0 ? { robots: { index: false, follow: false } } : {}),
+  };
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -28,8 +39,25 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export default async function AnnouncementsPage({ searchParams }: SearchProps) {
+  const params = await searchParams;
+  let q: string | null = null;
+  let invalidQuery = false;
+  try {
+    if (Object.keys(params).some((key) => key !== 'q')) throw new Error('unknown query key');
+    q = normalizeAnnouncementSearch(params.q);
+  } catch {
+    invalidQuery = true;
+  }
+  const fetched = invalidQuery
+    ? null
+    : await publicApi<{ announcements: Announcement[] }>(
+        q === null ? '/api/v1/announcements' : `/api/v1/announcements?q=${encodeURIComponent(q)}`,
+        60,
+      );
+  // Do not show unfiltered results as a successful title search if a stale API ignored q.
+  const data = q !== null && fetched !== null && !announcementSearchResponseMatches(fetched, q)
+    ? null : fetched;
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -77,6 +105,24 @@ export default async function AnnouncementsPage() {
         />
       )}
 
+      <form action="/announcements" method="get" role="search" className="flex flex-wrap items-end gap-3 rounded-xl border border-border p-4">
+        <div className="flex min-w-52 flex-1 flex-col gap-2">
+          <label htmlFor="announcement-title-query" className="text-sm font-semibold">공지 제목 검색</label>
+          <input id="announcement-title-query" name="q" type="search" minLength={2} maxLength={40}
+            defaultValue={typeof params.q === 'string' ? params.q : ''}
+            placeholder="검색어 2~40자" className="min-h-11 rounded-lg border border-border bg-background px-3 text-sm"
+          />
+        </div>
+        <button type="submit" className="min-h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground">검색</button>
+        {params.q !== undefined && <Link href="/announcements" className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm">초기화</Link>}
+        <p className="w-full text-xs text-muted-foreground">최근 게시된 공개 공지 20건의 제목만 검색합니다. 전체 과거 공지 검색은 아닙니다.</p>
+        {invalidQuery && <p role="alert" className="w-full text-sm text-destructive">검색어는 2~40자이며 중복·제어문자·알 수 없는 조건은 사용할 수 없습니다.</p>}
+      </form>
+      {q !== null && !invalidQuery && data !== null && (
+        <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+          최근 20건 중 제목이 일치하는 공지 {data.announcements.length}건을 표시합니다.
+        </p>
+      )}
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED NOTICE"
@@ -88,15 +134,15 @@ export default async function AnnouncementsPage() {
             </Link>
           }
         />
-        {data === null ? (
+        {invalidQuery ? null : data === null ? (
           <EmptyState
             title="지금은 공지를 불러올 수 없어요."
             description="잠시 후 다시 확인해 주세요."
           />
         ) : data.announcements.length === 0 ? (
           <EmptyState
-            title="공개된 운영 소식을 준비하고 있어요."
-            description="검토를 마친 공지부터 이곳에 표시됩니다."
+            title={q === null ? '공개된 운영 소식을 준비하고 있어요.' : '최근 20건 중 제목이 일치하는 공지가 없습니다.'}
+            description={q === null ? '검토를 마친 공지부터 이곳에 표시됩니다.' : '전체 공지 기록을 검색한 결과가 아닙니다. 검색어를 바꿔 다시 확인해 주세요.'}
           />
         ) : (
           data.announcements.map((notice) => (
