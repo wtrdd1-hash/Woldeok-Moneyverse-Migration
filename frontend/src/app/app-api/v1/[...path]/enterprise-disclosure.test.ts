@@ -35,7 +35,7 @@ describe('Android public enterprise evidence', () => {
     expect(body.settlementStatus).toBe('NOT_VERIFIED');
   });
   it('rejects a malformed upstream 200 instead of returning a false success', async () => {
-    upstream({ ...source, overview: { ...source.overview, total_soe_assets_wld: 9007199254740993 } });
+    upstream({ ...source, overview: { ...source.overview, total_soe_assets_wld: Number.MAX_SAFE_INTEGER + 2 } });
     const response = await GET(req(), context);
     expect(response.status).toBe(503);
     expect((await response.json()).code).toBe('enterprise_disclosure_unverified');

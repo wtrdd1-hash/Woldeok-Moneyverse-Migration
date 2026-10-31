@@ -27,3 +27,6 @@ Pending. Skips are not passes. Main untouched; Test/Production untouched; no rol
 - `git fetch origin main` returned unchanged `f13bbce27`; English/KO canonical planning unchanged on main. New open A #2272, B #2273, QA #2271 and C #2270 are unrelated to public SOE disclosure. Closed #1288 remains unmerged.
 - TDD GREEN: frontend 11 tests (including Android invalid JSON/503 and exact 64-bit WLD) and Nest 2 tests PASS. SQL inspection on READ ONLY development PostgreSQL: existing projected dividends format is `108000.000000000000`; repository now explicitly truncates projected WLD to integer string for exact client formatting. No data mutated.
 - Backend source remains direct legacy table read with current development `moneyverse_app` SELECT permissions (true on both SOE and private tables), not independently verified least privilege. P0 security gate remains HOLD until dedicated DB boundary audit. Do not add grants here.
+
+## Gate failure and correction (06:47 KST)
+- Checkpoint `29b3fb612`: `pnpm lint` FAILED with two `no-loss-of-precision` violations in negative test fixtures (intentional unsafe JS literal), 1,021 existing warnings. `pnpm typecheck` PASS; app-api 184 endpoints PASS. Replaced literals with `Number.MAX_SAFE_INTEGER + 2` to preserve the invalid-number regression without violating lint. All gates must rerun on new HEAD.

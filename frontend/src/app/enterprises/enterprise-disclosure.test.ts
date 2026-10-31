@@ -22,7 +22,7 @@ describe('public enterprise source evidence parser', () => {
     expect(verifiedEnterpriseDisclosure({ ...source, settlementStatus: 'PAID' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, disclosed_at: 'nonsense' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, disclosed_at: '2026-02-31T00:00:00.000Z' })).toBeNull();
-    expect(verifiedEnterpriseDisclosure({ ...source, overview: { ...source.overview, total_soe_assets_wld: 9007199254740993 } })).toBeNull();
+    expect(verifiedEnterpriseDisclosure({ ...source, overview: { ...source.overview, total_soe_assets_wld: Number.MAX_SAFE_INTEGER + 2 } })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, soes: [source.soes[0], source.soes[0]] })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, soes: [{ ...source.soes[0], dividend_rate_bps: 11000 }] })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, soes: [{ ...source.soes[0], total_assets_wld: '-1' }] })).toBeNull();
