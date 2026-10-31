@@ -23,6 +23,16 @@ function sanitizeChatBody(input: string): string {
   return cleaned;
 }
 
+function rethrowChatReadError(error: unknown): never {
+  if (error instanceof ChatInputError) {
+    throw new BadRequestException(error.message);
+  }
+  if ((error as { code?: string } | null)?.code === '42501') {
+    throw new ForbiddenException('대화방에 참여하고 있지 않거나 계정이 제한되었어요.');
+  }
+  throw error;
+}
+
 @Injectable()
 export class ChatService {
   constructor(private readonly repo: PostgresChatRepository) {}
@@ -86,10 +96,7 @@ export class ChatService {
     try {
       return await this.repo.listConversations(actorUserId, limit);
     } catch (error) {
-      if (error instanceof ChatInputError) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
+      rethrowChatReadError(error);
     }
   }
 
@@ -104,10 +111,7 @@ export class ChatService {
       // Return in chronological order (oldest to newest) for client convenience
       return [...messages].reverse();
     } catch (error) {
-      if (error instanceof ChatInputError) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
+      rethrowChatReadError(error);
     }
   }
 
@@ -120,10 +124,7 @@ export class ChatService {
     try {
       return await this.repo.syncMessages(actorUserId, conversationId, sinceSequence, limit);
     } catch (error) {
-      if (error instanceof ChatInputError) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
+      rethrowChatReadError(error);
     }
   }
 
@@ -131,10 +132,7 @@ export class ChatService {
     try {
       return await this.repo.archiveConversation(actorUserId, conversationId, archived);
     } catch (error) {
-      if (error instanceof ChatInputError) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
+      rethrowChatReadError(error);
     }
   }
 
@@ -203,7 +201,11 @@ export class ChatService {
   }
 
   async totalUnreadCount(actorUserId: string): Promise<number> {
-    return this.repo.totalUnreadCount(actorUserId);
+    try {
+      return await this.repo.totalUnreadCount(actorUserId);
+    } catch (error) {
+      rethrowChatReadError(error);
+    }
   }
 
   async searchActiveUsers(
