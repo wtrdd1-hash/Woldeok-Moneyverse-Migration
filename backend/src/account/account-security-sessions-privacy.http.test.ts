@@ -31,7 +31,7 @@ describe('security sessions HTTP privacy contract', () => {
   };
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [AccountSecurityController],
       providers: [{ provide: AccountSecurityRepository, useValue: repository }],
     })
@@ -44,7 +44,7 @@ describe('security sessions HTTP privacy contract', () => {
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .overrideGuard(ReauthGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 

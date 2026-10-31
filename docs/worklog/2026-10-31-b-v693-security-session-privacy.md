@@ -18,3 +18,7 @@
 - Initial metadata RED 4 FAIL; after @Header GREEN 5 PASS; actual HTTP 403 RED 1 FAIL, HTTP+metadata GREEN 10 PASS.
 - New `AccountSecurityPrivateResponseGuard` runs before session/auth/consent guards and sets response headers; route metadata remains for successful HTTP responses. No DB or auth decision change.
 - Refetched origin/main; no overlap in touched files; EN/KO plan SHA256 unchanged. Full gates pending.
+
+## Remote CI feedback — 17:49 KST
+- Initial PR #2178 verify/runtime-check failed on repository-wide Next ESLint rule `@next/next/no-assign-module-variable` in the new HTTP test (`const module`). This is our test naming error, not a pre-existing issue.
+- Renamed to `testingModule`; focused ESLint PASS and focused HTTP/metadata 9/9 PASS. Full gates will be rechecked on the final SHA. No merge or deploy.
