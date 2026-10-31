@@ -1,6 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { groupDigits } from '@/lib/money';
 import type { AdminBankOverview, AdminCreditGrade } from '../types';
@@ -11,6 +16,21 @@ interface Props {
 }
 
 export function BankRiskDashboard({ overview, grades }: Props) {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      router.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      toast.success('은행 여신 및 리스크 지표가 최신으로 동기화되었습니다.');
+    } catch {
+      toast.error('은행 데이터 갱신에 실패했습니다.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   // The loan book is capped at 50 rows; never infer portfolio health from it.
   // These two SQL aggregates cover all open loans, including rows not listed.
   const totalPrincipal = BigInt(overview.outstanding_amount);
@@ -68,9 +88,21 @@ export function BankRiskDashboard({ overview, grades }: Props) {
         <CardHeader>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <CardTitle className="text-base">은행 여신 리스크 & 건전성 모니터링</CardTitle>
-            <Badge variant={riskStatus.variant} className="text-xs font-bold">
-              {riskStatus.label}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={isRefreshing}
+                className="h-7 px-2 text-xs gap-1 border-border/80"
+              >
+                <RefreshCw className={`size-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                새로고침
+              </Button>
+              <Badge variant={riskStatus.variant} className="text-xs font-bold">
+                {riskStatus.label}
+              </Badge>
+            </div>
           </div>
           <CardDescription className="text-xs">
             전체 미상환 잔액 대비 연체 미상환 잔액 비율입니다. 아래 상세 목록은 최대 50건
