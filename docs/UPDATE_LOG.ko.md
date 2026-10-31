@@ -1,3 +1,11 @@
+## 2026-11-01 기획 v1576 — F675-200 회원 만료 달력 iCalendar 일회성 내보내기 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1574 → 현재 기능 추가 v1576 → 다음 기능 보완 v1578(잠정). 기준 main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834` 재조회. #2218 OPEN/미병합이며 F675-199 v1572/v1574의 가치 있는 설계를 기존 문서 6개에 보존. 개발 이슈 #2223. 신규 분산 기획 파일 없음.
+- 인증 회원이 명시적으로 선택하는 7/30일 KST 만료 예상 .ics 파일: 날짜별 종류·수량 합계, RFC5545 하루 이벤트 최대 30개/64KiB, CRLF·UTF-8 75바이트 접기·HMAC 불투명 UID, 상품명·개인정보·알림·외부 구독 없음. Nest/Next/Android 인증·동의·CSRF, 200 파일/204 확인된 빈 상태/503 원천 불명, private/no-store/noindex/nosniff/attachment, 기본 OFF. F675-199는 아직 미구현 선행조건.
+- P0 4(운영 실행 SHA, DB 권한·체크섬, 금융 원장, 정확 SHA Test·복원) + P1 6(SQL·ICS 인코더·Nest·Next/Android·개인정보/KPI·격리 PG17 회귀). QA #2220은 기존 Test SHA만 검증했고 Production은 차단. 수용시험은 제안만 했으며 실행하지 않음. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 수정, 런타임/DB/WLD/원장/Test/Production/병합 없음. RELEASE HOLD.
+
+## 2026-10-31 23:xx KST — 기획 v1574 (기능 보완 / 초안 / 운영 보류)
+미병합 종료된 선행 #2212의 F675-199 달력 설계를 최신 main 기반 통합문서에 복구하고, HMAC asOf 조회 토큰, KST 자정/TTL, 요약→상세 HMAC 서명 날짜 토큰, 마이크로초 keyset, 409 만료와 503 원천 장애 구분, 본인 인증/CSRF/개인정보/Android 및 10,001건 QA 계약을 강화. 개발 이슈 #2211, P0 4/P1 6. 런타임/DB/Test/운영/WLD 변경 없음. 외부 신규 0건·누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. main 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834. Draft #2218 OPEN; 이슈 #2211 댓글 6544459745; CI 대기, 운영 보류.
+
 ## 2026-10-31 개발 C v1233 — 쪽지 원천 조회 및 안전한 재조회 (초안 / 배포 보류)
 - 기준 main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`. 쪽지/대화 목록 조회 실패·비정상 응답을 실제 빈 목록으로 표시하지 않고, 조회 실패 중 신규 대화 자동 생성 금지. UUID·정확한 bigint·시각·중복·다른 대화 메시지 검증, 접근성 재조회 안내. 기존 Nest 계약 재사용, 금융/DB 쓰기 없음.
 - 집중 9 PASS, 프론트 2,785 PASS, 백엔드 2,786 PASS/501 SKIP, 계약 41 PASS, DB 62 PASS/4 SKIP, Lint/Typecheck/Build/API 184 PASS. 격리 PostgreSQL 17.11 마이그레이션 312 PASS지만 앱 역할의 쪽지 원본 테이블 SELECT 거부 확인(B v668 연계). 전체 보안 취약점 13건, QA `--inventory` 누락, 공식 인증 E2E 및 원격 CI 미완료. **운영 배포 보류**.

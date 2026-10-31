@@ -1,5 +1,101 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+**현재 기획:** v1576 F675-200 회원 만료 달력 iCalendar 일회성 내보내기 / 이슈 #2223 / 초안 / 운영 보류; 선행 #2218 미병합.
+
+## v2026.11.01.1576 — F675-200 회원 보유 아이템 만료 달력 iCalendar 파일 내보내기 (기능 추가 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 보완 v1574 → 현재 기능 추가 v1576 → 다음 기능 보완 v1578(잠정). main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834` 시작·중간 확인. AGENTS.md, README.md, 영문 PROJECT_PLAN.md를 정본으로 한국어 동등성을 유지한다. main의 기획 표제는 여전히 v1518이고 중간 기획이 병합됐다는 뜻이 아니다. v1574 Draft #2218은 OPEN/미병합이며 그 안의 F675-199(v1572/v1574) 달력 설계를 이번 독립 브랜치의 기존 통합문서에 보존한다. 개발 이슈 #2223. 실제 기능 구현이나 배포가 아닌 문서 기획이다.
+
+### 목적·대안·선행조건·회원 이용 흐름
+- **목적/대상:** 인증·동의가 유효한 회원이 본인 보유 아이템의 만료 **예상 날짜**를 개인 달력에 직접 옮겨 적지 않고 일회성 파일로 저장한다. 현재 `/inventory`는 목록이며 F675-199 `/inventory/expiry-calendar`는 아직 미구현·기본 OFF인 선행 기능이다. 양쪽 구현·검증·배포 전까지 이 기능을 사용 가능하다고 표시하지 않는다. 파일은 구독·실시간 동기화·알림 발송 증빙·금전 거래·미래 보유 보증이 아니다.
+- **대안:** (A) 기존 전체 보관함을 브라우저에서 .ics로 변환하면 `apiOrNull` 장애를 빈 보유로 오인하고 만료 판단시각이 불일치하며 10,001건 전송 부담이 있다. (B) OAuth/webcal 구독은 제3자 자격증명·공개 토큰 URL·동기화·보관 위험이 크다. (C) **채택:** 서버에서 본인 확인된 단일 SQL 문장으로 **한국시간 날짜별 합계만** 만든 일회성 .ics. 영구 내보내기 테이블, 외부 캘린더 API, 예약 작업, 금융 쓰기가 없다.
+- **진입/CTA:** `/inventory` → `/inventory/expiry-calendar` → '달력 파일(.ics) 받기' → 7일/30일 선택 및 '이 파일은 캘린더 앱에 저장될 수 있고 머니버스에서 아이템을 삭제해도 가져온 일정은 삭제되지 않습니다' 안내 확인 → '한 번 다운로드' 또는 '취소'. 자동 다운로드·URL 구독·자동 가져오기·백그라운드 공유·기본 동의 금지. 검증된 파일 생성 후 DB 기준 한국시간 시각과 날짜 수 표시. 반복 가져오기 시 앱에 따라 중복 또는 오래된 일정이 남을 수 있음을 명시한다.
+- **상태:** IDLE/CONFIRMATION/GENERATING/VERIFIED_FILE_READY(200)/VERIFIED_EMPTY(204, 파일 없음)/INVALID_REQUEST(400)/AUTH_REQUIRED(401)/CONSENT_REQUIRED(403)/ACCOUNT_CHANGED(409, 바이트 폐기)/RATE_LIMITED(429, Retry-After)/SOURCE_UNAVAILABLE(503, 파일 없음)/OFFLINE/CANCELLED. 조회 장애를 빈 일정으로, NULL을 0으로, 예측을 실제 알림 영수증으로 표시하지 않는다.
+
+### API·응답·개인정보·RFC 5545 파일 계약
+- **Nest 내부 API:** `POST /api/v1/shop/expiry-calendar/export`, JSON `{windowDays:7|30}`만 허용, 2KiB 요청 상한. 회원·기준시각·시간대·파일명·UID·아이템 ID를 클라이언트에서 받지 않는다. 검증된 세션으로 actor를 확정하고 인증·동의·CSRF 검사. Next 동일 출처 BFF `POST /api/inventory/expiry-calendar/export`는 `server-only` API 클라이언트 사용. Android `/app-api/v1/shop/expiry-calendar/export` 인증 게이트웨이 동등성. Nest 전체 API를 공개 엣지 경로로 열지 않는다. 회원당 분당 3회·일 10회, IP 자원 상한 및 회원별 동시 1회는 **실측 전 제안치**다.
+- **응답:** `200 text/calendar; charset=utf-8`, `Content-Disposition: attachment; filename="moneyverse-expiry-YYYYMMDD.ics"`(서버 KST 날짜), 전체 ≤64KiB·`VEVENT` 최대 30개(아이템별이 아니라 만료 날짜별 1개). 본인 DB 조회 성공으로 대상이 없음을 증명한 경우에만 `204`, 400/401/403/409/429/503에는 캘린더 바이트를 포함하지 않는다. 429는 `Retry-After`. Next/Nest/Android/실제 엣지의 200/204/오류 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, 필요 시 `Vary: Cookie`. GET/공유 URL/사이트맵/검색 색인/회원 간 캐시 재사용 금지. 파일명은 서버 고정값이며 사용자 입력을 헤더·파일에 반사하지 않는다.
+- **RFC 5545:** UTF-8과 모든 줄 CRLF, 줄 길이 **75바이트 이하**에서 UTF-8 문자 중간을 자르지 않는 접기(CRLF+공백). TEXT의 역슬래시·쉼표·세미콜론·개행 이스케이프, NUL/제어문자/CRLF 주입 거부. `BEGIN:VCALENDAR`/`VERSION:2.0`/고정 `PRODID`/`CALSCALE:GREGORIAN`/`METHOD:PUBLISH`. 만료 날짜별 `VEVENT`에 `UID`, DB 기준 UTC 초 단위 `DTSTAMP`, `DTSTART;VALUE=DATE:YYYYMMDD`, **다음 KST 날짜**를 종료일로 하는 `DTEND;VALUE=DATE:YYYYMMDD`(종료일 제외), `TRANSP:TRANSPARENT`, 정확한 상품 **종류 수**가 포함된 고정 한국어 `SUMMARY`, 정확한 보유 **수량 합계**와 스냅샷·비동기화 경고 `DESCRIPTION`. 날짜형 이벤트에는 `TZID` 불필요. 상품명·회원 UUID·이메일·외부 URL·`ATTENDEE`/`GEO`/`VALARM`/금융 정보/서명 토큰 삽입 금지.
+- **UID 개인정보:** 회원 UUID+KST 날짜+형식 버전을 도메인 분리한 HMAC-SHA256으로 불투명 소문자 16진 문자열을 만들고 고정 비라우팅 `@moneyverse.invalid`를 붙인다. 서버 키는 절대 노출하지 않는다. 같은 회원/날짜/버전은 같은 UID가 될 수 있으나 캘린더 앱이 중복·삭제를 자동 정리한다는 보장은 없다. 키 교체 시 기존 UID 파생을 유지하거나 버전 변경·중복 가능성을 명시한다. UID는 인증 토큰이 아니다.
+
+### DB 판단시각·제약·트랜잭션·운영 경계
+- **원천:** 주 PostgreSQL **단일 SQL 문장**에서 `asOfUtc` 한 번, `kstToday`를 `Asia/Seoul`로 정한다. 인증 회원의 `user_items` 중 `quantity>0`, `expires_at IS NOT NULL`, `expires_at>asOfUtc`, 만료일이 [KST 오늘 00:00, 오늘+7/30일 00:00)에 있는 행만 날짜별 집계한다. 상품 **종류 수**는 회원+상품 PK 행 수, **수량**은 `SUM(quantity)::bigint`를 정확한 10진 문자열로 직렬화하며 큰 수를 JS Number로 변환하지 않는다. 최대 30일 그룹 오름차순. 만료 날짜는 아이템 만료일이지 효과 만료·유지비·알림·미래 보유 증명이 아니다. SQL 성공 전 빈 결과를 확정하지 않는다.
+- **DB 권한:** F675-199의 제안된 본인 요약 조회 함수를 재사용한다. 아직 없다면 Backend B와 조정한 신규 순방향 마이그레이션의 migrator 소유 `SECURITY DEFINER`, 고정 `search_path`, 명시적 본인 필터, 스키마 한정 테이블, `REVOKE EXECUTE FROM PUBLIC`, 앱 역할에 `EXECUTE`만 부여한다. `user_items`·금융 테이블 직접 SELECT/DML 권한 추가 금지; 개발 앱 권한 불일치 #993 해결 전 운영 보류. 기존 PK(user_id,catalog_id), 수량 제약, 만료 의미 유지. 영구 테이블·인덱스·쓰기 트랜잭션은 기본적으로 추가하지 않는다. 부분 인덱스 `(user_id,expires_at,catalog_id) WHERE quantity>0 AND expires_at IS NOT NULL`는 10,001건 EXPLAIN/BUFFERS와 쓰기 비용 입증 후에만 검토하고 마이그레이션 번호를 B와 조율한다.
+- **정합성:** 한 SQL 문장의 MVCC 스냅샷을 사용하지만 파일은 그 순간의 예상이며 실시간 동기화나 영구 기록이 아니다. UI 요약과 파일 생성이 서로 다른 요청이면 결과가 달라질 수 있으므로 파일 고유 as-of를 표시한다. 클라이언트가 보낸 지문으로 타 회원 파일을 승인하지 않는다. 응답 커밋 전에 계정/동의/세션 epoch가 바뀌면 바이트 폐기. **전체 바이트 생성·64KiB 검증 후** 200 헤더를 확정하고 스트리밍 오류나 원천 불명 시 503, 부분 .ics를 200으로 반환하지 않는다. 이번 기획에서 보유 아이템·영수증·계정잔액·원장·WLD·DB 스키마 변경 없음.
+
+### 관리자·보안·모바일·SEO·지표·시험·배포
+- **보안/악용:** 본인 소유권(BOLA), 동의 만료, CSRF, 반복 요청, SQL/직렬화 CPU 제한, HMAC 키 회전, 파일명/TEXT 주입 방어, 고정 MIME/다운로드 헤더. 로그에는 익명 오류 코드·소요시간·이벤트 수·안전한 배포 버전만 기록하고 회원 ID·상품명·UID·파일 본문은 남기지 않는다. 429와 원천 불명 503 구분. Next 메타데이터만 믿지 않고 실제 엣지 헤더 검증. 외부 캘린더 앱으로 데이터가 넘어가는 것은 **회원의 명시적 선택**이며 이후 원격 삭제 불가.
+- **웹/Android/a11y:** 320px, 200% 확대, WCAG 2.2 AA, 44px 터치 영역, 명확한 확인창, Escape/취소·포커스 복귀, 포커스를 빼앗지 않는 aria-live, 모션 감소. Android는 명시적 OS 공유/저장 인텐트와 일시적인 범위 제한 URI만 사용하고 완료 시 접근을 해제한다. 자동 업로드·영구 앱 캐시·다른 앱 자동 실행 금지. 로그아웃/계정 전환 시 바이트·요청 폐기. 웹은 object URL 해제, 회원 페이지 noindex 및 사이트맵 제외.
+- **관리자/KPI:** 주간 다운로드 시작·검증된 200/204·400/409/429/503·7/30 선택·위험 고지 확인·SQL/직렬화 p50/p95·크기 초과·계정 전환 폐기 집계만 제공하고 서로 다른 회원 20명 미만 코호트는 숨긴다. 개별 회원·상품·UID·파일 내용 조회 기능 없음. 수용 **목표(실측 아님)**: 타 회원 파일 0, 원장 쓰기 0, 부분 파일 0, RFC 파서 오류 0, 보유 10,001건 p95<500ms.
+- **P0 4건:** OPS1576-01 (#1984/#2144/#2171) 실제 Production backend/frontend/edge SHA·불변 매니페스트·cgroup 여유·독립 복원/롤백; SEC1576-02 (#993/#828/#2111) DB 앱 권한·체크섬·본인 격리; FIN1576-03 (#1976/#2191, Draft #2221) Treasury·마켓 원장 출처와 미원장 결제 차단; REL1576-04 (#1088/#2144, QA Draft #2220) 필수 CI/보안/감사, 공식 Test의 **새 후보 정확 SHA** 인증 E2E, 독립 복원 후 운영자 승인 GitOps 승격. QA #2220의 Test 검증은 **기존 배포 SHA**에 한정되고 최신 main을 인증한 것이 아니며 Production 매니페스트도 없다. **P0 RELEASE HOLD**.
+- **P1 6건:** EXPORT1576-05 Backend B 본인 SQL·단일 시각·집계·bigint·EXPLAIN; EXPORT1576-06 Backend B RFC5545 인코더·UID·64KiB·부분파일 차단; EXPORT1576-07 Backend B Nest 인증/CSRF/2KiB/속도/상태코드; EXPORT1576-08 개발 A/C Next·Android 확인/다운로드·접근성·계정전환; EXPORT1576-09 개발 A/C 실제 엣지 개인정보/SEO·관리자 집계·기능 스위치; EXPORT1576-10 QA 격리 PG17 10,001건·회원 2명·동시 내보내기 2개·KST 자정 ±1µs·NULL/만료/0수량·7/30일 경계·30개 이벤트·64KiB·UTF-8/CRLF 주입·타 회원·204/503·429·Android/Next/엣지·RFC 파서 왕복·원장 무변경·롤백. **전부 설계한 시험이며 실제 실행하지 않았다.** 개발 A/B/C/QA 별도 브랜치로 이관.
+- **무중단/롤백:** `INVENTORY_EXPIRY_CALENDAR_EXPORT_ENABLED` 기본 OFF, F675-199 원천 검증 선행. 필요 시 순방향 스키마, 정확 SHA CI→공식 Test→보안/DB/금융/복원→운영자 승인 후 OFF→내부→제한 코호트→확대. 문제 발생 시 스위치 OFF, 적용된 마이그레이션을 파괴적으로 되돌리지 않는다. 이미 외부 앱에 가져온 파일은 머니버스에서 원격 취소할 수 없다. 기획 예약은 운영 배포 금지.
+- **외부 독립 근거:** IETF RFC 5545 (https://www.rfc-editor.org/rfc/rfc5545.html), OWASP 파일 다운로드 방어 (https://owasp-aasvs4.readthedocs.io/en/latest/12.3.4.html)를 설계 참고로 확인했지만 10,000건 근거 코퍼스 승인 수에는 넣지 않았다. 신규 실증·중복 제거·근거 분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 문서 전용이며 실제 기능 수용시험·런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+
+## v2026.10.31.1574 — F675-199 보유 아이템 만료 달력 조회 정합성 강화 (기능 보완 / 초안 / 운영 보류)
+
+**주기·근거:** 이전 기능 추가 v1572 → 현재 기능 보완 v1574 → 다음 기능 추가 v1576(잠정). 정본 main 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834 시작·중간 확인. 선행 Draft #2212는 22:49 KST에 **미병합 종료**됐으며 브랜치도 삭제됐다. 새 브랜치는 최신 main에서 출발해 아래 v1572의 가치 있는 설계를 명시적으로 복구한다. main의 기존 기획 표제는 v1518이므로 중간 기획안이 병합됐다고 주장하지 않는다. Draft PR #2218 OPEN/초안/운영 보류, 개발 이슈 #2211 OPEN(댓글 6544459745). 이번 작업은 문서 전용이며 실제 기능·배포가 아니다.
+
+### 발견한 설계 결함과 선택
+- **실제 운영 사고가 아닌 미구현 설계의 결함:** v1572 요약·날짜별 API는 asOfUtc를 응답하지만, 첫 날짜 상세 요청과 다음 페이지 요청에 요약 조회의 DB 판단시각을 결속하는 계약이 없다. 마이그레이션 123의 shop_my_items_v2는 만료 조건에 clock_timestamp()를 사용하므로 요청 간 동일한 기준시각을 보장하지 못한다. 요약과 상세 사이에 만료·상품명 변경·한국시간 자정이 발생하면 한 화면에서 서로 다른 시점의 결과를 하나의 달력처럼 보여줄 수 있다. 날짜별 지문만으로는 요약과 첫 상세 페이지의 일치를 입증할 수 없다.
+- **대안:** (A) 기존 보관함을 브라우저에서 필터링하면 조회 장애를 빈 결과로 오인하고 10,001건에 부적합, (B) 회원별 영구 스냅샷은 개인정보 보관·쓰기 복잡성 증가, (C) **선택** 120초 이내 HMAC 서명 조회 문맥과 날짜별 전체 결과 지문을 매 요청 DB에서 재검증한다. 신규 쓰기 테이블·알림 선행 구현·WLD/원장 변경은 없다. 120초는 실측되지 않은 설계값이다.
+
+### 화면·API·DB 계약
+- **회원 흐름:** /inventory → /inventory/expiry-calendar, 본인 인증·동의 완료 회원만 접근. 기본 7일/선택 30일, 날짜 선택, 20건 기본·최대 50건, 새로고침·보관함 복귀. 상태 LOADING/VERIFIED_DAYS/VERIFIED_EMPTY/VERIFIED_DAY_EMPTY/MORE_ITEMS/STALE_VIEW(409)/AUTH_REQUIRED(401)/CONSENT_REQUIRED(403)/RATE_LIMITED(429)/SOURCE_UNAVAILABLE(503)/ACCOUNT_CHANGED. 장애를 빈 달력으로 표시하지 않는다. '한국시간 [시각] 기준 만료 예상이며 알림 발송 기록이 아닙니다'를 표시한다. 409 시 전체 날짜 상세 페이지를 폐기하고 요약부터 재조회한다. 320px·200% 확대·WCAG 2.2 AA·키보드/스크린리더·Android 동등성을 적용한다.
+- **요약 POST:** /api/v1/shop/expiry-calendar/summary {windowDays:7|30}; 인증·동의·CSRF, 요청 2KiB 이내, 회원별 분당 20회는 제안치. 단일 주 DB SQL 문장에서 asOfUtc와 한국시간 오늘 날짜를 한 번 정한다. 회원 user_items의 quantity>0, expires_at 비NULL, expires_at>asOfUtc, 만료일이 [한국시간 오늘 00:00, 오늘+7/30일 00:00)에 포함된 행만 집계한다. 응답 200 VERIFIED {asOfUtc,kstToday,windowDays,viewToken,days:[{kstDate,typeCount,unitCount,dayToken,earliestExpiryUtc}],totalTypes,totalUnits}. 검증된 빈 결과만 200. 유형 수는 회원+상품 PK 행 수, 수량은 SUM(quantity)::bigint이며 JS 안전정수 범위를 넘으면 정확한 십진 문자열로 전송한다. dayToken은 viewToken 해시와 KST 날짜 및 날짜 전체 지문을 서버 HMAC으로 결속한 서명 토큰이며, 지문은 정렬된 날짜 전체 행의 상품 UUID·마이크로초 만료시각·수량·화면 표시 상품 필드를 길이 구분 정규 인코딩으로 해시한다.
+- **서명 조회 토큰:** 서버 HMAC은 버전, 회원 UUID, 인증 세션/계정 epoch, 6자리 마이크로초 UTC asOf, 한국시간 오늘, 7/30일, 발급시각, 만료시각=min(asOf+120초, 다음 KST 자정)을 결속한다. 인증 회원 식별자는 서버 세션에서만 얻고 클라이언트 임의 asOf를 받지 않는다. 키 ID·회전·상수시간 검증·2KiB 요청 상한을 둔다. 만료 경계 이상 또는 날짜 변경 시 409 STALE_VIEW, 빈 결과로 대체하지 않는다.
+- **날짜 POST:** /api/v1/shop/expiry-calendar/day 첫 요청 {viewToken,kstDate,dayToken,limit:20|50}, 다음 요청은 cursor 추가. 날짜는 서명된 7/30일 범위 안이어야 한다. 서명된 asOfUtc를 사용해 단일 주 DB 문장에서 날짜 전체 지문을 다시 계산하고 서명이 검증된 dayToken 내부의 지문과만 비교한다. 클라이언트가 제공한 미서명 지문은 신뢰하지 않는다. 불일치하면 409. 정렬은 (expires_at ASC,catalog_id ASC), DB 마이크로초를 그대로 사용하고 JS Date 비교·OFFSET을 사용하지 않는다. 다음 페이지 커서는 viewToken 해시·서명된 dayToken 해시·회원/세션·날짜·전체 지문·정확한 마지막 시각/UUID·버전·남은 TTL을 HMAC으로 결속한다. 토큰 형식 오류 400, 타 회원 403, DB/ACL/스키마 불명 503. 같은 건수로 상품이 교체되거나 상품 표시명이 바뀌어도 409를 반환해야 한다.
+- **정합성 한계:** 한 SQL 문장의 MVCC 스냅샷은 일관되지만 HTTP 요청 사이의 DB 트랜잭션 스냅샷은 공유되지 않는다. 동일 지문은 관측된 두 시점의 날짜별 내용이 같음을 의미할 뿐, 중간 변경 후 원상복구(ABA) 부재나 다른 날짜까지의 전역 원자성을 증명하지 않는다. 기준시각 이후 만료된 항목은 명시된 'asOf 기준 예상'에 120초 내 남을 수 있으며 실시간 보유라고 주장하지 않는다. 지문 정확성·성능을 입증하지 못하면 기능 스위치를 OFF로 유지하고 서명 없는 커서를 발행하지 않는다.
+- **DB 권한:** forward-only SECURITY DEFINER, migrator 소유·고정 search_path·moneyverse_app EXECUTE만 허용; user_items·catalog·금융 테이블 직접 권한 추가 금지. 기존 shop_my_items_v2는 동일 asOf 조회의 근거가 될 수 없다. Nest가 세션에서 actor를 결정해야 하며 DB 함수의 p_actor 인자만으로 탈취된 앱 DB 자격증명의 타 회원 조회가 원천 차단되는 것은 아니다. 인덱스 (user_id,expires_at,catalog_id) WHERE quantity>0 AND expires_at IS NOT NULL은 EXPLAIN ANALYZE BUFFERS 및 쓰기 비용 검증 후에만 검토한다.
+- **보안·SEO·관리자:** Next/Nest/Android의 200·4xx·5xx 모두 private/no-store/noindex/no-referrer, 필요 시 Vary Cookie, 사이트맵 제외. URL·분석 로그에 회원/아이템 식별자 노출 금지, 계정 전환 시 응답 폐기. 관리자는 서로 다른 회원 20명 이상 집계만 확인. 요약/날짜 조회, 7→30일 전환, 409/429/503, p95, 커서 재시도를 측정한다. p95<300ms는 미측정 목표. INVENTORY_EXPIRY_CALENDAR_ENABLED 기본 OFF.
+
+### 개발 이관 및 배포 조건 (P0 4건 + P1 6건)
+- **P0 OPS1574-01** (#1984/#2144/#2171): 실제 backend/frontend/edge SHA, cgroup 여유, 독립 복원·롤백 증빙. 타 작업 종료 금지.
+- **P0 SEC1574-02** (#993/#2111): PG17 체크섬·앱 권한·본인 조회, user_items/금융 직접 DML 권한 없음 증명.
+- **P0 FIN1574-03** (#1976/#2153/#2191): Treasury/마켓 원장 출처 증명. 달력 자체는 읽기 전용, WLD·원장 변경 0.
+- **P0 REL1574-04** (#1088/#1663/#2206): 미병합 종료 기획 복구, A/B/C/QA 중복 변경 정리, 공식 Test 정확 SHA 인증 E2E, 독립 복원·운영자 승인.
+- **P1 CAL1574-05 Backend B:** 한 SQL 문장 기준시각·한국시간 날짜·HMAC 서명 지문 토큰 요약, 10,001건 EXPLAIN·bigint 검증.
+- **P1 CAL1574-06 Backend B:** HMAC 조회 토큰/커서, 마이크로초 keyset, 지문 재검증, 자정/TTL 409·키 회전.
+- **P1 CAL1574-07 Backend B:** Nest 인증/동의/CSRF, 200/400/401/403/409/429/503, 요청 2KiB·속도 제한.
+- **P1 CAL1574-08 개발 A/C:** Next/Android 화면·상태 동등성, 503와 진짜 빈 결과 구분, 계정 전환·스크린리더·확대.
+- **P1 CAL1574-09 개발 A/C:** 엣지 개인정보·SEO 헤더, 기능 OFF, 20명 이상 관리자 집계, 성능 실측.
+- **P1 CAL1574-10 QA:** 격리 PG17 10,001건/회원 2명/동시 조회 2개, KST 자정 ±1µs, 동일 밀리초 다른 마이크로초, 페이지 사이 만료, 같은 수량 상품 교체·상품명 변경, 토큰 119/120/121초, 타 회원 커서, 64비트 집계, 앱 직접 테이블 권한 거부, 원장 쓰기 0, Next/Android/롤백 회귀. **설계만, 미실행.**
+- **게이트:** 마지막 상세 근거 QA v1420 FAILED/P0: 백엔드 2786 PASS/501 SKIP, 프론트 2776 PASS, 격리 PG17 312/312, 보안 취약점 13건, Test FX500, DB ACL/체크섬, 금융 출처, 정확 SHA Test/독립 복원 미해결. 이번 회차에 최신 전체 QA 통과는 확인되지 않았다. 23:05 KST main의 Build Production Release는 진행 중이었고 성공·승격으로 해석하지 않는다. 개발은 별도 브랜치·전진형 마이그레이션·Test 정확 SHA·운영자 승인을 거친다. 롤백은 기능 OFF, 파괴적 스키마 롤백 금지. **초안 / 운영 보류.**
+- **외부 독립 근거 10,000건 게이트:** 이번 신규 검증·중복 제거·분류 승인 0건, 누적 승인 수량 UNKNOWN/10,000. **BLOCKED / IN PROGRESS**이며 달성 주장 금지.
+
+## v2026.10.31.1572 — F675-199 회원 보유 아이템 만료 달력 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**Historical status correction:** predecessor Draft #2212 CLOSED UNMERGED at 2026-10-31 22:49 KST; archived proposal retained here as source material, not as merged implementation.
+
+**회차·진실 기준:** 이전 Feature Improvement v1570 → 현재 Feature Addition v1572 → 다음 Feature Improvement v1574(잠정). 최신 main 5bccda44d6db56aff05fa5623ef7f72b2ec0263c 시작·중간 확인, 미병합 기획 Draft #2203 계승, 개발 이슈 #2211. 본 문서는 설계안이며 구현·배포가 아니다. 영문 PROJECT_PLAN.md가 원본이고 본 문서는 동등한 한국어 대조본이다. F675-192~198 역시 미병합 기획이므로 달력 V1은 해당 기능의 실제 배포를 전제로 하지 않는다.
+
+### 목적, 대안, 회원 흐름 및 상태
+- **문제:** 현재 /inventory는 보유 아이템 목록을 표시하지만 날짜별 만료 예정 현황을 제공하지 않는다. 회원이 만료 전에 계획을 세우되 만료 예정과 알림 실제 전달을 혼동하지 않아야 한다. 읽기 전용 인벤토리 편의 기능이며 알림 발송·구매 기능이 아니다.
+- **대안:** (A) 브라우저에서 기존 목록을 필터링하면 10,001개 보유와 상위 API 장애 시 가짜 빈 목록 위험이 있다. (B) 미구현 F675-194 알림 미리보기에 의존하면 동의·제외·통합 알림과 만료 자체를 혼동한다. **선택:** 본인 전용 DB 날짜별 집계 및 제한된 일별 상세 조회. 알림 동의와 독립적이다. 이메일/푸시, 자동 갱신, 장착, 구매, WLD·원장 변경은 없다.
+- **대상·진입:** 인증과 최신 동의가 확인된 회원 본인만 /inventory → /inventory/expiry-calendar. 기본 KST 오늘부터 7개 날짜, 선택 시 30개 날짜; 날짜를 눌러 상세 목록 열기. CTA “7일”, “30일”, “아이템 보기”, “새로고침”, “보관함으로”. “만료 예정은 알림 발송 내역이 아닙니다”를 명시하며 만료시각이 없는 아이템은 기존 보관함에서 확인한다.
+- **정직한 화면 상태:** LOADING, VERIFIED_DAYS, VERIFIED_EMPTY(본인 DB 정상 응답에 한함), VERIFIED_DAY_EMPTY, MORE_ITEMS, STALE_DAY(409 재조회), AUTH_REQUIRED, CONSENT_REQUIRED, SOURCE_UNAVAILABLE(503), RATE_LIMITED(429), ACCOUNT_CHANGED(이전 응답 폐기). DB 실패를 “만료 예정 없음”으로 표현하지 않는다. 기능 스위치 OFF면 메뉴와 호출을 숨긴다. 날짜·건수 스크린리더 알림, 포커스 복구, 동작 축소, 터치 44px, 너비 320px/확대 200%, WCAG 2.2 AA, Next·Android 동등성.
+- **포함 기준:** user_items의 회원+catalog 기본키 1행은 상품 **종류 1개**이고 quantity는 별도 **수량**이다. quantity>0, expires_at NOT NULL, expires_at>DB 단일 asOf, [KST 오늘 00:00, 오늘+windowDays 00:00) 구간만 포함한다. 7일·30일은 오늘을 포함한 날짜 개수다. 종료일 자정과 정확히 일치하면 다음 구간으로 제외하고, 특정일 00:00 KST와 일치하면 그 날짜에 포함한다. 브라우저 시간대가 아닌 Asia/Seoul로 묶으며 PostgreSQL 마이크로초 원본을 JavaScript Date 밀리초로 절삭해 비교하지 않는다. 조회 중 만료되면 다음 조회에서 사라질 수 있으며 이는 영수증이 아닌 예측이다. expires_at NULL은 달력에서 제외한다.
+
+### API, DB 권한, 커서 및 정합성
+- **제안 Nest API:** 본인 인증·동의·CSRF POST /api/v1/shop/expiry-calendar/summary {windowDays:7|30}, POST /api/v1/shop/expiry-calendar/day {kstDate:YYYY-MM-DD,limit?:20|50,cursor?:opaque}. 회원 식별자는 세션에서만 얻고 요청 owner ID는 받지 않는다. Next 서버 경계와 Android /app-api/v1/shop/expiry-calendar/*는 같은 스키마를 사용한다. 본문 최대 2KiB, 회원당 분당 읽기 20회 제안(실측 필요). 상세 날짜는 최대 30일 범위 안이어야 한다. 정상 200 {status:'VERIFIED',asOfUtc,timeZone:'Asia/Seoul',windowDays,days:[{kstDate,typeCount,unitCount,earliestExpiryUtc}],totalTypes,totalUnits}; 일별 {status:'VERIFIED',kstDate,asOfUtc,items,nextCursor?,totalTypes,totalUnits}. 정상 확인된 빈 결과만 200 빈 목록. 잘못된 입력 400, 미인증 401, 동의·CSRF 403, 오래된 커서 409 STALE_DAY, 제한 429, DB·스키마·권한·근거 불명 503. 캐시나 장애 시 빈 배열 대체 금지.
+- **DB 경계:** 향후 검증된 번호로 전진형 마이그레이션을 추가하되 본인 전용 SECURITY DEFINER 함수(가칭 shop_owner_expiry_calendar_summary_v1(actor,window_days), shop_owner_expiry_calendar_day_v1(actor,kst_date,limit,cursor_fields))를 사용한다. 고정 search_path, moneyverse_migrator 소유, moneyverse_app에는 EXECUTE만 부여한다. user_items/shop_catalog/영수증/인증/금융 테이블 직접 SELECT/INSERT/UPDATE/DELETE 권한을 주지 않는다. 각 응답은 기본 DB의 단일 SQL 문장 스냅샷과 단일 asOf를 사용하며 HTTP 요청 사이에 동일 스냅샷이라고 주장하지 않는다. 회원 행 필터 후 catalog UUID로 결합. 후보 부분 인덱스 (user_id,expires_at,catalog_id) WHERE quantity>0 AND expires_at IS NOT NULL은 합성 10,001건 EXPLAIN(ANALYZE,BUFFERS) 및 쓰기 비용 확인 후 결정한다. V1 새 테이블은 필요하지 않다. 종류 수 COUNT(*) bigint, 수량 SUM(quantity)::bigint; JS 안전정수 초과는 정확한 십진 문자열로 전달한다.
+- **일별 페이지:** 기본 20/최대 50건, (expires_at ASC,catalog_id ASC) 키셋 정렬. HMAC 불투명 커서는 회원, KST 날짜, 마지막 정확한 마이크로초 만료시각·UUID, 선택일 전체 대상의 정렬된 (catalog_id,정확한 만료시각,quantity) 결정적 지문, 스키마 버전, 발급시각, 120초 만료를 결속한다. 다음 조회 시 단일 SQL 스냅샷에서 지문을 다시 계산해 변경 또는 만료면 409 STALE_DAY로 처음부터 새로고침한다. 이름·세션 비밀은 커서에 넣지 않고 서명키 교체를 지원한다. 지문 계산 비용과 최대 응답 크기는 수용 게이트이지 성능 합격 증거가 아니다. acquired_at을 보유 세대 증거로 사용하지 않는다. 안전한 지문/커서를 구현하지 못하면 기능 OFF를 유지한다.
+- **보안·운영:** Nest·Next·Android 게이트웨이의 정상·오류 응답에 Cache-Control private,no-store, X-Robots-Tag noindex, Referrer-Policy no-referrer를 강제하고 필요 시 Vary Cookie를 적용한다. 사이트맵 제외, URL에 아이템 ID 금지, 회원 아이템명·시간을 관리자 분석/로그에 남기지 않는다. 계정 전환 시 이전 응답을 폐기하며 매개변수 변조·CSRF·세션 경계를 검증한다. 읽기 전용이며 알림 설정, 아이템, WLD·원장 변경이 없다. 관리자 지표는 회원 20명 이상 집계만 공개한다. 달력 조회, 날짜 열기, 빈 목록, 재시도, 오래된 커서, 429/503, p95 지연 및 7/30일 전환을 KPI로 제안한다. p95<300ms는 미측정 목표다.
+
+### 소스 근거, 개발 백로그, QA 및 출시
+- **소스 근거:** 마이그레이션 071 user_items는 PRIMARY KEY(user_id,catalog_id), quantity>=0, expires_at timestamptz 및 앱 직접 권한 철회를 정의한다. 123 shop_my_items_v2는 회원 전용 SECURITY DEFINER이며 quantity>0과 미래 만료를 필터링하지만 만료 없는 행도 포함하고 clock_timestamp를 사용하므로 30일 단일 시각 집계와 동일하지 않다. Next /inventory/page.tsx는 apiOrNull 장애 시 []로 대체한다. 신규 달력은 이 가짜 빈 목록 처리를 복제하지 않는다. 최신 main에 F675-199 SQL/API/화면은 없다. 개발 A/B/C/QA와 대규모 통합 Draft #2206과 변경 영역을 분리한다.
+- **P0 OPS1572-01** (#1984/#2144/#2171): Production 실행·백엔드·프론트·엣지 SHA 출처, cgroup 여유 및 독립 복원·롤백 증명.
+- **P0 SEC1572-02** (#993/#2111): 깨끗한 PG17 권한·체크섬, 본인 격리·읽기 전용, 정확한 시각 및 조회 비용; 테이블 직접 권한 금지.
+- **P0 FIN1572-03** (#1976/#2153/#2191/#2209): Treasury·마켓플레이스 원장 출처, 원장 외 경로·가공된 감정서 문제 해결; 달력 금융 변경 0.
+- **P0 REL1572-04** (#1088/#2206): 동시 통합 PR·QA 조정, 보안·감사, 정확 SHA 공식 Test 인증 E2E, 독립 복원 및 운영자 승인.
+- **P1 CAL1572-05** Backend B: 본인 전용 날짜 집계 SQL·실증 후 부분 인덱스, 종류/수량·UTC/KST 경계.
+- **P1 CAL1572-06** Backend B: 일별 상세 SQL, 결정적 지문, 서명 키셋 커서, 120초 만료, 409 재조회·경합.
+- **P1 CAL1572-07** Backend B: Nest 인증·동의·CSRF·엄격한 2KiB 본문, 분당 20회 제안 제한, 200/400/401/403/409/429/503 계약.
+- **P1 CAL1572-08** 개발 A/C: Next·Android 화면/API 동등성, 장애 시 가짜 빈 목록 금지, 포커스·스크린리더·모바일·계정 전환.
+- **P1 CAL1572-09** 개발 A/C: 엣지 개인정보·noindex, 20명 이상 관리자 집계, 실측 성능, INVENTORY_EXPIRY_CALENDAR_ENABLED 기본 OFF.
+- **P1 CAL1572-10** QA: 격리 PG17 합성 보유 10,001건, 회원 2명, 동시 조회 2개, KST 자정 ±1µs, 7/30일 경계, NULL·만료·수량0, 64비트 집계, 타인 커서, 119/120/121초, 페이지 도중 변경, 앱 직접 SELECT/DML 거부, 원장 변경 0, 320px/200%·Android 계약. **시험 제안만 했으며 미실행.**
+- **출시·롤백:** 별도 개발 브랜치, 전진형 DB 변경, 전체 QA/권한/금융/보안/GitOps 통과 및 공식 Test 정확 SHA 인증 E2E, 독립 복원 연습·운영자 승인 후 Production 승격. 문제 발생 시 기능 스위치 OFF로 중단하고 DB 파괴적 롤백은 하지 않는다. Production RELEASE HOLD. 기존 QA1420 FAILED/P0: 백엔드 2,786 PASS/501 SKIP, 프론트 2,776 PASS, 격리 PG17 312/312, 전체 감사 취약점 13건, Test FX HTTP500, 권한·체크섬·금융 출처·정확 SHA Test·복원 차단. F675-199 실제 수용시험 미실행. 외부 독립 근거 신규 검증·중복 제거·분류 승인 0건, 누적 UNKNOWN / 10,000건: BLOCKED / IN PROGRESS.
+
+
 
 ## v2026.10.30.1518 — F675-185 회원 보관함 상태·유지비 근거 정확성 강화 (기능 보완 / 초안 / 운영 보류)
 
