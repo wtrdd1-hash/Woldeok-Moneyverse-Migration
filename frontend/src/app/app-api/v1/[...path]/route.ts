@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { verifiedEnterpriseDisclosure } from '@/app/enterprises/enterprise-disclosure';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -515,11 +516,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return new NextResponse(null, { status: response.status, headers });
   }
 
+  const publicEnterprisePath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'enterprises' && parts[1] === 'public';
+  if (publicEnterprisePath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'enterprise_disclosure_unverified', 'enterprise source evidence is unavailable');
+  }
   if (isJsonMediaType(response.headers.get('content-type'))) {
     const bytes = await response.arrayBuffer();
     try {
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
+      if (publicEnterprisePath && response.ok && !verifiedEnterpriseDisclosure(parsed)) {
+        return gatewayProblem(503, 'Service Unavailable', 'enterprise_disclosure_unverified', 'enterprise source evidence is unavailable');
+      }
       const compatible = addAppJsonCompatibility(parsed);
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
@@ -549,6 +558,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (publicEnterprisePath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'enterprise_disclosure_unverified', 'enterprise source evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
