@@ -44,7 +44,9 @@ describe('derivatives API provenance boundary', () => {
   }
 
   it('continues to reject financial mutations before any settlement', async () => {
-    await request(app.getHttpServer()).post('/api/v1/stocks/derivatives/open').send({}).expect(503);
-    await request(app.getHttpServer()).post('/api/v1/stocks/derivatives/any/close').send({}).expect(503);
+    const opened = await request(app.getHttpServer()).post('/api/v1/stocks/derivatives/open').send({}).expect(503);
+    const closed = await request(app.getHttpServer()).post('/api/v1/stocks/derivatives/any/close').send({}).expect(503);
+    expect(opened.body.code).toBe('DERIVATIVES_DATA_UNVERIFIED');
+    expect(closed.body.code).toBe('DERIVATIVES_DATA_UNVERIFIED');
   });
 });
