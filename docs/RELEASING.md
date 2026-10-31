@@ -9,8 +9,10 @@
 
 | Environment | Public origin | Current runtime | Backend / frontend |
 |---|---|---|---|
-| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 3000 / 3001 |
+| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 4164 / 4165 (v1550) |
 | Isolated Test | `https://test.easy-scraping.com` | Debian 13 host systemd + Nginx | 3100 / 3101 |
+
+**2026-10-31 v1550 verified Production:** PR #2165 merged main SHA bc8cd8a6c654af0336f550643f23049a58ee1d16. Persistent release backend:4164/frontend:4165 serves Production through Nginx and immutable production-current. The prior stable 3564/3565 units are pinned to the old immutable root for rollback/background work. Exact-SHA Test and Production identity preflights passed ok:true. Treasury 552 historically unlinked entries stay safely blocked HTTP 503. [Worklog](worklog/2026-10-31-swf-operational-promotion-v1550.md).
 
 Current Production data authority is PostgreSQL on the Debian host. The observed Production PostgreSQL runtime is Docker PostgreSQL 17.11.
 
