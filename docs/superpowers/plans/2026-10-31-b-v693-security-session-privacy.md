@@ -29,7 +29,7 @@
 - [x] Focused 10/10 PASS including actual HTTP 403 privacy headers.
 
 ## Task 2 — Verification and handoff
-- [ ] Run repository gates and report actual pass/skip/failure.
-- [ ] Re-fetch main and EN/KO plan; verify no conflicting PR changes.
-- [ ] Commit/push isolated branch and open Draft PR with RELEASE HOLD.
-- [ ] Preserve all existing A/C/QA/Planning reservations and production services.
+- [x] Run repository gates; record full audit failure and official Test exact-SHA block.
+- [x] Re-fetch main and EN/KO plan; no touched-file conflict.
+- [x] Commit/push isolated branch and open Draft PR #2178 with hold label.
+- [x] Preserve all existing A/C/QA/Planning reservations and production services.
