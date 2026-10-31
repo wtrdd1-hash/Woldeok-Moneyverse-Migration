@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -121,10 +122,20 @@ export class MarketplaceController {
   @Get('auctions')
   @ApiOperation({ summary: 'List active live English auctions' })
   listAuctions() {
-    return this.guarded(
-      () => this.marketplaceService.listAuctions(),
-      'failed to load auctions',
-    );
+    return this.guarded(async () => {
+      try {
+        return await this.marketplaceService.listAuctions();
+      } catch (error: unknown) {
+        // A missing table grant is an infrastructure contract failure, not an
+        // authorization decision against the signed-in member.
+        if (error instanceof Error &&
+            'code' in error && error.code === '42501' &&
+            error.message.includes('permission denied for table marketplace_auctions')) {
+          throw new ServiceUnavailableException('auction read evidence unavailable');
+        }
+        throw error;
+      }
+    }, 'failed to load auctions');
   }
 
   @Post('auctions')
@@ -141,14 +152,13 @@ export class MarketplaceController {
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Bid on a live English auction with escrow and anti-sniping extension' })
   bidAuction(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) auctionId: string,
-    @Body() body: BidAuctionDto,
-  ) {
-    return this.guarded(
-      () => this.marketplaceService.bidAuction(requireUserId(request), auctionId, body.bidAmountWld, body.maxProxyBidWld),
-      'failed to bid on auction',
-    );
+    @Req() _request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _auctionId: string,
+    @Body() _body: BidAuctionDto,
+  ): never {
+    // Migration 232 mutates account_balances directly, without an economy ledger
+    // transaction or durable escrow receipt. Refuse before reaching that writer.
+    throw new ServiceUnavailableException('auction escrow ledger verification pending');
   }
 
   // --- P2P Direct Trades ---

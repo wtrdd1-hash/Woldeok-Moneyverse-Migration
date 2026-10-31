@@ -448,6 +448,13 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // Auction evidence and blocked escrow commands are member-scoped, even when
+  // upstream errors would otherwise inherit cacheable edge headers.
+  if (parts[0] === 'marketplace' && parts[1] === 'auctions') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

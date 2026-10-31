@@ -63,21 +63,21 @@ describe('MarketplaceController', () => {
     expect(result).toBe('l1');
   });
 
-  it('listAuctions and bidAuction work properly with proxy bid', async () => {
+  it('lists auctions but refuses unledgered bids before invoking the service', async () => {
     const list = await controller.listAuctions();
     expect(list).toHaveLength(1);
-
-    const bidRes = await controller.bidAuction(mockReq, 'auc-1', {
+    vi.mocked(mockService.bidAuction).mockClear();
+    expect(() => controller.bidAuction(mockReq, 'auc-1', {
       bidAmountWld: '9000',
       maxProxyBidWld: '15000',
-    });
-    expect(bidRes).toEqual(expect.objectContaining({ currentBidWld: '9000' }));
-    expect(mockService.bidAuction).toHaveBeenCalledWith(
-      '11111111-1111-4111-8111-111111111111',
-      'auc-1',
-      '9000',
-      '15000',
-    );
+    })).toThrow('auction escrow ledger verification pending');
+    expect(mockService.bidAuction).not.toHaveBeenCalled();
+  });
+
+  it('reports revoked auction table reads as unavailable, not as member denial', async () => {
+    const permissionError = Object.assign(new Error('permission denied for table marketplace_auctions'), { code: '42501' });
+    vi.mocked(mockService.listAuctions).mockRejectedValueOnce(permissionError);
+    await expect(controller.listAuctions()).rejects.toMatchObject({ status: 503 });
   });
 
   it('createTrade, acceptTrade, confirmTrade, cancelTrade work properly', async () => {
