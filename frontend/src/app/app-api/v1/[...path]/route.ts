@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
+import { parseVerifiedShopHoldings } from '@/lib/shop-holdings-evidence';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -271,6 +272,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Owner holdings require a verified source before Android can display an empty inventory.
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings' &&
+      request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          parseVerifiedShopHoldings(await response.clone().json()) === null) {
+        throw new Error('unverified owner holdings');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_unverified',
+        'owner inventory evidence is unavailable');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -569,6 +584,11 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
     response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isWalletDetailPath(parts)) {
