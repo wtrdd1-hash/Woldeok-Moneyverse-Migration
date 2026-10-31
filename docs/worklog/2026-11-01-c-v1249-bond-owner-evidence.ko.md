@@ -14,4 +14,10 @@
 - 전체 필수 게이트 진행 중.
 
 ## 종료
-- 검증 결과와 배포 판정 대기.
+- 회원 채권·담보대출의 비정상 응답을 차단하고, 비회원/검증된 빈 목록/장애를 구분했습니다. 지급 미확인 이자와 원장 정산 보류 상태를 명확히 표시합니다.
+- 집중 테스트 17건, 전체 Lint 오류 0건(경고 1,020건), 전체 Typecheck·Build, app-api 계약 184개, Frontend 2,912건, Backend 2,950건, Contract 41건, Database 62건 통과. Backend 517건·DB 4건 SKIP은 통과로 계산하지 않았습니다. 단일 pnpm test는 240초 제한으로 중단되어 개별 전체 테스트로 확인했습니다.
+- 네트워크 격리 PostgreSQL 17.11에서 316/316 마이그레이션, 회원 2명 중 본인 보유/대출 1건씩만 조회하는 SQL 소유자 격리 검증 통과. 직접 테이블 조회 및 원장 INSERT 권한 차단 확인.
+- 독립 Next.js HTTP 200과 API 장애 안내 확인. 운영 의존성 High 이상 감사 PASS, 전체 의존성 감사 FAIL(낮음 1·보통 8), 전체 경로 QA 증빙 파일 부재 FAIL. 공식 Test 인증 E2E·독립 복원 BLOCKED.
+- Draft PR #2270에 보존, 구현 SHA CI 성공(후속 빌드 진행 중). 최종 문서 커밋 SHA의 CI는 별도 재확인 필요.
+- **최종 판정: PARTIAL / RELEASE BLOCKED.** main 병합·Test/Production 배포·GitOps·원장 변경 없음. 기존 A/B/QA/Gemini 및 핵심 예약 5개 유지.
+- 최종 main/기획 재확인, 검증·백업 및 원격 기록은 GitHub PR에 추가합니다.
