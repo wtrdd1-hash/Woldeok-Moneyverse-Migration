@@ -1,6 +1,9 @@
 'use client';
 
-import { Zap, Globe2, Landmark, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -143,6 +146,22 @@ export function EnterpriseControlTower({
   initialPrivate,
   initialDividendLogs,
 }: Props) {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      router.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      toast.success('공기업 및 국가지주회사 관제 데이터가 최신으로 동기화되었습니다.');
+    } catch {
+      toast.error('데이터 갱신 중 오류가 발생했습니다.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const overview = initialOverview;
   const soes = initialSoes;
   const privateEnterprises = initialPrivate;
@@ -175,7 +194,17 @@ export function EnterpriseControlTower({
                 없이 배당 수익을 극대화하여 국고와 시민에게 환원합니다.
               </CardDescription>
             </div>
-            <div className="shrink-0 flex items-center gap-2">
+            <div className="shrink-0 flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={isRefreshing}
+                className="gap-1.5 text-xs h-9"
+              >
+                <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                새로고침
+              </Button>
               <Button
                 size="sm"
                 className="gap-1.5 text-xs h-9 bg-primary text-primary-foreground font-semibold"

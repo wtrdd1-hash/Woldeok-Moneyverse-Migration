@@ -3,6 +3,7 @@ import { MintController } from '../../mint/mint.controller';
 import { MintService } from '../../mint/mint.service';
 import { CentralBankController } from '../../central-bank/central-bank.controller';
 import { CentralBankService } from '../../central-bank/central-bank.service';
+import { DurableCentralBankPolicyService } from '../../central-bank/durable-policy.service';
 import { MonetaryController } from './monetary.controller';
 import { AdminTreasuryController } from '../../admin/treasury/treasury.controller';
 import { TreasuryService } from '../../admin/treasury/treasury.service';
@@ -18,10 +19,15 @@ describe('v1415 unsafe finance operations fail closed', () => {
     }
   });
   it('legacy central bank cannot publish in-memory rates or accept synthetic mint', async () => {
-    const c = new CentralBankController({} as CentralBankService);
-    for (const call of [() => c.getMonetaryAggregates(), () => c.getBaseRate(), () => c.getReserveRequirement(),
-      () => c.getCommercialRates(), () => c.acceptMintBatch('x', {} as never, {} as never),
-      () => c.updateBaseRate({} as never, {} as never), () => c.updateReserveRequirement({} as never, {} as never)]) {
+    const mockDurableService = {
+      getBaseRate: vi.fn(),
+      updateBaseRate: vi.fn(),
+      getReserveRequirement: vi.fn(),
+      updateReserveRequirement: vi.fn(),
+    } as unknown as DurableCentralBankPolicyService;
+    const c = new CentralBankController({} as CentralBankService, mockDurableService);
+    for (const call of [() => c.getMonetaryAggregates(), () => c.getCommercialRates(),
+      () => c.acceptMintBatch('x', {} as never, {} as never)]) {
       await expect(call()).rejects.toMatchObject(unavailable);
     }
   });

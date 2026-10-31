@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Landmark, Percent, ShieldAlert, TrendingUp } from 'lucide-react';
+import { Landmark, Percent, RefreshCw, ShieldAlert, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,19 @@ export function CentralBankPanel() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await reload();
+      toast.success('중앙은행 정책 및 통화 지표가 최신으로 동기화되었습니다.');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : '중앙은행 데이터 갱신에 실패했습니다.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   const [rate, setRate] = useState('');
   const [inflation, setInflation] = useState('2.00');
   const [reserve, setReserve] = useState('');
@@ -99,10 +112,22 @@ export function CentralBankPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <Landmark className="h-6 w-6 text-blue-500" />
-        <h2 className="text-xl font-bold">국가중앙은행 (Woldeok Central Bank)</h2>
-        <Badge variant="outline">{snapshot ? '정책 DB 연동' : '데이터 확인 중'}</Badge>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Landmark className="h-6 w-6 text-blue-500" />
+          <h2 className="text-xl font-bold">국가중앙은행 (Woldeok Central Bank)</h2>
+          <Badge variant="outline">{snapshot ? '정책 DB 연동' : '데이터 확인 중'}</Badge>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleManualRefresh}
+          disabled={isRefreshing || busy}
+          className="text-xs h-8 gap-1.5"
+        >
+          <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          새로고침
+        </Button>
       </div>
       <Card>
         <CardHeader className="py-3">

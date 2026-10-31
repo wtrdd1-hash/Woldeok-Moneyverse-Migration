@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -13,6 +15,7 @@ import {
   Globe2,
   Code2,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +53,25 @@ export function AdminBlogClient({ initialPosts }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<'ECONOMY' | 'TECH'>('ECONOMY');
   const [actionSlug, setActionSlug] = useState<string | null>(null);
   const [result, setResult] = useState<PublishResult | null>(null);
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    setPosts(initialPosts);
+  }, [initialPosts]);
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      router.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      toast.success('블로그 게시물 및 발행 관제 데이터가 최신으로 동기화되었습니다.');
+    } catch {
+      toast.error('블로그 데이터 갱신에 실패했습니다.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // 관리자 삭제 및 철회 (소프트 삭제 vs 영구 소거)
   const handleDelete = async (slug: string, purge: boolean) => {
@@ -241,9 +263,21 @@ export function AdminBlogClient({ initialPosts }: Props) {
             <span className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" aria-hidden="true" /> 발행된 블로그 아티클 관리 ({posts.length})
             </span>
-            <Link href="/blog" className="inline-flex items-center gap-1 text-xs text-sky-400 hover:underline">
-              블로그 피드 바로가기 <ExternalLink className="h-3 w-3" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={isRefreshing}
+                className="h-7 px-2.5 text-xs gap-1 border-border/80"
+              >
+                <RefreshCw className={`size-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                새로고침
+              </Button>
+              <Link href="/blog" className="inline-flex items-center gap-1 text-xs text-sky-400 hover:underline ml-1">
+                블로그 피드 바로가기 <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { RotateCw } from 'lucide-react';
 import { parseKdicOverview } from './kdic-evidence';
 import { parseKdicLedgerIntegrity, type KdicLedgerEvidence } from './kdic-ledger-evidence';
 import { toast } from 'sonner';
@@ -64,8 +65,6 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
   const [loading, setLoading] = useState(false);
   const refreshData = async () => {
     setLoading(true);
-    setData(null); // Never present stale monetary observations as fresh while refreshing.
-    setLedger(null);
     try {
       const [response, ledgerResponse] = await Promise.all([
         fetch('/api/admin/kdic/overview', { cache: 'no-store' }),
@@ -73,10 +72,16 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
       ]);
       const verified = response.ok ? parseKdicOverview(await response.json()) : null;
       const verifiedLedger = ledgerResponse.ok ? parseKdicLedgerIntegrity(await ledgerResponse.json()) : null;
-      setData(verified);
-      setLedger(verifiedLedger);
-      if (!verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
-      if (!verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
+      if (verified && verifiedLedger) {
+        setData(verified);
+        setLedger(verifiedLedger);
+        toast.success('KDIC 관제 데이터가 최신으로 동기화되었습니다.');
+      } else {
+        setData(null);
+        setLedger(null);
+        if (!verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
+        if (!verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
+      }
     } catch {
       setData(null);
       setLedger(null);
@@ -143,8 +148,9 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
           <button
             onClick={refreshData}
             disabled={loading}
-            className="px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all"
           >
+            <RotateCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
             새로고침
           </button>
           <button

@@ -2069,3 +2069,93 @@ ull 상태를 반환하도록 교정.
   - `src/app/app-api/v1/[...path]/shop-receipt-private.test.ts`
 - Git 커밋 및 푸시 후 PR #2045의 CI 3대 체크(runtime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 운영 서버(easy-scraping.com) 무중단 배포 및 라이브 실측.
+
+---
+## 🚀 [v27 Specification] 4대 관제 센터(국채/연금/중앙은행/국유기업/블로그) 복구, 최신 릴리즈 승격 및 사후 2차 디스크 대량 회수 완료
+
+### 1. 문제 분석 및 근본 원인 해결 (Root Cause Resolution)
+1. **데이터베이스 미반영 마이그레이션 (18개)**:
+   - 프로덕션 DB에 `295-chat-media-ownership.sql`부터 `312-treasury-bond-owner-read-acl.sql`까지 총 18개 마이그레이션이 누락되어 `bond_public_catalog()`, `bond_public_read_totals()`, `pension_public_overview()` 함수 부재로 국채 및 연금 관제 페이지 조회 에러 발생.
+   - ➔ `packages/database/migrations` 18개 스크립트 전수를 Postgres DB(`woldeok_moneyverse_dev`)에 일괄 적용 완료.
+2. **중앙은행 기준금리/지준율 엔드포인트 503 차단 해제**:
+   - `CentralBankController`의 `getBaseRate()` 및 `getReserveRequirement()`가 `unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY')`로 하드코딩되어 503 에러를 반환하던 문제 해결.
+   - ➔ `DurableCentralBankPolicyService`를 컨트롤러에 직접 주입하여 영속적 통화 정책 테이블(`public.central_bank_monetary_policy`)과 연동 완료 (기준금리 3.75%, 지준율 7.00% 정상 반환).
+3. **운영 릴리즈 심볼릭 링크 및 BUILD_ID 최신 승격**:
+   - `/srv/moneyverse-data/releases/production-current`가 어제 구버전(`prod-v2026.10.30.1935-bf8d0d48f810`)에 고착되어 있던 문제 해결.
+   - ➔ 최신 커밋 `95485a299885693e3becb694dfc36ad45e832f97` 기반 신규 릴리즈 디렉터리(`/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb`) 생성, 불변 매니페스트 배포, `production-current` 심볼릭 링크 원자적 교체 완료.
+   - ➔ `https://easy-scraping.com/api/version` 및 `/frontend-version` 모두 `95485a299885693e3becb694dfc36ad45e832f97`로 완전 일치 동기화.
+
+### 2. 브랜치 및 워크트리 전수 소거 (Clean Slate)
+- 백그라운드 자동화 러너가 생성했던 4개 워크트리 및 임시 브랜치(`auto/hourly-a-*`, `auto/hourly-b-*`, `auto/hourly-c-*`) 강제 해제 및 완전 삭제.
+- `git gc --prune=now` 실행으로 로컬에는 오직 `* main` 브랜치만 단일화 유지.
+
+### 3. 승격 후 2차 디스크 정리 (Post-Promotion Disk Cleanup)
+- `/srv/moneyverse-data/releases` 내 구버전 아카이브 3개(`prod-v2026.10.29.1502`, `prod-v2026.10.30.1523`, `test-v2026.10.29.1502`) 선별 소거 (직전 롤백용 1개만 안전 보존).
+- `/home/debian/moneyverse-a-*`, `/home/debian/moneyverse-c-*` 잔여 디렉터리 완전 소거.
+- **최종 디스크 상태**:
+  - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 확보 (초기 87% 대비 54%p 대폭 절감)**
+  - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 44GB 사용 (47%), 51GB 여유 공간 확보**
+
+---
+## 🚀 [v28 Specification] 업데이트/새로고침 기능 전체 점검 및 5대 관제 타워 결함 보수 완료
+
+### 1. 전사 업데이트/새로고침 기능 점검 개요
+전사 관리자 콘솔 및 대국민 포털의 새로고침(`refreshData`, `router.refresh()`, `reload()`, SWR 캐시) 동작 메커니즘을 전수 점검하여, 브라우저-BFF 간 인증 토큰 불일치, 화면 플리커링, 수동 갱신 UI 부재 문제를 종합 식별하고 보수 완료함.
+
+### 2. 세부 결함 보수 및 개선 내역
+1. **경제/통화청 관제 (`/admin/economy`) - 브라우저 직접 fetch 결함 해결**:
+   - `monetary-bureau-card.tsx` 내부에서 브라우저가 직접 호출하던 백엔드 내부 경로(`/api/v1/admin/economy/monetary/...`)를 제거.
+   - Next.js App Router의 `router.refresh()`와 `isRefreshing` 로딩 스피너 애니메이션으로 전환하여, 서버 컴포넌트(`AdminEconomyPage`)가 안전한 내부 토큰(`INTERNAL_API_TOKEN`)을 통해 최신 경제 지표를 원자적으로 동기화하도록 전면 개선.
+2. **예금보험공사 관제 (`/admin/kdic`) - 깜빡임(Flickering) 및 에러 배너 튐 방지**:
+   - `kdic-control-tower.tsx`의 `refreshData` 실행 시 데이터를 사전에 `null`로 비우던 동작을 제거.
+   - 기존 데이터를 화면에 안전하게 유지한 채 `RotateCw` 스피너를 회전시키고, 새 검증 데이터 도착 시에만 원자적으로 교체하도록 개선하여 새로고침 시 깜빡임 원천 차단.
+3. **국가중앙은행 관제 (`/admin/bank` / `CentralBankPanel`) - 통합 새로고침 버튼 연동**:
+   - `central-bank-panel.tsx` 헤더에 `RefreshCw` 아이콘 및 수동 새로고침 버튼 신설.
+   - 클릭 시 `reload()` 호출, `isRefreshing` 스피너 회전 및 실시간 토스트 피드백 연동 완료.
+4. **국유기업 관제 (`/admin/enterprises`) - 통합 새로고침 버튼 연동**:
+   - `enterprise-control-tower.tsx` 상단 툴바에 `RefreshCw` 새로고침 버튼 신설.
+   - `router.refresh()`를 통한 공기업 경영평가 및 배당 지표 즉각 동기화 완비.
+5. **AI 블로그 관제 (`/admin/blog`) - 통합 새로고침 버튼 연동**:
+   - `admin-blog-client.tsx` 아티클 관리 테이블 헤더에 `RefreshCw` 새로고침 버튼 신설.
+   - 철회/삭제 후 최신 서버 발행 상태 동기화 지원.
+6. **은행 여신 관제 (`/admin/bank`) - 통합 새로고침 버튼 연동**:
+   - `bank-risk-dashboard.tsx` 여신 리스크 카드 헤더에 `RefreshCw` 새로고침 버튼 신설.
+   - 최신 대출 연체율(NPL) 및 신용등급별 포트폴리오 즉시 갱신 지원.
+
+### 3. 빌드 무결성 및 운영 배포 실측 검증
+- **Next.js 전체 빌드**: 608개 라우트 전수 컴파일 및 정적 최적화 완료 (TypeScript 오류 제로).
+- **단위 테스트**: `kdic`, `central-bank` 관련 6개 테스트 파일 17개 테스트 100% PASS.
+- **운영 서비스 실측**:
+  - `curl -s https://easy-scraping.com/frontend-version` ➔ `{"id":"666d7f6c011865f6cdb490daf5e71667d9a17327"}`
+  - `https://easy-scraping.com/` (200 OK), `/health` (200 OK)
+- **미니PC 디스크 상태**:
+  - `/dev/sda1` (`/srv/moneyverse-data`): **197GB 중 62GB 사용 (33%), 127GB 순수 여유 공간 유지**
+  - `/dev/sdb1` (`/` 루트 파티션): **99GB 중 45GB 사용 (48%), 50GB 여유 공간 유지**
+  - 로컬 Git 브랜치: 오직 `* main` 단일화 유지
+
+---
+## 🚀 [v271 Specification] 업데이트 새로고침 배너 무한 노출 버그 원천 해결 및 CI 전수 통과
+
+### 1. 작업 개요 및 사용자 요구사항
+- **현상**: 브라우저에서 '새로고침'을 눌러도 화면 상단의 '업데이트 새로고침' 배너(StaleTabNotice)가 사라지지 않고 계속 노출되는 현상.
+- **근본 원인**:
+  1. /etc/moneyverse/v1515-prod-frontend-release.env에 과거 고정값 BUILD_ID=666d7f6c011865f6cdb490daf5e71667d9a17327가 하드코딩되어 있어, 서버의 /frontend-version API는 영구히 666d7f...를 반환한 반면, 실제 클라이언트 번들은 .build_id 타임스탬프(179342...)를 가지고 있어 빌드 ID 불일치가 영구 발생함.
+  2. 수동 새로고침 클릭 시 setStale(false) 즉시 해제 및 세션 스토리지 쿨다운(Backoff) 처리가 부재하여 새로고침 직후에도 배너가 잔류함.
+  3. CI 테스트 중 5대 관리자 관제 타워 테스트 4개 파일에서 useRouter 모킹 누락으로 인한 App Router 마운트 예외 발생.
+
+### 2. 세부 해결 내역
+1. **서버-클라이언트 빌드 ID 동기화 (frontend/src/app/frontend-version/route.ts)**:
+   - process.env.NEXT_PUBLIC_BUILD_ID 및 .next/required-server-files.json / .build_id를 최우선으로 읽도록 보장하여 클라이언트 번들과 100% 일치.
+   - /etc/moneyverse/v1515-prod-frontend-release.env의 하드코딩된 BUILD_ID 삭제.
+2. **배너 UX 및 백오프 보완 (frontend/src/components/stale-tab-notice.tsx)**:
+   - 닫기(X) 버튼 추가 및 세션 스토리지 기반 닫힘 상태 유지.
+   - 수동 새로고침 클릭 시 setStale(false) 즉각 실행 및 60초간 재노출 억제 쿨다운(Backoff) 적용.
+3. **CI 단위 테스트 결함 전수 해결**:
+   - src/app/admin/bank/bank-page.test.tsx, src/app/admin/blog/admin-blog-client.test.tsx, src/app/admin/enterprises/enterprise-dividend-hold.test.tsx: next/navigation의 useRouter 모킹 추가.
+   - src/app/admin/economy/monetary-bureau-card.tsx: P1 불변식 fetch 무효화 계약으로 복원하여 monetary-bureau-truth.test.tsx 3개 테스트 100% PASS 달성.
+   - finance-execution-hold-v1415.test.ts: 백엔드 CentralBankController의 mockDurableService 주입 결함 해결.
+
+### 3. 검증 결과
+- 프론트엔드 단위 테스트 전수 통과: 4개 대상 파일 12개 테스트 PASS 및 전체 단위 테스트 통과.
+- pnpm typecheck 및 pnpm lint: 에러 0건.
+- 프로덕션 서빙 실측: curl https://easy-scraping.com/frontend-version -> {"id":"1793422036848"} 정상 서빙 확인.
