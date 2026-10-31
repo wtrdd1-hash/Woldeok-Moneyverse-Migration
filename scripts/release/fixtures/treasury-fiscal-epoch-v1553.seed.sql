@@ -25,6 +25,7 @@ CREATE TABLE public.system_treasury_ledger (
 );
 CREATE TABLE public.state_enterprise_dividend_logs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),ledger_tx_id uuid,
+  dividend_amount_wld numeric NOT NULL DEFAULT 1,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 INSERT INTO public.accounts VALUES
