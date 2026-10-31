@@ -62,6 +62,9 @@ export class StockCommunityController {
     @Inject(StockCommunityService) private readonly community: StockCommunityService | null,
   ) {}
   private service() {
+    if (replies !== undefined && replies !== 'with' && replies !== 'without') {
+      throw new BadRequestException('invalid reply filter');
+    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return this.community;
   }
@@ -92,12 +95,19 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({
+    name: 'replies',
+    required: false,
+    enum: ['with', 'without'],
+    description: 'Filter only the latest 50 public posts by reply presence',
+  })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'replies')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const replies = query.replies;
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +125,7 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(stock as string | undefined, q as string | undefined, replies as 'with' | 'without' | undefined),
     };
   }
 }
