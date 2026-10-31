@@ -9,7 +9,7 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import { holdingsFilterUrl } from './holdings-filter';
+import { holdingsFilterUrl, holdingsApiUrl, isVerifiedAttentionHoldings } from './holdings-filter';
 import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
@@ -39,11 +39,16 @@ export default async function ShopCatalogPage({
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
-  const [catalog, mine, today] = await Promise.all([
+  const [catalog, mineResult, today] = await Promise.all([
     apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
-    apiOrNull<{ holdings: HeldItem[] }>(`/api/v1/shop/holdings${mineStatus === 'attention' ? '?status=attention' : ''}`),
+    apiOrNull<{ holdings: HeldItem[] }>(holdingsApiUrl(mineStatus)),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
+  // A stale API can return HTTP 200 with all holdings even for an attention filter.
+  // That is an unavailable filter, not proof that every item needs upkeep.
+  const mine = mineStatus === 'attention' && !isVerifiedAttentionHoldings(mineResult)
+    ? null
+    : mineResult;
   const marketSaleActive = today?.event?.event_code === 'market_sale' && today.event.claimed;
 
   // How many of each the member holds right now. A failed shelf read leaves

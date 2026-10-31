@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { isVerifiedAttentionHoldings } from '@/app/shop/catalog/holdings-filter';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -116,6 +117,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
   }
 
+  const ownerHoldingsPath = parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings';
+  if (ownerHoldingsPath) {
+    const filters = request.nextUrl.searchParams.getAll('filter');
+    if (request.nextUrl.searchParams.has('status') || filters.length > 1 ||
+        (filters.length === 1 && filters[0] !== 'all' && filters[0] !== 'attention')) {
+      return gatewayProblem(400, 'Bad Request', 'shop_holdings_filter_invalid',
+        'owner holdings filter must be all or attention');
+    }
+  }
+
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
   let walletRange: ActivityCalendarRange | null = null;
@@ -227,6 +238,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (ownerHoldingsPath && request.method === 'GET' && response.ok &&
+      request.nextUrl.searchParams.get('filter') === 'attention') {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedAttentionHoldings(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_unverified',
+          'owner attention holdings could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_unverified',
+        'owner attention holdings could not be verified');
+    }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
@@ -448,6 +473,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

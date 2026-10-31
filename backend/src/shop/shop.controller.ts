@@ -37,6 +37,7 @@ import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './sh
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
 import { filterShopUpkeep } from './shop-upkeep-cap';
+import { filterShopHoldings, parseShopHoldingsStatus } from './shop-holdings-filter';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -343,20 +344,17 @@ export class ShopController {
   }
 
   @Get('holdings')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'Catalogue items the caller holds' })
+  @ApiOperation({ summary: 'Owner holdings, optionally restricted to upkeep attention' })
   async holdings(@Req() request: RequestWithSession, @Query('filter') filter?: unknown) {
-    if (filter !== undefined && filter !== 'attention') {
-      throw new BadRequestException('invalid holdings filter');
-    }
-    let holdings = await this.guarded(
+    const status = parseShopHoldingsStatus(filter);
+    const holdings = await this.guarded(
       () => this.repository().holdings(requireUserId(request)),
       'held items are unavailable',
     );
-    if (filter === 'attention') {
-      holdings = holdings.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
-    }
-    return { holdings };
+    return { holdings: filterShopHoldings(holdings, status) };
   }
 
   @Post('catalog/:id/purchases')

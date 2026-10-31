@@ -7,10 +7,14 @@
 - Constraints: use existing actor-scoped `shop_my_items_v2` PostgreSQL function; no migration, no direct table GRANT, no ledger writes. Avoid B #2136 (owner holdings privacy) duplication where possible; maintain separate PR and preserve their branch.
 
 ## In progress
-- [ ] RED: backend and frontend/app-api regression tests reproduce mismatch and stale HTTP 200.
-- [ ] GREEN: align query token, strict backend parsing and BigInt-safe attention predicate.
-- [ ] GREEN: app-api rejects duplicate/invalid filter and unverified 200; protect owner headers.
+- [x] RED: backend and frontend/app-api regression tests reproduce mismatch and stale HTTP 200.
+- [x] GREEN: align query token, strict backend parsing and BigInt-safe attention predicate.
+- [x] GREEN: app-api rejects duplicate/invalid filter and unverified 200; protect owner headers.
 - [ ] Verify database function execution and ACL, build/lint/typecheck/test/contract/CI, exact SHA, Test/Production gates.
+
+## Midpoint (2026-10-31 18:16 KST)
+- RED confirmed: backend 2 assertions fail after contract build; frontend 5 fail / 2 pass before implementation. First backend attempt lacked built contract; corrected environment before RED proof.
+- Implemented strict owner filter and Android verification; targeted GREEN: 7 backend and 7 frontend/Android tests pass. Full gates and exact-SHA CI pending.
 
 ## Finished
 - Pending verification. No integration, deployment, service restart, production database mutation or branch deletion permitted without release evidence.

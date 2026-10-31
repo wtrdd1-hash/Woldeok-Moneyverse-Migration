@@ -4,10 +4,10 @@ import type { ShopHoldingRow } from './shop.repository';
 export type ShopHoldingsStatus = 'all' | 'attention';
 
 /** A strict query token prevents silent fallback to an unfiltered private shelf. */
-export function parseShopHoldingsStatus(value: string | undefined): ShopHoldingsStatus {
+export function parseShopHoldingsStatus(value: unknown): ShopHoldingsStatus {
   if (value === undefined || value === 'all') return 'all';
   if (value === 'attention') return 'attention';
-  throw new BadRequestException('status must be all or attention');
+  throw new BadRequestException('filter must be all or attention');
 }
 
 /** The caller's rows have already been scoped by shop_my_items_v2(actor). */
