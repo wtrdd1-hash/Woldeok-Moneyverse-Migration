@@ -448,6 +448,14 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // Portfolio and trade history are owner-scoped even though market quotes are public.
+  // The gateway must not inherit an upstream public cache policy on any status.
+  if (parts.length === 2 && parts[0] === 'stocks' &&
+      (parts[1] === 'portfolio' || parts[1] === 'history')) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
