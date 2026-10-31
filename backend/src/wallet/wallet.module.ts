@@ -1,3 +1,4 @@
+import { TelegramAlertService } from '../telegram/telegram-alert.service';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
@@ -14,9 +15,9 @@ import { MarketBroadcast } from '../stock/market-broadcast';
   providers: [
     {
       provide: WalletService,
-      inject: [PG_POOL, { token: MarketBroadcast, optional: true }],
-      useFactory: (pool: Queryable | null, broadcast?: MarketBroadcast) =>
-        pool ? new WalletService(new PostgresWalletRepository(pool), { broadcast }) : null,
+      inject: [PG_POOL, { token: MarketBroadcast, optional: true }, { token: TelegramAlertService, optional: true }],
+      useFactory: (pool: Queryable | null, broadcast?: MarketBroadcast, telegramAlert?: TelegramAlertService) =>
+        pool ? new WalletService(new PostgresWalletRepository(pool), { broadcast, telegramAlert }) : null,
     },
   ],
   exports: [WalletService],

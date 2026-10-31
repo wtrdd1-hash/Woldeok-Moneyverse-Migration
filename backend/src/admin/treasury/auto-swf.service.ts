@@ -3,6 +3,7 @@ import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, On
 import { PG_POOL } from '../../core/pool.provider';
 import { queryRows } from '../../core/db';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
+import { TelegramAlertService } from '../../telegram/telegram-alert.service';
 
 /** Block unverified SWF settlements before any database write or success event. */
 export function swfLedgerUnavailable(): never {
@@ -60,6 +61,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   constructor(
     @Inject(PG_POOL) private readonly pool: Pool,
     private readonly discordAlert: DiscordAlertService,
+    private readonly telegramAlert?: TelegramAlertService,
   ) {}
 
   onModuleInit() {
@@ -182,7 +184,16 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     if (!rows[0]?.config) {
       throw new ServiceUnavailableException({ code: 'SWF_CONFIG_UNAVAILABLE' });
     }
-    return rows[0].config;
+    const updated = rows[0].config;
+    if (this.telegramAlert) {
+      this.telegramAlert.notifySwfEvent({
+        eventType: 'SWF_POLICY_UPDATED',
+        summary: `SWF 운용 정책 업데이트 (안전보유금: ${updated.safe_reserve_wld} WLD, 단일최대: ${updated.max_single_investment_wld} WLD)`,
+        amountWld: updated.safe_reserve_wld,
+        details: { actorId, equityRatio: updated.equity_ratio_pct, bondRatio: updated.bond_ratio_pct },
+      }).catch(() => undefined);
+    }
+    return updated;
   }
 
   async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {
