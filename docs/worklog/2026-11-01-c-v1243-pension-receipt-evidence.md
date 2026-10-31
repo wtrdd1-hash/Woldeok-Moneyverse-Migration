@@ -9,10 +9,16 @@
 - Release gate: HOLD until full exact-SHA validation and official Test; financial mutations remain paused.
 
 ## In progress
-- [ ] Source tests RED/GREEN
-- [ ] UI tests RED/GREEN
-- [ ] Real database and API integration evidence
+- [x] Source tests RED/GREEN
+- [x] UI tests RED/GREEN
+- [x] Real PostgreSQL owner receipt function and ACL evidence
 - [ ] Exact HEAD gates and remote CI
+
+## Midpoint (2026-11-01 02:20 KST)
+- Re-fetched main and EN/KO plans: main unchanged at f13bbce2; plan object IDs c0d71553/d9e508a1 unchanged.
+- TDD RED/GREEN: owner-source parser, independent account/wallet/receipt failure isolation, 320px tab scroll and actual HTTP header policy. Focused pension tests 15 PASS; header tests 9 PASS.
+- Fresh isolated PostgreSQL 17.11: 316/316 migrations; app-role raw pension receipt table SELECT false/false, owner function EXECUTE true/true, synthetic owner contributions/payouts 1/1 and unrelated owner 0. Existing pension account direct SELECT is denied (pre-existing GET account API gap); no permission broadening or financial mutation.
+- Pending full HEAD gates and HTTP E2E. Next config /pension override is distinct from open private-route PR #2225 (which does not include /pension), but semantic rebase will be required if that PR merges.
 
 ## Finished
 - PENDING.

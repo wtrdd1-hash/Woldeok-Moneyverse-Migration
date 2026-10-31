@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   Coins,
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/table';
 import { canonicalIntegerString, groupDigits, isPositiveWldInput } from '@/lib/money';
 import { calculatePensionForecast } from '@/lib/pension-money';
+import type { PensionSourceEvidence } from './pension-source';
 
 // Must match the unconditional backend P0 settlement hold. Reading existing receipts remains available.
 export const PENSION_LEDGER_SETTLEMENT_PAUSED = true;
@@ -84,6 +86,7 @@ interface PensionPortalClientProps {
   payouts: PayoutLog[];
   userCashBalance: string;
   isLoggedIn: boolean;
+  sourceEvidence?: PensionSourceEvidence;
 }
 
 export function PensionPortalClient({
@@ -93,6 +96,7 @@ export function PensionPortalClient({
   payouts: initialPayouts,
   userCashBalance: initialCashBalance,
   isLoggedIn,
+  sourceEvidence = { account: true, contributions: true, payouts: true, wallet: true },
 }: PensionPortalClientProps) {
   const [account, setAccount] = useState<MyPensionAccount | null>(initialAccount);
   const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions);
@@ -284,6 +288,15 @@ export function PensionPortalClient({
         </div>
       )}
 
+      {(!sourceEvidence.account || !sourceEvidence.contributions || !sourceEvidence.payouts || !sourceEvidence.wallet) && (
+        <div role="status" aria-live="polite" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+          <p>회원 연금 자료 중 일부를 확인할 수 없습니다. 조회 실패는 잔액 0 WLD나 기록 없음으로 처리하지 않습니다.</p>
+          <Link href="/pension" className="mt-2 inline-flex min-h-11 items-center rounded-lg border px-4 py-2 font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+            연금 정보 다시 조회
+          </Link>
+        </div>
+      )}
+
       {/* 대국민 기금 운용 현황 배너 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border/60 p-4 bg-card/60 backdrop-blur">
@@ -333,6 +346,14 @@ export function PensionPortalClient({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 내 연금 계좌 요약 (좌측 7열) */}
         <div className="lg:col-span-7 space-y-4">
+          {!sourceEvidence.account || !account ? (
+            <Card className="border-amber-500/40">
+              <CardHeader>
+                <CardTitle>내 연금 계좌 조회 불가</CardTitle>
+                <CardDescription>계좌 상태와 누적 기여금은 서버에서 확인되지 않았습니다. 납입·수령 내역은 각각 독립적으로 확인할 수 있습니다.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
           <Card className="border-border/60 bg-gradient-to-br from-card/80 to-muted/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
             <CardHeader className="pb-3">
@@ -362,21 +383,21 @@ export function PensionPortalClient({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-lg bg-background/50 border border-border/50">
                 <div>
                   <div className="text-xs text-muted-foreground">누적 적립 기여금</div>
-                  <div className="text-lg font-bold text-foreground mt-0.5">
+                  <div className="text-lg font-bold text-foreground mt-0.5 break-all">
                     {groupDigits(account?.accumulated_contribution_wld || '0')}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
                   </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">구형 산식 참고값 (시간당)</div>
-                  <div className="text-lg font-bold text-emerald-400 mt-0.5">
+                  <div className="text-lg font-bold text-emerald-400 mt-0.5 break-all">
                     +{groupDigits(hourlyPayout)}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD/h</span>
                   </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">누적 수령 총액</div>
-                  <div className="text-lg font-bold text-blue-400 mt-0.5">
+                  <div className="text-lg font-bold text-blue-400 mt-0.5 break-all">
                     {groupDigits(account?.total_payout_received_wld || '0')}{' '}
                     <span className="text-xs font-normal text-muted-foreground">WLD</span>
                   </div>
@@ -434,6 +455,7 @@ export function PensionPortalClient({
               </div>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* 연금 기여금 납입 허브 (우측 5열) */}
@@ -452,7 +474,7 @@ export function PensionPortalClient({
               <div className="text-xs text-muted-foreground flex justify-between">
                 <span>내 지갑 가용 잔액:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {groupDigits(cashBalance)} WLD
+                  {sourceEvidence.wallet ? `${groupDigits(cashBalance)} WLD` : '조회 불가'}
                 </span>
               </div>
 
@@ -532,18 +554,18 @@ export function PensionPortalClient({
 
       {/* 탭: 모의 연금 계산기 & 납입/수령 내역 */}
       <Tabs defaultValue="simulator" className="space-y-4">
-        <TabsList className="bg-muted/50 border border-border/50">
+        <TabsList className="bg-muted/50 border border-border/50 max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="simulator" className="gap-1.5">
             <Calculator className="h-4 w-4" />
             예상 기초연금 시뮬레이터
           </TabsTrigger>
           <TabsTrigger value="contributions" className="gap-1.5">
             <History className="h-4 w-4" />
-            내 기여금 납입 이력 ({contributions.length})
+            내 기여금 납입 이력 ({sourceEvidence.contributions ? contributions.length : '확인 불가'})
           </TabsTrigger>
           <TabsTrigger value="payouts" className="gap-1.5">
             <Clock className="h-4 w-4" />
-            기초연금 수령 내역 ({payouts.length})
+            기초연금 수령 내역 ({sourceEvidence.payouts ? payouts.length : '확인 불가'})
           </TabsTrigger>
         </TabsList>
 
@@ -622,7 +644,10 @@ export function PensionPortalClient({
         <TabsContent value="contributions">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {contributions.length === 0 ? (
+              <p className="mb-3 text-xs text-muted-foreground">서버에서 확인한 최근 최대 20건의 납입 기록입니다.</p>
+              {!sourceEvidence.contributions ? (
+                <p role="status" className="py-8 text-center text-sm text-muted-foreground">납입 내역 조회 불가</p>
+              ) : contributions.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기여금 납입 내역이 없습니다.
                 </div>
@@ -660,7 +685,10 @@ export function PensionPortalClient({
         <TabsContent value="payouts">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {payouts.length === 0 ? (
+              <p className="mb-3 text-xs text-muted-foreground">서버에서 확인한 최근 최대 20건의 수령 기록입니다.</p>
+              {!sourceEvidence.payouts ? (
+                <p role="status" className="py-8 text-center text-sm text-muted-foreground">수령 내역 조회 불가</p>
+              ) : payouts.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기초연금 수령 내역이 없습니다.
                 </div>

@@ -197,6 +197,16 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // The public pension summary shares this page with private owner receipts.
+      // Its HTML must not inherit the public crawler or shared-cache policy.
+      ...['/pension', '/:locale(ko|en|ja|zh|vi)/pension'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
     ];
   },
 
