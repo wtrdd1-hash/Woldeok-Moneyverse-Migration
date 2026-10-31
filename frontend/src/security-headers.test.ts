@@ -116,3 +116,44 @@ describe('security headers', () => {
     );
   });
 });
+
+
+describe('authenticated HTML route privacy at the HTTP edge', () => {
+  const privateRoots = [
+    'account', 'account-deletion', 'admin', 'wallet', 'dashboard', 'bank',
+    'chat', 'calendar', 'inventory', 'progression', 'quests', 'seasons',
+    'support', 'businesses', 'arcade', 'clubs', 'collections', 'marketplace',
+    'work', 'profile', 'developer', 'login', 'shop/catalog',
+    'stocks/alerts', 'stocks/compare', 'stocks/derivatives',
+    'stocks/history', 'stocks/portfolio', 'stocks/watchlist', 'gallery/submit',
+  ];
+
+  it('overrides permissive global indexing and caching on protected paths and all supported locale aliases', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const globalIndex = groups.findIndex((group) => group.source === '/:path*');
+    expect(globalIndex).toBe(0);
+    for (const root of privateRoots) {
+      for (const source of [`/${root}/:path*`, `/:locale(ko|en|ja|zh|vi)/${root}/:path*`]) {
+        const index = groups.findIndex((group) => group.source === source);
+        expect(index, `Missing private header policy for ${source}`).toBeGreaterThan(globalIndex);
+        const headers = new Map(groups[index]!.headers.map((header) => [header.key.toLowerCase(), header.value]));
+        expect(headers.get('x-robots-tag'), source).toBe('noindex, nofollow');
+        expect(headers.get('cache-control'), source).toBe('private, no-store');
+        expect(headers.get('referrer-policy'), source).toBe('no-referrer');
+      }
+    }
+  });
+
+  it('does not add private overrides to public home, blog, market and shop landing paths', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const privateSources = groups.slice(1).map((group) => group.source);
+    expect(privateSources).not.toContain('/:path*');
+    for (const publicPath of ['/blog/:path*', '/stocks/:path*', '/shop/:path*', '/guide/:path*']) {
+      expect(privateSources).not.toContain(publicPath);
+    }
+    const globalHeaders = new Map(groups[0]!.headers.map((header) => [header.key.toLowerCase(), header.value]));
+    expect(globalHeaders.get('x-robots-tag')).toContain('index, follow');
+  });
+});
