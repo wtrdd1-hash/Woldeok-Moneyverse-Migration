@@ -2989,7 +2989,7 @@ _Binary body. Do not JSON-decode._
 
 ## `GET` `/app-api/v1/photos` — Published gallery photos
 
-- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Authorization: 공개: 로그인 불필요
 - Success status: 200
 - Response mode: json
 - After success: 응답을 화면의 서버 기준 상태로 교체
@@ -2997,7 +2997,9 @@ _Binary body. Do not JSON-decode._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| q | query | false | string | minLength=2; maxLength=40 |
 
 ### Request body
 

@@ -8984,15 +8984,27 @@
     {
       "method": "GET",
       "path": "/app-api/v1/photos",
-      "purpose": "갤러리 사진 목록 조회",
+      "purpose": "최근 게시 승인된 갤러리 사진 24장 조회 및 설명 검색",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "authorization": "공개: 로그인 불필요",
       "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
       "backendRoute": "/api/photos",
       "operationId": "ContentController_photos",
       "backendOpenApiPath": "/photos",
       "summary": "Published gallery photos",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          },
+          "description": "Optional literal caption search within the newest 24 approved published photos. Duplicate, unsafe or malformed queries return 400."
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200
@@ -9001,7 +9013,9 @@
       "responseShape": {
         "kind": "json-object",
         "topLevelKeys": [
-          "photos"
+          "photos",
+          "query",
+          "scope"
         ]
       },
       "responseSchema": {
