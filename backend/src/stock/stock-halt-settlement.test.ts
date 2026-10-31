@@ -142,6 +142,7 @@ describe('PostgresStockRepository.haltSettlementReceipts', () => {
     const receipts = await repo.haltSettlementReceipts(ACTOR);
 
     expect(queries[0]?.text).toContain('public.virtual_stock_halt_settlements');
+    expect(queries[0]?.text).toContain('WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50');
     expect(queries[0]?.values).toEqual([ACTOR]);
     expect(receipts).toHaveLength(1);
     expect(receipts[0]?.stock_symbol).toBe('WDX');
