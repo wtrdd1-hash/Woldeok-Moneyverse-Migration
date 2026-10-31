@@ -24,12 +24,12 @@
 
 ### Task 1: Protected Next response headers
 **Files:** frontend/next.config.ts, frontend/src/security-headers.test.ts.
-- [ ] Write a failing route-level header regression test (RED).
-- [ ] Run focused test and capture failure.
-- [ ] Add minimal ordered private-route header rules (GREEN).
-- [ ] Re-run focused test and actual HTTP response verification.
+- [x] Write a failing route-level header regression test (RED).
+- [x] Run focused test and capture failure.
+- [x] Add minimal ordered private-route header rules (GREEN).
+- [x] Re-run focused test and actual HTTP response verification.
 
 ### Task 2: Verification and evidence
 **Files:** English/Korean worklogs, GitHub Draft PR.
-- [ ] Full lint, typecheck, build, tests, contract, security, isolated PostgreSQL and E2E gates.
-- [ ] Re-fetch main, check changes and CI, preserve artifacts, record RELEASE HOLD if any gate fails.
+- [x] Full lint, typecheck, build, tests, contract, security, isolated PostgreSQL and E2E gates.
+- [x] Re-fetch main, check changes and CI, preserve artifacts, record RELEASE HOLD if any gate fails.
