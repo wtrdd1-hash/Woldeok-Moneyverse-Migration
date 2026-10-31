@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1539 — Exact-backend-SHA frontend recovery canary (BUILT / NOT DEPLOYED)
+- [Worklog EN](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.md) / [KO](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.ko.md) · [Internal](docs/updates/v2026.10.31.1539-frontend-recovery-internal.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1539-frontend-recovery-github.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-github.ko.md). Built frontend exactly from current backend SHA 95485a, preview port 3893 HTTPS-header GET 5/5 HTTP 200/version matched. Historical source missing newer PR fixes; authorized Test/Production remain HOLD, P0 #2144.
+
+
 ## v2026.10.31.1538 — Production immutable release directory check (SOURCE VERIFIED / PROD HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-production-identity-drift-v1538.md) / [KO](docs/worklog/2026-10-31-production-identity-drift-v1538.ko.md); [Internal](docs/updates/v2026.10.31.1538-prod-integrity-internal.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1538-prod-integrity-github.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-github.ko.md). Production release path v0950 in-place relabelled to manifest v1336, backend SHA 95485a vs frontend timestamp; source gate fixed, RED then 31/31 + 119/119 PASS. Current real runtime remains blocked; no Production promotion. P0 #2144.
 
