@@ -60,7 +60,7 @@ describe('P0 club WLD settlement boundary', () => {
 
   it('keeps read-only club directory available', async () => {
     await request(app.getHttpServer()).get('/clubs').expect(200);
-    expect(listClubs).toHaveBeenCalledWith(actor, undefined, 50, 0);
+    expect(listClubs).toHaveBeenCalledWith(actor, undefined, 50, 0, undefined);
   });
 
   it('rejects direct service writes without invoking the repository', async () => {

@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseClubJoinMode, verifiedClubJoinModeResult } from '@/lib/club-join-mode';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -106,6 +107,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const clubDirectoryPath = request.method === 'GET' && parts.length === 1 && parts[0] === 'clubs';
+  const clubJoinModeValues = clubDirectoryPath ? request.nextUrl.searchParams.getAll('joinMode') : [];
+  const clubJoinMode = clubDirectoryPath && clubJoinModeValues.length > 0
+    ? parseClubJoinMode(clubJoinModeValues.length === 1 ? clubJoinModeValues[0] : clubJoinModeValues)
+    : 'all';
+  if (clubDirectoryPath && (clubJoinMode === null || (clubJoinModeValues.length > 0 && clubJoinMode === 'all'))) {
+    return gatewayProblem(400, 'Bad Request', 'club_join_mode_invalid', 'joinMode must be public, invite or request once');
+  }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -330,6 +340,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (clubDirectoryPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'club_directory_unverified', 'club directory evidence is unavailable');
+  }
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -411,6 +424,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (clubDirectoryPath && response.ok && !verifiedClubJoinModeResult(compatible, clubJoinMode!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'club_directory_unverified', 'club join mode evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -431,6 +447,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (clubDirectoryPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'club_directory_unverified', 'club directory evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -455,9 +474,9 @@ async function handle(request: NextRequest, context: Context) {
   }
   // Help publication metadata and member-scoped reads must not inherit a
   // cacheable upstream policy, including when the upstream returns an error.
-  if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  if (parts[0] === 'help' || parts[0] === 'clubs' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+    if (parts[0] === 'help' || parts[0] === 'clubs' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&

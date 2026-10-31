@@ -33,9 +33,9 @@ describe('ClubController roster and feed paging', () => {
 
   it('preserves club directory defaults and upper bounds', async () => {
     await controller.listClubs(request);
-    expect(service.listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0);
+    expect(service.listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0, undefined);
     await controller.listClubs(request, 'ALPHA', '100', '10000');
-    expect(service.listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000);
+    expect(service.listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000, undefined);
   });
 
   for (const value of invalid) {
@@ -94,7 +94,7 @@ describe('PostgresClubRepository direct-call paging', () => {
   it('binds valid club directory paging values', async () => {
     query.mockClear();
     await repo.listClubs(actor, 'ALPHA', 100, 10000);
-    expect(query).toHaveBeenLastCalledWith(expect.any(String), [actor, 'ALPHA', 100, 10000]);
+    expect(query).toHaveBeenLastCalledWith(expect.any(String), [actor, 'ALPHA', 100, 10000, null]);
   });
 
   for (const value of [NaN, Infinity, -Infinity, 0, -1, 1.5, 101, 1e20]) {

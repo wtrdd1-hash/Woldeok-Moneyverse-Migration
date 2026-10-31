@@ -48,9 +48,22 @@ describe('Club paging HTTP integration', () => {
 
   it('preserves valid club directory paging and the actor boundary', async () => {
     await request(app.getHttpServer()).get('/clubs').expect(200);
-    expect(listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0);
+    expect(listClubs).toHaveBeenLastCalledWith(actor, undefined, 50, 0, undefined);
     await request(app.getHttpServer()).get('/clubs?search=ALPHA&limit=100&offset=10000').expect(200);
-    expect(listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000);
+    expect(listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 100, 10000, undefined);
+  });
+
+  it('filters join mode with owner actor and rejects duplicates/unknown modes', async () => {
+    listClubs.mockClear();
+    const ok = await request(app.getHttpServer()).get('/clubs?joinMode=public&search=ALPHA').expect(200);
+    expect(ok.headers['cache-control']).toContain('no-store');
+    expect(ok.headers['x-robots-tag']).toBe('noindex');
+    expect(listClubs).toHaveBeenLastCalledWith(actor, 'ALPHA', 50, 0, 'public');
+    listClubs.mockClear();
+    for (const suffix of ['?joinMode=public&joinMode=invite', '?joinMode=unknown', '?search=x&search=y', '?search=' + 'x'.repeat(81)]) {
+      await request(app.getHttpServer()).get('/clubs' + suffix).expect(400);
+    }
+    expect(listClubs).not.toHaveBeenCalled();
   });
 
   it('returns 400 for malformed and duplicate roster pagination without service calls', async () => {

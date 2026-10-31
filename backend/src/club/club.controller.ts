@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -126,16 +127,25 @@ export class ClubController {
 
   @ApiOperation({ summary: '클럽 목록 탐색 및 검색' })
   @Get()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   async listClubs(
     @Req() req: RequestWithSession,
     @Query('search') search?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
+    @Query('joinMode') joinMode?: string,
   ) {
+    if (search !== undefined && (typeof search !== 'string' || search.length > 80 || /[\x00-\x1f\x7f]/.test(search))) {
+      throw new BadRequestException('search must be at most 80 characters');
+    }
+    if (joinMode !== undefined && !['public', 'invite', 'request'].includes(joinMode)) {
+      throw new BadRequestException('joinMode must be public, invite or request');
+    }
     const actorUserId = requireUserId(req);
     const parsedLimit = parseClubPagingNumber(limit, 50, 1, 100, 'limit');
     const parsedOffset = parseClubPagingNumber(offset, 0, 0, 10000, 'offset');
-    const clubs = await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset);
+    const clubs = await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset, joinMode);
     return { clubs };
   }
 

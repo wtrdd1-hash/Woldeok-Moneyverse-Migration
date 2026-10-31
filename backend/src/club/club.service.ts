@@ -24,8 +24,8 @@ export class ClubService {
     return rejectUnjournaledClubSettlement();
   }
 
-  async listClubs(actorUserId?: string, search?: string, limit = 50, offset = 0) {
-    return this.repo.listClubs(actorUserId, search, limit, offset);
+  async listClubs(actorUserId?: string, search?: string, limit = 50, offset = 0, joinMode?: string) {
+    return this.repo.listClubs(actorUserId, search, limit, offset, joinMode);
   }
 
   async getClubById(clubId: string, actorUserId?: string) {

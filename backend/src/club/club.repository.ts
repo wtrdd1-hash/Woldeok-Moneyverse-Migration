@@ -105,12 +105,20 @@ export class PostgresClubRepository {
     search?: string,
     limit = 50,
     offset = 0,
+    joinMode?: string,
   ): Promise<ClubSummaryRow[]> {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       throw new ClubInputError('limit must be an integer between 1 and 100');
     }
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
       throw new ClubInputError('offset must be an integer between 0 and 10000');
+    }
+
+    if (search !== undefined && (typeof search !== 'string' || search.length > 80 || /[\x00-\x1f\x7f]/.test(search))) {
+      throw new ClubInputError('search must be at most 80 characters');
+    }
+    if (joinMode !== undefined && !['public', 'invite', 'request'].includes(joinMode)) {
+      throw new ClubInputError('joinMode must be public, invite or request');
     }
 
     return queryRows<ClubSummaryRow>(
@@ -135,9 +143,10 @@ export class PostgresClubRepository {
        LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = $1::uuid
        WHERE c.status = 'active'
          AND ($2::text IS NULL OR c.name ILIKE ('%' || $2::text || '%') OR c.tag ILIKE ('%' || $2::text || '%'))
+         AND ($5::text IS NULL OR c.join_mode = $5::text)
        ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC
        LIMIT $3 OFFSET $4;`,
-      [actorUserId ?? null, search ? search.trim() : null, limit, offset],
+      [actorUserId ?? null, search ? search.trim() : null, limit, offset, joinMode ?? null],
     );
   }
 
