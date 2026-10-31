@@ -448,6 +448,13 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // Identity links, security records and account deletion are owner-scoped.
+  // Enforce privacy at the public App API edge even on upstream errors/HEAD.
+  if (parts[0] === 'account') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
