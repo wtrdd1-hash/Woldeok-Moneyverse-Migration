@@ -13,8 +13,15 @@
 - [ ] RED/GREEN frontend and Android gateway.
 - [ ] Target tests, build, lint, typecheck, DB/CI evidence.
 
-## Finished
-- Pending.
+## Finished — 02:45 KST
+- P1 user-visible implementation completed in isolated worktree; code SHA `fe1d918673d92fcc0c98197c2dd4e15e694a8519`. Source files unchanged since full tests and successful code-SHA CI.
+- Full Backend 2,954 PASS / 517 SKIP; full Frontend 2,906 PASS / 0 FAIL; Database 62 PASS / 4 SKIP; security 11 PASS; API contract 184 endpoints; typecheck PASS; full lint 0 errors / 1,022 warnings.
+- Backend build PASS. First full frontend build stalled under moneyverse-mcp TasksCurrent 942/1027; stopped only our build subprocess after 6 minutes. Isolated transient systemd build (debian user, 150% CPU, 2.5GB memory, 256 tasks) PASS, including 603/603 static page generation. No other developer service stopped or changed.
+- DEV PostgreSQL read-only app-role published function PASS, but direct `public.announcements` SELECT privilege is a P0 least-privilege violation; issue #993 updated. No migrations or DB mutations.
+- Code SHA GitHub CI #41225039551 SUCCESS. Candidate image #41225034250 pending at report time; final documentation SHA needs separate exact-SHA CI evidence.
+- Official Test version `bc8cd8a6c654af0336f550643f23049a58ee1d16`; Production version `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`. Neither equals candidate. Authenticated official Test E2E and independent restore BLOCKED; Production HOLD.
+- Starting remote branches 23 (including main), ending 24; open PRs 21 → 22; 23 non-main branches have unique unmerged commits. No branch deletion, merge, Test/Production deploy, service restart or rollback. Keep Draft PR #2243 and preserve all other work.
+
 
 ## In progress — 02:27 KST
 - RED observed: backend 4/4 failed (missing query validation/binding); frontend Android 3/3 failed (unmapped app API); client component import failed.
