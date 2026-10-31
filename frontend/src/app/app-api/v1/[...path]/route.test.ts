@@ -519,3 +519,26 @@ describe('Android account security events privacy', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 });
+
+describe('public announcement Android feed', () => {
+  it('routes to the published Nest feed and accepts verified empty evidence', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ announcements: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/announcements'), context('announcements'));
+    expect(response.status).toBe(200);
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).pathname).toBe('/api/v1/announcements');
+    expect(await response.json()).toEqual({ announcements: [] });
+  });
+  it('rejects malformed 200 announcement evidence', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ announcements: [{ title: 'draft' }] }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    })));
+    const response = await GET(request('/app-api/v1/announcements'), context('announcements'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+});

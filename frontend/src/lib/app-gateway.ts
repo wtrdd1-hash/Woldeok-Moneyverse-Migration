@@ -2,7 +2,7 @@ export const APP_API_VERSION = '1';
 export const APP_API_CONTRACT_VERSION = 'v2026.10.30.0125';
 
 export const APP_API_GROUPS = Object.freeze([
-  'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
+  'account', 'activity', 'admin', 'announcements', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
   'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
   'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
 ] as const);
@@ -50,6 +50,8 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   const clean = parts.map((part) => part.trim());
   if (clean.some((part) => !part || part === '.' || part === '..' || part.includes('/'))) return null;
   if (!APP_API_GROUP_SET.has(clean[0]!)) return null;
+  // Public announcements have one read-only collection path, not a writable subtree.
+  if (clean[0] === 'announcements' && clean.length !== 1) return null;
   // Android may read verified public help; no management/preview endpoints.
   if (clean[0] === 'admin' && clean[1] === 'help') return null;
   if (clean[0] === 'help') {

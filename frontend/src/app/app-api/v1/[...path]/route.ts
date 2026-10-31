@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parsePublicAnnouncements } from '@/lib/announcement-feed';
 import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -107,6 +108,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const announcementCollection = parts.length === 1 && parts[0] === 'announcements';
+  if (announcementCollection && request.method !== 'GET' && request.method !== 'HEAD') {
+    return gatewayProblem(405, 'Method Not Allowed', 'announcements_read_only',
+      'Published announcements are read-only');
+  }
+  const publicAnnouncementsPath = announcementCollection && (request.method === 'GET' || request.method === 'HEAD');
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -330,6 +337,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (publicAnnouncementsPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
+      'Published announcements are unavailable');
+  }
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -411,6 +422,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (publicAnnouncementsPath && response.ok && parsePublicAnnouncements(compatible) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
+          'Published announcements are unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
@@ -431,6 +446,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (publicAnnouncementsPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
+          'Published announcements are unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -441,6 +460,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (publicAnnouncementsPath && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcements_unverified',
+      'Published announcements are unavailable');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 
