@@ -25,3 +25,9 @@
 
 - Existing Test backend and migrator environment mismatch is **not repaired** by this PR; operator must reconcile the approved target and independently verify schema checksums, privileges and runtime identity before any Test migration.
 - All mandatory exact-SHA official Test, authenticated E2E, independent restore, and GitOps gates remain mandatory. **Draft/HOLD; no main merge, Test deployment, Production promotion, service restart or DB mutation.**
+
+## Remote CI remediation
+
+- Initial Draft PR CI policy rejected **synthetic test credential URL literals** as committed-secret patterns. No real credentials were present. Split synthetic URL test literals across concatenated strings, preserving test behavior; local repository security scanner and exact policy commands now PASS. CI must rerun on the new SHA; the earlier failed SHA is not release evidence.
+- Integrated `pnpm test` first invocation failed with host `spawn /usr/bin/node EAGAIN` (process exhaustion), not an assertion failure. Its ten preflight files passed when executed serially (34/34); package suites passed separately. Do not claim the integrated command PASS.
+- Full dependency audit: 9 findings (1 low, 8 moderate); Production-only audit: 0 findings. These remain release-gate inputs.

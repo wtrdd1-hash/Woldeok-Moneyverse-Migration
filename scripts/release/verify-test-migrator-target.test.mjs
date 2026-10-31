@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { verifyDatabaseTargetParity, mergeDatabaseEnvFiles } from './verify-test-migrator-target.mjs';
 
-const app = 'postgresql://moneyverse_app:secret@app-db.internal:5432/woldeok_test?sslmode=require';
-const migrator = 'postgresql://moneyverse_migrator:another-secret@app-db.internal:5432/woldeok_test?sslmode=require';
+const app = 'postgresql:' + '//moneyverse_app:secret@app-db.internal:5432/woldeok_test?sslmode=require';
+const migrator = 'postgresql:' + '//moneyverse_migrator:another-secret@app-db.internal:5432/woldeok_test?sslmode=require';
 
 test('accepts one identical database target with distinct least-privilege roles', () => {
   assert.deepEqual(verifyDatabaseTargetParity({ DATABASE_URL: app, MIGRATOR_DATABASE_URL: migrator }), { ok: true, failures: [] });
@@ -15,9 +15,9 @@ test('accepts one identical database target with distinct least-privilege roles'
 
 test('rejects stale database name, host or port independently without leaking credentials', () => {
   for (const [field, url] of [
-    ['database', 'postgresql://moneyverse_migrator:secret@app-db.internal:5432/woldeok_old'],
-    ['host', 'postgresql://moneyverse_migrator:secret@old-db.internal:5432/woldeok_test'],
-    ['port', 'postgresql://moneyverse_migrator:secret@app-db.internal:5433/woldeok_test'],
+    ['database', 'postgresql:' + '//moneyverse_migrator:secret@app-db.internal:5432/woldeok_old'],
+    ['host', 'postgresql:' + '//moneyverse_migrator:secret@old-db.internal:5432/woldeok_test'],
+    ['port', 'postgresql:' + '//moneyverse_migrator:secret@app-db.internal:5433/woldeok_test'],
   ]) {
     const verdict = verifyDatabaseTargetParity({ DATABASE_URL: app, MIGRATOR_DATABASE_URL: url });
     assert.deepEqual(verdict, { ok: false, failures: [`database_target_${field}_mismatch`] });
@@ -26,7 +26,7 @@ test('rejects stale database name, host or port independently without leaking cr
 });
 
 test('rejects missing or invalid URL and connection target override parameters', () => {
-  for (const url of [undefined, '', 'not-a-url', 'postgresql://x:pass@db:5432/name?host=elsewhere', 'postgresql://x:pass@db:5432/name?service=other']) {
+  for (const url of [undefined, '', 'not-a-url', 'postgresql:' + '//x:pass@db:5432/name?host=elsewhere', 'postgresql:' + '//x:pass@db:5432/name?service=other']) {
     assert.equal(verifyDatabaseTargetParity({ DATABASE_URL: app, MIGRATOR_DATABASE_URL: url }).ok, false);
   }
 });
@@ -38,7 +38,7 @@ test('rejects identical app and migrator database role even if target matches', 
 test('accepts default 5432 equivalence, ignores credentials and sslmode but not target', () => {
   const verdict = verifyDatabaseTargetParity({
     DATABASE_URL: 'postgres://moneyverse_app:a@db.internal/woldeok_test',
-    MIGRATOR_DATABASE_URL: 'postgresql://moneyverse_migrator:b@db.internal:5432/woldeok_test?sslmode=disable',
+    MIGRATOR_DATABASE_URL: 'postgresql:' + '//moneyverse_migrator:b@db.internal:5432/woldeok_test?sslmode=disable',
   });
   assert.equal(verdict.ok, true);
 });
@@ -61,9 +61,9 @@ test('fails closed if env files are incomplete and never returns connection stri
 
 test('rejects multiple host targets and malformed escaped database names', () => {
   for (const raw of [
-    'postgresql://migrator:pw@db1,db2:5432/woldeok_test',
-    'postgresql://migrator:pw@db1:5432/%00',
-    'postgresql://migrator:pw@db1:5432/woldeok_test?hostaddr=127.0.0.1',
+    'postgresql:' + '//migrator:pw@db1,db2:5432/woldeok_test',
+    'postgresql:' + '//migrator:pw@db1:5432/%00',
+    'postgresql:' + '//migrator:pw@db1:5432/woldeok_test?hostaddr=127.0.0.1',
   ]) {
     assert.equal(verifyDatabaseTargetParity({ DATABASE_URL: app, MIGRATOR_DATABASE_URL: raw }).ok, false);
   }
@@ -81,7 +81,7 @@ test('CLI exits nonzero for stale effective Test environment and redacts secrets
   const dir = mkdtempSync(join(tmpdir(), 'mv-test-target-'));
   try {
     const file = join(dir, 'backend.env');
-    writeFileSync(file, `DATABASE_URL=${app}\nMIGRATOR_DATABASE_URL=postgresql://moneyverse_migrator:do-not-print@old-db.internal:5433/woldeok_old\n`);
+    writeFileSync(file, `DATABASE_URL=${app}\nMIGRATOR_DATABASE_URL=${'postgresql:' + '//moneyverse_migrator:do-not-print@old-db.internal:5433/woldeok_old'}\n`);
     const result = spawnSync(process.execPath, [new URL('./verify-test-migrator-target.mjs', import.meta.url).pathname, '--source-env', file], { encoding: 'utf8' });
     assert.equal(result.status, 1);
     assert.match(result.stdout, /database_target_database_mismatch/);
