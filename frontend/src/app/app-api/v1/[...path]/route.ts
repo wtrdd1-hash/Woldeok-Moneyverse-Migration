@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { isVerifiedInventoryCondition } from '@/app/inventory/inventory-condition';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
@@ -271,6 +272,22 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  const ownerHoldingsPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'shop' && parts[1] === 'holdings';
+  if (ownerHoldingsPath && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('invalid holdings media type');
+      const payload = await response.clone().json() as { holdings?: unknown };
+      if (!payload || !Array.isArray(payload.holdings) ||
+          payload.holdings.some((item: unknown) => !isVerifiedInventoryCondition(item))) {
+        throw new Error('unverified holdings condition');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_holdings_unverified',
+        'owner inventory condition evidence could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -567,6 +584,11 @@ async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
   if (parts[0] === 'stocks' && parts[1] === 'history') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');
