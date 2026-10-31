@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, MiddlewareConsumer, Module, NestModule, UnauthorizedException, VersioningType } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, MiddlewareConsumer, Module, NestModule, UnauthorizedException, ServiceUnavailableException, VersioningType } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -26,6 +26,12 @@ class PublicProbeController {
     overview: async () => ({ balances: [], recent: [] }),
     activityPage: async () => ({ transactions: [], hasMore: false, nextCursor: null }),
     transferReceipt: async () => ({ status: 'unknown' }),
+    rewardAvailability: async () => ({ available: false }),
+    loans: async () => [],
+    transfer: async (_actor: string, body: { amount: string }) => {
+      if (body.amount === '999') throw new ServiceUnavailableException('ledger unavailable');
+      return { status: 'committed' };
+    },
   } }],
 })
 class WalletHttpFixture implements NestModule {
@@ -69,6 +75,8 @@ describe('wallet financial response privacy on actual Nest HTTP', () => {
     ['/api/v1/wallet/activity?period=7d', 200],
     [`/api/v1/wallet/transfers/receipts/${KEY}`, 200],
     ['/api/v1/wallet/activity?direction=invalid', 400],
+    ['/api/v1/rewards/availability', 200],
+    ['/api/v1/bank/loans', 200],
   ] as const)('protects authenticated GET %s (%s)', async (path, status) => {
     const res = await request(app.getHttpServer()).get(path).set('x-test-auth', '1');
     expect(res.status).toBe(status);
@@ -87,6 +95,16 @@ describe('wallet financial response privacy on actual Nest HTTP', () => {
     const req = method === 'POST' ? request(app.getHttpServer()).post(path) : request(app.getHttpServer()).get(path);
     const res = await req.set('x-test-auth', status === 403 ? '1' : '0')
       .set('x-test-consent', status === 403 ? '0' : '1');
+    expect(res.status).toBe(status);
+    expect(res.headers['cache-control']).toBe('private, no-store');
+    expect(res.headers['x-robots-tag']).toBe('noindex');
+    expect(res.headers['referrer-policy']).toBe('no-referrer');
+  });
+
+  it.each([['100', 201], ['999', 503]] as const)('protects wallet transfer POST %s (%s)', async (amount, status) => {
+    const res = await request(app.getHttpServer()).post('/api/v1/wallet/transfers')
+      .set('x-test-auth', '1')
+      .send({ recipientUserId: '22222222-2222-4222-8222-222222222222', amount, idempotencyKey: KEY });
     expect(res.status).toBe(status);
     expect(res.headers['cache-control']).toBe('private, no-store');
     expect(res.headers['x-robots-tag']).toBe('noindex');
