@@ -25,3 +25,6 @@
 - Official Test `/frontend-version` and `/api/version` both `bc8cd8a6c654af0336f550643f23049a58ee1d16`, not candidate. Production `/frontend-version` returned timestamp `1793450413898` while `/api/version` returned main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; provenance mismatch. Production watchlist edge advertises index/follow. Exact-SHA official authenticated Test E2E, release identity, restore and GitOps gates remain BLOCKED.
 - Mid and pre-merge main re-fetch: `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`, unchanged. No merge, Test deployment, Production promotion, GitOps, financial writes, rollback or branch deletion. All other A/B/QA/Gemini work preserved; five existing automations unchanged.
 - CI `classify`/`policy` passed; `runtime-check` and Test candidate workflow still in progress at final documentation checkpoint. Draft/HOLD until exact final HEAD CI and all release gates pass.
+
+## Integration checkpoint — 2026-11-01 01:04 KST
+- `origin/main` advanced from `353c6d5d6...` to `f13bbce273ffc65e8576170992d82ea00c27a1c9` (Telegram PR #2226). Diff contains backend/Telegram and `implementation_plan.md`, no watchlist, planning, AGENTS or README overlap. Rebased the isolated branch on the new main; source and full exact-HEAD gates must be rerun. This supersedes the earlier pre-merge snapshot; **no merge was attempted**.

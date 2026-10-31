@@ -23,3 +23,6 @@
 - 공식 Test 버전 `bc8cd8a6...`, Production 백엔드 버전 `353c6d5d...`와 프론트 타임스탬프 `1793450413898` 불일치. Production 관심종목 엣지 색인 헤더 문제 확인. 공식 exact-SHA 인증 E2E/릴리스·복원 게이트 BLOCKED.
 - 중간·병합 전 main 재확인: `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834` 유지. PR 병합·Test/Production 배포·GitOps·금융 원장·기존 브랜치 삭제 없음. 핵심 예약 5개 설정 변경 없음.
 - 원격 CI classify/policy PASS, runtime-check/Test 후보 진행 중. 모든 게이트 PASS 전까지 Draft/HOLD 유지.
+
+## main 통합 재확인 (01:04 KST)
+- 최신 main이 `f13bbce273ffc65e8576170992d82ea00c27a1c9`로 변경됨(텔레그램 PR #2226). 관심종목·통합기획·AGENTS·README 변경과 겹치지 않음을 확인하고 독립 브랜치를 최신 main으로 rebase. 최종 SHA 전체 게이트 재검증 필요. 병합하지 않음.
