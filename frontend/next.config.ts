@@ -50,6 +50,26 @@ function resolveBuildId(): string {
   return newId;
 }
 
+/**
+ * Only pages with an authenticated/console session contract belong here.
+ * A public page (e.g. /stocks or /shop) must never inherit these rules just
+ * because a nested member-only page shares its prefix.
+ */
+const PRIVATE_HTML_ROUTE_ROOTS = [
+  'account', 'account-deletion', 'admin', 'wallet', 'dashboard', 'bank',
+  'chat', 'calendar', 'inventory', 'progression', 'quests', 'seasons',
+  'support', 'businesses', 'arcade', 'clubs', 'collections', 'marketplace',
+  'work', 'profile', 'developer', 'login', 'shop/catalog',
+  'stocks/alerts', 'stocks/compare', 'stocks/derivatives',
+  'stocks/history', 'stocks/portfolio', 'stocks/watchlist', 'gallery/submit',
+] as const;
+
+const privateHtmlHeaders = [
+  { key: 'x-robots-tag', value: 'noindex, nofollow' },
+  { key: 'cache-control', value: 'private, no-store' },
+  { key: 'referrer-policy', value: 'no-referrer' },
+];
+
 const BUILD_ID = resolveBuildId();
 
 const config: NextConfig = {
@@ -192,11 +212,13 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
-      // The derivatives page is authenticated and must not inherit the public indexing header.
-      { source: '/stocks/derivatives', headers: [
-        { key: 'x-robots-tag', value: 'noindex, nofollow' },
-        { key: 'cache-control', value: 'private, no-store' },
-      ] },
+      // Later path-specific rules override the public indexing header.
+      // Locale-prefixed URLs are rewritten by proxy; protect the original URL
+      // as well as the internal destination so no intermediate response leaks.
+      ...PRIVATE_HTML_ROUTE_ROOTS.flatMap((root) => [
+        { source: `/${root}/:path*`, headers: privateHtmlHeaders },
+        { source: `/:locale(ko|en|ja|zh|vi)/${root}/:path*`, headers: privateHtmlHeaders },
+      ]),
     ];
   },
 

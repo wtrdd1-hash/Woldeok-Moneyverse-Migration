@@ -8,13 +8,16 @@
 - Scope: deterministic per-path noindex/nofollow, private/no-store and no-referrer for protected HTML paths, including localized aliases, without changing public SEO, auth, API, DB or ledger. Not a release approval.
 
 ## PLAN / CHECKLIST
-- [ ] TDD RED: assert protected route patterns and unchanged public indexability.
-- [ ] GREEN: add path-specific HTTP header rules after global defaults.
+- [x] TDD RED: assert protected route patterns and unchanged public indexability.
+- [x] GREEN: add path-specific HTTP header rules after global defaults.
 - [ ] Verify focused regression and independent HTTP response, then full HEAD gates where resources permit.
 - [ ] Re-fetch origin/main/plans, record exact SHA, remote CI, Test/Production, backups, and release HOLD.
 
-## IN PROGRESS
-- Test-first implementation pending.
+## IN PROGRESS — 2026-11-01 00:16 KST
+- TDD RED confirmed 1 targeted failure (missing `/account/:path*` private HTTP policy), 9 existing tests passed. `evidence/red.log`.
+- GREEN confirmed 10/10 focused tests PASS, including explicit protected root and locale-prefixed header rules. `evidence/green.log`.
+- `next.config.ts` now adds ordered protected-page overrides; public `/stocks`, `/shop`, `/blog`, `/guide` retain global indexability. No backend, SQL or user state changes.
+- Next.js production build and real HTTP verification pending. Global SEO default intentionally unchanged for public pages.
 
 ## FINISHED
 - Pending.
