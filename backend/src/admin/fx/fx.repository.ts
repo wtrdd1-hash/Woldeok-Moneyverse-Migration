@@ -103,35 +103,35 @@ export class FxRepository {
   constructor(private readonly pool: Pool) {}
 
   async getReserveStatus(): Promise<FxReserveStatus> {
-    const res = await this.pool.query(`
-      SELECT 
-        id,
-        reserve_name AS "reserveName",
-        currency,
-        total_reserves_usd::float AS "totalReservesUsd",
-        target_anchor_rate::float AS "targetAnchorRate",
-        current_rate::float AS "currentRate",
-        is_halted AS "isHalted",
-        total_interventions_count AS "totalInterventionsCount",
-        total_intervened_usd::float AS "totalIntervenedUsd",
-        updated_at AS "updatedAt"
-      FROM public.foreign_exchange_reserves
-      LIMIT 1;
-    `);
-
-    if (res.rows.length === 0) {
-      throw new Error('외환보유액 마스터 원장이 존재하지 않습니다.');
+    let rows: FxReserveStatus[];
+    try {
+      ({ rows } = await this.pool.query<FxReserveStatus>(`
+        SELECT id, reserve_name AS "reserveName", currency,
+          total_reserves_usd::float AS "totalReservesUsd",
+          target_anchor_rate::float AS "targetAnchorRate",
+          current_rate::float AS "currentRate", is_halted AS "isHalted",
+          total_interventions_count AS "totalInterventionsCount",
+          total_intervened_usd::float AS "totalIntervenedUsd",
+          updated_at AS "updatedAt"
+        FROM public.foreign_exchange_reserves LIMIT 1
+      `));
+    } catch {
+      throw new ServiceUnavailableException('FX reference observation unavailable');
     }
-    return res.rows[0];
+    const row = rows[0];
+    const timestamp = row ? new Date(row.updatedAt).getTime() : Number.NaN;
+    const ageMs = Date.now() - timestamp;
+    if (!row || !Number.isFinite(timestamp) || ageMs < -300_000 || ageMs > 86_400_000 ||
+        !Number.isFinite(row.currentRate) || row.currentRate <= 0 ||
+        !Number.isFinite(row.targetAnchorRate) || row.targetAnchorRate <= 0 ||
+        !Number.isFinite(row.totalReservesUsd) || row.totalReservesUsd < 0) {
+      throw new ServiceUnavailableException('FX reference observation unavailable');
+    }
+    return row;
   }
 
   async getLatestRate(): Promise<number> {
-    const res = await this.pool.query(`
-      SELECT current_rate::float AS rate 
-      FROM public.foreign_exchange_reserves 
-      LIMIT 1;
-    `);
-    return res.rows[0]?.rate ?? 1350.0;
+    return (await this.getReserveStatus()).currentRate;
   }
 
   async getRateHistory(limit: number = 30): Promise<FxRatePoint[]> {

@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Post,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -114,43 +116,12 @@ export class PublicFxController {
   constructor(private readonly fxService: FxService) {}
 
   @Get('portal')
+  @Header('Cache-Control', 'no-store')
   @SkipInternalToken()
-  @ApiOperation({ summary: '대국민 실시간 서울외환시장 환율, 외환보유액, 통화스왑, SDR 다변화 및 EWS 공개 조회' })
+  @ApiOperation({ summary: 'Public FX reference observations (unavailable pending verification)' })
   async getPublicPortalData() {
-    const [reserves, history, sdrAllocations, swapAgreements, forwardRates, ews] = await Promise.all([
-      this.fxService.getReserveStatus(),
-      this.fxService.getRateHistory(30),
-      this.fxService.getSdrAllocations(),
-      this.fxService.getSwapAgreements(),
-      this.fxService.getForwardRates(),
-      this.fxService.getEarlyWarningStatus(),
-    ]);
-
-    const totalSwapFacilityUsd = swapAgreements.reduce((sum, a) => sum + a.totalFacilityUsd, 0);
-    const availableSwapFacilityUsd = swapAgreements.reduce((sum, a) => sum + a.availableFacilityUsd, 0);
-
-    return {
-      success: true,
-      data: {
-        reserves: {
-          currency: reserves.currency,
-          totalReservesUsd: reserves.totalReservesUsd,
-          currentRate: reserves.currentRate,
-          targetAnchorRate: reserves.targetAnchorRate,
-          isHalted: reserves.isHalted,
-          updatedAt: reserves.updatedAt,
-        },
-        history,
-        sdrAllocations,
-        swapSummary: {
-          totalSwapFacilityUsd,
-          availableSwapFacilityUsd,
-          agreements: swapAgreements,
-        },
-        forwardRates,
-        ews,
-      },
-    };
+    // Seeded reference values have no independent source receipt or reliable freshness proof.
+    throw new ServiceUnavailableException('fx_source_unverified');
   }
 
   @Get('my-wallet')
@@ -163,11 +134,12 @@ export class PublicFxController {
   }
 
   @Get('forward/rates')
+  @Header('Cache-Control', 'no-store')
   @SkipInternalToken()
-  @ApiOperation({ summary: '1M/3M/6M CIP 내외금리차 기반 이론 선물환율 조회' })
+  @ApiOperation({ summary: 'Theoretical forward reference rates (unavailable pending verification)' })
   async getForwardRates() {
-    const rates = await this.fxService.getForwardRates();
-    return { success: true, data: rates };
+    // A derived quote cannot be published when its spot source is unverified.
+    throw new ServiceUnavailableException('fx_source_unverified');
   }
 
   @Get('forward/my-contracts')
