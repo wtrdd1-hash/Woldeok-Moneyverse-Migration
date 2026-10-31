@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { applyFreshCiDatabase, assertContiguousMigrationSequence, listMigrationFiles, requiredDatabaseEnv, sha256File } from './ci-apply.mjs';
@@ -85,5 +85,19 @@ test('refuses a stale CI migrator target before touching PostgreSQL', () => {
       if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+
+test('CI migration step provides the same isolated app/migrator URLs as its test step', () => {
+  const workflow = readFileSync(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const apply = workflow.split('      - name: Apply database migrations\n')[1]?.split('      - name: Test\n')[0];
+  const testing = workflow.split('      - name: Test\n')[1]?.split('      - name: Reject Prisma')[0];
+  assert.ok(apply, 'missing migration step');
+  assert.ok(testing, 'missing test step');
+  for (const key of ['DATABASE_URL', 'MIGRATOR_DATABASE_URL']) {
+    const value = (step) => step.match(new RegExp('^\\s{10}' + key + ':\\s*(.+)$', 'm'))?.[1]?.trim();
+    assert.ok(value(apply), 'migration step missing ' + key);
+    assert.equal(value(apply), value(testing), 'migration/test DB URL drift for ' + key);
   }
 });
