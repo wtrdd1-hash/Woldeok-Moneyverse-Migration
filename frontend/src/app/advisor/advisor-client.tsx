@@ -142,7 +142,17 @@ export function AdvisorClient() {
     try {
       const res = await fetch('/api/advisor/deoki/diagnose');
       const json = await res.json();
-      if (json && (json.ok || json.score)) {
+      // The current Backend diagnosis DTO is not the verified chart contract.
+      // Do not render the legacy placeholder metrics until an audited source exists.
+      if (res.ok && json?.sourceStatus === 'VERIFIED' &&
+          typeof json.score === 'number' && Number.isFinite(json.score) &&
+          typeof json.totalAssetWld === 'number' && Number.isSafeInteger(json.totalAssetWld) &&
+          typeof json.sharpeRatio === 'number' &&
+          typeof json.maxDrawdownRate === 'number' &&
+          typeof json.annualExpectedYield === 'number' &&
+          typeof json.statusLabel === 'string' &&
+          typeof json.rebalancingAction === 'string' &&
+          Array.isArray(json.allocation) && Array.isArray(json.strengths) && Array.isArray(json.risks)) {
         setData(json);
       }
     } catch {
@@ -211,6 +221,18 @@ export function AdvisorClient() {
     '부동산 월세 배당을 더 늘리려면?',
     '국채와 주식의 황금비율이 뭐야?',
   ];
+
+  if (!data) {
+    return (
+      <section role="status" aria-live="polite" className="rounded-lg border p-6 space-y-3">
+        <h2 className="text-lg font-semibold">포트폴리오 진단 증빙 확인 불가</h2>
+        <p className="text-sm text-muted-foreground">
+          {loading ? '금융정보 출처를 확인하고 있습니다.' : '검증된 자산 분석 자료가 없어 진단과 리밸런싱을 표시하지 않습니다.'}
+        </p>
+        {!loading && <Button type="button" onClick={() => { setLoading(true); void fetchDiagnosis(); }}>다시 확인</Button>}
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-6">
