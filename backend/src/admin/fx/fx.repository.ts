@@ -103,53 +103,26 @@ export class FxRepository {
   constructor(private readonly pool: Pool) {}
 
   async getReserveStatus(): Promise<FxReserveStatus> {
-    const res = await this.pool.query(`
-      SELECT 
-        id,
-        reserve_name AS "reserveName",
-        currency,
-        total_reserves_usd::float AS "totalReservesUsd",
-        target_anchor_rate::float AS "targetAnchorRate",
-        current_rate::float AS "currentRate",
-        is_halted AS "isHalted",
-        total_interventions_count AS "totalInterventionsCount",
-        total_intervened_usd::float AS "totalIntervenedUsd",
-        updated_at AS "updatedAt"
-      FROM public.foreign_exchange_reserves
-      LIMIT 1;
-    `);
-
-    if (res.rows.length === 0) {
-      throw new Error('외환보유액 마스터 원장이 존재하지 않습니다.');
+    const res = await this.pool.query('SELECT public.fx_public_reserve_status() AS result');
+    const reserve: FxReserveStatus | null = res.rows[0]?.result ?? null;
+    if (!reserve) {
+      throw new ServiceUnavailableException('FX reserve source is unavailable.');
     }
-    return res.rows[0];
+    return reserve;
   }
 
   async getLatestRate(): Promise<number> {
-    const res = await this.pool.query(`
-      SELECT current_rate::float AS rate 
-      FROM public.foreign_exchange_reserves 
-      LIMIT 1;
-    `);
-    return res.rows[0]?.rate ?? 1350.0;
+    const reserve = await this.getReserveStatus();
+    const rate = reserve.currentRate;
+    if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {
+      throw new ServiceUnavailableException('FX spot rate source is unavailable.');
+    }
+    return rate;
   }
 
   async getRateHistory(limit: number = 30): Promise<FxRatePoint[]> {
-    const res = await this.pool.query(`
-      SELECT 
-        id,
-        rate::float AS rate,
-        change_pct::float AS "changePct",
-        volume_usd::float AS "volumeUsd",
-        intervention_type AS "interventionType",
-        note,
-        created_at AS "createdAt"
-      FROM public.foreign_exchange_rates
-      ORDER BY created_at DESC
-      LIMIT $1;
-    `, [limit]);
-
-    return res.rows.reverse();
+    const res = await this.pool.query('SELECT public.fx_public_rate_history($1) AS result', [limit]);
+    return res.rows[0]?.result ?? [];
   }
 
   async getOrCreateUserWallet(_userId: string): Promise<FxWallet> {
@@ -211,39 +184,13 @@ export class FxRepository {
   }
 
   async getSdrAllocations(): Promise<SdrAssetAllocation[]> {
-    const res = await this.pool.query(`
-      SELECT 
-        id,
-        asset_name AS "assetName",
-        asset_type AS "assetType",
-        allocation_weight_pct::float AS "allocationWeightPct",
-        holding_amount::float AS "holdingAmount",
-        unit,
-        usd_value::float AS "usdValue",
-        updated_at AS "updatedAt"
-      FROM public.foreign_exchange_asset_allocations
-      ORDER BY allocation_weight_pct DESC;
-    `);
-    return res.rows;
+    const res = await this.pool.query('SELECT public.fx_public_sdr_allocations() AS result');
+    return res.rows[0]?.result ?? [];
   }
 
   async getSwapAgreements(): Promise<CurrencySwapAgreement[]> {
-    const res = await this.pool.query(`
-      SELECT 
-        id,
-        counterparty,
-        total_facility_usd::float AS "totalFacilityUsd",
-        drawn_amount_usd::float AS "drawnAmountUsd",
-        (total_facility_usd - drawn_amount_usd)::float AS "availableFacilityUsd",
-        status,
-        interest_rate_pct::float AS "interestRatePct",
-        effective_date AS "effectiveDate",
-        expiry_date AS "expiryDate",
-        updated_at AS "updatedAt"
-      FROM public.currency_swap_agreements
-      ORDER BY total_facility_usd DESC;
-    `);
-    return res.rows;
+    const res = await this.pool.query('SELECT public.fx_public_swap_agreements() AS result');
+    return res.rows[0]?.result ?? [];
   }
 
   async drawdownCurrencySwap(
