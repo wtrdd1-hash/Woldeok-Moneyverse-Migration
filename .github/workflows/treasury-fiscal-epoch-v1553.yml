@@ -1,5 +1,8 @@
 name: Treasury Fiscal Reset - Isolated PostgreSQL v1553
 on:
+  push:
+    branches:
+      - fix/treasury-fiscal-epoch-reset-v20261031-1553
   pull_request:
     paths:
       - 'packages/database/migrations/314-treasury-fiscal-epoch-reset.sql'
