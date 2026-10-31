@@ -12,3 +12,6 @@ MID/FINISH: PENDING.
 - Reproduced identical 8d74 CI TypeError from missing injected durable central bank policy in obsolete v1415 controller test.
 - Legacy synthetic mint/monetary endpoints remain HTTP 503. Durable base/reserve GET and audited PUT now assert HTTP 503 if canonical Postgres is absent, while dedicated durable service tests retain persistent policy and transactional audit/rollback.
 - Focused 12/12 tests PASS; monorepo typecheck and touched-file ESLint PASS. Production, DB, WLD and official Test untouched. Re-run new GitHub exact-SHA full CI after commit; previous 8d74 runs remain FAILED.
+
+## Isolated Test DB restore plan — recorded before operation
+Official Test c212 runs from deleted CWD and exposes uncertified Treasury 200/60M, so it is not a valid Test for new candidate. Separate moneyverse-test-db contains 214 applied migration records, while source has 311 migration SQL files through 312. Take permission-restricted Test-only custom-format pg_dump into secondary disk, restore to a NEW isolated database, and inspect migration parity; do not alter any existing Test/Production DB. This is not Production backup/rollback certification.

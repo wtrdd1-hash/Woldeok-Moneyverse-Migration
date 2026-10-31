@@ -6,6 +6,7 @@ const read = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/api', () => ({ apiOrNull: read }));
 vi.mock('@/lib/session', () => ({ requireAdminConsole: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('../admin-back', () => ({ AdminBack: () => null }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }) }));
 
 import AdminBankPage from './page';
 

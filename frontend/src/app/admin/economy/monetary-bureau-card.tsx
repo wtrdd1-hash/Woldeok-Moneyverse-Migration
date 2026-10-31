@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -174,30 +173,33 @@ export function MonetaryBureauCard({
     autoConfig?.max_step_pct?.toString() ?? '5.0',
   );
 
-  const router = useRouter();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  useEffect(() => {
-    setTelemetry(initialTelemetry ?? null);
-    setOrders(initialOrders ?? []);
-    setMints(initialMints ?? []);
-    setRetirements(initialRetirements ?? []);
-    setAutoConfig(initialAutoConfig ?? null);
-    setAutoEvents(initialAutoEvents ?? []);
-  }, [initialTelemetry, initialOrders, initialMints, initialRetirements, initialAutoConfig, initialAutoEvents]);
-
   const totalRetiredAmount = retirements.reduce(
     (acc, cur) => acc + BigInt(cur.amount_wld || '0'),
     BigInt(0),
   );
 
   const refreshData = async () => {
-    setIsRefreshing(true);
+    // A failed refresh invalidates old financial evidence rather than leaving stale numbers.
+    setTelemetry(null);
     try {
-      router.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 600));
-    } finally {
-      setIsRefreshing(false);
+      const [tRes, oRes, mRes, rRes, aRes] = await Promise.all([
+        fetch('/api/v1/admin/economy/monetary/telemetry'),
+        fetch('/api/v1/admin/economy/monetary/orders'),
+        fetch('/api/v1/admin/economy/monetary/certificates/mints'),
+        fetch('/api/v1/admin/economy/monetary/certificates/retirements'),
+        fetch('/api/v1/admin/economy/monetary/auto-regulation/status'),
+      ]);
+      if (tRes.ok) setTelemetry(await tRes.json());
+      if (oRes.ok) setOrders(await oRes.json());
+      if (mRes.ok) setMints(await mRes.json());
+      if (rRes.ok) setRetirements(await rRes.json());
+      if (aRes.ok) {
+        const aData = await aRes.json();
+        if (aData.config) setAutoConfig(aData.config);
+        if (aData.events) setAutoEvents(aData.events);
+      }
+    } catch {
+      setTelemetry(null);
     }
   };
 
@@ -404,9 +406,9 @@ export function MonetaryBureauCard({
               size="sm"
               onClick={refreshData}
               className="text-xs h-8"
-              disabled={isSubmitting || isRefreshing}
+              disabled={isSubmitting}
             >
-              <RefreshCw className={`size-3 mr-1 ${isRefreshing ? "animate-spin" : ""}`} /> 새로고침
+              <RefreshCw className="size-3 mr-1" /> 새로고침
             </Button>
             <Button
               variant={telemetry?.is_issuance_frozen ? 'destructive' : 'outline'}
