@@ -8,7 +8,7 @@
 - [x] 기준 릴리스 테스트 140/140 통과; Test/Production 공개 버전이 main과 다름.
 - [x] 중간: main·선행 PR 재확인, 개발 연계 GitHub 이슈 #2256 생성.
 - [x] 기존 영·한 PROJECT_PLAN, INTEGRATED_PLANNING_MASTER, UPDATE_LOG에 기본값 무결성·무변경 CAS·원자적 조회 보완을 통합; v1584의 대체된 부분 표시.
-- [ ] 완료: 릴리스/분류/동등성/diff 검증 재실행, 최종 SHA·원격 CI·GitHub 초안 PR 기록.
+- [x] 로컬 완료: 릴리스 140/140, 분류 24/24, 영·한 동등성, diff 검사 통과. 확장 시험 4 통과/1 실패는 변경 없는 main에서도 재현. 초안 PR #2258 생성; 최종 SHA 원격 CI는 별도 GitHub·호스트 완료 기록에서 검증.
 - [ ] 실제 개발·PG/Android 수용시험: 미실행(별도 개발 브랜치 필요).
 
 ## 운영 경계

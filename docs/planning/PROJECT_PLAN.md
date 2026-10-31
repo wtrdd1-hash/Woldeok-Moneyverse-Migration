@@ -1,10 +1,10 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1586 F675-202 default-view integrity hardening / issue #2256 / DRAFT / RELEASE HOLD; predecessor Draft #2253 OPEN UNMERGED.
+**Current planning:** v1586 F675-202 default-view integrity hardening / issue #2256 / Draft #2258 / DRAFT / RELEASE HOLD; predecessor Draft #2253 OPEN UNMERGED.
 
 
 ## v2026.11.01.1586 — F675-202 Default Saved Expiry-Calendar View Integrity Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle / authority:** Previous **Feature Addition v1584** → Current **Feature Improvement v1586** → Next **Feature Addition v1588 (provisional)**. Remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` checked at start/mid; English canonical, Korean meaning-equivalent. Predecessor planning Draft #2253 is OPEN/UNMERGED and its valid F675-199–202 planning is carried in an isolated docs-only branch, not main. Handoff **#2256**. QA v1426 **#2242** and QA v1427 Draft **#2248** inspected; **RELEASE HOLD**. No runtime implementation.
+**Cycle / authority:** Previous **Feature Addition v1584** → Current **Feature Improvement v1586** → Next **Feature Addition v1588 (provisional)**. Remote main `f13bbce273ffc65e8576170992d82ea00c27a1c9` checked at start/mid; English canonical, Korean meaning-equivalent. Predecessor planning Draft #2253 is OPEN/UNMERGED and its valid F675-199–202 planning is carried in an isolated docs-only branch, not main. Handoff **#2256**, Draft **#2258**. QA v1426 **#2242** and QA v1427 Draft **#2248** inspected; **RELEASE HOLD**. No runtime implementation.
 
 ### Source-verified scope, defect and alternatives
 - Actual `frontend/src/app/inventory/page.tsx` calls `requireMember()` and `apiOrNull('/api/v1/shop/holdings')` then collapses a failed read into `[]`; `inventory-view.tsx` has category tabs, not a default expiry view. Nest `shop.controller.ts` serves owner holdings through `shop.repository.ts` and migration 123 `shop_my_items_v2(actor)`. Migration 071 defines the shop category domain, migration 045 shows key-lock-first idempotency. The proposed F675-199 calendar, F675-200 .ics export, F675-201 saved views and F675-202 default preference **do not exist in deployed code**. The defects below are **design inconsistencies, not observed exploitation**.

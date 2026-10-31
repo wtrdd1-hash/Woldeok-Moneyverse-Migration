@@ -8,7 +8,7 @@
 - [x] Baseline 140/140 release tests PASS; fresh Test/Production public version IDs differ from main.
 - [x] MID: main and predecessor rechecked, GitHub handoff issue #2256 opened.
 - [x] Integrate F675-202 integrity/no-op/CAS/atomic-read correction in existing EN/KO PROJECT_PLAN, INTEGRATED_PLANNING_MASTER and UPDATE_LOG; mark v1584 historical where superseded.
-- [ ] FINAL: rerun release/classification/parity/diff checks and record exact SHA, remote CI, GitHub Draft PR.
+- [x] FINAL local: release 140/140 PASS; classifier 24/24 PASS; EN/KO parity PASS; diff check PASS. Extended 4 PASS/1 FAIL, same failure reproduced on unchanged main. Draft PR #2258 opened; final exact SHA remote CI to be verified separately in GitHub and host FINISH record.
 - [ ] Developer implementation and actual PG/Android acceptance tests: NOT DONE (separate development branches only).
 
 ## Release boundary
