@@ -28,15 +28,7 @@ export class MarketplaceService {
 
     return queryRows(
       this.pool,
-      `SELECT id::text, seller_id::text, item_code, item_name, category,
-              rarity, quantity, price_wld::text, listing_fee_wld::text,
-              status, description, created_at
-       FROM public.marketplace_listings
-       WHERE status = 'ACTIVE'
-         AND ($1::text IS NULL OR category = $1)
-         AND ($2::text IS NULL OR item_name ILIKE $2 OR description ILIKE $2)
-       ORDER BY created_at DESC
-       LIMIT $3 OFFSET $4`,
+      `SELECT * FROM public.marketplace_active_listings($1, $2, $3, $4)`,
       [category, search, limit, offset],
     );
   }
@@ -45,12 +37,7 @@ export class MarketplaceService {
     if (!this.pool) throw new Error('database pool unavailable');
     return queryRows(
       this.pool,
-      `SELECT id::text, seller_id::text, item_code, item_name, category,
-              rarity, quantity, price_wld::text, listing_fee_wld::text,
-              status, description, created_at, settled_at, cancelled_at
-       FROM public.marketplace_listings
-       WHERE seller_id = $1
-       ORDER BY created_at DESC`,
+      `SELECT * FROM public.marketplace_owner_listings($1::uuid)`,
       [actor],
     );
   }
