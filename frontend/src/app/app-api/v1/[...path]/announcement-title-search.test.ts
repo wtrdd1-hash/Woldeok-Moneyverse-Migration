@@ -17,6 +17,14 @@ describe('Android public announcement search', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ announcements: [{ announcementId: '11111111-1111-4111-8111-111111111111', title: 'Unrelated', body: 'x', imageUrl: null, imageAltText: null, isPinned: false, publishedAt: '2026-10-31T00:00:00.000Z' }] }), { headers: { 'content-type': 'application/json' } })));
     expect((await GET(request('q=notice&limit=50'), context)).status).toBe(503);
   });
+
+  it('rejects non-JSON 200 and duplicate upstream IDs', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('<html>wrong</html>', { headers: { 'content-type': 'text/html' } })));
+    expect((await GET(request('limit=50'), context)).status).toBe(503);
+    const row = { announcementId: '11111111-1111-4111-8111-111111111111', title: 'Notice', body: 'x', imageUrl: null, imageAltText: null, isPinned: false, publishedAt: '2026-10-31T00:00:00.000Z' };
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ announcements: [row, row] }), { headers: { 'content-type': 'application/json' } })));
+    expect((await GET(request('q=notice&limit=50'), context)).status).toBe(503);
+  });
   it('accepts verified matching public notices and forwards the query', async () => {
     const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ announcements: [{ announcementId: '11111111-1111-4111-8111-111111111111', title: 'Notice', body: 'x', imageUrl: null, imageAltText: null, isPinned: false, publishedAt: '2026-10-31T00:00:00.000Z' }] }), { headers: { 'content-type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchSpy);

@@ -22,3 +22,8 @@
 - Contract build, backend and frontend typecheck PASS; target ESLint 0 errors / 1 existing image warning.
 - Source main re-fetched and checked before checkpoint; other PRs/branches left untouched. No DB writes or release actions.
 - Pending full gates, real PostgreSQL app-role verification, exact SHA CI and official Test.
+
+## In progress — 02:32 KST
+- Full backend: 2,954 PASS / 517 SKIP / 0 FAIL. First frontend full: 2,904 PASS / 1 FAIL; app gateway expected group list omitted new public announcements group. Updated contract expectation and re-ran target suite: 20 PASS. Full frontend rerun launched through mv-task.
+- Real PostgreSQL 17 read-only app-role check: published function EXECUTE true; query succeeds; direct announcements SELECT true (least-privilege P0, not fixed in this feature). No mutation.
+- Release HOLD documented in docs/qa and docs/releases; exact-SHA official Test and Production not performed.
