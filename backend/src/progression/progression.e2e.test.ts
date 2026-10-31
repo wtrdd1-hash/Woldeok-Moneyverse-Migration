@@ -38,6 +38,17 @@ describe('progression routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
+  it('mounts the prestige read and rebirth refusal behind the existing session/CSRF guards', async () => {
+    const status = await request(app.getHttpServer()).get('/api/v1/progression/prestige');
+    const rebirth = await request(app.getHttpServer())
+      .post('/api/v1/progression/prestige/rebirths')
+      .send({});
+    expect(status.status).not.toBe(404);
+    expect(rebirth.status).not.toBe(404);
+    expect([401, 403, 428, 503]).toContain(status.status);
+    expect([401, 403, 428, 503]).toContain(rebirth.status);
+  });
+
   it('mounts the growth stage behind a session', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/progression');
     expect(response.status).not.toBe(404);
