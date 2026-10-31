@@ -18,6 +18,8 @@ describe.skipIf(!url)('member EXP floor against isolated PostgreSQL', () => {
       const filtered = await repository.tasks(actor, undefined, undefined, undefined, '50');
       expect(all.length).toBeGreaterThan(0);
       expect(filtered.map((row) => row.task_id)).toEqual(all.filter((row) => row.experience_preview !== null && BigInt(row.experience_preview) >= 50n).map((row) => row.task_id));
+      const combined = await repository.tasks(actor, undefined, 300, '1000', '50', true);
+      expect(combined.every((row) => row.experience_preview !== null && BigInt(row.experience_preview) >= 50n && row.reward_preview !== null && BigInt(row.reward_preview) <= 1000n && row.minimum_duration_seconds <= 300 && (row.daily_limit === 0 || row.taken_today < row.daily_limit))).toBe(true);
       expect((await client.query(`SELECT has_table_privilege(current_user, 'public.work_task_catalog', 'SELECT') AS allowed`)).rows[0]?.allowed).toBe(false);
     } finally {
       await client.query('ROLLBACK');

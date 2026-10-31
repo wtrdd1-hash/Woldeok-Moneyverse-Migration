@@ -185,7 +185,9 @@ export class WorkController {
       repository.featureState(),
       this.guarded(
         () => minExperience !== null
-          ? repository.tasks(actor, arg1, maxDuration ?? undefined, availability ? true : ceiling ?? undefined, minExperience)
+          ? availability && ceiling !== null
+            ? repository.tasks(actor, arg1, maxDuration ?? undefined, ceiling, minExperience, true)
+            : repository.tasks(actor, arg1, maxDuration ?? undefined, availability ? true : ceiling ?? undefined, minExperience)
           : availability
             ? repository.tasks(actor, arg1, maxDuration ?? undefined, true)
           : ceiling !== null

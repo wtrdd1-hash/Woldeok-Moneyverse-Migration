@@ -279,9 +279,12 @@ export class WorkRepository {
     });
   }
 
-  async tasks(actor: unknown, filterOrMinReward?: unknown, durationOrMaxDuration?: unknown, availabilityOrMaxReward?: unknown, minExperienceRaw?: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown, filterOrMinReward?: unknown, durationOrMaxDuration?: unknown, availabilityOrMaxReward?: unknown, minExperienceRaw?: unknown, availableWithCeilingRaw?: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     const minExperience = parseWorkTaskMinExperience(minExperienceRaw);
+    if (availableWithCeilingRaw !== undefined && (availableWithCeilingRaw !== true || minExperience === null || typeof availabilityOrMaxReward !== 'string')) {
+      throw new WorkInputError('combined availability and reward ceiling require a minimum EXP filter');
+    }
     if (minExperience !== null && (typeof filterOrMinReward === 'boolean' || typeof filterOrMinReward === 'number' || filterOrMinReward === 'true' || filterOrMinReward === 'false')) {
       throw new WorkInputError('minExperience cannot be combined with legacy recommended or difficulty filters');
     }
@@ -350,10 +353,10 @@ export class WorkRepository {
       throw new WorkInputError('minReward must be a non-negative integer string with at most 18 digits');
     }
     const maxDuration = parseWorkTaskMaxDuration(durationOrMaxDuration);
-    let availability = false;
+    let availability = availableWithCeilingRaw === true;
     let ceiling: string | null = null;
     if (typeof availabilityOrMaxReward === 'boolean') {
-      availability = availabilityOrMaxReward;
+      availability = availabilityOrMaxReward || availability;
     } else if (availabilityOrMaxReward !== undefined) {
       ceiling = parseWorkTaskMaxReward(availabilityOrMaxReward);
     }

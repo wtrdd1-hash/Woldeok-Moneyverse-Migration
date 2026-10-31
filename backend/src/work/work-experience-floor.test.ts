@@ -44,6 +44,22 @@ describe('member work minimum preview EXP', () => {
     expect(query.mock.calls[1]?.[1]).toEqual([ACTOR, null, '0']);
   });
 
+  it('combines availableOnly, reward ceiling and EXP floor instead of dropping a filter', async () => {
+    const { query, repository } = make();
+    await repository.tasks(ACTOR, '100', 300, '1000', '50', true);
+    const [sql, params] = query.mock.calls[0]!;
+    expect(params).toEqual([ACTOR, '100', 300, '1000', '50']);
+    expect(sql).toContain('task.reward_preview <= $4::numeric');
+    expect(sql).toContain('task.taken_today < task.daily_limit');
+    expect(sql).toContain('public.work_experience_preview($1, task.task_id) >= $5::numeric');
+
+    const tasks = vi.fn(async () => []);
+    const controller = new WorkController({ tasks, featureState: vi.fn(async () => 'enabled') } as unknown as WorkRepository);
+    const req = { session: { user_id: ACTOR } } as Parameters<WorkController['tasks']>[0];
+    await controller.tasks(req, undefined, '300', '1000', '1', '50');
+    expect(tasks).toHaveBeenCalledWith(ACTOR, undefined, 300, '1000', '50', true);
+  });
+
   it('preserves exact 0/1 WLD ceilings alongside the EXP filter', async () => {
     const tasks = vi.fn(async () => []);
     const featureState = vi.fn(async () => 'enabled');
