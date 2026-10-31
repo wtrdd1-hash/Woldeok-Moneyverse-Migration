@@ -1,4 +1,5 @@
 ## 기획 v1560 — 2026-10-31 (기능 추가 / DRAFT / RELEASE HOLD)
+- **GitHub:** Draft PR #2167 OPEN/HOLD, 이슈 #2166, 초기 SHA `59052ec3842d14557c17e4b36dcddb3c700e11db` 문서 CI·후보 빌드 SUCCESS, 최종 SHA 검증 전. 선행 #2157 미병합, 배포 없음.
 - F675-196 회원 선택형 매일 09시 KST 앱 내 만료 알림 통합 기능, 기본 개별 알림 유지. 이전 보완 v1558 → 현재 추가 v1560 → 다음 보완 v1562. main `1a3625f3c5e426c857e2b44a412d7949ac4a6257` 시작/중간, 선행 Draft #2157, 개발 이슈 #2166. 선행 알림 기능은 미구현.
 - 본인 인증 POST 미리보기/설정·CSRF·멱등성·리비전, 잠금 후 UTC 7일/1일 판단, 전체 집합 회원/일 원자적 알림함+영수증, 모드 간 중복 차단·소급 발송 금지·세대/개별 제외 우선, 정상 빈 상태와 503 구분. SECURITY DEFINER/직접 권한 거부, Android/Next 개인정보 헤더·접근성·20명 이상 관리자 집계·기본 OFF. P0 4/P1 6, 10,001건·워커 2개 시험 제안/미실행. 이번 v1560 로컬 릴리스 시험 122건 중 121 PASS / 1 FAIL: `verify-merged-pr-head.test.mjs`는 삭제 push를 기대하지만 현재 main의 정리 워크플로는 의도적으로 읽기 전용. 테스트/워크플로 내용이 main과 동일하므로 이번 문서 변경의 원인이 아님. REL1560-04 BLOCKED.  QA v1411은 과거 결과이며 정확 SHA Test·금융·보안·복원 HOLD. 외부 신규 0/누적 UNKNOWN 10,000 BLOCKED. 런타임·DB·WLD·원장·Test·Production·main 변경 없음. 통합 기획서·작업일지 참조.
 

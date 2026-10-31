@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1560 — F675-196 Owner Expiry Reminder Daily Digest (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **GitHub v1560:** Draft PR #2167 OPEN/HOLD stacked on #2157, issue #2166; initial SHA `59052ec3842d14557c17e4b36dcddb3c700e11db` CI + Build Test Candidate SUCCESS (DOCS_ONLY), final checkpoint SHA pending. Local release tests 121/122, not fully green. Parent draft branch diverges from latest main; reconcile before integration.
 
 **Cycle:** Previous Feature Improvement v1558 → Current Feature Addition v1560 → Next Feature Improvement v1562 (provisional). **Authority:** origin/main `1a3625f3c5e426c857e2b44a412d7949ac4a6257` checked at start/mid; AGENTS.md, README.md, English PROJECT_PLAN.md canonical, Korean counterpart; stacked after unmerged Draft #2157 (`ced5ee5e0a8f58b58c8f183807b4e246974c05ba`), engineering issue #2166. All F675-192/193/194/195 reminder designs are DRAFT and UNIMPLEMENTED. This is not a claim of deployed notification delivery. No separate feature-planning file.
 
