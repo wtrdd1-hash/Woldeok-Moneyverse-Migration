@@ -131,11 +131,15 @@ export class ClubController {
     @Query('search') search?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
+    @Query('minMembers') minMembers?: string,
   ) {
     const actorUserId = requireUserId(req);
     const parsedLimit = parseClubPagingNumber(limit, 50, 1, 100, 'limit');
     const parsedOffset = parseClubPagingNumber(offset, 0, 0, 10000, 'offset');
-    const clubs = await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset);
+    const parsedMinimum = parseClubPagingNumber(minMembers, 0, 0, 100000, 'minMembers');
+    const clubs = minMembers === undefined
+      ? await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset)
+      : await this.clubService.listClubs(actorUserId, search, parsedLimit, parsedOffset, parsedMinimum);
     return { clubs };
   }
 

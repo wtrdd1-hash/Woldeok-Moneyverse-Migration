@@ -94,7 +94,7 @@ describe('PostgresClubRepository direct-call paging', () => {
   it('binds valid club directory paging values', async () => {
     query.mockClear();
     await repo.listClubs(actor, 'ALPHA', 100, 10000);
-    expect(query).toHaveBeenLastCalledWith(expect.any(String), [actor, 'ALPHA', 100, 10000]);
+    expect(query).toHaveBeenLastCalledWith(expect.any(String), [actor, 'ALPHA', 0, 100, 10000]);
   });
 
   for (const value of [NaN, Infinity, -Infinity, 0, -1, 1.5, 101, 1e20]) {

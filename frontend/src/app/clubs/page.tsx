@@ -32,15 +32,21 @@ export interface ClubItem {
 export default async function ClubsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly search?: string }>;
+  readonly searchParams: Promise<{ readonly search?: string; readonly minMembers?: string }>;
 }) {
   await requireMember();
   const params = await searchParams;
   const searchQuery = params.search?.trim() || '';
-
-  const result = await apiOrNull<{ clubs: ClubItem[] }>(
-    `/api/v1/clubs${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`,
-  );
+  const minMembersRaw = params.minMembers;
+  const validMinimum = minMembersRaw === undefined ||
+    (/^(0|[1-9][0-9]{0,5})$/.test(minMembersRaw) && Number(minMembersRaw) <= 100000);
+  const query = new URLSearchParams();
+  if (searchQuery) query.set('search', searchQuery);
+  if (validMinimum && minMembersRaw !== undefined) query.set('minMembers', minMembersRaw);
+  const result = validMinimum ? await apiOrNull<{ clubs: ClubItem[] }>(
+    `/api/v1/clubs${query.size ? `?${query.toString()}` : ''}`,
+  ) : null;
+  const unavailable = !validMinimum || result === null;
   const clubs = result?.clubs ?? [];
   const myClubs = clubs.filter((c) => c.is_my_club);
   const otherClubs = clubs.filter((c) => !c.is_my_club);
@@ -55,7 +61,7 @@ export default async function ClubsPage({
 
       {/* 액션 바 및 검색 */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-card border border-border rounded-xl p-4 shadow-sm">
-        <form method="GET" action="/clubs" className="flex-1 flex gap-2">
+        <form method="GET" action="/clubs" className="flex-1 flex flex-wrap gap-2">
           <input
             type="text"
             name="search"
@@ -63,6 +69,18 @@ export default async function ClubsPage({
             placeholder="클럽 이름 또는 고유 태그로 검색..."
             className="flex-1 bg-muted/50 border border-input rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          <label className="flex items-center gap-2 text-sm">
+            최소 회원 수
+            <input
+              type="number"
+              name="minMembers"
+              min="0"
+              max="100000"
+              step="1"
+              defaultValue={minMembersRaw ?? ''}
+              className="w-28 bg-muted/50 border border-input rounded-lg px-3 py-2"
+            />
+          </label>
           <button
             type="submit"
             className="bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
@@ -80,8 +98,14 @@ export default async function ClubsPage({
         </Link>
       </div>
 
+      {unavailable && (
+        <p role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm">
+          {validMinimum ? '클럽 목록을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.' : '최소 회원 수는 0~100000 사이의 정수여야 합니다.'}
+        </p>
+      )}
+
       {/* 내가 소속된 클럽 섹션 */}
-      {myClubs.length > 0 && (
+      {!unavailable && myClubs.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             
@@ -109,11 +133,11 @@ export default async function ClubsPage({
             </h2>
           </div>
           <span className="text-sm text-muted-foreground">
-            총 {otherClubs.length}개의 클럽 활성 중
+            {unavailable ? '조회 불가' : `표시 ${otherClubs.length}개 (최대 50개 조회)`}
           </span>
         </div>
 
-        {otherClubs.length === 0 ? (
+        {unavailable ? null : otherClubs.length === 0 ? (
           <div className="text-center py-16 bg-card border border-dashed border-border rounded-xl space-y-3">
             
             <p className="text-muted-foreground font-medium">

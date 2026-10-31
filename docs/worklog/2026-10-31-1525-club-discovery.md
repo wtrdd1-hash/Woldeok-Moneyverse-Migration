@@ -1,0 +1,6 @@
+# Development A — Club directory least-privilege read and minimum-members search
+- BEFORE: 2026-10-31 15:25 KST, main `30cbbe02f0c27a13630aedf4a39190972d890f02`, branch `auto/hourly-a-20261031-1525-club-discovery`. Club directory currently JOINs `public.users` directly as app role, violating revoked read ACL. No modifications to other worktrees.
+- PLAN: [ ] RED unit/Android tests; [ ] new forward-only SQL read; [ ] backend validation/repository; [ ] browser search/error; [ ] Android proof; [ ] real PostgreSQL and full gates; [ ] final audit/PR/release HOLD.
+- IN PROGRESS: isolated worktree, reading AGENTS/README/English and Korean planning, QA, PR and CI; no deployments.
+
+- IN PROGRESS (15:32): TDD RED backend 2, Android 3; GREEN backend 114 including existing paging, Android 3, browser UI 3. Exact isolated PostgreSQL 17.11: 312 migration files including new 313 applied; min-member filter before page, search, actor membership and private owner name masking PASS; ledger 0 after ROLLBACK; users SELECT false; app EXECUTE true. **Existing P0** app role `public.clubs` UPDATE true; no grant change made. Main advanced from 30cbbe02 to 65193a09 during run; refresh before PR. No Test or Production mutation.

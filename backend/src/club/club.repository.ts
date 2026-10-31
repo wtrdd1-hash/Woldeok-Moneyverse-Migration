@@ -105,39 +105,27 @@ export class PostgresClubRepository {
     search?: string,
     limit = 50,
     offset = 0,
+    minMembers = 0,
   ): Promise<ClubSummaryRow[]> {
+    if (!actorUserId || !UUID_REGEX.test(actorUserId)) {
+      throw new ClubInputError('authenticated actor is required');
+    }
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       throw new ClubInputError('limit must be an integer between 1 and 100');
     }
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > 10000) {
       throw new ClubInputError('offset must be an integer between 0 and 10000');
     }
-
+    if (!Number.isSafeInteger(minMembers) || minMembers < 0 || minMembers > 100000) {
+      throw new ClubInputError('minMembers must be an integer between 0 and 100000');
+    }
+    if (search && search.trim().length > 80) {
+      throw new ClubInputError('search must be at most 80 characters');
+    }
     return queryRows<ClubSummaryRow>(
       this.client,
-      `SELECT
-         c.id,
-         c.tag,
-         c.name,
-         c.description,
-         c.owner_id,
-         COALESCE(u.display_name, '클럽장') AS owner_name,
-         c.join_mode,
-         c.status,
-         c.level,
-         c.experience::text AS experience,
-         c.member_count,
-         c.created_at,
-         ($1::uuid IS NOT NULL AND cm_actor.user_id IS NOT NULL) AS is_my_club,
-         cm_actor.role AS my_role
-       FROM public.clubs c
-       JOIN public.users u ON u.id = c.owner_id
-       LEFT JOIN public.club_members cm_actor ON cm_actor.club_id = c.id AND cm_actor.user_id = $1::uuid
-       WHERE c.status = 'active'
-         AND ($2::text IS NULL OR c.name ILIKE ('%' || $2::text || '%') OR c.tag ILIKE ('%' || $2::text || '%'))
-       ORDER BY c.level DESC, c.member_count DESC, c.created_at DESC
-       LIMIT $3 OFFSET $4;`,
-      [actorUserId ?? null, search ? search.trim() : null, limit, offset],
+      `SELECT * FROM public.club_directory_list($1::uuid, $2::text, $3::integer, $4::integer, $5::integer);`,
+      [actorUserId, search ? search.trim() : null, minMembers, limit, offset],
     );
   }
 

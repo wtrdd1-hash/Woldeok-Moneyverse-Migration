@@ -52,6 +52,23 @@ function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   return true;
 }
 
+function isVerifiedClubDirectory(payload: unknown, minMembers: number): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const rows = (payload as { clubs?: unknown }).clubs;
+  if (!Array.isArray(rows) || rows.length > 100) return false;
+  const ids = new Set<string>();
+  for (const row of rows) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+    const item = row as Record<string, unknown>;
+    if (typeof item.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.id) || ids.has(item.id)) return false;
+    if (typeof item.name !== 'string' || item.name.length < 2 || item.name.length > 30) return false;
+    if (item.status !== 'active' || !Number.isSafeInteger(item.member_count) ||
+        (item.member_count as number) < minMembers) return false;
+    ids.add(item.id);
+  }
+  return true;
+}
+
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
 }
@@ -106,6 +123,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const clubDirectory = request.method === 'GET' && parts.length === 1 && parts[0] === 'clubs';
+  const clubMinimumValues = clubDirectory ? request.nextUrl.searchParams.getAll('minMembers') : [];
+  if (clubMinimumValues.length > 1 || (clubMinimumValues.length === 1 &&
+      (!/^(0|[1-9][0-9]{0,5})$/.test(clubMinimumValues[0]!) || Number(clubMinimumValues[0]) > 100000))) {
+    return gatewayProblem(400, 'Bad Request', 'club_minimum_invalid', 'minimum club members must be 0 through 100000');
+  }
+  const clubMinimum = clubMinimumValues.length === 1 ? Number(clubMinimumValues[0]) : 0;
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
@@ -330,6 +355,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (clubDirectory && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedClubDirectory(await response.clone().json(), clubMinimum)) {
+        return gatewayProblem(503, 'Service Unavailable', 'club_directory_unverified', 'club directory evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'club_directory_unverified', 'club directory evidence is unavailable');
+    }
+  }
+
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
     return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
   }
@@ -398,8 +434,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateClubs = parts[0] === 'clubs';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateClubs) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateClubs) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -448,6 +485,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'clubs') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
