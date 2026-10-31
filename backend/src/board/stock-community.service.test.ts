@@ -85,9 +85,14 @@ describe('public board reply-presence discovery', () => {
 });
 
 describe('public board reply-presence HTTP contract', () => {
-  it.each([['with', 'without'], ['maybe'], [''], [null]])(
-    'rejects invalid or repeated reply query %j',
-    async (value) => {
+  it.each([
+    { value: ['with', 'without'] },
+    { value: 'maybe' },
+    { value: '' },
+    { value: null },
+  ])(
+    'rejects invalid or repeated reply query $value',
+    async ({ value }) => {
       const database = pool();
       const controller = new PublicStockCommunityController(new StockCommunityService(database));
       await expect(controller.list({ replies: value })).rejects.toThrow('invalid reply filter');
