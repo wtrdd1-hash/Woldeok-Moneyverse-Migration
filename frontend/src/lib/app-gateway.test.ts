@@ -41,6 +41,13 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['help', 'articles', 'ko', '../admin', 'report'])).toBeNull();
     expect(appGatewayPath(['help', 'articles', 'fr', 'wallet-guide', 'report'])).toBeNull();
   });
+  it('does not advertise an unverified prediction API group to Android', () => {
+    expect(appGatewayPath(['predictions', 'markets'])).toBeNull();
+    expect(appGatewayPath(['predictions', 'orders'])).toBeNull();
+    expect(appGatewayPath(['predictions', 'admin'])).toBeNull();
+    expect(appGatewayPath(['predictions', 'markets', 'fake-id'])).toBeNull();
+  });
+
   it('refuses internal and traversal paths', () => {
     expect(appGatewayPath(['admin', 'me'])).toBe('/api/v1/admin/me');
     expect(appGatewayPath(['integrations', 'discord'])).toBeNull();

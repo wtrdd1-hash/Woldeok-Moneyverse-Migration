@@ -109,6 +109,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return request.method === 'HEAD' ? new NextResponse(null, { status: response.status, headers: response.headers }) : response;
   }
 
+  // Never forward Android prediction orders or success-shaped markets until
+  // the source and settlement ledger have an independently verified contract.
+  if (parts[0] === 'predictions') {
+    const isMarkets = parts.length === 2 && parts[1] === 'markets' && request.method === 'GET';
+    const isOrders = parts.length === 2 && parts[1] === 'orders' && request.method === 'POST';
+    if (!isMarkets && !isOrders) {
+      return gatewayProblem(405, 'Method Not Allowed', 'prediction_method_unavailable',
+        'prediction operations are disabled');
+    }
+    return gatewayProblem(503, 'Service Unavailable',
+      isMarkets ? 'PREDICTION_MARKET_UNVERIFIED' : 'PREDICTION_SETTLEMENT_UNAVAILABLE',
+      'verified market and ledger settlement evidence are unavailable');
+  }
+
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
