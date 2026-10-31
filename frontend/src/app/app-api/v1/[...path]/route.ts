@@ -448,6 +448,14 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // Profile reads and updates are session/consent scoped; never let an upstream
+  // cache, crawler, or referrer policy expose member settings or private fields.
+  // Apply after proxy() so early gateway errors and HEAD/204 are covered too.
+  if (parts[0] === 'profile') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
