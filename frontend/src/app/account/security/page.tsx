@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { requireMember } from '@/lib/session';
 import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
 import {
@@ -53,19 +53,38 @@ export default async function AccountSecurityPage({
   const parsedCategory = parseSecurityEventCategory(params.category);
   const categoryInvalid = parsedCategory === null;
   const eventCategory = parsedCategory ?? 'all';
-  const eventPath = eventCategory === 'all'
-    ? '/api/v1/account/security/events'
-    : `/api/v1/account/security/events?category=${eventCategory}`;
+  const parsedSort = parseSecurityEventOrder(params.sort);
+  const sortInvalid = parsedSort === null;
+  const eventSort = parsedSort ?? 'recent';
+  const eventQuery = new URLSearchParams();
+  if (eventCategory !== 'all') eventQuery.set('category', eventCategory);
+  if (eventSort !== 'recent') eventQuery.set('sort', eventSort);
+  const eventPath = eventQuery.size
+    ? '/api/v1/account/security/events?' + eventQuery.toString()
+    : '/api/v1/account/security/events';
+  const categoryHref = (category: string) => {
+    const query = new URLSearchParams();
+    if (category !== 'all') query.set('category', category);
+    if (eventSort !== 'recent') query.set('sort', eventSort);
+    return `/account/security${query.size ? '?' + query.toString() : ''}`;
+  };
+  const sortHref = (sort: 'recent' | 'oldest') => {
+    const query = new URLSearchParams();
+    if (eventCategory !== 'all') query.set('category', eventCategory);
+    query.set('sort', sort);
+    return `/account/security?${query.toString()}`;
+  };
   const [rawSessions, rawIdentities, rawEvents] = await Promise.all([
     apiOrNull<unknown>('/api/v1/account/security/sessions'),
     apiOrNull<unknown>('/api/v1/account/identities'),
-    categoryInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
+    categoryInvalid || sortInvalid ? Promise.resolve(null) : apiOrNull<unknown>(eventPath),
   ]);
   const sessionData = parseSecuritySessions(rawSessions);
   const identityData = parseLinkedIdentities(rawIdentities);
   const parsedEvents = parseSecurityEvents(rawEvents);
-  const eventData = parsedEvents !== null && !categoryInvalid &&
-    securityEventsMatchCategory(parsedEvents, eventCategory) ? parsedEvents : null;
+  const eventData = parsedEvents !== null && !categoryInvalid && !sortInvalid &&
+    securityEventsMatchCategory(parsedEvents, eventCategory) &&
+    (params.sort === undefined || securityEventsMatchOrder(parsedEvents, eventSort)) ? parsedEvents : null;
   const sessions = sessionData ?? [];
   const identities = identityData ?? [];
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
@@ -371,9 +390,9 @@ export default async function AccountSecurityPage({
         <CardContent className="pt-0">
           <nav aria-label="보안 활동 유형" className="mb-3 flex flex-wrap gap-2">
             {[
-              { value: 'all', label: '전체', href: '/account/security' },
-              { value: 'login', label: '로그인', href: '/account/security?category=login' },
-              { value: 'settings', label: '설정 변경', href: '/account/security?category=settings' },
+              { value: 'all', label: '전체', href: categoryHref('all') },
+              { value: 'login', label: '로그인', href: categoryHref('login') },
+              { value: 'settings', label: '설정 변경', href: categoryHref('settings') },
             ].map((option) => (
               <Link key={option.value} href={option.href}
                 aria-current={!categoryInvalid && eventCategory === option.value ? 'page' : undefined}
@@ -382,8 +401,22 @@ export default async function AccountSecurityPage({
               </Link>
             ))}
           </nav>
-          <p className="mb-3 text-xs text-muted-foreground">필터는 본인의 최근 20건에만 적용됩니다. 전체 기록 검색이 아닙니다.</p>
-          {categoryInvalid ? (
+          <nav aria-label="보안 활동 정렬" className="mb-3 flex flex-wrap gap-2">
+            {([
+              { value: 'recent' as const, label: '최신순' },
+              { value: 'oldest' as const, label: '오래된순' },
+            ]).map((option) => (
+              <Link key={option.value} href={sortHref(option.value)}
+                aria-current={!sortInvalid && eventSort === option.value ? 'page' : undefined}
+                className="inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2">
+                {option.label}
+              </Link>
+            ))}
+          </nav>
+          <p className="mb-3 text-xs text-muted-foreground">정렬과 필터는 본인의 최근 20건에만 적용됩니다. 전체 기록 검색이 아닙니다.</p>
+          {sortInvalid ? (
+            <p role="alert" className="py-3 text-xs text-destructive">올바르지 않은 보안 활동 정렬입니다. 최신순을 선택해 주세요.</p>
+          ) : categoryInvalid ? (
             <p role="alert" className="py-3 text-xs text-destructive">올바르지 않은 보안 활동 필터입니다. 전체를 선택해 주세요.</p>
           ) : eventData === null ? (
             <p className="py-3 text-xs text-muted-foreground">보안 활동을 확인할 수 없습니다. 다시 조회해 주세요.</p>
@@ -399,7 +432,7 @@ export default async function AccountSecurityPage({
               ))}
             </div>
           )}
-          {!categoryInvalid && eventData !== null && (
+          {!categoryInvalid && !sortInvalid && eventData !== null && (
             <Button asChild variant="outline" size="sm" className="mt-3 min-h-11">
               <a href="/account/security/events.csv" download="moneyverse-security-events-recent.csv" aria-label="필터와 관계없이 전체 최근 최대 20건의 계정 보안 활동 CSV 다운로드">
                 전체 보안 활동 CSV 다운로드
