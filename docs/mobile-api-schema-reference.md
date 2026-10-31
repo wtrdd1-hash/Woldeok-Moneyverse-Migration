@@ -5072,18 +5072,7 @@ _No request body._
 
 ### Success response fields
 
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| receipts[] | true | object[] |  |
-| receipts[] | true | object |  |
-| receipts[].receipt_id | true | string |  |
-| receipts[].assignment_id | true | string |  |
-| receipts[].code | true | string |  |
-| receipts[].name | true | string |  |
-| receipts[].reward_amount | true | string |  |
-| receipts[].experience_amount | true | string |  |
-| receipts[].transaction_id | true | null \| string |  |
-| receipts[].created_at | true | string (date-time) |  |
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
