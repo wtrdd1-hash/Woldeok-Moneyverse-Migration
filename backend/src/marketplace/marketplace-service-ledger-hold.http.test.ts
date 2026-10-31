@@ -39,6 +39,10 @@ describe('P0 marketplace service financial hold at Nest HTTP boundary', () => {
     ['/marketplace/listings', { itemCode: 'frame', quantity: 1, price: '500', idempotencyKey: '33333333-3333-4333-8333-333333333333' }],
     ['/marketplace/listings/22222222-2222-4222-8222-222222222222/buy', { idempotencyKey: '33333333-3333-4333-8333-333333333333' }],
     ['/marketplace/auctions/22222222-2222-4222-8222-222222222222/bid', { bidAmountWld: '9000', maxProxyBidWld: '15000' }],
+    ['/marketplace/auctions', { itemCode: 'item', itemName: 'Item', category: 'test', rarity: 'COMMON', startPriceWld: '100' }],
+    ['/marketplace/trades', { recipientName: 'other', offeredWld: '100' }],
+    ['/marketplace/trades/22222222-2222-4222-8222-222222222222/accept', {}],
+    ['/marketplace/trades/22222222-2222-4222-8222-222222222222/confirm', {}],
   ])('returns HTTP 503 on unsafe POST %s without database access', async (path, body) => {
     const response = await request(app.getHttpServer()).post(path).send(body).expect(503);
     expect(response.body.message).toBe('marketplace_settlement_unverified');

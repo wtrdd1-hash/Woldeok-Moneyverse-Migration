@@ -111,6 +111,7 @@ export class MarketplaceService {
       description?: string;
     },
   ): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const duration = dto.durationMinutes ?? 45;
     const row = await queryOne<{ id: string }>(
@@ -324,6 +325,7 @@ export class MarketplaceService {
       requestedWld?: string;
     },
   ): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const senderRow = await queryOne<{ name: string }>(
       this.pool,
@@ -365,6 +367,7 @@ export class MarketplaceService {
   }
 
   async acceptTrade(actor: string, tradeId: string): Promise<boolean> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ id: string }>(
       this.pool,
@@ -378,6 +381,7 @@ export class MarketplaceService {
   }
 
   async confirmTrade(actor: string, tradeId: string): Promise<boolean> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ id: string }>(
       this.pool,
