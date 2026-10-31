@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1538 — Production immutable release directory check (SOURCE VERIFIED / PROD HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-drift-v1538.md) / [KO](docs/worklog/2026-10-31-production-identity-drift-v1538.ko.md); [Internal](docs/updates/v2026.10.31.1538-prod-integrity-internal.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1538-prod-integrity-github.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-github.ko.md). Production release path v0950 in-place relabelled to manifest v1336, backend SHA 95485a vs frontend timestamp; source gate fixed, RED then 31/31 + 119/119 PASS. Current real runtime remains blocked; no Production promotion. P0 #2144.
+
+
 ## v2026.10.31.1534 — Active Production release identity service detection (CURRENT PROD VERIFIED / NEW RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-production-identity-v1534.md) / [KO](docs/worklog/2026-10-31-production-identity-v1534.ko.md) · [Internal](docs/updates/v2026.10.31.1534-release-internal.md) / [KO](docs/updates/v2026.10.31.1534-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1534-release-github.md) / [KO](docs/updates/v2026.10.31.1534-release-github.ko.md). TDD RED 1, related release 30 GREEN; existing live public release 95485a... now read-only attested through actual active services and invariant SHA checks. This is NOT a new Test/Production deployment or finance release.
 

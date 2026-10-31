@@ -173,10 +173,29 @@ test('rejects unverifiable Treasury payloads and missing privacy cache controls'
   }
 });
 
+test('rejects a manifest relabelled in-place after another production release', () => {
+  const state = healthy();
+  const releasePath = '/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb';
+  state.channel = 'prod';
+  state.manifest.channel = 'prod';
+  state.manifest.version = 'v2026.10.31.0950';
+  state.releasePath = releasePath;
+  state.backendCwd = path.join(releasePath, 'backend');
+  state.frontendCwd = path.join(releasePath, 'frontend');
+  assert.deepEqual(verifyHostRuntimeIdentity(state), { ok:true, failures:[] });
+  // Even perfect SHA replies do not legitimize editing a previously cut-over release.
+  state.manifest.version = 'v2026.10.31.1336';
+  assert(verifyHostRuntimeIdentity(state).failures.includes('immutable_release_directory_version_mismatch'));
+});
+
 test('production channel also requires independent frontend and Treasury evidence', () => {
   const state = healthy();
   state.channel = 'prod';
   state.manifest.channel = 'prod';
+  state.manifest.version = 'v2026.10.31.0950';
+  state.releasePath = '/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb';
+  state.backendCwd = path.join(state.releasePath, 'backend');
+  state.frontendCwd = path.join(state.releasePath, 'frontend');
   assert.deepEqual(verifyHostRuntimeIdentity(state), { ok: true, failures: [] });
   state.publicFrontendVersionSha = '1793277134644';
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_frontend_sha_mismatch'));

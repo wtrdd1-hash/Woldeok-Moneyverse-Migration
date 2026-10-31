@@ -11,3 +11,12 @@
 
 ## MID / FINISH
 PENDING.
+
+## MID / FINISH — source hardening verified; Production still blocked
+- RED TDD for in-place release manifest relabel: one expected failing test even when all public SHA probes return a mutually consistent value; this was a missing provenance check.
+- Implemented a Production-only immutable path rule in `verify-host-runtime-identity.mjs`: the real resolved release directory must start with `prod-${manifest.version}-`. An in-place relabel from v0950 to v1336 without a new directory now explicitly fails. Test-channel behavior remains unchanged.
+- GREEN: affected identity-related 31/31 and all `scripts/release/*.test.mjs` 119/119 PASS; `git diff --check` PASS. GitHub remote main rechecked at 761a55a; no Gemini/main changes.
+- Live `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel prod --sha 666d7f6c...` exits 1 (BLOCKED) because the effective frontend release env currently has no valid `BUILD_ID`. Public backend still reports 95485a..., frontend reports timestamp `1793422036848`. Source gate correctly does not claim new release PASS.
+- On-disk frontend `.next/BUILD_ID` and `.next/required-server-files.json` both contain the timestamp; current manifest says source SHA 666d7f... but the physical release directory still bears v0950 and the original backend PID has been running since 09:58. This is NOT a tested/approved backend + frontend release.
+- Old build 95485a... is available as a *Git commit* only, not a validated ready-to-swap frontend artifact; latest separate Next build for another developer was running and host had limited available RAM. Did not add another competing build, modify nginx/systemd, or use the historical v1935 release for an untested rollback.
+- Actual restore action remains BLOCKED pending an isolated immutable release built from ONE exact signed source SHA and application-controlled Test + session QA. Owner-facing P0 issue #2144 updated separately. No DB/WLD write, no root permission change, no Production/official Test promotion.

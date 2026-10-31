@@ -151,6 +151,19 @@ export function verifyHostRuntimeIdentity(snapshot) {
   }
 
   const root = snapshot?.releasePath;
+  if (channel === 'prod') {
+    // Release folders are immutable generations. An in-place manifest relabel
+    // must fail even when another script rewrites ENV and public SHA strings.
+    // This check uses the resolved active release directory, never the mutable
+    // 'production-current' symlink text.
+    const version = manifest?.version;
+    const validVersion = typeof version === 'string'
+      && /^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]{1,4}$/.test(version);
+    const expectedPrefix = validVersion ? `prod-${version}-` : null;
+    if (!root || !expectedPrefix || !path.basename(root).startsWith(expectedPrefix)) {
+      fail('immutable_release_directory_version_mismatch');
+    }
+  }
   if (!root || snapshot?.backendCwd !== path.join(root, 'backend')) fail('backend_process_directory_mismatch');
   if (!root || snapshot?.frontendCwd !== path.join(root, 'frontend')) fail('frontend_process_directory_mismatch');
 
