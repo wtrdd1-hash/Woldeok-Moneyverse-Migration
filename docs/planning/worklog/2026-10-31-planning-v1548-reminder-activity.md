@@ -1,4 +1,5 @@
 # Planning v1548 — F675-193 Owner Expiry Reminder Activity and Exceptions
+- **GitHub v1548:** Draft PR #2123 OPEN/HOLD (stacked on #2119), engineering issue #2122 OPEN; no main merge, runtime or Production change.
 **State:** DOCUMENTATION PROPOSED / DRAFT / RELEASE HOLD. **Cycle:** Improvement v1546 → Addition v1548 → Improvement v1550 (provisional). **Main:** 761a55a094fb9dd383d213e817305e68c79fa23c. **Issue:** #2122. **Dependency:** Draft #2119/#2113.
 
 ## Start
