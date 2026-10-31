@@ -8,16 +8,23 @@
 - Approved task scope under the standing autonomous C directive: preserve authenticated PostgreSQL-backed GET `/api/v1/privacy/requests`, validate bounded owner-scoped receipts before display, fail closed with retry on bad/unavailable evidence, and enforce private HTTP headers for this page and privacy App API. No SQL/schema/ledger/identity mutation. Bounded existing flow, no new subsystem.
 
 ## PLAN / CHECKLIST
-- [ ] RED parser/page/privacy-header regression tests on current source.
-- [ ] GREEN parser, page failure UI and Next/Android private edge headers.
-- [ ] Focused regression, lint, typecheck, build, app-api, full suites, isolated real PG, security and official exact-SHA Test gates.
-- [ ] Re-fetch main/plans, final SHA verification, independent backup, GitHub draft PR, and release decision.
+- [x] RED parser/page/privacy-header regression tests on current source.
+- [x] GREEN parser, page failure UI and Next/Android private edge headers.
+- [x] Focused regression, lint, typecheck, build, app-api, full suites, isolated real PG and security; official exact-SHA Test gate FAIL/BLOCKED.
+- [x] Re-fetch main/plans, independent backup, GitHub Draft PR #2222, and release HOLD decision; final-head verification must be repeated after this documentation checkpoint.
 
 ## IN PROGRESS
 Pending RED test.
 
-## FINISHED
-Pending.
+## FINISHED — 2026-10-31 23:57 KST (source commit a3c1fbaf; final documentation commit pending)
+- Actual source change: runtime validation of owner-scoped privacy request history (30-row limit, UUID uniqueness, supported type/status, canonical timestamp/detail, selected filter and descending order). Fail-closed page with accessible 44px retry; `/account/privacy` HTTP private/no-store/noindex/no-referrer; Android privacy GET invalid success -> 503 and private headers on success/error. Existing authenticated Nest/SQL function unchanged.
+- TDD RED 5 failures; GREEN focused 78 PASS. Full frontend 2,910 PASS (557 files), backend 2,944 PASS / 517 SKIP (404 passed/102 skipped files), contract 41 PASS, database package 62 PASS / 4 SKIP, security tests 14 PASS. Skipped tests are not PASS.
+- Backend and Frontend builds PASS; all-workspace typecheck PASS; full lint PASS (0 errors / 1,016 warnings); app-api 184 endpoints PASS; independent Next HTTP `/account/privacy?type=access` HTTP 200 with `X-Robots-Tag: noindex, nofollow`, `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`. This is not authenticated E2E.
+- Isolated PostgreSQL 17.11-alpine, `--network none`: core SQL + 316 numbered migrations 002–317 PASS using the exact CI-style migrator superuser/DB identity; privacy function EXECUTE true, app direct privacy table SELECT false, direct ledger INSERT false. Additional disposable PostgreSQL 17 privacy type-filter fixture PASS: latest-100/filtered-30, other-owner isolation, direct table SELECT denied. Containers removed. Earlier manual role bootstrap attempts failed at migrations 017/020/029 and were corrected by matching CI service configuration; no production/shared database was touched.
+- Production dependency high-severity audit PASS (no known vulnerabilities); **full dependency audit FAIL: 9 advisories (1 low, 8 moderate)**. Full-route QA evidence **FAIL**: missing `artifacts/qa/full-route-ledger.json`. Official Test exact-source-SHA gate **FAIL**: Test backend/frontend still `bc8cd8a6c654af0336f550643f23049a58ee1d16`, not candidate; Production public API reports main `353c6d5d...`. Official Test authenticated backend/API/DB/login/user E2E and independent restore NOT RUN/BLOCKED. Remote required CI still in progress at this checkpoint.
+- Main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834` and both integrated plans re-fetched unchanged at start, midpoint and pre-finalization. Existing A/B/QA/Gemini PRs untouched. Draft PR #2222. Separate physical disk Git Bundle/Patch/Diff with SHA-256 and bundle verification PASS (source commit a3c1fbaf); refresh for final HEAD.
+- **PARTIAL / RELEASE BLOCKED**. No main merge, Test/Production promotion, GitOps change, shared service/DB/ledger mutation, rollback or branch deletion. Preserve all unmerged changes. Final HEAD and remote CI result to be appended to PR discussion after final checkpoint.
+
 
 ### MIDPOINT — 2026-10-31 23:43 KST
 - RED: 5 targeted failures observed (missing parser, missing member-page header, missing Android referrer fence, malformed Android success not rejected); `evidence/red.log` on miniPC.
