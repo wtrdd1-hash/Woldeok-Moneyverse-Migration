@@ -14,4 +14,4 @@
 - [x] Write strict parser tests; verify RED; implement parser; verify GREEN.
 - [x] Write UI/source tests for no fabricated data, no success fallback, error/empty/read-only; verify RED; implement accessible mobile UI; verify GREEN.
 - [x] Write HTTP BFF private-header tests; verify RED; implement no-store/noindex/no-referrer and page metadata; verify GREEN.
-- [ ] Recheck main, run full release gates on exact SHA, record blockers; draft PR only unless all pass.
+- [x] Recheck main, run available release gates, record blockers; Draft PR #2250 only, no merge/deploy.
