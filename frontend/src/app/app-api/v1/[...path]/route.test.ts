@@ -529,12 +529,26 @@ describe('Android public board reply-presence search', () => {
     vi.stubGlobal('fetch', fetchSpy);
     const response = await GET(request('/app-api/v1/board/public/stock-posts?replies=with&stock=WDX'), context('board', 'public', 'stock-posts'));
     expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
     const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
     expect(target.searchParams.get('replies')).toBe('with');
     expect(target.searchParams.get('stock')).toBe('WDX');
   });
 
-  it.each(['replies=with&replies=without', 'replies=all', 'replies=maybe'])(
+  it('accepts explicit all from the HTML filter and forwards it unchanged', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ posts: [] }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/board/public/stock-posts?replies=all'), context('board', 'public', 'stock-posts'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(new URL(String(fetchSpy.mock.calls[0]?.[0])).searchParams.get('replies')).toBe('all');
+  });
+
+  it.each(['replies=with&replies=without', 'replies=maybe', 'replies='])(
     'rejects malformed or duplicate filter %s before upstream access',
     async (query) => {
       process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
