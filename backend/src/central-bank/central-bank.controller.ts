@@ -15,18 +15,23 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
+import { requireUserId } from '../auth/session.context';
 import {
   AcceptMintBatchDto,
   UpdateBaseRateDto,
   UpdateReserveRequirementDto,
 } from './central-bank.dto';
 import { CentralBankService } from './central-bank.service';
+import { DurableCentralBankPolicyService } from './durable-policy.service';
 import { unverifiedFinanceOperation } from '../economy/monetary/finance-hold';
 
 @ApiTags('central-bank')
 @Controller('central-bank')
 export class CentralBankController {
-  constructor(private readonly centralBankService: CentralBankService) {}
+  constructor(
+    private readonly centralBankService: CentralBankService,
+    private readonly durablePolicyService: DurableCentralBankPolicyService,
+  ) {}
 
   @Post('mint-batches/:id/accept')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
@@ -48,33 +53,35 @@ export class CentralBankController {
   @Get('base-rate')
   @ApiOperation({ summary: '현재 국가 기준금리(Base Rate) 및 테일러 룰 추정 금리 조회' })
   async getBaseRate() {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    return this.durablePolicyService.getBaseRate();
   }
 
   @Put('base-rate')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '국가 기준금리(Base Rate) 결정 및 공시 (금융통화위원회)' })
   async updateBaseRate(
-    @Body() _dto: UpdateBaseRateDto,
-    @Req() _req: RequestWithSession,
+    @Body() dto: UpdateBaseRateDto,
+    @Req() req: RequestWithSession,
   ) {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    const actorId = requireUserId(req);
+    return this.durablePolicyService.updateBaseRate(dto, actorId);
   }
 
   @Get('reserve-requirement')
   @ApiOperation({ summary: '시중 상업은행 법정 지급준비율(Reserve Requirement Ratio) 조회' })
   async getReserveRequirement() {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    return this.durablePolicyService.getReserveRequirement();
   }
 
   @Put('reserve-requirement')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '시중 상업은행 법정 지급준비율 갱신 및 공시' })
   async updateReserveRequirement(
-    @Body() _dto: UpdateReserveRequirementDto,
-    @Req() _req: RequestWithSession,
+    @Body() dto: UpdateReserveRequirementDto,
+    @Req() req: RequestWithSession,
   ) {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    const actorId = requireUserId(req);
+    return this.durablePolicyService.updateReserveRequirement(dto, actorId);
   }
 
   @Get('commercial-rates')
