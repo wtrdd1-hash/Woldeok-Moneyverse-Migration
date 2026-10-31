@@ -30,9 +30,9 @@ describe('P0 #2191 marketplace SQL settlement fail-closed v318', () => {
   it('revokes direct app financial mutations while preserving read access', () => {
     const source = sql();
     for (const table of ['account_balances', 'accounts', 'ledger_transactions', 'ledger_postings', 'outbox_events', 'audit_logs']) {
-      expect(source).toMatch(new RegExp(`REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public\\.${table} FROM PUBLIC, moneyverse_app`, 'i'));
+      expect(source).toMatch(new RegExp(`REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public\\.${table} FROM PUBLIC, moneyverse_app`, 'i'));
     }
-    expect(source).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE|TRUNCATE|EXECUTE)\b/i);
+    expect(source).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE|TRUNCATE|REFERENCES|TRIGGER|EXECUTE)\b/i);
     expect(source).not.toMatch(/REVOKE\s+(ALL|SELECT)\b/i);
     expect(source).toMatch(/\bBEGIN;[\s\S]*COMMIT;\s*$/);
   });

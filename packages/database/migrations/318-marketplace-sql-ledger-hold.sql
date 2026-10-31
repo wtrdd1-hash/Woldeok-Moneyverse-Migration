@@ -47,12 +47,12 @@ REVOKE EXECUTE ON FUNCTION public.marketplace_bid_auction(uuid, text, uuid, text
 -- Production's historical app-role grants permit direct balance and ledger
 -- mutation even after disabling marketplace functions. Retain SELECT rights
 -- and the migrator-owned SECURITY DEFINER settlement functions; remove direct
--- app DML and TRUNCATE (including PUBLIC grants) at the monetary boundary.
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.account_balances FROM PUBLIC, moneyverse_app;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.accounts FROM PUBLIC, moneyverse_app;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.ledger_transactions FROM PUBLIC, moneyverse_app;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.ledger_postings FROM PUBLIC, moneyverse_app;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.outbox_events FROM PUBLIC, moneyverse_app;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE public.audit_logs FROM PUBLIC, moneyverse_app;
+-- app DML, TRUNCATE, REFERENCES and TRIGGER (including PUBLIC grants) at the monetary boundary.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.account_balances FROM PUBLIC, moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.accounts FROM PUBLIC, moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.ledger_transactions FROM PUBLIC, moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.ledger_postings FROM PUBLIC, moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.outbox_events FROM PUBLIC, moneyverse_app;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.audit_logs FROM PUBLIC, moneyverse_app;
 
 COMMIT;

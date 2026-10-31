@@ -17,8 +17,8 @@
 
 ## FINISHED
 
-- Verified code commit `e3d941899f9847365d78731217c21b293151efff` on baseline main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; origin/main unchanged at mid/final recheck.
-- Focused regression 7 PASS; isolated PostgreSQL 17.11 replay 317 files PASS. Additional Production-like privilege-drift simulation: injected 24 app financial DML privileges and three app EXECUTE grants after migration 317, applied migration 318, then verified all removed; migrator function calls all SQLSTATE 55000. Both disposable containers removed.
+- Initial code checkpoint `e3d941899f9847365d78731217c21b293151efff`; expanded ACL regression RED then GREEN on final branch head; baseline main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; origin/main unchanged at mid/final recheck.
+- Focused regression 7 PASS; isolated PostgreSQL 17.11 replay 317 files PASS. Additional Production-like privilege-drift simulation: injected 36 app financial DML/DDL privileges and three app EXECUTE grants after migration 317, applied migration 318, then verified all removed; migrator function calls all SQLSTATE 55000. Both disposable containers removed.
 - Local lint PASS (0 errors, 1,016 existing warnings), typecheck PASS, full build PASS, backend 2,944 PASS / 517 SKIP, database 69 PASS / 4 SKIP, contract 41 PASS, mobile API contract 184 PASS, security/release 22 PASS, production dependency audit PASS.
 - Frontend first run exceeded 210-second single-worker budget (EXIT 124), then rerun with two workers 2,901 PASS / 0 FAIL (EXIT 0).
 - Full dependency audit at low threshold FAIL: 9 advisories (8 moderate, 1 low); high threshold exit 0 does not override this.
@@ -30,5 +30,9 @@
 ### Checkpoint 1 — isolated implementation
 
 - RED: 7/7 new tests failed before the migration. GREEN: 7/7 passed after migration 318.
-- Disposable PostgreSQL 17.11: 317 migration files replayed; app-role 3 unsafe EXECUTE and 24 DML privileges denied; balance SELECT preserved; owner calls return SQLSTATE 55000. No shared DB changes.
+- Disposable PostgreSQL 17.11: 317 migration files replayed; app-role 3 unsafe EXECUTE and 36 DML/DDL privileges denied; balance SELECT preserved; owner calls return SQLSTATE 55000. No shared DB changes.
 - Full workspace and CI gates pending. RELEASE HOLD.
+
+### Final ACL extension
+
+- Fresh RED 1/7 exposed remaining Production app REFERENCES/TRIGGER grants on core financial tables. Migration 318 now revokes both in addition to INSERT/UPDATE/DELETE/TRUNCATE; GREEN 7/7. Synthetic broad-grant PG17.11 replay confirms 3 EXECUTE and 36 table privileges denied, balance SELECT preserved. No shared database touched.
