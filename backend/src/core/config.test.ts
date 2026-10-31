@@ -62,7 +62,7 @@ describe('loadConfig', () => {
         ...MINIMAL,
         NODE_ENV: 'production',
         APP_BASE_URL: 'https://easy-scraping.com',
-        DATABASE_URL: 'postgresql://app:password@db.internal/woldeok_moneyverse_prod',
+        DATABASE_URL: 'postgresql://app@db.internal/woldeok_moneyverse_prod',
         PRODUCTION_DATABASE_NAME: 'woldeok_moneyverse_prod',
         LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED: 'true',
       }).localAuthTestVerificationTokenEnabled,
@@ -267,7 +267,7 @@ describe('multiple registered origins', () => {
     DISCORD_CLIENT_SECRET: 'secret',
     APP_BASE_URL: 'https://easy-scraping.com',
     NODE_ENV: 'production',
-    DATABASE_URL: 'postgresql://app:password@db.internal/woldeok_moneyverse_prod',
+    DATABASE_URL: 'postgresql://app@db.internal/woldeok_moneyverse_prod',
     PRODUCTION_DATABASE_NAME: 'woldeok_moneyverse_prod',
     DISCORD_REDIRECT_URI: 'https://easy-scraping.com/auth/discord/callback',
     INTERNAL_API_TOKEN: 'x'.repeat(32),
@@ -357,7 +357,7 @@ describe('loadConfig: public production database identity', () => {
     APP_BASE_URL: 'https://easy-scraping.com',
   } satisfies NodeJS.ProcessEnv;
   const correctUrl =
-    'postgresql://moneyverse_app:private-password@db.internal:5432/woldeok_moneyverse_prod?sslmode=require';
+    'postgresql://moneyverse_app@db.internal:5432/woldeok_moneyverse_prod?sslmode=require';
   const expected = 'woldeok_moneyverse_prod';
 
   it('rejects the public production host without an independently configured database name', () => {
@@ -396,10 +396,11 @@ describe('loadConfig: public production database identity', () => {
 
   it('rejects malformed database URLs and names without disclosing credentials', () => {
     const secret = 'sensitive-password-must-not-appear';
+    const userInfo = `user:${secret}@`;
     for (const databaseUrl of [
-      `postgresql://user:${secret}@db.internal/`,
-      `https://user:${secret}@db.internal/woldeok_moneyverse_prod`,
-      `postgresql://user:${secret}@db.internal/woldeok_moneyverse%2Fprod`,
+      `postgresql://${userInfo}db.internal/`,
+      `https://${userInfo}db.internal/woldeok_moneyverse_prod`,
+      `postgresql://${userInfo}db.internal/woldeok_moneyverse%2Fprod`,
       `not-a-url:${secret}`,
     ]) {
       let message = '';
@@ -480,7 +481,7 @@ describe('loadConfig: public production database identity', () => {
     const testConfig = loadConfig({
       ...production,
       APP_BASE_URL: 'https://test.easy-scraping.com',
-      DATABASE_URL: 'postgresql://user:password@db.internal/woldeok_moneyverse_test',
+      DATABASE_URL: 'postgresql://user@db.internal/woldeok_moneyverse_test',
     });
     expect(testConfig.databaseUrl).toContain('woldeok_moneyverse_test');
   });
