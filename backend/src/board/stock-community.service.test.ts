@@ -52,3 +52,32 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('public board reply-presence discovery', () => {
+  it.each([
+    ['with', 'comment_count > 0'],
+    ['without', 'comment_count = 0'],
+  ] as const)('applies %s to the already bounded 50 public rows', async (replies, predicate) => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, replies)).resolves.toEqual([]);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain(predicate);
+    expect(values).toEqual([50, null, null, replies]);
+  });
+
+  it('combines symbol, title and reply filters without expanding the public scope', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(' wdx ', '  Market  ', 'with');
+    const [, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(values).toEqual([50, 'wdx', 'Market', 'with']);
+  });
+
+  it('rejects unsupported reply filters before PostgreSQL access', async () => {
+    const database = pool();
+    await expect(
+      new StockCommunityService(database).publicList(undefined, undefined, 'maybe' as 'with'),
+    ).rejects.toThrow('invalid reply filter');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
