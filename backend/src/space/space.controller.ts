@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -106,6 +107,14 @@ export class RentRealEstateLandDto {
   readonly idempotencyKey!: string;
 }
 
+// A catalogue, owner record or financial receipt is never verified by a hardcoded DTO.
+function unverifiedRealEstate(): ServiceUnavailableException {
+  return new ServiceUnavailableException({
+    code: 'REAL_ESTATE_SOURCE_UNVERIFIED',
+    message: 'Real-estate catalogue, ownership and settlement require an authoritative ledger source.',
+  });
+}
+
 @ApiTags('spaces')
 @Controller('spaces')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
@@ -123,112 +132,20 @@ export class SpaceController {
   @ApiOperation({ summary: '가상 부동산 메타버스 특별 구역 목록 조회' })
   @Get('real-estate/districts')
   async listDistricts() {
-    return {
-      districts: [
-        {
-          id: 'district-gangnam-teheran',
-          name: '강남 테헤란로 밸리',
-          description: '월덕 금융 및 IT 메가 벤처 본사 집중 구역 (상업용 최고 등급)',
-          floorPriceWld: 15000000,
-          totalLands: 100,
-          occupancyRatePercent: 88,
-          dailyTaxRatePercent: 0.05,
-        },
-        {
-          id: 'district-yeouido-finance',
-          name: '여의도 국제 금융가',
-          description: '월덕 증권거래소 및 대형 투자은행 본점 허브',
-          floorPriceWld: 22000000,
-          totalLands: 60,
-          occupancyRatePercent: 94,
-          dailyTaxRatePercent: 0.06,
-        },
-        {
-          id: 'district-seongsu-startup',
-          name: '성수 크리에이티브 밸리',
-          description: '젊은 스타트업 및 디자인/갤러리 융합 특구',
-          floorPriceWld: 9500000,
-          totalLands: 120,
-          occupancyRatePercent: 79,
-          dailyTaxRatePercent: 0.04,
-        },
-        {
-          id: 'district-pangyo-techno',
-          name: '판교 테크원 클러스터',
-          description: 'AI, 퀀트 알고리즘 및 클라우드 데이터센터 거점',
-          floorPriceWld: 18000000,
-          totalLands: 80,
-          occupancyRatePercent: 91,
-          dailyTaxRatePercent: 0.05,
-        },
-        {
-          id: 'district-hannam-village',
-          name: '한남 프라이빗 빌리지',
-          description: '최상위 부유층을 위한 프라이빗 펜트하우스 랜드',
-          floorPriceWld: 35000000,
-          totalLands: 30,
-          occupancyRatePercent: 96,
-          dailyTaxRatePercent: 0.08,
-        },
-      ],
-    };
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '가상 부동산 랜드 전체 및 구역별 필터 목록 조회' })
   @Get('real-estate/lands')
   async listRealEstateLands() {
-    return {
-      lands: [
-        {
-          id: 'land-th-101',
-          code: 'LAND-TH-101',
-          districtId: 'district-gangnam-teheran',
-          districtName: '강남 테헤란로 밸리',
-          tier: 'PRIME_HQ',
-          ownerUserId: null,
-          priceWld: 25000000,
-          isForSale: true,
-          isRented: false,
-          dailyRentYieldWld: 125000,
-        },
-        {
-          id: 'land-yd-204',
-          code: 'LAND-YD-204',
-          districtId: 'district-yeouido-finance',
-          districtName: '여의도 국제 금융가',
-          tier: 'PRIME_HQ',
-          ownerUserId: 'user-top-whaler',
-          priceWld: 38000000,
-          isForSale: false,
-          isRented: true,
-          dailyRentYieldWld: 190000,
-        },
-      ],
-    };
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '내 소유 가상 부동산 랜드 및 임대 현황 조회' })
   @Get('real-estate/my-lands')
   async listMyRealEstateLands(@Req() req: RequestWithSession) {
-    const actorUserId = requireUserId(req);
-    return {
-      lands: [
-        {
-          id: 'land-my-001',
-          code: 'LAND-SS-042',
-          districtId: 'district-seongsu-startup',
-          districtName: '성수 크리에이티브 밸리',
-          tier: 'COMMERCIAL',
-          ownerUserId: actorUserId,
-          purchasePriceWld: 9500000,
-          currentAppraisalWld: 11200000,
-          isRented: true,
-          dailyRentWld: 48000,
-          unclaimedRentWld: 144000,
-          acquiredAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-        },
-      ],
-    };
+    requireUserId(req);
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '가상 부동산 랜드 신규 매입 (WLD 영구 소각)' })
@@ -237,21 +154,9 @@ export class SpaceController {
     @Req() req: RequestWithSession,
     @Body() dto: PurchaseRealEstateLandDto,
   ) {
-    const actorUserId = requireUserId(req);
-    const receipt = {
-      landId: `land-${dto.idempotencyKey.slice(0, 8)}`,
-      code: dto.landCode,
-      districtId: dto.districtId,
-      tier: dto.landTier,
-      ownerUserId: actorUserId,
-      pricePaidWld: dto.priceWld,
-      purchasedAt: new Date().toISOString(),
-    };
-    return {
-      success: true,
-      receipt,
-      message: `랜드 ${dto.landCode} 필지가 ${dto.priceWld.toLocaleString()} WLD에 안전하게 매입 등기되었습니다.`,
-    };
+    requireUserId(req);
+    void dto;
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '가상 부동산 랜드 임대 등록 및 계약 체결' })
@@ -261,14 +166,10 @@ export class SpaceController {
     @Param('id') landId: string,
     @Body() dto: RentRealEstateLandDto,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      landId,
-      dailyRentWld: dto.dailyRentWld,
-      depositWld: dto.depositWld,
-      message: '랜드 임대 계약이 체결되어 매일 자정 임대료가 자동 적립됩니다.',
-    };
+    requireUserId(req);
+    void landId;
+    void dto;
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '가상 부동산 랜드 누적 임대료 수익 정산 수령' })
@@ -277,14 +178,9 @@ export class SpaceController {
     @Req() req: RequestWithSession,
     @Param('id') landId: string,
   ) {
-    const actorUserId = requireUserId(req);
-    return {
-      success: true,
-      landId,
-      settledAmountWld: 144000,
-      transferredToUserId: actorUserId,
-      message: '누적 임대료 수익 144,000 WLD가 지갑으로 즉시 입금되었습니다.',
-    };
+    requireUserId(req);
+    void landId;
+    throw unverifiedRealEstate();
   }
 
   @ApiOperation({ summary: '공공 도시 프로젝트 목록 조회' })

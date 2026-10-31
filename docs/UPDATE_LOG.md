@@ -1403,3 +1403,5 @@
 - Replaced synthetic landmark auction and rent-claim success responses with explicit source-unverified HTTP 503 and private headers.
 - Replaced fabricated ownership/yield UI with an accessible bilingual unavailable state; no WLD, DB or schema mutation.
 - Release remains HOLD pending exact-SHA validation, official Test and security gates.
+- Additional Nest API contract: six synthetic real-estate market/owner/purchase/rent/settlement endpoints now return 503, backed by seven Nest HTTP negative tests. Previous local-only C v1210 issue #2086 remains preserved.
+- Known release blockers: nine dependency advisories, absent full-route QA ledger, shared HTTP index/referrer override (#2225), exact-SHA authenticated Test and pending remote CI.
