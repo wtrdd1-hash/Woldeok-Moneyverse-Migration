@@ -519,3 +519,45 @@ describe('Android account security events privacy', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
 });
+
+describe('Android public board reply-presence search', () => {
+  it('forwards the exact filter to the public backend and accepts matching replies', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({
+      posts: [{ postId: '00000000-0000-4000-8000-000000000001', commentCount: 2 }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(request('/app-api/v1/board/public/stock-posts?replies=with&stock=WDX'), context('board', 'public', 'stock-posts'));
+    expect(response.status).toBe(200);
+    const target = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(target.searchParams.get('replies')).toBe('with');
+    expect(target.searchParams.get('stock')).toBe('WDX');
+  });
+
+  it.each(['replies=with&replies=without', 'replies=all', 'replies=maybe'])(
+    'rejects malformed or duplicate filter %s before upstream access',
+    async (query) => {
+      process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+      const response = await GET(request('/app-api/v1/board/public/stock-posts?' + query), context('board', 'public', 'stock-posts'));
+      expect(response.status).toBe(400);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    [{ posts: [{ commentCount: 0 }] }, 'with'],
+    [{ posts: [{ commentCount: 2 }] }, 'without'],
+    [{ posts: [{ commentCount: -1 }] }, 'with'],
+    [{ posts: 'not an array' }, 'with'],
+  ])('rejects unverified HTTP 200 board replies %j for %s', async (payload, replies) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(payload), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    })));
+    const response = await GET(request('/app-api/v1/board/public/stock-posts?replies=' + replies), context('board', 'public', 'stock-posts'));
+    expect(response.status).toBe(503);
+    expect((await response.json()).code).toBe('board_replies_unverified');
+  });
+});
