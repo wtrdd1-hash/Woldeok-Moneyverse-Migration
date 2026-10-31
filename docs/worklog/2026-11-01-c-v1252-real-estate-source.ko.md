@@ -22,3 +22,4 @@
 - 독립 PostgreSQL 17.11 마이그레이션 316/316 통과, 원장 직접 INSERT 불가 확인. 최초 ACL SQL 따옴표 오류는 새 격리 DB에서 수정 후 통과.
 - 전체 의존성 취약점 9건(낮음 1·보통 8), 전체 경로 QA 증빙 원장 누락, 실제 HTTP 비색인·참조자 정책 덮어쓰기(#2225), 공식 Test 인증 E2E 미실행 및 원격 CI 미완료로 릴리스 차단.
 - 최종 HEAD 검증 결과는 Draft PR #2281에 별도 기재. main·Test·Production·다른 작업 브랜치·핵심 예약 변경 없음. 배포·롤백·브랜치 삭제 없음.
+- 첫 최종 SHA 전체 Lint에서 신규 Nest HTTP 테스트 변수명 `module`이 Next ESLint 규칙에 위배됨을 확인. `testingModule`로 수정 후 신규 SHA에서 전체 게이트 재검증. 자동 예약·공용 서비스는 중단하지 않음.

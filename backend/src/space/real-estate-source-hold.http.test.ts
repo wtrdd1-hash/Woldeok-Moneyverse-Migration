@@ -22,7 +22,7 @@ describe('real estate Nest HTTP source integrity hold', () => {
   };
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [SpaceController],
       providers: [{ provide: SpaceService, useValue: service }],
     })
@@ -30,7 +30,7 @@ describe('real estate Nest HTTP source integrity hold', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
