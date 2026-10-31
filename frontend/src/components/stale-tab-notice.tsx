@@ -1,6 +1,6 @@
 'use client';
 
-import { RefreshCw, Sparkles } from 'lucide-react';
+import { RefreshCw, Sparkles, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 const EVERY_MS = 30_000;
 const RELEASE_PARAM = '__mv_release';
 const REFRESH_KEY = 'moneyverse-release-refresh';
+const DISMISS_KEY = 'moneyverse-release-dismissed';
 
 /**
  * 캐시 버스팅 파라미터가 포함된 강제 새로고침 URL 생성
@@ -109,6 +110,7 @@ export function StaleTabNotice({
         setStale(false);
         try {
           window.sessionStorage.removeItem(REFRESH_KEY);
+          window.sessionStorage.removeItem(DISMISS_KEY);
         } catch {
           // Session storage can be unavailable; keep the refresh path usable.
         }
@@ -120,7 +122,13 @@ export function StaleTabNotice({
 
       const transition = `${mine}->${newVersion}`;
 
-      // 이미 자동 리로드를 시도했으나 브라우저/프록시 캐시로 인해 동일한 구버전이 지속되는 경우
+      // Dismiss only this exact release transition; future releases must still be checked.
+      if (window.sessionStorage.getItem(DISMISS_KEY) === transition) {
+        setStale(false);
+        return;
+      }
+
+      // Previous automatic refresh attempt did not result in the requested version.
       if (window.sessionStorage.getItem(REFRESH_KEY) === transition) {
         setStale(true);
         return;
@@ -185,22 +193,38 @@ export function StaleTabNotice({
   return (
     <div
       role="status"
-      className="fixed inset-x-0 bottom-0 z-[100] flex flex-wrap items-center justify-between gap-3 border-t border-emerald-500/40 bg-[#090D16]/98 px-4 sm:px-6 py-3 text-sm text-foreground shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-2 duration-200"
+      aria-live="polite"
+      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-[100] w-auto sm:w-full max-w-md rounded-xl border border-emerald-500/40 bg-[#090D16]/95 p-3 text-sm text-foreground shadow-xl backdrop-blur-xl"
     >
-      <div className="flex items-center gap-2.5">
-        <Sparkles className="size-4 shrink-0 text-emerald-400 animate-pulse" />
-        <span className="font-semibold text-emerald-200 text-xs sm:text-sm [word-break:keep-all]">
-          최신 시스템 업데이트가 배포되었습니다. 새 버전 자동 적용이 이전 브라우저 캐시에 막혔습니다. 로그인은 유지되며 [새로고침]을 누르면 최신 웹페이지를 즉시 불러옵니다.
-        </span>
+      <div className="flex items-start gap-2">
+        <Sparkles aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+        <p className="min-w-0 flex-1 text-xs leading-5 text-emerald-100">
+          현재 화면과 서버 버전이 일치하지 않습니다. 새 버전의 화면을 불러오거나 이 알림을 닫을 수 있습니다.
+        </p>
+        <button
+          type="button"
+          aria-label="알림 닫기"
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-emerald-100 hover:bg-emerald-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+          onClick={() => {
+            try {
+              if (targetVersion) window.sessionStorage.setItem(DISMISS_KEY, `${mine}->${targetVersion}`);
+            } catch {
+              // Dismissal is still effective until this component remounts.
+            }
+            setStale(false);
+          }}
+        >
+          <X aria-hidden="true" className="size-4" />
+        </button>
       </div>
       <Button
         size="sm"
-        className="min-h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 px-3.5 rounded-lg shrink-0 cursor-pointer"
+        className="mt-2 min-h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm cursor-pointer"
         onClick={() => {
           isRefreshingRef.current = true;
-          // 수동 클릭 시 세션 스토리지 플래그를 비워 새로고침 후 루프에 갇히지 않게 함
           try {
             window.sessionStorage.removeItem(REFRESH_KEY);
+            window.sessionStorage.removeItem(DISMISS_KEY);
           } catch {
             // Storage access may be blocked; manual refresh must still work.
           }
@@ -210,9 +234,10 @@ export function StaleTabNotice({
           void executeHardRefresh(targetUrl, navigate);
         }}
       >
-        <RefreshCw className="size-3.5 animate-spin" />
-        최신 페이지 새로고침
+        <RefreshCw aria-hidden="true" className="size-4" />
+        최신 페이지 불러오기
       </Button>
     </div>
+
   );
 }

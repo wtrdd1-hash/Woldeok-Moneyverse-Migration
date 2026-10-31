@@ -227,7 +227,7 @@ export class TreasuryBondRepository {
         l.amount_wld::text,
         l.created_at::text
       FROM public.treasury_bond_coupon_logs l
-      JOIN public.treasury_bonds b ON b.id = l.bond_id
+      JOIN public.bond_public_catalog() b ON b.id = l.bond_id
       ORDER BY l.created_at DESC
       LIMIT $1
     `, [limit]);

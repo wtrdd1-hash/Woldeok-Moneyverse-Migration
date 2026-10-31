@@ -36,13 +36,35 @@ export function parseBuildId(text) {
 }
 
 /** The public version must belong to the immutable manifest's active service generation. */
-export function serviceForRelease(channel, manifest, role) {
+export function serviceForRelease(channel, manifest, role, activeLookup) {
   if (!['backend', 'frontend'].includes(role)) throw new Error('invalid service role');
   if (channel === 'test') return CHANNELS.test[role + 'Service'];
   if (channel !== 'prod') throw new Error('invalid release channel');
   const match = /^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.([0-9]{1,4})$/.exec(manifest?.version ?? '');
   if (!match) throw new Error('production manifest missing a valid immutable release version');
-  return `moneyverse-release-v${match[1]}-${role}.service`;
+  const historicalUnit = `moneyverse-release-v${match[1]}-${role}.service`;
+
+  // Hosts with stable live-prod units must attest the actual process directory.
+  // Never select by the mere presence of a service or its untrusted label.
+  if (activeLookup) {
+    const { releasePath, cwdFor } = activeLookup;
+    if (typeof releasePath !== 'string' || typeof cwdFor !== 'function') {
+      throw new Error('invalid active service lookup');
+    }
+    const expectedCwd = path.join(releasePath, role);
+    const matching = [historicalUnit, `moneyverse-live-prod-${role}.service`].filter((unit) => {
+      try {
+        return cwdFor(unit) === expectedCwd;
+      } catch {
+        return false; // Inactive service is never evidence.
+      }
+    });
+    if (matching.length !== 1) {
+      throw new Error(matching.length ? 'ambiguous active release service' : 'no exact active release service');
+    }
+    return matching[0];
+  }
+  return historicalUnit;
 }
 
 /** Parses systemctl's effective unit EnvironmentFiles without reading secret values into logs. */
@@ -129,6 +151,19 @@ export function verifyHostRuntimeIdentity(snapshot) {
   }
 
   const root = snapshot?.releasePath;
+  if (channel === 'prod') {
+    // Release folders are immutable generations. An in-place manifest relabel
+    // must fail even when another script rewrites ENV and public SHA strings.
+    // This check uses the resolved active release directory, never the mutable
+    // 'production-current' symlink text.
+    const version = manifest?.version;
+    const validVersion = typeof version === 'string'
+      && /^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]{1,4}$/.test(version);
+    const expectedPrefix = validVersion ? `prod-${version}-` : null;
+    if (!root || !expectedPrefix || !path.basename(root).startsWith(expectedPrefix)) {
+      fail('immutable_release_directory_version_mismatch');
+    }
+  }
   if (!root || snapshot?.backendCwd !== path.join(root, 'backend')) fail('backend_process_directory_mismatch');
   if (!root || snapshot?.frontendCwd !== path.join(root, 'frontend')) fail('frontend_process_directory_mismatch');
 
@@ -151,8 +186,9 @@ async function collectSnapshot(channel, expectedSha) {
   const cfg = CHANNELS[channel];
   const releasePath = realpathSync(cfg.releaseRoot);
   const manifest = JSON.parse(readFileSync(path.join(releasePath, '.moneyverse-release.json'), 'utf8'));
-  const backendService = serviceForRelease(channel, manifest, 'backend');
-  const frontendService = serviceForRelease(channel, manifest, 'frontend');
+  const activeLookup = { releasePath, cwdFor: systemdProcessDirectory };
+  const backendService = serviceForRelease(channel, manifest, 'backend', activeLookup);
+  const frontendService = serviceForRelease(channel, manifest, 'frontend', activeLookup);
 
   // Independently probe backend, frontend and the public financial disclosure
   // through the actual external edge. These are read-only GETs; a local .next

@@ -1,5 +1,26 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1539 — Exact-backend-SHA frontend recovery canary (BUILT / NOT DEPLOYED)
+- [Worklog EN](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.md) / [KO](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.ko.md) · [Internal](docs/updates/v2026.10.31.1539-frontend-recovery-internal.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1539-frontend-recovery-github.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-github.ko.md). Built frontend exactly from current backend SHA 95485a, preview port 3893 HTTPS-header GET 5/5 HTTP 200/version matched. Historical source missing newer PR fixes; authorized Test/Production remain HOLD, P0 #2144.
+
+
+## v2026.10.31.1538 — Production immutable release directory check (SOURCE VERIFIED / PROD HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-drift-v1538.md) / [KO](docs/worklog/2026-10-31-production-identity-drift-v1538.ko.md); [Internal](docs/updates/v2026.10.31.1538-prod-integrity-internal.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1538-prod-integrity-github.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-github.ko.md). Production release path v0950 in-place relabelled to manifest v1336, backend SHA 95485a vs frontend timestamp; source gate fixed, RED then 31/31 + 119/119 PASS. Current real runtime remains blocked; no Production promotion. P0 #2144.
+
+
+## v2026.10.31.1534 — Active Production release identity service detection (CURRENT PROD VERIFIED / NEW RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-v1534.md) / [KO](docs/worklog/2026-10-31-production-identity-v1534.ko.md) · [Internal](docs/updates/v2026.10.31.1534-release-internal.md) / [KO](docs/updates/v2026.10.31.1534-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1534-release-github.md) / [KO](docs/updates/v2026.10.31.1534-release-github.ko.md). TDD RED 1, related release 30 GREEN; existing live public release 95485a... now read-only attested through actual active services and invariant SHA checks. This is NOT a new Test/Production deployment or finance release.
+
+
+## v2026.10.31.1532 — Admin bond read ACL 42501 source fix (BRANCH VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-bond-coupon-read-v1532.md) / [KO](docs/worklog/2026-10-31-bond-coupon-read-v1532.ko.md) · [Internal EN](docs/updates/v2026.10.31.1532-bonds-internal.md) / [KO](docs/updates/v2026.10.31.1532-bonds-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1532-bonds-github.md) / [KO](docs/updates/v2026.10.31.1532-bonds-github.ko.md). Existing app-role restricted catalog replaces protected-table JOIN; real 42501 repro and corrected SQL proven, 66 bond tests + monorepo typecheck + lint/backend build PASS. Treasury 552 unlinked rows and financial 503 unresolved. Official Test/Production HOLD.
+
+
+
+## v2026.10.31.1530 — Persistent release notice source repair; finance incident verified (BRANCH ONLY / RELEASE HOLD)
+- [EN worklog](docs/worklog/2026-10-31-admin-finance-incident-v1530.md) / [KO](docs/worklog/2026-10-31-admin-finance-incident-v1530.ko.md); [internal](docs/updates/v2026.10.31.1530-admin-finance-internal.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1530-admin-finance-github.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-github.ko.md). Owner-specified miniPC MCP confirmed; TDD 9/9, typecheck, lint and Next build PASS for compact dismissible stale-release banner. Finance remains 503; 552/552 historical Treasury links absent, no persisted reconciliation, official Test/Production release HOLD. Draft #2131.
+
+
 ## v2026.10.30.1521 — KDIC administrator ledger visibility (BRANCH VERIFIED / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.md) / [KO](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.ko.md) · [Internal EN](docs/updates/v2026.10.30.1521-kdic-internal.md) / [KO](docs/updates/v2026.10.30.1521-kdic-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.30.1521-kdic-github.md) / [KO](docs/updates/v2026.10.30.1521-kdic-github.ko.md). Production process read-only ledger projection balanced (40/40), 552 Treasury links unresolved. Admin GET diagnostics only; financial POST HTTP 503 unchanged. No official Test/Production release.
 

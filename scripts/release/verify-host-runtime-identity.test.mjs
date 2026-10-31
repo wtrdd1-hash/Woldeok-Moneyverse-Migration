@@ -109,6 +109,30 @@ test('uses manifest version to select the active production generation, not stal
   assert.throws(() => serviceForRelease('prod', {version: 'latest'}, 'frontend'));
 });
 
+test('finds the unique active stable production service by actual immutable process directory', () => {
+  const root = '/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb';
+  const manifest = { version: 'v2026.10.31.0950' };
+  const cwdFor = (unit) => {
+    if (unit === 'moneyverse-live-prod-backend.service') return path.join(root, 'backend');
+    if (unit === 'moneyverse-live-prod-frontend.service') return path.join(root, 'frontend');
+    throw new Error('inactive service');
+  };
+  for (const role of ['backend', 'frontend']) {
+    assert.equal(
+      serviceForRelease('prod', manifest, role, { releasePath: root, cwdFor }),
+      `moneyverse-live-prod-${role}.service`,
+    );
+  }
+  assert.throws(() => serviceForRelease('prod', manifest, 'backend', {
+    releasePath: root,
+    cwdFor: () => '/srv/moneyverse-data/releases/unrelated/backend',
+  }), /no exact active release service/);
+  assert.throws(() => serviceForRelease('prod', manifest, 'frontend', {
+    releasePath: root,
+    cwdFor: () => path.join(root, 'frontend'),
+  }), /ambiguous active release service/);
+});
+
 test('uses active service EnvironmentFiles and last-wins BUILD_ID but never duplicate or missing keys', () => {
   const entries = parseEnvironmentFileLocations('/a/base.env (ignore_errors=no) /b/release.env (ignore_errors=no)');
   assert.deepEqual(entries, [{file:'/a/base.env',optional:false},{file:'/b/release.env',optional:false}]);
@@ -149,10 +173,29 @@ test('rejects unverifiable Treasury payloads and missing privacy cache controls'
   }
 });
 
+test('rejects a manifest relabelled in-place after another production release', () => {
+  const state = healthy();
+  const releasePath = '/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb';
+  state.channel = 'prod';
+  state.manifest.channel = 'prod';
+  state.manifest.version = 'v2026.10.31.0950';
+  state.releasePath = releasePath;
+  state.backendCwd = path.join(releasePath, 'backend');
+  state.frontendCwd = path.join(releasePath, 'frontend');
+  assert.deepEqual(verifyHostRuntimeIdentity(state), { ok:true, failures:[] });
+  // Even perfect SHA replies do not legitimize editing a previously cut-over release.
+  state.manifest.version = 'v2026.10.31.1336';
+  assert(verifyHostRuntimeIdentity(state).failures.includes('immutable_release_directory_version_mismatch'));
+});
+
 test('production channel also requires independent frontend and Treasury evidence', () => {
   const state = healthy();
   state.channel = 'prod';
   state.manifest.channel = 'prod';
+  state.manifest.version = 'v2026.10.31.0950';
+  state.releasePath = '/srv/moneyverse-data/releases/prod-v2026.10.31.0950-761a55a094fb';
+  state.backendCwd = path.join(state.releasePath, 'backend');
+  state.frontendCwd = path.join(state.releasePath, 'frontend');
   assert.deepEqual(verifyHostRuntimeIdentity(state), { ok: true, failures: [] });
   state.publicFrontendVersionSha = '1793277134644';
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_frontend_sha_mismatch'));

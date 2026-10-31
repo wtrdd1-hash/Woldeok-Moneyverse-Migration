@@ -45,6 +45,9 @@ describe('admin bond coupon history pagination contract', () => {
     await expect(repository.listRecentCouponLogs(30)).resolves.toEqual(rows);
     expect(query).toHaveBeenCalledOnce();
     expect(query.mock.calls[0]?.[0]).toContain('LIMIT $1');
+    // moneyverse_app may read the published catalog, not the protected bond base table.
+    expect(query.mock.calls[0]?.[0]).toMatch(/JOIN public\.bond_public_catalog\(\) b/);
+    expect(query.mock.calls[0]?.[0]).not.toMatch(/JOIN public\.treasury_bonds\b/);
     expect(query.mock.calls[0]?.[1]).toEqual([30]);
   });
 });
