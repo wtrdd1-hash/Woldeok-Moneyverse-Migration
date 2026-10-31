@@ -13,8 +13,8 @@
 - [x] Recheck main and latest PR/QA; maintain internal and GitHub update notes and document parity.
 
 ## Finished (to be verified)
-- [ ] Validate document equivalence, diff, cycle/priority counts and exact-SHA CI; report actual state without claiming implementation. (Await final CI evidence)
-- [ ] No runtime, DB, ledger, WLD, official Test, Production, or main changes.
+- [x] Validate EN/KO parity, diff, cycle/priority counts, release tests 117/117 and predecessor SHA CI/Build Candidate SUCCESS; final documentation commit CI to be checked in external completion record.
+- [x] No runtime, DB, ledger, WLD, official Test, Production, or main changes.
 
 **External independent reference gate:** newly verified 0; cumulative independently verified/deduplicated/classified UNKNOWN/10,000; BLOCKED / IN PROGRESS.
 
@@ -23,3 +23,8 @@
 - Fresh public HTTP: Production backend `95485a299885693e3becb694dfc36ad45e832f97`, frontend numeric `1793422036848`, Treasury HTTP 503. No exact-source parity; P0 #2144 remains.
 - Durable owner holding generation is a **pre-implementation blocker** until all acquisition/renewal paths prove monotonic generation, including identical-expiry reacquisition.
 - No new acceptance run; QA v1411 is historical. Documentation only, no deployment.
+
+## Finished record (2026-10-31 14:07 KST)
+- Six English/Korean document pairs parity PASS, 4 P0 + 6 P1 IDs, git diff --check PASS, release tests 117/117 PASS.
+- Predecessor SHA `33dd8fd02c62b3e88343403b448bd64a83f7df82` CI #41171194377 SUCCESS, Build Test Candidate #41171189939 SUCCESS. **Final commit including this record needs its own exact-SHA CI**.
+- Documentation-only verification, no feature acceptance. Draft #2149/HOLD, issue #2148 and P0 #2144 remain. No runtime/financial mutation.
