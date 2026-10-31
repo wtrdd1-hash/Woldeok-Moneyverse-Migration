@@ -291,7 +291,7 @@ export default async function BankPage() {
             </div>
           </div>
 
-          {/* 바젤 III 건전성 & Kinked 점프 이자율 곡선 */}
+          {/* Authenticated member bank standing, not a bank-wide liquidity guarantee. */}
           <div className="toss-card p-6">
             <BankLiquidityCard
               bankBalance={bank}
