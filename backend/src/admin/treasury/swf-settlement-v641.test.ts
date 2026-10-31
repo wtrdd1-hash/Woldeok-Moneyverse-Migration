@@ -9,6 +9,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 
 const SWF_HOLD = 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE';
 
@@ -29,6 +30,7 @@ describe('v641 SWF manual execution HTTP ledger gate', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     await app.init();

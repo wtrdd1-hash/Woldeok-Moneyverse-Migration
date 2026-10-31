@@ -7,6 +7,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AdminTreasuryController } from './treasury.controller';
 import { TreasuryRepository } from './treasury.repository';
 import { TreasuryService } from './treasury.service';
@@ -74,6 +75,7 @@ describe('P1 treasury ledger HTTP input contract', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = mod.createNestApplication();
     await app.init();

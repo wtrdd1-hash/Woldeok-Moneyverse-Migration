@@ -1,0 +1,16 @@
+# v2026.10.31.1549 — Reconcile SWF fixes after concurrent main promotion
+Status START / separate worktree / no Production DB writes or traffic changes.
+## START
+Owner requested full recovery of the mobile /admin/treasury SWF unverified panel and policy saving. Read AGENTS, DOCS_INDEX, PROJECT_PLAN, INTEGRATED_PLANNING_MASTER, DOCUMENTATION_POLICY, RELEASING and v1546 worklog. Remote main advanced while another agent was working to merge PR #2163 commit 1a3625f3 (SWF role-based GET + migration 313 named admin_swf_update_policy). Existing source branch e7e20dbdd PR #2162 contains a DIFFERENT migration 313 (admin_swf_update_config). They must NEVER both be installed or merged. Main implementation adopted, and new patch only restores missing frontend same-origin + server-only CSRF and backend CSRF/no-store, with rigorous Next TLS proxy E2E tests.
+## VERIFIED
+Real Production app has one SWF config, 4 portfolios and 270 events; function admin_swf_snapshot returns 4 portfolios/20 recent events for approver while raw table privileges remain revoked. e7e isolated Test signed-in GET and PUT 200, cross-origin and no-CSRF PUT 403, SSR panel visible, but that particular source differs from current main and cannot be deployed on top of overlapping 313.
+The current main SWF PUT BFF still uses plain api without CSRF and assumes Next's internal URL scheme; controller PUT lacks CsrfGuard. New source patch will not alter approved current main migration 313; validate its role checks, WLD precision, and atomic auditing separately in cloned Test-only DB. Preserve other agents' main and source.
+## MID/FINISH
+PENDING.
+
+## MID / FINISH — competing 313 avoided and scoped policy validated
+- Latest main 1a3625f3 includes merged #2163, role-scoped GET and canonical 313-admin-swf-governance-scoped-write.sql providing admin_swf_update_policy(uuid,jsonb). Original draft #2162 instead added a DIFFERENT migration 313 and MUST NOT be merged. This branch contains NO migration files.
+- Existing main canonical 313 applied ONLY on disposable Test smoke DB. Actual moneyverse_app role with approver successfully changed policy (exact 9007199254740993 WLD), created zero-WLD event, rolled back atomically; non-approver 42501, invalid numeric 22023. Treasury underlying table grants stayed revoked; original Test and Production DB untouched.
+- Next SWF PUT now invokes server-only mutate for one-use CSRF and verifies canonical configured HTTPS APP_BASE_URL (not private HTTP proxy or forgeable forwarded headers); validates returned evidence and no-store. Backend SWF GET/PUT no-store; PUT uses CsrfGuard and all existing Session/Consent/Admin guards. Three unrelated Nest HTTP fixture modules override CsrfGuard only in unit tests.
+- Treasury backend 144 passed, 18 real DB tests skipped, frontend Treasury 31 passed, release scripts 122 passed, zero failures. Prior e7e duplicate-313 isolated Test E2E passed signed-in GET/PUT backend/frontend 200 and CSRF/cross-origin denied 403, but is not the same main SQL implementation. This branch's canonical main SQL writer independently tested above; official SHA Test + Production release still pending.
+- Another agent advanced public Test to 32c737a. Do not overwrite active Test release without exact identity and rollback; main 1a3625 remains authoritative until next change.

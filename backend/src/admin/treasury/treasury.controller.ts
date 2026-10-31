@@ -16,6 +16,7 @@ import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validato
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
@@ -382,6 +383,7 @@ export class AdminTreasuryController {
   }
 
   @Get('swf')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 포트폴리오 및 잉여 세수 재순환 현황 조회' })
   async getSwfStatus(@Req() request: RequestWithSession) {
     // The application role cannot SELECT private SWF base tables. Database
@@ -411,6 +413,8 @@ export class AdminTreasuryController {
   }
 
   @Put('swf/config')
+  @UseGuards(CsrfGuard)
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
   async updateSwfConfig(
     @Req() request: RequestWithSession,
