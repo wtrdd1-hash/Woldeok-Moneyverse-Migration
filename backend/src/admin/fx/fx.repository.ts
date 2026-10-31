@@ -120,7 +120,7 @@ export class FxRepository {
     `);
 
     if (res.rows.length === 0) {
-      throw new Error('외환보유액 마스터 원장이 존재하지 않습니다.');
+      throw new ServiceUnavailableException('FX reserve source is unavailable.');
     }
     return res.rows[0];
   }
@@ -131,7 +131,13 @@ export class FxRepository {
       FROM public.foreign_exchange_reserves 
       LIMIT 1;
     `);
-    return res.rows[0]?.rate ?? 1350.0;
+    const rate: unknown = res.rows[0]?.rate;
+    // An absent or invalid source rate is not a market observation. Never
+    // substitute the historical 1350 WLD anchor as a live spot quote.
+    if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) {
+      throw new ServiceUnavailableException('FX spot rate source is unavailable.');
+    }
+    return rate;
   }
 
   async getRateHistory(limit: number = 30): Promise<FxRatePoint[]> {
