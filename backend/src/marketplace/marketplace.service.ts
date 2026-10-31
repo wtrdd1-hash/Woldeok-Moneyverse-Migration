@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -11,6 +11,13 @@ export class MarketplaceService {
     @Inject(PG_POOL) private readonly pool: Queryable | null,
     @Optional() @Inject(AuctionGateway) private readonly auctionGateway?: AuctionGateway,
   ) {}
+
+  // A controller-only hold can be bypassed by another service caller. No
+  // marketplace balance-changing operation is permitted until SQL settlement
+  // produces an authoritative, idempotent double-entry ledger receipt.
+  private requireLedgerBackedSettlement(): void {
+    throw new ServiceUnavailableException('marketplace_settlement_unverified');
+  }
 
   async listListings(query: MarketplaceQueryDto): Promise<unknown[]> {
     if (!this.pool) throw new Error('database pool unavailable');
@@ -56,6 +63,7 @@ export class MarketplaceService {
     key: string,
     description?: string,
   ): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ listing_id: string }>(
       this.pool,
@@ -66,6 +74,7 @@ export class MarketplaceService {
   }
 
   async buyListing(actor: string, listingId: string, key: string): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ tx_id: string }>(
       this.pool,
@@ -148,6 +157,7 @@ export class MarketplaceService {
   >();
 
   async bidAuction(actor: string, auctionId: string, bidAmountWld: string, maxProxyBidWld?: string): Promise<unknown> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const userRow = await queryOne<{ name: string; is_plus_user?: boolean }>(
       this.pool,
