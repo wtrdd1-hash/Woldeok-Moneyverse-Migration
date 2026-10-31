@@ -62,9 +62,30 @@ export interface StateHoldingOverview {
   governance_model: string;
 }
 
+export interface PublicEnterpriseDisclosure {
+  overview: StateHoldingOverview;
+  soes: StateEnterpriseRow[];
+  privateEnterprises: PrivateEnterpriseRow[];
+  financial_data_status: 'PROJECTION_ONLY_UNVERIFIED';
+  ledger_confirmed: false;
+}
+
 @Injectable()
 export class EnterpriseRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
+
+  async getPublicDisclosure(): Promise<PublicEnterpriseDisclosure> {
+    try {
+      const result = await this.pool.query<{ disclosure: PublicEnterpriseDisclosure }>(
+        'SELECT public.enterprise_public_disclosure_v1() AS disclosure',
+      );
+      if (!result.rows[0]?.disclosure) throw new Error('missing disclosure');
+      return result.rows[0].disclosure;
+    } catch {
+      // A missing migration, revoked EXECUTE or source failure must not expose raw SQL.
+      throw new ServiceUnavailableException('Public enterprise disclosure unavailable');
+    }
+  }
 
   async getStateHoldingOverview(): Promise<StateHoldingOverview> {
     const soeRes = await this.pool.query<{
@@ -77,7 +98,9 @@ export class EnterpriseRepository {
         coalesce(sum(total_assets_wld), 0)::numeric::text AS total_assets,
         coalesce(sum(operating_revenue_hourly_wld), 0)::numeric::text AS total_revenue,
         coalesce(sum(net_profit_hourly_wld), 0)::numeric::text AS total_profit,
-        coalesce(sum(net_profit_hourly_wld * dividend_rate_bps / 10000), 0)::numeric::text AS total_dividends
+        -- WLD is integer-denominated; truncate a projected fraction toward zero.
+        -- This is a projection only, NEVER a remittance receipt.
+        trunc(coalesce(sum(net_profit_hourly_wld * dividend_rate_bps / 10000), 0))::numeric(38,0)::text AS total_dividends
       FROM public.state_enterprises
       WHERE status = 'ACTIVE'
     `);

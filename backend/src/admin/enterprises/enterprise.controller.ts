@@ -101,18 +101,25 @@ export class PublicEnterpriseController {
   @Get('public')
   @ApiOperation({ summary: '대국민 알리오(ALIO) 공기업 경영정보 공개 공시' })
   async getPublicEnterprises() {
-    const [overview, soes, privateEnterprises] = await Promise.all([
-      this.service.getStateHoldingOverview(),
-      this.service.listStateEnterprises(),
-      this.service.listPrivateEnterprises(),
-    ]);
-
-    return {
-      overview,
-      soes,
-      privateEnterprises,
-      disclosed_at: new Date().toISOString(),
-      standards: 'OECD 공기업 지배구조 가이드라인 및 대한민국 공운법 표준',
-    };
+    try {
+      const disclosure = await this.service.getPublicDisclosure();
+      if (disclosure.financial_data_status !== 'PROJECTION_ONLY_UNVERIFIED' || disclosure.ledger_confirmed !== false) {
+        throw new Error('Unverified enterprise disclosure status');
+      }
+      return {
+        source: 'DATABASE_SNAPSHOT' as const,
+        // Stored operating projections are NOT a settled Treasury/ledger receipt.
+        settlementStatus: 'NOT_VERIFIED' as const,
+        ...disclosure,
+        disclosed_at: new Date().toISOString(),
+        standards: 'In-game virtual operating projections, not legal or settlement certification',
+      };
+    } catch {
+      // Never expose database details or synthesize a success-shaped financial report.
+      throw new ServiceUnavailableException({
+        code: 'ENTERPRISE_DISCLOSURE_UNAVAILABLE',
+        message: 'Verified enterprise disclosure is temporarily unavailable',
+      });
+    }
   }
 }
