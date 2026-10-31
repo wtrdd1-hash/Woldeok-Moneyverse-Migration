@@ -35,3 +35,35 @@ describe('Android public board title search parity', () => {
     expect(await response.json()).toEqual({ posts: [] });
   });
 });
+
+
+describe('Android board category search contract', () => {
+  const path = ['board', 'public', 'stock-posts'];
+  it('rejects duplicate and unknown categories before the backend', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    const upstream = vi.fn();
+    vi.stubGlobal('fetch', upstream);
+    for (const query of ['category=analysis&category=question', 'category=private']) {
+      const response = await GET(new NextRequest(`https://easy-scraping.com/app-api/v1/board/public/stock-posts?${query}`), { params: Promise.resolve({ path }) });
+      expect(response.status).toBe(400);
+    }
+    expect(upstream).not.toHaveBeenCalled();
+  });
+  it('rejects a success-shaped response that ignored the requested category', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ posts: [{ stock: { category: 'journal' } }] }), { headers: { 'content-type': 'application/json' } })));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?category=analysis'), { params: Promise.resolve({ path }) });
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+  it('forwards verified category results with no-store and noindex', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    const upstream = vi.fn(async () => new Response(JSON.stringify({ posts: [{ stock: { category: 'analysis' } }] }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' } }));
+    vi.stubGlobal('fetch', upstream);
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?category=analysis'), { params: Promise.resolve({ path }) });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(new URL(String(upstream.mock.calls[0]?.[0])).searchParams.get('category')).toBe('analysis');
+  });
+});

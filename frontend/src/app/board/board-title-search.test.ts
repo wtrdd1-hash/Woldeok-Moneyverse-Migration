@@ -21,3 +21,13 @@ describe('public board title search', () => {
     expect(page).toContain('robots: { index: !hasSearch');
   });
 });
+
+
+describe('public board stock discussion category search', () => {
+  it('provides an accessible category filter and excludes filtered URLs from indexing', () => {
+    const page = readFileSync('src/app/board/page.tsx', 'utf8');
+    expect(page).toContain('name="category"');
+    expect(page).toContain('categoryFilter');
+    expect(page).toContain('hasSearch = params.q !== undefined || params.category !== undefined');
+  });
+});

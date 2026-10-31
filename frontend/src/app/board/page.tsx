@@ -28,7 +28,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.category !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,11 +66,14 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const categoryFilter = typeof params.category === 'string' && ['analysis', 'question', 'journal', 'business', 'system'].includes(params.category) ? params.category : null;
+  const categoryInvalid = params.category !== undefined && categoryFilter === null;
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (categoryFilter) query.set('category', categoryFilter);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const data = search.invalid || categoryInvalid
     ? null
     : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
 
@@ -131,6 +134,17 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-category" className="grid gap-1 text-sm font-semibold">
+              종목 토론 유형
+              <select id="board-category" name="category" defaultValue={categoryFilter ?? ''} className="min-h-11 rounded-md border border-input bg-background px-3">
+                <option value="">전체 유형</option>
+                <option value="analysis">분석</option>
+                <option value="question">질문</option>
+                <option value="journal">일지</option>
+                <option value="business">사업</option>
+                <option value="system">시스템</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,9 +159,10 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건에서 제목과 종목 토론 유형을 검색합니다. 유형을 선택하면 해당 유형이 없는 일반 글은 제외됩니다. 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? (
+          {categoryInvalid ? <p role="alert" className="mt-2 text-sm text-destructive">올바른 종목 토론 유형을 선택해 주세요.</p> : null}
+          {search.invalid || categoryInvalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
             </p>
@@ -161,14 +176,14 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {search.invalid || categoryInvalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
+              search.query || categoryFilter
                 ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`

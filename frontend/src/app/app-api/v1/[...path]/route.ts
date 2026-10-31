@@ -197,6 +197,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const publicBoardCategoryPath = request.method === 'GET' && parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardCategoryValues = publicBoardCategoryPath ? request.nextUrl.searchParams.getAll('category') : [];
+  if (boardCategoryValues.length > 1 || (boardCategoryValues.length === 1 && !['analysis', 'question', 'journal', 'business', 'system'].includes(boardCategoryValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_category_invalid', 'invalid public stock discussion category');
+  }
+
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
@@ -271,6 +277,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // A legacy upstream may ignore category and return a successful but incorrect result.
+  // Verify the bounded public response rather than displaying unfiltered posts on Android.
+  if (publicBoardCategoryPath && boardCategoryValues.length === 1 && response.ok) {
+    let payload: unknown;
+    try { payload = await response.clone().json(); } catch { return gatewayProblem(502, 'Bad Gateway', 'board_category_unverified', 'unverified public board category results'); }
+    const posts = payload && typeof payload === 'object' && !Array.isArray(payload) ? (payload as { posts?: unknown }).posts : null;
+    if (!Array.isArray(posts) || posts.length > 50 || posts.some((post) =>
+      !post || typeof post !== 'object' || Array.isArray(post) ||
+      !(post as { stock?: unknown }).stock ||
+      typeof (post as { stock: { category?: unknown } }).stock.category !== 'string' ||
+      (post as { stock: { category: string } }).stock.category !== boardCategoryValues[0]
+    )) return gatewayProblem(502, 'Bad Gateway', 'board_category_unverified', 'unverified public board category results');
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -585,13 +605,7 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
