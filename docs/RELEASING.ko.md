@@ -60,7 +60,7 @@ Test가 exact intended candidate를 제공하지 않으면 승격은 BLOCKED다.
 node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>
 ```
 
-v717부터 이 명령은 immutable 릴리스 manifest의 버전으로 **실제 운영 중인 release 세대별 systemd 서비스**를 선택한다(Prod `moneyverse-release-vNNN-backend/frontend.service`, Test `test-main-backend/frontend.service`). 선택된 서비스의 **실효 EnvironmentFiles 순서에 따라 적용된** `BUILD_ID`, 프론트엔드 `.next/BUILD_ID`, 실제 프로세스 작업 디렉터리, 공개 버전 API를 대조하며 옛 v600 서비스나 고정된 오래된 env 파일을 대신 검사하지 않는다. 읽기 권한 제한된 `/etc/moneyverse/*-release.env`가 있으면 승인된 운영자만 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>` 형태로 읽기 전용 실행할 수 있다. 환경값 자체나 비밀정보는 출력하지 않는다. 항목 하나라도 누락·불일치하면 **승격 차단**이다. 읽기 전용이며 통과시키려고 배포 manifest나 버전 값을 조작해서는 안 된다. 정확한 코드와 빌드를 새 immutable 경로에 재배포해야 한다.
+v1534부터 이 명령은 immutable 릴리스 manifest의 경로에 **실제 프로세스 작업 경로가 정확히 일치하는 운영 systemd 서비스 1개만 선택**한다(Prod: 세대별 `moneyverse-release-vNNN-backend/frontend.service` 또는 현재 고정 운영 `moneyverse-live-prod-backend/frontend.service`, Test: `test-main-backend/frontend.service`). 선택된 서비스의 **실효 EnvironmentFiles 순서에 따라 적용된** `BUILD_ID`, 프론트엔드 `.next/BUILD_ID`, 실제 프로세스 작업 디렉터리, 공개 버전 API를 대조하며 옛 v600 서비스나 고정된 오래된 env 파일을 대신 검사하지 않는다. 읽기 권한 제한된 `/etc/moneyverse/*-release.env`가 있으면 승인된 운영자만 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel test --sha <검증된-40자-후보-SHA>` 형태로 읽기 전용 실행할 수 있다. 환경값 자체나 비밀정보는 출력하지 않는다. 항목 하나라도 누락·불일치하면 **승격 차단**이다. 읽기 전용이며 통과시키려고 배포 manifest나 버전 값을 조작해서는 안 된다. 정확한 코드와 빌드를 새 immutable 경로에 재배포해야 한다.
 
 **P0 경계 검증 추가(2026-10-30):** Backend `/api/version`과 별개로 공개 `/frontend-version`을 직접 조회하고 프론트엔드 빌드 ID가 정확한 소스 SHA와 일치해야 한다. 국고 공개 검증이 독립적으로 승인되기 전까지 `/api/treasury/overview`는 HTTP 503, `Cache-Control: private, no-store`, `ok:false`, `PUBLIC_TREASURY_RECONCILIATION_PENDING`, 미검증 잔액, 빈 원장 목록을 반환해야 한다. 가상 200 응답, 오래된 프론트 ID, 증거 누락 및 네트워크 오류는 배포 차단이다. 공개 경계 검사만으로 모든 직접 origin 또는 실제 DB를 인증한 것은 아니므로 활성 origin과 Nginx 라우팅을 별도로 확인해야 한다. QA v1376 이슈 #1917의 Test 가상 200 및 Production 시각형 프론트 ID를 통과시키기 위해 조건을 완화해서는 안 된다.
 
@@ -161,3 +161,9 @@ GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지�
 기존 moneyverse_app의 accounts, account_balances, system_treasury_vaults 쓰기 권한을 운영자가 명시적으로 승인했다. 해당 기존 권한을 철회하거나 이 세 승인 사항만으로 배포 작업을 반복 중단하지 않는다. 읽기 전용 진단 원본 결과는 남기고, 해당 승인 사항만 OPERATOR_ACCEPTED_EXISTING_DML로 구분한다. 다른 보안·원장 문제를 통과했다고 표시하지 않는다.
 
 원장 불일치, 마이그레이션 체크섬, 세션 연속성, 정확한 SHA Test, 백업 복원 및 무중단 운영 승격 검증은 별개로 필수이다. 운영 사본의 누락 SQL 23개 적용 연습 및 기존 권한 보존은 성공했으나 기존 체크섬 불일치 5개로 실제 운영 승격은 하지 않았다. 자세한 기록: updates/v2026.10.29.1212-internal.ko.md.
+
+### v2026.10.31.1538 — 운영 릴리스 디렉터리 제자리 세대 변경 금지
+실제 활성 운영 릴리스 폴더 이름은 반드시 `prod-${manifest.version}-`로 시작해야 한다. 기존 릴리스 폴더에 신규 manifest와 BUILD_ID만 덮어쓰는 방식은 배포가 아니며 차단한다. 새 불변 경로·동일 SHA 백엔드/프론트·공식 Test 및 무중단 승격 필수. 현재 v0950 폴더/v1336 manifest는 BLOCKED 상태다.
+
+### v2026.10.31.1536 — 기존 승인 금융 DML 정확 분류
+사용자가 승인한 기존 3개 금융 테이블 쓰기 권한은 실제 DB/앱 역할과 전체 권한 형태가 일치할 때만 경고로 처리한다. 그 외 모든 권한 추가·원장 불일치·국고 출처 불명은 계속 차단한다. 공식 Test와 운영 승격 승인이 아니다.

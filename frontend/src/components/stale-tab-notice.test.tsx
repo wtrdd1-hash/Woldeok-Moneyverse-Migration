@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { releaseRefreshUrl, StaleTabNotice } from './stale-tab-notice';
 
@@ -49,8 +49,39 @@ describe('StaleTabNotice', () => {
     const navigate = vi.fn();
     render(<StaleTabNotice everyMs={10} navigate={navigate} />);
     document.dispatchEvent(new Event('visibilitychange'));
-    expect((await screen.findByRole('status')).textContent).toMatch(/캐시에 막혔습니다/);
+    expect((await screen.findByRole('status')).textContent).toMatch(/현재 화면과 서버 버전이 일치하지 않습니다/);
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not assert that browser cache caused a persistent release mismatch', async () => {
+    answers('build-two');
+    window.sessionStorage.setItem('moneyverse-release-refresh', 'build-one->build-two');
+    render(<StaleTabNotice everyMs={10} navigate={vi.fn()} />);
+    const banner = await screen.findByRole('status');
+    expect(banner.textContent).not.toMatch(/브라우저 캐시|로그인은 유지/);
+    expect(screen.getByRole('button', { name: '알림 닫기' })).toBeTruthy();
+    expect(banner.className).toContain('max-w-md');
+  });
+
+  it('remembers dismissal for the same release transition without hiding future releases', async () => {
+    answers('build-two');
+    window.sessionStorage.setItem('moneyverse-release-refresh', 'build-one->build-two');
+    const navigate = vi.fn();
+    render(<StaleTabNotice everyMs={10} navigate={navigate} />);
+    await screen.findByRole('status');
+    fireEvent.click(screen.getByRole('button', { name: '알림 닫기' }));
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(window.sessionStorage.getItem('moneyverse-release-dismissed')).toBe('build-one->build-two');
+    cleanup();
+    render(<StaleTabNotice everyMs={10} navigate={navigate} />);
+    document.dispatchEvent(new Event('visibilitychange'));
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(screen.queryByRole('status')).toBeNull();
+
+    answers('build-three');
+    document.dispatchEvent(new Event('visibilitychange'));
+    await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1));
+    expect(navigate.mock.calls[0]?.[0]).toContain('__mv_release=build-three');
   });
 
   it('stays quiet when the answer cannot be read', async () => {

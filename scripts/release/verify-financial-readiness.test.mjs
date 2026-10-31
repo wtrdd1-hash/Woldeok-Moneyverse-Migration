@@ -20,6 +20,42 @@ test('strict baseline passes only this narrow audit, never grants deployment',()
   assert.match(r.caveat,/separate mandatory/);
 });
 
+const acceptedIdentity = {database:'woldeok_moneyverse_dev',role:'moneyverse_app'};
+const acceptedGrants = good.grants.map(x => ['account_balances','accounts','system_treasury_vaults'].includes(x.name)
+  ? {...x,can_insert:true,can_update:true,can_delete:true} : x);
+
+test('owner-approved existing three DML grants are explicit warnings, not release approval',()=>{
+  const r=evaluateFinancialReadiness({...good,identity:acceptedIdentity,grants:acceptedGrants});
+  assert.equal(r.ok,true);
+  assert.equal(r.status,'READY_FOR_OTHER_RELEASE_GATES');
+  assert.deepEqual(r.blockers,[]);
+  assert.deepEqual(r.warnings, [
+    'OPERATOR_ACCEPTED_EXISTING_DML:account_balances',
+    'OPERATOR_ACCEPTED_EXISTING_DML:accounts',
+    'OPERATOR_ACCEPTED_EXISTING_DML:system_treasury_vaults',
+  ]);
+  assert.match(r.caveat,/treasury/);
+});
+
+test('approval requires exact role, database and original full DML shape',()=>{
+  for(const identity of [{database:'other',role:'moneyverse_app'}, {database:'woldeok_moneyverse_dev',role:'other'}]){
+    assert(evaluateFinancialReadiness({...good,identity,grants:acceptedGrants}).blockers
+      .includes('direct_application_financial_dml:accounts'));
+  }
+  const changed=acceptedGrants.map(x=>x.name==='accounts'?{...x,can_delete:false}:x);
+  assert(evaluateFinancialReadiness({...good,identity:acceptedIdentity,grants:changed}).blockers
+    .includes('direct_application_financial_dml:accounts'));
+});
+
+test('approval never waives ledger DML or mismatched balances',()=>{
+  const extra=acceptedGrants.map(x=>x.name==='ledger_transactions'?{...x,can_insert:true}:x);
+  assert(evaluateFinancialReadiness({...good,identity:acceptedIdentity,grants:extra}).blockers
+    .includes('direct_application_financial_dml:ledger_transactions'));
+  assert(evaluateFinancialReadiness({...good,identity:acceptedIdentity,grants:acceptedGrants,
+    ledger:{...good.ledger,unexplained_account_count:1,unexplained_delta_wld:'1'}}).blockers
+    .includes('uncertified_account_opening_or_ledger_drift'));
+});
+
 test('fail closed when moneyverse_app can update account balances',()=>{
   const grants=good.grants.map(x=>x.name==='account_balances'?{...x,can_update:true}:x);
   const r=evaluateFinancialReadiness({...good,grants});

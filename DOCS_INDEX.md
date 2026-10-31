@@ -1,5 +1,44 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.10.31.1543 — Reconcile newly advanced remote main (ISOLATED MERGE / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-main-reconcile-v1543.md) / [KO](docs/worklog/2026-10-31-main-reconcile-v1543.ko.md) · [Internal](docs/updates/v2026.10.31.1543-main-internal.md) / [KO](docs/updates/v2026.10.31.1543-main-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1543-main-github.md) / [KO](docs/updates/v2026.10.31.1543-main-github.ko.md). Remote main moved 30cbbe02, two code conflicts resolved preserving safe central-bank 503 and compact notice; numeric tracked frontend/.build_id excluded. Fresh Test DB 311 source migrations passed. New SHA CI/official Test/Production HOLD.
+
+
+## v2026.10.31.1542 — Concurrent admin router CI repair and Test DB parity evidence (SOURCE VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-admin-router-ci-v1542.md) / [KO](docs/worklog/2026-10-31-admin-router-ci-v1542.ko.md) · [Internal EN](docs/updates/v2026.10.31.1542-admin-router-internal.md) / [KO](docs/updates/v2026.10.31.1542-admin-router-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1542-admin-router-github.md) / [KO](docs/updates/v2026.10.31.1542-admin-router-github.ko.md). Reused existing developer 45998b344 router mocks, targeted 12/12 PASS. Test PostgreSQL backup and isolated restoration verified; old Test schema missing 98 source migrations, one checksum mismatch and one unknown record, so release remains BLOCKED.
+
+
+## v2026.10.31.1541 — Monetary CI contract fix (SOURCE VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-ci-monetary-contract-v1541.md) / [KO](docs/worklog/2026-10-31-ci-monetary-contract-v1541.ko.md) · [Internal](docs/updates/v2026.10.31.1541-ci-internal.md) / [KO](docs/updates/v2026.10.31.1541-ci-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1541-ci-github.md) / [KO](docs/updates/v2026.10.31.1541-ci-github.ko.md). Exact 8d74 CI FAILED due to stale v1415 test after v954 durable policy; updated test preserves 503 without canonical DB. Targeted 12 PASS, typecheck and lint PASS. Full new exact SHA CI/Test/Production HOLD.
+
+
+## v2026.10.31.1540 — Unified admin/finance candidate (SOURCE VERIFIED / PROD HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-integrated-finance-release-v1540.md) / [KO](docs/worklog/2026-10-31-integrated-finance-release-v1540.ko.md) · [Internal EN](docs/updates/v2026.10.31.1540-unified-internal.md) / [KO](docs/updates/v2026.10.31.1540-unified-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1540-unified-github.md) / [KO](docs/updates/v2026.10.31.1540-unified-github.ko.md). Committed admin v666/central-bank v954 merged with v1530–v1539 patches, 9+66+122 tests, workspace typecheck, targeted lint, backend build PASS. Official exact-SHA Test and production HOLD; Treasury 552 records and P0 #2144 unresolved.
+
+
+## v2026.10.31.1539 — Exact-backend-SHA frontend recovery canary (BUILT / NOT DEPLOYED)
+- [Worklog EN](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.md) / [KO](docs/worklog/2026-10-31-frontend-recovery-canary-v1539.ko.md) · [Internal](docs/updates/v2026.10.31.1539-frontend-recovery-internal.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1539-frontend-recovery-github.md) / [KO](docs/updates/v2026.10.31.1539-frontend-recovery-github.ko.md). Built frontend exactly from current backend SHA 95485a, preview port 3893 HTTPS-header GET 5/5 HTTP 200/version matched. Historical source missing newer PR fixes; authorized Test/Production remain HOLD, P0 #2144.
+
+
+## v2026.10.31.1538 — Production immutable release directory check (SOURCE VERIFIED / PROD HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-drift-v1538.md) / [KO](docs/worklog/2026-10-31-production-identity-drift-v1538.ko.md); [Internal](docs/updates/v2026.10.31.1538-prod-integrity-internal.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1538-prod-integrity-github.md) / [KO](docs/updates/v2026.10.31.1538-prod-integrity-github.ko.md). Production release path v0950 in-place relabelled to manifest v1336, backend SHA 95485a vs frontend timestamp; source gate fixed, RED then 31/31 + 119/119 PASS. Current real runtime remains blocked; no Production promotion. P0 #2144.
+
+## v1536 — Existing owner-approved financial DML: [EN](docs/worklog/2026-10-31-financial-gate-v1536.md) / [KO](docs/worklog/2026-10-31-financial-gate-v1536.ko.md). 121 release tests pass; Treasury/Production HOLD.
+
+
+## v2026.10.31.1534 — Active Production release identity service detection (CURRENT PROD VERIFIED / NEW RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-production-identity-v1534.md) / [KO](docs/worklog/2026-10-31-production-identity-v1534.ko.md) · [Internal](docs/updates/v2026.10.31.1534-release-internal.md) / [KO](docs/updates/v2026.10.31.1534-release-internal.ko.md) · [GitHub](docs/updates/v2026.10.31.1534-release-github.md) / [KO](docs/updates/v2026.10.31.1534-release-github.ko.md). TDD RED 1, related release 30 GREEN; existing live public release 95485a... now read-only attested through actual active services and invariant SHA checks. This is NOT a new Test/Production deployment or finance release.
+
+
+## v2026.10.31.1532 — Admin bond read ACL 42501 source fix (BRANCH VERIFIED / RELEASE HOLD)
+- [Worklog EN](docs/worklog/2026-10-31-bond-coupon-read-v1532.md) / [KO](docs/worklog/2026-10-31-bond-coupon-read-v1532.ko.md) · [Internal EN](docs/updates/v2026.10.31.1532-bonds-internal.md) / [KO](docs/updates/v2026.10.31.1532-bonds-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1532-bonds-github.md) / [KO](docs/updates/v2026.10.31.1532-bonds-github.ko.md). Existing app-role restricted catalog replaces protected-table JOIN; real 42501 repro and corrected SQL proven, 66 bond tests + monorepo typecheck + lint/backend build PASS. Treasury 552 unlinked rows and financial 503 unresolved. Official Test/Production HOLD.
+
+
+
+## v2026.10.31.1530 — Persistent release notice source repair; finance incident verified (BRANCH ONLY / RELEASE HOLD)
+- [EN worklog](docs/worklog/2026-10-31-admin-finance-incident-v1530.md) / [KO](docs/worklog/2026-10-31-admin-finance-incident-v1530.ko.md); [internal](docs/updates/v2026.10.31.1530-admin-finance-internal.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-internal.ko.md); [GitHub](docs/updates/v2026.10.31.1530-admin-finance-github.md) / [KO](docs/updates/v2026.10.31.1530-admin-finance-github.ko.md). Owner-specified miniPC MCP confirmed; TDD 9/9, typecheck, lint and Next build PASS for compact dismissible stale-release banner. Finance remains 503; 552/552 historical Treasury links absent, no persisted reconciliation, official Test/Production release HOLD. Draft #2131.
+
+
 ## v2026.10.30.1521 — KDIC administrator ledger visibility (BRANCH VERIFIED / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.md) / [KO](docs/worklog/2026-10-30-kdic-ledger-admin-v1521.ko.md) · [Internal EN](docs/updates/v2026.10.30.1521-kdic-internal.md) / [KO](docs/updates/v2026.10.30.1521-kdic-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.30.1521-kdic-github.md) / [KO](docs/updates/v2026.10.30.1521-kdic-github.ko.md). Production process read-only ledger projection balanced (40/40), 552 Treasury links unresolved. Admin GET diagnostics only; financial POST HTTP 503 unchanged. No official Test/Production release.
 
