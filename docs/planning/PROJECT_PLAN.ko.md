@@ -1,5 +1,43 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1582 F675-201 저장 보기 재시도·ABA 보완 / 초안 / 운영 보류; 선행 초안 #2241 미병합.
+**현재 기획:** v1584 F675-202 만료 달력 저장 보기 기본값 / 이슈 #2252 / 초안 / 운영 보류; 선행 #2247 미병합.
+
+## v2026.11.01.1584 — F675-202 만료 달력 저장 보기 기본값 설정 (기능 추가 / 초안 / 운영 보류)
+
+**주기 및 기준:** 이전 **기능 보완 v1582** → 현재 **기능 추가 v1584** → 다음 **기능 보완 v1586(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`을 시작·중간에 확인했다. 영어 PROJECT_PLAN.md가 원본이고 이 문서는 동등한 한국어 대조본이다. AGENTS.md, README.md를 검토했다. 선행 초안 #2247은 미병합 OPEN이므로 v1578~1582의 유효한 기획을 별도 문서 전용 브랜치로 승계했다. **main 반영 또는 기능 구현을 의미하지 않는다.** 개발 연계 이슈 **#2252**, QA v1426 #2242 및 QA v1427 초안 #2248 확인. **운영 배포 보류.**
+
+### 사용자 문제·실제 소스 근거·대안
+- **실제 확인:** `frontend/src/app/inventory/page.tsx`는 `requireMember()` 후 `apiOrNull`로 `/api/v1/shop/holdings`를 조회하며 조회 실패도 `[]`로 표시할 수 있다. `inventory-view.tsx`에는 카테고리 탭이 있지만 만료 달력 기본 보기 설정은 없다. Nest `shop.controller.ts`는 본인 보유 목록을 제공하고 `shop.repository.ts`는 마이그레이션 123의 `shop_my_items_v2(actor)`를 호출한다. 마이그레이션 071은 `user_items(user_id,catalog_id)` 및 상점 카테고리 6종을 정의한다. **F675-199 달력·F675-200 .ics·F675-201 저장 보기는 미구현 기획**이며 신규 기능을 서비스 중인 것으로 표현하지 않는다.
+- **목적:** 로그인 및 동의가 유효한 회원이 F675-201의 최대 5개 저장 보기 중 **정확히 1개**를 기본값으로 지정해 웹·Android에서 동일하게 만료 달력을 열도록 한다. 기본값이 없으면 검증된 **전체/7일**로 진입한다. 아이템, 만료, 알림, 결제, WLD는 변경하지 않는다.
+- **대안:** (A) localStorage만 사용하면 기기간 불일치·계정 전환 정보 노출 위험이 있어 제외. (B) 각 저장 보기의 `is_default`를 변경하면 여러 행을 수정하고 기존 HMAC 보기 리비전과 불필요하게 결합하므로 제외. **선정 (C):** 회원별 한 행의 별도 기본값 설정, 단조 증가 리비전, nullable 불변 보기 UUID. 기존 보기의 생성 세대와 필터 리비전은 바꾸지 않는다.
+
+### 권한·진입점·화면·CTA·상태·접근성
+- 진입 `/inventory` → `/inventory/expiry-calendar` → `저장 보기` → `기본 보기로 설정` / `기본값 해제` / `달력 열기`. 다음 방문에는 회원 설정과 활성 저장 보기를 동일한 검증된 조회에서 해석한다. 기본값이 없거나 보기가 삭제된 경우 전체/7일로 안내하되 존재하지 않는 저장 보기를 만들어 표시하지 않는다. 자동 .ics 내보내기·알림·유료 작업은 없다.
+- 상태: 401 미인증, 403 동의 미완료, 초기/로딩, VERIFIED_DEFAULT, VERIFIED_FALLBACK, 검증된 저장 보기 0개, 409 PREF_CHANGED/VIEW_CHANGED, 410 STALE_INTENT, 202 UNKNOWN_COMMIT, 429 요청 제한, 503 SOURCE_UNAVAILABLE, 오프라인·계정 전환 취소. **DB 장애를 빈 설정이나 기본값 없음으로 표시하지 않는다.** 로그아웃·세션 세대 변경 시 이전 회원 결과와 진행 중 요청을 폐기한다.
+- 웹·Android 동등성: 현재 기본값과 CTA에 스크린리더 레이블, 키보드·포커스, 과도한 포커스 이동 없는 `aria-live`, 44px 터치 영역, 320px·200% 확대, WCAG 2.2 AA, 모션 감소, 한·영 동등 문구. 선행 F675-201 및 릴리스 게이트 승인 전에는 기본값 CTA 비활성화.
+
+### API·DB·트랜잭션·동시성 계약 — 제안이며 미구현
+- `GET /api/v1/shop/expiry-calendar/preferences`: 회원 본인과 활성 보기 확인 후 `{status:'VERIFIED',defaultViewId:UUID|null,preferenceRevision:decimalString,view:{id,name,category,windowDays,revision}|null}` 반환. 사용자 ID 쿼리 인자는 받지 않는다. `PUT /api/v1/shop/expiry-calendar/preferences/default`: `{viewId:UUID|null,expectedPreferenceRevision:decimalString}`, UUIDv4 `Idempotency-Key`, F675-201 방식 서명 `intentToken`. 인증·현재 동의·동일 출처 CSRF, 허용 목록 JSON 1KiB 이하, 분당 5회·하루 30회. 잘못된 JSON·중복 키·타인 UUID는 400/404로 존재를 노출하지 않는다. `GET /api/v1/shop/expiry-calendar/preferences/mutations/:idempotencyKey`는 본인 커밋 영수증 확인 200 또는 불명 202.
+- 충돌하지 않는 신규 순방향 마이그레이션으로 `public.user_expiry_calendar_preferences(user_id uuid PRIMARY KEY REFERENCES users(id),default_view_id uuid NULL,revision bigint NOT NULL DEFAULT 0 CHECK(revision>=0),updated_at timestamptz NOT NULL)` 추가 제안. **318 번호 충돌이 있으므로 번호를 예약하지 않는다.** F675-201 불변 보기 UUID에 회원+보기 복합 FK를 사용할 수 있으면 사용한다. FK 존재만으로 `deleted_at IS NULL`을 보장하지 않으므로 쓰기 함수에서 본인 활성 보기를 잠금 상태로 검증한다. 최초 변경 때만 설정 행을 만들고, 조회 시 행이 없으면 리비전 0·기본값 null로 검증해 반환한다. 회원별 한 행이므로 기본값은 최대 하나다.
+- 쓰기 순서: 트랜잭션 시작 → F675-201 CRUD와 공통 회원 단위 advisory 트랜잭션 잠금 → 설정 행 잠금 → 활성 저장 보기 확인 → 기대 리비전 CAS → 기본값 변경 및 리비전 정확히 1 증가 → 동일 트랜잭션에 불변 멱등 영수증 기록 → 커밋. 보기 DELETE는 **같은 트랜잭션에서** 연결된 기본값을 해제하고 설정 리비전을 증가시킨 뒤 soft-delete한다. 잠금 순서 통일로 교착을 방지한다. 동시 작성자 2명 중 하나만 성공, 나머지 409; A→B→A도 오래된 리비전으로 갱신 불가. 앱 역할에 테이블 직접 DML 권한을 주지 않고 고정 `search_path`의 검토된 `SECURITY DEFINER`만 EXECUTE 허용하며 PUBLIC EXECUTE를 철회한다.
+- 멱등성: 회원·세션 세대·set_default/clear_default·대상 불변 보기 UUID/null·기대 설정 리비전·스키마 버전의 도메인 분리 정규 다이제스트를 사용하고 난수·시각은 제외한다. 회원 잠금 하에서 **영수증을 토큰 만료보다 먼저 확인**한다. 동일 키/내용은 200 VERIFIED_HISTORICAL_COMMIT과 `currentState:'UNVERIFIED'`로 반환하고 새 GET을 수행한다. 동일 키/다른 내용은 409. 영수증 부재 시 회원·세션·키·다이제스트에 묶인 300초 이하 서명 intent를 검증하고 만료 시 410·쓰기 0건. 응답 유실은 성공/실패로 단정하지 않고 202 UNKNOWN으로 확인한다. 영수증 30일 이상, tombstone 90일 이상 제한적 보존; 정리 후 재실행은 intent 만료로 차단한다.
+- 달력 범위: 선택한 기본 보기는 F675-199 서명 토큰에 `viewId+creationGeneration+revision+category+windowDays+actor+session+asOf`로 결속한다. **기본값 설정 리비전은 이미 발급한 저장 보기 조회 토큰을 무효화하지 않는다.** 삭제된 보기 토큰은 409, 같은 슬롯의 새 보기를 구보기로 수용하지 않는다. F675-200의 필터 적용 .ics는 동일 회원·필터·스냅샷 검증 전까지 OFF.
+- Nest→Next/app-api→실제 edge 모든 성공·202·오류 응답에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 적용. 비공개 경로는 사이트맵 제외. 토큰·회원 UUID·저장 보기 이름을 URL·브라우저 저장소·Android 디스크·로그·분석 이벤트에 넣지 않는다. 관리자는 회원 20명 이상 집계군의 주간 합계만 조회한다.
+- KPI **미측정 목표:** 타인 설정 접근·변경 0, 503을 기본값 없음으로 오표시 0, 중복 커밋 0, 이전 계정 표시 0, GET p95 <200ms, 변경 p95 <400ms, 익명화 집계 기반 기본값 사용률·7일 재방문율. `expiry_calendar_default_view` 및 선행 기능 스위치는 기본 **OFF**.
+
+### 실행 가능한 개발 백로그 — P0 4건 + P1 6건 = 10건(모두 제안)
+1. **P0 OPS1584-01** (#1984/#2144/#2171): 운영 프론트·백엔드·edge의 불변 정확 SHA, 매니페스트·DB 환경, 독립 복원·자원 여유 검증. 공개 `/api/version` 200만으로 전체 배포를 인증하지 않는다. Test `bc8cd8a6...`, Production `353c6d5d...`, main `f13bbce...`가 다름.
+2. **P0 SEC1584-02** (#993/#828/#2242/#2233): 운영에만 있는 9개 테이블(소스 참조 5개), 앱 DML 권한, 마이그레이션 체크섬 5건, 318 충돌 및 운영 백엔드의 DEV DB 연결을 조사·분류한다. 파괴적 변경·과거 SQL 수정 금지.
+3. **P0 FIN1584-03** (#1976/#2191/#2232): Treasury·마켓플레이스·클럽 원장 출처 정합성 및 본 기능의 WLD·아이템 변경 0건 증명.
+4. **P0 REL1584-04** (#1088/#2231/#2235/#2248): 전체 보안 감사·QA, 정확 후보 SHA 공식 격리 Test와 로그인 웹/API/DB/Android E2E, 독립 복원 및 GitOps 운영 승인. Build Candidate 성공만으로 승격 불가. **RELEASE HOLD.**
+5. **P1 DEFAULT1584-05 Backend B:** 충돌 없는 순방향 설정·영수증 스키마, 회원 FK·활성 보기 검증, EXECUTE 전용 권한 및 부정 권한 시험.
+6. **P1 DEFAULT1584-06 Backend B:** 공통 회원 잠금·CAS·설정/해제/삭제 원자성, 영수증 우선 멱등성·intent TTL·202 UNKNOWN·보존 정책.
+7. **P1 DEFAULT1584-07 Backend B:** Nest GET/PUT/상태 API의 DTO·인증·동의·CSRF·제한, 200/202/400/403/404/409/410/429/503 계약 시험.
+8. **P1 DEFAULT1584-08 Dev A/C:** Next·Android 기본값 설정/해제/전체 폴백, 검증된 빈 결과와 장애 구분, 계정 전환 및 한·영 접근성.
+9. **P1 DEFAULT1584-09 Dev A/C:** 달력 서명 보기 범위, 실제 edge 비공개/noindex, 필터 .ics 차단, 관리자 익명 집계·SEO 회귀.
+10. **P1 DEFAULT1584-10 QA:** 격리 PG17 신규·업그레이드 적용, 보유 10,001건/회원 2명/작성자 2명/보기 5개, 설정과 삭제 경합, A→B→A, 30·90일 이후 재시도, 타인 권한, 503과 검증된 폴백, KST 자정 ±1µs, 320px Android/Next, WLD 변경 0건, 정확 SHA Test·독립 복원·롤백. **신규 기능 수용시험 미실행.**
+
+**배포·롤백·외부 근거:** 문서 전용 초안이며 런타임/DB/WLD/원장/Test/Production을 변경하지 않는다. 새 코드는 개발 예약의 별도 브랜치에서 구현하고 정확 SHA Test·권한·금융·E2E 및 운영자 승인 후 무중단 승격한다. 롤백은 스위치 OFF·이전 불변 바이너리로 수행하고 추가 스키마·영수증은 보존하며 적용된 마이그레이션을 고치지 않는다. QA v1426에서 격리 PG 316/316이지만 운영 259개 vs 신규 250개 테이블, 체크섬 5건 및 공식 Test/감사 실패가 남았다. QA v1427 초안 #2248은 CI 봇 설치의 외부 API rate-limit 개선으로 운영 승인 증거가 아니다. 외부 독립 레퍼런스 신규 검증·중복 제거·승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**.
+
 
 ## v2026.11.01.1582 — F675-201 만료 달력 저장 보기의 재시도·ABA·범위 식별 강화 (기능 보완 / 초안 / 운영 보류)
 
