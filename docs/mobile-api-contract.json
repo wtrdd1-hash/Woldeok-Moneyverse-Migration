@@ -11441,141 +11441,297 @@
         ]
       },
       "responseSchema": {
-        "type": "object",
-        "properties": {
-          "holdings": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "catalog_id": {
-                  "type": "string"
-                },
-                "code": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "category": {
-                  "type": "string"
-                },
-                "quantity": {
-                  "type": "number"
-                },
-                "acquired_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "expires_at": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  ]
-                },
-                "effect_kind": {
-                  "type": "string"
-                },
-                "rarity": {
-                  "type": "string"
-                },
-                "animation_css": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
-                "preview_data": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "holdings": {
+                "type": "array",
+                "items": {
                   "type": "object",
-                  "tsType": "Record<string, unknown>"
-                },
-                "is_equipped": {
-                  "type": "boolean"
-                },
-                "equipped_slot": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
+                  "properties": {
+                    "catalog_id": {
                       "type": "string"
-                    }
-                  ]
-                },
-                "serial_number": {
-                  "oneOf": [
-                    {
-                      "type": "null"
                     },
-                    {
+                    "code": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "quantity": {
                       "type": "number"
-                    }
-                  ]
-                },
-                "durable": {
-                  "type": "boolean"
-                },
-                "weekly_cost": {
-                  "type": "string"
-                },
-                "effect_expires_at": {
-                  "oneOf": [
-                    {
-                      "type": "null"
                     },
-                    {
+                    "acquired_at": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "expires_at": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    },
+                    "effect_kind": {
+                      "type": "string"
+                    },
+                    "rarity": {
+                      "type": "string"
+                    },
+                    "animation_css": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "preview_data": {
+                      "type": "object",
+                      "tsType": "Record<string, unknown>"
+                    },
+                    "is_equipped": {
+                      "type": "boolean"
+                    },
+                    "equipped_slot": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "serial_number": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    "durable": {
+                      "type": "boolean"
+                    },
+                    "weekly_cost": {
+                      "type": "string"
+                    },
+                    "effect_expires_at": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    },
+                    "unpaid_weeks": {
+                      "type": "number"
+                    },
+                    "arrears_due": {
+                      "type": "string"
+                    },
+                    "arrears_cap": {
+                      "type": "string"
+                    },
+                    "suspended": {
+                      "type": "boolean"
                     }
+                  },
+                  "required": [
+                    "catalog_id",
+                    "code",
+                    "name",
+                    "description",
+                    "category",
+                    "quantity",
+                    "acquired_at",
+                    "expires_at",
+                    "effect_kind",
+                    "rarity",
+                    "animation_css",
+                    "preview_data",
+                    "is_equipped",
+                    "equipped_slot",
+                    "serial_number"
                   ]
-                },
-                "unpaid_weeks": {
-                  "type": "number"
-                },
-                "arrears_due": {
-                  "type": "string"
-                },
-                "arrears_cap": {
-                  "type": "string"
-                },
-                "suspended": {
-                  "type": "boolean"
                 }
               },
-              "required": [
-                "catalog_id",
-                "code",
-                "name",
-                "description",
-                "category",
-                "quantity",
-                "acquired_at",
-                "expires_at",
-                "effect_kind",
-                "rarity",
-                "animation_css",
-                "preview_data",
-                "is_equipped",
-                "equipped_slot",
-                "serial_number"
-              ]
-            }
+              "filter": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "holdings"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "holdings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "catalog_id": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "number"
+                    },
+                    "acquired_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    },
+                    "effect_kind": {
+                      "type": "string"
+                    },
+                    "rarity": {
+                      "type": "string"
+                    },
+                    "animation_css": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "preview_data": {
+                      "type": "object",
+                      "tsType": "Record<string, unknown>"
+                    },
+                    "is_equipped": {
+                      "type": "boolean"
+                    },
+                    "equipped_slot": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "serial_number": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    "durable": {
+                      "type": "boolean"
+                    },
+                    "weekly_cost": {
+                      "type": "string"
+                    },
+                    "effect_expires_at": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    },
+                    "unpaid_weeks": {
+                      "type": "number"
+                    },
+                    "arrears_due": {
+                      "type": "string"
+                    },
+                    "arrears_cap": {
+                      "type": "string"
+                    },
+                    "suspended": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "catalog_id",
+                    "code",
+                    "name",
+                    "description",
+                    "category",
+                    "quantity",
+                    "acquired_at",
+                    "expires_at",
+                    "effect_kind",
+                    "rarity",
+                    "animation_css",
+                    "preview_data",
+                    "is_equipped",
+                    "equipped_slot",
+                    "serial_number"
+                  ]
+                }
+              },
+              "filter": {
+                "oneOf": [
+                  {
+                    "type": "undefined"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "holdings",
+              "filter"
+            ]
           }
-        },
-        "required": [
-          "holdings"
         ]
       },
       "responseCompatibility": {

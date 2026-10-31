@@ -10,8 +10,12 @@
 ## IN PROGRESS — v2
 - Awaiting RED/GREEN evidence and latest main recheck.
 
-## FINISHED — v3
-- Pending exact-SHA gate evidence; no merge or deployment without required PASS.
+## FINISHED — v3 (code complete, release HOLD)
+- Backend full 2,787 PASS / 501 SKIP; frontend full 2,781 PASS; targeted tests 3+5 PASS; contract build, typecheck, backend/frontend production builds PASS; targeted lint 0 errors/10 warnings. Real DEV PG read-only SQL executes; synthetic 7d=1/30d=2. No official Test candidate authenticated E2E.
+- Code SHA CI failed due generated mobile contract/schema drift; generated 184-endpoint English/Korean docs included in final commit. Final exact SHA CI and image require separate verification.
+- Remote branches 134 at start, 135 at final audit; open PRs 118 -> 120; 8 conflicting. No branch deleted (unique unmerged changes protected); no main merge.
+- DEV P0 app-role user_items direct SELECT/DELETE true, official Test auth E2E, independent restore, financial provenance and GitOps remain blockers. No Test/Production deploy, service restart, DB mutation or rollback. Revert PR for rollback.
+- QA/release evidence: docs/qa/2026-10-31-a-inventory-expiry-window[.ko].md and docs/releases/2026-10-31-a-inventory-expiry-hold[.ko].md; host logs in /srv/moneyverse-data/reports/Moneyverse-A-2026-10-31-2225-inventory-expiry/.
 
 ### MIDPOINT v2 — 22:28 KST
 - TDD RED: Backend controller 1 FAIL/2 PASS; frontend Android/expiry 2 FAIL/3 PASS. GREEN: Backend 3/3 and frontend 5/5 PASS. Contract build, backend and frontend typecheck PASS. Main rechecked unchanged `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`.

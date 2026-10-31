@@ -3832,32 +3832,7 @@ _No request body._
 
 ### Success response fields
 
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| holdings[] | true | object[] |  |
-| holdings[] | true | object |  |
-| holdings[].catalog_id | true | string |  |
-| holdings[].code | true | string |  |
-| holdings[].name | true | string |  |
-| holdings[].description | true | string |  |
-| holdings[].category | true | string |  |
-| holdings[].quantity | true | number |  |
-| holdings[].acquired_at | true | string (date-time) |  |
-| holdings[].expires_at | true | null \| string (date-time) |  |
-| holdings[].effect_kind | true | string |  |
-| holdings[].rarity | true | string |  |
-| holdings[].animation_css | true | null \| string |  |
-| holdings[].preview_data | true | object |  |
-| holdings[].is_equipped | true | boolean |  |
-| holdings[].equipped_slot | true | null \| string |  |
-| holdings[].serial_number | true | null \| number |  |
-| holdings[].durable | false | boolean |  |
-| holdings[].weekly_cost | false | string |  |
-| holdings[].effect_expires_at | false | null \| string (date-time) |  |
-| holdings[].unpaid_weeks | false | number |  |
-| holdings[].arrears_due | false | string |  |
-| holdings[].arrears_cap | false | string |  |
-| holdings[].suspended | false | boolean |  |
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
