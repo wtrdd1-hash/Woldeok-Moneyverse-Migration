@@ -2,6 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import {
   EnterpriseRepository,
   type PrivateEnterpriseRow,
+  type PublicEnterpriseDisclosure,
   type StateEnterpriseDividendLogRow,
   type StateEnterpriseRow,
   type StateHoldingOverview,
@@ -12,6 +13,10 @@ export class EnterpriseService {
   constructor(
     private readonly repository: EnterpriseRepository,
   ) {}
+
+  async getPublicDisclosure(): Promise<PublicEnterpriseDisclosure> {
+    return this.repository.getPublicDisclosure();
+  }
 
   async getStateHoldingOverview(): Promise<StateHoldingOverview> {
     return this.repository.getStateHoldingOverview();

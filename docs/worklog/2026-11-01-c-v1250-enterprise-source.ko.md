@@ -22,3 +22,18 @@
 
 ## 실패 및 수정 (06:47 KST)
 - 체크포인트 `29b3fb612`: 전체 Lint 실패(테스트용 안전하지 않은 정수 리터럴 2건), 기존 경고 1,021건. Typecheck와 app-api 184개 통과. 테스트 입력을 `Number.MAX_SAFE_INTEGER + 2`로 변경했으며 새 SHA에서 전체 재검증 예정.
+
+## 보안 읽기 함수 보완 (06:58 KST)
+- 새 격리 PostgreSQL 17.11에서 316개 마이그레이션 통과, 앱 역할의 기업 원본 테이블 직접 SELECT 불가 확인. 기존 공개 API의 직접 테이블 읽기가 실제 작동하지 않는 문제 확인.
+- DB 소유 SECURITY DEFINER 읽기 함수의 실패 테스트 3건 재현 후, 닫힌 미병합 Backend B v533 패턴을 최신 순번 **318**로 안전하게 재작성. 앱 역할에는 함수 EXECUTE만 허용, 테이블 직접 권한·원장 쓰기 추가 없음. 최종 SHA 재검증 필요.
+
+## 실제 격리 DB 통합 검증 (06:58 KST)
+- 초기 DB 준비 경쟁 조건을 확인하여 단순 `pg_isready` 대신 대상 DB의 `SELECT 1` 성공 후 진행.
+- 외부망 차단 PostgreSQL 17.11: 002–318 총 317개 마이그레이션 PASS. 앱 역할로 공개 함수 실행 시 공기업 3개·예상 배당 `108000` 정수 WLD 반환, 두 원본 테이블 SELECT `false`, 함수 EXECUTE `true`, 금융 원장 거래 0건. 컨테이너 제거. 실제 DB 읽기 계약 구현.
+- 명시적 loopback 전용 `_isolated` URL에서만 실행되는 DB 회귀 테스트 추가.
+
+## 종료 점검 및 배포 판정 (2026-11-01 07:01 KST)
+- main 및 영문/국문 정본 기획서 `f13bbce27` 재확인, 변경 없음. A/B/QA/Gemini 작업은 별도 보존.
+- 격리 PostgreSQL 17.11 순방향 마이그레이션 317/317 PASS, loopback 전용 실제 DB 테스트 3/3 PASS, 앱 역할은 공개 함수 EXECUTE만 가능하고 기업 원본 테이블 직접 SELECT 불가. 검증 컨테이너 제거, 원장 쓰기 없음.
+- 이전 코드 SHA `8d158dd8` 전체 Lint PASS(오류 0/기존 경고 1,021), Typecheck/Build/app-api 184 PASS, Frontend 2,912 PASS, Backend 2,952 PASS/517 SKIP. **이 결과는 신규 마이그레이션 318 이전이므로 최종 HEAD 인증으로 계산하지 않음.** 루트 전체 테스트는 180초 타임아웃, 개별 패키지 테스트는 완료. 전체 보안 감사 취약점 9건(낮음 1/보통 8), 운영 의존성 감사 PASS. 최종 SHA/원격 CI 추가 검증 필요.
+- 공식 Test 정확 SHA 인증 E2E, HTTP 검색 비색인 헤더, 독립 복원, 보안/릴리스 게이트 미인증. **RELEASE BLOCKED**, main 병합·Test/Production 배포·롤백 없음. PR #2274에 후속 검증 결과 추가, 고유 미병합 브랜치 보존.

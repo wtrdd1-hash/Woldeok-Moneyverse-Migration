@@ -11,9 +11,9 @@ Branch: `auto/hourly-c-enterprise-source-v1250-20261101-0645`.
 
 ## Plan and checkpoints
 - [x] START: miniPC 7 services active, development DB connected; inspect main, AGENTS, READMEs, canonical/KO plans, open PRs and CI; identify source gap.
-- [ ] RED: reproduce false fallback and invalid response acceptance.
-- [ ] GREEN: backend public source/status contract and frontend source validation/UI.
-- [ ] MID: fetch main and plans, inspect A/B/QA overlap; run focused tests.
+- [x] RED: reproduce false fallback and invalid response acceptance.
+- [x] GREEN: backend public source/status contract and frontend source validation/UI.
+- [x] MID: fetch main and plans, inspect A/B/QA overlap; run focused tests.
 - [ ] FINAL: exact-SHA lint/typecheck/build/tests/DB/security/CI and HTTP/E2E as possible; preserve HOLD on any failed gate.
 - [ ] PR and end-state evidence; no direct main/Test/Production mutation unless every release gate passes.
 
@@ -30,3 +30,19 @@ Pending. Skips are not passes. Main untouched; Test/Production untouched; no rol
 
 ## Gate failure and correction (06:47 KST)
 - Checkpoint `29b3fb612`: `pnpm lint` FAILED with two `no-loss-of-precision` violations in negative test fixtures (intentional unsafe JS literal), 1,021 existing warnings. `pnpm typecheck` PASS; app-api 184 endpoints PASS. Replaced literals with `Number.MAX_SAFE_INTEGER + 2` to preserve the invalid-number regression without violating lint. All gates must rerun on new HEAD.
+
+## Security-function follow-up (06:58 KST)
+- Fresh isolated PostgreSQL 17.11 on migrations 002–317: 316 migrations PASS, `moneyverse_app` has **no direct SELECT** on `state_enterprises`/`private_enterprises`. Existing Nest direct-table public API would fail; this was a real integration blocker, not a reason to broaden table grants.
+- New TDD RED 3 cases: missing DB-owned `getPublicDisclosure` and controller source call. Adapted closed/unmerged Backend B v533's SECDEF pattern as **new forward-only migration 318**, one atomic read function with app-role EXECUTE only, no new table grants or ledger mutation. Backend now consumes one database-owned disclosure. Re-run isolated PostgreSQL and exact HEAD gates.
+
+## Real isolated DB integration (06:58 KST)
+- First isolated retry hit an initialization race (`database ... does not exist` while Postgres was booting); fixed readiness to execute `SELECT 1` against the **target database**, not only `pg_isready`.
+- Fresh network-disabled PostgreSQL 17.11: **317/317 forward migrations 002–318 PASS**, `SET ROLE moneyverse_app` can execute `enterprise_public_disclosure_v1()` and returns three SOEs plus `108000` exact projected WLD; direct SELECT on both enterprise tables is `false`, function EXECUTE `true`, ledger transaction rows `0`. Container removed. The new function is an actual DB-backed read, not a UI-only placeholder.
+- Added isolated PostgreSQL regression tests guarded by an explicit loopback-only `_isolated` URL. No shared DB writes.
+
+## End checkpoint / release decision (2026-11-01 07:01 KST)
+- Main and English/KO canonical plans re-fetched unchanged `f13bbce273ffc65e8576170992d82ea00c27a1c9`. New A/B/QA PRs remain separate. No direct main changes.
+- Isolated fresh PostgreSQL 17.11 317/317 migrations PASS; loopback-only isolated backend DB tests 3/3 PASS; `moneyverse_app` can execute the new function but cannot SELECT either underlying enterprise table. Containers removed. No ledger writes.
+- Earlier code checkpoint `8d158dd8` lint PASS (0 errors/1,021 warnings), typecheck PASS, build PASS, app-api 184 endpoints PASS; frontend 2,912 PASS, backend 2,952 PASS/517 SKIP, contract/database tests PASS. **These full-suite results predate migration 318 and MUST NOT be counted as final exact-SHA certification.** Root `pnpm test` hit 180s timeout; later package suites completed. Full dependency audit FAIL 9 (1 low/8 moderate), production dependency audit PASS. Fresh HEAD revalidation and remote CI still pending.
+- Official Test exact-SHA authenticated user E2E, edge HTTP robots verification, independent restore, security provenance and GitOps release gate NOT CERTIFIED. RELEASE BLOCKED. No merge, Test/Production promotion or rollback. Preserve all A/B/QA/Gemini branches and open PRs. Only this independent worktree/branch changed.
+- Do not delete this branch until fully integrated or explicitly superseded. Final CI/HEAD evidence will be appended to Draft PR #2274 after revalidation.

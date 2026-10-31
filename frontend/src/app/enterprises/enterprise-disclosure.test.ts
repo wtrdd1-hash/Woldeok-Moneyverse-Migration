@@ -3,6 +3,7 @@ import { verifiedEnterpriseDisclosure } from './enterprise-disclosure';
 
 const source = {
   source: 'DATABASE_SNAPSHOT', settlementStatus: 'NOT_VERIFIED',
+  financial_data_status: 'PROJECTION_ONLY_UNVERIFIED', ledger_confirmed: false,
   disclosed_at: '2026-11-01T00:00:00.000Z',
   overview: { holding_name: 'Holding', holding_code: 'WSHC', governance_model: 'virtual',
     total_soe_assets_wld: '9007199254740993', hourly_soe_revenue_wld: '200',
@@ -20,6 +21,8 @@ describe('public enterprise source evidence parser', () => {
     expect(verifiedEnterpriseDisclosure(null)).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, source: 'UNKNOWN' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, settlementStatus: 'PAID' })).toBeNull();
+    expect(verifiedEnterpriseDisclosure({ ...source, ledger_confirmed: true })).toBeNull();
+    expect(verifiedEnterpriseDisclosure({ ...source, financial_data_status: 'SETTLED' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, disclosed_at: 'nonsense' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, disclosed_at: '2026-02-31T00:00:00.000Z' })).toBeNull();
     expect(verifiedEnterpriseDisclosure({ ...source, overview: { ...source.overview, total_soe_assets_wld: Number.MAX_SAFE_INTEGER + 2 } })).toBeNull();

@@ -4,6 +4,7 @@ import { GET } from './route';
 
 const source = {
   source: 'DATABASE_SNAPSHOT', settlementStatus: 'NOT_VERIFIED',
+  financial_data_status: 'PROJECTION_ONLY_UNVERIFIED', ledger_confirmed: false,
   disclosed_at: '2026-11-01T00:00:00.000Z',
   overview: { holding_name: 'WSHC', holding_code: 'WSHC', governance_model: 'virtual',
     total_soe_assets_wld: '9007199254740993', hourly_soe_revenue_wld: '200',

@@ -2,6 +2,8 @@
 export interface EnterpriseDisclosure {
   readonly source: 'DATABASE_SNAPSHOT';
   readonly settlementStatus: 'NOT_VERIFIED';
+  readonly financial_data_status: 'PROJECTION_ONLY_UNVERIFIED';
+  readonly ledger_confirmed: false;
   readonly disclosed_at: string;
   readonly overview: {
     readonly holding_name: string;
@@ -41,7 +43,8 @@ function integer(value: unknown, signed = false): value is string {
 }
 
 export function verifiedEnterpriseDisclosure(value: unknown): EnterpriseDisclosure | null {
-  if (!record(value) || value.source !== 'DATABASE_SNAPSHOT' || value.settlementStatus !== 'NOT_VERIFIED') return null;
+  if (!record(value) || value.source !== 'DATABASE_SNAPSHOT' || value.settlementStatus !== 'NOT_VERIFIED' ||
+      value.financial_data_status !== 'PROJECTION_ONLY_UNVERIFIED' || value.ledger_confirmed !== false) return null;
   if (typeof value.disclosed_at !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value.disclosed_at) ||
       !Number.isFinite(Date.parse(value.disclosed_at)) || !new Date(value.disclosed_at).toISOString().startsWith(value.disclosed_at.slice(0, 19))) return null;
   if (!record(value.overview) || !Array.isArray(value.soes) || value.soes.length > 100) return null;

@@ -8,9 +8,7 @@ const soes = [{ code: 'SOE_TEST', name: 'Verified SOE', net_profit_hourly_wld: '
 
 function controller(fail = false) {
   const service = {
-    getStateHoldingOverview: vi.fn().mockImplementation(() => fail ? Promise.reject(new Error('private DB host')) : Promise.resolve(overview)),
-    listStateEnterprises: vi.fn().mockResolvedValue(soes),
-    listPrivateEnterprises: vi.fn().mockResolvedValue([]),
+    getPublicDisclosure: vi.fn().mockImplementation(() => fail ? Promise.reject(new Error('private DB host')) : Promise.resolve({ overview, soes, privateEnterprises: [], financial_data_status: 'PROJECTION_ONLY_UNVERIFIED', ledger_confirmed: false })),
   } as unknown as EnterpriseService;
   return { subject: new PublicEnterpriseController(service), service };
 }
@@ -23,9 +21,15 @@ describe('public SOE disclosure integrity', () => {
     expect(response.soes).toEqual(soes);
     expect(response.source).toBe('DATABASE_SNAPSHOT');
     expect(response.settlementStatus).toBe('NOT_VERIFIED');
-    expect(service.getStateHoldingOverview).toHaveBeenCalledOnce();
+    expect(response.financial_data_status).toBe('PROJECTION_ONLY_UNVERIFIED');
+    expect(service.getPublicDisclosure).toHaveBeenCalledOnce();
   });
 
+  it('refuses a database response that asserts unverified ledger settlement', async () => {
+    const { subject, service } = controller();
+    vi.mocked(service.getPublicDisclosure).mockResolvedValue({ overview, soes, privateEnterprises: [], financial_data_status: 'PROJECTION_ONLY_UNVERIFIED', ledger_confirmed: true } as never);
+    await expect(subject.getPublicEnterprises()).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
   it('fails closed with 503 and no leaked database detail on read failure', async () => {
     const { subject } = controller(true);
     await expect(subject.getPublicEnterprises()).rejects.toBeInstanceOf(ServiceUnavailableException);

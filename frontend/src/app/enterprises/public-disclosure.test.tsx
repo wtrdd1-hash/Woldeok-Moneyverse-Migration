@@ -8,6 +8,8 @@ vi.mock('@/lib/api', () => ({ publicApi: vi.fn() }));
 const snapshot = {
   source: 'DATABASE_SNAPSHOT',
   settlementStatus: 'NOT_VERIFIED',
+  financial_data_status: 'PROJECTION_ONLY_UNVERIFIED',
+  ledger_confirmed: false,
   disclosed_at: '2026-10-25T00:00:00.000Z',
   overview: {
     holding_name: 'Verified holding', holding_code: 'WSHC',
