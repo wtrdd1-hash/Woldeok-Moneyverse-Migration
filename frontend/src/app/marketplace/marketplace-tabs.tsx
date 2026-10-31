@@ -6,7 +6,6 @@ import {
   Hammer,
   PackageOpen,
   Boxes,
-  PlusCircle,
   Coins,
   Flame,
   Gavel,
@@ -15,19 +14,14 @@ import {
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { CraftingPanel } from './crafting-panel';
 import { MarketListingsView } from './market-listings-view';
-import { MyListingsView } from './my-listings-view';
-import { SellListingModal } from './sell-listing-modal';
-import { PriceDiscoveryChart } from './price-discovery-chart';
 import { AuctionView } from './auction-view';
 import { DirectTradeView } from './direct-trade-view';
 import { AppraisalView } from './appraisal-view';
 import {
-  INITIAL_MARKET_LISTINGS,
   P0_CRAFTING_RECIPES,
   type CraftingRecipe,
   type MarketListing,
@@ -48,15 +42,8 @@ export function MarketplaceTabs({
   rarities: _rarities,
 }: MarketplaceTabsProps) {
   const [holdings, setHoldings] = useState<MarketplaceHolding[]>([...initialHoldings]);
-  const [listings, setListings] = useState<MarketListing[]>([...INITIAL_MARKET_LISTINGS]);
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const listings: MarketListing[] = [];
   const [currentBalance, setCurrentBalance] = useState(userBalanceWld);
-
-  // Stats calculation
-  const activeListingsCount = listings.filter((l) => l.status === 'active').length;
-  const totalVolumeWld = listings
-    .reduce((sum, item) => sum + BigInt(item.priceWld || '0'), 0n)
-    .toString();
 
   // Handle successful craft
   const handleCraftSuccess = (recipe: CraftingRecipe) => {
@@ -97,75 +84,6 @@ export function MarketplaceTabs({
     });
   };
 
-  // Handle successful buy
-  const handleBuyListing = (boughtItem: MarketListing) => {
-    // Deduct purchase price
-    try {
-      const newBal = BigInt(currentBalance) - BigInt(boughtItem.priceWld);
-      setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {
-      // Preserve the last authoritative balance when an amount is malformed.
-    }
-
-    // Mark listing as settled
-    setListings((prev) =>
-      prev.map((l) => (l.id === boughtItem.id ? { ...l, status: 'settled' } : l)),
-    );
-
-    // Add purchased item to holdings
-    const purchasedHolding: MarketplaceHolding = {
-      catalog_id: `buy_${Date.now()}`,
-      code: boughtItem.itemCode,
-      name: boughtItem.itemName,
-      description: boughtItem.description,
-      category: boughtItem.category,
-      quantity: boughtItem.quantity,
-      acquired_at: new Date().toISOString(),
-      rarity: boughtItem.rarity,
-      effect_kind: 'trade',
-      is_equipped: false,
-      serial_number: boughtItem.serialNumber,
-    };
-
-    setHoldings((prev) => [purchasedHolding, ...prev]);
-  };
-
-  // Handle create new sell listing
-  const handleListingCreated = (newListing: MarketListing) => {
-    setListings((prev) => [newListing, ...prev]);
-    // Deduct 1 from holding
-    setHoldings((prev) =>
-      prev
-        .map((h) => (h.code === newListing.itemCode ? { ...h, quantity: h.quantity - 1 } : h))
-        .filter((h) => h.quantity > 0),
-    );
-  };
-
-  // Handle cancel listing
-  const handleCancelListing = (listingId: string) => {
-    const target = listings.find((l) => l.id === listingId);
-    if (!target) return;
-
-    setListings((prev) => prev.filter((l) => l.id !== listingId));
-
-    // Return item to holdings
-    const restored: MarketplaceHolding = {
-      catalog_id: `restored_${Date.now()}`,
-      code: target.itemCode,
-      name: target.itemName,
-      description: target.description,
-      category: target.category,
-      quantity: target.quantity,
-      acquired_at: new Date().toISOString(),
-      rarity: target.rarity,
-      effect_kind: 'trade',
-      is_equipped: false,
-      serial_number: target.serialNumber,
-    };
-
-    setHoldings((prev) => [restored, ...prev]);
-  };
-
   return (
     <div className="grid gap-6">
       {/* 4-Stat Metric Banner */}
@@ -173,24 +91,24 @@ export function MarketplaceTabs({
         <Card className="border-border/60 bg-gradient-to-br from-primary/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <ShoppingBag className="size-3.5 text-primary" /> 활성 거래 매물
+              <ShoppingBag className="size-3.5 text-primary" /> 고정가 매물 조회
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-foreground">
-              {activeListingsCount} <span className="text-xs font-normal text-muted-foreground">건</span>
+              일시 중단
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">P0 에스크로 등록 물품</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">원장 검증 후 재개</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-amber-500/10 via-background to-muted/20">
           <CardContent className="p-4">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <Flame className="size-3.5 text-amber-500" /> 24h 시장 규모
+              <Flame className="size-3.5 text-amber-500" /> 24시간 거래 규모
             </span>
             <div className="mt-2 text-xl font-extrabold tabular-nums text-amber-600 dark:text-amber-400">
-              {groupDigits(totalVolumeWld)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              검증 대기
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">1% HARD_SINK 소각 연동</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">거래 원장 검증 전 표시 보류</p>
           </CardContent>
         </Card>
 
@@ -214,7 +132,7 @@ export function MarketplaceTabs({
             <div className="mt-2 text-xl font-extrabold tabular-nums text-sky-600 dark:text-sky-400">
               {groupDigits(currentBalance)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">거래 및 제작 즉시 사용 가능</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">지갑 요약 기준 · 고정가 거래 중단</p>
           </CardContent>
         </Card>
       </div>
@@ -246,28 +164,18 @@ export function MarketplaceTabs({
             </TabsTrigger>
           </TabsList>
 
-          <Button
-            onClick={() => setIsSellModalOpen(true)}
-            size="sm"
-            className="w-full sm:w-auto font-bold bg-primary hover:bg-primary/90"
-          >
-            <PlusCircle className="mr-1.5 size-4" /> 내 물품 판매 등록
-          </Button>
+          <span role="status" className="rounded-lg border border-amber-500/40 px-3 py-2 text-xs text-amber-700 dark:text-amber-200">
+            판매 등록 점검 중
+          </span>
         </div>
 
         <TabsContent value="market" className="pt-4 space-y-6">
-          <PriceDiscoveryChart
-            rollingMedianWld="1320"
-            p25Wld="1180"
-            p75Wld="1450"
-            volume7dWld="28500"
-            volume30dWld="124000"
-          />
+          <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+            원장 정산 검증 전까지 고정가 거래를 중단합니다. 검증되지 않은 시세와 예시 매물은 표시하지 않습니다.
+          </p>
           <MarketListingsView
             listings={listings}
             userBalanceWld={currentBalance}
-            onBuyListing={handleBuyListing}
-            onOpenSellModal={() => setIsSellModalOpen(true)}
           />
         </TabsContent>
 
@@ -292,11 +200,9 @@ export function MarketplaceTabs({
         </TabsContent>
 
         <TabsContent value="my-listings" className="pt-4">
-          <MyListingsView
-            listings={listings}
-            onCancelListing={handleCancelListing}
-            onOpenSellModal={() => setIsSellModalOpen(true)}
-          />
+          <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+            원장 정산 검증 전까지 내 판매 등록 내역 조회를 일시 중단합니다. 실제 등록 건수가 0건이라는 뜻은 아닙니다.
+          </p>
         </TabsContent>
 
         <TabsContent value="holdings" className="pt-4">
@@ -326,14 +232,6 @@ export function MarketplaceTabs({
         </TabsContent>
       </Tabs>
 
-      {/* Global Sell Listing Modal */}
-      <SellListingModal
-        open={isSellModalOpen}
-        onOpenChange={setIsSellModalOpen}
-        holdings={holdings}
-        userBalanceWld={currentBalance}
-        onListingCreated={handleListingCreated}
-      />
     </div>
   );
 }

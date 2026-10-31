@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -69,39 +70,22 @@ export class MarketplaceController {
 
   @Post('listings')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'List an item for sale in player marketplace with escrow lock' })
-  createListing(@Req() request: RequestWithSession, @Body() body: CreateListingDto) {
-    return this.guarded(
-      () =>
-        this.marketplaceService.createListing(
-          requireUserId(request),
-          body.itemCode,
-          body.quantity,
-          body.price,
-          body.idempotencyKey,
-          body.description,
-        ),
-      'failed to create marketplace listing',
-    );
+  @ApiOperation({ summary: 'Fixed-price listing temporarily unavailable until ledger settlement is verified' })
+  createListing(@Req() _request: RequestWithSession, @Body() _body: CreateListingDto): Promise<string | null> {
+    // Migration 232 can mutate balances without postings. Do not reach that
+    // function until a reviewed ledger-backed replacement is deployed.
+    throw new ServiceUnavailableException('marketplace ledger-backed settlement is unavailable');
   }
 
   @Post('listings/:id/buy')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Buy a marketplace listing item with 1% burn fee and 99% seller settlement' })
+  @ApiOperation({ summary: 'Fixed-price purchase temporarily unavailable until ledger settlement is verified' })
   buyListing(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) listingId: string,
-    @Body() body: BuyListingDto,
-  ) {
-    return this.guarded(
-      () =>
-        this.marketplaceService.buyListing(
-          requireUserId(request),
-          listingId,
-          body.idempotencyKey,
-        ),
-      'failed to buy marketplace listing',
-    );
+    @Req() _request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _listingId: string,
+    @Body() _body: BuyListingDto,
+  ): Promise<string | null> {
+    throw new ServiceUnavailableException('marketplace ledger-backed settlement is unavailable');
   }
 
   @Post('listings/:id/cancel')

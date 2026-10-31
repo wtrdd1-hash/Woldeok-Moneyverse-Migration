@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     '기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 간 아이템 거래소 및 재료 조합 제작대',
   alternates: { canonical: canonicalUrl('/marketplace') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default async function MarketplacePage() {
@@ -26,7 +26,7 @@ export default async function MarketplacePage() {
   ]);
 
   const holdings = holdingsData?.holdings ?? [];
-  const userBalance = walletData?.cash_balance || walletData?.balance || '1000';
+  const userBalance = walletData?.cash_balance || walletData?.balance || '0';
 
   const categoriesList = [...new Set(holdings.map((item) => item.category))].sort((a, b) =>
     a.localeCompare(b, 'ko-KR'),
@@ -42,8 +42,8 @@ export default async function MarketplacePage() {
         title={<T korean="플레이어 마켓 & 제작대" english="Player Marketplace & Crafting" />}
       >
         <T
-          korean="재료 아이템을 조합하여 한정판 외형과 부스트를 제작하고, 거래소(P0)에서 고정가격으로 다른 모험가와 안전하게 거래하세요. 거래 수수료 1%는 인플레이션 방지를 위해 소각(HARD_SINK)됩니다."
-          english="Craft limited cosmetic items and business boost kits from materials, and securely trade them with fellow adventurers in the P0 fixed-price marketplace."
+          korean="재료 아이템을 조합하여 한정판 외형과 부스트를 제작하고, 고정가 거래는 원장 정산 검증 전까지 일시 중단됩니다. 제작대 및 보유 아이템 정보를 확인할 수 있습니다."
+          english="Craft limited cosmetic items and business boost kits from materials, while fixed-price trading is temporarily unavailable pending ledger verification."
         />
       </PageHeader>
 

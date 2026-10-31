@@ -30,11 +30,10 @@ export function SellListingModal({
   onOpenChange,
   holdings,
   userBalanceWld,
-  onListingCreated,
 }: SellListingModalProps) {
   const [selectedCatalogId, setSelectedCatalogId] = useState<string>('');
   const [priceInput, setPriceInput] = useState<string>('100');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting = false;
   const [successNotice, setSuccessNotice] = useState(false);
 
   const selectedItem = holdings.find((h) => h.catalog_id === selectedCatalogId) || null;
@@ -43,34 +42,8 @@ export function SellListingModal({
   const netPayout = calculateSellerNet(priceInput);
   const canPayListingFee = BigInt(userBalanceWld || '0') >= BigInt(listingFee);
 
-  const handleCreateListing = () => {
-    if (!selectedItem) return;
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccessNotice(true);
-
-      const newListing: MarketListing = {
-        id: `list_${Date.now()}`,
-        sellerId: 'user_current',
-        sellerName: '나 (내 등록)',
-        isOwn: true,
-        itemCode: selectedItem.code,
-        itemName: selectedItem.name,
-        category: selectedItem.category,
-        rarity: (selectedItem.rarity as MarketListing['rarity']) || 'common',
-        quantity: 1,
-        priceWld: priceInput,
-        listedAt: new Date().toISOString(),
-        serialNumber: selectedItem.serial_number,
-        status: 'active',
-        description: selectedItem.description,
-      };
-
-      onListingCreated(newListing);
-    }, 1000);
-  };
+  // No client-only listing success: a real ledger receipt is required.
+  const handleCreateListing = () => undefined;
 
   const handleClose = () => {
     if (!isSubmitting) {
@@ -84,6 +57,9 @@ export function SellListingModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md sm:rounded-2xl">
+        <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+          원장 정산 검증 전까지 판매 등록을 일시 중단합니다. 수수료는 청구되지 않습니다.
+        </div>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <PlusCircle className="size-5 text-primary" />
@@ -213,7 +189,7 @@ export function SellListingModal({
               </Button>
               <Button
                 onClick={handleCreateListing}
-                disabled={isSubmitting || !selectedItem || !canPayListingFee || Number(priceInput) <= 0}
+                disabled
                 className="bg-primary hover:bg-primary/90"
               >
                 {isSubmitting ? (

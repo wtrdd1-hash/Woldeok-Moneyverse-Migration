@@ -53,14 +53,11 @@ describe('MarketplaceController', () => {
     expect(mockService.listListings).toHaveBeenCalledWith({});
   });
 
-  it('createListing calls service', async () => {
-    const result = await controller.createListing(mockReq, {
-      itemCode: 'frame_moonlight_emerald',
-      quantity: 1,
-      price: '500',
+  it('createListing is unavailable until the ledger-backed settlement is verified', () => {
+    expect(() => controller.createListing(mockReq, {
+      itemCode: 'frame_moonlight_emerald', quantity: 1, price: '500',
       idempotencyKey: '22222222-2222-4222-8222-222222222222',
-    });
-    expect(result).toBe('l1');
+    })).toThrow(/ledger-backed settlement/);
   });
 
   it('listAuctions and bidAuction work properly with proxy bid', async () => {

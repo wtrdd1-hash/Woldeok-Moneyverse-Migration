@@ -107,6 +107,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // P0: never proxy an unledgered listing fee or purchase to the private API.
+  // Read-only marketplace routes and existing cancel flows remain separate.
+  if (request.method === 'POST' && parts[0] === 'marketplace' && parts[1] === 'listings' &&
+      (parts.length === 2 || (parts.length === 4 && parts[3] === 'buy'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'marketplace_settlement_unavailable',
+      'Fixed-price marketplace settlement is unavailable until ledger verification');
+  }
+
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath

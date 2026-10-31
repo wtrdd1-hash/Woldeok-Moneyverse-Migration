@@ -27,14 +27,13 @@ interface MarketListingsViewProps {
 export function MarketListingsView({
   listings,
   userBalanceWld,
-  onBuyListing,
   onOpenSellModal,
 }: MarketListingsViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
   const [selectedListing, setSelectedListing] = useState<MarketListing | null>(null);
-  const [isBuying, setIsBuying] = useState(false);
+  const isBuying = false;
   const [buySuccessItem, setBuySuccessItem] = useState<MarketListing | null>(null);
 
   const _categories = ['all', 'frame', 'display', 'business', 'material', 'nameplate'];
@@ -68,18 +67,8 @@ export function MarketListingsView({
     setBuySuccessItem(null);
   };
 
-  const handleExecuteBuy = () => {
-    if (!selectedListing) return;
-    setIsBuying(true);
-
-    setTimeout(() => {
-      setIsBuying(false);
-      setBuySuccessItem(selectedListing);
-      if (onBuyListing) {
-        onBuyListing(selectedListing);
-      }
-    }, 1200);
-  };
+  // Financial mutations are disabled until a ledger-backed settlement exists.
+  const handleExecuteBuy = () => undefined;
 
   const userBalanceBig = BigInt(userBalanceWld || '0');
   const selectedPriceBig = selectedListing ? BigInt(selectedListing.priceWld) : 0n;
@@ -135,6 +124,10 @@ export function MarketListingsView({
             </Button>
           )}
         </div>
+      </div>
+
+      <div role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+        원장 정산 검증 전까지 고정가 매물 등록 및 구매를 일시 중단합니다. 실제 거래가 완료된 것으로 표시하지 않습니다.
       </div>
 
       {/* Listings Grid */}
@@ -206,12 +199,12 @@ export function MarketListingsView({
               <CardFooter className="pt-2">
                 <Button
                   onClick={() => handleStartBuy(item)}
-                  disabled={item.isOwn}
+                  disabled
                   variant={item.isOwn ? 'outline' : 'default'}
                   className="w-full text-xs font-semibold"
                 >
                   <ShoppingBag className="mr-1.5 size-3.5" />
-                  {item.isOwn ? '내가 등록한 물품' : '구매하기'}
+                  {item.isOwn ? '내가 등록한 물품' : '구매하기 (점검 중)'}
                 </Button>
               </CardFooter>
             </Card>
