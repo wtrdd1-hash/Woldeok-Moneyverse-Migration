@@ -25,6 +25,22 @@ describe('PocketController', () => {
     expect(mockRepo.listPockets).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111');
   });
 
+  it('passes the caller-owned idempotency key instead of a shared nil UUID for paid customization', async () => {
+    const key = '33333333-3333-4333-8333-333333333333';
+    await controller.customizePocket(mockReq, '44444444-4444-4444-8444-444444444444', {
+      themeColor: 'emerald',
+      iconCode: 'wallet',
+      idempotencyKey: key,
+    });
+    expect(mockRepo.customizePocket).toHaveBeenLastCalledWith(
+      key,
+      '11111111-1111-4111-8111-111111111111',
+      '44444444-4444-4444-8444-444444444444',
+      'emerald',
+      'wallet',
+    );
+  });
+
   it('createPocket calls repository with dto params', async () => {
     const result = await controller.createPocket(mockReq, {
       name: '비상금',
