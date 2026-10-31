@@ -1,53 +1,22 @@
 import type { Metadata } from 'next';
-import { Trophy, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { getServerLocale } from '@/lib/locale-server';
-import { lookupText } from '@/lib/i18n-dictionary';
+import Link from 'next/link';
 import { StocksLeagueClient } from './stocks-league-client';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getServerLocale();
-  const title = lookupText('가상 주식 실시간 카피 트레이딩 리그 & 고래 리더보드', locale);
-  const desc = lookupText(
-    '상위 1위 수익률 +184% 고래 트레이더들의 실시간 매매 내역을 투명하게 확인하고 원클릭으로 1:1 자동 추종 카피 트레이딩을 시작하세요.',
-    locale
-  );
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: '가상 주식 챔피언십 리그 | 월덕 머니버스',
+  description: '서버에 기록된 가상 주식 리그 현황을 확인합니다. 카피 트레이딩은 원장 정산 검증 전 이용할 수 없습니다.',
+  robots: { index: false, follow: false },
+};
 
-  return {
-    title: `${title} | Woldeok Moneyverse`,
-    description: desc,
-    openGraph: {
-      title,
-      description: desc,
-      type: 'website',
-    },
-  };
-}
-
-export default async function StocksLeaguePage() {
-  return (
-    <div className="container max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-500 text-xs font-bold flex items-center gap-1">
-            <Trophy className="size-3.5" />
-            <span>고래 챔피언십 리그</span>
-          </Badge>
-          <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono flex items-center gap-1">
-            <Sparkles className="size-3.5" />
-            <span>원클릭 1:1 자동 카피 트레이딩</span>
-          </Badge>
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
-          <TrendingUp className="size-7 text-indigo-500" />
-          <span>가상 주식 카피 트레이딩 리그 (Whale League)</span>
-        </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
-          검증된 상위 고래 트레이더들의 포트폴리오와 실시간 체결을 추종하세요. 수익 실현 시에만 1%의 성공 보수가 기여금으로 정산됩니다.
-        </p>
-      </div>
-
-      <StocksLeagueClient />
-    </div>
-  );
+export default function StocksLeaguePage() {
+  return <main className="mx-auto grid max-w-5xl gap-6 px-4 py-8 sm:px-6">
+    <header className="grid gap-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Whale League · Virtual Stocks</p>
+      <h1 className="text-2xl font-bold sm:text-3xl">가상 주식 챔피언십 리그</h1>
+      <p className="text-sm text-muted-foreground">실제 증권 거래나 투자 서비스가 아닌 게임 내 가상 주식 기록입니다. 확인되지 않은 거래나 수익률은 표시하지 않습니다.</p>
+      <Link href="/stocks" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 text-sm underline underline-offset-4">가상 주식 거래소로 돌아가기</Link>
+    </header>
+    <StocksLeagueClient />
+  </main>;
 }
