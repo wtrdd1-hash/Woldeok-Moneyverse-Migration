@@ -7,12 +7,12 @@
 - 인증 회원의 활성 시즌 이벤트를 WLD 참가비 상한으로 조회하는 읽기 전용 P1 개선. 금융 원장, 권한, 기존 마이그레이션 및 운영 배포 변경 없음.
 
 ## 작업 중
-- [ ] 테스트 우선으로 계약/백엔드/웹/Android 구현.
-- [ ] 정확 SHA 품질 게이트 및 실제 PostgreSQL 앱 계정 읽기 검증.
-- [ ] 최신 main/통합기획/PR/CI 재확인.
+- [x] 계약/백엔드/웹/Android 테스트 우선 구현.
+- [x] 코드 SHA 전체 품질 게이트 및 개발 PostgreSQL 권한 읽기 확인. 앱 계정의 비어 있지 않은 실제 이벤트 검증은 BLOCKED.
+- [x] 최신 main/통합기획/PR/CI 재확인, Draft PR #2259 작성.
 
 ## 종료
-미완료. 정확한 검증, Test/Production/HOLD 및 브랜치 보존 근거를 기록할 예정.
+코드 SHA `b9b066790d1a31c95c31f17a6f19a66282ef6ec0`: 루트 34, 공통 44, DB 62 PASS/4 SKIP, 백엔드 2,953 PASS/517 SKIP, 프론트 2,907 PASS. 타입·Lint·빌드·보안 감사 PASS. 개발 DB 앱 역할 직접 SELECT=true(#993), 활성 이벤트 0건. 공식 Test `bc8cd8a6...`, Production Backend `353c6d5d...`, Frontend 빌드 ID 출처 미검증. 정확 SHA Test E2E 및 릴리스 게이트 BLOCKED. Draft PR #2259, C #2234 변경 보존. 병합·배포·DB 쓰기·재시작·롤백·브랜치 삭제 없음. 최종 문서 커밋 및 CI 별도 확인. 상세 docs/qa 및 docs/updates 기록 참조.
 
 ### 중간 점검 (05:06 KST)
 - RED: 공통 계약 1파일, 백엔드 3건, Android 3건 실패를 확인. 수정 후 대상 공통 3건/백엔드 3건/웹·Android 5건 PASS. 추가 회귀 케이스는 최종 재검증 예정.

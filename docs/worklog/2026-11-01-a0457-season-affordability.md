@@ -8,12 +8,12 @@
 - Baseline remote branches 36 (including origin/HEAD), current PRs and CI audited separately; do not delete.
 
 ## In progress
-- [ ] Test-first implementation of contract/backend/web/Android.
-- [ ] Exact SHA build/lint/typecheck/test and real PostgreSQL app-role read.
-- [ ] Review current main, existing changes and PR/CI before PR and any merge.
+- [x] Test-first implementation of contract/backend/web/Android.
+- [x] Code SHA full test/build/lint/typecheck and DEV PostgreSQL privilege read; app-role nonempty event E2E remains BLOCKED.
+- [x] Review current main, existing changes and PR/CI; Draft PR #2259 created, no merge.
 
 ## Finished
-PENDING. Test, Test deployment, Production, rollback, branch preservation and exact SHA evidence to be updated.
+Code SHA `b9b066790d1a31c95c31f17a6f19a66282ef6ec0`: full local tests PASS (root 34; contract 44; DB 62 PASS/4 SKIP; backend 2,953 PASS/517 SKIP; frontend 2,907 PASS); typecheck/lint/build/audit PASS. DEV PostgreSQL app direct event SELECT=true (#993), 0 active events. Test `bc8cd8a6...`, Production backend `353c6d5d...`, frontend build ID not attested. Exact SHA official Test/E2E and release gates BLOCKED. Draft PR #2259; C #2234 overlapping page protected. No main merge, deployment, DB writes, restart, rollback or branch deletion. Final documentation commit and CI must be checked separately. Details: docs/qa/2026-11-01-a0457-season-affordability.md and docs/updates/2026-11-01-a0457-season-release-hold.md.
 
 ### Mid-run checkpoint (05:06 KST)
 - TDD RED: contract 1 file FAIL (missing helper); backend 3 FAIL (ignored query); Android 3 FAIL (invalid filter/legacy 200/public cache). GREEN after implementation: contract 3, backend 3, frontend/Android 5 targeted PASS before final added edge cases.
