@@ -177,6 +177,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
   }
 
+  const memberShopCatalog = parts.length === 2 && parts[0] === 'shop' &&
+    parts[1] === 'catalog' && request.method === 'GET';
+  const shopStockValues = memberShopCatalog ? request.nextUrl.searchParams.getAll('stock') : [];
+  if (shopStockValues.length > 1 || (shopStockValues.length === 1 &&
+      !['all', 'available', 'sold_out'].includes(shopStockValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'shop_stock_invalid',
+      'stock must be all, available or sold_out');
+  }
+
   const receiptAmountFilter =
     parts.length === 2 &&
     parts[0] === 'shop' &&
@@ -389,6 +398,31 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  if (memberShopCatalog && shopStockValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('not JSON');
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || !('catalogItems' in payload) ||
+          !Array.isArray(payload.catalogItems) || payload.catalogItems.length > 10_000 ||
+          !payload.catalogItems.every((row: unknown) => {
+            if (!row || typeof row !== 'object') return false;
+            const item = row as Record<string, unknown>;
+            const quantity = item.quantity;
+            const validQuantity = quantity === null || (typeof quantity === 'number' &&
+              Number.isSafeInteger(quantity) && quantity >= 0);
+            if (!validQuantity || typeof item.price !== 'string' ||
+                !/^(0|[1-9][0-9]*)$/.test(item.price)) return false;
+            if (shopStockValues[0] === 'sold_out') return quantity === 0;
+            if (shopStockValues[0] === 'available') return quantity === null ||
+              (typeof quantity === 'number' && quantity > 0);
+            return true;
+          })) throw new Error('invalid filtered catalogue');
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_stock_unverified',
+        'shop stock availability could not be verified');
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -398,8 +432,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateShopCatalog = parts[0] === 'shop' && parts[1] === 'catalog';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopCatalog) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -448,6 +483,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'catalog') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

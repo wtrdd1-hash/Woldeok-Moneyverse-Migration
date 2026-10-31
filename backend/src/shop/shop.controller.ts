@@ -64,12 +64,20 @@ export function requireShopStockFilter(value: unknown): string | null {
   throw new BadRequestException('invalid stock filter');
 }
 
+export function parseShopCatalogStock(value: unknown): 'all' | 'available' | 'sold_out' {
+  if (value === undefined || value === 'all') return 'all';
+  if (value === 'available' || value === 'sold_out') return value;
+  throw new BadRequestException('stock must be all, available or sold_out');
+}
+
 export function filterShopStock<T extends { readonly quantity?: unknown }>(
   items: readonly T[],
   filter: string | null,
 ): T[] {
-  if (!filter) return [...items];
-  return items.filter((item) => item.quantity === null || (typeof item.quantity === 'number' && item.quantity > 0));
+  if (!filter || filter === 'all') return [...items];
+  if (filter === 'sold_out') return items.filter((item) => item.quantity === 0);
+  return items.filter((item) => item.quantity === null ||
+    (typeof item.quantity === 'number' && Number.isSafeInteger(item.quantity) && item.quantity > 0));
 }
 
 export function filterShopItems<T extends SearchableShopItem>(
@@ -280,10 +288,12 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('stock') stock?: unknown,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    const stockMode = parseShopCatalogStock(stock);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
@@ -292,7 +302,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopStock(filtered, stockMode) };
   }
 
   @Get('catalog')
@@ -304,10 +314,12 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('stock') stock?: unknown,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    const stockMode = parseShopCatalogStock(stock);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
@@ -316,7 +328,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopStock(filtered, stockMode) };
   }
 
   @Get('compare')
