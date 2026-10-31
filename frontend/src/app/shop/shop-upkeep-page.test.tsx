@@ -26,7 +26,7 @@ vi.mock('./shop-membership-section', () => ({
   ),
 }));
 
-import ShopPage from './page';
+import ShopPage, { generateMetadata } from './page';
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -62,5 +62,24 @@ describe('shop upkeep ceiling server-rendered flow', () => {
     expect(mocks.publicApi).not.toHaveBeenCalled();
     expect(html).toContain('role="alert"');
     expect(html).toContain('aria-invalid="true"');
+  });
+});
+
+describe('shop catalog source truth', () => {
+  it('does not claim a verified empty catalog when the filtered API is unavailable', async () => {
+    mocks.apiOrNull.mockResolvedValue(null);
+    const html = renderToStaticMarkup(await ShopPage({ searchParams: Promise.resolve({ maxUpkeep: '0' }) }));
+    expect(html).toContain('role="alert"');
+    expect(html).not.toContain('data-items="0"');
+    expect(html).toContain('다시 시도');
+  });
+});
+
+
+describe('shop search SEO and accessible state', () => {
+  it('marks upkeep query pages noindex while keeping the canonical shop discoverable', async () => {
+    expect((await generateMetadata({ searchParams: Promise.resolve({ maxUpkeep: '0' }) })).robots)
+      .toEqual({ index: false, follow: true });
+    expect((await generateMetadata({ searchParams: Promise.resolve({}) })).robots).toBeUndefined();
   });
 });

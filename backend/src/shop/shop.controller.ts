@@ -36,7 +36,7 @@ import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } 
 import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './shop-catalog-order';
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
-import { filterShopUpkeep } from './shop-upkeep-cap';
+import { filterShopUpkeep, parseShopUpkeepCap } from './shop-upkeep-cap';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -274,16 +274,18 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The public catalogue; optional q, maxPrice, sort and category' })
+  @ApiOperation({ summary: 'Public shop catalogue; optional q, filter, sort, category and exact maxUpkeep WLD ceiling' })
   async publicCatalog(
     @Query('q') query?: string,
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('maxUpkeep') maxUpkeep?: unknown,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
@@ -292,22 +294,30 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
+    // Do not let a malformed read model turn a requested cap into an unfiltered success.
+    try {
+      filtered = filterShopUpkeep(filtered, maxUpkeep);
+    } catch {
+      throw new ServiceUnavailableException('catalog upkeep evidence is unavailable');
+    }
     return { catalogItems: filtered };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The member catalogue; q searches and sort orders exact price asc/desc' })
+  @ApiOperation({ summary: 'Member shop catalogue; optional q, filter, sort, category and exact maxUpkeep WLD ceiling' })
   async catalog(
     @Req() request: RequestWithSession,
     @Query('q') query?: string,
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('maxUpkeep') maxUpkeep?: unknown,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
@@ -316,6 +326,12 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
+    // Do not let a malformed read model turn a requested cap into an unfiltered success.
+    try {
+      filtered = filterShopUpkeep(filtered, maxUpkeep);
+    } catch {
+      throw new ServiceUnavailableException('catalog upkeep evidence is unavailable');
+    }
     return { catalogItems: filtered };
   }
 

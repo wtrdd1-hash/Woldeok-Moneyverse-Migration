@@ -15,7 +15,7 @@ import { parseShopUpkeepCap, shopCatalogueQuery } from './shop-upkeep-cap';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+const shopMetadata: Metadata = {
   title: 'WLD 아이템 상점',
   description:
     '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
@@ -31,6 +31,16 @@ const PRINCIPLES = [
 
 interface ShopPageProps {
   readonly searchParams: Promise<{ q?: string; maxUpkeep?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  return {
+    ...shopMetadata,
+    robots: params.q !== undefined || params.maxUpkeep !== undefined
+      ? { index: false, follow: true }
+      : undefined,
+  };
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
@@ -61,7 +71,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       : null,
   ]);
 
-  const items = catalogData?.catalogItems || [];
+  const catalogUnavailable = !cap.invalid &&
+    (!catalogData || !Array.isArray(catalogData.catalogItems));
+  const items = catalogUnavailable || cap.invalid ? [] : catalogData!.catalogItems;
   const userBalance = cashBalanceFromWallet(walletData);
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
@@ -141,6 +153,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             주세요.
           </p>
         ) : null}
+        {catalogUnavailable ? (
+          <p role="alert" className="text-sm text-destructive">
+            상품 목록을 확인할 수 없습니다. 현재 검색 결과를 빈 상점으로 표시하지 않습니다.{' '}
+            <Link className="underline" href={`/shop${querySuffix}`}>다시 시도</Link>
+          </p>
+        ) : null}
         {cap.value ? (
           <p className="text-sm text-muted-foreground">
             주간 유지비 {cap.value} WLD 이하 상품만 표시합니다.
@@ -175,13 +193,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       {/* Moneyverse Plus VIP Membership Tier Card */}
       <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
 
-      <ShopStoreView
+      {!catalogUnavailable && !cap.invalid ? <ShopStoreView
         items={items}
         allowCompare={loggedIn}
         userBalance={userBalance}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
-      />
+      /> : null}
     </div>
   );
 }
