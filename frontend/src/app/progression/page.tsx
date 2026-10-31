@@ -16,16 +16,15 @@ import {
 import { apiOrNull } from '@/lib/api';
 import { formatDay, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import type { CreditLoan, CreditRung } from './credit';
 import {
   gradeLabel,
   hasOverdueLoan,
-  isRepayable,
   lendsNothing,
   ratePercent,
   rungConditions,
 } from './credit';
 import { LoanBoard, RefreshButton } from './progression-forms';
+import { canOfferCreditApplication, parseCreditEvidence } from './credit-evidence';
 import type { ProgressionStatus } from './stages';
 import { STAGES, requirementLines, stageIndex, stageLabel } from './stages';
 import { UnlockLadder } from './unlock-parts';
@@ -39,25 +38,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-interface CreditStanding {
-  readonly grade: string | null;
-  readonly loans: readonly CreditLoan[];
-  readonly ladder: readonly CreditRung[];
-}
-
 export default async function ProgressionPage() {
   await requireMember();
 
-  const [progression, credit, earlyGame] = await Promise.all([
+  const [progression, rawCredit, earlyGame] = await Promise.all([
     apiOrNull<{ progression: ProgressionStatus | null }>('/api/v1/progression'),
-    apiOrNull<CreditStanding>('/api/v1/progression/credit'),
+    apiOrNull<unknown>('/api/v1/progression/credit'),
     apiOrNull<{ unlocks: readonly EarlyUnlock[] }>('/api/v1/progression/early-game'),
   ]);
 
+  const credit = parseCreditEvidence(rawCredit);
   const status = progression?.progression ?? null;
   const loans = credit?.loans ?? [];
   const ladder = credit?.ladder ?? [];
-  const canBorrow = !loans.some((loan) => isRepayable(loan.status));
+  const canBorrow = canOfferCreditApplication(credit);
   const current = stageIndex(status?.stage_code ?? null);
   const requirements = requirementLines(status?.next_requirements ?? null);
 
@@ -201,7 +195,11 @@ export default async function ProgressionPage() {
         </h2>
 
         {credit === null ? (
-          <EmptyState title="신용 정보를 불러오지 못했어요." />
+          <div role="alert" className="grid gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5">
+            <p className="font-semibold">신용 정보를 확인할 수 없습니다.</p>
+            <p className="text-sm text-muted-foreground">대출 기록이나 한도가 없다는 뜻이 아닙니다. 서버 응답을 확인한 뒤 다시 조회해 주세요.</p>
+            <Link href="/progression" className="inline-flex min-h-11 w-fit items-center rounded-lg border border-border px-4 text-sm font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">신용 정보 다시 조회</Link>
+          </div>
         ) : (
           <Card className="rounded-2xl border-border/80 shadow-md">
             <CardHeader className="pb-3">
@@ -211,7 +209,7 @@ export default async function ProgressionPage() {
                     CREDIT RATING
                   </CardDescription>
                   <CardTitle className="text-2xl font-black mt-1">
-                    {gradeLabel(credit.grade ?? 'new')}
+                    {credit.grade === null ? '등급 미확인' : gradeLabel(credit.grade)}
                   </CardTitle>
                 </div>
                 {canBorrow && (

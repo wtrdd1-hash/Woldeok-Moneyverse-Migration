@@ -190,13 +190,21 @@ const config: NextConfig = {
       });
     }
 
+    // Route-specific owner headers follow the global public indexing rule.
+    const privateCreditHeaders = [
+      { key: 'x-robots-tag', value: 'noindex, nofollow' },
+      { key: 'cache-control', value: 'private, no-store' },
+      { key: 'referrer-policy', value: 'no-referrer' },
+    ];
     return [
       { source: '/:path*', headers: security },
-      // The derivatives page is authenticated and must not inherit the public indexing header.
+      // Preserve the integrated derivatives privacy policy.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      { source: '/progression', headers: privateCreditHeaders },
+      { source: '/app-api/v1/progression/:path*', headers: privateCreditHeaders },
     ];
   },
 

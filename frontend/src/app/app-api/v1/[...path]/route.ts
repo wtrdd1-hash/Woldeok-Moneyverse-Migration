@@ -583,6 +583,13 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  // Progression and credit include owner-specific loans, WLD limits and account age.
+  // Enforce privacy after proxying so 200/401/403/503 cannot inherit public cache policy.
+  if (parts[0] === 'progression') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
