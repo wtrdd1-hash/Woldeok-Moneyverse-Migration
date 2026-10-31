@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedAnnouncementTitleSearch } from '@/lib/announcement-title-search-proof';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -195,6 +196,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return contractJson({
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
+  }
+
+  const announcementSearch = parts.length === 1 && parts[0] === 'announcements' && request.method === 'GET';
+  const announcementParams = request.nextUrl.searchParams;
+  const announcementQ = announcementSearch ? announcementParams.getAll('q') : [];
+  const announcementLimits = announcementSearch ? announcementParams.getAll('limit') : [];
+  if (announcementSearch && (announcementQ.length > 1 || announcementLimits.length > 1 ||
+      [...announcementParams.keys()].some((key) => key !== 'q' && key !== 'limit') ||
+      (announcementQ.length === 1 && (announcementQ[0]!.length > 80 || !announcementQ[0]!.trim() ||
+        /[\u0000-\u001f\u007f]/.test(announcementQ[0]!))) ||
+      (announcementLimits.length === 1 && !/^(?:[1-9]|[1-4][0-9]|50)$/.test(announcementLimits[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_search_invalid', 'invalid published announcement search');
   }
 
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
@@ -515,12 +528,23 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return new NextResponse(null, { status: response.status, headers });
   }
 
+  if (announcementSearch && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+      'published announcement search evidence is unavailable');
+  }
   if (isJsonMediaType(response.headers.get('content-type'))) {
     const bytes = await response.arrayBuffer();
     try {
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (announcementSearch && response.ok && !isVerifiedAnnouncementTitleSearch(
+        compatible, announcementQ.length ? announcementQ[0]!.trim() : null,
+        announcementLimits.length ? Number(announcementLimits[0]) : 20,
+      )) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+          'published announcement search evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +573,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (announcementSearch && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_search_unverified',
+          'published announcement search evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }

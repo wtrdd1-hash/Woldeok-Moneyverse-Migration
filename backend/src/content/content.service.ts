@@ -322,11 +322,11 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, q }: { limit?: number; q?: string } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
+    return (await this.repository.publishedAnnouncements({ limit: contentLimit, ...(q === undefined ? {} : { q }) })).map(
       normalizeAnnouncement,
     );
   }
