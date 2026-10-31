@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import { StockCommunityService } from './stock-community.service';
+import { PublicStockCommunityController } from './stock-community.controller';
 
 function pool() {
   return {
@@ -18,7 +19,7 @@ describe('StockCommunityService public discovery', () => {
     expect(database.query).toHaveBeenCalledTimes(1);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('upper(stock_symbol) = upper($2)');
-    expect(values).toEqual([50, 'wdx', null]);
+    expect(values).toEqual([50, 'wdx', null, null]);
   });
 
   it('rejects malformed symbols before querying PostgreSQL', async () => {
@@ -38,7 +39,7 @@ describe('StockCommunityService recent public title search', () => {
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain('strpos(lower(title), lower($3::text)) > 0');
-    expect(values).toEqual([50, 'wdx', 'WLD %_']);
+    expect(values).toEqual([50, 'wdx', 'WLD %_', null]);
   });
 
   it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
@@ -79,5 +80,23 @@ describe('public board reply-presence discovery', () => {
       new StockCommunityService(database).publicList(undefined, undefined, 'maybe' as 'with'),
     ).rejects.toThrow('invalid reply filter');
     expect(database.query).not.toHaveBeenCalled();
+  });
+});
+
+describe('public board reply-presence HTTP contract', () => {
+  it.each([['with', 'without'], ['maybe'], [''], [null]])(
+    'rejects invalid or repeated reply query %j',
+    async (value) => {
+      const database = pool();
+      const controller = new PublicStockCommunityController(new StockCommunityService(database));
+      await expect(controller.list({ replies: value })).rejects.toThrow('invalid reply filter');
+      expect(database.query).not.toHaveBeenCalled();
+    },
+  );
+  it('forwards a valid reply filter to the bounded DB read', async () => {
+    const database = pool();
+    const controller = new PublicStockCommunityController(new StockCommunityService(database));
+    await expect(controller.list({ replies: 'without' })).resolves.toEqual({ posts: [] });
+    expect(vi.mocked(database.query).mock.calls[0]?.[1]).toEqual([50, null, null, 'without']);
   });
 });
