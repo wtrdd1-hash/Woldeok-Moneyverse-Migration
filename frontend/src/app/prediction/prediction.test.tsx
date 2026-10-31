@@ -1,33 +1,46 @@
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import PredictionPage from './page';
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { parseStockPreview } from './prediction-source';
+import { PredictionView } from './prediction-view';
 
-vi.mock('@/components/locale-provider', () => ({
-  useLocale: () => ({ locale: 'ko' }),
-}));
+const stock = {
+  id: '11111111-1111-4111-8111-111111111111',
+  symbol: 'WDG',
+  name: 'Woldeok Games',
+  current_price: '12345678901234567890',
+};
 
-describe('PredictionPage Polymarket-Style Invariants', () => {
-  it('renders prediction markets list and calculates 2% fee properly', () => {
-    render(<PredictionPage />);
+describe('Prediction market source truth', () => {
+  it('accepts only verified stock snapshots without inventing prediction odds', () => {
+    expect(parseStockPreview({ stocks: [stock] })).toEqual({
+      status: 'verified',
+      stocks: [{ symbol: 'WDG', name: 'Woldeok Games', price: '12345678901234567890' }],
+    });
+  });
 
-    expect(screen.getByText(/월덕 가상 예측 마켓/i)).toBeDefined();
-    expect(screen.getAllByText(/월덕게임즈 \(WDG\) 이번 주 종가 1,500 WLD 돌파할까\?/i)[0]).toBeDefined();
+  it('distinguishes a verified empty list from missing or malformed source', () => {
+    expect(parseStockPreview({ stocks: [] })).toEqual({ status: 'empty', stocks: [] });
+    for (const bad of [null, undefined, {}, { stocks: null }, { stocks: [stock, stock] },
+      { stocks: [{ ...stock, current_price: '-1' }] },
+      { stocks: [{ ...stock, id: 'not-a-uuid' }] },
+    ]) {
+      expect(parseStockPreview(bad).status).toBe('unavailable');
+    }
+  });
 
-    // Select NO side
-    const noButtons = screen.getAllByRole('button', { name: /NO/i });
-    if (noButtons[0]) fireEvent.click(noButtons[0]);
+  it('never renders buy actions, fabricated odds, or a successful trade receipt', () => {
+    render(<PredictionView source={parseStockPreview({ stocks: [stock] })} />);
+    expect(screen.getByText(/Woldeok Games/)).toBeDefined();
+    expect(screen.getByText(/12,345,678,901,234,567,890 WLD/)).toBeDefined();
+    expect(screen.queryByRole('button', { name: /매수|buy/i })).toBeNull();
+    expect(screen.queryByText(/체결 완료|5,080,000 WLD|1\.68x|2\.32x/)).toBeNull();
+    expect(screen.getByText(/최신성은 검증되지 않았습니다/)).toBeDefined();
+  });
 
-    // Click Buy button
-    const buyButton = screen.getByRole('button', { name: /NO 지분 매수하기/i });
-    expect(buyButton).toBeDefined();
-    fireEvent.click(buyButton);
-
-    // Modal popup confirmation
-    expect(screen.getByText('예측 지분 체결 완료!')).toBeDefined();
-
-    const closeModalBtn = screen.getByRole('button', { name: '확인 및 닫기' });
-    fireEvent.click(closeModalBtn);
-    expect(screen.queryByText('예측 지분 체결 완료!')).toBeNull();
+  it('announces unavailable data without claiming zero prediction markets', () => {
+    render(<PredictionView source={parseStockPreview(null)} />);
+    expect(screen.getByRole('status').textContent).toMatch(/확인할 수 없습니다/);
+    expect(screen.queryByText(/0 WLD|체결 완료|1\.68x/)).toBeNull();
   });
 });
