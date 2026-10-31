@@ -8,6 +8,7 @@ import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/s
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
@@ -205,6 +206,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   }
 
+  const stockHistoryPath = parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'history';
+  const stockGrossValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('minGross') : [];
+  const stockHistoryLimitValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('limit') : [];
+  if (stockHistoryPath && (stockGrossValues.length > 1 ||
+      (stockGrossValues.length === 1 && normalizeStockHistoryGrossFloor(stockGrossValues[0]) === null) ||
+      stockHistoryLimitValues.length > 1 ||
+      (stockHistoryLimitValues.length === 1 && !['50', '100', '200'].includes(stockHistoryLimitValues[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -253,6 +264,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
         'The owner transaction detail could not be verified');
+    }
+  }
+
+  if (stockHistoryPath && stockGrossValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedStockHistoryGrossResponse(await response.clone().json(), stockGrossValues[0]!,
+            Number(stockHistoryLimitValues[0] ?? '50'))) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
+          'owner stock trade gross filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
+        'owner stock trade gross filter could not be verified');
     }
   }
 
@@ -420,8 +445,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -470,6 +496,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'stocks' && parts[1] === 'history') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
