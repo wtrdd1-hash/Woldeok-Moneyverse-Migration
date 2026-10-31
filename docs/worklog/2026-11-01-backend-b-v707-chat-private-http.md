@@ -12,3 +12,8 @@
 
 ## Finished
 - Pending.
+
+## In progress — 04:35 KST
+- RED: 6/7 real Nest HTTP tests fail because private cache header is absent; 1 public-route control passes. Initial fixture PG_POOL injection error corrected before authoritative RED.
+- GREEN: 7/7 real HTTP tests pass after ChatModule pre-guard middleware. GET list/unread/messages/sync, 401 denied, POST, HEAD, unrelated public endpoint tested.
+- No SQL, actor/consent, ledger, DB migration, or response body changes.
