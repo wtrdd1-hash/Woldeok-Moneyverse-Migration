@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Living Project Plan
 ## v2026.10.31.1564 — F675-197 Owner Bulk Reminder Mute Management (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **GitHub record:** Draft PR #2183 OPEN/HOLD, engineering issue #2182 OPEN, parent unmerged Draft #2174, initial commit `e5ae731a733a23b019a8721bbac4cf86731748e0`; final SHA CI pending, no merge or deployment.
 - **Cycle:** Previous Improvement v1562 → Current Addition v1564 → Next Improvement v1566 (provisional). Main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` start/mid; stacked on unmerged Draft #2174; handoff #2182; all F675-192–196 remain unimplemented proposals.
 - **Purpose/UX:** authenticated owner selects 1–50 **visible** holdings on /inventory/expiring/reminders/items/bulk, chooses mute/restore for 7-day/1-day/both, reviews and confirms one atomic batch; no hidden all-results selection, no WLD/item mutations. Global OFF blocks writes, failures are UNKNOWN/503 not verified-empty.
 - **API/DB:** CSRF+consent+session POST /api/v1/shop/expiry-reminders/mutes/bulk/preview and /apply; 16KiB, 50 distinct UUID cap, HMAC owner/session/generation/exact-microsecond expiry+revision 120s, idempotency UUID. PostgreSQL SECURITY DEFINER, sorted holding locks, owner+key UNIQUE receipt, all-or-nothing 409 stale; 5 batches/minute; Android parity and private/no-store/noindex/no-referrer all statuses.

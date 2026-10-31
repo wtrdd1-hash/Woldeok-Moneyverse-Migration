@@ -1,4 +1,5 @@
 ## Planning v1564 — 2026-10-31 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **GitHub record:** Draft PR #2183 OPEN/HOLD, engineering issue #2182 OPEN, parent unmerged Draft #2174, initial commit `e5ae731a733a23b019a8721bbac4cf86731748e0`; final SHA CI pending, no merge or deployment.
 - F675-197 owner bulk per-holding reminder mute/restore (1–50 visible selections, explicit preview/confirm, 7d/1d/both), all-or-nothing PostgreSQL operation with HMAC generation+microsecond expiry, revision and 120s preview, idempotency receipt, private Android/Next, cohort>=20 admin KPI. Main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` start/mid, parent Draft #2174, handoff #2182. Previous Improvement v1562 → Current Addition v1564 → Next Improvement v1566. P0 4/P1 6, parent F675-192–196 unimplemented; QA1417 full test timeout and 13 dependency vulnerabilities; 10,001-row acceptance NOT RUN; external new 0/cumulative UNKNOWN/10,000 BLOCKED. Docs only, flag OFF, RELEASE HOLD.
 
 ## Planning v1562 — 2026-10-31 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)

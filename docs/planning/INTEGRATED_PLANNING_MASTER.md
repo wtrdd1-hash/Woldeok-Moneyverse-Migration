@@ -1,5 +1,6 @@
 # Woldeok Moneyverse — Integrated Planning Master
 ## v2026.10.31.1564 — F675-197 Owner Bulk Expiry Reminder Mute Controls (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **GitHub record:** Draft PR #2183 OPEN/HOLD, engineering issue #2182 OPEN, parent unmerged Draft #2174, initial commit `e5ae731a733a23b019a8721bbac4cf86731748e0`; final SHA CI pending, no merge or deployment.
 
 **Cycle and source:** Previous Feature Improvement v1562 → Current Feature Addition v1564 → Next Feature Improvement v1566 (provisional). GitHub main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` checked at start and mid against AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity. This documentation branch is stacked on unmerged Draft #2174; handoff #2182. Main still has an older planning header, so v1556–1562 features remain proposals in the stacked Draft chain, NOT merged source truth. No runtime implementation.
 

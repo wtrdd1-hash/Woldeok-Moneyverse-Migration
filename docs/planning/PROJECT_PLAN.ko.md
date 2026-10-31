@@ -1,5 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
 ## v2026.10.31.1564 — F675-197 회원 만료 알림 일괄 제외·복구 (기능 추가 / DRAFT / RELEASE HOLD)
+- **GitHub 기록:** Draft PR #2183 OPEN/HOLD, 인계 이슈 #2182 OPEN, 선행 미병합 Draft #2174, 첫 커밋 `e5ae731a733a23b019a8721bbac4cf86731748e0`; 최종 SHA CI 결과 대기, 병합·배포 금지.
 - **회차:** 이전 보완 v1562 → 현재 추가 v1564 → 다음 보완 v1566(잠정). main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c` 시작·중간 확인; 미병합 Draft #2174 후속, 인계 #2182. F675-192~196 미구현 초안.
 - **목적·화면:** 본인 인증·동의 회원이 /inventory/expiring/reminders/items/bulk에서 보이는 1~50개만 명시 선택해 7일/1일/둘 다 제외·복구를 검토→확인, 단일 원자 트랜잭션. 숨겨진 전체 검색 결과 선택·WLD·보유 변경 금지. 전체 알림 OFF면 쓰기 차단, 장애는 503/UNKNOWN.
 - **API·DB:** 세션/동의/CSRF POST /api/v1/shop/expiry-reminders/mutes/bulk/preview 및 /apply, 16KiB·중복 없는 UUID 50개, 회원/세션/보유세대/DB 만료 마이크로초/리비전 결속 HMAC 120초, 멱등 UUID. SECURITY DEFINER·상품 UUID 정렬 잠금·회원+키 UNIQUE 영수증·409 전체 롤백, 분당 5배치. Android 동일 규약, 모든 상태 private/no-store/noindex/no-referrer.
