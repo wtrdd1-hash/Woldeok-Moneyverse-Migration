@@ -11,7 +11,7 @@ import { formatDay, formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
-import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardTitleQuery, parseBoardRepliesFilter } from './board-title-search';
 
 export const revalidate = 60;
 
@@ -28,7 +28,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.replies !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,11 +66,14 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const replies = parseBoardRepliesFilter(params.replies);
+  const invalid = search.invalid || replies.invalid;
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (replies.replies !== 'all') query.set('replies', replies.replies);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const data = invalid
     ? null
     : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
 
@@ -131,6 +134,20 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-replies" className="grid gap-1 text-sm font-semibold">
+              댓글 상태
+              <select
+                id="board-replies"
+                name="replies"
+                defaultValue={replies.replies}
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+                aria-describedby="board-search-scope"
+              >
+                <option value="all">전체</option>
+                <option value="with">댓글 있는 글</option>
+                <option value="without">댓글 없는 글</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,11 +162,11 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건의 제목과 댓글 유무에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? (
+          {invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
-              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+              검색어 또는 댓글 필터를 확인해 주세요. 검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
             </p>
           ) : null}
         </CardContent>
@@ -161,15 +178,15 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
-                ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
+              search.query || replies.replies !== 'all'
+                ? '최근 게시글 50건에서 조건에 맞는 글이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
                   : '아직 작성된 글이 없어요.'
