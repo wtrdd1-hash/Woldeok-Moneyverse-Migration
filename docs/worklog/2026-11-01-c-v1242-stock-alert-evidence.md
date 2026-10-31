@@ -16,3 +16,10 @@
 
 ## FINISHED
 - Pending exact-SHA evidence, CI, main recheck, Test/Production/rollback status.
+
+### MIDPOINT — 2026-11-01 01:41 KST
+- RED reproduced: 2 positive evidence assertions failed (6 negative controls passed).
+- GREEN: 8 parser cases PASS, 3 server-rendered member-page cases PASS; frontend TypeScript typecheck PASS.
+- Verified owner-scoped existing Nest GET `/stocks/alerts` and `/stocks/alerts/events` use `stock_alert_rules_list(actor)` and `stock_alert_events_list(actor,limit)` SQL functions. No new backend route or DB grant is necessary.
+- Re-fetched `origin/main` at midpoint; record SHA from gate output. Existing A/B/QA and other C worktrees remain untouched.
+- The page refuses malformed successful 200 payloads and exposes a keyboard-accessible retry. No success-shaped fallback or price coercion.
