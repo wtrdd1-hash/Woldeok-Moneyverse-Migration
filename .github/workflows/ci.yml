@@ -195,6 +195,8 @@ jobs:
           PGPASSWORD: ci_migrator_password
           PGDATABASE: woldeok_moneyverse_dev
           APP_DB_PASSWORD: ci_app_password
+          DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_dev
+          MIGRATOR_DATABASE_URL: postgresql://moneyverse_migrator:ci_migrator_password@localhost:5432/woldeok_moneyverse_dev
         run: node packages/database/ci-apply.mjs
 
       - name: Test
