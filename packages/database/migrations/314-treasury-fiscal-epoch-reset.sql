@@ -102,7 +102,7 @@ BEGIN
  INTO posting_count,balance,treasury_count FROM public.ledger_postings p
  JOIN public.accounts a ON a.id=p.account_id WHERE p.transaction_id=tx;
  IF posting_count<2 OR balance<>0 OR treasury_count<1
- OR NOT EXISTS(SELECT 1 FROM public.ledger_transactions WHERE id=tx) THEN
+ OR NOT EXISTS(SELECT 1 FROM public.ledger_transactions WHERE id=tx AND created_at>=began) THEN
   RAISE EXCEPTION 'TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE' USING ERRCODE='23514';
  END IF;
  RETURN NULL;
