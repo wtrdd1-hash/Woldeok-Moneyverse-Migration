@@ -17,3 +17,5 @@
 ## Release disposition
 - Source change is read-only and fail-closed. Full exact-HEAD CI, independent PostgreSQL, authenticated official Test E2E, security, edge privacy, and production provenance gates must all pass before merge. Prior shared global `X-Robots-Tag` issue is tracked by Draft #2225; page metadata alone does not certify actual HTTP headers.
 - No main, shared development DB, Test, Production, GitOps, other agent worktrees or core schedules are to be modified. Missing gates are BLOCKED, not PASS.
+
+- **Android app-api parity:** The same default-unfiltered bypass existed in the mobile proxy. RED showed HTTP 200 for malformed `quantity=NaN`; GREEN verifies both filtered/unfiltered responses and returns HTTP 503 `stock_history_source_unverified` for invalid default payloads, while retaining verified-empty 200 and private no-store/noindex/no-referrer. Existing contract route is reused.

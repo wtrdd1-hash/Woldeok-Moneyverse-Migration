@@ -11,7 +11,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
-import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
+import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryResponse } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
@@ -316,13 +316,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
-  if (stockHistoryPath && stockGrossValues.length === 1 && response.ok) {
+  if (stockHistoryPath && request.method === 'GET' && response.ok) {
     try {
       if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !isVerifiedStockHistoryGrossResponse(await response.clone().json(), stockGrossValues[0]!,
-            Number(stockHistoryLimitValues[0] ?? '50'))) {
-        return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
-          'owner stock trade gross filter could not be verified');
+          !isVerifiedStockHistoryResponse(await response.clone().json(),
+            Number(stockHistoryLimitValues[0] ?? '50'), stockGrossValues[0])) {
+        return gatewayProblem(503, 'Service Unavailable',
+          stockGrossValues.length ? 'stock_history_gross_unverified' : 'stock_history_source_unverified',
+          'owner stock trade history could not be verified');
       }
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
@@ -510,6 +511,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (privateStockHistory) headers.set('referrer-policy', 'no-referrer');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

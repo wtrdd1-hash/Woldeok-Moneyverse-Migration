@@ -16,3 +16,5 @@
 
 ## 배포 보류
 - 최종 HEAD 전체 빌드·테스트·보안·실제 PostgreSQL·app-api·공식 Test 인증 E2E·CI·운영 근거가 모두 통과하기 전 PR 병합 및 운영 승격 금지. 미실행·실패를 PASS로 기록하지 않음. A/B/QA/Gemini 작업 및 핵심 예약 보호.
+
+- **Android app-api 연계:** 모바일 프록시도 기본 조회에서 검증을 건너뛰는 결함 확인(잘못된 `quantity=NaN`에 HTTP 200). 수정 후 필터 유무 모두 검증하며 기본 조회 오류는 HTTP 503 `stock_history_source_unverified` 반환, 검증된 빈 목록은 200 유지. 비공개·비캐시·비색인·참조 차단 헤더 적용. 기존 API 계약 유지.
