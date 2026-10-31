@@ -11,6 +11,9 @@
  */
 
 :root {
+  --font-myeongjo: 'Nanum Myeongjo';
+  --font-noto-kr: 'Noto Sans KR Variable';
+  --font-plex-mono: 'IBM Plex Mono';
   --radius: 1rem;
 
   /* Paper and ink - Warm Moonlit Ivory */
