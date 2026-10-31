@@ -190,7 +190,12 @@ const config: NextConfig = {
       });
     }
 
-    return [{ source: '/:path*', headers: security }];
+    // The prediction route has no certified market or settlement contract. Its
+    // noindex policy must override the global public indexing header on HTTP.
+    return [
+      { source: '/:path*', headers: security },
+      { source: '/prediction', headers: [{ key: 'x-robots-tag', value: 'noindex, nofollow' }] },
+    ];
   },
 
   async redirects() {
