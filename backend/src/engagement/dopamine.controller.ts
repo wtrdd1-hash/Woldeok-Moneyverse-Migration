@@ -1,4 +1,4 @@
-﻿import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
@@ -114,21 +114,20 @@ export class DopamineController {
 
   @Post('bull-bear-vote')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Vote on Bull/Bear market sentiment and join 10,000 WLD midnight pool' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Bull/Bear votes are unavailable pending durable owner receipts and ledger-backed rewards' })
   async voteBullBear(
     @Req() request: RequestWithSession,
-    @Body() body: BullBearVoteDto,
+    @Body() _body: BullBearVoteDto,
   ) {
-    const userId = requireUserId(request);
-    return {
-      success: true,
-      userId,
-      vote: body.vote,
-      stockSymbol: body.stockSymbol || 'MARKET_OVERALL',
-      poolEligible: true,
-      airdropPoolWld: 10000,
-      settlementTime: '00:00:00 KST',
-    };
+    requireUserId(request);
+    // No owner-scoped vote receipt, idempotency, or WLD settlement exists.
+    // Reject rather than claiming a vote or jackpot eligibility in memory.
+    throw new ServiceUnavailableException({
+      code: 'BULL_BEAR_VOTE_UNAVAILABLE',
+      message: 'Bull/Bear voting is unavailable until persisted votes and reward receipts are verified',
+    });
   }
 
   @Post('mini-showdown')

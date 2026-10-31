@@ -82,7 +82,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
           role="button"
           tabIndex={0}
           onClick={() => setActiveModal('fever')}
-          className="group relative flex flex-col justify-between rounded-2xl border border-amber-500/30 bg-slate-950/60 p-4 transition-all duration-200 hover:border-amber-500/70 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer"
+          className="group relative flex flex-col justify-between rounded-2xl border border-amber-500/30 bg-slate-950/60 p-4 transition-all duration-200 hover:border-amber-500/70 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
         >
           <div className="flex items-start justify-between">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform">
@@ -186,6 +186,13 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
           role="button"
           tabIndex={0}
           onClick={() => setActiveModal('poll')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              setActiveModal('poll');
+            }
+          }}
+          aria-label="시장 방향 투표 이용 불가 안내 열기"
           className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-4 transition-all duration-200 hover:border-blue-500/50 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer"
         >
           <div className="flex items-start justify-between">
@@ -193,16 +200,16 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <TrendingUp className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
-              {t('arcade.poll.badge', locale, '일일 배팅')}
+              투표 중단
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              {t('arcade.poll.title', locale, '주식 여론 잭팟')}
+              시장 방향 투표 · 준비 중
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.poll.desc', locale, '내일의 코스피/나스닥 상승/하락을 투표하고 다수결/소수결 보너스를 획득하세요.')}
+              검증된 투표 영수증과 보상 정산이 없어 현재 참여할 수 없습니다.
             </p>
           </div>
         </div>
@@ -264,9 +271,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
             <BullBearPoll
               symbol="CHIPS"
               stockName="침팬지 반도체"
-              onVote={(dir) => {
-                showRewardNotice(`[${dir === 'bull' ? '상승' : '하락'}] 투표 완료! 자정 10,000 WLD 잭팟 풀 등록.`);
-              }}
             />
           </div>
         </div>

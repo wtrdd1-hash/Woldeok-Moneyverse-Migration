@@ -5,7 +5,7 @@
  * not a substitute for database, finance, session, UI or rollback acceptance.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readlinkSync, realpathSync } from 'node:fs';
+import { readFileSync, readlinkSync, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
@@ -86,22 +86,24 @@ export function mergeServiceBuildIds(texts) {
   return result;
 }
 
-function activeServiceBuildId(service) {
+function activeServiceBuildEvidence(service) {
   const raw = execFileSync('systemctl', ['show', service, '--property=EnvironmentFiles', '--value'], {
     encoding: 'utf8', timeout: 5000,
   });
   const files = parseEnvironmentFileLocations(raw);
   if (!files.length) throw new Error('no environment files for active systemd service: ' + service);
   const contents = [];
+  let newestMtimeMs = 0;
   for (const entry of files) {
     try {
       contents.push(readFileSync(entry.file, 'utf8'));
+      newestMtimeMs = Math.max(newestMtimeMs, statSync(entry.file).mtimeMs);
     } catch (error) {
       if (entry.optional && error?.code === 'ENOENT') continue;
       throw error;
     }
   }
-  return mergeServiceBuildIds(contents);
+  return { sha: mergeServiceBuildIds(contents), newestMtimeMs };
 }
 
 export function verifyHostRuntimeIdentity(snapshot) {
@@ -150,6 +152,19 @@ export function verifyHostRuntimeIdentity(snapshot) {
     fail('public_treasury_not_fail_closed');
   }
 
+  // An updated EnvironmentFile or artifact is not proof that systemd restarted
+  // the live process. Reject evidence written after the current process started.
+  const validTime = (value) => Number.isFinite(value) && value > 0;
+  const startedAfter = (started, ...files) =>
+    validTime(started) && files.every((modified) => validTime(modified) && started >= modified);
+  if (!startedAfter(snapshot?.backendStartedAtMs, snapshot?.backendEnvMtimeMs, snapshot?.manifestMtimeMs)) {
+    fail('backend_process_predates_release_files');
+  }
+  if (!startedAfter(snapshot?.frontendStartedAtMs, snapshot?.frontendEnvMtimeMs,
+    snapshot?.manifestMtimeMs, snapshot?.frontendBuildMtimeMs)) {
+    fail('frontend_process_predates_release_files');
+  }
+
   const root = snapshot?.releasePath;
   if (channel === 'prod') {
     // Release folders are immutable generations. An in-place manifest relabel
@@ -170,16 +185,32 @@ export function verifyHostRuntimeIdentity(snapshot) {
   return { ok: failures.length === 0, failures };
 }
 
-function systemdProcessDirectory(service) {
+function systemdMainPid(service) {
   const raw = execFileSync('systemctl', ['show', service, '--property=MainPID', '--value'], {
-    encoding: 'utf8',
-    timeout: 5000,
+    encoding: 'utf8', timeout: 5000,
   }).trim();
   const pid = Number(raw);
   if (!Number.isSafeInteger(pid) || pid <= 1) {
     throw new Error('inactive systemd service: ' + service);
   }
-  return realpathSync(readlinkSync('/proc/' + pid + '/cwd'));
+  return pid;
+}
+
+function systemdProcessEvidence(service) {
+  const pid = systemdMainPid(service);
+  const cwd = realpathSync(readlinkSync('/proc/' + pid + '/cwd'));
+  const raw = execFileSync('systemctl', ['show', service, '--property=ExecMainStartTimestamp', '--value'], {
+    encoding: 'utf8', timeout: 5000,
+  }).trim();
+  // systemd timestamps include the host timezone (e.g. KST), which Date.parse
+  // does not reliably accept; GNU date parses the host's own systemd format.
+  const epoch = Number(execFileSync('date', ['-d', raw, '+%s'], {
+    encoding: 'utf8', timeout: 5000,
+  }).trim());
+  if (!Number.isSafeInteger(epoch) || epoch <= 0 || systemdMainPid(service) !== pid) {
+    throw new Error('unstable or invalid systemd process generation: ' + service);
+  }
+  return { pid, cwd, startedAtMs: epoch * 1000 };
 }
 
 async function collectSnapshot(channel, expectedSha) {
@@ -209,13 +240,28 @@ async function collectSnapshot(channel, expectedSha) {
     versionResponse.json(), frontendResponse.json(), treasuryResponse.json(),
   ]);
 
+  const backendProcess = systemdProcessEvidence(backendService);
+  const frontendProcess = systemdProcessEvidence(frontendService);
+  const backendEnv = activeServiceBuildEvidence(backendService);
+  const frontendEnv = activeServiceBuildEvidence(frontendService);
+  if (systemdMainPid(backendService) !== backendProcess.pid ||
+      systemdMainPid(frontendService) !== frontendProcess.pid) {
+    throw new Error('systemd process generation changed while collecting release evidence');
+  }
+
   return {
     channel,
     expectedSha,
     releasePath,
     manifest,
-    backendReleaseSha: activeServiceBuildId(backendService),
-    frontendReleaseSha: activeServiceBuildId(frontendService),
+    backendReleaseSha: backendEnv.sha,
+    backendEnvMtimeMs: backendEnv.newestMtimeMs,
+    backendStartedAtMs: backendProcess.startedAtMs,
+    frontendReleaseSha: frontendEnv.sha,
+    frontendEnvMtimeMs: frontendEnv.newestMtimeMs,
+    frontendStartedAtMs: frontendProcess.startedAtMs,
+    manifestMtimeMs: statSync(path.join(releasePath, '.moneyverse-release.json')).mtimeMs,
+    frontendBuildMtimeMs: statSync(path.join(releasePath, 'frontend/.next/BUILD_ID')).mtimeMs,
     frontendBuildSha: readFileSync(path.join(releasePath, 'frontend/.next/BUILD_ID'), 'utf8').trim(),
     publicVersionSha: version?.id,
     publicFrontendVersionSha: frontendVersion?.id,
@@ -224,8 +270,8 @@ async function collectSnapshot(channel, expectedSha) {
       cacheControl: treasuryResponse.headers.get('cache-control'),
       body: treasuryBody,
     },
-    backendCwd: systemdProcessDirectory(backendService),
-    frontendCwd: systemdProcessDirectory(frontendService),
+    backendCwd: backendProcess.cwd,
+    frontendCwd: frontendProcess.cwd,
   };
 }
 

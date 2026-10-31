@@ -122,10 +122,21 @@ export class StockController {
   @Get('history')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Trades made by the caller' })
-  async history(@Req() request: RequestWithSession, @Query('limit') limit?: unknown) {
+  async history(@Req() request: RequestWithSession, @Query('limit') limit?: unknown, @Query('minGross') minGross?: unknown) {
     const count = limit === undefined || limit === '50' ? 50 : limit === '100' ? 100 : limit === '200' ? 200 : null;
     if (count === null) throw new BadRequestException('limit must be 50, 100 or 200');
-    return { trades: await this.service().history(requireUserId(request), count) };
+    if (minGross !== undefined && (typeof minGross !== 'string' || !/^[1-9][0-9]{0,29}$/.test(minGross))) {
+      throw new BadRequestException('minGross must be a canonical positive WLD integer');
+    }
+    const trades = await this.service().history(requireUserId(request), count);
+    if (minGross === undefined) return { trades };
+    const minimum = BigInt(minGross);
+    return { trades: trades.filter((trade) => {
+      if (typeof trade.gross_amount !== 'string' || !/^[0-9]+$/.test(trade.gross_amount)) {
+        throw new ServiceUnavailableException('stock trade gross amount is unverified');
+      }
+      return BigInt(trade.gross_amount) >= minimum;
+    }) };
   }
 
   /**

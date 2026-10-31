@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import { ContentModule } from '../content/content.module';
 import type { Queryable } from '../core/db';
@@ -7,6 +8,16 @@ import { EncryptionService } from '../security/encryption.service';
 import { ProfileController } from './profile.controller';
 import { ProfileImageController } from './profile-image.controller';
 import { ProfileRepository } from './profile.repository';
+
+export class ProfilePrivateResponseMiddleware {
+  use(_request: Request, response: Response, next: NextFunction): void {
+    // Authentication can refuse before controller decorators run; protect that response too.
+    response.setHeader('Cache-Control', 'private, no-store');
+    response.setHeader('X-Robots-Tag', 'noindex');
+    response.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  }
+}
 
 @Module({
   // ContentModule for `PrivateImageStorage`: a profile picture and a gallery
@@ -31,4 +42,9 @@ import { ProfileRepository } from './profile.repository';
     },
   ],
 })
-export class ProfileModule {}
+export class ProfileModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Do not attach this to the separately routed public profile-image bytes endpoint.
+    consumer.apply(ProfilePrivateResponseMiddleware).forRoutes(ProfileController);
+  }
+}

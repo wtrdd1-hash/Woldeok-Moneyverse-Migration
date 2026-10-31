@@ -7,7 +7,8 @@ import { PostingStrip } from '@/components/posting-strip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
+import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { requireMember } from '@/lib/session';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { sides } from '../sides';
@@ -53,6 +54,7 @@ export default async function WalletActivityPage({
     `/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? `&from=${range.from}&to=${range.to}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
   );
   const history = range && !verifiedWalletCalendarPage(unverifiedHistory, range, direction) ? null : unverifiedHistory;
+  const pageSummary = history ? verifiedWalletPageSummary(history) : null;
 
 
   return (
@@ -105,6 +107,21 @@ export default async function WalletActivityPage({
       {range && <p className="text-sm text-muted-foreground">선택한 한국 시간 날짜: {range.from} ~ {range.to} (양 끝 날짜 포함)</p>}
       {rangeError && <p role="alert" className="text-sm text-destructive">{rangeError}</p>}
       <p className="text-sm text-muted-foreground">확정된 본인 원장 기록을 한 번에 최대 50건씩 표시합니다. 입출금은 내 현금·은행 계정의 합계 순변동 기준이며, 계정 간 이동은 순변동 없음에 표시됩니다. 필터는 서버에서 이전 기록까지 적용됩니다.</p>
+      {history && (
+        <section aria-label="현재 지갑 기록 페이지 합계" className="rounded-xl border bg-card p-4 space-y-2">
+          {pageSummary ? (
+            <>
+              <h2 className="text-sm font-semibold">현재 화면 {pageSummary.transactionCount}건 · 검증된 WLD 변동</h2>
+              <dl className="grid gap-2 sm:grid-cols-3 text-sm">
+                <div><dt className="text-muted-foreground">현금 증감</dt><dd className="font-mono break-all">{groupDigits(pageSummary.cashDelta)} WLD</dd></div>
+                <div><dt className="text-muted-foreground">은행 증감</dt><dd className="font-mono break-all">{groupDigits(pageSummary.bankDelta)} WLD</dd></div>
+                <div><dt className="text-muted-foreground">순변동</dt><dd className="font-mono break-all">{groupDigits(pageSummary.netDelta)} WLD</dd></div>
+              </dl>
+              <p className="text-xs text-muted-foreground">이전 페이지와 전체 기간 합계가 아닙니다. 거래 정산 완료 증명도 아닙니다.</p>
+            </>
+          ) : <p role="status" className="text-sm text-muted-foreground">현재 화면 합계를 검증할 수 없습니다. 거래별 기록만 확인해 주세요.</p>}
+        </section>
+      )}
       {history?.hasMore && <p role="status" className="text-sm text-muted-foreground">이전 기록이 더 있습니다.</p>}
       {cursor && <Button asChild variant="outline" size="sm" className="w-fit"><Link href={activityPeriodUrl(period, direction, range)}>처음부터 다시 보기</Link></Button>}
       <Card>

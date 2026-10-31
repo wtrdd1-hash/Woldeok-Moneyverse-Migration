@@ -321,8 +321,8 @@ export class SpaceController {
 
   @ApiOperation({ summary: '개인 공간 부동산세 상태 조회' })
   @Get(':id/tax/status')
-  async getSpaceTaxStatus(@Param('id', ParseUUIDPipe) spaceId: string) {
-    const taxStatus = await this.spaceService.getSpaceTaxStatus(spaceId);
+  async getSpaceTaxStatus(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) spaceId: string) {
+    const taxStatus = await this.spaceService.getSpaceTaxStatus(requireUserId(req), spaceId);
     return { taxStatus };
   }
 
@@ -340,8 +340,8 @@ export class SpaceController {
 
   @ApiOperation({ summary: '개인 공간 상세 조회' })
   @Get(':id')
-  async getSpaceById(@Param('id', ParseUUIDPipe) spaceId: string) {
-    const space = await this.spaceService.getSpaceById(spaceId);
+  async getSpaceById(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) spaceId: string) {
+    const space = await this.spaceService.getSpaceById(requireUserId(req), spaceId);
     return { space };
   }
 

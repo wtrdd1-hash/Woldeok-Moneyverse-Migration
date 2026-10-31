@@ -27,10 +27,12 @@ describe('AI Financial Advisor Deoki (/advisor)', () => {
     expect(clientSource).toContain('/api/advisor/deoki/ask');
   });
 
-  it('ensures backend fallback for diagnose and ask routes', () => {
-    expect(diagnoseSource).toContain('Balanced Growth');
-    expect(diagnoseSource).toContain('1.84');
-    expect(askSource).toContain('generateDeokiResponse');
-    expect(askSource).toContain('샤프 지수');
+  it('does not manufacture financial advice when backend evidence is unavailable', () => {
+    expect(diagnoseSource).not.toContain('Balanced Growth');
+    expect(diagnoseSource).not.toContain('12450000');
+    expect(askSource).not.toContain('generateDeokiResponse');
+    expect(askSource).toContain('csrfToken: session.csrfToken');
+    expect(clientSource).toContain('포트폴리오 진단 증빙 확인 불가');
+    expect(clientSource).toContain("json?.sourceStatus === 'VERIFIED'");
   });
 });

@@ -28,7 +28,7 @@ import {
   CasinoSelfLimitDto,
   CasinoThemePlayDto,
 } from './casino.dto';
-import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
+import { CASINO_OPEN, CasinoInputError, CasinoJackpotProofUnavailableError, CasinoRepository } from './casino.repository';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 
 /**
@@ -136,6 +136,12 @@ export class CasinoController {
    * broken, and it must stay a 500 and page somebody.
    */
   private mapped(error: unknown, refusal: Refusal): unknown {
+    if (error instanceof CasinoJackpotProofUnavailableError) {
+      return new ServiceUnavailableException({
+        message: 'jackpot evidence unavailable',
+        code: 'jackpot_proof_unavailable',
+      });
+    }
     if (error instanceof CasinoInputError) return new BadRequestException(error.message);
     if (isAuthorizationFailure(error) || isRoleRefusal(error)) {
       return new ForbiddenException(refusal.forbidden);

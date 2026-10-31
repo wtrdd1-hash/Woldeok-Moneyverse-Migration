@@ -10,9 +10,10 @@ function guardsOn(method: 'saveSettings' | 'autoGenerate' | 'publish' | 'generat
 
 describe('AI news privileged mutation guards', () => {
   it.each(['saveSettings', 'autoGenerate', 'publish'] as const)(
-    'requires CSRF and recent reauthentication for %s',
+    'requires CSRF without repeated reauthentication for %s',
     (method) => {
-      expect(guardsOn(method)).toEqual(expect.arrayContaining([CsrfGuard, ReauthGuard]));
+      expect(guardsOn(method)).toEqual(expect.arrayContaining([CsrfGuard]));
+      expect(guardsOn(method)).not.toContain(ReauthGuard);
     },
   );
 

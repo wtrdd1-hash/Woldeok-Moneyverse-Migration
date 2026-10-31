@@ -5,6 +5,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -198,12 +199,28 @@ export class WorkController {
 
   @Get('receipts')
   @ApiOperation({ summary: 'What the work paid, and the ledger transaction it paid through' })
-  async receipts(@Req() request: RequestWithSession) {
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  async receipts(@Req() request: RequestWithSession, @Query('minReward') minReward?: unknown) {
+    if (minReward !== undefined &&
+        (typeof minReward !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(minReward))) {
+      throw new BadRequestException('minReward must be a canonical non-negative WLD integer');
+    }
+    const rows = await this.guarded(
+      () => this.repository().receipts(requireUserId(request)),
+      'work receipts are unavailable',
+    );
+    if (minReward === undefined) return { receipts: rows };
+    // The SECURITY DEFINER read is owner-scoped and limited to the latest 20;
+    // never interpret this filter as an all-time reward history search.
+    if (!Array.isArray(rows) || rows.length > 20 || rows.some((row) =>
+      typeof row.reward_amount !== 'string' || !/^(?:0|[1-9][0-9]{0,18})$/.test(row.reward_amount))) {
+      throw new ServiceUnavailableException('work receipt reward evidence is unavailable');
+    }
     return {
-      receipts: await this.guarded(
-        () => this.repository().receipts(requireUserId(request)),
-        'work receipts are unavailable',
-      ),
+      scope: 'recent20' as const,
+      minReward,
+      receipts: rows.filter((row) => BigInt(row.reward_amount) >= BigInt(minReward)),
     };
   }
 

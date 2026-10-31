@@ -20,9 +20,9 @@ export class SpaceService {
     return this.repo.listUserSpaces(actorUserId);
   }
 
-  async getSpaceById(spaceId: string) {
+  async getSpaceById(actorUserId: string, spaceId: string) {
     try {
-      const space = await this.repo.getSpaceById(spaceId);
+      const space = await this.repo.getSpaceById(actorUserId, spaceId);
       if (!space) throw new NotFoundException('공간을 찾을 수 없습니다.');
       return space;
     } catch (err: unknown) {
@@ -66,9 +66,9 @@ export class SpaceService {
     }
   }
 
-  async getSpaceTaxStatus(spaceId: string) {
+  async getSpaceTaxStatus(actorUserId: string, spaceId: string) {
     try {
-      return await this.repo.getSpaceTaxStatus(spaceId);
+      return await this.repo.getSpaceTaxStatus(actorUserId, spaceId);
     } catch (err: unknown) {
       if (err instanceof SpaceInputError) {
         if (err.message.includes('not found')) throw new NotFoundException('공간을 찾을 수 없습니다.');

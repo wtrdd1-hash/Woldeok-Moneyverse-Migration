@@ -30,4 +30,23 @@ describe('verified owner notification listing', () => {
     expect(query.mock.calls[0]![0]).toContain('is_read = FALSE');
   });
 
+  it('never returns an untrusted navigation link from the owner notification list', async () => {
+    const links = [
+      'https://evil.example/redirect', '//evil.example/path', 'javascript:alert(1)',
+      '/wallet%2f%2fevil.example', '/wallet\\evil.example', '/wallet\nnext',
+      '/wallets', '/inventory/expiring', '/wallet?tab=history', '/shop/purchases', null,
+    ];
+    const query = vi.fn().mockResolvedValue({ rows: links.map((link, index) => ({
+      id: String(index), user_id: 'owner', category: 'SYSTEM', title: 'notice', body: 'safe', link,
+      dedupe_key: null, is_read: false, read_at: null, created_at: new Date('2026-10-30T00:00:00Z'),
+    })) });
+    const service = new NotificationService({ query } as never);
+    const rows = await service.listNotifications('11111111-1111-4111-8111-111111111111', {});
+    expect(rows.map((row) => (row as { link: string | null }).link)).toEqual([
+      null, null, null, null, null, null, null, null,
+      '/wallet?tab=history', '/shop/purchases', null,
+    ]);
+    expect(query.mock.calls[0]?.[1]?.[0]).toBe('11111111-1111-4111-8111-111111111111');
+  });
+
 });

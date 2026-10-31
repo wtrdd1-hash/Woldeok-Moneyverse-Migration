@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const PASS_COUNT = 5;
+const FULL_SHA = /^[0-9a-f]{40}$/i;
 const TERMINAL_RESULTS = new Set(['PASS', 'FAIL', 'BLOCKED']);
 const DYNAMIC_SCENARIOS = new Set(['valid', 'not_found', 'permission_denied']);
 
@@ -25,7 +27,7 @@ function addIssue(issues, message) {
   issues.push(message);
 }
 
-export function verifyLedger({ inventory, fixtures, ledger }) {
+export function verifyLedger({ inventory, fixtures, ledger, expectedSha }) {
   const issues = [];
   if (inventory.schemaVersion !== 1 || !Array.isArray(inventory.pages)) {
     addIssue(issues, 'inventory must be schemaVersion 1 with pages');
@@ -41,7 +43,12 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
   if (ledger.inventorySha256 !== inventory.inventorySha256) {
     addIssue(issues, `inventory hash mismatch: expected ${inventory.inventorySha256}, got ${ledger.inventorySha256 ?? 'missing'}`);
   }
-  if (!isNonEmptyString(ledger.candidateSha)) addIssue(issues, 'ledger candidateSha is required');
+  if (!FULL_SHA.test(expectedSha ?? '')) addIssue(issues, 'expected candidate SHA must be a full 40-character Git commit SHA');
+  if (!FULL_SHA.test(ledger.candidateSha ?? '')) addIssue(issues, 'ledger candidateSha must be a full 40-character Git commit SHA');
+  if (FULL_SHA.test(expectedSha ?? '') && FULL_SHA.test(ledger.candidateSha ?? '') &&
+      expectedSha.toLowerCase() !== ledger.candidateSha.toLowerCase()) {
+    addIssue(issues, `candidate SHA mismatch: expected ${expectedSha}, got ${ledger.candidateSha}`);
+  }
 
   const fixtureById = new Map(fixtures.fixtures.map((fixture) => [fixture.id, fixture]));
   const pageByRoute = new Map(inventory.pages.map((page) => [page.route, page]));
@@ -58,6 +65,10 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
     if (!isNonEmptyString(entry.evidenceUri)) addIssue(issues, `${label} requires evidenceUri`);
     if (!isNonEmptyString(entry.executedAt)) addIssue(issues, `${label} requires executedAt`);
     if (!isNonEmptyString(entry.runtimeVersion)) addIssue(issues, `${label} requires runtimeVersion`);
+    else if (!FULL_SHA.test(entry.runtimeVersion) ||
+        (FULL_SHA.test(ledger.candidateSha ?? '') && entry.runtimeVersion.toLowerCase() !== ledger.candidateSha.toLowerCase())) {
+      addIssue(issues, `${label} runtimeVersion must match ledger candidate SHA`);
+    }
     if (!isNonEmptyString(entry.apiVersion)) addIssue(issues, `${label} requires apiVersion`);
     if (entry.result !== 'PASS' && !isNonEmptyString(entry.defectId)) {
       addIssue(issues, `${label} requires defectId for ${entry.result ?? 'non-pass'} result`);
@@ -98,10 +109,18 @@ export function verifyLedger({ inventory, fixtures, ledger }) {
 
 async function main() {
   const argv = process.argv.slice(2);
-  const inventory = await readJson(requiredOption(argv, '--inventory'));
-  const fixtures = await readJson(requiredOption(argv, '--fixtures'));
-  const ledger = await readJson(requiredOption(argv, '--ledger'));
-  const report = verifyLedger({ inventory, fixtures, ledger });
+  // Use the checked-out commit as independent evidence unless the Test candidate
+  // SHA is explicitly supplied. Never trust the ledger's self-declared SHA.
+  const expectedSha = argv.includes('--expected-sha')
+    ? requiredOption(argv, '--expected-sha')
+    : execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const inventory = await readJson(argv.includes('--inventory')
+    ? requiredOption(argv, '--inventory') : 'artifacts/qa/route-inventory.json');
+  const fixtures = await readJson(argv.includes('--fixtures')
+    ? requiredOption(argv, '--fixtures') : 'scripts/qa/fixtures/full-route-fixtures.v1.json');
+  const ledger = await readJson(argv.includes('--ledger')
+    ? requiredOption(argv, '--ledger') : 'artifacts/qa/full-route-ledger.json');
+  const report = verifyLedger({ inventory, fixtures, ledger, expectedSha });
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (!report.ok) process.exitCode = 1;
 }

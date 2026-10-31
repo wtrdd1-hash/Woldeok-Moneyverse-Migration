@@ -19,6 +19,8 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
+import { WorkReceiptRewardFilter } from './work-receipt-filter';
+import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts, workReceiptsApiPath } from '@/lib/work-receipt-reward-floor';
 import { normalizedWorkAvailableOnly, normalizedWorkDuration, normalizedWorkRewardCeiling, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
@@ -60,13 +62,16 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage({ searchParams }: {
-  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string; availableOnly?: string }>;
+  readonly searchParams?: Promise<{ maxDurationSeconds?: string; maxReward?: string; availableOnly?: string; receiptMinReward?: string | string[] }>;
 }) {
   await requireMember();
   const filters = await searchParams;
   const maxDurationSeconds = normalizedWorkDuration(filters?.maxDurationSeconds);
   const maxReward = normalizedWorkRewardCeiling(filters?.maxReward);
   const availableOnly = normalizedWorkAvailableOnly(filters?.availableOnly);
+  const receiptFloorRaw = filters?.receiptMinReward;
+  const receiptFloor = normalizeWorkReceiptFloor(receiptFloorRaw);
+  const receiptFilterInvalid = receiptFloorRaw !== undefined && receiptFloor === null;
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
@@ -74,7 +79,7 @@ export default async function WorkPage({ searchParams }: {
     apiOrNull<{ tasks: readonly WorkTask[] }>(workTasksApiPath(maxDurationSeconds, maxReward, availableOnly)),
     (maxDurationSeconds || maxReward || availableOnly) ? apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks') : Promise.resolve(null),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
-    apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
+    receiptFilterInvalid ? Promise.resolve(null) : apiOrNull<unknown>(workReceiptsApiPath(receiptFloor ?? undefined)),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
     apiOrNull<WorkSummary>('/api/v1/work'),
     apiOrNull<{
@@ -87,7 +92,10 @@ export default async function WorkPage({ searchParams }: {
   const verifiedBoard = availableOnly && !isVerifiedAvailableWorkBoard(board) ? null : board;
   const tasks = verifiedBoard?.tasks ?? [];
   const open = (assignments?.assignments ?? []).filter(isOpen);
-  const paid = receipts?.receipts ?? [];
+  const verifiedReceipts = receiptFloor !== null
+    ? parseFilteredWorkReceipts(receipts, receiptFloor)
+    : (receipts as { receipts: readonly WorkReceipt[] } | null);
+  const paid = verifiedReceipts?.receipts ?? [];
   const now = Date.now();
   // A filtered board must not erase server-provided durations for active assignments.
   const durationTasks = (maxDurationSeconds || maxReward || availableOnly) ? (fullBoard?.tasks ?? []) : tasks;
@@ -398,6 +406,14 @@ export default async function WorkPage({ searchParams }: {
         </section>
       )}
 
+      {/* 5. Owner-scoped recent work reward receipts; never confuse outage with empty. */}
+      <WorkReceiptRewardFilter
+        selected={typeof receiptFloorRaw === 'string' ? receiptFloorRaw : undefined}
+        invalid={receiptFilterInvalid}
+        unavailable={!receiptFilterInvalid && verifiedReceipts === null}
+        verifiedEmpty={!receiptFilterInvalid && verifiedReceipts !== null && receiptFloor !== null && paid.length === 0}
+        isEn={isEn}
+      />
       {/* 5. 최근 수령 영수증 */}
       {paid.length > 0 && (
         <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">

@@ -18,7 +18,13 @@ function healthy() {
       mutableGitCheckout: false,
     },
     backendReleaseSha: sha,
+    backendStartedAtMs: 2000,
+    backendEnvMtimeMs: 1000,
     frontendReleaseSha: sha,
+    frontendStartedAtMs: 2000,
+    frontendEnvMtimeMs: 1000,
+    manifestMtimeMs: 1000,
+    frontendBuildMtimeMs: 1000,
     frontendBuildSha: sha,
     publicVersionSha: sha,
     publicFrontendVersionSha: sha,
@@ -199,4 +205,26 @@ test('production channel also requires independent frontend and Treasury evidenc
   assert.deepEqual(verifyHostRuntimeIdentity(state), { ok: true, failures: [] });
   state.publicFrontendVersionSha = '1793277134644';
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('public_frontend_sha_mismatch'));
+});
+
+test('rejects backend started before its effective environment file was updated', () => {
+  const state = healthy();
+  state.backendEnvMtimeMs = 3000;
+  assert.ok(verifyHostRuntimeIdentity(state).failures.includes('backend_process_predates_release_files'));
+});
+
+test('rejects frontend started before manifest, build or environment was updated', () => {
+  for (const key of ['manifestMtimeMs', 'frontendBuildMtimeMs', 'frontendEnvMtimeMs']) {
+    const state = healthy();
+    state[key] = 3000;
+    assert.ok(verifyHostRuntimeIdentity(state).failures.includes('frontend_process_predates_release_files'));
+  }
+});
+
+test('rejects missing and non-finite process start evidence', () => {
+  const state = healthy();
+  state.backendStartedAtMs = null;
+  state.frontendStartedAtMs = NaN;
+  assert.ok(verifyHostRuntimeIdentity(state).failures.includes('backend_process_predates_release_files'));
+  assert.ok(verifyHostRuntimeIdentity(state).failures.includes('frontend_process_predates_release_files'));
 });

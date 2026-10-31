@@ -67,3 +67,12 @@ jobs:
             echo '- P0 #1663: preserve 352 unmerged recovered PR heads and review queue.'
             echo '- P0 #1088: independent exact-SHA Test/auth/finance/DB/security approval is required before enabling integration.'
           } >> "$GITHUB_STEP_SUMMARY"
+
+          # P0 #2031 / QA v1410: independently compare public Production
+          # with canonical main. This is read-only and reuses the existing
+          # inventory schedule; no extra workflow step or scheduler.
+          if [[ "${GITHUB_EVENT_NAME:-}" == "schedule" || "${GITHUB_EVENT_NAME:-}" == "workflow_dispatch" ]]; then
+            main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
+            [[ "$main_sha" =~ ^[0-9a-f]{40}$ ]] || { echo '::error::Canonical main SHA unavailable'; exit 1; }
+            node scripts/release/verify-production-public-main.mjs --main-sha "$main_sha"
+          fi

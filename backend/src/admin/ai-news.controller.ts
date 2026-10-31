@@ -35,7 +35,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -178,7 +177,7 @@ export class AiNewsController {
   }
 
   @Put('settings')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Store the model address, model name and, optionally, a new key' })
   saveSettings(@Req() request: RequestWithSession, @Body() body: SaveAiNewsSettingsDto) {
     return this.guarded(
@@ -215,7 +214,7 @@ export class AiNewsController {
   }
 
   @Post('auto-generate')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({
     summary: 'Auto-generate and optionally publish market news based on currently registered active stocks',
   })
@@ -227,7 +226,7 @@ export class AiNewsController {
   }
 
   @Post('scenarios/:id/publish')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Publish a scenario as a market event, with the values the operator settled on' })
   publish(
     @Req() request: RequestWithSession,

@@ -1,5 +1,6 @@
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import type { SupportKstRange } from './support-date-range';
 
 export interface SupportThreadRow {
   readonly thread_id: string;
@@ -23,7 +24,19 @@ export interface SupportMessageRow {
 export class SupportRepository {
   constructor(private readonly pool: Queryable) {}
 
-  myThreads(actor: string, status: string | null = null, q?: string, sort?: 'oldest') {
+  myThreads(actor: string, status: string | null = null, q?: string, sort?: 'oldest', range?: SupportKstRange) {
+    if (range) {
+      const params: unknown[] = [actor, 100];
+      const clauses: string[] = [];
+      if (q !== undefined) { params.push(q); clauses.push(`strpos(lower(subject), lower($${params.length})) > 0`); }
+      if (status !== null) { params.push(status); clauses.push(`status = $${params.length}`); }
+      params.push(range.fromUtc); clauses.push(`last_message_at >= $${params.length}::timestamptz`);
+      params.push(range.toUtcExclusive); clauses.push(`last_message_at < $${params.length}::timestamptz`);
+      return queryRows<SupportThreadRow>(this.pool,
+        `SELECT thread_id::text,subject,status,created_at,updated_at,last_message_at
+         FROM public.support_my_threads($1,$2) WHERE ${clauses.join(' AND ')}
+         ORDER BY last_message_at ${sort === 'oldest' ? 'ASC,thread_id ASC' : 'DESC,thread_id DESC'} LIMIT 50`, params);
+    }
     if (sort === 'oldest') {
       // Reorder the latest 100 owner-scoped conversations; never claim an all-time oldest search.
       const clauses: string[] = [];

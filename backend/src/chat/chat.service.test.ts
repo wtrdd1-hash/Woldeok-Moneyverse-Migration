@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import type { PostgresChatRepository } from './chat.repository';
 
@@ -61,6 +61,22 @@ describe('ChatService', () => {
     const messages = await service.listMessages(actorId, convId);
     expect(messages[0].sequence).toBe('1');
     expect(messages[1].sequence).toBe('2');
+  });
+
+  it('maps SQL participant denials to HTTP 403 across private read and archive paths', async () => {
+    const actor = '11111111-1111-4111-8111-111111111111';
+    const conversation = '22222222-2222-4222-8222-222222222222';
+    const denied = Object.assign(new Error('participant required'), { code: '42501' });
+    vi.mocked(mockRepo.listConversations).mockRejectedValueOnce(denied);
+    await expect(service.listConversations(actor)).rejects.toThrow(ForbiddenException);
+    vi.mocked(mockRepo.listMessages).mockRejectedValueOnce(denied);
+    await expect(service.listMessages(actor, conversation)).rejects.toThrow(ForbiddenException);
+    vi.mocked(mockRepo.syncMessages).mockRejectedValueOnce(denied);
+    await expect(service.syncMessages(actor, conversation)).rejects.toThrow(ForbiddenException);
+    vi.mocked(mockRepo.archiveConversation).mockRejectedValueOnce(denied);
+    await expect(service.archiveConversation(actor, conversation, true)).rejects.toThrow(ForbiddenException);
+    vi.mocked(mockRepo.totalUnreadCount).mockRejectedValueOnce(denied);
+    await expect(service.totalUnreadCount(actor)).rejects.toThrow(ForbiddenException);
   });
 
   it('delegates markAsRead to repository', async () => {

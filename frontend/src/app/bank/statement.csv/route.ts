@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import { bankStatementCsv, type BankStandingSnapshot } from '../bank-statement';
+import { bankStatementCsv } from '../bank-statement';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +13,7 @@ const privateHeaders = {
 export async function GET(): Promise<Response> {
   await requireMember();
   try {
-    const snapshot = await api<BankStandingSnapshot>('/api/v1/banking/standing/snapshot');
+    const snapshot = await api<unknown>('/api/v1/banking/standing/snapshot');
     const csv = bankStatementCsv(snapshot);
     return new Response(csv, {
       status: 200,

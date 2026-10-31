@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { OVERALL_HEADLINE, STATUS_LABEL, statusAggregateState } from '@/lib/status';
+import { parseStatusRows } from '@/lib/status-response';
 import { asStatusState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
 import { canonicalUrl } from '@/lib/seo';
@@ -55,8 +56,9 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
   };
 
 export default async function StatusPage() {
-  const data = await publicApi<{ status: StatusRow[] }>('/api/v1/status', 30);
-  const rows = data?.status ?? [];
+  const data = await publicApi<unknown>('/api/v1/status', 30);
+  const parsedRows = parseStatusRows(data);
+  const rows: StatusRow[] = parsedRows ?? [];
   const overall = statusAggregateState(rows);
   const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
@@ -104,7 +106,7 @@ export default async function StatusPage() {
           }
         />
 
-        {data === null ? (
+        {parsedRows === null ? (
           <EmptyState title="지금은 상태를 불러올 수 없어요." />
         ) : rows.length === 0 ? (
           <EmptyState title="아직 기록된 상태가 없어요." />

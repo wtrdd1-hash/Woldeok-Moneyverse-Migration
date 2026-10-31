@@ -1,6 +1,7 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+vi.mock('./actions', () => ({ customizePocketAction: vi.fn() }));
+import { fireEvent, render, screen } from '@testing-library/react';
 import { SavingPocketCustomizeDialog } from './saving-pocket-customize-dialog';
 import type { SavingPocket } from './types';
 
@@ -18,6 +19,27 @@ const mockPocket: SavingPocket = {
 };
 
 describe('SavingPocketCustomizeDialog Component Tests', () => {
+  it('retains one UUIDv4 for an unchanged intent and rotates it when the selected fee changes', () => {
+    const { rerender } = render(
+      <SavingPocketCustomizeDialog pocket={mockPocket} cashBalance="100000" open={true} onOpenChange={() => {}} />,
+    );
+    const readKey = () => (document.querySelector('input[name="idempotencyKey"]') as HTMLInputElement | null)?.value;
+    const first = readKey();
+    expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    rerender(<SavingPocketCustomizeDialog pocket={mockPocket} cashBalance="100000" open={true} onOpenChange={() => {}} />);
+    expect(readKey()).toBe(first);
+    fireEvent.click(screen.getByTitle('에메랄드 그린'));
+    const second = readKey();
+    expect(second).not.toBe(first);
+    rerender(<SavingPocketCustomizeDialog pocket={mockPocket} cashBalance="100000" open={true} onOpenChange={() => {}} />);
+    expect(readKey()).toBe(second);
+    rerender(<SavingPocketCustomizeDialog pocket={mockPocket} cashBalance="100000" open={false} onOpenChange={() => {}} />);
+    rerender(<SavingPocketCustomizeDialog pocket={mockPocket} cashBalance="100000" open={true} onOpenChange={() => {}} />);
+    const reopened = readKey();
+    expect(reopened).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(reopened).not.toBe(second);
+  });
+
   it('renders preview card and fee details correctly', () => {
     render(
       <SavingPocketCustomizeDialog

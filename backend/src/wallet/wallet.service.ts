@@ -63,6 +63,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   STOCK_LEAGUE_ENTRY: '주식 챔피언십 참가비',
   MARKETPLACE_APPRAISAL: '마켓 감정서 발급 수수료',
   SHOP_MAINTENANCE: '주간 유지비',
+  SINK_BANK_POCKET_CUSTOMIZE: '포켓 커스텀 수수료',
   // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
   VIRTUAL_STOCK_BUY: '주식 매수',
   VIRTUAL_STOCK_SELL: '주식 매도',
@@ -443,7 +444,9 @@ export class WalletService {
   async activityPage(authenticatedUserId: string, authenticatedSessionId: string,
     period: WalletActivityPeriod = 'all', cursor?: string, direction: WalletActivityDirection = 'all',
     rangeInput?: { from?: unknown; to?: unknown },
-  ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string }> {
+  ): Promise<{ transactions: WalletTransactionView[]; hasMore: boolean; nextCursor: string | null; asOf: string; pageSummary: {
+    scope: 'VISIBLE_PAGE_ONLY'; transactionCount: number; cashDelta: string; bankDelta: string; netDelta: string;
+  } | null }> {
     const owner = requireUuid(authenticatedUserId, 'authenticated user id');
     const session = requireUuid(authenticatedSessionId, 'authenticated session id');
     if (period !== 'all' && period !== '7d' && period !== '30d') throw new WalletInputError('invalid wallet activity period');
@@ -460,6 +463,16 @@ export class WalletService {
       ...(decoded ? { after: { at: range ? decoded.afterAt : new Date(decoded.afterAt), id: decoded.afterId } } : {}),
     });
     const transactions = normalizeTransactions(rows.slice(0, 50));
+    // Sum only owner-scoped visible rows, never the lookahead or older cursor pages.
+    // Legacy projections without both pocket deltas cannot prove a summary.
+    const completePockets = transactions.every((item) => item.cashDelta !== undefined && item.bankDelta !== undefined);
+    const pageSummary = completePockets ? {
+      scope: 'VISIBLE_PAGE_ONLY' as const,
+      transactionCount: transactions.length,
+      cashDelta: transactions.reduce((total, item) => total + BigInt(item.cashDelta!), 0n).toString(),
+      bankDelta: transactions.reduce((total, item) => total + BigInt(item.bankDelta!), 0n).toString(),
+      netDelta: transactions.reduce((total, item) => total + BigInt(item.netAmount), 0n).toString(),
+    } : null;
     const hasMore = rows.length > 50;
     const last = rows[49];
     const exactAfter = range ? (last as any)?.cursor_at : undefined;
@@ -471,7 +484,7 @@ export class WalletService {
       afterId: requireUuid(last.transaction_id, 'cursor transaction id'),
       ...(range ? { rangeFrom: range.from, rangeTo: range.to } : {}),
     }) : null;
-    return { transactions, hasMore, nextCursor, asOf: asOf.toISOString() };
+    return { transactions, hasMore, nextCursor, asOf: asOf.toISOString(), pageSummary };
   }
 
   /**

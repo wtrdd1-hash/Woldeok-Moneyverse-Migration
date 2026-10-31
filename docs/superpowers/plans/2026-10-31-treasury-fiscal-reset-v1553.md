@@ -1,0 +1,7 @@
+# v1553 — Treasury fiscal epoch recovery plan
+1. Read authority documents, inspect actual Production double-entry Treasury 0 vs five legacy vaults 220923528, 552 unlinked Treasury source and 744 dividend sources. Explicitly define owner-authorized Treasury-only reset and non-goals (member/canonical money, MINT, historic payouts).
+2. Full pg_dump + SHA256 independent backup on miniPC, restore identical snapshot to isolated Test PostgreSQL database, record source counts. No LIVE write before Test.
+3. TDD RED then migration 314: serializable exact baseline and archival epoch with backup hash; set only legacy vault balances to 0; deferred triggers for noncanonical credits/events, backdated insertion, obsolete transaction reuse, exact posting amount, archive immutability.
+4. Run synthetic PostgreSQL 16 workflow: original 552/744 remain, synthetic user 100 stays, current vault zero, invalid legacy operations fail, valid new source in explicit rolled-back Test transaction passes (run 41188959960 SUCCESS).
+5. STILL REQUIRED: execute 314 on restored Production-data Test, assert original user/canonical balances unchanged, test service/API paths and legacy function failures, restore backup in independent database, full exact backend/frontend CI plus rollback and supply/MINT certification. Only then approve Production staged no-downtime migration.
+6. If miniPC/PR tools blocked, stop; do not emulate Production deployment, record exact hold and leave safe draft branch. Do not disable financial 503 until real financial funds are available and certified.

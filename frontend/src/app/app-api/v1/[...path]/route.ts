@@ -1,14 +1,19 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
-import { parseSecurityEventCategory, securityEventsMatchCategory } from '@/lib/security-event-category';
+import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
+import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
+import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
+import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -89,7 +94,7 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } },
+    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' } },
   );
 }
 
@@ -107,6 +112,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
+  const supportQuery = request.nextUrl.searchParams;
+  const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
+  const supportRange = supportDateRequested && supportQuery.getAll('from').length === 1 && supportQuery.getAll('to').length === 1
+    ? parseSupportDateRange(supportQuery.get('from'), supportQuery.get('to')) : null;
+  if (supportDateRequested && (!supportRange || supportQuery.getAll('status').length > 1 ||
+    supportQuery.getAll('q').length > 1 || supportQuery.getAll('sort').length > 1 ||
+    (supportQuery.has('sort') && supportQuery.get('sort') !== 'oldest') ||
+    (supportQuery.has('status') && !['open', 'waiting_user', 'resolved'].includes(supportQuery.get('status')!)) ||
+    (supportQuery.has('q') && (!supportQuery.get('q')?.trim() || supportQuery.get('q')!.length > 80)))) {
+    return gatewayProblem(400, 'Bad Request', 'support_date_invalid', 'invalid support date window');
+  }
+
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
@@ -114,6 +132,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     : 'all';
   if (securityEventPath && securityCategory === null) {
     return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+  }
+  const sortValues = securityEventPath ? request.nextUrl.searchParams.getAll('sort') : [];
+  const securitySort = securityEventPath
+    ? parseSecurityEventOrder(sortValues.length > 1 ? sortValues : sortValues[0])
+    : 'recent';
+  if (securityEventPath && (securitySort === null ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'category' && key !== 'sort'))) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_security_sort', 'security event sort must be recent or oldest');
   }
 
   const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
@@ -177,6 +203,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
   }
 
+  const workReceiptPath = parts.length === 2 && parts[0] === 'work' && parts[1] === 'receipts' && request.method === 'GET';
+  const workRewardValues = workReceiptPath ? request.nextUrl.searchParams.getAll('minReward') : [];
+  if (workRewardValues.length > 1 ||
+      (workRewardValues.length === 1 && normalizeWorkReceiptFloor(workRewardValues[0]) === null)) {
+    return gatewayProblem(400, 'Bad Request', 'work_receipt_reward_invalid',
+      'minimum reward must be a canonical non-negative WLD integer');
+  }
+
   const receiptAmountFilter =
     parts.length === 2 &&
     parts[0] === 'shop' &&
@@ -194,6 +228,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       'minimum WLD must be a canonical positive integer',
     );
 
+  }
+
+  const stockHistoryPath = parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'history';
+  const stockGrossValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('minGross') : [];
+  const stockHistoryLimitValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('limit') : [];
+  if (stockHistoryPath && (stockGrossValues.length > 1 ||
+      (stockGrossValues.length === 1 && normalizeStockHistoryGrossFloor(stockGrossValues[0]) === null) ||
+      stockHistoryLimitValues.length > 1 ||
+      (stockHistoryLimitValues.length === 1 && !['50', '100', '200'].includes(stockHistoryLimitValues[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
   const outgoing = new Headers({
@@ -229,6 +273,31 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  // Bank standing is an owner-only observation; a legacy success-shaped response
+  // must not become a verified Android balance or leak extra upstream fields.
+  if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
+      parts[2] === 'snapshot' && request.method === 'GET') {
+    const privateHeaders = {
+      'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex',
+      'referrer-policy': 'no-referrer',
+    };
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Bank Snapshot Unavailable', 'bank_snapshot_unavailable',
+        'The owner bank snapshot could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON bank snapshot');
+      const snapshot = parseBankStandingSnapshot(await response.clone().json());
+      if (!snapshot) throw new Error('unverified bank snapshot');
+      return contractJson(snapshot, { status: 200, headers: privateHeaders });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bank_snapshot_unverified',
+        'The owner bank snapshot could not be verified');
+    }
+  }
+
   if (isWalletDetailPath(parts) && request.method === 'GET') {
     if (!response.ok) {
       const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
@@ -244,6 +313,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
         'The owner transaction detail could not be verified');
+    }
+  }
+
+  if (stockHistoryPath && stockGrossValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedStockHistoryGrossResponse(await response.clone().json(), stockGrossValues[0]!,
+            Number(stockHistoryLimitValues[0] ?? '50'))) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
+          'owner stock trade gross filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
+        'owner stock trade gross filter could not be verified');
     }
   }
 
@@ -268,6 +351,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       } catch {
         return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
       }
+    }
+  }
+
+  // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
+  if (supportRange && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedSupportDateRows(await response.clone().json(), supportRange,
+            supportQuery.get('status'), supportQuery.get('q')?.trim() ?? null, supportQuery.get('sort'))) {
+        return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
     }
   }
 
@@ -352,6 +448,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
 
 
+  if (workReceiptPath && workRewardValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseFilteredWorkReceipts(await response.clone().json(), workRewardValues[0]!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
+          'work receipt reward evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
+        'work receipt reward evidence is unavailable');
+    }
+  }
+
   if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
     try {
       const payload: unknown = await response.clone().json();
@@ -398,8 +507,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts) headers.set('x-robots-tag', 'noindex');
+  const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -413,9 +523,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const compatible = addAppJsonCompatibility(parsed);
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
-        if (verified === null || securityCategory === null || !securityEventsMatchCategory(verified, securityCategory)) {
+        if (verified === null || securityCategory === null || securitySort === null ||
+            !securityEventsMatchCategory(verified, securityCategory) ||
+            (sortValues.length > 0 && !securityEventsMatchOrder(verified, securitySort))) {
           return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
         }
+      }
+      if (request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+          response.ok && compatible && typeof compatible === 'object' && 'pageSummary' in compatible &&
+          (compatible as { pageSummary?: unknown }).pageSummary !== null &&
+          !verifiedWalletPageSummary(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'wallet_page_summary_unverified', 'wallet page totals could not be verified');
       }
       if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
         return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
@@ -448,6 +566,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'stocks' && parts[1] === 'history') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isWalletDetailPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
@@ -459,6 +582,7 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
+  if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {

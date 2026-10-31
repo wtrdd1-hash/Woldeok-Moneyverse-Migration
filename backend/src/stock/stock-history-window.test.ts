@@ -47,3 +47,26 @@ describe('owner-only stock trade history window', () => {
     expect(rows[0]?.gross_amount).toBe('900719925474099312345');
   });
 });
+
+describe('member stock history minimum gross WLD', () => {
+  it('filters exact integer strings inside the owner-scoped recent window', async () => {
+    const history = vi.fn(async () => [
+      { trade_id: 'a', gross_amount: '900719925474099312345' },
+      { trade_id: 'b', gross_amount: '900719925474099312344' },
+      { trade_id: 'c', gross_amount: '1' },
+    ]);
+    const subject = new StockController(new StockService({ history } as unknown as StockRepository));
+    await expect(subject.history(request, '100', '900719925474099312345')).resolves.toEqual({
+      trades: [{ trade_id: 'a', gross_amount: '900719925474099312345' }],
+    });
+    expect(history).toHaveBeenCalledWith(USER, 100);
+  });
+
+  it.each(['0', '-1', '01', '1.5', '1e3', ' 1', '', ['1', '2'], '9'.repeat(31)])(
+    'rejects invalid, repeated or unsafe minimum gross %s before querying', async (raw) => {
+      const { controller: subject, history } = controller();
+      await expect(subject.history(request, '50', raw)).rejects.toMatchObject({ status: 400 });
+      expect(history).not.toHaveBeenCalled();
+    },
+  );
+});

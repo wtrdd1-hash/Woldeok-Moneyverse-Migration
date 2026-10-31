@@ -13,6 +13,14 @@ const FACES = new Set(['heads', 'tails']);
  */
 export const CASINO_OPEN = 'enabled';
 
+/** No audited, dedicated arcade jackpot ledger source exists in the tracked schema. */
+export class CasinoJackpotProofUnavailableError extends Error {
+  constructor() {
+    super('jackpot proof unavailable');
+    this.name = 'CasinoJackpotProofUnavailableError';
+  }
+}
+
 export class CasinoInputError extends Error {
   constructor(message: string) {
     super(message);
@@ -633,15 +641,8 @@ export class CasinoRepository {
     return row;
   }
 
-  /** Read current casino house reserve, jackpot pool and today's play statistics. */
+  /** Do not equate treasury/sink balances or an unscoped play count with a funded jackpot. */
   async jackpotPool(): Promise<CasinoJackpotPoolRow> {
-    const row = await queryOne<CasinoJackpotPoolRow>(
-      this.pool,
-      `SELECT 
-         COALESCE((SELECT balance::text FROM public.accounts WHERE system_key = 'sink' AND status = 'active' LIMIT 1), '12845000') AS house_reserve,
-         COALESCE((SELECT balance::text FROM public.accounts WHERE system_key = 'treasury' AND status = 'active' LIMIT 1), '74500000') AS jackpot_amount,
-         COALESCE((SELECT count(*)::text FROM public.virtual_casino_theme_plays WHERE play_date = (now() AT TIME ZONE 'Asia/Seoul')::date), '0') AS total_plays_today`,
-    );
-    return row ?? { house_reserve: '12845000', jackpot_amount: '74500000', total_plays_today: '0' };
+    throw new CasinoJackpotProofUnavailableError();
   }
 }

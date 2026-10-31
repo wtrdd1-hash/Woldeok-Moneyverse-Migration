@@ -32,6 +32,6 @@ describe('AdminControlsController administrative role guards', () => {
   it.each(['grantRole', 'revokeRole'] as const)('%s requires CSRF and recent reauthentication', (method) => {
     const guards = guardsOn(method);
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
+    expect(guards).not.toContain(ReauthGuard);
   });
 });

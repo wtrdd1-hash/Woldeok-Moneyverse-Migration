@@ -50,7 +50,7 @@ describe('Space Property Tax & Foreclosure System', () => {
       estimatedForeclosurePrice: 50000,
     });
 
-    const status = await service.getSpaceTaxStatus(spaceId);
+    const status = await service.getSpaceTaxStatus('11111111-1111-4111-8111-111111111111', spaceId);
     expect(status.spaceType).toBe('SPACE_OFFICE');
     expect(status.dailyTaxWld).toBe(250);
     expect(status.isDelinquent).toBe(false);
@@ -59,7 +59,7 @@ describe('Space Property Tax & Foreclosure System', () => {
 
   it('throws NotFoundException when tax status requested for non-existent space', async () => {
     vi.mocked(mockRepo.getSpaceTaxStatus).mockRejectedValueOnce(new SpaceInputError('space not found'));
-    await expect(service.getSpaceTaxStatus('99999999-9999-9999-9999-999999999999')).rejects.toThrow(
+    await expect(service.getSpaceTaxStatus('11111111-1111-4111-8111-111111111111', '99999999-9999-9999-9999-999999999999')).rejects.toThrow(
       NotFoundException,
     );
   });

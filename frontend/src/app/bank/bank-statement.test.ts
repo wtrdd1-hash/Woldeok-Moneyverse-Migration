@@ -20,5 +20,9 @@ describe('private member bank CSV snapshot', () => {
     expect(() => bankStatementCsv({ ...snapshot, cashBalance: '=HYPERLINK(1)' })).toThrow();
     expect(() => bankStatementCsv({ ...snapshot, cashBalance: '1e3' })).toThrow();
     expect(() => bankStatementCsv({ ...snapshot, observedAt: '=cmd' })).toThrow();
+    expect(() => bankStatementCsv({ ...snapshot, observedAt: '2026-02-30T00:00:00.000Z' })).toThrow();
+    expect(() => bankStatementCsv({ ...snapshot, observedAt: '2026-10-28T07:00:00Z' })).toThrow();
+    expect(() => bankStatementCsv({ ...snapshot, depositBalance: '-1' })).toThrow();
+    expect(() => bankStatementCsv({ ...snapshot, readOnly: false as true })).toThrow();
   });
 });

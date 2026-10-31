@@ -30,99 +30,80 @@ export interface DeokiDiagnosis {
   readonly createdAt: string;
 }
 
+
+// The legacy chart DTO uses number. Reject WLD values it cannot represent
+// exactly instead of silently rounding a member's balance or valuation.
+function safeWld(value: unknown): number {
+  const text = typeof value === 'bigint' ? value.toString() :
+    typeof value === 'number' && Number.isSafeInteger(value) ? String(value) :
+    typeof value === 'string' ? value : null;
+  if (text === null || !/^(0|[1-9][0-9]*)$/.test(text)) throw new Error('advisor source amount invalid');
+  const parsed = BigInt(text);
+  if (parsed > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('advisor source amount exceeds safe range');
+  return Number(parsed);
+}
+
+function safeSum(values: readonly number[]): number {
+  const total = values.reduce((sum, value) => sum + BigInt(value), 0n);
+  if (total > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('advisor total exceeds safe range');
+  return Number(total);
+}
+
 export class DeokiAdvisorRepository {
   constructor(private readonly db: Queryable) {}
 
   async diagnoseUserPortfolio(userId: string): Promise<DeokiDiagnosis> {
-    // 1. 현금 잔액 조회
-    let cash = 0;
-    try {
-      const cashRes = await this.db.query(
-        `SELECT ab.available_amount as balance
-         FROM public.accounts a
-         JOIN public.account_balances ab ON ab.account_id = a.id
-         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH'
-         LIMIT 1`,
-        [userId]
-      );
-      const firstCash = cashRes.rows[0];
-      cash = firstCash ? Math.max(0, Number(firstCash.balance)) : 0;
-    } catch {
-      cash = 0;
-    }
+    // An absent optional bank account is zero; a failed query is not zero.
+    const cashRes = await this.db.query(
+      `SELECT ab.available_amount AS balance
+       FROM public.accounts a
+       JOIN public.account_balances ab ON ab.account_id = a.id
+       WHERE a.owner_user_id = $1 AND a.account_type = 'USER_CASH'
+       LIMIT 1`, [userId],
+    );
+    const cash = cashRes.rows[0] ? safeWld(cashRes.rows[0].balance) : 0;
 
-    // 2. 예금/뱅킹 잔액 조회 (R11: 실제 DB enum인 USER_BANK 사용)
-    let savings = 0;
-    try {
-      const savingsRes = await this.db.query(
-        `SELECT ab.available_amount as balance
-         FROM public.accounts a
-         JOIN public.account_balances ab ON ab.account_id = a.id
-         WHERE a.owner_user_id = $1 AND a.account_type = 'USER_BANK'
-         LIMIT 1`,
-        [userId]
-      );
-      const firstSavings = savingsRes.rows[0];
-      savings = firstSavings ? Math.max(0, Number(firstSavings.balance)) : 0;
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query USER_BANK balance:', err);
-      savings = 0;
-    }
+    const savingsRes = await this.db.query(
+      `SELECT ab.available_amount AS balance
+       FROM public.accounts a
+       JOIN public.account_balances ab ON ab.account_id = a.id
+       WHERE a.owner_user_id = $1 AND a.account_type = 'USER_BANK'
+       LIMIT 1`, [userId],
+    );
+    const savings = savingsRes.rows[0] ? safeWld(savingsRes.rows[0].balance) : 0;
 
-    // 3. 보유 가상 주식 평가액 조회
+    // 047 and 312 scope holdings to the authenticated actor inside SQL.
+    const stocksRes = await this.db.query(
+      `SELECT symbol, quantity AS shares, current_price, market_value AS eval_value
+       FROM public.stock_my_positions($1::uuid)
+       ORDER BY market_value DESC`, [userId],
+    );
     let totalStockVal = 0;
     const holdingStocks: Array<{ symbol: string; shares: number; price: number; evalVal: number }> = [];
-
-    try {
-      const stocksRes = await this.db.query(
-        `SELECT vs.symbol, vsp.quantity as shares, vs.current_price,
-                (vsp.quantity * vs.current_price) as eval_value
-         FROM public.virtual_stock_positions vsp
-         JOIN public.virtual_stocks vs ON vs.id = vsp.stock_id
-         WHERE vsp.user_id = $1 AND vsp.quantity > 0
-         ORDER BY eval_value DESC`,
-        [userId]
-      );
-
-      for (const row of stocksRes.rows) {
-        const val = Math.max(0, Number(row.eval_value));
-        totalStockVal += val;
-        holdingStocks.push({
-          symbol: row.symbol,
-          shares: Number(row.shares),
-          price: Number(row.current_price),
-          evalVal: val,
-        });
-      }
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query stock positions:', err);
-      totalStockVal = 0;
+    for (const row of stocksRes.rows) {
+      const val = safeWld(row.eval_value);
+      totalStockVal = safeSum([totalStockVal, val]);
+      holdingStocks.push({
+        symbol: row.symbol,
+        shares: safeWld(row.shares),
+        price: safeWld(row.current_price),
+        evalVal: val,
+      });
     }
 
-    // 4. 국채 보유액 조회 (R11: 실제 국채 보유 테이블 treasury_bond_holdings 연동)
-    let bondsVal = 0;
-    try {
-      const bondsRes = await this.db.query(
-        `SELECT COALESCE(SUM(purchase_price_total_wld + accrued_interest_wld), 0) as total_bonds
-         FROM public.treasury_bond_holdings
-         WHERE user_id = $1 AND status = 'HOLDING'`,
-        [userId]
-      );
-      const firstBond = bondsRes.rows[0];
-      if (firstBond) {
-        bondsVal = Number(firstBond.total_bonds);
-      }
-    } catch (err) {
-      console.warn('[DeokiAdvisor] Failed to query treasury bonds:', err);
-      bondsVal = 0;
-    }
-
-    const totalAsset = Math.max(1, cash + savings + totalStockVal + bondsVal);
+    const bondsRes = await this.db.query(
+      `SELECT COALESCE(SUM(purchase_price_total_wld::numeric + accrued_interest_wld::numeric), 0)::text AS total_bonds
+       FROM public.bond_owner_holdings($1::uuid)
+       WHERE status = 'HOLDING'`, [userId],
+    );
+    const bondsVal = safeWld(bondsRes.rows[0]?.total_bonds ?? '0');
+    const totalAsset = safeSum([cash, savings, totalStockVal, bondsVal]);
 
     // 5. 비중 및 집중도(HHI) 계산
-    const cashRatio = (cash + savings) / totalAsset;
-    const stockRatio = totalStockVal / totalAsset;
-    const bondRatio = bondsVal / totalAsset;
+    const divisor = totalAsset || 1;
+    const cashRatio = (cash + savings) / divisor;
+    const stockRatio = totalStockVal / divisor;
+    const bondRatio = bondsVal / divisor;
 
     let hhi = 0;
     let topSymbol: string | null = null;
@@ -232,36 +213,22 @@ export class DeokiAdvisorRepository {
       topStockRatio: Math.round(topStockRatio * 100),
     };
 
-    // 8. 진단 결과 DB 원장 기록 (게스트 지원 및 안전 폴백)
-    let diagId = '00000000-0000-0000-0000-000000000000';
-    let createdAt = new Date().toISOString();
-
-    const targetUserId = (userId && userId !== '00000000-0000-0000-0000-000000000000') ? userId : null;
-
-    try {
-      const insertRes = await this.db.query(
-        `INSERT INTO public.ai_financial_diagnoses (
-           user_id, pr_index, risk_level, asset_summary, diagnostic_notes, rebalance_suggestions
-         ) VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, created_at`,
-        [
-          targetUserId,
-          prIndex,
-          riskLevel,
-          JSON.stringify(assetSummary),
-          JSON.stringify(notes),
-          JSON.stringify(suggestions),
-        ]
-      );
-
-      const row = insertRes.rows[0];
-      if (row) {
-        diagId = row.id;
-        createdAt = row.created_at;
-      }
-    } catch {
-      // 게스트 유저이거나 DB 쓰기 경합 시에도 진단 결과는 정상 반환
+    // A diagnosis is not successful until the durable receipt is committed.
+    // The clean-schema app role currently lacks INSERT; this must fail closed
+    // until a reviewed actor-scoped SECURITY DEFINER receipt function exists.
+    const insertRes = await this.db.query(
+      `INSERT INTO public.ai_financial_diagnoses (
+         user_id, pr_index, risk_level, asset_summary, diagnostic_notes, rebalance_suggestions
+       ) VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, created_at`,
+      [userId, prIndex, riskLevel, JSON.stringify(assetSummary), JSON.stringify(notes), JSON.stringify(suggestions)],
+    );
+    const row = insertRes.rows[0];
+    if (typeof row?.id !== 'string' || !row.created_at) {
+      throw new Error('advisor diagnosis receipt unavailable');
     }
+    const diagId: string = row.id;
+    const createdAt: string = row.created_at;
 
     return {
       id: diagId,

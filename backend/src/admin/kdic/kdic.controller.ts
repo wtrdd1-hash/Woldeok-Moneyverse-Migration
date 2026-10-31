@@ -9,7 +9,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
-import { ReauthGuard } from '../../auth/guards/reauth.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -40,7 +39,7 @@ export class AdminKdicController {
   }
 
   @Post('assess-premiums')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '예보료 징수 — 원장 검증 전 집행 보류' })
   async assessPremiums() {
@@ -48,7 +47,7 @@ export class AdminKdicController {
   }
 
   @Post('liquidity-loan')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '긴급 유동성 대여 — 원장 검증 전 집행 보류' })
   async injectLiquidity() {
@@ -56,7 +55,7 @@ export class AdminKdicController {
   }
 
   @Post('payout')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '대위변제 — 원장 검증 전 집행 보류' })
   async executePayout() {

@@ -2,16 +2,14 @@ import {
   Body,
   Controller,
   Get,
-  Inject,
   Param,
-  ParseUUIDPipe,
   Post,
   ServiceUnavailableException,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IsIn, IsInt, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsPositive, IsString, IsUUID, Max, Min } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -105,20 +103,20 @@ export class DerivativesController {
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 진입 (증거금 잠금)' })
   @Post('open')
   async openPosition(
-    @Req() req: RequestWithSession,
-    @Body() dto: OpenDerivativePositionDto,
+    @Req() _req: RequestWithSession,
+    @Body() _dto: OpenDerivativePositionDto,
   ) {
-    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
+    return this.unverifiedData();
   }
 
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 시장가 청산' })
   @Post(':id/close')
   async closePosition(
-    @Req() req: RequestWithSession,
-    @Param('id') positionId: string,
-    @Body() dto: CloseDerivativePositionDto,
+    @Req() _req: RequestWithSession,
+    @Param('id') _positionId: string,
+    @Body() _dto: CloseDerivativePositionDto,
   ) {
-    throw new ServiceUnavailableException('시뮬레이션 기능입니다. 실제 자금 정산 및 상태 변경은 지원되지 않습니다.');
+    return this.unverifiedData();
   }
 
   @ApiOperation({ summary: 'Verified derivatives settlement history (unavailable pending ledger certification)' })

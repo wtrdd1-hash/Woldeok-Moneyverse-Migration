@@ -1,0 +1,40 @@
+# v2026.10.31.1567 — 운영 승격 지시 이행 기록 (진행 중 / 차단)
+
+## 시작
+사용자는 오류 해결 및 무중단 운영 승격을 명시적으로 지시했다. 기존 `accounts`, `account_balances`, `system_treasury_vaults` 앱 쓰기 권한에 대한 운영자 승인은 유지하며 해당 권한만으로 작업을 중단하지 않는다.
+시작·중간 확인된 main: `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`. 별도 브랜치 `ops/20261031-production-blocker-verification-v1567` 사용, 제미나이 등 다른 작업자의 브랜치·초안 PR 변경하지 않음.
+검토: AGENTS.md, 통합 개발 총서, 살아있는 통합 기획, 현재 런타임, 배포 표준, v1212 금융 권한 기록, v1550 실제 운영 승격 기록, 배포 workflow, 공개 PR·main 상태.
+
+## 중간 확인
+- 원격 장치 `debian13`·`minipc`·`weoldog` 모두 OFFLINE. 이번 세션에서는 운영 호스트 명령·DB 조회·실제 서버 검증이 불가능했다.
+- 문서상 마지막 확인 운영 버전: v1550, 코드 SHA `bc8cd8a6c654af0336f550643f23049a58ee1d16`. 이번 세션 실측이 아님.
+- 미해결: 과거 국고 552건의 원장 출처 미연결로 국고 공개 503 유지. v1552 운영 읽기 감사 기록에는 기업 배당 744건 중 738건 NULL, 6건 끊어진 참조가 보고됐다. 확인되지 않은 원장·국고 기록 생성이나 운영 DB 초기화는 해결 근거가 아니다.
+- 계획 PR #2189는 다른 초안 #2183에 종속된 DRAFT/HOLD 상태. 기존 협업 작업을 덮어쓰지 않음.
+- 운영 배포 workflow는 main 정확 SHA의 CI → 정식 격리 Test → 신원·백엔드·DB 검증을 요구한다. 문서 변경 자체는 운영 코드 배포가 아니다.
+
+## 해결·승격 실행 조건
+1. Debian 원격 에이전트 재연결 후 실제 systemd/Nginx 실행 세대·코드 SHA·DB 연결·롤백 세대 확인.
+2. 독립 복원 검증이 가능한 백업. 동일한 DB 스냅샷에서 원장 출처·기업 배당 관계를 읽기 전용 전수 대조한 뒤 행별로 일치/미확인/모순 구분.
+3. 금융 담당 작업과 조율하여 입증된 대상만 전방 수정. 적용된 마이그레이션 원본 변경, 임의 분개, 금융 데이터 삭제 금지.
+4. 별도 개발 브랜치에서 원인 재현 테스트, 정확 SHA CI, 공식 Test의 백엔드·프론트·모바일·원장·세션 검증.
+5. 신규 불변 운영 세대를 기존 운영과 병렬 기동, 무중단 절체, 실제 공개 기능·버전·세션·로그 확인과 롤백 보존.
+
+## 종료 상태
+**이번 세션에서 실제 수정한 것은 GitHub 작업 기록뿐. 코드 수정 0, 테스트 실행 0, Test 반영 0, 운영 승격 0, DB 변경 0.** 현재 원격 접속 및 원장 근거 부족 때문에 운영 승격을 완료했다고 보고하지 않는다. 기존 승인된 금융 세 테이블 권한 자체를 차단 사유로 삼지 않는다.
+
+## 추가 중간 확인 — @미니pc홍 원격 MCP 실제 연결 성공 (2026-10-31 19:36 KST 이후)
+- 이전 Remote Desktop Commander 장치 OFFLINE 판단은 전체 미니PC 연결 실패를 뜻하지 않았다. 전용 `@미니pc홍` MCP의 `system_exec_command`와 `moneyverse_get_system_status`가 정상 동작했음을 확인. 호스트 debian13, 백엔드·프론트·Nginx·Docker 정상 active, DB connected.
+- 로컬 main은 `30cbbe02f0c27a13630aedf4a39190972d890f02`였고 `git fetch origin main` 후 원격 `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`로 재확인. 기존 로컬 main을 덮어쓰지 않고 별도 detached 검증 워크트리 `/home/debian/mv-verify-v1567-20261031` 생성.
+- 실제 운영·Test `/api/version` 모두 `bc8cd8a6c654af0336f550643f23049a58ee1d16`. `production-current`와 `test-current`는 각각 `prod-v2026.10.31.1550-bc8cd8a6c654`, `test-v2026.10.31.1550-bc8cd8a6c654`를 가리킴.
+- 정확한 원격 main SHA에서 원장 증빙 감사 테스트 5/5 PASS, 금융 사전검사 테스트 18/18 PASS (실제 node --test 실행).
+- 실제 운영 moneyverse_app DB 읽기전용 감사: 종료 2 `BLOCKED_LEGACY_TREASURY_PROVENANCE`; 과거 국고 552/552 미연결, 정식 거래 891/분개 1829, 시간·금액 우연 후보 없음 551/1건 1개, 기업 배당 744건 중 NULL 738·유령 ID 6·정상 연결 0.
+- 같은 운영 앱 계정 금융 사전검사: `READY_FOR_OTHER_RELEASE_GATES`, 잔액 행 40·불균형 0·설명되지 않은 잔액차 0. 기존 승인된 세 금융 DML은 `OPERATOR_ACCEPTED_EXISTING_DML` 경고로 분리되고 차단 안 됨. 이 결과는 국고 출처 승인이 아님.
+- 공개 `/treasury` 페이지 HTTP 200 확인. 이 페이지 상태 코드만으로 실제 국고 지급/정산 API 503 차단 해제를 주장하지 않음.
+- 이번 추가 확인에서 운영 DB 변경, 백엔드/프론트 릴리스 교체, 운영 Nginx 변경 없음. 현재 적용중인 운영 웹 서비스 v1550 유지. 원장 출처가 검증되지 않은 금전 집행은 열지 않음.
+
+## 후속 진행 — 운영 신원·공개 국고 경계 확인
+- 2026-10-31 19:49 KST 전용 @미니pc홍 MCP 정상, 백엔드·프론트·Nginx·Docker active, 원격 main 재확인 `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`.
+- Production 및 Test 공개 `/api/treasury/overview` 각각 HTTP 503, `PUBLIC_TREASURY_RECONCILIATION_PENDING`, `verified:false`, `recentLedger:[]`. 이는 국고 출처 미확인에 대한 기존 안전 차단이다.
+- Production 공개 `/api/version`, `/frontend-version` 모두 `bc8cd8a6c654af0336f550643f23049a58ee1d16`.
+- 권한 부족을 보호 설정에 대한 무리한 변경으로 처리하지 않고, 문서화된 `sudo -n node scripts/release/verify-host-runtime-identity.mjs --channel prod --sha bc8cd8a6c654af0336f550643f23049a58ee1d16` 실행: `ok:true`, 실패 0, 서비스 릴리스 manifest·백/프론트·빌드 SHA 모두 일치. 이는 **기존 v1550 운영 신원 검사 PASS**이며 신규 버전 승격 또는 국고 지급 승인 아님.
+- 과거 원장 552건·배당 744건에 대한 독립 출처 영수증 부재가 남아 금융 기능 차단 유지. 이번에도 금전 쓰기·원장 보정·데이터 초기화·Nginx 절체·신규 웹 서비스 승격은 실행하지 않음.

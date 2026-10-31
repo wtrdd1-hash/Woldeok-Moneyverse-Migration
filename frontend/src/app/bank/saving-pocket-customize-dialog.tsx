@@ -61,6 +61,7 @@ export function SavingPocketCustomizeDialog({
 }: SavingPocketCustomizeDialogProps) {
   const [selectedColor, setSelectedColor] = useState<string>(pocket?.theme_color || 'sky');
   const [selectedIcon, setSelectedIcon] = useState<string>(pocket?.icon_code || 'piggy-bank');
+  const [intentKey, setIntentKey] = useState('');
   const [state, formAction, pending] = useActionState(customizePocketAction, IDLE);
 
   // 다이얼로그 열릴 때 초기화
@@ -70,6 +71,12 @@ export function SavingPocketCustomizeDialog({
       setSelectedIcon(pocket.icon_code || 'piggy-bank');
     }
   }, [pocket]);
+
+  const pocketId = pocket?.pocket_id ?? null;
+  React.useEffect(() => {
+    // A different pocket or a newly opened dialog is a different paid intent.
+    setIntentKey(open && pocketId ? globalThis.crypto.randomUUID() : '');
+  }, [open, pocketId]);
 
   const currentColor = pocket?.theme_color || 'sky';
   const currentIcon = pocket?.icon_code || 'piggy-bank';
@@ -127,6 +134,7 @@ export function SavingPocketCustomizeDialog({
 
         <form action={formAction} className="space-y-4 pt-2">
           <input type="hidden" name="pocketId" value={pocket?.pocket_id || ''} />
+          <input type="hidden" name="idempotencyKey" value={intentKey} />
           <input type="hidden" name="themeColor" value={selectedColor} />
           <input type="hidden" name="iconCode" value={selectedIcon} />
 
@@ -150,7 +158,13 @@ export function SavingPocketCustomizeDialog({
                   <button
                     key={color.id}
                     type="button"
-                    onClick={() => setSelectedColor(color.id)}
+                    onClick={() => {
+                      if (selectedColor !== color.id) {
+                        setSelectedColor(color.id);
+                        setIntentKey(globalThis.crypto.randomUUID());
+                      }
+                    }}
+                    disabled={pending}
                     className={`h-11 rounded-xl border flex flex-col items-center justify-center transition-all ${
                       isSelected
                         ? 'border-primary ring-2 ring-primary/30 shadow-sm scale-105'
@@ -192,7 +206,13 @@ export function SavingPocketCustomizeDialog({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setSelectedIcon(item.id)}
+                    onClick={() => {
+                      if (selectedIcon !== item.id) {
+                        setSelectedIcon(item.id);
+                        setIntentKey(globalThis.crypto.randomUUID());
+                      }
+                    }}
+                    disabled={pending}
                     className={`h-14 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                       isSelected
                         ? 'border-primary bg-primary/10 ring-2 ring-primary/30 text-primary font-bold shadow-sm'
@@ -242,7 +262,7 @@ export function SavingPocketCustomizeDialog({
               닫기
             </Button>
             <SubmitButton
-              disabled={pending || isInsufficient || (!isColorChanged && !isIconChanged)}
+              disabled={pending || !intentKey || isInsufficient || (!isColorChanged && !isIconChanged)}
               size="sm"
               className="bg-primary text-primary-foreground font-semibold"
             >

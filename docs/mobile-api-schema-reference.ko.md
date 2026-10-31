@@ -5072,18 +5072,7 @@ _요청 본문 없음._
 
 ### 성공 응답 필드
 
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| receipts[] | true | object[] |  |
-| receipts[] | true | object |  |
-| receipts[].receipt_id | true | string |  |
-| receipts[].assignment_id | true | string |  |
-| receipts[].code | true | string |  |
-| receipts[].name | true | string |  |
-| receipts[].reward_amount | true | string |  |
-| receipts[].experience_amount | true | string |  |
-| receipts[].transaction_id | true | null \| string |  |
-| receipts[].created_at | true | string (date-time) |  |
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

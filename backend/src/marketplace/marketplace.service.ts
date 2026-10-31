@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -12,6 +12,13 @@ export class MarketplaceService {
     @Optional() @Inject(AuctionGateway) private readonly auctionGateway?: AuctionGateway,
   ) {}
 
+  // A controller-only hold can be bypassed by another service caller. No
+  // marketplace balance-changing operation is permitted until SQL settlement
+  // produces an authoritative, idempotent double-entry ledger receipt.
+  private requireLedgerBackedSettlement(): void {
+    throw new ServiceUnavailableException('marketplace_settlement_unverified');
+  }
+
   async listListings(query: MarketplaceQueryDto): Promise<unknown[]> {
     if (!this.pool) throw new Error('database pool unavailable');
     const limit = query.limit ?? 50;
@@ -21,15 +28,7 @@ export class MarketplaceService {
 
     return queryRows(
       this.pool,
-      `SELECT id::text, seller_id::text, item_code, item_name, category,
-              rarity, quantity, price_wld::text, listing_fee_wld::text,
-              status, description, created_at
-       FROM public.marketplace_listings
-       WHERE status = 'ACTIVE'
-         AND ($1::text IS NULL OR category = $1)
-         AND ($2::text IS NULL OR item_name ILIKE $2 OR description ILIKE $2)
-       ORDER BY created_at DESC
-       LIMIT $3 OFFSET $4`,
+      `SELECT * FROM public.marketplace_active_listings($1, $2, $3, $4)`,
       [category, search, limit, offset],
     );
   }
@@ -38,12 +37,7 @@ export class MarketplaceService {
     if (!this.pool) throw new Error('database pool unavailable');
     return queryRows(
       this.pool,
-      `SELECT id::text, seller_id::text, item_code, item_name, category,
-              rarity, quantity, price_wld::text, listing_fee_wld::text,
-              status, description, created_at, settled_at, cancelled_at
-       FROM public.marketplace_listings
-       WHERE seller_id = $1
-       ORDER BY created_at DESC`,
+      `SELECT * FROM public.marketplace_owner_listings($1::uuid)`,
       [actor],
     );
   }
@@ -56,6 +50,7 @@ export class MarketplaceService {
     key: string,
     description?: string,
   ): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ listing_id: string }>(
       this.pool,
@@ -66,6 +61,7 @@ export class MarketplaceService {
   }
 
   async buyListing(actor: string, listingId: string, key: string): Promise<string | null> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const row = await queryOne<{ tx_id: string }>(
       this.pool,
@@ -148,6 +144,7 @@ export class MarketplaceService {
   >();
 
   async bidAuction(actor: string, auctionId: string, bidAmountWld: string, maxProxyBidWld?: string): Promise<unknown> {
+    this.requireLedgerBackedSettlement();
     if (!this.pool) throw new Error('database pool unavailable');
     const userRow = await queryOne<{ name: string; is_plus_user?: boolean }>(
       this.pool,

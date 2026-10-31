@@ -7,7 +7,7 @@ import RoadmapPage, { metadata } from './page';
 
 describe('RoadmapPage & RoadmapView (i18n Multi-Language Support)', () => {
   it('renders page metadata with rich title and SEO canonical', () => {
-    expect(metadata.title).toContain('초반·중반·후반 실전 성장 로드맵');
+    expect(metadata.title).toContain('머니버스 시작 가이드');
     expect(metadata.alternates?.canonical).toBe('https://easy-scraping.com/roadmap');
   });
 

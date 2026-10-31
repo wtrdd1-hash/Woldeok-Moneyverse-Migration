@@ -246,6 +246,12 @@ export async function customizePocketAction(_previous: ActionState, formData: Fo
   const pocketId = String(formData.get('pocketId') ?? '').trim();
   const themeColor = String(formData.get('themeColor') ?? '').trim();
   const iconCode = String(formData.get('iconCode') ?? '').trim();
+  const requestKey = String(formData.get('idempotencyKey') ?? '').trim();
+
+  // Preserve the browser's original intent key across uncertain network retries.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) {
+    return { status: 'error', message: '요청 식별자가 유효하지 않습니다. 창을 닫았다가 다시 열어 주세요.' };
+  }
 
   if (!UUID.test(pocketId)) {
     return { status: 'error', message: '포켓 통장 식별자가 올바르지 않습니다.' };
@@ -257,6 +263,7 @@ export async function customizePocketAction(_previous: ActionState, formData: Fo
       body: {
         themeColor: themeColor || undefined,
         iconCode: iconCode || undefined,
+        idempotencyKey: requestKey,
       },
     });
     revalidatePath('/bank');

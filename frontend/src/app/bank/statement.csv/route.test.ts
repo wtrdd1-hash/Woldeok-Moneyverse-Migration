@@ -28,7 +28,12 @@ describe('authenticated bank statement CSV download', () => {
     expect(response.headers.get('content-disposition')).toContain('attachment');
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
-    expect(await response.text()).toContain('cash_balance,900719925474099312345678');
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    const csv = new TextDecoder().decode(bytes);
+    expect(csv).toContain('cash_balance,900719925474099312345678');
+    expect(csv.startsWith('item,amount_wld\r\n')).toBe(true);
+    expect(csv).not.toContain('\\uFEFF');
   });
 
   it('never fetches the statement without the member session gate', async () => {
