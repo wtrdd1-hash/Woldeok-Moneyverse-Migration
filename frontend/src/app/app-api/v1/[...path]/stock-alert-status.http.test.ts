@@ -20,7 +20,7 @@ describe('Android owner stock alert condition status HTTP', () => {
   });
   it('forwards member session and rejects stale 200 rows that do not match the filter', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
-    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ alerts: [row] }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' } }));
+    const fetchSpy = vi.fn(async () => new Response(JSON.stringify({ alerts: [row], filterApplied: 'met' }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' } }));
     vi.stubGlobal('fetch', fetchSpy);
     const request = (status: string) => new NextRequest('https://easy-scraping.com/app-api/v1/stocks/alerts?status=' + status, { headers: { cookie: 'moneyverse_session=owner-session' } });
     const success = await GET(request('met'), path);
@@ -33,5 +33,8 @@ describe('Android owner stock alert condition status HTTP', () => {
     const blocked = await GET(request('watching'), path);
     expect(blocked.status).toBe(503);
     expect(blocked.headers.get('cache-control')).toBe('private, no-store');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ alerts: [] }), { headers: { 'content-type': 'application/json' } })));
+    const staleEmpty = await GET(request('watching'), path);
+    expect(staleEmpty.status).toBe(503);
   });
 });

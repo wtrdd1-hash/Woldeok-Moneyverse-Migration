@@ -14,7 +14,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, Min } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -74,12 +74,21 @@ export class StockAlertController {
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex')
   @ApiOperation({ summary: 'Conditional virtual-stock alerts belonging to the caller' })
-  async list(@Req() request: RequestWithSession, @Query('status') status?: unknown) {
+  @ApiQuery({ name: 'status', required: false, enum: ['all', 'met', 'watching'] })
+  async list(@Req() request: RequestWithSession, @Query() query: Record<string, unknown>) {
+    if (Object.keys(query).some((key) => key !== 'status')) {
+      throw new BadRequestException('unknown stock alert filter');
+    }
+    const status = query.status;
     if (status !== undefined && (typeof status !== 'string' ||
         !['all', 'met', 'watching'].includes(status))) {
       throw new BadRequestException('status must be all, met or watching');
     }
-    return { alerts: await this.repository().list(requireUserId(request), status ?? 'all') };
+    const selected = status ?? 'all';
+    const alerts = await this.repository().list(requireUserId(request), selected);
+    // The Android gateway requires this explicit source marker for filtered
+    // empty results: a stale backend returning [] is not proof of filtering.
+    return selected === 'all' ? { alerts } : { alerts, filterApplied: selected };
   }
 
   @Get('events')

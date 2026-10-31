@@ -4,7 +4,7 @@
 
 **Goal:** Authenticated members can filter their active virtual-stock alert rules by current server-evaluated condition (all, met, watching) in web and Android, without changing alert evaluation or balances.
 
-**Architecture:** Reuse existing `public.stock_alert_rules_list(p_actor)` SECURITY DEFINER read; filter its actor-scoped rows in a parameterized outer SELECT, with strict Nest and app-api query validation. Next renders a native GET form; Android rejects a stale backend that ignores the filter. No new migration or table grants.
+**Architecture:** Reuse existing `public.stock_alert_rules_list(p_actor)` SECURITY DEFINER read; filter its actor-scoped rows in a parameterized outer SELECT, with strict Nest and app-api query validation and a filterApplied response marker even for verified empty filtered results. Next renders a native GET form; Android rejects a stale backend that ignores the filter. No new migration or table grants.
 
 **Tech Stack:** NestJS, PostgreSQL 17, Next.js App Router, TypeScript, Vitest, Supertest.
 

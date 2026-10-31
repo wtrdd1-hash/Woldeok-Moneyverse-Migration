@@ -11,10 +11,12 @@ describe('Android stock alert status filter', () => {
     expect(stockAlertStatusQuery(new URLSearchParams('status=met&owner=other'))).toBeNull();
   });
   it('rejects stale HTTP 200 lists that ignore requested status or fabricate precision', () => {
-    expect(isVerifiedStockAlertStatusList({ alerts: [row] }, 'met')).toBe(true);
+    expect(isVerifiedStockAlertStatusList({ alerts: [row], filterApplied: 'met' }, 'met')).toBe(true);
     expect(isVerifiedStockAlertStatusList({ alerts: [row] }, 'watching')).toBe(false);
     expect(isVerifiedStockAlertStatusList({ alerts: [{ ...row, condition_met: null }] }, 'watching')).toBe(false);
     expect(isVerifiedStockAlertStatusList({ alerts: [{ ...row, current_price: Number('9007199254740993') }] }, 'met')).toBe(false);
-    expect(isVerifiedStockAlertStatusList({ alerts: [] }, 'watching')).toBe(true);
+    expect(isVerifiedStockAlertStatusList({ alerts: [] }, 'watching')).toBe(false);
+    expect(isVerifiedStockAlertStatusList({ alerts: [], filterApplied: 'watching' }, 'watching')).toBe(true);
+    expect(isVerifiedStockAlertStatusList({ alerts: [row], filterApplied: 'watching' }, 'met')).toBe(false);
   });
 });

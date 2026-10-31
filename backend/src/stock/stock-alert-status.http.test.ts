@@ -29,14 +29,19 @@ describe('member alert condition filter HTTP', () => {
   afterAll(async () => { await app?.close(); });
   it('defaults to all and forwards canonical statuses for the session actor', async () => {
     list.mockClear();
-    for (const suffix of ['', '?status=all', '?status=met', '?status=watching']) {
-      await request(app.getHttpServer()).get('/stocks/alerts' + suffix).expect(200, { alerts: [] });
+    for (const [suffix, body] of [
+      ['', { alerts: [] }],
+      ['?status=all', { alerts: [] }],
+      ['?status=met', { alerts: [], filterApplied: 'met' }],
+      ['?status=watching', { alerts: [], filterApplied: 'watching' }],
+    ] as const) {
+      await request(app.getHttpServer()).get('/stocks/alerts' + suffix).expect(200, body);
     }
     expect(list.mock.calls).toEqual([[USER, 'all'], [USER, 'all'], [USER, 'met'], [USER, 'watching']]);
   });
   it('rejects malformed, repeated or unsupported status without a DB call', async () => {
     list.mockClear();
-    for (const suffix of ['?status=', '?status=active', '?status=MET', '?status=%20met', '?status=met&status=watching', '?status=met&status=met']) {
+    for (const suffix of ['?status=', '?status=active', '?status=MET', '?status=%20met', '?status=met&status=watching', '?status=met&status=met', '?owner=other', '?status=met&limit=50']) {
       await request(app.getHttpServer()).get('/stocks/alerts' + suffix).expect(400);
     }
     expect(list).not.toHaveBeenCalled();

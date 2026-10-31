@@ -12,6 +12,8 @@ export function stockAlertStatusQuery(query: URLSearchParams): StockAlertStatus 
 }
 export function isVerifiedStockAlertStatusList(payload: unknown, status: StockAlertStatus): boolean {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  // A filtered empty array is ambiguous without an explicit backend proof.
+  if (status !== 'all' && (payload as Record<string, unknown>).filterApplied !== status) return false;
   const rows = (payload as Record<string, unknown>).alerts;
   if (!Array.isArray(rows)) return false;
   const seen = new Set<string>();
