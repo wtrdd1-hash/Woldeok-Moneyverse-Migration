@@ -104,9 +104,9 @@ export class PostgresBusinessRepository implements BusinessRepository {
       this.pool,
       `SELECT id::text, symbol, name, description, purchase_cost::text,
               daily_revenue::text, daily_operating_cost::text
-       FROM public.business_catalog()
-       WHERE ($1::bigint IS NULL OR purchase_cost <= $1::bigint)
-       ORDER BY purchase_cost, symbol`,
+       FROM public.business_catalog() AS catalog
+       WHERE ($1::bigint IS NULL OR catalog.purchase_cost <= $1::bigint)
+       ORDER BY catalog.purchase_cost, catalog.symbol`,
       [maxCost ?? null],
     );
   }

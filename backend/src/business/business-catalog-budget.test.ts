@@ -66,6 +66,7 @@ describe('business catalogue maximum WLD budget', () => {
     expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls[0]![0]).toContain('FROM public.business_catalog()');
     expect(query.mock.calls[0]![0]).toMatch(/purchase_cost\s*<=\s*\$1::bigint/);
+    expect(query.mock.calls[0]![0]).toContain('ORDER BY catalog.purchase_cost, catalog.symbol');
     expect(query.mock.calls[0]![1]).toEqual(['9007199254740993']);
   });
 });
