@@ -8,12 +8,15 @@
 ## In progress
 - [x] Harden F675-207 missing-preference-row/worker claim serialization, consent/disable races, key replay semantics, claim-day UX, edge privacy and negative tests.
 - [x] Maintain four English/Korean planning and log pairs and P0/P1 handoffs; do not edit runtime or other agents' changes.
-- [ ] Re-fetch main and canonical docs mid-run; execute fresh local and remote exact-SHA CI evidence.
+- [x] Re-fetched main and canonical docs mid-run; local release tests 147/147 PASS, classifier/hold 32/32 PASS, 4 EN/KO pairs PASS; remote exact-SHA CI pending.
 
 ## Finished (pending)
-- [ ] Final commit, GitHub Draft PR/issue, CI status and release-hold outcome.
+- [x] GitHub Draft PR #2335 created, existing issue #2327 handoff; docs-only RELEASE HOLD. Exact-SHA CI to be recorded in external final evidence after push.
 
 **Gate:** F675-203–207 proposed/not implemented; no DB migrations/production writes. External new approved 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 
 ## Mid-run (15:05 KST) / 중간 기록
 - Refetched origin/main: 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 (Treasury incident RCA v1611 merged). Preserved main incident docs and release preflight. Real Treasury remains NOT_RECOVERED; historic 552 Treasury + 744 SOE dividend sources unlinked. Latest QA #2330 crafting out-of-band cash/item risk remains P0 under B/C/QA. No Production writes.
+
+## Final local checkpoint (15:08 KST) / 최종 로컬 검증
+- Docs-only branch, no runtime/DB/WLD/ledger/Test/Production changes. Release tests 147 PASS / 0 FAIL; classifier/hold tests 32 PASS / 0 FAIL; EN/KO 4 pairs PASS; git diff --check PASS. Remote CI must be checked on the final commit SHA, not inferred from this checkpoint. External reference approvals new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.

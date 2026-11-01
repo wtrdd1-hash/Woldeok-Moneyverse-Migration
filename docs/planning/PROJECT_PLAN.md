@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1606 F675-207 missing-row/claim-day/idempotency hardening / issue #2327 / Draft PR pending / RELEASE HOLD; stacked on #2328; current main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
+**Current planning:** v1606 F675-207 missing-row/claim-day/idempotency hardening / issue #2327 / Draft PR #2335 / RELEASE HOLD; stacked on #2328; current main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
 
 ## v2026.11.01.1606 — F675-207 Missing-Row, Claim-Day and Idempotency Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
