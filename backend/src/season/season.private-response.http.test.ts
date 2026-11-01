@@ -104,7 +104,7 @@ describe('season member HTTP privacy before session, consent and CSRF guards', (
     assertPrivate((await request(app.getHttpServer()).post(path)
       .set('x-test-owner', '1').set('x-test-csrf', '0').expect(403)).headers);
     assertPrivate((await request(app.getHttpServer()).post(path)
-      .set('x-test-owner', '1').expect(503)).headers);
+      .set('x-test-owner', '1').send({}).expect(503)).headers);
   });
 
   it('protects HEAD member responses', async () => {
