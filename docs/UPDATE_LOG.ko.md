@@ -1,3 +1,5 @@
+## 2026-11-01 v1615: 공식 Test 314-320 적용 및 민감 원본 SELECT 없이 집계 함수만 실행, 세션105 보존, 회귀392 PASS, 실제 Test/운영 배포 대기.
+
 ## 2026-11-01 v1614 — 공식 Test 국고 백업 자체 증명, 비공개 복제 DB 통과
 - Exact original Production 314/552/744/e62cc historical proof preserved; Test archive 3/0/60m/2149b verified in independent private copy with SQL319 audited correction. Replayed SQL314–319, app-role real reconciliation 0/0, treasury/pension targeted 77 PASS. Public Test/Prod unchanged and pension monetary writes remain held.
 
