@@ -1,6 +1,6 @@
 # Planning v1594 — F675-204 Feature Improvement (documentation only)
 
-**Previous:** Feature Addition v1592. **Current:** Feature Improvement v1594. **Next:** Feature Addition v1596 (provisional). **Draft #PENDING / RELEASE HOLD**.
+**Previous:** Feature Addition v1592. **Current:** Feature Improvement v1594. **Next:** Feature Addition v1596 (provisional). **Draft #2290 / RELEASE HOLD**.
 
 ## Evidence and design decisions
 - Latest `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` verified at start/mid; #2283 OPEN/UNMERGED, not deployed. Read AGENTS, README, EN/KO canonical plans, SQL 071/123, Nest controller/repository, Next inventory, QA #2285. miniPC Debian 13 services active, dev DB connected, MCP cgroup 954/1027 tasks.

@@ -1,5 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1594 F675-204 스냅샷 동등성·정규 지문·커서 수명 보완 / 이슈 #2282 / Draft #PENDING / RELEASE HOLD; 선행 #2283 미병합.
+**현재 기획:** v1594 F675-204 스냅샷 동등성·정규 지문·커서 수명 보완 / 이슈 #2282 / Draft #2290 / RELEASE HOLD; 선행 #2283 미병합.
 
 
 ## v2026.11.01.1594 — F675-204 스냅샷 동등성·정규 지문·제한형 페이지네이션 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)

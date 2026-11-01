@@ -1,6 +1,6 @@
 # 기획 v1594 — F675-204 기능 보완 (문서 전용)
 
-**이전:** Feature Addition v1592. **현재:** Feature Improvement v1594. **다음:** Feature Addition v1596(잠정). **Draft #PENDING / RELEASE HOLD**.
+**이전:** Feature Addition v1592. **현재:** Feature Improvement v1594. **다음:** Feature Addition v1596(잠정). **Draft #2290 / RELEASE HOLD**.
 
 ## 조사 근거 및 설계 결정
 - 시작·중간 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 확인, #2283 미병합·미배포. AGENTS, README, 영한 정본 기획서, SQL 071/123, Nest 컨트롤러/리포지토리, Next 보관함, QA #2285 확인. miniPC Debian 13 서비스 활성·개발 DB 연결, MCP cgroup 954/1027 작업.
