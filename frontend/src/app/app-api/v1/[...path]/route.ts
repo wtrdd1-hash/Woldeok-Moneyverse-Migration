@@ -30,6 +30,13 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
 
+function isOwnerStockPath(parts: readonly string[]): boolean {
+  return parts[0] === 'stocks' && (
+    (parts.length === 2 && ['watchlist', 'portfolio', 'history', 'halt-receipts'].includes(parts[1]!)) ||
+    (parts.length === 3 && ['watchlist', 'orders'].includes(parts[2]!))
+  );
+}
+
 function isWalletDetailPath(parts: readonly string[]): boolean {
   return parts.length === 4 && parts[0] === 'wallet' && parts[1] === 'activity' &&
     parts[2] === 'transactions';
@@ -566,7 +573,7 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
-  if (parts[0] === 'stocks' && parts[1] === 'history') {
+  if (isOwnerStockPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');
