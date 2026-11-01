@@ -9,4 +9,7 @@ Eliminate URL-only success forgery on the member notification preference page wi
 - [x] Add failing tests to `frontend/src/app/account/notifications/preference-receipt.test.ts` for issuance only after receipt+readback, and no issuance on failure.
 - [x] Add page evidence tests proving URL-only `saved=1` cannot display success and a nonce+expected value+readback match is required.
 - [x] Implement minimal action/page changes, with a small pure helper in `notification-flash.ts` for testable parsing; preserve existing forms and error messages.
-- [ ] Run focused tests, lint, typecheck, build, frontend/backend suites, app-api/DB/security checks, remote CI; record SHA and all blockers.
+- [x] Run focused tests, lint, typecheck, build, frontend/backend suites, app-api/DB/security checks, remote CI; record SHA and all blockers.
+
+## Release hold
+Full dependency audit 9 findings; full-route QA ledger missing; official authenticated E2E and exact-SHA Test not run. No main merge or production deployment.
