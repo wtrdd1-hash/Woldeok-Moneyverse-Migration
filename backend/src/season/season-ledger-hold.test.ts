@@ -39,6 +39,35 @@ describe('P0 season reward claim ledger containment', () => {
     expect(claim).not.toHaveBeenCalled();
   });
 
+  it('rejects direct season settlement repository calls without touching PostgreSQL', async () => {
+    const { query, repository } = setup();
+    await expect(repository.settle(season)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SEASON_SETTLEMENT_UNAVAILABLE' },
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('rejects direct service settlement calls before any SQL', async () => {
+    const { query, service } = setup();
+    await expect(service.settle(season)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SEASON_SETTLEMENT_UNAVAILABLE' },
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('rejects the member settlement controller without invoking the service', async () => {
+    const { service } = setup();
+    const settle = vi.spyOn(service, 'settle');
+    const controller = new SeasonController(service);
+    await expect(controller.settle({ seasonId: season })).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SEASON_SETTLEMENT_UNAVAILABLE' },
+    });
+    expect(settle).not.toHaveBeenCalled();
+  });
+
   it('preserves read-only season event discovery', async () => {
     const { query, repository } = setup();
     await expect(repository.events()).resolves.toEqual([]);
