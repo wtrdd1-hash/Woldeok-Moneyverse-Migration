@@ -148,6 +148,46 @@ export function EnterpriseControlTower({
 }: Props) {
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
+  const [governanceReasons, setGovernanceReasons] = useState<Record<string, string>>({});
+  const [savingSoe, setSavingSoe] = useState<string | null>(null);
+
+  const submitSoeStatus = async (soe: StateEnterpriseItem) => {
+    if (savingSoe) return;
+    const newStatus = selectedStatuses[soe.code] ?? soe.status;
+    const reason = (governanceReasons[soe.code] ?? '').trim();
+    if (newStatus === soe.status || reason.length < 12 || reason.length > 500) {
+      toast.error('상태를 변경하고 12자 이상의 변경 사유를 입력해 주세요.');
+      return;
+    }
+    setSavingSoe(soe.code);
+    try {
+      const response = await fetch('/api/admin/enterprises/status', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          code: soe.code, status: newStatus, reason,
+          idempotencyKey: crypto.randomUUID(),
+        }),
+      });
+      const data: unknown = await response.json();
+      if (!response.ok || !data || typeof data !== 'object' || Array.isArray(data)
+        || (data as { applied?: unknown }).applied !== true
+        || (data as { settled?: unknown }).settled !== false) {
+        throw new Error('Database governance receipt not verified');
+      }
+      toast.success('공기업 운영 상태 변경이 감사 영수증과 함께 기록됐습니다.');
+      setGovernanceReasons((previous) => ({ ...previous, [soe.code]: '' }));
+      router.refresh();
+    } catch {
+      toast.error('상태 변경이 확인되지 않았습니다. 잠시 후 다시 조회해 주세요.');
+    } finally {
+      setSavingSoe(null);
+    }
+  };
+
 
   const refreshData = async () => {
     setIsRefreshing(true);
@@ -226,14 +266,14 @@ export function EnterpriseControlTower({
         <CardContent className="p-5 pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-2">
             <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-muted-foreground text-[11px]">공기업 총 운용 자산</div>
+              <div className="text-muted-foreground text-[11px]">등록 모형 자산 (국고 예치금 아님)</div>
               <div className="mt-1 font-mono font-bold text-base text-foreground">
                 {groupDigits(overview.total_soe_assets_wld)}{' '}
                 <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-muted-foreground text-[11px]">시간당 공기업 순이익</div>
+              <div className="text-muted-foreground text-[11px]">시간당 모형 공기업 순이익</div>
               <div className="mt-1 font-mono font-bold text-base text-emerald-600">
                 +{groupDigits(overview.hourly_soe_profit_wld)}{' '}
                 <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -249,7 +289,7 @@ export function EnterpriseControlTower({
               </div>
             </div>
             <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-muted-foreground text-[11px]">민간 기업 법인세 (15%)</div>
+              <div className="text-muted-foreground text-[11px]">모형 민간 기업 법인세 (15%)</div>
               <div className="mt-1 font-mono font-bold text-base text-blue-600">
                 +{groupDigits(overview.hourly_corporate_tax_wld)}{' '}
                 <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -264,8 +304,8 @@ export function EnterpriseControlTower({
         role="status"
         className="text-sm text-amber-700 dark:text-amber-400"
       >
-        공기업 상태 변경은 DB 최소권한 및 변경 영수증 검증 전까지 중지되었습니다. 실제 운영 상태는
-        조회 전용으로 표시합니다.
+        공기업 운영 상태는 승인 관리자만 변경할 수 있습니다. 변경 시 감사 영수증이 저장되며
+        배당 지급이나 국고 자금 이동은 실행되지 않습니다.
       </p>
 
       {/* 2. 3대 국가 기간 공기업 (SOE) 카드 그리드 */}
@@ -351,16 +391,49 @@ export function EnterpriseControlTower({
                       </Badge>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="min-h-11 text-xs"
-                      disabled
-                      aria-describedby="soe-status-mutation-hold"
-                    >
-                      <ShieldAlert className="h-3 w-3" />
-                      상태 변경은 검증 전까지 중지
-                    </Button>
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <label className="text-xs text-muted-foreground" htmlFor={`soe-status-${soe.code}`}>
+                        변경할 운영 상태
+                      </label>
+                      <select
+                        id={`soe-status-${soe.code}`}
+                        className="min-h-11 rounded-md border bg-background px-2 text-xs"
+                        aria-label={`${soe.name} 변경 상태`}
+                        value={selectedStatuses[soe.code] ?? soe.status}
+                        disabled={savingSoe !== null}
+                        onChange={(event) => setSelectedStatuses((previous) =>
+                          ({ ...previous, [soe.code]: event.target.value }))}
+                      >
+                        <option value="ACTIVE">운영</option>
+                        <option value="PAUSED">일시 중지</option>
+                        <option value="PRIVATIZING">민영화 진행</option>
+                      </select>
+                      <label className="text-xs text-muted-foreground" htmlFor={`soe-reason-${soe.code}`}>
+                        변경 사유 (12자 이상)
+                      </label>
+                      <input
+                        id={`soe-reason-${soe.code}`}
+                        className="min-h-11 min-w-0 rounded-md border bg-background px-2 text-xs"
+                        value={governanceReasons[soe.code] ?? ''}
+                        maxLength={500}
+                        disabled={savingSoe !== null}
+                        onChange={(event) => setGovernanceReasons((previous) =>
+                          ({ ...previous, [soe.code]: event.target.value }))}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 text-xs"
+                        disabled={savingSoe !== null
+                          || (selectedStatuses[soe.code] ?? soe.status) === soe.status
+                          || (governanceReasons[soe.code] ?? '').trim().length < 12}
+                        onClick={() => { void submitSoeStatus(soe); }}
+                        aria-describedby="soe-status-mutation-hold"
+                      >
+                        <ShieldAlert className="h-3 w-3" />
+                        {savingSoe === soe.code ? '영수증 확인 중' : '운영 상태 변경 저장'}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -24,7 +24,12 @@ describe('EnterpriseService', () => {
       '유효하지 않은 공기업 운영 상태입니다',
     );
 
-    const validResult = await service.updateSoeStatus('SOE_POWER', 'ACTIVE', 3500);
+    const actor = '11111111-1111-4111-8111-111111111111';
+    const key = '22222222-2222-4222-8222-222222222222';
+    const validResult = await service.updateSoeStatus('SOE_POWER', 'ACTIVE', 3500,
+      actor, 'Approver governance review', key);
     expect(validResult).toBe(true);
+    expect(mockRepo.updateSoeStatus).toHaveBeenCalledWith('SOE_POWER', 'ACTIVE', 3500,
+      actor, 'Approver governance review', key);
   });
 });

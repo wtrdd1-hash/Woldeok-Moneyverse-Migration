@@ -34,7 +34,7 @@ describe('SOE remittance safety hold in admin UI', () => {
 });
 
 describe('verified SOE operating status', () => {
-  it('counts only ACTIVE enterprises and disables unverified mutations on mobile and desktop', () => {
+  it('counts only ACTIVE enterprises and requires a reason before nonmonetary mutations', () => {
     const html = renderToStaticMarkup(
       createElement(EnterpriseControlTower, {
         initialOverview: {
@@ -72,7 +72,8 @@ describe('verified SOE operating status', () => {
       }),
     );
     expect(html).toContain('0개 가동 중 / 전체 1개');
-    expect(html).toContain('상태 변경은 검증 전까지 중지');
+    expect(html).toContain('공기업 운영 상태는 승인 관리자만 변경');
+    expect(html).toContain('운영 상태 변경 저장');
     expect(html).toMatch(/disabled=""[^>]*aria-describedby="soe-status-mutation-hold"/);
   });
 });

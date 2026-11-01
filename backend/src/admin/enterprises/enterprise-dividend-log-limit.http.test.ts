@@ -7,6 +7,7 @@ import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AdminEnterpriseController } from './enterprise.controller';
 import { EnterpriseService } from './enterprise.service';
 
@@ -24,6 +25,7 @@ describe('Admin enterprise dividend logs HTTP boundary (isolated guard doubles)'
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     await app.init();
