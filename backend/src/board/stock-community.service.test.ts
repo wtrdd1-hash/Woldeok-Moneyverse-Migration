@@ -18,7 +18,7 @@ describe('StockCommunityService public discovery', () => {
     expect(database.query).toHaveBeenCalledTimes(1);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('upper(stock_symbol) = upper($2)');
-    expect(values).toEqual([50, 'wdx', null]);
+    expect(values).toEqual([50, 'wdx', null, null]);
   });
 
   it('rejects malformed symbols before querying PostgreSQL', async () => {
@@ -38,7 +38,7 @@ describe('StockCommunityService recent public title search', () => {
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain('strpos(lower(title), lower($3::text)) > 0');
-    expect(values).toEqual([50, 'wdx', 'WLD %_']);
+    expect(values).toEqual([50, 'wdx', 'WLD %_', null]);
   });
 
   it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
@@ -51,4 +51,20 @@ describe('StockCommunityService recent public title search', () => {
       expect(database.query).not.toHaveBeenCalled();
     },
   );
+});
+
+
+describe('stock discussion category filter', () => {
+  it('filters within the bounded public SQL snapshot using an exact category', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList('WDX', 'news', 'analysis');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('category = $4::text');
+    expect(values).toEqual([50, 'WDX', 'news', 'analysis']);
+  });
+  it.each(['all', 'Analysis', 'question\n', 'unknown', ''])('rejects invalid category %j', async (value) => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, value)).rejects.toThrow('invalid board category');
+    expect(database.query).not.toHaveBeenCalled();
+  });
 });

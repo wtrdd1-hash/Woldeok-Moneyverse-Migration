@@ -112,6 +112,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const boardCategoryPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardCategoryValues = boardCategoryPath ? request.nextUrl.searchParams.getAll('category') : [];
+  if (boardCategoryPath && (boardCategoryValues.length > 1 ||
+      (boardCategoryValues.length === 1 && !['analysis', 'question', 'journal', 'business', 'system'].includes(boardCategoryValues[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'board_category_invalid', 'invalid stock discussion category');
+  }
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -354,6 +361,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  // A stale backend may ignore the category while still returning HTTP 200.
+  // Validate actual stock-linked rows, never accept a success-shaped mismatch.
+  if (boardCategoryValues.length === 1 && response.ok) {
+    try {
+      const payload: unknown = await response.clone().json();
+      if (!isJsonMediaType(response.headers.get('content-type')) || !payload || typeof payload !== 'object' ||
+          !('posts' in payload) || !Array.isArray(payload.posts) || payload.posts.length > 50) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_category_unverified', 'board category results are unavailable');
+      }
+      const ids = new Set<string>();
+      for (const row of payload.posts) {
+        if (!row || typeof row !== 'object' || typeof row.postId !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.postId) ||
+            ids.has(row.postId.toLowerCase()) || !row.stock ||
+            typeof row.stock !== 'object' || row.stock.category !== boardCategoryValues[0]) {
+          return gatewayProblem(503, 'Service Unavailable', 'board_category_unverified', 'board category results are unavailable');
+        }
+        ids.add(row.postId.toLowerCase());
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_category_unverified', 'board category results are unavailable');
+    }
+  }
+
   // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
   if (supportRange && response.ok) {
     try {
@@ -585,13 +616,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
