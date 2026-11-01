@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -42,4 +43,22 @@ import { StockLeagueRepository } from './stock-league.repository';
   ],
   exports: [StockService, StockAlertRepository, StockLeagueRepository],
 })
-export class StockModule {}
+export class StockModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Fail closed for every owner route, including future owner endpoints and
+    // guard failures. Only explicitly public GET/HEAD price reads are exempt.
+    consumer.apply((req: Request, res: Response, next: NextFunction) => {
+      const publicRead = (req.method === 'GET' || req.method === 'HEAD') && (
+        /(?:^|\/)stocks$/.test(req.path) ||
+        /(?:^|\/)stocks\/(?:sparklines|market-events)$/.test(req.path) ||
+        /(?:^|\/)stocks\/[0-9a-f-]{36}\/(?:prices|candles)$/i.test(req.path)
+      );
+      if (!publicRead) {
+        res.setHeader('Cache-Control', 'private, no-store');
+        res.setHeader('X-Robots-Tag', 'noindex');
+        res.setHeader('Referrer-Policy', 'no-referrer');
+      }
+      next();
+    }).forRoutes(StockController);
+  }
+}
