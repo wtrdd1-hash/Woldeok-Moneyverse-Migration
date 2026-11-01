@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1594 F675-204 snapshot equivalence, canonical digest and bounded cursor lifetime / issue #2282 / Draft #PENDING / RELEASE HOLD; prior #2283 OPEN UNMERGED.
+**Current planning:** v1594 F675-204 snapshot equivalence, canonical digest and bounded cursor lifetime / issue #2282 / Draft #2290 / RELEASE HOLD; prior #2283 OPEN UNMERGED.
 
 
 ## v2026.11.01.1594 — F675-204 Snapshot Equivalence, Canonical Fingerprints and Bounded Pagination (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
