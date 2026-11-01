@@ -12,3 +12,9 @@
 
 ## 종료
 - 최종 SHA 및 필수 게이트 결과 기록 예정. 미완료/실패는 PASS로 표시하지 않으며 Production 승격 금지.
+
+## 종료 (2026-11-02 08:02 KST) — 부분 완료 / 중복 작업 보류 / 배포 차단
+- 이전에 확인하지 못했던 기존 열린 Draft PR #2274(C v1250)가 동일한 공개 공기업 원본 검증을 이미 구현 중임을 전체 PR 재검토에서 발견. 중복 PR·병합을 생성하지 않고 독립 브랜치에 검증 결과를 보존. 기존 #2274의 DB 함수/Android 검증을 우선 검토해야 함.
+- 코드 SHA `7586043cb1e749a2b608e2671b4e1243b136c157`에서 집중 17건, 전체 Frontend 2,939건, Backend 2,980건(518 SKIP), Lint/Typecheck/Build/계약/보안 스크립트 PASS. 전체 의존성 감사 9건 FAIL, 경로 QA 증빙 누락 FAIL, 실제 인증 E2E/공식 Test exact-SHA/독립 복원 미완료.
+- 격리 PostgreSQL 17.11에서 322개 마이그레이션 PASS. moneyverse_app이 공기업 원본 테이블 직접 SELECT를 할 수 없어 `permission denied for table state_enterprises` 확인. 현재 Nest 공개 조회는 원본 테이블을 직접 읽으므로 실제 앱 계정에서는 작동한다고 인증할 수 없음. 광범위한 SELECT GRANT 금지, 기존 PR #2274 및 B 마이그레이션과 순서 조정 필요.
+- main 최종 재확인 동일. 공유 DB/운영 환경/다른 작업/예약 변경 없음. Production 배포 금지 유지.

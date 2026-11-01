@@ -1493,3 +1493,5 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 종료: 프론트 정확한 SHA 빌드 EAGAIN 실패, Test·운영 승격 미실행. GitHub PR #2319 Draft, CI #5120 진행 중. -->
+
+- **2026-11-02 개발 C v1288 (중복 보류 / 배포 차단):** 공개 공기업 원본 검증 회귀 17건, 전체 빌드·타입검사·린트, Frontend 2,939건 및 Backend 2,980건 통과. 격리 PostgreSQL 322개 적용 후 앱 계정의 공기업 원본 SELECT 권한 부재 확인. 동일 기능 기존 Draft #2274가 있으므로 중복 병합 금지. 의존성 감사 9건, 경로 증빙, 인증 E2E, 공식 Test exact-SHA 차단. 자세한 내용은 `docs/worklog/2026-11-02-c-v1288-public-soe-source.ko.md`.

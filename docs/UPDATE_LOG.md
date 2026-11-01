@@ -1440,3 +1440,5 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 final: frontend exact-SHA Next build FAILED EAGAIN, no Test/Production promotion. GitHub PR #2319 DRAFT, CI #5120 pending. -->
+
+- **2026-11-02 C v1288 (DUPLICATE HOLD / RELEASE BLOCKED):** Isolated public-SOE fail-closed regression (17 focused PASS; full build/typecheck/lint, frontend 2,939 and backend 2,980 PASS) revealed app-role PostgreSQL SELECT denial after 322 fresh migrations. Existing Draft #2274 covers the same feature; do not merge duplicate. Full audit (9 advisories), route ledger, authenticated E2E and exact-SHA Test remain blocked. See `docs/worklog/2026-11-02-c-v1288-public-soe-source.md`.
