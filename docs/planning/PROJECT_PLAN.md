@@ -2,7 +2,7 @@
 
 ## v2026.11.01.1614 — F675-209 Snooze Effective-Day and Early-Resume Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle / authority:** Previous Feature Addition v1612 → Current Feature Improvement v1614 → Next Feature Addition v1616 (provisional). Main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0` checked at start; recheck at midpoint and finish. Stacked on unmerged planning Draft #2355 (itself on #2349); existing handoff #2354. Canonical English, Korean parity. **All F675-203–209 are proposed, not implemented.** No runtime, schema, balances, items, Test or Production mutation.
+**Cycle / authority:** Previous Feature Addition v1612 → Current Feature Improvement v1614 → Next Feature Addition v1616 (provisional). Main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0` checked at start; recheck at midpoint and finish. Draft #2361 stacked on unmerged planning Draft #2355 (itself on #2349); existing handoff #2354. Canonical English, Korean parity. **All F675-203–209 are proposed, not implemented.** No runtime, schema, balances, items, Test or Production mutation.
 
 ### Verified contradiction and decision
 - **P0 design contradiction in v1612:** Paired `snooze_start_kst_day`/`snooze_end_exclusive_kst_day` with `end-start IN (1,3,7)` represents an original pause duration but **cannot encode early resume** after arbitrary elapsed days by truncating `end` (e.g. day 2 of a seven-day pause yields duration 2, which fails the CHECK). Replacing an ACTIVE interval on day D with a fresh D+1 interval can also silently unsnooze day D, contrary to the promise that mutations never change today's eligibility. These are specification defects, **not observed production bugs**; no F675-209 runtime exists.
