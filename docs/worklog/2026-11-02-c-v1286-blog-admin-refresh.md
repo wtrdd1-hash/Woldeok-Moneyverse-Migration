@@ -11,18 +11,26 @@
 
 ## Checklist
 - [x] Source audit, ownership/PR conflict check, isolated branch/worktree.
-- [ ] RED tests for unauthorized, malformed, unavailable, and verified refresh behavior.
-- [ ] Implement guarded BFF and client state reconciliation.
-- [ ] Mid-work main/plan recheck and targeted/full validation.
-- [ ] Final HEAD exact-SHA checks, PR, CI, isolated Test and release decision.
+- [x] RED tests for unauthorized, malformed, unavailable, and verified refresh behavior.
+- [x] Implement guarded BFF and client state reconciliation.
+- [x] Mid-work main/plan recheck and targeted/full validation (failures explicitly recorded).
+- [x] Draft PR and isolated PG/HTTP validation; exact-SHA final checks continue in task logs. No merge or release.
 
 ## In progress
 
 Pending RED test execution.
 
-## Finished
+## Finished — 2026-11-02 06:26 KST (release HOLD)
 
-Pending.
+- Draft PR **#2434**, `auto/hourly-c-blog-admin-refresh-proof-v1286-20261102-0611`; code revision `d478a55d211b3dd22664c1bff19d2a487deaa4ae`. English worklog canonical, Korean secondary. GitHub PR body and mid-run comment updated. The final documentation commit and its exact SHA are recorded in the external task chronology and PR final comment.
+- Focused RED/GREEN: 7 guarded BFF tests, 4 interactive admin UI tests, 9 global header policy tests = **20 PASS**; 1 existing admin blog component test also passed. Keyboard-friendly 44px refresh button and screen-reader live status/alert included.
+- Initial full code gate on `c73e2fd534666d1e3db6056fffd3d426214411c4`: Lint **PASS (0 errors / 1,027 warnings)**, Typecheck **PASS**, app-api **PASS (184 endpoints)**, workspace Build **PASS**. Frontend **2,932 PASS**; Backend **2,978 PASS / 2 FAIL / 518 SKIP**; database package **62 PASS / 5 SKIP**; contract **41 PASS**; security floor scripts **11 PASS**. Backend failures: `profile-private-response.http.test.ts` expects 200 for `/profile` and `/profile/settings`, receives 401. A focused baseline on unchanged `origin/main` passed 8/8, so full-suite concurrency/fixture cause remains unresolved; do not label these failures as fixed or proven pre-existing.
+- Isolated PostgreSQL 17.11 **322/322 migrations PASS**, network disabled, restricted app role EXECUTE on `blog_verified_admin_list(uuid)` true, raw verified article SELECT/INSERT false, nonadmin actor SQL 42501 denied. No shared DB changes. Final SHA positive-admin SQL replay is tracked separately in task logs.
+- Production-like isolated Next HTTP (after config correction): unauthenticated GET `/api/admin/blog/verified-refresh` **403**, `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`. Initial build had mistakenly inherited public headers; corrected and reverified after rebuild.
+- **Release blockers:** full dependency audit **FAIL (9 vulnerabilities: 1 low, 8 moderate)**; full-route QA **FAIL** because `artifacts/qa/full-route-ledger.json` is missing; Backend suite **2 FAIL**; official authenticated browser E2E / exact-SHA isolated Test / restore / GitOps release gate **BLOCKED**. Production dependency High+ audit **PASS** but does not waive the full audit. Remote required CI was not fully green at this checkpoint.
+- Public Test and Production `/frontend-version` both reported `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, which is only a frontend version endpoint, not a backend identity proof. Candidate **not deployed**. No merge, no GitOps mutation, no Production promotion, no rollback needed. No branches deleted; preserve unique unmerged changes and all A/B/Gemini/QA work.
+- **Verdict: PARTIAL / RELEASE BLOCKED.** Only a fully green exact-SHA release gate can authorize a future standard merge and deployment.
+
 
 ## In progress — 2026-11-02 06:16 KST
 
