@@ -19,3 +19,10 @@
 - Implemented bounded PostgreSQL function-result filter, both Nest controllers, web GET checkbox and noindex, Android gateway strict query/proof/no-store.
 - No migrations, table grants, ledger writes, Test or Production changes.
 - Midpoint main re-fetched before gate execution; source SHA unchanged at this checkpoint.
+
+## FINISHED — local implementation, release gated
+- TDD RED→GREEN completed. API/DB/browser/Android feature and tests committed; API contract EN/KO updated. No schema migration or ledger writes.
+- Full test suites passed under `NODE_ENV=test`: Backend 2,966 PASS/518 SKIP; Frontend 2,914 PASS (before new SSR 3-test file); database unit 62 PASS/4 SKIP. Typecheck PASS, builds PASS, lint 0 errors/1,022 warnings, security 12 PASS, Android contract 184 PASS, prod dependency audit no known vulnerabilities. See QA for initial environment-induced failures and final SHA retest.
+- Real DEV PostgreSQL `moneyverse_app` exact parameterized SQL: 1 latest published notice, 0 image-attached, READ ONLY / ROLLBACK. Existing P0 #993 app-role ACL violations remain.
+- Official Test/Production SHA mismatch; exact-SHA Test authenticated E2E and independent restore not certified. Draft PR/HOLD, no merge or deployment. Preserve all other branches and PRs. GitHub CI must be checked against the final SHA.
+- No Test/Production changes, no service restarts, no DB writes, no branch deletions, no rollback.

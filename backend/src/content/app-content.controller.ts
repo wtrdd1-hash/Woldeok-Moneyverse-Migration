@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
-import { parseAnnouncementImageQuery } from './announcement-image-filter';
+import { parseAnnouncementImageQuery, type PublicAnnouncementListResponse } from './announcement-image-filter';
 
 @ApiTags('content')
 @Controller('content')
@@ -15,7 +15,8 @@ export class AppContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements(@Query() query: Record<string, unknown> = {}) {
+  @ApiQuery({ name: 'withImage', required: false, enum: ['1'], description: 'Image-attached announcements among the latest 20 published notices' })
+  async announcements(@Query() query: Record<string, unknown> = {}): Promise<PublicAnnouncementListResponse> {
     const imageOnly = parseAnnouncementImageQuery(query);
     const announcements = await this.service().publicAnnouncements({ imageOnly });
     return imageOnly ? { announcements, filterApplied: 'with-image', sourceLimit: 20 } : { announcements };

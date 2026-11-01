@@ -1,4 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
+import type { ContentAnnouncement } from './content.service';
+
+export interface PublicAnnouncementListResponse {
+  readonly announcements: ContentAnnouncement[];
+  readonly filterApplied?: 'with-image';
+  readonly sourceLimit?: number;
+}
 
 /** Only the exact opt-in value is supported; duplicate query keys become arrays in Nest. */
 export function parseAnnouncementImageQuery(query: Record<string, unknown> = {}): boolean {

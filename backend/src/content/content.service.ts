@@ -216,7 +216,7 @@ function normalizePhotoReceipt(row: ContentPhotoReceiptRow): ContentPhotoReceipt
  * this module's static type checking).
  */
 export interface ContentRepositoryLike {
-  publishedAnnouncements(options?: { limit?: number }): Promise<ContentAnnouncementRow[]>;
+  publishedAnnouncements(options?: { limit?: number; imageOnly?: boolean }): Promise<ContentAnnouncementRow[]>;
   publishedPhotos(options?: { limit?: number }): Promise<ContentPhotoRow[]>;
   isPublicStorageKey(storageKey: unknown): Promise<boolean>;
   publicStatus(): Promise<ContentStatusRow[]>;
