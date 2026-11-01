@@ -44,6 +44,7 @@ import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { TreasuryService } from './treasury.service';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 
@@ -64,6 +65,7 @@ describe('P1 treasury flow real NestJS HTTP contract', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     await app.init();
