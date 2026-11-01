@@ -12,7 +12,7 @@ vi.mock('@/components/translated-text', () => ({ TranslatedText: ({ korean }: { 
 
 import MarketplacePage, { metadata } from './page';
 
-async function html() { return renderToStaticMarkup(await MarketplacePage()); }
+async function html() { return renderToStaticMarkup(await MarketplacePage({})); }
 
 describe('marketplace verified source UI', () => {
   beforeEach(() => { vi.clearAllMocks(); });
@@ -48,4 +48,20 @@ describe('marketplace verified source UI', () => {
     expect(markup).not.toContain('구매하기');
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
+
+  it('searches the SQL-backed full active listing set, not the first 50 rendered cards', async () => {
+    mocks.apiOrNull.mockResolvedValue([]);
+    const markup = renderToStaticMarkup(await MarketplacePage({ searchParams: Promise.resolve({ q: '  에메랄드  ' }) }));
+    expect(mocks.apiOrNull).toHaveBeenCalledWith('/api/v1/marketplace/listings?limit=50&search=%EC%97%90%EB%A9%94%EB%9E%84%EB%93%9C');
+    expect(markup).toContain('name="q"');
+    expect(markup).toContain('에메랄드');
+    expect(markup).toContain('검색 결과에서 확인된 활성 매물이 없습니다');
+  });
+
+  it('rejects duplicate query parameters before any API call', async () => {
+    const markup = renderToStaticMarkup(await MarketplacePage({ searchParams: Promise.resolve({ q: ['a', 'b'] }) }));
+    expect(mocks.apiOrNull).not.toHaveBeenCalled();
+    expect(markup).toContain('검색어를 확인');
+  });
+
 });

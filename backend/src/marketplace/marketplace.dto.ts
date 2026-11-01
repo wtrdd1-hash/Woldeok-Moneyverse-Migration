@@ -56,6 +56,8 @@ export class MarketplaceQueryDto {
   @ApiPropertyOptional({ description: '검색 키워드', example: '에메랄드' })
   @IsOptional()
   @IsString()
+  @MaxLength(80)
+  @Matches(/^[^\p{Cc}]*$/u)
   search?: string;
 
   @ApiPropertyOptional({ description: '결과 제한 수', example: 50 })
