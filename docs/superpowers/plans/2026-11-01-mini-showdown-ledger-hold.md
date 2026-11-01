@@ -6,5 +6,5 @@
 2. [x] Run focused test RED and record exact failure.
 3. [x] Replace `resolveMiniShowdown` synthetic return with 503 `MINI_SHOWDOWN_SETTLEMENT_UNAVAILABLE`; preserve guards, add private/no-store/noindex/no-referrer.
 4. [x] Run focused test GREEN and inspect diff; confirm no SQL, migration, ledger or wallet writes.
-5. [ ] Run available gates without interfering with A/C/QA; record failures, remote CI and official exact-SHA Test blocker.
-6. [ ] Create Draft/HOLD PR, notify C of frontend payout fallback and preserve RELEASE HOLD until exact-SHA, E2E, independent restore and GitOps PASS.
+5. [x] Run available gates without interfering with A/C/QA; record failures, remote CI and official exact-SHA Test blocker.
+6. [x] Create Draft/HOLD PR, notify C of frontend payout fallback and preserve RELEASE HOLD until exact-SHA, E2E, independent restore and GitOps PASS.
