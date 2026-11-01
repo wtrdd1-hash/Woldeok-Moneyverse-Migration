@@ -10,25 +10,16 @@ import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '../quests/early-events';
 import type { EarlyGameBoard } from '../quests/early-game';
 import { upcomingShopDeadlines, type ShopDeadlineItem } from './shop-deadlines';
+import { parseSeasonCalendarEvents } from './season-evidence';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export const metadata: Metadata = {
   title: '이벤트 캘린더',
   description: '시즌 이벤트와 오늘의 사건, 주간 목표 일정을 한곳에서 확인하세요.',
   robots: { index: false, follow: false },
 };
-
-interface SeasonEvent {
-  readonly event_id: string;
-  readonly season_id: string;
-  readonly season_name: string;
-  readonly title: string;
-  readonly description: string;
-  readonly cost_wld: string;
-  readonly points_per_entry: number;
-  readonly ends_at: string;
-}
 
 function nextWeekStart(weekStart: string): string | null {
   const value = new Date(`${weekStart}T00:00:00+09:00`);
@@ -40,14 +31,14 @@ function nextWeekStart(weekStart: string): string | null {
 export default async function CalendarPage() {
   await requireMember();
 
-  const [seasonData, todayData, earlyGame, shopData] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
+  const [seasonRaw, todayData, earlyGame, shopData] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/seasons/events'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
     apiOrNull<{ catalogItems: ShopDeadlineItem[] }>('/api/v1/shop/catalog'),
   ]);
 
-  const seasonEvents = seasonData?.events ?? [];
+  const seasonEvents = parseSeasonCalendarEvents(seasonRaw);
   const today = todayData?.event ?? null;
   const weeklyGoals = earlyGame?.goals ?? [];
   const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
@@ -187,11 +178,16 @@ export default async function CalendarPage() {
           title="종료 예정 시즌 이벤트"
           id="season-calendar-title"
         />
-        {seasonData === null ? (
-          <EmptyState
-            title="시즌 이벤트 일정을 불러오지 못했어요."
-            description="일정을 추측해서 표시하지 않습니다. 잠시 후 다시 확인해 주세요."
-          />
+        {seasonEvents === null ? (
+          <div role="alert" className="grid gap-3 rounded-xl border border-destructive/40 p-4">
+            <EmptyState
+              title="시즌 이벤트 일정을 확인할 수 없어요."
+              description="서버 응답을 검증하지 못했습니다. 이벤트가 없다는 의미는 아닙니다."
+            />
+            <Link href="/calendar" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">
+              시즌 일정 다시 조회
+            </Link>
+          </div>
         ) : seasonEvents.length === 0 ? (
           <EmptyState
             title="현재 진행 중인 시즌 이벤트가 없어요."
@@ -213,7 +209,7 @@ export default async function CalendarPage() {
                     종료 <time dateTime={event.ends_at}>{formatMoment(event.ends_at)}</time>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    참여 비용 {event.cost_wld} WLD · 1회당 {event.points_per_entry}점
+                    참여 비용 {groupDigits(event.cost_wld)} WLD · 1회당 {event.points_per_entry}점
                   </p>
                 </CardContent>
               </Card>

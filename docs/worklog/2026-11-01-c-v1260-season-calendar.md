@@ -8,14 +8,18 @@
 - Branch `auto/hourly-c-calendar-season-v1260-20261101-1316` and independent worktree `/srv/moneyverse-data/tasks/mv-c-v1260-calendar-season/repo`, from exact origin/main. Never edit main or shared workers.
 
 ## Implementation checklist
-- [ ] RED regression tests: valid empty/invalid event payload, duplicate IDs, invalid WLD/date and Android HTTP boundary.
-- [ ] GREEN: bounded pure parser, web fail-closed/error/verified-empty state and accessible retry, Android gateway.
-- [ ] Midpoint fetch main, review overlaps and change diff.
+- [x] RED regression tests: valid empty/invalid event payload, duplicate IDs, invalid WLD/date and Android HTTP boundary.
+- [x] GREEN: bounded pure parser, web fail-closed/error/verified-empty state and accessible retry, Android gateway.
+- [x] Midpoint fetch main, review overlaps and change diff.
 - [ ] Exact HEAD focused/full lint, typecheck, build, frontend/backend/unit/contract/security/app-api, real isolated PostgreSQL, E2E, CI, Test; record each PASS/FAIL/BLOCKED.
 - [ ] Final SHA, origin/main recheck, PR and preserved backups; no merge/deploy unless all release gates PASS.
 
-## Midpoint
-- Pending.
+## Midpoint — 2026-11-01 13:20 KST
+- RED reproduced: 7 failures across missing parser, unvalidated web page, Android 200 malformed payload and public cache inheritance. Focused test log: /tmp/mv-c-v1260-red.log.
+- GREEN: strict 200-event maximum, UUID/dedup, bounded text, exact WLD, integer points, real ISO date; web verified-empty vs invalid; 44px keyboard retry; Android GET 200 sanitization, 503 on malformed, safe 401, private no-store/noindex/no-referrer incl HEAD.
+- 16 focused tests PASS after correcting one test fixture that called HEAD handler with GET request. SSR rendered invalid/empty/verified paths. Targeted ESLint and frontend typecheck PASS.
+- Midpoint fetch: origin/main remains f13bbce273ffc65e8576170992d82ea00c27a1c9; no overlapping active season-calendar PR. A/B/QA work untouched.
+- No DB schema, ledger, WLD, migration, existing main, Test or Production changes.
 
 ## Final
 - Pending. Release HOLD until all required gates and official exact-SHA Test pass.
