@@ -11,3 +11,9 @@
 
 ## 종료
 - 최종 검증 및 릴리스 차단 결과 추후 기록.
+
+## 종료 (2026-11-02 08:12 KST) — 부분 완료 / 배포 차단
+- 구현 코드 SHA `6ecbf1a462d6282f68b92fa479c26a203ef803a3`: 집중 10건, 전체 Frontend 2,924건, Backend 2,980건(518 SKIP), 계약 41건, DB 패키지 62건(5 SKIP), 보안 17건, Lint/Typecheck/Build PASS. 전체 의존성 감사 취약점 9건 FAIL, 경로 QA 필수 증빙 누락 FAIL.
+- 독립 Next.js 실제 HTTP에서 `/enterprises`, `/en/enterprises`, `/ja/enterprises` 모두 200 및 `noindex, nofollow`, `/roadmap`은 기존 공개 색인 정책 유지. 인증된 브라우저 E2E/공식 Test exact-SHA/독립 복원 미실행.
+- 격리 PostgreSQL 17.11의 322개 마이그레이션 PASS, 검증용 컨테이너 제거. 기존 SOE API 앱 계정 직접 SELECT 권한 부재는 Draft #2274에서 별도 해결 필요.
+- main 시작·중간·종료 동일, Draft PR #2443 개설. 배포/병합/공유 DB/다른 작업/핵심 예약 5개 설정 변경 없음. 문서 커밋 후 HEAD 검증을 재실행하고 PR에 결과 기록. 모든 필수 게이트 전까지 운영배포 금지.
