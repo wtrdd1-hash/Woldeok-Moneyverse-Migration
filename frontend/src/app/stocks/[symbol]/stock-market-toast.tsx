@@ -1,128 +1,59 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, X, Radio } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
 import { playStockTickSound } from '@/lib/audio-effects';
-
-export interface RecentTradeItem {
-  readonly id: string;
-  readonly price: number;
-  readonly volume: number;
-  readonly isBuy: boolean;
-  readonly time: string;
-}
+import { useStockTrades } from '@/lib/use-market-prices';
 
 interface StockMarketToastProps {
+  readonly stockId: string;
   readonly symbol: string;
-  readonly currentPrice: string;
+  /** Retained for compatibility; the displayed price is never evidence of a trade. */
+  readonly currentPrice?: string;
   readonly isEn?: boolean;
 }
 
-export function StockMarketToast({
-  symbol,
-  currentPrice,
-  isEn = false,
-}: StockMarketToastProps) {
-  const [activeTrade, setActiveTrade] = useState<RecentTradeItem | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+export function StockMarketToast({ stockId, symbol, isEn = false }: StockMarketToastProps) {
+  const trades = useStockTrades(stockId);
+  const latest = trades[0];
+  const [visible, setVisible] = useState(false);
 
-  const priceNum = Number.parseInt(currentPrice.replaceAll(',', '') || '1000', 10);
-
-  // 12~20초 주기로 가상/실시간 대형 체결 틱 알림 시뮬레이션 및 슬라이드 인-아웃
   useEffect(() => {
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    // The source must be a recent server execution, not a price change or timer.
+    if (!latest || latest.stockId !== stockId || Date.now() - Date.parse(latest.timestamp) > 60_000) {
+      setVisible(false);
+      return;
+    }
+    setVisible(true);
+    playStockTickSound();
+    const timer = setTimeout(() => setVisible(false), 5000);
+    return () => clearTimeout(timer);
+  }, [latest, stockId]);
 
-    const interval = setInterval(() => {
-      // 30% 확률로 대규모 체결 틱 발생
-      const isBuy = Math.random() > 0.45;
-      const variation = (Math.random() - 0.48) * 0.02; // ±1% 변동
-      const execPrice = Math.max(1, Math.round(priceNum * (1 + variation)));
-      const volume = Math.floor(Math.random() * 80) + 10;
-      const now = new Date();
-      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-      const newTrade: RecentTradeItem = {
-        id: Math.random().toString(36).slice(2, 9),
-        price: execPrice,
-        volume,
-        isBuy,
-        time: timeStr,
-      };
-
-      setActiveTrade(newTrade);
-      setIsVisible(true);
-      playStockTickSound();
-
-      // 5초 후 슬라이드 아웃
-      if (hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        setIsVisible(false);
-      }, 5000);
-    }, 14000);
-
-    return () => {
-      clearInterval(interval);
-      if (hideTimer) clearTimeout(hideTimer);
-    };
-  }, [priceNum]);
-
-  if (!activeTrade || !isVisible) return null;
+  if (!latest || !visible || latest.stockId !== stockId) return null;
+  const isBuy = latest.side === 'BUY';
+  const time = new Date(latest.timestamp).toLocaleTimeString(isEn ? 'en-GB' : 'ko-KR', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  });
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-16 right-4 sm:bottom-6 sm:right-6 z-50 max-w-xs transition-all duration-300 ease-out animate-in slide-in-from-bottom-4 fade-in"
-    >
-      <div className="rounded-xl border border-border/80 bg-card/95 backdrop-blur-md p-3 shadow-xl flex items-center gap-3">
-        {/* 체결 아이콘 */}
-        <div
-          className={`size-8 rounded-lg flex items-center justify-center shrink-0 ${
-            activeTrade.isBuy
-              ? 'bg-emerald-500/15 text-emerald-500'
-              : 'bg-rose-500/15 text-rose-500'
-          }`}
-        >
-          {activeTrade.isBuy ? (
-            <ArrowUpRight className="size-4.5" />
-          ) : (
-            <ArrowDownRight className="size-4.5" />
-          )}
+    <div role="status" aria-live="polite" className="fixed bottom-16 right-4 z-50 max-w-[calc(100vw-2rem)] sm:bottom-6 sm:right-6 sm:max-w-xs">
+      <div className="flex items-center gap-3 rounded-xl border border-border/80 bg-card p-3 shadow-xl">
+        <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${isBuy ? 'bg-emerald-500/15 text-emerald-500' : 'bg-rose-500/15 text-rose-500'}`}>
+          {isBuy ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
         </div>
-
-        {/* 체결 내용 */}
-        <div className="flex-1 min-w-0 space-y-0.5">
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-            <span className="flex items-center gap-1 font-semibold text-foreground">
-              <Radio className="size-2 text-primary animate-ping" />
-              <span>{symbol} {isEn ? 'Live Trade' : '체결 틱'}</span>
-            </span>
-            <span>{activeTrade.time}</span>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1 font-semibold text-foreground"><Radio className="size-2 text-primary" />{symbol} {isEn ? 'Executed trade' : '실제 체결'}</span>
+            <span>{time}</span>
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span
-              className={`font-mono text-xs font-bold ${
-                activeTrade.isBuy ? 'text-emerald-500' : 'text-rose-500'
-              }`}
-            >
-              {groupDigits(activeTrade.price.toString())} WLD
-            </span>
-            <span className="font-mono text-[11px] font-semibold text-foreground">
-              {groupDigits(activeTrade.volume.toString())}주 ({activeTrade.isBuy ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')})
-            </span>
+          <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs font-bold">
+            <span className={isBuy ? 'text-emerald-500' : 'text-rose-500'}>{groupDigits(latest.price)} WLD</span>
+            <span>{groupDigits(latest.quantity.toString())}{isEn ? ' shares' : '주'} ({isBuy ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')})</span>
           </div>
         </div>
-
-        {/* 닫기 버튼 */}
-        <button
-          type="button"
-          onClick={() => setIsVisible(false)}
-          className="size-6 rounded-md hover:bg-muted text-muted-foreground flex items-center justify-center shrink-0 transition-colors"
-          aria-label={isEn ? 'Close toast' : '알림 닫기'}
-        >
-          <X className="size-3.5" />
-        </button>
+        <button type="button" onClick={() => setVisible(false)} className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label={isEn ? 'Dismiss executed trade' : '체결 알림 닫기'}><X className="size-4" /></button>
       </div>
     </div>
   );
