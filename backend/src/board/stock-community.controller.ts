@@ -18,7 +18,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { StockCommunityService } from './stock-community.service';
+import { publicBoardDayWindow, StockCommunityService } from './stock-community.service';
 
 class CreateStockPostDto {
   @ApiProperty({ maxLength: 120 })
@@ -92,12 +92,17 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'day', required: false, type: String, description: 'Seoul calendar day YYYY-MM-DD within latest 50 public posts' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'day')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const day = query.day;
+    if (day !== undefined && !publicBoardDayWindow(day)) {
+      throw new BadRequestException('invalid board day');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +120,10 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: day === undefined
+        ? await this.community.publicList(stock as string | undefined, q as string | undefined)
+        : await this.community.publicList(stock as string | undefined, q as string | undefined, day as string),
+      ...(day === undefined ? {} : { appliedDay: day as string }),
     };
   }
 }

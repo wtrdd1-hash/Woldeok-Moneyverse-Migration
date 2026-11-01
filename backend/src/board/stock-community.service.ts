@@ -7,6 +7,16 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 const STOCK_SYMBOL = /^[A-Za-z0-9._-]{1,16}$/;
 
+/** Canonical Seoul calendar day, converted to exact UTC half-open bounds. */
+export function publicBoardDayWindow(value: unknown): { start: string; end: string } | null {
+  if (typeof value !== 'string' || !/^20[0-9]{2}-[0-9]{2}-[0-9]{2}$/.test(value)) return null;
+  const utcDay = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(utcDay.valueOf()) || utcDay.toISOString().slice(0, 10) !== value) return null;
+  const start = Date.parse(`${value}T00:00:00+09:00`);
+  if (!Number.isFinite(start)) return null;
+  return { start: new Date(start).toISOString(), end: new Date(start + 86_400_000).toISOString() };
+}
+
 export interface StockTaggedPostInput {
   readonly actorUserId: string;
   readonly title: string;
@@ -116,7 +126,7 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, day?: string) {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -130,14 +140,18 @@ export class StockCommunityService {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
+    const window = day === undefined ? null : publicBoardDayWindow(day);
+    if (day !== undefined && !window) throw new Error('invalid board day');
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+          AND ($4::timestamptz IS NULL OR created_at >= $4::timestamptz)
+          AND ($5::timestamptz IS NULL OR created_at < $5::timestamptz)`,
+      [50, normalized, title, window?.start ?? null, window?.end ?? null],
     );
     return rows.map(mapped);
   }

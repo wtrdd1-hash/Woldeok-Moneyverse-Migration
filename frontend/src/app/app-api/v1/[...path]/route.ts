@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseBoardDay, isVerifiedBoardDayResponse } from '@/app/board/board-day';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -240,6 +241,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
+  const boardDayPath = parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardDayValues = boardDayPath ? request.nextUrl.searchParams.getAll('day') : [];
+  if (boardDayPath && (boardDayValues.length > 1 ||
+      (boardDayValues.length === 1 && parseBoardDay(boardDayValues[0]).invalid) ||
+      [...request.nextUrl.searchParams.keys()].some(key => !['stock', 'q', 'day'].includes(key)))) {
+    return gatewayProblem(400, 'Bad Request', 'board_day_invalid', 'invalid public board date filter');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -313,6 +322,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
         'The owner transaction detail could not be verified');
+    }
+  }
+
+  if (boardDayPath && boardDayValues.length === 1 && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardDayResponse(await response.clone().json(), boardDayValues[0]!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_day_unverified', 'public board date filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_day_unverified', 'public board date filter could not be verified');
     }
   }
 
@@ -585,13 +605,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('day'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('day'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

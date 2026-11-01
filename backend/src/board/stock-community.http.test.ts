@@ -22,3 +22,15 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+
+describe('public board Seoul-day HTTP query', () => {
+  it('forwards a validated day to the service', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ day: '2026-11-01' })).resolves.toEqual({ posts: [], appliedDay: '2026-11-01' });
+    expect(community.publicList).toHaveBeenCalledWith(undefined, undefined, '2026-11-01');
+  });
+  it.each([{ day: ['2026-11-01', '2026-11-02'] }, { day: '2026-02-30' }, { day: '2026-11-01', unknown: 'x' }])('rejects invalid day query %j', async query => {
+    await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+  });
+});
