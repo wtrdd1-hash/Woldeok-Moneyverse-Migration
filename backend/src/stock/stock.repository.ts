@@ -687,10 +687,13 @@ export class PostgresStockRepository {
   }
 
   /** The news that is running, for the market screen. */
-  async marketEvents(): Promise<readonly StockMarketEventRow[]> {
+  async marketEvents(direction?: 'up' | 'down'): Promise<readonly StockMarketEventRow[]> {
+    // Filter the existing SECURITY DEFINER projection in SQL, not a potentially stale UI subset.
+    const projection = 'SELECT id::text, stock_id::text, symbol, name, direction, strength, headline, body, source, starts_at, ends_at FROM public.stock_market_events_active()';
     return queryRows<StockMarketEventRow>(
       this.pool,
-      'SELECT id::text, stock_id::text, symbol, name, direction, strength, headline, body, source, starts_at, ends_at FROM public.stock_market_events_active()',
+      direction ? `${projection} WHERE direction::text = $1` : projection,
+      direction ? [direction] : undefined,
     );
   }
 

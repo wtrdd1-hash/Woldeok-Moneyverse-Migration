@@ -158,8 +158,11 @@ export class StockController {
   @Get('market-events')
   @SkipInternalToken()
   @ApiOperation({ summary: 'Market events currently in effect' })
-  async marketEvents() {
-    return { events: await this.service().marketEvents() };
+  async marketEvents(@Query('direction') direction?: string) {
+    if (direction !== undefined && direction !== 'up' && direction !== 'down') {
+      throw new BadRequestException('direction must be up or down');
+    }
+    return { events: await this.service().marketEvents(direction) };
   }
 
   @Get(':id/prices')

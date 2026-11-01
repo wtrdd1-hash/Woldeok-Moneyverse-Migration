@@ -1,0 +1,3 @@
+# Release gate — A 09:25 market-event direction filter
+
+**DRAFT / PRODUCTION HOLD.** No release or migration was executed. Public read-only `direction=up|down` is implemented on a separate branch; the original unfiltered endpoint is preserved. Main merge forbidden pending full Frontend gate (2 baseline admin-session failures), exact candidate SHA CI, official isolated Test authenticated backend/API/DB/E2E, P0 DEV app-role ACL remediation and independent restore / Production executable provenance. Test and Production remain on pre-candidate SHA. Rollback is a code revert or link removal; no DB/ledger rollback required.

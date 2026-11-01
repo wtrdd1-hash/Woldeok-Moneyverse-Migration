@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from 'next';
+import Link from 'next/link';
 import { apiOrNull } from '@/lib/api';
 import { canonicalUrl } from '@/lib/seo';
 import { NewspaperView } from './newspaper-view';
@@ -25,6 +26,9 @@ export default async function NewspaperPage() {
   const stocks: readonly StockTickerItem[] = stocksResult?.stocks ?? [];
   const weeklyBrief = weeklyBriefResult?.success === true ? weeklyBriefResult.data : undefined;
 
-  return <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} />;
+  return <>
+    <div className="mx-auto max-w-6xl px-4 pt-4"><Link href="/newspaper/events" className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm font-semibold">진행 중인 시장 이벤트 · 호재/악재 필터 →</Link></div>
+    <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} />
+  </>;
 }
 

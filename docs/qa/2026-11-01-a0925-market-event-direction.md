@@ -1,0 +1,9 @@
+# QA — A 09:25 active market-event direction filter (DRAFT / HOLD)
+
+- Base `origin/main`: `f13bbce273ffc65e8576170992d82ea00c27a1c9`; refreshed start, mid and pre-commit; canonical English/Korean integrated plans read.
+- TDD: initial Backend 10 RED; Frontend helper/Android RED. Corrected implementation: Backend 12 focused PASS (10 unit + 2 HTTP), Frontend 7 focused PASS (2 parser + 2 Android + 3 page).
+- Full Backend: 2,960 PASS / 517 SKIP, exit 0 before adding HTTP tests. Database unit: 62 PASS / 4 SKIP. Frontend full: 2,904 PASS / 2 FAIL, plus 1 worker error; exit 1. The same two administrator console session tests fail on unchanged main (2 FAIL / 35 PASS), so this candidate remains HOLD. They are not counted as passing.
+- Typecheck PASS; lint 0 errors / 1,022 warnings; API contract 184 endpoints PASS; security/release focused 10 PASS. Initial full build failed in Next page-data worker SIGABRT; single-worker retry with `MONEYVERSE_NEXT_BUILD_CPUS=1` PASS, including `/newspaper/events` route.
+- Real DEV PostgreSQL 17.11, `SET LOCAL ROLE moneyverse_app`, `BEGIN READ ONLY`: function EXECUTE true; active total 3, up 3, down 0; filtered up 3/down 0; ROLLBACK. This is a read-only source verification, not authenticated Test E2E. Existing DEV P0 ACL violation persists: `moneyverse_app` user_items DELETE=true, account_balances UPDATE=true. Production ACL not inferred.
+- Official Test SHA `bc8cd8a6c654af0336f550643f23049a58ee1d16`; Production API SHA `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`; candidate not deployed. Exact-SHA Test auth, accessibility browser E2E, independent restore, GitOps gate and Production provenance BLOCKED. No main merge, Test/Production deployment, DB writes or service restart.
+- Branch cleanup: 64 remote branches and 62 open PRs at start; all existing branches preserved, no deletion. Pre-commit conflicts/CI require re-evaluation; no candidate PASS claimed without final SHA CI.
