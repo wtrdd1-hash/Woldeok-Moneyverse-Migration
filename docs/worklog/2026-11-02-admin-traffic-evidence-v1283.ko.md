@@ -21,4 +21,3 @@
 - 최초 후보 원격 CI·후보 빌드 PASS, 최종 SHA CI 재확인 필요. 공식 Test 인증 E2E·복원·GitOps 승인 BLOCKED.
 - main 재확인 `a8541927c3a351d980454c66e95a3356c47e0722` 유지. 병합·Test/Production 배포·롤백·브랜치 삭제 없음. A/B/Gemini/QA 및 핵심 예약 5개 설정 변경 없음.
 - 최종 HEAD·CI 결과는 Draft PR #2424 댓글에 기록. 모든 게이트 PASS 전까지 RELEASE HOLD.
-

@@ -24,4 +24,3 @@
 - Official exact-SHA authenticated Test E2E, independent restore and GitOps release gate BLOCKED. No merge, Test/Production deployment, DB mutation outside disposable container, rollback or branch deletion.
 - Main re-fetched mid-run and before final checkpoint; remains `a8541927c3a351d980454c66e95a3356c47e0722`. A/B/Gemini/QA branches and all five automations untouched.
 - Final exact HEAD, CI and gate evidence are appended as GitHub PR #2424 comments; DRAFT/HOLD remains until all release requirements PASS.
-
