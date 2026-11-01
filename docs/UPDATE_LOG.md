@@ -1,3 +1,7 @@
+## 2026-11-01 C v1271 — Verified member support conversation source (DRAFT / RELEASE HOLD)
+- `/support` now validates owner-scoped thread/message API envelopes, rejects malformed sender/status and duplicate IDs, distinguishes verified empty from unavailable and blocks reply/export until history is verified. Accessible retry; existing Nest session and PostgreSQL owner-scope functions reused. No DB/ledger changes.
+- RED 6 defects, GREEN 50/50 focused support tests. Source candidate full lint/typecheck/build and frontend 2,911/backend 2,963 tests PASS; isolated PostgreSQL 316/316 PASS. Full audit 9 vulnerabilities, QA ledger missing, official Test exact-SHA E2E and release gates BLOCKED. [Worklog](worklog/2026-11-01-c-v1271-support-conversation-proof.md).
+
 ## 2026-11-01 v1611 — Treasury reset postmortem and evidence-based completion gate (Production NOT RECOVERED)
 - Verified full pre-reset backup checksum, live fiscal migration 314, historic vault archive 220,923,528 WLD, current canonical/vault 0; reran independent app-role provenance audit (BLOCKED: Treasury 552/552 unlinked, dividends 738 NULL+6 dangling). Public Production still 353c6d vs main 905207; Test bc8cd8; production-current symlink differs from real running unit directories.
 - New read-only source/host readiness reporter `scripts/release/verify-treasury-postreset-completion.mjs` + 6 tests PASS. Actual host diagnosis NOT_RECOVERED. Green CI/PR/zero epoch is not a payout or Production completion. [Incident RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.md).

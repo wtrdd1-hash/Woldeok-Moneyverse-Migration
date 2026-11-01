@@ -37,7 +37,7 @@ export function parseSupportThreads(payload: unknown): SupportThread[] | null {
   for (const entry of envelope.threads) {
     const row = record(entry);
     if (!row || !nonempty(row.thread_id, 128) || !nonempty(row.subject, 200) ||
-      !['open', 'waiting_user', 'resolved'].includes(String(row.status)) ||
+      (row.status !== 'open' && row.status !== 'waiting_user' && row.status !== 'resolved') ||
       typeof row.created_at !== 'string' || typeof row.last_message_at !== 'string' ||
       seen.has(row.thread_id)) return null;
     seen.add(row.thread_id);
@@ -55,7 +55,7 @@ export function parseSupportMessages(payload: unknown): SupportMessage[] | null 
     const row = record(entry);
     if (!row || !nonempty(row.message_id, 128) ||
       (row.sender_kind !== 'user' && row.sender_kind !== 'admin') ||
-      typeof row.body !== 'string' || row.body.length > 2000 ||
+      !nonempty(row.body, 2000) ||
       typeof row.created_at !== 'string' || seen.has(row.message_id)) return null;
     seen.add(row.message_id);
     result.push(row as SupportMessage);
