@@ -1,3 +1,38 @@
+## v2026.11.02.1634 — F675-214 구매 영향 미리보기의 구매 함수·재시도 진실성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR PENDING. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.
+
+### 소스 검증 정정: 현재 구매 경로는 072/165 단독이 아니라 218
+- 071은 회원·상품별 user_items 단일 행을 정의한다. 104의 BEFORE INSERT/UPDATE shop_stamp_item_term 트리거는 수량이 증가하면 기간제 **전체 보유품**의 expires_at을 다시 설정한다. 103의 early_event_claim도 구매 없이 이벤트 보상 수량을 증가시켜 동일 트리거를 실행할 수 있다. 다른 수량 변경 경로도 개발 단계에서 조사해야 하며 만료일 재설정 자체가 구매 증거는 아니다.
+- 072는 최초 shop_purchase_catalog를 정의했고 165는 가격 정책을 변경했지만, **218은 공개 함수를 경제 명령 래퍼로 교체**하고 이전 구매 정책을 비공개 shop_purchase_catalog_policy_v215로 분리했다. economic_command_claim/economic_command_complete가 회원·상품·수량 해시·멱등키와 원장/구매 영수증을 검증한다. 동일 멱등키의 정당한 재실행은 기존 불변 영수증을 확인하고 replayed=true를 반환하며 구매 정책·수량 upsert·만료 트리거를 다시 실행하지 않는다. 요청 내용 불일치나 영수증 불일치는 실패 처리한다. 이는 v1632 기획의 소스 근거 정정이지 운영 사고 확인이 아니다.
+- 개발 DB 읽기 전용 결과: shop_catalog 146행 중 기간 설정 2행, user_items 6행 중 만료일 존재 0행, 218 설치·비공개 정책 함수 존재. moneyverse_app은 공개 구매 래퍼 EXECUTE=true, 비공개 정책 EXECUTE=false. 반면 **DEV의 account_balances 직접 UPDATE=true, user_items 직접 SELECT/UPDATE=true, shop_catalog 직접 SELECT=true**로 최소 권한 의도와 모순된다(#993). 운영 권한이나 회원별 보유 상태를 추정하지 않는다. 권한 정정·DB 양/음성 시험은 P0이며 신규 테이블 GRANT 금지.
+
+### 회원 흐름·재실행·동시성
+- 실제 /shop/catalog BuyForm은 현재 바로 구매한다. 제안 기능은 기본 OFF에서 수량 1..100 선택 → 구매 영향 확인 → 본인 검증 미리보기 대화상자 → 구매 확정/취소로 분리한다. 관찰시각의 기존 수량·만료일과 RESTAMPS_ENTIRE_HOLDING / NEW_TIMED_HOLDING / NO_TERM_CHANGE를 구분한다. 신규 구매 시 전체 기간제 보유품이 연장될 수 있으나 이벤트 지급이나 다른 합법적인 수량 증가도 만료일을 변경할 수 있다. 구매별 가상 로트, 확정 가격·재고·적격성·구매 후 정확한 만료시각은 표시하지 않는다.
+- 30초 미리보기 만료, 회원/세션/동의/상품/수량 일치, 본인 변경 시 폐기는 **UI 신선도 검사일 뿐 GET→POST 사이 동일 스냅샷·재고 예약·CAS·외부 변경 없음의 보증이 아니다**. 30초 이내에도 다른 구매·이벤트 지급·상품 기간 변경·재고/가격 변경으로 상태가 달라질 수 있다. 로그아웃·계정 전환·동의 변경·오류·잘못된 DTO에서는 확정 CTA를 차단하고 다시 조회한다. 구매 POST는 독립적으로 거절할 수 있고 미리보기는 결제 권한이 아니다.
+- POST 후 VERIFIED_NEW_PURCHASE_RECEIPT(replayed=false), VERIFIED_IDEMPOTENT_REPLAY(replayed=true), REJECTED, RECEIPT_UNVERIFIED를 구분한다. 재실행 영수증은 **과거 결제의 성공**이지 새로운 WLD 차감·재고 감소·만료 연장의 증명이 아니다. 재실행 결과만으로 '새로 연장됨'을 표시하지 않는다. 영수증 검증 후 보유품을 다시 읽어 실제 만료일을 표시하고, 조회 실패 시 확인 불가를 표시한다. POST 응답을 잃어 결과가 불확실할 때는 **원래 멱등키**로 영수증/상태를 확인해야 하며 새로운 키로 무작정 재구매하지 않는다. 기존 서버 액션의 멱등키 수명주기를 유지한다.
+- 입력·오류: 중복/비정규 수량 400, 미인증 401, 동의 미완료 403, 과다 요청 429, 출처/DTO 불일치 503. 없는·비활성 상품은 회원 정보를 노출하지 않는 404/구매불가 상태로 분리 가능하다. 보유품 0행은 검증된 정상 결과이며 기존 만료 행은 별도 구매 로트가 아니다. 기간 NULL인데 기존 expires_at이 있으면 무기한이라고 주장하지 않고 UNKNOWN_SOURCE로 처리한다.
+
+### API·DB·보안·모바일·접근성·관리자·배포
+- 읽기 전용 본인 GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 유지. UUID·수량·쿼리키 엄격 검증, SessionGuard/AuthenticatedGuard/ConsentGuard와 신뢰된 서버 회원 신원, 클라이언트 userId 금지. DTO는 sourceStatus VERIFIED, observedAtUtcMicros, catalogId, requestedQuantity, holdingDurationDays, currentHolding, impact, previewOnly=true, priceStatus NOT_QUOTED, eligibilityStatus NOT_CERTIFIED. 명령 ID·원장·구매 키·예상 확정 만료일은 응답하지 않는다.
+- PostgreSQL 17 단일 연결 READ ONLY REPEATABLE READ에서 DB clock_timestamp() 한 번과 회원+상품 보유 행·상품 기간을 같은 스냅샷으로 조회한다. GET은 DML·잠금·예약·멱등 영수증을 만들지 않는다. 기존 PK(user_id,catalog_id)·상품 PK 활용, 인덱스는 격리 EXPLAIN과 쓰기 비용 검증 후만 제안한다. 새 SECURITY DEFINER 조회 함수는 앱 역할 실제 권한·세션→회원 결속·교차회원 거부 시험 후 불변 마이그레이션으로만 개발한다. 071/104/218 변경 금지. REPEATABLE READ는 **GET 내부** 일관성만 보증하며 정식 POST는 218 래퍼·비공개 정책·원장 영수증이 최종 진실 기준이다.
+- Next BFF 및 Android app-api/v1의 정확한 경로에서 성공·오류·HEAD·조건부 요청 모두 private,no-store/noindex,nofollow/no-referrer/nosniff, ETag/Last-Modified/Expires 제거, 304 금지. 현 app-api privateShopReceipts는 shop/purchases만 보호하므로 새 catalogue-impact 경로는 별도 규칙이 필요하다. 공개 HTML·검색엔진·사이트맵·분석·서비스워커·Android 디스크 캐시에 회원 만료 정보 금지. 계정 전환 중 이전 응답 폐기. 한영 동등 문구, 320px/200% 확대, 44px 이상 터치, 키보드/초점/aria-live, VoiceOver/TalkBack, 움직임 감소. 새 구매·재실행·오류·만료 확인 불가를 서로 다르게 안내한다.
+- 관리자: 개인 보유품/멱등키 노출 없이 20명 이상 코호트에서만 미리보기 사용, 새 영수증/재실행, 오류, p95, 재조회·폐기·정합성 불일치 익명 집계. p95 <250ms·GET 금융 변경 0은 **목표치이지 측정 결과가 아니다**. F675_214_PURCHASE_IMPACT_PREVIEW_ENABLED 기본 OFF. 공식 Test 정확 SHA·PG17 권한/원장·구매 재실행 E2E·독립 복원·운영자 승인 후 OFF→직원→소규모 단계. 롤백은 우선 OFF, 필요 시 불변 이미지; 과거 원장·영수증·보유품 삭제/수정 금지.
+
+### 개발 인계 P0 4건 / P1 6건
+1. **P0 OPS1634-01 (운영/QA):** Test/Production 실제 프로세스·이미지·매니페스트 SHA, 심볼릭 링크, 롤백 자산, 독립 복원 검증(#1984/#1088). 공개 버전 510dbe6...와 main a8541927c3a351d980454c66e95a3356c47e0722 차이만으로 실행 검증 완료 주장 금지.
+2. **P0 SEC1634-02 (B/DB):** DEV 직접 UPDATE account_balances 및 SELECT/UPDATE user_items 권한(#993), Test/운영 실제 권한, 신뢰 회원 신원, 318+ 마이그레이션·#2345 출처, 교차회원 거부를 독립 검증. 새 불변 권한 회수는 기존 함수 정상 시험 동반.
+3. **P0 FIN1634-03 (B/QA):** economic_command_claim→policy_v215→구매·원장 영수증과 재실행 무중복을 검증하고 국고·조폐·연금·제작·주식·시즌·소각 추첨·부동산 차단(#2330/#2340/#2357/#2366/#2404/#2405) 해소.
+4. **P0 REL1634-04 (QA/운영):** #2391 등 QA 실패, 공식 Test 정확 후보 SHA 인증 구매·재실행·원장 E2E, PG17 신규/업그레이드 권한, 실제 엣지 개인정보 및 독립 복원 통과 전 운영 승격 금지.
+5. **P1 IMPACT1634-05 (B/DB):** 218 래퍼/비공개 정책, 104 트리거, 103 이벤트 지급, NULL/만료/0수량·단일 시각 검증, 10,001건 EXPLAIN, 직접 GRANT 없음.
+6. **P1 IMPACT1634-06 (B/API):** 엄격 GET·본인 DTO, 기존 POST 재실행 플래그·요청 해시·불변 영수증, 결과 불명 시 같은 키 재조회, 400/401/403/404/429/503/304 방어.
+7. **P1 IMPACT1634-07 (A/Web):** 실제 BuyForm 2단계·30초 안내용 신선도·이벤트/동시성 경고, 계정 전환, 재실행 결과 구분, POST 뒤 실제 보유품 재조회, 한영 접근성.
+8. **P1 IMPACT1634-08 (C/Android):** app-api 정확한 경로 개인정보 헤더·오류/HEAD/조건부, 디스크 캐시 금지, 계정/동의 전환, TalkBack, 재실행 구분.
+9. **P1 IMPACT1634-09 (A/B/관리자):** 기본 OFF, 단계별 승인·감사·롤백, 20명 미만 소규모 셀 억제, 신원 없는 성능·오류·재실행 KPI.
+10. **P1 IMPACT1634-10 (QA):** 격리 PG17 신규/업그레이드, 10,001 보유품, 100 동시 조회·구매·이벤트 지급·재실행, 0/1/100 수량, 만료/NULL, 원래 키와 새 키, 재실행 원장 영수증 일치·추가 만료 재설정 0, 위조 회원·앱 권한, HEAD/304/오류, 30초·계정 전환, 320px 한영/Android, GET WLD/아이템/원장 변화 0. **시험 명세만 작성, 미실행**.
+
+**근거·릴리스 게이트:** 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. F675-214 PG17 수용시험·공식 Test 인증 정확 SHA·운영 승격·독립 복원 미실행. 문서 전용 DRAFT / RELEASE HOLD. 런타임·DB 마이그레이션/행·WLD·아이템·원장·Test·Production 변경 없음. CI/테스트 결과는 실제 실행 후에만 기록한다.
+
 # 월덕 머니버스 — Living Project Plan
 **v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
 ## v2026.11.02.1632 — F675-214 상점 구매 전 보유품 만료일 재설정 영향 미리보기 (FEATURE ADDITION / DRAFT / RELEASE HOLD)

@@ -1,0 +1,14 @@
+# Planning v1634 — F675-214 Purchase Impact Source and Replay Truth
+Date: 2026-11-02 KST. Previous Feature Addition v1632 / Current Feature Improvement v1634 / Next Feature Addition v1636 (tentative). DRAFT / RELEASE HOLD. Isolated branch docs/planning-v1634-catalog-purchase-impact-transaction-truth stacked on Draft #2422; handoff #2421; child PR PENDING.
+
+## Start / source
+Read local using-superpowers, brainstorming, using-git-worktrees, writing-plans, verification-before-completion skills; skills__list returned no URI so skills__read path BLOCKED only. miniPC Debian 13 services healthy and DEV PostgreSQL connected. Main a8541927c3a351d980454c66e95a3356c47e0722 checked start/mid. Read AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean paired plan from main and retained unmerged v1632 integrated docs. Compared migration 071/072/103/104/165/218 and BuyForm, Nest shop path, app-api edge with main; examined open GitHub PRs/QA. No runtime code or DB writes.
+
+## Source findings
+Migration 218 is current shop_purchase_catalog wrapper with economic_command_claim, private shop_purchase_catalog_policy_v215, verified replay receipts and payload hash; 072/165 are historical definitions. Replay does not invoke private policy or restamp. Migration 104 trigger fires on any quantity increase including 103 event gift. GET→POST 30-second TTL does not prevent concurrent changes; a fresh preview is not a settlement guarantee. Proposed after-POST receipt states and owner holdings refresh distinguish new purchase from replay; original key must be used to resolve lost POST response. DEV read-only: catalog 146, timed 2, holdings 6, expires_at non-null 0; role direct UPDATE account_balances and SELECT/UPDATE user_items true (#993). No Production permission inference. Public Test and Production /api/version both 510dbe6... at 05:08 KST, unlike main. QA #2391 remains unresolved.
+
+## Deliverables / handoff
+Updated English/Korean PROJECT_PLAN, integrated masters, update logs, and paired worklog (8 documentation files). Four P0: OPS1634-01, SEC1634-02, FIN1634-03, REL1634-04. Six P1: IMPACT1634-05..10 for DB, API, web, Android, admin and QA. Source-driven replay, cross-owner security, private edge, mobile WCAG, analytics and safe rollback included. No independent feature plan file. No implementation or Test/Production promotion.
+
+## Gates
+External independent verified/deduplicated/classified new 0, cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS. Proposed PG17, Android and official authenticated Test exact-SHA tests NOT RUN. Release remains DRAFT / HOLD. Verification/CI and final SHA to be appended only after actual execution.

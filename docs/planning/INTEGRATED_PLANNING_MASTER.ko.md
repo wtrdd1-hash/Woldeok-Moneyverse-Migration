@@ -1,3 +1,8 @@
+## v2026.11.02.1634 — F675-214 구매 영향: 경제 명령·멱등 재실행 근거 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+**주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR PENDING. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.
+
+**정정된 소스:** 071은 회원·상품별 보유품 한 행, 104는 수량 증가 시 기간제 전체 만료일 재설정(103 이벤트 지급도 구매 없이 증가). 072/165는 과거 구매 함수이고 **218이 현재 공개 shop_purchase_catalog 경제 명령 래퍼**이며 비공개 shop_purchase_catalog_policy_v215를 호출한다. 동일 키·동일 요청 재실행은 기존 불변 구매·원장 영수증을 검증하며 구매/수량 증가/만료 트리거를 다시 실행하지 않는다. 재실행을 새 WLD 차감·새 만료 연장으로 표시 금지. POST 결과 유실 시 원래 키로 확인, 검증된 영수증 뒤 실제 보유품 재조회. GET→POST 30초 UI 신선도는 DB 잠금이나 확정 견적이 아니다. 제안된 본인 GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100은 읽기 전용, 단일 DB 관찰시각·본인 행 기준, 가격/재고/구매 후 정확한 만료 보장 없음. Android app-api 새 경로 비공개/no-store/noindex·오류/HEAD/조건부·304 금지, 한영 WCAG 2.2 AA·320px, 관리자 20명 이상 집계, 기본 OFF·OFF 롤백. DEV 읽기 전용: 상품 146(기간제 2), 보유품 6(만료 0); 앱 역할 직접 UPDATE account_balances 및 SELECT/UPDATE user_items=true(#993), 운영 권한 UNKNOWN. P0 OPS1634-01 SEC1634-02 FIN1634-03 REL1634-04, P1 IMPACT1634-05~10 상세는 PROJECT_PLAN.ko.md 및 #2421. QA #2391 미해결, 기능 PG17/공식 Test/복원 미실행. 외부 신규 승인 0, 누적 UNKNOWN / 10,000 BLOCKED / IN PROGRESS. DRAFT / RELEASE HOLD; 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
 # 월덕 머니버스 — 통합 기획 마스터
 **v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
 ## v2026.11.02.1632 — F675-214 상점 구매 전 보유품 만료일 재설정 영향 미리보기 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
