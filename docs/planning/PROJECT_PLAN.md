@@ -1,4 +1,6 @@
 # Woldeok Moneyverse — Living Project Plan
+**v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; base #2410), developer handoff issue #2409. No merge or deployment.
+
 
 ## v2026.11.02.1630 — F675-213 Holding-Row Truth, Restamp Semantics and Exact Count Contract (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

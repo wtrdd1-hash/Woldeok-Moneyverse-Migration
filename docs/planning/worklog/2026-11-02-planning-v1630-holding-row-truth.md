@@ -1,4 +1,6 @@
 # Planning v1630 — F675-213 Holding-Row and Expiry Restamp Truth
+**v1630 GitHub:** Draft PR #2416 OPEN/HOLD (base #2410); handoff #2409.
+
 
 **Date:** 2026-11-02 KST. **Cycle:** Previous Feature Addition v1628 → Current Feature Improvement v1630 → Next Feature Addition v1632 (provisional).
 **Status:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **Main start/mid:** 510dbe6bf4d5c2a8089fc06b480776053da7a2e3. **Stack base:** unmerged Draft #2410 (v1628 head c9bb5d4f30a8ef25d2c88079344c2432fa3fae60). **Developer handoff:** #2409.

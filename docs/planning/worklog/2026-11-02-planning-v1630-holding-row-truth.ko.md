@@ -1,4 +1,6 @@
 # 기획 v1630 — F675-213 단일 보유품 행·만료일 재설정 근거
+**v1630 GitHub:** Draft PR #2416 OPEN/HOLD (기준 #2410); 인계 #2409.
+
 
 **일자:** 2026-11-02 KST. **회차:** 이전 Feature Addition v1628 → 현재 Feature Improvement v1630 → 다음 Feature Addition v1632(잠정).
 **상태:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **main 시작·중간:** 510dbe6bf4d5c2a8089fc06b480776053da7a2e3. **선행:** 미병합 Draft #2410 (v1628 c9bb5d4f30a8ef25d2c88079344c2432fa3fae60). **인계:** #2409.

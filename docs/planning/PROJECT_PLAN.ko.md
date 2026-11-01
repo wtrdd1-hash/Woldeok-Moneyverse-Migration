@@ -1,4 +1,6 @@
 # 월덕 머니버스 — Living Project Plan
+**v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; 기준 #2410), 개발 인계 이슈 #2409. 병합·배포 없음.
+
 
 ## v2026.11.02.1630 — F675-213 보유품 단일 행·만료일 재설정·정확한 집계 계약 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
