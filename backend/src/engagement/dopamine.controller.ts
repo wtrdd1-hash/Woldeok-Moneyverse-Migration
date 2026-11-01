@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
@@ -7,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
-  InternalServerErrorException,
   Header,
   Post,
   Req,
@@ -56,7 +54,6 @@ export interface DailyQuestClaimDto {
   readonly idempotencyKey?: string;
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 @ApiTags('dopamine')
 @Controller('engagement/dopamine')
@@ -221,53 +218,35 @@ export class DopamineController {
   }
 
   @Get('attendance/status')
-  @ApiOperation({ summary: 'Get daily attendance streak and lucky roulette status' })
-  async getAttendanceStatus(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    if (this.repository) {
-      return await this.repository.getAttendanceStatus(userId);
-    }
-    return {
-      checkedInToday: false,
-      streakDays: 1,
-      lastAttendedDate: null,
-      nextRewardPreview: 50,
-      isJackpotEligible: false,
-    };
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Attendance status unavailable pending owner-scoped ledger evidence' })
+  async getAttendanceStatus(@Req() request: RequestWithSession): Promise<never> {
+    requireUserId(request);
+    // A missing/revoked attendance source cannot be presented as a verified zero.
+    throw new ServiceUnavailableException({
+      code: 'ATTENDANCE_EVIDENCE_UNAVAILABLE',
+      message: 'Attendance evidence is unavailable until a verified owner-scoped source exists',
+    });
   }
 
   @Post('attendance/spin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim daily attendance reward and spin the lucky dopamine roulette' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Attendance WLD spins held until atomic ledger-backed settlement exists' })
   async claimAttendanceSpin(
     @Req() request: RequestWithSession,
-    @Body() body: { idempotencyKey?: string },
-  ) {
-    const userId = requireUserId(request);
-    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
-      ? body.idempotencyKey
-      : randomUUID();
-
-    if (this.repository) {
-      try {
-        return await this.repository.claimAttendanceSpin(userId, key);
-      } catch (error: unknown) {
-        if (error instanceof DopamineInputError) {
-          throw new BadRequestException(error.message);
-        }
-        const msg = error instanceof Error ? error.message : String(error);
-        throw new InternalServerErrorException(msg);
-      }
-    }
-
-    return {
-      success: true,
-      rewardAmount: 50,
-      streakDays: 1,
-      isJackpot: false,
-      newBalance: '1000',
-      claimedAt: new Date().toISOString(),
-    };
+    @Body() _body: { idempotencyKey?: string },
+  ): Promise<never> {
+    requireUserId(request);
+    // Never accept a simulated WLD payout or call the non-atomic legacy mint.
+    throw new ServiceUnavailableException({
+      code: 'ATTENDANCE_SETTLEMENT_UNAVAILABLE',
+      message: 'Attendance WLD rewards are unavailable without an atomic ledger settlement',
+    });
   }
 
   @Get('daily-quest/status')

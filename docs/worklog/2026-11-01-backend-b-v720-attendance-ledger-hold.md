@@ -16,3 +16,12 @@
 
 ## Finished
 - Pending.
+
+## Midpoint — 2026-11-01 12:42 KST
+- Rechecked origin/main: f13bbce273ffc65e8576170992d82ea00c27a1c9; no upstream advance.
+- RED: 6/6 new attendance safety tests failed on canonical main; observed synthetic 200 reward and non-atomic repository SQL path.
+- GREEN: 6/6 direct tests plus 3/3 authenticated Nest HTTP tests PASS; 503 codes `ATTENDANCE_EVIDENCE_UNAVAILABLE` and `ATTENDANCE_SETTLEMENT_UNAVAILABLE`, private no-store/noindex/no-referrer, no DB method calls.
+- Full workspace typecheck PASS; targeted ESLint PASS; diff-check PASS.
+- Full backend attempt inside moneyverse-mcp cgroup ABORTED (TasksCurrent 1020/1027); isolated transient systemd test gate started with 192-task/1800M memory limits, still running at checkpoint.
+- Explicit frontend handoff: `frontend/src/app/api/attendance/status/route.ts` still maps upstream 503 to fabricated signed-in streak/reward; `frontend/src/components/daily-attendance-roulette.tsx` still promises WLD and permits spinning. No claim of safe end-user flow until C/A fixes those and Android parity.
+- No migration, DB writes, service restart, main merge, Test or Production deploy.
