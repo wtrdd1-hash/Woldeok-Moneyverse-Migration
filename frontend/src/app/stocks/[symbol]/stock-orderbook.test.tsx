@@ -235,48 +235,21 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
     expect(screen.getByText(/28,000/)).toBeDefined();
   });
 
-  it('renders StockConditionalOrders with Stop-Loss / Take-Profit presets and register button', () => {
+  it('routes conditional-order visitors to persisted alerts without claiming auto-sell fills', () => {
     render(
       <StockConditionalOrders
-        stockId="WDG"
+        stockId="6eecf913-9a47-4a2b-851f-74b90efc802e"
         symbol="WDG"
-        name="월덱 게임즈"
-        currentPrice="15,000"
+        name="Woldeok Games"
+        currentPrice="15000"
         holdingQuantity="100"
         isEn={false}
       />
     );
-
-    // 헤더 및 모드 버튼 검증
-    expect(screen.getByText(/스탑로스 & 익절 자동 감시/i)).toBeDefined();
-    expect(screen.getByText(/손절 감시 \(Stop-Loss\)/i)).toBeDefined();
-    expect(screen.getByText(/익절 감시 \(Take-Profit\)/i)).toBeDefined();
-
-    // 프리셋 버튼 검증 (-3%, -5%, -10%)
-    expect(screen.getByText('-3%')).toBeDefined();
-    expect(screen.getByText('-5%')).toBeDefined();
-    expect(screen.getByText('-10%')).toBeDefined();
-
-    // 손절 감시 버튼 클릭 -> 입력창 자동 계산 검증
-    const btn5 = screen.getByText('-5%');
-    fireEvent.click(btn5);
-    const triggerInput = screen.getByLabelText(/감시 발동 단가/i) as HTMLInputElement;
-    expect(Number.parseInt(triggerInput.value, 10)).toBeLessThan(15000);
-
-    // 익절 모드로 전환 클릭
-    const tpBtn = screen.getByText(/익절 감시 \(Take-Profit\)/i);
-    fireEvent.click(tpBtn);
-    expect(screen.getByText('+5%')).toBeDefined();
-    expect(screen.getByText('+10%')).toBeDefined();
-    expect(screen.getByText('+20%')).toBeDefined();
-
-    // 잔고 수량 비율 버튼 검증
-    expect(screen.getByText('25%')).toBeDefined();
-    expect(screen.getByText('50%')).toBeDefined();
-    expect(screen.getByText(/전량 \(100%\)/i)).toBeDefined();
-
-    // 감시 등록 버튼 검증
-    expect(screen.getByText(/익절 감시 주문 등록/i)).toBeDefined();
+    expect(screen.getByText(/서버에 저장되는 가격 알림/)).toBeDefined();
+    expect(screen.getByRole('button', { name: /조건부 알림 설정/ })).toBeDefined();
+    expect(screen.getByRole('link', { name: /내 가격 알림 보기/ })).toBeDefined();
+    expect(screen.queryByText(/자동 체결되었습니다/)).toBeNull();
   });
 
   it('renders orderbook depth chart and toggles between ladder and depth views', () => {

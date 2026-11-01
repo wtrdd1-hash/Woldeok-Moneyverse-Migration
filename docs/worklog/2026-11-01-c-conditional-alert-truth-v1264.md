@@ -11,13 +11,13 @@
 
 ## Plan / checkpoints
 - [x] Establish isolated worktree and inspect authority and competing work.
-- [ ] RED: regression test fails against simulated local-only execution UI.
-- [ ] GREEN: connect the conditional panel to existing verified alert creation and owner alert listing.
+- [x] RED: three new tests failed against the original simulated local-only execution UI.
+- [x] GREEN: remove local-only rules and fabricated trade receipts; use existing owner-verified alert action/dialog and alert listing.
 - [ ] Verify responsive/keyboard/screen reader and security/DB/API contracts.
 - [ ] Run exact-SHA gates, CI, main recheck; hold release on any missing gate.
 
 ## IN PROGRESS
-Pending test-first implementation.
+RED reproduced (3/3); replaced conditional-order client with server-backed price-alert entry, preserved stock detail and mobile/desktop component interface. Legacy browser state is never read, written, or interpreted as a trade. The pre-existing alert action verifies a returned UUID against the owner-scoped database readback. Focused tests and full gates pending.
 
 ## FINISHED
 Pending validation and release decision.
