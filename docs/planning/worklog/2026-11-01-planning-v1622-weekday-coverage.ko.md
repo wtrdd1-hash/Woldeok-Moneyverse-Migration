@@ -14,10 +14,10 @@
 
 ## 개발 인계 — 문서만
 - P0 OPS1622-01/SEC1622-02/FIN1622-03/REL1622-04, P1 GAP1622-05~10. 런타임·SQL 마이그레이션·Test·운영 변경 없음.
-- 영문·국문 정본/통합문서 갱신. 검증 후 기존 이슈 #2383 업데이트 및 별도 Draft/HOLD PR 예정.
+- 영문·국문 정본/통합문서 갱신. 기존 이슈 #2383에 v1622 백로그 댓글 등록, Draft/HOLD PR #2388 생성(기준 미병합 #2384).
 - 외부 독립 근거 신규 실제 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**.
 
 ## 완료 검증
-- 릴리스/분류 테스트·영문 국문 대조·git diff 검사·최종 SHA CI·Draft 링크 확인 예정. 실제 PG17·웹·Android·공식 Test 정확 SHA 기능 수용시험 **미실행**.
+- 릴리스 147/147 PASS, 분류 24/24 PASS, 영문·국문 4쌍×13 마커 PASS, 4개 일정 위험 계산 사례 PASS, git diff --check PASS. Draft #2388 OPEN/HOLD, 이슈 #2383 업데이트. 최종 SHA 원격 CI는 별도 확인 전까지 PENDING. 실제 PG17·웹·Android·공식 Test 정확 SHA 기능 수용시험 **미실행**.
 
 **Contract/계약 코드:** POTENTIAL_GAP, NO_STATIC_GAP_DETECTED, EVALUATED_NO_ELIGIBLE_HOLDINGS, SKIPPED_BY_WEEKDAY.

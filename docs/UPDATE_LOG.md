@@ -1,5 +1,5 @@
 ## v2026.11.01.1622 — F675-211 Weekday Schedule-Coverage Integrity (planning only / DRAFT / RELEASE HOLD)
-- Previous Addition v1620 → Current Improvement v1622 → Next Addition v1624 (provisional); main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` rechecked at start/mid, stacked on unmerged #2384, handoff #2383.
+- Previous Addition v1620 → Current Improvement v1622 → Next Addition v1624 (provisional); main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` rechecked at start/mid, stacked on unmerged #2384, handoff #2383, Draft #2388.
 - Verified design gap: 09–11 KST scan jitter plus 24/72h lookahead and selected weekdays can leave theoretical unscanned expiry intervals (Mon-only+72h: 98h, EVERY_DAY+24h: 2h). Add source-verified cyclic schedule risk/UNKNOWN, accessible nonblocking warning, strict evaluated-empty vs unknown receipts, no delivery or item-loss claim. F675-211 not implemented.
 - Four P0 and six P1 backlog items; release HOLD for DB ACL #993, migration #2233/#2345, financial #2330/#2340/#2357/#2366 and exact-SHA Test/restore. No runtime/DB/WLD/Test/Production changes. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Full EN/KO integrated plan.
 - Contract/contract names: POTENTIAL_GAP, NO_STATIC_GAP_DETECTED, EVALUATED_NO_ELIGIBLE_HOLDINGS, SKIPPED_BY_WEEKDAY, OPS1622-01, SEC1622-02, FIN1622-03, REL1622-04.

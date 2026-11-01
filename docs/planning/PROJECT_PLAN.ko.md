@@ -2,7 +2,7 @@
 
 ## v2026.11.01.1622 — F675-211 수신 요일의 만료 알림 누락 위험·작업 증빙 정합성 (기능 보완 / 초안 / 운영 보류)
 
-**주기·정본:** 이전 **기능 추가 v1620** → 현재 **기능 보완 v1622** → 다음 **기능 추가 v1624(잠정)**. 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재조회, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/DB 소스·GitHub 개발/QA 확인. 미병합 기획 Draft #2384(헤드 `346a9907945b853939f37e967ac4f168ede39de7`)의 문서 전용 후속이며 개발 인계 #2383 유지. F675-205~211은 **기획만·미구현**이고 실제 운영 작업자나 승인된 설정/영수증 스키마가 검증된 것은 아니다. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`와 Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다르다. 문서 CI는 배포 승인이 아니다.
+**주기·정본:** 이전 **기능 추가 v1620** → 현재 **기능 보완 v1622** → 다음 **기능 추가 v1624(잠정)**. 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재조회, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/DB 소스·GitHub 개발/QA 확인. 미병합 기획 Draft #2384(헤드 `346a9907945b853939f37e967ac4f168ede39de7`)의 문서 전용 후속이며 개발 인계 #2383, 새 Draft PR #2388(OPEN/HOLD)로 기록. F675-205~211은 **기획만·미구현**이고 실제 운영 작업자나 승인된 설정/영수증 스키마가 검증된 것은 아니다. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`와 Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다르다. 문서 CI는 배포 승인이 아니다.
 
 ### 확인한 설계 결함: 선택 요일과 유한 조회 구간 사이의 만료 누락 위험
 - **소스 확인:** `frontend/src/app/account/notifications/page.tsx`에는 목표/NPC 설정·알림함만 있고 요일 선택은 없다. `backend/src/notification/notification.controller.ts`는 알림함/읽음 API이며 제안된 작업자가 없다. migration `123-store-read-models-v2.sql`의 `shop_my_items_v2`도 일일 단일 시점 알림 작업자의 증빙이 아니다. 이는 **설계상 위험**이며 실제 회원의 알림 누락이 확인됐다는 뜻은 아니다.

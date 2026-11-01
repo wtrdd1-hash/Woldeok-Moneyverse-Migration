@@ -14,10 +14,10 @@
 
 ## Implementation handoff — docs only
 - P0 OPS1622-01, SEC1622-02, FIN1622-03, REL1622-04; P1 GAP1622-05 through GAP1622-10. No runtime, SQL migration, Test or Production modification.
-- Full EN/KO canonical and integrated specs updated. Existing development issue #2383 to be updated and stacked Draft PR to be created after verification.
+- Full EN/KO canonical and integrated specs updated. Existing issue #2383 updated with v1622 backlog; stacked Draft/HOLD PR #2388 created against unmerged #2384.
 - External independently verified/deduplicated/classified references: **new 0**, cumulative **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**.
 
 ## Completion verification
-- Pending: release tests, classifier tests, EN/KO parity, git diff --check, final SHA remote CI and Draft/HOLD link. Actual PG17, web, Android and official exact-SHA Test feature acceptance **NOT RUN**.
+- Local release 147/147 PASS; classifier 24/24 PASS; EN/KO 4 pairs ×13 markers PASS; four schedule-risk fixtures PASS; git diff --check PASS. Draft #2388 OPEN/HOLD; issue #2383 updated. Final SHA remote CI PENDING until separately verified. Actual PG17, web, Android and official exact-SHA Test feature acceptance **NOT RUN**.
 
 **Contract/계약 코드:** POTENTIAL_GAP, NO_STATIC_GAP_DETECTED, EVALUATED_NO_ELIGIBLE_HOLDINGS, SKIPPED_BY_WEEKDAY.
