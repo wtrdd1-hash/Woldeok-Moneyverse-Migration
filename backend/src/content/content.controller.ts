@@ -7,6 +7,7 @@ import {
   Inject,
   Optional,
   Param,
+  Query,
   ParseUUIDPipe,
   Post,
   Put,
@@ -31,6 +32,7 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
 import { ContentService } from './content.service';
+import { parseAnnouncementImageQuery } from './announcement-image-filter';
 import { PrivateImageStorage } from './private-image-storage';
 
 export class SaveAnnouncementDto {
@@ -168,8 +170,10 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    const imageOnly = parseAnnouncementImageQuery(query);
+    const announcements = await this.service().publicAnnouncements({ imageOnly });
+    return imageOnly ? { announcements, filterApplied: 'with-image', sourceLimit: 20 } : { announcements };
   }
 
   @Get('photos')

@@ -13,3 +13,9 @@
 ### RED checkpoint
 - Backend three new tests failed as expected; frontend/Android ten new tests failed as expected (missing parser, unsupported filter, no Android validation). Logs: task/evidence/backend-red.log and frontend-red.log.
 - Revised Android path to existing `/app-api/v1/content/announcements` (not unregistered `/announcements`) and added app content controller coverage before implementation.
+
+### GREEN checkpoint
+- Backend 3/3 and Frontend/Android 12/12 targeted tests PASS after RED (evidence in task/evidence).
+- Implemented bounded PostgreSQL function-result filter, both Nest controllers, web GET checkbox and noindex, Android gateway strict query/proof/no-store.
+- No migrations, table grants, ledger writes, Test or Production changes.
+- Midpoint main re-fetched before gate execution; source SHA unchanged at this checkpoint.
