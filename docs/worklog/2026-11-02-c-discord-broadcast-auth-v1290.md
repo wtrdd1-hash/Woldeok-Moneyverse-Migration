@@ -14,5 +14,13 @@
 - No production secret value recorded. No service restarted or DB/ledger changed.
 - Re-fetched origin/main mid-task; remains a8541927c3a351d980454c66e95a3356c47e0722.
 - Next: full gates and CI; release remains HOLD.
+## Second TDD cycle / actual HTTP — 08:58 KST
+- Built isolated Next.js on loopback: forged historical fallback secret and cross-origin POST both returned HTTP 403; no bot dispatch.
+- Real HTTP revealed that global Next.js config overrode route response privacy headers: X-Robots-Tag was public index/follow and Referrer-Policy strict-origin-when-cross-origin.
+- RED: one edge header policy test failed. GREEN: exact endpoint-specific header override added; 33/33 focused security/config tests pass. Fresh isolated HTTP rebuild required.
+- RED: elevated admin console lock test failed; GREEN: browser requests now require both verified administrator viewer and backend /api/v1/admin/security consoleSession.state=open, fail closed on backend outage.
+- Initial SHA 56ecaacc24598c6d63b0be5523208975b8cfee69 full gates: Lint PASS (0 errors/1027 warnings), Typecheck PASS, Build PASS, Frontend 2945 PASS, Backend 2978 PASS/2 FAIL/518 SKIP (pre-existing profile HTTP 401 vs 200), Contract PASS, Database package 62 PASS/5 SKIP, app-api 184 endpoints PASS, security 11 PASS, production high audit PASS, full audit FAIL (9 advisories), route QA FAIL (missing ledger), bot test first failed due absent worktree node_modules but 11 PASS after symlink.
+- Isolated PostgreSQL 17.11: 322/322 migrations PASS, 27 real-DB tests PASS, outbox INSERT/UPDATE and audit DELETE denied to app role. Container removed.
+- Fresh SHA gates required after edge and elevated-session corrections.
 ## Finished
 - Pending.

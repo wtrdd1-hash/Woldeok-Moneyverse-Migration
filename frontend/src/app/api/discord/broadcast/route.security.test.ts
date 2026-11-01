@@ -1,14 +1,17 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { viewerMock, adminMock } = vi.hoisted(() => ({
+const { viewerMock, adminMock, apiMock } = vi.hoisted(() => ({
   viewerMock: vi.fn(),
   adminMock: vi.fn(),
+  apiMock: vi.fn(),
 }));
 vi.mock('@/lib/viewer', () => ({
   currentViewer: viewerMock,
   isAdministrator: adminMock,
 }));
+
+vi.mock('@/lib/api', () => ({ api: apiMock }));
 
 import { POST } from './route';
 
@@ -37,6 +40,7 @@ describe('P0 Discord broadcast ingress authentication and delivery evidence', ()
     vi.resetAllMocks();
     viewerMock.mockResolvedValue(null);
     adminMock.mockReturnValue(false);
+    apiMock.mockResolvedValue({ consoleSession: { state: 'open' } });
     botReceipt();
   });
 
@@ -66,6 +70,16 @@ describe('P0 Discord broadcast ingress authentication and delivery evidence', ()
     adminMock.mockReturnValue(true);
     expect((await POST(request())).status).toBe(403);
     expect((await POST(request(undefined, { origin: 'https://attacker.invalid', 'sec-fetch-site': 'cross-site' }))).status).toBe(403);
+    expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+  });
+
+  it('rejects an administrator whose elevated console session is locked or cannot be verified', async () => {
+    process.env.INTERNAL_API_SECRET = validSecret;
+    adminMock.mockReturnValue(true);
+    apiMock.mockResolvedValueOnce({ consoleSession: { state: 'locked' } });
+    expect((await POST(request(undefined, { origin: 'https://easy-scraping.com' }))).status).toBe(403);
+    apiMock.mockRejectedValueOnce(new Error('backend unavailable'));
+    expect((await POST(request(undefined, { origin: 'https://easy-scraping.com' }))).status).toBe(403);
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 

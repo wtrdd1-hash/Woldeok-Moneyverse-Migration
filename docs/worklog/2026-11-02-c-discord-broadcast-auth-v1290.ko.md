@@ -12,5 +12,12 @@
 - 환경 변수 기반 32~512바이트 비밀값, 상수시간 비교, 관리자 동일 출처, JSON 크기·형식 제한, 비공개 응답 헤더, 봇 수락 증빙 검증 적용.
 - main 재조회 결과 변경 없음. 운영 비밀값·서비스·DB·원장 변경 없음.
 - 전체 게이트 및 원격 CI 확인 대기. 운영 보류.
+## 2차 수정 — 08:58 KST
+- 독립 Next.js 실제 HTTP에서 과거 기본 비밀값·외부 Origin POST는 403 확인.
+- 실제 응답에서 전역 SEO 정책이 API의 noindex/no-referrer를 덮는 문제 발견. RED 1건 실패 후 경로별 헤더 설정으로 GREEN 33/33 통과.
+- 관리자 콘솔 잠금 상태에서도 발송 가능한 문제 RED 재현. 백엔드 /api/v1/admin/security의 실제 open 상태 확인 추가 후 GREEN.
+- 1차 SHA: Lint·Typecheck·Build PASS, 프론트 2945 PASS, 백엔드 2978 PASS/2 FAIL(기존 프로필 HTTP), DB 패키지 62 PASS/5 SKIP, app-api 184 PASS, 보안 11 PASS. 전체 감사 9건 취약점, 전체 경로 QA 증빙 누락. 봇 테스트 의존성 링크 후 11 PASS.
+- 격리 PostgreSQL 17.11 322개 마이그레이션 및 실 DB 테스트 27건 통과. 컨테이너 제거.
+- 2차 수정 HEAD에서 전체 게이트 및 실제 HTTP 재검증 필요.
 ## 종료
 - 검증 후 작성 예정.

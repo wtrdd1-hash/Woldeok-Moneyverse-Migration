@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { currentViewer, isAdministrator } from '@/lib/viewer';
+import { api } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,14 @@ async function authorized(req: Request, secret: string | null): Promise<boolean>
   const fetchSite = req.headers.get('sec-fetch-site');
   if (!origin || origin !== new URL(req.url).origin ||
       (fetchSite !== null && fetchSite !== 'same-origin' && fetchSite !== 'none')) return false;
-  return isAdministrator(await currentViewer());
+  if (!isAdministrator(await currentViewer())) return false;
+  try {
+    const state = await api<{ consoleSession?: { state?: string } }>('/api/v1/admin/security');
+    return state.consoleSession?.state === 'open';
+  } catch {
+    // A stale or unavailable elevated session must not authorize a broadcast.
+    return false;
+  }
 }
 
 interface BroadcastField { readonly name: string; readonly value: string; readonly inline?: boolean }
