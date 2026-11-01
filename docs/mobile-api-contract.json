@@ -7864,10 +7864,19 @@
                 "publishedAt"
               ]
             }
+          },
+          "count": {
+            "type": "number"
+          },
+          "sourceStatus": {
+            "type": "string",
+            "const": "VERIFIED"
           }
         },
         "required": [
-          "announcements"
+          "announcements",
+          "count",
+          "sourceStatus"
         ]
       },
       "responseCompatibility": {

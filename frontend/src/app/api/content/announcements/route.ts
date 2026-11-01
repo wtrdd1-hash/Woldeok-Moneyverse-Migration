@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
 import { apiOrNull } from '@/lib/api';
+import { parseVerifiedAnnouncements } from '@/lib/announcement-source';
 
 export const dynamic = 'force-dynamic';
 
+const headers = {
+  'cache-control': 'no-store',
+  'x-robots-tag': 'noindex',
+  'referrer-policy': 'no-referrer',
+};
+
 export async function GET(): Promise<NextResponse> {
-  const data = await apiOrNull<unknown>('/api/v1/content/announcements');
-  if (!data) {
+  const source = await apiOrNull<unknown>('/api/v1/content/announcements');
+  const snapshot = parseVerifiedAnnouncements(source);
+  if (!snapshot) {
     return NextResponse.json(
-      { announcements: [] },
-      { status: 200, headers: { 'cache-control': 'public, max-age=60' } },
+      { sourceStatus: 'UNAVAILABLE', code: 'ANNOUNCEMENTS_UNVERIFIED' },
+      { status: 503, headers },
     );
   }
-  return NextResponse.json(data, {
-    headers: { 'cache-control': 'public, max-age=60' },
-  });
+  return NextResponse.json(snapshot, { status: 200, headers });
 }

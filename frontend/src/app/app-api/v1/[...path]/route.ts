@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { parseVerifiedAnnouncements } from '@/lib/announcement-source';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
@@ -271,6 +272,25 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Android must never mistake an upstream outage or legacy HTTP 200 []
+  // for a verified empty public announcement snapshot.
+  if (request.method === 'GET' && parts.length === 2 &&
+      parts[0] === 'content' && parts[1] === 'announcements') {
+    if (!response.ok) return gatewayProblem(503, 'Service Unavailable',
+      'announcements_unavailable', 'Published announcements could not be verified');
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON announcements');
+      const snapshot = parseVerifiedAnnouncements(await response.clone().json());
+      if (!snapshot) throw new Error('unverified announcements');
+      return contractJson(snapshot, {status:200,headers:{
+        'cache-control':'no-store', 'x-robots-tag':'noindex', 'referrer-policy':'no-referrer',
+      }});
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable',
+        'announcements_unverified', 'Published announcements could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response

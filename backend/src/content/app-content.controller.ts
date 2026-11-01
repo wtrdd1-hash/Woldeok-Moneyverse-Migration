@@ -15,7 +15,9 @@ export class AppContentController {
   @Get('announcements')
   @ApiOperation({ summary: 'App API: published announcements' })
   async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+    const announcements = await this.service().publicAnnouncements();
+    // A verified empty list is distinct from an unavailable publication source.
+    return { announcements, count: announcements.length, sourceStatus: 'VERIFIED' as const };
   }
 
   @Get('photos')
