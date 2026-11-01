@@ -30,7 +30,6 @@ import { StockAlertDeleteButton } from './stock-alert-delete-button';
 import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
-import { StockMarketToast } from './stock-market-toast';
 import { QuickOrderbookSimulator } from '@/components/quick-orderbook-simulator';
 import { StockSentimentPoll } from '@/components/stock-sentiment-poll';
 import { StockHaltBanner } from './stock-halt-banner';
@@ -325,13 +324,6 @@ export default async function StockHubPage({
           </p>
         )}
       </div>
-
-      {/* 실시간 틱 토스트 알림 */}
-      <StockMarketToast
-        symbol={stock.symbol}
-        currentPrice={stock.current_price}
-        isEn={isEn}
-      />
 
       {/* 3. [Toss 2026 Core] 상단 차트 & 인터랙티브 트레이딩 허브 */}
       <Tabs defaultValue="trading" className="space-y-6">

@@ -1,14 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Scale, Zap, Activity, AreaChart, ListOrdered } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, RefreshCw, Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
-import { generateKrxLadder, getKrxTickSize } from '../tick-size';
-import { playStockTickSound } from '@/lib/audio-effects';
-import { StockDepthChart } from './stock-depth-chart';
 
 interface StockOrderbookProps {
   readonly stockId?: string | undefined;
@@ -19,8 +15,7 @@ interface StockOrderbookProps {
   readonly onSelectPrice?: ((price: string, side: 'buy' | 'sell') => void) | undefined;
 }
 
-export type OrderbookViewMode = 'ladder' | 'depth';
-
+// Retained for the standalone chart's type contract, not for generated market data.
 export interface OrderbookRow {
   readonly step: number;
   readonly price: string;
@@ -29,471 +24,60 @@ export interface OrderbookRow {
   readonly cumulativeVolume: number;
 }
 
-export interface RecentTradeItem {
-  readonly id: string;
-  readonly time: string;
-  readonly price: string;
-  readonly volume: number;
-  readonly side: 'buy' | 'sell';
-}
+export function StockOrderbook({ stockId, currentPrice, dayOpenPrice, isEn = false }: StockOrderbookProps) {
+  const quote = useQuote(stockId ?? '', { price: currentPrice, open: dayOpenPrice ?? currentPrice });
+  const lastPrice = quote.price || currentPrice;
+  const [checking, setChecking] = useState(false);
+  const [revision, setRevision] = useState(0);
 
-export interface OrderbookData {
-  readonly asks: OrderbookRow[];
-  readonly bids: OrderbookRow[];
-  readonly totalAskVolume: number;
-  readonly totalBidVolume: number;
-  readonly bidRatio: number;
-  readonly askRatio: number;
-  readonly bestAsk: number;
-  readonly bestBid: number;
-  readonly spread: number;
-  readonly spreadBps: string;
-  readonly intensityPct: number; // 체결강도 (Bid Vol / Ask Vol * 100)
-}
-
-export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): OrderbookData {
-  const priceNum = Number.parseInt(currentPriceStr.replaceAll(',', '') || '1000', 10);
-  const { askPrices, bidPrices } = generateKrxLadder(priceNum, depth);
-
-  // 단계별 스텝 목록 생성 (5-Depth 또는 10-Depth)
-  const askSteps = depth === 5 ? [5, 4, 3, 2, 1] : [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-  const bidSteps = depth === 5 ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-  let cumAsk = 0;
-  const rawAsks = askSteps.map((step, idx) => {
-    const askPrice = askPrices[idx] ?? Math.max(1, priceNum + step);
-    const hash = ((priceNum * 31 + step * 97) ^ (step * 13)) % 100;
-    const baseVol = 40 + step * 25;
-    const irregularNoise = Math.floor((hash / 100) * 45) - 20;
-    const volume = Math.max(10, baseVol + irregularNoise);
-    return { step, price: askPrice.toString(), volume };
-  });
-
-  const asks: OrderbookRow[] = rawAsks.map((item) => {
-    cumAsk += item.volume;
-    return {
-      ...item,
-      percent: Math.min(100, Math.round((item.volume / 350) * 100)),
-      cumulativeVolume: cumAsk,
-    };
-  });
-
-  let cumBid = 0;
-  const rawBids = bidSteps.map((step, idx) => {
-    const bidPrice = bidPrices[idx] ?? Math.max(1, priceNum - step);
-    const hash = ((priceNum * 47 + step * 83) ^ (step * 29)) % 100;
-    const baseVol = 45 + step * 22;
-    const irregularNoise = Math.floor((hash / 100) * 40) - 18;
-    const volume = Math.max(10, baseVol + irregularNoise);
-    return { step, price: bidPrice.toString(), volume };
-  });
-
-  const bids: OrderbookRow[] = rawBids.map((item) => {
-    cumBid += item.volume;
-    return {
-      ...item,
-      percent: Math.min(100, Math.round((item.volume / 350) * 100)),
-      cumulativeVolume: cumBid,
-    };
-  });
-
-  const totalAskVolume = asks.reduce((sum, a) => sum + a.volume, 0);
-  const totalBidVolume = bids.reduce((sum, b) => sum + b.volume, 0);
-  const grandTotal = totalAskVolume + totalBidVolume || 1;
-  const bidRatio = Math.round((totalBidVolume / grandTotal) * 100);
-  const askRatio = 100 - bidRatio;
-
-  const bestAsk = Number.parseInt(asks[asks.length - 1]?.price ?? currentPriceStr, 10);
-  const bestBid = Number.parseInt(bids[0]?.price ?? currentPriceStr, 10);
-  const spread = Math.abs(bestAsk - bestBid);
-  const spreadBps = priceNum > 0 ? ((spread / priceNum) * 100).toFixed(2) : '0.00';
-
-  // 체결강도 산출 (기본 매수 잔량 대비 매도 잔량 비율, 100% 기준)
-  const intensityPct = totalAskVolume > 0 ? Math.round((totalBidVolume / totalAskVolume) * 1000) / 10 : 100.0;
-
-  return {
-    asks,
-    bids,
-    totalAskVolume,
-    totalBidVolume,
-    bidRatio,
-    askRatio,
-    bestAsk,
-    bestBid,
-    spread,
-    spreadBps,
-    intensityPct,
-  };
-}
-
-export function StockOrderbook({
-  stockId,
-  currentPrice,
-  dayOpenPrice,
-  isEn = false,
-  onSelectPrice,
-}: StockOrderbookProps) {
-  const [depth, setDepth] = useState<5 | 10>(5);
-  const [viewMode, setViewMode] = useState<OrderbookViewMode>('ladder');
-
+  const refresh = useCallback(() => setRevision((previous) => previous + 1), []);
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('wdmv_orderbook_depth_v1');
-      if (saved === '10' || saved === '5') {
-        setDepth(Number.parseInt(saved, 10) as 5 | 10);
-      }
-      const savedView = localStorage.getItem('wdmv_orderbook_view_mode_v1');
-      if (savedView === 'ladder' || savedView === 'depth') {
-        setViewMode(savedView as OrderbookViewMode);
-      }
-    } catch {
-      // Ignore localStorage access failures
-    }
-  }, []);
-
-  const handleDepthChange = (nextDepth: 5 | 10) => {
-    setDepth(nextDepth);
-    playStockTickSound();
-    try {
-      localStorage.setItem('wdmv_orderbook_depth_v1', nextDepth.toString());
-    } catch {
-      // Ignore localStorage access failures
-    }
-  };
-
-  const handleViewModeChange = (nextMode: OrderbookViewMode) => {
-    setViewMode(nextMode);
-    playStockTickSound();
-    try {
-      localStorage.setItem('wdmv_orderbook_view_mode_v1', nextMode);
-    } catch {
-      // Ignore localStorage access failures
-    }
-  };
-  
-  // 웹소켓 실시간 틱 구독 (stockId가 있을 경우 실시간 반영, 없을 경우 fallback)
-  const initialOpen = dayOpenPrice || currentPrice;
-  const quote = useQuote(stockId ?? '', { price: currentPrice, open: initialOpen });
-  const livePrice = quote.price || currentPrice;
-
-  // 플래시 펄스 애니메이션 상태 ('rise' | 'fall' | null)
-  const [flash, setFlash] = useState<'rise' | 'fall' | null>(null);
-  const prevPriceRef = useRef<string>(livePrice);
-
-  // 최근 체결 틱 스트림 상태 (최신 5개)
-  const [recentTrades, setRecentTrades] = useState<RecentTradeItem[]>([]);
-
-  useEffect(() => {
-    // 초기 틱 스트림 세팅 (현재가 기반 5건)
-    const baseNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
-    const now = new Date();
-    const initialTrades: RecentTradeItem[] = Array.from({ length: 5 }).map((_, i) => {
-      const d = new Date(now.getTime() - (5 - i) * 3500);
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const side: 'buy' | 'sell' = i % 2 === 0 ? 'buy' : 'sell';
-      const offset = (i - 2) * 5;
-      return {
-        id: `t-init-${i}`,
-        time: timeStr,
-        price: Math.max(1, baseNum + offset).toString(),
-        volume: 10 + (i * 17) % 50,
-        side,
-      };
+    const controller = new AbortController();
+    if (!stockId) return () => controller.abort();
+    setChecking(true);
+    void fetch(`/api/stocks/${encodeURIComponent(stockId)}/orderbook`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    }).catch(() => undefined).finally(() => {
+      if (!controller.signal.aborted) setChecking(false);
     });
-    setRecentTrades(initialTrades);
-  }, []);
-
-  useEffect(() => {
-    if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
-      const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
-      const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
-
-      const side: 'buy' | 'sell' = currNum >= prevNum ? 'buy' : 'sell';
-      if (currNum > prevNum) {
-        setFlash('rise');
-      } else if (currNum < prevNum) {
-        setFlash('fall');
-      }
-
-      // 새 체결 틱 스트림에 추가
-      const d = new Date();
-      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
-      const newTrade: RecentTradeItem = {
-        id: `t-${Date.now()}`,
-        time: timeStr,
-        price: livePrice,
-        volume: Math.floor(10 + Math.random() * 45),
-        side,
-      };
-
-      setRecentTrades((prev) => [newTrade, ...prev.slice(0, 4)]);
-
-      const timer = setTimeout(() => {
-        setFlash(null);
-      }, 650);
-
-      prevPriceRef.current = livePrice;
-      return () => clearTimeout(timer);
-    }
-    prevPriceRef.current = livePrice;
-  }, [livePrice]);
-
-  const livePriceNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
-  const currentTick = getKrxTickSize(livePriceNum);
-  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio, intensityPct } = computeOrderbook(livePrice, depth);
-
-  const isBuyDominant = intensityPct >= 100;
+    return () => controller.abort();
+  }, [stockId, revision]);
 
   return (
-    <Card className="toss-card border-border/80 shadow-sm overflow-hidden select-none">
-      <CardHeader className="p-3.5 sm:p-4 pb-2 border-b border-border/60 bg-muted/20">
-        <div className="flex min-w-0 flex-col items-start gap-3" data-testid="orderbook-header-layout">
-          <CardTitle className="flex max-w-full min-w-0 items-center gap-1.5 text-sm font-bold">
-            <Scale className="size-4 text-primary" />
-            <span className="min-w-0">
-              {viewMode === 'depth'
-                ? (isEn ? 'Market Depth Chart' : '실시간 호가 심도 (Depth)')
-                : (isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`)}
-            </span>
-            {flash && (
-              <span className="flex size-2 relative ml-1">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  flash === 'rise' ? 'bg-emerald-400' : 'bg-rose-400'
-                }`} />
-                <span className={`relative inline-flex rounded-full size-2 ${
-                  flash === 'rise' ? 'bg-emerald-500' : 'bg-rose-500'
-                }`} />
-              </span>
-            )}
-          </CardTitle>
-          <div className="flex w-full min-w-0 flex-wrap items-center gap-2" data-testid="orderbook-header-controls">
-            {/* 호가 ↔ 심도 뷰 세그먼트 스위처 */}
-            <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('ladder')}
-                className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
-                  viewMode === 'ladder'
-                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title={isEn ? '10-Depth Orderbook Ladder' : '10단 가격 호가창'}
-              >
-                <ListOrdered className="size-3" />
-                <span>{isEn ? 'Ladder' : '호가'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange('depth')}
-                className={`rounded px-2 py-0.5 transition-all flex items-center gap-1 ${
-                  viewMode === 'depth'
-                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title={isEn ? 'Cumulative Market Depth Chart' : '실시간 누적 심도 차트'}
-              >
-                <AreaChart className="size-3" />
-                <span>{isEn ? 'Depth' : '심도'}</span>
-              </button>
-            </div>
-
-            {/* 체결강도 뱃지 */}
-            <Badge
-              variant="outline"
-              className={`font-mono tabular-nums text-[10px] hidden sm:inline-flex border transition-colors ${
-                isBuyDominant
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 font-bold'
-                  : 'border-rose-500/40 bg-rose-500/10 text-rose-500 font-bold'
-              }`}
-              title={isEn ? 'Buy-Sell Volume Intensity' : '체결강도 (매수잔량/매도잔량)'}
-            >
-              <Activity className="size-3 mr-1" />
-              <span>{isEn ? 'Intensity' : '체결강도'} {intensityPct}%</span>
-            </Badge>
-
-            <Badge variant="outline" className="font-mono tabular-nums text-[10px] text-primary/80 hidden sm:inline-flex border-primary/30 bg-primary/5">
-              {isEn ? `1 Tick = ${groupDigits(currentTick.toString())} WLD` : `1틱 = ${groupDigits(currentTick.toString())} WLD`}
-            </Badge>
-            <Badge variant="outline" className="font-mono tabular-nums text-[10px] text-muted-foreground hidden sm:inline-flex">
-              {isEn ? `Spread ${spread} WLD (${spreadBps}%)` : `스프레드 ${groupDigits(spread.toString())} WLD (${spreadBps}%)`}
-            </Badge>
-
-            {/* 5 / 10 Depth 토글 버튼 (호가창 모드일 때만 표시) */}
-            {viewMode === 'ladder' && (
-              <div className="inline-flex rounded-lg border border-border/70 bg-muted/50 p-0.5 text-[11px] font-semibold">
-                <button
-                  type="button"
-                  onClick={() => handleDepthChange(5)}
-                  className={`rounded px-2 py-0.5 transition-all ${
-                    depth === 5 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  5D
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDepthChange(10)}
-                  className={`rounded px-2 py-0.5 transition-all ${
-                    depth === 10 ? 'bg-primary text-primary-foreground font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  10D
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+    <Card className="toss-card min-w-0 overflow-hidden border-border/80 shadow-sm" data-testid="stock-depth-source-hold">
+      <CardHeader className="border-b border-border/60 bg-muted/20 p-3.5 sm:p-4">
+        <CardTitle className="flex min-w-0 items-center gap-2 text-sm font-bold">
+          <Scale aria-hidden="true" className="size-4 shrink-0 text-primary" />
+          {isEn ? 'Stock quote and order depth' : '주식 가격 및 호가 현황'}
+        </CardTitle>
       </CardHeader>
-
-      <CardContent className="p-2 space-y-1.5 text-xs font-mono tabular-nums tracking-tight select-none">
-        {viewMode === 'depth' ? (
-          <StockDepthChart
-            bids={bids}
-            asks={asks}
-            livePrice={livePrice}
-            isEn={isEn}
-            onSelectPrice={onSelectPrice}
-          />
-        ) : (
-          <>
-        <div className="space-y-0.5">
-          {asks.map((ask) => {
-            const askNum = Number.parseInt(ask.price, 10);
-            const deltaPct = livePriceNum > 0 ? (((askNum - livePriceNum) / livePriceNum) * 100).toFixed(1) : (ask.step * 0.5).toFixed(1);
-            return (
-              <button
-                key={`ask-${ask.step}`}
-                type="button"
-                onClick={() => {
-                  onSelectPrice?.(ask.price, 'buy');
-                  playStockTickSound();
-                }}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--fall)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
-                title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
-              >
-                {/* 잔량 비례 배경 게이지 바 */}
-                <div
-                  className="absolute inset-y-0 right-0 bg-[var(--fall)]/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
-                  style={{ width: `${ask.percent}%` }}
-                />
-                <span className="relative z-10 font-bold text-[var(--fall)] flex items-center gap-1.5">
-                  <span className="text-[10px] opacity-70">+{deltaPct}%</span>
-                  <span>{groupDigits(ask.price)}</span>
-                </span>
-                <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
-                  <span>{groupDigits(ask.volume.toString())}</span>
-                  <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 현재 체결가 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
-        <div className={`flex items-center justify-between px-3 py-2 rounded-lg border font-bold transition-all duration-300 ${
-          flash === 'rise'
-            ? 'bg-[var(--rise)]/25 border-[var(--rise)]/50 shadow-xs'
-            : flash === 'fall'
-            ? 'bg-[var(--fall)]/25 border-[var(--fall)]/50 shadow-xs'
-            : 'bg-primary/10 border-primary/30'
-        }`}>
-          <span className="text-primary flex items-center gap-1.5">
-            <Zap className={`size-3.5 transition-transform duration-300 ${flash ? 'scale-125 text-amber-500' : ''}`} />
-            <span>{isEn ? 'Current Price' : '현재 체결가'}</span>
+      <CardContent className="space-y-4 p-3.5 sm:p-4">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-border/70 bg-muted/20 p-3">
+          <span className="text-xs text-muted-foreground">
+            {isEn ? 'Last reported price (not an order or execution)' : '최근 제공 가격 (호가·체결 기록 아님)'}
           </span>
-          <span className={`text-sm font-extrabold transition-colors duration-300 ${
-            flash === 'rise' ? 'text-[var(--rise)]' : flash === 'fall' ? 'text-[var(--fall)]' : 'text-foreground'
-          }`}>
-            {groupDigits(livePrice)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+          <span className="break-all font-mono text-base font-bold tabular-nums">
+            {groupDigits(lastPrice.replaceAll(',', ''))} WLD
           </span>
         </div>
-
-        {/* 매수호가 리스트 (Bids, Rise/Bid 계열 동적 테마) */}
-        <div className="space-y-0.5">
-          {bids.map((bid) => {
-            const bidNum = Number.parseInt(bid.price, 10);
-            const deltaPct = livePriceNum > 0 ? (((bidNum - livePriceNum) / livePriceNum) * 100).toFixed(1) : (-bid.step * 0.5).toFixed(1);
-            return (
-              <button
-                key={`bid-${bid.step}`}
-                type="button"
-                onClick={() => {
-                  onSelectPrice?.(bid.price, 'sell');
-                  playStockTickSound();
-                }}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-[var(--rise)]/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
-                title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
-              >
-                {/* 잔량 비례 배경 게이지 바 */}
-                <div
-                  className="absolute inset-y-0 right-0 bg-[var(--rise)]/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
-                  style={{ width: `${bid.percent}%` }}
-                />
-                <span className="relative z-10 font-bold text-[var(--rise)] flex items-center gap-1.5">
-                  <span className="text-[10px] opacity-70">{deltaPct}%</span>
-                  <span>{groupDigits(bid.price)}</span>
-                </span>
-                <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
-                  <span>{groupDigits(bid.volume.toString())}</span>
-                  <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
-                </span>
-              </button>
-            );
-          })}
+        <div role="status" aria-live="polite" className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+          <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <p className="min-w-0 break-words text-foreground">
+            {checking
+              ? (isEn ? 'Checking the order depth source. No live orders are displayed.' : '호가 원천 검증 중입니다. 실시간 주문 잔량은 표시하지 않습니다.')
+              : (isEn ? 'Verified order depth and executions are unavailable. Price changes are not trades.' : '호가 및 체결 원천을 검증할 수 없어 주문 잔량과 체결 내역을 제공하지 않습니다.')}
+          </p>
         </div>
-
-        {/* 호가 잔량 매수/매도 압력 비율 바 (Order Pressure Ratio) */}
-        <div className="pt-2 px-1 space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-            <span className="text-rose-600 dark:text-rose-400 font-semibold">
-              {isEn ? 'Ask' : '매도'} {askRatio}% ({groupDigits(totalAskVolume.toString())})
-            </span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              {isEn ? 'Bid' : '매수'} {bidRatio}% ({groupDigits(totalBidVolume.toString())})
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden flex">
-            <div
-              className="h-full bg-rose-500 transition-all duration-500"
-              style={{ width: `${askRatio}%` }}
-            />
-            <div
-              className="h-full bg-emerald-500 transition-all duration-500"
-              style={{ width: `${bidRatio}%` }}
-            />
-          </div>
-        </div>
-
-        {/* 최근 체결 틱 5건 미니 스트림 (Recent Trades Stream) */}
-        {recentTrades.length > 0 && (
-          <div className="pt-2.5 mt-2 border-t border-border/60 px-1 space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              <span>{isEn ? 'Recent Trades' : '최근 체결 틱'}</span>
-              <span className="text-[9px] font-normal opacity-70">{isEn ? 'Time / Price / Qty' : '시간 · 체결가 · 수량'}</span>
-            </div>
-            <div className="space-y-1">
-              {recentTrades.map((t) => {
-                const isTradeBuy = t.side === 'buy';
-                return (
-                  <div
-                    key={t.id}
-                    className="flex items-center justify-between text-[11px] px-2 py-1 rounded bg-muted/20 border border-border/40 animate-in fade-in"
-                  >
-                    <span className="text-muted-foreground/80 text-[10px]">{t.time}</span>
-                    <span className={`font-bold ${isTradeBuy ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {groupDigits(t.price)}
-                    </span>
-                    <span className="text-muted-foreground font-medium text-[10px]">
-                      {groupDigits(t.volume.toString())}{isEn ? 'sh' : '주'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        </>
-        )}
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={checking}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+        >
+          <RefreshCw aria-hidden="true" className="size-4" />
+          {isEn ? 'Check depth availability again' : '호가 제공 여부 다시 확인'}
+        </button>
       </CardContent>
     </Card>
   );
