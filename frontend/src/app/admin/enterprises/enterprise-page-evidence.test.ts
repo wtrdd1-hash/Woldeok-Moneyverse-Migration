@@ -15,11 +15,11 @@ describe('enterprise admin fail-closed page', () => {
     expect(page).not.toContain('privateEnterprises ?? []');
     expect(page).not.toContain('dividendLogs ?? []');
   });
-  it('does not expose optimistic status changes without a verified DB-owned receipt', () => {
+  it('submits status only through the audited gateway without optimistic toggles', () => {
     expect(view).not.toContain('handleToggleStatus');
-    expect(view).not.toContain("fetch('/api/admin/enterprises/status'");
-    expect(view).toContain('상태 변경은 검증 전까지 중지');
-    expect(nextRoute).toContain('503');
-    expect(nextRoute).not.toContain("method: 'PUT'");
+    expect(view).toContain("fetch('/api/admin/enterprises/status'");
+    expect(view).toContain('공기업 운영 상태는 승인 관리자만 변경');
+    expect(nextRoute).toContain('SOE_STATUS_RECEIPT_UNVERIFIED');
+    expect(nextRoute).toContain("method: 'PUT'");
   });
 });
