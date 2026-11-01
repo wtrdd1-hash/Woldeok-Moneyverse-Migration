@@ -16,18 +16,18 @@
 - English canonical records; Korean supporting record. Accessibility and Android HTTP privacy.
 
 ## Task 1 — TDD guardrails
-- [ ] Write action test: even valid recipeId never calls `mutate`, result is error.
-- [ ] Write panel test: no craftable/submit controls or fake burn/receipt; accessible status.
-- [ ] Write Android proxy test: GET/POST crafting return 503 and private headers without upstream fetch.
-- [ ] Run focused tests and capture expected RED.
+- [x] Write action test: even valid recipeId never calls `mutate`, result is error.
+- [x] Write panel test: no craftable/submit controls or fake burn/receipt; accessible status.
+- [x] Write Android proxy test: GET/POST crafting return 503 and private headers without upstream fetch.
+- [x] Run focused tests and capture expected RED.
 
 ## Task 2 — Minimal safety implementation
-- [ ] Replace server action with fail-closed response; keep compatible result type.
-- [ ] Replace legacy panel with accessible, responsive read-only source-hold notice.
-- [ ] Add Android crafting short-circuit before app gateway proxy.
-- [ ] Run focused GREEN tests and inspect diff.
+- [x] Replace server action with fail-closed response; keep compatible result type.
+- [x] Replace legacy panel with accessible, responsive read-only source-hold notice.
+- [x] Add Android crafting short-circuit before app gateway proxy.
+- [x] Run focused GREEN tests and inspect diff.
 
 ## Task 3 — Verification and hold
-- [ ] Re-fetch origin/main and canonical plan; record drift and dependencies.
+- [x] Re-fetch origin/main and canonical plan; record drift and dependencies.
 - [ ] Run focused/full frontend/backend, lint/typecheck/build, app-api, security, PostgreSQL and E2E where possible.
 - [ ] Push Draft PR and English/Korean final worklog; no merge or deploy without full PASS.

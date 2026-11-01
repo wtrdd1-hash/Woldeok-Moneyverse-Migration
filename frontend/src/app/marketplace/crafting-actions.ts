@@ -1,8 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 export interface CraftingActionResult extends ActionState {
   readonly result?: {
@@ -15,38 +13,10 @@ export interface CraftingActionResult extends ActionState {
   } | null;
 }
 
-export async function executeCraftingAction(recipeId: string): Promise<CraftingActionResult> {
-  if (!recipeId) {
-    return { status: 'error', message: '제작할 레시피가 지정되지 않았습니다.' };
-  }
-
-  try {
-    const key = idempotencyKey();
-    const result = await mutate<{
-      success: boolean;
-      item_code: string;
-      name: string;
-      category: string;
-      rarity: string;
-      fee_wld: number;
-    }>('/api/v1/crafting/execute', {
-      method: 'POST',
-      body: {
-        recipeId,
-        idempotencyKey: key,
-      },
-    });
-
-    revalidatePath('/marketplace');
-    revalidatePath('/inventory');
-    revalidatePath('/wallet');
-
-    return {
-      status: 'ok',
-      message: `${result.name} 제작이 완료되었습니다! (수수료 ${result.fee_wld} WLD 소각)`,
-      result,
-    };
-  } catch (error) {
-    return failure(error, '재료가 부족하거나 제작 수수료 잔액이 부족하여 제작에 실패했습니다.');
-  }
+/** No crafting write is safe until a canonical ledger receipt and idempotency source exist. */
+export async function executeCraftingAction(_recipeId: string): Promise<CraftingActionResult> {
+  return {
+    status: 'error',
+    message: '원장 정산 및 제작 결과가 검증되지 않아 제작 기능을 이용할 수 없습니다. 제작 요청을 전송하지 않았습니다.',
+  };
 }

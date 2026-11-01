@@ -5,9 +5,10 @@
 - QA #2330: 개발 DB의 추적되지 않은 제작 함수가 원장·멱등성 없이 WLD 및 아이템을 직접 변경할 수 있다는 근거. 운영 피해나 실행 여부는 확인되지 않음.
 - Backend B #2332는 NestJS/DB 차단 담당. 이번 C는 Next 서버 액션·기존 제작 UI·Android 게이트웨이에서 허위 성공 및 미검증 제작 요청을 차단. A/B/QA/Gemini 브랜치, main, DB, 운영 서비스는 수정하지 않음.
 
-## 진행
-- [ ] 실패 테스트 작성·실행 → 구현 → 통과 확인.
-- [ ] 최신 main 및 영문 정본 기획서 중간 재확인.
+## 진행 — 14:46 KST
+- RED: Android GET/POST, Next 서버 액션, 제작 UI 4건 모두 의도한 실패 재현.
+- [x] RED 4건 → GREEN 4건, 변경 파일 ESLint 및 Frontend Typecheck 통과.
+- [x] 중간 main `905207630...` 및 영문·국문 v1518 기획서 재확인. B #2332 별도 유지.
 - [ ] 최종 SHA별 검증과 GitHub Draft PR 기록.
 
 ## 종료
