@@ -44,6 +44,7 @@ export class AdminNationalPensionController {
   }
 
   @Post('distribute-payouts')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '은퇴 연금 수령 대상자 대상 기초연금 일괄 수동 집행' })
   async distributePayouts() {
     return this.service.distributeHourlyPensionPayouts();
