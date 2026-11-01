@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/cn';
+import { saveSpaceLayout } from './layout-actions';
 
 export type FurnitureCategory = 'all' | 'tech' | 'wealth' | 'lounge' | 'vibe';
 
@@ -220,22 +221,20 @@ export function SpaceCanvasEditor({
     };
 
     try {
+      if (spaceId) {
+        const result = await saveSpaceLayout(spaceId, layout);
+        if (result.status !== 'ok') {
+          showToast(result.message);
+          return;
+        }
+      }
       if (typeof window !== 'undefined') {
         const savedKey = `mv_space_layout_${spaceId ?? 'default'}`;
         localStorage.setItem(savedKey, JSON.stringify(layout));
       }
-
-      if (spaceId) {
-        await fetch(`/api/v1/spaces/${spaceId}/layout`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ layout }),
-        });
-      }
-
-      showToast('인테리어 배치가 안전하게 저장되었습니다!');
+      showToast(spaceId ? '서버에 저장된 인테리어 배치를 확인했습니다.' : '이 브라우저에만 배치를 저장했습니다.');
     } catch {
-      showToast('로컬 브라우저에 배치가 안전하게 저장되었습니다.');
+      showToast('저장 상태를 확인하지 못했습니다. 다시 시도해 주세요.');
     } finally {
       setIsSaving(false);
     }

@@ -14,6 +14,7 @@ import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsObject, IsPositive, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -347,6 +348,7 @@ export class SpaceController {
 
   @ApiOperation({ summary: '개인 공간 인테리어/레이아웃 저장' })
   @Put(':id/layout')
+  @UseGuards(CsrfGuard)
   async updateLayout(
     @Req() req: RequestWithSession,
     @Param('id', ParseUUIDPipe) spaceId: string,
