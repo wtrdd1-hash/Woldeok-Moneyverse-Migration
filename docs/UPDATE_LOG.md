@@ -1,3 +1,7 @@
+## 2026-11-01 v1607 — Treasury CI fixture stabilization (candidate, release hold)
+- Merge latest main QA v1605 into isolated v1607 Treasury branch; stabilize two expired synthetic administrator-session receipt tests with test-only clock (RED 2 fail, GREEN 37 pass). Real session expiry validation unchanged.
+- Reapply exact-source CI, immutable Test and runtime identity checks before any Production deployment. Historic Treasury source 552 and SOE dividend 744 remain monetary provenance blockers. See [worklog](worklog/2026-11-01-treasury-qa-ci-unblock-v1607.md).
+
 ## 2026-11-01 v1603 — Treasury current fiscal proof source repair (TEST VERIFIED / PRODUCTION HOLD)
 - Actual Production DB epoch 314 was already applied by Oct 31: current 5 vaults and canonical Treasury both 0; 552 historic Treasury events and 744 dividend logs retained, zero new source. Older v1553 release-hold note is historical, not evidence of today's DB state.
 - Corrected unconditional TreasuryRepository UNVERIFIED with read-only canonical+archive evidence and current-epoch 24h/30d reporting. No historical link forge, money movement, schema/migration or payout enablement.

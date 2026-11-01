@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { verifiedConsoleOpen, verifiedConsoleClose } from './console-session-receipt';
 
 const openReceipt = {
@@ -7,6 +7,13 @@ const openReceipt = {
 };
 const rotated = 'mv_session=synthetic-token; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000';
 const cleared = 'mv_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
+
+// Keep date-sensitive synthetic receipts independent of wall-clock CI time.
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-10-31T12:00:00.000Z'));
+});
+afterEach(() => { vi.useRealTimers(); });
 
 describe('administrator console session evidence', () => {
   it('accepts a verified open body and a browser-storable rotated session cookie', () => {
