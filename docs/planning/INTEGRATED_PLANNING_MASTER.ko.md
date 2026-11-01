@@ -1,9 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1596 F675-205 회원 보관함 만료 예정 일일 알림함 요약 / 이슈 #2296 / DRAFT / RELEASE HOLD; 선행 Draft #2290 미병합.
+**현재 기획:** v1596 F675-205 회원 보관함 만료 예정 일일 알림함 요약 / 이슈 #2296 / Draft #2297 / DRAFT / RELEASE HOLD; 선행 Draft #2290 미병합.
 
 ## v2026.11.01.1596 — F675-205 회원 보관함 만료 예정 일일 알림함 요약 (기능 추가 / DRAFT / RELEASE HOLD)
 
-**주기와 기준:** 이전 **Feature Improvement v1594** → 현재 **Feature Addition v1596** → 다음 **Feature Improvement v1598(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. `AGENTS.md`, `README.md`, 영어 `PROJECT_PLAN.md` 원본과 한국어 동등 문서를 기준으로 삼음. 개발 인계 이슈 **#2296** 등록. 이전 기획 Draft **#2290**은 미병합이므로 F675-199~204의 유효한 내용을 독립 문서 브랜치로 승계했으며 운영에 반영하지 않음. 아래는 **구현되지 않은 제안 설계**이고 분산 기획 파일은 추가하지 않음.
+**주기와 기준:** 이전 **Feature Improvement v1594** → 현재 **Feature Addition v1596** → 다음 **Feature Improvement v1598(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. `AGENTS.md`, `README.md`, 영어 `PROJECT_PLAN.md` 원본과 한국어 동등 문서를 기준으로 삼음. 개발 인계 이슈 **#2296**, 기획 Draft PR **#2297** 등록. 이전 기획 Draft **#2290**은 미병합이므로 F675-199~204의 유효한 내용을 독립 문서 브랜치로 승계했으며 운영에 반영하지 않음. 아래는 **구현되지 않은 제안 설계**이고 분산 기획 파일은 추가하지 않음.
 
 ### 실제 소스 근거와 대안
 - `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패 시 `[]`로 대체하므로 이를 실제 보유 아이템 0건의 증거로 쓰지 않음. 마이그레이션 **071**의 `public.user_items(user_id,catalog_id,quantity,expires_at)`는 회원·카탈로그 복합 PK이며, **123**의 `shop_my_items_v2(p_actor)`는 만료 행을 제외하지만 인자로 받은 회원이 인증된 회원인지 DB가 독립 증명하지 않음. 보유 만료는 효과 영수증 만료·유지비·금융 정산과 다름. F675-203/204 요약·상세 기능은 여전히 미구현 Draft.
