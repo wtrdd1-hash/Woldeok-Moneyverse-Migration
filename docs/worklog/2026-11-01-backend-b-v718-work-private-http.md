@@ -8,11 +8,11 @@
 - Risk: miniPC `moneyverse-mcp` cgroup near TasksMax 1027; run bounded single-process checks. Release HOLD until all exact-SHA gates PASS.
 
 ## In progress
-- [ ] RED real HTTP regression
-- [ ] GREEN code and focused tests
+- [x] RED real HTTP regression — 10 fail / 1 public control pass
+- [x] GREEN code and focused tests — 12/12 pass with CPU affinity 0
 - [ ] Full checks / isolated PostgreSQL where feasible
 - [ ] Fresh main and planning sync
 - [ ] Draft PR / CI / release decision
 
 ## Finished
-- Pending.
+- Pending release gates.

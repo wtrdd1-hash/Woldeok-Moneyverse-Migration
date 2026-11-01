@@ -123,6 +123,15 @@ describe('member Work API real HTTP response privacy', () => {
     },
   );
 
+  it('protects the intentionally blocked unledgered qualification purchase', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/work/qualifications/certify')
+      .set('x-test-session', '1').send({ jobType: 'farmer' });
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('WORK_QUALIFICATION_LEDGER_UNAVAILABLE');
+    assertPrivate(response);
+  });
+
   it('does not mark unrelated public endpoints private', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/work-public-control');
     expect(response.status).toBe(200);
