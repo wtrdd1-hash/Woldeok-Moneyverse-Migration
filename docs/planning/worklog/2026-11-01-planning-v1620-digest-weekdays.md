@@ -6,7 +6,7 @@
 
 **Before work (22:08–22:14 KST):** miniPC Debian 13.6 backend/frontend/Discord/MCP/nginx/docker active, DEV DB connected; main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` checked. Read main AGENTS.md, README.md, canonical English/Korean plan, installed Superpowers skills, actual notification page, Nest controller, Android app-api, 071/114/123 database references, open planning/QA/developer PRs. Stacked on unmerged planning Draft #2375 (`54a8f2e7a35e4a0a8d7d0546f0c39c7fe295c804`), isolated worktree. No runtime change.
 
-**In progress:** [x] Define F675-211 exact user/API/DB/worker/privacy/QA/release contract. [x] Synchronize EN/KO canonical and integrated master. [x] Update EN/KO update logs. [x] GitHub P0/P1 issue and draft PR. [x] Midpoint main recheck. [ ] Verification.
+**In progress:** [x] Define F675-211 exact user/API/DB/worker/privacy/QA/release contract. [x] Synchronize EN/KO canonical and integrated master. [x] Update EN/KO update logs. [x] GitHub P0/P1 issue and draft PR. [x] Midpoint main recheck. [x] Verification.
 
 **Finished:** Pending evidence.
 
@@ -14,3 +14,5 @@
  External independent references newly verified 0; cumulative approved UNKNOWN/10,000, gate BLOCKED/IN PROGRESS. No Test/Production writes authorized.
 
 **Midpoint verification:** node --test scripts/release/*.test.mjs 147/147 PASS; classifier 24/24 PASS. Initial bilingual marker audit identified a missing `weekdayIsoDays` mention in integrated masters; corrected before final audit. Draft PR/remote CI pending. RELEASE HOLD.
+
+**Finished (documentation verification):** Draft PR #2384 OPEN/HOLD, handoff issue #2383 OPEN. Six existing integrated/canonical/update documents plus two bilingual worklogs; no distributed planning files. Local release 147/147 PASS, classifier 24/24 PASS, bilingual keys/backlog and Git diff verified. Remote exact final SHA CI will be recorded in separate GitHub final evidence. Actual PostgreSQL/Web/Android feature acceptance, Test exact-SHA and Production rollout NOT RUN. External new approved 0, cumulative UNKNOWN/10,000. **PRODUCTION RELEASE HOLD.**
