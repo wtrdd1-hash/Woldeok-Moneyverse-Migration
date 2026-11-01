@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { BellRing, CheckCircle2, ChevronLeft, Goal, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
@@ -10,6 +11,7 @@ import { requireMember } from '@/lib/session';
 import { saveGoalNotifications } from './actions';
 import { NotificationTabsBar } from './notification-tabs-bar';
 import { NotificationSearchPanel } from './notification-search-panel';
+import { isNotificationSaveConfirmed } from './notification-flash';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '알림 설정', robots: { index: false, follow: false } };
@@ -20,9 +22,11 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
   const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
   const preferenceVerified = typeof board?.notifications_enabled === 'boolean';
   const enabled = board?.notifications_enabled === true;
+  const proofCookie = (await cookies()).get('mv-notification-save-proof')?.value;
+  const savedConfirmed = isNotificationSaveConfirmed(params.saved, proofCookie, preferenceVerified ? enabled : null);
   return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
     <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 센터 & 설정">중요한 비즈니스 수급, 금융 이자, 목표와 소식을 확인하고 수신 여부를 직접 정할 수 있습니다.</PageHeader>
-    {params.saved === '1' ? <Alert><CheckCircle2 className="size-4"/><AlertDescription>알림 설정을 저장했습니다. 퀘스트 화면에도 바로 적용됩니다.</AlertDescription></Alert> : null}
+    {savedConfirmed ? <Alert><CheckCircle2 className="size-4"/><AlertDescription>알림 설정을 저장했습니다. 퀘스트 화면에도 바로 적용됩니다.</AlertDescription></Alert> : null}
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
 
     {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
