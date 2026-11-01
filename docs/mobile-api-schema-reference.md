@@ -5187,12 +5187,12 @@ _No request body._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `GET` `/app-api/v1/newspaper/poll` — Get weekly market sentiment opinion poll status
+## `GET` `/app-api/v1/newspaper/poll` — Reader poll tally unavailable until source verification
 
-- Authorization: 공개: 로그인 불필요
-- Success status: 200
+- Authorization: Public route currently returns HTTP 503
+- Success status: None (service unavailable)
 - Response mode: json
-- After success: 응답을 화면의 서버 기준 상태로 교체
+- After success: No successful response; HTTP 503 fail-closed until verified evidence exists
 - Operation ID: `NewspaperController_getWeeklyPoll`
 
 ### Path/query parameters
@@ -5205,28 +5205,16 @@ _No request body._
 
 ### Success response fields
 
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
-## `POST` `/app-api/v1/newspaper/poll/vote` — Cast vote on weekly market outlook poll
+## `POST` `/app-api/v1/newspaper/poll/vote` — Reader poll voting unavailable until durable receipt verification
 
-- Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
-- Success status: 201
+- Authorization: Public route currently returns HTTP 503; future voting requires authenticated actor, consent and CSRF
+- Success status: None (service unavailable)
 - Response mode: json
-- After success: 관련 GET을 다시 호출해 서버 상태와 동기화
+- After success: No successful response; HTTP 503 fail-closed until verified evidence exists
 - Operation ID: `NewspaperController_voteWeeklyPoll`
 
 ### Path/query parameters
@@ -5235,26 +5223,11 @@ _None._
 
 ### Request body
 
-- Content-Type: `undefined`
-
-_None._
-
+_No request body._
 
 ### Success response fields
 
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

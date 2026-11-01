@@ -16,3 +16,8 @@ No migration, WLD, ledger, DB or shared service mutations. Production deployment
 - GREEN: 10/10 backend and 10/10 frontend focused tests pass. No query or financial write attempted.
 - New HTTP 503 codes: `NEWSPAPER_POLL_SOURCE_UNVERIFIED` and `NEWSPAPER_POLL_VOTE_UNAVAILABLE`; `Cache-Control: no-store`.
 - Frontend newspaper replaces fake votes/localStorage receipt with truthful unavailable status; developer portal examples match HTTP 503.
+
+## Contract and quality checkpoint
+- Full lint PASS (0 errors; 1,028 pre-existing warnings), typecheck PASS.
+- First `api:contract:check` correctly reported drift: Swagger now returns `never` on held poll endpoints. Regenerated 184-route Android contract + EN/KO schema references; manually corrected stale successful-poll metadata and amended schema-reference generator to render empty success statuses as unavailable rather than trailing whitespace.
+- Contract changed only GET/POST newspaper poll response semantics; route paths and counts remain 184. The Android app must treat 503 as unavailable, not a zero tally or successful vote.

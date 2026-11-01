@@ -67,7 +67,9 @@ function renderEndpoint(endpoint, ko) {
   lines.push(`## \`${endpoint.method}\` \`${endpoint.path}\` — ${title}`);
   lines.push('');
   lines.push(ko ? `- 인증/권한: ${endpoint.authorization}` : `- Authorization: ${endpoint.authorization}`);
-  lines.push(ko ? `- 성공 상태: ${(endpoint.successStatuses ?? []).join(', ')}` : `- Success status: ${(endpoint.successStatuses ?? []).join(', ')}`);
+  const successStatuses = endpoint.successStatuses ?? [];
+  const statusText = successStatuses.length ? successStatuses.join(', ') : (ko ? '없음 (서비스 이용 불가)' : 'None (service unavailable)');
+  lines.push(ko ? `- 성공 상태: ${statusText}` : `- Success status: ${statusText}`);
   lines.push(ko ? `- 응답 모드: ${endpoint.responseMode}` : `- Response mode: ${endpoint.responseMode}`);
   lines.push(ko ? `- 성공 후 동기화: ${endpoint.afterSuccess}` : `- After success: ${endpoint.afterSuccess}`);
   lines.push(`- Operation ID: \`${endpoint.operationId}\``);

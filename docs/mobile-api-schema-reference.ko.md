@@ -5187,12 +5187,12 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
-## `GET` `/app-api/v1/newspaper/poll` — 주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회
+## `GET` `/app-api/v1/newspaper/poll` — Poll tallies are held until verified source evidence exists
 
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
+- 인증/권한: Public route currently returns HTTP 503
+- 성공 상태: 없음 (서비스 이용 불가)
 - 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- 성공 후 동기화: No successful response; HTTP 503 fail-closed until verified evidence exists
 - Operation ID: `NewspaperController_getWeeklyPoll`
 
 ### 경로/쿼리 파라미터
@@ -5205,28 +5205,16 @@ _요청 본문 없음._
 
 ### 성공 응답 필드
 
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
-## `POST` `/app-api/v1/newspaper/poll/vote` — 이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환
+## `POST` `/app-api/v1/newspaper/poll/vote` — Poll vote writes are held until durable actor-bound receipts and idempotency exist
 
-- 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
-- 성공 상태: 201
+- 인증/권한: Public route currently returns HTTP 503; future voting requires authenticated actor, consent and CSRF
+- 성공 상태: 없음 (서비스 이용 불가)
 - 응답 모드: json
-- 성공 후 동기화: 관련 GET을 다시 호출해 서버 상태와 동기화
+- 성공 후 동기화: No successful response; HTTP 503 fail-closed until verified evidence exists
 - Operation ID: `NewspaperController_voteWeeklyPoll`
 
 ### 경로/쿼리 파라미터
@@ -5235,26 +5223,11 @@ _None._
 
 ### 요청 본문
 
-- Content-Type: `undefined`
-
-_None._
-
+_요청 본문 없음._
 
 ### 성공 응답 필드
 
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| success | true | boolean |  |
-| data | true | object |  |
-| data.id | true | string |  |
-| data.question | true | string |  |
-| data.options[] | true | object[] |  |
-| data.options[] | true | object |  |
-| data.options[].id | true | string |  |
-| data.options[].label | true | string |  |
-| data.options[].votes | true | number |  |
-| data.options[].percentage | true | number |  |
-| data.totalVotes | true | number |  |
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
