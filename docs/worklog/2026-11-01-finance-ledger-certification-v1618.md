@@ -25,3 +25,6 @@ Strategy: preserve legacy 238 payouts and 50,000 WLD archived as unverified, nev
 
 ## MIDPOINT v1618.5 — 2026-11-02 00:02 KST
 - Public release gate previously rejected all HTTP 200 Treasury even when independent scoped fiscal proof certified current 0 WLD. Introduced shared narrow `safeTreasuryEdgeResponse`: retains old 503 fail-closed response; accepts HTTP200 only if current total/available/reserve all literal `0`, historical payout/burn unknown, no beneficiary or program claims, eligibility false, empty history and private no-store. Never authorizes minting or pensions. Both exact host and isolated public Test gates share it, with forged payout/positive WLD negative tests. 28 source unit tests PASS. This is not proof of public Test session continuity or Production promotion.
+
+## MIDPOINT v1618.6 — 2026-11-02 00:06 KST
+- Earlier CI #41318700289 failed in wallet transaction-label coverage (new NPS-funded transfer types otherwise display generic `경제 활동`). Added exact Korean label for both NPS_FUNDED_CONTRIBUTION/WITHDRAWAL, now wallet label unit suite 31 PASS. Historical ledger records untouched.
