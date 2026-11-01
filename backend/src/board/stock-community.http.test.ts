@@ -8,7 +8,7 @@ describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
-    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
+    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ', undefined);
   });
   it.each([
     { q: ['a', 'b'] },
@@ -21,4 +21,19 @@ describe('public board title query HTTP validation', () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
+});
+
+describe('public board author HTTP validation', () => {
+  it('forwards one bounded author name alongside stock and title', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'news', author: ' 김 ' }))
+      .resolves.toEqual({ posts: [] });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', ' 김 ');
+  });
+  it.each([{ author: ['a', 'b'] }, { author: '' }, { author: '<script>' }, { author: 'x'.repeat(81) }])(
+    'rejects invalid author filter %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query))
+        .rejects.toMatchObject({ status: 400 });
+    },
+  );
 });
