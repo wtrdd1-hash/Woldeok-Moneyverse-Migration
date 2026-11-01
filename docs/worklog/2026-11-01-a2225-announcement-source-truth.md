@@ -13,5 +13,10 @@
 - RED: backend 4 failed / 2 passed; frontend 6 failed. GREEN: backend 6 passed, frontend 18 passed. Evidence in isolated task directory.
 - Midpoint `origin/main` rechecked unchanged `3d5e321c`; full gates and release status pending. No main merge, Test/Production deployment, DB mutation, service restart, or branch deletion.
 
-## FINISHED — PENDING
-- To be updated with exact SHA, gate evidence, release HOLD and branch preservation reasons.
+## FINISHED — 2026-11-01 22:40 KST / DRAFT HOLD
+- Code SHA `982b1b28068acf32f5b9ee9c5c4dcc102ac22562`; PR #2385. Docs closeout SHA is published separately in PR after commit.
+- Full backend 2,976 PASS / 518 SKIP, frontend 2,922 PASS, DB unit 62 PASS / 4 SKIP; targeted 6+18 PASS; SEO/a11y 22 PASS; security/release 14 PASS. Lint 0 errors / 1,027 warnings, typecheck PASS, backend/frontend builds PASS (602 pages), Android contract 184 PASS, production audit 0 known vulnerabilities. All-dependency audit FAIL (8 moderate, 1 low). Full-route ledger FAIL (missing evidence file).
+- Real DEV PostgreSQL 17.11 read-only app-role function EXECUTE PASS; 1 published row, 0 null IDs/titles; no writes, ROLLBACK. DEV app role retains direct announcements SELECT, account_balances UPDATE and user_items DELETE (P0 #993). Not an assertion about Production ACL.
+- Branch audit: start 144 remote heads / 131 open PR; after push 145 remote heads / 132 open PR, 135 non-main with unique commits and 10 ancestor/same, 28 conflicting PRs, 0 duplicate tip SHA. No branch deletion: all unique changes protected and remaining ancestors may belong to active worktrees/PRs.
+- Code exact-SHA CI and image build started; final docs SHA CI must be rechecked. Official Test `e39af10f...` and Production `353c6d5d...` differ from candidate; Test exact-SHA auth/E2E, independent restore and GitOps release gate BLOCKED. No merge, Test/Production deploy, service restart, DB/ledger change or rollback. Production HOLD.
+- [x] Full local gates completed with explicit failures; [x] real PG read; [x] PR Draft/HOLD; [ ] exact-final-SHA CI; [ ] official Test E2E; [ ] release authorization.
