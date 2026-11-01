@@ -226,4 +226,45 @@ describe('AnalyticsClientView', () => {
     fireEvent.click(toggleBtn);
     expect(screen.getByRole('button', { name: /관리자 포함/ })).toBeDefined();
   });
+  it('shows exact high-value quintile and capitalization evidence and exports exact CSV integers', () => {
+    const member: AdminUser = {
+      user_id: 'exact-member', display_name: 'Exact', status: 'active',
+      created_at: '2026-11-01T00:00:00Z', restricted_at: null, restriction_reason: null,
+      total_net_worth: '9007199254740993', cash_balance: '9007199254740993',
+      bank_balance: '0', bond_balance: '0', stock_eval: '0',
+    };
+    const item: AdminStock = {
+      id: 'exact-stock', symbol: 'EXACT', name: 'Exact Stock',
+      current_price: '9007199254740993', shares_outstanding: '2', shares_available: '0',
+      holders: 0, trades: 0, active: true,
+    };
+    const attrs = vi.spyOn(HTMLAnchorElement.prototype, 'setAttribute');
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<AnalyticsClientView users={[member]} stocks={[item]} />);
+    expect(screen.getByText('18,014,398,509,481,986 WLD')).toBeDefined();
+    expect(screen.getAllByText(/9,007,199,254,740,993 WLD/).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: /CSV 리포트 내보내기/ }));
+    const href = attrs.mock.calls.find(([name, value]) => name === 'href' && value.startsWith('data:text/csv'))?.[1] ?? '';
+    expect(decodeURI(href)).toContain('9007199254740993');
+    expect(decodeURI(href)).toContain('18014398509481986');
+    attrs.mockRestore();
+    click.mockRestore();
+  });
+
+  it('fails closed on malformed wealth and stock API evidence instead of showing zero', () => {
+    const member: AdminUser = {
+      user_id: 'bad', display_name: 'Bad', status: 'active',
+      created_at: '2026-11-01T00:00:00Z', restricted_at: null, restriction_reason: null,
+      total_net_worth: 'not-an-integer', cash_balance: '1', bank_balance: '0', bond_balance: '0', stock_eval: '0',
+    };
+    const item: AdminStock = {
+      id: 'bad', symbol: 'BAD', name: 'Bad Stock', current_price: 'Infinity',
+      shares_outstanding: '10', shares_available: '0', holders: 0, trades: 0, active: true,
+    };
+    render(<AnalyticsClientView users={[member]} stocks={[item]} />);
+    expect(screen.getByText(/자산 분위 자료를 검증하지 못했습니다/)).toBeDefined();
+    expect(screen.getByText(/시가총액 자료를 검증하지 못했습니다/)).toBeDefined();
+    expect(screen.queryByText('Bad Stock')).toBeNull();
+  });
+
 });

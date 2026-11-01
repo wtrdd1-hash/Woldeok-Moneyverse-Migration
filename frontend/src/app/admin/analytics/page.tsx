@@ -6,6 +6,7 @@ import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { AnalyticsClientView } from './analytics-client-view';
 import { parseAnalyticsApiHealth, parseAnalyticsSeo } from './analytics-evidence';
+import { parseAnalyticsUsers, parseAnalyticsStocks } from './analytics-precision';
 import type {
   AdminStock,
   AdminUser,
@@ -30,8 +31,10 @@ export default async function AdminAnalyticsPage() {
     apiOrNull<unknown>('/api/v1/admin/api-health/status'),
   ]);
 
-  const allUsers = usersRes?.users ?? [];
-  const stocksList = stocksRes?.stocks ?? [];
+  const verifiedUsers = parseAnalyticsUsers(usersRes);
+  const allUsers = verifiedUsers ?? [];
+  const verifiedStocks = parseAnalyticsStocks(stocksRes);
+  const stocksList = verifiedStocks ?? [];
   const seoData = parseAnalyticsSeo(seoRes);
   const apiDomains = parseAnalyticsApiHealth(apiHealthRes);
 
@@ -47,7 +50,8 @@ export default async function AdminAnalyticsPage() {
         stocks={stocksList}
         seoData={seoData}
         apiDomains={apiDomains}
-        usersAvailable={Array.isArray(usersRes?.users)}
+        usersAvailable={verifiedUsers !== null}
+        stocksAvailable={verifiedStocks !== null}
       />
     </div>
   );

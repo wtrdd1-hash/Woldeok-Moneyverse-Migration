@@ -7,10 +7,10 @@ vi.mock('@/lib/session', () => ({ requireAdminConsole: adminMock }));
 vi.mock('@/components/page-header', () => ({ PageHeader: ({ children }: { children: React.ReactNode }) => <header>{children}</header> }));
 vi.mock('../admin-back', () => ({ AdminBack: () => <div>Back</div> }));
 vi.mock('./analytics-client-view', () => ({
-  AnalyticsClientView: ({ seoData, apiDomains, usersAvailable }: {
-    seoData: unknown; apiDomains: unknown; usersAvailable: boolean;
+  AnalyticsClientView: ({ seoData, apiDomains, usersAvailable, stocksAvailable }: {
+    seoData: unknown; apiDomains: unknown; usersAvailable: boolean; stocksAvailable: boolean;
   }) => <div data-testid="analytics-evidence">{seoData ? 'SEO_VERIFIED' : 'SEO_UNAVAILABLE'}
-    {apiDomains ? 'API_VERIFIED' : 'API_UNAVAILABLE'}{usersAvailable ? 'USERS_AVAILABLE' : 'USERS_UNAVAILABLE'}</div>,
+    {apiDomains ? 'API_VERIFIED' : 'API_UNAVAILABLE'}{usersAvailable ? 'USERS_AVAILABLE' : 'USERS_UNAVAILABLE'}{stocksAvailable ? 'STOCKS_AVAILABLE' : 'STOCKS_UNAVAILABLE'}</div>,
 }));
 import AdminAnalyticsPage, { metadata } from './page';
 
@@ -41,4 +41,12 @@ describe('admin analytics API evidence wiring', () => {
     const html = renderToStaticMarkup(await AdminAnalyticsPage());
     expect(html).toContain('API_UNAVAILABLE');
   });
+  it('treats malformed successful admin list responses as unavailable, not zero', async () => {
+    apiMock.mockImplementation(async (path: string) => path.endsWith('/admin/users')
+      ? { users: [null] } : path.endsWith('/admin/stocks') ? { stocks: [{ id: 'x', current_price: 'bad' }] } : null);
+    const html = renderToStaticMarkup(await AdminAnalyticsPage());
+    expect(html).toContain('USERS_UNAVAILABLE');
+    expect(html).toContain('STOCKS_UNAVAILABLE');
+  });
+
 });

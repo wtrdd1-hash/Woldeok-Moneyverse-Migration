@@ -27,6 +27,7 @@ import type { AdminUser, AdminStock, ReconciliationHealth, FeatureSwitch } from 
 import type { SeoInitialData } from '../seo/seo-client-view';
 import type { AnalyticsDomainEvidence } from './analytics-evidence';
 import { calculateSampleMoney } from './analytics-money';
+import { calculateWealthQuintiles, calculateStockCapitalization } from './analytics-precision';
 
 export interface AnalyticsClientViewProps {
   users?: readonly AdminUser[];
@@ -36,6 +37,7 @@ export interface AnalyticsClientViewProps {
   seoData?: SeoInitialData | null;
   apiDomains?: readonly AnalyticsDomainEvidence[] | null;
   usersAvailable?: boolean;
+  stocksAvailable?: boolean;
 }
 
 type AnalyticsCategory = 'all' | 'user_economy' | 'seo_crawlers' | 'traffic_sources' | 'api_health';
@@ -46,6 +48,7 @@ export function AnalyticsClientView({
   seoData = null,
   apiDomains = null,
   usersAvailable = true,
+  stocksAvailable = true,
 }: AnalyticsClientViewProps) {
   const [activeCategory, setActiveCategory] = useState<AnalyticsCategory>('all');
   const [excludeAdmin, setExcludeAdmin] = useState(true);
@@ -110,74 +113,9 @@ export function AnalyticsClientView({
   // The authenticated admin-user API supplies canonical integer strings; never round WLD through Number.
   const monetaryStats = useMemo(() => calculateSampleMoney(effectiveUsers), [effectiveUsers]);
 
-  // 3. 5분위 자산 계층 통계
-  const quintileStats = useMemo(() => {
-    if (effectiveUsers.length === 0) return [];
-
-    const sortedUsers = [...effectiveUsers].sort(
-      (a, b) => (Number(b.total_net_worth) || 0) - (Number(a.total_net_worth) || 0)
-    );
-
-    const totalNetWorthAll = sortedUsers.reduce(
-      (acc, u) => acc + (Number(u.total_net_worth) || 0),
-      0
-    );
-
-    const size = Math.max(1, Math.floor(sortedUsers.length / 5));
-    const labels = [
-      '5분위 (상위 20%)',
-      '4분위 (20~40%)',
-      '3분위 (40~60%)',
-      '2분위 (60~80%)',
-      '1분위 (하위 20%)',
-    ];
-    const colors = ['#f59e0b', '#3b82f6', '#10b981', '#6366f1', '#ec4899'];
-
-    const result = [];
-    for (let i = 0; i < 5; i++) {
-      const start = i * size;
-      const end = i === 4 ? sortedUsers.length : (i + 1) * size;
-      const group = sortedUsers.slice(start, end);
-      const groupWealth = group.reduce(
-        (acc, u) => acc + (Number(u.total_net_worth) || 0),
-        0
-      );
-      const avg = group.length > 0 ? groupWealth / group.length : 0;
-      const ratio = totalNetWorthAll > 0 ? (groupWealth / totalNetWorthAll) * 100 : 0;
-
-      result.push({
-        label: labels[i],
-        color: colors[i],
-        count: group.length,
-        totalWealth: groupWealth,
-        avgWealth: avg,
-        ratio: ratio.toFixed(1),
-      });
-    }
-
-    return result;
-  }, [effectiveUsers]);
-
-  // 4. 주식 시장 종목별 시총 랭킹 (Top 5)
-  const stockRankings = useMemo(() => {
-    const list = stocks.map((s) => {
-      const price = Number(s.current_price) || 0;
-      const shares = Number(s.shares_outstanding) || 0;
-      const cap = price * shares;
-      return {
-        id: s.id,
-        symbol: s.symbol,
-        name: s.name,
-        cap,
-        price,
-        trades: s.trades,
-        active: s.active && !s.halt_status,
-      };
-    });
-
-    list.sort((a, b) => b.cap - a.cap);
-    return list.slice(0, 5);
-  }, [stocks]);
+  // Source rows are decimal strings; preserve exact WLD and share quantities.
+  const quintileStats = useMemo(() => calculateWealthQuintiles(effectiveUsers), [effectiveUsers]);
+  const stockRankings = useMemo(() => calculateStockCapitalization(stocks), [stocks]);
 
   // 5. CSV exports must carry the same evidence scope and unavailable states as the screen.
   const handleExportCsv = () => {
@@ -206,9 +144,23 @@ export function AnalyticsClientView({
     lines.push('');
     lines.push('=== BOUNDED SAMPLE WEALTH DISTRIBUTION (NOT GLOBAL) ===');
     lines.push('Quintile,User Count,Total Wealth,Average Wealth,Share Ratio (%)');
-    (usersAvailable ? quintileStats : []).forEach((q) => {
-      lines.push(`${q.label},${q.count},${q.totalWealth},${Math.round(q.avgWealth)},${q.ratio}%`);
-    });
+    if (!usersAvailable || quintileStats === null) {
+      lines.push('UNAVAILABLE,UNAVAILABLE,UNAVAILABLE,UNAVAILABLE,UNAVAILABLE');
+    } else {
+      quintileStats.forEach((q) => {
+        lines.push(`${q.label},${q.count},${q.totalWealth},${q.avgWealth},${q.ratio}%`);
+      });
+    }
+    lines.push('');
+    lines.push('=== VERIFIED STOCK CAPITALIZATION (BOUNDED ADMIN SAMPLE) ===');
+    lines.push('Symbol,Price WLD,Shares Outstanding,Market Capitalization WLD');
+    if (!stocksAvailable || stockRankings === null) {
+      lines.push('UNAVAILABLE,UNAVAILABLE,UNAVAILABLE,UNAVAILABLE');
+    } else {
+      stockRankings.forEach((row) => {
+        lines.push(`${row.symbol},${row.price},${row.shares},${row.cap}`);
+      });
+    }
     lines.push('');
     lines.push('=== SEO & SEARCH ENGINE CRAWLER METRICS ===');
     lines.push(`24h Bot Hits,${seoData?.totalHits24h ?? 'UNAVAILABLE'}`);
@@ -294,6 +246,7 @@ export function AnalyticsClientView({
       <p role="status" className="text-xs text-amber-300">
         회원·경제 지표는 관리자 목록 조회 표본(최대 100명) 기반이며 전체 회원·총 통화 공급량이 아닙니다.
         {!usersAvailable && ' 회원 자료 조회 실패 — 회원 통계는 검증되지 않았습니다.'}
+        {!stocksAvailable && ' 주식 자료 조회 실패 — 시가총액은 검증되지 않았습니다.'}
       </p>
 
       {/* 통계 도메인 원클릭 카테고리 전환 탭 바 (모바일 가로 스크롤 및 flex 축소 텍스트 겹침 방지) */}
@@ -566,21 +519,23 @@ export function AnalyticsClientView({
                   </Badge>
                 </div>
                 <CardDescription className="text-xs text-slate-400">
-                  전체 유저 자산 5분위 분배율(상위 20%부터 하위 20%까지의 파이 점유율)
+                  조회된 회원 표본의 자산 5분위 비율입니다. 전체 회원 분포가 아닙니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {quintileStats.map((q) => (
+                {quintileStats === null && <p role="alert" className="rounded-lg border border-amber-500/40 p-3 text-sm text-amber-200">자산 분위 자료를 검증하지 못했습니다. 누락되거나 잘못된 금액은 0으로 대체하지 않습니다.</p>}
+                {quintileStats !== null && quintileStats.length === 0 && <p role="status" className="text-sm text-slate-300">조회된 회원 표본이 없습니다.</p>}
+                {quintileStats?.map((q) => (
                   <div key={q.label} className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="font-medium text-slate-300">{q.label} ({q.count}명)</span>
-                      <span className="font-mono font-bold text-white">{q.ratio}% ({Math.round(q.avgWealth).toLocaleString()} WLD)</span>
+                      <span className="font-mono font-bold text-white">{q.ratio}% ({q.avgWealth.toLocaleString()} WLD)</span>
                     </div>
                     <div className="h-2.5 w-full rounded-full bg-slate-950 overflow-hidden border border-slate-800/80">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${Math.max(2, Number(q.ratio))}%`,
+                          width: `${Number(q.ratio)}%`,
                           backgroundColor: q.color,
                         }}
                       />
@@ -609,7 +564,9 @@ export function AnalyticsClientView({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {stockRankings.map((s, idx) => (
+                {(!stocksAvailable || stockRankings === null) && <p role="alert" className="rounded-lg border border-amber-500/40 p-3 text-sm text-amber-200">시가총액 자료를 검증하지 못했습니다. API 장애 또는 잘못된 정수 문자열은 0으로 표시하지 않습니다.</p>}
+                {stocksAvailable && stockRankings !== null && stockRankings.length === 0 && <p role="status" className="text-sm text-slate-300">검증된 상장 종목이 없습니다.</p>}
+                {stocksAvailable && stockRankings?.map((s, idx) => (
                   <div key={s.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
                     <div className="flex items-center gap-3">
                       <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-800 text-xs font-bold text-slate-300">

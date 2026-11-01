@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending.
+
+### Checkpoint 18:47 KST
+- TDD RED: missing helper module; integration assertions reproduced incorrect rounded stock cap and absent invalid-source alert (2 failures / 8 passes); parser contract RED twice. Initial Vitest DOM run without NODE_ENV=test produced React.act environment errors; corrected environment and reran.
+- GREEN: exact BigInt quintiles, capitalization ranking, invalid-source fail-closed, API envelope validation, CSV exact integer export; 19 focused frontend tests PASS across 3 files.
+- Responsive chart layout preserved; source-failure warnings use `role=alert`, valid empty uses `role=status`; no new API, DB, schema or finance write. Existing authenticated admin users/stocks read APIs reused.
+- `origin/main` re-fetched mid-task. Full gates and CI remain pending; DRAFT / RELEASE HOLD.
