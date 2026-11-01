@@ -29,6 +29,14 @@ describe('Android gallery Seoul-day contract', () => {
     expect(response.status).toBe(503);
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
+  it.each(['html', 'no-content'])('rejects a success-shaped %s response without verified photo JSON', async (kind) => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com'); vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => kind === 'html'
+      ? new Response('<html>unverified</html>', { status: 200, headers: { 'content-type': 'text/html' } })
+      : new Response(null, { status: 204 })));
+    const response = await GET(request('?day=2026-09-07'), context);
+    expect(response.status).toBe(503);
+  });
   it('accepts a verified day result and never caches or indexes it', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com'); vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
     const upstream = vi.fn(async () => new Response(JSON.stringify({ photos: [photo] }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' } }));

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedGalleryDayResponse, parseGalleryDay } from '@/app/gallery/gallery-day';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const galleryDayRequest = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'photos' && request.nextUrl.searchParams.has('day');
+  const galleryDay = galleryDayRequest ? parseGalleryDay(request.nextUrl.searchParams.get('day')) : null;
+  if (galleryDayRequest && (!galleryDay || request.nextUrl.searchParams.getAll('day').length !== 1 ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'day'))) {
+    return gatewayProblem(400, 'Bad Request', 'gallery_day_invalid', 'a single valid gallery publication day is required');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +280,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (galleryDayRequest && response.ok && (response.status !== 200 || !isJsonMediaType(response.headers.get('content-type')))) {
+    return gatewayProblem(503, 'Service Unavailable', 'gallery_day_unverified', 'published photo day filter could not be verified');
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -510,6 +523,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (galleryDayRequest) { headers.set('cache-control', 'no-store'); headers.set('x-robots-tag', 'noindex'); headers.set('referrer-policy', 'no-referrer'); }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -521,6 +535,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (galleryDayRequest && response.ok && (!galleryDay || !isVerifiedGalleryDayResponse(compatible, galleryDay))) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_day_unverified', 'published photo day filter could not be verified');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +566,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (galleryDayRequest && response.ok) return gatewayProblem(503, 'Service Unavailable', 'gallery_day_unverified', 'published photo day filter could not be verified');
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -594,6 +612,11 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos' && request.nextUrl.searchParams.has('day')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

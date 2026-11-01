@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { parseGalleryDay, photoMatchesGalleryDay } from './gallery-day';
 import type {
   ContentAnnouncementReceiptRow,
   ContentAnnouncementRow,
@@ -331,9 +332,12 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, day }: { limit?: number; day?: unknown } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    const selectedDay = day === undefined ? undefined : parseGalleryDay(day);
+    if (day !== undefined && !selectedDay) throw new ContentInputError('invalid gallery publication day');
+    const photos = (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    return selectedDay ? photos.filter((photo) => photoMatchesGalleryDay(photo.publishedAt, selectedDay)) : photos;
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {
