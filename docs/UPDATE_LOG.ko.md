@@ -1,6 +1,6 @@
 ## v2026.11.01.1600 — F675-206 회원 보관함 만료 알림 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 
-**주기 및 기준:** 이전 **Feature Improvement v1598** → 현재 **Feature Addition v1600** → 다음 **Feature Improvement v1602(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. main의 AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 국문 PROJECT_PLAN.ko.md를 대조했다. 선행 기획 Draft **#2301**은 미병합 OPEN이며 유효한 F675-199~205 기획을 이 별도 문서 브랜치로 승계했다. 개발 이슈 **#2307**. **F675-206은 미구현**이고 별도 분산 기획 파일이나 런타임 배포는 없다.
+**주기 및 기준:** 이전 **Feature Improvement v1598** → 현재 **Feature Addition v1600** → 다음 **Feature Improvement v1602(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. main의 AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 국문 PROJECT_PLAN.ko.md를 대조했다. 선행 기획 Draft **#2301**은 미병합 OPEN이며 유효한 F675-199~205 기획을 이 별도 문서 브랜치로 승계했다. 개발 이슈 **#2307**, Draft PR **#2309**. **F675-206은 미구현**이고 별도 분산 기획 파일이나 런타임 배포는 없다.
 
 ### 소스 근거, 목적, 대안
 - **소스 확인:** `frontend/src/app/account/notifications/page.tsx`에는 회원 전용 알림 설정 및 기존 목표 알림 설정이 있지만 만료 미리보기는 없다. `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패를 `[]`로 바꿀 수 있어 장애를 검증된 0건으로 판단하면 안 된다. `backend/src/shop/shop.controller.ts`의 holdings GET에는 Session/Authenticated/Consent 가드가 있으며, `shop.repository.ts`는 마이그레이션 123의 `public.shop_my_items_v2(actor)`를 호출한다. `frontend/src/app/app-api/v1/[...path]/route.ts`의 비공개 헤더 처리는 일부 경로에만 명시되어 있다. 이는 소스 위험이지 운영 개인정보 유출의 증거가 아니다.
