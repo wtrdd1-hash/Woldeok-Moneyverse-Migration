@@ -31,12 +31,20 @@ function fixture(failure: Failure = 'none', dailyAverage = '1000') {
 }
 
 describe('P1 treasury overview evidence cannot silently become synthetic numbers', () => {
-  it.each(['circulation', 'missing-circulation', 'zero-circulation', 'outflow', 'missing-outflow', 'negative-outflow', 'budgets'] as const)(
+  it.each(['circulation', 'missing-circulation', 'outflow', 'missing-outflow', 'negative-outflow', 'budgets'] as const)(
     'fails closed when %s evidence is unavailable', async (failure) => {
       const { repository } = fixture(failure);
       await expect(repository.getOverview()).rejects.toMatchObject({ status: 503 });
     },
   );
+
+  it('reports verified zero circulation without inventing a reserve ratio', async () => {
+    const { repository } = fixture('zero-circulation');
+    const overview = await repository.getOverview();
+    expect(overview.total_treasury_wld).toBe('1000000');
+    expect(overview.total_circulating_wld).toBe('0');
+    expect(overview.reserve_ratio_pct).toBeNull();
+  });
 
   it('marks 30-day coverage unavailable when no expenses exist, not a fictitious 10,000 WLD/day', async () => {
     const { repository } = fixture('none', '0');
