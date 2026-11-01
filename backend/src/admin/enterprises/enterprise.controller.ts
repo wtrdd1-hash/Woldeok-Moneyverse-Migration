@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ServiceUnavailableException,
   Body,
   Controller,
   Get,
@@ -74,21 +73,27 @@ export class AdminEnterpriseController {
   }
 
   @Put('soes/:code')
-  @ApiOperation({ summary: '공기업 운영 상태 및 법정 배당률 변경 (킬스위치/민영화 제어)' })
+  @ApiOperation({ summary: 'Audited nonmonetary SOE governance transition' })
   async updateSoeStatus(
     @Param('code') code: string,
-    @Body('status') status: string,
-    @Body('dividendRateBps') dividendRateBps?: number,
+    @Body() body: {
+      status?: string;
+      dividendRateBps?: number;
+      reason?: string;
+      idempotencyKey?: string;
+    },
+    @Req() req: RequestWithSession,
   ) {
-    // The legacy repository performs direct app-role table DML and does not
-    // provide an auditable DB-owned receipt. No HTTP caller may execute it.
-    void code;
-    void status;
-    void dividendRateBps;
-    throw new ServiceUnavailableException({
-      code: 'SOE_STATUS_MUTATION_UNVERIFIED',
-      message: 'SOE status updates are suspended pending least-privilege receipt verification',
-    });
+    const actorId = requireUserId(req);
+    if (!body || typeof body.status !== 'string' || typeof body.reason !== 'string'
+      || typeof body.idempotencyKey !== 'string'
+      || (body.dividendRateBps !== undefined && typeof body.dividendRateBps !== 'number')) {
+      throw new BadRequestException('Invalid SOE governance payload');
+    }
+    return this.service.updateSoeStatus(
+      code, body.status, body.dividendRateBps,
+      actorId, body.reason, body.idempotencyKey,
+    );
   }
 }
 
