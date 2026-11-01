@@ -25,6 +25,19 @@ export function optionalContentUuid(value: unknown, field: string): string | nul
   return requireContentUuid(value, field);
 }
 
+export function parsePhotoCaptionQuery(query: Record<string, unknown>): string | null {
+  const keys = Object.keys(query);
+  if (keys.length === 0) return null;
+  if (keys.length !== 1 || keys[0] !== 'q' || typeof query.q !== 'string') {
+    throw new ContentInputError('q must be a single caption search string');
+  }
+  const caption = query.q.trim();
+  if ([...caption].length < 2 || [...caption].length > 60 || /[\u0000-\u001F\u007F]/.test(caption)) {
+    throw new ContentInputError('q must be 2 to 60 safe characters');
+  }
+  return caption;
+}
+
 export function requireContentLimit(value: unknown, field = 'limit'): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 100) {
     throw new ContentInputError(`${field} must be an integer between 1 and 100`);
@@ -255,12 +268,13 @@ export class PostgresContentRepository {
     return rows;
   }
 
-  async publishedPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhotoRow[]> {
+  async publishedPhotos({ limit = 24, caption = null }: { limit?: number; caption?: string | null } = {}): Promise<ContentPhotoRow[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
     const { rows } = await this.pool.query<ContentPhotoRow>(
       `SELECT photo_id::text AS photo_id, image_url, alt_text, published_at
-       FROM public.content_list_published_photos($1)`,
-      [contentLimit],
+       FROM public.content_list_published_photos($1)
+       WHERE ($2::text IS NULL OR strpos(lower(alt_text), lower($2)) > 0)`,
+      [contentLimit, caption],
     );
     return rows;
   }

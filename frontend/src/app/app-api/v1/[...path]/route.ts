@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { parseGalleryCaptionQuery, isVerifiedCaptionGallery } from '@/app/gallery/gallery-caption';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -111,6 +112,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const captionPhotoPath = request.method === 'GET' && (
+    (parts.length === 1 && parts[0] === 'photos') ||
+    (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')
+  );
+  const captionValues = captionPhotoPath ? request.nextUrl.searchParams.getAll('q') : [];
+  const captionQuery = captionValues.length === 1 ? parseGalleryCaptionQuery(captionValues[0]) : null;
+  if (captionPhotoPath && (
+    [...request.nextUrl.searchParams.keys()].some((key) => key !== 'q') ||
+    (captionValues.length > 0 && (captionValues.length !== 1 || !captionQuery))
+  )) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_photo_caption', 'q must be a single 2–60 character caption query');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +285,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (captionPhotoPath && captionValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedCaptionGallery(await response.clone().json(), captionQuery!)) {
+        throw new Error('unverified caption filter');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'photo_caption_unverified',
+        'the public gallery caption filter could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -581,6 +607,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (((parts.length === 1 && parts[0] === 'photos') ||
+       (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')) &&
+      request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.

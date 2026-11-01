@@ -2619,7 +2619,9 @@ _No request body._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| q | query | false | string | minLength=2; maxLength=60 |
 
 ### Request body
 
@@ -2997,7 +2999,9 @@ _Binary body. Do not JSON-decode._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| q | query | false | string | minLength=2; maxLength=60 |
 
 ### Request body
 

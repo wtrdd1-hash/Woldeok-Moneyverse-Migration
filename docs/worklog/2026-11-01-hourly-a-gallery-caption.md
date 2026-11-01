@@ -14,3 +14,12 @@
 ## Finished (v3 pending)
 - SHA, changed files, PASS/FAIL/BLOCKED, Test/Production/rollback, branch counts and preservation decisions to be appended.
 - No merge or deployment without exact-SHA official Test + full CI + ACL + GitOps gates.
+
+## In progress (v2 — 20:35 KST)
+- RED: backend 3 tests failed before implementation; frontend 3 failed. A separate Android alias test failed 200-vs-503 before repair. All now GREEN.
+- Backend repository filters only the 24-row published SECURITY DEFINER function result with parameterized literal substring; Nest public and app controllers reject duplicate, invalid and unknown query keys.
+- Next gallery offers labelled keyboard GET form and clear action, bounded-source disclosure, verified-empty vs unavailable, and dynamic robots noindex for filtered pages.
+- Android /photos and /content/photos aliases reject invalid queries and legacy unfiltered HTTP 200, with no-store/noindex on filtered responses.
+- Real DEV PostgreSQL 17.11 moneyverse_app READ ONLY / ROLLBACK: function EXECUTE=true, photos direct SELECT=false, recent public rows=2, positive=1, negative=0, literal wildcard=0. Existing P0 direct account_balances UPDATE=true and user_items DELETE=true. Production permissions unverified.
+- origin/main re-fetched at midpoint; no advance from 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0. Gallery sort Draft #2331 overlaps; preserve. No changes to other worktrees.
+- Focused backend 11 PASS; focused frontend 8 PASS. Full suites, build, lint, exact SHA CI and official Test still pending.
