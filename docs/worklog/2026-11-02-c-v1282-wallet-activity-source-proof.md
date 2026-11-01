@@ -8,11 +8,11 @@
 - No overlap found with active A/B/C/QA PRs; do not touch their branches.
 
 ## IN PROGRESS
-- [ ] Write RED tests for malformed non-calendar owner activity pages.
-- [ ] Validate bounded page, cursor, ISO timestamps, unique UUIDs, directions and exact signed WLD amounts before rendering.
-- [ ] Preserve legitimate owner activity and independently verified page-only summaries.
+- [x] Write RED tests for malformed non-calendar owner activity pages (03:50 KST: 6 UI failures and missing pure validator; 2923 other frontend tests passed).
+- [x] Validate bounded page, cursor, ISO timestamps, unique UUIDs, directions and exact signed WLD amounts before rendering. Focused GREEN 24/24, Backend owner HTTP contract 4/4, focused ESLint and full typecheck PASS (03:54 KST).
+- [x] Preserve legitimate owner activity and independently verified page-only summaries; malformed responses show retry and unknown rather than false-empty.
 - [ ] Verify focused, full and isolated gates on exact HEAD; record failures without waiver.
-- [ ] Refresh main and planning, publish Draft PR, preserve evidence and HOLD until all gates PASS.
+- [ ] Refreshed origin/main at 03:55 KST: unchanged `510dbe6b`; canonical English/Korean plans unchanged at v1518. Publish Draft PR, preserve evidence and HOLD until all gates PASS.
 
 ## FINISHED
 Pending.

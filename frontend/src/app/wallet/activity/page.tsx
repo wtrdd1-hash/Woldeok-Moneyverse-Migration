@@ -11,8 +11,8 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { requireMember } from '@/lib/session';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
+import { verifiedWalletActivityPage } from '@/lib/wallet-activity-proof';
 import { sides } from '../sides';
-import type { WalletHistoryPage } from './types';
 import { activityPeriod, activityPeriodUrl, activityCursorUrl, activityDirection, activityCalendarRange } from './period';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '내 지갑 기록',
   robots: { index: false, follow: false },
+  referrer: 'no-referrer',
 };
 
 /**
@@ -50,10 +51,11 @@ export default async function WalletActivityPage({
   }
   // The API verifies the opaque cursor against the current owner and session.
   const cursor = typeof params?.cursor === 'string' && params.cursor.length <= 2048 ? params.cursor : undefined;
-  const unverifiedHistory = rangeError ? null : await apiOrNull<WalletHistoryPage>(
+  const unverifiedHistory = rangeError ? null : await apiOrNull<unknown>(
     `/api/v1/wallet/activity?period=${period}&direction=${direction}${range ? `&from=${range.from}&to=${range.to}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
   );
-  const history = range && !verifiedWalletCalendarPage(unverifiedHistory, range, direction) ? null : unverifiedHistory;
+  const verified = verifiedWalletActivityPage(unverifiedHistory, period, direction);
+  const history = range && !verifiedWalletCalendarPage(verified, range, direction) ? null : verified;
   const pageSummary = history ? verifiedWalletPageSummary(history) : null;
 
 
@@ -129,7 +131,12 @@ export default async function WalletActivityPage({
           {rangeError ? (
             <EmptyState title="날짜 범위를 다시 확인해 주세요." />
           ) : !history ? (
-            <EmptyState title="지금은 기록을 불러올 수 없어요." />
+            <div role="status" aria-live="polite" className="grid gap-3">
+              <EmptyState title="지금은 기록을 불러올 수 없어요." description="본인 원장 응답을 검증하지 못했습니다. 거래가 없다는 뜻은 아닙니다." />
+              <Button asChild variant="outline" className="min-h-11 w-fit">
+                <Link href={activityPeriodUrl(period, direction, range)}>다시 조회</Link>
+              </Button>
+            </div>
           ) : history.transactions.length === 0 ? (
             <EmptyState
               title="아직 기록된 활동이 없어요."
