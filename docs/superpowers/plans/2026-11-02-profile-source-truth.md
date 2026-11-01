@@ -33,6 +33,6 @@
 - [x] Verify accessible retry, noindex, and unchanged existing backend contract in targeted tests.
 
 ### Task 3: Release gate and preservation
-- [ ] Re-fetch main and resolve semantic changes if any.
-- [ ] Run exact-SHA build/lint/typecheck/unit/integration/DB/security/app-api/E2E/CI gates where possible.
-- [ ] Update English/Korean logs, push branch and draft PR; block merge/deploy on any failed gate.
+- [x] Re-fetch main at start/mid/end; unchanged.
+- [x] Run all locally available gates and record failed/blocked checks; do not claim complete release validation.
+- [x] Update English/Korean logs, push branch and draft PR #2401; merge/deploy blocked.

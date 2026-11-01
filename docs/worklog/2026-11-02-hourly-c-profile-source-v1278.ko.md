@@ -19,4 +19,9 @@
 - 공유 DB/운영/다른 작업 변경 없음.
 
 ## 종료
-- PR, 최종 SHA, 실패/차단/배포 및 보존 근거 기록 예정.
+- Draft PR #2401: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2401 (병합 보류). 개발 코드 SHA `b4fa074ba551b15fac1b3417f563a7e5d915df8d`; 최종 기록 커밋 SHA는 PR에 추가 기록.
+- 빌드·lint(오류 0, 경고 1027)·typecheck PASS, Frontend 2956 PASS, Backend 2978 PASS/2 FAIL/518 SKIP, DB 패키지 62 PASS/5 SKIP, 보안 스크립트 17 PASS, app-api 184개 계약 PASS.
+- 별도 네트워크 차단 PostgreSQL 17.11에서 322/322 마이그레이션 PASS. 앱 역할의 프로필 조회 함수 실행 허용·원본 프로필/칭호 테이블 SELECT 거부, 합성 회원 프로필·설정 조회 성공, 원장 거래 0건 확인. 컨테이너 제거, 공유 DB 불변.
+- 차단: Backend 기존 프로필 HTTP 인증 테스트 2건 401(기대 200), A Draft #2265 담당; 의존성 취약점 낮음 1·보통 8; 전체 경로 QA 증빙 파일 누락; 루트 테스트 60초 시간 초과. 별도 Next HTTP에서 `/profile`의 X-Robots-Tag `index, follow` 노출 확인(기존 공통 헤더 결함). 원격 후보 CI build 진행 중, 공식 인증 E2E·정확 SHA Test·독립 복원 미완료.
+- main 시작·중간·종료 SHA 동일. main 직접 수정/병합/공식 Test·Production 배포/GitOps 변경 없음. 롤백 불필요. 다른 A/B/QA/Gemini 브랜치 삭제·변경 없음.
+- 판정 PARTIAL / RELEASE BLOCKED. 코드와 Draft PR 보존; 모든 필수 PASS 전 운영 승격 금지.
