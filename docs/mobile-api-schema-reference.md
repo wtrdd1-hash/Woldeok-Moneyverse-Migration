@@ -2587,7 +2587,7 @@ _None._
 
 ### Path/query parameters
 
-_None._
+- Optional `day=YYYY-MM-DD` (Seoul date, years 2000–2099). Filter applies only to the latest 20 published announcements. Duplicate/invalid values return 400; filtered 200 requires `publicationDay` echo and in-day timestamps or Android returns 503. Filtered responses are no-store/noindex.
 
 ### Request body
 
@@ -2597,6 +2597,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| publicationDay | false | string | Exact echoed Seoul day when filtered |
 | announcements[] | true | object[] |  |
 | announcements[] | true | object |  |
 | announcements[].announcementId | true | string |  |

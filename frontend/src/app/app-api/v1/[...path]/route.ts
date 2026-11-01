@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedAnnouncementDayResponse, parseAnnouncementDay } from '@/lib/announcement-day';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -111,6 +112,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const announcementDayPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  const announcementQuery = request.nextUrl.searchParams;
+  const announcementDayValues = announcementDayPath ? announcementQuery.getAll('day') : [];
+  const announcementDay = announcementDayValues.length === 1 ? parseAnnouncementDay(announcementDayValues[0]) : null;
+  if (announcementDayPath && (announcementDayValues.length > 1 ||
+      (announcementDayValues.length === 1 && !announcementDay) ||
+      [...announcementQuery.keys()].some((key) => key !== 'day'))) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_day_invalid', 'publication day must be a valid YYYY-MM-DD');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +283,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // A stale content backend must not claim a filtered announcement result without
+  // the exact day echo and published timestamps inside the requested Seoul day.
+  if (announcementDay && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedAnnouncementDayResponse(await response.clone().json(), announcementDay)) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_day_unverified',
+          'publication day results could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'announcement_day_unverified',
+        'publication day results could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -583,6 +610,11 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('day')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {

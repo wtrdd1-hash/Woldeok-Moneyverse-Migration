@@ -6,17 +6,28 @@ import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
+import { isVerifiedAnnouncementDayResponse, parseAnnouncementDay } from '@/lib/announcement-day';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
 };
+
+type PageProps = { searchParams: Promise<{ day?: string | string[] }> };
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const { day } = await searchParams;
+  return day === undefined ? baseMetadata : {
+    ...baseMetadata,
+    robots: { index: false, follow: false },
+  };
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -28,8 +39,19 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export default async function AnnouncementsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const day = parseAnnouncementDay(params.day);
+  const invalidDay = params.day !== undefined && day === null;
+  const fetched = invalidDay
+    ? null
+    : await publicApi<{ announcements: Announcement[]; publicationDay?: string }>(
+        day ? `/api/v1/announcements?day=${encodeURIComponent(day)}` : '/api/v1/announcements',
+        day ? 0 : 60,
+      );
+  const data = invalidDay
+    ? { announcements: [] as Announcement[] }
+    : day && fetched && !isVerifiedAnnouncementDayResponse(fetched, day) ? null : fetched;
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -88,7 +110,36 @@ export default async function AnnouncementsPage() {
             </Link>
           }
         />
-        {data === null ? (
+        <form action="/announcements" method="get" role="search" className="flex flex-wrap items-end gap-3 rounded-xl border border-border/50 bg-card p-4">
+          <div className="grid gap-1.5">
+            <label htmlFor="announcement-day" className="text-sm font-semibold">게시일 (한국시간)</label>
+            <input
+              id="announcement-day"
+              name="day"
+              type="date"
+              min="2000-01-01"
+              max="2099-12-31"
+              defaultValue={day ?? ''}
+              className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm"
+            />
+          </div>
+          <button type="submit" className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">
+            날짜 검색
+          </button>
+          {params.day !== undefined && (
+            <Link href="/announcements" className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold underline underline-offset-4">
+              검색 초기화
+            </Link>
+          )}
+          <p className="w-full text-xs text-muted-foreground">
+            최근 공개 공지 최대 20건에서만 검색합니다. 이전 공지 전체를 검색하지는 않습니다.
+          </p>
+        </form>
+        {invalidDay ? (
+          <p role="alert" className="rounded-lg border border-destructive/50 p-4 text-sm text-destructive">
+            올바른 게시일을 선택해 주세요.
+          </p>
+        ) : data === null ? (
           <EmptyState
             title="지금은 공지를 불러올 수 없어요."
             description="잠시 후 다시 확인해 주세요."

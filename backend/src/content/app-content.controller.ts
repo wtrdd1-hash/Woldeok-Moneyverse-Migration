@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ContentInputError } from './content.repository';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 
 @ApiTags('content')
@@ -14,8 +15,18 @@ export class AppContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  @ApiQuery({ name: 'day', required: false, description: 'Seoul publication day YYYY-MM-DD, latest 20 only' })
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'day')) {
+      throw new BadRequestException('unsupported announcement query');
+    }
+    try {
+      const announcements = await this.service().publicAnnouncements({ day: query.day });
+      return { announcements, ...(query.day !== undefined ? { publicationDay: query.day } : {}) };
+    } catch (error: unknown) {
+      if (error instanceof ContentInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   @Get('photos')

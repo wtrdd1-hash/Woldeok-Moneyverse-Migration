@@ -8,6 +8,7 @@ import {
   Optional,
   Param,
   ParseUUIDPipe,
+  Query,
   Post,
   Put,
   Req,
@@ -15,7 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -168,8 +169,17 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  @ApiQuery({ name: 'day', required: false, description: 'Seoul publication day YYYY-MM-DD, latest 20 only' })
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'day')) {
+      throw new BadRequestException('unsupported announcement query');
+    }
+    const day = query.day;
+    const announcements = await this.guarded(
+      () => this.service().publicAnnouncements({ day }),
+      'invalid publication day',
+    );
+    return { announcements, ...(day !== undefined ? { publicationDay: day } : {}) };
   }
 
   @Get('photos')
