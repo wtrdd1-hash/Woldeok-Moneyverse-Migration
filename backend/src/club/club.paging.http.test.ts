@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { ClubController } from './club.controller';
 import { ClubService } from './club.service';
 
@@ -25,6 +26,7 @@ describe('Club paging HTTP integration', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
