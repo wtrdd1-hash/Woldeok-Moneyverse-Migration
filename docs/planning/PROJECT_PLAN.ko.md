@@ -2,7 +2,7 @@
 
 ## v2026.11.01.1618 — F675-210 카테고리 레지스트리·만료 판정·작업자 증빙 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
-**주기·정본:** 이전 **기능 추가 v1616** → 현재 **기능 보완 v1618** → 다음 **기능 추가 v1620(잠정)**. 시작·중간 최신 main 3d5e321c3d1221febff677469fecdfcb3cf42e7d의 AGENTS.md·README.md·영문 PROJECT_PLAN 정본·한국어 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 확인. 미병합 기획 Draft #2369(57412c0896d893431bf2c972771c3995c45a7f13) 기반 문서 전용, 개발 이슈 #2368 연계. F675-205/207/208/209/210 모두 **미구현 기획**. 운영 카테고리·DB 권한을 직접 검증했다고 주장하지 않는다.
+**주기·정본:** 이전 **기능 추가 v1616** → 현재 **기능 보완 v1618** → 다음 **기능 추가 v1620(잠정)**. 시작·중간 최신 main 3d5e321c3d1221febff677469fecdfcb3cf42e7d의 AGENTS.md·README.md·영문 PROJECT_PLAN 정본·한국어 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 확인. 미병합 기획 Draft #2369(57412c0896d893431bf2c972771c3995c45a7f13) 기반 문서 전용, 개발 이슈 #2368 연계, 신규 Draft PR #2375.  F675-205/207/208/209/210 모두 **미구현 기획**. 운영 카테고리·DB 권한을 직접 검증했다고 주장하지 않는다.
 
 ### 실제 소스와 기존 설계의 모순
 1. **DB 카테고리 CHECK 목록은 승인된 회원용 분류표가 아니다(P0 설계 위험).** migration 071은 초기 6종, 114는 frame/background/effect/nameplate/title/badge/season/limited/business/convenience/general/job/vehicle/luxury **14개 허용 코드**를 정의한다. 그러나 허용 코드는 실제 판매 중·만료 대상 아이템 존재, 승인된 한영 라벨, Production 동일 상태를 증명하지 않는다. v1616에서 확인한 DEV DB 고유 코드 14개는 개발 환경 관찰일 뿐 영속 레지스트리 근거가 아니다. migration 123의 `shop_my_items_v2`는 카테고리와 보유 만료시각을 반환하지만 공인 한영 카테고리 레지스트리를 제공하지 않는다. `SELECT DISTINCT` 실시간 결과·개수·수정 가능한 라벨·관찰시각을 `registryVersion`으로 사용하지 않는다.

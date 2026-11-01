@@ -1,5 +1,5 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1618 F675-210 카테고리 레지스트리·작업자 증빙 보완 / 개발 이슈 #2368 / Draft PR PENDING / 초안·운영 보류; #2369 기반; main 3d5e321c3d1221febff677469fecdfcb3cf42e7d.
+**현재 기획:** v1618 F675-210 카테고리 레지스트리·작업자 증빙 보완 / 개발 이슈 #2368 / Draft PR #2375 / 초안·운영 보류; #2369 기반; main 3d5e321c3d1221febff677469fecdfcb3cf42e7d.
 
 ## v2026.11.01.1618 — F675-210 카테고리 범위 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 이전 추가 v1616 → 현재 보완 v1618 → 다음 추가 v1620(잠정). main 3d5e321c3d1221febff677469fecdfcb3cf42e7d 시작·중간 확인, Draft #2369 기반, 이슈 #2368. **기획 전용·미구현.** 071 초기 6종·114 허용 코드 14종 CHECK는 승인된 ACTIVE/RETIRED·한영 라벨·만료 적격 레지스트리가 아니다. 123 shop_my_items_v2의 category+held.expires_at와 복수 clock_timestamp도 24/72시간 단일 asOf 작업자 증빙이 아니다. registryVersion은 승인된 정렬 코드·한영 라벨·수명주기·적격·정책의 불변 다이제스트, DISTINCT 개수/시각 사용 금지. 폐기된 SELECTED 저장 코드는 REQUIRES_REVIEW로 보존, 자동 삭제/ALL 전환 금지, 작업자는 UNKNOWN_SCOPE 차단. 승인 출처 없으면 503/BLOCKED, 임의 테이블/권한 추가 금지.
