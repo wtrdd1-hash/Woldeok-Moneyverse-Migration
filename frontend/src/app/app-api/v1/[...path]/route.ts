@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { parseOwnerPhotoSubmissions } from '@/app/gallery/submit/owner-submissions';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
@@ -339,6 +340,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
+  if (parts.length === 2 && parts[0] === 'photos' && parts[1] === 'mine') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
       return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
@@ -521,6 +527,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (request.method === 'GET' && parts.length === 2 &&
+          parts[0] === 'photos' && parts[1] === 'mine' && response.ok &&
+          parseOwnerPhotoSubmissions(compatible) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'photo_owner_unverified',
+          'member photo submissions could not be verified');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +561,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (request.method === 'GET' && parts.length === 2 &&
+          parts[0] === 'photos' && parts[1] === 'mine' && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'photo_owner_unverified',
+          'member photo submissions could not be verified');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -594,6 +611,11 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 2 && parts[0] === 'photos' && parts[1] === 'mine') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

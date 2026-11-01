@@ -13,6 +13,7 @@ import { requireMember } from '@/lib/session';
 import { TranslatedText as T } from '@/components/translated-text';
 import { PhotoSubmissionForm } from './submit-forms';
 import { WithdrawPendingPhotoForm } from './withdraw-photo-form';
+import { parseOwnerPhotoSubmissions } from './owner-submissions';
 
 /** One member's own submissions. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -22,20 +23,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** `public.member_my_photo_submissions` (098), as the API returns it. */
-interface Submission {
-  readonly photo_id: string;
-  readonly image_url: string | null;
-  readonly alt_text: string;
-  readonly published: boolean;
-  readonly submitted_at: string;
-  readonly published_at: string | null;
-}
-
 export default async function GallerySubmitPage() {
   await requireMember();
-  const data = await apiOrNull<{ submissions: readonly Submission[] }>('/api/v1/photos/mine');
-  const submissions = data?.submissions ?? [];
+  const data = await apiOrNull<unknown>('/api/v1/photos/mine');
+  const submissions = parseOwnerPhotoSubmissions(data);
 
   return (
     <div data-page="gallery-submit" className="mv-page mv-page--community grid gap-6">
@@ -75,8 +66,16 @@ export default async function GallerySubmitPage() {
           <T korean="내가 보낸 사진" english="My Submissions" />
         </h2>
 
-        {data === null ? (
-          <EmptyState title={<T korean="보낸 사진을 불러오지 못했어요." english="Failed to load your submissions." />} />
+        {submissions === null ? (
+          <div role="alert" className="grid gap-3 rounded-xl border p-4">
+            <EmptyState
+              title={<T korean="보낸 사진을 확인할 수 없어요." english="Unable to verify your submissions." />}
+              description={<T korean="내 사진 목록을 확인하지 못했어요. 추정된 내역은 표시하지 않습니다." english="Your photo records could not be verified. Unconfirmed records are hidden." />}
+            />
+            <Link href="/gallery/submit" className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <T korean="다시 확인하기" english="Try again" />
+            </Link>
+          </div>
         ) : submissions.length === 0 ? (
           <EmptyState
             title={<T korean="아직 보낸 사진이 없어요." english="No submissions yet." />}
@@ -100,6 +99,7 @@ export default async function GallerySubmitPage() {
                           alt={submission.alt_text}
                           className="max-h-full max-w-full object-contain"
                           loading="lazy"
+                          referrerPolicy="no-referrer"
                         />
                       </div>
                     )}
