@@ -7,3 +7,10 @@
 - Scope: strict owner/admin queue read validation, verified-empty versus unavailable, expiration-safe publication controls, responsive keyboard/screen-reader retry, no new API/DB or WLD writes. The current GET /api/v1/admin/help/articles is the only authority.
 - Checklist: [x] source investigation [ ] RED tests [ ] parser and UI [ ] focused verification [ ] full exact-SHA gates [ ] main recheck [ ] PR/release decision.
 - Release rule: no merge or deployment without complete mandatory gates, official isolated Test and exact SHA proof.
+
+## In progress (2026-11-02 01:19 KST)
+- TDD RED: review-evidence.test.ts failed on missing parser (exit 1). GREEN: 20 parser tests PASS.
+- Page integration regression initially failed due jsdom externalizing node:crypto; corrected test environment to Node; focused parser+page 23/23 PASS.
+- Implemented bounded 50-row shape checks, UUIDs, exact string versions, digest/HTTPS/date/enum validation, duplicate rejection, evidence expiry and fail-closed UI. Backend remains the authenticated Nest controller and PostgreSQL SECURITY DEFINER queue; no schema or WLD changes.
+- Midpoint fetch origin/main remains 510dbe6bf4d5c2a8089fc06b480776053da7a2e3.
+- Checklist: [x] investigation [x] RED [x] parser and UI [x] focused regression [ ] full gates [ ] final main recheck [ ] PR decision.

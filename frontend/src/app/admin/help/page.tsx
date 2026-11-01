@@ -1,21 +1,20 @@
 import { randomUUID } from 'node:crypto';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { api } from '@/lib/api';
+import { apiOrNull } from '@/lib/api';
+import { parseHelpReviewQueue } from './review-evidence';
 import { requireAdminConsole } from '@/lib/session';
 import { createVerifiedHelpDraft, publishVerifiedHelp, retractVerifiedHelp } from './actions';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '도움말 검증 · 관리자', robots: { index: false, follow: false } };
 
-type Draft = { article_id: string; locale: string; slug: string; category: string; title: string;
-  body_plain: string; source_url: string; source_sha256: string; reviewed_until: string;
-  state: string; version: string; author_id: string; canApprove: boolean; canRetract: boolean };
-
 export default async function AdminHelpPage() {
   await requireAdminConsole('/admin/help');
   if (process.env.VERIFIED_HELP_CENTER_V1 !== 'true') notFound();
-  const { articles, canDraft } = await api<{ articles: Draft[]; canDraft: boolean }>('/api/v1/admin/help/articles');
+  const queue = parseHelpReviewQueue(await apiOrNull<unknown>('/api/v1/admin/help/articles'));
+  const articles = queue?.articles ?? [];
+  const canDraft = queue?.canDraft === true;
   return <main className="mx-auto grid w-full max-w-5xl gap-6 p-4">
     <header><h1 className="text-3xl font-bold">검증된 도움말 관리</h1>
       <p>작성자와 승인자는 달라야 합니다. 근거 원문과 SHA-256을 독립적으로 확인한 뒤 게시하세요.</p></header>
@@ -35,15 +34,20 @@ export default async function AdminHelpPage() {
       </form>
     </section>}
     <section className="grid gap-4"><h2 className="text-xl font-bold">승인·철회 검토 대기열(최대 50건)</h2>
-      {articles.length === 0 && <p>조회에 성공했으며 검토할 항목이 없습니다.</p>}
+      {queue === null && <div role="alert" aria-live="polite" className="grid gap-3 rounded-lg border border-destructive/40 p-4">
+        <p>검토 목록을 확인할 수 없습니다. 확인되지 않은 자료로 초안을 작성하거나 승인·철회할 수 없습니다.</p>
+        <a href="/admin/help" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 underline underline-offset-4 focus-visible:outline-2">다시 조회</a>
+      </div>}
+      {queue !== null && articles.length === 0 && <p>조회에 성공했으며 검토할 항목이 없습니다.</p>}
       {articles.map(article => <article key={article.article_id} className="grid gap-3 rounded-xl border p-4">
-        <h3 className="font-bold">{article.title}</h3><p>{article.locale} / {article.category} / {article.state} / v{article.version}</p>
+        <h3 className="font-bold">{article.title}</h3>
+        {!article.reviewCurrent && <p role="status" className="text-sm text-destructive">근거 검토 기한이 지났습니다. 이 자료는 승인할 수 없습니다.</p>}<p>{article.locale} / {article.category} / {article.state} / v{article.version}</p>
         <details><summary className="cursor-pointer underline">본문과 근거 검토</summary>
           <pre className="mt-2 whitespace-pre-wrap break-words">{article.body_plain}</pre>
           <p className="break-all text-sm">근거: {article.source_url} / SHA-256: {article.source_sha256}</p>
           <p className="text-sm">검토 만료: {article.reviewed_until}</p>
         </details>
-        {article.state === 'draft' && article.canApprove && <form action={publishVerifiedHelp} className="flex flex-wrap gap-2">
+        {article.state === 'draft' && article.canApprove && article.reviewCurrent && <form action={publishVerifiedHelp} className="flex flex-wrap gap-2">
           <input type="hidden" name="articleId" value={article.article_id} /><input type="hidden" name="expectedVersion" value={article.version} />
           <input type="hidden" name="idempotencyKey" value={randomUUID()} />
           <button className="rounded-lg border p-3 font-semibold">독립 검토 후 승인·게시</button>
