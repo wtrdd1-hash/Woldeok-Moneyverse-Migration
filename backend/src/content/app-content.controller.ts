@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ContentService } from './content.service';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ContentService, type ContentPhoto } from './content.service';
+import { parsePhotoMonth } from './photo-month';
 
 @ApiTags('content')
 @Controller('content')
@@ -20,8 +21,11 @@ export class AppContentController {
 
   @Get('photos')
   @ApiOperation({ summary: 'App API: published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiQuery({ name: 'month', required: false, type: String, description: 'Seoul publication month YYYY-MM, within latest 24 approved photos' })
+  async photos(@Query() query: Record<string, unknown> = {}): Promise<{ photos: ContentPhoto[]; month?: string }> {
+    const month = parsePhotoMonth(query);
+    const photos = await this.service().publicPhotos(month === null ? {} : { month });
+    return month === null ? { photos } : { photos, month };
   }
 
   @Get('status')

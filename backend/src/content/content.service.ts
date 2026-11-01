@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { photoMatchesSeoulMonth } from './photo-month';
 import type {
   ContentAnnouncementReceiptRow,
   ContentAnnouncementRow,
@@ -331,9 +332,10 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, month = null }: { limit?: number; month?: string | null } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    const approved = (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    return month === null ? approved : approved.filter((photo) => photoMatchesSeoulMonth(photo.publishedAt, month));
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
+import { parseGalleryMonth, isVerifiedGalleryMonthResponse } from '@/lib/gallery-month';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
@@ -111,6 +112,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const galleryMonthPath = request.method === 'GET' &&
+    (parts.length === 1 && parts[0] === 'photos' ||
+      parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos');
+  const galleryMonthRequested = galleryMonthPath && request.nextUrl.searchParams.has('month');
+  const galleryMonthValues = galleryMonthPath ? request.nextUrl.searchParams.getAll('month') : [];
+  const galleryMonth = galleryMonthValues.length === 1 ? parseGalleryMonth(galleryMonthValues[0]) : null;
+  if (galleryMonthPath && (galleryMonthValues.length > 1 ||
+      (galleryMonthRequested && (galleryMonth === null || galleryMonth === 'INVALID')) ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'month'))) {
+    return gatewayProblem(400, 'Bad Request', 'gallery_month_invalid', 'select one valid publication month');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -354,6 +367,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  // An old backend may ignore month= and return a success-shaped unfiltered gallery.
+  if (galleryMonthRequested && galleryMonth && galleryMonth !== 'INVALID' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedGalleryMonthResponse(await response.clone().json(), galleryMonth)) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_month_unverified',
+          'the gallery month filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'gallery_month_unverified',
+        'the gallery month filter could not be verified');
+    }
+  }
+
   // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
   if (supportRange && response.ok) {
     try {
@@ -594,6 +621,13 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if ((parts.length === 1 && parts[0] === 'photos' ||
+      parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos') &&
+      request.nextUrl.searchParams.has('month')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
