@@ -26,6 +26,25 @@ export function TreasuryReserveGauge({ overview, isEn = false }: TreasuryReserve
     );
   }
 
+  if (overview.verified === true && overview.totalBalanceWld === '0') {
+    return (
+      <Card className="moneyverse-card border-emerald-500/30 bg-card/75">
+        <CardContent className="p-4 sm:p-6 space-y-3" role="status">
+          <div className="flex items-center gap-2 text-emerald-400 font-bold">
+            <ShieldCheck className="size-5" />
+            {isEn ? 'Current Treasury ledger independently reconciled' : '현재 국고 회계기 독립 대사 검증 완료'}
+          </div>
+          <p className="font-mono text-3xl font-extrabold tabular-nums">0 WLD</p>
+          <p className="text-sm text-muted-foreground">
+            {isEn
+              ? 'Current reserve and available disbursement funds: 0 WLD. A 30% policy target does not prove funding or policy compliance. Legacy payouts and issuance remain uncertified.'
+              : '현재 비축금·집행 가능 잔액 모두 0 WLD입니다. 30%는 정책 목표일 뿐 실제 집행 또는 비축 준수 증빙이 아니며, 과거 지급·발행 실적도 미검증입니다.'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const reservePct = overview.reserveRatioPercent; // 30%
   const availablePct = 100 - reservePct; // 70%
 
@@ -41,7 +60,7 @@ export function TreasuryReserveGauge({ overview, isEn = false }: TreasuryReserve
               </span>
               <Badge variant="outline" className="text-[11px] font-mono border-emerald-500/40 text-emerald-400 bg-emerald-500/10">
                 <ShieldCheck className="size-3 mr-1" />
-                {isEn ? '30% Safe Reserve Rule' : '30% 법정 안전 비축금 준수'}
+                {isEn ? '30% Safe Reserve Rule' : '30% 법정 안전 비축금 정책 목표'}
               </Badge>
             </div>
             <div className="flex items-baseline gap-2">

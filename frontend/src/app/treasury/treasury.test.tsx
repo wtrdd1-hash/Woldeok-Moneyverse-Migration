@@ -60,13 +60,27 @@ describe('National Treasury Portal & 5 Core Expenditure Programs Suite', () => {
     // 총 잔액 표기 검증
     expect(screen.getByText('25,000,000')).toBeDefined();
     // 30% 안전 비축금 배지 검증
-    expect(screen.getByText(/30% 법정 안전 비축금 준수/i)).toBeDefined();
+    expect(screen.getByText(/30% 법정 안전 비축금 정책 목표/i)).toBeDefined();
     // 가용 잉여금 및 비축금 수치 검증
     expect(screen.getByText('17,500,000 WLD')).toBeDefined();
     expect(screen.getByText('7,500,000 WLD')).toBeDefined();
     // 누적 시민 환원액 및 소각량 검증
     expect(screen.getByText(/3,420,000 WLD/i)).toBeDefined();
     expect(screen.getByText(/1,280,000 WLD/i)).toBeDefined();
+  });
+
+  it('shows evidence-backed zero Treasury without claiming funded payouts or reserve compliance', () => {
+    render(<TreasuryReserveGauge overview={{
+      ...mockOverview, verified: true, totalBalanceWld: '0',
+      safeReserveWld: '0', availableBalanceWld: '0',
+      totalCumulativeDisbursedWld: '—', totalBurnedWld: '—',
+      beneficiaryCount: null, activeProgramsCount: 0,
+    }} isEn={false} />);
+    const summary = screen.getByRole('status');
+    expect(summary.textContent).toContain('현재 국고 회계기 독립 대사 검증 완료');
+    expect(summary.textContent).toContain('0 WLD');
+    expect(summary.textContent).toContain('과거 지급·발행 실적도 미검증');
+    expect(screen.queryByText('30% 법정 안전 비축금 준수')).toBeNull();
   });
 
   it('renders TreasuryProgramCard with program metadata and claim action button', () => {
