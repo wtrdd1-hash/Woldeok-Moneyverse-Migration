@@ -1,5 +1,5 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1604 F675-207 회원 만료 알림 조회 기간 설정 / 이슈 #2327 / DRAFT / RELEASE HOLD; 선행 #2315; 최신 main 95877554097b595d8dcfa28b60ecb65e50bf0c2d.
+**현재 기획:** v1604 F675-207 회원 만료 알림 조회 기간 설정 / 이슈 #2327 / Draft PR #2328 / RELEASE HOLD; 선행 #2315; 최신 main 95877554097b595d8dcfa28b60ecb65e50bf0c2d.
 
 ## v2026.11.01.1604 — F675-207 회원 만료 알림 조회 기간 설정 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 

@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1604 F675-207 owner expiry digest lookahead preference / issue #2327 / DRAFT / RELEASE HOLD; stacked on #2315; current main 95877554097b595d8dcfa28b60ecb65e50bf0c2d.
+**Current planning:** v1604 F675-207 owner expiry digest lookahead preference / issue #2327 / Draft PR #2328 / RELEASE HOLD; stacked on #2315; current main 95877554097b595d8dcfa28b60ecb65e50bf0c2d.
 
 ## v2026.11.01.1604 — F675-207 Member Expiry Digest Lookahead Preference (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
