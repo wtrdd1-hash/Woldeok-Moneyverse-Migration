@@ -30,3 +30,11 @@ Pending.
 - GREEN: 5 guarded BFF tests and 4 interactive refresh tests plus 1 pre-existing admin blog test = **10 PASS**.
 - BFF reads only existing elevated-session Nest API. All malformed/partial results fail with HTTP 503; valid zero list is distinct. Browser keeps local legacy rows and updates only verified rows; failure keeps prior list and shows an accessible alert. No fake 600-ms sync success.
 - Re-fetched main and revisited canonical/KO integrated plans; no code changes in shared checkout. CI and full SHA verification pending.
+
+## In progress — 2026-11-02 06:22 KST
+
+- Independent Next HTTP check on the code SHA returned correct anonymous HTTP 403, **but global Next headers overrode route-local policy**: `X-Robots-Tag: index, follow` and `Referrer-Policy: strict-origin-when-cross-origin`. Do not claim private HTTP success for the first build.
+- RED: 1 header-policy test failed; GREEN: targeted `next.config.ts` route override now passes 9 header tests. This is route-specific to avoid touching concurrent C/B security PRs.
+- RED: session-authority outage and duplicate verified slug tests failed; GREEN: guarded BFF now returns 503 for both. Final focused suite **20 PASS**.
+- Isolated PostgreSQL 17.11 (network none) applied 322 migrations, confirmed app role EXECUTE on `blog_verified_admin_list(uuid)`, no direct SELECT/INSERT on verified article table, and SQL 42501 denial for a nonadmin actor. The container was removed.
+- Production-like HTTP recheck must be repeated after rebuilding the new Next header configuration.

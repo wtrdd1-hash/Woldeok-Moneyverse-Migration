@@ -26,6 +26,22 @@ describe('admin blog verified refresh BFF', () => {
     expect(response.headers.get('referrer-policy')).toBe('no-referrer');
   });
 
+  it('returns a private 503 when the viewer authority cannot be established', async () => {
+    mocks.viewer.mockRejectedValue(new Error('session unavailable'));
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(mocks.api).not.toHaveBeenCalled();
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('rejects duplicate verified article identities rather than showing ambiguous rows', async () => {
+    mocks.isAdmin.mockReturnValue(true);
+    mocks.api.mockResolvedValue({ posts: [{ slug: verified.slug }, { slug: verified.slug }] });
+    mocks.project.mockReturnValue([verified, verified]);
+    const response = await GET();
+    expect(response.status).toBe(503);
+  });
+
   it('fails closed on backend outages without returning a successful empty list', async () => {
     mocks.isAdmin.mockReturnValue(true);
     mocks.api.mockRejectedValue(new Error('backend offline'));

@@ -106,6 +106,17 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('overrides global public headers for the private blog refresh BFF', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const privateGroup = groups.find((group) => group.source === '/api/admin/blog/verified-refresh');
+    expect(privateGroup).toBeDefined();
+    const headers = new Map(privateGroup!.headers.map((header) => [header.key.toLowerCase(), header.value]));
+    expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(headers.get('cache-control')).toBe('private, no-store');
+    expect(headers.get('referrer-policy')).toBe('no-referrer');
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
