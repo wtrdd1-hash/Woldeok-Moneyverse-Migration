@@ -26,3 +26,10 @@
 ## Remaining work
 
 A/C: disable misleading hardcoded craftable badges/buttons and WLD-burn/item-delivery claims; see #2330. DB/QA: reconcile out-of-band DEV function and Production/Test provenance, design a forward-only audited ledger+idempotency settlement with safe replay, owner checks and negative permissions; do not patch applied migrations or delete a live function blindly. Run full clean DB and exact-SHA Test authentication/ledger E2E before any approval.
+
+## Final local gate addendum
+
+- Full workspace Lint PASS (0 errors, 1,022 existing warnings); full workspace Typecheck PASS.
+- Mobile API contract generation correctly changed the crafting GET/POST success `responseSchema` to `never` (both are 503-only); regenerated `docs/mobile-api-contract.json` is committed alongside the code. API contract check must be rerun at the new SHA.
+- Frontend full Vitest exceeded 185 seconds and was terminated by the bounded runner (exit 124), so no full Frontend PASS claim. Crafting frontend tests were among the completed passing files, but the full suite is **UNVERIFIED**.
+- Full Backend 2 failing profile HTTP fixture tests are pre-existing and tracked in QA v1439/#2265. They are not silently waived. Exact-SHA CI and official Test remain required before merge.
