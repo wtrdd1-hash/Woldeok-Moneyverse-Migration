@@ -1,4 +1,10 @@
 ## v2026.11.01.1622 — F675-211 Weekday Schedule-Coverage Integrity (planning only / DRAFT / RELEASE HOLD)
+
+## v2026.11.02.1624 — F675-212 Read-Only 14-Day Schedule Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Previous Improvement v1622 → Current Addition v1624 → Next Improvement v1626; main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` start/mid, stacked on unmerged #2388.
+- Proposed verified owner-only 7/14-day KST advisory calendar. Missing source 503, partial unknown, policy drift 409; no item/delivery promise or writes. Strict private Next/Android, bilingual accessibility, cohort>=20 KPI, flag OFF. **Not implemented.**
+- P0 4/P1 6 handoff; ACL/migration/financial/QA release blockers remain. Feature tests NOT RUN, no runtime/DB/WLD/Test/Production changes. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+
 - Previous Addition v1620 → Current Improvement v1622 → Next Addition v1624 (provisional); main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` rechecked at start/mid, stacked on unmerged #2384, handoff #2383, Draft #2388.
 - Verified design gap: 09–11 KST scan jitter plus 24/72h lookahead and selected weekdays can leave theoretical unscanned expiry intervals (Mon-only+72h: 98h, EVERY_DAY+24h: 2h). Add source-verified cyclic schedule risk/UNKNOWN, accessible nonblocking warning, strict evaluated-empty vs unknown receipts, no delivery or item-loss claim. F675-211 not implemented.
 - Four P0 and six P1 backlog items; release HOLD for DB ACL #993, migration #2233/#2345, financial #2330/#2340/#2357/#2366 and exact-SHA Test/restore. No runtime/DB/WLD/Test/Production changes. External approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Full EN/KO integrated plan.

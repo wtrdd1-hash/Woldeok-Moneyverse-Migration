@@ -1,5 +1,36 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.02.1624 — F675-212 회원 만료 알림 향후 14일 일정 미리보기 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 보완 v1622 → 현재 기능 추가 v1624 → 다음 기능 보완 v1626(잠정). 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재확인, AGENTS.md·README.md·영문 정본/한국어 대조·Next/Nest/app-api/DB·GitHub QA 조사. 미병합 Draft #2388; 개발 인계 #2396 기반 문서 전용. F675-205~212는 **제안·미구현**. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`, Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다름. **DRAFT / RELEASE HOLD**.
+
+### 목적·대안·사용자 흐름·상태
+- **대상/목적:** 로그인·동의 유효 회원이 향후 보관함 만료 알림의 수신 동의, F675-207 24/72시간 조회, F675-209 1/3/7일 중지, F675-210 카테고리 검토, F675-211 요일을 합쳐 날짜별 설정상 후보를 이해하도록 **읽기 전용 안내 달력**을 제공한다. 실제 만료 보유품·작업 실행·알림 생성·발송·기기 전달 예측은 아니다. 현재 `frontend/src/app/account/notifications/page.tsx`와 Nest `backend/src/notification/notification.controller.ts`에 기능이 없고 마이그레이션 123 `shop_my_items_v2`는 미래 작업 증명이 아니다.
+- **대안:** 브라우저/Android 캐시 기반 계산은 기기·동의·시간대 불일치로 제외. 미래 보유품 조회 후 발송 확정은 아이템·분류 변동 및 개인정보·부하 위험으로 제외. **선택:** 검증된 PostgreSQL 단일 설정/정책 스냅샷의 서버 투영. 보유품 조회·쓰기·새 cron·테이블·마이그레이션 기본 없음. 제안된 선행 기능의 실제 출처가 없으면 503.
+- **진입/CTA:** `/account/notifications` → **향후 14일 미리보기**, **새로고침**, **요일 변경**, **중지 변경**, **조회 기간 변경**, **카테고리 검토**, **재시도**. PostgreSQL KST 기준 오늘부터 13일 뒤까지 14개 날짜·ISO 요일 1~7·`CONFIGURED_CANDIDATE`, `NOT_SELECTED_WEEKDAY`, `PAUSED_BY_SNOOZE`, `DIGEST_DISABLED`, `CONSENT_REQUIRED`, `CATEGORY_REVIEW_REQUIRED`, `UNKNOWN` 상태 표시. 09:00~11:00 KST는 계획상 작업 시간일 뿐 전달 약속 아님. 오늘은 별도 불변 회원/일자 영수증을 검증하지 못하면 `TODAY_OUTCOME_UNVERIFIED`, 영수증도 기기 전달 증거 아님. 과거 영수증 미래 투영 금지. 로딩/VERIFIED/PARTIAL/401/403/409/429/503/오프라인/60초 STALE/계정 전환 폐기 구분, v1622 조회 공백 위험 경고 유지.
+- **우선순위:** 동의 유효성 → 수신 동의 → 적용일 기준 중지·재개 예약 → ISO 요일 → 승인 분류 READY/REQUIRES_REVIEW → 설정상 후보. 미확인/중지/미동의는 '만료품 0개'가 아니다. 조회 기간은 검증된 설정값 안내만 하고 개별 아이템을 추론하지 않는다. 미래 변경 가능성 `subjectToChange:true`. PostgreSQL IANA `Asia/Seoul` 달력·ISO 요일 연산, 브라우저 지역시간·단순 24시간 밀리초 더하기 금지.
+
+### API·DB·권한·개인정보·접근성
+- **Nest 본인 GET:** `/api/v1/shop/expiry-digest/schedule-preview?days=14`, days 7/14만 허용(기본 14), 중복/미등록 파라미터·회원 ID·0/15는 400. SessionGuard·AuthenticatedGuard·ConsentGuard, 회원 신원은 서버 세션만. 검증된 200 계약: `{sourceStatus:'VERIFIED',observedAtUtcMicros:string,todayKstDay:string,policyVersion:string,preferenceRevision:string,sourceRevision:string,lookaheadHours:24|72,workerWindowKst:{start:'09:00',end:'11:00'},scheduleRiskStatus:'POTENTIAL_GAP'|'NO_STATIC_GAP_DETECTED'|'UNKNOWN',days:[{kstDay:string,weekdayIso:number,status:string,subjectToChange:boolean,claimEvidence:'NOT_EVALUATED'|'VERIFIED_EVALUATED'|'UNKNOWN'}],expiresAtUtcMicros:string}`. sourceRevision은 세션 범위 비가역 불투명 토큰. 회원 UUID·원시 동의/세션 비밀·보유품/수량·원시 분류 선택·타인 영수증 응답/로그 금지.
+- **오류:** 설정·중지·분류 레지스트리·작업 정책·DB 권한 미검증 → 503 `PREVIEW_SOURCE_UNVERIFIED`, 성공처럼 보이는 빈 달력 금지. 전체 출처 검증 후 특정 날짜 미확인 → `sourceStatus:'PARTIAL'` 및 해당 날짜 UNKNOWN·사유 코드, VERIFIED 위장 금지. 정책 변경 → 409 `PREVIEW_POLICY_CHANGED` 후 새로고침, 동의 만료 403, 호출 제한 429. CONSENT_REQUIRED는 인증 전 UI 안내에만 사용하며 200 달력으로 동의 만료 정보를 반환하지 않는다. 보유품/실제 작업 결과 인증 API가 아니다.
+- **DB:** PostgreSQL 17 읽기 전용 REPEATABLE READ 단일 트랜잭션, `clock_timestamp()` 한 번 관찰, UTC 마이크로초 6자리 텍스트·동일 스냅샷 KST 날짜. 회원 PK/FK·요일 배열 정규화·공통 리비전·중지 예약·승인 registryVersion/worker policyVersion의 **실제 적용 스키마** 선확인. F675-205~211 테이블/영수증은 제안 상태, 임의 마이그레이션 번호·테이블·인덱스·앱 역할 SELECT/DML GRANT 금지. SECURITY DEFINER의 UUID 인자만으로 본인 인증 불가(#993). 일별 claim·알림·설정·아이템·WLD·원장 쓰기 0. 318 충돌 #2233, 공식 Test 출처 #2345, 권한 게이트 선해결; 회원 PK 조회 EXPLAIN/BUFFERS 후 인덱스 판단.
+- **Next/Android/SEO/a11y:** 동일 출처 비공개 BFF `/api/shop/expiry-digest/schedule-preview`, Android `/app-api/v1/shop/expiry-digest/schedule-preview`, DTO 엄격 검증, 잘못된 200을 빈 결과로 변환 금지. 실제 app-api는 `shop/purchases` 비공개이나 제안 `shop/expiry-digest` 미포함: GET/HEAD·400/401/403/409/429/503/502/504·조건부 요청·상위 장애까지 가드 전 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, ETag/Last-Modified/Expires 제거·304 금지. 허용 days 외 설정을 URL/사이트맵/공개 HTML/로그/분석/localStorage/Android 디스크에 저장 금지. 로그아웃·계정·동의·sourceRevision 변경/새 요청 시 이전 응답 폐기. 320px/200% 확대/44px 터치, 색상 외 텍스트 상태, 키보드·초점·aria-live, 한영·TalkBack·동작 줄이기.
+- **관리자·남용·KPI:** `inventory_expiry_digest_schedule_preview` 기본 OFF. 관리자 회원 가장/개별 미리보기 조회·내보내기·대리 수정 금지. 회원별 GET 분당 10회 이하 목표(부하 시험 후 확정), 원시 회원/날짜/선택 로깅 금지. 20명 이상 코호트 익명 집계·작은 셀 억제: 이용률, UNKNOWN/409/503, p95, STALE·계정 전환 폐기, 공백 경고 조회. 후보 날짜를 실제 발송 건수로 간주 금지. p95<300ms·타인 노출 0·WLD/원장/아이템 쓰기 0은 목표·미측정.
+
+### P0/P1 개발 인계·시험·운영
+1. **P0 OPS1624-01:** 실제 Test/Production 불변 실행 SHA, 용량·롤백 이미지·독립 복원 #1984/#2171; 버전 API만으로 승인 금지.
+2. **P0 SEC1624-02:** 실제 설정/claim/레지스트리/중지 스키마·신원 결속·앱 역할 음성 권한 #993, 318 충돌 #2233, Test 출처 #2345. 미존재 시 BLOCKED.
+3. **P0 FIN1624-03:** 제작 원장 #2330, 주식 허위 체결 #2340, 시즌 정산 EXECUTE #2357, 국고/연금/조폐/중앙은행 #2366 별도 차단.
+4. **P0 REL1624-04:** 공식 Test 정확 SHA 2회원 인증 E2E, 웹/Android 비공개 엣지, 새 설치/업그레이드·전체 시험·독립 복원·운영 승인; QA #2391 정책 테스트 조사.
+5. **P1 PREVIEW1624-05 (B/DB):** 회원 전용 단일 스냅샷·KST·정책 출처·직접 권한 음성 시험.
+6. **P1 PREVIEW1624-06 (B/API):** 7/14일 GET, 400/401/403/409/429/503, VERIFIED/PARTIAL/UNKNOWN, 오늘 허위 영수증/쓰기 금지.
+7. **P1 PREVIEW1624-07 (A/Web):** 접근성 14일 카드·설정 CTA·STALE/409/503·비공개 BFF·한영 안내.
+8. **P1 PREVIEW1624-08 (C/Android):** app-api 성공/오류/HEAD/304 비공개 헤더, 디스크 캐시 금지, TalkBack/계정 전환; C #2395/#2387과 별도.
+9. **P1 PREVIEW1624-09 (A/B/Admin):** 20명 이상 익명 KPI, OFF→직원→제한 코호트, 경고·플래그 우선 롤백.
+10. **P1 PREVIEW1624-10 (QA):** 격리 PostgreSQL17 새 설치/업그레이드, 합성 보유품 10,001건으로 아이템 조회 불필요 증명, 회원/동의/권한 음성 100건 이상, 연월·일→월·자정·09/11시 경계 100건 이상, 중지/요일/분류/정책 경합 100건 이상, days 7/14/0/15/중복, 60초 STALE, Android 비공개/계정 전환 50건 이상, 320px/한영/TalkBack, WLD/원장/아이템 변화 0, 공식 Test 정확 SHA E2E. **모두 시험 제안·미실행.**
+- **운영/롤백:** 문서 Draft/HOLD, A/B/C/QA 별도 브랜치·Test Docker·정확 SHA·보안/금융/마이그레이션/복원·운영 승인 후 OFF→직원→코호트. 플래그 OFF·검증된 불변 이미지 롤백, 설정/영수증 삭제·허위 소급 생성 금지. 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. main 병합·런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+
 ## v2026.11.01.1622 — F675-211 수신 요일의 만료 알림 누락 위험·작업 증빙 정합성 (기능 보완 / 초안 / 운영 보류)
 
 **주기·정본:** 이전 **기능 추가 v1620** → 현재 **기능 보완 v1622** → 다음 **기능 추가 v1624(잠정)**. 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재조회, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/DB 소스·GitHub 개발/QA 확인. 미병합 기획 Draft #2384(헤드 `346a9907945b853939f37e967ac4f168ede39de7`)의 문서 전용 후속이며 개발 인계 #2383, 새 Draft PR #2388(OPEN/HOLD)로 기록. F675-205~211은 **기획만·미구현**이고 실제 운영 작업자나 승인된 설정/영수증 스키마가 검증된 것은 아니다. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`와 Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다르다. 문서 CI는 배포 승인이 아니다.

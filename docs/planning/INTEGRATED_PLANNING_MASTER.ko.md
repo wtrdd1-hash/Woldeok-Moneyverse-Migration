@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.02.1624 — F675-212 회원 만료 알림 14일 일정 미리보기 (기능 추가 / 초안 / 운영 보류)
+이전 보완 v1622 → 현재 추가 v1624 → 다음 보완 v1626(잠정). main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작/중간, 미병합 Draft #2388; 개발 인계 #2396 기반. **기획·미구현.** 로그인 회원의 `/account/notifications`에서 14일 KST 설정상 후보/요일 제외/중지/미동의/분류 검토/UNKNOWN 표시, 실제 만료·작업·전달 보장 금지. Nest GET `/api/v1/shop/expiry-digest/schedule-preview?days=7|14`, Next 비공개 BFF·Android app-api, 검증된 PostgreSQL 단일 읽기 스냅샷, 쓰기/새 테이블 없음. 출처 불명 503, 일부 미확인 UNKNOWN, 정책 변경 409, 60초 STALE/계정 전환, private/no-store/noindex, 한영/WCAG 2.2 AA/TalkBack, 관리자 20명 이상 집계·플래그 OFF. P0 OPS1624-01 SEC1624-02 FIN1624-03 REL1624-04, P1 PREVIEW1624-05~10(DB/API/웹/Android/관리자/QA). #993/#2233/#2345/#2330/#2340/#2357/#2366·QA #2391 운영 차단; Test e39af10f6...·Production 353c6d5d... main 불일치. 수용시험 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음. 상세 양 언어 PROJECT_PLAN.
+
+**현재 기획:** v1624 F675-212 미리보기 / 인계 #2396 / Draft 준비 중 / 운영 보류; #2388 기반.
+
+
 ## v2026.11.01.1622 — F675-211 수신 요일·조회 구간 공백 및 작업 증빙 보완 (기능 보완 / 초안 / 운영 보류)
 이전 추가 v1620 → 현재 보완 v1622 → 다음 추가 v1624(잠정). main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 확인, 미병합 Draft #2384 위 문서 전용 작업, 인계 #2383·Draft #2388. **기획만·미구현.** 실제 알림 설정 화면·Nest 알림 컨트롤러에 F675-211 없음. 09~11시 KST 실행 편차와 24/72시간 조회 구간·선택 요일로 만료 조회 공백이 발생할 수 있는 설계 위험 확인. 순환 ISO 요일 최대 간격 G에 대해 `worstCaseScheduledGapHours=24*G+2`, `potentialScheduleGapHours=max(0,worst-lookahead)`; 월요일만+72시간 잠재 98시간, 매일+24시간 2시간, 월/목+72시간 26시간, 매일+72시간 일정상 0시간이지만 실제 전달 보장 아님. 검증된 POTENTIAL_GAP/NO_STATIC_GAP_DETECTED/UNKNOWN 응답·비차단 경고·재조회, 동의·요일·조회 구간 자동 변경 금지. 실제 조회 커버리지는 포함 요일의 완전한 조회 영수증으로만 증명; 전체 적격 0건이 검증된 경우 EVALUATED_NO_ELIGIBLE_HOLDINGS(알림 없음), 10,001건 이상 페이지 잘림/출처 불명은 정상 0건 금지. SKIPPED_BY_WEEKDAY는 조회 커버리지가 아님. 09~11시 외 작업 성공·오늘 적용 허위 약속 금지. Next/Android 비공개·한영/WCAG 2.2 AA·관리자 20명 이상 집계·기능 OFF·회원/일자 불변 claim. P0 OPS1622-01 SEC1622-02 FIN1622-03 REL1622-04, P1 GAP1622-05~10(DB·API/작업자·웹·Android·관리자·QA). #993/#2233/#2345/#2260/#2330/#2340/#2357/#2366 별도 차단, Test e39af10f6a...·Production 353c6d5d...는 main과 다름. PostgreSQL17·10,001건·경합·정확 SHA Test 기능 수용시험 **미실행**. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음. 상세 영문·국문 PROJECT_PLAN.
 
