@@ -19,3 +19,6 @@ Strategy: preserve legacy 238 payouts and 50,000 WLD archived as unverified, nev
 - GitHub full CI run #41317019548 FAILED in *existing* stock-league disposable PG fixture (expected one escrow; new NPS escrows produce three). This also reveals a real cross-feature account-selection flaw in immutable 273 stock-league function, which selected first arbitrary ESCROW by UUID.
 - New additive migration323 binds stock-league payments to exact existing `ESCROW:escrow`, never `national_pension_fund` or `national_pension_welfare`; original migration273 unchanged. CI disposable fixture binds account identity exactly, rejects cross-escrow leakage, checks two-posting conservation and rollback. No reason to wipe member/historic financial records.
 - Full CI and actual monetary settlement certification still needed before any live promotion.
+
+## MIDPOINT v1618.4 — 2026-11-01 23:59 KST
+- Added new disposable-GitHub-PostgreSQL-only Treasury Core NPS fixture with real application role, exact NPS deposit and 95/5 withdrawal, duplicate replay, single journal transaction keys, five balanced postings, immutable receipts, negative idempotency and unbacked payout, global money conservation and outer ROLLBACK. CI guard enforces localhost moneyverse_migrator database only. Integration acceptance is NOT claimed until the actual GitHub test job succeeds.
