@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedUnansweredBoardResponse } from '@/lib/board-unanswered';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const unansweredBoardPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const unansweredValues = unansweredBoardPath ? request.nextUrl.searchParams.getAll('unanswered') : [];
+  if (unansweredBoardPath && (unansweredValues.length > 1 ||
+      (unansweredValues.length === 1 && (unansweredValues[0] !== '1' ||
+        [...request.nextUrl.searchParams.keys()].some((key) => !['stock', 'q', 'unanswered'].includes(key)) ||
+        request.nextUrl.searchParams.getAll('stock').length > 1 ||
+        request.nextUrl.searchParams.getAll('q').length > 1)))) {
+    return gatewayProblem(400, 'Bad Request', 'board_unanswered_invalid', 'unanswered must be 1 and filters must be unambiguous');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +283,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (unansweredBoardPath && unansweredValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedUnansweredBoardResponse(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_unanswered_unverified',
+          'unanswered public board results could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_unanswered_unverified',
+        'unanswered public board results could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -585,13 +610,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('unanswered'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('unanswered'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

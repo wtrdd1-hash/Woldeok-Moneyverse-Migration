@@ -16,3 +16,9 @@
 
 ## FINISHED
 Pending. No release approved.
+
+## MID — 01:58 KST
+- RED confirmed: Backend 3 failures (HTTP/SQL/default arguments); Frontend 8 failures (missing parser/UI/Android response enforcement). The initial GREEN attempt found 2 legacy service test expectations and a new test quote typo; both corrected, not hidden.
+- GREEN: Backend targeted 22 PASS; Frontend/Android targeted 12 PASS. Full workspace typecheck PASS; changed-file ESLint PASS.
+- Real PostgreSQL 17.11, `SET LOCAL ROLE moneyverse_app`, READ ONLY: function EXECUTE=true; latest public rows=1, unanswered=1, replied=0; query returned one genuine zero-reply row; ROLLBACK. No DB changes.
+- Fetched all origin branches and open PRs at midpoint; branch audit stored in task evidence. No branch deletion or integration.
