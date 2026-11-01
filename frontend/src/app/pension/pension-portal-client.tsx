@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   Coins,
@@ -80,9 +81,11 @@ export interface PayoutLog {
 interface PensionPortalClientProps {
   overview: NationalPensionOverview | null;
   myAccount: MyPensionAccount | null;
-  contributions: ContributionLog[];
-  payouts: PayoutLog[];
+  contributions: ContributionLog[] | null;
+  payouts: PayoutLog[] | null;
   userCashBalance: string;
+  walletVerified?: boolean;
+  memberStatus?: 'guest' | 'verified' | 'unavailable';
   isLoggedIn: boolean;
 }
 
@@ -92,11 +95,13 @@ export function PensionPortalClient({
   contributions: initialContributions,
   payouts: initialPayouts,
   userCashBalance: initialCashBalance,
+  walletVerified = true,
   isLoggedIn,
+  memberStatus = isLoggedIn ? 'verified' : 'guest',
 }: PensionPortalClientProps) {
   const [account, setAccount] = useState<MyPensionAccount | null>(initialAccount);
-  const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions);
-  const [payouts, setPayouts] = useState<PayoutLog[]>(initialPayouts);
+  const [contributions, setContributions] = useState<ContributionLog[]>(initialContributions ?? []);
+  const [payouts, setPayouts] = useState<PayoutLog[]>(initialPayouts ?? []);
   const [cashBalance, setCashBalance] = useState<string>(initialCashBalance);
 
   // 기여금 납입 폼
@@ -333,6 +338,24 @@ export function PensionPortalClient({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 내 연금 계좌 요약 (좌측 7열) */}
         <div className="lg:col-span-7 space-y-4">
+          {memberStatus !== 'verified' ? (
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle>{memberStatus === 'guest' ? '로그인 후 연금 계좌 확인' : '연금 계좌 조회 불가'}</CardTitle>
+                <CardDescription>
+                  {memberStatus === 'guest'
+                    ? '로그인하면 본인의 기존 연금 기록을 조회할 수 있습니다.'
+                    : '연금 계좌의 출처를 확인하지 못했습니다. 잔액을 0으로 추정하지 않습니다.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href={memberStatus === 'guest' ? '/login' : '/pension'}
+                  className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold underline underline-offset-4">
+                  {memberStatus === 'guest' ? '로그인하기' : '다시 조회하기'}
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
           <Card className="border-border/60 bg-gradient-to-br from-card/80 to-muted/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
             <CardHeader className="pb-3">
@@ -434,6 +457,7 @@ export function PensionPortalClient({
               </div>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* 연금 기여금 납입 허브 (우측 5열) */}
@@ -452,7 +476,9 @@ export function PensionPortalClient({
               <div className="text-xs text-muted-foreground flex justify-between">
                 <span>내 지갑 가용 잔액:</span>
                 <span className="font-mono font-semibold text-foreground">
-                  {groupDigits(cashBalance)} WLD
+                  {walletVerified && memberStatus === 'verified'
+                    ? groupDigits(cashBalance) + ' WLD'
+                    : memberStatus === 'guest' ? '로그인 후 확인' : '지갑 잔액 조회 불가'}
                 </span>
               </div>
 
@@ -532,18 +558,18 @@ export function PensionPortalClient({
 
       {/* 탭: 모의 연금 계산기 & 납입/수령 내역 */}
       <Tabs defaultValue="simulator" className="space-y-4">
-        <TabsList className="bg-muted/50 border border-border/50">
-          <TabsTrigger value="simulator" className="gap-1.5">
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 border border-border/50 bg-muted/50 p-2">
+          <TabsTrigger value="simulator" className="min-h-11 flex-1 basis-full gap-1.5 whitespace-normal sm:basis-auto">
             <Calculator className="h-4 w-4" />
             예상 기초연금 시뮬레이터
           </TabsTrigger>
-          <TabsTrigger value="contributions" className="gap-1.5">
+          <TabsTrigger value="contributions" className="min-h-11 flex-1 basis-full gap-1.5 whitespace-normal sm:basis-auto">
             <History className="h-4 w-4" />
-            내 기여금 납입 이력 ({contributions.length})
+            내 기여금 납입 이력 ({initialContributions === null || memberStatus !== 'verified' ? '확인 불가' : contributions.length})
           </TabsTrigger>
-          <TabsTrigger value="payouts" className="gap-1.5">
+          <TabsTrigger value="payouts" className="min-h-11 flex-1 basis-full gap-1.5 whitespace-normal sm:basis-auto">
             <Clock className="h-4 w-4" />
-            기초연금 수령 내역 ({payouts.length})
+            기초연금 수령 내역 ({initialPayouts === null || memberStatus !== 'verified' ? '확인 불가' : payouts.length})
           </TabsTrigger>
         </TabsList>
 
@@ -622,7 +648,15 @@ export function PensionPortalClient({
         <TabsContent value="contributions">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {contributions.length === 0 ? (
+              {initialContributions === null || memberStatus !== 'verified' ? (
+                <div role="status" className="space-y-3 py-8 text-center text-sm text-muted-foreground">
+                  <p>{memberStatus === 'guest' ? '로그인 후 납입 내역 확인' : '기여금 내역 조회 불가'}</p>
+                  <Link href={memberStatus === 'guest' ? '/login' : '/pension'}
+                    className="inline-flex min-h-11 items-center rounded-lg border px-4 font-semibold underline underline-offset-4">
+                    {memberStatus === 'guest' ? '로그인하기' : '다시 조회하기'}
+                  </Link>
+                </div>
+              ) : contributions.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기여금 납입 내역이 없습니다.
                 </div>
@@ -660,7 +694,15 @@ export function PensionPortalClient({
         <TabsContent value="payouts">
           <Card className="border-border/60 bg-card/60">
             <CardContent className="pt-6">
-              {payouts.length === 0 ? (
+              {initialPayouts === null || memberStatus !== 'verified' ? (
+                <div role="status" className="space-y-3 py-8 text-center text-sm text-muted-foreground">
+                  <p>{memberStatus === 'guest' ? '로그인 후 수령 내역 확인' : '수령 내역 조회 불가'}</p>
+                  <Link href={memberStatus === 'guest' ? '/login' : '/pension'}
+                    className="inline-flex min-h-11 items-center rounded-lg border px-4 font-semibold underline underline-offset-4">
+                    {memberStatus === 'guest' ? '로그인하기' : '다시 조회하기'}
+                  </Link>
+                </div>
+              ) : payouts.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   아직 기초연금 수령 내역이 없습니다.
                 </div>
