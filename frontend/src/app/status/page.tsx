@@ -11,6 +11,7 @@ import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { OVERALL_HEADLINE, STATUS_LABEL, statusAggregateState } from '@/lib/status';
 import { parseStatusRows } from '@/lib/status-response';
+import { parseSourceStatusRows, validStatusSourceKey } from '@/lib/status-source';
 import { asStatusState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
 import { canonicalUrl } from '@/lib/seo';
@@ -55,10 +56,17 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
     unknown: 'outline',
   };
 
-export default async function StatusPage() {
+export default async function StatusPage({ searchParams }: { searchParams?: Promise<{ sourceKey?: string }> }) {
+  const selectedSource = (await searchParams)?.sourceKey ?? null;
+  const validSource = selectedSource !== null && validStatusSourceKey(selectedSource);
   const data = await publicApi<unknown>('/api/v1/status', 30);
+  const filteredData = validSource
+    ? await publicApi<unknown>(`/api/v1/status?sourceKey=${encodeURIComponent(selectedSource)}`, 0)
+    : null;
   const parsedRows = parseStatusRows(data);
   const rows: StatusRow[] = parsedRows ?? [];
+  const visibleRows = selectedSource === null ? parsedRows
+    : validSource ? parseSourceStatusRows(filteredData, selectedSource) : null;
   const overall = statusAggregateState(rows);
   const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
@@ -106,15 +114,20 @@ export default async function StatusPage() {
           }
         />
 
-        {parsedRows === null ? (
+        {selectedSource !== null && (
+          <Link href="/status" className="w-fit text-sm font-semibold underline underline-offset-4">전체 상태 보기</Link>
+        )}
+        {parsedRows === null || visibleRows === null ? (
           <EmptyState title="지금은 상태를 불러올 수 없어요." />
         ) : rows.length === 0 ? (
           <EmptyState title="아직 기록된 상태가 없어요." />
+        ) : visibleRows.length === 0 ? (
+          <EmptyState title="선택한 서비스의 공개 상태 기록이 없어요." description="전체 상태에서 다른 서비스를 선택할 수 있어요." />
         ) : (
           <Card>
             <CardContent>
               <dl className="grid gap-3">
-                {rows.map((row) => {
+                {visibleRows.map((row) => {
                   const state = asStatusState(row.state);
                   const needsFreshness = row.freshnessState !== 'fresh';
                   return (
@@ -124,6 +137,11 @@ export default async function StatusPage() {
                     >
                       <div className="grid gap-0.5">
                         <dt className="font-bold">{row.displayName}</dt>
+                        {selectedSource === null && (
+                          <dd><Link href={`/status?sourceKey=${encodeURIComponent(row.sourceKey)}`}
+                            aria-label={`${row.displayName} 상태 자세히 보기`}
+                            className="text-xs underline underline-offset-4">상태 자세히 보기</Link></dd>
+                        )}
                         {/* The collector writes what it measured here — a
                             round trip in milliseconds, or the status code it
                             was refused with. */}

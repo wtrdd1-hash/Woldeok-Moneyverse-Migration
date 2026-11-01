@@ -8047,10 +8047,21 @@
                 "policyVersion"
               ]
             }
+          },
+          "sourceKey": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
-          "status"
+          "status",
+          "sourceKey"
         ]
       },
       "responseCompatibility": {

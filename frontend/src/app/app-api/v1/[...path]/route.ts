@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseSourceStatusRows, validStatusSourceKey } from '@/lib/status-source';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const statusSourcePath = parts.length === 1 && parts[0] === 'status';
+  const sourceQuery = request.nextUrl.searchParams;
+  if (statusSourcePath && ([...sourceQuery.keys()].some((key) => key !== 'sourceKey') ||
+      sourceQuery.getAll('sourceKey').length > 1 ||
+      (sourceQuery.has('sourceKey') && !validStatusSourceKey(sourceQuery.get('sourceKey'))))) {
+    return gatewayProblem(400, 'Bad Request', 'status_source_invalid', 'invalid public status source key');
+  }
+  const statusSourceRequested = statusSourcePath && sourceQuery.has('sourceKey');
+  if (statusSourceRequested && request.method !== 'GET') {
+    return gatewayProblem(405, 'Method Not Allowed', 'status_source_method', 'filtered status requires GET');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +284,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (statusSourceRequested) {
+    if (!response.ok) return gatewayProblem(response.status === 429 ? 429 : 503,
+      'Status Unavailable', 'status_source_unavailable', 'service status source could not be verified');
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          parseSourceStatusRows(await response.clone().json(), sourceQuery.get('sourceKey')!) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'status_source_unverified',
+          'the status source filter was not verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'status_source_unverified',
+        'the status source filter was not verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -581,6 +609,10 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 1 && parts[0] === 'status' && request.nextUrl.searchParams.has('sourceKey')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.

@@ -10,12 +10,13 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -180,8 +181,16 @@ export class ContentController {
 
   @Get('status')
   @ApiOperation({ summary: 'Server status board' })
-  async status() {
-    return { status: await this.service().serviceStatus() };
+  @ApiQuery({ name: 'sourceKey', required: false, type: String, description: 'Exact public service source key' })
+  async status(@Query() query: Record<string, unknown> = {}) {
+    const keys = Object.keys(query);
+    if (keys.some((key) => key !== 'sourceKey') ||
+        (keys.includes('sourceKey') &&
+          (typeof query.sourceKey !== 'string' || !/^[a-z][a-z0-9_-]{2,63}$/.test(query.sourceKey)))) {
+      throw new BadRequestException('sourceKey must be a canonical public service key');
+    }
+    const sourceKey = typeof query.sourceKey === 'string' ? query.sourceKey : null;
+    return { status: await this.service().serviceStatus({ sourceKey }), sourceKey };
   }
 
   @Post('admin/announcements')
