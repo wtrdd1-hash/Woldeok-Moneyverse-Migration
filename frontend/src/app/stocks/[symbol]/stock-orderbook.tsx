@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Scale, Zap, Activity, AreaChart, ListOrdered } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -194,10 +194,8 @@ export function StockOrderbook({
 
   useEffect(() => {
     if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
-      const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
       const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
-
-      const side: 'buy' | 'sell' = currNum >= prevNum ? 'buy' : 'sell';
+      const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
       if (currNum > prevNum) {
         setFlash('rise');
       } else if (currNum < prevNum) {
@@ -322,6 +320,9 @@ export function StockOrderbook({
       </CardHeader>
 
       <CardContent className="p-2 space-y-1.5 text-xs font-mono tabular-nums tracking-tight select-none">
+        <p role="note" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 font-sans text-[11px] leading-relaxed text-foreground">
+          {isEn ? 'Illustrative price ladder and simulated volumes; not verified live bids or asks.' : '가격 단계와 호가 잔량은 예시 시뮬레이션으로 실제 매수·매도 주문 잔량이 아닙니다.'}
+        </p>
         {viewMode === 'depth' ? (
           <StockDepthChart
             bids={bids}

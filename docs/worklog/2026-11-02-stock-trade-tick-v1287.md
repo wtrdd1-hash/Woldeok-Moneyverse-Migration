@@ -21,3 +21,9 @@ Pending.
 - Repaired a discovered `useSyncExternalStore` infinite rerender by using a stable empty snapshot; room subscription now renews on socket reconnect.
 - Midpoint origin/main still `a8541927c3a351d980454c66e95a3356c47e0722`; full lint/build/test/CI/Test release gates still pending.
 - Known separate gap: illustrative orderbook depth and ratios are still synthetic; do not interpret as actual order liquidity. Separate P1 work required.
+
+## Candidate verification / release decision — 2026-11-02 06:55 KST
+- First committed candidate `f957998171826e78f955f06ee91845fdac40388d`: full lint 0 errors / 1,027 warnings; typecheck PASS; app-api 184 endpoints PASS; build PASS; backend 2,980 PASS / 518 SKIP; frontend 2,941 PASS; production-only high-severity audit PASS.
+- Full dependency audit FAIL (8 moderate, 1 low); full route QA FAIL (missing `artifacts/qa/full-route-ledger.json`); official exact-SHA Test and authenticated browser/Android E2E BLOCKED. Production/Test currently advertise `510dbe6...`, not this branch. Latest QA v1456 also reports P0 app-role privilege and runtime/edge mismatches.
+- Added explicit in-product warning that synthetic price-ladder depth is **not actual liquidity**; actual execution rows remain strictly server-event sourced. Added socket integration test and keyboard dismiss regression. Final exact-SHA rerun required after this checkpoint.
+- **Release decision: DRAFT / HOLD.** No merge, Test deployment, Production promotion, financial write, branch deletion or rollback. Follow-up: independent certified real orderbook source and full authenticated E2E.

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStockTrades } from '@/lib/use-market-prices';
 import type { LiveTradeData } from '@/lib/use-market-prices';
@@ -39,6 +39,11 @@ describe('verified stock trade notification', () => {
     expect(screen.getByRole('status').textContent).toContain('15,000');
     expect(screen.getByRole('status').textContent).toContain('7주');
     act(() => vi.advanceTimersByTime(5000));
+    expect(screen.queryByRole('status')).toBeNull();
+    useTrades.mockReturnValue([{ ...trade, id: 'receipt-2' }]);
+    rerender(<StockMarketToast stockId={stockId} symbol="WDG" currentPrice="15000" />);
+    expect(screen.getByRole('status')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: '체결 알림 닫기' }));
     expect(screen.queryByRole('status')).toBeNull();
   });
 });

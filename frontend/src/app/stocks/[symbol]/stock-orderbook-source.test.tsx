@@ -12,6 +12,7 @@ describe('verified execution history in the price ladder', () => {
   it('does not create five trade executions when the socket has none', () => {
     render(<StockOrderbook stockId="stock-1" currentPrice="15000" />);
     expect(screen.getByText(/확인된 실제 체결 내역이 없습니다/i)).toBeDefined();
+    expect(screen.getByRole('note').textContent).toContain('예시 시뮬레이션');
     expect(screen.queryByText(/t-init-/i)).toBeNull();
   });
 });
