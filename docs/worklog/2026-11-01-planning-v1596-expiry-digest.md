@@ -4,7 +4,7 @@
 - [x] MID: main and canonical docs rechecked; prior unmerged planning sections carried into isolated worktree. Existing notification inbox and PRODUCT_ACTIVITY category observed, but no in_app_notifications CREATE TABLE in numbered migrations: schema parity is a blocker, not assumed fixed.
 - [x] DESIGN: opt-in daily KST inventory expiry digest; owner settings, bounded scheduled inbox delivery, dedupe receipt, fail-closed security and privacy, mobile/a11y/admin/KPI, 4 P0 and 6 P1 backlog.
 - [x] VERIFY: local 140/140 release PASS and 24/24 classifier PASS; remote final SHA CI must be checked separately. English/Korean parity, release classification, source docs, Git diff, exact SHA CI.
-- [ ] FINISH: GitHub Draft PR, issue and logs; no main merge, runtime, DB, WLD, item, Test or Production mutation.
+- [x] FINISH: GitHub Draft PR #2297 and issue #2296, records; no main merge, runtime, DB, WLD, item, Test or Production mutation. Final exact-SHA remote CI is checked independently and reported in PR/issue and miniPC FINISH record.
 - **Cycle:** Previous Improvement v1594 / Current Addition v1596 / Next Improvement v1598 (provisional). **Status:** DRAFT / RELEASE HOLD. External evidence newly approved 0; cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS.
 
 - GitHub development handoff: #2296; documentation-only isolated branch, no new feature acceptance test.
