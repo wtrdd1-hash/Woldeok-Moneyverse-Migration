@@ -32,6 +32,14 @@ describe('global search SSR source and query integrity', () => {
     expect(html).not.toContain('href="/wallet"');
   });
 
+  it('keeps verified public guide search available during an authentication outage', async () => {
+    viewer.mockResolvedValue(null);
+    const html = await htmlFor('가이드');
+    expect(html).toContain('로그인 상태를 확인할 수 없습니다');
+    expect(html).toContain('href="/guide"');
+    expect(html).not.toContain('href="/wallet"');
+  });
+
   it('does not claim bank or wallet is public for guests', async () => {
     viewer.mockResolvedValue({ signedIn: false, consentCurrent: false, adminRoles: [] });
     const html = await htmlFor('지갑');

@@ -13,4 +13,4 @@
 ## Steps
 - [x] Add regression tests for malformed `q`, Unicode bounds, guest/member/admin classification, API unknown and server rendering; verify RED.
 - [x] Implement query normalization, source-status distinction and member-only public-nav exclusion; verify GREEN.
-- [ ] Run focused and full validation, inspect remote CI, document remaining release blockers and keep PR draft.
+- [x] Run focused and full validation, inspect remote CI, document remaining release blockers and keep PR draft.

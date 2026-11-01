@@ -17,7 +17,9 @@
 - TDD RED: 8 failed/5 passed; duplicate q and malformed viewer SSR, and guest `/wallet`/`bank` public classification reproduced. GREEN: 13/13 focused tests PASS.
 - Existing authenticated `viewerOrUnknown` reads Nest `/api/v1/auth/viewer` rather than synthesizing auth state; invalid payload or transport outage is unknown and never treated as verified member/admin. No new backend/DB route needed; no fake success.
 - Input accepts a single valid Unicode query of up to 80 code points; duplicate query keys, control characters, lone surrogates and non-string values fail closed with a keyboard-accessible correction prompt. A separate status/retry distinguishes auth API outage from verified empty results. Public masthead links to actual `requireMember` pages `/wallet` and `/bank` are not shown as public search results.
-- Next: full HEAD gates and isolated auth/DB checks; CI and release policy remain blocking until proven. GitHub PR is kept draft.
+- Validation checkpoint: full lint 0 errors / 1,022 warnings, typecheck PASS, API contract 184 PASS, frontend 2,910 PASS, backend 2,963 PASS / 518 SKIP, contract 41 PASS, DB package 62 PASS / 4 SKIP, both builds PASS. Isolated PostgreSQL 17.11 network-disabled 316/316 migrations PASS, app direct `users` SELECT and raw ledger INSERT both false. High+ production audit PASS; full audit FAIL (9 low/moderate). Full-route QA FAIL (missing full-route-ledger.json).
+- Review found public navigation was hidden entirely on auth API outage. Added a new RED SSR test, then changed rendering to show verified public matches alongside the unknown-status warning. Focused final 14/14 PASS. These changes require a new exact-SHA full-gate run.
+- Next: rerun all required gates at final code SHA, independent HTTP E2E, remote CI and release evidence; draft PR only. GitHub PR is kept draft.
 
 
 ## END

@@ -75,21 +75,27 @@ export default async function SearchPage({
         </Button>
       </form>
 
-      {invalid ? (
-        <p role="alert" className="border-l-4 border-destructive bg-destructive/10 p-4 text-sm text-foreground">
-          검색어 형식이 올바르지 않습니다. 하나의 검색어를 80자 이내로 입력해 주세요.
-        </p>
-      ) : viewerUnavailable ? (
+      {viewerUnavailable && !invalid && (
         <div role="alert" className="flex flex-wrap items-center gap-3 border-l-4 border-amber-500 bg-amber-500/10 p-4 text-sm text-foreground">
-          <p>로그인 상태를 확인할 수 없습니다. 회원·운영 메뉴 검색 결과를 확정할 수 없습니다.</p>
+          <p>로그인 상태를 확인할 수 없습니다. 공개 화면은 검색할 수 있지만 회원·운영 메뉴는 확인할 수 없습니다.</p>
           <Button asChild variant="outline" className="min-h-11">
             <Link href={`/search?q=${encodeURIComponent(query)}`}>다시 확인</Link>
           </Button>
         </div>
+      )}
+
+      {invalid ? (
+        <p role="alert" className="border-l-4 border-destructive bg-destructive/10 p-4 text-sm text-foreground">
+          검색어 형식이 올바르지 않습니다. 하나의 검색어를 80자 이내로 입력해 주세요.
+        </p>
       ) : !query.trim() ? (
         <EmptyState title="찾을 기능을 입력해 주세요." description="한글·영문 기능명이나 경로로 검색할 수 있습니다." />
       ) : results.length === 0 ? (
-        <EmptyState title="검색 결과가 없습니다." description="다른 기능명으로 검색하거나 메뉴에서 원하는 화면을 찾아보세요." />
+        viewerUnavailable ? (
+          <EmptyState title="공개 화면에서 일치하는 결과를 확인할 수 없습니다." description="회원·운영 메뉴는 로그인 상태를 확인한 후 검색할 수 있습니다." />
+        ) : (
+          <EmptyState title="검색 결과가 없습니다." description="다른 기능명으로 검색하거나 메뉴에서 원하는 화면을 찾아보세요." />
+        )
       ) : (
         <section aria-labelledby="search-results" className="grid gap-3">
           <h2 id="search-results" className="text-lg font-bold">검색 결과 {results.length}개</h2>
