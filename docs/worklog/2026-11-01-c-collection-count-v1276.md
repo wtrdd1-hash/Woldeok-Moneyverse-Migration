@@ -14,3 +14,7 @@
 - [ ] Intermediate main/plan fetch
 - [ ] Exact SHA verification and PR
 - [ ] Final gate/deploy decision
+
+## Correction / aborted hypothesis — 23:18 KST
+- Byte-level inspection showed the source regex contains the **correct single** `\\d` escape. The JSON-escaped tool output had been misread. Backend multi-digit and malformed-count tests passed unchanged (11/11); frontend 5/5 passed with required `NODE_ENV=test` (without it React.act failed even on existing tests). No product defect in this candidate. **No product change, no PR, no merge.**
+- Switched to independent admin API-health telemetry verification candidate. This branch is preserved as an explicit negative investigation record; it is not a successful development cycle.
