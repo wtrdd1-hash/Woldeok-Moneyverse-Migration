@@ -1,3 +1,7 @@
+## 2026-11-01 개발 C v1263 — 벤처 투자 원장 근거 보호 (초안 / 운영 보류)
+- `/businesses/ventures`의 예시 회원 잔액 6천만 WLD·가짜 지분/IPO/배당금과 로컬 거래 버튼 제거. Nest 인증 조회는 검증 근거가 없으면 503 유지, 관련 5개 API에 비공개·비색인·참조자 제한 헤더 적용. 원장·DB·Android 경로 변경 없음.
+- 코드 SHA `1cd570c29...`: 웹 2,905건, Backend 2,965건(518 SKIP), 독립 PostgreSQL 316개, Lint/Typecheck/Build/app-api PASS. 전체 감사 취약점 9건, 전체 경로 QA 증빙 누락, 실제 HTTP 비색인 헤더 오류, 공식 Test E2E/복원 및 원격 CI 미확인으로 **배포 보류**. [작업 기록](worklog/2026-11-01-c-v1263-venture-source.ko.md) · Draft PR #2336.
+
 ## 2026-11-01 v1611 — 국고 초기화 후 운영 미복구 사후분석 및 완료 판정기 (운영 미복구)
 - 백업 SHA·migration314·보관 금고 220,923,528 WLD·현재 금고/정식 국고 0 확인, 실제 앱권한 감사 차단(국고 552/552 미연결, 배당 NULL738/유령6). 공개 운영 353c6d vs main 905207, Test bc8cd8, 운영 포인터/실제 서비스 경로 불일치.
 - 읽기 전용 판정기 `scripts/release/verify-treasury-postreset-completion.mjs`와 6개 회귀 테스트 통과, 실제 호스트 판정 NOT_RECOVERED. CI/PR/0회계기만으로 지급/운영 정상화 선언 불가. [사고 RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md).
