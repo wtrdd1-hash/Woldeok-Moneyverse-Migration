@@ -19,3 +19,8 @@
 - 실제 PostgreSQL 17.11 읽기 전용 앱 역할: 공개 승인 사진 2건, 함수 EXECUTE 허용, 사진 원본 테이블 직접 SELECT 불허. 개발 DB의 잔액 UPDATE/보유품 DELETE/사용자 SELECT 권한은 여전히 허용(P0 #993); 운영 DB로 일반화 금지.
 - 원격 참조 82개(심볼릭 origin 포함), 열린 PR 79개, 충돌 보고 0, 미통합 고유 브랜치 81개 보존. #2249 동일 갤러리 파일 변경 통합 주의.
 - 공식 Test 정확 SHA E2E·독립 복원 미완료, Production HOLD. Test/Production 변경 없음.
+
+## 작업 중 — v2 오류 수정 (12:43 KST)
+- 최초 Frontend 전체 빌드는 Next 자동 생성 PageProps 타입 제약 오류로 **FAIL**(webpack 컴파일 성공 후 타입검사 실패). 페이지·메타데이터의 선택적 인자 기본값 제거, 새 SHA 전체 빌드 재검증 필요.
+- Android `/app-api/v1/photos?day=` 별칭이 `/content/photos` 검증을 우회하는 문제를 RED(503 예상, 실제 200)로 재현 후 공통 경로 판별로 수정. 대상 Frontend 11/11 PASS. 동시 작업에 따른 `pthread_create` 경고는 게이트 성공 근거로 사용하지 않음.
+- Test/Production 변경 없음. 기존 빌드 실패 기록 보존, Backend 전체 테스트 진행 중, 공식 Test 정확 SHA BLOCKED.

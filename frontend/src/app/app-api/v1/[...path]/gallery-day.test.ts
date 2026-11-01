@@ -9,6 +9,7 @@ const photo = {
   publishedAt: '2026-09-06T15:00:00.000Z',
 };
 const context = { params: Promise.resolve({ path: ['content', 'photos'] }) };
+const publicContext = { params: Promise.resolve({ path: ['photos'] }) };
 const request = (search: string) => new NextRequest(`https://easy-scraping.com/app-api/v1/content/photos${search}`, { headers: { host: 'easy-scraping.com' } });
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
@@ -36,6 +37,17 @@ describe('Android gallery Seoul-day contract', () => {
       : new Response(null, { status: 204 })));
     const response = await GET(request('?day=2026-09-07'), context);
     expect(response.status).toBe(503);
+  });
+  it('applies the same filter verification on the direct /photos Android alias', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com'); vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    const upstream = vi.fn(async () => new Response(JSON.stringify({ photos: [{ ...photo, publishedAt: '2026-09-05T15:00:00.000Z' }] }), {
+      headers: { 'content-type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', upstream);
+    const direct = new NextRequest('https://easy-scraping.com/app-api/v1/photos?day=2026-09-07');
+    const response = await GET(direct, publicContext);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
   it('accepts a verified day result and never caches or indexes it', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com'); vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');

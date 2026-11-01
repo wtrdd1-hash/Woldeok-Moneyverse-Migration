@@ -19,3 +19,8 @@
 - Real PostgreSQL 17.11 `BEGIN READ ONLY; SET LOCAL ROLE moneyverse_app; ... ROLLBACK`: 2 recent approved photos, function EXECUTE=true, photos direct SELECT=false. DEV `account_balances` UPDATE, `user_items` DELETE, `users` SELECT are still true: P0 #993 remains OPEN; not evidence about Production.
 - Branch audit at midpoint: 82 remote refs (including symbolic origin), 79 open PRs, no reported conflicts; 81 non-main branches with unmerged commits. No deletion. #2249 touches gallery files and requires integration review.
 - Test and Production remain unchanged. Exact-SHA Test E2E and independent backup restore BLOCKED. Release HOLD.
+
+## In progress — v2 repair, 12:43 KST
+- Frontend first full build **FAILED** at Next generated `.next/types/app/gallery/page.ts`: optional props object default caused `PageProps` constraint failure, despite webpack compilation. Removed default parameter objects from page and metadata entry points; requires fresh build on new SHA.
+- Android public alias `/app-api/v1/photos?day=` initially bypassed the new `/content/photos` verification. Added RED regression (200 instead of expected 503), then route-path unification. New frontend targeted 11/11 PASS; transient `pthread_create` warning from concurrent host work was not treated as a pass/fail criterion.
+- No Test/Production change; prior build failure is retained in evidence, not silently rewritten. Backend full suite running; official Test exact SHA remains BLOCKED.

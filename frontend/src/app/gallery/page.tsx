@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 type GallerySearchParams = { readonly day?: string | string[] };
 
-export async function generateMetadata({ searchParams }: { searchParams?: Promise<GallerySearchParams> } = {}): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams?: Promise<GallerySearchParams> }): Promise<Metadata> {
   const filtered = (await searchParams)?.day !== undefined;
   return {
     title: '사진 | Gallery',
@@ -33,7 +33,7 @@ interface Photo {
   readonly publishedAt: string | null;
 }
 
-export default async function GalleryPage({ searchParams }: { searchParams?: Promise<GallerySearchParams> } = {}) {
+export default async function GalleryPage({ searchParams }: { searchParams?: Promise<GallerySearchParams> }) {
   const rawDay = (await searchParams)?.day;
   const dayRequested = rawDay !== undefined;
   const day = dayRequested ? parseGalleryDay(rawDay) : null;

@@ -19,6 +19,7 @@ describe('Seoul gallery publication day', () => {
     expect(isVerifiedGalleryDayResponse({ photos: [photo] }, '2026-09-07')).toBe(true);
     expect(isVerifiedGalleryDayResponse({ photos: [photo] }, '2026-09-06')).toBe(false);
     expect(isVerifiedGalleryDayResponse({ photos: [{ ...photo, publishedAt: null }] }, '2026-09-07')).toBe(false);
+    expect(isVerifiedGalleryDayResponse({ photos: [{ ...photo, publishedAt: '2026-09-07' }] }, '2026-09-07')).toBe(false);
     expect(isVerifiedGalleryDayResponse({ photos: [{ ...photo, imageUrl: 'javascript:alert(1)' }] }, '2026-09-07')).toBe(false);
     expect(isVerifiedGalleryDayResponse({ photos: Array.from({ length: 25 }, () => photo) }, '2026-09-07')).toBe(false);
     expect(isVerifiedGalleryDayResponse({ photos: [] }, '2026-09-07')).toBe(true);

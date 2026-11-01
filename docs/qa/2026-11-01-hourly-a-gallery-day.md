@@ -5,3 +5,7 @@
 - DEV PostgreSQL app role: public approved photo function EXECUTE=true, direct photos SELECT=false; 2 rows, read-only ROLLBACK. Other DEV ACL P0 #993 unresolved.
 - Full build/lint/typecheck/unit/integration/real-PostgreSQL isolated E2E/security/a11y/SEO/official Test exact-SHA are separate gates. Never infer them from targeted tests.
 - Test: unchanged, exact-SHA auth E2E BLOCKED. Production: unchanged, HOLD. Rollback: discard branch; no migration or runtime change.
+
+## v2 regression / first build failure
+- First Next build exit 1: generated PageProps rejects defaulted `GalleryPage` / `generateMetadata` props; fixed and awaiting new-SHA build.
+- Android `/app-api/v1/photos` alias was unverified; RED 1 failure, GREEN frontend 11/11. Re-run full gates on final SHA.
