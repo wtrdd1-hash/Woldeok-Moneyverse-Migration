@@ -22,16 +22,16 @@
 - The UI must not invite an unverified WLD debit.
 
 ## Task 1 — RED tests
-- [ ] Add backend HTTP test for POST 503/no SQL; Next BFF contract test; SQL migration contract test.
-- [ ] Execute RED and capture failures.
+- [x] Add backend HTTP test for POST 503/no SQL; Next BFF contract test; SQL migration contract test.
+- [x] Execute RED and capture failures.
 
 ## Task 2 — Safe implementation
-- [ ] Replace POST handler with fail-closed 503; Next BFF POST with explicit 503.
-- [ ] Disable unverified burn CTA in UI.
-- [ ] Create migration 324 to replace legacy function body with 55000 and revoke EXECUTE.
-- [ ] Run GREEN and review diffs.
+- [x] Replace POST handler with fail-closed 503; Next BFF POST with explicit 503.
+- [x] Disable unverified burn CTA in UI.
+- [x] Create migration 324 to replace legacy function body with 55000 and revoke EXECUTE.
+- [x] Run GREEN and review diffs.
 
 ## Task 3 — Verification and release hold
-- [ ] Run isolated PG17 migration and app-role function privilege test.
-- [ ] Run lint/typecheck/build/targeted+full tests, CI, Test exact-SHA.
-- [ ] Record failures, publish Draft PR/HOLD; do not merge unless all gates pass.
+- [x] Run isolated PG17 migration and app-role function privilege test.
+- [x] Run lint/typecheck/build/targeted+full tests; record failed full backend, audit and incomplete CI/Test exact-SHA as release blockers.
+- [x] Record failures, publish Draft PR #2403/HOLD and issue #2404; no merge or promotion.
