@@ -1,5 +1,14 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.02.1628 — F675-213 회원 보유품 만료 임박 검증 조회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+이전 Improvement v1626 → 현재 Addition v1628 → 다음 Improvement v1630(잠정). main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, 미병합 Draft #2402에 누적, 인계 이슈 #2409. **기획안/미구현.** 회원 /shop/catalog에서 알림 동의와 독립적으로 현재 보유품의 24/72시간 만료 임박 현황을 읽기 전용으로 확인하며 /account/notifications 연결은 선택 사항이다. 미래 발송 약속 금지. 기존 shop_my_items_v2는 다중 clock_timestamp와 무제한 결과이므로 보유품 held.expires_at(효과 종료 아님)을 단일 PostgreSQL asOf/REPEATABLE READ로 집계하고, 정확한 총계는 bigint 문자열, 상위 10개 묶음 미리보기, 전체 조회가 증명된 경우에만 VERIFIED_EMPTY를 반환하도록 제안한다. Nest GET /api/v1/shop/expiry-snapshot?hours=24|72, Next/Android 비공개/no-store/noindex, 불명확하면 503, 60초 STALE, 한영 WCAG/TalkBack, 기본 OFF, 관리자 20명 이상 코호트. P0 OPS1628-01 SEC1628-02 FIN1628-03 REL1628-04; P1 SNAP1628-05..10 DB/API/Web/Android/Admin/QA. 금융 차단 #2404/#2405 별도 유지, #993 권한·정확 SHA Test·복원 HOLD. 공개 Test 버전은 main과 같지만 실행 이미지 증명은 아니며 Production 353c6d5...는 다르다. 기능 시험 미실행, 외부 신규 검증 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS, 런타임/DB/WLD/원장/Test/Production 변경 없음. 상세 계약은 PROJECT_PLAN.ko.md 참조.
+
+**최신 QA:** 표준 정책/백업/보안 171/171 PASS, 분류기 24/24 PASS, 한영 4쌍×9표식 PASS. 확장 175/176(1 FAIL): 기존 verify-merged-pr-head 시험은 파괴적 git push를 요구하지만 현재 정리 워크플로는 contents:read의 읽기 전용이다. QA의 오래된 시험 정리 OPEN이며 실제 브랜치 삭제 증거가 아니다. 기능 수용시험 미실행.
+
+**현재 기획:** v1628 F675-213 회원 만료 임박 보유품 조회 / 이슈 #2409 / Draft PR 예정 / DRAFT / RELEASE HOLD; #2402에 누적.
+
+
 ## v2026.11.02.1626 — F675-212 시간·영수증 진실성 보완 (기능 보완 / 초안 / 운영 보류)
 이전 추가 v1624 → 현재 보완 v1626 → 다음 추가 v1628(잠정). main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 재확인, 미병합 #2397 위 문서 전용, 개발 인계 #2396. **미구현.** 날짜별 설정상 configurationStatus(후보/요일 제외/중지/미동의/분류/UNKNOWN)와 실제 executionStatus(미래 미관찰, 오늘 09시 전/09~11시/11시 이후 미확인, 검증된 완전 조회 영수증만 평가됨, 제외 영수증은 조회 아님)를 분리. KST 실행 창 [09:00,11:00), 이전 설정 리비전 영수증은 과거 결과로 유지, 보유품 0건/전달 완료 추정 금지. 선택적 X-Preview-Expected-Revision 실제 불일치만 409; REPEATABLE READ는 조회 당시 증거. 엄격한 본인 7/14일 GET, DB 단일 시각·날짜별 적용일, 보유품 미래 조회/쓰기 금지, Next/Android 가드 전 비공개, 60초 STALE, 한영 WCAG/TalkBack, 관리자 20명 이상 집계·기본 OFF. P0 OPS1626-01 SEC1626-02 FIN1626-03 REL1626-04; P1 TRUTH1626-05~10. QA #2398 백엔드 2 FAIL·의존성 권고 9건, 정확 SHA E2E/복원 보류; Test 공개 버전 510dbe6...은 main과 일치하지만 HTTP 표시만, Production 353c6d5...는 불일치. 기능 시험 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS, 런타임/DB/WLD/원장/Test/운영 변경 없음. 양 언어 PROJECT_PLAN 상세.
 
