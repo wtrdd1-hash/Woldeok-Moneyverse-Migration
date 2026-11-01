@@ -1,3 +1,6 @@
+## 2026-11-01 v1618.2 — Unified Treasury Core funded NPS candidate
+- New DB-owned `treasury_core_post` for new funded NPS deposit/95-5 withdrawal with canonical balanced ledger, separate NPS/welfare escrows, immutable receipts and idempotent DB authority. Historical NPS 238 payout rows remain unverified; Mint/CB/SWF payout holds unchanged. Private cloned Production SQL318–322 successful and targeted 246 backend/7 FE tests PASS. **No money-moving PostgreSQL integration or live Test/Production promotion certified yet.**
+
 ## 2026-11-01 v1617 — Treasury current fiscal proof display source tested, release HOLD
 - Certified server-owned public Treasury zero can return 200 only after strict vault/balance/timestamp checks; unknown source stays 503, old payments remain unverified. 18 frontend tests/typecheck/lint PASS; historic release gate requires 503 and must be updated with independent verification before Production.
 

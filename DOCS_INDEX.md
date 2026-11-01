@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1618.2 — One Treasury Core for genuinely funded NPS transfers (PRIVATE SCHEMA PASS / MONETARY RELEASE HOLD)
+- [Unified Treasury Core EN](docs/architecture/TREASURY_CORE.md) / [KO](docs/architecture/TREASURY_CORE.ko.md); [Worklog EN](docs/worklog/2026-11-01-finance-ledger-certification-v1618.md) / [KO](docs/worklog/2026-11-01-finance-ledger-certification-v1618.ko.md). SQL321/322 forward-only canonical funded NPS escrow + one DB-owned Treasury Core, immutable receipts, UUIDv4 idempotency and distinct welfare escrow. Nest/Next guarded session + one-use CSRF and new pension funded UI. Restored real production private PostgreSQL clone migration318–322 PASS, existing ledger untouched. Backend Treasury/NPS 246 and frontend funded 7 tests PASS; actual financial transaction simulation and official Test/Production release NOT CERTIFIED. Mint/CB/legacy payout hold remains in force.
+
+
 ## v2026.11.01.1617 — Current Treasury public proof display (SOURCE TEST PASS / RELEASE GATE HOLD)
 - [Worklog EN](docs/worklog/2026-11-01-treasury-public-read-v1617.md) / [KO](docs/worklog/2026-11-01-treasury-public-read-v1617.ko.md) · [Internal EN](docs/updates/v2026.11.01.1617-treasury-public-internal.md) / [KO](docs/updates/v2026.11.01.1617-treasury-public-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1617-treasury-public-github.md) / [KO](docs/updates/v2026.11.01.1617-treasury-public-github.ko.md). Fixed permanently-unverified public BFF/SSR to consume DB-owned current fiscal proof; exact zero amount and no payout, stricter validation and 0-WLD UI. 18 targeted frontend tests, typecheck, lint PASS. Old release identity gate still hardcodes 503 and must not be bypassed; official Test/Production not promoted.
 

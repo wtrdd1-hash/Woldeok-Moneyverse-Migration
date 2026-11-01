@@ -62,6 +62,29 @@ export class PublicNationalPensionController {
     return this.service.getOverview();
   }
 
+  @Get('funded/position')
+  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @ApiOperation({ summary: '정식 원장으로 증명된 신규 국민연금 에스크로 적립금 조회' })
+  async getFundedPosition(@Req() req: RequestWithSession) {
+    return this.service.getFundedPosition(requireUserId(req));
+  }
+
+  @Post('funded/contribute')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: '국고 공통 코어를 통한 신규 원장 증빙 국민연금 납입' })
+  async contributeFunded(@Req() req: RequestWithSession,
+    @Body('idempotencyKey') key: string, @Body('amountWld') amount: string) {
+    return this.service.contributeFunded(requireUserId(req), key, amount);
+  }
+
+  @Post('funded/withdraw')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: '신규 에스크로에 실제 보관된 적립금만 원장 증빙 환급(95%/5%)' })
+  async withdrawFunded(@Req() req: RequestWithSession,
+    @Body('idempotencyKey') key: string, @Body('principalWld') principal: string) {
+    return this.service.withdrawFunded(requireUserId(req), key, principal);
+  }
+
   @Get('my-account')
   @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: '내 국민연금 계좌, 적립금, 등급, 은퇴 수령 상태 조회' })

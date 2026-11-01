@@ -46,6 +46,23 @@ export interface NationalPensionPayoutLogRow {
   created_at: string;
 }
 
+/** Only newly funded, canonical Treasury Core pension money is spendable. */
+export interface FundedPensionPosition {
+  funded_principal_wld: string;
+  cumulative_funded_contribution_wld: string;
+  escrow_balance_wld: string;
+  certified_receipt_count: string;
+}
+
+export interface FundedPensionCoreReceipt {
+  ledger_transaction_id: string;
+  principal_wld: string;
+  user_disbursement_wld: string;
+  welfare_fee_wld: string;
+  fund_balance_wld: string;
+  replayed: boolean;
+}
+
 /** Exact minor-unit pension math; avoid converting ledger money to Number. */
 export function pensionRefundSplit(principalWld: string): { refundAmountWld: string; welfareContributionWld: string } {
   const principal = BigInt(requirePositiveWld(principalWld, 'principalWld'));
@@ -88,6 +105,53 @@ export class NationalPensionRepository {
   /** Must be unreachable until a separately certified, funded, balanced NPS Core command replaces legacy SQL. */
   private assertLedgerSettlementCertified(): void {
     throw new PensionLedgerSettlementHoldError();
+  }
+
+  /**
+   * The only authorized new pension money path: SECURITY DEFINER Treasury Core.
+   * Legacy pension balances and legacy pension receipt tables are not updated.
+   * The caller MUST bind actor to a verified Nest user session + one-use CSRF.
+   */
+  async getFundedPosition(actor: string): Promise<FundedPensionPosition> {
+    const res = await this.pool.query<FundedPensionPosition>(
+      'SELECT * FROM public.treasury_core_pension_position($1::uuid)', [actor],
+    );
+    if (!res.rows[0] || res.rows[0].escrow_balance_wld === null) {
+      throw new ServiceUnavailableException('Treasury Core pension account is unverified');
+    }
+    return res.rows[0];
+  }
+
+  async postFundedPension(
+    actor: string, key: string, command: 'NPS_FUND' | 'NPS_WITHDRAW', amount: string,
+  ): Promise<FundedPensionCoreReceipt> {
+    const exact = requirePositiveWld(amount, 'amountWld');
+    if (command === 'NPS_FUND' && BigInt(exact) < 1000n) {
+      throw new BadRequestException('Funded pension contribution must be at least 1000 WLD');
+    }
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(key)) {
+      throw new BadRequestException('A UUIDv4 idempotency key is required');
+    }
+    try {
+      const result = await this.pool.query<FundedPensionCoreReceipt>(
+        'SELECT * FROM public.treasury_core_post($1::uuid,$2::uuid,$3::text,$4::text)',
+        [actor, key, command, exact],
+      );
+      const receipt = result.rows[0];
+      if (!receipt || !receipt.ledger_transaction_id || receipt.principal_wld !== exact
+        || !/^(?:0|[1-9]\d*)$/.test(receipt.fund_balance_wld)) {
+        throw new ServiceUnavailableException('Treasury Core durable receipt is missing');
+      }
+      return receipt;
+    } catch (err) {
+      if (err instanceof ServiceUnavailableException) throw err;
+      const pg = err as { code?: string };
+      if (pg.code === '22023' || pg.code === '42501') {
+        throw new BadRequestException('Treasury Core funding, ownership or balance rules rejected the request');
+      }
+      this.logger.error('Treasury Core pension settlement failed without a certified receipt');
+      throw new ServiceUnavailableException('Treasury Core settlement unavailable');
+    }
   }
 
   private calculateTierAndRate(accumulated: bigint): { tier: string; hourlyRateBps: number } {
