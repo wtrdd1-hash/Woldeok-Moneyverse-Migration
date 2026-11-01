@@ -20,3 +20,10 @@ The member-only /gallery/submit page types the untrusted GET /api/v1/photos/mine
 - GREEN: 7/7 focused tests PASS after parser, Next page error state, and App API protections.
 - Main re-fetched unchanged at 510dbe6bf4d5c2a8089fc06b480776053da7a2e3; planning main still v1518, active draft planning #2402 is notification scheduling (not photo owner).
 - Full typecheck PASS; lint PASS with 0 errors, 1027 pre-existing warnings. Full build/test/DB/CI pending.
+
+## IN PROGRESS — actual HTTP discovery and correction
+- First isolated Next HTTP probe **FAILED** (500): the gateway mistakenly mutated native fetch `Response.headers`, which are immutable. Vitest doubles had not reproduced that behavior.
+- Added regression with immutable native-like headers: RED 1 failure; removed the premature upstream header mutation and kept the final mutable NextResponse override. GREEN 8/8.
+- Earlier SHA d30869ade is **superseded**; all passing gates from it require revalidation at the corrected HEAD.
+- First isolated PostgreSQL attempt hit the entrypoint's temporary server shutdown (not a schema defect); a clean retry passed **322/322 migrations**, owner rows=1, other owner rows=0, direct photos SELECT=false. Container removed.
+- Initial whole-suite results on superseded SHA: Frontend 2929 PASS; Backend 2978 PASS / 2 FAIL (existing profile private HTTP tests) / 518 SKIP. API contract 184 PASS, DB package 62 PASS / 5 SKIP; security scripts 17 PASS; production dependency audit PASS; all-dependency audit FAIL (9 vulnerabilities), full-route QA FAIL (missing ledger).

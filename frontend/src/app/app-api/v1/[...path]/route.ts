@@ -340,11 +340,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
-  if (parts.length === 2 && parts[0] === 'photos' && parts[1] === 'mine') {
-    response.headers.set('cache-control', 'private, no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-    response.headers.set('referrer-policy', 'no-referrer');
-  }
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
       return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
