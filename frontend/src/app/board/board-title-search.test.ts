@@ -5,9 +5,10 @@ import { parseBoardTitleQuery } from './board-title-search';
 describe('public board title search', () => {
   it('normalizes a bounded title query without inventing a global search', () => {
     expect(parseBoardTitleQuery(undefined)).toEqual({ query: null, invalid: false });
+    expect(parseBoardTitleQuery('')).toEqual({ query: null, invalid: false });
     expect(parseBoardTitleQuery('  제주  ')).toEqual({ query: '제주', invalid: false });
   });
-  it.each(['', '   ', ['one', 'two'], 'x'.repeat(81), 'a\nb', '<script>'])(
+  it.each([['one', 'two'], 'x'.repeat(81), 'a\nb', '<script>'])(
     'rejects invalid query %j',
     (value) => {
       expect(parseBoardTitleQuery(value).invalid).toBe(true);

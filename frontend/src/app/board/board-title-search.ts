@@ -1,6 +1,6 @@
 /** Only searches the latest 50 publicly visible board posts, never the full archive. */
 export function parseBoardTitleQuery(value: unknown): { query: string | null; invalid: boolean } {
-  if (value === undefined) return { query: null, invalid: false };
+  if (value === undefined || value === '' || (typeof value === 'string' && !value.trim())) return { query: null, invalid: false };
   if (
     typeof value !== 'string' ||
     !value.trim() ||

@@ -1920,7 +1920,9 @@ _요청 본문 없음._
 
 | 이름 | 위치 | 필수 | 타입 | 제약 |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| stance | query | false | string | enum="all","bullish","neutral","bearish","none" |
 
 ### 요청 본문
 
@@ -1930,6 +1932,9 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| appliedStance | false | object |  |
+| appliedStance.value | true | string="none" \| string="bullish" \| string="neutral" \| string="bearish" |  |
+| appliedStance.scope | true | string="latest50" | const="latest50" |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |
