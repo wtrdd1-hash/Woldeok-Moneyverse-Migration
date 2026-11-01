@@ -18,4 +18,10 @@
 - Full gates and exact-SHA CI still pending; not integrated or deployed.
 
 ## Finished — v3
-- Pending final SHA, test results, QA, Test/Production/rollback and branch disposition.
+- Feature code SHA `30ceccbd7c1b305ef8e9d41dcdd16251fd5eab86`; final docs SHA = PR #2440 head. Files changed: seven source/test files plus App API gateway, bilingual QA/release records and this worklog; see PR diff.
+- Fresh `origin/main` still `a8541927c3a351d980454c66e95a3356c47e0722` at start/mid/end. Latest unmerged integrated plan Draft #2439 read; no planner files modified. Backend B #2353 virtual merge clean, no code duplicated.
+- Verified: RED reproduced; GREEN 8 PASS; Frontend full 2,930 PASS; Backend full 2,980 PASS / 518 SKIP; DB 62 PASS / 5 SKIP; root policy 34 PASS; lint 0 errors/1,027 warnings; typecheck, build and 184-endpoint Android API contract PASS; code SHA CI SUCCESS.
+- Security: production-only audit PASS; full audit 9 vulnerabilities FAIL. DEV PostgreSQL app-role direct club/core DML privilege P0 FAIL (#993), checked READ ONLY with ROLLBACK. No DB, ledger or Production writes.
+- Test/Production both publicly report `510dbe6bf4d5...`, not candidate. Authenticated Test exact-SHA E2E, independent restore and GitOps release gates BLOCKED. Release HOLD; no merge, deploy, restart, rollback or deletion.
+- End audit: 201 non-main branches (185 unintegrated, 16 ancestors), 177 open PRs, 29 conflicts. Deleted 0; preserve all unintegrated branches and unreviewed ancestors.
+- Full evidence: miniPC `/srv/moneyverse-data/tasks/mv-a-20261102-0720-club-csrf/evidence/`; bilingual QA and release HOLD committed. Follow-up on issue #2352 and P0 #993. Recurring development reservations remain unchanged.
