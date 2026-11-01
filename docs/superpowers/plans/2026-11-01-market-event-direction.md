@@ -15,3 +15,6 @@ A public visitor wants to distinguish currently active positive and negative vir
 ## Rollback
 
 Revert the feature commit or hide the public link and reject optional direction until a corrected candidate is validated. Existing unfiltered endpoint and migration 124 remain unchanged. No data rollback, ledger mutation or grant is required.
+
+## Review amendment: empty-result provenance
+A legacy backend can ignore `direction` and return an empty HTTP 200. For filtered reads, Nest must echo `appliedDirection` and Next/Android must require an exact match before accepting even empty rows. The unfiltered endpoint preserves `{events}`. This prevents a false verified-empty claim during rolling deployment.

@@ -13,11 +13,13 @@ describe('market event direction evidence', () => {
     for (const invalid of ['UP', 'all', '', 'sideways']) expect(() => parseMarketEventDirection(invalid)).toThrow();
   });
   it('distinguishes verified empty from malformed or unfiltered success', () => {
-    expect(verifiedMarketEvents({ events: [] }, 'up')).toEqual([]);
-    expect(verifiedMarketEvents({ events: [event] }, 'up')).toHaveLength(1);
-    expect(verifiedMarketEvents({ events: [event] }, 'down')).toBeNull();
-    expect(verifiedMarketEvents({ events: [{ ...event, headline: '' }] }, 'up')).toBeNull();
-    expect(verifiedMarketEvents({ events: [{ ...event, starts_at: 'not-a-date' }] }, 'up')).toBeNull();
+    expect(verifiedMarketEvents({ events: [] }, 'up')).toBeNull();
+    expect(verifiedMarketEvents({ events: [], appliedDirection: 'down' }, 'up')).toBeNull();
+    expect(verifiedMarketEvents({ events: [], appliedDirection: 'up' }, 'up')).toEqual([]);
+    expect(verifiedMarketEvents({ events: [event], appliedDirection: 'up' }, 'up')).toHaveLength(1);
+    expect(verifiedMarketEvents({ events: [event], appliedDirection: 'down' }, 'down')).toBeNull();
+    expect(verifiedMarketEvents({ events: [{ ...event, headline: '' }], appliedDirection: 'up' }, 'up')).toBeNull();
+    expect(verifiedMarketEvents({ events: [{ ...event, starts_at: 'not-a-date' }], appliedDirection: 'up' }, 'up')).toBeNull();
     expect(verifiedMarketEvents({ events: 'bad' }, 'up')).toBeNull();
   });
 });

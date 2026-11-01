@@ -24,8 +24,11 @@ describe('Android market event direction filter', () => {
     const rejected = await GET(request(url), context);
     expect(rejected.status).toBe(503);
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ events: [] }), { status: 200, headers: { 'content-type': 'application/json' } })));
+    const unverifiedEmpty = await GET(request(url), context);
+    expect(unverifiedEmpty.status).toBe(503);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ events: [], appliedDirection: 'down' }), { status: 200, headers: { 'content-type': 'application/json' } })));
     const accepted = await GET(request(url), context);
     expect(accepted.status).toBe(200);
-    expect((await accepted.json()).events).toEqual([]);
+    expect(await accepted.json()).toMatchObject({ events: [], appliedDirection: 'down' });
   });
 });

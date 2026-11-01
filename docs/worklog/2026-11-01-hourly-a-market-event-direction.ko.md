@@ -9,3 +9,5 @@
 **종료:** Backend 전체 2,960 PASS/517 SKIP, Frontend 전체 2,904 PASS/2 FAIL 및 워커 오류, DB 단위 62 PASS/4 SKIP, 모바일 API 계약 184 PASS, 보안 10 PASS, 타입검사 PASS, Lint 오류 0, 단일 워커 빌드 PASS. 정확 SHA 공식 Test E2E·운영 승격 차단. 브랜치 삭제·main 병합·배포·서비스 재시작·DB 변경·롤백 없음. 증거: `/srv/moneyverse-data/tasks/mv-a-20261101-0925-market-event-filter/evidence/`.
 
 **GitHub 종료:** Draft PR #2293, 원격 브랜치 65개/열린 PR 63개, 삭제·병합 0건. 최초 코드 SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`; 최종 기록 SHA는 PR에 기재. 정확 SHA CI 진행 중.
+
+**v3 추가 검토:** 구형 무필터 HTTP 200 빈 배열이 Android 검증을 통과할 수 있어 `appliedDirection` 증거를 Backend·웹·Android에 추가. 빈 결과도 정확히 검증. TDD RED 2+2, GREEN 12+7, Backend 전체 2,962 PASS/517 SKIP. Frontend 전체 재실행 EPIPE 중단, 이전 2건 실패 잔존. rayon 스레드 자원 부족으로 빌드 첫 실패 후 스레드 제한 재시도 PASS. 테스트 변수명 수정 후 Lint 오류 0. 새 SHA는 PR에 기록. 배포 없음.

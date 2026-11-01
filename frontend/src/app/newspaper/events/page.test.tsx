@@ -11,7 +11,7 @@ const event = { id: '11111111-1111-4111-8111-111111111111', stock_id: null, symb
 beforeEach(() => vi.mocked(apiOrNull).mockReset());
 describe('market event direction page', () => {
   it('requests the backend filtered source and renders verified events', async () => {
-    vi.mocked(apiOrNull).mockResolvedValue({ events: [event] });
+    vi.mocked(apiOrNull).mockResolvedValue({ events: [event], appliedDirection: 'up' });
     const page = await MarketEventsPage({ searchParams: Promise.resolve({ direction: 'up' }) });
     const html = renderToStaticMarkup(page);
     expect(apiOrNull).toHaveBeenCalledWith('/api/v1/stocks/market-events?direction=up');
@@ -22,7 +22,7 @@ describe('market event direction page', () => {
     vi.mocked(apiOrNull).mockResolvedValue(null);
     const failed = renderToStaticMarkup(await MarketEventsPage({ searchParams: Promise.resolve({ direction: 'down' }) }));
     expect(failed).toContain('검증할 수 없습니다');
-    vi.mocked(apiOrNull).mockResolvedValue({ events: [] });
+    vi.mocked(apiOrNull).mockResolvedValue({ events: [], appliedDirection: 'down' });
     const empty = renderToStaticMarkup(await MarketEventsPage({ searchParams: Promise.resolve({ direction: 'down' }) }));
     expect(empty).toContain('해당하는 진행 중인 이벤트가 없습니다');
   });

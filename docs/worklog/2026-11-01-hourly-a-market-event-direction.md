@@ -9,3 +9,5 @@
 **End:** Candidate draft only; full Backend 2960 PASS/517 SKIP; Frontend 2904 PASS/2 FAIL + worker error; DB unit 62 PASS/4 SKIP; API contract 184 PASS; security 10 PASS; typecheck, lint (0 errors), single-worker build PASS. Official Test and Production remain at older SHA. No merge, deployment, restart, branch cleanup or rollback. Evidence under `/srv/moneyverse-data/tasks/mv-a-20261101-0925-market-event-filter/evidence/`.
 
 **GitHub end:** Draft PR #2293; 65 remote heads / 63 open PRs, zero deletions or merges. Initial code SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`; final documentation SHA recorded in PR. Exact SHA CI pending.
+
+**V3 after PR review:** Found that an empty legacy unfiltered HTTP 200 could pass Android validation. Added source echo `appliedDirection` and required it on both web and Android even for empty results. TDD RED 2+2, GREEN 12+7; Backend full 2962 PASS/517 SKIP. Frontend full retry aborted EPIPE; earlier 2 baseline failures remain. Initial constrained build failed due rayon thread resource limits, retry with RAYON_NUM_THREADS=1 PASS. Full lint 0 errors after renaming test variable. New SHA will be recorded in PR. No release.

@@ -14,7 +14,7 @@ describe('public market-event direction HTTP contract', () => {
   let app: INestApplication;
   const marketEvents = vi.fn(async () => []);
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [StockController],
       providers: [{ provide: StockService, useValue: { marketEvents } }],
     }).overrideGuard(SessionGuard).useValue({ canActivate: () => true })
@@ -22,7 +22,7 @@ describe('public market-event direction HTTP contract', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
@@ -37,9 +37,9 @@ describe('public market-event direction HTTP contract', () => {
   });
   it('accepts up/down and preserves the existing unfiltered endpoint', async () => {
     marketEvents.mockClear();
-    for (const suffix of ['?direction=up', '?direction=down', '']) {
-      await request(app.getHttpServer()).get('/api/v1/stocks/market-events' + suffix).expect(200, { events: [] });
-    }
+    await request(app.getHttpServer()).get('/api/v1/stocks/market-events?direction=up').expect(200, { events: [], appliedDirection: 'up' });
+    await request(app.getHttpServer()).get('/api/v1/stocks/market-events?direction=down').expect(200, { events: [], appliedDirection: 'down' });
+    await request(app.getHttpServer()).get('/api/v1/stocks/market-events').expect(200, { events: [] });
     expect(marketEvents.mock.calls).toEqual([['up'], ['down'], [undefined]]);
   });
 });

@@ -23,7 +23,11 @@ export interface VerifiedMarketEvent {
 
 export function verifiedMarketEvents(payload: unknown, direction: MarketEventDirection | null): readonly VerifiedMarketEvent[] | null {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-  const rows = (payload as { events?: unknown }).events;
+  const envelope = payload as { events?: unknown; appliedDirection?: unknown };
+  // A legacy backend may return an empty unfiltered list. Only an exact
+  // source echo can certify that an empty filtered result was actually filtered.
+  if (direction !== null && envelope.appliedDirection !== direction) return null;
+  const rows = envelope.events;
   if (!Array.isArray(rows)) return null;
   const ids = new Set<string>();
   for (const row of rows) {

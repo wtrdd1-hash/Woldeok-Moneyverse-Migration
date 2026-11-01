@@ -162,7 +162,8 @@ export class StockController {
     if (direction !== undefined && direction !== 'up' && direction !== 'down') {
       throw new BadRequestException('direction must be up or down');
     }
-    return { events: await this.service().marketEvents(direction) };
+    const events = await this.service().marketEvents(direction);
+    return direction ? { events, appliedDirection: direction } : { events };
   }
 
   @Get(':id/prices')

@@ -293,7 +293,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('invalid content type');
       const rows = verifiedMarketEvents(await response.clone().json(), marketEventDirection);
       if (rows === null) throw new Error('unverified market events');
-      return contractJson({ events: rows }, { status: 200, headers: { 'cache-control': 'no-store' } });
+      return contractJson({ events: rows, appliedDirection: marketEventDirection }, { status: 200, headers: { 'cache-control': 'no-store' } });
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'market_event_direction_unverified', 'market event filter could not be verified');
     }

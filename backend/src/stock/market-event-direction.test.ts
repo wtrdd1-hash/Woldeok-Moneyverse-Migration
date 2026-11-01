@@ -16,9 +16,9 @@ describe('public active market event direction filter', () => {
   it('passes only canonical directions and keeps legacy no-filter behavior', async () => {
     const service = { marketEvents: vi.fn(async () => []) };
     const controller = new StockController(service as unknown as StockService);
-    await controller.marketEvents('up');
-    await controller.marketEvents('down');
-    await controller.marketEvents(undefined);
+    await expect(controller.marketEvents('up')).resolves.toEqual({ events: [], appliedDirection: 'up' });
+    await expect(controller.marketEvents('down')).resolves.toEqual({ events: [], appliedDirection: 'down' });
+    await expect(controller.marketEvents(undefined)).resolves.toEqual({ events: [] });
     expect(service.marketEvents.mock.calls).toEqual([['up'], ['down'], [undefined]]);
   });
   it('applies the filter in SQL over the SECURITY DEFINER projection', async () => {
