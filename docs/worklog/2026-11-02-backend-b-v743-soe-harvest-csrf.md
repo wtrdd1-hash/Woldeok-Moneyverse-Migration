@@ -8,7 +8,7 @@
 - Plan: RED HTTP regression for absent/invalid CSRF, valid session-bound CSRF still returns 503, admin GET unchanged; add route guard; GREEN; run repository gates; no merge/deploy without exact-SHA Test and complete CI.
 
 ## In progress
-- [ ] RED HTTP regression
+- [x] RED HTTP regression: 3 failures of 5 tests; missing and invalid CSRF reached the 503 service instead of returning 403.
 - [ ] Minimal route guard
 - [ ] GREEN and project gates
 - [ ] Recheck main and release HOLD
