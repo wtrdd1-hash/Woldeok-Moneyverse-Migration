@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
-import { parseBuildId, verifyHostRuntimeIdentity, serviceForRelease, parseEnvironmentFileLocations, mergeServiceBuildIds } from './verify-host-runtime-identity.mjs';
+import { parseBuildId, verifyHostRuntimeIdentity, serviceForRelease, parseEnvironmentFileLocations, mergeServiceBuildIds, activeServiceLookup } from './verify-host-runtime-identity.mjs';
 
 const sha = 'a'.repeat(40);
 const root = '/srv/moneyverse-data/releases/test-v123-aaaaaaaaaaaa';
@@ -227,4 +227,17 @@ test('rejects missing and non-finite process start evidence', () => {
   state.frontendStartedAtMs = NaN;
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('backend_process_predates_release_files'));
   assert.ok(verifyHostRuntimeIdentity(state).failures.includes('frontend_process_predates_release_files'));
+});
+
+test('binds active service directory evidence to the actual systemd process, not a missing global', () => {
+  const releasePath = '/srv/moneyverse-data/releases/prod-v2026.11.01.1609-0123456789ab';
+  const calls = [];
+  const lookup = activeServiceLookup(releasePath, (service) => {
+    calls.push(service);
+    return { cwd: service === 'current.service' ? path.join(releasePath, 'backend') : '/old/release/backend' };
+  });
+  assert.equal(lookup.releasePath, releasePath);
+  assert.equal(lookup.cwdFor('current.service'), path.join(releasePath, 'backend'));
+  assert.equal(lookup.cwdFor('stale.service'), '/old/release/backend');
+  assert.deepEqual(calls, ['current.service', 'stale.service']);
 });

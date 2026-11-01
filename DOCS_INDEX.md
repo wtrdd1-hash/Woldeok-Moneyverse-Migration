@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1609 — Host runtime identity CLI bugfix (source tested / Production hold)
+- [Worklog EN](docs/worklog/2026-11-01-treasury-runtime-identity-v1609.md) / [KO](docs/worklog/2026-11-01-treasury-runtime-identity-v1609.ko.md) · [Internal EN](docs/updates/v2026.11.01.1609-runtime-identity-internal.md) / [KO](docs/updates/v2026.11.01.1609-runtime-identity-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1609-runtime-identity-github.md) / [KO](docs/updates/v2026.11.01.1609-runtime-identity-github.ko.md). Undefined systemdProcessDirectory repaired with tested process-evidence lookup (20/20). Actual Test blocks old SHA, actual Production blocks missing legacy immutable manifest; inactive merged-main Test/Prod candidates prepared, no public promotion.
+
+
 ## v2026.11.01.1607 — Treasury CI time-stability + current main reconciliation (TEST CANDIDATE / RELEASE HOLD)
 - [Worklog EN](docs/worklog/2026-11-01-treasury-qa-ci-unblock-v1607.md) / [KO](docs/worklog/2026-11-01-treasury-qa-ci-unblock-v1607.ko.md) · [Internal EN](docs/updates/v2026.11.01.1607-treasury-internal.md) / [KO](docs/updates/v2026.11.01.1607-treasury-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1607-treasury-github.md) / [KO](docs/updates/v2026.11.01.1607-treasury-github.ko.md). v1603 audit code + main v1605 QA dual-disk changes; fix 2 expired synthetic console-session fixtures (RED 2 failures → 37 targeted PASS), with production authentication unchanged. Need exact-SHA v1607 CI/Test before promotion; historical Treasury 552 / dividend 744 provenance still blocked.
 
