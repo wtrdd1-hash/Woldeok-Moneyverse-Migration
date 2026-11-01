@@ -1,4 +1,5 @@
 ## v2026.11.02.1638 — F675-215 Expired Holdings: Microsecond-Safe Cursor and Honest Inventory State (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+**v1638 GitHub:** Draft PR #2439 OPEN/HOLD (base Draft #2433); developer handoff issue #2432; final-SHA CI pending; no merge/deployment.
 
 **Cycle:** Previous Feature Addition v1636 → Current Feature Improvement v1638 → Next Feature Addition v1640 (provisional). Source authority: latest origin/main `a8541927c3a351d980454c66e95a3356c47e0722` re-fetched at start and mid-cycle, AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity. Docs-only child of unmerged Draft #2433; developer issue #2432. **F675-215 remains PROPOSED, NOT IMPLEMENTED. No merge, Test or Production approval.**
 

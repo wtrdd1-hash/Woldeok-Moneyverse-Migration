@@ -1,4 +1,5 @@
 # Planning v1638 — F675-215 Microsecond Cursor and Inventory-State Truth
+**v1638 GitHub:** Draft PR #2439 OPEN/HOLD (base Draft #2433); developer handoff issue #2432; final-SHA CI pending; no merge/deployment.
 
 **2026-11-02 07:10 KST | FEATURE IMPROVEMENT | DRAFT / RELEASE HOLD**
 
