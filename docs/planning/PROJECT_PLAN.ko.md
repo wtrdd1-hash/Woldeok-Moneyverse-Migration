@@ -1,5 +1,39 @@
 # 월덕 머니버스 — Living Project Plan
 
+
+## v2026.11.02.1626 — F675-212 만료 알림 일정 미리보기의 시간·영수증 진실성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 기능 추가 v1624 → 현재 기능 보완 v1626 → 다음 기능 추가 v1628(잠정). 최신 origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 조사. 미병합 Draft #2397(eba17f20d4fe92d71d05f72368e087468786fe81) 위 문서 전용 작업, 기존 개발 인계 #2396; v1626 신규 이슈/PR은 작성 시점 미발행. F675-205~212는 **제안·미구현**. 공개 Test 버전 API는 현재 main과 동일한 510dbe6...을 반환하지만 실제 불변 실행 이미지·DB 마이그레이션·인증 E2E·독립 복원 증빙이 아니다. Production은 353c6d5...로 불일치. **DRAFT / RELEASE HOLD**.
+
+### 실제 소스 근거·설계 결함·선택
+- **확인:** 실제 /account/notifications 화면은 목표/NPC 설정과 알림함을 제공하며 제안된 만료 달력·작업자는 없다. Nest notification.controller.ts도 알림함/읽음 API만 제공한다. app-api catch-all은 shop/purchases를 비공개로 취급하지만 제안된 shop/expiry-digest/schedule-preview는 목록에 없다. 마이그레이션 123 shop_my_items_v2의 여러 clock_timestamp() 호출은 미래 만료 알림 작업 증거가 아니다. 이는 설계 검토 근거이며 실제 알림 누락이나 정보 유출 확인은 아니다.
+- **결함 A — 설정과 실행의 혼합:** v1624의 CONFIGURED_CANDIDATE, claimEvidence VERIFIED_EVALUATED/NOT_EVALUATED, sourceStatus VERIFIED가 함께 있으면 설정 스냅샷을 실제 미래 작업·완전한 조회·오늘 실행 증명으로 오인할 수 있다. 영수증 부재는 미실행·적격 0건·전달 실패 어느 것도 증명하지 않는다.
+- **결함 B — 오늘의 시간 경계:** 오늘 09:00 이전, 09:00~11:00 실행 창, 11:00 이후, 이미 불변 영수증이 생성된 경우를 구별해야 한다. 당일 작업 후 설정 변경은 과거 실행 결과를 바꾸지 않는다. 중지·재개 예약은 날짜별 적용일을 따라야 한다. 제안된 실행 창은 KST **[09:00,11:00)**, 즉 11:00 정확히 종료(작업자 정책 버전에서 승인 필요). 시간이 지났다고 완료로 판단 금지.
+- **결함 C — 스냅샷과 변경 감지:** REPEATABLE READ는 조회 중 일관된 데이터만 보장하며 응답 이후 설정 불변을 보장하지 않는다. 클라이언트가 기대 리비전을 제시하지 않았다면 과거 설정을 알 수 없으므로 가상의 정책 변경을 이유로 409를 만들지 않는다. 200 응답은 관찰 시점의 안내이며 미래 보장이 아니다.
+- **제외:** 선택 요일·조회 기간 자동 확대, 추가 cron, 미래 보유품 예측, 안전/완료 녹색 표시, 영수증 부재로 정상 빈 결과 추정. **채택:** 날짜별 설정상 후보와 실제 검증된 실행 증거를 독립 상태로 구분, 출처 불명 UNKNOWN으로 차단.
+
+### 회원 화면·API·시간·권한 계약(제안)
+- **진입/CTA:** 동의 유효 로그인 회원 /account/notifications → 14일 미리보기(7일 선택), 새로고침, 요일·중지·조회 기간 변경, 카테고리 검토, 재시도. PostgreSQL 한 번 관찰한 KST 오늘 포함 14개 연속 날짜(7일 요청은 정확히 7개). 기존 CONFIGURED_CANDIDATE, NOT_SELECTED_WEEKDAY, PAUSED_BY_SNOOZE, DIGEST_DISABLED, CATEGORY_REVIEW_REQUIRED, UNKNOWN은 **설정상 상태**일 뿐 전달 증거가 아니다. CONSENT_REQUIRED는 인증 전 UI 안내만 허용하고 동의 만료 API는 403·달력 미반환.
+- **날짜별 별도 executionStatus:** 미래 날짜는 무조건 FUTURE_NOT_OBSERVED. 오늘 09:00 전 영수증 없음 TODAY_PRE_WINDOW_UNVERIFIED, 09:00 이상 11:00 미만 TODAY_WINDOW_UNVERIFIED, 11:00 이후 영수증 없음 TODAY_WINDOW_ELAPSED_UNVERIFIED. 유효한 본인/당일 불변 완전 조회 영수증만 TODAY_VERIFIED_EVALUATED, 실제 제외 영수증만 TODAY_VERIFIED_SKIPPED(보유품 조회 아님), 출처 불명은 UNKNOWN. **이전 설정/정책 리비전으로 실행된 영수증**은 “이전 설정으로 오늘 처리됨”으로 표시하며 현재 설정으로 소급 변환하지 않는다. 미래에 오늘의 실행 결과를 투영하지 않는다.
+- **DTO:** Nest 본인 GET /api/v1/shop/expiry-digest/schedule-preview?days=7|14, Next 비공개 BFF와 Android app-api. 기존 sourceStatus VERIFIED/PARTIAL은 **설정·정책 출처만** 검증한다. observedAtUtcMicros(6자리), todayKstDay, preferenceRevision, 불투명 consentGeneration, policyVersion, 세션 범위 불투명 sourceRevision, effectiveScheduleVersion, 날짜별 {kstDay,weekdayIso,configurationStatus,executionStatus,executionEvidenceVersion:null|string,subjectToChange:true} 추가. 기존 claimEvidence는 executionStatus로 대체. F675-208/211의 검증된 영수증 출처가 없으면 오늘 executionStatus UNKNOWN, 미래는 FUTURE_NOT_OBSERVED. 회원 UUID·동의/세션 비밀·아이템·원시 설정·타인 영수증 노출 금지.
+- **409 조건:** 클라이언트는 이전 본인/세션 응답의 불투명 X-Preview-Expected-Revision 헤더를 선택적으로 보낼 수 있다. 단일 읽기 트랜잭션의 sourceRevision과 다를 때만 409 PREVIEW_POLICY_CHANGED·달력 미반환. 헤더가 없으면 현행 스냅샷 200 또는 출처 불명 503; 조회 뒤 발생할 가상 경합으로 409 금지. 잘못된·중복·타 세션 리비전은 400/403으로 차단. ETag/304 금지, 리비전을 URL·분석에 기록 금지. 설정 저장·로그아웃·동의/계정/정책 변경 즉시 캐시 폐기; 60초는 최대 신선도이지 현행 보증이 아니다. 오프라인은 STALE.
+- **DB·일자 계산:** PostgreSQL17 읽기 전용 REPEATABLE READ, 단일 clock_timestamp()에서 UTC 6자리 마이크로초·KST 날짜/ISO 요일 계산. 날짜별로 유효 동의·수신 설정·중지/재개 적용일·요일·승인 분류를 검증하고 재동의 후 옛 중지 예약 자동 복구 금지. 실제 영수증은 **생성 당시** 회원/동의 세대·KST 날짜·asOfUtcMicros·정책/레지스트리 버전·설정 리비전·전체 조회 증거로 검증한다. 현재 리비전과 다르다고 과거 영수증을 수정하지 않는다. 전역 출처 미확인 503 PREVIEW_SOURCE_UNVERIFIED, 검증된 전체 출처 중 특정 날짜만 불명일 때만 PARTIAL+UNKNOWN. 미래 보유품 조회·새 테이블/마이그레이션/인덱스/작업자·쓰기·moneyverse_app 직접 SELECT/DML GRANT 금지; 실제 스키마·신원 경계 #993/#2233/#2345 선확인.
+- **문구·접근성:** 후보일은 “설정상 알림 생성 가능일이며 실제 알림은 보장되지 않습니다.”, 11:00 이후 영수증 부재는 “확인된 처리 기록이 없습니다”(적격 0건·전달 실패로 단정 금지), 옛 설정 영수증은 “오늘 처리는 이전 저장 설정을 따랐습니다.” v1622 이론적 조회 공백 경고 유지. 한영·320px/200%·44px 터치·키보드·상태 텍스트·aria-live·TalkBack·동작 줄이기, 로딩/401/403/409/429/503/오프라인/STALE. 기능 기본 OFF.
+- **개인정보·관리자:** 제안된 shop/expiry-digest/schedule-preview 정확 경로를 Next/Android 실제 엣지 **가드 전** GET/HEAD·정상/오류·상위 장애·조건부 요청 모두 private/no-store, noindex/nofollow, no-referrer, nosniff; ETag/Last-Modified/Expires 제거·304 금지. 설정/영수증을 로그·공개 HTML·사이트맵·기기 디스크·회원 단위 분석에 저장 금지. 관리자 대리 조회/내보내기 금지, 20명 이상 코호트·작은 셀 억제 집계(설정 조회, UNKNOWN/검증 실행, 409/503, STALE, p95). KPI는 목표·미측정.
+
+### P0/P1 개발 인계·시험·운영
+1. **P0 OPS1626-01:** Test/Production 실제 불변 실행 SHA·롤백 이미지·자원·독립 복원 증명 #1984/#2171. 공개 Test 버전=main은 HTTP 정보일 뿐 전체 승인 아님.
+2. **P0 SEC1626-02:** F675-205~211 설정/영수증/분류 스키마·동의 세대·앱 역할 권한·타인 EXECUTE 음성 시험 #993, 318 충돌 #2233, 공식 Test 재무 출처 #2345.
+3. **P0 FIN1626-03:** 제작 원장 #2330, 주식 허위 체결 #2340, 시즌 정산 EXECUTE #2357, 국고/연금/조폐/중앙은행 재원 #2366 독립 해결; 이 문서는 런타임 변경 금지.
+4. **P0 REL1626-04:** QA #2398의 미병합 후보에서 정책 시험 196/196 통과 보고가 있으나 백엔드 2 FAIL·의존성 권고 9건·Test/복원 미증빙. 공식 정확 SHA 인증 2회원 E2E·실제 PG·권한/개인정보/금융·독립 복원·운영 승인 필수.
+5. **P1 TRUTH1626-05 (B/DB):** 단일 asOf 적용일 투영, 과거 영수증 검증, 미확인 차단, 직접 권한/쓰기 0.
+6. **P1 TRUTH1626-06 (B/API):** configurationStatus/executionStatus 분리, 7/14 엄격 처리, 선택적 기대 리비전, 400/401/403/409/429/503, 09:00/11:00 경계.
+7. **P1 TRUTH1626-07 (A/웹):** 접근성 달력, 오늘/미확인/이전 설정 문구, 비공개 BFF·60초 STALE·허위 빈 결과 금지.
+8. **P1 TRUTH1626-08 (C/Android):** app-api 정확 경로 가드 전 비공개, 304 차단, TalkBack·오프라인·계정/동의 변경 폐기; C #2401/#2395 별도 조정.
+9. **P1 TRUTH1626-09 (A/B/관리자):** 기본 OFF, 20명 이상 익명 KPI, 직원→코호트 감사 배포·플래그 우선 롤백.
+10. **P1 TRUTH1626-10 (QA):** 격리 PG17 새 설치/업그레이드, 합성 보유품 10,001건으로 미래 조회 없음 확인, 08:59:59.999999/09:00:00/10:59:59.999999/11:00:00·자정·일→월·연도 경계 100건 이상, PUT/작업자/동의/분류 경합 100건 이상, 회원/위조 리비전 100건 이상, days 7/14/0/15/중복·409, Android HEAD/304/오프라인/계정 50건 이상, 320px/한영/TalkBack, 아이템/WLD/원장 변화 0. **모든 기능 수용시험 제안·미실행.**
+- **배포·롤백:** 개발 A/B/C/QA 별도 브랜치·테스트 우선·공식 Test 정확 후보 SHA·마이그레이션/권한/금융/백업·운영 승인 후 OFF→직원→코호트. 플래그 OFF 후 검증된 불변 이미지 롤백, 과거 영수증 삭제/변조 금지. 외부 독립 레퍼런스 신규 획득·검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. main 병합·런타임/DB/WLD/원장/아이템/Test/Production 변경 없음.
+
 ## v2026.11.02.1624 — F675-212 회원 만료 알림 향후 14일 일정 미리보기 (기능 추가 / 초안 / 운영 보류)
 
 **주기:** 이전 기능 보완 v1622 → 현재 기능 추가 v1624 → 다음 기능 보완 v1626(잠정). 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재확인, AGENTS.md·README.md·영문 정본/한국어 대조·Next/Nest/app-api/DB·GitHub QA 조사. 미병합 Draft #2388; 개발 인계 #2396·Draft #2397 기반 문서 전용. F675-205~212는 **제안·미구현**. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`, Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다름. **DRAFT / RELEASE HOLD**.
