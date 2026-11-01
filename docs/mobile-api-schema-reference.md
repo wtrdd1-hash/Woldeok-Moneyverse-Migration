@@ -1928,20 +1928,7 @@ _No request body._
 
 ### Success response fields
 
-| Field | Required | Type | Constraints/meaning |
-|---|---|---|---|
-| posts[] | true | object[] |  |
-| posts[] | true | object |  |
-| posts[].authorName | true | string |  |
-| posts[].createdAt | true | string |  |
-| posts[].updatedAt | true | null \| string |  |
-| posts[].commentCount | true | number |  |
-| posts[].mine | true | boolean |  |
-| posts[].hasImage | true | boolean |  |
-| posts[].stock | true | null \| object |  |
-| posts[].body | false | string |  |
-| posts[].postId | true | string |  |
-| posts[].title | true | string |  |
+_None._
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

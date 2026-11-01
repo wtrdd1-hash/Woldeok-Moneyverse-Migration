@@ -5190,102 +5190,212 @@
         ]
       },
       "responseSchema": {
-        "type": "object",
-        "properties": {
-          "posts": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "authorName": {
-                  "type": "string"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "posts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "authorName": {
                       "type": "string"
-                    }
-                  ]
-                },
-                "commentCount": {
-                  "type": "number"
-                },
-                "mine": {
-                  "type": "boolean"
-                },
-                "hasImage": {
-                  "type": "boolean"
-                },
-                "stock": {
-                  "oneOf": [
-                    {
-                      "type": "null"
                     },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "stockId": {
-                          "type": "string"
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "oneOf": [
+                        {
+                          "type": "null"
                         },
-                        "symbol": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "category": {
-                          "type": "string"
-                        },
-                        "stance": {
-                          "type": "string"
-                        },
-                        "positionDisclosure": {
+                        {
                           "type": "string"
                         }
-                      },
-                      "required": [
-                        "stockId",
-                        "symbol",
-                        "name",
-                        "category",
-                        "stance",
-                        "positionDisclosure"
                       ]
+                    },
+                    "commentCount": {
+                      "type": "number"
+                    },
+                    "mine": {
+                      "type": "boolean"
+                    },
+                    "hasImage": {
+                      "type": "boolean"
+                    },
+                    "stock": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "stockId": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "type": "string"
+                            },
+                            "stance": {
+                              "type": "string"
+                            },
+                            "positionDisclosure": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "stockId",
+                            "symbol",
+                            "name",
+                            "category",
+                            "stance",
+                            "positionDisclosure"
+                          ]
+                        }
+                      ]
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "postId": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
                     }
+                  },
+                  "required": [
+                    "authorName",
+                    "createdAt",
+                    "updatedAt",
+                    "commentCount",
+                    "mine",
+                    "hasImage",
+                    "stock",
+                    "postId",
+                    "title"
                   ]
-                },
-                "body": {
-                  "type": "string"
-                },
-                "postId": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
                 }
               },
-              "required": [
-                "authorName",
-                "createdAt",
-                "updatedAt",
-                "commentCount",
-                "mine",
-                "hasImage",
-                "stock",
-                "postId",
-                "title"
-              ]
-            }
+              "minReplies": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "posts"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "posts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "authorName": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "commentCount": {
+                      "type": "number"
+                    },
+                    "mine": {
+                      "type": "boolean"
+                    },
+                    "hasImage": {
+                      "type": "boolean"
+                    },
+                    "stock": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "stockId": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "type": "string"
+                            },
+                            "stance": {
+                              "type": "string"
+                            },
+                            "positionDisclosure": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "stockId",
+                            "symbol",
+                            "name",
+                            "category",
+                            "stance",
+                            "positionDisclosure"
+                          ]
+                        }
+                      ]
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "postId": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "authorName",
+                    "createdAt",
+                    "updatedAt",
+                    "commentCount",
+                    "mine",
+                    "hasImage",
+                    "stock",
+                    "postId",
+                    "title"
+                  ]
+                }
+              },
+              "minReplies": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "posts",
+              "minReplies"
+            ]
           }
-        },
-        "required": [
-          "posts"
         ]
       },
       "responseCompatibility": {

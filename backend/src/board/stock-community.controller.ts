@@ -85,6 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
+  @ApiQuery({ name: 'minReplies', required: false, enum: ['2', '5', '10'], description: 'Minimum replies in the latest 50 public posts' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -93,11 +94,16 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'minReplies')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const minReplies = query.minReplies;
+    if (minReplies !== undefined && (typeof minReplies !== 'string' || !['2', '5', '10'].includes(minReplies))) {
+      throw new BadRequestException('invalid reply threshold');
+    }
+    const minimum = minReplies === undefined ? undefined : Number(minReplies);
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -114,8 +120,7 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
-    };
+    const posts = await this.community.publicList(stock as string | undefined, q as string | undefined, minimum);
+    return minimum === undefined ? { posts } : { posts, minReplies: minimum };
   }
 }

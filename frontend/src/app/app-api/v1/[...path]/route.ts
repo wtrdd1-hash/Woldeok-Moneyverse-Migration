@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedBoardReplyThreshold } from '@/lib/board-reply-proof';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -111,6 +112,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const boardReplyPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const replyValues = boardReplyPath ? request.nextUrl.searchParams.getAll('minReplies') : [];
+  if (replyValues.length > 1 || (replyValues.length === 1 && !['2', '5', '10'].includes(replyValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_reply_threshold_invalid', 'invalid public board reply threshold');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +279,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Filtered Android discovery must be proven by a matching backend contract,
+  // not an HTTP 200 from a stale service that silently ignores minReplies.
+  if (boardReplyPath && replyValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON board response');
+      if (!isVerifiedBoardReplyThreshold(await response.clone().json(), Number(replyValues[0]))) {
+        throw new Error('unverified board reply threshold');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_reply_threshold_unverified', 'public board reply threshold could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -585,13 +606,7 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('minReplies'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
