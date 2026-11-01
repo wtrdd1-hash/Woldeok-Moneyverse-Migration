@@ -26,16 +26,16 @@
 - A two-point quote must not be rendered as a real tick-history chart.
 
 ### Task 1: Source evidence boundary
-- [ ] Add failing parser tests for valid/invalid stock/event API payloads and empty/unavailable distinction.
-- [ ] Observe RED.
-- [ ] Implement bounded strict validators for API-backed newspaper props.
-- [ ] Observe GREEN.
+- [x] Add failing parser tests for valid/invalid stock/event API payloads and empty/unavailable distinction.
+- [x] Observe RED.
+- [x] Implement bounded strict validators for API-backed newspaper props.
+- [x] Observe GREEN.
 
 ### Task 2: Truthful public UI
-- [ ] Add failing component/page tests for unavailable, empty, synthetic poll and chart.
-- [ ] Observe RED.
-- [ ] Replace fabricated market/poll states with accessible source-status and retry.
-- [ ] Observe GREEN.
+- [x] Add failing component/page tests for unavailable, empty, synthetic poll and chart.
+- [x] Observe RED.
+- [x] Replace fabricated market/poll states with accessible source-status and retry.
+- [x] Observe GREEN.
 
 ### Task 3: Verification and release discipline
 - [ ] Run exact HEAD focused tests, lint, typecheck, build, full suites, DB/API/CI/E2E where possible.
