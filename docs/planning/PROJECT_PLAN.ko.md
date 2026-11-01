@@ -3,7 +3,7 @@
 
 ## v2026.11.02.1626 — F675-212 만료 알림 일정 미리보기의 시간·영수증 진실성 보완 (기능 보완 / 초안 / 운영 보류)
 
-**주기:** 이전 기능 추가 v1624 → 현재 기능 보완 v1626 → 다음 기능 추가 v1628(잠정). 최신 origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 조사. 미병합 Draft #2397(eba17f20d4fe92d71d05f72368e087468786fe81) 위 문서 전용 작업, 기존 개발 인계 #2396; v1626 신규 이슈/PR은 작성 시점 미발행. F675-205~212는 **제안·미구현**. 공개 Test 버전 API는 현재 main과 동일한 510dbe6...을 반환하지만 실제 불변 실행 이미지·DB 마이그레이션·인증 E2E·독립 복원 증빙이 아니다. Production은 353c6d5...로 불일치. **DRAFT / RELEASE HOLD**.
+**주기:** 이전 기능 추가 v1624 → 현재 기능 보완 v1626 → 다음 기능 추가 v1628(잠정). 최신 origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, AGENTS.md·README.md·영문 정본/국문 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 조사. 미병합 Draft #2397(eba17f20d4fe92d71d05f72368e087468786fe81) 위 문서 전용 작업, 기존 개발 인계 #2396; 기존 개발 인계 #2396 및 신규 Draft #2402. F675-205~212는 **제안·미구현**. 공개 Test 버전 API는 현재 main과 동일한 510dbe6...을 반환하지만 실제 불변 실행 이미지·DB 마이그레이션·인증 E2E·독립 복원 증빙이 아니다. Production은 353c6d5...로 불일치. **DRAFT / RELEASE HOLD**.
 
 ### 실제 소스 근거·설계 결함·선택
 - **확인:** 실제 /account/notifications 화면은 목표/NPC 설정과 알림함을 제공하며 제안된 만료 달력·작업자는 없다. Nest notification.controller.ts도 알림함/읽음 API만 제공한다. app-api catch-all은 shop/purchases를 비공개로 취급하지만 제안된 shop/expiry-digest/schedule-preview는 목록에 없다. 마이그레이션 123 shop_my_items_v2의 여러 clock_timestamp() 호출은 미래 만료 알림 작업 증거가 아니다. 이는 설계 검토 근거이며 실제 알림 누락이나 정보 유출 확인은 아니다.
