@@ -41,4 +41,21 @@ describe('venture finance evidence HTTP contract', () => {
     expect(response.headers['cache-control']).toContain('no-store');
     expect(JSON.stringify(response.body)).not.toContain('48500');
   });
+  it('keeps owner finance refusals private and non-indexable', async () => {
+    for (const path of ['pitches', 'investments']) {
+      const response = await request(app.getHttpServer()).get(`/businesses/ventures/${path}`).expect(503);
+      expect(response.headers['cache-control']).toBe('private, no-store');
+      expect(response.headers['x-robots-tag']).toBe('noindex');
+      expect(response.headers['referrer-policy']).toBe('no-referrer');
+    }
+  });
+
+  it('refuses unledgered investments, dividend claims and founder registration with private headers', async () => {
+    for (const path of ['invest', 'claim-dividend', 'apply-founder']) {
+      const response = await request(app.getHttpServer()).post(`/businesses/ventures/${path}`).send({}).expect(503);
+      expect(response.headers['cache-control']).toBe('private, no-store');
+      expect(response.headers['x-robots-tag']).toBe('noindex');
+      expect(response.headers['referrer-policy']).toBe('no-referrer');
+    }
+  });
 });

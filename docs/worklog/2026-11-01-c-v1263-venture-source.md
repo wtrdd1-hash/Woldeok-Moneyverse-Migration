@@ -7,8 +7,14 @@
 - Scope: remove fabricated financial ownership and transactional affordances; read both authenticated Nest source endpoints, show truthful unavailable/verified-empty states, accessible mobile layout, noindex; regression tests. Do not modify ledger or schema.
 - Plan: RED regression tests; GREEN server page; focused tests, lint/typecheck/build, full gates where feasible; mid/end main recheck; Draft PR only if release gates remain blocked.
 
-## In progress
-- Pending implementation and gate evidence.
+## In progress — 2026-11-01 15:13 KST
+- RED: three new web tests failed on the old hook-only demo page; two HTTP privacy tests failed on unprotected venture responses.
+- GREEN: removed invented investor balances, seeded IPOs, owner dividends and local-only finance actions; authenticated SSR page reads both existing Nest owner endpoints and refuses even legacy 200 payloads without certified source receipts.
+- Added `private, no-store`, `noindex`, `no-referrer` on all five existing Nest venture read/write endpoints. Backend financial actions remain 503 and no DB/ledger mutations were added.
+- Focused web tests: 7 PASS; Nest HTTP tests: 4 PASS. Additional metadata test pending final gates.
+- Midpoint fetch: `origin/main` remained `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`. Android app API does not currently expose venture paths; no invented Android completion.
+- Existing source includes explicit demo disclaimers but still presents member-shaped synthetic money and success-like local interactions. New screen removes that ambiguity rather than pretending to implement settlement.
+
 
 ## Finished
 - Pending final SHA and gate evidence.

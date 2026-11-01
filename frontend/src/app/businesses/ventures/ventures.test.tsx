@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import {
@@ -8,6 +8,9 @@ import {
   calculateCorporateTaxAndBurn,
   INITIAL_VENTURE_COMPANIES,
 } from '@moneyverse/contract';
+vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn(async () => null) }));
+vi.mock('@/lib/session', () => ({ requireMember: vi.fn(async () => undefined) }));
+vi.mock('@/lib/locale-server', () => ({ getServerLocale: vi.fn(async () => 'ko') }));
 import VenturesPage from './page';
 
 describe('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 계약 및 금융 연산 엔진 테스트', () => {
@@ -58,21 +61,10 @@ describe('가상 스타트업 VC 엔젤투자 & 크라우드펀딩 계약 및 �
     expect(corporateTax).toBe(900000);
   });
 
-  it('4. 프론트엔드 스타트업 VC 대시보드가 정상 렌더링되어야 한다', () => {
-    render(<VenturesPage />);
-    expect(screen.getByText(/가상 스타트업 VC & 엔젤투자/i)).toBeDefined();
-    expect(screen.getByText(/스타트업 디렉토리 & 기업가치 랭킹/i)).toBeDefined();
-    expect(screen.getByText(/공모주 청약\(IPO\) 크라우드펀딩/i)).toBeDefined();
-    expect(screen.getByText(/내 보유 지분 & 엔젤 거버넌스/i)).toBeDefined();
-  });
-});
-
-describe('venture preview financial truth', () => {
-  it('does not describe a hardcoded WLD example as a live ledger', () => {
-    render(<VenturesPage />);
-    expect(screen.getByText(/시뮬레이션 · 미리보기/)).toBeDefined();
-    expect(screen.queryByText('실시간 원장')).toBeNull();
-    expect(screen.queryByText('수령 가능한 미수령 배당금')).toBeNull();
-    expect(screen.queryByText(/실시간 누적 배당금/)).toBeNull();
+  it('4. venture page does not publish synthetic equity or transaction controls', async () => {
+    render(await VenturesPage());
+    expect(screen.getByRole('heading', { name: /가상 스타트업·벤처 투자/ })).toBeDefined();
+    expect(screen.getByRole('alert').textContent).toMatch(/원장/);
+    expect(screen.queryByRole('button', { name: /청약|배당|설립/ })).toBeNull();
   });
 });
