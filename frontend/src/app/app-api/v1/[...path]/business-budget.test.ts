@@ -17,6 +17,8 @@ describe('Android owner business catalogue budget truth', () => {
     for (const query of ['?maxCost=01', '?maxCost=1&maxCost=2', '?maxCost=1e3']) {
       const response = await GET(request(query), { params: Promise.resolve({ path }) });
       expect(response.status).toBe(400);
+      expect(response.headers.get('cache-control')).toContain('no-store');
+      expect(response.headers.get('x-robots-tag')).toBe('noindex');
     }
     expect(fetch).not.toHaveBeenCalled();
   });

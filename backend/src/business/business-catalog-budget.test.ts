@@ -38,8 +38,13 @@ describe('business catalogue maximum WLD budget', () => {
 
   it('passes exact 64-bit-safe budget strings to the source on web and Android aliases', async () => {
     service.catalog.mockClear();
-    await request(app.getHttpServer()).get('/business-types?maxCost=9007199254740993').expect(200);
-    await request(app.getHttpServer()).get('/businesses/catalog?maxCost=9007199254740993').expect(200);
+    const web = await request(app.getHttpServer()).get('/business-types?maxCost=9007199254740993').expect(200);
+    const android = await request(app.getHttpServer()).get('/businesses/catalog?maxCost=9007199254740993').expect(200);
+    for (const response of [web, android]) {
+      expect(response.headers['cache-control']).toBe('private, no-store');
+      expect(response.headers['x-robots-tag']).toBe('noindex');
+      expect(response.headers['referrer-policy']).toBe('no-referrer');
+    }
     expect(service.catalog).toHaveBeenCalledTimes(2);
     expect(service.catalog).toHaveBeenNthCalledWith(1, '9007199254740993');
     expect(service.catalog).toHaveBeenNthCalledWith(2, '9007199254740993');

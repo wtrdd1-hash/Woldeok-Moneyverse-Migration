@@ -18,6 +18,10 @@ describe('business catalogue budget search', () => {
     expect(page).toContain('name="maxCost"');
     expect(page).toContain('readonly searchParams: Promise<');
     expect(page).toContain('role="search"');
+    expect(page).toContain('aria-describedby="business-budget-note"');
+    expect(page).toContain('min-h-11');
+    expect(page).toContain('role="alert"');
+    expect(page).toContain('robots: { index: false, follow: false }');
     expect(page).toContain('인수 비용 상한');
     expect(page).toContain('예산은 검색 조건이며 보유 잔액이나 구매 가능 여부를 뜻하지 않습니다.');
     expect(page).toContain('maxCost=${budget.value}');
