@@ -23,5 +23,5 @@
 
 ## Task 4 — Evidence
 - [x] Update mobile API contract, English/Korean QA, release HOLD and worklogs.
-- [ ] Re-fetch main, test build/lint/typecheck/whole suites, disposable/read-only PostgreSQL, security/SEO/a11y/contract, CI exact SHA.
+- [x] Re-fetch main, test build/lint/typecheck/whole suites, disposable/read-only PostgreSQL, security/SEO/a11y/contract, CI exact SHA.
 - [ ] Merge only on all PASS + exact Test SHA authenticated E2E + rollback proof; otherwise Draft/HOLD and preserve all unique branches.
