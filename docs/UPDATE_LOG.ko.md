@@ -1,4 +1,16 @@
 ## v2026.11.02.1626 — F675-212 시간·영수증 진실성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
+
+## 2026-11-02 v1628 — F675-213 회원 보유품 만료 임박 검증 조회 (기능 추가 / DRAFT / RELEASE HOLD)
+- **검증:** 표준 정책/백업/보안 171/171, 분류기 24/24, 한영 4쌍×9표식 PASS. 확장 175/176 중 오래된 브랜치 정리 시험 1건 실패(현재 워크플로는 읽기 전용). QA 정리 OPEN, 기능 E2E 미실행.
+
+- **회차:** 이전 Feature Improvement v1626 → 현재 Feature Addition v1628 → 다음 Feature Improvement v1630(잠정). main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, 미병합 #2402에 누적하는 별도 문서 브랜치. 개발 이슈 #2409, 신규 Draft PR 예정.
+- **실제 소스:** /shop/catalog은 보유품 expires_at과 효과 effect_expires_at을 구분한다. Nest GET /api/v1/shop/holdings는 shop_my_items_v2를 사용하며 마이그레이션 123은 clock_timestamp를 여러 번 호출하고 결과가 무제한이다. **읽기 전용** 현재 24/72시간 소유자 현황, 단일 DB 관찰시각, 정확한 전체 총계·상위 10개 묶음, 검증된 0건과 503 구분을 제안한다. 알림·WLD 성공 약속 금지.
+- **계약:** Nest GET /api/v1/shop/expiry-snapshot?hours=24|72, 엄격한 회원 세션·동의, PostgreSQL 17 REPEATABLE READ 읽기 전용·마이크로초 경계·bigint 문자열·직접 DML 금지, Next/Android/HEAD/오류 비공개, 60초 STALE, 한영 320px/TalkBack, 관리자 20명 이상 코호트, 기본 OFF.
+- **인계:** P0 OPS1628-01 SEC1628-02 FIN1628-03 REL1628-04; P1 SNAP1628-05..10(DB/API/Web/Android/Admin/QA). #993/#2233/#2345/#2330/#2340/#2357/#2366/#2404/#2405 독립 차단 유지. 공개 Test 버전만 main과 같고 Production 353c6d5...는 다르다. **DRAFT / RELEASE HOLD**, 런타임/DB/WLD/원장/Test/Production 변경 없음.
+- **근거:** 외부 독립 레퍼런스 신규 검증·중복 제거·근거 분류 0건, 누적 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 실제 기능 수용시험 미실행. 문서 정책 테스트/CI는 실행 후에만 결과 기록. 상세 영문 정본·국문 동등 계약은 PROJECT_PLAN에 있다.
+
 이전 추가 v1624 → 현재 보완 v1626 → 다음 추가 v1628(잠정). main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 재확인, 미병합 #2397 위 문서 전용, 개발 인계 #2396. **미구현.** 날짜별 설정상 configurationStatus(후보/요일 제외/중지/미동의/분류/UNKNOWN)와 실제 executionStatus(미래 미관찰, 오늘 09시 전/09~11시/11시 이후 미확인, 검증된 완전 조회 영수증만 평가됨, 제외 영수증은 조회 아님)를 분리. KST 실행 창 [09:00,11:00), 이전 설정 리비전 영수증은 과거 결과로 유지, 보유품 0건/전달 완료 추정 금지. 선택적 X-Preview-Expected-Revision 실제 불일치만 409; REPEATABLE READ는 조회 당시 증거. 엄격한 본인 7/14일 GET, DB 단일 시각·날짜별 적용일, 보유품 미래 조회/쓰기 금지, Next/Android 가드 전 비공개, 60초 STALE, 한영 WCAG/TalkBack, 관리자 20명 이상 집계·기본 OFF. P0 OPS1626-01 SEC1626-02 FIN1626-03 REL1626-04; P1 TRUTH1626-05~10. QA #2398 백엔드 2 FAIL·의존성 권고 9건, 정확 SHA E2E/복원 보류; Test 공개 버전 510dbe6...은 main과 일치하지만 HTTP 표시만, Production 353c6d5...는 불일치. 기능 시험 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS, 런타임/DB/WLD/원장/Test/운영 변경 없음. 양 언어 PROJECT_PLAN 상세.
 
 **현재 기획:** v1626 F675-212 시간·영수증 정합성 / 인계 #2396 / Draft PR #2402 / 운영 보류; #2397 기반.

@@ -1,5 +1,52 @@
 # 월덕 머니버스 — Living Project Plan
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
+
+## v2026.11.02.1628 — F675-213 회원 보유품 만료 임박 현황 검증 조회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 Feature Improvement v1626 → 현재 Feature Addition v1628 → 다음 Feature Improvement v1630(잠정). 기준 origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3을 시작·중간에 재확인하고 AGENTS.md, README.md, 영문 정본·한국어 대조 기획서, 실제 frontend/backend/app-api/DB, 열린 GitHub PR과 QA를 조사했다. 미병합 Draft #2402에 쌓는 문서 전용 브랜치이며 개발 인계 이슈는 **#2409**이다. F675-213은 **기획안이며 미구현**이다. 공개 Test 버전 API의 SHA가 main과 같아도 실행 이미지·DB·인증 E2E·독립 복원 증명은 아니다. Production은 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834이다. **DRAFT / RELEASE HOLD.**
+
+### 1. 목적·대상·대안
+- **대상과 문제:** 인증 및 최신 동의가 확인된 회원이 **현재** 소유한 보유품 중 향후 24/72시간 내 만료 예정인 항목을 확인한다. 아직 미구현인 F675-205–212 알림 설정·미래 일정과 독립적이다. 달력의 후보일은 실제 보유품 목록이 아니다. 구매·갱신·사용·장착·거래·WLD·작업자 변경은 허용하지 않는다.
+- **확인한 소스:** Next /account/notifications에는 목표/NPC 설정과 알림함이 있고 /shop/catalog은 보유품 expires_at과 효과 effect_expires_at을 구분한다. Nest GET /api/v1/shop/holdings는 shop_my_items_v2(actor)로 현재 보유품 전체를 읽는다. 불변 마이그레이션 123은 수량이 양수이고 미만료인 user_items를 반환하지만 clock_timestamp()를 여러 번 호출하고 조회 건수 제한·단일 관찰시각의 24/72시간 집계·완전성 증빙은 없다. 이는 **소스상 설계 공백**이지 실제 운영 알림 누락이나 개인정보 유출의 증거가 아니다.
+- **기각:** 브라우저에서 전체 보유품 응답 필터링(무제한·경합), 미래 보유품 예측, 누락 행을 만료 증명으로 간주, 알림·원장 쓰기 추가. **선택:** 서버가 검증한 읽기 전용 현재 만료 임박 집계와 상위 10개 미리보기.
+
+### 2. 회원 화면·상태·API
+- **진입:** /shop/catalog의 “만료 임박” 영역, /account/notifications에서 /shop/catalog로 연결(검증되지 않은 상품별 상세 링크 금지). 기본 24시간, 24/72시간 전환, 새로고침, 보유품 보기, 재시도 CTA. “KST [시각] 기준” 표시. 기간 전환 시 이전 응답 폐기. 알림 동의·요일·일시중지·카테고리 설정은 바꾸지 않으며 알림 생성·전달을 약속하지 않는다.
+- **상태:** LOADING, VERIFIED_NONEMPTY, VERIFIED_EMPTY(권위 있는 전체 조회 완료 증명 필수), UNAVAILABLE(503), CONSENT_REQUIRED(403), AUTH_REQUIRED(401), RATE_LIMITED(429), STALE/OFFLINE(60초 초과·계정/정책 전환), INVALID_QUERY(400). 잘못된 200·누락 행·잘린 결과·출처 불명·시간 초과를 빈 결과로 표시하지 않는다. 관찰시각과 같은 만료는 제외, 종료 경계와 같은 만료는 포함한다. expires_at NULL은 무기한으로 제외한다. 보유품 만료와 효과 종료·유지비 정지·판매 종료를 혼동하지 않는다.
+- **Nest GET 제안:** /api/v1/shop/expiry-snapshot?hours=24|72. hours 생략 시 24, 중복·0·73·비십진수·잘못된 인코딩·알 수 없는 인자·과도한 쿼리는 400. SessionGuard/AuthenticatedGuard/ConsentGuard, 서버 세션에서 소유자 결정, 클라이언트 소유자 UUID 불허. 읽기 전용이므로 쓰기 CSRF 없음. 세션+IP당 분당 30회 이하와 동시성 상한은 **설계 목표**, 429 Retry-After.
+- **검증된 200 DTO:** {sourceStatus:"VERIFIED", observedAtUtcMicros:"YYYY-MM-DDTHH:mm:ss.ffffffZ", windowHours:24|72, totalHoldingRows:"십진 bigint 문자열", totalUnits:"십진 bigint 문자열", totalGroups:"십진 bigint 문자열", hasMore:boolean, items:[{catalogId:UUID, code:string, name:string, categoryCode:string, expiresAtUtcMicros:string, quantity:"십진 bigint 문자열"}]}. items 최대 10개, 만료시각 오름차순·catalogId 오름차순, 정확한 (catalog_id, expires_at)별 묶음으로 중복 로트를 합산한다. 총계는 상위 10개가 아니라 **전체 적격 데이터** 기준, hasMore는 totalGroups>10인 경우에만 참이다. 구매 가격·소유자 내부 ID·원장 ID·민감 영수증·효과 정보는 반환하지 않는다. 검증된 0건은 모든 총계 "0", items [], hasMore false. v1에는 페이지네이션/커서가 없고 전체 보유품은 기존 상점 화면에서 본다.
+
+### 3. DB·트랜잭션·보안
+- **출처:** 추후 검토된 SECURITY DEFINER 읽기 모델(가칭 shop_expiring_holdings_summary)이 PostgreSQL 17의 **단일 REPEATABLE READ READ ONLY 스냅샷**에서 public.user_items와 public.shop_catalog를 조회한다. DB clock_timestamp()를 **단 한 번** 호출해 UTC 마이크로초 관찰시각을 얻고, 본인 수량>0 및 held.expires_at > asOf AND <= asOf + 24|72시간 조건으로 전체 집계와 상위 10개를 동일 스냅샷에서 계산한다. effect_expires_at, JS Date 밀리초 반올림, 미래 알림 달력, 영수증 부재를 보유품 만료 판정 근거로 사용하지 않는다. 실제 행 식별자·수량 의미·소유자 연결을 증명하지 못하면 503/BLOCKED이며 완화된 SQL로 대체하지 않는다.
+- **제약·인덱스:** 신규 마이그레이션 전에 최신 번호·실제 스키마·권한·폐기 가능한 PostgreSQL 복제본의 EXPLAIN (ANALYZE, BUFFERS)을 확인한다. 필요시 quantity>0 조건부 (user_id, expires_at, catalog_id) 인덱스를 검토하되 실제 테이블과 제약 호환성 우선. 수량 음수 방지 및 bigint SUM 오버플로·JS 안전 정수 문제를 검증하고 십진 문자열로 직렬화한다. 승인 시에만 순방향 불변 마이그레이션, PUBLIC 실행 권한 회수, moneyverse_app 직접 테이블 DML 금지, 검토된 EXECUTE만 허용, 고정 search_path와 소유자·세션 연결을 적용한다. p_actor를 받는 함수 자체는 DB 차원의 본인 인증 증거가 아니므로 SQL 역할/HTTP 교차 회원 음성 테스트가 필수다.
+- **동시성·성능:** 전체 적격 행에 같은 asOf를 사용한다. 스냅샷 이후 구매·사용은 과거 응답을 소급 변경하지 않는다. 관찰시각 표시, 계정 변경·아이템 변경 즉시 폐기, 최대 60초 이후 STALE. 백그라운드 스캔·DB 쓰기·아이템 변경 잠금 없음. 10,001건 이상에서 상위 10개 및 p95 250ms 미만은 **미측정 테스트 목표**이다. 개인별 스냅샷 영구 저장·내보내기·물리화 뷰·개인정보 감사 로그는 추가하지 않는다.
+
+### 4. 웹·Android·관리자·SEO·분석
+- **비공개 응답:** Nest·Next BFF·Android app-api의 정확한 경로에서 인증 가드 이전부터 GET/HEAD 및 200/400/401/403/405/429/503·상류 장애에 private/no-store/noindex/nofollow/no-referrer/nosniff 적용. ETag·Last-Modified·Expires 제거, 304 금지, CDN/Android 디스크 캐시 금지, URL·로그·사이트맵·공개 HTML에 소유자 정보 금지. 응답 스키마와 배열·문자열 길이를 검증하고 잘못된 HTTP 200은 503 UNVERIFIED로 처리한다.
+- **접근성:** 320px·200% 확대·44px 이상 터치, 키보드·포커스·스크린리더 상태/건수 알림·TalkBack·모션 감소·한영 동등 문구, 24/72시간 전환·관찰시각·STALE/재시도 표시. 허위 상품별 상세 링크, 만료 확정 문구, 자동 갱신 CTA 금지. 기존 보유품 화면으로 이동한다.
+- **관리자:** 회원별 조회·가장·내보내기 없이 집계만 사용. 사용량, VERIFIED_EMPTY/NONEMPTY/UNAVAILABLE, 401/403/429/503, STALE 폐기, p50/p95, 상위 10개 초과율을 모니터링한다. 20명 미만 코호트와 소수 셀은 비공개. F675_213_EXPIRY_SNAPSHOT_ENABLED 기본 OFF. 출처 검증 성공률 99% 이상과 p95 250ms 미만은 **관측값이 아닌 목표**다.
+
+### 5. P0/P1 개발 인계 및 수용시험
+1. **P0 OPS1628-01:** Test/Production 실행 SHA·GitOps/공개 엣지·독립 복원과 원장 대조 증명(#1984/#2171).
+2. **P0 SEC1628-02:** 실제 앱 역할 권한·세션→소유자 SQL 증빙·교차 회원 차단·마이그레이션 번호/출처(#993/#2233/#2345).
+3. **P0 FIN1628-03:** 제작 #2330, 주식 #2340, 시즌 #2357, 국고 #2366, 소각 추첨 #2404, 부동산 #2405의 금융 진실성 차단을 별도 유지한다. 본 기능은 WLD 변경이 없다.
+4. **P0 REL1628-04:** 최신 QA의 백엔드 실패·의존성 권고를 반영하고 공식 정확 후보 SHA 인증 Test·실제 DB/보안·app-api·독립 복원 전 운영승격 금지.
+5. **P1 SNAP1628-05 (B/DB):** 단일 asOf·소유자 읽기 함수·24/72시간 정확 집계·10,001건 이상·인덱스/권한 증명, 직접 DML 없음.
+6. **P1 SNAP1628-06 (B/API):** GET DTO·엄격한 인자·세션/동의/속도·503 실패 닫힘·계약 테스트.
+7. **P1 SNAP1628-07 (A/Web):** 상점 영역·알림 설정 연결·검증됨/빈 결과/STALE/장애 UI·허위 링크 금지.
+8. **P1 SNAP1628-08 (C/Android):** 비공개 app-api 경계·잘못된 200/HEAD/304·계정 전환·TalkBack 테스트.
+9. **P1 SNAP1628-09 (A/B/Admin):** 기본 OFF·20명 이상 코호트 집계·직원→일부 회원 배포·감사·플래그 우선 롤백.
+10. **P1 SNAP1628-10 (QA):** 격리 PostgreSQL 17 초기/업그레이드, 10,001건 이상, 2회원 SQL EXECUTE/HTTP 위조 음성, 동일 asOf 마이크로초 하한·상한, NULL, 같은 카탈로그 중복 로트, 큰 bigint 합계, 동시 사용, 24/72/잘못된 인자, 비공개 HEAD/304, 오프라인·계정 전환, 320px 한영, WLD·아이템·원장 변화 0, 공식 정확 SHA Test E2E와 독립 복원. **기능 수용시험은 제안일 뿐 미실행**이다.
+
+### 6. 배포·외부 근거·기록
+- **이번 문서 QA:** 표준 백업/릴리스/보안 **171/171 PASS**, 분류기 **24/24 PASS**, 한영 4쌍×9표식 PASS, git diff --check PASS. **확장** 시험에서 scripts/release/tests/verify-merged-pr-head.test.mjs를 추가하면 **175/176 PASS, 1 FAIL**이다. 오래된 시험은 정확 HEAD 게이트 뒤 파괴적 git push를 요구하지만 실제 cleanup-merged-branches.yml은 contents:read이며 git push가 없는 **읽기 전용** 작업이다. 이는 QA가 정리할 **오래된 시험·워크플로 계약 불일치**이지 실제 브랜치 삭제 증거가 아니다. 실패를 숨기지 않고 RELEASE HOLD 유지, 신규 기능 수용시험 미실행.
+
+- 기획 예약은 코드를 구현·배포하지 않는다. 개발 A/B/C/QA는 별도 브랜치, RED→GREEN, 실제 스키마·권한 검토, 공식 Test **정확 후보 SHA**, 금융·보안·백업 게이트, 운영자 승인, OFF→직원→일부 회원 후 승격한다. 롤백은 기능 OFF 우선, 이후 검증된 불변 이미지로 되돌린다. 문서 CI 성공이나 공개 /api/version 값만으로 운영 성공을 주장하지 않는다. 읽기 모델 장애 시 기능만 숨기며 과거 보유품은 변경하지 않는다.
+- 외부 독립 레퍼런스 신규 획득·검증·중복 제거·근거 분류 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 10,000건 달성 주장 및 외부 서비스 홍보 숫자 전용 금지. 런타임·DB·WLD·원장·아이템·Test·Production 변경 없음.
+- **작업 기록:** miniPC planning-v1628-records START/MID/FINISH, 영문 정본·국문 동등 통합 기획서/업데이트 로그/쌍 작업일지, 개발 이슈 #2409, 신규 Draft PR OPEN/HOLD. 최종 커밋·완료 전에 origin/main과 두 기획서를 다시 확인한다.
+
+
 
 ## v2026.11.02.1626 — F675-212 만료 알림 일정 미리보기의 시간·영수증 진실성 보완 (기능 보완 / 초안 / 운영 보류)
 
