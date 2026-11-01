@@ -12,7 +12,8 @@
 
 ## In progress
 - Planned: strict query parser, Nest web/Android endpoints, shared published snapshot filtering, Next accessible search form, Android response verification, regression tests, contract update.
-- Status: NOT YET IMPLEMENTED.
+- RED evidence: backend and frontend Vitest fail to import missing announcement-body module; logs evidence/red-backend.log and evidence/red-frontend.log at 21:29 KST. Tests were written before implementation.
+- Status: implementing minimal shared snapshot filters.
 
 ## Finished
 - Pending evidence. Production and Test must remain unchanged.
