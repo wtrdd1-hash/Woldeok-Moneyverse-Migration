@@ -10,8 +10,19 @@
 ## In progress
 - [x] RED HTTP regression: 3 failures of 5 tests; missing and invalid CSRF reached the 503 service instead of returning 403.
 - [x] Minimal route guard: @UseGuards(CsrfGuard) on SOE dividend harvest; no SQL/ledger/API shape changes.
-- [ ] GREEN and project gates: focused HTTP 5/5 PASS; full gates pending.
-- [ ] Recheck main and release HOLD
+- [x] GREEN and project gates: focused HTTP 5/5 PASS; full gates executed.
+- [x] Recheck main and release HOLD
 
 ## Finished
-- Pending.
+
+## Finished — 2026-11-02 05:46 KST
+- Focused HTTP 5/5 PASS. Backend full 2983 PASS / 2 FAIL / 518 SKIP.
+- Frontend 2922 PASS; database 62 PASS / 5 SKIP; contract 41 PASS; security 22 PASS.
+- Isolated PostgreSQL 17.11: 322 migrations, 48 PASS / 2 SKIP.
+- Lint, typecheck, build PASS; full audit 9 findings.
+- Exact-SHA Test BLOCKED; no merge or deployment.
+- Main SHA a8541927c3a351d980454c66e95a3356c47e0722; RED SHA 705f07ac0; code SHA 5560ce5ad.
+- Mobile API 184 endpoints match; production dependency audit PASS; full audit FAIL (9 findings).
+- Official Test /api/version is 510dbe6bf4d5c2a8089fc06b480776053da7a2e3, not candidate.
+- Draft/HOLD PR #2430. Exact-SHA Test, auth E2E and GitOps release gates NOT VERIFIED.
+- No merge, deployment or branch cleanup; other workers unchanged.
