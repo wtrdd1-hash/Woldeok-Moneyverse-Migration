@@ -1,0 +1,11 @@
+# QA — A 2026-11-02 05:25 Stock Discussion Category Filter
+
+**Status: DRAFT / RELEASE HOLD** — exact SHA `5d884a4decd50eeac7ebc38dede588a2a093703f` (code checkpoint; final documentation SHA pending).
+
+- Scope: Nest GET `/api/v1/board/public/stock-posts?category=analysis|question|journal|business|system`; Next `/board` GET selector; Android `/app-api/v1/board/public/stock-posts`; existing PostgreSQL `member_board_public_list_with_stock(50)`. Filter is applied **after** the latest 50 public rows, not to the full archive.
+- TDD RED backend 7 failing tests / frontend 7 failing tests; GREEN backend 26/26 and frontend 14/14. Invalid and duplicate category inputs rejected; Android mismatched/missing stock context and duplicate post IDs fail closed (503). SEO selector and noindex/no-store regression tests included.
+- `pnpm typecheck` PASS, changed-file lint PASS. API contract generated: 184 endpoints. Root full tests exit 0: backend 2,991 PASS/518 SKIP, frontend 2,936 PASS, DB 62 PASS/5 SKIP, contract 41 PASS. Full lint 0 errors/1,027 warnings; full build PASS (602 Next pages); production dependency audit 0 findings PASS; full dependency audit 9 advisories FAIL (1 low, 8 moderate). The full test log includes a terminated duplicate invocation; the surviving command exited 0.
+- PostgreSQL 17.11 DEV `moneyverse_app` read-only transaction: `member_board_public_list_with_stock(integer)` EXECUTE=true, public rows=1, analysis rows=0, exact filter SQL executes, ROLLBACK. Multi-row real positive category case **NOT VERIFIED**. No new migration, DML, privilege, financial transaction or idempotency change.
+- **P0 SEC FAIL (#993):** DEV `moneyverse_app` effective `account_balances` UPDATE=true and `user_items` DELETE=true; Production ACL not tested. Existing unmerged B remediation PR #2419 protected.
+- **Release blockers:** official Test and Production publicly advertise `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not candidate; authenticated exact-SHA Test E2E, independent backup restore, Production provenance and GitOps release gate not verified. PR #2425 and #2417 virtual merges each conflict in six code files; preserve both unique changes.
+- **Deployment:** no main merge, Test/Production deployment, restart, DB mutation or branch deletion. Rollback is feature-code revert after a verified release; no rollout performed.
