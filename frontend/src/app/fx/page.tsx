@@ -111,6 +111,7 @@ export default function SeoulFxPortalPage() {
         json?.success === true &&
         evidence?.spotRateVerified === true &&
         evidence?.ledgerBacked === true &&
+        evidence?.settlementReady === true &&
         typeof evidence?.asOf === 'string' &&
         Number.isFinite(Date.parse(evidence.asOf)) &&
         typeof reserves?.currentRate === 'number' &&

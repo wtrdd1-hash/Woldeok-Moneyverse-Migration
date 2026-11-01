@@ -36,6 +36,30 @@ describe('FX source truth and settlement hold', () => {
     expect(document.body.textContent).not.toContain('1352.50');
   });
 
+  it('does not expose trade controls when quote evidence exists but settlement is still blocked', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          reserves: {
+            currency: 'WLD', currentRate: 1300, totalReservesUsd: 100,
+            targetAnchorRate: 1300, isHalted: false, updatedAt: '2026-11-01T01:00:00Z',
+          },
+          history: [],
+          sourceEvidence: {
+            spotRateVerified: true, ledgerBacked: true,
+            settlementReady: false, asOf: '2026-11-01T01:00:00Z',
+          },
+        },
+      }),
+    } as Response);
+    render(<SeoulFxPortalPage />);
+    expect((await screen.findByRole('alert')).textContent).toContain('원장 정산');
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(document.body.textContent).not.toContain('1300.00');
+  });
+
   it('retries source read without silently accepting unavailable state as an empty market', async () => {
     vi.mocked(fetch).mockResolvedValue({ ok: false, status: 503 } as Response);
     render(<SeoulFxPortalPage />);
