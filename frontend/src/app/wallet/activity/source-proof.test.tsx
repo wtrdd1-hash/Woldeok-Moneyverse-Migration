@@ -37,9 +37,9 @@ describe('wallet activity server-rendered owner proof', () => {
     const html = renderToStaticMarkup(await WalletActivityPage({ searchParams: Promise.resolve({ direction: 'out' }) }));
     expect(html).toContain('지금은 기록을 불러올 수 없어요.');
     expect(html).not.toContain('Bank transfer');
-    expect(html).toContain('role=\"status\"');
-    expect(html).toContain('aria-live=\"polite\"');
-    expect(html).toContain('href=\"/wallet/activity?direction=out\"');
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain('href="/wallet/activity?direction=out"');
     expect(html).toContain('다시 조회');
     expect(html).toContain('min-h-11');
   });
