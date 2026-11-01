@@ -9,3 +9,7 @@
 
 ## IN PROGRESS
 - Worktree initialized, no main checkout edits. Production and Test unchanged.
+
+### RED checkpoint
+- Backend three new tests failed as expected; frontend/Android ten new tests failed as expected (missing parser, unsupported filter, no Android validation). Logs: task/evidence/backend-red.log and frontend-red.log.
+- Revised Android path to existing `/app-api/v1/content/announcements` (not unregistered `/announcements`) and added app content controller coverage before implementation.
