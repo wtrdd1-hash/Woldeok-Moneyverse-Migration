@@ -38,16 +38,22 @@ export default async function PublicPensionPage() {
       const [contribs, payLogs, wallet] = await Promise.allSettled([
         api<unknown>('/api/v1/pension/my-contributions'),
         api<unknown>('/api/v1/pension/my-payouts'),
-        api<unknown>('/api/v1/wallet/summary'),
+        api<unknown>('/api/v1/wallet'),
       ]);
       contributions = contribs.status === 'fulfilled' ? verifyPensionContributions(contribs.value, owner) : null;
       payouts = payLogs.status === 'fulfilled' ? verifyPensionPayouts(payLogs.value, owner) : null;
-      if (wallet.status === 'fulfilled' && wallet.value && typeof wallet.value === 'object') {
+      if (wallet.status === 'fulfilled' && wallet.value && typeof wallet.value === 'object' &&
+          !Array.isArray(wallet.value)) {
         const value = wallet.value as Record<string, unknown>;
-        const cash = canonicalIntegerString(value.cashBalance ?? value.balance);
-        if (cash !== null && !cash.startsWith('-')) {
-          userCashBalance = cash;
-          walletVerified = true;
+        const balances = value.balances;
+        if (balances && typeof balances === 'object' && !Array.isArray(balances)) {
+          const source = balances as Record<string, unknown>;
+          const cash = canonicalIntegerString(source.totalAvailableAmount);
+          if (source.currency === 'WLD' && typeof source.totalAvailableAmount === 'string' &&
+              cash !== null && !cash.startsWith('-') && cash === source.totalAvailableAmount) {
+            userCashBalance = cash;
+            walletVerified = true;
+          }
         }
       }
     } else {

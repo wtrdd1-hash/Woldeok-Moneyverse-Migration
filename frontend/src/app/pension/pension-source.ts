@@ -24,7 +24,12 @@ function count(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 function date(value: unknown): value is string {
-  return typeof value === 'string' && DATE.test(value) && Number.isFinite(Date.parse(value));
+  if (typeof value !== 'string' || !DATE.test(value) || !Number.isFinite(Date.parse(value))) return false;
+  const year = Number(value.slice(0, 4));
+  const month = Number(value.slice(5, 7));
+  const day = Number(value.slice(8, 10));
+  return month >= 1 && month <= 12 && day >= 1 &&
+    day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
 export function verifyPensionOverview(raw: unknown): NationalPensionOverview | null {

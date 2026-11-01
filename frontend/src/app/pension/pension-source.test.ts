@@ -52,6 +52,7 @@ describe('P1 pension evidence at the Next/Nest boundary', () => {
     expect(verifyPensionPayouts({ items: [] })).toBeNull();
     expect(verifyPensionContributions([contribution, contribution])).toBeNull();
     expect(verifyPensionPayouts([payout, { ...payout, id: second, created_at: 'not-a-date' }])).toBeNull();
+    expect(verifyPensionPayouts([{ ...payout, created_at: '2026-02-30T00:00:00Z' }])).toBeNull();
     expect(verifyPensionContributions([{ ...contribution, amount_wld: -10 }])).toBeNull();
     expect(verifyPensionPayouts([{ ...payout, snapshot_accumulated_wld: '-5' }])).toBeNull();
     expect(verifyPensionPayouts(Array.from({ length: 21 }, (_, i) => ({ ...payout, id: uuid + i })))).toBeNull();

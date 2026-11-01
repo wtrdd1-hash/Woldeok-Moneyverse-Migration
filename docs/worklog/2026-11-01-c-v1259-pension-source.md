@@ -12,6 +12,8 @@
 - [x] GREEN: six initial parser/UI tests and four server boundary tests; all pension focused suites now 13 PASS.
 - [x] Nest `pension_owner_contributions` / `pension_owner_payout_logs` owner functions and controller guards inspected; no new backend route or DB schema. Existing `GET my-account` creates a row when absent; this pre-existing side effect is NOT a new read-only contract and needs separate B/QA review.
 - [x] Midpoint `git fetch origin main` still `f13bbce273ffc65e8576170992d82ea00c27a1c9`; other active PRs unchanged, protected.
+- [x] Additional RED found wallet API route `/api/v1/wallet/summary` does not exist in Nest; expected verified WLD remained `0`. GREEN switched to real `GET /api/v1/wallet` with `balances.currency=WLD`, exact `totalAvailableAmount` and rejects wrong currency/unsafe amounts. 13 focused tests PASS.
+- [x] Duplicate discovery: previous local C candidates v1188 (#1982), v1209 (#2083), and unmerged remote v1243 `6cf6b6e3` overlap. Preserve all, keep this PR Draft; compare source/HTTP privacy before any integration.
 - [ ] Full exact-SHA build/lint/typecheck/tests/security/real-PG/CI/E2E gates; release hold remains.
 
 
