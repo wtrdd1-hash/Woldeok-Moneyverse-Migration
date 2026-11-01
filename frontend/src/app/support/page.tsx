@@ -4,13 +4,12 @@ import { api } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange } from '@/lib/support-date-range';
+import { parseSupportMessages, parseSupportThreads } from './support-conversation-evidence';
 import { NewSupportThreadForm, SupportReplyForm } from './member-support-forms';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '관리자 문의', robots: { index: false, follow: false } };
 
-type Thread = { thread_id: string; subject: string; status: string; created_at: string; last_message_at: string };
-type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };
 const label: Record<string,string> = { open: '관리자 답변 대기', waiting_user: '내 답변 대기', resolved: '처리 완료' };
 
 export default async function SupportPage({ searchParams }: { searchParams: Promise<{ thread?: string; status?: string; q?: string; sort?: string; from?: string; to?: string }> }) {
@@ -25,17 +24,19 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const to = range ? params.to! : null;
   const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from, to } : {}) } as Record<string, string>);
   const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ""}`;
-  const { threads } = q
-    ? await api<{ threads: Thread[] }>(path, {})
-    : await api<{ threads: Thread[] }>(path);
+  const threadsSource = await api<unknown>(path).catch(() => null);
+  const verifiedThreads = parseSupportThreads(threadsSource);
+  const threadsUnavailable = verifiedThreads === null;
+  const threads = verifiedThreads ?? [];
   const summary = parseSupportSummary(
     await api<unknown>('/api/v1/support/threads/summary').catch(() => null),
   );
   // A stale or forged selected ID must not trigger an additional private read.
   const selected = threads.find(t => t.thread_id === params.thread)?.thread_id ?? threads[0]?.thread_id;
-  const messages = selected
-    ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
-    : [];
+  const messageSource = selected
+    ? await api<unknown>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`).catch(() => null)
+    : { messages: [] };
+  const messages = parseSupportMessages(messageSource);
   return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
@@ -58,7 +59,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
           </>
         )}
       </section>
-      <NewSupportThreadForm />
+      {!threadsUnavailable ? <NewSupportThreadForm /> : null}
       <form method="get" action="/support" className="grid gap-2 rounded-xl border bg-card p-3">
         <label htmlFor="support-search" className="text-sm font-semibold">문의 제목 검색</label>
         <input id="support-search" name="q" type="search" maxLength={80} defaultValue={q} autoComplete="off" className="min-h-11 w-full rounded-xl border bg-background p-2" placeholder="최근 문의 제목 검색" />
@@ -82,12 +83,12 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
         {(params.from || params.to) && !range && <p role="alert" className="text-sm text-destructive">유효한 시작일과 종료일을 함께 입력하세요 (최대 366일).</p>}
         <button type="submit" className="min-h-11 rounded-xl border bg-primary px-4 text-primary-foreground">필터 적용</button>
       </form>
-      <div className="grid gap-2">{threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from: from!, to: to! } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
+      <div className="grid gap-2">{threadsUnavailable ? <div role="alert" className="grid gap-2 rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-sm"><p>문의 목록을 확인할 수 없습니다. 조회 장애는 문의가 없다는 뜻이 아닙니다.</p><Link href="/support" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">다시 조회</Link></div> : threads.length === 0 && <p className="text-sm text-muted-foreground">{q ? '검색 결과가 없습니다.' : '조건에 맞는 문의가 없습니다.'}</p>}{threads.map(t => <Link key={t.thread_id} href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from: from!, to: to! } : {}), thread: t.thread_id }).toString()}`} className={`rounded-xl border p-3 ${selected===t.thread_id?'bg-primary/10 border-primary':'bg-card'}`}>
         <div className="font-bold">{t.subject}</div><div className="text-xs text-muted-foreground">{label[t.status] ?? t.status}</div>
       </Link>)}</div>
     </section>
     <section className="flex min-h-[60vh] flex-col rounded-2xl border bg-card p-4">
-      {!selected ? <p className="m-auto text-muted-foreground">새 문의를 작성하면 관리자와 대화를 시작할 수 있습니다.</p> : <>
+      {!selected ? <p className="m-auto text-muted-foreground">{threadsUnavailable ? '문의 목록을 확인한 뒤 대화를 선택할 수 있습니다.' : '새 문의를 작성하면 관리자와 대화를 시작할 수 있습니다.'}</p> : messages === null ? <div role="alert" className="m-auto grid gap-3 rounded-xl border border-amber-500/50 p-4 text-sm"><p>대화 내역을 확인할 수 없습니다. 확인되지 않은 메시지는 표시하거나 답장할 수 없습니다.</p><Link href={`/support?${new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from: from!, to: to! } : {}), thread: selected }).toString()}`} className="inline-flex min-h-11 items-center rounded-lg border px-4 py-2 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">다시 조회</Link></div> : <>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
           <p className="text-xs text-muted-foreground">대화 내역은 오래된 순으로 최대 500건까지 다운로드할 수 있습니다.</p>
           <a href={`/support/transcript/${encodeURIComponent(selected)}`} download className="inline-flex min-h-11 items-center rounded-xl border px-4 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" aria-label="선택한 관리자 문의의 대화 내역 CSV 다운로드">대화 내역 CSV 다운로드</a>

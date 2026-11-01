@@ -12,3 +12,9 @@
 
 ## END / PENDING
 - No merge/Test/Production before all gates PASS.
+
+### 19:49 KST checkpoint
+- TDD RED: 4 failing / 1 passing page tests reproduced `threads.find is not a function`, thrown backend outage, fabricated sender rendering and unhandled message outage.
+- GREEN: 9/9 focused page tests passed; frontend typecheck passed.
+- Implementation: bounded envelope validation for owner thread and message arrays, duplicate/sender rejection, distinct unavailable vs verified-empty UI, retry links, no reply/transcript actions on invalid message source. Existing SQL owner scope unchanged.
+- Next: full support regression, lint/build/unit/contract/DB/security/CI; keep release HOLD.
