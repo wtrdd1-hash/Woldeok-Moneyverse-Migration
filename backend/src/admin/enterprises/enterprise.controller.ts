@@ -63,6 +63,7 @@ export class AdminEnterpriseController {
   }
 
   @Post('soes/harvest')
+  @UseGuards(CsrfGuard)
   @ApiResponse({
     status: 503,
     description: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE: atomic dividend settlement not certified',

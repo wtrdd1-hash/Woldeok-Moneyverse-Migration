@@ -9,8 +9,8 @@
 
 ## In progress
 - [x] RED HTTP regression: 3 failures of 5 tests; missing and invalid CSRF reached the 503 service instead of returning 403.
-- [ ] Minimal route guard
-- [ ] GREEN and project gates
+- [x] Minimal route guard: @UseGuards(CsrfGuard) on SOE dividend harvest; no SQL/ledger/API shape changes.
+- [ ] GREEN and project gates: focused HTTP 5/5 PASS; full gates pending.
 - [ ] Recheck main and release HOLD
 
 ## Finished
