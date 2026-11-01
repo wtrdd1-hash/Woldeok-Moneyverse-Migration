@@ -10,3 +10,6 @@
 
 ## 실제 HTTP 발견·수정
 독립 Next HTTP 시험에서 원본 fetch Response의 불변 헤더를 수정하려 해 HTTP 500 발생. 회귀 테스트를 추가해 RED 1건 재현 후, 최종 NextResponse에만 개인정보 헤더를 적용하도록 수정하여 집중 테스트 8건 PASS. 첫 SHA는 폐기하고 수정 SHA에서 재검증 필요. 독립 PostgreSQL 322개 마이그레이션 적용 성공, 소유자 1건·타 회원 0건, 직접 테이블 조회 권한 없음. 기존 Backend 프로필 HTTP 테스트 2건 실패 및 보안 감사 9건, 전체 경로 QA 누락으로 배포 차단.
+
+## 실제 엣지 헤더 결함 추가 수정
+독립 HTTP에서 정상 200/오류 503은 확인했지만 Next 전역 헤더가 `noindex` 및 `no-referrer`를 덮어쓰는 문제를 발견함. `/app-api/v1/photos/mine` 경로에만 별도 개인정보 헤더 정책을 추가함. 테스트 RED 1건 재현 후 집중·엣지 테스트 17건 PASS. 새 SHA의 전체 재검증 및 HTTP 재검사 필요.

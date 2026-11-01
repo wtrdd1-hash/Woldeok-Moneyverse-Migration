@@ -27,3 +27,8 @@ The member-only /gallery/submit page types the untrusted GET /api/v1/photos/mine
 - Earlier SHA d30869ade is **superseded**; all passing gates from it require revalidation at the corrected HEAD.
 - First isolated PostgreSQL attempt hit the entrypoint's temporary server shutdown (not a schema defect); a clean retry passed **322/322 migrations**, owner rows=1, other owner rows=0, direct photos SELECT=false. Container removed.
 - Initial whole-suite results on superseded SHA: Frontend 2929 PASS; Backend 2978 PASS / 2 FAIL (existing profile private HTTP tests) / 518 SKIP. API contract 184 PASS, DB package 62 PASS / 5 SKIP; security scripts 17 PASS; production dependency audit PASS; all-dependency audit FAIL (9 vulnerabilities), full-route QA FAIL (missing ledger).
+
+## IN PROGRESS — actual edge policy correction
+- Second isolated Next HTTP probe: valid owner list HTTP 200 and malformed owner list HTTP 503, **but Next's global config overwrote the route's X-Robots-Tag to index/follow and Referrer-Policy to strict-origin-when-cross-origin**. The HTTP privacy gate therefore FAILED despite route-level Vitest PASS.
+- Added a route-specific `next.config.ts` policy for `/app-api/v1/photos/mine` (private/no-store, noindex, no-referrer), after the global policy; test RED 1 then GREEN 17 focused/edge assertions. This is a narrowly scoped follow-up to the existing global header issue tracked in Draft #2225, without editing that PR.
+- A new SHA and full rebuild/HTTP retest are required. Official Test and Production unchanged.
