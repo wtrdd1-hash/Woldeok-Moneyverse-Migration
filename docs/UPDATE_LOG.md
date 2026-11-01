@@ -1,3 +1,7 @@
+
+## v2026.11.01.1618 — F675-210 Registry and Claim Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+Previous Addition v1616 → Current Improvement v1618 → Next Addition v1620. Main 3d5e321c3d1221febff677469fecdfcb3cf42e7d checked start/mid. Category CHECK 071/114 is not approved KO/EN taxonomy; proposed immutable registry version, retired saved-code review, same-asOf holding-expiry worker claim, fail-closed UNKNOWN_SCOPE, pre-guard Android/Next privacy and P0 4/P1 6 handoff #2368. Stacked on Draft #2369, new Draft pending. No implementation or deployment; external 0 new, UNKNOWN/10,000 cumulative, RELEASE HOLD.
+
 ## v2026.11.01.1616 — F675-210 Owner Digest Category Scope (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 Previous Improvement v1614 → Current Addition v1616 → Next Improvement v1618. Proposed server-verified category registry and ALL/SELECTED 1–16 owner digest preference, versioned taxonomy, owner CAS/idempotency, worker fail-closed, Web/Android privacy/a11y. Docs-only Draft `#2369` stacked on #2361, handoff `#2368`; P0 4/P1 6, external new 0 / cumulative UNKNOWN of 10,000; RELEASE HOLD.
 

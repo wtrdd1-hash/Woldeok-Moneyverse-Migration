@@ -1,5 +1,42 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.01.1618 — F675-210 카테고리 레지스트리·만료 판정·작업자 증빙 정합성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 **기능 추가 v1616** → 현재 **기능 보완 v1618** → 다음 **기능 추가 v1620(잠정)**. 시작·중간 최신 main 3d5e321c3d1221febff677469fecdfcb3cf42e7d의 AGENTS.md·README.md·영문 PROJECT_PLAN 정본·한국어 대조·실제 Next/Nest/app-api/DB·GitHub PR/QA 확인. 미병합 기획 Draft #2369(57412c0896d893431bf2c972771c3995c45a7f13) 기반 문서 전용, 개발 이슈 #2368 연계. F675-205/207/208/209/210 모두 **미구현 기획**. 운영 카테고리·DB 권한을 직접 검증했다고 주장하지 않는다.
+
+### 실제 소스와 기존 설계의 모순
+1. **DB 카테고리 CHECK 목록은 승인된 회원용 분류표가 아니다(P0 설계 위험).** migration 071은 초기 6종, 114는 frame/background/effect/nameplate/title/badge/season/limited/business/convenience/general/job/vehicle/luxury **14개 허용 코드**를 정의한다. 그러나 허용 코드는 실제 판매 중·만료 대상 아이템 존재, 승인된 한영 라벨, Production 동일 상태를 증명하지 않는다. v1616에서 확인한 DEV DB 고유 코드 14개는 개발 환경 관찰일 뿐 영속 레지스트리 근거가 아니다. migration 123의 `shop_my_items_v2`는 카테고리와 보유 만료시각을 반환하지만 공인 한영 카테고리 레지스트리를 제공하지 않는다. `SELECT DISTINCT` 실시간 결과·개수·수정 가능한 라벨·관찰시각을 `registryVersion`으로 사용하지 않는다.
+2. **카테고리 설정과 만료 알림 집계는 다른 문제다.** 123은 여러 `clock_timestamp()`로 이미 만료된 보유품을 제외하며 별도 효과 만료시각도 반환한다. 이는 미래 24/72시간 알림의 동일 시점 집계 증빙이 아니다. 서로 다른 HTTP 조회에서 카테고리를 필터링하면 만료·카테고리 변경·작업자 claim 사이에 결과가 달라질 수 있다. 보유품 만료와 효과 만료를 혼동하거나 소스 오류를 “예정 0건”으로 표시하지 않는다.
+3. **저장한 선택 코드가 폐기·재분류될 수 있다.** v1616의 배열 1~16개 CHECK만으로 유일·정렬·승인 레지스트리 포함을 검증할 수 없다. 폐기된 코드를 자동 삭제하거나 SELECTED를 ALL로 바꾸면 회원 동의 없이 알림 범위가 확대된다. GET→PUT 또는 저장→09시 작업자 사이의 버전 변경은 별도 오류/검토 상태가 필요하다.
+4. **개인정보 보호는 경로별 명시가 필요하다.** 확인한 main의 Android app-api는 `shop/purchases`를 비공개 대상으로 처리하지만 제안 경로 `shop/expiry-digest/category-scope`는 포함하지 않는다. 현재 알림 설정 페이지에는 만료 알림 카테고리 기능이 없다. C의 알림함 페이지 PR #2373과 B의 HTTP 개인정보 PR을 건드리지 않고 개발 인계한다.
+
+**보완 결정:** 운영자가 승인한 코드·한영 라벨·ACTIVE/RETIRED 수명주기·만료 알림 적격 여부·출처 리비전으로 구성한 **버전형 공개 레지스트리**, 단일 회원 설정 행, 회원/KST 날짜별 불변 작업자 claim 스냅샷을 사용한다. 클라이언트 고정 분류, DISTINCT 기반 분류, 자동 전체 전환, 검토 없는 DB 직접 권한 부여는 거부한다. 기본적으로 새 테이블을 만들지 않지만, 현행 스키마에서 영속적인 승인 버전과 작업자 검증이 불가능하면 정식 전방 마이그레이션 검토 전까지 **BLOCKED**이다. 금융 원장은 변경하지 않는다.
+
+### 회원 동선·API·분류 변경의 정확한 처리
+- **대상·진입:** 인증·동의 유효 회원의 `/account/notifications` → 별도 '만료 알림 카테고리' 카드 → **모든 카테고리(향후 승인된 신규 카테고리 포함)** / **직접 선택(1~16개)** → **선택 저장**, **전체로 초기화**, **취소**, **다시 시도**, **변경된 카테고리 검토**. 저장만으로 알림 활성화·조회기간(24/72시간)·일시중지(1/3/7일)·보안/거래 알림·기존 알림함이 변경되지 않는다. 당일 이미 처리된 claim은 수정하지 않으며 다음 **수신 가능** 알림부터 적용될 수 있을 뿐 오늘 발송을 보장하지 않는다.
+- **승인 레지스트리:** migration 114의 14개 허용 코드를 **후보**로 사용하고 코드별 승인된 labelKo/labelEn, ACTIVE/RETIRED, expiryScopeEligible를 명시한다. 승인된 ACTIVE·만료 알림 적격 코드만 선택 가능하다. `registryVersion`은 코드·라벨·수명주기·적격 여부·스키마/정책 리비전의 정렬된 불변 본문에 대한 결정적 다이제스트이다. 적용 마이그레이션·실제 DB·공인 정책과 일치하기 전에는 게시하지 않는다. 현재 상품 행이 없는 코드를 자동 폐기하지 않으며 승인되지 않은 라벨/미지 코드가 있으면 503 `CATEGORY_REGISTRY_UNVERIFIED`, 정상적인 빈 목록으로 처리하지 않는다. Production 실제 분류 수량은 미확인이다.
+- **Nest GET `/api/v1/shop/expiry-digest/category-scope`:** 세션으로 확인한 본인만, 임의 회원 쿼리 금지. 레지스트리·저장 설정 검증 성공 때만 200 `{sourceStatus:'VERIFIED',scopeStatus:'READY'|'REQUIRES_REVIEW',mode:'ALL'|'SELECTED',categoryCodes:string[],unavailableSavedCodes:string[],registryVersion:string,availableCategories:[{code,labelKo,labelEn}],revision:string,observedAtUtcMicros:string,effectiveFromKstDay:string|null}`. 저장된 SELECTED 코드가 폐기/부적격이면 코드를 보존하여 `REQUIRES_REVIEW`로 보여주되 **자동 삭제·재매핑·전체 전환·알림 생성 금지**. 레지스트리 자체 미검증은 503. 회원 UUID는 응답에 포함하지 않는다.
+- **Nest PUT 동일 경로:** SessionGuard/AuthenticatedGuard/ConsentGuard/CSRF/속도 제한, JSON `{mode,categoryCodes,expectedRevision,expectedRegistryVersion,idempotencyKey}`만 허용, 본문 최대 2KiB. ALL은 빈 배열, SELECTED는 승인 ACTIVE·적격 소문자 정렬·중복 없는 1~16개. 알 수 없는 코드·폐기 코드·비정규 유니코드·불필요 필드·오래된 리비전/버전 거부. 409 `CATEGORY_REGISTRY_CHANGED`/`PREFERENCE_CHANGED` 후 최신 GET 안내, 401/403/429/503 구분. 같은 멱등키를 다른 본문·회원·동의 세대로 재사용하거나 이후 설정이 바뀐 상태에서 오래된 성공 응답을 반환하지 않는다.
+- **원자적 DB 처리:** 멱등키 잠금 → 공통 회원 잠금(최초 설정 행 없음 포함) → 동일 트랜잭션에서 동의·알림 활성화 세대, 승인 레지스트리 버전, 기대 리비전, 당일 작업자 claim 확인 → 설정·불변 영수증 함께 저장. 배열 CHECK는 길이·모양만 검증할 수 있고 실제 승인 레지스트리 포함·중복은 보증하지 못하므로 **같은 권위 레지스트리 스냅샷에서 DB 측 검증**을 수행한다. 회원 FK/PK, 비음수 리비전, 배열 상한, 회원+멱등키 영수증 유일, 회원+KST 일일 claim 유일. app 역할의 직접 SELECT/DML을 추가하지 않으며 SECURITY DEFINER의 회원 UUID 인자만으로 DB 신원 검증을 완료했다고 보지 않는다(#993).
+- **09:00~11:00 KST 작업자:** 동일 회원 잠금과 PostgreSQL primary의 단일 트랜잭션 관찰 `asOfUtcMicros`에서 회원/KST 일자·동의 세대·24/72시간·일시중지·카테고리 모드/코드/리비전·레지스트리 버전을 함께 고정한다. 보유품 만료는 `held.expires_at`만 사용(효과 만료 제외), `quantity>0`, `expires_at>asOf` 및 `expires_at<=asOf+lookahead`, 동일 스냅샷에서 보유 회원·카탈로그 카테고리 결합. 정확히 asOf와 같은 만료는 제외, 상한과 같은 만료는 포함한다. 별도 HTTP `shop_my_items_v2` 결과로 미래 만료를 확정하지 않는다. 출처·카테고리 변경·동의·권한·영수증 불명 시 `UNKNOWN_SCOPE` / 차단, 부분/전체 대체 발송이나 가짜 0건 금지.
+- **불변 claim 증빙:** 승인된 단일 트랜잭션에서 (회원,KST 날짜,동의 세대,설정 리비전,registryVersion,모드,선택 코드,조회기간,중지 상태,asOfUtcMicros,적격 집합 다이제스트,결과)를 유일 영수증 및 알림 생성 증빙에 결속한다. 커밋 전 분류 정책 변경을 재확인하고 불일치 시 보수적으로 중단/재시도한다. 정상 적격 0건과 `UNKNOWN_SCOPE`·`SUPPRESSED_BY_SNOOZE`를 구별한다. 카테고리 폐기 시 과거 영수증 수정 금지. 회원 ID·아이템명·선택 코드·알림 내용·키의 원문 로그 금지. F675-205/208 작업자·영수증은 아직 미구현이다.
+- **웹·Android·개인정보·접근성:** Next 동일출처 `/api/shop/expiry-digest/category-scope`, Android 정확한 `/app-api/v1/shop/expiry-digest/category-scope`에서 엄격한 DTO 검증, 내부 토큰 서버 보관, 잘못된 200은 503 차단. GET/PUT/HEAD, 가드 401/403, 409/429/503, 조건부 요청에도 **가드 이전** `private,no-store`·`noindex,nofollow`·`no-referrer`·`nosniff`, ETag/Last-Modified/Expires 제거, 304 금지. Android 디스크 저장 금지, 로그아웃·계정 전환·동의 철회·신규 요청 시 이전 응답 취소/폐기, 60초 STALE와 저장 후 독립 재조회. 320px·200% 확대·44px 터치·키보드 fieldset/legend·명확한 포커스·aria-live·한영/TalkBack 동등. '폐기 코드 검토 필요'와 '만료 예정 0건'을 혼동하지 않는다.
+- **관리·악용·SEO·KPI:** `inventory_expiry_digest_category_scope` 기본 OFF, 모든 P0 검증 후 직원→소수 코호트. 20명 이상 집계만 레지스트리 일치율, 검토 필요, 409/503/UNKNOWN_SCOPE, 중복 claim, 범위 불일치, STALE, p95 GET<300ms/PUT<500ms/worker<500ms **목표치(측정 아님)**. 관리자 회원 대리설정·개별 ID·선택값·쿼리 로그·검색 색인·사이트맵·내보내기 금지. 10,001개 보유품에서 EXPLAIN/BUFFERS로 인덱스 필요성을 확인한 뒤 조정된 번호의 전방 마이그레이션만 검토한다.
+
+### 개발 인계: P0 4건 / P1 6건
+1. **P0 OPS1618-01:** 실제 Test/Production 실행 SHA, 불변 롤백 이미지, 독립 복원, 프로세스 자원 확인. 읽기 전용 공개 Test `e39af10f6...` / Production `353c6d5d...`는 최신 main 3d5e321c3d1221febff677469fecdfcb3cf42e7d과 다름. 버전 API만으로 승격 금지(#2171/#1984).
+2. **P0 SEC1618-02:** 승인된 분류·한영 라벨 정책, 설정/알림/영수증 DDL, 동의 신원 결속, app 역할 최소권한 #993, 시즌 함수 EXECUTE #2357, main 318~320 적용 출처 및 미병합 318 중복 #2233 검증. 직접 GRANT·적용 SQL 수정 금지.
+3. **P0 FIN1618-03:** 국고·연금·조폐국·중앙은행 #2366, 제작 원장 우회 #2330, 허위 주식 체결 #2340, 유통량 0인 Test 국고 #2374 독립 차단 유지. 설정 기능의 WLD/원장/아이템 변경 0건 증명.
+4. **P0 REL1618-04:** 공식 Test exact-SHA 앱+마이그레이터+DB+edge, 두 회원 인증 E2E, HTTP 비공개 헤더, 전체 CI/보안/의존성, 독립 복원·GitOps 검증. Test 백업 출처 #2345, 마이그레이터 드리프트 #2260, 자동 병합 #1088. 미완료 BLOCKED.
+5. **P1 SCOPE1618-05 (B/DB):** 14개 후보 코드·한영 라벨·수명주기·적격 정책과 결정적 버전, 실제 소스 불일치 음성시험. 영속 출처가 없으면 DB 설계 BLOCKED, 새 테이블 임의 추가 금지.
+6. **P1 SCOPE1618-06 (B/API/worker):** GET/PUT 엄격 DTO·CAS/멱등·회원 잠금·불변 claim, 단일 asOf 보유 만료 경계·분류 드리프트 차단.
+7. **P1 SCOPE1618-07 (A/Web):** 폐기 코드 검토 UI, ALL 신규 코드 포함 고지, 저장 후 조회/409 갱신/503 재시도/60초 STALE, 320px·한영·WCAG 2.2 AA; C #2373 알림함 작업과 충돌 분리.
+8. **P1 SCOPE1618-08 (C/Android):** 정확한 app-api 개인정보/304 거부·DTO·계정 전환·디스크 캐시 금지·TalkBack 동등, 별도 브랜치.
+9. **P1 SCOPE1618-09 (A/B 관리자):** 20명 이상 집계 KPI, 감사 가능한 기본 OFF→직원→코호트, 플래그 우선 롤백·개별 정보 비노출.
+10. **P1 SCOPE1618-10 (QA):** PG17 격리 clean/upgrade, 보유품 10,001개, 회원 위조 >=100, 분류 변경·폐기 >=100, 작업자/PUT/동의 경합 >=100, 마이크로초/KST 경계 >=100, Android 개인정보/계정 전환 >=50, 한영 라벨, 직접 권한 거부, 원장 변화 0, 공식 Test exact-SHA 인증 E2E. **모두 제안이며 실행하지 않음.**
+
+**배포·롤백:** 이 PR은 문서 전용 Draft이며 병합/배포하지 않는다. 개발 예약에서 별도 브랜치·Test 정확 SHA 게이트 후 승인 시에만 OFF→직원→코호트; 레지스트리/회원/영수증/금융 출처 불명 시 OFF·이전 불변 바이너리 복원, 적용 마이그레이션·회원 설정·영수증 삭제 금지. 외부 독립 레퍼런스 신규 검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. **DRAFT / PRODUCTION RELEASE HOLD**.
+
 ## v2026.11.01.1616 — F675-210 회원 보관함 만료 알림 카테고리 선택 (기능 추가 / 초안 / 운영 보류)
 
 **주기·정본:** 이전 **기능 보완 v1614** → 현재 **기능 추가 v1616** → 다음 **기능 보완 v1618(잠정)**. 시작·중간 main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`, AGENTS.md·README·영문 정본·한국어 대조·실제 프론트/백엔드/app-api/DB·PR·QA 확인. 미병합 기획 #2361 기반 Draft `#2369`, 개발 이슈 `#2368`. **F675-199~210 모두 미구현 제안**. 런타임·DB·알림·아이템·WLD·원장·Test·Production 변경 없는 문서 작업.
