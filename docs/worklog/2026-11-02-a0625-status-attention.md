@@ -11,7 +11,7 @@
 - RED evidence: backend and frontend targeted tests failed before implementation; GREEN backend 10 PASS, frontend 13 PASS (including prior freshness regressions).
 - Backend returns sourceKey proof (null for unfiltered), validates exact canonical key; read-only `content_public_status()` output filtered after normalization. Android rejects ignored/legacy HTTP 200 including empty responses. Web retains full overall headline and links to per-source detail.
 - DEV PostgreSQL 17.11 `moneyverse_app` READ ONLY: 3 public sources (`api`, `database`, `web`), function EXECUTE=true, ROLLBACK. Existing P0 app-role `account_balances` UPDATE and `user_items` DELETE remain true; no production ACL inference.
-- English/Korean integrated plans rechecked against unchanged origin/main; mobile contract regenerated (184 endpoints). Full gates pending.
+- English/Korean integrated plans rechecked against unchanged origin/main; mobile contract regenerated (184 endpoints). First full SHA gates: Backend 2,982 PASS / 518 SKIP, Database 62 PASS / 5 SKIP, Contract 41 PASS; typecheck PASS, lint 0 errors / 1,027 warnings, API contract PASS. Frontend 2,928 PASS / 1 FAIL because the app-group allowlist expectation omitted the newly supported `status` group. Updated the exact contract expectation (not a gate bypass); full gates must be rerun on new SHA.
 
 ## Finished
 - Pending final evidence, SHA, gate status, branch/PR audit, Test/Production and rollback.
