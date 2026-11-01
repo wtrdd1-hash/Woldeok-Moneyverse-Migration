@@ -1,3 +1,13 @@
+## v2026.11.02.1638 — F675-215 만료 보유품 커서 마이크로초 정밀도 보완 (기능 보완 / 초안 / 배포 보류)
+**v1638 GitHub:** Draft PR #2439 OPEN/HOLD(상위 Draft #2433), 개발 인계 #2432, 최종 SHA CI 확인 대기, 병합·배포 없음.
+**주기:** 이전 기능 추가 v1636 → 현재 기능 보완 v1638 → 다음 기능 추가 v1640(잠정). 최신 main `a8541927c3a351d980454c66e95a3356c47e0722` 시작·중간 재확인. 미병합 Draft #2433 후속 문서 전용, 개발 인계 #2432. **기획 단계이며 미구현.**
+
+**실제 확인:** 071의 `expires_at timestamptz`, 123의 만료 제외 조건, 104의 수량 증가 만료일 재설정. `pg` OID 1184 변환 실험에서 `.123456`이 JS Date `.123`으로 바뀌어 456마이크로초가 소실됐다. 이는 제안된 키셋 커서의 정밀도 위험이며 실제 Production 누락 사고의 증거는 아니다. UTC 소수 6자리 문자열과 SQL의 `expires_at DESC,catalog_id ASC` 비교, JS Date/Number 변환 금지, 회원+세션+필터+limit HMAC, 5분 TTL·512바이트·키 교체·400/409/503 구분을 명세했다. 페이지별 REPEATABLE READ는 요청 사이 MVCC를 보장하지 않으며 총계도 해당 페이지 시점에 한정한다. `/inventory`의 `apiOrNull`→`[]`는 활성 조회 실패를 빈 목록으로 표시하므로 활성/만료 상태를 분리하고 목록 재시작을 제공한다. Android app-api의 기존 shop/purchases 비공개 처리만으로 shop/holdings가 보호되지는 않는다. 이번 작업은 런타임 변경 없음.
+
+**개발 인계:** P0 OPS/SEC/FIN/REL1638-01..04, P1 MICROS1638-05..10을 영문 정본·한국어 동등 PROJECT_PLAN에 반영. 정상/오류/HEAD/조건부 비공개 no-store/noindex·304 금지, KO/EN WCAG 2.2 AA, 20명 이상 관리자 집계, 기본 OFF, 정확 SHA Test·복원 게이트. 07:10 KST 공개 Test/Production 버전 모두 `510dbe6...`으로 main과 다르고 실행 이미지 증빙 아님. DEV 권한 #993, 금융 정합성, QA #2391, 공식 Test·독립 복원 미완료. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. DB·아이템·WLD·원장·Test·Production 변경 없음. **DRAFT / RELEASE HOLD.**
+
+**v1638 신규 검증:** 릴리스·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS 및 기존 공성전 문구 검증 1건 FAIL (#2391). 설치된 `pg` 마이크로초 손실 재현 PASS, 영문·국문 4쌍×9항목 PASS, git diff --check PASS. F675-215 실제 기능 수용시험 미실행, 최종 SHA GitHub CI 별도 확인 필요.
+
 ## 2026-11-02 v1636 — F675-215 회원 만료 보유품 조회 (기능 추가 / 초안 / 배포 보류)
 이전 보완 v1634 → 현재 추가 v1636 → 다음 보완 v1638. Superpowers using-superpowers·brainstorming·worktrees·writing-plans·verification 확인. skills__list에 URI가 없어 miniPC 설치 파일을 직접 읽었다. Debian 13 서비스·개발 DB 연결 확인. main a8541927c3a351d980454c66e95a3356c47e0722 시작·06:13 재조회. 영어 정본과 한국어 대조. 123은 만료 보유품을 제외하며 /inventory는 출처 오류를 빈 목록으로 표시한다. 071의 회원·상품 단일 행과 104의 만료일 재설정 때문에 과거 구매 영수증/복구 권리로 해석하면 안 된다. F675-215는 현재 만료 행 조회·읽기 GET 제안이며 검증된 빈 목록과 출처 오류, PG17 페이지별 스냅샷·페이지 간 변경 한계, 소유자 cursor, Android/Next 비공개, KO/EN 접근성, 관리자 집계, 기본 OFF를 명세했다. 개발 인계 #2432, Draft PR #2433, v1634 Draft #2428 후속. P0 4/P1 6. Test/Production 공개 SHA 510dbe6...은 main과 다르고 정확 SHA 기능시험·독립 복원 미검증. B/C 최신 초안의 백엔드 실패 2건·개발 의존성 권고 9건. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·아이템·원장·Test·Production 변경 없음. RELEASE HOLD.
 
