@@ -83,19 +83,10 @@ export class MarketplaceService {
 
   // --- Auctions ---
   async listAuctions(): Promise<unknown[]> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    return queryRows(
-      this.pool,
-      `SELECT id::text, item_name AS "itemName", item_code AS "itemCode",
-              category, rarity, seller_id::text AS "sellerId", seller_name AS "sellerName",
-              start_price_wld::text AS "startPriceWld", current_bid_wld::text AS "currentBidWld",
-              highest_bidder_id::text AS "highestBidderId", highest_bidder_name AS "highestBidderName",
-              bid_count AS "bidCount", buy_now_price_wld::text AS "buyNowPriceWld",
-              ends_at::text AS "endsAt", is_extended AS "isExtended", description
-       FROM public.marketplace_auctions
-       WHERE status = 'ACTIVE'
-       ORDER BY ends_at ASC`,
-    );
+    // Migration 232 seeded sample auction/bid records. Until source provenance
+    // and ledger-backed escrow are certified, even a successful SELECT would
+    // misrepresent those samples as real member-owned auctions.
+    throw new ServiceUnavailableException('marketplace_auction_source_unverified');
   }
 
   async createAuction(

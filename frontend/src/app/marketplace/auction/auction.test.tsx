@@ -1,51 +1,34 @@
 import React from 'react';
-import { describe, it, expect, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import AuctionMarketplacePage from './page';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import AuctionMarketplacePage, { metadata } from './page';
+import { apiOrNull } from '@/lib/api';
+import { requireMember } from '@/lib/session';
 
-describe('AuctionMarketplacePage Component', () => {
-  afterEach(() => {
-    cleanup();
+vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/session', () => ({ requireMember: vi.fn().mockResolvedValue(undefined) }));
+
+describe('Marketplace auction source containment', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
+  it('requires a member and consults the guarded server API without displaying fabricated auctions or money', async () => {
+    render(await AuctionMarketplacePage());
+    expect(requireMember).toHaveBeenCalledOnce();
+    expect(apiOrNull).toHaveBeenCalledWith('/api/v1/marketplace/auctions');
+    expect(screen.getByRole('alert').textContent).toContain('검증');
+    expect(screen.queryByText(/황금 호가창 네온 테마/)).toBeNull();
+    expect(screen.queryByText(/842,500|250,000|CryptoWhale/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /입찰|구매|확정/ })).toBeNull();
   });
 
-  it('renders auction page header, stats, and initial auction items', () => {
-    const { container } = render(<AuctionMarketplacePage />);
-
-    expect(container.textContent).toContain('Steam형 P2P 아티팩트 경매장');
-    expect(container.textContent).toContain('총 소각된 거래 수수료');
-    expect(container.textContent).toContain('황금 호가창 네온 테마 (1기 한정)');
+  it('does not turn even a success-shaped response into a verified market', async () => {
+    vi.mocked(apiOrNull).mockResolvedValueOnce([{ id: 'demo', currentBidWld: '9000' }]);
+    render(await AuctionMarketplacePage());
+    expect(screen.getByRole('alert').textContent).toContain('검증');
+    expect(screen.queryByText(/9,000 WLD/)).toBeNull();
+    expect(screen.getByRole('link', { name: /다시 확인/ }).getAttribute('href')).toBe('/marketplace/auction');
   });
 
-  it('filters auction items when category button is clicked', () => {
-    const { container, getByRole } = render(<AuctionMarketplacePage />);
-
-    // Click '칭호/엠블럼' filter
-    const titleFilter = getByRole('button', { name: /📜 칭호\/엠블럼/i });
-    fireEvent.click(titleFilter);
-
-    // Should display the title item and not the theme item
-    expect(container.textContent).toContain('[전설] 시장을 뒤흔드는 자 칭호');
-    expect(container.textContent).not.toContain('황금 호가창 네온 테마 (1기 한정)');
-  });
-
-  it('opens bid modal but confirms preview without changing real account', () => {
-    const { container, getAllByRole, getByRole } = render(<AuctionMarketplacePage />);
-
-    // Click first item bid button
-    const bidButtons = getAllByRole('button', { name: '입찰하기 (Bid)' });
-    const firstBidBtn = bidButtons[0];
-    if (!firstBidBtn) throw new Error('Bid button not found');
-    fireEvent.click(firstBidBtn);
-
-    expect(container.textContent).toContain('아티팩트 경매 입찰하기');
-    expect(container.textContent).toContain('5% 거래 수수료 소각');
-
-    // Confirm bid
-    const confirmBidBtn = getByRole('button', { name: '입찰 확정' });
-    fireEvent.click(confirmBidBtn);
-
-    // Notification appears
-    expect(container.textContent).toContain('경매 미리보기 화면입니다.');
-    expect(container.textContent).not.toContain('입찰 성공!');
+  it('is private and unindexable by search engines', () => {
+    expect(metadata).toMatchObject({ robots: { index: false, follow: false } });
   });
 });
