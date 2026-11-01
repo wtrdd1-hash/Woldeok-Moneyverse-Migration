@@ -1,7 +1,7 @@
 ## v2026.11.01.1622 — F675-211 Weekday Schedule-Coverage Integrity (planning only / DRAFT / RELEASE HOLD)
 
 ## v2026.11.02.1624 — F675-212 Read-Only 14-Day Schedule Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
-- Previous Improvement v1622 → Current Addition v1624 → Next Improvement v1626; main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` start/mid, stacked on unmerged #2388.
+- Previous Improvement v1622 → Current Addition v1624 → Next Improvement v1626; main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` start/mid, stacked on unmerged #2388; Draft #2397 and issue #2396.
 - Proposed verified owner-only 7/14-day KST advisory calendar. Missing source 503, partial unknown, policy drift 409; no item/delivery promise or writes. Strict private Next/Android, bilingual accessibility, cohort>=20 KPI, flag OFF. **Not implemented.**
 - P0 4/P1 6 handoff; ACL/migration/financial/QA release blockers remain. Feature tests NOT RUN, no runtime/DB/WLD/Test/Production changes. External new approved 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 

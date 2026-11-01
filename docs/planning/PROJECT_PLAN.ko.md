@@ -2,7 +2,7 @@
 
 ## v2026.11.02.1624 — F675-212 회원 만료 알림 향후 14일 일정 미리보기 (기능 추가 / 초안 / 운영 보류)
 
-**주기:** 이전 기능 보완 v1622 → 현재 기능 추가 v1624 → 다음 기능 보완 v1626(잠정). 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재확인, AGENTS.md·README.md·영문 정본/한국어 대조·Next/Nest/app-api/DB·GitHub QA 조사. 미병합 Draft #2388; 개발 인계 #2396 기반 문서 전용. F675-205~212는 **제안·미구현**. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`, Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다름. **DRAFT / RELEASE HOLD**.
+**주기:** 이전 기능 보완 v1622 → 현재 기능 추가 v1624 → 다음 기능 보완 v1626(잠정). 원격 main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 재확인, AGENTS.md·README.md·영문 정본/한국어 대조·Next/Nest/app-api/DB·GitHub QA 조사. 미병합 Draft #2388; 개발 인계 #2396·Draft #2397 기반 문서 전용. F675-205~212는 **제안·미구현**. Test `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`, Production `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`는 main과 다름. **DRAFT / RELEASE HOLD**.
 
 ### 목적·대안·사용자 흐름·상태
 - **대상/목적:** 로그인·동의 유효 회원이 향후 보관함 만료 알림의 수신 동의, F675-207 24/72시간 조회, F675-209 1/3/7일 중지, F675-210 카테고리 검토, F675-211 요일을 합쳐 날짜별 설정상 후보를 이해하도록 **읽기 전용 안내 달력**을 제공한다. 실제 만료 보유품·작업 실행·알림 생성·발송·기기 전달 예측은 아니다. 현재 `frontend/src/app/account/notifications/page.tsx`와 Nest `backend/src/notification/notification.controller.ts`에 기능이 없고 마이그레이션 123 `shop_my_items_v2`는 미래 작업 증명이 아니다.

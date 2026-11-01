@@ -3,7 +3,7 @@
 ## v2026.11.02.1624 — F675-212 회원 만료 알림 14일 일정 미리보기 (기능 추가 / 초안 / 운영 보류)
 이전 보완 v1622 → 현재 추가 v1624 → 다음 보완 v1626(잠정). main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작/중간, 미병합 Draft #2388; 개발 인계 #2396 기반. **기획·미구현.** 로그인 회원의 `/account/notifications`에서 14일 KST 설정상 후보/요일 제외/중지/미동의/분류 검토/UNKNOWN 표시, 실제 만료·작업·전달 보장 금지. Nest GET `/api/v1/shop/expiry-digest/schedule-preview?days=7|14`, Next 비공개 BFF·Android app-api, 검증된 PostgreSQL 단일 읽기 스냅샷, 쓰기/새 테이블 없음. 출처 불명 503, 일부 미확인 UNKNOWN, 정책 변경 409, 60초 STALE/계정 전환, private/no-store/noindex, 한영/WCAG 2.2 AA/TalkBack, 관리자 20명 이상 집계·플래그 OFF. P0 OPS1624-01 SEC1624-02 FIN1624-03 REL1624-04, P1 PREVIEW1624-05~10(DB/API/웹/Android/관리자/QA). #993/#2233/#2345/#2330/#2340/#2357/#2366·QA #2391 운영 차단; Test e39af10f6...·Production 353c6d5d... main 불일치. 수용시험 미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임/DB/WLD/원장/Test/운영 변경 없음. 상세 양 언어 PROJECT_PLAN.
 
-**현재 기획:** v1624 F675-212 미리보기 / 인계 #2396 / Draft 준비 중 / 운영 보류; #2388 기반.
+**현재 기획:** v1624 F675-212 미리보기 / 인계 #2396 / Draft #2397 / 운영 보류; #2388 기반.
 
 
 ## v2026.11.01.1622 — F675-211 수신 요일·조회 구간 공백 및 작업 증빙 보완 (기능 보완 / 초안 / 운영 보류)
