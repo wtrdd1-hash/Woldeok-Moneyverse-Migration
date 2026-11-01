@@ -1,5 +1,6 @@
 ## v2026.11.02.1640 — F675-216 Verified Inventory Status Support Inquiry (FEATURE ADDITION / DRAFT / RELEASE HOLD)
-**GitHub handoff:** Issue #2442 OPEN / P0 4 + P1 6; Draft PR pending; RELEASE HOLD.
+**GitHub handoff:** Issue #2442 OPEN / P0 4 + P1 6; Draft PR #2444 OPEN / HOLD; RELEASE HOLD.
+**Verification:** release/security/backup 171/171 PASS; release classifier 24/24 PASS; QA 22/23 PASS with one pre-existing warfare-copy assertion FAIL (#2391); four EN/KO pairs PASS; git diff --check PASS. New-feature acceptance NOT RUN.
 **Cycle:** Previous Improvement v1638 → Current Addition v1640 → Next Improvement v1642 (provisional). Canonical authority origin/main a8541927c3a351d980454c66e95a3356c47e0722; docs-only stacked on Draft #2439. Proposed authenticated owner-only inventory status inquiry: GET server-sampled current holding preview + POST idempotent support case, existing /support and /admin/support handoff, no refunds/restores. Source migrations 071/104/123/196; generic support replay currently does not bind payload, so dedicated receipt/digest + atomic row-locked snapshot are required. HMAC owner/session 120s preview, exact UTC microseconds, CSRF, DB 3/hour and 10/day, OFF flag, private Android/Next gateway, KO/EN a11y, P0 4/P1 6 handoff, Test exact-SHA and restore before any release. Not implemented; external independently approved references new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS; RELEASE HOLD.
 
 

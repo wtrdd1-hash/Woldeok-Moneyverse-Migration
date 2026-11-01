@@ -1,4 +1,6 @@
 ## v2026.11.02.1640 — F675-216 Owner Inventory Status Inquiry with Verified Snapshot (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub handoff:** Draft PR #2444 OPEN/HOLD; developer issue #2442; no merge/deployment.
+**Verification:** release/security/backup 171/171 PASS; release classifier 24/24 PASS; QA 22/23 PASS with one pre-existing warfare-copy assertion FAIL (#2391); four EN/KO pairs PASS; git diff --check PASS. New-feature acceptance NOT RUN.
 **Cycle:** Previous Feature Improvement v1638 → Current Feature Addition v1640 → Next Feature Improvement v1642 (provisional). Source authority: origin/main `a8541927c3a351d980454c66e95a3356c47e0722` checked at start/mid; AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity. Docs-only child of unmerged Draft #2439; developer handoff issue #2442. **PROPOSED, NOT IMPLEMENTED; no merge, Test or Production approval.**
 
 ### Purpose, source truth and non-goals
