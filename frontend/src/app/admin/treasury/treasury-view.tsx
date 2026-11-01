@@ -232,7 +232,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
           <CardHeader className="p-4 pb-2">
             <CardDescription className="text-xs">통화량 대비 비축률 (Reserve Ratio)</CardDescription>
             <CardTitle className="text-2xl font-bold tracking-tight text-emerald-600">
-              {overview.reserve_ratio_pct.toFixed(2)}%
+              {overview.reserve_ratio_pct === null ? '산정 불가 (유통량 0)' : `${overview.reserve_ratio_pct.toFixed(2)}%`}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 text-xs text-muted-foreground">

@@ -97,6 +97,13 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     },
   ];
 
+  it('labels an undefined zero-circulation reserve ratio without fabricating a percentage', () => {
+    render(<TreasuryView overview={{ ...mockOverview,
+      total_treasury_wld: '0', total_circulating_wld: '0', reserve_ratio_pct: null,
+    }} ledger={[]} />);
+    expect(screen.getByText('산정 불가 (유통량 0)')).toBeTruthy();
+  });
+
   it('isTreasuryOutflow detects balance drops and outflow types correctly', () => {
     // 1. 배당 지출 -> outflow = true
     expect(isTreasuryOutflow(mockLedger[0]!)).toBe(true);

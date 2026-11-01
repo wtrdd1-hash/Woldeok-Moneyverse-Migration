@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1616 — Zero circulation reserve ratio (TEST CANDIDATE)
+- [Worklog EN](docs/worklog/2026-11-01-treasury-zero-circulation-v1616.md) / [KO](docs/worklog/2026-11-01-treasury-zero-circulation-v1616.ko.md). Source test verifies zero current Treasury with zero circulating WLD and explicitly unavailable ratio; no synthetic balance. Live release not yet complete.
+
+
 ## v2026.11.01.1615 — Scoped Treasury proof: OFFICIAL TEST DB MIGRATED / LIVE TEST PENDING
 - [Worklog EN](docs/worklog/2026-11-01-treasury-scoped-proof-v1615.md) / [KO](docs/worklog/2026-11-01-treasury-scoped-proof-v1615.ko.md). [Internal EN](docs/updates/v2026.11.01.1615-treasury-internal.md) / [KO](docs/updates/v2026.11.01.1615-treasury-internal.ko.md). [GitHub EN](docs/updates/v2026.11.01.1615-treasury-github.md) / [KO](docs/updates/v2026.11.01.1615-treasury-github.ko.md). Official Test migrations314-320, 105 sessions preserved, DB-owned aggregation avoids broad raw app table grants, Treasury current 0 WLD; production untouched.
 
