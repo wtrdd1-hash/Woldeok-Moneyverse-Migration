@@ -29,7 +29,7 @@ const certified = {
 
 function fixture(proof: Record<string, unknown> | null = certified) {
   const query = vi.fn(async (sql: string) => {
-    if (sql.includes('fiscal_epoch AS')) return { rows: proof ? [proof] : [] };
+    if (sql.includes('public.treasury_fiscal_proof_read()')) return { rows: proof ? [proof] : [] };
     if (sql.includes('FROM public.system_treasury_vaults') && sql.includes('ORDER BY')) return { rows: vaults };
     if (sql.includes('sum(ab.available_amount)')) return { rows: [{ total: '100000' }] };
     if (sql.includes('daily_avg')) return { rows: [{ daily_avg: '0' }] };

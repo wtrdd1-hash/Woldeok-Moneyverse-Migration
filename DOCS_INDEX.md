@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1615 — Scoped Treasury proof: OFFICIAL TEST DB MIGRATED / LIVE TEST PENDING
+- [Worklog EN](docs/worklog/2026-11-01-treasury-scoped-proof-v1615.md) / [KO](docs/worklog/2026-11-01-treasury-scoped-proof-v1615.ko.md). [Internal EN](docs/updates/v2026.11.01.1615-treasury-internal.md) / [KO](docs/updates/v2026.11.01.1615-treasury-internal.ko.md). [GitHub EN](docs/updates/v2026.11.01.1615-treasury-github.md) / [KO](docs/updates/v2026.11.01.1615-treasury-github.ko.md). Official Test migrations314-320, 105 sessions preserved, DB-owned aggregation avoids broad raw app table grants, Treasury current 0 WLD; production untouched.
+
+
 ## v2026.11.01.1614 — Independent official Test Treasury epoch attestation (PRIVATE CLONE PASS / LIVE HOLD)
 - [Worklog EN](docs/worklog/2026-11-01-treasury-test-epoch-attestation-v1614.md) / [KO](docs/worklog/2026-11-01-treasury-test-epoch-attestation-v1614.ko.md) · [Internal EN](docs/updates/v2026.11.01.1614-fiscal-test-internal.md) / [KO](docs/updates/v2026.11.01.1614-fiscal-test-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1614-fiscal-test-github.md) / [KO](docs/updates/v2026.11.01.1614-fiscal-test-github.ko.md). Forward SQL319 Test-specific backup correction; Prod 552/744/e62cc provenance unchanged. Restored official Test backup to private DB; six migrations 314–319 PASS with scoped historical 316 chat function drift repaired on private clone only. Real Test app-role treasury proof RECONCILED 0 WLD, discrepancy 0; 77 Treasury/pension targeted tests PASS. Public Test/Production not promoted, pension monetary settlement remains BLOCKED.
 

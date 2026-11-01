@@ -1,3 +1,5 @@
+## 2026-11-01 v1615: Official Test fiscal 314-320 applied, scoped aggregate proof with app EXECUTE only, 105 sessions preserved; 392 targeted regression PASS, live Test/Prod pending.
+
 ## 2026-11-01 v1614 — Distinct Test Treasury epoch evidence, private restored DB PASS
 - Exact original Production 314/552/744/e62cc historical proof preserved; Test archive 3/0/60m/2149b verified in independent private copy with SQL319 audited correction. Replayed SQL314–319, app-role real reconciliation 0/0, treasury/pension targeted 77 PASS. Public Test/Prod unchanged and pension monetary writes remain held.
 
