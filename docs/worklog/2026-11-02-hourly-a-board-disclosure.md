@@ -16,5 +16,8 @@
 - Query uses existing bounded PostgreSQL function and parameter `$4`; self-reported status is never presented as a verified holding.
 
 
+- 04:36: Code SHA CI #41342242084 and candidate image #41342168928 FAILED in runtime-check because generated mobile API contract/schema files drifted after the new response marker. Root cause verified in CI logs; no feature-test failure identified.
+- 04:37: Regenerated `docs/mobile-api-contract.json` and English/Korean schema references (15 inserted lines), preserving 184 endpoints; repairing the generated contract on this branch. Re-run CI on new SHA; do not bypass the contract gate.
+
 ## Finished
 - Pending exact SHA, gates, Test/Production/rollback and branch preservation decision.
