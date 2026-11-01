@@ -84,3 +84,16 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('ContentService published announcement ordering', () => {
+  it('sorts only the DB-owned public snapshot and preserves pinned default', async () => {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    const pinned = { announcement_id: '00000000-0000-4000-8000-000000000001', title: 'Older pinned', body: 'public', image_url: null, image_alt_text: null, is_pinned: true, published_at: new Date('2026-09-01T00:00:00Z') };
+    const recent = { ...pinned, announcement_id: '00000000-0000-4000-8000-000000000002', title: 'Recent', is_pinned: false, published_at: new Date('2026-10-01T00:00:00Z') };
+    repository.publishedAnnouncements = vi.fn().mockResolvedValue([pinned, recent]);
+    const service = new ContentService(repository);
+    expect((await service.publicAnnouncements()).map((row) => row.title)).toEqual(['Older pinned', 'Recent']);
+    expect((await service.publicAnnouncements({ sort: 'newest' })).map((row) => row.title)).toEqual(['Recent', 'Older pinned']);
+    expect((await service.publicAnnouncements({ sort: 'oldest' })).map((row) => row.title)).toEqual(['Older pinned', 'Recent']);
+    expect(repository.publishedAnnouncements).toHaveBeenCalledWith({ limit: 20 });
+  });
+});

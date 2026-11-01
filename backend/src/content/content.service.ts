@@ -1,3 +1,4 @@
+import { orderPublishedAnnouncements, type AnnouncementOrder } from './announcement-order';
 import { Injectable } from '@nestjs/common';
 import type {
   ContentAnnouncementReceiptRow,
@@ -322,12 +323,13 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, sort = 'pinned' }: { limit?: number; sort?: AnnouncementOrder } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
-      normalizeAnnouncement,
+    return orderPublishedAnnouncements(
+      (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(normalizeAnnouncement),
+      sort,
     );
   }
 
