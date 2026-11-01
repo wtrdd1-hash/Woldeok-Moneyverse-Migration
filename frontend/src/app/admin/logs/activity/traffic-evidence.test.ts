@@ -22,6 +22,16 @@ describe('admin traffic source evidence', () => {
     }, request)?.summary.pageViews).toBe(0);
   });
 
+  it('accepts PostgreSQL month/year buckets without inventing missing periods', () => {
+    for (const [granularity, periods, bucket] of [
+      ['month', 24, '2026-11-01'], ['year', 10, '2026-01-01'],
+    ] as const) {
+      expect(parseTrafficEvidence({
+        ...valid, granularity, periods, series: [{ ...valid.series[0], bucket }],
+      }, { granularity, periods })).not.toBeNull();
+    }
+  });
+
   it.each([
     null, {}, { ...valid, granularity: 'month' }, { ...valid, periods: 31 },
     { ...valid, summary: { ...valid.summary, pageViews: '4' } },
@@ -32,6 +42,7 @@ describe('admin traffic source evidence', () => {
     { ...valid, series: 'not-an-array' },
     { ...valid, series: [{ ...valid.series[0], pageViews: 3 }] },
     { ...valid, series: [valid.series[0], valid.series[0]] },
+    { ...valid, series: [{ ...valid.series[0], bucket: '2026-11-02' }, { ...valid.series[0], bucket: '2026-11-01' }] },
     { ...valid, series: [{ ...valid.series[0], bucket: '2026-11-32' }] },
     { ...valid, series: [{ ...valid.series[0], uniqueSessions: 5 }] },
     { ...valid, landingPages: [{ ...valid.landingPages[0], anonymousEntries: 4 }] },
