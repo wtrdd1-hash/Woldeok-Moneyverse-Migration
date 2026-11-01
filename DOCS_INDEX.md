@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1614 — Independent official Test Treasury epoch attestation (PRIVATE CLONE PASS / LIVE HOLD)
+- [Worklog EN](docs/worklog/2026-11-01-treasury-test-epoch-attestation-v1614.md) / [KO](docs/worklog/2026-11-01-treasury-test-epoch-attestation-v1614.ko.md) · [Internal EN](docs/updates/v2026.11.01.1614-fiscal-test-internal.md) / [KO](docs/updates/v2026.11.01.1614-fiscal-test-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1614-fiscal-test-github.md) / [KO](docs/updates/v2026.11.01.1614-fiscal-test-github.ko.md). Forward SQL319 Test-specific backup correction; Prod 552/744/e62cc provenance unchanged. Restored official Test backup to private DB; six migrations 314–319 PASS with scoped historical 316 chat function drift repaired on private clone only. Real Test app-role treasury proof RECONCILED 0 WLD, discrepancy 0; 77 Treasury/pension targeted tests PASS. Public Test/Production not promoted, pension monetary settlement remains BLOCKED.
+
+
 ## v2026.11.01.1613 — Audited SOE nonmonetary governance repair (isolated PostgreSQL PASS / Production HOLD)
 - [Worklog EN](docs/worklog/2026-11-01-soe-governance-recovery-v1613.md) / [KO](docs/worklog/2026-11-01-soe-governance-recovery-v1613.ko.md) · [Internal EN](docs/updates/v2026.11.01.1613-soe-governance-internal.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1613-soe-governance-github.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-github.ko.md). New DB 318 approver+append-only receipt atomic governance, backend+frontend status form, no monetary path. Real restored PG app DML/role negatives, approver receipt/idempotency, rollback PASS. Backend SOE 42/Frontend SOE 13 PASS, full CI and official Test→Production NOT YET certified.
 

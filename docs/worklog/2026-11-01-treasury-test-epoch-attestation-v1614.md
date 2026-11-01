@@ -1,0 +1,7 @@
+# v2026.11.01.1614 — Genuine official Test epoch attestation without weakening Production
+## START — 2026-11-01 16:44 KST
+- User ordered full recovery and Production promotion. Parent application branch v1613 source verified CI SUCCESS but actual official Test has historic 3 Treasury/0 SOE, 60,000,000 WLD modeled vault vs canonical 0 and migrations stop at 313. Production applied 314–317 with original 552/744, archived 220,923,528 WLD, fixed pre-reset backup SHA e62cc652..., member balances protected.
+- Existing immutable migration 314 hardcodes Production pre-reset backup hash, while separate verified official Test full backup is SHA 2149b774... (19 MiB). Blindly applying 314 would leave false Test archival provenance; v1603 read proof also hardcodes Production counts/backup. Do not alter or falsely re-register migration314.
+- Isolated branch `fix/treasury-test-epoch-provenance-v1614` based on v1613 docs head fee8540ee. Plan: strong DB-identity-bound Test archival attestation correction forward migration 319 with immutable log and external backup hash, preserve original 314 binary/checksum, strictly allowlist Production/Test separate fiscal proof; rehearse on private restoration of actual Test backup, test unauthorized/forged values and rollback; only then consider official Test migration and exact-SHA staging. Never expose restored Production member data to public Test or enable payouts.
+## MID — pending
+## FINISH — pending

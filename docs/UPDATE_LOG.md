@@ -1,3 +1,6 @@
+## 2026-11-01 v1614 — Distinct Test Treasury epoch evidence, private restored DB PASS
+- Exact original Production 314/552/744/e62cc historical proof preserved; Test archive 3/0/60m/2149b verified in independent private copy with SQL319 audited correction. Replayed SQL314–319, app-role real reconciliation 0/0, treasury/pension targeted 77 PASS. Public Test/Prod unchanged and pension monetary writes remain held.
+
 ## 2026-11-01 v1613 — SOE governance audited nonmonetary status transitions (isolated Test PASS; release HOLD)
 - **v1613 final release status (16:40 KST):** Full GitHub CI SUCCESS. Isolated app-role PostgreSQL+Nest HTTP tests passed. Exact-SHA Test/Prod artifacts staged inactive; official Test remains v313 lineage vs Production v314–317, Test provenance hash differs. Official Test gate BLOCKED. New issue #2345; no public deployment or payouts.
 - Migration 318 DB-owned approver function and immutable receipt; restricted app DML, idempotent atomic governance, Nest one-use CSRF, same-origin Next BFF, verified UI; model-assets label. Isolated restored real-data PostgreSQL security/receipt/rollback PASS, Backend 42 and Frontend 13 targeted PASS, full CI/release pending. Historical 552 Treasury and 744 dividends monetary holds remain. [Worklog](worklog/2026-11-01-soe-governance-recovery-v1613.md).

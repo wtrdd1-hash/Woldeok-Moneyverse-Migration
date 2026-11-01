@@ -1,3 +1,6 @@
+## 2026-11-01 v1614 — 공식 Test 국고 백업 자체 증명, 비공개 복제 DB 통과
+- Exact original Production 314/552/744/e62cc historical proof preserved; Test archive 3/0/60m/2149b verified in independent private copy with SQL319 audited correction. Replayed SQL314–319, app-role real reconciliation 0/0, treasury/pension targeted 77 PASS. Public Test/Prod unchanged and pension monetary writes remain held.
+
 ## 2026-11-01 v1613 — 공기업 비금전 운영 상태 변경과 영수증 구현 (격리 Test PASS, 운영 HOLD)
 - **v1613 최종(16:40 KST):** GitHub 전체 CI 성공, 격리 PostgreSQL 앱권한·Nest HTTP 영수증 테스트 통과. 정확한 SHA Test/Prod 후보 비활성, 공식 Test 313 이력 vs 운영 314~317 및 백업 SHA 상충으로 공식 Test 게이트 차단. 이슈 #2345, 실제 운영 미승격·자금 미지급.
 - SQL 318 DB 승인자 SECURITY DEFINER와 불변 영수증, 앱 직접 DML 금지, 멱등 원자적 처리; Nest 일회용 CSRF, Next 동일 출처 BFF, 관리자 상태 입력과 모형 자산 레이블. 실데이터 격리 PostgreSQL 권한/영수증/롤백 PASS, 백엔드 42/프론트 13 PASS, 전체 CI/운영 배포 미확인. 구 국고 552/배당 744는 금융 출처 차단 유지. [기록](worklog/2026-11-01-soe-governance-recovery-v1613.ko.md).
