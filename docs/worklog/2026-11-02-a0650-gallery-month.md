@@ -18,3 +18,12 @@
 
 ## Finished
 Pending final exact-SHA gates and PR evidence. Do not merge or deploy while P0 ACL, full security audit, official Test and restore gates remain unresolved.
+
+## Final local gate checkpoint — 07:05 KST
+- Code+tests SHA `277a3167e7135963a3c567d77ed0e77b52b2e375`: root `NODE_ENV=test pnpm test` exit 0; root Node tests 34 PASS, contract 41 PASS, database 62 PASS / 5 SKIP, backend 2,990 PASS / 518 SKIP, frontend 2,928 PASS. SKIP is not PASS.
+- Root `pnpm typecheck` PASS; `pnpm build` PASS; `pnpm lint` PASS with 0 errors / 1,027 warnings; generated mobile API contract 184 endpoints and exact check PASS after code commit.
+- `pnpm audit --prod --audit-level=low` PASS (0 known). Full `pnpm audit --audit-level=low` FAIL: 9 advisories (1 low, 8 moderate), including dev-only deepmerge. Do not call this a clean security gate.
+- DEV PG app role READ ONLY/ROLLBACK: approved latest photos 2, both Seoul 2026-09; positive month aggregation at SQL function level. This is not official Test E2E.
+- Public Test and Production /api/version both report `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not candidate. Exact-SHA authenticated Test E2E, independent restore, GitOps provenance and Production smoke are BLOCKED/not run.
+- Pre-close main `a8541927c3a351d980454c66e95a3356c47e0722` unchanged. 191 non-main remote refs: 177 unique-unmerged, 14 already main ancestors. Open PRs 174, 29 conflict states. Virtual merges with gallery PRs #2312/#2331/#2371/#2249 conflict (5/5/5/8 files); concurrent status #2435 conflicts in Android gateway. No forced merge, branch deletion or other agent worktree change.
+- Changed 21 files in feature commit; no migration or ledger write. Release remains HOLD. Preserve every branch with unique changes. Even already-merged branches were not deleted because concurrent ownership/review not verified.

@@ -20,3 +20,13 @@
 
 ## Release
 HOLD. No main merge, Test or Production deployment, DB migration, service restart, branch deletion or rollback. Rollback is dropping the unmerged read-only branch after preserving evidence.
+
+## Verified code-SHA gates — 2026-11-02 07:05 KST
+- Feature SHA: `277a3167e7135963a3c567d77ed0e77b52b2e375`.
+- Root full tests exit 0: 34 Node PASS; 41 contract PASS; 62 DB PASS / 5 SKIP; 2,990 backend PASS / 518 SKIP; 2,928 frontend PASS. No skip counted as pass.
+- Typecheck PASS, build PASS, lint PASS (0 errors / 1,027 warnings). Mobile API 184 endpoints contract PASS.
+- Production dependency audit PASS (0 known); full dependency audit FAIL (9: 1 low, 8 moderate). Existing P0 DEV ACL #993 FAIL.
+- DEV PG READ ONLY/ROLLBACK: 2 approved photos, both Seoul 2026-09. No official Test exact-SHA E2E.
+- Test and Production public version: `510dbe6bf4d5c2a8089fc06b480776053da7a2e3` (not candidate). Official Test authentication, independent restore and GitOps release gate BLOCKED.
+- Remote audit: 191 non-main refs (177 unique-unmerged, 14 ancestors); 174 open PRs, 29 conflicting. Virtual merge conflicts with #2312/#2331/#2371/#2249 and concurrent #2435. No branch deletion.
+- **Release verdict remains HOLD.** Final documentation commit, exact final SHA CI and image build still require GitHub evidence; never infer PASS from local results.

@@ -15,10 +15,10 @@
 - [x] Write failing backend month parsing/service/controller tests and frontend parser/response tests; record RED.
 - [x] Implement backend validated query in both public controllers, month filter after existing approved-row normalization, and tests GREEN.
 - [x] Implement gallery month UI, SEO, Android fail-closed response verification, and tests GREEN.
-- [ ] Regenerate app-api contract only if route shape changes; validate exact contract.
-- [ ] Check DEV PostgreSQL app-role READ ONLY with existing approved photo function, verify no direct table access additions.
+- [x] Regenerate app-api contract only if route shape changes; validate exact contract.
+- [x] Check DEV PostgreSQL app-role READ ONLY with existing approved photo function, verify no direct table access additions.
 - [ ] Run targeted, full unit, typecheck, lint, build, security, app-api, accessibility/SEO, CI, isolated Test exact SHA gates; capture exact evidence and blockers.
-- [ ] Refresh origin/main and integration plan at midpoint and pre-merge. Create Draft PR with HOLD when any required gate is unproven; never deploy without independent Test/restore/production gates.
-- [ ] Record QA, worklog, release decision, branch inventory and SHA; protect all unmerged changes.
+- [x] Refresh origin/main and integration plan at midpoint and pre-merge. Create Draft PR with HOLD when any required gate is unproven; never deploy without independent Test/restore/production gates.
+- [x] Record QA, worklog, release decision, branch inventory and SHA; protect all unmerged changes.
 
 **Rollback:** Revert this read-only branch or disable UI entry; no DB migration or data rollback required.
