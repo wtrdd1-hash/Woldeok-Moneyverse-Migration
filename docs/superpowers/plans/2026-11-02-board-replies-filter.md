@@ -27,16 +27,16 @@
 ---
 
 ### Task 1: Backend + PostgreSQL source
-- [ ] Add failing controller and service tests for exact `replied=1`, invalid duplicates, and parameterized SQL.
-- [ ] Run RED tests; implement validation and SQL predicate `($4::boolean = false OR comment_count > 0)` on the bounded function output.
-- [ ] Run GREEN tests and verify no migrations/grants.
+- [x] Add failing controller and service tests for exact `replied=1`, invalid duplicates, and parameterized SQL.
+- [x] Run RED tests; implement validation and SQL predicate `($4::boolean = false OR comment_count > 0)` on the bounded function output.
+- [x] Run GREEN tests and verify no migrations/grants.
 
 ### Task 2: Web public board
-- [ ] Add failing query parser tests and page regression assertions.
-- [ ] Add labelled checkbox, preserve stock/title search, noindex filtered URLs and truthful 50-row empty state.
-- [ ] Run GREEN tests and accessibility checks.
+- [x] Add failing query parser tests and page regression assertions.
+- [x] Add labelled checkbox, preserve stock/title search, noindex filtered URLs and truthful 50-row empty state.
+- [x] Run GREEN tests and accessibility checks.
 
 ### Task 3: Android gateway and contract
-- [ ] Add failing app-api tests for duplicate/invalid `replied`, non-JSON and unfiltered 200.
-- [ ] Add validation and fail-closed response verification; update API contract description if needed.
-- [ ] Run GREEN tests, full gates and read-only PostgreSQL; record exact SHA and HOLD.
+- [x] Add failing app-api tests for duplicate/invalid `replied`, non-JSON and unfiltered 200.
+- [x] Add validation and fail-closed response verification; update API contract description if needed.
+- [x] Run GREEN tests, full gates and read-only PostgreSQL; record exact SHA and HOLD.
