@@ -39,9 +39,12 @@ export class BlogVerifiedRepository {
       'SELECT content_digest FROM public.blog_verified_recent_digests()');
     return new Set(rows.map(row => row.content_digest));
   }
-  list() {
+  list(topic?: 'ECONOMY' | 'CODING' | 'COMPUTER') {
+    // Filter only the already bounded, published-only SECURITY DEFINER projection.
     return queryRows<PublishedArticleRow>(this.pool(),
-      'SELECT * FROM public.blog_verified_public_list()');
+      topic ? 'SELECT * FROM public.blog_verified_public_list() AS post WHERE post.topic = $1'
+        : 'SELECT * FROM public.blog_verified_public_list()',
+      topic ? [topic] : []);
   }
   listForAdmin(actor: string) {
     return queryRows<PublishedArticleRow>(this.pool(),

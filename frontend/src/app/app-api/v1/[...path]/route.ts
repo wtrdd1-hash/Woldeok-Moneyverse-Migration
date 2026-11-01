@@ -112,6 +112,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const blogVerifiedList = parts.length === 2 && parts[0] === 'blog' && parts[1] === 'verified';
+  if (parts[0] === 'blog' && request.method !== 'GET' && request.method !== 'HEAD') {
+    return gatewayProblem(405, 'Method Not Allowed', 'blog_public_read_only', 'verified editorial API is read-only');
+  }
+  const blogTopicValues = blogVerifiedList ? request.nextUrl.searchParams.getAll('topic') : [];
+  if (parts[0] === 'blog' && (
+    [...request.nextUrl.searchParams.keys()].some(key => !blogVerifiedList || key !== 'topic') ||
+    blogTopicValues.length > 1 ||
+    (blogTopicValues.length === 1 && !['ECONOMY', 'CODING', 'COMPUTER'].includes(blogTopicValues[0]!))
+  )) {
+    return gatewayProblem(400, 'Bad Request', 'blog_topic_invalid', 'invalid verified editorial topic');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -271,6 +284,31 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (blogVerifiedList && blogTopicValues.length === 1 && response.ok) {
+    try {
+      if (response.status !== 200 || !isJsonMediaType(response.headers.get('content-type'))) {
+        throw new Error('unverified blog media type');
+      }
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('invalid blog envelope');
+      const body = payload as Record<string, unknown>;
+      const posts = body.posts;
+      if (body.success !== true || body.scope !== 'LATEST_150_PUBLISHED' ||
+          !Number.isSafeInteger(body.count) || (body.count as number) < 0 ||
+          !Array.isArray(posts) || posts.length > 150 || posts.length !== body.count ||
+          !posts.every((post: unknown) => {
+            if (!post || typeof post !== 'object' || Array.isArray(post)) return false;
+            const item = post as Record<string, unknown>;
+            return item.topic === blogTopicValues[0] && item.status === 'PUBLISHED' &&
+              typeof item.slug === 'string' && /^[a-z0-9-]{10,110}$/.test(item.slug) &&
+              typeof item.receipt === 'string' && /^[0-9a-f-]{36}$/i.test(item.receipt);
+          })) throw new Error('unverified blog filter');
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'blog_topic_unverified',
+        'verified editorial topic results are unavailable');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -566,6 +604,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'blog' && parts[1] === 'verified') {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('referrer-policy', 'no-referrer');
+    if (request.nextUrl.searchParams.has('topic')) response.headers.set('x-robots-tag', 'noindex');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

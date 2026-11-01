@@ -1,3 +1,5 @@
+export type VerifiedEditorialTopic = 'ECONOMY' | 'CODING' | 'COMPUTER';
+
 export type BlogCategory = 'WEALTH' | 'COMPOUND' | 'STOCKS' | 'TAX' | 'MACRO' | 'TECH';
 
 export const BLOG_CATEGORIES: ReadonlyArray<{ id: BlogCategory; label: string }> = [
@@ -52,6 +54,8 @@ export interface BlogPost {
   readonly isAiGenerated: boolean;
   /** DB-issued receipt, not an AI-provided string. */
   readonly verificationReceipt?: string | undefined;
+  /** Verified publication subject; never inferred from a generated seed post. */
+  readonly verifiedTopic?: VerifiedEditorialTopic | undefined;
   readonly views: number;
   /** Supplied only by verified analytics, not by the article generator. */
   readonly viewCountVerified?: boolean | undefined;

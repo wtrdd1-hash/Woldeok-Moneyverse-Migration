@@ -17,6 +17,14 @@ describe('verified blog repository least-privilege reads (QA #1661)', () => {
     expect(query.mock.calls[1][1]).toEqual(['2026-10-28-kr-economy-0']);
   });
 
+  it('filters the bounded published projection with a parameterized topic and no table grant', async () => {
+    const { repo, query } = repository();
+    await repo.list('CODING');
+    expect(query.mock.calls[0][0]).toMatch(/FROM public\.blog_verified_public_list\(\).*WHERE post\.topic = \$1/);
+    expect(query.mock.calls[0][1]).toEqual(['CODING']);
+    expect(query.mock.calls[0][0]).not.toContain('blog_verified_articles');
+  });
+
   it('uses metadata-only functions for scheduler idempotency', async () => {
     const { repo, query } = repository();
     await repo.currentPeriod('2026-10-28T12:00+09:00');

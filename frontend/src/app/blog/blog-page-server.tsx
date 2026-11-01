@@ -73,8 +73,8 @@ export async function metadataForArticle(slug: string, locale: BlogLocale): Prom
 }
 
 export function summarizeBlogPost(post: BlogPost) {
-  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
-  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
+  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName, verifiedTopic } = post;
+  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName,verifiedTopic};
 }
 export async function renderBlogHub(locale: BlogLocale) {
   const posts = countryBlogPosts([...await verifiedPublicArticles(),...getAllBlogPosts()].filter(isBlogDiscoverable), locale);
