@@ -33,7 +33,7 @@ describe('v744 treasury administrative write boundary', () => {
   const touchAdminSession = vi.fn();
   const createBackupSnapshot = vi.fn();
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [AdminTreasuryController],
       providers: [
         { provide: TreasuryService, useValue: { createBackupSnapshot } },
@@ -54,7 +54,7 @@ describe('v744 treasury administrative write boundary', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });
