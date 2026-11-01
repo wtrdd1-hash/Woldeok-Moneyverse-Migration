@@ -114,7 +114,9 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '현재 크라우드펀딩 진행 중인 스타트업 피치 목록 조회' })
-  @Header('Cache-Control', 'no-store')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @Get('pitches')
   async listPitches() {
     // No persisted, audited funding source exists. A fabricated market is not an empty market.
@@ -122,7 +124,9 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '내 VC 엔젤투자 포트폴리오 및 배당금 현황 조회' })
-  @Header('Cache-Control', 'no-store')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @Get('investments')
   async listMyInvestments(@Req() req: RequestWithSession) {
     requireUserId(req);
@@ -131,6 +135,9 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '스타트업 피치 엔젤투자 집행 (SAFE 지분 취득)' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @Post('invest')
   async investVenture(
     @Req() req: RequestWithSession,
@@ -140,6 +147,9 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '스타트업 분기 배당금 즉시 수령 (지갑 입금)' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @Post('claim-dividend')
   async claimDividend(
     @Req() req: RequestWithSession,
@@ -149,6 +159,9 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '창업자 스타트업 펀딩 피치 신규 등록 신청' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @Post('apply-founder')
   async applyFounderPitch(
     @Req() req: RequestWithSession,
