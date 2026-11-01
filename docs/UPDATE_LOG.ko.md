@@ -1,3 +1,294 @@
+## v2026.11.01.1602 — F675-206 미리보기 전송·개인정보·신원 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+
+이전 추가 v1600 → 현재 보완 v1602 → 다음 추가 v1604(잠정). 기준 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`, 선행 Draft #2309, 이슈 #2307. 네 가지 설계 보완: (D1) `apiOrNull` 오류→0건 방지와 동일 출처 Next GET BFF·응답 엄격 검증, (D2) Android app-api `shop/expiry-digest/preview` 정확 경로의 오류/HEAD/조건부 요청까지 비공개 캐시 정책 및 악성 상위 캐시 헤더 차단, (D3) 60초 STALE·세션 세대/요청 취소, (D4) 공유 앱 DB 역할의 UUID 위조 가능성과 풀 타임아웃 설정 누출 차단. P0 4/P1 6 갱신, PG17·Android·웹 수용시험은 제안만 하고 미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서 전용, main 병합·런타임/DB/WLD/원장/Test/Production 변경 없음, RELEASE HOLD.
+
+## v2026.11.01.1600 — F675-206 회원 보관함 만료 알림 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기 및 기준:** 이전 **Feature Improvement v1598** → 현재 **Feature Addition v1600** → 다음 **Feature Improvement v1602(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. main의 AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 국문 PROJECT_PLAN.ko.md를 대조했다. 선행 기획 Draft **#2301**은 미병합 OPEN이며 유효한 F675-199~205 기획을 이 별도 문서 브랜치로 승계했다. 개발 이슈 **#2307**, Draft PR **#2309**. **F675-206은 미구현**이고 별도 분산 기획 파일이나 런타임 배포는 없다.
+
+### 소스 근거, 목적, 대안
+- **소스 확인:** `frontend/src/app/account/notifications/page.tsx`에는 회원 전용 알림 설정 및 기존 목표 알림 설정이 있지만 만료 미리보기는 없다. `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패를 `[]`로 바꿀 수 있어 장애를 검증된 0건으로 판단하면 안 된다. `backend/src/shop/shop.controller.ts`의 holdings GET에는 Session/Authenticated/Consent 가드가 있으며, `shop.repository.ts`는 마이그레이션 123의 `public.shop_my_items_v2(actor)`를 호출한다. `frontend/src/app/app-api/v1/[...path]/route.ts`의 비공개 헤더 처리는 일부 경로에만 명시되어 있다. 이는 소스 위험이지 운영 개인정보 유출의 증거가 아니다.
+- **목적:** 인증·동의가 유효한 보유자가 F675-205 일일 알림을 켜기 전에 **현재 기준으로 알림에 포함될 아이템 종류 수**를 직접 확인한다. F675-203 요약과 F675-205 발송기는 모두 미구현 기획이며, 이번 기능은 발송·설정 저장·알림함 영수증 생성이나 09:00 발송 보장을 하지 않는다.
+- **대안:** (A) 브라우저에서 전체 보유 목록 집계는 오류→0건, 무제한 응답, 시각 정밀도 문제로 제외; (B) 미리보기 저장 테이블은 데이터 노후화·보존 위험으로 제외; **(C) 선택:** PostgreSQL 회원 전용 제한 집계를 Nest GET으로 제공한다. F675-203 집계가 먼저 구현되면 동일한 검증된 계산식을 재사용하고 중복 계산을 만들지 않는다. 신규 테이블·금융 쓰기는 없다.
+
+### 회원 흐름, 상태, 정확한 응답
+- **진입점:** `/account/notifications`의 제안된 만료 알림 설정 아래. CTA **만료 알림 미리보기** → **새로고침** → **보관함 열기**. 알림 설정이 OFF여도 조회할 수 있고 조회만으로 수신 동의가 되지 않는다. 안내 문구: “현재 보유 아이템 기준 미리보기입니다. 수량은 바뀔 수 있으며 예약 알림 발송은 보장되지 않습니다.” 두 구간·기준시각·마지막 검증 조회만 표시하고 상품명·상품 ID·잔액·보유 수량·회원 UUID·가짜 알림은 표시하지 않는다.
+- **구간:** PostgreSQL 단일 `statement_timestamp()`를 UTC 소수점 6자리 `asOf`로 사용. **(asOf, asOf+24시간]** 및 **(asOf+24시간, asOf+72시간]**에 만료되는 카탈로그 종류 수. `quantity>0`, `expires_at IS NOT NULL`인 회원 보유 항목만 포함한다. 이미 만료된 항목, 효과 만료, 유지비, 정지 상태 추정, 금융 이벤트는 제외한다. (회원,상품) PK의 상품은 구간당 1종으로 집계한다. 수치는 JS 실수 대신 **정규 비음수 십진 문자열**로 전달한다. 경계: asOf 정확히 만료는 제외, +24시간은 첫 구간, +24시간+1µs는 두 번째, +72시간은 두 번째, +72시간+1µs는 제외.
+- **상태:** FLAG_OFF(기존 화면 유지), LOADING, VERIFIED_NONZERO, VERIFIED_ZERO, REFRESHING, AUTH_REQUIRED, CONSENT_REQUIRED, RATE_LIMITED, SOURCE_UNAVAILABLE, OFFLINE, SESSION_CHANGED. 503/타임아웃/시각 불명은 0건 성공으로 표시하지 않는다. 검증된 미리보기도 **조회 순간의 값**이지 미래 발송 결과나 09:00 작업 실행의 보증이 아니다. 로그아웃·계정 전환 시 이전 값을 즉시 지운다.
+
+### API·DB 권한·보안·성능
+- **Nest:** `GET /api/v1/shop/expiry-digest/preview`에 SessionGuard, AuthenticatedGuard, ConsentGuard 적용. 회원은 서버 세션에서만 결정하고 요청의 회원 UUID·필터·본문은 허용하지 않는다. 알 수 없는 쿼리는 400, 인증 없음 401, 동의 없음 403, 요청 제한 429, DB·스키마·시각 검증 실패 503. GET이므로 CSRF 쓰기 토큰·멱등키 불필요. 성공 `200 {sourceStatus:'VERIFIED',asOfUtcMicros:'YYYY-MM-DDTHH:mm:ss.ffffffZ',count0To24h:'0',count24To72h:'0'}`. 새로고침은 새 조회이며 과거 성공 결과를 재사용하지 않는다.
+- **SQL:** 필요할 때만 신규 순방향 마이그레이션을 사용하며 **318 번호 충돌** 해결 후 번호를 협의한다. 제안 함수 `public.shop_expiry_digest_preview_v1(p_actor uuid)`는 migrator 소유 SECURITY DEFINER, 고정 `search_path=pg_catalog,pg_temp`, 스키마 명시, PUBLIC EXECUTE 회수 및 검증된 역할에만 EXECUTE 부여. 한 읽기 명령 안에서 회원 조건과 마이크로초 경계를 적용하고 동적 SQL은 금지한다. **P0 보안 게이트:** 전달된 UUID나 호출자가 설정한 GUC는 DB 차원의 회원 신원 증명이 아니다. 앱 역할의 테이블 권한 부정 시험과 회원 2명 간 직접 EXECUTE 위조 접근 차단을 입증하거나, 안전한 신원 결속 설계가 승인될 때까지 신규 권한·기능 활성화를 차단한다. `user_items` 직접 SELECT나 알림 테이블 권한을 임의 부여하지 않는다.
+- **제한:** 회원당 분당 10회, SQL 2초, p95 300ms 미만은 **시험 목표치이며 실측이 아니다**. 10,001건 합성 보유 데이터에서 `EXPLAIN (ANALYZE, BUFFERS)`로 기존 인덱스를 검토하고 효과가 입증된 경우에만 인덱스를 추가한다. 한 SQL 문장의 동일 기준시각·스냅샷만 보장하며 HTTP 요청 간 고정 스냅샷을 주장하지 않는다. 쓰기 트랜잭션·잠금·영수증은 없다. 확인되지 않은 `in_app_notifications` 생성 DDL은 F675-205의 별도 P0 차단 조건이며 이 읽기 기능에 의존시키지 않는다.
+- **개인정보/SEO:** Nest·Next BFF·app-api·최종 HTTP 엣지의 성공과 오류 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 검증. 사이트맵·공개 canonical 제외. 회원 UUID·아이템명·만료 상세·응답 본문·인증 토큰을 로그/분석에 남기지 않는다. Android는 app-api 동등성, 디스크 캐시 금지, 로그아웃·계정 전환의 세션 세대 검증으로 지연 응답 폐기. 320px·200% 확대·44px 터치·키보드/aria-live·동작 감소·WCAG 2.2 AA·한영 의미 동등성.
+- **관리자/KPI:** 미리보기 요청 수, 검증된 0건 비율, 401/403/429/503, p95, 이전 세션 응답 폐기를 집계하고 회원 **20명 미만 코호트는 비공개**. 회원별 조회 대시보드·외부 발송·마케팅 추론은 없다. 목표는 타 회원 정보 노출 0, 보유/WLD/원장 변경 0, 장애→0건 오표시 0, 공개 캐시 응답 0이며 실측 성공으로 주장하지 않는다.
+
+### 개발 백로그 — P0 4건 + P1 6건 (OPEN)
+1. **P0 OPS1600-01:** 운영 frontend/backend/edge 실행 SHA·복원 아티팩트·독립 복원 및 cgroup 여유 증명(#2171); 공유 프로세스 강제 종료 금지.
+2. **P0 SEC1600-02:** PG17 신규·업그레이드 스키마, 앱 역할 ACL, 회원 2명 직접 EXECUTE 위조 접근 차단; 운영 전용 9개 테이블/소스 참조 5개(#2242), 체크섬 5건, 마이그레이션 318 충돌(#2233), DEV 광범위 권한(#993) 해결. 증명 전 신규 권한 금지.
+3. **P0 FIN1600-03:** 실제 PostgreSQL에서 읽기 전용 및 보유 아이템/WLD/원장 변화량 0 검증, 기존 재무 출처 게이트 유지.
+4. **P0 REL1600-04:** QA v1435 관리자 fixture 수정 Draft #2303(국소 37/37, 미병합), Test 백엔드/마이그레이터 DB 불일치(#2260), 운영 다국어 500(#2262), 빌드 성공만으로 자동 통합 승인하는 문제(#1088); 정확 SHA Test·전체 CI·독립 복원·운영자 승인 필수.
+5. **P1 PREVIEW1600-05 (B/DB):** F675-203/205와 안전하게 공유 가능한 회원 집계, 마이크로초 경계, 두 회원 ACL, 10,001건 EXPLAIN, 직접 테이블 권한 금지.
+6. **P1 PREVIEW1600-06 (B/API):** 인증 GET, 십진 문자열·UTC 정밀도, 400/401/403/429/503, SQL 제한, 비공개 헤더.
+7. **P1 PREVIEW1600-07 (A):** 접근 가능한 미리보기/새로고침, 검증된 0건과 장애 구분, 자동 수신 동의·발송 보장 주장 금지, 기능 OFF 시 기존 화면.
+8. **P1 PREVIEW1600-08 (C):** Android/app-api 동등성, 계정 전환 지연 응답 차단, 비공개 헤더, 디스크 캐시 금지.
+9. **P1 PREVIEW1600-09 (A/C):** 회원 20명 이상 집계 KPI, 최종 엣지 SEO/개인정보, 민감 로그 금지, 320px WCAG 2.2 AA.
+10. **P1 PREVIEW1600-10 (QA):** 격리 PG17 신규/업그레이드, 회원 2명·위조 100회, 보유 10,001건, 1µs 경계·KST 전환, 동시 읽기/보유 변경 100회, 429/503, Android 로그아웃, HTTP 헤더·금융 변경 0, 정확 SHA Test·롤백.
+
+**수용시험은 제안만 했으며 실행하지 않았다.** 기능 스위치 `inventory_expiry_digest_preview` 기본 OFF. B/A/C/QA 별도 브랜치·Test 정확 SHA 검증 후 main/CI/보안/금융/백업/운영자 승인, OFF→소규모→확대. 롤백은 스위치 OFF로 기존 알림 설정 복원하며 DB 파괴적 롤백 금지. QA v1435의 fixture 통과는 전체 릴리스 통과가 아니다. 외부 독립 레퍼런스 신규 실검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. **DRAFT / RELEASE HOLD**, 런타임/DB/아이템/WLD/원장/Test/Production 변경 없음.
+
+## v2026.11.01.1598 — F675-205 동의 철회 동기화 및 일일 알림 중복 방지 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기 및 근거:** 이전 Feature Addition v1596 → 현재 Feature Improvement v1598 → 다음 Feature Addition v1600(잠정). 시작과 중간에 origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9 확인. 기준은 main의 AGENTS.md, README.md, 영어 PROJECT_PLAN.md 원본과 한국어 대조 문서. 이전 기획 Draft #2297 미병합, 개발 인계 이슈 #2296, Draft PR #2301. F675-205 미구현 기능의 문서 설계만 수정하며 분산 기획 파일을 새로 만들지 않음.
+
+### 구현 전에 보완한 설계 문제 네 가지
+
+**D1 — 설정 행 잠금만으로 동의 철회와 알림 생성을 직렬화할 수 없음(P0).** v1596 작업자는 알림 설정 행을 잠그고 동의를 재검사하지만, 다른 트랜잭션의 동의 철회가 검사와 알림 INSERT 사이에 커밋될 수 있음. 따라서 “커밋 전 철회 시 반드시 미발송”이라는 기존 표현은 입증되지 않음. **선택:** 작업자·알림 설정 변경·기존 동의 철회 및 계정 삭제 경로가 공통으로 따르는 회원별 권한 직렬화 규약과 단조 증가 동의 세대 또는 동등한 지속성 철회 장벽을 설계. 모든 경로의 잠금 순서는 회원 권한 행 → 설정 → 영수증 → 알림함으로 통일하고, 작업자는 원자적 INSERT 직전에 잠금 아래에서 세대·설정 활성 상태를 재검증. 작업자 권한 검증보다 먼저 직렬화된 철회는 새 알림을 차단하지만 이미 커밋된 알림은 과거 기록으로 남음. 기존 철회 경로를 같은 규약으로 변경할 수 없다면 보장했다고 주장하거나 작업자를 활성화하지 말 것: **P0 BLOCKED**. 호출자가 변경할 수 있는 세션 변수는 독립적인 신원 증거가 아님. 철회 후 재동의하더라도 이전 ON 상태를 자동 복구하지 않고 다시 명시적으로 활성화해야 함. 동시 요청만이 아니라 양방향 커밋 순서를 검증하는 테스트 필수.
+
+**D2 — 알림함 보존기간과 SENT 영수증의 참조 무결성 충돌 가능성(P0).** v1596은 notification_id와 상태/ID CHECK를 제안했지만 실제 알림함 PK·FK·삭제 정책은 확인하지 못함. SENT는 ID가 반드시 있어야 한다는 CHECK와 FK ON DELETE SET NULL을 함께 쓰면 정상 알림 삭제가 실패할 수 있음. **선택:** (회원 UUID, KST 날짜) 유일 영수증을 알림함 행의 현재 존재 여부와 독립적인 중복 방지 근거로 유지. SENT는 생성 트랜잭션의 커밋을 뜻하며 현재 알림 존재나 읽음 여부를 뜻하지 않음. 깨끗한 설치의 실제 DDL과 보존·삭제 정책을 확인하기 전에는 FK 삭제 동작을 결정하지 말 것. 보안 검토 후 삭제 가능한 nullable 참조와 별도 과거 상태 또는 FK가 없는 불투명 삽입 식별자를 선택. SKIPPED_ZERO는 해당 KST 날짜의 최종 결과이므로 10시 이후 새 보유 아이템이 생겨도 같은 날 재발송하지 않음. 알림함 행을 삭제해도 중복 발송이 가능해져서는 안 됨. 계정 삭제 시 영수증·설정의 삭제 또는 익명화 정책을 검증해 회원 UUID를 무기한 보존하지 말 것. 번호형 마이그레이션에서 확인된 것은 테스트용 fixture뿐이므로 실제 in_app_notifications 생성 DDL은 **P0 BLOCKED**.
+
+**D3 — 작업 시간과 트랜잭션 커밋 시각은 다름.** v1596의 오전 9~11시 작업과 집계용 statement_timestamp는 서로 다른 의미임. 11시 전에 시작한 트랜잭션이 11시 이후 커밋될 수 있고 커밋 직전 시각 확인만으로 엄격한 커밋 마감은 수학적으로 보장할 수 없음. **선택:** DB 시각 기준 Asia/Seoul [09:00,11:00)에서만 작업을 선점하고, 두 개의 겹치지 않는 만료 구간은 하나의 statement_timestamp로 집계하며 그 시각에서 KST 날짜를 도출. 쓰기 직전에 DB 시각과 기능 스위치를 재확인하고 이미 마감을 넘겼으면 중단. 11시 이후 새 선점 금지, 다른 날짜 소급 처리 금지. 진행 중이던 커밋은 11시 직후 완료될 가능성이 있으므로 사용자 안내는 “9시경 실행, 재시도는 보통 11시 종료, 도착 보장 없음”으로 하고 엄격한 커밋 시각 SLA는 주장하지 않음. 앱 로컬 시각이나 여러 배치에 걸친 transaction_timestamp로 날짜를 결정하지 않음. PostgreSQL KST 자정 경계·시계 차이 검증과 제한된 취소/트랜잭션 타임아웃을 명세하며 공유 프로세스를 강제 종료하지 않음.
+
+**D4 — 현재 알림 코드만으로 신규 알림 생성 가능성과 안전한 링크를 보장할 수 없음.** Nest NotificationService는 public.in_app_notifications를 직접 읽으며 safeNotificationLink의 허용 목록에는 /inventory가 없음. PRODUCT_ACTIVITY 분류가 DTO에 존재한다는 사실만으로 새 DB에서 알림함을 만들 수 있거나 앱 역할 권한이 안전하다는 증거가 되지 않음. **선택:** 실제 DDL·소유자·제약·보존 정책을 먼저 확인하고 /inventory 정확 경로만 허용하며 악성 URL·Android 딥링크 거부 시험 수행. 전용 작업자에게는 검토된 함수 EXECUTE와 제한된 회원 후보 조회만 허용하며 user_items·금융 테이블 직접 DML을 부여하지 않음. 기능 스위치 기본 OFF, 장애를 빈 결과로 바꾸지 않음, 알림 INSERT 실패를 SENT로 보고하지 않음. 알림 카테고리만으로 접근 권한을 결정하지 않음.
+
+### 보완된 회원/API/DB 계약과 검증 게이트
+
+- **목적·대상·화면·CTA·상태:** 로그인 및 동의 완료한 회원만 /account/notifications에서 명시적 활성화, /inventory에 설정 링크. 오전 9시경 알림함에 0~24시간과 24~72시간 만료 예정 상품 종류 수만 안내하며 상품명·수량·식별자·WLD 정보는 제외. 활성화, 비활성화, 재시도, 보관함 열기 CTA. VERIFIED ON/OFF, LOADING, SAVING, VERIFIED_NO_CHANGE, REVISION_CONFLICT, AUTH_REQUIRED, CONSENT_REQUIRED, RATE_LIMITED, SOURCE_UNAVAILABLE, OFFLINE, SESSION_CHANGED 구분. SENT 후 비활성화는 기존 알림을 회수하지 않음. SKIPPED_ZERO는 발송 실패가 아님.
+- **API:** GET /api/v1/shop/expiry-digest/preferences, CSRF 검증 PUT(expectedRevision 정규 10진 문자열, 회원은 세션에서만 도출). 리비전 일치 시에만 200 VERIFIED_NO_CHANGE, 오래된 설정은 409, 인증·동의·제한·DB 오류는 401/403/429/503으로 실패 처리. 모호한 저장 결과는 GET 재조회 후 재시도. 서버 검증된 권한 경계가 지원할 때만 동의 세대/자격 리비전을 추가하며 클라이언트가 보낸 세대를 신뢰하지 않음. 동의 철회 시 설정 OFF, 오래된 PUT으로 재활성화 불가.
+- **DB·트랜잭션:** 마이그레이션 318 충돌 해결 후 전진 전용 신규 번호. 회원 설정과 (회원, KST 날짜) 고유 영수증. 철회 경로와 공유하는 회원 권한 잠금 → 설정 잠금 → 중복 영수증 확인 → 검증된 보관함 집계 → 알림 INSERT와 SENT 영수증을 하나의 트랜잭션으로 커밋. 검증된 0건에만 SKIPPED_ZERO. 커밋 전 장애는 알림·영수증 모두 없음, 커밋 후 응답 유실은 영수증으로 재시도 중복 차단. 알림 삭제가 영수증을 너무 일찍 지우지 않도록 보존기간 대조. WLD·아이템·금융 원장 변경 없음.
+- **관리자·보안·SEO·모바일·접근성·KPI:** 회원 20명 이상 집계만 관리자에게 표시, 회원 UUID·알림 본문은 로그/지표 제외. Nest·Next·app-api·Android 게이트웨이·edge의 정상 및 오류 응답 모두 private/no-store/noindex/nosniff/referrer 헤더. 320px·200% 확대·44px 조작부·WCAG 2.2 AA·키보드·aria-live·한영 의미 동등성. Android는 계정 변경 후 늦은 응답 폐기, 검증된 /inventory 딥링크만 사용. 철회 이후 새로 승인된 알림 0, KST 날짜당 SENT 중복 0, 금융·아이템 변경 0은 목표이며 p95/작업 완료율은 실제 Test 측정 전 성과라고 주장하지 않음.
+- **수용시험(미실행):** PostgreSQL 17 깨끗한 설치와 업그레이드, 회원 2명·앱 역할 타 회원 접근 차단, 철회와 선점의 두 커밋 순서, 재동의 뒤 오래된 ON, 계정 삭제, 다중 작업자, SKIPPED_ZERO 뒤 신규 보유, SENT 뒤 알림 삭제·재시도, 커밋 전후 장애, KST 08:59:59/09:00/10:59:59/11:00/자정, 24/72시간 ±1마이크로초, 10,001건, 429/503/409, 악성 링크, 오류 응답 보안 헤더, Android 로그아웃·접근성. 배치 100건 처리의 공정성·성능·cgroup 여유를 측정하기 전 일일 도착을 보장하지 않음.
+- **개발 인계(P0 4건 + P1 6건):** P0-01 운영 frontend/backend/edge SHA·독립 복원·cgroup(#2171). P0-02 동의 철회 직렬화·알림 DDL·앱 역할 격리·삭제/보존 검증 및 운영 스키마·체크섬·318 충돌(#2242/#2233/#993). P0-03 금융 원장 출처와 금융/아이템 변화 0 검증. P0-04 Test 백엔드/마이그레이터 불일치(#2260), 다국어 500(#2262), 관리자 테스트 만료(#2292), 빌드만 성공한 PR 자동승격 차단(#1088), 정확 SHA Test 및 운영자 승인. P1-05 Backend B 스키마/동의 장벽/영수증 수명, P1-06 Backend B CAS API·철회 시 OFF, P1-07 Backend B KST 작업자·원자적 중복 방지, P1-08 Dev A 웹 설정·검증된 알림 링크, P1-09 Dev C Android/app-api·세션 격리·비공개 헤더·집계 KPI, P1-10 QA PostgreSQL/모바일/edge/경합/복구 시험. A/B/C/QA 코드 소유권을 침범하지 않으며 기획은 문서만 수정.
+- **배포·롤백·근거:** inventory_expiry_daily_digest 기본 OFF, 별도 개발 브랜치·정확 SHA 공식 Test·전체 CI/DB 보안·독립 복원·운영자 승인 후 GitOps 승격. 롤백은 기능 OFF → 작업자 중단 → 필요시 불변 이미지 복구, 기존 마이그레이션 유지. Production RELEASE HOLD. 공개 Test bc8cd8a6... 및 Production 353c6d5d...는 main과 다르며 실제 실행 SHA 증명은 아님. 외부 독립 레퍼런스 이번 회차 검증·중복 제거·분류 승인 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 실제 신규 기능 수용시험 및 런타임/DB/WLD/원장/Test/Production 변경 없음.
+
+## v2026.11.01.1596 — F675-205 회원 보관함 만료 예정 일일 알림함 요약 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기와 기준:** 이전 **Feature Improvement v1594** → 현재 **Feature Addition v1596** → 다음 **Feature Improvement v1598(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. `AGENTS.md`, `README.md`, 영어 `PROJECT_PLAN.md` 원본과 한국어 동등 문서를 기준으로 삼음. 개발 인계 이슈 **#2296**, 기획 Draft PR **#2297** 등록. 이전 기획 Draft **#2290**은 미병합이므로 F675-199~204의 유효한 내용을 독립 문서 브랜치로 승계했으며 운영에 반영하지 않음. 아래는 **구현되지 않은 제안 설계**이고 분산 기획 파일은 추가하지 않음.
+
+### 실제 소스 근거와 대안
+- `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패 시 `[]`로 대체하므로 이를 실제 보유 아이템 0건의 증거로 쓰지 않음. 마이그레이션 **071**의 `public.user_items(user_id,catalog_id,quantity,expires_at)`는 회원·카탈로그 복합 PK이며, **123**의 `shop_my_items_v2(p_actor)`는 만료 행을 제외하지만 인자로 받은 회원이 인증된 회원인지 DB가 독립 증명하지 않음. 보유 만료는 효과 영수증 만료·유지비·금융 정산과 다름. F675-203/204 요약·상세 기능은 여전히 미구현 Draft.
+- Nest `NotificationController`에는 `SessionGuard`, `AuthenticatedGuard`, `ConsentGuard`를 적용한 알림함 조회·읽음 처리와 쓰기 CSRF가 있음. `NOTIFICATION_CATEGORIES`에 `PRODUCT_ACTIVITY`가 있고 Next `/account/notifications`에 알림함이 있음. 그러나 `safeNotificationLink`는 현재 **`/inventory`를 허용하지 않으며**, 조사한 번호형 마이그레이션에서 `CREATE TABLE public.in_app_notifications`를 **발견하지 못함**(시험 fixture는 배포 스키마가 아님). 신규 기능에 앞서 새 설치 스키마·제약·권한·인덱스의 **P0 UNKNOWN/BLOCKED** 검증 필요.
+- 대안 A 브라우저 전용 토스트는 브라우저 종료 시 알릴 수 없어 제외. 대안 B 외부 푸시·이메일은 동의·전송 실패·개인정보 위험 때문에 제외. **선택 C: 회원이 직접 켠 경우 KST 기준 하루 최대 한 번 서버가 생성하는 앱 내부 알림함 요약.** 스키마·권한 증명 후 기존 알림함을 재사용. 푸시·SMS·이메일·Discord·금융 행동·자동 갱신 없음. F675-199~204 구현과 독립.
+
+### 회원 화면·상태·시간
+- **목적/대상:** 로그인·동의가 유효한 보관함 소유자가 매일 직접 접속하지 않아도 만료 임박을 인지. **/account/notifications → 보관함 만료 알림** 토글과 설명, **/inventory → 만료 알림 설정** 링크. 기존 `engagement.notifications_enabled` 및 필수 보안 알림과 별도 설정, **기본 OFF**. CTA **매일 알림 받기**, **알림 끄기**, **다시 시도**, **보관함 열기**. 확인된 설정 리비전과 `한국시간 오전 9시 전후, 도착 보장 없음` 명시. 실시간 알림 보장 금지.
+- 서버는 매일 **09:00 Asia/Seoul**에 실행, 당일 KST 날짜만 처리하고 **11:00 KST**까지만 안전 재시도. 지난 날짜의 알림을 소급 생성하거나 11시 이후 발송하지 않음. PostgreSQL 한 기준시각 `asOf`의 두 겹치지 않는 구간 **(asOf,asOf+24h]**, **(asOf+24h,asOf+72h]**를 마이크로초 정밀도로 계산. `quantity>0`, 만료시각 NULL 아님, 회원 본인 행만 포함. 효과 만료·유지비·이미 만료된 아이템 제외. 아이템 수량이 아닌 각 구간의 **카탈로그 종류 수**만 제공하고 상품명·잔액·식별자는 포함하지 않음. 예: `24시간 안에 2종, 그다음 48시간에 3종이 만료 예정입니다. 현재 보관함에서 다시 확인하세요.` 양쪽 0이면 알림을 생성하지 않음.
+- 동의한 회원에게 **KST 하루 최대 1개의 커밋된 알림**, 전달·읽음 보장 아님. 당일 보유 상태가 바뀌어도 재전송하지 않음. 카테고리 `PRODUCT_ACTIVITY`; `/inventory`는 허용 경로와 Android 딥링크 시험 후에만 적용. 알림 데이터로 임의 URL 생성 금지. 읽음 처리는 기존 회원 인증 경로를 사용하며 관리자 사칭 경로 없음.
+- UI 상태 `FLAG_OFF`, `PREFERENCE_LOADING`, `PREFERENCE_VERIFIED_OFF`, `PREFERENCE_VERIFIED_ON`, `SAVING`, `VERIFIED_NO_CHANGE`, `REVISION_CONFLICT`, `AUTH_REQUIRED`, `CONSENT_REQUIRED`, `RATE_LIMITED`, `SOURCE_UNAVAILABLE`, `OFFLINE`, `SESSION_CHANGED`. GET 실패를 OFF로 오표시하지 않고 PUT 실패를 저장 완료로 낙관 표시하지 않음. 409 시 설정을 다시 읽고 사용자가 재시도하도록 안내. 토글 ON만으로 실제 알림 발송 성공을 주장하지 않음.
+
+### API·DB·동시성·인증·악용 방지
+- Nest **GET /api/v1/shop/expiry-digest/preferences** 응답 `{enabled:boolean,revision:string,updatedAtUtc:string|null,sourceStatus:'VERIFIED'}`; CSRF 적용 **PUT** 본문 `{enabled:boolean,expectedRevision:string}`, 리비전 일치·실제 변경 없음일 때만 `200 VERIFIED_NO_CHANGE`. 리비전은 안전하지 않은 JS number가 아니라 정규화된 음이 아닌 십진 문자열. 서버가 인증 세션에서 회원을 도출하고 요청 본문에 회원 UUID를 받지 않음. 400 잘못된 값, 401 비인증, 403 동의/권한, 409 CAS 충돌, 429 요청 제한, 503 DB·스키마 장애. 다른 기기의 설정을 무조건 덮어쓰는 PATCH 없음. 가역적인 CAS 토글이므로 별도 멱등키 테이블 대신 응답 유실 시 GET으로 실제 결과 확인 후 PUT 재시도. 회원당 **분당 설정 쓰기 10건**. Next BFF·Android 게이트웨이도 동일 계약.
+- 번호를 예약하지 않은 **전진형 마이그레이션 제안**: `inventory_expiry_digest_preferences(user_id uuid PK REFERENCES users(id),enabled boolean NOT NULL DEFAULT false,revision bigint NOT NULL DEFAULT 0 CHECK(revision>=0),updated_at timestamptz NOT NULL)`; `inventory_expiry_digest_receipts(user_id uuid REFERENCES users(id),digest_date date NOT NULL,outcome text CHECK IN ('SENT','SKIPPED_ZERO'),notification_id uuid NULL,as_of_utc timestamptz NOT NULL,count_24h bigint NOT NULL,count_24_72h bigint NOT NULL,PRIMARY KEY(user_id,digest_date),CHECK outcome/notification_id 정합성)`. `in_app_notifications`의 실제 PK·dedupe_key·FK·소유자와 마이그레이션을 검증하기 전 DDL 확정 금지. 기존 적용 마이그레이션 318 수정 금지. 부분 인덱스 `preferences(user_id) WHERE enabled` 및 보유 아이템 소유자·만료 조회 인덱스는 10,001행 `EXPLAIN (ANALYZE, BUFFERS)`로 중복 여부 확인 후 검토. WLD·아이템·원장 쓰기 없음.
+- 설정 PUT 트랜잭션: 세션 검증 → CSRF·동의 → 회원 설정 행 잠금(없으면 충돌 안전 기본행 생성) → `expectedRevision` 확인 → no-op 또는 리비전 1회 증가 → 커밋. 실제 앱 DB 역할의 회원 경계 검증 필수. **P0 보안 차단:** 서로 다른 두 회원의 앱 역할 직접 호출/위조 차단 시험과 보안 담당 승인이 있기 전 신규 SECURITY DEFINER EXECUTE나 `user_items`·알림 테이블 직접 권한을 부여하지 않음. 호출자가 바꿀 수 있는 `SET LOCAL actor`는 인증 증거가 아님. `search_path=pg_catalog,pg_temp`, 스키마 명시, migrator 함수 소유, PUBLIC REVOKE. 스케줄러는 웹 앱 역할이 아닌 최소 권한의 별도 심사된 실행 주체.
+- 작업자는 검증된 전용 역할로 당일 영수증 anti-join을 이용해 **배치당 최대 100명의 ON 회원 후보 ID**만 읽고, **회원당 별도 DB 트랜잭션**에서 해당 설정 행을 `FOR UPDATE SKIP LOCKED`로 잠가 설정·동의를 재확인, `statement_timestamp()`와 KST 날짜 확정, 두 구간 집계 후 **`SKIPPED_ZERO` 영수증 또는 `PRODUCT_ACTIVITY` 알림 1개+`SENT` 영수증**을 원자적으로 기록. 유일키 `(user_id,digest_date)`로 재시도·충돌·두 작업자 중복 차단. 실패 시 모두 롤백하며 가짜 성공 알림 생성 금지. 작업 시작 및 커밋 직전 기능 스위치 확인. SQL 2초, 잠금 500ms, 배치 100, 11시 종료는 **실측 전 목표 제한**. 알림함 커밋은 회원 열람의 증거가 아님.
+- 스케줄러에는 금융 테이블 임의 쓰기 권한 금지. 설정 해제·동의 철회가 커밋보다 먼저 확인되면 발송하지 않음. 이미 커밋된 알림은 과거 기록으로 남고 외부에서 취소할 수 없음. 보존·삭제는 기존 알림 정책 검증 후 적용하며 기간을 임의로 단정하지 않음. 외부 전송과 무제한 백그라운드 작업 금지.
+
+### 관리자·보안·SEO·Android·접근성·분석·배포
+- 관리자는 집계된 활성 회원 수, 처리 시도·SENT/SKIPPED_ZERO, 중복 충돌, DB 장애, 지연, p95만 확인. **서로 다른 회원 20명 미만 집계 비공개**. 회원별 조회 화면과 원본 UUID·아이템명·만료시각·SQL·알림 본문·링크 로그/분석 금지. 요청 본문과 세션 토큰 기록 금지. 타 회원 데이터 0건, WLD·아이템·원장 변화 0건이 필수 목표.
+- Nest/Next/app-api/Android 게이트웨이 **성공·오류 응답 전체**에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`; 비공개 설정·알림함은 사이트맵/검색 제외. 메타데이터뿐 아니라 실제 HTTP 엣지 헤더 검증(#2012). 제3자 추적·외부 알림 금지. 위조 링크·대량 열거·큰 요청·작업자 재실행 방지.
+- Next 설정은 **320px**, **200% 확대**, **44px 터치**, 키보드/스크린리더 토글 레이블, 포커스를 빼앗지 않는 `aria-live` 저장/충돌 안내, 모션 감소, 한영 의미 동등, WCAG **2.2 AA**. Android는 인증된 app-api 경유, 같은 토글·딥링크, 디스크 캐시 금지, 로그아웃/계정 전환 시 세션 세대로 늦은 응답 폐기, 검증된 `/inventory`만 본인 보관함 화면으로 매핑.
+- KPI **실측 아님, 수용 목표**: 설정 저장 p95 <300ms, 검증된 처리 용량에서 당일 11시 전 배치 종료, 회원당 하루 커밋 알림 ≤1, 무단 접근 0, 원장·아이템 변경 0, 개인정보 보호 헤더 누락 0. 반복 전체 일일 배치 시험 전 전달 신뢰성 보장 금지.
+- QA **제안, 미실행**: 격리 PostgreSQL 17 신규·업그레이드 스키마와 318 충돌, 회원 2명·앱 역할 위조, 보유 10,001건, NULL/만료/수량0, 구간 ±1µs, KST 날짜 경계, 고정 +09:00, 작업자 100건 동시 실행, 커밋 후 응답 유실 재시도, 설정 OFF·동의 철회 경쟁, 0건 영수증, 11시 중단, 작업자 재시작, 429/503/409, 두 기기 CAS, CSRF, 악성 링크, 전체 HTTP 상태의 no-store/noindex, Android 계정 전환, 320px/a11y, 금융·아이템 변화 0. 활성화 전에 알림 테이블 DDL·제약을 신규 DB에서 독립 검증.
+- **릴리스:** 기능 스위치 `inventory_expiry_daily_digest` **기본 OFF**. 스키마·앱 권한, QA v1433 고정 만료시간 fixture (#2292; main 프론트 2,899 PASS/2 FAIL), Test backend/migrator DB 불일치 (#2260), Production 다국어 500 (#2262), 운영 전용 테이블 9개 (#2242), 체크섬 불일치 5건, 마이그레이션 318 충돌 (#2233) 해결이 선행. 개발 B SQL/작업자, A 웹, C Android, QA 독립 브랜치. 실제 백엔드·DB·모바일·인증 E2E를 포함한 exact-SHA Test, 전체 CI/보안, 독립 복원, 운영자 승인 GitOps 승격만 허용. 롤백은 **기능 OFF·스케줄러 중단 우선**, 필요 시 불변 이미지 복원, 전진형 마이그레이션과 영수증 보존. **Production RELEASE HOLD**.
+
+### 구체적인 개발 인계 — P0 4건 / P1 6건 (전부 OPEN)
+1. **P0 DIGEST1596-01 OPS:** 실제 Production 프론트·백엔드·엣지 SHA, 롤백/독립 복원, miniPC 작업 한계(#2171), 타 작업 프로세스 강제 종료 금지 검증.
+2. **P0 DIGEST1596-02 SEC/DB:** 신규 DB 알림 테이블 DDL 출처, 운영 전용 테이블 9개·소스 참조 5개, 앱 역할 DML 및 회원 위조 차단(#993/#2242), 체크섬 5건, 마이그레이션 318 충돌(#2233); 심사 전 신규 권한/작업자 차단.
+3. **P0 DIGEST1596-03 FIN:** 알림 작업자 금융 쓰기 권한 없음 증명, Treasury·마켓플레이스 원장 출처 대조, 요약 기능의 WLD·아이템·원장 변경 0 검증.
+4. **P0 DIGEST1596-04 RELEASE/QA:** QA v1433 날짜 고정 관리자 fixture(#2292), Test 백엔드/migrator 불일치(#2260), Production 다국어 HTTP 500(#2262), 전체 CI, exact-SHA 인증 Test와 독립 복원.
+5. **P1 DIGEST1596-05 Backend B/DB:** 전진형 설정·영수증 스키마, 회원 범위 CAS 함수, 최소 권한 스케줄러, 인덱스와 PostgreSQL 17 신규 설치 일치 검증.
+6. **P1 DIGEST1596-06 Backend B:** 인증 GET/PUT, 문자열 리비전, 동의·CSRF, 409/no-op/재조회, 개인정보 헤더, 제한 및 트랜잭션.
+7. **P1 DIGEST1596-07 Backend B:** KST 09시 배치·11시 종료, SKIP LOCKED와 회원/날짜 유일 영수증·알림 원자 기록, 장애·재시작 지표.
+8. **P1 DIGEST1596-08 Dev A:** 웹 토글, PRODUCT_ACTIVITY 알림 렌더링, 안전한 `/inventory` 링크, 실패/충돌 상태와 접근성.
+9. **P1 DIGEST1596-09 Dev C:** Android/app-api 동등성, 세션 격리, 딥링크 검증, 엣지 비공개/noindex, 관리자 20명 이상 집계 KPI.
+10. **P1 DIGEST1596-10 QA:** 격리 PG17 회원 2명/10,001건/±1µs/KST/100동시성/CAS/해제/작업자 장애, 전체 웹·백엔드·app-api·모바일·엣지, exact-SHA Test와 롤백.
+
+**근거 및 상태:** 시작 시 miniPC Debian 13.6 서비스 활성·개발 PostgreSQL 연결, `moneyverse-mcp` cgroup 968/1027 작업으로 자원 경고. QA v1433의 관리자 fixture 실패는 **시험 결함**이며 운영 관리자 세션 장애가 입증된 것은 아님. 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 기능 미구현·실제 수용시험 미실행·코드/DB/WLD/아이템/원장/Test/Production 변경 없음. **DRAFT / RELEASE HOLD.**
+
+## v2026.11.01.1594 — F675-204 스냅샷 동등성·정규 지문·제한형 페이지네이션 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**주기 / 기준:** 이전 **Feature Addition v1592** → 현재 **Feature Improvement v1594** → 다음 **Feature Addition v1596(잠정)**. 시작과 중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 확인. `AGENTS.md`, `README.md`, 영문 정본·한국어 대조 기획서, SQL 마이그레이션 071/123, Nest 상점 컨트롤러·리포지토리, Next `/inventory`, 미병합 Draft **#2283**, QA **#2285** 조사. 기존 F675-199~204의 가치 있는 제안은 별도 문서 브랜치에 계승하며 **main 또는 운영에 반영됐다는 의미가 아님**. 개발 연계 **#2282**. **DRAFT / RELEASE HOLD; 구현하지 않음.**
+
+### 실제 소스에 근거한 설계 문제 4건과 선택 근거
+
+1. **D1 — 지문이 같아도 변경 이력이 없었다고 증명할 수 없음(ABA).** v1592의 '페이지 사이 모든 변경은 HTTP 409' 약속은 아이템 삭제 후 동일 상태로 복구하거나 수량 변경 후 원복하는 경우 성립하지 않음. 상태 지문은 **재검증 시점의 관측 가능한 전체 상태가 최초와 동일한지** 확인할 뿐 중간 변경 이력을 증명하지 못함. **채택 A:** 최초와 현재의 정렬된 전체 소스 상태가 다를 때만 `409 SNAPSHOT_CHANGED`를 보장하며, 동일 상태로 돌아온 ABA에서는 409를 보장하지 않음. DB 트랜잭션으로 고정된 스냅샷이나 변경 감사기록으로 표현하지 않음. **대안 B 보류:** 회원별 단조 증가 변경 리비전은 ABA를 잡을 수 있지만 모든 아이템·상품 변경 경로의 쓰기·마이그레이션·감사가 필요해 독립 읽기 기능 범위를 벗어남. 추후 이력 검증이 필요하면 별도 심사된 리비전 설계를 선행. 화면에는 '해당 시각 기준 저장된 조회와 비교 검증' 및 '현재 보유 현황은 새로고침 필요'를 표시.
+2. **D2 — 정규 바이트 규약이 없는 지문은 재현할 수 없음.** 회원별 `(expires_at,catalog_id)` 정렬을 고정하고 행마다 **정확히** `[상품 UUID 문자열, UTC 소수 6자리 만료시각, 정규 십진수 수량 문자열, 상품 코드, 상품명, 카테고리]`를 사용. PostgreSQL 17 제안 식은 `encode(sha256(convert_to(coalesce(jsonb_agg(jsonb_build_array(...) ORDER BY expires_at,catalog_id),'[]'::jsonb)::text,'UTF8')),'hex')`; **집계 함수 내부 ORDER BY** 및 최초 토큰의 `asOf`를 사용. AEAD 토큰에 알고리즘 버전과 조회 구간을 결속. JS `Date`, 정렬되지 않은 집계, 지역화 표시값, 효과 만료시각 또는 클라이언트 입력을 해시하지 않음. 최초 페이지·지문·키셋·`hasMore`는 **단일 READ COMMITTED SQL 문장**에서 산출하고, 다음 페이지는 전체 구간 지문을 먼저 비교한 뒤 반환. 표시 메타데이터가 달라져도 `409`. 지문 일치는 **상태 동등성**일 뿐 SHA-256 충돌이나 ABA 부재 증명은 아님. PG17 내장 sha256 및 정확 바이트 시험은 권한 부여 전 확인.
+3. **D3 — 고정 120초 커서로는 10,001건을 20건씩, 분당 30회 제한에서 순회하기 어려움.** 기본 **20건/페이지**, 최대 **50건/페이지**, 최초·다음 페이지 통합 **회원당 30회/분**은 유지. 대신 성공한 비최종 페이지마다 **마지막 활동 기준 최대 120초**의 새 서명·암호화 커서를 발급하고 최초 조회로부터 **절대 30분**을 넘지 않음. AEAD에는 회원·인증 세션 세대·구간·불변 최초 `asOf`·알고리즘 버전·최초 지문·`(expires_at,catalog_id)` 키셋·최초 페이지 크기 상한·`firstIssuedAt`·`issuedAt`·`expiresAt=min(now+120초,firstIssuedAt+1800초)`를 결속. 갱신해도 최초 기준시각과 지문은 변경하지 않음. 만료 `410 SNAPSHOT_EXPIRED`, 상태 차이 `409 SNAPSHOT_CHANGED` 시 **결과 다시 조회** CTA를 제공하며 서로 다른 페이지를 섞지 않음. 10,001건은 20건씩 최대 501회 요청(분당 30회면 최소 16.7분)이므로 **가능한 범위에서의 탐색**이지 중단 없는 완료 보장은 아님. 60초 경과 시 스냅샷 기준시각과 오래됨 표시를 강화하고 실시간 재고처럼 표현하지 않음.
+4. **D4 — 전체 구간 무제한 해시는 메모리 고갈·부분 데이터 위험이 있음.** 제안 제한: 구간당 일치 행 **20,000개**, 정규 집계 UTF-8 **4MiB**, 읽기 SQL 문장 **2초 제한**. 실제 적용 전 `EXPLAIN (ANALYZE, BUFFERS)`와 격리 PG17 수용시험으로 검증. JSONB를 생성하기 전에 동일 SQL 문장에서 20,001번째 행 감시값과 정확한 정규 인코딩 바이트 예산을 선검증하고, 무제한 집계 후에야 초과를 발견하는 구현은 금지. 초과, 지문 계산 실패, 소스 결합 무결성 오류, DB·시계 오류 시 정제된 `503 SOURCE_UNAVAILABLE` / `SNAPSHOT_LIMIT_EXCEEDED`를 반환하고 **절대** `200 VERIFIED_EMPTY`, 잘린 `hasMore=false`, 미검증 페이지로 표시하지 않음. 연결 오류 시 미검증 추가 행 폐기. 20,001행과 4MiB 초과 데이터를 각각 시험. 마이그레이션 318 충돌 #2233 해소 전 신규 번호·인덱스 예약 금지.
+
+### 수정된 전체 기능 계약(기획안, 미구현)
+
+- **목적 / 대상 / 권한 / 진입점:** 인증·동의 유효한 보유자만 기존 `/inventory` → **만료 임박** → **0~24시간**, **24~72시간**, **72~168시간** 선택 → **아이템 보기**, **더 보기**, **결과 다시 조회**, 기존 보관함 행 CTA. API의 `24h`,`72h`,`168h`는 각각 **서로 겹치지 않는 세 구간**이며 누적 0~72/168시간이 아님. 최초 PostgreSQL `statement_timestamp()` 기준 `(asOf,+24h]`, `(+24h,+72h]`, `(+72h,+168h]`; UTC 마이크로초 정확도. NULL/이미 만료/수량 0, 효과 만료·유지비 제외. 아이템·원장·WLD 변경 없음. `inventory_expiry_drilldown` 기능 스위치 기본 **OFF**, 미구현 F675-199~203과 독립.
+- **API / 화면 상태:** 인증 가드 적용 `GET /api/v1/shop/expiry-urgency/items?band=24h|72h|168h&limit=20`, CSRF 보호 `POST /api/v1/shop/expiry-urgency/items/pages` 본문 `{pageToken,limit}`. 회원은 세션에서만 도출; 정수 limit 1~50, 후속 limit은 최초 상한 이하. `200`은 완전 검증된 결과·빈 결과만, UTC 소수 6자리 시각·십진수 문자열 수량·`hasMore`·선택적 갱신 `pageToken`·`snapshotAsOf`·`snapshotExpiresAt` 포함. `401` 인증 없음, `403` 권한 없음/토큰 부적합, `409` 소스 상태 변화, `410` 토큰 만료, `429` 요청 제한, `503` 소스 장애/상한 초과. LOADING, VERIFIED_ITEMS, VERIFIED_EMPTY, SNAPSHOT_STALE, RESTART_REQUIRED, UNAVAILABLE, OFFLINE, FLAG_OFF, SESSION_CHANGED 상태를 분리. 커서 중복·역순·잘못된 JSON/숫자/시간은 거부하고 오류를 빈 보관함으로 표시하지 않음.
+- **DB / 트랜잭션 / 권한:** 요청당 최초 `asOf`를 고정한 회원 범위 **읽기 전용 SQL 문장 하나**, SQL 내 UTC 6자리 문자열 직렬화, 결정적 정렬·전체 지문·커서 산출; HTTP 요청 간 장기 트랜잭션·영속 스냅샷·변경 감사 리비전 없음. 마이그레이션 071의 회원/상품 PK와 123의 `shop_my_items_v2(p_actor)`는 **호출자가 전달한 회원 인자만으로 DB 인증 신원을 증명하지 못함**. **P0 보안 차단:** 독립 검토된 DB 회원 신원 결속 또는 권한 격리 조회 게이트웨이, 앱 역할 직접 실행의 타 회원 UUID 거부 시험, 보안 책임자 승인 전 신규 SECURITY DEFINER EXECUTE 권한 금지. 직접 테이블 권한 회수 유지, `SET search_path=pg_catalog,pg_temp`, migrator 함수 소유, PUBLIC 실행 회수. 인덱스는 EXPLAIN 이후 검토하며 호출자가 쓸 수 있는 `SET LOCAL actor`는 신원 증명이 아님.
+- **관리자 / 개인정보 / SEO / 모바일 / 접근성 / KPI:** 관리자 타 회원 대리 조회 금지, **20명 이상 집계**의 페이지 조회·409/410/429/503·p95 지표만 허용. 로그에 회원·토큰·아이템·만료시각·커서·지문 금지. Nest/Next/Android 게이트웨이/엣지 **성공·오류 모두** `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`; 비공개 페이지 사이트맵 제외. 320px, 200% 확대, 44px 터치, 키보드·초점·aria-live·모션 감소, 한영 동등성. 로그아웃·계정 전환 시 지연 응답과 메모리 행 폐기. 10,001행 p95<250ms, 타 회원 0행, 공유 캐시 0건은 **측정 결과가 아닌 목표**.
+- **QA / 배포 / 롤백:** 격리 PG17 새 설치·업그레이드, 2회원 및 앱 역할 직접 타 회원 조회 시도, 10,001/20,001행, 4MiB 초과, 유니코드·구분자·NULL 메타데이터, SHA-256 정규 바이트 재현, 구간 경계 ±1µs, 변경 상태와 ABA 복구 상태 구별, 커서 반복 갱신·120초 비활동·30분 절대 만료, 30회/분 제한, 401/403/409/410/429/503, CSRF·토큰 위조·다른 세션, 웹/Android/엣지 개인정보 헤더, 원장·아이템 변화 0, 기본 OFF·롤백. 개발 B는 승인된 SQL/API, A는 웹, C는 Android, QA는 독립 증거 담당. 정확 SHA 공식 Test에서 백엔드·마이그레이터 DB 대상 일치와 독립 복원 확인 후 운영자 명시 승인으로 운영 승격. **기획에서 배포하지 않음.** 롤백은 기능 OFF 우선, 이후 불변 이미지로 복귀하며 적용된 마이그레이션은 수정하지 않음.
+
+### 우선순위 개발 연계 — P0 4건 + P1 6건(모두 OPEN)
+
+1. **P0 DRILL1594-01 OPS:** 운영 프론트·백엔드·엣지 실행 SHA, DB 연결, miniPC 작업 여유, 암호화 독립 복원·롤백 증명(#2144/#2171). 공개 버전만으로 불충분.
+2. **P0 DRILL1594-02 SEC/DB:** 2회원 DB 신원 결속 입증 전 신규 EXECUTE 차단; 운영 전용 테이블 9개·소스 참조 5개·앱 DML·체크섬 불일치 5건·318 충돌 정리(#2242/#2233).
+3. **P0 DRILL1594-03 FIN:** Treasury·마켓플레이스·클럽 원장 근거와 읽기 시 아이템/WLD/원장 변화 0 입증(#2191). 허위 성공 표시 금지.
+4. **P0 DRILL1594-04 RELEASE:** Test 백엔드·마이그레이터 DB 대상 일치(#2260/#2271), 운영 다국어 HTTP 500(#2262), 공식 Test 정확 SHA·독립 복원·승인. QA #2285의 AGENTS Debian/NixOS 안내 모순은 별도 문서 담당자 수정으로 연계하고 여기서 무단 변경하지 않음.
+5. **P1 DRILL1594-05 Backend B:** 승인된 PG17 회원 조회, 결정적 JSONB/SHA-256 지문, 20k/4MiB/2초 제한, 단일 문장 키셋·EXPLAIN 근거.
+6. **P1 DRILL1594-06 Backend B:** 타입 API, AEAD 비활동 120초+절대 30분, 최초 시각/지문 결속, 409/410/429/503 및 비공개 헤더.
+7. **P1 DRILL1594-07 Dev A:** 접근성 웹 구간/CTA, 정확한 오래됨·기준시각·다시 조회, 20/50 페이지, 보관함 오류의 빈 목록 오표시 차단.
+8. **P1 DRILL1594-08 Dev C:** Android app-api 동등성, UTC 소수 6자리·십진수 문자열, 세션 세대 분리·영속 개인정보 캐시 금지.
+9. **P1 DRILL1594-09 Dev A/C:** 모든 상태의 엣지 비공개/noindex, 20명 이상 관리자 KPI, 토큰·개인정보 로그 제거.
+10. **P1 DRILL1594-10 QA:** 격리 PG17 2회원·10,001/20,001행·4MiB·정규 바이트·ABA·커서 갱신/만료·경계·모바일/엣지/CSRF·원장 0변화·정확 SHA 롤백 증거.
+
+**운영 게이트:** miniPC Debian 13 주요 서비스 활성, 개발 DB 연결 확인. `moneyverse-mcp` cgroup 작업 수 **954/1027** 확인으로 자원 위험 존재. 공개 Test 버전 `bc8cd8a6...`, Production `353c6d5d...`는 main `f13bbce2...`와 불일치하며 공개 문자열은 실제 실행 SHA 증명이 아님. QA #2285에서 AGENTS 런타임 설명 충돌 발견; `docs/INFRASTRUCTURE.md`, `docs/RELEASING.md`와 운영 승인 절차를 임의 대체하지 않음. **RELEASE HOLD / 보안 BLOCKED**. 외부 독립 근거 신규 실제 검증·중복 제거·분류 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 신규 기능 수용시험은 실행하지 않았고 기획 회차에서 코드·DB·아이템·WLD·원장·Test·Production 변경 없음.
+
+## v2026.11.01.1592 — F675-204 회원 보관함 만료 임박 아이템 검증형 상세 목록 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+**주기 / 기준:** 이전 **Feature Improvement v1590** → 현재 **Feature Addition v1592** → 다음 **Feature Improvement v1594(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`을 시작·중간에 재확인했다. 영문이 canonical이며 국문은 의미 동등 문서다. 선행 기획 Draft **#2275 OPEN/UNMERGED**의 유효한 내용을 독립 문서 브랜치에서 이어받았으나 main이나 Production에 반영된 것으로 간주하지 않는다. 개발 이관 **#2282**, 초안 **#2283**. **DRAFT / RELEASE HOLD**. F675-199~204는 검증된 런타임 기능이 아닌 기획 명세다.
+
+### 사용자 가치, 대안, 범위 및 진입점
+
+**F675-204**는 인증·동의가 유효한 회원이 선택한 만료 임박 구간에서 *어떤 보유 아이템*이 만료되는지 신뢰할 수 있는 상세 목록으로 보여준다. 기획 중인 F675-203 집계 카드는 종류·수량만 제공한다. 기존 `/inventory`는 보유 목록을 보여주지만 `frontend/src/app/inventory/page.tsx`에서 API 조회 실패를 `[]`로 대체하여 빈 보관함처럼 오인할 수 있다. 대안 A(클라이언트 보유 배열 필터)는 실패의 빈 결과 오인·기준시각 변동·무제한 페이지 문제로 제외한다. 대안 B(영속 만료 스냅샷 테이블)는 민감정보 저장과 오래된 데이터 정리 부담으로 제외한다. **선택 C:** 서버 검증·짧은 수명의 무상태 스냅샷 토큰과 단일 SQL 문장 기반 회원 전용 조회, 페이지 간 불일치 시 실패 처리. F675-203은 선택적 진입 CTA일 뿐 필수 배포 의존성이 아니며 `/inventory`에서 독립적으로 동작해야 한다.
+
+- **대상 / 권한 / CTA:** 로그인·동의 완료 회원만 `/inventory` → `만료 임박` → **0~24시간**, **24~72시간**, **72~168시간** 선택 → `아이템 보기` → 각 행의 `보관함에서 보기`(기존 아이템 식별자 활용; 존재하지 않는 상세 경로를 만들지 않음). 자동 소비·갱신·알림·구매·잔액 이동·기타 쓰기 없음. 기능 스위치 `inventory_expiry_drilldown` 기본 **OFF**, F675-199~203과 독립. 관리자가 이 경로에서 타 회원으로 가장할 수 없음.
+- **화면과 상태:** 페이지당 20건, 최대 50건. 정확한 만료시각, 표시명, 카테고리, 정규 십진 문자열 수량, 한국시간 표기. 검증된 `hasMore`일 때만 `더 보기`. `LOADING`, `VERIFIED_ITEMS`, `VERIFIED_EMPTY`, `STALE/RESTART_REQUIRED`, `UNAVAILABLE`, `UNAUTHENTICATED`, `FORBIDDEN`, `RATE_LIMITED`, `OFFLINE`, `FLAG_OFF`, `SESSION_CHANGED` 구분. 503이나 토큰 오류를 0건으로 처리하지 않음. 정상 빈 결과는 선택 구간의 **유한한 미래 보유 만료시각과 양수 수량에 해당하는 아이템 없음**만 의미하며 전체 보관함·더 먼 미래 만료의 부재를 뜻하지 않는다. 회원 식별자는 제목·URL·로그·지표에 넣지 않음.
+- **구간 경계:** PostgreSQL `statement_timestamp()`를 단일 `asOf`로 사용. 서로 겹치지 않는 `(asOf,asOf+24h]`, `(asOf+24h,asOf+72h]`, `(asOf+72h,asOf+168h]`. 한국 날짜가 아닌 UTC 시각으로 비교하고 한국시간은 표시 전용. NULL·이미 만료·수량 0·효과 만료·유지비 기한은 제외. 각 24/72/168시간 경계의 ±1마이크로초를 시험하며 한 구간이 비어도 다른 구간의 보유 정보를 숨기지 않음.
+
+### API, 스냅샷 및 트랜잭션 명세 (제안, 미구현)
+
+- **첫 조회 API:** `GET /api/v1/shop/expiry-urgency/items?band=24h|72h|168h&limit=20`; 정확한 band 값과 정수 limit 1~50만 허용(기본 20). SessionGuard·AuthenticatedGuard·ConsentGuard가 인증 세션에서 회원을 도출하고 클라이언트의 userId/asOf/SQL 인자는 거부. `200` 응답 `{asOf,band,items:[{catalogId,name,category,quantity,expiresAt}],hasMore,pageToken?,expiresInSeconds:120}`. UTC 시각은 SQL에서 소수점 6자리 문자열로 직렬화하고 JS Date 변환을 거치지 않는다. 수량은 음수 없는 정규 십진 문자열. 토큰 만료 후 데이터를 실시간이라고 주장하지 않음.
+- **다음 페이지:** 읽기 전용 `POST /api/v1/shop/expiry-urgency/items/pages` + CSRF + JSON `{pageToken,limit}`. POST 선택 이유는 토큰이 URL/접근 로그에 노출되지 않게 하기 위함이며 데이터 쓰기는 하지 않는다. 회원 인증·세션 세대·동의를 매번 재검증하고 두 엔드포인트 합산 **회원당 분당 30회** 제한, 429에는 제한된 `Retry-After`. 페이지 토큰은 키 ID·교체 정책을 갖춘 **인증된 암호화 AEAD**로 보호하며 회원·세션 세대·구간·원래 `asOf`·구간 전체 지문·`(expires_at,catalog_id)` 커서·limit 상한·발급/만료시각을 결속한다. 유효기간 **120초**. 회원 UUID나 아이템 정보를 URL·평문 토큰·텔레메트리에 노출하지 않음. 변조·세션 불일치·구간 변경·키 오류는 다른 회원 존재를 드러내지 않고 403/409 처리.
+- **일관성:** 요청마다 READ COMMITTED 단일 SQL 문장을 실행하고 첫 토큰의 `asOf`를 그대로 사용. **구간 전체 정렬 데이터 지문**(카탈로그 UUID, 만료 마이크로초, 수량, 표시 메타데이터)을 첫 페이지 지문과 비교한 후 다음 페이지 반환. 삽입·삭제·수정·정렬·표시명 변경 시 `409 SNAPSHOT_CHANGED`와 첫 페이지부터 재조회. 토큰 만료는 `410 SNAPSHOT_EXPIRED`, DB/원천 정합성 오류는 민감정보 없는 `503 SOURCE_UNAVAILABLE`. HTTP 요청 사이에 장기 트랜잭션을 유지하거나 REPEATABLE READ 스냅샷이 유지된다고 주장하지 않는다. 지문 검증 실패 시 일부 결과를 정상으로 반환하지 않는다. 첫 페이지도 하나의 DB 문장·스냅샷에서 지문과 목록을 생성한다.
+- **DB / 보안 게이트:** `071-shop-catalog-schema.sql`, `123-store-read-models-v2.sql`은 `user_items`의 회원/카탈로그 PK와 `shop_my_items_v2(p_actor)`를 정의한다. 그러나 함수 인자로 받은 actor는 **DB가 독립적으로 검증한 인증 신원**이 아니다. `WHERE user_id=p_actor`만 있는 SECURITY DEFINER 함수로 SQL 인젝션에 강한 회원 격리를 보장한다고 주장할 수 없다. 새로운 함수·EXECUTE 권한 부여는 DB 신원 결속 증명 또는 보안 책임자가 승인한 별도 권한 격리 조회 게이트웨이와 임의 actor EXECUTE 부정시험이 끝날 때까지 **BLOCKED**. `user_items` 직접 테이블 권한은 철회 상태 유지. `SECURITY DEFINER SET search_path=pg_catalog,pg_temp`, 함수 소유자는 migrator, PUBLIC 실행권한 철회. `(expires_at,catalog_id)` 키셋(회원 내 UUID 고유), 회원별 유한 만료 인덱스는 격리 10,001건 `EXPLAIN (ANALYZE, BUFFERS)` 이후에만 결정. 동시 개발의 **318번 마이그레이션 충돌** 해결 전 번호 예약 금지, 적용된 체크섬 수정 금지. 테이블·원장·아이템 쓰기 및 장시간 행 잠금 없음.
+
+### 개인정보, 관리자, 접근성, KPI 및 배포
+
+- **HTTP/SEO:** 웹·Android 게이트웨이와 API의 성공 및 401/403/409/410/429/503 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`. 보관함은 사이트맵·공개 검색에서 제외. 토큰·회원 ID·아이템명·만료시각을 로그에 기록하지 않음. Android는 로그아웃·계정 전환 시 메모리 목록 삭제, 세션 세대가 다른 지연 응답 폐기. 민감한 영속 캐시·공유 CDN 캐시 금지.
+- **모바일/a11y:** 폭 320px, 200% 확대, WCAG 2.2 AA 키보드 포커스·접근 가능한 목록 구조·44px 터치 영역·모션 감소·KO/EN 라벨·정확한 경과시간 설명. 스크린리더 live region은 결과 수와 상태를 과도한 반복 없이 알림. 목록 추가 시 포커스가 이동하지 않도록 안정된 아이템 식별자를 사용. 커서 오류에는 무한 재시도 대신 `결과 새로고침` CTA.
+- **관리자 / 분석:** 검증된 첫 페이지 조회·추가 페이지 완료·409/410/429/503 비율·p95 지연시간의 집계만 사용. 관리자 통계는 **20명 이상 집단**에서만 공개, 회원별 텔레메트리 금지. 목표: 10,001건 p95 첫 페이지 <250ms, 타 회원 행 0, 공유 캐시 응답 0, 원장/아이템 변경 0. **실측치가 아닌 수용시험 목표**.
+- **QA / 배포:** 격리 PostgreSQL 17 신규/업그레이드, 두 회원의 직접 앱 역할 신원 위조 시도, 실제 10,001건, 24/72/168시간 ±1마이크로초, NULL/효과만/0/만료, JS Number 변환 없는 큰 십진 문자열, 페이지 사이 삽입/삭제/수정 409, 120초 만료 410, 다른 세션/변조, 401/403/429/503, 320px/a11y, Android 동등성, 엣지 헤더, 원장 변경 0, 기능 OFF·롤백. 개발 B는 SQL/API, 개발 A는 웹, 개발 C는 Android, QA는 증거 담당이며 코드 변경 중복 금지. 별도 개발 브랜치 → 공식 정확 SHA Test 앱/마이그레이터 DB 일치 검증 → 인증 E2E·독립 복원 → 운영자 승인 후 통제된 Production 승격. 롤백은 기능 OFF 우선, 원장·적용 마이그레이션 체크섬 수정 금지.
+
+### P0/P1 개발 백로그 (P0 4건 + P1 6건, 전부 OPEN)
+
+1. **P0 DRILL1592-01 OPS:** Production 프론트/백엔드/엣지 실제 SHA, DB 신원, 작업 여유, 암호화 백업 독립 복원·롤백 입증. 공개 버전 문자열만으로 배포 출처를 입증하지 않음.
+2. **P0 DRILL1592-02 SEC/DB:** 임의 actor EXECUTE, 운영 전용 테이블 9개/소스 참조 5개, 앱 역할 과도한 DML, 체크섬 불일치 5건, 마이그레이션 318 충돌 해결 전 신규 EXECUTE 금지.
+3. **P0 DRILL1592-03 FIN:** Treasury/마켓플레이스/클럽 원장 출처 확인 및 허구 공개 재무 수치 제거는 별도 개발 C로 이관. 본 조회의 WLD/원장/아이템 변경 0 확인.
+4. **P0 DRILL1592-04 RELEASE:** Test 백엔드/마이그레이터 연결 대상 (#2260/#2266/#2271), Production 다국어 HTTP 500 (#2262), 정확 SHA Test E2E, 독립 복원·운영 승인.
+5. **P1 DRILL1592-05 Backend B:** 승인된 회원 결속 SQL, 전체 지문/키셋, 마이크로초 정밀도, 인덱스 실측; 권한 철회 유지.
+6. **P1 DRILL1592-06 Backend B:** Nest 첫 조회/페이지 API, 120초 암호화 토큰, 세션 격리, 409/410/429/503, 비공개 헤더·요청 제한.
+7. **P1 DRILL1592-07 Dev A:** 웹 상세 목록, 정확한 로딩/빈 결과/오래됨/장애, 포커스/320px/KO-EN, 조회 실패를 빈 배열로 대체하지 않음.
+8. **P1 DRILL1592-08 Dev C:** Android app-api 동등성, 정확한 시각·수량 문자열, 세션 세대 검증, 민감정보 영속 저장 금지.
+9. **P1 DRILL1592-09 Dev A/C:** 게이트웨이/엣지 헤더, noindex, 관리자 집단 20명 이상 KPI, 개인정보 없는 관측성·토큰 로깅 회귀시험.
+10. **P1 DRILL1592-10 QA:** 격리 PG17 두 회원+10,001건+±1µs+페이지 사이 변경+재사용+접근성/Android/엣지+원장 변경 0+롤백 증거.
+
+**현재 운영 게이트:** miniPC Debian13 주요 서비스 활성, 개발 DB 연결, MCP TasksCurrent **919/1027**(자원 경고). 원격 main `f13bbce2...`; Test 공개 버전 `bc8cd8a6...`, Production `353c6d5d...`(모두 HTTP 200이나 최신 main과 불일치). QA v1430 Draft #2271은 릴리스 승인이 아니다. **Production RELEASE HOLD**, DB actor 권한 부여 **BLOCKED**. 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000** — **BLOCKED / IN PROGRESS**. 이번 기획에서 신규 기능 수용시험 미실행, 코드/DB/WLD/원장/Test/Production 변경 없음.
+
+## v2026.11.01.1590 — F675-203 보유 만료 임박 요약의 원천 무결성·회원 권한·시각 신선도 강화 (기능 보완 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 **기능 추가 v1588** → 현재 **기능 보완 v1590** → 다음 **기능 추가 v1592(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`를 시작·중간에 재확인했다. 영문 PROJECT_PLAN.md가 정본이며 본 문서는 의미 동등한 한국어 대조본이다. 선행 기획 PR **#2269는 OPEN/미병합**이므로 F675-199~203의 유효한 내용을 별도 문서 브랜치로 승계했으며 구현·운영 반영으로 간주하지 않는다. 개발 인계 **#2268**, **Draft #2275 / RELEASE HOLD**.
+
+### 실제 소스에서 발견한 설계 결함과 선택
+
+- **D1 — 함수의 회원 UUID 인자는 DB 인증 증명이 아니다(P0 설계 게이트).** 마이그레이션 071은 앱 역할의 테이블 직접 권한을 철회하지만, 123은 `shop_my_items_v2(p_actor uuid)`에 `moneyverse_app EXECUTE`를 부여하고 **호출자가 전달한** UUID로 필터링한다. v1588의 `shop_my_expiry_urgency_v1(p_actor)`도 동일한 구조를 제안했다. Nest `SessionGuard, AuthenticatedGuard, ConsentGuard`와 `requireUserId(request)`는 정상 HTTP 요청의 인증·소유자 결속을 제공하지만, SQL EXECUTE 호출자는 다른 회원 UUID를 인자로 전달할 수 있다. SECURITY DEFINER만으로 인자와 로그인 회원이 자동 결속되지는 않는다. **실제 타 회원 조회·침해를 수행하거나 확인한 것은 아니며**, 함수 서명과 권한 구조에서 확인되는 위협모델 위험이다. (A) `WHERE user_id=p_actor`만으로 DB 수준 회원 격리를 주장하거나 (B) 앱 역할이 임의 설정 가능한 `SET LOCAL actor_id`를 인증 증명으로 취급하는 대안을 배제한다. **선택 C:** DB가 독립적으로 검증할 수 있는 회원 인증 결속 또는 별도 권한 격리 읽기 게이트웨이를 보안 책임자가 SQL 주입 위협모델과 함께 검토한다. 두 회원 음성 시험이 통과하기 전에는 기능 OFF·EXECUTE 신규 부여 금지, 상태는 **애플리케이션 인증만 검증 / DB 회원 결속 미검증**으로 표시한다. `user_items` 직접 SELECT 권한 부여로 우회하지 않는다.
+- **D2 — 기존 2^53 초과 시험의 데이터 조건이 모순이다.** 마이그레이션 071의 `quantity`는 `integer`(최댓값 2,147,483,647)이고 PK는 `(user_id,catalog_id)`이다. 서로 다른 상품 10,001개로 만들 수 있는 최대 수량 합계는 **21,476,983,953,647**로 2^53보다 작다. 시험을 분리한다. **실제 상품 10,001개를 생성하는 회원 fixture**로 실행계획·3구간·두 회원 분리·정확한 수량을 검증하고, 별도 정수/전송 스트레스 fixture에서 `generate_series(1,4194305)` (4,194,305행)의 `sum(2147483647::bigint)` 또는 결정적 DB 숫자 응답 대역으로 2^53 초과를 검증한다. JavaScript Number·Android Double 변환 없이 문자열/정확 정수 연산으로 전송해야 한다. 10,001건만으로 2^53을 시험했다고 주장하지 않는다.
+- **D3 — PostgreSQL 마이크로초가 JavaScript Date에서 밀리초로 손실될 수 있다.** `asOf`, `nextExpiryAt`은 SQL에서 `to_char(ts AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')` 같은 방식으로 **UTC 소수점 6자리 문자열**을 만들어 반환한다. `Date.toISOString()`을 원천 시각 직렬화에 사용하지 않는다. UTC 형식·실제 날짜·시간대 유효성을 엄격히 검증하고 Nest→Next→Android 전송 과정에서 원문을 보존한다. 경계 ±1µs는 정확한 정수 기반으로 비교하며 한국시간 변환은 화면에만 적용한다. 원천 시각이 잘못되면 정상 빈 결과가 아니라 `503 SOURCE_UNAVAILABLE`이다.
+- **D4 — SQL 스냅샷이 맞아도 화면에는 오래된 결과가 표시될 수 있다.** `statement_timestamp()`는 SQL 문 시작시각이지 HTTP 응답시각이나 요청 간 공통 스냅샷이 아니다. DB `asOf`를 한 번만 캡처하고 서버 응답시 기준시각 경과가 **5초 초과**이거나 DB statement timeout **2초**를 초과하면 검증 실패로 처리하는 신선도 계약을 제안한다(실측값이 아닌 설정 후보, 서버·DB 시계 차이도 감지). 클라이언트는 검증 결과가 **60초** 지나면 STALE로 표시하고, 다시 화면이 보이거나 포커스를 얻은 때 60초 경과 시 새로 조회한다. **5분** 이상 재검증하지 못하면 숫자를 현재값처럼 보여주지 않는다. 429는 제한된 Retry-After를 준수하며 무한 새로고침을 금지한다. 정상 빈 결과는 **향후 168시간 이내의 만료시각이 확정된 보유 항목이 0개**라는 뜻일 뿐, 보관함 전체가 비었거나 7일 이후·NULL 만료가 없다는 뜻이 아니다.
+
+### 구현 계약 보완 — 아직 미구현
+
+- **대상·진입·화면:** 인증·동의 완료 회원이 기존 `/inventory`에서 기능 스위치 `inventory_expiry_urgency_summary`(기본 OFF)를 통해 접근한다. `(asOf,+24h]`, `(+24h,+72h]`, `(+72h,+168h]` 세 구간은 서로 겹치지 않으며 종류 수·보유 수량·가장 가까운 보유 만료시각과 '보관함 보기' CTA를 표시한다. F675-199 실제 구현·활성화 전에는 만료 달력 CTA를 표시하지 않는다. 로딩, `VERIFIED_COUNTS`, `VERIFIED_EMPTY`, `STALE`, 오프라인, 401·403·429·503, 계정 전환을 구분한다. 320px·200% 확대·44px 터치·WCAG 2.2 AA 키보드/포커스/aria-live·모션 축소·한영 문구. 로그아웃·계정 전환 시 이전 요청 ID와 수량을 폐기한다.
+- **API:** 제안된 `GET /api/v1/shop/expiry-urgency`는 클라이언트가 회원 ID·기준시각·임의 필터를 전달하지 못하게 하며 인증 세션·동의에서 회원을 유도한다. 한 번의 완전한 DB 읽기 결과만 200, 401/403/429/503은 별도 처리한다. v1588의 응답 스키마를 유지하되 `asOf`·`nextExpiryAt`은 UTC 소수점 6자리, `timezone:'Asia/Seoul'`은 **표시 시간대**만 뜻한다. 구간 ID 누락·중복·순서 오류, 정규화되지 않은 정수 문자열, 음수, `kindCount>unitCount`, 3구간 합계와 `total7d` 불일치, 상태·수량 모순, 총합 0과 `nextExpiryAt` NULL 불일치, 가장 이른 만료가 `(asOf,asOf+168h]` 밖인 응답은 `503 SOURCE_UNAVAILABLE`로 차단한다. 회원당 분당 30회 조회 제한 목표. GET은 쓰기·멱등 영수증·아이템·원장 변경이 없다.
+- **SQL·인덱스·트랜잭션:** READ COMMITTED 읽기 문 1개에서 MATERIALIZED `statement_timestamp()` 기준시각 1회 캡처. `user_items.user_id=인증회원`, `quantity>0`, NULL이 아닌 `expires_at>asOf AND <=asOf+168h`만 집계한다. `count(*)::bigint`, `sum(quantity::bigint)`(PostgreSQL numeric 결과), `min(expires_at)`; 행별 `clock_timestamp()`, 효과 만료·유지비 대체 금지. SECURITY DEFINER 고정 `search_path=pg_catalog,pg_temp`, migrator 소유, PUBLIC 권한 철회. **D1 해소 전 앱 역할 EXECUTE 신규 부여 금지**. 기존 회원/상품 PK로 먼저 측정하고 10,001건 EXPLAIN BUFFERS 이후에만 `(user_id,expires_at) WHERE quantity>0 AND expires_at IS NOT NULL` 부분 인덱스를 검토한다. 마이그레이션 318 충돌 해결 후 신규 번호로만 추가하고 기존 체크섬은 수정하지 않는다.
+- **개인정보·SEO·관리·분석:** Nest/Next/Android 앱 게이트웨이/엣지의 정상·오류 응답에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`를 적용한다. 회원 보관함은 사이트맵에서 제외한다. 회원 ID·정확 수량·만료시각·세션을 URL·로그·공용 캐시·분석에 남기지 않는다. 관리자에게는 20명 이상 집단의 검증·STALE·503·429 비율과 p95 지연만 제공한다. 10,001건 p95 <250ms, 타 회원 조회 0건, 공용 캐시 응답 0건은 **시험 목표이며 실측 아님**.
+
+### 개발 인계 — P0 4건 + P1 6건, 전부 OPEN
+
+1. **P0 OPS1590-01** (#1984/#2144/#2171): 운영 프론트·백엔드·엣지 정확 SHA, 활성 DB 정체, 작업 여유, 독립 암호화 백업 복원·롤백 입증.
+2. **P0 SEC1590-02** (#993/#828/#2242/#2233): 임의 `EXECUTE(p_other)`에서 DB 회원 결속 입증, 기존 함수 위험 분류, 운영 전용 9개 테이블(소스 참조 5개)·광범위 DML·체크섬 5건·마이그레이션 318 충돌 정리. 보안 책임자 승인·음성 시험 전 신규 EXECUTE 금지.
+3. **P0 FIN1590-03** (#1976/#2191/#2274): 국고·마켓·클럽 원장 출처, 별도 개발 C의 공공기업 가공 수치 제거, 임박 요약 조회 전후 WLD·아이템·원장 변화 0 입증.
+4. **P0 REL1590-04** (#1088/#2260/#2262/#2271): 공식 Test 앱/마이그레이터 DB 동일 대상, 운영 다국어 HTTP 500, 전체 QA·보안, 정확 SHA 격리 Test 인증 E2E, 독립 복원·운영자 GitOps 승인. QA v1430 #2271은 B #2266 CI 수정 **초안**이며 운영 승인 아님.
+5. **P1 URGENCY1590-05 개발 B:** DB에서 검증 가능한 회원 결속 선택·검토, 단일 SQL/경계/정밀도/실행계획·권한 음성 시험.
+6. **P1 URGENCY1590-06 개발 B:** Nest GET의 구간 간 불변식·UTC 마이크로초·신선도/타임아웃·429/503 엄격 검증, 쓰기 없음.
+7. **P1 URGENCY1590-07 개발 A:** 보관함 독립 임박 카드, 이동 24·72·168시간 안내, STALE·정상 빈 결과 구분, 기존 보관함 조회 장애와 혼동 금지.
+8. **P1 URGENCY1590-08 개발 C:** Android 앱 API 경로, 정밀 정수·UTC 문자열 보존, 계정 세대·늦은 응답 차단, 비공개 디스크 캐시 금지.
+9. **P1 URGENCY1590-09 개발 A/C:** 엣지 정상·오류 개인정보·noindex, 20명 이상 관리자 집계, 요청 제한·PII 회귀.
+10. **P1 URGENCY1590-10 QA:** 폐기형 PG17 신규·업그레이드, 2명 회원 앱 역할 직접 EXECUTE 위조 음성, 실제 상품 10,001개, 별도 2^53 초과 정수 스트레스, 24/72/168h ±1µs, NULL·기만료·효과만료, STALE·시계 오차, 401/403/429/503, 웹/Android/엣지, 원장 변화 0, 기능 OFF·롤백.
+
+### 게이트 및 상태
+
+**신규 기능 수용시험은 전부 제안만 했고 실행하지 않았다.** SQL·API·웹·Android 구현, main 병합, Test·Production 변경 없음. 선행 초안 #2269와 QA #2271은 배포 승인 아님. Gemini·개발 A/B/C·QA 브랜치를 유지한다. 기능 OFF → 회원 결속 보안 검토·전진형 마이그레이션 → 격리 CI/PG·정확 SHA → 공식 Test 인증 웹·Android·엣지·복원 → 운영자 GitOps 무중단 카나리 → 단계별 ON. 롤백은 기능 OFF와 이전 불변 이미지 복귀, 사용 중인 클라이언트가 사라질 때까지 추가 SQL 유지. 외부 독립 근거 **신규 검증·중복제거·분류 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS**. **DRAFT / RELEASE HOLD**.
+
+
+## v2026.11.01.1588 — F675-203 회원 보관함 만료 임박 요약 (기능 추가 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 **기능 보완 v1586** → 현재 **기능 추가 v1588** → 다음 **기능 보완 v1590(잠정)**. 원격 main `f13bbce273ffc65e8576170992d82ea00c27a1c9` 시작·문서 작업 전 확인. 영문 PROJECT_PLAN.md 정본·한국어 의미 동등. 이전 기획 초안 **#2258**은 OPEN/미병합이므로 F675-199~202의 유효한 설계를 격리 문서 브랜치에서 승계했으며 **main 반영이나 구현을 뜻하지 않는다**. 개발 인계 **#2268**, 초안 PR **#2269**. **DRAFT / RELEASE HOLD**.
+
+### 사용자 목적·실제 소스·대안
+- **대상·목적:** 인증 및 필수 동의를 완료한 회원이 보유 아이템 중 만료가 가까운 종류·수량을 전체 목록 탐색 없이 확인한다. **겹치지 않는** 향후 0~24시간, 24~72시간, 72~168시간 구간별 상품 종류 수, 보유 수량과 가장 빠른 보유 만료시각을 제공한다. 알림 발송, 결제, 유지비 정산, 장착, 아이템 사용, WLD 이전이나 사용 가능 보장을 의미하지 않는다.
+- **검증한 원본:** `frontend/src/app/inventory/page.tsx`는 `requireMember()` 후 `apiOrNull('/api/v1/shop/holdings')`를 호출하며 상위 API 장애를 `[]`로 바꿀 수 있다. `inventory-view.tsx`에는 카테고리 탭과 장착 미리보기가 있지만 임박 요약은 없다. Nest `shop.controller.ts`·`shop.repository.ts`는 회원 보유 읽기를 제공한다. 마이그레이션 **071**의 `user_items`는 회원/상품 복합 PK, 음수가 아닌 수량과 NULL 가능 `expires_at`을 정의한다. **123**의 `shop_my_items_v2(p_actor)`는 회원·양수 수량·미만료 보유를 필터링하지만 `clock_timestamp()`를 별도 호출하며 효과 영수증의 `effect_expires_at`은 **보유 만료와 별개**다. 보유 만료는 효과 만료, 연체 납부, 사용 가능성, 알림 도달 증거가 아니다. F675-199 달력·200 ICS·201 저장 보기·202 기본값은 모두 **미구현 기획**이며 본 기능의 선행 구현 조건이 아니다.
+- **대안:** A 브라우저에서 기존 전체 보유 배열 집계는 10,001건 이상 비용 및 거짓 빈 결과 문제로 제외. B 회원별 예약 캐시는 지연·개인정보·불필요한 작업 때문에 제외. **선택 C:** 회원 전용 PostgreSQL 읽기 집계 함수 + 타입 검증 Nest GET + 웹/Android 앱 API 동등성. 신규 테이블, 금융·아이템 쓰기 없음.
+
+### 화면·권한·상태·접근성
+- **진입:** 기존 `/inventory`의 로그인 및 동의 확인 후 기능 스위치 `inventory_expiry_urgency_summary`(기본 **OFF**)로 '보유 만료 임박' 카드 표시. 세 구간별 서로 겹치지 않는 수치와 '보관함 보기' CTA를 제공한다. '만료 달력 열기'는 F675-199가 실제 구현·활성화된 뒤에만 표시하며 미구현 경로를 노출하지 않는다. 구간은 한국시간의 '오늘/이번 주'가 아니라 **현재부터 흐르는 24·72·168시간**임을 설명하고 기준시각을 한국시간으로 표기한다.
+- **상태:** 최초 로딩, `200 VERIFIED_COUNTS`, 실제로 0건임이 확인된 `200 VERIFIED_EMPTY`, `401 UNAUTHENTICATED`, `403 CONSENT_REQUIRED`, `429 RATE_LIMITED`, `503 SOURCE_UNAVAILABLE`/원본 형식 오류, 오프라인, 로그아웃·계정 전환. 장애를 0건으로 표시하지 않는다. 이전 정상 결과를 보여주더라도 동일 세션의 '오래된 정보'로 명확히 표시하며 계정이 바뀌면 전부 폐기한다. 요약 장애로 기존 보관함·장착 화면을 숨기지 않는다.
+- **접근성·모바일:** 너비 320px, 확대 200%, WCAG 2.2 AA, 키보드/보이는 포커스, 44px 터치, 수량과 만료시각 음성 안내, 정상 상태의 `aria-live=polite`, 모션 축소, 한·영 문구. Next·Android는 요청 식별자와 세션 세대를 결속해 늦은 응답·계정 전환·로그아웃 후 응답을 버리고 디스크·공용 캐시에 보존하지 않는다.
+
+### API·DB·보안 계약 — 제안이며 미구현
+- **GET** `/api/v1/shop/expiry-urgency`: 서버가 인증 세션과 동의에서 회원을 결정하며 요청의 `userId`, 임의 `asOf`, 카테고리·SQL 조건을 받지 않는다. 응답은 `{status:'VERIFIED_COUNTS'|'VERIFIED_EMPTY',asOf:ISO8601Microseconds,timezone:'Asia/Seoul',bands:[{id:'H0_24'|'H24_72'|'H72_168',kindCount:decimalString,unitCount:decimalString}],total7d:{kindCount:decimalString,unitCount:decimalString},nextExpiryAt:ISO8601Microseconds|null}`. 종류 수·수량은 2^53을 넘더라도 손실 없는 **0 이상의 정수 문자열**이며 DB 마이크로초는 ISO 문자열로 보존하고 UI 표시 때만 현지화한다. 누락·음수·소수·오버플로·구간 합계 불일치면 `503`, 정상 빈 결과만 `200 VERIFIED_EMPTY`. 회원당 분당 30회 읽기 제한 제안, `429` 및 제한된 재시도 안내. GET은 멱등 영수증·쓰기 트랜잭션이 없다.
+- **단일 SQL 원본:** 신규 `public.shop_my_expiry_urgency_v1(p_actor uuid)`은 `STABLE SECURITY DEFINER SET search_path=pg_catalog,pg_temp`인 읽기 함수. 단일 READ COMMITTED SQL 문에서 `statement_timestamp()`를 한 번만 MATERIALIZED CTE로 캡처한 `asOf`를 사용한다. `user_items`의 `user_id=p_actor`, `quantity>0`, `expires_at IS NOT NULL`, `expires_at>asOf`, `expires_at<=asOf+interval '168 hours'`만 집계한다. 구간 경계는 `(asOf,asOf+24h]`, `(asOf+24h,asOf+72h]`, `(asOf+72h,asOf+168h]`이며 정확히 경계에 걸리면 앞 구간이다. 회원/상품 PK이므로 `count(*)::bigint`는 **상품 종류 수**, `sum(quantity::bigint)`는 큰 수를 손실 없이 집계하며 `min(expires_at)`는 가장 이른 만료다. 7일 총합은 세 구간의 정확한 합. NULL 만료는 **기한 미상으로 제외**하며 영구 보유라고 단정하지 않는다. 이미 만료된 보유는 제외한다. `effect_expires_at`·장애 시 0 대체 금지. 동일 SQL 문 스냅샷만 보장하고 HTTP 요청 사이 일관성이나 커밋시각 증명은 주장하지 않는다. 신규 테이블·물리화 뷰·스케줄러 없음.
+- **권한·인덱스·트랜잭션:** 함수 소유자는 migrator, PUBLIC EXECUTE 철회 후 앱 역할에 해당 함수 EXECUTE만 허용, `user_items` 직접 읽기·쓰기 권한 추가 금지. `p_actor` 자체는 인증이 아니므로 Nest가 검증된 세션에서 유도한다. 데이터·원장 쓰기 없음. 기존 회원/상품 PK로 회원 필터링 후 합성 10,001건 `EXPLAIN (ANALYZE, BUFFERS)`로 필요성을 확인한 뒤에만 선택적 `(user_id,expires_at)` 부분 인덱스 검토. 동시 인덱스 생성은 별도 비트랜잭션 마이그레이션 승인이 필요하며 무잠금이라고 단정하지 않는다. **#2233 마이그레이션 318 충돌 해결 전 번호 예약 금지**, 적용된 SQL 체크섬 수정 금지.
+- **개인정보·SEO·관리·분석:** Nest→Next→Android 앱 API→Nginx의 실제 HTTP 응답(오류 포함)에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 적용. 회원 ID·정확 수량·URL·토큰·만료시각을 공용 캐시·분석 로그로 보내지 않는다. 관리자 KPI는 20명 이상 집계 집단에 한해 정상 조회·503/429 비율·p95 지연·보관함 진입을 집계한다. 10,001건에서 p95 <250ms 및 공용 캐시 0건은 **목표일 뿐 실측 아님**. 회원별 관리자 조회나 새로운 쓰기 권한 없음.
+
+### 개발 인계 — P0 4건 + P1 6건 (전부 미완료)
+1. **P0 OPS1588-01** (#1984/#2144/#2171): 운영 프론트·백엔드·엣지 실행 SHA, DB 결속, 작업 수 여유, 독립 백업 복원·롤백 증명.
+2. **P0 SEC1588-02** (#993/#2242/#2233): 운영 전용 9개 테이블(소스 참조 5개), 앱 역할 광범위 DML, 체크섬 5건, 318 번호 충돌 조정 및 최소 권한 검증.
+3. **P0 FIN1588-03** (#2191/#1976): 국고·마켓·클럽 원장 출처 및 요약 기능의 WLD·아이템 변경량 0 검증.
+4. **P0 REL1588-04** (#2260/#2262/#2263): 공식 Test 앱/마이그레이터 DB 대상 불일치와 운영 다국어 HTTP 500 해결, 전체 QA·감사, 정확 SHA 격리 Test 인증 E2E, 독립 복원, 운영자 GitOps 승인.
+5. **P1 URGENCY1588-05 Backend B:** 단일 시각·경계·대정수·ACL·EXPLAIN의 회원 SQL 함수, 마이그레이션 번호 조율.
+6. **P1 URGENCY1588-06 Backend B:** 인증·동의 결속 Nest GET, 엄격한 200 정상/503 미확인/429 제한, 데이터 쓰기 없음.
+7. **P1 URGENCY1588-07 개발 A:** 보관함 임박 카드·3구간·정상 0/장애 구분·접근성·기능 OFF·기존 보관함 독립 유지.
+8. **P1 URGENCY1588-08 개발 C:** Android 앱 API 경로·응답 검증·계정/세션 세대 차단·디스크 캐시 금지·한영 동등성.
+9. **P1 URGENCY1588-09 개발 A/C:** 실제 엣지 비공개·SEO 회귀, 20명 이상 집계 KPI, 개인정보·정확 수량 유출 금지.
+10. **P1 URGENCY1588-10 QA:** 폐기형 PG17 신규·업그레이드, 보유 10,001건, 회원 2명, 동시 변경, 경계 ±1마이크로초, NULL·기만료·효과만 만료, 2^53 초과 합계, 권한 거부, 429/503, Android, 원장 변화 0, OFF 롤백; 공식 정확 SHA Test와 독립 복원.
+
+### 수용시험·배포·외부 근거 게이트
+- 위 신규 기능 수용시험은 모두 **제안만 했으며 실행하지 않았다**. SQL/API/웹/Android 신규 기능은 미구현이다. 기존 `apiOrNull → []` 거짓 빈 결과는 개발 담당자의 별도 결함이며 신규 카드로 은폐하지 않는다. QA v1429 **#2260**에서 공식 Test 앱/마이그레이터 DB 대상 불일치(구형 마이그레이터 246개, 실제 앱 316개 적용), **#2262/#2263**에서 운영 다국어 HTTP 500과 초안 수정이 확인됐다. QA v1426 **#2242**의 운영 전용 테이블·권한 문제도 미해결이다. 공개 Test `bc8cd8a6...`, 운영 `353c6d5d...`, main `f13bbce...`는 서로 다르며 실행 출처 검증은 **BLOCKED**다.
+- **무중단 배포:** 스위치 OFF → 신규 함수·API를 검토한 전진형 변경 → 정확 후보 SHA 격리 PG/CI → 공식 Test 웹·Android·엣지 인증 시험 → 독립 복원·운영자 GitOps 승인 → 단계별 ON. **롤백:** OFF 및 이전 불변 이미지로 복귀, 클라이언트 소멸 전 추가 SQL 보존. 자동 병합·배포 없음, Gemini/개발 A/B/C/QA 브랜치·예약 불변. 외부 독립 근거 신규 검증 승인 **0건**, 누적 검증·중복 제거·근거 분류 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. **초안 / 운영 보류**.
+
+- **로컬 검증 기록:** 릴리스 140/140, 분류 24/24, 영문·국문 4쌍, diff-check PASS; 확장 브랜치 정리 4 PASS / 1 FAIL(미수정 main 동일). 초안 #2269·개발 인계 #2268; 최종 SHA 원격 CI는 PR 댓글에 기록, 문서 전용으로 런타임 빌드 제외. 초안/운영 보류.
+
+## 2026-11-01 기획 v1586 — F675-202 기본 저장 보기 무결성·원자적 조회·무변경 CAS (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1584 → 현재 보완 v1586 → 다음 추가 v1588(잠정). 기준 main f13bbce273ffc65e8576170992d82ea00c27a1c9 시작·중간 확인, 미병합 초안 #2253을 별도 문서 브랜치로 승계. 개발 연계 #2256·초안 PR #2258, 영문 정본·한국어 동등성.
+- 설계 보완: null이 아닌 끊어진/삭제된/타 회원/무효 기본값은 503 PREFERENCE_INTEGRITY_UNKNOWN(전체/7일 정상 폴백 금지); 회원 공유 잠금 후 READ COMMITTED JOIN으로 기본값·활성 보기와 달력 토큰을 원자적으로 판정; 쓰기 잠금 순서는 멱등키→영수증→회원 배타→CAS. 리비전 검증 후 동일 값이면 200 VERIFIED_NO_CHANGE 무변경 영수증, 리비전·설정 행 증가 없음; 오래된 CAS는 409; 타 회원·없는·삭제된 UUID는 동일한 404. 웹·Android는 리비전·세션 세대로 늦게 도착한 GET을 차단하며 202/503을 폴백으로 둔갑시키지 않는다.
+- P0 OPS1586-01/SEC1586-02/FIN1586-03/REL1586-04, P1 DEFAULT1586-05~DEFAULT1586-10 총 10건. QA v1426 #2242 운영 전용 9개 테이블(소스 참조 5개), 체크섬 5건, 앱 DML·정확 SHA Test/복원 보류. QA v1427 #2248 CI 봇 수정은 운영 승인 아님. 10,001건·회원 2명·동시 2개·보기 5개 수용시험 제안만 했으며 미실행. F675-199~202 미구현, 스위치 OFF.
+- 공개 Test bc8cd8a6, Production 353c6d5d, main f13bbce 불일치. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. main 병합·런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+## 2026-11-01 기획 v1584 — F675-202 만료 달력 저장 보기 기본값 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1582 → 현재 기능 추가 v1584 → 다음 기능 보완 v1586(잠정). main f13bbce 시작·중간 확인, 선행 #2247 미병합 기획 승계. 개발 이슈 #2252, 초안 PR #2253. 기존 영·한 통합 문서 6개만 변경.
+- F675-201 저장 보기 최대 5개 중 기본값 하나를 선택하는 신규 제안: 회원별 설정 행·단조 리비전 CAS, 보기 삭제 시 원자적 해제, 멱등키 선잠금·영수증 우선 재시도와 300초 서명 intent, 202 UNKNOWN·409/410 구분, 웹·Android 전체/7일 폴백, no-store/noindex·320px WCAG2.2 AA. F675-199/200/201/202는 모두 미구현이며 런타임·DB 변경 없음.
+- P0 OPS1584-01/SEC1584-02/FIN1584-03/REL1584-04, P1 DEFAULT1584-05~-10. QA v1426 #2242 운영 259 vs 신규 250개 테이블, 추가 9개/소스 참조 5개, 체크섬 5건, 공식 Test·감사 보류. QA v1427 초안 #2248은 운영 승인 아님. 신규 기능 수용시험 미실행.
+- 공개 Test 버전 bc8cd8a6, Production 353c6d5d, main f13bbce 상이; 전체 실행 출처 미인증. 외부 근거 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 병합·배포·원장·WLD 변경 없음.
+
+## 2026-11-01 기획 v1582 — F675-201 저장 보기 ABA·영수증 보존 후 재시도 강화 (기능 보완 / 초안 / 운영 보류)
+- 이전 추가 v1580 → 현재 보완 v1582 → 다음 추가 v1584(잠정); main f13bbce 시작·중간 확인, 미병합 #2241 복구, 개발 이슈 #2240. 기존 영문·국문 통합문서/일지 6개만 변경.
+- 설계 개선: 불변 보기 UUID·생성 세대를 F675-199 서명 토큰에 결속하고 회원 공유 잠금으로 확인(슬롯 재사용 ABA는 409); 과거 커밋 영수증은 현재 상태가 아니며 신규 쓰기는 300초 서명 의도 필수(정리된 멱등키 재실행 방지); 유니코드 전체 casefold라는 부정확한 주장을 DB NFC+ASCII-C 비교로 수정. P0 4/P1 6, 기능 OFF, 수용시험 미실행.
+- QA v1426 #2242: 격리 PG 316/316, 운영 259/새 설치 250 테이블, 운영 추가 9개 모두 앱 쓰기 가능·5개 소스 참조, 체크섬 5개 불일치, 공식 Test 정확 SHA exit 1·전체 감사 exit 1. 운영 환경·금융·권한·복원 P0 보류. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·원장·Test·Production·main 변경 없음.
+
+## 2026-11-01 기획 v1580 — F675-201 회원 만료 달력 카테고리 저장 보기 (기능 추가 / 초안 / 출시 보류)
+- 이전 기능 보완 v1578 → 현재 기능 추가 v1580 → 다음 기능 보완 v1582(잠정). main f13bbce273ffc65e8576170992d82ea00c27a1c9 시작·중간 확인, 미병합 Draft #2230의 기획을 별도 브랜치에 복구. main 표제 v1518. GitHub 개발 인계 #2240. 기존 영문·국문 문서·일지 6개만 변경.
+- 본인 전용 카테고리·7/30일 저장 보기 최대 5개, 071의 DB 카테고리 사용(치장 UI 탭과 구별). 추가형 SECURITY DEFINER·30일 멱등 영수증·revision CAS·회원 잠금·소프트 삭제·웹/Android 비공개·달력/내보내기 HMAC 필터 결속·20명 이상 관리자 집계·기능 OFF. F675-199/200 미구현 선행조건. P0 4 + P1 6, 수용시험 미실행.
+- QA v1425 FAILED/P0: 백엔드 main 1건 실패, 전체 감사 취약점 9건, 체크섬 5건 불일치, 318 번호 충돌 #2233, 금융 권한·원장, 공식 Test 정확 SHA·독립 복원 차단. 운영 출시 보류. 외부 근거 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. runtime·DB·WLD·원장·Test·Production·main 변경 없음.
+
+## 2026-11-01 기획 v1578 — F675-200 불변 스냅샷 식별 및 iCalendar 원자적 전달 (기능 보완 / 초안 / 운영 보류)
+- 이전 기능 추가 v1576 → 현재 기능 보완 v1578 → 다음 기능 추가 v1580(잠정). 최신 main `f13bbce273ffc65e8576170992d82ea00c27a1c9` 시작·중간 확인, 미병합 Draft #2224 설계를 기존 6개 통합문서에 복구, 이슈 #2223. 다른 개발 브랜치 변경 없음.
+- 영속 SEQUENCE 없는 회원/날짜 고정 UID 문제 보완: 다운로드별 CSPRNG 128비트 난수+HMAC UID, SEQUENCE:0, 외부 캘린더 중복·회수 불가 경고. 내보내기마다 별도 불변 스냅샷. Nest 전체 바이트 생성 후 200, 내부 SHA256·Content-Length, Next/Android 전체 검증 뒤 공개 헤더, 204 검증된 빈 결과/503 원천 불명, 리다이렉트·압축 금지, 모든 엣지 private/no-store/noindex/nosniff, 내부 다이제스트 외부 유출 금지. 정확한 수량 문자열·64KiB/75바이트 RFC5545 게이트.
+- P0 4(운영 SHA·복원, DB 권한·체크섬, 금융 원장, 공식 Test 새 최종 SHA) + P1 6(본인 집계, 인코더 UID, Nest, Next/Android, 엣지/KPI, 격리 PG17 회귀). 실제 기능 수용시험 제안만·미실행, 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 수정, 런타임/DB/WLD/원장/Test/운영 병합·배포 없음. 운영 보류.
+
+## 2026-11-01 기획 v1576 — F675-200 회원 만료 달력 iCalendar 일회성 내보내기 (기능 추가 / 초안 / 운영 보류)
+- 이전 기능 보완 v1574 → 현재 기능 추가 v1576 → 다음 기능 보완 v1578(잠정). 기준 main `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834` 재조회. #2218 OPEN/미병합이며 F675-199 v1572/v1574의 가치 있는 설계를 기존 문서 6개에 보존. 개발 이슈 #2223. 신규 분산 기획 파일 없음.
+- 인증 회원이 명시적으로 선택하는 7/30일 KST 만료 예상 .ics 파일: 날짜별 종류·수량 합계, RFC5545 하루 이벤트 최대 30개/64KiB, CRLF·UTF-8 75바이트 접기·HMAC 불투명 UID, 상품명·개인정보·알림·외부 구독 없음. Nest/Next/Android 인증·동의·CSRF, 200 파일/204 확인된 빈 상태/503 원천 불명, private/no-store/noindex/nosniff/attachment, 기본 OFF. F675-199는 아직 미구현 선행조건.
+- P0 4(운영 실행 SHA, DB 권한·체크섬, 금융 원장, 정확 SHA Test·복원) + P1 6(SQL·ICS 인코더·Nest·Next/Android·개인정보/KPI·격리 PG17 회귀). QA #2220은 기존 Test SHA만 검증했고 Production은 차단. 수용시험은 제안만 했으며 실행하지 않음. 외부 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 수정, 런타임/DB/WLD/원장/Test/Production/병합 없음. RELEASE HOLD.
+
+## 2026-10-31 23:xx KST — 기획 v1574 (기능 보완 / 초안 / 운영 보류)
+미병합 종료된 선행 #2212의 F675-199 달력 설계를 최신 main 기반 통합문서에 복구하고, HMAC asOf 조회 토큰, KST 자정/TTL, 요약→상세 HMAC 서명 날짜 토큰, 마이크로초 keyset, 409 만료와 503 원천 장애 구분, 본인 인증/CSRF/개인정보/Android 및 10,001건 QA 계약을 강화. 개발 이슈 #2211, P0 4/P1 6. 런타임/DB/Test/운영/WLD 변경 없음. 외부 신규 0건·누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. main 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834. Draft #2218 OPEN; 이슈 #2211 댓글 6544459745; CI 대기, 운영 보류.
+
 ## 2026-10-31 개발 C v1233 — 쪽지 원천 조회 및 안전한 재조회 (초안 / 배포 보류)
 - 기준 main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`. 쪽지/대화 목록 조회 실패·비정상 응답을 실제 빈 목록으로 표시하지 않고, 조회 실패 중 신규 대화 자동 생성 금지. UUID·정확한 bigint·시각·중복·다른 대화 메시지 검증, 접근성 재조회 안내. 기존 Nest 계약 재사용, 금융/DB 쓰기 없음.
 - 집중 9 PASS, 프론트 2,785 PASS, 백엔드 2,786 PASS/501 SKIP, 계약 41 PASS, DB 62 PASS/4 SKIP, Lint/Typecheck/Build/API 184 PASS. 격리 PostgreSQL 17.11 마이그레이션 312 PASS지만 앱 역할의 쪽지 원본 테이블 SELECT 거부 확인(B v668 연계). 전체 보안 취약점 13건, QA `--inventory` 누락, 공식 인증 E2E 및 원격 CI 미완료. **운영 배포 보류**.
