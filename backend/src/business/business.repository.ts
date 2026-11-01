@@ -99,10 +99,15 @@ export class PostgresBusinessRepository implements BusinessRepository {
     this.pool = pool;
   }
 
-  async catalog(): Promise<readonly BusinessCatalogRow[]> {
+  async catalog(maxCost?: string): Promise<readonly BusinessCatalogRow[]> {
     return queryRows<BusinessCatalogRow>(
       this.pool,
-      'SELECT id::text,symbol,name,description,purchase_cost::text,daily_revenue::text,daily_operating_cost::text FROM public.business_catalog()',
+      `SELECT id::text, symbol, name, description, purchase_cost::text,
+              daily_revenue::text, daily_operating_cost::text
+       FROM public.business_catalog()
+       WHERE ($1::bigint IS NULL OR purchase_cost <= $1::bigint)
+       ORDER BY purchase_cost, symbol`,
+      [maxCost ?? null],
     );
   }
 

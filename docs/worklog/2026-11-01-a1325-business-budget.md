@@ -8,8 +8,13 @@
 - Existing work protected: A/B/C/QA/planning branches and PRs; no deletions. Recheck origin/main and living English/Korean plan before code, mid-work and before any integration.
 - Main baseline: see task `main-start.sha`; branch and CI snapshots in task directory. Release: HOLD; no Test or Production deployment without exact SHA evidence.
 
-## IN PROGRESS
-- Initial checkpoint only; implementation and tests not yet run.
+## IN PROGRESS — 13:29 KST
+- Main rechecked unchanged at `f13bbce273ffc65e8576170992d82ea00c27a1c9`; living EN/KO plan and previous QA inspected. Other teams' branches untouched.
+- TDD RED: backend 10 tests failed as expected after correcting CsrfGuard test harness; frontend parser module missing and Android budget/response/cache tests failed. Logs: `red-backend3.log`, `red-frontend2.log`.
+- GREEN: backend 10/10, frontend 14/14 targeted PASS under one-core resource isolation (`taskset -c 1`); first backend retry hit concurrent host process/thread exhaustion, not a pass. Logs: `green-backend2.log`, `green-frontend2.log`.
+- Changed: Nest controller/service/repository, SQL read filter, Next member catalogue search, Android app-api verification/private headers, targeted tests. No migration, new direct grants, WLD/ledger writes or Production mutations.
+- Next: review, full gates, real PostgreSQL, exact-SHA CI and official Test evidence. Release HOLD.
+
 
 ## FINISHED
 - Pending evidence.
