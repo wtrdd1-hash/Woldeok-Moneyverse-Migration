@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -51,6 +53,7 @@ export class AdminFxController {
   }
 
   @Post('intervene')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '중앙은행 외환당국 스무딩 오퍼레이션 시장개입 집행' })
   async intervene(
     @Body() body: { type: 'SELL_USD' | 'BUY_USD'; amountUsd?: number },
@@ -67,6 +70,7 @@ export class AdminFxController {
   }
 
   @Post('swaps/drawdown')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '우방국 양자간 통화스왑 비상 자금 인출 및 외환보유액 공급' })
   async drawdownSwap(
     @Body() body: { agreementId: string; amountUsd: number; purpose?: string },
@@ -87,6 +91,7 @@ export class AdminFxController {
   }
 
   @Post('forward/settle')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '선물환(Forward) 계약 수동/만기 즉시 정산' })
   async settleForward(@Body() body: { contractId: string }) {
     const result = await this.fxService.settleForwardContract(body.contractId);
@@ -98,6 +103,7 @@ export class AdminFxController {
   }
 
   @Post('halt')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '외환시장 거래 긴급 일시정지(Halt) 킬스위치 제어' })
   async toggleHalt(@Body() body: { isHalted: boolean }, @Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -152,7 +158,7 @@ export class PublicFxController {
   }
 
   @Post('forward/contract')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, CsrfGuard)
   @ApiOperation({ summary: '선물환(Forward) 환헤지 계약 체결 (10% 증거금)' })
   async createForwardContract(
     @Body() body: {
@@ -177,7 +183,7 @@ export class PublicFxController {
   }
 
   @Post('swap/wld-to-usd')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, CsrfGuard)
   @ApiOperation({ summary: 'WLD ➡️ USD 1초 즉시 환전' })
   async swapWldToUsd(@Body() body: { wldAmount: number }, @Req() req: RequestWithSession) {
     const userId = requireUserId(req);
@@ -190,7 +196,7 @@ export class PublicFxController {
   }
 
   @Post('swap/usd-to-wld')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, CsrfGuard)
   @ApiOperation({ summary: 'USD ➡️ WLD 1초 즉시 환전' })
   async swapUsdToWld(@Body() body: { usdAmount: number }, @Req() req: RequestWithSession) {
     const userId = requireUserId(req);
