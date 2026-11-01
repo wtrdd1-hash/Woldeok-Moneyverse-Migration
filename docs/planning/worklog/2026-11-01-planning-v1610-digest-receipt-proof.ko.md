@@ -1,6 +1,6 @@
 # 기획 v1610 — F675-208 생성 증빙·추적 범위 보완 (2026-11-01)
 
-**주기:** 이전 기능 추가 v1608 / 현재 기능 보완 v1610 / 다음 기능 추가 v1612(잠정). **상태:** DRAFT / RELEASE HOLD. **기준:** origin/main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 시작·중간 확인, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 국문 대조, 선행 Draft #2343·이슈 #2342.
+**주기:** 이전 기능 추가 v1608 / 현재 기능 보완 v1610 / 다음 기능 추가 v1612(잠정). **상태:** DRAFT / RELEASE HOLD. **기준:** origin/main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 시작·중간 확인, AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md 및 국문 대조, 현재 Draft #2349·선행 #2343·이슈 #2342.
 
 ## 근거와 결정
 - 상태는 VERIFIED_CREATED / NO_VERIFIED_RECORD / NOT_TRACKED이며 추적 범위 불명·고아·위조 근거는 SOURCE_UNAVAILABLE 503이다.

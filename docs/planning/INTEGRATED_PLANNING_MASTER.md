@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1610 F675-208 creation-proof/coverage/privacy hardening / issue #2342 / DRAFT / RELEASE HOLD; stacked on #2343; main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
+**Current planning:** v1610 F675-208 creation-proof/coverage/privacy hardening / issue #2342 / Draft #2349 / RELEASE HOLD; stacked on #2343; main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
 
 ## v2026.11.01.1610 — F675-208 Creation-Proof, Coverage and Privacy Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

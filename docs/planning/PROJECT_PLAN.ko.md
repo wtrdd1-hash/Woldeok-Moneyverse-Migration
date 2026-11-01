@@ -2,7 +2,7 @@
 
 ## v2026.11.01.1610 — F675-208 생성 증빙·추적 범위·개인정보 보완 (기능 보완 / 초안 / 운영 보류)
 
-**주기·기준:** 이전 **기능 추가 v1608** → 현재 **기능 보완 v1610** → 다음 **기능 추가 v1612(잠정)**. 원격 main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`을 시작·중간에 확인하고 `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`, 국문 대조, 소스 및 열린 QA/PR을 조사했다. 미병합 선행 Draft **#2343**, 개발 이슈 **#2342**를 승계한다. F675-203~208은 모두 **미구현 기획**이다. 이번 변경은 문서 설계 보완이며 실제 보안 사고 확정, 마이그레이션, 권한 부여, 기능 출시 또는 배포가 아니다.
+**주기·기준:** 이전 **기능 추가 v1608** → 현재 **기능 보완 v1610** → 다음 **기능 추가 v1612(잠정)**. 원격 main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`을 시작·중간에 확인하고 `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md`, 국문 대조, 소스 및 열린 QA/PR을 조사했다. 현재 Draft **#2349**, 미병합 선행 **#2343**, 개발 이슈 **#2342**를 기록한다. F675-203~208은 모두 **미구현 기획**이다. 이번 변경은 문서 설계 보완이며 실제 보안 사고 확정, 마이그레이션, 권한 부여, 기능 출시 또는 배포가 아니다.
 
 ### 실제 소스 근거와 설계 결정
 - **DEV 실측(2026-11-01 17:08 KST, 읽기 전용):** `woldeok_moneyverse_dev`의 `public.in_app_notifications`는 존재하며 PK(id), FK(user_id→users.id), null이 아닌 dedupe_key 부분 UNIQUE, 회원·생성시각 인덱스 `idx_in_app_notif_user_created`, 허용 카테고리 7종을 확인했다. **개발 DB**의 `moneyverse_app`은 이 테이블에 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 등 직접 권한을 보유한다. 이는 #993과 연관된 개발 권한 경계 위험이지 **운영 DB 권한 증거가 아니다**. DEV에서 `%expiry%digest%` 함수는 0개다. 저장소의 번호형 init/마이그레이션에서 해당 테이블의 정식 CREATE TABLE을 확인하지 못했고 테스트 fixture는 신규 설치 증빙이 아니다. 기존 NotificationService는 직접 SELECT하고 지갑·참여·PVP 저장소는 직접 INSERT한다. 다른 작업자의 코드나 공유 DB는 변경하지 않는다.

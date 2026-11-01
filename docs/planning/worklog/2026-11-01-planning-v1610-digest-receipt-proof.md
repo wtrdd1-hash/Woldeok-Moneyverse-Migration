@@ -1,6 +1,6 @@
 # Planning v1610 — F675-208 Creation-Proof and Coverage Hardening (2026-11-01)
 
-**Cycle:** Previous Feature Addition v1608 / Current Feature Improvement v1610 / Next Feature Addition v1612 (provisional). **State:** DRAFT / RELEASE HOLD. **Authority:** origin/main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 checked at start and midpoint; AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity; predecessor Draft #2343 and issue #2342.
+**Cycle:** Previous Feature Addition v1608 / Current Feature Improvement v1610 / Next Feature Addition v1612 (provisional). **State:** DRAFT / RELEASE HOLD. **Authority:** origin/main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 checked at start and midpoint; AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity; current Draft #2349, predecessor #2343 and issue #2342.
 
 ## Evidence and decisions
 - State machine remains VERIFIED_CREATED / NO_VERIFIED_RECORD / NOT_TRACKED; SOURCE_UNAVAILABLE 503 on unknown coverage, orphan or forged evidence.
