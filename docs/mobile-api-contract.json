@@ -5192,6 +5192,21 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "appliedFilters": {
+            "type": "object",
+            "properties": {
+              "repliedOnly": {
+                "type": "boolean"
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "repliedOnly",
+              "scope"
+            ]
+          },
           "posts": {
             "type": "array",
             "items": {
