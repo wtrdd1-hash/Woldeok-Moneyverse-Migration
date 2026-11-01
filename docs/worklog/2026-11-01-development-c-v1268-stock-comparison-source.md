@@ -9,9 +9,13 @@
 - No schema, financial ledger, session, Android route or API mutation. Fail closed rather than silently discard bad rows. No deployment unless all exact-SHA gates pass.
 
 ## IN PROGRESS
-- [ ] TDD red/green and server-page regression.
+- [x] TDD red/green and server-page regression: RED missing decoder + false verified UI; GREEN 9/9.
 - [ ] Full build/lint/typecheck/unit/integration/security/app-api and isolated PostgreSQL/E2E evidence.
 - [ ] Re-fetch main/planning, review other PRs, record final SHA and gate results.
+
+## MID / IN PROGRESS — 2026-11-01 18:20 KST
+- Added `verified-market.ts` to reject malformed/duplicate/contradictory stock snapshots before BigInt; verified empty remains distinct. A server-page retry state is keyboard accessible.
+- Re-fetched origin/main; still at start SHA; no active stock comparison PR overlap.
 
 ## FINISHED
 - Pending. Release HOLD until all required gates pass.
