@@ -14,6 +14,19 @@ CREATE TABLE IF NOT EXISTS public.soe_governance_receipts (
   recorded_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 ALTER TABLE public.soe_governance_receipts OWNER TO moneyverse_migrator;
+-- Enforce append-only provenance even for privileged maintenance code.
+CREATE OR REPLACE FUNCTION public.soe_governance_receipt_immutable()
+RETURNS trigger LANGUAGE plpgsql
+SET search_path = pg_catalog, pg_temp
+AS $immutable$
+BEGIN
+  RAISE EXCEPTION USING ERRCODE='55000', MESSAGE='SOE governance receipts are immutable';
+END;
+$immutable$;
+ALTER FUNCTION public.soe_governance_receipt_immutable() OWNER TO moneyverse_migrator;
+CREATE TRIGGER soe_governance_receipts_immutable
+  BEFORE UPDATE OR DELETE OR TRUNCATE ON public.soe_governance_receipts
+  FOR EACH STATEMENT EXECUTE FUNCTION public.soe_governance_receipt_immutable();
 REVOKE ALL ON TABLE public.soe_governance_receipts FROM PUBLIC, moneyverse_app;
 CREATE OR REPLACE FUNCTION public.admin_soe_update_status(
   p_actor uuid, p_code text, p_status text, p_rate_bps integer,
