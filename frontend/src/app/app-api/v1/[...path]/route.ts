@@ -112,6 +112,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const pinnedNoticePath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  const pinnedValues = pinnedNoticePath ? request.nextUrl.searchParams.getAll('pinnedOnly') : [];
+  if (pinnedNoticePath && ([...request.nextUrl.searchParams.keys()].some((key) => key !== 'pinnedOnly') ||
+      (pinnedValues.length > 0 && (pinnedValues.length !== 1 || pinnedValues[0] !== '1')))) {
+    return gatewayProblem(400, 'Bad Request', 'invalid_announcement_pinned', 'pinnedOnly must be the single value 1');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -271,6 +279,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (pinnedNoticePath && pinnedValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON announcement feed');
+      const data: unknown = await response.clone().json();
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('invalid announcement feed');
+      const rows = (data as { announcements?: unknown }).announcements;
+      if (!Array.isArray(rows) || rows.length > 20 ||
+          rows.some((row) => !row || typeof row !== 'object' || Array.isArray(row) ||
+            (row as { isPinned?: unknown }).isPinned !== true ||
+            typeof (row as { announcementId?: unknown }).announcementId !== 'string')) {
+        throw new Error('unverified pinned feed');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'announcement_pinned_unverified',
+        'the pinned announcement filter could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -583,6 +609,12 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('pinnedOnly')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {

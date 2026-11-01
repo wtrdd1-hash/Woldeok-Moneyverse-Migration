@@ -9,10 +9,15 @@
 - Risks: existing A announcement date/image Draft PRs edit same files; do not overwrite their unmerged changes. Feature is isolated and release HOLD until all gates pass.
 
 ## In progress
-- [ ] RED backend + Android + frontend tests.
-- [ ] Implement backend SQL wrapper, service, public and app controllers, web filter, Android gateway.
+- [x] RED backend + Android + frontend tests (3 backend + 3 frontend fail before implementation; logs retained).
+- [x] Implement backend SQL wrapper, service, public and app controllers, web filter, Android gateway. Target 3 backend + 4 frontend PASS; both typechecks PASS.
 - [ ] Verify targets, typecheck, lint, build, full suites, real PostgreSQL and CI; record exact SHA.
 - [ ] Recheck main, preserve other work, create Draft PR only; no release without official Test exact SHA, security and rollback.
+
+## Midpoint (19:26 KST)
+- Rechecked main unchanged. Real PostgreSQL 17.11 `moneyverse_app` read-only SQL PASS, 1 published notice / 0 pinned, positive multi-row case unverified. Transaction ROLLBACK.
+- Existing P0 direct grants observed: announcements SELECT, account_balances UPDATE, user_items DELETE. No DB writes or privilege changes.
+- Full suites, build, lint and CI still pending.
 
 ## Finished
 - Pending evidence.

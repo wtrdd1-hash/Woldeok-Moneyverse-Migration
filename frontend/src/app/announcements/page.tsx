@@ -1,6 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { parseAnnouncementPinned } from './announcement-pinned';
 import { ArrowRight, Image as ImageIcon, Pin } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
@@ -12,11 +14,18 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
 };
+
+type PageProps = { readonly searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const pinnedOnly = parseAnnouncementPinned(await searchParams);
+  return pinnedOnly ? { ...baseMetadata, robots: { index: false, follow: false } } : baseMetadata;
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -28,8 +37,13 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export default async function AnnouncementsPage({ searchParams }: PageProps) {
+  const pinnedOnly = parseAnnouncementPinned(await searchParams);
+  if (pinnedOnly === null) notFound();
+  const data = await publicApi<{ announcements: Announcement[] }>(
+    pinnedOnly ? '/api/v1/announcements?pinnedOnly=1' : '/api/v1/announcements',
+    pinnedOnly ? 0 : 60,
+  );
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -77,6 +91,15 @@ export default async function AnnouncementsPage() {
         />
       )}
 
+      <form action="/announcements" method="get" className="flex flex-wrap items-center gap-3 rounded-xl border border-border/50 bg-card p-4">
+        <label htmlFor="pinned-only" className="flex min-h-11 items-center gap-2 text-sm font-semibold">
+          <input id="pinned-only" type="checkbox" name="pinnedOnly" value="1" defaultChecked={pinnedOnly} className="size-4" />
+          고정 공지만 보기
+        </label>
+        <button type="submit" className="min-h-11 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground">적용</button>
+        {pinnedOnly && <Link href="/announcements" className="inline-flex min-h-11 items-center text-sm underline">전체 보기</Link>}
+        <p className="w-full text-xs text-muted-foreground">최근 공개 공지 20건 내에서만 필터링합니다.</p>
+      </form>
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED NOTICE"
@@ -95,8 +118,8 @@ export default async function AnnouncementsPage() {
           />
         ) : data.announcements.length === 0 ? (
           <EmptyState
-            title="공개된 운영 소식을 준비하고 있어요."
-            description="검토를 마친 공지부터 이곳에 표시됩니다."
+            title={pinnedOnly ? '최근 공지 중 고정된 소식이 없어요.' : '공개된 운영 소식을 준비하고 있어요.'}
+            description={pinnedOnly ? '전체 공지에서 다른 소식을 확인해 주세요.' : '검토를 마친 공지부터 이곳에 표시됩니다.'}
           />
         ) : (
           data.announcements.map((notice) => (

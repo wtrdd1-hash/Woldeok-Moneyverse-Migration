@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -29,7 +30,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
-import { ContentInputError } from './content.repository';
+import { ContentInputError, parseAnnouncementPinnedQuery } from './content.repository';
 import { ContentService } from './content.service';
 import { PrivateImageStorage } from './private-image-storage';
 
@@ -168,8 +169,15 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown>) {
+    return this.guarded(
+      async () => ({
+        announcements: await this.service().publicAnnouncements({
+          pinnedOnly: parseAnnouncementPinnedQuery(query),
+        }),
+      }),
+      'could not load published announcements',
+    );
   }
 
   @Get('photos')

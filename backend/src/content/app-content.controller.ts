@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
+import { ContentInputError, parseAnnouncementPinnedQuery } from './content.repository';
 
 @ApiTags('content')
 @Controller('content')
@@ -14,8 +15,15 @@ export class AppContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown>) {
+    let pinnedOnly: boolean;
+    try {
+      pinnedOnly = parseAnnouncementPinnedQuery(query);
+    } catch (error: unknown) {
+      if (error instanceof ContentInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
+    return { announcements: await this.service().publicAnnouncements({ pinnedOnly }) };
   }
 
   @Get('photos')
