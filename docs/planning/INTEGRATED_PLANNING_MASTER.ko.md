@@ -1,5 +1,50 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1594 F675-204 스냅샷 동등성·정규 지문·커서 수명 보완 / 이슈 #2282 / Draft #2290 / RELEASE HOLD; 선행 #2283 미병합.
+**현재 기획:** v1596 F675-205 회원 보관함 만료 예정 일일 알림함 요약 / 이슈 #2296 / DRAFT / RELEASE HOLD; 선행 Draft #2290 미병합.
+
+## v2026.11.01.1596 — F675-205 회원 보관함 만료 예정 일일 알림함 요약 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**주기와 기준:** 이전 **Feature Improvement v1594** → 현재 **Feature Addition v1596** → 다음 **Feature Improvement v1598(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. `AGENTS.md`, `README.md`, 영어 `PROJECT_PLAN.md` 원본과 한국어 동등 문서를 기준으로 삼음. 개발 인계 이슈 **#2296** 등록. 이전 기획 Draft **#2290**은 미병합이므로 F675-199~204의 유효한 내용을 독립 문서 브랜치로 승계했으며 운영에 반영하지 않음. 아래는 **구현되지 않은 제안 설계**이고 분산 기획 파일은 추가하지 않음.
+
+### 실제 소스 근거와 대안
+- `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 실패 시 `[]`로 대체하므로 이를 실제 보유 아이템 0건의 증거로 쓰지 않음. 마이그레이션 **071**의 `public.user_items(user_id,catalog_id,quantity,expires_at)`는 회원·카탈로그 복합 PK이며, **123**의 `shop_my_items_v2(p_actor)`는 만료 행을 제외하지만 인자로 받은 회원이 인증된 회원인지 DB가 독립 증명하지 않음. 보유 만료는 효과 영수증 만료·유지비·금융 정산과 다름. F675-203/204 요약·상세 기능은 여전히 미구현 Draft.
+- Nest `NotificationController`에는 `SessionGuard`, `AuthenticatedGuard`, `ConsentGuard`를 적용한 알림함 조회·읽음 처리와 쓰기 CSRF가 있음. `NOTIFICATION_CATEGORIES`에 `PRODUCT_ACTIVITY`가 있고 Next `/account/notifications`에 알림함이 있음. 그러나 `safeNotificationLink`는 현재 **`/inventory`를 허용하지 않으며**, 조사한 번호형 마이그레이션에서 `CREATE TABLE public.in_app_notifications`를 **발견하지 못함**(시험 fixture는 배포 스키마가 아님). 신규 기능에 앞서 새 설치 스키마·제약·권한·인덱스의 **P0 UNKNOWN/BLOCKED** 검증 필요.
+- 대안 A 브라우저 전용 토스트는 브라우저 종료 시 알릴 수 없어 제외. 대안 B 외부 푸시·이메일은 동의·전송 실패·개인정보 위험 때문에 제외. **선택 C: 회원이 직접 켠 경우 KST 기준 하루 최대 한 번 서버가 생성하는 앱 내부 알림함 요약.** 스키마·권한 증명 후 기존 알림함을 재사용. 푸시·SMS·이메일·Discord·금융 행동·자동 갱신 없음. F675-199~204 구현과 독립.
+
+### 회원 화면·상태·시간
+- **목적/대상:** 로그인·동의가 유효한 보관함 소유자가 매일 직접 접속하지 않아도 만료 임박을 인지. **/account/notifications → 보관함 만료 알림** 토글과 설명, **/inventory → 만료 알림 설정** 링크. 기존 `engagement.notifications_enabled` 및 필수 보안 알림과 별도 설정, **기본 OFF**. CTA **매일 알림 받기**, **알림 끄기**, **다시 시도**, **보관함 열기**. 확인된 설정 리비전과 `한국시간 오전 9시 전후, 도착 보장 없음` 명시. 실시간 알림 보장 금지.
+- 서버는 매일 **09:00 Asia/Seoul**에 실행, 당일 KST 날짜만 처리하고 **11:00 KST**까지만 안전 재시도. 지난 날짜의 알림을 소급 생성하거나 11시 이후 발송하지 않음. PostgreSQL 한 기준시각 `asOf`의 두 겹치지 않는 구간 **(asOf,asOf+24h]**, **(asOf+24h,asOf+72h]**를 마이크로초 정밀도로 계산. `quantity>0`, 만료시각 NULL 아님, 회원 본인 행만 포함. 효과 만료·유지비·이미 만료된 아이템 제외. 아이템 수량이 아닌 각 구간의 **카탈로그 종류 수**만 제공하고 상품명·잔액·식별자는 포함하지 않음. 예: `24시간 안에 2종, 그다음 48시간에 3종이 만료 예정입니다. 현재 보관함에서 다시 확인하세요.` 양쪽 0이면 알림을 생성하지 않음.
+- 동의한 회원에게 **KST 하루 최대 1개의 커밋된 알림**, 전달·읽음 보장 아님. 당일 보유 상태가 바뀌어도 재전송하지 않음. 카테고리 `PRODUCT_ACTIVITY`; `/inventory`는 허용 경로와 Android 딥링크 시험 후에만 적용. 알림 데이터로 임의 URL 생성 금지. 읽음 처리는 기존 회원 인증 경로를 사용하며 관리자 사칭 경로 없음.
+- UI 상태 `FLAG_OFF`, `PREFERENCE_LOADING`, `PREFERENCE_VERIFIED_OFF`, `PREFERENCE_VERIFIED_ON`, `SAVING`, `VERIFIED_NO_CHANGE`, `REVISION_CONFLICT`, `AUTH_REQUIRED`, `CONSENT_REQUIRED`, `RATE_LIMITED`, `SOURCE_UNAVAILABLE`, `OFFLINE`, `SESSION_CHANGED`. GET 실패를 OFF로 오표시하지 않고 PUT 실패를 저장 완료로 낙관 표시하지 않음. 409 시 설정을 다시 읽고 사용자가 재시도하도록 안내. 토글 ON만으로 실제 알림 발송 성공을 주장하지 않음.
+
+### API·DB·동시성·인증·악용 방지
+- Nest **GET /api/v1/shop/expiry-digest/preferences** 응답 `{enabled:boolean,revision:string,updatedAtUtc:string|null,sourceStatus:'VERIFIED'}`; CSRF 적용 **PUT** 본문 `{enabled:boolean,expectedRevision:string}`, 리비전 일치·실제 변경 없음일 때만 `200 VERIFIED_NO_CHANGE`. 리비전은 안전하지 않은 JS number가 아니라 정규화된 음이 아닌 십진 문자열. 서버가 인증 세션에서 회원을 도출하고 요청 본문에 회원 UUID를 받지 않음. 400 잘못된 값, 401 비인증, 403 동의/권한, 409 CAS 충돌, 429 요청 제한, 503 DB·스키마 장애. 다른 기기의 설정을 무조건 덮어쓰는 PATCH 없음. 가역적인 CAS 토글이므로 별도 멱등키 테이블 대신 응답 유실 시 GET으로 실제 결과 확인 후 PUT 재시도. 회원당 **분당 설정 쓰기 10건**. Next BFF·Android 게이트웨이도 동일 계약.
+- 번호를 예약하지 않은 **전진형 마이그레이션 제안**: `inventory_expiry_digest_preferences(user_id uuid PK REFERENCES users(id),enabled boolean NOT NULL DEFAULT false,revision bigint NOT NULL DEFAULT 0 CHECK(revision>=0),updated_at timestamptz NOT NULL)`; `inventory_expiry_digest_receipts(user_id uuid REFERENCES users(id),digest_date date NOT NULL,outcome text CHECK IN ('SENT','SKIPPED_ZERO'),notification_id uuid NULL,as_of_utc timestamptz NOT NULL,count_24h bigint NOT NULL,count_24_72h bigint NOT NULL,PRIMARY KEY(user_id,digest_date),CHECK outcome/notification_id 정합성)`. `in_app_notifications`의 실제 PK·dedupe_key·FK·소유자와 마이그레이션을 검증하기 전 DDL 확정 금지. 기존 적용 마이그레이션 318 수정 금지. 부분 인덱스 `preferences(user_id) WHERE enabled` 및 보유 아이템 소유자·만료 조회 인덱스는 10,001행 `EXPLAIN (ANALYZE, BUFFERS)`로 중복 여부 확인 후 검토. WLD·아이템·원장 쓰기 없음.
+- 설정 PUT 트랜잭션: 세션 검증 → CSRF·동의 → 회원 설정 행 잠금(없으면 충돌 안전 기본행 생성) → `expectedRevision` 확인 → no-op 또는 리비전 1회 증가 → 커밋. 실제 앱 DB 역할의 회원 경계 검증 필수. **P0 보안 차단:** 서로 다른 두 회원의 앱 역할 직접 호출/위조 차단 시험과 보안 담당 승인이 있기 전 신규 SECURITY DEFINER EXECUTE나 `user_items`·알림 테이블 직접 권한을 부여하지 않음. 호출자가 바꿀 수 있는 `SET LOCAL actor`는 인증 증거가 아님. `search_path=pg_catalog,pg_temp`, 스키마 명시, migrator 함수 소유, PUBLIC REVOKE. 스케줄러는 웹 앱 역할이 아닌 최소 권한의 별도 심사된 실행 주체.
+- 작업자는 검증된 전용 역할로 당일 영수증 anti-join을 이용해 **배치당 최대 100명의 ON 회원 후보 ID**만 읽고, **회원당 별도 DB 트랜잭션**에서 해당 설정 행을 `FOR UPDATE SKIP LOCKED`로 잠가 설정·동의를 재확인, `statement_timestamp()`와 KST 날짜 확정, 두 구간 집계 후 **`SKIPPED_ZERO` 영수증 또는 `PRODUCT_ACTIVITY` 알림 1개+`SENT` 영수증**을 원자적으로 기록. 유일키 `(user_id,digest_date)`로 재시도·충돌·두 작업자 중복 차단. 실패 시 모두 롤백하며 가짜 성공 알림 생성 금지. 작업 시작 및 커밋 직전 기능 스위치 확인. SQL 2초, 잠금 500ms, 배치 100, 11시 종료는 **실측 전 목표 제한**. 알림함 커밋은 회원 열람의 증거가 아님.
+- 스케줄러에는 금융 테이블 임의 쓰기 권한 금지. 설정 해제·동의 철회가 커밋보다 먼저 확인되면 발송하지 않음. 이미 커밋된 알림은 과거 기록으로 남고 외부에서 취소할 수 없음. 보존·삭제는 기존 알림 정책 검증 후 적용하며 기간을 임의로 단정하지 않음. 외부 전송과 무제한 백그라운드 작업 금지.
+
+### 관리자·보안·SEO·Android·접근성·분석·배포
+- 관리자는 집계된 활성 회원 수, 처리 시도·SENT/SKIPPED_ZERO, 중복 충돌, DB 장애, 지연, p95만 확인. **서로 다른 회원 20명 미만 집계 비공개**. 회원별 조회 화면과 원본 UUID·아이템명·만료시각·SQL·알림 본문·링크 로그/분석 금지. 요청 본문과 세션 토큰 기록 금지. 타 회원 데이터 0건, WLD·아이템·원장 변화 0건이 필수 목표.
+- Nest/Next/app-api/Android 게이트웨이 **성공·오류 응답 전체**에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`; 비공개 설정·알림함은 사이트맵/검색 제외. 메타데이터뿐 아니라 실제 HTTP 엣지 헤더 검증(#2012). 제3자 추적·외부 알림 금지. 위조 링크·대량 열거·큰 요청·작업자 재실행 방지.
+- Next 설정은 **320px**, **200% 확대**, **44px 터치**, 키보드/스크린리더 토글 레이블, 포커스를 빼앗지 않는 `aria-live` 저장/충돌 안내, 모션 감소, 한영 의미 동등, WCAG **2.2 AA**. Android는 인증된 app-api 경유, 같은 토글·딥링크, 디스크 캐시 금지, 로그아웃/계정 전환 시 세션 세대로 늦은 응답 폐기, 검증된 `/inventory`만 본인 보관함 화면으로 매핑.
+- KPI **실측 아님, 수용 목표**: 설정 저장 p95 <300ms, 검증된 처리 용량에서 당일 11시 전 배치 종료, 회원당 하루 커밋 알림 ≤1, 무단 접근 0, 원장·아이템 변경 0, 개인정보 보호 헤더 누락 0. 반복 전체 일일 배치 시험 전 전달 신뢰성 보장 금지.
+- QA **제안, 미실행**: 격리 PostgreSQL 17 신규·업그레이드 스키마와 318 충돌, 회원 2명·앱 역할 위조, 보유 10,001건, NULL/만료/수량0, 구간 ±1µs, KST 날짜 경계, 고정 +09:00, 작업자 100건 동시 실행, 커밋 후 응답 유실 재시도, 설정 OFF·동의 철회 경쟁, 0건 영수증, 11시 중단, 작업자 재시작, 429/503/409, 두 기기 CAS, CSRF, 악성 링크, 전체 HTTP 상태의 no-store/noindex, Android 계정 전환, 320px/a11y, 금융·아이템 변화 0. 활성화 전에 알림 테이블 DDL·제약을 신규 DB에서 독립 검증.
+- **릴리스:** 기능 스위치 `inventory_expiry_daily_digest` **기본 OFF**. 스키마·앱 권한, QA v1433 고정 만료시간 fixture (#2292; main 프론트 2,899 PASS/2 FAIL), Test backend/migrator DB 불일치 (#2260), Production 다국어 500 (#2262), 운영 전용 테이블 9개 (#2242), 체크섬 불일치 5건, 마이그레이션 318 충돌 (#2233) 해결이 선행. 개발 B SQL/작업자, A 웹, C Android, QA 독립 브랜치. 실제 백엔드·DB·모바일·인증 E2E를 포함한 exact-SHA Test, 전체 CI/보안, 독립 복원, 운영자 승인 GitOps 승격만 허용. 롤백은 **기능 OFF·스케줄러 중단 우선**, 필요 시 불변 이미지 복원, 전진형 마이그레이션과 영수증 보존. **Production RELEASE HOLD**.
+
+### 구체적인 개발 인계 — P0 4건 / P1 6건 (전부 OPEN)
+1. **P0 DIGEST1596-01 OPS:** 실제 Production 프론트·백엔드·엣지 SHA, 롤백/독립 복원, miniPC 작업 한계(#2171), 타 작업 프로세스 강제 종료 금지 검증.
+2. **P0 DIGEST1596-02 SEC/DB:** 신규 DB 알림 테이블 DDL 출처, 운영 전용 테이블 9개·소스 참조 5개, 앱 역할 DML 및 회원 위조 차단(#993/#2242), 체크섬 5건, 마이그레이션 318 충돌(#2233); 심사 전 신규 권한/작업자 차단.
+3. **P0 DIGEST1596-03 FIN:** 알림 작업자 금융 쓰기 권한 없음 증명, Treasury·마켓플레이스 원장 출처 대조, 요약 기능의 WLD·아이템·원장 변경 0 검증.
+4. **P0 DIGEST1596-04 RELEASE/QA:** QA v1433 날짜 고정 관리자 fixture(#2292), Test 백엔드/migrator 불일치(#2260), Production 다국어 HTTP 500(#2262), 전체 CI, exact-SHA 인증 Test와 독립 복원.
+5. **P1 DIGEST1596-05 Backend B/DB:** 전진형 설정·영수증 스키마, 회원 범위 CAS 함수, 최소 권한 스케줄러, 인덱스와 PostgreSQL 17 신규 설치 일치 검증.
+6. **P1 DIGEST1596-06 Backend B:** 인증 GET/PUT, 문자열 리비전, 동의·CSRF, 409/no-op/재조회, 개인정보 헤더, 제한 및 트랜잭션.
+7. **P1 DIGEST1596-07 Backend B:** KST 09시 배치·11시 종료, SKIP LOCKED와 회원/날짜 유일 영수증·알림 원자 기록, 장애·재시작 지표.
+8. **P1 DIGEST1596-08 Dev A:** 웹 토글, PRODUCT_ACTIVITY 알림 렌더링, 안전한 `/inventory` 링크, 실패/충돌 상태와 접근성.
+9. **P1 DIGEST1596-09 Dev C:** Android/app-api 동등성, 세션 격리, 딥링크 검증, 엣지 비공개/noindex, 관리자 20명 이상 집계 KPI.
+10. **P1 DIGEST1596-10 QA:** 격리 PG17 회원 2명/10,001건/±1µs/KST/100동시성/CAS/해제/작업자 장애, 전체 웹·백엔드·app-api·모바일·엣지, exact-SHA Test와 롤백.
+
+**근거 및 상태:** 시작 시 miniPC Debian 13.6 서비스 활성·개발 PostgreSQL 연결, `moneyverse-mcp` cgroup 968/1027 작업으로 자원 경고. QA v1433의 관리자 fixture 실패는 **시험 결함**이며 운영 관리자 세션 장애가 입증된 것은 아님. 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 기능 미구현·실제 수용시험 미실행·코드/DB/WLD/아이템/원장/Test/Production 변경 없음. **DRAFT / RELEASE HOLD.**
+
 
 
 ## v2026.11.01.1594 — F675-204 스냅샷 동등성·정규 지문·제한형 페이지네이션 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
