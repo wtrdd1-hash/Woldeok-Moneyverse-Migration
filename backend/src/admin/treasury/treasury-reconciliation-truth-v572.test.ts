@@ -50,7 +50,7 @@ describe('P1 treasury reconciliation evidence integrity', () => {
       discrepancy_amount_wld: null,
       last_reconciled_at: null,
     });
-    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledTimes(2);
   });
 
   it('does not invent a ledger reconciliation on the standalone endpoint', async () => {
@@ -63,6 +63,6 @@ describe('P1 treasury reconciliation evidence integrity', () => {
       discrepancy_amount_wld: null,
       last_reconciled_at: null,
     });
-    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledTimes(2);
   });
 });

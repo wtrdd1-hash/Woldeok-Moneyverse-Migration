@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+# v2026.11.01.1603 — Treasury fiscal epoch proof: SOURCE TEST VERIFIED / PRODUCTION HOLD
+- [Worklog](docs/worklog/2026-11-01-treasury-live-recovery-v1603.md) / [KO](docs/worklog/2026-11-01-treasury-live-recovery-v1603.ko.md); [Internal](docs/updates/v2026.11.01.1603-treasury-internal.md) / [KO](docs/updates/v2026.11.01.1603-treasury-internal.ko.md); [GitHub](docs/updates/v2026.11.01.1603-treasury-github.md) / [KO](docs/updates/v2026.11.01.1603-treasury-github.ko.md). Actual Production treasury fiscal reset already present, but admin source hardcoded UNVERIFIED; scoped source fix and isolated real-data Test verified. Production promotion NOT claimed.
+
+
 ## v2026.10.31.1553 — Treasury zero-based fiscal epoch reset candidate (ISOLATED POSTGRES PASS / PRODUCTION HOLD)
 - [Worklog EN](docs/worklog/2026-10-31-treasury-fiscal-reset-v1553.md) / [KO](docs/worklog/2026-10-31-treasury-fiscal-reset-v1553.ko.md) · [Internal EN](docs/updates/v2026.10.31.1553-treasury-internal.md) / [KO](docs/updates/v2026.10.31.1553-treasury-internal.ko.md) · [GitHub EN](docs/updates/v2026.10.31.1553-treasury-github.md) / [KO](docs/updates/v2026.10.31.1553-treasury-github.ko.md) · [Changelog EN](docs/changelog/2026-10-31-treasury-v1553.md) / [KO](docs/changelog/2026-10-31-treasury-v1553.ko.md). Owner-authorized Treasury-only reset migration 314 archives 5 legacy vaults / 552 ledger entries / 744 source dividends and starts zero-based canonical-backed epoch; synthetic PostgreSQL 16 migration/forgery tests SUCCESS run 41188959960. Production full dump SHA verified and restored to isolated Test, but migration NOT applied to real-data Test or Production. Finance 503 remains, canonical/member balances untouched.
 
