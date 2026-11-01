@@ -417,6 +417,121 @@ export interface TreasuryOverview {
 export class TreasuryRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
+  /**
+   * A read-time fiscal proof for the owner-approved epoch. Old 552/744 rows
+   * are immutable archive evidence, not spendable Treasury receipts.
+   * Every amount and the proof timestamp come from a single PostgreSQL
+   * statement snapshot; missing privileges, data or schema fail closed.
+   */
+  private async readFiscalEpochProof(vaultTotal: string): Promise<{
+    reconciliation: TreasuryReconciliation;
+    epochStartedAt: Date | null;
+  }> {
+    const unverified = {
+      reconciliation: unverifiedTreasuryReconciliation(vaultTotal),
+      epochStartedAt: null,
+    };
+    try {
+      const result = await this.pool.query<{
+        vault_total: string; vault_count: string; canonical_count: string;
+        canonical_total: string; journal_total: string;
+        historic_treasury_count: string; historic_dividend_count: string;
+        expected_treasury_count: string; expected_dividend_count: string;
+        archive_total: string; archive_items_total: string;
+        archive_items_count: string; backup_sha256: string;
+        invalid_new_sources: string; verified_at: Date;
+        epoch_opened_at: Date;
+      }>(`
+        WITH fiscal_epoch AS (
+          SELECT * FROM public.treasury_fiscal_epochs WHERE id = 1
+        )
+        SELECT
+          e.opened_at AS epoch_opened_at,
+          e.archived_legacy_events::text AS expected_treasury_count,
+          e.archived_enterprise_dividends::text AS expected_dividend_count,
+          e.archived_vault_total_wld AS archive_total,
+          e.full_backup_sha256 AS backup_sha256,
+          jsonb_array_length(e.archived_vaults)::text AS archive_items_count,
+          (SELECT coalesce(sum((item->>'balance_wld')::numeric), 0)::text
+             FROM jsonb_array_elements(e.archived_vaults) AS item) AS archive_items_total,
+          (SELECT count(*)::text FROM public.system_treasury_vaults) AS vault_count,
+          (SELECT coalesce(sum(balance_wld::numeric), 0)::text
+             FROM public.system_treasury_vaults) AS vault_total,
+          (SELECT count(*)::text FROM public.accounts a
+             JOIN public.account_balances ab ON ab.account_id = a.id
+             WHERE a.account_type = 'TREASURY' AND a.system_key = 'treasury') AS canonical_count,
+          (SELECT coalesce(sum(ab.available_amount), 0)::text
+             FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id
+             WHERE a.account_type = 'TREASURY' AND a.system_key = 'treasury') AS canonical_total,
+          (SELECT coalesce(sum(CASE WHEN p.direction::text = 'debit'
+              THEN p.amount ELSE -p.amount END), 0)::text
+             FROM public.ledger_postings p JOIN public.accounts a ON a.id = p.account_id
+             WHERE a.account_type = 'TREASURY' AND a.system_key = 'treasury') AS journal_total,
+          (SELECT count(*)::text FROM public.system_treasury_ledger l
+             WHERE l.created_at < e.opened_at) AS historic_treasury_count,
+          (SELECT count(*)::text FROM public.state_enterprise_dividend_logs d
+             WHERE d.created_at < e.opened_at) AS historic_dividend_count,
+          (SELECT count(*)::text FROM (
+             SELECT l.ledger_transaction_id AS tx_id, l.amount_wld::numeric AS amount
+               FROM public.system_treasury_ledger l WHERE l.created_at >= e.opened_at
+             UNION ALL
+             SELECT d.ledger_tx_id AS tx_id, d.dividend_amount_wld::numeric AS amount
+               FROM public.state_enterprise_dividend_logs d WHERE d.created_at >= e.opened_at
+          ) src
+          WHERE src.tx_id IS NULL OR src.amount IS NULL OR src.amount <= 0
+            OR NOT EXISTS (
+              SELECT 1 FROM public.ledger_transactions tx
+              WHERE tx.id = src.tx_id AND tx.created_at >= e.opened_at
+            )
+            OR NOT EXISTS (
+              SELECT 1 FROM public.ledger_postings p
+              JOIN public.accounts a ON a.id = p.account_id
+              WHERE p.transaction_id = src.tx_id
+              GROUP BY p.transaction_id
+              HAVING count(*) >= 2
+                AND coalesce(sum(CASE WHEN p.direction::text = 'debit'
+                    THEN p.amount ELSE -p.amount END), 0) = 0
+                AND coalesce(sum(p.amount) FILTER (
+                    WHERE a.account_type = 'TREASURY' AND a.system_key = 'treasury'), 0) = src.amount
+            )) AS invalid_new_sources,
+          statement_timestamp() AS verified_at
+        FROM fiscal_epoch e
+      `);
+      if (result.rows.length !== 1) return unverified;
+      const r = result.rows[0];
+      if (!r) return unverified;
+      const expectedBackup = 'e62cc6528e22c3bf60362c4e584d09b01cecef3d9112eb5a0f9e5bcde9e32bc7';
+      const verifiedAt = new Date(r.verified_at);
+      const epochAt = new Date(r.epoch_opened_at);
+      if (
+        r.vault_total !== vaultTotal || r.vault_count !== '5' ||
+        r.canonical_count !== '1' || r.canonical_total !== vaultTotal ||
+        r.journal_total !== vaultTotal || r.invalid_new_sources !== '0' ||
+        r.historic_treasury_count !== r.expected_treasury_count ||
+        r.historic_dividend_count !== r.expected_dividend_count ||
+        r.expected_treasury_count !== '552' || r.expected_dividend_count !== '744' ||
+        r.archive_total !== '220923528' || r.archive_items_total !== r.archive_total ||
+        r.archive_items_count !== '5' || r.backup_sha256 !== expectedBackup ||
+        !Number.isFinite(verifiedAt.getTime()) ||
+        !Number.isFinite(epochAt.getTime()) ||
+        verifiedAt.getTime() < epochAt.getTime() ||
+        verifiedAt.getTime() > Date.now() + 5000
+      ) return unverified;
+      return {
+        reconciliation: {
+          status: 'RECONCILED',
+          total_vaults_balance_wld: vaultTotal,
+          total_ledger_net_flow_wld: r.journal_total,
+          discrepancy_amount_wld: '0',
+          last_reconciled_at: verifiedAt.toISOString(),
+        },
+        epochStartedAt: epochAt,
+      };
+    } catch {
+      return unverified;
+    }
+  }
+
   async getOverview(): Promise<TreasuryOverview> {
     // 1. Vaults
     const vaultsRes = await this.pool.query<TreasuryVaultRow>(`
@@ -430,6 +545,8 @@ export class TreasuryRepository {
     for (const v of vaults) {
       totalTreasury += BigInt(v.balance_wld);
     }
+
+    const { reconciliation, epochStartedAt } = await this.readFiscalEpochProof(totalTreasury.toString());
 
     // 2. Circulating user currency M0/M2 (sum of all user cash and bank balances)
     let totalCirculating: bigint;
@@ -456,8 +573,9 @@ export class TreasuryRepository {
       SELECT tx_type, coalesce(sum(amount_wld::numeric), 0)::bigint::text AS total_amount
       FROM public.system_treasury_ledger
       WHERE created_at >= NOW() - INTERVAL '24 hours'
+        AND ($1::timestamptz IS NULL OR created_at >= $1::timestamptz)
       GROUP BY tx_type
-    `);
+    `, [epochStartedAt]);
 
     let injected = '0';
     let absorbed = '0';
@@ -500,8 +618,9 @@ export class TreasuryRepository {
         SELECT coalesce(sum(amount_wld::numeric) / 30, 0)::bigint::text AS daily_avg
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
+          AND ($1::timestamptz IS NULL OR created_at >= $1::timestamptz)
           AND tx_type IN ('INJECTION', 'STOCK_HALT_SETTLEMENT', 'EMERGENCY_RESERVE_TRANSFER', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'MARKET_BUYBACK_BURN')
-      `);
+      `, [epochStartedAt]);
       if (typeof outflowRes.rows[0]?.daily_avg !== 'string') throw new Error('missing outflow evidence');
       dailyOutflow30d = BigInt(outflowRes.rows[0].daily_avg);
       if (dailyOutflow30d < BigInt(0)) throw new Error('negative outflow');
@@ -512,11 +631,7 @@ export class TreasuryRepository {
     // A verified zero outflow cannot support a finite coverage-days estimate.
     const coverageDays = dailyOutflow30d === BigInt(0) ? undefined : Number(availableWld / dailyOutflow30d);
 
-    // Vault totals alone cannot prove journal completeness or reconciliation.
-    // Do not manufacture a ledger total, zero discrepancy, or verification time.
-    const reconciliation = unverifiedTreasuryReconciliation(totalTreasury.toString());
-
-    const liveBudgets = await this.calculateLiveBudgets();
+    const liveBudgets = await this.calculateLiveBudgets(epochStartedAt);
 
     return {
       vaults,
@@ -538,7 +653,7 @@ export class TreasuryRepository {
     };
   }
 
-  async calculateLiveBudgets(): Promise<readonly TreasuryBudgetEnvelope[]> {
+  async calculateLiveBudgets(epochStartedAt: Date | null = null): Promise<readonly TreasuryBudgetEnvelope[]> {
     const settledByCategory: Record<string, bigint> = {};
     for (const b of AUTHORITATIVE_BUDGET_ENVELOPES) {
       settledByCategory[b.category] = BigInt(0);
@@ -552,8 +667,9 @@ export class TreasuryRepository {
       }>(`
         SELECT amount_wld, tx_type, reason
         FROM public.system_treasury_ledger
-        WHERE tx_type IN ('ABSORPTION_SINK', 'STOCK_HALT_SETTLEMENT', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'GRANT', 'DISBURSEMENT', 'MARKET_BUYBACK_BURN')
-      `);
+        WHERE ($1::timestamptz IS NULL OR created_at >= $1::timestamptz)
+          AND tx_type IN ('ABSORPTION_SINK', 'STOCK_HALT_SETTLEMENT', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'GRANT', 'DISBURSEMENT', 'MARKET_BUYBACK_BURN')
+      `, [epochStartedAt]);
 
       for (const row of rowsRes.rows) {
         const amt = BigInt(row.amount_wld || '0');
@@ -637,6 +753,7 @@ export class TreasuryRepository {
         SELECT amount_wld, tx_type, reason, created_at
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
+          AND created_at >= (SELECT opened_at FROM public.treasury_fiscal_epochs WHERE id=1)
           AND tx_type IN ('INJECTION', 'FEE_RECIRCULATION', 'ABSORPTION_SINK', 'CASINO_PIGOVIAN_TAX', 'STOCK_SPECULATION_TAX', 'WEALTH_TAX_COLLECTION')
       `);
 
@@ -720,6 +837,7 @@ export class TreasuryRepository {
         SELECT amount_wld, tx_type, reason, created_at
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
+          AND created_at >= (SELECT opened_at FROM public.treasury_fiscal_epochs WHERE id=1)
           AND tx_type IN ('ABSORPTION_SINK', 'STOCK_HALT_SETTLEMENT', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'GRANT', 'DISBURSEMENT', 'MARKET_BUYBACK_BURN')
       `);
 
@@ -896,7 +1014,7 @@ export class TreasuryRepository {
       throw new ServiceUnavailableException('TREASURY_VAULT_TOTAL_UNVERIFIED');
     }
 
-    return unverifiedTreasuryReconciliation(totalVaults);
+    return (await this.readFiscalEpochProof(totalVaults)).reconciliation;
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {

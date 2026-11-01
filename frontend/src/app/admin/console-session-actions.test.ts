@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IDLE } from '@/lib/action-state';
 
 const { api, apiWithCookie, relaySetCookie, revalidatePath } = vi.hoisted(() => ({
@@ -16,7 +16,14 @@ const opened = { state: 'open', csrfToken: 'synthetic-csrf-token', expiresAt: '2
 const rotated = 'mv_session=synthetic-token; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000';
 const cleared = 'mv_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
 
-beforeEach(() => { vi.resetAllMocks(); api.mockResolvedValue({ csrfToken: 'synthetic-csrf' }); });
+// Use a deterministic time before the test receipt's expiry; never weaken real validators.
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-10-31T12:00:00.000Z'));
+  vi.resetAllMocks();
+  api.mockResolvedValue({ csrfToken: 'synthetic-csrf' });
+});
+afterEach(() => { vi.useRealTimers(); });
 
 describe('administrator console server actions', () => {
   it('refuses an HTTP 200 open with no rotated session cookie', async () => {

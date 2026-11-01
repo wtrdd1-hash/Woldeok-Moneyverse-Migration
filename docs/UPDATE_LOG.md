@@ -1,3 +1,12 @@
+## 2026-11-01 v1607 — Treasury CI fixture stabilization (candidate, release hold)
+- Merge latest main QA v1605 into isolated v1607 Treasury branch; stabilize two expired synthetic administrator-session receipt tests with test-only clock (RED 2 fail, GREEN 37 pass). Real session expiry validation unchanged.
+- Reapply exact-source CI, immutable Test and runtime identity checks before any Production deployment. Historic Treasury source 552 and SOE dividend 744 remain monetary provenance blockers. See [worklog](worklog/2026-11-01-treasury-qa-ci-unblock-v1607.md).
+
+## 2026-11-01 v1603 — Treasury current fiscal proof source repair (TEST VERIFIED / PRODUCTION HOLD)
+- Actual Production DB epoch 314 was already applied by Oct 31: current 5 vaults and canonical Treasury both 0; 552 historic Treasury events and 744 dividend logs retained, zero new source. Older v1553 release-hold note is historical, not evidence of today's DB state.
+- Corrected unconditional TreasuryRepository UNVERIFIED with read-only canonical+archive evidence and current-epoch 24h/30d reporting. No historical link forge, money movement, schema/migration or payout enablement.
+- Isolated real-data Test clone migration 314 completed; original 40 accounts, 891 canonical transactions and 1829 postings preserved. Backend Treasury 172 PASS/20 conditional SKIP; typecheck/build PASS. Exact-SHA official Test/Production and financial settlement still HOLD; public live runtime SHA currently differs from manifest pointer. [Worklog](worklog/2026-11-01-treasury-live-recovery-v1603.md).
+
 ## 2026-10-31 C v1233 — Chat source evidence and safe retry (DRAFT / RELEASE HOLD)
 - From main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`: `/chat` no longer turns failed/malformed authenticated conversation or message reads into an empty inbox, and does not auto-open a peer while the list is unverified. UUID, exact bigint, timestamp, duplicate and cross-conversation guards; accessible retry and noindex metadata. Nest contract unchanged; no financial/DB writes.
 - TDD 9 PASS; frontend 2,785 PASS, backend 2,786 PASS/501 SKIP, contract 41 PASS, database 62 PASS/4 SKIP, lint/typecheck/build/app-api 184 PASS. Isolated PostgreSQL 17.11 migrations 312 PASS, but app-role chat direct SELECT denied: Backend B v668 dependency. Full audit 13 vulnerabilities, route-ledger missing `--inventory`, official exact-SHA authenticated E2E and remote CI incomplete. **RELEASE HOLD**; no merge/deploy.
@@ -1398,3 +1407,5 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+
+<!-- v1603 final: frontend exact-SHA Next build FAILED EAGAIN, no Test/Production promotion. GitHub PR #2319 DRAFT, CI #5120 pending. -->
