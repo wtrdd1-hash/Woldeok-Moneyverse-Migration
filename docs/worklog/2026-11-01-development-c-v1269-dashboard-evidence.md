@@ -9,9 +9,13 @@
 - Release policy: all exact-SHA gates required for merge/Test/Production; any FAIL/BLOCKED means Draft/HOLD only.
 
 ## IN PROGRESS
-- [ ] TDD focused regression and server rendering.
+- [x] TDD focused regression and server rendering: RED observed, GREEN 9/9.
 - [ ] Final SHA lint/typecheck/build/unit/contract/security/isolated PostgreSQL/HTTP/E2E evidence.
 - [ ] Re-fetch main and planning; final PR/CI/Test/Production/rollback status.
+
+## MID — 2026-11-01 18:25 KST
+- Implemented runtime evidence checks for wallet, watchlist, portfolio, trade history and triggered alerts; unknown summary counts no longer display zero. Accessible retry and per-section status.
+- Main/planning re-fetched unchanged; no dashboard PR overlap. Focused 9 PASS; full Typecheck PASS; Lint PASS with 0 errors/1,023 existing warnings.
 
 ## FINISHED
 - Pending.
