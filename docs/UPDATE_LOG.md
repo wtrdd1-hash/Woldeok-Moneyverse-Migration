@@ -1440,3 +1440,5 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 final: frontend exact-SHA Next build FAILED EAGAIN, no Test/Production promotion. GitHub PR #2319 DRAFT, CI #5120 pending. -->
+
+- **2026-11-02 C v1288b (P1, DRAFT/HOLD):** Route-scoped HTTP `X-Robots-Tag: noindex, nofollow` for public SOE disclosures and localized variants, correcting the measured conflict with the globally indexable HTTP response. Separate from existing Draft #2274's page/API/DB work; no financial writes. See `docs/worklog/2026-11-02-c-v1288b-soe-http-index-gate.md`.

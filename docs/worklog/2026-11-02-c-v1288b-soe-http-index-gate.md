@@ -9,3 +9,8 @@
 ## MID — pending
 
 ## END — pending
+
+## MID — 2026-11-02 08:03 KST
+- RED: `security-headers.test.ts` 1 FAIL/9 PASS; no route-scoped noindex for public SOE, confirmed HTTP `X-Robots-Tag: index, follow` even though HTML carried noindex metadata.
+- GREEN: add route-scoped `X-Robots-Tag: noindex, nofollow` for `/enterprises` and localized prefixes, without modifying global SEO policy or other workers' routes. Focused 10/10 PASS. Origin/main fetched again unchanged.
+- This is a distinct edge HTTP contract from Draft #2274, which edits the page, backend, Android and DB but not `frontend/next.config.ts`.

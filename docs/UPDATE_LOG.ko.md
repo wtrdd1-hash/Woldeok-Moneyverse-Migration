@@ -1493,3 +1493,5 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 종료: 프론트 정확한 SHA 빌드 EAGAIN 실패, Test·운영 승격 미실행. GitHub PR #2319 Draft, CI #5120 진행 중. -->
+
+- **2026-11-02 개발 C v1288b (P1, 배포 보류):** 공기업 공개 페이지 및 언어별 경로의 실제 HTTP `X-Robots-Tag`를 비색인으로 제한하여 기존 공용 응답의 `index, follow` 충돌 수정. 기존 Draft #2274의 화면/API/DB 작업과 구분되는 경계 정책. 금융 쓰기 없음. 자세한 내용은 `docs/worklog/2026-11-02-c-v1288b-soe-http-index-gate.ko.md`.
