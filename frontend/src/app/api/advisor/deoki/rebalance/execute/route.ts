@@ -11,7 +11,19 @@ const PRIVATE_HEADERS = {
 export async function POST(req: Request): Promise<NextResponse> {
   const origin = req.headers.get('origin');
   const site = req.headers.get('sec-fetch-site');
-  if (!origin || origin !== new URL(req.url).origin || (site !== null && site !== 'same-origin')) {
+  // Next can normalize Request.url to localhost behind a proxy. The incoming
+  // Host (not attacker-controlled X-Forwarded-Host) is the browser's origin host.
+  const requestUrl = new URL(req.url);
+  const host = req.headers.get('host') || requestUrl.host;
+  const forwardedProto = req.headers.get('x-forwarded-proto');
+  const scheme = forwardedProto === 'https' || forwardedProto === 'http'
+    ? forwardedProto : requestUrl.protocol.slice(0, -1);
+  let expectedOrigin: string | null = null;
+  try {
+    const expectedUrl = new URL(`${scheme}://${host}`);
+    if (expectedUrl.host.toLowerCase() === host.toLowerCase()) expectedOrigin = expectedUrl.origin;
+  } catch { /* malformed Host fails closed */ }
+  if (!origin || origin !== expectedOrigin || (site !== null && site !== 'same-origin')) {
     return NextResponse.json({ success: false, error: 'forbidden_origin' }, { status: 403, headers: PRIVATE_HEADERS });
   }
   try {

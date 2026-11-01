@@ -27,6 +27,29 @@ describe('advisor rebalance must not forge execution receipts', () => {
     assertPrivate(response);
   });
 
+  it('accepts the browser Host origin even when Next normalizes Request.url to localhost', async () => {
+    isLoggedInMember.mockResolvedValueOnce(false);
+    const normalized = new Request('http://localhost:49329/api/advisor/deoki/rebalance/execute', {
+      method: 'POST', headers: { host: '127.0.0.1:49329', origin: 'http://127.0.0.1:49329',
+        'sec-fetch-site': 'same-origin', 'content-type': 'application/json' }, body: '{}',
+    });
+    const response = await POST(normalized);
+    expect(response.status).toBe(401);
+    assertPrivate(response);
+  });
+
+  it('uses the TLS proxy scheme without trusting forwarded-host for origin checks', async () => {
+    isLoggedInMember.mockResolvedValueOnce(false);
+    const normalized = new Request('http://localhost:49329/api/advisor/deoki/rebalance/execute', {
+      method: 'POST', headers: { host: 'easy-scraping.com', 'x-forwarded-proto': 'https',
+        'x-forwarded-host': 'attacker.example', origin: 'https://easy-scraping.com',
+        'sec-fetch-site': 'same-origin', 'content-type': 'application/json' }, body: '{}',
+    });
+    const response = await POST(normalized);
+    expect(response.status).toBe(401);
+    assertPrivate(response);
+  });
+
   it('rejects unauthenticated requests without a simulated receipt', async () => {
     isLoggedInMember.mockResolvedValueOnce(false);
     const response = await POST(request());
