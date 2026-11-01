@@ -28,10 +28,11 @@ describe('Virtual Real Estate & Land Leasing System (/spaces/real-estate)', () =
     expect(combinedSource).toContain('font-mono');
   });
 
-  it('provides passive rent claim and room expansion interactions', () => {
-    expect(combinedSource).toContain('handleCollectYield');
-    expect(combinedSource).toContain('handleExpandRoom');
-    expect(combinedSource).toContain('부동산 임대료');
+  it('does not fabricate owner rent settlement or room expansion in the shared space view', () => {
+    expect(viewSource).not.toContain('handleCollectYield');
+    expect(viewSource).not.toContain('handleExpandRoom');
+    expect(viewSource).toContain('api<unknown>');
+    expect(viewSource).toContain('임대료 수령');
   });
 
   it('mounts RealEstateAuctionClient with landmark auctions and rent yield claim', () => {

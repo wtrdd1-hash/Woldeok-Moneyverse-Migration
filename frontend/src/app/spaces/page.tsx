@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Sparkles, Home, ShieldCheck } from 'lucide-react';
+import { Sparkles, Home, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getServerLocale } from '@/lib/locale-server';
 import { lookupText } from '@/lib/i18n-dictionary';
@@ -10,12 +10,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
   const title = lookupText('가상 부동산 & 개인 공간 (Personal Spaces)', locale);
   const desc = lookupText(
-    '머니버스 8대 메가시티 가상 부동산 분양 및 7대 개인 룸 인테리어 쇼룸. 실시간 부동산 임대료 수익 정산과 공간 확장을 경험하세요.',
+    '인증된 서버의 개인 공간 보유 내역을 조회합니다. 가상 부동산 거래와 임대료 정산은 검증 전까지 중단됩니다.',
     locale
   );
 
   return {
     title: `${title} | Woldeok Moneyverse`,
+    robots: { index: false, follow: false },
     description: desc,
     openGraph: {
       title,
@@ -35,8 +36,8 @@ export default async function PersonalSpacesPage() {
             <span>가상 부동산 분양 & 개인 공간 시스템</span>
           </Badge>
           <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono flex items-center gap-1">
-            <ShieldCheck className="size-3.5" />
-            <span>공인 소유권 등기 원장 연동</span>
+            <ShieldAlert className="size-3.5" />
+            <span>인증된 서버 조회 전용</span>
           </Badge>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
@@ -44,8 +45,8 @@ export default async function PersonalSpacesPage() {
           <span>개인 공간 & 메가시티 랜드 (Personal Spaces)</span>
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
-          7대 개인 공간(스타터 룸부터 불멸의 레거시 홀까지)과 8대 도시 구역 랜드마크를 소유하세요.
-          공간 인테리어 확장 및 리모델링에 따라 매초 실시간 가상 부동산 임대료(Rent Yield)가 누적됩니다.
+          서버에서 확인된 회원별 공간만 표시합니다. 브라우저 저장 데이터는 실제 소유권이 아닙니다.
+          임대료 수령과 WLD 차감 기능은 검증된 금융 원장 계약이 마련될 때까지 제공하지 않습니다.
         </p>
       </div>
 
