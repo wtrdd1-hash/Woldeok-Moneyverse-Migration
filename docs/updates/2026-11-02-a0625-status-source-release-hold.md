@@ -1,0 +1,3 @@
+# Release HOLD — source-specific public service status (A0625)
+
+Draft PR #2435, main baseline `a8541927c3a351d980454c66e95a3356c47e0722`. Local exact repair SHA `29b5fe4c519b02961117d505ed549ebf377849e8` passed backend/frontend/database/contract tests, build, typecheck, lint (0 errors) and mobile contract; full dependency audit FAIL (9), DEV least-privilege P0 #993 FAIL. Exact final docs SHA CI and official Test authenticated E2E pending/blocked. Test and Production expose `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not candidate. Existing status PR #2264 and board PR #2429 conflict. **No main merge, Test/Production promotion, database change, service restart, branch deletion or rollback.** Non-destructive rollback: close/revert unmerged PR.

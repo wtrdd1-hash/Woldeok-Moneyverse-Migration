@@ -15,3 +15,12 @@
 
 ## Finished
 - Pending final evidence, SHA, gate status, branch/PR audit, Test/Production and rollback.
+
+### Verification and integration checkpoint (v3)
+- Repair SHA `29b5fe4c519b02961117d505ed549ebf377849e8`: full Backend 2,982 PASS / 518 SKIP, Frontend 2,929 PASS, Database 62 PASS / 5 SKIP, Contract 41 PASS, build PASS, typecheck PASS, lint 0 errors/1,027 warnings, mobile contract 184 endpoints PASS, security policy 11 PASS. Production audit zero known; full audit 9 advisories FAIL.
+- DEV DB role `moneyverse_app` public status function EXECUTE true, 3 sources, positive `api` match 1; READ ONLY/ROLLBACK. DEV P0 ACL #993 still FAIL. Test and Production publicly advertise old SHA `510dbe6bf4d5...`, not candidate.
+- Virtual merges: #2264 and #2429 conflict; no forced integration. Remote branches start 189 → pre-close 191 (main included); unmerged 174 → 176, open PRs 171 → 172, conflicting PRs 29. No deletion; preserve all unique/unintegrated commits.
+- QA English/Korean and release HOLD English/Korean in docs/qa and docs/updates. Test exact SHA auth E2E, independent restore and GitOps gates blocked; no main merge, deploy, rollback, DB mutation or service restart.
+
+## Finished (v4)
+- Candidate remains Draft/HOLD pending exact final SHA CI and required Test/Production gates. Final SHA and post-document gates to be appended after verification.
