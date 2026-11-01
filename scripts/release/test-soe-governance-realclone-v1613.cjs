@@ -87,6 +87,19 @@ if (parsed.hostname !== '127.0.0.1' || parsed.port !== '5580' ||
         after.dividends !== before.dividends || after.status !== newStatus) {
       throw Error('Non-atomic or monetary SOE governance mutation');
     }
+    // Even the owner must not be able to rewrite or delete recorded governance evidence.
+    for (const [name, sql] of [
+      ['UPDATE', 'UPDATE public.soe_governance_receipts SET change_reason = \'tamper\''],
+      ['DELETE', 'DELETE FROM public.soe_governance_receipts'],
+      ['TRUNCATE', 'TRUNCATE TABLE public.soe_governance_receipts'],
+    ]) {
+      await db.query('SAVEPOINT immutable_negative');
+      let immutableDenied = false;
+      try { await db.query(sql); }
+      catch (error) { immutableDenied = error.code === '55000'; }
+      await db.query('ROLLBACK TO SAVEPOINT immutable_negative');
+      if (!immutableDenied) throw Error('Immutable receipt protection failed for '+name);
+    }
     await db.query('ROLLBACK');
     const afterRollback = (await db.query(`
       SELECT (SELECT count(*) FROM public.soe_governance_receipts) receipts,
@@ -100,7 +113,7 @@ if (parsed.hostname !== '127.0.0.1' || parsed.port !== '5580' ||
       appTableUpdate:false,appReceiptInsert:false,functionExecute:true,
       unauthorizedActorDenied:true,directDmlDenied:true,
       approvedChangeAndReceiptAtomic:true,idempotentReplay:true,
-      ledgerAndDividendRowsUnchanged:true,testRolledBack:true,
+      ledgerAndDividendRowsUnchanged:true,appendOnlyReceiptProtection:true,testRolledBack:true,
     }));
   } finally { await db.end(); }
 })().catch(e=>{ console.error('SOE_ISOLATED_DB_TEST_FAILED',e.code||e.message);process.exitCode=2; });

@@ -1,7 +1,7 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
 ## v2026.11.01.1613 — Audited SOE nonmonetary governance repair (isolated PostgreSQL PASS / Production HOLD)
-- [Worklog EN](docs/worklog/2026-11-01-soe-governance-recovery-v1613.md) / [KO](docs/worklog/2026-11-01-soe-governance-recovery-v1613.ko.md) · [Internal EN](docs/updates/v2026.11.01.1613-soe-governance-internal.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1613-soe-governance-github.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-github.ko.md). New DB 318 approver+receipt atomic governance, backend+frontend status form, no monetary path. Real restored PG app DML/role negatives, approver receipt/idempotency, rollback PASS. Backend SOE 42/Frontend SOE 13 PASS, full CI and official Test→Production NOT YET certified.
+- [Worklog EN](docs/worklog/2026-11-01-soe-governance-recovery-v1613.md) / [KO](docs/worklog/2026-11-01-soe-governance-recovery-v1613.ko.md) · [Internal EN](docs/updates/v2026.11.01.1613-soe-governance-internal.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1613-soe-governance-github.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-github.ko.md). New DB 318 approver+append-only receipt atomic governance, backend+frontend status form, no monetary path. Real restored PG app DML/role negatives, approver receipt/idempotency, rollback PASS. Backend SOE 42/Frontend SOE 13 PASS, full CI and official Test→Production NOT YET certified.
 
 
 ## v2026.11.01.1611 — Post-reset Treasury recovery failure RCA (LIVE NOT RECOVERED)
