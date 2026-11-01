@@ -13,4 +13,8 @@
 - 04:36 코드 SHA CI 및 후보 이미지 검증은 Android 계약 문서 미갱신으로 실패했습니다. 04:37 계약 JSON과 영문/국문 스키마 참조를 재생성하고 새 SHA에서 재검증합니다.
 
 ## 종료
-- 최종 SHA, CI, Test/Production 및 롤백 여부는 검증 후 기록합니다.
+- 버전: 시작 `61501015...` → 기능 `f68e4a7...` → 계약 수정 `d87f3ab...` → 최종 QA/배포 보류(정확 SHA는 PR 댓글).
+- Backend 2,987 PASS/518 SKIP, Frontend 최초 190초 제한 종료 후 2,938 PASS, DB 62 PASS/5 SKIP, 보안 정책 34 PASS, 모바일 계약 184개 PASS, 빌드·타입검사 PASS, 린트 오류 0/경고 1,027. 운영 의존성 0건, 전체 감사 9건 FAIL.
+- 실제 PostgreSQL 읽기 전용 조회·ROLLBACK, 개발 DB 최소 권한 P0 실패. 공식 Test 후보 SHA 불일치 및 Treasury HTTP 200, 인증 E2E·독립 복원 차단.
+- 종료 감사 원격 브랜치 180개(main 포함), 미통합 166개, 열린 PR 163개, 충돌 29개. #2417과 6개 파일 충돌. 삭제 0개.
+- **운영 보류:** main 병합, Test/Production 배포, DB 변경, 서비스 재시작, 롤백 없음. CI 최종 결과는 PR 댓글로 별도 기록.

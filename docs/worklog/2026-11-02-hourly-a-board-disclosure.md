@@ -20,4 +20,8 @@
 - 04:37: Regenerated `docs/mobile-api-contract.json` and English/Korean schema references (15 inserted lines), preserving 184 endpoints; repairing the generated contract on this branch. Re-run CI on new SHA; do not bypass the contract gate.
 
 ## Finished
-- Pending exact SHA, gates, Test/Production/rollback and branch preservation decision.
+- v1 start `61501015f6c8036f6a1cfa291b45789c87549d2e` → v2 feature `f68e4a7f304eb1717cbc34b2b3353b8285e2355a` → v3 contract repair `d87f3ab6ed7f0336f2451f29fd4f6ac78cc851f4` → v4 QA/Release closeout (final SHA in PR comment).
+- Backend full 2,987 PASS / 518 SKIP; Frontend first serial run TIMEOUT 190s, parallel rerun 2,938 PASS; database 62 PASS / 5 SKIP. Root security 34 PASS; API contract 184 endpoints PASS; build/typecheck PASS; lint 0 errors / 1,027 warnings; production-only audit 0 known; full dependency audit FAIL 9 (1 low, 8 moderate).
+- Real PostgreSQL read-only prepared query PASS (1 public row, 0 matching actual disclosures); synthetic 4-row read-only predicate PASS; ROLLBACK. DEV ACL P0 FAIL. Test exact-SHA preflight FAIL (public/manifest/env/artifact mismatch), public Test and Production advertised `510dbe6...` and Treasury HTTP 200; authenticated exact-SHA E2E and independent backup restore BLOCKED.
+- End branch audit: 180 remote branches including main, 166 unmerged, 14 merged, 163 open PRs, 29 conflicting; PR #2417 virtual merge 6 file conflicts. Delete 0; preserve unique/unreviewed changes and all concurrent agents.
+- Release: **HOLD**. No main merge, Test/Production promotion, systemd restart, DB mutation, rollback or branch deletion. Repair SHA CI and image pending at document preparation; final PR SHA and CI outcome recorded separately in PR comment.
