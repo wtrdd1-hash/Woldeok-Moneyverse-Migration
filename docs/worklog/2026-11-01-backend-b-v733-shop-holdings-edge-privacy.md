@@ -38,3 +38,10 @@
 ## Finished (candidate prepared; release not approved)
 - Candidate is suitable only as Draft/HOLD PR. Recheck latest main and planning before any merge, then require full green CI, exact-head Test E2E and all GitOps release gates.
 - Main merge: NONE. Test deployment: NONE. Production deployment: NONE. No automation changes or other developer worktree edits.
+
+### PR and exact-runtime verification (22:54 KST)
+- Code SHA: `f1ed266b804867e423463c431f368db4efc7aea4`; Draft/HOLD PR #2386, `hold` label; issue #2012 updated.
+- Read-only public Production `HEAD /app-api/v1/shop/holdings`: HTTP 401, `X-Robots-Tag: index, follow` and no explicit cache-control; Test HEAD HTTP 401 has `noindex, nofollow` but no explicit cache-control. No authenticated content was requested.
+- Read-only official Test identity gate for code SHA: **FAIL**, Test runs `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`; six mismatches: manifest, backend environment, frontend environment, frontend artifact, public backend version, public frontend version.
+- Remote PR CI classify, policy and release-input PASS; runtime-check and verify/runtime-check still IN_PROGRESS at last check. No CI success claim for final head.
+- No main merge, Test/Production deploy, financial or shared DB mutation. This remains a partial security fix with RELEASE HOLD.
