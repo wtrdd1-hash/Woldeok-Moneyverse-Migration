@@ -19,15 +19,6 @@ describe('public board Seoul-day search', () => {
     expect(isVerifiedBoardDayResponse({ posts: [], appliedDay: '2026-11-01' }, '2026-11-01')).toBe(true);
     expect(isVerifiedBoardDayResponse({ posts: null, appliedDay: '2026-11-01' }, '2026-11-01')).toBe(false);
     expect(isVerifiedBoardDayResponse({ posts: [] }, '2026-11-01')).toBe(false);
-    expect(isVerifiedBoardDayResponse({ posts: [] }, '2026-11-01')).toBe(false);
-  });
-  it('keeps an accessible Seoul date field and prevents indexed filtered pages', () => {
-    const page = readFileSync('src/app/board/page.tsx', 'utf8');
-    expect(page).toContain('name="day"');
-    expect(page).toContain('type="date"');
-    expect(page).toContain('htmlFor="board-day"');
-    expect(page).toContain('params.day !== undefined');
-    expect(page).toContain('isVerifiedBoardDayResponse(fetched, day.day)');
   });
   it('keeps an accessible Seoul date field and prevents indexed filtered pages', () => {
     const page = readFileSync('src/app/board/page.tsx', 'utf8');
