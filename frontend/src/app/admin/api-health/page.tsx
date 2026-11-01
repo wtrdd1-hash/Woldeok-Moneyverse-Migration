@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
 import { apiOrNull } from '@/lib/api';
-import { ApiHealthDashboard, type ApiHealthResponse } from './api-health-dashboard';
+import { ApiHealthDashboard } from './api-health-dashboard';
+import { parseApiHealthResponse } from './api-health-source';
 
 export const metadata: Metadata = {
   title: '14대 도메인 API 측정 증빙 — 관리자',
@@ -19,7 +20,7 @@ export default async function AdminApiHealthPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const liveData = await apiOrNull<ApiHealthResponse>('/api/v1/admin/api-health/status');
+  const liveData = parseApiHealthResponse(await apiOrNull<unknown>('/api/v1/admin/api-health/status'));
 
   return (
     <div data-page="admin-api-health" className="mv-page mv-page--admin grid gap-6 max-w-6xl mx-auto">

@@ -14,3 +14,8 @@
 - [ ] Intermediate main/plan check
 - [ ] Exact-SHA gates and PR
 - [ ] Final release decision
+
+## Intermediate — 2026-11-01 23:21 KST
+- RED: dashboard malformed `domains` raised `TypeError: domains.map is not a function`; forged `isLiveTelemetry`/success-rate rendered as real. Gateway 3/3 regression tests failed (missing privacy headers and 200 for forged rate). New parser module absent as expected.
+- GREEN: 23/23 focused tests PASS. Runtime validation now covers initial SSR, client refresh and private gateway; backup inventory reuses existing validator. Invalid payload is 503 at gateway and unknown/error at UI; no stale success badge.
+- Re-fetched origin/main and both canonical planning docs; no main change. Other agents' branches/worktrees untouched.
