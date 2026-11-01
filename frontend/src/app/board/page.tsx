@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { isVerifiedBoardDisclosure, parseBoardDisclosure } from './board-disclosure';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.positionDisclosure !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +67,18 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const disclosure = parseBoardDisclosure(params.positionDisclosure);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (disclosure.value) query.set('positionDisclosure', disclosure.value);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const result = search.invalid || disclosure.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; appliedFilters?: { positionDisclosure: string } }>(
+        `/api/v1/board/public/stock-posts${suffix}`, disclosure.value ? 0 : 60,
+      );
+  const data = disclosure.value && !isVerifiedBoardDisclosure(result, disclosure.value) ? null : result;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +137,22 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-position-disclosure" className="grid gap-1 text-sm font-semibold">
+              작성자 보유 상태 신고
+              <select
+                id="board-position-disclosure"
+                name="positionDisclosure"
+                defaultValue={disclosure.value ?? ''}
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+                aria-describedby="board-disclosure-scope"
+              >
+                <option value="">전체</option>
+                <option value="holder">보유 신고</option>
+                <option value="no_position">미보유 신고</option>
+                <option value="operator_related">운영자 관련 신고</option>
+                <option value="undisclosed">미공개 신고</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -147,6 +169,14 @@ export default async function BoardPage({
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
             최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
+          <p id="board-disclosure-scope" className="mt-1 text-xs text-muted-foreground">
+            작성자가 직접 신고한 정보이며 실제 보유 여부를 인증하지 않습니다. 최근 공개 게시글 50건만 검색합니다.
+          </p>
+          {disclosure.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              보유 상태 신고 필터를 다시 선택해 주세요.
+            </p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,15 +191,17 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
+        {search.invalid || disclosure.invalid ? (
+          <EmptyState title="검색 조건을 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
-                ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
+              disclosure.value
+                ? '최근 게시글 50건에서 일치하는 자기신고 상태가 없어요.'
+                : search.query
+                  ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
                   : '아직 작성된 글이 없어요.'

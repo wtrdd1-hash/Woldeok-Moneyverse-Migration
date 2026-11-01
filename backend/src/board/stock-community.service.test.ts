@@ -18,7 +18,7 @@ describe('StockCommunityService public discovery', () => {
     expect(database.query).toHaveBeenCalledTimes(1);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('upper(stock_symbol) = upper($2)');
-    expect(values).toEqual([50, 'wdx', null]);
+    expect(values).toEqual([50, 'wdx', null, null]);
   });
 
   it('rejects malformed symbols before querying PostgreSQL', async () => {
@@ -38,7 +38,7 @@ describe('StockCommunityService recent public title search', () => {
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain('strpos(lower(title), lower($3::text)) > 0');
-    expect(values).toEqual([50, 'wdx', 'WLD %_']);
+    expect(values).toEqual([50, 'wdx', 'WLD %_', null]);
   });
 
   it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
@@ -51,4 +51,23 @@ describe('StockCommunityService recent public title search', () => {
       expect(database.query).not.toHaveBeenCalled();
     },
   );
+});
+
+
+describe('StockCommunityService self-reported position disclosure', () => {
+  it('applies a parameterized filter only after the bounded public SQL function', async () => {
+    const database = pool();
+    const service = new StockCommunityService(database);
+    await expect(service.publicList('WDX', 'trade', 'operator_related')).resolves.toEqual([]);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('position_disclosure = $4::text');
+    expect(values).toEqual([50, 'WDX', 'trade', 'operator_related']);
+  });
+
+  it('rejects unsupported disclosure values before database access', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'verified_holder')).rejects.toThrow('invalid position disclosure');
+    expect(database.query).not.toHaveBeenCalled();
+  });
 });

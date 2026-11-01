@@ -8,7 +8,7 @@ describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
-    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
+    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ', undefined);
   });
   it.each([
     { q: ['a', 'b'] },
@@ -20,5 +20,25 @@ describe('public board title query HTTP validation', () => {
   ])('rejects ambiguous or invalid query %j as HTTP 400', async (query) => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
+  });
+});
+
+
+describe('public stock board position disclosure HTTP validation', () => {
+  it('accepts a self-report filter and echoes the applied value', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ positionDisclosure: 'holder', stock: 'WDX' })).resolves.toEqual({
+      posts: [], appliedFilters: { positionDisclosure: 'holder' },
+    });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', undefined, 'holder');
+  });
+
+  it.each([
+    { positionDisclosure: ['holder', 'no_position'] },
+    { positionDisclosure: '' },
+    { positionDisclosure: 'verified_holder' },
+    { positionDisclosure: 'holder', unknown: '1' },
+  ])('rejects unsupported or ambiguous self-report filter %j', async (query) => {
+    await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
   });
 });

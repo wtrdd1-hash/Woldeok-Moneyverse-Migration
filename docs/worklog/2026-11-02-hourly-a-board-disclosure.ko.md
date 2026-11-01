@@ -7,7 +7,8 @@
 - DB 기존 SECURITY DEFINER 조회 함수만 사용하고 신규 마이그레이션·권한·금융 원장 변경을 금지합니다.
 
 ## 진행 중
-- Backend/Frontend/Android 회귀테스트를 먼저 실패시킨 뒤 수정하고 검증합니다.
+- 04:27 RED 테스트 실패 재현, 04:28 Backend 22건·Frontend 13건 GREEN 확인. 추가 UUID 중복 검증을 작성했습니다.
+- 최신 main 재확인 결과 동일 SHA이며, 변경 파일 린트 오류는 0건입니다.
 
 ## 종료
 - 최종 SHA, CI, Test/Production 및 롤백 여부는 검증 후 기록합니다.

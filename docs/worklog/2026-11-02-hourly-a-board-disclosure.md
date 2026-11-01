@@ -11,7 +11,10 @@
 - Safety: `moneyverse_app` may only execute existing read functions; never grant table privileges or modify immutable applied migrations; no money writes; Test/Production release blocked unless exact SHA and independent restore pass.
 
 ## In progress
-- Pending tests and implementation. Follow TDD RED→GREEN; re-fetch `origin/main` mid-work and before integration.
+- 04:27: RED reproduced (backend 3 failures, frontend 4 failures); 04:28 GREEN backend 22/22 and frontend 13/13. Follow-up duplicate-ID regression added.
+- 04:30: Re-fetched `origin/main`, still `a8541927c3a351d980454c66e95a3356c47e0722`; no overlap with B/C. Targeted lint 0 errors. Whole-workspace gates still pending.
+- Query uses existing bounded PostgreSQL function and parameter `$4`; self-reported status is never presented as a verified holding.
+
 
 ## Finished
 - Pending exact SHA, gates, Test/Production/rollback and branch preservation decision.
