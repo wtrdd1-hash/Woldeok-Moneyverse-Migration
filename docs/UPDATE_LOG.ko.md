@@ -1,3 +1,7 @@
+## 2026-11-01 C v1271 — 회원 문의 대화 원본 검증 (초안 / 운영 보류)
+- `/support` 본인 문의/대화 응답의 구조·중복·발신자 검증, 실제 빈 상태와 장애 구분, 재조회, 미검증 대화 답장/내보내기 차단. 기존 Nest 인증 및 PostgreSQL 본인 소유 함수 재사용. DB/원장 변경 없음.
+- RED 6건, 문의 테스트 50/50 PASS. 코드 후보 전체 린트·타입검사·빌드, 프론트 2,911/백엔드 2,963 테스트 PASS, 격리 PostgreSQL 316/316 PASS. 의존성 취약점 9건·QA 원장 부재·공식 Test 정확 SHA E2E 미완료로 운영 보류. [작업일지](worklog/2026-11-01-c-v1271-support-conversation-proof.ko.md).
+
 ## 2026-11-01 v1611 — 국고 초기화 후 운영 미복구 사후분석 및 완료 판정기 (운영 미복구)
 - 백업 SHA·migration314·보관 금고 220,923,528 WLD·현재 금고/정식 국고 0 확인, 실제 앱권한 감사 차단(국고 552/552 미연결, 배당 NULL738/유령6). 공개 운영 353c6d vs main 905207, Test bc8cd8, 운영 포인터/실제 서비스 경로 불일치.
 - 읽기 전용 판정기 `scripts/release/verify-treasury-postreset-completion.mjs`와 6개 회귀 테스트 통과, 실제 호스트 판정 NOT_RECOVERED. CI/PR/0회계기만으로 지급/운영 정상화 선언 불가. [사고 RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md).
