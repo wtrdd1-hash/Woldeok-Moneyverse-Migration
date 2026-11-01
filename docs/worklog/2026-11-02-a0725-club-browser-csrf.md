@@ -11,7 +11,11 @@
 - Plan: (1) write RED tests for session acquisition/failure and seven caller wiring; (2) implement shared browser helper and wire all seven sites; (3) run GREEN focused/full gates, real PG read-only, app-api and security; (4) audit fresh main, CI, PR overlap and release gates. HOLD without exact SHA Test E2E and all release proofs.
 
 ## In progress — v2
-- Pending implementation and verification.
+- RED: missing shared helper and two public-cache leak assertions fail (see miniPC evidence `red-tests.log`).
+- GREEN: eight focused tests PASS. All seven club mutation controls now fetch a fresh session CSRF through a single client helper. Existing club creation/funding backend 503 holds remain unchanged.
+- App API forwards CSRF and owner cookie, and forces `private, no-store`, `noindex`, `no-referrer` for club and session responses even if upstream advertises public caching.
+- Backend B PR #2353 remains separate; no overlapping backend/controller edits, no DB migration, no new grants.
+- Full gates and exact-SHA CI still pending; not integrated or deployed.
 
 ## Finished — v3
 - Pending final SHA, test results, QA, Test/Production/rollback and branch disposition.

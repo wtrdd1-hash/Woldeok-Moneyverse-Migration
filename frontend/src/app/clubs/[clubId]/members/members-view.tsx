@@ -1,5 +1,6 @@
 'use client';
 
+import { clubMutation } from '../../club-mutation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -31,7 +32,7 @@ export function MembersView({
   const handleRoleChange = async (targetUserId: string, newRole: string) => {
     setUpdatingUser(targetUserId);
     try {
-      const res = await fetch(`/api/v1/clubs/${clubId}/members/${targetUserId}/role`, {
+      const res = await clubMutation(`/api/v1/clubs/${clubId}/members/${targetUserId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole }),

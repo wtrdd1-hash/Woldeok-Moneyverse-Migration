@@ -1,5 +1,6 @@
 'use client';
 
+import { clubMutation } from '../club-mutation';
 import React, { useState } from 'react';
 import {
   LayoutGrid,
@@ -170,7 +171,7 @@ export function ClubhouseCanvas({
     setIsSaving(true);
     setSaveMessage(null);
     try {
-      const res = await fetch(`/api/v1/clubs/${clubId}/canvas`, {
+      const res = await clubMutation(`/api/v1/clubs/${clubId}/canvas`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ grid, totalScore }),
