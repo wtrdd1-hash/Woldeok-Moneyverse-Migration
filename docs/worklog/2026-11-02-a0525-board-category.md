@@ -17,4 +17,3 @@
 - Real DEV PostgreSQL function EXECUTE and read-only SQL PASS; no real positive multi-row category fixture. DEV P0 ACL FAIL (`account_balances` UPDATE, `user_items` DELETE). No DB/ledger writes.
 - Closing inventory: 184 remote branches including main, 170 unmerged branches, 13 merged non-main branches; 167 open PRs, 29 conflicting. Exact duplicate open PR titles 0. Virtual merge against #2425 and #2417 each conflicts in six files; all unintegrated unique commits protected. Branch deletions: 0; preserve because active work and merge safety cannot be certified.
 - Official Test and Production advertise `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not candidate. Exact-SHA Test authenticated E2E, independent restore, P0 ACL and GitOps release gate BLOCKED. No main merge, Test/Production deployment, service restart, rollback or cleanup. Draft PR #2429 kept on HOLD; next run may revisit CI and conflicts after other PRs land.
-
