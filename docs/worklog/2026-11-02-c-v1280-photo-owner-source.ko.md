@@ -13,3 +13,6 @@
 
 ## 실제 엣지 헤더 결함 추가 수정
 독립 HTTP에서 정상 200/오류 503은 확인했지만 Next 전역 헤더가 `noindex` 및 `no-referrer`를 덮어쓰는 문제를 발견함. `/app-api/v1/photos/mine` 경로에만 별도 개인정보 헤더 정책을 추가함. 테스트 RED 1건 재현 후 집중·엣지 테스트 17건 PASS. 새 SHA의 전체 재검증 및 HTTP 재검사 필요.
+
+## 종료 — 2026-11-02 02:08 KST — PARTIAL / RELEASE BLOCKED
+회원 사진 제출 목록 검증, 잘못된 자료의 표시·철회 차단, 재조회 안내, Android GET 및 Next 엣지의 private/no-store·noindex·no-referrer 적용 완료. 독립 Next HTTP 정상 200·비정상 503, 헤더 세 가지 확인. 집중 프론트/엣지 17건, 사진 Backend 20건, 전체 Frontend 2,931건 PASS. 전체 Backend 2,978 PASS/2 FAIL(기존 프로필 HTTP 인증 기대값 불일치)/518 SKIP. Build·Typecheck·Lint(오류 0, 경고 1,027) PASS. app-api 184개 계약 PASS, DB 패키지 62 PASS/5 SKIP, 보안 스크립트 17 PASS, 운영 의존성 감사 PASS. 독립 PostgreSQL 17.11에서 마이그레이션 322개 적용, 본인 1건·타인 0건, 직접 SELECT 권한 없음. 전체 의존성 취약점 9건, 전체 경로 QA 증빙 누락, 원격 CI 미완료, 공식 Test 인증 E2E 미실행으로 병합·운영배포 금지. 최신 main 510dbe6... 변경 없음. PR #2408 보존, 타 개발 브랜치와 예약 변경 없음. 최종 기록 커밋 후 정확 SHA 재검증 필요.

@@ -32,3 +32,15 @@ The member-only /gallery/submit page types the untrusted GET /api/v1/photos/mine
 - Second isolated Next HTTP probe: valid owner list HTTP 200 and malformed owner list HTTP 503, **but Next's global config overwrote the route's X-Robots-Tag to index/follow and Referrer-Policy to strict-origin-when-cross-origin**. The HTTP privacy gate therefore FAILED despite route-level Vitest PASS.
 - Added a route-specific `next.config.ts` policy for `/app-api/v1/photos/mine` (private/no-store, noindex, no-referrer), after the global policy; test RED 1 then GREEN 17 focused/edge assertions. This is a narrowly scoped follow-up to the existing global header issue tracked in Draft #2225, without editing that PR.
 - A new SHA and full rebuild/HTTP retest are required. Official Test and Production unchanged.
+
+## FINISHED — 2026-11-02 02:08 KST — PARTIAL / RELEASE BLOCKED
+- Implementation: runtime owner photo list validator, explicit unavailable/retry state, secure image referrer, Android GET malformed-source hold and owner-private headers at both handler and Next HTTP edge. No new SQL, WLD, grants, schema, production/Test change.
+- RED/GREEN: original 3 failing Android cases and missing parser; immutable native fetch response regression RED then GREEN; actual HTTP edge noindex/referrer regression RED then GREEN. Focused frontend/edge 17 PASS; backend photo tests 20 PASS.
+- Corrected code SHA before final worklog commit: 0b210bcf18d42c3376068ef60d80ea27a5a43996.
+- Full frontend 2931 PASS; full backend 2978 PASS / 2 FAIL (profile-private-response.http.test.ts expects HTTP 200, gets 401) / 518 SKIP. These profile tests were also failing before this branch's final fixes; no unrelated A/B/QA changes made.
+- Build PASS; typecheck PASS; lint PASS (0 errors / 1027 warnings). App API contract 184 endpoints PASS. Database package 62 PASS / 5 SKIP; security scripts 17 PASS; production dependency audit PASS.
+- Fresh isolated PostgreSQL 17.11: 322/322 migrations applied, member photo SQL owner=1 / other=0, direct SELECT privilege=false. Temporary container removed.
+- Isolated Next HTTP with independent mock upstream: valid owner GET 200; malformed owner GET 503; both Cache-Control private/no-store, X-Robots-Tag noindex, Referrer-Policy no-referrer. This is not a certified authenticated browser E2E.
+- Release blockers: backend suite 2 FAIL; all-dependency audit 9 vulnerabilities (1 low / 8 moderate); full-route QA missing artifacts/qa/full-route-ledger.json; remote CI candidate runtime checks pending; official Test exact-SHA/auth flow, independent restore, Production gate NOT RUN/BLOCKED. Existing global private HTML header Draft #2225 remains separate and unmerged.
+- Latest origin/main re-fetched unchanged 510dbe6bf4d5c2a8089fc06b480776053da7a2e3; canonical planning main v1518, active draft #2402 v1626 checked. No merge or deploy. No branch deletion. Worktree and Draft PR #2408 retained.
+- Final documentation commit will advance HEAD; validation must be tied to that exact SHA before any release consideration. No successful release claimed.
