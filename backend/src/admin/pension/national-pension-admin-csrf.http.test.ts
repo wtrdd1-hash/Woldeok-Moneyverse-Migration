@@ -26,7 +26,7 @@ describe('P1 admin pension payout HTTP CSRF boundary', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [AdminNationalPensionController],
       providers: [
         { provide: NationalPensionService, useValue: { distributeHourlyPensionPayouts: payout, getOverview } },
@@ -45,7 +45,7 @@ describe('P1 admin pension payout HTTP CSRF boundary', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
