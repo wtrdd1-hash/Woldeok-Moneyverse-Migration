@@ -84,7 +84,7 @@ export function calculateWealthQuintiles(users: readonly Pick<AdminUser, 'user_i
     offset += count;
     const totalWealth = group.reduce((sum, amount) => sum + amount, 0n);
     return {
-      label, color: QUINTILE_COLORS[index], count, totalWealth,
+      label, color: QUINTILE_COLORS[index]!, count, totalWealth,
       avgWealth: count > 0 ? (totalWealth + BigInt(Math.floor(count / 2))) / BigInt(count) : 0n,
       ratio: shareTenths(totalWealth, total),
     };
