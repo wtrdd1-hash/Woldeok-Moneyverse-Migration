@@ -69,6 +69,17 @@ describe('private chat mutation CSRF HTTP boundary', () => {
     expect(unblockUser).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['read receipt', '/chat/conversations/' + conversation + '/read', { sequence: '1' }],
+    ['archive', '/chat/conversations/' + conversation + '/archive', { archived: true }],
+    ['mute', '/chat/conversations/' + conversation + '/mute', { muted: true }],
+    ['block', '/chat/users/' + peer + '/block', {}],
+    ['abuse report', '/chat/conversations/' + conversation + '/report', { reason: 'other', details: 'spam message' }],
+  ])('rejects missing CSRF for %s', async (_label, path, body) => {
+    await request(app.getHttpServer()).post(path).send(body).expect(403);
+    expect(verifyCsrf).not.toHaveBeenCalled();
+  });
+
   it('accepts a valid session-bound token for private chat mutations', async () => {
     await request(app.getHttpServer()).post('/chat/conversations')
       .set('x-csrf-token', 'valid-token').send({ peerUserId: peer }).expect(201);

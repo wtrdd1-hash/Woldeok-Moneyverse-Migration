@@ -29,3 +29,11 @@ Pending.
 - First full typecheck PASS, Nest build PASS, Next build PASS (602 static pages).
 - Full lint found 1 new error: Next's reserved `module` identifier in the new Nest HTTP test; renamed the local test fixture variable without touching runtime code. The 1,027 existing warnings are unchanged.
 - All gates must be rerun at the new SHA; no claim of a green candidate from the previous SHA.
+
+### Full-gate and PostgreSQL checkpoint (23:21 KST)
+- Backend focused HTTP 14/14 PASS (including all eight mutation routes, GET safe method, token rejection and successful token acceptance); frontend composer/report 15/15 PASS.
+- Full frontend Vitest 2,908 PASS. Backend Vitest 2,972 PASS / 2 FAIL / 518 SKIP; the two failures are unchanged profile HTTP fixtures returning 401 (QA v1447, existing PR #2265), not chat.
+- Full lint PASS after correcting the reserved test variable (0 errors / 1,027 existing warnings). Full typecheck PASS; Nest build PASS; Next production build PASS (602 static pages).
+- Contract 41 PASS; database package 62 PASS / 4 SKIP; mobile App API contract matches. Production dependency audit 0 known; full audit FAIL (9 known low/moderate vulnerabilities).
+- Disposable PostgreSQL 17.11: 319 migrations and 319 checksum rows applied, 256 public tables, auction execute privilege false. Real PostgreSQL game/session/chat report tests 40 PASS, no skips in final isolated run. Earlier generic run 37 PASS / 8 SKIP because the chat suites require dedicated env; final run enabled the report suite. The separate paging fixture requires seeded data and was not claimed as passing.
+- Isolated containers removed, no shared DB write. Exact-SHA official Test and authenticated E2E not verified. Production remains prohibited.
