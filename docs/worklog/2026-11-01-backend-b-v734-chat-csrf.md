@@ -37,3 +37,16 @@ Pending.
 - Contract 41 PASS; database package 62 PASS / 4 SKIP; mobile App API contract matches. Production dependency audit 0 known; full audit FAIL (9 known low/moderate vulnerabilities).
 - Disposable PostgreSQL 17.11: 319 migrations and 319 checksum rows applied, 256 public tables, auction execute privilege false. Real PostgreSQL game/session/chat report tests 40 PASS, no skips in final isolated run. Earlier generic run 37 PASS / 8 SKIP because the chat suites require dedicated env; final run enabled the report suite. The separate paging fixture requires seeded data and was not claimed as passing.
 - Isolated containers removed, no shared DB write. Exact-SHA official Test and authenticated E2E not verified. Production remains prohibited.
+
+### Final candidate gate checkpoint (23:28 KST)
+- Full root `pnpm test`: FAIL at the same pre-existing profile fixture 2 HTTP 401 cases; backend now 2,977 PASS / 2 FAIL / 518 SKIP. No profile guard bypass or unrelated PR modification.
+- Repeated full lint PASS (0 errors, 1,027 warnings), full typecheck PASS, Nest build PASS and Next production build PASS at the tested candidate.
+- Security/release Node suite 164/164 PASS. Exact-SHA public Test gate FAIL: `backend_version_unverified`, `frontend_version_unverified`. Host Test runtime identity BLOCKED by `EACCES` reading protected `/etc/moneyverse/test-backend.env`; no privilege escalation.
+- Draft/HOLD PR #2389; GitHub CI classify, policy, release-input PASS, runtime-check and verify/runtime-check IN_PROGRESS at this checkpoint.
+- Latest `origin/main` still `3d5e321c3d1221febff677469fecdfcb3cf42e7d`; English and Korean plans remain v1518 in main. No merge authorization.
+- Security/frontend handoff: chat browser composer flow is included in this same PR to prevent a backend-only break; A/C should avoid independently adding direct browser CSRF bypasses.
+- No main merge, Test deployment, Production promotion, or deletion of other worktrees. Both task-owned PostgreSQL containers stopped and removed. No live chat/member data was accessed.
+- Remaining blockers: root backend test failures, CI runtime, official Test exact-SHA + authenticated E2E, financial DB/ledger QA P0 findings, independent backup restore and operator GitOps approval.
+
+## Finished — 2026-11-01 23:28 KST
+**PARTIAL / BLOCKED.** Real code change and regression proof are preserved in Draft/HOLD PR #2389. Production is prohibited.
