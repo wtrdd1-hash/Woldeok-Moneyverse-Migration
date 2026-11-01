@@ -34,4 +34,3 @@
 10. **P1 PREVIEW1600-10 (QA):** 격리 PG17 신규/업그레이드, 회원 2명·위조 100회, 보유 10,001건, 1µs 경계·KST 전환, 동시 읽기/보유 변경 100회, 429/503, Android 로그아웃, HTTP 헤더·금융 변경 0, 정확 SHA Test·롤백.
 
 **수용시험은 제안만 했으며 실행하지 않았다.** 기능 스위치 `inventory_expiry_digest_preview` 기본 OFF. B/A/C/QA 별도 브랜치·Test 정확 SHA 검증 후 main/CI/보안/금융/백업/운영자 승인, OFF→소규모→확대. 롤백은 스위치 OFF로 기존 알림 설정 복원하며 DB 파괴적 롤백 금지. QA v1435의 fixture 통과는 전체 릴리스 통과가 아니다. 외부 독립 레퍼런스 신규 실검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. **DRAFT / RELEASE HOLD**, 런타임/DB/아이템/WLD/원장/Test/Production 변경 없음.
-

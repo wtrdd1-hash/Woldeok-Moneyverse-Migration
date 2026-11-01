@@ -34,4 +34,3 @@
 10. **P1 PREVIEW1600-10 (QA):** isolated PG17 clean+upgrade, 2 owners/100 spoof attempts, 10,001 holdings, 1µs 24/72h edges, KST rollover, 100 concurrent reads/holdings changes, 429/503, Android logout, edge headers and zero finance writes; exact-SHA Test and rollback.
 
 **Acceptance PROPOSED, NOT RUN.** Feature flag `inventory_expiry_digest_preview` defaults OFF; B/A/C/QA use independent branches and Test exact-SHA gate; release only after reviewed main/CI/security/finance/backup/operator approval, staged OFF→small cohort→broader. Rollback flag OFF restores existing notification settings; no destructive DB rollback. QA v1435 fixture green is not full suite clearance. External independent references newly verified/deduplicated/classified **0**; cumulative **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. **DRAFT / RELEASE HOLD**; no runtime/DB/item/WLD/ledger/Test/Production change.
-
