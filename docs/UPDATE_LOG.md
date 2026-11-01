@@ -1,3 +1,6 @@
+## 2026-11-02 v1620 — Real Production Treasury public cutover verified
+- Production Nginx stale v1550 routing corrected to merged-main v1619 (backend4184/frontend4185) after stable environment repair and exact-SHA Test. Public treasury HTTP200 RECONCILED current 0 WLD, official production identity gate PASS; old v1550 services and configuration backup retained for rollback. No historic mint/pension settlement certified. [Worklog](worklog/2026-11-02-treasury-prod-cutover-v1620.md).
+
 ## 2026-11-01 v1618.3 — Stock-league escrow segregation regression repaired
 - Full CI #41317019548 failed existing disposable PG stock-league test: it assumed a single ESCROW account, while new NPS fund/welfare escrows create three. Forward migration323 rebinds the stock-league ledger to exact `system_key=escrow`; disposable Postgres acceptance now reads/verifies only that escrow and rejects leaked money to NPS escrows. No deletion or changes to migration273. Full CI requires rerun.
 
