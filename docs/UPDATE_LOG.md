@@ -1,5 +1,10 @@
 ## v2026.11.01.1606 — F675-207 Race/Replay Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+## v2026.11.01.1608 — F675-208 Member Digest Receipt History (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+Previous Improvement v1606 → Current Addition v1608 → Next Improvement v1610 (provisional). Canonical main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 start/mid; unmerged predecessor Draft #2335 retained; developer issue #2342. Proposed owner-only last-seven-KST-day proof of in-app digest **creation**, not delivery or read. Reuses F675-205 atomic receipt+inbox linkage; no new table by default, no false “not sent” on absent evidence. Existing notification inbox/search is not provenance, and numbered notification CREATE TABLE DDL was not found in this source inspection (no live-schema absence claim). Strict Nest/Next/Android private GET, PostgreSQL owner ACL, KST microseconds, >=8-day evidence retention, cohort>=20 admin telemetry, flag OFF, P0 4/P1 6. QA #2330 crafting outside ledger and Treasury v1611 NOT_RECOVERED remain independent P0. No functional acceptance or release; external approved new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only DRAFT/HOLD.
+
+
+
 Previous Addition v1604 → Current Improvement v1606 → Next Addition v1608 (provisional); canonical main 9052076301bf1975422731ab50a8b7770dbbe951 at start / 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 at midpoint; predecessor Draft #2328, current Draft #2335 and issue #2327. Corrected missing-row worker/PUT serialization via owner transaction advisory lock, key-before-owner order, global-key receipt and stale-replay 409, earliest-possible KST day rather than promised delivery, consent/disable fencing, private Next/Android edge, real PG17 acceptance. Latest QA crafting out-of-band cash/item mutation #2330 remains separate P0 owner work. P0 4/P1 6. F675-203–207 NOT IMPLEMENTED; no runtime/DB/ledger/Test/Production changes. External newly approved 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only DRAFT/HOLD.
 
 ## v2026.11.01.1604 — F675-207 Member Expiry Digest Lookahead (FEATURE ADDITION / DRAFT / RELEASE HOLD)

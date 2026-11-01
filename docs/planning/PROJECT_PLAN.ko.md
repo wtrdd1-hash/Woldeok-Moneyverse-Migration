@@ -1,5 +1,33 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1606 F675-207 기본 행 부재·당일 처리·멱등성 보완 / 이슈 #2327 / 초안 PR #2335 / 운영 보류; #2328 종속, 기준 main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
+
+## v2026.11.01.1608 — F675-208 회원 만료 알림 생성 영수증 이력 (기능 추가 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 **기능 보완 v1606** → 현재 **기능 추가 v1608** → 다음 **기능 보완 v1610(잠정)**. 최신 main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`을 시작·중간에 확인하고 `AGENTS.md`, `README.md`, 영문 정본과 국문 대조 문서를 검토했다. 미병합 Draft #2335(선행 #2328)를 승계하며 개발 이슈 #2342에 인계한다. F675-203~207은 **미구현**이며 F675-208도 문서상 제안일 뿐 런타임·DB·WLD·원장·Test·Production 변경이 없다.
+
+### 목적·소스 근거·대안
+- **문제:** 제안된 F675-205 매일 09:00 KST 앱 내부 만료 알림에 대해 회원이 “해당 날짜에 내 알림함에 실제 알림이 생성됐는가?”를 근거로 확인할 수 없다. 현 `frontend/src/app/account/notifications/page.tsx`는 회원 전용 알림 탭과 별개의 게임 목표 수신 설정을 제공하지만 만료 알림 생성 영수증 이력은 없다. `backend/src/notification/notification.controller.ts`의 회원 전용 목록·검색·읽음 영수증은 메시지 조회이며 **생성의 원자적 근거**가 아니다. 조사한 번호형 DB 마이그레이션·init에서 `in_app_notifications` 정식 CREATE TABLE 정의를 확인하지 못했다. 테스트 fixture는 운영 스키마의 증거가 아니며 실제 운영 테이블 부재를 단정하지 않는다.
+- **대안:** A) 알림함 검색 결과로 “발송됨” 추론 — 삭제·보존·페이지 제한으로 오판하므로 기각. B) 새 감사 원장/테이블 — 중복 상태와 마이그레이션 부담으로 기각. **C) 선택:** F675-205에서 제안한 회원·KST 날짜별 유일 생성 영수증과 같은 트랜잭션에서 생성된 알림함 행을 **읽기 전용**으로 대조한다. 이는 생성 증빙이지 단말 전달, 읽음, 작업자 성공, 금융 거래 증빙이 아니다. F675-205가 구현되지 않았거나 두 행 연결을 증명하지 못하면 플래그 OFF/503이며 과거 기록을 만들어내지 않는다.
+
+### 대상·권한·진입·화면·CTA·상태
+- 현재 인증·동의가 유효한 회원 본인만 `/account/notifications`에서 “최근 7일 만료 알림 생성 기록”, **기록 확인**, **새로고침**, **알림함 열기**, **보관함 열기**를 이용한다. 안내: “생성됨은 앱 내부 알림함에 기록이 함께 커밋됐다는 뜻이며, 읽음이나 기기 전달을 뜻하지 않습니다.” 영수증이 없으면 **검증된 생성 기록 없음**으로 표현하며 “미발송”, “누락”, “작업 실패”, “알림 꺼짐”으로 단정하지 않는다. 아이템명·수량·잔액·카탈로그/영수증/알림 ID·회원 UUID·타인 기록은 반환하지 않는다.
+- PostgreSQL의 단일 `asOfUtcMicros`에서 `Asia/Seoul` 달력 날짜를 산출해 **오늘 포함 최근 7일**, 최신순 고정 표시한다. 날짜별 `VERIFIED_CREATED`는 동일 스냅샷에서 회원·날짜 영수증과 동일 회원의 알림함 행이 정확히 1:1 대응할 때만 허용한다. `WINDOW_OPEN`은 오늘 11:00 KST 이전 생성 근거가 없을 때(작업 중이라는 증거 아님), `NO_VERIFIED_RECORD`는 오늘 작업 시간 종료 후 또는 과거 날짜에 완전한 조회에서 생성 근거가 없을 때(실제 미발송 증거 아님) 표시한다. 고아 영수증·회원 불일치·날짜 중복·참조 알림 누락은 전체 **503 SOURCE_UNAVAILABLE**이며 0건으로 바꾸지 않는다. 보존 만료로 7일 이력의 일부를 검증할 수 없다면 전체 조회를 미검증 처리한다.
+- 화면 상태: FLAG_OFF, LOADING, VERIFIED_WITH_CREATED, VERIFIED_WITHOUT_RECORD, REFRESHING, AUTH_REQUIRED(401), CONSENT_REQUIRED(403), RATE_LIMITED(429/Retry-After), SOURCE_UNAVAILABLE(503), OFFLINE, SESSION_CHANGED. 시각 형식 오류·부분 응답은 성공 배지 금지. 기존 알림 탭·검색과 목표 알림 설정을 유지한다.
+
+### API·DB·제약·인덱스·트랜잭션
+- **Nest:** `GET /api/v1/shop/expiry-digest/receipt-history`; 본문·회원 UUID·임의 날짜/범위/페이지 인자 없음, 알 수 없는 쿼리 400. `SessionGuard`·`AuthenticatedGuard`·`ConsentGuard` 적용, 회원 식별자는 검증된 세션에서만 획득. 읽기 전용 GET에는 쓰기 CSRF 토큰이 불필요하다. `200 {sourceStatus:"VERIFIED",asOfUtcMicros:"YYYY-MM-DDTHH:mm:ss.ffffffZ",timezone:"Asia/Seoul",days:[{kstDate:"YYYY-MM-DD",state:"VERIFIED_CREATED"|"WINDOW_OPEN"|"NO_VERIFIED_RECORD",createdAtUtcMicros?:string}]}` — 정확히 7개 날짜, 생성 검증 시에만 생성시각. 401/403/429/503 구분, 잘못된 입력 400, 내용/ID 반환 금지.
+- **PostgreSQL(B):** 단일 읽기 전용 REPEATABLE READ 트랜잭션·단일 `statement_timestamp()`·KST 날짜 경계·회원별 영수증↔알림함 결합 검증. 기능 활성화 전 `UNIQUE(user_id,kst_date)`, 영수증과 동일 회원 알림함 행 FK/참조 무결성, **동일 트랜잭션 생성·커밋**을 입증해야 한다. 영수증만 먼저 CREATED로 기록 금지. 두 근거 모두 **완전한 KST 8일 이상** 보존을 제안하되 개인정보·보존 정책 승인 필요; 과거 이력 소급 생성 금지. 기존 회원·날짜 유일 인덱스와 알림 PK/회원 키를 우선 활용, 추가 인덱스는 실제 `EXPLAIN (ANALYZE,BUFFERS)`로만 결정. 새 테이블·금융 원장·보관함 변경·작업자 재예약 없음.
+- **권한:** 검토된 migrator 소유·고정 search_path `SECURITY DEFINER` 읽기 함수가 필요할 수 있다. 함수에 `p_actor uuid`를 전달하고 Nest 인증을 거친 사실은 DB 독립 신원 증명이 아니다. 공유 `moneyverse_app` 역할의 타인 UUID 직접 EXECUTE 위험은 신원 결속 검증 또는 격리된 서비스 신뢰 모델의 명시적 승인 전까지 **BLOCKED**. PUBLIC EXECUTE 회수, 회원 영수증·알림·`user_items`에 앱 역할 직접 DML/SELECT 금지. 마이그레이션 318 충돌·운영 체크섬·신규 설치 스키마 검증 후 번호 배정, 적용된 SQL 수정 금지. 풀에 남는 세션 SET 대신 트랜잭션 로컬 타임아웃 적용.
+- **웹/Android(A/C):** 동일 출처 Next BFF `GET /api/shop/expiry-digest/receipt-history`는 서버 전용 `frontend/src/lib/api.ts`를 사용하고 응답 상태·형식을 엄격 검증한다. `apiOrNull` 오류→빈 이력 처리 금지. Android `/app-api/v1/shop/expiry-digest/receipt-history` 정확한 GET 경로만 허용. 성공·오류·HEAD·조건부 요청 모두 실제 엣지에서 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 강제; ETag·Last-Modified·Expires·304·상위 public 캐시 제거. 로그아웃·동의 철회·계정 전환·새로고침 시 이전 응답 취소/폐기. 디스크·오프라인 캐시 없음.
+
+### 관리자·보안·SEO·모바일·분석·수용·배포
+- `inventory_expiry_digest_receipt_history` 플래그 **기본 OFF**, F675-205의 영수증·알림함 원자적 스키마 검증과 발송 기능 게이트에 종속된다. 기록 조회 활성화가 알림 수신 동의나 실제 발송을 켜서는 안 된다. 회원당 분당 최대 10회와 전역 보호는 제안 목표, 7행 고정 응답. 로그에 회원 UUID·원문 영수증·알림 내용·아이템·응답 본문을 남기지 않는다. 관리자에게 회원별 이력 조회/대리 수신 권한 없음. 관리자 KPI는 생성 검증률·미검증 기록률·503·무결성 불일치·p95·계정 전환 응답 폐기만, **서로 다른 회원 20명 미만 코호트 비공개**; 생성률은 전달 성공률이 아니다.
+- 회원 전용 경로는 사이트맵/검색 인덱스 제외. 320px, 200% 확대, 44px 이상 터치, 키보드·초점 복원·스크린리더·aria-live·동작 줄이기, KO/EN/Android 동등성 및 WCAG 2.2 AA. **측정 전 목표**: 7일 DB 읽기 p95 <300ms, 타인 데이터 노출 0, 잘못된 VERIFIED_CREATED 0, 원장·WLD·아이템 변동 0, 캐시 가능한 회원 응답 0.
+- **QA 수용시험은 아직 실행하지 않음:** PostgreSQL17 신규 설치/업그레이드/ACL/체크섬, 보유 10,001건(보관함 전체 스캔 불필요), 회원 2명·직접 역할 위조·계정 전환 100건 이상, 고아/중복/타인 영수증·알림 100건 이상, KST 08:59:59.999999/09:00/10:59:59.999999/11:00/23:59:59.999999 및 7/8일 보존 경계, 작업자·동의 철회 경합, 401/403/429/503·잘못된 200·HEAD/304·상위 캐시, Android 오프라인, 접근성, 금융 변동 0. 모의 테스트 성공만으로 공식 Test 수용 승인 금지.
+- **P0 4건:** OPS1608-01 운영 실제 실행 SHA·독립 복원/롤백·miniPC 자원; SEC1608-02 정식 알림 DDL·영수증 FK/유일성/보존·DB 권한·UUID 위조 차단·318 충돌; FIN1608-03 국고 v1611 **NOT_RECOVERED**(국고 552건·배당 744건 출처 미검증) 및 원장 외 제작 변경 #2330은 B/C/QA 별도 소유, 알림 영수증으로 금융 회복을 주장하지 않음; REL1608-04 공식 Test 앱/마이그레이터 대상 불일치 #2260, 운영 다국어 #2262, 전체 QA·정확 SHA·독립 복원.
+- **P1 6건:** DIGEST1608-05 B/DB 회원별 7일 조회·EXPLAIN·권한 거부; DIGEST1608-06 B/Nest 엄격 GET·불일치 503; DIGEST1608-07 A/Next 검증 상태·접근성·BFF; DIGEST1608-08 C/Android 정확 경로·비공개 헤더·세션 격리; DIGEST1608-09 A/C 관리자 집계 KPI·SEO·a11y; DIGEST1608-10 QA 실제 PG17·KST·보존·동시성·엣지·금융 무변동·롤백.
+- **운영승격:** 문서 초안·RELEASE HOLD. 개발 A/B/C/QA가 별도 브랜치·Test Docker·순방향 마이그레이션으로 구현한다. 정확한 소스 SHA → 전체 CI → 공식 Test 앱/마이그레이터 동일 SHA 및 실제 PG/API/웹/Android 수용 → 금융 출처 대조·독립 복원 → 운영자 승인 → OFF→내부→소규모→확대. 문제 시 플래그 OFF만으로 롤백하며 영수증 삭제·금융 이력 수정 금지. 기획 회차는 main 병합·Production 배포를 하지 않는다. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
+
+**현재 기획:** v1608 F675-208 회원 만료 알림 생성 영수증 이력 / 개발 이슈 #2342 / 초안 / 운영 보류; 선행 #2335·#2328, 기준 main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
 
 ## v2026.11.01.1606 — F675-207 기본 행 부재·당일 처리·멱등성 보완 (기능 보완 / 초안 / 운영 보류)
 
