@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import { EarlyGameController } from './early-game.controller';
 import { EARLY_GAME_REPOSITORY_PROVIDER } from './early-game.provider';
@@ -15,4 +16,15 @@ import { EARLY_GAME_REPOSITORY_PROVIDER } from './early-game.provider';
   controllers: [EarlyGameController],
   providers: [EARLY_GAME_REPOSITORY_PROVIDER],
 })
-export class EarlyGameModule {}
+export class EarlyGameModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Owner event and claim responses, including guard refusals, must never
+    // inherit public edge caches. Middleware runs before session/consent/CSRF.
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(EarlyGameController);
+  }
+}
