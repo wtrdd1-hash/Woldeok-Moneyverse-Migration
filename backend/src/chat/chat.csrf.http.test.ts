@@ -25,7 +25,7 @@ describe('private chat mutation CSRF HTTP boundary', () => {
   const totalUnreadCount = vi.fn(async () => '0');
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [ChatController],
       providers: [
         { provide: ChatService, useValue: { openConversation, sendMessage, unblockUser, listConversations, totalUnreadCount } },
@@ -37,7 +37,7 @@ describe('private chat mutation CSRF HTTP boundary', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
       req.session = { id: sessionId, user_id: actor };
       next();

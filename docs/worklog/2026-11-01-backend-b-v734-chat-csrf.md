@@ -24,3 +24,8 @@ Pending.
 - Backend GREEN: 9/9 HTTP tests across CSRF and bigint cursor fixtures. New class-level CsrfGuard preserves Session→Authenticated→Consent ordering; existing cursor test doubles explicitly override CSRF only for unrelated parsing tests.
 - Frontend GREEN: 15/15 composer and abuse report tests. Browser composer now calls a server action that uses existing `mutate()` CSRF token acquisition for both conversation open and message send; no direct browser write or exposed token.
 - No new route, SQL, migration, WLD change, or service restart. Existing chat server actions remain unchanged for other callers.
+
+### Gate correction (23:13 KST)
+- First full typecheck PASS, Nest build PASS, Next build PASS (602 static pages).
+- Full lint found 1 new error: Next's reserved `module` identifier in the new Nest HTTP test; renamed the local test fixture variable without touching runtime code. The 1,027 existing warnings are unchanged.
+- All gates must be rerun at the new SHA; no claim of a green candidate from the previous SHA.
