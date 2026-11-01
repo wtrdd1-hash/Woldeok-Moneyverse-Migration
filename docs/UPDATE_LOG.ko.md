@@ -1,8 +1,8 @@
 ## 2026-11-02 v1634 — F675-214 구매 영향 경제 명령·재실행 근거 보완 (Feature Improvement / DRAFT / RELEASE HOLD)
-**주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR PENDING. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.
+**주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR #2428 OPEN/HOLD. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.
 - 소스 정정: 071 회원·상품별 한 행, 104 수량 증가 시 전체 만료 재설정(103 비구매 이벤트 지급 포함), 218 현재 공개 구매 함수를 economic_command_claim + 비공개 policy_v215로 감싼다. 정당한 재실행은 원래 영수증을 반환하며 구매·만료 재설정을 다시 하지 않는다. 30초 신선도는 동시성 보증이 아니며 POST 뒤 실제 보유품 재조회·응답 유실 시 원래 키 확인 필요.
 - DEV 읽기 전용: 상품 146(기간 2), 보유품 6(만료 0); 앱 역할 직접 UPDATE account_balances 및 SELECT/UPDATE user_items TRUE(#993), P0 보안 차단. 05:08 KST Test·Production /api/version 510dbe6..., main a8541927c3a351d980454c66e95a3356c47e0722. QA #2391 미해결, 운영 DB 권한 추정 금지.
-- P0 4/P1 6 (IMPACT1634-05~10) #2421, #2422 후속 Draft; 기능 미구현. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. PG17·공식 Test 정확 SHA·독립 복원 미실행, 런타임·DB·WLD·원장·배포 변경 없음. CI/시험 결과는 실제 수행 후 기록.
+- P0 4/P1 6 (IMPACT1634-05~10) #2421, #2422 후속 Draft; 기능 미구현. 외부 독립 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. PG17·공식 Test 정확 SHA·독립 복원 미실행, 런타임·DB·WLD·원장·배포 변경 없음. 로컬 정책 186/186 PASS, 분류기 24/24 PASS, QA 22/23 PASS·기존 #2391 FAIL, 한영 4쌍×15표지 PASS; 최종 SHA CI 대기.
 
 ## 2026-11-02 v1632 — F675-214 구매 전 보유품 만료일 영향 미리보기: GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 (기능 추가 / DRAFT / RELEASE HOLD)
 **v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
