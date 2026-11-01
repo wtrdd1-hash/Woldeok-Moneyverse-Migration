@@ -11,3 +11,9 @@
 
 ## FINISHED
 - Pending evidence.
+
+## IN PROGRESS — 2026-11-01 09:47 KST
+- RED 18 owner HTTP privacy assertions failed, 3 public controls passed.
+- GREEN 21/21 focused; marketplace suite 50/50.
+- Typecheck PASS, lint PASS (0 errors, 1022 existing warnings), backend/frontend build PASS.
+- Pending full tests, isolated PostgreSQL and remote CI.
