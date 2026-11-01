@@ -54,6 +54,14 @@ describe('shop upkeep ceiling server-rendered flow', () => {
     expect(html).toContain('data-vip="true"');
     expect(html).toContain('data-items="1"');
   });
+  it('does not claim a verified zero result when filtered catalogue source is unavailable', async () => {
+    mocks.apiOrNull.mockResolvedValue(null);
+    const html = renderToStaticMarkup(
+      await ShopPage({ searchParams: Promise.resolve({ q: 'hat', maxUpkeep: '0' }) }),
+    );
+    expect(html).not.toContain('검색 결과 0개');
+    expect(html).toContain('상점 목록을 확인할 수 없습니다');
+  });
   it('reports malformed query and avoids the catalogue fetch instead of claiming zero matching products', async () => {
     mocks.isLoggedInMember.mockResolvedValue(false);
     const html = renderToStaticMarkup(

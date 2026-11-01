@@ -36,7 +36,7 @@ import { compareShopCatalog, parseShopCompareIds, ShopCompareUnavailableError } 
 import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './shop-catalog-order';
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
-import { filterShopUpkeep } from './shop-upkeep-cap';
+import { filterShopUpkeep, parseShopUpkeepCap } from './shop-upkeep-cap';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -280,10 +280,12 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('maxUpkeep') maxUpkeep?: string,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(null),
       'the catalogue is unavailable',
@@ -292,7 +294,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopUpkeep(filtered, maxUpkeep) };
   }
 
   @Get('catalog')
@@ -304,10 +306,12 @@ export class ShopController {
     @Query('filter') filter1?: unknown,
     @Query('sort') filter2?: unknown,
     @Query('category') filter3?: unknown,
+    @Query('maxUpkeep') maxUpkeep?: string,
   ) {
     validateShopFilter(filter1);
     validateShopFilter(filter2);
     validateShopFilter(filter3);
+    parseShopUpkeepCap(maxUpkeep);
     const catalogItems = await this.guarded(
       () => this.repository().catalog(requireUserId(request)),
       'the catalogue is unavailable',
@@ -316,7 +320,7 @@ export class ShopController {
     filtered = applyGenericShopFilter(filtered, filter1);
     filtered = applyGenericShopFilter(filtered, filter2);
     filtered = applyGenericShopFilter(filtered, filter3);
-    return { catalogItems: filtered };
+    return { catalogItems: filterShopUpkeep(filtered, maxUpkeep) };
   }
 
   @Get('compare')

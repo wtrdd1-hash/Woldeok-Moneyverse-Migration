@@ -211,6 +211,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       'minimum reward must be a canonical non-negative WLD integer');
   }
 
+  const shopCatalogUpkeepPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'shop' && (parts[1] === 'catalog' || parts[1] === 'public-catalog');
+  const upkeepValues = shopCatalogUpkeepPath ? request.nextUrl.searchParams.getAll('maxUpkeep') : [];
+  if (upkeepValues.length > 1 || (upkeepValues.length === 1 &&
+      !/^(0|[1-9][0-9]{0,29})$/.test(upkeepValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'shop_upkeep_invalid',
+      'maxUpkeep must be a canonical nonnegative WLD integer up to 30 digits');
+  }
+
   const receiptAmountFilter =
     parts.length === 2 &&
     parts[0] === 'shop' &&
@@ -461,6 +470,24 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (shopCatalogUpkeepPath && upkeepValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('unverified catalogue media type');
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('unverified catalogue');
+      const items = (payload as { catalogItems?: unknown }).catalogItems;
+      if (!Array.isArray(items) || items.length > 1000 || !items.every((row: unknown) => {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+        const amount = (row as { maintenance_cost?: unknown }).maintenance_cost;
+        return typeof amount === 'string' && /^(0|[1-9][0-9]*)$/.test(amount) &&
+          BigInt(amount) <= BigInt(upkeepValues[0]!);
+      })) throw new Error('upkeep ceiling not verified');
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'shop_upkeep_unverified',
+        'the shop upkeep ceiling could not be verified');
+    }
+  }
+
   if (receiptAmountFilter && minAmounts.length === 1 && response.ok) {
     try {
       const payload: unknown = await response.clone().json();
@@ -507,9 +534,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
+  const privateShopUpkeep = shopCatalogUpkeepPath && upkeepValues.length === 1;
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopUpkeep || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopUpkeep || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+
+  if (privateShopUpkeep) headers.set('referrer-policy', 'no-referrer');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

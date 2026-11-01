@@ -11,7 +11,7 @@ import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 import { ShopMembershipSection } from './shop-membership-section';
-import { parseShopUpkeepCap, shopCatalogueQuery } from './shop-upkeep-cap';
+import { parseShopUpkeepCap, shopCatalogueQuery, verifiedShopUpkeepCatalogue } from './shop-upkeep-cap';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +61,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       : null,
   ]);
 
-  const items = catalogData?.catalogItems || [];
+  const verifiedCatalog = catalogData && (!cap.value || verifiedShopUpkeepCatalogue<CatalogItem>(catalogData, cap.value))
+    ? catalogData : null;
+  const items = verifiedCatalog?.catalogItems ?? [];
   const userBalance = cashBalanceFromWallet(walletData);
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
@@ -141,17 +143,22 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             주세요.
           </p>
         ) : null}
-        {cap.value ? (
+        {cap.value && verifiedCatalog ? (
           <p className="text-sm text-muted-foreground">
             주간 유지비 {cap.value} WLD 이하 상품만 표시합니다.
           </p>
         ) : null}
-        {query && !cap.invalid ? (
+        {query && !cap.invalid && verifiedCatalog ? (
           <p className="text-sm text-muted-foreground">
             “{query}” 검색 결과 {items.length}개
           </p>
         ) : null}
 
+        {!cap.invalid && !verifiedCatalog ? (
+          <p role="alert" className="text-sm text-destructive">
+            상점 목록을 확인할 수 없습니다. 필터 결과를 검증하지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <ul aria-label="상점 2.0 원칙" className="flex flex-wrap gap-2">
             {PRINCIPLES.map((principle) => (
