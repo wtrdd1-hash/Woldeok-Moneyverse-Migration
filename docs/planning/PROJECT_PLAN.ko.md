@@ -1,3 +1,50 @@
+## v2026.11.02.1640 — F675-216 회원 보유품 상태 확인 증빙 연계 문의 (기능 추가 / 초안 / 배포 보류)
+**GitHub 인계:** 이슈 #2442 OPEN / P0 4 + P1 6; Draft PR #2444 OPEN / HOLD; RELEASE HOLD.
+**검증:** 정책·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS·기존 공성전 문구 검증 1건 FAIL(#2391), 영문·국문 4쌍 대조 PASS, git diff --check PASS. 신규 기능 수용시험 미실행.
+**개발 DB 읽기 전용 실측:** PostgreSQL 17.11, support_threads 3행·user_items 6행; DEV moneyverse_app의 user_items SELECT/UPDATE와 account_balances UPDATE 권한이 모두 true. P0 #993 유지; Test·Production 권한 상태는 확인하지 않았으며 이를 동일하다고 단정하지 않는다.
+**사이클:** 이전 기능 보완 v1638 → 현재 기능 추가 v1640 → 다음 기능 보완 v1642(잠정). 기술 기준은 시작·중간 재확인한 origin/main `a8541927c3a351d980454c66e95a3356c47e0722`, AGENTS.md, README.md, 영문 정본과 본 한국어 동등 기획서. 미병합 Draft #2439 후속 문서 전용 변경. **F675-216은 제안이며 미구현, 병합·Test·Production 승인 없음.**
+
+### 목적, 근거와 제외 범위
+- **대상:** 로그인·동의가 유효한 회원이 현재 확인된 활성 보유품 또는 제안된 F675-215 만료 보유품의 수량·만료일·상태를 운영자에게 문의할 때, 검증되지 않은 구매 이력을 사실로 만들지 않고 **서버에서 확인한 현행 DB 상태**를 함께 접수한다. 현재 `/support`는 자유 입력만 지원하고, `/inventory`는 활성 조회 실패를 빈 배열로 처리한다. 이는 화면/증빙의 설계상 공백이지 운영 아이템 분실이 확인됐다는 뜻이 아니다.
+- **출처:** 마이그레이션 071의 회원·상품별 단일 보유품 행, 104의 수량 증가 시 만료일 재설정(구매 외 보상도 포함), 123의 활성 보유품 조회 시 만료 제외, 196의 기존 문의·답장·관리자 SECURITY DEFINER 함수. 기존 `support_create_thread`는 멱등키 재사용 시 소유자만 검사하고 제목/본문 동일성은 검증하지 않으므로 **신규 전용 영수증으로 요청 동일성을 검증**해야 한다.
+- **하지 않는 일:** WLD 환불, 아이템 복원·지급, 자동 보상, 구매 로트/과거 만료 이력 복원, 만료 변경 원인 단정, 문의 글의 암호학적 불변성 보장. 삭제·소진·부재 행은 검증된 보유품이라고 표시할 수 없으므로 일반 `/support`로 안내한다.
+
+### 회원 동선과 화면 상태
+- `/inventory`에서 검증된 활성 또는 만료 보유품 행의 **보유품 상태 문의** → 사유 `EXPIRY_UNEXPECTED | QUANTITY_UNEXPECTED | STATUS_UNEXPECTED | OTHER` → 설명 10~500 유니코드 코드포인트 → **현재 상태 확인** → **문의 접수** 또는 **취소**. 보유품 이름은 현행 카탈로그 표시명이며 구매 당시 증빙이 아님을 알린다. 만료일은 구매 외 수량 증가로도 변경될 수 있으며 문의가 보상을 보장하지 않는다는 고지를 포함한다.
+- 조회 실패·출처 미검증이면 자동 증빙 입력 없이 **일반 문의 열기**만 제공한다. 접수 성공은 기존 `/support?thread=<검증된 ID>`로 연결하며 같은 문의를 중복 생성하지 않는다.
+- 상태: IDLE/VERIFYING/VERIFIED_PREVIEW/STALE_RECHECK/SUBMITTING/RECEIPT_VERIFIED/UNKNOWN_DELIVERY/NOT_FOUND/UNAVAILABLE/RATE_LIMITED. 서버가 확인한 값과 관찰시각만 표시한다. 결과 불명 시 기존 문의 기록에서 **동일 멱등키 영수증**을 조회하고, 새로운 키로 자동 재시도하거나 확인 전 성공 메시지를 표시하지 않는다. 로그아웃·계정 변경 시 이전 응답을 폐기한다.
+- 만료 여부는 `user_items.expires_at`만으로 ACTIVE/EXPIRED/PERMANENT를 판정하며 `effect_expires_at`을 혼용하지 않는다. 만료 보유품은 현재 남은 행이지 과거 구매 영수증이 아니다.
+
+### API, DB 제약과 원자적 처리(개발 제안)
+- `GET /api/v1/support/inventory-status/preview?catalogId=<UUID>`: SessionGuard/AuthenticatedGuard/ConsentGuard, 세션에서 신뢰한 actor, UUID 단일 파라미터. `{sourceStatus:'VERIFIED',catalogId,quantity,status,observedAtUtcMicros,expiresAtUtcMicros|null,previewToken,expiresInSeconds:120}` 응답. PostgreSQL 마이크로초를 유지한 UTC 소수 6자리 문자열을 사용하고 JS Date/실수형 시간으로 동등성 비교하지 않는다. 소유자 행이 없거나 수량 0임이 검증되면 404, DB·카탈로그 출처 불명은 503.
+- `POST /api/v1/support/inventory-status`: 동일 인증·동의와 CSRF, `{previewToken,reason,explanation,idempotencyKey:UUIDv4}`, JSON 16KiB 제한. 실제 저장 영수증 검증 후 `{threadId,messageId,observedAtUtcMicros,status,replayed}`. 400 잘못된 입력, 401 미인증, 403 동의/CSRF, 404 검증된 부재, 409 상태 변경/동일 키 다른 요청·세션, 429 제한, 503 출처·영수증 불명. 미확인 쓰기에는 200을 반환하지 않는다.
+- `GET /api/v1/support/inventory-status/receipts/:idempotencyKey`는 결과 불명 시 본인만 조회하는 영수증 API다(원본 문의·메시지 검증 200, 부재 확인 404, 출처 불명 503). 공개 조회나 전체 검색이 아니다. 이미 접수된 동일 previewToken/사유/설명/키의 멱등 재실행은 120초 토큰이 만료된 뒤에도 원본 영수증을 반환하지만, 미접수 상태의 만료 토큰은 거부한다.
+- 새 **순방향 전용 마이그레이션**에서 소유자 범위 SECURITY DEFINER 미리보기 읽기 및 `support_create_inventory_status_case` 쓰기 함수를 정의한다. 함수 소유자는 `moneyverse_migrator`, search_path는 `pg_catalog,pg_temp`, PUBLIC/앱 역할 테이블 직접 권한 REVOKE, 필요한 함수 EXECUTE만 GRANT한다. 최소 `inventory_support_case_receipts` 테이블은 멱등키 PK, 회원/상품 FK, 문의 스레드 UNIQUE FK, 요청 SHA-256, 관찰 상태·시각·생성시각을 보유하며 `(user_id,created_at DESC)` 인덱스로 요청량을 제한한다.
+- 미리보기는 PostgreSQL 관찰시각 1개와 회원·상품 현행 행을 조회한다. 120초 HMAC-SHA256 토큰에는 회원·세션 지문, 상품 UUID, 정확한 수량/만료·획득시각(UTC 마이크로초), 관찰시각을 바인딩한다. 512바이트 이하, 상수시간 검증, 키 교체. 없는 리비전이나 요청 간 MVCC 일관성을 보장하지 않는다.
+- 접수 시 단일 트랜잭션에서 보유품 행을 잠그고 정확한 스냅샷을 재검증한 뒤 전용 영수증 및 기존 문의 스레드/첫 메시지를 **원자적으로** 저장한다. 동시 재구매·보상에 의한 수량/만료 변경은 409. 동일 키·회원·요청 해시 재실행은 보유품이 이후 변경돼도 **기존 영수증을 먼저 확인**해 원본을 반환한다. 동일 키 다른 요청/타인 요청은 거부한다. 값이 바뀌었다 원래대로 돌아오는 ABA는 별도 리비전이 없어 완전히 검출하지 못한다고 명시한다. 본문은 서버 검증 근거+회원 설명을 합쳐 기존 2,000자, 제목은 120자 이내. WLD·보유품·원장 변경 없음.
+
+### 운영자, 보안, SEO, 모바일, 검증 및 배포
+- 기존 `/admin/support`에 `INVENTORY_STATUS` 유형을 표시하고 기존 관리자 권한·CSRF로 답장/해결 처리한다. 자동 환불·증빙 수정 기능은 없다. 접수 당시 **DB 관찰 상태**이지 과거 원인이나 불변 원장 증명이 아님을 표시한다. 보존·삭제 기준은 기존 고객문의 정책과 출시 전 합의한다.
+- 회원별 신규 문의 1시간 3건·1일 10건 제한을 DB 쓰기 경로에서 검증하고 IP/API 제한을 추가한다. 분석에는 회원 설명·토큰·상품 ID·정확한 시각을 보내지 않는다. 20명 이상 코호트만 미리보기→접수, 409/429/503, p95, 운영자 첫 답변 시간을 집계하며 보상 SLA를 약속하지 않는다.
+- Next BFF와 Android app-api는 정상·오류·HEAD·조건부 요청에서 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`; ETag/Last-Modified/Expires 제거, 304·공개 SEO·디스크 캐시·외부 분석 금지. 한국어·영어 동등, 320px, 200% 확대, 44px 터치, 키보드·TalkBack/VoiceOver, 오류 알림 및 초점 복원.
+- 시험: PostgreSQL 17 신규·업그레이드, 10,001개 이상 보유품, 활성/만료/무기한/효과만 만료, 경계 마이크로초 6자리, 구매·보상 만료일 재설정, A/B 소유자, 행 부재·수량 0, 카탈로그 불일치, 동시 변경·중복 멱등키, 다른 본문 재실행, 변경 후 동일키 재실행, 3/시간·10/일, 영수증 불일치, DB 장애, 400/401/403/404/409/429/503, Android 비공개 헤더·HEAD·304, WLD/아이템/원장 쓰기 0. **제안된 시험이며 실행되지 않았다.**
+- `F675_216_INVENTORY_STATUS_SUPPORT_ENABLED` 기본 OFF. B/DB·API, A/Web, C/Android, QA가 별도 브랜치에서 개발한다. 공식 Test 정확 SHA 로그인 E2E, 권한 감사, 백업·독립 복원, 금융 게이트 통과 전 승격 금지. 롤백은 우선 기능 OFF, 순방향 마이그레이션은 비활성 상태로 유지하며 회원 문의 기록을 삭제하지 않는다.
+
+### 개발 백로그 — P0 4건 / P1 6건(미수행 인계)
+1. **P0 OPS1640-01 (Ops/QA):** Test·Production 실제 프로세스/이미지/매니페스트 SHA·롤백 자산·독립 복원 증빙 (#1984/#1088). 공개 버전 응답만으로 승인 불가.
+2. **P0 SEC1640-02 (B/DB):** DEV/Test/Production 앱 역할 실효 권한 (#993/#828), 소유자·세션 음성 테스트, 보유품·문의 테이블 직접 권한 금지.
+3. **P0 FIN1640-03 (B/QA):** Treasury/NPS/Mint·제작·주식·시즌·소각·부동산 원장 출처 대사. 문의 기능은 금융 오류를 해결하지 않음.
+4. **P0 REL1640-04 (QA/Ops):** QA #2391, 프로필 HTTP 실패·의존성 보안 권고, 공식 Test 정확 SHA·PG17·독립 복원, 운영 배포 HOLD.
+5. **P1 CASE1640-05 (B/DB):** 최소 전용 영수증 테이블·소유자 미리보기·행 잠금 원자적 문의 생성·요청 해시·쿼터·인덱스.
+6. **P1 CASE1640-06 (B/API):** GET 미리보기/POST 생성, 세션·HMAC·CSRF·유효성·마이크로초·영수증 fail-closed.
+7. **P1 CASE1640-07 (A/Web):** 검증된 보유품에서 문의 진입, 확인/접수/영수증/불명 상태, 일반 문의 대체, 한국어·영어 접근성.
+8. **P1 CASE1640-08 (C/Android):** 비공개 게이트웨이·계정 변경 응답 폐기·HEAD/조건부 요청·TalkBack.
+9. **P1 CASE1640-09 (A/B/Admin):** 기존 문의 큐 유형 표시·기능 OFF·20명 이상 익명 KPI·쿼터/503·롤백.
+10. **P1 CASE1640-10 (QA):** DB·HTTP·CSRF·멱등 재실행·10,001행·동시성·KO/EN·모바일·경제 쓰기 0·정확 SHA Test 수용시험. **미실행.**
+
+**외부 독립 근거 게이트:** 신규 확보·중복 제거·실제 근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 런타임·DB·Test·Production 변경 **없음**, Production **RELEASE HOLD**.
+
+
 ## v2026.11.02.1638 — F675-215 만료 보유품: 마이크로초 정밀도 커서·보관함 상태 정합성 보완 (기능 보완 / 초안 / 배포 보류)
 **v1638 GitHub:** Draft PR #2439 OPEN/HOLD(상위 Draft #2433), 개발 인계 #2432, 최종 SHA CI 확인 대기, 병합·배포 없음.
 
