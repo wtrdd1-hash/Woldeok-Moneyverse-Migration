@@ -1,6 +1,7 @@
 ## v2026.11.02.1640 — F675-216 회원 보유품 상태 증빙 연계 문의 (기능 추가 / 초안 / 배포 보류)
 **GitHub 인계:** 이슈 #2442 OPEN / P0 4 + P1 6; Draft PR #2444 OPEN / HOLD; RELEASE HOLD.
 **검증:** 정책·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS·기존 공성전 문구 검증 1건 FAIL(#2391), 영문·국문 4쌍 대조 PASS, git diff --check PASS. 신규 기능 수용시험 미실행.
+**개발 DB 읽기 전용 실측:** PostgreSQL 17.11, support_threads 3행·user_items 6행; DEV moneyverse_app의 user_items SELECT/UPDATE와 account_balances UPDATE 권한이 모두 true. P0 #993 유지; Test·Production 권한 상태는 확인하지 않았으며 이를 동일하다고 단정하지 않는다.
 **사이클:** 이전 보완 v1638 → 현재 추가 v1640 → 다음 보완 v1642(잠정). 기준 origin/main a8541927c3a351d980454c66e95a3356c47e0722, Draft #2439 후속 문서 전용. 회원 소유 보유품 현행 DB 상태 미리보기 GET + 멱등 문의 POST, 기존 /support·/admin/support 연계, 환불·복구 없음. 마이그레이션 071/104/123/196 확인; 기존 문의 멱등 재실행은 본문 동일성 검증이 없어 전용 영수증·요청 해시·원자적 행 잠금 검증을 제안. 세션 HMAC 120초, UTC 마이크로초, CSRF, DB 시간당 3건/일 10건, 기능 기본 OFF, 웹·Android 비공개, KO/EN 접근성, P0 4/P1 6 인계, 정확 SHA Test·독립 복원 전 배포 금지. 미구현; 외부 독립 승인 신규 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS, RELEASE HOLD.
 
 

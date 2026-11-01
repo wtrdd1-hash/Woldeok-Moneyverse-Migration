@@ -1,6 +1,7 @@
 # 기획 v1640 — F675-216 회원 보유품 상태 증빙 연계 문의
 **GitHub 인계:** Draft PR #2444 OPEN/HOLD; 개발 이슈 #2442; 병합·배포 없음.
 **검증:** 정책·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS·기존 공성전 문구 검증 1건 FAIL(#2391), 영문·국문 4쌍 대조 PASS, git diff --check PASS. 신규 기능 수용시험 미실행.
+**개발 DB 읽기 전용 실측:** PostgreSQL 17.11, support_threads 3행·user_items 6행; DEV moneyverse_app의 user_items SELECT/UPDATE와 account_balances UPDATE 권한이 모두 true. P0 #993 유지; Test·Production 권한 상태는 확인하지 않았으며 이를 동일하다고 단정하지 않는다.
 **2026-11-02 08:00 KST | 기능 추가 | 초안 / 운영 배포 보류**
 
 이전 기능 보완 v1638 → 현재 기능 추가 v1640 → 다음 기능 보완 v1642(잠정). 상위 Draft #2439, 개발 이슈 #2442 연결. AGENTS.md·README.md·영문/국문 통합 기획서를 읽고 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인. miniPC Debian 13 서비스 정상, 개발 PostgreSQL 연결 확인.
