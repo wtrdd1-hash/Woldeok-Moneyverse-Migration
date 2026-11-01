@@ -192,6 +192,16 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Owner-only watchlist responses must override the global public crawler
+      // policy even when the visitor uses a locale-prefixed URL.
+      ...['/stocks/watchlist', '/:locale/stocks/watchlist'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
