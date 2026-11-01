@@ -1,9 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1598 F675-205 동의 철회 동기화·알림 중복 방지 / 이슈 #2296 / Draft 준비 / DRAFT / RELEASE HOLD; 선행 Draft #2297 미병합.
+**현재 기획:** v1598 F675-205 동의 철회 동기화·알림 중복 방지 / 이슈 #2296 / Draft #2301 / DRAFT / RELEASE HOLD; 선행 Draft #2297 미병합.
 
 ## v2026.11.01.1598 — F675-205 동의 철회 동기화 및 일일 알림 중복 방지 강화 (기능 보완 / DRAFT / RELEASE HOLD)
 
-**주기 및 근거:** 이전 Feature Addition v1596 → 현재 Feature Improvement v1598 → 다음 Feature Addition v1600(잠정). 시작과 중간에 origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9 확인. 기준은 main의 AGENTS.md, README.md, 영어 PROJECT_PLAN.md 원본과 한국어 대조 문서. 이전 기획 Draft #2297 미병합, 개발 인계 이슈 #2296. F675-205 미구현 기능의 문서 설계만 수정하며 분산 기획 파일을 새로 만들지 않음.
+**주기 및 근거:** 이전 Feature Addition v1596 → 현재 Feature Improvement v1598 → 다음 Feature Addition v1600(잠정). 시작과 중간에 origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9 확인. 기준은 main의 AGENTS.md, README.md, 영어 PROJECT_PLAN.md 원본과 한국어 대조 문서. 이전 기획 Draft #2297 미병합, 개발 인계 이슈 #2296, Draft PR #2301. F675-205 미구현 기능의 문서 설계만 수정하며 분산 기획 파일을 새로 만들지 않음.
 
 ### 구현 전에 보완한 설계 문제 네 가지
 

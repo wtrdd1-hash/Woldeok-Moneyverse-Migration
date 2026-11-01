@@ -6,3 +6,4 @@
 - 동의 철회 경합, 알림 삭제·영수증 보존, KST 마감, 알림함 DDL·링크 권한의 설계 문제 4건 보완.
 - P0 4건·P1 6건 개발 인계. 외부 근거 신규 승인 0건, 누적 UNKNOWN/10,000 BLOCKED.
 - 런타임·DB·WLD·아이템·원장·Test·Production 미변경, 신규 기능 수용시험 미실행. DRAFT / RELEASE HOLD.
+- GitHub Draft PR #2301 OPEN/HOLD; issue #2296 updated.

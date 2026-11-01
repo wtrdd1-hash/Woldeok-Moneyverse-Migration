@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1598 F675-205 consent-fenced daily digest / issue #2296 / Draft pending / DRAFT / RELEASE HOLD; predecessor Draft #2297 OPEN.
+**Current planning:** v1598 F675-205 consent-fenced daily digest / issue #2296 / Draft #2301 / DRAFT / RELEASE HOLD; predecessor Draft #2297 OPEN.
 
 ## v2026.11.01.1598 — F675-205 Consent-Fenced Daily Digest and Durable Dedupe (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle and source:** Previous Feature Addition v1596 → Current Feature Improvement v1598 → Next Feature Addition v1600 (provisional). At start and midpoint, origin/main = f13bbce273ffc65e8576170992d82ea00c27a1c9. Authority: main AGENTS.md, README.md, English PROJECT_PLAN.md (canonical), Korean parity; previous planning Draft #2297 remains unmerged. Development issue #2296. This is a documentation-only correction to proposed F675-205, not a shipped feature. No new distributed feature-plan file.
+**Cycle and source:** Previous Feature Addition v1596 → Current Feature Improvement v1598 → Next Feature Addition v1600 (provisional). At start and midpoint, origin/main = f13bbce273ffc65e8576170992d82ea00c27a1c9. Authority: main AGENTS.md, README.md, English PROJECT_PLAN.md (canonical), Korean parity; previous planning Draft #2297 remains unmerged. Development issue #2296 and Draft PR #2301. This is a documentation-only correction to proposed F675-205, not a shipped feature. No new distributed feature-plan file.
 
 ### Four defects corrected before implementation
 
