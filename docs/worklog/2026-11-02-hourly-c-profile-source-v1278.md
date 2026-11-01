@@ -8,13 +8,17 @@
 - Overlap check: open #2265 concerns profile HTTP privacy tests; no open PR implementing this owner readback validation. No A/B/QA/Gemini branch is modified.
 
 ## Plan
-- [ ] RED: runtime parser tests for profile, settings, earned titles and cross-response consistency; page integration test for fail-closed editing.
-- [ ] GREEN: validate all three sources before rendering profile card and replacement-write form; retain existing copy, mobile layout, robots noindex, and existing authenticated API.
+- [x] RED: 30 runtime parser cases and four page integration cases; observed behavioral RED (1/30 then 3/4 failures).
+- [x] GREEN: all 34 new tests PASS; invalid source blocks display/write, cross-read mismatch blocks replacement, keyboard-accessible GET retry added.
 - [ ] Verify: focused tests, lint, typecheck, build, full unit/contract/security/DB/E2E and remote CI at exact HEAD; preserve honest BLOCKED status.
 - [ ] Re-fetch main mid-run and before any merge; do not merge or deploy unless every mandatory gate passes.
 
 ## In progress
-- Pending TDD implementation and verification.
+- 00:49-00:52 KST: RED 1/30 pure and 3/4 page, GREEN 30/30 pure and 4/4 page; existing profile tests 26 PASS.
+- Re-fetched main mid-run: `510dbe6bf4d5c2a8089fc06b480776053da7a2e3` unchanged.
+- Preliminary full lint PASS (0 errors, 1027 warnings) and typecheck PASS before retry UI update; final HEAD must rerun.
+- Existing authenticated Nest profile GET/GET settings/GET titles contract and SQL member_profile_view/member_profile_settings/member_earned_titles reused; no backend/API/DB change.
+- Worktree remains isolated; official Test and Production untouched.
 
 ## Finished
 - Pending final evidence, PR link, main comparison, Test/Production/rollback status, and branch retention decision.

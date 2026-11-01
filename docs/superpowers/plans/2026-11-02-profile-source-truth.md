@@ -23,14 +23,14 @@
 - Conflicting profile/settings visibility must block the write form.
 
 ### Task 1: Pure runtime proof
-- [ ] Add tests for valid and malformed profile/settings/title responses.
-- [ ] Run focused Vitest and capture RED failures.
-- [ ] Implement narrow runtime validators; run GREEN.
+- [x] Add tests for valid and malformed profile/settings/title responses.
+- [x] Run focused Vitest and capture RED failures.
+- [x] Implement narrow runtime validators; run GREEN.
 
 ### Task 2: Owner page integration
-- [ ] Add a page regression for fail-closed form and profile card.
-- [ ] Run RED, wire validators into page, then run GREEN.
-- [ ] Verify accessibility/noindex and unchanged backend contract.
+- [x] Add a page regression for fail-closed form and profile card.
+- [x] Run RED, wire validators into page, then run GREEN.
+- [x] Verify accessible retry, noindex, and unchanged existing backend contract in targeted tests.
 
 ### Task 3: Release gate and preservation
 - [ ] Re-fetch main and resolve semantic changes if any.
