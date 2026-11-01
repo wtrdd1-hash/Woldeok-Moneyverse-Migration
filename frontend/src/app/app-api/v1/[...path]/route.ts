@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedBoardOrderPayload, parseBoardOrder } from '@/app/board/board-order';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -565,7 +566,29 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
+  const boardPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const values = boardPath ? request.nextUrl.searchParams.getAll('order') : [];
+  const boardOrder = parseBoardOrder(values.length === 0 ? undefined : values.length === 1 ? values[0] : null);
+  if (boardPath && boardOrder.invalid) {
+    return gatewayProblem(400, 'Bad Request', 'board_order_invalid', 'invalid public board order');
+  }
   const response = await proxy(request, parts);
+  if (boardPath && boardOrder.explicit && response.status === 200 && request.method === 'GET') {
+    let verified = false;
+    try {
+      verified = isVerifiedBoardOrderPayload(await response.clone().json(), boardOrder.order);
+    } catch { /* malformed upstream body is not verified */ }
+    if (!verified) {
+      return gatewayProblem(503, 'Service Unavailable', 'board_order_unverified',
+        'public board ordering could not be verified');
+    }
+  }
+  if (boardPath && boardOrder.explicit) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
