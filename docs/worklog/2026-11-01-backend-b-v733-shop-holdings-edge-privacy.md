@@ -45,3 +45,11 @@
 - Read-only official Test identity gate for code SHA: **FAIL**, Test runs `e39af10f6a876f56b40b7e5a070cdb3dcb61d699`; six mismatches: manifest, backend environment, frontend environment, frontend artifact, public backend version, public frontend version.
 - Remote PR CI classify, policy and release-input PASS; runtime-check and verify/runtime-check still IN_PROGRESS at last check. No CI success claim for final head.
 - No main merge, Test/Production deploy, financial or shared DB mutation. This remains a partial security fix with RELEASE HOLD.
+
+### Real HTTP edge regression and second RED→GREEN (23:02 KST)
+- A temporary isolated Next production server with a synthetic upstream returned **RED** despite the first route-level fix: GET 200 and HEAD 401 inherited global `X-Robots-Tag: index, follow` and `Referrer-Policy: strict-origin-when-cross-origin`. This exposed a real Next config precedence problem missed by handler-only tests.
+- Added a `frontend/src/security-headers.test.ts` config regression: RED 1 fail / 8 pass, then GREEN 9/9 PASS after adding a specific `/app-api/v1/shop/holdings/:path*` Next header rule *after* global headers.
+- Rebuilt Next production image: PASS, 602 static pages. Retested isolated real HTTP GET 200 and HEAD 401: **both** now emit `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer` with synthetic upstream advertising public caching. No live member credentials/data used.
+- The first smoke script left an orphan Next process on a task-owned localhost port. Confirmed its exact task worktree cwd, stopped only that process, switched smoke to direct Next CLI with trap cleanup; final smoke left no task test ports listening. No other developer process touched.
+- Repeated full workspace typecheck PASS; full lint PASS (0 errors, 1,027 warnings); full Frontend Vitest PASS after config correction.
+- Backend/root full suite still has the known two profile fixture failures, and exact-SHA Test is mismatched; Draft/HOLD continues.
