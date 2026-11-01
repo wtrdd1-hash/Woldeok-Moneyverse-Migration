@@ -14,3 +14,15 @@
 - Implemented bounded 50-row shape checks, UUIDs, exact string versions, digest/HTTPS/date/enum validation, duplicate rejection, evidence expiry and fail-closed UI. Backend remains the authenticated Nest controller and PostgreSQL SECURITY DEFINER queue; no schema or WLD changes.
 - Midpoint fetch origin/main remains 510dbe6bf4d5c2a8089fc06b480776053da7a2e3.
 - Checklist: [x] investigation [x] RED [x] parser and UI [x] focused regression [ ] full gates [ ] final main recheck [ ] PR decision.
+
+## Final verification and release hold (2026-11-02 01:38 KST)
+- Base and mid/pre-PR origin/main: 510dbe6bf4d5c2a8089fc06b480776053da7a2e3, unchanged. No rebase required. Separate worktree, clean except this branch's intended files.
+- Focused: 23 frontend parser/page PASS; Nest help controller/repository 5 PASS.
+- Full exact application candidate SHA before this documentation checkpoint: b35d9ba0c808572ff547e2bfd3bf98b3d98c9e7d. Build PASS, typecheck PASS, lint PASS (0 errors / 1027 warnings), mobile app-api contract PASS (184 endpoints).
+- Canonical frontend suite: 2945 PASS. Canonical backend suite: 2978 PASS / 2 FAIL / 518 SKIP. The two failures are existing profile owner HTTP tests expecting 200 but receiving 401; reproduced independently, unrelated to help review code. No assertion weakened.
+- Database package: 62 PASS / 5 SKIP. Independent disposable PostgreSQL 17.11: 322/322 migrations applied, help_admin_queue exists, app role direct help_articles SELECT=false, help_admin_queue EXECUTE=true. Isolated container removed; no shared DB mutation.
+- Security scripts: 17 PASS. Production dependencies audit at high threshold PASS; complete audit FAIL with 9 vulnerabilities (1 low, 8 moderate).
+- Full-route QA FAIL: missing artifacts/qa/full-route-ledger.json. Authenticated browser E2E and official isolated Test exact-SHA candidate deployment BLOCKED (feature flag OFF and Test environment not certified); no GitOps/Production action.
+- Build test first failed under a direct Vitest invocation lacking NODE_ENV=test (499 false environment failures), corrected by canonical pnpm frontend test (2945 PASS). No test gate bypass.
+- Final candidate is intentionally DRAFT/HOLD: do not merge to main, run release workflow, or claim Production/Test validation. No rollback necessary, no foreign branches/worktrees removed.
+- Checklist: [x] investigation [x] RED/GREEN [x] implementation [x] focused regression [x] attempted full gates [x] PostgreSQL ACL [x] pre-PR main recheck [ ] release gates (BLOCKED).
