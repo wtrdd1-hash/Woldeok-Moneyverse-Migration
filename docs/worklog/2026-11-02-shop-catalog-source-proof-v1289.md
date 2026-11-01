@@ -19,3 +19,10 @@
 - [x] RED source parser and search input tests.
 - [x] GREEN validation and page wiring.
 - [ ] Full exact-HEAD gates, PostgreSQL, app-api, CI, Test.
+
+## HTTP finding / second RED-GREEN — 2026-11-02 08:30 KST
+- Isolated Next.js build HTTP `GET /shop/catalog?q[]=owned` returned 200 and a private Cache-Control, with robots META `noindex, nofollow` but **actual X-Robots-Tag `index, follow, ...`** and Referrer-Policy `strict-origin-when-cross-origin`. This is a concrete crawler/privacy header conflict on a member route, independent of the earlier JSON issue.
+- RED Next.js route-header policy test failed (no private route header). GREEN 11/11 focused parser, SSR and route-header tests after adding `/shop/catalog` and localized `/ko|en|ja|zh|vi/shop/catalog` override in `frontend/next.config.ts`; real HTTP retest pending fresh build.
+- Previous exact code SHA `b0f98e053fb899f77adc9675b59d0f6f16266d57` gate evidence: Lint PASS (0 errors/1,027 warnings); Typecheck PASS; Build PASS; Frontend 2,932 PASS; Backend 2,978 PASS/2 FAIL/518 SKIP (pre-existing profile HTTP 401 vs expected 200); app-api 184 endpoint contract PASS; security 11 PASS; database package 62 PASS/5 SKIP; isolated PostgreSQL 17.11 322/322 migration files applied, shop DB 26 PASS, app role has no direct catalogue/inventory SELECT or purchase INSERT, but both authorized read functions EXECUTE; production high-severity audit PASS; full audit FAIL 9 advisories; full-route QA FAIL missing ledger; authenticated official Test E2E BLOCKED. No shared DB writes.
+- Initial isolated PG attempts failed from missing container-mounted SQL and migrator role; corrected isolated setup, final fresh PG PASS and disposable container removed. No shared database affected.
+- Final SHA requires fresh gates and HTTP retest. Release HOLD regardless of success because mandatory existing failures remain.
