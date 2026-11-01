@@ -1,0 +1,11 @@
+# Planning v1610 — F675-208 Creation-Proof and Coverage Hardening (2026-11-01)
+
+**Cycle:** Previous Feature Addition v1608 / Current Feature Improvement v1610 / Next Feature Addition v1612 (provisional). **State:** DRAFT / RELEASE HOLD. **Authority:** origin/main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0 checked at start and midpoint; AGENTS.md, README.md, English canonical PROJECT_PLAN.md and Korean parity; current Draft #2349, predecessor #2343 and issue #2342.
+
+## Evidence and decisions
+- State machine remains VERIFIED_CREATED / NO_VERIFIED_RECORD / NOT_TRACKED; SOURCE_UNAVAILABLE 503 on unknown coverage, orphan or forged evidence.
+- MiniPC Debian 13.6 active, DEV DB connected. Read-only DEV SQL: public.in_app_notifications exists; PK(id), owner FK, partial UNIQUE(dedupe_key), owner/created index. moneyverse_app has direct DML/TRUNCATE on this DEV table (not Production evidence); canonical numbered CREATE TABLE absent in inspected init/migrations. No expiry digest function in DEV. Current backend directly reads and writes notifications; safeNotificationLink rejects /inventory.
+- Corrected creation proof: join alone is insufficient; require approved atomic worker writer and owner/category/dedupe binding. Corrected negative proof: per-owner/cohort KST-day coverage and >=8-day joint retention; otherwise 503. Explicit MVCC observation versus commit timestamp; same-day creation labels WITHIN_EXPECTED_WINDOW or OUTSIDE_EXPECTED_WINDOW. Early private response enforcement on guard errors/HEAD/conditional; 60s stale and account-switch fencing.
+- Latest P0 Test fiscal provenance #2345 (Test migration 313, Production 314), unsafe auto-merge #1088, DEV role grants #993, crafting #2330, stock trade claims #2340, Treasury 552/744 historic evidence HOLD. Test/Production /api/version remain bc8cd8... / 353c6d... rather than latest main. Proposed P0 4/P1 6 and real acceptance tests NOT RUN.
+- External independent reference gate: newly approved/deduplicated/classified 0; cumulative UNKNOWN / 10,000, BLOCKED/IN PROGRESS.
+- No runtime, DB, financial data, Test, Production, automation, other worker branch, or main changes. Release remains HOLD. See integrated canonical/KO plans for implementable requirements.
