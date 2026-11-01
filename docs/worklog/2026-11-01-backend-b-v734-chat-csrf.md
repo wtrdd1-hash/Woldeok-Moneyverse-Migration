@@ -17,3 +17,10 @@
 
 ## Finished
 Pending.
+
+### RED → GREEN checkpoint (23:09 KST)
+- Backend RED: 2 of 4 new Nest HTTP cases failed, missing CSRF returned 201 instead of 403; GET and valid-token paths already passed.
+- Frontend RED: 4 of 4 composer flow tests failed because no server-side composer existed and the browser directly POSTed without CSRF.
+- Backend GREEN: 9/9 HTTP tests across CSRF and bigint cursor fixtures. New class-level CsrfGuard preserves Session→Authenticated→Consent ordering; existing cursor test doubles explicitly override CSRF only for unrelated parsing tests.
+- Frontend GREEN: 15/15 composer and abuse report tests. Browser composer now calls a server action that uses existing `mutate()` CSRF token acquisition for both conversation open and message send; no direct browser write or exposed token.
+- No new route, SQL, migration, WLD change, or service restart. Existing chat server actions remain unchanged for other callers.

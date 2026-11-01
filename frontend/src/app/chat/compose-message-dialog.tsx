@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { sendAdminDirectMessage } from '@/app/admin/actions';
+import { composePrivateChatAction } from './actions';
 
 interface SearchedUser {
   readonly user_id: string;
@@ -159,31 +160,13 @@ export function ComposeMessageDialog({
           setStatusMessage({ type: 'error', text: res.message ?? '발송 중 오류가 발생했습니다.' });
         }
       } else {
-        // 2. 일반 1:1 쪽지 발송 (대화방 생성 및 메시지 전송)
-        const openRes = await fetch('/app-api/v1/chat/conversations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ peerUserId: selectedUser.user_id }),
-        });
-
-        if (!openRes.ok) {
-          const err = await openRes.json().catch(() => ({}));
-          throw new Error(err.message || '대화방을 생성할 수 없습니다.');
+        // Keep private chat writes behind server actions that obtain session-bound CSRF.
+        const composed = await composePrivateChatAction(selectedUser.user_id, trimmed);
+        if (composed.status !== 'ok' || !composed.conversationId) {
+          setStatusMessage({ type: 'error', text: composed.message ?? '쪽지 발송 여부를 확인할 수 없습니다.' });
+          return;
         }
-
-        const openData = await openRes.json();
-        const conversationId = openData.conversation_id;
-
-        const msgRes = await fetch(`/app-api/v1/chat/conversations/${encodeURIComponent(conversationId)}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body: trimmed }),
-        });
-
-        if (!msgRes.ok) {
-          const err = await msgRes.json().catch(() => ({}));
-          throw new Error(err.message || '메시지를 발송할 수 없습니다.');
-        }
+        const conversationId = composed.conversationId;
 
         setStatusMessage({ type: 'ok', text: '쪽지를 성공적으로 전송했습니다.' });
         setTimeout(() => {

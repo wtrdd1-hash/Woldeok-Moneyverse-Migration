@@ -55,6 +55,34 @@ export async function openConversationAction(
   }
 }
 
+const CHAT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Keep the browser composer on the same session-bound CSRF path as other chat actions. */
+export async function composePrivateChatAction(
+  peerUserId: string,
+  body: string,
+): Promise<ActionState & { conversationId?: string }> {
+  const cleanBody = body.trim();
+  if (!CHAT_UUID.test(peerUserId) || !cleanBody || cleanBody.length > 2000) {
+    return { status: 'error', message: '대화 상대방과 메시지 내용을 확인해 주세요.' };
+  }
+  const openForm = new FormData();
+  openForm.set('peerUserId', peerUserId);
+  const opened = await openConversationAction({ status: 'idle' }, openForm);
+  if (opened.status !== 'ok' || !opened.conversationId || !CHAT_UUID.test(opened.conversationId)) {
+    return { status: 'error', message: '대화방을 확인할 수 없어 메시지를 보내지 않았어요.' };
+  }
+  const sendForm = new FormData();
+  sendForm.set('conversationId', opened.conversationId);
+  sendForm.set('body', cleanBody);
+  const sent = await sendMessageAction({ status: 'idle' }, sendForm);
+  if (sent.status !== 'ok' || !sent.messageId || !CHAT_UUID.test(sent.messageId) ||
+      chatSequence(sent.sequence) === null) {
+    return { status: 'error', message: '메시지 발송 결과를 확인할 수 없어요. 중복 발송 전에 대화 내역을 확인해 주세요.' };
+  }
+  return { status: 'ok', message: '쪽지를 성공적으로 전송했습니다.', conversationId: opened.conversationId };
+}
+
 export async function sendMessageAction(
   _previous: ActionState,
   formData: FormData,
