@@ -18,3 +18,14 @@
 - Official Test exact candidate SHA preflight FAIL: actual Test backend/frontend and manifest remain `bc8cd8a6c654af0336f550643f23049a58ee1d16`; six SHA mismatches. This is an expected release blocker, not a deployment attempt.
 - First local full Backend attempt (fork pool, 2 workers) timed out after 170s. Re-running in single-threaded mode per independent QA v1444 profile; do not claim full suite PASS until its exit status is recorded.
 - Draft/HOLD PR #2363 opened. No main merge, Test deployment, Production deployment, or branch cleanup.
+
+## Finished development / validation checkpoint
+
+- **RED commit:** `044566104` (6/7 HTTP tests fail before middleware).
+- **Implementation commit:** `171d130da` (7/7 HTTP GREEN after fixing fixture request body; scoped module middleware).
+- **Full Backend tests:** PASS — 2,970 passed / 518 skipped (single-threaded Vitest, 151.16 s). Earlier fork-pool 170 s timeout was an execution-profile issue, not treated as PASS.
+- **Full Frontend tests:** PASS — 2,902 passed (single-threaded Vitest, 215.36 s).
+- **Workspace build:** PASS — backend and frontend, Next.js compiled, TypeScript and static generation completed (173 s). Build-only generated `frontend/.build_id` removed from own worktree.
+- **Workspace lint and typecheck:** PASS. API contracts, database tests, security/release 34 tests and isolated PostgreSQL checks PASS as recorded above.
+- **Remaining release blockers:** full dev dependency audit 9 findings; P0 `season_settle_rewards(uuid)` EXECUTE still granted to app role (#2357), migration 318 collisions, official Test six exact-SHA mismatches, independent authenticated Test E2E and GitOps approval not run. No complete release-gate PASS claim.
+- **Release decision:** Draft/HOLD PR #2363, no merge, no Test candidate deployment, no Production promotion, no shared DB mutation. Independent A/C/QA/Gemini worktrees and existing automation reservations untouched. No branch cleanup because unmerged unique changes remain.
