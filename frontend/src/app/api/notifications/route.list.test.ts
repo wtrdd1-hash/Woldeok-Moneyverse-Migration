@@ -44,4 +44,19 @@ describe('verified notification BFF list', () => {
   });
 
 
+  it('fails closed on contradictory owner-filter rows even when the backend returns HTTP 200', async () => {
+    const row = { id: '11111111-1111-4111-8111-111111111111', category: 'SECURITY', title: 'Wrong category', body: 'Mismatch', is_read: true, created_at: '2026-11-01T00:00:00Z' };
+    api.mockResolvedValue([row]);
+    const response = await GET(new Request('https://example.test/api/notifications?category=TRANSACTIONAL&unreadOnly=true'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('rejects invalid or oversized backend pages rather than presenting them as verified owner data', async () => {
+    api.mockResolvedValue([{ id: 'bad', category: 'SYSTEM', title: 'Unverified', body: 'x', is_read: false, created_at: '2026-11-01T00:00:00Z' }]);
+    expect((await GET(new Request('https://example.test/api/notifications'))).status).toBe(503);
+    api.mockResolvedValue(Array.from({ length: 3 }, (_, i) => ({ id: `11111111-1111-4111-8111-${String(i).padStart(12, '0')}`, category: 'SYSTEM', title: 'Valid', body: 'x', is_read: false, created_at: '2026-11-01T00:00:00Z' })));
+    expect((await GET(new Request('https://example.test/api/notifications?limit=2'))).status).toBe(503);
+  });
+
 });
