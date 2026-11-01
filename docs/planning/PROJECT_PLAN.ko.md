@@ -1,3 +1,39 @@
+## v2026.11.02.1638 — F675-215 만료 보유품: 마이크로초 정밀도 커서·보관함 상태 정합성 보완 (기능 보완 / 초안 / 배포 보류)
+
+**주기:** 이전 기능 추가 v1636 → 현재 기능 보완 v1638 → 다음 기능 추가 v1640(잠정). 기술 정본은 최신 origin/main `a8541927c3a351d980454c66e95a3356c47e0722`(시작·중간 재조회)의 AGENTS.md, README.md, 영어 PROJECT_PLAN.md이며 본 문서는 동등한 한국어 대조본이다. 미병합 Draft #2433 후속 문서 전용 브랜치, 개발 인계 #2432. **F675-215 미구현, Test·Production·병합 미승인.**
+
+### 실제 소스 검증과 설계 정정
+- 마이그레이션 071은 `user_items.expires_at timestamptz`를 정의하고 123의 `shop_my_items_v2`는 `clock_timestamp()`로 만료 행을 제외한다. 104는 정시 삭제 작업이 아닌 조회 시점 만료 판정이며, 수량 증가 시 회원·상품당 단일 행의 만료일을 재설정한다. 만료 양수 보유품 행은 **현재 저장된 상태**이지 구매 이력·환불 근거·복원 권리가 아니다. 상품명·분류도 과거 고정 값이 아닌 **현재 카탈로그 값**이다.
+- **실제 라이브러리 재현:** `require('./backend/node_modules/pg').types.getTypeParser(1184,'text')('2026-11-02 07:11:01.123456+09')`를 실행하자 JavaScript `Date`의 ISO 결과는 `2026-11-01T22:11:01.123Z`로, 끝 456마이크로초가 소실됐다. 따라서 v1636의 제안된 `(expires_at,catalog_id)` 커서를 기본 `pg` timestamptz→Date 변환, `Date.parse`, `toISOString`, JS 밀리초 숫자에 통과시키면 안 된다. 이는 **라이브러리에서 확인한 정밀도 위험**이지 미구현 F675-215의 실제 운영 누락 사고가 아니다.
+- 현재 `frontend/src/app/inventory/page.tsx`의 `apiOrNull('/api/v1/shop/holdings')`와 `holdingsData?.holdings || []`는 활성 보유품 조회 실패를 0개처럼 보여준다. 신규 만료 영역은 활성/만료 각각 조회 성공 여부를 독립 판정해야 한다. Android app-api는 현재 `shop/purchases`를 비공개 처리하지만 `shop/holdings` 전체는 별도 확인이 필요하다. A/C 기존 런타임은 기획 예약에서 변경하지 않는다.
+
+### API·DB·커서의 정확한 개발 인계(미구현)
+- 제안 회원 전용 `GET /api/v1/shop/holdings/expired?limit=20&cursor=...` 유지(기본 20, 1~50; 중복/미지원 쿼리 거부). 응답은 `sourceStatus:'VERIFIED'`, **UTC 소수 6자리 고정 문자열** `observedAtUtcMicros`, `items`의 문자열 `expiresAtUtcMicros`·`acquiredAtUtcMicros`, `nextCursor`, `hasMore`, `totalStatus:'VERIFIED'|'NOT_COMPUTED'`를 사용한다. 표시용 `expiresAt`을 밀리초로 반올림하더라도 커서 비교에 재사용 금지. 정렬·만료 경계·SQL 조건·서명값에서 JS Date/Number 사용 금지. 시간대/소수자리 오류, 비정상 수량, 한 페이지 내 중복 상품 ID는 검증 실패. 완전한 회원 범위 조회가 성공한 경우만 `VERIFIED_EMPTY`, 실패 시 빈 배열 대체 금지.
+- PostgreSQL 17의 **페이지별 단일 연결**, 읽기 전용 `REPEATABLE READ`, 한 번 확보한 DB 관찰시각. `to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')` 또는 동등하게 검증된 무손실 표현으로 마이크로초 문자열을 만든다. `user_id=trusted_actor AND quantity>0 AND expires_at IS NOT NULL AND expires_at<=as_of`; 정렬 `expires_at DESC,catalog_id ASC`, 다음 페이지 조건 `expires_at < :last_expiry::timestamptz OR (expires_at = :last_expiry::timestamptz AND catalog_id > :last_catalog_id::uuid)`. 커서의 시각과 UUID는 검증된 원본만 사용한다. `limit+1` 조회로 같은 명령문에서 `hasMore` 판정, OFFSET 금지. 카탈로그 조인 누락·원본 불일치는 503.
+- 커서 v1은 인증 **회원+세션 지문**, 정규화된 필터·limit, 첫 페이지 `asOfUtcMicros`, 마지막 행의 정확한 `expiresAtUtcMicros`·상품 UUID, 발급/만료(5분 이내)를 포함하고 HMAC-SHA256 서명, 상수시간 비교, 키 버전·교체를 적용한다. base64url·최대 512바이트를 엄격 검사하고 회원 ID 직접 지정·커서 원문 로그·무제한 파싱을 금지한다. 변조/만료는 400, **검증된** 보유품 리비전 변화만 409, 원본 미검증은 503. 존재하지 않는 리비전 열을 지어내지 않는다. 첫 페이지 시각을 고정해도 HTTP 요청 사이 MVCC 스냅샷은 고정되지 않으므로 재획득·삭제 중 누락/중복 가능성을 안내하고 best-effort로 표기한다.
+- `totalCatalogHoldings`는 **같은 페이지 트랜잭션 스냅샷**에서 정확한 COUNT(*)를 계산한 경우에만 반환하며, 다른 페이지까지 유지되는 총계라고 주장하지 않는다. 앞 페이지의 `hasMore=true` 뒤에 빈 페이지가 나와도 전체 목록이 0개라고 표시하지 않는다. 검증 가능한 변경이면 `목록 다시 불러오기`, 그 외에는 변경 가능성 안내. 카탈로그 명칭 변경, 수량 0, 삭제, 만료일 재설정을 각각 회귀시험한다.
+
+### UX·개인정보·관리자·배포
+- 활성/만료 보유품을 각각 `LOADING`, `VERIFIED_ROWS`, `VERIFIED_EMPTY`, `UNAVAILABLE`, `STALE_PAGE`로 관리한다. 활성 조회 실패를 `0개`로 표시하지 않는다. 409·회원/세션 전환 시 커서와 기존 행을 폐기하고 `목록 다시 불러오기 / Restart list` 버튼 제공, 초점은 제목으로 복귀하며 aria-live 안내. 만료 아이템은 장착·아바타 계산에 포함하지 않는다. 한국어·영어 동등, WCAG 2.2 AA, 320px, 200% 확대, 터치 44px, 키보드·TalkBack/VoiceOver·동작 줄이기.
+- Next BFF/Android app-api의 정상·400/401/403/409/429/503·HEAD·조건부 요청에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 적용. ETag/Last-Modified/Expires·304·디스크/서비스워커 캐시·공개 SEO/분석 노출 금지. 로그아웃·계정 전환 응답 차단. 관리자에게는 최소 20명 집단의 정밀도 오류·커서 재시작·409/503·p95 집계만 제공, 회원·상품 상세/커서·SQL 시각 공개 금지.
+- 기능 스위치 `F675_215_EXPIRED_HOLDINGS_ARCHIVE_ENABLED` **기본 OFF**. PG17 신규/업그레이드, 상품별 보유품 10,001행·마이크로초 동일/경계, 인덱스 EXPLAIN, 회원 A/B·세션 전환, 커서 변조·키 교체, 페이지 사이 삭제·만료 재설정, 401/403/409/429/503, Android 비공개 HEAD·조건부, 금융·아이템·원장 쓰기 **0건**을 실제 수용시험으로 요구한다(미실행). 정확 SHA Test, 이미지·매니페스트 출처, 독립 복원, DEV/Test/Production 권한 #993, QA #2391 및 금융 정합성 해결 전 RELEASE HOLD. 문제 발생 시 기능 OFF, 검증된 이미지 롤백.
+
+### 개발 백로그 — P0 4건 + P1 6건 (A/B/C/QA 실행과 분리)
+1. **P0 OPS1638-01 (Ops/QA):** Test/Production 실제 프로세스·이미지·매니페스트 SHA, 독립 복원·롤백 자산 증빙 #1984/#1088. 공개 버전만으로 승인 금지.
+2. **P0 SEC1638-02 (B/DB):** DEV/Test/Production 앱 역할 권한 재측정, DEV 직접 접근 위험 #993/#828, 신뢰 회원·세션 바인딩·교차 회원 차단. `user_items` 직접 SELECT/UPDATE 추가 금지.
+3. **P0 FIN1638-03 (B/QA):** Treasury/NPS/Mint, 제작·주식·시즌·소각·부동산 원장 재원 정합성 검증 후 전역 승격.
+4. **P0 REL1638-04 (QA/Ops):** 프로필 HTTP 실패, 의존성 권고, QA #2391, 공식 정확 SHA Test 로그인/PG17/독립 복원 완료 전 배포 보류.
+5. **P1 MICROS1638-05 (B/DB):** 마이크로초 손실 없는 SQL 출력·정확한 키셋·단일 페이지 트랜잭션, 상품 라벨 출처, 10,001행 EXPLAIN; 기존 마이그레이션 수정 금지.
+6. **P1 MICROS1638-06 (B/API):** 마이크로초 문자열 DTO·회원+세션+limit 결합 HMAC 커서, 5분 TTL·512바이트·상수시간 비교·키 교체·400/409/503·속도 제한.
+7. **P1 MICROS1638-07 (A/Web):** 활성/만료 독립 검증 상태·409 재시작·장착 격리·KO/EN 접근성/모바일.
+8. **P1 MICROS1638-08 (C/Android):** 보유품 GET/HEAD/오류/조건부 비공개·304/캐시 차단·계정 전환 응답 차단·TalkBack.
+9. **P1 MICROS1638-09 (A/B/Admin):** OFF 스위치, 20명 이상 집계 KPI, 우선 OFF 롤백.
+10. **P1 MICROS1638-10 (QA):** pg `123456→123000` 재현, 소수 6자리 동일 경계·동일 시각 2행·10,001행·페이지 사이 삭제/재설정·회원/세션·커서 변조·검증된 빈 결과/503·정확 SHA/금융 쓰기 0건 시험. **제안된 시험이며 미실행.**
+
+**운영·근거 게이트:** miniPC Debian 13 서비스와 DEV DB 연결 확인. main `a8541927c3a351d980454c66e95a3356c47e0722` 시작·중간 확인. 2026-11-02 07:10 KST Test·Production `/api/version` 모두 `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`(main과 다르며 실제 실행 이미지 증명 아님). 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 실제 신규 기능 수용시험·DB 마이그레이션·금융 변경·main 병합·Production 배포 없음. **DRAFT / RELEASE HOLD.**
+
+**v1638 신규 검증:** 릴리스·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS 및 기존 공성전 문구 검증 1건 FAIL (#2391). 설치된 `pg` 마이크로초 손실 재현 PASS, 영문·국문 4쌍×9항목 PASS, git diff --check PASS. F675-215 실제 기능 수용시험 미실행, 최종 SHA GitHub CI 별도 확인 필요.
+
 ## v2026.11.02.1636 — F675-215 회원 만료 보유품 조회 (기능 추가 / 초안 / 배포 보류)
 
 **주기:** 이전 기능 보완 v1634 → 현재 기능 추가 v1636 → 다음 기능 보완 v1638(잠정). 기준 main `a8541927c3a351d980454c66e95a3356c47e0722` 시작·기획 중 확인. AGENTS.md, README.md 및 영어 정본과 동등한 한국어 기획. 미병합 Draft #2428의 문서 전용 후속, 개발 인계 #2432, 자식 Draft PR #2433 OPEN/HOLD. **F675-215는 제안일 뿐 구현되지 않았으며 Test·Production 배포 승인도 없다.**

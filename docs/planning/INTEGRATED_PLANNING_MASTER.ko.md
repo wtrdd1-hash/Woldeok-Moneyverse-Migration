@@ -1,3 +1,12 @@
+## v2026.11.02.1638 — F675-215 만료 보유품 커서 마이크로초 정밀도 보완 (기능 보완 / 초안 / 배포 보류)
+**주기:** 이전 기능 추가 v1636 → 현재 기능 보완 v1638 → 다음 기능 추가 v1640(잠정). 최신 main `a8541927c3a351d980454c66e95a3356c47e0722` 시작·중간 재확인. 미병합 Draft #2433 후속 문서 전용, 개발 인계 #2432. **기획 단계이며 미구현.**
+
+**실제 확인:** 071의 `expires_at timestamptz`, 123의 만료 제외 조건, 104의 수량 증가 만료일 재설정. `pg` OID 1184 변환 실험에서 `.123456`이 JS Date `.123`으로 바뀌어 456마이크로초가 소실됐다. 이는 제안된 키셋 커서의 정밀도 위험이며 실제 Production 누락 사고의 증거는 아니다. UTC 소수 6자리 문자열과 SQL의 `expires_at DESC,catalog_id ASC` 비교, JS Date/Number 변환 금지, 회원+세션+필터+limit HMAC, 5분 TTL·512바이트·키 교체·400/409/503 구분을 명세했다. 페이지별 REPEATABLE READ는 요청 사이 MVCC를 보장하지 않으며 총계도 해당 페이지 시점에 한정한다. `/inventory`의 `apiOrNull`→`[]`는 활성 조회 실패를 빈 목록으로 표시하므로 활성/만료 상태를 분리하고 목록 재시작을 제공한다. Android app-api의 기존 shop/purchases 비공개 처리만으로 shop/holdings가 보호되지는 않는다. 이번 작업은 런타임 변경 없음.
+
+**개발 인계:** P0 OPS/SEC/FIN/REL1638-01..04, P1 MICROS1638-05..10을 영문 정본·한국어 동등 PROJECT_PLAN에 반영. 정상/오류/HEAD/조건부 비공개 no-store/noindex·304 금지, KO/EN WCAG 2.2 AA, 20명 이상 관리자 집계, 기본 OFF, 정확 SHA Test·복원 게이트. 07:10 KST 공개 Test/Production 버전 모두 `510dbe6...`으로 main과 다르고 실행 이미지 증빙 아님. DEV 권한 #993, 금융 정합성, QA #2391, 공식 Test·독립 복원 미완료. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. DB·아이템·WLD·원장·Test·Production 변경 없음. **DRAFT / RELEASE HOLD.**
+
+**v1638 신규 검증:** 릴리스·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS 및 기존 공성전 문구 검증 1건 FAIL (#2391). 설치된 `pg` 마이크로초 손실 재현 PASS, 영문·국문 4쌍×9항목 PASS, git diff --check PASS. F675-215 실제 기능 수용시험 미실행, 최종 SHA GitHub CI 별도 확인 필요.
+
 ## v2026.11.02.1636 — F675-215 회원 만료 보유품 조회 (기능 추가 / 초안 / 배포 보류)
 **주기:** 이전 보완 v1634 → 현재 추가 v1636 → 다음 보완 v1638. main a8541927c3a351d980454c66e95a3356c47e0722 확인, Draft #2428의 문서 후속, 인계 #2432, Draft PR #2433 OPEN/HOLD. **제안이며 미구현.** 123의 shop_my_items_v2는 만료 행을 제외하고 /inventory는 조회 실패를 빈 배열로 처리한다. 071의 회원·상품 단일 현재 행은 104의 수량 증가로 재설정될 수 있어 만료 목록은 과거 구매 영수증·복구 권리가 아니다. 제안: /inventory의 별도 만료 영역, 회원 전용 GET /api/v1/shop/holdings/expired, 인증·동의, 단일 관찰시각, PG17 읽기·키셋, 요청 사이 MVCC 불일치 명시, 검증된 빈 목록/출처 오류 구분, Android 포함 private/no-store/noindex, 한국어·영어 접근성, 기본 OFF. P0 OPS/SEC/FIN/REL1636-01..04 및 P1 ARCHIVE1636-05..10 상세는 통합 PROJECT_PLAN.ko.md. Test/Production 공개 버전 510dbe6...은 main과 다르며 독립 복원 미검증. 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·아이템·원장 변경 없음. **RELEASE HOLD.**
 
