@@ -718,7 +718,7 @@ export interface AdminTreasuryOverview {
   readonly vaults: readonly AdminTreasuryVault[];
   readonly total_treasury_wld: string;
   readonly total_circulating_wld: string;
-  readonly reserve_ratio_pct: number;
+  readonly reserve_ratio_pct: number | null;
   readonly available_wld?: string;
   readonly reserve_wld?: string;
   readonly coverage_days?: number;

@@ -398,7 +398,7 @@ export interface TreasuryOverview {
   vaults: TreasuryVaultRow[];
   total_treasury_wld: string;
   total_circulating_wld: string;
-  reserve_ratio_pct: number;
+  reserve_ratio_pct: number | null;
   available_wld: string;
   reserve_wld: string;
   coverage_days: number | undefined;
@@ -532,12 +532,17 @@ export class TreasuryRepository {
       `);
       if (typeof circRes.rows[0]?.total !== 'string') throw new Error('missing circulation evidence');
       totalCirculating = BigInt(circRes.rows[0].total);
-      if (totalCirculating <= BigInt(0)) throw new Error('undefined reserve ratio');
+      if (totalCirculating < BigInt(0)) throw new Error('negative circulation');
     } catch {
       throw new ServiceUnavailableException('TREASURY_CIRCULATION_UNVERIFIED');
     }
 
-    const reserveRatio = Number((totalTreasury * BigInt(10000)) / totalCirculating) / 100;
+    const reserveRatio = totalCirculating === BigInt(0)
+      ? null
+      : Number((totalTreasury * BigInt(10000)) / totalCirculating) / 100;
+    if (reserveRatio !== null && !Number.isFinite(reserveRatio)) {
+      throw new ServiceUnavailableException('TREASURY_RESERVE_RATIO_OVERFLOW');
+    }
     // 3. 24h Stats from ledger
     const statsRes = await this.pool.query<{
       tx_type: string;

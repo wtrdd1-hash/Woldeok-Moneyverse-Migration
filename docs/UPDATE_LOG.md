@@ -1,3 +1,14 @@
+## 2026-11-01 v1618.3 — Stock-league escrow segregation regression repaired
+- Full CI #41317019548 failed existing disposable PG stock-league test: it assumed a single ESCROW account, while new NPS fund/welfare escrows create three. Forward migration323 rebinds the stock-league ledger to exact `system_key=escrow`; disposable Postgres acceptance now reads/verifies only that escrow and rejects leaked money to NPS escrows. No deletion or changes to migration273. Full CI requires rerun.
+
+## 2026-11-01 v1618.2 — Unified Treasury Core funded NPS candidate
+- New DB-owned `treasury_core_post` for new funded NPS deposit/95-5 withdrawal with canonical balanced ledger, separate NPS/welfare escrows, immutable receipts and idempotent DB authority. Historical NPS 238 payout rows remain unverified; Mint/CB/SWF payout holds unchanged. Private cloned Production SQL318–322 successful and targeted 246 backend/7 FE tests PASS. **No money-moving PostgreSQL integration or live Test/Production promotion certified yet.**
+
+## 2026-11-01 v1617 — Treasury current fiscal proof display source tested, release HOLD
+- Certified server-owned public Treasury zero can return 200 only after strict vault/balance/timestamp checks; unknown source stays 503, old payments remain unverified. 18 frontend tests/typecheck/lint PASS; historic release gate requires 503 and must be updated with independent verification before Production.
+
+## 2026-11-01 v1616 — Zero circulation shows a noncomputable reserve ratio, backend15/frontend12 targeted PASS, source candidate.
+
 ## 2026-11-01 v1615: Official Test fiscal 314-320 applied, scoped aggregate proof with app EXECUTE only, 105 sessions preserved; 392 targeted regression PASS, live Test/Prod pending.
 
 ## 2026-11-01 v1614 — Distinct Test Treasury epoch evidence, private restored DB PASS

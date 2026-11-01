@@ -27,11 +27,11 @@ const certified = {
   epoch_opened_at: new Date('2026-10-31T13:53:31.686Z'),
 };
 
-function fixture(proof: Record<string, unknown> | null = certified) {
+function fixture(proof: Record<string, unknown> | null = certified, circulation = '100000') {
   const query = vi.fn(async (sql: string) => {
     if (sql.includes('public.treasury_fiscal_proof_read()')) return { rows: proof ? [proof] : [] };
     if (sql.includes('FROM public.system_treasury_vaults') && sql.includes('ORDER BY')) return { rows: vaults };
-    if (sql.includes('sum(ab.available_amount)')) return { rows: [{ total: '100000' }] };
+    if (sql.includes('sum(ab.available_amount)')) return { rows: [{ total: circulation }] };
     if (sql.includes('daily_avg')) return { rows: [{ daily_avg: '0' }] };
     if (sql.includes('SELECT amount_wld, tx_type, reason')) return { rows: [] };
     if (sql.includes('GROUP BY tx_type')) return { rows: [] };
@@ -56,6 +56,15 @@ describe('v1603: current fiscal epoch proof, not archived phantom money', () => 
     expect(overview.stats_24h).toEqual({
       injected_wld: '0', absorbed_wld: '0', stock_halt_funded_wld: '0', recirculated_wld: '0',
     });
+  });
+
+  it('returns verified zero-funded Treasury with an unavailable reserve ratio when circulation is exactly zero', async () => {
+    const { repo } = fixture(certified, '0');
+    const overview = await repo.getOverview();
+    expect(overview.reconciliation.status).toBe('RECONCILED');
+    expect(overview.total_treasury_wld).toBe('0');
+    expect(overview.total_circulating_wld).toBe('0');
+    expect(overview.reserve_ratio_pct).toBeNull();
   });
 
   it('accepts exactly the independently attested official Test backup, without relaxing Production requirements', async () => {

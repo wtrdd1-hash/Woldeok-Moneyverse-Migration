@@ -4,6 +4,7 @@
  * Backend SHA alone is not proof of the frontend or public financial disclosure.
  */
 import process from 'node:process';
+import { safeTreasuryEdgeResponse } from './certified-treasury-edge-evidence.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -20,23 +21,7 @@ export function verifyIsolatedTestPublicEvidence(snapshot) {
   if (snapshot?.frontendStatus !== 200 || snapshot?.frontendVersion?.id !== expected) {
     failures.push('frontend_version_unverified');
   }
-  const treasury = snapshot?.treasuryBody;
-  const cache = (snapshot?.treasuryCacheControl ?? '')
-    .toLowerCase()
-    .split(',')
-    .map((part) => part.trim());
-  if (
-    snapshot?.treasuryStatus !== 503 ||
-    !cache.includes('private') ||
-    !cache.includes('no-store') ||
-    treasury?.ok !== false ||
-    treasury?.status !== 'UNVERIFIED' ||
-    treasury?.code !== 'PUBLIC_TREASURY_RECONCILIATION_PENDING' ||
-    treasury?.overview?.verified !== false ||
-    treasury?.overview?.totalBalanceWld !== '—' ||
-    !Array.isArray(treasury?.recentLedger) ||
-    treasury.recentLedger.length !== 0
-  ) {
+  if (!safeTreasuryEdgeResponse(snapshot?.treasuryStatus, snapshot?.treasuryCacheControl, snapshot?.treasuryBody)) {
     failures.push('public_treasury_not_fail_closed');
   }
   if (

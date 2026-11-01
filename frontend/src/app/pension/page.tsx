@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { FundedTreasuryPensionPanel } from './funded-treasury-pension-panel';
 import { publicApi, api } from '@/lib/api';
+import { isLoggedInMember } from '@/lib/session';
 import { canonicalIntegerString } from '@/lib/money';
 import {
   PensionPortalClient,
@@ -25,7 +27,7 @@ export default async function PublicPensionPage() {
   let contributions: ContributionLog[] = [];
   let payouts: PayoutLog[] = [];
   let userCashBalance = '0';
-  let isLoggedIn = false;
+  const isLoggedIn = await isLoggedInMember();
 
   try {
     const [acc, contribs, payLogs, wallet] = await Promise.all([
@@ -37,7 +39,6 @@ export default async function PublicPensionPage() {
 
     if (acc && acc.id) {
       myAccount = acc;
-      isLoggedIn = true;
     }
     if (Array.isArray(contribs)) {
       contributions = contribs;
@@ -48,7 +49,7 @@ export default async function PublicPensionPage() {
     const walletData = wallet as { cashBalance?: string | number; balance?: string | number } | null;
     userCashBalance = canonicalIntegerString(walletData?.cashBalance ?? walletData?.balance ?? '0') ?? '0';
   } catch {
-    isLoggedIn = false;
+    // Session state comes from the real session, not legacy pension account existence.
   }
 
   return (
@@ -61,6 +62,7 @@ export default async function PublicPensionPage() {
         userCashBalance={userCashBalance}
         isLoggedIn={isLoggedIn}
       />
+      {isLoggedIn && <FundedTreasuryPensionPanel />}
     </div>
   );
 }

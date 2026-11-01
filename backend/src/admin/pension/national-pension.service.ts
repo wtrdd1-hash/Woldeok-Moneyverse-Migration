@@ -22,6 +22,18 @@ export class NationalPensionService {
     return this.repository.getOverview();
   }
 
+  async getFundedPosition(actor: string) {
+    return this.repository.getFundedPosition(actor);
+  }
+
+  async contributeFunded(actor: string, idempotencyKey: string, amountWld: string) {
+    return this.repository.postFundedPension(actor, idempotencyKey, 'NPS_FUND', amountWld);
+  }
+
+  async withdrawFunded(actor: string, idempotencyKey: string, principalWld: string) {
+    return this.repository.postFundedPension(actor, idempotencyKey, 'NPS_WITHDRAW', principalWld);
+  }
+
   async getAccount(userId: string): Promise<NationalPensionAccountRow> {
     return this.repository.getOrCreateAccount(userId);
   }

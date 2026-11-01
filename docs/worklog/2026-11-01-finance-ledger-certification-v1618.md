@@ -1,0 +1,30 @@
+# v2026.11.01.1618 — Canonical monetary provenance and funded pension settlement
+## START (2026-11-01 23:10 KST)
+Owner explicitly ordered monetary proof certification and actual Production promotion, without repeated source-only reporting.
+Reviewed DOCS_INDEX (master), v1611–v1617 records, current main 3d5e321c, live Test e39af10f and Production 353c6d. Isolated MiniPC worktree `fix/pension-certified-settlement-v1618` stacked on v1617 SHA 8476c879, avoiding other contributors.
+Actual Production read-only evidence:
+- Canonical account balance sums by type: MINT -5,078,810, SINK +237,300, USER_BANK +57,708, USER_CASH +4,783,802, TREASURY 0, ESCROW 0. Exact global net 0 WLD.
+- Core ledger 891 transactions / 1,829 postings. No `NPS_*` transaction type; historic pension 238 payout records totaling 10,710 WLD and one 50,000 WLD contribution therefore NOT independently certified canonical settlements.
+- Treasury 552 historical rows and 744 dividends, current vault/canonical Treasury 0. Past pension code directly credits/debits account_balances and mutable treasury_vaults, with GREATEST(0) silent shortfall and no Core postings. It is deliberately held by PensionLedgerSettlementHoldError.
+Strategy: preserve legacy 238 payouts and 50,000 WLD archived as unverified, never fabricate balancing postings or reissue money. Add separately accounted, durable, funded NPS positions with a dedicated canonical pension escrow. Only new canonical-backed contributions/liquidations can transact. Mint and central-bank issuance require separate supply proof and authorized dual approval before accepting writes. Exact DB roles/idempotency, negative/replay/rollback tests, official Test→Production release gates required.
+## MID — 2026-11-01 23:34 KST
+- New forward SQL321 dedicated NPS funded escrow, new funded positions/receipts; SQL322 unified DB-owned `treasury_core_post`, append-only treasury receipts, 95/5 refund to actual independent welfare escrow, scoped funded position read. Legacy 238 pension payout rows, 552 Treasury and 744 SOE dividend entries remain untouched and unverified.
+- Authentic session actor + one-use CsrfGuard new Nest NPS funded position/contribution/withdraw endpoints; no raw balance/vault DML. Same-origin Next BFF validates UUIDv4, exact WLD strings and complete DB-owned receipt. New pension panel is explicitly separated from historic NPS accounting. Existing legacy unjournaled payout/retirement/liquidate code remains permanently blocked.
+- Restored verified Production backup into private `wdmv_v1618_treasury_core`, applied SQL318–322 without errors. Existing canonical 891 transactions, 1829 postings and 238 historic NPS payouts retained; no live Production or official Test DB writes. **Actual money-moving transaction integration was NOT executed/verified**; therefore no issuance/payout certification or live release claimed.
+- Targeted backend Treasury + NPS 246 PASS /20 SKIP; frontend pension+BFF 7 PASS; backend/frontend typecheck PASS; targeted frontend lint PASS. Source-only contract tests do not substitute for actual PostgreSQL role, idempotency, cash conservation or rollback verification.
+## FINISH — Candidate code built, complete monetary evidence and live promotion NOT YET VERIFIED
+- Must rerun full CI, actual clone transaction/replay/concurrent/rollback negative tests and official Test runtime before any branch merge or zero-downtime Production promotion. Preserve operational current balances and do not override historical unverified payout holds.
+
+## MIDPOINT v1618.3 — 2026-11-01 23:55 KST
+- GitHub full CI run #41317019548 FAILED in *existing* stock-league disposable PG fixture (expected one escrow; new NPS escrows produce three). This also reveals a real cross-feature account-selection flaw in immutable 273 stock-league function, which selected first arbitrary ESCROW by UUID.
+- New additive migration323 binds stock-league payments to exact existing `ESCROW:escrow`, never `national_pension_fund` or `national_pension_welfare`; original migration273 unchanged. CI disposable fixture binds account identity exactly, rejects cross-escrow leakage, checks two-posting conservation and rollback. No reason to wipe member/historic financial records.
+- Full CI and actual monetary settlement certification still needed before any live promotion.
+
+## MIDPOINT v1618.4 — 2026-11-01 23:59 KST
+- Added new disposable-GitHub-PostgreSQL-only Treasury Core NPS fixture with real application role, exact NPS deposit and 95/5 withdrawal, duplicate replay, single journal transaction keys, five balanced postings, immutable receipts, negative idempotency and unbacked payout, global money conservation and outer ROLLBACK. CI guard enforces localhost moneyverse_migrator database only. Integration acceptance is NOT claimed until the actual GitHub test job succeeds.
+
+## MIDPOINT v1618.5 — 2026-11-02 00:02 KST
+- Public release gate previously rejected all HTTP 200 Treasury even when independent scoped fiscal proof certified current 0 WLD. Introduced shared narrow `safeTreasuryEdgeResponse`: retains old 503 fail-closed response; accepts HTTP200 only if current total/available/reserve all literal `0`, historical payout/burn unknown, no beneficiary or program claims, eligibility false, empty history and private no-store. Never authorizes minting or pensions. Both exact host and isolated public Test gates share it, with forged payout/positive WLD negative tests. 28 source unit tests PASS. This is not proof of public Test session continuity or Production promotion.
+
+## MIDPOINT v1618.6 — 2026-11-02 00:06 KST
+- Earlier CI #41318700289 failed in wallet transaction-label coverage (new NPS-funded transfer types otherwise display generic `경제 활동`). Added exact Korean label for both NPS_FUNDED_CONTRIBUTION/WITHDRAWAL, now wallet label unit suite 31 PASS. Historical ledger records untouched.
