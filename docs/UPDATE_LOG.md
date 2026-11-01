@@ -1,3 +1,6 @@
+## 2026-11-01 v1618.3 — Stock-league escrow segregation regression repaired
+- Full CI #41317019548 failed existing disposable PG stock-league test: it assumed a single ESCROW account, while new NPS fund/welfare escrows create three. Forward migration323 rebinds the stock-league ledger to exact `system_key=escrow`; disposable Postgres acceptance now reads/verifies only that escrow and rejects leaked money to NPS escrows. No deletion or changes to migration273. Full CI requires rerun.
+
 ## 2026-11-01 v1618.2 — Unified Treasury Core funded NPS candidate
 - New DB-owned `treasury_core_post` for new funded NPS deposit/95-5 withdrawal with canonical balanced ledger, separate NPS/welfare escrows, immutable receipts and idempotent DB authority. Historical NPS 238 payout rows remain unverified; Mint/CB/SWF payout holds unchanged. Private cloned Production SQL318–322 successful and targeted 246 backend/7 FE tests PASS. **No money-moving PostgreSQL integration or live Test/Production promotion certified yet.**
 

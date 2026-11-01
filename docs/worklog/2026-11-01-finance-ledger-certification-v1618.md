@@ -14,3 +14,8 @@ Strategy: preserve legacy 238 payouts and 50,000 WLD archived as unverified, nev
 - Targeted backend Treasury + NPS 246 PASS /20 SKIP; frontend pension+BFF 7 PASS; backend/frontend typecheck PASS; targeted frontend lint PASS. Source-only contract tests do not substitute for actual PostgreSQL role, idempotency, cash conservation or rollback verification.
 ## FINISH — Candidate code built, complete monetary evidence and live promotion NOT YET VERIFIED
 - Must rerun full CI, actual clone transaction/replay/concurrent/rollback negative tests and official Test runtime before any branch merge or zero-downtime Production promotion. Preserve operational current balances and do not override historical unverified payout holds.
+
+## MIDPOINT v1618.3 — 2026-11-01 23:55 KST
+- GitHub full CI run #41317019548 FAILED in *existing* stock-league disposable PG fixture (expected one escrow; new NPS escrows produce three). This also reveals a real cross-feature account-selection flaw in immutable 273 stock-league function, which selected first arbitrary ESCROW by UUID.
+- New additive migration323 binds stock-league payments to exact existing `ESCROW:escrow`, never `national_pension_fund` or `national_pension_welfare`; original migration273 unchanged. CI disposable fixture binds account identity exactly, rejects cross-escrow leakage, checks two-posting conservation and rollback. No reason to wipe member/historic financial records.
+- Full CI and actual monetary settlement certification still needed before any live promotion.

@@ -11,7 +11,7 @@ INSERT INTO public.stock_league_seasons(season_number,title,starts_at,ends_at,en
   VALUES (999, 'Synthetic league',now()-interval '1 day',now()+interval '1 day',10000)
   RETURNING id AS season_id \gset
 SELECT b.available_amount::text AS before_escrow FROM public.account_balances b
-JOIN public.accounts a ON a.id=b.account_id WHERE a.account_type='ESCROW' \gset
+JOIN public.accounts a ON a.id=b.account_id WHERE a.account_type='ESCROW' AND a.system_key='escrow' \gset
 SELECT set_config('v754.member',:'member_id',true);
 SELECT set_config('v754.season',:'season_id',true);
 SELECT set_config('v754.escrow_before',:'before_escrow',true);
@@ -34,7 +34,12 @@ BEGIN
   WHERE a.owner_user_id=member AND a.account_type='USER_CASH';
   SELECT b.available_amount INTO escrow
   FROM public.account_balances b JOIN public.accounts a ON a.id=b.account_id
-  WHERE a.account_type='ESCROW';
+  WHERE a.account_type='ESCROW' AND a.system_key='escrow';
+  IF EXISTS (
+    SELECT 1 FROM public.accounts a JOIN public.account_balances b ON b.account_id=a.id
+    WHERE a.account_type='ESCROW' AND a.system_key <> 'escrow'
+      AND b.available_amount <> 0
+  ) THEN RAISE EXCEPTION 'league money leaked to NPS escrow'; END IF;
   SELECT count(*) INTO txn_count FROM public.ledger_transactions WHERE idempotency_key=tx;
   SELECT count(*) INTO posting_count FROM public.ledger_postings p JOIN public.ledger_transactions t
     ON p.transaction_id=t.id WHERE t.idempotency_key=tx;
