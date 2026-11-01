@@ -23,3 +23,10 @@ Pending RED test execution.
 ## Finished
 
 Pending.
+
+## In progress — 2026-11-02 06:16 KST
+
+- RED: absent BFF module fails; client behavior tests reproduced four false-refresh failures after correcting `NODE_ENV=test` test harness.
+- GREEN: 5 guarded BFF tests and 4 interactive refresh tests plus 1 pre-existing admin blog test = **10 PASS**.
+- BFF reads only existing elevated-session Nest API. All malformed/partial results fail with HTTP 503; valid zero list is distinct. Browser keeps local legacy rows and updates only verified rows; failure keeps prior list and shows an accessible alert. No fake 600-ms sync success.
+- Re-fetched main and revisited canonical/KO integrated plans; no code changes in shared checkout. CI and full SHA verification pending.
