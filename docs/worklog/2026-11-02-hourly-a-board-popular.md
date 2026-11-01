@@ -37,3 +37,8 @@
 - Review found the HTML `<select name="sort">` always submits its default option. The initial empty value was rejected by Nest; switching to `recent` alone would still be rejected. New RED: backend 1 FAIL and frontend 3 FAIL.
 - Accepted explicit `sort=recent` (legacy newest-first behavior) without a popular proof marker, kept strict `sort=popular` verification, updated Android query enum and accessible form default. GREEN backend 23 PASS and frontend 22 PASS.
 - Stopped only the superseded A final-gate process tree; no other agents' processes were touched. The earlier exact-SHA run is invalidated. Final new-SHA full gates and CI must run before any completion claim.
+
+### REPAIR — 02:45 KST (native GET blank title search)
+- Further end-to-end form review found that the always-present `name="q"` input sends `q=` when blank. The existing Next title parser rejected this, so selecting popular sort without typing a title could not reach the API. RED frontend 1 failure.
+- Normalize blank or whitespace-only form search to no title filter **at the Next boundary**; preserve strict backend/API rejection of explicitly invalid empty q. GREEN 28 board title/SEO/Android tests.
+- Stopped only superseded A final2 gate processes. New exact-SHA full tests and CI must be rerun. No other reservation/process touched.
