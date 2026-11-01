@@ -16,3 +16,12 @@
 
 ## Finished
 - Pending.
+
+### RED evidence — 2026-11-01 21:37 KST
+- `pnpm --dir backend exec vitest run src/auth/local-auth-telegram-privacy.test.ts src/telegram/member-auth-privacy.test.ts`: 6 FAIL / 0 PASS before production change, showing unverified registration alert, non-current-consent login alert, forwarded IP/user metadata and external PII serialization.
+- RED commit `faaff2175cb43584ab8b48324c51e556e97ab787` pushed to independent branch.
+- The unconfigured-transport test needed an explicit mocked credentials loader because the host can have a paired Telegram configuration; no real outbound network was called.
+
+### In-progress implementation
+- Controller no longer emits pre-verification registration alert; current-consent login emits only generic event without forwarding headers or user data.
+- Service ignores legacy login payload and rejects all registration notifications until verified-account policy exists.

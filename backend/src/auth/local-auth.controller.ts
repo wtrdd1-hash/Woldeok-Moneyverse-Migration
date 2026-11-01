@@ -223,13 +223,8 @@ export class LocalAuthController {
     });
 
     if (accepted) {
-      if (this.telegram) {
-        this.telegram.notifyUserRegistered({
-          userId: '신규 신청',
-          displayName: body.displayName,
-          email,
-        }).catch(() => undefined);
-      }
+      // Registration is not a verified account. Never export its email/name
+      // to an external notification service before identity verification.
       try {
         await this.verificationEmails.send({ to: email, token, baseUrl: this.config.baseUrl });
       } catch (error) {
@@ -391,16 +386,10 @@ export class LocalAuthController {
       );
       response.setHeader('set-cookie', sessionCookie(login.token, this.config));
       const consentCurrent = await this.sessionStore().hasCurrentUserConsent(login.session_id);
-      if (this.telegram) {
-        const reqAny: any = request;
-        const forwardedHeader = reqAny && reqAny.get ? reqAny.get('x-forwarded-for') : '';
-        const clientIp = (String(forwardedHeader || reqAny?.ip || 'unknown').split(',')[0] ?? 'unknown').trim();
-        const userAgent = String(reqAny && reqAny.get ? reqAny.get('user-agent') || 'unknown' : 'unknown');
-        this.telegram.notifyUserLogin({
-          userId: credential.user_id,
-          ipAddress: clientIp,
-          userAgent,
-        }).catch(() => undefined);
+      // Only a current-consent session may trigger a generic member event.
+      // Never trust forwarding headers as an audit identity or export member PII.
+      if (consentCurrent && this.telegram) {
+        this.telegram.notifyUserLogin().catch(() => undefined);
       }
       return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };
     } catch {

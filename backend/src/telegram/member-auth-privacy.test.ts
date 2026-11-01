@@ -34,9 +34,10 @@ describe('Telegram member-auth PII minimization', () => {
 
   it('does not send a member event when transport is not configured', async () => {
     const fetch = vi.spyOn(ssrfDefense, 'safeFetch').mockResolvedValue({ ok: true, status: 200 } as never);
+    // This host may have a real paired Telegram file; disable fallback lookup
+    // for this negative transport test rather than depending on host secrets.
+    vi.spyOn(TelegramAlertService.prototype as never, 'initCredentials').mockImplementation(() => undefined);
     const service = new TelegramAlertService();
-    (service as unknown as { cachedBotToken: string | null }).cachedBotToken = null;
-    (service as unknown as { cachedChatId: string | null }).cachedChatId = null;
     delete process.env.TELEGRAM_BOT_TOKEN;
     delete process.env.TELEGRAM_CHAT_ID;
     expect(await service.notifyUserLogin(member)).toBe(false);
