@@ -609,13 +609,8 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' &&
+      (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('sort'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

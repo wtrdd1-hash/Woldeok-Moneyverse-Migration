@@ -1920,7 +1920,9 @@ _No request body._
 
 | Name | In | Required | Type | Constraints |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| sort | query | false | string | enum="popular" |
 
 ### Request body
 

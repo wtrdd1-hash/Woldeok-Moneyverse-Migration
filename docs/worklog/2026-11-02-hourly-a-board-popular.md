@@ -22,3 +22,10 @@
 - SQL orders **after** the existing 50-row PostgreSQL `SECURITY DEFINER` function, with no direct table access or new migration.
 - Initial remote audit: 168 remote heads including main; 152 open PRs. No branch deletion; other authors' unique commits protected.
 - Full tests, real DB proof, security, exact-SHA CI and release gates remain pending. Draft/HOLD only.
+
+### IN PROGRESS — 02:35 KST (second code revision)
+- First full backend suite 2,988 PASS/518 SKIP; first full frontend suite 2,940 PASS; database suite 62 PASS/5 SKIP. These ran on the first code revision and are **not** evidence for the later revision until rerun.
+- Accessibility/SEO regression test caught a real gap: the app-api HTTP edge only marked `q` responses noindex/no-store, not `sort=popular`. RED 1/2; fixed the edge and removed a duplicated legacy guard; GREEN 10/10 UI+Android tests.
+- Updated curated Android query contract: optional `stock`/`q`/`sort=popular` (previous stock incorrectly marked required), regenerated English/Korean schema references.
+- Actual DEV PostgreSQL read-only app-role proof: EXECUTE=true, 1 latest public row, 0 replies, monotone query true; app direct UPDATE on `account_balances` and DELETE on `user_items` still true (P0 #993). No actual multi-row positive ranking proof.
+- No Test/Production changes, no branch cleanup. Full final-SHA gates and CI still required.

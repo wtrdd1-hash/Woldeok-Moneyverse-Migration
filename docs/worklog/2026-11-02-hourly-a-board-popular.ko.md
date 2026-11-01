@@ -14,3 +14,10 @@
 
 ## 종료
 - 전체 게이트 검증 이후 갱신 예정. 운영 승격 승인 아님.
+
+### 진행 중 (02:35 KST, 2차 수정)
+- 최초 코드 전체 시험: 백엔드 2,988 PASS/518 SKIP, 프론트엔드 2,940 PASS, DB 단위 62 PASS/5 SKIP. 이후 수정된 최종 SHA의 증거로는 별도 재검증 필요.
+- 접근성·SEO 회귀시험에서 `sort=popular` 모바일 API 응답의 noindex/no-store 누락 발견(RED 1/2). 중복된 기존 HTTP 헤더 블록을 하나로 통합해 수정한 뒤 UI·Android 10/10 PASS.
+- Android 계약의 선택형 `stock`, `q`, `sort=popular`를 정확하게 반영하고 영문·국문 스키마 문서 재생성.
+- 실제 개발 DB 읽기 전용: 최근 공개 게시글 1건/댓글 0건, 정렬 SQL 실행 PASS. `moneyverse_app`의 잔액 직접 UPDATE·아이템 직접 DELETE 권한은 P0 #993으로 남음. 운영 DB 동일 여부 미확인.
+- 공식 Test·Production 변경 없음. 최신 SHA 전체 게이트 및 CI 재검증 필요.
