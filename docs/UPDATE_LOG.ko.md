@@ -1,3 +1,7 @@
+## v2026.11.01.1602 — F675-206 미리보기 전송·개인정보·신원 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+
+이전 추가 v1600 → 현재 보완 v1602 → 다음 추가 v1604(잠정). 기준 main `f13bbce273ffc65e8576170992d82ea00c27a1c9`, 선행 Draft #2309, 이슈 #2307. 네 가지 설계 보완: (D1) `apiOrNull` 오류→0건 방지와 동일 출처 Next GET BFF·응답 엄격 검증, (D2) Android app-api `shop/expiry-digest/preview` 정확 경로의 오류/HEAD/조건부 요청까지 비공개 캐시 정책 및 악성 상위 캐시 헤더 차단, (D3) 60초 STALE·세션 세대/요청 취소, (D4) 공유 앱 DB 역할의 UUID 위조 가능성과 풀 타임아웃 설정 누출 차단. P0 4/P1 6 갱신, PG17·Android·웹 수용시험은 제안만 하고 미실행. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서 전용, main 병합·런타임/DB/WLD/원장/Test/Production 변경 없음, RELEASE HOLD.
+
 ## v2026.11.01.1600 — F675-206 회원 보관함 만료 알림 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **주기 및 기준:** 이전 **Feature Improvement v1598** → 현재 **Feature Addition v1600** → 다음 **Feature Improvement v1602(잠정)**. 시작·중간에 `origin/main=f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. main의 AGENTS.md, README.md, 영문 PROJECT_PLAN.md(정본), 국문 PROJECT_PLAN.ko.md를 대조했다. 선행 기획 Draft **#2301**은 미병합 OPEN이며 유효한 F675-199~205 기획을 이 별도 문서 브랜치로 승계했다. 개발 이슈 **#2307**, Draft PR **#2309**. **F675-206은 미구현**이고 별도 분산 기획 파일이나 런타임 배포는 없다.

@@ -1,5 +1,33 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1600 F675-206 보관함 만료 알림 미리보기 / 이슈 #2307 / Draft #2309 / DRAFT / RELEASE HOLD; 선행 #2301 미병합.
+**현재 기획:** v1602 F675-206 전송·개인정보·DB 신원 경계 강화 / 이슈 #2307 / Draft 준비 / RELEASE HOLD; 선행 #2309.
+
+## v2026.11.01.1602 — F675-206 만료 알림 미리보기 전송·개인정보·신원 경계 강화 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**주기·기준:** 이전 **Feature Addition v1600** → 현재 **Feature Improvement v1602** → 다음 **Feature Addition v1604(잠정)**. 기준 main `f13bbce273ffc65e8576170992d82ea00c27a1c9` 재확인. AGENTS.md·README.md·영문 PROJECT_PLAN.md(정본)·PROJECT_PLAN.ko.md 대조. 미병합 기획 Draft **#2309** 위에 문서만 승계하며 개발 이슈는 **#2307**. F675-203/205/206 모두 **미구현**. 신규 기능·마이그레이션·SQL 권한·API·UI·알림함 쓰기·런타임 배포 없음.
+
+### 소스에서 확인한 공백과 결정
+
+**D1 — 웹 브라우저의 미리보기 조회 경로가 명세되지 않음(P1).** `frontend/src/app/account/notifications/page.tsx`는 `requireMember()`를 사용하는 서버 컴포넌트이고 기존 목표 설정 조회에 `apiOrNull()`을 사용한다. 이 헬퍼는 API 오류를 null로 바꾸므로 검증된 0건의 근거가 될 수 없다. 브라우저의 클라이언트 컴포넌트는 서버 전용 `frontend/src/lib/api.ts`를 직접 호출할 수 없다. **결정:** 개발 A가 `frontend/src/app/api/shop/expiry-digest/preview/route.ts`에 동일 출처 **GET `/api/shop/expiry-digest/preview`** Next BFF를 만든다. 기존 서버 API 헬퍼로 현재 세션을 전달하되 `ApiError`를 구분해 401/403/429를 유지하고 미검증 응답·파싱·시각 실패는 503으로 처리한다. `[]`/null/0/가짜 성공·익명 캐시·수신 동의·알림 생성을 금지한다. 기존 알림 설정에 클라이언트 `expiry-digest-preview-panel.tsx`를 추가해 `cache:'no-store'`로 조회하며 `sourceStatus==='VERIFIED'`, 정규 비음수 십진 문자열, 실제 UTC 마이크로초 시각을 검증한다. 잘못된 200 JSON/HTML/null을 검증된 0건으로 표시하지 않는 시험 필수.
+
+**D2 — Android 게이트웨이가 공개 캐시 헤더를 그대로 전달할 수 있음(P0 개인정보 게이트).** `frontend/src/lib/app-gateway.ts:48-74`는 `shop` 그룹을 허용하지만 `frontend/src/app/app-api/v1/[...path]/route.ts:501-513`의 비공개 강제 규칙은 `shop/purchases`에만 적용된다. `handle()` 565-603 부근에도 만료 미리보기 전용 처리가 없다. **결정:** 개발 C는 정확히 `['shop','expiry-digest','preview']`만 매칭하고 GET만 허용한다(HEAD는 캐시 가능한 개체 없이 명시 처리). 성공 응답 스키마를 검증한 후 Android에 전달한다. 200·400·401·403·405·429·503·502/504 및 잘못된 상위 200 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`를 강제한다. `ETag`, `Last-Modified`, `Expires` 등 캐시 검증자를 제거하고 조건부 요청으로 304가 이전 회원의 결과를 재사용하지 못하도록 차단한다. 공개 `shop/items`, `shop/public-catalog`에는 광범위한 비공개 규칙을 적용하지 않는다. CDN·프록시 최종 응답 및 Android 계정 전환 시험 필요. **운영 개인정보 유출이 확인된 것은 아님.**
+
+**D3 — 검증된 조회가 무기한 최신 정보는 아님(P1).** PostgreSQL `statement_timestamp()`는 조회 기준시각이지 화면 표시시각이 아니다. 수신 시 '검증 시각'을 보여주고 단조 증가 UI 타이머로 **60초 후 STALE**로 표시하며 새로고침 없이 최신 수량으로 주장하지 않는다. 숨긴 탭 복귀·오프라인 복귀에서도 과거 값을 VERIFIED로 되돌리지 않는다. 이전 값은 '오래된 결과'라는 명시적 표시 아래에만 남기며 활성 0건처럼 사용하지 않는다. `AbortController`와 요청·세션 세대 번호로 새로고침·로그아웃·동의 철회·계정 전환 후 늦은 응답을 폐기한다. 두 만료 구간 `(asOf,+24h]`, `(+24h,+72h]`는 클라이언트 Date가 아닌 SQL 기준으로 계산한다. 지나치게 늦은 응답·잘못된 `asOfUtcMicros`는 조회 불가로 처리한다. 60초는 **제안된 UX 정책**이지 실측 SLA가 아니다.
+
+**D4 — 회원 UUID 인자는 DB 신원이 아니며 커넥션 풀의 타임아웃 설정이 누출될 수 있음(P0 보안 게이트).** 마이그레이션 071은 `user_items` PK `(user_id,catalog_id)`, `quantity>=0`, `expires_at timestamptz`를 정의하고 앱 테이블 권한을 회수한다. 123의 `shop_my_items_v2(p_actor uuid)`는 인자로 받은 회원을 신뢰하는 SECURITY DEFINER 함수다. 동일한 앱 DB 역할이 새 `shop_expiry_digest_preview_v1(p_actor uuid)`를 직접 실행할 수 있다면 다른 회원 UUID를 넣을 수 있으므로 Nest 인증만으로 DB 직접 위조 접근 차단 시험을 통과할 수 없다. **결정:** 독립 인증된 DB 신원 결속(예: 별도 인증 주체별 실행)을 보안 담당자가 입증하거나, 별도 서비스 자격증명과 보완 통제를 갖춘 더 약한 서비스 신뢰 모델을 위험으로 명시·승인하기 전까지 공유 앱 역할에 신규 EXECUTE를 부여하지 않는다. 호출자가 쓸 수 있는 GUC나 서비스 검사만으로 독립 DB 신원 검증을 주장하지 않는다. 어느 모델이든 `user_items` 직접 SELECT 금지, PUBLIC EXECUTE 회수, 회원 2명 직접 위조 시험이 필요하다. SQL 2초 제한은 풀 연결에 영구 `SET`을 남기지 않고 READ ONLY 트랜잭션의 `SET LOCAL statement_timeout` 또는 안전하게 설정된 전용 풀/역할로 구현·재사용 시험한다. 단일 SQL 스냅샷·기준시각, `quantity>0`, `expires_at IS NOT NULL`, 마이크로초 경계, PK 상품당 1종만 집계한다. 10,001건 EXPLAIN 실측 전 `(user_id,expires_at)` 인덱스를 임의 추가하지 않는다. 회원당 분당 10회·추가 남용 방지·429 Retry-After는 **시험 목표**다.
+
+### 구현 인계·수용 기준·배포
+
+- **API/DB:** Nest 인증·동의 GET, 빈 쿼리만 허용, 회원은 세션에서 결정. 성공 `200 {sourceStatus:'VERIFIED',asOfUtcMicros:'YYYY-MM-DDTHH:mm:ss.ffffffZ',count0To24h:'0',count24To72h:'0'}`, 오류 401/403/429/503. 본문·회원 UUID 덮어쓰기·금융/아이템 쓰기·알림 영수증 없음. P0 승인 전 DB 신원 증명 주장 금지. 기존 `shop_my_items_v2`는 별도의 `clock_timestamp()`를 사용하므로 결과 배열을 원자적 집계 기준으로 삼지 않고 격리 PG17에서 단일 asOf SQL과 비교한다. 마이그레이션 번호 318 충돌 해결 전 신규 번호 지정 금지.
+- **회원/UI/SEO:** `/account/notifications`의 회원 전용 미리보기/새로고침/보관함 열기. 기능 OFF 시 기존 화면 유지. 320px·200% 확대·44px 터치·키보드·`aria-live`·동작 감소·WCAG 2.2 AA·한영 의미 동등성. F675-205 자동 수신 동의·09:00 KST 발송 보장 없음. Nest·Next BFF·app-api·엣지의 성공/오류/HEAD 모두 private/no-store/noindex, 사이트맵·공개 canonical 제외, 민감한 회원·아이템·응답 로그 금지.
+- **관리자/KPI:** 조회 시도·검증 0건·STALE 비율·응답 파싱 실패·401/403/429/503·p95·이전 세션 응답 폐기·회원 간 접근 시도를 집계. 회원 **20명 이상 코호트만** 공개하며 개인별 조회 대시보드 없음. p95 300ms 미만·공개 캐시 응답 0은 **목표이지 실측 아님**.
+- **QA(제안, 미실행):** PG17 신규·업그레이드, 회원 2명·UUID 위조 100회, 보유 10,001건, 1µs 경계, 읽기/쓰기 동시 100회, SQL 타임아웃·풀 재사용, 잘못된 200 JSON/HTML/null, 401/403/429/503/502/504, HEAD/304/조건부 요청, 악의적 상위 `Cache-Control: public`+ETag, CDN 헤더, 탭 복귀·지연 응답·로그아웃·동의 철회, Android 계정 2개 캐시 격리, 접근성, 보유/WLD/원장 변화량 0. A/B/C/QA는 각자 브랜치에서 개발하고 공식 Test 정확 SHA·전체 릴리스 게이트 통과 전 배포 금지.
+
+**P0 4건:** OPS1602-01 운영 실행 SHA·롤백·독립 복원 및 cgroup 자원 #2171. SEC1602-02 DB 신원 결속·앱 권한·운영 스키마/체크섬 #2242/#993·마이그레이션 318 충돌 #2233. FIN1602-03 보유/WLD/원장 변경 0과 금융 출처 확인(출석 정산 Draft #2313은 별도 담당). REL1602-04 Test DB 불일치 #2260·운영 다국어 500 #2262·빌드만으로 승격 #1088·QA v1435 Draft #2303·QA v1436 Draft #2310; 전체 CI·정확 SHA Test·복원·운영자 승인.
+
+**P1 6건:** PREVIEW1602-05(B/DB) 단일 asOf 집계·타임아웃/풀 안전성·DB 권한 시험. PREVIEW1602-06(B/API) 엄격한 GET·응답·오류·429. PREVIEW1602-07(A) Next BFF·접근 가능한 클라이언트·STALE/세션 차단. PREVIEW1602-08(C) Android app-api 정확 경로 비공개 헤더·캐시 검증자 제거·응답 검증·계정 격리. PREVIEW1602-09(A/C) 최종 엣지 개인정보/SEO·20명 이상 KPI. PREVIEW1602-10(QA) PG17·HTTP/캐시·동시성·접근성·Android·금융 변화 0 회귀시험.
+
+**릴리스 게이트:** `inventory_expiry_digest_preview` 기본 OFF, 문서 전용 Draft / RELEASE HOLD. main 병합·런타임/DB/금융/Test/Production 변경 없음. 외부 독립 레퍼런스 신규 실검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 실제 성능·기능 수용시험 통과를 주장하지 않는다.
+
 
 ## v2026.11.01.1600 — F675-206 회원 보관함 만료 알림 미리보기 (기능 추가 / DRAFT / RELEASE HOLD)
 
