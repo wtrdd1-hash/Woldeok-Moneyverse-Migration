@@ -213,11 +213,16 @@ function systemdProcessEvidence(service) {
   return { pid, cwd, startedAtMs: epoch * 1000 };
 }
 
+/** Bind the real active process evidence to service selection, never a static unit label. */
+export function activeServiceLookup(releasePath, evidenceFor = systemdProcessEvidence) {
+  return { releasePath, cwdFor: (service) => evidenceFor(service).cwd };
+}
+
 async function collectSnapshot(channel, expectedSha) {
   const cfg = CHANNELS[channel];
   const releasePath = realpathSync(cfg.releaseRoot);
   const manifest = JSON.parse(readFileSync(path.join(releasePath, '.moneyverse-release.json'), 'utf8'));
-  const activeLookup = { releasePath, cwdFor: systemdProcessDirectory };
+  const activeLookup = activeServiceLookup(releasePath);
   const backendService = serviceForRelease(channel, manifest, 'backend', activeLookup);
   const frontendService = serviceForRelease(channel, manifest, 'frontend', activeLookup);
 
