@@ -21,6 +21,16 @@ export interface StateEnterpriseRow {
   updated_at: string;
 }
 
+export interface SoeGovernanceReceipt {
+  receipt_id: string;
+  code: string;
+  old_status: string;
+  new_status: string;
+  dividend_rate_bps: number;
+  applied: true;
+  settled: false;
+}
+
 export interface StateEnterpriseDividendLogRow {
   id: string;
   enterprise_id: string;
@@ -185,17 +195,38 @@ export class EnterpriseRepository {
     });
   }
 
-  async updateSoeStatus(code: string, status: string, dividendRateBps?: number): Promise<boolean> {
-    const params: unknown[] = [status, code];
-    let query = `UPDATE public.state_enterprises SET status = $1, updated_at = NOW()`;
-    if (dividendRateBps !== undefined) {
-      params.splice(1, 0, dividendRateBps);
-      query = `UPDATE public.state_enterprises SET status = $1, dividend_rate_bps = $2, updated_at = NOW() WHERE code = $3`;
-    } else {
-      query += ` WHERE code = $2`;
+  async updateSoeStatus(
+    code: string,
+    status: string,
+    dividendRateBps: number | undefined,
+    actorId: string,
+    reason: string,
+    idempotencyKey: string,
+  ): Promise<SoeGovernanceReceipt> {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuid.test(actorId) || !uuid.test(idempotencyKey)
+      || !/^SOE_[A-Z0-9_]{2,40}$/.test(code)
+      || !['ACTIVE', 'PAUSED', 'PRIVATIZING'].includes(status)
+      || (dividendRateBps !== undefined && (!Number.isInteger(dividendRateBps)
+        || dividendRateBps < 0 || dividendRateBps > 10000))
+      || typeof reason !== 'string' || reason.trim().length < 12 || reason.length > 500) {
+      throw new BadRequestException('Invalid SOE governance request');
     }
-
-    const res = await this.pool.query(query, params);
-    return ((res as { rowCount?: number }).rowCount ?? res.rows.length) > 0;
+    // The application never holds direct UPDATE permission on this table.
+    // The approver role check, mutation and immutable receipt are in one DB call.
+    const result = await this.pool.query<{ receipt: SoeGovernanceReceipt }>(
+      `SELECT public.admin_soe_update_status($1::uuid, $2::text, $3::text, $4::integer, $5::text, $6::uuid) AS receipt`,
+      [actorId, code, status, dividendRateBps ?? null, reason.trim(), idempotencyKey],
+    );
+    const receipt = result.rows[0]?.receipt;
+    if (!receipt || receipt.applied !== true || receipt.settled !== false
+      || receipt.code !== code || receipt.new_status !== status
+      || receipt.receipt_id !== idempotencyKey) {
+      throw new ServiceUnavailableException({
+        code: 'SOE_STATUS_RECEIPT_UNVERIFIED',
+        message: 'Database-owned SOE governance receipt missing or inconsistent',
+      });
+    }
+    return receipt;
   }
 }
