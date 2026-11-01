@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Flame, Sparkles, Trophy, ShieldAlert, Coins, Landmark, ArrowRight, CheckCircle2, RotateCw } from 'lucide-react';
+import { Flame, Trophy, Coins, Landmark, ArrowRight } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
 
 interface WinnerLog {
@@ -22,15 +22,7 @@ interface EventStats {
 }
 
 export function AntiInflationBurnEventCard() {
-  const [stats, setStats] = useState<EventStats>({
-    totalBurnedWld: '0',
-    totalParticipants: 0,
-    recentWinners: [],
-  });
-  const [loading, setLoading] = useState(false);
-  const [burning, setBurning] = useState(false);
-  const [resultMsg, setResultMsg] = useState<{ title: string; text: string } | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [stats, setStats] = useState<EventStats | null>(null);
 
   const fetchStats = async () => {
     try {
@@ -48,37 +40,6 @@ export function AntiInflationBurnEventCard() {
     fetchStats();
   }, []);
 
-  const handleBurnDraw = async () => {
-    if (burning) return;
-    setBurning(true);
-    setErrorMsg(null);
-    setResultMsg(null);
-
-    try {
-      const res = await fetch('/api/events/burn-draw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ burnAmount: 10000 }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrorMsg(data.error || '소각 드로우 참여에 실패했습니다.');
-        setBurning(false);
-        return;
-      }
-
-      setResultMsg({
-        title: data.awardedTitle || '국고 수호자',
-        text: data.message || '10,000 WLD가 영구 소각되어 통화 가치를 지켰습니다!',
-      });
-      fetchStats();
-    } catch (err: any) {
-      setErrorMsg(err?.message || '네트워크 오류가 발생했습니다.');
-    } finally {
-      setBurning(false);
-    }
-  };
 
   return (
     <Card className="rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-950/20 via-background to-amber-950/20 shadow-xl overflow-hidden backdrop-blur-md relative">
@@ -109,7 +70,7 @@ export function AntiInflationBurnEventCard() {
 
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="border-amber-500/40 text-amber-400 bg-amber-500/10 text-xs px-3 py-1 font-mono font-bold">
-              누적 소각: {groupDigits(stats.totalBurnedWld)} WLD
+              누적 소각: {stats ? `${groupDigits(stats.totalBurnedWld)} WLD` : '미확인'}
             </Badge>
           </div>
         </div>
@@ -133,23 +94,12 @@ export function AntiInflationBurnEventCard() {
               </p>
             </div>
 
-            <Button
-              onClick={handleBurnDraw}
-              disabled={burning}
-              className="w-full h-10 font-bold rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white shadow-md shadow-rose-500/20"
-            >
-              {burning ? (
-                <>
-                  <RotateCw className="h-4 w-4 mr-2 animate-spin" />
-                  소각 및 칭호 추첨 중...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2 fill-white" />
-                  10,000 WLD 소각 드로우 참여
-                </>
-              )}
+            <Button disabled aria-describedby="burn-draw-hold" className="w-full h-10 font-bold rounded-xl">
+              원장 검증 전 참여 중단
             </Button>
+            <p id="burn-draw-hold" className="text-xs text-muted-foreground" role="status">
+              원장 정산과 중복 실행 방지가 검증될 때까지 WLD 차감 및 칭호 추첨을 진행하지 않습니다.
+            </p>
           </div>
 
           {/* 이벤트 2: 7일 락업 국고 방위 특별 국채 */}
@@ -197,23 +147,8 @@ export function AntiInflationBurnEventCard() {
           </div>
         </div>
 
-        {/* 당첨 결과 알림 */}
-        {resultMsg && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border border-amber-500/40 text-center animate-in fade-in zoom-in-95">
-            <p className="text-base font-extrabold text-amber-400 flex items-center justify-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-400 animate-spin" />
-              칭호 획득: [{resultMsg.title}]
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{resultMsg.text}</p>
-          </div>
-        )}
-
-        {errorMsg && (
-          <p className="text-xs text-destructive text-center font-medium">{errorMsg}</p>
-        )}
-
         {/* 최근 명예 소각자 롤링 칩 */}
-        {stats.recentWinners.length > 0 && (
+        {stats && stats.recentWinners.length > 0 && (
           <div className="pt-2 border-t border-border/40 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-muted-foreground font-semibold flex items-center gap-1 shrink-0">
               <Flame className="h-3.5 w-3.5 text-rose-500" /> 최근 명예 소각자:
