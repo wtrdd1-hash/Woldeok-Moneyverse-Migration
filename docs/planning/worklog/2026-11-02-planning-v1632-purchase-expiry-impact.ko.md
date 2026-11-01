@@ -1,6 +1,7 @@
 # 기획 v1632 — F675-214 상점 구매 전 보유품 만료일 재설정 영향 미리보기
+**v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
 
-**일자:** 2026-11-02 KST. **회차:** 이전 Feature Improvement v1630 → 현재 Feature Addition v1632 → 다음 Feature Improvement v1634(잠정). **상태:** 문서 후보 / DRAFT / RELEASE HOLD. **기준:** 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722, 미병합 Draft #2416 후속. 개발 인계 이슈 #2421 등록, Draft PR 작성 예정.
+**일자:** 2026-11-02 KST. **회차:** 이전 Feature Improvement v1630 → 현재 Feature Addition v1632 → 다음 Feature Improvement v1634(잠정). **상태:** 문서 후보 / DRAFT / RELEASE HOLD. **기준:** 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722, 미병합 Draft #2416 후속. 개발 인계 이슈 #2421 등록, Draft PR #2422 OPEN/HOLD.
 
 ## 시작·근거
 - miniPC Debian 13.6 서비스 정상, 개발 PostgreSQL 연결. 설치된 Superpowers using-superpowers·brainstorming·using-git-worktrees·writing-plans·verification-before-completion 직접 확인. skills__list가 URI를 반환하지 않아 skills__read 방식만 BLOCKED.

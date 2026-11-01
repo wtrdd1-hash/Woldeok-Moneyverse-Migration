@@ -1,6 +1,7 @@
 # Planning v1632 — F675-214 Catalogue Purchase Expiry-Restamp Impact Preview
+**v1632 GitHub:** Draft PR #2422 OPEN/HOLD (base #2416), developer handoff #2421. No merge or deployment.
 
-**Date:** 2026-11-02 KST. **Cycle:** Previous Feature Improvement v1630 → Current Feature Addition v1632 → Next Feature Improvement v1634 (provisional). **Status:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **Source:** latest origin/main a8541927c3a351d980454c66e95a3356c47e0722; stacked on unmerged Draft #2416. GitHub handoff issue #2421 created; child Draft PR pending.
+**Date:** 2026-11-02 KST. **Cycle:** Previous Feature Improvement v1630 → Current Feature Addition v1632 → Next Feature Improvement v1634 (provisional). **Status:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **Source:** latest origin/main a8541927c3a351d980454c66e95a3356c47e0722; stacked on unmerged Draft #2416. GitHub handoff issue #2421 created; child Draft PR #2422 OPEN/HOLD.
 
 ## START / evidence
 - miniPC Debian 13.6 health active, DEV PostgreSQL connected. Superpowers using-superpowers, brainstorming, using-git-worktrees, writing-plans and verification-before-completion inspected locally; skills__list yielded no URI, so skills__read route BLOCKED only.

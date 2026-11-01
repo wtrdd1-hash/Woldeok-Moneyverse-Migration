@@ -1,7 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
+**v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
 ## v2026.11.02.1632 — F675-214 상점 구매 전 보유품 만료일 재설정 영향 미리보기 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**회차:** 이전 Feature Improvement v1630 → 현재 Feature Addition v1632 → 다음 Feature Improvement v1634(잠정). 기술 정본은 origin/main a8541927c3a351d980454c66e95a3356c47e0722, AGENTS.md, README.md, 영어 PROJECT_PLAN.md이며 한국어 동등 계약으로 작성한다. 미병합 Draft #2416에 쌓는 별도 문서 브랜치이고 개발 인계 이슈 #2421 등록, 후속 Draft PR 작성 예정. F675-214는 **제안·미구현**이다. 04:09 KST 기준 Test·Production 공개 /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 최신 main과 다르다. Treasury v1620의 Production v1619 검증 기록은 해당 운영 전환에 대한 증거이지 전체 릴리스 승인이 아니다. DRAFT / RELEASE HOLD.
+**회차:** 이전 Feature Improvement v1630 → 현재 Feature Addition v1632 → 다음 Feature Improvement v1634(잠정). 기술 정본은 origin/main a8541927c3a351d980454c66e95a3356c47e0722, AGENTS.md, README.md, 영어 PROJECT_PLAN.md이며 한국어 동등 계약으로 작성한다. 미병합 Draft #2416에 쌓는 별도 문서 브랜치이고 개발 인계 이슈 #2421 등록, 후속 Draft PR #2422 OPEN/HOLD. F675-214는 **제안·미구현**이다. 04:09 KST 기준 Test·Production 공개 /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 최신 main과 다르다. Treasury v1620의 Production v1619 검증 기록은 해당 운영 전환에 대한 증거이지 전체 릴리스 승인이 아니다. DRAFT / RELEASE HOLD.
 
 ### 1. 사용자 문제, 실제 근거, 대안
 - **대상/목적:** 로그인 및 동의가 유효한 회원이 기간제 상품을 추가 구매할 때, 추가 수량만이 아니라 **기존 회원·상품 전체 보유품의 만료시각이 다시 설정될 수 있음**을 WLD 결제 전에 이해하게 한다. 실제 Production 손실이나 장애가 확인되었다는 뜻은 아니다. 진입점은 실제 /shop/catalog의 BuyForm이며 별도의 구형 /shop 구매 버튼이 아니다.
@@ -37,7 +38,7 @@
 9. **P1 IMPACT1632-09 (A/B/Admin):** 기본 OFF, 20명 이상 집계, 단계 배포·OFF 우선 롤백, 관리자 감사, 개인 분석 금지.
 10. **P1 IMPACT1632-10 (QA):** 격리 PG17 초기·업그레이드, 10,001개 보유품/동시 미리보기 100건, 수량 0/1/100, 신규·기존·만료·NULL·0수량, 마이크로초 경계, 타 회원 2명, 401/403/429/503/304/HEAD, 30초 STALE, 한영 320px, Android 계정 전환, 구매 멱등 재시도 1회 정산, 미리보기 전후 WLD/아이템/원장 변경 0. **모두 제안·미실행.**
 
-**근거 게이트:** 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 0건, 누적 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 신규 문서 브랜치 정책/보안/백업 171/171 PASS, 분류기 24/24 PASS, 확장 QA 193/194 PASS·1 FAIL(공성전 시뮬레이션 구형 검증 #2391). 원격 CI 예정이며 기능 수용시험 성공 근거가 아니다. F675-214 실제 수용시험·공식 Test 정확 SHA·독립 복원·운영승격은 이번 기획에서 미실행. DRAFT / RELEASE HOLD, 런타임 코드·DB 데이터·WLD·아이템·원장·Test·Production 변경 없음.
+**근거 게이트:** 외부 독립 레퍼런스 신규 검증·중복 제거·분류 승인 0건, 누적 승인 UNKNOWN / 10,000, BLOCKED / IN PROGRESS. 신규 문서 브랜치 정책/보안/백업 171/171 PASS, 분류기 24/24 PASS, 확장 QA 193/194 PASS·1 FAIL(공성전 시뮬레이션 구형 검증 #2391). 최종 SHA 원격 CI 예정이며 기능 수용시험 성공 근거가 아니다. F675-214 실제 수용시험·공식 Test 정확 SHA·독립 복원·운영승격은 이번 기획에서 미실행. DRAFT / RELEASE HOLD, 런타임 코드·DB 데이터·WLD·아이템·원장·Test·Production 변경 없음.
 
 
 **v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; 기준 #2410), 개발 인계 이슈 #2409. 병합·배포 없음.
