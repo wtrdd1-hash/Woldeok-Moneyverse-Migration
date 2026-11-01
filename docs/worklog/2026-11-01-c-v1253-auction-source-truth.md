@@ -28,3 +28,6 @@
 ### 08:48–08:51 KST — TDD RED/GREEN implementation
 - RED verified: backend source tests 2 failed (query returned sample rows / generic DB unavailable), frontend page tests 3 failed (old client-only demo and missing metadata). Captured `/tmp/mv-c1253-{backend,frontend}-red.log`.
 - Implemented service-level `503 marketplace_auction_source_unverified` before SQL, and authenticated noindex member page with no seeded amounts, bidding or live ticker. B #2221's write containment unchanged.
+
+### 2026-11-01 09:05 KST — Final-SHA regression repair
+- Final HEAD `93a8c96cd...` lint/typecheck/build PASS but full frontend tests **2 FAIL / 2,899 PASS**: admin console session tests used a fixed `idleExpiresAt=2026-11-01T00:00:00Z`, which expired precisely at 09:00 KST between the initial green and final rerun. No application security behavior was changed. Replaced the two *test-only* future receipt fixtures with relative future timestamps; retain fixed past-expiry rejection tests. All required gates must be rerun at new HEAD.
