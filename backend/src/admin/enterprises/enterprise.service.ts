@@ -4,6 +4,7 @@ import {
   type PrivateEnterpriseRow,
   type StateEnterpriseDividendLogRow,
   type StateEnterpriseRow,
+  type SoeGovernanceReceipt,
   type StateHoldingOverview,
 } from './enterprise.repository';
 
@@ -37,11 +38,14 @@ export class EnterpriseService {
     });
   }
 
-  async updateSoeStatus(code: string, status: string, dividendRateBps?: number): Promise<boolean> {
+  async updateSoeStatus(
+    code: string, status: string, dividendRateBps: number | undefined,
+    actorId: string, reason: string, idempotencyKey: string,
+  ): Promise<SoeGovernanceReceipt> {
     const validStatuses = ['ACTIVE', 'PAUSED', 'PRIVATIZING'];
     if (!validStatuses.includes(status)) {
       throw new Error(`유효하지 않은 공기업 운영 상태입니다: ${status}`);
     }
-    return this.repository.updateSoeStatus(code, status, dividendRateBps);
+    return this.repository.updateSoeStatus(code, status, dividendRateBps, actorId, reason, idempotencyKey);
   }
 }
