@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# v2026.10.27.1317 — hourly HTTP smoke + QA-owned disk scratch cleanup
+# v2026.11.01.1605 — hourly HTTP smoke + two-physical-disk bounded cache hygiene
 # This is NOT the five-pass authenticated/full-route functional QA certification.
 set -Eeuo pipefail
 
 BASE_URL="${MONEYVERSE_QA_URL:-https://easy-scraping.com}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 CLEANER="$SCRIPT_DIR/../../ops/storage/qa-disk-cleanup.mjs"
+DUAL_DISK="$SCRIPT_DIR/../../ops/storage/qa-dual-disk-maintenance.mjs"
 LOG_FILE="${MONEYVERSE_QA_LOG_FILE:-/var/log/moneyverse-hourly-qa.log}"
 STAMP="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
@@ -27,6 +28,12 @@ finalize() {
   /usr/bin/node "$CLEANER" || cleanup_rc=$?
   if ((cleanup_rc != 0)); then
     log "[QA_DISK_FAIL] QA-owned cleanup failed, code=$cleanup_rc"
+    ((rc != 0)) || rc=2
+  fi
+  local dual_disk_rc=0
+  /usr/bin/node "$DUAL_DISK" || dual_disk_rc=$?
+  if ((dual_disk_rc != 0)); then
+    log "[QA_DUAL_DISK_FAIL] bounded dual-physical-disk cache cleanup failed, code=$dual_disk_rc"
     ((rc != 0)) || rc=2
   fi
   exit "$rc"
