@@ -19,3 +19,6 @@
 
 ## FINISHED
 - Pending. Release HOLD until all required gates pass.
+
+## OVERLAP DISCOVERY / STOP — 2026-11-01 18:23 KST
+- Expanded active-PR review found Draft #2245 already implements this same comparison decoder and retry state with 29 focused tests. Do NOT open or merge a duplicate PR. This branch is retained as an auditable superseded experiment; no Test/Production changes. Pivot to a new independent worktree for a distinct dashboard defect.
