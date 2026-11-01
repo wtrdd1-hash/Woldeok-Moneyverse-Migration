@@ -10,3 +10,12 @@
 - [ ] Full exact-HEAD gates, PostgreSQL, app-api, CI, Test.
 - [ ] Mid and final main/plan recheck; PR and bilingual worklog; release decision.
 - Production/Test: HOLD until all required gates PASS.
+
+## Midpoint — 2026-11-02 08:20 KST
+- Re-fetched origin/main `a8541927c3a351d980454c66e95a3356c47e0722`; English plan SHA256 `0e18217e147699dbb04f2f85fa94308922a57889d5b070b3fe081ceff8b78c34`, Korean plan `2a384f4c842eac8ecf3813fcbcc6627fd08c98c3ccfabe1a17730d9f97f8cd12`, unchanged.
+- RED behavior: 5 failed/1 passed; malformed catalogue/holdings, unsafe WLD and repeated query values were not rejected.
+- GREEN: 10/10 focused parser+server-rendered page integration PASS. Invalid or unverified sources now hide financial action controls, show accessible retry and distinct error/verified-empty; `q[]` and overlong input no longer crash.
+- Contract: existing authenticated NestJS shop reads, SQL SECURITY DEFINER read models and server-authoritative purchase/settlement actions; no new DB schema or financial writes.
+- [x] RED source parser and search input tests.
+- [x] GREEN validation and page wiring.
+- [ ] Full exact-HEAD gates, PostgreSQL, app-api, CI, Test.
