@@ -15,7 +15,7 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
     },
   } as unknown as RequestWithSession;
 
-  it('가상 부동산 & 메타버스 랜드 엔드포인트 정상 동작', async () => {
+  it('real-estate endpoints refuse synthetic ownership and unledgered WLD receipts', async () => {
     const spaceServiceMock = {
       listUserSpaces: async () => [],
       listCityProjects: async () => [],
@@ -29,36 +29,41 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
     } as unknown as SpaceService;
 
     const controller = new SpaceController(spaceServiceMock);
-    const districts = await controller.listDistricts();
-    expect(districts.districts.length).toBeGreaterThan(0);
-    expect(districts.districts[0].id).toBe('district-gangnam-teheran');
+    for (const read of [
+      () => controller.listDistricts(),
+      () => controller.listRealEstateLands(),
+      () => controller.listMyRealEstateLands(mockReq),
+    ]) {
+      await expect(read()).rejects.toMatchObject({
+        status: 503,
+        response: { code: 'REAL_ESTATE_SOURCE_UNVERIFIED' },
+      });
+    }
 
-    const lands = await controller.listRealEstateLands();
-    expect(lands.lands.length).toBeGreaterThan(0);
-
-    const myLands = await controller.listMyRealEstateLands(mockReq);
-    expect(myLands.lands.length).toBeGreaterThan(0);
-
-    const purchaseRes = await controller.purchaseRealEstateLand(mockReq, {
+    await expect(controller.purchaseRealEstateLand(mockReq, {
       districtId: 'district-gangnam-teheran',
       landCode: 'LAND-TH-999',
       landTier: 'PRIME_HQ',
       priceWld: 25000000,
       idempotencyKey: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    })).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'REAL_ESTATE_LEDGER_UNAVAILABLE' },
     });
-    expect(purchaseRes.success).toBe(true);
-    expect(purchaseRes.receipt.code).toBe('LAND-TH-999');
 
-    const rentRes = await controller.rentRealEstateLand(mockReq, 'land-001', {
+    await expect(controller.rentRealEstateLand(mockReq, 'land-001', {
       dailyRentWld: 50000,
       depositWld: 500000,
       idempotencyKey: 'a1b2c3d4-e5f6-7890-abcd-ef1234567891',
+    })).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'REAL_ESTATE_LEDGER_UNAVAILABLE' },
     });
-    expect(rentRes.success).toBe(true);
 
-    const settleRes = await controller.settleLandRent(mockReq, 'land-001');
-    expect(settleRes.success).toBe(true);
-    expect(settleRes.settledAmountWld).toBe(144000);
+    await expect(controller.settleLandRent(mockReq, 'land-001')).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'REAL_ESTATE_LEDGER_UNAVAILABLE' },
+    });
   });
 
   it('derivatives read APIs reject unverified synthetic markets, positions and settlement history', async () => {
