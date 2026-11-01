@@ -60,12 +60,27 @@ test('live admin blog and grants pages have navigation entries', () => {
   assert.match(categories, /href: '\/admin\/treasury\/grants'/);
 });
 
-test('quant, warfare and derivatives must not falsely claim persistent executions', () => {
-  for (const name of ['frontend/src/app/tools/quant-studio/page.tsx','frontend/src/app/clubs/warfare/page.tsx','frontend/src/app/stocks/derivatives/page.tsx']) {
-    assert.match(read(name), /시뮬레이션|미리보기/);
-  }
+test('quant explicitly identifies simulated execution', () => {
   const quant = read('frontend/src/app/tools/quant-studio/page.tsx');
+  assert.match(quant, /시뮬레이션|미리보기/);
   assert.doesNotMatch(quant, /setBots\(\(prev\) => \[newBot/);
+});
+
+test('disabled derivatives require a member and never report unverified trades', () => {
+  const derivatives = read('frontend/src/app/stocks/derivatives/page.tsx');
+  assert.match(derivatives, /await requireMember\(\)/);
+  assert.match(derivatives, /현재 파생상품 거래를 이용할 수 없습니다/);
+  assert.match(derivatives, /확인되지 않은 잔액, 체결, 청산가 또는 보호 보장을 표시하지 않습니다/);
+  assert.match(derivatives, /이 화면에서는 WLD가 차감되지 않습니다/);
+});
+
+test('disabled warfare requires a member and never reports an unverified payout', () => {
+  const warfare = read('frontend/src/app/clubs/warfare/page.tsx');
+  assert.match(warfare, /await requireMember\(\)/);
+  assert.match(warfare, /api<\{ clubs: unknown \}>\('\/api\/v1\/clubs\?limit=50'\)/);
+  assert.match(warfare, /if \(\!Array\.isArray\(response\.clubs\) \|\| \!response\.clubs\.every\(isVerifiedClub\)\) return null/);
+  assert.match(warfare, /공성전 기능은 현재 이용할 수 없습니다/);
+  assert.match(warfare, /거래 또는 지급이 완료된 것으로 표시하지 않습니다/);
 });
 
 test('exposed blog operations page enforces elevated admin console before rendering', () => {
