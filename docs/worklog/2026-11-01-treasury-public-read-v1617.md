@@ -9,3 +9,13 @@
 - Gauge 0-state displays verified current 0 WLD/reserve 0/available 0 and does NOT claim compliance with 30% reserve policy. Updated obsolete fixture expectation and created forged/duplicate vault, overdraw, stale timestamp, overflow-string and payout negative tests.
 - Related frontend 18 tests PASS, TS typecheck PASS, ESLint PASS. Existing release identity/public-edge scripts still insist public Treasury **always** returns 503. Until a separate independent certified-200 acceptance gate is created, exact Test→Production deployment must remain HOLD; those release guards were not bypassed.
 ## FINISH — pending full CI, native Test and deployment gates
+
+## MIDPOINT 2 — 2026-11-01 KST
+- Source exact SHA 8add2becb2602451f8c37dfa7fb847221b1ab7bd pushed as stacked Draft PR #2382. Targeted frontend 18/18 PASS; TypeScript PASS; ESLint PASS. Next production compilation/build PASS, but standalone output traced 27 dependencies outside isolated worktree because its node_modules symlinks reference the older dependency worktree. This is not yet a deployable immutable artifact.
+- Real official Test DB queried under moneyverse_app with new repository code: current epoch RECONCILED, balances 0, zero circulation and null circulation ratio; in-process PublicTreasuryController returns success true/0 WLD. Old live Test BFF still returns 503, proving UI hardcode, not a fiscal proof failure.
+- Started localhost-only private Next candidate on 4517; received 503 because isolated unit lacked API_ORIGIN (the official Test frontend has it configured). Private service stopped; the 503 is not credited as a successful E2E. Real candidate needs Test-equivalent internal environment and authenticated acceptance.
+- Identity/public-edge release gates intentionally insist on 503 and are not weakened or bypassed. Entire PR CI in progress. No live Test/Production service, DB, member balance, payout or issuing operation changed.
+
+## MIDPOINT 3 — 2026-11-01 KST
+- GitHub full CI #41308950253 SUCCESS for application code SHA 8add2bec. The first isolated package build emitted missing standalone trace because node_modules pointed into an older worktree. Replaced only those three dependency symlinks with a true offline frozen-lockfile install, ran package contract build, and rebuilt exact Next SHA 8add2bec successfully with no outside-worktree trace warnings. Standalone frontend server.js present.
+- Inactive release staging was correctly blocked while there were uncommitted worklog updates and a generated frontend/.build_id. No official Test/Production process or DB touched. Existing public Treasury identity gate still only accepts 503, so 200-acceptance production promotion not certified.
