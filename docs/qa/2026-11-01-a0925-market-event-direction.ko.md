@@ -7,3 +7,5 @@
 - 개발 PostgreSQL 17.11에서 moneyverse_app 읽기 전용 실행: 함수 EXECUTE 허용, 전체 3건/호재 3건/악재 0건, 필터 결과 3/0건, ROLLBACK. 실제 Test 인증 E2E를 대신하지 않음. 개발 DB의 user_items DELETE, account_balances UPDATE 직접 권한은 기존 P0 위반이며 운영 DB에도 동일하다고 단정하지 않음.
 - Test 공개 SHA `bc8cd8a6...`, Production API SHA `353c6d5d...`로 후보와 불일치. 정확 SHA Test 인증·접근성 브라우저 E2E·독립 복원·GitOps·운영 출처 증거 미충족. 병합/배포/DB 쓰기/재시작 없음.
 - 시작 원격 브랜치 64개/열린 PR 62개. 기존 브랜치 삭제 없음. 최종 SHA CI 완료 전 PASS로 판정하지 않음.
+
+- Draft PR #2293 생성 후 원격 브랜치 65개/열린 PR 63개. 기존 브랜치 삭제 0개, 미통합 변경 보존. 최초 코드·기록 SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`, 후속 기록 SHA는 PR 참조. 최종 SHA CI 진행 중으로 PASS 미판정.

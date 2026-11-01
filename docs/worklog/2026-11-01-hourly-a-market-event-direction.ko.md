@@ -7,3 +7,5 @@
 **중간:** main과 기획서 재확인, 변동 없음. 개발 DB의 실제 호재 3건·악재 0건을 읽기 전용 확인 후 ROLLBACK. Frontend 전체 관리자 세션 2건 실패는 변경하지 않은 main에서도 재현. 개발 DB P0 직접 DML 권한 위반 잔존.
 
 **종료:** Backend 전체 2,960 PASS/517 SKIP, Frontend 전체 2,904 PASS/2 FAIL 및 워커 오류, DB 단위 62 PASS/4 SKIP, 모바일 API 계약 184 PASS, 보안 10 PASS, 타입검사 PASS, Lint 오류 0, 단일 워커 빌드 PASS. 정확 SHA 공식 Test E2E·운영 승격 차단. 브랜치 삭제·main 병합·배포·서비스 재시작·DB 변경·롤백 없음. 증거: `/srv/moneyverse-data/tasks/mv-a-20261101-0925-market-event-filter/evidence/`.
+
+**GitHub 종료:** Draft PR #2293, 원격 브랜치 65개/열린 PR 63개, 삭제·병합 0건. 최초 코드 SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`; 최종 기록 SHA는 PR에 기재. 정확 SHA CI 진행 중.
