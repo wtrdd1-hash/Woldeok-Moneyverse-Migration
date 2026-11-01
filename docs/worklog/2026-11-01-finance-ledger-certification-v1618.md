@@ -22,3 +22,6 @@ Strategy: preserve legacy 238 payouts and 50,000 WLD archived as unverified, nev
 
 ## MIDPOINT v1618.4 — 2026-11-01 23:59 KST
 - Added new disposable-GitHub-PostgreSQL-only Treasury Core NPS fixture with real application role, exact NPS deposit and 95/5 withdrawal, duplicate replay, single journal transaction keys, five balanced postings, immutable receipts, negative idempotency and unbacked payout, global money conservation and outer ROLLBACK. CI guard enforces localhost moneyverse_migrator database only. Integration acceptance is NOT claimed until the actual GitHub test job succeeds.
+
+## MIDPOINT v1618.5 — 2026-11-02 00:02 KST
+- Public release gate previously rejected all HTTP 200 Treasury even when independent scoped fiscal proof certified current 0 WLD. Introduced shared narrow `safeTreasuryEdgeResponse`: retains old 503 fail-closed response; accepts HTTP200 only if current total/available/reserve all literal `0`, historical payout/burn unknown, no beneficiary or program claims, eligibility false, empty history and private no-store. Never authorizes minting or pensions. Both exact host and isolated public Test gates share it, with forged payout/positive WLD negative tests. 28 source unit tests PASS. This is not proof of public Test session continuity or Production promotion.

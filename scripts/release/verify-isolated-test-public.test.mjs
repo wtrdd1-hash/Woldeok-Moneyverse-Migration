@@ -40,6 +40,34 @@ test('rejects missing, stale or timestamp-only backend and frontend identity', (
   }
 });
 
+function certifiedCurrentZero() {
+  return {
+    ok: true, status: 'RECONCILED',
+    overview: {
+      verified: true, totalBalanceWld: '0',
+      availableBalanceWld: '0', safeReserveWld: '0',
+      totalCumulativeDisbursedWld: '—', totalBurnedWld: '—',
+      beneficiaryCount: null, activeProgramsCount: 0,
+      lastDisbursedAt: '', reserveRatioPercent: 30,
+    },
+    userEligibility: {
+      isLoggedIn: false, citizenDividendEligible: false,
+      emergencyReliefEligible: false, bondBoosterEligible: false,
+      activeGrantApplied: false, userCashBalance: '—',
+    },
+    recentLedger: [],
+  };
+}
+
+test('accepts independently certified current Treasury zero and rejects any invented historical payouts', () => {
+  const snapshot = valid();
+  snapshot.treasuryStatus = 200;
+  snapshot.treasuryBody = certifiedCurrentZero();
+  assert.equal(verifyIsolatedTestPublicEvidence(snapshot).ok, true);
+  snapshot.treasuryBody.overview.totalCumulativeDisbursedWld = '100';
+  assert.ok(verifyIsolatedTestPublicEvidence(snapshot).failures.includes('public_treasury_not_fail_closed'));
+});
+
 test('rejects a synthetic Treasury HTTP 200 and any disclosed ledger row', () => {
   const synthetic = valid();
   synthetic.treasuryStatus = 200;

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { safeTreasuryEdgeResponse } from './certified-treasury-edge-evidence.mjs';
 /**
  * Read-only host release gate. Rejects a public version that is inconsistent with
  * the release actually used by both systemd services. This is an identity gate,
@@ -141,14 +142,7 @@ export function verifyHostRuntimeIdentity(snapshot) {
   // by the public edge. In particular, stale Test builds used to return invented
   // disbursement receipts while the backend advertised the expected SHA.
   const treasury = snapshot?.publicTreasury;
-  const cacheDirectives = (treasury?.cacheControl ?? '').toLowerCase().split(',').map((part) => part.trim());
-  const body = treasury?.body;
-  if (treasury?.status !== 503 || !cacheDirectives.includes('private') ||
-      !cacheDirectives.includes('no-store') || body?.ok !== false ||
-      body?.status !== 'UNVERIFIED' ||
-      body?.code !== 'PUBLIC_TREASURY_RECONCILIATION_PENDING' ||
-      body?.overview?.verified !== false || body?.overview?.totalBalanceWld !== '—' ||
-      !Array.isArray(body?.recentLedger) || body.recentLedger.length !== 0) {
+  if (!safeTreasuryEdgeResponse(treasury?.status, treasury?.cacheControl, treasury?.body)) {
     fail('public_treasury_not_fail_closed');
   }
 
