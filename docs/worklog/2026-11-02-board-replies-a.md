@@ -28,3 +28,8 @@
 - **Branch audit:** start 158 remote branches (including main), 141 open PRs; midpoint 160 remote branches, 146 unique unmerged, 13 ancestor-only, 141 open PRs, 29 reported conflicting. No deletions: preserve all unique work and ancestor-only branches still potentially owned by other PRs/worktrees.
 - **Test/Production:** Test public version `510dbe6...`, Production backend `353c6d5...`; neither is this candidate. Official exact-SHA Test authenticated E2E, independent restore, P0 ACL/finance and GitOps remain BLOCKED. No main merge, Test/Production deployment, DB/ledger write, service restart or rollback. Release HOLD.
 - **GitHub:** Draft PR #2399. Local evidence under `/srv/moneyverse-data/tasks/mv-a-20261102-0025-board-replies/evidence/`.
+
+## v4 verification follow-up (2026-11-02 00:57 KST)
+- Independently reviewed the existing P1 implementation; discovered uppercase/lowercase UUID alias could bypass Android duplicate identity verification. Added RED regression, fixed canonical UUID duplicate check, and added Android HTTP 503 regression. Targeted 20 PASS after one observed RED failure.
+- Re-fetched unchanged main and mutable English/Korean planning docs. Remote branches 160 including main, 147 unique unmerged / 12 ancestor-only; 143 Draft PRs, 29 conflicts. No branch deletion, no collision with B/C worktrees.
+- Re-run exact v4 SHA full gates before any merge; previous full-suite evidence remains scoped to its original SHA. Official Test/Production and rollback remain HOLD.

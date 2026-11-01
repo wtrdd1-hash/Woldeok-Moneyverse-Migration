@@ -19,11 +19,12 @@ export function isVerifiedRepliedPosts(payload: unknown): boolean {
     if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
     const post = row as Record<string, unknown>;
     if (typeof post.postId !== 'string' ||
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(post.postId) ||
-        ids.has(post.postId)) return false;
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(post.postId)) return false;
+    const canonicalPostId = post.postId.toLowerCase();
+    if (ids.has(canonicalPostId)) return false;
     if (typeof post.commentCount !== 'number' || !Number.isSafeInteger(post.commentCount) ||
         post.commentCount < 1) return false;
-    ids.add(post.postId);
+    ids.add(canonicalPostId);
   }
   return true;
 }

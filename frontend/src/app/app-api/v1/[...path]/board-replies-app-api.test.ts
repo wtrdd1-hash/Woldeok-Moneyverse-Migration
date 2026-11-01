@@ -37,6 +37,8 @@ describe('Android public board replied-only source verification', () => {
     { posts: [] },
     { posts: [post] },
     { posts: [{ ...post, commentCount: 0 }], appliedFilters: { repliedOnly: true, scope: 'latest50' } },
+    { posts: [post, { ...post, postId: post.postId.toUpperCase() }],
+      appliedFilters: { repliedOnly: true, scope: 'latest50' } },
   ])('rejects an unverified HTTP 200 response', async (payload) => {
     stub(payload);
     const response = await GET(new NextRequest(`${base}?replied=1`, { headers }), path);

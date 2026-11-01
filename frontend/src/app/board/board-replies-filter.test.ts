@@ -23,5 +23,9 @@ describe('public board replied-only filter', () => {
     expect(isVerifiedRepliedPosts({ ...valid, posts: [{ ...valid.posts[0], commentCount: 1.5 }] })).toBe(false);
     expect(isVerifiedRepliedPosts({ ...valid, posts: Array(51).fill(valid.posts[0]) })).toBe(false);
     expect(isVerifiedRepliedPosts({ ...valid, posts: [valid.posts[0], valid.posts[0]] })).toBe(false);
+    expect(isVerifiedRepliedPosts({ ...valid, posts: [
+      { ...valid.posts[0], postId: 'aaaaaaaa-2222-4333-8444-555555555555' },
+      { ...valid.posts[0], postId: 'AAAAAAAA-2222-4333-8444-555555555555' },
+    ] })).toBe(false);
   });
 });

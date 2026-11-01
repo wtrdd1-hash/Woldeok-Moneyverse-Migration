@@ -40,3 +40,9 @@
 - Preserve every branch with unique unmerged commits. Ancestor-only branches also remain because other worktrees/PRs may own them; no destructive cleanup without ownership confirmation.
 
 **Release decision:** DRAFT/HOLD. Only merge after final exact-head CI and full required gates, official Test exact SHA backend/frontend/DB/auth/mobile E2E, independent restore and finance/ACL/GitOps approval. Candidate code has no migration to roll back; reverting the feature commit after review removes the optional filter without altering ledger data.
+
+## v4 independent regression hardening — 2026-11-02 00:57 KST
+- Re-reviewed the exact candidate in isolated A worktree against unchanged origin/main `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, canonical English/Korean plans, QA and PRs. Identified that a success-shaped Android board response containing the same UUID in uppercase and lowercase hex was accepted as two distinct posts.
+- TDD RED: 1 failure / 9 passes (`evidence/red-uuid-canonical.log`). Canonical UUID lowercasing before duplicate comparison fixes the case-insensitive identity collision; GREEN: 20/20 targeted web and Android tests (`evidence/green-uuid-canonical.log`), including HTTP 503 for malformed duplicate-identity success. No new permissions, migration or financial mutation.
+- Fresh remote audit: 160 remote branches including main; 159 non-main, 147 with unmerged unique commits and 12 ancestors; 143 open Draft PRs, 29 conflicting. Preserve every branch: no deletion because owner/worktree references are not fully proven.
+- **The previous full-suite PASS belongs to the prior SHA, not this v4 candidate.** Run all mandatory gates again at the committed v4 SHA; report exact results and blockers in PR #2399. No main merge or deployment without official exact-SHA Test and release evidence.

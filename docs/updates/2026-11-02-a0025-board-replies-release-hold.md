@@ -5,3 +5,8 @@
 Local Backend/Frontend full suites, builds, typecheck, lint, generated Android contract, security subset and real DEV PostgreSQL read-only query passed. This is not sufficient release evidence. The official Test stack has not run this candidate SHA; authenticated Test frontend/backend/API/DB/mobile E2E, independent external restore, finance reconciliation and least-privilege review are outstanding. DEV app role can still UPDATE `account_balances` and DELETE `user_items` (#993). Prior QA v1448 reported independent Production P0 concerns. Final GitHub exact-head CI must be reviewed separately.
 
 **Rollback:** no runtime rollout occurred, so no operational rollback needed. A reviewed revert of the isolated feature commit removes the optional filter; no migration, balance, ledger or applied SQL is changed. Do not remove other contributors' unmerged branches or alter the production GitOps manifest.
+
+## v4 hold checkpoint
+- Canonical UUID deduplication hardened after a failing Android response regression; targeted 20 PASS. Prior full-suite PASS cannot be transferred to v4 SHA; require new exact-SHA gates.
+- Unchanged main `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`; 143 open Draft PRs / 29 conflicts; protect 147 branches with unique unmerged commits.
+- Release remains HOLD pending official Test exact SHA, authenticated E2E, independent restore, DEV/Production least privilege, financial integrity and GitOps.
