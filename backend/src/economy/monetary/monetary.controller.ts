@@ -1,6 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -45,6 +47,7 @@ export class MonetaryController {
   }
 
   @Post('auto-regulation/update')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '화폐량 자동 조절 설정값 변경' })
   async updateAutoRegulation(
     @Body()
@@ -67,6 +70,7 @@ export class MonetaryController {
   }
 
   @Post('auto-regulation/run')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '화폐량 자동 조절 즉시 1회 수동 평가 및 집행' })
   async runAutoRegulationManually(@Req() _req: RequestWithSession) {
     return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
@@ -85,6 +89,7 @@ export class MonetaryController {
   }
 
   @Post('ai-council/propose-policy')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'AI 정책 위원회 권고안 기반 통화정책 명령서 자동 등록 (PROPOSED)' })
   async proposeFromAiCouncil(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -111,6 +116,7 @@ export class MonetaryController {
   }
 
   @Post('orders/propose')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '신규 통화정책 명령서 발의 (PROPOSED)' })
   async proposeOrder(
     @Req() req: RequestWithSession,
@@ -135,6 +141,7 @@ export class MonetaryController {
   }
 
   @Post('orders/:id/approve')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '통화정책 명령서 공식 승인 (APPROVED)' })
   async approveOrder(@Req() req: RequestWithSession, @Param('id') orderId: string) {
     const adminId = requireUserId(req);
@@ -142,6 +149,7 @@ export class MonetaryController {
   }
 
   @Post('freeze')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '신규 통화 발행 긴급 동결' })
   async freeze(@Req() req: RequestWithSession, @Body('reason') reason: string) {
     const adminId = requireUserId(req);
@@ -149,6 +157,7 @@ export class MonetaryController {
   }
 
   @Post('unfreeze')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '통화 발행 긴급 동결 해제' })
   async unfreeze(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -174,6 +183,7 @@ export class MonetaryController {
   }
 
   @Post('execute-mint')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
   async executeMint(
     @Req() _req: RequestWithSession,
