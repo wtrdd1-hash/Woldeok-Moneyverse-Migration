@@ -20,6 +20,7 @@ describe('unanswered public board discovery', () => {
     expect(isVerifiedUnansweredBoardResponse({ posts: [], appliedFilters: { unansweredOnly: true, scope: 'latest50' } })).toBe(true);
     expect(isVerifiedUnansweredBoardResponse({ posts: Array.from({ length: 51 }, () => ({ postId, commentCount: 0 })), appliedFilters: { unansweredOnly: true, scope: 'latest50' } })).toBe(false);
     expect(isVerifiedUnansweredBoardResponse({ results: [] })).toBe(false);
+    expect(isVerifiedUnansweredBoardResponse({ posts: [] })).toBe(false); // no backend filter attestation
   });
   it('uses a labelled GET control, preserves stock/title filters, and excludes filtered results from SEO', () => {
     const page = readFileSync('src/app/board/page.tsx', 'utf8');

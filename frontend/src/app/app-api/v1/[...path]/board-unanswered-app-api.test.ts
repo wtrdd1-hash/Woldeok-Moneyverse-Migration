@@ -31,12 +31,12 @@ describe('Android unanswered board filter', () => {
     expect(url.searchParams.get('q')).toBe('help');
     expect(url.searchParams.get('stock')).toBe('WDX');
   });
-  it.each(['?unanswered=0', '?unanswered=1&unanswered=1', '?unanswered=true', '?unanswered=1&unknown=1'])('rejects invalid filters without forwarding %s', async (query) => {
+  it.each(['?unanswered=0', '?unanswered=1&unanswered=1', '?unanswered=true', '?unanswered=1&unknown=1', '?unanswered=1&stock=A&stock=B', '?unanswered=1&q=a&q=b'])('rejects invalid filters without forwarding %s', async (query) => {
     const { response, upstream } = await run(query, { posts: [] });
     expect(response.status).toBe(400);
     expect(upstream).not.toHaveBeenCalled();
   });
-  it.each([{ posts: [{ postId: id, commentCount: 2 }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: [{ postId: id }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: [{ postId: id, commentCount: 0 }, { postId: id.toUpperCase(), commentCount: 0 }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: 'none' }])(
+  it.each([{ posts: [{ postId: id, commentCount: 2 }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: [{ postId: id }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: [{ postId: id, commentCount: 0 }, { postId: id.toUpperCase(), commentCount: 0 }], appliedFilters: { unansweredOnly: true, scope: 'latest50' } }, { posts: 'none' }, { posts: [] }])(
     'rejects unverified HTTP 200 payload %j', async (payload) => {
       const { response } = await run('?unanswered=1', payload);
       expect(response.status).toBe(503);
