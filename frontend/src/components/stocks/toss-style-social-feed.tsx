@@ -6,9 +6,9 @@ export function TossStyleSocialFeed({ posts }: { readonly posts: readonly Verifi
   return (
     <section aria-labelledby="stock-feed-heading" className="mx-auto w-full max-w-4xl space-y-5">
       <div className="rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-6">
-        <h2 id="stock-feed-heading" className="text-xl font-bold text-white sm:text-2xl">
+        <h1 id="stock-feed-heading" className="text-xl font-bold text-white sm:text-2xl">
           주식 종목별 공개 토론
-        </h2>
+        </h1>
         <p className="mt-2 text-sm leading-6 text-slate-300">
           최근 공개 게시글 최대 50건 중 종목이 지정된 글만 표시합니다. 종목·투자 의견은 작성자의
           게시 내용이며 실제 보유량, 수익률 또는 거래 체결 인증이 아닙니다.
