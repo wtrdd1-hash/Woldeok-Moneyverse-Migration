@@ -25,6 +25,16 @@ describe('Android published announcement body search', () => {
     expect(response.status).toBe(503);
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
   });
+  it('fails closed on non-JSON and empty upstream successes', async () => {
+    for (const upstream of [
+      new Response('not-json', { status: 200, headers: { 'content-type': 'text/plain' } }),
+      new Response(null, { status: 204 }),
+    ]) {
+      vi.stubGlobal('fetch', vi.fn(async () => upstream.clone()));
+      const response = await GET(req('?body=%EC%84%9C%EB%B2%84'), context);
+      expect(response.status).toBe(503);
+    }
+  });
   it('forwards body and preserves no-store/noindex on verified response', async () => {
     const spy = vi.fn(async () => new Response(JSON.stringify({ announcements: [row] }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public,max-age=3600' } }));
     vi.stubGlobal('fetch', spy);

@@ -77,6 +77,19 @@ export default async function AnnouncementsPage() {
         />
       )}
 
+      <form method="get" action="/announcements/body" role="search"
+        className="flex flex-wrap items-end gap-3 rounded-xl border border-border/50 bg-card p-4">
+        <label htmlFor="notice-body" className="grid min-w-0 flex-1 gap-1 text-sm font-semibold">
+          공지 본문 검색
+          <input id="notice-body" name="body" type="search" maxLength={80}
+            placeholder="본문에 포함된 단어" required
+            aria-describedby="notice-body-scope"
+            className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-sm" />
+        </label>
+        <button type="submit" className="min-h-11 rounded-md bg-amber-600 px-4 py-2 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">검색</button>
+        <p id="notice-body-scope" className="w-full text-xs text-muted-foreground">공개 조회 함수가 반환한 최근 공지 최대 20건의 본문에서만 검색합니다. 전체 과거 공지 검색이 아닙니다.</p>
+      </form>
+
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED NOTICE"

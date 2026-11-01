@@ -1,3 +1,4 @@
+import { parseAnnouncementBodyFilter } from './announcement-body';
 import {
   BadRequestException,
   Body,
@@ -10,12 +11,13 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -167,9 +169,10 @@ export class ContentController {
   }
 
   @Get('announcements')
+  @ApiQuery({ name: 'body', required: false, description: 'Substring within the latest 20 published notice bodies (1–80 characters)' })
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    return { announcements: await this.service().publicAnnouncements({ body: parseAnnouncementBodyFilter(query) }) };
   }
 
   @Get('photos')

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { parseAnnouncementFilters, verifiedAnnouncementBody } from './announcement-body';
+import { parseAnnouncementBodyFilter, verifiedAnnouncementBody } from './announcement-body';
 
 describe('public announcement body search query and evidence', () => {
-  it('rejects duplicate, unsupported and unsafe keys, composes sort', () => {
-    expect(parseAnnouncementFilters(new URLSearchParams())).toEqual({ sort: 'pinned', body: null });
-    expect(parseAnnouncementFilters(new URLSearchParams('body=%20server%20&sort=oldest'))).toEqual({ sort: 'oldest', body: 'server' });
+  it('rejects duplicate, unsupported and unsafe keys, rejects sort', () => {
+    expect(parseAnnouncementBodyFilter(new URLSearchParams())).toEqual({ body: null });
+    expect(parseAnnouncementBodyFilter(new URLSearchParams('body=%20server%20'))).toEqual({ body: 'server' });
     for (const query of ['body=x&body=y', 'body=', 'body=%3C', 'body=a%00b', 'body=x&secret=1', 'body=x&sort=oldest&sort=newest']) {
-      expect(parseAnnouncementFilters(new URLSearchParams(query))).toBeNull();
+      expect(parseAnnouncementBodyFilter(new URLSearchParams(query))).toBeNull();
     }
   });
   it('rejects stale upstream success and accepts verified published matching rows', () => {

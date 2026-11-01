@@ -11,9 +11,15 @@
 - Process: TDD RED -> implementation GREEN -> full local gates -> fresh main recheck -> PR; no merge/deploy without release gates.
 
 ## In progress
-- Planned: strict query parser, Nest web/Android endpoints, shared published snapshot filtering, Next accessible search form, Android response verification, regression tests, contract update.
+- Planned: strict body-only query parser, Nest web/Android endpoints, shared published snapshot filtering, Next accessible search form, Android response verification, regression tests, contract update.
 - RED evidence: backend and frontend Vitest fail to import missing announcement-body module; logs evidence/red-backend.log and evidence/red-frontend.log at 21:29 KST. Tests were written before implementation.
-- Status: implementing minimal shared snapshot filters.
+- Mid-run main SHA rechecked: `3d5e321c3d1221febff677469fecdfcb3cf42e7d` unchanged. Latest planning Draft #2375 remains unmerged and is not runtime authority.
+- Implementation: bounded body-only case-insensitive search via existing published SECURITY DEFINER read, strict Nest and Android query validation, separate /announcements/body noindex web route, Android stale-200 rejection. No migrations or direct table grants.
+- TDD GREEN: Backend 4/4; frontend initial 6/6; additional non-JSON/204 Android RED reproduced and fixed, final target 7/7.
+- Full local backend 2,974 PASS / 518 SKIP, frontend 2,910 PASS before the additional Android non-JSON guard; final targeted Android tests 7 PASS. Database 62 PASS / 4 SKIP. Typecheck, builds, full lint (0 errors / 1,027 warnings), API contract (184 endpoints), security (10 PASS) succeeded. Full final frontend rerun pending.
+- Real DEV PostgreSQL read: published function EXECUTE=true for app role, one published notice, zero matching `서버`; DEV app role direct announcements SELECT=true violates least privilege P0 #993. No write.
+- Next build still marks canonical /announcements dynamic, as in preceding A build; it retains its original revalidate=60 and no-searchParams behavior. Search-only route is explicitly dynamic/noindex. No claim that canonical is statically prerendered.
+- Status: code complete, awaiting final verification, PR, exact SHA CI, official Test/Production gates.
 
 ## Finished
 - Pending evidence. Production and Test must remain unchanged.
