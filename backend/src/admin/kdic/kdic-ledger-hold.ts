@@ -15,3 +15,14 @@ export function rejectUnverifiedKdicSettlement(): never {
     message: 'KDIC financial settlement is suspended pending verified ledger and authorization controls',
   });
 }
+
+/** Public coverage cannot be certified from legacy insurance summary tables.
+ * No statutory KRW insurance applies to in-service virtual WLD balances.
+ * Keep the hold independent of admin-only ledger diagnostics or service mocks.
+ */
+export function rejectUnverifiedKdicCoverage(): never {
+  throw new ServiceUnavailableException({
+    code: 'KDIC_COVERAGE_UNVERIFIED',
+    message: 'Virtual WLD deposit insurance and payout eligibility are not verified',
+  });
+}
