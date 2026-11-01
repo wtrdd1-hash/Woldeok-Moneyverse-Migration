@@ -92,9 +92,13 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'editedOnly', required: false, type: String, description: '1: only edited posts within latest 50 public posts' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'editedOnly')) {
       throw new BadRequestException('invalid board search');
+    }
+    if (query.editedOnly !== undefined && query.editedOnly !== '1') {
+      throw new BadRequestException('invalid edited posts filter');
     }
     const stock = query.stock;
     const q = query.q;
@@ -115,7 +119,9 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(
+        stock as string | undefined, q as string | undefined, query.editedOnly === '1',
+      ),
     };
   }
 }

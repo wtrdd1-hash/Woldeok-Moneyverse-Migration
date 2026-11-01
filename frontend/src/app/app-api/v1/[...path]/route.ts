@@ -3,6 +3,7 @@ import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
+import { isVerifiedEditedBoardPosts } from '@/lib/board-edited';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
@@ -111,6 +112,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const editedBoardPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const editedValues = editedBoardPath ? request.nextUrl.searchParams.getAll('editedOnly') : [];
+  if (editedBoardPath && (editedValues.length > 1 ||
+      (editedValues.length === 1 && editedValues[0] !== '1') ||
+      (editedValues.length === 1 && [...request.nextUrl.searchParams.keys()].some(
+        (key) => key !== 'stock' && key !== 'q' && key !== 'editedOnly')))) {
+    return gatewayProblem(400, 'Bad Request', 'board_edited_filter_invalid', 'editedOnly must be 1 when provided');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +282,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (editedBoardPath && editedValues.length === 1 && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedEditedBoardPosts(await response.clone().json(),
+            request.nextUrl.searchParams.get('stock'), request.nextUrl.searchParams.get('q'))) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_edited_unverified',
+          'edited public posts could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_edited_unverified',
+        'edited public posts could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -583,17 +608,14 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
-  // Query-specific public board results are not stable crawlable pages.
+  // Filtered public board snapshots are non-indexable and must not be cached,
+  // including upstream failures and HEAD responses.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
+      parts[2] === 'stock-posts' &&
+      (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('editedOnly'))) {
+    response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
