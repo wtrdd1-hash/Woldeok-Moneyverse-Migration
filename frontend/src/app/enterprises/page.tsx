@@ -1,112 +1,50 @@
 import type { Metadata } from 'next';
-import { Building2, Zap, Globe2, Landmark, CheckCircle2, FileText, ArrowRight } from 'lucide-react';
+import { Building2, Zap, Globe2, Landmark, FileText, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicApi } from '@/lib/api';
-import { groupDigits } from '@/lib/money';
+import { formatEnterpriseWld, parsePublicEnterpriseDisclosure } from './public-enterprise-evidence';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '국가 공기업 경영정보 공개 (ALIO) | 머니버스 공공 거버넌스',
-  description: '월덱 국가투자공사(WSHC) 산하 3대 국가 기간 공기업(W-Power, W-Net, WDB) 및 민간 상장 기업의 경영실적, 배당 납입, 경영평가 대국민 투명 공시 포털입니다.',
+  title: '공기업 경영정보 조회 | 머니버스',
+  description: '서버에서 확인된 공기업의 자산 및 시간당 경영 추정치를 조회합니다. 국고 배당 납입 증빙과는 구분됩니다.',
+  robots: { index: false, follow: false },
 };
 
-interface PublicEnterpriseResponse {
-  overview: {
-    holding_name: string;
-    holding_code: string;
-    total_soe_assets_wld: string;
-    hourly_soe_revenue_wld: string;
-    hourly_soe_profit_wld: string;
-    hourly_soe_dividends_wld: string;
-    governance_model: string;
-  };
-  soes: Array<{
-    code: string;
-    name: string;
-    category: string;
-    ceo_name: string;
-    total_assets_wld: string;
-    operating_revenue_hourly_wld: string;
-    net_profit_hourly_wld: string;
-    dividend_rate_bps: number;
-    eval_grade: string;
-    description: string;
-  }>;
-  disclosed_at: string;
-  standards: string;
-}
-
 export default async function PublicEnterprisesPage() {
-  const data = await publicApi<PublicEnterpriseResponse>('/api/v1/enterprises/public', 30);
-
-  const overview = data?.overview ?? {
-    holding_name: '월덱 국가투자공사 (WSHC)',
-    holding_code: 'WSHC_SOE_HOLDING',
-    total_soe_assets_wld: '365000000',
-    hourly_soe_revenue_wld: '540000',
-    hourly_soe_profit_wld: '360000',
-    hourly_soe_dividends_wld: '108000',
-    governance_model: '싱가포르 테마섹 + 노르웨이 GPFG 하이브리드 지주회사 모델',
-  };
-
-  const soes = data?.soes ?? [
-    {
-      code: 'SOE_POWER',
-      name: '월덱 에너지공사 (W-Power)',
-      category: 'ENERGY',
-      ceo_name: '강전력 (전력에너지전문관)',
-      total_assets_wld: '120000000',
-      operating_revenue_hourly_wld: '180000',
-      net_profit_hourly_wld: '120000',
-      dividend_rate_bps: 3000,
-      eval_grade: 'S',
-      description: '국가 기간 전력 인프라망 공급, 가상 채굴 및 서버 데이터센터 에너지 안정화 전담 공기업',
-    },
-    {
-      code: 'SOE_NET',
-      name: '월덱 네트워크교통공사 (W-Net & Transit)',
-      category: 'INFRASTRUCTURE',
-      ceo_name: '송통신 (망인프라전문관)',
-      total_assets_wld: '95000000',
-      operating_revenue_hourly_wld: '140000',
-      net_profit_hourly_wld: '90000',
-      dividend_rate_bps: 3000,
-      eval_grade: 'A',
-      description: '가상 거래소 결제망, 장터 고속 데이터 통신망 및 상거래 트래픽 인프라 유지보수 전담 공기업',
-    },
-    {
-      code: 'SOE_BANK',
-      name: '월덱 국책투자은행 (WDB Development Bank)',
-      category: 'DEVELOPMENT_BANK',
-      ceo_name: '윤국책 (금융투자전문관)',
-      total_assets_wld: '150000000',
-      operating_revenue_hourly_wld: '220000',
-      net_profit_hourly_wld: '150000',
-      dividend_rate_bps: 3000,
-      eval_grade: 'A',
-      description: '유저 스타트업 저금리 팩토링, 혁신 벤처 펀딩, 국채 발행 및 시장 안정화 전담 국가개발금융공사',
-    },
-  ];
-
+  const source = await publicApi<unknown>('/api/v1/enterprises/public', 30);
+  const data = parsePublicEnterpriseDisclosure(source);
+  if (data === null) {
+    return (
+      <main className="container mx-auto grid max-w-6xl gap-6 px-4 py-8" data-page="public-enterprises">
+        <h1 className="text-2xl font-bold">국가 공기업 경영정보</h1>
+        <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
+          공기업 공시 자료를 확인할 수 없습니다. 조회 장애 또는 검증되지 않은 응답일 수 있으며, 자산·매출·배당금이 0이라는 뜻이 아닙니다.
+        </p>
+        <Link href="/enterprises" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">다시 조회</Link>
+      </main>
+    );
+  }
+  const { overview, soes } = data;
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
       {/* 헤더 섹션 */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs font-mono text-primary">
-            PUBLIC ALIO DISCLOSURE
+            PUBLIC ENTERPRISE SOURCE SNAPSHOT
           </Badge>
-          <Badge className="bg-emerald-600 text-white text-[11px]">OECD 공기업 지배구조 표준</Badge>
+          <Badge className="bg-emerald-600 text-white text-[11px]">서버 조회 자료</Badge>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-          국가 공기업 경영정보 공개 시스템 (ALIO)
+          국가 공기업 경영정보 조회
         </h1>
         <p className="text-sm text-muted-foreground">
-          월덱 국가투자공사(WSHC)가 소유한 3대 기간 공기업의 재무 상태, 당기순이익, 국고 법정 배당 납입 실적을 전 국민에게 투명하게 공개합니다.
+          서버가 제공한 공기업의 자산 및 시간당 경영 수치를 조회합니다. 배당 예상액은 계산값이며 국고 납입 영수증이 아닙니다.
         </p>
       </div>
 
@@ -124,7 +62,7 @@ export default async function PublicEnterprisesPage() {
               </CardDescription>
             </div>
             <span className="text-[11px] font-mono text-muted-foreground">
-              기준: {new Date(data?.disclosed_at ?? new Date()).toLocaleDateString('ko-KR')} 실시간 공시
+              API 응답 생성 시각: {new Date(data.disclosed_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (실제 납입 증빙 아님)
             </span>
           </div>
         </CardHeader>
@@ -133,25 +71,25 @@ export default async function PublicEnterprisesPage() {
             <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
               <span className="text-zinc-400 block text-[11px]">공기업 합산 자산</span>
               <span className="font-mono font-bold text-base text-zinc-100 mt-1 block">
-                {groupDigits(overview.total_soe_assets_wld)} WLD
+                {formatEnterpriseWld(overview.total_soe_assets_wld)} WLD
               </span>
             </div>
             <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
               <span className="text-zinc-400 block text-[11px]">시간당 총 매출</span>
               <span className="font-mono font-bold text-base text-[#00E5FF] mt-1 block">
-                +{groupDigits(overview.hourly_soe_revenue_wld)} WLD
+                +{formatEnterpriseWld(overview.hourly_soe_revenue_wld)} WLD
               </span>
             </div>
             <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
               <span className="text-zinc-400 block text-[11px]">시간당 순이익</span>
               <span className="font-mono font-bold text-base text-[#00F59B] mt-1 block">
-                +{groupDigits(overview.hourly_soe_profit_wld)} WLD
+                +{formatEnterpriseWld(overview.hourly_soe_profit_wld)} WLD
               </span>
             </div>
             <div className="p-3 rounded-xl border border-[#222738] bg-[#121622]">
-              <span className="text-zinc-400 block text-[11px]">국고 귀속 배당금 (30%)</span>
+              <span className="text-zinc-400 block text-[11px]">시간당 예상 배당액 (계산값)</span>
               <span className="font-mono font-bold text-base text-emerald-400 mt-1 block">
-                +{groupDigits(overview.hourly_soe_dividends_wld)} WLD
+                +{formatEnterpriseWld(overview.hourly_soe_dividends_wld)} WLD
               </span>
             </div>
           </div>
@@ -160,8 +98,9 @@ export default async function PublicEnterprisesPage() {
 
       {/* 3대 공기업 카드 */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold tracking-tight">3대 기간 공기업 공시 목록</h2>
+        <h2 className="text-lg font-bold tracking-tight">조회된 공기업 목록</h2>
         <div className="grid gap-4 md:grid-cols-3">
+          {soes.length === 0 ? <p role="status" className="rounded-lg border p-4 text-sm md:col-span-3">조회 결과에 공기업이 없습니다.</p> : null}
           {soes.map((soe) => (
             <Card key={soe.code} className="border shadow-xs bg-card flex flex-col justify-between">
               <CardHeader className="p-5 pb-3">
@@ -170,7 +109,7 @@ export default async function PublicEnterprisesPage() {
                     {soe.code}
                   </Badge>
                   <Badge className="bg-primary/90 text-white font-mono text-[11px]">
-                    {soe.eval_grade}등급 우수기관
+                    {soe.eval_grade}등급 · {soe.status}
                   </Badge>
                 </div>
                 <CardTitle className="text-base font-bold flex items-center gap-1.5">
@@ -191,16 +130,16 @@ export default async function PublicEnterprisesPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">자산 규모</span>
-                    <span className="font-mono font-semibold">{groupDigits(soe.total_assets_wld)} WLD</span>
+                    <span className="font-mono font-semibold">{formatEnterpriseWld(soe.total_assets_wld)} WLD</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">시간당 순이익</span>
                     <span className="font-mono text-emerald-600 font-semibold">
-                      +{groupDigits(soe.net_profit_hourly_wld)} WLD
+                      +{formatEnterpriseWld(soe.net_profit_hourly_wld)} WLD
                     </span>
                   </div>
                   <div className="flex justify-between pt-1 border-t border-border/40">
-                    <span className="text-muted-foreground">법정 국고 환원율</span>
+                    <span className="text-muted-foreground">설정된 배당률 (납입 증빙 아님)</span>
                     <span className="font-mono font-bold text-primary">
                       {(soe.dividend_rate_bps / 100).toFixed(0)}% (사회 환원)
                     </span>
