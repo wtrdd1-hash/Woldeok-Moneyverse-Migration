@@ -38,7 +38,7 @@ const mutations = [
 describe('admin monetary policy HTTP CSRF and open console boundary', () => {
   let app: INestApplication;
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [MonetaryController],
       providers: [
         { provide: CentralBankService, useValue: {
@@ -62,7 +62,7 @@ describe('admin monetary policy HTTP CSRF and open console boundary', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });

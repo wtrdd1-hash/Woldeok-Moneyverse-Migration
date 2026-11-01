@@ -18,3 +18,9 @@ Pending.
 
 ### RED checkpoint
 - Actual Nest HTTP test `monetary-admin-csrf.http.test.ts`: **17 failed / 1 passed** before implementation, with missing/invalid token accepted or returned 503 from unguarded financial HOLD routes. No financial service mock should be invoked by denied requests. The positive test also proved no admin-console touch was performed.
+
+### In-progress checkpoint
+- Implemented method-scoped `AdminSessionGuard` then `CsrfGuard` on eight POST routes; GET stays on existing role/consent checks. No DB, finance ledger or API payload modifications.
+- Focused suite initially exposed Nest testing-module injection failure in two pre-existing HTTP fixtures. Added `SessionRepository` mock provider only in those fixtures; all 136 focused tests then passed.
+- TDD GREEN: new 18/18 HTTP tests PASS. Full typecheck PASS. Full lint PASS (0 errors, 1,027 pre-existing warnings). Backend/frontend build PASS.
+- Frontend `monetary-bureau-card.tsx` still calls direct `/api/v1/admin/economy/monetary/*` from the browser without CSRF. This PR does not claim a working end-to-end admin mutation flow; a separate frontend owner must integrate authenticated server action and session token.
