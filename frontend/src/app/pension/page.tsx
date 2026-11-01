@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { publicApi, api, ApiError } from '@/lib/api';
-import { canonicalIntegerString } from '@/lib/money';
-import { verifyPensionAccount, verifyPensionContributions, verifyPensionOverview, verifyPensionPayouts } from './pension-source';
+import { verifyPensionAccount, verifyPensionContributions, verifyPensionOverview, verifyPensionPayouts, verifyPensionWalletCash } from './pension-source';
 import {
   PensionPortalClient,
   type MyPensionAccount,
@@ -42,18 +41,11 @@ export default async function PublicPensionPage() {
       ]);
       contributions = contribs.status === 'fulfilled' ? verifyPensionContributions(contribs.value, owner) : null;
       payouts = payLogs.status === 'fulfilled' ? verifyPensionPayouts(payLogs.value, owner) : null;
-      if (wallet.status === 'fulfilled' && wallet.value && typeof wallet.value === 'object' &&
-          !Array.isArray(wallet.value)) {
-        const value = wallet.value as Record<string, unknown>;
-        const balances = value.balances;
-        if (balances && typeof balances === 'object' && !Array.isArray(balances)) {
-          const source = balances as Record<string, unknown>;
-          const cash = canonicalIntegerString(source.totalAvailableAmount);
-          if (source.currency === 'WLD' && typeof source.totalAvailableAmount === 'string' &&
-              cash !== null && !cash.startsWith('-') && cash === source.totalAvailableAmount) {
-            userCashBalance = cash;
-            walletVerified = true;
-          }
+      if (wallet.status === 'fulfilled') {
+        const cash = verifyPensionWalletCash(wallet.value, myAccount.user_id);
+        if (cash !== null) {
+          userCashBalance = cash;
+          walletVerified = true;
         }
       }
     } else {

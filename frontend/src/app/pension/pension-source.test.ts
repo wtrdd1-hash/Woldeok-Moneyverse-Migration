@@ -4,6 +4,7 @@ import {
   verifyPensionAccount,
   verifyPensionContributions,
   verifyPensionPayouts,
+  verifyPensionWalletCash,
 } from './pension-source';
 
 const uuid = '123e4567-e89b-42d3-a456-426614174000';
@@ -24,6 +25,22 @@ const contribution = { id: uuid, amount_wld: '999999999999999999999', note: '기
 const payout = { id: uuid, payout_amount_wld: '45', snapshot_accumulated_wld: '500', created_at: '2026-10-01T00:00:00Z' };
 
 describe('P1 pension evidence at the Next/Nest boundary', () => {
+  it('uses only the authenticated cash pocket, not cash plus bank, for a pension contribution balance', () => {
+    const wallet = {
+      userId: second,
+      balances: {
+        currency: 'WLD',
+        cash: { availableAmount: '9007199254740993', updatedAt: '2026-10-01T00:00:00Z' },
+        bank: { availableAmount: '50', updatedAt: '2026-10-01T00:00:00Z' },
+        totalAvailableAmount: '9007199254741043',
+      },
+    };
+    expect(verifyPensionWalletCash(wallet, second)).toBe('9007199254740993');
+    expect(verifyPensionWalletCash(wallet, uuid)).toBeNull();
+    expect(verifyPensionWalletCash({ ...wallet, balances: { ...wallet.balances, totalAvailableAmount: '999' } }, second)).toBeNull();
+    expect(verifyPensionWalletCash({ ...wallet, balances: { ...wallet.balances, currency: 'USD' } }, second)).toBeNull();
+    expect(verifyPensionWalletCash({ ...wallet, balances: { ...wallet.balances, cash: { availableAmount: 9007199254740992, updatedAt: '2026-10-01T00:00:00Z' } } }, second)).toBeNull();
+  });
   it('accepts canonical large integer amounts without Number precision loss', () => {
     expect(verifyPensionOverview(overview)?.totalAumWld).toBe('9007199254740993');
     expect(verifyPensionAccount(account)?.accumulated_contribution_wld).toBe('9007199254740993');

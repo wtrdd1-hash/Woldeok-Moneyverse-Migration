@@ -43,7 +43,7 @@ describe('P1 Next pension owner source integration', () => {
     mocks.api.mockImplementation(async (path: string) => {
       if (path.endsWith('/my-account')) return account;
       if (path.endsWith('/my-contributions') || path.endsWith('/my-payouts')) return [];
-      if (path.endsWith('/wallet')) return { balances: { currency: 'WLD', totalAvailableAmount: '9007199254740993' } };
+      if (path.endsWith('/wallet')) return { userId: user, balances: { currency: 'WLD', cash: { availableAmount: '9007199254740993', updatedAt: '2026-10-01T00:00:00Z' }, bank: { availableAmount: '50', updatedAt: '2026-10-01T00:00:00Z' }, totalAvailableAmount: '9007199254741043' } };
       throw Error('unexpected route');
     });
     const props = propsOf(await PublicPensionPage());
@@ -61,7 +61,7 @@ describe('P1 Next pension owner source integration', () => {
         amount_wld: '10', note: 'wrong owner', created_at: '2026-10-01T00:00:00Z',
       }];
       if (path.endsWith('/my-payouts')) throw new ApiError(503);
-      if (path.endsWith('/wallet')) return { balances: { currency: 'USD', totalAvailableAmount: '100' } };
+      if (path.endsWith('/wallet')) return { userId: user, balances: { currency: 'WLD', cash: { availableAmount: '100', updatedAt: '2026-10-01T00:00:00Z' }, bank: { availableAmount: '50', updatedAt: '2026-10-01T00:00:00Z' }, totalAvailableAmount: '999' } };
       throw Error('unexpected route');
     });
     const props = propsOf(await PublicPensionPage());

@@ -5,7 +5,7 @@ import type {
 // Only the Nest/PostgreSQL owner-scoped read is authoritative; never coerce unknown
 // numeric JSON to a WLD amount or treat a malformed response as an empty history.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const WLD = /^(?:0|[1-9][0-9]{0,37})$/;
+const WLD = /^(?:0|[1-9][0-9]{0,255})$/;
 const DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
 const TIERS = new Set(['TIER_1_YOUTH', 'TIER_2_CITIZEN', 'TIER_3_GOLD', 'TIER_4_PLATINUM', 'TIER_5_HONOR']);
 const STATUSES = new Set(['ACCUMULATING', 'RETIRED_RECEIVING', 'LIQUIDATED']);
@@ -115,4 +115,20 @@ export function verifyPensionPayouts(
       snapshot_accumulated_wld: item.snapshot_accumulated_wld, created_at: item.created_at,
     };
   }, owner);
+}
+
+/** The wallet's total includes the bank pocket; only cash is spendable for NPS. */
+export function verifyPensionWalletCash(raw: unknown, expectedOwner: string): string | null {
+  const value = record(raw);
+  if (!value || !uuid(value.userId) || value.userId !== expectedOwner) return null;
+  const balances = record(value.balances);
+  const cash = balances ? record(balances.cash) : null;
+  const bank = balances ? record(balances.bank) : null;
+  if (!balances || balances.currency !== 'WLD' || !cash || !bank ||
+      !money(cash.availableAmount) || !money(bank.availableAmount) ||
+      !money(balances.totalAvailableAmount) ||
+      !date(cash.updatedAt) || !date(bank.updatedAt) ||
+      BigInt(cash.availableAmount) + BigInt(bank.availableAmount) !==
+        BigInt(balances.totalAvailableAmount)) return null;
+  return cash.availableAmount;
 }

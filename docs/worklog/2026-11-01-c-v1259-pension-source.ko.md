@@ -12,7 +12,7 @@
 - 실제 NestJS 회원 인증·소유자 제한 API를 재사용하면서 WLD 정수 문자열, UUID, 날짜, 중복 기록, 소유자 일치 여부를 검증.
 - 조회 실패와 실제 빈 내역을 구분하고, 로그인/계좌 조회 불가/지갑 조회 불가를 분리. 재조회 링크, 44px 탭, 비색인 메타데이터 적용.
 - 기존 원장 정산 중단을 유지하며 신규 DB·금융 원장 쓰기 없음.
-- 추가 RED로 실제 Nest 지갑 API 경로가 `/api/v1/wallet`임을 확인해 잘못된 `/api/v1/wallet/summary` 호출을 수정함. `balances.currency=WLD`와 정밀한 `totalAvailableAmount`를 검증하며, 집중 테스트 13건 PASS. 전체 빌드·테스트·보안·격리 PostgreSQL·원격 CI 검증 진행 중.
+- 추가 RED로 실제 Nest 지갑 API 경로가 `/api/v1/wallet`임을 확인해 잘못된 `/api/v1/wallet/summary` 호출을 수정함. `balances.currency=WLD`와 정밀한 `totalAvailableAmount`를 검증하며, 지갑 합계는 은행 잔액을 포함하므로 실제 납입 가능 현금 잔액과 구분하도록 수정함. 회원 ID·현금+은행=합계·시각·WLD 정밀도를 검증하고 현금만 표시함. 집중 테스트 14건 PASS. 전체 빌드·테스트·보안·격리 PostgreSQL·원격 CI 검증 진행 중.
 
 ## 중복 개발·릴리스 주의
 - 기존 미통합 후보 v1188(#1982), v1209(#2083), v1243 브랜치와 일부 기능이 겹침을 추가 발견함. 새 PR #2314는 중복 통합 방지 검토가 끝나기 전까지 Draft/HOLD 유지. 기존 브랜치의 고유 변경과 HTTP 테스트는 보존.

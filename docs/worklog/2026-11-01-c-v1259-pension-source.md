@@ -14,6 +14,7 @@
 - [x] Midpoint `git fetch origin main` still `f13bbce273ffc65e8576170992d82ea00c27a1c9`; other active PRs unchanged, protected.
 - [x] Additional RED found wallet API route `/api/v1/wallet/summary` does not exist in Nest; expected verified WLD remained `0`. GREEN switched to real `GET /api/v1/wallet` with `balances.currency=WLD`, exact `totalAvailableAmount` and rejects wrong currency/unsafe amounts. 13 focused tests PASS.
 - [x] Duplicate discovery: previous local C candidates v1188 (#1982), v1209 (#2083), and unmerged remote v1243 `6cf6b6e3` overlap. Preserve all, keep this PR Draft; compare source/HTTP privacy before any integration.
+- [x] Financial correction: `wallet.balances.totalAvailableAmount` includes USER_BANK, not spendable USER_CASH. Source-grounded `GET /api/v1/wallet` now requires matching userId, WLD currency, cash/bank timestamps, exact decimal strings and cash+bank=total; display only cash. Focused 14 PASS. Intermediate full gate runs stopped for this new code revision; their results do NOT certify the new HEAD.
 - [ ] Full exact-SHA build/lint/typecheck/tests/security/real-PG/CI/E2E gates; release hold remains.
 
 
