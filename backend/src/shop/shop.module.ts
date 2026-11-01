@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -32,4 +33,28 @@ import { ShopService } from './shop.service';
   ],
   exports: [ShopService],
 })
-export class ShopModule {}
+export class ShopModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Owner purchase, inventory and settlement responses must remain private even
+    // when authentication/consent/CSRF guards reject the request. Public item,
+    // catalogue and cosmetics reads deliberately retain their public policy.
+    const ownerRoutes = [
+      'shop/purchases',
+      'shop/purchases/export',
+      'shop/catalog',
+      'shop/compare',
+      'shop/holdings',
+      'shop/items/:id/purchases',
+      'shop/catalog/:id/purchases',
+      'shop/holdings/:id/equip',
+      'shop/holdings/:id/consumptions',
+      'shop/holdings/:id/upkeep-settlements',
+    ];
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(...ownerRoutes.map((path) => ({ path, method: RequestMethod.ALL })));
+  }
+}
