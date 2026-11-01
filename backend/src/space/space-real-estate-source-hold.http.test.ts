@@ -13,7 +13,7 @@ describe('P0 real-estate Nest HTTP source-truth boundary', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [SpaceController],
       providers: [{ provide: SpaceService, useValue: {} }],
     })
@@ -21,7 +21,7 @@ describe('P0 real-estate Nest HTTP source-truth boundary', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
 
