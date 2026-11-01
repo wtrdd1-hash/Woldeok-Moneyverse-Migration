@@ -1,5 +1,5 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1602 F675-206 transport/privacy/DB identity hardening / issue #2307 / Draft pending / RELEASE HOLD; stacked on #2309.
+**Current planning:** v1602 F675-206 transport/privacy/DB identity hardening / issue #2307 / Draft #2315 / RELEASE HOLD; stacked on #2309.
 
 ## v2026.11.01.1602 — F675-206 Expiry Digest Preview Transport, Privacy and Trust-Boundary Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
