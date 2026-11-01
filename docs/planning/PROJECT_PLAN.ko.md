@@ -1,3 +1,43 @@
+## v2026.11.02.1636 — F675-215 회원 만료 보유품 조회 (기능 추가 / 초안 / 배포 보류)
+
+**주기:** 이전 기능 보완 v1634 → 현재 기능 추가 v1636 → 다음 기능 보완 v1638(잠정). 기준 main `a8541927c3a351d980454c66e95a3356c47e0722` 시작·기획 중 확인. AGENTS.md, README.md 및 영어 정본과 동등한 한국어 기획. 미병합 Draft #2428의 문서 전용 후속, 개발 인계 #2432, 자식 Draft PR #2433 OPEN/HOLD. **F675-215는 제안일 뿐 구현되지 않았으며 Test·Production 배포 승인도 없다.**
+
+### 실제 소스와 문제 정의
+- `/inventory`는 `GET /api/v1/shop/holdings`를 사용한다. 마이그레이션 `123-store-read-models-v2.sql`의 `shop_my_items_v2`는 `quantity>0`이며 만료일이 없거나 아직 지나지 않은 행만 반환한다. 따라서 DB에 남아 있는 만료된 보유품 행은 현재 보관함에 표시되지 않는다. `inventory/page.tsx`는 조회 실패도 빈 배열로 처리한다. 이는 소스상 UX 공백이며 실제 운영 데이터 유실을 확인했다는 뜻은 아니다.
+- 071의 `user_items`는 회원·상품당 **현재 상태 한 행**이고, 104의 수량 증가 트리거는 구매 이외 보상에도 해당 행 전체 만료일을 재설정할 수 있다. 만료 행은 과거 구매 영수증, 독립 로트, 복구 권리 또는 만료 원인의 증거가 아니다. 재획득으로 만료일이 갱신되면 현재 만료 목록에서 빠진다. 삭제·소비된 행은 현재 상태만으로 복원할 수 없다.
+- 대상은 보관함에서 사라진 아이템의 **현재 DB에 남아 있는 만료 상태**를 확인하려는 회원이다. 과거 거래 이력, 보상·환불, 재구매, 복원, 장착, 내보내기, 결제는 범위에서 제외한다.
+
+### 진입점·화면·CTA·상태
+- `/inventory`의 활성 보관함 아래 접힌 `만료된 보유품 / Expired holdings` 영역. `만료된 보유품 보기`, `더 보기`, `다시 시도` 버튼을 제공한다. 확인된 총수만 표시하며 복원·장착 버튼은 제공하지 않는다. 만료된 치장품은 활성 아바타에 반영하지 않는다.
+- `NOT_LOADED`, `LOADING`, `VERIFIED_ROWS`, `VERIFIED_EMPTY`, `STALE_PAGE`, `UNAVAILABLE`, `FORBIDDEN` 상태를 구분한다. 원본 실패·잘못된 200은 빈 목록이 아니다. DB 관찰시각과 “현재 보유 상태이며 구매 이력은 아님”을 표시한다. `expires_at==observedAt`은 만료, NULL은 미만료, `effect_expires_at`은 보유품 만료일과 별개다.
+- 페이지를 넘기는 동안 수량 증가·만료 재설정으로 목록이 달라질 수 있음을 안내한다. 한국어·영어, WCAG 2.2 AA, 320px/200% 확대, 44px 이상 터치, 키보드 초점·aria-live·동작 줄이기·TalkBack/VoiceOver를 수용 조건으로 한다.
+
+### API·DB·트랜잭션 설계(미구현)
+- 회원 전용 읽기 API `GET /api/v1/shop/holdings/expired?limit=20&cursor=<opaque>`. limit 기본 20·최대 50, 정수 1~50만 허용. 서명된 불투명 cursor는 인증 회원·필터·기준시각에 결합하고 최대 512바이트·5분 TTL로 제한한다. 중복·미지원 쿼리, 클라이언트 회원 ID, 변조 cursor는 거부한다. SessionGuard/AuthenticatedGuard/ConsentGuard, 남용 제한을 적용한다. 검증된 200, 잘못된 요청 400, 비로그인 401, 동의 없음 403, 검증 가능한 페이지 무효화 409, 과도한 요청 429, 출처 불명 503. 불확실한 200·SQL 오류 노출 금지.
+- DTO: `sourceStatus:'VERIFIED'`, `observedAtUtcMicros`, `items:[{catalogId,code,name,category,quantity,acquiredAt,expiresAt}]`, `nextCursor|null`, `hasMore`, `totalStatus:'VERIFIED'|'NOT_COMPUTED'`, 전체 정확 집계 시에만 `totalCatalogHoldings`. 현재 회원·상품별 행이며 불변 영수증·결제·WLD 정보는 반환하지 않는다.
+- PostgreSQL 17의 한 연결·한 페이지 `REPEATABLE READ READ ONLY` 트랜잭션과 단일 DB 관찰시각. 신뢰 가능한 회원 ID로 `user_id=actor AND quantity>0 AND expires_at IS NOT NULL AND expires_at<=observedAt`를 검사한다. 상품 조인 누락·불일치는 503으로 차단한다. `expires_at DESC,catalog_id ASC` 키셋 정렬 및 limit+1. OFFSET 금지. 현재 PK만으로 정렬 성능을 가정하지 않으며 10,001건 이상 EXPLAIN 후 `(user_id,expires_at DESC,catalog_id)` 부분 인덱스를 검토한다.
+- cursor가 첫 페이지 관찰시각을 보관해도 **HTTP 요청 사이 MVCC 스냅샷이 지속되는 것은 아니다.** 강한 페이지 일관성을 보장하려면 검증된 소유자별 변경 리비전 또는 스냅샷 기법이 추가로 필요하다. 없으면 best-effort라고 표시하고 변경이 입증될 때 409 후 처음부터 재조회한다. 변경으로 인한 누락·중복이 없다고 주장하지 않는다.
+- 신규 읽기 `SECURITY DEFINER` 함수는 실제 DB 권한과 세션→회원 결합을 검증한 후 순방향 마이그레이션으로만 추가한다. 071/104/123 수정 금지, 보호 테이블 직접 권한 부여 금지, WLD·아이템·원장 쓰기 금지. 개발 DB에서 확인된 보호 테이블 과도 권한 #993을 DEV/Test/Production별로 재검증하고 회원 A/B 교차 조회 음성시험을 실시한다.
+
+### 개인정보·Android·SEO·관리자·배포
+- Next BFF와 Android `frontend/src/app/app-api/v1/[...path]/route.ts`에서 정상·오류·HEAD·조건부 응답 모두 `private,no-store`, `noindex,nofollow`, `no-referrer`, `nosniff` 강제. ETag/Last-Modified/Expires 제거, 304·디스크·서비스워커 캐시 금지. 기존 `privateShopReceipts`는 구매내역만 보호하고 신규 만료 보유품 경로는 포함하지 않는다. 로그·공개 HTML·사이트맵·분석 페이로드에 회원 보유품을 노출하지 않으며 로그아웃·계정 전환 시 이전 응답을 폐기한다.
+- 관리자는 최소 20명 집계 집단의 조회수, 검증된 빈 목록, 출처 오류, 페이지 재시작, p95, 409/429/503만 확인한다. 회원별 목록·아이템 내역·cursor 내보내기 금지. 제안 목표 p95 250ms 미만, 조회로 인한 금융 쓰기 0건, 소유자 격리 100%이며 측정된 성과가 아니다.
+- `F675_215_EXPIRED_HOLDINGS_ARCHIVE_ENABLED` 기본 OFF. DB 권한·PostgreSQL 17 테스트→공식 Test 정확 SHA 로그인/회원·관리자/Android/금융 회귀 및 독립 복원→직원→소규모→승인 후 확대. 문제 시 우선 기능 스위치 OFF, 필요 시 검증된 이미지로 롤백한다. 기획 예약은 런타임·DB·아이템·원장·Test·Production을 변경하지 않는다.
+
+### P0/P1 개발 인계 (P0 4건 + P1 6건)
+1. **P0 OPS1636-01 (Ops/QA):** Test/Production 실제 프로세스·이미지·매니페스트 SHA, 배포 링크, 롤백 자산, GitOps 및 독립 복원 #1984/#1088 검증.
+2. **P0 SEC1636-02 (B/DB):** DEV/Test/Production 유효 앱 역할 DML/EXECUTE, 개발 DB의 account_balances UPDATE·user_items SELECT/UPDATE #993/#828, 회원 결합·마이그레이션 연속성·교차 회원 차단.
+3. **P0 FIN1636-03 (B/QA):** Treasury/NPS/Mint, 제작·주식·시즌·소각·부동산 원장·재원 정합성 해결. 신규 조회 자체는 WLD를 이동하지 않는다.
+4. **P0 REL1636-04 (QA/Ops):** 기존 프로필 HTTP 테스트 실패 2건, 개발 의존성 권고 9건, QA #2391, 공식 정확 SHA 인증 E2E·PostgreSQL 17·독립 복원 통과 전 배포 보류.
+5. **P1 ARCHIVE1636-05 (B/DB):** 회원 범위 읽기 함수, 단일 시각, 경계·NULL·수량0·재설정·인덱스 EXPLAIN·추가 GRANT 금지.
+6. **P1 ARCHIVE1636-06 (B/API):** limit·cursor 서명/TTL/회원 검증, 409, 빈 목록과 503 구분, 401/403/429, DTO·속도 제한.
+7. **P1 ARCHIVE1636-07 (A/Web):** 접힌 만료 목록, 활성 장착과 분리, 로딩/빈/오류/변경, 한국어·영어/접근성.
+8. **P1 ARCHIVE1636-08 (C/Android):** GET/HEAD/오류/조건부 비공개 헤더, 304 거부, 계정 전환 차단·TalkBack·캐시 금지.
+9. **P1 ARCHIVE1636-09 (A/B/Admin):** 기본 OFF, 집계 집단 20명 이상 KPI, 단계별 노출 및 기능 스위치 롤백.
+10. **P1 ARCHIVE1636-10 (QA):** 격리 PG17 신규·업그레이드, 10,001행, 마이크로초 경계, NULL/0/효과 만료만 있는 행, 페이지 사이 재설정, 회원 A/B, 변조 cursor, 400/401/403/409/429/503, 비공개 헤더·Android·KO/EN, 금융/보유품 쓰기 0건. **모두 제안된 시험이며 실행되지 않았다.**
+
+**근거 및 운영 게이트:** 2026-11-02 06:12 KST Test·Production 공개 /api/version 모두 `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`로 최신 main과 다르다. 공개 응답은 실제 실행 이미지·DB·복원 증빙이 아니다. 개발 C #2431 및 B #2430은 미병합 초안이며 기존 프로필 테스트 실패 2건·개발 의존성 보안 권고 9건이 보고되었다. 외부 독립 레퍼런스 이번 회차 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 신규 기능 수용시험·운영 승격 미수행. **DRAFT / RELEASE HOLD.**
+
 ## v2026.11.02.1634 — F675-214 구매 영향 미리보기의 구매 함수·재시도 진실성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR #2428 OPEN/HOLD. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.

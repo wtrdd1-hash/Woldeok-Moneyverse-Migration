@@ -1,3 +1,6 @@
+## v2026.11.02.1636 — F675-215 회원 만료 보유품 조회 (기능 추가 / 초안 / 배포 보류)
+**주기:** 이전 보완 v1634 → 현재 추가 v1636 → 다음 보완 v1638. main a8541927c3a351d980454c66e95a3356c47e0722 확인, Draft #2428의 문서 후속, 인계 #2432, Draft PR #2433 OPEN/HOLD. **제안이며 미구현.** 123의 shop_my_items_v2는 만료 행을 제외하고 /inventory는 조회 실패를 빈 배열로 처리한다. 071의 회원·상품 단일 현재 행은 104의 수량 증가로 재설정될 수 있어 만료 목록은 과거 구매 영수증·복구 권리가 아니다. 제안: /inventory의 별도 만료 영역, 회원 전용 GET /api/v1/shop/holdings/expired, 인증·동의, 단일 관찰시각, PG17 읽기·키셋, 요청 사이 MVCC 불일치 명시, 검증된 빈 목록/출처 오류 구분, Android 포함 private/no-store/noindex, 한국어·영어 접근성, 기본 OFF. P0 OPS/SEC/FIN/REL1636-01..04 및 P1 ARCHIVE1636-05..10 상세는 통합 PROJECT_PLAN.ko.md. Test/Production 공개 버전 510dbe6...은 main과 다르며 독립 복원 미검증. 외부 신규 승인 0건·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·WLD·아이템·원장 변경 없음. **RELEASE HOLD.**
+
 ## v2026.11.02.1634 — F675-214 구매 영향: 경제 명령·멱등 재실행 근거 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 **주기:** 이전 Feature Addition v1632 → 현재 Feature Improvement v1634 → 다음 Feature Addition v1636(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 재확인; 미병합 Draft #2422 후속 문서 전용 브랜치, 개발 인계 #2421, 신규 Draft PR #2428 OPEN/HOLD. 영문 정본/한국어 동등. F675-214는 기획안으로 미구현. 05:08 KST 공개 Test·Production /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며, HTTP SHA는 실행 이미지·DB·복원 증명이 아니다. DRAFT / RELEASE HOLD.
 
