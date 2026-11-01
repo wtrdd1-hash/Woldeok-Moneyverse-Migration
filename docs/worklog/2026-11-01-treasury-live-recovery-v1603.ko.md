@@ -16,6 +16,13 @@
 - 운영 릴리스 포인터 `prod-v2026.11.01.0102-f13bbce273ff`와 공개 업스트림 4164 버전 `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`가 달라 정확한 운영 배포 증거 불일치. 공식 Test는 `bc8cd8a6...`로 구버전. 단순 포인터 이동만으로 승격 주장 불가.
 - 배당 수취·공기업 변경 차단은 국고 정식 잔액 0 및 실거래 증빙 부족으로 별도 유지될 수 있음. 현황 대사 조회 개선을 실제 지급 승인과 혼동하지 않을 것.
 
-## 종료 — 대기
+## 종료 — 2026-11-01 KST (코드 작업 완료, 운영 승격 보류)
+- GitHub Draft PR #2319, `fix/treasury-fiscal-live-recovery-v1603`, 코드 SHA `d0d7349afe3d7c11a404238189387844e9f21141` (이번 기록만 추가하기 이전). 기본 main `f13bbce2`. 코드·한영 문서 푸시. v1603의 main 병합·공식 Test 적용·운영 배포·운영 DB 쓰기는 없음.
+- 국고 백엔드 172 PASS/20 조건부 SKIP, Backend typecheck+Nest build 성공, 국고 프론트 11 PASS(NODE_ENV=test). 실제 운영 앱 계정/실데이터 복제 Test에서 읽기 SQL PASS. 전체 프론트 타입 검사/서버 연동 HTTP E2E, 선택적 PG 통합 Vitest는 미확인.
+- 정확한 SHA로 mv-task 프론트 빌드 시도: Next.js 자식 프로세스 생성 `EAGAIN`으로 실패. `frontend/.next/BUILD_ID` 생성 실패하여 정확한 SHA의 immutable Test 스테이징 불가. 안전한 운영 승격 금지.
+- GitHub CI #5120 진행 중(최종 결론 미확인). 공개 운영 /api/version `353c6d5d6ddbc14b1067e84f9c4a127bab1c3834`, 공식 Test `bc8cd8a6c654af0336f550643f23049a58ee1d16`, 운영 포인터 `prod-v2026.11.01.0102-f13bbce273ff`. 포인터와 실제 운영 프로세스 SHA 불일치; 운영 승격 완료 보고 금지.
+- 종료 시 운영 DB 읽기 전용 재조회: 금고 0, 정식 국고 0, 구 국고 552/배당 744, 현재 회계기 1건. 지급 가용 자금 0. 공기업 배당 수취 `SOE_DIVIDEND_LEDGER_UNAVAILABLE`, 공기업 상태변경 `SOE_STATUS_MUTATION_UNVERIFIED`는 별도 코드에서 강제 차단. 초기화만으로 해제되지 않음.
+- 남은 필수 작업: 서버 프로세스 한도 문제 무중단 해소→프론트 빌드·타입 검증→CI→정확한 SHA 공식 Test 인증 E2E·복원·MINT/공급량 점검→안전한 무중단 운영 승격→운영 버전/국고·공기업 조회 재검증. 현재 PR Draft/HOLD 유지, 회계 데이터 임의 주입/보호 해제 없음.
+
 
 - **추가 UI 정직성:** 운영 국고 녹색 표시를 전체 이력 정산 완료가 아니라 “현 회계기 대사 일치”로 한정. 과거 거래/배당 미검증 및 현 국고 0의 지급 불가를 함께 표기. 프론트 Treasury 화면 테스트 NODE_ENV=test **11/11 PASS**. 운영 프론트 미배포.

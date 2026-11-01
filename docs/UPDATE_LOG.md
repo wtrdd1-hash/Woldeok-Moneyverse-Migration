@@ -1403,3 +1403,5 @@
 - Branch: .
 - Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
 - Runtime code and Production services are unchanged by this documentation-only release.
+
+<!-- v1603 final: frontend exact-SHA Next build FAILED EAGAIN, no Test/Production promotion. GitHub PR #2319 DRAFT, CI #5120 pending. -->
