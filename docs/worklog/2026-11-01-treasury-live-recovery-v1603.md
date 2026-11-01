@@ -17,3 +17,5 @@
 - Current user-visible blocked buttons for dividend/state enterprise status may be independently disabled by zero canonical funds and missing financial source proof; restoring a read-only reconciliation is NOT permission to re-enable transactions.
 
 ## FINISH — pending
+
+- **Follow-up UI truth fix:** Admin Treasury green badge now reads "current fiscal epoch matched" rather than claiming all historical reconciliation. Explicit warning states archived transactions/dividends remain uncertified and Treasury zero cannot support payments. Frontend Treasury view tests **11/11 PASS** (NODE_ENV=test); no Production frontend deployment yet.

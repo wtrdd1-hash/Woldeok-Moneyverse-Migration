@@ -133,6 +133,25 @@ describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
     expect(within(audit).queryByText('전체 (0)')).toBeNull();
   });
 
+  it('qualifies a successful zero-based reconciliation as CURRENT epoch only, not historic dividend settlement', () => {
+    const now = new Date().toISOString();
+    const epochOverview = {
+      ...mockOverview,
+      total_treasury_wld: '0',
+      reconciliation: {
+        status: 'RECONCILED',
+        total_vaults_balance_wld: '0',
+        total_ledger_net_flow_wld: '0',
+        discrepancy_amount_wld: '0',
+        last_reconciled_at: now,
+      },
+    } as unknown as AdminTreasuryOverview;
+    render(<TreasuryView overview={epochOverview} ledger={[]} />);
+    expect(screen.getByText('현 회계기 대사 일치')).toBeTruthy();
+    expect(screen.getByText(/구 회계기 거래 및 공기업 배당 정산까지 검증한 것은 아닙니다/)).toBeTruthy();
+    expect(screen.queryByText('대사 완료 (일치)')).toBeNull();
+  });
+
   it('shows unverified reconciliation without a false green success or zero discrepancy', () => {
     const unverified = {
       ...mockOverview,

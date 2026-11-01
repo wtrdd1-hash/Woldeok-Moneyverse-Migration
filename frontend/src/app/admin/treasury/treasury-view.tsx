@@ -279,7 +279,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm font-semibold">국고 회계 대사 검증 상태 (Reconciliation Evidence)</CardTitle>
                 <Badge className={overview.reconciliation.status === 'RECONCILED' ? 'bg-emerald-600 text-white text-[11px]' : overview.reconciliation.status === 'DISCREPANCY' ? 'bg-destructive text-white text-[11px]' : 'bg-amber-600 text-white text-[11px]'}>
-                  {overview.reconciliation.status === 'RECONCILED' ? '대사 완료 (일치)' : overview.reconciliation.status === 'DISCREPANCY' ? '불일치 감지 (주의)' : '대사 검증 미완료'}
+                  {overview.reconciliation.status === 'RECONCILED' ? '현 회계기 대사 일치' : overview.reconciliation.status === 'DISCREPANCY' ? '불일치 감지 (주의)' : '대사 검증 미완료'}
                 </Badge>
               </div>
               <span className="text-[11px] text-muted-foreground font-mono">
@@ -302,6 +302,12 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
                 <span className={overview.reconciliation.status === 'RECONCILED' ? 'font-bold text-emerald-600 font-mono text-sm' : overview.reconciliation.status === 'DISCREPANCY' ? 'font-bold text-destructive font-mono text-sm' : 'font-bold text-amber-700 font-mono text-sm'}>{overview.reconciliation.discrepancy_amount_wld === null ? '미검증' : `${groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD`}</span>
               </div>
             </div>
+            {overview.reconciliation.status === 'RECONCILED' && (
+              <p role="status" className="mt-3 text-xs text-muted-foreground">
+                새 회계기 초기화 이후 현재 금고·정식 원장 잔액의 대사만 확인했습니다.
+                구 회계기 거래 및 공기업 배당 정산까지 검증한 것은 아닙니다. 국고 가용금이 0 WLD라면 배당·지원금 지급은 불가능합니다.
+              </p>
+            )}
             {overview.reconciliation.status === 'UNVERIFIED' && (
               <p role="status" className="mt-3 text-xs text-amber-700">
                 금고 잔액은 조회되었지만 독립 원장 대사 증빙은 확인되지 않았습니다. 일치 여부는 미확인입니다.
