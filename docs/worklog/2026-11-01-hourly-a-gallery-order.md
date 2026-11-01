@@ -22,3 +22,10 @@
 ## FINISHED
 - Code implemented; no DB migration or WLD write. DEV P0 ACL remains: moneyverse_app UPDATE account_balances=true, DELETE user_items=true. Official Test exact-SHA, auth E2E, isolated backup restore and Production provenance NOT verified; no merge/deploy/restart.
 - Final candidate SHA, PR and CI to be recorded after push.
+
+## FINAL CHECKPOINT / REMOTE UPDATE
+- Feature and test commit SHA: `ebef822c9e6c5685f6643f896f9d62b9768a6844` (18 changed files: backend controller/service/validator/test, frontend gallery page/parser/test, Android gateway/proof/test, English/Korean plan/QA/release/worklog). Final docs-only follow-up SHA is in PR #2331, not counted as feature completion.
+- Latest origin/main rechecked at integration review: `9052076301bf1975422731ab50a8b7770dbbe951`, unchanged. Branch created from exact current main; no merge or deployment attempted.
+- Branch audit: 98 remote non-main (99 including main); 93 with unmerged commits, 5 ancestors/equal; 0 duplicate tip SHA. Open PRs 91, all Draft, 22 CONFLICTING and 69 MERGEABLE, no duplicate PR head SHA. **Deleted 0 branches**: unique work protected; even ancestor branches retained pending owner/release review.
+- Draft PR #2331 with `hold` label. Exact code SHA CI #41277840467 and Test Candidate build #41277828334 started; pending at checkpoint. Existing gallery PRs #2312/#2249 retained. Issue #993 updated with read-only DEV ACL evidence.
+- Test/Production: no deployment, restart, schema/financial mutation, or rollback. Existing Production Release run #41276483835 FAILED exact-main push runtime-check prerequisite. Recovery: code revert only after review; no schema rollback.
