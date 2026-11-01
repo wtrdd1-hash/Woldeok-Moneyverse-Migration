@@ -10,6 +10,7 @@ import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatc
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
+import { verifiedGalleryOrder } from '@/lib/gallery-order-proof';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
@@ -111,6 +112,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const galleryOrderPath = (parts.length === 1 && parts[0] === 'photos') ||
+    (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos');
+  const gallerySortValues = galleryOrderPath ? request.nextUrl.searchParams.getAll('sort') : [];
+  const gallerySort = gallerySortValues.length === 1 &&
+    (gallerySortValues[0] === 'oldest' || gallerySortValues[0] === 'newest')
+    ? gallerySortValues[0] : null;
+  if (galleryOrderPath && (gallerySortValues.length > 1 ||
+      (gallerySortValues.length === 1 && gallerySort === null) ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'sort'))) {
+    return gatewayProblem(400, 'Bad Request', 'gallery_order_invalid', 'sort must be newest or oldest');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -498,6 +511,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  if (galleryOrderPath && gallerySort && response.ok && request.method === 'GET') {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedGalleryOrder(await response.clone().json(), gallerySort)) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_order_unverified',
+          'approved gallery publication order could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'gallery_order_unverified',
+        'approved gallery publication order could not be verified');
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -594,6 +620,13 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (((parts.length === 1 && parts[0] === 'photos') ||
+      (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')) &&
+      request.nextUrl.searchParams.has('sort')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
