@@ -1,4 +1,10 @@
 ## 2026-10-31 C v1233 — Chat source evidence and safe retry (DRAFT / RELEASE HOLD)
+
+## 2026-11-01 — Development C v1257: Star Drop settlement source truth (DRAFT / RELEASE HOLD)
+- Authenticated Nest Star Drop reward POST now rejects unledgered WLD claims with private 503; status no longer claims three available payouts.
+- Browser practice remains accessible but cannot post or display a fake payout; Android app-api rejects legacy upstream fake success before forwarding.
+- Regression coverage for server, browser and app gateway. Independent PostgreSQL 17.11 migrations 316/316; no ledger writes. Full frontend/CI/QA/release gates remain blocked. See `docs/worklog/2026-11-01-c-v1257-star-drop-source-truth.md` and Draft PR #2306.
+
 - From main `5bccda44d6db56aff05fa5623ef7f72b2ec0263c`: `/chat` no longer turns failed/malformed authenticated conversation or message reads into an empty inbox, and does not auto-open a peer while the list is unverified. UUID, exact bigint, timestamp, duplicate and cross-conversation guards; accessible retry and noindex metadata. Nest contract unchanged; no financial/DB writes.
 - TDD 9 PASS; frontend 2,785 PASS, backend 2,786 PASS/501 SKIP, contract 41 PASS, database 62 PASS/4 SKIP, lint/typecheck/build/app-api 184 PASS. Isolated PostgreSQL 17.11 migrations 312 PASS, but app-role chat direct SELECT denied: Backend B v668 dependency. Full audit 13 vulnerabilities, route-ledger missing `--inventory`, official exact-SHA authenticated E2E and remote CI incomplete. **RELEASE HOLD**; no merge/deploy.
 

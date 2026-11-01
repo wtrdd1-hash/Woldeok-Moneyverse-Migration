@@ -155,7 +155,6 @@ export class DopamineController {
   }
 
   @Post('star-drop')
-  @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'private, no-store')
   @Header('X-Robots-Tag', 'noindex, nofollow')
   @ApiOperation({ summary: 'Star Drop claims held until an idempotent owner ledger receipt exists' })

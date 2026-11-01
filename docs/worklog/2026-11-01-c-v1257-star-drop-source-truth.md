@@ -8,12 +8,17 @@
 - Release safety: no migration, no direct ledger changes, no official Test or Production deployment without all required gates.
 
 ## In progress
-- [ ] RED tests and reproduction
-- [ ] Minimal backend/API and UI correction
-- [ ] Full SHA-specific verification and mid-run main recheck
+- [x] RED tests and reproduction
+- [x] Minimal backend/API and UI correction
+- [x] Full SHA-specific verification and mid-run main recheck (release gates not all PASS)
 
-## Finished
-- Pending.
+## Finished — 2026-11-01 11:57 KST
+- Feature: backend Star Drop POST returns authenticated 503 `STAR_DROP_SETTLEMENT_UNAVAILABLE`, no fake rewardAmount, private/no-store/noindex; status reports `starDropRemaining=0`. Browser no longer submits a locally chosen tier or announces an unposted reward. Mobile app-api blocks even a legacy upstream 200 reward at the edge, returning 503/no-store/noindex/no-referrer before fetch. Keyboard-accessible 320px-friendly practice screen retains 5-tap interaction but disables payout and labels the result simulation-only.
+- RED evidence: backend 2 failures (fake success and false availability); app-api 1 failure (legacy 200 forwarded). GREEN focused: Nest 3/3, web/modal/client/edge 6/6. No new DB schema, money writes, or migration.
+- Verification at code SHA `8f129e94c11cf1a2712188e22d7cdaf6591082e2` before final edge hardening: Lint PASS 0 errors/1022 warnings; typecheck PASS; Backend build PASS; Frontend build FAIL on Next static-page worker SIGABRT after successful compilation and TypeScript (initial 1024 MB heap OOM; 1800 MB retry static generation abort); Backend full 2953 PASS/517 SKIP (serial retry after initial EPIPE); Frontend full 2900 PASS/2 FAIL (admin console stale date fixture, QA #2303); Contract 41 PASS; database package 62 PASS/4 SKIP; app-api 184 endpoints PASS; isolated PostgreSQL 17.11 316/316 migrations PASS, app role ledger INSERT=false; prod high audit PASS 0 known; full dependency audit FAIL 9 (1 low/8 moderate); full-route QA FAIL missing full-route-ledger.json; remote CI runtime-check FAIL on same two admin session fixtures. New edge regression PASS 1/1 after initial RED. Post-final-SHA revalidation results recorded separately in PR.
+- Independent PostgreSQL container was removed; no shared Test/Production DB modified. The official exact-SHA authenticated Test/E2E, GitOps release and Production smoke/version are BLOCKED. No main merge, deployment, branch deletion or rollback. The PR remains DRAFT/HOLD; all unique work remains preserved.
+- Main rechecked start, midpoint and pre-final: `f13bbce273ffc65e8576170992d82ea00c27a1c9` unchanged. Existing A/B/QA/Gemini work and automation schedules untouched.
+- Release verdict: PARTIAL / RELEASE BLOCKED until all mandatory gates pass. Not a completed financial claim feature; this is a source-truth safety hold.
 
 ## In progress — 2026-11-01 11:44 KST
 - RED reproduced: backend 2/2 new source-truth tests failed (fabricated `success:true`, remaining=3). Frontend DOM tests initially could not run under inherited production React; rerun with `NODE_ENV=test` for valid evidence.
