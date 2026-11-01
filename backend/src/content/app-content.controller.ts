@@ -22,7 +22,7 @@ export class AppContentController {
     }
     try {
       const announcements = await this.service().publicAnnouncements({ day: query.day });
-      return { announcements, ...(query.day !== undefined ? { publicationDay: query.day } : {}) };
+      return { announcements, ...(query.day !== undefined ? { publicationDay: query.day as string } : {}) };
     } catch (error: unknown) {
       if (error instanceof ContentInputError) throw new BadRequestException(error.message);
       throw error;

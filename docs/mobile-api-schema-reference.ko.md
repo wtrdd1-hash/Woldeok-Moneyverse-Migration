@@ -2587,7 +2587,9 @@ _None._
 
 ### 경로/쿼리 파라미터
 
-- 선택 `day=YYYY-MM-DD` (한국시간, 2000~2099년). 최근 공개 공지 20건에서만 필터링한다. 중복·잘못된 날짜는 400, `publicationDay` 확인값과 게시일 범위를 검증할 수 없는 200 응답은 Android에서 503 처리한다. 필터 결과는 no-store/noindex.
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| day | query | false | string (date) | pattern="^20[0-9]{2}-[0-9]{2}-[0-9]{2}$"; description="Optional Seoul publication day; searches latest 20 published notices only" |
 
 ### 요청 본문
 
@@ -2597,7 +2599,7 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
-| publicationDay | false | string | 날짜 필터 사용 시 서버 확인값 |
+| publicationDay | false | string |  |
 | announcements[] | true | object[] |  |
 | announcements[] | true | object |  |
 | announcements[].announcementId | true | string |  |

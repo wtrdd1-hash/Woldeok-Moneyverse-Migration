@@ -179,7 +179,7 @@ export class ContentController {
       () => this.service().publicAnnouncements({ day }),
       'invalid publication day',
     );
-    return { announcements, ...(day !== undefined ? { publicationDay: day } : {}) };
+    return { announcements, ...(day !== undefined ? { publicationDay: day as string } : {}) };
   }
 
   @Get('photos')
