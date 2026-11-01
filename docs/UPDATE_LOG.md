@@ -1,3 +1,6 @@
+## 2026-11-01 v1617 — Treasury current fiscal proof display source tested, release HOLD
+- Certified server-owned public Treasury zero can return 200 only after strict vault/balance/timestamp checks; unknown source stays 503, old payments remain unverified. 18 frontend tests/typecheck/lint PASS; historic release gate requires 503 and must be updated with independent verification before Production.
+
 ## 2026-11-01 v1616 — Zero circulation shows a noncomputable reserve ratio, backend15/frontend12 targeted PASS, source candidate.
 
 ## 2026-11-01 v1615: Official Test fiscal 314-320 applied, scoped aggregate proof with app EXECUTE only, 105 sessions preserved; 392 targeted regression PASS, live Test/Prod pending.

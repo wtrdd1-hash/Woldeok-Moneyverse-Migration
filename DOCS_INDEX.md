@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1617 — Current Treasury public proof display (SOURCE TEST PASS / RELEASE GATE HOLD)
+- [Worklog EN](docs/worklog/2026-11-01-treasury-public-read-v1617.md) / [KO](docs/worklog/2026-11-01-treasury-public-read-v1617.ko.md) · [Internal EN](docs/updates/v2026.11.01.1617-treasury-public-internal.md) / [KO](docs/updates/v2026.11.01.1617-treasury-public-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1617-treasury-public-github.md) / [KO](docs/updates/v2026.11.01.1617-treasury-public-github.ko.md). Fixed permanently-unverified public BFF/SSR to consume DB-owned current fiscal proof; exact zero amount and no payout, stricter validation and 0-WLD UI. 18 targeted frontend tests, typecheck, lint PASS. Old release identity gate still hardcodes 503 and must not be bypassed; official Test/Production not promoted.
+
+
 ## v2026.11.01.1616 — Zero circulation reserve ratio (TEST CANDIDATE)
 - [Worklog EN](docs/worklog/2026-11-01-treasury-zero-circulation-v1616.md) / [KO](docs/worklog/2026-11-01-treasury-zero-circulation-v1616.ko.md). Source test verifies zero current Treasury with zero circulating WLD and explicitly unavailable ratio; no synthetic balance. Live release not yet complete.
 
