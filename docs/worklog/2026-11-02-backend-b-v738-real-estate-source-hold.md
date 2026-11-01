@@ -8,10 +8,10 @@
 - Decision: fail closed for unverifiable real-estate reads and financial writes, preserve authentication, remove fabricated success, and render explicit unavailable state. No DB/ledger writes, migrations, or production changes.
 
 ## In progress
-- [ ] RED: HTTP/handler tests prove fabricated success currently returned.
-- [ ] GREEN: backend and Next fail-closed responses; truthful client states.
-- [ ] Regression: focused, lint, typecheck, build, full suites, real PostgreSQL/CI/Test exact-SHA gates.
-- [ ] Refresh latest main/plan and PR overlap before any integration.
+- [x] RED: 2 backend handler and 3 Next edge tests fail against fabricated success (expected 503; observed 200/201). UI RED after NODE_ENV=test also reproduces synthetic share and rent presentation.
+- [x] GREEN: 2 Nest handler + 6 Nest HTTP + 3 Next edge + 1 React UI tests pass. Real-estate GET returns 503 source-unverified; mutations return 503 ledger-unavailable; Next edge is private/no-store/noindex/no-referrer. The client shows an unavailable alert and no fake shares, bids or WLD claim.
+- [ ] Regression: full typecheck PASS; lint/build/full suites/real PostgreSQL/CI/Test exact-SHA still pending.
+- [x] Mid-work fetch: main still `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, EN/KO plan unchanged; no duplicate real-estate PR found. Refresh again before any integration.
 
 ## Finished
 - Pending validation. RELEASE HOLD. No main merge or Test/Production deployment unless all gates pass.

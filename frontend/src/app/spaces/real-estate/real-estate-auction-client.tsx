@@ -24,25 +24,32 @@ import type { LandmarkAuction } from '@/app/api/spaces/real-estate/auction/route
 export function RealEstateAuctionClient() {
   const [auctions, setAuctions] = useState<LandmarkAuction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sourceStatus, setSourceStatus] = useState<'loading' | 'verified' | 'unavailable'>('loading');
   const [selectedAuction, setSelectedAuction] = useState<LandmarkAuction | null>(null);
   const [bidAmount, setBidAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [totalUnclaimedRent, setTotalUnclaimedRent] = useState<number>(4990);
+  const [totalUnclaimedRent, setTotalUnclaimedRent] = useState<number>(0);
   const [isClaiming, setIsClaiming] = useState(false);
 
   const fetchAuctions = async () => {
     try {
-      const res = await fetch('/api/spaces/real-estate/auction');
-      const data = await res.json();
-      if (data.ok) {
-        setAuctions(data.auctions || []);
-        if (data.totalUnclaimedRent !== undefined) {
-          setTotalUnclaimedRent(data.totalUnclaimedRent);
-        }
+      const res = await fetch('/api/spaces/real-estate/auction', { cache: 'no-store' });
+      const data: unknown = await res.json();
+      if (!res.ok || !data || typeof data !== 'object' || !('ok' in data) || data.ok !== true ||
+          !('auctions' in data) || !Array.isArray(data.auctions) ||
+          !('totalUnclaimedRent' in data) || typeof data.totalUnclaimedRent !== 'number' ||
+          !Number.isFinite(data.totalUnclaimedRent) || data.totalUnclaimedRent < 0) {
+        throw new Error('Real-estate source not verified');
       }
+      setAuctions(data.auctions as LandmarkAuction[]);
+      setTotalUnclaimedRent(data.totalUnclaimedRent);
+      setSourceStatus('verified');
     } catch {
-      // fallback safe
+      // A failed owner read is not evidence of zero holdings or zero dividends.
+      setAuctions([]);
+      setTotalUnclaimedRent(0);
+      setSourceStatus('unavailable');
     } finally {
       setLoading(false);
     }
@@ -118,6 +125,23 @@ export function RealEstateAuctionClient() {
     return `${hours}시간 ${mins}분 남음`;
   };
 
+  if (sourceStatus === 'loading') {
+    return <div role="status" className="rounded-xl border p-6 text-sm text-muted-foreground">경매 및 월세 배당 원본을 확인하는 중입니다.</div>;
+  }
+  if (sourceStatus === 'unavailable') {
+    return (
+      <div role="alert" className="rounded-xl border p-6 text-sm text-muted-foreground">
+        경매, 보유 지분 및 월세 배당 정보를 현재 확인할 수 없습니다. 검증된 원장 정보가 준비되기 전까지 입찰과 수령을 진행할 수 없습니다.
+      </div>
+    );
+  }
+
+  const totalShares = auctions.reduce((sum, auction) => sum + auction.userShares, 0);
+  const allShares = auctions.reduce((sum, auction) => sum + auction.totalShares, 0);
+  const averageYield = auctions.length > 0
+    ? auctions.reduce((sum, auction) => sum + auction.annualYieldRate, 0) / auctions.length
+    : null;
+
   return (
     <div className="space-y-6">
       {/* Overview Stat Strip */}
@@ -129,7 +153,7 @@ export function RealEstateAuctionClient() {
               <Building2 className="size-4 text-indigo-500" />
             </CardDescription>
             <CardTitle className="text-xl font-black font-mono tracking-tight text-foreground">
-              4개 프라임 구역
+              {auctions.length}개 확인됨
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
@@ -144,11 +168,11 @@ export function RealEstateAuctionClient() {
               <Layers className="size-4 text-emerald-500" />
             </CardDescription>
             <CardTitle className="text-xl font-black font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
-              15 주 (Shares)
+              {totalShares.toLocaleString()} 주 (Shares)
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            전체 랜드마크 지분 3.75% 점유
+            전체 랜드마크 지분 {allShares > 0 ? ((totalShares / allShares) * 100).toFixed(2) : "0.00"}% 점유
           </CardContent>
         </Card>
 
@@ -159,7 +183,7 @@ export function RealEstateAuctionClient() {
               <TrendingUp className="size-4 text-sky-500" />
             </CardDescription>
             <CardTitle className="text-xl font-black font-mono tracking-tight text-sky-500">
-              연 13.4%
+              {averageYield === null ? "확인 불가" : `연 ${averageYield.toFixed(1)}%`}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
@@ -197,7 +221,7 @@ export function RealEstateAuctionClient() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Gavel className="size-5 text-indigo-500" />
-            <span>메가시티 4대 프라임 랜드마크 경매 (Landmark Auctions)</span>
+            <span>메가시티 랜드마크 경매 (Landmark Auctions)</span>
           </h2>
           <span className="text-xs text-muted-foreground">실시간 호가 입찰 & 자동 연장 가드</span>
         </div>
