@@ -5192,6 +5192,21 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "appliedSort": {
+            "type": "object",
+            "properties": {
+              "order": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "order",
+              "scope"
+            ]
+          },
           "posts": {
             "type": "array",
             "items": {

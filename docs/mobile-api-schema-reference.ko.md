@@ -1930,6 +1930,9 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| appliedSort | false | object |  |
+| appliedSort.order | true | string |  |
+| appliedSort.scope | true | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

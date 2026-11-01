@@ -8,7 +8,7 @@ describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
-    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
+    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ', 'recent');
   });
   it.each([
     { q: ['a', 'b'] },
@@ -21,4 +21,19 @@ describe('public board title query HTTP validation', () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
+});
+
+describe('popular public board ordering', () => {
+  it('forwards the explicit popular sort and certifies its bounded scope', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'help', sort: 'popular' })).resolves.toEqual({
+      posts: [], appliedSort: { order: 'popular', scope: 'latest50' },
+    });
+    expect(community.publicList).toHaveBeenLastCalledWith('WDX', 'help', 'popular');
+  });
+  it.each([{ sort: '' }, { sort: 'recent' }, { sort: 'oldest' }, { sort: ['popular', 'popular'] }, { sort: 'popular', cursor: 'x' }])(
+    'rejects invalid/ambiguous popular sort %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
 });

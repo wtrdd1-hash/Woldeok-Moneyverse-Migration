@@ -1930,6 +1930,9 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| appliedSort | false | object |  |
+| appliedSort.order | true | string |  |
+| appliedSort.scope | true | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |
