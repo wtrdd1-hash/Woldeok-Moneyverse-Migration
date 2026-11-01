@@ -75,20 +75,15 @@ describe('NewspaperView', () => {
     expect(text).toContain('악재 50%');
   });
 
-  it('handles user poll interaction and shows percentage tally', () => {
+  it('does not invent poll counts or accept browser-only votes without a durable receipt', () => {
     const { container } = render(<NewspaperView events={MOCK_EVENTS} stocks={MOCK_STOCKS} />);
-    const pollButtons = Array.from(container.querySelectorAll('button')).filter((b) =>
-      b.textContent?.includes('강력 상승') || b.textContent?.includes('Bullish')
-    );
-    expect(pollButtons.length).toBeGreaterThan(0);
-
-    // Click first poll option button
-    if (pollButtons[0]) {
-      fireEvent.click(pollButtons[0]);
-    }
-
     const text = container.textContent ?? '';
-    expect(text).toContain('투표에 참여해 주셔서 감사합니다');
+    expect(text).toContain('투표 집계와 참여 기능을 확인할 수 없습니다');
+    expect(text).not.toContain('총 참여자 316명');
+    expect(text).not.toContain('투표에 참여해 주셔서 감사합니다');
+    expect(Array.from(container.querySelectorAll('button')).filter((b) =>
+      b.textContent?.includes('강력 상승') || b.textContent?.includes('Bullish Surge')
+    )).toHaveLength(0);
   });
 
   it('renders clean fallback state when no events exist', () => {

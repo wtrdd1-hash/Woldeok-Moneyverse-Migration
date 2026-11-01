@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Optional, Post, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Header, Inject, Optional, Post, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -10,20 +10,6 @@ export interface NewspaperPulseData {
   leadHeadline: string;
   leadSummary: string;
   updatedAt: string;
-}
-
-export interface PollOption {
-  id: string;
-  label: string;
-  votes: number;
-  percentage: number;
-}
-
-export interface NewspaperPollData {
-  id: string;
-  question: string;
-  options: PollOption[];
-  totalVotes: number;
 }
 
 export interface FinancialLoreItem {
@@ -65,13 +51,6 @@ export interface WeeklyBriefData {
 @Controller('newspaper')
 export class NewspaperController {
   constructor(@Optional() @Inject(PG_POOL) private readonly pool?: Queryable) {}
-
-  private pollVotes: Record<string, number> = {
-    bullish: 342,
-    sideways: 215,
-    bearish: 128,
-    cash: 59,
-  };
 
   @Get('weekly-brief')
   @ApiOperation({ summary: 'Weekly economic report unavailable until every metric has verified provenance' })
@@ -135,29 +114,29 @@ export class NewspaperController {
   }
 
   @Get('poll')
-  @ApiOperation({ summary: '주간 독자 여론조사 현황 조회' })
-  getWeeklyPoll(): { success: boolean; data: NewspaperPollData } {
-    return {
-      success: true,
-      data: this.calculatePollDistribution(),
-    };
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Reader poll unavailable until durable vote and tally provenance is verified' })
+  @ApiResponse({ status: 503, description: 'NEWSPAPER_POLL_SOURCE_UNVERIFIED: no authoritative tally exists' })
+  getWeeklyPoll(): never {
+    // The previous totals were seeded literals, not recorded community votes.
+    throw new ServiceUnavailableException({
+      statusCode: 503,
+      code: 'NEWSPAPER_POLL_SOURCE_UNVERIFIED',
+      message: 'Reader poll results are unavailable until a verified tally source exists.',
+    });
   }
 
   @Post('poll/vote')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '주간 독자 여론조사 투표 참여' })
-  voteWeeklyPoll(@Body() body: { choiceId?: string }): { success: boolean; data: NewspaperPollData } {
-    const choice = body?.choiceId || 'bullish';
-    if (this.pollVotes[choice] !== undefined) {
-      this.pollVotes[choice] += 1;
-    } else {
-      this.pollVotes[choice] = 1;
-    }
-
-    return {
-      success: true,
-      data: this.calculatePollDistribution(),
-    };
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Reader poll voting unavailable until durable, replay-safe receipts exist' })
+  @ApiResponse({ status: 503, description: 'NEWSPAPER_POLL_VOTE_UNAVAILABLE: no durable actor-bound vote receipt' })
+  voteWeeklyPoll(): never {
+    // Do not accept a public vote into per-process memory or claim a successful receipt.
+    throw new ServiceUnavailableException({
+      statusCode: 503,
+      code: 'NEWSPAPER_POLL_VOTE_UNAVAILABLE',
+      message: 'Voting is unavailable until durable, actor-bound vote receipts are verified.',
+    });
   }
 
   @Get('lore')
@@ -191,27 +170,4 @@ export class NewspaperController {
     };
   }
 
-  private calculatePollDistribution(): NewspaperPollData {
-    const totalVotes = Object.values(this.pollVotes).reduce((acc, v) => acc + v, 0) || 1;
-    const labels: Record<string, string> = {
-      bullish: '상승세 지속 (Bullish)',
-      sideways: '박스권 횡보 (Neutral)',
-      bearish: '조정 및 하락 (Bearish)',
-      cash: '현금/안전자산 예치',
-    };
-
-    const options: PollOption[] = Object.entries(this.pollVotes).map(([id, votes]) => ({
-      id,
-      label: labels[id] || id,
-      votes,
-      percentage: Math.round((votes / totalVotes) * 100),
-    }));
-
-    return {
-      id: 'poll-2026-09-w4',
-      question: '이번 주 머니버스 가상 증시 전망은 어디로 향할까요?',
-      options,
-      totalVotes,
-    };
-  }
 }

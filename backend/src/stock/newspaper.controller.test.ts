@@ -34,20 +34,10 @@ describe('NewspaperController', () => {
     await expect(controller.getMarketPulse()).rejects.toMatchObject({ status: 503 });
   });
 
-  it('returns weekly poll and correctly tallies vote distribution', () => {
+  it('never invents a poll tally or accepts a process-local vote', () => {
     const controller = new NewspaperController();
-    const initialPoll = controller.getWeeklyPoll();
-
-    expect(initialPoll.success).toBe(true);
-    expect(initialPoll.data.options.length).toBe(4);
-    const initialVotes = initialPoll.data.totalVotes;
-
-    const voteResult = controller.voteWeeklyPoll({ choiceId: 'bullish' });
-    expect(voteResult.success).toBe(true);
-    expect(voteResult.data.totalVotes).toBe(initialVotes + 1);
-    const bullishOption = voteResult.data.options.find((o) => o.id === 'bullish');
-    expect(bullishOption).toBeDefined();
-    expect(bullishOption?.votes).toBeGreaterThan(0);
+    expect(() => controller.getWeeklyPoll()).toThrow();
+    expect(() => controller.voteWeeklyPoll()).toThrow();
   });
 
   it('returns financial lore educational items', () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, render, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DeveloperPortalView } from './developer-portal-view';
+import { DeveloperPortalView, ENDPOINTS_DATA } from './developer-portal-view';
 import { appApiContract } from '@/lib/app-gateway';
 
 vi.mock('@/components/locale-provider', () => ({
@@ -36,6 +36,15 @@ describe('DeveloperPortalView', () => {
     const text = container.textContent ?? '';
     expect(text).toContain('/app-api/v1/newspaper/pulse');
     expect(text).toContain('/app-api/v1/newspaper/poll');
+  });
+
+  it('documents poll GET and vote POST as unavailable, not successful seeded tallies', () => {
+    for (const id of ['newspaper-poll', 'newspaper-vote']) {
+      const endpoint = ENDPOINTS_DATA.find((item) => item.id === id);
+      expect(endpoint?.sampleResponse).toContain('503');
+      expect(endpoint?.sampleResponse).not.toContain('success": true');
+      expect(endpoint?.sampleResponse).not.toContain('votes": 342');
+    }
   });
 
   it('switches between code snippet tabs (cURL, TypeScript, Python, Live Sandbox)', () => {
@@ -77,6 +86,6 @@ describe('DeveloperPortalView', () => {
 
     const text = container.textContent ?? '';
     expect(text).toContain('/app-api/v1/newspaper/poll');
-    expect(text).toContain('이번 주 머니버스 가상 증시 전망은 어디로 향할까요');
+    expect(text).toContain('NEWSPAPER_POLL_SOURCE_UNVERIFIED');
   });
 });
