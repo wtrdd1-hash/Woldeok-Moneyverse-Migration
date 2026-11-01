@@ -1,3 +1,9 @@
+## 2026-11-02 v1632 — F675-214 구매 전 보유품 만료일 영향 미리보기: GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 (기능 추가 / DRAFT / RELEASE HOLD)
+**v1632 GitHub:** Draft PR #2422 OPEN/HOLD (기준 #2416), 개발 인계 #2421. 병합·배포 없음.
+- 회차: 이전 보완 v1630 → 현재 추가 v1632 → 다음 보완 v1634(잠정). 최신 main a8541927c3a351d980454c66e95a3356c47e0722, Draft #2416 후속. 개발 인계 이슈 #2421 등록, 후속 Draft PR #2422 OPEN/HOLD.
+- 근거: /shop/catalog BuyForm 즉시 제출, 071 회원·상품당 한 행, 072 정식 원장 구매·수량 추가, 104 수량 증가 시 기간제 전체 보유품 만료일 재설정. 읽기 전용 구매 영향 GET과 명시적 확인 제안, 결제 견적이나 결제 행위 아님. RESTAMPS_ENTIRE_HOLDING / NEW_TIMED_HOLDING / NO_TERM_CHANGE, 30초 STALE, Next/Android 비공개, 앱 역할 직접 테이블 권한 금지.
+- P0 4/P1 6(IMPACT1632-05~IMPACT1632-10), PG17/로그인·원장/공식 Test 정확 SHA·독립 복원 미실행, 운영 보류. 외부 신규 검증·중복 제거·분류 승인 0건, 누적 UNKNOWN / 10,000 BLOCKED / IN PROGRESS. 런타임·DB·WLD·아이템·원장·Test·Production 변경 없음. 표준 171/171 PASS, 분류기 24/24 PASS, 확장 193/194 PASS·구형 공성전 검증 1 FAIL(#2391). PR #2422 OPEN/HOLD, 최종 CI 예정.
+
 ## 2026-11-02 v1630 — F675-213 단일 보유품 행·재구매 만료일 재설정 보완 (기능 보완 / 초안 / 운영 보류)
 **v1630 GitHub:** Draft PR #2416 OPEN/HOLD, #2410 종속, 인계 #2409.
 - **최신 검증:** 표준 171/171 PASS, 분류기 24/24 PASS, 확장 175/176(기존 파괴적 브랜치 정리 시험 1건 FAIL), 기능 E2E 미실행.
