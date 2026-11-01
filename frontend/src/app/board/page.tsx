@@ -12,7 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
-import { parseBoardDay } from './board-day';
+import { parseBoardDay, isVerifiedBoardDayResponse } from './board-day';
 
 export const revalidate = 60;
 
@@ -76,7 +76,7 @@ export default async function BoardPage({
   const fetched = search.invalid || day.invalid
     ? null
     : await publicApi<{ posts: PostSummary[]; appliedDay?: string }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
-  const data = day.day && fetched?.appliedDay !== day.day ? null : fetched;
+  const data = day.day && !isVerifiedBoardDayResponse(fetched, day.day) ? null : fetched;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
