@@ -113,17 +113,14 @@ export async function voteBullBear(_vote: 'bull' | 'bear', _stockSymbol = 'MARKE
  * AI 덕이봇과의 1:1 주사위 미니 쇼다운 승부 결과 결제/정산
  */
 export async function resolveMiniShowdown(
-  outcome: 'win' | 'loss',
-  playerRoll: number[],
-  aiRoll: number[],
-  stake = 100,
+  _outcome: 'win' | 'loss',
+  _playerRoll: number[],
+  _aiRoll: number[],
+  _stake = 100,
 ): Promise<MiniShowdownResult | null> {
-  return postDopamine<MiniShowdownResult>('mini-showdown', {
-    outcome,
-    playerRoll,
-    aiRoll,
-    stake,
-  });
+  // The server has no certified debit/payout ledger receipt for this activity.
+  // Do not send client-generated dice or publish a synthetic wallet update.
+  return null;
 }
 
 /**
