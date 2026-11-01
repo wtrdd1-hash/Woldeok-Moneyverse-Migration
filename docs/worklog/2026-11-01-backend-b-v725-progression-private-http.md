@@ -18,11 +18,18 @@
 - Contract 41 PASS; database package 62 PASS / 4 SKIP.
 - Isolated PostgreSQL 17.11: 316 migrations applied; session + progression integration 30 PASS; app role ledger DELETE and balance UPDATE denied. Ephemeral container removed. No shared DB modified.
 - Backend full test: TIMEOUT after 190 seconds; not a pass.
-- Frontend build: FAIL, Node heap exhaustion under 1 GiB cap; not a pass.
+- Frontend build: initial FAIL (Node heap exhaustion with 1 GiB cap), then PASS with 2 GiB heap and single V8 pool.
 - Frontend full test: TIMEOUT after 145 seconds, with failures observed; not a pass.
 - Production dependency audit PASS (0 known vulnerabilities). Full audit FAIL: 9 vulnerabilities (1 low, 8 moderate).
-- Official Test exact-SHA, authenticated core-user-flow E2E, GitOps release gates: NOT RUN for this branch; BLOCKED.
+- Official public Test exact-SHA: FAIL for pre-final candidate e449351177ea3c657794d382d5c893cb8254ee94 (backend_version_unverified, frontend_version_unverified); Test still serves bc8cd8a6c654af0336f550643f23049a58ee1d16. Authenticated core-user-flow E2E and GitOps release gates: NOT RUN; BLOCKED.
 - See host evidence under `/srv/moneyverse-data/tasks/mv-b-v725-progression-private-http-20261101-1635/logs/`.
+
+## Additional validation and remote review (16:47–16:49 KST)
+- Security HTTP headers/CORS/rate-limit: 33 PASS; frontend progression credit: 18 PASS.
+- Mobile API contract: 184 endpoints matched. Security/release/backup targeted Node tests: 20 PASS.
+- Draft PR #2346 created with hold label; merge status BLOCKED. Initial remote classify, policy and release-input PASS; runtime-check still pending at last observation.
+- Frontend full-suite failures and backend full-suite timeout remain release blockers despite focused passing tests.
+- No changes to other worktrees, Test deployment, Production, shared DB or economic balances.
 
 ## Finished / release decision
 - This is a real Backend code change with focused tests, not a documentation-only result.
