@@ -11,8 +11,11 @@
 ## IN PROGRESS
 - Pending implementation and evidence.
 
-## FINISHED
-- Pending verification; no release approval.
+## FINISHED IMPLEMENTATION / RELEASE HOLD — 02:38 KST
+- Implemented and pushed the full Nest/Next/SQL/Android contract feature, plus a second SEO edge fix. Code SHA `94ae1f160c928ad05bbe61c6ab022cb20ba28e27`; final documentation SHA to be recorded in PR.
+- Full first-code gates: backend 2,988 PASS/518 SKIP; frontend 2,940 PASS; database 62 PASS/5 SKIP; typecheck, lint (0 errors/1,027 warnings), backend/frontend builds, Android 184-endpoint contract and security scripts 11 PASS. Second-code UI/Android regression 10 PASS. All-dependency audit 9 findings FAIL; production audit 0 known.
+- DEV PostgreSQL read-only proof and P0 ACL recorded in issue #993; dev-toolchain findings in #1075. Exact-SHA official Test preflight FAIL; Production HOLD. See docs/qa/2026-11-02-a0225-board-popular.md and docs/releases/v2026.11.02-a0225-board-popular-hold.md.
+- Final exact-SHA full gates and GitHub CI must be rerun after the documentation commit; no merge or deployment until all independent gates PASS. No branch deletion, rollback or scheduled-task changes.
 
 ### IN PROGRESS — 02:27 KST
 - RED reproduced: backend 3 failing new assertions; frontend 7 failing new assertions. Baseline backend 15/15 PASS.
