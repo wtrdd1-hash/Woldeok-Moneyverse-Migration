@@ -1,5 +1,7 @@
 # 월덕 머니버스 — Living Project Plan
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
+
 ## v2026.11.02.1628 — F675-213 회원 보유품 만료 임박 현황 검증 조회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **회차:** 이전 Feature Improvement v1626 → 현재 Feature Addition v1628 → 다음 Feature Improvement v1630(잠정). 기준 origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3을 시작·중간에 재확인하고 AGENTS.md, README.md, 영문 정본·한국어 대조 기획서, 실제 frontend/backend/app-api/DB, 열린 GitHub PR과 QA를 조사했다. 미병합 Draft #2402에 쌓는 문서 전용 브랜치이며 개발 인계 이슈는 **#2409**이다. F675-213은 **기획안이며 미구현**이다. 공개 Test 버전 API의 SHA가 main과 같아도 실행 이미지·DB·인증 E2E·독립 복원 증명은 아니다. Production은 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834이다. **DRAFT / RELEASE HOLD.**

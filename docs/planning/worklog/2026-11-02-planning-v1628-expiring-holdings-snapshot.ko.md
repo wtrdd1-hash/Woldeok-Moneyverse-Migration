@@ -1,5 +1,7 @@
 # 기획 v1628 — F675-213 회원 보유품 만료 임박 검증 조회
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
+
 **날짜:** 2026-11-02 KST. **회차:** 이전 Feature Improvement v1626; 현재 Feature Addition v1628; 다음 Feature Improvement v1630(잠정).
 **상태:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **시작·중간 main:** 510dbe6bf4d5c2a8089fc06b480776053da7a2e3. **누적 기준:** 미병합 Draft #2402, SHA c5812debab56dec968294ad0108c4ee5c36f308f. **인계:** #2409.
 

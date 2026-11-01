@@ -1,5 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; base #2402), developer handoff issue #2409. No merge or deployment.
+
 ## v2026.11.02.1628 — F675-213 Verified Current Expiring Holdings Snapshot (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 **Cycle:** Previous Feature Improvement v1626 → Current Feature Addition v1628 → Next Feature Improvement v1630 (provisional). Authoritative origin/main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 checked at start and midpoint against AGENTS.md, README.md, both integrated plans, actual frontend/backend/app-api/DB, open GitHub PRs and QA. Docs-only branch stacked on **unmerged Draft #2402**, developer handoff **#2409**. F675-213 is **PROPOSED, NOT IMPLEMENTED**. Test public version API equals main, but this does not certify immutable runtime image/DB/E2E/restore; Production reports 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834. **DRAFT / RELEASE HOLD.**

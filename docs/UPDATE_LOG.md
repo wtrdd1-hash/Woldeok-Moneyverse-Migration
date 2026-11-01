@@ -1,5 +1,7 @@
 ## v2026.11.02.1626 — F675-212 Temporal Truth and Receipt Boundary (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; base #2402), developer handoff issue #2409. No merge or deployment.
+
 ## 2026-11-02 v1628 — F675-213 owner expiring holdings snapshot (Feature Addition / DRAFT / RELEASE HOLD)
 - **Verification delta:** standard 171/171 policy/backup/security and 24/24 classifier PASS; bilingual 4 pairs×9 markers PASS. Expanded 175/176 has one stale cleanup test expecting a destructive push while the workflow is read-only; QA reconciliation OPEN. No feature E2E.
 

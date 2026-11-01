@@ -1,5 +1,7 @@
 # Planning v1628 — F675-213 Verified Current Expiring Holdings Snapshot
 
+**v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; base #2402), developer handoff issue #2409. No merge or deployment.
+
 **Date:** 2026-11-02 KST. **Cycle:** Previous Feature Improvement v1626; Current Feature Addition v1628; Next Feature Improvement v1630 (provisional).
 **Status:** DOCUMENTATION CANDIDATE / DRAFT / RELEASE HOLD. **Main at start/mid:** 510dbe6bf4d5c2a8089fc06b480776053da7a2e3. **Stack base:** unmerged Draft #2402, head c5812debab56dec968294ad0108c4ee5c36f308f. **Issue:** #2409.
 
