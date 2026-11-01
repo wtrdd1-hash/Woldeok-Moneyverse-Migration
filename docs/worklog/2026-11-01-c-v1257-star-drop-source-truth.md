@@ -14,3 +14,9 @@
 
 ## Finished
 - Pending.
+
+## In progress — 2026-11-01 11:44 KST
+- RED reproduced: backend 2/2 new source-truth tests failed (fabricated `success:true`, remaining=3). Frontend DOM tests initially could not run under inherited production React; rerun with `NODE_ENV=test` for valid evidence.
+- GREEN: Nest claim now throws 503 with private/no-store and noindex headers; status reports zero available claims. Browser client no longer POSTs or broadcasts an optimistic wallet update. Practice modal retains keyboard-operated tap progression but disables settlement and labels the result as a simulation. Parent station no longer advertises a fake receipt.
+- Focused backend 3/3 PASS, frontend modal 4/4 PASS. Authenticated Nest HTTP regression confirms 503/no receipt/no-store/noindex.
+- Midpoint `origin/main` fetch unchanged at `f13bbce273ffc65e8576170992d82ea00c27a1c9`. Existing A/B/QA and other C PRs remain untouched.

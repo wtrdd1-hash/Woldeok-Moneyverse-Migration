@@ -19,7 +19,7 @@ import { GoldenDuckFever } from './golden-duck-fever';
 import { DeokiPetStation } from './deoki-pet-station';
 import { BullBearPoll } from './bull-bear-poll';
 import { MiniShowdownModal } from './mini-showdown-modal';
-import { StarDropModal, type StarDropReward } from './star-drop-modal';
+import { StarDropModal } from './star-drop-modal';
 
 interface CasualDopamineStationProps {
   className?: string;
@@ -292,10 +292,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
       <StarDropModal
         isOpen={activeModal === 'stardrop'}
         onClose={() => setActiveModal(null)}
-        dailyFreeRemaining={3}
-        onClaimReward={(reward: StarDropReward) => {
-          showRewardNotice(`스타 드롭 [${reward.title}] 수령 완료!`);
-        }}
+        dailyFreeRemaining={0}
       />
     </div>
   );

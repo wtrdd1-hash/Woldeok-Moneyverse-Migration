@@ -129,11 +129,9 @@ export async function resolveMiniShowdown(
 /**
  * 브롤스타즈형 스타 드롭 5연속 탭 최종 등급 보상 수령
  */
-export async function claimStarDrop(tapTier: 'rare' | 'epic' | 'legendary' | 'mythic'): Promise<StarDropResult | null> {
-  return postDopamine<StarDropResult>('star-drop', {
-    tapTier,
-    idempotencyKey: `stardrop_${tapTier}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  });
+export async function claimStarDrop(_tapTier: 'rare' | 'epic' | 'legendary' | 'mythic'): Promise<StarDropResult | null> {
+  // No DB-owned settlement receipt exists; never emit an optimistic wallet refresh.
+  return null;
 }
 
 /**

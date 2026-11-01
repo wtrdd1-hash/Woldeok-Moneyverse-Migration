@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, fireEvent, cleanup } from '@testing-library/react';
 import { StarDropModal } from './star-drop-modal';
 
 vi.mock('@/lib/dopamine-api', () => ({
@@ -25,8 +25,8 @@ describe('StarDropModal Component', () => {
     );
 
     expect(container.textContent).toContain('Brawl Stars형 스타 드롭');
-    expect(container.textContent).toContain('100% 가상 시뮬레이터 (현금 환전 불가)');
-    expect(container.textContent).toContain('일일 무료: 3회');
+    expect(container.textContent).toContain('연습용 시뮬레이터 (WLD 지급 없음)');
+    expect(container.textContent).toContain('연습 모드 (지급 없음)');
     expect(container.textContent).toContain('0/5 TAP');
   });
 
@@ -38,13 +38,13 @@ describe('StarDropModal Component', () => {
     const infoBtn = getByRole('button', { name: '확률표 확인' });
     fireEvent.click(infoBtn);
 
-    expect(container.textContent).toContain('공정 확률표 (2024 게임산업진흥법 준수)');
+    expect(container.textContent).toContain('연습용 확률 안내 (실제 보상 없음)');
     expect(container.textContent).toContain('전설 (Legendary)');
 
     const confirmBtn = getByRole('button', { name: '확인 완료' });
     fireEvent.click(confirmBtn);
 
-    expect(container.textContent).not.toContain('공정 확률표 (2024 게임산업진흥법 준수)');
+    expect(container.textContent).not.toContain('연습용 확률 안내 (실제 보상 없음)');
   });
 
   it('progresses tap count on click and cracks open on 5th tap to reveal reward', async () => {
@@ -63,15 +63,10 @@ describe('StarDropModal Component', () => {
     fireEvent.click(tapBtn);
 
     // After 5 taps, reveal reward screen appears
-    expect(container.textContent).toContain('잭팟 달성!');
-    expect(container.textContent).toContain('보상 수령하고 인벤토리에 넣기');
+    expect(container.textContent).toContain('연습 결과:');
+    expect(container.textContent).toContain('보상 정산은 현재 이용할 수 없습니다');
 
-    // Claim reward
-    const claimBtn = getByRole('button', { name: '보상 수령하고 인벤토리에 넣기' });
-    fireEvent.click(claimBtn);
-
-    await waitFor(() => {
-      expect(handleClaim).toHaveBeenCalledTimes(1);
-    });
+    expect(getByRole('button', { name: '보상 정산 이용 불가' })).toHaveProperty('disabled', true);
+    expect(handleClaim).not.toHaveBeenCalled();
   });
 });
