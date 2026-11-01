@@ -5,6 +5,10 @@
 ## v2026.11.01.1604 — F675-207 회원 만료 알림 조회 기간 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
 이전 기능 보완 v1602 → 현재 기능 추가 v1604 → 다음 기능 보완 v1606(잠정); 최신 main 95877554097b595d8dcfa28b60ecb65e50bf0c2d; 선행 미병합 #2315; 개발 이슈 #2327, Draft PR #2328. 회원 전용 24h/72h 조회 기간, 기본 72h, 저장해도 알림 자동 동의 금지; 예약 작업·영수증 경합, 리비전 CAS·멱등성, Next/Nest/Android 비공개 응답, DB 신원·마이그레이션 318 게이트. P0 4건/P1 6건. 최신 main 국고 v1607 및 QA 디스크 파일 보존. 기능은 모두 미구현·미시험, 문서 전용 Draft/HOLD. 외부 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+## 2026-11-01 v1611 — 국고 초기화 후 운영 미복구 사후분석 및 완료 판정기 (운영 미복구)
+- 백업 SHA·migration314·보관 금고 220,923,528 WLD·현재 금고/정식 국고 0 확인, 실제 앱권한 감사 차단(국고 552/552 미연결, 배당 NULL738/유령6). 공개 운영 353c6d vs main 905207, Test bc8cd8, 운영 포인터/실제 서비스 경로 불일치.
+- 읽기 전용 판정기 `scripts/release/verify-treasury-postreset-completion.mjs`와 6개 회귀 테스트 통과, 실제 호스트 판정 NOT_RECOVERED. CI/PR/0회계기만으로 지급/운영 정상화 선언 불가. [사고 RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md).
+
 ## 2026-11-01 v1609 — 운영 배포 버전 검증기 누락 참조 수정 (운영 미승격)
 - 실행 프로세스 디렉터리 조회에서 누락된 함수를 기존 systemd 프로세스 증빙 함수로 교체, 회귀 테스트 포함 20/20 PASS. 실제 Test에서 구버전 SHA 불일치 6건을 보고하고, 운영은 기존 릴리스 매니페스트가 없어 차단. 허위 승격 없음.
 - main SHA 95877554097b595d8dcfa28b60ecb65e50bf0c2d의 Test/운영 불변 후보 비활성 생성. 과거 국고 552건/배당 744건 출처 감사 별도 차단. [기록](worklog/2026-11-01-treasury-runtime-identity-v1609.ko.md).

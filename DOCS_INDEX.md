@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1611 — Post-reset Treasury recovery failure RCA (LIVE NOT RECOVERED)
+- [Incident RCA EN](docs/incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.md) / [KO](docs/incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md) · [Worklog EN](docs/worklog/2026-11-01-treasury-incident-root-cause-v1611.md) / [Worklog KO](docs/worklog/2026-11-01-treasury-incident-root-cause-v1611.ko.md) · [Internal EN](docs/updates/v2026.11.01.1611-treasury-rca-internal.md) / [KO](docs/updates/v2026.11.01.1611-treasury-rca-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1611-treasury-rca-github.md) / [KO](docs/updates/v2026.11.01.1611-treasury-rca-github.ko.md). Production migration 314 did reset 5 live vaults to 0 and archive 220,923,528 WLD (full backup hash verified). Source/CI merged but public Production and Test remain old SHA, historical Treasury 552 + dividends 744 lack canonical provenance. Read-only incident audit BLOCKED, 6 fail-closed regression tests PASS. **No live recovery / no payouts / no Production promotion**.
+
+
 ## v2026.11.01.1609 — Host runtime identity CLI bugfix (source tested / Production hold)
 - [Worklog EN](docs/worklog/2026-11-01-treasury-runtime-identity-v1609.md) / [KO](docs/worklog/2026-11-01-treasury-runtime-identity-v1609.ko.md) · [Internal EN](docs/updates/v2026.11.01.1609-runtime-identity-internal.md) / [KO](docs/updates/v2026.11.01.1609-runtime-identity-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1609-runtime-identity-github.md) / [KO](docs/updates/v2026.11.01.1609-runtime-identity-github.ko.md). Undefined systemdProcessDirectory repaired with tested process-evidence lookup (20/20). Actual Test blocks old SHA, actual Production blocks missing legacy immutable manifest; inactive merged-main Test/Prod candidates prepared, no public promotion.
 
