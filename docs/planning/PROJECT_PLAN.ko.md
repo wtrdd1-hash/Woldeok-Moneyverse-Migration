@@ -1,4 +1,43 @@
 # 월덕 머니버스 — Living Project Plan
+**v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; 기준 #2410), 개발 인계 이슈 #2409. 병합·배포 없음.
+
+
+## v2026.11.02.1630 — F675-213 보유품 단일 행·만료일 재설정·정확한 집계 계약 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**회차:** 이전 Feature Addition v1628 → 현재 Feature Improvement v1630 → 다음 Feature Addition v1632(잠정). 시작 기준 main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3; 중간·커밋 전 main 및 한영 기획서 재확인. 미병합 Draft #2410의 문서 전용 후속, 개발 인계 #2409. **F675-213은 미구현 기획안**이며 실제 운영 보유품 소실·알림 장애가 확인된 것은 아니다. 공개 Test 버전 SHA 일치만으로 실행 이미지/DB/복원을 증명하지 못한다. Production 공개 버전은 353c6d5d6ddbc14b1067e84f9c4a127bab1c3834. **DRAFT / RELEASE HOLD**.
+
+### 실제 소스·스키마 확인과 수정 이유
+- **근거:** 마이그레이션 071의 public.user_items는 PRIMARY KEY(user_id,catalog_id), quantity>=0 CHECK, 회원·상품당 만료시각 expires_at 한 개만 가진다. 마이그레이션 104의 shop_stamp_item_term 트리거는 수량 증가 시 **해당 회원·상품의 전체 보유품 만료시각을 새로 설정**하고 수량 감소 시 연장하지 않는다. 마이그레이션 072와 165의 재구매는 같은 행에 수량을 합산한다. 123의 shop_my_items_v2는 보유품 만료와 별개인 효과 종료시각을 반환한다. 개발 PostgreSQL 읽기 전용 확인에서도 동일 PK/CHECK와 user_items_pkey, idx_user_items_equipped 인덱스만 확인했다. 2026-11-02 03시대 KST 개발 DB 집계는 전체 6행·양수 수량 6행·만료시각 NOT NULL **0행**·현재 72시간 후보 **0행**이다. **개발 DB 한정**이며 Production 데이터나 기능 수요의 증거가 아니다.
+- **v1628 설계 오류:** (catalog_id,expires_at)별 여러 로트를 묶는다는 설명, 중복 로트 시험, 개별 구매 단위의 만료일 약속은 실제 회원·상품당 한 행 모델과 맞지 않는다. 재구매하면 기존 전체 수량의 만료시각이 뒤로 이동할 수 있고 로트별 만료 이력을 복원할 수 없다. 개발 DB에 후보가 0건이라는 사실은 신규 UI의 정상 작동을 검증하지 않는다.
+- **대안 검토:** shop_purchases에서 로트를 추론하면 선물·지급분과 현재 보유품의 만료일을 인증할 수 없다. 신규 로트 테이블/마이그레이션을 기획 예약에서 생성하거나 존재하지 않는 로트를 묶지 않는다. **채택:** 현재 회원·상품별 **보유품 행**을 정확히 조회하고 전체 만료시각 재설정 가능성을 명시하는 읽기 전용 현황. 미래 만료·갱신·알림 발송 보장이나 구매 로트 이력으로 표현하지 않는다.
+
+### 회원 화면·API·데이터 무결성 수정 계약
+- **대상·진입·CTA:** 인증·동의 유효 회원이 /shop/catalog의 ‘만료 임박’에서 기본 24시간 또는 72시간을 선택하고 새로고침/전체 보유품 보기/재시도를 사용한다. /account/notifications 연결은 선택. ‘만료 예정 보유품 종류 수’와 ‘총 수량’을 구분한다. “같은 기간제 상품을 추가 구매하면 기존 보유품 전체의 만료시각이 다시 설정될 수 있습니다”를 표시한다. 자동 알림·자동 연장을 약속하지 않는다.
+- **상태:** LOADING, VERIFIED_NONEMPTY, VERIFIED_EMPTY, UNAVAILABLE/UNKNOWN_SOURCE(503), AUTH_REQUIRED(401), CONSENT_REQUIRED(403), INVALID_QUERY(400), RATE_LIMITED(429), STALE/OFFLINE(60초 초과·로그아웃·회원/동의/보유품 변경). VERIFIED_EMPTY는 **전체 적격 행을 성공적으로 집계**했을 때만 허용한다. 상위 10개가 비었거나 행·영수증이 없거나 개발 샘플이 0건인 것만으로 검증된 빈 결과를 만들지 않는다. 잘못된 200·시간 초과도 503 처리.
+- **Nest GET:** /api/v1/shop/expiry-snapshot?hours=24|72, hours 생략 시 24, 중복·알 수 없는·과대·잘못된 파라미터는 400. SessionGuard/AuthenticatedGuard/ConsentGuard, 서버 검증 세션에서만 회원 식별. 사용자 입력 UUID 금지, 조회 전용 GET, 세션/IP별 요청량·동시성 제한 및 429 Retry-After, 304 금지.
+- **수정된 검증 200 DTO (v1628의 totalGroups·가상 로트 묶음 대체):** {sourceStatus:"VERIFIED",observedAtUtcMicros:"YYYY-MM-DDTHH:mm:ss.ffffffZ",windowHours:24|72,totalCatalogHoldings:"decimal bigint",totalUnits:"decimal bigint",hasMore:boolean,items:[{catalogId:UUID,code:string,name:string,categoryCode:string,expiresAtUtcMicros:string,quantity:"decimal bigint"}]}. **totalGroups·로트 ID는 없음.** items는 실제 적격 user_items 행 최대 10개, 만료시각 오름차순→catalogId 오름차순. totalCatalogHoldings는 전체 적격 행 COUNT(*), totalUnits는 동일 집합 SUM(quantity::bigint), hasMore는 totalCatalogHoldings>10일 때만 true. 수량·건수는 안전한 10진 문자열이며 JS Number로 강제 변환하지 않는다. 검증된 0은 totalCatalogHoldings:"0",totalUnits:"0",items:[],hasMore:false. 출처·조인 유일성·집계·직렬화가 불확실하면 503.
+- **SQL:** 동일 커넥션의 PostgreSQL 17 읽기 전용 REPEATABLE READ에서 clock_timestamp()를 단 한 번 평가한 materialized asOf로 모든 결과를 계산한다. user_items.user_id=검증된 회원, quantity>0, expires_at>asOf AND expires_at<=asOf+(24|72시간), shop_catalog PK 조인. NULL 만료는 무기한으로 제외한다. COUNT/SUM은 LIMIT 10 적용 전 **전체 집합**에서 계산한다. timestamptz 마이크로초 6자리를 유지하고 JS 밀리초로 반올림해 경계를 비교하지 않는다. 스냅샷 이후 재구매·소비·만료일 변경은 소급 반영되지 않으며 변경 시 UI를 무효화한다.
+- **권한:** SECURITY DEFINER에 p_actor(uuid)만 전달하고 moneyverse_app에 EXECUTE를 주면 침해된 앱 역할이 다른 회원 UUID를 직접 호출할 수 있다. 신뢰 가능한 DB 세션-회원 결합 또는 동등한 검증된 수단과 다른 회원 SQL/HTTP 차단 시험이 선행돼야 한다. 직접 테이블 SELECT/INSERT/UPDATE/DELETE 권한을 편의상 부여하지 않는다. #993/#2233/#2345 권한·마이그레이션 출처 문제를 해결한 뒤 불변 신규 마이그레이션 번호를 정한다. 이번 회차는 마이그레이션 없음.
+- **인덱스·성능:** 개발 DB의 현재 PK(user_id,catalog_id)가 회원 필터 경로이며 (user_id,expires_at) 인덱스는 확인되지 않았다. 별도 PG17에서 **서로 다른 상품 10,001종**으로 EXPLAIN(ANALYZE,BUFFERS)·쓰기 증폭을 측정한 뒤에만 WHERE quantity>0 조건부 회원+만료시각+상품 인덱스를 검토한다. p95<250ms·미리보기 10행 이하는 **시험 목표**, 측정 사실이 아니다. bigint 한계 초과 가능성이 있다면 numeric 집계 후 범위 검증, 조용한 오버플로 금지.
+- **웹·Android·SEO·접근성:** Next BFF와 Android app-api 정확한 경로에서 인증 전 GET/HEAD/오류/조건부 요청 모두 private/no-store/noindex/nofollow/no-referrer/nosniff, ETag/Last-Modified/Expires 제거 및 304 금지. 비공개 보유품을 공개 HTML·사이트맵·URL·분석 로그·디스크 캐시에 기록하지 않는다. 응답 DTO 전체 검증, 계정 전환·60초 경과 응답 폐기, 한영 동등 문구, 320px/200% 확대/44px 터치/키보드/aria-live/TalkBack/모션 감소. 보유품 만료와 효과 종료·유지비 정지를 구분하고 가상 로트 링크를 만들지 않는다.
+- **관리자·KPI·배포:** F675_213_EXPIRY_SNAPSHOT_ENABLED 기본 OFF. VERIFIED_EMPTY/NONEMPTY/503, 401/403/429, 응답 지연·오래된 응답 폐기·10개 초과율만 20명 이상 익명 코호트 및 소수 셀 억제로 집계, 회원별 내보내기·대리 조회 금지. 실제 성능·성공률은 미측정. 개발 A/B/C/QA 별도 브랜치→공식 Test 정확 후보 SHA→권한/금융/마이그레이션/복원 증빙→운영자 승인→OFF/직원/소규모 순서. 롤백은 플래그 OFF 후 검증된 불변 아티팩트, 보유품·원장 수정 금지.
+
+### P0/P1 개발 인계 (이슈 #2409)
+1. **P0 OPS1630-01:** Test/Production 실행 이미지·SHA·GitOps·공개 엣지 및 독립 복원/대사 증빙 (#1984/#2171); 버전 API만으로 불충분.
+2. **P0 SEC1630-02:** 환경별 실제 앱 역할 권한, 세션→회원 DB 결합 및 타 회원 접근 차단, 마이그레이션 318·Test 314 출처 (#993/#2233/#2345). 개발 DB 결과를 Production으로 일반화 금지.
+3. **P0 FIN1630-03:** 제작·주식·시즌·국고·소각 추첨·부동산 원장 근거 (#2330/#2340/#2357/#2366/#2404/#2405)를 독립 해결.
+4. **P0 REL1630-04:** 확장 브랜치 정리 테스트 실패·백엔드/보안 QA 정리, 공식 정확 SHA Test의 인증·PostgreSQL·Android·금융 E2E 및 독립 복원. 문서 CI 성공만으로 승격 금지.
+5. **P1 ROW1630-05 (B/DB):** 회원·상품 단일 행, 수량 증가 재설정·감소 비연장, 한 asOf·전체 COUNT/SUM, DB 신원/ACL/EXPLAIN.
+6. **P1 ROW1630-06 (B/API):** totalGroups 제거 DTO, 엄격한 24/72, 401/403/429/503, 잘못된 200 차단, 10진 문자열.
+7. **P1 ROW1630-07 (A/Web):** 종류 수와 수량 분리, 재구매 만료일 재설정 설명, 진짜 빈 상태/STALE/오류, 비공개 BFF·한영 접근성.
+8. **P1 ROW1630-08 (C/Android):** app-api 인증 전 비공개 응답, HEAD/304/오류/캐시, 계정·동의 전환, TalkBack.
+9. **P1 ROW1630-09 (A/B/Admin):** 기본 OFF, 20명 이상 익명 통계·소수 셀 억제, 직원→코호트, 지연/503/상위10 초과 감시·롤백.
+10. **P1 ROW1630-10 (QA):** 분리된 PG17 신규·업그레이드, 서로 다른 상품 10,001종, 적격 0/1/10/11행, 재구매 전체 만료시각 재설정·감소 비연장, 24/72 마이크로초 경계·NULL·수량0·타 회원/SQL 권한·COUNT/SUM·bigint·60초·Android HEAD/304·한영 320px, 보유품/WLD/원장 변화 0, 공식 정확 SHA Test·복원. **모두 제안 시험이며 미실행.**
+
+**v1630 문서 검증:** 표준 백업·릴리스·보안 Node **171/171 PASS**, 분류기 **24/24 PASS**, 확장 **175/176 PASS·1 FAIL**(읽기 전용 브랜치 정리 워크플로에 파괴적 push를 요구하는 오래된 시험), Git diff 검사 PASS. 확장 실패는 QA OPEN, 신규 기능 수용·PG17 마이그레이션·공식 정확 SHA Test·복원 미실행.
+
+**근거·운영:** 기획 문서만 변경, 런타임·마이그레이션·아이템·WLD·원장·Test·Production 변경 없음. 외부 독립 레퍼런스 신규 검증·중복 제거·근거 분류 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 10,000건 달성 주장 금지. Gemini/개발 A/B/C/QA 변경 분리, 최종 커밋 전 main·한영 기획서 재조회 및 실제 테스트·CI 결과만 기록.
+
 
 **v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
 
