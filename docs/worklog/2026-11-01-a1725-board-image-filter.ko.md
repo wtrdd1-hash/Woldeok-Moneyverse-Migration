@@ -17,3 +17,12 @@
 
 ## 종료
 검증 전, 병합 및 배포 없음.
+
+### 17:35 KST 중간 기록
+- 최신 main/영문·국문 기획서 재확인, main SHA 변경 없음.
+- Backend 대상 23 PASS, 웹 17 PASS, Android 12 PASS, Typecheck PASS, API 계약 184개 PASS.
+- Frontend 전체 2922 PASS, DB 단위 62 PASS/4 SKIP, Lint 오류 0/경고 1022.
+- Backend 전체 2969 PASS/2 FAIL/518 SKIP: 기존 프로필 HTTP 인증 401 문제. 수리 PR #2265와 중복 수정하지 않음.
+- 개발 PostgreSQL 읽기 전용 검증: 공개 글 1건 중 사진 1건, 준비된 SQL TRUE/FALSE 각각 1건, ROLLBACK.
+- 개발 DB 최소권한 위반(account_balances UPDATE, user_items DELETE, users SELECT) 재확인. 운영 DB 상태는 미확인.
+- 전체 빌드/정확 SHA Test 미완료, 병합 및 배포 보류.

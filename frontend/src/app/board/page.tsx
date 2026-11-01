@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardImageFilter } from './board-image-filter';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.withImage !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -48,6 +49,7 @@ interface PostSummary {
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly commentCount: number;
+  readonly hasImage?: boolean;
   readonly mine: boolean;
   readonly stock: StockContext | null;
 }
@@ -66,13 +68,16 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const imageFilter = parseBoardImageFilter(params.withImage);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (imageFilter.imageOnly) query.set('withImage', '1');
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const invalidFilter = search.invalid || imageFilter.invalid;
+  const data = invalidFilter
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, imageFilter.imageOnly ? 0 : 60);
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +136,10 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-image-only" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold">
+              <input id="board-image-only" type="checkbox" name="withImage" value="1" defaultChecked={imageFilter.imageOnly} className="size-5 accent-primary" />
+              사진 첨부 글만 보기
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,12 +154,15 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건의 제목과 사진 첨부 여부에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
             </p>
+          ) : null}
+          {imageFilter.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">사진 필터 값이 올바르지 않습니다. 다시 선택해 주세요.</p>
           ) : null}
         </CardContent>
       </Card>
@@ -161,14 +173,16 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
+        {invalidFilter ? (
+          <EmptyState title="검색 조건을 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
+              imageFilter.imageOnly
+                ? '최근 공개 게시글 50건에서 조건에 맞는 사진 첨부 글이 없어요.'
+                : search.query
                 ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
@@ -194,6 +208,7 @@ export default async function BoardPage({
                             </Badge>
                           ) : null}
                           <b className="truncate font-bold">{post.title}</b>
+                          {post.hasImage ? <Badge variant="secondary" className="shrink-0">사진</Badge> : null}
                           {post.commentCount > 0 && (
                             <span
                               className="flex shrink-0 items-center gap-1 text-xs font-bold text-clay-ink"
