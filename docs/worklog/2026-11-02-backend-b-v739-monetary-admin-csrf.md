@@ -15,3 +15,6 @@
 
 ## Finished
 Pending.
+
+### RED checkpoint
+- Actual Nest HTTP test `monetary-admin-csrf.http.test.ts`: **17 failed / 1 passed** before implementation, with missing/invalid token accepted or returned 503 from unguarded financial HOLD routes. No financial service mock should be invoked by denied requests. The positive test also proved no admin-console touch was performed.
