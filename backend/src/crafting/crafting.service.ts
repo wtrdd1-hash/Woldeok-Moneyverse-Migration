@@ -1,7 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import type { Queryable } from '../core/db';
-import { queryOne } from '../core/db';
-import { PG_POOL } from '../core/pool.provider';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 
 export interface CraftingRecipe {
   id: string;
@@ -95,19 +92,20 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
 
 @Injectable()
 export class CraftingService {
-  constructor(@Inject(PG_POOL) private readonly pool: Queryable | null) {}
-
-  listRecipes(): CraftingRecipe[] {
-    return CRAFTING_RECIPES;
+  listRecipes(): never {
+    throw new ServiceUnavailableException({
+      code: 'CRAFTING_SOURCE_UNVERIFIED',
+      message: 'crafting recipe availability is not verified',
+    });
   }
 
-  async executeCrafting(actor: string, recipeId: string, key: string): Promise<unknown> {
-    if (!this.pool) throw new Error('database pool unavailable');
-    const row = await queryOne<{ result: unknown }>(
-      this.pool,
-      `SELECT public.crafting_execute($1, $2, $3) AS result`,
-      [actor, recipeId, key],
-    );
-    return row?.result ?? null;
+  async executeCrafting(_actor: string, _recipeId: string, _key: string): Promise<never> {
+    // The existing DEV function debits user_cash_balances without the ledger
+    // and ignores the supplied idempotency key. Do not invoke it, even from
+    // an internal caller bypassing CraftingController.
+    throw new ServiceUnavailableException({
+      code: 'CRAFTING_LEDGER_UNAVAILABLE',
+      message: 'crafting settlement is unavailable',
+    });
   }
 }
