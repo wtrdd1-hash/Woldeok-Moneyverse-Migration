@@ -1,5 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1618 F675-210 카테고리 레지스트리·작업자 증빙 보완 / 개발 이슈 #2368 / Draft PR #2375 / 초안·운영 보류; #2369 기반; main 3d5e321c3d1221febff677469fecdfcb3cf42e7d.
+
+## v2026.11.01.1620 — F675-211 회원 만료 알림 수신 요일 선택 (기능 추가 / 초안 / 운영 보류)
+이전 보완 v1618 → 현재 추가 v1620 → 다음 보완 v1622(잠정). main `3d5e321c3d1221febff677469fecdfcb3cf42e7d` 시작·중간 확인, 미병합 Draft #2375 기반, 개발 이슈 #2383·Draft PR #2384. **기획만·미구현.** 로그인 회원이 `/account/notifications`에서 EVERY_DAY(기본) 또는 SELECTED(정렬·중복 없는 ISO 요일 월1~일7)를 저장/초기화/취소/재시도. F675-205 향후 09:00 KST 보유품 만료 알림만 제한하며 수신 동의 자동 활성화·F675-209 일시중지 무시·F675-210 분류 확대·보안/거래 알림 차단·전달 보장 금지. 다음 설정 요일은 달력 후보이지 생성/전달 영수증이 아니다.
+
+Nest GET/PUT `/api/v1/shop/expiry-digest/weekdays`, `weekdayIsoDays` 정규 ISO 정수 배열, Next BFF `/api/shop/expiry-digest/weekdays`, Android `/app-api/v1/shop/expiry-digest/weekdays`; 2KiB 엄격 DTO·세션/동의/CSRF·공통 리비전 CAS/UUIDv4 멱등·409/503·회원 잠금·불변 영수증. 제안된 단일 회원 설정 행·smallint[] ISO 요일·회원 PK·회원/일자 UNIQUE claim 재사용, 임의 DML 권한/마이그레이션 번호 금지. 작업자는 단일 DB asOf/KST 날짜로 동의→중지→요일→분류/보유품 순서, 실제 검증한 제외에만 `SKIPPED_BY_WEEKDAY`; 영수증 부재를 전달/만료 0건으로 위장 금지. 포함 요일에는 `(asOf,asOf+24/72h]` 보유 만료와 알림+영수증 원자 생성, 중복 금지. 가드 전 private/no-store/noindex·304 금지·60초 STALE/계정 전환·한영/320px/WCAG 2.2 AA/TalkBack, 관리자 20명 이상 집계·기본 OFF·원장/아이템 변화 0. P0 OPS1620-01 SEC1620-02 FIN1620-03 REL1620-04, P1 WEEK1620-05~10(DB·API/작업자·웹·Android·관리자·QA). #993/#2233/#2345/#2260/#2330/#2340/#2357/#2366 운영 보류, Test/Production SHA 불일치·수용시험 미실행. 외부 신규 승인 0·누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·Test·운영 변경 없음. 상세 양 언어 정본 PROJECT_PLAN.
+
+**현재 기획:** v1620 F675-211 회원 만료 알림 수신 요일 선택 / 개발 이슈 #2383 / Draft PR #2384 / 초안·운영 보류; #2375 기반; main 3d5e321c3d1221febff677469fecdfcb3cf42e7d.
 
 ## v2026.11.01.1618 — F675-210 카테고리 범위 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 이전 추가 v1616 → 현재 보완 v1618 → 다음 추가 v1620(잠정). main 3d5e321c3d1221febff677469fecdfcb3cf42e7d 시작·중간 확인, Draft #2369 기반, 이슈 #2368. **기획 전용·미구현.** 071 초기 6종·114 허용 코드 14종 CHECK는 승인된 ACTIVE/RETIRED·한영 라벨·만료 적격 레지스트리가 아니다. 123 shop_my_items_v2의 category+held.expires_at와 복수 clock_timestamp도 24/72시간 단일 asOf 작업자 증빙이 아니다. registryVersion은 승인된 정렬 코드·한영 라벨·수명주기·적격·정책의 불변 다이제스트, DISTINCT 개수/시각 사용 금지. 폐기된 SELECTED 저장 코드는 REQUIRES_REVIEW로 보존, 자동 삭제/ALL 전환 금지, 작업자는 UNKNOWN_SCOPE 차단. 승인 출처 없으면 503/BLOCKED, 임의 테이블/권한 추가 금지.
