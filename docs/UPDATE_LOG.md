@@ -1,3 +1,8 @@
+## 2026-11-02 v1632 — F675-214 catalogue purchase expiry impact preview: GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 (Feature Addition / DRAFT / RELEASE HOLD)
+- Cycle: Previous Improvement v1630 → Current Addition v1632 → Next Improvement v1634 (provisional). Latest main a8541927c3a351d980454c66e95a3356c47e0722, stacked on Draft #2416; handoff issue #2421; child Draft PR pending.
+- Source: /shop/catalog BuyForm submits directly; 071 one row per member/catalog, 072 canonical purchase and upsert, 104 restamps whole timed holding on quantity increase. Proposed new read-only verified purchase-impact GET and confirmation, not a quote or payment. RESTAMPS_ENTIRE_HOLDING / NEW_TIMED_HOLDING / NO_TERM_CHANGE; 30s stale, private Next/Android, no direct app grants.
+- P0 4/P1 6 (IMPACT1632-05 through IMPACT1632-10), real PG17/auth/ledger/official exact-SHA Test and independent restore NOT RUN; release HOLD. External new verified/deduplicated/classified 0; cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS. No runtime/DB/WLD/items/ledger/Test/Production mutation. Standard 171/171 PASS, classifier 24/24 PASS, expanded 193/194 PASS with one stale warfare assertion FAIL (#2391). PR/CI pending.
+
 ## 2026-11-02 v1630 — F675-213 holding-row truth and restamp correction (Feature Improvement / DRAFT / RELEASE HOLD)
 **v1630 GitHub:** Draft PR #2416 OPEN/HOLD, stacked on #2410; handoff #2409.
 - **Fresh QA:** standard 171/171 PASS, classifier 24/24 PASS; expanded 175/176 (one legacy destructive-cleanup test FAIL); no feature E2E.

@@ -1,4 +1,11 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.11.02.1632 — F675-214 상점 구매 전 보유품 만료일 재설정 영향 미리보기 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+이전 Feature Improvement v1630 → 현재 Feature Addition v1632 → 다음 Feature Improvement v1634(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 조사, 미병합 Draft #2416 후속 문서 전용. **F675-214 기획안·미구현.** 실제 /shop/catalog BuyForm은 바로 구매하고, 마이그레이션 071은 회원·상품별 user_items 한 행, 072는 정식 원장 결제·수량 추가, 104는 수량 증가 시 **기간제 전체 보유품** 만료일을 재설정한다. 만료된 기존 행도 DB에 남을 수 있다. 새 읽기 전용 GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 및 명시적 구매 확인을 제안한다. 정확한 결제 후 만료일·재고 예약·확정 가격·WLD 이동·구매 성공을 약속하지 않는다. 200 VERIFIED에 RESTAMPS_ENTIRE_HOLDING / NEW_TIMED_HOLDING / NO_TERM_CHANGE 및 observedAtUtcMicros, 기존 만료/NULL·불완전 출처는 엄격히 판정한다. 미리보기는 정식 POST 원장 트랜잭션과 분리되며 결제 권한이 아니다.
+
+P0 OPS1632-01 SEC1632-02 FIN1632-03 REL1632-04, P1 IMPACT1632-05~IMPACT1632-10(B/DB·B/API·A/Web·C/Android·A/B/Admin·QA). 읽기 전용 REPEATABLE READ, 단일 DB 관찰시각, PK(user_id,catalog_id), 세션→회원 신원 검증, 앱 역할 직접 테이블 권한 금지, 400/401/403/429/503, Next/Android 비공개/no-store/noindex/HEAD/304, 30초 STALE, 한영 WCAG 2.2 AA/TalkBack, 20명 이상 관리자 집계, F675_214_PURCHASE_IMPACT_PREVIEW_ENABLED 기본 OFF. Test·Production 공개 버전 510dbe6...는 최신 main과 다르고 Treasury v1619 운영 전환 근거는 전체 릴리스 승인이 아니다. 실제 기능 E2E·PG17·공식 Test 정확 SHA·독립 복원 미실행. 외부 신규 승인 0, 누적 UNKNOWN / 10,000 BLOCKED / IN PROGRESS. **DRAFT / RELEASE HOLD.** 런타임/DB/WLD/아이템/원장/Test/Production 변경 없음. 상세 계약은 PROJECT_PLAN.ko.md.
+
+
 **v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; 기준 #2410), 개발 인계 이슈 #2409. 병합·배포 없음.
 
 

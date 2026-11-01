@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
+## v2026.11.02.1632 — F675-214 Catalogue Purchase Expiry-Restamp Impact Preview (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+
+Previous Feature Improvement v1630 → Current Feature Addition v1632 → Next Feature Improvement v1634 (provisional). Latest origin/main a8541927c3a351d980454c66e95a3356c47e0722 inspected; documentation-only stacked on unmerged Draft #2416. **F675-214 PROPOSED, NOT IMPLEMENTED.** Real /shop/catalog BuyForm directly purchases; migration 071 stores one user_items row per owner/catalog, 072 performs canonical ledger purchase and quantity upsert, 104 restamps **entire timed holding** expiry on quantity increase. Expired rows may remain even when filtered from holdings. Chosen new read-only GET /api/v1/shop/catalog/:id/purchase-impact?quantity=1..100 and explicit confirmation, no exact future expiry, stock reservation, binding price, WLD movement or purchase success promise. 200 VERIFIED with RESTAMPS_ENTIRE_HOLDING / NEW_TIMED_HOLDING / NO_TERM_CHANGE and observedAtUtcMicros; expired/NULL and malformed source fail-closed. Preview is separate from canonical POST transaction and never authorizes a settlement.
+
+P0 OPS1632-01 SEC1632-02 FIN1632-03 REL1632-04; P1 IMPACT1632-05 through IMPACT1632-10 for B/DB, B/API, A/Web, C/Android, A/B/Admin and QA. Read-only REPEATABLE READ, one DB observedAt, PK(user_id,catalog_id), trusted session→actor, no direct app-role table grants, strict 400/401/403/429/503, private/no-store/noindex/HEAD/304 on Next and Android, 30s STALE, KO/EN WCAG 2.2 AA/TalkBack, cohort>=20, flag F675_214_PURCHASE_IMPACT_PREVIEW_ENABLED OFF. Test/Production public version 510dbe6... differs from latest main; specific Treasury v1619 Production cutover evidence is not blanket release authorization. Actual feature E2E/PG17/official Test exact-SHA/independent restore NOT RUN. External newly approved 0, cumulative UNKNOWN / 10,000 BLOCKED / IN PROGRESS. **DRAFT / RELEASE HOLD.** No runtime/DB/WLD/item/ledger/Test/Production mutation. Full executable handoff contract in PROJECT_PLAN.md; Korean equivalent paired.
+
+
 **v1630 GitHub:** Draft PR #2416 (OPEN / HOLD; base #2410), developer handoff issue #2409. No merge or deployment.
 
 
