@@ -24,7 +24,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const to = range ? params.to! : null;
   const filters = new URLSearchParams({ ...(status ? { status } : {}), ...(q ? { q } : {}), ...(sort ? { sort } : {}), ...(range ? { from, to } : {}) } as Record<string, string>);
   const path = `/api/v1/support/threads${filters.size ? `?${filters}` : ""}`;
-  const threadsSource = await api<unknown>(path).catch(() => null);
+  const threadsSource = await (q ? api<unknown>(path, {}) : api<unknown>(path)).catch(() => null);
   const verifiedThreads = parseSupportThreads(threadsSource);
   const threadsUnavailable = verifiedThreads === null;
   const threads = verifiedThreads ?? [];
