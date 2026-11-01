@@ -12,8 +12,7 @@ import type { EarlyGameBoard } from './early-game';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
 import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
-import { NPCS } from './quests';
-import type { EngagementBoard } from './quests';
+import { NPCS, parseEngagementBoard } from './quests';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { VipGoldenChestCard } from '@/components/vip-golden-chest-card';
 import { parseVipChestStatus } from './vip-chest-status';
@@ -68,14 +67,15 @@ export default async function QuestsPage() {
   // early-game read is separate because it is a different kind of answer --
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
-  const [board, earlyGame, today, firstDay, rawVipChest] = await Promise.all([
-    apiOrNull<EngagementBoard>('/api/v1/engagement'),
+  const [rawBoard, earlyGame, today, firstDay, rawVipChest] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/engagement'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
     apiOrNull<unknown>('/api/v1/engagement/dopamine/vip-chest/status'),
   ]);
 
+  const board = parseEngagementBoard(rawBoard);
   const vipChest = parseVipChestStatus(rawVipChest);
 
   return (
@@ -161,10 +161,12 @@ export default async function QuestsPage() {
         </p>
 
         {board === null ? (
-          <EmptyState
-            title="오늘의 퀘스트를 불러오지 못했어요."
-            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
-          />
+          <div role="status" aria-live="polite">
+            <EmptyState
+              title="오늘의 퀘스트를 불러오지 못했어요."
+              description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+            />
+          </div>
         ) : board.today_tasks.length === 0 ? (
           // A different fact from the one above: the request worked and the
           // catalogue has nothing open for today.

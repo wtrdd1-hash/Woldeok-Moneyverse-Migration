@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseEngagementBoard } from '@/app/quests/quests';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -498,6 +499,21 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  // The owner engagement dashboard is built by a SQL function. Do not pass a
+  // legacy success-shaped but malformed snapshot to Android as verified goals.
+  if (request.method === 'GET' && parts.length === 1 && parts[0] === 'engagement' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseEngagementBoard(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'engagement_board_unverified',
+          'member quest evidence could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'engagement_board_unverified',
+        'member quest evidence could not be verified');
+    }
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -594,6 +610,13 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  // Every engagement route is owner-scoped, including error responses and
+  // legacy game endpoints; no upstream public cache or referrer policy applies.
+  if (parts[0] === 'engagement') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
