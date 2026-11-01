@@ -29,5 +29,5 @@
 
 ## Task 3 — Verification and hold
 - [x] Re-fetch origin/main and canonical plan; record drift and dependencies.
-- [ ] Run focused/full frontend/backend, lint/typecheck/build, app-api, security, PostgreSQL and E2E where possible.
-- [ ] Push Draft PR and English/Korean final worklog; no merge or deploy without full PASS.
+- [x] Run focused/full frontend/backend, lint/typecheck/build, app-api, security, PostgreSQL and HTTP; record full-route/E2E blockers.
+- [x] Push Draft PR #2333 and English/Korean final worklog; no merge or deploy without full PASS.
