@@ -11,3 +11,5 @@
 - Draft PR #2293 생성 후 원격 브랜치 65개/열린 PR 63개. 기존 브랜치 삭제 0개, 미통합 변경 보존. 최초 코드·기록 SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`, 후속 기록 SHA는 PR 참조. 최종 SHA CI 진행 중으로 PASS 미판정.
 
 **v3 빈 결과 증거 강화:** 구형 백엔드의 무필터 HTTP 200 `events:[]`는 필터 적용 증거가 아님. Nest가 필터 요청에 `appliedDirection`을 응답하고 웹·Android는 빈 결과도 정확한 값 일치를 요구하며 미일치 시 검증 실패 처리. TDD RED Backend 2/Frontend 2, GREEN Backend 12/Frontend 7. 최신 Backend 전체 2,962 PASS/517 SKIP. 최신 Frontend 전체 재실행은 워커 EPIPE로 집계 전 중단; 앞선 전체 실행 2 FAIL/워커 오류가 마지막 완결 보고. v3 빌드 첫 시도 rayon 스레드 자원 부족, 스레드 제한 재시도 PASS. 새 테스트 파일 Lint 오류 수정 후 전체 오류 0/경고 1,022. HOLD 유지.
+
+**v4 계약 보완:** Nest 응답 union 타입으로 모바일 스키마 참조의 응답 필드가 누락되어 단일 타입+선택 `appliedDirection`으로 변경. 184개 엔드포인트 계약 JSON 및 영문·국문 참조 문서 재생성. 대상 Backend 12/Frontend 7 PASS, 타입검사 PASS. 생성 산출물 커밋.

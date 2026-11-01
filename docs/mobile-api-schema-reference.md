@@ -4480,6 +4480,7 @@ _No request body._
 | events[].source | true | string |  |
 | events[].starts_at | true | string (date-time) |  |
 | events[].ends_at | true | string (date-time) |  |
+| appliedDirection | false | string="up" \| string="down" |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

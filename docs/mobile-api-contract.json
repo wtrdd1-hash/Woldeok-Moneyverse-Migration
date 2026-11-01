@@ -14020,6 +14020,18 @@
                 "ends_at"
               ]
             }
+          },
+          "appliedDirection": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "up"
+              },
+              {
+                "type": "string",
+                "const": "down"
+              }
+            ]
           }
         },
         "required": [

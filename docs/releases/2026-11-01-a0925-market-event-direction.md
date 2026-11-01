@@ -5,3 +5,5 @@
 Start 64 remote branches / 62 open PRs; end 65 / 63 after Draft PR #2293. No branches deleted or merged; all existing unique work retained. Initial candidate SHA `0ec87cf3d55ab669699f6e7da4b0146c00a000d6`; final record SHA in PR. Exact-SHA CI pending.
 
 V3 gate: filtered responses now carry and require `appliedDirection` even for verified empty; unfiltered compatibility unchanged. Backend full 2962 PASS/517 SKIP; latest frontend full aborted EPIPE, prior 2 baseline failures; constrained Next build PASS; lint 0 errors. Production HOLD unchanged.
+
+V4: Android API contract/schema references regenerated for optional `appliedDirection` without losing existing event fields; source echo is required for filtered requests. Full release gate still HOLD.
