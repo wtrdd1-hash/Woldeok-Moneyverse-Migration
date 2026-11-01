@@ -9,9 +9,9 @@
 
 ## Implementation and TDD
 - Existing `member_board_public_list_with_stock(50)` → read-only SQL ordering by descending `comment_count`, then `created_at`, then `post_id`; filter by existing stock and title. The top-50 *newest* set is selected before the popular order. No global ranking, new migration, direct table grants, ledger write, money conversion or auth change.
-- Nest allows only `sort=popular` and emits `appliedSort` proof. Next has a labelled 44px native select, truthful 50-row scope and noindex metadata. Android app-api validates duplicate/unknown parameters and rejects unverified HTTP 200 as 503. Conditional response headers are no-store/noindex.
-- Baseline backend 15 PASS. RED backend 3 failures and frontend 7 failures; GREEN backend 23 PASS, frontend 18 PASS. Second SEO/accessibility test RED 1/2 identified missing app-api sort noindex/no-store; fixed and GREEN UI+Android 10 PASS.
-- Android curated contract now correctly documents optional `stock`, `q`, `sort=popular`; English/Korean schema references regenerated.
+- Nest accepts `sort=recent|popular`; only `popular` emits `appliedSort` proof. Next has a labelled 44px native select, truthful 50-row scope and noindex metadata. Android app-api validates duplicate/unknown parameters and rejects unverified HTTP 200 as 503. Conditional response headers are no-store/noindex.
+- Baseline backend 15 PASS. RED backend 3 failures and frontend 7 failures; GREEN backend 23 PASS, frontend 18 PASS. Second SEO/accessibility test RED 1/2 identified missing app-api sort noindex/no-store; fixed and GREEN UI+Android 10 PASS. Third RED revealed the native select always submits `sort=recent` even for the default view: backend 1 FAIL, frontend 3 FAIL; accepted explicit `recent` without a popularity marker and GREEN backend 23 PASS / frontend 22 PASS. This prevents default search form HTTP 400.
+- Android curated contract now correctly documents optional `stock`, `q`, `sort=recent|popular`; English/Korean schema references regenerated.
 
 ## Executed gates (first code revision; final SHA still requires retest)
 | Gate | Observed | Result |

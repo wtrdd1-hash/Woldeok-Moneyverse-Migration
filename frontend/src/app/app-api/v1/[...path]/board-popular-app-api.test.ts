@@ -31,7 +31,13 @@ describe('Android popular public board ordering', () => {
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
     expect(new URL(String(upstream.mock.calls[0]?.[0])).searchParams.get('sort')).toBe('popular');
   });
-  it.each(['?sort=oldest', '?sort=popular&sort=popular', '?sort=popular&unknown=1', '?sort=popular&q=x&q=y'])('rejects invalid query %s', async (query) => {
+  it('accepts recent ordering without a popular proof marker', async () => {
+    const { response, upstream } = await run('?sort=recent', { posts: [] });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(new URL(String(upstream.mock.calls[0]?.[0])).searchParams.get('sort')).toBe('recent');
+  });
+  it.each(['?sort=', '?sort=oldest', '?sort=popular&sort=popular', '?sort=popular&unknown=1', '?sort=popular&q=x&q=y'])('rejects invalid query %s', async (query) => {
     const { response, upstream } = await run(query, valid);
     expect(response.status).toBe(400);
     expect(upstream).not.toHaveBeenCalled();

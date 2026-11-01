@@ -85,7 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
-  @ApiQuery({ name: 'sort', required: false, enum: ['popular'], description: 'Most replies among the latest 50 public posts' })
+  @ApiQuery({ name: 'sort', required: false, enum: ['recent', 'popular'], description: 'Recent or most replies among the latest 50 public posts' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -100,7 +100,7 @@ export class PublicStockCommunityController {
     const stock = query.stock;
     const q = query.q;
     const sort = query.sort;
-    if (sort !== undefined && sort !== 'popular') {
+    if (sort !== undefined && sort !== 'recent' && sort !== 'popular') {
       throw new BadRequestException('invalid public board sort');
     }
     if (

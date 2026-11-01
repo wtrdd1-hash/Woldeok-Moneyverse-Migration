@@ -5194,6 +5194,7 @@
           "schema": {
             "type": "string",
             "enum": [
+              "recent",
               "popular"
             ]
           }

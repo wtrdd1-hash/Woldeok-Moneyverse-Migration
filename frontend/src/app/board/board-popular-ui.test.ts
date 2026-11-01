@@ -9,7 +9,9 @@ describe('accessible popular board discovery and SEO boundaries', () => {
     expect(page).toContain('htmlFor="board-sort"');
     expect(page).toContain('id="board-sort"');
     expect(page).toContain('name="sort"');
+    expect(page).toContain('<option value="recent">최신 글</option>');
     expect(page).toContain('<option value="popular">댓글 많은 글</option>');
+    expect(page).toContain("defaultValue={sort.enabled ? 'popular' : 'recent'}");
     expect(page).toContain('min-h-11 rounded-md border');
     expect(page).toContain('aria-describedby="board-search-scope"');
     expect(page).toContain('최근 공개 게시글 50건');

@@ -142,11 +142,11 @@ export default async function BoardPage({
               <select
                 id="board-sort"
                 name="sort"
-                defaultValue={sort.enabled ? 'popular' : ''}
+                defaultValue={sort.enabled ? 'popular' : 'recent'}
                 className="min-h-11 rounded-md border border-input bg-background px-3"
                 aria-describedby="board-search-scope"
               >
-                <option value="">최신 글</option>
+                <option value="recent">최신 글</option>
                 <option value="popular">댓글 많은 글</option>
               </select>
             </label>

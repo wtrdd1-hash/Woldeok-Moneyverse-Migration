@@ -3,7 +3,7 @@ export function parseBoardPopularSort(value: string | string[] | undefined): {
   readonly enabled: boolean;
   readonly invalid: boolean;
 } {
-  if (value === undefined) return { enabled: false, invalid: false };
+  if (value === undefined || value === 'recent') return { enabled: false, invalid: false };
   return value === 'popular' ? { enabled: true, invalid: false } : { enabled: false, invalid: true };
 }
 

@@ -1922,7 +1922,7 @@ _요청 본문 없음._
 |---|---|---|---|---|
 | stock | query | false | string | maxLength=16 |
 | q | query | false | string | maxLength=80 |
-| sort | query | false | string | enum="popular" |
+| sort | query | false | string | enum="recent","popular" |
 
 ### 요청 본문
 

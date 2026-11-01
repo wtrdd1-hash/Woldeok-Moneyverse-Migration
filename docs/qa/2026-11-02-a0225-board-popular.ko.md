@@ -4,14 +4,14 @@
 
 ## 기준과 격리
 - 기준 main `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`; 독립 브랜치 `auto/hourly-a-20261102-0225-board-popular`.
-- 1차 코드 SHA `2fd4c243699bb6cf58a32327ab2f2381f287fa5e`, 2차 코드 SHA `94ae1f160c928ad05bbe61c6ab022cb20ba28e27`. 문서 포함 최종 SHA는 PR #2412와 서버 증거에 별도 기록하며 전체 게이트 재검증 필요.
+- 1차 코드 SHA `2fd4c243699bb6cf58a32327ab2f2381f287fa5e`, 2차 코드 SHA `94ae1f160c928ad05bbe61c6ab022cb20ba28e27` 이후 기본 정렬 버그 수정. 문서 포함 최종 SHA는 PR #2412와 서버 증거에 별도 기록하며 전체 게이트 재검증 필요.
 - 정책, README, 영문 정본/국문 통합기획, 미병합 기획 #2410(v1628), 기존 QA/개발 로그/PR/CI 확인.
 
 ## 구현 및 회귀시험
 - 기존 DB `SECURITY DEFINER` 함수가 제공하는 **최신 공개 게시글 50건 내부에서만** 댓글 많은 순 정렬. 전체 게시글 인기 순위 아님. 기존 종목·제목 검색 유지. 신규 DB 마이그레이션·권한·원장·잔액·인증 변경 없음.
-- Nest는 `sort=popular`만 허용하고 적용 증거를 반환. 웹은 접근성 있는 44px 선택 메뉴, 검색 범위, noindex 제공. Android API는 중복·잘못된 조건과 검증 불가 HTTP 200을 차단하고 no-store/noindex 강제.
-- 기존 백엔드 15 PASS. 신규 실패 재현: 백엔드 3 FAIL/프론트 7 FAIL → 수정 후 백엔드 23 PASS/프론트 18 PASS. SEO/접근성 추가 시험에서 모바일 정렬 응답의 색인 방지 누락 RED 1/2 발견, 수정 후 UI·Android 10 PASS.
-- 모바일 계약 184개 엔드포인트. 종목/제목/정렬 매개변수의 선택 여부와 영문·국문 스키마 문서 정정.
+- Nest는 `sort=recent|popular`를 허용하며 인기순일 때만 적용 증거를 반환. 웹은 접근성 있는 44px 선택 메뉴, 검색 범위, noindex 제공. Android API는 중복·잘못된 조건과 검증 불가 HTTP 200을 차단하고 no-store/noindex 강제.
+- 기존 백엔드 15 PASS. 신규 실패 재현: 백엔드 3 FAIL/프론트 7 FAIL → 수정 후 백엔드 23 PASS/프론트 18 PASS. SEO/접근성 추가 시험에서 모바일 정렬 응답의 색인 방지 누락 RED 1/2 발견, 수정 후 UI·Android 10 PASS. 세 번째 RED에서 기본 선택 메뉴가 `sort=recent`를 항상 제출하여 HTTP 400이 되는 결함을 발견(백엔드 1 FAIL·프론트 3 FAIL), 명시적 recent를 허용하도록 수정해 백엔드 23 PASS·프론트 22 PASS.
+- 모바일 계약 184개 엔드포인트. 종목/제목/정렬(recent|popular) 매개변수의 선택 여부와 영문·국문 스키마 문서 정정.
 
 ## 최초 코드 전체 게이트
 | 검증 | 결과 |

@@ -24,3 +24,8 @@
 - Android 계약의 선택형 `stock`, `q`, `sort=popular`를 정확하게 반영하고 영문·국문 스키마 문서 재생성.
 - 실제 개발 DB 읽기 전용: 최근 공개 게시글 1건/댓글 0건, 정렬 SQL 실행 PASS. `moneyverse_app`의 잔액 직접 UPDATE·아이템 직접 DELETE 권한은 P0 #993으로 남음. 운영 DB 동일 여부 미확인.
 - 공식 Test·Production 변경 없음. 최신 SHA 전체 게이트 및 CI 재검증 필요.
+
+### 3차 오류 수정 (02:42 KST)
+- HTML 선택 메뉴가 기본값을 항상 GET으로 전송하는데 기존 API는 빈 정렬 또는 recent를 거부하는 결함 발견. RED: 백엔드 1 FAIL, 프론트엔드 3 FAIL.
+- 기본 `sort=recent`를 명시적으로 허용하고 인기순 `sort=popular`의 검증은 유지. Android 계약·접근성 메뉴 수정 후 백엔드 23 PASS, 프론트 22 PASS.
+- 이전 SHA의 개발 A 전체 게이트만 중지하고 다른 예약 프로세스는 유지. 새로운 최종 SHA에서 전체 게이트와 CI 재검증 필수.

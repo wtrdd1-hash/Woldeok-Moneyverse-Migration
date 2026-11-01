@@ -116,11 +116,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const popularBoardPath = request.method === 'GET' && parts.length === 3 &&
     parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
   const popularValues = popularBoardPath ? request.nextUrl.searchParams.getAll('sort') : [];
-  if (popularValues.length > 0 && (popularValues.length !== 1 || popularValues[0] !== 'popular' ||
+  if (popularValues.length > 0 && (popularValues.length !== 1 || !['recent', 'popular'].includes(popularValues[0]!) ||
       [...request.nextUrl.searchParams.keys()].some((key) => !['stock', 'q', 'sort'].includes(key)) ||
       request.nextUrl.searchParams.getAll('stock').length > 1 ||
       request.nextUrl.searchParams.getAll('q').length > 1)) {
-    return gatewayProblem(400, 'Bad Request', 'board_popular_invalid', 'sort must be popular with unambiguous filters');
+    return gatewayProblem(400, 'Bad Request', 'board_popular_invalid', 'sort must be recent or popular with unambiguous filters');
   }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
@@ -284,7 +284,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
-  if (popularBoardPath && popularValues.length === 1 && response.ok) {
+  if (popularBoardPath && popularValues[0] === 'popular' && response.ok) {
     try {
       if (!isJsonMediaType(response.headers.get('content-type')) ||
           !isVerifiedPopularBoardResponse(await response.clone().json())) {

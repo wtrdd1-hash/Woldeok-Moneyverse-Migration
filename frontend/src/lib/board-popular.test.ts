@@ -12,8 +12,9 @@ describe('bounded popular board proof', () => {
   it('accepts only one explicit popular sort', () => {
     expect(parseBoardPopularSort(undefined)).toEqual({ enabled: false, invalid: false });
     expect(parseBoardPopularSort('popular')).toEqual({ enabled: true, invalid: false });
+    expect(parseBoardPopularSort('recent')).toEqual({ enabled: false, invalid: false });
     expect(parseBoardPopularSort(['popular', 'popular']).invalid).toBe(true);
-    expect(parseBoardPopularSort('recent').invalid).toBe(true);
+    expect(parseBoardPopularSort('oldest').invalid).toBe(true);
   });
   it('accepts descending replies, newest-first tie, and verified empty snapshot', () => {
     expect(isVerifiedPopularBoardResponse(payload([post(id1, 3), post(id2, 1)]))).toBe(true);

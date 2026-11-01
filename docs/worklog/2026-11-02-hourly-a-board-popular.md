@@ -32,3 +32,8 @@
 - Updated curated Android query contract: optional `stock`/`q`/`sort=popular` (previous stock incorrectly marked required), regenerated English/Korean schema references.
 - Actual DEV PostgreSQL read-only app-role proof: EXECUTE=true, 1 latest public row, 0 replies, monotone query true; app direct UPDATE on `account_balances` and DELETE on `user_items` still true (P0 #993). No actual multi-row positive ranking proof.
 - No Test/Production changes, no branch cleanup. Full final-SHA gates and CI still required.
+
+### REPAIR — 02:42 KST (native GET default sort)
+- Review found the HTML `<select name="sort">` always submits its default option. The initial empty value was rejected by Nest; switching to `recent` alone would still be rejected. New RED: backend 1 FAIL and frontend 3 FAIL.
+- Accepted explicit `sort=recent` (legacy newest-first behavior) without a popular proof marker, kept strict `sort=popular` verification, updated Android query enum and accessible form default. GREEN backend 23 PASS and frontend 22 PASS.
+- Stopped only the superseded A final-gate process tree; no other agents' processes were touched. The earlier exact-SHA run is invalidated. Final new-SHA full gates and CI must run before any completion claim.

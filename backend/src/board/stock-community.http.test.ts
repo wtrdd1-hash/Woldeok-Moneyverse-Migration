@@ -31,7 +31,11 @@ describe('popular public board ordering', () => {
     });
     expect(community.publicList).toHaveBeenLastCalledWith('WDX', 'help', 'popular');
   });
-  it.each([{ sort: '' }, { sort: 'recent' }, { sort: 'oldest' }, { sort: ['popular', 'popular'] }, { sort: 'popular', cursor: 'x' }])(
+  it('accepts explicit recent sort without a popularity proof marker', async () => {
+    await expect(new PublicStockCommunityController(community).list({ sort: 'recent' })).resolves.toEqual({ posts: [] });
+    expect(community.publicList).toHaveBeenLastCalledWith(undefined, undefined, 'recent');
+  });
+  it.each([{ sort: '' }, { sort: 'oldest' }, { sort: ['popular', 'popular'] }, { sort: 'popular', cursor: 'x' }])(
     'rejects invalid/ambiguous popular sort %j', async (query) => {
       await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
     },
