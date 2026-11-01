@@ -24,16 +24,16 @@
 - Existing trade/order functionality unchanged.
 
 ## Task 1: Source contract
-- [ ] Add backend controller 503 regression test; run RED.
-- [ ] Implement explicit public unavailable depth endpoint; run GREEN.
-- [ ] Add Next route tests for 503 and malformed ID; run RED.
-- [ ] Implement no-store fail-closed Next proxy; run GREEN.
+- [x] Add backend controller 503 regression test; run RED.
+- [x] Implement explicit public unavailable depth endpoint; run GREEN.
+- [x] Add Next route tests for 503 and malformed ID; run RED.
+- [x] Implement no-store fail-closed Next proxy; run GREEN.
 
 ## Task 2: Frontend truth
-- [ ] Add regression tests for absent fabricated depth/trades and accessible status; run RED.
-- [ ] Replace synthetic depth with quote-only unavailability view; remove fake trade toast.
-- [ ] Update obsolete synthetic data tests and run GREEN.
+- [x] Add regression tests for absent fabricated depth/trades and accessible status; run RED.
+- [x] Replace synthetic depth with quote-only unavailability view; remove fake trade toast.
+- [x] Update obsolete synthetic data tests and run GREEN.
 
 ## Task 3: Verify and preserve
-- [ ] Run exact HEAD gates, record pass/fail/blocked without claiming skipped tests.
-- [ ] Fetch main/plan at mid/end; preserve changes as Draft PR, never merge with failing gates.
+- [x] Run exact HEAD gates, record pass/fail/blocked without claiming skipped tests.
+- [x] Fetch main/plan at mid/end; preserve changes as Draft PR, never merge with failing gates.
