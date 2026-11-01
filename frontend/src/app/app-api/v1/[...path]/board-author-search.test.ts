@@ -9,8 +9,8 @@ function request(author: string) {
   return new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?author=' + author,
     { headers: { host: 'easy-scraping.com' } });
 }
-function upstream(posts: unknown[]) {
-  return new Response(JSON.stringify({ posts }), {
+function upstream(posts: unknown[], authorFilter?: string) {
+  return new Response(JSON.stringify({ posts, ...(authorFilter ? { authorFilter } : {}) }), {
     headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
   });
 }
@@ -27,15 +27,21 @@ describe('Android bounded public board author search', () => {
   it('fails closed when an HTTP 200 response does not match the requested public author', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
-    vi.stubGlobal('fetch', vi.fn(async () => upstream([{ authorName: 'Other', postId: 'id' }])));
+    vi.stubGlobal('fetch', vi.fn(async () => upstream([{ authorName: 'Other', postId: 'id' }], '김')));
     const response = await GET(request('%EA%B9%80'), context);
     expect(response.status).toBe(503);
     expect(response.headers.get('cache-control')).toContain('no-store');
   });
+  it('rejects an empty legacy HTTP 200 response that cannot prove author filtering', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => upstream([])));
+    expect((await GET(request('%EA%B9%80'), context)).status).toBe(503);
+  });
   it('forwards a literal author filter and noindexes a verified bounded result', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
-    const fetcher = vi.fn(async () => upstream([{ authorName: '김%_', postId: 'id' }]));
+    const fetcher = vi.fn(async () => upstream([{ authorName: '김%_', postId: 'id' }], '김%_'));
     vi.stubGlobal('fetch', fetcher);
     const response = await GET(request('%EA%B9%80%25_'), context);
     expect(response.status).toBe(200);

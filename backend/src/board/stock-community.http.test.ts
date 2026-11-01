@@ -27,7 +27,7 @@ describe('public board author HTTP validation', () => {
   it('forwards one bounded author name alongside stock and title', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: 'news', author: ' 김 ' }))
-      .resolves.toEqual({ posts: [] });
+      .resolves.toEqual({ posts: [], authorFilter: '김' });
     expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', ' 김 ');
   });
   it.each([{ author: ['a', 'b'] }, { author: '' }, { author: '<script>' }, { author: 'x'.repeat(81) }])(

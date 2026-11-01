@@ -130,8 +130,9 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined, author as string | undefined),
-    };
+    const posts = await this.community.publicList(
+      stock as string | undefined, q as string | undefined, author as string | undefined,
+    );
+    return { posts, ...(typeof author === 'string' ? { authorFilter: author.trim() } : {}) };
   }
 }

@@ -289,6 +289,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON board');
       const payload: unknown = await response.clone().json();
       if (!payload || typeof payload !== 'object' || !('posts' in payload) ||
+          !('authorFilter' in payload) || payload.authorFilter !== boardAuthor ||
           !Array.isArray(payload.posts) || payload.posts.length > 50 ||
           !payload.posts.every((row: unknown) => {
             if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
