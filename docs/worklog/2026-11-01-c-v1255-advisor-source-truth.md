@@ -16,3 +16,9 @@
 
 ## Finished
 - Pending.
+
+### In progress — 09:49 KST
+- RED reproduced 9 failing assertions against original fabricated execution / diagnosis contract (evidence `tdd-red.log`).
+- GREEN: authenticated rebalance now HTTP 503, anonymous 401, cross-origin 403, no generated trade receipt; BFF diagnosis validates a durable backend receipt and internally consistent safe-integer WLD, maps only owner-safe read-only fields; UI no longer promises live Sharpe, returns a keyboard/assistive-technology friendly error/retry and verified as-of values.
+- 13 focused tests PASS (including jsdom retry, authenticated view, missing consent); targeted eslint and frontend TypeScript PASS. First parallel test run hit shared-host worker starvation, rerun with one worker PASS.
+- Midpoint fetch origin/main remains `f13bbce273ffc65e8576170992d82ea00c27a1c9`; EN canonical planning header unchanged. No overlap with current A/B/QA PR inventory.
