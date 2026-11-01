@@ -9,3 +9,10 @@
 - Plan: docs/superpowers/plans/2026-11-01-fx-source-truth-v1256.md.
 - State: IN PROGRESS. RED tests, source gate, SEO correction, regression and exact-SHA gates pending.
 - Production, Test, main and other task worktrees remain untouched.
+
+## MID (2026-11-01 10:43 KST)
+- Re-fetched origin/main: f13bbce273ffc65e8576170992d82ea00c27a1c9 (unchanged). Canonical EN/KO planning rechecked.
+- RED: four frontend regression tests failed before implementation, including a crash on a success-shaped malformed response; captured /tmp/mv-c-v1256-red.log.
+- GREEN: four frontend tests passed after fail-closed source gate, source evidence validation, stale data clearing, keyboard Retry, responsive error, and noindex metadata; backend FX public HTTP and mutation hold 10 tests PASS.
+- Focused ESLint 0 errors / 1 existing-style hook dependency warning; frontend typecheck PASS. Full exact-SHA gates pending.
+- Source is deliberately 503 on current main. This is a protective user-facing hold, not a completed FX market or real settlement.
