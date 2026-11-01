@@ -9,7 +9,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { DopamineController } from './dopamine.controller';
-import type { DopamineRepository } from './dopamine.repository';
+import { DopamineRepository } from './dopamine.repository';
 
 const USER = '11111111-2222-4333-8444-555555555555';
 const memberRequest = { session: { user_id: USER } } as unknown as RequestWithSession;
@@ -42,7 +42,7 @@ describe('P0 mini-showdown authenticated HTTP boundary', () => {
   beforeAll(async () => {
     const builder = Test.createTestingModule({
       controllers: [DopamineController],
-      providers: [{ provide: 'DUMMY', useValue: null }],
+      providers: [{ provide: DopamineRepository, useValue: null }],
     });
     for (const guard of [SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard]) {
       builder.overrideGuard(guard).useValue({ canActivate: () => true });
@@ -66,5 +66,8 @@ describe('P0 mini-showdown authenticated HTTP boundary', () => {
     expect(response.body).not.toHaveProperty('payout');
     expect(response.body).not.toHaveProperty('transactionId');
     expect(response.body).not.toHaveProperty('success', true);
+    expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.headers['x-robots-tag']).toBe('noindex');
+    expect(response.headers['referrer-policy']).toBe('no-referrer');
   });
 });

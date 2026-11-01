@@ -131,27 +131,21 @@ export class DopamineController {
   }
 
   @Post('mini-showdown')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Resolve 1:1 Instant Dice Showdown against AI' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Mini-showdown settlement held until server-authoritative dice and atomic ledger receipts exist' })
   async resolveMiniShowdown(
     @Req() request: RequestWithSession,
-    @Body() body: MiniShowdownDto,
-  ) {
-    const userId = requireUserId(request);
-    const stake = body.stake ?? 100;
-    const isWin = body.outcome === 'win';
-    const rewardAmount = isWin ? Math.floor(stake * 1.9) : 0;
-
-    return {
-      success: true,
-      userId,
-      outcome: body.outcome,
-      stake,
-      payout: rewardAmount,
-      playerRoll: body.playerRoll,
-      aiRoll: body.aiRoll,
-      resolvedAt: new Date().toISOString(),
-    };
+    @Body() _body: MiniShowdownDto,
+  ): Promise<never> {
+    requireUserId(request);
+    // Caller-selected dice, result and stake cannot attest a wager or WLD payout.
+    // Never return success before a DB-owned idempotent stake/settlement receipt exists.
+    throw new ServiceUnavailableException({
+      code: 'MINI_SHOWDOWN_SETTLEMENT_UNAVAILABLE',
+      message: 'Mini-showdown WLD settlement requires verified server dice and atomic ledger receipts',
+    });
   }
 
   @Post('star-drop')
