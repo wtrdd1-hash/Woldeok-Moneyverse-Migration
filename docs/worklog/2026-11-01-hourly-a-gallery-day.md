@@ -11,3 +11,11 @@
 ## In progress — TDD RED
 - Added Nest service/controller and Android/gallery contract tests before production changes. Backend RED: 11 failed / 4 passed; existing service ignored day and controllers ignored duplicate parameters.
 - Frontend RED: missing gallery-day validator module and app-api filter; test fixture token adjusted to isolate intended behavior. Logs: `red-backend.log`, `red-frontend.log` in task directory.
+
+## In progress — implementation checkpoint 12:38 KST
+- Nest public `/api/v1/photos?day=` and Android-facing `/api/v1/content/photos?day=` now validate one Gregorian date and reuse `content_list_published_photos(24)`; no new SQL, grant or financial write.
+- Next `/gallery?day=` offers an accessible labelled date GET form, clear link, explicit latest-24 scope, verified-empty/error distinction and filtered-page noindex. Android app-api rejects unfiltered, non-JSON or 204 success-shaped upstream responses.
+- TDD GREEN: backend targeted 15/15, frontend targeted 10/10. Backend typecheck PASS, Android contract 184 endpoints PASS, targeted ESLint 0 errors/1 pre-existing image warning. Full lint/build/suites pending.
+- Real PostgreSQL 17.11 `BEGIN READ ONLY; SET LOCAL ROLE moneyverse_app; ... ROLLBACK`: 2 recent approved photos, function EXECUTE=true, photos direct SELECT=false. DEV `account_balances` UPDATE, `user_items` DELETE, `users` SELECT are still true: P0 #993 remains OPEN; not evidence about Production.
+- Branch audit at midpoint: 82 remote refs (including symbolic origin), 79 open PRs, no reported conflicts; 81 non-main branches with unmerged commits. No deletion. #2249 touches gallery files and requires integration review.
+- Test and Production remain unchanged. Exact-SHA Test E2E and independent backup restore BLOCKED. Release HOLD.
