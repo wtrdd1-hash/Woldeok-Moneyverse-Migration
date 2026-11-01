@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({ redirect: (url: string) => { throw new Error
 
 import { openConsole, closeConsole } from './security-actions';
 
-const opened = { state: 'open', csrfToken: 'synthetic-csrf-token', expiresAt: '2027-01-01T00:00:00.000Z', idleExpiresAt: '2026-11-01T00:00:00.000Z' };
+const opened = { state: 'open', csrfToken: 'synthetic-csrf-token', expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), idleExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() };
 const rotated = 'mv_session=synthetic-token; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000';
 const cleared = 'mv_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
 
