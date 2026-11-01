@@ -22,3 +22,14 @@
 - Existing noindex/private headers, responsive layout, keyboard buttons and screen-reader status retained; no DB schema, financial ledger, authentication bypass or shared service changed.
 - Re-fetched origin/main during implementation: 65a18c8713707339dbb1c5c0c92e7afa2e43e308, unchanged.
 - Pending exact-SHA full gates and independent DB/HTTP/E2E; release HOLD.
+
+## CLOSEOUT PREPARATION — 2026-11-01 21:02 KST
+- Initial HEAD `c84cf5eba76f46ae27e76a6c8676075299972972` verified: full Lint PASS (0 errors), Typecheck PASS, Frontend/Backend Build PASS, Frontend 2,913 PASS, Backend 2,967 PASS / 2 FAIL / 518 SKIP (existing profile HTTP privacy expectations, not modified by this branch), Contract 41 PASS, Database package 62 PASS / 4 SKIP, app-api 184 endpoints PASS, security scripts PASS, production High+ audit PASS, full dependency audit FAIL (9: 1 low / 8 moderate), full-route QA FAIL (missing full-route-ledger.json).
+- Isolated PostgreSQL 17.11: 318 migrations applied, two existing notification pagination/read-filter synthetic fixtures PASS. Canonical migrations do NOT create `public.in_app_notifications`; therefore full fresh-schema notification DB contract remains BLOCKED. No shared DB or role modified. Disposable container removed.
+- Main advanced by Treasury #2370 to `3d5e321c3d1221febff677469fecdfcb3cf42e7d`. Rebased our single isolated commit without conflict to `55d4797ca36e691096c6efcbbd83928f96b875ee`; updated our own Draft PR #2373 using force-with-lease. No A/B/QA/Gemini branch changed.
+- Official Test public version endpoint reported `3a77f1399896b977bf9f00bb00d359350c48bc71`, not this candidate. Exact-SHA authenticated Test E2E and independent restore not proven. No main merge, Test candidate rollout, Production GitOps, WLD write or rollback.
+- **Final release disposition: PARTIAL / RELEASE BLOCKED.** The next exact-HEAD full gate run and remote CI results will be posted on Draft PR #2373. Existing failures and absent official Test evidence prohibit promotion regardless of any focused pass.
+
+## FINISHED — DRAFT / HOLD
+- Source changes preserved on the independent branch and GitHub Draft PR #2373. No unique unmerged branch deleted; existing five schedules untouched.
+- All final validation details and any further main drift are recorded as PR comments and task evidence outside this commit, avoiding self-invalidating verification commits.

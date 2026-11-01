@@ -19,3 +19,13 @@
 - 기존 읽음 영수증은 이미 정상적으로 유지되므로 불필요한 변경을 하지 않음.
 - 인증된 Nest 본인 조회와 PostgreSQL 사용자 조건을 재사용. Next 응답 검증 및 화면별 페이지 중복 검증을 추가. 개인정보 헤더·비색인·모바일·접근성 유지.
 - 작업 중 main 재조회: 65a18c8713707339dbb1c5c0c92e7afa2e43e308, 변동 없음. 운영 승격 보류.
+
+## 종료 준비 — 2026-11-01 21:02 KST
+- 최초 SHA c84cf5eba76f46ae27e76a6c8676075299972972: Lint·Typecheck·양측 Build 통과, Frontend 2,913건 통과, Backend 2,967건 통과·2건 실패·518건 건너뜀. Contract 41건, DB 패키지 62건, app-api 184개 엔드포인트 및 보안 스크립트 통과.
+- 전체 의존성 취약점 9건(낮음 1, 보통 8), 전체 경로 QA 필수 증빙 누락, 기존 프로필 HTTP 시험 2건 실패.
+- 독립 PostgreSQL 17.11: 마이그레이션 318개 적용 및 알림 페이징/읽음 필터 합성 fixture 2개 통과. 그러나 정본 마이그레이션에 in_app_notifications 테이블 생성이 없어 실제 새 설치 알림 DB 계약은 BLOCKED. 공유 DB·운영 변경 없음. 임시 컨테이너 삭제.
+- Treasury PR #2370으로 main이 3d5e321c3d1221febff677469fecdfcb3cf42e7d로 전진하여 충돌 없이 독립 브랜치를 재기준화함. Draft PR #2373 유지. A/B/QA/Gemini 작업 보존.
+- 공식 Test 버전 3a77f1399896b977bf9f00bb00d359350c48bc71은 후보 SHA가 아님. 인증된 Test E2E, 복원, 운영승격은 미완료.
+
+## 종료 — PARTIAL / RELEASE BLOCKED
+- 최종 SHA의 재검증·원격 CI 세부 결과는 PR #2373 댓글과 독립 증빙에 기록. main 병합·Test 배포·Production·롤백 없음. 기존 5개 예약 변경 없음.

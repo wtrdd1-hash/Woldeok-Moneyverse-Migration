@@ -13,5 +13,7 @@
 ## Tasks
 - [x] Add RED tests for contradictory category/read state, cross-page duplicates and confirmed receipt persistence.
 - [x] Implement page proof and UI consumption; keep accessible error/retry, responsive layout and noindex.
-- [ ] Run focused GREEN, lint/typecheck/build/full suites and isolated DB/security/app-api/HTTP/E2E as feasible.
-- [ ] Re-fetch main mid-work and before any merge, create Draft PR with precise evidence; hold release unless all gates PASS.
+- [x] Run focused GREEN, lint/typecheck/build/full suites and isolated DB/security/app-api/HTTP/E2E as feasible.
+- [x] Re-fetch main mid-work and before any merge, create Draft PR with precise evidence; hold release unless all gates PASS.
+
+**Release decision:** DRAFT/HOLD. Full-route QA, backend profile HTTP regression, dependency audit and canonical notification DB evidence block approval. Exact final-SHA evidence is recorded in PR #2373.
