@@ -43,7 +43,7 @@ function expectPrivate(response: request.Response): void {
 describe('owner-only shop HTTP privacy before authentication and consent', () => {
   let app: INestApplication;
   beforeAll(async () => {
-    const module = await Test.createTestingModule({ imports: [ShopPrivacyFixture] })
+    const testingModule = await Test.createTestingModule({ imports: [ShopPrivacyFixture] })
       .overrideGuard(SessionGuard).useValue({ canActivate: (ctx: ExecutionContext) => {
         const req = ctx.switchToHttp().getRequest();
         if (req.headers['x-test-auth'] !== '1') throw new UnauthorizedException('login required');
@@ -59,7 +59,7 @@ describe('owner-only shop HTTP privacy before authentication and consent', () =>
       } })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.init();
   });
   afterAll(async () => { await app?.close(); });
@@ -89,8 +89,7 @@ describe('owner-only shop HTTP privacy before authentication and consent', () =>
     expectPrivate(response);
   });
 
-  it.each(['/shop/items', '/shop/public-catalog', `/shop/cosmetics/${OWNER}`, '/public-probe'])
-  ('does not change the public cache contract of %s', async (path) => {
+  it.each(['/shop/items', '/shop/public-catalog', `/shop/cosmetics/${OWNER}`, '/public-probe'])('does not change the public cache contract of %s', async (path) => {
     const response = await request(app.getHttpServer()).get(path).expect(200);
     expect(response.headers['cache-control']).toBeUndefined();
     expect(response.headers['x-robots-tag']).toBeUndefined();

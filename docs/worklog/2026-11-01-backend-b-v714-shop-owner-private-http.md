@@ -19,3 +19,8 @@
 - GREEN: `ShopModule` now registers pre-guard middleware for exactly ten owner-only route patterns, preserving three public shop endpoints. 17/17 HTTP tests PASS.
 - No API payload, SQL, migration, WLD, ledger or shared runtime changes. `origin/main` still `f13bbce273ffc65e8576170992d82ea00c27a1c9` at midpoint. A PR #2236 and #2229 modify `shop.controller.ts`, not `shop.module.ts`.
 - Broader CI/PG/official Test exact-SHA gates pending; release HOLD.
+
+### 09:07 KST — CI repair checkpoint
+- Initial PR CI runtime-check failed at ESLint: test fixture local variable `module` shadowed Next.js reserved global and a line break between `it.each(...)` and invocation. These are test-source lint defects, not a production logic failure.
+- Renamed fixture variable and made the parameterized test invocation single-line. Re-run required at new SHA.
+- Bounded full backend test run hit EPIPE under concurrent host load; not a PASS. A duplicate long-running gate command was terminated to avoid contention with other workers.
