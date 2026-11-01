@@ -1,3 +1,6 @@
+## 2026-11-01 v1613 — 공기업 비금전 운영 상태 변경과 영수증 구현 (격리 Test PASS, 운영 HOLD)
+- SQL 318 DB 승인자 SECURITY DEFINER와 불변 영수증, 앱 직접 DML 금지, 멱등 원자적 처리; Nest 일회용 CSRF, Next 동일 출처 BFF, 관리자 상태 입력과 모형 자산 레이블. 실데이터 격리 PostgreSQL 권한/영수증/롤백 PASS, 백엔드 42/프론트 13 PASS, 전체 CI/운영 배포 미확인. 구 국고 552/배당 744는 금융 출처 차단 유지. [기록](worklog/2026-11-01-soe-governance-recovery-v1613.ko.md).
+
 ## 2026-11-01 v1611 — 국고 초기화 후 운영 미복구 사후분석 및 완료 판정기 (운영 미복구)
 - 백업 SHA·migration314·보관 금고 220,923,528 WLD·현재 금고/정식 국고 0 확인, 실제 앱권한 감사 차단(국고 552/552 미연결, 배당 NULL738/유령6). 공개 운영 353c6d vs main 905207, Test bc8cd8, 운영 포인터/실제 서비스 경로 불일치.
 - 읽기 전용 판정기 `scripts/release/verify-treasury-postreset-completion.mjs`와 6개 회귀 테스트 통과, 실제 호스트 판정 NOT_RECOVERED. CI/PR/0회계기만으로 지급/운영 정상화 선언 불가. [사고 RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md).

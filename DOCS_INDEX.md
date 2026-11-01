@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.01.1613 — Audited SOE nonmonetary governance repair (isolated PostgreSQL PASS / Production HOLD)
+- [Worklog EN](docs/worklog/2026-11-01-soe-governance-recovery-v1613.md) / [KO](docs/worklog/2026-11-01-soe-governance-recovery-v1613.ko.md) · [Internal EN](docs/updates/v2026.11.01.1613-soe-governance-internal.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1613-soe-governance-github.md) / [KO](docs/updates/v2026.11.01.1613-soe-governance-github.ko.md). New DB 318 approver+receipt atomic governance, backend+frontend status form, no monetary path. Real restored PG app DML/role negatives, approver receipt/idempotency, rollback PASS. Backend SOE 42/Frontend SOE 13 PASS, full CI and official Test→Production NOT YET certified.
+
+
 ## v2026.11.01.1611 — Post-reset Treasury recovery failure RCA (LIVE NOT RECOVERED)
 - [Incident RCA EN](docs/incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.md) / [KO](docs/incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.ko.md) · [Worklog EN](docs/worklog/2026-11-01-treasury-incident-root-cause-v1611.md) / [Worklog KO](docs/worklog/2026-11-01-treasury-incident-root-cause-v1611.ko.md) · [Internal EN](docs/updates/v2026.11.01.1611-treasury-rca-internal.md) / [KO](docs/updates/v2026.11.01.1611-treasury-rca-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.01.1611-treasury-rca-github.md) / [KO](docs/updates/v2026.11.01.1611-treasury-rca-github.ko.md). Production migration 314 did reset 5 live vaults to 0 and archive 220,923,528 WLD (full backup hash verified). Source/CI merged but public Production and Test remain old SHA, historical Treasury 552 + dividends 744 lack canonical provenance. Read-only incident audit BLOCKED, 6 fail-closed regression tests PASS. **No live recovery / no payouts / no Production promotion**.
 

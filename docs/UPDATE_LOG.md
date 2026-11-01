@@ -1,3 +1,6 @@
+## 2026-11-01 v1613 — SOE governance audited nonmonetary status transitions (isolated Test PASS; release HOLD)
+- Migration 318 DB-owned approver function and immutable receipt; restricted app DML, idempotent atomic governance, Nest one-use CSRF, same-origin Next BFF, verified UI; model-assets label. Isolated restored real-data PostgreSQL security/receipt/rollback PASS, Backend 42 and Frontend 13 targeted PASS, full CI/release pending. Historical 552 Treasury and 744 dividends monetary holds remain. [Worklog](worklog/2026-11-01-soe-governance-recovery-v1613.md).
+
 ## 2026-11-01 v1611 — Treasury reset postmortem and evidence-based completion gate (Production NOT RECOVERED)
 - Verified full pre-reset backup checksum, live fiscal migration 314, historic vault archive 220,923,528 WLD, current canonical/vault 0; reran independent app-role provenance audit (BLOCKED: Treasury 552/552 unlinked, dividends 738 NULL+6 dangling). Public Production still 353c6d vs main 905207; Test bc8cd8; production-current symlink differs from real running unit directories.
 - New read-only source/host readiness reporter `scripts/release/verify-treasury-postreset-completion.mjs` + 6 tests PASS. Actual host diagnosis NOT_RECOVERED. Green CI/PR/zero epoch is not a payout or Production completion. [Incident RCA](incidents/2026-11-01-treasury-postreset-recovery-failure-v1611.md).

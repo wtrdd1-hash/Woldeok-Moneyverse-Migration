@@ -1,0 +1,11 @@
+# v2026.11.01.1613 — SOE nonmonetary governance restoration
+## START — 2026-11-01 KST
+- User ordered completion, not synthetic status. Started from current origin/main `1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0`; dedicated `fix/treasury-soe-governance-v1613` (GitHub PR #2341) and isolated MiniPC worktree.
+- Re-read canonical DOCS_INDEX, AGENTS (DB SECURITY DEFINER boundary), living PROJECT_PLAN, RELEASING, incident RCA v1611 and current systemd/DB; user member funds are protected. Public Production SHA `353c6d...`, official Test SHA `bc8cd8...`; historical Treasury 552/SOE dividends 744 have no source proof.
+- Split status configuration (nonmonetary) from dividends, mint, central-bank and SWF settlement (still held). NEVER reinitialize current fiscal epoch or replay old 220,923,528 WLD.
+## MID — verified source and isolated real-data Test
+- New forward-only 318 migration: immutable `soe_governance_receipts` and `admin_soe_update_status(actor,code,status,rate,reason,idempotency_key)`. DB checks active approver/superadmin, validates reason/status/rate and transaction idempotency, atomically changes SOE row and writes verified receipt. Explicitly revokes app direct SOE UPDATE and receipt INSERT.
+- Authenticated Nest PUT takes actual session actor, explicit CsrfGuard. No direct table DML; reject non-DB receipt. Next BFF checks origin and server one-use CSRF; UI allows status/reason only with receipt, no optimistic balance or dividend write. UI relabels 365,000,000 WLD as modeled enterprise registered assets, not funded Treasury.
+- Isolated restored actual-data Postgres `wdmv_v1553_fiscal_reset`: migration SQL 318 PASS. Real application-role test PASS: direct app UPDATE denied, unauthorized actor denied, approver atomic receipt PASS, idempotent replay stable, 891 canonical transactions/1829 postings/744 dividends unchanged; ROLLBACK restored SOE status/receipt count. NOT run on Production DB.
+- Local backend Enterprise tests 42 PASS, 3 conditional SKIP; frontend Enterprise tests 13 PASS; Backend+Frontend typecheck PASS (after initial change); latest CSRF fix requires final full CI. Draft PR #2341 created. No official Test or Production deployment yet.
+## FINISH — Pending CI, official Test and release
