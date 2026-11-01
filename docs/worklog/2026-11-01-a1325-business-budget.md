@@ -16,5 +16,7 @@
 - Next: review, full gates, real PostgreSQL, exact-SHA CI and official Test evidence. Release HOLD.
 
 
+- CI `41273255228` failed Next.js generated PageProps validation: optional `searchParams` / default page props. Root cause fixed by making required `Promise` PageProps; next exact SHA requires fresh full gates.
+
 ## FINISHED
-- Pending evidence.
+- Pending final evidence.

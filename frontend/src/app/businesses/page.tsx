@@ -89,10 +89,10 @@ function locked(
 export default async function BusinessesPage({
   searchParams,
 }: {
-  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
-} = {}) {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireMember();
-  const params = (await searchParams) ?? {};
+  const params = await searchParams;
   const budget = parseBusinessBudget(params.maxCost);
 
   const [catalog, mineV2, ladder, capital, inventoryRes] = await Promise.all([
