@@ -1,3 +1,7 @@
+## 2026-11-01 v1609 — Release identity verifier reference fix (read-only verified, Production HOLD)
+- Replaced the nonexistent process-directory resolver with a real systemd process evidence lookup; added deterministic dependency-injected regression test. Source unit tests 20/20 PASS. Actual Test checks now return six true old-version mismatches; Production release pointer refers to old immutable folder with no .moneyverse-release.json. No false upgrade.
+- Exact main SHA 95877554097b595d8dcfa28b60ecb65e50bf0c2d Test+Prod immutable artifacts staged inactive; finance source audit of 552 legacy Treasury/744 SOE dividends remains HOLD. [Worklog](worklog/2026-11-01-treasury-runtime-identity-v1609.md).
+
 ## 2026-11-01 v1607 — Treasury CI fixture stabilization (candidate, release hold)
 - Merge latest main QA v1605 into isolated v1607 Treasury branch; stabilize two expired synthetic administrator-session receipt tests with test-only clock (RED 2 fail, GREEN 37 pass). Real session expiry validation unchanged.
 - Reapply exact-source CI, immutable Test and runtime identity checks before any Production deployment. Historic Treasury source 552 and SOE dividend 744 remain monetary provenance blockers. See [worklog](worklog/2026-11-01-treasury-qa-ci-unblock-v1607.md).
