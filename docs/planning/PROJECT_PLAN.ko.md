@@ -46,7 +46,7 @@
 
 ### 2. 화면·CTA·상태 및 시간 진실성
 - /shop/catalog → 기존 수량 1~100(상품별 실제 제한은 더 작을 수 있음) → "구매 영향 확인" → 검증된 영향 대화상자 → "구매 확정" 또는 "취소". 현재 전체 보유수량, 확인된 기존 만료일, 기간제 보유일수와 "같은 기간제 상품을 추가 구매하면 기존 전체 보유품의 만료일이 다시 설정되며 정확한 시각은 결제 때 서버가 정합니다"를 표시한다. 신규 기간제 구매는 새 보유품 생성으로 설명하고 무기한 상품에 가상의 만료일을 부여하지 않는다. 표시 가격은 확정 견적이 아니며 실제 구매 함수가 가격·재고·제한을 재검증한다.
-- 상태: IDLE, LOADING, VERIFIED_RESTAMP, VERIFIED_NEW_TIMED, VERIFIED_NO_TERM, VERIFIED_EXISTING_EXPIRED, STALE(30초 초과·수량/상품/회원/세션/동의 변경), AUTH_REQUIRED 401, CONSENT_REQUIRED 403, INVALID_INPUT 400, RATE_LIMITED 429, UNAVAILABLE/UNKNOWN_SOURCE 503, PURCHASE_#2428 OPEN/HOLD, PURCHASE_RECEIPT_VERIFIED, PURCHASE_REJECTED. 이미 만료된 기존 행은 관찰시각에 만료된 기존 보유품으로 표시하며 새 로트라고 꾸미지 않는다. 미리보기는 구매 성공 보증이 아닌 참고 정보다.
+- 상태: IDLE, LOADING, VERIFIED_RESTAMP, VERIFIED_NEW_TIMED, VERIFIED_NO_TERM, VERIFIED_EXISTING_EXPIRED, STALE(30초 초과·수량/상품/회원/세션/동의 변경), AUTH_REQUIRED 401, CONSENT_REQUIRED 403, INVALID_INPUT 400, RATE_LIMITED 429, UNAVAILABLE/UNKNOWN_SOURCE 503, PURCHASE_PENDING, PURCHASE_RECEIPT_VERIFIED, PURCHASE_REJECTED. 이미 만료된 기존 행은 관찰시각에 만료된 기존 보유품으로 표시하며 새 로트라고 꾸미지 않는다. 미리보기는 구매 성공 보증이 아닌 참고 정보다.
 - 기능 스위치 ON일 때 상품·수량·회원이 일치하는 30초 이내 VERIFIED 결과 없이는 구매 확정 CTA를 활성화하지 않는다. 503·시간초과·잘못된 JSON에서는 재시도만 허용한다. 계정 전환·로그아웃·동의 변경·구매/사용 직후 이전 결과를 폐기한다. OFF면 기존 구매 동작을 유지한다. 조회와 결제 사이 원자적 일관성을 보장한다고 주장하지 않는다. 이를 보장하려면 향후 별도의 단일 트랜잭션 견적·결제 계약이 필요하다.
 
 ### 3. Nest API, DB 제약·인덱스·트랜잭션
@@ -1453,7 +1453,7 @@
 
 ## v2026.10.24.1204 — F675-108 회원 읽기·상호작용 접근성 환경설정 (기획 초안 / 운영승격 보류)
 - Previous 기능 보완 v1202 / Current 기능 추가 v1204 / Next 기능 보완 v1206(잠정). main 54d5140ddb49dd3e2193a2f82b71a6a0a57cfede 시작·중간 동일, QA v1205 FAILED/HOLD. 계정 메뉴에는 접근성 설정이 없지만 브라우저별 테마·포인트색과 OS 움직임 줄이기는 이미 구현됨. 기기 세션 관리·테마 저장·OS 접근성 기능을 중복 구현하지 않는다.
-- 방문자 /accessibility, 회원 /account/accessibility: 로컬 미리보기, 글자 100~200%, 검증된 높은 대비, 기기 설정 따름/움직임 줄이기, 기본 OFF인 명시적 기기간 동기화. LOCAL_ONLY/SYNC_#2428 OPEN/HOLD/SYNCED/CONFLICT/OFFLINE/FAILED 영수증 구분. 본인 전용 GET/PUT/DELETE API, 신규 설정/멱등 영수증 테이블, CAS/버전·엄격한 허용값, 앱 직접 DML·PUBLIC 권한 금지. 관리자 익명 집계, Android OS 접근성 우선, noindex/no-store, WCAG 2.2 AA, 320px·200% 확대, KPI·기능 스위치 롤백.
+- 방문자 /accessibility, 회원 /account/accessibility: 로컬 미리보기, 글자 100~200%, 검증된 높은 대비, 기기 설정 따름/움직임 줄이기, 기본 OFF인 명시적 기기간 동기화. LOCAL_ONLY/SYNC_PENDING/SYNCED/CONFLICT/OFFLINE/FAILED 영수증 구분. 본인 전용 GET/PUT/DELETE API, 신규 설정/멱등 영수증 테이블, CAS/버전·엄격한 허용값, 앱 직접 DML·PUBLIC 권한 금지. 관리자 익명 집계, Android OS 접근성 우선, noindex/no-store, WCAG 2.2 AA, 320px·200% 확대, KPI·기능 스위치 롤백.
 - P0 ENV1204-01 (#1053/#1060 운영/개발 DB 공유·5433 바인딩), SEC1204-02 (#993 앱 DML/PUBLIC 은행 함수), REL1204-03 (#1067 Next Critical2/High1·#1066 백업·CI·Migration266·정확 SHA Test), A11Y1204-04 핵심 흐름 접근성 기준선. P1 A11Y1204-05~10 로컬 UI, 본인 동기화/영수증, CSS 우선순위, Android/관리자 집계, 개인정보/SEO/KPI, 100건 동시성·400% 확대 회귀. 상세 계약은 기존 영어 통합 정본과 한국어 동등 문서에 반영. 런타임·DB·WLD·Test·운영 변경 없음.
 - 외부 독립 발행기관 W3C·MDN 2곳 검토, 신규 승인 0건, 누적 중복 제거 승인 UNKNOWN/10,000 BLOCKED. Gemini/A/B/C/QA 작업과 분리된 Draft 문서 기획.
 
@@ -2796,7 +2796,7 @@ Google Search/Play와 OWASP 최신 공식자료 → exact main/PR/CI 및 Debian 
 - 기존 전체 기능의 화면상태, 권한, API, DB/동시성, 감사, fallback, privacy/abuse, KPI, 성능, QA, rollback 계약은 유지한다. 상태 mutation은 ownership/BOLA, idempotency/replay, transaction/unique constraint, audit receipt, real-DB concurrency test가 필수다.
 - SEO: Google Search Central은 2026-09-17 infinite-scroll 지침을 변경 없이 현행 문서로 이전했다. 공개 infinite-scroll 화면은 crawlable paginated URL, server-renderable link, stable ordering, self-canonical, deterministic title/H1, 정상 200/404를 제공하고 cursor는 API 내부용, facet은 승격 전 기본 noindex/canonical로 한다.
 - 수익성: Google Play EEA/UK/US standard 예시는 auto-renew 10%, 기타 new-install 20%, 기타 existing-install 25%와 applicable 5% billing fee이며 KR rollout은 2026-12-31 예정이다. SKU economics는 policy-versioned로 계산하고 미실측 지표는 가설/테스트 기준으로만 기록한다.
-- Bot/main 델타: 작업 중간 main에는 PR #441도 병합되어 길드 범위 Discord 명령어를 지원 음악 명령 7개로 원자 교체하고 global command는 유지한다. 운영 재시작 후 command/voice smoke 증거 전까지 MERGED / PRODUCTION-POST-RESTART-SMOKE-#2428 OPEN/HOLD으로 분류한다.
+- Bot/main 델타: 작업 중간 main에는 PR #441도 병합되어 길드 범위 Discord 명령어를 지원 음악 명령 7개로 원자 교체하고 global command는 유지한다. 운영 재시작 후 command/voice smoke 증거 전까지 MERGED / PRODUCTION-POST-RESTART-SMOKE-PENDING으로 분류한다.
 - 우선순위: P0 isolated restore/off-host backup → P0 release-class matrix → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility.
 
 ### v197 worklog
@@ -3599,7 +3599,7 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 
 ### WORK-CLOCK-149-01 — dashboard/write clock 수렴
 
-- **우선순위/severity/status:** P1 정확성+경제무결성 영향 / HIGH / PR #370 FIX #2428 OPEN/HOLD.
+- **우선순위/severity/status:** P1 정확성+경제무결성 영향 / HIGH / PR #370 FIX PENDING.
 - settlement는 가속 Moneyverse server clock을 사용하지만 legacy `work_my_dashboard` read model은 실제 Asia/Seoul day/week window를 사용할 수 있어 화면의 `daily_paid`/`weekly_paid`와 실제 settlement quota window가 달라질 수 있다.
 - migration 202에서 dashboard key를 settlement와 동일한 `server_game_day_key()` / `server_game_week_key()` 권위로 통일한다. 적용된 migration은 immutable이며 migration 번호 중복과 checksum 변경은 CI hard fail이다.
 - QA: 경계 -1/0/+1초, 가속 day/week rollover, 동시 completion, idempotent retry, restart, timezone 설정, stale dashboard cache, API/UI parity, real PostgreSQL regression. 모든 시험 시각에서 settlement/dashboard key가 동일해야 통과한다.
@@ -3649,12 +3649,12 @@ v152 통합은 문서만 변경한다. runtime code, product data/DB schema, Flu
 - 증거일: 2026-09-16. 시작 및 작업 중간 기준 `main`은 `9ca10bed71bf0175c146324ee9e6eca111f35ad8`로 동일했고 문서 브랜치 생성 전 source drift는 없었다.
 - 해당 exact-main SHA의 `Build Production Release #880`은 확인 시점 `in_progress`였다. 따라서 current-main Production 검증은 `UNVERIFIED`다. 문서 merge, skipped auto-promotion, 진행 중 release는 운영 증거가 아니다.
 - `REL-110/REL-133`은 exact Test workload SHA, public Test SHA, backend readiness, 권위 DB path/schema, Production SHA와 smoke evidence가 모두 일치할 때까지 P0다. timeout 연장이나 rerun만으로 incident를 종료하지 않는다.
-- 열린 PR #370(`WORK-CLOCK-149-01`)은 새 main 기준 현재 non-mergeable이며 `HIGH / FIX_#2428 OPEN/HOLD`을 유지한다. rebase/update 과정에서 적용 migration의 번호·내용 불변성을 지키고 실제 PostgreSQL 가속 day/week 경계 회귀시험을 다시 통과해야 한다.
+- 열린 PR #370(`WORK-CLOCK-149-01`)은 새 main 기준 현재 non-mergeable이며 `HIGH / FIX_PENDING`을 유지한다. rebase/update 과정에서 적용 migration의 번호·내용 불변성을 지키고 실제 PostgreSQL 가속 day/week 경계 회귀시험을 다시 통과해야 한다.
 
 ### 18.2 구현 가능한 백로그 변경
 
 1. `REL-EVIDENCE-153-01 / P0 / IN_PROGRESS`: 모든 release attempt는 성공/실패와 무관하게 release SHA, desired/applied revision, workload generation, image digest, pod-local/public version SHA, backend readiness, DB authority/schema checksum, 최초 실패계층, probe timestamp/latency, rollback target을 evidence bundle로 남긴다. secret/cookie/Authorization/DSN/private key는 금지한다. 수용조건은 실패 release 중 evidence 누락 0건, exact-SHA/DB assertion 불일치 상태 Production promotion 0건이다.
-2. `WORK-CLOCK-149-01 / HIGH / FIX_#2428 OPEN/HOLD`: dashboard와 settlement는 동일한 `server_game_day_key()`/`server_game_week_key()`를 사용한다. 경계 -1/0/+1초, 현실 10분 game-day rollover, 현실 70분 game-week rollover, 동시 completion, retry/idempotency, process restart, DB timezone 변경을 시험한다. rollback은 forward-only corrective migration이며 적용 migration을 수정하거나 renumber하지 않는다.
+2. `WORK-CLOCK-149-01 / HIGH / FIX_PENDING`: dashboard와 settlement는 동일한 `server_game_day_key()`/`server_game_week_key()`를 사용한다. 경계 -1/0/+1초, 현실 10분 game-day rollover, 현실 70분 game-week rollover, 동시 completion, retry/idempotency, process restart, DB timezone 변경을 시험한다. rollback은 forward-only corrective migration이며 적용 migration을 수정하거나 renumber하지 않는다.
 3. `SEO-153-01 / P1 / ADOPT`: Google Search Central의 현재 9월 8일 변경은 지역별 Search experience 문서를 추가했고 8월 28일 site reputation policy 변경은 계속 중요하다. WDX/가상주식을 실제 금융정보 provider처럼 표현해 finance surface 자격을 노리지 않는다. 공개 SEO read-model은 content owner/editorial control/sponsor/index policy를 유지하고 계정·거래·카지노내역·결제 callback·관리자 화면은 `noindex` 및 sitemap 제외를 유지한다. favicon QA는 안정적인 정사각형 URL과 homepage/favicon crawlability를 검사한다.
 4. `MONETIZATION-153-01 / P1 / ADOPT`: Google Play에는 하나의 보편적 수수료율이 없다. unit economics는 market, effective-date/install cohort, recurring/non-recurring, billing path, enrolled program을 key로 한다. EEA/UK/US의 2026-06-30 이후 standard 기준은 auto-renewing subscription 10%, 기타 new-install 20%, existing-install 25%이며 해당 시 5% billing fee를 더한다. 나머지 시장은 새 구조가 실제 적용되기 전 현재 적용 프로그램 규칙을 사용한다. conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 측정 전 `가설/테스트 기준`이다.
 
@@ -3675,7 +3675,7 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - branch metadata는 protection enabled이나 required-status-check enforcement가 `off`이고 required context/check가 비어 있다. 따라서 `REL-104-03`은 runtime-sensitive path가 저장소 차원에서 강제되기 전까지 confirmed 상태를 유지한다.
 - 수용조건은 fail-closed다. 이미지 빌드 완료만으로 `IMAGE_BUILT` 이후 상태로 승격하지 않는다. isolated Test에서 exact SHA/digest, backend/API/DB path, least-privilege DB, 변경기능 QA, noindex를 증명해야 한다. 실패/timeout 회차도 secret 없이 expected/observed evidence를 보존한다.
 
-### Work clock 무결성 — WORK-CLOCK-149-01 — HIGH — FIX #2428 OPEN/HOLD / REBASE REQUIRED
+### Work clock 무결성 — WORK-CLOCK-149-01 — HIGH — FIX PENDING / REBASE REQUIRED
 - PR #370은 head `8ff8314a4425f874508b3d8d966e95ae40450b2a`, 기록된 base `3d87165f83bcb60903e85d4f3600fdf40074ef40` 상태로 열려 있고 현재 main은 더 전진했다. 수정 목적은 `work_my_dashboard.daily_paid/weekly_paid`를 `server_game_day_key()` / `server_game_week_key()`와 일치시키고 real-PostgreSQL regression을 추가하는 것이다.
 - 병합 전 current main과 rebase/reconcile하고 migration 번호 중복/적용 migration 불변성 및 real-DB 테스트를 다시 수행한 뒤 exact-head isolated Test를 요구한다. 이미 적용된 migration은 수정/rename하지 않고 새 forward migration으로 충돌을 해결한다.
 - QA: game-day/week 경계 -1/0/+1초, 현실 10분 day·70분 week rollover, 동시 완료, duplicate/retry idempotency, process restart, DB timezone, stale read-model/cache, settlement 권위와 dashboard counter 동일성을 검증한다.
@@ -3816,7 +3816,7 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 
 ### CI-158-02 — HIGH — IN PROGRESS / 릴리스 증거 아님
 - 현재 exact main은 문서 commit `88452f14ca344ee1d060b58b84953599bf657538`. Build Test Candidate #755의 `verify/check`는 secret rejection, lint, raw-control-byte 검사, typecheck, build, DB migration 적용, tests, Prisma schema mutation 차단, production dependency audit까지 성공했다. 캡처 시 backend candidate push는 성공했고 frontend candidate image build는 진행 중이다.
-- `VERIFY_GREEN`, `BACKEND_IMAGE_BUILT`, `FRONTEND_IMAGE_#2428 OPEN/HOLD`을 분리한다. 어느 것도 `TEST_APPLIED`, `TEST_PUBLIC_EXACT`, `DB_VERIFIED`, `CHANGED_FLOW_QA_GREEN`, `PRODUCTION_VERIFIED`를 의미하지 않는다. 상태 API/대시보드는 downstream 필수 상태가 없을 때 aggregate green을 만들지 않는다.
+- `VERIFY_GREEN`, `BACKEND_IMAGE_BUILT`, `FRONTEND_IMAGE_PENDING`을 분리한다. 어느 것도 `TEST_APPLIED`, `TEST_PUBLIC_EXACT`, `DB_VERIFIED`, `CHANGED_FLOW_QA_GREEN`, `PRODUCTION_VERIFIED`를 의미하지 않는다. 상태 API/대시보드는 downstream 필수 상태가 없을 때 aggregate green을 만들지 않는다.
 
 ### SEO-CRAWLER-158-03 — P1 — 설계 갱신 / 구현 미검증
 - 2026-09-16 Google Search Central 문서 변경 로그는 `GoogleProducer` HTTP User-Agent 문자열 갱신을 기록했다. 따라서 crawler 분류를 고정된 전체 UA 문자열에 의존시키지 않는다. crawler identity가 필요한 경우 Google의 공식 검증 방법을 따르며, 일반 익명 HTTP client와 다른 privileged/indexable content를 crawler에게만 제공하지 않는다.
