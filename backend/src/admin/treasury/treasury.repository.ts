@@ -433,6 +433,7 @@ export class TreasuryRepository {
     };
     try {
       const result = await this.pool.query<{
+        database_name: string;
         vault_total: string; vault_count: string; canonical_count: string;
         canonical_total: string; journal_total: string;
         historic_treasury_count: string; historic_dividend_count: string;
@@ -446,6 +447,7 @@ export class TreasuryRepository {
           SELECT * FROM public.treasury_fiscal_epochs WHERE id = 1
         )
         SELECT
+          current_database() AS database_name,
           e.opened_at AS epoch_opened_at,
           e.archived_legacy_events::text AS expected_treasury_count,
           e.archived_enterprise_dividends::text AS expected_dividend_count,
@@ -500,7 +502,28 @@ export class TreasuryRepository {
       if (result.rows.length !== 1) return unverified;
       const r = result.rows[0];
       if (!r) return unverified;
-      const expectedBackup = 'e62cc6528e22c3bf60362c4e584d09b01cecef3d9112eb5a0f9e5bcde9e32bc7';
+      // Independent immutable archival evidence for each expressly approved
+      // database lineage. No request parameter may select a looser baseline.
+      // The Test fingerprint is the SHA of its own verified full pg_dump, not
+      // the hardcoded Production backup embedded in historic migration 314.
+      const prodArchive = {
+        oldTreasury: '552',
+        oldDividends: '744',
+        archivedWld: '220923528',
+        sha: 'e62cc6528e22c3bf60362c4e584d09b01cecef3d9112eb5a0f9e5bcde9e32bc7',
+      };
+      const testArchive = {
+        oldTreasury: '3',
+        oldDividends: '0',
+        archivedWld: '60000000',
+        sha: '2149b77487f83f4e871ff44aa0e1f471b8ada6db9d9e622ce66e6e19ead420d6',
+      };
+      const expectedArchive: typeof prodArchive | undefined = ({
+        woldeok_moneyverse_dev: prodArchive,
+        wdmv_v1553_fiscal_reset: prodArchive, // private real-data rehearsal clone
+        wdmv_v761_test_acl_v1544_restore: testArchive,
+        wdmv_v1614_fiscal_rehearsal: testArchive,
+      } as Record<string, typeof prodArchive>)[r.database_name];
       const verifiedAt = new Date(r.verified_at);
       const epochAt = new Date(r.epoch_opened_at);
       if (
@@ -509,9 +532,13 @@ export class TreasuryRepository {
         r.journal_total !== vaultTotal || r.invalid_new_sources !== '0' ||
         r.historic_treasury_count !== r.expected_treasury_count ||
         r.historic_dividend_count !== r.expected_dividend_count ||
-        r.expected_treasury_count !== '552' || r.expected_dividend_count !== '744' ||
-        r.archive_total !== '220923528' || r.archive_items_total !== r.archive_total ||
-        r.archive_items_count !== '5' || r.backup_sha256 !== expectedBackup ||
+        !expectedArchive ||
+        r.expected_treasury_count !== expectedArchive.oldTreasury ||
+        r.expected_dividend_count !== expectedArchive.oldDividends ||
+        r.archive_total !== expectedArchive.archivedWld ||
+        r.archive_items_total !== r.archive_total ||
+        r.archive_items_count !== '5' ||
+        r.backup_sha256 !== expectedArchive.sha ||
         !Number.isFinite(verifiedAt.getTime()) ||
         !Number.isFinite(epochAt.getTime()) ||
         verifiedAt.getTime() < epochAt.getTime() ||

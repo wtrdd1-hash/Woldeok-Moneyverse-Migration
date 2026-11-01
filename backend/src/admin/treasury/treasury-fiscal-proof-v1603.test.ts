@@ -8,6 +8,7 @@ const vaults = ['VAULT_EMERGENCY','VAULT_INFRA','VAULT_MAIN','VAULT_RESERVE','VA
 }));
 
 const certified = {
+  database_name: 'woldeok_moneyverse_dev',
   vault_total: '0',
   vault_count: '5',
   canonical_count: '1',
@@ -55,6 +56,21 @@ describe('v1603: current fiscal epoch proof, not archived phantom money', () => 
     expect(overview.stats_24h).toEqual({
       injected_wld: '0', absorbed_wld: '0', stock_halt_funded_wld: '0', recirculated_wld: '0',
     });
+  });
+
+  it('accepts exactly the independently attested official Test backup, without relaxing Production requirements', async () => {
+    const testProof = {
+      ...certified, database_name: 'wdmv_v761_test_acl_v1544_restore',
+      historic_treasury_count: '3', historic_dividend_count: '0',
+      expected_treasury_count: '3', expected_dividend_count: '0',
+      archive_total: '60000000', archive_items_total: '60000000',
+      backup_sha256: '2149b77487f83f4e871ff44aa0e1f471b8ada6db9d9e622ce66e6e19ead420d6',
+    };
+    expect((await fixture(testProof).repo.getOverview()).reconciliation.status).toBe('RECONCILED');
+    expect((await fixture({...testProof,database_name:'woldeok_moneyverse_dev'}).repo.getOverview()).reconciliation.status).toBe('UNVERIFIED');
+    expect((await fixture({...testProof,backup_sha256:certified.backup_sha256}).repo.getOverview()).reconciliation.status).toBe('UNVERIFIED');
+    expect((await fixture({...certified,database_name:'wdmv_v761_test_acl_v1544_restore'}).repo.getOverview()).reconciliation.status).toBe('UNVERIFIED');
+    expect((await fixture({...certified,database_name:'unrecognized_db'}).repo.getOverview()).reconciliation.status).toBe('UNVERIFIED');
   });
 
   it.each([
