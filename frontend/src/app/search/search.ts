@@ -5,6 +5,25 @@ export interface SearchEntry extends NavEntry {
   readonly access: 'public' | 'member' | 'admin';
 }
 
+/** The public masthead links to these pages, but their server pages require a member session. */
+const MEMBER_ONLY_SEARCH_ROUTES = new Set(['/wallet', '/bank']);
+
+export function parseSearchQuery(value: unknown): { readonly query: string; readonly invalid: boolean } {
+  if (value === undefined) return { query: '', invalid: false };
+  if (typeof value !== 'string') return { query: '', invalid: true };
+  const query = value.trim();
+  if (Array.from(query).length > 80 || /[\u0000-\u001f\u007f]/u.test(query)) {
+    return { query: '', invalid: true };
+  }
+  try {
+    // A lone surrogate cannot be safely round-tripped through a URL.
+    encodeURIComponent(query);
+  } catch {
+    return { query: '', invalid: true };
+  }
+  return { query, invalid: false };
+}
+
 export function searchableEntries(
   publicEntries: readonly NavEntry[],
   memberEntries: readonly NavEntry[],
@@ -16,6 +35,7 @@ export function searchableEntries(
   const result: SearchEntry[] = [];
   const append = (entries: readonly NavEntry[], access: SearchEntry['access']) => {
     for (const entry of entries) {
+      if (access === 'public' && MEMBER_ONLY_SEARCH_ROUTES.has(entry.href)) continue;
       if (seen.has(entry.href)) continue;
       seen.add(entry.href);
       result.push({ ...entry, access });

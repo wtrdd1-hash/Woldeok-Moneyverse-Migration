@@ -8,13 +8,17 @@
 - Isolation: do not alter A/B/QA/Gemini branches or open PRs. Draft/hold until all exact-SHA gates pass.
 
 ## PLAN
-- [ ] Write failing query/visibility and server-render tests; observe RED.
-- [ ] Implement bounded query parsing, correct access labels and outage state; observe GREEN.
+- [x] Write failing query/visibility and server-render tests; observe RED (8 failures, 5 existing passes).
+- [x] Implement bounded query parsing, correct access labels and outage state; observe GREEN (13/13 focused tests).
 - [ ] Run focused and whole-repo gates, PostgreSQL/auth/app-api/E2E where available; capture exact SHA and blockers.
 - [ ] Re-fetch origin/main at mid/end, update EN/KO logs, push branch and Draft PR; no release without full gates.
 
-## MID
-Pending.
+## MID — 2026-11-01 16:17 KST
+- TDD RED: 8 failed/5 passed; duplicate q and malformed viewer SSR, and guest `/wallet`/`bank` public classification reproduced. GREEN: 13/13 focused tests PASS.
+- Existing authenticated `viewerOrUnknown` reads Nest `/api/v1/auth/viewer` rather than synthesizing auth state; invalid payload or transport outage is unknown and never treated as verified member/admin. No new backend/DB route needed; no fake success.
+- Input accepts a single valid Unicode query of up to 80 code points; duplicate query keys, control characters, lone surrogates and non-string values fail closed with a keyboard-accessible correction prompt. A separate status/retry distinguishes auth API outage from verified empty results. Public masthead links to actual `requireMember` pages `/wallet` and `/bank` are not shown as public search results.
+- Next: full HEAD gates and isolated auth/DB checks; CI and release policy remain blocking until proven. GitHub PR is kept draft.
+
 
 ## END
 Pending.
