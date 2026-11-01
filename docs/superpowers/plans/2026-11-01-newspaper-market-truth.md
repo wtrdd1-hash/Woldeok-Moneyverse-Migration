@@ -38,6 +38,6 @@
 - [x] Observe GREEN.
 
 ### Task 3: Verification and release discipline
-- [ ] Run exact HEAD focused tests, lint, typecheck, build, full suites, DB/API/CI/E2E where possible.
-- [ ] Fetch main during work and before any merge; record gate outcomes and blockers.
+- [x] Run exact HEAD focused tests, lint, typecheck, build, full suites, DB/API/CI/E2E where possible.
+- [x] Fetch main during work and before any merge; record gate outcomes and blockers.
 - [ ] Publish a draft PR only; merge/promote only with all required gates PASS.

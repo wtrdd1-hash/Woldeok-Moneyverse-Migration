@@ -15,5 +15,12 @@
 - Backend source contract reused: `stock_market_events_active()` and `stock_market_overview()` via existing Nest read routes. No new SQL/ledger write.
 - Focused tests 13 PASS; frontend TypeScript check PASS. Origin/main mid-work fetch remains `1e389dc1a`.
 - Remaining: page/API contract regression, full gates, CI, final SHA, PR and release hold.
-## FINISHED
-- Pending verified results.
+## FINISHED — 2026-11-01 17:00 KST
+- Source + UI + page contract tests 15 PASS. `pnpm lint` PASS (0 errors, 1,022 existing warnings); `pnpm typecheck` PASS; `pnpm build` PASS; `NODE_ENV=test pnpm test` PASS (frontend 2,912 PASS, backend 2,963 PASS/518 SKIP, contract 41 PASS, DB package 62 PASS/4 SKIP). Skips are not passes.
+- App API schema generation/check passed for 184 endpoints; existing Nest API reads reused.
+- Isolated network-disabled PostgreSQL 17.11: 316/316 migrations PASS; `stock_market_events_active()` and `stock_market_overview()` executable by app role; direct `virtual_stocks` SELECT denied. Disposable container removed.
+- Isolated Next.js HTTP GET `/newspaper`: 200; explicit source-unavailable and poll hold rendered; fabricated 316 voters and market-stability statement absent; private no-store response.
+- Production dependency high-severity audit PASS; full dependency audit FAIL (1 low, 8 moderate). Full route QA FAIL: missing `artifacts/qa/full-route-ledger.json`. Full authenticated E2E, viewport measurement, session continuity and exact-SHA official Test are BLOCKED.
+- Main fetched at start/middle/end and remained `1e389dc1a`; no conflicts. No PR merge, Test/Production deployment, rollback, cleanup or branch deletion. All A/B/Gemini/QA worktrees preserved.
+- Draft PR and remote CI status are recorded in GitHub rather than claiming unverified PASS.
+- **Final disposition: PARTIAL / RELEASE BLOCKED.** No release promotion.
