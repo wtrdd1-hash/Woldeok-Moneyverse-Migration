@@ -32,6 +32,16 @@ describe('admin activity UI-to-authenticated-API contract', () => {
     mocks.apiOrNull.mockImplementation(async (path: string) => path.endsWith('/admin/users') ? { users: members } : null);
     mocks.api.mockResolvedValue([]);
   });
+
+  it('fails closed on malformed traffic analytics instead of showing fabricated counts', async () => {
+    mocks.apiOrNull.mockImplementation(async (path: string) => path.endsWith('/admin/users')
+      ? { users: members }
+      : { granularity: 'day', periods: 30, summary: { pageViews: 9999 }, series: 'bad' });
+    const html = await visit();
+    expect(html).toContain('접속 분석을 확인할 수 없습니다');
+    expect(html).toContain('다시 조회');
+    expect(html).not.toContain('9,999');
+  });
   it('resolves a nickname to a UUID before issuing the backend request and preserves pagination', async () => {
     const html = await visit({ userId: 'Alice', limit: '30', page: '2', eventType: 'page_view' });
     expect(mocks.requireAdminConsole).toHaveBeenCalledWith('/admin/logs/activity');
