@@ -1,5 +1,18 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.02.1630 — F675-213 Holding-Row/Restamp Truth (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+Previous Feature Addition v1628 → Current Feature Improvement v1630 → Next Feature Addition v1632 (provisional). Main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 checked at start/mid; docs-only child of unmerged Draft #2410, handoff issue #2409. **F675-213 PROPOSED, NOT IMPLEMENTED.** Migration 071 and read-only DEV schema prove user_items PRIMARY KEY(user_id,catalog_id), one row per member/catalog; migration 104 shop_stamp_item_term restamps the entire timed holding when quantity increases, decrement does not extend. Migration 072/165 purchase upserts quantities. Therefore v1628's duplicate-lot grouping was inconsistent with source. No per-purchase lot expiries can be reconstructed. DEV sample has 6 positive holdings, 0 timed/72h candidates (DEV only, not Production or feature test).
+
+Revised owner GET /api/v1/shop/expiry-snapshot?hours=24|72: one PostgreSQL asOf microsecond, read-only REPEATABLE READ, strict actor/consent, exact COUNT(*) **totalCatalogHoldings** and SUM(quantity::bigint) **totalUnits** across the full eligible owner+expiry set; top 10 **unique catalog holdings**, hasMore iff count>10, no totalGroups/lot IDs. Expiry (asOf,asOf+hours], NULL excluded, effect expiry separate; malformed/unverified source 503, verified zero only after complete SQL aggregate. UI explains repeat purchase can reset entire holding expiry; as-of advisory not guaranteed delivery. Require real DB session→actor authorization, no direct app-role table grants, PG17 benchmark with 10,001 **distinct catalog** rows, KO/EN Next/Android private/no-store/noindex/HEAD/304, 60s stale, 320px/TalkBack, cohort>=20 and default OFF.
+
+P0 OPS1630-01 SEC1630-02 FIN1630-03 REL1630-04; P1 ROW1630-05..ROW1630-10 (B/DB, B/API, A/Web, C/Android, A/B/Admin, QA) updated in #2409. #993/#2233/#2345, #2330/#2340/#2357/#2366/#2404/#2405, exact-SHA Test/restore remain independent RELEASE HOLD. Feature acceptance and official Test **NOT RUN**. External new verified/deduplicated/classified **0**, cumulative **UNKNOWN / 10,000**, BLOCKED / IN PROGRESS. No runtime/DB/WLD/ledger/Test/Production mutation. Full contract in PROJECT_PLAN.md; English canonical and Korean equivalent.
+
+**Fresh QA:** standard 171/171 PASS; classifier 24/24 PASS; expanded 175/176 (one obsolete destructive-cleanup assertion FAIL), feature E2E NOT RUN.
+
+**Current planning:** v1630 F675-213 holding-row/restamp correction / handoff #2409 / Draft PR pending / DRAFT / RELEASE HOLD; stacked on #2410.
+
+
 **v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; base #2402), developer handoff issue #2409. No merge or deployment.
 
 ## v2026.11.02.1628 — F675-213 Verified Expiring Holdings Snapshot (FEATURE ADDITION / DRAFT / RELEASE HOLD)

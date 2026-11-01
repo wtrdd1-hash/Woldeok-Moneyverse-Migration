@@ -1,3 +1,9 @@
+## 2026-11-02 v1630 — F675-213 holding-row truth and restamp correction (Feature Improvement / DRAFT / RELEASE HOLD)
+- **Fresh QA:** standard 171/171 PASS, classifier 24/24 PASS; expanded 175/176 (one legacy destructive-cleanup test FAIL); no feature E2E.
+- Cycle: Previous Addition v1628 → Current Improvement v1630 → Next Addition v1632 (provisional). Main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 start/mid; child of Draft #2410, developer handoff #2409.
+- Verified migration 071/DEV PK(user_id,catalog_id), quantity>=0; migration 104 stamps **entire holding** on quantity increase, no per-purchase lots. DEV six positive holdings, zero timed/72h candidates (not Production evidence). Replaced fictional duplicate-lot grouping with unique catalog holding rows; exact totalCatalogHoldings COUNT and totalUnits SUM, top ten and hasMore>10, 24/72 microsecond boundaries and fail-closed 503. Clarified repeat-purchase expiry restamp in member UI.
+- P0 4/P1 6 handoff ROW1630-05..ROW1630-10, owner/DB EXECUTE, immutable Test/restore, finance and QA blockers remain. No implementation, migration, WLD, item or Production change. External independent references new approved 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Fresh tests and PR/CI results recorded after verification.
+
 ## v2026.11.02.1626 — F675-212 Temporal Truth and Receipt Boundary (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
 **v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; base #2402), developer handoff issue #2409. No merge or deployment.

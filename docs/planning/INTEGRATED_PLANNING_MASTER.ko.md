@@ -1,5 +1,18 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.02.1630 — F675-213 보유품 단일 행·재구매 만료일 재설정 정합성 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+이전 Feature Addition v1628 → 현재 Feature Improvement v1630 → 다음 Feature Addition v1632(잠정). main 510dbe6bf4d5c2a8089fc06b480776053da7a2e3 시작·중간 확인, 미병합 Draft #2410의 문서 전용 후속, 개발 인계 #2409. **F675-213 기획안·미구현.** 마이그레이션 071과 개발 DB 읽기 전용 확인에서 user_items PRIMARY KEY(user_id,catalog_id), 즉 회원·상품당 단일 행을 확인했다. 마이그레이션 104 shop_stamp_item_term은 수량 증가 시 기간제 보유품 전체의 만료일을 다시 설정하며 감소 시 연장하지 않는다. 072/165 재구매는 동일 행에 수량을 더한다. 따라서 v1628의 중복 로트 묶음은 실제 스키마에 맞지 않으며 구매별 만료시각을 복원할 수 없다. 개발 DB 양수 보유품 6행·기간제 만료시각 0행·현재 72시간 후보 0행은 개발 샘플일 뿐 Production/기능 검증이 아니다.
+
+수정된 본인 GET /api/v1/shop/expiry-snapshot?hours=24|72는 PostgreSQL 마이크로초 asOf 1회·읽기 전용 REPEATABLE READ·세션/동의 검증을 전제로 전체 적격 집합의 COUNT(*) **totalCatalogHoldings**(상품별 보유품 행 수), SUM(quantity::bigint) **totalUnits**(수량)를 정확히 계산한다. 상위 10개는 **서로 다른 상품 보유품**이며 hasMore는 전체 행 수>10일 때만 true; totalGroups/가상 로트 ID 제거. 만료 경계 (asOf,asOf+hours], NULL 제외, 효과 종료는 별개, 출처 불명확하면 503, 검증된 전체 집계에서만 빈 결과 허용. 화면은 재구매 시 기존 전체 보유품 만료시각이 재설정될 수 있음을 안내한다. DB 세션→회원 신원 증명, 직접 앱 역할 테이블 권한 금지, 서로 다른 상품 10,001종 PG17 성능 시험, 한영 Next/Android 비공개/no-store/noindex/HEAD/304, 60초 STALE, 320px/TalkBack, 관리자 20명 이상 코호트·기본 OFF.
+
+P0 OPS1630-01 SEC1630-02 FIN1630-03 REL1630-04; P1 ROW1630-05~ROW1630-10(B/DB·B/API·A/Web·C/Android·A/B/Admin·QA)을 #2409에 갱신한다. #993/#2233/#2345 및 #2330/#2340/#2357/#2366/#2404/#2405, 공식 Test 정확 SHA·독립 복원 RELEASE HOLD 유지. 기능 수용시험·공식 Test **미실행**. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000**, BLOCKED / IN PROGRESS. 런타임/DB/WLD/원장/Test/Production 변경 없음. 상세 내용은 PROJECT_PLAN.ko.md.
+
+**최신 검증:** 표준 171/171 PASS, 분류기 24/24 PASS, 확장 175/176(파괴적 브랜치 정리 기대의 오래된 시험 1건 FAIL), 기능 E2E 미실행.
+
+**현재 기획:** v1630 F675-213 단일 보유품 행·만료일 재설정 정합성 / 인계 #2409 / Draft PR 대기 / 운영 보류; #2410 종속.
+
+
 **v1628 GitHub:** Draft PR #2410 (OPEN / HOLD; 기준 #2402), 개발 인계 이슈 #2409. 병합·배포 없음.
 
 ## v2026.11.02.1628 — F675-213 회원 보유품 만료 임박 검증 조회 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
