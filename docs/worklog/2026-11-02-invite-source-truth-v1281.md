@@ -14,3 +14,10 @@
 
 ## Release policy
 - No PR merge or production promotion without all exact-HEAD checks, isolated real-PostgreSQL, authenticated browser E2E, required CI, and official Test evidence. Record blocked gates explicitly.
+
+## Verification and correction (2026-11-02 03:01 KST)
+- On candidate `083a381c7c3325fce55eb10b4cf1f4e095c207a5`: lint 0 errors/1,026 warnings; typecheck PASS after isolated worktree dependency symlinks; frontend build PASS with 2 GiB heap after 1 GiB OOM; backend build PASS; frontend full suite 2,924 PASS; backend 2,978 PASS, 2 FAIL, 518 SKIP (unrelated profile HTTP test expects 200 but receives 401); database package 62 PASS, 5 SKIP; app-api contract 184 endpoints PASS; full route QA FAIL missing `artifacts/qa/full-route-ledger.json`; dependency audit FAIL 9 (1 low, 8 moderate).
+- Disposable PostgreSQL 17.11 applied 322/322 migrations successfully after waiting for post-init server startup; verified `moneyverse_app` has no INSERT on ledger_transactions; ephemeral container deleted. No shared database touched.
+- Independent Next HTTP test initially found `200` and `<meta name="robots" content="noindex, nofollow">`, but **HTTP `X-Robots-Tag` was `index, follow`** and `Referrer-Policy` allowed cross-origin origin disclosure. Also, Next Flight serialized the route parameter even though the rendered UI did not display it. This requires HTTP protection, not only page metadata.
+- Added route-specific noindex, no-referrer, private no-store headers to `frontend/next.config.ts`; a new header-policy test failed before the fix and passed afterward (11/11 focused tests). Related broader private-header Draft #2225 remains untouched and must be considered before merge.
+- All above measurements precede the final follow-up commit; rerun mandatory gates on its exact HEAD before release decisions.

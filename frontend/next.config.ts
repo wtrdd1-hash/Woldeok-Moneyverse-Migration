@@ -192,6 +192,13 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Invitation codes are unverified URL tokens, not certified reward receipts.
+      // The global public indexing/referrer defaults must never override this route.
+      { source: '/invite/:code', headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+        { key: 'cache-control', value: 'private, no-store' },
+      ] },
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
