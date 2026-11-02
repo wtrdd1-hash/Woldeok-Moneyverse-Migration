@@ -1,3 +1,48 @@
+## v2026.11.02.1652 — F675-219 회원 문의 전체 보존 대화 페이지 조회 (기능 추가 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 보완 v1650 → 현재 기능 추가 v1652 → 다음 기능 보완 v1654(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 확인, AGENTS.md·README·영문 PROJECT_PLAN.md 정본 및 본 한국어 대조본. 이전 초안 #2473 위에 문서 전용으로 누적, 개발 인계 이슈 #2477. F675-219는 **미구현**이며 병합·배포·금융/보유품 변경을 승인하지 않는다.
+
+### 문제·실측 근거·대안
+
+- frontend/src/app/support/page.tsx는 문의 메시지를 한 번에 읽고 페이지 이동 없이 표시한다. backend/src/support/support.repository.ts의 기본 호출은 200건이며 마이그레이션 196의 support_thread_messages는 최대 500건으로 제한한다. 기존 CSV/텍스트 다운로드도 최대 500건 및 truncated 표시다. 따라서 500건 초과 대화 전체를 현 화면에서 조회할 방법이 없다. 이는 **소스에서 확인된 기능 제한**이지 실제 회원의 메시지 손실 사고가 아니다.
+- 기존 support_messages의 (thread_id,created_at ASC,id ASC) 인덱스를 활용한다. 개발 PostgreSQL 17.11 읽기 전용 검사: 문의 3건·메시지 6건·한 문의 최대 3건. moneyverse_app의 support_messages 직접 SELECT는 거부됐지만 account_balances 직접 UPDATE는 허용되어 P0 #993을 유지한다. 개발 DB 결과를 Test·Production에 일반화하지 않는다.
+- 대안 A 500→10,001 일괄 반환은 응답·모바일 메모리·DB 부하로 기각, B 브라우저 200건 내 페이지 나누기는 실제 과거 대화 조회 불가로 기각. C **본인 전용 50+1 SQL 키셋과 서명 커서** 채택. 새 공개 목록·첨부·이메일·금융 기능은 없다. 기존 500건 내보내기를 전체 이력으로 오표시하지 않는다.
+
+### 사용자·화면·권한·상태
+
+- 목적은 회원이 본인 문의의 **현재 보존된** 모든 메시지를 단계적으로 확인하는 것이다. 진입점 /support?thread={UUID}, 회원 세션·동의·소유권 확인 필수. 첫 화면 50건을 시간순으로 보여주고 '다음 대화 50개 보기' CTA로 추가한다. 실제 마지막 페이지에서 '현재 보존된 대화의 마지막 메시지'로 안내하며 법적 완전보관 증명은 하지 않는다. 관리자의 기존 /admin/support 화면은 V1에서 그대로 둔다.
+- 상태는 로딩, 검증된 목록, 검증된 빈 목록, 다음 페이지 로딩, 마지막 페이지, 400 입력 오류, 401 미인증, 403 동의 부족, 404 타인/없는 문의 동일 응답, 409 원천 변경 새로고침, 410 커서 만료 첫 페이지 재시작, 429 요청 제한, 503 DB 장애, 오프라인, 계정 전환 취소로 구분한다. 오류를 []로 바꾸지 않고 다른 회원의 응답·커서를 섞지 않는다. 위조되거나 오래된 thread 선택을 첫 번째 다른 문의로 조용히 대체하지 않는다.
+- 320px·200% 확대·44px 터치·WCAG 2.2 AA·한국어/영어·키보드 초점 복원·스크린리더 송신자/시각 레이블·aria-live·모션 축소·명시적 재시도를 요구한다. 비공개 메시지 자동 프리페치는 금지한다.
+
+### API·DB·인덱스·트랜잭션·커서
+
+- Nest 회원 전용 GET /api/v1/support/threads/:id/messages/pages?limit=50&cursor=... (기본 50, 1~100), SessionGuard·AuthenticatedGuard·ConsentGuard. Next 서버 전용 BFF와 Android /app-api/v1/support/threads/:id/messages/pages도 동등한 인증을 적용한다. 응답 {messages:[{messageId,senderKind,body,createdAtUtc}],pageSize,hasMore,nextCursor,sourceStatus:'VERIFIED',sourceRevision,asOfUtc}. 타인 UUID·감사/원장 정보 반환 금지. 중복 파라미터·잘못된 UUID/limit/cursor는 거부, 400/401/403/404/409/410/429/503 구분.
+- 전방 마이그레이션에 SECURITY DEFINER 함수 support_thread_messages_page_v1(본인,문의,제한,마지막 시각/ID,원천 리비전,상한 시각/ID)를 추가한다. 고정 search_path·스키마 명시·함수 내 소유권 검사·PUBLIC EXECUTE 회수·앱에는 함수 EXECUTE만 허용한다. support_messages 직접 SELECT/INSERT/UPDATE/DELETE GRANT 금지. 기존 인덱스 우선, 합성 10,001건 EXPLAIN ANALYZE/BUFFERS에서 필요성이 입증될 때만 새 인덱스 추가. SQL에서 마이크로초 시각+UUID 정확 비교하고 JS Date 밀리초 변환 손실을 방지한다.
+- 제안된 support_threads.message_revision bigint NOT NULL DEFAULT 0 CHECK >=0을 모든 메시지 생성·삭제 경로에서 문의 행 잠금 후 원자적으로 증가시킨다(첫 메시지·회원 답변·관리자 답변·보존 삭제 포함). 기존 0은 레거시 초기값이며 과거 완전성 보증이 아니다. 첫 페이지는 읽기 전용 REPEATABLE READ에서 리비전·최대 (created_at,id)·asOf를 동일 스냅샷으로 확정한다. 후속 페이지는 리비전과 소유권을 다시 검증하고 변경 시 409를 반환한다. HTTP 요청 간 동일 MVCC 스냅샷이라고 주장하지 않는다. 삭제 경로에서 리비전을 갱신할 수 없으면 공개 BLOCKED.
+- 키셋 조건은 (created_at,id) > (lastCreated,lastId), <= (snapshotMaxCreated,snapshotMaxId), created_at ASC,id ASC, limit+1. 커서는 버전/HMAC-SHA256, 최대 5분, 회원·문의·세션 세대·리비전·asOf 마이크로초·상한·마지막 키·limit·만료에 결속한다. 위조·타인/세션 변경·리비전 변경은 400/409, 만료는 410. 커서·본문·서명 비밀을 로그에 기록하지 않는다. GET은 읽기 전용이며 WLD·원장·보유품 쓰기나 멱등키 사용이 없다.
+
+### 관리자·보안·SEO·KPI·검증·롤백
+
+- V1은 본인 조회만 제공하고 관리자 기존 제한 조회는 유지한다. 관리자가 회원 권한으로 위장하거나 본인 API를 관리자용으로 재사용하지 않는다. 회원 ID·제목·본문·커서·원문은 분석/로그에 남기지 않는다. 회원별 요청량·DB 시간·응답 크기 제한, POST 답변의 기존 CSRF는 그대로 유지한다.
+- 200·오류·리다이렉트·HEAD·Android 엣지 모두 Cache-Control private,no-store, X-Robots-Tag noindex,nofollow, Referrer-Policy no-referrer를 검증한다. /support와 API는 검색 색인·사이트맵에서 제외한다. 관리자 KPI는 서로 다른 회원 20명 이상일 때만 주간 페이지 완독·409/410/429/503·p95·타인 차단 건수를 익명 집계한다. 목표 p95 300ms 이하·타인 노출 0·금융 쓰기 0은 **수용 목표이지 실측 성과가 아니다**.
+- 격리 PostgreSQL 17.11 합성 10,001건 이상, 타인 100, 위조/만료/세션 전환 커서 100, 동시 추가 100, 삭제/리비전 변경 50, 마이크로초/한국시간 경계 50, 오류·타임아웃 50, 기존 500건 다운로드 회귀, Android·접근성·HTTP 헤더·원장 변화 0 검증을 **계획만 작성, 미실행**. 실제 회원 데이터 주입 금지.
+- 기능 스위치 support_full_history_pages 기본 OFF. 별도 개발 브랜치·Docker Test DB·TDD/코드 리뷰 후 정확 SHA 공식 Test 인증 E2E·독립 복원까지 통과해야 내부→제한 회원→확대. 장애 시 OFF로 기존 UI 복귀, 메시지·리비전·마이그레이션 삭제 금지. 기획 예약은 런타임/DB/운영 배포를 하지 않는다.
+
+### P0 4건 + P1 6건
+
+1. **P0 OPS1652-01:** 실제 Production 실행 이미지·엣지 SHA, 롤백 자산·독립 복원 검증. 공개 /api/version 510dbe6...은 실행 증명이 아님.
+2. **P0 SEC1652-02:** 개발 앱 역할 잔액 직접 UPDATE #993, 전체 DML·새 설치/마이그레이션 충돌·최소 권한 검증.
+3. **P0 FIN1652-03:** 국고·MINT·SWF·원장 정합성 및 출처 재검증; 문의 읽기로 금융 안정성을 증명하지 않음.
+4. **P0 REL1652-04:** 최신 QA 운영 다국어 HTTP500·백엔드 Production 모드 실패, 전체 의존성 감사·개인정보 헤더·공식 Test 정확 SHA·독립 복원.
+5. **P1 HISTORY1652-05 (B/DB):** 본인 SQL 페이지·리비전·모든 작성자 직렬화·기존 인덱스 EXPLAIN·마이크로초·권한 음성시험.
+6. **P1 HISTORY1652-06 (B/API):** Nest DTO/가드·HMAC 커서·오류/제한·실제 HTTP 개인정보 헤더.
+7. **P1 HISTORY1652-07 (A/Web):** /support 50건 추가 보기·검증된 빈/오류·정확한 문의 선택·키보드/모바일·500건 내보내기 정직한 안내.
+8. **P1 HISTORY1652-08 (C/Android):** app-api 계약·성공/오류 no-store/noindex·계정 전환 취소·개인정보 디스크 캐시 금지.
+9. **P1 HISTORY1652-09 (A/C/Admin):** 익명 20명 KPI·악용 방지·기본 OFF·단계적 공개·비파괴 롤백.
+10. **P1 HISTORY1652-10 (QA):** 합성 10,001+ 및 위조/동시/삭제/시각 경계 회귀, 금융 변화 0, 정확 SHA Test·롤백.
+
+**차단 게이트:** 마지막 확인 QA v1462 FAILED/P0_PRODUCTION_HOLD(운영 다국어 표본 28건 중 16건 HTTP500, 백엔드 Production 모드 2건 실패), 더 최신 QA 최종 결과는 독립 확인 전 UNKNOWN. 14시경 Test/Production /api/version 모두 510dbe6...로 main과 불일치. 외부 독립 근거 신규 중복 제거·분류 승인 0건, 누적 승인 UNKNOWN / 10,000건 → BLOCKED / IN PROGRESS. 수용시험 미실행, DRAFT / RELEASE HOLD, 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
 ## v2026.11.02.1650 — F675-218 문의 처리 평가: 상태 CAS·재시도 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 **GitHub:** 선행 Draft #2468, P0/P1 이슈 #2467, 이번 Draft PR #2473 OPEN/HOLD. **운영 승격 보류.**
 **주기:** 이전 Feature Addition v1648 → 현재 Feature Improvement v1650 → 다음 Feature Addition v1652(잠정). 기준은 시작·중간에 재조회한 최신 `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 동등한 국문 계획서. 미병합 Draft #2468에 적층한 문서 전용 변경이며 개발 이슈는 #2467. **F675-218 미구현.** 런타임·DB·WLD·원장·Test·Production 변경 없음.
@@ -742,7 +787,7 @@
 - **P1 6건:** DIGEST1608-05 B/DB 회원별 7일 조회·EXPLAIN·권한 거부; DIGEST1608-06 B/Nest 엄격 GET·불일치 503; DIGEST1608-07 A/Next 검증 상태·접근성·BFF; DIGEST1608-08 C/Android 정확 경로·비공개 헤더·세션 격리; DIGEST1608-09 A/C 관리자 집계 KPI·SEO·a11y; DIGEST1608-10 QA 실제 PG17·KST·보존·동시성·엣지·금융 무변동·롤백.
 - **운영승격:** 문서 초안·RELEASE HOLD. 개발 A/B/C/QA가 별도 브랜치·Test Docker·순방향 마이그레이션으로 구현한다. 정확한 소스 SHA → 전체 CI → 공식 Test 앱/마이그레이터 동일 SHA 및 실제 PG/API/웹/Android 수용 → 금융 출처 대조·독립 복원 → 운영자 승인 → OFF→내부→소규모→확대. 문제 시 플래그 OFF만으로 롤백하며 영수증 삭제·금융 이력 수정 금지. 기획 회차는 main 병합·Production 배포를 하지 않는다. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**.
 
-**현재 기획:** v1608 F675-208 회원 만료 알림 생성 영수증 이력 / 개발 이슈 #2342 / 초안 / 운영 보류; 선행 #2335·#2328, 기준 main 1e389dc1a6b253f7dbff7cc6765fbe4a17bcb9e0.
+**현재 기획:** v1652 F675-219 회원 문의 전체 보존 대화 페이지 조회 / 이슈 #2477 / 초안 준비 / 운영 보류; #2473 후속.
 
 ## v2026.11.01.1606 — F675-207 기본 행 부재·당일 처리·멱등성 보완 (기능 보완 / 초안 / 운영 보류)
 
