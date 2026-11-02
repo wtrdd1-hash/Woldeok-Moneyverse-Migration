@@ -193,7 +193,7 @@ const config: NextConfig = {
     return [
       { source: '/:path*', headers: security },
       // Account overview includes owner identities and sessions; public indexing/cache headers are unsafe.
-      ...['/account', '/:locale(en|ko|ja|zh-CN|zh-TW|vi)/account'].map((source) => ({
+      ...['/account', '/:locale(en|ko|ja|zh|vi)/account'].map((source) => ({
         source,
         headers: [
           { key: 'x-robots-tag', value: 'noindex, nofollow' },
