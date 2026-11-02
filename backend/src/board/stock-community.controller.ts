@@ -122,6 +122,7 @@ export class PublicStockCommunityController {
       posts: query.withImage === '1'
         ? await this.community.publicList(stock as string | undefined, q as string | undefined, true)
         : await this.community.publicList(stock as string | undefined, q as string | undefined),
+      ...(query.withImage === '1' ? { imageFilter: 'with' } : {}),
     };
   }
 }

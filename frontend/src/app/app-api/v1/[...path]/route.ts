@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { verifiedBoardImageResults } from '@/app/board/board-image-filter';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -57,22 +58,6 @@ function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   return true;
 }
 
-function isVerifiedImageOnlyBoardResponse(payload: unknown): boolean {
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
-  const posts = (payload as { posts?: unknown }).posts;
-  if (!Array.isArray(posts) || posts.length > 50) return false;
-  const seen = new Set<string>();
-  for (const post of posts) {
-    if (!post || typeof post !== 'object' || Array.isArray(post)) return false;
-    const row = post as Record<string, unknown>;
-    if (typeof row.postId !== 'string' ||
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.postId) ||
-        seen.has(row.postId) || typeof row.title !== 'string' || !row.title.trim() ||
-        row.hasImage !== true) return false;
-    seen.add(row.postId);
-  }
-  return true;
-}
 
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
@@ -302,10 +287,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
-  if (boardImageRequested && response.ok) {
+  if (boardImageRequested && request.method === 'GET' && response.ok) {
     try {
       if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !isVerifiedImageOnlyBoardResponse(await response.clone().json())) {
+          !verifiedBoardImageResults(await response.clone().json())) {
         return gatewayProblem(503, 'Service Unavailable', 'board_image_filter_unverified',
           'public image-only board results could not be verified');
       }
@@ -631,6 +616,7 @@ async function handle(request: NextRequest, context: Context) {
         request.nextUrl.searchParams.has('withImage'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
