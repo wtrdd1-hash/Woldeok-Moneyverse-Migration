@@ -17,10 +17,10 @@ function semverAtLeast(value, floor) {
   return true;
 }
 
-test('all Vitest workspaces declare the patched 4.1.11 floor', () => {
+test('all Vitest workspaces declare the patched 4.1.12 floor', () => {
   for (const workspace of workspaces) {
     const manifest = JSON.parse(readFileSync(resolve(root, workspace, 'package.json'), 'utf8'));
-    assert.ok(semverAtLeast(manifest.devDependencies.vitest, [4, 1, 11]), workspace + ' Vitest must be >=4.1.11');
+    assert.ok(semverAtLeast(manifest.devDependencies.vitest, [4, 1, 12]), workspace + ' Vitest must be >=4.1.12');
   }
 });
 
@@ -28,7 +28,8 @@ test('the lockfile excludes vulnerable tinypool 1.x and Vitest 3.x', () => {
   const lock = readFileSync(resolve(root, 'pnpm-lock.yaml'), 'utf8');
   assert.doesNotMatch(lock, /^  tinypool@1\./m, 'vulnerable tinypool 1.x must not remain');
   assert.doesNotMatch(lock, /^  vitest@3\./m, 'vulnerable Vitest 3.x must not remain');
-  assert.match(lock, /^  vitest@4\.1\.11:/m, 'lockfile must contain patched Vitest 4.1.11');
+  assert.match(lock, /^  vitest@4\.1\.12:/m, 'lockfile must contain patched Vitest 4.1.12');
+  assert.doesNotMatch(lock, /^  @vitest\/mocker@4\.1\.12:/m, 'vulnerable Vitest mocker must not remain');
 });
 
 test('Vite, fast-uri and brace-expansion lock entries meet patched floors', () => {
@@ -46,6 +47,6 @@ test('Vite, fast-uri and brace-expansion lock entries meet patched floors', () =
   assert.ok(brace.length > 0, 'brace-expansion must be locked');
   assert.ok(brace.every((value) => {
     const major = Number(value.split('.')[0]);
-    return major === 1 ? semverAtLeast(value, [1, 1, 20]) : major === 5 ? semverAtLeast(value, [5, 0, 11]) : true;
+    return major === 1 ? semverAtLeast(value, [1, 1, 21]) : major === 5 ? semverAtLeast(value, [5, 0, 12]) : true;
   }), 'brace-expansion 1.x and 5.x must meet patched floors');
 });
