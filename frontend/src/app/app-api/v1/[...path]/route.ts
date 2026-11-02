@@ -112,6 +112,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // Older Nest deployments may still return success-shaped virtual insurance
+  // balances. Never proxy these as verified coverage to Android members.
+  if (parts[0] === 'kdic' && parts.length === 2 && ['portal', 'my-coverage'].includes(parts[1]!)) {
+    return gatewayProblem(503, 'Service Unavailable', 'KDIC_COVERAGE_UNVERIFIED',
+      'Virtual WLD coverage and payout eligibility are not verified');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));

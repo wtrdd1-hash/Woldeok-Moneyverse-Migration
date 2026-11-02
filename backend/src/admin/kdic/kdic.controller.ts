@@ -14,9 +14,8 @@ import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 import type { RequestWithSession } from '../../auth/session.context';
-import { requireUserId } from '../../auth/session.context';
 import { KdicService } from './kdic.service';
-import { rejectUnverifiedKdicSettlement } from './kdic-ledger-hold';
+import { rejectUnverifiedKdicSettlement, rejectUnverifiedKdicCoverage } from './kdic-ledger-hold';
 
 @ApiTags('Deposit Insurance (KDIC) & Financial Stability Control')
 @Controller('admin/kdic')
@@ -71,38 +70,17 @@ export class PublicKdicController {
 
   @Get('portal')
   @SkipInternalToken()
-  @ApiOperation({ summary: '대국민 예금자보호 제도 및 예보기금 공개 조회' })
-  async getPublicPortalData() {
-    const data = await this.kdicService.getFundOverview();
-    return {
-      success: true,
-      data: {
-        fund: {
-          fundName: data.fund.fundName,
-          totalFundWld: data.fund.totalFundWld,
-          protectionLimitPerUser: data.fund.protectionLimitPerUser,
-          totalInsuredDepositsWld: data.fund.totalInsuredDepositsWld,
-          isEmergencyMode: data.fund.isEmergencyMode,
-          updatedAt: data.fund.updatedAt,
-        },
-        institutions: data.institutions.map(i => ({
-          institutionName: i.institutionName,
-          institutionType: i.institutionType,
-          bisRatioPct: i.bisRatioPct,
-          soundnessGrade: i.soundnessGrade,
-          status: i.status,
-        })),
-        summary: data.summary,
-      },
-    };
+  @ApiResponse({ status: 503, description: 'KDIC_COVERAGE_UNVERIFIED: virtual coverage not certified' })
+  @ApiOperation({ summary: '가상 예금 보호 인증 보류 — 법적 보장이나 기금 잔액을 공개하지 않음' })
+  async getPublicPortalData(): Promise<never> {
+    rejectUnverifiedKdicCoverage();
   }
 
   @Get('my-coverage')
   @UseGuards(SessionGuard, AuthenticatedGuard)
-  @ApiOperation({ summary: '내 계좌별 예금자보호 한도 및 보호금액 조회' })
-  async getMyCoverage(@Req() req: RequestWithSession) {
-    const userId = requireUserId(req);
-    const coverage = await this.kdicService.getUserCoverage(userId);
-    return { success: true, data: coverage };
+  @ApiResponse({ status: 503, description: 'KDIC_COVERAGE_UNVERIFIED: owner coverage not certified' })
+  @ApiOperation({ summary: '회원별 가상 보호금액 인증 보류' })
+  async getMyCoverage(@Req() _req: RequestWithSession): Promise<never> {
+    rejectUnverifiedKdicCoverage();
   }
 }
