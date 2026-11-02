@@ -12,6 +12,7 @@ import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger
 import { IsIn, IsInt, IsPositive, IsString, IsUUID, Max, Min } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 
@@ -102,6 +103,8 @@ export class DerivativesController {
 
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 진입 (증거금 잠금)' })
   @Post('open')
+  @UseGuards(CsrfGuard)
+  @ApiResponse({ status: 403, description: 'Missing or invalid session-bound CSRF token' })
   async openPosition(
     @Req() _req: RequestWithSession,
     @Body() _dto: OpenDerivativePositionDto,
@@ -111,6 +114,8 @@ export class DerivativesController {
 
   @ApiOperation({ summary: '가상 레버리지 선물 포지션 시장가 청산' })
   @Post(':id/close')
+  @UseGuards(CsrfGuard)
+  @ApiResponse({ status: 403, description: 'Missing or invalid session-bound CSRF token' })
   async closePosition(
     @Req() _req: RequestWithSession,
     @Param('id') _positionId: string,
