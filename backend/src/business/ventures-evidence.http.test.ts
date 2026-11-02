@@ -5,6 +5,8 @@ import request from 'supertest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { SessionRepository } from '../auth/session.repository';
 import { VenturesController } from './ventures.controller';
 
 const actor = '11111111-1111-4111-8111-111111111111';
@@ -13,7 +15,7 @@ describe('venture finance evidence HTTP contract', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ controllers: [VenturesController] })
+    const moduleRef = await Test.createTestingModule({ controllers: [VenturesController], providers: [CsrfGuard, { provide: SessionRepository, useValue: { verifyCsrf: async () => false } }] })
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })

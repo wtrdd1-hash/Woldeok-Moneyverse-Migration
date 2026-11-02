@@ -14,6 +14,7 @@ import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -132,6 +133,7 @@ export class VenturesController {
 
   @ApiOperation({ summary: '스타트업 피치 엔젤투자 집행 (SAFE 지분 취득)' })
   @Post('invest')
+  @UseGuards(CsrfGuard)
   async investVenture(
     @Req() req: RequestWithSession,
     @Body() dto: InvestVentureDto,
@@ -141,6 +143,7 @@ export class VenturesController {
 
   @ApiOperation({ summary: '스타트업 분기 배당금 즉시 수령 (지갑 입금)' })
   @Post('claim-dividend')
+  @UseGuards(CsrfGuard)
   async claimDividend(
     @Req() req: RequestWithSession,
     @Body() dto: ClaimDividendDto,
@@ -150,6 +153,7 @@ export class VenturesController {
 
   @ApiOperation({ summary: '창업자 스타트업 펀딩 피치 신규 등록 신청' })
   @Post('apply-founder')
+  @UseGuards(CsrfGuard)
   async applyFounderPitch(
     @Req() req: RequestWithSession,
     @Body() dto: ApplyVentureFounderDto,
