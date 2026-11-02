@@ -12,5 +12,11 @@
 - RED: backend 3 new failures / 19 existing pass; frontend 8 new failures. See host evidence/red-backend.log and red-frontend.log. Tests added before implementation.
 - Next: implement only `media=text` on bounded existing public SQL function, source proof on Nest, web and Android; do not touch other worktrees.
 
+## IN PROGRESS — v2.1
+- Implemented Nest `media=text` with parameterized read-only PostgreSQL filter over `member_board_public_list_with_stock(50)`, explicit `filterApplied` marker and fail-closed image-row assertion.
+- Implemented accessible web selector, verified-empty versus source-unavailable distinction, filtered robots noindex and Android gateway response proof + private error headers.
+- RED->GREEN: Backend 23 focused PASS, Frontend 20 focused PASS; full workspace typecheck PASS. Real PostgreSQL 17.11 read-only app-role query/prepare PASS; 1 latest public row, 0 text-only rows. DEV app role still has direct board SELECT (P0 least-privilege issue; Production not checked).
+- Origin/main advanced from `a8541927...` to `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e` during implementation (SOE v1621). Rebase and full exact-HEAD gates pending.
+
 ## FINISHED — v3
 - Pending verification; Production HOLD until all gates pass.
