@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.03.1627.1 — Scheduled QA dual-disk historical cache hygiene: PRODUCTION QA OPS VERIFIED
+- [Operational release EN](docs/releases/v2026.11.03.1627-qa-ops.md) / [KO](docs/releases/v2026.11.03.1627-qa-ops.ko.md) · [Internal EN](docs/updates/v2026.11.03.1627.1-qa-ops-internal.md) / [KO](docs/updates/v2026.11.03.1627.1-qa-ops-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.03.1627.1-qa-ops-github.md) / [KO](docs/updates/v2026.11.03.1627.1-qa-ops-github.ko.md). PR #2597 CI success, merged `d22c36dbecad1fe136d3850715f1068a7d1df573`. Immutable QA operations v1627 systemd override activated and actual QA 08:46 KST exit 0, 24 HTTP passes, 2 auth-gated not functionally tested. Historical cache scans root 5/data 35, 0 eligible/deleted; root 79%/data 78%, strict both OK. Former manual 35.07GB sweep separately credited to disk01. This is **QA operations verification**, NOT app/finance deployment.
+
 ## v2026.11.03.1627 — Scheduled QA task-local Next cache maintenance (SOURCE TESTED, RELEASE HOLD)
 - [EN worklog](docs/worklog/2026-11-03-qa-next-cache-v1627.md) / [KO](docs/worklog/2026-11-03-qa-next-cache-v1627.ko.md) · [Internal EN](docs/updates/v2026.11.03.1627-qa-cache-internal.md) / [KO](docs/updates/v2026.11.03.1627-qa-cache-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.03.1627-qa-cache-github.md) / [KO](docs/updates/v2026.11.03.1627-qa-cache-github.ko.md). Separate hourly QA cleanup candidate for inactive historical worktree `.next/cache`, 120h ordinary/12h disk-pressure bounded retention. Existing host disk01 manual cache sweep 35.07GB is independent; this candidate dry-run deleted 0. Tests 8/8 PASS, Test/Production scheduler release not yet verified.
 
