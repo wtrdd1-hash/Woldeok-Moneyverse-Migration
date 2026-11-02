@@ -7,3 +7,5 @@
 **Design decision:** F675-221 currently retained all-time member support case metadata via 50+1 owner-scoped keyset, DB revision and consistent snapshot, 5-minute AES-GCM session/filter/revision cursor, 409 drift, exact-thread navigation dependency, flag OFF and private web/Android. Existing recent-100 filter and 500-message transcript stay accurately labeled. No independent reference approval; new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Synthetic acceptance proposed only, NOT RUN. No code, schema, financial, Test or Production writes.
 
 **End:** pending final local tests, GitHub CI and Draft PR; do not treat docs-only validation as feature acceptance or release permission.
+
+**Final local checks:** standard 171/171 PASS, release classifier 24/24 PASS, security PASS, EN/KO 3 pairs x14 + 15 detailed markers PASS, git diff --check PASS; expanded suite 175/176 with one pre-existing cleanup workflow assertion FAIL. Draft PR #2498 OPEN/HOLD; developer issue #2497. No feature acceptance or deployment.
