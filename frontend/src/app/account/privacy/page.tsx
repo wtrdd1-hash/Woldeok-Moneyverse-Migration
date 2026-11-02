@@ -8,6 +8,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { PrivacyRequestForm } from '../account-forms';
+import { parseOwnerPrivacyRequests } from './privacy-request-evidence';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -16,14 +17,6 @@ export const metadata: Metadata = {
   title: '개인정보 센터',
   robots: { index: false, follow: false },
 };
-
-interface PrivacyRequest {
-  readonly requestId: string;
-  readonly requestType: string;
-  readonly detail: string | null;
-  readonly status: string;
-  readonly createdAt: string;
-}
 
 const REQUEST_TYPE_NAME: Readonly<Record<string, string>> = {
   access: '개인정보 열람 요청',
@@ -41,9 +34,10 @@ export default async function AccountPrivacyPage({
   await requireMember();
   const { type } = await searchParams;
   const selectedType = typeof type === 'string' && Object.hasOwn(REQUEST_TYPE_NAME, type) ? type : null;
-  const privacyData = selectedType
-    ? await apiOrNull<{ requests: PrivacyRequest[] }>(`/api/v1/privacy/requests?type=${selectedType}`)
-    : await apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests');
+  const rawPrivacyData = selectedType
+    ? await apiOrNull<unknown>(`/api/v1/privacy/requests?type=${selectedType}`)
+    : await apiOrNull<unknown>('/api/v1/privacy/requests');
+  const privacyRequests = parseOwnerPrivacyRequests(rawPrivacyData, selectedType);
 
   return (
     <div data-page="account-privacy" className="mv-page mv-page--member grid gap-6">
@@ -58,8 +52,11 @@ export default async function AccountPrivacyPage({
           <Link href="/privacy#privacy-rights" className="text-primary">이용자 권리와 처리 기준 보기 →</Link>
         </p>
 
-        {privacyData === null ? (
-          <EmptyState title="개인정보 요청 기록을 불러올 수 없어요." description="잠시 후 다시 시도해 주세요." />
+        {privacyRequests === null ? (
+          <div role="alert" className="grid gap-3">
+            <EmptyState title="개인정보 요청 기록을 불러올 수 없어요." description="잘못된 응답 또는 일시적인 서버 장애입니다. 확인되지 않은 기록은 표시하지 않습니다." />
+            <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit"><Link href={selectedType ? `/account/privacy?type=${selectedType}` : "/account/privacy"}>다시 조회</Link></Button>
+          </div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
@@ -84,11 +81,11 @@ export default async function AccountPrivacyPage({
                 <p className="mb-3 text-xs text-muted-foreground">
                   {selectedType ? '최근 100건의 요청 중 선택한 종류를 최대 30건 표시합니다.' : '최근 30건의 요청을 표시합니다.'}
                 </p>
-                {privacyData.requests.length === 0 ? (
+                {privacyRequests.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{selectedType ? '최근 100건에서 해당 종류의 요청이 없어요.' : '아직 기록한 개인정보 요청이 없어요.'}</p>
                 ) : (
                   <ul className="grid gap-3">
-                    {privacyData.requests.map((request) => (
+                    {privacyRequests.map((request) => (
                       <li key={request.requestId} className="border-b pb-3 last:border-b-0 last:pb-0">
                         <p className="text-sm font-medium">{REQUEST_TYPE_NAME[request.requestType] ?? request.requestType}</p>
                         <p className="text-xs text-muted-foreground">
