@@ -20,7 +20,7 @@ describe('Admin enterprise dividend logs HTTP boundary (isolated guard doubles)'
       controllers: [AdminEnterpriseController],
       providers: [{ provide: EnterpriseService, useValue: { listRecentDividendLogs } }],
     })
-      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(SessionGuard).useValue({ canActivate: (ctx: { switchToHttp: () => { getRequest: () => { session?: unknown } } }) => { ctx.switchToHttp().getRequest().session = { user_id: '11111111-1111-4111-8111-111111111111' }; return true; } })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
