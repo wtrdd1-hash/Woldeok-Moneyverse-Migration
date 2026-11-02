@@ -30,3 +30,18 @@
 - New RED test confirmed missing actual-edge privacy headers on the base and `/en`/`/ko` localized aliases (3 failures). Narrow proxy fix sets `noindex, nofollow`, `private, no-store`, and `no-referrer` only for the admin delivery page, preserving public routes. GREEN: 21/21 focused tests.
 - This route-scoped change does not replace the broader unmerged private-header PR #2225. It is needed for this page to avoid relying on HTML metadata alone.
 - A fresh disposable PostgreSQL attempt initially failed due to the container SQL wrapper using host file paths, then a migrator-role ownership mismatch and unsafe test-only worker group membership. Test harness is being corrected without modifying repository migrations or shared databases.
+
+### Validation checkpoint — 2026-11-02 11:03 KST
+- Corrected source `7e83f71d1893ec47be3748a66208057d3c028f3d`: production Next build PASS; isolated real HTTP GET on `/admin/logs/delivery?status=outstanding&event=wallet.deposit` and `/en/admin/logs/delivery?status=terminal` returned `X-Robots-Tag: noindex, nofollow`, `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`. HTTP 200 alone is not authenticated E2E; no real admin session was used.
+- Disposable PostgreSQL 17.11 PASS: 322/322 forward-only migrations; admin function returned 3 seeded recent rows with `delivered,pending,retry_pending`, 1-row limit respected, app role EXECUTE true and direct `user_roles` SELECT false. Non-approver actor refused with `approver role required`. Container removed; no shared/Production DB writes.
+- Earlier preflight SHA `a6cd0f9`: Lint and Typecheck PASS, Frontend 2,934 PASS, Database 62 PASS/5 SKIP, API contract 184 PASS, security 17 PASS. Backend 2,978 PASS/2 FAIL/518 SKIP (unrelated profile HTTP expected 200, received 401); production-mode same two failures. Route ledger FAIL (missing `artifacts/qa/full-route-ledger.json`); full audit FAIL (8 moderate, 1 low). First Next build failed, corrected build later PASS. These are *not* final-SHA gate results.
+- Official exact-SHA authenticated Test browser/mobile E2E, independent restore and GitOps release are BLOCKED. CI runtime checks are pending at this checkpoint. Do not merge or deploy.
+
+## Finished — RELEASE HOLD
+- [x] RED tests reproduced and corrected; focused 21/21 PASS.
+- [x] Verified status/type triage and actual HTTP edge privacy implemented.
+- [x] Mid/end main and EN/KO plan source rechecked (main still `a8541927c3a351d980454c66e95a3356c47e0722`).
+- [x] Disposable PostgreSQL 322 migrations, role authorization, and HTTP headers proved; test environment removed.
+- [ ] Full **final HEAD** gates and remote CI: rerun after this worklog commit, with results posted on Draft PR #2459. Failures and skips remain blockers.
+- [ ] Official Test authenticated E2E, independent restore, main merge, Production smoke/rollback: NOT DONE; no release.
+- No changes to A/B/Gemini/QA branches or main. Preserve all unique unmerged branches and Draft PRs. No cleanup or reservation mutation.

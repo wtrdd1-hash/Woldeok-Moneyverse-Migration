@@ -25,3 +25,15 @@
 - 독립 Next.js HTTP 조회에서 HTML noindex와 달리 X-Robots-Tag가 index, follow로 반환됨. 내부 API 토큰 미설정 오류가 함께 발생했으므로 인증된 회원 E2E나 운영 개인정보 유출을 증명하는 결과는 아님.
 - 기본·영문·한국어 관리자 전달 로그 경로의 실제 HTTP 비색인·비공개 캐시·참조자 차단 헤더 RED 3건을 재현하고 경로 한정 프록시 수정 후 집중 21건 통과.
 - 미병합 일반 보호 PR #2225를 대체하지 않음. 격리 DB 초기 검증 실패는 테스트 실행기 경로·소유권·그룹 역할 설정 문제이며 저장소 마이그레이션은 변경하지 않음.
+
+### 검증 체크포인트 — 2026-11-02 11:03 KST
+- 수정 코드 `7e83f71d1893ec47be3748a66208057d3c028f3d`에서 Next 운영 빌드 통과. 독립 HTTP에서 기본·영문 관리자 전달 로그의 X-Robots-Tag=noindex, nofollow, Cache-Control=private, no-store, Referrer-Policy=no-referrer 확인. 실제 관리자 인증 브라우저 E2E는 아님.
+- 격리 PostgreSQL 17.11 마이그레이션 322/322 통과. 관리자 함수가 시험 데이터 3건(pending/retry_pending/delivered)을 정확히 반환하고 1건 제한 준수, 앱 역할 함수 실행 허용·원본 RBAC 직접 조회 차단, 비관리자 호출 거부 확인. 컨테이너 제거, 공유·운영 DB 변경 없음.
+- 이전 HEAD에서 Lint/Typecheck/프론트 2,934건/DB 62건/API 계약 184개/보안 17건 통과. Backend 2,978건 통과·2건 실패·518건 건너뜀(프로필 HTTP 200 예상, 401 응답). 전체 경로 QA 필수 파일 누락, 전체 의존성 감사 보통 8건·낮음 1건. 최초 빌드 실패 후 수정 빌드 통과. **최종 HEAD의 전체 검증으로 간주하지 않음.**
+
+## 작업 종료 — RELEASE HOLD
+- RED-GREEN 및 집중 테스트 21건 통과. 전달 로그 필터·실제 HTTP 보호 적용.
+- 시작·중간·종료 main 및 영문·한국어 기획 확인, main 변동 없음.
+- 격리 PostgreSQL 및 HTTP 검증 완료. 마지막 작업일지 커밋 후 정확한 최종 SHA에서 전체 게이트 재실행, 결과는 Draft PR #2459에 기록.
+- 인증된 공식 Test E2E·독립 복원·GitOps 승격·Production smoke는 미수행. 모든 필수 PASS 전 병합·배포 금지.
+- 개발 A/B, Gemini, QA 및 main 미수정. 미통합 브랜치·PR 보존, 예약 설정 미변경.
