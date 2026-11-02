@@ -40,6 +40,9 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
     let activeController: AbortController | null = null;
     async function fetchBuffs() {
       activeController?.abort();
+      // A pending refresh cannot certify the old badge; hide it until a new
+      // source response passes freshness and event-window verification.
+      if (isMounted) { setBuffs([]); setLoaded(false); }
       const controller = new AbortController();
       activeController = controller;
       try {

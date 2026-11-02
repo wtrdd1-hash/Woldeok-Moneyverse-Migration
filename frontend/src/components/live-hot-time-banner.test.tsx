@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import { LiveHotTimeBanner } from './live-hot-time-banner';
 
 vi.mock('@/components/locale-provider', () => ({ useLocale: () => ({ locale: 'ko' }) }));
@@ -21,6 +22,23 @@ describe('public live hot-time evidence', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(screen.queryByText('Verified work buff')).toBeNull();
     expect(screen.queryByText(/LIVE HOT-TIME|실시간 골든 핫타임/)).toBeNull();
+  });
+
+  it('removes a formerly live badge while a later refresh has no source response', async () => {
+    const pending = new Promise<never>(() => {});
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ activeBuffs: [buff], hasActiveHotTime: true, serverTime: new Date().toISOString() }) })
+      .mockReturnValueOnce(pending);
+    vi.stubGlobal('fetch', fetchMock);
+    const intervalSpy = vi.spyOn(window, 'setInterval');
+    render(<LiveHotTimeBanner />);
+    await waitFor(() => expect(screen.getByText('Verified work buff')).toBeTruthy());
+    const refresh = intervalSpy.mock.calls.find(([, ms]) => ms === 60_000)?.[0];
+    expect(refresh).toBeDefined();
+    await act(async () => { (refresh as () => void)(); });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Verified work buff')).toBeNull();
+    intervalSpy.mockRestore();
   });
 
   it('shows a source-current buff without fabricating other events', async () => {

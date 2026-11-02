@@ -12,5 +12,9 @@
 - 중간 main 재확인: f5c3fbedae 유지. PR #2573/#2574 및 B #2575와 중복 없음.
 - 전체 검증 및 독립 PostgreSQL 확인 진행 중.
 
-## 종료
-- 검증 후 기록.
+## 종료 및 배포 판정 (2026-11-03 05:33 KST)
+- 추가 RED: 재조회 대기 중 오래된 LIVE 유지, Android app-api의 오래된 HTTP 200 통과·공개 캐시·Backend 오류 본문 전달 재현. 수정 후 집중 테스트 22/22 PASS.
+- 미니PC 독립 PostgreSQL 17.11에서 SQL 328개 적용 PASS, 핫타임 원천 테이블 `economic_hot_time_events` 부재와 앱 계정 조회 실패 확인. Backend/DB 집중 24 PASS. 실제 핫타임 제공 기능 정상이라고 주장할 수 없음.
+- Production 관리자 통제 화면의 공개 HTTP는 index/follow 반환, Test는 noindex. 독립 Next HTTP 6개 경로 noindex/no-store/no-referrer PASS. 단독 HTTP 환경에는 내부 API 토큰이 없어 인증 사용자 E2E 불가.
+- 첫 전체 게이트: Lint/Typecheck/Build PASS, Frontend 2955 PASS/1 FAIL(검증 스크립트 CPU 환경값 문제), Backend 2983 PASS/2 FAIL/518 SKIP(기존 프로필 인증 401), DB 72 PASS/5 SKIP, app-api 184 계약 PASS, Bot 재시험 11 PASS. 전체 보안 감사 취약점 9건, 전체 경로 QA 증빙 누락. 최종 SHA 게이트 재검증 예정.
+- 공식 Test·Production SHA 불일치, 인증 E2E·GitOps 게이트 미완료. Draft PR #2577 보존, main 병합·운영배포 금지. A/B/QA/Gemini 작업과 핵심 예약 유지.

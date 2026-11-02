@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseCurrentHotTimeEvidence } from '@/lib/hot-time-evidence';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -273,6 +274,27 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  // The public live bonus is not a historical feed. An old HTTP 200 or a
+  // backend SQL failure must never become an Android LIVE badge or cached data.
+  const hotTimePath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'economy' && parts[1] === 'hot-time' && parts[2] === 'active';
+  if (hotTimePath) {
+    if (!response.ok) {
+      return gatewayProblem(503, 'Service Unavailable', 'hot_time_source_unavailable',
+        'Current hot-time evidence is unavailable');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !parseCurrentHotTimeEvidence(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'hot_time_source_unverified',
+          'Current hot-time evidence could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'hot_time_source_unverified',
+        'Current hot-time evidence could not be verified');
+    }
+  }
+
   // Bank standing is an owner-only observation; a legacy success-shaped response
   // must not become a verified Android balance or leak extra upstream fields.
   if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
@@ -510,6 +532,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+
+  if (hotTimePath) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex');
+    headers.set('referrer-policy', 'no-referrer');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
