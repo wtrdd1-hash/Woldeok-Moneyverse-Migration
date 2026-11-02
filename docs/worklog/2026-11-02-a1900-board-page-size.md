@@ -10,9 +10,9 @@
 ## Planned / in progress
 - [x] RED tests for Nest validation, PostgreSQL bounded SQL, web and Android provenance.
 - [x] GREEN minimal backend, frontend and gateway implementation.
-- [ ] Recheck main and integration plan; inspect other open PRs and collisions.
-- [ ] Run typecheck, unit, integration, real PostgreSQL read-only, lint, build, security, API/SEO/accessibility and exact-SHA CI.
-- [ ] Record final branch/SHA/PR/CI/Test/Production and rollback evidence. No merge or deploy without full gates.
+- [x] Recheck main and integration plan; inspect other open PRs and collisions.
+- [x] Run local typecheck, unit, HTTP integration, real PostgreSQL read-only, lint, build, security, API/SEO/accessibility; exact-SHA CI remains subject to final GitHub run.
+- [x] Record branch/code SHA/PR/local gates/Test/Production/rollback; final GitHub CI to be appended in PR. No merge or deploy without full gates.
 
 ## In progress — 2026-11-02 19:04 KST
 - RED: backend 3 failures, frontend 7 failures before implementation; exact files and logs preserved in task evidence.
@@ -21,5 +21,9 @@
 - Public SSR and Android reject unverified success, including empty results. Explicit result pages are no-store/noindex.
 - No migration, ledger write, direct table grant, release action, or shared checkout edit.
 
-## Finished
-- Pending full gates and exact-SHA Test.
+## Finished — 2026-11-02 19:16 KST (release HOLD)
+- Code/contract SHA `b4ab109bf78b0702ec553c96406f0ba326a6f3d4`; Draft PR #2517. Files: Nest controller/service/tests, Next board SSR/size verifier/tests, Android gateway/tests, generated EN/KO mobile API contract, QA/release/worklog EN/KO. No migration or production changes.
+- Full backend 2,989 PASS / 2 profile-auth FAIL / 518 SKIP; frontend initial 499 FAIL because host NODE_ENV=production, root-cause correction NODE_ENV=test yields 2,933 PASS. Database 62 PASS/5 SKIP, contract 41 PASS, policy 34 PASS, typecheck/lint/build PASS, API contract regenerated and PASS, production dependency audit PASS, full audit 9 vulnerabilities FAIL.
+- DEV PostgreSQL READ ONLY role SQL PASS (1 actual post; synthetic filtered 2), DEV direct DELETE/UPDATE P0 still open. Official Test and Production identity six SHA mismatches vs 6fe94aee... and public Treasury 200 vs required 503. Official authenticated Test E2E and independent restore BLOCKED. No main merge or release.
+- Remote branch audit 265 heads (including main), open PR 244 (181 mergeability UNKNOWN), five overlapping A PR virtual merge conflicts. No branch deletion, all unmerged unique work retained. Shared checkout unchanged.
+- Rollback plan: omit optional `limit`; no runtime or database rollback performed. GitHub PR and evidence are the handoff for subsequent repair/QA.
