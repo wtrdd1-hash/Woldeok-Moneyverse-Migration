@@ -502,8 +502,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const ownerAlertRead = request.method === 'GET' && parts[0] === 'stocks' && parts[1] === 'alerts' &&
     (parts.length === 2 || (parts.length === 3 && parts[2] === 'events'));
   // A 204/304 is not a verified empty list; do not permit a cached private response.
-  if (ownerAlertRead && response.ok && (response.status === 204 || response.status === 304 ||
-      !isJsonMediaType(response.headers.get('content-type')))) {
+  if (ownerAlertRead && ((response.status >= 200 && response.status < 400 && response.status !== 200) ||
+      (response.ok && !isJsonMediaType(response.headers.get('content-type'))))) {
     return gatewayProblem(503, 'Service Unavailable', 'stock_alert_source_unverified', 'owner alert source is unavailable');
   }
 

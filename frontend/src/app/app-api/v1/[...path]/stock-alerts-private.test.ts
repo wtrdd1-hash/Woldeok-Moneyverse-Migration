@@ -43,6 +43,8 @@ describe('Android conditional alerts source privacy', () => {
       new Response('{bad', { headers: { 'content-type': 'application/json' } }),
       new Response('ok', { headers: { 'content-type': 'text/plain' } }),
       new Response(null, { status: 204 }),
+      new Response(null, { status: 304 }),
+      new Response(JSON.stringify({ alerts: [] }), { status: 206, headers: { 'content-type': 'application/json' } }),
     ]) {
       vi.stubGlobal('fetch', vi.fn(async () => upstream.clone()));
       const res = await GET(req(''), ctx('stocks', 'alerts'));
