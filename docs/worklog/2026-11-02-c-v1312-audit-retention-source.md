@@ -12,7 +12,11 @@
 - TDD RED: 1 failed / 6 passed on contradictory expired range; GREEN: 10/10 focused parser + admin page tests.
 - Found and fixed test mock setup error (undefined URL), then reran 10/10 PASS.
 - Existing Nest admin audit API and SQL migration 065 are authoritative: SQL computes expired count and MIN/MAX from the same predicate; joins latest disposition method/time as a pair. New parser refuses inconsistent fields and future disposition evidence. No API/DB schema change.
-- Mid-run origin/main re-fetch pending final gates; branch remains isolated. Full release gates pending.
+- Real isolated Next.js HTTP probe exposed a second P1: `/admin/logs/integrity` and `/en/admin/logs/integrity` returned `X-Robots-Tag: index, follow` despite page metadata `noindex`. Root cause: global Next.js HTTP header in next.config overrides page metadata; added route-specific override for canonical and five localized paths, plus private no-store and no-referrer.
+- Edge TDD RED 1 failed/8 passed, GREEN combined 19/19 parser/page/security-header tests. Existing responsive table and accessible retry preserved.
+- First exact SHA e301cba6eb: lint/typecheck/build/frontend full suite PASS; backend and other gates running. New edge change requires a fresh final SHA gate cycle.
+- Isolated PostgreSQL 17.11, 323/323 migrations applied; app role `audit_logs` direct SELECT=false, `admin_audit_retention_overview(uuid)` EXECUTE=true. No persistent DB touched.
+- Mid-run origin/main advanced from b1f858c to 9cade11 (blog docs only, no source overlap). Rebase and final exact-SHA revalidation pending.
 
 ## Finished
 - Pending.

@@ -12,5 +12,6 @@
 - [x] Run focused tests and capture RED.
 - [x] Implement minimal parser consistency checks, keep valid empty and populated evidence.
 - [x] Run focused tests GREEN and page regression.
+- [x] Reproduce real HTTP SEO regression, add failing edge test and fix exact route-specific headers.
 - [ ] Run exact-SHA gates, record failures; re-fetch origin/main before PR and release decisions.
 - [ ] Commit implementation and EN/KO worklog, push Draft PR; hold merge/deploy unless every release gate passes.

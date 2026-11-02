@@ -106,6 +106,19 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('keeps audit integrity evidence private at the actual edge in every supported locale', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    for (const prefix of ['', '/ko', '/en', '/ja', '/zh', '/vi']) {
+      const group = groups.find((entry) => entry.source === `${prefix}/admin/logs/integrity`);
+      expect(group, `missing private headers for ${prefix || '/'} audit route`).toBeDefined();
+      const headers = new Map(group!.headers.map((header) => [header.key, header.value]));
+      expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(headers.get('cache-control')).toContain('private, no-store');
+      expect(headers.get('referrer-policy')).toBe('no-referrer');
+    }
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
