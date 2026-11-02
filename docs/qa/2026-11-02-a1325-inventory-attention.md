@@ -16,6 +16,6 @@
 - Official Test exact candidate SHA, independent off-host restore, release provenance, finance integrity, P0 DB ACL and GitOps gates remain BLOCKED; do not merge or deploy without complete evidence.
 
 ## Branch and rollback safeguards
-- Start: 206 open PRs, 29 conflicting; full remote fetch: 228 refs including main, 214 not merged, 14 merged (counts as inspected; branches not deleted). Virtual merges with existing PR #2239/#2229/#2386/#2419 reported no file conflicts; they are not approval or substitute for functional integration. Preserve all contributor work.
+- Start: 206 open PRs, 29 conflicting; full remote fetch: 228 refs including main, 214 not merged, 14 merged (counts as inspected; branches not deleted). Final virtual merge **conflicts** with #2239 and #2229 (shared holdings controller/tests); #2386 and #2419 show no file conflict. No actual merge or override of unique work. Preserve all contributor work.
 - No main merge, Test/Production deployment, service restart, production DB mutation, applied migration edit, rollback or branch deletion. Rollback after a future authorized release: set `INVENTORY_ATTENTION_FILTER_ENABLED=0` and rebuild or revert the PR, without touching balances/items.
 - Logs: `/srv/moneyverse-data/tasks/mv-a-20261102-1325-inventory-attention/evidence/`.

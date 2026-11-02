@@ -525,6 +525,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopHoldings || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
   if (privateShopHoldings) headers.set('referrer-policy', 'no-referrer');
+  // A filtered 206/204/304 cannot prove that the entire owner result was verified.
+  if (inventoryAttentionRequested && response.status !== 200 && (response.ok || response.status === 304)) {
+    return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'partial or empty owner response is not verifiable');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });

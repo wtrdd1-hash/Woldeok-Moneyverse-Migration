@@ -32,6 +32,14 @@ describe('Android owner holdings attention filter', () => {
     expect(response.status).toBe(400);
     expect(upstream).not.toHaveBeenCalled();
   });
+  it.each([204, 206, 304])('rejects bodyless or partial upstream status %s', async (status) => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(status === 206 ? JSON.stringify({ filter: 'attention', holdings: [due] }) : null,
+      { status, headers: { 'content-type': 'application/json' } })));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/shop/holdings?filter=attention'), path);
+    expect(response.status).toBe(503);
+  });
   it('does not claim HEAD has verified attention results', async () => {
     setup({ filter: 'attention', holdings: [] });
     const response = await HEAD(new NextRequest('https://easy-scraping.com/app-api/v1/shop/holdings?filter=attention', { method: 'HEAD' }), path);
