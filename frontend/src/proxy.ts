@@ -220,6 +220,15 @@ export function proxy(request: NextRequest) {
   }
 
   response.headers.set('x-moneyverse-locale', finalLocale);
+  // The admin delivery log contains privileged event metadata. A page-level
+  // robots meta tag cannot override the global public X-Robots-Tag header.
+  // Protect the actual HTTP edge, including localized rewrites and failures.
+  if (targetPath === '/admin/logs/delivery') {
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+
 
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');

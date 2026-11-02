@@ -24,3 +24,9 @@
 ### Build failure and correction — 2026-11-02 10:52 KST
 - Initial SHA `a6cd0f939cee12c1c38b7b8213695da0462e189b`: full lint/typecheck passed and frontend unit suite 2934 PASS, but Next.js production build failed: optional *page props object* was inferred as `undefined | PageProps`. This is a real failure, not a pass.
 - Correction: make the Next page props object mandatory (while allowing `searchParams` to be omitted) and adapt SSR tests. All required gates must be rerun on the corrected final SHA.
+
+### HTTP privacy discovery — 2026-11-02 10:59 KST
+- A standalone Next.js HTTP probe of `/admin/logs/delivery?status=outstanding&event=wallet.deposit` returned `X-Robots-Tag: index, follow` despite the page's `noindex` HTML meta tag. Its body had an INTERNAL_API_TOKEN configuration error, so this is **not** a successful authenticated user E2E or evidence of a Production disclosure.
+- New RED test confirmed missing actual-edge privacy headers on the base and `/en`/`/ko` localized aliases (3 failures). Narrow proxy fix sets `noindex, nofollow`, `private, no-store`, and `no-referrer` only for the admin delivery page, preserving public routes. GREEN: 21/21 focused tests.
+- This route-scoped change does not replace the broader unmerged private-header PR #2225. It is needed for this page to avoid relying on HTML metadata alone.
+- A fresh disposable PostgreSQL attempt initially failed due to the container SQL wrapper using host file paths, then a migrator-role ownership mismatch and unsafe test-only worker group membership. Test harness is being corrected without modifying repository migrations or shared databases.
