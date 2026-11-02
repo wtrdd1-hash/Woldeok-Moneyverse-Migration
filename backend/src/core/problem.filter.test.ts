@@ -11,7 +11,7 @@ function hostFor(): {
 } {
   const json = vi.fn();
   const type = vi.fn();
-  const response = { status: vi.fn(), type, json };
+  const response = { status: vi.fn(), type, json, setHeader: vi.fn() };
   response.status.mockReturnValue(response);
   type.mockReturnValue(response);
   const host = {
@@ -119,6 +119,39 @@ describe('ProblemFilter', () => {
         code: 'reauthentication_required',
       }),
     );
+  });
+
+  it.each([401, 403])('marks %i problem responses private and non-indexable', (statusCode) => {
+    const headers = new Map<string, string>();
+    const setHeader = vi.fn((name: string, value: string) => { headers.set(name.toLowerCase(), value); });
+    const response = {
+      status: vi.fn(), type: vi.fn(), json: vi.fn(), setHeader,
+    };
+    response.status.mockReturnValue(response);
+    response.type.mockReturnValue(response);
+    const host = {
+      switchToHttp: () => ({ getResponse: () => response }),
+    } as unknown as ArgumentsHost;
+    // Simulate a less restrictive earlier middleware or upstream policy.
+    headers.set('cache-control', 'public, max-age=600');
+    headers.set('x-robots-tag', 'index, follow');
+    new ProblemFilter(true).catch(new HttpException('access denied', statusCode), host);
+    expect(headers.get('cache-control')).toBe('private, no-store');
+    expect(headers.get('x-robots-tag')).toBe('noindex');
+    expect(headers.get('referrer-policy')).toBe('no-referrer');
+    expect(response.status).toHaveBeenCalledWith(statusCode);
+  });
+
+  it('preserves public 404 caching policy without applying private-auth headers', () => {
+    const setHeader = vi.fn();
+    const response = { status: vi.fn(), type: vi.fn(), json: vi.fn(), setHeader };
+    response.status.mockReturnValue(response);
+    response.type.mockReturnValue(response);
+    const host = {
+      switchToHttp: () => ({ getResponse: () => response }),
+    } as unknown as ArgumentsHost;
+    new ProblemFilter(true).catch(new NotFoundException(), host);
+    expect(setHeader).not.toHaveBeenCalled();
   });
 
   it('ignores a code that is not a string', () => {
