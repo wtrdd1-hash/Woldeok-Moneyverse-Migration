@@ -5,6 +5,16 @@ import { currentViewer, isAdministrator } from '@/lib/viewer';
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request: Request) {
+  // This BFF obtains a backend CSRF token on behalf of the browser. Reject
+  // cross-origin requests *before* using the privileged server-side session.
+  const origin = request.headers.get('origin');
+  const site = request.headers.get('sec-fetch-site');
+  if (!origin || origin !== new URL(request.url).origin || (site && site !== 'same-origin')) {
+    return NextResponse.json(
+      { error: 'CROSS_ORIGIN_FORBIDDEN' },
+      { status: 403, headers: { 'Cache-Control': 'private, no-store' } },
+    );
+  }
   try {
     const viewer = await currentViewer();
     if (!isAdministrator(viewer)) {
