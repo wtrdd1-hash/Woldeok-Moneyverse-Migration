@@ -9,5 +9,6 @@ describe('public board text-only discovery UI', () => {
     expect(page).toContain('query.set(\'media\', \'text\')');
     expect(page).toContain('robots: { index: !hasSearch');
     expect(page).toContain('verifiedTextOnlyBoardResponse');
+    expect(page).toContain("media.media === 'text' || search.query ? 0 : 60");
   });
 });

@@ -77,7 +77,7 @@ export default async function BoardPage({
   const suffix = query.size ? `?${query.toString()}` : '';
   const source = invalidSearch
     ? null
-    : await publicApi<{ posts: PostSummary[]; filterApplied?: string }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; filterApplied?: string }>(`/api/v1/board/public/stock-posts${suffix}`, media.media === 'text' || search.query ? 0 : 60);
   const data = media.media === 'text' && source && !verifiedTextOnlyBoardResponse(source) ? null : source;
 
   const boardBreadcrumb = breadcrumbJsonLd([

@@ -116,7 +116,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'board_media_invalid', 'media must be text when provided');
   }
   if (mediaValues.length === 1 && request.method === 'HEAD') {
-    return gatewayProblem(405, 'Method Not Allowed', 'board_media_head_unverified', 'filtered result proof requires GET');
+    const problem = gatewayProblem(405, 'Method Not Allowed', 'board_media_head_unverified', 'filtered result proof requires GET');
+    return new NextResponse(null, { status: 405, headers: problem.headers });
   }
   const boardTextOnly = boardTextOnlyPath && mediaValues.length === 1 && request.method === 'GET';
 
@@ -284,6 +285,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  if (boardTextOnly && response.status >= 300 && response.status < 400) {
+    return gatewayProblem(503, 'Service Unavailable', 'board_media_unverified',
+      'redirected or conditional public board results cannot be verified');
+  }
   if (boardTextOnly && response.ok) {
     try {
       if (!isJsonMediaType(response.headers.get('content-type')) ||

@@ -41,6 +41,17 @@ describe('Android text-only public board search', () => {
     const response = await GET(request('text'), { params: Promise.resolve({ path }) });
     expect(response.status).toBe(503);
   });
+
+  it.each([302, 304])('rejects bodyless or redirected upstream %i instead of claiming verified text-only results', async (status) => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, {
+      status, headers: { location: '/board', etag: 'stale' },
+    })));
+    const response = await GET(request('text'), { params: Promise.resolve({ path }) });
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
   it('rejects unsupported media without contacting upstream', async () => {
     const fetchMock = upstream({ posts: [], filterApplied: 'text' });
     const response = await GET(request('images'), { params: Promise.resolve({ path }) });
@@ -51,6 +62,7 @@ describe('Android text-only public board search', () => {
     const fetchMock = upstream({ posts: [], filterApplied: 'text' });
     const response = await HEAD(request('text', 'HEAD'), { params: Promise.resolve({ path }) });
     expect(response.status).toBe(405);
+    expect(await response.text()).toBe('');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
