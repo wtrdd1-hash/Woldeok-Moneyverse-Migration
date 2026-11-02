@@ -22,3 +22,16 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+describe('public board image-description query HTTP validation', () => {
+  it('forwards the image alt query with optional title and stock', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'news', alt: '  sunset  ' })).resolves.toEqual({ posts: [], appliedImageAltQuery: 'sunset' });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', '  sunset  ');
+  });
+  it.each([{ alt: ['a', 'b'] }, { alt: '' }, { alt: '<script>' }, { alt: 'x'.repeat(81) }, { alt: 'sun', unexpected: '1' }])(
+    'rejects invalid image description query %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

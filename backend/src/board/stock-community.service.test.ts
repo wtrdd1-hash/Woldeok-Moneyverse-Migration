@@ -52,3 +52,21 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('StockCommunityService public image-description search', () => {
+  it('uses a literal case-insensitive image alt-text filter inside the existing recent 50 SECDEF rows', async () => {
+    const database = pool();
+    const service = new StockCommunityService(database);
+    await expect(service.publicList('WDX', 'news', '  제주 %_  ')).resolves.toEqual([]);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('strpos(lower(image_alt_text), lower($4::text)) > 0');
+    expect(String(sql)).toContain('image_storage_key IS NOT NULL');
+    expect(values).toEqual([50, 'WDX', 'news', '제주 %_']);
+  });
+  it.each(['', ' ', '<script>', 'a\nb', 'x'.repeat(81)])('rejects invalid image alt query %j', async (value) => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, value)).rejects.toThrow('invalid image description search');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});

@@ -11,3 +11,7 @@
 
 ## FINISHED
 - Pending final gates; default RELEASE HOLD.
+
+### MID 01:07 KST — TDD RED
+- RED Backend target 7 FAIL / 20 PASS (new image-description controller/service cases); Frontend target 2 FAIL (missing parser and unverified Android success accepted). Evidence stored in miniPC task evidence directory.
+- Re-fetched main before implementation. Existing B/C and finance changes untouched. No migration, new table privilege or deployment.
