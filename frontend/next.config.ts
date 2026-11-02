@@ -192,6 +192,15 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Guest takedown case IDs and status credentials must never be indexed or cached.
+      ...['/safety/takedown', '/:locale(ko|en|ja|zh|vi)/safety/takedown'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

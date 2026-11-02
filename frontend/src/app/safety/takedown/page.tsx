@@ -8,6 +8,8 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { IDLE } from '@/lib/action-state';
+import { lookupEmergencyTakedown, type TakedownLookupState } from './status-actions';
+import { takedownStatusLabels } from './takedown-status';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { submitEmergencyTakedown } from './actions';
@@ -15,6 +17,7 @@ import { submitEmergencyTakedown } from './actions';
 export default function EmergencyTakedownPage() {
   const { locale } = useLocale();
   const [state, formAction] = useActionState(submitEmergencyTakedown, IDLE);
+  const [lookup, lookupAction] = useActionState(lookupEmergencyTakedown, { status: 'idle' } as TakedownLookupState);
 
   return (
     <div data-page="safety-takedown" className="mv-page grid gap-6 py-6 max-w-2xl mx-auto px-4">
@@ -39,7 +42,7 @@ export default function EmergencyTakedownPage() {
             <CardTitle className="text-base font-semibold">신청서 작성</CardTitle>
           </div>
           <CardDescription className="text-xs text-muted-foreground mt-1">
-            접수 즉시 관리자 모더레이션 큐에 최우선 등록되며, 24시간 내 심사 및 격리 삭제 조치가 진행됩니다.
+            접수 후 관리자 검토 대기열로 전달됩니다. 실제 조치 여부와 처리 상태는 아래에서 조회할 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -162,7 +165,7 @@ export default function EmergencyTakedownPage() {
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs focus:ring-1 focus:ring-ring"
               />
               <span className="text-[11px] text-muted-foreground mt-1 block">
-                추후 로그인 없이 접수 상태 및 조치 결과를 열람할 때 사용됩니다.
+                추후 로그인 없이 접수 상태 및 조치 결과를 열람할 때 사용됩니다. <a href="#takedown-status" className="underline underline-offset-2">접수 상태 조회로 이동</a>
               </span>
             </div>
 
@@ -172,6 +175,39 @@ export default function EmergencyTakedownPage() {
               </SubmitButton>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card id="takedown-status" className="border shadow-sm scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">접수 상태 조회</CardTitle>
+          <CardDescription>로그인 없이 접수 번호와 접수 당시 설정한 비밀번호로 실제 처리 상태를 확인합니다. 비밀번호는 URL에 포함되지 않습니다.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form action={lookupAction} autoComplete="off" className="grid gap-4">
+            <div>
+              <label htmlFor="lookupCaseId" className="mb-1 block text-sm font-medium">접수 번호</label>
+              <input id="lookupCaseId" name="caseId" required minLength={5} maxLength={32} autoComplete="off"
+                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm" />
+            </div>
+            <div>
+              <label htmlFor="lookupPasscode" className="mb-1 block text-sm font-medium">조회 비밀번호</label>
+              <input id="lookupPasscode" name="passcode" type="password" required minLength={6} maxLength={64} autoComplete="off"
+                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm" />
+            </div>
+            <SubmitButton className="w-full sm:w-fit">처리 상태 확인</SubmitButton>
+          </form>
+          {lookup.status === 'error' ? <p role="alert" className="text-sm text-destructive">{lookup.message}</p> : null}
+          {lookup.status === 'ok' && lookup.receipt ? (
+            <section role="status" aria-live="polite" className="min-w-0 space-y-2 rounded-lg border p-4 text-sm">
+              <h3 className="font-semibold">확인된 접수 상태</h3>
+              <p className="break-all">접수 번호: {lookup.receipt.caseId}</p>
+              <p>처리 상태: <strong>{takedownStatusLabels[lookup.receipt.status]}</strong></p>
+              <p>접수 시각 (UTC): <time dateTime={lookup.receipt.createdAt}>{lookup.receipt.createdAt}</time></p>
+              {lookup.receipt.actionedAt ? <p>조치 시각 (UTC): <time dateTime={lookup.receipt.actionedAt}>{lookup.receipt.actionedAt}</time></p> : null}
+              <p className="text-xs text-muted-foreground">서버에 기록된 마지막 상태이며, 완료되지 않은 조치를 완료로 표시하지 않습니다.</p>
+            </section>
+          ) : null}
         </CardContent>
       </Card>
     </div>
