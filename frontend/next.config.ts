@@ -190,8 +190,20 @@ const config: NextConfig = {
       });
     }
 
+    // Next's global SEO header overrides Route Handler response headers at the
+    // actual HTTP edge. Admin IndexNow preview/confirmation must stay private
+    // even when the public website opts into search indexing.
+    const privateSeoAuditHeaders = [
+      { key: 'x-robots-tag', value: 'noindex, nofollow' },
+      { key: 'cache-control', value: 'private, no-store' },
+      { key: 'referrer-policy', value: 'no-referrer' },
+    ];
+
     return [
       { source: '/:path*', headers: security },
+      { source: '/admin/seo-audit', headers: privateSeoAuditHeaders },
+      { source: '/:locale(en|ja|zh|ko)/admin/seo-audit', headers: privateSeoAuditHeaders },
+      { source: '/api/admin/seo-audit', headers: privateSeoAuditHeaders },
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
