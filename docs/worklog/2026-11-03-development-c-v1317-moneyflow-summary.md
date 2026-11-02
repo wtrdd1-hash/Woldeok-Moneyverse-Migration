@@ -13,3 +13,8 @@
 - Preserved original semantics: Nest's `SUM(post.amount)` equals debit+credit subtotals; counts from the same PostgreSQL owner posting set. No new API, DB migration, grants, financial write or synthetic data. Existing Next admin session guard retained.
 - Mobile: horizontally scrollable admin ledger region now keyboard focusable with accessible label. Admin pages retain responsive layout. SEO: private/noindex/no-referrer on six routes.
 - Midpoint `origin/main` fetched and unchanged at `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`. Final gates pending.
+
+## MID-2 — 2026-11-03 03:18 KST
+- Isolated network-disabled PostgreSQL 17.11 applied all 328 numbered SQL steps. `moneyverse_app` can SELECT ledger_transactions, ledger_postings and accounts but **cannot SELECT member_profiles**; the actual Nest money-flow query fails `42501 permission denied for table member_profiles`. This is a pre-existing P0 source availability blocker; never claim the API works or release this branch.
+- Added targeted Nest HTTP boundary: map PostgreSQL `42501` to sanitized 503 `ADMIN_MONEY_FLOW_SOURCE_UNAVAILABLE` (without altering 400 validation) and private/noindex endpoint headers. TDD RED 1; GREEN 28/28 backend money-flow focused tests. A proper operator-scoped `SECURITY DEFINER` read function, not direct table grants, is required in a separate coordinated DB migration.
+- The database container was removed. No shared DEV/Production DB or balances changed. All final gates and official Test remain pending.

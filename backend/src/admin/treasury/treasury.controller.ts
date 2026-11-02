@@ -262,6 +262,8 @@ export class AdminTreasuryController {
   }
 
   @Get('user-money-flows')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
   @ApiOperation({ summary: '전체 유저 자금 흐름(입출금/주식/상점/복식부기 원장) 실시간 조회' })
   async getUserMoneyFlows(
     @Query('limit') limit?: number,
@@ -270,7 +272,16 @@ export class AdminTreasuryController {
     @Query('type') type?: string,
     @Query('direction') direction?: string,
   ) {
-    return this.service.getUserMoneyFlows(limit, cursor, search, type, direction);
+    try {
+      return await this.service.getUserMoneyFlows(limit, cursor, search, type, direction);
+    } catch (error: unknown) {
+      // Revoked profile-table reads are a source outage, never an empty ledger
+      // or an SQL detail to expose in an administrator HTTP response.
+      if (error !== null && typeof error === 'object' && 'code' in error && error.code === '42501') {
+        throw new ServiceUnavailableException('ADMIN_MONEY_FLOW_SOURCE_UNAVAILABLE');
+      }
+      throw error;
+    }
   }
 
   @Post('inject')
