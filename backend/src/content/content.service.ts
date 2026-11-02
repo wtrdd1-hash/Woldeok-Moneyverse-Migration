@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { announcementRecencyWindow, type AnnouncementRecency } from './announcement-recency';
 import type {
   ContentAnnouncementReceiptRow,
   ContentAnnouncementRow,
@@ -93,7 +94,7 @@ function normalizeAnnouncement(row: ContentAnnouncementRow): ContentAnnouncement
         ? null
         : databasePlainText(row.image_alt_text, 'announcement image alt text', 300),
     isPinned: Boolean(row?.is_pinned),
-    publishedAt: timestamp(row?.published_at, 'announcement published timestamp'),
+    publishedAt: timestamp(row?.published_at, 'announcement published timestamp', { nullable: true }),
   };
 }
 
@@ -322,13 +323,21 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({
+    limit = 20,
+    recent = null,
+    asOf = new Date(),
+  }: { limit?: number; recent?: AnnouncementRecency | null; asOf?: Date } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
+    const published = (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
       normalizeAnnouncement,
     );
+    // Filtering occurs after the DB's published-only, bounded latest-20 read.
+    return recent
+      ? published.filter((notice) => announcementRecencyWindow(recent, notice.publishedAt, asOf))
+      : published;
   }
 
   async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {

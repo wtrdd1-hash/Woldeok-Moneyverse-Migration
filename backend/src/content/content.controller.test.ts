@@ -43,3 +43,16 @@ describe('administrator publication security boundary', () => {
     });
   }
 });
+
+describe('public announcement recency controller parity', () => {
+  it('rejects unsupported or duplicated query filters before reaching storage', async () => {
+    const publicAnnouncements = vi.fn().mockResolvedValue([]);
+    const controller = new ContentController({publicAnnouncements} as never);
+    await expect(controller.announcements(['7d', '30d'])).rejects.toThrow();
+    await expect(controller.announcements('7D')).rejects.toThrow();
+    expect(publicAnnouncements).not.toHaveBeenCalled();
+    const result = await controller.announcements('7d');
+    expect(result).toMatchObject({recentApplied: '7d', scope: 'latest-20-published', announcements: []});
+    expect(publicAnnouncements).toHaveBeenCalledWith({recent: '7d', asOf: expect.any(Date)});
+  });
+});
