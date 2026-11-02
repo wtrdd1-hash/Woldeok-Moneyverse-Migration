@@ -17,5 +17,14 @@
 - Need full gates, isolated DB, HTTP and CI; release remains blocked.
 
 
-## FINISH
-Pending.
+## FINISH — 2026-11-03 07:04 KST — PARTIAL / RELEASE BLOCKED
+- Version sequence: v1323.0 start checkpoint `0179578af1`; v1323.1 implementation `d35c6feb6a`; v1323.2 final evidence/test commit (SHA from git after commit). Branch and PR #2584 remain independent and DRAFT.
+- Implementation source: Next `/chat` GET no longer invokes a write. New member-initiated form calls existing server-side authenticated, CSRF-protected chat open POST; verified room ID drives navigation. Existing room and error behavior preserved. Responsive 44px+ control and screen-reader error, localized copy. Browser composer B #2389 untouched.
+- TDD: unexpected GET write reproduced RED. Focused 19 PASS after fix; one extra invalid-receipt test added.
+- Full implementation-SHA gates `d35c6feb6a00dad7804368930488928a720b2903`: lint PASS (0 errors, 1,027 warnings); typecheck PASS; build PASS; frontend 2,952 PASS; backend 2,985 PASS / 518 SKIP; contract 41 PASS; database package 72 PASS / 5 SKIP; app-api 184 endpoints PASS.
+- Isolated PostgreSQL 17.11 (new disposable container): core init + 327 numbered migrations 002–328 PASS; explicit open/read/ACL and chat abuse report DB tests 6 PASS after fixing test isolation (concurrent unrelated test created another room). Container removed. No shared DB or financial write.
+- Isolated HTTP with synthetic 401 authentication backend: `/chat`, `/ko/chat`, `/en/chat`, `/ja/chat`, `/zh/chat`, `/vi/chat` all 307 to login and all have private/no-store, noindex/nofollow, no-referrer. First unconfigured server produced 500 because INTERNAL_API_TOKEN was absent; corrected test fixture, not application code. Public Test/Production still report older SHAs; Production /ko returns 500.
+- Global dependency audit FAIL: 9 vulnerabilities (8 moderate, 1 low). Full-route QA FAIL: `artifacts/qa/full-route-ledger.json` missing. Required remote CI incomplete; official authenticated browser/Android E2E, official Test exact SHA, independent restore and GitOps release proof BLOCKED.
+- Final exact-SHA gates will be rerun after this final commit; evidence and CI outcomes will be posted on PR #2584 without a further code commit. No main merge, Test deployment, Production promotion or GitOps changes. Rollback not needed. No other agent branches/worktrees deleted.
+- Local evidence: `/srv/moneyverse-data/tasks/mv-c-v1323-chat-peer-consent-20261103-0645/evidence/`; remote Draft PR #2584. The root checkout's other agent changes were not touched.
+

@@ -30,6 +30,14 @@ describe('explicit peer conversation start', () => {
     await waitFor(() => expect(replace).toHaveBeenCalledWith(`/chat?conversationId=${room}`));
   });
 
+  it('shows a verification warning instead of navigating on an invalid success receipt', async () => {
+    openConversationAction.mockResolvedValue({ status: 'ok', conversationId: 'not-a-uuid' });
+    const { container } = render(<PeerConversationStart peerUserId={peer} locale="en" />);
+    await act(async () => { fireEvent.submit(container.querySelector('form')!); });
+    expect(screen.getByRole('alert').textContent).toContain('confirmation is unavailable');
+    expect(replace).not.toHaveBeenCalled();
+  });
+
   it('does not navigate on rejected or malformed server receipts', async () => {
     openConversationAction.mockResolvedValue({ status: 'error', message: 'No permission' });
     const { container } = render(<PeerConversationStart peerUserId={peer} locale="en" />);
