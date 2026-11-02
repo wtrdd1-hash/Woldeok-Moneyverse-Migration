@@ -9,7 +9,7 @@
 ## Implementation checklist
 - [x] RED: actual Nest HTTP guard regression and Next BFF regression tests.
 - [x] GREEN: add guards and forward server session CSRF token; fail closed on false update.
-- [ ] Run focused and workspace checks, inspect CI and Test SHA.
+- [ ] Run focused and workspace checks, inspect CI and Test SHA (bond 75 PASS, typecheck PASS; rest pending).
 - [ ] Re-fetch main and plans, record HOLD blockers and PR.
 
 ## In progress
@@ -23,3 +23,8 @@
 - GREEN: Nest 9/9 PASS; Next 4/4 PASS.
 - Added `CsrfGuard` to admin coupon payout/status and `ConsentGuard,CsrfGuard` to owner rollover. Next BFF obtains server-session CSRF, validates UUID/boolean, rejects unconfirmed/mismatched update, and sends private no-store/noindex/no-referrer headers.
 - No SQL/migration/ledger/balance changes. Original `origin/main` remains unchanged at midpoint.
+
+### Regression checkpoint (10:44 KST)
+- Focused bond suite initially failed at Nest test fixture injection: adding CsrfGuard to admin methods requires the coupon-logs GET-only fixture to override the guard (no session repository provider in that isolated test module). Corrected fixture without weakening production guards.
+- Bond suite rerun: 13 files PASS / 75 tests PASS. Whole workspace typecheck exit 0. Whole workspace lint printed 0 errors/1,026 warnings, but wrapper exit capture timed out; targeted exit verification and remaining gates pending.
+- Root disk briefly 97%; avoid bulk deletion and avoid concurrent memory-heavy builds.
