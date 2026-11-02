@@ -92,12 +92,19 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({
+    name: 'alt',
+    required: false,
+    type: String,
+    description: 'Literal image description match in latest 50 public posts, 1-80 characters',
+  })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'alt')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const alt = query.alt;
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -113,9 +120,27 @@ export class PublicStockCommunityController {
     ) {
       throw new BadRequestException('invalid board search');
     }
+    if (
+      alt !== undefined &&
+      (typeof alt !== 'string' ||
+        !alt.trim() ||
+        alt.trim().length > 80 ||
+        /[<>\u0000-\u001f\u007f]/.test(alt))
+    ) {
+      throw new BadRequestException('invalid image description search');
+    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
+    const posts =
+      alt === undefined
+        ? await this.community.publicList(stock as string | undefined, q as string | undefined)
+        : await this.community.publicList(
+            stock as string | undefined,
+            q as string | undefined,
+            alt as string,
+          );
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts,
+      ...(typeof alt === 'string' ? { appliedImageAltQuery: alt.trim() } : {}),
     };
   }
 }
