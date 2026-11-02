@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import config from '../next.config';
+
+const ORIGINAL_INDEXING = process.env.SEO_INDEXING_ENABLED;
+afterEach(() => {
+  if (ORIGINAL_INDEXING === undefined) delete process.env.SEO_INDEXING_ENABLED;
+  else process.env.SEO_INDEXING_ENABLED = ORIGINAL_INDEXING;
+});
 
 /** The audited administrator history is never a public indexable or cacheable document. */
 describe('administrator audit root HTTP privacy', () => {
