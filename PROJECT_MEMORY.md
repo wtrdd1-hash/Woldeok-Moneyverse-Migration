@@ -1,5 +1,12 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
+## 2026-11-03 v1626 — 최신 실제 운영 금융 기준선
+- **실제 운영 SHA:** `f5c3fbedae1c3b3ec2374882b049aac43a655eb4` (정식 메인 PR #2545 병합), 운영 `/srv/moneyverse-data/releases/prod-v2026.11.03.1626-f5c3fbedae1c`. 공개 백엔드·프런트엔드·불변 빌드 동시 일치, 운영 `ok:true,failures:[]`; 기존 v1624 서비스 롤백용 가동 유지.
+- **실제 운영 데이터 초기화:** 백업 SHA256 `67aa7851e7cf866a4fa2439c54622d8fc1a2c02430c6745f45b9b7b99fb00559`, 관리자가 SQL325 함수를 명시 실행함. 과거 금융 모형 데이터 1,546행 아카이브와 행별 해시 검증 0 오류, 국고 과거 552·공기업 배당 744 보관 증빙 대사 일치, 현재 활성 미연결 0. 회원 현금계좌 19/원장 거래 891/분개 1,829 건 초기화 전후 동일, 새 Treasury Core 영수증 0.
+- **실제 코드 기능:** SQL328 정식 원장 연결과 회원 국고 자발 기부 UI/API 배포. 격리 DB에서만 1,000 WLD 실분개·멱등 재시도 검증; 운영 회원 자금 테스트 이동 없음. 운영 국고 실제 재원 0 WLD이므로 과거 연금·배당·KDIC 지급과 발권은 **여전히 별도 금전 증빙/충당 필요, 차단 유지**. 로그인 관리자 실제 DOM E2E 미확인.
+- [운영 기록 EN](docs/worklog/2026-11-02-finance-reset-v1626.md) / [KO](docs/worklog/2026-11-02-finance-reset-v1626.ko.md). 아래 이전 시점의 운영 정보보다 우선.
+
+
 - **최종 갱신일:** 2026-10-14 (전사 아키텍처 및 불변 규칙 최신화 쇄신판)
 - **관리 주체:** Woldeok Moneyverse Core Architecture & Operations
 - **문서 상태:** 활성 정본 (Active Single Source of Truth Memory)
