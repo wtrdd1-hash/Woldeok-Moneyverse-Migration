@@ -1,5 +1,48 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1670 F675-223 담당자 배정 무변경 영수증·권한 회수·삭제 정합성 / 이슈 #2536 / 부모 초안 #2537 / 운영 보류.
+**현재 기획:** v1672 F675-224 관리자 전용 관련 문의 연결 / 이슈 #2548 / 초안 #2544 종속 / 운영 보류.
+
+## v2026.11.03.1672 — F675-224 관리자 전용 관련 문의 연결 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Improvement v1670 → 현재 Feature Addition v1672 → 다음 Feature Improvement v1674(잠정). **기준:** 최신 원격 main `9cade11af53db9f27c2b9f0ea9d39005ea8d0387` 시작·중간 확인, AGENTS.md·README.md·영문 정본·본 한국어 대조. 미병합 Draft #2544(F675-223) 위에 쌓인 기획이며 #2537도 선행한다. F675-217~224를 main 구현 기능으로 간주하지 않는다. **개발 인계:** [#2548](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2548). 기획 전용이며 런타임·DB·금융·Test·Production 변경 없음.
+
+### 목적, 확인한 공백, 대상과 범위
+
+실제 마이그레이션 `196-user-admin-support-chat.sql`은 `support_threads`·`support_messages` 및 관리자 목록/답변/상태 함수만 제공하며 문의 간 관계 테이블은 없다. Nest `backend/src/support/support.controller.ts`에도 목록·메시지·답변·상태만 있다. `frontend/src/app/admin/support/admin-support-view.tsx`에는 회원에게 보내는 기본 답변 문구는 있지만 관련 문의 연결 기능은 없다. 개발 PostgreSQL 17.11 읽기 전용 확인: 문의 3건, 메시지 6건, public 테이블 268개, 앱 계정 잔액 직접 UPDATE 허용. 실제 회원 피해 발생을 주장하지 않는다. 내부 메모 F675-143(#1493)은 이미 별도 기획되어 중복하지 않는다.
+
+**목적:** 같은 회원이 반복 제출한 문의를 관리자가 안전하게 연결해 중복 조사를 줄인다. **대상/진입:** 현재 권한을 보유한 관리자 `/admin/support?thread=<UUID>` → 관리자 전용 **관련 문의** 패널. 이는 참고용 연결이지 병합이 아니다. 메시지·첨부파일 복사, 회원/담당자/분류/상태/SLA/우선순위/잔액 변경, 회원 알림, 자동 종료, 다른 회원 문의 자동 추천은 금지한다.
+
+### 화면, CTA, 상태 및 접근성
+
+- 관리자만 관련 문의 카드(제목·상태·생성일·관리자 내부 링크)와 **기존 문의 연결**, **문의 보기**, **연결 해제**(확인 대화상자)를 본다. 후보 선택기는 동일 회원의 최근 최대 20건만 표시하며 현재·이미 연결된 문의는 제외한다. 선택적 제목 접두어 검색은 3~80자이고 **전체 검색이 아닌 최근 일치 항목**임을 표시한다. 클라이언트가 보낸 회원 ID를 신뢰하지 않는다. 최고 관리자도 다른 회원 문의는 연결할 수 없다. 회원 `/support`, 내보내기, 공개 프로필, 알림에는 표시하지 않는다.
+- 상태 `LOADING`, 성공한 조회에 한한 `EMPTY`, `READY`, `SAVING`, `LINKED`, `UNLINKED`, `CONFLICT`(새 키로 재시도), `FORBIDDEN`, `UNAVAILABLE`. 401/403/503을 빈 목록으로 위장하지 않고 실패 시 입력을 보존한다. 과거 요청 재실행은 신규 변경으로 표시하지 않는다.
+- 관리자 웹은 모바일 반응형, 44px 터치 영역, 키보드 모달·초점 복귀·스크린리더 상태 알림 및 WCAG 2.2 AA를 준수한다. 회원 Android app-api는 403/404로 메타데이터를 차단한다. 관리자 Android 화면은 별도 승인 전 범위 밖이다.
+
+### 제안 API 및 권한 (아직 미구현)
+
+- `GET /api/v1/admin/support/threads/:threadId/related`: 활성 연결 0~20건, `{relatedThreadId,subject,status,createdAt,relationRevision}`; 본문·연락처 제외, `Cache-Control: private, no-store` 및 `X-Robots-Tag: noindex, nofollow`, 조회 중 쓰기 없음.
+- `GET /api/v1/admin/support/threads/:threadId/related-candidates?q=<prefix>`: 같은 회원의 다른 최근 문의 최대 20건, 선택적 3~80자 정규화된 접두어, `(last_message_at DESC,id DESC)` 정렬, `{candidates,scope:'RECENT_20'}`. 전체 건수·완전성 주장 금지, 길이 초과 422. 범용 `threads/:id/:slug`와 충돌하지 않는 명시 경로.
+- `POST /api/v1/admin/support/threads/:threadId/related` JSON `{relatedThreadId:UUID,idempotencyKey:UUID}`: 최초 생성 201, 새로운 키로 이미 연결된 건 재확인 200, 동일 요청 재실행은 원래 결과+`replayed:true`(이벤트 추가 없음). 같은 관리자·키로 다른 대상/동작 재사용은 409. 자기 자신 연결 422, 다른 회원 대상 404, 한 문의당 활성 20개 초과 409.
+- `DELETE /api/v1/admin/support/threads/:threadId/related/:relatedThreadId` JSON `{expectedRevision:십진 문자열,idempotencyKey:UUID}`: 최초 해제 200, 오래된 리비전 409, 없는 관계 404. 동일 키 재실행은 과거 결과를 돌려주며 이후 다시 연결된 관계를 변경하지 않는다. DTO는 알 수 없는 필드·잘못된 UUID·범위 초과 리비전을 거부한다.
+- 기존 Nest `SessionGuard`, `AuthenticatedGuard`, `ConsentGuard`, `AdminGuard`, `AdminSessionGuard`, 쓰기 CSRF를 유지한다. SQL 함수도 **독립적으로** 현재 관리자 역할과 두 문의의 동일 소유자를 확인한다. v1670 역할 회수와 공통 잠금 규약 검증 전 기능 ON 금지. 응답 401/403/404/409/422/429/503, 성공·오류 모두 private/no-store, Next 서버 전용 API 중계, 브라우저에 내부 토큰 노출 금지.
+
+### PostgreSQL 제약·인덱스·트랜잭션·멱등성
+
+- 기존 적용 마이그레이션 196 수정 금지. 실제 최신 고유 번호 뒤에 순방향 마이그레이션 추가: `support_related_cases(thread_low_id UUID REFERENCES support_threads(id), thread_high_id UUID REFERENCES support_threads(id), active BOOLEAN, revision BIGINT CHECK(revision>0), created_at,updated_at,removed_at)`; PK `(thread_low_id,thread_high_id)`, `CHECK(thread_low_id<thread_high_id)`, `CHECK(active=(removed_at IS NULL))`. UUID 정렬로 순서가 뒤집힌 중복 관계를 방지한다. 활성 관계의 역방향 조회를 위해 `(thread_high_id,thread_low_id) WHERE active` 인덱스와 필요한 정방향 인덱스를 둔다. 회원 삭제 시 자동으로 개인정보가 모두 삭제된다고 가정하지 않고 FK 삭제 순서를 별도 검증한다.
+- `support_related_case_receipts(actor_id,idempotency_key,operation,canonical_pair,payload_digest,result_revision,result_kind,result_at)`에 `(actor_id,idempotency_key)` PK와 불변 영수증을 둔다. HMAC 기반 다이제스트는 관리자·동작·정규화 쌍·예상 리비전을 결속한다. `CREATED`, `UNCHANGED`, `UNLINKED`, `ALREADY_REMOVED`를 구분하며 가짜 변경 이벤트를 만들지 않는다. `support_related_case_events`에는 본문 없는 추가 전용 감사 메타데이터만 기록한다. 감사 기록 실패 시 전체 트랜잭션을 롤백한다.
+- 동일 트랜잭션에서 역할 회수 경로와 공통 규약으로 현재 역할을 잠그고, 두 문의 행을 UUID 오름차순으로 잠근 뒤 존재·동일 `user_id`·양쪽 활성 연결 20개 제한을 검증한다. 동일 관리자·키 충돌은 영수증 고유 제약과 불변 다이제스트로 직렬화한다. 관계 행 잠금·CAS·감사·영수증을 원자적으로 수행한다. 역순 동시 연결은 관계 하나만 만들고, 제한 경합에서도 20개를 넘지 않아야 한다. `last_message_at`과 회원 메시지·읽음 표식은 변경하지 않는다. HTTP 요청 사이 완전한 스냅샷은 보장하지 않으며 제한된 실시간 목록이라고 표시한다.
+- `admin_support_related_list`, `admin_support_related_candidates`, `admin_support_related_link`, `admin_support_related_unlink`는 고정 `search_path`의 `SECURITY DEFINER`, 명시적 actor·관리자 역할·동일 소유자 확인, PUBLIC EXECUTE 회수, `moneyverse_app`에는 EXECUTE만 부여한다. 앱 테이블 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 부여 금지. 회원 삭제·관리자 역할 회수·감사 보존·법적 보존 예외는 FK와 개인정보 삭제 정책을 승인받아야 하며 실제 물리 삭제를 검증 없이 주장하지 않는다. 영수증·메타데이터 암호화 및 키 관리는 기능 ON 전에 개인정보 검토를 통과해야 한다.
+
+### 보안·악용 방지·SEO·모바일·분석·배포
+
+관리자·관계별 요청 속도 제한, UUID 열거 방지, 접두어·응답 크기 제한, 제목 이스케이프, 회원 식별자/검색어 로그 금지, 외부 분석 전송 금지, sitemap·검색 노출 금지. 회원 대화 내보내기·이메일·Discord·Android app-api에 연결 정보가 포함되면 안 된다. k>=20 익명 집계에서만 관련 문의 활용률, 중복 조사 시간의 간접 지표, 연결/해제 오류율을 보고하며 부족하면 UNKNOWN, 관리자 개인 순위나 인과 효과를 주장하지 않는다. 기능 스위치 `support_related_cases_v1` **기본 OFF**.
+
+**제안 수용시험(미실행):** PostgreSQL17.11 신규/업그레이드 마이그레이션·권한 부정시험, 합성 문의 10,001건, 역순 동시 연결·20개 제한·해제/재연결 뒤 동일 키 재실행·오래된 CAS·역할 회수·회원 삭제·감사 실패 롤백 각 100회, 다른 회원 BOLA와 회원 Android 차단 100회, 알림/메시지/상태/금융 변경 0건, 웹/모바일 WCAG 및 noindex/no-store 검사. 공식 분리 Test에서 정확한 후보 SHA의 인증 E2E, 전체 백업과 독립 복원, GitOps 승인, 카나리 관찰 및 기능 OFF 롤백 후에만 운영 승격 가능. 스키마 롤백은 삭제가 아닌 순방향/스위치 OFF를 원칙으로 한다.
+
+### P0/P1 개발 백로그·QA·외부 근거 게이트
+
+**P0 4건:** `OPS1672-01` 실제 실행 바이너리/이미지/엣지 SHA·외부 독립 복원·롤백 및 루트 디스크 89% 여유 확보(#1170); `SEC1672-02` 운영 앱 TRUNCATE 213/264, UPDATE 195/264, DELETE 194/264, 체크섬 불일치 5건과 Test DB 연결 불일치(#993, #2546); `FIN1672-03` 실제 자금 출처 원장 대조와 별도 승인된 금융 초기화 검증(#2545는 미배포 초안); `REL1672-04` 운영 다국어 16/28 HTTP500, 운영 모드 백엔드 2 FAIL, 라우트 원장 누락, 공식 Test exact-SHA·GitOps 게이트(#2263, #2265). **P1 6건:** `RELCASE1672-05` DB 제약/인덱스/권한, `-06` SQL 잠금·CAS·영수증·감사, `-07` Nest API/가드/라우트 맵, `-08` Next 관리자 UI·모바일 개인정보, `-09` 삭제/보존·SEO·KPI, `-10` 실제 PG 경합·보안·E2E·롤백.
+
+**최신 독립 확인 QA v1475(2026-11-02 23:46 KST): FAILED / P0_PRODUCTION_HOLD.** 운영 다국어 HTTP500 16/28, 앱 TRUNCATE 213/264, 체크섬 5건, 운영 모드 백엔드 2건 실패, 전체 의존성 경고 9건, Test DB 불일치. 소스 단위시험 성공은 배포 승인 근거가 아니다. 출처 `/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1475-internal.md`. **외부 독립 레퍼런스:** 이번 회차 신규 확보·검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 검증되지 않은 달성을 주장하지 않는다. **Production RELEASE HOLD.**
 
 ## v2026.11.02.1670 — F675-223 담당자 배정 무변경 영수증·권한 회수·개인정보 삭제 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
