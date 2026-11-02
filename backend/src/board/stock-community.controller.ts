@@ -93,7 +93,10 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   @ApiQuery({ name: 'sort', required: false, enum: ['recent', 'discussed'], description: 'Order within the latest 50 public posts' })
-  async list(@Query() query: Record<string, unknown>) {
+  async list(@Query() query: Record<string, unknown>): Promise<{
+    posts: Awaited<ReturnType<StockCommunityService['publicList']>>;
+    sortApplied?: 'recent' | 'discussed';
+  }> {
     if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'sort')) {
       throw new BadRequestException('invalid board search');
     }

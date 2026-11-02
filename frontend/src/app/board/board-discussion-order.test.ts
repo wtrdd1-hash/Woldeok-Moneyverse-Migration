@@ -18,3 +18,14 @@ describe('public board most-discussed sort', () => {
     expect(page).toContain("query.set('sort', order.order)");
   });
 });
+
+describe('generated Android board contract parity', () => {
+  it('retains the posts schema and adds optional source-applied sort proof', () => {
+    const contract = JSON.parse(readFileSync('../docs/mobile-api-contract.json', 'utf8')) as {
+      endpoints: { path: string; responseSchema?: { properties?: Record<string, unknown> } }[];
+    };
+    const endpoint = contract.endpoints.find((entry) => entry.path === '/app-api/v1/board/public/stock-posts');
+    expect(endpoint?.responseSchema?.properties).toHaveProperty('posts');
+    expect(endpoint?.responseSchema?.properties).toHaveProperty('sortApplied');
+  });
+});

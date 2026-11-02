@@ -5282,6 +5282,18 @@
                 "title"
               ]
             }
+          },
+          "sortApplied": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "recent"
+              },
+              {
+                "type": "string",
+                "const": "discussed"
+              }
+            ]
           }
         },
         "required": [

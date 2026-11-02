@@ -134,7 +134,7 @@ export class StockCommunityService {
     // The source function bounds the set to the latest 50 before any ranking.
     const order = sort === 'discussed'
       ? "ORDER BY CASE WHEN $4::text = 'discussed' THEN comment_count END DESC NULLS LAST, created_at DESC, post_id DESC"
-      : '';
+      : 'ORDER BY created_at DESC, post_id DESC';
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,

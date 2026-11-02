@@ -57,3 +57,17 @@ describe('Android most-discussed public board parity', () => {
     expect(upstream).not.toHaveBeenCalled();
   });
 });
+
+describe('Android discussion order boundary cases', () => {
+  it('accepts an empty result only when the source explicitly confirms applied order', async () => {
+    const { response } = await request({ posts: [], sortApplied: 'discussed' });
+    expect(response.status).toBe(200);
+  });
+  it('rejects increasing timestamps within equal comment counts', async () => {
+    const { response } = await request({
+      posts: [post(uuid1, 2, '2026-11-01T00:00:00.000Z'), post(uuid2, 2, '2026-11-02T00:00:00.000Z')],
+      sortApplied: 'discussed',
+    });
+    expect(response.status).toBe(503);
+  });
+});

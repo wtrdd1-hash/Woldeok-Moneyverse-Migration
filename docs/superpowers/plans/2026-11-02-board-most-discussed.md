@@ -20,4 +20,4 @@ Review focus: empty results missing proof -> 503; equal counts deterministic tie
 ### Task 3 Android
 - [x] Write failing gateway tests; RED; implement fail-closed proof, no-store/noindex; GREEN.
 ### Task 4 Integration
-- [ ] Fetch main again; full tests/build/lint/typecheck/contract/security/DB; audit branches/PR/CI; official exact-SHA Test if eligible; log HOLD/PASS and rollback; push draft PR.
+- [x] Fetch main again; full tests/build/lint/typecheck/contract/security/DB; audit branches/PR/CI; official exact-SHA Test preflight FAIL; log HOLD/PASS and rollback; push draft PR.
