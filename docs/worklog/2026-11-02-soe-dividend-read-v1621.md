@@ -9,4 +9,4 @@
 - MiniPC health tool reports services active; miniPC remote shell was unavailable to this run. No authenticated live E2E or production fixes certified.
 
 ## MID / END
-Pending code changes and independent Test evidence. Nothing is marked deployed.
+Source-only candidate committed: SQL324 scoped admin history read, backend actor forwarding, and regression fixtures. HTTP guard-double test is not adapted and likely fails; actual tests/official Test/Production unverified. No data or Production deployment occurred. HOLD.
