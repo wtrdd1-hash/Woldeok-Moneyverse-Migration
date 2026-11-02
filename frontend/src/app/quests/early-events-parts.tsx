@@ -112,7 +112,7 @@ export function FirstDayFlow({ steps }: { readonly steps: readonly FirstDayStep[
                     <Progress value={goalPercent(step.step_progress, step.step_target)} />
                   </>
                 )}
-                <Link href={step.step_href} className="text-xs font-extrabold text-clay-ink">
+                <Link href={step.step_href} aria-label={step.step_label + " 바로 가기"} className="inline-flex min-h-11 items-center rounded-md px-2 text-sm font-extrabold text-clay-ink underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                   바로 가기
                 </Link>
               </CardContent>
