@@ -1,3 +1,30 @@
+## v2026.11.02.1646 — F675-217 관리자 답변 알림: 삭제 이후 재시도 정합성과 신규 DB 설치 검증 (기능 보완 / 초안 / 운영 보류)
+
+**사이클:** 이전 기능 추가 v1644 → 현재 기능 보완 v1646 → 다음 기능 추가 v1648(잠정). 시작·중간 main a8541927c3a351d980454c66e95a3356c47e0722 확인. 기술 정본 AGENTS.md, README.md, 영문 PROJECT_PLAN.md 및 국문 동등 문서. 선행 미병합 Draft #2456, 개발 이슈 #2455. F675-217은 **제안 단계/미구현**이며 문서만 변경한다.
+
+### 실제 근거로 확인한 오류: 알림 행의 UNIQUE만으로 영구 영수증이 되지 않음
+- 마이그레이션 196의 admin_support_reply는 support_messages.idempotency_key의 전역 UNIQUE를 사용하고 동일 관리자/문의/본문 재실행 시 기존 메시지를 반환한다. 알림은 생성하지 않으며, 기존 함수는 문의 행을 먼저 잠그지 않고 waiting_user/last_message_at을 갱신한다. Nest SupportRepository.adminReply는 이 SQL 함수를 호출한다. 새로운 설계는 기존 멱등·감사 의미를 유지하고 기능 OFF 또는 과거에 저장된 답변을 새 알림으로 오인하지 않아야 한다.
+- 2026-11-02 11시대 읽기 전용 개발 PostgreSQL 17.11: 문의 스레드 3행, 메시지 6행, 인앱 알림 0행. 알림 dedupe_key는 **행이 존재하는 동안만** 적용되는 부분 UNIQUE 인덱스다. 알림 user_id FK는 users(id) ON DELETE CASCADE, support_messages.thread_id FK는 support_threads(id) ON DELETE CASCADE다. SERVICE_OPERATIONAL 분류 CHECK가 있다. 개발 moneyverse_app은 알림 INSERT/DELETE 및 account_balances UPDATE 직접 권한이 있어 P0 #993이 남는다. Test·Production 실측 증거는 아니다.
+- **핵심 결함:** 보존기간 만료나 개인정보 삭제로 알림 행이 제거되면 dedupe_key UNIQUE도 그 답변을 기억하지 못한다. 같은 요청 재시도에서 알림을 재생성하거나 현재 알림이 남아 있다고 주장하면 안 된다. v1644 제안은 기능 OFF 시 기록된 기존 답변과 ON 시 알림까지 함께 커밋된 답변을 영속적으로 구분하지 못했다.
+- 저장소의 init/번호형 마이그레이션에서는 public.in_app_notifications의 정식 CREATE TABLE을 확인하지 못했다(시험 fixture만 존재). 기존 지갑·참여·PVP 저장소는 해당 테이블에 직접 INSERT한다. 개발 DB에 테이블이 있다는 사실만으로 신규 설치/마이그레이션 재현성이나 최소 권한이 보장되지 않는다. PostgreSQL 17 신규 설치·업그레이드·권한 부정시험 전까지 **P0 BLOCKED**다.
+
+### 트랜잭션·영수증·재실행·삭제 보존 계약 (개발 B/DB)
+1. **새로운 ON 답변만** 단일 PostgreSQL 연결의 SECURITY DEFINER 트랜잭션으로 처리한다. Nest의 인증된 관리자·CSRF·동의·세션 가드와 DB 관리자 역할을 검증하고 기존 멱등키를 확인한 뒤 정확한 support_threads 행을 FOR UPDATE로 잠근다. 잠금 뒤 멱등키 재확인, 단일 DB 관찰시각 채택, support_messages 삽입, waiting_user 상태, 기존 감사 이벤트, 일반 문구의 회원 알림, 최소 support_reply_notice_receipts 영수증을 모두 기록한다. Nest에서 풀 연결을 나눠 가짜 트랜잭션을 만들거나 잠금 중 외부 전송을 하지 않는다. 동시 답변 시 마지막 메시지 시각 역행을 막는다. 알림/영수증/감사 중 하나라도 실패하면 새 답변 전부 롤백하고 503으로 처리한다. OFF는 기존 함수를 유지하고 영수증/소급 알림을 만들지 않는다.
+2. 순방향 신규 영수증 제안(번호는 개발 시 동시 마이그레이션 검토 후 배정): support_reply_notice_receipts(message_id uuid PK REFERENCES support_messages(id) ON DELETE CASCADE, owner_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, request_hash bytea NOT NULL 32바이트 CHECK, notification_id uuid NOT NULL, notice_inserted_at timestamptz NOT NULL). 버전/관리자/문의/정규화 본문/멱등키를 명확한 직렬화로 SHA-256 해시하고 본문·제목·세션·토큰 원문은 저장하지 않는다. notification_id는 **삽입 당시 식별자일 뿐 FK를 두지 않는다**. FK RESTRICT는 알림 보존 삭제를 막고, SET NULL은 생성 영수증의 NOT NULL 조건과 충돌할 수 있기 때문이다. 영수증은 해당 문의 메시지와 회원의 합법적 보존기간 안에서만 남고 개인정보 삭제 시 제거된다. 다만 마이그레이션 196의 support_threads.user_id와 support_messages.sender_user_id FK에는 ON DELETE CASCADE가 없으므로, users 행 삭제만으로 정리된다고 주장하지 않는다. 승인된 삭제·익명화 순서와 부정시험이 선행돼야 한다. 과거 생성 사실은 현재 알림 존재·전달·열람 증거가 아니다.
+3. 같은 관리자/키/문의/본문 재실행은 기존 메시지와 영수증을 검증한다. 영수증이 있고 회원/메시지/해시가 일치하면 과거 생성 사실만 반환하며, 현재 알림 존재는 회원 범위 조회로 별도 확인한다. 이미 삭제된 알림은 HISTORICAL_CREATED_PURGED로 보고 **재삽입하지 않는다**. 영수증 없는 과거/OFF 답변은 NOT_TRACKED_LEGACY_OR_OFF로 보고 **소급 생성하지 않는다**. 다른 본문·관리자·문의·키 충돌 또는 영수증 불일치는 409/503으로 안전하게 거부한다. ON CONFLICT DO NOTHING을 성공 증거로 사용하지 않는다. 동일 키 동시 요청은 메시지·알림·영수증 각각 한 건만 만들고 서로 다른 키는 별도 알림을 만든다. '정확히 한 번'의 범위는 보존 중인 문의 메시지이며 개인정보 삭제 이후 영구 재실행을 보장하지 않는다.
+4. 알림은 서버가 직접 생성한 SERVICE_OPERATIONAL 분류, 일반적인 국·영문 제목/본문, thread.user_id 소유자, support:admin-reply:<message UUID> 중복키, 정확한 /support?thread=<표준 UUID> 내부 링크만 허용한다. 동일 트랜잭션에서 ID·소유자·분류·중복키·링크를 다시 확인하고 불일치 시 전부 롤백한다. 기능 스위치의 ON/OFF 판단은 새 트랜잭션 동안 고정한다. 커밋 후 OFF는 기존 알림을 삭제하지 않고 다시 ON으로 바꿔도 과거 OFF 답변을 재발송하지 않는다. 이메일·푸시·WLD·아이템·환불·금융 아웃박스·원장 쓰기는 없다.
+
+### 화면·API·권한·운영 계약
+- 회원: 로그인한 /account/notifications → 검증된 일반 알림 → '문의 확인' → 회원 소유권 검증 GET /api/v1/support/threads/:id → 최근 100개 밖에서도 정확한 /support?thread=<UUID>. 잘못된/타인/삭제된 ID는 다른 문의로 자동 대체하지 않는다. 로딩, 읽지 않음/읽음, 검증된 빈 목록, 401/403/비열거형 404/409/503/재시도를 구분하고 SSR 조회만으로 읽음 처리하지 않는다. Android app-api도 동일한 링크 검증·계정 전환 격리를 적용한다.
+- 관리자 POST /api/v1/admin/support/threads/:id/messages는 기존 가드를 유지한다. 추가 영수증 응답의 noticeState는 CREATED_NOW / ALREADY_CREATED / HISTORICAL_CREATED_PURGED / NOT_TRACKED_LEGACY_OR_OFF로 구분하고 검증된 messageId, 현재 존재할 때만 notificationId를 반환한다. '전달됨/열람됨/푸시 성공'이라고 표기하지 않는다. 알림 테이블 출처·권한·영수증 불일치가 해결되지 않으면 OFF를 유지한다. 클라이언트 타임아웃은 UNKNOWN_DELIVERY로 처리하고 **같은 키와 본문**으로만 재시도한다.
+- 보안: 앱 역할의 새 직접 테이블 GRANT 금지. 기존 직접 INSERT 소비자를 전수 조사하고 호환 경로를 SECURITY DEFINER 함수로 전환·검증한 후에만 기존 과권한을 순방향으로 회수한다. 클라이언트가 보낸 UUID는 인증이 아니다. 내부 /support?thread=<표준 UUID>만 허용하며 추가 쿼리·fragment·인코딩·제어문자·역슬래시를 거부한다. Nest/Next/Android의 성공·오류·HEAD·조건부 응답은 private/no-store/noindex/no-referrer, 공유 캐시·304 금지. 문의 본문·회원 ID·키는 알림 문구·로그·분석에 포함하지 않는다. 회원 문의·알림함은 검색엔진 사이트맵 제외, 공개 SEO 영향 없음. 국·영문, 320px, 200% 확대, 키보드/스크린리더 WCAG 2.2 AA, 터치 44px 이상.
+- 관리자 통계는 신규 답변, 검증된 알림 행, 중복 재실행, 삭제 후 과거 영수증, 과거/OFF 답변, 롤백, 잘못된 회원 링크를 구분한다. 20명 이상 집단만 익명 집계하며 별도 관찰 없이 회원 열람을 주장하지 않는다. p95 영수증 300ms 미만, 중복 신규 알림 0, 잘못된 문의 이동 0, 부분 커밋 0은 **실측이 아닌 목표**다. OFF가 롤백 수단이고 기존 기록은 보존하며 자동 병합·승격하지 않는다.
+
+### P0/P1 개발 인계 및 미실행 수용시험
+- **P0 4건:** OPS1646-01 실제 실행 SHA/공식 Test·운영 출처/독립 복원; SEC1646-02 알림 테이블 신규 설치 계보, 개발 과권한 #993, DEV/Test/Production 별도 권한 부정시험; FIN1646-03 국고·원장 출처와 금융 변경 0 증명; REL1646-04 전체 QA/CI 장애, 후보 exact-SHA 공식 Test 인증 E2E, 롤백·승격 승인.
+- **P1 6건:** NOTICE1646-05 원자적 SQL/보존 호환 영수증/권한; -06 Nest 멱등·스위치·영수증; -07 웹 정확한 문의 이동/안전 링크; -08 Android·app-api 비공개/계정 전환; -09 관리자 현재/과거 상태별 KPI 및 20명 집계; -10 PostgreSQL 17 신규 설치·업그레이드, 동일/다른 키 동시 100건, ON→OFF→ON 재실행, 알림 보존 삭제, 회원 탈퇴, FK/캐스케이드, 부분 UNIQUE 충돌, 타인·악성 링크 100건, 최근 100개 밖 문의, 국·영문 320px 접근성 및 Test exact-SHA. 모두 **시험 제안이며 실행하지 않음**. 개발 A/B/C/QA/Gemini는 별도 브랜치, 공식 Test 게이트, 검토된 운영 승격만 사용한다.
+- **운영 보류:** 11시대 Test/Production 공개 /api/version 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 기준 main과 다르며 실제 이미지 증명이 아니다. 테이블 계보·최소권한·국고·전체 QA·공식 Test·독립 복원 미해결. **DRAFT / RELEASE HOLD**. 외부 독립 레퍼런스 신규 검증·중복제거·근거 분류 승인 **0건**, 누적 **UNKNOWN / 10,000건**: **BLOCKED / IN PROGRESS**. 달성 주장 금지.
+
 ## v2026.11.02.1644 — F675-217 관리자 답변 검증 기반 회원 인앱 알림 (기능 추가 / 초안 / 배포 보류)
 **GitHub 인계:** Draft PR #2456 OPEN/HOLD(#2450 상위), 개발 이슈 #2455 OPEN(P0 4 / P1 6). 문서 전용, 배포 없음.
 
