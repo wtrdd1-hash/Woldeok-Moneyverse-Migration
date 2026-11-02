@@ -142,7 +142,7 @@ export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComp
             {isEn ? 'Select at least two stocks to compare.' : '비교할 종목을 2개 이상 선택해 주세요.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="max-w-full overflow-x-auto" role="region" aria-label={isEn ? 'Stock comparison table' : '주식 종목 비교표'} tabIndex={0}>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -158,23 +158,23 @@ export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComp
               <TableBody>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Current price' : '현재가'}</TableHead>
-                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{groupDigits(stock.current_price)} WLD</TableCell>)}
+                  {selected.map((stock) => <TableCell key={stock.id} className="min-w-36 break-all tabular-nums text-right">{groupDigits(stock.current_price)} WLD</TableCell>)}
                 </TableRow>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Change from open' : '시가 대비'}</TableHead>
-                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{signedDelta(stock.current_price, stock.day_open_price)} WLD</TableCell>)}
+                  {selected.map((stock) => <TableCell key={stock.id} className="min-w-36 break-all tabular-nums text-right">{signedDelta(stock.current_price, stock.day_open_price)} WLD</TableCell>)}
                 </TableRow>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Change rate' : '등락률'}</TableHead>
-                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{signedPercentChange(stock.current_price, stock.day_open_price)}</TableCell>)}
+                  {selected.map((stock) => <TableCell key={stock.id} className="min-w-36 break-all tabular-nums text-right">{signedPercentChange(stock.current_price, stock.day_open_price)}</TableCell>)}
                 </TableRow>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Day range' : '오늘 범위'}</TableHead>
-                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{groupDigits(stock.day_low_price)}–{groupDigits(stock.day_high_price)}</TableCell>)}
+                  {selected.map((stock) => <TableCell key={stock.id} className="min-w-36 break-all tabular-nums text-right">{groupDigits(stock.day_low_price)}–{groupDigits(stock.day_high_price)}</TableCell>)}
                 </TableRow>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Available shares' : '거래 가능 수량'}</TableHead>
-                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{groupDigits(stock.shares_available)}{isEn ? ' shares' : '주'}</TableCell>)}
+                  {selected.map((stock) => <TableCell key={stock.id} className="min-w-36 break-all tabular-nums text-right">{groupDigits(stock.shares_available)}{isEn ? ' shares' : '주'}</TableCell>)}
                 </TableRow>
               </TableBody>
             </Table>
