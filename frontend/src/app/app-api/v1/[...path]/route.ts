@@ -11,7 +11,7 @@ import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
-import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
+import { normalizeStockHistoryGrossFloor, parseVerifiedStockHistory } from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
@@ -316,17 +316,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
-  if (stockHistoryPath && stockGrossValues.length === 1 && response.ok) {
+  if (stockHistoryPath && request.method === 'GET' && response.ok) {
     try {
       if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !isVerifiedStockHistoryGrossResponse(await response.clone().json(), stockGrossValues[0]!,
-            Number(stockHistoryLimitValues[0] ?? '50'))) {
-        return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
-          'owner stock trade gross filter could not be verified');
+          !parseVerifiedStockHistory(await response.clone().json(),
+            Number(stockHistoryLimitValues[0] ?? '50') as 50 | 100 | 200, stockGrossValues[0])) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_history_source_unverified',
+          'owner stock trade history could not be verified');
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
-        'owner stock trade gross filter could not be verified');
+      return gatewayProblem(503, 'Service Unavailable', 'stock_history_source_unverified',
+        'owner stock trade history could not be verified');
     }
   }
 

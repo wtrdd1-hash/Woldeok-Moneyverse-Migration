@@ -21,3 +21,9 @@ Pending RED tests.
 
 ## Finished
 Pending gates; no main merge, Test or Production release without every required PASS.
+
+### 12:49 KST — IN PROGRESS / RED→GREEN
+- RED: 6 tests failed on main-derived HEAD, including `history?.trades.filter is not a function` and Android unfiltered HTTP 200 instead of required 503. Evidence `evidence/red.log` in miniPC task directory.
+- GREEN: 31 focused tests PASS, frontend TypeScript PASS, contract build PASS. A single strict parser now validates every owner trade GET, with private Android error behavior and accessible web retry. No backend, SQL, financial or permission changes.
+- Midpoint fetch: origin/main still a8541927c3a351d980454c66e95a3356c47e0722; planning v1648 remains Draft/HOLD. No overlap with A board, B central-bank or QA.
+- Full SHA gates, real PostgreSQL, security audit, CI and exact-SHA Test remain pending; release HOLD.
