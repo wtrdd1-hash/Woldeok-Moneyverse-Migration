@@ -1,3 +1,6 @@
+## 2026-11-03 v1627.1 — Actual Production QA scheduler dual-disk maintenance VERIFIED (operations only)
+- PR #2597 merged main `d22c36d`; CI 41547623648 SUCCESS and storage tests 19/19. Immutable QA v1627 effective systemd unit 08:46:13–08:46:41 KST exit 0, HTTP 24 PASS/2 auth-gated NOT TESTED, QA timer active. Cache scans root5/data35, eligible/deleted=0 after independent manual sweep; root 79%/data 78%, dual-disk strict OK. No application/finance release. [EN proof](releases/v2026.11.03.1627-qa-ops.md) / [KO](releases/v2026.11.03.1627-qa-ops.ko.md).
+
 ## 2026-11-03 v1627 — Historical task Next cache retention in hourly QA (SOURCE TESTED / RELEASE HOLD)
 - TDD safe workspace-only Next cache sweep integrated into two-disk maintenance. Root/data pressure thresholds 85%/80%; 12h under pressure, normal 5d, mount-specific deletion count and byte budgets. Zero persistent files, releases, active workspaces or finance data touched. New and existing disk tests 8/8 PASS, host dry run 0 eligible; exact-source Test and Production scheduler update pending. [EN record](worklog/2026-11-03-qa-next-cache-v1627.md) / [KO](worklog/2026-11-03-qa-next-cache-v1627.ko.md).
 
