@@ -12,3 +12,7 @@ Status: STARTED / RELEASE HOLD. Canonical English record; Korean companion is se
 - [ ] Implementation and focused GREEN
 - [ ] Full build/lint/typecheck/unit/integration/real-PG/security/app-api/E2E and CI
 - [ ] Re-fetch main/plan; final release decision and evidence
+
+## In progress — 2026-11-02 13:45 KST
+- RED reproduced on exact isolated branch: 8 failures / 14 passes in focused 22 tests. Missing digest/preview, unreviewed POST accepted, unsafe URL list not rejected, no confirmation UI, and private HTTP headers missing.
+- Backend contract: existing Next BFF calls real IndexNow external API; no PostgreSQL writes are involved. Plan to bind a SHA-256 digest to the exact URL list, not merely count, and require explicit confirmation.
