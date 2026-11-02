@@ -8,7 +8,7 @@
 - Plan: RED tests for filter parser/semantics and SSR; GREEN implementation; full gates and real PostgreSQL read-model proof; remote CI; PR in DRAFT until every gate passes. No Production promotion without exact-SHA Test and GitOps approval.
 
 ## In progress
-- [ ] RED regression reproduced.
+- [x] RED regression reproduced (focused test fails before implementation).
 - [ ] Verified filter implemented and tested.
 - [ ] Mid-run main/plan fetch and source overlap checked.
 - [ ] Full exact-SHA gates and isolated DB checks recorded.
