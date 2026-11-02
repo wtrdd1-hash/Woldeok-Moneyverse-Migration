@@ -13,3 +13,8 @@
 
 ## Release boundary
 - All required exact-HEAD checks, real PostgreSQL, full QA and official Test auth E2E remain independent gates. Any non-PASS blocks merge and Production. This file is a development record, not deployment authorization.
+
+## Mid-run HTTP correction
+- The first exact-SHA isolated Next.js build succeeded on a bounded-CPU retry (initial build SIGABRT: Tokio could not spawn a thread under the shared service cgroup `pids.max=1027`). Real HTTP then showed `/api/admin/enterprises/refresh` answered 500 without the internal token, and `/admin/enterprises` plus `/en/admin/enterprises` inherited `index, follow` from global headers despite page metadata.
+- Added explicit administrator-security API check with private 401/403/503 errors; all four enterprise reads remain behind open-console verification. Added narrow real HTTP noindex/no-store/no-referrer overrides for root and localized admin enterprise pages. RED 5 cases followed by 10 focused PASS.
+- Origin main advanced to `666d1b40cd2cc9078ef74826ed2d654956cb061b` through #2514, containing SOE deployment documentation only. Rebase to latest main and revalidate exact final SHA; no Test/Production mutation by this worktree.

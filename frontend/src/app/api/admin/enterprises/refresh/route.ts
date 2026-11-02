@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
-import { requireAdminConsole } from '@/lib/session';
+import { api, ApiError } from '@/lib/api';
 import { parseEnterpriseEvidence } from '@/app/admin/enterprises/enterprise-evidence';
 
 export const dynamic = 'force-dynamic';
@@ -13,9 +12,24 @@ const privateHeaders = {
 
 /** Read-only, authenticated proof before the console may announce a refresh. */
 export async function GET() {
-  // Session, role and open-console checks must run before any data access.
-  // The Nest endpoints independently enforce those checks for every read.
-  await requireAdminConsole('/admin/enterprises');
+  // The backend enforces session, consent and administrator role. Check
+  // console elevation here too; every subsequent Nest read repeats that gate.
+  // Unlike page redirects, API errors must keep private headers even offline.
+  try {
+    const admin = await api<{ consoleSession?: { state?: string } }>('/api/v1/admin/security');
+    if (admin?.consoleSession?.state !== 'open') {
+      return NextResponse.json({ success: false, code: 'SOE_REFRESH_CONSOLE_LOCKED' }, {
+        status: 403, headers: privateHeaders,
+      });
+    }
+  } catch (error) {
+    const status = error instanceof ApiError
+      ? error.status === 401 ? 401 : [403, 428].includes(error.status) ? 403 : 503
+      : 503;
+    return NextResponse.json({ success: false, code: 'SOE_REFRESH_AUTH_UNAVAILABLE' }, {
+      status, headers: privateHeaders,
+    });
+  }
   try {
     const [overview, soes, privateEnterprises, dividendLogs] = await Promise.all([
       api<unknown>('/api/v1/admin/enterprises/overview'),
