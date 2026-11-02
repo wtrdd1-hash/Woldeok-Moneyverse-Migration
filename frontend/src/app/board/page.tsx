@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { isVerifiedBoardStockName, parseBoardStockName } from './board-stock-name-search';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.stockName !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +67,18 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const stockName = parseBoardStockName(params.stockName);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (stockName.query) query.set('stockName', stockName.query);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const result = search.invalid || stockName.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; stockNameFilter?: string; sourceWindow?: number }>(
+        `/api/v1/board/public/stock-posts${suffix}`, stockName.query ? 0 : 60);
+  const data = result && (!stockName.query || isVerifiedBoardStockName(result, stockName.query))
+    ? result : null;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +137,13 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-stock-name" className="grid min-w-0 flex-1 gap-1 text-sm font-semibold">
+              종목명 검색
+              <input id="board-stock-name" name="stockName" type="search" maxLength={80}
+                defaultValue={stockName.query ?? (typeof params.stockName === 'string' ? params.stockName.slice(0, 80) : '')}
+                placeholder="종목명 일부" aria-describedby="board-search-scope"
+                className="min-h-11 rounded-md border border-input bg-background px-3" />
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,8 +158,13 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건의 제목과 연결된 종목명에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
+          {stockName.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              종목명은 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+            </p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,15 +179,17 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {search.invalid || stockName.invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
-                ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
+              stockName.query
+                ? '최근 게시글 50건에서 일치하는 종목명이 없어요.'
+                : search.query
+                  ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
                   : '아직 작성된 글이 없어요.'

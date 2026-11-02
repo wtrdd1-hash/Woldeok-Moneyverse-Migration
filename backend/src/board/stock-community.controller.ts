@@ -92,12 +92,19 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({
+    name: 'stockName',
+    required: false,
+    type: String,
+    description: 'Literal stock-name substring in the latest 50 public posts, 1-80 characters',
+  })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'stockName')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const stockName = query.stockName;
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -113,9 +120,16 @@ export class PublicStockCommunityController {
     ) {
       throw new BadRequestException('invalid board search');
     }
+    if (stockName !== undefined &&
+      (typeof stockName !== 'string' || !stockName.trim() ||
+        stockName.trim().length > 80 || /[<>\u0000-\u001f\u007f]/.test(stockName))) {
+      throw new BadRequestException('invalid stock name');
+    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(stock as string | undefined, q as string | undefined,
+        stockName as string | undefined),
+      ...(typeof stockName === 'string' ? { stockNameFilter: stockName.trim(), sourceWindow: 50 } : {}),
     };
   }
 }
