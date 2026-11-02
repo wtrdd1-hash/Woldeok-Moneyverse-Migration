@@ -120,6 +120,6 @@ export class PublicStockCommunityController {
     const posts = order === 'updated'
       ? await this.community.publicList(stock as string | undefined, q as string | undefined, 'updated')
       : await this.community.publicList(stock as string | undefined, q as string | undefined);
-    return order === 'updated' ? { posts, order: 'updated' as const } : { posts };
+    return { posts, ...(order === 'updated' ? { order: 'updated' as const } : {}) };
   }
 }
