@@ -25,7 +25,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ProfileAvatar } from '@/app/profile/profile-avatar';
 import { jobLabel, titleLabel } from '@/app/profile/profile';
@@ -35,6 +34,7 @@ import { requireMember } from '@/lib/session';
 import { DeleteAccountForm, LinkButton, ReauthButton, UnlinkButton } from './account-forms';
 import { canUnlinkOAuthIdentity, isLinkableOAuthProvider } from './identity-provider';
 import { accountLinkedNotice, accountReauthNotice } from './account-verification-notices';
+import { accountSecuritySummary } from './account-security-summary';
 import { parseLinkedIdentities } from './security/account-security-evidence';
 
 export const dynamic = 'force-dynamic';
@@ -102,7 +102,7 @@ export default async function AccountPage({
     apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
     apiOrNull<{ providers: { id: string; enabled: boolean }[] }>('/api/v1/auth/providers'),
     apiOrNull<OwnProfileResponse>('/api/v1/profile'),
-    reauth === 'done' ? apiOrNull<unknown>('/api/v1/account/security/sessions') : Promise.resolve(null),
+    apiOrNull<unknown>('/api/v1/account/security/sessions'),
   ]);
 
   const verifiedIdentities = parseLinkedIdentities(identityData);
@@ -110,6 +110,7 @@ export default async function AccountPage({
   const hasVerifiedLoginMethod = verifiedIdentities !== null && identities.length > 0;
   const linkedNotice = accountLinkedNotice(linked, identityData);
   const reauthNotice = accountReauthNotice(reauth, reauthData, Date.now());
+  const securityEvidence = accountSecuritySummary(identityData, reauthData);
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
   const available = (providerData?.providers ?? []).filter(isLinkableOAuthProvider);
   const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
@@ -132,13 +133,6 @@ export default async function AccountPage({
     (userEmail ? userEmail.split('@')[0] : null) ||
     '월덕 회원';
 
-  // 계정 보안 종합 점수 (100점 만점 기준)
-  const isSocialLinked = identities.some((i) => i.provider !== 'local_email');
-  const hasMultipleIdentities = identities.length >= 2;
-  const securityScore = Math.min(
-    100,
-    (isSocialLinked ? 35 : 20) + (hasMultipleIdentities ? 35 : 20) + 30,
-  );
 
   return (
     <div data-page="account" className="mx-auto w-full max-w-6xl space-y-6 pb-20 pt-2 sm:space-y-8 sm:pt-4">
@@ -267,21 +261,30 @@ export default async function AccountPage({
                 )}
               </div>
 
-              {/* Account Security Progress Score Widget */}
-              <div className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-muted-foreground">계정 보안 완성도</span>
-                  <span className="font-mono tabular-nums font-bold text-primary">{hasVerifiedLoginMethod ? `${securityScore}%` : '확인 불가'}</span>
-                </div>
-                {hasVerifiedLoginMethod && <Progress value={securityScore} className="mt-2 h-1.5 bg-muted" />}
-                <p className="mt-1.5 text-[10px] text-muted-foreground">
-                  {!hasVerifiedLoginMethod
-                    ? '로그인 수단을 확인하지 못해 보안 완성도를 표시할 수 없습니다.'
-                    : securityScore >= 90
-                    ? '🛡️ 최고 등급 보안 보호 상태입니다.'
-                    : '💡 추가 로그인 수단을 연동하면 계정 보호가 강화됩니다.'}
+              {/* Only show facts returned by the authenticated owner read APIs. */}
+              <section aria-label="계정 보안 조회 현황" className="mt-5 w-full rounded-xl border border-border/60 bg-muted/20 p-3 text-left">
+                <h3 className="text-xs font-semibold text-foreground">계정 보안 조회 현황</h3>
+                <dl className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
+                  <div>
+                    <dt className="text-muted-foreground">로그인 수단</dt>
+                    <dd className="mt-1 font-semibold" data-testid="verified-linked-methods">
+                      {securityEvidence.linkedMethods === null ? '확인할 수 없음' : securityEvidence.linkedMethods + '개 연결됨'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">활성 로그인 기기</dt>
+                    <dd className="mt-1 font-semibold" data-testid="verified-active-sessions">
+                      {securityEvidence.activeSessions === null ? '확인할 수 없음' : securityEvidence.activeSessions + '개 세션'}
+                    </dd>
+                  </div>
+                </dl>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  서버에서 조회한 연결 수단과 세션 수입니다. 보안 등급이나 침해 방지 수준을 인증하는 점수는 아닙니다.
                 </p>
-              </div>
+                <Link href="/account/security" className="mt-2 inline-flex min-h-11 items-center rounded-md text-xs font-semibold text-primary underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                  로그인 기기 및 보안 설정 확인
+                </Link>
+              </section>
             </div>
 
             <Separator className="my-5 opacity-60" />
