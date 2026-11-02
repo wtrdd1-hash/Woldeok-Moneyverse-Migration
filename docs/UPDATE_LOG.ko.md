@@ -1,5 +1,5 @@
 ## v2026.11.02.1654 — F675-219 정확한 문의 선택·커서 무결성 (기능 보완 / 초안 / 보류)
-**주기:** 이전 추가 v1652 → 현재 보완 v1654 → 다음 추가 v1656(잠정). 정본 main `a8541927c3a351d980454c66e95a3356c47e0722`, 선행 Draft #2478, 개발 이슈 #2477. 영문/국문 동등 문서 전용, **미구현**.
+**주기:** 이전 추가 v1652 → 현재 보완 v1654 → 다음 추가 v1656(잠정). 정본 main `a8541927c3a351d980454c66e95a3356c47e0722`, 선행 Draft #2478, 현 Draft #2483 OPEN/HOLD, 개발 이슈 #2477. 영문/국문 동등 문서 전용, **미구현**.
 **실제 소스 기반 개선:** /support는 최근 50건 목록 밖의 명시적 문의 ID를 첫 문의로 대체하므로 정확한 본인 문의 GET과 대체 금지. Nest 기존 `/messages/:messageId`와 `/messages/pages` 충돌 위험을 피하는 `/message-pages`. 최신 50건부터 보여주고 이전 기록은 PostgreSQL 마이크로초+UUID 내림차순 키셋으로 앞에 추가. HMAC 서명만으로 커서가 불투명하지 않으므로 인증 암호화·세션 결속·페이지별 5분 재발급. 모든 쓰기/삭제에 DB 리비전 강제, `p_actor` UUID만으로 DB 독립 신원 검증 불가. 기존 내보내기 최대 500건 유지.
 **커서/DB 게이트:** AES-256-GCM 불투명 커서, DB 소유 message_revision, 10,001건 이상 합성 메시지 수용시험 제안·미실행; RELEASE HOLD.
 **P0/P1:** OPS/SEC/FIN/REL1654-01~04, HISTORY1654-05~10 DB/API/웹/Android/KPI/QA. QA v1464 FAILED/P0_HOLD: 운영 다국어 28건 중 16건 500, 실제 Production 앱 역할 264개 테이블 중 UPDATE 195/DELETE 194, 체크섬 불일치 5건, Test 앱/마이그레이터 불일치, 운영 모드 백엔드 2건 실패, 의존성 9건, 라우트 173 대 166. Test/Production 공개 버전 510dbe6...은 main과 다름. 정확 SHA Test·독립 복원·보안/금융 BLOCKED. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 런타임·DB·원장·Test·Production 변경 없음. 수용시험은 **제안만, 미실행**.

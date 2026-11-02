@@ -1,6 +1,6 @@
 ## v2026.11.02.1654 — F675-219 Support History: Exact-Thread Navigation, Route Safety and Cursor Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle and authority:** Previous Feature Addition **v1652** → Current Feature Improvement **v1654** → Next Feature Addition **v1656 (provisional)**. Latest `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722` checked at start and midpoint; source authority: `AGENTS.md`, `README.md`, English canonical `docs/planning/PROJECT_PLAN.md`, Korean equivalent `PROJECT_PLAN.ko.md`. Parent unmerged Draft PR **#2478**; developer handoff issue **#2477**; this is an isolated documentation-only proposal. **F675-219 NOT IMPLEMENTED.** No runtime/DB/WLD/ledger/Test/Production mutation.
+**Cycle and authority:** Previous Feature Addition **v1652** → Current Feature Improvement **v1654** → Next Feature Addition **v1656 (provisional)**. Latest `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722` checked at start and midpoint; source authority: `AGENTS.md`, `README.md`, English canonical `docs/planning/PROJECT_PLAN.md`, Korean equivalent `PROJECT_PLAN.ko.md`. Parent unmerged Draft PR **#2478**; current Draft PR **#2483** (OPEN/HOLD); developer handoff issue **#2477**; this is an isolated documentation-only proposal. **F675-219 NOT IMPLEMENTED.** No runtime/DB/WLD/ledger/Test/Production mutation.
 
 ### Verified code gaps and decisions (not Production incidents)
 
