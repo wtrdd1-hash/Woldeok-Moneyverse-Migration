@@ -27,3 +27,9 @@
 - DEV PostgreSQL read-only `member_board_public_list_with_stock(50)` exact query executed, 0 matching WLD titles; function EXECUTE=true. DEV direct `member_board_posts` SELECT=true remains a least-privilege finding, not a production assertion.
 - `pnpm audit --audit-level=low`: 9 findings (1 low, 8 moderate), release HOLD.
 - Main re-fetched, no advance at checkpoint. No Test/Production mutation.
+
+## Finished — candidate review, not release
+- Feature implemented in Nest/parameterized PostgreSQL function read, Next web, Android app-api; no migration or ledger change.
+- Full gate evidence in `docs/qa/2026-11-02-a2056-board-exact-title.md`; security/build/full-test failures mean this is NOT a release-ready completion.
+- Start 275 remote heads/253 open PR; checkpoint 277/254, 29 conflicting; 18 fully-main-ancestor refs preserved; zero deleted. No other worktree modified.
+- Official Test and Production SHAs differ from candidate. GitOps release gate NOT satisfied. No deployment or rollback.
