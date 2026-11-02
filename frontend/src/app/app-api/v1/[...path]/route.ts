@@ -113,7 +113,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
-  const galleryPhotosPath = parts.length === 1 && parts[0] === 'photos' && request.method === 'GET';
+  const galleryPhotosPath = request.method === 'GET' && (
+    (parts.length === 1 && parts[0] === 'photos') ||
+    (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')
+  );
   const galleryQuery = request.nextUrl.searchParams;
   if (galleryPhotosPath && (galleryQuery.getAll('sort').length > 1 ||
       (galleryQuery.has('sort') && galleryQuery.get('sort') !== 'caption') ||
@@ -618,7 +621,9 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
-  if (parts.length === 1 && parts[0] === 'photos' && request.nextUrl.searchParams.has('sort')) {
+  if (((parts.length === 1 && parts[0] === 'photos') ||
+       (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')) &&
+      request.nextUrl.searchParams.has('sort')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

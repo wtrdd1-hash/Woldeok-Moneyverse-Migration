@@ -30,6 +30,16 @@ describe('Android approved-gallery caption sort', () => {
     expect(new URL(String(upstream.mock.calls[0]?.[0])).searchParams.get('sort')).toBe('caption');
   });
 
+  it('verifies the documented content/photos Android alias, not only /photos', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ photos: [photo(B, '바다'), photo(A, 'Alpha')] }), {
+      headers: { 'content-type': 'application/json' },
+    })));
+    const alias = { params: Promise.resolve({ path: ['content', 'photos'] }) };
+    expect((await GET(request('?sort=caption'), alias)).status).toBe(503);
+  });
+
   it('rejects a success-shaped upstream that ignored the requested sort', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');

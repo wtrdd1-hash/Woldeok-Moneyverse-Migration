@@ -1,0 +1,12 @@
+# QA — A bounded approved-gallery caption order (2026-11-03)
+
+**Candidate status: IMPLEMENTED / TARGETED PASS / BACKEND FULL FAIL / SECURITY AUDIT FAIL / OFFICIAL TEST BLOCKED / RELEASE HOLD.**
+
+- **Base:** main `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`. Isolated branch `auto/hourly-a-20261103-0225-gallery-caption-order`, independent worktree. No modifications to the dirty main checkout or B/C/planning worktrees.
+- **Feature:** `/gallery?sort=caption`, Nest `/api/v1/photos?sort=caption`, Android `/app-api/v1/photos?sort=caption` and `/app-api/v1/content/photos?sort=caption`. Only 24 most recent operator-approved public photos, sorted by UTF-8 bytewise description and UUID; default remains newest. Invalid/duplicate/unknown queries 400. Android verifies 200 responses or returns 503; no-store/noindex; no ledger writes, no migration, no app-role table grants.
+- **TDD:** Initial backend RED 5, frontend RED 5; alias regression RED 1+1. GREEN 12 backend unit/HTTP and 10 frontend/parser/SEO/a11y/Android targeted tests. Real PostgreSQL 17.11 read-only role test passed on 2 approved rows; app role EXECUTE true, photos direct SELECT/UPDATE/DELETE false.
+- **Full baseline:** backend 2,989 PASS / 2 FAIL / 518 SKIP (existing profile HTTP 401 expected 200); frontend 2,954 PASS; DB 72 PASS / 5 SKIP; contract 41 PASS; app API contract 184 endpoints; backend/frontend builds and typecheck PASS; full ESLint 0 errors/1,027 existing warnings. Production audit 0, all-dependency audit **9 FAIL** (8 moderate/1 low). These full-suite results precede the Android alias fix; final exact-SHA retest will be recorded separately.
+- **P0 security:** DEV role `moneyverse_app` still has account_balances UPDATE and user_items DELETE; Production ACL unverified. Main QA/release gates remain failed. Disk 97% used (~2.9 GB free). Do not delete others' data.
+- **Environment:** public Test `0c70a114da5f4cc5374bc4b80e0403a044f8546f`; Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; neither is the candidate. Official isolated Test exact-SHA auth/user-flow E2E, independent backup restore, production provenance and GitOps release gate BLOCKED.
+- **Audit:** 310 non-main remote-tracking refs, 292 unmerged with unique commits, 18 in main; 279 open PR, 29 conflicts. Existing gallery PR #2371/#2331/#2438 overlap paths; no forced merge, branch deletion or cleanup. Preserve unique changes.
+- **Evidence:** `/srv/moneyverse-data/tasks/mv-a-20261103-0225-gallery-caption-order/evidence/`. Final SHA, CI, changed-file list and gate updates follow in worklog.

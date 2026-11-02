@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Queryable } from '../core/db';
 import { PostgresContentRepository } from './content.repository';
 import { ContentController } from './content.controller';
+import { AppContentController } from './app-content.controller';
 import { ContentService } from './content.service';
 
 const photo = {
@@ -38,6 +39,14 @@ describe('P1 gallery caption ordering', () => {
       photos: [expect.objectContaining({ altText: '바다' })],
     });
     expect(String(query.mock.calls[0]?.[0])).toContain('ORDER BY alt_text COLLATE "C"');
+  });
+
+  it('applies the same sort to the canonical Android content/photos alias', async () => {
+    const publicPhotos = vi.fn(async () => []);
+    const controller = new AppContentController({ publicPhotos } as never);
+    await expect(controller.photos({ sort: 'caption' })).resolves.toEqual({ photos: [] });
+    expect(publicPhotos).toHaveBeenCalledWith({ sort: 'caption' });
+    await expect(controller.photos({ sort: ['caption', 'caption'] })).rejects.toMatchObject({ status: 400 });
   });
 
   it.each([{ sort: ['caption', 'caption'] }, { sort: 'oldest' }, { arbitrary: '1' }])(
