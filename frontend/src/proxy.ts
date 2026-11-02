@@ -221,6 +221,13 @@ export function proxy(request: NextRequest) {
 
   response.headers.set('x-moneyverse-locale', finalLocale);
 
+  if (targetPath === '/stocks/league' || targetPath.startsWith('/api/stocks/league') || targetPath.startsWith('/app-api/v1/stocks/league')) {
+    // Localized rewrites share this route; do not inherit the public index policy.
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');
   }
