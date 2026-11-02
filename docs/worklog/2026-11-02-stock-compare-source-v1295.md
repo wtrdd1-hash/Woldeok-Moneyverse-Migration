@@ -15,5 +15,10 @@
 - Midpoint `git fetch origin main`: unchanged at `a8541927c3a351d980454c66e95a3356c47e0722`. Production/Test untouched.
 - Next: full exact-HEAD gates and CI. No gate has been waived.
 
-## Finished
-- Pending.
+## Finished checkpoint (2026-11-02 12:22 KST; release HOLD)
+- Independent Next.js HTTP probe exposed `x-robots-tag: index, follow` on `/stocks/compare` despite page metadata `noindex`. Added exact-path overrides for the member comparison and five localized aliases: `noindex, nofollow`, `private, no-store`, `no-referrer`.
+- Header TDD: 1 regression failed before the change; after the change 29/29 focused source/math/SSR/header tests passed.
+- Isolated PostgreSQL 17.11 on previous code checkpoint: 322 migrations, 10 real stock rows, no invalid market prices, `moneyverse_app` can execute `stock_market_overview()` but cannot directly SELECT/INSERT `virtual_stocks`; DB integration suite passed. Repeat exact final HEAD gate if required.
+- Final exact-SHA Build/Lint/Typecheck/Unit/Integration/Security/CI/HTTP and official Test evidence are not yet all complete at this checkpoint. Status is PARTIAL / RELEASE BLOCKED until verified.
+- Official Test and Production expose frontend version `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not this candidate. No Test/Production deployment, no merge, no rollback and no branch deletion. Existing A/B/Gemini/QA work preserved.
+- Remaining gate results will be appended to PR #2469 and to local evidence without changing the tested HEAD.

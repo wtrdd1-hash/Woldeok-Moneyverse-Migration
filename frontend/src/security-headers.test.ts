@@ -106,6 +106,19 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('overrides public crawler headers for authenticated stock comparisons and localized aliases', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    for (const source of ['/stocks/compare', '/en/stocks/compare', '/ja/stocks/compare']) {
+      const group = groups.find((entry) => entry.source === source);
+      expect(group, source).toBeDefined();
+      const headers = new Map(group!.headers.map((header) => [header.key.toLowerCase(), header.value]));
+      expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(headers.get('cache-control')).toBe('private, no-store');
+      expect(headers.get('referrer-policy')).toBe('no-referrer');
+    }
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
