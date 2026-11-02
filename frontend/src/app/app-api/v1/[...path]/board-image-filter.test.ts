@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from './route';
+import { GET, HEAD } from './route';
 
 const path = { params: Promise.resolve({ path: ['board', 'public', 'stock-posts'] }) };
 const origin = 'https://easy-scraping.com/app-api/v1/board/public/stock-posts';
@@ -13,7 +13,7 @@ describe('Android public board image-only parity', () => {
   it('forwards the filter, verifies image-only rows and prevents indexing or caching', async () => {
     vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
-    const upstream = vi.fn(async () => new Response(JSON.stringify({ posts: [photo] }), {
+    const upstream = vi.fn(async () => new Response(JSON.stringify({ imageFilter: 'with', posts: [photo] }), {
       headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
     }));
     vi.stubGlobal('fetch', upstream);
@@ -22,9 +22,22 @@ describe('Android public board image-only parity', () => {
     expect(new URL(String(upstream.mock.calls[0]?.[0])).searchParams.get('withImage')).toBe('1');
     expect(response.headers.get('cache-control')).toContain('no-store');
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
-    expect(await response.json()).toEqual({ posts: [photo] });
+    expect(await response.json()).toEqual({ imageFilter: 'with', posts: [photo] });
   });
-  it.each(['withImage=0', 'withImage=true', 'withImage=', 'withImage=1&withImage=1', 'withImage=1&bad=1'])(
+  it('rejects a legacy empty HTTP 200 without an explicit filter echo', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ posts: [] }), { headers: { 'content-type': 'application/json' } })));
+    expect((await GET(new NextRequest(origin + '?withImage=1', { headers }), path)).status).toBe(503);
+  });
+  it('accepts filtered HEAD without treating its absent body as an invalid result', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 200 })));
+    const response = await HEAD(new NextRequest(origin + '?withImage=1', { method: 'HEAD', headers }), path);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it.each(['withImage=0' , 'withImage=true', 'withImage=', 'withImage=1&withImage=1', 'withImage=1&bad=1'])(
     'rejects invalid query %s before proxying', async (query) => {
       vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
       vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
@@ -35,8 +48,9 @@ describe('Android public board image-only parity', () => {
       expect(upstream).not.toHaveBeenCalled();
     },
   );
-  it.each([{ posts: [{ ...photo, hasImage: false }] }, { posts: [{ ...photo, hasImage: 'yes' }] },
-    { posts: [{ ...photo }, { ...photo }] }, { posts: null }, { posts: Array.from({ length: 51 }, () => photo) }])(
+  it.each([{ imageFilter: 'with', posts: [{ ...photo, hasImage: false }] }, { imageFilter: 'with', posts: [{ ...photo, hasImage: 'yes' }] },
+    { imageFilter: 'with', posts: [{ ...photo }, { ...photo }] },
+    { imageFilter: 'with', posts: [{ ...photo }, { ...photo, postId: photo.postId.toUpperCase() }] }, { posts: null }, { posts: Array.from({ length: 51 }, () => photo) }])(
     'fails closed on an unverified success payload %j', async (payload) => {
       vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
       vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');

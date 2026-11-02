@@ -26,7 +26,7 @@ describe('public board title query HTTP validation', () => {
 describe('public board image-only HTTP filter', () => {
   it('passes an explicit image-only request to the bounded service', async () => {
     const controller = new PublicStockCommunityController(community);
-    await expect(controller.list({ stock: 'WDX', q: 'photo', withImage: '1' })).resolves.toEqual({ posts: [] });
+    await expect(controller.list({ stock: 'WDX', q: 'photo', withImage: '1' })).resolves.toEqual({ posts: [], imageFilter: 'with' });
     expect(community.publicList).toHaveBeenLastCalledWith('WDX', 'photo', true);
   });
   it.each([{ withImage: '0' }, { withImage: 'true' }, { withImage: '' },

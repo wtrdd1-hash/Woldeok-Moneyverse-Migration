@@ -12,7 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
-import { parseBoardImageFilter } from './board-image-filter';
+import { parseBoardImageFilter, verifiedBoardImageResults } from './board-image-filter';
 
 export const revalidate = 60;
 
@@ -75,9 +75,10 @@ export default async function BoardPage({
   if (imageFilter.imageOnly) query.set('withImage', '1');
   const suffix = query.size ? `?${query.toString()}` : '';
   const invalidFilter = search.invalid || imageFilter.invalid;
-  const data = invalidFilter
+  const result = invalidFilter
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, imageFilter.imageOnly ? 0 : 60);
+    : await publicApi<{ posts: PostSummary[]; imageFilter?: string }>(`/api/v1/board/public/stock-posts${suffix}`, imageFilter.imageOnly ? 0 : 60);
+  const data = imageFilter.imageOnly && !verifiedBoardImageResults(result) ? null : result;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },

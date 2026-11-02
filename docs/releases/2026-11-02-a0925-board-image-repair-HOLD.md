@@ -1,0 +1,2 @@
+# Release Gate — 2026-11-02 A0925 Image Proof Repair
+**DRAFT / HOLD — NOT RELEASED.** Stacked on Draft #2350, not independently mergeable. No exact-SHA official Test authenticated E2E, independent restore or all-security PASS. DEV P0 ACL #993 and 9 all-dependency audit findings unresolved. No migration, deployment, rollback, restart, branch deletion or production mutation. Rollback plan: keep #2350 and this repair unmerged; if later integrated, disable image-only filter UI/API feature through a reviewed follow-up, not DB writes.
