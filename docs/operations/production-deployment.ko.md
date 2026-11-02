@@ -11,7 +11,7 @@ Docker Compose는 Production 배포 제어면이 아닙니다.
 
 ## 현재 공개 edge 런타임
 
-GitOps는 복구/목표 아키텍처의 target/provenance 상태로 유지하지만 **현재 관측된 공개 릴리스 권위는 Nginx 뒤 Debian 13 host systemd runtime**입니다. Production backend/frontend는 `3000/3001`, Test backend/frontend는 `3100/3101`을 사용합니다. 모든 승격은 승인된 exact application source를 이 host release 서비스에 반영하고 공개 version/runtime evidence를 확인해야 합니다. GitOps manifest 변경만으로 공개 사이트가 바뀌었다고 판단하지 않습니다.
+GitOps는 복구/목표 아키텍처의 target/provenance 상태로 유지하지만 **현재 관측된 공개 릴리스 권위는 Nginx 뒤 Debian 13 host systemd runtime**입니다. 현재 Production backend/frontend는 v2026.11.02.1622 운영 릴리스의 `4194/4195`(앱 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`), 공식 Test는 `3100/3101`을 사용합니다. 구 운영 v1619 `4184/4185`는 롤백용으로 가동 유지 중이며, 과거 문서의 `3000/3001`은 현행 공개 트래픽 경로가 아닙니다. 모든 승격은 승인된 exact application source를 이 host release 서비스에 반영하고 공개 version/runtime evidence를 확인해야 합니다. GitOps manifest 변경만으로 공개 사이트가 바뀌었다고 판단하지 않습니다.
 
 host mirror는 동일 승인 SHA를 사용하고 이전 unit 설정을 롤백용으로 보존해야 하며, 릴리스 완료 보고 전에 같은 catalog/status/SEO probe를 통과해야 합니다.
 
