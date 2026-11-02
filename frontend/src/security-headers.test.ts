@@ -115,4 +115,18 @@ describe('security headers', () => {
       'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     );
   });
+  it('keeps password-reset token URLs private in every supported locale even when indexing is enabled', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const privateGroups = groups.filter((group) => group.source.includes('reset-password'));
+    expect(privateGroups).toHaveLength(2);
+    for (const group of privateGroups) {
+      const headers = new Map(group.headers.map((header) => [header.key, header.value]));
+      expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(headers.get('cache-control')).toBe('private, no-store');
+      expect(headers.get('referrer-policy')).toBe('no-referrer');
+    }
+    expect(privateGroups[1]!.source).toBe('/:locale(en|ko|ja|zh|vi)/reset-password');
+  });
+
 });

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 vi.mock('@/lib/api', () => ({ api: mocks.api, ApiError: class ApiError extends Error { status: number; constructor(status: number) { super('API error'); this.status = status; } } }));
 
+import { ApiError } from '@/lib/api';
 import { isPasswordResetReceipt } from './reset-receipt';
 import { completePasswordReset } from './actions';
 
@@ -45,4 +46,20 @@ describe('password reset mutation receipt', () => {
     await expect(completePasswordReset(data)).rejects.toThrow('REDIRECT:/reset-password?error=mismatch&token=');
     expect(mocks.api).not.toHaveBeenCalled();
   });
+  it.each([503, 502, 500])('keeps the reset token retryable when the API returns HTTP %i', async (status) => {
+    mocks.api.mockRejectedValue(new ApiError(status));
+    await expect(completePasswordReset(form())).rejects.toThrow('REDIRECT:/reset-password?error=unavailable&token=');
+    expect(mocks.redirect).not.toHaveBeenCalledWith('/login?password_reset=1');
+  });
+
+  it.each([[401, 'invalid'], [400, 'invalid'], [403, 'policy']])('preserves the existing refusal for HTTP %i', async (status, code) => {
+    mocks.api.mockRejectedValue(new ApiError(status));
+    await expect(completePasswordReset(form())).rejects.toThrow(`REDIRECT:/reset-password?error=${code}&token=`);
+  });
+
+  it('does not claim an expired token on network failure', async () => {
+    mocks.api.mockRejectedValue(new TypeError('fetch failed'));
+    await expect(completePasswordReset(form())).rejects.toThrow('REDIRECT:/reset-password?error=unavailable&token=');
+  });
+
 });

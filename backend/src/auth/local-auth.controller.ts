@@ -309,16 +309,19 @@ export class LocalAuthController {
     if (!acceptablePassword(body.password)) {
       throw new ForbiddenException('password does not meet policy');
     }
+    let completed: boolean;
     try {
-      const completed = await this.credentialStore().completePasswordReset(
+      completed = await this.credentialStore().completePasswordReset(
         body.token,
         await hashPassword(body.password),
       );
-      if (!completed) throw new Error('password reset failed');
-      return { outcome: 'password-reset' as const };
     } catch {
-      throw new UnauthorizedException('password reset failed');
+      // A database or hashing outage is not evidence that the one-time token expired.
+      // Never expose credential-store diagnostics to the unauthenticated caller.
+      throw new ServiceUnavailableException('password reset temporarily unavailable');
     }
+    if (!completed) throw new UnauthorizedException('password reset failed');
+    return { outcome: 'password-reset' as const };
   }
 
   @Post('verify-email')
