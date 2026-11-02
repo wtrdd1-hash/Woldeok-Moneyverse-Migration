@@ -171,3 +171,13 @@ For Production identity, require the resolved active release directory basename 
 
 ### v2026.10.31.1536 — Narrow approval for pre-existing financial DML
 The operator's v2026.10.29.1212 acceptance applies only to **existing** full INSERT/UPDATE/DELETE privileges on `accounts`, `account_balances`, `system_treasury_vaults` with actual database `woldeok_moneyverse_dev` and role `moneyverse_app`. The read-only preflight reports explicit `OPERATOR_ACCEPTED_EXISTING_DML` warnings, not silently clean permission flags. Changed or partial privilege shape, different DB/role, new ledger posting/transaction DML and journal imbalance remain BLOCKED. `READY_FOR_OTHER_RELEASE_GATES` means only this narrow projection/grants check passed; Treasury provenance, opening balances, funded settlements, exact authenticated Test, session continuity and Production promotion still require independent evidence. Never grant more rights to force this status.
+
+### Existing-table TRIGGER/MAINTAIN app-role release prerequisite — B v764
+
+The read-only PostgreSQL 17 verifier rejects effective `moneyverse_app` `TRIGGER` or `MAINTAIN` rights on existing `public` base/partitioned tables, including rights inherited through `PUBLIC` or role membership. These rights are not required for the intended SECURITY DEFINER application boundary. It checks exact database identity, the role, a complete table inventory, and protected financial/identity/audit tables. Run under the approved read-only operator connection with an explicit database identity:
+
+```bash
+node scripts/release/verify-app-table-maintenance.mjs --env-file /absolute/approved/operator.env --expected-db woldeok_moneyverse_dev
+```
+
+A `BLOCKED` result must stop release; **never grant rights to make the check green**. This tool neither revokes grants nor proves Production safe, and it does not replace DML, TRUNCATE, default ACL, migration checksum, ledger, authenticated Test exact-SHA, backup restore, or GitOps checks. Do not infer a Production privilege count from DEV evidence. See `docs/worklog/2026-11-03-backend-b-v764-app-trigger-maintain-acl.md`.
