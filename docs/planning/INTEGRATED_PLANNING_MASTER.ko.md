@@ -1,5 +1,35 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1682 F675-226 관리자 개인 문구 무결성 / 이슈 #2570 / 선행 초안 #2572 / 운영 보류.
+**현재 기획:** v1684 F675-227 회원 문의 해결 피드백 / 이슈 #2580 / 선행 초안 #2576 / 운영 보류.
+
+## v2026.11.03.1684 — F675-227 회원 문의 해결 후 만족도 피드백 (기능 추가 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 보완 v1682 → 현재 기능 추가 v1684 → 다음 기능 보완 v1686(잠정). 2026-11-03 06:09 KST 원격 main `f5c3fbedae1c3b3ec2374882b049aac43a655eb4` 확인, 중간·완료 재조회 예정. AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·한국어 대조. 미병합 초안 #2576 위에 누적, 개발 이슈 #2580. **F675-227 미구현 / 기획 제안만 수행.** 런타임·DB·WLD·원장·Test·Production 변경 없음.
+
+### 실제 소스 근거와 차별화
+- **실제 확인:** `196-user-admin-support-chat.sql`의 `support_threads`는 `open|waiting_user|resolved` 상태, `support_messages`는 메시지를 저장한다. `admin_support_set_status`는 관리자 상태 변경을 수행한다. Nest `support.controller.ts`에는 회원 문의·답변, 관리자 목록·답변·상태 변경 API가 있지만 문의 해결 피드백 API는 없다. 회원 메시지 POST는 문의를 다시 open으로 바꾼다. 확인한 지원 소스에서 만족도 테이블/API/UI는 발견하지 못했다. 기존 resolved 상태를 **회원의 해결 만족 확인**으로 해석하지 않는다.
+- **목적·대상:** 관리자가 문의를 해결 처리한 뒤 해당 문의 **소유 회원**이 선택적으로 응대 경험을 1~5점으로 평가하고, `still_unresolved|unclear_response|slow_response|other` 중 선택 사유를 남길 수 있다(사유 선택 사항). 고객지원 품질 관측이며 문제 해결 사실·회원 평판·관리자 징계·WLD 보상 근거가 아니다. 기존 F675-222 문의 분류, F675-223 담당자, F675-224 연관 문의, F675-225 개인 재확인, F675-226 답변 문구와 중복하지 않는다. V1에는 자유입력·이메일·푸시·자동 재개·외부 분석 연동이 없다. `support_resolution_feedback_v1` 기본 **OFF**.
+
+### 권한·진입점·화면·CTA·상태
+- 회원 `/support` → 본인 문의 상세 → **응대 평가하기**. 상태가 현재 `resolved`이고 검증된 최신 해결 이벤트가 존재하며 DB 기준 해결 시각 이후 7일 이내에만 노출한다. 1~5점, 고정 사유(선택), **평가 제출** 후 읽기 전용 접수 영수증. 7일은 제품·개인정보 정책 승인 전 제안값. `미해결/검증된 해결 이벤트 없음/제출 완료/기한 종료/기능 OFF/로딩/오프라인/소스 장애/상태 변경`을 구별하고 오류를 성공·빈 결과로 위장하지 않는다.
+- 평가는 **명시적 독립 요청**이며 메시지 작성·문의 상태 변경·담당자 지정·금융 원장 변경·알림 발송을 일으키지 않는다. 낮은 점수라도 자동으로 문의를 열지 않는다. 회원이 원하면 기존 **답변 작성(메시지로 재개)** 동작을 별도로 명시 선택해야 한다. 기존 문의 상태 필터·대화록·메시지 영수증 유지.
+- 인증 세션·동의가 유효한 문의 소유 회원만 본인 피드백을 조회·제출한다. Nest가 세션에서 행위자를 추출하고 클라이언트 UUID를 신뢰하지 않는다. 관리자는 기존 문의 접근 권한 내에서만 건별 확인 가능하고 집계는 최신 관리자 역할·최근 재인증을 요구한다. 타 회원 UUID는 소유권 확인 후 안전한 404로 은폐. Android는 동일 소유자 API를 안전하게 지원하거나 미구현 상태를 명시하고 관리자 통계 화면은 제공하지 않는다.
+- 320px 대응, 터치 목표 44px, WCAG 2.2 AA, 점수 그룹 fieldset/legend·키보드·스크린리더·오류 live-region·초점 복귀·현지화 기한·동작 감소. 오래된 캐시의 점수를 최신으로 표현하지 않는다. SEO 비공개: 회원·관리자·app-api/BFF/프록시의 성공/오류 모두 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer`, 사이트맵 제외.
+
+### API·PostgreSQL·트랜잭션 (제안)
+- 회원 `GET /api/v1/support/threads/:threadId/feedback`: 소유권 확인 후 `{eligibility: ELIGIBLE|SUBMITTED|EXPIRED|NOT_RESOLVED|UNAVAILABLE, resolutionId, expiresAt, rating?, reason?, revision}`. `updated_at`만으로 해결 이벤트를 추정하지 않는다. `POST /api/v1/support/threads/:threadId/feedback`: `{resolutionId,rating:1..5,reason?:enum}`, UUID `Idempotency-Key`, 최신 해결 이벤트의 강한 `If-Match` 필수. 관리자 `GET /api/v1/admin/support/feedback/summary`는 서로 다른 해결 이벤트 20건 이상 집단에서만 비식별 집계 반환. 오류: 400 입력·알 수 없는 필드, 401 인증, 403 동의/권한, 404 타인/미존재, 409 동일 키 내용 충돌·기제출, 410 기한 만료, 412 오래된 이벤트, 428 조건 누락, 429 악용, 503 소스 장애. 검증된 피드백 없음과 조회 실패를 구별한다.
+- 추가 전용 마이그레이션: `support_resolution_events(id uuid PK,thread_id FK ON DELETE CASCADE,member_id FK,epoch_no bigint CHECK>0,resolved_at timestamptz,created_by_admin FK nullable)`, `UNIQUE(thread_id,epoch_no)`, `(member_id,resolved_at DESC,id)` 인덱스. **미해결→resolved 실제 전이에서만** 기존 관리자 상태 변경 트랜잭션 안에 새 불변 해결 이벤트 생성, resolved→resolved 무변경은 이벤트 생성 금지. 회원 메시지로 다시 열리면 현재 평가 자격이 사라지고 재해결 시 새 epoch 생성. `support_resolution_feedback(id uuid PK,resolution_id FK UNIQUE ON DELETE CASCADE,thread_id FK,member_id FK,rating smallint CHECK 1..5,reason text CHECK enum or NULL,submitted_at timestamptz)`; 회원·문의·epoch 동일성은 개별 FK만으로 충분하지 않으므로 잠금이 있는 SECURITY DEFINER 함수에서 검증한다. 집계용 `(submitted_at DESC,resolution_id)` 인덱스. 앱 계정 직접 테이블 DML/SELECT 권한 추가 금지. 회원 삭제·관리자 계정 삭제·백업 보존 정책 승인 필요.
+- 단일 제출 트랜잭션: 세션·동의·소유권 확인 → 회원·문의 고정 순서 잠금 → 현재 resolved 및 **최신** epoch → If-Match → 단 한 번 취득한 DB `clock_timestamp()`로 `resolved_at <= now < resolved_at + interval '7 days'` → `(actor_id,idempotency_key)` 영수증 직렬화 → epoch당 1건 저장 → 감사 메타데이터·HMAC 정규 요청 영수증(메서드/경로/epoch/점수/사유/선행 조건) 원자 저장. 인증 토큰·대화 본문 저장 금지. 동일 키·동일 요청 재실행은 과거 영수증만 반환, 다른 내용 409. 문의 재개·재해결 뒤 과거 영수증을 최신 점수·ETag로 오인 금지, 재실행도 현재 회원 소유권·동의 재검증. DB 함수 인자로 전달한 UUID만으로 본인 인증이 성립하지 않으므로 최소 EXECUTE·역할 회수 잠금·SQLSTATE 23505/40001/40P01 처리·롤백 성공 위장 금지.
+- 악용·보존: 고정 사유만 허용, HTML/자유입력 없음, 회원/IP 별 속도 제한(신뢰할 수 있는 프록시 식별), epoch당 1회, 보상·자동 징계·관리자 개인 순위 금지. 원본 피드백 90일 후 집계만 유지하는 안은 **개인정보 승인 전 제안값**. 삭제·열람권이 영수증 재실행보다 우선하며 HMAC 키 교체·영수증 삭제표식 정책 승인 필요. 소규모 집단에서 개별 관리자 평가 노출 금지.
+
+### KPI·회귀시험·무중단 배포·롤백
+- 지표: `eligible_verified_resolution_epochs`, `feedback_submitted_epochs`, `feedback_response_rate`(제출/자격), 점수 분포·사유·7일 이내 문의 재개는 **별도 관측**. 20개 이상의 서로 다른 해결 이벤트와 충분한 회원 표본을 충족한 경우만 집계하며 응답 편향·표본 수 표시. 높은 점수를 실제 해결 성공으로 주장하지 않는다. 개선 기대는 **가설/시험 목표**일 뿐 측정값이 아니다. 공개 SEO·검색 유입 효과 없음.
+- 개발 인계 #2580: P1 **CSAT1684-05** DB 해결 epoch, **-06** Nest/API·멱등, **-07** 회원 화면·접근성, **-08** 관리자·Android·비공개 HTTP, **-09** 악용·보존·KPI, **CSAT1684-10** PostgreSQL17·권한·상태·시간·병렬 재실행·개인정보 삭제·정확 SHA 수용시험. 같은/다른 키 동시 제출 100건, resolved→재개→resolved, 7일 경계, 타 회원 UUID 100건, 권한 회수·CSRF·2xx/4xx/5xx 캐시·320px 스크린리더·자동 재개 금지 시험은 **제안만 했으며 실행하지 않음**.
+- 스키마 확장만 선적 → API 스위치 OFF → 공식 Test 정확 SHA·인증 회원/관리자/API/DB/Android 검증 → 승인된 카나리 → QA·보안·독립 복원·롤백 증거 → 별도 GitOps 운영 승인. 롤백은 기능 스위치 OFF, 기존 이벤트/평가 데이터 보존, 스키마 삭제·기존 상태 재작성 금지. 체크섬/권한/실행 SHA·이미지/복원/엣지 개인정보/금융 정합성/P0 QA 중 하나라도 실패하면 운영 승격 금지. **Production RELEASE HOLD**.
+
+### P0 및 외부 독립 근거
+- **P0 4건:** OPS1684-01 루트 97%·약 3.7GiB 잔여(06:09 KST), 작업자 파일 보존·독립 외부 복원(#1170); SEC1684-02 마지막 상세 QA v1480 앱 계정 264개 중 UPDATE195/DELETE194/TRUNCATE213/TRIGGER214, 비표준 definer 경로 19개, 체크섬 불일치 5건(#993)이며 최신 수치는 재측정 전 확정 금지; FIN1684-03 Treasury/Mint/NPS/SWF/원장 독립 출처·무변경 증거; REL1684-04 개발 C 초안 #2579에서 QA v1481 FAILED/P0 언급(세부 원문은 독립 확인하지 못함), 마지막 상세 v1480 운영 확대 28경로 중 24건 HTTP500·정확 SHA Test 실패, 인증 E2E·독립 복원 없음(#1088). 공개 버전 운영 `305d7c7...`, Test `0c70a114...`로 main과 불일치. 디스크 위험은 현재 서비스 중단 증거가 아니다.
+- **외부 독립 근거 10,000건 게이트:** 신규 확보·검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 합성 시험·중복·검증 안 된 자료는 제외. 영문·한국어 통합/정본·업데이트·대응 작업일지만 변경, 분산 기획서 신규 생성 금지.
+
 
 ## v2026.11.03.1682 — F675-226 관리자 개인 답변 문구 정규화·재실행·작성 중 안전성 (기능 보완 / 초안 / 운영 보류)
 

@@ -1,3 +1,7 @@
+## 2026-11-03 v1684 — F675-227 member support resolution feedback
+- Planning only, NOT IMPLEMENTED. Issue #2580. RELEASE HOLD. P0 4, P1 6.
+- External independent references: new 0; cumulative UNKNOWN/10000; BLOCKED/IN PROGRESS.
+
 ## 2026-11-03 v1682 — F675-226 snippet title/replay/draft integrity (planning only)
 - Clarified ASCII-only casefold/NFC title_key_v1 and DB C-collation uniqueness; immutable historical replay after soft delete, no content/ETag resurrection, actor revocation and 20-active quota transaction fencing. F675-226 NOT IMPLEMENTED; issue #2570, stacked Draft #2572.
 - QA v1480 FAILED/P0: Production 24 HTTP500/28 expanded paths (different coverage), app TRUNCATE 213/264 and TRIGGER 214/264, 19 unsafe definer paths, 5 migration mismatches, exact-SHA Test gate failed. Root QA 99%/1.1GiB vs fresh 05:01 97%/~3GiB; recovery not certified. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10000, BLOCKED/IN PROGRESS. No runtime/DB/deployment.
