@@ -1,3 +1,7 @@
+## 2026-11-03 v1688 — F675-228 structured support clarification cards (planning only)
+- Source-verified support routes/migration196 lack typed clarification cards. Proposed one pending, three lifetime, seven-day expiry, owner/admin CAS/immutable receipts and shared status-transition prerequisite; F675-228 NOT IMPLEMENTED; issue #2591, stacked Draft #2585. Flag OFF.
+- Last detailed QA v1482 FAILED/P0; root 97%/3.0GiB, Production 24/28 HTTP500, excessive DB grants, five checksums, exact-SHA Test/restore BLOCKED. P0 4/P1 6, RELEASE HOLD. External new 0, cumulative UNKNOWN/10000 BLOCKED. No runtime/DB/finance/deploy changes.
+
 ## 2026-11-03 v1686 — F675-227 resolution transition integrity (planning only)
 - Source-proven three status writers require one locked transition/epoch authority, legacy-unverified eligibility, replay-safe messages and strong CAS. F675-227 NOT IMPLEMENTED; issue #2580, stacked Draft #2581.
 - QA v1482 FAILED/P0: Production 24/28 HTTP500, Test 0/28, root 97%/3.3GiB, excessive DB app grants, 5 checksum mismatches, exact-main CI 2 FAIL, off-host restore BLOCKED. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10000 BLOCKED. Docs only.
