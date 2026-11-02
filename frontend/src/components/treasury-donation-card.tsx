@@ -62,7 +62,7 @@ export function TreasuryDonationCard() {
       setSubmitting(true);
       const idempotencyKey = donationKeyRef.current ?? crypto.randomUUID();
       donationKeyRef.current = idempotencyKey;
-      const res = await fetch('/api/admin/treasury/donate', {
+      const res = await fetch('/api/treasury/donate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({

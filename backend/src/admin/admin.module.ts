@@ -48,7 +48,7 @@ function devicePepper(config: AppConfig): string {
   return process.env.ADMIN_DEVICE_HASH_PEPPER || config.internalToken;
 }
 
-import { AdminTreasuryController, PublicTreasuryController } from './treasury/treasury.controller';
+import { AdminTreasuryController, PublicTreasuryController, FundedTreasuryDonationController } from './treasury/treasury.controller';
 import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
 import { AutoSovereignWealthFundService } from './treasury/auto-swf.service';
@@ -80,6 +80,7 @@ import { TelegramAlertService } from '../telegram/telegram-alert.service';
     AdminBackupController,
     AdminTreasuryController,
     PublicTreasuryController,
+    FundedTreasuryDonationController,
     AdminEnterpriseController,
     PublicEnterpriseController,
     AdminTreasuryBondController,
