@@ -24,13 +24,13 @@
 
 ### Task 1: Owner wallet response parser
 **Files:** Create `frontend/src/app/wallet/wallet-overview-proof.ts`, test `wallet-overview-proof.test.ts`.
-- [ ] Write valid and invalid shape tests, run RED.
-- [ ] Implement strict parser and run GREEN.
+- [x] Write valid and invalid shape tests, run RED.
+- [x] Implement strict parser and run GREEN.
 
 ### Task 2: Connect wallet page
 **Files:** Modify `frontend/src/app/wallet/page.tsx`, add `wallet-overview-page.test.tsx`.
-- [ ] Test malformed payload renders unavailable instead of throwing.
-- [ ] Wire parser and accessible retry link, run GREEN.
+- [x] Test malformed payload renders unavailable instead of throwing.
+- [x] Wire parser and accessible retry link, run GREEN.
 
 ### Task 3: Verification and release hold
 - [ ] Execute required gates at exact HEAD and record failures/skips.

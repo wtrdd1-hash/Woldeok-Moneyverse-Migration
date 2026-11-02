@@ -31,7 +31,7 @@ import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { PortfolioAllocationRadar } from '@/components/portfolio-allocation-radar';
 import { sides } from './sides';
-import type { Overview } from './sides';
+import { verifiedWalletOverview } from './wallet-overview-proof';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
 import {
   BankPanel,
@@ -67,20 +67,27 @@ function signedPercent(bpsText: string): string {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet?recent=50'),
+  const [rawWallet, loanData, rewardAvailability, portfolioData] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
     apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
     apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
   ]);
 
+  const wallet = verifiedWalletOverview(rawWallet);
   if (!wallet) {
     return (
       <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
-        <EmptyState
-          title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
-          description={<T korean="잠시 후 다시 확인해 주세요." english="Please try again in a few moments." />}
-        />
+        <div role="status">
+          <EmptyState
+            title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
+            description={<T korean="잔액을 검증할 수 없습니다. 잠시 후 다시 확인해 주세요." english="Balance verification is unavailable. Please try again." />}
+          >
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href="/wallet">다시 조회</Link>
+            </Button>
+          </EmptyState>
+        </div>
       </div>
     );
   }
@@ -103,8 +110,8 @@ export default async function WalletPage() {
   const isStockProfit = stockAnalysis ? BigInt(stockAnalysis.total_unrealized_gain_loss) > 0n : false;
   const isStockLoss = stockAnalysis ? BigInt(stockAnalysis.total_unrealized_gain_loss) < 0n : false;
 
-  const cashAvailable = BigInt(balances.cash.availableAmount || '0');
-  const bankAvailable = BigInt(balances.bank.availableAmount || '0');
+  const cashAvailable = BigInt(balances.cash.availableAmount);
+  const bankAvailable = BigInt(balances.bank.availableAmount);
   const grandTotalAmount = cashAvailable + bankAvailable + actualStocksValue;
 
   return (
