@@ -8,7 +8,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatDay, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '../quests/early-events';
-import type { EarlyGameBoard } from '../quests/early-game';
+import { parseWeeklyResetEvidence } from './weekly-reset-evidence';
 import { upcomingShopDeadlines, type ShopDeadlineItem } from './shop-deadlines';
 
 export const dynamic = 'force-dynamic';
@@ -30,28 +30,21 @@ interface SeasonEvent {
   readonly ends_at: string;
 }
 
-function nextWeekStart(weekStart: string): string | null {
-  const value = new Date(`${weekStart}T00:00:00+09:00`);
-  if (Number.isNaN(value.getTime())) return null;
-  value.setUTCDate(value.getUTCDate() + 7);
-  return value.toISOString();
-}
-
 export default async function CalendarPage() {
   await requireMember();
 
   const [seasonData, todayData, earlyGame, shopData] = await Promise.all([
     apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
-    apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
+    apiOrNull<unknown>('/api/v1/engagement/early-game'),
     apiOrNull<{ catalogItems: ShopDeadlineItem[] }>('/api/v1/shop/catalog'),
   ]);
 
   const seasonEvents = seasonData?.events ?? [];
   const today = todayData?.event ?? null;
-  const weeklyGoals = earlyGame?.goals ?? [];
-  const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
-  const nextReset = weekStart ? nextWeekStart(weekStart) : null;
+  const weekly = parseWeeklyResetEvidence(earlyGame);
+  const weekStart = weekly?.weekStart ?? null;
+  const nextReset = weekly?.nextReset ?? null;
   const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? []);
 
   return (
@@ -110,14 +103,17 @@ export default async function CalendarPage() {
               <CardTitle className="text-base">주간 목표 갱신</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3">
-              {earlyGame === null ? (
-                <p className="text-sm text-muted-foreground">주간 목표 일정을 불러오지 못했어요.</p>
+              {weekly === null ? (
+                <div role="alert" className="grid gap-3 text-sm">
+                  <p>주간 목표 일정을 확인할 수 없어요. 저장된 목표가 없다는 의미는 아닙니다.</p>
+                  <Link href="/calendar" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">다시 확인</Link>
+                </div>
               ) : weekStart === null ? (
                 <p className="text-sm text-muted-foreground">현재 주간 목표가 없어요.</p>
               ) : (
                 <>
                   <p className="text-sm">
-                    이번 주 목표 {weeklyGoals.filter((goal) => goal.goal_window === 'week').length}
+                    이번 주 목표 {weekly.count}
                     개
                   </p>
                   <p className="text-xs text-muted-foreground">
