@@ -1,4 +1,5 @@
 ## v2026.11.02.1648 — F675-218 Verified Resolved-Support Satisfaction Feedback (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub:** Draft PR #2468 OPEN/HOLD; developer issue #2467; parent unmerged #2460. No merge/deploy.
 **GitHub handoff:** developer backlog #2467; Draft PR pending; stacked on unmerged planning #2460. Documentation-only, NOT IMPLEMENTED.
 
 **Cycle:** Previous Feature Improvement v1646 → Current Feature Addition v1648 → Next Feature Improvement v1650 (provisional). Source authority: main a8541927c3a351d980454c66e95a3356c47e0722 checked at start and midpoint; AGENTS.md, README.md, canonical English PROJECT_PLAN.md, Korean semantic counterpart. Do not merge or deploy as runtime functionality.
