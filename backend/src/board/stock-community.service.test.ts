@@ -52,3 +52,21 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+
+describe('bounded public board updated ordering', () => {
+  it('orders only the latest 50 rows in PostgreSQL using deterministic timestamps', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(undefined, undefined, 'updated');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('GREATEST(created_at, COALESCE(updated_at, created_at))');
+    expect(String(sql)).toContain('post_id DESC');
+    expect(values).toEqual([50, null, null]);
+  });
+  it('rejects unsupported order before querying PostgreSQL', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'oldest')).rejects.toThrow('invalid board order');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});

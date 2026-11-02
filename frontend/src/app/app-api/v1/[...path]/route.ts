@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedBoardUpdateOrder } from '@/app/board/board-update-order';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -111,6 +112,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const boardUpdatePath = parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardOrderValues = boardUpdatePath ? request.nextUrl.searchParams.getAll('order') : [];
+  const boardUpdateRequested = boardOrderValues.length === 1 && boardOrderValues[0] === 'updated';
+  if (boardOrderValues.length > 1 || (boardOrderValues.length === 1 && !['latest', 'updated'].includes(boardOrderValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_order_invalid', 'invalid public board ordering');
+  }
+  if (boardUpdateRequested && request.method === 'HEAD') {
+    return gatewayProblem(503, 'Service Unavailable', 'board_order_unverified', 'HEAD cannot prove the updated ordering');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -521,6 +532,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (boardUpdateRequested && response.ok && !isVerifiedBoardUpdateOrder(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_order_unverified', 'updated ordering evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +563,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (boardUpdateRequested && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_order_unverified', 'updated ordering evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -559,6 +576,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (boardUpdateRequested && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'board_order_unverified', 'updated ordering evidence is unavailable');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 
@@ -585,13 +605,7 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('order'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

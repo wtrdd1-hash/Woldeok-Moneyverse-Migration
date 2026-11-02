@@ -12,3 +12,10 @@
 
 ## Finished — v3
 - Pending evidence and final disposition.
+
+### In progress — v2.1 (12:28 KST)
+- TDD RED: Backend 3 failures / 17 passes; Frontend 8 failures, then default-select regression RED Backend 1 / Frontend 3.
+- GREEN: Backend 20/20, Frontend 21/21 including title-search regression; backend/frontend typecheck passed before default-selector fix.
+- Actual PostgreSQL 17.11: `SET LOCAL ROLE moneyverse_app` inside READ ONLY transaction; `member_board_public_list_with_stock(50)` executes, 1 public post, updated-order SQL executes, ROLLBACK. No DML or grant.
+- Default form sends explicit `order=latest`; both HTTP and Android gateway accept it. Updated-order response requires server marker and chronological UUID/timestamp verification; unverifiable successful Android responses fail 503. Noindex/no-store for query-specific results.
+- `origin/main` and both master plans rechecked; independent contributor changes untouched. Full tests/build/contract and exact-SHA official Test still pending.
