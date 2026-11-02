@@ -192,6 +192,12 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Arcade play history is member-private even when the guest landing is public.
+      ...['/arcade', '/:locale(ko|en|ja|zh|vi)/arcade'].map((source) => ({ source, headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'cache-control', value: 'private, no-store' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+      ] })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

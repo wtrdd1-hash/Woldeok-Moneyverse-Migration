@@ -36,6 +36,7 @@ import { CasinoAudioControls } from '@/components/casino-audio-controls';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 
 import { getServerLocale } from '@/lib/locale-server';
+import { parseCasinoHistory, type CasinoHistoryEntry } from './casino-history-evidence';
 
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -134,17 +135,6 @@ interface CoinFairness {
   readonly created_at: string | null;
 }
 
-interface CasinoHistoryEntry {
-  readonly play_id: string;
-  readonly game: 'coin' | 'dice_parity' | 'dice_number';
-  readonly choice: string;
-  readonly outcome: string;
-  readonly stake_amount: string;
-  readonly net_amount: string;
-  readonly transaction_id: string;
-  readonly played_at: string;
-}
-
 interface SelfLimit {
   readonly daily_bet_limit: string;
   readonly daily_loss_limit: string;
@@ -189,11 +179,11 @@ export default async function CasinoPage() {
   }
   await requireMember();
 
-  const [terms, fairness, games, history, selfLimit, gameClock] = await Promise.all([
+  const [terms, fairness, games, historyRaw, selfLimit, gameClock] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
-    apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
+    apiOrNull<unknown>('/api/v1/casino/history'),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
     apiOrNull<ServerGameClock>('/api/v1/casino/clock'),
   ]);
@@ -206,6 +196,7 @@ export default async function CasinoPage() {
   const gemGame = dice.find((g) => g.game === 'gem_5');
   const wheelGame = dice.find((g) => g.game === 'wheel_20');
 
+  const history = parseCasinoHistory(historyRaw);
   const plays = history ?? [];
 
   const closure: CasinoClosure | null =
@@ -772,7 +763,10 @@ export default async function CasinoPage() {
         </CardHeader>
         <CardContent>
           {history === null ? (
-            <EmptyState title="기록을 불러오지 못했어요." />
+            <div role="alert" aria-live="polite" className="grid gap-3">
+              <EmptyState title="게임 기록을 검증하지 못했어요." description="서버 기록을 확인할 수 없어 정산 내역을 표시하지 않습니다." />
+              <a href="/arcade" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2">기록 다시 조회</a>
+            </div>
           ) : plays.length === 0 ? (
             <EmptyState
               title="아직 게임 기록이 없어요."

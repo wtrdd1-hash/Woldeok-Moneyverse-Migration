@@ -11,3 +11,10 @@
 ## MID — pending
 
 ## END — pending
+
+## MID — 2026-11-02 19:17 KST
+- TDD RED: missing history evidence module plus Android public-cache and invalid-success tests reproduced; 3 failed tests before implementation.
+- GREEN: strict bounded 20-row SQL-shape parser, UUID/game/outcome/BigInt/date/order/duplicate checks, verified empty vs unknown, accessible retry, Android 503 for malformed success and private headers for success/errors, locale-aware web HTTP noindex/no-store/no-referrer.
+- Focused tests: 12/12 PASS; frontend typecheck PASS. No backend/DB contract changes.
+- `origin/main` fetched again: no advancement at this checkpoint.
+- Remaining: full build/lint/typecheck/tests, isolated PostgreSQL, HTTP, security/QA/CI, exact-SHA official Test and release decision.
