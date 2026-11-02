@@ -1,4 +1,5 @@
 ## v2026.11.02.1644 — F675-217 관리자 답변 검증 기반 회원 인앱 알림 (기능 추가 / 초안 / 배포 보류)
+**GitHub 인계:** Draft PR #2456 OPEN/HOLD(#2450 상위), 개발 이슈 #2455 OPEN(P0 4 / P1 6). 문서 전용, 배포 없음.
 
 **사이클:** 이전 Feature Improvement v1642 → 현재 Feature Addition v1644 → 다음 Feature Improvement v1646(잠정). 기준 origin/main `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, 영문 정본 `docs/planning/PROJECT_PLAN.md` 및 국문 동등 문서. 시작·중간 main 재조회, 상위 미병합 `docs/planning-v1642-inventory-case-quota-atomicity` / Draft #2450 후속. 개발 인계 이슈 #2455. **제안 단계이며 F675-217은 구현되지 않았다.** main 병합, 런타임/DB/원장/WLD/아이템/Test/Production 변경 없음.
 

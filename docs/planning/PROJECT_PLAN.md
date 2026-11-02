@@ -1,4 +1,5 @@
 ## v2026.11.02.1644 — F675-217 Verified Administrator Support Reply In-App Notice (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+**GitHub handoff:** Draft PR #2456 OPEN/HOLD (stacked on #2450); developer issue #2455 OPEN (P0 4 / P1 6). Documentation-only, no release.
 
 **Cycle:** Previous Feature Improvement v1642 → Current Feature Addition v1644 → Next Feature Improvement v1646 (provisional). Canonical authority: origin/main `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, English `docs/planning/PROJECT_PLAN.md`; Korean semantic parity. Main checked at start and mid; planning parent `docs/planning-v1642-inventory-case-quota-atomicity` / Draft #2450, unmerged. Developer handoff issue #2455. **PROPOSED ONLY: F675-217 is NOT IMPLEMENTED.** No main merge, runtime/DB/ledger/WLD/item/Test/Production changes.
 

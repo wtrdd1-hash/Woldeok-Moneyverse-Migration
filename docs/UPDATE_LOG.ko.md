@@ -1,4 +1,5 @@
 ## v2026.11.02.1644 — F675-217 관리자 답변 인앱 알림 (기능 추가 / 초안 / 배포 보류)
+**GitHub 인계:** Draft PR #2456 OPEN/HOLD(#2450 상위), 개발 이슈 #2455 OPEN(P0 4 / P1 6). 문서 전용, 배포 없음.
 **사이클:** 이전 기능 보완 v1642 → 현재 기능 추가 v1644 → 다음 기능 보완 v1646(잠정). 시작·중간 확인 main a8541927c3a351d980454c66e95a3356c47e0722, 상위 미병합 Draft #2450, 개발 인계 #2455. **제안/미구현**; 문서 전용, 런타임/DB/금융/Test/Production 변경 없음.
 **실제 근거:** 마이그레이션 196은 관리자 문의 답변을 저장하고 waiting_user 상태로 바꾸지만 알림은 만들지 않는다. NotificationService는 in_app_notifications를 읽으나 safeNotificationLink가 /support를 거부한다. /support?thread는 회원 최근 100개에서만 선택하고 없으면 다른 문의를 열 수 있다. 개발 PostgreSQL 17.11 읽기 전용 실측: 알림 dedupe_key 고유 부분 인덱스, 회원·시각 및 읽음 인덱스, SERVICE_OPERATIONAL 분류 확인. DEV 앱 역할의 알림 INSERT/SELECT 허용은 운영 증거가 아니다. DEV user_items/account_balances UPDATE는 P0 #993. 알림 테이블 생성 출처/새 스키마 일치 검증 필요.
 **V1 기능:** 로그인 회원에게 실제 커밋된 새 관리자 답변당 SERVICE_OPERATIONAL 인앱 알림 정확히 1건. 제목/본문은 고정 안내로 문의 내용·제목·개인정보 미포함. 외부 이메일·푸시·보상·환불 없음. 상태만 변경·과거 답변·회원 답변에는 알림 없음. /account/notifications → 문의 확인 → 정규 /support?thread=<UUID>; 최근 100건 밖 문의도 DB 소유자 단건 조회, 타인/삭제/무효 ID는 다른 문의로 대체하지 않음. 로딩/읽음/안읽음/정상 빈 목록/503 장애/401/403/404/409, KO/EN, 320px WCAG 2.2 AA, Android 계정 전환 및 캐시 보호.
