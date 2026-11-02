@@ -192,6 +192,16 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Credential and session state is owner-only. The global public SEO header
+      // is not safe for these pages, including their localized aliases.
+      ...['', '/ko', '/en', '/ja', '/zh', '/vi'].map((prefix) => ({
+        source: `${prefix}/account/security`,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

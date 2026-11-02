@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { isVerifiedCredentialReceipt } from './credential-receipts';
+import { securityFeedback } from './security-feedback';
 
 const actions = readFileSync('src/app/account/security/actions.ts', 'utf8');
 const page = readFileSync('src/app/account/security/page.tsx', 'utf8');
@@ -35,7 +36,9 @@ describe('member local credential mutation receipts', () => {
   });
 
   it('does not promise actual email delivery from an accepted send request', () => {
-    expect(page).toContain('이메일 변경 확인 메일 발송 요청이 접수되었습니다.');
+    expect(page).toContain('securityFeedback(params, sessionData, receiptEvents)');
+    expect(securityFeedback({ email: 'verification-sent' }, null, [{ type: 'local_email_change_requested', createdAt: new Date().toISOString() }])?.message)
+      .toContain('이메일 변경 확인 메일 발송 요청이 접수되었습니다.');
     expect(page).not.toContain('새 로그인 이메일로 확인 링크를 보냈습니다.');
     expect(page).toContain('robots: { index: false, follow: false }');
     expect(page).toContain('min-h-11');
