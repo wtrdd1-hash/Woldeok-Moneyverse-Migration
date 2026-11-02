@@ -1,3 +1,7 @@
+## 2026-11-03 v1674 — 관련 문의 연결 재실행·인증·삭제 정합성 보완 (기획 전용)
+- F675-224 개선: 무변경 연결도 불변 영수증, 연결/해제 모두 리비전 CAS, DELETE JSON 대신 Idempotency-Key/If-Match 헤더, actor UUID 인증 경계 명확화, 소유권 변경/탈퇴, 최근20 후보 부분성 표시. 미구현, 초안 #2549 종속, 개발 이슈 #2548.
+- 원격 main f5c3fbedae1c3b3ec2374882b049aac43a655eb4, QA v1476 FAILED/P0, 루트 디스크 95%/5.6GB, 공개 Test 0c70a114.../Production 305d7c7...는 이미지 증거 아님. P0 4/P1 6, 운영 보류. 외부 신규 0/누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경, 런타임/DB/금융/배포 변경 없음.
+
 ## 2026-11-03 v1672 — 관리자 전용 관련 문의 연결 (기획 전용)
 - F675-224 신규: 이미 존재하는 내부 메모 F675-143(#1493)와 중복되지 않는다. 같은 회원 문의만 참고용 연결·해제하며 병합/메시지/상태/금융 변경 금지. 관리자 패널·최근 20건 후보, CAS·불변 영수증·쌍 고유 제약·순서 잠금, SQL 역할/소유자 확인, 회원/Android 차단, WCAG·SEO·개인정보·KPI, 기능 기본 OFF. 개발 이슈 #2548, 미병합 Draft #2544 종속.
 - 원격 main `9cade11af53db9f27c2b9f0ea9d39005ea8d0387` 시작/중간 확인, 개발 DB 읽기 전용 문의 3/메시지 6/테이블 268, 앱 잔액 UPDATE 허용. QA v1475 FAILED/P0: 운영 다국어 16/28 HTTP500, TRUNCATE 213/264, 체크섬 5건, Test DB 불일치, 운영 모드 2 FAIL. 루트 디스크 89%, 임의 삭제 없음. P0 4/P1 6. 외부 근거 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED. 런타임·DB·원장·Test·Production 변경 없음, RELEASE HOLD. [작업일지](worklog/2026-11-03-planning-v1672-support-related-cases.ko.md).
