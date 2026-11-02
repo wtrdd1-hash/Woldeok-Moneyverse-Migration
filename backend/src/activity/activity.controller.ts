@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -46,17 +47,23 @@ export class ActivityController {
   @ApiOperation({ summary: 'Ingest client activity telemetry events (page view, dwell, clicks)' })
   async ingestEvents(@Req() request: RequestWithSession, @Body() body: IngestActivityEventsDto) {
     let actor: string | null = null;
-    if (this.sessions) {
-      const token = sessionToken(request.headers, this.config);
-      if (token) {
-        try {
-          const session = await this.sessions.get(token);
-          if (session?.user_id) {
-            actor = session.user_id;
-          }
-        } catch {
-          // Proceed as anonymous if session lookup fails
-        }
+    const token = sessionToken(request.headers, this.config);
+    if (token) {
+      // A storage outage is not evidence that a signed-in member was anonymous.
+      if (!this.sessions) {
+        throw new ServiceUnavailableException({
+          code: 'ACTIVITY_SESSION_UNVERIFIED',
+          message: 'Activity session verification is unavailable',
+        });
+      }
+      try {
+        const session = await this.sessions.get(token);
+        if (session?.user_id) actor = session.user_id;
+      } catch {
+        throw new ServiceUnavailableException({
+          code: 'ACTIVITY_SESSION_UNVERIFIED',
+          message: 'Activity session verification is unavailable',
+        });
       }
     }
     const ip = this.extractIp(request);
