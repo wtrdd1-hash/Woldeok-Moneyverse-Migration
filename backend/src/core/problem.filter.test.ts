@@ -24,6 +24,46 @@ function hostFor(): {
 }
 
 describe('ProblemFilter', () => {
+  it('redacts explicit HTTP 500 error detail and code in production', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({ message: 'database password=private-secret', code: 'SQL_password=private-secret' }, 500),
+      host,
+    );
+    const [document] = json.mock.calls[0] as [Record<string, unknown>];
+    expect(document).toEqual({
+      type: 'about:blank',
+      title: 'Internal Server Error',
+      status: 500,
+      detail: 'internal server error',
+    });
+    expect(JSON.stringify(document)).not.toContain('private-secret');
+  });
+
+  it('redacts explicit HTTP 500 validation arrays in production', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({ message: ['query contains private-secret'], code: 'db_query_failed' }, 500),
+      host,
+    );
+    expect(JSON.stringify(json.mock.calls[0])).not.toContain('private-secret');
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ detail: 'internal server error' }));
+  });
+
+  it('preserves HTTP 500 details in development for diagnostics', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(false).catch(new HttpException({ message: 'developer diagnostic', code: 'db_error' }, 500), host);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ detail: 'developer diagnostic', code: 'db_error' }));
+  });
+
+  it('preserves existing service-unavailable error codes for clients', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({ message: 'source unavailable', code: 'SOURCE_UNAVAILABLE' }, 503),
+      host,
+    );
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ status: 503, code: 'SOURCE_UNAVAILABLE' }));
+  });
   it('maps a NotFoundException to a 404 problem document', () => {
     const { host, status, json } = hostFor();
     new ProblemFilter(false).catch(new NotFoundException('no such thing'), host);
