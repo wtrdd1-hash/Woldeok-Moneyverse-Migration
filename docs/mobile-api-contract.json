@@ -5192,6 +5192,9 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "appliedImageAltQuery": {
+            "type": "string"
+          },
           "posts": {
             "type": "array",
             "items": {
