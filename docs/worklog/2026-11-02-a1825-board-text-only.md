@@ -9,7 +9,8 @@
 - Plan: (1) RED tests for API, SQL and Android/web; (2) implementation; (3) targeted and broad gates; (4) re-fetch main/plans; (5) PR and HOLD record.
 
 ## IN PROGRESS — v2
-- Not started. TDD tests and changes will be recorded in subsequent checkpoint.
+- RED: backend 3 new failures / 19 existing pass; frontend 8 new failures. See host evidence/red-backend.log and red-frontend.log. Tests added before implementation.
+- Next: implement only `media=text` on bounded existing public SQL function, source proof on Nest, web and Android; do not touch other worktrees.
 
 ## FINISHED — v3
 - Pending verification; Production HOLD until all gates pass.

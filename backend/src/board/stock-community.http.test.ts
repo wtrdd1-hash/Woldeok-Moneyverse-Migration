@@ -22,3 +22,19 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+describe('public board text-only discovery HTTP contract', () => {
+  it('returns an explicit source-applied marker even for verified empty text-only results', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'news', media: 'text' })).resolves.toEqual({
+      posts: [], filterApplied: 'text',
+    });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', 'text');
+  });
+
+  it.each([{ media: '' }, { media: 'image' }, { media: ['text', 'text'] }, { media: 'TEXT' }])(
+    'rejects ambiguous text-only filter %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

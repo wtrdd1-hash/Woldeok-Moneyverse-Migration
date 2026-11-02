@@ -52,3 +52,19 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('StockCommunityService public text-only search', () => {
+  it('filters after the bounded public function and never reads private posts directly', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList('WDX', '  제주 ', 'text');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('image_storage_key IS NULL');
+    expect(values).toEqual([50, 'WDX', '제주', 'text']);
+  });
+  it('rejects unknown filter values before DB access', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'images')).rejects.toThrow('invalid media filter');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
