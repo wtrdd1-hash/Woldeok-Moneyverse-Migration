@@ -12,7 +12,7 @@ Docker Compose is not the Production deployment control plane.
 
 ## Current public-edge runtime
 
-GitOps remains target/provenance state for the recovery architecture, but the **current observed public release authority is the Debian 13 host systemd runtime behind Nginx**: Production backend/frontend on ports `3000/3001`, and Test backend/frontend on `3100/3101`. Every promotion must place the approved exact application source into these host release services and verify the public version/runtime evidence. A GitOps manifest update by itself is not evidence that the public site changed.
+GitOps remains target/provenance state for the recovery architecture, but the **current observed public release authority is the Debian 13 host systemd runtime behind Nginx**: Production backend/frontend on ports `4194/4195` (v2026.11.02.1622, source SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`), and Test backend/frontend on `3100/3101`. The previous Production v1619 ports `4184/4185` remain running for rollback. Historical descriptions of ports `3000/3001` below refer to older deployments. Every promotion must place the approved exact application source into these host release services and verify the public version/runtime evidence. A GitOps manifest update by itself is not evidence that the public site changed.
 
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 
