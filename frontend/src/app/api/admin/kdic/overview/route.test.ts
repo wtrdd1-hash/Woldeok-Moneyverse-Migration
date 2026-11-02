@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fixture } from '@/app/admin/kdic/kdic-fixture';
 
 const apiMock = vi.hoisted(() => vi.fn());
-vi.mock('@/lib/api', () => ({ api: apiMock }));
+vi.mock('@/lib/api', () => ({ api: apiMock, ApiError: class ApiError extends Error {} }));
 import { GET } from './route';
 
 beforeEach(() => apiMock.mockReset());

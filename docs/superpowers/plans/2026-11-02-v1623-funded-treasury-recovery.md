@@ -9,10 +9,10 @@
 **Stack:** PostgreSQL 17.11, NestJS, Next.js, Vitest, systemd/Nginx on miniPC.
 
 ## Gates and tasks
-- [ ] Record snapshot counts, original account invariants, checksum of full backup, and isolate from live Production.
-- [ ] Test funded NPS contribution of exactly 1,000 WLD on a clone with a real positive-balance member, validate two postings, unchanged total supply, escrow+wallet deltas, event/outbox and one immutable receipt.
-- [ ] Replay same idempotency key and assert no duplicate money; reject mismatched key, insufficient funds, cross-member key and invalid inputs; test funded NPS full early withdrawal 95/5 split, two escrows and balances; safe rollback negative and no historical rewriting.
-- [ ] Diagnose direct API and BFF auth/403/503 semantics for pension/KDIC and implement only reproduced defects, with failing tests written first.
+- [x] Record snapshot counts, original account invariants, checksum of full backup, and isolate from live Production.
+- [x] Test funded NPS contribution of exactly 1,000 WLD on a clone with a real positive-balance member, validate two postings, unchanged total supply, escrow+wallet deltas, event/outbox and one immutable receipt.
+- [x] Replay same idempotency key and assert no duplicate money; reject mismatched key, insufficient funds, cross-member key and invalid inputs; test funded NPS full early withdrawal 95/5 split, two escrows and balances; safe rollback negative and no historical rewriting.
+- [x] Diagnose direct API and BFF auth/403/503 semantics for pension/KDIC and implement only reproduced defects, with failing tests written first.
 - [ ] Run affected tests, whole typecheck/lint/build and CI. Recheck `main` SHA before integration. Don't promote any failed financial gate.
 - [ ] Independently verify official Test and Production exact code+DB identities, backup/restore and canary cutover where permitted. Record start/mid/end plus EN/KO internal/GitHub updates.
 
