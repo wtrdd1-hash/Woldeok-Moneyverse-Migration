@@ -9,3 +9,6 @@ The authenticated administrator controls overview calls `admin_list_roles`, whic
 ## UX, security and verification
 
 The administrator role card retains responsive layout, keyboard-reachable retry and screen-reader status/alert semantics. Existing admin session authorization and page `robots: noindex` remain. Tests cover backend intentional refusal versus missing privilege and frontend malformed/restricted/empty states. RED and GREEN evidence, exact SHA gates, live PostgreSQL, CI and release decisions are recorded in the task's internal log and PR; PASS must not be inferred from a prior run. Production and Test remain untouched until every release gate passes.
+
+## HTTP privacy / SEO regression
+A separate RED test confirmed the global Next.js X-Robots-Tag index,follow would override the admin page metadata. The specific admin controls path and localized variants now return noindex,nofollow, private,no-store and no-referrer. This is scoped to the existing private page; no new API or public route.
