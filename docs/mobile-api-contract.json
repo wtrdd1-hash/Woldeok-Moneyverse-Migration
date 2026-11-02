@@ -5192,6 +5192,12 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "authorFilterApplied": {
+            "type": "string"
+          },
+          "sourceWindow": {
+            "type": "number"
+          },
           "posts": {
             "type": "array",
             "items": {
