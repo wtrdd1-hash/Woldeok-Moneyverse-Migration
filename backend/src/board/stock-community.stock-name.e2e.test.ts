@@ -9,11 +9,11 @@ describe('public stock-name discovery HTTP integration', () => {
   let app: INestApplication;
   const publicList = vi.fn(async () => []);
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [PublicStockCommunityController],
       providers: [{ provide: StockCommunityService, useValue: { publicList } }],
     }).compile();
-    app = module.createNestApplication();
+    app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
