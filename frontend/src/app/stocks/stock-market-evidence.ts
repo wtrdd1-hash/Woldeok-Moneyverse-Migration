@@ -37,7 +37,8 @@ function verifiedRow(value: unknown): value is PublicMarketStock {
   for (const key of ['shares_outstanding', 'shares_available'] as const) {
     if (typeof value[key] !== 'string' || !NONNEGATIVE.test(value[key])) return false;
   }
-  if (BigInt(value.day_low_price as string) > BigInt(value.day_high_price as string)) return false;
+  if (BigInt(value.day_low_price as string) > BigInt(value.day_high_price as string) ||
+      BigInt(value.shares_available as string) > BigInt(value.shares_outstanding as string)) return false;
   return true;
 }
 

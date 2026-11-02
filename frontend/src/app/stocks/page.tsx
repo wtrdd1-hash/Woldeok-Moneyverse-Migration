@@ -131,7 +131,7 @@ export default async function StocksPage({
               );
             })}
           </div>
-          <span className="text-xs font-mono text-slate-400 hidden sm:inline shrink-0">
+          {verifiedMarket !== null && <span className="text-xs font-mono text-slate-400 hidden sm:inline shrink-0">
             {localeLabel(
               locale,
               `총 ${stocks.length}개 종목 상장 중`,
@@ -139,7 +139,7 @@ export default async function StocksPage({
               `計${stocks.length}銘柄上場中`,
               `现已上市${stocks.length}只股票`,
             )}
-          </span>
+          </span>}
         </div>
 
         {/* 3. 10 Listed Companies: Toss Clean Card List */}

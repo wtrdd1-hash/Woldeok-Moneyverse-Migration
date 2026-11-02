@@ -29,7 +29,7 @@ describe('public virtual market source truth', () => {
       { current_price: '1e9' }, { current_price: 'NaN' }, { current_price: 100 },
       { current_price: '-1' }, { day_open_price: '0' }, { shares_available: '-2' },
       { day_low_price: '9999999999999999999999999999999' },
-      { symbol: '../../admin' }, { id: 'forged' }, { name: '' },
+      { shares_available: '101' }, { symbol: '../../admin' }, { id: 'forged' }, { name: '' },
       { halt_status: 'UNKNOWN' }, { description: 9 },
     ]) expect(parsePublicMarket({ stocks: [{ ...base, ...patch }] })).toBeNull();
   });

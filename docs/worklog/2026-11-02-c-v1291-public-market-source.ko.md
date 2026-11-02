@@ -10,8 +10,15 @@
 ## 진행
 - TDD, 독립 검증, 원격 CI 및 병합·배포 게이트 대기.
 
-## 종료
-- 최종 SHA/검증/보존/배포 결과는 종료 시 추가.
+## 종료 — RELEASE HOLD
+- 코드 체크포인트 `30173ab6dc70cac6a5a66fb5a8dc7ca5b8edbe24`: 전체 Lint 오류 0, Typecheck PASS. 최초 1GiB Next 빌드 OOM → 3GiB 재시도 PASS. Frontend 2,933 PASS, Backend 2,980 PASS/518 SKIP, Contract 41 PASS, DB 패키지 62 PASS/5 SKIP, app-api 184개 PASS, 보안 정책 11 PASS.
+- 추가 TDD RED 2건(거래 가능 수량 불일치, 장애 시 상장 종목 0건 허위 표기) 수정 후 집중 테스트 11 PASS.
+- 독립 PostgreSQL 17.11 마이그레이션 322/322 PASS, 실제 주식 DB 테스트 15 PASS. 앱 계정의 주식 원본 테이블 직접 조회·삽입 불가, 승인된 시세 조회 함수 실행 가능. 컨테이너 제거.
+- 독립 HTTP `/stocks` 200 및 시세 조회 장애/재조회 표시 확인. 공식 인증 브라우저·모바일 E2E는 BLOCKED.
+- 전체 의존성 감사 9건(보통 8, 낮음 1) FAIL, 전체 경로 QA 증빙 파일 누락 FAIL. QA v1459 운영 P0 HOLD(운영 다국어 500, DB 권한·마이그레이션 불일치, 복원 미인증).
+- Draft PR #2454, main 동일. 최종 HEAD exact-SHA 검증 결과는 PR에 별도 기재. Test/Production 미배포, 병합 SHA 없음, 롤백 불필요.
+- 별도 브랜치/worktree 및 고유 변경 보존. Gemini/A/B/QA와 핵심 5개 예약 설정 미변경.
+
 
 ## 중간 — 2026-11-02 09:51 KST
 - TDD RED: 파서 3건, 페이지 4건 실패 재현. GREEN: 파서 5건, 페이지 5건 통과.

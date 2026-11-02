@@ -29,6 +29,7 @@ describe('public market page end-to-end source presentation', () => {
     const html = await render();
     expect(html).toContain('주식 시세를 확인할 수 없습니다');
     expect(html).not.toContain('거래 가능한 종목이 없습니다');
+    expect(html).not.toContain('총 0개 종목 상장 중');
     expect(html).toContain('role="alert"');
     expect(html).toContain('다시 조회');
   });
