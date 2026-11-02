@@ -26,8 +26,8 @@ export class EnterpriseService {
     return this.repository.listPrivateEnterprises();
   }
 
-  async listRecentDividendLogs(limit = 20): Promise<StateEnterpriseDividendLogRow[]> {
-    return this.repository.listRecentDividendLogs(limit);
+  async listRecentDividendLogs(limit = 20, actorId?: string): Promise<StateEnterpriseDividendLogRow[]> {
+    return this.repository.listRecentDividendLogs(limit, actorId);
   }
 
   async harvestSoeDividends(_adminId?: string) {

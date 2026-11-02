@@ -20,7 +20,7 @@ describe('Admin enterprise dividend logs HTTP boundary (isolated guard doubles)'
       controllers: [AdminEnterpriseController],
       providers: [{ provide: EnterpriseService, useValue: { listRecentDividendLogs } }],
     })
-      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(SessionGuard).useValue({ canActivate: (ctx: { switchToHttp: () => { getRequest: () => { session?: unknown } } }) => { ctx.switchToHttp().getRequest().session = { user_id: '11111111-1111-4111-8111-111111111111' }; return true; } })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
@@ -49,6 +49,6 @@ describe('Admin enterprise dividend logs HTTP boundary (isolated guard doubles)'
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs').expect(200);
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs?limit=1').expect(200);
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs?limit=100').expect(200);
-    expect(listRecentDividendLogs.mock.calls).toEqual([[20], [1], [100]]);
+    expect(listRecentDividendLogs.mock.calls).toEqual([[20, '11111111-1111-4111-8111-111111111111'], [1, '11111111-1111-4111-8111-111111111111'], [100, '11111111-1111-4111-8111-111111111111']]);
   });
 });

@@ -156,26 +156,18 @@ export class EnterpriseRepository {
     return res.rows;
   }
 
-  async listRecentDividendLogs(limit = 20): Promise<StateEnterpriseDividendLogRow[]> {
+  async listRecentDividendLogs(limit = 20, actorId?: string): Promise<StateEnterpriseDividendLogRow[]> {
     // Defense in depth for callers that bypass the HTTP controller.
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       throw new BadRequestException('limit must be an integer from 1 to 100');
     }
-    const res = await this.pool.query<StateEnterpriseDividendLogRow>(`
-      SELECT
-        l.id, l.enterprise_id,
-        e.code AS enterprise_code,
-        e.name AS enterprise_name,
-        l.dividend_amount_wld::text,
-        l.revenue_wld::text,
-        l.net_profit_wld::text,
-        l.eval_grade,
-        l.created_at::text
-      FROM public.state_enterprise_dividend_logs l
-      JOIN public.state_enterprises e ON e.id = l.enterprise_id
-      ORDER BY l.created_at DESC
-      LIMIT $1
-    `, [limit]);
+    if (typeof actorId !== 'string' || !/^[0-9a-f-]{36}$/i.test(actorId)) {
+      throw new BadRequestException('valid administrator identity required');
+    }
+    const res = await this.pool.query<StateEnterpriseDividendLogRow>(
+      'SELECT * FROM public.admin_soe_dividend_history_read($1::uuid, $2::integer)',
+      [actorId, limit],
+    );
     return res.rows;
   }
 
