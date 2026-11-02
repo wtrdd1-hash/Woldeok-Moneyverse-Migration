@@ -10,7 +10,7 @@
 
 ## TDD and local gates
 - RED before implementation: Backend 3 failures, Frontend 7 failures. GREEN targeted: Backend 23/23, Frontend 10/10; after millisecond sort correction, focused 10/10 and Frontend 4/4; actual Nest HTTP integration 5/5.
-- Full Backend: **2,989 PASS / 2 FAIL / 518 SKIP**. Both failures are existing `profile-private-response.http.test.ts` authenticated profile 401 instead of expected 200; repair PR #2265 exists. No false full-suite PASS.
+- Full Backend first attempt inherited host `NODE_ENV=production`: **2,989 PASS / 2 FAIL / 518 SKIP**, both in profile auth HTTP. Isolated `NODE_ENV=test` rerun of that file: **8 PASS / 0 FAIL**. Full exact-final-SHA Backend rerun with corrected test environment is pending; do not treat the first attempt as a product regression.
 - Full Frontend first attempt inherited host `NODE_ENV=production`: **499 FAIL / 2,401 PASS**, `React.act is not a function`. Root cause is the test runtime environment; rerun exact code SHA with `NODE_ENV=test`: **2,933 PASS / 0 FAIL**. No source change was made to suppress tests.
 - Database 62 PASS / 5 SKIP; contract 41 PASS; security/backup/release policy 34 PASS; typecheck PASS; ESLint 0 errors / 1,027 pre-existing warnings; Backend+Frontend build PASS, 602 Next pages. App API contract 184 endpoints; initial drift FAIL due to optional response union; generated English/Korean schema and JSON committed, rerun `pnpm api:contract:check` PASS.
 - Production dependency audit 0 known vulnerabilities; full dependency audit **9 (1 low, 8 moderate) FAIL**.
