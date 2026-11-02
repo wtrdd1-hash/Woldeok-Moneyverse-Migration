@@ -1,5 +1,259 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+**현재 기획:** v1676 F675-225 관리자 전용 문의 재확인 알림 / 이슈 #2558 / 초안 #2555 종속 / 운영 보류.
+
+## v2026.11.03.1676 — F675-225 관리자 전용 문의 재확인 알림 (기능 추가 / 초안 / 운영 보류)
+
+**주기와 기준:** 이전 Feature Improvement v1674 → 현재 Feature Addition v1676 → 다음 Feature Improvement v1678(잠정). 원격 main f5c3fbedae1c3b3ec2374882b049aac43a655eb4 시작·중간 재확인; AGENTS.md·README.md·영문 정본·한국어 대조를 기술 기준으로 사용한다. 미병합 Draft #2555(선행 #2549)에 종속, 개발 이슈 #2558. F675-225는 **미구현**이다. 기획 문서만 변경하며 코드·스키마·잔액·아이템·원장·Test·Production을 변경하지 않는다.
+
+### 소스에서 확인한 공백, 목적과 범위
+- 현재 main의 Nest AdminSupportController에는 관리자 문의 목록·메시지·답변·상태 변경만 있다. SupportRepository는 마이그레이션 196의 admin_support_threads/admin_support_reply/admin_support_set_status를 호출하고, 마이그레이션 196에는 support_threads/support_messages 및 (status,last_message_at,id) 대기열 인덱스만 있으며 담당 관리자 개인 재확인 알림 테이블·함수는 없다. /admin/support 웹에는 open/waiting_user/resolved 탭과 답변·상태 폼이 있지만 개인 재확인 목록은 없다. Android app-api는 있으나 관리자 재확인 API 계약은 확인되지 않는다. 개발 PostgreSQL 17.11 읽기 전용 결과 문의 3건·메시지 6건, support_admin_followups 테이블 없음, 앱 계정의 account_balances UPDATE 유효 권한 TRUE(개발 환경에 한함). 이는 설계 공백이며 운영 사고 발생 사실이 아니다.
+- **목적:** 권한 있는 관리자가 특정 문의를 나중에 다시 볼 시각을 개인적으로 지정하되 문의 상태를 바꾸거나 기존 대기열에서 숨기지 않는다. **대상:** 현재 권한이 유효한 관리자. **진입:** /admin/support → 내 재확인 목록 및 선택한 문의 → 나중에 다시 확인. SLA·담당자 배정·상위 처리 요청·내부 메모·자동 답변·회원 알림·대기열 숨김·문의 종료·금융 기능이 아니다. 기존 F675-223 담당자 배정, F675-224 관련 문의, F675-175 회원 임시저장, 기존 답변 템플릿과 중복 구현 금지. V1은 이메일·푸시·cron·외부 전송을 수행하지 않는다.
+
+### 화면·CTA·상태·권한
+- 관리자 본인에게만 알림 유무·기한을 보여주고 시각은 사용자 지역 설정과 KST/UTC 오프셋을 명확히 표시한다. **알림 설정 / 시각 변경 / 알림 해제** 버튼, 1시간·내일·7일 프리셋과 검증된 날짜 입력을 제공한다. 다른 관리자가 문의를 볼 수 있어도 그 관리자의 개인 알림은 볼 수 없다. 권한이 회수되면 접근 불가. 클라이언트가 adminId/memberId를 지정할 수 없다. 문의가 resolved라도 알림을 자동 삭제하거나 문의를 재개하지 않고 **완료된 문의 — 알림을 확인하세요** 안내만 표시한다.
+- **내 재확인 목록**은 기한 도래·예정·전체 필터, 관리자당 활성 최대 20건, (due_at ASC,thread_id ASC) 정렬을 제공한다. 기존 문의 대기열과 상태 우선순위는 유지한다. 기한 도래 여부는 DB 단일 statement_timestamp() 스냅샷에서 계산하고 저장된 상태로 취급하지 않는다. 응답 scope=ACTIVE_OPERATOR_MAX20 및 서버 asOf를 표시하며 전체 과거 이력·여러 요청에 걸친 스냅샷을 주장하지 않는다. LOADING/EMPTY/READY/SAVING/DUE/UPCOMING/CONFLICT/REPLAYED/OFFLINE/FORBIDDEN/UNAVAILABLE/SESSION_EXPIRED를 구분한다. 정상 인증 조회 결과가 비었을 때만 EMPTY를 표시하고 오류를 빈 목록으로 바꾸지 않는다. 복구 가능한 실패 시 입력·선택 문의를 보존한다. 과도한 긴급성 유도 문구 금지.
+- 모든 조회/쓰기에 Nest SessionGuard/AuthenticatedGuard/ConsentGuard/AdminGuard/AdminSessionGuard 및 최근 관리자 재인증, 쓰기에 CsrfGuard를 적용한다. SQL에서도 현재 관리자 역할·문의 존재를 재검증하되 **actor UUID만으로 실제 HTTP 주체를 인증할 수 없다.** v1674의 임의 관리자 UUID 신뢰 경계와 v1670의 역할 회수 직렬화가 해결되기 전에는 기능 OFF를 유지한다. moneyverse_app에 알림·영수증·문의·금융 테이블 직접 DML 부여 금지. 회원 API/Android에는 알림 존재·기한·집계·오류 차이를 노출하지 않는다.
+
+### 제안 API 및 오류 (미실행)
+- GET /api/v1/admin/support/followups?view=due|upcoming|all → {asOf,scope:'ACTIVE_OPERATOR_MAX20',items:[{threadId,subject,status,dueAt,revision,overdue}]}; 단일 SQL 문에서 최대 20건 반환, dueAt<=asOf면 기한 도래. 제목·상태는 관리자 문의 접근을 확인한 뒤에만 조회한다. 20건 활성 상한이므로 전체 이력 건수나 커서는 필요하지 않다. GET /api/v1/admin/support/threads/:threadId/followup → {active,dueAt|null,revision} 및 강한 따옴표형 정수 ETag. 최초 행 부재는 revision 0, 해제 tombstone은 마지막 리비전을 보존한다. 접근 불가 문의는 404.
+- PUT /api/v1/admin/support/threads/:threadId/followup은 {dueAt: RFC3339 오프셋 포함 시각}만 받고 Idempotency-Key: UUID, If-Match: 강한 따옴표형 정수 리비전("0" 포함)을 요구한다. 서버에서 UTC로 정규화하고 신규 요청의 기한은 DB 트랜잭션 시각 기준 15분 이상~30일 이하(양끝 포함), 초 단위만 허용한다. 오프셋 없는 시각, 잘못된 DST, 소수 초·범위 초과를 거부한다. 최초 설정 201, 변경 또는 신규 키의 무변경 200, {active:true,dueAt,revision,replayed:false}와 ETag 반환.
+- DELETE /api/v1/admin/support/threads/:threadId/followup은 본문 없이 동일 두 헤더를 사용하고 {active:false,dueAt:null,revision,replayed:false}를 반환한다. 이미 비활성인 알림에 대한 새로운 키는 불변 영수증을 기록하는 200 무변경이며 리비전/이벤트는 증가하지 않는다. 과거 동일 키 재시도는 나중에 해제·재설정됐어도 최초 결과(replayed:true)만 반환하고 상태를 변경하지 않는다. 현재 인증 및 정규화 요청 다이제스트 검증을 신규 시각 범위·CAS 검증보다 먼저 수행해 이미 기한이 지난 과거 성공도 안전하게 재실행한다. 같은 actor/key로 작업·문의·기한·선행 리비전이 다르면 409. 헤더 누락 428, 오래된 리비전 412, 입력 오류 422, 상한 409 LIMIT_REACHED, 과다 요청 429, 의존성 장애 503. 401/403/404는 회원·관리자 정보 노출을 막고 장애를 빈 목록으로 바꾸지 않는다. Next BFF /app-api/v1은 If-Match/Idempotency-Key/ETag를 보존하고 내부 자격 증명을 브라우저에 노출하지 않는다.
+- 성공·오류 응답 모두 Cache-Control: private,no-store, X-Robots-Tag: noindex,nofollow. 공개 사이트맵·canonical·공유 카드·검색 색인에 문의 정보 노출 금지.
+
+### PostgreSQL 스키마·인덱스·트랜잭션·동시성
+- 실제 최신 고유 마이그레이션 번호 이후 전진형 신규 마이그레이션을 작성하고 적용된 196은 수정하지 않는다. 제안 support_admin_followups는 admin_id UUID REFERENCES users(id), thread_id UUID REFERENCES support_threads(id), active BOOLEAN NOT NULL, due_at TIMESTAMPTZ NULL, revision BIGINT NOT NULL CHECK(revision>=1), created_at/updated_at/cleared_at TIMESTAMPTZ, PRIMARY KEY(admin_id,thread_id), CHECK(active=(due_at IS NOT NULL)), CHECK(active OR cleared_at IS NOT NULL). 행 부재가 revision 0이며 최초 설정은 1, 해제 시 실제 변경에만 증가하고 tombstone을 남긴다. CAS·재실행 보호에 필요한 tombstone 임의 삭제 금지. 활성 행 부분 인덱스 (admin_id,due_at,thread_id) WHERE active. 메시지 본문 인덱스 금지. 관리자당 활성 최대 20건, 임의 자동 축출 금지.
+- 제안 support_admin_followup_receipts는 (actor_id,idempotency_key UUID) UNIQUE, thread_id, 작업, expected_revision BIGINT, 정규화 요청 HMAC 다이제스트, 불변 최초 HTTP 결과·리비전·dueAt·선택적 event_id·생성시각·승인된 보존기한을 기록한다. 메모·메시지·이메일·연락처 저장 금지. HMAC 키는 DB 밖에서 관리하고 회전·재실행 기간을 문서화한다. 실제 변경과 무변경 성공 모두 영수증을 남기며, 감사 이벤트는 실제 변경에만 생성한다. 승인 없는 무기한 보존 주장 금지.
+- 한 트랜잭션에서 Nest 실제 세션/CSRF 인증 → 역할 회수와 공통 잠금 규칙으로 관리자 users 행 잠금 → DB 현재 역할 재검사 → 대상 support_threads 행 잠금 → actor/key 영수증 직렬화 → 알림 행/tombstone 잠금 → 강한 선행 리비전·관리자당 20개 활성 상한 검증 → 행·불변 영수증·필요한 감사 이벤트 원자 기록. 감사 실패 시 전체 롤백. 동일 키 재실행은 현재 권한과 다이제스트를 검증한 뒤 과거 결과만 반환하며 기한 만료·현재 리비전 변경으로 새 쓰기를 하지 않는다. 최초 동시 삽입은 PK로 직렬화하고 설정/해제 경합에서도 중복 활성·상한 초과를 방지한다. HTTP 주체와 SQL actor의 안전한 결속이 미확인되면 fail-closed. SECURITY DEFINER 함수의 search_path 고정·테이블 명시·PUBLIC REVOKE, 검증된 EXECUTE만 moneyverse_app에 부여하며 직접 SELECT/UPDATE/DELETE/TRUNCATE/TRIGGER 금지.
+- 개인정보 생명주기: support_messages, support_admin_followups, 영수증, 감사, support_threads/users의 삭제·보존·법적 보류 순서를 명세한다(196의 user FK는 비연쇄). 권한 회수 즉시 접근 차단, 물리 삭제/가명화·재실행 tombstone·감사 보존은 승인된 정책에 따라 정합성 확보. 즉시 물리 삭제나 관리자 식별자의 영구 보존을 근거 없이 약속하지 않는다. 문의 상태·담당자·메시지·회원 알림·WLD·아이템·원장은 변경하지 않는다.
+
+### SEO·모바일·분석·시험·운영승격
+- 관리자 웹 320px 반응형, 44px 터치 영역, 키보드 날짜 선택·해제 확인·명확한 포커스·스크린리더 상태 알림·충돌 복구, WCAG 2.2 AA. 회원 Android 게이트웨이는 일관되게 거부하며 알림 데이터 없음; 구버전 앱은 미지원 관리자 경로를 안전하게 무시하고 계정 전환·로그아웃 시 캐시를 폐기한다. V1 관리자 Android UI는 제외한다.
+- 행위자/문의별 속도 제한과 권한 탐색 방지, 로그에는 가린 actor·작업·결과·리비전만 기록한다. 관리자 KPI는 20명 이상 익명 집계로 생성·변경·해제·기한 확인·CAS 충돌·재실행 정확성·p95·권한 누출 0을 추적한다. 측정하지 않은 응답시간 개선이나 전환율은 사실로 표시하지 않는다. support_admin_followups_v1 스위치는 기본 OFF, 관리자 한정 점진 적용과 독립 보안 검토 필수.
+- **제안 수용시험(미실행):** 격리 PostgreSQL17 신규/업그레이드·독립 복원, 회원 혼합 합성 문의 10,001건, 동시 상한·설정·해제 경합 100, 무변경→해제→동일 키 재실행 및 오래된 리비전 100, 역할 회수/임의 actor 위장/삭제 경합 100, 회원·Android BOLA 거부 100, 프록시 If-Match/Idempotency-Key/ETag 100, KST/DST·15분/30일 경계, 320px·스크린리더 50. WLD·원장·아이템 변경 0을 검증한다. 개발 A/B/C/QA가 별도 브랜치에서 구현하고 공식 Test 정확 실행 이미지 SHA 인증 E2E, 스위치 OFF·전진 스키마 롤백 리허설, 독립 복원·명시적 승인 후 무중단 운영 승격한다. 적용된 마이그레이션을 역변경하지 않는다.
+
+### P0/P1 개발 인계·최신 QA·외부 독립 근거
+- **P0 4건:** OPS1676-01 실행 이미지/엣지 SHA·외부 독립 복원·롤백·루트 디스크 여유(#1170, 02:01 KST 96% 사용/4.1GB 여유, 타 작업 데이터 임의 삭제 금지); SEC1676-02 운영/Test 앱 UPDATE/DELETE/TRUNCATE/TRIGGER/기본 ACL 및 체크섬 불일치 5건(#993), SQL actor 결속·역할 회수 검증; FIN1676-03 국고/Mint/NPS/SWF 원장 자금 출처와 금융 변화 0 증명; REL1676-04 운영 다국어 500·main CI test-gate·Test DB 불일치 해결, 정확 SHA 인증 Test/Android·독립 운영승격 승인.
+- **P1 6건:** FOLLOW1676-05 DB 행/인덱스/영수증/권한; FOLLOW1676-06 Nest/Next 강한 CAS·불변 재실행·시각 범위 API; FOLLOW1676-07 관리자 기한 목록·접근성; FOLLOW1676-08 회원 Android 차단·게이트웨이/세션 결속; FOLLOW1676-09 개인정보/역할 회수/SEO/KPI; FOLLOW1676-10 실제 PG17/경합/삭제/프록시/스위치 롤백 회귀. 개발 이슈 #2558; 초안 전용, 런타임 변경 없음.
+- **QA v1477, 2026-11-03 01:29 KST: FAILED/P0_PRODUCTION_HOLD.** 운영 9x200/17x500/2x401, Test 26x200/2x401; 정확 main CI 15 SUCCESS/65 SKIPPED/1 FAILED test-gate; 앱 UPDATE 195/DELETE 194/TRUNCATE 213/TRIGGER 214(264개 중), 운영 마이그레이션 323/327 및 체크섬 불일치 5건; 열린 PR 273건/초안 260건. QA 관측값이며 운영 DB를 이번 기획에서 독립 재측정한 결과가 아니다. 02:02 KST 공개 버전 API: Production 305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b, Test 0c70a114da5f4cc5374bc4b80e0403a044f8546f. 공개 ID는 실행 이미지 다이제스트 증거가 아니다. **운영 RELEASE HOLD.**
+- **외부 독립 레퍼런스:** 신규 실제 획득·검증·중복 제거·분류 승인 0건, 누적 승인 UNKNOWN / 10,000, 게이트 BLOCKED / IN PROGRESS. 합성 시험 데이터·과거 제안·UI 목록 규모를 승인된 독립 근거로 계산하지 않는다. 신규 분산 기획 파일 없이 영문·국문 정본/통합문서·업데이트 로그·쌍으로 된 작업일지만 변경한다.
+
+## v2026.11.03.1674 — F675-224 관련 문의 연결 재실행·인증 경계·개인정보 삭제 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Addition v1672 → 현재 Feature Improvement v1674 → 다음 Feature Addition v1676(잠정). **기준:** 원격 main f5c3fbedae1c3b3ec2374882b049aac43a655eb4 시작·중간·최종 재확인, AGENTS.md·README.md·영문 정본·한국어 대조. 미병합 Draft #2549(기초 #2544)에 종속, 개발 이슈 #2548. 문서 전용이며 v1674는 충돌하는 v1672 요청·재실행 조건을 대체한다. F675-224는 **미구현**이다.
+
+### 실제 소스에서 확인한 위험과 보완 결정
+
+1. **actor UUID는 실제 호출자 인증 증거가 아니다.** 적용 마이그레이션 196의 admin_support_threads는 admin_current_roles(p_actor)를 검사하지만 p_actor는 호출자가 전달하는 UUID다. Nest는 Session/Authenticated/Consent/Admin/AdminSession 가드와 requireUserId(req)로 HTTP 세션 사용자를 도출한다. SQL 역할 조회는 *전달된 계정*의 권한을 검사할 뿐 HTTP 세션을 독립적으로 암호학적 인증하지 않는다. 이를 독립 인증으로 주장하지 않는다. 기능 ON 전에 moneyverse_app 권한으로 임의 관리자 UUID를 전달하는 부정시험, 역할 위장 위험 평가, 신뢰된 주체 결속 설계 승인 또는 잔여 백엔드 신뢰 경계의 명시적 수용이 필요하다. 앱 테이블 직접 권한 확대 금지, CSRF/비공개 엣지 유지.
+2. **변경 없는 연결 요청에도 불변 영수증이 필요하다.** v1672의 이미 연결된 관계에 대한 신규 키 200 응답에 영수증 보존 조건이 모호하다. 연결 해제 후 같은 키를 재시도하면 뜻하지 않게 재연결될 수 있다. 최초 승인된 연결·해제 요청은 변경 없음까지 포함해 원래 HTTP 결과·선택적 NULL event_id를 불변 영수증으로 기록한다. 재실행은 매번 현재 인증 및 동일 키·정규화 요청 다이제스트를 확인하고 역사적 결과(replayed=true)만 반환한다. 다른 내용으로 같은 키를 사용하면 409, 재실행 감사 이벤트 추가 금지.
+3. **연결에도 리비전 선행조건이 필요하다.** 기존 POST에는 pair revision 검사가 없어 오래된 관리자 화면에서 해제된 관계를 다시 연결할 수 있다. 양쪽 변경 모두 강한 pair revision 검사를 요구한다. 처음 없는 관계는 revision 0, 최초 연결 1, 해제 시 증가, 재연결 시 다시 증가한다. CAS/재실행 보호 기간 동안 tombstone을 유지하고 리비전은 초기화하지 않는다. 오래된 요청은 412; 이미 연결된 관계의 신규 키 무변경 응답에도 영수증을 남기며 리비전/이벤트는 증가시키지 않는다.
+4. **DELETE JSON 본문 의존을 제거한다.** v1672 DELETE 본문을 대체해 POST·DELETE 모두 Idempotency-Key: UUID 및 If-Match: 강한 따옴표형 pair revision 헤더를 요구한다. POST 본문은 {relatedThreadId}만, DELETE는 경로로 대상 식별하고 본문 없음. 선행조건 누락 428, 오래됨 412, 동일 키 다른 작업·쌍·리비전 409. ETag와 정확한 정수 리비전 문자열 반환. Nest/Next BFF/프록시에서 헤더 전달 시험, 약한 ETag·알 수 없는 필드·잘못된 UUID·정수 범위 초과 거부, 관리자 전용·쓰기 CSRF 유지.
+5. **회원 소유권·탈퇴·역할 회수 일관성.** 마이그레이션 196의 support_threads.user_id 및 support_messages.sender_user_id 외래키에는 ON DELETE CASCADE가 없다. 새 관계 테이블만 연쇄 삭제해도 회원 탈퇴가 안전해지는 것은 아니다. 보존 의무/법적 보류, 메시지→관계→영수증→감사→회원 삭제 순서와 필요한 가명화·최소 보존을 검증한다. support_threads.user_id의 무단 변경을 금지하거나 관계를 같은 트랜잭션에서 해제·감사한다. 모든 조회/쓰기에서 두 문의의 현재 동일 회원 소유를 확인한다. 관리자 역할 회수와 관계 변경은 v1670의 공통 잠금·직렬화 규칙을 사용한다.
+6. **후보 검색은 전체 목록이 아니다.** 기존 인덱스 support_threads_user_recent_idx는 (user_id,last_message_at DESC,id DESC)이고 관계 테이블·접두어 인덱스는 없다. 최근 20건만 표시하면 오래된 문의가 누락될 수 있다. scope=RECENT_20, 21번째 행을 실제 조회한 경우에만 hasMore=true, 전체 건수/전체 없음 주장 금지. q는 NFC·trim한 3~80자 리터럴 접두어이며 LIKE 특수문자를 이스케이프하고 다른 회원 검색을 금지한다. 동일 회원 10,001건 EXPLAIN으로 성능 확인 후 필요할 때만 회원 범위 인덱스를 검토한다. 상태 변경·정렬 변경에도 HTTP 요청 간 완전한 스냅샷을 주장하지 않는다.
+
+### 구현 가능한 DB/API/화면/보안/운영 조건 (제안, 미실행)
+
+양방향 관계를 정규화한 low_id=min(UUID), high_id=max(UUID), CHECK(low_id<high_id), PRIMARY KEY(low_id,high_id), active, revision BIGINT>=1, updated_at을 사용한다. CAS/재실행 보호에 필요한 tombstone은 임의 삭제 금지. (actor_id,idempotency_key) 유일 영수증의 HMAC은 작업·정렬된 쌍·선행 리비전·행위자를 결속하며 원래 상태 코드/리비전과 nullable event_id를 불변 기록한다. 본문·연락처 저장 금지, 키는 DB 밖에서 관리·검증된 기간에 따라 회전, 영구 보존을 근거 없이 주장하지 않는다.
+
+한 트랜잭션에서 Nest 세션·최근 관리자 인증·CSRF 검증 → DB 역할 회수와 공통 잠금으로 역할 재확인 → 두 support_threads를 UUID 오름차순 잠금 → 존재·소유권·리비전 확인 → 관계/tombstone 잠금 → 멱등 영수증 확인·고유키 직렬화 → 신규 연결 시 **양 끝점 각각 최대 20개**를 잠금 상태에서 검사 → 관계·감사·영수증 원자 기록. 재실행은 현재 인증 후 과거 결과만 반환하며 현재 관계 상태를 변경하지 않는다. 감사 실패 시 전체 롤백, 상한 초과는 409 LIMIT_REACHED. 금융 원장·WLD·아이템·메시지·문의 상태·담당자·알림 변경 없음.
+
+관리자 /admin/support?thread=<UUID>의 **관련 문의**에서 기존 문의 연결·보기·연결 해제(확인) 제공. 412 발생 시 새로고침 안내, 역사적 재실행 배지, 저장 중 버튼 비활성화, LOADING/EMPTY/PARTIAL/ERROR/FORBIDDEN 구분. 최근 20건을 전체로 표시하지 않는다. 성공·오류 모두 private/no-store/noindex, 사이트맵 제외, 회원 Android 정보 노출 금지, 320px·WCAG 2.2 AA 키보드/초점/상태 알림. 관리자 KPI는 20명 이상 집계만 사용하고 외부 분석에 UUID·제목 전송 금지; 생성 건수·CAS 충돌·재실행 정확성·p95·권한 누출 0을 측정. 행위자·쌍별 속도 제한, UUID 열거 방지. 기능 스위치 support_related_cases_v1 기본 OFF; 공식 Test 정확 실행 이미지 SHA·인증 E2E·독립 승인 후 운영 승격, 롤백은 스위치 OFF(역마이그레이션 금지), tombstone/영수증 보존, 독립 복원 및 금융 변화 0 증명.
+
+**제안 수용시험(미실행):** PostgreSQL17 신규/업그레이드, 회원 혼합 합성 문의 10,001건, 역순 연결 동시성 100, 20개 상한 경합 100, 무변경→해제→같은 키 재실행 100, 해제→재연결→오래된 If-Match 100, 역할 회수/임의 actor 위장 100, 소유권 변경/탈퇴 경합 100, DELETE 프록시 헤더 보존 100, 회원 Android/BOLA 차단 100, 320px/스크린리더 50. 모든 시험에서 영수증·감사 원자성과 금융 변경 없음 확인.
+
+### P0/P1 개발 백로그·QA·외부 근거 게이트
+
+**P0 4건:** OPS1674-01 실행 이미지/엣지 SHA·롤백·외부 독립 복원 증명, miniPC 루트 디스크 **01:10 KST 사용률 95%, 여유 5.6GB**를 타 작업 데이터 삭제 없이 완화(#1170); SEC1674-02 운영/Test 앱 TRUNCATE/UPDATE/DELETE 권한·체크섬 불일치 5건(#993) 재검증 및 임의 actor SQL 호출·역할 회수 보안 검토; FIN1674-03 국고/Mint/NPS/SWF 자금 출처와 금융 변경 0 증명; REL1674-04 운영 다국어 500·운영모드 테스트·Test DB 불일치 해결, 정확 SHA 인증 E2E/Android·독립 복원·승인. **P1 6건:** LINK1674-05 DB 정규화 쌍/tombstone/20개 상한/권한 부정시험; LINK1674-06 Nest/Next 멱등 무변경 영수증·CAS 헤더; LINK1674-07 관리자 UI 최근20 표시·412/재실행·접근성; LINK1674-08 Android 회원 차단·세션 결속; LINK1674-09 탈퇴·감사/KPI·SEO 엣지; LINK1674-10 격리 PG 10,001건·경합·프록시 회귀·스위치 OFF 롤백. 개발 예약에서 별도 브랜치, 공식 Test exact-SHA 게이트 및 승인된 운영 승격만 수행한다.
+
+**개발 DB 신규 읽기 전용 확인:** PostgreSQL 17.11 woldeok_moneyverse_dev의 문의 3건·메시지 6건, support_related_cases 테이블 없음, moneyverse_app의 account_balances UPDATE 유효 권한 TRUE. 개발 환경 증거이며 운영 권한 측정값이 아니다.
+
+**최신 QA:** v1476 2026-11-03 00:38 KST FAILED/P0_PRODUCTION_HOLD (/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.03.1476-end.md): 운영 다국어 HTTP500 16/28, Test 0/28, Test 후보 #2545 Treasury CI 13건 실패, 공식 인증 exact-main Test E2E와 외부 독립 복원 BLOCKED. QA 기준 main은 과거 9cade11a...이며 새 main f5c3fbed...의 승인 근거가 아니다. 01:12 KST 공개 버전 API: Test 0c70a114da5f4cc5374bc4b80e0403a044f8546f, Production 305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b. 공개 ID는 실제 이미지 다이제스트 증거가 아니다. **Production RELEASE HOLD**.
+
+**외부 독립 레퍼런스:** 신규 실제 확보·검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 합성 시험 데이터는 외부 독립 근거로 계산하지 않는다. 기획에서 런타임·DB·WLD·아이템·금융 원장·Test·Production·예약 설정 변경 금지.
+
+
+## v2026.11.03.1672 — F675-224 관리자 전용 관련 문의 연결 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Improvement v1670 → 현재 Feature Addition v1672 → 다음 Feature Improvement v1674(잠정). **기준:** 최신 원격 main `9cade11af53db9f27c2b9f0ea9d39005ea8d0387` 시작·중간 확인, AGENTS.md·README.md·영문 정본·본 한국어 대조. 미병합 Draft #2544(F675-223) 위에 쌓인 기획이며 #2537도 선행한다. F675-217~224를 main 구현 기능으로 간주하지 않는다. **개발 인계:** [#2548](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2548). 기획 전용이며 런타임·DB·금융·Test·Production 변경 없음.
+
+### 목적, 확인한 공백, 대상과 범위
+
+실제 마이그레이션 `196-user-admin-support-chat.sql`은 `support_threads`·`support_messages` 및 관리자 목록/답변/상태 함수만 제공하며 문의 간 관계 테이블은 없다. Nest `backend/src/support/support.controller.ts`에도 목록·메시지·답변·상태만 있다. `frontend/src/app/admin/support/admin-support-view.tsx`에는 회원에게 보내는 기본 답변 문구는 있지만 관련 문의 연결 기능은 없다. 개발 PostgreSQL 17.11 읽기 전용 확인: 문의 3건, 메시지 6건, public 테이블 268개, 앱 계정 잔액 직접 UPDATE 허용. 실제 회원 피해 발생을 주장하지 않는다. 내부 메모 F675-143(#1493)은 이미 별도 기획되어 중복하지 않는다.
+
+**목적:** 같은 회원이 반복 제출한 문의를 관리자가 안전하게 연결해 중복 조사를 줄인다. **대상/진입:** 현재 권한을 보유한 관리자 `/admin/support?thread=<UUID>` → 관리자 전용 **관련 문의** 패널. 이는 참고용 연결이지 병합이 아니다. 메시지·첨부파일 복사, 회원/담당자/분류/상태/SLA/우선순위/잔액 변경, 회원 알림, 자동 종료, 다른 회원 문의 자동 추천은 금지한다.
+
+### 화면, CTA, 상태 및 접근성
+
+- 관리자만 관련 문의 카드(제목·상태·생성일·관리자 내부 링크)와 **기존 문의 연결**, **문의 보기**, **연결 해제**(확인 대화상자)를 본다. 후보 선택기는 동일 회원의 최근 최대 20건만 표시하며 현재·이미 연결된 문의는 제외한다. 선택적 제목 접두어 검색은 3~80자이고 **전체 검색이 아닌 최근 일치 항목**임을 표시한다. 클라이언트가 보낸 회원 ID를 신뢰하지 않는다. 최고 관리자도 다른 회원 문의는 연결할 수 없다. 회원 `/support`, 내보내기, 공개 프로필, 알림에는 표시하지 않는다.
+- 상태 `LOADING`, 성공한 조회에 한한 `EMPTY`, `READY`, `SAVING`, `LINKED`, `UNLINKED`, `CONFLICT`(새 키로 재시도), `FORBIDDEN`, `UNAVAILABLE`. 401/403/503을 빈 목록으로 위장하지 않고 실패 시 입력을 보존한다. 과거 요청 재실행은 신규 변경으로 표시하지 않는다.
+- 관리자 웹은 모바일 반응형, 44px 터치 영역, 키보드 모달·초점 복귀·스크린리더 상태 알림 및 WCAG 2.2 AA를 준수한다. 회원 Android app-api는 403/404로 메타데이터를 차단한다. 관리자 Android 화면은 별도 승인 전 범위 밖이다.
+
+### 제안 API 및 권한 (아직 미구현)
+
+- `GET /api/v1/admin/support/threads/:threadId/related`: 활성 연결 0~20건, `{relatedThreadId,subject,status,createdAt,relationRevision}`; 본문·연락처 제외, `Cache-Control: private, no-store` 및 `X-Robots-Tag: noindex, nofollow`, 조회 중 쓰기 없음.
+- `GET /api/v1/admin/support/threads/:threadId/related-candidates?q=<prefix>`: 같은 회원의 다른 최근 문의 최대 20건, 선택적 3~80자 정규화된 접두어, `(last_message_at DESC,id DESC)` 정렬, `{candidates,scope:'RECENT_20'}`. 전체 건수·완전성 주장 금지, 길이 초과 422. 범용 `threads/:id/:slug`와 충돌하지 않는 명시 경로.
+- `POST /api/v1/admin/support/threads/:threadId/related` JSON `{relatedThreadId:UUID,idempotencyKey:UUID}`: 최초 생성 201, 새로운 키로 이미 연결된 건 재확인 200, 동일 요청 재실행은 원래 결과+`replayed:true`(이벤트 추가 없음). 같은 관리자·키로 다른 대상/동작 재사용은 409. 자기 자신 연결 422, 다른 회원 대상 404, 한 문의당 활성 20개 초과 409.
+- `DELETE /api/v1/admin/support/threads/:threadId/related/:relatedThreadId` JSON `{expectedRevision:십진 문자열,idempotencyKey:UUID}`: 최초 해제 200, 오래된 리비전 409, 없는 관계 404. 동일 키 재실행은 과거 결과를 돌려주며 이후 다시 연결된 관계를 변경하지 않는다. DTO는 알 수 없는 필드·잘못된 UUID·범위 초과 리비전을 거부한다.
+- 기존 Nest `SessionGuard`, `AuthenticatedGuard`, `ConsentGuard`, `AdminGuard`, `AdminSessionGuard`, 쓰기 CSRF를 유지한다. SQL 함수도 **독립적으로** 현재 관리자 역할과 두 문의의 동일 소유자를 확인한다. v1670 역할 회수와 공통 잠금 규약 검증 전 기능 ON 금지. 응답 401/403/404/409/422/429/503, 성공·오류 모두 private/no-store, Next 서버 전용 API 중계, 브라우저에 내부 토큰 노출 금지.
+
+### PostgreSQL 제약·인덱스·트랜잭션·멱등성
+
+- 기존 적용 마이그레이션 196 수정 금지. 실제 최신 고유 번호 뒤에 순방향 마이그레이션 추가: `support_related_cases(thread_low_id UUID REFERENCES support_threads(id), thread_high_id UUID REFERENCES support_threads(id), active BOOLEAN, revision BIGINT CHECK(revision>0), created_at,updated_at,removed_at)`; PK `(thread_low_id,thread_high_id)`, `CHECK(thread_low_id<thread_high_id)`, `CHECK(active=(removed_at IS NULL))`. UUID 정렬로 순서가 뒤집힌 중복 관계를 방지한다. 활성 관계의 역방향 조회를 위해 `(thread_high_id,thread_low_id) WHERE active` 인덱스와 필요한 정방향 인덱스를 둔다. 회원 삭제 시 자동으로 개인정보가 모두 삭제된다고 가정하지 않고 FK 삭제 순서를 별도 검증한다.
+- `support_related_case_receipts(actor_id,idempotency_key,operation,canonical_pair,payload_digest,result_revision,result_kind,result_at)`에 `(actor_id,idempotency_key)` PK와 불변 영수증을 둔다. HMAC 기반 다이제스트는 관리자·동작·정규화 쌍·예상 리비전을 결속한다. `CREATED`, `UNCHANGED`, `UNLINKED`, `ALREADY_REMOVED`를 구분하며 가짜 변경 이벤트를 만들지 않는다. `support_related_case_events`에는 본문 없는 추가 전용 감사 메타데이터만 기록한다. 감사 기록 실패 시 전체 트랜잭션을 롤백한다.
+- 동일 트랜잭션에서 역할 회수 경로와 공통 규약으로 현재 역할을 잠그고, 두 문의 행을 UUID 오름차순으로 잠근 뒤 존재·동일 `user_id`·양쪽 활성 연결 20개 제한을 검증한다. 동일 관리자·키 충돌은 영수증 고유 제약과 불변 다이제스트로 직렬화한다. 관계 행 잠금·CAS·감사·영수증을 원자적으로 수행한다. 역순 동시 연결은 관계 하나만 만들고, 제한 경합에서도 20개를 넘지 않아야 한다. `last_message_at`과 회원 메시지·읽음 표식은 변경하지 않는다. HTTP 요청 사이 완전한 스냅샷은 보장하지 않으며 제한된 실시간 목록이라고 표시한다.
+- `admin_support_related_list`, `admin_support_related_candidates`, `admin_support_related_link`, `admin_support_related_unlink`는 고정 `search_path`의 `SECURITY DEFINER`, 명시적 actor·관리자 역할·동일 소유자 확인, PUBLIC EXECUTE 회수, `moneyverse_app`에는 EXECUTE만 부여한다. 앱 테이블 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 부여 금지. 회원 삭제·관리자 역할 회수·감사 보존·법적 보존 예외는 FK와 개인정보 삭제 정책을 승인받아야 하며 실제 물리 삭제를 검증 없이 주장하지 않는다. 영수증·메타데이터 암호화 및 키 관리는 기능 ON 전에 개인정보 검토를 통과해야 한다.
+
+### 보안·악용 방지·SEO·모바일·분석·배포
+
+관리자·관계별 요청 속도 제한, UUID 열거 방지, 접두어·응답 크기 제한, 제목 이스케이프, 회원 식별자/검색어 로그 금지, 외부 분석 전송 금지, sitemap·검색 노출 금지. 회원 대화 내보내기·이메일·Discord·Android app-api에 연결 정보가 포함되면 안 된다. k>=20 익명 집계에서만 관련 문의 활용률, 중복 조사 시간의 간접 지표, 연결/해제 오류율을 보고하며 부족하면 UNKNOWN, 관리자 개인 순위나 인과 효과를 주장하지 않는다. 기능 스위치 `support_related_cases_v1` **기본 OFF**.
+
+**제안 수용시험(미실행):** PostgreSQL17.11 신규/업그레이드 마이그레이션·권한 부정시험, 합성 문의 10,001건, 역순 동시 연결·20개 제한·해제/재연결 뒤 동일 키 재실행·오래된 CAS·역할 회수·회원 삭제·감사 실패 롤백 각 100회, 다른 회원 BOLA와 회원 Android 차단 100회, 알림/메시지/상태/금융 변경 0건, 웹/모바일 WCAG 및 noindex/no-store 검사. 공식 분리 Test에서 정확한 후보 SHA의 인증 E2E, 전체 백업과 독립 복원, GitOps 승인, 카나리 관찰 및 기능 OFF 롤백 후에만 운영 승격 가능. 스키마 롤백은 삭제가 아닌 순방향/스위치 OFF를 원칙으로 한다.
+
+### P0/P1 개발 백로그·QA·외부 근거 게이트
+
+**P0 4건:** `OPS1672-01` 실제 실행 바이너리/이미지/엣지 SHA·외부 독립 복원·롤백 및 루트 디스크 89% 여유 확보(#1170); `SEC1672-02` 운영 앱 TRUNCATE 213/264, UPDATE 195/264, DELETE 194/264, 체크섬 불일치 5건과 Test DB 연결 불일치(#993, #2546); `FIN1672-03` 실제 자금 출처 원장 대조와 별도 승인된 금융 초기화 검증(#2545는 미배포 초안); `REL1672-04` 운영 다국어 16/28 HTTP500, 운영 모드 백엔드 2 FAIL, 라우트 원장 누락, 공식 Test exact-SHA·GitOps 게이트(#2263, #2265). **P1 6건:** `RELCASE1672-05` DB 제약/인덱스/권한, `-06` SQL 잠금·CAS·영수증·감사, `-07` Nest API/가드/라우트 맵, `-08` Next 관리자 UI·모바일 개인정보, `-09` 삭제/보존·SEO·KPI, `-10` 실제 PG 경합·보안·E2E·롤백.
+
+**최신 독립 확인 QA v1475(2026-11-02 23:46 KST): FAILED / P0_PRODUCTION_HOLD.** 운영 다국어 HTTP500 16/28, 앱 TRUNCATE 213/264, 체크섬 5건, 운영 모드 백엔드 2건 실패, 전체 의존성 경고 9건, Test DB 불일치. 소스 단위시험 성공은 배포 승인 근거가 아니다. 출처 `/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1475-internal.md`. **외부 독립 레퍼런스:** 이번 회차 신규 확보·검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 검증되지 않은 달성을 주장하지 않는다. **Production RELEASE HOLD.**
+
+## v2026.11.02.1670 — F675-223 담당자 배정 무변경 영수증·권한 회수·개인정보 삭제 정합성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Addition v1668 → 현재 Feature Improvement v1670 → 다음 Feature Addition v1672(잠정). **기준:** origin/main 9cade11af53db9f27c2b9f0ea9d39005ea8d0387 시작·중간 확인(완료 재조회 필요), AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본과 국문 동등성. **선행:** 미병합 v1668 Draft #2537 (b19aa0dc9c888a4c5a57a3adcad7223f6f1826f1), 개발 이슈 #2536. 문서 전용이며 F675-223은 **미구현**.
+
+### 실제 소스 근거와 설계 수정
+
+1. **변경 없는 요청에도 영수증 필요:** v1668은 상태가 동일한 새 멱등키 요청에 이벤트를 남기지 않는다고 했지만, 제안 영수증은 event_id가 필수이며 무변경 결과의 영속 저장이 명확하지 않음. 나중에 담당자가 바뀐 후 동일 키가 재시도되면 뜻하지 않은 변경을 일으킬 위험이 있음. **수정:** 수락된 모든 키에 불변 영수증 저장. 결과 UNCHANGED는 event_id NULL, 담당자 리비전 증가 없음, 가짜 변경 이벤트·감사 없음. 요청 HMAC은 관리자·문의·작업 버전·대상·사유·기대 리비전·정규화 본문 포함. 재시도 시 현재 관리자 권한 재검증 후 **과거 결과**를 반환하며 현재 담당자로 오인시키지 않음. 동일 키·다른 내용은 409, 동일 키 경합은 유니크 인덱스·행 잠금으로 직렬화. 개인정보 영구 보존 대신 법적 보존 기간 후 최소 재생 방지 tombstone 검토.
+2. **권한 회수와 담당자 변경 경합:** 마이그레이션 007의 admin_current_roles는 active users와 user_roles를 조회하지만 행 잠금은 수행하지 않음. 마이그레이션 196의 관리자 답변·상태 변경도 먼저 역할 확인 후 갱신함. v1668의 트랜잭션 내 역할 확인만으로 동시 권한 회수를 막는다고 단정할 수 없음. **수정:** 관리자·대상자 UUID 순으로 신원/역할 잠금 → 문의 행 → 담당자 행 → 영수증/이벤트 순서를 검토하고, 권한 부여·회수 경로에도 **동일 직렬화 규칙** 적용(또는 동등한 검증된 직렬화). 권한 관리 경로와 합의되지 않으면 기능 활성화 BLOCKED. 단순 2회 SELECT는 증명이 아님. Nest 최신 관리자 세션·동의·CSRF와 SQL 활성 역할 검증 모두 필수. 권한 회수된 요청자는 과거 영수증 재조회도 403 처리하며 관리자 신원 누출 금지.
+3. **삭제·보존·NULL 담당자:** 마이그레이션 196의 support_threads.user_id 및 support_messages.sender_user_id는 ON DELETE CASCADE가 없고, v1668 신규 담당자 FK도 사용자 삭제 전략이 불명확함. 회원 탈퇴나 관리자 계정 삭제 시 FK 충돌·불필요한 직원 식별자 보존 위험. **수정:** 회원 문의/메시지, 현재 담당자, 변경 이벤트, 감사, 영수증, 직원 계정의 법적 보존·삭제 순서 명세. 금융/감사 테이블에 무분별한 CASCADE 금지. 합법적 삭제 후 최소 비가역 중복 방지 표식만 보존; 현재 담당자 NULL 및 STALE/ERASED 상태는 명시적 감사 변경으로만. FK RESTRICT, 직원 비활성·삭제, 회원 삭제, 이벤트/영수증 보존 및 삭제 후 재시도 테스트. 출처 미확인은 UNASSIGNED로 조작하지 말고 UNKNOWN/503.
+4. **목록 출처 리비전의 실제 증명:** v1668의 sourceRevision은 생성 주체가 정의되지 않았음. 요청 하나의 MVCC 스냅샷이나 시각을 커서에 넣는 것만으로 여러 HTTP 요청에 걸친 완전한 목록을 보장할 수 없음. 답변·상태·담당자·보존·삭제를 모두 포괄하는 지속적 변경 워터마크를 설계·검증하거나, 검증 전까지 LIVE_BEST_EFFORT와 새로고침을 표시하고 전체 누락 없음 주장 금지. 기존 open → waiting_user → resolved 순서, DB 마이크로초 시각+UUID, 50+1, 관리자 세션에 묶인 5분 암호화 커서 유지. 전역 핫 로우는 성능 검토 없이 도입 금지. 변경된 커서 409, 만료 410, 부분 성공으로 위장 금지.
+
+### 관리자 UX·API·DB·보안·운영 계약
+
+**대상/진입:** /admin/support의 권한 있는 관리자에게 담당/해제/인계/인수, 리비전, 과거 결과 배지, 권한 상실 경고, 충돌 후 새로고침 CTA 제공. 회원 /support에는 직원 정보 미노출. 자동 배정·만료·SLA·금전 권한 없음. 키보드·스크린리더에 409/403/503 상태 명확히 알림, 320/390px·200% 확대·44px 터치 목표. Android 관리자 기능이 존재하는 경우에만 검증된 세션 세대와 응답으로 처리하고 직원 정보 디스크 캐시 금지. 실제 엣지의 성공·오류 모두 private no-store/noindex/nofollow/noreferrer/nosniff; 분석에 회원/직원 ID 기록 금지.
+
+**쓰기 API:** v1668 POST/PUT/DELETE /api/v1/admin/support/threads/:id/assignment 유지, expectedAssignmentRevision 10진 문자열·UUID 멱등키 필수, 미허용 필드 거부. 최초 요청은 현재 권한 확인과 역할 잠금 → 문의/담당자 잠금 → 정규화 요청 다이제스트 확인·저장 → CAS → 실제 변경일 때만 이벤트·감사 → UNCHANGED 포함 영수증을 **단일 트랜잭션**에 기록. 영수증 event_id는 UNCHANGED일 때만 NULL, CHANGED일 때 반드시 존재하도록 CHECK; UNIQUE(actor_admin_id,idempotency_key), 키 버전·HMAC·저장 응답·생성시각·보존 상태 필수. 새 키의 무변경 요청도 기대 리비전이 오래됐으면 409. 같은 키·같은 내용은 현재 권한 확인 후 저장된 **과거 결과** 반환, 다른 내용은 409. 400/401/403/404/409/410/429/503 구분, 존재 여부 노출 없는 404. 브라우저 버튼 비활성화는 중복 방지 근거가 아님.
+
+**조회/DB:** PostgreSQL SECURITY DEFINER 고정 search_path·PUBLIC 권한 회수·앱 계정 EXECUTE만 허용. GET /api/v1/admin/support/assignments는 권한 확인된 50+1 목록과 검증 가능한 범위/완전성만 반환. 권한 부여·회수 경로와 잠금 순서, admin_append_audit_event 전역 감사 체인 잠금의 데드락 가능성을 함께 검토. 영수증 (관리자,키), 담당자 (관리자,갱신시각), 상태 우선순위 인덱스는 10,001개 합성 문의 EXPLAIN 후 결정. HMAC 키 교체, FK 삭제, 기존 영수증 보존 정책 필요. 기능 스위치 support_admin_assignment 기본 OFF. 기획은 금융/아이템/WLD/원장/국고/운영 배포를 변경하지 않음.
+
+**수용·롤백(제안, 미실행):** 무변경→후속 변경→동일키 재시도 100회, 동일키 다른 본문 100회, 관리자 담당/권한 회수 경합 100회, 직원/회원 삭제·보존 100회, 답변/상태/담당 변경 경합 100회; 앱 계정 직접 DML 거부, 커서 변조·만료·세션 교체, Android/웹 개인정보 헤더·접근성. PostgreSQL17.11 기존 323개+고유 신규 전진 마이그레이션, 공식 Test 정확 SHA, 인증 E2E, 외부 독립 암호화 복원, 금융 변동 0, 승인된 GitOps 운영 승격·롤백 전까지 OFF. B/DB/API, A/Web, C/Android, QA 각기 다른 브랜치에서 수행.
+
+### 갱신된 P0/P1 개발 백로그·QA·외부 근거
+
+**P0 4건:** OPS1670-01 실제 실행 바이너리/이미지/엣지 SHA·외부 복원·롤백; SEC1670-02 Production 앱 TRUNCATE 213/264, 기본 앱 권한 8, UPDATE/DELETE·적용 체크섬 5건·Test DB 정체성(#993); FIN1670-03 국고/원장 출처·금융/아이템 변동 0 독립 증명; REL1670-04 운영 다국어 HTTP500 16/28, 운영 모드 백엔드 2 FAIL, 감사 9, QA 정책 1 FAIL, 공식 Test 정확 SHA/E2E/승인. **P1 6건:** ASSIGN1670-05 B/DB 무변경 영수증·FK 삭제·권한 회수 직렬화; ASSIGN1670-06 B/API 과거 영수증/409/403/503; ASSIGN1670-07 A/Web 충돌·과거 결과·목록 범위; ASSIGN1670-08 C/Android/엣지 개인정보 fail-closed; ASSIGN1670-09 관리자 감사/KPI 20명 미만 셀 억제·권한 상실 대시보드; ASSIGN1670-10 QA 합성 10,001건·100회 동시성/삭제/재시도·잠금 증명·정확 SHA·롤백.
+
+**최신 QA v1474(2026-11-02 23:03 KST): FAILED / P0_PRODUCTION_HOLD**, 원본 /srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1474-end.md. 운영 다국어 HTTP500 16/28, 앱 TRUNCATE 213/264, 기본 앱 권한 8, 운영 모드 백엔드 2 FAIL, 전체 감사 9, QA 정책 1 FAIL; Test HTTP500 0/28. 23:15 KST 공개 Production/Test /api/version 모두 305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b, 현재 main 9cade11af53db9f27c2b9f0ea9d39005ea8d0387과 다름. 공개 SHA만으로 실제 실행 이미지 다이제스트 증명 불가. 개발 PG17.11 읽기 전용: 문의 3/메시지 6/담당자 테이블 0, 앱 잔액 UPDATE 허용. 운영 RELEASE HOLD.
+
+**외부 독립 레퍼런스:** 신규 검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 달성 주장 금지. 문서 전용으로 런타임/DB/WLD/아이템/원장/Test/Production/예약 변경 없음.
+
+## v2026.11.02.1668 — F675-223 관리자 문의 담당자 배정·인계 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Improvement v1666 → 현재 Feature Addition v1668 → 다음 Feature Improvement v1670(잠정). **기준:** 시작 시 main `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b` 확인(중간·완료 재확인 필요), AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본과 국문 동등 문서. **부모:** 미병합 초안 #2529(v1666, #2523 후속). **개발 인계:** #2536. 문서 전용 초안이며 구현 승인 아님. F675-223 및 기존 F675-217~222 초안은 main에 구현되지 않음.
+
+## 목적·대상·실제 코드 근거
+
+**목적:** 관리자 두 명이 같은 문의를 중복 처리할 위험을 줄이고 명시적 인계를 남기되 회원 답변을 막지 않음. **대상:** `/admin/support`의 인증된 관리자. 회원 `/support`에는 담당 관리자 신원, 답변 시간 보장, 금융 혜택을 노출하지 않음. **실측:** 마이그레이션 196의 `support_threads`에는 상태·제목·최근 메시지 시각은 있지만 담당자·배정 리비전이 없음. `admin_support_threads` 정렬은 open → waiting_user → resolved. Nest AdminSupportController에는 목록/메시지/답변/상태 변경만 있으며 배정 API가 없고 AdminSupportView에도 배정 CTA가 없음. 실제 PostgreSQL17.11 읽기 전용 확인: 문의 3건/메시지 6건, `assigned_admin_id` 및 `support_assignment_events` 없음, `moneyverse_app`의 account_balances UPDATE/TRUNCATE 권한 true. 이는 기능 공백과 권한 위험의 증거이며 **실제 운영 중복 처리 사고 증거는 아님**.
+
+## 대안·채택 범위
+
+**A 브라우저만의 '처리 중' 배지:** 관리자 간 동기화 불가로 기각. **B 독점 잠금·자동 만료 임대:** 연결이 끊긴 담당자 때문에 답변이 막힐 수 있어 기각. **C 채택 V1:** DB 트랜잭션/CAS 기반 문의당 담당자 1명, 명시적 인계·인수·감사. **배정은 협업 안내일 뿐 권한이나 독점 잠금이 아님**. 기존 관리자의 답변·상태 변경 권한을 변경하지 않으며 자동 배정·SLA·우선순위 상향·회원에게 직원 신원 표시·WLD/아이템/원장 쓰기를 하지 않음. F675-222 분류는 선택적 연계이며 배정의 필수 선행 기능이 아님.
+
+## 권한·진입점·화면·CTA·상태
+
+로그인·최신 동의·AdminGuard·최근 관리자 세션을 통과한 관리자는 `/admin/support`에서 전체/미배정/내 담당/다른 담당/오래됨 필터를 사용. 오래됨은 담당자 권한 상실 또는 24시간 변경 없음으로 표시하되 **24시간은 경고 기준이지 자동 만료가 아님**. 관리자만 담당자 표시명·배정 리비전·검증된 변경시각 확인. **담당하기(Claim)** 미배정, **담당 해제(Release)** 본인, **인계(Transfer)** 현재 담당→활성 관리자, **인수(Take over)** 다른 담당 건은 필수 사유(`handoff_unavailable|coverage|escalation`)·확인, **새로고침** 409, **다시 시도** 503, 제출 중 버튼 비활성화. 대상은 임의 UUID가 아니라 권한 검증된 활성 관리자 선택기. 로딩/확인된 빈 상태/401·403/권한 해지/충돌 409/429/503/출처 불명 구분. 마지막 답변자를 담당자로 추정하거나 자동 배정 금지. 기존 open→waiting_user→resolved 우선 정렬과 그룹 내 last_message_at DESC,id DESC 유지.
+
+## 제안 API 계약(관리자 전용·비공개)
+
+`GET /api/v1/admin/support/assignments?status=&assignment=all|unassigned|mine|others|stale&cursor=`는 최대 50+1건, `threadId,status,assignmentState,assigneeDisplay(관리자만),assignmentRevision(십진 문자열),assignedAt,assignmentUpdatedAt,nextCursor,sourceRevision` 반환. 목록에는 메시지 본문 미포함, 근거 없는 총계 금지. F675-222가 구현되면 상태 우선순위·원본 검증 커서를 재사용하고 아니면 별도 검증된 제한 조회 함수 구현. 커서는 관리자·세션·필터·상태순위·PostgreSQL 마이크로초 시각·UUID·리비전·5분 유효기간을 AES-256-GCM으로 결속, 키 회전. 원본 변경 409, 만료 410, 부분 성공 반환 금지. 기존 `/threads/:id/messages/:messageId` 라우트와 충돌 금지.
+
+`POST /api/v1/admin/support/threads/:id/assignment` 미배정 건 담당, `PUT /api/v1/admin/support/threads/:id/assignment` 인계·사유 있는 인수, `DELETE /api/v1/admin/support/threads/:id/assignment` 본인 해제(타인 건은 명시적 감사 인수 절차만). 변경 요청마다 `expectedAssignmentRevision` 십진 문자열, UUID `idempotencyKey`, CSRF·최근 관리자 세션 필수. 응답은 `threadId,assignmentRevision,assigneeId(관리자만),eventId,outcome,changedAt`. 동일 키·동일 정규화 요청은 이후 리비전이 바뀌어도 최초 영수증 재생; 동일 키·다른 내용 409 `IDEMPOTENCY_CONFLICT`, 새 키·오래된 리비전 409 `ASSIGNMENT_CHANGED`, 없는 문의 404, 잘못된 요청 400, 미인증 401/403, 제한 429, 원본 오류 503. 근거 없는 빈 성공 응답 금지.
+
+## DB 스키마·제약·인덱스·권한·트랜잭션
+
+현재 고유 마이그레이션 끝 이후 **전진 전용** 추가(번호 선점 금지). `support_thread_assignments(thread_id uuid PRIMARY KEY REFERENCES support_threads(id), assignee_admin_id uuid NULL REFERENCES users(id), assignment_revision bigint NOT NULL DEFAULT 0 CHECK >=0, assigned_at timestamptz NULL, updated_at timestamptz NOT NULL)`로 문의당 현재 담당자 최대 1명 보장. NULL은 확인된 미배정, 미조회와 다름. 과거 문의는 배정 없음·리비전 0으로 초기화하며 담당자를 추정하지 않음. `support_assignment_events(event_id uuid PK,thread_id,actor_admin_id,previous_admin_id,next_admin_id,operation enum,reason enum nullable,revision bigint,created_at,UNIQUE(thread_id,revision))` 불변 이벤트와 `support_assignment_receipts(actor_admin_id,idempotency_key,operation_version,request_hmac,key_version,event_id,receipt_payload,created_at,retention_state,UNIQUE(actor_admin_id,idempotency_key))` 불변 영수증을 별도 저장. 회원 제목/본문은 영수증에 보관 금지. actor/문의/작업/대상/사유/예상 리비전 정규화값에 버전 있는 keyed HMAC 사용. 삭제·보존 정책은 별도 승인, 삭제 후 중복 생성 방지 최소 tombstone 유지.
+
+트랜잭션 안에서 `admin_current_roles`로 요청자·대상 관리자 권한 확인, 문의 행→배정 행 순서로 잠금(기존 답변/상태/분류 변경과 잠금 순서 조정), **기존 영수증을 먼저 조회**하고 예상 리비전 CAS, 해제·인계·인수 정책 검증, 이벤트·영수증·리비전 +1·기존 `admin_append_audit_event`(ID·사유만, 본문 제외)를 원자적으로 기록. 동일 키 재실행은 최신 담당자가 달라져도 기존 결과만 반환. 신규 키의 동일 상태 요청은 검증된 현재 상태만 반환하고 가짜 인계 이벤트를 만들지 않음. 관리자 권한이 해지돼도 GET에서 데이터를 몰래 수정하지 않고 `STALE_ASSIGNEE`를 표시한 뒤 사유 있는 인수. SQLSTATE 교착·재시도와 동시 100건 검증. `(assignee_admin_id,updated_at DESC,thread_id)` 및 상태 우선 인덱스는 EXPLAIN 이후 결정. 전역 핫 카운터·무제한 OFFSET 금지. SECURITY DEFINER 고정 search_path, 함수 내부 권한 확인, PUBLIC 철회, 앱 계정은 함수 EXECUTE만 허용하며 **테이블 직접 DML 권한 금지**.
+
+## 보안·개인정보·모바일·SEO·분석
+
+Nest와 SQL에서 관리자 권한·최신 동의·세션·CSRF·actor 출처 검증, 속도 제한·열거 방지. 클라이언트 전달 actor/role 신뢰 금지. 다른 담당자의 배정 정보도 관리자 화면에서만 노출, 회원 `/support`·공개 API·사이트맵·검색에 직원 신원/감사 내역 노출 금지. Next BFF/app-api/Android는 상위 응답 스키마·세션 세대 검증, 잘못된 HTTP200은 503으로 실패, 계정 전환 시 이전 요청 취소, 비공개 디스크 캐시 금지. 실제 엣지의 성공/오류 모두 `Cache-Control: private,no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`. 본문·회원·직원·커서 등 로그/분석 제외. 관리자 UI 320/390px, 확대 200%, 44px 터치, 키보드·포커스·라이브 영역, WCAG2.2 AA. 공개 SEO 이익 주장 금지. 익명 관리자 KPI: 미배정 시간 p50/p95, 배정 후 첫 답변, 충돌/인수, 오래됨 비율, 조회 p95 <350ms **목표일 뿐 실측 아님**. 집계당 서로 다른 회원 20명 미만 및 역산 가능한 작은 셀 비공개, 개인 식별 분석 금지.
+
+## 테스트·무중단 배포·롤백·선행 조건
+
+기능 스위치 `support_admin_assignment` 기본 **OFF**. **제안만, 미실행:** 격리 PostgreSQL17.11 기존 323개 전체 마이그레이션 + 전진 추가, 합성 문의 10,001건, 관리자 2명 동시 담당 100건, 동일/다른 내용 멱등 재실행·삭제 후 재시도 100건, 권한 해지/대상 비활성·삭제/보존 100건, 답변/상태/분류/배정 동시 변경 100건, 커서 위변조/만료/계정 전환/Android 엣지 100건, 앱 계정 UPDATE/DELETE/TRUNCATE/ALTER 거부와 SECURITY DEFINER 실행, WLD·아이템·원장 변동 0, 관리자 전용 응답 헤더와 WCAG. A/B/C/QA 별도 브랜치·RED-GREEN-REFACTOR·정확 SHA CI 후 공식 Test 정확 SHA 인증 웹/관리자/Android·DB 검증, 독립 암호화 외부 복원, 승인된 GitOps 카나리·모니터링이 모두 통과해야 ON. 롤백은 OFF 및 이전 UI/API 복귀, 추가 스키마·감사 기록 보존. 적용된 마이그레이션 되돌리거나 영수증 삭제 금지.
+
+## P0/P1 백로그·최신 QA·외부 근거
+
+**P0 4건:** OPS1668-01 운영 실제 실행 SHA/이미지/엣지와 독립 복원·롤백; SEC1668-02 Production 앱 TRUNCATE **213/264**, UPDATE **195/264**, DELETE **194/264**, TRIGGER/MAINTAIN, migrator 기본 TABLE ALL, 체크섬 불일치 5건, Test 앱/마이그레이터 DB 불일치(#993); FIN1668-03 국고/MINT/SWF 원장 출처·금융 변동 0; REL1668-04 Production 다국어 HTTP500 **16/28**, 운영 모드 백엔드 **2 FAIL**, 의존성 감사 **9**, QA 정책/라우트 원장/CI, 공식 Test 정확 SHA E2E·독립 승인. **P1 6건:** ASSIGN1668-05 B/DB 제약·권한·영수증; ASSIGN1668-06 B/API CAS·관리자 경로; ASSIGN1668-07 A/Web 접근성; ASSIGN1668-08 C/Android 비공개 엣지; ASSIGN1668-09 관리자 KPI/감사; ASSIGN1668-10 QA 1만 건·동시성·권한·금융·롤백. 개발 인계 **#2536**, Gemini/A/B/C/QA 코드 변경과 분리.
+
+**최신 QA v1472(2026-11-02 21:36 KST): FAILED/P0_PRODUCTION_HOLD.** 원본 `/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1472-end.md`; QA v1472의 21:36 기준 공개 Production v1622 `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`, Test v1623 `abfbb8aee63393c9f58e72159bd5bcab06f99412`. **22:20:58 KST 신규 재확인:** Production은 v1622 유지, Test는 일시적 HTTP 502 1회 후 HTTP 200으로 현재 main `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b` 반환. 공개 버전만으로 실제 이미지 불변성·공식 Test 인증 E2E·운영 승격을 인증할 수 없음. QA 격리 PG17.11 323/323 마이그레이션 PASS이나 Production ACL 편차 잔존. 신규 외부 독립 획득·검증·중복 제거·분류 승인 **0건**, 누적 승인 **UNKNOWN/10,000건** → **BLOCKED/IN PROGRESS**. 기획 완료를 기능 구현·수용시험·근거 게이트·배포 승인으로 주장하지 않음. **초안 / 운영 RELEASE HOLD**.
+
+
+## v2026.11.02.1666 — F675-222 문의 분류 멱등 재실행·원래 분류 출처·관리자 대기열 우선순위 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Addition v1664 → 현재 Feature Improvement v1666 → 다음 Feature Addition v1668(잠정). **기준:** origin/main `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b` 시작·중간 확인(완료 시 재확인), `AGENTS.md`, `README.md`, 영문 `PROJECT_PLAN.md` 정본 및 국문 동등 문서. 미병합 기획 초안 #2523(v1664)에 쌓는 문서 전용 보완, 개발 인계 #2522. F675-217~221 초안도 main 구현으로 간주하지 않음. **F675-222 미구현**, 기획 예약은 코드·DB·배포를 변경하지 않음.
+
+### 실제 코드 근거 및 보완 필요성
+- **기존 생성키는 동일 내용의 증거가 아님:** 적용 마이그레이션 `196-user-admin-support-chat.sql`의 `support_threads.create_key`는 UNIQUE이지만 `support_create_thread(actor,key,subject,body)`는 동일 키·회원이면 **제목이나 최초 메시지 내용의 일치 여부를 비교하지 않고** 기존 문의를 반환함(54~64행). 최초 메시지의 멱등키도 같은 키이며 메시지는 나중에 삭제될 수 있음. 신규 분류 API는 이를 그대로 답습하면 안 됨. 운영 사고 확인이 아닌 **코드 기반 잠재 위험**.
+- **기존 관리자 우선순위 보존:** `admin_support_threads`는 `open → waiting_user → resolved` 순으로 먼저 정렬하고, 각 그룹에서 `last_message_at DESC,id DESC`를 사용함. v1664 신규 분류 대기열의 최신순만 적용하면 미처리 문의의 노출 우선순위가 바뀜. 상태 필터가 없으면 기존 상태 우선순위를 유지하며, HTTP 페이지 사이에 동일 MVCC 스냅샷이 유지된다고 주장하지 않음.
+- **최초 분류 출처 불변:** 기존 제안의 변경 가능한 `category_source`를 `admin_reclassified`로 덮으면 회원 직접 선택과 기존 문의 기본값을 구분할 수 없게 됨. 최초 분류 출처·코드와 현재 분류를 분리하고 관리자 변경은 불변 감사 기록으로 남김. 개발 PG17.11 읽기 전용: 문의 3건/메시지 6건, 분류 열 없음, 앱 계정 잔액 직접 UPDATE=true(P0 #993). 운영 데이터에 그대로 일반화하지 않음.
+
+### 회원·관리자 화면, API, DB 및 검증 가능한 계약
+1. **회원 화면:** 인증·동의 완료 회원이 `/support`에서 `account_access|balance_discrepancy|item_shop|technical|other` 중 선택 후 제목·내용을 작성하고 ‘문의 등록’을 누름. 최초 분류 출처(회원 선택/기존 미확인)와 현재 관리자 분류를 구분 표시. F675-219의 본인 문의 정확 조회가 구현된 뒤에만 확인된 문의로 이동. 중복 클릭 대기, 409 충돌, 410/409 검증 불가능한 기존 재시도, 429/503 재시도 UI, 키보드·스크린리더·320px·200%·WCAG 2.2 AA 지원. `support_case_category_triage` 기본 OFF일 때는 기존 API 유지하며 기존 API의 재시도 검증을 개선했다고 주장하지 않음.
+2. **신규 생성 API:** `POST /api/v1/support/threads/categorized`는 NFC/trim 제목(1~120), 본문(1~2000), 정확한 분류 enum, UUID 멱등키, UTF-8 바이트 제한과 중복/미허용 필드 거부. 회원·작업 버전·키·정규화 제목/본문·분류를 포함한 요청을 **서버 비밀키 기반 HMAC 다이제스트**로 검증하며, 비밀키 버전·교체·보존 정책을 갖춘 불변 영수증을 문의·첫 메시지와 한 트랜잭션에 저장. 원문 본문 또는 추측 가능한 일반 SHA 저장 금지. 동일 회원/키/동일 내용은 메시지 삭제 후에도 같은 영수증, 다른 내용은 409, 다른 회원은 존재를 드러내지 않는 404/409. 장애를 빈 목록으로 변환하지 않음.
+3. **기존 키 충돌:** 신규 경로에서 기존 `create_key`를 만났으나 불변 다이제스트가 없으면 분류 영수증을 임의 생성하거나 `member_selected`로 추정 금지. 첫 메시지가 보존돼 있다면 회원·제목·첫 본문을 검증한 별도 `LEGACY_UNCATEGORIZED` 결과만 허용(검토 필요). 메시지 삭제·불일치·불확실성은 `LEGACY_REPLAY_UNVERIFIABLE`로 실패 처리하고 **새 키로 다시 요청**하도록 안내; 기존 키로 두 번째 문의 생성 금지. 적용된 196을 수정하지 않고, 기존 함수의 동작을 자동으로 고쳤다고 주장하지 않음. 기존 키의 다른 본문, 삭제, 다른 회원, 동시 생성 회귀시험 필수.
+4. **DB 최초 출처:** 최신 고유 번호 이후의 전방 마이그레이션에 불변 `initial_category_code`·`initial_category_source`(`legacy_unknown|member_selected`)와 변경 가능한 `category_code`·`category_source`(`legacy_default|member_selected|admin_reclassified`)·`category_revision BIGINT CHECK >=0` 분리. 기존 행은 최초 출처 `legacy_unknown`, 현재 분류 `other`/출처 `legacy_default`로 기록하고 과거 회원 선택이라고 소급 인증하지 않음. 관리자 변경은 회원 원래 출처를 덮지 않으며 행위자·사유·리비전을 본문 없이 감사 기록.
+5. **관리자 대기열:** `GET /api/v1/admin/support/triage?category=&status=&cursor=`는 50+1 키셋, 정렬 키 `(status_rank ASC,last_message_at DESC,id DESC)`(open=0, waiting_user=1, resolved=2). 상태 고정 필터 시 rank는 일정. AES-256-GCM 5분 커서에 관리자 세션·필터·용도·대기열 버전·rank·DB 마이크로초 시각·UUID 결속, 키 교체 지원. 단일 읽기 스냅샷과 원천 리비전 검증; 변경 시 부분 목록 없이 409 REFRESH_REQUIRED, 만료 410, 전체 개수 보장 금지. 상태순 인덱스는 `EXPLAIN (ANALYZE,BUFFERS)` 검증 후 결정, OFFSET 금지. 전역 단일 리비전 행 병목은 동시 작성 100건 벤치마크 통과 전 도입 금지.
+6. **관리자 재분류:** `PUT /api/v1/admin/support/threads/:id/category`는 서버가 인증한 관리자·최근 세션·CSRF, 10진 문자열 기대 리비전, UUID 키, 허용 사유만 받음. 행 잠금·CAS·불변 영수증·감사 기록을 한 트랜잭션에 수행. **같은 키의 정확한 재시도는 그 뒤 현재 리비전이 증가해도 원래 영수증 반환**, 다른 내용 409, 다른 키의 오래된 리비전 409. 동일 분류 no-op은 감사·리비전 증가 없음. 회원 최초 출처 보존, 답변/상태/삭제와 잠금 순서 일관화, WLD·아이템·원장 쓰기 없음.
+7. **권한·보안·모바일·SEO·KPI:** Nest 인증/동의 및 PostgreSQL `SECURITY DEFINER`의 별도 회원·관리자 권한 검사, 고정 search_path·PUBLIC EXECUTE 회수, 앱 계정 직접 테이블 DML 권한 추가 금지. Next BFF/Android app-api는 세션 세대·영수증 출처·응답 스키마 검증, 잘못된 HTTP200은 503으로 차단. 실제 엣지 성공/오류 모두 private,no-store·noindex,nofollow·no-referrer·nosniff, sitemap 제외, 본문/제목/회원ID/커서 로그·기기 디스크 캐시 금지, 계정 변경 시 지연 응답 폐기. 공개 SEO 변경 없음. 관리자 KPI는 버킷당 고유 회원 20명 이상에서만 공개하고 작은 셀 숨김; 키 충돌, 409/410, 대기열 지연, 분류 이력, p95<350ms는 **목표**이지 실측 아님.
+8. **테스트·승격:** **제안만 했으며 미실행**: 격리 PG17 신규 설치·196→신규 마이그레이션, 혼합 상태 10,001건, 키/본문/분류/회원 충돌 및 첫 메시지 삭제 100건, 관리자 CAS 경합 100건, 상태·메시지·분류·개인정보 삭제 동시성 100건, 커서 위변조·만료·계정 변경 100건, 동시 작성 100건과 우선순위 안정성, 앱 권한 부정/SECURITY DEFINER 긍정, 웹/Android/엣지 오류, 금융 변경 0. A/B/C/QA 별도 브랜치, 플래그 OFF, 공식 Test 정확 SHA·인증/DB/금융 E2E·외부 암호화 백업 독립 복원·승인된 main·GitOps 무중단 승격·감시 후 활성화. 롤백은 플래그 OFF, 추가 스키마 보존. **운영 승격 금지.**
+
+### P0/P1 인계·최신 QA·외부 근거
+- **P0 4건:** OPS1666-01 실행 바이너리·다이제스트·독립 복원·롤백; SEC1666-02 운영/Test 앱 권한·적용 체크섬 5건·Test 마이그레이터(#993); FIN1666-03 원장 출처와 금융 변경 0 검증; REL1666-04 운영 다국어 HTTP500·백엔드 운영 모드·의존성/정책·공식 Test 정확 SHA·승인. **P1 6건:** TRIAGE1666-05 B/DB 최초 출처·HMAC 영수증·전방 마이그레이션·인덱스; -06 B/API 기존/신규 키 충돌·CAS·상태 우선 대기열; -07 A/Web 정확한 분류·기존 출처 UI; -08 C/Android/app-api 개인정보·세션 격리; -09 관리자 KPI·감사·20명 제한; -10 QA 10k/100건 경합·Test·복원·플래그 롤백. 개발 인계 #2522, F675-219와 A/B/C/QA 작업 중복 금지.
+- **2026-11-02 약 21:04 KST 기준:** Production 공개 `/api/version`=`6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`(v1622), Test=`abfbb8aee63393c9f58e72159bd5bcab06f99412`(v1623 후보). 공개 SHA만으로 실제 프로세스 다이제스트는 입증 불가. QA v1470은 IndexNow 단위 테스트 수정만 검증했으며 릴리스 PASS가 아님. 독립 확인한 최근 전체 QA v1469 **FAILED/P0_PRODUCTION_HOLD**(운영 다국어 16/28 HTTP500, 앱 UPDATE195/DELETE194/264, 체크섬 불일치5, Test 마이그레이터 불일치, 운영 모드 백엔드2 FAIL). QA v1471 작업 폴더는 관찰했으나 최종 판정 **미확인**. **Production RELEASE HOLD**.
+- **외부 독립 레퍼런스:** 신규 실제 수집·검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 허위 달성 주장 금지. 이번 기획은 런타임/DB/WLD/아이템/원장/Test/Production을 변경하지 않음.
+
+
+
+## v2026.11.02.1664 — F675-222 관리자 문의 분류·검증된 처리 대기열 (기능 추가 / 초안 / 운영 보류)
+
+**주기:** 이전 Feature Improvement v1662 → 현재 Feature Addition v1664 → 다음 Feature Improvement v1666(잠정). **정본:** main 3eb1441090cb0602e054908547dcf43bfe4299dd 시작·중간 확인; AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본 및 국문 대조. 이전 초안 #2516은 미병합이며 최신 main에 구현된 기능으로 취급하지 않음. 개발 인계 이슈 #2522. 초안 PR #2523(초기 SHA 7f5183ecf7035233f0b854cfe01137a86e16b405 CI SUCCESS, 실행 #41434537515; 문서 전용 runtime-check SKIPPED). **F675-222 미구현.** 이번 작업은 문서 전용이며 런타임/DB/WLD/보유품/원장/Test/Production/병합/배포 변경 없음.
+
+## 실제 근거·목적·선택
+
+- 마이그레이션 196의 support_threads에는 제목·상태·생성키만 있고 분류·분류 리비전이 없음. support_create_thread(actor,key,subject,body), Nest POST /support/threads, Next /support 작성 화면에도 분류가 없으며 관리자 목록은 상태만 필터링. 개발 PostgreSQL 17.11 읽기 전용 결과: 문의 3건, 메시지 6건, 분류 열 0개, moneyverse_app의 account_balances 직접 UPDATE 허용(P0 #993). 이는 **코드로 확인한 기능 공백**이며 실제 운영 사고나 SLA 위반 확인이 아님.
+- 목적: 회원이 새 문의의 주제를 지정하고 권한 있는 관리자가 검증된 분류 대기열에서 처리. 대상: 인증·동의 완료 회원과 관리자. 성공 기준: 최초 메시지와 분류의 원자적 저장, 동일 요청 중복 방지, 정확한 관리자 재분류, 타인 문의 노출 0, 기존 데이터와 동시성 처리.
+- 자유입력 분류(개인정보·스팸 위험), 회원 지정 긴급도·처리시간 보장(남용·근거 없는 약속)을 배제하고 고정 분류 5개 채택: account_access(계정 접근), balance_discrepancy(가상 잔액 내역), item_shop(아이템·상점), technical(기술 문제), other(기타). 분류는 **상담용 표시값**일 뿐 원장 거래·보상·우선권·유료 신속처리 근거가 아님. 첨부·공개 페이지·자동 환불 제외. 기능 플래그 support_case_category_triage 기본 OFF.
+
+## 회원·관리자 화면 및 권한
+
+1. 회원 /support 새 문의에 분류 선택(한국어/영어 설명), 제목 1~120자, 본문 1~2000자, “문의 등록” CTA. 성공 영수증에 정확한 threadId, categoryCode, categorySource=member_selected, categoryRevision, status=open 표시. 중복 클릭 UI 차단 외에 서버 멱등성 필수. 정확한 문의 열기는 F675-219가 구현·검증된 후만 연결; 현재 다른 첫 문의로 대체하는 /support?thread= 동작 금지. 기능 OFF에서는 기존 API·화면 유지. 기존 문의는 other로 이관하되 “기존 문의 분류 미지정(legacy_default)”으로 표시하고 회원 선택으로 허위 표시하지 않음.
+2. 관리자 /admin/support에서 분류+상태 필터, 최근순 50+1 페이지, “분류 변경” CTA, 현재 분류·출처·리비전·최근 활동 표시. 로딩/검증된 빈 결과/400 입력 오류/401·403 권한/404 미존재·접근불가/409 리비전 충돌/410 커서 만료/429 제한/503 검증불가 상태를 구분. 긴급도·SLA를 암시하지 않음. 감사 기록은 변경 전후 분류·관리자·문의·사유코드·리비전만 기록하고 본문 복사 금지.
+3. 회원 API에는 SessionGuard, AuthenticatedGuard, ConsentGuard, 관리자 변경에는 AdminGuard, AdminSessionGuard, CSRF를 적용. 서버 세션에서 actor 도출, PostgreSQL SECURITY DEFINER 내부에서 active 사용자 및 admin_current_roles 확인. actor UUID 인자 자체는 인증이 아님. 클라이언트의 memberId/adminId/권한/긴급도는 신뢰하지 않으며 타인 문의 존재 여부도 노출하지 않음. GET은 쓰기 없음.
+
+## API 계약·실패 처리
+
+4. 신규 회원 POST /api/v1/support/threads/categorized: {subject,body,categoryCode,idempotencyKey:uuid} → {thread:{threadId,status,categoryCode,categorySource,categoryRevision,createdAt},receiptVersion:1}. JSON 타입, 5개 enum, trim/NFC, UTF-8 바이트 상한, UUID 검증; 알 수 없는 필드·중복 파라미터 거부. 같은 키+같은 내용은 동일 영수증, 같은 키+다른 분류/제목/본문/행위자는 409. 동시 생성은 1건만. 기존 POST /support/threads는 별도 승격 전까지 유지.
+5. 관리자 GET /api/v1/admin/support/triage?category=&status=&cursor=: {items:[{threadId,subject,status,categoryCode,categorySource,categoryRevision,lastMessageAt}],nextCursor,hasNext,queueRevision,scope:"RETAINED_CASES",countIsComplete:false}. 50+1 고정, PostgreSQL 최신순 (last_message_at DESC,uuid DESC), OFFSET·무제한 COUNT 금지. 목록과 리비전은 동일 MVCC 스냅샷; 변경 시 부분 결과 없이 409. AES-256-GCM 불투명 커서(랜덤 96비트 nonce, 키 회전, 관리자 세션·필터 결속, 5분 유효), DB 마이크로초 경계 문자열. 위조 400, 만료 410, 형식이 잘못된 상위 HTTP200은 503이며 빈 목록으로 대체하지 않음.
+6. 관리자 PUT /api/v1/admin/support/threads/:id/category: {categoryCode,expectedCategoryRevision:decimal-string,idempotencyKey:uuid,reasonCode:taxonomy_error|member_clarification|routing_fix} → {threadId,categoryCode,categoryRevision,categorySource:"admin_reclassified"}. 최근 관리자 세션+CSRF, 행 잠금 CAS. 동일 키·동일 본문 재실행은 기존 영수증, 다른 내용은 409. 관리자 동시 변경은 한 요청만 성공, 나머지는 409 재조회. 같은 분류로의 no-op은 리비전·감사 이벤트 증가 금지.
+
+## PostgreSQL·보안·트랜잭션
+
+7. 현재 최종 마이그레이션 이후 **신규 순번 전방 마이그레이션**만 작성, 적용된 196 수정 금지. support_threads.category_code TEXT NOT NULL DEFAULT 'other' + CHECK 5개, category_source TEXT NOT NULL DEFAULT 'legacy_default' + CHECK(legacy_default/member_selected/admin_reclassified), category_revision BIGINT NOT NULL DEFAULT 0 + CHECK >=0. 기존 행은 other/legacy_default로 보존. 신규 support_create_thread_categorized(p_actor,p_key,p_subject,p_body,p_category)는 문의+최초 메시지를 한 트랜잭션으로 생성하고 create_key 재사용 시 분류·제목·본문·행위자까지 검증. 기존 함수 시그니처 유지.
+8. 관리자 support_triage_list 및 support_reclassify_category SECURITY DEFINER 함수는 고정 search_path, moneyverse_migrator 소유, PUBLIC EXECUTE 회수, moneyverse_app에 필요한 EXECUTE만 허용. 지원 테이블 직접 SELECT/DML 권한 추가 금지. 재분류 UUID 멱등 영수증은 요청 내용 해시·불변 결과·행위자·문의 참조를 보존하고 개인정보 삭제·보존 외래키 정책을 검증. 행 잠금→리비전 검증→분류·출처·리비전 변경→기존 감사 이벤트→영수증을 한 트랜잭션으로 처리, 실패 시 전체 롤백. 본문·회원 개인정보는 영수증/감사에 저장 금지. (category_code,status,last_message_at DESC,id DESC) 인덱스는 EXPLAIN/ANALYZE 성능 확인 후 도입, 기존 상태 인덱스 유지.
+9. 관리자 대기열 전역 리비전은 문의 생성·분류·상태·마지막 메시지·보존 삭제·탈퇴 삭제에 원자적으로 증가. 잠금 순서와 lock_timeout을 명시. 단일 SQL STABLE 스냅샷 또는 동일 연결 REPEATABLE READ READ ONLY 사용; VOLATILE 다중 쿼리 READ COMMITTED는 불가. 커서 경계는 PostgreSQL 마이크로초/UUID를 직접 사용하며 JS Date 밀리초로 만들지 않음. 트리거·초기화 경합 검증, 플래그 OFF 롤백 시 추가 컬럼·영수증 보존, 파괴적 다운그레이드 금지. 가상경제/원장/잔액과 트랜잭션 연결 금지.
+
+## 개인정보·Android·접근성·KPI·검증
+
+10. 회원 /support, 관리자 /admin/support, app-api 및 Android는 private,no-store / noindex,nofollow / no-referrer / nosniff, 사이트맵 제외, ETag/304 금지. 제목·본문·회원ID·커서 로그 및 분석 저장 금지. app-api는 상위 응답의 category/receipt/revision/scope 검증, 잘못된 HTTP200은 503. Android 로그아웃·계정 전환 시 커서와 진행 중 요청 폐기. KO/EN, 키보드·스크린리더, 320px, 200% 확대, WCAG 2.2 AA. 공개 SEO 변화 없음.
+11. 관리자 KPI는 구간별 서로 다른 회원 20명 이상일 때만 집계: 분류별 생성량, 검증된 첫 답변까지의 중앙값, 재분류 비율, 409·429·503 비율, p95 대기열 지연. 소수 집계 숨김, 본문·제목·개인별 추출 금지, 측정하지 않은 SLA 준수율 생성 금지. **실측 아닌 테스트 목표:** 분류 저장 불일치 0, 타인 노출 0, 중복 생성 0, CAS 무단 덮어쓰기 0, 합성 1만 건 p95 <350ms, 치명적 a11y 오류 0.
+12. **제안된 미실행 테스트:** 신규 PostgreSQL 설치와 196→신규 마이그레이션, 기존 3행 이관, 합성 10,001건+타인 데이터, 멱등 충돌 100건, 관리자 CAS 경합 100회, 커서 위조·만료·계정 변경 100건, 상태·삭제·탈퇴 동시성, 실제 앱 권한 거부, Android 잘못된 200, 전체 backend/frontend/모바일, 공식 Test 인증 exact-SHA E2E. 코드는 A/B/C 별도 브랜치에서 RED→GREEN, CI·DB·원장 증명·외부 암호화 복원, 승인 main, GitOps 무중단 승격·스모크·롤백. 문서 CI만으로 배포 금지.
+
+## 최신 QA·우선순위·차단
+
+- **최종 실행 신원 재확인(2026-11-02 20:11 KST):** 공개 Test /api/version은 abfbb8aee63393c9f58e72159bd5bcab06f99412로 변경되어 OPEN·비초안 금융 PR #2521(v1623)과 일치. Production은 6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e(v1622) 유지. QA v1469의 양쪽 v1622 결과는 19:36 시점 사실이며 이후 Test 후보에 그대로 적용하지 않음. 기획 작업은 어느 환경도 승격·변경하지 않았고 F675-222의 공식 Test 정확 SHA 검증은 미실행.
+- **QA v1469, 2026-11-02 19:36 KST FAILED / P0_PRODUCTION_HOLD:** v1622 운영 다국어 표본 28건 중 16건 HTTP500(Test 0/28), 운영 모드 백엔드 2 FAIL, 정책 1 FAIL, 의존성 경고 9건, Production 앱 계정 UPDATE 195/DELETE 194(264개 테이블), 체크섬 불일치 5건, 공식 Test 마이그레이터 80개 불일치, 전체 경로 E2E 차단. Test/Production 공개 버전은 6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e(v1622)로 일치. main 3eb1441의 이후 문서 커밋과 다르다는 사실만으로 배포 실패라 단정하지 않음. 운영 loopback TLS EPROTO가 보고됐고 수정 초안 #2263은 미병합. 이전 QA의 단순 반복이 아니라 신규 확인된 결과.
+- **P0 4건:** OPS1664-01 실제 실행 SHA·이미지·외부 복원; SEC1664-02 최소 권한·체크섬·Test DB 신원; FIN1664-03 원장 출처·재무 쓰기 0; REL1664-04 다국어 HTTP500·백엔드/정책/의존성·인증 exact-SHA Test·승격 승인.
+- **P1 6건:** TRIAGE1664-05 B/DB 마이그레이션·인덱스; TRIAGE1664-06 B/API 멱등 생성·CAS·목록; TRIAGE1664-07 A/Web 회원·관리자 UX; TRIAGE1664-08 C/Android·app-api 증명; TRIAGE1664-09 관리자 익명 KPI; TRIAGE1664-10 QA·복원·경합·점진 활성화. 개발 이슈 #2522. Gemini/A/B/C/QA 변경과 분리, F675-217~221 초안은 구현된 main 기능으로 간주하지 않음.
+- **외부 독립 근거 10,000건 게이트:** 이번 신규 획득·검증·중복제거·근거분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 달성 주장 금지. **최종 상태: DOCUMENTATION ONLY / DRAFT / RELEASE HOLD.** 기능 수용시험·DB 변경·Test·Production·금융 데이터 변경 없음.
+
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
 - **주기:** 이전 추가 v1516 → 현재 보완 v1518 → 다음 추가 v1520(잠정). 정본 main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` 시작·중간 확인, 선행 #2025, 이슈 #2024, 초안 #2029. 기획 문서만.
