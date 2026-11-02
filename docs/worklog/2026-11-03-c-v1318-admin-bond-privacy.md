@@ -16,3 +16,8 @@
 
 ## FINISHED
 - Pending.
+
+### MID — 2026-11-03 03:51 KST
+- RED: 6/14 focused tests failed on current main, proving public indexing, missing private response headers and unsafe upstream error reflection/status propagation.
+- GREEN: bond BFF now emits private/noindex/no-referrer headers for success and failure, preserves authenticated backend 401/403, returns 503 for other errors, and never returns SQL or session diagnostics. Administrator bond page default and five locale variants override public HTTP headers. No DB, ledger, or backend authorization changes.
+- The first broad focused run was contaminated by the miniPC shell's `NODE_ENV=production`: four existing React UI tests failed with `React.act is not a function`. Retried with `NODE_ENV=test` and recorded actual result. Broad exact-SHA gates pending.

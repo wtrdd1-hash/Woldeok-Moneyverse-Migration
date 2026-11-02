@@ -116,3 +116,20 @@ describe('security headers', () => {
     );
   });
 });
+
+describe('administrator bond page HTTP confidentiality', () => {
+  it('overrides public index and cache headers for default and localized routes', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const privateGroups = groups.filter((group) => group.source === '/admin/bonds' || group.source.includes('/admin/bonds'));
+    expect(privateGroups.map((group) => group.source)).toEqual(expect.arrayContaining([
+      '/admin/bonds', '/:locale(en|ko|ja|zh|vi)/admin/bonds',
+    ]));
+    for (const group of privateGroups) {
+      const headers = new Map(group.headers.map((header) => [header.key, header.value]));
+      expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(headers.get('cache-control')).toBe('private, no-store');
+      expect(headers.get('referrer-policy')).toBe('no-referrer');
+    }
+  });
+});
