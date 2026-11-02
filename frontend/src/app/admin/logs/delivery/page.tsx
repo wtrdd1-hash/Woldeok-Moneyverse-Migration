@@ -34,7 +34,7 @@ export default async function AdminDeliveryLogsPage({
   searchParams,
 }: {
   readonly searchParams?: Promise<{ readonly status?: string | string[]; readonly event?: string | string[] }>;
-} = {}) {
+}) {
   await requireAdminConsole('/admin/logs/delivery');
   const filter = parseDeliveryFilter(await (searchParams ?? Promise.resolve({})));
   const response = await apiOrNull<unknown>(

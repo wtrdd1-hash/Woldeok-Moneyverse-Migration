@@ -20,3 +20,7 @@
 - RED test failed on missing delivery filter; GREEN: 17/17 focused tests pass. Status filters and literal event-type substring operate only on the 30-row validated response. Invalid URL arrays, unknown statuses, control characters and overly long searches fail closed.
 - Existing guarded NestJS controller, repository and `admin_recent_discord_outbox_events(uuid, integer)` SQL remain the source of truth; no UI-only simulated receipts, writes, new permissions or new endpoints.
 - Re-fetched `origin/main` and EN/KO integrated plan; baseline unchanged. Re-evaluate before any merge.
+
+### Build failure and correction — 2026-11-02 10:52 KST
+- Initial SHA `a6cd0f939cee12c1c38b7b8213695da0462e189b`: full lint/typecheck passed and frontend unit suite 2934 PASS, but Next.js production build failed: optional *page props object* was inferred as `undefined | PageProps`. This is a real failure, not a pass.
+- Correction: make the Next page props object mandatory (while allowing `searchParams` to be omitted) and adapt SSR tests. All required gates must be rerun on the corrected final SHA.

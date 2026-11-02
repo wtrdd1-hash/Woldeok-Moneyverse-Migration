@@ -11,7 +11,7 @@ beforeEach(() => { apiMock.mockReset(); guardMock.mockReset(); });
 describe('admin Discord delivery page', () => {
   it('shows unavailable evidence rather than fabricated zero counts, with accessible retry', async () => {
     apiMock.mockResolvedValue(null);
-    const html = renderToStaticMarkup(await Page());
+    const html = renderToStaticMarkup(await Page({}));
     expect(guardMock).toHaveBeenCalledWith('/admin/logs/delivery');
     expect(html).toContain('조회 불가');
     expect(html).not.toContain('>0건<');
@@ -21,14 +21,14 @@ describe('admin Discord delivery page', () => {
   });
   it('shows zero only for verified empty rows and labels the 30-row scope', async () => {
     apiMock.mockResolvedValue({ events: [] });
-    const html = renderToStaticMarkup(await Page());
+    const html = renderToStaticMarkup(await Page({}));
     expect(html).toContain('0건');
     expect(html).toContain('최근 최대 30건');
     expect(html).not.toContain('조회 불가');
   });
   it('fails closed on a malformed successful HTTP payload', async () => {
     apiMock.mockResolvedValue({ events: [{ delivery_status: 'delivered' }] });
-    const html = renderToStaticMarkup(await Page());
+    const html = renderToStaticMarkup(await Page({}));
     expect(html).toContain('조회 불가');
     expect(html).not.toContain('1건');
   });
@@ -43,7 +43,7 @@ describe('admin Discord delivery page', () => {
       { ...base, event_id: 'b6cfc890-930e-4a3c-9fd8-271f4e1c0a53', delivery_status: 'suppressed', delivery_attempts: 0 },
       { ...base, event_id: 'd8d02d98-6ad1-4c35-a16a-f9e05f7b1878', delivery_status: 'dead_letter' },
     ] });
-    const html = renderToStaticMarkup(await Page());
+    const html = renderToStaticMarkup(await Page({}));
     expect(html).toContain('전달 제외');
     expect(html).toContain('최종 실패');
     expect(html).toContain('보류·실패');
