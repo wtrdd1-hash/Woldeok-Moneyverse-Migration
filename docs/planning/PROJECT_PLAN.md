@@ -1,6 +1,6 @@
 ## v2026.11.02.1656 — F675-220 Verified Administrator-Reply Unread State for Members (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle and authority:** Previous Feature Improvement v1654 → Current Feature Addition v1656 → Next Feature Improvement v1658 (provisional). At start and midpoint, origin/main = a8541927c3a351d980454c66e95a3356c47e0722. Read AGENTS.md, README.md, canonical English PROJECT_PLAN.md and Korean counterpart. Parent unmerged Draft #2483; developer handoff issue #2488. This proposal is documentation-only and F675-220 is NOT IMPLEMENTED. It must not merge into Production, change runtime/DB/WLD/ledger/Test/Production, or be treated as tested functionality.
+**Cycle and authority:** Previous Feature Improvement v1654 → Current Feature Addition v1656 → Next Feature Improvement v1658 (provisional). At start and midpoint, origin/main = a8541927c3a351d980454c66e95a3356c47e0722. Read AGENTS.md, README.md, canonical English PROJECT_PLAN.md and Korean counterpart. Parent unmerged Draft #2483; developer handoff issue #2488 (current Draft PR #2489). This proposal is documentation-only and F675-220 is NOT IMPLEMENTED. It must not merge into Production, change runtime/DB/WLD/ledger/Test/Production, or be treated as tested functionality.
 
 ### Verified gap, alternatives and design decision
 
