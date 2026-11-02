@@ -21,22 +21,30 @@ function authorized(presented, expected) {
   return timingSafeEqual(actualHash, expectedHash);
 }
 
+function hasForbiddenControl(text, allowWhitespace = false) {
+  for (const character of text) {
+    const code = character.charCodeAt(0);
+    if (code === 127 || (code < 32 && !(allowWhitespace && [9, 10, 13].includes(code)))) return true;
+  }
+  return false;
+}
+
 function parsePayload(body) {
   const value = JSON.parse(body);
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('invalid broadcast body');
   const { title, description = '', fields = [], color = 0x10b981, notifyAdminDm = false } = value;
   if (typeof title !== 'string' || title.trim().length < 1 || title.length > 256
-      || /[\u0000-\u001f\u007f]/.test(title)
+      || hasForbiddenControl(title)
       || typeof description !== 'string' || description.length > 4096
-      || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(description)
+      || hasForbiddenControl(description, true)
       || !Array.isArray(fields) || fields.length > 25
       || !Number.isInteger(color) || color < 0 || color > 0xffffff
       || typeof notifyAdminDm !== 'boolean') throw Error('invalid broadcast fields');
   if (!fields.every(f => f && typeof f === 'object' && !Array.isArray(f)
       && typeof f.name === 'string' && f.name.trim().length > 0 && f.name.length <= 256
-      && !/[\u0000-\u001f\u007f]/.test(f.name)
+      && !hasForbiddenControl(f.name)
       && typeof f.value === 'string' && f.value.trim().length > 0 && f.value.length <= 1024
-      && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(f.value)
+      && !hasForbiddenControl(f.value, true)
       && (f.inline === undefined || typeof f.inline === 'boolean'))) {
     throw Error('invalid broadcast field');
   }
