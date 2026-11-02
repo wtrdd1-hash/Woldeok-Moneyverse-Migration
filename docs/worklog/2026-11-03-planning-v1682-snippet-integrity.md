@@ -5,8 +5,10 @@
 ## Checklist
 - [x] Read installed Superpowers using-superpowers, brainstorming, using-git-worktrees, writing-plans and verification-before-completion; skills__list empty so skills__read is BLOCKED.
 - [x] Inspect source, previous planning, latest QA, GitHub PRs and main.
-- [ ] Harden title normalization, replay/tombstone, role and UX race semantics.
-- [ ] Update English/Korean canonical and integrated plans and logs.
+- [x] Harden title normalization, replay/tombstone, role and UX race semantics.
+- [x] Update English/Korean canonical and integrated plans and logs.
 - [ ] Recheck main, run verification, publish draft PR and update backlog.
 
 **Release:** DRAFT / PRODUCTION RELEASE HOLD. External references newly approved 0; cumulative UNKNOWN/10,000, BLOCKED / IN PROGRESS.
+
+**MIDPOINT:** Four canonical/integrated planning files and two update logs updated; QA v1480 examined, main rechecked unchanged. Current draft remains documentation-only and unverified by runtime acceptance tests.
