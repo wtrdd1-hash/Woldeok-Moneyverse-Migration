@@ -1,3 +1,7 @@
+## 2026-11-03 v1686 — F675-227 resolution transition integrity (planning only)
+- Source-proven three status writers require one locked transition/epoch authority, legacy-unverified eligibility, replay-safe messages and strong CAS. F675-227 NOT IMPLEMENTED; issue #2580, stacked Draft #2581.
+- QA v1482 FAILED/P0: Production 24/28 HTTP500, Test 0/28, root 97%/3.3GiB, excessive DB app grants, 5 checksum mismatches, exact-main CI 2 FAIL, off-host restore BLOCKED. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10000 BLOCKED. Docs only.
+
 ## 2026-11-03 v1684 — F675-227 member support resolution feedback
 - Planning only, NOT IMPLEMENTED. Issue #2580. RELEASE HOLD. P0 4, P1 6.
 - External independent references: new 0; cumulative UNKNOWN/10000; BLOCKED/IN PROGRESS.

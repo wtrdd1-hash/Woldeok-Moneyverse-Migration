@@ -1,5 +1,28 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1684 F675-227 회원 문의 해결 피드백 / 이슈 #2580 / 선행 초안 #2576 / 운영 보류.
+**현재 기획:** v1686 F675-227 해결 상태 전이 정합성 / 이슈 #2580 / 선행 초안 #2581 / 운영 보류.
+
+## v2026.11.03.1686 — F675-227 해결 이벤트와 만족도 평가 상태 전이 정합성 (기능 보완 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 추가 v1684 → 현재 기능 보완 v1686 → 다음 기능 추가 v1688(잠정). 시작 원격 main f5c3fbedae1c3b3ec2374882b049aac43a655eb4, 중간·완료 재조회. AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·한국어 대조. 미병합 기획 초안 #2581 위에 누적, 개발 이슈 #2580. **F675-227 미구현**, 문서만 변경하며 런타임·DB·WLD·원장·Test·Production·예약은 변경하지 않는다.
+
+### 실제 소스에서 확인한 기존 기획의 누락
+- 마이그레이션 196의 admin_support_set_status(actor,thread,status)는 resolved→resolved 무변경에도 updated_at과 감사 이벤트를 갱신하고 Idempotency-Key·If-Match·리비전이 없다. support_add_message는 회원 메시지를 INSERT한 뒤 open, admin_support_reply는 관리자 메시지 INSERT 뒤 waiting_user로 상태를 바꾼다. **서로 다른 상태 작성 경로 세 개**이며 두 메시지 함수는 INSERT 후에야 문의 UPDATE 잠금을 잡는다. Nest support.controller.ts의 회원/관리자 API가 이를 호출하고 기존 PUT /admin/support/threads/:id/status는 status만 받는다. v1684는 회원 답변을 다뤘지만 관리자 답변·무변경 해결·동시 상태 변경을 완전히 규정하지 못했다. 이는 소스에서 확인한 **설계 누락**이며 실제 운영 사고 확정이 아니다.
+- 피드백 ON 전 모든 작성자를 버전 고정 DB 단일 전이 함수로 통합한다. 인증 행위자·역할 잠금을 먼저, **메시지 INSERT 전 문의 행 잠금**을 다음에 획득하고 문의 이후 사용자 행을 역순 잠그지 않는다. 이전 상태·단조 증가 리비전을 검증한 뒤 상태·메시지·epoch·영수증·감사를 하나의 트랜잭션으로 확정한다. 무변경 상태 요청은 불변 영수증만 가능하며 resolved_at·리비전·가짜 해결 이벤트를 갱신하지 않는다. resolved를 벗어나는 전이는 같은 잠금에서 평가 자격을 무효화한다. 해결된 문의에 관리자 답변을 쓰면 waiting_user, 회원 답변을 쓰면 open으로 전이한다.
+- 미해결→resolved **실제 전이에서만** thread_id·member_id·epoch_no·resolved_at·전이 영수증·관리자 정보를 가진 불변 해결 이벤트 하나를 같은 트랜잭션에 생성한다. 잠긴 문의의 카운터에서 epoch_no를 만들고 잠금 없는 MAX()+1은 금지한다. UNIQUE(thread_id,epoch_no), UNIQUE(source_transition_id), 단일 current_resolution_id FK 또는 동등 제약으로 중복을 막는다. resolved→resolved 재시도는 제안된 7일 평가 기한을 연장하지 않는다. 이벤트가 검증되지 않은 기존 resolved 행은 **LEGACY_UNVERIFIED**로 표시하며 시각·평가를 꾸며내지 않는다. 이후 정상 재개·재해결된 새 epoch만 평가할 수 있다.
+- 마이그레이션은 추가 전용이며 기존 SECURITY DEFINER 함수는 계측된 래퍼로 원자 교체하거나 Nest 전환 후 앱 EXECUTE를 회수한다. 피드백 ON인 동안 epoch를 누락하는 기존 경로가 남아서는 안 된다. Test에서 Nest·SQL·자동화·백그라운드 호출자를 조사한다. 미계측 작성자·이벤트 누락·체크섬 드리프트·인증 결속 불명은 503/기능 OFF로 닫힌 실패 처리한다. 마이그레이션 196 원본·적용된 체크섬 수정 금지, 롤백은 피드백 OFF와 데이터 보존만 허용한다.
+
+### API·동시성·권한·개인정보
+- 회원 GET /api/v1/support/threads/:id/feedback는 세션·동의·소유권 확인 후 단일 검증 DB 스냅샷에서 상태·current_resolution_id·문의 리비전·평가를 읽는다. LEGACY_UNVERIFIED·NOT_RESOLVED·ELIGIBLE·SUBMITTED·EXPIRED·UNAVAILABLE을 구별한다. 회원 POST는 1~5점·선택 고정 사유, UUID Idempotency-Key와 **문의 리비전+해결 UUID**를 결속한 강한 If-Match를 요구한다. Nest는 인증 세션에서 행위자를 추출하며 DB 함수에 넘긴 UUID만으로 인증하지 않는다. 행위자/역할→문의 잠금, epoch·리비전 확인, DB 시계 한 번 취득, 7일 기간 검증, epoch당 한 번 평가·HMAC 정규 요청 영수증·감사를 원자 기록한다. 타 회원/미존재 404, 사전조건 누락 428, 오래된 상태 412, 같은 키 다른 내용 409, 기한 종료 410, 소스 장애 503. 과거 재실행은 현재 ETag·평가 자격이 아닌 과거 결과만 반환하며 재실행 전에도 세션·동의·소유권 재검증.
+- 관리자 상태 API는 버전 고정 강한 CAS·Idempotency-Key를 도입하되 기존 화면 흐름을 유지하고 누락/오래된 조건은 실패 처리한다. 회원·관리자 메시지의 기존 요청키를 유지한다. **이미 확정된 메시지 재실행으로 더 최근 해결 상태를 다시 열면 안 된다.** 해결↔답변↔평가는 문의 잠금으로 직렬화한다. 답변이 먼저면 이후 명시적 해결이 새 epoch를 만들고, 해결이 먼저면 뒤따른 답변이 그 epoch를 무효화하며 오래된 평가 POST는 412다. 같은 키 재실행은 과거 영수증만 반환하고 두 번째 메시지·상태 변경 금지, 다른 키 메시지는 별개지만 상태 전이는 직렬화. 계정 삭제·관리자 역할 회수의 잠금 순서를 통일하고 SQLSTATE 23505/40001/40P01 제한 재시도·롤백 성공 위장 금지.
+- DB는 unique feedback(resolution_id), 문의/회원/epoch 일치(복합 FK 또는 잠금 함수 검증), 불변 이벤트·NOT NULL 시각·삭제 감사를 요구한다. 회원 삭제는 승인된 정책대로 연쇄 삭제, 관리자 삭제는 허용된 비식별 출처만 보존한다. 앱 계정에 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER 권한을 추가하지 않는다. 신규 SECURITY DEFINER는 스키마 명시·SET search_path=pg_catalog,pg_temp·PUBLIC EXECUTE 회수·최소 앱 EXECUTE. 타 회원 BOLA·관리자 BFLA·역할 회수 경합 시험 필수.
+- 화면 /support → 본인 문의 → 응대 평가하기는 검증된 현재 epoch에만 제공한다. 기존 이벤트 검증 불가·재개·기제출·기한 만료·오래된 상태·OFF·오프라인·장애를 구별한다. 낮은 평가도 메시지 전송·문의 재개·관리자 상태·금융 변경 금지, 답변 작성은 별도 명시 동작. Android는 같은 소유자 계약 또는 명확한 미지원 표시. 320px·44px·키보드/fieldset/legend·스크린리더 오류·초점 복귀·현지화·동작 감소·안전한 오프라인 재시도. 회원/관리자/BFF/app-api 성공·오류 모두 private,no-store/noindex,nofollow/no-referrer, 사이트맵 제외. 공개 SEO 효과 주장 금지.
+- KPI 분모는 **검증된 평가 가능 epoch**로 기존 LEGACY_UNVERIFIED와 소스 오류를 제외한다. 분자는 확정된 고유 평가만 세고 재실행은 제외한다. 응답 편향·표본 수 표시, 서로 다른 epoch·회원 20건 미만 집계 비공개. 해결→답변과 오래된 재실행 거부는 개인정보 없는 집계만, 개인 관리자 순위·보상·자동 징계 금지.
+
+### P0/P1 개발 인계·운영 게이트
+- **P1 6건:** CSAT1686-05 단일 전이 함수·불변 epoch·무변경 제약; -06 세 작성 경로 계측·CAS·영수증·과거 재실행; -07 회원 원자 GET/POST·소유권·시계·HMAC; -08 웹/Android·비공개 헤더·접근성; -09 삭제·보존·관리자 집계·악용 방지; -10 PostgreSQL17·공식 정확 SHA Test·롤백 회귀. **제안 시험(미실행):** 상태/관리자 답변/회원 답변/평가 순서별 동시 100건, 재개·재해결 전후 동일 키 100건, 타 회원 UUID 100건, 7일 경계, 기존 resolved/이벤트 없음, 권한·동의 회수, 2xx/4xx/5xx 비공개, 320px 접근성, OFF 기존 기능, 외부 독립 복원. 거짓 평가 자격 0·중복 epoch 0·재실행 재개 0은 관측 실적이 아닌 수용 목표.
+- **P0 4건:** OPS1686-01 07:07 KST 루트 97%·약 3.3GiB 잔여, 다른 작업자 보존·안전 용량 확보·외부 독립 복원(#1170); SEC1686-02 QA v1482 앱 UPDATE 195/DELETE 194/TRUNCATE 213(전체 264), 실행 가능한 비표준 definer 19개, 마이그레이션 체크섬 5건 불일치(#993)이며 이번 기획에서 별도 권한 재측정은 하지 않음; FIN1686-03 Treasury/Mint/NPS/SWF/원장 출처·금융 무변경 검증; REL1686-04 QA v1482 FAILED/P0, 운영 확대 다국어 HTTP500 24/28·Test 0/28, 정확 main CI 2건 실패, 운영 공개 SHA 305d7c7...·Test 0c70a114...는 main 불일치, 공식 정확 SHA 인증 Test E2E/GitOps/외부 복원 BLOCKED(#1088). 디스크 위험은 실제 서비스 중단 증거가 아님. **운영 승격 보류.**
+- **외부 독립 레퍼런스:** 신규 확보·검증·중복 제거·근거 분류 승인 **0건**, 누적 **UNKNOWN / 10,000**, **BLOCKED / IN PROGRESS**. 합성·중복·미검증 자료 제외. 기존 영문 정본·한국어 동등 통합문서만 갱신하며 신규 분산 기능 명세 파일 생성 금지.
+
 
 ## v2026.11.03.1684 — F675-227 회원 문의 해결 후 만족도 피드백 (기능 추가 / 초안 / 운영 보류)
 
