@@ -159,3 +159,30 @@ test('invalid or contradictory signed-WLD totals are blocked without lossy Numbe
     assert.equal(evaluateFinancialReadiness({...good,ledger:{...good.ledger,[key]:'9007199254740993'}}).ok,false);
   }
 });
+
+
+test('P0: sensitive member tables must be included in the read-only release grant snapshot', async () => {
+  const calls=[];
+  const c={async query(sql,args){calls.push({sql,args});if(sql.includes('current_database()'))return{rows:[good.identity]};if(sql.includes('has_table_privilege'))return{rows:good.grants};if(sql.includes('account_net AS'))return{rows:[good.ledger]};return{rows:[]};}};
+  await readFinancialSnapshot(c);
+  const names=calls.find(x=>x.sql.includes('has_table_privilege')).args[0];
+  for (const name of ['users','identities','user_consents','user_items','audit_logs']) {
+    assert(names.includes(name), `${name} must be queried, not silently omitted`);
+  }
+});
+
+test('P0: missing sensitive grant evidence fails closed instead of READY', () => {
+  const result=evaluateFinancialReadiness(good);
+  assert.equal(result.ok,false);
+  assert(result.blockers.includes('missing_sensitive_table:users'));
+  assert(result.blockers.includes('missing_sensitive_table:user_items'));
+});
+
+test('P0: direct member identity and inventory DML blocks financial readiness', () => {
+  const extra=['users','identities','user_consents','user_items','audit_logs'].map(name => ({
+    name,can_insert:false,can_update:name==='users',can_delete:name==='user_items',
+  }));
+  const result=evaluateFinancialReadiness({...good,grants:[...good.grants,...extra]});
+  assert(result.blockers.includes('direct_application_sensitive_dml:users'));
+  assert(result.blockers.includes('direct_application_sensitive_dml:user_items'));
+});
