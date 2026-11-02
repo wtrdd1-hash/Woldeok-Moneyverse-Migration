@@ -20,6 +20,28 @@ describe('v1626 public Treasury donation CSRF and canonical receipt boundary',()
   expect(response.status).toBe(200); expect((await response.json()).ledger_transaction_id).toBe(key);
   expect(mutate).toHaveBeenCalledExactlyOnceWith('/api/v1/treasury/donate',{method:'POST',body:{amountWld:'1000',memo:'Donation',idempotencyKey:key}});
  });
+ it('accepts a legitimate HTTPS origin when Next runs behind the localhost reverse proxy', async () => {
+  mutate.mockRejectedValueOnce(new ApiError(401, 'login required'));
+  const proxyRequest = new Request('http://127.0.0.1:3101/api/treasury/donate', {
+    method: 'POST', headers: {
+      host: 'test.easy-scraping.com', origin: 'https://test.easy-scraping.com',
+      'sec-fetch-site': 'same-origin', 'content-type': 'application/json',
+    }, body: JSON.stringify({ amountWld: '1000', idempotencyKey: key }),
+  });
+  const response = await POST(proxyRequest);
+  expect(response.status).toBe(401);
+  expect((await response.json()).code).toBe('AUTHENTICATION_REQUIRED');
+ });
+ it('rejects a forged external Origin through a public proxy host', async () => {
+  const proxyRequest = new Request('http://127.0.0.1:3101/api/treasury/donate', {
+    method: 'POST', headers: {
+      host: 'test.easy-scraping.com', origin: 'https://evil.example',
+      'sec-fetch-site': 'cross-site', 'content-type': 'application/json',
+    }, body: JSON.stringify({ amountWld: '1000', idempotencyKey: key }),
+  });
+  expect((await POST(proxyRequest)).status).toBe(403);
+  expect(mutate).not.toHaveBeenCalled();
+ });
  it('denies cross-site before calling an underlying financial API',async()=>{
   const response=await POST(req({amountWld:'1000',idempotencyKey:key},true));
   expect(response.status).toBe(403); expect(mutate).not.toHaveBeenCalled();
