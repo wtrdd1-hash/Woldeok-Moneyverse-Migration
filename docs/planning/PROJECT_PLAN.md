@@ -1,4 +1,5 @@
 ## v2026.11.02.1646 — F675-217 Admin Reply Notice: Durable Replay Truth and Clean-Schema Gate (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+**GitHub handoff:** Draft PR #2460 OPEN/HOLD (parent #2456), developer issue #2455 updated; docs-only, feature not implemented, no release.
 
 **Cycle:** Previous Feature Addition v1644 → Current Feature Improvement v1646 → Next Feature Addition v1648 (provisional). Canonical main a8541927c3a351d980454c66e95a3356c47e0722 checked at start/mid; authority AGENTS.md, README.md, English PROJECT_PLAN.md with Korean semantic parity. Parent unmerged Draft #2456; developer issue #2455. F675-217 remains **PROPOSED / NOT IMPLEMENTED**; docs-only, no runtime/DB/finance/Test/Production mutation.
 
