@@ -52,3 +52,21 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+
+describe('StockCommunityService verified stock discussion category', () => {
+  it('filters only tagged stock posts inside the bounded latest 50 source rows', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(undefined, undefined, 'question');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('primary_stock_id IS NOT NULL');
+    expect(String(sql)).toContain('category = $4');
+    expect(values).toEqual([50, null, null, 'question']);
+  });
+  it('rejects unknown categories before database access', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'not-a-category')).rejects.toThrow('invalid board category');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});

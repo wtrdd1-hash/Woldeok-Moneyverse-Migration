@@ -5172,9 +5172,34 @@
         {
           "name": "stock",
           "in": "query",
-          "required": true,
+          "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 16
+          }
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "analysis",
+              "question",
+              "journal",
+              "business",
+              "system"
+            ]
           }
         }
       ],
@@ -5192,6 +5217,9 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "categoryFilter": {
+            "type": "string"
+          },
           "posts": {
             "type": "array",
             "items": {

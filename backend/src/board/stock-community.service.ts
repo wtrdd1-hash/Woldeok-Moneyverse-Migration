@@ -6,6 +6,7 @@ import { boardText } from './board.service';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 const STOCK_SYMBOL = /^[A-Za-z0-9._-]{1,16}$/;
+const STOCK_CATEGORIES = new Set(['analysis', 'question', 'journal', 'business', 'system']);
 
 export interface StockTaggedPostInput {
   readonly actorUserId: string;
@@ -116,7 +117,7 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, category?: string) {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -129,6 +130,8 @@ export class StockCommunityService {
     ) {
       throw new Error('invalid title search');
     }
+    if (category !== undefined && !STOCK_CATEGORIES.has(category))
+      throw new Error('invalid board category');
     const title = titleQuery?.trim() ?? null;
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
@@ -136,8 +139,9 @@ export class StockCommunityService {
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+          ${category === undefined ? '' : 'AND primary_stock_id IS NOT NULL AND category = $4'}`,
+      category === undefined ? [50, normalized, title] : [50, normalized, title, category],
     );
     return rows.map(mapped);
   }
