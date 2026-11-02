@@ -59,7 +59,7 @@ describe('StockCommunityService bounded public board size', () => {
     await new StockCommunityService(database).publicList('WDX', 'hello', 25);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('member_board_public_list_with_stock($1)');
-    expect(String(sql)).toContain('LIMIT $4::integer');
+    expect(String(sql)).toContain("date_trunc('milliseconds', created_at) DESC, post_id DESC LIMIT $4::integer");
     expect(values).toEqual([50, 'WDX', 'hello', 25]);
   });
   it('rejects an invalid limit before querying the DB', async () => {

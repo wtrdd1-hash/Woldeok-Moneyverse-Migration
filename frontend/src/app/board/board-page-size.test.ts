@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { isVerifiedBoardPageSizeResponse, parseBoardPageSize } from '@/lib/board-page-size';
 
@@ -9,6 +10,13 @@ describe('public board bounded display size', () => {
     expect(parseBoardPageSize(undefined)).toBe(50);
     for (const value of ['10', '25', '50']) expect(parseBoardPageSize(value)).toBe(Number(value));
     for (const value of ['', '0', '11', '100', '010', ['10', '25'], 10, null]) expect(parseBoardPageSize(value)).toBeNull();
+  });
+  it('exposes a labelled display selector and prevents indexing size-specific pages', () => {
+    const page = readFileSync('src/app/board/page.tsx', 'utf8');
+    expect(page).toContain('htmlFor="board-page-size"');
+    expect(page).toContain('name="limit"');
+    expect(page).toContain('params.limit !== undefined');
+    expect(page).toContain('limited ? 0 : 60');
   });
   it('requires explicit source proof even for an empty successful response', () => {
     expect(isVerifiedBoardPageSizeResponse({ posts: [], limitApplied: 10, sourceWindow: 50 }, 10)).toBe(true);

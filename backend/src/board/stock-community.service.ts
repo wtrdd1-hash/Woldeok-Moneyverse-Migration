@@ -139,7 +139,7 @@ export class StockCommunityService {
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
           AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
-        ${limit === undefined ? '' : 'ORDER BY created_at DESC, post_id DESC LIMIT $4::integer'}`,
+        ${limit === undefined ? '' : "ORDER BY date_trunc('milliseconds', created_at) DESC, post_id DESC LIMIT $4::integer"}`,
       limit === undefined ? [50, normalized, title] : [50, normalized, title, limit],
     );
     return rows.map(mapped);
