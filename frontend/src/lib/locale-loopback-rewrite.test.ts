@@ -31,6 +31,20 @@ describe('localized public routes behind TLS-terminating ingress', () => {
     expect(rewrite.hostname).toBe('easy-scraping.com');
   });
 
+  it.each(['https://127.0.0.1:4205', 'https://[::1]:4205'])(
+    'uses HTTP only for literal loopback origin %s', (origin) => {
+      const rewrite = new URL(localized('/ko/login', origin).headers.get('x-middleware-rewrite') ?? '');
+      expect(rewrite.protocol).toBe('http:');
+      expect(rewrite.pathname).toBe('/login');
+    },
+  );
+
+  it('does not treat lookalike hostnames as trusted loopback', () => {
+    const rewrite = new URL(localized('/en/login', 'https://localhost.evil.test').headers.get('x-middleware-rewrite') ?? '');
+    expect(rewrite.protocol).toBe('https:');
+    expect(rewrite.hostname).toBe('localhost.evil.test');
+  });
+
   it('does not rewrite physical localized blog routes', () => {
     const response = localized('/en/blog');
     expect(response.headers.get('x-middleware-rewrite')).toBeNull();
