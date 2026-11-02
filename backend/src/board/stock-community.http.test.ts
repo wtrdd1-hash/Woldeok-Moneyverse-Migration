@@ -22,3 +22,20 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+describe('public board stock-symbol sort HTTP contract', () => {
+  it('accepts stock-symbol order alongside existing filters and returns source proof', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'news', sort: 'stock-symbol' })).resolves.toEqual({
+      posts: [], sortApplied: 'stock-symbol',
+    });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', 'stock-symbol');
+  });
+
+  it.each([{ sort: ['recent', 'stock-symbol'] }, { sort: 'unknown' }, { sort: '' }, { sort: 'STOCK-SYMBOL' }])(
+    'rejects ambiguous or invalid sort %j', async (query) => {
+      const controller = new PublicStockCommunityController(community);
+      await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

@@ -1,3 +1,4 @@
+import { isVerifiedBoardSymbolOrder } from '@/lib/board-stock-symbol-order';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -112,6 +113,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const boardSortPath = parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardSortValues = boardSortPath ? request.nextUrl.searchParams.getAll('sort') : [];
+  if (boardSortPath && (boardSortValues.length > 1 ||
+      (boardSortValues.length === 1 && !['recent', 'stock-symbol'].includes(boardSortValues[0]!)))) {
+    return gatewayProblem(400, 'Bad Request', 'board_sort_invalid', 'unsupported public board order');
+  }
+  if (boardSortPath && boardSortValues[0] === 'stock-symbol' && request.method !== 'GET') {
+    return gatewayProblem(405, 'Method Not Allowed', 'board_sort_method', 'sorted board data requires GET');
+  }
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -354,6 +364,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (boardSortPath && boardSortValues[0] === 'stock-symbol' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardSymbolOrder(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_sort_unverified',
+          'public board stock-symbol ordering is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_sort_unverified',
+        'public board stock-symbol ordering is unverified');
+    }
+  }
+
   // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
   if (supportRange && response.ok) {
     try {
@@ -583,17 +606,13 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
-  // Query-specific public board results are not stable crawlable pages.
+  // Public search/sort URLs represent a moving 50-post snapshot, not indexable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') ||
+        request.nextUrl.searchParams.has('sort'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

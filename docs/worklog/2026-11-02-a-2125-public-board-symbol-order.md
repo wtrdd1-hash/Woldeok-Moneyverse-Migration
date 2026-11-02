@@ -9,8 +9,13 @@
 - TDD: add failing controller/service/UI/Android tests; implement minimal code; run full gates and real PostgreSQL read-only proof. Preserve exact SHA and report any blocked gates.
 - Release: HOLD until complete gates, official Test exact-SHA E2E, backup restore, security and GitOps approval. No production changes or branch cleanup unless provably safe.
 
-## V2 — In progress
-- Pending.
+## V2 — In progress (21:30 KST)
+- TDD RED: Nest 3 failures / 19 passes; Frontend 4 failures / 2 tests files, expected missing sort support and verifier.
+- TDD GREEN: Nest focused 22 PASS, Frontend focused 6 PASS. Initial Nest regression (default mock expected two args, received third `undefined`) repaired without changing default API semantics.
+- Typecheck: contract build PASS, Nest PASS, Next PASS on this worktree.
+- PostgreSQL 17.11: real public read function returned 1 untagged post; app role EXECUTE=true. Read-only synthetic four-row SQL sorted AAA/aaa/WDX/untagged, stable UUID tie. No database write. Existing DEV least-privilege P0 persists: `account_balances` UPDATE=true and `user_items` DELETE=true for `moneyverse_app`; Production unverified.
+- Midpoint `origin/main` still `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; English/Korean plan blobs `c0d71553`/`d9e508a1` unchanged; open PR count 256. No other worktree touched.
+- Pending full gates, security audit, final SHA CI, official Test exact-SHA and release hold.
 
 ## V3 — Finished
 - Pending.

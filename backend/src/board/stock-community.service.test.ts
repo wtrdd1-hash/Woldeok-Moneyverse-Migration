@@ -52,3 +52,22 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('StockCommunityService bounded public stock-symbol order', () => {
+  it('sorts only the existing latest-50 source rows with untagged posts last and stable UUID tie-break', async () => {
+    const database = pool();
+    const service = new StockCommunityService(database);
+    await expect(service.publicList(undefined, undefined, 'stock-symbol')).resolves.toEqual([]);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('ORDER BY');
+    expect(String(sql)).toContain('upper(stock_symbol) COLLATE "C"');
+    expect(String(sql)).toContain('post_id ASC');
+    expect(values).toEqual([50, null, null]);
+  });
+  it('rejects invalid sort before touching database', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'descending')).rejects.toThrow('invalid board sort');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
