@@ -13,3 +13,10 @@
 
 ## 작업 종료
 - 최종 검증 및 GitHub CI 완료 여부를 영어 원본 작업일지에 추가 기록 예정. 필수 검증이 모두 충족되기 전 main 병합 및 운영 배포 금지.
+
+
+## 복구 및 최종 감사 (11:50 이후)
+- 복구 코드 `e887c8bd39e71d8dd54f4790ff8ea0ebce6b501d`. Backend 2,987 PASS/518 SKIP, Frontend 2,928 PASS, DB 62 PASS/5 SKIP, 계약 41 PASS, 빌드·타입·린트 PASS. 전체 보안 감사 취약점 9건 FAIL.
+- 개발 DB 앱 계정의 잔액 UPDATE·아이템 DELETE 허용(P0), Test·운영 공개 버전 `510dbe6bf4d5…`로 후보와 불일치. 정확 SHA 인증 E2E·복원 BLOCKED.
+- 비-main 217개 중 고유 미통합 203개, main 포함 14개; 열린 Draft PR 199개, 충돌 29개, 삭제 0개. 변경 보호.
+- QA/릴리스 근거는 `docs/qa/2026-11-02-hourly-a-board-recent-period.ko.md`, `docs/releases/2026-11-02-hourly-a-board-recent-period-hold.ko.md`. **운영 보류**; 병합·배포·DB 변경·재시작·롤백 없음.
