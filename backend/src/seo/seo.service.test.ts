@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as gscClient from './gsc-client';
+import * as ssrfDefense from '../security/ssrf-defense';
 import { SeoService } from './seo.service';
 
 describe('SeoService', () => {
@@ -50,13 +51,27 @@ describe('SeoService', () => {
   });
 
   it('should handle submitUrls without breaking', async () => {
-    const service = new SeoService();
-    const result = await service.submitUrls(['/stocks/DUCKS', '/guide/dopamine-system']);
+    const outbound = vi.spyOn(ssrfDefense, 'safeFetch').mockResolvedValue(new Response(null, { status: 202 }));
+    try {
+      const service = new SeoService();
+      const result = await service.submitUrls(['/stocks/DUCKS', '/guide/dopamine-system']);
 
-    expect(result.success).toBe(result.indexNowResponses.some(({ status }) => status === 200 || status === 202));
-    expect(result.submittedUrls.length).toBe(2);
-    expect(result.indexNowResponses.length).toBe(3);
-    expect(result.googlePingStatus).toBeDefined();
+      expect(result.success).toBe(true);
+      expect(result.submittedUrls.map((url) => new URL(url).pathname)).toEqual([
+        '/stocks/DUCKS',
+        '/guide/dopamine-system',
+      ]);
+      expect(result.indexNowResponses.map(({ status }) => status)).toEqual([202, 202, 202]);
+      expect(result.googlePingStatus).toBe(410);
+      expect(outbound).toHaveBeenCalledTimes(3);
+      expect(outbound.mock.calls.map(([url]) => String(url))).toEqual([
+        'https://api.indexnow.org/indexnow',
+        'https://searchadvisor.naver.com/indexnow',
+        'https://www.bing.com/indexnow',
+      ]);
+    } finally {
+      outbound.mockRestore();
+    }
   });
 
   it('returns an explicit unconfigured state instead of fabricated GSC metrics', async () => {
