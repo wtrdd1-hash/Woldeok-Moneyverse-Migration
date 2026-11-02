@@ -1,14 +1,12 @@
+import { isSameOriginFinanceMutation } from '@/lib/finance-mutation-origin';
 import { NextResponse } from 'next/server';
 import { mutate } from '@/lib/mutate';
 import { ApiError } from '@/lib/api';
 export const dynamic = 'force-dynamic';
 const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
 export async function POST(request: Request) {
-  const origin = request.headers.get('origin');
-  const site = request.headers.get('sec-fetch-site');
-  if (!origin || origin !== new URL(request.url).origin
-    || (site !== null && site !== 'same-origin')) {
-    return NextResponse.json({ error: 'Forbidden request' }, { status: 403, headers });
+  if (!isSameOriginFinanceMutation(request)) {
+    return NextResponse.json({ code: 'REQUEST_ORIGIN_FORBIDDEN' }, { status: 403, headers });
   }
   try {
     const body = await request.json() as Record<string, unknown>;
