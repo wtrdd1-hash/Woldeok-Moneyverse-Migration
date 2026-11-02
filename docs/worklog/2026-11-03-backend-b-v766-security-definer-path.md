@@ -24,8 +24,8 @@
 - A safe remediation needs reviewed forward-only migrations and per-function behavioral tests; blindly rewriting search_path risks breaking existing unqualified SQL.
 
 ## Finished — Draft PR #2557 / RELEASE HOLD
-- Final main re-fetch:  (unchanged since start). No merge or deployment attempted.
-- Code: , , . Explicit expected DB identity, no writes, fail-closed on missing/noncanonical definer search_path.
+- Final main re-fetch: `f5c3fbedae1c3b3ec2374882b049aac43a655eb4` (unchanged since start). No merge or deployment attempted.
+- Code: `scripts/release/verify-security-definer-path.sql`, `scripts/release/verify-security-definer-path.sh`, `scripts/release/verify-security-definer-path.test.sh`. Explicit expected DB identity, no writes, fail-closed on missing/noncanonical definer search_path.
 - API contract: unchanged. DB schema/migrations/permissions: unchanged. Existing 23 unsafe functions remain and require a separate reviewed remediation.
 - Isolated PostgreSQL regression: PASS (8 scenarios); bash syntax and diff check PASS. Live read-only production-connected DB: BLOCKED 23/548, exit 3.
 - Full workspace build/lint/typecheck/unit/integration/security/app-api/E2E, remote required CI and official exact-SHA Test: NOT RUN/NOT CONFIRMED; root disk 96%, production DB privilege/checksum drift. No PASS claim.
