@@ -11,6 +11,14 @@ describe('LocalAuthController password recovery', () => {
     expect(mail.send).not.toHaveBeenCalled();
   });
 
+  it('never reveals whether a known address failed email delivery', async () => {
+    const localAuth = { startPasswordReset: vi.fn(async () => true) };
+    const mail = { send: vi.fn(async () => { throw new Error('SMTP down'); }) };
+    const controller = new LocalAuthController({ baseUrl: 'https://example.test' } as never, null, localAuth as never, mail as never);
+    await expect(controller.requestPasswordReset({ email: 'known@example.com' })).resolves.toEqual({ accepted: true });
+    expect(mail.send).toHaveBeenCalledOnce();
+  });
+
   it('replaces the password through a one-time token', async () => {
     const localAuth = { completePasswordReset: vi.fn(async () => true) };
     const controller = new LocalAuthController({} as never, null, localAuth as never, {} as never);
