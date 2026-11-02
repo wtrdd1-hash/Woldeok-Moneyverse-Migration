@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -173,9 +174,13 @@ export class ContentController {
   }
 
   @Get('photos')
-  @ApiOperation({ summary: 'Published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiOperation({ summary: 'Published gallery photos, optionally sorted by caption within latest 24' })
+  async photos(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'sort') ||
+        (query.sort !== undefined && query.sort !== 'caption')) {
+      throw new BadRequestException('invalid gallery sort');
+    }
+    return { photos: await this.service().publicPhotos(query.sort === 'caption' ? { sort: 'caption' } : {}) };
   }
 
   @Get('status')

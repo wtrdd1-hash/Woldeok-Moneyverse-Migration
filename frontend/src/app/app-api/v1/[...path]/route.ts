@@ -15,6 +15,7 @@ import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } 
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
+import { verifiedGalleryCaptionOrder } from '@/app/gallery/gallery-caption-order';
 import {
   APP_API_REQUEST_HEADERS,
   APP_API_RESPONSE_HEADERS,
@@ -111,6 +112,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const galleryPhotosPath = parts.length === 1 && parts[0] === 'photos' && request.method === 'GET';
+  const galleryQuery = request.nextUrl.searchParams;
+  if (galleryPhotosPath && (galleryQuery.getAll('sort').length > 1 ||
+      (galleryQuery.has('sort') && galleryQuery.get('sort') !== 'caption') ||
+      [...galleryQuery.keys()].some((key) => key !== 'sort'))) {
+    return gatewayProblem(400, 'Bad Request', 'gallery_sort_invalid', 'invalid gallery order');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +280,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Android must not accept a legacy backend that ignores caption ordering.
+  if (galleryPhotosPath && galleryQuery.get('sort') === 'caption' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedGalleryCaptionOrder(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_sort_unverified',
+          'gallery caption ordering could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'gallery_sort_unverified',
+        'gallery caption ordering could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -592,6 +615,10 @@ async function handle(request: NextRequest, context: Context) {
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 1 && parts[0] === 'photos' && request.nextUrl.searchParams.has('sort')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

@@ -7,13 +7,14 @@ import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
 import { canonicalUrl } from '@/lib/seo';
+import { parseGallerySort } from './gallery-caption-order';
 
 // Publication changes must be visible immediately. The public API query still
 // remains cheap and bounded; caching this page hid freshly approved photos for
 // up to five minutes and made a successful review look like a failure.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+const galleryMetadata: Metadata = {
   title: '사진 | Gallery',
   description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
   alternates: { canonical: canonicalUrl('/gallery') },
@@ -26,8 +27,21 @@ interface Photo {
   readonly publishedAt: string | null;
 }
 
-export default async function GalleryPage() {
-  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 0);
+export async function generateMetadata({ searchParams }: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  return { ...galleryMetadata, robots: { index: params.sort === undefined, follow: true } };
+}
+
+export default async function GalleryPage({ searchParams }: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const sort = parseGallerySort(params.sort);
+  const data = sort.invalid ? null : await publicApi<{ photos: Photo[] }>(
+    sort.sort === 'caption' ? '/api/v1/photos?sort=caption' : '/api/v1/photos', 0,
+  );
   const photos = data?.photos ?? [];
 
   return (
@@ -62,7 +76,23 @@ export default async function GalleryPage() {
           }
         />
 
-        {data === null ? (
+        <nav aria-label="사진 정렬" className="flex flex-wrap items-center gap-3 text-sm">
+          <Link href="/gallery" aria-current={!sort.sort && !sort.invalid ? 'page' : undefined}
+            className="min-h-11 inline-flex items-center rounded-md border px-3 font-semibold underline-offset-4 hover:underline">
+            <T korean="최신순" english="Newest first" />
+          </Link>
+          <Link href="/gallery?sort=caption" aria-current={sort.sort === 'caption' ? 'page' : undefined}
+            className="min-h-11 inline-flex items-center rounded-md border px-3 font-semibold underline-offset-4 hover:underline">
+            <T korean="설명 문자순" english="Description order" />
+          </Link>
+          <p className="w-full text-xs text-muted-foreground">
+            <T korean="승인된 최근 사진 24장 안에서만 정렬합니다. 전체 갤러리 정렬이 아닙니다."
+              english="Ordering covers only the latest 24 approved photos, not the full archive." />
+          </p>
+        </nav>
+        {sort.invalid ? (
+          <EmptyState title={<T korean="정렬 조건을 확인해 주세요." english="Invalid gallery order." />} />
+        ) : data === null ? (
           <EmptyState
             title={
               <T
