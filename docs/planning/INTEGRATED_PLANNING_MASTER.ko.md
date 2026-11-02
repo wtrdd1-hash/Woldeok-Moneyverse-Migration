@@ -1,3 +1,11 @@
+## v2026.11.02.1646 — F675-217 관리자 답변 알림: 삭제 후 재시도 정합성 (기능 보완 / 초안 / 운영 보류)
+**GitHub 인계:** Draft PR #2460 OPEN/HOLD (선행 #2456), 개발 이슈 #2455 갱신; 문서 전용, 기능 미구현, 운영 승격 보류.
+**사이클:** 이전 기능 추가 v1644 → 현재 기능 보완 v1646 → 다음 기능 추가 v1648(잠정). 기준 main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 확인; 선행 미병합 Draft #2456, 이슈 #2455. **제안/미구현**, 런타임·DB·금융·Test·Production 변경 없음.
+**실측:** 마이그레이션 196의 답변 멱등키 UNIQUE는 알림을 생성하지 않는다. 개발 PostgreSQL 17.11의 알림 dedupe_key는 부분 UNIQUE, 알림 회원 FK·문의 메시지 스레드 FK는 ON DELETE CASCADE다. 문의 3행/메시지 6행/알림 0행. 알림이 삭제되면 중복키 인덱스도 과거 생성 사실을 잃으므로 재시도 시 재생성 금지. 정식 번호형 알림 테이블 CREATE TABLE 계보 미확인, 개발 앱 계정 알림 INSERT/DELETE·잔액 UPDATE 허용은 P0 #993; 운영 권한 단정 금지.
+**알림 분류 및 영수증:** SERVICE_OPERATIONAL, support_reply_notice_receipts.
+**개선:** 새 ON 관리자 답변만 단일 SECURITY DEFINER 트랜잭션으로 문의 잠금·메시지/상태/감사/일반 문구 알림/최소 생성 영수증을 원자적 저장한다. 실패 시 전체 롤백. 동일 관리자/키/문의/본문 재실행은 기존 영수증 확인 후 삭제된 알림을 재발송하지 않는다. 과거/OFF 답변은 NOT_TRACKED_LEGACY_OR_OFF로 분리하고 소급 생성하지 않는다. 알림 ID는 보존 삭제를 막는 FK가 아닌 과거 식별자로 기록하고 회원 삭제 시 관련 영수증도 제거한다. 응답 CREATED_NOW / ALREADY_CREATED / HISTORICAL_CREATED_PURGED / NOT_TRACKED_LEGACY_OR_OFF는 전달·열람 증거가 아니다. 최근 100건 밖 정확한 본인 문의 링크, URL 제한, Next/Android 비공개, 국·영문 WCAG 2.2 AA. 상세 계약은 영문 정본 PROJECT_PLAN.md 및 국문 동등 문서.
+**백로그:** P0 OPS/SEC/FIN/REL1646-01~04, P1 NOTICE1646-05~10. 신규 DB 설치·동시 재시도·보존 삭제·OFF/ON·FK/타인·Android 시험은 **명세만, 미실행**. 공개 Test/Production 버전 510dbe6...은 main과 다르고 실행 이미지 증거가 아니다. 독립 복원·국고·공식 Test 정확 SHA·QA 미해결. 외부 신규 승인 0건, 누적 UNKNOWN/10,000건 **BLOCKED / IN PROGRESS**. **DRAFT / RELEASE HOLD**.
+
 ## v2026.11.02.1644 — F675-217 관리자 답변 인앱 알림 (기능 추가 / 초안 / 배포 보류)
 **GitHub 인계:** Draft PR #2456 OPEN/HOLD(#2450 상위), 개발 이슈 #2455 OPEN(P0 4 / P1 6). 문서 전용, 배포 없음.
 **사이클:** 이전 기능 보완 v1642 → 현재 기능 추가 v1644 → 다음 기능 보완 v1646(잠정). 시작·중간 확인 main a8541927c3a351d980454c66e95a3356c47e0722, 상위 미병합 Draft #2450, 개발 인계 #2455. **제안/미구현**; 문서 전용, 런타임/DB/금융/Test/Production 변경 없음.
