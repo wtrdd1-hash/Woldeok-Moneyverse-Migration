@@ -10,3 +10,5 @@
 - Latest QA v1473: Production locale HTTP 500, app-role broad TRUNCATE/default ACL, checksum drift, official Test source mismatch, independent off-host restore and authenticated E2E BLOCKED. Main CI includes failure.
 - Exact SHA official isolated Test, authenticated mobile/browser E2E, accessibility automated audit, SEO HTTP smoke, independent restore and GitOps gate: **NOT RUN / BLOCKED**. No PASS inferred.
 - Release decision: **DRAFT/HOLD**. No main merge, Production/Test deployment, database mutation, service restart, branch deletion, or rollback execution. Existing running version unchanged.
+
+- Final pre-integration sync: latest main advanced to `b1f858c6b3684066bd609b06eebc59d65fb317af` (blog v1625), merged into candidate branch without conflicts. Exact new SHA gates supersede earlier pre-sync results.

@@ -9,3 +9,5 @@
 - **P0 차단:** 개발 앱 역할 account_balances TRUNCATE, user_items DELETE 허용. 전체 의존성 취약점 9건(보통 8/낮음 1) FAIL. 운영 의존성 감사 0건. QA v1473에서 운영 locale HTTP 500, 광범위 DB 권한, 공식 Test SHA 불일치, 독립 복원·인증 E2E 미완료.
 - 정확한 후보 SHA 공식 격리 Test, 인증 브라우저/모바일 E2E, 접근성 자동검사, 운영 SEO HTTP 확인, 외부 독립 복원, GitOps 게이트는 **미실행/차단**. 성공으로 간주하지 않음.
 - 결론 **DRAFT/HOLD**. main 병합, Test/운영 배포, DB/원장 수정, 서비스 재시작, 브랜치 삭제 없음.
+
+- 통합 직전 main이 `b1f858c6b3684066bd609b06eebc59d65fb317af`(블로그 v1625)로 전진하여 분리 브랜치에 충돌 없이 병합함. 새 SHA 전체 게이트를 다시 확인하며 이전 검증은 최신 SHA 증거로 대체되지 않음.

@@ -5,3 +5,5 @@
 3. Mid: refetched unchanged main and English/Korean plan hashes; fixed legacy no-filter test signature and contract generator union drift. Targeted GREEN, full suites, build, lint, audits; real DB read-only proof.
 4. Pre-integration: refetched unchanged main and plan hashes. Branch audit preserved all collaborator branches; no cleanup because unique unmerged work and active PR references. CI and official Test required before merge; P0 blockers remain.
 5. Test/Production/rollback: not deployed; no shared DB/ledger changes; no service restarts; rollback is revert candidate only. GitHub PR stays Draft/HOLD. Evidence path `/srv/moneyverse-data/tasks/mv-a-20261102-2235-board-category/evidence/`.
+
+6. Latest main advanced to `b1f858c6b3684066bd609b06eebc59d65fb317af` (blog-only v1625). Rechecked plan hashes; merged latest main into isolated feature branch without conflicts or force push. Reverify all gates on final SHA; no production promotion.
