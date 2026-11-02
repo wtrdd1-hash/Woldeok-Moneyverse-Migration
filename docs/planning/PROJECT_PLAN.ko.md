@@ -1,3 +1,33 @@
+## v2026.11.02.1648 — F675-218 처리 완료 문의의 검증된 만족도 평가 (기능 추가 / 초안 / 운영 보류)
+**GitHub:** Draft PR #2468 OPEN/HOLD, 개발 이슈 #2467, 미병합 선행 #2460. 병합·배포 금지.
+**GitHub 인계:** 개발 백로그 #2467, Draft PR 작성 예정, 미병합 기획 #2460에 종속. 문서 전용이며 **기능 미구현**.
+
+**주기:** 이전 기능 보완 v1646 → 현재 기능 추가 v1648 → 다음 기능 보완 v1650(잠정). 시작·중간 main a8541927c3a351d980454c66e95a3356c47e0722 재확인. AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md와 의미 동등한 한국어 기획서가 기술 기준이다. 운영 병합·배포 금지.
+
+### 목적·대상·실제 근거·설계 선택
+- **목적:** 관리자 문의가 처리 완료된 뒤 회원이 답변의 유용성을 선택적으로 평가해 고객지원 품질을 개선한다. 대상은 본인 문의의 검증된 처리 완료 회차를 가진 로그인 회원이며, 관리자는 개인별 평가가 아니라 익명 집계만 본다. 진입점 /support → 정확한 본인 처리 완료 문의 → '이번 처리 평가하기'. WLD, 아이템, 보상, 환불, 계정 권한 및 공개 리뷰에는 영향을 주지 않는다.
+- **소스 확인:** 마이그레이션 196의 support_threads.status는 open/waiting_user/resolved이며 admin_support_set_status는 변경 가능한 updated_at만 갱신한다. 불변 처리 완료 회차 ID는 없다. 현재 /support는 최대 최근 100건을 표시하고 만족도 입력 화면이 없다. 요청한 thread가 목록에 없을 때 다른 문의를 선택할 수 있어 #2455의 정확한 본인 문의 조회가 선행 조건이다. 개발 PostgreSQL 17.11 읽기 전용 결과 문의 3건, 현재 처리 완료 2건, 메시지 6건. 개발 앱 계정의 account_balances/user_items UPDATE 허용은 P0 #993이며 Test·Production 권한으로 일반화하지 않는다.
+- **대안 비교:** (A) 문의당 평가 1건은 재개·재종결 시 이전 평가가 새 처리 결과로 오인된다. (B) updated_at을 회차 ID로 쓰면 일반 상태 변경과 경합 때문에 불안정하다. **(C) 불변 처리 완료 이벤트 ID를 별도 저장**하는 방안을 채택한 초안이다. 관리자 상태가 비종결 → resolved로 실제 전환될 때만 이벤트를 생성한다. 기존 종결 건에 과거 이벤트를 임의 생성하지 않는다. 구현 전 개발 설계 승인과 마이그레이션 검증이 필요하다.
+- **화면·CTA·상태:** 본인 소유가 확인되고 현재 resolved이며 불변 이벤트가 존재할 때만 1~5점 라디오 선택, 선택적 고정 사유(명확성/속도/도움/미해결/기타), '평가 제출', '취소' 표시. 자유 입력·첨부·개인정보·보상 없음. 제출 후 검증된 영수증과 완료 안내, 같은 요청 재시도는 기존 접수 표시. V1에서는 수정·삭제 UI를 제공하지 않으며 법정 삭제는 기존 승인 절차에 따른다. 로딩/입력 가능/제출 완료/검증된 빈 상태/과거 미추적/재개로 부적격/404 타인 또는 미존재/401/403/409 경합·중복키 충돌/429 제한/503 원본 장애를 구분한다. 잘못된 thread로 다른 문의를 자동 선택하지 않는다. 기본 OFF는 UI를 숨기지만 기존 평가를 삭제하지 않는다.
+
+### DB·트랜잭션·멱등성·보존
+- **향후 번호형 마이그레이션:** 개발자가 동시 PR의 번호 충돌을 조사한 뒤 새 번호 배정. support_resolution_events(id UUID PK, thread_id FK, owner_id FK, resolved_by FK, resolved_at timestamptz, transition_key UUID UNIQUE)는 실제 관리자 비종결→종결 전환과 감사 로그를 **동일 SECURITY DEFINER 트랜잭션**으로 저장한다. resolved→resolved 재호출은 새 이벤트를 만들지 않는다. 회원 답변으로 문의가 다시 열리면 과거 이벤트는 기록으로 남되 새로운 평가 대상은 아니다. 기존 관리자 세션·동의·CSRF·관리자 권한 검사 유지, 본문 actor 신뢰 금지. FK 삭제 동작·개인정보 보존을 검토한다.
+- support_resolution_feedback(resolution_id UUID PK/FK ON DELETE CASCADE, owner_id FK, score SMALLINT CHECK 1..5, reason 제한 ENUM, request_key UUID UNIQUE, request_hash BYTEA 32바이트, submitted_at timestamptz). 실제 쿼리 계획으로 필요한 인덱스만 추가: 이벤트(thread_id,resolved_at DESC,id DESC), 평가(owner_id,submitted_at) 선택. 해시에는 버전/인증 회원/이벤트/점수/사유/키를 정규화하여 넣고 원문·세션·토큰을 보관하지 않는다. moneyverse_app에 신규 테이블 직접 SELECT/INSERT/UPDATE/DELETE GRANT 금지, 검증된 SECURITY DEFINER 함수만 EXECUTE.
+- **원자성:** 정확한 문의 행 FOR UPDATE 잠금 → 본인·활성 세션·resolved·최신 이벤트 검증 → 기존 요청키 영수증 확인(제한 집계보다 먼저) → 평가 1행·영수증 저장 및 재조회 → 커밋. 같은 키·같은 내용은 기존 영수증만 반환; 다른 내용 또는 같은 회차 새 키는 409, 타인 요청은 존재 여부를 숨긴 404. 재개와 제출 경합은 잠금 순서로 409 처리, 재종결하면 새 회차로 평가 가능. 네트워크 타임아웃 뒤 영수증 404가 아직 처리 중인 원 요청의 실패 증명은 아니므로 같은 키로 재확인하며 새 키 자동 발급 금지. 악용 방지: 회원별 10분 3회·한국시간 하루 10회 제한, 새 성공 요청과 검증된 재시도는 분리 계수; 경합 시 직렬화 또는 실패 닫힘.
+- **보존·삭제:** 개인 평가 원문이나 IP/기기 정보는 분석에 넣지 않는다. 문의·회원 삭제 시 FK 연쇄 또는 승인된 순서대로 삭제·익명화하고 독립 DB 시험을 거친다. 기존 support_threads.user_id FK는 ON DELETE CASCADE가 아니므로 사용자 삭제만으로 안전하다고 주장하지 않는다. 삭제 후 영구 멱등 재실행 보장 없음. 과거 종결 회차를 임의로 소급 생성하지 않는다.
+
+### API·관리자·보안·SEO·모바일·배포
+- **Nest API 제안:** GET /api/v1/support/threads/:id/resolution-feedback = 본인 이벤트 적격성과 영수증 확인. POST 같은 경로 = resolutionId UUID, score 1~5, reason 제한 값/null, idempotencyKey UUID. SessionGuard/AuthenticatedGuard/ConsentGuard/CSRF 및 DB 본인 소유 검사. 반환 resolutionId, ELIGIBLE/SUBMITTED/LEGACY_UNTRACKED/INELIGIBLE, 검증된 receipt. 400 입력 오류, 401 미로그인, 403 동의, 404 타인/미존재, 409 상태 변경/중복 충돌, 429 제한, 503 DB 불확실. 조회 장애를 정상 빈 상태나 성공으로 바꾸지 않는다.
+- **관리자:** 처리 완료 회차, 평가 참여율, 점수 분포, 종결~평가 지연 p50/p95, 재개·중복·오류 집계. 표본 20명 미만은 비공개·소수 셀 억제. 개인 평가로 담당자를 서열화하거나 인과적 품질을 단정하지 않는다. 별도 관리자 권한과 최소 권한 DB 집계 함수 사용.
+- **웹/Android:** /support 기존 필터·대화·CSV/TXT 다운로드는 유지하고 정확한 본인 thread 조회 후 평가 카드 표시. 한국어/영어, 320px, 200% 확대, 키보드/스크린리더, 44px 터치, WCAG 2.2 AA. 실패 시 '조회 불가/재시도'를 보여주며 빈 별 5개로 오인시키지 않는다. Android app-api도 동일 본인/세션 결속, 계정 전환 이전 응답 차단, 로컬 디스크 캐시 금지, 타입 검증, 백그라운드 평가 쓰기 금지. Nest/Next/App API 실제 엣지의 정상/오류/HEAD/304 모두 private no-store/noindex/no-referrer, 상위 public 캐시 헤더 차단. 비공개 /support는 사이트맵 제외, 공개 SEO 영향 없음.
+- **KPI 목표(실측 아님):** 타인 정보 노출 0, 처리 회차당 중복 접수 0, 부분 커밋 0, 제한된 부하에서 영수증 p95 300ms 미만, 추적 가능한 처리 회차 대비 검증된 참여율. 무응답을 부정 평가로 해석 금지. feature flag support_resolution_feedback 기본 OFF. 독립 브랜치 → 깨끗한 PG17 신규 설치/업그레이드·권한 거부·회귀 → 공식 Test 정확 SHA 회원/관리자 E2E·Android·접근성·실제 엣지 → 승인된 단계적 운영 승격. OFF 롤백은 신규 진입만 막고 저장된 평가/적용 마이그레이션을 지우지 않는다. 이번 회차는 문서 전용이며 런타임·DB·금융·Test·Production 변경 없음.
+
+### P0/P1 개발 백로그·게이트
+**P0 4건:** OPS1648-01 운영 실제 실행 SHA·롤백·외부 독립 복원 #1984; SEC1648-02 개발 잔액·보유품 UPDATE #993, 신규 설치/마이그레이션 번호 충돌·권한 거부; FIN1648-03 국고/MINT/SWF/원장 근거와 금융 무변경; REL1648-04 QA v1461 FAILED/P0, Production 다국어 500, 비공개 401 헤더 누락, 전체 의존성 감사·라우트 원장, 공식 Test 정확 SHA 인증 E2E·독립 복원.
+**P1 6건:** FEEDBACK1648-05 이벤트/평가 스키마·FK·인덱스·삭제; -06 관리자 전환/회원 평가 원자성·멱등성; -07 Nest DTO·보호·영수증·오류; -08 웹 정확한 문의·한영·접근성; -09 Android 개인정보·관리자 익명 KPI; -10 격리 PG17 동시성·재개·삭제·롤백 회귀. 신규 기능 수용시험은 **제안만 했고 실행하지 않음**.
+**QA 실제 관찰:** v1461 FAILED/P0_PRODUCTION_HOLD, 백엔드/프론트 종료 0이나 backend-prod-mode/audit-all/route-ledger/QA-policy 실패. Production 다국어 경로 표본에서 HTTP 500 16건, 같은 Test 표본 0건; 비공개 401 응답 헤더 누락 관찰. 전체 장애라고 확대 해석하지 않는다. Test·Production 공개 /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 main과 다르며 실행 이미지 증명이 아니다. **RELEASE HOLD**.
+**외부 독립 레퍼런스:** 이번 회차 신규 획득·검증·중복제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. A/B/C/QA/Gemini 작업·브랜치·마이그레이션 번호 불변. 미병합 선행 Draft #2460에 종속되므로 자동 병합 금지.
+
 ## v2026.11.02.1646 — F675-217 관리자 답변 알림: 삭제 이후 재시도 정합성과 신규 DB 설치 검증 (기능 보완 / 초안 / 운영 보류)
 **GitHub 인계:** Draft PR #2460 OPEN/HOLD (선행 #2456), 개발 이슈 #2455 갱신; 문서 전용, 기능 미구현, 운영 승격 보류.
 
