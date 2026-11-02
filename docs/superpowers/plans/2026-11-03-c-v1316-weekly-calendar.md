@@ -9,20 +9,20 @@
 **Tech Stack:** Next.js App Router, TypeScript, Vitest, NestJS, PostgreSQL 17.
 
 ## Task 1 — RED contract
-- [ ] Write `frontend/src/app/calendar/weekly-reset-evidence.test.ts` with valid, empty, malformed, conflicting and stale cases.
-- [ ] Run the test and record failure before implementation.
+- [x] Write `frontend/src/app/calendar/weekly-reset-evidence.test.ts` with valid, empty, malformed, conflicting and stale cases.
+- [x] Run the test and record failure before implementation.
 
 ## Task 2 — GREEN behavior
-- [ ] Add `frontend/src/app/calendar/weekly-reset-evidence.ts` parser with explicit null for unavailable and verified-empty object for zero goals.
-- [ ] Use parser in `calendar/page.tsx`; error must not show 'no goals', and include accessible retry.
-- [ ] Run focused tests, lint and typecheck; review errors.
+- [x] Add `frontend/src/app/calendar/weekly-reset-evidence.ts` parser with explicit null for unavailable and verified-empty object for zero goals.
+- [x] Use parser in `calendar/page.tsx`; error must not show 'no goals', and include accessible retry.
+- [x] Run focused tests, lint and typecheck; review errors.
 
 ## Task 3 — Verification and handoff
-- [ ] Re-fetch main and compare relevant files/plan before final PR decision.
-- [ ] Run exact HEAD build, lint, typecheck, unit, integration, real PostgreSQL, security, app-api, E2E, CI where available; record all blockers.
-- [ ] Preserve independent branch, English/Korean logs and safe GitHub PR. Do not merge/deploy on a failed gate.
+- [x] Re-fetch main and compare relevant files/plan before final PR decision.
+- [x] Run exact code HEAD gates; record backend, audit, QA and E2E blockers. Re-run after final documentation commit.
+- [x] Preserve independent branch, English/Korean logs and safe GitHub Draft PR. No merge/deploy.
 
 ## Supplemental RED/GREEN — real HTTP privacy
 - [x] RED: route-specific headers absent under global public indexing policy.
 - [x] GREEN: six exact canonical/localized member calendar paths protected by noindex/private/no-referrer in Next config.
-- [ ] Rebuild final SHA and inspect actual HTTP headers.
+- [x] Built code SHA and inspected six HTTP headers; 500 responses from missing isolated backend, so authenticated E2E remains BLOCKED.

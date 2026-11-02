@@ -10,8 +10,16 @@
 ## 진행
 - TDD RED, 수정, 독립 검증 예정.
 
-## 종료
-- 검증 및 배포 판정 기록 예정.
+## 종료 — 2026-11-03 02:56 KST — PARTIAL / RELEASE BLOCKED
+- 코드 후보 SHA `e872669813e08ff6629cfe30cbbd3e42fc320bdb`, Draft PR #2562. main `f5c3fbedae1c3b3ec2374882b049aac43a655eb4` 시작·중간·종료 동일.
+- 주간 목표 잘못된 HTTP 200·주 시작일 모순·오래된 일정의 허위 빈 상태를 차단하고 키보드 재조회, 6개 경로 개인정보·SEO 헤더 적용. 기존 Nest 인증 및 SQL 101 최소권한 함수 재사용.
+- 코드 후보: Lint 오류 0/경고 1,027, Typecheck/양쪽 Build 통과, Frontend 2,958건 통과, Backend 2,983건 통과·2건 실패·518건 제외, DB 패키지 72건 통과·5건 제외, app-api 184개 계약, 보안 11건 통과. 격리 PostgreSQL 17.11에서 SQL 328단계와 실제 회원 주간 목표 4건 확인.
+- 차단: Backend 프로필 테스트 2건(401/200), 의존성 취약점 9건, 전체 경로 QA 증빙 누락. 독립 Next HTTP 6개 경로 비색인·비공개 헤더는 확인했으나 Backend 127.0.0.1:3020 미연결로 HTTP 500이며 로그인 E2E 통과가 아님. 로컬 빌드 버전 ID는 Git SHA와 불일치.
+- 공식 Test `2dd507030dc1e461cbcf18f060260959f4c26a8f`, Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`로 후보와 불일치. 인증된 브라우저/Android E2E·정확한 Test SHA·독립 복원·운영 승인 미완료.
+- 표준 CI runtime-check 및 후보 verify/runtime-check 통과, 후보 build 대기(02:55). Android app-api 캐시/출처 추가 검증은 이슈 #2565, 시즌 캘린더 기존 PR #2318과 통합 조정 필요.
+- 코드 후보의 이중 물리 디스크 Git Bundle/Patch 백업 SHA-256 일치. A/B/QA/Gemini·핵심 예약 5개 변경 없음. main 병합, Test/Production 배포, GitOps, 롤백, 브랜치 삭제 없음.
+- 이 종료 문서 커밋으로 최종 HEAD가 변경되므로 필수 게이트를 새 SHA에서 다시 실행하고 PR #2562에 증빙. 기존 SHA 통과 결과를 최종 HEAD 통과로 간주하지 않음.
+
 
 ### 중간 — 02:35 KST
 - TDD RED: 기능 3건, SSR 허위 빈 일정 1건, 비정상 큰 정수 1건 실패 재현. 수정 후 캘린더 집중 테스트 12/12 통과.
