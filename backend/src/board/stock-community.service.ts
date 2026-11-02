@@ -150,7 +150,7 @@ export class StockCommunityService {
       if (seen.has(postId)) throw new Error('duplicate public board post id');
       if (row.mine !== false) throw new Error('invalid public board ownership');
       seen.add(postId);
-      return { ...mapped(row), postId };
+      return mapped({ ...row, post_id: postId });
     });
   }
 }

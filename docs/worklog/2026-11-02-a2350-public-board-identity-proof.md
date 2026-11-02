@@ -21,3 +21,11 @@
 - RED: backend 3 failures for malformed/duplicate/private post identity; frontend 1 missing parser plus Android unverified 200; malformed JSON and non-JSON Android 200 independently RED (2 failures).
 - GREEN: backend 11/11 targeted, frontend 14/14 targeted. Source proof checks bounded latest-50 IDs, safe counts, timestamps, public ownership; SSR refuses unverified success and Android returns no-store/noindex 503.
 - No migrations, direct DB grants, ledger, balance or service changes. Final gates pending.
+
+### Final local validation checkpoint — 2026-11-03 00:02 KST
+- Code implementation completed; no direct SQL table access or schema change. Mobile contract initially reported drift due to object property insertion order; repaired source order, then regenerated contract check PASS (184 endpoints / 683 methods) without changing committed contract artifacts.
+- Full backend 2,984 PASS / 2 FAIL / 518 SKIP, existing profile auth HTTP 401-vs-200 (#2265). Database 62 PASS / 5 SKIP, contract 41 PASS. Frontend 2,952 PASS. Typecheck PASS; lint 0 errors / 1,027 warnings; build PASS (602 pages).
+- Full dependency audit FAIL (9, low 1/moderate 8); production dependency audit PASS (0 known).
+- DEV PostgreSQL READ ONLY latest-50 function returned 1 row; app-role direct UPDATE/DELETE overgrants remain P0 #993. No mutation.
+- Remote audit: 294 total branches (main included), 293 non-main; 276 unmerged, 17 ancestor. 265 open PRs, 29 conflicts at start. Virtual merge with #2540/#2530/#2519 CONFLICT. No branch deletion, no main merge.
+- Final candidate PR and exact SHA/CI preflight still to be recorded. Test/Production HOLD; no runtime change or rollback.
