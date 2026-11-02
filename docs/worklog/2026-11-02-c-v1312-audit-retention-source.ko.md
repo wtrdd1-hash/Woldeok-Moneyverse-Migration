@@ -16,5 +16,10 @@
 - 독립 PostgreSQL 17.11에서 마이그레이션 323개 적용. 앱 역할의 감사 원본 SELECT 불가, 허가된 함수 EXECUTE 가능 확인.
 - origin/main이 b1f858c에서 9cade11로 진전(블로그 문서 변경만), 재통합 및 최종 검증 대기.
 
-## 종료
-- 대기.
+## 종료 (릴리스 판정, 2026-11-02 23:06 KST)
+- 감사 보존 건수·순번 및 처리 방식·시각 모순 거부, 관리자 감사 화면 기본/5개 다국어 경로에 noindex/no-store/no-referrer 적용. Nest/PG 기존 계약 재사용, 금융·DB 스키마 변경 없음.
+- 초기 SHA `e301cba6eb`: lint/typecheck/build, 프론트 2,940건, DB 패키지, 계약, app-api 184개, 보안 스크립트 통과. 백엔드 2,981 통과/2 실패/518 건너뜀(프로필 인증 401 대 기대 200). 전체 경로 QA 증빙 파일 누락으로 실패. 이후 HTTP 헤더 변경이 있어 초기 테스트를 최종 SHA 통과로 취급하지 않음.
+- 독립 PostgreSQL 17.11에서 마이그레이션 323개 통과, 앱 역할 감사 원본 직접 DML 차단 및 승인된 함수 실행·비관리자 거부 확인.
+- 초기 실제 HTTP에서 index, follow 문제 재현. 수정 후 집중 테스트 19/19 통과, 최종 빌드 HTTP 재확인 예정.
+- main `9cade11af53db9f27c2b9f0ea9d39005ea8d0387`에 충돌 없이 rebase, 최종 SHA 테스트 결과는 PR #2542에 별도 기록.
+- **PARTIAL / RELEASE HOLD:** 인증 브라우저/Android E2E, 공식 Test exact SHA, 독립 복원, 백엔드·전체 QA 필수 통과 미확보. Draft PR 보존, 병합/운영배포/롤백 없음. A/B/Gemini/QA 및 핵심 예약 5개 변경 없음.

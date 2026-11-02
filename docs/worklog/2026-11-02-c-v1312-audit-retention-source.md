@@ -18,5 +18,10 @@
 - Isolated PostgreSQL 17.11, 323/323 migrations applied; app role `audit_logs` direct SELECT=false, `admin_audit_retention_overview(uuid)` EXECUTE=true. No persistent DB touched.
 - Mid-run origin/main advanced from b1f858c to 9cade11 (blog docs only, no source overlap). Rebase and final exact-SHA revalidation pending.
 
-## Finished
-- Pending.
+## Finished (release disposition, 2026-11-02 23:06 KST)
+- Implementation: fail-closed audit retention count/sequence and disposition/time validation, plus HTTP private/noindex/no-referrer on six canonical/localized admin integrity routes. Existing Nest/PG contract reused; no DB schema, financial write or main mutation.
+- First gate run at initial implementation SHA `e301cba6eb8d4e89ff67fd39f1b44a1188d34828`: lint, typecheck, build, frontend 2,940 PASS, database package, contract, app-api 184 endpoints, security scripts PASS. Backend 2,981 PASS / 2 FAIL / 518 SKIP (pre-existing profile HTTP 401-vs-200). Full-route QA FAIL missing `artifacts/qa/full-route-ledger.json`. New edge changes were made afterward; first gate evidence does not certify final SHA.
+- Isolated PostgreSQL 17.11: 323 migrations PASS, app role cannot SELECT/INSERT/UPDATE/DELETE audit_logs, SECURITY DEFINER function executable, unauthorized actor rejected. Container ephemeral; no shared database writes.
+- Initial independent HTTP confirmed `index, follow` on `/admin/logs/integrity` and `/en/admin/logs/integrity`; fix covered by 19/19 focused tests. Actual post-fix HTTP must be rechecked after final build.
+- Main rechecked and rebased from `b1f858c` onto `9cade11af53db9f27c2b9f0ea9d39005ea8d0387` (blog-only change); no conflict. Exact final SHA gates pending at this checkpoint; publish their results to PR #2542.
+- **PARTIAL / RELEASE HOLD:** authenticated browser/Android E2E, official Test exact-SHA, independent restore, all-green backend and QA remain unproven. Draft PR only. No merge, Production, GitOps or rollback action. No other branch/worktree removed; A/B/Gemini/QA preserved. Five recurring tasks untouched.
