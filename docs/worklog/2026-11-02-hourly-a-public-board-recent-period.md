@@ -12,3 +12,10 @@
 
 ## Finished
 - PENDING. Production HOLD until all release gates pass.
+
+## In progress — 11:27 KST
+- TDD RED observed: Backend 3 failed / 19 passed; Frontend 3 failed (plus missing parser module). Implemented period validation, bound PostgreSQL cutoff, labelled web selector, noindex metadata and Android fail-closed source verification.
+- GREEN target suites: Backend 22/22; Frontend 6/6. Typecheck PASS. Mobile API contract generated (184 endpoints) and EN/KO schema references updated; pre-commit contract drift is expected.
+- Real DEV PostgreSQL 17.11 read-only `SET ROLE moneyverse_app` verified public snapshot EXECUTE and 7-day filter SQL (0 matches). P0 direct `account_balances` UPDATE and `user_items` DELETE are still allowed in DEV; no write, all rolled back. Production ACL unverified.
+- Refetched main mid-work: `a8541927c3a351d980454c66e95a3356c47e0722` unchanged. Other A/B/C/Gemini branches and original dirty main remain untouched.
+- Remaining: complete full gates, exact-SHA CI, Test E2E, restore and release decision. Production HOLD.
