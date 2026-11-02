@@ -116,3 +116,21 @@ describe('security headers', () => {
     );
   });
 });
+
+
+describe('public enterprise disclosure HTTP indexing boundary', () => {
+  it('overrides the public indexable header for default and localized enterprise pages', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const noindex = groups.filter((group) => group.headers.some((header) =>
+      header.key.toLowerCase() === 'x-robots-tag' && header.value === 'noindex, nofollow'));
+    expect(noindex.some((group) => group.source === '/enterprises')).toBe(true);
+    expect(noindex.some((group) => group.source.includes(':locale') && group.source.endsWith('/enterprises'))).toBe(true);
+  });
+  it('preserves the broad public indexing policy and the Test indexing switch', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    expect((await headersFor('https://easy-scraping.com')).get('x-robots-tag')).toContain('index, follow');
+    process.env.SEO_INDEXING_ENABLED = 'false';
+    expect((await headersFor('https://test.easy-scraping.com')).get('x-robots-tag')).toBe('noindex, nofollow');
+  });
+});

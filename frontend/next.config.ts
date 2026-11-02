@@ -197,6 +197,15 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // Public SOE numbers are not certified settlement receipts. Keep the
+      // response itself non-indexable even when the public indexing gate is on;
+      // page metadata alone cannot override the global X-Robots-Tag header.
+      { source: '/enterprises', headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+      ] },
+      { source: '/:locale(en|ja|zh|vi|ko)/enterprises', headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+      ] },
     ];
   },
 
