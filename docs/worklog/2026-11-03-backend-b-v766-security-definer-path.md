@@ -12,7 +12,7 @@
 1. [x] Write isolated PostgreSQL RED regression proving unsafe paths and wrong DB identity fail.
 2. [x] Implement read-only SQL and CLI release checker, with strict database identity and fail-closed behavior.
 3. [x] Run GREEN regression, read-only actual DB probe, source static checks, re-fetch latest main and plan.
-4. [ ] Record API/DB contract (no API or schema change), CI/Test gate status and HOLD, push independent Draft PR.
+4. [x] Record API/DB contract (no API or schema change), CI/Test gate status and HOLD, push independent Draft PR.
 
 ## In progress — verification
 - RED: isolated PostgreSQL test failed on missing checker (exit 1); fixture startup corrected before meaningful RED.
@@ -22,3 +22,11 @@
 - Bash syntax and `git diff --check` pass. No dependency install, lint/typecheck/full build/unit/full CI/E2E attempted on root disk at 96% used; these remain BLOCKED/NOT RUN, not PASS.
 - Candidate not merged, no official exact-SHA Test run, no independent restore, no GitOps release approval. Production HOLD.
 - A safe remediation needs reviewed forward-only migrations and per-function behavioral tests; blindly rewriting search_path risks breaking existing unqualified SQL.
+
+## Finished — Draft PR #2557 / RELEASE HOLD
+- Final main re-fetch:  (unchanged since start). No merge or deployment attempted.
+- Code: , , . Explicit expected DB identity, no writes, fail-closed on missing/noncanonical definer search_path.
+- API contract: unchanged. DB schema/migrations/permissions: unchanged. Existing 23 unsafe functions remain and require a separate reviewed remediation.
+- Isolated PostgreSQL regression: PASS (8 scenarios); bash syntax and diff check PASS. Live read-only production-connected DB: BLOCKED 23/548, exit 3.
+- Full workspace build/lint/typecheck/unit/integration/security/app-api/E2E, remote required CI and official exact-SHA Test: NOT RUN/NOT CONFIRMED; root disk 96%, production DB privilege/checksum drift. No PASS claim.
+- Draft PR: #2557. No merge, Test deploy, Production deploy, DB mutation, branch cleanup or other worker modification. Release HOLD.
