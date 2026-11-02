@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { mutate } = vi.hoisted(() => ({ mutate: vi.fn() }));
 vi.mock('@/lib/mutate', () => ({ mutate }));
+import { ApiError } from '@/lib/api';
 import { POST as contribute } from './contribute/route';
 import { POST as withdraw } from './withdraw/route';
 
@@ -46,6 +47,20 @@ describe('Treasury Core pension Next same-origin mutation boundary', () => {
       expect(response.status).toBe(400);
     }
     expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { operation: 'contribute', action: contribute, field: 'amountWld', status: 401 },
+    { operation: 'contribute', action: contribute, field: 'amountWld', status: 403 },
+    { operation: 'withdraw', action: withdraw, field: 'principalWld', status: 401 },
+    { operation: 'withdraw', action: withdraw, field: 'principalWld', status: 403 },
+  ] as const)('$operation preserves HTTP $status as authentication/authorization error', async ({ operation, action, field, status }) => {
+    mutate.mockRejectedValueOnce(new ApiError(status, 'sensitive backend detail'));
+    const response = await action(request('/api/pension/funded/' + operation, {
+      idempotencyKey: key, [field]: '1000',
+    }));
+    expect(response.status).toBe(status);
+    expect((await response.json()).code).toBe(status === 401 ? 'AUTHENTICATION_REQUIRED' : 'AUTHORIZATION_DENIED');
   });
 
   it('keeps withdrawals scoped and never invents cash after a missing receipt', async () => {

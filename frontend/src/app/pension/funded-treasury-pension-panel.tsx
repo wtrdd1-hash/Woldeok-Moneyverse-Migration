@@ -26,7 +26,7 @@ const readable = (s: string) => exact(s) ? groupDigits(s) : '—';
 
 export function FundedTreasuryPensionPanel() {
   const [position, setPosition] = useState<Position | null>(null);
-  const [status, setStatus] = useState<'loading'|'verified'|'unavailable'>('loading');
+  const [status, setStatus] = useState<'loading'|'verified'|'unavailable'|'unauthenticated'|'forbidden'>('loading');
   const [amount, setAmount] = useState('1000');
   const [busy, setBusy] = useState(false);
   const pendingFund = useRef<{ amount: string; key: string } | null>(null);
@@ -35,6 +35,8 @@ export function FundedTreasuryPensionPanel() {
   async function refresh() {
     try {
       const response = await fetch('/api/pension/funded/position', { cache: 'no-store' });
+      if (response.status === 401) { setPosition(null); setStatus('unauthenticated'); return; }
+      if (response.status === 403) { setPosition(null); setStatus('forbidden'); return; }
       if (!response.ok) throw new Error('uncertified');
       const data = await response.json() as Position;
       if (!exact(data.funded_principal_wld)
@@ -102,7 +104,10 @@ export function FundedTreasuryPensionPanel() {
       <CardContent className="space-y-4">
         {status !== 'verified' || !position ? (
           <p role="status" className="text-amber-400">
-            {status === 'loading' ? '원장 증빙 조회 중' : '국고 코어 원장 증빙 미확인 — 납입 및 환급 중단'}
+            {status === 'loading' ? '원장 증빙 조회 중'
+              : status === 'unauthenticated' ? '로그인 후 신규 국민연금 적립금을 확인할 수 있습니다.'
+              : status === 'forbidden' ? '국민연금 신규 적립금 접근 권한이 없습니다.'
+              : '국고 코어 원장 증빙 미확인 — 납입 및 환급 중단'}
           </p>
         ) : (
           <>

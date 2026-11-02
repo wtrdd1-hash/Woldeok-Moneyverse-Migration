@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { mutate } from '@/lib/mutate';
+import { ApiError } from '@/lib/api';
 export const dynamic = 'force-dynamic';
 const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
 export async function POST(request: Request) {
@@ -42,7 +43,12 @@ export async function POST(request: Request) {
       throw new Error('Treasury Core monetary conservation evidence failed');
     }
     return NextResponse.json(result, { headers });
-  } catch {
+  } catch (error) {
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      return NextResponse.json({
+        code: error.status === 401 ? 'AUTHENTICATION_REQUIRED' : 'AUTHORIZATION_DENIED',
+      }, { status: error.status, headers });
+    }
     return NextResponse.json(
       { code: 'TREASURY_CORE_SETTLEMENT_UNVERIFIED', error: '정식 원장 영수증 검증 또는 지급 재원이 부족합니다.' },
       { status: 503, headers },
