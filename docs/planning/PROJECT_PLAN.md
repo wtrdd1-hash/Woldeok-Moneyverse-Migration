@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
-**Current planning:** v1664 F675-222 support category triage / issue #2522 / Draft pending / RELEASE HOLD; prior v1662 Draft #2516 unmerged.
+**Current planning:** v1664 F675-222 support category triage / issue #2522 / Draft #2523 / RELEASE HOLD; prior v1662 Draft #2516 unmerged.
 
 ## v2026.11.02.1664 — F675-222 Verified Support Category Triage (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle:** Previous Feature Improvement v1662 → Current Feature Addition v1664 → Next Feature Improvement v1666 (provisional). **Canonical:** main 3eb1441090cb0602e054908547dcf43bfe4299dd at start and midpoint; AGENTS.md, README.md, PROJECT_PLAN.md (English canonical), PROJECT_PLAN.ko.md (parity). Prior Draft #2516 is unmerged and is a dependency reference, NOT an incorporated main feature. Developer handoff: issue #2522. **F675-222 NOT IMPLEMENTED.** Planning-only: no runtime, DB, WLD, items, ledger, Test, Production, merge or deployment.
+**Cycle:** Previous Feature Improvement v1662 → Current Feature Addition v1664 → Next Feature Improvement v1666 (provisional). **Canonical:** main 3eb1441090cb0602e054908547dcf43bfe4299dd at start and midpoint; AGENTS.md, README.md, PROJECT_PLAN.md (English canonical), PROJECT_PLAN.ko.md (parity). Prior Draft #2516 is unmerged and is a dependency reference, NOT an incorporated main feature. Developer handoff: issue #2522. Draft PR #2523 (CI initial SHA 7f5183ecf7035233f0b854cfe01137a86e16b405 SUCCESS, run #41434537515; runtime-check SKIPPED because docs-only). **F675-222 NOT IMPLEMENTED.** Planning-only: no runtime, DB, WLD, items, ledger, Test, Production, merge or deployment.
 
 ## Verified gap, scope and trade-off
 

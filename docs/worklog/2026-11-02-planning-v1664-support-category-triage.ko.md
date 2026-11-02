@@ -38,3 +38,8 @@
 - **P0 4건:** OPS1664-01 실제 실행 SHA·이미지·외부 복원; SEC1664-02 최소 권한·체크섬·Test DB 신원; FIN1664-03 원장 출처·재무 쓰기 0; REL1664-04 다국어 HTTP500·백엔드/정책/의존성·인증 exact-SHA Test·승격 승인.
 - **P1 6건:** TRIAGE1664-05 B/DB 마이그레이션·인덱스; TRIAGE1664-06 B/API 멱등 생성·CAS·목록; TRIAGE1664-07 A/Web 회원·관리자 UX; TRIAGE1664-08 C/Android·app-api 증명; TRIAGE1664-09 관리자 익명 KPI; TRIAGE1664-10 QA·복원·경합·점진 활성화. 개발 이슈 #2522. Gemini/A/B/C/QA 변경과 분리, F675-217~221 초안은 구현된 main 기능으로 간주하지 않음.
 - **외부 독립 근거 10,000건 게이트:** 이번 신규 획득·검증·중복제거·근거분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 달성 주장 금지. **최종 상태: DOCUMENTATION ONLY / DRAFT / RELEASE HOLD.** 기능 수용시험·DB 변경·Test·Production·금융 데이터 변경 없음.
+
+## 검증 및 GitHub 인계
+- 격리 기획 브랜치 docs/planning-v1664-support-category-triage, PR #2523 OPEN/DRAFT, 이슈 #2522 OPEN. 첫 커밋 7f5183ecf7035233f0b854cfe01137a86e16b405. GitHub CI #41434537515 SUCCESS(분류·정책; 문서 전용 런타임 검사 SKIPPED).
+- 로컬 직렬 정책·보안·백업 173/173 PASS, 릴리스 분류 24/24 PASS, 저장소 보안 스캔 PASS, 영문·국문 2쌍 x14 항목 PASS, git diff --check PASS. 최초 Node 기본 병렬 실행은 호스트 pthread_create 자원 부족으로 완료하지 못했으며 직렬 재실행은 성공. 기능 수용시험·공식 Test 정확 SHA·외부 독립 복원·운영 승격은 미실행.
+- 시작·중간 origin/main은 3eb1441090cb0602e054908547dcf43bfe4299dd로 동일. 다른 개발자의 브랜치·미병합 PR·서비스는 변경하지 않았으며 RELEASE HOLD 유지.

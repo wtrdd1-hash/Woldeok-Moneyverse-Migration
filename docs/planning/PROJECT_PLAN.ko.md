@@ -1,9 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획:** v1664 F675-222 관리자 문의 분류 / 이슈 #2522 / 초안 대기 / 운영 보류; 이전 v1662 초안 #2516 미병합.
+**현재 기획:** v1664 F675-222 관리자 문의 분류 / 이슈 #2522 / 초안 #2523 / 운영 보류; 이전 v1662 초안 #2516 미병합.
 
 ## v2026.11.02.1664 — F675-222 관리자 문의 분류·검증된 처리 대기열 (기능 추가 / 초안 / 운영 보류)
 
-**주기:** 이전 Feature Improvement v1662 → 현재 Feature Addition v1664 → 다음 Feature Improvement v1666(잠정). **정본:** main 3eb1441090cb0602e054908547dcf43bfe4299dd 시작·중간 확인; AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본 및 국문 대조. 이전 초안 #2516은 미병합이며 최신 main에 구현된 기능으로 취급하지 않음. 개발 인계 이슈 #2522. **F675-222 미구현.** 이번 작업은 문서 전용이며 런타임/DB/WLD/보유품/원장/Test/Production/병합/배포 변경 없음.
+**주기:** 이전 Feature Improvement v1662 → 현재 Feature Addition v1664 → 다음 Feature Improvement v1666(잠정). **정본:** main 3eb1441090cb0602e054908547dcf43bfe4299dd 시작·중간 확인; AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본 및 국문 대조. 이전 초안 #2516은 미병합이며 최신 main에 구현된 기능으로 취급하지 않음. 개발 인계 이슈 #2522. 초안 PR #2523(초기 SHA 7f5183ecf7035233f0b854cfe01137a86e16b405 CI SUCCESS, 실행 #41434537515; 문서 전용 runtime-check SKIPPED). **F675-222 미구현.** 이번 작업은 문서 전용이며 런타임/DB/WLD/보유품/원장/Test/Production/병합/배포 변경 없음.
 
 ## 실제 근거·목적·선택
 
