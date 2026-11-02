@@ -8,11 +8,15 @@
 
 ## Plan and checkpoint ledger
 - [x] Inspect main, repo policy, existing PRs, live symptom and loopback listener.
-- [ ] RED: add executable proxy tests for HTTPS forwarded loopback, locale and query preservation, public HTTPS behavior, physical routes.
-- [ ] GREEN: make the minimal loopback-only rewrite correction; avoid insecure rewrites to public hosts.
+- [x] RED: add executable proxy tests for HTTPS forwarded loopback, locale and query preservation, public HTTPS behavior, physical routes.
+- [x] GREEN: make the minimal loopback-only rewrite correction; avoid insecure rewrites to public hosts.
 - [ ] Run focused tests, frontend lint/typecheck/build, full test and CI; inspect exact SHA and PostgreSQL read-only gates.
 - [ ] Re-fetch main and re-read integrated plan before PR; do not merge or deploy without official Test exact-SHA, restore and GitOps gates.
 - [ ] Publish English/Korean QA, release HOLD, worklog and PR with exact test/CI evidence.
 
 ## Safety
 No DB migration, financial ledger, app-role grant, Production/Test mutation, service restart or deletion is authorized by this task. Keep other PRs and worktrees intact. Any unresolved full gate is HOLD.
+
+## Midpoint 00:39 KST
+- RED: 5 failed / 2 passed (HTTP loopback scheme), then GREEN: 7 passed / 0 failed. Tests cover 3 localized tools pages, stocks, roadmap, physical blog, public HTTPS origin.
+- Change only `frontend/src/proxy.ts` (loopback-only scheme correction) and focused test; external HTTPS origin unchanged.
