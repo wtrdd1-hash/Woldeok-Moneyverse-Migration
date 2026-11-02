@@ -6,6 +6,7 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseMemberProfileResponse } from '@/app/profile/public-profile-proof';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -271,6 +272,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // The member profile read is visibility-filtered in PostgreSQL; a stale API
+  // must not send arbitrary fields, malformed counts or cacheable responses.
+  if (parts.length === 2 && parts[0] === 'profile' && request.method === 'GET') {
+    const privateHeaders = {
+      'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex, nofollow',
+      'referrer-policy': 'no-referrer',
+    };
+    if (!response.ok) {
+      const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Profile Unavailable', 'member_profile_unavailable',
+        'The member profile could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON profile');
+      const verified = parseMemberProfileResponse(await response.clone().json());
+      if (!verified) throw new Error('unverified member profile');
+      return contractJson(verified, { status: 200, headers: privateHeaders });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'member_profile_unverified',
+        'The member profile could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -581,6 +606,11 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts[0] === 'profile') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
