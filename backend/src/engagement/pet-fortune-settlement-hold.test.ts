@@ -6,8 +6,10 @@ const request = { session: { user_id: '11111111-2222-4333-8444-555555555555' } }
 
 describe('Pet Fortune evidence boundary', () => {
   it('does not advertise an unavailable WLD claim as eligible', async () => {
-    const status = await new DopamineController(null).getDopamineStatus(request);
-    expect(status.fortuneCookieAvailable).toBe(false);
+    await expect(new DopamineController(null).getDopamineStatus(request)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'DOPAMINE_QUOTA_UNVERIFIED' },
+    });
   });
   for (const petAction of ['pet', 'fortune'] as const) {
     it(`rejects ${petAction} without a durable owner-scoped ledger receipt`, async () => {

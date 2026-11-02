@@ -13,7 +13,7 @@ import { DopamineRepository } from './dopamine.repository';
 describe('Dopamine quota status HTTP contract', () => {
   let app: INestApplication;
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [DopamineController],
       providers: [{ provide: DopamineRepository, useValue: null }],
     })
@@ -27,7 +27,7 @@ describe('Dopamine quota status HTTP contract', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.setGlobalPrefix('api');
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
