@@ -186,3 +186,13 @@ test('P0: direct member identity and inventory DML blocks financial readiness', 
   assert(result.blockers.includes('direct_application_sensitive_dml:users'));
   assert(result.blockers.includes('direct_application_sensitive_dml:user_items'));
 });
+
+
+test('sensitive DML is reported separately from financial exceptions, never waived', () => {
+  const grants=acceptedGrants.map(x=>x.name==='users'?{...x,can_update:true}:x);
+  const result=evaluateFinancialReadiness({...good,identity:acceptedIdentity,grants});
+  assert.equal(result.ok,false);
+  assert(result.blockers.includes('direct_application_sensitive_dml:users'));
+  assert.deepEqual(result.summary.sensitiveTablesWithAppDml,['users']);
+  assert.deepEqual(result.summary.coreTablesWithAppDml,['account_balances','accounts','system_treasury_vaults']);
+});
