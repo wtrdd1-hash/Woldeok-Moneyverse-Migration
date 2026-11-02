@@ -14,5 +14,9 @@
 - Mid-run main remains f5c3fbedae1c3b3ec2374882b049aac43a655eb4. Development PostgreSQL 17.11: published-announcement function exists, app EXECUTE=true, current snapshot 1 row. No writes.
 - Full gates and deployment identity still pending; release HOLD.
 
+## Repair (separate branch)
+- CI runtime-check failed on initial SHA fee081bf157fba4e9b9af28e903c22a75d394e39: Next.js disallows exporting static metadata and generateMetadata together. The typechecker did not catch it.
+- Fixed in isolated repair branch by making the metadata constant private; run full build/CI again on new SHA.
+
 ## Finished
 - Pending.

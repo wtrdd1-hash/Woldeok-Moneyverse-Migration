@@ -13,7 +13,7 @@ import { parseAnnouncementRecencyQuery, verifiedAnnouncementRecency } from '@/li
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
@@ -33,7 +33,7 @@ export async function generateMetadata({
   searchParams,
 }: { readonly searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const params = await searchParams;
-  return { ...metadata, robots: { index: params.recent === undefined, follow: true } };
+  return { ...baseMetadata, robots: { index: params.recent === undefined, follow: true } };
 }
 
 export default async function AnnouncementsPage({
