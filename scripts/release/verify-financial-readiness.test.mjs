@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { evaluateFinancialReadiness, readFinancialSnapshot, PROTECTED_FINANCIAL_TABLES } from './verify-financial-readiness.mjs';
+import { evaluateFinancialReadiness, readFinancialSnapshot, PROTECTED_FINANCIAL_TABLES, PROTECTED_SENSITIVE_TABLES } from './verify-financial-readiness.mjs';
 
 const good = Object.freeze({
   identity:{database:'moneyverse_test',role:'moneyverse_app'},
-  grants:PROTECTED_FINANCIAL_TABLES.map(name=>({name,can_insert:false,can_update:false,can_delete:false})),
+  grants:[...PROTECTED_FINANCIAL_TABLES,...PROTECTED_SENSITIVE_TABLES].map(name=>({name,can_insert:false,can_update:false,can_delete:false})),
   ledger:{
     balance_rows:3,unexplained_account_count:0,unexplained_delta_wld:'0',
     unexplained_without_postings_count:0,unexplained_without_postings_delta_wld:'0',
@@ -172,7 +172,7 @@ test('P0: sensitive member tables must be included in the read-only release gran
 });
 
 test('P0: missing sensitive grant evidence fails closed instead of READY', () => {
-  const result=evaluateFinancialReadiness(good);
+  const result=evaluateFinancialReadiness({...good,grants:good.grants.filter(x=>!PROTECTED_SENSITIVE_TABLES.includes(x.name))});
   assert.equal(result.ok,false);
   assert(result.blockers.includes('missing_sensitive_table:users'));
   assert(result.blockers.includes('missing_sensitive_table:user_items'));
@@ -182,7 +182,7 @@ test('P0: direct member identity and inventory DML blocks financial readiness', 
   const extra=['users','identities','user_consents','user_items','audit_logs'].map(name => ({
     name,can_insert:false,can_update:name==='users',can_delete:name==='user_items',
   }));
-  const result=evaluateFinancialReadiness({...good,grants:[...good.grants,...extra]});
+  const result=evaluateFinancialReadiness({...good,grants:[...good.grants.filter(x=>!PROTECTED_SENSITIVE_TABLES.includes(x.name)),...extra]});
   assert(result.blockers.includes('direct_application_sensitive_dml:users'));
   assert(result.blockers.includes('direct_application_sensitive_dml:user_items'));
 });
