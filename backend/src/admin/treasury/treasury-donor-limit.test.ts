@@ -7,6 +7,7 @@ import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminTreasuryController } from './treasury.controller';
 import { TreasuryRepository } from './treasury.repository';
@@ -81,6 +82,7 @@ describe('P1 treasury donor ranking HTTP boundary', () => {
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();

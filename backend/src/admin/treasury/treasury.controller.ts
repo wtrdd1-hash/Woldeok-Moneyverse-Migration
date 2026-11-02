@@ -14,6 +14,7 @@
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
@@ -274,6 +275,7 @@ export class AdminTreasuryController {
   }
 
   @Post('inject')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '국고 자금 긴급 주입 (Step-Up/Admin)' })
   async injectFunds(
     @Req() _request: RequestWithSession,
@@ -283,6 +285,7 @@ export class AdminTreasuryController {
   }
 
   @Post('drain')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '국고 잉여 자금 영구 소각 (Step-Up/Admin)' })
   async absorbFunds(
     @Req() _request: RequestWithSession,
@@ -292,6 +295,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/dividend')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
   async disburseDividend(
     @Req() _request: RequestWithSession,
@@ -310,6 +314,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/targeted')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '저자산 초기 시민 타겟팅 국고 선별 지원금 집행 (Targeted Relief)' })
   async disburseTargetedSubsidy(
     @Req() _request: RequestWithSession,
@@ -319,6 +324,7 @@ export class AdminTreasuryController {
   }
 
   @Post('donate')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '시민 자발적 국고 기부 및 잉여 자금 흡수 (명예 칭호 수여)' })
   async userDonate(
     @Req() _request: RequestWithSession,
@@ -341,6 +347,7 @@ export class AdminTreasuryController {
   }
 
   @Post('disburse/grant')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
   async disburseGrant(
     @Req() _request: RequestWithSession,
@@ -350,6 +357,7 @@ export class AdminTreasuryController {
   }
 
   @Post('budget/distribute')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '헌법적 4분할 목적별 예산 배정 집행 (복지40/인프라30/비상20/소각10)' })
   async distributeBudget(
     @Req() _request: RequestWithSession,
@@ -359,6 +367,7 @@ export class AdminTreasuryController {
   }
 
   @Post('buyback/burn')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '룬스케이프형 역매수 영구소각 집행 (장터 덤핑 매물 국고 매입/소각)' })
   async buybackBurn(
     @Req() _request: RequestWithSession,
@@ -383,6 +392,7 @@ export class AdminTreasuryController {
   }
 
   @Post('tax/wealth')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
   async executeWealthTax(
     @Req() _request: RequestWithSession,
@@ -404,6 +414,7 @@ export class AdminTreasuryController {
   }
 
   @Post('backup/snapshot')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '무료 클라우드 스토리지 불변 원장 백업 스냅샷 수동 발행' })
   async createBackupSnapshot(
     @Req() request: RequestWithSession,
@@ -430,6 +441,7 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/rebalance')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 복리 성장 국부펀드(ASWF) 포트폴리오 리밸런싱 및 복리 성장 실행' })
   async triggerSwfRebalance() {
@@ -437,6 +449,7 @@ export class AdminTreasuryController {
   }
 
   @Post('swf/liquidate')
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
   async liquidateSwfToTreasury(@Body('targetPortfolioAumWld') _targetPortfolioAumWld?: string) {
@@ -444,7 +457,7 @@ export class AdminTreasuryController {
   }
 
   @Put('swf/config')
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: '자율 국부펀드(ASWF) 안전 준비금 및 투자 한도 튜닝' })
   async updateSwfConfig(
