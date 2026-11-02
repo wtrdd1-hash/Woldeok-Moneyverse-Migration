@@ -1,3 +1,46 @@
+## v2026.11.02.1658 — F675-220 회원별 읽음 추적 등록·답변 재시도·개인정보 삭제 무결성 (기능 보완 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 추가 v1656 → 현재 기능 보완 v1658 → 다음 기능 추가 v1660(잠정). 기술 진실 기준은 최신 `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 한국어 동등본이다. 시작·중간 main 재조회 결과 동일했다. 미병합 Draft #2489 위에 적층된 **문서 전용** 변경이며 현 Draft PR #2495, 개발 인계 #2488. **F675-220은 미구현**이다. 런타임·DB·WLD·금융 원장·Test·Production 수정이나 신규 기능 수용시험은 없다.
+
+### 실제 근거와 설계 결정
+
+- 마이그레이션 `196`의 `support_threads`·`support_messages`에는 발신자 종류, UUID `idempotency_key`, 생성시각이 있으나 **읽음 표식·관리자 답변 순번·회원별 추적 시작점·삭제 후에도 남는 답변 영수증이 없다**. 현재 Nest 문의 API와 `/support` 화면에도 등록·읽음 API 및 검증된 미열람 UI가 없다. 이는 **소스상 공백**이며 운영 사고가 확인됐다는 뜻은 아니다.
+- v1656의 `last_seen_admin_seq`만으로 단계별 대상자(코호트) 활성화를 처리하면, DB가 답변 순번을 부여하기 시작한 뒤 뒤늦게 활성화된 회원에게 **활성화 이전 답변이 새 미열람으로 표시될 수 있다**. 표식이 없다는 이유로 0부터 세거나 첫 GET에서 현재 순번을 읽음으로 설정하면 잘못된 결과가 생긴다. **선택:** 문의별 명시적 등록 POST, DB가 잠금 상태에서 저장한 `tracking_start_seq` 기준선, 초기 `last_seen_admin_seq`, 등록 전 UNTRACKED/ENROLLING 상태. GET은 절대 쓰지 않으며 소급 읽음·미열람 추정도 하지 않는다.
+- 기존 `admin_support_reply`는 메시지 테이블의 멱등키만 확인한다. 보존기간 삭제 후 같은 요청을 재시도하면 키가 사라져 답변과 순번이 다시 생성될 수 있다. 이는 **소스에서 도출한 잠재 위험**이며 실제 사고 증거는 없다. F675-217의 관리자 답변 알림 영수증과 **공유하는 최소 불변 답변 영수증**을 사용하고 별도 중복 영수증 체계를 만들지 않는다.
+
+### 등록·트랜잭션·DB·보존 무결성
+
+1. **대상·진입·화면:** `support_admin_reply_unread_proof` 기능 스위치는 기본 OFF. 대상 회원은 정확히 본인 소유인 문의에서 “이 문의부터 새 관리자 답변 추적” CTA를 명시적으로 선택한다. 기존 문의 등록은 인증·동의·CSRF가 있는 POST이고 GET/프리패치/첫 화면에서 자동 등록하지 않는다. 새 문의는 대상 회원에 한해 `support_create_thread`의 동일 트랜잭션에서 등록할 수 있다. 최근 50개 목록 및 정확한 문의 화면에서 UNTRACKED, ENROLLING, VERIFIED_UNREAD, VERIFIED_ZERO_SINCE_ENROLLMENT, UNKNOWN_BEFORE_TRACKING, FEATURE_OFF, 409 STALE, 503 UNVERIFIABLE을 구분한다. **표식 없음은 0개가 아니며**, 문의 하나를 등록했다고 모든 문의가 등록된 것은 아니다.
+2. **순방향 스키마:** v1656에서 제안한 `support_member_read_markers`에 `tracking_start_seq bigint NOT NULL CHECK >=0`, `last_seen_admin_seq bigint NOT NULL CHECK (last_seen_admin_seq >= tracking_start_seq)`, `enrolled_at timestamptz NOT NULL`, `enrollment_epoch bigint NOT NULL CHECK >0`, `had_pretracking_admin_reply boolean NOT NULL`을 추가한다. `PRIMARY KEY(thread_id)`, 복합 회원 소유 FK, `support_threads.admin_reply_seq`, `support_messages(thread_id,admin_reply_seq)` 부분 UNIQUE 인덱스를 유지한다. 같은 등록 epoch 재시도는 원래 기준선을 반환하며 읽음 표식을 초기화하지 않는다. 마이그레이션 번호는 개발 B와 조율하며 이 문서에서 예약하지 않는다.
+3. **원자적 등록:** DB 소유 함수가 본인 문의와 대상자·epoch를 확인하고 `support_threads FOR UPDATE`로 잠근 후 현재 `admin_reply_seq`를 `tracking_start_seq`와 초기 `last_seen_admin_seq`에 동일하게 기록한다. 등록 전 관리자 답변(레거시 NULL 또는 기준선 이하)이 존재했는지도 보존한다. 관리자 답변 INSERT는 **동일 문의 행 잠금을 먼저 획득한 후** 순번을 할당해야 한다. 등록보다 먼저 커밋한 답변은 이전 기록으로 구분하고, 등록 뒤 커밋한 답변만 새 미열람이다. 100건 경합시험으로 경계에서 누락·이중 분류가 없는지 검증한다. 기능 활성화 시 모든 문의를 무제한 잠그거나 소급 처리하지 않는다.
+4. **기능 OFF/ON·대상자 변경:** 일시 OFF는 UI/POST를 숨기되 표식·영수증을 삭제하지 않는다. 보안 승인된 DB 순번 쓰기는 회원별 UI 스위치와 독립적으로 유지한다. 같은 회원/문의 재활성화는 기존 epoch·표식을 유지하고 OFF 동안 발생한 답변도 **“이 문의의 추적 시작 이후”** 범위로 명확히 표시한다. 별도 정책 승인된 초기화만 새 epoch와 문의 잠금·감사 영수증으로 처리하며 클라이언트가 순번·epoch를 보내거나 표식 DELETE로 초기화하는 것을 금지한다. 일괄 등록 대기 중인 문의는 ENROLLING/UNTRACKED이며 검증된 0으로 표시하지 않는다. 로그아웃·계정 전환 시 이전 회원 배지/응답 폐기.
+5. **미열람 집계·읽음 확인:** 실제 **보존된** 관리자 메시지 중 `admin_reply_seq > greatest(tracking_start_seq,last_seen_admin_seq)`만 100행 한도로 조회해 `trackedUnreadCount 0..99`, `hasMoreUnread`을 반환한다. 순번 차이를 개수로 쓰지 않는다(삭제 공백). POST 읽음 확인은 회원 본인 문의, 현재 보존된 관리자 `messageId`, 등록 기준선 이후 순번, 동일 활성 epoch를 검증하고 문의 잠금 아래 `GREATEST`로만 전진한다. 다른 기기의 더 최신 확인 뒤 늦게 도착한 요청은 현재 표식을 반환하고 `applied=false`다. 대상 답변이 먼저 삭제되면 표식을 바꾸지 않고 409. 새 답변 동시 등록은 미열람으로 남는다. 등록 전 답변으로 표식을 전진시키지 않는다.
+6. **답변 삭제 후 재시도:** DB 소유 최소 영수증을 기존 전역 고유 `idempotency_key`에 결속하고 문의·관리자·정규화 본문 해시·원본 메시지 ID·순번을 기록한다. 같은 본문 재시도는 원래 결과만 반환, 다른 본문은 409. 메시지가 보존기간에 따라 삭제된 뒤에는 `PURGED_NO_RECREATE`를 반환해 본문·답변·순번·알림을 다시 만들지 않는다. F675-217 알림 영수증 및 F675-218 상태 CAS와 단일 잠금 순서·단일 답변 영수증을 공유해야 하며 별도 경합 쓰기 경로는 배포 금지. 가명 식별자 영수증의 목적·TTL·삭제 정책은 승인받고, 회원 완전 삭제 뒤에는 접근 자체를 거부한다.
+7. **개인정보 삭제의 실제 FK 문제:** 마이그레이션 196의 `support_threads.user_id REFERENCES users(id)` 및 `support_messages.sender_user_id REFERENCES users(id)`에는 **ON DELETE CASCADE가 없다**. 신규 표식에만 ON DELETE CASCADE를 설정해도 회원 삭제와 지원 대화·영수증의 적법한 삭제가 보장되지 않는다. 운영 계정 삭제 절차, 관리자 발신 메시지, 문의/메시지 삭제 순서, 최소 영수증, 법정 보존·감사 예외, 리비전 트리거를 함께 검증해야 한다. 무차별 CASCADE나 실제 운영 데이터 삭제를 제안하지 않는다. 앱 계정 직접 테이블 DML 금지, `p_actor` UUID 매개변수만으로 DB 신원 독립 검증 불가. 정책·실제 PostgreSQL 검증 전 기능 활성화 차단.
+8. **잠금·인덱스:** 기존 `support_messages_thread_idx`와 v1656의 부분 UNIQUE 순번 인덱스 활용을 우선한다. 10,001건 `EXPLAIN (ANALYZE,BUFFERS)`로 입증되기 전 중복 인덱스 추가 금지. 문의→영수증→메시지 잠금 순서(또는 데드락 없음이 검증된 동등 방식), 트랜잭션 범위 timeout, 재시도·롤백 멱등성, GET 무쓰기, F675-219 메시지 리비전과 삭제·수정·보존 경로 전체 연동을 개발 검증 조건으로 한다.
+
+### API·모바일·관리·보안·SEO·지표·배포
+
+- **신규 제안 API(현재 미구현):** `POST /api/v1/support/threads/:id/unread-enrollment`(인증·동의·CSRF·본인 확인), `GET /api/v1/support/threads/:id/unread`(읽기 전용), `POST /api/v1/support/threads/:id/read-marker`(`{messageId:UUID}`). 등록 응답은 `{threadId,trackingState:'VERIFIED',trackingStartSeq:string,enrollmentEpoch:string,enrolledAtUtc,legacyReadState:'UNKNOWN'|'NONE'}`; 조회는 `{trackingState:'UNTRACKED'|'ENROLLING'|'VERIFIED'|'FEATURE_OFF',trackedUnreadCount?:number,hasMoreUnread?:boolean,legacyReadState,asOfUtc}`. 미등록/오류에는 개수를 생략한다. bigint는 문자열로 전송하고 회원 ID·기준선·epoch는 입력받지 않는다. 읽음 응답은 적용 여부, 현재 읽음 위치 및 검증된 개수를 반환한다. 400/401/403/404(타인/미존재 비구별)/409/429/503을 분리하며 실패·잘못된 200을 0으로 바꾸지 않는다.
+- **웹·Android:** A는 정확한 문의 화면과 명시적 등록·읽음 CTA, C는 app-api 동등 계약·계정 전환 요청 차단·오프라인 재시도를 담당한다. “추적 시작 이후 새 답변 0개”, “이전 답변 읽음 여부 미확인”을 구분한다. GET·스크롤·백그라운드 조회로 읽음 처리하지 않는다. 한국어/영어, 320px, 200% 확대, WCAG 2.2 AA, 44px 터치, 키보드/포커스/aria-live 지원. 문의 본문·제목·식별자·토큰을 분석/푸시/로그/리퍼러에 포함하지 않는다. 성공/실패/HEAD/리다이렉트/엣지에서 `Cache-Control: private,no-store`, `X-Robots-Tag: noindex,nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, ETag/304 재사용 금지. /support 및 회원·관리자 경로는 사이트맵/공개 SEO 제외.
+- **관리·남용방지·KPI:** 관리자는 개별 회원 읽음 상태를 조회·대리 확인할 수 없다. 서로 다른 회원 20명 이상 익명 집계에 한해 등록률·첫 답변 전환·UNKNOWN 비율·영수증 삭제 재시도·409/429/503·p95를 표시하고 작은 집계는 숨긴다. 회원+IP 등록/읽음 제한, SQL 본인 확인·권한 최소화·CSRF·타임아웃. 목표값(미측정): 등록 이전 답변의 거짓 미열람 0, 등록 경계 새 답변 누락 0, 삭제 후 답변 재생성 0, 타인 데이터 노출 0, WLD·보유품·원장 변경 0, 합성 p95 조회 300ms/확인 500ms 미만.
+- **수용시험·롤백:** B/DB PG17 합성 10,001건 이상, 문의 101건 이상, 등록과 답변 100건 동시성, 다중기기 순서 뒤바뀐 읽음 100건, 삭제/동일키·다른 본문 재시도 100건, 회원 삭제 FK·보존 사례, 기능 OFF/ON/코호트 100건, 타인 ID 100건. A/C/QA는 실제 Nest/Next/Android 200/400/401/403/404/409/429/503 헤더·세션·접근성 시험, 정확 SHA 공식 Test, 독립 복원, 금융 정합성, 롤백을 확인해야 한다. **모두 계획이며 실행하지 않았다.** 롤백은 기능 OFF만 사용하고 DB 스키마/영수증 삭제·자동 기준선 초기화 금지. P0 남아 있으면 운영 승격 금지.
+
+### 개발 인계 — P0 4건 + P1 6건
+
+1. **P0 OPS1658-01:** Test/Production 실제 실행 이미지·엣지 digest와 소스 SHA, GitOps·공개 버전 대조, 독립 암호화 외부 복원 및 롤백.
+2. **P0 SEC1658-02:** QA v1466 운영 앱 계정 UPDATE 195/DELETE 194(264 테이블), 마이그레이션 체크섬 219/220/221/234/266 불일치, Test 앱/마이그레이터 DB 분리, DB 독립 신원·최소 권한·회원 삭제 FK/보존 검증. #993 연계.
+3. **P0 FIN1658-03:** Treasury/MINT/SWF/금융 원장 출처·정합성 독립 검증, 등록·배지·읽음·재시도 중 잔액/보유품/원장 변화 0.
+4. **P0 REL1658-04:** QA v1466 FAILED/P0_HOLD, 운영 다국어 HTTP 500 16/28(HTTPS→HTTP 로컬 프록시 EPROTO, 기존 Draft #2263), 운영 모드 백엔드 2 FAIL, 보안·의존성·라우트 결함, 정확 SHA 공식 Test 인증 E2E 부재.
+5. **P1 UNREAD1658-05 B/DB:** 회원/문의 등록 기준선·epoch, 순번·영수증 삭제 표식, 잠금 순서, 계정 삭제·보존·권한 마이그레이션.
+6. **P1 UNREAD1658-06 B/API:** 본인 등록 POST/미열람 GET/읽음 POST, CSRF·세션·동의·bigint DTO·409 재시도.
+7. **P1 UNREAD1658-07 A/Web:** 정확한 문의 등록 CTA, 미등록/레거시/검증 상태, GET 무쓰기, 최근 50건 배지·접근성.
+8. **P1 UNREAD1658-08 C/Android:** app-api 계약, 오류 포함 비공개 헤더, 계정 전환·오프라인·개인정보 캐시 차단.
+9. **P1 UNREAD1658-09 A/C/Admin/KPI:** 20명 이상 익명 지표, 기본 OFF, 코호트 등록/롤백·SEO/개인정보.
+10. **P1 UNREAD1658-10 QA:** PG17 경합/삭제/재시도/개인정보 삭제/스위치/정확 SHA Test·독립 복원. **미실행**.
+
+**실제 근거(2026-11-02 16:32 KST):** QA v1466 `FAILED/P0`(`/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1466-end.md`). 운영 다국어 28건 중 16건 HTTP 500(Test 0건), 앱 직접 UPDATE 195/DELETE 194(264 테이블), 체크섬 5건, Test DB 불일치, 운영 모드 백엔드 2건 실패, 비공개 401 헤더·라우트 원장 문제. 최신 main SHA 위와 같음. 공개 Test/Production 버전은 **이전 회차에** `510dbe6...`으로 관찰됐으며 **이번 문서 회차에 새로 실행 이미지 검증하지 않았다**. 외부 독립 근거 신규 검증·중복 제거·분류 승인 **0건**, 누적 **UNKNOWN / 10,000** → **BLOCKED / IN PROGRESS**. 병합·배포·신규 기능 수용시험 없음. **DRAFT / RELEASE HOLD.**
+
 ## v2026.11.02.1656 — F675-220 회원 관리자 답변 읽지 않음 상태의 검증·명시적 읽음 확인 (기능 추가 / 초안 / 운영 보류)
 
 **주기·기준:** 이전 기능 보완 v1654 → 현재 기능 추가 v1656 → 다음 기능 보완 v1658(잠정). 시작·중간 최신 origin/main = a8541927c3a351d980454c66e95a3356c47e0722. AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md, 한국어 대조본 확인. 선행 미병합 Draft #2483, 개발 인계 이슈 #2488 (현 Draft PR #2489). **F675-220 미구현**이며 이번 회차는 문서 전용이다. 런타임·DB·WLD·금융 원장·Test·Production을 변경하거나 기능 수용시험을 통과했다고 주장하지 않는다.
