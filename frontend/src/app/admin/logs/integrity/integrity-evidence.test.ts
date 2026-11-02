@@ -91,6 +91,35 @@ describe('privileged audit integrity evidence', () => {
     expect(parseAuditRetention({ categories: [retention, retention] })).toBeNull();
   });
 
+  it('refuses contradictory retention overview proof from the SQL source', () => {
+    // Migration 065 computes MIN/MAX only for rows counted as expired.
+    expect(parseAuditRetention({ categories: [{
+      ...retention, expired_rows: '0',
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, oldest_expired_sequence: null, newest_expired_sequence: null,
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, oldest_expired_sequence: '0', newest_expired_sequence: '0',
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, last_disposition: 'archived', last_disposition_at: null,
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, last_disposition: null, last_disposition_at: '2026-10-27T00:00:00.000Z',
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, last_disposition: 'archived', last_disposition_at: '2099-01-01T00:00:00.000Z',
+    }] })).toBeNull();
+    expect(parseAuditRetention({ categories: [{
+      ...retention, expired_rows: '0',
+      oldest_expired_sequence: null, newest_expired_sequence: null,
+    }] })).toHaveLength(1);
+    expect(parseAuditRetention({ categories: [{
+      ...retention, last_disposition: 'archived', last_disposition_at: '2026-10-27T00:00:00.000Z',
+    }] })).toHaveLength(1);
+  });
+
   it('rejects malformed disposition receipts and invalid sequence ranges', () => {
     expect(parseAuditDispositions({ dispositions: [{ ...disposition, from_sequence: '9007199254740994' }] })).toBeNull();
     expect(parseAuditDispositions({ dispositions: [{ ...disposition, method: 'deleted' }] })).toBeNull();
