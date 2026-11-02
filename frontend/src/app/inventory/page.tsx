@@ -5,23 +5,29 @@ import { Accent } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { InventoryView, type HeldItem } from './inventory-view';
+import { isVerifiedInventoryAttention } from '@/lib/inventory-attention';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
   await requireMember();
 
-  const [holdingsData, profileData] = await Promise.all([
+  const attentionEnabled = process.env.INVENTORY_ATTENTION_FILTER_ENABLED === '1';
+  const [holdingsData, profileData, attentionData] = await Promise.all([
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile'),
+    attentionEnabled ? apiOrNull<unknown>('/api/v1/shop/holdings?filter=attention') : Promise.resolve(null),
   ]);
 
-  const holdings = holdingsData?.holdings || [];
+  const holdings = Array.isArray(holdingsData?.holdings) ? holdingsData.holdings : null;
+  const attentionHoldings = attentionEnabled && isVerifiedInventoryAttention(attentionData)
+    ? attentionData.holdings as unknown as HeldItem[] : null;
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
@@ -45,11 +51,18 @@ export default async function InventoryPage() {
         />
       </PageHeader>
 
-      <InventoryView
-        holdings={holdings}
-        currentUsername={username}
-        userAvatarUrl={avatarUrl}
-      />
+      {holdings === null ? (
+        <div role="alert" className="rounded-lg border p-6">
+          보관함 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.
+        </div>
+      ) : (
+        <InventoryView
+          holdings={holdings}
+          attentionHoldings={attentionEnabled ? attentionHoldings : undefined}
+          currentUsername={username}
+          userAvatarUrl={avatarUrl}
+        />
+      )}
     </div>
   );
 }

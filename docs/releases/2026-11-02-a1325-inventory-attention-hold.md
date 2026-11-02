@@ -1,0 +1,3 @@
+# Development A — 2026-11-02 13:25 KST — RELEASE HOLD
+
+Inventory attention filtering is implemented behind a default-OFF web flag. **Do not merge to main or promote to Test/Production.** Backend full tests have 3 failures (2 existing profile HTTP 401-vs-200, 1 parallel SEO timeout), full dependency audit has 9 findings, DEV app role can DELETE user_items, and exact candidate SHA official Test auth/E2E, independent restore and GitOps provenance are not proven. Local build/targeted tests and CI cannot override failed gates. No data migration, ledger write, service restart, deploy or branch deletion occurred. Future rollback: disable `INVENTORY_ATTENTION_FILTER_ENABLED`, rebuild/verify or revert the PR; never rewrite applied migrations.

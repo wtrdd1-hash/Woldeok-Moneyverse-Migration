@@ -16,12 +16,16 @@ export function filterShopHoldings(
   status: ShopHoldingsStatus,
 ): ShopHoldingRow[] {
   if (status === 'all') return [...rows];
-  return rows.filter(
-    (row) =>
-      row.suspended === true ||
-      (row.unpaid_weeks ?? 0) > 0 ||
-      (typeof row.arrears_due === 'string' &&
-        /^\d+$/.test(row.arrears_due) &&
-        BigInt(row.arrears_due) > 0n),
+  // Invalid source values must not become a verified empty attention shelf.
+  for (const row of rows) {
+    if (typeof row.suspended !== 'boolean' ||
+        !Number.isSafeInteger(row.unpaid_weeks) || (row.unpaid_weeks ?? -1) < 0 ||
+        typeof row.arrears_due !== 'string' ||
+        !/^(0|[1-9][0-9]{0,39})$/.test(row.arrears_due)) {
+      throw new Error('invalid owner holdings attention source');
+    }
+  }
+  return rows.filter((row) =>
+    row.suspended === true || (row.unpaid_weeks ?? 0) > 0 || BigInt(row.arrears_due!) > 0n,
   );
 }

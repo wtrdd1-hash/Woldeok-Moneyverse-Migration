@@ -11572,10 +11572,14 @@
                 "serial_number"
               ]
             }
+          },
+          "filter": {
+            "type": "string"
           }
         },
         "required": [
-          "holdings"
+          "holdings",
+          "filter"
         ]
       },
       "responseCompatibility": {
