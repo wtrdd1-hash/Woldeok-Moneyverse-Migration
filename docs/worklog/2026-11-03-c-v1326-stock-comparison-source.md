@@ -8,3 +8,10 @@
 - Existing backend route `StockController.list` uses `StockService.list` -> `StockRepository.list` -> PostgreSQL `stock_market_overview()` SECURITY DEFINER; no new DB or financial writes needed.
 - Stages: [ ] RED tests [ ] verified data UI + HTTP privacy [ ] focused GREEN [ ] full gates [ ] isolated PostgreSQL/HTTP [ ] main refetch + PR [ ] release gate decision.
 - Never merge or promote without all required gates PASS; preserve A/B/Gemini/QA branches and five schedules.
+
+## IN PROGRESS — RED/GREEN — 2026-11-03 08:20 KST
+- TDD RED: 3 test suites failed as expected (missing parser, unverified comparison rendered, no member-only HTTP headers). Existing API data was not validated before BigInt calculations.
+- Implemented bounded all-or-nothing source parser: PostgreSQL bigint integer strings (including >2^53), UUID, symbol/name, unique IDs/symbols and coherent high/low. Invalid/unavailable response never becomes verified empty; accessible retry displayed. Existing Nest stock list read path reused, no backend or DB writes.
+- Applied direct and supported localized private/no-store, noindex/nofollow, no-referrer HTTP policies.
+- Focused GREEN: 22/22 tests PASS in 3 suites. Re-fetched origin/main at midpoint; unchanged from initial base.
+- Next: full exact-SHA gates, isolated PostgreSQL/HTTP and remote CI; no release without full proof.
