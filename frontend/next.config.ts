@@ -192,6 +192,16 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // The administrator audit history is privileged and may include member/session
+      // evidence. Page metadata cannot override the global HTTP indexing header.
+      ...['/admin/logs', '/:locale(en|ja|zh|ko|vi)/admin/logs'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

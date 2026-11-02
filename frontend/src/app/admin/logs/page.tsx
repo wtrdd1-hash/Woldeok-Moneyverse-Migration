@@ -178,7 +178,7 @@ export default async function AdminLogsPage({
             <div>
               <CardTitle className="text-base font-bold">운영 감사 로그 원장</CardTitle>
               <CardDescription className="text-xs">
-                각 항목은 SHA-256 해시 체인으로 불변 보존되며, IP 주소 및 세션은 안전하게 보호됩니다.
+                각 항목의 해시 형식과 조회 순서를 확인합니다. 이 화면은 해시 체인 무결성을 인증하지 않습니다.
               </CardDescription>
             </div>
             {!('problem' in search) && (
