@@ -1,5 +1,38 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1686 F675-227 해결 상태 전이 정합성 / 이슈 #2580 / 선행 초안 #2581 / 운영 보류.
+**현재 기획:** v1688 F675-228 문의 추가 정보 요청 / 이슈 #2591 / 선행 초안 #2585 / 운영 보류.
+
+## v2026.11.03.1688 — F675-228 문의 추가 정보 요청 카드 (기능 추가 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 보완 v1686 → 현재 기능 추가 v1688 → 다음 기능 보완 v1690(잠정). 시작 원격 main f5c3fbedae1c3b3ec2374882b049aac43a655eb4, 중간·완료 재조회. AGENTS.md·README.md·영문 PROJECT_PLAN.md 정본·한국어 대조. 미병합 초안 #2585(선행 #2581)에 누적, 개발 이슈 #2591. **F675-228 미구현**. 이번 회차는 문서만 변경하며 런타임·SQL·금융 잔액·Test/Production·예약을 변경하지 않는다.
+
+### 문제, 대안, 범위와 선행 조건
+- **소스 근거:** 마이그레이션 196은 support_threads/support_messages 및 open/waiting_user/resolved 상태와 회원·관리자 답변을 제공한다. backend/src/support/support.controller.ts에는 구조화 추가정보 요청 API가 없고, frontend/src/app/support/page.tsx 및 frontend/src/app/admin/support/admin-support-view.tsx는 대화 화면이며 frontend/src/app/app-api/v1/[...path]/route.ts는 Android 게이트웨이다. 확인한 소스에서 별도 추가정보 요청 테이블·동작·화면은 찾지 못했다. 이는 제품 기능 공백이며 운영 장애가 입증된 것은 아니다.
+- **목적·대상:** 승인된 문의 관리자가 누락된 정보 한 가지를 정형 질문으로 요청하고 해당 문의의 회원이 답변하도록 하여 모호한 자유 대화를 줄인다. 대안 (가) 기존 자유형 답변만 이용: 진행상태 추적 어려움, (나) 첨부파일·외부 폼: 개인정보·악성파일·저장공간 위험, (다) **채택:** 문의 내부의 제한된 질문 카드와 불변 영수증. F675-104 재검토, F675-105 증빙 보관소, F675-222 분류, F675-223 담당 배정, F675-225 개인 알림, F675-226 답변 문구, F675-227 만족도와 중복되지 않는다.
+- **필수 선행:** v1686에서 요구한 DB 단일 상태 전이 권한·선잠금 규칙을 회원·관리자 메시지 및 상태 변경 경로 전체에 구현·검증하기 전에는 기능을 켤 수 없다. 우회 작성 경로 금지. support_structured_clarification_v1 기본 OFF, 불명확하면 닫힌 실패.
+
+### 권한, 진입점과 사용자 흐름
+- 실제 관리자 권한과 최근 관리자 세션을 검증한 운영자: /admin/support → 문의 선택 → **추가 정보 요청**. affected_feature(영향받은 기능), approximate_occurrence_time(대략 발생 시각), reproduction_steps(재현 단계) 중 한 가지 코드만 선택하고 현지화된 고정 문구를 미리 본 뒤 **요청 보내기**. 관리자에게 대기/답변/제공 불가/취소/만료, 요청·만료 시각, 대기 중 **요청 취소**를 표시한다. 일괄 발송, AI 질문, 첨부, 외부 전송, 답변 시간 보장, 자동 종료, 금융 변경 금지.
+- 인증된 문의 소유 회원: /support → 해당 문의 선택 → 질문 카드. 유형별 입력(affected_feature: 서버 승인 기능 열거형, approximate_occurrence_time: 시간대가 명시된 ISO-8601 분 단위, reproduction_steps: 유니코드 1~1000자)을 제공하고 **답변 보내기** 또는 **제공할 수 없음**을 선택한다. 비밀번호·복구 코드·주민등록번호·결제 인증정보 입력 금지를 안내한다. 작성 중 답변 자동 전송이나 다른 문의 변경 금지. 기능 OFF여도 기존 대화는 유지한다.
+- 명시 상태: 비활성/미지원, 로딩, 비어 있음, 대기, 전송 중, 답변, 제공 불가, 취소, 만료, 충돌, 오프라인/재시도, 권한 회수. 만료·취소 카드는 읽기 전용. 과거 영수증은 현재 상태의 증명이 아니므로 재실행이나 412 이후 서버 상태를 재조회한다. 가짜 성공·관리자 확인 표시 금지.
+
+### API·인증·데이터 계약
+- 회원 GET /api/v1/support/threads/:id/clarifications, POST /api/v1/support/threads/:id/clarifications/:requestId/respond (action answer|decline, 답변 시 유형별 answer). 관리자 GET /api/v1/admin/support/threads/:id/clarifications, POST /api/v1/admin/support/threads/:id/clarifications (promptCode), POST /api/v1/admin/support/threads/:id/clarifications/:requestId/cancel. 모든 변경에 CSRF와 UUID Idempotency-Key가 필수이며 생성은 문의 리비전 If-Match, 답변·취소는 문의+요청 리비전의 강한 If-Match가 필수. 불변 receiptId/requestId/state/revision/서버 시각 반환. GET은 현재 상태 ETag를 반환하지만 과거 재실행 영수증은 현재 ETag를 반환하지 않는다.
+- 행위자·역할은 인증 세션에서만 추출하고 신뢰 가능한 서버 경계와 DB SECURITY DEFINER에서 다시 결속한다. JSON의 actor UUID/userId/role은 신뢰하지 않는다. 타 회원 문의와 존재하지 않는 문의는 구별 불가 404, 미인증 401, 관리자 권한 부족 403, 잘못된 입력 400, 활성 요청·횟수 충돌 409, 만료 410, 오래된 리비전 412, If-Match 누락 428, 속도 제한 429, DB 상태 불명 503. 웹/app-api의 성공·실패 모두 오류 내용 비식별화, Cache-Control: private, no-store, X-Robots-Tag: noindex, Referrer-Policy: no-referrer 적용. Android는 인증된 소유자 전용 기능을 동등 제공하거나 명시적 미지원 상태를 표시한다.
+- 질문 입력 검증: affected_feature는 버전 관리된 허용 목록만, approximate_occurrence_time은 오프셋이 있는 분 단위 시각과 과거 90일 이내만(시간대 추정 금지), reproduction_steps는 공백 정리·유니코드 길이 제한·제어문자 및 명백한 비밀값 패턴 차단(완전 탐지 보장 금지). 원문 답변을 분석·URL·추적·예외에 기록하지 않는다. 공개 조회·검색·SEO 표면 없음.
+
+### PostgreSQL 제약, 트랜잭션, 만료, 삭제
+- 기존 마이그레이션 196·체크섬을 수정하지 않는 추가 전용 마이그레이션. support_clarification_requests(id UUID PK, thread_id FK ON DELETE CASCADE, member_id FK, admin_id FK, prompt_code CHECK, prompt_version, state CHECK pending|answered|declined|cancelled|expired, request_revision BIGINT, requested_at, expires_at, answered_message_id nullable FK, closed_at)와 불변 support_clarification_receipts(id PK, actor_id, request_id, idempotency_key, canonical_payload_hmac, result_state, committed_at). UNIQUE(actor_id,idempotency_key), 상태 pending에 대한 부분 UNIQUE(thread_id), 인덱스 (thread_id,requested_at DESC,id DESC) 및 (state,expires_at,id). 문의 행 잠금 안에서 **문의당 평생 최대 3건, 동시 대기 1건** 검사. moneyverse_app의 테이블 직접 DML/SELECT 권한 부여 금지, 최소 범위 EXECUTE만 부여, PUBLIC 권한 회수와 안전한 search_path 필수.
+- 트랜잭션은 인증 행위자·역할 잠금 → support_threads 행 잠금 → 요청 행 UUID 고정 순서로 잠그고 역순 잠금 금지. 생성 시 만료된 대기 요청을 같은 잠금에서 expired로 확정한 뒤 부분 UNIQUE 및 3건 제한을 검사하고, 해결 상태가 아닌 문의에만 요청·영수증·감사를 생성한다. 상태를 waiting_user로 바꾸는 경우 DB 단일 전이 권한을 반드시 거친다. 회원 답변/제공 불가는 소유권·질문 유형·DB 시각의 만료·강한 리비전을 검사한다. 답변이면 기존 support_messages에 회원 메시지 정확히 1건을 넣고 answered_message_id에 연결하며 요청 종료와 문의 open 전이를 **동일 트랜잭션**으로 확정한다. 제공 불가는 메시지 생성 없이 요청 종료와 open 전이만 수행한다. 관리자 취소는 회원 메시지나 가짜 해결 상태를 만들지 않으며 문의 상태를 자동으로 바꾸지 않는다. 유형별 답변은 검증된 고정 표시 형식으로 support_messages.body에 기록하고 원문 비밀값을 영수증에 넣지 않는다. 만료는 조회 시 DB 시각으로 계산하고 다음 잠금 쓰기에서 확정하며 cron은 필요 없다. 7일은 브라우저가 아닌 DB requested_at 기준이다.
+- 동일 키·동일 정규화 요청 재전송은 기존 불변 결과만 반환하며 새 메시지·상태 전이·감사·횟수 소비가 없다. 동일 키에 다른 본문은 409. 답변·취소·만료 후 과거 재실행이 대기 상태를 복원하거나 현재 ETag를 제공해서는 안 된다. 탈퇴·문의 삭제·관리자 권한 회수 시 승인된 보존·삭제 정책에 따라 답변과 영수증을 일관되게 삭제·가명화하고 권한 회수 관리자는 차단한다. 감사에는 행위자·요청 ID·질문 코드·동작·시각만 남기며 답변 원문은 금지한다. 권한 회수 경합과 타 회원 조회는 닫힌 실패.
+
+### 개인정보·접근성·지표·검증·배포
+- 웹·게이트웨이 전부 비공개/noindex, 사이트맵·구조화 데이터·자연검색 영향 없음. WCAG 2.2 AA: 320px 재배치, 레이블·상태 안내, 키보드·포커스, 44px 터치, 동작 축소, 한국어/영어 현지화, 한글 IME 입력 보호. Android는 동등한 유형별 입력 또는 버전 게이트에 따른 명시적 미지원 상태. 타 회원 카드·관리자 감사정보 노출 금지.
+- 질문 생성/답변/제공 불가/취소/만료는 비식별 집계만 기록하고 분모에 만료·제공 불가를 포함한다. 48시간 내 답변 비율, 답변 소요 중앙값, 7일 문의 해결률은 **제안 KPI**이며 관측 성과가 아니다. 보상·자동 제재·긴급도 상승·SLA 보장 없음. 관리자·회원·문의별 속도 제한과 평생 3건/동시 1건 제한, 반복 질문 남용 모니터링 및 비공개 관리자 검토.
+- 기능 ON 전 실제 PostgreSQL 17의 트랜잭션·역할·소유권 음성 테스트, 요청/답변/취소/만료 100개 경합 조합, 재실행·동일 키 다른 본문·권한 회수·7일 경계·DST/오프셋·메시지 원자성·기존 상태 작성자 전체·BOLA/BFLA·CSRF·2xx/4xx/5xx 비공개 헤더·Android 계약·삭제·접근성 검증. 정확 후보 SHA를 격리 Test에 배포해 회원/관리자 인증 E2E, 독립 외부 백업 복원, 금융 잔액 변화 0과 롤백을 증명해야 한다. 스키마만 먼저 추가하고 기능 OFF, 근거 없는 과거 데이터 보정 금지. 모든 게이트 통과 후에만 ON. 롤백은 기능 OFF로 전환하고 메시지·영수증을 보존하며 기존 문의 기능을 유지한다. 파괴적 역마이그레이션이나 기획 예약의 운영 배포 금지.
+
+### P0/P1 개발 백로그와 출시 게이트
+- **P0 4건:** OPS1688-01 루트 97%/잔여 약 3.0GiB, 데이터 볼륨 91%로 소유자 확인 후 안전한 용량 확보 및 외부 독립 복원(#1170); SEC1688-02 마지막 상세 QA v1482의 앱 UPDATE195/DELETE194/TRUNCATE213(264개 중), 위험 실행 가능 함수 19개, 마이그레이션 체크섬 불일치 5건 재측정·최소권한·주체 결속(#993); FIN1688-03 Treasury/Mint/NPS/SWF 독립 원장 근거 및 잔액 변화 0 검증; REL1688-04 QA v1482 FAILED/P0(운영 다국어 확대 28경로 중 HTTP500 24, Test 0), 정확 SHA Test/CI/복원 게이트 미완료(#1088). 공개 운영 버전 305d7c7..., Test 0c70a114...는 이미지 증빙이 아니다. **운영 출시 보류**.
+- **P1 6건:** CLAR1688-05 추가형 DB 제약·영수증; -06 Nest 인증·강한 CAS API; -07 회원/관리자 웹 카드; -08 Android/app-api/개인정보·접근성; -09 남용·삭제·KPI; -10 실제 PG17 경합·정확 SHA Test E2E·무중단 롤백. 구현은 별도 브랜치와 독립 QA, 기획 예약에서 운영 변경 금지. **외부 독립 레퍼런스:** 이번 신규 획득·검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 달성 주장 금지.
 
 ## v2026.11.03.1686 — F675-227 해결 이벤트와 만족도 평가 상태 전이 정합성 (기능 보완 / 초안 / 운영 보류)
 
