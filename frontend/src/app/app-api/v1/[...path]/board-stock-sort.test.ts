@@ -27,6 +27,11 @@ describe('Android public board stock order proof', () => {
     expect(res.headers.get('cache-control')).toContain('no-store');
     expect(res.headers.get('x-robots-tag')).toBe('noindex');
   });
+  it('rejects untagged-first rows and repeated post identities', async () => {
+    const id = '11111111-1111-4111-8111-111111111111';
+    expect((await request([row(null, id), row('AAA', '22222222-2222-4222-8222-222222222222')])).status).toBe(503);
+    expect((await request([row('AAA', id), row('AAA', id.toUpperCase())])).status).toBe(503);
+  });
   it('fails closed on unverified ordering', async () => {
     const res = await request([row('WDX', '11111111-1111-4111-8111-111111111111'), row('AAA', '22222222-2222-4222-8222-222222222222')]);
     expect(res.status).toBe(503);

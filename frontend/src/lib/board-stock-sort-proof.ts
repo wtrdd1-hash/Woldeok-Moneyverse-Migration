@@ -10,7 +10,7 @@ export function verifiedBoardStockSort(payload: unknown): boolean {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
     const row = value as Record<string, unknown>;
     if (typeof row.postId !== 'string' ||
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.postId) || seen.has(row.postId)) return false;
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.postId) || seen.has(row.postId.toLowerCase())) return false;
     if (row.stock !== null && (!row.stock || typeof row.stock !== 'object' || Array.isArray(row.stock))) return false;
     const symbol = row.stock === null ? null : (row.stock as Record<string, unknown>).symbol;
     if (symbol !== null && (typeof symbol !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(symbol))) return false;
@@ -19,7 +19,7 @@ export function verifiedBoardStockSort(payload: unknown): boolean {
         previous.symbol !== null && current.symbol !== null && (previous.symbol > current.symbol ||
           previous.symbol === current.symbol && previous.id > current.id) ||
         previous.symbol === null && current.symbol === null && previous.id > current.id)) return false;
-    seen.add(row.postId);
+    seen.add(row.postId.toLowerCase());
     previous = current;
   }
   return true;
