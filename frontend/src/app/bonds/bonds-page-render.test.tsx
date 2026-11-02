@@ -3,9 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createElement } from 'react';
 
 const mocks = vi.hoisted(() => ({ publicApi: vi.fn(), api: vi.fn() }));
-vi.mock('@/lib/api', () => ({ publicApi: mocks.publicApi, api: mocks.api }));
-vi.mock('./bonds-portal-client', () => ({ BondsPortalClient: ({ initialBonds }: { initialBonds: unknown[] }) =>
-  createElement('div', { 'data-testid': 'verified-bonds' }, `${initialBonds.length} verified bonds`) }));
+vi.mock('@/lib/api', () => ({ publicApi: mocks.publicApi, api: mocks.api, ApiError: class ApiError extends Error { status = 401; } }));
+vi.mock('./bonds-portal-client', () => ({ BondsPortalClient: ({ initialBonds, ownerStatus, repoStatus }: { initialBonds: unknown[]; ownerStatus: string; repoStatus: string }) =>
+  createElement('div', { 'data-testid': 'verified-bonds' }, `${initialBonds.length} verified bonds owner=${ownerStatus} repo=${repoStatus}`) }));
 vi.mock('@/components/treasury-donation-card', () => ({ TreasuryDonationCard: () => createElement('div') }));
 import PublicBondsPage from './page';
 
@@ -25,6 +25,16 @@ describe('bond market SSR and real API integration', () => {
     expect(markup).not.toContain('4.50%');
     expect(markup).not.toContain('verified-bonds');
     expect(mocks.api).not.toHaveBeenCalled();
+  });
+  it('does not claim zero holdings or loans when owner endpoints are unavailable', async () => {
+    mocks.publicApi.mockResolvedValue({ disclosed_at: now, overview: {
+      totalBondsActive: 1, totalFundedWld: '100000', totalHoldersCount: 1,
+      totalCouponsPaidWld: '0', benchmark1YYield: '4.50%', benchmark3YYield: '—', benchmark5YYield: '—',
+    }, bonds: [bond] });
+    mocks.api.mockResolvedValueOnce({ bad: 'not an array' }).mockRejectedValueOnce(new Error('outage'));
+    const markup = renderToStaticMarkup(await PublicBondsPage());
+    expect(markup).toContain('owner=unavailable repo=unavailable');
+    expect(markup).not.toContain('owner=verified');
   });
   it('passes only verified backend bond data to the real member UI', async () => {
     mocks.publicApi.mockResolvedValue({ disclosed_at: now, overview: {

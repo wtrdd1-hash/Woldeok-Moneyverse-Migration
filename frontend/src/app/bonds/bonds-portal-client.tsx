@@ -86,6 +86,8 @@ interface BondsPortalClientProps {
     benchmark5YYield: string;
   };
   isLoggedIn: boolean;
+  ownerStatus?: 'guest' | 'verified' | 'unavailable';
+  repoStatus?: 'guest' | 'verified' | 'unavailable';
 }
 
 export function BondsPortalClient({
@@ -94,6 +96,8 @@ export function BondsPortalClient({
   initialRepoLoans = [],
   overview,
   isLoggedIn,
+  ownerStatus = 'guest',
+  repoStatus = 'guest',
 }: BondsPortalClientProps) {
   const [bonds, setBonds] = useState<PublicBondItem[]>(initialBonds);
   const [holdings, setHoldings] = useState<UserHoldingItem[]>(initialHoldings);
@@ -466,7 +470,14 @@ export function BondsPortalClient({
             </div>
           </div>
 
-          {holdings.length === 0 ? (
+          {ownerStatus === 'unavailable' ? (
+            <div role="alert" className="rounded-xl border border-amber-500/40 p-5 text-sm">
+              보유 채권 정보를 확인할 수 없습니다. 보유 수량을 0으로 간주하지 않습니다.
+              <a href="/bonds" className="mt-3 block min-h-11 w-fit rounded-md border px-4 py-3 underline">다시 조회</a>
+            </div>
+          ) : ownerStatus === 'guest' ? (
+            <p role="status" className="rounded-xl border p-5 text-sm">내 보유 채권은 로그인 후 확인할 수 있습니다.</p>
+          ) : holdings.length === 0 ? (
             <Card className="border-border/80">
               <CardContent className="text-center py-12 text-muted-foreground space-y-2">
                 <ShieldCheck className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
@@ -579,7 +590,14 @@ export function BondsPortalClient({
             </div>
           </div>
 
-          {repoLoans.length === 0 ? (
+          {repoStatus === 'unavailable' ? (
+            <div role="alert" className="rounded-xl border border-amber-500/40 p-5 text-sm">
+              담보 대출 내역을 확인할 수 없습니다. 대출이 없다는 뜻이 아닙니다.
+              <a href="/bonds" className="mt-3 block min-h-11 w-fit rounded-md border px-4 py-3 underline">다시 조회</a>
+            </div>
+          ) : repoStatus === 'guest' ? (
+            <p role="status" className="rounded-xl border p-5 text-sm">담보 대출 내역은 로그인 후 확인할 수 있습니다.</p>
+          ) : repoLoans.length === 0 ? (
             <Card className="border-border/80">
               <CardContent className="text-center py-12 text-muted-foreground space-y-2">
                 <Landmark className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />

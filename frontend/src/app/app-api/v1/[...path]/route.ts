@@ -5,6 +5,7 @@ import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
+import { parseBondOwnerHoldings, parseBondOwnerRepoLoans } from '@/app/bonds/owner-source';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -271,6 +272,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Only the authenticated Nest owner endpoints may supply bond holdings and
+  // repo loans. Never relay malformed owner financial rows or backend errors.
+  const ownerBondRead = request.method === 'GET' && parts.length === 2 && parts[0] === 'bonds' &&
+    (parts[1] === 'my-holdings' || parts[1] === 'my-repo-loans');
+  if (ownerBondRead) {
+    const privateHeaders = { 'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' };
+    if (!response.ok) {
+      const status = [401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Bond Owner Read Unavailable', 'bond_owner_read_unavailable',
+        'Owner bond records could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON owner bond data');
+      const raw = await response.clone().json();
+      const verified = parts[1] === 'my-holdings' ? parseBondOwnerHoldings(raw) : parseBondOwnerRepoLoans(raw);
+      if (verified === null) throw new Error('invalid owner bond data');
+      return contractJson(verified, { status: 200, headers: privateHeaders });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bond_owner_read_unverified',
+        'Owner bond records could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response

@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { verifyBondMarkets } from './market-integrity';
+import { parseBondOwnerHoldings, parseBondOwnerRepoLoans } from './owner-source';
+import { ApiError } from '@/lib/api';
 import { canonicalUrl } from '@/lib/seo';
 import { publicApi, api } from '@/lib/api';
 import {
   BondsPortalClient,
-  type UserHoldingItem,
 } from './bonds-portal-client';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
   title: '게임 내 가상 WLD 채권 거래소 | 머니버스',
   description: '실제 국가채권이나 금융상품이 아닌 머니버스 게임 내 가상 WLD 채권의 서버 조회 시점 금리와 잔여 좌수를 확인합니다.',
   alternates: { canonical: canonicalUrl('/bonds') },
-  robots: { index: true, follow: true },
+  // This route includes member-specific holdings and repo loans in its SSR.
+  robots: { index: false, follow: false },
 };
 
 import { TreasuryDonationCard } from '@/components/treasury-donation-card';
@@ -37,37 +39,30 @@ export default async function PublicBondsPage() {
 
   const { overview, bonds } = market;
 
-  // 로그인 상태인 경우 내 보유 채권 및 레포 대출 조회 시도
-  let holdings: UserHoldingItem[] = [];
-  let repoLoans: any[] = [];
-  let isLoggedIn = false;
-
-  try {
-    const [userHoldings, userRepoLoans] = await Promise.all([
-      api<UserHoldingItem[]>('/api/v1/bonds/my-holdings'),
-      api<any[]>('/api/v1/bonds/my-repo-loans').catch(() => []),
-    ]);
-    if (Array.isArray(userHoldings)) {
-      holdings = userHoldings;
-      isLoggedIn = true;
-    }
-    if (Array.isArray(userRepoLoans)) {
-      repoLoans = userRepoLoans;
-    }
-  } catch {
-    // 비로그인 방문자
-    isLoggedIn = false;
-  }
+  // The backend binds each owner read to the authenticated session; Next only
+  // validates the returned shape. Never interpret an outage as an empty account.
+  const [holdingRead, repoRead] = await Promise.allSettled([
+    api<unknown>('/api/v1/bonds/my-holdings'),
+    api<unknown>('/api/v1/bonds/my-repo-loans'),
+  ]);
+  const holdings = holdingRead.status === 'fulfilled' ? parseBondOwnerHoldings(holdingRead.value) : null;
+  const repoLoans = repoRead.status === 'fulfilled' ? parseBondOwnerRepoLoans(repoRead.value) : null;
+  const guest = holdingRead.status === 'rejected' && holdingRead.reason instanceof ApiError &&
+    holdingRead.reason.status === 401;
+  const ownerStatus = guest ? 'guest' : holdings === null ? 'unavailable' : 'verified';
+  const repoStatus = guest ? 'guest' : repoLoans === null ? 'unavailable' : 'verified';
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
       <p className="text-sm text-muted-foreground">게임 내 가상 채권 · 서버 조회 <time dateTime={market.disclosedAt}>{new Date(market.disclosedAt).toLocaleString('ko-KR')}</time> 기준 · 실제 국가채권이나 원화 금융상품이 아닙니다.</p>
       <BondsPortalClient
         initialBonds={bonds}
-        initialHoldings={holdings}
-        initialRepoLoans={repoLoans}
+        initialHoldings={holdings ?? []}
+        initialRepoLoans={repoLoans ?? []}
         overview={overview}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={ownerStatus === 'verified'}
+        ownerStatus={ownerStatus}
+        repoStatus={repoStatus}
       />
 
       <section aria-label="국고 공공 기부 & 명예의 전당">
