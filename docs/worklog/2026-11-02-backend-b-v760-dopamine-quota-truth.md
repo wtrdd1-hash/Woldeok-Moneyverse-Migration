@@ -21,3 +21,10 @@ Pending.
 ## Finished
 
 Pending.
+
+## In progress — 2026-11-02 21:12 KST
+
+- TDD RED: two controller tests rejected the prior successful fabricated quota payload (`dailyShowdownsRemaining=10`, `starDropRemaining=3`, `bullBearVotedToday=false`). Initial direct vitest attempt could not fork inside MCP service's 1027 PID limit; retried inside bounded `systemd-run --user --scope` without touching other processes.
+- GREEN: `GET /engagement/dopamine/status` now requires the session actor and responds 503 with `DOPAMINE_QUOTA_UNVERIFIED`; private/no-store/noindex, no source or wallet writes.
+- Focused controller 6/6 PASS (including existing Golden Duck), new real Nest HTTP 2/2 PASS (authorized 503/private and unauthenticated 401).
+- Mid-work origin/main remains `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`. Next: broad gates and exact-SHA proof.

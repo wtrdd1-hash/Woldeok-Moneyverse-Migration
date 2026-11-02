@@ -181,17 +181,16 @@ export class DopamineController {
 
   @Get('status')
   @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Get available daily dopamine activity quotas and cooldowns' })
-  async getDopamineStatus(@Req() request: RequestWithSession) {
-    const userId = requireUserId(request);
-    return {
-      userId,
-      goldenDuckFeverAvailable: false,
-      fortuneCookieAvailable: false,
-      bullBearVotedToday: false,
-      dailyShowdownsRemaining: 10,
-      starDropRemaining: 3,
-    };
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Daily dopamine quotas unavailable without durable owner receipts' })
+  async getDopamineStatus(@Req() request: RequestWithSession): Promise<never> {
+    requireUserId(request);
+    // No durable per-owner vote or claim history supports a remaining quota.
+    throw new ServiceUnavailableException({
+      statusCode: 503,
+      code: 'DOPAMINE_QUOTA_UNVERIFIED',
+      message: 'Daily activity quotas are unavailable until owner receipts are verified.',
+    });
   }
 
   @Get('vip-chest/status')
