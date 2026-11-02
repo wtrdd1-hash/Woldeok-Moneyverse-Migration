@@ -256,43 +256,16 @@ export class AdminController {
 
   @Post('messages/broadcast')
   @UseGuards(AdminSessionGuard, CsrfGuard)
-  @ApiOperation({ summary: '관리자가 전체 회원에게 공식 공지 쪽지 일괄 발송' })
-  async broadcastMessage(
-    @Req() request: RequestWithSession,
-    @Body() dto: BroadcastAdminMessageDto,
-  ) {
-    const actorUserId = requireUserId(request);
-    const users = (await this.service().users(actorUserId, { limit: 100 })) as Array<{ user_id: string }>;
-
-    const prefix = `📢 [전체 공식 공지: ${dto.title.trim()}]\n\n`;
-    const fullBody = `${prefix}${dto.body.trim()}`;
-
-    let sentCount = 0;
-    for (const target of users) {
-      if (target.user_id === actorUserId) continue;
-      try {
-        const conv = await this.chatService().openConversation(actorUserId, target.user_id);
-        await this.chatService().sendMessage(actorUserId, conv.conversation_id, randomUUID(), fullBody);
-        sentCount++;
-      } catch {
-        // Continue delivering to remaining users even if one fails
-      }
-    }
-
-    await this.service().recordAudit({
-      actorUserId,
-      action: 'admin_broadcast_message',
-      requestId: contextOf(request)?.requestId ?? null,
-      metadata: {
-        title: dto.title,
-        recipientCount: sentCount,
-      },
+  @ApiOperation({ summary: 'Broadcast disabled until a durable, idempotent per-recipient delivery ledger exists' })
+  broadcastMessage(@Body() _dto: BroadcastAdminMessageDto): never {
+    // The previous implementation enumerated at most 100 users, silently ignored
+    // delivery failures and returned success without a replay-safe fanout receipt.
+    // A retry could duplicate messages while the response claimed full delivery.
+    // Do not enumerate recipients, send messages or emit a misleading audit entry.
+    throw new ServiceUnavailableException({
+      code: 'ADMIN_BROADCAST_DELIVERY_UNVERIFIED',
+      message: 'Broadcast is unavailable until durable per-recipient delivery and replay verification are implemented',
     });
-
-    return {
-      success: true,
-      sentCount,
-      totalUsers: users.length - 1,
-    };
   }
+
 }
