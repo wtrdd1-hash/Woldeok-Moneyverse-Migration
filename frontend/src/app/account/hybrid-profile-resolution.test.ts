@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const source = readFileSync('src/app/account/page.tsx', 'utf8');
 
-describe('account hybrid profile resolution and security score', () => {
+describe('account hybrid profile resolution and security evidence', () => {
   it('implements 4-tier hybrid display name resolution', () => {
     expect(source).toContain('rawDisplayName?.trim()');
     expect(source).toContain('oauthIdentity?.displayName?.trim()');
@@ -17,11 +17,11 @@ describe('account hybrid profile resolution and security score', () => {
     expect(source).toContain('imageUrl={rawImageUrl ?? null}');
   });
 
-  it('calculates 100-point account security progress score', () => {
-    expect(source).toContain('securityScore');
-    expect(source).toContain('<Progress value={securityScore}');
-    expect(source).toContain('계정 보안 완성도');
-    expect(source).toContain('font-mono tabular-nums');
+  it('renders verified owner security evidence without a fabricated grade', () => {
+    expect(source).toContain('accountSecuritySummary');
+    expect(source).toContain('활성 로그인 기기');
+    expect(source).not.toContain('securityScore');
+    expect(source).not.toContain('최고 등급 보안 보호');
   });
 
   it('renders quick action link to profile and cosmetics settings', () => {
