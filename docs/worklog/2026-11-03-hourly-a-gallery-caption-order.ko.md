@@ -17,3 +17,8 @@
 - 공개 갤러리 및 Android 별칭 모두 검증. Backend HTTP 5, 단위 7, Frontend 파서 2/SEO·접근성 2/Android 게이트웨이 6 통과.
 - 전체 ESLint 오류 0/기존 경고 1,027, Backend/Next 운영 빌드 통과, 앱 API 계약 184개 일치. 개발 DB 읽기 전용 검사 유지. 권한·마이그레이션·원장 변경 없음.
 - QA/Release 문서 커밋 후 정확한 최종 SHA의 전체 테스트와 CI를 추가 확인. 그 전까지 배포 HOLD.
+
+## 최종 검토 시점(02:51 KST)
+- 직전 검사 SHA `69ec9c0a9c7dbe0703c38c7fd0f3cb68a3e7e942`: Backend 전체 2,995 PASS / 2 FAIL / 518 SKIP, Frontend 전체 2,957 PASS. 기존 프로필 인증 HTTP 401 2건은 PR #2265에서 별도 처리 중. 갤러리 신규 테스트 실패 없음.
+- main 대비 23개 파일. 비-main 시작 308→종료 311, 열린 PR 278→281, 충돌 29. 삭제 0개, 고유 미통합 변경 전부 보존. #2371/#2331/#2438 가상 병합 충돌. Draft PR #2564 `hold` 유지.
+- 본 증거 업데이트 이후 정확한 최종 SHA는 PR #2564 댓글과 미니PC 증거에 기록. 공식 Test/Production/롤백 변경 없음.

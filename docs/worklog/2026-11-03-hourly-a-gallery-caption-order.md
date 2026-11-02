@@ -17,3 +17,8 @@
 - Both public gallery paths and Android aliases verified. HTTP controller tests 5 PASS; backend unit 7 PASS; frontend parser 2, SEO/a11y render 2, Android gateway 6 PASS. All affected code and new tests typecheck.
 - Full ESLint 0 errors / 1,027 existing warnings; backend and Next production builds PASS after alias fix; API contract generation/check PASS (184 endpoints). Real PostgreSQL proof remains read-only. No permission, migration or financial mutation.
 - Exact final commit full-suite/CI verification to follow after QA and release documents are committed. Until then all deployment gates remain HOLD.
+
+## Final review checkpoint (02:51 KST)
+- Previous candidate `69ec9c0a9c7dbe0703c38c7fd0f3cb68a3e7e942`: exact-SHA backend full 2,995 PASS / 2 FAIL / 518 SKIP; frontend full 2,957 PASS. Failures are the two unchanged profile 401 regressions tracked by existing repair PR #2265. No new failure in gallery feature tests.
+- 23 files changed from main. Start remote non-main refs 308 / open PR 278; ending 311 / open PR 281, conflicts 29; 0 deleted, all unique unmerged work retained. Merge-tree conflicts with #2371/#2331/#2438; no merge attempted. Draft PR #2564 labeled `hold`.
+- Exact final SHA after this evidence update will be tested and recorded in PR #2564 comments and task evidence. Production and official Test remain untouched, rollback not executed. No claim of release success.

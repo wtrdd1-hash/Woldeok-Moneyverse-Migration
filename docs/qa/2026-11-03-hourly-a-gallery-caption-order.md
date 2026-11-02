@@ -10,3 +10,9 @@
 - **Environment:** public Test `0c70a114da5f4cc5374bc4b80e0403a044f8546f`; Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; neither is the candidate. Official isolated Test exact-SHA auth/user-flow E2E, independent backup restore, production provenance and GitOps release gate BLOCKED.
 - **Audit:** 310 non-main remote-tracking refs, 292 unmerged with unique commits, 18 in main; 279 open PR, 29 conflicts. Existing gallery PR #2371/#2331/#2438 overlap paths; no forced merge, branch deletion or cleanup. Preserve unique changes.
 - **Evidence:** `/srv/moneyverse-data/tasks/mv-a-20261103-0225-gallery-caption-order/evidence/`. Final SHA, CI, changed-file list and gate updates follow in worklog.
+
+## Full exact-SHA verification checkpoint (prior to final QA update)
+- Tested SHA `69ec9c0a9c7dbe0703c38c7fd0f3cb68a3e7e942`: Backend **2,995 PASS / 2 FAIL / 518 SKIP** (same two existing profile 401 failures); Frontend **2,957 PASS**. Newly added backend HTTP 5 + service/controller 7, frontend SEO/a11y 2 + parser 2 + Android gateway 6 all PASS. No new failing test from this feature.
+- Final source changes from main: **23 files**, including Nest repository/service/controllers, web gallery, Android app-api gateway, TDD/HTTP/SEO tests, EN/KO QA/release/worklog and API docs. CI candidate and image build in progress at last checkpoint; no success claim without a completed run.
+- Ending audit at 02:51 KST: **311 non-main remote-tracking refs** (start snapshot 308 before branch creation, intermediate 310), **281 open PRs** (start 278), **29 conflicting PRs**. No branch deleted (0); 292 of 310 mid-audit refs carried unique unmerged commits. In-memory merge-tree simulations with #2371/#2331/#2438 all reported conflicts; all protected.
+- **Official Test/Production/rollback:** Test/Production SHA mismatched, no official Test exact-SHA authenticated E2E, no independent restore, no GitOps approval, no deployment or rollback. Draft PR #2564 stays HOLD.

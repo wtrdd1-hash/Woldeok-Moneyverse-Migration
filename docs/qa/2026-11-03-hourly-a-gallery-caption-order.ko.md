@@ -9,3 +9,8 @@
 - 기존 P0 개발 DB `account_balances` UPDATE 및 `user_items` DELETE 허용, 운영 DB 권한 미확인. 디스크 97% 사용. 공식 Test `0c70a114...`, Production `305d7c7f...` 후보 SHA 불일치, 인증 E2E/독립 복원/GitOps BLOCKED.
 - 비-main 브랜치 310개(미통합 292/병합 18), 열린 PR 279개, 충돌 29개. 기존 갤러리 PR #2371/#2331/#2438 파일 중첩. 강제 병합/삭제 없음.
 - 증거: `/srv/moneyverse-data/tasks/mv-a-20261103-0225-gallery-caption-order/evidence/`. 최종 SHA 및 CI는 작업일지에 별도 기록.
+
+## 전체 테스트 및 종료 감사(최종 QA 문서 업데이트 직전)
+- 검사 SHA `69ec9c0a9c7dbe0703c38c7fd0f3cb68a3e7e942`: Backend **2,995 PASS / 2 FAIL / 518 SKIP**(기존 프로필 401 2건), Frontend **2,957 PASS**. 신규 Backend HTTP 5/단위 7, Frontend SEO·접근성 2/파서 2/Android 6 통과. 이번 기능 신규 실패 없음.
+- main 대비 변경 파일 **23개**. 종료 02:51 KST 원격 비-main 311개(시작 308, 중간 310), 열린 PR 281개(시작 278), 충돌 PR 29개. 브랜치 삭제 0개. 중간 감사에서 고유 미통합 커밋 브랜치 292개. #2371/#2331/#2438 가상 병합 충돌, 모두 보호.
+- 공식 Test/Production SHA 불일치, 정확 SHA 인증 E2E·독립 복원·GitOps 미완료. 배포/롤백 없음. Draft PR #2564 HOLD. CI/이미지 빌드는 마지막 확인 시 진행 중.
