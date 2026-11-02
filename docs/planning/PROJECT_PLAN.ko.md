@@ -1,3 +1,51 @@
+## v2026.11.02.1656 — F675-220 회원 관리자 답변 읽지 않음 상태의 검증·명시적 읽음 확인 (기능 추가 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 보완 v1654 → 현재 기능 추가 v1656 → 다음 기능 보완 v1658(잠정). 시작·중간 최신 origin/main = a8541927c3a351d980454c66e95a3356c47e0722. AGENTS.md, README.md, 영문 정본 PROJECT_PLAN.md, 한국어 대조본 확인. 선행 미병합 Draft #2483, 개발 인계 이슈 #2488. **F675-220 미구현**이며 이번 회차는 문서 전용이다. 런타임·DB·WLD·금융 원장·Test·Production을 변경하거나 기능 수용시험을 통과했다고 주장하지 않는다.
+
+### 실제 소스 공백, 대안과 선택
+
+- 마이그레이션 196의 support_threads/support_messages에는 발신자 종류·작성시각·UUID가 있으나 회원의 읽음 표식, 문의별 관리자 답변 순번, 본인 전용 읽지 않음 조회 함수가 없다. 현재 frontend/src/app/support/page.tsx는 문의 처리 상태와 최근 50건을 표시하지만 검증된 읽지 않음 배지나 명시적 읽음 확인이 없다. F675-217 인앱 알림 및 F675-219 대화 페이지 조회는 별도의 미병합 기획으로, 이미 구현됐다고 가정하지 않는다. 이는 소스의 기능 공백이며 실제 회원의 알림 누락 사고를 입증하지 않는다.
+- 대안 A: status='waiting_user' 또는 last_message_at을 읽지 않음으로 추론 → 문의 처리 상태와 읽음은 다르므로 거부. 대안 B: GET 화면·프리패치·백그라운드 조회만으로 자동 읽음 → 실제 확인 증거가 없어 거부. 대안 C: 전체 관리자 답변 순번에서 읽음 순번을 빼서 미열람 수 계산 → 메시지 삭제·보존기간 처리 후 순번 공백으로 거짓 수치가 되어 거부. **선택 D:** 회원이 실제 관리자 답변을 지정해 '이 답변까지 읽음'을 명시적으로 요청하고, DB가 본인 소유와 답변 존재를 확인해 단조 증가 읽음 위치를 기록하며, 현재 보존된 추적 대상 관리자 답변만 세어 배지를 표시한다.
+- V1은 인증된 회원 본인의 문의에서 **기능 활성화 후 생성된 관리자 답변**만 추적한다. 과거 답변은 읽음 상태가 확인되지 않으므로 UNKNOWN_LEGACY로 표시하고 임의 소급·자동 읽음·자동 미열람 처리를 하지 않는다. 읽음 표식은 편의 기능이며 실제 사람이 문장을 읽었다는 법적 증명이나 관리자 전달 영수증이 아니다. 인앱 알림 존재 여부와 읽음 표식은 별도 상태다.
+
+### 사용자 흐름·권한·CTA·화면 상태
+
+- 진입: /support 최근 50건 본인 문의 목록 및 /support?thread=<UUID> 정확한 본인 문의. 최근 50건 각각에 기능 활성화 이후 확인된 '새 관리자 답변 N개'(표시 상한 99+) 또는 과거 기록의 '기존 답변 읽음 여부 미확인'을 표시한다. 최근 50건을 전체 문의라고 주장하지 않는다. 명시된 문의가 목록 밖이거나 존재하지 않아도 다른 문의를 임의로 열지 않는다(F675-219 정확한 문의 검증 선결). 검증된 관리자 메시지에만 '이 답변까지 읽음' CTA를 제공하며 GET·마우스 이동·프리패치·화면 노출만으로 POST하지 않는다.
+- 회원 메시지, 다른 회원 문의, 없는 메시지, 삭제된 관리자 메시지, 추적 전 관리자 메시지는 읽음 위치를 전진시키지 않는다. 더 최신 답변을 명시적으로 읽음 처리하면 같은 문의의 이전 추적 답변까지 확인한 것으로 처리한다는 설명을 제공한다. 여러 기기에서 오래된 읽음 응답이 나중에 와도 위치는 후퇴하지 않는다.
+- FEATURE_OFF(기존 화면 유지), VERIFIED_UNREAD, VERIFIED_ZERO_NEW, UNKNOWN_LEGACY, ACK_PENDING, ACK_APPLIED, ACK_REPLAY, 입력 오류 400, 미인증 401, 동의 403, 타인/미존재 404(존재 여부 비공개), 삭제/원천 변경 409(재조회), 요청 제한 429, 원천 확인 불가 503, 오프라인, 계정 전환 취소를 구분한다. 404/503을 0개나 '모두 읽음'으로 바꾸지 않으며 서버 확인 전 성공 표시 금지. 업스트림 200의 구조가 잘못돼도 검증된 0으로 취급하지 않는다.
+- 한국어/영어, 320px, 확대 200%, WCAG 2.2 AA, 최소 44px 터치, 키보드·레이블·포커스 복원, aria-live, 모션 감소, 스크린리더 발신자·시각 안내. 알림 제목·분석에 회원 문의 제목이나 본문을 넣지 않는다.
+
+### 데이터베이스·트랜잭션·인덱스·권한
+
+- 새 **순방향 마이그레이션**으로 support_threads.admin_reply_seq bigint NOT NULL DEFAULT 0 CHECK >=0, support_messages.admin_reply_seq bigint NULL을 도입한다. 기능 활성화 후 관리자 답변에만 양수 순번을 기록하고 회원 메시지는 NULL, 과거 관리자 메시지도 NULL(UNKNOWN_LEGACY)로 유지한다. CHECK (admin_reply_seq IS NULL OR (sender_kind='admin' AND admin_reply_seq>0))와 부분 UNIQUE 인덱스 support_messages(thread_id,admin_reply_seq) WHERE admin_reply_seq IS NOT NULL로 중복 순번을 금지한다. 기존 support_messages(thread_id,created_at,id) 인덱스를 우선 재사용하고 합성 10,001건 EXPLAIN (ANALYZE, BUFFERS) 전에는 중복 인덱스를 추가하지 않는다. 삭제된 순번은 재사용하지 않는다. 마이그레이션 번호는 Backend B와 조율하며 이번 문서가 예약하지 않는다.
+- support_member_read_markers 신규 테이블: thread_id uuid PRIMARY KEY REFERENCES support_threads(id) ON DELETE CASCADE, user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, last_seen_admin_seq bigint NOT NULL CHECK >=0, updated_at timestamptz NOT NULL. support_threads에 UNIQUE (id,user_id), 표식에 복합 FOREIGN KEY (thread_id,user_id)를 추가해 잘못된 회원 결속을 DB에서도 막고, 함수에서도 support_threads.user_id와 요청 회원을 대조한 뒤에만 upsert한다. 앱 역할의 원본 테이블 직접 SELECT/INSERT/UPDATE/DELETE/TRUNCATE 및 PUBLIC 함수 EXECUTE 금지, 고정 search_path·스키마 명시 SECURITY DEFINER 함수의 EXECUTE만 허용한다. DB 함수의 p_actor UUID는 독립 인증이 아니므로 HTTP 세션·동의·CSRF 및 서비스 신뢰 경계의 보안 검토가 필요하다.
+- 실제 관리자 답변 INSERT는 먼저 해당 문의 행을 잠그고 같은 트랜잭션에서 admin_reply_seq를 한 번 증가시킨 후 메시지에 순번을 기록한다. 동일 멱등키 재요청은 기존 메시지·순번을 반환하고 증가하지 않는다. 키 재사용에 본문이 다르면 거부한다. 회원 답장·상태만 변경·알림·실패/롤백된 관리자 답변은 순번을 증가시키지 않는다. F675-217 알림 영수증과 F675-218 상태 CAS의 잠금 순서·트랜잭션을 개발 B에서 함께 검토한다. 이번 예약은 SQL을 실행하거나 DB를 변경하지 않는다.
+- 읽음 POST는 하나의 트랜잭션에서 정확한 본인 문의 행을 잠그고 messageId가 해당 문의의 현재 보존된 관리자 답변이며 admin_reply_seq가 NULL이 아닌지 확인한 다음 last_seen_admin_seq = GREATEST(기존, 검증 순번)으로 갱신한다. 반복 POST는 멱등이며, 늦게 도착한 과거 요청으로 위치가 내려가지 않는다. 동시에 생성된 더 최신 관리자 답변은 미열람으로 남는다. 배지는 실제 남은 관리자 메시지 중 seq > marker를 LIMIT 100으로 조회하여 최대 99+로 표시한다. 전체 순번 차감으로 건수를 계산하지 않는다. 삭제·보존 경로가 추적 무결성을 우회하면 기능 활성화 BLOCKED.
+- 추적 관리자 답변이 없으면 '추적 시작 이후 새 답변 0'은 가능하지만 레거시 읽음 상태는 UNKNOWN으로 따로 표시한다. 회원 탈퇴·GDPR 삭제 시 기존 정책에 따라 읽음 표식도 제거하고, 삭제 의무 이후 개인 영수증을 보존하지 않는다. WLD·아이템·원장·회원 권한·감사 로그 변경은 범위 밖이다.
+
+### API·웹·Android·관리자·보안·SEO·KPI
+
+- Nest GET /api/v1/support/threads/:id/unread: {threadId,sourceStatus:'VERIFIED',trackedUnreadCount:0..99,hasMoreUnread,legacyReadState:'UNKNOWN'|'NONE',lastSeenAdminSeq:string|null,asOfUtc}. POST /api/v1/support/threads/:id/read-marker는 {messageId:UUID}만 허용하고 SessionGuard·AuthenticatedGuard·ConsentGuard·CsrfGuard 및 DB 소유권 검증을 통과해야 한다. 응답 {threadId,applied:boolean,readThroughSeq:string,trackedUnreadCount,hasMoreUnread,sourceStatus:'VERIFIED'}. 클라이언트가 회원 ID·순번·시간을 정해 보내지 못한다. 오류 400/401/403/404/409/429/503을 구분하며 기존 /messages/:messageId 및 제안 /message-pages와 경로 충돌이 없어야 한다.
+- 최근 50건 배지는 본인 목록과 같은 제한된 스냅샷에서 본인 전용 배치 SECURITY DEFINER 조회로 제공하고 50회 개별 네트워크 요청(N+1)을 만들지 않는다. 전체 문의 미열람 수라고 표시하지 않는다. Next 동일 출처 BFF는 응답 구조·인증·CSRF를 검증한다. Android app-api는 동등 계약·세션 폐기·계정 전환 요청 취소·오래된 응답 폐기·개인정보 디스크 캐시 금지를 지킨다.
+- 성공·오류·HEAD·리다이렉트·CDN 실제 HTTP에 Cache-Control: private, no-store, X-Robots-Tag: noindex,nofollow, Referrer-Policy: no-referrer, X-Content-Type-Options: nosniff. ETag/Last-Modified/Expires 제거, 304 재사용 금지. /support와 API는 사이트맵·공개 SEO·구조화 데이터에서 제외. 메시지 본문·회원/문의 UUID·읽음 순번·세션·CSRF를 로그/분석에 저장하지 않고 쿼리 문자열 마스킹. 회원+IP 요청량·SQL 타임아웃·응답 크기 제한, GET 쓰기 금지.
+- V1 관리자에게 개별 회원의 읽음 여부는 제공하지 않고 회원 대신 읽음 처리도 불가하다. 주간 서로 다른 회원 20명 이상 코호트에서만 활성 이용, 미열람→명시적 확인 전환, p95 확인 지연, 409/429/503, 중복 재요청, 계정 전환 응답 차단 수를 익명 집계하고 작은 집계칸은 숨긴다. 타인 노출 0, 거짓 검증 0, 금융 원장 변경 0, 합성 10,001건 조회 p95 300ms 미만·POST 500ms 미만은 **수용 목표이지 실측 성과가 아니다**.
+- 기능 스위치 support_admin_reply_unread_proof 기본 OFF. F675-217 알림과 F675-219 페이지 조회는 선택적 연계이며 미구현 상태에서도 정확한 본인 문의 검증만으로 독립 동작할 수 있어야 한다. 번호·체크섬·ACL 확인 후 개발 별도 브랜치·격리 PostgreSQL 시험·공식 Test 정확 SHA 인증 E2E·독립 복원·금융 대사·롤백 증명·운영자 승인 전에는 공개하지 않는다. 내부→소수 회원→확대, 문제 발생 시 스위치 OFF로 기존 UI 복귀하며 표식·순번·마이그레이션은 삭제하지 않는다. P0 남으면 Production RELEASE HOLD.
+
+### 개발 인계: P0 4건 + P1 6건
+
+1. **P0 OPS1656-01:** Test/Production 실제 실행 이미지·엣지 digest·애플리케이션 SHA, GitOps/공개 버전 일치, 독립 암호화 오프호스트 복원·롤백.
+2. **P0 SEC1656-02:** QA v1465 운영 앱 역할 264개 중 UPDATE 195/DELETE 194, 적용 체크섬 불일치 5건, Test 앱/마이그레이터 DB 분리, 신규 설치 마이그레이션 정합성·독립 회원 신원 경계·최소 권한 부정 시험. #993 연계.
+3. **P0 FIN1656-03:** Treasury/MINT/SWF/원장 독립 대사, 읽음 기능 시험 중 WLD·보유품·원장 변경 0 증명.
+4. **P0 REL1656-04:** QA v1465 FAILED/P0_PRODUCTION_HOLD(운영 다국어 HTTP 500 16/28, 운영 모드 백엔드 2건 실패, 전체 감사 9건, 라우트 원장 ENOENT·QA 정책 실패). 전체 CI·공식 Test 정확 SHA 웹/Android 인증 E2E·독립 복원·롤백 전 승격 금지.
+5. **P1 UNREAD1656-05 B/DB:** 관리자 답변 순번·읽음 표식 순방향 스키마, 잠금 순서·본인 배치 조회·인덱스·최소 권한·동시성.
+6. **P1 UNREAD1656-06 B/API:** 본인 미열람 GET 및 CSRF 읽음 POST, 엄격 DTO·오류·멱등 단조 응답.
+7. **P1 UNREAD1656-07 A/Web:** 최근 50건 배지, 정확한 문의·명시적 CTA, 한국어/영어 접근성·UNKNOWN/오류 상태.
+8. **P1 UNREAD1656-08 C/Android:** app-api 계약, 성공/오류 개인정보 헤더, 세션 전환 응답 차단·캐시 금지.
+9. **P1 UNREAD1656-09 A/C/관리자/KPI:** 20명 이상 익명 지표, 기본 OFF·단계적 활성화·경보/롤백·레거시 불확실성 표시.
+10. **P1 UNREAD1656-10 QA:** 격리 PG17 합성 메시지 10,001건 이상, 동시 관리자 답변 100회·순서 뒤바뀐 읽음 100회·타인 ID 위조 100회·멱등/삭제/보존 100회, 99+·레거시 NULL·원장 변경 0, 실제 HTTP·키보드·Android·엣지·공식 Test 정확 SHA·독립 복원. **시험 제안만, 미실행.**
+
+**관측 게이트(2026-11-02 15:29 KST):** QA v1465 **FAILED / P0_PRODUCTION_HOLD**, /srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.02.1465-end.md. 16시대 Test·Production 공개 /api/version은 모두 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 최신 main과 다르며 실제 이미지 증명도 아니다. 외부 독립 레퍼런스 신규 실제 검증·중복 제거·근거 분류 승인 **0건**, 누적 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 신규 기능 구현·수용시험·Test/Production 배포 없음. **DRAFT / RELEASE HOLD.**
+
 ## v2026.11.02.1654 — F675-219 문의 대화 기록: 정확한 문의 선택·라우트 충돌·커서 무결성 보완 (기능 보완 / 초안 / 운영 보류)
 
 **주기·기준:** 이전 기능 추가 **v1652** → 현재 기능 보완 **v1654** → 다음 기능 추가 **v1656(잠정)**. 최신 `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722` 시작·중간 재조회. 진실 기준은 `AGENTS.md`, `README.md`, 영문 정본 `docs/planning/PROJECT_PLAN.md` 및 본 한국어 동등 문서다. 선행 미병합 Draft PR **#2478**, 현 Draft PR **#2483** (OPEN/HOLD), 개발 이슈 **#2477**. **F675-219 미구현**, 이번 변경은 문서 전용이며 런타임·DB·WLD·원장·Test·Production 변경은 없다.
