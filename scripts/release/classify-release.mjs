@@ -87,6 +87,8 @@ function pathKind(path) {
   if (!path || path.startsWith('/') || path.split('/').includes('..') || unsafeCharacter) return 'unknown';
   // The exact generated API schema is runtime input, never a docs-only bypass.
   // Every other JSON file under docs remains UNKNOWN/fail-closed.
+  // This generated inventory is QA control evidence, never a runtime artifact.
+  if (path === 'artifacts/qa/route-inventory.json') return 'control';
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
@@ -170,7 +172,7 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
     repositoryHeadSha,
   ]).sort();
   const unsafeDocumentBlob = changedPaths.some((path) => {
-    if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json') return false;
+    if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json' && path !== 'artifacts/qa/route-inventory.json') return false;
     const before = isSafeDocumentBlob(root, baseSha, path);
     const after = isSafeDocumentBlob(root, repositoryHeadSha, path);
     return (before === null && after === null) || before === false || after === false;

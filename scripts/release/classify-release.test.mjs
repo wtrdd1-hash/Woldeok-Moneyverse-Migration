@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -35,6 +35,23 @@ test('backup and restore tooling is release control plane', () => {
     classifyPaths(['scripts/backup/verify-backup-evidence.mjs', 'package.json']),
     'MIXED',
   );
+});
+
+test('only the canonical QA route inventory artifact is control plane', () => {
+  assert.equal(classifyPaths(['artifacts/qa/route-inventory.json']), 'CONTROL_PLANE_ONLY');
+  assert.equal(classifyPaths(['artifacts/qa/route-inventory.json', 'scripts/qa/verify-full-route-qa-ledger.test.mjs']), 'CONTROL_PLANE_ONLY');
+  assert.equal(classifyPaths(['artifacts/qa/full-route-ledger.json']), 'UNKNOWN');
+  assert.equal(classifyPaths(['artifacts/qa/unsafe.json']), 'UNKNOWN');
+});
+
+test('release policy exercises the full-route source inventory parity gate', () => {
+  const root = new URL('../../', import.meta.url).pathname;
+  const result = spawnSync(process.execPath, ['--test', 'scripts/qa/verify-full-route-qa-ledger.test.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, NODE_TEST_CONTEXT: undefined },
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
 });
 
 test('backend API audit tooling is release control plane', () => {
@@ -204,6 +221,24 @@ test('executable and contract-like documentation paths fail closed', () => {
   }
   assert.equal(classifyPaths(['docs/guide.md', 'docs/images/safe.png']), 'DOCS_ONLY');
   assert.equal(classifyPaths(['docs/embedded-script.sh', 'backend/src/app.module.ts']), 'UNKNOWN');
+});
+
+test('canonical QA inventory cannot bypass classification as executable or symlink', () => {
+  withDocumentFixture(({ repo, commit, base }) => {
+    const directory = join(repo, 'artifacts', 'qa');
+    mkdirSync(directory, { recursive: true });
+    const file = join(directory, 'route-inventory.json');
+    writeFileSync(file, '{"schemaVersion":1}\n');
+    const normal = commit('add QA inventory');
+    assert.equal(buildReleaseInput({ repo, base, head: normal }).classification, 'CONTROL_PLANE_ONLY');
+    chmodSync(file, 0o755);
+    const executable = commit('make QA inventory executable');
+    assert.equal(buildReleaseInput({ repo, base: normal, head: executable }).classification, 'UNKNOWN');
+    unlinkSync(file);
+    symlinkSync('../../docs/guide.md', file);
+    const linked = commit('replace QA inventory with symlink');
+    assert.equal(buildReleaseInput({ repo, base: executable, head: linked }).classification, 'UNKNOWN');
+  });
 });
 
 test('only the generated mobile API JSON contract enters the runtime lane, never docs-only', () => {
