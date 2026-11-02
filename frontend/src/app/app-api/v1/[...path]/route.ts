@@ -1,3 +1,4 @@
+import { verifiedBoardTopicResponse, parseBoardTopic } from '@/lib/board-topic-proof';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -240,6 +241,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
+  const boardTopicPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardTopicValues = boardTopicPath ? request.nextUrl.searchParams.getAll('topic') : [];
+  const boardTopic = parseBoardTopic(boardTopicValues.length > 1 ? boardTopicValues : boardTopicValues[0]);
+  if (boardTopicPath && boardTopic.invalid) {
+    return gatewayProblem(400, 'Bad Request', 'board_topic_invalid', 'topic must be stock or general');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -327,6 +336,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
         'owner stock trade gross filter could not be verified');
+    }
+  }
+
+  if (boardTopicPath && boardTopic.topic && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedBoardTopicResponse(await response.clone().json(), boardTopic.topic)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_topic_unverified',
+          'public board topic filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_topic_unverified',
+        'public board topic filter could not be verified');
     }
   }
 
@@ -585,13 +607,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('topic'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('topic'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
