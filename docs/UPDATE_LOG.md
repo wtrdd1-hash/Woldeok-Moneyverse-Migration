@@ -1,3 +1,7 @@
+## 2026-11-03 v1678 — F675-225 replay, time and evidence integrity (planning only)
+- Historical same-key replay has no current-resource ETag; UI refreshes GET. Canonical UTC-second HMAC and key rotation/retention, DB-second boundary and IANA DST rules, truthful due-list analytics. F675-225 NOT IMPLEMENTED; issue #2558; stacked on Draft #2560.
+- QA v1478 FAILED/P0; root 98%/2.5GB, Production localized 17/28 HTTP500, 19 app-executable unsafe-definer paths, 5 checksum mismatches, exact-main Test gate failed. P0 4/P1 6, RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/finance/deploy changes.
+
 ## 2026-11-03 v1676 — Administrator-only support follow-up reminders (planning only)
 - Feature Addition F675-225: private per-operator Set/Reschedule/Clear reminders and due/upcoming list, 20 active cap, strong revision CAS, immutable no-op/replay receipts, DB-time due classification, role-revoke serialization and erasure/privacy. NOT IMPLEMENTED; stacked Draft #2555, issue #2558.
 - Remote main f5c3fbedae1c3b3ec2374882b049aac43a655eb4; QA v1477 FAILED/P0, root disk 96%/4.1GB free, Production public 305d7c7... and Test 0c70a114... are not image proof. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only; no runtime/DB/finance/deployment changes.
