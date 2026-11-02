@@ -19,5 +19,12 @@
 - 1차 SHA: Lint·Typecheck·Build PASS, 프론트 2945 PASS, 백엔드 2978 PASS/2 FAIL(기존 프로필 HTTP), DB 패키지 62 PASS/5 SKIP, app-api 184 PASS, 보안 11 PASS. 전체 감사 9건 취약점, 전체 경로 QA 증빙 누락. 봇 테스트 의존성 링크 후 11 PASS.
 - 격리 PostgreSQL 17.11 322개 마이그레이션 및 실 DB 테스트 27건 통과. 컨테이너 제거.
 - 2차 수정 HEAD에서 전체 게이트 및 실제 HTTP 재검증 필요.
-## 종료
-- 검증 후 작성 예정.
+## 종료 — 2026-11-02 09:06 KST (운영 보류 판정)
+- 코드 후보 SHA 04ac83fa64e682b80e64b5c84cd20803b5377a5d; 본 종료 기록 커밋 후 HEAD는 변경되므로 해당 SHA의 별도 게이트를 기록한다. Draft PR #2449.
+- 코드 SHA: Lint PASS(오류 0/경고 1,027), Typecheck·Build PASS, 프론트엔드 2,947 PASS, 백엔드 2,978 PASS/2 FAIL/518 SKIP(기존 프로필 HTTP 401/200 불일치), 계약 PASS, DB 패키지 62 PASS/5 SKIP, app-api 184 PASS, 보안 11 PASS, 봇 11 PASS, 운영 High 이상 감사 PASS. 전체 감사 9건(보통 8/낮음 1), 전체 경로 QA 증빙 파일 누락으로 FAIL.
+- 격리 PostgreSQL 17.11 322/322 마이그레이션, 실제 DB 테스트 27건 PASS, 앱 계정의 outbox 쓰기·감사 삭제 권한 차단 확인. 컨테이너 제거.
+- 독립 Next.js 실제 HTTP에서 과거 기본 비밀값 POST 403 및 private/no-store, noindex/nofollow, no-referrer 확인. 실제 디스코드 메시지 전송은 하지 않음.
+- 원격 CI 일부 PASS, runtime-check 대기. 공식 Test/Production 버전 510dbe6bf4d5c2a8089fc06b480776053da7a2e3으로 후보와 다름. 정확 SHA 공식 Test, 로그인 브라우저/Android E2E, 실제 디스코드 전송 및 세션 연속성 BLOCKED.
+- main 시작·중간·종료 재조회 a8541927c3a351d980454c66e95a3356c47e0722 동일. 영문 정본/국문 보조 통합기획 변경 없음. A/B/QA/Gemini 작업 보호.
+- 최종: PARTIAL / RELEASE BLOCKED. PR 병합·Test/Production 배포·GitOps·원장·DB 변경 없음. 롤백 불필요. #2446의 Next 설정 변경과 향후 의미 단위 통합 필요.
+- 남은 과제: 봇의 sendLog가 채널 전송 실패를 삼키므로 봇 수락과 실제 Discord 게시 완료는 다름. 독립 전달 영수증 확인 전 발송 완료로 주장하지 않는다.
