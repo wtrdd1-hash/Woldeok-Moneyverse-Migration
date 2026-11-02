@@ -156,7 +156,7 @@ export class EnterpriseRepository {
     return res.rows;
   }
 
-  async listRecentDividendLogs(limit = 20): Promise<StateEnterpriseDividendLogRow[]> {
+  async listRecentDividendLogs(limit = 20, actorId?: string): Promise<StateEnterpriseDividendLogRow[]> {
     // Defense in depth for callers that bypass the HTTP controller.
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       throw new BadRequestException('limit must be an integer from 1 to 100');
