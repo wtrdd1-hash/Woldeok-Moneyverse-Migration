@@ -4,7 +4,7 @@ import { requireAdminConsole } from '@/lib/session';
 import { validateStorageSnapshot } from '@/app/admin/operations/storage/storage-view';
 
 export const dynamic = 'force-dynamic';
-const headers = { 'Cache-Control': 'private, no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow' };
+const headers = { 'Cache-Control': 'private, no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' };
 
 export async function GET() {
   try {
