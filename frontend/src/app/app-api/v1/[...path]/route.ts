@@ -599,6 +599,15 @@ async function handle(request: NextRequest, context: Context) {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
+  // Session and holdings evidence is owner-scoped even on successful reads.
+  // An upstream auth denial must not inherit public cache or indexing policy.
+  const ownerScoped = (parts[0] === 'shop' && parts[1] === 'holdings') ||
+    (parts[0] === 'auth' && parts[1] === 'session');
+  if (ownerScoped || response.status === 401 || response.status === 403) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   return response;
 }
 
