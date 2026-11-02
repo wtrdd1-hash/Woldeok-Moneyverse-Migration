@@ -9,7 +9,7 @@ interface Props {
 }
 
 const DM_PRESETS = [
-  { id: 'default', label: '기본 무결성 연동', desc: '원장 대사/음수잔액/감사체인 기본 검증', icon: '🔔' },
+  { id: 'default', label: '기본 무결성 연동 테스트', desc: '원장 대사/음수잔액/감사체인 기본 검증', icon: '🔔' },
   { id: 'whale', label: '고래 대규모 자금 이동', desc: '단일 5천만 WLD+ 급격 이체 감지', icon: '🐋' },
   { id: 'jackpot', label: '카지노 1억 WLD 잭팟', desc: '슬롯/룰렛 초대형 잭팟 즉시 직보', icon: '🎰' },
   { id: 'treasury', label: '국고 준비금 결핍 경보', desc: '국고 잔액 10억 WLD 미만 하회', icon: '⚠️' },
@@ -34,7 +34,7 @@ export function AdminDiscordDmTestButton({ adminUserId }: Props) {
 
       if (res.ok && data.success) {
         const found = DM_PRESETS.find((p) => p.id === targetPreset);
-        toast.success(`[${found?.label ?? targetPreset}] 관리자 DM이 발송되었습니다!`, {
+        toast.success(`[${found?.label ?? targetPreset}] 테스트 DM 전송이 수락되었습니다 (실제 사건 아님).`, {
           description: `수신자: ${adminUserId} | 채널: ${data.channelId || 'DM'}`,
         });
       } else {
@@ -53,7 +53,7 @@ export function AdminDiscordDmTestButton({ adminUserId }: Props) {
     <div className="flex flex-col gap-2 p-3 rounded-lg border border-border/60 bg-muted/20">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="font-semibold text-foreground flex items-center gap-1.5">
-          <span>📨</span> 관리자 1:1 관제 DM 프리셋 발송
+          <span>📨</span> 관리자 DM 테스트 (모의 시나리오 · 실제 사건 아님)
         </span>
         <span className="font-mono text-[11px] text-muted-foreground/80">ID: {adminUserId}</span>
       </div>

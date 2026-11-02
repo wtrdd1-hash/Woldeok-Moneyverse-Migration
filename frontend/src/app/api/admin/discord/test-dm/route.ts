@@ -1,58 +1,39 @@
 import { NextResponse } from 'next/server';
-import { currentViewer, isAdministrator } from '@/lib/viewer';
 import { api, ApiError } from '@/lib/api';
+import { mutate } from '@/lib/mutate';
 
 export const dynamic = 'force-dynamic';
 
+const headers = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' };
+const reply = (body: unknown, status = 200) => NextResponse.json(body, { status, headers });
+const presets = new Set(['default', 'whale', 'jackpot', 'treasury', 'killswitch', 'bank_delinquency']);
+
 export async function POST(req: Request) {
+  // A browser may have an administrator cookie even when the POST is initiated
+  // from another origin. Check the boundary before obtaining a CSRF token.
+  const origin = req.headers.get('origin');
+  const site = req.headers.get('sec-fetch-site');
+  if (!origin || origin !== new URL(req.url).origin || (site && site !== 'same-origin')) {
+    return reply({ success: false, error: 'cross_origin_forbidden' }, 403);
+  }
   try {
-    // R14 보안 가드: 관리자 세션 검증
-    const viewer = await currentViewer();
-    if (!isAdministrator(viewer)) {
-      return NextResponse.json(
-        { success: false, error: '관리자 권한이 필요합니다.' },
-        { status: 403 },
-      );
+    const security = await api<{ consoleSession?: { state?: string } }>('/api/v1/admin/security');
+    if (security.consoleSession?.state !== 'open') {
+      return reply({ success: false, error: 'admin_console_required' }, 403);
     }
-
-    const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-
-    // 관리자 세션에서 유효한 CSRF 토큰 획득
-    let csrfToken: string | undefined = req.headers.get('x-csrf-token') || undefined;
-    if (!csrfToken) {
-      try {
-        const session = await api<{ csrfToken?: string }>('/api/v1/auth/session');
-        csrfToken = session.csrfToken;
-      } catch {
-        // Fallback swallow
-      }
+    const body: unknown = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+      !('preset' in body) || typeof body.preset !== 'string' || !presets.has(body.preset)) {
+      return reply({ success: false, error: 'invalid_test_preset' }, 400);
     }
-
-    // 표준 api()를 통해 x-internal-token, 쿠키, CSRF 토큰을 안전하게 주입
-    const data = await api<Record<string, unknown>>('/api/v1/admin/discord/test-dm', {
-      method: 'POST',
-      body,
-      ...(csrfToken ? { csrfToken } : {}),
+    // Server-side mutate obtains a token bound to this exact session.
+    const result = await mutate<Record<string, unknown>>('/api/v1/admin/discord/test-dm', {
+      method: 'POST', body: { preset: body.preset },
     });
-
-    return NextResponse.json(data);
+    return reply(result);
   } catch (error) {
-    if (error instanceof ApiError) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: error.detail || error.message,
-        },
-        { status: error.status },
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Internal Server Error',
-      },
-      { status: 500 },
-    );
+    const status = error instanceof ApiError && [401, 403].includes(error.status)
+      ? error.status : 503;
+    return reply({ success: false, error: status === 503 ? 'dm_test_unavailable' : 'admin_authorization_required' }, status);
   }
 }
