@@ -5192,6 +5192,10 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "sortApplied": {
+            "type": "string",
+            "const": "title"
+          },
           "posts": {
             "type": "array",
             "items": {

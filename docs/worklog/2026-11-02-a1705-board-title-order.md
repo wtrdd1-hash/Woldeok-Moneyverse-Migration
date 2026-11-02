@@ -8,8 +8,12 @@
 - Plan: (1) RED regression tests; (2) Backend + PostgreSQL bounded sort; (3) Next UI/SSR + Android proxy proof; (4) contract and English/Korean docs; (5) target/full tests, live DEV PostgreSQL read-only, GitHub CI, Test SHA/Production release gates; (6) integrate only if all gates PASS.
 - Status: BEFORE WORK, tests not yet executed. Branches and PRs protected; no deletion.
 
-## IN PROGRESS — v1
-Pending implementation and evidence.
+## IN PROGRESS — v1 / code and contract ready for full gates
+- Test-first RED: Backend 3 failing tests, Frontend 8 failing tests before implementation; evidence saved in `evidence/red-*.log`.
+- GREEN: Backend 3/3 and Frontend 10/10 target tests after implementation; follow-up tie-breaker tests added. Full typecheck PASS; targeted ESLint PASS. Generated Android contract lists 184 endpoints and optional `sortApplied: title`.
+- Implemented opt-in `sort=title` in Nest controller and bounded PostgreSQL read query, Next `/board` UI and SSR proof check, Android gateway validation and cache/noindex/referrer headers. Existing default two-argument call retained. No migration, grant or ledger change.
+- Midpoint `origin/main` still `a8541927c3a351d980454c66e95a3356c47e0722`; other A/B/C/QA changes remain separate. Final gates, real PostgreSQL, Test and CI are pending.
+
 
 ## FINISHED — v2
 Pending verification; do not interpret this draft as successful development or authorization to merge/release.
