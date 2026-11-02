@@ -1,5 +1,5 @@
 ## v2026.11.02.1650 — F675-218 Resolution Feedback: Status CAS and Replay Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
-**GitHub:** parent Draft #2468; P0/P1 issue #2467; this cycle Draft PR pending. **RELEASE HOLD**.
+**GitHub:** parent Draft #2468; P0/P1 issue #2467; this cycle Draft PR #2473 OPEN/HOLD. **RELEASE HOLD**.
 **Cycle:** Previous Feature Addition v1648 → Current Feature Improvement v1650 → Next Feature Addition v1652 (provisional). Canonical source is latest `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722` (checked at start and midpoint), `AGENTS.md`, `README.md`, English `PROJECT_PLAN.md` and semantically equivalent Korean plan. Stacked documentation-only on unmerged Draft #2468; developer issue #2467. **F675-218 NOT IMPLEMENTED.** No runtime, database, WLD, ledger, Test or Production changes.
 
 ### Source-backed defect and alternatives
