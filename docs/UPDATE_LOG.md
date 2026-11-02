@@ -1,3 +1,7 @@
+## 2026-11-03 v1682 — F675-226 snippet title/replay/draft integrity (planning only)
+- Clarified ASCII-only casefold/NFC title_key_v1 and DB C-collation uniqueness; immutable historical replay after soft delete, no content/ETag resurrection, actor revocation and 20-active quota transaction fencing. F675-226 NOT IMPLEMENTED; issue #2570, stacked Draft #2572.
+- QA v1480 FAILED/P0: Production 24 HTTP500/28 expanded paths (different coverage), app TRUNCATE 213/264 and TRIGGER 214/264, 19 unsafe definer paths, 5 migration mismatches, exact-SHA Test gate failed. Root QA 99%/1.1GiB vs fresh 05:01 97%/~3GiB; recovery not certified. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10000, BLOCKED/IN PROGRESS. No runtime/DB/deployment.
+
 ## 2026-11-03 v1680 — F675-226 personal administrator support reply snippets (planning only)
 - Existing 3 hardcoded admin canned replies verified; proposed up to 20 personal editable snippets, insert into unsent composer only, never auto-send; no AI interpolation or member visibility. F675-226 **NOT IMPLEMENTED**; engineering issue #2570; stacked on Draft #2566.
 - QA v1479 FAILED/P0, root 99%/1.1GiB free, Production localized 17/28 HTTP500, broad app DB grants, 19 unsafe app-executable definer paths, five checksum mismatches, main Test gate failed. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/finance/deploy changes.
