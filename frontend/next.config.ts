@@ -194,7 +194,7 @@ const config: NextConfig = {
       { source: '/:path*', headers: security },
       // Administrator enterprise data is private, including localized URLs.
       // Override the global public indexing policy at the real HTTP edge.
-      ...['/admin/enterprises', '/:locale/admin/enterprises'].map((source) => ({
+      ...['/admin/enterprises', '/:locale/admin/enterprises', '/api/admin/enterprises/refresh'].map((source) => ({
         source,
         headers: [
           { key: 'x-robots-tag', value: 'noindex, nofollow' },
