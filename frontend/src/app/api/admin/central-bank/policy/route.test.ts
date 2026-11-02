@@ -11,8 +11,24 @@ import { PUT } from './route';
 describe('v1503 admin durable monetary policy BFF', () => {
   beforeEach(() => { api.mockReset(); currentViewer.mockReset(); isAdministrator.mockReset(); });
 
-  const req = (body: object) => new Request('http://localhost/api/admin/central-bank/policy', {
-    method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  const req = (body: object, headers: Record<string, string> = {}) => new Request('http://localhost/api/admin/central-bank/policy', {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json', origin: 'http://localhost', 'sec-fetch-site': 'same-origin', ...headers },
+    body: JSON.stringify(body),
+  });
+
+  it.each([
+    [{ origin: '' }, 'missing Origin'],
+    [{ origin: 'https://attacker.example' }, 'foreign Origin'],
+    [{ 'sec-fetch-site': 'cross-site' }, 'cross-site fetch'],
+    [{ 'sec-fetch-site': 'same-site' }, 'sibling subdomain fetch'],
+  ] as const)('rejects %s (%s) before obtaining an administrator CSRF token', async (headers) => {
+    currentViewer.mockResolvedValue({ signedIn: true });
+    isAdministrator.mockReturnValue(true);
+    const response = await PUT(req({ kind: 'base-rate', value: '4.25', rationale: 'Approved stabilization' }, headers));
+    expect(response.status).toBe(403);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(api).not.toHaveBeenCalled();
   });
 
   it('denies unauthorized requests before touching the backend', async () => {
