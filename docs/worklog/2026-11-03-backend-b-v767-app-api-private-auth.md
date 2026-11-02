@@ -13,7 +13,7 @@
 - [x] Write failing HTTP gateway regression tests and capture RED.
 - [x] Minimal privacy response code, capture GREEN.
 - [x] Recheck latest main/plans and run available gates.
-- [ ] Record CI/official Test SHA, PR and release hold.
+- [x] Record CI/official Test SHA, PR and release hold.
 
 ## Validation
 Pending.
@@ -28,3 +28,10 @@ Pending.
 - API contract: no route/body/status changes. Private/no-store and noindex on app-api shop/holdings and auth/session, and on all 401/403 app-api results; public meta/contract 200 remains cacheable.
 - Scope limitation: direct Production `/api/v1/auth/session` and nginx-injected headers are NOT fixed by this Next app-api change; require independent edge remediation and exact public verification.
 - Database, schema, financial ledger, balances, services and other agents untouched.
+
+## Final evidence — 2026-11-03T02:40:58+09:00
+- Draft PR #2563 opened from code SHA `fb78441c580041f031bd8bc384754e0d4b30be88` against main `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`. Branch isolated; no merge.
+- Fresh unauthenticated Production GET: `/app-api/v1/shop/holdings` HTTP 401 and `/api/v1/auth/session` HTTP 401; both still emit `X-Robots-Tag: index, follow...` and no explicit private/no-store. This is the deployed baseline, not proof the unmerged change works at edge.
+- Official Test `/api/version`: `0c70a114da5f4cc5374bc4b80e0403a044f8546f`; Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; neither matches PR SHA. Exact-SHA Test/auth/core-flow validation BLOCKED.
+- Source/PR checks may be pending or skipped; skipped is never PASS. Root filesystem 97%; no full build, DB mutation, Production deployment, service restart, branch cleanup or scheduling changes.
+- Release: HOLD. CI, full tests, Test exact-SHA, edge header proof, independent restore, backend/DB auth and GitOps release gates required before merge or promotion.
