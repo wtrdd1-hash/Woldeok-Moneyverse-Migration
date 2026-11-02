@@ -1,3 +1,6 @@
+## 2026-11-03 v1627 — Historical task Next cache retention in hourly QA (SOURCE TESTED / RELEASE HOLD)
+- TDD safe workspace-only Next cache sweep integrated into two-disk maintenance. Root/data pressure thresholds 85%/80%; 12h under pressure, normal 5d, mount-specific deletion count and byte budgets. Zero persistent files, releases, active workspaces or finance data touched. New and existing disk tests 8/8 PASS, host dry run 0 eligible; exact-source Test and Production scheduler update pending. [EN record](worklog/2026-11-03-qa-next-cache-v1627.md) / [KO](worklog/2026-11-03-qa-next-cache-v1627.ko.md).
+
 ## 2026-11-02 v1620 — Real Production Treasury public cutover verified
 - Production Nginx stale v1550 routing corrected to merged-main v1619 (backend4184/frontend4185) after stable environment repair and exact-SHA Test. Public treasury HTTP200 RECONCILED current 0 WLD, official production identity gate PASS; old v1550 services and configuration backup retained for rollback. No historic mint/pension settlement certified. [Worklog](worklog/2026-11-02-treasury-prod-cutover-v1620.md).
 

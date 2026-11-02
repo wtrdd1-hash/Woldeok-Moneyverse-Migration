@@ -10,6 +10,7 @@ import {
 import { join, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { sweepTaskNextCaches } from './qa-task-next-cache.mjs';
 
 const RETENTION_MS = 5 * 24 * 60 * 60 * 1000;
 const MAX_TREE_BYTES = 2 * 1024 ** 3;
@@ -171,6 +172,9 @@ function main() {
   }
   const before = { root: disk('/'), data: disk('/srv/moneyverse-data') };
   const cleanup = sweepRebuildableCaches({ dryRun });
+  const taskCacheCleanup = sweepTaskNextCaches({ dryRun, usedPct: {
+    root: before.root.usedPct, data: before.data.usedPct,
+  } });
   const docker = dryRun ? { status: 'not_run_dry_run' } : dockerBuildCachePrune();
   const after = { root: disk('/'), data: disk('/srv/moneyverse-data') };
   const pressure = Object.entries(after).filter(([, d]) => d.usedPct >= 85)
@@ -178,15 +182,16 @@ function main() {
   const diskDelta = Object.fromEntries(Object.keys(before).map(key => [key, {
     availableBytesDelta: after[key].availableBytes - before[key].availableBytes,
     // Busy host writes from other workers can offset reclaimed storage.
-    cacheBytesDeleted: cleanup[key].bytes,
+    cacheBytesDeleted: cleanup[key].bytes + taskCacheCleanup[key].bytes,
   }]));
-  const reclaimed = cleanup.root.deleted + cleanup.data.deleted;
+  const reclaimed = cleanup.root.deleted + cleanup.data.deleted
+    + taskCacheCleanup.root.deleted + taskCacheCleanup.data.deleted;
   const outcome = dryRun ? 'DRY_RUN' : reclaimed ? 'CACHE_ITEMS_REMOVED'
     : docker.reclaimedBytes > 0 ? 'DOCKER_BUILDER_CACHE_RECLAIMED'
       : 'NO_ELIGIBLE_CACHE_REMOVED';
   console.log(JSON.stringify({
-    event: 'scheduled_qa_dual_disk_maintenance', version: 'v2026.11.01.1605',
-    before, cleanup, docker, pressure, diskDelta, outcome, after,
+    event: 'scheduled_qa_dual_disk_maintenance', version: 'v2026.11.03.1627',
+    before, cleanup, taskCacheCleanup, docker, pressure, diskDelta, outcome, after,
   }));
   if (pressure.length) {
     console.error('[QA_DISK_PRESSURE] >=85%: ' + pressure.join(',')
