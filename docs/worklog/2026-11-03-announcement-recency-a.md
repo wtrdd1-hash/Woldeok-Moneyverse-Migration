@@ -1,0 +1,13 @@
+# A — Published announcement recency (2026-11-03)
+
+## Before work
+- Baseline: origin/main f5c3fbedae1c3b3ec2374882b049aac43a655eb4, isolated worktree. The shared checkout contains unrelated uncommitted changes; never touch it.
+- Read AGENTS.md, README.md, EN/KO integrated plans, current PR and CI summaries. Overlapping announcement PRs cover title/body searches, pinned, image, publication-day and ordering; this change is a distinct relative-age filter on the existing 20-row published snapshot.
+- No DB schema/migration or finance writes. Existing SECURITY DEFINER published-announcement read remains authoritative. Filter may not claim all historical notices.
+- RED: add tests for invalid, duplicate, recent=7d/30d and date boundary. GREEN: Nest web and Android read routes, service, Next UI, Android gateway validation. Verify and document blockers. Release default HOLD.
+
+## In progress
+- Pending.
+
+## Finished
+- Pending.
