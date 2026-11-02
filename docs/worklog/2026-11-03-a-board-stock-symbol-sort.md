@@ -15,3 +15,11 @@
 
 ## Finished
 - Pending. Test/Production untouched; no branch deletion.
+
+### Midpoint verification (01:32–01:46 KST)
+- Re-fetched main at start, middle, and before release: unchanged `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`.
+- Commits: initial log `b9267d813202707b55efd7471ee3c66f658682aa`, feature `0a897b781230e3eeb37a479a8d37ee10caf2eff1`, contract `ec99805b1bcf86fbd9e115c84b6dd0902a0944b7`, proof hardening `5abe3792d80e5f11db4dc80cc0f0d15355a3cbea`.
+- RED -> GREEN; 184 Android contract endpoints, strict source marker, Next noindex, no direct table access. Full frontend 2,951 PASS at contract SHA; full backend 2,986 PASS/2 FAIL/518 SKIP, database 72 PASS/5 SKIP, contract 41 PASS, static 34 PASS. Lint 0 errors/1,027 warnings, build PASS. Full audit 9 vulnerabilities, DEV DB ACL P0 fail. See English/Korean QA.
+- Branch audit: 303 remote non-main refs (285 unique unmerged, 18 merged ancestor), 273 open PRs, 29 conflicting, 38 PRs with failing CI. Existing PR #2554/#2526/#2494/#2448 merge-tree conflicts. 0 branches deleted; preserve all unique changes and other agent worktrees.
+- Disk started 96% / 4.5GB available; own generated `.next` (994MB) removed after successful build and saved log, restoring 4.4GB available. No other task data removed.
+- Official Test and Production run different SHA; no Test E2E, independent restore, promotion, or rollback. Release HOLD.
