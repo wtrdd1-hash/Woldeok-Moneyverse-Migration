@@ -164,7 +164,10 @@ export class AiNewsController {
         throw new ServiceUnavailableException({ message: error.message, code: error.code });
       }
       if (isExpectedCommandFailure(error)) {
-        throw new BadRequestException({ message, code: 'ai_news_refused', detail: pgMessage(error) });
+        // PostgreSQL messages can contain schema, input or credential details.
+        // Only two exact, source-controlled refusals have a safe UI explanation.
+        const detail = safeAiNewsRefusalDetail(error);
+        throw new BadRequestException({ message, code: 'ai_news_refused', ...(detail ? { detail } : {}) });
       }
       throw error;
     }
@@ -258,4 +261,12 @@ function pgMessage(error: unknown): string | undefined {
   return typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
     ? error.message
     : undefined;
+}
+
+
+function safeAiNewsRefusalDetail(error: unknown): 'reversal' | 'no longer open' | undefined {
+  const message = pgMessage(error);
+  if (message === 'a strong reversal cannot follow the opposite news within six hours') return 'reversal';
+  if (message === 'scenario is no longer open') return 'no longer open';
+  return undefined;
 }
