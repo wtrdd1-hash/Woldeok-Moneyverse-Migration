@@ -1,3 +1,44 @@
+## v2026.11.02.1660 — F675-221 회원 관리자 문의 전체 보존 목록 탐색 (기능 추가 / DRAFT / RELEASE HOLD)
+
+**회차/정본:** 이전 기능 보완 v1658 → 현재 기능 추가 v1660 → 다음 기능 보완 v1662(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 및 AGENTS.md·README.md·영문 PROJECT_PLAN.md를 기준으로 시작·중간 재확인. 미병합 Draft #2495에 적층하는 문서 전용 기획, 개발 이슈 #2497. **F675-221은 아직 구현되지 않았다.** 런타임·DB·WLD·보유품·원장·Test·Production 변경 및 병합·배포 금지.
+
+### 실제 소스 근거, 목적과 범위
+- **문제:** 회원은 최근 최대 100개 문의에서만 제목/상태/한국시간 날짜/순서 필터를 적용하고 최대 50개 결과를 받는다. Nest SupportRepository.myThreads는 public.support_my_threads(actor,100)을 먼저 호출하며, 마이그레이션 196은 이 함수의 최대 반환을 100으로 제한한다. 기존 인덱스는 support_threads_user_recent_idx(user_id,last_message_at DESC,id DESC). /support에서 명시한 과거 문의 ID가 목록에 없으면 첫 번째 문의를 대신 선택할 위험이 있으며, 정확한 본인 문의 조회는 F675-219/v1654의 별도 선행 조건이다. 이는 **코드에서 확인된 제약**이지 실제 회원 사고의 증거가 아니다.
+- **대상/성공:** 보존된 문의가 100건 이상인 로그인·동의 완료 회원. /support/archive에서 **현재 보존 중인 본인 문의 스레드의 메타데이터 전체**를 50건씩 순차 조회한다. 삭제된 기록까지 복구한다거나 전체 역사적 건수를 증명한다고 주장하지 않는다. 대화 메시지 전체 조회(F675-219), 읽지 않음(F675-220), 만족도(F675-218) 및 관리자 검색과는 별개다.
+- **대안:** 최근 100건 재사용은 전체 보존 목록이 아니므로 제외. OFFSET은 동시 변경 시 중복/누락 및 비용 증가로 제외. **선택안은 소유자 검증을 DB에서 수행하는 50+1 키셋 페이지와 회원별 목록 리비전**. V1은 읽기 전용이며 태그·첨부·삭제·상태 변경·결제·원장 변경을 추가하지 않는다.
+
+### 진입점·화면·상태·API
+1. **진입/권한:** support_case_archive 기능 스위치 기본 OFF. /support에서 기능 가능 여부가 검증된 경우에만 “전체 보존 문의 보기” CTA 표시. Next requireMember 및 Nest SessionGuard·AuthenticatedGuard·ConsentGuard를 적용하고 매 페이지마다 SECURITY DEFINER 내부에서 실제 소유권 확인. 요청 파라미터로 userId/actor를 받지 않으며 관리자도 다른 회원의 목록을 이 경로로 조회할 수 없다. 기능 OFF는 빈 목록이 아니라 FEATURE_OFF.
+2. **화면:** /support/archive에서 제목 부분 문자열 검색(대소문자 무시, 공백 제거, 2~80자, 제어문자 거부), 상태(open/waiting_user/resolved), 마지막 메시지 한국시간 시작·종료일(양끝 포함, 최대 366일, UTC 반열린 구간 변환)을 선택한다. 필터 초기화, “이전 문의 50건 더 보기”, 확인된 빈 결과·로딩·리비전 변경·조회 실패·잘못된 필터·권한 없음 상태를 구분한다. 정렬은 last_message_at DESC, thread UUID DESC. 항목은 제목·상태·마지막 메시지 시각만 표시하고 본문·회원 식별자·메시지 내용은 노출하지 않는다. 기존 최근 100건 요약은 계속 표본이라고 명시한다.
+3. **API:** 신규 GET /api/v1/support/thread-pages?status=&q=&from=&to=&cursor= (기존 /threads/:id/messages와 구분). 중복 파라미터를 거부하고 페이지 크기는 50으로 고정, OFFSET/임의 LIMIT 금지. 응답 {items:[{threadId,subject,status,lastMessageAtUtc,createdAtUtc}],nextCursor,hasNext,archiveRevision,asOfUtc,scope:"RETAINED_OWNER_THREADS",countIsComplete:false}. DB에서 51행을 조회해 다음 페이지 여부만 결정한다. 검증된 빈 결과와 상류 오류/잘못된 200 응답은 구별하며 전체 건수(totalCount)는 반환하지 않는다.
+4. **커서 보안:** AES-256-GCM 불투명 커서(키 ID, 랜덤 nonce, AAD로 경로·계약 버전 결속, 키 회전). 내부에는 회원/세션 결속 해시, 정규화된 필터 해시, 목록 리비전의 10진 문자열, PostgreSQL 마이크로초 시각, 마지막 UUID, 발급·만료(5분)를 담는다. 외부에서 디코딩 가능한 base64에 개인정보를 넣지 않는다. 변조·만료·타 세션·필터 변경·미지의 키는 400/410으로 거부하고 자동 첫 페이지 대체를 금지한다. JavaScript 부동소수점으로 마이크로초/BigInt 정밀도를 잃지 않는다.
+5. **정확한 문의 이동:** 목록에서 문의를 열 때 F675-219/v1654의 정확한 소유자 검증 API를 사용한다. 그 기능이 구현·검증되기 전에는 현재 /support?thread=...의 첫 행 대체 동작으로 연결하지 않고 CTA를 비활성화한다. 목록 조회가 자동으로 200개 메시지를 가져오거나 전체 대화 다운로드를 보장하지 않는다. 기존 CSV/TXT 최대 500건 제한은 유지한다.
+
+### DB 제약·인덱스·트랜잭션·동시성
+6. **순방향 스키마:** support_member_archive_revisions(user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, revision bigint NOT NULL CHECK >=0, updated_at timestamptz NOT NULL) 제안. 기존 문의 소유자에 대한 초기 리비전 행을 마이그레이션에서 생성하며 데이터 파괴/기존 마이그레이션 수정 금지. support_threads의 생성·제목/상태/last_message_at 변경·삭제 시 AFTER 트리거가 같은 트랜잭션에서 해당 회원의 리비전을 증가시킨다. 문의 소유자 변경은 금지한다. 마이그레이션 196의 회원·관리자 답변 및 관리자 상태 변경 함수는 support_threads를 UPDATE하므로 실제 모든 writer·보존 삭제 경로의 트리거 적용을 회귀시험으로 확인한다. moneyverse_app 직접 테이블 DML/SELECT 권한 추가 금지; 고정 search_path·활성 회원 검증·최소 EXECUTE만 허용.
+7. **스냅샷/충돌:** 최초·후속 페이지의 리비전과 목록은 동일 MVCC 스냅샷의 단일 SQL 문 또는 단일 커넥션의 REPEATABLE READ READ ONLY 트랜잭션으로 읽는다. 커서 리비전과 DB 리비전이 다르면 409 ARCHIVE_CHANGED 및 사용자 선택 “처음부터 다시 보기” CTA. 변경을 무시한 중복/누락 페이지 제공, GET의 DB 쓰기 및 무제한 잠금 금지. 기존 문의가 있는데 리비전 행이 없다면 0으로 간주하지 말고 503으로 차단·마이그레이션 복구. 문의가 없는 신규 회원의 확인된 리비전 0만 정상.
+8. **키셋/성능:** WHERE user_id=세션 소유자 AND 상태/제목 literal strpos(lower(subject),lower(q))>0 AND UTC 날짜 구간 AND (last_message_at,id)<(커서시각,커서UUID); ORDER BY last_message_at DESC,id DESC LIMIT 51. 기존 user_recent 인덱스를 활용하고 회원 문의 10,001건·다른 회원 100명 데이터로 EXPLAIN(ANALYZE,BUFFERS) 측정. 상태 복합 인덱스나 pg_trgm은 실제 성능 근거와 확장 설치 가능성 확인 후에만 추가. 타임아웃, 회원+IP 요청 제한, 응답 크기 제한, 무제한 COUNT(*) 금지.
+9. **개인정보 삭제/롤백:** 리비전 변경과 스레드 변경은 원자적으로 커밋. 마이그레이션 196의 support_threads.user_id 및 support_messages.sender_user_id 외래키는 자동 CASCADE가 아니므로 새 리비전 행에 CASCADE를 적용하는 것만으로 탈퇴·법정 보존·삭제가 보장되지 않는다. 독립 PostgreSQL에서 계정 삭제·보존 정책과 외래키를 검증. 롤백은 기능 OFF와 이전 API로 복귀하되 리비전 스키마/값은 유지하고 실서비스에서 DROP·리셋하지 않는다. 별도 개발 브랜치·공식 Test 정확 SHA·독립 백업 복원·운영 승격 게이트를 개발 예약에 인계한다.
+
+### 관리자·보안·SEO·모바일·접근성·분석·검증
+10. **보안/악용 방지:** 본인 메타데이터만 반환. 세션·동의·DB 소유권 검증, 향후 쓰기 API에는 CSRF(이번 V1은 GET만), q·날짜 제한, 429 요청 제한, 타인 정확 ID 404 비열거, 리비전 변경 409, 만료 410, DB/응답 불일치 503. 웹·app-api·실제 엣지의 성공·오류·HEAD·리다이렉트에 Cache-Control: private,no-store, X-Robots-Tag: noindex,nofollow, Referrer-Policy: no-referrer, X-Content-Type-Options: nosniff; ETag/304 개인 캐시 재사용 금지. /support/archive는 사이트맵 제외, 공개 SEO 유입 목적이 아니다. 분석/로그에 제목·커서·스레드 UUID·회원 ID·본문 기록 금지.
+11. **모바일/a11y/관리자:** Android app-api와 웹의 필터·커서·상태 동등성, 계정 변경 시 요청 폐기, 오프라인 디스크 캐시 금지, 타 계정 커서 재사용 금지. KO/EN, 320px, 200% 확대, 터치 44px 이상, 키보드·스크린리더·포커스 복원·aria-live, WCAG 2.2 AA. 관리자는 개별 열람 추적이 아니라 서로 다른 회원 20명 이상 코호트의 페이지 깊이·검증된 빈 결과·409/429/503·p95만 익명 집계, 작은 셀 숨김.
+12. **KPI/수용시험:** 목표(미측정) 타인 문의 0건, 리비전 불변 시 페이지 중복·누락 0건, 개인정보 캐시/SEO 누출 0건, WLD·아이템·원장 변경 0건, 합성 10,001건에서 p95 <350ms. 회원 10,001건 이상, 다른 회원 100건 이상, 동시 관리자 답변/상태 변경/삭제 100회, 변조·만료·타 세션 커서 100회, KST 날짜 경계·마이크로초·UUID 동률, 401/403/404/409/410/429/503 및 잘못된 200, 신규 설치·탈퇴·롤백, 정확 SHA Test의 인증된 Next/Nest/Android E2E와 독립 복원. **모두 제안된 테스트이며 미실행.** F675-219 정확한 문의 이동과 P0 게이트가 완료될 때까지 기능 OFF.
+
+### 개발 인계 — P0 4건 + P1 6건 (이슈 #2497)
+1. **P0 OPS1660-01:** 실제 Test/Production 실행 SHA·프론트/백엔드/엣지 이미지 digest·GitOps 승인·암호화된 외부 독립 복원·롤백.
+2. **P0 SEC1660-02:** QA v1467 운영 앱 권한 264개 중 UPDATE195/DELETE194, 적용 마이그레이션 체크섬 5건 불일치, Test 앱/마이그레이터 DB 분리. 직접 권한 추가 없이 최소 권한 함수로 해결(#993), 신규 설치·삭제·세션 결속 검증.
+3. **P0 FIN1660-03:** 국고/MINT/SWF/금융 원장 출처 독립 대조, 목록 조회 전후 WLD·보유품·원장 변동 0 검증.
+4. **P0 REL1660-04:** QA v1467 FAILED/P0, 운영 다국어 28건 중 HTTP500 16건, 운영 모드 백엔드 2건 실패, 의존성 감사 9건, 라우트 E2E·외부 복원 미완료. 공식 Test 정확 SHA 및 전체 게이트.
+5. **P1 ARCHIVE1660-05 B/DB:** 회원별 리비전 테이블/트리거, 소유자 검증 50+1 키셋 함수, 인덱스·성능·탈퇴 시험.
+6. **P1 ARCHIVE1660-06 B/API:** Nest /support/thread-pages GET, 검증·AEAD 세션/필터/리비전 커서, 400/401/403/404/409/410/429/503.
+7. **P1 ARCHIVE1660-07 A/Web:** /support/archive 검색·필터·더보기·확인된 빈 상태/오류/충돌, 정확한 문의 이동 선행 연계.
+8. **P1 ARCHIVE1660-08 C/Android:** app-api 계약·모든 상태의 비공개 헤더·계정 전환·오프라인 회귀.
+9. **P1 ARCHIVE1660-09 A/C/Admin/KPI:** 기능 OFF, 20명 이상 익명 집계, SEO·개인정보·접근성·단계적 활성화·롤백.
+10. **P1 ARCHIVE1660-10 QA:** 실제 PG17 10,001건, 동시 리비전 경쟁, 타인 ID, 커서 위변조, 정확 SHA Test E2E 및 독립 복원.
+
+**실측 근거(2026-11-02 18:11~18:16 KST):** 최신 QA v1467(17:48:49 KST) FAILED/P0_PRODUCTION_HOLD. 운영 다국어 HTTP500 16/28, 앱 권한 UPDATE195/DELETE194/264, 체크섬 불일치 5, Test DB 분리, 운영 모드 백엔드 2건 실패, 의존성 감사 9건. 개발 PG17.11 읽기 전용: 문의 3·메시지 6·종결 2, 앱 support_threads SELECT 거부, account_balances UPDATE 허용. Test/Production 공개 버전 API는 모두 HTTP200 및 510dbe6bf4d5c2a8089fc06b480776053da7a2e3이며 최신 main과 다르고 실제 이미지 digest 증거가 아니다. 외부 독립 레퍼런스 신규 검증·중복제거·분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 운영 RELEASE HOLD.
+
 ## v2026.11.02.1658 — F675-220 회원별 읽음 추적 등록·답변 재시도·개인정보 삭제 무결성 (기능 보완 / 초안 / 운영 보류)
 
 **주기·기준:** 이전 기능 추가 v1656 → 현재 기능 보완 v1658 → 다음 기능 추가 v1660(잠정). 기술 진실 기준은 최신 `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, 영문 정본 `PROJECT_PLAN.md` 및 한국어 동등본이다. 시작·중간 main 재조회 결과 동일했다. 미병합 Draft #2489 위에 적층된 **문서 전용** 변경이며 현 Draft PR #2495, 개발 인계 #2488. **F675-220은 미구현**이다. 런타임·DB·WLD·금융 원장·Test·Production 수정이나 신규 기능 수용시험은 없다.
