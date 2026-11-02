@@ -4,6 +4,13 @@
 
 # 현재 런타임 기준선
 
+## 2026-11-02 v1622 — 최신 운영 실측
+- **현재 공개 운영** `https://easy-scraping.com`: backend `moneyverse-release-v1622-backend.service` `127.0.0.1:4194`, frontend `moneyverse-release-v1622-frontend.service` `127.0.0.1:4195`. 불변 릴리스 `/srv/moneyverse-data/releases/prod-v2026.11.02.1622-6fe94aeeebbd`, 실제 앱 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`. Nginx 운영 라우트만 무중단 교체, 구 v1619 서비스 4184/4185 가동 유지하여 롤백 가능.
+- 공식 Test는 3100/3101에서 병합 메인 SHA `6fe94...` 실행. Test·Production 독립 신원 검사 `ok:true,failures:[]`. 후속 문서-only 메인 커밋 `666d1b40...`은 실제 운영 앱 SHA를 바꾸지 않음.
+- 권위 운영 DB: PostgreSQL 17.11, 호스트 5433, `woldeok_moneyverse_dev`; 신규 SQL324 관리자 공기업 배당 이력 DB 함수 적용. 배당 744·국고 552 원본 보존, 검사 당시 세션 1,899건. 현 회계기 0 WLD 국고 조회는 200, 과거 지급/발권/원장 출처 미인증은 계속 차단.
+- [운영 검증 기록 EN](worklog/2026-11-02-soe-prod-cutover-v1622.md) / [KO](worklog/2026-11-02-soe-prod-cutover-v1622.ko.md). 인증된 모바일 관리자 실제 DOM E2E는 미수행. 아래 v1550/v701/기타 버전은 과거 시점 기록이며 현행 운영 경로 아님.
+
+
 ## 2026-10-31 v1550 — 최신 실제 운영 관측
 - 공개 Production https://easy-scraping.com 은 불변 prod-v2026.10.31.1550-bc8cd8a6c654, 정확한 코드 SHA bc8cd8a6c654af0336f550643f23049a58ee1d16. Nginx 운영 API/백엔드는 127.0.0.1:4164, 프론트엔드는 127.0.0.1:4165이며 새 moneyverse-release-v1550 systemd 서비스는 부팅 시 자동 시작.
 - 공개 백/프론트 버전 일치, 실제 Production 신원 검사 실패 0. 공식 Test 역시 동일 코드 SHA로 3100/3101 제공 및 신원 검사 통과.
