@@ -1,6 +1,6 @@
 ## v2026.11.02.1658 — F675-220 Cohort Enrollment, Reply Replay and Erasure Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
-**Cycle/authority:** Previous Feature Addition v1656 → Current Feature Improvement v1658 → Next Feature Addition v1660 (provisional). Source of truth: latest `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, English canonical `docs/planning/PROJECT_PLAN.md` and Korean parity; start/mid re-fetch confirmed main unchanged. Stacked documentation-only on unmerged Draft #2489, handoff #2488. **F675-220 is NOT IMPLEMENTED**; no runtime/DB/ledger/WLD/Test/Production writes or feature acceptance.
+**Cycle/authority:** Previous Feature Addition v1656 → Current Feature Improvement v1658 → Next Feature Addition v1660 (provisional). Source of truth: latest `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722`, `AGENTS.md`, `README.md`, English canonical `docs/planning/PROJECT_PLAN.md` and Korean parity; start/mid re-fetch confirmed main unchanged. Stacked documentation-only on unmerged Draft #2489, current Draft PR #2495, handoff #2488. **F675-220 is NOT IMPLEMENTED**; no runtime/DB/ledger/WLD/Test/Production writes or feature acceptance.
 
 ### Source-proven lifecycle gap and chosen design
 
