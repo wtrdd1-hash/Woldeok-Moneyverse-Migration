@@ -85,6 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
+  @ApiQuery({ name: 'period', required: false, enum: ['24h', '7d', '30d'], description: 'UTC age window within the latest 50 public posts' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -93,11 +94,15 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'period')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const period = query.period;
+    if (period !== undefined && (typeof period !== 'string' || !['24h', '7d', '30d'].includes(period))) {
+      throw new BadRequestException('invalid public board period');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -114,8 +119,10 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
-    };
+    const cutoffUtc = period === undefined ? undefined : new Date(Date.now() - ({ '24h': 1, '7d': 7, '30d': 30 } as Record<string, number>)[period as string]! * 86_400_000).toISOString();
+    const posts = cutoffUtc
+      ? await this.community.publicList(stock as string | undefined, q as string | undefined, cutoffUtc)
+      : await this.community.publicList(stock as string | undefined, q as string | undefined);
+    return cutoffUtc ? { posts, period, cutoffUtc } : { posts };
   }
 }

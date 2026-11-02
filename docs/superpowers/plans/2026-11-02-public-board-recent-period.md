@@ -16,8 +16,8 @@
 - TDD RED then GREEN, exact-SHA CI, official Test E2E and GitOps release gates; no production on HOLD.
 
 ## Tasks
-- [ ] Add failing Nest controller/service period validation and SQL binding tests; implement minimal period filter.
-- [ ] Add failing web period parser/SSR test; implement labelled selector and truthful metadata.
-- [ ] Add failing Android gateway stale/duplicate/invalid source tests; implement fail-closed validator and headers.
+- [x] Add failing Nest controller/service period validation and SQL binding tests; implement minimal period filter.
+- [x] Add failing web period parser/SSR test; implement labelled selector and truthful metadata.
+- [x] Add failing Android gateway stale/duplicate/invalid source tests; implement fail-closed validator and headers.
 - [ ] Run target/full tests, lint, typecheck, build, real PostgreSQL read-only, security audit and contract parity.
 - [ ] Re-fetch main, inspect open PR conflicts, record SHA/branch/QA/release, create Draft PR, HOLD on missing gates.
