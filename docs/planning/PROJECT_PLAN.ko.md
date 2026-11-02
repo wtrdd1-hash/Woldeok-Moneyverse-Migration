@@ -1,3 +1,44 @@
+## v2026.11.02.1654 — F675-219 문의 대화 기록: 정확한 문의 선택·라우트 충돌·커서 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+**주기·기준:** 이전 기능 추가 **v1652** → 현재 기능 보완 **v1654** → 다음 기능 추가 **v1656(잠정)**. 최신 `origin/main` `a8541927c3a351d980454c66e95a3356c47e0722` 시작·중간 재조회. 진실 기준은 `AGENTS.md`, `README.md`, 영문 정본 `docs/planning/PROJECT_PLAN.md` 및 본 한국어 동등 문서다. 선행 미병합 Draft PR **#2478**, 현 Draft PR **#2483** (OPEN/HOLD), 개발 이슈 **#2477**. **F675-219 미구현**, 이번 변경은 문서 전용이며 런타임·DB·WLD·원장·Test·Production 변경은 없다.
+
+### 소스 확인 문제와 개선 결정(운영 사고로 단정하지 않음)
+
+1. **최근 목록 밖 문의가 다른 문의로 바뀌는 문제(P1):** `frontend/src/app/support/page.tsx`는 `selected = threads.find(t => t.thread_id === params.thread)?.thread_id ?? threads[0]?.thread_id`를 사용한다. `SupportRepository.myThreads`는 기본 최근 **50건**, 필터 경로도 최대 100건을 대상으로 한다. 따라서 본인의 51번째 이전 문의 링크나 필터에서 제외된 문의, 잘못된 ID를 선택하면 첫 번째 보이는 문의가 대신 열린다. F675-217 답변 알림과 F675-219 페이지 조회의 정확성을 깨뜨릴 수 있다. **결정:** `thread`를 명시한 경우 절대 다른 문의로 대체하지 않는다. 본인 소유를 DB에서 확인하는 `SECURITY DEFINER` 기반 `GET /api/v1/support/threads/:id`를 추가하여 `{threadId,subject,status,createdAtUtc,lastMessageAtUtc}`만 반환한다. 미존재·타인 문의는 존재 여부를 누설하지 않는 404, 다른 문의/메시지 조회 없음. 목록 필터와 무관하게 정확한 문의를 검증한다. 선택 파라미터가 없을 때만 첫 번째 본인 문의를 명시적으로 기본 선택할 수 있다.
+
+2. **라우트 충돌 위험(P1):** 기존 Nest `backend/src/support/support.controller.ts`에는 `GET threads/:id/messages/:messageId`가 `ParseUUIDPipe`와 함께 있다. v1652 제안 `GET threads/:id/messages/pages`는 등록 순서에 따라 `pages`를 메시지 UUID로 처리할 위험이 있다. 이는 **소스에서 추론한 충돌 가능성**이며 실제 HTTP 장애를 재현한 것은 아니다. **결정:** 독립 경로 `GET /api/v1/support/threads/:id/message-pages?limit=50&cursor=...`와 정확한 문의 GET을 사용한다. 기존 `/messages/:messageId`는 UUID 영수증 전용으로 유지한다. Nest 실제 라우트 매칭·OpenAPI·Next BFF·Android app-api에 세 경로를 모두 회귀 검증하며 새 경로 실패 시 기존 200건 목록으로 조용히 대체하지 않는다.
+
+3. **오래된 첫 50건이 최신 관리자 답변을 가림(P1):** 마이그레이션 196의 기존 조회는 `created_at ASC,id ASC`로 200/500건을 제한한다. v1652 방식처럼 가장 오래된 50건부터 보여주면 10,001건 대화에서 최신 답변까지 200회 이상 이동해야 한다. **결정:** 첫 화면은 최신 50건을 `ORDER BY created_at DESC,id DESC LIMIT 51`로 조회하고 표시할 때만 오래된 순으로 뒤집는다. '이전 대화 50개 불러오기'는 현재 가장 오래된 키보다 **작은** `(created_at,id)`를 DB에서 내림차순으로 51건 조회하고, 화면에서는 오름차순으로 앞에 추가한다. 기존 `support_messages_thread_idx(thread_id,created_at ASC,id ASC)`의 역방향 스캔을 우선 활용하며 10,001건 합성 데이터의 `EXPLAIN (ANALYZE,BUFFERS)` 증거 없이는 중복 DESC 인덱스를 추가하지 않는다. 동일 마이크로초는 UUID로 결정하고 JavaScript Date 밀리초 변환 없이 PostgreSQL에서 비교한다. 새 답변으로 소스가 바뀌면 409 후 명시적 새로고침, 영구 법적 보관본이라고 표시하지 않는다.
+
+4. **HMAC 서명과 비밀성의 혼동(P1):** v1652의 HMAC 서명 JSON 커서는 변조를 막지만 직렬화된 회원·문의·세션 UUID를 숨기지 않는다. **결정:** 새 96비트 nonce와 키 ID를 갖춘 버전형 AES-256-GCM 인증 암호화 또는 동등한 불투명 방식 사용. 평문에는 목적, 회원, 정확한 문의, 실제 `auth_sessions.id` 또는 서버 유도 세션 결속값(존재하지 않는 `session_generation` 컬럼을 가정하지 않음), 메시지 리비전, 최구간 키(마이크로초 UTC 문자열+UUID), 최초 high-water, limit, 발급/만료 시각만 넣는다. 세션 토큰·CSRF·본문·제목은 금지한다. base64url 길이·형식·인증 태그·키 회전·폐기 세션·계정 전환을 검증한다. 비밀키는 Next/Android 번들에 넣지 않는다. 커서는 같은 출처의 보호된 API로만 전달하고 Nginx/APM/오류 로그의 쿼리 문자열을 마스킹하며 브라우저 영구 저장을 금지한다. **매 성공 페이지마다 새로운 5분 커서**를 발급하여 최초 5분 후 201페이지 전체 순회가 막히지 않도록 한다. 최초 리비전과 high-water는 유지하며 만료 410에서는 새로 시작하고 서로 다른 스냅샷을 이어붙이지 않는다.
+
+5. **메시지 리비전은 아직 실재하지 않음(P0 선결 조건):** v1652의 `support_threads.message_revision`은 제안일 뿐 현재 마이그레이션 196의 `support_create_thread`, `support_add_message`, `admin_support_reply`는 해당 값을 관리하지 않는다. 새 번호의 순방향 마이그레이션으로 모든 메시지 INSERT·DELETE·보이는 내용 수정·보존기간 삭제에 적용되는 DB 소유 리비전 규칙을 도입한다. 권장안은 검토된 행 트리거와 메시지 쓰기 전에 동일 문의 행을 잠그는 함수 갱신이다. CASCADE 회원 탈퇴, 중복 멱등 재시도(증가 없음), 트랜잭션 롤백(증가 없음), 동시 삽입·잠금 순서·우회 직접 DML 거부를 실제 PostgreSQL에서 검증한다. 본문·작성시각·소유자 변경은 금지하거나 해당 문의 리비전을 증가시킨다. 레거시 0은 추적 이전 상태이지 완전한 과거 보존 증명이 아니다. 최초 페이지의 본인 소유·리비전·high-water·메시지는 읽기 전용 REPEATABLE READ 일관 스냅샷에서 얻고 다음 페이지마다 동일 회원·세션·리비전을 확인하여 변경 시 409. 요청 간 MVCC 스냅샷 지속을 주장하지 않는다. 첫 페이지는 DESC 50+1, 과거 페이지는 `(created_at,id)<(:oldestCreated,:oldestId)`, 최초 high-water 상한, 응답은 표시용 ASC. 모든 쓰기·보존 경로의 리비전 보장을 증명하지 못하면 **활성화 BLOCKED**.
+
+6. **DB 함수 인자의 회원 UUID는 독립적인 인증 신원이 아님(P0):** 기존 `SECURITY DEFINER` 함수는 `p_actor uuid`를 받으므로 앱 DB 계정이 유출되면 다른 회원 UUID로 EXECUTE를 호출할 수 있다. HTTP의 SessionGuard·AuthenticatedGuard·ConsentGuard와 SQL 소유자 조건은 서비스 경계를 보호하지만 **DB 독립 인증**을 보장하지 않는다. 보안 담당자는 DB에 독립적으로 결속된 신원 증거를 만들거나, 더 약한 서비스 신뢰 모델을 명시적으로 승인하고 계정 분리·EXECUTE 최소화·부정 시험·감시를 문서화해야 한다. `WHERE user_id=p_actor`만으로 직접 DB 사칭 방지가 입증됐다고 주장하지 않는다. 앱의 직접 테이블 SELECT/DML과 PUBLIC 함수 EXECUTE는 허용하지 않으며 함수 소유자·search_path를 검증한다.
+
+### 화면·API·트랜잭션·보안·운영
+
+- **대상·진입·CTA·상태:** 로그인한 본인 `/support?thread=<UUID>`, 최근 목록과 무관하게 정확한 문의 제목/상태 확인. 최신 50건을 대화 시간순으로 표시, '이전 대화 50개 불러오기'. VERIFIED_EMPTY, VERIFIED_LAST_RETAINED, LOADING, STALE_409(재시작), EXPIRED_410(재시작), OWNER_NOT_FOUND_404, OFFLINE, RATE_LIMITED_429, UNAVAILABLE_503 구분. 필터 변경·로그아웃·계정 전환 시 다른 문의로 자동 대체하지 않는다. 기존 답장 POST/CSRF 및 최대 500건 CSV/TXT 내보내기 기능·한계 표시 유지.
+- **Nest/API:** 정확한 본인 문의 GET과 `GET /api/v1/support/threads/:id/message-pages?limit=50&cursor=...` (1~100, 기본 50). 세션·인증·동의 가드, 클라이언트 회원 ID 지정 불가, UUID/limit/커서 중복·형식 엄격 검증. 응답 `{threadId,sourceStatus:'VERIFIED',sourceRevision,asOfUtcMicros,messages:[{messageId,senderKind,body,createdAtUtcMicros}],hasMore,nextCursor}`. 오류 400/401/403/404/409/410/429/503, 본인 검증과 메시지 읽기는 동일 읽기 전용 스냅샷, PostgreSQL 마이크로초 문자열 보존, 영수증·원장·보유품 쓰기 없음. 타임아웃은 트랜잭션 범위에서만 적용하여 커넥션 풀에 세션 SET이 남지 않게 한다.
+- **Next/Android:** A는 같은 출처의 좁은 BFF와 타입 검증 클라이언트 컴포넌트, AbortController 및 세션 세대 검사, 404/503을 `[]`나 `apiOrNull`로 바꾸지 않음. C는 app-api의 정확한 `support/threads/:id/message-pages` 매칭·응답 검증, 업스트림 HTML/부분 200 실패 폐쇄, 계정 전환 응답 폐기·디스크 캐시 금지. 200/400/401/403/404/409/410/429/503·HEAD·리다이렉트·CDN 실제 응답에 `Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` 강제. ETag/Last-Modified/Expires 제거 및 304 재사용 차단. 공개 SEO canonical·사이트맵·본문 분석 로그 금지.
+- **관리자·악용방지·분석:** V1 본인 전용, 기존 관리자 목록·500건 조회 변경 없음. 회원+IP 요청량 제한, SQL/응답 예산, 50/100건 제한, 20명 이상 고유 회원 집계와 작은 집계칸 추론 방지. KPI: 정확한 문의 딥링크 성공/안전한 404, 라우트 충돌 0건, 커서 변경·만료율, 합성 10,001건에서 페이지 p95<=300ms(시험 목표), 타인 노출·캐시 가능한 본인 응답·원장 변경 모두 0. 본문·UUID·커서는 로그/분석에 남기지 않는다. KO/EN, 320px, 200% 확대, WCAG 2.2 AA, 44px 터치, 키보드·VoiceOver·TalkBack, 이전 대화 추가 시 포커스·스크롤 보존, aria-live 및 모션 감소.
+- **배포·롤백:** `support_full_history_pages` 기본 OFF. 번호 충돌·체크섬을 해결한 새 순방향 마이그레이션, 전체 쓰기 경로·보존 리비전 검증, 공식 Test 정확 SHA·실제 PG17·인증된 웹/Android E2E·보안·금융·독립 복원·롤백·운영자 승인 후 내부→소수 회원→확대. 롤백은 기능 OFF로 메시지·리비전 보존, 다운 마이그레이션/운영 직접 패치 금지. 문서 CI 성공은 런타임 승인 아님. P0 남으면 RELEASE HOLD.
+
+### 구체적인 개발 백로그 (P0 4건 + P1 6건)
+
+1. **P0 OPS1654-01:** Test/Production 실제 실행 frontend/backend/edge 이미지 digest·애플리케이션 SHA, GitOps와 공개 버전 불일치, 독립 암호화 오프호스트 복원 및 롤백 자산 검증.
+2. **P0 SEC1654-02:** QA v1464의 실제 Production 앱 DB 계정 직접 UPDATE 195개/DELETE 194개(264개 테이블), 적용 마이그레이션 체크섬 불일치 5건, Test 앱/마이그레이터 DB 불일치·소스 마이그레이션 79개 누락 해결. 최소 권한·DB 회원 신원 경계 결정·신규 설치 번호 충돌 검증.
+3. **P0 FIN1654-03:** Treasury/MINT/SWF/원장 잔액 독립 대사, 대화 조회의 WLD·보유품·원장 쓰기 0건 검증. 문의 시험만으로 금융 정합성을 승인하지 않는다.
+4. **P0 REL1654-04:** QA v1464 FAILED/P0_HOLD(운영 다국어 28건 중 16건 HTTP 500, Test 0건, Next loopback EPROTO), Production 모드 백엔드 실패 2건, 의존성 9건, 라우트 원장 173 대 166, 필수 5회 검증 부재. 공식 Test 정확 SHA E2E·독립 복원 전 승격 금지.
+5. **P1 HISTORY1654-05 B/DB:** 정확한 본인 문의 읽기, DESC 50+1 역방향 키셋, 트리거/쓰기 함수 리비전, 마이크로초 문자열, EXPLAIN, DB 신원 사칭 위험 승인 및 부정 SQL 시험.
+6. **P1 HISTORY1654-06 B/API:** 충돌 없는 `/message-pages`, 정확한 문의 GET, 페이지마다 갱신되는 인증 암호화 커서, 세션 폐기·엄격 오류/타임아웃, Nest 라우트·OpenAPI 회귀.
+7. **P1 HISTORY1654-07 A/Web:** 최근 50/100건 밖 문의 딥링크, 다른 문의 자동 대체 금지, 최신 50건과 이전 대화 앞에 추가, 오류 상태·BFF·포커스·접근성.
+8. **P1 HISTORY1654-08 C/Android:** app-api 경로·암호화 커서 전달, 캐시 검증자 제거·성공/오류/HEAD 개인정보 헤더, 계정 전환 차단.
+9. **P1 HISTORY1654-09 A/C/관리자/KPI:** 관리자 기존 기능 유지, 고유 회원 20명 이상 익명 통계, 기본 OFF·단계적 활성화·롤백·SEO/개인정보 검증.
+10. **P1 HISTORY1654-10 QA:** 격리 PostgreSQL17 합성 메시지 10,001건 이상·본인 문의 101건 이상(최근 목록 밖 딥링크), `/messages/:uuid` 대 `/message-pages`, 암호화 커서 위조·만료·세션 폐기 100회, 동시 삽입 100회, 삭제/보존/롤백 50회, 마이크로초 동일시각 50회, 갱신 커서로 201페이지 완주, 악성 캐시 헤더, DB 2회원 사칭 경계, 금융 변경 0건, 정확 SHA Test·Android·브라우저·독립 복원. **모두 시험 제안이며 미실행.**
+
+**현재 운영 증거(2026-11-02 14:25 KST):** QA **v1464 FAILED / P0_PRODUCTION_HOLD**, `/srv/moneyverse-data/qa-reports/qa1464-evidence/release-hold-comment.md`. 15시대 Test·Production 공개 버전은 `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`로 main과 다르며 실행 이미지 증명이 아니다. 외부 독립 레퍼런스 신규 실제 검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건** → **BLOCKED / IN PROGRESS**. 신규 기능 구현·수용시험 성공을 주장하지 않는다. **문서 전용 / DRAFT / RELEASE HOLD.**
+
 ## v2026.11.02.1652 — F675-219 회원 문의 전체 보존 대화 페이지 조회 (기능 추가 / 초안 / 운영 보류)
 
 **주기·기준:** 이전 기능 보완 v1650 → 현재 기능 추가 v1652 → 다음 기능 보완 v1654(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 시작·중간 확인, AGENTS.md·README·영문 PROJECT_PLAN.md 정본 및 본 한국어 대조본. 이전 초안 #2473 위에 문서 전용으로 누적, 현 초안 PR #2478 OPEN/HOLD, 개발 인계 이슈 #2477. F675-219는 **미구현**이며 병합·배포·금융/보유품 변경을 승인하지 않는다.
