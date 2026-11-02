@@ -21,3 +21,8 @@
 - [ ] Re-fetch main and compare relevant files/plan before final PR decision.
 - [ ] Run exact HEAD build, lint, typecheck, unit, integration, real PostgreSQL, security, app-api, E2E, CI where available; record all blockers.
 - [ ] Preserve independent branch, English/Korean logs and safe GitHub PR. Do not merge/deploy on a failed gate.
+
+## Supplemental RED/GREEN — real HTTP privacy
+- [x] RED: route-specific headers absent under global public indexing policy.
+- [x] GREEN: six exact canonical/localized member calendar paths protected by noindex/private/no-referrer in Next config.
+- [ ] Rebuild final SHA and inspect actual HTTP headers.

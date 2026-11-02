@@ -20,3 +20,8 @@ Pending.
 - TDD RED confirmed: 3 behavioral failures (valid, verified empty, lifetime count), 1 SSR false-empty failure, 1 unbounded bigint failure; GREEN focused 12/12 tests including existing shop deadlines.
 - Added strict bounded weekly-goal parser and accessible retry. Existing Nest owner-scoped `early_game_weekly_goals` migration 101 unchanged; no fake client data or WLD writes.
 - Mid-run fetch: `origin/main` still `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`. Overlap warning: PR #2318 edits calendar page for separate season feed; do not merge until semantic integration.
+
+### MID-2 — 2026-11-03 02:43 KST
+- First candidate `5192e4d49106a4ce037101976234a76fbd679e83`: lint/typecheck/frontend unit 2,957 PASS/database unit/app-api 184/security scripts/frontend+backend build PASS; backend unit 2,983 PASS / 2 FAIL / 518 SKIP (profile privacy 200 vs 401); QA full-route ledger missing. This SHA is superseded by the HTTP policy fix below.
+- Isolated network-disabled PostgreSQL 17.11: init + 327 numbered migrations = 328 SQL steps PASS; seeded actor returned four canonical goals for KST week `2026-11-02` under `moneyverse_app` SECURITY DEFINER read; direct catalogue SELECT denied. Container removed.
+- Additional RED: Next config supplied public `index, follow` to the private calendar path despite page metadata `noindex`. Added six exact canonical/localized routes with `noindex, nofollow`, `private, no-store`, `no-referrer`. Header and SSR focused 19 PASS. Re-run all gates on the new HEAD; prior SHA evidence is not final proof.
