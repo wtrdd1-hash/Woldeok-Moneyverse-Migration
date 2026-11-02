@@ -12,3 +12,9 @@
 
 ## Finished
 - Pending validation.
+
+## In progress — 2026-11-02 20:48 KST
+- RED: frontend unfiltered source 11 failures; backend unfiltered source 4 failures. GREEN: frontend parser 13 PASS; backend 16 PASS; accessible retry/verified-empty UI 2 PASS. Discovered `pg` returns timestamptz as Date; normalized to ISO before HTTP proof, tested.
+- Midpoint origin/main re-fetch: `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b` unchanged. No main/DB/other worktree modifications.
+- Host high process pressure (3053 threads), so limited test workers; no shared services or other contributor processes stopped.
+- Next: exact HEAD gates and official release hold review.

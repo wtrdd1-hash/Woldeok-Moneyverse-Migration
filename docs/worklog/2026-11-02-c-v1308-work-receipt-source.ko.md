@@ -10,3 +10,7 @@
 
 ## 종료
 - 검증 후 기록.
+
+## 중간 (2026-11-02 20:48 KST)
+- Frontend RED 11건·Backend RED 4건 재현 후 검증기 및 Date→ISO 정규화 구현. 집중 Frontend 15건, Backend 16건 PASS.
+- 최신 main 재조회 결과 동일. 호스트 프로세스 부하로 테스트 병렬도 제한, 타 작업 및 서비스 보호.

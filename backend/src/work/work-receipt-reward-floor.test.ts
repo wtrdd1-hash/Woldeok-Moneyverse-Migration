@@ -19,7 +19,7 @@ const row = (reward_amount: string) => ({
 
 describe('owner-scoped work receipt reward floor', () => {
   it('filters only the database owner-scoped latest 20 rows using exact BigInt and echoes the accepted filter', async () => {
-    const receipts = vi.fn(async () => [row('9007199254740993'), row('9007199254740992')]);
+    const receipts = vi.fn(async () => [row('9007199254740993'), { ...row('9007199254740992'), receipt_id: '00000000-0000-4000-8000-000000000004' }]);
     const controller = new WorkController({ receipts } as unknown as WorkRepository);
     const result = await controller.receipts(request, '9007199254740993');
     expect(receipts).toHaveBeenCalledWith(actor);
@@ -47,6 +47,21 @@ describe('owner-scoped work receipt reward floor', () => {
     await expect(controller.receipts(request, '100')).rejects.toBeInstanceOf(
       ServiceUnavailableException,
     );
+  });
+  it.each([
+    { receipts: async () => [row('1e4')] },
+    { receipts: async () => [{ ...row('1'), receipt_id: 'not-a-uuid' }] },
+    { receipts: async () => [row('1'), row('1')] },
+    { receipts: async () => Array(21).fill(row('1')) },
+  ])('rejects invalid unfiltered source receipts instead of claiming payment', async ({ receipts }) => {
+    const controller = new WorkController({ receipts } as unknown as WorkRepository);
+    await expect(controller.receipts(request)).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+  it('normalizes PostgreSQL timestamptz Date values to ISO without changing reward amounts', async () => {
+    const controller = new WorkController({
+      receipts: async () => [{ ...row('9007199254740993'), created_at: new Date('2026-10-30T00:00:00Z') }],
+    } as unknown as WorkRepository);
+    expect(await controller.receipts(request)).toEqual({ receipts: [{ ...row('9007199254740993'), created_at: '2026-10-30T00:00:00.000Z' }] });
   });
   it('preserves the unfiltered legacy response', async () => {
     const controller = new WorkController({
