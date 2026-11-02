@@ -29,7 +29,6 @@ import {
   VirtualBondsCard,
 } from './bank-forms';
 import { SavingsGoalProgressRing } from './savings-progress-ring';
-import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { BankPrivacyNotice } from './bank-privacy-notice';
 import { BankStatementDownloadLink } from './bank-statement-link';
@@ -37,7 +36,8 @@ import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { BankStanding, SavingPocket } from './types';
+import type { BankStanding } from './types';
+import { SavingPocketsSource } from './saving-pockets-source';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +54,7 @@ export default async function BankPage() {
 
   const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
-    apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
+    apiOrNull<unknown>('/api/v1/banking/pockets'),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
     apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
   ]);
@@ -163,8 +163,9 @@ export default async function BankPage() {
 
           {/* 목적별 저축 포켓 (Saving Pockets) 관리 카드 */}
           <div className="toss-card p-6">
-            <SavingPocketsCard
-              pockets={pockets ?? []}
+            <SavingPocketsSource
+              raw={pockets}
+              locale={locale}
               cashBalance={cash}
               bankBalance={bank}
             />
