@@ -27,7 +27,9 @@ export function isVerifiedBoardUpdateOrder(payload: unknown): boolean {
     if (row.updatedAt !== null && (typeof row.updatedAt !== 'string' || !ISO.test(row.updatedAt))) return false;
     const created = Date.parse(row.createdAt);
     const updated = row.updatedAt === null ? created : Date.parse(row.updatedAt as string);
-    if (!Number.isFinite(created) || !Number.isFinite(updated)) return false;
+    if (!Number.isFinite(created) || !Number.isFinite(updated) ||
+        new Date(created).toISOString() !== row.createdAt ||
+        (row.updatedAt !== null && new Date(updated).toISOString() !== row.updatedAt)) return false;
     const activity = Math.max(created, updated);
     if (activity > previousActivity || (activity === previousActivity && created > previousCreated) ||
         (activity === previousActivity && created === previousCreated && id > previousId)) return false;

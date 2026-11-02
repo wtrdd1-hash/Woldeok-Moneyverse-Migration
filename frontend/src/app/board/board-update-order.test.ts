@@ -21,6 +21,8 @@ describe('public board updated order', () => {
     expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: [b, a] })).toBe(false);
     expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: [a, {...a, postId: a.postId.toUpperCase()}] })).toBe(false);
     expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: [{...a, updatedAt: 'not-a-date'}] })).toBe(false);
+    expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: [{...a, createdAt: '2026-02-30T00:00:00.000Z'}] })).toBe(false);
+    expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: [{...a, updatedAt: '2026-02-30T00:00:00.000Z'}] })).toBe(false);
     expect(isVerifiedBoardUpdateOrder({ order: 'updated', posts: Array.from({length: 51}, (_, i) => ({...a, postId: String(i)})) })).toBe(false);
   });
   it('renders labelled update ordering, bounded scope and noindex filtered results', () => {
