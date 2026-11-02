@@ -9,9 +9,13 @@
 - Rollback: omit `match=exact` or revert this isolated commit. Production release HOLD until all gates pass.
 
 ## In progress
-- [ ] Add failing Backend/Frontend/App API tests first and record RED.
-- [ ] Implement minimal backend, web and Android proxy parity and record GREEN.
+- [x] RED recorded: Backend 2 failed / 18 passed; Frontend 4 failed / 9 passed.
+- [x] Implemented backend SQL/HTTP, web selector/provenance and Android fail-closed proxy. GREEN focused verification pending final rerun.
 - [ ] Recheck latest main/plan; test, typecheck, lint, build, DB read-only, CI; record evidence and blockers.
 
 ## Finished
 - Pending verification; do not merge or deploy without exact-SHA official Test and GitOps gates.
+
+## Midpoint
+- `origin/main` re-fetched at 21:00 KST and remains `305d7c7f`. Other developers' dirty worktree untouched.
+- First implementation had an unterminated SQL template and a legacy controller call arity regression; both corrected before further verification.

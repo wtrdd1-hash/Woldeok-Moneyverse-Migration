@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedExactBoard } from '@/lib/board-exact-title';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -521,6 +522,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (response.ok && request.method === 'GET' && parts.length === 3 &&
+          parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts' &&
+          request.nextUrl.searchParams.has('match') &&
+          (request.nextUrl.searchParams.getAll('match').length !== 1 ||
+           request.nextUrl.searchParams.get('match') !== 'exact' ||
+           request.nextUrl.searchParams.getAll('q').length !== 1 ||
+           !isVerifiedExactBoard(compatible, request.nextUrl.searchParams.get('q')?.trim() ?? '', request.nextUrl.searchParams.get('stock')))) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -585,15 +595,17 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('match'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('match'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

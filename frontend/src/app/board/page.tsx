@@ -11,7 +11,8 @@ import { formatDay, formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
-import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardTitleQuery, parseBoardTitleMatch } from './board-title-search';
+import { isVerifiedExactBoard } from '@/lib/board-exact-title';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.match !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +67,20 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const match = parseBoardTitleMatch(params.match, search.query);
+  const invalid = search.invalid || match.invalid;
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (match.mode === 'exact') query.set('match', 'exact');
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const source = invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; titleMatch?: string; titleQuery?: string }>(
+        `/api/v1/board/public/stock-posts${suffix}`, search.query ? 0 : 60,
+      );
+  const data = match.mode === 'exact' && source && !isVerifiedExactBoard(source, search.query!, stock)
+    ? null : source;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +139,14 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-title-match" className="grid gap-1 text-sm font-semibold">
+              제목 일치 방식
+              <select id="board-title-match" name="match" defaultValue={match.mode ?? 'partial'}
+                className="min-h-11 rounded-md border border-input bg-background px-3">
+                <option value="partial">포함</option>
+                <option value="exact">정확히 일치</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -147,9 +163,9 @@ export default async function BoardPage({
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
             최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? (
+          {invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
-              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+              검색어는 1~80자이며 정확히 일치 검색에는 검색어가 필요합니다. 제어문자와 꺾쇠괄호는 사용할 수 없습니다.
             </p>
           ) : null}
         </CardContent>
@@ -161,7 +177,7 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />

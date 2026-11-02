@@ -35,3 +35,24 @@ describe('Android public board title search parity', () => {
     expect(await response.json()).toEqual({ posts: [] });
   });
 });
+
+
+describe('Android exact-title provenance', () => {
+  it('rejects unverified exact responses instead of returning HTTP 200', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({posts: []}), {headers:{'content-type':'application/json'}})));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?q=WLD&match=exact', {headers:{host:'easy-scraping.com'}}), {params:Promise.resolve({path:['board','public','stock-posts']})});
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+  it('accepts a verified empty exact result and protects privacy', async () => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({posts: [], titleMatch:'exact',titleQuery:'WLD'}), {headers:{'content-type':'application/json','cache-control':'public, max-age=600'}})));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?q=WLD&match=exact', {headers:{host:'easy-scraping.com'}}), {params:Promise.resolve({path:['board','public','stock-posts']})});
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+  });
+});
