@@ -7,6 +7,7 @@ import { PublicFxController } from './fx.controller';
 import { FxService } from './fx.service';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 
 describe('public FX reference HTTP safety contract', () => {
   let app: INestApplication;
@@ -20,6 +21,7 @@ describe('public FX reference HTTP safety contract', () => {
     })
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
