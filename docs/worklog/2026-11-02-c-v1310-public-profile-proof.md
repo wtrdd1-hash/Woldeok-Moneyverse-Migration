@@ -16,3 +16,8 @@ Status: DRAFT / RELEASE HOLD. No main merge, official Test or Production change.
 ## Release discipline
 - Exact final SHA, full lint/test/contract/security/real PostgreSQL/E2E/CI evidence recorded in PR and execution logs as each gate finishes. Any unverified gate remains BLOCKED; no PR merge or deployment.
 - Other A/B/Gemini/QA branches and core recurring automations preserved. Worktree and draft PR retained pending review.
+
+## HTTP finding and repair (2026-11-02 22:02 KST)
+- An isolated Next.js server exposed `X-Robots-Tag: index, follow` on `/profile/:id`, `/en/profile/:id` and `/app-api/v1/profile/:id` despite route-level private policy. Global `next.config.ts` security headers overrode the route's response headers. The `/frontend-version` endpoint returned a timestamp, not the Git SHA, so it is **not** exact-SHA evidence.
+- Added eight explicit edge header rules for base/localized profile routes and Android/API gateway routes, with `noindex, nofollow`, `private, no-store`, and `no-referrer`. New TDD RED 8 failures; GREEN 16/16 security/header tests. Rebuild and real HTTP recheck required before release.
+- At the first committed candidate, frontend full suite 2,955 PASS, backend full suite 2,983 PASS / 518 SKIP, fresh PostgreSQL 17.11 323 migrations and 24 profile DB tests PASS, lint 0 errors/1,027 warnings, typecheck/build/184-endpoint contract PASS. Full dependency audit FAIL (8 moderate, 1 low); full-route QA ledger missing; authenticated E2E and official exact-SHA Test BLOCKED.

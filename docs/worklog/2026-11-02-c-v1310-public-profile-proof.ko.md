@@ -15,3 +15,8 @@
 ## 종료 조건
 - 최종 SHA 전체 테스트, 실제 PostgreSQL, CI, 공식 Test, E2E 증빙을 확인하기 전에는 성공·병합·운영 배포로 표시하지 않음.
 - 금융 원장·DB 스키마 변경 없음. A/B/Gemini/QA와 예약 5개 유지. 결과는 독립 브랜치와 Draft PR에 보존.
+
+## 실제 HTTP 결함 재현 및 보완 (2026-11-02 22:02 KST)
+- 독립 Next.js 서버에서 회원 프로필 기본·영어·Android API 경로의 `X-Robots-Tag: index, follow`를 확인. 전역 next.config 헤더가 페이지·API의 비색인 설정을 덮어쓴 원인임. `/frontend-version`은 Git SHA가 아닌 타임스탬프이므로 정확한 SHA 증빙이 아님.
+- 기본/다국어/Android/API 8개 경로에 비색인·비공개 캐시·참조정보 차단 규칙을 명시. 실패 재현 8건, 수정 후 헤더·보안 테스트 16/16 통과. 실제 HTTP 재검증 필요.
+- 최초 커밋 기준 프론트 2,955 PASS, 백엔드 2,983 PASS/518 SKIP, 독립 PostgreSQL 17.11 마이그레이션 323개 및 프로필 DB 24건 PASS. Lint 오류 0/경고 1,027, Typecheck·Build·API 계약 184개 PASS. 전체 의존성 감사 9건 및 QA 증빙 누락, 공식 인증 E2E·Test 정확 SHA는 배포 차단.
