@@ -15,3 +15,10 @@
 
 ## Finished
 - Pending validation and release decision.
+
+## In progress (RED→GREEN)
+- RED: Backend 2 failed / 2 passed; Next 5 failed / 1 passed on missing guard and BFF authority.
+- GREEN: Backend SEO guard tests 13/13 PASS; Next SEO route tests 24/24 PASS.
+- Current origin/main unchanged at a8541927c3a351d980454c66e95a3356c47e0722.
+- No external tweet sent; publisher mocked in tests.
+- Full gates pending.
