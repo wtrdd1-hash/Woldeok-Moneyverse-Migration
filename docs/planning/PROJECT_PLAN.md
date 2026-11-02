@@ -1,6 +1,6 @@
 ## v2026.11.02.1652 — F675-219 Verified Complete Support Conversation Pagination (FEATURE ADDITION / DRAFT / RELEASE HOLD)
 
-**Cycle and authority:** Previous Feature Improvement v1650 → Current Feature Addition v1652 → Next Feature Improvement v1654 (provisional). Latest origin/main a8541927c3a351d980454c66e95a3356c47e0722 checked at start and midpoint; AGENTS.md, README.md, English PROJECT_PLAN.md canonical, Korean parity. This is an unmerged docs-only proposal stacked on Draft PR #2473, issue #2477. Feature F675-219 is NOT IMPLEMENTED. Do not merge, deploy, modify money/holdings, or treat documentation CI as feature acceptance.
+**Cycle and authority:** Previous Feature Improvement v1650 → Current Feature Addition v1652 → Next Feature Improvement v1654 (provisional). Latest origin/main a8541927c3a351d980454c66e95a3356c47e0722 checked at start and midpoint; AGENTS.md, README.md, English PROJECT_PLAN.md canonical, Korean parity. This is an unmerged docs-only proposal stacked on Draft PR #2473, current Draft PR #2478 OPEN/HOLD, issue #2477. Feature F675-219 is NOT IMPLEMENTED. Do not merge, deploy, modify money/holdings, or treat documentation CI as feature acceptance.
 
 ### Problem, evidence and design tradeoffs
 
@@ -791,7 +791,7 @@
 - **P1 (6):** DIGEST1608-05 B/DB owner-only seven-day query and EXPLAIN/negative ACL; DIGEST1608-06 B/Nest strict GET DTO and fail-closed mismatch handling; DIGEST1608-07 A/Next status card/BFF and accessible truthful copy; DIGEST1608-08 C/Android exact-path privacy and session fencing; DIGEST1608-09 A/C privacy headers, admin aggregate KPI, a11y and analytics; DIGEST1608-10 QA real PG17, worker/retention/KST and cross-owner tests, exact-SHA edge and rollback.
 - **Release:** documentation DRAFT/HOLD; A/B/C/QA own separate branches, isolated test Docker, forward-only migrations and review. Gate: source exact SHA → full CI → official Test app/migrator exact SHA + real PG/API/web/Android acceptance → financial source reconciliation and independent restore → operator sign-off → OFF→staff→small cohort→broader rollout. Rollback switch OFF only; do not erase receipts or rewrite financial history. Main merge and Production promotion **NOT AUTHORIZED** by this planning. External independent reference new verified/deduplicated/classified **0**, cumulative **UNKNOWN / 10,000**, gate **BLOCKED / IN PROGRESS**.
 
-**Current planning:** v1652 F675-219 verified full support conversation pages / issue #2477 / Draft pending / RELEASE HOLD; stacked on #2473.
+**Current planning:** v1652 F675-219 verified full support conversation pages / issue #2477 / Draft #2478 OPEN/HOLD / RELEASE HOLD; stacked on #2473.
 
 ## v2026.11.01.1606 — F675-207 Missing-Row, Claim-Day and Idempotency Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 
