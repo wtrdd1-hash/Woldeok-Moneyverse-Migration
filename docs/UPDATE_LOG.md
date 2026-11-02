@@ -1,3 +1,7 @@
+## 2026-11-03 v1676 — Administrator-only support follow-up reminders (planning only)
+- Feature Addition F675-225: private per-operator Set/Reschedule/Clear reminders and due/upcoming list, 20 active cap, strong revision CAS, immutable no-op/replay receipts, DB-time due classification, role-revoke serialization and erasure/privacy. NOT IMPLEMENTED; stacked Draft #2555, issue #2558.
+- Remote main f5c3fbedae1c3b3ec2374882b049aac43a655eb4; QA v1477 FAILED/P0, root disk 96%/4.1GB free, Production public 305d7c7... and Test 0c70a114... are not image proof. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs-only; no runtime/DB/finance/deployment changes.
+
 ## 2026-11-03 v1674 — Related-case replay, principal and erasure integrity (planning only)
 - F675-224 improvement: immutable receipts for no-op links, strong revision CAS for both link/unlink, Idempotency-Key and If-Match headers instead of DELETE JSON, role UUID trust-boundary correction, owner-change/erasure plan, partial recent-20 candidate semantics. Still NOT IMPLEMENTED; stacked on Draft #2549, handoff #2548.
 - Remote main f5c3fbedae1c3b3ec2374882b049aac43a655eb4; QA v1476 FAILED/P0; root disk 95%/5.6G free; public Test 0c70a114... and Production 305d7c7... not runtime image proof. P0 4/P1 6, Production RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs only; no runtime/DB/financial/deployment changes.
