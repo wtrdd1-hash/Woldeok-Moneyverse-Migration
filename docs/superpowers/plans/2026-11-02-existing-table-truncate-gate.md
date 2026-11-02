@@ -27,5 +27,6 @@
 
 ## Task 2 — Release integration and verification
 - [x] Add test to root test runner and document required operator gate.
-- [x] Run lint, typecheck and root unit suites; full build and CI pending.
+- [x] Run lint, typecheck, root unit suites, separate backend/frontend builds and production audit.
+- [ ] Full remote runtime CI and exact-SHA Test remain pending/BLOCKED.
 - [ ] Preserve PR as Draft/HOLD if any release prerequisite is unverified.
