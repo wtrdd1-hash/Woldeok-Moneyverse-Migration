@@ -48,7 +48,7 @@ describe('AI news HTTP database error privacy', () => {
   }
 
   it('does not expose raw SQL or connection details through serialized HTTP errors', async () => {
-    const secret = 'postgres://admin:secret@internal-db.example/users';
+    const secret = 'private-row=member-123; db-host=internal-db.local';
     publish.mockRejectedValueOnce(pgFailure('23505', `constraint failure ${secret}`));
     const response = await postPublish();
     expect(response.status).toBe(400);

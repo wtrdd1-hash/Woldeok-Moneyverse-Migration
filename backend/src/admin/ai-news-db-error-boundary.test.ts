@@ -27,7 +27,7 @@ async function rejectedPublication(error: Error): Promise<BadRequestException> {
 
 describe('AI news database error privacy boundary', () => {
   it('does not serialize raw PostgreSQL messages or secret-bearing details for expected command failures', async () => {
-    const secret = 'postgres://admin:secret@private-db.example/users';
+    const secret = 'private-row=member-123; db-host=internal-db.local';
     const error = await rejectedPublication(pgFailure('P0001', `invalid command: ${secret}`));
     expect(error.getStatus()).toBe(400);
     expect(error.getResponse()).toMatchObject({
