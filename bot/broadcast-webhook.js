@@ -26,16 +26,23 @@ function parsePayload(body) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('invalid broadcast body');
   const { title, description = '', fields = [], color = 0x10b981, notifyAdminDm = false } = value;
   if (typeof title !== 'string' || title.trim().length < 1 || title.length > 256
+      || /[\u0000-\u001f\u007f]/.test(title)
       || typeof description !== 'string' || description.length > 4096
+      || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(description)
       || !Array.isArray(fields) || fields.length > 25
       || !Number.isInteger(color) || color < 0 || color > 0xffffff
       || typeof notifyAdminDm !== 'boolean') throw Error('invalid broadcast fields');
   if (!fields.every(f => f && typeof f === 'object' && !Array.isArray(f)
-      && typeof f.name === 'string' && f.name.length > 0 && f.name.length <= 256
-      && typeof f.value === 'string' && f.value.length > 0 && f.value.length <= 1024
+      && typeof f.name === 'string' && f.name.trim().length > 0 && f.name.length <= 256
+      && !/[\u0000-\u001f\u007f]/.test(f.name)
+      && typeof f.value === 'string' && f.value.trim().length > 0 && f.value.length <= 1024
+      && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(f.value)
       && (f.inline === undefined || typeof f.inline === 'boolean'))) {
     throw Error('invalid broadcast field');
   }
+  const totalEmbedText = title.length + description.length
+    + fields.reduce((total, field) => total + field.name.length + field.value.length, 0);
+  if (totalEmbedText > 6000) throw Error('Discord embed exceeds total character limit');
   return { title, description, fields: fields.map(f => ({
     name: f.name, value: f.value, inline: f.inline ?? true,
   })), color, notifyAdminDm };

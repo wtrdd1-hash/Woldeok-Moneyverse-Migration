@@ -39,7 +39,7 @@ test('missing, wrong, short, or duplicated secret cannot dispatch', async () => 
 test('rejects oversized, invalid JSON, and unbounded Discord embeds before dispatch', async () => {
   let sent = 0;
   await withServer({ secret: SECRET, sendChannel: async () => { sent++; return true; } }, async url => {
-    for (const payload of ['{invalid', { ...valid, description: 'x'.repeat(17000) }, { ...valid, fields: Array.from({length: 26}, (_, i) => ({name: 'N' + i, value: 'V'})) }, { ...valid, color: -1 }]) {
+    for (const payload of ['{invalid', { ...valid, description: 'x'.repeat(17000) }, { ...valid, fields: Array.from({length: 26}, (_, i) => ({name: 'N' + i, value: 'V'})) }, { ...valid, fields: Array.from({length: 8}, (_, i) => ({name: 'N' + i, value: 'V'.repeat(800)})) }, { ...valid, title: 'Invalid\nTitle' }, { ...valid, color: -1 }]) {
       const response = await post(url, payload);
       assert.ok([400, 413].includes(response.status), String(response.status));
     }
