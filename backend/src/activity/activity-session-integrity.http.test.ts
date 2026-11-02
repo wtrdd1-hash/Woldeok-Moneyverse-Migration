@@ -21,7 +21,7 @@ describe('POST /activity/events session provenance HTTP contract', () => {
   it('returns a source-unverified 503 and does not record anonymous telemetry when a session lookup fails', async () => {
     const recordEvents = vi.fn().mockResolvedValue({ recorded: 1 });
     const get = vi.fn().mockRejectedValue(new Error('database temporarily unavailable'));
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [ActivityController],
       providers: [
         { provide: ActivityService, useValue: { recordEvents } },
@@ -35,7 +35,7 @@ describe('POST /activity/events session provenance HTTP contract', () => {
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     await app.listen(0, '127.0.0.1');
     const url = `${await app.getUrl()}/activity/events`;
     const response = await fetch(url, {
