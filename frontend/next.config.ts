@@ -197,6 +197,16 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // A private portfolio must not inherit the site-wide public SEO header.
+      // Localized rewrites keep their original URL, so both URL shapes need the override.
+      ...['/stocks/portfolio', '/:locale/stocks/portfolio'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
     ];
   },
 
