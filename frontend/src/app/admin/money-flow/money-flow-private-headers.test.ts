@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import config from '../../../../next.config';
 
-const routes = ['/admin/money-flow', ...['ko', 'en', 'ja', 'zh-CN', 'vi'].map((locale) => `/${locale}/admin/money-flow`)];
+const routes = ['/admin/money-flow', ...['ko', 'en', 'ja', 'zh', 'vi'].map((locale) => `/${locale}/admin/money-flow`)];
 
 describe('administrator money-flow privacy at the HTTP edge', () => {
   it.each(routes)('enforces private no-store, noindex and no-referrer on %s', async (route) => {

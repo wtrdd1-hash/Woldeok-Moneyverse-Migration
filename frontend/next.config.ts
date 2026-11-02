@@ -199,7 +199,7 @@ const config: NextConfig = {
       ] },
       // The authenticated administrator ledger includes member identities and
       // must never inherit public SEO or intermediary cache defaults.
-      ...['/admin/money-flow', ...['ko', 'en', 'ja', 'zh-CN', 'vi'].map((locale) => `/${locale}/admin/money-flow`)].map((source) => ({
+      ...['/admin/money-flow', ...['ko', 'en', 'ja', 'zh', 'vi'].map((locale) => `/${locale}/admin/money-flow`)].map((source) => ({
         source,
         headers: [
           { key: 'x-robots-tag', value: 'noindex, nofollow' },
