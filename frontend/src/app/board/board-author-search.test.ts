@@ -14,12 +14,12 @@ describe('public author discovery', () => {
   );
   it('requires source evidence even when posts are empty', () => {
     expect(verifiedBoardAuthorResults({ posts: [] }, '홍')).toBe(false);
-    expect(verifiedBoardAuthorResults({ posts: [], authorFilterApplied: '홍', sourceWindow: 50 }, '홍')).toBe(true);
+    expect(verifiedBoardAuthorResults({ posts: [], authorFilter: '홍', sourceWindow: 50 }, '홍')).toBe(true);
   });
   it('rejects mismatched authors, duplicate IDs and malformed records', () => {
     const item = { postId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', authorName: '홍길동',
       title: '안내', createdAt: '2026-11-02T10:00:00.000Z', commentCount: 0 };
-    const envelope = { authorFilterApplied: '홍', sourceWindow: 50 };
+    const envelope = { authorFilter: '홍', sourceWindow: 50 };
     expect(verifiedBoardAuthorResults({ ...envelope, posts: [item] }, '홍')).toBe(true);
     expect(verifiedBoardAuthorResults({ ...envelope, posts: [{ ...item, authorName: '김' }] }, '홍')).toBe(false);
     expect(verifiedBoardAuthorResults({ ...envelope, posts: [item, { ...item, postId: item.postId.toUpperCase() }] }, '홍')).toBe(false);

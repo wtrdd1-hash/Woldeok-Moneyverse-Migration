@@ -24,7 +24,7 @@ describe('public author discovery HTTP boundary', () => {
     const res = await request(app.getHttpServer())
       .get('/board/public/stock-posts?author=%20%ED%99%8D%20&q=%20hello%20')
       .expect(200);
-    expect(res.body).toEqual({ posts: [], authorFilterApplied: '홍', sourceWindow: 50 });
+    expect(res.body).toEqual({ posts: [], authorFilter: '홍', sourceWindow: 50 });
     expect(list).toHaveBeenCalledWith(undefined, ' hello ', '홍');
   });
   it('preserves the legacy default response', async () => {

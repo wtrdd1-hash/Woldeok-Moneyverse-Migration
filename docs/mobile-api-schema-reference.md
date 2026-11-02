@@ -1930,7 +1930,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
-| authorFilterApplied | false | string |  |
+| authorFilter | false | string |  |
 | sourceWindow | false | number |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |

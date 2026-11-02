@@ -123,6 +123,6 @@ export class PublicStockCommunityController {
     const posts = normalizedAuthor === undefined
       ? await this.community.publicList(stock as string | undefined, q as string | undefined)
       : await this.community.publicList(stock as string | undefined, q as string | undefined, normalizedAuthor);
-    return { posts, ...(normalizedAuthor === undefined ? {} : { authorFilterApplied: normalizedAuthor, sourceWindow: 50 }) };
+    return { posts, ...(normalizedAuthor === undefined ? {} : { authorFilter: normalizedAuthor, sourceWindow: 50 }) };
   }
 }

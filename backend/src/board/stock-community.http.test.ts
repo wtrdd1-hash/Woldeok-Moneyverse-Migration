@@ -28,7 +28,7 @@ describe('public board author filter contract', () => {
   it('returns explicit source evidence even for verified-empty results', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ author: '  홍길동  ', q: 'news' })).resolves.toEqual({
-      posts: [], authorFilterApplied: '홍길동', sourceWindow: 50,
+      posts: [], authorFilter: '홍길동', sourceWindow: 50,
     });
     expect(community.publicList).toHaveBeenCalledWith(undefined, 'news', '홍길동');
   });

@@ -75,7 +75,7 @@ export default async function BoardPage({
   const suffix = query.size ? `?${query.toString()}` : '';
   const fetched = search.invalid || author.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[]; authorFilterApplied?: string; sourceWindow?: number }>(
+    : await publicApi<{ posts: PostSummary[]; authorFilter?: string; sourceWindow?: number }>(
         `/api/v1/board/public/stock-posts${suffix}`, author.query ? 0 : 60);
   const data = author.query && fetched && !verifiedBoardAuthorResults(fetched, author.query) ? null : fetched;
 

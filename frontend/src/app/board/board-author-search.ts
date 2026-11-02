@@ -13,7 +13,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 export function verifiedBoardAuthorResults(payload: unknown, author: string): boolean {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
   const result = payload as Record<string, unknown>;
-  if (result.authorFilterApplied !== author || result.sourceWindow !== 50 || !Array.isArray(result.posts) || result.posts.length > 50) return false;
+  if (result.authorFilter !== author || result.sourceWindow !== 50 || !Array.isArray(result.posts) || result.posts.length > 50) return false;
   const ids = new Set<string>();
   for (const post of result.posts) {
     if (!post || typeof post !== 'object' || Array.isArray(post)) return false;

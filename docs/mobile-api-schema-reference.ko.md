@@ -1930,7 +1930,7 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
-| authorFilterApplied | false | string |  |
+| authorFilter | false | string |  |
 | sourceWindow | false | number |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |

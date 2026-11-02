@@ -5192,7 +5192,7 @@
       "responseSchema": {
         "type": "object",
         "properties": {
-          "authorFilterApplied": {
+          "authorFilter": {
             "type": "string"
           },
           "sourceWindow": {
