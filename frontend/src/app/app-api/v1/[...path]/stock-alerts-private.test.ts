@@ -37,6 +37,18 @@ describe('Android conditional alerts source privacy', () => {
     const res = await GET(req(''), ctx('stocks', 'alerts'));
     expect(res.status).toBe(503); privateHeaders(res);
   });
+  it('rejects malformed JSON, non-JSON success and empty 204 as unverified', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    for (const upstream of [
+      new Response('{bad', { headers: { 'content-type': 'application/json' } }),
+      new Response('ok', { headers: { 'content-type': 'text/plain' } }),
+      new Response(null, { status: 204 }),
+    ]) {
+      vi.stubGlobal('fetch', vi.fn(async () => upstream.clone()));
+      const res = await GET(req(''), ctx('stocks', 'alerts'));
+      expect(res.status).toBe(503); privateHeaders(res);
+    }
+  });
   it('keeps error and HEAD responses private', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ message: 'no session' }), {
