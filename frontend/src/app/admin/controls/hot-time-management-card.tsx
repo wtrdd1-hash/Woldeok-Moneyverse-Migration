@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Flame } from 'lucide-react';
-import { parseHotTimeEvidence } from '@/lib/hot-time-evidence';
+import { parseCurrentHotTimeEvidence } from '@/lib/hot-time-evidence';
 import type { HotTimePayload } from '@/components/live-hot-time-banner';
 
 type State = { readonly status: 'loading' | 'unavailable' } | { readonly status: 'ready'; readonly data: HotTimePayload };
@@ -25,7 +25,7 @@ export function HotTimeManagementCard() {
         signal: controller.signal,
       });
       if (!response.ok) throw new Error('hot-time API unavailable');
-      const data = parseHotTimeEvidence(await response.json() as unknown);
+      const data = parseCurrentHotTimeEvidence(await response.json() as unknown);
       if (!data) throw new Error('invalid hot-time API evidence');
       if (!controller.signal.aborted) setState({ status: 'ready', data });
     } catch {
@@ -35,7 +35,15 @@ export function HotTimeManagementCard() {
 
   useEffect(() => {
     void refresh();
-    return () => request.current?.abort();
+    // A previously verified snapshot expires while the administrator keeps the tab open.
+    const timer = window.setInterval(() => void refresh(), 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void refresh(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+      request.current?.abort();
+    };
   }, [refresh]);
 
   return (

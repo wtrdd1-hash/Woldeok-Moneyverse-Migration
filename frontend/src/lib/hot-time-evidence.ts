@@ -22,3 +22,16 @@ export function parseHotTimeEvidence(value: unknown): HotTimePayload | null {
   if (value.hasActiveHotTime !== (buffs.length > 0)) return null;
   return { activeBuffs: buffs, hasActiveHotTime: value.hasActiveHotTime, serverTime: value.serverTime };
 }
+
+
+/** A well-formed historical snapshot is not evidence of a live economic bonus. */
+export function parseCurrentHotTimeEvidence(value: unknown, nowMs = Date.now()): HotTimePayload | null {
+  const parsed = parseHotTimeEvidence(value);
+  if (!parsed || !Number.isFinite(nowMs)) return null;
+  const ageMs = nowMs - Date.parse(parsed.serverTime);
+  // Bound both transport/cache delay and clock skew; do not claim a live bonus
+  // from an old response merely because its end timestamp is in the future.
+  if (ageMs > 120_000 || ageMs < -30_000) return null;
+  if (parsed.activeBuffs.some((buff) => Date.parse(buff.startsAt) > nowMs || Date.parse(buff.endsAt) <= nowMs)) return null;
+  return parsed;
+}
