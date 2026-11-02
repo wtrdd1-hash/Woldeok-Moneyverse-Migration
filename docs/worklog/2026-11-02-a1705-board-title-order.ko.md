@@ -13,5 +13,7 @@
 - Android 184개 엔드포인트 계약 생성. main SHA 재확인 후 전체 게이트·실제 DB·CI·격리 Test 검증 대기.
 
 
-## 작업 종료 — v2
-검증 전. 본 문서는 통합 또는 배포 승인이 아님.
+## 작업 종료 — v2 / 코드 구현, 배포 보류
+- Frontend 전체 2,932 PASS, Backend 2,981 PASS/2 FAIL/518 SKIP(기존 인증 문제), DB 62 PASS/5 SKIP, 계약 41 PASS, 정책 27 PASS. 타입검사 PASS, lint 오류 0/경고 1,027. 1,024 MiB 빌드 OOM 후 2,048 MiB 재실행 PASS.
+- 전체 의존성 감사 9건 FAIL, 전체 경로 QA 증거 부재, 개발 DB 과도한 권한, 공식 Test SHA 불일치 6건 및 Treasury HTTP 200. 인증 E2E·독립 복원·GitOps 차단.
+- 시작 원격 브랜치 242개/PR 224개, 종료 244개/225개, 충돌 29개, 삭제 0개. PR #2494 Draft/HOLD, main·Test·Production 변경 없음. QA 및 릴리스 문서 참조.

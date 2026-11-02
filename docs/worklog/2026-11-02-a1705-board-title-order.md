@@ -15,5 +15,7 @@
 - Midpoint `origin/main` still `a8541927c3a351d980454c66e95a3356c47e0722`; other A/B/C/QA changes remain separate. Final gates, real PostgreSQL, Test and CI are pending.
 
 
-## FINISHED — v2
-Pending verification; do not interpret this draft as successful development or authorization to merge/release.
+## FINISHED — v2 / implementation code complete; release HOLD
+- Full evidence: Frontend 2,932 PASS; Backend 2,981 PASS / 2 FAIL / 518 SKIP (pre-existing profile auth); Database 62 PASS / 5 SKIP; Contract 41 PASS; policy 27 PASS; typecheck PASS; lint 0 errors/1,027 warnings. First build OOM with 1,024 MiB heap, retry Frontend PASS with 2,048 MiB. Full dependency audit 9 findings/FAIL; production-only audit PASS; full-route QA ledger missing/BLOCKED.
+- Real DEV PostgreSQL READ ONLY/ROLLBACK: public function executable, one public post, SQL and synthetic C order PASS; P0 direct DML rights persist. Test exact-SHA preflight six mismatches and Treasury HTTP 200; authenticated E2E, independent restore, GitOps and rollback provenance BLOCKED.
+- Branch audit: start 242 live heads/224 open PRs; end 244/225, 29 conflicts, 0 deletions. Merge-tree conflicts with previous A drafts; protect all unique unmerged changes. Main unchanged. Draft PR #2494; no main merge, Test/Production deploy, DB mutation, restart or rollback. See QA and release HOLD docs. Final PR SHA is recorded in evidence and PR.
