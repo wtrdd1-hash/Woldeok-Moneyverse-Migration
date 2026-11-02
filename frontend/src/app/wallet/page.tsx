@@ -84,7 +84,7 @@ export default async function WalletPage() {
             description={<T korean="잔액을 검증할 수 없습니다. 잠시 후 다시 확인해 주세요." english="Balance verification is unavailable. Please try again." />}
           >
             <Button asChild variant="outline" className="min-h-11">
-              <Link href="/wallet">다시 조회</Link>
+              <Link href="/wallet"><T korean="다시 조회" english="Retry" /></Link>
             </Button>
           </EmptyState>
         </div>

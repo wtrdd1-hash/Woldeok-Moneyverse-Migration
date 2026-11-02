@@ -33,6 +33,6 @@
 - [x] Wire parser and accessible retry link, run GREEN.
 
 ### Task 3: Verification and release hold
-- [ ] Execute required gates at exact HEAD and record failures/skips.
-- [ ] Fetch latest main and plans, update EN/KO worklogs and PR.
-- [ ] Do not merge/deploy without all required gates.
+- [x] Execute required gates at exact HEAD and record failures/skips.
+- [x] Fetch latest main and plans, update EN/KO worklogs and PR.
+- [x] Do not merge/deploy without all required gates.

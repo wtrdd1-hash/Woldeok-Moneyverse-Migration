@@ -13,5 +13,12 @@
 - 필수 전체 검증 및 공식 Test 인증 E2E 미완료로 병합·배포 보류.
 
 
-## 종료
-대기.
+## 종료 — 2026-11-02 11:59 KST — PARTIAL / RELEASE BLOCKED
+- 회원 지갑 응답의 WLD 정수, 현금·은행 합계, 거래 항목, 날짜·UUID 검증. 정상 0 WLD와 조회 실패 구분. 44px 재조회 버튼과 한·영 접근성 문구 적용.
+- 독립 Next HTTP에서 지갑 기본/상세 및 영어·한국어 경로 모두 `private, no-store`, `noindex, nofollow`, `no-referrer` 확인. 인증 E2E 증빙은 아님.
+- 초기 후보 SHA `1f19c79a37d7ea187c8ad3b73144ce9481d739e1`: 집중 25건, Frontend 2947건, Backend 2980건(518건 SKIP), 계약 41건, DB 패키지 62건(5건 SKIP), app-api 184 엔드포인트, 보안 17건, 정책 25건, 전체 Build·Lint·Typecheck 통과.
+- 독립 PostgreSQL 17.11 마이그레이션 322/322, 지갑 DB 테스트 12건 통과·6건 SKIP. DB 직접 금융 INSERT 및 회원 테이블 SELECT 권한 차단. 컨테이너 제거.
+- 봇 테스트는 독립 작업 폴더의 의존성 링크 누락으로 처음 실패했으나 환경을 수정해 11건 통과. 코드 변경 없음.
+- 운영 차단: Backend production-mode 프로필 HTTP 테스트 2건 실패(예상 200, 실제 401), 전체 의존성 취약점 9건, 전체 경로 QA 증빙 파일 누락, 인증 브라우저·Android E2E 및 공식 Test 정확한 SHA 검증 미완료.
+- Test/Production 공개 프론트 버전은 `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`으로 후보와 다름. 최신 main `a8541927c3a351d980454c66e95a3356c47e0722` 재확인. 병합·Test/운영배포·GitOps 변경 없음, 롤백 불필요. 다른 작업/핵심 예약 5개 변경 없음.
+- 최종 HEAD SHA와 검증 증빙은 Draft PR #2465 및 외부 증빙 디렉터리에 기록. 미통합 고유 변경 보존.

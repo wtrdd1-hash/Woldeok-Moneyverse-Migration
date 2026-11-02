@@ -5,7 +5,7 @@ import WalletPage from './page';
 
 vi.mock('@/lib/api', () => ({ apiOrNull: vi.fn() }));
 vi.mock('@/lib/session', () => ({ requireMember: vi.fn().mockResolvedValue({ userId: '123e4567-e89b-42d3-a456-426614174000' }) }));
-vi.mock('@/components/translated-text', () => ({ TranslatedText: ({ korean }: { korean: string }) => <span>{korean}</span> }));
+vi.mock('@/components/translated-text', () => ({ TranslatedText: ({ korean, english }: { korean: string; english?: string }) => <span data-en={english}>{korean}</span> }));
 
 describe('authenticated wallet overview unavailable-state integration', () => {
   beforeEach(() => vi.mocked(apiOrNull).mockReset());
@@ -21,6 +21,7 @@ describe('authenticated wallet overview unavailable-state integration', () => {
     const html = renderToStaticMarkup(await WalletPage());
     expect(html).toContain('지금은 지갑을 불러올 수 없어요');
     expect(html).toContain('다시 조회');
+    expect(html).toContain('data-en="Retry"');
     expect(html).toContain('href="/wallet"');
     expect(html).not.toContain('내 가상 자산 총액');
     expect(html).not.toContain('not-a-balance');
