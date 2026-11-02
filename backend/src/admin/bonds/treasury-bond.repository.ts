@@ -4,6 +4,7 @@ import { PG_POOL } from '../../core/pool.provider';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
+import { BOND_POLICY_WRITE_HOLD_REASON } from './bond-policy-write-hold';
 
 export interface TreasuryBondRow {
   id: string;
@@ -277,16 +278,8 @@ export class TreasuryBondRepository {
     // economy_post_transaction postings and could replay coupons each invocation.
     throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
   }
-  async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number): Promise<boolean> {
-    const params: (string | number)[] = [status, bondId];
-    let query = `UPDATE public.treasury_bonds SET status = $1, updated_at = now()`;
-    if (typeof annualCouponRateBps === 'number') {
-      const hourlyBps = Math.max(1, Math.round((annualCouponRateBps / 365 / 24) * 100));
-      query += `, annual_coupon_rate_bps = $3, hourly_coupon_rate_bps = $4`;
-      params.push(annualCouponRateBps, hourlyBps);
-    }
-    query += ` WHERE id = $2`;
-    const res = await this.pool.query(query, params);
-    return (res.rowCount ?? 0) > 0;
+  async updateBondStatus(_bondId: string, _status: string, _annualCouponRateBps?: number): Promise<never> {
+    // Direct UPDATE would bypass the DB-owned policy authorization and durable audit receipt.
+    throw new ServiceUnavailableException(BOND_POLICY_WRITE_HOLD_REASON);
   }
 }

@@ -24,7 +24,7 @@ describe('admin bond policy write safety', () => {
   const listBonds = vi.fn().mockResolvedValue([]);
   let app: INestApplication;
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       controllers: [AdminTreasuryBondController],
       providers: [
         TreasuryBondService,
@@ -40,7 +40,7 @@ describe('admin bond policy write safety', () => {
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
       .compile();
-    app = module.createNestApplication();
+    app = testingModule.createNestApplication();
     app.use((req: RequestWithSession, _res: unknown, next: () => void) => {
       req.session = { id: 's1', user_id: 'admin-1' } as RequestWithSession['session'];
       next();
