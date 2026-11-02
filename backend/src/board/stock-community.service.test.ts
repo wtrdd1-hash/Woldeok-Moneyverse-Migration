@@ -52,3 +52,22 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('StockCommunityService bounded discussion ordering', () => {
+  it('sorts only the most recent 50 public rows by verified comment count and stable ties', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(undefined, undefined, 'discussed');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('comment_count');
+    expect(String(sql)).toContain('ORDER BY');
+    expect(String(sql)).toContain('post_id');
+    expect(values).toEqual([50, null, null, 'discussed']);
+  });
+
+  it('rejects invalid sort before touching PostgreSQL', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'popular' as 'discussed')).rejects.toThrow('invalid board sort');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});

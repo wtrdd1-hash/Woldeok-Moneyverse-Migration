@@ -14,10 +14,10 @@ Global constraints: no migration/grant/ledger mutation/new endpoint; default rec
 Review focus: empty results missing proof -> 503; equal counts deterministic tie-break; invalid/duplicate sort -> 400; existing filters preserved; Android strict row validation.
 
 ### Task 1 Backend
-- [ ] Write failing controller/service tests; RED; implement parameterized SQL and proof; GREEN.
+- [x] Write failing controller/service tests; RED; implement parameterized SQL and proof; GREEN.
 ### Task 2 Web
-- [ ] Write failing parser tests; RED; implement accessible SSR select/noindex; GREEN.
+- [x] Write failing parser tests; RED; implement accessible SSR select/noindex; GREEN.
 ### Task 3 Android
-- [ ] Write failing gateway tests; RED; implement fail-closed proof, no-store/noindex; GREEN.
+- [x] Write failing gateway tests; RED; implement fail-closed proof, no-store/noindex; GREEN.
 ### Task 4 Integration
 - [ ] Fetch main again; full tests/build/lint/typecheck/contract/security/DB; audit branches/PR/CI; official exact-SHA Test if eligible; log HOLD/PASS and rollback; push draft PR.

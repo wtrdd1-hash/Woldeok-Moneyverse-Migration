@@ -13,3 +13,10 @@
 - [ ] Tests RED then GREEN, full validation and cross-branch conflict audit.
 ## Finished
 - Pending.
+
+### Midpoint checkpoint (2026-11-02 14:27 KST)
+- Re-read AGENTS.md, README.md, English/Korean living plans, QA/worklogs and current PR list; main still a8541927c3a351d980454c66e95a3356c47e0722.
+- TDD RED: backend 3 FAIL/19 PASS, frontend 7 FAIL (see evidence/red-*.log).
+- TDD GREEN: backend 22 PASS, frontend 14 PASS; targeted ESLint exit 0; full workspace typecheck exit 0.
+- Backend SQL ranks only the bounded existing SECURITY DEFINER function result; no migration or grants. Web/Android require sortApplied proof; invalid/duplicate sort fails closed.
+- GitHub checkpoint pushed before full gates; no merge or deployment attempted.
