@@ -1,5 +1,12 @@
 # Current Runtime Baseline
 
+## 2026-11-02 v1622 — latest independently verified Production runtime
+- **Production public** `https://easy-scraping.com`: backend `moneyverse-release-v1622-backend.service` on `127.0.0.1:4194` and frontend `moneyverse-release-v1622-frontend.service` on `127.0.0.1:4195`; immutable release `/srv/moneyverse-data/releases/prod-v2026.11.02.1622-6fe94aeeebbd`, application SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`. Nginx Production-only reverse proxy reloaded with zero downtime. Previous v1619 services on 4184/4185 remain active for rollback.
+- Official Test remains on 3100/3101 with merged-main SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`. Both Test and Production exact-runtime identity checks: `ok:true,failures:[]`. Later documentation-only main commit `666d1b40...` does NOT change the deployed application SHA.
+- Actual Production PostgreSQL 17.11 on host port 5433 / `woldeok_moneyverse_dev` has new forward SQL324 actor-scoped SOE dividend history read; old dividend rows 744 and Treasury events 552 intact, 1,899 authentication sessions at verification. Current fiscal Treasury 0 WLD proof remains 200. Historical payout, issuance and 552/744 provenance not certified, monetary holds remain.
+- [Audited operations EN](worklog/2026-11-02-soe-prod-cutover-v1622.md) / [KO](worklog/2026-11-02-soe-prod-cutover-v1622.ko.md). Authenticated mobile admin DOM E2E not independently observed. Older runtime sections below are historical snapshots, not current deployment authorities.
+
+
 ## 2026-10-31 v1550 — latest observed live deployment
 - Production public https://easy-scraping.com runs immutable prod-v2026.10.31.1550-bc8cd8a6c654, applicationSourceSha bc8cd8a6c654af0336f550643f23049a58ee1d16. Nginx routes Production API/backend to 127.0.0.1:4164 (moneyverse-release-v1550-backend.service) and frontend to 127.0.0.1:4165 (moneyverse-release-v1550-frontend.service). Both services are enabled for boot.
 - Public backend /api/version and frontend /frontend-version match SHA. Host verify-host-runtime-identity --channel prod passed with no failures. Official Test independently serves matching SHA on 3100/3101 and passed its identity check.
