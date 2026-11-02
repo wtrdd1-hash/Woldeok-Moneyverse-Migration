@@ -15,6 +15,10 @@ vi.mock('@/lib/viewer', () => ({ currentViewer: vi.fn().mockResolvedValue({}), i
 vi.mock('next/navigation', () => ({ redirect }));
 vi.mock('./chat-view', () => ({ ChatView: () => <div data-testid="verified-inbox" /> }));
 vi.mock('./compose-message-dialog', () => ({ ComposeMessageDialog: () => null }));
+vi.mock('./peer-conversation-start', () => ({
+  PeerConversationStart: ({ peerUserId }: { peerUserId: string }) =>
+    <div data-testid="peer-start" data-peer={peerUserId}>대화방 열기</div>,
+}));
 
 import ChatPage from './page';
 
@@ -63,10 +67,31 @@ describe('chat page read-integrity boundary', () => {
     expect(html).not.toContain('data-testid="verified-inbox"');
   });
 
-  it('redirects only after a verified peer open receipt', async () => {
-    apiOrNull.mockResolvedValue({ conversations: [] });
-    mutate.mockResolvedValue({ conversation_id: conversationId });
-    await expect(render({ peer: peerId })).rejects.toThrow('NEXT_REDIRECT');
-    expect(redirect).toHaveBeenCalledWith(`/chat?conversationId=${conversationId}`);
+  it('never opens a conversation from a GET link, but offers an explicit accessible compose action', async () => {
+    apiOrNull.mockResolvedValue({ conversations: [], totalUnread: '0' });
+    const html = await render({ peer: peerId });
+    expect(mutate).not.toHaveBeenCalled();
+    expect(html).toContain('data-testid="peer-start"');
+    expect(html).toContain(`data-peer="${peerId}"`);
+    expect(html).toContain('대화방 열기');
+    expect(html).toContain('직접 대화방 열기를 누르기 전에는 대화방을 만들지 않습니다');
+    expect(mutate).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('does not offer an unverified recipient from an invalid peer query', async () => {
+    apiOrNull.mockResolvedValue({ conversations: [], totalUnread: '0' });
+    const html = await render({ peer: 'invalid-recipient' });
+    expect(html).not.toContain('data-testid="peer-start"');
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it('reuses an existing verified conversation without creating a duplicate', async () => {
+    apiOrNull.mockResolvedValueOnce({ conversations: [conversation], totalUnread: '0' })
+      .mockResolvedValueOnce({ messages: [] });
+    const html = await render({ peer: peerId });
+    expect(html).toContain('data-testid="verified-inbox"');
+    expect(html).not.toContain('data-testid="peer-start"');
+    expect(mutate).not.toHaveBeenCalled();
   });
 });
