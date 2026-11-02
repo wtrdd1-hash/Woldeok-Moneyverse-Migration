@@ -1,0 +1,21 @@
+[Unit]
+Description=Moneyverse verified-blog-only frontend v1625 (isolated 4207)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+WorkingDirectory=/srv/moneyverse-data/releases/prod-v2026.11.02.1624-305d7c7fec2e/frontend
+EnvironmentFile=/home/debian/Woldeok-Moneyverse-Migration/frontend/.env.local
+EnvironmentFile=/etc/moneyverse/blog-v1418-final-front.env
+EnvironmentFile=/etc/moneyverse/blog-v1625-verified-front.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node .next/standalone/frontend/server.js
+Restart=on-failure
+RestartSec=4
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
