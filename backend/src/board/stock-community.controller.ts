@@ -122,6 +122,6 @@ export class PublicStockCommunityController {
     const posts = sort === undefined
       ? await this.community.publicList(stock as string | undefined, q as string | undefined)
       : await this.community.publicList(stock as string | undefined, q as string | undefined, sort);
-    return sort === 'stock' ? { posts, sortApplied: 'stock' as const } : { posts };
+    return { posts, sortApplied: sort === 'stock' ? 'stock' : 'recent' };
   }
 }

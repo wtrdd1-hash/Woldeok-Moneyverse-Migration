@@ -5282,10 +5282,14 @@
                 "title"
               ]
             }
+          },
+          "sortApplied": {
+            "type": "string"
           }
         },
         "required": [
-          "posts"
+          "posts",
+          "sortApplied"
         ]
       },
       "responseCompatibility": {
