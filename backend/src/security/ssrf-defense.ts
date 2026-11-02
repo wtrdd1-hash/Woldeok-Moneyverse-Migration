@@ -19,8 +19,8 @@ function isPrivateIPv4(ip: string): boolean {
     return true; // Invalid format treated as unsafe
   }
 
-  const [a, b] = parts;
-  if (a === undefined || b === undefined) return true;
+  const [a, b, c] = parts;
+  if (a === undefined || b === undefined || c === undefined) return true;
 
   // 0.0.0.0/8 (Current network)
   if (a === 0) return true;
@@ -32,6 +32,13 @@ function isPrivateIPv4(ip: string): boolean {
   if (a === 169 && b === 254) return true;
   // 172.16.0.0/12 (Private 172.16.0.0 ~ 172.31.255.255)
   if (a === 172 && b >= 16 && b <= 31) return true;
+  // IANA special-purpose addresses: protocol assignments, documentation
+  // networks and deprecated 6to4 relay anycast are not safe egress targets.
+  // Fail closed for the full /24 even when a specific address is anycast.
+  if (a === 192 && b === 0 && (c === 0 || c === 2)) return true;
+  if (a === 192 && b === 88 && c === 99) return true;
+  if (a === 198 && b === 51 && c === 100) return true;
+  if (a === 203 && b === 0 && c === 113) return true;
   // 192.168.0.0/16 (Private)
   if (a === 192 && b === 168) return true;
   // 100.64.0.0/10 (CGNAT)

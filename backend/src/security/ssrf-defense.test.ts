@@ -36,6 +36,27 @@ describe('SSRF Defense Engine', () => {
       expect(isPrivateIp('142.250.190.46')).toBe(false);
     });
 
+    it('rejects special-purpose IPv4 destinations that are not globally routable', () => {
+      for (const ip of [
+        '192.0.0.1', // IETF protocol assignments
+        '192.0.2.1', // TEST-NET-1
+        '192.88.99.1', // deprecated 6to4 relay anycast
+        '198.51.100.1', // TEST-NET-2
+        '203.0.113.1', // TEST-NET-3
+        '::ffff:c000:201', // IPv4-mapped TEST-NET-1
+      ]) {
+        expect(isPrivateIp(ip), ip).toBe(true);
+      }
+      expect(isPrivateIp('8.8.8.8')).toBe(false);
+      expect(isPrivateIp('::ffff:808:808')).toBe(false);
+    });
+
+    it('rejects direct special-purpose IPv4 URLs before any network request', async () => {
+      for (const ip of ['192.0.2.42', '198.51.100.42', '203.0.113.42']) {
+        await expect(assertSafeOutboundUrl(`https://${ip}/`)).rejects.toThrow(SsrffSecurityError);
+      }
+    });
+
     it('identifies private IPv6 addresses accurately', () => {
       // Loopback
       expect(isPrivateIp('::1')).toBe(true);
