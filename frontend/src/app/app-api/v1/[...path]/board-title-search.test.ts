@@ -56,3 +56,17 @@ describe('Android exact-title provenance', () => {
     expect(response.headers.get('referrer-policy')).toBe('no-referrer');
   });
 });
+
+
+describe('Android exact title malformed upstream', () => {
+  it.each([
+    {body:'not-json', contentType:'application/json'},
+    {body:'unverified', contentType:'text/plain'},
+  ])('fails closed on $contentType responses', async ({body,contentType}) => {
+    vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(body, {headers:{'content-type':contentType}})));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/board/public/stock-posts?q=WLD&match=exact', {headers:{host:'easy-scraping.com'}}), {params:Promise.resolve({path:['board','public','stock-posts']})});
+    expect(response.status).toBe(503);
+  });
+});

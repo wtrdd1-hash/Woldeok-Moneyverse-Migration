@@ -19,3 +19,11 @@
 ## Midpoint
 - `origin/main` re-fetched at 21:00 KST and remains `305d7c7f`. Other developers' dirty worktree untouched.
 - First implementation had an unterminated SQL template and a legacy controller call arity regression; both corrected before further verification.
+
+## Verification checkpoint (21:06 KST)
+- Focused tests: Backend 20 PASS, Frontend 17 PASS, including RED-to-GREEN malformed JSON fail-closed.
+- Typecheck PASS, lint 0 errors/1,027 warnings. Full build failed at Next static generation (SIGSEGV), not claimed PASS.
+- `pnpm test` initially BLOCKED at generated Android contract drift; regenerated EN/KO schema and JSON, to commit before rerunning.
+- DEV PostgreSQL read-only `member_board_public_list_with_stock(50)` exact query executed, 0 matching WLD titles; function EXECUTE=true. DEV direct `member_board_posts` SELECT=true remains a least-privilege finding, not a production assertion.
+- `pnpm audit --audit-level=low`: 9 findings (1 low, 8 moderate), release HOLD.
+- Main re-fetched, no advance at checkpoint. No Test/Production mutation.

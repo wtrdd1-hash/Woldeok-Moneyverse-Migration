@@ -1930,6 +1930,8 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| titleMatch | false | string="exact" | const="exact" |
+| titleQuery | false | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

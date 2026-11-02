@@ -5192,6 +5192,13 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "titleMatch": {
+            "type": "string",
+            "const": "exact"
+          },
+          "titleQuery": {
+            "type": "string"
+          },
           "posts": {
             "type": "array",
             "items": {

@@ -122,8 +122,9 @@ export class PublicStockCommunityController {
     const posts = match === 'exact'
       ? await this.community.publicList(stock as string | undefined, q as string, 'exact')
       : await this.community.publicList(stock as string | undefined, q as string | undefined);
-    return match === 'exact'
-      ? { posts, titleMatch: 'exact', titleQuery: (q as string).trim() }
-      : { posts };
+    return {
+      posts,
+      ...(match === 'exact' ? { titleMatch: 'exact' as const, titleQuery: (q as string).trim() } : {}),
+    };
   }
 }

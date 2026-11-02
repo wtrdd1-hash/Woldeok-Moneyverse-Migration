@@ -112,6 +112,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  const exactBoardPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts' &&
+    request.nextUrl.searchParams.has('match');
+  if (exactBoardPath && request.method === 'HEAD') {
+    return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'HEAD cannot verify exact board rows');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -512,6 +518,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
+  if (exactBoardPath && (response.status === 204 || response.status === 304 ||
+      (response.ok && !isJsonMediaType(response.headers.get('content-type'))))) {
+    return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+  }
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
   }
@@ -559,6 +569,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (exactBoardPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
