@@ -10,11 +10,13 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
 import { getStockName } from '@/lib/i18n-dictionary';
+import { compareAmounts, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import dynamicImport from 'next/dynamic';
 import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
 import { GlobalMacroPulseTicker } from '@/components/global-macro-pulse-ticker';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
+import { marketDayChange, parsePublicMarket } from './stock-market-evidence';
 import { canonicalUrl } from '@/lib/seo';
 
 const TradeDialog = dynamicImport(
@@ -25,28 +27,28 @@ export const dynamic = 'force-dynamic';
 
 const STOCKS_META_BY_LOCALE = {
   en: {
-    title: 'Virtual Stock Exchange — Toss-style Real-time Orderbook & Trading',
-    description: 'Track real-time virtual quotes, 10-depth orderbooks, and trade 10 listed companies with ease.',
+    title: 'Virtual Stock Exchange — Verified Market Prices',
+    description: 'View server-provided virtual stock prices and access game trading controls. Quotes and trades are not real securities.',
     canonical: '/en/stocks',
   },
   ko: {
-    title: '가상 주식 거래소 — 실시간 10단 호가창 & 모의투자 | 월덕 머니버스',
-    description: '[토스 증권 스타일] 10대 가상 상장사 실시간 호가, 캔들 차트, 1초 모의투자 시뮬레이터. 가입 즉시 1만 WLD 지급!',
+    title: '가상 주식 거래소 — 서버 시세 및 게임 거래 | 월덕 머니버스',
+    description: '서버에서 제공하는 가상 주식 종목과 WLD 시세를 조회하고 게임 내 거래 기능을 이용할 수 있습니다. 실제 주식 투자 상품이 아닙니다.',
     canonical: '/stocks',
   },
   ja: {
-    title: '仮想株式取引所 — リアルタイム10段階気配値＆模擬投資',
-    description: 'トス証券スタイルの直感的な仮想株式取引所。10大上場企業のリアルタイム相場とチャート。',
+    title: '仮想株式取引所 — サーバー相場とゲーム内取引',
+    description: 'サーバーから取得した仮想株式の価格とゲーム内取引を表示します。実際の証券ではありません。',
     canonical: '/ja/stocks',
   },
   zh: {
-    title: '虚拟股票交易所 — 实时10档深度盘口与模拟交易',
-    description: 'Toss风格极简虚拟股票交易所，实时查看10大标的行情与深度K线。',
+    title: '虚拟股票交易所 — 服务器报价与游戏内交易',
+    description: '查看服务器提供的虚拟股票报价及游戏内交易入口。并非真实证券交易。',
     canonical: '/zh/stocks',
   },
   vi: {
     title: 'Sàn giao dịch Cổ phiếu ảo | Woldeok Moneyverse',
-    description: 'Trải nghiệm sàn giao dịch cổ phiếu ảo thời gian thực với sổ lệnh khớp giá tốc độ cao.',
+    description: 'Xem giá cổ phiếu ảo từ máy chủ và giao dịch trong trò chơi, không phải chứng khoán thật.',
     canonical: '/vi/stocks',
   },
 };
@@ -77,20 +79,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-interface StockRow {
-  readonly id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly description: string;
-  readonly current_price: string;
-  readonly day_open_price: string;
-  readonly day_high_price: string;
-  readonly day_low_price: string;
-  readonly shares_outstanding: string;
-  readonly shares_available: string;
-  readonly halt_status?: string;
-}
-
 export default async function StocksPage({
   searchParams,
 }: {
@@ -98,17 +86,17 @@ export default async function StocksPage({
 }) {
   const locale = await getServerLocale();
   const [marketData, params] = await Promise.all([
-    apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
+    apiOrNull<unknown>('/api/v1/stocks'),
     searchParams,
   ]);
 
-  const rawStocks = marketData?.stocks ?? [];
+  const verifiedMarket = parsePublicMarket(marketData);
   const sortParam = Array.isArray(params?.sort) ? params.sort[0] : params?.sort;
   const sort = normalizeStockSort(sortParam);
-  const stocks = sortMarketStocks(rawStocks, sort);
+  const stocks = verifiedMarket === null ? [] : sortMarketStocks(verifiedMarket, sort);
 
   const filterOptions = [
-    { value: 'default', label: localeLabel(locale, '전체 10종목', 'All 10 Stocks', '全10銘柄', '全部10只股票') },
+    { value: 'default', label: localeLabel(locale, '전체 종목', 'All Stocks', 'すべての銘柄', '全部股票') },
     { value: 'change', label: localeLabel(locale, '급등·급락순', 'Top Movers', '変動率順', '涨跌幅榜') },
     { value: 'price', label: localeLabel(locale, '가격순', 'By Price', '価格順', '价格高低') },
     { value: 'name', label: localeLabel(locale, '이름순', 'By Name', '名前順', '名称排序') },
@@ -132,7 +120,7 @@ export default async function StocksPage({
                 <Link
                   key={value}
                   href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`}
-                  className={`btn-toss min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all shrink-0 ${
+                  className={`btn-toss min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 px-3.5 text-xs font-bold rounded-xl transition-all shrink-0 ${
                     isActive
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
                       : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800 hover:bg-slate-800/60'
@@ -156,7 +144,14 @@ export default async function StocksPage({
 
         {/* 3. 10 Listed Companies: Toss Clean Card List */}
         <div className="space-y-2.5">
-          {stocks.length === 0 ? (
+          {verifiedMarket === null ? (
+            <div role="alert" aria-live="polite" className="toss-card grid gap-3 rounded-2xl border border-amber-500/40 bg-[#0f1422] p-5 text-sm text-slate-200">
+              <p>{localeLabel(locale, '주식 시세를 확인할 수 없습니다. 잠시 후 다시 조회해 주세요.', 'Stock prices are unavailable. Please try again.', '株価を確認できません。再度お試しください。', '无法确认股票报价，请稍后重试。')}</p>
+              <Link href="/stocks" className="inline-flex min-h-11 w-fit items-center rounded-lg border px-4 py-2 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2">
+                {localeLabel(locale, '다시 조회', 'Retry', '再読み込み', '重试')}
+              </Link>
+            </div>
+          ) : stocks.length === 0 ? (
             <div className="toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
               {localeLabel(
                 locale,
@@ -168,11 +163,8 @@ export default async function StocksPage({
             </div>
           ) : (
             stocks.map((stock) => {
-              const cur = Number.parseInt(stock.current_price, 10);
-              const open = Number.parseInt(stock.day_open_price || stock.current_price, 10);
-              const pct = open > 0 ? ((cur - open) / open) * 100 : 0;
-              const isPositive = pct >= 0;
-              const isHalted = stock.halt_status && stock.halt_status.includes('HALT');
+              const direction = compareAmounts(stock.current_price, stock.day_open_price);
+              const isHalted = stock.halt_status !== 'ACTIVE';
               const localizedStockName = getStockName(stock.symbol, locale, stock.name);
 
               return (
@@ -181,7 +173,7 @@ export default async function StocksPage({
                   className="toss-card p-4 sm:p-5 flex items-center justify-between gap-3.5 bg-[#0f1422] border-slate-800/80 hover:border-emerald-500/40 transition-all btn-interactive rounded-2xl shadow-sm"
                 >
                   {/* Stock Brand Icon & Name */}
-                  <Link href={`/stocks/${stock.symbol}`} className="flex items-center gap-3.5 min-w-0 flex-1 group">
+                  <Link href={`/stocks/${encodeURIComponent(stock.symbol)}`} className="flex items-center gap-3.5 min-w-0 flex-1 group focus-visible:outline-2 focus-visible:outline-offset-2">
                     <div className="size-11 sm:size-12 rounded-2xl bg-slate-800/80 border border-slate-700/60 grid place-items-center font-black font-fintech text-xs text-slate-200 shrink-0 group-hover:scale-105 transition-transform shadow-inner">
                       {stock.symbol.slice(0, 3)}
                     </div>
@@ -203,21 +195,25 @@ export default async function StocksPage({
                   </Link>
 
                   {/* Price & Change Rate */}
-                  <Link href={`/stocks/${stock.symbol}`} className="text-right shrink-0 min-w-[90px]">
+                  <Link href={`/stocks/${encodeURIComponent(stock.symbol)}`} className="min-w-0 max-w-[45vw] shrink-0 break-all text-right sm:max-w-none focus-visible:outline-2 focus-visible:outline-offset-2">
                     <div className="text-xs sm:text-sm font-black font-fintech text-slate-100 tabular-nums">
-                      {cur.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
+                      {groupDigits(stock.current_price)} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
                     </div>
                     <div className={`text-xs font-extrabold font-fintech tabular-nums mt-0.5 flex items-center justify-end gap-0.5 ${
-                      isPositive ? 'text-emerald-400' : 'text-rose-400'
+                      direction > 0 ? 'text-emerald-400' : direction < 0 ? 'text-rose-400' : 'text-slate-400'
                     }`}>
-                      {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                      <span>{isPositive ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`}</span>
+                      {direction > 0 ? <TrendingUp className="size-3" aria-hidden="true" /> : direction < 0 ? <TrendingDown className="size-3" aria-hidden="true" /> : null}
+                      <span>{marketDayChange(stock.current_price, stock.day_open_price)}</span>
                     </div>
                   </Link>
 
                   {/* Trade Action Trigger */}
                   <div className="shrink-0 pl-1">
-                    <TradeDialog
+                    {isHalted ? (
+                      <span className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/50 px-3 text-xs text-rose-300">
+                        {localeLabel(locale, '매수 불가', 'Trading halted', '取引停止', '暂停交易')}
+                      </span>
+                    ) : <TradeDialog
                       stockId={stock.id}
                       symbol={stock.symbol}
                       name={localizedStockName}
@@ -225,8 +221,8 @@ export default async function StocksPage({
                       side="buy"
                       triggerLabel={localeLabel(locale, '매수', 'Buy', '買い', '买入')}
                       triggerVariant="default"
-                      triggerClassName="h-9 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss rounded-xl"
-                    />
+                      triggerClassName="min-h-11 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss rounded-xl"
+                    />}
                   </div>
                 </div>
               );
@@ -241,10 +237,10 @@ export default async function StocksPage({
             <span className="font-bold text-slate-200">
               {localeLabel(
                 locale,
-                '100% 안전한 가상 모의투자 안내',
-                '100% Risk-Free Trading Simulation',
-                '100%安全な仮想模擬投資ガイド',
-                '100%安全的模拟投资提示',
+                '가상 주식 거래 안내',
+                'Virtual Stock Trading Notice',
+                '仮想株式取引のご案内',
+                '虚拟股票交易提示',
               )}
             </span>
             <p className="leading-relaxed [word-break:keep-all]">
