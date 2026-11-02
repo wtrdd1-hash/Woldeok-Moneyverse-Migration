@@ -4,6 +4,10 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { PG_POOL } from '../core/pool.provider';
 import { BurnEventController } from './burn-event.controller';
+import { SessionGuard } from '../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 
 const query = vi.fn();
 
@@ -13,7 +17,12 @@ describe('burn draw public statistics HTTP source contract', () => {
     const testingModule = await Test.createTestingModule({
       controllers: [BurnEventController],
       providers: [{ provide: PG_POOL, useValue: { query } }],
-    }).compile();
+    })
+      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
+      .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
+      .compile();
     app = testingModule.createNestApplication();
     await app.init();
   });

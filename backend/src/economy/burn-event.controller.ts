@@ -1,15 +1,20 @@
 import {
-  BadRequestException,
-  Body,
   Controller,
   Get,
   Inject,
   Post,
+  UseGuards,
+  Header,
   Req,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { RequestWithSession } from '../auth/session.context';
+import { requireUserId } from '../auth/session.context';
+import { SessionGuard } from '../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 
@@ -78,38 +83,19 @@ export class BurnEventController {
   }
 
   @Post('participate')
-  @ApiOperation({ summary: '10,000 WLD 국고 영구 소각 및 한정판 칭호 드로우 참여' })
-  async participateBurnDraw(@Req() req: RequestWithSession, @Body() body: { burnAmount?: string | number }) {
-    const userId = req.session?.user_id;
-    if (!userId) {
-      throw new BadRequestException('로그인이 필요한 서비스입니다.');
-    }
-
-    // Exact WLD across JSON, Node, and PostgreSQL. Unsafe JSON numbers have
-    // already lost information and must be rejected rather than rounded.
-    const rawAmount = body?.burnAmount;
-    let requested: string;
-    if (rawAmount === undefined || rawAmount === null || rawAmount === 0) {
-      requested = '10000';
-    } else if (typeof rawAmount === 'string' && /^[1-9][0-9]*$/.test(rawAmount)) {
-      requested = rawAmount;
-    } else if (typeof rawAmount === 'number' && Number.isSafeInteger(rawAmount) && rawAmount > 0) {
-      requested = String(rawAmount);
-    } else {
-      throw new BadRequestException('금액은 정확한 양의 WLD 정수 문자열이어야 합니다.');
-    }
-    const burnAmount = BigInt(requested) >= 10000n ? requested : '10000';
-
-    try {
-      const res = await this.pool.query<{ participate_anti_inflation_burn_draw: any }>(
-        `SELECT public.participate_anti_inflation_burn_draw($1, $2)`,
-        [userId, burnAmount]
-      );
-      const result = res.rows[0]?.participate_anti_inflation_burn_draw;
-      return result;
-    } catch (err: any) {
-      console.error('[BurnEventController] Error:', err);
-      throw new BadRequestException(err?.message || '소각 드로우 참여에 실패했습니다.');
-    }
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
+  @ApiOperation({ summary: 'Burn draw unavailable until canonical ledger settlement and replay are verified' })
+  participateBurnDraw(@Req() req: RequestWithSession): never {
+    requireUserId(req);
+    // Migration 263 updates balances directly and records only a legacy entry.
+    // Do not issue a success receipt or touch SQL before atomic Economy Core settlement exists.
+    throw new ServiceUnavailableException({
+      statusCode: 503,
+      code: 'BURN_DRAW_LEDGER_UNAVAILABLE',
+      message: 'Burn draw is unavailable until verified ledger settlement is implemented.',
+    });
   }
 }

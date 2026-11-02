@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BurnEventController } from './burn-event.controller';
 import type { Queryable } from '../core/db';
 import type { RequestWithSession } from '../auth/session.context';
@@ -16,16 +16,10 @@ describe('burn-draw WLD overflow protection', () => {
     expect(result.recentWinners[0]?.burnAmount).toBe(longAmount);
   });
 
-  it('passes a huge canonical string to numeric SQL rather than Number', async () => {
-    const amount = '9'.repeat(100);
-    let params: unknown[] = [];
-    const pool = { query: async (_sql: string, values: unknown[]) => {
-      params = values;
-      return { rows: [{ participate_anti_inflation_burn_draw: { success: true } }] };
-    } } as unknown as Queryable;
-    const controller = new BurnEventController(pool);
-    await controller.participateBurnDraw(user, { burnAmount: amount });
-    expect(params[1]).toBe(amount);
-    await expect(controller.participateBurnDraw(user, { burnAmount: Number.MAX_SAFE_INTEGER + 2 })).rejects.toThrow();
+  it('rejects even a large burn request without querying an unledgered function', () => {
+    const query = vi.fn();
+    const controller = new BurnEventController({ query } as unknown as Queryable);
+    expect(() => controller.participateBurnDraw(user)).toThrowError(/Service Unavailable|verified ledger settlement/i);
+    expect(query).not.toHaveBeenCalled();
   });
 });
