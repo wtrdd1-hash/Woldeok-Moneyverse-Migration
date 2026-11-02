@@ -136,6 +136,10 @@ export class AuthController {
     @Req() request: RequestWithSession,
     @Res({ passthrough: true }) response: Response,
   ) {
+    // The response contains a rotating CSRF secret, never a public cache entry.
+    response.setHeader('cache-control', 'private, no-store');
+    response.setHeader('x-robots-tag', 'noindex, nofollow');
+    response.setHeader('referrer-policy', 'no-referrer');
     const csrfToken = await this.store().rotateCsrf(requireSession(request).id);
     const token = sessionToken(request.headers, this.config);
     if (token) {
