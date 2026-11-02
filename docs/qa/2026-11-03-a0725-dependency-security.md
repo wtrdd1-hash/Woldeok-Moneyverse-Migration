@@ -14,9 +14,9 @@
 - Workspace typecheck: PASS. Database unit tests: 72 PASS / 5 SKIP. Contract unit tests: 41 PASS.
 - Backend focused Vitest 4.1.12: 8 PASS; Frontend focused Vitest 4.1.12: 8 PASS.
 - Backend build PASS. Android app API contract check: 184 endpoint contracts PASS.
-- Backend full test and Frontend full test exceeded separate 105-second execution caps under shared-host load: **TIMEOUT, NOT PASS**.
-- Frontend Next.js build generated 602 static pages, then exceeded an 85-second cap while collecting build traces: **TIMEOUT, NOT PASS**.
-- Full ESLint run interrupted before a result; targeted .mjs file was ignored by ESLint configuration, so no lint PASS is claimed.
+- Initial full-suite attempts each exceeded a 105-second cap; after reducing Vitest workers, **Backend full: 2,983 PASS / 2 FAIL / 518 SKIP** (existing `profile-private-response.http.test.ts` 200-vs-401 assertions; Draft repair #2265 remains open). **Frontend full: 2,947 PASS / 0 FAIL** with the package-required `NODE_ENV=test`. An earlier manual Vitest invocation omitted this environment and produced 502 invalid-mode failures; it is superseded by the correct PASS.
+- Frontend Next.js build initially exceeded an 85-second cap after generating 602 static pages; a clean retry with a 150-second cap **PASS** (602 static pages).
+- Full ESLint retry **PASS** (0 errors, 1,026 warnings). The targeted .mjs file was ignored by ESLint configuration; security regression was run via node:test instead.
 - Real PostgreSQL isolated Test, authenticated user E2E, accessibility, SEO, official Test exact-SHA, independent restore, GitOps and rollback verification: **BLOCKED / NOT EXECUTED**. No schema or runtime changes to test against a real DB.
 - 07:36 KST public HTTP check: Production `/ko` HTTP 500 and `/en` HTTP 500, Test `/ko` HTTP 200. Existing locale repair Draft #2552 remains unmerged. Root filesystem ~97% used.
 

@@ -12,7 +12,7 @@
 - [x] RED baseline audit evidence (9 findings) and minimal dependency override patch.
 - [x] GREEN targeted regression, typecheck, contract, DB units, backend build; full mandatory gates attempted but TIMEOUT/BLOCKED.
 - [x] Mid-run main and English/Korean plan recheck, QA/release HOLD; final SHA and PR counts in PR evidence.
-- [ ] Draft PR and CI evidence after push.
+- [x] Draft PR #2587 opened; CI observed running, do not merge.
 
 ## Mid-run (07:27–07:36 KST)
 - Changed root brace-expansion override 1.1.20/5.0.11 -> 1.1.21/5.0.12 and Vitest in backend/frontend/contract/database 4.1.11 -> 4.1.12; regenerated lockfile. Security floor test updated. No feature functionality claimed.
@@ -23,3 +23,13 @@
 - Remote refs at checkpoint: 330 branches, 300 open PRs, 29 conflicting. No deletion: all unique unintegrated work preserved.
 - Production `/ko` and `/en` HTTP 500, Test `/ko` 200. Official exact-SHA Test, DB security, E2E, restore and release gate BLOCKED. No Test/Production or DB mutation.
 - Evidence: `/srv/moneyverse-data/tasks/mv-a-20261103-0725-security-audit/evidence/`.
+
+## Final checkpoint (07:46 KST)
+- Code SHA `0b8863a7d5ae4f5d8efb05145b37f58996706579` passed security floors, typecheck, backend/frontend builds, contract, DB tests, full frontend suite, and full lint (0 errors, 1026 warnings).
+- Backend full: 2983 PASS / 2 FAIL / 518 SKIP (existing profile 401 vs expected 200; Draft repair #2265). Frontend full: 2947 PASS / 0 FAIL with required `NODE_ENV=test`. Earlier ad-hoc invocation without NODE_ENV produced invalid-mode React.act failures and is not the canonical result.
+- `pnpm audit` remains FAIL with 3 findings; no attempt to override incompatible minimatch majors or unpatched deepmerge. No end-to-end member feature completed.
+- Remote heads before new branch: 330; after: 331. Open PR before: 300; after Draft #2587: 301; conflicting 29. Remote-tracking refs include origin/HEAD symbolic alias; 17 ancestor branch refs (plus origin/HEAD alias) require PR/owner checks before deletion, so deleted 0, preserved all 330 pre-existing branches plus new branch.
+- Changes: root package.json, pnpm-lock.yaml, backend/frontend/contract/database package.json, security floor test, EN/KO QA, release HOLD and worklog. No database schema, privilege, ledger, service, Test or Production mutation.
+- Main unchanged at `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`; planning Draft #2585 concerns support status, no overlap. No merge or rollback performed.
+- Official Test exact candidate SHA, auth/user flow, independent restore and GitOps release gate NOT RUN/BLOCKED; production locale HTTP 500 persists. Production HOLD.
+- After this documentation checkpoint, a new final commit SHA will be recorded in PR evidence; CI must be checked against that exact SHA.
