@@ -139,6 +139,18 @@ export class StockCommunityService {
           AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
       [50, normalized, title],
     );
-    return rows.map(mapped);
+    // The database read is a bounded public snapshot, not a trusted identity envelope.
+    if (rows.length > 50) throw new Error('invalid public board result size');
+    const seen = new Set<string>();
+    return rows.map((row) => {
+      if (typeof row.post_id !== 'string' || !UUID.test(row.post_id)) {
+        throw new Error('invalid public board post id');
+      }
+      const postId = row.post_id.toLowerCase();
+      if (seen.has(postId)) throw new Error('duplicate public board post id');
+      if (row.mine !== false) throw new Error('invalid public board ownership');
+      seen.add(postId);
+      return { ...mapped(row), postId };
+    });
   }
 }

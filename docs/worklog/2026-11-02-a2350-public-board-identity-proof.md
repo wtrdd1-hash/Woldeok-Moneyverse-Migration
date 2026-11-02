@@ -15,3 +15,9 @@
 
 ## Finished
 - Pending. No merge, deployment, DB writes or branch deletion authorized.
+
+### Midpoint checkpoint — 2026-11-02 23:54 KST
+- Re-fetched main: `9cade11af53db9f27c2b9f0ea9d39005ea8d0387` unchanged.
+- RED: backend 3 failures for malformed/duplicate/private post identity; frontend 1 missing parser plus Android unverified 200; malformed JSON and non-JSON Android 200 independently RED (2 failures).
+- GREEN: backend 11/11 targeted, frontend 14/14 targeted. Source proof checks bounded latest-50 IDs, safe counts, timestamps, public ownership; SSR refuses unverified success and Android returns no-store/noindex 503.
+- No migrations, direct DB grants, ledger, balance or service changes. Final gates pending.
