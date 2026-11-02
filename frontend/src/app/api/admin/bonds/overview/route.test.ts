@@ -13,7 +13,7 @@ import { GET } from './route';
 
 const overview = {
   totalBondsActive: 0, totalFundedWld: '0', totalHoldersCount: 0,
-  totalCouponsPaidWld: '0', benchmark1YYield: '—', benchmark3YYield: '—', benchmark5YYield: '—',
+  totalCouponsPaidWld: '42', benchmark1YYield: '—', benchmark3YYield: '—', benchmark5YYield: '—',
 };
 
 function assertPrivate(response: Response) {
@@ -30,8 +30,12 @@ describe('administrator bond evidence proxy confidentiality', () => {
     const response = await GET();
     expect(response.status).toBe(200);
     assertPrivate(response);
-    expect((await response.json()).overview.totalBondsActive).toBe(0);
-    expect(apiMock).toHaveBeenCalledTimes(3);
+    expect(await response.json()).toEqual({ overview, bonds: [], couponLogs: [] });
+    expect(apiMock.mock.calls.map(([path]) => path)).toEqual([
+      '/api/v1/admin/bonds/overview',
+      '/api/v1/admin/bonds/list',
+      '/api/v1/admin/bonds/coupon-logs?limit=30',
+    ]);
   });
 
   it.each([401, 403])('preserves backend auth refusal %i without exposing upstream detail', async (status) => {
@@ -48,6 +52,15 @@ describe('administrator bond evidence proxy confidentiality', () => {
     expect(response.status).toBe(503);
     assertPrivate(response);
     expect(JSON.stringify(await response.json())).not.toMatch(/permission|table secret|418/);
+  });
+
+  it('preserves the existing fail-closed coupon aggregate contract', async () => {
+    apiMock.mockResolvedValueOnce({ ...overview, totalCouponsPaidWld: 'NaN' })
+      .mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const response = await GET();
+    expect(response.status).toBe(503);
+    assertPrivate(response);
+    expect((await response.json()).error).toBeTruthy();
   });
 
   it('does not return a false success on malformed financial evidence', async () => {

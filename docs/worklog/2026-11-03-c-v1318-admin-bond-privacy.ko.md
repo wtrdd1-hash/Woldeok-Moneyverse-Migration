@@ -18,3 +18,12 @@
 - 수정 후 국채 관리자 API는 성공/실패 모두 비캐시·비색인·참조정보 차단. Backend 401/403은 유지하고 기타 실패는 503으로 처리하며 내부 SQL 오류 메시지는 노출하지 않음.
 - 관리자 국채 기본/다국어 경로 HTTP 보호 정책 추가. DB·원장·인증 권한 변경 없음.
 - 첫 회귀 테스트는 미니PC의 `NODE_ENV=production` 영향으로 기존 React UI 4건에서 `React.act is not a function` 오류 발생. `NODE_ENV=test`로 재검증하고 결과 기록.
+
+## 종료 — 2026-11-03 04시 KST (후보, 릴리스 보류)
+- 후보 SHA `c81a3bb4ad1ef5c9d947a429c83e933b0f46f16b`: Lint 오류 0/경고 1,026, Typecheck/Build 통과, Frontend 2,951건 통과, Backend 2,985건 통과·518건 건너뜀, DB 패키지 72건 통과·5건 건너뜀, Contract 41건 통과, Android app-api 184개 엔드포인트 동등성 통과, 보안 스크립트 11건 통과, 운영 High 이상 취약점 검사 통과.
+- 독립 Next HTTP에서 `/frontend-version` 후보 SHA 일치, 관리자 국채 기본/5개 언어 경로 모두 HTTP 200과 비색인·비공개 캐시·참조정보 차단 헤더 확인.
+- 격리 PostgreSQL 17.11에서 마이그레이션 327개(002~328) 실행 통과. 다만 테스트용 임시 마이그레이터 권한을 높여 부트스트랩했으므로 실제 운영과 동일한 권한 경계·인증 사용자 흐름을 증명한 것은 아님. 컨테이너 삭제, 공유 DB 미변경.
+- 미해결: 전체 의존성 취약점 9건(보통 8/낮음 1), 전체 경로 QA 증빙 파일 누락, 격리 worktree Bot 패키지 누락, 공식 Test 정확 SHA 및 실제 로그인 브라우저/Android E2E 미실행.
+- 공식 Test 공개 버전 `2dd507030dc1e461cbcf18f060260959f4c26a8f`, Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; 후보와 불일치. 병합/배포/롤백/타 작업 삭제 없음. 핵심 예약 5개 변경 없음.
+- 미니PC 루트 디스크 여유가 약 11MiB로 감소해 본 작업의 Next 임시 빌드 캐시만 제거, 약 896MiB 확보. 타 작업 파일 미삭제.
+- **PARTIAL / RELEASE BLOCKED**, Draft PR #2569 보존.
