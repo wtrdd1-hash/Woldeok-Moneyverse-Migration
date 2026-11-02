@@ -1,3 +1,7 @@
+## 2026-11-03 v1680 — F675-226 personal administrator support reply snippets (planning only)
+- Existing 3 hardcoded admin canned replies verified; proposed up to 20 personal editable snippets, insert into unsent composer only, never auto-send; no AI interpolation or member visibility. F675-226 **NOT IMPLEMENTED**; engineering issue #2570; stacked on Draft #2566.
+- QA v1479 FAILED/P0, root 99%/1.1GiB free, Production localized 17/28 HTTP500, broad app DB grants, 19 unsafe app-executable definer paths, five checksum mismatches, main Test gate failed. P0 4/P1 6; RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/finance/deploy changes.
+
 ## 2026-11-03 v1678 — F675-225 replay, time and evidence integrity (planning only)
 - Historical same-key replay has no current-resource ETag; UI refreshes GET. Canonical UTC-second HMAC and key rotation/retention, DB-second boundary and IANA DST rules, truthful due-list analytics. F675-225 NOT IMPLEMENTED; issue #2558; stacked on Draft #2560.
 - QA v1478 FAILED/P0; root 98%/2.5GB, Production localized 17/28 HTTP500, 19 app-executable unsafe-definer paths, 5 checksum mismatches, exact-main Test gate failed. P0 4/P1 6, RELEASE HOLD. External new 0, cumulative UNKNOWN/10,000 BLOCKED. No runtime/DB/finance/deploy changes.
