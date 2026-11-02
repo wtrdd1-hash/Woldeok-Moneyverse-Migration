@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "repositoryHead": null,
-  "routeCount": 166,
-  "administratorRouteCount": 34,
-  "dynamicRouteCount": 31,
-  "dataPageMarkerCount": 83,
-  "inventorySha256": "dc9997c85644ae47c380604d8e25e2539517a1a00dab4a408315067c02864e15",
+  "routeCount": 173,
+  "administratorRouteCount": 36,
+  "dynamicRouteCount": 33,
+  "dataPageMarkerCount": 87,
+  "inventorySha256": "8e54bed383e8dfdd658a8e110f0035d27b9c3129ba35c5347c22dff0a48aa140",
   "pages": [
     {
       "route": "/",
@@ -190,6 +190,13 @@
       "dataPage": null
     },
     {
+      "route": "/admin/help",
+      "source": "frontend/src/app/admin/help/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": null
+    },
+    {
       "route": "/admin/kdic",
       "source": "frontend/src/app/admin/kdic/page.tsx",
       "routeKind": "static",
@@ -244,6 +251,13 @@
       "routeKind": "static",
       "administrator": true,
       "dataPage": "admin-money-flow"
+    },
+    {
+      "route": "/admin/operations/storage",
+      "source": "frontend/src/app/admin/operations/storage/page.tsx",
+      "routeKind": "static",
+      "administrator": true,
+      "dataPage": "admin-storage-headroom"
     },
     {
       "route": "/admin/pension",
@@ -474,7 +488,7 @@
       "source": "frontend/src/app/clubs/warfare/page.tsx",
       "routeKind": "static",
       "administrator": false,
-      "dataPage": null
+      "dataPage": "club-warfare"
     },
     {
       "route": "/collections",
@@ -565,7 +579,7 @@
       "source": "frontend/src/app/guide/page.tsx",
       "routeKind": "static",
       "administrator": false,
-      "dataPage": "guide"
+      "dataPage": null
     },
     {
       "route": "/guide/career-mastery",
@@ -608,6 +622,20 @@
       "routeKind": "static",
       "administrator": false,
       "dataPage": "guide-virtual-banking"
+    },
+    {
+      "route": "/help",
+      "source": "frontend/src/app/help/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/help/[slug]",
+      "source": "frontend/src/app/help/[slug]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
     },
     {
       "route": "/inventory",
@@ -726,7 +754,7 @@
       "source": "frontend/src/app/progression/prestige/page.tsx",
       "routeKind": "static",
       "administrator": false,
-      "dataPage": null
+      "dataPage": "prestige"
     },
     {
       "route": "/quests",
@@ -859,7 +887,7 @@
       "source": "frontend/src/app/stocks/derivatives/page.tsx",
       "routeKind": "static",
       "administrator": false,
-      "dataPage": null
+      "dataPage": "derivatives"
     },
     {
       "route": "/stocks/history",
@@ -939,6 +967,13 @@
       "dataPage": null
     },
     {
+      "route": "/tools/crypto-apy-calculator",
+      "source": "frontend/src/app/tools/crypto-apy-calculator/page.tsx",
+      "routeKind": "static",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
       "route": "/tools/dividend-tax-calculator",
       "source": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
       "routeKind": "static",
@@ -963,6 +998,13 @@
       "route": "/tools/farming-calculator/[preset]",
       "source": "frontend/src/app/tools/farming-calculator/[preset]/page.tsx",
       "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": null
+    },
+    {
+      "route": "/tools/fire-calculator",
+      "source": "frontend/src/app/tools/fire-calculator/page.tsx",
+      "routeKind": "static",
       "administrator": false,
       "dataPage": null
     },
@@ -1161,6 +1203,13 @@
       "routeKind": "static",
       "administrator": false,
       "dataPage": "wallet-activity"
+    },
+    {
+      "route": "/wallet/activity/transactions/[transactionId]",
+      "source": "frontend/src/app/wallet/activity/transactions/[transactionId]/page.tsx",
+      "routeKind": "dynamic",
+      "administrator": false,
+      "dataPage": "wallet-transaction-detail"
     },
     {
       "route": "/work",

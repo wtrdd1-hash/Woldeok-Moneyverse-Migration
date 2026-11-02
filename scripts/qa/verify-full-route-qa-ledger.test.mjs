@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { verifyLedger } from './verify-full-route-qa-ledger.mjs';
@@ -129,5 +129,21 @@ test('CLI binds synthetic QA ledger to externally supplied commit, never ledger 
     assert.match(implicit.stdout, /candidate SHA mismatch/);
   } finally {
     rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+
+test('committed full-route inventory exactly matches current source pages and metadata', () => {
+  const root = new URL('../../', import.meta.url).pathname;
+  const generated = spawnSync(process.execPath, ['scripts/qa/generate-full-route-inventory.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  assert.equal(generated.status, 0, generated.stderr);
+  const actual = JSON.parse(generated.stdout);
+  const recorded = JSON.parse(readFileSync(path.join(root, 'artifacts/qa/route-inventory.json'), 'utf8'));
+  const keys = ['routeCount', 'administratorRouteCount', 'dynamicRouteCount', 'dataPageMarkerCount', 'inventorySha256', 'pages'];
+  for (const key of keys) {
+    assert.deepEqual(recorded[key], actual[key], `stale route inventory ${key}; regenerate with node scripts/qa/generate-full-route-inventory.mjs --output artifacts/qa/route-inventory.json`);
   }
 });
