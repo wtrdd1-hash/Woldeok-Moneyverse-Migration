@@ -151,6 +151,9 @@ OAuth 완료 후 웹 callback은 브라우저 세션을 앱 세션으로 재사�
 | `GET` | `/app-api/v1/board/public/posts/:id` | `/api/board/public/posts/:id` |
 | `GET` | `/app-api/v1/board/public/posts/:id/comments` | `/api/board/public/posts/:id/comments` |
 | `GET` | `/app-api/v1/board/public/stock-posts` | `/api/board/public/stock-posts` |
+
+> **최근 공개 게시글 최소 댓글 수 필터 (초안/배포 보류):** `GET /app-api/v1/board/public/stock-posts`에 `minReplies=1|5|10` 선택적으로 사용. `q`, `stock`과 조합 가능하며 PostgreSQL의 최근 공개 글 50건만 대상으로 합니다. 필터 응답은 빈 결과라도 `filters: { minReplies: number, scope: "latest50" }` 및 행 검증이 필요합니다. 잘못되거나 중복된 값은 400, 필터 미적용·증거 누락·비정상 성공 응답은 503. 검색별 Android 응답은 `no-store`, `noindex`를 적용합니다. DB 권한·금융 원장 변경 및 운영 배포 없음.
+
 | `POST` | `/app-api/v1/board/stock-posts` | `/api/board/stock-posts` |
 | `GET` | `/app-api/v1/businesses/equity` | `/api/business-equity` |
 | `GET` | `/app-api/v1/businesses/catalog` | `/api/business-types` |

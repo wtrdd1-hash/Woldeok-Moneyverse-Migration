@@ -49,13 +49,27 @@ describe('Android minimum replies proof', () => {
   });
   it('accepts verified matching rows and blocks indexing', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
-    const fetcher = vi.fn(async () => new Response(JSON.stringify({ posts: [{ postId: '11111111-1111-4111-8111-111111111111', commentCount: 5 }] }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' } }));
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ posts: [{ postId: '11111111-1111-4111-8111-111111111111', commentCount: 5 }], filters: { minReplies: 5, scope: 'latest50' } }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' } }));
     vi.stubGlobal('fetch', fetcher);
     const response = await GET(request(), context);
     expect(response.status).toBe(200);
     expect(response.headers.get('x-robots-tag')).toBe('noindex');
     expect(response.headers.get('cache-control')).toContain('no-store');
     expect(new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get('minReplies')).toBe('5');
+  });
+  it('rejects an unproven empty success, not inventing a verified empty result', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ posts: [] }), { headers: { 'content-type': 'application/json' } })));
+    expect((await GET(request(), context)).status).toBe(503);
+  });
+  it('accepts a proven empty result and rejects duplicated post identities', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
+    const row = { postId: '11111111-1111-4111-8111-111111111111', commentCount: 5 };
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ posts: [], filters: { minReplies: 5, scope: 'latest50' } }), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetcher);
+    expect((await GET(request(), context)).status).toBe(200);
+    fetcher.mockImplementation(async () => new Response(JSON.stringify({ posts: [row, row], filters: { minReplies: 5, scope: 'latest50' } }), { headers: { 'content-type': 'application/json' } }));
+    expect((await GET(request(), context)).status).toBe(503);
   });
   it('rejects duplicated filter values before contacting upstream', async () => {
     vi.stubEnv('INTERNAL_API_TOKEN', 'test-only');
