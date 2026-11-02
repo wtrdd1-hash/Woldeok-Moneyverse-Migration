@@ -154,6 +154,17 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
+### v2026.11.02.1622 — 최신 운영 실측 (이전 v360 기록보다 우선)
+
+- **실측:** 2026-11-02 18:49~18:51 KST, 국고/공기업 읽기 경로. 실제 공개 운영 버전 `v2026.11.02.1622`, 앱 코드 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`, 경로 `/srv/moneyverse-data/releases/prod-v2026.11.02.1622-6fe94aeeebbd`.
+- **실서비스:** systemd `moneyverse-release-v1622-backend/frontend.service` 4194/4195, Nginx 운영 경로 전환 완료. 이전 v1619 4184/4185 유지, 롤백 가능. Test도 정확한 메인 SHA, 운영/테스트 신원 게이트 `ok:true,failures:[]`.
+- **운영 금융 데이터:** 세션 **1,899건(종료 시점 단면)**, 구 국고 **552건**, 배당 **744건** 보존. SQL324 관리자 범위 조회 함수 적용, 앱 직접 배당 테이블 SELECT 금지. 실제 앱 역할 20건/100건 조회 통과. 회원 잔액·기존 원장 변경 없음.
+- **수용 한계:** 사용자 로그인 브라우저 관리자 DOM은 직접 테스트하지 못함. 이는 SOE 조회 경로 복구이며 과거 552/744 출처, 국민연금 지급, 조폐국/중앙은행 발행, KDIC 집행은 **여전히 정식 금융 증빙 대기/차단**.
+- **검증·변경 기록:** [EN](docs/worklog/2026-11-02-soe-prod-cutover-v1622.md) / [KO](docs/worklog/2026-11-02-soe-prod-cutover-v1622.ko.md). 별도 문서 PR은 코드 런타임 SHA를 변경하지 않는다.
+
+### 2026-09-22 v360 — 역사적 이전 스냅샷 (현재 실행 버전 아님)
+
+
 - **최종 갱신일시**: 2026-09-22 21:22:00 KST
 - **현재 프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
 - **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)

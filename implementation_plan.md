@@ -2211,3 +2211,15 @@ ull 상태를 반환하도록 교정.
 - 텔레그램 실제 테스트 전송 스크립트 실행 및 영수증(message_id) 실측 확인.
 - 전체 빌드(`pnpm build`) 및 린트(`pnpm lint`), 타입체크(`pnpm typecheck`) 통과 확인.
 - GitHub Actions CI ALL PASS 확인 및 `main` 머지 후 운영 승격 & 디스크 정리.
+
+
+---
+
+## v2026.11.02.1622 — 공기업 배당 이력 관리자 조회 권한 회귀 복구 (운영 검증 완료)
+
+- **기록 기준:** 통합 메인 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`, PR #2496, 별도 문서 버전 v1622. 사용자 화면의 공기업 조회 실패 원인은 SQL320이 앱 직접 배당 로그 SELECT를 회수했으나 Nest가 구 SQL을 호출하는 코드 불일치.
+- **구현:** 전방 SQL324 `admin_soe_dividend_history_read(actor,limit)` SECURITY DEFINER 관리자 역할 검사/조회 범위 제한/EXECUTE-only. Nest 관리자 세션 행위자 전달. 금전 정산/원장/잔액 로직 변경 없음.
+- **검증:** 미니PC 40개 대상 테스트, 타입·빌드·lint, CI 전체 PASS. 격리 PG17 002~324 적용, 무권한 접근/삭제 관리자/조회 범위 오류/앱 직접 SELECT/UPDATE 차단 확인. 공식 Test 백업·복제본·적용·원장 권한 Test, 인증 세션 105건 보존. 병합 SHA와 동일한 공식 Test 런타임 신원 검증 통과.
+- **운영:** 119MB 백업 SHA 검증 후 별도 PostgreSQL에 실운영 복제·SQL324 확인. 실제 운영 신규 SQL324 적용, 구 국고 552/공기업 배당 744 기록 유지, 검증 당시 세션 1,899 보존. 신규 불변 v1622 백엔드/프런트 4194/4195 기동, 구 4184/4185 유지, Nginx 무중단 전환, 실제 공개 SHA·운영 릴리스 검사 `ok:true,failures:[]`. 앱 역할 실제 이력 20/100 조회 통과, 비인증 HTTP401 및 공개 HTTP200 검증.
+- **미수용/후속:** 관리자 실제 로그인 DOM E2E 미실시. 과거 국고 552건·배당 744건의 개별 정식 원장 출처, 과거 국민연금 정기지급, 조폐국/중앙은행 정식 발권·소각, 예금보험공사 금융 집행은 이 릴리스가 증명하지 않았으므로 차단 유지. 관리자 화면 조회 정상화와 금전 지급 가능을 혼동하지 않는다.
+- **문서·내역:** [작업 EN](docs/worklog/2026-11-02-soe-prod-cutover-v1622.md) / [KO](docs/worklog/2026-11-02-soe-prod-cutover-v1622.ko.md), [내부 EN](docs/updates/v2026.11.02.1622-soe-internal.md) / [KO](docs/updates/v2026.11.02.1622-soe-internal.ko.md), [GitHub EN](docs/updates/v2026.11.02.1622-soe-github.md) / [KO](docs/updates/v2026.11.02.1622-soe-github.ko.md). 기존 계획 삭제 없이 누적 기록.
