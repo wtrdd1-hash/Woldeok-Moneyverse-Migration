@@ -27,4 +27,3 @@
 - Global dependency audit FAIL: 9 vulnerabilities (8 moderate, 1 low). Full-route QA FAIL: `artifacts/qa/full-route-ledger.json` missing. Required remote CI incomplete; official authenticated browser/Android E2E, official Test exact SHA, independent restore and GitOps release proof BLOCKED.
 - Final exact-SHA gates will be rerun after this final commit; evidence and CI outcomes will be posted on PR #2584 without a further code commit. No main merge, Test deployment, Production promotion or GitOps changes. Rollback not needed. No other agent branches/worktrees deleted.
 - Local evidence: `/srv/moneyverse-data/tasks/mv-c-v1323-chat-peer-consent-20261103-0645/evidence/`; remote Draft PR #2584. The root checkout's other agent changes were not touched.
-
