@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -19,6 +20,7 @@ import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { parseDeliveryEvidence } from './delivery-evidence';
+import { filterDeliveryEvents, parseDeliveryFilter } from './delivery-filter';
 import { LogsSubNav } from '../logs-sub-nav';
 
 export const dynamic = 'force-dynamic';
@@ -28,13 +30,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminDeliveryLogsPage() {
+export default async function AdminDeliveryLogsPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<{ readonly status?: string | string[]; readonly event?: string | string[] }>;
+} = {}) {
   await requireAdminConsole('/admin/logs/delivery');
+  const filter = parseDeliveryFilter(await (searchParams ?? Promise.resolve({})));
   const response = await apiOrNull<unknown>(
     '/api/v1/admin/discord-outbox-events',
   );
   const outbox = parseDeliveryEvidence(response);
   const events = outbox?.events ?? [];
+  const visibleEvents = filter === null ? [] : filterDeliveryEvents(events, filter);
 
   return (
     <div data-page="admin-logs-delivery" className="mv-page mv-page--admin grid gap-5">
@@ -77,7 +85,32 @@ export default async function AdminDeliveryLogsPage() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grid gap-4">
+          {outbox !== null && filter !== null ? (
+            <form method="get" action="/admin/logs/delivery" role="search" aria-label="전달 기록 검색" className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-end">
+              <div className="grid min-w-0 gap-1">
+                <label htmlFor="delivery-status" className="text-sm font-medium">전달 상태</label>
+                <select id="delivery-status" name="status" defaultValue={filter.status} className="min-h-11 w-full min-w-0 rounded-md border bg-background px-3 text-sm">
+                  <option value="all">전체 상태</option>
+                  <option value="outstanding">진행 중·재시도 대기</option>
+                  <option value="terminal">전달 제외·최종 실패</option>
+                  <option value="delivered">전달 완료</option>
+                  <option value="retried">재시도 이력 (2회 이상)</option>
+                </select>
+              </div>
+              <div className="grid min-w-0 gap-1">
+                <label htmlFor="delivery-event" className="text-sm font-medium">사건 유형 검색</label>
+                <Input id="delivery-event" name="event" type="search" maxLength={64} defaultValue={filter.event} placeholder="wallet.deposit" autoComplete="off" className="min-h-11 min-w-0" />
+              </div>
+              <Button type="submit" className="min-h-11">검색</Button>
+              <Button asChild variant="outline" className="min-h-11"><Link href="/admin/logs/delivery">필터 초기화</Link></Button>
+            </form>
+          ) : null}
+          {outbox !== null && filter !== null ? (
+            <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+              검색 결과 {visibleEvents.length}건 / 최근 {events.length}건 (최대 30건 조회 범위, 전체 전달 이력 아님)
+            </p>
+          ) : null}
           {outbox === null ? (
             <div role="alert" aria-live="polite" className="grid gap-3">
               <EmptyState title="Discord 전달 현황 조회 불가" description="API 응답을 확인할 수 없어 전달 건수와 상태를 표시하지 않습니다." />
@@ -85,11 +118,19 @@ export default async function AdminDeliveryLogsPage() {
                 <Link href="/admin/logs/delivery">다시 조회</Link>
               </Button>
             </div>
+          ) : filter === null ? (
+            <div role="alert" className="grid gap-3 rounded-lg border border-destructive/40 p-4">
+              <p>잘못된 검색 조건입니다. 상태와 사건 유형을 확인해 주세요.</p>
+              <Button asChild variant="outline" className="min-h-11 w-full sm:w-fit"><Link href="/admin/logs/delivery">필터 초기화</Link></Button>
+            </div>
           ) : events.length === 0 ? (
             <EmptyState title="전달 기록이 없습니다." />
+          ) : visibleEvents.length === 0 ? (
+            <EmptyState title="조건에 맞는 전달 기록이 없습니다." description="최근 최대 30건 내에서 다른 조건을 선택하거나 필터를 초기화해 주세요." />
           ) : (
             <div className="overflow-x-auto rounded-xl border">
               <Table>
+                <caption className="sr-only">최근 최대 30건에서 검색 조건에 맞는 Discord 전달 이벤트</caption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>시각</TableHead>
@@ -100,7 +141,7 @@ export default async function AdminDeliveryLogsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.map((event) => (
+                  {visibleEvents.map((event) => (
                     <TableRow key={event.event_id}>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                         {formatMoment(event.created_at)}

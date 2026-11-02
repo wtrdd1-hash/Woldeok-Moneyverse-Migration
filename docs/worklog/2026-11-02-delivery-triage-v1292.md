@@ -9,9 +9,14 @@
 
 ## In progress
 - [x] RED regression reproduced (focused test fails before implementation).
-- [ ] Verified filter implemented and tested.
-- [ ] Mid-run main/plan fetch and source overlap checked.
+- [x] Verified filter implemented and focused tests 17 PASS.
+- [x] Mid-run main/plan fetch checked; unchanged a8541927; no overlap with A/B/QA/Gemini PRs.
 - [ ] Full exact-SHA gates and isolated DB checks recorded.
 
 ## Finished
 - Pending verification. Merge/production forbidden until all gates pass.
+
+### Mid-run — 2026-11-02 10:46 KST
+- RED test failed on missing delivery filter; GREEN: 17/17 focused tests pass. Status filters and literal event-type substring operate only on the 30-row validated response. Invalid URL arrays, unknown statuses, control characters and overly long searches fail closed.
+- Existing guarded NestJS controller, repository and `admin_recent_discord_outbox_events(uuid, integer)` SQL remain the source of truth; no UI-only simulated receipts, writes, new permissions or new endpoints.
+- Re-fetched `origin/main` and EN/KO integrated plan; baseline unchanged. Re-evaluate before any merge.
