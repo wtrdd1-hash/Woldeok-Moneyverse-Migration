@@ -1,3 +1,10 @@
+## v2026.11.02.1642 — F675-216 문의 원자적 영수증과 동시 요청량 제한 보완 (기능 보완 / 초안 / 배포 보류)
+**검증/런타임:** 정책·보안·백업 기본 시험 176/176 PASS, 릴리스 분류 24/24 PASS, 확장 정책 180/181 PASS·기존 읽기 전용 브랜치 정리 기대치 1 FAIL, QA 22/23 PASS·기존 공성전 문구 #2391 1 FAIL, 한영 4쌍 ×20 표지자 PASS, git diff --check PASS. Test·Production 공개 버전 API 모두 510dbe6...로 최신 main과 다름(실행 이미지 증명 아님). F675-216 수용시험 미실행.
+**사이클:** 이전 기능 추가 v1640 → 현재 기능 보완 v1642 → 다음 기능 추가 v1644(잠정). 시작·중간 확인한 main a8541927c3a351d980454c66e95a3356c47e0722, 상위 미병합 Draft #2444, 개발 이슈 #2442. **제안/미구현.**
+**실측:** 마이그레이션 196은 문의 스레드·첫 메시지에 동일 서버 키를 쓰지만 메시지 ID를 반환하지 않고, 302 영수증은 ID를 알아야 조회 가능하며 Next 기존 액션은 호출마다 새 UUID를 생성한다. 개발 PostgreSQL 17.11 현재 앱 역할은 support_threads SELECT/INSERT/UPDATE 및 support_messages INSERT가 거부되지만 user_items/account_balances UPDATE는 허용된다(#993). Test·Production 상태는 미확인. 과거 권한 관측을 현재 사실로 오인하지 않는다.
+**개선:** 단일 SECURITY DEFINER 트랜잭션, 클라이언트 문의 키와 서버 문의 키 분리, 실제 스레드·첫 메시지 확인 영수증, 회원 잠금 후 최근 60분 3건·KST 하루 10건 동시 제한, 정규화 SHA-256 기반 제한 미차감 멱등 재실행, 잠금 순서와 경쟁 롤백. POST 결과 불명 중 GET 404는 이후 커밋 부재를 보장하지 않으므로 동일 키 유지·자동 새 키 생성 금지. 웹/Android 비공개·noindex, 한영 WCAG 2.2 AA, 20명 이상 익명 통계, 기존 관리자 문의, 기본 OFF, 경제 쓰기 0. P0 4/P1 6의 상세 수용 조건은 영문·국문 PROJECT_PLAN에 기록했고 기능 Test는 미실행. 외부 신규 승인 0건·누적 UNKNOWN/10,000건 BLOCKED/IN PROGRESS. Production RELEASE HOLD, 런타임·DB·배포 변경 없음.
+
+
 ## v2026.11.02.1640 — F675-216 회원 보유품 상태 증빙 연계 문의 (기능 추가 / 초안 / 배포 보류)
 **GitHub 인계:** 이슈 #2442 OPEN / P0 4 + P1 6; Draft PR #2444 OPEN / HOLD; RELEASE HOLD.
 **검증:** 정책·보안·백업 171/171 PASS, 릴리스 분류 24/24 PASS, QA 22/23 PASS·기존 공성전 문구 검증 1건 FAIL(#2391), 영문·국문 4쌍 대조 PASS, git diff --check PASS. 신규 기능 수용시험 미실행.
