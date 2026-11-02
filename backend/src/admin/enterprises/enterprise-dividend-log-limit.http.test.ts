@@ -49,6 +49,6 @@ describe('Admin enterprise dividend logs HTTP boundary (isolated guard doubles)'
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs').expect(200);
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs?limit=1').expect(200);
     await request(app.getHttpServer()).get('/admin/enterprises/dividend-logs?limit=100').expect(200);
-    expect(listRecentDividendLogs.mock.calls).toEqual([[20], [1], [100]]);
+    expect(listRecentDividendLogs.mock.calls).toEqual([[20, '11111111-1111-4111-8111-111111111111'], [1, '11111111-1111-4111-8111-111111111111'], [100, '11111111-1111-4111-8111-111111111111']]);
   });
 });
