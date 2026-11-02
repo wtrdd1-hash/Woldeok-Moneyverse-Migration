@@ -7,3 +7,5 @@
 **종료:** 검증·CI·PR 근거 추후 기재. 외부 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 기능 미구현, 런타임/DB/금융/Test/Production 무변경. RELEASE HOLD.
 
 **로컬 검증:** 정책·보안·릴리스 확장 시험 183/183 PASS, 릴리스 분류 24/24 PASS, 저장소 보안 PASS, 영문/국문 4쌍 및 설계 10항목·P0 4/P1 6 대조 PASS, git diff --check PASS. 실제 신규 기능 시험 미실행.
+
+**GitHub:** Draft PR #2516 OPEN/HOLD; developer issue #2497 updated.

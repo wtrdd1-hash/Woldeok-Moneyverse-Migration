@@ -7,3 +7,5 @@
 **End:** Pending verification/CI/PR evidence appended below. External references new verified 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Feature not implemented, no runtime/DB/financial/Test/Production mutation. RELEASE HOLD.
 
 **Local verification:** policy/security/release expanded 183/183 PASS; release classifier 24/24 PASS; repository security PASS; EN/KO four pairs and ten design clauses + 4 P0/6 P1 parity PASS; git diff --check PASS. No runtime feature tests executed.
+
+**GitHub:** Draft PR #2516 OPEN/HOLD; developer issue #2497 updated.
