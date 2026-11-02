@@ -52,3 +52,20 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+
+describe('StockCommunityService self-declared position discovery', () => {
+  it('applies the disclosure filter after the bounded SECURITY DEFINER public read', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(undefined, undefined, 'holder');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('position_disclosure = $4::text');
+    expect(values).toEqual([50, null, null, 'holder']);
+  });
+  it('rejects invalid position values before querying PostgreSQL', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'administrator')).rejects.toThrow('invalid position disclosure');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
