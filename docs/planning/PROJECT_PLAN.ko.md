@@ -1,3 +1,39 @@
+## v2026.11.02.1662 — F675-221 문의 보존 목록 스냅샷·커서·쓰기 정합성 (기능 보완 / DRAFT / RELEASE HOLD)
+
+**회차·진실 기준:** 이전 기능 추가 v1660 → 현재 기능 보완 v1662 → 다음 기능 추가 v1664(잠정). 최신 origin/main 3eb1441090cb0602e054908547dcf43bfe4299dd, AGENTS.md·README.md·영문 정본 PROJECT_PLAN.md·한국어 동등본을 시작·중간 재조회했다. 미병합 Draft #2498 / current Draft #2516에 적층한 문서 전용 제안이며 이슈 #2497 / Draft PR #2516을 갱신한다. **F675-221은 아직 구현되지 않았다.** 런타임·스키마·회원·금융·Test·Production 변경 없음.
+
+### 실제 소스 근거와 v1660 설계의 공백
+- 마이그레이션 196은 NOT NULL last_message_at과 (user_id,last_message_at DESC,id DESC) 인덱스를 만든다. support_my_threads는 최대 100건, Nest SupportRepository는 이 표본에서 검색하며 Next /support는 명시한 과거 문의가 없으면 첫 문의를 선택할 수 있다. 개발 PG17.11 읽기 전용 결과 문의 3건·메시지 6건, support_member_archive_revisions 테이블 없음. 실제 회원 사고가 확인된 것은 아니다.
+- **스냅샷 공백:** v1660의 ‘단일 SQL 문’만으로는 충분하지 않다. VOLATILE PL/pgSQL SECURITY DEFINER 함수가 READ COMMITTED에서 리비전과 목록을 서로 다른 내부 SQL 문으로 읽으면 각 문에 다른 MVCC 스냅샷이 적용될 수 있다. 그 사이 변경·보존 삭제가 커밋되면 잘못된 리비전으로 커서를 발급해 중복·누락할 위험이 있다. HTTP 요청 하나라는 이유로 스냅샷 일치를 주장하지 않는다.
+- **쓰기 순서 공백:** 마이그레이션 196의 회원·관리자 답변 함수는 메시지 INSERT에서 얻은 v_at으로 나중에 support_threads.last_message_at을 UPDATE한다. 서로 다른 요청이 해당 행 잠금을 기다리면 나중에 반영된 오래된 시각이 최신 시각을 덮을 수 있다. 이는 재현된 운영 사고가 아니라 코드에서 도출한 경합 위험이다.
+- **정밀도 공백:** node-postgres Date 변환은 PostgreSQL 마이크로초를 밀리초로 줄일 수 있다. JS Date로 키셋 커서를 만들면 1ms 안의 서로 다른 행이 중복·누락될 수 있다. UUID 비교는 DB uuid 타입을 사용한다.
+
+### 개발 승인 전 확정할 설계 변경
+1. **대상·권한·API:** support_case_archive 기본 OFF, GET /api/v1/support/thread-pages, 50+1 조회, 본인 문의와 제목 literal/상태/KST 날짜 필터를 유지한다. 세션·동의로 확인한 actor만 서버에서 전달하며 쿼리·커서·Android에서 actor/userId를 받지 않는다. DB SECURITY DEFINER의 user_id=p_actor는 소유자 범위 제한이지 UUID만으로 독립 신원 인증이 되는 것은 아니다. 보존된 메타데이터만 대상으로 하고 삭제 이력·전체 역사 건수를 주장하지 않는다. 정확한 문의 이동 F675-219 구현 전에는 다른 문의로 대체 이동 금지.
+2. **동일 스냅샷:** 리비전과 행을 한 문장의 동일 MVCC 스냅샷으로 읽는 SQL STABLE SECURITY DEFINER 함수와 MATERIALIZED 리비전 CTE 또는 한 연결의 REPEATABLE READ READ ONLY 트랜잭션을 사용한다. VOLATILE 함수 내부의 복수 READ COMMITTED 문이나 서로 다른 풀 연결은 금지한다. 커서 리비전이 다르면 부분 행 없이 409 ARCHIVE_CHANGED와 사용자 선택 재시작을 반환한다. 쓰기가 스냅샷 전·조회 중·페이지 사이에 커밋되는 3가지 장벽 시험으로 증명한다.
+3. **순방향 마이그레이션:** 196을 수정하지 않고 신규 마이그레이션에서 기존 회원 리비전 초기화와 트리거 설치 순서의 경합을 막는다(단일 트랜잭션, 짧은 DDL 잠금, lock_timeout, 실패 시 재시도/중단). 회원별 리비전 생성·증가는 INSERT ... ON CONFLICT(user_id) DO UPDATE SET revision=revision+1 RETURNING revision으로 원자화하고 BIGINT 초과는 차단한다. 문의가 없는 신규 회원의 검증된 0만 허용하고 문의가 존재하지만 리비전 행이 없으면 503으로 차단한다. 재시작·보존 삭제·기능 OFF·롤백에서 리비전 초기화 금지.
+4. **트리거 적용 범위:** 문의 INSERT/DELETE와 제목·상태·last_message_at 및 응답에 포함된 메타데이터 변경에 같은 트랜잭션으로 리비전을 올린다. 소유자 이전, created_at·create_key 변경을 금지한다. 관계없는 열의 값이 실제로 바뀌지 않은 UPDATE는 안전성을 증명한 경우에만 제외한다. support_create_thread, support_add_message, admin_support_reply, admin_support_set_status, 보존·일괄 삭제, 탈퇴 경로를 실제 DB 회귀시험으로 검증한다. moneyverse_app 직접 테이블 DML/SELECT 권한 추가 금지. 문의→리비전 잠금 순서, 연쇄 삭제 트리거, 데드락·시간제한·재시도를 명시한다.
+5. **마지막 메시지 시각 단조성:** 문의 행 잠금 후 last_message_at=GREATEST(기존 값, 새 메시지 시각)으로 갱신하며 시각은 잠금 획득 후 생성하거나 동등한 결정적 직렬화 방식을 검증한다. 관리자 상태만 변경할 때 새 메시지가 온 것처럼 시각을 바꾸지 않고 리비전만 올린다. 서로 다른 생성 시각·커밋 순서의 동시 회원/관리자 답변을 시험해 정렬이 뒤로 가지 않음을 증명한다.
+6. **정확한 키셋:** PostgreSQL에서 마이크로초 epoch 10진 문자열(또는 소수점 6자리 ISO)과 UUID를 생성해 커서에 넣는다. Node·Android는 문자열/BigInt로 처리하고 JS Date 밀리초·부동소수점으로 경계를 계산하지 않는다. SQL (last_message_at,id)<($time::timestamptz,$uuid::uuid), DESC/DESC, LIMIT 51. 10,001건 합성 데이터의 전체 정렬 결과와 비교하며 동일 밀리초 내 마이크로초 차이, 동일 시각/UUID 경계, 한국시간 자정 및 보존 삭제를 검증한다. 화면의 시각 표시는 밀리초여도 다음 커서는 서버만 생성한다.
+7. **커서·필터:** 서버 전용 AES-256-GCM, 96비트 랜덤 nonce, 키 ID 교체, 경로·계약 버전 AAD, 회원·세션·정규화 필터·리비전·정확한 DB 경계 결속, 5분 만료 및 페이지별 갱신, 길이 최대 2048바이트. 검색어는 한 번만 trim+NFC, 유니코드 2~80 코드포인트·UTF-8 바이트 상한, 제어·양방향 오버라이드 문자 거부. 상태와 KST 날짜 UTC 반열린 범위 정규화, 중복/미지 파라미터 거부. SQL은 literal 부분 문자열이며 LIKE 와일드카드가 아니다. 변조·다른 세션·필터 변경은 400, 만료·폐기 키는 410, 리비전 변경은 409; 어느 경우도 빈 목록으로 대체하지 않는다. 제목·커서·회원 ID를 분석/오류 로그에 남기지 않는다.
+8. **화면·실패 상태:** /support/archive 최신 50건·이전 50건 더 보기·필터 초기화·검증된 빈 결과·로딩·409 재시작·410 만료·429 제한·503 검증 불가를 구분한다. 잘못된 상류 HTTP 200은 빈 결과가 아니다. 제목·상태·시각만 표시하고 메시지 본문은 표시하지 않는다. 웹·app-api·Android·리다이렉트·오류 응답의 private no-store, noindex/nofollow, no-referrer, nosniff, ETag/304 금지를 검증한다. Android 계정 전환 시 요청 폐기·메모리 커서 삭제. 한국어/영어, 키보드·스크린리더, 320px, 200% 확대, WCAG 2.2 AA.
+9. **관리·시험·롤백:** GET은 무쓰기. 정확한 문의 이동, 스키마·보안·금융·QA·공식 Test 정확 SHA 게이트 전 기능 OFF. 관리자는 개별 문의 추적 없이 서로 다른 회원 20명 이상 익명 집계(페이지 깊이, 409/410/429/503, p95)만 조회. P1 수용시험은 **제안만 했고 미실행**: 회원 문의 10,001건+타 회원 100명, 쓰기/조회 경합 100회, 잘못된 커서 100회, 신규 설치·동시 백필·탈퇴·DB 최소 권한, p95<350ms, Next/Nest/Android 로그인 E2E, 외부 암호화 독립 복원·롤백. 무제한 COUNT/OFFSET/직접 테이블 권한 금지. 롤백은 기능 OFF이며 리비전 스키마·값은 유지한다.
+10. **최신 운영 증거 정정:** v1660의 main a8541927보다 최신 main은 3eb1441이며 문서·운영 기준이 갱신됐다. 최신 정본 운영 기준 v1622에 따르면 Test/Production 앱 SHA는 6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e이고 이번 공개 버전 API 재조회도 일치한다. main 3eb1441에는 이후 문서 전용 커밋이 포함되어 있으므로 **main과 앱 SHA 차이만으로 배포 실패라고 판단하면 안 된다.** 독립적으로 확인 가능한 마지막 QA v1467 FAILED/P0(당시 운영 다국어 HTTP500 16/28, 앱 UPDATE195/DELETE194/264, 체크섬 5건, Test DB 불일치, 운영 모드 백엔드 2건 실패, 의존성 감사 9건)는 **v1622 승격 이전의 보고서**다. 새 운영에서도 같은 수치라고 주장하지 않으며 최신 QA 재실행이 필요하다. 외부 복원·금융 원장 출처·DB 최소 권한·최신 전체 QA는 미해결이므로 본 기능 Production RELEASE HOLD.
+
+### 개발 인계 — P0 4건 + P1 6건 (이슈 #2497 / Draft PR #2516)
+- **P0 OPS1662-01:** v1622 실제 Test/Production 서비스·이미지 digest·소스 SHA 및 암호화 외부 독립 복원/롤백 재검증.
+- **P0 SEC1662-02:** 현재 운영 앱 계정 권한·마이그레이션 체크섬 재측정, #993 최소 권한 순방향 수정, 소유권·탈퇴 DB 시험.
+- **P0 FIN1662-03:** 국고/MINT/SWF/원장 과거 출처 독립 대조 및 조회 전후 WLD·보유품·원장 변동 0 검증.
+- **P0 REL1662-04:** v1622 이후 전체 QA 재실행, 과거 16/28 HTTP500·운영 모드 실패 재평가, 공식 Test 정확 SHA 로그인 E2E·승격 승인.
+- **P1 ARCHIVE1662-05 B/DB:** STABLE 단일 스냅샷 또는 RR, 원자적 리비전 UPSERT, 트리거/백필 잠금 순서·경합 검증.
+- **P1 ARCHIVE1662-06 B/API:** 마이크로초 정확 커서·정규화 필터·세션 결속 AEAD·400/409/410/429/503·잘못된 200 차단.
+- **P1 ARCHIVE1662-07 B/DB 쓰기:** last_message_at 단조성, 모든 문의 변경·보존·탈퇴 트리거 범위.
+- **P1 ARCHIVE1662-08 A/Web+C/Android:** 정확한 본인 문의 이동, 만료/변경 UI, 세션 차단·비공개 헤더·접근성.
+- **P1 ARCHIVE1662-09 관리/KPI:** 기능 기본 OFF, 20명 이상 익명 지표, 개인정보 로그 금지·기능 롤백.
+- **P1 ARCHIVE1662-10 QA:** 10,001건·100회 경합·마이크로초·신규 설치·권한·Test 정확 SHA·독립 복원.
+
+**외부 독립 레퍼런스 게이트:** 이번 신규 확보·검증·중복제거·근거 분류 승인 0건, 누적 승인 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. **기능 수용시험 미실행.** 기획 과정에서 런타임 코드·DB 스키마/데이터·WLD·원장·Test·Production을 변경하지 않았다.
+
 ## v2026.11.02.1660 — F675-221 회원 관리자 문의 전체 보존 목록 탐색 (기능 추가 / DRAFT / RELEASE HOLD)
 
 **회차/정본:** 이전 기능 보완 v1658 → 현재 기능 추가 v1660 → 다음 기능 보완 v1662(잠정). 최신 origin/main a8541927c3a351d980454c66e95a3356c47e0722 및 AGENTS.md·README.md·영문 PROJECT_PLAN.md를 기준으로 시작·중간 재확인. 미병합 Draft #2495에 적층하는 문서 전용 기획, 개발 이슈 #2497·현재 Draft PR #2498. **F675-221은 아직 구현되지 않았다.** 런타임·DB·WLD·보유품·원장·Test·Production 변경 및 병합·배포 금지.
