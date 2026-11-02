@@ -136,6 +136,8 @@ describe('admin SEO audit: real authority and honest evidence', () => {
     expect((await POST(postRequest())).status).toBe(409);
     expect((await POST(postRequest({ candidateUrlCount: 2, candidateDigest: 'not-a-digest' }))).status).toBe(400);
     expect((await POST(postRequest({ candidateUrlCount: 1, candidateDigest }))).status).toBe(409);
+    urlsMock.mockReturnValueOnce(['https://easy-scraping.com/', 'https://easy-scraping.com/new-tools']);
+    expect((await POST(postRequest({ candidateUrlCount: 2, candidateDigest }))).status).toBe(409);
     expect((await POST(new Request('https://easy-scraping.com/api/admin/seo-audit', {
       method: 'POST', headers: { origin: 'https://easy-scraping.com' },
     }))).status).toBe(400);

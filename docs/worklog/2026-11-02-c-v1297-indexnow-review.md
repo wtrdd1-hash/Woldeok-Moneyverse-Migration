@@ -16,3 +16,8 @@ Status: STARTED / RELEASE HOLD. Canonical English record; Korean companion is se
 ## In progress — 2026-11-02 13:45 KST
 - RED reproduced on exact isolated branch: 8 failures / 14 passes in focused 22 tests. Missing digest/preview, unreviewed POST accepted, unsafe URL list not rejected, no confirmation UI, and private HTTP headers missing.
 - Backend contract: existing Next BFF calls real IndexNow external API; no PostgreSQL writes are involved. Plan to bind a SHA-256 digest to the exact URL list, not merely count, and require explicit confirmation.
+
+## In progress — 2026-11-02 13:47 KST (RED→GREEN)
+- Focused 30/30 PASS across BFF, evidence parser, real repository candidate list, IndexNow adapter and accessible React confirmation. TDD uncovered an extra source issue: root URL was emitted without canonical trailing slash; corrected only that URL. The public savings-pot simulation is intentionally sitemap-indexable, so the validator preserves it rather than incorrectly treating it as private.
+- GET now exposes the exact ordered candidate URL list and SHA-256 digest under private/noindex/no-referrer. POST requires same-origin, elevated admin console, strict JSON confirmation matching both digest and count, and submits that exact list. 409 on same-count source change; 503 on unsafe candidate; no false indexing claims. Confirmation modal is keyboard-accessible, touch controls >=44px; cancellation sends no request.
+- Contract build, frontend typecheck, focused lint PASS. Midpoint origin/main remains `a8541927c3a351d980454c66e95a3356c47e0722`; latest planning v1650 #2473 still Draft/HOLD. Other A/B/C/QA work untouched. Full gates remain pending.

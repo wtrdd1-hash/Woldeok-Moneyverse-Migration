@@ -1,12 +1,21 @@
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { ApiError, api } from '@/lib/api';
 import { getAllPublicUrlsForIndexNow, submitToIndexNow } from '@/lib/indexnow';
-import { parseIndexNowReceipt, parseSeoTelemetry } from '@/lib/admin-seo-audit-evidence';
+import { parseIndexNowCandidateUrls, parseIndexNowReceipt, parseSeoTelemetry } from '@/lib/admin-seo-audit-evidence';
 
 export const dynamic = 'force-dynamic';
 
 const reply = (body: unknown, status = 200) =>
-  NextResponse.json(body, { status, headers: { 'Cache-Control': 'private, no-store' } });
+  NextResponse.json(body, { status, headers: {
+    'Cache-Control': 'private, no-store',
+    'X-Robots-Tag': 'noindex, nofollow',
+    'Referrer-Policy': 'no-referrer',
+  } });
+
+const candidates = () => parseIndexNowCandidateUrls(getAllPublicUrlsForIndexNow());
+const digestOf = (urls: readonly string[]) =>
+  createHash('sha256').update(JSON.stringify(urls)).digest('hex');
 
 async function authorize(): Promise<NextResponse | null> {
   try {
@@ -23,11 +32,15 @@ async function authorize(): Promise<NextResponse | null> {
 export async function GET() {
   const denied = await authorize();
   if (denied) return denied;
+  const urls = candidates();
+  if (urls === null) return reply({ error: 'candidate_source_invalid' }, 503);
   let telemetry = null;
   try { telemetry = parseSeoTelemetry(await api('/api/v1/seo/status')); } catch { /* unknown, not healthy */ }
   return reply({
     timestamp: new Date().toISOString(),
-    candidateUrlCount: getAllPublicUrlsForIndexNow().length,
+    candidateUrlCount: urls.length,
+    candidateUrls: urls,
+    candidateDigest: digestOf(urls),
     telemetry,
     telemetryStatus: telemetry ? 'observed' : 'unavailable',
     indexingStatus: 'not_measured',
@@ -43,9 +56,34 @@ export async function POST(request: Request) {
   }
   const denied = await authorize();
   if (denied) return denied;
+  if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
+    return reply({ ok: false, error: 'invalid_confirmation' }, 400);
+  }
+  let confirmation: unknown;
   try {
-    const result = await submitToIndexNow();
-    if (!result.success) return reply({
+    const raw = await request.text();
+    if (raw.length > 256) return reply({ ok: false, error: 'invalid_confirmation' }, 400);
+    confirmation = JSON.parse(raw);
+  } catch {
+    return reply({ ok: false, error: 'invalid_confirmation' }, 400);
+  }
+  if (confirmation === null || typeof confirmation !== 'object' || Array.isArray(confirmation)) {
+    return reply({ ok: false, error: 'invalid_confirmation' }, 400);
+  }
+  const body = confirmation as Record<string, unknown>;
+  if (typeof body.candidateDigest !== 'string' || !/^[a-f0-9]{64}$/.test(body.candidateDigest) ||
+      typeof body.candidateUrlCount !== 'number' || !Number.isSafeInteger(body.candidateUrlCount) ||
+      body.candidateUrlCount < 1 || body.candidateUrlCount > 10000) {
+    return reply({ ok: false, error: 'invalid_confirmation' }, 400);
+  }
+  const urls = candidates();
+  if (urls === null) return reply({ ok: false, error: 'candidate_source_invalid' }, 503);
+  if (urls.length !== body.candidateUrlCount || digestOf(urls) !== body.candidateDigest) {
+    return reply({ ok: false, error: 'candidate_source_changed' }, 409);
+  }
+  try {
+    const result = await submitToIndexNow(urls);
+    if (!result.success || result.submittedCount !== urls.length) return reply({
       ok: false, error: 'indexnow_submission_failed',
       submittedCount: result.submittedCount,
       upstreamStatus: result.status,

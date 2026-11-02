@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { parseSeoTelemetry, parseSeoAuditSnapshot, parseIndexNowReceipt } from './admin-seo-audit-evidence';
+import { parseSeoTelemetry, parseSeoAuditSnapshot, parseIndexNowReceipt, parseIndexNowCandidateUrls } from './admin-seo-audit-evidence';
+
+import { getAllPublicUrlsForIndexNow } from './indexnow';
 
 const telemetry = { totalHits24h: 12, totalHits7d: 30, avgDurationMs: 87, botDistribution: { Googlebot: 7 } };
 const snapshot = { candidateUrls: ['https://easy-scraping.com/', 'https://easy-scraping.com/tools'], candidateDigest: 'a'.repeat(64), timestamp: new Date().toISOString(), candidateUrlCount: 2, telemetry,
   telemetryStatus: 'observed', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured' };
 
 describe('admin SEO audit evidence', () => {
+  it('accepts the actual repository-generated IndexNow candidate set without private routes', () => {
+    const urls = getAllPublicUrlsForIndexNow();
+    expect(urls.length).toBeGreaterThan(20);
+    expect(urls.filter((url) => parseIndexNowCandidateUrls([url]) === null)).toEqual([]);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(parseIndexNowCandidateUrls(urls)).toEqual(urls);
+    expect(urls.some((url) => url.includes('/admin/') || url.includes('/account/'))).toBe(false);
+  });
   it('accepts bounded crawler measurements without private source fields', () => {
     expect(parseSeoTelemetry({ ...telemetry, privateLog: 'should not leak' })).toEqual(telemetry);
     expect(parseSeoAuditSnapshot(snapshot)?.telemetry?.totalHits24h).toBe(12);

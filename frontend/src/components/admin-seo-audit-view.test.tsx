@@ -58,6 +58,35 @@ describe('admin SEO audit UI evidence and accessibility', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('requires a new review after a changed candidate set, never silently retries POST', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(snapshot))
+      .mockResolvedValueOnce({ ok: false, status: 409, json: async () => ({ error: 'candidate_source_changed' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<AdminSeoAuditView />);
+    const submit = await screen.findByRole('button', { name: /IndexNow URL 제출/ });
+    fireEvent.click(submit);
+    fireEvent.click(screen.getByRole('button', { name: '검토한 URL 전송 확인' }));
+    expect(await screen.findByText(/제출 후보 목록이 변경되었습니다/)).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect((submit as HTMLButtonElement).disabled).toBe(true);
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it('does not re-submit the same confirmed batch from one browser after acceptance', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(response(snapshot))
+      .mockResolvedValueOnce({ ok: true, status: 202, json: async () => ({
+        ok: true, submittedCount: 2, status: 202, indexingConfirmed: false,
+      }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<AdminSeoAuditView />);
+    const submit = await screen.findByRole('button', { name: /IndexNow URL 제출/ });
+    fireEvent.click(submit);
+    fireEvent.click(screen.getByRole('button', { name: '검토한 URL 전송 확인' }));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
+    expect((submit as HTMLButtonElement).disabled).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps the submit control disabled when no real candidate URL exists', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({ ...snapshot, candidateUrlCount: 0, candidateUrls: [] })));
     render(<AdminSeoAuditView />);

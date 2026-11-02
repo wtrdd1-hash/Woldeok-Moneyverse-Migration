@@ -6,6 +6,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { parseIndexNowReceipt, parseSeoAuditSnapshot, type SeoAuditSnapshot } from '@/lib/admin-seo-audit-evidence';
 
 const formatNumber = (value: number | undefined) =>
@@ -16,6 +17,8 @@ export function AdminSeoAuditView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submittedDigest, setSubmittedDigest] = useState<string | null>(null);
   const [submission, setSubmission] = useState<ReturnType<typeof parseIndexNowReceipt>>(null);
 
   const load = useCallback(async (signal?: AbortSignal) => {
@@ -23,6 +26,8 @@ export function AdminSeoAuditView() {
     setError(null);
     setAudit(null);
     setSubmission(null);
+    setSubmittedDigest(null);
+    setConfirmOpen(false);
     try {
       const response = await fetch('/api/admin/seo-audit', {
         credentials: 'same-origin', cache: 'no-store', ...(signal ? { signal } : {}),
@@ -49,16 +54,25 @@ export function AdminSeoAuditView() {
   }, [load]);
 
   const submit = async () => {
-    if (submitting) return;
+    if (submitting || !audit || submittedDigest === audit.candidateDigest) return;
     setSubmitting(true);
     setSubmission(null);
     try {
       const response = await fetch('/api/admin/seo-audit', {
         method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ candidateUrlCount: audit.candidateUrlCount, candidateDigest: audit.candidateDigest }),
       });
-      const result = parseIndexNowReceipt(await response.json());
+      const payload: unknown = await response.json();
+      if (response.status === 409) {
+        setAudit(null);
+        setError('제출 후보 목록이 변경되었습니다. 다시 조회하고 검토한 뒤 제출해 주세요.');
+        throw new Error('제출 후보가 변경되었습니다. 새로 조회해 주세요.');
+      }
+      const result = parseIndexNowReceipt(payload);
       if (!response.ok || !result) throw new Error('IndexNow 접수 결과를 검증할 수 없습니다.');
       setSubmission(result);
+      setSubmittedDigest(audit.candidateDigest);
       toast.success(`${formatNumber(result.submittedCount)}개 URL의 IndexNow 요청이 접수되었습니다. 색인 완료는 별도 확인이 필요합니다.`);
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '전송 실패');
@@ -84,16 +98,41 @@ export function AdminSeoAuditView() {
           <h1 className="text-2xl font-bold">검색엔진 수집 감사</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">수집 로그는 서버 관측치입니다. 실제 검색 색인과 구조화 데이터 유효성은 별도 검증이 필요합니다.</p>
         </div>
-        <Button type="button" onClick={() => void submit()} disabled={submitting || loading || !audit || audit.candidateUrlCount === 0} className="min-h-11 max-w-full whitespace-normal text-left">
+        <Button type="button" onClick={() => setConfirmOpen(true)} disabled={submitting || loading || !audit || audit.candidateUrlCount === 0 || submittedDigest === audit.candidateDigest} className="min-h-11 max-w-full whitespace-normal text-left">
           <RefreshCw aria-hidden="true" className={submitting ? 'mr-2 size-4 animate-spin' : 'mr-2 size-4'} />
           {submitting ? 'IndexNow 전송 중' : 'IndexNow URL 제출'}
         </Button>
       </div>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>IndexNow 제출 대상 확인</AlertDialogTitle>
+            <AlertDialogDescription>
+              검토한 {audit?.candidateUrlCount ?? 0}개 URL의 변경 알림을 외부 IndexNow 서버에 전송합니다.
+              수락은 검색엔진 색인 완료를 뜻하지 않습니다. 목록이 바뀌면 서버가 전송을 거부합니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-11" disabled={submitting}>취소</AlertDialogCancel>
+            <Button type="button" className="min-h-11" disabled={submitting || !audit}
+              onClick={() => { setConfirmOpen(false); void submit(); }}>검토한 URL 전송 확인</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div role="status" aria-live="polite" className="text-sm text-muted-foreground">
         {loading ? '감사 정보 불러오는 중…' : error ?? (audit ? `응답 시각: ${new Date(audit.timestamp).toLocaleString('ko-KR')} (개별 크롤러 측정 시각 아님)` : '정보 없음')}
       </div>
       {error && <Button type="button" variant="outline" onClick={() => void load()} className="min-h-11">다시 시도</Button>}
       {audit && <>
+        <details className="rounded-lg border p-4 text-sm">
+          <summary className="min-h-11 cursor-pointer py-2 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">
+            제출 후보 URL {audit.candidateUrlCount}개 검토
+          </summary>
+          <p className="my-2 text-xs text-muted-foreground">현재 서버가 생성한 제출 후보 목록입니다. 실제 색인 가능 여부는 별도로 검증해야 합니다.</p>
+          <ol aria-label="IndexNow 제출 후보 URL" className="max-h-64 list-decimal space-y-1 overflow-auto pl-5">
+            {audit.candidateUrls.map((url) => <li key={url} className="break-all">{url}</li>)}
+          </ol>
+        </details>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Metric title="IndexNow 제출 후보 URL" value={`${formatNumber(audit.candidateUrlCount)}개`} detail="실제 색인 URL 수가 아닙니다." />
           <Metric title="최근 24시간 크롤러 요청" value={formatNumber(telemetry?.totalHits24h)} detail={telemetry ? '서버 로그 관측' : '텔레메트리 이용 불가'} />
