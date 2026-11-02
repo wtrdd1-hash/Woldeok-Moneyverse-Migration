@@ -5,6 +5,7 @@ import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
+import { parseVerifiedBankStanding } from '@/app/bank/bank-standing-proof';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -271,6 +272,25 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (parts.length === 2 && parts[0] === 'banking' && parts[1] === 'standing' && request.method === 'GET') {
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Bank Standing Unavailable', 'bank_standing_unavailable',
+        'The owner bank standing could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON bank standing');
+      const standing = parseVerifiedBankStanding(await response.clone().json());
+      if (!standing) throw new Error('unverified bank standing');
+      return contractJson(standing, { status: 200, headers: {
+        'cache-control': 'private, no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer',
+      } });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bank_standing_unverified',
+        'The owner bank standing could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -581,6 +601,10 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts[0] === 'banking') {
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.

@@ -8,8 +8,12 @@
 - Plan: TDD RED malformed/valid huge/loan/bond/Android; strict parser; web verified/unavailable and accessible retry; Android fail-closed private response; no fabricated accrued interest; targeted and full gates; official exact-SHA Test only if gates PASS.
 - Release: HOLD pending every mandatory gate; protect all other worktrees and reservations.
 
-## In progress
-- Pending RED, implementation and verification.
+## In progress — 2026-11-02 19:45–19:49 KST
+- TDD RED: missing proof source first; then 6 meaningful failures (invalid Android 200, public indexing, raw SQL error, exact amount), 2 hero display failures and 1 edge-header failure.
+- GREEN: strict migration 194 owner bank parser; reject malformed amounts, rates, loan, bonds, duplicates; web unavailable vs valid; Android 503 and private/noindex/no-referrer; hero uses exact PostgreSQL unclaimed interest, no synthetic per-second WLD; edge protection for default/localized routes.
+- Focused 41/41 PASS, full lint PASS (0 errors, 1026 existing warnings), full typecheck PASS.
+- Mid-fetch origin/main remains `3eb1441090cb0602e054908547dcf43bfe4299dd`.
+- Next: build, full suites, isolated PostgreSQL, contract/security, E2E and release gate review.
 
 ## Finished
 - Pending.
