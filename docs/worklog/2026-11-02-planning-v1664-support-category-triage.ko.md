@@ -34,6 +34,7 @@
 
 ## 최신 QA·우선순위·차단
 
+- **최종 실행 신원 재확인(2026-11-02 20:11 KST):** 공개 Test /api/version은 abfbb8aee63393c9f58e72159bd5bcab06f99412로 변경되어 OPEN·비초안 금융 PR #2521(v1623)과 일치. Production은 6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e(v1622) 유지. QA v1469의 양쪽 v1622 결과는 19:36 시점 사실이며 이후 Test 후보에 그대로 적용하지 않음. 기획 작업은 어느 환경도 승격·변경하지 않았고 F675-222의 공식 Test 정확 SHA 검증은 미실행.
 - **QA v1469, 2026-11-02 19:36 KST FAILED / P0_PRODUCTION_HOLD:** v1622 운영 다국어 표본 28건 중 16건 HTTP500(Test 0/28), 운영 모드 백엔드 2 FAIL, 정책 1 FAIL, 의존성 경고 9건, Production 앱 계정 UPDATE 195/DELETE 194(264개 테이블), 체크섬 불일치 5건, 공식 Test 마이그레이터 80개 불일치, 전체 경로 E2E 차단. Test/Production 공개 버전은 6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e(v1622)로 일치. main 3eb1441의 이후 문서 커밋과 다르다는 사실만으로 배포 실패라 단정하지 않음. 운영 loopback TLS EPROTO가 보고됐고 수정 초안 #2263은 미병합. 이전 QA의 단순 반복이 아니라 신규 확인된 결과.
 - **P0 4건:** OPS1664-01 실제 실행 SHA·이미지·외부 복원; SEC1664-02 최소 권한·체크섬·Test DB 신원; FIN1664-03 원장 출처·재무 쓰기 0; REL1664-04 다국어 HTTP500·백엔드/정책/의존성·인증 exact-SHA Test·승격 승인.
 - **P1 6건:** TRIAGE1664-05 B/DB 마이그레이션·인덱스; TRIAGE1664-06 B/API 멱등 생성·CAS·목록; TRIAGE1664-07 A/Web 회원·관리자 UX; TRIAGE1664-08 C/Android·app-api 증명; TRIAGE1664-09 관리자 익명 KPI; TRIAGE1664-10 QA·복원·경합·점진 활성화. 개발 이슈 #2522. Gemini/A/B/C/QA 변경과 분리, F675-217~221 초안은 구현된 main 기능으로 간주하지 않음.
