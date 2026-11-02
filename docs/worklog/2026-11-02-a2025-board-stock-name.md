@@ -23,3 +23,7 @@
 - Real DEV PG READ ONLY app-role function execution PASS; 1 public post, 0 stockName matches; DEV P0 broad direct DELETE/UPDATE still true. Test `abfbb8aee...` and Production `6fe94aee...` do not serve candidate; both public Treasury endpoints returned 200 (HOLD policy expects 503).
 - Start remote refs 277, unmerged 258, open PR 250; mid 278, unmerged 259, open PR 251, conflicting 29. Deleted 0. All unique A/B/C/Gemini work protected.
 - No main merge, Test/Production release, service restart, DB mutation, rollback or branch deletion. Exact-SHA Test auth E2E, independent restore, security/accessibility/SEO and release gate BLOCKED. Continue recurring work without disabling any schedule.
+
+### Final pre-integration recheck
+- On prior documentation SHA `20e91722c4eb4970b36fa66a47342a4a006075c7`, bounded frontend full 2,947 PASS; policy 34 PASS, database 62 PASS/5 SKIP, contract 41 PASS, backend 2,997 PASS/2 FAIL/518 SKIP. Default root run EPIPE; no full gate PASS claim.
+- Re-fetched main SHA `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b` before final documentation update. Open PR 253, remote refs 280, unmerged 261, conflicts 29. All unique changes protected. Draft/RELEASE HOLD persists.

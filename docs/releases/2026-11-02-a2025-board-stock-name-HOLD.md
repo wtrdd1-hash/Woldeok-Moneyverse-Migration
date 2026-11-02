@@ -5,3 +5,5 @@
 - Local gates: focused regression PASS, typecheck/build/lint PASS after fix; **Backend full FAIL (2 profile auth tests), Frontend full FAIL (worker exit despite 2,945 assertions PASS), full dependency audit FAIL (9)**. DEV app-role ACL P0 persists.
 - Official Test and Production publicly serve older different SHAs; neither serves candidate. Both Treasury overview endpoints returned 200, contrary to mandatory 503 HOLD policy. Exact-SHA Test authenticated E2E, backup restore, rollback proof and GitOps release gate not satisfied.
 - Decision: **DO NOT MERGE / DO NOT DEPLOY**. Keep all unique branches and PRs. No Production or Test mutation, no rollback performed. Reassess from current main only after independent evidence closes every required gate.
+
+**Updated frontend evidence:** bounded-worker full suite PASS (2,947 tests); original default run had a worker crash. Independently bounded backend still FAIL (two existing profile auth 401 tests), root `pnpm test` worker EPIPE, full audit and DEV ACL P0 remain. Release decision unchanged: HOLD.

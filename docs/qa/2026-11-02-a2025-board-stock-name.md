@@ -18,3 +18,9 @@
 ## Repository audit and disposition
 - At start: 277 remote refs (as counted locally), 258 unmerged; 250 open PRs. Mid: 278 remote refs, 259 unmerged, 251 open PRs (29 conflicting). Other branches/PRs contain unique work; **0 branches deleted**. Existing overlapping A PRs are protected.
 - **Release HOLD**: no main merge, Test/Production deploy, service restart, Production DB write or rollback. Rollback is not needed because no deployment occurred. Preserve Draft PR #2526 until all gates independently pass.
+
+## Follow-up exact-documentation-SHA verification (20:45–20:50 KST)
+- On SHA `20e91722c4eb4970b36fa66a47342a4a006075c7`, frontend Vitest with bounded workers `--maxWorkers=2`: **560 files / 2,947 tests PASS, 0 unhandled errors**. The earlier default-parallel worker crash is a test-runner resource issue, not a remaining failing assertion. Default `pnpm test` on this SHA encountered a database Vitest worker `EPIPE` before reaching backend; it is NOT PASS.
+- Independently on that SHA with bounded workers: policy 34 PASS; database 62 PASS/5 SKIP; contract 41 PASS; backend **2,997 PASS / 2 FAIL / 518 SKIP** (the same profile auth 401 failures). Thus the complete application gate remains **FAIL** even though the frontend suite passes.
+- Latest main unchanged `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`; latest observed open PR 253, remote refs 280, unmerged 261, conflicts 29. No branch deletion or integration.
+- The subsequent final QA-only commit does not change application code; its exact SHA and final CI state will be recorded in PR #2526 and host evidence.
