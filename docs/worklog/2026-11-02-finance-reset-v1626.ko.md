@@ -19,3 +19,6 @@
 
 ### 추가 중간 기록 — 신규 국고 입금의 정식 원장 누락 복구 (v1626.3)
 운영 DB 복원본에서 기존 `treasury_user_donate` 1000 WLD 이체를 실제 실행하면 원장 영수증을 반환한 직후 COMMIT에서 `TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE`로 롤백되는 RED 확인. 종전 SQL272이 정식 복식 거래를 만들면서 국고 이력에 같은 `ledger_transaction_id`를 누락한 오류를 발견. 신규 SQL328에서 동일 거래 ID를 국고 원천 거래에 연결하고 회원 현금 통화는 WLD만 허용. 격리 운영 DB에서 회원 지갑 -1000/국고 +1000, 전표 2개 균형, 국고 대사 1000/1000, 전체 공급량 불변을 증명하고 같은 키 재요청은 기존 영수증 재사용하여 이중 지급 없음. `IDEMPOTENT_PASS`, `FUNDED_DONATION_CONSERVED_PASS`. **실제 운영 회원 자금 이체나 발권은 실행하지 않음.** 신규 기부로 유입되는 자금의 정식 처리 경로를 고친 것이며 기존 국민연금/배당/KDIC의 무재원 지급을 승인하거나 해결하지는 않음.
+
+### 추가 기록 — 회원 실제 국고 입금 API 및 화면 연결 복구
+SQL328 원장 수정만으로는 회원이 화면에서 입금할 수 없는 원인 확인: 관리자 Nest `/admin/treasury/donate`는 무조건 503을 반환하고 회원 화면의 `/api/admin/treasury/donate`에는 Next 경로가 존재하지 않았음. 이를 TDD RED/ GREEN으로 수정해 회원 로그인/동의/일회성 CSRF가 필수인 `POST /api/v1/treasury/donate`에 실제 세션 회원 ID를 전달, Next `/api/treasury/donate`에서 정상 WLD 문자열/멱등 UUIDv4/실제 원장 영수증을 검증하도록 연결. 회원 UI의 주소도 변경. 백엔드 2개·프런트엔드 9개 테스트 통과. **운영 회원 자금 이동은 테스트로 수행하지 않았음**. 기존 국고 0 WLD 상태에서 새 기부가 실제 발생해야 금액이 증가함.

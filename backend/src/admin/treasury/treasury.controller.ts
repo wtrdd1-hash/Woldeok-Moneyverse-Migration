@@ -175,6 +175,16 @@ function hasCertifiedTreasuryProof(overview: Awaited<ReturnType<TreasuryService[
 export class PublicTreasuryController {
   constructor(private readonly service: TreasuryService) {}
 
+  /** Voluntary WLD donation backed by member cash and a canonical two-sided journal. */
+  @Post('donate')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: '인증된 회원이 자신의 실제 WLD를 국고에 기부 (정식 복식원장·멱등 영수증)' })
+  async userDonate(@Req() req: RequestWithSession, @Body() dto: TreasuryUserDonateDto) {
+    return this.service.userDonate(
+      requireUserId(req), dto.amountWld, dto.memo ?? '국고 자발적 공공 기부', dto.idempotencyKey,
+    );
+  }
+
   @Get('public-overview')
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Public treasury overview from verified ledger evidence' })
