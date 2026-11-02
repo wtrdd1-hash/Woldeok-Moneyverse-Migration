@@ -6,6 +6,7 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { isVerifiedBoardPageSizeResponse, parseBoardPageSize } from '@/lib/board-page-size';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -240,6 +241,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
+  const boardLimitPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardLimitValues = boardLimitPath ? request.nextUrl.searchParams.getAll('limit') : [];
+  const boardSize = boardLimitValues.length === 1 ? parseBoardPageSize(boardLimitValues[0]) : null;
+  if (boardLimitValues.length > 1 || (boardLimitValues.length === 1 && boardSize === null)) {
+    return gatewayProblem(400, 'Bad Request', 'board_limit_invalid', 'invalid public board display size');
+  }
+  if (boardSize !== null && request.method !== 'GET') {
+    return gatewayProblem(405, 'Method Not Allowed', 'board_limit_method', 'bounded public board discovery requires GET');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -271,6 +283,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (boardSize !== null && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardPageSizeResponse(await response.clone().json(), boardSize)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_limit_unverified',
+          'bounded public board results are unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_limit_unverified',
+        'bounded public board results are unverified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -585,15 +610,10 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('limit'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
