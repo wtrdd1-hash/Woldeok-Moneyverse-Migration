@@ -15,3 +15,10 @@
 - TDD RED: Android gateway three assertions failed (unverified 200, duplicated filter forwarded, unsafe referrer). Parser missing-module RED, then GREEN. Resource pressure caused one esbuild process failure and one fork timeout; isolated retries with `GOMAXPROCS=1`, `UV_THREADPOOL_SIZE=1`, `--maxWorkers=1` passed.
 - Implemented bounded verified list parser, filtered-type proof, duplicate/unknown-field/status/date checks, web failure/retry and verified-empty distinction, Android 400/503 source validation and private headers, web member-route private edge policy. No database or ledger edits.
 - Focused suite: 35/35 PASS across parser, page SSR, mutation receipt and Android gateway. Changed-file ESLint PASS, frontend TypeScript PASS. Full gates pending.
+
+## Verification checkpoint — 2026-11-02 22:33 KST
+- Fresh `origin/main` still `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`.
+- Full frontend run with one thread completed: 2,959 PASS / 2 FAIL. Both failures were preexisting source-shape test fixtures invalidated by the stronger runtime contract: one asserted the obsolete unsafe `apiOrNull<typed>` text; one expected a malformed upstream 200 to be forwarded. Updated the tests to assert the verified parser and a valid owner response, preserving the cache-privacy assertions. Focused 80/80 PASS after correction.
+- Full ESLint 0 errors / 1,027 warnings; frontend/backend TypeScript PASS, backend and contract build PASS; app-api contract 184 endpoints PASS.
+- Isolated PostgreSQL 17.11 applied 323 contiguous migrations; `moneyverse_app` can EXECUTE owner privacy function but cannot directly SELECT owner request table; real PostgreSQL backend integration 10/10 PASS; ephemeral DB destroyed.
+- Security production/high audit PASS, full audit FAIL (8 moderate, 1 low); full-route QA FAIL (missing `artifacts/qa/full-route-ledger.json`). Full Next build blocked by host `EAGAIN` process exhaustion; retry after concurrency drops. Remote candidate verify/runtime-check FAIL, other required CI pending. No release.

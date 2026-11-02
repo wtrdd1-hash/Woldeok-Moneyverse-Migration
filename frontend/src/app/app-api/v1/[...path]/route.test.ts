@@ -189,7 +189,7 @@ describe('app API route compatibility', () => {
 
   it.each([200, 401, 403, 500])('fences privacy request GET response %s regardless of upstream cache policy', async (status) => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requests: [{ detail: 'private detail' }] }), {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ requests: [{ requestId: '1b6c0a5f-c623-4c0e-b9f2-3e897dcbe8fd', requestType: 'access', detail: 'private detail', status: 'received', createdAt: '2026-10-29T03:00:00.000Z' }] }), {
       status,
       headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=86400' },
     })));
