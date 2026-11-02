@@ -71,5 +71,16 @@ export function validateMoneyFlowResponse(value: unknown): UserMoneyFlowResponse
     || (s.all_time_users !== undefined && !count(s.all_time_users))
     || (s.last_transaction_at !== undefined && s.last_transaction_at !== null && !timestamp(s.last_transaction_at))
     || (value.next_cursor !== null && !moneyFlowCursor(value.next_cursor))) return null;
+
+  // The Nest treasury query derives volume from the same posting set as the
+  // debit and credit subtotals. Reject impossible financial evidence rather
+  // than allowing an HTTP 200 to certify contradictory numbers.
+  const volume = BigInt(s.total_volume_24h);
+  if (volume !== BigInt(s.total_inflow_24h) + BigInt(s.total_outflow_24h)
+    || (s.total_transactions_24h === 0 && (volume !== 0n || s.active_users_24h !== 0))
+    || (s.all_time_transactions !== undefined && s.total_transactions_24h > s.all_time_transactions)
+    || (s.all_time_users !== undefined && s.active_users_24h > s.all_time_users)
+    || (s.all_time_transactions === 0 && s.last_transaction_at != null)
+    || (s.all_time_transactions !== undefined && s.all_time_transactions > 0 && s.last_transaction_at === null)) return null;
   return value as unknown as UserMoneyFlowResponse;
 }

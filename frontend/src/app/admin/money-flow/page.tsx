@@ -393,7 +393,7 @@ export default async function AdminMoneyFlowPage({ searchParams }: PageProps) {
               description="검색어나 필터 조건을 변경하여 다시 조회해 보세요."
             />
           ) : (
-            <div className="w-full max-w-full min-w-0 overflow-x-auto rounded-lg border border-border/50 mv-table-wrapper">
+            <div tabIndex={0} role="region" aria-label="회원 원장 거래 내역 표, 좌우로 스크롤 가능" className="w-full max-w-full min-w-0 overflow-x-auto rounded-lg border border-border/50 mv-table-wrapper focus-visible:outline-2 focus-visible:outline-offset-2">
               <table className="w-full min-w-[700px] text-left text-xs">
                 <caption className="sr-only">검증된 회원 자금 흐름 원장 거래 내역</caption>
                 <thead>
