@@ -26,7 +26,7 @@ import {
   rungConditions,
 } from './credit';
 import { LoanBoard, RefreshButton } from './progression-forms';
-import type { ProgressionStatus } from './stages';
+import { parseProgressionStageEvidence } from './stage-evidence';
 import { STAGES, requirementLines, stageIndex, stageLabel } from './stages';
 import { UnlockLadder } from './unlock-parts';
 import type { EarlyUnlock } from './unlocks';
@@ -49,12 +49,13 @@ export default async function ProgressionPage() {
   await requireMember();
 
   const [progression, credit, earlyGame] = await Promise.all([
-    apiOrNull<{ progression: ProgressionStatus | null }>('/api/v1/progression'),
+    apiOrNull<unknown>('/api/v1/progression'),
     apiOrNull<CreditStanding>('/api/v1/progression/credit'),
     apiOrNull<{ unlocks: readonly EarlyUnlock[] }>('/api/v1/progression/early-game'),
   ]);
 
-  const status = progression?.progression ?? null;
+  const stageEvidence = parseProgressionStageEvidence(progression);
+  const status = stageEvidence.kind === 'verified' ? stageEvidence.status : null;
   const loans = credit?.loans ?? [];
   const ladder = credit?.ladder ?? [];
   const canBorrow = !loans.some((loan) => isRepayable(loan.status));
@@ -91,11 +92,18 @@ export default async function ProgressionPage() {
           )}
         </div>
 
-        {progression === null ? (
+        {stageEvidence.kind === 'unavailable' ? (
           <EmptyState
             title="성장 단계를 불러오지 못했어요."
             description="단계를 추정해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
-          />
+          >
+            <Link
+              href="/progression"
+              className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              성장 단계 다시 조회
+            </Link>
+          </EmptyState>
         ) : status === null ? (
           <EmptyState
             title="아직 성장 단계가 계산되지 않았어요."
