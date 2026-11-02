@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import pageSource from './page.tsx?raw';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+vi.mock('./controls-forms', () => ({ SwitchStateBadge: ({ state }: { state: string }) => <span>{state === 'paused' ? '일시 중지' : state}</span> }));
 import { EmergencyKillSwitchCard } from './emergency-kill-switch-card';
 import { parseControlsOverview, parsePublishedPolicy } from './controls-evidence';
 
@@ -15,6 +15,7 @@ const overview = {
   ],
   policies: [],
   roles: [],
+  rolesEvidence: 'VERIFIED',
 };
 
 describe('verified emergency operator controls', () => {
@@ -24,6 +25,10 @@ describe('verified emergency operator controls', () => {
     expect(parseControlsOverview({ ...overview, featureSwitches: [{ ...overview.featureSwitches[0], state: 'frozen' }] })).toBeNull();
     expect(parseControlsOverview({ ...overview, featureSwitches: [...overview.featureSwitches, ...overview.featureSwitches] })).toBeNull();
     expect(parseControlsOverview({ ...overview, policies: null })).toBeNull();
+    expect(parseControlsOverview({ ...overview, rolesEvidence: undefined })).toBeNull();
+    expect(parseControlsOverview({ ...overview, rolesEvidence: 'RESTRICTED', roles: [{ user_id: 'a', role: 'superadmin', display_name: 'Admin', granted_at: '2026-10-27T03:00:00Z' }] })).toBeNull();
+    expect(parseControlsOverview({ ...overview, rolesEvidence: 'RESTRICTED' })?.rolesEvidence).toBe('RESTRICTED');
+    expect(parseControlsOverview({ ...overview, rolesEvidence: 'UNAVAILABLE' })?.rolesEvidence).toBe('UNAVAILABLE');
   });
 
   it('rejects malformed policies, role assignments and duplicate active policies', () => {
@@ -40,10 +45,12 @@ describe('verified emergency operator controls', () => {
   });
 
   it('guards privileged controls and never assumes superadmin from page code', () => {
-    const page = readFileSync(resolve(process.cwd(), 'src/app/admin/controls/page.tsx'), 'utf8');
+    const page = pageSource;
     expect(page).toContain('parseControlsOverview(rawOverview)');
     expect(page).toContain("admin.roles.includes('superadmin')");
-    expect(page).toContain('isSuperadmin && overview !== null');
+    expect(page).toContain("isSuperadmin && overview?.rolesEvidence === 'VERIFIED'");
+    expect(page).toContain("overview.rolesEvidence === 'RESTRICTED'");
+    expect(page).toContain('role="status"');
     expect(page).not.toContain('isSuperadmin={true}');
     expect(page).not.toContain("?? '2026-09-02'");
   });

@@ -4,6 +4,7 @@ export interface VerifiedControlsOverview {
   readonly featureSwitches: readonly FeatureSwitch[];
   readonly policies: readonly EconomyPolicyVersion[];
   readonly roles: readonly AdminRoleAssignment[];
+  readonly rolesEvidence: 'VERIFIED' | 'RESTRICTED' | 'UNAVAILABLE';
 }
 
 const STATES = new Set(['enabled', 'paused', 'safe_mode', 'disabled']);
@@ -59,11 +60,14 @@ export function parseControlsOverview(value: unknown): VerifiedControlsOverview 
   const featureSwitches: FeatureSwitch[] = value.featureSwitches;
   const policies: EconomyPolicyVersion[] = value.policies;
   const roles: AdminRoleAssignment[] = value.roles;
+  const rolesEvidence = value.rolesEvidence;
+  if (rolesEvidence !== 'VERIFIED' && rolesEvidence !== 'RESTRICTED' && rolesEvidence !== 'UNAVAILABLE') return null;
+  if (rolesEvidence !== 'VERIFIED' && roles.length !== 0) return null;
   if (!unique(featureSwitches, (item) => item.feature_key) ||
       !unique(policies, (item) => item.policy_id) ||
       !unique(roles, (item) => `${item.user_id}:${item.role}`) ||
       policies.filter((item) => item.status === 'active').length > 1) return null;
-  return { featureSwitches, policies, roles };
+  return { featureSwitches, policies, roles, rolesEvidence };
 }
 
 export function parsePublishedPolicy(value: unknown): { termsVersion: string; privacyVersion: string } | null {
