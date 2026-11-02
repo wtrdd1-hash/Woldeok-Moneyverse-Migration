@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardMinimumReplies, parseBoardTitleQuery } from './board-title-search';
 
 describe('public board title search', () => {
   it('normalizes a bounded title query without inventing a global search', () => {
@@ -19,5 +19,22 @@ describe('public board title search', () => {
     expect(page).toContain('name="q"');
     expect(page).toContain('최근 공개 게시글 50건');
     expect(page).toContain('robots: { index: !hasSearch');
+  });
+});
+
+
+describe('public board minimum replies', () => {
+  it('accepts only explicit 1, 5, 10 thresholds', () => {
+    expect(parseBoardMinimumReplies(undefined)).toEqual({ minimum: null, invalid: false });
+    expect(parseBoardMinimumReplies('5')).toEqual({ minimum: 5, invalid: false });
+    for (const input of ['0', '2', '01', '1.0', ['1', '5'], '']) {
+      expect(parseBoardMinimumReplies(input).invalid).toBe(true);
+    }
+  });
+  it('renders a labelled native select and marks filtered pages noindex', () => {
+    const page = readFileSync('src/app/board/page.tsx', 'utf8');
+    expect(page).toContain('name="minReplies"');
+    expect(page).toContain('최근 공개 게시글 50건');
+    expect(page).toContain('params.minReplies');
   });
 });
