@@ -24,6 +24,20 @@ describe('tierFor', () => {
     }
   });
 
+  it('applies the auth budget to OAuth identity linking and unlinking', () => {
+    expect(tierFor('/api/v1/account/identities/discord/link', 'POST')).toEqual({ name: 'auth', limit: 20 });
+    expect(tierFor('/account/identities/google/link', 'POST')).toEqual({ name: 'auth', limit: 20 });
+    expect(tierFor('/API/V1/ACCOUNT/IDENTITIES/discord/LINK', 'POST')).toEqual({ name: 'auth', limit: 20 });
+    expect(tierFor('/api/v1/account/identities/00000000-0000-4000-8000-000000000000', 'DELETE')).toEqual({ name: 'auth', limit: 20 });
+  });
+
+  it('does not throttle unrelated account paths as OAuth identity mutations', () => {
+    expect(tierFor('/api/v1/account/settings', 'PUT')).toEqual({ name: 'sensitive', limit: 60 });
+    expect(tierFor('/api/v1/account/identities', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/api/v1/account/identities/discord/link/extra', 'POST')).toEqual({ name: 'sensitive', limit: 60 });
+    expect(tierFor('/api/v1/account/identities/discord/link', 'PUT')).toEqual({ name: 'sensitive', limit: 60 });
+  });
+
   it('gives an API read the read tier', () => {
     expect(tierFor('/api/v1/wallet', 'GET')).toEqual({ name: 'read', limit: 12000 });
   });
