@@ -121,7 +121,8 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       transactionsWithoutPostings: ledger?.transactions_without_postings ?? null,
       sensitiveTablesWithAppDml: validGrants.filter(x => x && PROTECTED_SENSITIVE_TABLES.includes(x.name)
         && DML_KEYS.some(key => x[key] === true)).map(x => x.name),
-      coreTablesWithAppDml: validGrants.filter(x => x && (x.can_insert === true || x.can_update === true || x.can_delete === true))
+      coreTablesWithAppDml: validGrants.filter(x => x && PROTECTED_FINANCIAL_TABLES.includes(x.name)
+        && (x.can_insert === true || x.can_update === true || x.can_delete === true))
         .map(x => x.name),
     },
     caveat: 'Opening-balance provenance and treasury/money-supply reconciliation are separate mandatory gates. A zero count here is not approval for Production.',
