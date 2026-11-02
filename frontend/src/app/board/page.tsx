@@ -159,7 +159,7 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 최대 50건에서 제목과 작성 기간을 검색합니다. 과거 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건 이내에서 제목과 작성 기간을 검색합니다. 과거 전체 게시글 검색이 아닙니다.
           </p>
           {recent.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">작성 기간은 24시간, 7일 또는 30일만 선택할 수 있습니다.</p>
