@@ -1,0 +1,2 @@
+# v2026.11.04.1719 — Fiscal record least privilege
+New forward-only SQL332 revokes web role direct financial record mutations over eight protected certificate, Treasury, bond and NPS tables; effective table and column postconditions; safe central bank policy writers explicitly out of scope. Real restored PG17 ledger-proof and 4/4 source tests pass. Production rollout of this migration requires separate gate.
