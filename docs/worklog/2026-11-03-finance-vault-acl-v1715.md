@@ -13,3 +13,10 @@ Read latest DOCS_INDEX, AGENTS, TREASURY_CORE, RELEASING, v1714 worklog, v1701 i
 
 ## DURING — pending
 ## END — pending
+
+## MID — v1715 isolated verification
+- Source TDD RED was observed before SQL331 existed; after implementation 3 of 3 source regressions passed.
+- Network-isolated restored Production-backup PostgreSQL 17.11 clone: replayed prior application-role full Treasury-vault grant only in the clone. SQL331 committed after SQL329/SQL330.
+- Effective application vault INSERT, UPDATE and column UPDATE now false. Existing canonical ledger 891 transactions, 1829 postings, 42 accounts, 1546 archived records remained unchanged, with zero transaction imbalance and account drift.
+- Actual Production remains on prior release and was read-only checked. Prior owner-approved DML was explicitly identified; no Production money operation or grant modification was done here.
+- Official Test v1714 previous merge SHA 96f64345 already running and DB readiness passed. SQL331 official Test/Production validation and authenticated financial E2E remain pending.
