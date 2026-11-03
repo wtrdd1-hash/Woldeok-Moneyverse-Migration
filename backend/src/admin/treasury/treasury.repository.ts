@@ -731,7 +731,7 @@ export class TreasuryRepository {
         SELECT amount_wld, tx_type, reason, created_at
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
-          AND created_at >= (SELECT opened_at FROM public.treasury_fiscal_epochs WHERE id=1)
+          AND created_at >= (SELECT epoch_opened_at FROM public.treasury_fiscal_proof_read())
           AND tx_type IN ('INJECTION', 'FEE_RECIRCULATION', 'ABSORPTION_SINK', 'CASINO_PIGOVIAN_TAX', 'STOCK_SPECULATION_TAX', 'WEALTH_TAX_COLLECTION')
       `);
 
@@ -815,7 +815,7 @@ export class TreasuryRepository {
         SELECT amount_wld, tx_type, reason, created_at
         FROM public.system_treasury_ledger
         WHERE created_at >= NOW() - INTERVAL '30 days'
-          AND created_at >= (SELECT opened_at FROM public.treasury_fiscal_epochs WHERE id=1)
+          AND created_at >= (SELECT epoch_opened_at FROM public.treasury_fiscal_proof_read())
           AND tx_type IN ('ABSORPTION_SINK', 'STOCK_HALT_SETTLEMENT', 'CITIZEN_DIVIDEND', 'COMMUNITY_FUNDING', 'WELFARE_SUBSIDY', 'MARKET_STIMULUS', 'PUBLIC_GRANT', 'GRANT', 'DISBURSEMENT', 'MARKET_BUYBACK_BURN')
       `);
 
