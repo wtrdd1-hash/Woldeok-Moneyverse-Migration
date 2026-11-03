@@ -10,7 +10,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     const data = await api<{ unreadCount: number }>('/api/v1/notifications/unread-count');
     if (!Number.isSafeInteger(data?.unreadCount) || data.unreadCount < 0) throw new Error('Invalid count');
-    return NextResponse.json(data, { headers });
+    return NextResponse.json({ unreadCount: data.unreadCount }, { headers });
   } catch {
     return NextResponse.json({ error: 'Count unavailable' }, { status: 503, headers });
   }
