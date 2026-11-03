@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.03.DB-AUDIT.1 — Live database keys, ledger, privilege and migration audit (evidence-only)
+- [EN audit](docs/audits/2026-11-03-db-keys-ledger-integrity-v2026.11.03.DB-AUDIT.1.md) / [KO](docs/audits/2026-11-03-db-keys-ledger-integrity-v2026.11.03.DB-AUDIT.1.ko.md). On miniPC connected DB: 266/266 PK, 318 FK, 126 UNIQUE; balanced 891 tx/1829 postings/42 accounts and 1546 verified archive hashes. OPEN P0: explicit app-role destructive grants on accounts/balances/schema_migrations and 5 historical migration SHA256 mismatches. OPEN: 2 legacy W accounts, FK indexing/cascade/reconciliation evidence gaps. No DB/ACL/code writes, no Test/Production promotion. [EN worklog](docs/worklog/2026-11-03-db-keys-integrity-vDB-AUDIT.1.md) / [KO](docs/worklog/2026-11-03-db-keys-integrity-vDB-AUDIT.1.ko.md). Internal/GitHub bilingual updates in docs/updates/.
+
 ## v2026.11.03.1651 — Treasury revenue and expense ACL source correction
 - EN/KO worklog: docs/worklog/2026-11-03-treasury-epoch-access-v1651.md / .ko.md. Existing SECURITY DEFINER fiscal-proof query replaces two invalid protected-table reads. Actual live DB 42501 root cause, 27 regressions pass; no WLD operation or role privilege changes. Release pending.
 
