@@ -9,3 +9,10 @@ Proposed smallest safe forward-only v1719 SQL332: revoke app/PUBLIC raw record m
 
 ## MID — pending
 ## END — pending
+
+## MID — clone privilege and funded-caller validation
+- Source test RED on missing SQL332 then GREEN 4/4. Independent schema migration numbered 332 after actual live 331. No prior numbered SQL changed.
+- A new network-none PG17.11 clone restored from the actual November 4 Production pre-migration backup, with SQL329/330/331 already proven, successfully applied SQL332 (COMMIT). Read-only SQL verifies 8 protected finance tables, no web-role direct INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER or column-level DML, and no journal projection drift.
+- Tested the actual web-role SECURITY DEFINER Treasury donation: 10 WLD one donation, identical receipt on retry, full ROLLBACK. Newly funded NPS app-role 1,000 contribution then 950 refund/50 welfare split, replay IDs identical, full ROLLBACK. Original 891 transactions and 0 new receipts preserved.
+- Active Central Bank policy/decision tables deliberately excluded: their current service uses direct DML; revoking this now would disable existing admin policy actions. Mint issuance/retirement endpoints are fail-closed so forbidden direct certificate writes are not currently legitimately needed.
+- LIVE Production presently SQL329/330/331, this SQL332 is not yet deployed. The full release of SQL332 needs exact-main Test and operational checks.
