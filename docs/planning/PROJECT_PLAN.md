@@ -1,4 +1,22 @@
 # Woldeok Moneyverse — Living Project Plan
+**Current planning: v1694 F675-229 integrity refinement / DRAFT / RELEASE HOLD.**
+
+## v2026.11.03.1694 — F675-229 Saved-view integrity refinement (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+**Cycle:** Previous Feature Addition v1692 → Current Feature Improvement v1694 → Next Feature Addition v1696 (provisional). Source: latest main e325d3ef827441f807734178cfcd8fe72d7061be; stacked unmerged Draft #2611, issue #2610. This is a **design proposal, not an implemented or verified feature**. Flag remains OFF; no Production promotion.
+
+**P0 prerequisite:** Production/Test parity and independently restored backup, exact-SHA authenticated E2E, database least-privilege and migration checksum investigation must pass before rollout. Existing support status/queue behavior remains authoritative; no financial mutations.
+
+**Integrity refinements and acceptance criteria:**
+1. **Collection-CAS liveness:** An absent per-admin collection-state row must be created atomically on first GET/write using a session-bound admin identity, not a caller-supplied UUID. POST requires the collection ETag from GET (including the empty collection); concurrent first-create requests must serialize on the stable owner row. Return 412 on stale If-Match, 428 if missing, 409 only on idempotency digest/name conflicts; never return a misleading 404 for an empty collection.
+2. **Pagination truthfulness:** The existing server query returns at most 100 rows before client activity filtering; a 7-day filter may produce zero matches while older or unreturned threads exist. UI must label subset scope next to counts and empty states. Never call it global oldest, total or no open tickets. A refresh must discard stale results on account/role change and ignore late responses from previous filters (request generation token/AbortController).
+3. **Stable time semantics:** Define activity windows against a single serverNow from the same queue response, with UTC instants and inclusive lower bound (>= serverNow minus 24h/7d/30d). If serverNow cannot be trusted, fail closed to an explicitly unverified state; do not substitute device clock. Null last_message_at is sorted after dated rows, tie-break by thread UUID. No local timezone/DST arithmetic.
+4. **Name canonicalization parity:** Persist normalized NFC display name and DB-computed ASCII-only case-insensitive key; reject U+0000–001F, U+007F–009F, bidi overrides/isolates and zero-width formatting. Count Unicode code points, not UTF-16 units, in both Nest and PG tests; do not claim confusable-script or full Unicode casefold equivalence. Unique owner+key constraint is final arbiter.
+5. **Replay and deletion:** Idempotency receipts retain immutable historical outcome, never current state/ETag. Tombstone keys remain unusable for account lifetime or a formally proven replay horizon; after account deletion, privacy erasure and non-reuse policy must be reconciled with retention law. Replay cannot re-create deleted presets or disclose a renamed/deleted name.
+6. **Authorization and deployment:** Recheck admin role inside each SECURITY DEFINER write under revocation fence; fixed search_path and revoked PUBLIC EXECUTE. Cross-admin reads/writes return indistinguishable 404; admin BFF only, never public app-api. Feature flag OFF and forward-only migration; rollback disables UI/API, retains tables and receipt audit without destructive down-migration.
+
+**Developer gate (not executed here):** PG17 migrations/parity, 100 concurrent first-create/rename/delete/replay/role-revoke interleavings, 8/9 quota, 40/41 codepoint and Unicode edge cases, stale ETags and account switch, UTC boundary and null timestamps, empty bounded subset, no-cache/SSR privacy, 320px WCAG 2.2 AA, Korean/English IME, Android denial, existing support and ledger regression. Separate branch → exact-SHA Test → QA approval → Production promotion/smoke/rollback. **External independent verified deduplicated references newly approved: 0; cumulative UNKNOWN/10,000; gate BLOCKED/IN PROGRESS.**
+
 **Current planning:** v1692 F675-229 admin saved support queue views / issue #2610 / stacked on Draft #2602 / RELEASE HOLD.
 
 ## v2026.11.03.1692 — F675-229 Admin Saved Support Queue Views (FEATURE ADDITION / DRAFT / RELEASE HOLD)
