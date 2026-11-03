@@ -10,6 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
 import { submitLocalLogin } from './actions';
+import { parseLoginProviderEvidence } from './login-provider-evidence';
 
 export async function LoginProvidersView({
   error,
@@ -19,11 +20,10 @@ export async function LoginProvidersView({
   readonly notice?: string | undefined;
 }) {
   const locale = await getServerLocale();
-  const data = await apiOrNull<{ providers: { id: string; enabled: boolean }[] }>(
-    '/api/v1/auth/providers',
-  );
-  const enabled = new Set((data?.providers ?? []).filter((p) => p.enabled).map((p) => p.id));
-  const availableProviders = (['google', 'discord'] as const).filter((id) => enabled.has(id));
+  const evidence = parseLoginProviderEvidence(await apiOrNull<unknown>('/api/v1/auth/providers'));
+  const availableProviders = evidence.status === 'verified' ? evidence.oauthEnabled : [];
+  // An upstream outage does not prove local login is disabled; retain the attempt path.
+  const showLocalLogin = evidence.status === 'unavailable' || evidence.localEnabled;
 
   return (
     <div className="mx-auto w-full max-w-[420px] py-4 sm:py-8">
@@ -66,11 +66,37 @@ export async function LoginProvidersView({
         </Alert>
       )}
 
+      {evidence.status === 'unavailable' && (
+        <Alert role="status" aria-live="polite" className="mb-5 border-amber-500/40">
+          <AlertDescription className="flex flex-col gap-3 text-sm">
+            <span>{localeLabel(locale,
+              '로그인 수단의 서버 상태를 확인하지 못했습니다. 이메일 로그인은 시도할 수 있지만, 간편 로그인 사용 가능 여부는 확인 전까지 표시하지 않습니다.',
+              'Sign-in provider status is unavailable. You may try email sign-in; social sign-in availability is not verified.',
+              'ログイン方法の状態を確認できません。メールログインはお試しいただけます。',
+              '无法确认登录服务状态。您仍可尝试邮箱登录。',
+              'Không thể xác minh trạng thái đăng nhập. Bạn vẫn có thể thử đăng nhập bằng email.')}</span>
+            <Button asChild variant="outline" className="min-h-11 w-fit">
+              <a href="/login/providers">{localeLabel(locale, '다시 확인', 'Retry provider check', '再確認', '重试', 'Thử lại')}</a>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      {evidence.status === 'verified' && !evidence.localEnabled && availableProviders.length === 0 && (
+        <Alert role="status" className="mb-5 border-amber-500/40">
+          <AlertDescription>{localeLabel(locale,
+            '현재 사용할 수 있는 로그인 수단이 없습니다. 잠시 후 다시 확인해 주세요.',
+            'No sign-in methods are currently enabled. Please try again later.',
+            '現在利用可能なログイン方法はありません。',
+            '当前没有可用的登录方式。',
+            'Hiện không có phương thức đăng nhập nào.')}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Main FinTech Card */}
       <Card className="border-border/80 bg-card/95 shadow-sm backdrop-blur-sm">
         <CardContent className="p-6 sm:p-7">
           {/* Local Email Login Form */}
-          <form action={submitLocalLogin} className="grid gap-4">
+          {showLocalLogin ? <form action={submitLocalLogin} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="local-email" className="text-xs font-semibold text-muted-foreground">
                 {localeLabel(locale, '이메일 주소', 'Email Address', 'メールアドレス', '邮箱地址', 'Địa chỉ Email')}
@@ -119,7 +145,15 @@ export async function LoginProvidersView({
               {localeLabel(locale, '자체 계정으로 로그인', 'Sign In with Email', 'メールでログイン', '邮箱登录', 'Đăng nhập với Email')}
               <ArrowRight className="ml-1 size-4" />
             </Button>
-          </form>
+          </form> : (
+            <p role="status" className="text-sm text-muted-foreground">
+              {localeLabel(locale, '이 배포 환경에서는 이메일 로그인이 비활성화되어 있습니다.',
+                'Email sign-in is disabled in this deployment.',
+                'この環境ではメールログインは無効です。',
+                '此部署已禁用邮箱登录。',
+                'Đăng nhập bằng email đã bị tắt trong môi trường này.')}
+            </p>
+          )}
 
           {/* Social Sign-in Divider */}
           {availableProviders.length > 0 && (

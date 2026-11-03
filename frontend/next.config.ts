@@ -192,6 +192,15 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Provider availability and login error details are not public search content.
+      ...['/login/providers', '/:locale(en|ko|ja|zh|vi)/login/providers'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
