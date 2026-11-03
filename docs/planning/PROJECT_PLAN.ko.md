@@ -1,5 +1,18 @@
 # 월덕 머니버스 — Living Project Plan
-**현재 기획: v1694 F675-229 정합성 보완 / 초안 / 운영 보류.**
+**현재 기획: v1696 F675-230 관리자 문의 우선순위 분류 / 초안 / 운영 보류.**
+
+## v1696 — F675-230 관리자 문의 우선순위 분류 (기능 추가 / 초안 / 운영 보류)
+- **주기:** 이전 기능 보완 v1694 → 현재 기능 추가 v1696 → 다음 기능 보완 v1698(잠정). Draft #2615 후속 독립 기획이며 구현 완료가 아님. 기준 main a8e967b11bc67948caf422f120410c04306657b2 (2026-11-03 12:05 KST); 병합 전 재확인.
+- **목적·대상·진입:** 권한 있는 문의 관리자만 문의별 일반/높음/긴급 우선순위를 지정. /admin/support 목록·상세의 '우선순위 설정/해제', 저장/취소 CTA, 로딩·충돌·권한거부·삭제·실패·재시도 상태. 회원에게 표시하지 않으며 문의 상태, 금융 잔액, 자동 제재·답변 순서를 변경하지 않음. 기본 OFF일 때 기존 정렬 유지.
+- **권한·보안:** API와 PostgreSQL SECURITY DEFINER 함수 양쪽에서 관리자 권한 확인, 고정 search_path, 앱 계정 직접 테이블 권한 부여 금지. CSRF·속도 제한·감사 로그(관리자/문의/변경 전후/사유 코드), 자유 입력 민감 메모 금지. 다른 사용자의 문의 접근 차단, 관리자 세션 회수 즉시 거부, 계정 변경 시 캐시 격리. 모든 응답과 app-api 프록시에 private/no-store, noindex. 회원·Android 회원 API에는 비노출.
+- **DB·트랜잭션:** 후속 번호의 추가형 마이그레이션에서 개념적 support_ticket_priority(ticket_id UUID PK/FK ON DELETE CASCADE, priority SMALLINT CHECK 1..3, revision BIGINT>0, updated_by UUID, updated_at TIMESTAMPTZ) 정의. 실제 테이블명·키 타입은 구현 전 현행 스키마로 검증 필수. 문의 행→우선순위 행 고정 순서 잠금, 관리자 권한·강한 If-Match revision 검증, 우선순위와 감사 기록 원자적 커밋, 충돌 409. 관리자+문의+작업+정규화 payload 범위의 멱등성 키·영수증·재실행 tombstone, 다른 payload 키 재사용 거부. 인덱스(priority DESC,updated_at DESC,ticket_id)는 실행계획 확인 후만 도입.
+- **API:** 제안 GET /api/v1/admin/support/priorities?cursor=&limit= (최대 100), PUT /api/v1/admin/support/:ticketId/priority {priority:normal|high|urgent,reasonCode} + If-Match + Idempotency-Key. 400/401/403/404/409/429/503, 입력 크기·ID·열거형 검증. 기존 관리자 목록에 커서가 있다면 중복 API 대신 기존 계약 확장. 회원 API 비노출.
+- **화면·접근성·SEO:** 색만으로 구분하지 않는 텍스트 배지, 320px 반응형, WCAG 2.2 AA 키보드·초점·대비·스크린리더 저장/충돌 알림. 공개 검색 인덱싱 금지. Android 관리자도 웹 권한 검증 우회 불가.
+- **관리·KPI:** 관리자만 우선순위별 건수, 최초 사람 응답까지 중위시간 확인; 집계 최소 20건, 식별자 없는 분석 이벤트(시도/성공/충돌). 긴급은 내부 큐 힌트이며 SLA 보장이나 자동 에스컬레이션 아님.
+- **검증·배포·복구:** enum/인증/CSRF/권한회수/입력오류/멱등성/동시성/교차 계정/캐시/모바일·접근성/Android 비노출, 실 DB 함수·권한·복구, 문의 1만 건 페이지 성능. support_priority_triage 플래그 기본 OFF; 추가형 스키마, 기존 자료 일괄 갱신 불필요. 정확 SHA Test 인증 E2E·외부 독립 백업 복원·승인 후 1%→10%→100% 점진 활성화. 문제 시 플래그 OFF, 데이터·감사 기록 보존, 파괴적 롤백 금지.
+- **P0 4건:** OPS1696-01 운영 다국어 HTTP500, SEC1696-02 DB 과다 권한·search_path, REL1696-03 정확 SHA Test 인증 E2E/CI 출처, BAK1696-04 외부 독립 복원. **P1 6건:** TRIAGE1696-05 실제 스키마/API 확인, -06 DB 함수·제약, -07 API·CSRF·멱등성, -08 관리자 UI·접근성, -09 통합·부하·회귀, -10 플래그·관측·복구. 개발 A/B/C에 영역별 인계, QA 독립 승인. 기획 예약은 배포 금지.
+- **QA·근거:** 내부 QA v1487 FAILED/P0, 운영 표본 7/7 HTTP500·Test 0/7, 정확 SHA·복원 미검증. 외부 독립 레퍼런스 이번 회차 신규 승인 **0건**, 누적 **UNKNOWN / 10,000건**; 획득·중복제거·근거분류 **BLOCKED / IN PROGRESS**. 운영 RELEASE HOLD.
+
 
 ## v2026.11.03.1694 — F675-229 저장된 보기 정합성 보완 (기능 보완 / 초안 / 운영 보류)
 
