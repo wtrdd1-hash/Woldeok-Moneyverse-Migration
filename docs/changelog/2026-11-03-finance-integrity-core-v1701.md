@@ -1,0 +1,2 @@
+# Changelog v2026.11.03.1701 — Financial Integrity Core
+Added immutable per-transaction JSON evidence for canonical WLD postings, strict transition validation, replay integrity, aggregate reconciler and web-role denial. Four business domains share one source of truth; no public finance core API. Five synthetic transactions on isolated PG17.11 PASS; full Production compatibility/release not yet verified. No live account mutation.
