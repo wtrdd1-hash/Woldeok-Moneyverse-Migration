@@ -1,3 +1,8 @@
+import { UseGuards } from '@nestjs/common';
+import { SessionGuard } from '../auth/guards/session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import {
   BadRequestException,
   Body,
@@ -78,6 +83,7 @@ export class BurnEventController {
   }
 
   @Post('participate')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '10,000 WLD 국고 영구 소각 및 한정판 칭호 드로우 참여' })
   async participateBurnDraw(@Req() req: RequestWithSession, @Body() body: { burnAmount?: string | number }) {
     const userId = req.session?.user_id;

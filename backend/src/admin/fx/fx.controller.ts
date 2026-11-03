@@ -12,6 +12,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import { SkipInternalToken } from '../../auth/guards/skip-internal-token.decorator';
 import type { RequestWithSession } from '../../auth/session.context';
@@ -20,7 +21,7 @@ import { FxService } from './fx.service';
 
 @ApiTags('Foreign Exchange (FX) & Reserves Control')
 @Controller('admin/fx')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, CsrfGuard)
 export class AdminFxController {
   constructor(private readonly fxService: FxService) {}
 
@@ -152,7 +153,7 @@ export class PublicFxController {
   }
 
   @Post('forward/contract')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '선물환(Forward) 환헤지 계약 체결 (10% 증거금)' })
   async createForwardContract(
     @Body() body: {
@@ -177,7 +178,7 @@ export class PublicFxController {
   }
 
   @Post('swap/wld-to-usd')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'WLD ➡️ USD 1초 즉시 환전' })
   async swapWldToUsd(@Body() body: { wldAmount: number }, @Req() req: RequestWithSession) {
     const userId = requireUserId(req);
@@ -190,7 +191,7 @@ export class PublicFxController {
   }
 
   @Post('swap/usd-to-wld')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'USD ➡️ WLD 1초 즉시 환전' })
   async swapUsdToWld(@Body() body: { usdAmount: number }, @Req() req: RequestWithSession) {
     const userId = requireUserId(req);

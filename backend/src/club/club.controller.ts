@@ -17,6 +17,7 @@ import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs
 import { IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString, IsUUID, Matches, MaxLength, Min, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -120,7 +121,7 @@ function parseClubPagingNumber(raw: unknown, fallback: number, min: number, max:
 
 @ApiTags('clubs')
 @Controller('clubs')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class ClubController {
   constructor(@Inject(ClubService) private readonly clubService: ClubService) {}
 

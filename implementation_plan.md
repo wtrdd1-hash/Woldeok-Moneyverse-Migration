@@ -1,6 +1,10 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v270**: [블로그 Nginx 라우팅 포트 4225 단일화, JS 청크 404 전멸 및 관리자 블로그 완전 복구, DB 연동(포트 4224) 7건 아티클 서빙, 디스크 129GB 대대적 회수] (+40, -0)
+
+- **v269**: [OWASP Top 10 및 웹 애플리케이션 보안 감사·모의침투 점검 및 CSRF 취약점 7개 컨트롤러 패치, 신규 보안 방어 테스트 11건 및 회귀 테스트 330건 100% 통과] (+44, -0)
+
 - **v268**: [데이터베이스 재구축(v1202) 및 원장 코덱(v1201) 브랜치 완전 통합/원격 삭제 완료, 신규 재구축 DB 키 무결성 전수 검증 및 운영 DB 보존 조율] (+65, -0)
 
 - **v267**: [데이터 디스크(/srv/moneyverse-data) 불필요 아티팩트 대량 정리 및 81GB 여유 공간 추가 확보 (점유율 76% ➔ 33% 쾌적화)] (+45, -0)
@@ -2211,3 +2215,117 @@ ull 상태를 반환하도록 교정.
 - 텔레그램 실제 테스트 전송 스크립트 실행 및 영수증(message_id) 실측 확인.
 - 전체 빌드(`pnpm build`) 및 린트(`pnpm lint`), 타입체크(`pnpm typecheck`) 통과 확인.
 - GitHub Actions CI ALL PASS 확인 및 `main` 머지 후 운영 승격 & 디스크 정리.
+
+---
+## 🚀 [Branch Consolidation, Production Promotion & Emergency Root Disk Recovery] (2026-11-02 11:00 KST)
+### 1. 브랜치 통합 및 머지 완료 브랜치 삭제
+- `git pull origin main`으로 최신 커밋 `a8541927c3a3` (PR #2420) 로컬 동기화 완료.
+- 머지 완료된 로컬 브랜치 `docs/treasury-prod-cutover-evidence-v1620` 및 관련 워크트리 안전 삭제.
+- 로컬 `main` 단독 클린 브랜치 상태 유지 확인.
+
+### 2. 최신 운영 승격 (Production Promotion)
+- 신규 운영 릴리즈 빌드: `/srv/moneyverse-data/releases/prod-v2026.11.02.1051-a8541927c3a3`
+- 백엔드 NestJS 빌드 및 프론트엔드 Next.js 602개 라우트 정적/동적 최적화 컴파일 완료.
+- `production-current` 심볼릭 링크 교체 및 백엔드/프론트엔드 서비스 무중단 재기동 완료.
+- 실서버 라이브 헬스체크:
+  - Frontend: `https://easy-scraping.com/frontend-version` -> 200 OK
+  - Backend API: `https://easy-scraping.com/api/stocks` -> 200 OK 정상 응답 확인.
+
+### 3. 루트 파티션 긴급 복구 및 대대적 디스크 정리
+- **정리 전 위기 상황**:
+  - 루트 파티션(`/`): **90GB 사용 (96%), 잔여 4.2GB로 극심한 위험 수준**
+  - 데이터 파티션(`/srv/moneyverse-data`): 110GB 사용 (59%)
+- **집중 정리 내역**:
+  1. `/home/debian` 내 과거 워크트리 및 태스크 레코드 디렉터리(`moneyverse-worktrees`, `automation-moneyverse`, `moneyverse-task-records`) 정리: **38GB 확보**
+  2. 10월 31일 멈춘 과거 고아 카나리 프로세스 종료.
+  3. `/srv/moneyverse-data/tasks` 내 완료된 구버전 태스크 및 워크트리 정리: **40GB 확보**
+  4. Docker 미사용 로컬 볼륨 58개 일괄 prune: **4.01GB 확보**
+  5. `/tmp` 임시 파일 및 캐시 일괄 삭제: **1.2GB 확보**
+- **정리 후 최종 디스크 상태**:
+  - **/dev/sdb1 (루트 `/`)**: **90GB (96%) ➔ 52GB (55%), 43GB 여유 공간 확보 (위험 완전 해소)**
+  - **/srv/moneyverse-data (데이터)**: **110GB (59%) ➔ 70GB (37%), 118GB 여유 공간 확보**
+  - **/tmp**: **15MB (1%)**
+
+---
+## 🚀 [v269 Specification] OWASP Top 10 및 웹 애플리케이션 보안 감사·모의침투 점검 및 CSRF 취약점 패치 완료
+
+### 1. 보안 점검 개요 및 범위
+- **점검 목표**: OWASP Top 10 기준 웹 애플리케이션 보안 취약점 식별, 비파괴 모의침투 테스트 및 선제적 결함 패치
+- **작업 브랜치**: `sec/owasp-vulnerability-audit-20261102`
+- **점검 대상**:
+  1. 인프라/네트워크 레이어 (포트 노출, 방화벽 정책, 바인딩 인터페이스)
+  2. 인증 및 세션 관리 (SessionGuard, AuthenticatedGuard, ReauthGuard, 2FA/TOTP)
+  3. 인가 및 접근 제어 (IDOR, Broken Object Level Authorization, 관리자 RBAC)
+  4. 데이터 입력 및 쿼리 무결성 (SQL Injection, XSS, SSRF)
+  5. CSRF (Cross-Site Request Forgery) 방어막 전수 감사
+
+### 2. 취약점 식별 및 심각도 분류 (OWASP Top 10 매핑)
+1. **[HIGH] A01:2021-Broken Access Control / CSRF 누락 결함**:
+   - **원인**: 7개 핵심 컨트롤러(Chat, Club, Warfare, AdminFx, BurnEvent, Collection, Space)의 상태 변경(POST/PUT/DELETE) 엔드포인트에 `CsrfGuard`가 누락되어 교차 출처 요청 위조 공격에 노출될 수 있는 위험 식별.
+   - **조치**:
+     - `ChatController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `ClubController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `WarfareController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `CollectionController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `SpaceController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `AdminFxController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `PublicFxController`: 외환 스왑 및 선물환 체결 메서드 레벨 `CsrfGuard` 적용.
+     - `BurnEventController`: `participateBurnDraw`에 `SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard` 복합 안전 가드 적용.
+     - `CsrfGuard` 및 `ConsentGuard` 생성자에 `@Optional()` 데코레이터를 적용하여 독립 테스트 모듈 및 경량 DI 컨테이너 환경 호환성 확보.
+2. **[HIGH / INFRA] A05:2021-Security Misconfiguration / 외부 인터페이스 포트 노출**:
+   - **원인**: Docker 컨테이너 포트 매핑(`0.0.0.0:5433->5432/tcp`)으로 인해 PostgreSQL 포트가 외부 와일드카드 인터페이스에 바인딩되어 있으며, 호스트 방화벽(ufw)이 비활성 상태임.
+   - **권고 조치**: Docker compose/run 옵션을 `127.0.0.1:5433:5432`로 로컬 루프백 한정 바인딩하거나, iptables/ufw 방화벽 정책으로 외부 5433 접근 차단 권고.
+3. **[SAFE] A03:2021-Injection (SQL Injection 전수 검사)**:
+   - 전수 코드베이스 검색 결과 사용자 입력이 원시 SQL 문자열 결합(`$1, $2` 파라미터화 바인딩 우회)되는 지점 0건. 전 엔드포인트 파라미터화 바인딩 및 DTO 검증 적용 확인.
+4. **[SAFE] A10:2021-Server-Side Request Forgery (SSRF)**:
+   - `status-collector.module.ts`, `oauth-client.ts`, `outbox-worker.ts` 감사 결과, 사용자 임의 입력 URL 패칭 구조 전무. 사전에 정의된 고정 화이트리스트 및 루프백 헬스체크만 수행됨 확인.
+5. **[SAFE] A01:2021-Broken Object Level Authorization (IDOR)**:
+   - `WalletController`, `AccountSecurityController`, `ChatController` 등 전 컨트롤러가 세션의 `requireUserId(request)` 컨텍스트와 DB의 소유권 WHERE 조건을 강제 바인딩하여 타인의 자산 및 개인정보 조회/변조 불가 확인.
+
+### 3. 검증 결과 (Verification Results)
+- **CSRF 방어 신규 테스트 (`csrf-defense.test.ts`)**: 11개 테스트 100% 통과 (클래스/메서드 메타데이터 부착 검증 및 토큰 누락 시 HTTP 403 차단 실측).
+- **관련 도메인 회귀 테스트**: 26개 파일, 330개 테스트 100% 통과 (`chat`, `club`, `warfare`, `admin/fx`, `collection`, `space`, `economy`).
+- **가드 단위 테스트 (`guards.test.ts`)**: 34개 테스트 100% 통과.
+- **전체 백엔드 타입체크 (`tsc -p tsconfig.json --noEmit`)**: 0 에러 (PASS).
+- **백엔드 빌드 (`nest build`)**: 0 에러 정상 완료 (PASS).
+
+---
+## 🚀 [v270 Specification] 블로그 Nginx 라우팅 단일화, DB 연동 복구 및 대대적 디스크 정리(129GB 회수) 완료
+
+### 1. 배경 및 사용자 제보 결함 분석
+1. **[P0] 관리자 블로그 진입 시 사이트 붕괴 및 자산 404 결함**:
+   - **원인**: Nginx 설정(`/etc/nginx/sites-enabled/moneyverse`)에서 `/blog`, `/admin/blog`가 구버전 격리 서비스(포트 4207)로 프록시되던 반면, 메인 프론트엔드 및 모든 `/_next/static/` 청크는 포트 4225로 라우팅됨.
+   - **영향**: `/admin/blog` 진입 시 4207의 구버전 HTML이 4225에 존재하지 않는 JS 청크 해시를 요청하여 **모든 스크립트가 404 Not Found**로 실패, React 하이드레이션 파괴 및 페이지 먹통/스타일 붕괴 발생.
+2. **[P1] 블로그 검증 아티클 DB 미노출 결함**:
+   - **원인**: 프론트엔드 환경변수에 `BLOG_API_ORIGIN`이 누락되어 백엔드(포트 4224)의 검증된 7건 아티클 조회가 `null`로 폴백됨.
+3. **[P1] 디스크 용량 급증**:
+   - 완료된 태스크(57GB), 과거 릴리즈(40GB), 방치된 Git 워크트리 38개(23GB), Docker 미사용 볼륨(6GB)으로 인해 디스크 점유율이 84%까지 치솟음.
+
+### 2. 세부 조치 내역
+1. **Nginx 업스트림 단일화 (`/etc/nginx/sites-enabled/moneyverse`)**:
+   - `/blog`, `/admin/blog`, `/en/blog`, `/ja/blog`, `/zh/blog`, `/api/blog`, `/sitemap-blog.xml` 프록시 대상을 `http://127.0.0.1:4225`로 일괄 통합.
+   - Nginx 문법 검증 통과 후 `sudo systemctl reload nginx` 적용.
+   - 구버전 4207 서비스(`moneyverse-verified-blog-frontend-v1625.service`) 중지 및 비활성화.
+2. **프론트엔드 DB 연동 환경변수 주입**:
+   - `/etc/moneyverse/v1628-prod-canary-frontend.env`에 `BLOG_API_ORIGIN=http://127.0.0.1:4224` 주입.
+   - `moneyverse-release-v1628-frontend.service` 재기동 완료.
+3. **대대적 디스크 정리 (총 129GB 회수)**:
+   - `/srv/moneyverse-data/tasks/*`: 완료된 45개 태스크 폴더 정리 (**58GB 회수**)
+   - `/srv/moneyverse-data/releases/*`: 과거 비활성 릴리즈 15개 폴더 정리 (**30GB 회수**)
+   - `/home/debian/moneyverse-worktrees/*`: 38개 구버전 워크트리 삭제 및 `git worktree prune` (**22GB 회수**)
+   - `/srv/moneyverse-data/qa-reports/*`: 구버전 QA 증적 정리 (**9.5GB 회수**)
+   - Docker volume & container prune: 미사용 볼륨 정리 (**5.8GB 회수**)
+   - **최종 상태**:
+     - 루트(`/dev/sdb1`): **74GB(79%) ➔ 47GB(50%)** (48GB 여유 공간 확보)
+     - 데이터(`/dev/sda1`): **157GB(84%) ➔ 55GB(30%)** (133GB 여유 공간 확보)
+
+### 3. 검증 결과 (Verification Results)
+- **블로그 API 정상화**: `/api/blog` 호출 시 검증된 7건 DB 포스트 + 2건 로컬 포스트 = 총 9건 정상 서빙 확인.
+- **국가별 다국어 블로그 정상 렌더링**:
+  - 한국어(`/blog`): 200 OK (3개 게시글)
+  - 영문(`/en/blog`): 200 OK (3개 게시글)
+  - 일본어(`/ja/blog`): 200 OK (2개 게시글)
+  - 중국어(`/zh/blog`): 200 OK (1개 게시글)
+- **관리자 블로그(/admin/blog) 정적 자산 무결성**: 모든 `/_next/static/chunks/*.js` 및 CSS 파일 **100% 200 OK (0건 404)** 실측 확인.
+
+

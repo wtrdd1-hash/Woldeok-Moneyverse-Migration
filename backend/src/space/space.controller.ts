@@ -14,6 +14,7 @@ import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsObject, IsPositive, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -108,7 +109,7 @@ export class RentRealEstateLandDto {
 
 @ApiTags('spaces')
 @Controller('spaces')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class SpaceController {
   constructor(@Inject(SpaceService) private readonly spaceService: SpaceService) {}
 
