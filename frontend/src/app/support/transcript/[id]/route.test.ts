@@ -28,6 +28,18 @@ describe('member support CSV route', () => {
     expect(await response.text()).toContain("'=SUM(1)");
   });
 
+  it.each([
+    { threadId, messages: [], truncated: undefined },
+    { threadId, messages: [{ message_id: 'm1', sender_kind: 'admin', body: 'ok', created_at: 'bad-date' }], truncated: false },
+    { threadId, messages: [{ message_id: 'm1', sender_kind: 'intruder', body: 'ok', created_at: '2026-10-28T00:00:00Z' }], truncated: false },
+  ])('rejects unverified transcript evidence before CSV download: %#', async payload => {
+    apiMock.mockResolvedValue(payload);
+    const response = await GET(new Request(`https://example.com/support/transcript/${threadId}`), { params: Promise.resolve({ id: threadId }) });
+    expect(response.status).toBe(502);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('content-disposition')).toBeNull();
+  });
+
   it('does not turn an upstream ownership denial into a downloadable CSV', async () => {
     apiMock.mockRejectedValue(new Error('forbidden'));
     await expect(GET(new Request(`https://example.com/support/transcript/${threadId}`), { params: Promise.resolve({ id: threadId }) })).rejects.toThrow('forbidden');
