@@ -16,3 +16,6 @@ Production baseline: 891 tx/1829 postings/42 account balances/1546 finance archi
 Production pointer is prod-v2026.11.03.1715-d72f81564002, current Test pointer test-v2026.11.03.1715-d72f81564002. Financial SQL329-331 now actually applied with provenance. No old service stopped, no production reset, no fake WLD, all original canonical balances retained. Release QA proof in docs/releases/v2026.11.04.1718-finance-core-prod.md and .ko.md.
 
 Full finance service recovery remains unresolved: unfunded Treasury/NPS escrow and legacy NPS hourly payout, state enterprise cash dividends, KDIC cash claims, SWF real transfers and monetary issuance require approved DB-owned funded settlement (#2366). Do not call these fixed. Browser-auth/session continuity still needs a legitimate signed-in human acceptance check.
+
+## POSTCUTOVER — Trusted Finance Integrity Scan
+- Live Production, inside read-only transaction and SET LOCAL ROLE moneyverse_reconciler: SELECT public.finance_integrity_scan() returned status=CLEAN, missingBalanceRows=0, balanceDiscrepancies=0, corruptEvidenceDigests=0, unbalancedTransactions=0, missingProtectedReceipts=0, historicalReconciliationRequired=true. This **does not** certify historical unprotected transactions retroactively.
