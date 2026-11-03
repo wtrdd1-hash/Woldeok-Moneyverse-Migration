@@ -77,6 +77,55 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(len(self.api.sent), 2)
         self.assertIn("복구", self.api.sent[-1]["text"])
 
+    def test_disk_percentage_fluctuation_is_not_recovery(self):
+        self.chat.write_text("777")
+        key = "disk:/srv/moneyverse-data"
+        for value in ("35%", "38%", "36%"):
+            reconcile(self.bridge, state_for(self.bridge),
+                      {key: ("OK", value)}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 0)
+        self.assertEqual(state_for(self.bridge)["last"][key]["value"], "36%")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {key: ("WARNING", "92%")}, now_day="2026-11-03")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {key: ("WARNING", "93%")}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 1)
+        reconcile(self.bridge, state_for(self.bridge),
+                  {key: ("CRITICAL", "96%")}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 2)
+        reconcile(self.bridge, state_for(self.bridge),
+                  {key: ("OK", "50%")}, now_day="2026-11-03")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {key: ("OK", "49%")}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 3)
+        self.assertIn("복구", self.api.sent[-1]["text"])
+
+    def test_qa_in_progress_cannot_provisionally_recover(self):
+        self.chat.write_text("777")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {"qa": ("CRITICAL", "exit-code")}, now_day="2026-11-03")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {"qa": ("PENDING", "in-progress")}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 1)
+        self.assertEqual(state_for(self.bridge)["last"]["qa"]["level"], "CRITICAL")
+        reconcile(self.bridge, state_for(self.bridge),
+                  {"qa": ("OK", "success")}, now_day="2026-11-03")
+        self.assertEqual(len(self.api.sent), 2)
+        self.assertIn("복구", self.api.sent[-1]["text"])
+
+    @patch("telegram_bridge.systemctl")
+    def test_running_oneshot_has_pending_not_provisional_ok(self, show):
+        def fake(unit):
+            if unit == "moneyverse-qa.service":
+                return {"ActiveState": "activating", "Result": "success",
+                        "LoadState": "loaded"}
+            return {"ActiveState": "active", "Result": "success",
+                    "LoadState": "loaded", "SubState": "waiting",
+                    "NextElapseUSecRealtime": "Fri 2026-10-30 09:20 KST"}
+        show.side_effect = fake
+        self.assertEqual(unit_snapshot()["moneyverse-qa.service"],
+                         ("PENDING", "in-progress"))
+
     @patch("telegram_bridge.systemctl")
     def test_active_but_elapsed_market_timer_is_degraded(self, show):
         def fake(unit):

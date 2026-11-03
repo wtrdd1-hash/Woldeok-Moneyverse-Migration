@@ -1,4 +1,7 @@
-﻿## v2026.10.30.1504 — Owner-only wallet transaction detail planning (DRAFT / RELEASE HOLD)
+﻿## v2026.11.03.1646 — Telegram false recovery alerts (TEST_VERIFIED)
+- Prevent bogus disk recovery alerts on stable OK percentages and provisional recovery during in-progress QA. Isolated 30 tests pass; no finance/app data changed. [Issue #2617](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2617); [details](../updates/v2026.11.03.1646-telegram-alert-recovery-github.md).
+
+## v2026.10.30.1504 — Owner-only wallet transaction detail planning (DRAFT / RELEASE HOLD)
 - F675-182 read-only owner ledger detail, strict permission/precision/Android privacy contract; P0 release identity split QA v1387, app-role ACL and finance provenance. P0 4/P1 6 in #1988. No runtime deployment.
 
 ## v2026.10.30.1500 — Owner-only wallet calendar range (planning DRAFT / RELEASE HOLD)

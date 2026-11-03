@@ -203,6 +203,11 @@ def unit_snapshot() -> dict[str, tuple[str, str]]:
         results[unit] = ("OK" if state == "active" else "WARNING", state)
     for unit in ONESHOT:
         data = systemctl(unit)
+        # A running oneshot temporarily reports Result=success even before its
+        # command has finished. Never announce recovery during that window.
+        if data.get("ActiveState") in ("activating", "deactivating"):
+            results[unit] = ("PENDING", "in-progress")
+            continue
         result = data.get("Result", "unknown")
         results[unit] = ("OK" if result == "success" and data.get("LoadState", "loaded") != "not-found"
                          else "CRITICAL", result)
@@ -227,7 +232,16 @@ def reconcile(bridge: Bridge, state: dict, snapshot: dict[str, tuple[str, str]],
     for key, (level, value) in snapshot.items():
         current = {"level": level, "value": value}
         prior = previous.get(key)
+        if level == "PENDING":
+            # Do not persist a provisional result over the previous settled
+            # state: a later exit-code must still be reported as a failure.
+            continue
         if prior == current:
+            continue
+        if key.startswith("disk:") and prior is not None and prior.get("level") == level:
+            # Percentage changes within the same severity are not recoveries.
+            # Retain the latest reading for summaries without a false alert.
+            previous[key] = current
             continue
         if level == "OK" and prior is None:
             previous[key] = current
