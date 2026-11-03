@@ -21,7 +21,9 @@ export default async function Page({
   const { threads } = await api<{ threads: AdminSupportThread[] }>(
     `/api/v1/admin/support/threads${status ? `?status=${encodeURIComponent(status)}` : ''}`
   );
-  const selected = q.thread ?? threads[0]?.thread_id;
+  // Only request messages for a thread returned by the authorized list.
+  // Untrusted URL parameters must never cause a separate private API read.
+  const selected = threads.find(thread => thread.thread_id === q.thread)?.thread_id ?? threads[0]?.thread_id;
   const messages = selected
     ? (
         await api<{ messages: AdminSupportMessage[] }>(
