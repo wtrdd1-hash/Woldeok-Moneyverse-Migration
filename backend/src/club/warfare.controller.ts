@@ -13,6 +13,7 @@ import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsInt, IsPositive, IsString, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -66,7 +67,7 @@ const WARFARE_UNAVAILABLE =
 
 @ApiTags('warfare')
 @Controller('clubs/warfare')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class WarfareController {
   @ApiOperation({ summary: '검증된 공성전 데이터가 없으면 조회 거부' })
   @Get('strongholds')

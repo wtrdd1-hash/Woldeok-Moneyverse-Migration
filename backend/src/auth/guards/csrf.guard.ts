@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Optional,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import type { RequestWithSession } from '../session.context';
@@ -16,7 +17,8 @@ export class CsrfGuard implements CanActivate {
     // @Inject is required, not decorative: the parameter's declared type is
     // the union `SessionRepository | null`, which TypeScript erases to Object
     // in design:paramtypes. Without an explicit token Nest cannot resolve it.
-    @Inject(SessionRepository) private readonly sessions: SessionRepository | null,
+    @Optional()
+    @Inject(SessionRepository) private readonly sessions: SessionRepository | null = null,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

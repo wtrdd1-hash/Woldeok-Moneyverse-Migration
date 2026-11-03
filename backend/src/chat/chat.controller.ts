@@ -17,6 +17,7 @@ import { IsBoolean, IsDefined, IsIn, IsOptional, IsString, IsUUID, MaxLength, Mi
 import { randomUUID } from 'node:crypto';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -101,7 +102,7 @@ function parseChatListLimit(raw: unknown, defaultLimit: number, maxLimit: number
 
 @ApiTags('chat')
 @Controller('chat')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class ChatController {
   constructor(@Inject(ChatService) private readonly chat: ChatService) {}
 

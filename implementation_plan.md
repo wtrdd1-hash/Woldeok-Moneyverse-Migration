@@ -1,6 +1,10 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v270**: [블로그 Nginx 라우팅 포트 4225 단일화, JS 청크 404 전멸 및 관리자 블로그 완전 복구, DB 연동(포트 4224) 7건 아티클 서빙, 디스크 129GB 대대적 회수] (+40, -0)
+
+- **v269**: [OWASP Top 10 및 웹 애플리케이션 보안 감사·모의침투 점검 및 CSRF 취약점 7개 컨트롤러 패치, 신규 보안 방어 테스트 11건 및 회귀 테스트 330건 100% 통과] (+44, -0)
+
 - **v268**: [데이터베이스 재구축(v1202) 및 원장 코덱(v1201) 브랜치 완전 통합/원격 삭제 완료, 신규 재구축 DB 키 무결성 전수 검증 및 운영 DB 보존 조율] (+65, -0)
 
 - **v267**: [데이터 디스크(/srv/moneyverse-data) 불필요 아티팩트 대량 정리 및 81GB 여유 공간 추가 확보 (점유율 76% ➔ 33% 쾌적화)] (+45, -0)
@@ -988,7 +992,8 @@ flowchart TD
 
 ### 3. 검증 결과 및 운영 반영 내역 (v261 완결)
 - **브랜치 통합 및 원격 정리 결과**:
-  - 통합 브랜치: elease/v2026.10.29-consolidated (4대 최신 체인 완벽 머지 후 main 승격)
+  - 통합 브랜치: 
+elease/v2026.10.29-consolidated (4대 최신 체인 완벽 머지 후 main 승격)
   - 원격 삭제 브랜치: 109개 전수 삭제 완료 (origin/main 단일 브랜치만 유지)
   - 원격 서버 로컬 잔여 워크트리 및 stale 브랜치 정리 완료
 - **프로덕션 빌드 및 서비스 재기동**:
@@ -1363,7 +1368,8 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
 ### 1. 작업 개요 및 핵심 요구사항 달성
 - **43개 원격 브랜치 무손실 전수 통합**:
   - hourly-a, hourly-b, hourly-c, docs/, uto/ 등 43개 원격 브랜치를 main에 100% 충돌 없이 병합 완료.
-  - 라우트 캐시 차단(oute.ts), 고객지원 검색/요약(support.controller.ts), 국고 SWF 거버넌스(uto-swf.service.ts)의 충돌을 완전 해소.
+  - 라우트 캐시 차단(
+oute.ts), 고객지원 검색/요약(support.controller.ts), 국고 SWF 거버넌스(uto-swf.service.ts)의 충돌을 완전 해소.
 - **원격 잔여 브랜치 전수 삭제**:
   - git push origin --delete를 통해 43개 원격 브랜치를 완전히 소거하고, 원격에는 오직 origin/main과 origin/HEAD만 보존.
 - **운영 실서버(Production) 승격 배포 완료**:
@@ -1578,7 +1584,8 @@ ginx -t) 통과 후 무중단 재로드(systemctl reload nginx) 완료.
 ---
 ## 🚀 [v6 Specification] 국고 금융 원장 무결성 및 SWF 회수 계약 복원 완료
 ### 1. 배경 및 근본 원인 분석
-- GitHub Actions CI untime-check 런 중 국고 관련 3개 단위/계약 테스트 실패 발생:
+- GitHub Actions CI 
+untime-check 런 중 국고 관련 3개 단위/계약 테스트 실패 발생:
   1. swf-liquidation-sql-v1415.test.ts: uto-swf.service.ts의 SWF 포트폴리오 회수(liquidateToTreasuryVault) 구현체가 누락되어 감사 이벤트 SQL(PORTFOLIO_LIQUIDATED_TO_VAULT, $1::numeric, $4::jsonb) 불일치.
   2. 	reasury-ledger-cursor-v619.test.ts: 	reasury.controller.ts의 listTransactions에서 parseTreasuryLedgerLimit 및 decodeTreasuryLedgerCursor 유효성 검증(400 반환) 누락.
   3. 	reasury-reconciliation-truth-v572.test.ts: 	reasury.repository.ts의 erifiedTreasuryReconciliation이 임의로 status: 'RECONCILED'를 거짓 생성하던 결함을 원래의 금융 원장 무결성 규칙(UNVERIFIED)으로 복원.
@@ -1599,7 +1606,8 @@ ull 상태를 반환하도록 교정.
 ---
 ## 🚀 [v7 Specification] 국채 청약/이자 정산 금융 안전 방어 및 SWF 관리자 스냅샷 복원
 ### 1. 배경 및 원인 분석
-- GitHub Actions CI untime-check 런 중 국채 및 SWF 관련 4개 테스트 실패 식별:
+- GitHub Actions CI 
+untime-check 런 중 국채 및 SWF 관련 4개 테스트 실패 식별:
   1. uto-swf-admin-read.test.ts: AutoSovereignWealthFundService에 getAdminSnapshot 메서드 누락.
   2. 	reasury-bond-subscription-hold.http.test.ts: 국채 청약 엔드포인트(subscribeBond)에 Consent/CSRF 가드 누락 및 미인증 청약 방어 홀드(503) 누락.
   3. 	reasury-bond.repository.test.ts: 리포지토리 레이어 국채 청약 방어 홀드(503) 누락.
@@ -1621,7 +1629,8 @@ ull 상태를 반환하도록 교정.
 ---
 ## 🚀 [v8 Specification] 업무 보드 보상 필터링 계약 및 국채 시간당 정산 안전 홀드 복원
 ### 1. 배경 및 원인 분석
-- GitHub Actions CI untime-check 런 중 업무 및 국채 리포지토리 관련 3개 테스트 실패 식별:
+- GitHub Actions CI 
+untime-check 런 중 업무 및 국채 리포지토리 관련 3개 테스트 실패 식별:
   1. 	reasury-bond-hourly-ledger-hold.test.ts: TreasuryBondRepository.processHourlyCouponsAndMaturities에서 DB 커넥션 획득 전 503 방어 홀드(BOND_COUPON_SETTLEMENT_HOLD_REASON) 누락.
   2. work-reward-ceiling.test.ts & work-reward-floor.test.ts: work.repository.ts 및 work.controller.ts의 	asks 엔드포인트에서 minReward, maxDurationSeconds, maxReward 파라미터 유효성 검증 및 쿼리 조건 누락.
 
@@ -1935,7 +1944,8 @@ ull 상태를 반환하도록 교정.
 
 ### 3. 검증 계획
 - 변경 사항 Git 커밋 및 원격 피처 브랜치(ix/admin-control-tower-telemetry-and-modals) 푸시.
-- GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
+- GitHub Actions CI (PR #2045) 3개 체크 (
+untime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
 ---
@@ -1953,7 +1963,9 @@ ull 상태를 반환하도록 교정.
    - 	imestamp 함수가 Date.now()를 기준으로 미래 시각을 차단하는데, 테스트 케이스의 2026-10-29가 테스트 작성 시점(2026-10-28)에는 미래였으나 현재 러너 기준 과거 시각으로 처리되어 fail-closed 거부 실패.
    - Vitest 테스트 환경에서 기준 시각을 고정하여 미래 시간 거절 검증 정상화.
 4. **src/app/admin/api-health/backup-evidence.test.tsx & ackup-route.test.ts 실패 원인**:
-   - parseBackupEvidence 함수 누락 및 emoteBackupVerified, estoreVerified 필드 누락.
+   - parseBackupEvidence 함수 누락 및 
+emoteBackupVerified, 
+estoreVerified 필드 누락.
    - 검증 실패 시 502 대신 503 에러 응답 반환 규격(6d52db27 규격) 복원.
 5. **src/app/api/shop/purchases/route.search.test.ts & shop-receipt-private.test.ts 실패 원인**:
    - dateStart 정규식 백슬래시 탈락(d{4}-d{2}-d{2} -> \d{4}-\d{2}-\d{2}) 수정.
@@ -1979,7 +1991,8 @@ ull 상태를 반환하도록 교정.
 
 ### 3. 검증 계획
 - 변경 사항 Git 커밋 및 원격 피처 브랜치(ix/admin-control-tower-telemetry-and-modals) 푸시.
-- GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
+- GitHub Actions CI (PR #2045) 3개 체크 (
+untime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
 ---
@@ -1990,15 +2003,19 @@ ull 상태를 반환하도록 교정.
    - startReauthentication 함수가 ctions.ts에서 누락되어 TS2305 에러 발생.
    - 계정 재인증 시작 함수(startReauthentication) 원본 복원.
 2. **src/app/account/actions.ts 타입 에러**:
-   - deleteAccount 내부의 elaySetCookie(response) 호출 시 esponse 객체 전체가 전달되어 TS2345 (Argument of type ... is not assignable to parameter of type 'readonly string[]') 발생.
-   - piWithCookie<null>('/api/v1/auth/logout', ...) 호출 후 { setCookie }를 분해하여 elaySetCookie(setCookie)로 올바른 타입 배열 전달 복원.
+   - deleteAccount 내부의 
+elaySetCookie(response) 호출 시 
+esponse 객체 전체가 전달되어 TS2345 (Argument of type ... is not assignable to parameter of type 'readonly string[]') 발생.
+   - piWithCookie<null>('/api/v1/auth/logout', ...) 호출 후 { setCookie }를 분해하여 
+elaySetCookie(setCookie)로 올바른 타입 배열 전달 복원.
 
 ### 2. 세부 변경 사항
 - rontend/src/app/account/actions.ts: startReauthentication export 복원 및 deleteAccount 내 setCookie 분해 바인딩 복원.
 
 ### 3. 검증 계획
 - 변경 사항 Git 커밋 및 원격 피처 브랜치(ix/admin-control-tower-telemetry-and-modals) 푸시.
-- GitHub Actions CI (PR #2045) 3개 체크 (untime-check, classify, policy) ALL PASS 확인.
+- GitHub Actions CI (PR #2045) 3개 체크 (
+untime-check, classify, policy) ALL PASS 확인.
 - PR #2045 스쿼시 머지 및 원격 브랜치 삭제.
 - 운영 서버(easy-scraping.com) 무중단 릴리즈 승격(배포) 및 라이브 실측.
 
@@ -2250,3 +2267,156 @@ ull 상태를 반환하도록 교정.
 - 운영 직전 전체 백업 SHA256 `67aa7851e7cf866a4fa2439c54622d8fc1a2c02430c6745f45b9b7b99fb00559`. SQL325~328 및 명시 승인된 금융 자료 보관 초기화 실제 커밋: 과거 원본 1546행 SHA256 보관·변조 0, 국고 552/배당 744/연금 238 활성 미증빙 기록 제거. 정식 원장·회원 계좌 유지.
 - 운영 새 백엔드 4214·프런트엔드 4215를 무중단 승격, 메인 버전·런타임 `ok:true`, 공개 국고 200 RECONCILED 확인. 구 v1624 롤백 보존.
 - **미완료 분리**: 0 WLD 전체 잔액에서 연금·KDIC·공기업 실제 자금 지급과 민트/중앙은행 신규 발권은 정식 재원 확보/승인·원장 구축 전까지 잠금 유지. 허위 인증/발행을 성공으로 보고하지 않음. P0 #2366 참조.
+
+---
+## 🚀 [Branch Consolidation, Production Promotion & Emergency Root Disk Recovery] (2026-11-02 11:00 KST)
+### 1. 브랜치 통합 및 머지 완료 브랜치 삭제
+- `git pull origin main`으로 최신 커밋 `a8541927c3a3` (PR #2420) 로컬 동기화 완료.
+- 머지 완료된 로컬 브랜치 `docs/treasury-prod-cutover-evidence-v1620` 및 관련 워크트리 안전 삭제.
+- 로컬 `main` 단독 클린 브랜치 상태 유지 확인.
+
+### 2. 최신 운영 승격 (Production Promotion)
+- 신규 운영 릴리즈 빌드: `/srv/moneyverse-data/releases/prod-v2026.11.02.1051-a8541927c3a3`
+- 백엔드 NestJS 빌드 및 프론트엔드 Next.js 602개 라우트 정적/동적 최적화 컴파일 완료.
+- `production-current` 심볼릭 링크 교체 및 백엔드/프론트엔드 서비스 무중단 재기동 완료.
+- 실서버 라이브 헬스체크:
+  - Frontend: `https://easy-scraping.com/frontend-version` -> 200 OK
+  - Backend API: `https://easy-scraping.com/api/stocks` -> 200 OK 정상 응답 확인.
+
+### 3. 루트 파티션 긴급 복구 및 대대적 디스크 정리
+- **정리 전 위기 상황**:
+  - 루트 파티션(`/`): **90GB 사용 (96%), 잔여 4.2GB로 극심한 위험 수준**
+  - 데이터 파티션(`/srv/moneyverse-data`): 110GB 사용 (59%)
+- **집중 정리 내역**:
+  1. `/home/debian` 내 과거 워크트리 및 태스크 레코드 디렉터리(`moneyverse-worktrees`, `automation-moneyverse`, `moneyverse-task-records`) 정리: **38GB 확보**
+  2. 10월 31일 멈춘 과거 고아 카나리 프로세스 종료.
+  3. `/srv/moneyverse-data/tasks` 내 완료된 구버전 태스크 및 워크트리 정리: **40GB 확보**
+  4. Docker 미사용 로컬 볼륨 58개 일괄 prune: **4.01GB 확보**
+  5. `/tmp` 임시 파일 및 캐시 일괄 삭제: **1.2GB 확보**
+- **정리 후 최종 디스크 상태**:
+  - **/dev/sdb1 (루트 `/`)**: **90GB (96%) ➔ 52GB (55%), 43GB 여유 공간 확보 (위험 완전 해소)**
+  - **/srv/moneyverse-data (데이터)**: **110GB (59%) ➔ 70GB (37%), 118GB 여유 공간 확보**
+  - **/tmp**: **15MB (1%)**
+
+---
+## 🚀 [v269 Specification] OWASP Top 10 및 웹 애플리케이션 보안 감사·모의침투 점검 및 CSRF 취약점 패치 완료
+
+### 1. 보안 점검 개요 및 범위
+- **점검 목표**: OWASP Top 10 기준 웹 애플리케이션 보안 취약점 식별, 비파괴 모의침투 테스트 및 선제적 결함 패치
+- **작업 브랜치**: `sec/owasp-vulnerability-audit-20261102`
+- **점검 대상**:
+  1. 인프라/네트워크 레이어 (포트 노출, 방화벽 정책, 바인딩 인터페이스)
+  2. 인증 및 세션 관리 (SessionGuard, AuthenticatedGuard, ReauthGuard, 2FA/TOTP)
+  3. 인가 및 접근 제어 (IDOR, Broken Object Level Authorization, 관리자 RBAC)
+  4. 데이터 입력 및 쿼리 무결성 (SQL Injection, XSS, SSRF)
+  5. CSRF (Cross-Site Request Forgery) 방어막 전수 감사
+
+### 2. 취약점 식별 및 심각도 분류 (OWASP Top 10 매핑)
+1. **[HIGH] A01:2021-Broken Access Control / CSRF 누락 결함**:
+   - **원인**: 7개 핵심 컨트롤러(Chat, Club, Warfare, AdminFx, BurnEvent, Collection, Space)의 상태 변경(POST/PUT/DELETE) 엔드포인트에 `CsrfGuard`가 누락되어 교차 출처 요청 위조 공격에 노출될 수 있는 위험 식별.
+   - **조치**:
+     - `ChatController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `ClubController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `WarfareController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `CollectionController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `SpaceController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `AdminFxController`: 클래스 레벨 `@UseGuards(..., CsrfGuard)` 적용.
+     - `PublicFxController`: 외환 스왑 및 선물환 체결 메서드 레벨 `CsrfGuard` 적용.
+     - `BurnEventController`: `participateBurnDraw`에 `SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard` 복합 안전 가드 적용.
+     - `CsrfGuard` 및 `ConsentGuard` 생성자에 `@Optional()` 데코레이터를 적용하여 독립 테스트 모듈 및 경량 DI 컨테이너 환경 호환성 확보.
+2. **[HIGH / INFRA] A05:2021-Security Misconfiguration / 외부 인터페이스 포트 노출**:
+   - **원인**: Docker 컨테이너 포트 매핑(`0.0.0.0:5433->5432/tcp`)으로 인해 PostgreSQL 포트가 외부 와일드카드 인터페이스에 바인딩되어 있으며, 호스트 방화벽(ufw)이 비활성 상태임.
+   - **권고 조치**: Docker compose/run 옵션을 `127.0.0.1:5433:5432`로 로컬 루프백 한정 바인딩하거나, iptables/ufw 방화벽 정책으로 외부 5433 접근 차단 권고.
+3. **[SAFE] A03:2021-Injection (SQL Injection 전수 검사)**:
+   - 전수 코드베이스 검색 결과 사용자 입력이 원시 SQL 문자열 결합(`$1, $2` 파라미터화 바인딩 우회)되는 지점 0건. 전 엔드포인트 파라미터화 바인딩 및 DTO 검증 적용 확인.
+4. **[SAFE] A10:2021-Server-Side Request Forgery (SSRF)**:
+   - `status-collector.module.ts`, `oauth-client.ts`, `outbox-worker.ts` 감사 결과, 사용자 임의 입력 URL 패칭 구조 전무. 사전에 정의된 고정 화이트리스트 및 루프백 헬스체크만 수행됨 확인.
+5. **[SAFE] A01:2021-Broken Object Level Authorization (IDOR)**:
+   - `WalletController`, `AccountSecurityController`, `ChatController` 등 전 컨트롤러가 세션의 `requireUserId(request)` 컨텍스트와 DB의 소유권 WHERE 조건을 강제 바인딩하여 타인의 자산 및 개인정보 조회/변조 불가 확인.
+
+### 3. 검증 결과 (Verification Results)
+- **CSRF 방어 신규 테스트 (`csrf-defense.test.ts`)**: 11개 테스트 100% 통과 (클래스/메서드 메타데이터 부착 검증 및 토큰 누락 시 HTTP 403 차단 실측).
+- **관련 도메인 회귀 테스트**: 26개 파일, 330개 테스트 100% 통과 (`chat`, `club`, `warfare`, `admin/fx`, `collection`, `space`, `economy`).
+- **가드 단위 테스트 (`guards.test.ts`)**: 34개 테스트 100% 통과.
+- **전체 백엔드 타입체크 (`tsc -p tsconfig.json --noEmit`)**: 0 에러 (PASS).
+- **백엔드 빌드 (`nest build`)**: 0 에러 정상 완료 (PASS).
+
+---
+## 🚀 [v270 Specification] 블로그 Nginx 라우팅 단일화, DB 연동 복구 및 대대적 디스크 정리(129GB 회수) 완료
+
+### 1. 배경 및 사용자 제보 결함 분석
+1. **[P0] 관리자 블로그 진입 시 사이트 붕괴 및 자산 404 결함**:
+   - **원인**: Nginx 설정(`/etc/nginx/sites-enabled/moneyverse`)에서 `/blog`, `/admin/blog`가 구버전 격리 서비스(포트 4207)로 프록시되던 반면, 메인 프론트엔드 및 모든 `/_next/static/` 청크는 포트 4225로 라우팅됨.
+   - **영향**: `/admin/blog` 진입 시 4207의 구버전 HTML이 4225에 존재하지 않는 JS 청크 해시를 요청하여 **모든 스크립트가 404 Not Found**로 실패, React 하이드레이션 파괴 및 페이지 먹통/스타일 붕괴 발생.
+2. **[P1] 블로그 검증 아티클 DB 미노출 결함**:
+   - **원인**: 프론트엔드 환경변수에 `BLOG_API_ORIGIN`이 누락되어 백엔드(포트 4224)의 검증된 7건 아티클 조회가 `null`로 폴백됨.
+3. **[P1] 디스크 용량 급증**:
+   - 완료된 태스크(57GB), 과거 릴리즈(40GB), 방치된 Git 워크트리 38개(23GB), Docker 미사용 볼륨(6GB)으로 인해 디스크 점유율이 84%까지 치솟음.
+
+### 2. 세부 조치 내역
+1. **Nginx 업스트림 단일화 (`/etc/nginx/sites-enabled/moneyverse`)**:
+   - `/blog`, `/admin/blog`, `/en/blog`, `/ja/blog`, `/zh/blog`, `/api/blog`, `/sitemap-blog.xml` 프록시 대상을 `http://127.0.0.1:4225`로 일괄 통합.
+   - Nginx 문법 검증 통과 후 `sudo systemctl reload nginx` 적용.
+   - 구버전 4207 서비스(`moneyverse-verified-blog-frontend-v1625.service`) 중지 및 비활성화.
+2. **프론트엔드 DB 연동 환경변수 주입**:
+   - `/etc/moneyverse/v1628-prod-canary-frontend.env`에 `BLOG_API_ORIGIN=http://127.0.0.1:4224` 주입.
+   - `moneyverse-release-v1628-frontend.service` 재기동 완료.
+3. **대대적 디스크 정리 (총 129GB 회수)**:
+   - `/srv/moneyverse-data/tasks/*`: 완료된 45개 태스크 폴더 정리 (**58GB 회수**)
+   - `/srv/moneyverse-data/releases/*`: 과거 비활성 릴리즈 15개 폴더 정리 (**30GB 회수**)
+   - `/home/debian/moneyverse-worktrees/*`: 38개 구버전 워크트리 삭제 및 `git worktree prune` (**22GB 회수**)
+   - `/srv/moneyverse-data/qa-reports/*`: 구버전 QA 증적 정리 (**9.5GB 회수**)
+   - Docker volume & container prune: 미사용 볼륨 정리 (**5.8GB 회수**)
+   - **최종 상태**:
+     - 루트(`/dev/sdb1`): **74GB(79%) ➔ 47GB(50%)** (48GB 여유 공간 확보)
+     - 데이터(`/dev/sda1`): **157GB(84%) ➔ 55GB(30%)** (133GB 여유 공간 확보)
+
+### 3. 검증 결과 (Verification Results)
+- **블로그 API 정상화**: `/api/blog` 호출 시 검증된 7건 DB 포스트 + 2건 로컬 포스트 = 총 9건 정상 서빙 확인.
+- **국가별 다국어 블로그 정상 렌더링**:
+  - 한국어(`/blog`): 200 OK (3개 게시글)
+  - 영문(`/en/blog`): 200 OK (3개 게시글)
+  - 일본어(`/ja/blog`): 200 OK (2개 게시글)
+  - 중국어(`/zh/blog`): 200 OK (1개 게시글)
+- **관리자 블로그(/admin/blog) 정적 자산 무결성**: 모든 `/_next/static/chunks/*.js` 및 CSS 파일 **100% 200 OK (0건 404)** 실측 확인.
+
+
+
+
+---
+## 🚀 [v271 Specification] OWASP 보안 패치 브랜치 통합(Merge) 및 무중단 운영 승격 (Production Promotion)
+
+### 1. 브랜치 통합 개요
+- **통합 대상 브랜치**: `sec/owasp-vulnerability-audit-20261102` (커밋 `937cd0ce35`)
+- **타겟 브랜치**: `main` (원격 `origin/main` 최신 `8c5caae4e2` 동기화 완료)
+- **통합 방식**: 3-Way Merge (`--no-ff`), Zero-Deletion Invariant(`-0 lines`) 준수
+- **통합 파일 목록**:
+  1. `SECURITY_AUDIT_REPORT_OWASP_20261102.md`: OWASP Top 10 보안 감사 및 모의침투 테스트 상세 보고서
+  2. `backend/src/admin/fx/fx.controller.ts`: 관리자 환율 조작 및 쿼터 설정 CSRF 가드 적용
+  3. `backend/src/auth/guards/consent.guard.ts`: 경량 DI 테스트 지원 `@Optional()` 세션 저장소 주입
+  4. `backend/src/auth/guards/csrf.guard.ts`: 경량 DI 테스트 지원 `@Optional()` 세션 저장소 주입
+  5. `backend/src/chat/chat.controller.ts`: 채팅방 생성 및 메시지 발송 CSRF 가드 적용
+  6. `backend/src/chat/chat.message-limit.http.test.ts`: CSRF 토큰 헤더 연계 테스트 보강
+  7. `backend/src/club/club.controller.ts`: 클럽 생성 및 재정 변동 CSRF 가드 적용
+  8. `backend/src/club/club.ledger-hold.test.ts`: 클럽 회계 테스트 CSRF 토큰 보강
+  9. `backend/src/club/warfare.controller.ts`: 공성전 선포 및 자금 지출 CSRF 가드 적용
+  10. `backend/src/club/warfare.http.test.ts`: 공성전 HTTP 테스트 CSRF 토큰 보강
+  11. `backend/src/collection/collection.controller.ts`: 컬렉션 교환 CSRF 가드 적용
+  12. `backend/src/economy/burn-event.controller.ts`: 소각 드로우 응모 CSRF 복합 가드 적용
+  13. `backend/src/security/csrf-defense.test.ts`: CSRF 방어 전수 자동화 검증 테스트 슈트 신규 추가 (11/11 PASS)
+  14. `backend/src/space/space.controller.ts`: 개인 스페이스 설정 저장 CSRF 가드 적용
+  15. `implementation_plan.md`: v269, v270, v271 누적 보존
+
+### 2. 운영 승격 계획 (Production Promotion Architecture)
+1. **빌드 검증**:
+   - 백엔드 NestJS 프로덕션 번들 빌드 (`pnpm --filter backend build`)
+   - 프론트엔드 정적 최적화 컴파일 검증
+2. **운영 릴리즈 디렉터리 동기화 및 심볼릭 링크 교체**:
+   - `/srv/moneyverse-data/releases/production-current` 무중단 전환
+3. **서비스 무중단 리로드 / 재기동**:
+   - `systemctl reload-or-restart moneyverse-release-*-backend.service`
+   - `systemctl reload-or-restart moneyverse-release-*-frontend.service`
+4. **실시간 헬스체크 및 통합 회귀 검증**:
+   - `/health`, `/api/version`, `/frontend-version`, `/blog`, `/admin/blog`, `/api/blog` 실측
+5. **피처 브랜치 정리**:
+   - 머지 완료된 로컬 `sec/owasp-vulnerability-audit-20261102` 브랜치 안전 삭제
