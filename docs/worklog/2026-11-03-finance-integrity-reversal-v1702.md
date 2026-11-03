@@ -13,7 +13,12 @@
 4. Request final merged-main Test/Production only when parent #2632 and full CI are both green. No false operational completion claims.
 
 ## DURING
-Pending.
+- GitHub source analysis confirms SQL083 `economy_transaction_dependents` discovers any FK to `ledger_transactions`; new SQL329 proof FK was treated as a loan/purchase-like business dependency. Generic correction failed on finance_integrity_receipts even though that proof is deliberately immutable and not an external claim.
+- A second incompatibility exists: SQL083 creates a new compensating transaction, then sets `reverses_transaction_id` once. SQL329's statement-level blanket ledger UPDATE trigger rejects that single link. No previous applied migration has been changed.
+- Edited only un-applied SQL329 on isolated stacked branch: replace blanket ledger tx UPDATE/DELETE trigger with guarded row-level correction-link exception. It requires exactly first-time link, ADMIN_ADJUSTMENT, matching persisted reversal outbox, unchanged other columns and superadmin; DELETE and TRUNCATE remain rejected. Ledger postings and finance JSON receipts remain immutable.
+- SQL329 redefines only `economy_transaction_dependents` to exclude the canonical `finance_integrity_receipts` row exactly as `ledger_postings` are excluded, while still refusing all genuine business FK dependents (loans, shop, etc.).
+- Extended existing real-PostgreSQL ledger correction test: asserts both original and correction have immutable proof records and a type rewrite still fails with SQLSTATE 55000. Existing 2 failing correction tests from CI are RED evidence.
+- Awaiting stacked-PR CI; Production and Test releases are not changed.
 
 ## FINISHED
-Pending.
+Pending CI, independent review, and exact-main release gates.
