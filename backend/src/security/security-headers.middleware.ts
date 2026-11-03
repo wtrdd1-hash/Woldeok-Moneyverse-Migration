@@ -19,7 +19,11 @@ export function securityHeaders(options: SecurityHeaderOptions = {}) {
     res.setHeader('X-Frame-Options', 'DENY');
 
     // 3. Strict Referrer Policy
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Preserve a stricter privacy decision made by an upstream boundary.
+    // A blanket default must never downgrade an explicit no-referrer policy.
+    if (res.getHeader?.('Referrer-Policy') !== 'no-referrer') {
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
 
     // 4. Permissions Policy
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
