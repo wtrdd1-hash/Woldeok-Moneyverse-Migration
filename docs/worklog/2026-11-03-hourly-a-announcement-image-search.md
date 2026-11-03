@@ -21,4 +21,9 @@
 - Security boundary: no app table grants, immutable migrations, ledger writes, auth changes, deployments or restarts.
 
 ## FINISHED
-- Pending validation.
+- Code commit 79143689c450da75593fef5195ffa405e50ab1a9; main sync merge e013e023b5c9f082ae7a8a78a2f3e68b57a9858a. Draft PR #2607 open. Final branch SHA recorded in PR head after this QA/release documentation commit.
+- Changed files: 15 before QA/release docs; 2 Nest controllers, content repository/service/parser/tests, Next notice page/parser/tests, Android gateway/tests, worklog and implementation plan. Final docs add 4 QA/release files. No applied migration change.
+- Focused backend 6 PASS and frontend 6 PASS; frontend full 2955 PASS; backend full 2986 PASS / 2 FAIL / 518 SKIP; DB unit 72 PASS / 5 SKIP; API contract 184 PASS; Typecheck and Backend/Frontend build PASS (frontend initial 1GB OOM, 2GB retry PASS); audit 9 advisories exit 1.
+- Root/data disk at start 79%/83%; no cache or other developer artifact deleted. Branches deleted 0; all unique unmerged branches preserved. No Test/Production changes, rollback not executed.
+- Full evidence in task evidence directory and docs/qa/2026-11-03-a0925-announcement-image-search.md. Release decision DRAFT/HOLD in docs/releases/2026-11-03-a0925-announcement-image-search-hold.md.
+- Exact final SHA CI and official isolated Test authenticated E2E are required and not certified. Do not merge or deploy.

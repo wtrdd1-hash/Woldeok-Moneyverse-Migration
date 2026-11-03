@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
 import { parseAnnouncementImageSearch } from './announcement-image-search';
 import { PostgresContentRepository } from './content.repository';
+import { ContentService } from './content.service';
 import { ContentController } from './content.controller';
 import { AppContentController } from './app-content.controller';
 
@@ -25,6 +26,16 @@ describe('published announcement image description search', () => {
     expect(sql).toContain('strpos(lower(image_alt_text), lower($2::text)) > 0');
     expect(sql).toContain('image_url IS NOT NULL');
     expect(values).toEqual([20, '제주 %_']);
+  });
+
+  it('passes a normalized search from the service to the published-only repository', async () => {
+    const publishedAnnouncements = vi.fn().mockResolvedValue([]);
+    const repository = Object.assign(Object.create(PostgresContentRepository.prototype), {
+      publishedAnnouncements,
+    }) as PostgresContentRepository;
+    const service = new ContentService(repository);
+    await expect(service.publicAnnouncements({ imageAlt: '  제주 %_  ' })).resolves.toEqual([]);
+    expect(publishedAnnouncements).toHaveBeenCalledWith({ limit: 20, imageAlt: '제주 %_' });
   });
 
   it('passes validated image search to both public and Android content controllers', async () => {
