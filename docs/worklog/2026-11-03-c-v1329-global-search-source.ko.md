@@ -14,5 +14,14 @@
 - [완료] 집중 테스트 9/9 통과. 전체 게이트 및 실제 HTTP 검증 예정.
 
 
-## 종료
-대기.
+## 종료 — 2026-11-03 10:03 KST (부분 완료 / 배포 차단)
+- [완료] 중복·비정상 검색 매개변수로 인한 서버 오류 방지. 인증 조회 API 장애를 비로그인으로 오인하지 않고 공개 메뉴만 노출. 기존 Nest 인증 API 연동 유지.
+- [완료] HTTP 회귀 테스트에서 지원하지 않는 `zh-CN`, `zh-TW` 경로의 404를 발견해 실제 지원 언어 `ko,en,ja,zh,vi`로 수정. 최종 8/8 PASS. 기본 및 5개 언어 검색 경로에서 비색인·비공개·참조정보 차단 헤더 확인.
+- [완료] Lint(오류 0/경고 1027), Typecheck, Build, Frontend 2955건, Database 72건(5 SKIP), app-api 184개, 보안 17건 PASS.
+- [완료] 독립 PostgreSQL 17.11에서 번호 002–328의 마이그레이션 327개 적용, 인증/세션 21건 PASS, 앱 계정의 users 직접 SELECT 차단 확인. 격리 DB 제거. 공유 DB 변경 없음.
+- [미해결] Backend 2983 PASS / 2 FAIL / 518 SKIP(프로필 HTTP 401/200), 의존성 취약점 9건, 전체 경로 QA 증빙 누락, 공식 인증 E2E 및 후보 SHA Test 검증 차단.
+- [확인] 실제 Production 검색 HTTP는 여전히 `index, follow`. Test/Production 버전 `109c0322699ce4b8588498ad765d56d09c9dce8e`은 후보와 다름.
+- [확인] 구현 SHA `919d2d8ed055ff336753d3eac7fefec50aa50770`의 GitHub CI와 후보 빌드는 성공. 최종 작업일지 커밋 SHA는 별도 재검증.
+- [보존] 작업 중 다른 호스트 정리 작업이 초기 /srv 작업트리를 삭제했으나 GitHub에 보존된 커밋으로 /home/debian/auto 아래 독립 작업트리를 복구. 미통합 변경 보존. main은 시작·중간·종료 동일 `e83ad8a6d1b8d477bfbe661ea3cffd46f270509c`.
+- [배포] Draft PR #2606 유지. main 병합, 공식 Test 배포, Production 승격, GitOps 변경 및 롤백 없음. 필수 게이트 통과 전 배포 금지. 핵심 예약 설정 변경 없음.
+

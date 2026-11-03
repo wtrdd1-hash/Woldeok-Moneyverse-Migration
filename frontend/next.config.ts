@@ -198,7 +198,7 @@ const config: NextConfig = {
         { key: 'cache-control', value: 'private, no-store' },
       ] },
       // Search results depend on the current viewer and may contain personal queries.
-      ...['/search', '/:locale(ko|en|ja|zh-CN|zh-TW|vi)/search'].map((source) => ({
+      ...['/search', '/:locale(ko|en|ja|zh|vi)/search'].map((source) => ({
         source,
         headers: [
           { key: 'x-robots-tag', value: 'noindex, nofollow' },
