@@ -1,0 +1,7 @@
+# Development C v1332 — Owner notification response privacy (English canonical)
+
+- Start (2026-11-03 12:48 KST): Debian 13.6 miniPC and seven services healthy; DEV PostgreSQL connected. Fetched origin/main a8e967b11bc67948caf422f120410c04306657b2. Reviewed AGENTS, README/README.ko, both master plans, open PRs, recent CI, A/B and QA work. Separate clean worktree; no edits to main or other workers.
+- Gap: two authenticated notification endpoints, GET /api/notifications/unread-count and POST /api/notifications/claim-all, returned private no-store but omitted explicit noindex/nofollow and no-referrer HTTP headers. Their response payloads depend on authenticated owner state; upstream app/API contracts and authorization remain unchanged.
+- RED: two real NextResponse tests failed on missing X-Robots-Tag. GREEN: added both protective headers to all response branches; targeted 5/5 PASS, frontend full 2,974 PASS, production build PASS, contract build PASS, frontend typecheck PASS, changed-file ESLint PASS.
+- Midpoint: origin/main unchanged a8e967b11bc67948caf422f120410c04306657b2. No DB migrations, finance writes, backend API changes or deployment.
+- Gate: full workspace backend/DB/security/app-api, authenticated browser/Android E2E, official Test exact SHA, full CI, independent restore NOT VERIFIED. RELEASE HOLD. No merge/Production promotion permitted. Preserve branch and PR until verified.

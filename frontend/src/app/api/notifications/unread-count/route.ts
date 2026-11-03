@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
 import { viewerOrUnknown } from '@/lib/viewer';
 export const dynamic = 'force-dynamic';
-const headers = { 'cache-control': 'private, no-store' };
+const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow', 'referrer-policy': 'no-referrer' };
 export async function GET(): Promise<NextResponse> {
   const viewer = await viewerOrUnknown().catch(() => null);
   if (!viewer) return NextResponse.json({ error: 'Authentication unavailable' }, { status: 503, headers });
