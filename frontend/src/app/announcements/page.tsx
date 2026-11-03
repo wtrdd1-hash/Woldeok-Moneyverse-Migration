@@ -9,10 +9,11 @@ import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { parseAnnouncementImageQuery } from './announcement-image-search';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const announcementMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
@@ -28,8 +29,31 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export async function generateMetadata({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  return {
+    ...announcementMetadata,
+    robots: { index: params.imageAlt === undefined, follow: true },
+  };
+}
+
+export default async function AnnouncementsPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const search = parseAnnouncementImageQuery(params.imageAlt);
+  const path = search.query
+    ? `/api/v1/announcements?imageAlt=${encodeURIComponent(search.query)}`
+    : '/api/v1/announcements';
+  const data = search.invalid
+    ? null
+    : await publicApi<{ announcements: Announcement[] }>(path, search.query ? 0 : 60);
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -54,6 +78,24 @@ export default async function AnnouncementsPage() {
       >
         검토를 마친 공지만 이곳에 게시됩니다. 카드를 클릭하면 상세 내용을 볼 수 있어요.
       </PageHeader>
+
+      <form role="search" method="get" action="/announcements" className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+        <label htmlFor="announcement-image-alt" className="grid min-w-0 flex-1 gap-1 text-sm font-semibold">
+          공지 이미지 설명 검색
+          <input id="announcement-image-alt" type="search" name="imageAlt" maxLength={80}
+            defaultValue={search.query ?? (typeof params.imageAlt === 'string' ? params.imageAlt.slice(0, 80) : '')}
+            placeholder="이미지에 대한 설명" aria-describedby="announcement-image-scope"
+            className="min-h-11 rounded-md border border-input bg-background px-3" />
+        </label>
+        <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">검색</button>
+        <Link href="/announcements" className="inline-flex min-h-11 items-center underline underline-offset-4">초기화</Link>
+        <p id="announcement-image-scope" className="w-full text-xs text-muted-foreground">
+          최근 공개 공지 20건의 첨부 이미지 설명에서만 검색합니다. 전체 공지 검색이 아닙니다.
+        </p>
+        {search.invalid ? <p role="alert" className="w-full text-sm text-destructive">
+          검색어는 2~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+        </p> : null}
+      </form>
 
       {/* Structured data for the announcement list */}
       {data && data.announcements.length > 0 && (
@@ -88,15 +130,17 @@ export default async function AnnouncementsPage() {
             </Link>
           }
         />
-        {data === null ? (
+        {search.invalid ? (
+          <EmptyState title="검색어를 확인해 주세요." />
+        ) : data === null ? (
           <EmptyState
             title="지금은 공지를 불러올 수 없어요."
             description="잠시 후 다시 확인해 주세요."
           />
         ) : data.announcements.length === 0 ? (
           <EmptyState
-            title="공개된 운영 소식을 준비하고 있어요."
-            description="검토를 마친 공지부터 이곳에 표시됩니다."
+            title={search.query ? '최근 공지 20건에서 일치하는 이미지 설명이 없어요.' : '공개된 운영 소식을 준비하고 있어요.'}
+            description={search.query ? '다른 검색어로 다시 찾아보세요.' : '검토를 마친 공지부터 이곳에 표시됩니다.'}
           />
         ) : (
           data.announcements.map((notice) => (

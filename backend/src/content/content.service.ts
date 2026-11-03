@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { parseAnnouncementImageSearch } from './announcement-image-search';
 import type {
   ContentAnnouncementReceiptRow,
   ContentAnnouncementRow,
@@ -216,7 +217,7 @@ function normalizePhotoReceipt(row: ContentPhotoReceiptRow): ContentPhotoReceipt
  * this module's static type checking).
  */
 export interface ContentRepositoryLike {
-  publishedAnnouncements(options?: { limit?: number }): Promise<ContentAnnouncementRow[]>;
+  publishedAnnouncements(options?: { limit?: number; imageAlt?: string }): Promise<ContentAnnouncementRow[]>;
   publishedPhotos(options?: { limit?: number }): Promise<ContentPhotoRow[]>;
   isPublicStorageKey(storageKey: unknown): Promise<boolean>;
   publicStatus(): Promise<ContentStatusRow[]>;
@@ -322,13 +323,15 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, imageAlt }: { limit?: number; imageAlt?: string } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
-      normalizeAnnouncement,
-    );
+    const term = parseAnnouncementImageSearch(imageAlt === undefined ? {} : { imageAlt });
+    return (await this.repository.publishedAnnouncements({
+      limit: contentLimit,
+      ...(term === undefined ? {} : { imageAlt: term }),
+    })).map(normalizeAnnouncement);
   }
 
   async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {

@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
+import { parseAnnouncementImageSearch } from './announcement-image-search';
 
 @ApiTags('content')
 @Controller('content')
@@ -14,8 +15,11 @@ export class AppContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    const imageAlt = parseAnnouncementImageSearch(query);
+    return { announcements: await this.service().publicAnnouncements(
+      imageAlt === undefined ? {} : { imageAlt },
+    ) };
   }
 
   @Get('photos')

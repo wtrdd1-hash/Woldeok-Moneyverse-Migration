@@ -243,14 +243,17 @@ export class PostgresContentRepository {
     this.pool = pool;
   }
 
-  async publishedAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publishedAnnouncements({ limit = 20, imageAlt }: { limit?: number; imageAlt?: string } = {}): Promise<
     ContentAnnouncementRow[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
+    const term = imageAlt === undefined ? null : imageAlt.trim();
     const { rows } = await this.pool.query<ContentAnnouncementRow>(
       `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
-       FROM public.content_list_published_announcements($1)`,
-      [contentLimit],
+       FROM public.content_list_published_announcements($1)` +
+        (term === null ? '' : `
+       WHERE image_url IS NOT NULL AND strpos(lower(image_alt_text), lower($2::text)) > 0`),
+      term === null ? [contentLimit] : [contentLimit, term],
     );
     return rows;
   }

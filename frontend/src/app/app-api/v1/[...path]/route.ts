@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseAnnouncementImageQuery, verifiedAnnouncementImageResults } from '@/app/announcements/announcement-image-search';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const announcementImagePath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  const announcementQueryValues = announcementImagePath
+    ? request.nextUrl.searchParams.getAll('imageAlt') : [];
+  const announcementSearch = parseAnnouncementImageQuery(announcementQueryValues.length > 1
+    ? announcementQueryValues : announcementQueryValues[0]);
+  if (announcementImagePath && (announcementSearch.invalid ||
+    [...request.nextUrl.searchParams.keys()].some((key) => key !== 'imageAlt'))) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_image_query_invalid',
+      'invalid published announcement image description search');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -273,6 +286,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  if (announcementImagePath && announcementSearch.query && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON announcement results');
+      const verified = verifiedAnnouncementImageResults(await response.clone().json(), announcementSearch.query);
+      if (!verified) throw new Error('unverified announcement image results');
+      return contractJson(verified, { status: 200, headers: {
+        'cache-control': 'no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer',
+      } });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'announcement_image_results_unverified',
+        'published announcement image search results could not be verified');
+    }
+  }
+
   // Bank standing is an owner-only observation; a legacy success-shaped response
   // must not become a verified Android balance or leak extra upstream fields.
   if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
@@ -339,6 +366,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('imageAlt')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
       return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
@@ -594,6 +627,12 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('imageAlt')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
