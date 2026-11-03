@@ -37,7 +37,7 @@ export async function GET(req: Request): Promise<NextResponse> {
 
   try {
     const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam !== null ? '&unreadOnly=' + unreadParam : ''}${readParam !== null ? '&readOnly=' + readParam : ''}`);
-    if (!Array.isArray(items)) throw new Error('Invalid feed');
+    if (!Array.isArray(items) || items.length > Number(limit)) throw new Error('Invalid feed size');
     return NextResponse.json({ notifications: items }, { headers: privateHeaders });
   } catch {
     return NextResponse.json({ error: 'Notification feed unavailable' }, { status: 503, headers: privateHeaders });
