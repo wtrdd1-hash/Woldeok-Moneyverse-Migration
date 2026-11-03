@@ -20,3 +20,20 @@
 
 ## END — 미완료
 검증되지 않은 지급·발권·복구·운영 승격은 완료로 보고하지 않는다.
+
+## MID — 2026-11-03 16:40 KST 실제 운영 재검증
+1. 정확한 소스/서비스 검사: 운영 공개 /api/version 및 /frontend-version 모두 07fa93a7781c60e042c59862953bc6f05452e45a. sudo -n 실행으로 /etc/moneyverse 읽기 권한을 정상 확보한 후 운영 공식 verify-host-runtime-identity --channel prod --sha 07fa... = ok:true, failures:[]; treasury overview HTTP200 status RECONCILED, 보유 0 WLD.
+2. 운영 PostgreSQL 계좌 42, 원장 891건, 전표 1,829. debit를 가산·credit를 감산하는 이 프로젝트의 실제 정산 수식으로 42/42 계좌 일치, 미일치 0; 891/891 거래 차변 합계와 대변 합계 일치, 불균형 0. 최초 임의 credit-plus 수식은 거꾸로 계산하여 24건 가짜 경고를 발생시켰으므로 폐기. 원장 부호 규칙은 packages/database/init/001-economy-core.sql 근거.
+3. 보존 금액: USER_CASH 4,783,802 WLD + USER_BANK 57,708 WLD = 4,841,510 WLD. MINT -5,078,810 WLD, SINK +237,300 WLD, 총 계좌 합계 0. 5개 현재 국고 모형 금고 0 및 정식 TREASURY 0.
+4. 11월 2일 23:14 UTC 금융 리셋 실행 1회, finance_reset_archive_entries 1,546행. 1,546/1,546행의 payload::text SHA256 전수 재계산 결과 불일치 0, 결함 해시 0. 8개 원본 테이블의 보관 개수와 finance_reset_runs.original_row_counts 일치. 기존 국고 552, 배당 744, 연금 지급 238 포함; 현재 그 세 테이블 모두 0행. 백업 원본 파일 124,890,258바이트 직접 SHA256 검산 = 67aa7851e7cf866a4fa2439c54622d8fc1a2c02430c6745f45b9b7b99fb00559 (기존 운영 기록 일치). 복구 실행 검증은 본 감사에서 수행하지 않음.
+5. 새 국고 Core SECURITY DEFINER 함수의 app EXECUTE=true, 직접 국고 Core 영수증 INSERT=false, 신규 연금 영수증 UPDATE=false, 직접 원장 거래 INSERT=false. 신규 treasury_core_receipts=0, pension_funded_receipts=0, mint_certificates=0, KDIC 지급=0, 현재 국고 0. SWF 모형 포트폴리오 4건/이벤트 272건은 지급 가능한 정식 국고의 근거가 아님.
+6. **P0 보안:** 실제 운영 DB account_balances에 moneyverse_app UPDATE=true. 기본 266테이블 중 애플리케이션 역할이 직접 INSERT/UPDATE/DELETE 중 한 개 이상을 가진 테이블 197개. 동일 DB와 역할은 공식 v1622 실제 운영 연결 자료에 확인됨. 즉 2026-10-23 개발 DB에서 보고된 #993 경계 문제가 여전히 중요한 운영 권한 리스크. 테이블 직접 UPDATE 수행은 하지 않았음. 과거 AGENTS의 'SELECT only' 설명과 현장 ACL 불일치.
+7. #2366 현존 금융 차단: 신규 재원 없는 연금 일괄 지급, 국고 미충당 배당/지원, 예보 지급, 조폐국/중앙은행 실제 발행은 모형 정책/메모리 숫자로 정식 증명 불가능. 해당 POST를 503에서 강제 개방하거나 원장·감사영수증을 위조하지 않음. 0자금에서 원장 무결성은 정상이고, '정산/운영 가능'은 별개.
+8. 익명 요청으로 POST /api/treasury/donate, /api/pension/funded/contribute, /api/pension/funded/withdraw 모두 HTTP403(CSRF/Origin 보호). 인증된 실제 금융 트랜잭션은 수행하지 않았으므로 기능성 E2E PASS라 주장하지 않음.
+
+### 다음 수정에 필요한 정확한 업무 경계
+- [ ] #993: 별도 수정 브랜치에서 현장 ACL 원인과 모든 필요한 DB 래퍼를 식별, 새 순방향 migration으로 account_balances의 비인가 직접 DML 제거하고 테스트·공식 Test·운영까지 증명
+- [ ] #2366: 실제 자금이 보전되는 DB 복식 원장만으로 국민연금 정기 지급, SOE 배당, KDIC 지급을 각각 멱등/불변영수증/관리자승인 경계로 구현
+- [ ] 조폐국·중앙은행: 메모리 모의발행을 실화폐 증거로 표시하지 않고 승인자 분리/발행 한도/발권 영수증/공급량 제약을 구현
+- [ ] 실제 지급가능 WLD 출처가 0인 상태에서 금액 창출/기부 대리 실행은 하지 않음. 백업·유저 잔액·금융 로그 보존
+- [ ] 각 모듈을 실제 인증 사용자/관리자 E2E, 격리 Postgres, 공식 Test/무중단 운영으로 개별 승인 및 증명. 현재 감사 문서는 코드·DB 변경/운영 승격을 의미하지 않음
