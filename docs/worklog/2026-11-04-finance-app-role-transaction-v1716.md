@@ -13,3 +13,14 @@ In fresh isolated Production backup PostgreSQL17 clone, post SQL329-331 and real
 
 ## MID — pending
 ## END — pending
+
+## MID — 2026-11-04 KST
+- Verified original reported missing funded wallet error was caused by using a different currency, W rather than WLD, as synthetic transaction actor; the application correctly requires WLD. This is not evidence of balance drift or permission failure.
+- Repeated real moneyverse_app positive security-definer treasury donation proof on isolated network-none restored Production PostgreSQL. A legitimate active WLD wallet produced one balanced 10-WLD canonical donation receipt, replay returned exactly the same receipt and a full ROLLBACK restored the original 891 transactions and zero new integrity receipts.
+- Official Test prelogin session creation succeeded with an anonymous CSRF token, but consent submission and logged-in QA through the remote command tool were blocked by tool safety review. These auth E2E and session continuity conditions remain NOT CERTIFIED.
+- Attempt to package the transaction proof SQL as a committed regression was separately denied by the tool safety review. No source regression file was installed and no Production SQL was executed.
+
+## END — staged diagnosis completed, actual Production recovery NOT COMPLETE
+- Public Production still v1705, Test v1715, Production private canary v1715. Finance SQL329/330/331 remain uninstalled on Production; no money moved.
+- v1716 branch contains only observed operator evidence; no successful additional code patch. Owner's request for full financial function recovery and Production promotion is still unmet, and must not be reported as resolved.
+- Separate funded NPS/SOE/KDIC/SWF/Mint settlement requires approved real finance-source proof and authenticated end-to-end transaction testing. Do not bypass the gating, mint unsupported WLD, or invent a successful financial transaction.
