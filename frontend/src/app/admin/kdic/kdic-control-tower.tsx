@@ -70,7 +70,7 @@ function isFreshLedgerProof(proof: KdicLedgerEvidence | null): boolean {
 export function KdicControlTower({ initialData, initialLedger = null }: { initialData: KdicOverviewData | null; initialLedger?: KdicLedgerEvidence | null }) {
   // Reject proof generated before a reset while a long-lived tab was asleep.
   const initialEvidenceFresh = isFreshLedgerProof(initialLedger);
-  const [data, setData] = useState<KdicOverviewData | null>(initialEvidenceFresh ? initialData : null);
+  const [data, setData] = useState<KdicOverviewData | null>(initialData);
   const [ledger, setLedger] = useState<KdicLedgerEvidence | null>(initialEvidenceFresh ? initialLedger : null);
   const [loading, setLoading] = useState(false);
   const refreshData = async (silent = false) => {
@@ -78,26 +78,23 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
     setData(null);
     setLedger(null);
     try {
-      const [response, ledgerResponse] = await Promise.all([
-        fetch('/api/admin/kdic/overview', { cache: 'no-store' }),
-        fetch('/api/admin/kdic/ledger-integrity', { cache: 'no-store' }),
+      // These are independent read-only evidence sources. A failed ledger query
+      // must never erase a separately verified insurance fund observation.
+      const [fundResult, ledgerResult] = await Promise.allSettled([
+        fetch('/api/admin/kdic/overview', { cache: 'no-store' }).then(async (response) =>
+          response.ok ? parseKdicOverview(await response.json()) : null),
+        fetch('/api/admin/kdic/ledger-integrity', { cache: 'no-store' }).then(async (response) =>
+          response.ok ? parseKdicLedgerIntegrity(await response.json()) : null),
       ]);
-      const verified = response.ok ? parseKdicOverview(await response.json()) : null;
-      const verifiedLedger = ledgerResponse.ok ? parseKdicLedgerIntegrity(await ledgerResponse.json()) : null;
-      if (verified && verifiedLedger) {
-        setData(verified);
-        setLedger(verifiedLedger);
-        if (!silent) toast.success('KDIC 관제 데이터가 최신으로 동기화되었습니다.');
-      } else {
-        setData(null);
-        setLedger(null);
-        if (!silent && !verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
-        if (!silent && !verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
+      const verifiedFund = fundResult.status === 'fulfilled' ? fundResult.value : null;
+      const verifiedLedger = ledgerResult.status === 'fulfilled' ? ledgerResult.value : null;
+      setData(verifiedFund);
+      setLedger(verifiedLedger);
+      if (!silent) {
+        if (verifiedFund) toast.success('KDIC 기금 및 기관 조회 결과를 갱신했습니다.');
+        else toast.error('KDIC 기금 및 기관 데이터 검증에 실패했습니다.');
+        if (!verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
       }
-    } catch {
-      setData(null);
-      setLedger(null);
-      if (!silent) toast.error('KDIC 관제 데이터를 다시 조회하지 못했습니다.');
     } finally {
       setLoading(false);
     }
@@ -113,16 +110,23 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
 
   return (
     <div className="space-y-6">
-      {!data && (
+      {loading && <p role="status" className="text-sm text-muted-foreground">KDIC 기금·원장 검증 자료 조회 중...</p>}
+      {!data && !loading && (
         <div role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
           KDIC 조회 결과를 확인할 수 없습니다. 미확인 금액을 0 WLD 또는 정상 상태로 판단하지 마세요.
         </div>
       )}
-      <p role="status" className="text-xs text-amber-300">금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.</p>
+      <p role="status" className={ledger?.numericBalanced ? 'text-xs text-muted-foreground' : 'text-xs text-amber-300'}>
+        {ledger?.numericBalanced
+          ? '원장 계좌·전표 수치는 일치합니다. KDIC 실제 보상·징수는 별도 정산·지급 영수증 검증 전까지 보류됩니다.'
+          : '금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.'}
+      </p>
       <section aria-label="KDIC 원장 검증" className="rounded-2xl border border-amber-500/30 bg-slate-900/70 p-4 space-y-3">
         <h3 className="font-semibold text-white">관리자 원장 진단 · 읽기 전용</h3>
         {!ledger ? (
-          <p role="status" className="text-sm text-amber-300">실시간 원장 증거를 확인하지 못했습니다. 원장 상태를 정상으로 판단하지 마세요.</p>
+          loading
+            ? <p role="status" className="text-sm text-muted-foreground">원장 검증 자료 조회 중...</p>
+            : <p role="status" className="text-sm text-amber-300">실시간 원장 증거를 확인하지 못했습니다. 원장 상태를 정상으로 판단하지 마세요.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
