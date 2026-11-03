@@ -21,6 +21,13 @@ describe('notification mark-all verified receipt', () => {
     expect(mutate).toHaveBeenCalledWith('/api/v1/notifications/read-all-receipt');
   });
 
+  it('does not expose unexpected upstream receipt properties', async () => {
+    mutate.mockResolvedValue({ updatedCount: 1, remainingUnreadCount: 0, privateEmail: 'secret@example.test', accessToken: 'secret' });
+    const response = await POST(request());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ updatedCount: 1, remainingUnreadCount: 0 });
+  });
+
   it('rejects a fabricated zero when the backend receipt is incomplete', async () => {
     mutate.mockResolvedValue({ updatedCount: 3 });
     const response = await POST(request());
