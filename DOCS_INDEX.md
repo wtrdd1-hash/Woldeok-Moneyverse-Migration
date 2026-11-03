@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.03.1652.2 — Verified Production KDIC/Mint observation UI, Treasury Core audit
+- [EN Production](docs/releases/v2026.11.03.1652-finance-admin-evidence-prod.md) / [KO](docs/releases/v2026.11.03.1652-finance-admin-evidence-prod.ko.md) · [EN worklog](docs/worklog/2026-11-03-finance-admin-evidence-v1652.md) / [KO](docs/worklog/2026-11-03-finance-admin-evidence-v1652.ko.md). PR #2626 final CI 41579739572 SUCCESS, merged main ea8a238d19725e07c9f9f22c2a4066fbeb4f52bf, exact-main Test & Production identity ok:true/failures:[]. KDIC independent sources and neutral pending, Mint persistent DB counters 0/0/0 and no fake issuance; Central Bank verified partial data neutral, real freeze alerts only. Ledger 891/1829, mismatch/unbalanced/unlinked0, members 4,841,510 WLD preserved. QA 24 PASS/0 fail/2 login-only untested, dual disk strict root52/data48 OK. No real WLD writers released; remaining P0 #993/#2366 and stale FX.
+
 ## v2026.11.03.1652 — Finance admin evidence: KDIC/Mint/Treasury Core read-only audit
 - [Worklog EN](docs/worklog/2026-11-03-finance-admin-evidence-v1652.md) / [KO](docs/worklog/2026-11-03-finance-admin-evidence-v1652.ko.md), internal/GitHub update, changelog. Verified real fund and ledger, fixed combined refresh false warning, Mint now queries live policy/certificate counts, source failure is never zero. Core ACL/ledger 891/1829, Treasury 0, FX 27-day stale source, no monetary writers changed. 55 focused tests. Test/Production pending.
 
