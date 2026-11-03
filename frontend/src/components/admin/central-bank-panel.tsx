@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Landmark, Percent, RefreshCw, ShieldAlert, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,6 +80,17 @@ export function CentralBankPanel() {
     });
     return () => abort.abort();
   }, []);
+
+  useAdminFinanceRevalidation(async () => {
+    setSnapshot(null);
+    setError('');
+    try {
+      await reload();
+    } catch {
+      setSnapshot(null);
+      setError('최신 금융 원장·정책 조회에 실패했습니다. 과거 수치를 숨겼습니다.');
+    }
+  }, { onMount: false });
 
   async function save(kind: 'base-rate' | 'reserve-requirement') {
     if (reason.trim().length < 10) {

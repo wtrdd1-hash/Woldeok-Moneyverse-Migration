@@ -1,3 +1,6 @@
+## 2026-11-03 v1628 — Read-only admin finance freshness after reset (SOURCE TESTED; RELEASE PENDING)
+- Existing long-lived KDIC/NPS/central bank/enterprise admin tabs can retain pre-reset ledger and AUM data. Source adds tab-focus, pageshow and visibility revalidation and 5-minute KDIC proof expiry; unknown stays unknown rather than stale success. Direct live DB: 0 active/unlinked legacy Treasury, NPS AUM 0, 4,841,510 WLD member assets preserved (net account sum 0 including Mint/Sink), Treasury 0; SOE 365m nominal only. 17 focused tests/typecheck/lint pass; payout 503 hold unchanged. [Evidence](worklog/2026-11-03-finance-admin-freshness-v1628.md).
+
 ## 2026-11-03 v1627.1 — Actual Production QA scheduler dual-disk maintenance VERIFIED (operations only)
 - PR #2597 merged main `d22c36d`; CI 41547623648 SUCCESS and storage tests 19/19. Immutable QA v1627 effective systemd unit 08:46:13–08:46:41 KST exit 0, HTTP 24 PASS/2 auth-gated NOT TESTED, QA timer active. Cache scans root5/data35, eligible/deleted=0 after independent manual sweep; root 79%/data 78%, dual-disk strict OK. No application/finance release. [EN proof](releases/v2026.11.03.1627-qa-ops.md) / [KO](releases/v2026.11.03.1627-qa-ops.ko.md).
 

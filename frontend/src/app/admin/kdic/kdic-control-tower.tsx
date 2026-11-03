@@ -5,6 +5,7 @@ import { RotateCw } from 'lucide-react';
 import { parseKdicOverview } from './kdic-evidence';
 import { parseKdicLedgerIntegrity, type KdicLedgerEvidence } from './kdic-ledger-evidence';
 import { toast } from 'sonner';
+import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 
 export interface KdicOverviewData {
   fund: {
@@ -59,12 +60,23 @@ export interface KdicOverviewData {
   }>;
 }
 
+function isFreshLedgerProof(proof: KdicLedgerEvidence | null): boolean {
+  if (!proof) return true;
+  const time = Date.parse(proof.checkedAt);
+  return Number.isFinite(time) && time <= Date.now() + 30_000
+    && Date.now() - time <= 5 * 60_000;
+}
+
 export function KdicControlTower({ initialData, initialLedger = null }: { initialData: KdicOverviewData | null; initialLedger?: KdicLedgerEvidence | null }) {
-  const [data, setData] = useState<KdicOverviewData | null>(initialData);
-  const [ledger, setLedger] = useState<KdicLedgerEvidence | null>(initialLedger);
+  // Reject proof generated before a reset while a long-lived tab was asleep.
+  const initialEvidenceFresh = isFreshLedgerProof(initialLedger);
+  const [data, setData] = useState<KdicOverviewData | null>(initialEvidenceFresh ? initialData : null);
+  const [ledger, setLedger] = useState<KdicLedgerEvidence | null>(initialEvidenceFresh ? initialLedger : null);
   const [loading, setLoading] = useState(false);
-  const refreshData = async () => {
+  const refreshData = async (silent = false) => {
     setLoading(true);
+    setData(null);
+    setLedger(null);
     try {
       const [response, ledgerResponse] = await Promise.all([
         fetch('/api/admin/kdic/overview', { cache: 'no-store' }),
@@ -75,21 +87,23 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
       if (verified && verifiedLedger) {
         setData(verified);
         setLedger(verifiedLedger);
-        toast.success('KDIC 관제 데이터가 최신으로 동기화되었습니다.');
+        if (!silent) toast.success('KDIC 관제 데이터가 최신으로 동기화되었습니다.');
       } else {
         setData(null);
         setLedger(null);
-        if (!verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
-        if (!verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
+        if (!silent && !verified) toast.error('KDIC 관제 데이터 검증에 실패했습니다.');
+        if (!silent && !verifiedLedger) toast.error('KDIC 원장 대조 결과를 확인하지 못했습니다.');
       }
     } catch {
       setData(null);
       setLedger(null);
-      toast.error('KDIC 관제 데이터를 다시 조회하지 못했습니다.');
+      if (!silent) toast.error('KDIC 관제 데이터를 다시 조회하지 못했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
+  useAdminFinanceRevalidation(() => refreshData(true));
 
   const fund = data?.fund;
   const institutions = data?.institutions ?? [];
@@ -146,7 +160,7 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
 
         <div className="flex items-center gap-3">
           <button
-            onClick={refreshData}
+            onClick={() => void refreshData()}
             disabled={loading}
             className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all"
           >

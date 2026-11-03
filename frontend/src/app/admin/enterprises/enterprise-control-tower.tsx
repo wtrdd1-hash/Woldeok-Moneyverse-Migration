@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -147,6 +148,7 @@ export function EnterpriseControlTower({
   initialDividendLogs,
 }: Props) {
   const router = useRouter();
+  useAdminFinanceRevalidation(() => { router.refresh(); }, { onMount: false });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
   const [governanceReasons, setGovernanceReasons] = useState<Record<string, string>>({});
