@@ -1,3 +1,13 @@
+## v1708 — F675-233 관리자 전용 문의 내부 메모 (기능 추가 / 초안 / 운영 보류)
+- **주기:** 이전 기능 보완 v1706 → 현재 기능 추가 v1708 → 다음 기능 보완 v1710(잠정). 미병합 v1706 브랜치 기반 문서 변경만 수행; main 병합 전 재대조. `admin_support_private_notes_v1` 기본 OFF.
+- **목적·권한:** 인증된 문의 관리자만 문의별 내부 메모를 읽는다. 회원 메시지·답변·상태·응답 대기 시간·금융 원장에 영향을 주지 않는다. 회원 API, 알림, 검색 색인, 공개 SEO, 내보내기에 포함하지 않는다. 실제 관리자·문의 키는 마이그레이션 196과 `SupportRepository` 검증 후 확정.
+- **화면·CTA·상태:** 관리자 문의 상세에 '내부 메모 — 회원에게 표시되지 않음' 별도 패널, 메모 추가·본인 메모 수정·본인 메모 삭제·취소 버튼. 삭제 전 확인, 작성자·UTC 시각 표시. 로딩·빈 목록·저장·검증 오류·충돌·권한 회수·오프라인 상태 제공. 기존 답변 버튼·임시저장과 시각적·기능적으로 분리. 320px, 키보드 포커스, WCAG 2.2 AA, 스크린리더, Android 계정 전환 캐시 제거.
+- **제안 API:** `GET /api/v1/admin/support/threads/:id/internal-notes?cursor=&limit=20`, `POST /api/v1/admin/support/threads/:id/internal-notes`, `PATCH /api/v1/admin/support/threads/:id/internal-notes/:noteId`, `DELETE /api/v1/admin/support/threads/:id/internal-notes/:noteId`. 20개씩 안정 커서(생성시각+ID), 문의당 100개, 메모당 유니코드 2,000 코드포인트 및 UTF-8 8KiB. LF 정규화된 일반 텍스트만, 첨부·멘션·HTML·외부 이벤트 금지. 관리자 세션·CSRF·쓰기 멱등 키 필수, 수정·삭제 강한 If-Match 필수(누락 428/충돌 412), 키-본문 불일치 409, 제한 429, 검증 실패 422, 비관리자 403, 숨겨진 문의·메모 404. 성공·실패 모두 no-store, Vary: Cookie, noindex.
+- **제안 DB:** `support_admin_internal_notes`의 note_id UUID PK, 실제 타입의 thread_id·author_admin_id FK, body, revision UUID, created_at·updated_at·deleted_at. CHECK 길이와 본문, 활성 행 부분 인덱스 `(thread_id,created_at DESC,note_id DESC)`, 필요시 작성자 인덱스. 소프트 삭제 툼스톤과 영속 리비전으로 ABA 방지. 문의 행 잠금 후 100개 상한 직렬화. 기획 작업은 DDL 실행하지 않음.
+- **트랜잭션·보안:** 잠금 전후 관리자 역할·문의 접근 재검증, 본인 메모만 수정·삭제, 다른 관리자는 읽기만 가능. 메모·감사 기록·멱등 영수증을 단일 트랜잭션 처리. 관리자·경로·본문 해시 결합, 동일 재시도 결과만 재생. 기존 답변·상태 함수 호출 금지. 본문 저장 암호화 정책, 로그·추적·분석·오류 본문 제외, XSS 출력 이스케이프, 속도 제한, 다른 계정 정보 노출 방지. 종료 90일 후 정책에 따른 정리, 법적 보존 예외 우선. KPI는 본문 없는 집계(최소 20명)·성공률·지연시간. SEO 공개 진입점 없음.
+- **수용·배포 P1:** NOTE1708-05 실제 키·권한 조사, -06 제약·잠금·멱등, -07 API·커서·ETag, -08 관리자 UI·Next 캐시 보호, -09 관리자 2명·권한 회수·101번째 메모·유니코드·오래된 삭제·중복 키·회원 API 유출·Android·320px 회귀, -10 OFF·카나리·롤백. 개발 별도 브랜치와 정확 SHA 인증 Test E2E, 독립 외부 복원 검증 완료 전 운영 승격 금지. OFF 롤백은 데이터 보존·기능 차단.
+- **P0 유지:** OPS1708-01 운영 HTTP 500, SEC1708-02 DB 최소권한·체크섬, REL1708-03 정확 SHA 인증 Test, BAK1708-04 외부 복원. 해결 증거 미확인으로 BLOCKED, 운영 RELEASE HOLD. 외부 독립 신규 검증·중복 제거·근거 분류 0건, 누적 UNKNOWN/10,000, BLOCKED / IN PROGRESS.
+
 ## v1706 — F675-232 임시저장 소유권·최초 생성·전송 경계 정합성 (기능 보완 / 초안 / 운영 보류)
 - **주기:** 이전 기능 추가 v1704 → 현재 기능 보완 v1706 → 다음 기능 추가 v1708(잠정). Draft #2639 기반 누적 초안으로 main 미병합; 병합 전 최신 main 재대조 필수. 실제 사고가 아니라 설계 위험 개선이며 기능 플래그는 OFF.
 - **코드 근거:** `backend/src/support/support.controller.ts`의 관리자 경로는 `@Controller('admin/support')`, 회원 경로는 `@Controller('support')`이며 관리자·세션·CSRF 가드를 사용한다. 임시저장 API는 아직 존재하지 않는다. 실제 관리자 식별자와 문의 소유권은 마이그레이션 196 및 `SupportRepository`에서 검증한 뒤 FK·함수 시그니처를 결정한다. 관리자와 문의 작성 회원을 동일 인물로 가정하지 않는다.
