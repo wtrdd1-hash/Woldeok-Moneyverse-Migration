@@ -105,3 +105,19 @@ describe('Android owner-private KST shop receipt date filter', () => {
     expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 });
+
+
+describe('Android owner-private shop holdings', () => {
+  it('never exposes owner holdings through upstream public cache or indexing headers', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ items: [{ id: 'held-1', quantity: 2 }] }), {
+      headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600', 'x-robots-tag': 'all' },
+    })));
+    const response = await GET(new NextRequest('https://easy-scraping.com/app-api/v1/shop/holdings', {
+      headers: { cookie: 'moneyverse_session=owner-session' },
+    }), { params: Promise.resolve({ path: ['shop', 'holdings'] }) });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+});
