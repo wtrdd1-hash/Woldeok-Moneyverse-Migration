@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.03.1652 — Finance admin evidence: KDIC/Mint/Treasury Core read-only audit
+- [Worklog EN](docs/worklog/2026-11-03-finance-admin-evidence-v1652.md) / [KO](docs/worklog/2026-11-03-finance-admin-evidence-v1652.ko.md), internal/GitHub update, changelog. Verified real fund and ledger, fixed combined refresh false warning, Mint now queries live policy/certificate counts, source failure is never zero. Core ACL/ledger 891/1829, Treasury 0, FX 27-day stale source, no monetary writers changed. 55 focused tests. Test/Production pending.
+
 ## v2026.11.03.1651 — Treasury revenue and expense ACL source correction
 - EN/KO worklog: docs/worklog/2026-11-03-treasury-epoch-access-v1651.md / .ko.md. Existing SECURITY DEFINER fiscal-proof query replaces two invalid protected-table reads. Actual live DB 42501 root cause, 27 regressions pass; no WLD operation or role privilege changes. Release pending.
 

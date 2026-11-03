@@ -1,3 +1,6 @@
+## 2026-11-03 v1652 — KDIC independent evidence and Mint read-only persistent status
+- False KDIC total outage after partial fetch failure fixed, authenticated Mint policy DB counters replace static generic warning, central bank partial state neutral; actual invalid proof still warns. Core ACL/ledger read-only and FX stale-source audit. 55 focused tests passed. No money movement. CI/Test/Production pending.
+
 ## 2026-11-03 v1651 — Treasury fiscal query correction
 Revenue and expenditure 503: real PostgreSQL 42501 on intentionally private epoch table. Read epoch via existing scoped fiscal proof; 27 tests PASS. No financial mutation; Test/Production pending.
 

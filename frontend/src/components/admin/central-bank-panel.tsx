@@ -144,8 +144,8 @@ export function CentralBankPanel() {
       <Card>
         <CardHeader className="py-3">
           <CardTitle className="flex items-center gap-2 text-sm font-medium">
-            <ShieldAlert className="h-4 w-4 text-amber-500" />
-            독립 원장 검증 전 — 통화정책 및 금융 지표
+            <Landmark className="h-4 w-4 text-blue-500" />
+            통화정책 DB 및 확인된 원장 지표
           </CardTitle>
           <CardDescription className="text-xs">
             기준금리와 지급준비율은 정책 DB에 영구 기록하고 감사 이력을 남깁니다. 실제 화폐 발행과 국고 이동은 별도 복식부기 승인 대상입니다.
@@ -156,10 +156,11 @@ export function CentralBankPanel() {
       {!snapshot && !error ? <p role="status">정책 DB와 원장 조회 중...</p> : null}
       {snapshot ? (
         <>
-          <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+          <div role="status" className="rounded-lg border border-border bg-muted/20 p-4 text-sm">
             아래 통화량은 실제 금융 테이블의 확인된 일부 합계이며 은행 유동성·에스크로 합산이 아직 빠져 있어 전체 통화량 불변식을 인증한 것은 아닙니다.
             조폐국 신규 화폐의 공식 원장 발행 기능은 별도 승인·정산 검증 전까지 실행하지 않습니다.
           </div>
+          {snapshot.monetary.is_issuance_frozen && <p role="alert" className="rounded-lg border border-amber-500/40 p-3 text-sm">통화 신규 발행이 정책 DB에서 동결된 상태입니다.</p>}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               ['원장 확인 합계 (부분)', money(snapshot.monetary.m_total)],
