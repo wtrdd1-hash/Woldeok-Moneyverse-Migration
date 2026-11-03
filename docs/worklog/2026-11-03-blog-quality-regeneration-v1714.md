@@ -8,14 +8,21 @@
 - Branch: `fix/blog-quality-regeneration-v2026.11.03.1714` created from current `origin/main`; independent from active v1712 SEO branch.
 
 ## Plan / acceptance
-- [ ] Write RED regression tests for generated unsupported numbers and repeated model prose; preserve refusal when regeneration is exhausted.
-- [ ] Implement bounded content-specific regeneration with a single global attempt budget; never substitute fake sources or strip numerical evidence silently.
-- [ ] Run targeted tests, typecheck, backend build and appropriate isolated Test worker probes.
+- [x] Write RED regression tests for generated unsupported numbers and repeated model prose; preserve refusal when regeneration is exhausted.
+- [x] Implement bounded content-specific regeneration with a single global attempt budget; never substitute fake sources or strip numerical evidence silently.
+- [x] Run targeted tests, typecheck, backend build and appropriate isolated Test worker probes.
 - [ ] Re-fetch `origin/main`, integrate without overwriting other agent changes, publish EN/KO internal and GitHub update records.
 - [ ] Promote only after exact candidate Test health and worker validation; record Production result and remaining blockers explicitly.
 
-## Midpoint
-Pending.
+## Midpoint — 2026-11-03 16:49 KST
+- RED suite reproduced four missing behaviors (official citation URL year false positive, unsupported number persistence, repeated sentence persistence, failure-call budget); 2 additional baseline profile HTTP tests returned 401 instead of expected 200 in a broad first run and are unrelated to these modules; do not claim all backend tests pass.
+- Implementation adds per-section deterministic early checks and up to two additional model calls across the whole article. A rejected section is discarded; reasons are sent to the local trusted model to regenerate. If exhaustion occurs, publication still fails closed and no DB receipt is forged. Numeric scanning excludes the exact official source URL but still scans prose/title/excerpt.
+- Focused blog suite 26/26 PASS, backend TypeScript typecheck PASS, backend `nest build` PASS, changed-file ESLint 0 errors / one pre-existing unused `extractJson` warning.
+- New isolated pinned worker candidate staged in `/srv/moneyverse-data/releases/blog-worker-v2026.11.03.1714-candidate` by hard-link copy followed by unlink-and-replace of exactly two compiled modules; original operational files verified unchanged. SHA256 manifest checked and compiled artifact import PASS.
+- Isolated compiled-artifact Japanese economy canary: first draft fabricated an unsourced year; same section regenerated and the result passed independent deterministic gate (6 model invocations, 3,630-character article, official URL cited), with no DB write. Test site's `/api/health` HTTP 200; this is **not** an exact-source Test backend or authenticated/full financial QA certification.
+- Existing v1419 Production timer independently succeeded on its 16:45 retry: 16:48:04 KST published previously missing 16:00 Japanese economy slot with its own DB receipt. This is **legacy retry recovery**, not proof new code has been deployed.
+- Scope separated from parallel v1712 blog SEO and finance branches. No deployment/symlink switch yet.
+
 
 ## End
 Pending; no release or recovery claim until independently evidenced.

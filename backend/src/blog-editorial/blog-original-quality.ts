@@ -85,7 +85,7 @@ export function checkOriginalArticle(
   // No invented decimal figures, percentages, years or benchmark measurements.
   // Numbers needed for software examples must be introduced by trusted examples
   // during a separate reproducibility check before enabling that category.
-  if (/(?:\b\d{4}\b|\b\d{1,3}(?:\.\d+)?\s*%)/.test(body)) {
+  if (/(?:\b\d{4}\b|\b\d{1,3}(?:\.\d+)?\s*%)/.test(editorialText)) {
     reasons.push('NUMERICAL_CLAIMS_NEED_INDEPENDENT_PROOF');
   }
   if (slot.topic !== 'ECONOMY' && !/(?:JavaScript|HTTP|TCP|JSON|SQL|네트워크|ネットワーク|网络)/i.test(body)) {
