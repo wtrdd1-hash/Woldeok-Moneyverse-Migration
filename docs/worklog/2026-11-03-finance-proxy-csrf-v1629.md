@@ -15,3 +15,9 @@
 - RED: missing common validator module, Vitest failed. GREEN: strict canonical HTTPS Host/Origin and loopback request validator + three route integrations. 35 tests PASS across three files, including new proxy acceptance/401 and cross-origin 403 cases. TypeScript and scoped ESLint PASS.
 - Public domains allowlist is explicit, arbitrary X-Forwarded-Host cannot substitute for the actual Host, and nonlocal URLs are rejected. Existing direct same-origin test requests still work.
 - Final release evidence pending; no Production claim from source-only tests.
+
+## v1629.1 — actual Next canary correction (interim)
+- Original compiled canary still returned 403 on all three routes despite 35 synthetic tests. Local-only temporary diagnostic (no cookies, tokens, personal data) showed Next rewrote the internal request URL as `https://localhost:4246`, with genuine Host and Origin set to `easy-scraping.com`; first validator incorrectly required HTTP loopback.
+- TDD real-format RED (1 fail/15 pass), then GREEN: allow actual localhost HTTP/HTTPS protocol only if canonical public Host, Origin and forwarded Host match exactly. Added two spoof-negative cases; 38 source tests PASS; temporary logging fully removed.
+- Protected local-only Next canary using the existing frontend environment and backend returned 401 to each of the three legitimate same-origin unauthenticated POSTs and 403 to each forged cross-site POST. No authenticated WLD transfer or mint. Stopped canary and diagnostic services.
+- GitHub CI and official exact-SHA Test/Production remain separate gates.

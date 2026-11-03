@@ -1511,3 +1511,6 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 종료: 프론트 정확한 SHA 빌드 EAGAIN 실패, Test·운영 승격 미실행. GitHub PR #2319 Draft, CI #5120 진행 중. -->
+
+## 2026-11-03 v1629.1 — 실제 카나리 공개 금융 HTTPS 요청 재확인 (배포 전)
+- Next 실제 내부 URL이 `https://localhost`로 바뀌어 첫 카나리 403 재발. RED → 수정 후 테스트 38개 통과, 보호된 카나리 정상 공개 출처 비로그인 요청 401 3건, 악성 출처 403 3건. 금융 이체/발권 없음. 공식 운영 검증 전.

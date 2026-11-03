@@ -12,6 +12,7 @@ const localNames = new Set(['127.0.0.1', 'localhost', '[::1]']);
 export function isSameOriginFinanceMutation(request: Request): boolean {
   const originHeader = request.headers.get('origin');
   const site = request.headers.get('sec-fetch-site');
+
   if (!originHeader || (site !== null && site !== 'same-origin')) return false;
   try {
     const origin = new URL(originHeader);
@@ -21,7 +22,8 @@ export function isSameOriginFinanceMutation(request: Request): boolean {
     if (internal.origin === origin.origin) return true;
 
     // No trust in arbitrary X-Forwarded-Host; require public Host from Nginx.
-    if (internal.protocol !== 'http:' || !localNames.has(internal.hostname)) return false;
+    // Next uses X-Forwarded-Proto to reconstruct HTTPS even for a localhost upstream.
+    if (!['http:', 'https:'].includes(internal.protocol) || !localNames.has(internal.hostname)) return false;
     if (origin.protocol !== 'https:' || !canonicalHosts.has(origin.host)) return false;
     const host = request.headers.get('host')?.trim().toLowerCase();
     const forwarded = request.headers.get('x-forwarded-host')?.trim().toLowerCase();

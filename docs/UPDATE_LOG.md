@@ -1458,3 +1458,6 @@
 - Runtime code and Production services are unchanged by this documentation-only release.
 
 <!-- v1603 final: frontend exact-SHA Next build FAILED EAGAIN, no Test/Production promotion. GitHub PR #2319 DRAFT, CI #5120 pending. -->
+
+## 2026-11-03 v1629.1 — Real Next origin canary correction (release pending)
+- Actual Next proxy URL is HTTPS localhost even on an HTTP loopback upstream. Initial canary 403 recurred, RED test reproduced; updated strict validator and spoof negatives PASS 38 tests. Protected local canary valid-origin guest 401 x3, evil origin 403 x3. No financial transfers; exact Test/Production pending.

@@ -520,3 +520,6 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
 
 Read-only findings; not a full browser acceptance, Test deployment, or Production release.
+
+## v2026.11.03.1629.1 — Real Next finance-origin canary: source and local-only verification
+- [EN](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.md) / [KO](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.ko.md): first canary still 403 due to actual `https://localhost` Next normalization, corrected via RED/GREEN; 38 tests. Protected local-only canary authenticates genuine guest HTTP 401 x3 while cross-site HTTP 403 x3. No WLD write, official CI/Test/Production still pending.

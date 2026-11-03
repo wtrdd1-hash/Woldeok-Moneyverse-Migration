@@ -8,6 +8,7 @@ function request(url: string, headers: Record<string,string>): Request {
 describe('v1629 strict owner-backed financial POST origin handling', () => {
   it.each([
     ['production', 'http://127.0.0.1:4225/api/treasury/donate', 'easy-scraping.com'],
+    ['Next forwarded HTTPS localhost', 'https://localhost:4246/api/treasury/donate', 'easy-scraping.com'],
     ['test', 'http://127.0.0.1:3101/api/treasury/donate', 'test.easy-scraping.com'],
   ])('accepts %s public HTTPS proxy address only when Host and Origin match', (_label, url, host) => {
     expect(isSameOriginFinanceMutation(request(url, { host, origin: 'https://' + host,
@@ -32,6 +33,18 @@ describe('v1629 strict owner-backed financial POST origin handling', () => {
   ])('rejects nonmatching or hostile request %#', (args) => {
     expect(isSameOriginFinanceMutation(request('http://127.0.0.1:4225/api/treasury/donate', {
       host:args.host, origin:args.origin, 'sec-fetch-site':args.site
+    }))).toBe(false);
+  });
+  it('rejects an untrusted Host even when Next reconstructs HTTPS localhost', () => {
+    expect(isSameOriginFinanceMutation(request('https://localhost:4246/api/treasury/donate', {
+      host:'attacker.example','x-forwarded-host':'easy-scraping.com',
+      origin:validPublic,'sec-fetch-site':'same-origin',
+    }))).toBe(false);
+  });
+  it('rejects forwarded Host that conflicts with the canonical public Host', () => {
+    expect(isSameOriginFinanceMutation(request('https://localhost:4246/api/treasury/donate', {
+      host:'easy-scraping.com','x-forwarded-host':'evil.example',
+      origin:validPublic,'sec-fetch-site':'same-origin',
     }))).toBe(false);
   });
   it('does not permit a forged X-Forwarded-Host to override an untrusted Host', () => {
