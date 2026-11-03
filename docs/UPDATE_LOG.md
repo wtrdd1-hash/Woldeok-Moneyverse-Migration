@@ -1,3 +1,6 @@
+## 2026-11-03 v1629 — Source fix for three financial POST proxy-Origin blockers (release pending)
+- Production public HTTPS no-session donation/NPS contribution/NPS withdrawal all returned 403 before auth. Strict allowlisted public Host+Origin and loopback request validator restores ability to reach authentication 401; rejects external origins, forged forward hosts, unknown ports and cross-site. 35 finance tests + lint/typecheck PASS. No Production money transfers/mint. [EN](worklog/2026-11-03-finance-proxy-csrf-v1629.md) / [KO](worklog/2026-11-03-finance-proxy-csrf-v1629.ko.md).
+
 ## 2026-11-03 v1628.2 — Final hourly QA after UI Production deployment and storage hygiene
 - Actual QA v1627 ran 09:39:38–09:40:05 KST: exit 0, HTTP 24 PASS / 2 auth-gated NOT TESTED / 0 unexpected failures. Task cache cleanup root 5 scanned/0 deleted, data 38 scanned/3 deleted, allocated bytes reclaimed **2,883,731,456**, available bytes delta **2,883,727,360**. Data disk used 84→82%, root 79%. Separate safe own build cleanup 2,050,207,744 bytes; aggregate actions ~4.93GB. Data disk still WARN at 82% according to `dual-disk-check --strict` (exit 2), and no remaining eligible cache was falsely claimed. [EN proof](releases/v2026.11.03.1628.1-finance-screen-prod.md).
 

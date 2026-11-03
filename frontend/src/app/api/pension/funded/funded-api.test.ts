@@ -29,6 +29,21 @@ describe('Treasury Core pension Next same-origin mutation boundary', () => {
     });
   });
 
+  it.each([
+    { endpoint: '/api/pension/funded/contribute', action: contribute, field: 'amountWld' },
+    { endpoint: '/api/pension/funded/withdraw', action: withdraw, field: 'principalWld' },
+  ] as const)('reaches authentication through verified HTTPS proxy on $endpoint', async ({ endpoint, action, field }) => {
+    mutate.mockRejectedValueOnce(new ApiError(401, 'login required'));
+    const proxyRequest = new Request('http://127.0.0.1:4225' + endpoint, {
+      method:'POST', headers:{host:'easy-scraping.com', origin:'https://easy-scraping.com',
+      'sec-fetch-site':'same-origin','content-type':'application/json'},
+      body:JSON.stringify({[field]:'1000',idempotencyKey:key}),
+    });
+    const response=await action(proxyRequest);
+    expect(response.status).toBe(401);
+    expect((await response.json()).code).toBe('AUTHENTICATION_REQUIRED');
+  });
+
   it('rejects cross-origin writes before receiving server CSRF token', async () => {
     const response = await contribute(request('/api/pension/funded/contribute', {
       idempotencyKey:key,amountWld:'1000',
