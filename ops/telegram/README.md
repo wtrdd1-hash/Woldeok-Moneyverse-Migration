@@ -28,3 +28,7 @@ The **standalone** bridge scans read-only local systemd state and dual-disk util
 ## v2026.10.30.1 — Market timer reliability
 
 Use an explicit recurring wall-clock calendar schedule every two minutes. The base operations alert bot flags active/elapsed market timers with no real next trigger and emits recovery once scheduled. Market snapshots now include a last-observed time. Observations separated by more than ten minutes disclose a gap without a false two-minute price alarm; the 09:00 KST digest can recover until 11:59. The standalone market timer can be disabled without restarting application services. Do not forward secrets, private accounts or raw financial data.
+
+## Alert transition semantics (v2026.11.03.1646)
+
+Disk measurement changes within the same severity update the state without a notification. Only actual severity transitions produce a recovery or degradation alert. Running systemd oneshots are PENDING and must not be treated as completed successes. Real failures remain critical. Verify both with the isolated unit tests before installing the exact reviewed script.
