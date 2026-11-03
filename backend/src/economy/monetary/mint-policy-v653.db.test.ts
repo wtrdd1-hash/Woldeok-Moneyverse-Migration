@@ -37,15 +37,11 @@ describe.runIf(enabled)('real PG cancelled monetary order', () => {
       );
       const service = new MintBureauService(pool);
       await expect(service.retireAuthorizedAmount(user,rejected,'50','HARD_SINK_PURGE','Cancelled order must be rejected',randomUUID())).rejects.toThrow(ForbiddenException);
-      const first = await service.retireAuthorizedAmount(user,allowed,'30','HARD_SINK_PURGE','First approved retirement',randomUUID());
-      expect(first.amount_wld).toBe('30');
-      await expect(service.retireAuthorizedAmount(user,allowed,'90','HARD_SINK_PURGE','Insufficient remaining limit',randomUUID())).rejects.toThrow(ForbiddenException);
+      await expect(service.retireAuthorizedAmount(user,allowed,'30','HARD_SINK_PURGE','Approved certificate-only retirement is unsafe',randomUUID()))
+        .rejects.toThrow(ForbiddenException);
       const state = await pool.query('SELECT status,executed_amount_wld FROM public.monetary_policy_orders WHERE id=$1',[allowed]);
-      expect(state.rows[0]).toMatchObject({status:'APPROVED',executed_amount_wld:'30'});
-      await service.retireAuthorizedAmount(user,allowed,'70','HARD_SINK_PURGE','Remaining approved retirement',randomUUID());
-      const done = await pool.query('SELECT status,executed_amount_wld FROM public.monetary_policy_orders WHERE id=$1',[allowed]);
-      expect(done.rows[0]).toMatchObject({status:'EXECUTED',executed_amount_wld:'100'});
-      const refused = await pool.query('SELECT count(*)::int AS n FROM public.retirement_certificates WHERE policy_order_id=$1',[rejected]);
+      expect(state.rows[0]).toMatchObject({status:'APPROVED',executed_amount_wld:'0'});
+      const refused = await pool.query('SELECT count(*)::int AS n FROM public.retirement_certificates');
       expect(refused.rows[0].n).toBe(0);
     } finally {
       await pool.query('ROLLBACK');

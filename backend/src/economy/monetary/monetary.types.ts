@@ -34,6 +34,9 @@ export interface MintCertificate {
   recipient_user_id: string | null;
   idempotency_key: string;
   actor_id: string | null;
+  ledger_transaction_id: string;
+  evidence_digest: string;
+  replayed: boolean;
   created_at: string;
 }
 

@@ -105,29 +105,28 @@ export class CentralBankService {
   }
 
   async approvePolicyOrder(approverId: string, orderId: string): Promise<MonetaryPolicyOrder> {
-    const orderRes = await this.pool.query<MonetaryPolicyOrder>(
-      `SELECT * FROM public.monetary_policy_orders WHERE id = $1`,
-      [orderId],
-    );
-    const order = orderRes.rows[0];
-    if (!order) {
-      throw new BadRequestException('해당 통화정책 명령서를 찾을 수 없습니다.');
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuid.test(approverId) || !uuid.test(orderId)) {
+      throw new BadRequestException('valid policy order and approver UUID required');
     }
-    if (order.status !== 'PROPOSED') {
-      throw new BadRequestException(`현재 상태(${order.status})에서는 승인할 수 없습니다.`);
+    let result: { rows: MonetaryPolicyOrder[] };
+    try {
+      result = await this.pool.query<MonetaryPolicyOrder>(
+        'SELECT * FROM public.monetary_approve_policy_order($1::uuid,$2::uuid)',
+        [approverId, orderId],
+      );
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501') {
+        throw new ForbiddenException('independent monetary approver and valid policy order required');
+      }
+      throw new ServiceUnavailableException('canonical monetary approval unavailable');
     }
-
-    const res = await this.pool.query<MonetaryPolicyOrder>(
-      `
-      UPDATE public.monetary_policy_orders
-      SET status = 'APPROVED', approved_by = $1, updated_at = NOW()
-      WHERE id = $2
-      RETURNING *
-    `,
-      [approverId, orderId],
-    );
-
-    return res.rows[0]!;
+    const order = result.rows[0];
+    if (!order || order.id !== orderId || order.approved_by !== approverId
+      || order.status !== 'APPROVED' || order.proposed_by === approverId) {
+      throw new ServiceUnavailableException('canonical policy approval receipt missing');
+    }
+    return order;
   }
 
   async freezeIssuance(adminId: string, reason: string): Promise<{ is_issuance_frozen: boolean }> {

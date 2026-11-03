@@ -59,18 +59,18 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
     });
 
     it('approves a proposed policy order', async () => {
-      const mockOrder = { id: 'order-1', status: 'PROPOSED' };
-      const approvedOrder = { id: 'order-1', status: 'APPROVED', approved_by: 'approver-1' };
-      const mockPool = {
-        query: vi
-          .fn()
-          .mockResolvedValueOnce({ rows: [mockOrder] })
-          .mockResolvedValueOnce({ rows: [approvedOrder] }),
-      } as unknown as Queryable;
-      const cbService = new CentralBankService(mockPool);
-
-      const res = await cbService.approvePolicyOrder('approver-1', 'order-1');
+      const orderId = '11111111-1111-4111-8111-111111111111';
+      const approverId = '22222222-2222-4222-8222-222222222222';
+      const approvedOrder = { id: orderId, status: 'APPROVED', approved_by: approverId,
+        proposed_by: '33333333-3333-4333-8333-333333333333' };
+      const query = vi.fn().mockResolvedValueOnce({ rows: [approvedOrder] });
+      const cbService = new CentralBankService({ query } as unknown as Queryable);
+      const res = await cbService.approvePolicyOrder(approverId, orderId);
       expect(res.status).toBe('APPROVED');
+      expect(query).toHaveBeenCalledExactlyOnceWith(
+        'SELECT * FROM public.monetary_approve_policy_order($1::uuid,$2::uuid)',
+        [approverId,orderId],
+      );
     });
 
     it('freezes issuance when authorized', async () => {
@@ -84,62 +84,40 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
     });
   });
 
-  describe('MintBureauService', () => {
-    it('fails closed when the atomic issuance guard rejects the request', async () => {
+  describe('MintBureauService canonical verification', () => {
+    const actor = '11111111-1111-4111-8111-111111111111';
+    const order = '22222222-2222-4222-8222-222222222222';
+    const user = '33333333-3333-4333-8333-333333333333';
+    const key = '44444444-4444-4444-8444-444444444444';
+    it('never treats a rejected canonical DB mint as an approved certificate', async () => {
       const query = vi.fn().mockResolvedValue({ rows: [] });
       const bureau = new MintBureauService({ query } as unknown as Queryable);
-      await expect(bureau.executeAuthorizedMint('admin-1', '11111111-1111-4111-8111-111111111111', '5000', null, 'idemp-1'))
-        .rejects.toThrow(ForbiddenException);
-      expect(query).toHaveBeenCalledTimes(1);
-      expect(query.mock.calls[0]?.[0]).toContain('is_issuance_frozen = false');
-      expect(query.mock.calls[0]?.[0]).toContain('executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric');
+      await expect(bureau.executeAuthorizedMint(actor, order, '5000', user, key))
+        .rejects.toThrow();
+      expect(query).toHaveBeenCalledExactlyOnceWith(
+        'SELECT * FROM public.monetary_execute_canonical_mint($1::uuid,$2::uuid,$3::text,$4::uuid,$5::uuid)',
+        [actor, order, '5000', user, key],
+      );
     });
-
-    it('reserves policy capacity and writes one certificate in the same statement', async () => {
+    it('accepts only a ledger-linked receipt from the single database command', async () => {
       const certificate = {
-        id: 'cert-uuid-1', amount_wld: '3000', idempotency_key: 'idemp-key-99',
+        id: '55555555-5555-4555-8555-555555555555',
+        policy_order_id: order, recipient_user_id: user,
+        idempotency_key: key, actor_id: actor, amount_wld: '3000',
+        ledger_transaction_id: '66666666-6666-4666-8666-666666666666',
+        evidence_digest: 'f'.repeat(64), replayed: false,
       };
       const query = vi.fn().mockResolvedValue({ rows: [certificate] });
       const bureau = new MintBureauService({ query } as unknown as Queryable);
-      const result = await bureau.executeAuthorizedMint(
-        'admin-1', '11111111-1111-4111-8111-111111111111', '3000', null, 'idemp-key-99',
-      );
-      expect(result).toEqual(certificate);
-      expect(query).toHaveBeenCalledTimes(1);
-      const sql = query.mock.calls[0]?.[0] as string;
-      expect(sql).toContain('WITH reserved AS');
-      expect(sql).toContain('UPDATE public.monetary_policy_orders');
-      expect(sql).toContain('INSERT INTO public.mint_certificates');
-      expect(sql).toContain('FROM reserved');
+      expect(await bureau.executeAuthorizedMint(actor, order, '3000', user, key)).toEqual(certificate);
+      expect(query).toHaveBeenCalledOnce();
     });
-
-    it('successfully records RetirementCertificate for hard sinks', async () => {
-      const mockRetireCert = {
-        id: 'retire-uuid-1',
-        policy_order_id: null,
-        amount_wld: '15000',
-        source_type: 'MARKET_BUYBACK_BURN',
-        actor_id: 'admin-1',
-        reason: '룬스케이프형 역매수 영구 소각 집행',
-        idempotency_key: 'idemp-burn-1',
-        created_at: new Date().toISOString(),
-      };
-
-      const mockPool = {
-        query: vi.fn().mockResolvedValueOnce({ rows: [mockRetireCert] }),
-      } as unknown as Queryable;
-      const mbService = new MintBureauService(mockPool);
-
-      const res = await mbService.retireAuthorizedAmount(
-        'admin-1',
-        null,
-        '15000',
-        'MARKET_BUYBACK_BURN',
-        '룬스케이프형 역매수 영구 소각 집행',
-        'idemp-burn-1',
-      );
-      expect(res.id).toBe('retire-uuid-1');
-      expect(res.amount_wld).toBe('15000');
+    it('retirement certificates require a separate funded canonical sink command', async () => {
+      const query = vi.fn();
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      await expect(bureau.retireAuthorizedAmount(actor, null, '15000', 'MARKET_BUYBACK_BURN', 'No verified source', key))
+        .rejects.toThrow(ForbiddenException);
+      expect(query).not.toHaveBeenCalled();
     });
   });
 

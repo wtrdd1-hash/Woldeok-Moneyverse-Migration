@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 import type { MintCertificate, MonetaryPolicyOrder, RetirementCertificate } from './monetary.types';
@@ -7,6 +7,7 @@ import type { MintCertificate, MonetaryPolicyOrder, RetirementCertificate } from
 export class MintBureauService {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
+  /** No certificate is money until the DB-owned command posts a balanced journal. */
   async executeAuthorizedMint(
     actorId: string,
     policyOrderId: string,
@@ -14,100 +15,48 @@ export class MintBureauService {
     recipientUserId: string | null,
     idempotencyKey: string,
   ): Promise<MintCertificate> {
-    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
-      throw new BadRequestException('발행 수량은 1 WLD 이상의 정수여야 합니다.');
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (![actorId, policyOrderId, recipientUserId, idempotencyKey].every(
+      (value) => typeof value === 'string' && uuid.test(value),
+    ) || !/^[1-9][0-9]{0,79}$/.test(amountWld)) {
+      throw new BadRequestException('Canonical Mint requires actor, approved order, recipient, UUIDv4 key and exact positive WLD');
     }
-    if (!idempotencyKey || idempotencyKey.trim().length === 0) {
-      throw new BadRequestException('멱등성 키(idempotencyKey)는 필수입니다.');
+    let certificate: MintCertificate | undefined;
+    try {
+      const result = await this.pool.query<MintCertificate>(
+        'SELECT * FROM public.monetary_execute_canonical_mint($1::uuid,$2::uuid,$3::text,$4::uuid,$5::uuid)',
+        [actorId, policyOrderId, amountWld, recipientUserId, idempotencyKey],
+      );
+      certificate = result.rows[0];
+    } catch (err) {
+      const pg = err as { code?: string };
+      if (pg.code === '42501') throw new ForbiddenException('Canonical Mint approval required');
+      if (pg.code === '22023' || pg.code === '23505') {
+        throw new BadRequestException('Canonical Mint order, balance or replay parameters rejected');
+      }
+      throw new ServiceUnavailableException('Canonical Mint posting unavailable');
     }
-
-    // One PostgreSQL statement makes limit reservation and certificate recording atomic.
-    // The guarded UPDATE serializes competing issuers on the policy order row.
-    const result = await this.pool.query<MintCertificate>(
-      `WITH reserved AS (
-        UPDATE public.monetary_policy_orders
-           SET executed_amount_wld = (executed_amount_wld::numeric + $2::numeric)::text,
-               status = CASE WHEN executed_amount_wld::numeric + $2::numeric = max_amount_wld::numeric
-                             THEN 'EXECUTED' ELSE 'APPROVED' END,
-               updated_at = clock_timestamp()
-         WHERE id = $1::uuid AND order_type = 'MINT' AND status = 'APPROVED'
-           AND expires_at > clock_timestamp()
-           AND executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric
-           AND EXISTS (
-             SELECT 1 FROM public.monetary_system_status
-             WHERE id = 1 AND is_issuance_frozen = false
-           )
-         RETURNING id, target_envelope
-      )
-      INSERT INTO public.mint_certificates
-        (policy_order_id, amount_wld, source_envelope, recipient_user_id, idempotency_key, actor_id)
-      SELECT id, $2, target_envelope, $3::uuid, $4, $5::uuid FROM reserved
-      RETURNING *`,
-      [policyOrderId, amountWld, recipientUserId, idempotencyKey, actorId],
-    );
-    if (!result.rows[0]) {
-      throw new ForbiddenException('Issuance is frozen, expired, cancelled, or exceeds approved capacity');
+    if (!certificate || certificate.actor_id !== actorId
+      || certificate.policy_order_id !== policyOrderId
+      || certificate.recipient_user_id !== recipientUserId
+      || certificate.idempotency_key !== idempotencyKey
+      || certificate.amount_wld !== amountWld
+      || !uuid.test(certificate.id)
+      || typeof certificate.ledger_transaction_id !== 'string'
+      || !uuid.test(certificate.ledger_transaction_id)
+      || !/^[0-9a-f]{64}$/.test(certificate.evidence_digest ?? '')
+      || typeof certificate.replayed !== 'boolean') {
+      throw new ServiceUnavailableException('Canonical Mint ledger-linked receipt missing or inconsistent');
     }
-    return result.rows[0];
+    return certificate;
   }
 
   async retireAuthorizedAmount(
-    actorId: string,
-    policyOrderId: string | null,
-    amountWld: string,
-    sourceType: string,
-    reason: string,
-    idempotencyKey: string,
+    _actorId: string, _policyOrderId: string | null, _amountWld: string,
+    _sourceType: string, _reason: string, _idempotencyKey: string,
   ): Promise<RetirementCertificate> {
-    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
-      throw new BadRequestException('소각/폐기 수량은 1 WLD 이상의 정수여야 합니다.');
-    }
-    if (!reason || reason.trim().length < 5) {
-      throw new BadRequestException('소각 감사 사유는 최소 5자 이상 필요합니다.');
-    }
-    if (!idempotencyKey || idempotencyKey.trim().length === 0) {
-      throw new BadRequestException('멱등성 키는 필수입니다.');
-    }
-
-    if (policyOrderId !== null) {
-      // A linked retirement must have an unexpired approved RETIRE order.
-      // The conditional update and certificate insert execute atomically.
-      const guarded = await this.pool.query<RetirementCertificate>(
-        `WITH authorized AS (
-          UPDATE public.monetary_policy_orders
-             SET executed_amount_wld = (executed_amount_wld::numeric + $2::numeric)::text,
-                 status = CASE WHEN executed_amount_wld::numeric + $2::numeric = max_amount_wld::numeric
-                               THEN 'EXECUTED' ELSE 'APPROVED' END,
-                 updated_at = clock_timestamp()
-           WHERE id = $1::uuid AND order_type = 'RETIRE' AND status = 'APPROVED'
-             AND expires_at > clock_timestamp()
-             AND executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric
-           RETURNING id
-        )
-        INSERT INTO public.retirement_certificates
-          (policy_order_id, amount_wld, source_type, actor_id, reason, idempotency_key)
-        SELECT id, $2, $3, $4, $5, $6 FROM authorized
-        RETURNING *`,
-        [policyOrderId, amountWld, sourceType, actorId, reason, idempotencyKey],
-      );
-      if (!guarded.rows[0]) {
-        throw new ForbiddenException('Retirement policy is cancelled, expired, or out of funds');
-      }
-      return guarded.rows[0];
-    }
-
-    const certRes = await this.pool.query<RetirementCertificate>(
-      `
-      INSERT INTO public.retirement_certificates (
-        policy_order_id, amount_wld, source_type, actor_id, reason, idempotency_key
-      )
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *
-    `,
-      [policyOrderId, amountWld, sourceType, actorId, reason, idempotencyKey],
-    );
-
-    return certRes.rows[0]!;
+    // The old policy-only path wrote certificates without debiting a proven WLD source.
+    throw new ForbiddenException('Canonical funded retirement command not yet available');
   }
 
   async listMintCertificates(limit = 20): Promise<MintCertificate[]> {

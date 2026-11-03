@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
@@ -85,6 +86,7 @@ export class MonetaryController {
   }
 
   @Post('ai-council/propose-policy')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'AI 정책 위원회 권고안 기반 통화정책 명령서 자동 등록 (PROPOSED)' })
   async proposeFromAiCouncil(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -111,6 +113,7 @@ export class MonetaryController {
   }
 
   @Post('orders/propose')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '신규 통화정책 명령서 발의 (PROPOSED)' })
   async proposeOrder(
     @Req() req: RequestWithSession,
@@ -135,6 +138,7 @@ export class MonetaryController {
   }
 
   @Post('orders/:id/approve')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '통화정책 명령서 공식 승인 (APPROVED)' })
   async approveOrder(@Req() req: RequestWithSession, @Param('id') orderId: string) {
     const adminId = requireUserId(req);
@@ -142,6 +146,7 @@ export class MonetaryController {
   }
 
   @Post('freeze')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '신규 통화 발행 긴급 동결' })
   async freeze(@Req() req: RequestWithSession, @Body('reason') reason: string) {
     const adminId = requireUserId(req);
@@ -149,6 +154,7 @@ export class MonetaryController {
   }
 
   @Post('unfreeze')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '통화 발행 긴급 동결 해제' })
   async unfreeze(@Req() req: RequestWithSession) {
     const adminId = requireUserId(req);
@@ -174,17 +180,21 @@ export class MonetaryController {
   }
 
   @Post('execute-mint')
-  @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Independent approved Mint policy to one balanced canonical transaction and durable certificate' })
   async executeMint(
-    @Req() _req: RequestWithSession,
+    @Req() req: RequestWithSession,
     @Body()
-    _body: {
+    body: {
       policy_order_id: string;
       amount_wld: string;
       recipient_user_id?: string | null;
       idempotency_key: string;
     },
   ) {
-    return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
+    return this.mintBureau.executeAuthorizedMint(
+      requireUserId(req), body.policy_order_id, body.amount_wld,
+      body.recipient_user_id ?? null, body.idempotency_key,
+    );
   }
 }
