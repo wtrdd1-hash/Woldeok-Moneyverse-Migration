@@ -138,6 +138,26 @@ describe.skipIf(!DATABASE_URL)('ledger corrections against a real database', () 
         );
         expect(linked[0]?.reverses).toBe(original);
         expect(linked[0]?.type).toBe('ADMIN_ADJUSTMENT');
+
+        // New integrity proofs are canonical journal records, not business
+        // dependents. Both sides of the reversal must retain their proof.
+        const { rows: proofs } = await client.query<{ transaction_id: string }>(
+          `SELECT transaction_id::text FROM public.finance_integrity_receipts
+           WHERE transaction_id = ANY($1::uuid[]) ORDER BY transaction_id`,
+          [[original, rows[0]?.transaction_id]],
+        );
+        expect(proofs.map((proof) => proof.transaction_id).sort()).toEqual(
+          [original, rows[0]?.transaction_id].sort(),
+        );
+
+        // The one-time correction relationship must not permit rewriting a
+        // journal's type, amount, actor, or ordinary metadata.
+        const prohibited = await rejectionOf(() => client.query(
+          `UPDATE public.ledger_transactions
+           SET type = 'FORGED_ADJUSTMENT' WHERE id = $1`,
+          [rows[0]?.transaction_id],
+        ));
+        expect(code(prohibited)).toBe('55000');
       });
     });
 
