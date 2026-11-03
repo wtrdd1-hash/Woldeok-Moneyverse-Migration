@@ -32,9 +32,41 @@ REVOKE ALL ON FUNCTION public.finance_integrity_immutable() FROM PUBLIC, moneyve
 CREATE TRIGGER finance_integrity_receipts_immutable
   BEFORE UPDATE OR DELETE OR TRUNCATE ON public.finance_integrity_receipts
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
+-- Corrections append a NEW balanced journal but must link its metadata to the
+-- old transaction after economy_post_transaction returns. This is a single
+-- non-monetary transition, not a license to update old money/postings.
+CREATE FUNCTION public.finance_integrity_ledger_link_only()
+RETURNS trigger LANGUAGE plpgsql
+SET search_path=pg_catalog,pg_temp AS $link$
+BEGIN
+  IF OLD.reverses_transaction_id IS NULL
+    AND NEW.reverses_transaction_id IS NOT NULL
+    AND OLD.type='ADMIN_ADJUSTMENT'
+    AND NEW.type='ADMIN_ADJUSTMENT'
+    AND NEW.reverses_transaction_id<>OLD.id
+    AND (pg_catalog.to_jsonb(NEW)-'reverses_transaction_id') =
+        (pg_catalog.to_jsonb(OLD)-'reverses_transaction_id')
+    AND EXISTS (SELECT 1 FROM public.ledger_transactions t
+                WHERE t.id=NEW.reverses_transaction_id)
+    AND EXISTS (SELECT 1 FROM public.outbox_events e
+                WHERE e.aggregate_id=NEW.id
+                  AND e.type='economy.transaction.reversed'
+                  AND e.payload->>'reverses'=NEW.reverses_transaction_id::text)
+  THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION USING ERRCODE='55000',
+    MESSAGE='canonical ledger transaction is immutable except one-time correction link';
+END
+$link$;
+ALTER FUNCTION public.finance_integrity_ledger_link_only() OWNER TO moneyverse_migrator;
+REVOKE ALL ON FUNCTION public.finance_integrity_ledger_link_only() FROM PUBLIC,moneyverse_app;
 CREATE TRIGGER finance_integrity_ledger_transactions_immutable
-  BEFORE UPDATE OR DELETE OR TRUNCATE ON public.ledger_transactions
+  BEFORE DELETE OR TRUNCATE ON public.ledger_transactions
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
+CREATE TRIGGER finance_integrity_ledger_transactions_update_guard
+  BEFORE UPDATE ON public.ledger_transactions
+  FOR EACH ROW EXECUTE FUNCTION public.finance_integrity_ledger_link_only();
 CREATE TRIGGER finance_integrity_ledger_postings_immutable
   BEFORE UPDATE OR DELETE OR TRUNCATE ON public.ledger_postings
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
@@ -188,6 +220,49 @@ ALTER FUNCTION public.finance_integrity_assert_and_record(uuid,jsonb,jsonb,text,
   OWNER TO moneyverse_migrator;
 REVOKE ALL ON FUNCTION public.finance_integrity_assert_and_record(uuid,jsonb,jsonb,text,text)
   FROM PUBLIC,moneyverse_app;
+
+-- The generic correction guard auto-detects business records referencing
+-- a transaction. Accounting proof is an intrinsic part of the journal, like
+-- ledger_postings, not a remaining loan/purchase/position obligation.
+-- Preserve every other FK as a disqualifying correction dependent.
+CREATE OR REPLACE FUNCTION public.economy_transaction_dependents(p_transaction uuid)
+RETURNS text[]
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_reference record;
+  v_found boolean;
+  v_tables text[] := ARRAY[]::text[];
+BEGIN
+  FOR v_reference IN
+    SELECT source_table.relname AS table_name, source_column.attname AS column_name
+    FROM pg_catalog.pg_constraint AS constraint_row
+    JOIN pg_catalog.pg_class AS source_table ON source_table.oid = constraint_row.conrelid
+    JOIN pg_catalog.pg_attribute AS source_column
+      ON source_column.attrelid = constraint_row.conrelid
+      AND source_column.attnum = constraint_row.conkey[1]
+    WHERE constraint_row.contype = 'f'
+      AND constraint_row.confrelid = 'public.ledger_transactions'::pg_catalog.regclass
+      AND source_table.relname NOT IN ('ledger_postings', 'finance_integrity_receipts')
+      AND pg_catalog.array_length(constraint_row.conkey, 1) = 1
+  LOOP
+    EXECUTE pg_catalog.format(
+      'SELECT EXISTS (SELECT 1 FROM public.%I WHERE %I = $1)',
+      v_reference.table_name, v_reference.column_name
+    ) INTO v_found USING p_transaction;
+
+    IF v_found THEN
+      v_tables := v_tables || v_reference.table_name;
+    END IF;
+  END LOOP;
+
+  RETURN v_tables;
+END;
+$$;
+
 
 -- A replay after enforcement MUST have an intact matching receipt. Pre-migration
 -- receipts remain LEGACY_UNVERIFIED rather than being fabricated.

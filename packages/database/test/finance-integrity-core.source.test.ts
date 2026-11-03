@@ -48,6 +48,15 @@ describe('v1701 internal financial integrity boundary', () => {
     expect(migration).toContain('GRANT EXECUTE ON FUNCTION public.finance_integrity_scan() TO moneyverse_reconciler');
   });
 
+  it('retains authorized append-only correction without weakening journal writes', () => {
+    expect(migration).toContain('finance_integrity_ledger_link_only');
+    expect(migration).toContain('finance_integrity_ledger_transactions_update_guard');
+    expect(migration).toContain('finance_integrity_receipts');
+    expect(migration).toContain('finance_integrity_ledger_transactions_immutable');
+    expect(migration).toContain("e.type='economy.transaction.reversed'");
+    expect(migration).toContain("'ledger_postings', 'finance_integrity_receipts'");
+  });
+
   it('does not publish developer DB to external network interfaces', () => {
     expect(compose).toContain('127.0.0.1:5433:5432');
     expect(compose).not.toMatch(/^\s*- ['"]?5433:5432['"]?$/m);

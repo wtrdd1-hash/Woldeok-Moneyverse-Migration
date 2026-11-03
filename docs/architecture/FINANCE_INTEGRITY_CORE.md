@@ -18,3 +18,6 @@ COMMIT;
 Disposable PostgreSQL 17.11 SQL tests: 5 synthetic transactions in 4 domains, 20-digit+ exact WLD, replay, rejection/rollback, immutable receipts, detected induced corruption and denied web role, successful. These do not prove exact Production schema, independent restore, official Test backend, CI or safe Production promotion. Keep release on hold until each gate is verified.
 
 **Network finding:** the existing dev database container was observed listening on host 0.0.0.0:5433. The branch changes compose.yml to 127.0.0.1:5433:5432, but the running container was intentionally not recreated. Actual host exposure remains to be remediated and independently confirmed at deployment.
+
+### Correction compatibility v1701.1
+SQL083 reverses WLD by appending a new transaction and linking its reverses_transaction_id to the original. The new JSON evidence is **not** a business dependent that prevents correction; all other business FK dependencies remain protected. The ledger_transactions update guard accepts only a one-time non-monetary reversal link with a matching origin reversal outbox event. It rejects changes to type, amount, actor, request hash, and other fields; transaction deletion and posting changes remain prohibited. The independent production-clone SQL regression uses a transaction with ROLLBACK.
