@@ -10,8 +10,13 @@
 - [ ] Verify exact SHA with lint/typecheck/build/unit/contract/integration/security/real PostgreSQL/E2E and CI; document each PASS/FAIL/BLOCKED.
 - [ ] Re-fetch main during work and before any merge. Do not merge/promote until all required gates pass.
 
-## IN PROGRESS
-Pending.
+## IN PROGRESS — 2026-11-03 09:47 KST
+- [x] RED: 4 new tests failed because untrusted query/audience parsers did not exist (5 baseline tests passed).
+- [x] GREEN: strict NFC/80-codepoint single-value query parser; malformed/duplicate queries display accessible error rather than 500.
+- [x] Viewer evidence: `viewerOrUnknown` uses existing Nest `/api/v1/auth/viewer`; an unreachable/malformed response stays UNKNOWN and only public navigation is exposed. No fabricated auth state or new DB grants.
+- [x] Search-specific noindex, private no-store, no-referrer HTTP headers for default and locale routes.
+- [x] Focused search tests 9/9 PASS; pending final regression and HTTP evidence.
+
 
 ## FINISHED
 Pending.
