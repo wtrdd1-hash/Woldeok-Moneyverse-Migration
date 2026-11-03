@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.03.1629 — Restore legitimate same-origin finance POST behind HTTPS proxy (source verified; release pending)
+- [EN worklog](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.md) / [KO](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.ko.md) · [Internal EN](docs/updates/v2026.11.03.1629-finance-internal.md) / [KO](docs/updates/v2026.11.03.1629-finance-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.03.1629-finance-github.md) / [KO](docs/updates/v2026.11.03.1629-finance-github.ko.md). Production no-session HTTPS donation and newly funded pension contribute/withdraw all returned 403 from a false internal Request.url vs Origin mismatch. v1629 strictly binds public HTTPS Origin to matching real Host on loopback, rejects spoofed forwarding/cross-origin, retains session/CSRF and balanced DB receipts; 35 tests, lint and typecheck PASS. No money moved, unfunded legacy disbursement/Mint/KDIC remains held.
+
 ## v2026.11.03.1628.2 — Post-Production scheduled QA and bounded disk cleanup verified
 - [EN Production release proof + QA addendum](docs/releases/v2026.11.03.1628.1-finance-screen-prod.md) / [KO](docs/releases/v2026.11.03.1628.1-finance-screen-prod.ko.md); [EN changelog](docs/changelog/2026-11-03-finance-postqa-v1628.2.md) / [KO](docs/changelog/2026-11-03-finance-postqa-v1628.2.ko.md). At 2026-11-03 09:39–09:40 KST actual hourly QA v1627 against new v1628 Production: 24 HTTP PASS, 2 login-gated NOT FUNCTIONALLY TESTED, 0 failures, exit 0. Data disk old inactive task Next cache 3 items reclaimed **2,883,731,456 allocated bytes**; data occupancy 84%→82%, physical root 79%. Prior isolated own build cleanup separately reclaimed 2,050,207,744 bytes; combined two distinct cleanup actions 4,933,939,200 bytes, NOT all attributable to QA. Dual-disk strict checker returned WARN on data 82% and exit 2; do not report strict OK. No active releases, DB, backups or user data deleted. Money issuance and legacy pension/KDIC/SOE payout still blocked due zero funded Treasury.
 
@@ -517,3 +520,6 @@ Debian 13 가상화 인프라, 백업/복구, 반응형 디자인 시스템 및 
 - [Worklog / 작업 기록](docs/worklog/2026-10-14-service-ui-audit-v624.ko.md) · [Internal update](docs/updates/v2026.10.14.624-internal.ko.md) · [GitHub update](docs/updates/v2026.10.14.624-github.ko.md)
 
 Read-only findings; not a full browser acceptance, Test deployment, or Production release.
+
+## v2026.11.03.1629.1 — Real Next finance-origin canary: source and local-only verification
+- [EN](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.md) / [KO](docs/worklog/2026-11-03-finance-proxy-csrf-v1629.ko.md): first canary still 403 due to actual `https://localhost` Next normalization, corrected via RED/GREEN; 38 tests. Protected local-only canary authenticates genuine guest HTTP 401 x3 while cross-site HTTP 403 x3. No WLD write, official CI/Test/Production still pending.
