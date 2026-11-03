@@ -11,3 +11,7 @@ Targets: KDIC independently refreshed safe evidence, database-backed Mint read-o
 
 ## Midpoint
 Midpoint: KDIC regression initially 2 RED, fixed per-source Promise.allSettled (14 KDIC tests PASS). Mint status evidence/UI tests 3 RED followed by 11 PASS, and BFF auth/invalid-input tests. Central Bank normal partial state no longer rendered as alarming header; frozen policy alert remains. Real Production app-role monetary telemetry returned approved 0, minted 0, retired 0, frozen false and verified_invariant false. Backend Treasury Core/KDIC/monetary 23 tests PASS, frontend related 32 PASS, scoped TypeScript and ESLint PASS. No DB writes. Current run has not deployed.
+
+## v1652.1 transient refresh state
+- Also fixed temporary false KDIC red outage while both requests are legitimately in flight: during refresh both previous observations are hidden (avoid old cross-epoch values), but loading is now an explicit neutral state and a red alert appears only after an actual failed response.
+- Regression for pending Promise and no premature red alert: KDIC suite 8/8 PASS. On completion, each independent read controls its own visible data. This amendment requires new final commit CI and release identity.

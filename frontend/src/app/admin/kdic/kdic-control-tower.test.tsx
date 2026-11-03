@@ -49,6 +49,13 @@ describe('KDIC admin truthful observation and unsafe action hold', () => {
     expect(region.textContent).not.toContain('552 / 552건');
   });
 
+  it('does not flash a false source outage while refresh is still pending', () => {
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
+    render(<KdicControlTower initialData={fixture.data} />);
+    fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getAllByText(/검증 자료 조회 중/).length).toBeGreaterThan(0);
+  });
   it('keeps verified fund and institutions visible when only the separate ledger diagnostics fail', async () => {
     vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
       ok: url === '/api/admin/kdic/overview',

@@ -110,7 +110,8 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
 
   return (
     <div className="space-y-6">
-      {!data && (
+      {loading && <p role="status" className="text-sm text-muted-foreground">KDIC 기금·원장 검증 자료 조회 중...</p>}
+      {!data && !loading && (
         <div role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
           KDIC 조회 결과를 확인할 수 없습니다. 미확인 금액을 0 WLD 또는 정상 상태로 판단하지 마세요.
         </div>
@@ -123,7 +124,9 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
       <section aria-label="KDIC 원장 검증" className="rounded-2xl border border-amber-500/30 bg-slate-900/70 p-4 space-y-3">
         <h3 className="font-semibold text-white">관리자 원장 진단 · 읽기 전용</h3>
         {!ledger ? (
-          <p role="status" className="text-sm text-amber-300">실시간 원장 증거를 확인하지 못했습니다. 원장 상태를 정상으로 판단하지 마세요.</p>
+          loading
+            ? <p role="status" className="text-sm text-muted-foreground">원장 검증 자료 조회 중...</p>
+            : <p role="status" className="text-sm text-amber-300">실시간 원장 증거를 확인하지 못했습니다. 원장 상태를 정상으로 판단하지 마세요.</p>
         ) : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
