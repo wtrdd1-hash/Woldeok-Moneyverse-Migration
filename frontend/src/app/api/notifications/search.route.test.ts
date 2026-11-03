@@ -14,6 +14,15 @@ describe('private notification search BFF', () => {
     expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(mutate).toHaveBeenCalledWith('/api/v1/notifications/search', { body: valid });
   });
+  it('rejects an upstream search page larger than the requested limit', async () => {
+    mutate.mockResolvedValueOnce({ items: [{ id: 'a' }, { id: 'b' }], hasMore: false, nextCursor: null, asOfUtc: '2026-10-29T00:00:00Z' });
+    const response = await POST(new Request('https://example.test/api/notifications/search', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-moneyverse-notification-search': '1' },
+      body: JSON.stringify({ ...valid, limit: 1 }),
+    }));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
   it('does not forward unauthenticated requests or arbitrary owner fields', async () => {
     viewerOrUnknown.mockResolvedValueOnce({ signedIn: false });
     const request = (body: unknown) => new Request('https://example.test/api/notifications/search', {
