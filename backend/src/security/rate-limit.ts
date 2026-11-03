@@ -88,9 +88,6 @@ export function tierFor(pathname: string, method: string): RateLimitTier {
   return { name: 'read', limit: READ_LIMIT };
 }
 
-const single = (value: string | string[] | undefined): string | undefined =>
-  (Array.isArray(value) ? value[0] : value)?.trim() || undefined;
-
 /**
  * Who to count a request against.
  *
@@ -107,12 +104,33 @@ const single = (value: string | string[] | undefined): string | undefined =>
 function validIp(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const candidate = value.trim();
-  return isIP(candidate) ? candidate : undefined;
+  const family = isIP(candidate);
+  if (family === 4) return candidate;
+  if (family !== 6) return undefined;
+
+  // A single IPv6 peer can be spelled many ways. The throttle key must not
+  // depend on leading zeroes, hex casing, or IPv4-mapped presentation.
+  try {
+    const canonical = new URL(`http://[${candidate}]/`).hostname.slice(1, -1);
+    if (canonical.startsWith('::ffff:')) {
+      const pair = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(canonical.slice(7));
+      if (pair) {
+        const high = Number.parseInt(pair[1]!, 16);
+        const low = Number.parseInt(pair[2]!, 16);
+        return [high >>> 8, high & 255, low >>> 8, low & 255].join('.');
+      }
+    }
+    return canonical;
+  } catch {
+    return undefined;
+  }
 }
 
 export function requestClientKey(request: KeyableRequest, options: ClientKeyOptions): string {
   if (options.trustForwardedFor) {
-    const connecting = validIp(single(request.headers['cf-connecting-ip']));
+    // Duplicate proxy identity headers are ambiguous; never select the first.
+    const header = request.headers['cf-connecting-ip'];
+    const connecting = typeof header === 'string' ? validIp(header) : undefined;
     if (connecting) return connecting;
   }
   return validIp(request.socket.remoteAddress) ?? 'unknown';

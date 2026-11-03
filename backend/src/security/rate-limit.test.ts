@@ -117,6 +117,27 @@ describe('requestClientKey', () => {
     expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
   });
 
+  it('uses one canonical rate-limit identity for equivalent IPv6 spellings', () => {
+    const headers = { 'cf-connecting-ip': '2001:0DB8:0000:0000:0000:0000:0000:0001' };
+    const expanded = requestClientKey({ headers, socket: { remoteAddress: '10.0.0.4' } }, { trustForwardedFor: true });
+    const compact = requestClientKey({ headers: { 'cf-connecting-ip': '2001:db8::1' }, socket: { remoteAddress: '10.0.0.4' } }, { trustForwardedFor: true });
+    expect(expanded).toBe('2001:db8::1');
+    expect(expanded).toBe(compact);
+  });
+
+  it('counts IPv4-mapped IPv6 and the corresponding IPv4 as the same client', () => {
+    const mapped = requestClientKey({ headers: { 'cf-connecting-ip': '::ffff:203.0.113.9' }, socket: { remoteAddress: '10.0.0.4' } }, { trustForwardedFor: true });
+    expect(mapped).toBe('203.0.113.9');
+  });
+
+  it('rejects repeated CF identity headers instead of choosing an attacker-controlled first value', () => {
+    const request = {
+      headers: { 'cf-connecting-ip': ['203.0.113.9', '198.51.100.7'] },
+      socket: { remoteAddress: '10.0.0.4' },
+    };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('10.0.0.4');
+  });
+
   it('rejects a malformed trusted edge address', () => {
     const request = {
       headers: { 'cf-connecting-ip': '203.0.113.9, 198.51.100.7' },
