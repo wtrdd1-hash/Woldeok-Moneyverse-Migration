@@ -29,3 +29,7 @@ Pending GitHub CI, immutable Test source, authenticated UI verification, and Pro
 - Final 09:32 KST production read-only DB: 891 journal transactions, 1829 postings, 42 accounts, 0 unbalanced / projection mismatch / active Treasury unlinked. Member balances 4,841,510 WLD intact, Treasury 0 WLD, NPS AUM 0, no financial issuance/payout. No authenticated administrator DOM test performed.
 - Freed 2,050,207,744 bytes from only our isolated inactive build workspace, without deleting immutable releases or any ledger/DB/backup/QA evidence. Host receipt recorded.
 - Real money-moving legacy NPS/KDIC/SOE/Mint/CB APIs still held pending funded canonical approval, issue #2366. [Complete operations proof](../releases/v2026.11.03.1628.1-finance-screen-prod.md).
+
+
+## v1628.2 addendum — post-promotion QA
+The actual scheduled QA service was manually invoked after Production cutover (2026-11-03 09:39:38–09:40:05 KST), exited 0 and checked HTTP 24 PASS/2 auth-gated NOT TESTED/0 fail. Task cache cleanup data 38 checked, 3 eligible/deleted, 2,883,731,456 allocated bytes reclaimed; root 5 checked/deleted 0. Data mount 84%→82%, root 79%. Strict disk check data 82% WARN exit 2, not all clear. Independent own-build cleanup earlier reclaimed 2,050,207,744 bytes; total separate measured cleanup 4,933,939,200 bytes. Protected runtime releases and financial DB unchanged.
