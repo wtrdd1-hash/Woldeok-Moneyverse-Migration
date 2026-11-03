@@ -32,12 +32,87 @@ REVOKE ALL ON FUNCTION public.finance_integrity_immutable() FROM PUBLIC, moneyve
 CREATE TRIGGER finance_integrity_receipts_immutable
   BEFORE UPDATE OR DELETE OR TRUNCATE ON public.finance_integrity_receipts
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
-CREATE TRIGGER finance_integrity_ledger_transactions_immutable
-  BEFORE UPDATE OR DELETE OR TRUNCATE ON public.ledger_transactions
+-- A financial correction appends a SECOND transaction. SQL083 links only the
+-- new correction to its original, once, after the second journal/outbox commit.
+-- Preserve that limited compatibility while forbidding all other row edits.
+-- The linked original, its journal and its immutable JSON proof are untouched.
+CREATE FUNCTION public.finance_integrity_reversal_link_guard()
+RETURNS trigger LANGUAGE plpgsql
+SET search_path = pg_catalog, pg_temp AS $reverse_guard$
+DECLARE
+  v_expected public.ledger_transactions%ROWTYPE;
+BEGIN
+  IF TG_OP = 'UPDATE' THEN
+    v_expected := OLD;
+    v_expected.reverses_transaction_id := NEW.reverses_transaction_id;
+    IF OLD.type = 'ADMIN_ADJUSTMENT'
+       AND OLD.reverses_transaction_id IS NULL
+       AND NEW.reverses_transaction_id IS NOT NULL
+       AND NEW.reverses_transaction_id <> OLD.id
+       AND NEW IS NOT DISTINCT FROM v_expected
+       AND EXISTS (
+         SELECT 1 FROM public.outbox_events e
+         WHERE e.aggregate_id = OLD.id
+           AND e.type = 'economy.transaction.reversed'
+           AND e.payload->>'reverses' = NEW.reverses_transaction_id::text
+       )
+    THEN
+      PERFORM public.admin_require_superadmin(OLD.actor_user_id);
+      RETURN NEW;
+    END IF;
+  END IF;
+  RAISE EXCEPTION USING ERRCODE='55000',
+    MESSAGE='canonical journal and integrity receipts are append-only';
+END
+$reverse_guard$;
+ALTER FUNCTION public.finance_integrity_reversal_link_guard() OWNER TO moneyverse_migrator;
+REVOKE ALL ON FUNCTION public.finance_integrity_reversal_link_guard() FROM PUBLIC,moneyverse_app;
+CREATE TRIGGER finance_integrity_ledger_transactions_update_delete
+  BEFORE UPDATE OR DELETE ON public.ledger_transactions
+  FOR EACH ROW EXECUTE FUNCTION public.finance_integrity_reversal_link_guard();
+CREATE TRIGGER finance_integrity_ledger_transactions_truncate
+  BEFORE TRUNCATE ON public.ledger_transactions
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
 CREATE TRIGGER finance_integrity_ledger_postings_immutable
   BEFORE UPDATE OR DELETE OR TRUNCATE ON public.ledger_postings
   FOR EACH STATEMENT EXECUTE FUNCTION public.finance_integrity_immutable();
+
+-- SQL083 forbids monetary reversal if business rows depend on the original
+-- transaction. A canonical proof row is a journal invariant (just like
+-- ledger_postings), not a business promise such as a loan or purchase. Keep
+-- every other FK-dependent guard intact. Never remove the proof's own FK.
+CREATE OR REPLACE FUNCTION public.economy_transaction_dependents(p_transaction uuid)
+RETURNS text[]
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $dependents$
+DECLARE
+  v_reference record;
+  v_found boolean;
+  v_tables text[] := ARRAY[]::text[];
+BEGIN
+  FOR v_reference IN
+    SELECT source_table.relname AS table_name, source_column.attname AS column_name
+    FROM pg_catalog.pg_constraint AS constraint_row
+    JOIN pg_catalog.pg_class AS source_table ON source_table.oid = constraint_row.conrelid
+    JOIN pg_catalog.pg_attribute AS source_column
+      ON source_column.attrelid = constraint_row.conrelid
+      AND source_column.attnum = constraint_row.conkey[1]
+    WHERE constraint_row.contype = 'f'
+      AND constraint_row.confrelid = 'public.ledger_transactions'::pg_catalog.regclass
+      AND source_table.relname NOT IN ('ledger_postings', 'finance_integrity_receipts')
+      AND pg_catalog.array_length(constraint_row.conkey, 1) = 1
+  LOOP
+    EXECUTE pg_catalog.format(
+      'SELECT EXISTS (SELECT 1 FROM public.%I WHERE %I = $1)',
+      v_reference.table_name, v_reference.column_name
+    ) INTO v_found USING p_transaction;
+    IF v_found THEN v_tables := v_tables || v_reference.table_name; END IF;
+  END LOOP;
+  RETURN v_tables;
+END
+$dependents$;
+ALTER FUNCTION public.economy_transaction_dependents(uuid) OWNER TO moneyverse_migrator;
+REVOKE ALL ON FUNCTION public.economy_transaction_dependents(uuid) FROM PUBLIC,moneyverse_app;
 
 CREATE TABLE public.finance_integrity_policy (
   singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
