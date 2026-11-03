@@ -2,16 +2,44 @@ import { describe, expect, it, vi } from 'vitest';
 import { createCountryBlogPost, COUNTRY_EDITION_TOPICS } from './blog-country-editorial';
 import { blogAlternateLanguages, blogUrl, getBlogCountryEdition, canonicalBlogSlug } from './blog-seo';
 import { addBlogPost, getAllBlogPosts, getBlogPostBySlug } from './blog-data';
-import { metadataForArticle, summarizeBlogPost } from './blog-page-server';
+import { metadataForArticle, metadataForHub, summarizeBlogPost } from './blog-page-server';
 import { isBlogDiscoverable } from './blog-seo';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { GET as getBlogSitemap } from '../sitemap-blog.xml/route';
+import { GET as getBlogSitemap, buildBlogSitemapXml } from '../sitemap-blog.xml/route';
 
 const origin = 'https://easy-scraping.com';
 
 describe('country-specific blog and canonical SEO', () => {
+  it('keeps locale-specific hub titles absolute instead of duplicating the root site-name template', () => {
+    expect(metadataForHub('ko').title).toEqual({ absolute: '월덕 블로그 | 경제 · 코딩 · 컴퓨터' });
+    expect(metadataForHub('en').title).toEqual({ absolute: 'US Economics, Coding & Computers | Woldeok Moneyverse' });
+    expect(metadataForHub('ja').title).toEqual({ absolute: '日本の経済・プログラミング・コンピュータ | Woldeok Moneyverse' });
+    expect(metadataForHub('zh').title).toEqual({ absolute: '经济、编程与计算机知识 | Woldeok Moneyverse' });
+  });
+
+  it('does not disclose blog URLs in a Test/noindex environment', async () => {
+    vi.stubEnv('SEO_INDEXING_ENABLED', 'false');
+    try {
+      const response = await getBlogSitemap();
+      const xml = await response.text();
+      expect(xml).toContain('<urlset');
+      expect(xml).not.toContain('<loc>');
+      expect(response.headers.get('cache-control')).toBe('no-store');
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it('publishes each canonical blog article URL only once and tolerates unverified modification timestamps', () => {
+    const post = createCountryBlogPost('compound');
+    const xml = buildBlogSitemapXml([post, post, { ...post, updatedAt: 'not-a-date' }]);
+    const loc = `<loc>${blogUrl(post.slug, 'ko')}</loc>`;
+    expect(xml.split(loc)).toHaveLength(2);
+    expect(xml).toContain(`<loc>${blogUrl(post.slug, 'en')}</loc>`);
+    expect(xml).not.toContain('not-a-date');
+    expect(xml).not.toContain('Invalid Date');
+  });
+
   it('provides at least six distinct financial education subjects with four genuinely localized editions', () => {
     expect(COUNTRY_EDITION_TOPICS.length).toBeGreaterThanOrEqual(6);
     expect(new Set(COUNTRY_EDITION_TOPICS)).toHaveProperty('size', COUNTRY_EDITION_TOPICS.length);
