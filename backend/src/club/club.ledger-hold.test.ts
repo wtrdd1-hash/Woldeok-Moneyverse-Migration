@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import type { Queryable } from '../core/db';
 import { ClubController } from './club.controller';
 import { PostgresClubRepository } from './club.repository';
@@ -30,6 +31,7 @@ describe('P0 club WLD settlement boundary', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {

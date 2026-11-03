@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 
@@ -24,6 +25,7 @@ describe('private chat history and sync pagination HTTP contract', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
@@ -71,6 +73,7 @@ describe('private chat exact bigint cursor HTTP regression', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
@@ -111,6 +114,7 @@ describe('private chat read receipt exact bigint HTTP contract', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => { req.session = { user_id: actor }; next(); });

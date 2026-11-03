@@ -5,6 +5,7 @@ import request from 'supertest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { WarfareController } from './warfare.controller';
 
 describe('Warfare HTTP finance evidence boundary', () => {
@@ -16,6 +17,7 @@ describe('Warfare HTTP finance evidence boundary', () => {
       .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => authenticated })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     app.use((req: { session?: unknown }, _res: unknown, next: () => void) => {
