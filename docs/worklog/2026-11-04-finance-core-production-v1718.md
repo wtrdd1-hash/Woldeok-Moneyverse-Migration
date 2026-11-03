@@ -1,0 +1,18 @@
+# v2026.11.04.1718 — Production financial core rollout worklog
+
+## START — 2026-11-04 KST
+Owner repeatedly ordered actual financial correction and Production promotion, not a read-only audit. Started from current integrated master DOCS_INDEX, AGENTS, Treasury Core and release rules; fetched latest main a4fca7afe097cccdc13306c9114830d01250a71f, compared previous Production v1705 with CI-passing immutable v1715 candidate SHA d72f8156400231f2566993bc5c06eee16b507002; no frontend/backend source differences. Test already deployed exact same app SHA and SQL329/330/331; built new isolated branch for funded app-role regression and maintained other contributors' work untouched.
+
+Production baseline: 891 tx/1829 postings/42 account balances/1546 finance archive, user cash+bank 4841510 WLD, 1902 auth sessions; old public v1705 and three explicit direct web-app financial-table DML grants. Snapshot/rollback plan required.
+
+## MID — measured and performed
+- Real web DB role on pre-production network-none restored Production PG17.11: Treasury 10 WLD donation receipt/idempotency PASS and new NPS 1000 funded contribution + withdrawal 950 refund/50 welfare/idempotency PASS, all inside BEGIN/ROLLBACK. No member money moved. New disposable-clone guarded SQL regression and 4 source tests / 4 Node tests prepared. Focused migration + source suite 17/17 PASS.
+- Fresh actual live Production 130457899 byte full pg_dump, SHA256 82ea8ca451dc2ffde87e2f676fb63d1d5e6bddd99b8788e6246cdad9c4263b02, hash and archive list checked, independent network-none PG17.11 restore proven. New clone SQL329/330/331 and full financial/permission checks PASS. Nginx config/previous immutable services kept for rollback.
+- Live actual Production DB SQL329, SQL330, SQL331 each COMMIT with canonical source SHA256 recorded as schema_migrations. Before/after journal and member balance exactly unchanged, user money 4841510, sessions 1902 preserved, app DML blocked on accounts/balances/vault. Production financial readiness READY_FOR_OTHER_RELEASE_GATES, blockers[], warnings[], 0 imbalance, 0 projection mismatch and 0 archive-hash error.
+- New immutable Production backend 4384/frontend 4385 active before cutover; old 4274/4275 remained active. Atomically replaced Nginx config changing only 6 backend and 15 frontend ports, and production-current symlink; nginx -t PASS and reload. Public HTTPS both API/frontend versions exact SHA d72f8156400231f2566993bc5c06eee16b507002. Official Production identity ok:true failures:[], all 12 sampled public routes 200, guest security 401 and 403x3, zero new error-level logs.
+- Test auth E2E and signed-in session continuity had been blocked by tool safety review; do not invent their successful execution. The monetary SQL regression above is clone-only and is not a signed-in HTTP user action. Pre-existing session row-count retention is not a substitute.
+
+## END — actual core release completed, legacy settlement remains open
+Production pointer is prod-v2026.11.03.1715-d72f81564002, current Test pointer test-v2026.11.03.1715-d72f81564002. Financial SQL329-331 now actually applied with provenance. No old service stopped, no production reset, no fake WLD, all original canonical balances retained. Release QA proof in docs/releases/v2026.11.04.1718-finance-core-prod.md and .ko.md.
+
+Full finance service recovery remains unresolved: unfunded Treasury/NPS escrow and legacy NPS hourly payout, state enterprise cash dividends, KDIC cash claims, SWF real transfers and monetary issuance require approved DB-owned funded settlement (#2366). Do not call these fixed. Browser-auth/session continuity still needs a legitimate signed-in human acceptance check.
