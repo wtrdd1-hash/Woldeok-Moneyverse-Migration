@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 import {
   ShieldCheck,
   Coins,
@@ -58,8 +59,10 @@ export function PensionControlTower({
   const [payoutLogs, setPayoutLogs] = useState<PayoutLogItem[] | null>(initialPayoutLogs);
   const [loading, setLoading] = useState(false);
 
-  const refreshData = async () => {
+  const refreshData = async (silent = false) => {
     setLoading(true);
+    setOverview(null);
+    setPayoutLogs(null);
     try {
       const [overviewResponse, payoutResponse] = await Promise.all([
         fetch('/api/admin/pension/overview', { cache: 'no-store' }),
@@ -74,17 +77,19 @@ export function PensionControlTower({
       setOverview(verifiedOverview);
       setPayoutLogs(verifiedPayouts);
       if (verifiedOverview === null || verifiedPayouts === null) {
-        toast.error('일부 연금 관제 데이터를 확인할 수 없습니다.');
+        if (!silent) toast.error('일부 연금 관제 데이터를 확인할 수 없습니다.');
       }
     } catch {
       // A failed refresh must never leave stale figures appearing current.
       setOverview(null);
       setPayoutLogs(null);
-      toast.error('국민연금 관제 데이터 갱신에 실패했습니다.');
+      if (!silent) toast.error('국민연금 관제 데이터 갱신에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
+  useAdminFinanceRevalidation(() => refreshData(true));
 
   return (
     <div className="space-y-6">
@@ -109,7 +114,7 @@ export function PensionControlTower({
           <Button
             variant="outline"
             size="sm"
-            onClick={refreshData}
+            onClick={() => void refreshData()}
             disabled={loading}
             className="min-h-11 min-w-11 gap-1.5"
           >

@@ -35,6 +35,18 @@ describe('admin pension evidence and payout hold', () => {
     expect(screen.getAllByText(/9,007,199,254,740,993/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/기금 100% 국가 재정 지급 보증/)).toBeNull();
   });
+  it('revalidates pre-reset pension AUM on mount and removes stale 50,000 WLD', async () => {
+    const staleOverview = { ...overview, totalAumWld: '50000' };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...overview, totalAumWld: '0', vaultMainBalanceWld: '0' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<PensionControlTower initialOverview={staleOverview} initialPayoutLogs={[]} />);
+    await waitFor(() => expect(screen.getAllByText(/0/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.queryByText(/50,000/)).toBeNull());
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/pension/overview', { cache: 'no-store' });
+  });
+
   it('refreshes both authenticated overview and payout logs with no-store', async () => {
     const nextOverview = { ...overview, totalAumWld: '12345' };
     const fetchMock = vi.fn()
