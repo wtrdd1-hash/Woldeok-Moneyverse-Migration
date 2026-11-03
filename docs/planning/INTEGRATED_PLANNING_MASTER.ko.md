@@ -1,5 +1,36 @@
 # 월덕 머니버스 — 통합 기획 마스터
-**현재 기획:** v1690 F675-228 생명주기·상태 정합성 / 이슈 #2591 / 선행 초안 #2592 / 운영 보류.
+**현재 기획:** v1692 F675-229 관리자 개인용 문의함 저장된 보기 / 이슈 #2610 / 선행 초안 #2602 / 운영 보류.
+
+## v2026.11.03.1692 — F675-229 관리자 개인용 문의함 저장된 보기 (기능 추가 / 초안 / 운영 보류)
+
+**주기·정본:** 이전 기능 보완 v1690 → 현재 기능 추가 v1692 → 다음 기능 보완 v1694(잠정). 원격 main 시작·중간 확인값 `e83ad8a6d1b8d477bfbe661ea3cffd46f270509c`; 이전 미병합 기획 초안 #2602(F675-228), 개발 이슈 #2610. AGENTS.md, README.md, 영문 PROJECT_PLAN.md 정본과 한국어 동등 문서 기준. **F675-229 미구현**, 기능 스위치 `admin_support_saved_views_v1` 기본 OFF. 기획 예약에서 런타임·SQL·금융·Test·Production 변경 금지.
+
+### 목적·실제 소스·제외 범위
+- **대상:** 반복적으로 문의를 분류하는 인증된 지원 관리자. 현재 `frontend/src/app/admin/support/admin-support-view.tsx`는 전체/답변 대기/회원 대기/완료 상태 탭과 불러온 문의에 대한 제목·닉네임·사용자 ID 클라이언트 검색을 제공한다. `page.tsx`는 상태만 서버에 전달한다. `backend/src/support/support.controller.ts`, `support.repository.ts`는 마이그레이션 196의 `admin_support_threads(actor,status,limit=100)`를 호출한다. DB 함수는 상태 우선순위·최근 활동순으로 정렬하며 최대 250건까지 허용하지만 Nest 기본값은 100건이다. 최신 main에서 관리자 개인별 저장된 보기 API/테이블은 확인되지 않았다. 이는 **소스에서 확인한 기능 공백**이지 운영 사고의 증거는 아니다.
+- **목표:** 관리자가 문의 상태·활동 기간·정렬을 개인 설정으로 저장·적용한다. V1은 기존 API가 반환한 **최대 100건의 제한된 집합만** 대상으로 한다. 전체 기간 모든 문의, 전체 건수, 전역 오래된 순, 자동 배정 또는 SLA 처리를 제공한다고 주장하지 않는다. 모든 결과 수에 **"현재 조회된 최대 100건 기준"**을 표시한다. 기존 자유형 검색은 일시적 입력으로 유지하며 검색어·회원 ID·닉네임·본문을 프리셋·URL·분석·감사에 저장하지 않는다.
+- **제외:** 회원 설정·첨부·메시지·자동 답변·문의 상태 변경·우선순위 상승·금융 동작·회원 알림·외부 웹훅·관리자 역할 부여를 수행하지 않는다. 기존 F675-224~F675-228과 별도 기능이다.
+
+### 사용자 흐름·화면·CTA·상태
+- 기존 관리자 인증 `requireAdminConsole` 및 서버 관리자 세션 검사 이후 `/admin/support`의 문의 목록 위에 "저장된 보기" 선택기를 배치한다. `현재 필터 저장`, `적용`, `이름/설정 수정`, `삭제`, `기본 보기로 복원` 버튼을 제공한다. 관리자별 **최대 8개**. 이름은 공백 제거·NFC 정규화 후 유니코드 1~40자, 제어·양방향 서식 문자 거부. 저장 항목은 `statusFilter=all|open|waiting_user|resolved`, `activityWindow=all|24h|7d|30d`(최근 메시지 기준), `order=queue|oldest_in_loaded`로 한정한다. SQL·사용자 ID·검색어·URL 저장 불가.
+- 적용 시 해당 상태의 **인증된 서버 문의 목록을 새로 조회**하고 반환된 최대 100건 내에서 활동 기간을 필터링한다. `queue`는 서버 상태 우선순위 유지, `oldest_in_loaded`는 **불러온 집합 안에서만** 최근 메시지 시각·ID로 안정 정렬한다. 프리셋은 문의·메시지·기존 5초 자동 새로고침을 변경하지 않는다. 새로고침 시 활성 필터를 재적용하되 작성 중인 자유형 검색어를 덮어쓰지 않는다. 관리자 계정 전환 시 이전 계정 프리셋/캐시 즉시 제거.
+- 로딩·저장 보기 없음·조회 집합 내 결과 없음·8개 한도·네트워크/503(과거 목록은 **검증되지 않음** 표시)·권한 회수 403·로그인 401·이름 중복/멱등 충돌 409·오래된 리비전 412·조건 헤더 누락 428·요청 제한 429·기능 OFF를 구분한다. 삭제 확인 후 복구는 **새로운** 생성 요청으로만 가능하며 삭제 영수증 재생으로 복원하지 않는다. 다른 관리자 계정 캐시 표시 금지.
+
+### API·DB·트랜잭션·보안
+- **Nest 관리자 전용 API:** `GET /api/v1/admin/support/views`, `POST /api/v1/admin/support/views`, `PATCH /api/v1/admin/support/views/:id`, `DELETE /api/v1/admin/support/views/:id`. GET은 엄격한 자료형 목록·`serverNow`·리비전을 반환한다. 쓰기는 세션 추출 관리자 UUID, `AdminGuard`·`AdminSessionGuard`·동의/세션 검사, CSRF, UUIDv4 `Idempotency-Key`, 강한 `If-Match`(생성은 컬렉션 리비전, 수정·삭제는 항목 리비전)를 요구한다. 누락 428, 오래됨 412, 동일 키/다른 본문 409, 타 관리자 항목 404, 기타 400/401/403/429/503은 닫힌 실패. 성공·오류 모두 `private,no-store`, `noindex,nofollow`, `no-referrer`. 이름/ID는 공개 메타데이터·로그 제외. **관리자 전용 Next 인증 BFF**만 호출하며 공개 `/app-api/v1/[...path]`에 관리자 경로를 열지 않는다.
+- **PostgreSQL 17 추가형 마이그레이션(개발 예약):** `admin_support_saved_views(id UUID PK, admin_user_id UUID NOT NULL FK users ON DELETE CASCADE, name TEXT, name_key TEXT, status_filter TEXT, activity_window TEXT, order_mode TEXT, revision BIGINT NOT NULL DEFAULT 1 CHECK revision>0, created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ)`. 이름 1~40자·허용 enum CHECK, DB의 `normalize(btrim(name),NFC)`와 ASCII 대문자→소문자 변환으로 이름 키 생성, `UNIQUE(admin_user_id,name_key)`. 유니코드 전체 대소문자 동일성을 보장하지 않는다. 인덱스 `(admin_user_id,updated_at DESC,id DESC)`. 기존 `support_threads_admin_queue_idx(status,last_message_at DESC,id DESC)` 재사용. 전역 검색 인덱스나 앱 계정 직접 테이블 SELECT/DML 권한 추가 금지. 쿼터 및 컬렉션 CAS용 `admin_support_view_state(admin_user_id UUID PK REFERENCES users ON DELETE CASCADE, collection_revision BIGINT NOT NULL DEFAULT 1 CHECK collection_revision>0)`를 두고 생성/수정/삭제가 성공할 때만 리비전을 증가시킨다. 불변 `admin_support_view_receipts(actor_id,key,operation,canonical_digest,key_version,view_id,original_revision,outcome,created_at,expires_at)`는 `UNIQUE(actor_id,key)`, 만료 인덱스·승인된 보존기간을 적용하되 계정 생존 동안 키 재사용 금지용 최소 해시 묘비를 유지해 과거 생성 요청의 재실행으로 삭제 항목이 복원되지 않게 한다. 버전형 HMAC 및 키 교체를 적용하고 **이름·회원 개인정보 원문 미저장**.
+- **원자성:** Nest 세션 신원과 DB 관리자 권한 별도 확인. SECURITY DEFINER 내부에서 권한 회수와 직렬화되는 역할 차단막을 검증하고, 관리자별 고정 소유자/쿼터 행을 먼저 잠근 뒤 생성 수를 확인해 동시 생성에도 최대 8개를 보장한다. 잠금 순서 관리자 권한 → 소유자/쿼터 → 보기 → 영수증. 한 트랜잭션에서 정규화·리비전·이름 유일성·변경·불변 영수증·민감정보 제외 감사 기록 확정. 실제 변경에만 리비전 증가. 동일 행위자+키+본문 재전송은 과거 결과만, 다른 본문은 409, 삭제 후 과거 생성 재전송은 재생성/현재 ETag 금지. 권한 회수 후 영수증도 접근 불가. `moneyverse_app` 직접 권한 금지, 역할 검증 SECURITY DEFINER 최소 함수·고정 search_path·PUBLIC EXECUTE 취소. 이미 적용된 마이그레이션 196/체크섬 수정 금지.
+- **악용·개인정보:** BFLA/BOLA·CSRF·UUID 위조·권한 회수 경합·8/9개 동시 생성·이름 충돌·과거 영수증·If-Match 변조 차단. 제안 제한 관리자당 시간당 쓰기 20회, 분당 조회 60회(실측 후 조정). 감사에는 행위자·동작·보기 ID·결과·상관관계만 기록하고 이름·검색어·회원 ID·본문 제외. 계정 삭제 시 보기 FK 삭제, 영수증은 승인된 보존/법적 보류 정책 적용. 타 관리자 데이터 내보내기 금지.
+- **SEO·모바일·접근성:** 관리자 화면·응답 noindex/사이트맵 제외, 계정 간 SSR 캐시 공유 금지. Android/app-api 관리자 저장 보기는 **미지원**, 404/403으로 차단. 웹 관리자 320px 재배치, 키보드·스크린리더 상태 알림, WCAG 2.2 AA, 44px 터치, 한영 동등 문구, 동작 감소 및 한글 IME 조합 중 편집 안전. 이름은 이스케이프된 텍스트로 출력.
+
+### 분석/KPI·테스트·배포/롤백
+- **가설 지표(실측 아님):** 저장 보기를 1개 이상 가진 활성 관리자 비율, 7일 내 재사용률, 문의함 진입→필터 적용 시간 중앙값, 409/412/429/403 비율, 제한 집합 빈 결과율, 5초 폴링 부하. 이벤트는 enum/집계만 사용하고 이름·검색어·회원 ID 제외. UI 복잡성으로 처리 시간 증가·권한/개인정보 회귀·폴링 부하 초과 시 중단/개선. 검증되지 않은 KPI 상승 주장 금지.
+- **개발 테스트:** PG17 마이그레이션 패리티·앱 역할 권한 거부, 생성/이름 변경/삭제/재실행/권한 회수 경합 100회 이상, NFC·ASCII 대소문자·제어문자·40/41자·시간대/DST·시계 오차·8/9개·100건 제한·상태별 서버 재조회·오래된 ETag·삭제 후 재전송, Nest BFLA/BOLA/CSRF/제한, Next 비공개 SSR, Android 게이트웨이 차단, 한영/320px/a11y/IME, 성공/오류 보안 헤더, 기능 OFF·기존 문의/원장 회귀. **이번 기획에서는 F675-229 기능 수용시험 미실행**.
+- **무중단 승격:** 개발 예약 별도 브랜치·검토 → 추가형 마이그레이션·스위치 OFF → 전체 CI·후보 정확 SHA Test 백엔드/프론트/API/실제 DB/관리자 인증 E2E → 독립 암호화 오프호스트 복원·금융 무변동·QA 승인 → P0 전부 해소 후 카나리·GitOps 무중단 운영승격. `/api/version` 문자열 외 실제 이미지 다이제스트·인증 흐름 검증. 롤백 스위치 OFF 우선, 호환 코드 되돌림, 데이터/영수증은 승인 보존 전까지 유지. 기획 예약에서 배포 금지.
+
+### P0/P1 개발 인계·실증·외부 근거
+- **P0 4건:** OPS1692-01 오프호스트 독립 복원·용량 감시(#1170, 10:07 루트 51%/47GB 여유·데이터 30%/132GB 여유, 복원 성공 아님); SEC1692-02 DEV PG 읽기 전용 266개 기본 테이블, 앱 UPDATE195/DELETE194/TRUNCATE213/TRIGGER214, 마이그레이션 327건, Production 권한 미검증(#993); REL1692-03 QA v1485 FAILED/P0 보고, 10:07 Production `/en/tools`·`/ko` HTTP500/Test HTTP200, 공개 버전 `109c0322699ce4b8588498ad765d56d09c9dce8e`는 이미지 증명 아님, 정확 SHA Test 인증 E2E·복원 미완료(#1088); FIN1692-04 과거 Treasury/NPS/SOE/KDIC/Mint 자금 근거·승인·원장 정합성(#2366).
+- **P1 6건:** VIEW1692-05 DB 제약·권한·쿼터·영수증, -06 Nest 인증/CSRF/CAS/멱등, -07 관리자 웹 제한 집합 보기, -08 개인정보·Android 차단·SEO·접근성, -09 악용·보존·분석, -10 실제 DB 동시성·정확 SHA Test·독립 복원·스위치 롤백. GitHub 개발 이슈 #2610. 기존 F675-228 및 타 작업자 브랜치 변경 없음.
+- **외부 독립 레퍼런스 게이트:** 신규 검증·중복 제거·근거 분류 승인 **0건**, 누적 승인 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 목표 달성으로 표시하지 않는다.
 
 ## v2026.11.03.1690 — F675-228 추가 정보 요청 카드 생명주기·상태·근거 정합성 (기능 보완 / 초안 / 운영 보류)
 
