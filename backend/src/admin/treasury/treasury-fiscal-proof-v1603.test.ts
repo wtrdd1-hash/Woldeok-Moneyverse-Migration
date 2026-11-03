@@ -105,7 +105,9 @@ describe('v1603: current fiscal epoch proof, not archived phantom money', () => 
       await repo[method]();
       const statement = query.mock.calls.map(([sql]) => sql).find((sql) =>
         sql.includes('FROM public.system_treasury_ledger'));
-      expect(statement).toContain('created_at >= (SELECT opened_at FROM public.treasury_fiscal_epochs WHERE id=1)');
+      expect(statement).toContain('created_at >= (SELECT epoch_opened_at FROM public.treasury_fiscal_proof_read())');
+      expect(statement).not.toContain('FROM public.treasury_fiscal_epochs');
+      // Fiscal epoch remains a private table; app-role reads only a DB-owned scoped function.
     },
   );
 
