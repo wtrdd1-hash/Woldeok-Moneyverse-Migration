@@ -17,3 +17,10 @@ Owner instructs all Treasury, NPS, SOE, KDIC, Mint, CB, SWF functions to truly w
 
 ## MID — pending
 ## END — pending
+
+## MID — first actual correction
+- Reproduced NPS public UI defect: working funded deposit/refund panel was below massive paused legacy portal; older historic transfers rightly fail closed.
+- TDD created new SSR tests and observed 2 RED before change; moved canonical funded panel to first section for logged-in users, clear guest login explanation, existing legacy protected historical records below; targeted 7 GREEN after change.
+- Validated actual funded path remains session/CSRF and strict replay-safe DB receipts. Legacy hourly pension and unverified liquidation remain held, never unconditionally unpaused.
+- Shared contract build then frontend TypeScript PASS, focused ESLint 0 errors (7 pre-existing legacy warnings); diff check clean.
+- Live accounts have no funded SOE issuer account type and Treasury holds 0 WLD: these payments need approved real sources, not synthetic WLD. Independent Mint #2683 and tax #2682 work untouched.
