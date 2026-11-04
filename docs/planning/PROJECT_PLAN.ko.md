@@ -3009,3 +3009,20 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## 기획 사이클 v1782 — 2026-11-05 — Feature Addition: F675-251 증빙 영수증 철회 및 현재 검증 상태 (제안, 미구현)
+
+**주기:** 이전 v1780 기능 보완 → 현재 v1782 기능 추가 → 다음 v1784 기능 보완. **상태:** 문서 변경만 수행, 운영 배포 HOLD. 기준 main `223f256a7425`; 선행 F675-249/250은 미병합 Draft PR이며 실제 런타임 기능으로 간주하지 않는다.
+
+**목적·대상:** SLA 사고 증빙 내보내기 검증 영수증이 과거에 유효했더라도 내보내기 철회, 테넌트·팀 권한 상실, 서명키 침해, 보존기간 만료 이후 현재 유효한 승인으로 오인하지 않도록 한다. 대상은 사고 감독자, 독립 승인자, 내부 감사자다. 상태 조회가 증빙 원문 열람 권한을 부여하지 않는다. 선행 F675-249/250의 독립 검증 없이는 `NOT_AVAILABLE`로 실패 폐쇄한다.
+
+**진입·화면:** 관리자 문의 > SLA 사고 > 증빙 내보내기 > 영수증 상세 > `현재 상태 확인`; 감독자의 `철회 요청`(사유·사고 ID) 후 독립 승인자가 `철회 승인` 또는 `거부`. 상태 `ACTIVE`, `REVOKED`, `EXPIRED`, `KEY_COMPROMISED`, `UNKNOWN`, `PENDING_APPROVAL`, `ACCESS_DENIED`, `NOT_AVAILABLE`. 과거 서명 당시의 암호학적 유효성과 현재 열람·사용 권한을 별도 표시한다. 로딩·빈 상태·오류·재시도·근거 오래됨 경고, UTC/KST, 한·영 동등성, 모바일 320px, WCAG 2.2 AA 키보드·초점·상태 알림. 관리자 페이지 noindex·캐시 금지·분석 개인정보 제외.
+
+**제안 API(실제 스키마 확인 전 확정 금지):** `GET /api/v1/admin/support/sla-policy/receipts/:receiptId/status`는 불투명 ID, 상태, 평가 시각, 정책 버전, 출처 워터마크, 철회 세대, 비식별 사유 코드 반환; 근거 불충분 시 UNKNOWN. `POST /api/v1/admin/support/sla-policy/receipts/:receiptId/revocations`는 감독자 권한·사고 참조·사유·멱등 키·예상 세대 필요. `POST .../revocations/:requestId/approve`는 요청자와 다른 승인자의 커밋 시점 권한 재검증 필수. 범위 외 접근은 존재 여부를 숨긴 403, 세대 충돌 409, 사유 오류 422, 요청 제한 429, 신뢰 근거 부족 503/UNKNOWN. 공개 무인증 검증은 위협 모델·개인정보 검토 전 금지.
+
+**DB·트랜잭션:** 실제 테이블명 조사 후 마이그레이션 설계. `receipt_revocation_requests` UUID PK, 테넌트·팀·영수증 FK, 요청자/승인자 분리 CHECK, 상태 CHECK, `expected_generation`, `(tenant_id,receipt_id,idempotency_key)` UNIQUE, 영수증별 열린 요청 부분 UNIQUE. `receipt_revocation_events` 추가 전용, `(tenant_id,receipt_id,generation)` UNIQUE, `(tenant_id,receipt_id,created_at DESC,id DESC)` 복합 인덱스. 테넌트 RLS/SECURITY DEFINER 최소권한, 행 잠금·CAS 세대 펜싱, 철회 세대·불변 감사·Outbox 단일 트랜잭션, 비동기 발행·재시도 대사. 이벤트 누락 시 ACTIVE 추정 금지. 보존 만료·키 침해는 ACTIVE보다 우선하며 철회 때문에 불변 증빙을 임의 삭제하지 않는다.
+
+**보안·운영·KPI:** 행위자·테넌트·영수증별 속도 제한, CSRF·변경 시 재인증, 자기 승인·권한 철회·교차 테넌트 차단, 로그에 원문·토큰·키·개인정보 제외. KPI: 철회 전파 p95, 잘못된 ACTIVE 건수(목표 0), 무권한 조회 시도, 승인 지연, UNKNOWN 비율, 재시도 적체. 테스트: 철회 0/1/다수, 동시 승인·철회, 멱등 재시도, 처리 중 권한 철회, 키 침해·교체, 보존 만료, Outbox 누락, DB 타임아웃, 테넌트 격리, 모바일·접근성·국제화, noindex·캐시·롤백. `admin_support_sla_receipt_revocation_v1` 기본 OFF. 추가형 마이그레이션 → 인증된 Test exact-SHA E2E·부정 테스트 → 모니터링 카나리 → P0 게이트 통과 후 운영 승격. 롤백 시 감사 이력을 바꾸지 않고 UI/API 쓰기·작업자 비활성화.
+
+**P0/P1·외부 근거:** P0 운영 HTTP 500/배포 SHA 확인, DB 최소권한·마이그레이션 체크섬, 인증 Test exact-SHA E2E, 독립 백업 복원·원장 대사, 금융·법률 게이트. P1 실제 문의 컨트롤러/DB/app-api/UX 조사, F675-249/250 선행 구현, 철회 이벤트·API·UI·보안·복구 테스트를 개발 예약의 독립 브랜치로 연계. 외부 독립 레퍼런스 이번 회차 신규 검증 **0건**, 누적 검증 **UNKNOWN/10,000건 — BLOCKED / IN PROGRESS**. 본 문서는 런타임 코드·DB 데이터·운영 배포를 승인하지 않는다.
