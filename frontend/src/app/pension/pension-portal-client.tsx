@@ -36,7 +36,7 @@ import { calculatePensionForecast } from '@/lib/pension-money';
 
 // Must match the unconditional backend P0 settlement hold. Reading existing receipts remains available.
 export const PENSION_LEDGER_SETTLEMENT_PAUSED = true;
-const PENSION_HOLD_NOTICE = '원장 정산 검증 중입니다. 국민연금 납입·해지·은퇴 전환·정기 지급이 일시 중단되었습니다. 기존 내역 조회는 가능합니다.';
+const PENSION_HOLD_NOTICE = '과거 국민연금 원장 정산 검증 중입니다. 과거 미증빙 납입·해지·은퇴 전환·정기 지급은 중단되며, 신규 적립·환급은 상단 정식 원장 국민연금에서 이용할 수 있습니다.';
 
 export interface NationalPensionOverview {
   totalAumWld: string;
@@ -258,13 +258,13 @@ export function PensionPortalClient({
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            국민(유저)의 자발적 기여금으로 국고를 든든히 확충하고, 은퇴 후 기존 연금 내역을 확인할 수 있는 가상경제 서비스입니다. 정산 검증 완료 전 신규 거래 및 지급은 중단됩니다.
+            신규 정식 원장 연금의 납입·환급은 상단에서 이용할 수 있습니다. 이 아래에서는 과거 국민연금 기록만 조회하며 미증빙 과거 정기 지급은 재원·원장 증빙 전까지 중단합니다.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="px-3 py-1 text-xs font-mono">
-            {PENSION_LEDGER_SETTLEMENT_PAUSED ? '정산 검증 중 · 거래 중단' : '정산 증빙 검증 필요'}
+            {PENSION_LEDGER_SETTLEMENT_PAUSED ? '구형 연금 정산 검증 중' : '정산 증빙 검증 필요'}
           </Badge>
         </div>
       </div>
@@ -522,7 +522,7 @@ export function PensionPortalClient({
               </Button>
 
               <div className="p-2.5 rounded bg-muted/30 border border-border/40 text-[11px] text-muted-foreground space-y-1">
-                <p>• 기존 납입·국고 기록은 확인 중이며 새로운 납입은 중단됐습니다.</p>
+                <p>• 이 구형 납입은 중단됐습니다. 새 적립금은 상단 정식 원장 국민연금 기능으로 납입할 수 있습니다.</p>
                 <p>• 정기 지급은 현재 원장 정산 검증이 끝날 때까지 중단됩니다.</p>
               </div>
             </CardContent>

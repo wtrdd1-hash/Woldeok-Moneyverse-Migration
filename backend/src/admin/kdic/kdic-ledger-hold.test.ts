@@ -3,6 +3,7 @@ vi.mock('../../discord/discord-alert.service', () => ({ DiscordAlertService: cla
 import { AdminKdicController } from './kdic.controller';
 import { KdicService } from './kdic.service';
 import { KdicRepository } from './kdic.repository';
+import type { RequestWithSession } from '../../auth/session.context';
 
 async function expectHold(promise: Promise<unknown>): Promise<void> {
   await expect(promise).rejects.toMatchObject({
@@ -26,7 +27,10 @@ describe('KDIC legacy financial mutation containment', () => {
     expect(service.assessQuarterlyPremiums).not.toHaveBeenCalled();
     expect(service.injectEmergencyLiquidity).not.toHaveBeenCalled();
     expect(service.executeDepositPayout).not.toHaveBeenCalled();
-    expect(await controller.getOverview()).toEqual({ success: true, data: { fund: { id: 'KDIC_MAIN_FUND' } } });
+    const actor = '285d77b4-8a73-4d85-8edb-e59bad8ad21f';
+    const request = { session: { user_id: actor } } as unknown as RequestWithSession;
+    expect(await controller.getOverview(request)).toEqual({ success: true, data: { fund: { id: 'KDIC_MAIN_FUND' } } });
+    expect(service.getFundOverview).toHaveBeenCalledWith(actor);
   });
 
   it('rejects direct repository calls before opening any DB connection', async () => {

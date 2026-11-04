@@ -3,39 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { calculateKdicIllustration, parseKdicPortalResponse, type VerifiedKdicPortalData } from './kdic-portal-evidence';
 
-interface KdicPortalData {
-  fund: {
-    fundName: string;
-    totalFundWld: number;
-    protectionLimitPerUser: number;
-    totalInsuredDepositsWld: number;
-    cumulativePremiumsCollectedWld: number;
-    cumulativePayoutsWld: number;
-    isEmergencyMode: boolean;
-    updatedAt: string;
-  };
-  institutions: Array<{
-    id: string;
-    institutionName: string;
-    institutionType: string;
-    bisRatioPct: number;
-    soundnessGrade: string;
-    totalDepositsWld: number;
-    premiumRatePct: number;
-    status: string;
-  }>;
-  summary: {
-    totalInsuredInstitutions: number;
-    totalDepositsWld: number;
-    averageBisRatioPct: number;
-    reserveCoverageRatioPct: number;
-  };
-}
 
 export default function KdicPortalPage() {
   const [activeTab, setActiveTab] = useState<'calculator' | 'institutions' | 'safetynet' | 'faq'>('calculator');
-  const [data, setData] = useState<KdicPortalData | null>(null);
+  const [data, setData] = useState<VerifiedKdicPortalData | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 시뮬레이터 입력값
@@ -46,6 +19,7 @@ export default function KdicPortalPage() {
     protectedAmount: number;
     unprotectedAmount: number;
     isFullyProtected: boolean;
+    illustratedCoveragePct: number;
   } | null>(null);
 
   useEffect(() => {
@@ -56,31 +30,29 @@ export default function KdicPortalPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/v1/kdic/portal');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          setData(json.data);
-        }
-      }
+      if (!res.ok) throw new Error('KDIC source unavailable');
+      const evidence = parseKdicPortalResponse(await res.json());
+      if (!evidence) throw new Error('Invalid KDIC evidence');
+      setData(evidence);
     } catch {
-      // 오프라인 시 기본 안전 데이터 렌더링
+      // Unavailable source must never turn into fabricated 10M WLD or invented banks.
+      setData(null);
     } finally {
       setLoading(false);
     }
   };
 
   const runCalculator = () => {
-    const total = Number(calcBankDeposit) + Number(calcInterest);
-    const limit = 500000; // 5천만원 상당 (500,000 WLD)
-    const protectedAmount = Math.min(total, limit);
-    const unprotectedAmount = Math.max(0, total - limit);
-    setCalcResult({
-      totalDeposit: total,
-      protectedAmount,
-      unprotectedAmount,
-      isFullyProtected: unprotectedAmount === 0,
-    });
-    toast.success('보호 한도 분석이 완료되었습니다.');
+    const illustration = calculateKdicIllustration(
+      calcBankDeposit, calcInterest, data?.fund.protectionLimitPerUser ?? 500000,
+    );
+    if (!illustration) {
+      toast.error('입력 금액은 0 이상의 안전한 정수 WLD여야 합니다.');
+      setCalcResult(null);
+      return;
+    }
+    setCalcResult(illustration);
+    toast.success('정책상 예상 보호 한도 계산이 완료되었습니다. (지급 확약 아님)');
   };
 
   const getGradeBadge = (grade: string) => {
@@ -106,17 +78,17 @@ export default function KdicPortalPage() {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold uppercase tracking-wider">
                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                대한민국 예금자보호법 제31조 공식 적용
+                월덕 가상경제 예금자보호 정책 안내
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 예금보험공사(KDIC) 예금자보호 포털
               </h1>
               <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
-                금융기관이 파산하거나 영업 정지 처분을 받아도, 예금보험공사가{' '}
+                월덕 가상경제 예금자보호 정책은 해당 보호 한도를 안내합니다. 실제 지급은 정식 재원과 원장 정산을 확인한 후 처리합니다. 기준 금액은{' '}
                 <strong className="text-white font-bold underline decoration-blue-400 underline-offset-4">
                   1인당 최고 5,000만원 (500,000 WLD)
                 </strong>
-                까지 원금과 소정의 이자를 법적으로 전액 보호합니다.
+                이며, 계산 결과는 지급 확약이 아닌 정책상 시뮬레이션입니다.
               </p>
             </div>
 
@@ -124,10 +96,10 @@ export default function KdicPortalPage() {
               <div className="text-center sm:text-right">
                 <div className="text-xs text-blue-200 font-medium">예금보험기금 총 적립액</div>
                 <div className="text-2xl font-black text-amber-300 font-mono">
-                  {data?.fund?.totalFundWld ? Number(data.fund.totalFundWld).toLocaleString() : '10,000,000'} WLD
+                  {data ? data.fund.totalFundWld.toLocaleString() + ' WLD' : loading ? '조회 중' : '자료 없음'}
                 </div>
                 <div className="text-[11px] text-slate-300 mt-0.5">
-                  부보 금융기관 {data?.summary?.totalInsuredInstitutions || 2}개사 완벽 보증
+                  {data ? `정식 DB 기록상 금융기관 ${data.summary.totalInsuredInstitutions}개사` : '금융기관 기록 확인 불가'}
                 </div>
               </div>
               <div className="w-14 h-14 rounded-full bg-blue-500/30 flex items-center justify-center border-2 border-blue-400 shadow-inner">
@@ -169,7 +141,7 @@ export default function KdicPortalPage() {
                   <span>🧮</span> 내 예금 보호한도 시뮬레이션
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  동일 금융기관별로 1인당 원금과 이자를 합산하여 500,000 WLD(5,000만원)까지 보호됩니다.
+                  정책상 한도를 가정한 예시 계산입니다. 실제 지급 가능액과 증명은 정식 DB 재원·원장 정산에 따릅니다.
                 </p>
               </div>
 
@@ -246,14 +218,14 @@ export default function KdicPortalPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/20">
                         <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-400 font-bold mb-1">
-                          <span>법적 보호 금액</span>
-                          <span>전액 보장</span>
+                          <span>정책상 예상 보호 금액</span>
+                          <span>계산상 한도 내</span>
                         </div>
                         <div className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
                           {calcResult.protectedAmount.toLocaleString()} WLD
                         </div>
                         <div className="text-[11px] text-emerald-600/80 mt-1">
-                          파산 시 예금보험공사 즉시 100% 대위변제
+                          실제 지급은 재원·원장 영수증 확인 후 집행됩니다.
                         </div>
                       </div>
 
@@ -264,7 +236,7 @@ export default function KdicPortalPage() {
                       }`}>
                         <div className="flex items-center justify-between text-xs font-bold mb-1">
                           <span>한도 초과 미보호액</span>
-                          <span>{calcResult.unprotectedAmount > 0 ? '분산 예치 권고' : '0 WLD (안전)'}</span>
+                          <span>{calcResult.unprotectedAmount > 0 ? '분산 예치 권고' : '0 WLD (한도 이내)'}</span>
                         </div>
                         <div className="text-2xl font-black font-mono">
                           {calcResult.unprotectedAmount.toLocaleString()} WLD
@@ -281,17 +253,17 @@ export default function KdicPortalPage() {
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-xs font-medium text-slate-500">
                         <span>보호 비율</span>
-                        <span>{((calcResult.protectedAmount / calcResult.totalDeposit) * 100).toFixed(1)}%</span>
+                        <span>{calcResult.illustratedCoveragePct.toFixed(1)}%</span>
                       </div>
                       <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
                         <div
                           className="bg-emerald-500 h-full transition-all duration-500"
-                          style={{ width: `${(calcResult.protectedAmount / calcResult.totalDeposit) * 100}%` }}
+                          style={{ width: `${calcResult.illustratedCoveragePct}%` }}
                         />
                         {calcResult.unprotectedAmount > 0 && (
                           <div
                             className="bg-rose-500 h-full transition-all duration-500"
-                            style={{ width: `${(calcResult.unprotectedAmount / calcResult.totalDeposit) * 100}%` }}
+                            style={{ width: `${calcResult.totalDeposit > 0 ? 100 - calcResult.illustratedCoveragePct : 0}%` }}
                           />
                         )}
                       </div>
@@ -311,7 +283,7 @@ export default function KdicPortalPage() {
               </div>
 
               <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                <span>공식 부보 인증 번호: KDIC-WLD-PROTECT-2026</span>
+                <span>시뮬레이션 안내용 표기 (금융 지급 증명서가 아닙니다)</span>
                 <Link href="/bank" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                   상업은행 예금 계좌 바로가기 →
                 </Link>
@@ -334,7 +306,7 @@ export default function KdicPortalPage() {
               </div>
               <div className="flex items-center gap-4 text-xs font-mono">
                 <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
-                  평균 BIS 비율: <strong className="text-blue-600 dark:text-blue-400">{data?.summary?.averageBisRatioPct || 14.3}%</strong>
+                  평균 BIS 비율: <strong className="text-blue-600 dark:text-blue-400">{data ? `${data.summary.averageBisRatioPct}%` : '—'}</strong>
                 </div>
                 <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
                   규제 권고치: <strong className="text-emerald-600 dark:text-emerald-400">8.0% 이상</strong>
@@ -343,28 +315,7 @@ export default function KdicPortalPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {(data?.institutions || [
-                {
-                  id: 'kdic-inst-bank-01',
-                  institutionName: '월덕상업은행 (Commercial Bank)',
-                  institutionType: '은행(제1금융권)',
-                  bisRatioPct: 14.5,
-                  soundnessGrade: '1등급(우량)',
-                  totalDepositsWld: 12500000,
-                  premiumRatePct: 0.08,
-                  status: 'NORMAL',
-                },
-                {
-                  id: 'kdic-inst-sec-01',
-                  institutionName: '월덕투자증권 (Investment Securities)',
-                  institutionType: '금융투자업(증권)',
-                  bisRatioPct: 13.8,
-                  soundnessGrade: '1등급(우량)',
-                  totalDepositsWld: 8200000,
-                  premiumRatePct: 0.15,
-                  status: 'NORMAL',
-                },
-              ]).map((inst) => (
+              {(data?.institutions ?? []).map((inst) => (
                 <div
                   key={inst.id}
                   className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden space-y-4"
@@ -392,7 +343,7 @@ export default function KdicPortalPage() {
                       <div className="text-lg font-black font-mono text-blue-600 dark:text-blue-400 mt-0.5">
                         {Number(inst.bisRatioPct).toFixed(2)}%
                       </div>
-                      <div className="text-[10px] text-emerald-600 mt-0.5">권고치(8.0%) 충족</div>
+                      <div className="text-[10px] text-emerald-600 mt-0.5">{inst.bisRatioPct >= 8 ? '권고치(8.0%) 충족' : '권고치(8.0%) 미달'}</div>
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60">
@@ -406,12 +357,14 @@ export default function KdicPortalPage() {
 
                   <div className="p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 flex items-center justify-between text-xs">
                     <span className="text-blue-900 dark:text-blue-300 font-medium">
-                      ✓ 예금보험공사 원리금 5천만원 보호 지정기관
+                      월덕 가상경제 예금자보호 정책 대상
                     </span>
-                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">보호 중</span>
+                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">정책 대상</span>
                   </div>
                 </div>
               ))}
+              {!data && <p role="status" className="text-sm text-slate-500">예금보험 원천 데이터가 확인되지 않아 금융기관 현황을 표시하지 않습니다.</p>}
+              {data && data.institutions.length === 0 && <p role="status" className="text-sm text-slate-500">확인된 부보 금융기관 기록이 없습니다.</p>}
             </div>
           </div>
         )}
@@ -424,7 +377,7 @@ export default function KdicPortalPage() {
                 <span>🚨</span> 금융안정기금 & 뱅크런 비상 대위변제 3단계 안전망
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                금융기관의 유동성 위기 발생 시 예금자를 보호하고 국가 금융시스템 붕괴를 방지하는 실시간 위기 관리 시스템입니다.
+                금융기관 유동성 위험 대응을 위한 정책상 절차 예시입니다. 실제 지급·대출 가능 여부는 정식 기금 잔액과 원장 정산에 따라 결정됩니다.
               </p>
             </div>
 
@@ -434,10 +387,10 @@ export default function KdicPortalPage() {
                   1
                 </div>
                 <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                  실시간 BIS 모니터링 & 조기 경보
+                  BIS 현황 평가 및 조기 경보 정책
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  부보 금융기관의 BIS 비율이 8.0% 미만으로 하락하거나 대규모 예금 인출(뱅크런 조짐)이 감지되면 즉시 관리자 디스코드 1:1 비상 핫라인으로 징후가 보고됩니다.
+                  BIS 비율 8.0% 미만 또는 대량 인출 징후를 확인하고, 검증된 데이터에 따라 관리자 통보 여부를 판단하도록 설계된 정책입니다.
                 </p>
               </div>
 
@@ -449,7 +402,7 @@ export default function KdicPortalPage() {
                   금융안정기금 긴급 유동성 대여 (Bailout)
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  일시적 유동성 부족으로 지급 불능 위험에 처한 은행에 예금보험기금 자금을 즉시 긴급 대여하여 연쇄 도산을 방지하고 시장을 안정시킵니다.
+                  예보기금의 실제 가용 재원과 승인된 원장 거래가 검증된 경우에만 긴급 유동성 대여가 가능하도록 설계된 절차입니다.
                 </p>
               </div>
 
@@ -458,10 +411,10 @@ export default function KdicPortalPage() {
                   3
                 </div>
                 <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                  원리금 5천만원 즉시 대위변제 (Payout)
+                  한도 내 대위변제 검증 절차 (Payout)
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  금융기관 파산 확정 시 피해 예금자 1인당 최고 500,000 WLD(5,000만원)까지 즉시 예보기금에서 대위변제금을 유저 계정으로 100% 직거래 환급합니다.
+                  금융기관 문제가 확정되면 한도·신원·실제 기금 잔액·복식원장 영수증을 검증한 후 지급하도록 설계되었습니다. 현 시점 자동 지급 완료를 의미하지 않습니다.
                 </p>
               </div>
             </div>
@@ -483,7 +436,7 @@ export default function KdicPortalPage() {
                 <span>📜</span> 예금자보호법 주요 규정 및 FAQ
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                대한민국 예금자보호법(KDIC) 래퍼런스에 따른 보호 대상 및 법적 기준입니다.
+                대한민국 예금자보호제도를 참고한 월덕 가상경제의 정책 설명이며 실제 법적 지급 보증이 아닙니다.
               </p>
             </div>
 
