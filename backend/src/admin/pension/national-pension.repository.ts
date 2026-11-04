@@ -77,6 +77,8 @@ export function pensionHourlyPayout(principalWld: string, rateBps: number): stri
   if (!Number.isSafeInteger(rateBps) || rateBps < 1) throw new RangeError('invalid pension rate');
   const principal = BigInt(principalWld);
   if (principal < 0n) throw new RangeError('invalid pension principal');
+  // A zero-funded position cannot generate an entitlement from min-1 rounding.
+  if (principal === 0n) return '0';
   const due = principal * BigInt(rateBps) / 10000n;
   return (due > 0n ? due : 1n).toString();
 }
