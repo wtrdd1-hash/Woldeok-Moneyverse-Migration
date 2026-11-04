@@ -1,4 +1,4 @@
-import { AdminControlCenterV2 } from './admin-control-center-v2';
+﻿import { AdminControlCenterV2 } from './admin-control-center-v2';
 import { EconomyAiStatusCard, type EconomyAiStatus } from './ai-status-card';
 import { CouncilDebateCard, type CouncilDebateData } from './council-debate-card';
 import { EconomySinkCard } from './economy-sink-card';
@@ -7,6 +7,7 @@ import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import { MonetaryVelocityCard } from './monetary-velocity-card';
 import { CasinoEconomyDashboard } from './casino-economy-dashboard';
 import { AdminNationalTreasuryControlCard } from './admin-national-treasury-control-card';
+import { AdminTaxPolicyCard } from './admin-tax-policy-card';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
@@ -433,6 +434,7 @@ export default async function AdminEconomyPage({
       <section aria-labelledby="treasury-lottery-taylor-control" className="grid gap-3">
         <SectionHeader eyebrow="TREASURY POLICY & SINK" title="국고 복권 소각 & 테일러 칙 정책 관제" id="treasury-lottery-taylor-control" />
         <AdminNationalTreasuryControlCard />
+        <AdminTaxPolicyCard />
       </section>
 
       <section aria-labelledby="economy-payout" className="grid gap-3">
