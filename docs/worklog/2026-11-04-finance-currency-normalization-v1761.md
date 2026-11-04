@@ -14,3 +14,9 @@ Read-only actual Production inspected: two active USER_CASH accounts use obsolet
 - Versioned EN/KO internal and GitHub logs, before/mid/end, recheck main before completion.
 ## MID — pending
 ## END — pending
+
+## MID — TDD and source proof
+- After offline workspace dependency install, saw RED due missing migration SQL336. Implemented forward SQL336 that accepts only previously active USER_CASH W accounts with valid posted balances and globally zero-sum ledger; moves only accounts.currency W->WLD, retaining account IDs, owners, balances, transactions/postings and supplied user money.
+- Per-account immutable SHA256 currency-code normalization evidence is inserted only for the alias accounts, app role loses all direct writes and new CHECK prevents reintroducing W on future accounts. Migration aborts before commit on unknown currencies, bad journal projection, global imbalance or mismatch in moved count. The small accounts metadata change holds an account-table write lock during the atomic transition to prevent races.
+- Targeted source tests 2/2 GREEN. Separate repeatable READ ONLY post-migration proof saved as packages/database/test/finance-currency-alias-v1761.verify.sql; no actual financial Production/Test DB mutation or promotion claimed. Actual Production read-only two W member accounts have 2,142,022 in stored W alias and lack duplicate WLD cash, so this is an account code normalization, **not** a transfer or new issuance.
+- This is an independent SQL336 stack based on PR #2705 source 50fa251...; CI and execution on restored real Test/Production databases must pass before any public release.
