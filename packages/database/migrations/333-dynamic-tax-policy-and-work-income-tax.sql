@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.tax_policy_configs (
 INSERT INTO public.tax_policy_configs (
   tax_type, name, base_rate_bps, current_rate_bps, min_rate_bps, max_rate_bps, auto_adjust_enabled
 ) VALUES
-  ('WORK_INCOME', '직업 근로 소득세 (Work Income Tax)', 500, 500, 300, 1500, true),
+  ('WORK_INCOME', '직업 근로 소득세 (Work Income Tax)', 0, 0, 0, 1500, true),
   ('MARKETPLACE', '마켓 거래세 (Marketplace Transaction Tax)', 300, 300, 100, 1000, true),
   ('WEALTH', '고액 자산가 누진 부유세 (Progressive Wealth Tax)', 1000, 1000, 500, 2500, true),
   ('PROPERTY', '부동산 보유세 (Property Holding Tax)', 200, 200, 100, 800, true)
@@ -172,6 +172,10 @@ DECLARE
   v_status public.work_assignment_status;
   v_gross_reward bigint;
   v_net_reward bigint;
+  v_daily_cap bigint;
+  v_weekly_cap bigint;
+  v_day_paid bigint;
+  v_week_paid bigint;
   v_tax bigint := 0;
   v_tax_main bigint := 0;
   v_tax_welfare bigint := 0;
@@ -263,6 +267,36 @@ BEGIN
   v_xp := public.work_experience_preview(p_actor, v_task);
   IF v_gross_reward IS NULL OR v_xp IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'work rewards are disabled';
+  END IF;
+
+  -- 193 Work Global Quota Authority 검사
+  PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('moneyverse:work-global-quota:' || p_actor::text, 0)
+  );
+
+  SELECT policy_row.daily_cap, policy_row.weekly_cap
+    INTO v_daily_cap, v_weekly_cap
+  FROM public.work_reward_policy_versions policy_row
+  WHERE policy_row.enabled AND policy_row.effective_at <= pg_catalog.clock_timestamp()
+  ORDER BY policy_row.effective_at DESC, policy_row.id DESC LIMIT 1;
+
+  SELECT coalesce(sum(receipt_row.reward_amount), 0) INTO v_day_paid
+  FROM public.work_reward_receipts receipt_row
+  WHERE receipt_row.user_id = p_actor
+    AND receipt_row.created_at >= public.server_game_day_start();
+
+  SELECT coalesce(sum(receipt_row.reward_amount), 0) INTO v_week_paid
+  FROM public.work_reward_receipts receipt_row
+  WHERE receipt_row.user_id = p_actor
+    AND receipt_row.created_at >= public.server_game_week_start();
+
+  v_gross_reward := LEAST(
+    v_gross_reward,
+    GREATEST(v_daily_cap - v_day_paid, 0),
+    GREATEST(v_weekly_cap - v_week_paid, 0)
+  );
+  IF v_gross_reward <= 0 THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'work reward quota reached';
   END IF;
 
   -- 1. Calculate Work Income Tax (직업 소득세 원천징수 계산)
@@ -433,6 +467,14 @@ $function$;
 
 GRANT SELECT ON public.tax_policy_configs TO moneyverse_app;
 GRANT SELECT ON public.tax_revenue_ledger TO moneyverse_app;
+ALTER FUNCTION public.admin_update_tax_policy(uuid, text, integer, integer, boolean) OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.economy_auto_adjust_tax_rates() OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.work_verify_and_reward(uuid, uuid, uuid) OWNER TO moneyverse_migrator;
+
+REVOKE ALL PRIVILEGES ON FUNCTION public.admin_update_tax_policy(uuid, text, integer, integer, boolean) FROM PUBLIC, moneyverse_app;
+REVOKE ALL PRIVILEGES ON FUNCTION public.economy_auto_adjust_tax_rates() FROM PUBLIC, moneyverse_app;
+REVOKE ALL PRIVILEGES ON FUNCTION public.work_verify_and_reward(uuid, uuid, uuid) FROM PUBLIC, moneyverse_app;
+
 GRANT EXECUTE ON FUNCTION public.admin_update_tax_policy(uuid, text, integer, integer, boolean) TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.economy_auto_adjust_tax_rates() TO moneyverse_app;
 GRANT EXECUTE ON FUNCTION public.work_verify_and_reward(uuid, uuid, uuid) TO moneyverse_app;
