@@ -45,6 +45,7 @@ DO $seed_treasury$
 DECLARE
   v_mint_id uuid;
   v_treasury_id uuid;
+  v_actor uuid;
   v_tx_id uuid;
   v_key uuid := 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'::uuid;
   v_curr_treasury_balance numeric;
@@ -56,13 +57,14 @@ DECLARE
   v_infra_id uuid;
   v_reserve_id uuid;
 BEGIN
+  SELECT id INTO v_actor FROM public.users WHERE status = 'active' LIMIT 1;
   SELECT id INTO v_mint_id FROM public.accounts WHERE account_type = 'MINT' AND system_key = 'mint';
   SELECT a.id, coalesce(ab.available_amount, 0) INTO v_treasury_id, v_curr_treasury_balance
   FROM public.accounts a
   LEFT JOIN public.account_balances ab ON ab.account_id = a.id
   WHERE a.account_type = 'TREASURY' AND a.system_key = 'treasury';
 
-  IF v_treasury_id IS NOT NULL AND v_mint_id IS NOT NULL AND v_curr_treasury_balance < v_seed_amount THEN
+  IF v_treasury_id IS NOT NULL AND v_mint_id IS NOT NULL AND v_actor IS NOT NULL AND v_curr_treasury_balance < v_seed_amount THEN
     -- MINT (credit) -> TREASURY (debit) 복식부기 원장 발행
     v_postings := jsonb_build_array(
       jsonb_build_object('accountId', v_mint_id, 'amount', v_seed_amount::text, 'direction', 'credit'),
@@ -72,7 +74,7 @@ BEGIN
     v_tx_id := public.economy_post_transaction(
       v_key,
       'TREASURY_SEED_INJECTION',
-      v_treasury_id,
+      v_actor,
       'v2026.11.05.1762',
       v_postings,
       'treasury.seed_reserve_established',
