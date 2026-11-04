@@ -229,8 +229,14 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'submitted work assignment required';
   END IF;
 
-  -- Verify active job
-  SELECT progress_row.current_tier::text INTO v_job_tier
+  -- Verify active job and calculate tier
+  SELECT (CASE
+    WHEN progress_row.level >= 40 THEN 'TIER_5'
+    WHEN progress_row.level >= 30 THEN 'TIER_4'
+    WHEN progress_row.level >= 20 THEN 'TIER_3'
+    WHEN progress_row.level >= 10 THEN 'TIER_2'
+    ELSE 'TIER_1'
+  END) INTO v_job_tier
   FROM public.user_job_progress AS progress_row
   JOIN public.work_task_catalog AS task_row ON task_row.job_type = progress_row.job_type
   WHERE progress_row.user_id = p_actor
@@ -389,6 +395,10 @@ BEGIN
       verification_reason = 'automatic verification'
   WHERE assignment_row.id = p_assignment;
 
+  UPDATE public.work_completion_records AS record_row
+  SET verifier_result = 'approved', verifier_detail = 'automatic verification'
+  WHERE record_row.assignment_id = p_assignment;
+
   INSERT INTO public.work_reward_receipts (
     idempotency_key, assignment_id, user_id, reward_amount,
     experience_amount, transaction_id, gross_reward_amount, tax_amount
@@ -396,6 +406,21 @@ BEGIN
     p_key, p_assignment, p_actor, v_net_reward,
     v_xp, v_transaction, v_gross_reward, v_tax
   );
+
+  UPDATE public.work_reward_windows AS window_row
+  SET paid_amount = window_row.paid_amount + v_net_reward
+  WHERE window_row.user_id = p_actor
+    AND ((window_row.window_start = v_day AND window_row.window_kind = 'day')
+      OR (window_row.window_start = v_week AND window_row.window_kind = 'week'));
+
+  INSERT INTO public.user_job_progress (user_id, job_type, experience, level, selected_at)
+  SELECT p_actor, task_row.job_type, v_xp, 1, pg_catalog.clock_timestamp()
+  FROM public.work_task_catalog AS task_row
+  WHERE task_row.id = v_task
+  ON CONFLICT (user_id, job_type) DO UPDATE
+  SET experience = user_job_progress.experience + excluded.experience,
+      level = least(50, 1 + ((user_job_progress.experience + excluded.experience) / 100)::integer),
+      changed_at = pg_catalog.clock_timestamp();
 
   assignment_id := p_assignment;
   reward_amount := v_net_reward;
