@@ -34,13 +34,18 @@ export class KdicService {
     return { ...row, numericBalanced: balanced, settlementReady: false as const, state: 'BLOCKED' as const, blockers };
   }
 
-  async getFundOverview() {
-    const [fund, institutions, recentPremiums, recentPayouts] = await Promise.all([
+  async getFundOverview(adminActor?: string) {
+    const [fund, institutions] = await Promise.all([
       this.repo.getFundStatus(),
       this.repo.getInsuredInstitutions(),
-      this.repo.listRecentPremiums(10),
-      this.repo.listRecentPayouts(10),
     ]);
+    // Public visitors never query member-identifying KDIC premium or payout records.
+    const [recentPremiums, recentPayouts] = adminActor
+      ? await Promise.all([
+          this.repo.listRecentPremiums(10, adminActor),
+          this.repo.listRecentPayouts(10, adminActor),
+        ])
+      : [[], []];
 
     const totalDeposits = institutions.reduce((sum, i) => sum + i.totalDepositsWld, 0);
     const averageBisRatio = institutions.length > 0 

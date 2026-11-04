@@ -26,8 +26,8 @@ export class AdminKdicController {
 
   @Get('overview')
   @ApiOperation({ summary: '예금보험공사 기금 및 금융기관 건전성 총괄 관제' })
-  async getOverview() {
-    const data = await this.kdicService.getFundOverview();
+  async getOverview(@Req() req: RequestWithSession) {
+    const data = await this.kdicService.getFundOverview(requireUserId(req));
     return { success: true, data };
   }
 
