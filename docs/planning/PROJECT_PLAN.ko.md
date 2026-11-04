@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### 기획 주기 v1778 (2026-11-05) — F675-250 SLA 증빙 내보내기 독립 검증 영수증 [P1; 기획 전용]
+이전: v1776 기능 보완; 현재: v1778 기능 추가; 다음: v1780 기능 보완. 구현·배포된 API 또는 마이그레이션이 아니며 F675-243~249의 실증 구현, P0 게이트, 독립 보안 검토가 선행 조건이다.
+- **목적·권한·진입:** 테넌트/팀의 권한 있는 감독자·감사자가 증빙 묶음과 불변 원본 매니페스트의 일치를 개인정보 공개 없이 검증한다. 관리자 > 문의 > SLA 사고 > 내보내기 > 영수증 검증. CTA: 검증, 영수증 ID 복사, 비식별 보고서 다운로드. 독립 검토 권한 필요, 익명 조회 불가.
+- **화면·상태:** REQUESTED, VERIFYING, VERIFIED, MISMATCH, INSUFFICIENT_EVIDENCE, EXPIRED, REVOKED, ERROR. 해시 알고리즘, 스냅샷 워터마크, 서명 키 ID, UTC 시각, 안전한 사유 코드와 수동 에스컬레이션을 표시한다. 암호학적 일치가 원천 증빙의 완전성·진실성을 보증하지는 않는다.
+- **API 제안:** POST /api/v1/admin/support/sla-policy/exports/:exportId/verification (Idempotency-Key, If-Match); GET /api/v1/admin/support/sla-policy/exports/:exportId/verifications/:verificationId; GET /.../:verificationId/report. 모두 인증·테넌트/팀 권한 확인, no-store, 요청 크기 제한, 균일한 403/404 정책.
+- **DB·트랜잭션:** export_verification(id, tenant_id, team_id, export_id, manifest_digest, snapshot_watermark, signer_key_id, verifier_id, status, reason_code, created_at, completed_at, revision) 제안. 불변 export FK, 상태 전이 CHECK, (export_id,verifier_id,manifest_digest,idempotency_key_hash) UNIQUE, 범위/상태/시각 인덱스. READY·미철회·미만료 검증 후 정규화 매니페스트 바이트·객체 해시·서명 신뢰 체인을 비교하고 결과·감사·Outbox를 원자적으로 기록한다.
+- **보안·악용방지:** 원본 파일·토큰을 URL/로그/분석/보고서에 포함하지 않는다. 요청·보고서 전달 때 RBAC 재확인, 폐기 키·변조 해시 거부, 비용 높은 검증 속도 제한, 단기 범위 권한, 개인정보 비식별, 테넌트 추론·재생 공격 차단. 키 교체 시 과거 검증 근거는 유지하되 철회된 다운로드 권한은 부활하지 않는다.
+- **SEO·모바일·접근성·KPI:** 비공개 noindex/nofollow, 320px 반응형, 키보드/스크린리더 상태 알림, WCAG 2.2 AA, 한영 동등성. 검증 p95, 불일치율, 근거부족율, 권한 거부율, 중복 요청 집계.
+- **테스트·배포·롤백:** 0/1/100/101건, 해시 변조, 객체 누락, 만료/철회, 키 교체/폐기, 동시 검증, 작업자 장애, 멱등 재시도, 권한 철회, 테넌트 격리, 캐시 유출, 320px/a11y. 기본 OFF 플래그, 별도 개발 브랜치, 공식 Test exact-SHA 인증 E2E·보안 게이트 후 카나리. 롤백 시 검증 쓰기만 중단하고 불변 영수증은 보존한다.
+- **P0 백로그:** 운영 HTTP 500·배포 SHA, DB 최소권한·마이그레이션 체크섬, 인증된 Test exact-SHA E2E, 독립 백업 복원·원장 대사. 증빙 없으면 운영 승격 금지.
+- **P1 백로그:** 실제 문의/내보내기 스키마·컨트롤러 확인, F675-249 후 영수증 API·DB 제약, 서명/키 교체, 관리자 UX, 위협 모델·장애 주입 회귀. A/B/C/QA/Gemini와 파일 충돌 회피.
+- **외부 레퍼런스 게이트:** 신규 독립 검증 0건, 누적 승인 UNKNOWN / 10,000건. 중복 제거·출처 근거 분류 전 BLOCKED / IN PROGRESS, 달성 주장 금지.
