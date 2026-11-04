@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### 기획 v1740 — F675-240 승인 무결성 및 배포 게이트 (2026-11-04; 기능 보완)
+**주기:** 이전 기능 추가 v1738 → 현재 기능 보완 v1740 → 다음 기능 추가 v1742. **상태:** 제안 단계, 운영 구현·배포 없음. 기준 main dfb98c7c5c2279201ab44808f7ea259acb5ac84d. v1738 초안 PR #2679는 미병합이며 아래 API는 기존 구현이 아닌 독립 보완 명세다.
+
+**사용자·권한 계약.** 관리자 답변 템플릿은 일반 텍스트이며 관리자가 직접 삽입하고 별도 전송해야 한다. 작성자는 불변 리비전 N을 검토 요청할 수 있고, 해당 리비전 작성에 참여하지 않은 유효한 테넌트·팀 검토 권한자만 승인·반려할 수 있다. 팀 이동 이후에도 자기 작성 내용 승인을 금지한다. 목록 조회 후 권한이 철회되면 작업을 거부하고 테넌트 간 존재 여부도 노출하지 않는다. 자동 전송, 회원 개인정보 자동 삽입, 본문의 분석·검색엔진·회원 API·로그 노출을 금지한다. 기존 문의 전송 권한 검사를 우회하지 않는다.
+
+**상태·화면.** DRAFT → PENDING_REVIEW → APPROVED 또는 CHANGES_REQUESTED. 승인 리비전 수정 시 기존 승인본을 보존하고 신규 DRAFT 리비전을 생성한다. 승인된 본문은 제자리 수정할 수 없다. CTA: 초안 저장, 검토 요청, 승인, 수정 요청, 답변에 삽입. 충돌·대기·오류·권한 회수 안내와 320px 모바일, 키보드, 스크린리더, 포커스 복구, 한국어·영어 동등성을 요구한다. 승인 버튼은 메시지를 발송하지 않는다.
+
+**API·DB 제안(실제 스키마 확인 후 확정).** 관리자 전용 GET /admin/support/reply-templates?status=&cursor=, POST /admin/support/reply-templates/:id/revisions/:revision/submit, POST /admin/support/reply-templates/:id/revisions/:revision/decision. 결정 본문 {decision: approve|changes_requested, reason?}; CSRF, 관리자 세션/필요한 단계 인증, Idempotency-Key, 강한 If-Match ETag 필수. template_revision 불변 행(tenant_id, team_id, template_id, revision, author_id, body_text, sha256), review_decision, audit_event, 멱등성 영수증을 동일 트랜잭션으로 관리한다. unique(template_id,revision), 테넌트·팀 범위 외래키, unique(template_id,revision,reviewer_id,decision_request_id), (tenant_id,team_id,status,updated_at DESC,id DESC) 및 (template_id,revision) 인덱스를 검토한다. 기존 DB 구조 확인 전 마이그레이션 금지; 금융 원장 변경 금지.
+
+**동시성·보안.** 테넌트·팀과 템플릿·리비전 행을 일정한 순서로 잠그고 검토자의 현재 권한·자기 승인 금지·If-Match·대기 상태·본문 해시를 다시 검사한다. 결정·감사·영수증·승인 포인터를 원자적으로 처리한다. 동시 승인·반려는 하나만 확정하며 동일 멱등성 키/동일 본문은 결과 재생, 다른 본문은 409, 오래된 ETag는 412로 응답한다. 감사 기록 실패 시 전체 롤백한다. XSS, 과도한 본문, 커서 변조, 대량 조회, 권한 탐색, 승인 스팸을 차단하고 no-store/noindex와 요청 제한을 적용한다.
+
+**측정·검증·롤백.** 본문·회원 식별자 없이 제출 수, 검토 지연 중앙값, 재작업률, 거부 요청 수를 집계한다. admin_support_template_review_v1 기본 OFF. 격리 DB 마이그레이션·롤백 연습 및 권한 감사를 거친 후 정확 SHA 인증 Test UI/API/모바일·접근성·한국어/영어 회귀, 동시 결정 10건 이상, 권한 회수, 오프라인 재시도, 기존 수동 전송을 검증한다. 명시적 운영 승격 승인 전 배포 금지. 롤백 시 기능 스위치 OFF, 불변 감사·리비전 유지. P0: 운영 HTTP 500·배포 SHA, 최소권한·체크섬, 정확 SHA Test E2E, 외부 복원·원장 대사. P1: 실제 스키마 조사, 리비전 상태 함수, 관리자 API, UI, 경합·보안 테스트, 스위치·롤백 증거. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건; 게이트 BLOCKED/IN PROGRESS.
