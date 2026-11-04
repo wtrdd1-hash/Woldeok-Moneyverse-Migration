@@ -457,13 +457,16 @@ export class AdminTreasuryController {
     }
     return this.swfService.updateConfig(body, actorId);
   }
+
+  @Get('health-insurance')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: '국민건강보험(NHI) 공단 재정 및 납부/급여 원장 현황 조회' })
+  async getHealthInsuranceOverview() {
+    return this.service.getHealthInsuranceOverview();
+  }
+
 }
 
-
-/** Guarded donation is isolated from anonymous public overview DI and disclosure. */
-@ApiTags('Member Treasury')
-@Controller('treasury')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class FundedTreasuryDonationController {
   constructor(private readonly service: TreasuryService) {}
 
@@ -475,4 +478,21 @@ export class FundedTreasuryDonationController {
       requireUserId(req), dto.amountWld, dto.memo ?? '국고 자발적 공공 기부', dto.idempotencyKey,
     );
   }
+
+  @Post('health-insurance/claim')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: '인증된 회원의 법정 건강보험 혜택/치료비 지원금 청구 (복지기금 70% 지원)' })
+  async claimHealthInsuranceBenefit(
+    @Req() req: RequestWithSession,
+    @Body() body: { claimType: string; expenseWld: string; reason: string },
+  ) {
+    const userId = requireUserId(req);
+    return this.service.claimHealthInsuranceBenefit(
+      userId,
+      body.claimType || 'FATIGUE_RECOVERY',
+      body.expenseWld,
+      body.reason || '작업 피로도 회복 및 의료 지원',
+    );
+  }
+
 }
