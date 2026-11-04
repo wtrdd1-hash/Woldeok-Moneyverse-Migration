@@ -14,7 +14,7 @@ describe('pension monetary exactness', () => {
   it('computes hourly payouts for large savings without Number roundoff', () => {
     const amount = '9'.repeat(90);
     expect(pensionHourlyPayout(amount, 12)).toBe((BigInt(amount) * 12n / 10000n).toString());
-    expect(pensionHourlyPayout('0', 8)).toBe('1');
+    expect(pensionHourlyPayout('0', 8)).toBe('0'); // unfunded zero principal must never imply 1 WLD liability
   });
 
   it('rejects unsafe JSON numbers before sending any amount to the repository', async () => {
