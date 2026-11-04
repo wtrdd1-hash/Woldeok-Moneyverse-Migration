@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   Controller,
@@ -178,6 +178,29 @@ export class UpdateKnobsV2Dto {
   @Min(0)
   @Max(10000)
   readonly loanRateBps!: number;
+}
+
+export class UpdateTaxPolicyDto {
+  @ApiProperty({ description: '세금 유형', example: 'WORK_INCOME' })
+  @IsString()
+  @IsIn(['WORK_INCOME', 'MARKETPLACE', 'WEALTH', 'PROPERTY'])
+  readonly taxType!: string;
+
+  @ApiProperty({ description: '기본 세율 (bps, 100 = 1%)', example: 500 })
+  @IsInt()
+  @Min(0)
+  @Max(5000)
+  readonly baseRateBps!: number;
+
+  @ApiProperty({ description: '현재 적용 세율 (bps, 100 = 1%)', example: 500 })
+  @IsInt()
+  @Min(0)
+  @Max(5000)
+  readonly currentRateBps!: number;
+
+  @ApiProperty({ description: '거시경제 연동 자동 조절 여부', example: true })
+  @IsBoolean()
+  readonly autoAdjust!: boolean;
 }
 
 export class OverrideUserAssetDto {
@@ -521,6 +544,42 @@ export class AdminEconomyController {
           idempotencyKey: body.idempotencyKey,
         }),
       'failed to override user asset',
+    );
+  }
+
+    @Get('tax-policy')
+  @ApiOperation({ summary: 'Get current tax policy configurations and revenue summary' })
+  getTaxPolicy() {
+    return this.guarded(
+      () => this.repository().getTaxPolicies(),
+      'failed to get tax policy',
+    );
+  }
+
+  @Post('tax-policy')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Update tax policy configuration' })
+  updateTaxPolicy(@Req() request: RequestWithSession, @Body() body: UpdateTaxPolicyDto) {
+    return this.guarded(
+      () =>
+        this.repository().updateTaxPolicy({
+          adminId: requireUserId(request),
+          taxType: body.taxType,
+          baseRateBps: body.baseRateBps,
+          currentRateBps: body.currentRateBps,
+          autoAdjust: body.autoAdjust,
+        }),
+      'failed to update tax policy',
+    );
+  }
+
+  @Post('tax-policy/auto-adjust')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Trigger macroeconomic auto-adjustment for dynamic tax rates' })
+  autoAdjustTaxRates() {
+    return this.guarded(
+      () => this.repository().triggerAutoAdjustTax(),
+      'failed to auto-adjust tax rates',
     );
   }
 

@@ -115,7 +115,7 @@ export class KdicRepository {
         cumulative_payouts_wld::float AS "cumulativePayoutsWld",
         is_emergency_mode AS "isEmergencyMode",
         updated_at AS "updatedAt"
-      FROM public.deposit_insurance_funds
+      FROM public.kdic_read_fund_v1743()
       LIMIT 1;
     `);
 
@@ -137,7 +137,7 @@ export class KdicRepository {
         premium_rate_pct::float AS "premiumRatePct",
         status,
         updated_at AS "updatedAt"
-      FROM public.insured_institutions
+      FROM public.kdic_read_institutions_v1743()
       ORDER BY total_deposits_wld DESC;
     `);
     return res.rows;
@@ -146,7 +146,7 @@ export class KdicRepository {
   async getUserInsuredCoverage(userId: string): Promise<UserInsuredCoverage> {
     const fundRes = await this.pool.query(`
       SELECT coalesce(protection_limit_per_user, 500000)::float AS "protectionLimit"
-      FROM public.deposit_insurance_funds
+      FROM public.kdic_read_fund_v1743()
       LIMIT 1;
     `);
     const protectionLimit = fundRes.rows[0]?.protectionLimit ?? 500000;
@@ -194,44 +194,41 @@ export class KdicRepository {
     rejectUnverifiedKdicSettlement();
   }
 
-  async listRecentPremiums(limit: number = 20): Promise<KdicPremiumRecord[]> {
+  async listRecentPremiums(limit = 10, adminActor?: string): Promise<KdicPremiumRecord[]> {
+    if (!adminActor) throw new Error('KDIC administrator actor is required');
     const res = await this.pool.query(`
       SELECT 
         p.id,
         p.institution_id AS "institutionId",
-        coalesce(i.institution_name, p.institution_id) AS "institutionName",
+        p.institution_name AS "institutionName",
         p.quarter,
         p.assessed_deposit_base::float AS "assessedDepositBase",
         p.premium_amount_wld::float AS "premiumAmountWld",
         p.status,
         p.created_at AS "createdAt"
-      FROM public.deposit_insurance_premiums p
-      LEFT JOIN public.insured_institutions i ON i.id = p.institution_id
-      ORDER BY p.created_at DESC
-      LIMIT $1;
-    `, [limit]);
+      FROM public.kdic_read_recent_premiums_v1743($1::uuid, $2::integer) p
+      ORDER BY p.created_at DESC, p.id DESC;
+    `, [adminActor, limit]);
     return res.rows;
   }
 
-  async listRecentPayouts(limit: number = 20): Promise<KdicPayoutRecord[]> {
+  async listRecentPayouts(limit = 10, adminActor?: string): Promise<KdicPayoutRecord[]> {
+    if (!adminActor) throw new Error('KDIC administrator actor is required');
     const res = await this.pool.query(`
       SELECT 
         py.id,
         py.institution_id AS "institutionId",
-        coalesce(i.institution_name, py.institution_id) AS "institutionName",
+        py.institution_name AS "institutionName",
         py.user_id AS "userId",
-        coalesce(mp.display_name, '예금자') AS "displayName",
+        py.display_name AS "displayName",
         py.original_deposit_wld::float AS "originalDepositWld",
         py.payout_amount_wld::float AS "payoutAmountWld",
         py.status,
         py.reason,
         py.created_at AS "createdAt"
-      FROM public.deposit_insurance_payouts py
-      LEFT JOIN public.insured_institutions i ON i.id = py.institution_id
-      LEFT JOIN public.member_profiles mp ON mp.user_id = py.user_id
-      ORDER BY py.created_at DESC
-      LIMIT $1;
-    `, [limit]);
+      FROM public.kdic_read_recent_payouts_v1743($1::uuid, $2::integer) py
+      ORDER BY py.created_at DESC, py.id DESC;
+    `, [adminActor, limit]);
     return res.rows;
   }
 }

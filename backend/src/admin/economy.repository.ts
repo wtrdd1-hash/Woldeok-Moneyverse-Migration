@@ -686,4 +686,50 @@ export class EconomyConsoleRepository {
     return row?.result ?? {};
   }
 
+  async getTaxPolicies(): Promise<{ configs: unknown[]; summary: unknown[] }> {
+    const configs = await queryRows(
+      this.pool,
+      `SELECT id, tax_type, name, base_rate_bps, current_rate_bps, min_rate_bps, max_rate_bps,
+              auto_adjust_enabled, tier_multipliers, last_adjusted_at, updated_at
+       FROM public.tax_policy_configs
+       ORDER BY tax_type ASC`,
+    );
+
+    const summary = await queryRows(
+      this.pool,
+      `SELECT tax_type, COUNT(*)::text AS tx_count,
+              COALESCE(SUM(tax_amount_wld), 0)::text AS total_tax_wld,
+              COALESCE(SUM(vault_main_portion_wld), 0)::text AS vault_main_wld,
+              COALESCE(SUM(vault_welfare_portion_wld), 0)::text AS vault_welfare_wld
+       FROM public.tax_revenue_ledger
+       GROUP BY tax_type`,
+    );
+
+    return { configs, summary };
+  }
+
+  async updateTaxPolicy(input: {
+    readonly adminId: unknown;
+    readonly taxType: string;
+    readonly baseRateBps: number;
+    readonly currentRateBps: number;
+    readonly autoAdjust: boolean;
+  }): Promise<Record<string, unknown>> {
+    assertUuid(input.adminId, 'admin');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_update_tax_policy($1::uuid, $2, $3, $4, $5) AS result`,
+      [input.adminId, input.taxType, input.baseRateBps, input.currentRateBps, input.autoAdjust],
+    );
+    return row?.result ?? {};
+  }
+
+  async triggerAutoAdjustTax(): Promise<Record<string, unknown>> {
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.economy_auto_adjust_tax_rates() AS result`,
+    );
+    return row?.result ?? {};
+  }
+
 }
