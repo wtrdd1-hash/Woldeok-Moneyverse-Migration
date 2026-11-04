@@ -1,0 +1,12 @@
+# v2026.11.04.1741 — Mint evidence read restoration
+
+## START — 2026-11-04 KST
+Owner ordered full finance restoration. Scoped correction: backend Mint GET reads currently return 503 unconditionally while memory-seeded historical batches are not certified finance. Read DOCS_INDEX, AGENTS, integrated plan, 11/01–11/04 finance incidents and SQL332; base main d31343eaf0. Production currently has 0 Mint certificates and 0 retire certificates; Production app SELECT true but official Test app SELECT false. Create limited SECURITY DEFINER read projection, not broad table grants; never invoke in-memory simulation, no money writes. Independent worktree avoids Gemini conflicts. New v1741 schema function and Nest DB read only.
+
+## MID — actual implementation and independent verification
+- Added forward-only SQL334 with bounded read-only `mint_evidence_read_v1741(integer)` SECURITY DEFINER, grants only app EXECUTE and not raw SELECT/DML; status is VERIFIED_EMPTY only when both evidence tables empty, otherwise UNVERIFIED, never invented supply or certificates. Existing POST issuance/burn remains fail-closed. Admin-authenticated GET `/mint/batches` and `/mint/audit-certificates` use real projection rather than seeded process-local memory. Unsupported GET detail/seigniorage remain held rather than falsely certified.
+- TDD/repository tests: 12/12 focused Mint+existing legacy guard PASS; contract build, backend build and typecheck PASS.
+- Independently backed up and restored official Test finance DB into disposable PG17 clone `mv_v1741_mint_clone` (not official Test mutation); applied SQL334 and verified `moneyverse_app` raw Mint table SELECT denied but function EXECUTE works. Empty Test DB returns VERIFIED_EMPTY with no certified issuance. Inserted fake 999,999,999 WLD certificate and policy only within BEGIN/ROLLBACK, confirmed `UNVERIFIED`, `monetaryIssuanceCertified=false`, count=1. Rollback leaves zero records. Unrelated main SQL333 also applied successfully in isolated clone, but its fiscal policy changes require separate proof before any Test/Production promotion. No live member WLD touched.
+
+## END — Release candidate only
+Scoped Mint read repair; actual monetary issuance, retirement, CBDC authority, KDIC/SOE/SWF/NPS #2366 are not restored. Main advanced to ff9839bdea923157b5903e21afb63a82a54bfdc1 during work; rebase before PR and preserve other contributors. Do not promote SQL334 until sequential migration #333 and official Test exact merged SHA gates are verified. No Production deployment of v1741 in this worklog.

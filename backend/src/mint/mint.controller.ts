@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Optional,
   Get,
   Param,
   Post,
@@ -16,6 +17,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { BurnCurrencyDto, CreateMintBatchDto } from './mint.dto';
 import { MintService } from './mint.service';
+import { MintEvidenceReadService } from './mint-evidence-read.service';
 
 import { unverifiedFinanceOperation } from '../economy/monetary/finance-hold';
 
@@ -23,7 +25,10 @@ import { unverifiedFinanceOperation } from '../economy/monetary/finance-hold';
 @Controller('mint')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
 export class MintController {
-  constructor(private readonly mintService: MintService) {}
+  constructor(
+    private readonly mintService: MintService,
+    @Optional() private readonly evidence?: MintEvidenceReadService,
+  ) {}
 
   @Post('batches')
   @UseGuards(CsrfGuard)
@@ -38,7 +43,7 @@ export class MintController {
   @Get('batches')
   @ApiOperation({ summary: '조폐국 화폐 주조 배치 및 인수 상태 목록 조회' })
   async getBatches() {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    return this.evidence ? this.evidence.read() : unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
   }
 
   @Get('batches/:id')
@@ -66,6 +71,6 @@ export class MintController {
   @Get('audit-certificates')
   @ApiOperation({ summary: '화폐 소각 및 주조 감사 공인 인증서 목록 조회' })
   async getAuditCertificates() {
-    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
+    return this.evidence ? this.evidence.read() : unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
   }
 }
