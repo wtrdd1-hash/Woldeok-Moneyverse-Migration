@@ -1,3 +1,12 @@
+## v1774 — F675-249 관리자 SLA 사고 증빙 내보내기 패키지 (FEATURE ADDITION; 2026-11-05; 초안 / 배포 보류)
+- **주기:** 이전 Feature Improvement v1772 → 현재 Feature Addition v1774 → 다음 Feature Improvement v1776. 기준 main `223f256a7425a81f34fa83a0e1628a978fb3c6e6`. 문서 제안이며 미구현. F675-243~248과 실제 문의·감사 스키마 검증 선행.
+- **목적·권한·진입:** 권한 있는 컴플라이언스 감독자가 테넌트 간 노출 없이 사고 증빙을 내부 조사용으로 보존. 관리자 > 문의 > SLA > 사고 > 증빙 내보내기. 사고 범위 감독자 요청, 별도 준법 검토자 승인; 일반 상담원 불가. 사유 입력 → 범위 미리보기 → 승인 → 생성 → 다운로드 → 만료/철회. LOADING, PENDING_APPROVAL, GENERATING, READY, EXPIRED, REVOKED, UNKNOWN, ERROR 상태; 누락 증빙을 정상으로 판단 금지.
+- **API:** `POST /api/v1/admin/support/sla-policy/incidents/:id/exports`(멱등키·사유·UTC 범위·증빙 유형), `POST /.../exports/:exportId/approve`(별도 승인자·리비전 조건), `GET /.../exports/:exportId`(상태·건수·워터마크), `POST /.../exports/:exportId/download-token`(일회용 단기 토큰). 테넌트 외 접근은 구분 불가한 403/404, 오래된 승인 409, 잘못된 범위 422, 과다 요청 429. app-api 캐시 금지.
+- **DB·트랜잭션:** 실제 스키마 확인 후 설계. 불변 export_job(테넌트·팀·사고·멱등키, 요청자·승인자, 범위 해시, 스냅샷 워터마크, 상태·만료), export_item(작업별 source_event_id 유일, `(committed_at,event_id)` 안정 정렬), 추가 전용 감사/Outbox. `(tenant_id,incident_id,created_at DESC)` 및 대기 작업 부분 인덱스는 EXPLAIN 검증 후 적용. 원본은 읽기 전용 반복 읽기 스냅샷, 승인·상태 변경은 행 잠금·리비전 검증·감사/Outbox 원자적 커밋. 암호화된 저장 객체와 SHA-256 매니페스트, 근거 누락·충돌은 UNKNOWN; 장애 재시도 중복 생성 금지.
+- **보안·화면·SEO:** 요청·승인·토큰 사용 시 테넌트/팀 권한 재검증, 권한 철회 즉시 토큰 무효화, 2인 승인, 사유·보존기간·크기·횟수 제한, 악성 콘텐츠 검사, URL/로그 개인정보 배제, no-store/noindex, 접근 감사. 공개 SEO 대상 아님. 320px 모바일, 44px 터치, WCAG 2.2 AA, 키보드·스크린리더 상태, 한영 오류 안내. KPI는 승인 건수, 생성 지연 p95, UNKNOWN 비율, 철회 후 접근 시도, 중복 생성 0건; 민감정보 분석 수집 금지.
+- **테스트·배포:** 권한·유일성·워터마크·Outbox·UTC 경계·매니페스트 손상·작업자 장애·100/101건·동시 승인·권한 철회·IDOR·테넌트 재사용·토큰 만료·객체 삭제 회귀. 기능 스위치 `admin_support_sla_incident_export_v1` 기본 OFF, 별도 개발 브랜치, 인증된 exact-SHA Test E2E·복구 리허설·롤백 확인 후 테넌트별 승인 활성화. expand/migrate/backfill/contract 분리; 롤백은 신규 내보내기 중지·토큰 철회, 불변 감사 기록 보존.
+- **P0:** 운영 HTTP 500/배포 SHA; DB 최소권한·마이그레이션 체크섬; 인증된 Test exact-SHA E2E; 독립 백업 복원·원장 대사. **P1:** 실제 증빙 스키마·출처, 권한·승인 API, 매니페스트·보존, 멱등 작업자·Outbox, 관리자 모바일·접근성 UI, 보안·장애·롤백 테스트. 독립 외부 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건, 게이트 BLOCKED / IN PROGRESS. 운영 배포 HOLD.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
