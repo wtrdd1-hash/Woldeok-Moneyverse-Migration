@@ -10,3 +10,6 @@ START 2026-11-04 KST. Owner ordered actual remaining finance implementation and 
 ## END — scoped candidate, NOT full restoration
 - This corrects a genuine zero-principal phantom entitlement, but legacy pension settlement, KDIC, SOE dividends, SWF, and Mint/CB issue #2366 are still not implemented as funded canonical transactions. No basis to report all restored or promote this as a finance completion. Do not overwrite member balances or reset archival source again.
 - This change needs GitHub PR CI + exact-main Test and zero-downtime Production before claiming the code fix is live. Existing 2026-11-04 integrity CLEAN is independent and already Production-verified.
+
+## POST-END — Actual Production promotion, 2026-11-04 09:35 KST
+The previously pending scoped code fix was subsequently merged at `ff9839bdea923157b5903e21afb63a82a54bfdc1`, CI success, exact Test and zero-downtime Production deployed. Official Production release proof: [v1740 release](../releases/v2026.11.04.1740-pension-zero-principal-production.md). Live backend+frontend SHA and `finance_integrity_scan CLEAN` certified. Explicitly NOT a complete finance settlement release; existing 503 funded holds remain. Independent signed-in session E2E and KDIC Test ACL parity remain outstanding.
