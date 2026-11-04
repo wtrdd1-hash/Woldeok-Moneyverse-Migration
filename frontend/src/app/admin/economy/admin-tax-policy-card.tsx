@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, RefreshCw, Sliders, CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Sliders, CheckCircle2, TrendingUp } from 'lucide-react';
 
 interface TaxPolicyConfig {
   id: string;
