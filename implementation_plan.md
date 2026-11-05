@@ -2502,3 +2502,13 @@ flowchart TD
    - 원격 운영 서버 마이그레이션 339 적용 및 실서비스 정상 작동 검증.
 
 ---
+
+## 🚀 [v272 Specification] 국부펀드 UI 하드코딩 문구 수정 및 실행 엔진 환경변수 연동 (+25, -0)
+- **발견된 현상 및 원인 분석**:
+  - `frontend/src/app/admin/treasury/swf-control-panel.tsx` 341번 라인에 `/ 실행 엔진: 원장 검증 전 중단` 문자열이 정적 하드코딩되어 정책이 활성화되어 있어도 화면 상에 항상 중단으로 노출됨.
+  - 호스트 `backend/.env`에 `MONEYVERSE_SWF_EXECUTION_ENABLED=true`가 누락되어 리밸런싱 API 호출 시 fail-closed 정책으로 비활성화 응답이 반환됨.
+  - 데이터베이스의 관리자 세션(`d5165745-...`)은 `admin_session_touch` 결과 `open` 상태로 정상 유효하며 권한(`superadmin`)도 정상임.
+- **수정 사항**:
+  1. `frontend/src/app/admin/treasury/swf-control-panel.tsx`: 341번 라인을 `{isEnabled ? '원장 검증 완료 및 정상 가동' : '원장 검증 전 중단'}` 동적 조건 분기로 전환.
+  2. 원격 서버 `backend/.env`에 `MONEYVERSE_SWF_EXECUTION_ENABLED=true` 영구 반영 및 서비스 리로드.
+  3. 로컬 및 원격 빌드/검증/배포 동기화.
