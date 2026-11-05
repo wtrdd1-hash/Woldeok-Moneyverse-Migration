@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### 기획 회차 v1798 (2026-11-05 15:05 KST) — F675-255 독립 인계 수령 확인 및 증빙 관리 이력 (제안 단계)
+주기: 이전 기능 보완 v1796 → 현재 기능 추가 v1798 → 다음 기능 보완 v1800. 기준 main `e096e16b0ec6175ff74630345f2742ff1f50ba53`. F675-249~254 선행 제안은 현재 main 통합 기획서에 없으므로 Draft PR을 먼저 검토·통합해야 하며 구현 완료로 간주하지 않는다.
+- **목적·대상·진입:** 테넌트별 SLA 철회 사고 증빙을 독립 보안 검토자에게 인계한 사실을 확인한다. 사고 감독자는 관리자 > SLA 사고 > 인계 > 수령 확인 요청, 검토자는 할당함 > 매니페스트 확인 > 수령/사유 기재 거절. 감독자는 취소 가능하나 검토자 대리 수령은 불가. 수령 확인은 증빙의 진실성·사고 해결·철회된 증빙 접근 권한을 뜻하지 않는다.
+- **권한·상태:** 감독자 `handoff:create/cancel`, 독립 검토자 `handoff:ack/reject`, 감사자 `handoff:read`. 자기 승인·위임 계정 우회·타 테넌트/팀 접근 금지. 상태 `REQUESTED`, `ACKNOWLEDGED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `UNKNOWN`; 로딩·빈 목록·권한 거절·오래된 상태·충돌·재시도 UI 제공. 모든 변경 및 다운로드에서 실시간 권한, 사고 세대, 영수증 철회·만료를 재확인하고 불명확하면 차단한다.
+- **API 제안(미구현):** `POST /admin/sla/incidents/:id/handoffs`(범위·검토자·만료·멱등키), `GET /admin/sla/handoffs?cursor=`, `POST /admin/sla/handoffs/:id/acknowledge`(매니페스트 해시·예상 버전), `POST /admin/sla/handoffs/:id/reject`(사유·예상 버전), `POST /admin/sla/handoffs/:id/cancel`(예상 버전). 400/401/403/404/409/410/429 응답과 타 테넌트 비노출 404. 요청자 지정 테넌트·서명 신뢰 루트는 신뢰하지 않는다.
+- **DB·트랜잭션:** `handoff(id,tenant_id,incident_id,reviewer_id,requester_id,manifest_sha256,incident_generation,state,expires_at,version,created_at,updated_at)` 및 불변 `handoff_transition`. 테넌트 복합 외래키, 요청자≠검토자 CHECK, 테넌트+멱등키 UNIQUE, 사고/검토자/세대별 활성 인계 부분 UNIQUE, `(tenant_id,reviewer_id,state,created_at DESC,id)` 및 `(tenant_id,incident_id,created_at DESC)` 인덱스. 행 잠금/CAS로 권위 있는 사고·철회 세대 재검증 후 상태·불변 감사·Outbox를 단일 트랜잭션으로 기록. 작업자 펜싱·재시도·데드레터·중복 제거. 원본 증빙과 철회 상태는 변경하지 않는다.
+- **보안·운영:** 정규 매니페스트 해시와 신뢰 키 등록부 결합; 재생·중복 JSON 키·미지원 알고리즘 차단; 감사·내보내기 개인정보 비식별화, 행위자·테넌트별 요청 제한, 임시 토큰 짧은 보존, 관리자 화면 noindex/no-store. 모바일 320px·WCAG 2.2 AA·키보드/포커스·한영 동등성. KPI는 수령 확인 지연 중앙값/p95, 오래된 인계 거절률, 테넌트 격리 차단 수, 만료 미처리 건수이며 민감한 원문은 분석에서 제외한다.
+- **테스트·배포:** 계약·마이그레이션·실 DB 제약, 0/1/100/101 페이지네이션, 동시 검토, 수령 중 철회, 권한 박탈, 만료, 중복·재생, 작업자 장애, 감사/Outbox 롤백, 접근성·모바일·한영 회귀. `admin_sla_handoff_custody_v1` 기본 OFF. 개발 독립 브랜치·격리 Test 인증 exact-SHA·P0 검증 후 점진 배포; 롤백은 신규 수령만 비활성화하고 불변 이력은 유지. 기획 예약은 런타임 배포 금지.
+- **P0:** 2026-11-05 14:10 KST QA에서 운영 `/en`·`/en/login` HTTP 500, Test 200 확인; 배포 SHA/프록시 재작성 원인 미확정, 운영 승격 HOLD. DB 최소권한·체크섬, 독립 백업 복원·원장 대사, 국내 법률/금융 게이트, 인증 exact-SHA Test 미검증. **P1:** 기존 Draft PR과 최신 main 대조, 실제 frontend/backend/app-api/DB 조사, 백엔드 자동 재시작과 `/srv/moneyverse` 깨진 배포 심볼릭 링크 조사, 선행 기능 구현 후 수령 확인 기능 착수.
+- **외부 독립 레퍼런스:** 신규 검증 0건, 누적 UNKNOWN/10,000건. 중복 제거·근거 분류 수량 미검증, BLOCKED / IN PROGRESS. 달성 주장 금지.
