@@ -267,9 +267,11 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
 
     if (receipt.success) {
       if (this.discordAlert) {
-        this.discordAlert.sendAdminDirectMessage(
-          '[SWF 자금 회수] 주식 매각 +' + receipt.liquidated_wld + ' WLD 회수 환원, 국고 중앙 금고(VAULT_MAIN) 잔액: ' + receipt.vault_main_balance + ' WLD (원장 전표 ' + receipt.ledger_transaction_id + ')'
-        ).catch(() => undefined);
+        this.discordAlert.sendAdminDirectMessage({
+          title: '💸 [국부펀드] 초과 AUM 주식 청산 및 중앙 금고 환원 완료',
+          description: '[SWF 자금 회수] 주식 매각 +' + receipt.liquidated_wld + ' WLD 회수 환원, 국고 중앙 금고(VAULT_MAIN) 잔액: ' + receipt.vault_main_balance + ' WLD (원장 전표 ' + receipt.ledger_transaction_id + ')',
+          color: 0x10b981,
+        }).catch(() => undefined);
       }
       if (this.telegramAlert) {
         this.telegramAlert.notifySwfEvent({
