@@ -113,7 +113,7 @@ BEGIN
     ) VALUES (
       v_welfare_id, 'INJECTION', '3000000',
       '국민건강보험 및 시민복지기금 300만 WLD 기초 시드 전입',
-      '0', '3000000', v_tx_id, clock_timestamp()
+      '0', '3000000', NULL, clock_timestamp()
     );
   END IF;
 END $seed_treasury$;
