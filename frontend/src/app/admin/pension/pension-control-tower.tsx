@@ -96,7 +96,7 @@ export function PensionControlTower({
       setOverview(verifiedOverview);
       setPayoutLogs(verifiedPayouts);
       if (verifiedOverview === null || verifiedPayouts === null) {
-        if (!silent) toast.error('일부 연금 관제 데이터를 확인할 수 없습니다.');
+        if (!silent) toast.error('일부 연금 관련 데이터를 확인할 수 없습니다.');
       }
     } catch {
       // A failed refresh must never leave stale figures appearing current.
