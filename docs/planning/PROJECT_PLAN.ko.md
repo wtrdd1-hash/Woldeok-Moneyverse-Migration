@@ -1,3 +1,19 @@
+## v2026.11.06.0424 — F675-261 동결 갱신 판정 영수증 대사 보완 (기능 보완 / 제안 / 운영 보류)
+
+주기: 이전 **기능 추가 v1822** → 현재 **기능 보완 v1824** → 다음 **기능 추가 v1826**. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03`, 선행 제안 PR #2779. 구현 완료가 아닌 기획 보완이며 영어 문서가 원본이다.
+
+**P0 운영 게이트:** Production `/en`, `/en/login`을 독립 HTTPS 경로에서 재검증하고 백엔드 재시작, `/srv/moneyverse` 배포 심볼릭 링크, 실제 배포 SHA 및 Test exact-SHA, DB 마이그레이션 체크섬·최소권한, 독립 백업 복원, 금융 원장 대사, 국내 법률·상거래 검증을 완료해야 한다. 과거 HTTP 500은 현재 장애의 증거가 아니며 필수 증빙이 미확인되면 운영 승격 금지.
+
+**P1 F675-261 인수 조건:** 목적은 원본 증빙의 보존·철회 상태를 변경하지 않고 동결 갱신 판정 영수증의 누락·중복·위조·역순을 탐지하는 것이다. 테넌트 범위 담당자(요청), 독립 준법 검토자(승인·거절), 보안 감사자(비식별 내보내기) 역할을 분리하며 실효 사용자·위임 계정·서비스 주체의 자기 승인을 금지한다. 진입점은 관리자 > 증빙 관리 > 갱신 영수증 > 대사. 상태 `NOT_STARTED`, `RUNNING`, `MATCHED`, `MISMATCHED`, `BLOCKED_UNKNOWN`, `REVIEW_PENDING`, `ATTESTED`, `REJECTED`; CTA는 대사 실행, 서명 증빙 보기, 불일치 상신, 독립 확인, 거절, 비식별 보고서 내보내기. 각 CTA에 로딩·권한 거절·버전 만료·재시도·안전 실패 상태를 제공한다.
+
+**제안 API(미구현):** `POST /admin/custody/renewal-receipts/reconciliations`(Idempotency-Key, If-Match, 테넌트 범위), `GET /admin/custody/renewal-receipts/reconciliations`(커서), `GET /admin/custody/renewal-receipts/reconciliations/:id`, `POST /:id/escalations`, `POST /:id/attestations`(독립 검토·서명 매니페스트), `GET /:id/redacted-export`(단기 권한·no-store). 버전 충돌은 409/412, 신뢰 증빙 누락은 `BLOCKED_UNKNOWN`으로 안전 차단하며 Outbox 수신 확인 없이 성공 처리하지 않는다.
+
+**DB·트랜잭션:** 대사·영수증·원본 사고·검토자에 테넌트 복합 외래키, UNIQUE(tenant_id, source_receipt_id, source_generation, reconciliation_policy_version), 활성 대사 부분 UNIQUE, 상태·버전 CHECK, 불변 매니페스트 해시를 적용한다. (tenant_id,state,created_at DESC,id), (tenant_id,source_receipt_id) 인덱스를 둔다. 잠금 또는 직렬화 트랜잭션 안에서 CAS 상태 변경·불변 감사·Outbox를 원자적으로 기록하고 직렬화 충돌은 제한된 지터 재시도한다. 작업자 펜싱, 멱등 소비, 재생 공격 시간창, 데드레터 상신, 역순 영수증 거부가 필수다. 서명에는 증빙 해시·키 버전·철회 세대·테넌트·정책 버전을 결합한다.
+
+**보안·UX·검증:** 조회·수정·내보내기마다 테넌트·팀·실효 신원 재인가, 실행·내보내기 속도 제한, 개인정보 비식별·접근 감사, 검색 제외 및 `no-store`/`noindex`를 적용한다. 모바일 320px, 키보드·스크린리더 상태 안내, WCAG 2.2 AA. KPI는 불일치율·독립 확인 소요시간·신뢰 불명 비율·중복 억제·오탐률이며 기준치는 임의 생성하지 않는다. 실제 PostgreSQL 동시 승인·철회, 테넌트 간 IDOR, 위임 자기 승인, 키 교체·철회, 재생·역순, Outbox 장애 복구, 영한 동등성, 접근성·관리자 회귀 테스트가 필수다. 기능 플래그 기본 OFF; 별도 개발 브랜치, 인증된 Test exact-SHA, 롤백 검증 및 명시적 승격 승인 전 운영 금지. 롤백 후에도 불변 증빙·철회 제한을 유지한다.
+
+**근거 게이트:** 이번 회차 검증된 외부 독립 레퍼런스 **0건**, 누적 독립 검증·중복 제거·근거 분류 **UNKNOWN / 10,000건**. **BLOCKED / IN PROGRESS**. 이번 변경은 기획서만 수정하며 런타임·운영 데이터는 변경하지 않는다.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
