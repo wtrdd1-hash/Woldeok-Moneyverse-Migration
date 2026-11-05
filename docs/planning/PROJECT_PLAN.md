@@ -1,3 +1,19 @@
+## v2026.11.06.0730 — F675-263 Independent dispute evidence replay guard (FEATURE ADDITION / PROPOSAL / RELEASE HOLD)
+
+Cycle: Previous Improvement v1828; Current Addition v1830; Next Improvement v1832. F675-260/261/262 dependencies are not proven implemented in main. Planning only; no runtime deployment.
+
+**Goal, actors, entry, CTAs:** Compliance supervisors verify reproducibility of F675-262 dispute evidence before disposition. Admin dispute detail > Verify replay, Inspect manifest, Request independent attestation, Export redacted receipt. Tenant-scoped request and attest permissions must be separate. Initiator, prior adjudicator, delegated principal and independent attestor must be different effective human principals; cross-tenant and expired delegation fail closed.
+
+**States/UI:** NOT_REQUESTED, QUEUED, VERIFYING, MATCHED, MISMATCHED, BLOCKED_UNKNOWN, ATTESTED, CANCELLED. Display source dispute, immutable manifest SHA-256, signing key epoch, verification timestamp and reviewer. A mismatch must never overwrite source evidence, dispute or ledger. Retention, revocation and download blocks remain in force.
+
+**Proposed API (six endpoints, pending real code contract audit):** POST /admin/custody/disputes/:id/replay-checks (Idempotency-Key, If-Match); GET /admin/custody/disputes/:id/replay-checks; GET /admin/custody/replay-checks/:id; POST /admin/custody/replay-checks/:id/attest (If-Match); POST /admin/custody/replay-checks/:id/cancel; GET /admin/custody/replay-checks/:id/redacted-receipt. 403 unauthorized, 409/412 version conflict, 423 BLOCKED_UNKNOWN when evidence/key unverifiable. Opaque IDs, tenant-filtered stable cursor pagination and deterministic idempotent responses.
+
+**DB and transactions:** Proposed custody_dispute_replay_checks(tenant_id,check_id,dispute_id,attempt_no,status,manifest_sha256,key_epoch,requested_by,attested_by,version,created_at,updated_at). Composite FK (tenant_id,dispute_id), UNIQUE(tenant_id,dispute_id,attempt_no), CHECK attempt_no>0 and version>=0, status constraint, partial unique active-attempt index and (tenant_id,created_at DESC,check_id) listing index. Attempt, immutable audit and Outbox must commit atomically; CAS versions, actor-scoped idempotency, worker fencing and replay deduplication required. Verify key revocation generation and manifest both before and after replay; UNKNOWN cannot silently become MATCHED.
+
+**Security, UX, KPI and release:** Noindex/nofollow admin routes; no PII in logs/analytics; rate limits, CSRF, payload caps, session revalidation, signed short-lived redacted export, alerts on mismatch spikes. 320px mobile and WCAG 2.2 AA keyboard/screen-reader support, Korean/English parity. Measure completion, mismatch accuracy, attestation latency, BLOCKED_UNKNOWN and deduplication. Test tenant isolation, delegated self-approval, concurrent attest/cancel, reordered Outbox, revoked keys, stale manifests, PostgreSQL constraints and rollback. Default-OFF admin_custody_dispute_replay_guard_v1. Require isolated migration rehearsal, exact-SHA Test E2E, rollback proof and approval before Production; rollback disables new requests without deleting immutable records.
+
+**P0/P1 and evidence gate:** P0 recheck historical Production /en and /en/login HTTP 500, restarts, symlink, deployed SHA, least privilege, migration checksum, restore, financial ledger reconciliation and Korean legal requirements. P1 reconcile open PRs and actual frontend/backend/app-api/DB contracts; implement F675-260–263 in separate development branches. Newly verified external independent references: 0; cumulative verified UNKNOWN/10,000; deduplication and evidence classification BLOCKED / IN PROGRESS. No claim of completion.
+
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
