@@ -3009,3 +3009,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### 기획 v1804 — F675-256 독립 인계 수령 이력 대사 무결성 보완 (기능 보완, 2026-11-05)
+이전: 기능 추가 v1802 / 현재: 기능 보완 v1804 / 다음: 기능 추가 v1806. **제안 단계·미구현·운영 배포 보류.** F675-249~256 선행 기획은 열린 Draft PR에 있으며 main에 반영되었다고 볼 수 없다. 수령 확인이나 대사 성공은 사고 해결 또는 철회 증빙 다운로드 허용을 의미하지 않는다.
+
+**목적·권한·화면:** 테넌트 보안 관리자와 독립 검토자가 인계 수령 기록을 권위 있는 사고 세대·철회 등록부·서명 매니페스트·검토자 권한과 대조한다. 진입점: 관리자 > SLA 사고 > 증빙 인계 > 대사. 검토자는 증빙을 읽기만 하며 독립 감독자만 예외를 확인한다. CTA: 대사 실행·불일치 조회·개인정보 제거 감사 증빙 내보내기·예외 확인. 상태: NOT_RUN/RUNNING/VERIFIED/MISMATCH/UNKNOWN/STALE. 권위 데이터 또는 서명키를 검증할 수 없으면 UNKNOWN으로 차단한다. 모바일 320px, WCAG 2.2 AA, 한국어·영어 상태·오류·재시도 동등 지원. 검색 제외 및 캐시 금지, 분석 이벤트에 증빙 원문 금지.
+
+**API 제안:** POST /admin/sla/incidents/:incidentId/custody/reconciliations (Idempotency-Key, If-Match 사고 세대), GET /admin/sla/incidents/:incidentId/custody/reconciliations/:runId, GET /admin/sla/incidents/:incidentId/custody/reconciliations?cursor=, POST /admin/sla/incidents/:incidentId/custody/reconciliations/:runId/acknowledgements (reasonCode, If-Match 버전). 모든 요청은 인증·최소권한·테넌트/팀 검증을 트랜잭션 안에서 다시 수행한다. 테넌트 간 조회는 존재 여부를 노출하지 않는 403, 오래된 세대 409, 잘못된 사유 422, 호출 제한 429, 권위 데이터 장애 503/UNKNOWN. 클라이언트의 VERIFIED 상태 입력은 신뢰하지 않는다.
+
+**DB·트랜잭션:** 제안 테이블 custody_reconciliation_run(tenant_id, team_id, incident_id, run_id UUID, incident_generation, revocation_generation, manifest_sha256, signer_key_version, reviewer_id, status, evidence_watermark, created_at, expires_at, version), 불변 관측 테이블 custody_reconciliation_observation(tenant_id, run_id, source_id, source_generation, payload_digest). 테넌트·팀 복합 FK, 상태 CHECK, (tenant_id, incident_id, idempotency_key) UNIQUE, 미해결 부분 인덱스, 최신순 조회 인덱스를 적용한다. 사고·인계 행 잠금, 세대 및 서명키·검토자 검증, 버전 CAS, 불변 감사·Outbox 기록을 단일 트랜잭션으로 묶고 실패 시 전부 롤백한다. 작업자 임대 펜싱과 이벤트 중복·역순 방지로 UNKNOWN/STALE의 잘못된 VERIFIED 승격을 차단한다. 개인정보 보존·법적 보존 의무를 따르고 원문은 로그에 남기지 않는다.
+
+**보안·검증·출시:** 자기 확인(위임 계정 포함), 재생 공격, 위조 관측, 침해된 서명키, 만료 인계, 테넌트 횡단, 철회와 확인의 경합을 방지한다. 권한·세대 경합·멱등성·키 교체·Outbox 재처리·작업자 장애·접근성·영한 동등성·내보내기 개인정보 회귀 테스트를 수행한다. KPI는 불일치 탐지 지연, 필수 출처의 유효 서명 관측률, 잘못된 VERIFIED 건수(목표 0), 예외 체류 시간, 감사/Outbox 지연이다. 기능 플래그 기본 OFF, 하위 호환 마이그레이션과 인증된 정확한 SHA Test E2E 및 롤백 검증 후 단계적 활성화한다. 롤백 시 UI/작업자만 중단하며 감사 기록을 삭제하거나 철회를 복구하지 않는다.
+
+**P0/P1 및 실제 QA:** 2026-11-05 17:18 KST QA에서 운영 /en·/en/login HTTP 500, Test 200. 운영 SHA, HTTPS 미들웨어 재작성, 백엔드 재시작(NRestarts 120241), /srv/moneyverse 잘못된 심볼릭 링크, DB 최소권한·체크섬, 백업 복원, 원장 대사, 국내 법률 게이트, 정확한 SHA Test 검증을 P0로 유지한다. P1은 F675-249~256 Draft PR과 main 정합성 확보 및 실제 frontend/backend/app-api/API/DB 선행 계약 확인이다. 개발 A/B/C·QA는 독립 브랜치로 수행하고 기획 예약은 런타임을 배포하지 않는다. 외부 독립 레퍼런스 이번 회차 신규 검증 0건, 누적 UNKNOWN/10,000건: BLOCKED/IN PROGRESS.
