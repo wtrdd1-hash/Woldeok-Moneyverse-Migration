@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### 기획 v1806 — F675-257 대사 예외 판정·독립 승인 (기능 추가, 2026-11-05)
+
+**주기:** 이전 기능 보완 v1804 → 현재 기능 추가 v1806 → 다음 기능 보완 v1808. 제안만 작성 / 미구현 / 운영 배포 보류. F675-249~256은 미병합 선행 기획이며 최신 main 및 실제 구현 검증이 선행되어야 한다.
+
+**목적·화면·흐름:** 테넌트 보안 관리자가 F675-256 대사 불일치를 분류하고 담당 지정·재관측 요청·근거 기반 판정을 제안한다. 별도 독립 검토자는 승인/거절, 감사자는 비식별 불변 기록 읽기만 가능하다. 진입점 관리자 > SLA 사고 > 수령 이력 대사 > 예외. 목록 필터는 테넌트/팀·심각도·불일치·경과시간·담당자·증빙 신선도. 상세는 권위 있는 철회 세대, 관측 워터마크, 증빙 해시, 감사 이력을 표시한다. CTA 담당 지정·재관측·판정 제안·승인/거절·재개. 상태 OPEN, INVESTIGATING, AWAITING_PROOF, PENDING_REVIEW, ACCEPTED_WITH_EVIDENCE, REJECTED, REOPENED, UNKNOWN. 판정 성공도 철회된 증빙을 복구하거나 원본 사고를 종료하지 않는다. 근거 누락·만료·상충은 UNKNOWN 안전 실패. noindex/no-store, 모바일 320px, 키보드/스크린리더 WCAG 2.2 AA, 영문·국문 동등성.
+
+**제안 API(실제 라우터 검증 필수):** GET /admin/sla/custody/reconciliation-exceptions; GET /admin/sla/custody/reconciliation-exceptions/:id; POST /admin/sla/custody/reconciliation-exceptions/:id/assign; POST /admin/sla/custody/reconciliation-exceptions/:id/dispositions; POST /admin/sla/custody/reconciliation-exceptions/:id/reviews; POST /admin/sla/custody/reconciliation-exceptions/:id/reopen. 테넌트 관리자만 지정·제안, 독립 검토자만 승인/거절, 감사자 읽기 전용. 행위자/위임 원주체 자기 승인 금지, 변경에 Idempotency-Key·If-Match, 401/403/404/409/412/429, 페이지 크기 제한, 타 테넌트 존재 비노출.
+
+**제안 DB·트랜잭션:** reconciliation_exception(id UUID,tenant_id,team_id,incident_id,run_id,mismatch_fingerprint,generation bigint,state,severity,assignee_id,version bigint,created_at,updated_at); reconciliation_exception_disposition(id,tenant_id,exception_id,proposer_id,reviewer_id,evidence_hash,signer_key_id,proof_observed_at,decision,reviewed_at). 테넌트 복합 FK, UNIQUE(tenant_id,run_id,mismatch_fingerprint,generation), 상태·세대 CHECK, 미해결 부분 인덱스(tenant_id,state,severity,created_at), 사고·담당자 인덱스. 단일 트랜잭션에서 사고/철회 세대와 서명키 검증, CAS 버전 잠금, 불변 판정·감사·Outbox 기록, 상태 변경. 작업자 lease/fencing, 중복 제거, 지수 백오프, 데드레터, 직렬화 충돌 재시도. 민감 증빙 비식별, 보존기간·키 교체·CSRF·재생 방지·호출 제한·조회 감사.
+
+**KPI·테스트·배포:** 분류 p50/p95, SLA 초과 미해결, 만료 증빙율, 오판정율, 테넌트 격리, 중복 전달. 권한 행렬·위임 자기 승인·테넌트 침범·CAS 경합·중복/역순 Outbox·서명키 침해·세대 변화·DB 롤백·접근성·번역·noindex 검증. 기능 스위치 admin_sla_custody_exception_disposition_v1 기본 OFF; 읽기 전용 관측, 무중단 추가 스키마, 인증된 Test exact-SHA E2E·독립 복원 후 활성화; 스위치 롤백. P0 해소 전 운영 승격 금지.
+
+**P0/P1:** P0: 17:18 KST QA 보고 Production /en·/en/login HTTP 500, Test 200(이번 회차 재현 미확인), 배포 SHA·프록시·백엔드 재시작·/srv/moneyverse 심볼릭 링크, Test exact-SHA, DB 최소권한/체크섬, 독립 복원, 금융 원장 대사, 국내 법률 게이트. P1: F675-249~256 미병합 PR과 main 정합성, 실제 frontend/backend/API/DB/app-api·최신 QA 조사, 선행 구현 후 F675-257 별도 개발 브랜치. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS. 기획 예약은 런타임 배포하지 않는다.
