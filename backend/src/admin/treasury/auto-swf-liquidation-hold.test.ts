@@ -15,68 +15,68 @@ import { AutoSovereignWealthFundService } from './auto-swf.service';
 import { AdminTreasuryController } from './treasury.controller';
 import { TreasuryService } from './treasury.service';
 
-const HOLD_CODE = 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE';
-
-describe('P0 SWF manual liquidation financial boundary', () => {
-  for (const enabled of ['true', 'false']) {
-    it(`rejects manual liquidation without DB or Discord writes even when execution flag is ${enabled}`, async () => {
-      const previous = process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
-      process.env.MONEYVERSE_SWF_EXECUTION_ENABLED = enabled;
-      try {
-        const connect = vi.fn();
-        const query = vi.fn();
-        const sendDiscordEmbed = vi.fn();
-        const sendAdminDirectMessage = vi.fn();
-        const service = new AutoSovereignWealthFundService(
-          { connect, query } as unknown as Pool,
-          { sendDiscordEmbed, sendAdminDirectMessage } as unknown as DiscordAlertService,
-        );
-        await expect(service.liquidateToTreasuryVault('20000000')).rejects.toMatchObject({
-          status: 503,
-          response: { code: HOLD_CODE },
-        });
-        expect(connect).not.toHaveBeenCalled();
-        expect(query).not.toHaveBeenCalled();
-        expect(sendDiscordEmbed).not.toHaveBeenCalled();
-        expect(sendAdminDirectMessage).not.toHaveBeenCalled();
-      } finally {
-        if (previous === undefined) delete process.env.MONEYVERSE_SWF_EXECUTION_ENABLED;
-        else process.env.MONEYVERSE_SWF_EXECUTION_ENABLED = previous;
-      }
-    });
-  }
-
-  it('propagates HTTP 503 from the existing admin endpoint instead of reporting success', async () => {
-    const connect = vi.fn();
-    const swf = new AutoSovereignWealthFundService(
-      { connect } as unknown as Pool,
-      {} as DiscordAlertService,
-    );
-    const controller = new AdminTreasuryController({} as never, swf);
-    await expect(controller.liquidateSwfToTreasury('1')).rejects.toMatchObject({
-      status: 503,
-      response: { code: HOLD_CODE },
-    });
-    expect(connect).not.toHaveBeenCalled();
-  });
-
+describe('P0 SWF manual liquidation canonical financial boundary', () => {
   it('does not retain the legacy unjournaled vault and portfolio mutation SQL in the liquidation method', () => {
     const source = readFileSync(fileURLToPath(new URL('./auto-swf.service.ts', import.meta.url)), 'utf8');
     const liquidation = source.slice(source.indexOf('  async liquidateToTreasuryVault('));
     expect(liquidation).not.toMatch(/UPDATE public\.(?:system_treasury_vaults|treasury_swf_portfolios)/);
     expect(liquidation).not.toMatch(/INSERT INTO public\.system_treasury_ledger/);
   });
-});
 
+  it('rejects manual liquidation when database raises permission error 42501', async () => {
+    const query = vi.fn().mockRejectedValue({ code: '42501' });
+    const pool = { query } as unknown as Pool;
+    const service = new AutoSovereignWealthFundService(pool, {} as DiscordAlertService);
+    await expect(service.liquidateToTreasuryVault('00000000-0000-0000-0000-000000000001', '20000000')).rejects.toMatchObject({
+      status: 403,
+      response: { code: 'SWF_LIQUIDATION_NOT_AUTHORIZED' },
+    });
+  });
+
+  it('invokes canonical admin_swf_liquidate_to_vault procedure and returns immutable ledger receipt', async () => {
+    const mockReceipt = {
+      success: true,
+      code: 'SWF_LIQUIDATION_SETTLED',
+      liquidated_wld: '181056162',
+      prior_aum_wld: '201056162',
+      new_aum_wld: '20000000',
+      target_aum_wld: '20000000',
+      vault_main_balance: '185055982',
+      ledger_transaction_id: 'a0000000-0000-0000-0000-000000000001',
+    };
+    const query = vi.fn().mockResolvedValue({ rows: [{ receipt: mockReceipt }] });
+    const sendAdminDirectMessage = vi.fn().mockResolvedValue(undefined);
+    const pool = { query } as unknown as Pool;
+    const service = new AutoSovereignWealthFundService(
+      pool,
+      { sendAdminDirectMessage } as unknown as DiscordAlertService,
+    );
+    const result = await service.liquidateToTreasuryVault('00000000-0000-0000-0000-000000000001', '20000000');
+    expect(result).toEqual(mockReceipt);
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('public.admin_swf_liquidate_to_vault'),
+      ['00000000-0000-0000-0000-000000000001', '20000000'],
+    );
+    expect(sendAdminDirectMessage).toHaveBeenCalled();
+  });
+});
 
 describe('SWF manual liquidation HTTP contract', () => {
   let app: INestApplication;
-  const connect = vi.fn();
+  const mockReceipt = {
+    success: true,
+    code: 'SWF_LIQUIDATION_SETTLED',
+    liquidated_wld: '181056162',
+    prior_aum_wld: '201056162',
+    new_aum_wld: '20000000',
+    target_aum_wld: '20000000',
+    vault_main_balance: '185055982',
+    ledger_transaction_id: 'a0000000-0000-0000-0000-000000000001',
+  };
+  const liquidateToTreasuryVault = vi.fn().mockResolvedValue(mockReceipt);
+
   beforeAll(async () => {
-    const swf = new AutoSovereignWealthFundService(
-      { connect } as unknown as Pool,
-      {} as DiscordAlertService,
-    );
+    const swf = { liquidateToTreasuryVault } as unknown as AutoSovereignWealthFundService;
     const testingModule = await Test.createTestingModule({
       controllers: [AdminTreasuryController],
       providers: [
@@ -84,7 +84,13 @@ describe('SWF manual liquidation HTTP contract', () => {
         { provide: AutoSovereignWealthFundService, useValue: swf },
       ],
     })
-      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(SessionGuard).useValue({
+        canActivate: (ctx: any) => {
+          const req = ctx.switchToHttp().getRequest();
+          req.session = { user_id: '00000000-0000-0000-0000-000000000001', role: 'superadmin' };
+          return true;
+        },
+      })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
@@ -95,12 +101,15 @@ describe('SWF manual liquidation HTTP contract', () => {
   });
   afterAll(async () => { await app?.close(); });
 
-  it('responds with 503 and a machine-readable hold code without opening a transaction', async () => {
+  it('responds with 200/201 and settled receipt from canonical liquidation procedure', async () => {
     const response = await request(app.getHttpServer())
       .post('/admin/treasury/swf/liquidate')
       .send({ targetPortfolioAumWld: '20000000' })
-      .expect(503);
-    expect(response.body).toMatchObject({ code: HOLD_CODE });
-    expect(connect).not.toHaveBeenCalled();
+      .expect(201);
+    expect(response.body).toEqual(mockReceipt);
+    expect(liquidateToTreasuryVault).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001',
+      '20000000',
+    );
   });
 });

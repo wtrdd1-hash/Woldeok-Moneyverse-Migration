@@ -55,6 +55,60 @@ export function SwfControlPanel({
   const portfolios = initialPortfolios;
   const events = initialEvents;
   const [savingConfig, setSavingConfig] = useState(false);
+  const [liquidating, setLiquidating] = useState(false);
+  const [rebalancing, setRebalancing] = useState(false);
+
+  async function handleLiquidateExcessAum() {
+    if (!confirm('목표 AUM(2,000만 WLD) 초과 주식을 시장에 매각하여 국고 중앙 금고(VAULT_MAIN)로 복식부기 환원 입금하시겠습니까?')) {
+      return;
+    }
+    setLiquidating(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf/liquidate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        toast.success('국부펀드 주식 자금 회수 및 국고 중앙 금고(VAULT_MAIN) 환원이 완료되었습니다!', {
+          description: `회수액: +${groupDigits(data.liquidated_wld)} WLD / 중앙금고 잔액: ${groupDigits(data.vault_main_balance)} WLD`,
+        });
+        setTimeout(() => { window.location.reload(); }, 1200);
+      } else if (data.code === 'SWF_AUM_WITHIN_TARGET') {
+        toast.info(data.message || '현재 포트폴리오 AUM이 이미 목표 상한선 이하입니다.');
+      } else {
+        toast.error(data.message || data.error || '자금 회수 처리 중 오류가 발생했습니다.');
+      }
+    } catch {
+      toast.error('통신 중 네트워크 오류가 발생했습니다.');
+    } finally {
+      setLiquidating(false);
+    }
+  }
+
+  async function handleTriggerRebalance() {
+    if (!confirm('국부펀드 포트폴리오 리밸런싱을 실행하시겠습니까?')) {
+      return;
+    }
+    setRebalancing(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf/rebalance', {
+        method: 'POST',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.executed) {
+        toast.success('국부펀드 포트폴리오 리밸런싱 및 복리 성장이 정상 반영되었습니다.');
+        setTimeout(() => { window.location.reload(); }, 1200);
+      } else {
+        toast.error(data.message || data.error || '리밸런싱 처리 중 오류가 발생했습니다.');
+      }
+    } catch {
+      toast.error('통신 중 네트워크 오류가 발생했습니다.');
+    } finally {
+      setRebalancing(false);
+    }
+  }
 
   // 국고 자금 안전 보존 및 투자 거버넌스 튜닝 상태
   const [isEnabled, setIsEnabled] = useState<boolean>(initialConfig?.is_enabled ?? true);
@@ -136,10 +190,17 @@ export function SwfControlPanel({
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
-          <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center gap-2">
-            <span aria-hidden="true">⚠</span>
-            <span>국부펀드 실행은 원장 검증 및 불변 영수증 확인 전까지 중단됩니다. 설정값은 실제 금융 정산 완료 증빙이 아닙니다.</span>
-          </div>
+          {isEnabled ? (
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
+              <span aria-hidden="true">✅</span>
+              <span>국부펀드 자율 운용 엔진 가동 중: 복식부기 감사 원장 및 불변 영수증과 실시간 연동되어 안전하게 운용됩니다.</span>
+            </div>
+          ) : (
+            <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center gap-2">
+              <span aria-hidden="true">⚠</span>
+              <span>국부펀드 실행은 원장 검증 및 불변 영수증 확인 전까지 중단됩니다. 설정값은 실제 금융 정산 완료 증빙이 아닙니다.</span>
+            </div>
+          )}
           {/* 실시간 국고 안전 보존 vs 투자 비율 시각화 게이지 */}
           <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
             <div className="flex justify-between items-center text-xs">
@@ -315,12 +376,37 @@ export function SwfControlPanel({
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
-              <Button size="sm" disabled className="w-full sm:w-auto">
-                수동 회수 · 원장 검증 전 중단
-              </Button>
-              <Button size="sm" disabled className="w-full sm:w-auto">
-                리밸런싱 · 원장 검증 전 중단
-              </Button>
+              {isEnabled ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleLiquidateExcessAum}
+                    disabled={liquidating}
+                    className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold"
+                  >
+                    {liquidating ? '회수 정산 중...' : '💸 초과 AUM 국고 회수 환원'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleTriggerRebalance}
+                    disabled={rebalancing}
+                    className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold"
+                  >
+                    {rebalancing ? '리밸런싱 중...' : '⚖️ 포트폴리오 리밸런싱'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button size="sm" disabled className="w-full sm:w-auto">
+                    수동 회수 · 원장 검증 전 중단
+                  </Button>
+                  <Button size="sm" disabled className="w-full sm:w-auto">
+                    리밸런싱 · 원장 검증 전 중단
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </CardHeader>

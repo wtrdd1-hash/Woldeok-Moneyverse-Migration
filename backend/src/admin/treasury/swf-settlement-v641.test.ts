@@ -11,12 +11,17 @@ import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
 
-const SWF_HOLD = 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE';
-
-describe('v641 SWF manual execution HTTP ledger gate', () => {
+describe('v641 SWF manual execution canonical ledger dispatch', () => {
   let app: INestApplication;
-  const evaluateAndRebalance = vi.fn();
-  const liquidateToTreasuryVault = vi.fn();
+  const mockReceipt = {
+    success: true,
+    code: 'SWF_LIQUIDATION_SETTLED',
+    liquidated_wld: '181056162',
+    vault_main_balance: '185055982',
+    ledger_transaction_id: 'a0000000-0000-0000-0000-000000000001',
+  };
+  const evaluateAndRebalance = vi.fn().mockResolvedValue({ executed: true, reason: 'SWF_EVALUATED_AND_REBALANCED' });
+  const liquidateToTreasuryVault = vi.fn().mockResolvedValue(mockReceipt);
 
   beforeAll(async () => {
     const testingModule = await Test.createTestingModule({
@@ -26,7 +31,13 @@ describe('v641 SWF manual execution HTTP ledger gate', () => {
         { provide: AutoSovereignWealthFundService, useValue: { evaluateAndRebalance, liquidateToTreasuryVault } },
       ],
     })
-      .overrideGuard(SessionGuard).useValue({ canActivate: () => true })
+      .overrideGuard(SessionGuard).useValue({
+        canActivate: (ctx: any) => {
+          const req = ctx.switchToHttp().getRequest();
+          req.session = { user_id: '00000000-0000-0000-0000-000000000001', role: 'superadmin' };
+          return true;
+        },
+      })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
@@ -38,14 +49,25 @@ describe('v641 SWF manual execution HTTP ledger gate', () => {
 
   afterAll(async () => { await app?.close(); });
 
-  it.each(['rebalance', 'liquidate'] as const)('%s refuses unverified financial execution before service dispatch', async (action) => {
+  it('dispatches rebalance to service and returns result', async () => {
     const response = await request(app.getHttpServer())
-      .post(`/admin/treasury/swf/${action}`)
-      .send(action === 'liquidate' ? { targetPortfolioAumWld: '20000000' } : {})
-      .expect(503);
-    expect(response.body).toMatchObject({ code: SWF_HOLD });
+      .post('/admin/treasury/swf/rebalance')
+      .expect(201);
+    expect(response.body).toMatchObject({ executed: true });
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(evaluateAndRebalance).not.toHaveBeenCalled();
-    expect(liquidateToTreasuryVault).not.toHaveBeenCalled();
+    expect(evaluateAndRebalance).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000001');
+  });
+
+  it('dispatches liquidation to service with target AUM and returns settled receipt', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/admin/treasury/swf/liquidate')
+      .send({ targetPortfolioAumWld: '20000000' })
+      .expect(201);
+    expect(response.body).toEqual(mockReceipt);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(liquidateToTreasuryVault).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001',
+      '20000000',
+    );
   });
 });

@@ -2453,3 +2453,52 @@ untime-check, classify, policy) ALL PASS 확인.
 4. **운영 무중단 승격 및 디스크 2차 정리**:
    - 신규 릴리스 `prod-v2026.11.05.1762-13db973c2b` 배포 및 symlink 교체, `moneyverse-backend` / `moneyverse-frontend` 정상 active 기동.
    - Next.js 캐시 및 임시 파일 정리로 총 9GB 디스크 공간 추가 회수 완료.
+
+---
+## 🚀 [v271 Specification] 국부펀드(ASWF) 원장 검증 청산 프로시저 및 수동 회수/리밸런싱 실서비스 정상화 (+115, -0)
+
+### 1. 배경 및 목적
+- 국부펀드(ASWF) 패널에 안전 규제 목적으로 걸려 있던 '원장 검증 전 중단' 홀드(v641 Fail-Closed Gate)를 해제하고,
+- 실제 목표 AUM(2,000만 WLD 또는 관리자 지정치) 초과 주식을 시장에 매각하여 국고 중앙 금고(VAULT_MAIN)로 합법 복식부기 입금하는 정식 PostgreSQL 저장 프로시저(public.admin_swf_liquidate_to_vault) 및 백엔드/프론트엔드 연동을 구현한다.
+- 이를 통해 '허위 가짜 성공'이 아닌 '불변 PostgreSQL 트랜잭션 및 복식부기 원장 증빙'에 기반한 온전한 실서비스 정상화를 완료한다.
+
+### 2. 아키텍처 및 데이터 흐름 (Architecture Diagram)
+\\\mermaid
+flowchart TD
+    AdminUI["관리자 국고 SWF 패널 (/admin/treasury)"] -->|POST /api/admin/treasury/swf/liquidate| BFF["Next.js BFF 라우트"]
+    BFF -->|CSRF & Admin Session 토큰 전달| NestAPI["NestJS Backend (@Post swf/liquidate)"]
+    NestAPI -->|AutoSovereignWealthFundService| DBProc["public.admin_swf_liquidate_to_vault(p_actor, p_target_aum)"]
+    subgraph DB [PostgreSQL 원자적 트랜잭션]
+        DBProc -->|1. 초과 AUM 비례 산출| Portfolios["treasury_swf_portfolios (수량/평가액 비례 차감)"]
+        DBProc -->|2. 중앙 금고 입금| Vaults["system_treasury_vaults (VAULT_MAIN 증액)"]
+        DBProc -->|3. 국고 감사 원장 기록| Ledger["system_treasury_ledger (INJECTION / SWF_LIQUIDATION)"]
+        DBProc -->|4. 복식부기 전표 발행| Journal["economy_post_transaction (MINT -> TREASURY)"]
+        DBProc -->|5. 거버넌스 감사 이벤트| Events["treasury_swf_events (PORTFOLIO_LIQUIDATED_TO_VAULT)"]
+    end
+    DBProc -->|성공 영수증 반환| NestAPI
+    NestAPI -->|Discord / Telegram 알림 발송| Alerts["운영 관제 알림"]
+    NestAPI -->|HTTP 200/201 영수증 반환| AdminUI
+\\\
+
+### 3. 변경 대상 파일 및 세부 구현 명세
+1. **데이터베이스 마이그레이션 (packages/database/migrations/339-swf-canonical-liquidation-and-settlement.sql)**:
+   - \public.admin_swf_liquidate_to_vault(p_actor uuid, p_target_aum numeric DEFAULT 20000000)\ 함수 작성 (SECURITY DEFINER).
+   - 관리자 역할(superadmin, admin, operator) 검증.
+   - 포트폴리오 비례 차감, VAULT_MAIN 증액, 원장 기록, 복식부기 전표 발행, SWF 감사 이벤트 기록.
+   - \GRANT EXECUTE ON FUNCTION public.admin_swf_liquidate_to_vault TO moneyverse_app;\
+2. **백엔드 서비스 (ackend/src/admin/treasury/auto-swf.service.ts)**:
+   - \liquidateToTreasuryVault(actorId: string, targetPortfolioAumWld?: string)\: 실제 DB 프로시저를 호출하고 영수증 JSON 반환 및 텔레그램/디스코드 알림 발송.
+   - \evaluateAndRebalance(actorId?: string)\: 실제 리밸런싱 실행 및 영수증 반환.
+3. **백엔드 컨트롤러 (ackend/src/admin/treasury/treasury.controller.ts)**:
+   - \@Post('swf/liquidate')\ 및 \@Post('swf/rebalance')\에 실제 서비스 호출 바인딩, actorId 전달, 영수증 반환.
+4. **지갑 라벨 매핑 (ackend/src/wallet/wallet.service.ts)**:
+   - \TRANSACTION_LABELS\에 \SWF_PORTFOLIO_LIQUIDATION: '국부펀드 자산 회수 환원'\ 정식 등록.
+5. **프론트엔드 BFF 및 UI (rontend/src/app/admin/treasury/swf-control-panel.tsx)**:
+   - \isEnabled === true\일 때 '수동 자금 회수 환원' 및 '포트폴리오 리밸런싱' 버튼 활성화.
+   - 클릭 시 \/api/admin/treasury/swf/liquidate\ 호출 및 로딩, 성공 토스트, 실시간 리프레시.
+   - \isEnabled === false\일 때는 기존 안전 규제 알림 및 disabled 상태 유지하여 호환성 보장.
+6. **테스트 및 검증**:
+   - 백엔드 SWF 단위/통합 테스트, 프론트엔드 SWF 렌더링 테스트 전수 통과 확인.
+   - 원격 운영 서버 마이그레이션 339 적용 및 실서비스 정상 작동 검증.
+
+---

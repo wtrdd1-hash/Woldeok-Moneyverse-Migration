@@ -74,6 +74,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   TREASURY_CITIZEN_DIVIDEND: '국고 시민 배당',
   TREASURY_SEED_INJECTION: '국고 기초 준비금 전입',
   HEALTH_INSURANCE_BENEFIT: '국민건강보험 급여 지원',
+  SWF_PORTFOLIO_LIQUIDATION: '국부펀드 자산 회수 환원',
   BOND_PURCHASE: '국채 매입',
   BOND_REDEEM: '국채 만기 상환',
 });

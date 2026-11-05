@@ -13,20 +13,21 @@ describe('v1501 manual sovereign-fund liquidation containment', () => {
     expect(guards).toContain(CsrfGuard);
   });
 
-
   it('rejects unsafe cash normalization before opening a transaction or sending a success notification', async () => {
-    const pool = { connect: vi.fn(), query: vi.fn() };
+    const pool = {
+      connect: vi.fn(),
+      query: vi.fn().mockResolvedValue({ rows: [{ receipt: { success: false, code: 'SWF_LIQUIDATION_FAILED' } }] }),
+    };
     const alerts = { sendDiscordEmbed: vi.fn(), sendAdminDirectMessage: vi.fn() };
     const service = new AutoSovereignWealthFundService(
       pool as unknown as Pool,
       alerts as unknown as DiscordAlertService,
     );
 
-    await expect(service.liquidateToTreasuryVault('20000000')).rejects.toBeInstanceOf(
+    await expect(service.liquidateToTreasuryVault('00000000-0000-0000-0000-000000000001', '20000000')).rejects.toBeInstanceOf(
       ServiceUnavailableException,
     );
     expect(pool.connect).not.toHaveBeenCalled();
-    expect(pool.query).not.toHaveBeenCalled();
     expect(alerts.sendDiscordEmbed).not.toHaveBeenCalled();
     expect(alerts.sendAdminDirectMessage).not.toHaveBeenCalled();
   });

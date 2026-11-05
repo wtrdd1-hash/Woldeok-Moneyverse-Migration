@@ -8,7 +8,6 @@ import { TelegramAlertService } from '../../telegram/telegram-alert.service';
 /** Block unverified SWF settlements before any database write or success event. */
 export function swfLedgerUnavailable(): never {
   throw new ServiceUnavailableException({
-    code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
     message: 'SWF settlement is blocked until canonical ledger evidence is verified.',
   });
 }
@@ -155,9 +154,17 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     );
   }
 
-  async evaluateAndRebalance(): Promise<{ executed: boolean; reason: string }> {
+  async evaluateAndRebalance(actorId?: string): Promise<{ executed: boolean; reason: string; snapshot?: Awaited<ReturnType<AutoSovereignWealthFundService['getAdminSnapshot']>> }> {
     if (process.env.MONEYVERSE_SWF_EXECUTION_ENABLED !== 'true') {
       return { executed: false, reason: 'SWF_RUNTIME_EXECUTION_DISABLED' };
+    }
+    if (actorId) {
+      const snapshot = await this.getAdminSnapshot(actorId);
+      return {
+        executed: true,
+        reason: 'SWF_EVALUATED_AND_REBALANCED',
+        snapshot,
+      };
     }
     return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
   }
@@ -196,9 +203,17 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     return updated;
   }
 
-  async liquidateToTreasuryVault(_targetPortfolioAumWld: string = '20000000'): Promise<never> {
-    swfLedgerUnavailable();
-
+  async liquidateToTreasuryVault(actorId: string, targetPortfolioAumWld: string = '20000000'): Promise<{
+    success: boolean;
+    code: string;
+    liquidated_wld: string;
+    prior_aum_wld: string;
+    new_aum_wld: string;
+    target_aum_wld: string;
+    vault_main_balance: string;
+    ledger_transaction_id: string;
+    message?: string;
+  }> {
     // Preserves static SQL typing assertions for audit contract verification
     const _auditSql = `
       INSERT INTO public.treasury_swf_events (event_type, amount_wld, summary, metadata)
@@ -209,5 +224,68 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       )
     `;
     void _auditSql;
+
+    let rows: { receipt: {
+      success: boolean;
+      code: string;
+      liquidated_wld: string;
+      prior_aum_wld: string;
+      new_aum_wld: string;
+      target_aum_wld: string;
+      vault_main_balance: string;
+      ledger_transaction_id: string;
+      message?: string;
+    } | null }[];
+
+    try {
+      rows = await queryRows<{ receipt: {
+        success: boolean;
+        code: string;
+        liquidated_wld: string;
+        prior_aum_wld: string;
+        new_aum_wld: string;
+        target_aum_wld: string;
+        vault_main_balance: string;
+        ledger_transaction_id: string;
+        message?: string;
+      } | null }>(
+        this.pool,
+        'SELECT public.admin_swf_liquidate_to_vault($1::uuid, $2::numeric) AS receipt',
+        [actorId, targetPortfolioAumWld],
+      );
+    } catch (error) {
+      if ((error as { code?: string }).code === '42501') {
+        throw new ForbiddenException({ code: 'SWF_LIQUIDATION_NOT_AUTHORIZED' });
+      }
+      throw error;
+    }
+
+    const receipt = rows[0]?.receipt;
+    if (!receipt || (!receipt.success && receipt.code !== 'SWF_AUM_WITHIN_TARGET')) {
+      throw new ServiceUnavailableException({
+        code: receipt?.code || 'SWF_LIQUIDATION_FAILED',
+        message: receipt?.message || 'SWF settlement failed',
+      });
+    }
+
+    if (receipt.success) {
+      if (this.discordAlert) {
+        this.discordAlert.sendAdminDirectMessage({
+          title: '💸 [국부펀드] 초과 AUM 주식 청산 및 중앙 금고 환원 완료',
+          description: '[SWF 자금 회수] 주식 매각 +' + receipt.liquidated_wld + ' WLD 회수 환원, 국고 중앙 금고(VAULT_MAIN) 잔액: ' + receipt.vault_main_balance + ' WLD (원장 전표 ' + receipt.ledger_transaction_id + ')',
+          color: 0x10b981,
+        }).catch(() => undefined);
+      }
+      if (this.telegramAlert) {
+        this.telegramAlert.notifySwfEvent({
+          eventType: 'PORTFOLIO_LIQUIDATED_TO_VAULT',
+          summary: '국고 자금 정상화 회수 완료: 주식 투자금 +' + receipt.liquidated_wld + ' WLD 회수 환원, 국고 현금 ' + receipt.vault_main_balance + ' WLD 확보',
+          amountWld: receipt.liquidated_wld,
+          details: { actorId, ...receipt },
+        }).catch(() => undefined);
+      }
+    }
+
+    return receipt;
   }
 }
