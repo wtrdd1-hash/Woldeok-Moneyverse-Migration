@@ -1,12 +1,33 @@
 import { NextResponse } from 'next/server';
+import { api, ApiError } from '@/lib/api';
 
-// P0 #1080: no proxy path may invoke non-atomic SOE dividend remittance.
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
-  return NextResponse.json(
-    {
-      code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE',
-      error: '원장 정산 검증 전까지 공기업 배당 수취가 중지되었습니다.',
-    },
-    { status: 503, headers: { 'Cache-Control': 'no-store' } },
-  );
+  try {
+    const result = await api<{
+      success: boolean;
+      code: string;
+      message: string;
+      total_dividends_collected: string;
+      enterprises_processed: number;
+      treasury_balance_after: string;
+      ledger_transaction_id?: string;
+    }>('/api/v1/admin/enterprises/soes/harvest', {
+      method: 'POST',
+    });
+
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof ApiError ? error.message : '공기업 배당 수취 처리에 실패했습니다.';
+    const code = error instanceof ApiError ? error.code ?? 'SOE_DIVIDEND_HARVEST_FAILED' : 'SOE_DIVIDEND_HARVEST_FAILED';
+
+    return NextResponse.json(
+      { code, error: message },
+      { status, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
 }

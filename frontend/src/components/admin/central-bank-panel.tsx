@@ -18,14 +18,14 @@ interface Policy {
   enforcedAt?: string;
 }
 interface Snapshot {
-  source: 'ledger_partial_and_persistent_policy';
+  source: 'ledger_partial_and_persistent_policy' | 'ledger_verified_and_persistent_policy';
   monetary: {
     m_total: string;
     m_circulating: string;
     m_treasury: string;
     m_bank_liquidity: string | null;
     m_locked: string | null;
-    verified_invariant: false;
+    verified_invariant: boolean;
     active_policy_orders_count: number;
     total_mint_certificates_count: number;
     is_issuance_frozen: boolean;
@@ -64,7 +64,7 @@ export function CentralBankPanel() {
     const response = await fetch('/api/admin/central-bank/status', { cache: 'no-store', signal: signal ?? null });
     if (!response.ok) throw new Error('원장 및 정책 DB 조회에 실패했습니다.');
     const result: Snapshot = await response.json();
-    if (result.source !== 'ledger_partial_and_persistent_policy') throw new Error('정책 데이터 출처가 검증되지 않았습니다.');
+    if (result.source !== 'ledger_partial_and_persistent_policy' && result.source !== 'ledger_verified_and_persistent_policy') throw new Error('정책 데이터 출처가 검증되지 않았습니다.');
     if (signal?.aborted) return;
     setSnapshot(result);
     setRate(result.policy.ratePercent ?? '');
@@ -156,16 +156,27 @@ export function CentralBankPanel() {
       {!snapshot && !error ? <p role="status">정책 DB와 원장 조회 중...</p> : null}
       {snapshot ? (
         <>
-          <div role="status" className="rounded-lg border border-border bg-muted/20 p-4 text-sm">
-            아래 통화량은 실제 금융 테이블의 확인된 일부 합계이며 은행 유동성·에스크로 합산이 아직 빠져 있어 전체 통화량 불변식을 인증한 것은 아닙니다.
-            조폐국 신규 화폐의 공식 원장 발행 기능은 별도 승인·정산 검증 전까지 실행하지 않습니다.
-          </div>
+          {snapshot.monetary.verified_invariant ? (
+            <div role="status" className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
+              <div>
+                <strong>통화량 불변식 전수 인증 완료:</strong> 회원 유통, 은행 예금 유동성, 국고 금고, 락업/에스크로 및 MINT 대차대조표가 100% 일치합니다.
+              </div>
+              <Badge className="bg-emerald-600 text-white shrink-0">원장 불변식 정상</Badge>
+            </div>
+          ) : (
+            <div role="status" className="rounded-lg border border-border bg-muted/20 p-4 text-sm">
+              아래 통화량은 실제 금융 테이블의 확인된 일부 합계이며 은행 유동성·에스크로 합산이 아직 빠져 있어 전체 통화량 불변식을 인증한 것은 아닙니다.
+              조폐국 신규 화폐의 공식 원장 발행 기능은 별도 승인·정산 검증 전까지 실행하지 않습니다.
+            </div>
+          )}
           {snapshot.monetary.is_issuance_frozen && <p role="alert" className="rounded-lg border border-amber-500/40 p-3 text-sm">통화 신규 발행이 정책 DB에서 동결된 상태입니다.</p>}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              ['원장 확인 합계 (부분)', money(snapshot.monetary.m_total)],
-              ['회원 유통 계정 (부분)', money(snapshot.monetary.m_circulating)],
-              ['국고 보유 금고 (부분)', money(snapshot.monetary.m_treasury)],
+              [snapshot.monetary.verified_invariant ? '총 통화량 (불변식 인증)' : '원장 확인 합계 (부분)', money(snapshot.monetary.m_total)],
+              [snapshot.monetary.verified_invariant ? '민간 유통 통화량' : '회원 유통 계정 (부분)', money(snapshot.monetary.m_circulating)],
+              [snapshot.monetary.verified_invariant ? '국고 보유 중앙 금고' : '국고 보유 금고 (부분)', money(snapshot.monetary.m_treasury)],
+              ...(snapshot.monetary.m_bank_liquidity ? [['은행 예금 유동성', money(snapshot.monetary.m_bank_liquidity)]] : []),
+              ...(snapshot.monetary.m_locked ? [['에스크로 & 소각/락업', money(snapshot.monetary.m_locked)]] : []),
             ].map(([label, value]) => (
               <Card key={label}>
                 <CardHeader className="pb-2">

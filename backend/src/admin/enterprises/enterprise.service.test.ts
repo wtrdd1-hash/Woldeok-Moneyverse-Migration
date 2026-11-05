@@ -3,15 +3,22 @@ import { EnterpriseService } from './enterprise.service';
 import type { EnterpriseRepository } from './enterprise.repository';
 
 describe('EnterpriseService', () => {
-  it('rejects unjournaled SOE dividend harvest before repository or Discord effects', async () => {
-    const repo = { distributeSoeDividends: vi.fn() } as unknown as EnterpriseRepository;
+  it('delegates canonical SOE dividend harvest to repository', async () => {
+    const mockResult = {
+      total_dividends_collected: '108000',
+      enterprises_processed: 3,
+      treasury_balance_after: '191163911',
+      ledger_transaction_id: 'tx-uuid-1234',
+    };
+    const repo = {
+      distributeSoeDividends: vi.fn().mockResolvedValue(mockResult),
+    } as unknown as EnterpriseRepository;
     const service = new EnterpriseService(repo);
 
-    await expect(service.harvestSoeDividends('admin-uuid')).rejects.toMatchObject({
-      status: 503,
-      response: expect.objectContaining({ code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE' }),
-    });
-    expect(repo.distributeSoeDividends).not.toHaveBeenCalled();
+    const result = await service.harvestSoeDividends('admin-uuid-1234');
+
+    expect(repo.distributeSoeDividends).toHaveBeenCalledWith('admin-uuid-1234');
+    expect(result).toEqual(mockResult);
   });
 
   it('should validate status on updateSoeStatus', async () => {

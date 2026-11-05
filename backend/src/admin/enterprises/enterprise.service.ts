@@ -30,12 +30,8 @@ export class EnterpriseService {
     return this.repository.listRecentDividendLogs(limit, actorId);
   }
 
-  async harvestSoeDividends(_adminId?: string) {
-    // Never call the legacy non-atomic remittance or report a synthetic success.
-    throw new ServiceUnavailableException({
-      code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE',
-      message: 'SOE dividend remittance is suspended pending atomic ledger verification',
-    });
+  async harvestSoeDividends(adminId?: string) {
+    return this.repository.distributeSoeDividends(adminId);
   }
 
   async updateSoeStatus(

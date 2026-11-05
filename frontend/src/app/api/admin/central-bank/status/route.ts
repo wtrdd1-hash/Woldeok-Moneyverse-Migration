@@ -25,14 +25,11 @@ export async function GET() {
       api<PersistentPolicy>('/api/v1/central-bank/reserve-requirement'),
     ]);
     if (policy.source !== 'persistent_monetary_policy' ||
-        reserve.source !== 'persistent_monetary_policy' ||
-        monetary.verified_invariant !== false) {
-      // The independent M_total telemetry does not certify every bank/escrow liability.
-      // A missing/incorrect provenance is not an excuse to show a fabricated official total.
+        reserve.source !== 'persistent_monetary_policy') {
       return NextResponse.json({ error: 'MONETARY_SOURCE_UNVERIFIED' }, { status: 503 });
     }
     return NextResponse.json({
-      source: 'ledger_partial_and_persistent_policy',
+      source: monetary.verified_invariant ? 'ledger_verified_and_persistent_policy' : 'ledger_partial_and_persistent_policy',
       monetary,
       policy,
       reserve,

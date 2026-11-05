@@ -13,22 +13,27 @@ export class CentralBankService {
   constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
   async getMonetaryTelemetry(): Promise<MonetaryTelemetryOverview> {
-    // An incomplete financial snapshot is unavailable, never a fabricated zero.
-    // This read does NOT certify the full bank/escrow ledger invariant.
     try {
       const invRes = await this.pool.query<{
         treasury_wld: string;
-        user_balances_wld: string;
+        user_cash_wld: string;
+        bank_liquidity_wld: string;
+        locked_wld: string;
+        mint_total_wld: string;
         is_issuance_frozen: boolean | null;
       }>(`
         SELECT
           coalesce((SELECT sum(balance_wld::numeric) FROM public.system_treasury_vaults), 0)::bigint::text AS treasury_wld,
-          coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('USER_CASH', 'USER_BANK')), 0)::bigint::text AS user_balances_wld,
+          coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type = 'USER_CASH'), 0)::bigint::text AS user_cash_wld,
+          coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type = 'USER_BANK'), 0)::bigint::text AS bank_liquidity_wld,
+          coalesce((SELECT sum(ab.available_amount) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type IN ('SINK', 'ESCROW')), 0)::bigint::text AS locked_wld,
+          coalesce((SELECT abs(sum(ab.available_amount)) FROM public.accounts a JOIN public.account_balances ab ON ab.account_id = a.id WHERE a.account_type = 'MINT'), 0)::bigint::text AS mint_total_wld,
           (SELECT is_issuance_frozen FROM public.monetary_system_status WHERE id = 1) AS is_issuance_frozen
       `);
       const row = invRes.rows[0];
       if (!row || typeof row.is_issuance_frozen !== 'boolean' ||
-          !/^[0-9]+$/.test(row.treasury_wld) || !/^[0-9]+$/.test(row.user_balances_wld)) {
+          !/^[0-9]+$/.test(row.treasury_wld) || !/^[0-9]+$/.test(row.user_cash_wld) ||
+          !/^[0-9]+$/.test(row.bank_liquidity_wld) || !/^[0-9]+$/.test(row.locked_wld)) {
         throw new Error('incomplete monetary state');
       }
 
@@ -53,19 +58,26 @@ export class CentralBankService {
       }
 
       const treasuryWld = BigInt(row.treasury_wld);
-      const userWld = BigInt(row.user_balances_wld);
+      const userCashWld = BigInt(row.user_cash_wld);
+      const bankLiquidityWld = BigInt(row.bank_liquidity_wld);
+      const lockedWld = BigInt(row.locked_wld);
+      const mintTotalWld = BigInt(row.mint_total_wld);
+
+      const calculatedTotal = treasuryWld + userCashWld + bankLiquidityWld + lockedWld;
+      const isInvariantVerified = (mintTotalWld > BigInt(0) && calculatedTotal === mintTotalWld) || (mintTotalWld === BigInt(0) && calculatedTotal === BigInt(0));
+
       return {
-        m_total: (treasuryWld + userWld).toString(),
-        m_circulating: userWld.toString(),
+        m_total: calculatedTotal.toString(),
+        m_circulating: (userCashWld + bankLiquidityWld).toString(),
         m_treasury: treasuryWld.toString(),
-        m_bank_liquidity: null,
-        m_locked: null,
+        m_bank_liquidity: bankLiquidityWld.toString(),
+        m_locked: lockedWld.toString(),
         is_issuance_frozen: row.is_issuance_frozen,
         active_policy_orders_count: activeOrders,
         total_mint_certificates_count: mints,
         total_retirement_certificates_count: retirements,
-        verified_invariant: false,
-        last_reconciled_at: null,
+        verified_invariant: isInvariantVerified,
+        last_reconciled_at: isInvariantVerified ? new Date().toISOString() : null,
       };
     } catch {
       // Never expose DB errors or present an unverified state as healthy.
