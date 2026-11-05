@@ -17,6 +17,10 @@ describe('shop holdings app least privilege', () => {
     expect(migration).toContain('REVOKE ALL PRIVILEGES ON TABLE public.user_items FROM PUBLIC, moneyverse_app');
     expect(migration).not.toMatch(forbiddenGrant);
   });
+  it('explicitly revokes historical column-level grants, not just table grants', () => {
+    expect(migration).toContain('pg_catalog.pg_attribute');
+    expect(migration).toContain('REVOKE SELECT (%I), INSERT (%I), UPDATE (%I), REFERENCES (%I) ON TABLE public.user_items FROM PUBLIC, moneyverse_app');
+  });
   it('fails closed on effective table and column grants', () => {
     expect(migration).toContain('has_table_privilege');
     expect(migration).toContain('has_any_column_privilege');
