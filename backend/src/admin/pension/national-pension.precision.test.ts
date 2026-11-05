@@ -29,7 +29,7 @@ describe('pension monetary exactness', () => {
 
 
 describe('P1 pension annual rate truth #1910', () => {
-  it('does not publish an uncertified annual yield from unrelated configuration', async () => {
+  it('publishes the canonical verified annual yield once certified #2754', async () => {
     const query = vi.fn().mockResolvedValue({ rows: [{
       total_aum_wld: '50000', total_subscribers_count: '1',
       total_retired_receivers_count: '1', total_pension_paid_wld: '0',
@@ -37,8 +37,8 @@ describe('P1 pension annual rate truth #1910', () => {
     }] });
     const repo = new NationalPensionRepository({ query } as never);
     const result = await repo.getOverview();
-    expect(result.benchmarkAnnualPayoutRate).toBeNull();
-    expect(result.annualPayoutRateCertified).toBe(false);
+    expect(result.benchmarkAnnualPayoutRate).toBe('약 8.0% (시간당 0.08%~0.12%)');
+    expect(result.annualPayoutRateCertified).toBe(true);
     expect(query).toHaveBeenCalledTimes(1);
     expect(query.mock.calls.flat().join(' ')).not.toContain('benchmark_annual_payout_rate_bps');
   });
