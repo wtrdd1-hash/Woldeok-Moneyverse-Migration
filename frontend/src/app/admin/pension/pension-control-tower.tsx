@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 import {
   ShieldCheck,
+  CheckCircle2,
   Coins,
   TrendingUp,
   Percent,
