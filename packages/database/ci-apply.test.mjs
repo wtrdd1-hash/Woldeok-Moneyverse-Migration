@@ -11,7 +11,7 @@ test('lists numbered SQL migrations in deterministic order', () => {
     writeFileSync(join(dir, '010-z.sql'), 'select 10;\n');
     writeFileSync(join(dir, '002-a.sql'), 'select 2;\n');
     writeFileSync(join(dir, 'README.md'), 'ignore');
-    assert.deepEqual(listMigrationFiles(dir).map((p) => p.split('/').pop()), ['002-a.sql', '010-z.sql']);
+    assert.deepEqual(listMigrationFiles(dir).map((p) => p.split(/[/\\]/).pop()), ['002-a.sql', '010-z.sql']);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
