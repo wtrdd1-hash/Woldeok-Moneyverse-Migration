@@ -3009,3 +3009,12 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## v1794 — F675-254 에스컬레이션 증빙 독립 인계 (기능 추가, 2026-11-05)
+주기: 이전 v1792 기능 보완 → 현재 v1794 기능 추가 → 다음 v1796 기능 보완. 제안만; F675-249~253 미검증, 기능 OFF, 운영 RELEASE HOLD.
+목적: 미해결 철회 전파 사고를 독립 검토자에게 인계. 관리자 > SLA > 에스컬레이션 > 인계 요청(범위·사유·만료), 별도 검토자 승인/거절, 감독자 철회. DRAFT/PENDING_APPROVAL/ACCEPTED/REJECTED/REVOKED/EXPIRED/UNKNOWN; 근거 부족은 UNKNOWN.
+API: POST /admin/sla/escalations/:id/handoffs(멱등키), GET /admin/sla/escalations/:id/handoffs(커서), POST /admin/sla/handoffs/:id/decision(expected_version), POST /admin/sla/handoffs/:id/revoke. 매번 테넌트·팀 RBAC/철회 세대/현재 권한 재검증. 자기 승인·타 테넌트·구 세대 거부. 409 버전, 403 권한, 404 테넌트 은닉, 422 범위, 429 속도 제한.
+DB: sla_escalation_handoffs(id,tenant_id,team_id,incident_id,requester_id,reviewer_id,scope_json,reason_digest,status,revocation_generation,version,idempotency_key,expires_at,created_at,updated_at). 테넌트/팀 복합 FK, 상태·만료·독립 승인 CHECK, (tenant_id,requester_id,idempotency_key) UNIQUE, 사고 최신순 인덱스·대기 부분 인덱스. 행 잠금/CAS, 불변 감사·Outbox 단일 트랜잭션, 작업자 임대·펜싱·멱등 재시도·DLQ. 실제 철회 권위 상태 변경 금지.
+보안: 서명 매니페스트 해시와 제한 참조만, 원본 개인정보·공개 토큰 금지; noindex/no-store, CDN 금지, 만료·철회 즉시 차단, 재생 공격·크기·속도 제한. 인계 승인은 전파 완료 증거가 아님. 모바일 320px, 키보드·포커스·스크린리더, WCAG 2.2 AA, 한영 동등성. 관리자 감사에 범위·요청자·승인자·시각·해시·정책 버전.
+KPI: 비식별 대기 p95·독립 승인·UNKNOWN·권한 거부. 0/1/100/101건, 자기 승인, 테넌트 격리, 동시성, 구 세대, 만료, 중복, 작업자 장애, 근거 누락, 접근성·언어 회귀. OFF → 공식 Test exact-SHA 인증 E2E/체크섬/롤백 → P0 해결 후 제한 배포. 롤백 OFF·작업자 배수, 철회 재활성화 금지.
+P0 운영 HTTP 500/배포 SHA, DB 최소권한/체크섬, Test exact-SHA, 백업 복원/원장 대사, 국내 법률·금융 게이트. P1 실제 frontend/backend/app-api/DB·QA 조사, F675-249~253 선행 구현 후 인계 API/DB/UI/Outbox/회귀. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10000, BLOCKED/IN PROGRESS.
