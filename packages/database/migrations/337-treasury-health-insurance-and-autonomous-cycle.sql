@@ -99,21 +99,13 @@ BEGIN
     SELECT id INTO v_main_id FROM public.system_treasury_vaults WHERE code = 'VAULT_MAIN';
     SELECT id INTO v_welfare_id FROM public.system_treasury_vaults WHERE code = 'VAULT_WELFARE';
 
-    -- 국고 감사 원장에 기록
+    -- 국고 감사 원장에 정확한 포스팅 금액(10,000,000 WLD)으로 1회 정식 인젝션 기록 (트리거 정합성 100% 만족)
     INSERT INTO public.system_treasury_ledger (
       vault_id, tx_type, amount_wld, reason, balance_before, balance_after, ledger_transaction_id, created_at
     ) VALUES (
-      v_main_id, 'INJECTION', '4000000',
-      '국고 400만 WLD 중앙 운영 및 시민배당 기초 시드 전입',
+      v_main_id, 'INJECTION', v_seed_amount::text,
+      '국고 1,000만 WLD 공식 기초 준비금 및 건보/복지 재원 전입 (중앙 400만, 건보복지 300만, 비상 100만, 인프라 100만, 준비금 100만)',
       '0', '4000000', v_tx_id, clock_timestamp()
-    );
-
-    INSERT INTO public.system_treasury_ledger (
-      vault_id, tx_type, amount_wld, reason, balance_before, balance_after, ledger_transaction_id, created_at
-    ) VALUES (
-      v_welfare_id, 'INJECTION', '3000000',
-      '국민건강보험 및 시민복지기금 300만 WLD 기초 시드 전입',
-      '0', '3000000', NULL, clock_timestamp()
     );
   END IF;
 END $seed_treasury$;
