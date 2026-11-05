@@ -1,4 +1,16 @@
 # Woldeok Moneyverse — Living Project Plan
+## v2026.11.06.0016 — F675-259 Freeze-Release Audit Integrity (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- Cycle: Previous Addition v1814 → Current Improvement v1816 → Next Addition v1818. Main 0b5b2b1385d2. Prior F675-249–259 drafts NOT assumed merged or implemented.
+- Invariant: release of a review-only freeze MUST NEVER restore revoked evidence access, lift legal hold, alter source revocation, or signify incident closure. Missing/stale manifest, revoked signing key, mismatched incident generation or unknown identity → BLOCKED_UNKNOWN, fail closed.
+- Permissions: effective requester (including delegation) differs from independent compliance approver; security supervisor has separate revoke permission. Revalidate live tenant/team/appeal ownership and roles at EVERY transition/export. Hide cross-tenant object existence.
+- Six proposed APIs: authenticated admin, per-tenant rate limits, Idempotency-Key scoped to tenant+actor+appeal+action+payload hash, expected_version/If-Match, incident_generation, manifest_sha256, reason code. 409 CAS conflict, 412 stale precondition, 422 illegal transition, 403 unauthorized. Revoked approval never replays as valid.
+- State: REQUESTED→APPROVED/REJECTED; REQUESTED/APPROVED→REVOKED; REQUESTED→EXPIRED; any uncertain proof→BLOCKED_UNKNOWN. APPROVED never grants download. Prevent approve-after-revoke, concurrent double approval, expired approval and stale-generation resurrection.
+- PostgreSQL: tenant-scoped composite FK, UUID unique request, immutable manifest hash and policy version, partial unique index one active request per appeal, CHECK valid version/expiry; SELECT FOR UPDATE or CAS, state+append-only audit+Outbox in ONE transaction; dedupe event_id, worker lease/fencing, replay-safe retry.
+- Admin UI /admin/sla/appeals/:id/freeze-audit: permanent source-revocation banner, evidence freshness, independence check, blocked UNKNOWN, revoke confirmation; 320px responsive, WCAG 2.2 AA focus/error announcements, EN/KO parity, noindex/no-store, no PII in metrics. KPIs unauthorized denials, UNKNOWN rate, reconciliation latency, audit completeness.
+- Tests: real DB concurrency, delegated self-approval, cross-tenant IDOR, simultaneous revoke/approve, expired/rotated keys, missing manifest, Outbox duplication/out-of-order, worker crash, evidence-download denied after approval. Isolated implementation branch → CI → authenticated Test exact-SHA → monitored flag OFF-by-default → rollback proof before Production.
+- P0: 2026-11-05 QA previously showed Production /en and /en/login HTTP 500, backend restarts, dangling /srv/moneyverse link; remediation NOT proven. Verify actual deployed SHA, DB grants/checksums, independent backup restore, ledger reconciliation, KR legal gate. RELEASE HOLD.
+- P1: reconcile F675-249–259 overlapping draft PRs against canonical main; developers A/B/C own code, QA independently verifies. External independent references newly verified 0; cumulative UNKNOWN/10,000 — BLOCKED/IN PROGRESS. Docs only.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.10.30.1518 — F675-185 Inventory Lifecycle Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
