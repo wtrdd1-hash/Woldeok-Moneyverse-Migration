@@ -2512,3 +2512,33 @@ flowchart TD
   1. `frontend/src/app/admin/treasury/swf-control-panel.tsx`: 341번 라인을 `{isEnabled ? '원장 검증 완료 및 정상 가동' : '원장 검증 전 중단'}` 동적 조건 분기로 전환.
   2. 원격 서버 `backend/.env`에 `MONEYVERSE_SWF_EXECUTION_ENABLED=true` 영구 반영 및 서비스 리로드.
   3. 로컬 및 원격 빌드/검증/배포 동기화.
+
+
+---
+
+## 🚀 [v273 Specification] 모바일 브라우저 캐시 무효화 및 국고/국부펀드 강제 새로고침 기능 구현 (+45, -0)
+- **배경 및 원인 분석**:
+  - 모바일 디바이스(iOS Safari, Android Chrome 등)는 브라우저 수준의 BFCache(Back-Forward Cache) 및 디스크 캐싱 정책으로 인해, 배포 완료 후에도 이전 정적 HTML/JS 번들을 장시간 유지함.
+  - 모바일 브라우저에는 데스크톱의 Ctrl + F5와 같은 강력 새로고침 단축키가 없어 사용자가 국고 관리 화면에서 이전의 캐시된 상태('설정값은 실제 금융 정산 완료 증빙이 아닙니다' 및 비활성 버튼)를 계속 보게 됨.
+  - 기존 국고 페이지(admin/treasury/page.tsx)에는 사용자가 명시적으로 캐시를 무효화하고 최신 원장 데이터를 갱신할 수 있는 새로고침 버튼이 부재했음.
+- **구현 변경 사항**:
+  1. **TreasuryForceRefreshButton 컴포넌트 신규 개발**:
+     - frontend/src/app/admin/treasury/treasury-force-refresh-button.tsx 생성.
+     - min-h-[44px] 터치 타깃 준수 (fintech-responsive-layout-engine 스킬 표준).
+     - 타임스탬프 쿼리(?_t=${Date.now()})를 통한 하드 캐시버스팅 네비게이션 및 router.refresh() 연동.
+     - 로딩 스피너 및 sonner 토스트 알림 연동.
+  2. **국고 페이지 헤더 및 서버 캐시 제어 강화**:
+     - frontend/src/app/admin/treasury/page.tsx:
+       - export const revalidate = 0;, export const fetchCache = 'force-no-store'; 선언.
+       - PageHeader의 action 슬롯 및 국부펀드 데이터 검증 실패 안내 블록에 TreasuryForceRefreshButton 배치.
+       - apiOrNull 내부 fetch 호출 시 { revalidate: 0 } 강제 전달.
+  3. **국부펀드 패널 인라인 갱신 및 캐시버스팅 리로드**:
+     - frontend/src/app/admin/treasury/swf-control-panel.tsx:
+       - portfolios, events를 리액티브 상태(useState)로 전환.
+       - 인라인 handleRefreshSwfData() 추가로 /api/admin/treasury/swf?_t=${Date.now()} 단독 비동기 동기화 지원.
+       - 거버넌스 카드 헤더에 🔄 최신 원장 동기화 버튼 추가.
+       - 상태 배너 내 새로고침/재확인 퀵 액션 링크 추가.
+       - 수동 회수 및 리밸런싱 성공 후 새로고침 방식을 타임스탬프 캐시버스팅 replace로 전환.
+  4. **단위 테스트 및 회귀 방지 검증**:
+     - treasury-force-refresh-button.test.tsx 신규 작성 (터치 타깃 44px 및 라우터 새로고침 트리거 검증).
+     - swf-page-evidence.test.tsx 및 treasury-page-evidence.test.tsx 모킹 보강.

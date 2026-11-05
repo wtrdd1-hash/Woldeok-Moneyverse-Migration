@@ -52,11 +52,46 @@ export function SwfControlPanel({
   initialPortfolios = [],
   initialEvents = [],
 }: Props) {
-  const portfolios = initialPortfolios;
-  const events = initialEvents;
+  const [portfolios, setPortfolios] = useState<SwfPortfolioItem[]>(initialPortfolios);
+  const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
   const [liquidating, setLiquidating] = useState(false);
   const [rebalancing, setRebalancing] = useState(false);
+
+  async function handleRefreshSwfData() {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch(`/api/admin/treasury/swf?_t=${Date.now()}`, {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('국부펀드 데이터 조회 실패');
+      const data = await res.json();
+      if (data && data.config) {
+        setIsEnabled(Boolean(data.config.is_enabled));
+        if (data.config.reinvestment_ratio_pct !== undefined) {
+          setReinvestRatio(Number(data.config.reinvestment_ratio_pct));
+        }
+        if (data.config.max_investment_ratio_pct !== undefined) {
+          setMaxInvestCap(Number(data.config.max_investment_ratio_pct));
+        }
+        if (data.config.safe_reserve_wld) {
+          setSafeReserve(String(data.config.safe_reserve_wld));
+        }
+      }
+      if (Array.isArray(data?.portfolios)) {
+        setPortfolios(data.portfolios);
+      }
+      if (Array.isArray(data?.events)) {
+        setEvents(data.events);
+      }
+      toast.success('국부펀드 최신 원장 데이터가 동기화되었습니다.');
+    } catch {
+      toast.error('최신 국부펀드 데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   async function handleLiquidateExcessAum() {
     if (!confirm('목표 AUM(2,000만 WLD) 초과 주식을 시장에 매각하여 국고 중앙 금고(VAULT_MAIN)로 복식부기 환원 입금하시겠습니까?')) {
@@ -74,7 +109,15 @@ export function SwfControlPanel({
         toast.success('국부펀드 주식 자금 회수 및 국고 중앙 금고(VAULT_MAIN) 환원이 완료되었습니다!', {
           description: `회수액: +${groupDigits(data.liquidated_wld)} WLD / 중앙금고 잔액: ${groupDigits(data.vault_main_balance)} WLD`,
         });
-        setTimeout(() => { window.location.reload(); }, 1200);
+        setTimeout(() => {
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('_t', Date.now().toString());
+            window.location.replace(url.toString());
+          } catch {
+            window.location.reload();
+          }
+        }, 1200);
       } else if (data.code === 'SWF_AUM_WITHIN_TARGET') {
         toast.info(data.message || '현재 포트폴리오 AUM이 이미 목표 상한선 이하입니다.');
       } else {
@@ -99,7 +142,15 @@ export function SwfControlPanel({
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.executed) {
         toast.success('국부펀드 포트폴리오 리밸런싱 및 복리 성장이 정상 반영되었습니다.');
-        setTimeout(() => { window.location.reload(); }, 1200);
+        setTimeout(() => {
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('_t', Date.now().toString());
+            window.location.replace(url.toString());
+          } catch {
+            window.location.reload();
+          }
+        }, 1200);
       } else {
         toast.error(data.message || data.error || '리밸런싱 처리 중 오류가 발생했습니다.');
       }
@@ -178,27 +229,60 @@ export function SwfControlPanel({
                 비상 완충(VAULT_EMERGENCY), 공공 인프라(VAULT_INFRA), 통화안정 지준금(VAULT_RESERVE) 등 국가 필수 시스템에 국고 대부분을 상시 유보하고, 적정 비율만 안전하게 투자하도록 통제합니다.
               </CardDescription>
             </div>
-            <Button
-              size="sm"
-              onClick={handleSaveGovernanceConfig}
-              disabled={savingConfig}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-95 transition-all shrink-0 w-full sm:w-auto"
-            >
-              {savingConfig ? '저장 중...' : '💾 정책 설정 저장'}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleRefreshSwfData}
+                disabled={isRefreshing}
+                aria-label="국부펀드 최신 원장 동기화"
+                className="border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs shrink-0 w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
+              >
+                {isRefreshing ? '동기화 중...' : '🔄 최신 원장 동기화'}
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveGovernanceConfig}
+                disabled={savingConfig}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md active:scale-95 transition-all shrink-0 w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
+              >
+                {savingConfig ? '저장 중...' : '💾 정책 설정 저장'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
         <CardContent className="pt-6 space-y-6">
           {isEnabled ? (
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center gap-2">
-              <span aria-hidden="true">✅</span>
-              <span>국부펀드 자율 운용 엔진 가동 중: 복식부기 감사 원장 및 불변 영수증과 실시간 연동되어 안전하게 운용됩니다.</span>
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span aria-hidden="true">✅</span>
+                <span>국부펀드 자율 운용 엔진 가동 중: 복식부기 감사 원장 및 불변 영수증과 실시간 연동되어 안전하게 운용됩니다.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleRefreshSwfData}
+                disabled={isRefreshing}
+                className="text-[11px] underline text-emerald-400 hover:text-emerald-300 shrink-0 ml-2 py-1 px-1.5"
+              >
+                {isRefreshing ? '갱신 중...' : '새로고침'}
+              </button>
             </div>
           ) : (
-            <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center gap-2">
-              <span aria-hidden="true">⚠</span>
-              <span>국부펀드 실행은 원장 검증 및 불변 영수증 확인 전까지 중단됩니다. 설정값은 실제 금융 정산 완료 증빙이 아닙니다.</span>
+            <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span aria-hidden="true">⚠</span>
+                <span>국부펀드 실행은 원장 검증 및 불변 영수증 확인 전까지 중단됩니다. 설정값은 실제 금융 정산 완료 증빙이 아닙니다.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleRefreshSwfData}
+                disabled={isRefreshing}
+                className="text-[11px] underline text-amber-400 hover:text-amber-300 shrink-0 ml-2 py-1 px-1.5"
+              >
+                {isRefreshing ? '갱신 중...' : '재확인'}
+              </button>
             </div>
           )}
           {/* 실시간 국고 안전 보존 vs 투자 비율 시각화 게이지 */}
