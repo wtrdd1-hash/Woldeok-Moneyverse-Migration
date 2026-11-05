@@ -1,4 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v2026.11.05.2314 — F675-259 독립 이의신청 검토 동결 해제 감사 (기능 추가 / 초안 / 운영 보류)
+- 주기: 이전 기능 보완 v1812 → 현재 기능 추가 v1814 → 다음 기능 보완 v1816. 기준 main 0b5b2b1385d2. F675-249~258 미병합 선행기능 구현 BLOCKED.
+- 목적: 감독자가 이의신청 종료 후 검토용 동결 해제를 요청, 독립 준법 검토자가 승인/거절, 보안 감독자가 철회. 관리자 /admin/sla/appeals/:id/freeze-audit, CTA 요청/승인/거절/철회, FROZEN/REQUESTED/APPROVED/REJECTED/EXPIRED/REVOKED/UNKNOWN. 승인은 원본 증빙 철회나 다운로드 차단을 해제하지 않음.
+- API: POST/GET /api/v1/admin/sla/appeals/:id/freeze-release-requests, GET /:requestId, POST /:requestId/approve, /reject, /revoke. 사유·기대 버전·매니페스트 SHA-256·멱등키, 오류 400/401/403/404/409/422/429/503. 모든 조회·변경에서 테넌트/팀/위임 포함 실효 사용자/철회 세대/서명/권한 재검증.
+- DB: 테넌트 범위 복합 FK, UUID, 상태·만료·자기승인 금지 CHECK, UNIQUE(tenant_id,appeal_id,idempotency_key), 미해결 부분 인덱스. 행잠금 CAS, 불변 감사+Outbox 원자성, 작업자 펜싱·중복 제거·재시도·데드레터. UNKNOWN 안전 차단, 원장/원본 증빙 변경 금지.
+- 보안/UX/KPI: 기본 OFF 플래그 admin_sla_appeal_freeze_release_audit_v1, 테넌트 우회·재생·오래된 서명·위임 자기승인·동시 철회 방지. noindex/no-store, 320px, WCAG 2.2 AA, EN/KO 동등, 개인정보 없는 승인 시간·만료·철회·거부 KPI.
+- 테스트/배포: 실제 PostgreSQL 동시성, 테넌트 격리, 키 교체, 만료, Outbox 복구, 철회 증빙 다운로드 불가 회귀, 접근성, 인증 E2E. 독립 브랜치→CI→Test exact-SHA→모니터링 플래그→P0 해소 후 운영. 롤백 OFF, 불변 기록 보존.
+- P0 QA 2026-11-05 22:19: 운영 /en·/en/login HTTP 500, Test 200, 백엔드 재시작 123685회, /srv/moneyverse 링크 손상, 배포 SHA 불일치. 원인 미확정. DB 최소권한/체크섬, 독립 복원, 원장 대사, 국내 법률, Test exact-SHA 미검증: RELEASE HOLD.
+- P1: F675-249~258 PR/main 정합성 및 frontend/backend/admin/app-api/DB 실계약 조사. 외부 독립 검증 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 문서만 변경.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
