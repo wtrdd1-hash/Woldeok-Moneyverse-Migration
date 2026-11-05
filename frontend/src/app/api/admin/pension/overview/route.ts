@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
 import { parsePensionOverview } from '@/app/admin/pension/pension-evidence';
 
@@ -13,7 +13,7 @@ export async function GET() {
       typeof error.status === 'number' && error.status >= 400 && error.status < 600
       ? error.status : 503;
     return NextResponse.json(
-      { error: '연금 관리자 개요를 확인할 수 없습니다.' },
+      { error: '연금 관리자 개요를 확인할 수 없습니다.', code: 'PENSION_OVERVIEW_EVIDENCE_INVALID' },
       { status, headers: { 'Cache-Control': 'private, no-store' } },
     );
   }

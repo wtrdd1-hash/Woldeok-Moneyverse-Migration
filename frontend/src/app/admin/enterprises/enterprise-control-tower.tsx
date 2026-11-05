@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -329,7 +329,7 @@ export function EnterpriseControlTower({
         className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground"
       >
         <ShieldCheck className="size-4 text-primary shrink-0" />
-        <span>공기업 거버넌스 안내: 운영 상태 변경 시 불변 감사 영수증이 기록되며, 배당 수취는 상단의 '공기업 배당 국고 즉시 수취' 버튼을 통해 국고(VAULT_MAIN)로 원자적 집행됩니다.</span>
+        <span>공기업 운영 상태는 승인 관리자만 변경할 수 있습니다. 변경 시 불변 감사 영수증이 기록되며, 배당 수취는 상단의 '공기업 배당 국고 즉시 수취' 버튼을 통해 국고(VAULT_MAIN)로 원자적 집행됩니다.</span>
       </div>
 
       {/* 2. 3대 국가 기간 공기업 (SOE) 카드 그리드 */}

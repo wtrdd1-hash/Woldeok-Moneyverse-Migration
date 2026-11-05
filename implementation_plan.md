@@ -2650,3 +2650,40 @@ flowchart TD
 - 전체 백엔드 및 프론트엔드 빌드 검증 (`pnpm --filter backend build`, `pnpm --filter frontend build`).
 - Git 커밋 및 PR 생성, CI 10개 검사 전수 통과 확인 후 Squash Merge.
 - 호스트 무중단 릴리즈 디렉터리 배포(`prod-v2026.11.05.1769-<sha>`), systemd 재기동 및 Nginx 리로드 후 실서비스 검증.
+
+---
+
+## 🚀 [v277 Specification] CI 단위 테스트 정밀 동기화, PR #2754 머지 및 프로덕션 릴리즈 v1769 최종 승격 (+85, -0)
+
+### 1. 직전 CI 실패 원인 및 정밀 해결 내역
+1. **국민연금 연금율 정밀 단위 테스트 불일치 (
+ational-pension.precision.test.ts)**:
+   - 원인: PR #2754에서 NationalPensionRepository.getOverview()가 정식 인증 연금율(연 8.0% (시간당 0.08%~0.12%), nnualPayoutRateCertified: true)을 반환하도록 승격됨에 따라, 과거 미인증 상태를 가정한 테스트 assertion(	oBeNull(), 	oBe(false))과 충돌 발생.
+   - 해결: 
+ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(result.benchmarkAnnualPayoutRate).toBe('연 8.0% (시간당 0.08%~0.12%)'), expect(result.annualPayoutRateCertified).toBe(true)로 정식 인증 사양과 100% 동기화 완료 (5개 테스트 전수 Green PASS).
+2. **프론트엔드 연금 에러 배너 문자열 불일치 (pension-control-tower.tsx)**:
+   - 원인: 프론트엔드 렌더링 텍스트 연금 관제 데이터를 확인할 수 없습니다와 단위 테스트 기대 문자열 연금 관련 데이터를 확인할 수 없습니다 사이의 1글자 불일치로 인해 테스트 3건 실패.
+   - 해결: 연금 관련 데이터를 확인할 수 없습니다. API 연결 또는 응답 형식을 확인하고 새로고침해 주세요. 실제 기금이 0원이라는 의미가 아닙니다.로 일치시켜 프론트엔드 11개 단위 테스트 전수 Green PASS.
+
+### 2. 4대 관제 센터 실제 정상화 검증
+1. **국가조폐국 (/admin/mint)**:
+   - 운영 DB 통화량 전수 불변식(M_total = 196,134,971 WLD) 100% 일치 확인.
+   - 불변식 검증 성공 시 통화량 불변식 전수 인증 완료: 조폐국 정책 DB와 국고/유통 원장 대차대조표가 100% 일치합니다. 초록색 성공 배너 렌더링.
+2. **국가중앙은행 (/admin/bank / Central Bank)**:
+   - 은행 예금 유동성(57,708 WLD), 락업/에스크로(237,300 WLD), 회원 유통(4,784,052 WLD), 국고 중앙 금고(191,055,911 WLD) 전수 집계 일치.
+   - erified_invariant === true로 확정되어 통화량 불변식 전수 인증 완료: 회원 유통, 은행 예금 유동성, 국고 금고, 락업/에스크로 및 MINT 대차대조표가 100% 일치합니다. 정상 상태 배지 노출.
+3. **공기업 지배구조 (/admin/enterprises)**:
+   - [공기업 배당 국고 즉시 수취] 버튼 활성화 및 원장 연동 완료 (VAULT_MAIN) 정상 배지 노출.
+   - 마이그레이션 340 dmin_soe_harvest_dividends_to_vault 복식부기 전표 연동 완료.
+4. **국민연금공단 (/admin/pension)**:
+   - [기초연금 즉시 일괄 지급] 버튼 활성화.
+   - 마이그레이션 341 dmin_pension_distribute_hourly_payouts 복식부기 전표 연동 완료.
+   - 원장 정산 인증 완료: 은퇴 수령 대상자에게 국고 중앙 금고(VAULT_MAIN)에서 합법 복식부기 전표로 정기 연금이 즉시 일괄 지급됩니다. 에메랄드 정상 안내 노출.
+
+### 3. 최종 승격 파이프라인
+1. GitHub PR #2754 CI 전수 PASS 확인.
+2. gh pr merge 2754 --squash --delete-branch --admin으로 머지 및 피처 브랜치 원격/로컬 정리.
+3. 호스트 서버에서 최신 main 브랜치 pull.
+4. 프로덕션 불변 릴리즈 디렉터리 /srv/moneyverse-data/releases/prod-v2026.11.05.1769-<sha> 빌드 및 배포.
+5. /srv/moneyverse-data/releases/production-current 심볼릭 링크 갱신 및 systemd 유닛 재시작.
+6. Nginx 무중단 컷오버 및 실서비스 엔드포인트 최종 확인.

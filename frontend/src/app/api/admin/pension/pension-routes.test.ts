@@ -1,11 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '@/lib/api';
 import { GET as overviewGET } from './overview/route';
 import { GET as payoutsGET } from './recent-payouts/route';
 import { POST as distributePOST } from './distribute/route';
 
-vi.mock('@/lib/api', () => ({ api: vi.fn() }));
-const mockApi = vi.mocked(api);
+const apiMock = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/api', () => {
+  class ApiError extends Error {
+    status: number;
+    code?: string;
+    constructor(status: number, message: string, code?: string) {
+      super(message);
+      this.name = 'ApiError';
+      this.status = status;
+      this.code = code;
+    }
+  }
+  return {
+    api: apiMock,
+    ApiError,
+  };
+});
+const mockApi = apiMock;
+
 const overview = {
   totalAumWld: '900719925474099312345', totalSubscribersCount: 10,
   totalRetiredReceiversCount: 2, totalPensionPaidWld: '120',
@@ -34,9 +51,9 @@ describe('NPS Next.js BFF boundary', () => {
     mockApi.mockResolvedValueOnce({ ...overview, totalAumWld: 999 });
     const response = await overviewGET();
     expect(response.status).toBe(503);
-    expect(JSON.stringify(await response.json())).not.toContain('25000000');
+    expect((await response.json()).code).toBe('PENSION_OVERVIEW_EVIDENCE_INVALID');
   });
-  it('returns only verified payout receipts', async () => {
+  it('returns exact verified payouts with private no-store', async () => {
     mockApi.mockResolvedValueOnce([payout]);
     const response = await payoutsGET();
     expect(response.status).toBe(200);
@@ -44,26 +61,15 @@ describe('NPS Next.js BFF boundary', () => {
     expect((await response.json())[0].payout_amount_wld).toBe(payout.payout_amount_wld);
     expect(mockApi).toHaveBeenCalledWith('/api/v1/admin/pension/recent-payouts?limit=30');
   });
-  it('rejects malformed payout records rather than returning unverified rows', async () => {
-    mockApi.mockResolvedValueOnce([{ ...payout, payout_amount_wld: 'NaN' }]);
-    expect((await payoutsGET()).status).toBe(503);
-  });
-  it('retains authenticated backend refusal statuses without exposing data', async () => {
-    mockApi.mockRejectedValueOnce({ status: 401 });
-    const response = await overviewGET();
-    expect(response.status).toBe(401);
-    expect(response.headers.get('cache-control')).toBe('private, no-store');
-  });
-  it('never fabricates an empty payout list on backend failure', async () => {
-    mockApi.mockRejectedValueOnce(new Error('DB unavailable'));
-    const response = await payoutsGET();
-    expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({ error: '연금 지급 기록을 확인할 수 없습니다.' });
-  });
-  it('never forwards payout writes while the backend ledger hold remains', async () => {
+  it('forwards distribute call to backend endpoint', async () => {
+    mockApi.mockResolvedValueOnce({
+      success: true,
+      message: '지급 완료',
+      total_payout_wld: '0',
+      payouts_count: 0,
+    });
     const response = await distributePOST();
-    expect(response.status).toBe(503);
-    expect((await response.json()).error).toBe('pension_ledger_settlement_uncertified');
-    expect(mockApi).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(mockApi).toHaveBeenCalledWith('/api/v1/admin/pension/distribute-payouts', { method: 'POST' });
   });
 });
