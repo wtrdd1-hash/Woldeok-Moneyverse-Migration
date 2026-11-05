@@ -72,6 +72,8 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   NPS_FUNDED_CONTRIBUTION: '국민연금 신규 정식 적립금 납입',
   NPS_FUNDED_WITHDRAWAL: '국민연금 신규 적립금 환급',
   TREASURY_CITIZEN_DIVIDEND: '국고 시민 배당',
+  TREASURY_SEED_INJECTION: '국고 기초 준비금 전입',
+  HEALTH_INSURANCE_BENEFIT: '국민건강보험 급여 지원',
   BOND_PURCHASE: '국채 매입',
   BOND_REDEEM: '국채 만기 상환',
 });

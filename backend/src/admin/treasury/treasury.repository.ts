@@ -1383,4 +1383,124 @@ export class TreasuryRepository {
       next_cursor,
     };
   }
+
+  async getHealthInsuranceOverview(): Promise<{
+    config: {
+      premium_rate_bps: number;
+      coverage_rate_pct: number;
+      min_claim_amount_wld: string;
+      max_claim_per_day_wld: string;
+      is_active: boolean;
+    };
+    welfare_vault_balance_wld: string;
+    total_contributions_wld: string;
+    total_benefits_paid_wld: string;
+    total_records_count: number;
+    recent_records: Array<{
+      id: string;
+      user_id: string;
+      record_type: string;
+      gross_amount_wld: string;
+      benefit_amount_wld: string;
+      user_copay_wld: string;
+      reason: string;
+      created_at: string;
+    }>;
+  }> {
+    const configRes = await this.pool.query<{
+      premium_rate_bps: number;
+      coverage_rate_pct: string;
+      min_claim_amount_wld: string;
+      max_claim_per_day_wld: string;
+      is_active: boolean;
+    }>(
+      `SELECT premium_rate_bps, coverage_rate_pct::text, min_claim_amount_wld::text, max_claim_per_day_wld::text, is_active
+       FROM public.health_insurance_configs WHERE id = 'current'`,
+    );
+
+    const vaultRes = await this.pool.query<{ balance_wld: string }>(
+      `SELECT balance_wld FROM public.system_treasury_vaults WHERE code = 'VAULT_WELFARE'`,
+    );
+
+    const statsRes = await this.pool.query<{
+      total_contributions: string;
+      total_benefits: string;
+      record_count: string;
+    }>(
+      `SELECT 
+         coalesce(sum(user_copay_wld) FILTER (WHERE record_type = 'PREMIUM_CONTRIBUTION'), 0)::text AS total_contributions,
+         coalesce(sum(benefit_amount_wld) FILTER (WHERE record_type = 'BENEFIT_PAYOUT'), 0)::text AS total_benefits,
+         count(*)::text AS record_count
+       FROM public.health_insurance_records`,
+    );
+
+    const recentRes = await this.pool.query<{
+      id: string;
+      user_id: string;
+      record_type: string;
+      gross_amount_wld: string;
+      benefit_amount_wld: string;
+      user_copay_wld: string;
+      reason: string;
+      created_at: Date;
+    }>(
+      `SELECT id, user_id, record_type, gross_amount_wld::text, benefit_amount_wld::text, user_copay_wld::text, reason, created_at
+       FROM public.health_insurance_records
+       ORDER BY created_at DESC
+       LIMIT 20`,
+    );
+
+    const cfg = configRes.rows[0] ?? {
+      premium_rate_bps: 354,
+      coverage_rate_pct: '70.00',
+      min_claim_amount_wld: '10',
+      max_claim_per_day_wld: '50000',
+      is_active: true,
+    };
+
+    return {
+      config: {
+        premium_rate_bps: Number(cfg.premium_rate_bps),
+        coverage_rate_pct: Number(cfg.coverage_rate_pct),
+        min_claim_amount_wld: cfg.min_claim_amount_wld,
+        max_claim_per_day_wld: cfg.max_claim_per_day_wld,
+        is_active: cfg.is_active,
+      },
+      welfare_vault_balance_wld: vaultRes.rows[0]?.balance_wld ?? '0',
+      total_contributions_wld: statsRes.rows[0]?.total_contributions ?? '0',
+      total_benefits_paid_wld: statsRes.rows[0]?.total_benefits ?? '0',
+      total_records_count: Number(statsRes.rows[0]?.record_count ?? 0),
+      recent_records: recentRes.rows.map((r) => ({
+        id: r.id,
+        user_id: r.user_id,
+        record_type: r.record_type,
+        gross_amount_wld: r.gross_amount_wld,
+        benefit_amount_wld: r.benefit_amount_wld,
+        user_copay_wld: r.user_copay_wld,
+        reason: r.reason,
+        created_at: r.created_at.toISOString(),
+      })),
+    };
+  }
+
+  async claimHealthInsuranceBenefit(
+    userId: string,
+    claimType: string,
+    expenseWld: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    tx_id: string;
+    claim_type: string;
+    expense_wld: string;
+    benefit_amount_wld: string;
+    user_copay_wld: string;
+    welfare_balance_after: string;
+  }> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.health_insurance_claim_benefit($1::uuid, $2::text, $3::numeric, $4::text) AS result`,
+      [userId, claimType, expenseWld, reason],
+    );
+    return res.rows[0]?.result;
+  }
 }

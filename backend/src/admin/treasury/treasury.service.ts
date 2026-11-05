@@ -292,4 +292,35 @@ export class TreasuryService {
     });
   }
 
+  async getHealthInsuranceOverview() {
+    return this.repository.getHealthInsuranceOverview();
+  }
+
+  async claimHealthInsuranceBenefit(userId: string, claimType: string, expenseWld: string, reason: string) {
+    if (!userId || typeof userId !== 'string') {
+      throw new TreasuryInputError('유효한 유저 ID가 필요합니다.');
+    }
+    if (!expenseWld || !/^\d+$/.test(expenseWld) || BigInt(expenseWld) <= BigInt(0)) {
+      throw new TreasuryInputError('청구 비용은 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 5) {
+      throw new TreasuryInputError('건강보험 청구 사유는 최소 5자 이상 입력해야 합니다.');
+    }
+    try {
+      const result = await this.repository.claimHealthInsuranceBenefit(userId, claimType, expenseWld, reason);
+      if (this.telegram) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'TARGETED_SUBSIDY',
+          amountWld: (result as any)?.benefit_amount_wld || expenseWld,
+          targetUser: userId,
+          adminId: 'system.health_insurance',
+          reason: `[건보급여] ${claimType}: ${reason}`,
+        }).catch(() => undefined);
+      }
+      return result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
 }
