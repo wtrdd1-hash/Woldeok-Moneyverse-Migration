@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const migration = readFileSync(join(__dirname, '../migrations/337-restrict-shop-holdings-app-acl.sql'), 'utf8');
+const migration = readFileSync(join(__dirname, '../migrations/339-restrict-shop-holdings-app-acl.sql'), 'utf8');
 
 const forbiddenGrant = /GRANT\s+.*ON\s+TABLE\s+public\.user_items/i;
 const forbiddenMemberMutation = /(?:INSERT INTO|UPDATE|DELETE FROM|TRUNCATE TABLE)\s+public\./i;
