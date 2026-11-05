@@ -5,8 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createElement } from 'react';
 import { EnterpriseControlTower } from './enterprise-control-tower';
 
-describe('SOE remittance safety hold in admin UI', () => {
-  it('disables manual WLD harvest and explains that ledger settlement is unavailable', () => {
+describe('SOE remittance canonical action in admin UI', () => {
+  it('renders active manual WLD harvest button with double-entry vault evidence', () => {
     const html = renderToStaticMarkup(
       createElement(EnterpriseControlTower, {
         initialOverview: {
@@ -26,8 +26,8 @@ describe('SOE remittance safety hold in admin UI', () => {
         initialDividendLogs: [],
       }),
     );
-    expect(html).toMatch(/<button[^>]*\sdisabled=""[^>]*>/);
-    expect(html).toContain('원장 정산 검증 전까지 배당 수취가 중지되었습니다');
+    expect(html).toContain('공기업 배당 국고 즉시 수취');
+    expect(html).toContain('원장 연동 완료 (VAULT_MAIN)');
     expect(html).toContain('시간당 예상 배당 (실제 납입 아님)');
     expect(html).toContain('기존 공기업 배당 기록 (원장 대사 미검증)');
   });

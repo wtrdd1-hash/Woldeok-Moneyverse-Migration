@@ -2542,3 +2542,38 @@ flowchart TD
   4. **단위 테스트 및 회귀 방지 검증**:
      - treasury-force-refresh-button.test.tsx 신규 작성 (터치 타깃 44px 및 라우터 새로고침 트리거 검증).
      - swf-page-evidence.test.tsx 및 treasury-page-evidence.test.tsx 모킹 보강.
+
+
+---
+
+## 🚀 [v274 Specification] 공기업 배당 국고 즉시 수취 복식부기 및 중앙은행/조폐국 통화량 불변식 정산 정상화 (+75, -0)
+- **배경 및 원인 분석**:
+  - **공기업 지배구조 (`/admin/enterprises`)**:
+    - `[공기업 배당 국고 즉시 수취]` 버튼이 `disabled` 상태이며 `원장 정산 검증 전까지 배당 수취가 중지되었습니다.` 경고 문구로 하드코딩 중단되어 있음.
+    - `/api/admin/enterprises/harvest` 엔드포인트가 503 `SOE_DIVIDEND_LEDGER_UNAVAILABLE` 에러를 반환하고, 백엔드 `EnterpriseRepository.distributeSoeDividends`도 예외를 던지도록 fail-closed 잠금 상태였음.
+    - 3대 공기업(에너지공사, 네트워크교통공사, 국책투자은행)의 시간당 배당액 합계인 108,000 WLD가 실제로 국고 중앙 금고(`VAULT_MAIN`)로 입금되는 복식부기 원장 저장 프로시저가 부재했음.
+  - **국가중앙은행 (`/admin/treasury` 또는 중앙은행 탭)**:
+    - 은행 유동성 및 에스크로 잔액이 합산에서 빠져 있어 "전체 통화량 불변식을 인증한 것은 아닙니다. 아래 통화량은 일부 합계입니다."라는 경고가 지속 노출됨.
+    - 은행 예금, 대출 준비금, 거래소/장터 에스크로, 국민연금(NPS), 예금보험공사(KDIC) 기금을 포괄하는 전수 통화량 불변식(Total Money Supply Invariant) 집계가 필요함.
+  - **국가조폐국 (`/admin/treasury` 또는 조폐국 탭)**:
+    - 기존 정책 명령(169건)이 모두 `CANCELLED` 상태로 되어 있어 승인 상태 명령 0건, 정식 발행 증명서 0건으로 표시됨.
+    - 관리자가 승인 상태의 MINT/RETIRE 정책 명령을 신규 발행하고 조폐국 증명서를 정식 발급할 수 있는 승인 파이프라인 및 초기 정식 주조 기록 정상화 필요.
+- **상세 구현 계획**:
+  1. **[공기업 복식부기 배당 국고 수취 프로시저]**:
+     - PostgreSQL 저장 프로시저 `public.admin_soe_harvest_dividends_to_vault(actor_id uuid, reason text, idempotency_key uuid)` 구현:
+       - `state_enterprises`의 활성 공기업 배당금 계산 (총 108,000 WLD).
+       - 원장 트랜잭션 기록 (`financial_transactions` 및 `journal_entries` / `postings`): SOE 수익 계정에서 국고 중앙 금고(`VAULT_MAIN`)로 복식부기 대차평형 입금.
+       - `state_enterprise_dividend_logs`에 배당 수취 영수증 기록 (공기업별 세부 배당액 및 원장 트랜잭션 ID 매핑).
+     - 백엔드 `EnterpriseService.distributeSoeDividends` 구현: 위 프로시저를 호출하여 실제 수취 결과 및 영수증 반환.
+     - 프론트엔드 `enterprise-control-tower.tsx`:
+       - `[공기업 배당 국고 즉시 수취]` 버튼 활성화, 클릭 시 로딩 스피너 및 `/api/admin/enterprises/harvest` 비동기 호출 연동.
+       - 수취 완료 시 최신 국고 잔액 및 공기업 배당 현황 리프레시, sonner 성공 토스트 노출.
+       - "원장 정산 검증 전까지 배당 수취가 중지되었습니다." 문구를 "정식 복식부기 원장 연동 완료 (국고 중앙금고 입금)" 정상 상태 배지로 전환.
+  2. **[중앙은행 통화량 전수 불변식 및 경고 해소]**:
+     - 백엔드 중앙은행 통화량 집계 서비스에 은행 예금 잔액, 에스크로 잔액, NPS/KDIC 공공 기금을 전수 합산하는 쿼리 보강.
+     - 프론트엔드 `central-bank-panel.tsx`에서 전수 불변식 인증 배지 노출 및 부분 합계 경고 문구 제거.
+  3. **[조폐국 승인 파이프라인 및 증명서 연동]**:
+     - `monetary_policy_orders` 승인(APPROVED) 및 발행 증명서 발급 연동 로직 정상화.
+  4. **[검증 및 무중단 프로덕션 승격]**:
+     - 단위 테스트 작성 및 전수 통과 확인.
+     - 프로덕션 빌드, 신규 불변 릴리즈 디렉터리(`v1767`), systemd 유닛 및 Nginx 무중단 포트 컷오버 적용.

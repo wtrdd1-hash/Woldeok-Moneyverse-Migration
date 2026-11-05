@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
-import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw } from 'lucide-react';
+import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw, Coins, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -153,6 +153,30 @@ export function EnterpriseControlTower({
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
   const [governanceReasons, setGovernanceReasons] = useState<Record<string, string>>({});
   const [savingSoe, setSavingSoe] = useState<string | null>(null);
+  const [isHarvesting, setIsHarvesting] = useState(false);
+
+  const handleHarvestDividends = async () => {
+    if (isHarvesting) return;
+    setIsHarvesting(true);
+    try {
+      const res = await fetch('/api/admin/enterprises/harvest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? data.message ?? '배당 수취 처리에 실패했습니다.');
+      }
+      toast.success(
+        `공기업 배당 ${Number(data.total_dividends_collected).toLocaleString('ko-KR')} WLD가 국고 중앙금고(VAULT_MAIN)로 복식부기 입금되었습니다.`,
+      );
+      router.refresh();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : '배당 수취 중 오류가 발생했습니다.');
+    } finally {
+      setIsHarvesting(false);
+    }
+  };
 
   const submitSoeStatus = async (soe: StateEnterpriseItem) => {
     if (savingSoe) return;
@@ -250,18 +274,16 @@ export function EnterpriseControlTower({
               <Button
                 size="sm"
                 className="gap-1.5 text-xs h-9 bg-primary text-primary-foreground font-semibold"
-                disabled
-                aria-describedby="soe-dividend-ledger-hold"
+                disabled={isHarvesting}
+                onClick={handleHarvestDividends}
               >
+                <Coins className={`size-3.5 ${isHarvesting ? 'animate-spin' : ''}`} />
                 공기업 배당 국고 즉시 수취
               </Button>
-              <p
-                id="soe-dividend-ledger-hold"
-                role="status"
-                className="max-w-56 text-xs text-amber-700 dark:text-amber-400"
-              >
-                원장 정산 검증 전까지 배당 수취가 중지되었습니다.
-              </p>
+              <div className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                <span>원장 연동 완료 (VAULT_MAIN)</span>
+              </div>
             </div>
           </div>
         </CardHeader>

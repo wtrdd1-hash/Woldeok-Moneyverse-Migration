@@ -40,13 +40,13 @@ describe('v1613 SOE DB-owned governance receipt', () => {
       'short',key)).rejects.toMatchObject({ status: 400 });
     expect(query).not.toHaveBeenCalled();
   });
-  it('service rejects unknown statuses and keeps dividend blocked', async () => {
-    const repo = { updateSoeStatus: vi.fn(), distributeSoeDividends: vi.fn() } as any;
+  it('service rejects unknown statuses and delegates canonical dividend harvest', async () => {
+    const repo = { updateSoeStatus: vi.fn(), distributeSoeDividends: vi.fn().mockResolvedValue({ total_dividends_collected: '108000' }) } as any;
     const service = new EnterpriseService(repo);
     await expect(service.updateSoeStatus('SOE_POWER','BROKEN',undefined,actor,
       'Operator governance decision',key)).rejects.toThrow();
     expect(repo.updateSoeStatus).not.toHaveBeenCalled();
-    await expect(service.harvestSoeDividends(actor)).rejects.toMatchObject({status:503});
-    expect(repo.distributeSoeDividends).not.toHaveBeenCalled();
+    await service.harvestSoeDividends(actor);
+    expect(repo.distributeSoeDividends).toHaveBeenCalledWith(actor);
   });
 });

@@ -176,15 +176,51 @@ export class EnterpriseRepository {
    * including scheduled jobs or direct repository users, may execute it.
    * Re-enable only through an independently verified DB-owned ledger settlement.
    */
-  async distributeSoeDividends(_adminId?: string): Promise<{
+  async distributeSoeDividends(adminId?: string): Promise<{
     total_dividends_collected: string;
     enterprises_processed: number;
     treasury_balance_after: string;
+    ledger_transaction_id?: string;
   }> {
-    throw new ServiceUnavailableException({
-      code: 'SOE_DIVIDEND_LEDGER_UNAVAILABLE',
-      message: 'SOE dividend remittance is suspended pending atomic ledger verification',
-    });
+    if (!adminId) {
+      throw new ServiceUnavailableException({
+        code: 'SOE_DIVIDEND_ACTOR_REQUIRED',
+        message: '공기업 배당 수취를 집행할 관리자 식별자가 필요합니다.',
+      });
+    }
+    const result = await this.pool.query<{ harvest: {
+      success: boolean;
+      code: string;
+      message: string;
+      total_dividends_collected: string;
+      enterprises_processed: number;
+      treasury_balance_after: string;
+      ledger_transaction_id?: string;
+    } }>(
+      'SELECT public.admin_soe_harvest_dividends_to_vault($1::uuid) AS harvest',
+      [adminId],
+    );
+    const row = result.rows[0]?.harvest;
+    if (!row || !row.success) {
+      throw new ServiceUnavailableException({
+        code: row?.code ?? 'SOE_DIVIDEND_HARVEST_FAILED',
+        message: row?.message ?? '공기업 배당금 국고 귀속 처리에 실패했습니다.',
+      });
+    }
+    const out: {
+      total_dividends_collected: string;
+      enterprises_processed: number;
+      treasury_balance_after: string;
+      ledger_transaction_id?: string;
+    } = {
+      total_dividends_collected: row.total_dividends_collected,
+      enterprises_processed: row.enterprises_processed,
+      treasury_balance_after: row.treasury_balance_after,
+    };
+    if (row.ledger_transaction_id) {
+      out.ledger_transaction_id = row.ledger_transaction_id;
+    }
+    return out;
   }
 
   async updateSoeStatus(
