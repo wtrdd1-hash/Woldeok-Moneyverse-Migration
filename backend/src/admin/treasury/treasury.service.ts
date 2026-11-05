@@ -310,7 +310,7 @@ export class TreasuryService {
       const result = await this.repository.claimHealthInsuranceBenefit(userId, claimType, expenseWld, reason);
       if (this.telegram) {
         this.telegram.notifyTreasuryGrant({
-          action: 'HEALTH_INSURANCE_CLAIM',
+          action: 'TARGETED_SUBSIDY',
           amountWld: (result as any)?.benefit_amount_wld || expenseWld,
           targetUser: userId,
           adminId: 'system.health_insurance',
