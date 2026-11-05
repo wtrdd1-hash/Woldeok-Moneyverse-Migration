@@ -25,15 +25,29 @@ afterEach(() => vi.unstubAllGlobals());
 describe('admin pension evidence and payout hold', () => {
   it('shows unavailable data rather than invented zeros or a 25M vault', () => {
     render(<PensionControlTower initialOverview={null} initialPayoutLogs={null} />);
-    expect(screen.getByRole('alert').textContent).toContain('연금 관제 데이터를 확인할 수 없습니다');
+    expect(screen.getByRole('alert').textContent).toContain('연금 관련 데이터를 확인할 수 없습니다');
     expect(screen.getByText(/지급 내역을 확인할 수 없습니다/)).toBeTruthy();
     expect(screen.queryByText(/25,000,000/)).toBeNull();
   });
-  it('keeps uncertified manual payouts disabled and preserves exact large WLD', () => {
+  it('enables certified manual payouts and preserves exact large WLD', () => {
     render(<PensionControlTower initialOverview={overview} initialPayoutLogs={[payout]} />);
-    expect((screen.getByRole('button', { name: /기초연금 즉시 일괄 지급/ }) as HTMLButtonElement).disabled).toBe(true);
+    const button = screen.getByRole('button', { name: /기초연금 즉시 일괄 지급/ }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
     expect(screen.getAllByText(/9,007,199,254,740,993/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/기금 100% 국가 재정 지급 보증/)).toBeNull();
+  });
+  it('calls canonical distribute API and revalidates when payout button is clicked', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, message: '지급 완료', total_payout_wld: '0', payouts_count: 0 }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => overview })
+      .mockResolvedValueOnce({ ok: true, json: async () => [payout] });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<PensionControlTower initialOverview={overview} initialPayoutLogs={[payout]} />);
+    const button = screen.getByRole('button', { name: /기초연금 즉시 일괄 지급/ });
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/admin/pension/distribute', { method: 'POST' });
+    });
   });
   it('revalidates pre-reset pension AUM on mount and removes stale 50,000 WLD', async () => {
     const staleOverview = { ...overview, totalAumWld: '50000' };
@@ -67,14 +81,14 @@ describe('admin pension evidence and payout hold', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => [] }));
     render(<PensionControlTower initialOverview={overview} initialPayoutLogs={[]} />);
     fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('연금 관제 데이터를 확인할 수 없습니다'));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('연금 관련 데이터를 확인할 수 없습니다'));
     expect(screen.queryByText(/9,007,199,254,740,993/)).toBeNull();
   });
   it('invalidates stale data when authenticated refresh fails', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     render(<PensionControlTower initialOverview={overview} initialPayoutLogs={[payout]} />);
     fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('연금 관제 데이터를 확인할 수 없습니다'));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('연금 관련 데이터를 확인할 수 없습니다'));
     expect(screen.getByText(/지급 내역을 확인할 수 없습니다/)).toBeTruthy();
   });
 });

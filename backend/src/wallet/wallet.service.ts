@@ -78,6 +78,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   SWF_PORTFOLIO_LIQUIDATION: '국부펀드 자산 회수 환원',
   BOND_PURCHASE: '국채 매입',
   BOND_REDEEM: '국채 만기 상환',
+  NPS_PENSION_PAYOUT: '공적 연금 지급',
 });
 
 export class WalletTransactionNotFoundError extends Error {

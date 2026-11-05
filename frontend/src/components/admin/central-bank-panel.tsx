@@ -61,7 +61,7 @@ export function CentralBankPanel() {
   const [reason, setReason] = useState('');
 
   async function reload(signal?: AbortSignal) {
-    const response = await fetch('/api/admin/central-bank/status', { cache: 'no-store', signal: signal ?? null });
+    const response = await fetch(`/api/admin/central-bank/status?_t=${Date.now()}`, { cache: 'no-store', signal: signal ?? null });
     if (!response.ok) throw new Error('원장 및 정책 DB 조회에 실패했습니다.');
     const result: Snapshot = await response.json();
     if (result.source !== 'ledger_partial_and_persistent_policy' && result.source !== 'ledger_verified_and_persistent_policy') throw new Error('정책 데이터 출처가 검증되지 않았습니다.');

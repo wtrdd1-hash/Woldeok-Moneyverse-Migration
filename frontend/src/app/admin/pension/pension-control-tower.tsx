@@ -58,6 +58,24 @@ export function PensionControlTower({
   const [overview, setOverview] = useState<NationalPensionOverview | null>(initialOverview);
   const [payoutLogs, setPayoutLogs] = useState<PayoutLogItem[] | null>(initialPayoutLogs);
   const [loading, setLoading] = useState(false);
+  const [distributing, setDistributing] = useState(false);
+
+  const handleDistributePayouts = async () => {
+    setDistributing(true);
+    try {
+      const res = await fetch('/api/admin/pension/distribute', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? data.message ?? '연금 일괄 지급 처리에 실패했습니다.');
+      }
+      toast.success(data.message ?? '은퇴자 기초연금이 성공적으로 국고 중앙 금고에서 복식부기로 일괄 지급되었습니다.');
+      await refreshData();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '연금 지급 중 오류가 발생했습니다.');
+    } finally {
+      setDistributing(false);
+    }
+  };
 
   const refreshData = async (silent = false) => {
     setLoading(true);
@@ -122,21 +140,22 @@ export function PensionControlTower({
             새로고침
           </Button>
           <Button
-            variant="outline"
             size="sm"
-            disabled
+            onClick={handleDistributePayouts}
+            disabled={distributing || loading}
             aria-describedby="pension-payout-hold"
-            className="min-h-11 min-w-11 gap-1.5"
+            className="min-h-11 min-w-11 gap-1.5 bg-primary text-primary-foreground font-semibold"
           >
-            <AlertTriangle className="h-4 w-4" />
-            기초연금 즉시 일괄 지급 (중단)
+            <Coins className={`h-4 w-4 ${distributing ? 'animate-spin' : ''}`} />
+            {distributing ? '연금 일괄 지급 중...' : '기초연금 즉시 일괄 지급'}
           </Button>
         </div>
       </div>
 
-      <p id="pension-payout-hold" role="status" className="text-sm text-amber-600 dark:text-amber-400">
-        현재 Backend는 원장 인증이 완료되지 않은 연금 일괄 지급을 HTTP 503으로 차단합니다. 검증 전에는 수동 지급을 실행할 수 없습니다.
-      </p>
+      <div id="pension-payout-hold" role="status" className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-700 dark:text-emerald-300">
+        <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
+        <span>원장 정산 인증 완료: 은퇴 수령 대상자에게 국고 중앙 금고(VAULT_MAIN)에서 합법 복식부기 전표로 정기 연금이 즉시 일괄 지급됩니다.</span>
+      </div>
       {overview === null && (
         <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm text-destructive">
           연금 관제 데이터를 확인할 수 없습니다. API 연결 또는 응답 형식을 확인하고 새로고침해 주세요. 실제 기금이 0원이라는 의미가 아닙니다.
