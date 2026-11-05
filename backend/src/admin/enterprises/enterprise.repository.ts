@@ -207,12 +207,20 @@ export class EnterpriseRepository {
         message: row?.message ?? '공기업 배당금 국고 귀속 처리에 실패했습니다.',
       });
     }
-    return {
+    const out: {
+      total_dividends_collected: string;
+      enterprises_processed: number;
+      treasury_balance_after: string;
+      ledger_transaction_id?: string;
+    } = {
       total_dividends_collected: row.total_dividends_collected,
       enterprises_processed: row.enterprises_processed,
       treasury_balance_after: row.treasury_balance_after,
-      ledger_transaction_id: row.ledger_transaction_id,
     };
+    if (row.ledger_transaction_id) {
+      out.ledger_transaction_id = row.ledger_transaction_id;
+    }
+    return out;
   }
 
   async updateSoeStatus(
