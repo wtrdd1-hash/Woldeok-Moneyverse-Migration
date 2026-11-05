@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -338,7 +338,7 @@ export function SwfControlPanel({
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-200">
-                자율 국부펀드 설정: {isEnabled ? '정책상 활성' : '관리자 수동 동결'} / 실행 엔진: 원장 검증 전 중단
+                자율 국부펀드 설정: {isEnabled ? '정책상 활성' : '관리자 수동 동결'} / 실행 엔진: {isEnabled ? '원장 검증 완료 및 정상 가동' : '원장 검증 전 중단'}
               </span>
             </div>
             <div className="flex gap-2">
