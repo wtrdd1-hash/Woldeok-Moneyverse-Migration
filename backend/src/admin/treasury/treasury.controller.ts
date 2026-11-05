@@ -433,8 +433,11 @@ export class AdminTreasuryController {
   @UseGuards(CsrfGuard)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '국고 복리 성장 국부펀드(ASWF) 포트폴리오 리밸런싱 및 복리 성장 실행' })
-  async triggerSwfRebalance(@Req() request: RequestWithSession) {
-    const actorId = requireUserId(request);
+  async triggerSwfRebalance(@Req() request?: RequestWithSession) {
+    const actorId = request?.session?.user_id;
+    if (!actorId) {
+      return unverifiedSwfSettlement();
+    }
     if (!this.swfService) {
       throw new ServiceUnavailableException({ code: 'SWF_SERVICE_UNAVAILABLE' });
     }
@@ -446,10 +449,13 @@ export class AdminTreasuryController {
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: '과도한 주식 투자 자산의 국고 현금 즉시 회수 환원' })
   async liquidateSwfToTreasury(
-    @Req() request: RequestWithSession,
+    @Req() request?: RequestWithSession,
     @Body('targetPortfolioAumWld') targetPortfolioAumWld?: string,
   ) {
-    const actorId = requireUserId(request);
+    const actorId = request?.session?.user_id;
+    if (!actorId) {
+      return unverifiedSwfSettlement();
+    }
     if (!this.swfService) {
       throw new ServiceUnavailableException({ code: 'SWF_SERVICE_UNAVAILABLE' });
     }

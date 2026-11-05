@@ -155,6 +155,9 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   }
 
   async evaluateAndRebalance(actorId?: string): Promise<{ executed: boolean; reason: string; snapshot?: Awaited<ReturnType<AutoSovereignWealthFundService['getAdminSnapshot']>> }> {
+    if (process.env.MONEYVERSE_SWF_EXECUTION_ENABLED !== 'true') {
+      return { executed: false, reason: 'SWF_RUNTIME_EXECUTION_DISABLED' };
+    }
     if (actorId) {
       const snapshot = await this.getAdminSnapshot(actorId);
       return {
@@ -163,7 +166,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
         snapshot,
       };
     }
-    return { executed: false, reason: 'SWF_ACTOR_REQUIRED' };
+    return { executed: false, reason: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE' };
   }
 
   async updateConfig(params: Partial<SwfConfig>, actorId: string): Promise<SwfConfig> {
