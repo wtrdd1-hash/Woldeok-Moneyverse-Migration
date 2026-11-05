@@ -202,6 +202,17 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-moneyverse-locale', finalLocale);
   const rewriteTarget = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
+  // TLS terminates at the public ingress. Next may reconstruct request.url as
+  // https://localhost:<http-listener-port> from forwarded headers; an internal
+  // rewrite to that URL would attempt TLS against its plain HTTP listener.
+  // Only normalize loopback destinations, never a visitor-facing HTTPS origin.
+  if (
+    explicitPrefixLocale && targetPath !== pathname &&
+    rewriteTarget.protocol === 'https:' &&
+    ['localhost', '127.0.0.1', '[::1]'].includes(rewriteTarget.hostname.toLowerCase())
+  ) {
+    rewriteTarget.protocol = 'http:';
+  }
   if (explicitPrefixLocale && targetPath !== pathname) {
     rewriteTarget.searchParams.set(INTERNAL_REWRITE_LOCALE_PARAM, explicitPrefixLocale);
   }
