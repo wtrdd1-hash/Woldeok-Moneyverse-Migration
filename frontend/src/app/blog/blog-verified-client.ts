@@ -46,6 +46,7 @@ function toBlogPost(row:VerifiedRow):BlogPost {
     relatedCalculatorName:row.topic==='ECONOMY'?'기초 계산':'개발 블로그',
     isAiGenerated:true,views:0,country:row.country as BlogCountry,
     status:row.status==='WITHDRAWN'?'WITHDRAWN':'PUBLISHED',verificationReceipt:row.receipt,
+    verifiedTopic:row.topic,
     ...(translations ? {translations}:{}),
   };
 }

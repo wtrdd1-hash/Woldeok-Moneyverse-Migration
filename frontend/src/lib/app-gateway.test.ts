@@ -76,7 +76,7 @@ describe('appGatewayOrigin', () => {
 describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
-      'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
+      'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'blog', 'board', 'bonds', 'businesses',
       'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
       'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
@@ -95,7 +95,7 @@ describe('app API compatibility contract', () => {
   it('stamps every app response with stable API and contract versions', () => {
     const headers = appendAppContractHeaders(new Headers());
     expect(headers.get('x-moneyverse-api-version')).toBe('1');
-    expect(APP_API_CONTRACT_VERSION).toBe('v2026.10.30.0125');
+    expect(APP_API_CONTRACT_VERSION).toBe('v2026.11.01.1025');
     expect(headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
     expect(headers.get('x-content-type-options')).toBe('nosniff');
   });

@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import type { BlogPost } from './blog.types';
 import { BLOG_CATEGORIES } from './blog.types';
 import { blogUrl, type BlogLocale } from './blog-seo';
+import { filterVerifiedEditorialTopic, type VerifiedTopicSelection } from './blog-topic-filter';
 
 const BLOG_LABELS: Record<BlogLocale, {
   all: string; search: string; featured: string; latest: string; count: string;
@@ -32,7 +33,14 @@ const BLOG_LABELS: Record<BlogLocale, {
   zh: { all:'全部',search:'搜索主题或关键词...',featured:'精选文章',latest:'家庭金融文章',count:'共',read:'阅读',minutes:'阅读时间',noResults:'未找到符合条件的文章。',categories:{COMPOUND:'储蓄与复利',TAX:'税收与制度',STOCKS:'股票与ETF',WEALTH:'家庭规划',MACRO:'物价与经济'} },
 };
 
-export type BlogHubSummary = Pick<BlogPost, 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName' | 'viewCountVerified'>;
+const VERIFIED_SUBJECT_LABELS: Record<BlogLocale, { label: string; all: string; economy: string; coding: string; computer: string }> = {
+  ko: { label: '검증된 원문 주제', all: '모든 글', economy: '경제', coding: '코딩', computer: '컴퓨터' },
+  en: { label: 'Verified editorial topic', all: 'All articles', economy: 'Economy', coding: 'Coding', computer: 'Computers' },
+  ja: { label: '検証済み記事の主題', all: 'すべての記事', economy: '経済', coding: 'プログラミング', computer: 'コンピュータ' },
+  zh: { label: '已验证文章主题', all: '全部文章', economy: '经济', coding: '编程', computer: '计算机' },
+};
+
+export type BlogHubSummary = Pick<BlogPost, 'verifiedTopic' | 'slug' | 'title' | 'excerpt' | 'category' | 'categoryLabel' | 'publishedAt' | 'readTimeMinutes' | 'tags' | 'views' | 'author' | 'heroImage' | 'relatedCalculatorHref' | 'relatedCalculatorName' | 'viewCountVerified'>;
 
 interface Props {
   readonly initialPosts: readonly BlogHubSummary[];
@@ -42,9 +50,10 @@ interface Props {
 export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [verifiedTopic, setVerifiedTopic] = useState<VerifiedTopicSelection>('ALL');
   const labels = BLOG_LABELS[locale];
 
-  const filteredPosts = initialPosts.filter((post) => {
+  const filteredPosts = filterVerifiedEditorialTopic(initialPosts, verifiedTopic).filter((post) => {
     const matchCategory = selectedCategory === 'ALL' || post.category === selectedCategory;
     const matchSearch =
       !searchQuery.trim() ||
@@ -90,6 +99,19 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
           ))}
         </div>
 
+        <div className="flex shrink-0 flex-col gap-1">
+          <label htmlFor="verified-blog-topic" className="text-xs font-medium text-muted-foreground">
+            {VERIFIED_SUBJECT_LABELS[locale].label}
+          </label>
+          <select id="verified-blog-topic" value={verifiedTopic}
+            onChange={(event) => setVerifiedTopic(event.target.value as VerifiedTopicSelection)}
+            className="h-9 rounded-md border border-border bg-background px-2 text-xs">
+            <option value="ALL">{VERIFIED_SUBJECT_LABELS[locale].all}</option>
+            <option value="ECONOMY">{VERIFIED_SUBJECT_LABELS[locale].economy}</option>
+            <option value="CODING">{VERIFIED_SUBJECT_LABELS[locale].coding}</option>
+            <option value="COMPUTER">{VERIFIED_SUBJECT_LABELS[locale].computer}</option>
+          </select>
+        </div>
         {/* Search input */}
         <div className="relative w-full sm:w-64 shrink-0">
           <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -180,7 +202,7 @@ export function BlogHubClient({ initialPosts, locale = 'ko' }: Props) {
             <Sparkles className="size-4 text-indigo-400" />
             <span>최신 금융 아티클 목록</span>
           </h2>
-          <span className="text-xs text-muted-foreground font-mono">{labels.count} {filteredPosts.length}</span>
+          <span className="text-xs text-muted-foreground font-mono" aria-live="polite">{labels.count} {filteredPosts.length}</span>
         </div>
 
         {!featuredPost ? (

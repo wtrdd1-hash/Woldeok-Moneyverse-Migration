@@ -42,6 +42,7 @@ describe('DB-verified country blog public projection',()=>{
   expect(blogAlternateLanguages(posts[0]!)).toEqual({'zh-CN':'https://easy-scraping.com/zh/blog/'+row.slug});
   expect(posts[0]?.views).toBe(0);
   expect(posts[0]?.verificationReceipt).toBe(row.receipt);
+  expect(posts[0]?.verifiedTopic).toBe('CODING');
  });
  it('lets the administrator inspect withdrawn verified posts without resurrecting public discovery',()=>{
   const entries=verifiedArticlesForAdmin([row,{...row,status:'WITHDRAWN'}, {...row,status:'DELETED'}]);

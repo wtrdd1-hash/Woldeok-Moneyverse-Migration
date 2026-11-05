@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.10.30.0125**
+Update version: **v2026.11.01.1025**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 184 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 186 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5800,6 +5800,57 @@ _No request body._
 | threadId | true | string |  |
 | status | true | string |  |
 | verified | true | boolean |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/blog/verified` — Published verified editorial list (latest 150) with optional topic filter
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 최대 최근 150개 공개 원문 중 검증된 주제 결과만 표시
+- Operation ID: `BlogVerifiedPublicController_list`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| topic | query | false | string | enum="ECONOMY","CODING","COMPUTER" |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+_None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/blog/verified/:slug` — Published verified editorial by canonical slug
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 최대 최근 150개 공개 원문 중 검증된 주제 결과만 표시
+- Operation ID: `BlogVerifiedPublicController_bySlug`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| slug | path | true | string | pattern="^[a-z0-9-]{10,110}$" |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| post | true | null \| object |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

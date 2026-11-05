@@ -1,8 +1,8 @@
 export const APP_API_VERSION = '1';
-export const APP_API_CONTRACT_VERSION = 'v2026.10.30.0125';
+export const APP_API_CONTRACT_VERSION = 'v2026.11.01.1025';
 
 export const APP_API_GROUPS = Object.freeze([
-  'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'bonds', 'businesses',
+  'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'blog', 'board', 'bonds', 'businesses',
   'casino', 'chat', 'clubs', 'collections', 'content', 'crafting', 'developer', 'early-game', 'economy', 'engagement', 'enterprises', 'fx', 'help', 'kdic', 'marketplace', 'media', 'newspaper', 'notifications', 'pension', 'photos', 'privacy',
   'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
 ] as const);
@@ -52,6 +52,11 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   if (!APP_API_GROUP_SET.has(clean[0]!)) return null;
   // Android may read verified public help; no management/preview endpoints.
   if (clean[0] === 'admin' && clean[1] === 'help') return null;
+  if (clean[0] === 'blog') {
+    const verifiedPublicRead = (clean.length === 2 && clean[1] === 'verified') ||
+      (clean.length === 3 && clean[1] === 'verified' && /^[a-z0-9-]{10,110}$/.test(clean[2]!));
+    if (!verifiedPublicRead) return null;
+  }
   if (clean[0] === 'help') {
     const publicRead = (clean.length === 2 && (clean[1] === 'categories' || clean[1] === 'search')) ||
       ((clean.length === 4 || (clean.length === 5 && clean[4] === 'report')) && clean[1] === 'articles' && ['ko', 'en'].includes(clean[2]!) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(clean[3]!));
