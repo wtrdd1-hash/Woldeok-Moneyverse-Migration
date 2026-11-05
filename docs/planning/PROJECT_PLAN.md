@@ -1,3 +1,16 @@
+## v2026.11.06.0832 — F675-263 replay guard hardening (FEATURE IMPROVEMENT / RELEASE HOLD)
+
+Cycle: Previous Addition v1830 → Current Improvement v1832 → Next Addition v1834. Proposal only, based on unmerged PR #2789. Source main 0b5b2b1385d2a75614d39458dff94f7d3098ed03 checked at start and mid-run.
+
+Invariant: bind each attempt to tenant, dispute, original evidence generation, manifest SHA-256, signing-key epoch, policy version and request version. No match, attestation, export, expiry, cancellation or retry may clear source revocation, retention, download restriction or finality. Missing/revoked/stale/unverifiable inputs fail closed BLOCKED_UNKNOWN. Requester, original adjudicator and attester must be independent by effective identity and delegation chain.
+
+API/state: retain six proposed admin endpoints. Tenant authorization and session revalidation on create, attest and export. Scope Idempotency-Key to tenant+actor+operation+canonical request hash; If-Match conflict 409, invalid transition 422, forbidden 403, inaccessible tenant resource 404. NOT_REQUESTED→QUEUED→VERIFYING→MATCHED/MISMATCHED/BLOCKED_UNKNOWN; MATCHED→ATTESTED requires independent recheck. CANCELLED terminal; MISMATCHED/BLOCKED_UNKNOWN cannot attest. Retry creates immutable new attempt. Cursor bound to tenant, sort, filters and expiry.
+
+DB/transactions: composite tenant FK, UNIQUE(tenant_id,dispute_id,attempt_no), partial unique active attempt per dispute, CHECK attester only for ATTESTED and version >= 1; manifest and key epoch required once verification starts. Row lock/CAS serializes attestation, cancellation and retry. State, immutable audit and outbox in one transaction. Worker uses stable event ID, fencing, backoff, dead-letter inspection, idempotent consumers. No raw evidence in logs/outbox.
+
+Admin, security, mobile, analytics: show source generation, verification freshness, effective reviewer, BLOCKED_UNKNOWN reason and safe retry CTA, never revocation override. Redacted export short-lived, signed, scoped, audited. CSRF, rate limits, payload caps, noindex admin, 320px and WCAG 2.2 AA, equivalent English/Korean. PII-free KPI: blocked rate, mismatch resolution time, duplicate suppression, attestation latency. Test PostgreSQL concurrency/tenant isolation, delegated self-approval, key rotation, tampering, worker crash, out-of-order outbox, accessibility and rollback. Flag OFF; Test exact-SHA and rollback evidence before production; planning does not deploy.
+
+P0: recheck historic Production /en and /en/login HTTP 500, backend restarts, symlink, deployed SHA, DB ACL/checksums, independent restore, ledger reconciliation, Korean legal sign-off. P1: reconcile PR #2789 with main, prerequisites F675-260/261/262, real frontend/backend/app-api/DB contract. No replay-checks implementation matched limited backend/src and frontend/src search, not exhaustive proof. External independent references newly verified 0, cumulative UNKNOWN/10,000; gate BLOCKED / IN PROGRESS.
 ## v2026.11.06.0730 — F675-263 Independent dispute evidence replay guard (FEATURE ADDITION / PROPOSAL / RELEASE HOLD)
 
 Cycle: Previous Improvement v1828; Current Addition v1830; Next Improvement v1832. F675-260/261/262 dependencies are not proven implemented in main. Planning only; no runtime deployment.
