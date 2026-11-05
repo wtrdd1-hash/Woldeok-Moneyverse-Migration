@@ -151,4 +151,11 @@ BEGIN
 END;
 $function$;
 
-GRANT EXECUTE ON FUNCTION public.admin_soe_harvest_dividends_to_vault(uuid) TO moneyverse_app, postgres;
+REVOKE ALL PRIVILEGES ON FUNCTION public.admin_soe_harvest_dividends_to_vault(uuid) FROM PUBLIC, moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.admin_soe_harvest_dividends_to_vault(uuid) TO moneyverse_app;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.admin_soe_harvest_dividends_to_vault(uuid) TO postgres';
+  END IF;
+END $$;
