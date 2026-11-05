@@ -75,7 +75,7 @@ BEGIN
       v_key,
       'TREASURY_SEED_INJECTION',
       v_actor,
-      'v2026.11.05.1762',
+      NULL,
       v_postings,
       'treasury.seed_reserve_established',
       jsonb_build_object(
@@ -188,7 +188,7 @@ BEGIN
     v_key,
     'HEALTH_INSURANCE_BENEFIT',
     p_user_id,
-    'v2026.11.05.1762',
+    NULL,
     v_postings,
     'health_insurance.benefit_paid',
     jsonb_build_object(
@@ -384,7 +384,7 @@ BEGIN
     v_key,
     'WORK_REWARD_SETTLEMENT',
     p_user_id,
-    'v2026.11.05.1762',
+    NULL,
     v_postings,
     'work.reward_distributed',
     jsonb_build_object(
