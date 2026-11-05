@@ -2420,3 +2420,36 @@ untime-check, classify, policy) ALL PASS 확인.
    - `/health`, `/api/version`, `/frontend-version`, `/blog`, `/admin/blog`, `/api/blog` 실측
 5. **피처 브랜치 정리**:
    - 머지 완료된 로컬 `sec/owasp-vulnerability-audit-20261102` 브랜치 안전 삭제
+
+---
+## 🏛️ [v230 Specification] 국고 및 국민건강보험(사회보험) 기능 장애 원인 심층 분석 및 영구 정상화 완결 (v2026.11.05.1762)
+
+### 1. 국고/건강보험 10회 이상 작업 실패 및 기능 불능의 근본 원인 (Root Cause Analysis)
+1. **국고 잔액 0원 동결 및 314/325 리셋의 부작용**:
+   - 과거 마이그레이션 314 및 325에서 '원장 미증빙 레거시 데이터'라는 명분으로 국고 복식부기 계정(`accounts.account_type = 'TREASURY'`)과 5대 금고(`system_treasury_vaults`) 잔액을 모두 0 WLD로 리셋하고 비워둠.
+   - 국고 지출 함수들(`treasury_disburse_citizen_dividend`, `treasury_disburse_targeted_subsidy`, `distributeBudgetRule` 등)은 모두 `v_treasury_balance < v_total` 또는 30% 준비금 보호 룰을 검사함. 잔액이 0원이므로 모든 지출/배당/지원금 기능이 `insufficient certified treasury ledger balance` 예외를 던지며 100% 실행 불가 상태였음.
+2. **트리거 불변식 충돌 (`treasury_fiscal_guard_event`)**:
+   - `system_treasury_ledger` 테이블의 트리거는 `ledger_transactions`에 포스팅된 국고 금액과 레저의 `amount_wld`가 정확히 1원 단위까지 일치(`IS NOT DISTINCT FROM`)해야만 승인함. 분할 인서트나 금액 불일치 시 `TREASURY_EPOCH_MISSING_CANONICAL_PROVENANCE` 예외를 던져 트랜잭션이 롤백됨.
+3. **건강보험(National Health Insurance) 제도의 실질적 엔진 단절**:
+   - 직업/상점 소득에서 건강보험료(3.54%)가 적립되는 파이프라인과, 유저가 의료비/치료비/피로도 회복 급여를 청구하여 복지기금에서 70% 지원금을 지급받는 함수가 구축되어 있지 않았음.
+
+### 2. 마이그레이션 337 핵심 조치 및 완결 내용
+1. **합법적 1,000만 WLD 기초 국고 복식부기 전입 및 5대 금고 동기화**:
+   - `MINT` 계정 (credit) -> `TREASURY` 계정 (debit 10,000,000 WLD) 정식 전입 (`economy_post_transaction`).
+   - 5대 금고 분배:
+     - `VAULT_MAIN` (중앙 국고): 4,000,000 WLD (시민 배당금 재원 확보)
+     - `VAULT_WELFARE` (국민건강보험 및 시민복지): 3,000,000 WLD (건보 혜택 및 복지 재원 확보)
+     - `VAULT_EMERGENCY` (긴급 재난 완충): 1,000,000 WLD
+     - `VAULT_INFRA` (공공 인프라): 1,000,000 WLD
+     - `VAULT_RESERVE` (통화안정 준비금): 1,000,000 WLD
+   - 복식부기 국고 계정 잔액 = 10,000,000 WLD == 5대 금고 총합 = 10,000,000 WLD로 완전 일치.
+2. **국민건강보험(National Health Insurance) 전용 엔진 구축**:
+   - `health_insurance_configs`: 법정 건강보험요율 3.54% (354 bps), 건보공단 급여 70% 보장.
+   - `health_insurance_records`: 건보료 원천징수 및 혜택 환급 원장 테이블 신설.
+   - `health_insurance_claim_benefit`: 피로도 회복 및 의료비 발생 시 복지기금(`VAULT_WELFARE`)에서 최대 70% 즉각 환급 지급.
+3. **실행 검증 및 정상화 확인**:
+   - 건강보험 청구 테스트: 100 WLD 의료비 청구 시 70 WLD 공단 지원금 즉시 환급 (`welfare_balance_after: 2999930`) 확인 완료.
+   - 시민 배당금 테스트: 18명 대상 1인당 10 WLD 총 180 WLD 지급 및 금고 3,999,820 WLD 차감 정상 작동 확인 완료.
+4. **운영 무중단 승격 및 디스크 2차 정리**:
+   - 신규 릴리스 `prod-v2026.11.05.1762-13db973c2b` 배포 및 symlink 교체, `moneyverse-backend` / `moneyverse-frontend` 정상 active 기동.
+   - Next.js 캐시 및 임시 파일 정리로 총 9GB 디스크 공간 추가 회수 완료.
