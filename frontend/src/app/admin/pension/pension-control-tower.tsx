@@ -159,7 +159,7 @@ export function PensionControlTower({
       </div>
       {overview === null && (
         <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm text-destructive">
-          연금 관제 데이터를 확인할 수 없습니다. API 연결 또는 응답 형식을 확인하고 새로고침해 주세요. 실제 기금이 0원이라는 의미가 아닙니다.
+          연금 관련 데이터를 확인할 수 없습니다. API 연결 또는 응답 형식을 확인하고 새로고침해 주세요. 실제 기금이 0원이라는 의미가 아닙니다.
         </div>
       )}
             {/* 4대 핵심 지표 카드 */}
