@@ -3009,3 +3009,18 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## 기획 주기 v1788 — 2026-11-05 — Feature Improvement F675-252 철회 전파 무결성 개선(제안, 미구현)
+
+**주기:** 이전 v1786 기능 추가 → 현재 v1788 기능 보완 → 다음 v1790 기능 추가. 기준 main `9570c50d33b8d3acc17f2e1dd1aa2c8518ac86ad`(국고/보험 변경). F675-249~252는 Draft 제안이며 main 병합·운영 구현으로 간주하지 않는다.
+
+**안전 불변식과 판정:** 영수증 철회는 기본 DB에 먼저 확정하고 이후 이벤트를 전파한다. 모든 증빙 조회·다운로드는 권위 있는 DB 철회 세대를 직접 검사하며 철회·DB 장애·권한 불명·근거 부족 시 차단한다. 전파 감시는 참고용이며 허가 근거가 될 수 없다. `VERIFIED`는 버전이 지정된 필수 경로 등록부 전체에서 철회 세대 이상의 최신 인증 관측을 확보했을 때만 허용한다. 등록부·출처 근거 누락, 관측 만료, 관측자 권한 철회, 상충 관측은 `UNKNOWN`, 검증된 지연은 `LAGGING`, 유예 시간 이내는 `PENDING`으로 처리한다. 사고가 없다는 이유만으로 정상 추정하지 않으며 롤백으로 철회 영수증을 재활성화하지 않는다.
+
+**화면·권한:** 관리자 > 문의 > SLA 사고 > 영수증 > 전파 상태, 기본 OFF 스위치 `admin_support_receipt_revocation_propagation_v1`. 담당 감독자는 경로별 비식별 키, 관측 세대, 증빙 워터마크, 마지막 검증 시각과 조치를 확인한다. 감사자는 비식별 읽기만, 별도 사고 담당자만 사유를 기록해 지연을 확인할 수 있으며 확인은 차단 해제가 아니다. LOADING/VERIFIED/PENDING/LAGGING/UNKNOWN/ERROR/ACCESS_DENIED, 새로고침·필터 CTA, 320px 모바일, WCAG 2.2 AA, 한영 동등성, `noindex`·`no-store`.
+
+**API:** `GET /api/v1/admin/support/sla-policy/receipts/:id/revocation-propagation`은 권한 범위, 최대 100건 커서, `registryVersion`, `revocationGeneration`, `evaluatedAt`, `watermark`, 경로별 `observedGeneration`, `observationSource`, `freshUntil`, `state`, `overallState` 반환을 제안한다. `POST .../:id/propagation-acknowledgments`는 사고 담당 권한·사유·CSRF·멱등키 필수. 테넌트 열거 방지 403/404, 구세대 409, 요청 제한 429, 권위 DB 장애 503; 클라이언트의 VERIFIED 판정은 신뢰하지 않는다.
+
+**DB·작업자:** 실제 스키마를 먼저 확인한다. `(tenant_id,team_id,receipt_id)` 복합 FK, `(receipt_id,surface_key,registry_version,observed_generation,source_event_id)` 유일 불변 관측, `(tenant_id,team_id,receipt_id,verified_at DESC)` 및 `(surface_key,registry_version,verified_at DESC)` 인덱스는 EXPLAIN·보존기간 검토 후 적용한다. 서명된 관측자 신원·출처 이벤트를 보존하고 DB 시계로 신선도를 판단하며 단조 세대 CAS·펜싱 임대를 적용한다. 관측·감사·Outbox는 원자적 트랜잭션으로 기록한다. 등록부 수량 제한, 미등록·중복 경로 거부, 재생·테넌트 간 주입 차단, 개인정보 비식별화, 애플리케이션 역할의 특권 테이블 직접 쓰기 금지.
+
+**검증·배포:** P0 운영 HTTP 500/배포 SHA, DB 최소권한·마이그레이션 체크섬, 인증 Test exact-SHA E2E, 독립 백업 복원·원장 대사, 법률·금융 게이트는 계속 차단 조건이다. P1 실제 프론트·백엔드·app-api·DB 조사, 선행 F675-249/250/251 검증, 경로 0/1/100/101개, 등록부 변경, 이벤트 누락, Outbox 지연, 작업자 장애, 재생, 동시 철회, 관측자 권한 철회, 테넌트 탈출, 시계 오차, 모바일·접근성·한영 회귀 테스트. KPI 전파 지연 p95/p99, UNKNOWN 비율, 철회 다운로드 차단 성공률, 잘못된 VERIFIED 수(목표 0), 개인정보 원문 수집 금지. 기능 OFF → 인증 Test exact-SHA → 제한적 카나리 → P0 충족 후 운영; 롤백은 감시 화면·작업자만 비활성화하고 철회 자체는 유지한다. 외부 독립 근거 신규 검증 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 운영 **RELEASE HOLD**. 기획 회차에서 런타임 배포 금지.
