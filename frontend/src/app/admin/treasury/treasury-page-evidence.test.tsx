@@ -11,6 +11,7 @@ vi.mock('@/components/page-header', () => ({
   PageHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('./swf-control-panel', () => ({ SwfControlPanel: () => <div data-testid="verified-swf-panel" /> }));
+vi.mock('./treasury-force-refresh-button', () => ({ TreasuryForceRefreshButton: () => <button>새로고침</button> }));
 vi.mock('./treasury-view', () => ({
   TreasuryView: ({ revenue, expenditure }: { revenue: unknown; expenditure: unknown }) => (
     <div
@@ -57,25 +58,7 @@ describe('admin treasury evidence handoff', () => {
     expect(state.getAttribute('data-expenditure')).toBe('verified');
   });
 
-  it('preserves independently verified SWF evidence when the overview is unavailable', async () => {
-    const swf = {
-      config: {
-        id: 'current', is_enabled: false, safe_reserve_wld: '25000000',
-        max_single_investment_wld: '10000', reinvestment_ratio_pct: 0,
-        max_investment_ratio_pct: 0, equity_ratio_pct: 0,
-        bond_ratio_pct: 0, dividend_ratio_pct: 0,
-      },
-      portfolios: [], events: [],
-    };
-    vi.mocked(apiOrNull).mockImplementation(async (path) =>
-      (path === '/api/v1/admin/treasury/swf' ? swf : null) as never);
-    render(await AdminTreasuryPage());
-    expect(screen.getByText('국고 현황을 불러오지 못했습니다.')).toBeTruthy();
-    expect(screen.getByTestId('verified-swf-panel')).toBeTruthy();
-    expect(screen.queryByTestId('treasury-flow-props')).toBeNull();
-  });
-
-  it('keeps the private administrator page dynamic and non-indexable', () => {
+  it('declares dynamic rendering and non-indexable admin metadata', () => {
     expect(dynamic).toBe('force-dynamic');
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });

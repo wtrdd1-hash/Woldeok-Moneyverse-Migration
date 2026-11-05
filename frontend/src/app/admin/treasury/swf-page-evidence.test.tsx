@@ -5,6 +5,7 @@ vi.mock('@/lib/api', () => ({ apiOrNull: read }));
 vi.mock('@/lib/session', () => ({ requireAdminConsole: gate }));
 vi.mock('./swf-control-panel', () => ({ SwfControlPanel: () => <div data-testid="verified-swf-console" /> }));
 vi.mock('./treasury-view', () => ({ TreasuryView: () => <div data-testid="treasury-view" /> }));
+vi.mock('./treasury-force-refresh-button', () => ({ TreasuryForceRefreshButton: () => <button>새로고침</button> }));
 import Page, { metadata } from './page';
 
 const config = { id: 'current', is_enabled: false, safe_reserve_wld: '0', max_single_investment_wld: '100',
