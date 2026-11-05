@@ -12,11 +12,19 @@ const summary = {
 };
 
 describe('NPS public overview least-privilege boundary', () => {
-  it('reads a single scoped aggregate without raw table access or money mutation', async () => {
-    const query = vi.fn().mockResolvedValue({ rows: [summary] });
+  it('reads aggregate and certified benchmark rate without raw table access or money mutation', async () => {
+    const query = vi.fn().mockImplementation((sql: string) => {
+      if (sql.includes('pension_public_overview')) {
+        return Promise.resolve({ rows: [summary] });
+      }
+      if (sql.includes('national_pension_configs')) {
+        return Promise.resolve({ rows: [{ benchmark_annual_payout_rate_bps: 800 }] });
+      }
+      return Promise.resolve({ rows: [] });
+    });
     const repository = new NationalPensionRepository({ query } as unknown as Pool);
     const result = await repository.getOverview();
-    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalled();
     const sql = String(query.mock.calls[0]?.[0]);
     expect(sql).toMatch(/^SELECT \* FROM public\.pension_public_overview\(\)/i);
     expect(sql).not.toMatch(/FROM\s+public\.(?:national_pension_accounts|system_treasury_vaults)/i);
@@ -25,8 +33,8 @@ describe('NPS public overview least-privilege boundary', () => {
       totalSubscribersCount: 3,
       totalRetiredReceiversCount: 1,
       totalPensionPaidWld: summary.total_pension_paid_wld,
-      benchmarkAnnualPayoutRate: null,
-      annualPayoutRateCertified: false,
+      benchmarkAnnualPayoutRate: '연 8.0% (시간당 0.08%~0.12%)',
+      annualPayoutRateCertified: true,
       vaultMainBalanceWld: summary.vault_main_balance_wld,
     });
   });

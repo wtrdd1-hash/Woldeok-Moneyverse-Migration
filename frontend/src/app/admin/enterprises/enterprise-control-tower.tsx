@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
-import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw, Coins, CheckCircle2 } from 'lucide-react';
+import { Zap, Globe2, Landmark, ShieldAlert, RefreshCw, Coins, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -323,14 +323,14 @@ export function EnterpriseControlTower({
         </CardContent>
       </Card>
 
-      <p
+      <div
         id="soe-status-mutation-hold"
         role="status"
-        className="text-sm text-amber-700 dark:text-amber-400"
+        className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground"
       >
-        공기업 운영 상태는 승인 관리자만 변경할 수 있습니다. 변경 시 감사 영수증이 저장되며
-        배당 지급이나 국고 자금 이동은 실행되지 않습니다.
-      </p>
+        <ShieldCheck className="size-4 text-primary shrink-0" />
+        <span>공기업 운영 상태는 승인 관리자만 변경할 수 있습니다. 변경 시 불변 감사 영수증이 기록되며, 배당 수취는 상단의 '공기업 배당 국고 즉시 수취' 버튼을 통해 국고(VAULT_MAIN)로 원자적 집행됩니다.</span>
+      </div>
 
       {/* 2. 3대 국가 기간 공기업 (SOE) 카드 그리드 */}
       <div>

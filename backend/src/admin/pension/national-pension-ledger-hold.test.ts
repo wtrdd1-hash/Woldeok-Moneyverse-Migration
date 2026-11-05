@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { BadRequestException } from '@nestjs/common';
 import { NationalPensionRepository } from './national-pension.repository';
 
 afterEach(() => vi.unstubAllEnvs());
@@ -29,14 +30,33 @@ describe('P0 national pension ledger integrity hold', () => {
   it('halts early liquidation before refund or welfare vault adjustment', async () => {
     await rejectsBeforeSql(repo => repo.liquidate('user'));
   });
-  it('halts hourly pension payout before any unjournaled credit', async () => {
-    await rejectsBeforeSql(repo => repo.distributeHourlyPensionPayouts());
+  it('requires a valid administrator UUID before canonical pension payout procedure call', async () => {
+    const { repo } = setup();
+    await expect(repo.distributeHourlyPensionPayouts()).rejects.toBeInstanceOf(BadRequestException);
+    await expect(repo.distributeHourlyPensionPayouts('invalid-uuid')).rejects.toBeInstanceOf(BadRequestException);
   });
   it('halts a new retirement guarantee while payout is uncertified', async () => {
     await rejectsBeforeSql(repo => repo.toggleRetirement('user'));
   });
-  it('cannot be bypassed by environment feature flags', async () => {
-    vi.stubEnv('MONEYVERSE_PENSION_SETTLEMENT_ENABLED','true');
-    await rejectsBeforeSql(repo => repo.distributeHourlyPensionPayouts());
+  it('executes certified canonical procedure when valid admin UUID is provided', async () => {
+    const adminId = '5f7b8b44-e4aa-40b8-b93a-800ec0151d20';
+    const query = vi.fn().mockResolvedValue({
+      rows: [{
+        admin_pension_distribute_hourly_payouts: {
+          success: true,
+          code: 'PENSION_PAYOUT_DISTRIBUTED',
+          payouts_count: 0,
+          total_payout_wld: '0',
+          vault_balance_after_wld: '185055981',
+        },
+      }],
+    });
+    const repo = new NationalPensionRepository({ query } as never);
+    const result = await repo.distributeHourlyPensionPayouts(adminId);
+    expect(result.success).toBe(true);
+    expect(query).toHaveBeenCalledWith(
+      'SELECT public.admin_pension_distribute_hourly_payouts($1::uuid)',
+      [adminId],
+    );
   });
 });

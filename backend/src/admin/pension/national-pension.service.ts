@@ -82,9 +82,9 @@ export class NationalPensionService {
     return this.repository.liquidate(userId);
   }
 
-  async distributeHourlyPensionPayouts() {
+  async distributeHourlyPensionPayouts(actorUserId?: string) {
     this.logger.log('Executing hourly national pension payouts...');
-    const result = await this.repository.distributeHourlyPensionPayouts();
+    const result = await this.repository.distributeHourlyPensionPayouts(actorUserId);
     this.logger.log(
       `Distributed ${result.totalPayoutAmount} WLD to ${result.pensionersCount} pensioners.`,
     );

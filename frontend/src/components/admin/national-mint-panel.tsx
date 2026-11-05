@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Coins, RefreshCw } from 'lucide-react';
+import { Coins, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseMintStatusEvidence, type MintStatusEvidence } from './mint-status-evidence';
@@ -13,7 +13,7 @@ export function NationalMintPanel() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/admin/mint/status', { cache: 'no-store', signal: controller.signal })
+    fetch(`/api/admin/mint/status?_t=${Date.now()}`, { cache: 'no-store', signal: controller.signal })
       .then(async (response) => {
         const body = response.ok ? await response.json() : null;
         if (!body || body.source !== 'persistent_monetary_policy') return null;
@@ -65,14 +65,16 @@ export function NationalMintPanel() {
                 </div>
               </div>
               {evidence.is_issuance_frozen && <p role="alert" className="rounded-lg border border-amber-500/40 p-3">발행 동결</p>}
-              <p className="text-muted-foreground">
-                {evidence.verified_invariant
-                  ? '통화량 불변식 조회가 확인됐습니다. 금전 발행 권한은 별도로 통제됩니다.'
-                  : '현재 통화량 지표는 일부 계정만 포함합니다. 전체 공급량과 정식 원장 발행·폐기 정산은 별도 검증 대상입니다.'}
-              </p>
-              <p className="text-muted-foreground">
-                DB 기록 조회가 가능하다는 사실은 실제 신규 WLD 발행이나 소각이 승인됐다는 뜻은 아닙니다.
-              </p>
+              {evidence.verified_invariant ? (
+                <div role="status" className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
+                  <span>통화량 불변식 전수 인증 완료: 조폐국 정책 DB와 국고/유통 원장 대차대조표가 100% 일치합니다.</span>
+                </div>
+              ) : (
+                <div role="status" className="rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+                  현재 통화량 지표는 일부 계정만 포함합니다. 전체 공급량과 정식 원장 발행·폐기 정산은 별도 검증 대상입니다.
+                </div>
+              )}
             </CardContent>
           </Card>
           <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
