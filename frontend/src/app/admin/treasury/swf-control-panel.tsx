@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,7 +95,7 @@ export function SwfControlPanel({
 
   useEffect(() => {
     const timer = setInterval(() => {
-      void refreshSwfData();
+      void handleRefreshSwfData();
     }, 20000);
     return () => clearInterval(timer);
   }, []);
