@@ -3089,3 +3089,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - P0: 운영 배포 SHA 기준 /en·/en/login 500 및 백엔드 재시작 재검증; 이번 회차 /srv/moneyverse 심볼릭 링크 대상 부재 확인. DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검증 전 배포 HOLD.
 - P1: 미병합 #2806/#2808/#2809/#2811/#2813 중복 정리; 실제 frontend/backend/app-api/관리자/Outbox/DB 계약 검증(backend/src에서 custody 구현 확인 안 됨); F675-264..268 선행 Test exact-SHA 이후 F675-269 개발.
 - 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건, 출처·중복 제거·근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
+
+## 기획 주기 v1858 — 2026-11-06 — 기능 추가: F675-270 SLA 정책 활성화 섀도 모니터링 및 안전 롤백 승인
+
+- 주기: 이전 v1856 기능 보완; 현재 v1858 기능 추가; 다음 v1860 기능 보완. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획 전용, 기본 OFF 플래그 `admin_incident_sla_shadow_guard_v1`, 운영 RELEASE HOLD. 미병합 F675-267/268/269에 의존하며 기존 사건 기한·원장을 변경하지 않는다.
+- 목적/권한/진입: F675-269의 독립 승인 후 SLA 초과율 이상 변동을 증빙 보존 상태 변경 없이 감지한다. 관리자 > 증빙 보존 > SLA 정책 > 활성화 모니터링. 운영자는 조회·일시정지 요청, 독립 검토자는 정지·롤백 승인, 보안 담당자는 긴급 처리 비활성화만 가능하다. 위임·대리 계정을 포함한 실효 신원 분리 강제.
+- 화면/상태/CTA: 정책 버전, 불변 기준선, 섀도/활성 초과 건수 차이, 경고 임계치, 표본 수·신선도 표시. 차이 보기, 비식별 사례 확인, 일시정지 요청, 독립 승인, 향후 활성화 중지, 신규 사건에만 이전 정책 복원, 서명 영수증 내보내기. MONITORING -> ALERTED -> REVIEW_PENDING -> PAUSED -> ROLLED_BACK 또는 RESOLVED; 기준선·서명 부재 시 BLOCKED_UNKNOWN. 영수증은 불변. 자동 롤백·기존 사건 기한 소급 수정 금지.
+- 제안 관리자 API(미구현): GET /api/v1/admin/custody/sla-activations/:id/monitor; GET /:id/divergences?cursor=; POST /:id/request-pause; POST /:id/approve-pause; POST /:id/rollback-new-incidents; GET /:id/receipt. 인증 테넌트 기준 식별자 검증, 안정 커서·상한·비식별 응답. 변경 요청은 Idempotency-Key, If-Match, 쿠키 인증 CSRF, 서명 근거와 독립 검토자 필수. 타 테넌트 404, 권한 부족 403, 버전 충돌 409, 잘못된 전이 422, 한도 초과 429.
+- PostgreSQL/트랜잭션: 테넌트 복합 FK로 불변 정책 활성화/버전에 연결된 activation_monitor_runs, divergence_samples, rollback_receipts 제안. UNIQUE(tenant_id,activation_id,window_start,algorithm_version), 유한 건수·상태 CHECK, (tenant_id,status,next_check_at,id) 부분 큐 인덱스. 표본 워터마크·알고리즘 버전·기준선 해시·서명 키 ID 보존. 정책 계열 행 잠금과 활성 버전·CAS 검증 후 향후 신규 사건의 정책 포인터, 불변 영수증·감사·Outbox를 단일 트랜잭션 처리. moneyverse_app에는 검증된 SECURITY DEFINER 함수의 제한된 EXECUTE만 부여하고 직접 쓰기·원장 변경 금지.
+- 탐지/보안: 섀도 계산은 읽기 전용·시간 제한·속도 제한. 동일 테넌트·달력·시간대·사건 세대의 동등 집단만 비교하고 최소 표본·신뢰구간 충족 후 경고. 워터마크 부재, 시계 오차, 철회 서명, 활성 포인터 충돌 시 차단. 작업자 임대 펜싱·멱등 이벤트 지문·백오프·데드레터로 중복 방지. 임의 외부 URL·개인정보 KPI·자동 재전송·증빙 다운로드 권한 부여·철회 해제 금지.
+- 모바일/SEO/분석: 320px 반응형, 키보드·스크린리더 상태 알림, WCAG 2.2 AA, 영·한 동등성, 인증 관리자 noindex. KPI는 섀도 차이 오탐률, 탐지 지연 p95, 독립 정지 승인 시간, 롤백 빈도이며 테넌트별 집계·비식별만 허용.
+- 테스트/배포: 테넌트 격리, 위임 자기 승인 차단, 표본 부족·오래된 기준선, UTC/DST 달력, 임계치 경계, 동시 롤백, 작업자 중단·재실행, Outbox 역순, 서명키 철회, DB 권한 거부, 접근성·영한 및 F675-264..269 회귀. 추가형 마이그레이션·건수/체크섬 사전 검증, 별도 개발 브랜치, Test exact-SHA, 독립 검토, 기본 OFF 카나리. 롤백은 플래그·섀도 작업자만 비활성화하며 감사·영수증·기존 사건 기한 보존.
+- P0: 과거 운영 /en·/en/login 500, 백엔드 재시작, /srv/moneyverse 심볼릭 링크 문제를 운영 배포 SHA 기준 재검증. DB 최소권한·마이그레이션 체크섬, 독립 복원 훈련, 원장 대사, 국내 법률 검토 없이는 운영 승격 금지.
+- P1: 미병합 기획 PR #2813/#2815 및 선행 PR 중복 검토, 실제 Next.js 관리자·NestJS 컨트롤러·Discord Outbox·app-api·SQL 마이그레이션 계약 확인. F675-267..269 Test exact-SHA 통과 후 별도 개발 승인으로 F675-270 구현.
+- 외부 독립 레퍼런스 게이트: 이번 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·근거 분류 BLOCKED / IN PROGRESS, 달성 주장 금지.
