@@ -3210,3 +3210,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 테스트·배포: 교차 테넌트, 위임 자기 승인, 동시 상향 보고/종결, 오래된 버전, DST/휴일, 작업자 재시작·중복·지연 이벤트, 알림 실패·폭주·쿼터, 영한·모바일·접근성 회귀. 개발 별도 브랜치, 실제 DB/Outbox Test exact-SHA 증빙, OFF→제한 카나리→관찰 후 확대; 문제 시 생성 중단하되 불변 감사 보존. 기획 예약은 런타임 배포 금지.
 - P0 출시 보류: /srv/moneyverse 운영 링크 대상 없음, 과거 /en·/en/login 500·재시작은 실제 배포 SHA로 확인 필요; DB 최소권한·마이그레이션 체크섬·독립 복원·금융 원장 대사·국내 법률 검토. P1: 누적 기획 PR #2823/#2825/#2827/#2829/#2831/#2834 및 인증 #2822 충돌 정리, 실제 프론트·백엔드·app-api·DB·Outbox 계약 확인, F675-271/272/273 선행 구현.
 - 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
+
+
+## 기획 주기 v1876 — 2026-11-07 — 기능 보완: F675-274 에스컬레이션 무결성 및 기한 안전성
+
+- 주기: 이전 v1874 기능 추가 → 현재 v1876 기능 보완 → 다음 v1878 기능 추가. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획 전용, 플래그 `admin_sla_discrepancy_escalation_v1` 기본 OFF. 선행 F675-271/272/273 런타임 구현 미검증.
+- 목적·권한·진입·CTA: 관리자 > 증빙 보관 > SLA 증빙 > 불일치 > 에스컬레이션. 테넌트 준법 담당자가 정책 미리보기, 독립 감사자가 활성화 승인, 담당자가 확인·상향 보고, 지원 담당자는 비식별 집계만 조회. 화면 상태 PENDING_APPROVAL/ACTIVE/PAUSED/EXPIRED/INSUFFICIENT_DATA/REVOKED를 구분하고 미리보기·승인 요청·승인·활성화·확인·상향 보고·유예 요청·유예 검토 CTA 제공. 데이터 부족을 정상으로 표시하지 않음.
+- 불변 미리보기: 테넌트·정책군·정책 세대·IANA 시간대·휴일 달력 해시·임계값·사건 심각도 스냅샷·평가기 버전·이벤트 워터마크·영향 건수를 정규화 SHA-256 해시에 결합. 15분 이내 만료, 정책·사건·달력·키 변경 시 무효화. 승인과 활성화 시 해시·세대를 재검증하고 기존 확정 기한은 소급 변경 금지.
+- 제안 API(미구현): GET/POST /api/v1/admin/custody/sla-evidence/escalation-policies, POST /escalation-policies/:id/preview·approve·activate, GET /escalation-alerts?cursor=&state=, POST /escalation-alerts/:id/acknowledge·escalate·request-extension·review-extension. 쓰기 멱등성 키, 상태 변경 If-Match CAS, CSRF, 테넌트 RBAC, 커서 제한, 403/404/409/422/429 응답 및 교차 테넌트 존재 정보 차단. 실제 NestJS 경로와 구현 전 대조.
+- DB·트랜잭션: 정책 PK(tenant_id,id), UNIQUE(tenant_id,policy_family,generation), 활성 정책 부분 UNIQUE, 양수 임계값 및 상태 CHECK. 알림의 테넌트 복합 FK(사건·정책), UNIQUE(tenant_id,case_id,policy_generation,stage), (tenant_id,state,due_at,id) 인덱스 및 고위험 기한초과 부분 인덱스. CAS 잠금·불변 결정/감사·Outbox를 단일 트랜잭션에 기록; 작업자 펜싱과 중복 전송 방지. SECURITY DEFINER에서 실효 사용자·테넌트 검증, 앱 계정 직접 쓰기 권한 금지.
+- 독립 승인·안전: 위임을 포함한 실효 신원 분리, 작성자·담당자 자기 승인 및 자기 유예 승인 금지. UTC 확정 시각과 IANA 시간대를 보존하여 DST 처리; 유예는 사유·기한·독립 결정 필수. INVALID_SIGNATURE/REVOKED를 VERIFIED로 변경 불가. 워터마크 누락·키 철회·달력 오류·오래된 스냅샷·Outbox 장애 시 차단. 재시도 지수 백오프·테넌트 쿼터, 알림·로그·분석에서 개인정보 제외.
+- UX·SEO·KPI: 인증 관리자 화면 noindex 및 사이트맵 제외, 320px 모바일·키보드·상태 텍스트·WCAG 2.2 AA, 영문·한국어 의미 동등. KPI p95 확인 지연, 고위험 기한초과 수, 중복 알림 비율, 자기 승인 차단 수, 유예 검토 소요 시간(소수 집계 비공개).
+- 테스트·배포: 테넌트 교차 접근, 위임 자기 승인, 중복 이벤트, 오래된 If-Match, 유예·종결 동시 실행, DST/휴일, 워터마크 부족, 작업자 재시작·재생, Outbox 롤백, 속도 제한, EN/KO 동등성, 320px 접근성 회귀. 개발팀 별도 브랜치, 실제 PostgreSQL/Outbox Test exact-SHA, 독립 승인 후 단계적 승격·롤백; 기획 예약은 런타임 배포 금지.
+- P0 RELEASE HOLD: 2026-11-07 06:01 KST /srv/moneyverse → 누락된 prod-v600 대상 확인. 운영 SHA·과거 /en 및 /en/login 500/재시작, DB 최소권한, 마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검증 필요. P1: 미병합 기획 PR #2823/#2825/#2827/#2829/#2831/#2834/#2836 중복 해소, 인증 #2822 및 실제 frontend/backend/app-api/DB/Outbox 계약 대조, F675-271/272/273 선행 구현.
+- 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 수집·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
