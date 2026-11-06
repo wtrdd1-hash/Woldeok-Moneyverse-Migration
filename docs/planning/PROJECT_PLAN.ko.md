@@ -3021,3 +3021,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 분석·인수: 사건 수, 검토 지연 중앙값, 미검토 사건 경과, 잘못된 묶음 비율, 중복 제거된 데드레터 포괄률(PII 제외). 권한 분리·복합 FK·인덱스·중복 재시도·롤백·한영/a11y 회귀. 플래그 `admin_custody_delivery_incidents_v1` 기본 OFF, 확장형 마이그레이션, shadow-read, 일부 테넌트 단계 배포, Test exact-SHA 보안·작업자 복구 게이트. 플래그 OFF로 UI/API 복귀하되 불변 증거는 삭제하지 않는다.
 - P0: 운영 `/en`, `/en/login` HTTP 500, 백엔드 재시작, 릴리스 심볼릭 링크를 현재 배포 SHA 기준으로 재검증. DB 최소권한·마이그레이션 체크섬, 독립 복원, 원장 대사, 법률 검토, Test exact-SHA 전에는 운영 승격 금지. 과거 QA 기록을 현재 장애로 단정하지 않는다.
 - P1: 미병합 PR #2798/#2800/#2802/#2804 및 F675-264~266 의존성 정리, 실제 `backend/src/discord/outbox-worker.ts`, `backend/src/admin`, `frontend/src/app`, `packages/database`, app-api 계약 확인, F675-267 별도 개발 브랜치 배정. 외부 독립 근거 신규 검증 **0건**, 누적 **UNKNOWN / 10,000건**, 중복 제거·근거 분류 **BLOCKED / IN PROGRESS**.
+
+## 기획 주기 v1848 — 2026-11-06 — 기능 보완: F675-267 사건 상관분석 무결성
+
+- 주기: 이전 v1846 기능 추가, 현재 v1848 기능 보완, 다음 v1850 기능 추가. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 명세만 변경, 운영 배포 보류. v1846은 미병합 제안으로 구현 완료가 아니다.
+- 목적/대상/진입점: 테넌트 운영 감독자가 F675-265 만료 상신에 속한 F675-266 데드레터 실패를 묶어 분류한다. 종결은 별도 독립 준법 검토자만 가능하며 위임을 포함한 실효 신원으로 자기 승인을 차단한다. 묶기·종결은 재전송, 증빙 접근 제한 해제, 잔액 변경을 수행하지 않는다.
+- 화면: 테넌트별 실패 수·최장 경과·비식별 사유·최신성 목록, 사건 타임라인, 묶기·인지·독립 검토 요청·종결·비식별 영수증 내보내기 CTA. OPEN → ACKNOWLEDGED → UNDER_REVIEW → CLOSED. 서명 누락·철회는 BLOCKED_UNKNOWN으로 종결 차단. 로딩·빈 목록·403·404·버전 충돌 409·검증 422·안전한 재시도 상태 표시.
+- 제안 API(미구현): GET /api/v1/admin/custody/delivery-incidents, GET /:id, POST /group, POST /:id/triage, POST /:id/request-review, POST /:id/close, GET /:id/receipt. (created_at,id) 커서, 변경 시 Idempotency-Key 및 If-Match 필수. 동일 키에 다른 정규화 본문은 409, 타 테넌트 자원은 404, 권한 없음은 403.
+- 묶기 지문: tenant_id·escalation_id·channel·policy_version 해시. 테넌트·세대 간 혼합 금지. 데드레터 하나는 사건 세대당 항목 하나, 여러 전달 시도는 별도 불변 이력 보존. 종결 사건 재개 금지, 후속 실패는 연결된 새 세대. 수동 분리·병합은 독립 검토된 불변 감사 사건 필요.
+- 제안 DB: 상신/데드레터에 테넌트 복합 FK, UNIQUE(tenant_id,dead_letter_id,incident_generation), UNIQUE(tenant_id,group_fingerprint,generation), 상태 CHECK·양수 버전, (tenant_id,status,created_at DESC,id DESC) 및 (tenant_id,escalation_id,created_at DESC) 인덱스. 잠금/CAS 단일 트랜잭션으로 권한·연결·불변 감사·Outbox 처리. moneyverse_app에 테이블 광범위 권한을 주지 않고 제한된 SECURITY DEFINER EXECUTE 사용.
+- 보안/복구: 종결 시 서명 세대·철회 검증, 불명확하면 차단. 요청·테넌트 쿼터, 내보내기·로그 비식별, 작업자 펜싱·중복 제거. 역순 이벤트·작업자 장애·키 교체가 재전송을 유발하지 않아야 한다. 관리자 인증·noindex, 모바일 320px, 44px 터치, 키보드, WCAG 2.2 AA, 영한 동등성.
+- 지표/테스트: 개인정보 없는 분류 시간 중앙값, 장기 미처리, 오묶기 수정, 중복 제거율, 감사 완전성. 테넌트 격리·위임 자기 승인·동시 묶기/종결·CAS 충돌·멱등키 불일치·서명 철회·역순 이벤트·재시작·커서·접근성·언어 회귀.
+- 배포: 플래그 기본 OFF, 개발 별도 브랜치, 호환형 추가 마이그레이션, 백필 체크섬, Test exact-SHA DB 권한·계약·E2E 게이트 후 운영 승격. 장애 시 앱 플래그 복구·소비자 중지, 불변 감사·원장 삭제 금지.
+- P0: 운영 /en·/en/login HTTP 500, 백엔드 재시작·배포 심볼릭 링크를 실제 배포 SHA로 재검증; 독립 복원·원장 대사·마이그레이션 체크섬·DB 최소권한·국내 법률 검증은 배포 조건. P1: 중복 기획 PR 정리, 실제 backend/src/discord/outbox-worker.ts, backend/src/admin/operations.repository.ts, frontend/src/app/admin, packages/database 마이그레이션 계약 확인.
+- 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·분류 증빙 전까지 BLOCKED / IN PROGRESS.
