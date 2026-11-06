@@ -3144,3 +3144,18 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 테스트·배포·롤백: 테넌트 격리, 승인 신원, 정규화 재현성, 키 교체, 해시 손상, 일회성 토큰 경쟁, 철회·다운로드 경쟁, READY 전후 작업자 장애, 정리·만료, EN/KO 및 320px. 실제 PostgreSQL·객체 저장소 격리 Test에서 exact-SHA 검증 후 제한적 플래그 활성화, 문제 시 플래그와 토큰 발급 중단. 기존 SLA 기한·증빙 접근 제한은 변경하지 않는다.
 - P0 RELEASE HOLD: 운영 SHA와 /en /en/login 500, 재시작, /srv/moneyverse 끊어진 링크 확인; DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·법률 검토. P1: #2823 및 선행 누적 PR 정리, frontend/backend/app-api/Outbox/DB 계약 대조, #2822 인증 프로필 회귀 실패 수정.
 - 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건; 출처·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
+
+
+## 기획 주기 v1866 — 2026-11-07 — Feature Addition: F675-272 SLA 증빙 읽기 전용 검증 작업공간
+
+- 주기: 이전 v1864 기능 보완, 현재 v1866 기능 추가, 다음 v1868 기능 보완. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획만 수행하며 `admin_sla_evidence_verification_v1` 기본 OFF. 런타임·원장 변경 없음. F675-269/270/271에 의존하며 배포 완료를 가정하지 않음.
+- 목적·대상·진입: 테넌트별 준법 감사자가 원본 회원정보 없이 F675-271의 SLA 활성화 증빙을 독립 검증. 관리자 > 증빙 관리 > SLA 정책 > 증빙 > 번들 검증. 준법 검토자가 검증 요청, 별도 읽기 전용 감사자가 서명 결과 확인, 지원 담당자는 집계 오류 코드만 확인.
+- 화면·CTA·상태: 매니페스트 업로드 또는 기존 내보내기 선택, 무결성 검증, 결과 확인, 독립 검토 요청, 비식별 영수증 다운로드. NOT_STARTED, VALIDATING, VERIFIED, INCOMPLETE, INVALID_SIGNATURE, REVOKED, EXPIRED, FAILED. 출처 버전, 정규화 버전, 키 ID, 해시 일치, 누락 항목, 검증 시각과 조치 안내 표시. INVALID를 성공으로 표시하거나 업로드 키를 자동 신뢰하지 않음.
+- 제안 API(미구현): POST /api/v1/admin/custody/sla-evidence/verifications (Idempotency-Key, If-Match), GET /verifications/:id, GET /verifications/:id/findings?cursor=, POST /verifications/:id/request-review, POST /verifications/:id/approve-review (독립 실효 신원), GET /verifications/:id/receipt. 403/404/409/422/429, 불투명 테넌트 ID, 페이지·입력 크기 제한.
+- DB: 테넌트별 evidence_verification_runs, verification_findings, review_decisions, 불변 verification_receipts. (tenant_id,export_id), (tenant_id,run_id) 복합 FK; UNIQUE(tenant_id,export_id,manifest_digest,verifier_version); 상태·크기·만료 CHECK; (tenant_id,created_at DESC,id DESC) 및 검토 대기 부분 인덱스. 원본 회원정보 대신 매니페스트 해시·정제된 결과·서명 메타데이터만 보관.
+- 트랜잭션·동시성: 불변 키 이력과 원본 매니페스트 대조, 세대 잠금·CAS 상태 변경, 감사·Outbox 원자적 기록. 작업자 리스·펜싱, 결정적 중복 제거, 재실행 안전 영수증. 신뢰 키 누락·철회 시 차단. 원본 정책·기한·내보내기·원장은 절대 변경하지 않음.
+- 관리자·보안·악용 방지: 테넌트 RBAC, 위임 포함 실효 신원 독립 승인, CSRF, 업로드 용량·유형 제한, JSON 파서 제한, 허용 서명 알고리즘, 키 ID 엄격 확인, 외부 URL 조회 금지(SSRF), 속도 제한, 안전한 다운로드, 일회용 nonce, 보존·감사. 신뢰할 수 없는 HTML 렌더링 금지.
+- SEO·모바일·접근성·분석: 인증 관리자 noindex 및 사이트맵 제외, 320px 대응, 키보드 조작·상태 안내, WCAG 2.2 AA, 영문·한국어 동등 문구. 비식별 KPI는 검증 성공률, 서명 오류율, p95 소요 시간, 독립 검토 완료율, 폐기 키 오류율. 소수 회원 식별 가능 지표 배제.
+- 테스트·배포·롤백: 테넌트 침범, 위변조 매니페스트, 철회·교체 키, 정규화 불일치, 누락 객체, 중복 요청, 작업자 중단, 위임 자기 승인, nonce 재사용, 동시 철회·검증, DST 시각, 모바일·접근성·번역 회귀. 선행 기능 구현 후 별도 브랜치, OFF 플래그, Test exact-SHA, DB 최소권한·체크섬, 독립 복원·원장 대사 후 카나리. 롤백은 플래그 OFF이며 불변 영수증 삭제 금지. 기획 예약에서 운영 승격 금지.
+- P0 RELEASE HOLD: /srv/moneyverse 링크, 운영 SHA, 과거 /en 및 /en/login 500·재시작, DB 권한·체크섬, 독립 복원, 금융 원장 대사, 국내 법률 검토 재검증. P1: 미병합 기획 PR #2823/#2825 및 인증 PR #2822 회귀 확인, 실제 프론트·백엔드·app-api·Outbox·DB 계약 확인, 개발 예약의 독립 브랜치·정확 SHA 테스트 연계.
+- 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
