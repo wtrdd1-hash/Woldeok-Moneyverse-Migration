@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
 import { parseKdicOverview } from './kdic-evidence';
 import { parseKdicLedgerIntegrity, type KdicLedgerEvidence } from './kdic-ledger-evidence';
