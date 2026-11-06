@@ -12,7 +12,7 @@ import { ConsentGuard } from './consent.guard';
 import { CsrfGuard } from './csrf.guard';
 import { InternalTokenGuard } from './internal-token.guard';
 import { ReauthGuard } from './reauth.guard';
-import { SessionGuard } from './session.guard';
+import { OptionalSessionGuard, SessionGuard } from './session.guard';
 
 function contextFor(request: Partial<RequestWithSession>): ExecutionContext {
   const full = { headers: {}, method: 'GET', ...request } as RequestWithSession;
@@ -50,6 +50,27 @@ describe('SessionGuard', () => {
   it('rejects when no session matches the token', async () => {
     const guard = new SessionGuard({ get: async () => null } as never, CONFIG_INSECURE as never);
     await expect(guard.canActivate(contextFor({}))).rejects.toThrow(UnauthorizedException);
+  });
+});
+
+describe('OptionalSessionGuard', () => {
+  it('allows a cookie-free guest without requiring the session store', async () => {
+    const guard = new OptionalSessionGuard(null, CONFIG_INSECURE as never);
+    await expect(guard.canActivate(contextFor({}))).resolves.toBe(true);
+  });
+
+  it('fails closed when a cookie is presented but the session store is offline', async () => {
+    const guard = new OptionalSessionGuard(null, CONFIG_INSECURE as never);
+    const context = contextFor({ headers: { cookie: `mv_session=${'a'.repeat(64)}` } });
+    await expect(guard.canActivate(context)).rejects.toThrow(ServiceUnavailableException);
+    expect(requestOf(context).session).toBeUndefined();
+  });
+
+  it('rejects a presented cookie that cannot be resolved rather than treating it as a guest', async () => {
+    const guard = new OptionalSessionGuard({ get: async () => null } as never, CONFIG_INSECURE as never);
+    const context = contextFor({ headers: { cookie: `mv_session=${'a'.repeat(64)}` } });
+    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    expect(requestOf(context).session).toBeUndefined();
   });
 });
 
