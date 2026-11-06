@@ -110,6 +110,17 @@ describe('shop routes', () => {
     );
   });
 
+  it('fails closed for filtered member holdings when the session store is unavailable', async () => {
+    // This suite intentionally has no DATABASE_URL. A presented session cookie
+    // must never let the request reach the holdings handler without validation.
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/shop/holdings?category=general&rarity=rare')
+      .set('Cookie', `mv_session=${'a'.repeat(64)}`);
+    expect(response.status).toBe(503);
+    expect(response.body.detail).toBe('session store unavailable');
+    expect(response.body.detail).not.toBe('shop catalogue is unavailable');
+  });
+
   it('mounts the catalogue purchase command behind a session', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/shop/catalog/00000000-0000-4000-8000-000000000000/purchases')
