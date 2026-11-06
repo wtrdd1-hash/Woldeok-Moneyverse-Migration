@@ -108,6 +108,21 @@ describe('shop routes', () => {
     expect(response.body.detail, 'a guard must answer before the handler').not.toBe(
       'shop catalogue is unavailable',
     );
+    // An offline store is not evidence of an authentication boundary. A 503
+    // is acceptable here only when issued by the internal-token guard.
+    if (response.status === 503) {
+      expect(response.body.detail).toBe('internal token required');
+    }
+  });
+
+  it('rejects anonymous filtered holdings before reaching the store', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/shop/holdings?category=general&rarity=rare');
+    expect([401, 428, 503]).toContain(response.status);
+    expect(response.body.detail).not.toBe('shop catalogue is unavailable');
+    if (response.status === 503) {
+      expect(response.body.detail).toBe('internal token required');
+    }
   });
 
   it('mounts the catalogue purchase command behind a session', async () => {
