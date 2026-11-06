@@ -3172,3 +3172,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 테스트·배포: 테넌트 분리, 검증 도중 키 교체·철회, 스키마 불일치, 잘못된 유니코드, nonce 재사용, 커밋 전후 작업자 중단, 오래된 펜싱, 철회·다운로드 경합, 위임 실효 신원, DST, 모바일·접근성·양언어 회귀. 별도 개발 브랜치, 격리 Test exact-SHA, 기본 OFF→제한적 카나리, 즉시 플래그 OFF·롤백, 불변 영수증 보존. 기존 SLA 기한·금융 원장 변경 금지.
 - P0 배포 보류: miniPC /srv/moneyverse 링크 대상 없음. 운영 SHA 및 과거 /en /en/login 500·재시작 재검증, DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검토. P1: 미병합 기획 PR #2823/#2825/#2827, 인증 PR #2822 회귀, 실제 frontend/backend/app-api/outbox/DB 계약 확인 후 구현.
 - 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
+
+## 기획 주기 v1870 — 2026-11-07 — 기능 추가: F675-273 증빙 불일치 조치 대기열
+
+- 주기: 이전 v1868 기능 보완 → 현재 v1870 기능 추가 → 다음 v1872 기능 보완. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획만 수행하며 `admin_sla_evidence_discrepancy_triage_v1` 기본 OFF. 미구현 F675-271/272 선행 필요; 런타임·원장 변경 없음.
+- 목적·역할: F675-272의 VERIFIED 이외 발견 사항을 테넌트별 감사 가능한 조치 대기열로 관리하되 원본 증빙·신뢰 판정·사건 기한·금융 원장은 변경하지 않는다. 관리자 > 증빙 보관 > SLA 증빙 > 검증 발견 사항 > 조치. 준법 운영자가 등록·배정하고 증빙 담당자는 새 내보내기 세대에 수정안을 제출하며 독립 감사자가 종결 승인/거절한다. 지원 담당자는 집계만 본다.
+- 화면·CTA·상태: 조치 열기, 담당자 배정, 비식별 설명 첨부, 재검증 요청, 상신, 종결 검토, 재개. OPEN, ASSIGNED, WAITING_NEW_GENERATION, REVERIFYING, READY_FOR_REVIEW, CLOSED, REOPENED, BLOCKED. 유형·원본 해시·심각도·기한·담당자·새 세대·불변 이력을 표시한다. INVALID_SIGNATURE/REVOKED는 수동 정상 판정 불가, INCOMPLETE만 새 세대 재검증으로 해결한다.
+- 제안 API(미구현): POST /api/v1/admin/custody/sla-evidence/discrepancies (멱등성 키·발견 세대); GET /discrepancies?state=&cursor=; GET /discrepancies/:id; PATCH /discrepancies/:id/assignment (If-Match); POST /discrepancies/:id/link-reverification; POST /discrepancies/:id/request-closure; POST /discrepancies/:id/decide-closure (독립 실효 신원·If-Match); POST /discrepancies/:id/reopen. 테넌트 안전 403/404, 충돌 409, 전이 오류 422, 속도 제한 429 및 안정 커서.
+- DB·트랜잭션: discrepancy_cases의 (tenant_id,id) PK, (tenant_id,verification_run_id,finding_id) 복합 FK, UNIQUE(tenant_id,finding_id,source_generation), 심각도·상태 CHECK; 불변 discrepancy_events/closure_decisions, (tenant_id,case_id) FK, UNIQUE(tenant_id,case_id,decision_generation). (tenant_id,state,due_at,id) 인덱스와 심각한 미종결 건 부분 인덱스; 회원 개인정보 저장 금지. CAS 상태 전이·감사·Outbox를 단일 트랜잭션으로 처리하고 작업자 펜싱·재시도 중복 방지. 기존 검증 영수증 수정 금지.
+- 관리자·보안·악용 방지: 테넌트 RBAC, 담당자와 종결자의 실효 신원 분리, 위임 자기 승인 차단, CSRF, 첨부·본문 할당량, 콘텐츠 정화, 비식별 사유 코드, 악성 첨부 검사, 보존·법적 보류 및 테넌트별 속도 제한. 서명 무효·키 철회를 사람의 종결 결정만으로 VERIFIED로 변경하지 않으며 새 세대의 독립 검증 성공이 필요하다.
+- SEO·모바일·접근성·KPI: 인증 화면 noindex·사이트맵 제외, 320px 대응, 키보드 조작·상태 알림, WCAG 2.2 AA, 영어·한국어 의미 동등. 조치 p95 소요 시간, 심각한 SLA 초과 건, 재개율, 독립 종결률, 재검증 성공률을 개인정보 없이 집계한다.
+- 테스트·배포·롤백: 테넌트 격리, 중복 발견, 동시 배정, 위임 자기 승인, 키 철회, 변조된 재내보내기, 작업자 중단·재실행, Outbox 롤백, 증빙 만료, DST, 언어 동등성, 320px·키보드 테스트. 별도 개발 브랜치에서 구현하고 실제 PostgreSQL·객체 저장소의 격리 Test exact-SHA 및 권한·마이그레이션 검사 후 P0 통과 시 OFF→제한 ON; 롤백은 플래그와 신규 쓰기만 차단하며 감사 기록 보존.
+- P0 운영 보류: 2026-11-07 03:03 KST /srv/moneyverse 링크 대상 없음 확인. 운영 SHA, 과거 /en·/en/login 500·재시작, DB 최소권한·마이그레이션 체크섬, 백업 복원, 원장 대사, 국내 법률 검토 필요. P1: 누적 기획 PR #2823/#2825/#2827/#2829 분리·중복 해소, 실제 frontend/backend/app-api/DB/Outbox 계약 확인, 인증 PR #2822 최신 검사 SUCCESS(병합 증거 아님), 선행 F675-271/272 구현.
+- 외부 독립 레퍼런스: 이번 신규 검증 0건, 누적 UNKNOWN / 10,000건. 획득·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
