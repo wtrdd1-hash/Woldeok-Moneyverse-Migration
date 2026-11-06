@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
@@ -149,6 +149,13 @@ export function EnterpriseControlTower({
 }: Props) {
   const router = useRouter();
   useAdminFinanceRevalidation(() => { router.refresh(); }, { onMount: false });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      router.refresh();
+    }, 20000);
+    return () => clearInterval(timer);
+  }, [router]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
   const [governanceReasons, setGovernanceReasons] = useState<Record<string, string>>({});

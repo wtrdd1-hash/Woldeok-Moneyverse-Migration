@@ -102,6 +102,13 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
 
   useAdminFinanceRevalidation(() => refreshData(true));
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void refreshData(true);
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
+
   const fund = data?.fund;
   const institutions = data?.institutions ?? [];
   const summary = data?.summary;

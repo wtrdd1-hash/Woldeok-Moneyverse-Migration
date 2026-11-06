@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Coins, RefreshCw, CheckCircle2 } from 'lucide-react';
@@ -27,6 +27,16 @@ export function NationalMintPanel() {
       .catch(() => { if (!controller.signal.aborted) { setEvidence(null); setError(true); } })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      fetch(/api/admin/mint/status?_t=, { cache: 'no-store' })
+        .then(async (res) => (res.ok ? parseMintStatusEvidence(await res.json()) : null))
+        .then((res) => { if (res) setEvidence(res); })
+        .catch(() => {});
+    }, 20000);
+    return () => clearInterval(timer);
   }, []);
 
   return (

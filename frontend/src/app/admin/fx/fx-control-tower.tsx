@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export interface FxStatusData {
@@ -89,6 +89,13 @@ export function FxControlTower({ initialData }: { initialData: FxStatusData }) {
   const router = useRouter();
   const data = initialData;
   const refreshData = () => router.refresh();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      router.refresh();
+    }, 20000);
+    return () => clearInterval(timer);
+  }, [router]);
 
   const reserves = data.reserves;
   const txs = data.txs;

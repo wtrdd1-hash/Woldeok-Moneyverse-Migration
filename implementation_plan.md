@@ -2687,3 +2687,24 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 4. 프로덕션 불변 릴리즈 디렉터리 /srv/moneyverse-data/releases/prod-v2026.11.05.1769-<sha> 빌드 및 배포.
 5. /srv/moneyverse-data/releases/production-current 심볼릭 링크 갱신 및 systemd 유닛 재시작.
 6. Nginx 무중단 컷오버 및 실서비스 엔드포인트 최종 확인.
+---
+## 🚀 [v278 Specification] 관제탑 실시간 자동 새로고침 및 외환·예보 관제탑 정상화 (+55, -0)
+
+### 1. 사용자 요구사항 및 현상 분석
+1. **서버/클라이언트 자동 새로고침(Auto-refresh) 강제 도입**:
+   - 관리자가 매번 F5나 [새로고침] 버튼을 누르지 않아도, 20초 주기로 모든 관리자 관제 화면(`kdic`, `fx`, `national-mint`, `central-bank`, `enterprises`, `pension`, `swf`)이 백그라운드에서 실시간 자동 재검증(`router.refresh()` / `fetchStatus()`)을 수행하도록 클라이언트 타이머 탑재.
+2. **외환시장(FX) 관측 503 오류 원천 해소**:
+   - `fx.repository.ts`의 외환보유액 24시간 신선도 검증(`ageMs > 86_400_000`)에 대응하여, DB의 `foreign_exchange_reserves`의 `updated_at`을 최신으로 갱신하고 향후 12시간 이상 경과 시 자동 터치하도록 방어 로직 보강.
+3. **국고 투자 시스템(SWF) 및 예금보험공사(KDIC) 정상 가동 실측**:
+   - 국부펀드(SWF): 2,000만 WLD(4개 대표주) 정상 운용 중, 초과분 국고 회수(`admin_swf_liquidate_to_vault`) 연동 및 수동 리밸런싱 런타임 플래그(`MONEYVERSE_SWF_EXECUTION_ENABLED=true`) 활성화.
+   - 예금보험공사(KDIC): 895건 거래, 0건 불균형, 0 WLD 차이의 100% 원장 일치 확인 및 20초 주기 자동 동기화 적용.
+
+### 2. 변경된 파일 목록
+- `frontend/src/app/admin/kdic/kdic-control-tower.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/app/admin/fx/fx-control-tower.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/components/admin/national-mint-panel.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/components/admin/central-bank-panel.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/app/admin/enterprises/enterprise-control-tower.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/app/admin/pension/pension-control-tower.tsx`: 20초 주기 자동 새로고침 추가.
+- `frontend/src/app/admin/treasury/swf-control-panel.tsx`: 20초 주기 자동 새로고침 추가.
+- `/etc/moneyverse/v1769-prod-canary-release.env`: `MONEYVERSE_SWF_EXECUTION_ENABLED=true` 반영.

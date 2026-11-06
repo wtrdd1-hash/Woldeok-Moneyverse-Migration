@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminFinanceRevalidation } from '@/lib/use-admin-finance-revalidation';
 import {
   ShieldCheck,
@@ -109,6 +109,13 @@ export function PensionControlTower({
   };
 
   useAdminFinanceRevalidation(() => refreshData(true));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void refreshData(true);
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="space-y-6">

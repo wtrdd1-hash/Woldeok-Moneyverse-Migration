@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Landmark, Percent, RefreshCw, ShieldAlert, TrendingUp } from 'lucide-react';
@@ -79,6 +79,13 @@ export function CentralBankPanel() {
       if (!abort.signal.aborted) setError('서버 원장과 통화정책 DB를 확인할 수 없습니다. 성공으로 표시하지 않습니다.');
     });
     return () => abort.abort();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void reload().catch(() => {});
+    }, 20000);
+    return () => clearInterval(timer);
   }, []);
 
   useAdminFinanceRevalidation(async () => {
