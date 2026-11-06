@@ -3159,3 +3159,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 테스트·배포·롤백: 테넌트 침범, 위변조 매니페스트, 철회·교체 키, 정규화 불일치, 누락 객체, 중복 요청, 작업자 중단, 위임 자기 승인, nonce 재사용, 동시 철회·검증, DST 시각, 모바일·접근성·번역 회귀. 선행 기능 구현 후 별도 브랜치, OFF 플래그, Test exact-SHA, DB 최소권한·체크섬, 독립 복원·원장 대사 후 카나리. 롤백은 플래그 OFF이며 불변 영수증 삭제 금지. 기획 예약에서 운영 승격 금지.
 - P0 RELEASE HOLD: /srv/moneyverse 링크, 운영 SHA, 과거 /en 및 /en/login 500·재시작, DB 권한·체크섬, 독립 복원, 금융 원장 대사, 국내 법률 검토 재검증. P1: 미병합 기획 PR #2823/#2825 및 인증 PR #2822 회귀 확인, 실제 프론트·백엔드·app-api·Outbox·DB 계약 확인, 개발 예약의 독립 브랜치·정확 SHA 테스트 연계.
 - 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
+
+## 기획 주기 v1868 — 2026-11-07 — 기능 보완: F675-272 증빙 검증 신뢰·독립 검토 강화
+
+- 주기: 이전 v1866 기능 추가 → 현재 v1868 기능 보완 → 다음 v1870 기능 추가. main 기준 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획만 수행, admin_sla_evidence_verification_v1 기본 OFF, 운영 배포 없음.
+- 범위: 테넌트 준법 검토자와 독립 감사자의 읽기 전용 검증 강화. 관리자 > 보존 관리 > SLA 정책 > 증빙 > 검증. 매니페스트 업로드·선택, 무결성 검증, 결과 보기, 독립 검토 요청, 승인·반려, 영수증 다운로드 CTA. PENDING, VALIDATING, VERIFIED, INCOMPLETE, INVALID_SIGNATURE, REVOKED, EXPIRED, FAILED, REVIEWED 상태를 접근 가능하게 표시하며 VERIFIED는 법적 적합성 보증이 아니다.
+- 신뢰 기준: 요청 시 신뢰된 서명키 ID, 허용 알고리즘, 유효 기간, 철회 체크포인트, 정규 JSON 스키마 버전, 산출물 해시와 원본 내보내기 세대를 고정한다. 업로드된 매니페스트에서 신뢰 앵커를 가져오지 않는다. 영수증 발급 전 키 철회와 원본 세대를 재검증하고 사후 철회된 영수증은 과거 검증으로만 표시한다. 키 저장소 장애, 시각 모호성, 정규화 불일치는 안전 차단하고 비식별 오류를 제공한다.
+- 제안 API: POST /api/v1/admin/custody/sla-evidence/verifications(멱등성 키·If-Match 원본 세대), GET /verifications/:id, GET /verifications/:id/findings?cursor=(안정적인 ID 커서·페이지 제한), POST /verifications/:id/request-review, POST /verifications/:id/approve-review(독립 실효 신원·If-Match), GET /verifications/:id/receipt(권한 확인·일회성 전달). 403 금지, 404 타 테넌트 비노출, 409 세대 충돌, 422 매니페스트 오류, 429 요청 제한; CSRF·크기 제한. 실제 백엔드 라우트와 구현 전 대조한다.
+- DB: verification_runs UNIQUE(tenant_id,export_id,manifest_digest,verifier_version), (tenant_id,export_id) 복합 FK, 원본 세대·서명키 불변. findings (tenant_id,run_id) FK, review_decisions UNIQUE(tenant_id,run_id,decision_generation), receipts UNIQUE(tenant_id,run_id,receipt_generation), 상태·크기·만료 CHECK, (tenant_id,state,created_at DESC,id DESC) 및 검토 대기 부분 인덱스. SECURITY DEFINER로 테넌트·행위자 권한 강제, 직접 테이블 권한 금지.
+- 트랜잭션: 작업자 임대·펜싱으로 오래된 작업자 게시를 방지하고 CAS 버전·불변 감사·Outbox를 원자적으로 커밋한다. 승인과 영수증은 정확한 매니페스트 해시·세대에 결합한다. 철회·승인·재시도 경합에서 중복 신뢰 영수증 금지. READY 및 재검증 이전 객체 접근 차단; 장애는 안전한 FAILED와 멱등 재시도.
+- 보안·사용성: 위임 자기 승인 차단, 산출물 암호화, 일회성 nonce, 요청·용량 제한, 외부 URL 가져오기 금지, 비신뢰 HTML 렌더링 금지, 로그 비식별·보존 정책. 인증 관리자 noindex·사이트맵 제외, 320px 키보드·WCAG 2.2 AA 상태 알림, 영문·한국어 의미 동등. 개인정보 없는 검증 p95, 철회키 거절, 독립 검토 소요, 오탐 이의제기율, 감사 기록 충족률 KPI.
+- 테스트·배포: 테넌트 분리, 검증 도중 키 교체·철회, 스키마 불일치, 잘못된 유니코드, nonce 재사용, 커밋 전후 작업자 중단, 오래된 펜싱, 철회·다운로드 경합, 위임 실효 신원, DST, 모바일·접근성·양언어 회귀. 별도 개발 브랜치, 격리 Test exact-SHA, 기본 OFF→제한적 카나리, 즉시 플래그 OFF·롤백, 불변 영수증 보존. 기존 SLA 기한·금융 원장 변경 금지.
+- P0 배포 보류: miniPC /srv/moneyverse 링크 대상 없음. 운영 SHA 및 과거 /en /en/login 500·재시작 재검증, DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검토. P1: 미병합 기획 PR #2823/#2825/#2827, 인증 PR #2822 회귀, 실제 frontend/backend/app-api/outbox/DB 계약 확인 후 구현.
+- 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
