@@ -3075,3 +3075,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - P0: 운영 /en·/en/login 과거 500 및 백엔드 재시작은 운영 SHA 기준 재검증. 이번 회차 /srv/moneyverse 심볼릭 링크 대상 부재 확인. DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검증 전 운영 배포 금지.
 - P1: 미병합 PR #2806/#2808/#2809/#2811 중복·충돌 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 확인, F675-267/268 회귀 통과 후 개발 예약 별도 브랜치 구현. 누적 기획 PR은 중복 검토 없이 병합 금지.
 - 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·실증 근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
+
+## 기획 주기 v1856 — 2026-11-06 — 기능 보완: F675-269 SLA 정책 영향 미리보기 및 활성화 보호 강화
+
+- 주기: 이전 v1854 기능 추가; 현재 v1856 기능 보완; 다음 v1858 기능 추가. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 미병합 v1854/#2813에 의존하는 기획 전용 변경, 기본 OFF, 운영 배포 HOLD.
+- 대상/진입: 테넌트 정책 담당자가 관리자 > 증빙 보존 > SLA 정책 > 영향 비교에서 초안과 발효 시각을 선택한다. 별도 독립 준법 검토자는 미리보기 검토·승인·반려·활성화 취소 CTA를 사용한다. 상태는 DRAFT -> PREVIEWED -> PENDING_REVIEW -> APPROVED -> SCHEDULED -> ACTIVE이며 REJECTED/EXPIRED/CANCELLED/SUPERSEDED는 종결 상태로 재활성화하지 않는다.
+- 미리보기 고정: 테넌트, 초안 해시, 정책 버전, 달력·시간대·휴일 규칙 버전, 증빙 기준 시점, 사건 세대 스냅샷, 발효 시각, 계산 알고리즘 버전, 정확한 건수로 불변 preview_digest를 만든다. 생성 후 15분 또는 원천 개정 시 즉시 무효화하며 승인과 활성화 모두 트랜잭션에서 재검증한다. 자동 갱신·자동 승인은 금지하며 기존 사건의 확정 기한은 소급 변경하지 않는다.
+- 제안 API(미구현): GET /api/v1/admin/custody/sla-policies?cursor=, POST /drafts, POST /:id/preview, POST /:id/request-review, POST /:id/approve, POST /:id/schedule, POST /:id/cancel, GET /:id/impact-receipt. 인증된 테넌트와 실효 신원을 SECURITY DEFINER에서 검증하고 요청 테넌트 값을 권한 근거로 사용하지 않는다. 쓰기는 Idempotency-Key·If-Match, 쿠키 인증은 CSRF 보호가 필요하다. 교차 테넌트 404, 권한 부족 403, 스냅샷 경합 409, 잘못된 상태 422, 쿼터 초과 429를 반환한다. 미리보기·내보내기는 건수 제한·속도 제한·개인정보 마스킹을 적용한다.
+- DB: 테넌트 범위 policy_versions/policy_previews/activation_jobs, 복합 (tenant_id,id) 키·외래키, SLA 간격 음수 및 비정상 기한 방지 CHECK, UNIQUE(tenant_id,policy_family,version), ACTIVE 상태 부분 UNIQUE(tenant_id,policy_family), 활성화 큐 부분 인덱스(status,effective_at,id). 승인에는 실효 요청자·검토자·위임 관계·서명된 digest를 보존한다. 정책 계열 행 잠금 및 버전 비교 후 활성 포인터를 변경하고 불변 감사·영수증·Outbox를 단일 트랜잭션으로 기록한다. moneyverse_app에는 검토된 SECURITY DEFINER 함수 EXECUTE만 최소 부여하고 테이블 쓰기 권한은 부여하지 않는다.
+- 장애/악용: 스케줄러 지연과 무관하게 DB 시각으로 활성 버전을 강제한다. 작업자 펜싱, 활성화 멱등성 지문, 역순 Outbox·재시작 복구로 활성 버전 중복을 차단한다. 증빙 누락, 서명키 철회, 스냅샷 변경, 시간대 모호성은 BLOCKED_UNKNOWN 및 독립 검토 알림으로 처리한다. 위임 자기 승인·대량 미리보기 추출·임의 콜백 URL을 금지한다.
+- 화면/SEO/접근성/KPI: 변경 전후 초과 건수, 신규 영향 사건, 달력·시간대, UTC/현지 발효 시각, 서명 digest, 유효 시간과 명시적 확인을 표시한다. 320px, 키보드·스크린리더 WCAG 2.2 AA, 영어/한국어 동등성, 관리자 noindex·사이트맵 제외를 적용한다. 개인정보 없는 미리보기 무효화율·승인 지연·오래된 활성화 거절·롤백 복구·오탐 KPI를 측정한다.
+- 테스트/배포: DB 권한 거부·교차 테넌트·위임 신원, 만료 경계·DST·휴일·정책 경합·이중 활성화·작업자 재시작·서명 철회·기존 사건 불변·모바일/접근성/번역·F675-264..268 회귀 테스트. 추가형 마이그레이션, 건수/체크섬 드라이런과 인덱스 계획, 기본 OFF, 독립 개발 브랜치, Test exact-SHA 통합/보안/E2E, 단계적 카나리, 독립 운영 승인. 롤백은 플래그·작업자를 끄고 감사 가능한 전진 트랜잭션으로 이전 활성 정책을 복원하며 영수증은 보존한다. 원장과 증빙 접근권한 변경 금지.
+- P0: 운영 배포 SHA 기준 /en·/en/login 500 및 백엔드 재시작 재검증; 이번 회차 /srv/moneyverse 심볼릭 링크 대상 부재 확인. DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검증 전 배포 HOLD.
+- P1: 미병합 #2806/#2808/#2809/#2811/#2813 중복 정리; 실제 frontend/backend/app-api/관리자/Outbox/DB 계약 검증(backend/src에서 custody 구현 확인 안 됨); F675-264..268 선행 Test exact-SHA 이후 F675-269 개발.
+- 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건, 출처·중복 제거·근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
