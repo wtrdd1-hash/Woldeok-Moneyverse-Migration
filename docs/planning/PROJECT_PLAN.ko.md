@@ -3103,3 +3103,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - P0: 과거 운영 /en·/en/login 500, 백엔드 재시작, /srv/moneyverse 심볼릭 링크 문제를 운영 배포 SHA 기준 재검증. DB 최소권한·마이그레이션 체크섬, 독립 복원 훈련, 원장 대사, 국내 법률 검토 없이는 운영 승격 금지.
 - P1: 미병합 기획 PR #2813/#2815 및 선행 PR 중복 검토, 실제 Next.js 관리자·NestJS 컨트롤러·Discord Outbox·app-api·SQL 마이그레이션 계약 확인. F675-267..269 Test exact-SHA 통과 후 별도 개발 승인으로 F675-270 구현.
 - 외부 독립 레퍼런스 게이트: 이번 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·근거 분류 BLOCKED / IN PROGRESS, 달성 주장 금지.
+
+## 기획 회차 v1860 — 2026-11-06 — 기능 보완: F675-270 섀도 모니터 무결성과 롤백 승인
+
+- 주기: 이전 v1858 기능 추가 → 현재 v1860 기능 보완 → 다음 v1862 기능 추가. main 기준 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획만 수정, 기능 플래그 기본 OFF.
+- 목적·대상·진입점: 관리자 > 증빙 보존 > SLA 정책 > 활성화 모니터링. 준법 담당자가 불변 비교 집단, 활성/섀도 정책 버전, 이벤트 워터마크, 표본 충족률, 서명된 평가기 개정을 확인한다. CTA: 비식별 편차 확인, 일시정지 요청, 롤백 제안, 독립 승인/거절, 신규 사건용 롤백 실행, 비식별 서명 영수증 내보내기. 상태: 빈 자료·오래됨·표본 부족·차단·대기·승인·거절·실행·실패.
+- 비교 무결성: 테넌트·정책군·이벤트 시간 창·사건 세대·시간대·휴일 달력 개정이 동일한 집단만 비교한다. 지연·역순 이벤트는 워터마크 확정 전 제외. 최소 표본과 최신성 임계값을 서명된 정책에 고정한다. 표본 부족은 정상 판정이 아닌 INSUFFICIENT_DATA로 표시하고 누락 자료만으로 자동 롤백하지 않는다.
+- 권한: 위임 계정을 포함한 실효 인간 신원 기준 요청자와 독립 준법 승인자 분리. 실행 시 역할·서명·테넌트·승인 만료 재검증. 자기 승인, 테넌트 교차 접근, 정책군 불일치 차단. 일시정지는 신규 활성화만 제한하며 증빙 보존을 우회하지 않는다.
+- 제안 API(미구현): GET /api/v1/admin/custody/sla-activations/:id/monitor; GET /:id/divergences?cursor=; POST /:id/request-pause; POST /:id/request-rollback; POST /:id/approve-rollback; POST /:id/execute-rollback; GET /:id/receipts/:receiptId. 변경 요청에 CSRF, 행위자 결속 Idempotency-Key, If-Match 필수; 403/404/409/422/429 오류 구분. 커서는 테넌트·스냅샷·필터·만료에 결속.
+- PostgreSQL: 테넌트별 activation_monitor_runs, cohort_watermarks, rollback_requests, independent_approvals, 불변 rollback_receipts. 테넌트 복합 FK, UNIQUE(tenant_id,activation_id,window_start,window_end,evaluator_revision), UNIQUE(tenant_id,request_id,approval_generation), 표본/건수 범위 CHECK, 단조 워터마크, 정책군별 미처리 롤백 하나만 허용하는 부분 UNIQUE, 테넌트/시간 인덱스. 앱 계정 광범위 GRANT 금지; SECURITY DEFINER 함수 내부 행위자 권한 검증.
+- 트랜잭션: 테넌트 정책군 행 잠금, 활성 세대·서명 기준·독립 승인·만료 재검증 후 CAS로 신규 사건용 정책 포인터 변경과 영수증·감사·Outbox 원자적 기록. 멱등성 지문·작업자 펜싱으로 재시작·재시도·동시 롤백 시 중복/복수 활성화 방지.
+- 보안·SEO·접근성·KPI: 섀도 평가는 읽기 전용·속도 제한, 개인정보 마스킹, 표본/페이지 상한, 임의 외부 URL·SSRF 차단. 관리자 noindex·사이트맵 제외, 320px 모바일, 키보드, WCAG 2.2 AA, 영문/한국어 동등성, UTC/현지 시간. KPI는 표본 분모, 편차 신뢰도, 오탐, 검토 지연, 롤백 성공률, 누락 표시(개인정보 제외).
+- 회귀·배포: 표본 0/부족, DST/자정, 달력·평가기 개정, 지연/중복 이벤트, 서명 철회, 위임 자기 승인, 테넌트 격리, 작업자 중단, 동시 활성화/롤백, DB 권한 거부, 기존 사건 기한 및 증빙 제한 불변 테스트. 별도 개발 브랜치, Test exact-SHA E2E/보안/접근성, 독립 승인, 단계적 플래그 및 안전한 OFF 롤백 필수. 기획에서 운영 코드 배포 금지.
+- P0 운영 승격 보류: 실제 배포 SHA, 과거 운영 /en·/en/login 500·백엔드 재시작, /srv/moneyverse 링크 대상, DB 최소권한/마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검증. P1: 누적 PR #2813/#2815/#2818 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 및 F675-267~269 선행 구현 확인. 제안 API는 운영 구현이 아님.
+- 외부 독립 근거 신규 검증 0건, 누적 UNKNOWN/10,000건. 출처·중복 제거·근거 분류 게이트 BLOCKED / IN PROGRESS.
