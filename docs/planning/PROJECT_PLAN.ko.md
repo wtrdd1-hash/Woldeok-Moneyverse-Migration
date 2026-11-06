@@ -3009,3 +3009,18 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## 기획 주기 v1844 — 2026-11-06 — Feature Improvement (F675-266 알림 데드레터 복구 강화)
+
+- 주기: 이전 v1842 기능 추가 → 현재 v1844 기능 보완 → 다음 v1846 기능 추가. **명세 전용 / 운영 배포 보류**. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03`. 미병합 PR #2802의 F675-266을 독립적으로 보완하므로 병합 전 중복·충돌 대조가 필요하다.
+- 구현 조사: `backend/src/discord/outbox-worker.ts`, `backend/src/admin/admin.controller.ts`, `backend/src/admin/operations.controller.ts`, `frontend/src/app`, `packages/database/migrations`가 존재한다. 이는 연동 조사 지점이지 F675-266의 화면·API·DB 구현 증거가 아니다. 기존 작업자 재시도 의미, DB 권한, 관리자 인증 계약을 개발 전에 대조한다.
+- 대상·진입·화면: 인증된 테넌트 관리자 메뉴의 전달 실패 큐에서 상태·채널·경과시간 필터, 변경 불가 시도 타임라인, 비식별 페이로드 해시, `재시도 요청`, `독립 승인`, `격리`, `비식별 영수증 내보내기` CTA를 제공한다. 웹훅 전체 주소·비밀값·원문 개인정보는 표시하지 않는다. 상태는 `PENDING`, `QUARANTINED`, `REVIEW_REQUIRED`, `APPROVED`, `RETRYING`, `DELIVERED`, `FAILED_FINAL`, `BLOCKED_UNKNOWN`이며 잘못된 전이는 409다.
+- 권한: 조회·수정·내보내기마다 테넌트와 객체 RBAC를 검사한다. 요청자·기존 전달정책 책임자·독립 승인자는 위임·서비스 계정을 포함한 실효 신원 기준으로 분리한다. 다른 테넌트는 정보 노출 없는 404, 권한 부족은 403이다. 승인해도 철회·만료 증빙 접근은 복구하지 않는다.
+- 제안 API(미구현): `GET /admin/delivery-deadletters`, `GET /admin/delivery-deadletters/:id`, `POST /admin/delivery-deadletters/:id/retry-requests`, `POST /admin/delivery-deadletters/:id/approvals`, `POST /admin/delivery-deadletters/:id/quarantine`, `GET /admin/delivery-deadletters/:id/receipt`. 변경 API는 테넌트·실효 행위자·`Idempotency-Key`·`If-Match`를 요구한다. 충돌/잘못된 전이 409, 잘못된 입력 422, 할당량 초과 429로 처리한다.
+- DB: 원본 이벤트·대상에 테넌트 복합 외래키, `(tenant_id,source_event_id,target_id,generation)` 및 `(tenant_id,idempotency_key,actor_id)` UNIQUE, 유한 상태·시도 상한 CHECK, 활성 검토 부분 인덱스와 `(tenant_id,status,next_attempt_at)` 인덱스를 제안한다. 기존 SECURITY DEFINER 권한 경계를 보존하고 앱 역할에 원장·감사 직접 변경 권한을 부여하지 않는다. CAS 상태 전이·불변 감사·Outbox를 단일 트랜잭션으로 묶고 작업자 펜싱 토큰으로 오래된 완료 처리를 거절한다.
+- 재시도 보안: 지터 포함 지수 백오프, 최대 횟수, 테넌트·채널별 제한, 목적지 허용목록과 DNS 재바인딩·사설 IP·리다이렉트 차단, 서명된 페이로드 해시·키 세대 검증, 중복 영수증·역순 이벤트 방어를 요구한다. 승인은 제한된 1회 전달 시도만 허용한다. 원본 매니페스트 누락·철회 키는 `BLOCKED_UNKNOWN`으로 실패 차단한다.
+- 모바일·접근성·SEO·KPI: 320px 카드형 대응, 키보드·스크린리더 상태 안내, WCAG 2.2 AA, 영문·한국어 동등 메시지, 관리자 noindex를 적용한다. 개인정보 없는 대기시간 p95·재시도 성공률·중복 억제·검증불가·승인 분리 위반 지표를 수집하고 목표는 기준선 측정 후 정한다.
+- 테스트·승격: 401/403/404/409/422/429, 테넌트 격리, 위임 자기승인, 멱등 중복, CAS 경합, 작업자 장애·펜싱, 횟수 상한, DNS 재바인딩, 키 철회, 역순 이벤트, 영문·한국어·모바일·접근성 회귀를 검증한다. 개발 별도 브랜치 → Test exact-SHA 인증 E2E → 마이그레이션·권한 대사 → 사람 승인 운영승격·롤백 증빙 순서다. 기획 예약은 런타임을 배포하지 않는다.
+- P0: 과거 운영 `/en`, `/en/login` 500·백엔드 재시작·배포 링크 문제를 현재 배포 SHA로 재검증한다. DB 최소권한·마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검토, Test exact-SHA는 증빙 전까지 차단이다. 과거 보고만으로 현재 장애를 단정하지 않는다.
+- P1: PR #2798/#2800/#2802 및 F675-264/265 의존성 정합성, 실제 frontend/backend/app-api/DB 계약 조사, 별도 개발 담당의 F675-266 구현·회귀 테스트를 추적한다.
+- 외부 독립 레퍼런스: 이번 신규 검증 **0건**, 누적 **UNKNOWN / 10,000건**. 수집·중복 제거·출처 분류 **BLOCKED / IN PROGRESS**, 달성 주장 금지.
