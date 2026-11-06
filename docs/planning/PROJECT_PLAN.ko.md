@@ -566,10 +566,10 @@
 - **근거:** [v600 작업 기록](../worklog/2026-10-14-authority-runtime-reconciliation-v600.md), [GitHub 업데이트](../updates/v2026.10.14.600-github.ko.md).
 
 
-> **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
+> **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)
 > **현재 통합 버전:** v2026.10.10.543
 > **구현·증거 동기화:** 2026-10-10 (v543/v542 통합 기록)
-> **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
+> **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > **기존 완료도 기록(역사적 증거, 현행 권위 아님):** [기획 공백 해소 및 수용증거 명세](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
@@ -3062,3 +3062,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - P0: 운영 /en·/en/login 과거 500, 백엔드 재시작·릴리스 심볼릭 링크를 배포 SHA로 재검증하고 DB 권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검증 전 운영 배포 금지.
 - P1: 기획 PR #2806/#2808/#2809 중복 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 확인, F675-264~267 선행 구현 검증 후 개발 예약의 별도 브랜치·Test exact-SHA 연계.
 - 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건, 중복 제거·출처·분류 게이트 BLOCKED / IN PROGRESS.
+
+
+## 기획 주기 v1854 — 2026-11-06 — 기능 추가: F675-269 SLA 정책 사전 영향 예측 및 활성화 보호
+- 주기: 이전 v1852 기능 보완, 현재 v1854 기능 추가, 다음 v1856 기능 보완. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 명세만 작성, 플래그 `admin_incident_sla_policy_preview_v1` 기본 OFF, 운영 RELEASE HOLD. 미병합 F675-267/268에 의존하며 기존 사건 기한은 변경하지 않는다.
+- 목적·대상: 준법 정책 담당자와 독립 검토자가 SLA 달력 변경 전 영향도를 결정적으로 미리 계산해 대량 오탐 상신과 시간대 오류를 방지한다. 진입점: 관리자 > 증빙 보관 > 전달 실패 사건 > SLA 정책 > 변경 미리보기. 작성자는 초안·미리보기만, 별도 실효 신원의 준법 검토자는 승인, 보안 운영자는 긴급 비활성화만 허용. 위임·대리 계정 자기 승인 금지.
+- 화면·상태·CTA: IANA 시간대, 영업일 달력 버전, 인지·검토 기한, UTC 적용 시각 입력; 영향 미리보기, 현행 비교, 독립 검토 요청, 승인, 예약 활성화, 취소, 비식별 증빙 내보내기. DRAFT -> PREVIEWED -> REVIEW_PENDING -> APPROVED -> SCHEDULED -> ACTIVE; REJECTED/CANCELLED/SUPERSEDED 종료. 미리보기는 15분 경과 또는 정책·원천 사건 세대 변경 시 무효화하며 활성화에는 최신 다이제스트와 이중 승인이 필요하다. 모바일 320px, WCAG 2.2 AA, 영한 동등, 관리자 인증·noindex.
+- 관리자 API 제안 7개: POST /admin/custody/sla-policies/drafts, POST /admin/custody/sla-policies/{id}/preview, GET /admin/custody/sla-policies/{id}/impact?cursor=, POST /admin/custody/sla-policies/{id}/request-review, POST /admin/custody/sla-policies/{id}/approve, POST /admin/custody/sla-policies/{id}/activate, POST /admin/custody/sla-policies/{id}/cancel. 실제 계약과 구현 검토 필요. 쓰기는 테넌트 RBAC, Idempotency-Key, If-Match, 쿠키 인증 CSRF 필수; 타 테넌트 404, 구버전 409, 잘못된 정책 422, 권한 부족 403. 결과는 집계와 비식별 예시만 커서 페이지네이션.
+- DB: tenant_id 복합 FK, UNIQUE(tenant_id,policy_key,version), UNIQUE(tenant_id,preview_digest), 상태·UTC 적용 시각·양수 기한·IANA 시간대 CHECK(시간대 유효성은 검증 함수로 확인), 테넌트별 활성 정책 부분 UNIQUE, (tenant_id,state,effective_at,id) 및 (tenant_id,expires_at) 인덱스. 다이제스트는 정책 바이트·달력 스냅샷 체크섬·사건 워터마크·원천 세대·미리보기 시각에 결합한다. 활성화 트랜잭션은 정책 키 잠금, 독립 승인·최신 다이제스트·워터마크 확인, 불변 감사·Outbox 원자 기록. 기존 사건 deadline_at·정책 스냅샷 재계산 금지.
+- 보안·악용 방지: 테넌트 내 읽기 전용 미리보기, 예시 최대 100건, 사용자·테넌트 속도 제한, 개인정보 비식별, 외부 달력 URL·SSRF 차단, 승인된 달력 스냅샷만 사용, DST·휴일 변동 검사. SECURITY DEFINER 최소 EXECUTE, 앱 계정 직접 테이블 쓰기 금지. 활성화가 증빙 접근, 데드레터 재전송, 원장 변경, 기존 사건 소급 종결을 허용하지 않는다.
+- KPI·테스트·배포: 미리보기 대비 활성화율, 롤백 횟수, 예상 기한 초과 변화, SLA 오탐 수; 개인정보 분석 금지. UTC 자정·DST·휴일 달력 버전·동시 승인·워터마크 만료·교차 테넌트·위임 자기 승인·멱등 재시도·Outbox 장애·DB 권한·접근성·영한·F675-264~268 회귀. 추가형 마이그레이션과 체크섬 드라이런, 별도 개발 브랜치 Test exact-SHA, 플래그 카나리·독립 운영 승인; 롤백 시 새 활성화·작업자 중단, 불변 정책·영수증 보존.
+- P0: 운영 /en·/en/login 과거 500 및 백엔드 재시작은 운영 SHA 기준 재검증. 이번 회차 /srv/moneyverse 심볼릭 링크 대상 부재 확인. DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검증 전 운영 배포 금지.
+- P1: 미병합 PR #2806/#2808/#2809/#2811 중복·충돌 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 확인, F675-267/268 회귀 통과 후 개발 예약 별도 브랜치 구현. 누적 기획 PR은 중복 검토 없이 병합 금지.
+- 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·실증 근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
