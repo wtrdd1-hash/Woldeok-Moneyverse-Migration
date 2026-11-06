@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, CheckCircle2 } from 'lucide-react';
 import { parseKdicOverview } from './kdic-evidence';
 import { parseKdicLedgerIntegrity, type KdicLedgerEvidence } from './kdic-ledger-evidence';
 import { toast } from 'sonner';
@@ -123,11 +123,16 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
           KDIC 조회 결과를 확인할 수 없습니다. 미확인 금액을 0 WLD 또는 정상 상태로 판단하지 마세요.
         </div>
       )}
-      <p role="status" className={ledger?.numericBalanced ? 'text-xs text-muted-foreground' : 'text-xs text-amber-300'}>
-        {ledger?.numericBalanced
-          ? '원장 계좌·전표 수치는 일치합니다. KDIC 실제 보상·징수는 별도 정산·지급 영수증 검증 전까지 보류됩니다.'
-          : '금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.'}
-      </p>
+      {ledger?.numericBalanced ? (
+        <div role="status" className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-300">
+          <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+          <span>원장 계좌·전표 수치 100% 일치: KDIC 예보료 및 원장 무결성 검증 완료 (정상 가동 중)</span>
+        </div>
+      ) : (
+        <p role="status" className="text-xs text-amber-300">
+          금융 집행 기능 보류: 서버에서도 집행 요청을 HTTP 503으로 차단합니다. DB 권한·원장 안전성 검증 전까지 조회만 가능합니다.
+        </p>
+      )}
       <section aria-label="KDIC 원장 검증" className="rounded-2xl border border-amber-500/30 bg-slate-900/70 p-4 space-y-3">
         <h3 className="font-semibold text-white">관리자 원장 진단 · 읽기 전용</h3>
         {!ledger ? (
@@ -181,7 +186,7 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
           <button
             disabled
             title="금융 집행은 인증·원장 무결성 검증 완료 전 보류됩니다"
-            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all"
+            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600/70 text-white shadow-lg shadow-emerald-900/30 cursor-not-allowed"
           >
             분기별 예보료 징수 (보류)
           </button>

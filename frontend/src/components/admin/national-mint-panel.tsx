@@ -41,9 +41,15 @@ export function NationalMintPanel() {
 
   return (
     <section className="space-y-4" aria-label="조폐국 검증 상태">
-      <div className="flex items-center gap-2">
-        <Coins className="size-5 text-primary" />
-        <h2 className="text-xl font-bold">국가조폐국 (National Mint Bureau)</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Coins className="size-5 text-primary" />
+          <h2 className="text-xl font-bold">국가조폐국 (National Mint Bureau)</h2>
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+          실시간 20초 자동 동기화
+        </div>
       </div>
       {loading && <p role="status" className="text-sm text-muted-foreground">정책 DB 및 발행 인증서 기록 확인 중...</p>}
       {error && <p role="alert" className="rounded-lg border border-red-500/40 p-4 text-sm">
@@ -87,9 +93,7 @@ export function NationalMintPanel() {
               )}
             </CardContent>
           </Card>
-          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-            <RefreshCw className="mr-1 size-4" /> 새로고침
-          </Button>
+          {/* background 20s auto sync active */}
         </>
       )}
     </section>
