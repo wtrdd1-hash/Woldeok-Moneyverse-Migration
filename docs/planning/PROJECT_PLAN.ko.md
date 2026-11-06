@@ -3035,3 +3035,18 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 배포: 플래그 기본 OFF, 개발 별도 브랜치, 호환형 추가 마이그레이션, 백필 체크섬, Test exact-SHA DB 권한·계약·E2E 게이트 후 운영 승격. 장애 시 앱 플래그 복구·소비자 중지, 불변 감사·원장 삭제 금지.
 - P0: 운영 /en·/en/login HTTP 500, 백엔드 재시작·배포 심볼릭 링크를 실제 배포 SHA로 재검증; 독립 복원·원장 대사·마이그레이션 체크섬·DB 최소권한·국내 법률 검증은 배포 조건. P1: 중복 기획 PR 정리, 실제 backend/src/discord/outbox-worker.ts, backend/src/admin/operations.repository.ts, frontend/src/app/admin, packages/database 마이그레이션 계약 확인.
 - 외부 독립 근거: 신규 검증 0건, 누적 UNKNOWN / 10,000건. 출처·중복 제거·분류 증빙 전까지 BLOCKED / IN PROGRESS.
+
+## 기획 주기 v1850 — 2026-11-06 — 기능 추가: F675-268 사건 SLA 초과 독립 상신
+
+- 주기: 이전 v1848 기능 보완, 현재 v1850 기능 추가, 다음 v1852 기능 보완. main 기준 0b5b2b1385d2a75614d39458dff94f7d3098ed03, 미병합 v1848 기획을 기반으로 한 제안. 문서 전용, 플래그 기본 OFF, 운영 배포 보류.
+- 목적·대상·진입점: F675-267 알림 전달 실패 사건의 인지·검토 기한이 초과될 때 운영 감독자가 이를 확인하고 독립 준법 검토자가 조치하도록 한다. 관리자 > 증빙 관리 > 전달 실패 사건 > SLA 초과. 기한 초과는 알림 재전송이나 증빙 열람 권한을 부여하지 않는다.
+- 권한·상태: 감독자는 조회·인지, 독립 준법 검토자는 담당자 배정·증빙 최신성 확인 후 종결. 요청자·종결자·위임 실효 신원과 독립 검토자 분리. OPEN → ACKNOWLEDGED → UNDER_REVIEW → RESOLVED; 새로운 불변 사건 세대로 대체되면 INVALIDATED. 테넌트·정책·서명·증빙 확인 불가 시 BLOCKED_UNKNOWN.
+- 화면·CTA: 테넌트별 기한 UTC/현지 시각, 초과 시간, 비식별 사건 해시, 채널, 심각도, 검토자, 상태를 표시. 사건 보기·인지·독립 검토자 지정·시정 요청·종결·비식별 영수증 내보내기. 확인 대화상자·충돌 시 새로고침·320px 모바일·키보드/스크린리더·WCAG 2.2 AA·영어/한국어 동등성·관리자 noindex/sitemap 제외.
+- 제안 관리자 API(미구현): GET /api/v1/admin/custody/incident-sla-breaches?cursor=, GET /:id, POST /:id/acknowledge, POST /:id/assign-reviewer, POST /:id/request-remediation, POST /:id/resolve, GET /:id/receipt. 테넌트 서버 판정, RBAC 및 SECURITY DEFINER 실효 행위자 검증, 쓰기 멱등성 키·If-Match/CAS; 403/404(타 테넌트 은닉)/409/422, 제한된 페이지네이션·호출량.
+- 제안 DB: custody_incident_sla_breaches(tenant_id,id,incident_id,incident_generation,policy_version,deadline_at,status,version,assigned_reviewer,created_at,resolved_at). 테넌트 복합 FK, UNIQUE(tenant_id,incident_id,incident_generation,policy_version), 상태·버전·기한 CHECK, 미해결 (tenant_id,status,deadline_at,id) 부분 인덱스. 불변 영수증·감사·Outbox를 단일 트랜잭션 처리. moneyverse_app에 광범위한 테이블 권한을 주지 않고 SECURITY DEFINER 함수의 제한적 EXECUTE만 부여.
+- 기한·동시성·복구: 사건 시작 시각과 불변 정책 스냅샷으로 기한 계산. 작업자 중단에도 DB 현재 시각 기준 조회·인가에서 기한 초과 강제. 사건 행 잠금 및 결정적 중복 제거 키로 한 세대당 한 건 생성, 감사·Outbox 원자성 보장. 중복·역순 이벤트, 작업자 재시작, 서명키 철회, 세대 불일치는 자동 종결하지 않고 차단.
+- 보안·분석: 테넌트 격리, 위임 자기 승인 차단, 쿼터·개인정보 마스킹·임의 콜백 금지. 재전송은 F675-266의 별도 승인 절차만 허용. SLA 종결은 원본 증빙 보존·철회·다운로드 제한·금융 원장·사건 이력을 변경하지 않는다. KPI는 1000건당 초과율, 인지 지연 p50/p95, 미처리 경과 시간, 독립 검토 완료율 및 오탐률(PII 제외).
+- 검증·배포: DB 최소권한, 교차 테넌트, 위임 우회, 동시 배정/종결, 기한 경계, 정책 교체, Outbox 중복, 작업자 재시작, 서명 철회, 모바일/a11y/영한 동등성 및 F675-264~267 회귀. 별도 개발 브랜치·추가형 마이그레이션·백필 건수/체크섬·기본 OFF·Test exact-SHA·단계적 카나리·독립 승인. 롤백은 플래그/작업자 중단만 수행하고 영수증 보존, 파괴적 마이그레이션 금지.
+- P0: 운영 /en 및 /en/login 과거 500, 백엔드 재시작, 릴리스 심볼릭 링크와 실제 배포 SHA 재검증, DB 최소권한·마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검증 전 운영 배포 보류.
+- P1: 미병합 PR #2806/#2808 및 선행 중복 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 검증, F675-264~267 선행 구현 확인 후 개발 예약에서 별도 브랜치 구현.
+- 외부 독립 레퍼런스: 신규 검증 0건, 누적 UNKNOWN/10,000건. 출처·중복 제거·근거 분류 게이트 BLOCKED/IN PROGRESS.
