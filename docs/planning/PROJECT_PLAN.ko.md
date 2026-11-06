@@ -3117,3 +3117,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 회귀·배포: 표본 0/부족, DST/자정, 달력·평가기 개정, 지연/중복 이벤트, 서명 철회, 위임 자기 승인, 테넌트 격리, 작업자 중단, 동시 활성화/롤백, DB 권한 거부, 기존 사건 기한 및 증빙 제한 불변 테스트. 별도 개발 브랜치, Test exact-SHA E2E/보안/접근성, 독립 승인, 단계적 플래그 및 안전한 OFF 롤백 필수. 기획에서 운영 코드 배포 금지.
 - P0 운영 승격 보류: 실제 배포 SHA, 과거 운영 /en·/en/login 500·백엔드 재시작, /srv/moneyverse 링크 대상, DB 최소권한/마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검증. P1: 누적 PR #2813/#2815/#2818 정리, 실제 frontend/backend/admin/outbox/app-api/DB 계약 및 F675-267~269 선행 구현 확인. 제안 API는 운영 구현이 아님.
 - 외부 독립 근거 신규 검증 0건, 누적 UNKNOWN/10,000건. 출처·중복 제거·근거 분류 게이트 BLOCKED / IN PROGRESS.
+
+## 기획 주기 v1862 — 2026-11-06 — Feature Addition: F675-271 SLA 정책 활성화 증빙 내보내기
+
+- 주기: 이전 v1860 기능 보완; 현재 v1862 기능 추가; 다음 v1864 기능 보완. main 기준 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획 문서만 수정하며 admin_sla_activation_evidence_export_v1 기본 OFF.
+- 목적/권한/진입점: 준법 검토자와 읽기 전용 감사자가 F675-269/270 활성화, 섀도 편차, 승인, 신규 사건에만 적용하는 롤백의 비식별 검증 증빙을 내보냄. 관리자 > 증빙 보존 > SLA 정책 > 활성화 > 증빙 > 내보내기 요청.
+- 화면/상태/CTA: 내보내기 요청, 범위 검토, 영수증 다운로드; QUEUED, GENERATING, READY, EXPIRED, REVOKED, FAILED, BLOCKED. 생성 시각, 정책 세대, 불변 코호트 해시, 범위 및 제외 항목 표시; 회원 원본 식별자와 만료된 증빙 다운로드 링크 제외.
+- 제안 API(미구현): POST /api/v1/admin/custody/sla-activations/:id/evidence-exports (Idempotency-Key, If-Match, 목적 범위); GET /:id/evidence-exports/:exportId; GET /:id/evidence-exports/:exportId/download (단기 서명 일회성 URL); POST /:id/evidence-exports/:exportId/revoke; GET /:id/evidence-exports?cursor=. 403/404/409/410/422/429 및 제한된 커서 페이지네이션.
+- PostgreSQL: 테넌트별 activation_evidence_exports, export_artifacts, 복합 테넌트/활성화 외래키, UNIQUE(tenant_id,activation_id,idempotency_key), 상태/만료/크기 CHECK, (tenant_id,created_at DESC,id) 및 대기 상태 인덱스. 불변 해시·출처 매니페스트·스키마 버전; 좁은 SECURITY DEFINER 경계 외 직접 테이블 접근 금지.
+- 트랜잭션: 요청 생성과 감사/Outbox 원자적 처리, 작업자 임대·펜싱과 CAS 상태 변경, 체크섬·서명 검증 후에만 결과 공개. 철회 시 토큰 무효화 및 불변 감사 추가; 재실행 멱등성과 중복 접근 방지.
+- 보안: 테넌트 RBAC, 민감 범위 독립 준법 승인, 위임 신원 분리, CSRF, 수신 대상·TTL 제한 서명 URL, 안전한 MIME, 저장 경로 허용 목록, 암호화, 속도·크기 할당량, 개인정보 마스킹 및 존재 여부 추측 방지. 서명키 철회·원천 스냅샷 불완전·해시 불일치 시 차단.
+- SEO/모바일/접근성/지표: 인증 관리자 noindex 및 사이트맵 제외, 320px 키보드 중심 진행·다운로드, WCAG 2.2 AA, 영한 동등성. 내보내기 p95, 실패·철회율, 감사 커버리지; 분석에 개인정보 미수집.
+- 회귀/배포: 테넌트 침범, 만료·재사용 토큰, 위임 자기 승인, 원천 누락, 작업자 중단, 중복 작업, 해시 훼손, 서명 교체, 철회/다운로드 경합, 영한·모바일 테스트. 별도 개발 브랜치, OFF 플래그, exact-SHA Test, 카나리, 즉시 비활성화·롤백; 기존 SLA 기한과 증빙 접근권은 변경하지 않음.
+- P0 운영 승격 보류: 운영 SHA 및 /en, /en/login 500·재시작·심볼릭 링크 재검증, DB 최소권한, 마이그레이션 체크섬, 독립 복원, 원장 대사, 법률 검토. P1: 미병합 #2818/#2820 정리, 실제 frontend/backend/app-api/outbox/DB 계약 확인 및 F675-269/270 선행 검증 후 구현.
+- 외부 독립 레퍼런스: 이번 검증 0건, 누적 UNKNOWN / 10,000건; 출처·중복제거·근거분류 BLOCKED / IN PROGRESS.
