@@ -1,3 +1,32 @@
+## v2026.11.06.0832 — F675-263 증빙 재검증 보호 강화 (FEATURE IMPROVEMENT / RELEASE HOLD)
+
+주기: 이전 Addition v1830 → 현재 Improvement v1832 → 다음 Addition v1834. 미병합 PR #2789 기반 제안이며 운영 구현이 아니다. 시작·중간 main SHA 0b5b2b1385d2a75614d39458dff94f7d3098ed03.
+
+불변조건: 시도마다 테넌트·이의신청·원본 증빙 세대·SHA-256 매니페스트·서명키 세대·정책 버전·요청 버전을 결합한다. 일치·확인·내보내기·만료·취소·재시도로 원본 철회·보존·다운로드 제한·종결을 해제하지 않는다. 누락·철회·만료·검증 불능은 BLOCKED_UNKNOWN으로 차단한다. 요청자·원 판정자·확인자는 위임 계보를 포함한 실효 신원으로 분리한다.
+
+API·상태: 기존 관리자 API 6개 제안 유지. 생성·확인·내보내기마다 테넌트 권한 및 세션 재검증. Idempotency-Key 범위는 테넌트+행위자+작업+정규화 요청 해시, If-Match 충돌 409, 잘못된 전이 422, 권한 없음 403, 타 테넌트 자원 404. NOT_REQUESTED→QUEUED→VERIFYING→MATCHED/MISMATCHED/BLOCKED_UNKNOWN, MATCHED→ATTESTED는 독립 재검증 후만 허용. CANCELLED 종결, MISMATCHED/BLOCKED_UNKNOWN 확인 금지. 재시도는 불변 신규 시도로 기록. 목록 커서는 테넌트·정렬·필터·만료 결합.
+
+DB·트랜잭션: 테넌트 복합 FK, UNIQUE(tenant_id,dispute_id,attempt_no), 활성 시도 부분 UNIQUE, ATTESTED 확인자 및 version>=1 CHECK, 검증 시작 시 매니페스트·키 세대 필수. 행 잠금/CAS로 확인·취소·재시도 경합 처리. 상태+불변 감사+Outbox 단일 트랜잭션. 작업자 안정적 이벤트 ID·펜싱·백오프·데드레터·멱등 소비. 원본 증빙 로그/Outbox 금지.
+
+관리자·보안·모바일·분석: 원본 세대·검증 최신성·실효 검토자·BLOCKED_UNKNOWN 사유·안전 재시도 CTA 표시, 철회 우회 금지. 비식별 내보내기는 단기 서명·범위 제한·감사. CSRF·속도/크기 제한, 관리자 noindex, 모바일 320px, WCAG 2.2 AA, 영·한 동등성. 개인정보 제외 KPI: 검증 불능률·불일치 처리 시간·중복 차단·확인 지연. 실제 PostgreSQL 동시성·테넌트 격리·위임 자기 승인·키 교체·변조·작업자 장애·Outbox 역순·접근성·롤백 테스트. 플래그 기본 OFF, Test exact-SHA 및 롤백 근거 확보 전 운영 금지. 기획 예약은 배포하지 않는다.
+
+P0: 과거 Production /en·/en/login HTTP 500, 재시작·심볼릭 링크·배포 SHA 재검증, DB 권한/체크섬·독립 복원·원장 대사·국내 법률 검증. P1: PR #2789와 main 정합성, F675-260/261/262 선행 구현, 실제 frontend/backend/app-api/DB 계약 확인. backend/src·frontend/src 제한적 검색에서 replay-checks 구현 미발견(전수 확인 아님). 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000건, 게이트 BLOCKED / IN PROGRESS.
+## v2026.11.06.0730 — F675-263 독립 이의신청 증빙 재검증 보호 (FEATURE ADDITION / 제안 / RELEASE HOLD)
+
+주기: 이전 Improvement v1828 → 현재 Addition v1830 → 다음 Improvement v1832. F675-260/261/262 선행 기능의 main 구현은 미입증. 기획만 수행하며 런타임 배포 없음.
+
+**목적·대상·진입·CTA:** 준법 감독자가 F675-262 이의신청 종결 전에 증빙 재현성을 검증한다. 관리자 이의신청 상세 > 재검증, 매니페스트 확인, 독립 확인 요청, 비식별 영수증 내보내기. 테넌트별 요청/독립 확인 권한 분리. 신청자·기존 판정자·위임 주체·확인자의 실효 사용자는 달라야 하며 테넌트 침범·만료 위임은 차단한다.
+
+**상태·화면:** NOT_REQUESTED, QUEUED, VERIFYING, MATCHED, MISMATCHED, BLOCKED_UNKNOWN, ATTESTED, CANCELLED. 원본 이의신청, 불변 SHA-256 매니페스트, 서명키 세대, 검증 시각, 확인자를 표시한다. 불일치가 원본 증빙·판정·원장을 덮어쓰지 않으며 보존·철회·다운로드 제한을 유지한다.
+
+**관리자 API 제안 6개(실제 코드 계약 검증 전):** POST /admin/custody/disputes/:id/replay-checks (Idempotency-Key, If-Match), GET /admin/custody/disputes/:id/replay-checks, GET /admin/custody/replay-checks/:id, POST /admin/custody/replay-checks/:id/attest (If-Match), POST /admin/custody/replay-checks/:id/cancel, GET /admin/custody/replay-checks/:id/redacted-receipt. 권한 없음 403, 버전 충돌 409/412, 증빙·서명키 검증 불가 423 BLOCKED_UNKNOWN. 불투명 식별자, 테넌트 범위 커서 페이지네이션, 결정적 멱등 응답.
+
+**DB·트랜잭션:** custody_dispute_replay_checks(tenant_id,check_id,dispute_id,attempt_no,status,manifest_sha256,key_epoch,requested_by,attested_by,version,created_at,updated_at). (tenant_id,dispute_id) 복합 FK, (tenant_id,dispute_id,attempt_no) UNIQUE, 시도번호 양수·버전 음수 금지 CHECK, 상태 제약, 활성 시도 부분 UNIQUE 및 (tenant_id,created_at DESC,check_id) 인덱스. 시도·불변 감사·Outbox 단일 트랜잭션, CAS, 사용자별 멱등성, 작업자 펜싱과 중복 제거. 재검증 전후 매니페스트와 서명키 철회 세대를 확인하고 UNKNOWN을 임의 MATCHED로 변경 금지.
+
+**보안·화면·KPI·배포:** 관리자 noindex,nofollow, 로그·분석 PII 배제, 속도 제한, CSRF, 요청 크기 제한, 세션 재검증, 단기 서명 비식별 내보내기, 불일치 경보. 모바일 320px, WCAG 2.2 AA 키보드·스크린리더, 한영 동등성. 검증 완료율·불일치 정확도·독립 확인 시간·UNKNOWN 비율·중복 제거율 측정. 테넌트 격리, 위임 자기 승인, 동시 확인/취소, 역순 Outbox, 서명키 철회, 해시 불일치, PostgreSQL 제약·롤백 회귀 테스트. 기본 OFF admin_custody_dispute_replay_guard_v1. Test exact-SHA E2E, 마이그레이션·롤백 리허설, 운영 승인 전 Production 활성화 금지. 롤백은 불변 기록 보존.
+
+**P0/P1·외부 근거 게이트:** P0 과거 Production /en, /en/login HTTP 500, 재시작·심볼릭 링크·배포 SHA 재확인, DB 최소권한·체크섬·복원, 금융 원장 대사, 국내 법률 검증. P1 열린 PR과 실제 frontend/backend/app-api/DB 계약 검증, F675-260~263 별도 개발 브랜치 구현. 신규 검증 독립 외부 레퍼런스 0건, 누적 UNKNOWN/10,000건. 중복 제거·근거 분류 게이트 BLOCKED / IN PROGRESS, 달성 주장 금지.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
