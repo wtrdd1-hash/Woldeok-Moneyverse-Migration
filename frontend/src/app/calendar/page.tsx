@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { formatDay, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { verifiedSeasonDeadlinePayload } from '@/lib/season-deadline';
 import type { TodayEvent } from '../quests/early-events';
 import type { EarlyGameBoard } from '../quests/early-game';
 import { upcomingShopDeadlines, type ShopDeadlineItem } from './shop-deadlines';
@@ -37,17 +38,21 @@ function nextWeekStart(weekStart: string): string | null {
   return value.toISOString();
 }
 
-export default async function CalendarPage() {
+export default async function CalendarPage({ searchParams }: { readonly searchParams?: Promise<{ readonly endingWithin?: string }> }) {
   await requireMember();
+  const endingWithinSevenDays = (await searchParams)?.endingWithin === '7d';
 
   const [seasonData, todayData, earlyGame, shopData] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
+    apiOrNull<unknown>(endingWithinSevenDays ? '/api/v1/seasons/events?endingWithin=7d' : '/api/v1/seasons/events'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
     apiOrNull<{ catalogItems: ShopDeadlineItem[] }>('/api/v1/shop/catalog'),
   ]);
 
-  const seasonEvents = seasonData?.events ?? [];
+  const verifiedSeasonData = endingWithinSevenDays
+    ? verifiedSeasonDeadlinePayload(seasonData)
+    : seasonData as { events: SeasonEvent[] } | null;
+  const seasonEvents = verifiedSeasonData?.events ?? [];
   const today = todayData?.event ?? null;
   const weeklyGoals = earlyGame?.goals ?? [];
   const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
@@ -187,14 +192,18 @@ export default async function CalendarPage() {
           title="종료 예정 시즌 이벤트"
           id="season-calendar-title"
         />
-        {seasonData === null ? (
+        <nav className="flex flex-wrap gap-3 text-sm" aria-label="시즌 종료 기간 선택">
+          <Link href="/calendar" aria-current={!endingWithinSevenDays ? 'page' : undefined} className="rounded-md border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2">전체 시즌 이벤트</Link>
+          <Link href="/calendar?endingWithin=7d" aria-current={endingWithinSevenDays ? 'page' : undefined} className="rounded-md border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2">7일 이내 종료</Link>
+        </nav>
+        {verifiedSeasonData === null ? (
           <EmptyState
             title="시즌 이벤트 일정을 불러오지 못했어요."
             description="일정을 추측해서 표시하지 않습니다. 잠시 후 다시 확인해 주세요."
           />
         ) : seasonEvents.length === 0 ? (
           <EmptyState
-            title="현재 진행 중인 시즌 이벤트가 없어요."
+            title={endingWithinSevenDays ? '7일 이내 종료되는 시즌 이벤트가 없어요.' : '현재 진행 중인 시즌 이벤트가 없어요.'}
             description="새 이벤트가 열리면 이곳에 표시돼요."
           />
         ) : (

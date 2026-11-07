@@ -10964,6 +10964,9 @@
                 "ends_at"
               ]
             }
+          },
+          "asOfUtc": {
+            "type": "string"
           }
         },
         "required": [
