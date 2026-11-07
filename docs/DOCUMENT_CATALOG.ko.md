@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.11.07.1912 — 국가재정·중앙은행·조폐국 종합 기획 (PLANNING / DRAFT)
+- [공식 자료 16건 비교표](research/2026-11-07-sovereign-treasury-reference-matrix-v1912.ko.md) / [영문](research/2026-11-07-sovereign-treasury-reference-matrix-v1912.md); [상세 기능·회계·구현 기획](planning/TREASURY_SOVEREIGN_OPERATING_MODEL_SPEC_v2026.11.07.1912.ko.md) / [영문](planning/TREASURY_SOVEREIGN_OPERATING_MODEL_SPEC_v2026.11.07.1912.md); [작업 기록](worklog/2026-11-07-treasury-sovereign-design-v1912.ko.md), [변경기록](changelog/2026-11-07-treasury-sovereign-design-v1912.ko.md), [GitHub용](updates/v2026.11.07.1912-github.ko.md), [내부용](updates/v2026.11.07.1912-internal.ko.md). 통합 기획이 채택하기 전의 초안이며 금융 거래·운영 배포 변경 없음.
+
 ## v2026.10.20.981 — 시스템 안전 캐시 정리 (실기기 검증)
 - [작업기록](worklog/2026-10-20-host-storage-cleanup-v981.ko.md) / [영문](worklog/2026-10-20-host-storage-cleanup-v981.md) · [변경기록](changelog/2026-10-20-host-storage-cleanup-v981.ko.md) · [GitHub](updates/v2026.10.20.981-github.ko.md) · [내부용](updates/v2026.10.20.981-internal.ko.md). 루트 64%→62%, 1.51GB 확보, 앱 배포 없음.
 
