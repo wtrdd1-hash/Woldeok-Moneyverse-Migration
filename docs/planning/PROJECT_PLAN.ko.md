@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## 기획 사이클 v1784 — 2026-11-05 — Feature Improvement: F675-251 영수증 철회 무결성 보완 (제안, 미구현)
+
+**주기:** 이전 v1782 기능 추가 → 현재 v1784 기능 보완 → 다음 v1786 기능 추가. 기준 main `223f256a7425`; F675-249/250/251은 미병합 초안이며 운영 기능이 아니다. v1782 설계를 통합 보완하되 병합된 것으로 간주하지 않는다.
+
+**우선순위·신뢰 경계:** 과거 서명은 당시 키·정책 아래 무결성만 입증하며 현재 권한이나 원천 증빙의 완전성을 보장하지 않는다. 상태 판정은 신뢰된 서명키 등록부, 내보내기 보존·철회, 영수증 세대, 현재 범위별 권한, 커밋된 감사·Outbox 워터마크를 결합한다. 누락·상충 근거는 `ACTIVE`가 아닌 `UNKNOWN`/`NOT_AVAILABLE`로 처리한다. 우선순위: 권한 없는 사용자는 `ACCESS_DENIED`, 선행 기능 부재는 `NOT_AVAILABLE`, 이후 `KEY_COMPROMISED`/`REVOKED`/`EXPIRED`, 근거 부족은 `UNKNOWN`, 독립적으로 완전한 근거에만 `ACTIVE`. 승인 대기는 이미 철회된 상태로 오인하지 않도록 별도 `PENDING_APPROVAL` 절차 표시로 분리한다.
+
+**대상·화면:** 관리자 > 문의 > SLA 사고 > 증빙 내보내기 > 영수증 > 현재 상태 확인. 범위 권한이 있는 감독자가 사유·예상 세대로 철회를 요청하고 별도 적격 승인자가 승인·거절하며 감사자는 비식별 상태·불변 이력만 열람한다. 확인 CTA, 오래된 근거 경고, 로딩·빈 화면·거부·UNKNOWN·재시도, 키보드 초점·스크린리더 상태 알림, 320px·WCAG 2.2 AA·한영 동등성·UTC/KST를 적용한다. 관리자 화면은 비공개 `noindex`, `Cache-Control: no-store`; URL·분석 이벤트에서 개인정보 제외.
+
+**API·DB 인수조건(구현 전 실제 스키마 확인):** GET `/api/v1/admin/support/sla-policy/receipts/:id/status`는 불투명 ID, historicalSignatureValid, currentStatus, evaluatedAt, evidenceWatermark, policyVersion, revocationGeneration을 반환하되 증빙 원문은 제외한다. POST `.../:id/revocations`는 감독자 권한·사유·`Idempotency-Key`·`If-Match` 세대가 필요하며 POST `.../revocations/:requestId/approve`는 별도 승인자 및 커밋 시점 재인가를 요구한다. 범위 외 접근 403/404 비열거, 세대 충돌 409, 잘못된 사유 422, 속도 제한 429, 근거 불가 503 실패 폐쇄. 제안 DB는 테넌트·팀·영수증 복합 FK, 요청자 != 승인자 CHECK, 테넌트/영수증/멱등키 UNIQUE, 미처리 요청 부분 UNIQUE, 영수증/세대 추가 전용 이벤트 UNIQUE, `(tenant_id,team_id,receipt_id,created_at,id)` 인덱스를 포함한다. 행 잠금·세대 CAS 후 세대 변경·불변 감사·Outbox를 단일 트랜잭션으로 커밋한다. SECURITY DEFINER 고정 search_path·제한 EXECUTE, 앱 계정의 직접 쓰기 금지; 실제 권한 먼저 검증.
+
+**보안·운영·검증:** 조회·승인·다운로드마다 재인가하고 자기 승인, 서명 커서 재사용, 교차 테넌트 ID, CSRF, 만료 세션을 차단하며 요청 제한·비밀값 마스킹을 적용한다. 작업자는 임대 펜싱과 단조 세대로 오래된 ACTIVE 발행을 차단하고 장애·타임아웃 후 Outbox와 DB를 대사한다. 동시 승인, 멱등 중복, 키 침해·교체, 신뢰 등록부 누락, 요청 중 만료, 권한 철회, 감사·Outbox 누락, 0/1/100/101 이벤트, 모바일 접근성, 캐시·검색 제외, 기능 OFF 롤백을 테스트한다. KPI는 잘못된 ACTIVE 0건, 철회 전파 p95, UNKNOWN 비율, 무권한 시도, 승인 지연, Outbox 적체다. `admin_support_sla_receipt_revocation_v1` 기본 OFF; 추가형 마이그레이션·인증 Test exact-SHA 부정 E2E 후 단계적 운영 승격, 롤백 시 감사 이력 보존.
+
+**P0/P1·근거 게이트:** P0 운영 HTTP 500·배포 SHA 독립 확인, DB 권한·마이그레이션 체크섬, 인증 Test exact-SHA E2E, 독립 백업 복원·원장 대사, 금융·법률 안전 게이트. P1 실제 문의 컨트롤러·프론트·app-api·감사/Outbox·DB 조사, F675-249/250 선행 구현·검증 후 별도 개발 브랜치에서 API/DB/UI·보안·롤백 테스트. 기획은 런타임을 배포하지 않는다. 외부 독립 레퍼런스 이번 회차 신규 검증 **0건**, 누적 **UNKNOWN / 10,000건**, **BLOCKED / IN PROGRESS**. 운영 **RELEASE HOLD**.
