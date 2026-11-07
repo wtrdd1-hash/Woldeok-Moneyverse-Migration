@@ -155,28 +155,19 @@ export class DopamineController {
   }
 
   @Post('star-drop')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Star Drop 5-tap upgrade tier reward' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
+  @ApiOperation({ summary: 'Star Drop claims held until an idempotent owner ledger receipt exists' })
   async claimStarDrop(
     @Req() request: RequestWithSession,
-    @Body() body: StarDropClaimDto,
+    @Body() _body: StarDropClaimDto,
   ) {
-    const userId = requireUserId(request);
-    const tierRewards = {
-      rare: 1000,
-      epic: 2500,
-      legendary: 5000,
-      mythic: 10000,
-    };
-    const rewardAmount = tierRewards[body.tapTier] || 1000;
-
-    return {
-      success: true,
-      userId,
-      tier: body.tapTier,
-      rewardAmount,
-      claimedAt: new Date().toISOString(),
-    };
+    requireUserId(request);
+    // A client-selected tier is not a persisted reward or a verified settlement.
+    throw new ServiceUnavailableException({
+      code: 'STAR_DROP_SETTLEMENT_UNAVAILABLE',
+      message: 'Star Drop practice awards no WLD; ledger-backed claims are unavailable',
+    });
   }
 
   @Get('status')
@@ -190,7 +181,7 @@ export class DopamineController {
       fortuneCookieAvailable: false,
       bullBearVotedToday: false,
       dailyShowdownsRemaining: 10,
-      starDropRemaining: 3,
+      starDropRemaining: 0,
     };
   }
 

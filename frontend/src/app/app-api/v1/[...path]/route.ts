@@ -112,6 +112,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // A rolling deployment may still route to an old Nest image that invents
+  // Star Drop WLD receipts. Hold the Android edge before any upstream call.
+  if (parts.length === 3 && parts[0] === 'engagement' && parts[1] === 'dopamine' &&
+      parts[2] === 'star-drop' && request.method === 'POST') {
+    return gatewayProblem(503, 'Service Unavailable', 'STAR_DROP_SETTLEMENT_UNAVAILABLE',
+      'Star Drop rewards require a verified ledger settlement');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));

@@ -27,7 +27,6 @@ const RARITY_CONFIG = {
     border: 'border-cyan-400',
     text: 'text-cyan-300',
     bg: 'bg-cyan-500/20',
-    rewardText: '1,000 ~ 3,000 WLD',
   },
   super_rare: {
     label: '초희귀 (Super Rare)',
@@ -35,7 +34,6 @@ const RARITY_CONFIG = {
     border: 'border-emerald-400',
     text: 'text-emerald-300',
     bg: 'bg-emerald-500/20',
-    rewardText: '5,000 ~ 10,000 WLD',
   },
   epic: {
     label: '에픽 (Epic)',
@@ -43,7 +41,6 @@ const RARITY_CONFIG = {
     border: 'border-purple-400',
     text: 'text-purple-300',
     bg: 'bg-purple-500/20',
-    rewardText: '20,000 WLD + 스트릭 프리즈 1회',
   },
   mythic: {
     label: '신화 (Mythic)',
@@ -51,7 +48,6 @@ const RARITY_CONFIG = {
     border: 'border-rose-400',
     text: 'text-rose-300',
     bg: 'bg-rose-500/20',
-    rewardText: '50,000 WLD + 우량주 1.0주',
   },
   legendary: {
     label: '전설 (Legendary)',
@@ -59,20 +55,18 @@ const RARITY_CONFIG = {
     border: 'border-amber-300',
     text: 'text-amber-300',
     bg: 'bg-amber-500/25',
-    rewardText: '100,000 WLD + 황금 칭호 + 주식 5.0주',
   },
 };
 
 const RARITY_ORDER: StarDropRarity[] = ['rare', 'super_rare', 'epic', 'mythic', 'legendary'];
 
-import { claimStarDrop } from '@/lib/dopamine-api';
 
 export function StarDropModal({
   isOpen,
   onClose,
-  dailyFreeRemaining = 3,
+  dailyFreeRemaining: _dailyFreeRemaining = 0,
   hasLuckyCharm = false,
-  onClaimReward,
+  onClaimReward: _onClaimReward,
 }: StarDropModalProps) {
   const [tapCount, setTapCount] = useState<number>(0);
   const [currentRarity, setCurrentRarity] = useState<StarDropRarity>('rare');
@@ -100,40 +94,6 @@ export function StarDropModal({
     if (nextTap >= 5) {
       setIsOpened(true);
     }
-  };
-
-  const getFinalReward = (): StarDropReward => {
-    switch (currentRarity) {
-      case 'legendary':
-        return { rarity: 'legendary', rewardType: 'wld', title: '100,000 WLD & 전설 아티팩트', amount: 100000 };
-      case 'mythic':
-        return { rarity: 'mythic', rewardType: 'stock', title: '50,000 WLD & 우량주 1.0주', amount: 50000 };
-      case 'epic':
-        return { rarity: 'epic', rewardType: 'freeze', title: '20,000 WLD & 스트릭 프리즈', amount: 20000 };
-      case 'super_rare':
-        return { rarity: 'super_rare', rewardType: 'wld', title: '8,000 WLD', amount: 8000 };
-      default:
-        return { rarity: 'rare', rewardType: 'wld', title: '2,500 WLD', amount: 2500 };
-    }
-  };
-
-  const handleClaim = async () => {
-    const reward = getFinalReward();
-    const tierMap: Record<StarDropRarity, 'rare' | 'epic' | 'legendary' | 'mythic'> = {
-      rare: 'rare',
-      super_rare: 'rare',
-      epic: 'epic',
-      mythic: 'mythic',
-      legendary: 'legendary',
-    };
-    try {
-      await claimStarDrop(tierMap[currentRarity]);
-    } catch {
-      // Offline fallback
-    }
-
-    if (onClaimReward) onClaimReward(reward);
-    onClose();
   };
 
   const config = RARITY_CONFIG[currentRarity];
@@ -180,9 +140,9 @@ export function StarDropModal({
         <div className="mt-3 flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-1.5 text-[11px] text-slate-400">
           <span className="flex items-center gap-1">
             <Shield className="h-3.5 w-3.5 text-emerald-400" />
-            100% 가상 시뮬레이터 (현금 환전 불가)
+            연습용 시뮬레이터 (WLD 지급 없음)
           </span>
-          <span className="font-mono text-amber-400">일일 무료: {dailyFreeRemaining}회</span>
+          <span className="font-mono text-amber-400">연습 모드 (지급 없음)</span>
         </div>
 
         {/* Main Interactive Star Drop Area */}
@@ -207,7 +167,7 @@ export function StarDropModal({
                   현재 등급: {config.label}
                 </span>
                 <p className="mt-1 text-xs text-slate-400">
-                  상자를 {5 - tapCount}번 더 탭하면 등급이 상승하며 보상이 개봉됩니다!
+                  상자를 {5 - tapCount}번 더 탭하면 연습 등급을 확인할 수 있습니다.
                 </p>
               </div>
 
@@ -234,25 +194,27 @@ export function StarDropModal({
 
               <div>
                 <span className={`text-xs font-black tracking-wider ${config.text}`}>
-                  🎉 {config.label} 잭팟 달성!
+                  연습 결과: {config.label}
                 </span>
                 <h3 className="mt-1 text-lg font-extrabold text-white">
-                  {getFinalReward().title}
+                  연습용 등급입니다. 실제 WLD나 아이템은 지급되지 않습니다.
                 </h3>
               </div>
 
               <button
                 type="button"
-                onClick={handleClaim}
-                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-3 text-sm font-bold text-slate-950 shadow-lg hover:from-amber-400 hover:to-amber-500 active:scale-95"
+                disabled
+                className="w-full min-h-11 rounded-xl border border-amber-500/40 bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 disabled:cursor-not-allowed"
               >
-                보상 수령하고 인벤토리에 넣기
+                보상 정산 이용 불가
               </button>
             </div>
           )}
         </div>
 
-        {/* VIP Lucky Charm Toggle */}
+        <p role="status" className="text-center text-xs text-amber-200">보상 정산은 현재 이용할 수 없습니다. 이 화면은 연습용이며 거래·지급을 실행하지 않습니다.</p>
+
+      {/* VIP Lucky Charm Toggle */}
         {!isOpened && (
           <div className="mt-2 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-800/40 p-3">
             <div className="flex items-center gap-2">
@@ -287,7 +249,7 @@ export function StarDropModal({
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 id="prob-modal-title" className="text-sm font-bold text-white">
-                  공정 확률표 (2024 게임산업진흥법 준수)
+                  연습용 확률 안내 (실제 보상 없음)
                 </h3>
                 <button
                   type="button"
@@ -322,7 +284,7 @@ export function StarDropModal({
               </div>
 
               <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-[11px] text-slate-400 leading-relaxed">
-                본 확률표는 모든 유저에게 균등하게 적용되는 의사난수(PRNG) 기반이며, 획득한 보상은 가상 시뮬레이션 포인트로 현금 환전 및 외부 거래가 일체 불가합니다.
+                표시된 비율과 등급은 연습용 예시이며 실제 지급 확률이나 정산 결과가 아닙니다. WLD, 아이템, 주식은 지급되지 않습니다.
               </div>
             </div>
 
