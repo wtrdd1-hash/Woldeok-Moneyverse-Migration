@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { LocalAuthController } from './local-auth.controller';
 
@@ -24,4 +24,11 @@ describe('LocalAuthController password recovery', () => {
     await expect(controller.completePasswordReset({ token: 'x'.repeat(32), password: 'password' })).rejects.toBeInstanceOf(ForbiddenException);
     await expect(controller.completePasswordReset({ token: 'x'.repeat(32), password: 'new secure passphrase 2026!' })).rejects.toBeInstanceOf(UnauthorizedException);
   });
+  it('returns a retryable unavailable error instead of an invalid-token claim when the credential store fails', async () => {
+    const localAuth = { completePasswordReset: vi.fn(async () => { throw new Error('db connection unavailable'); }) };
+    const controller = new LocalAuthController({} as never, null, localAuth as never, {} as never);
+    await expect(controller.completePasswordReset({ token: 'x'.repeat(32), password: 'new secure passphrase 2026!' }))
+      .rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
 });

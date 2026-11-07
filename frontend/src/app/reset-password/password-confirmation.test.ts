@@ -19,4 +19,9 @@ describe('password reset confirmation', () => {
     expect(actions).toContain('error=mismatch');
     expect(page).toContain("mismatch:'새 비밀번호 확인 값이 일치하지 않습니다.'");
   });
+  it('offers a non-expiry retry message for temporary API failures', () => {
+    expect(page).toContain("unavailable:'");
+    expect(page).toContain('role="alert"');
+  });
+
 });

@@ -197,6 +197,16 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // Password reset URLs carry a one-time credential in the query string.
+      // Keep it out of caches, search indexes, and same-origin referrer headers.
+      ...['/reset-password', '/:locale(en|ko|ja|zh|vi)/reset-password'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
     ];
   },
 

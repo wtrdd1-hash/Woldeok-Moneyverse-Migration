@@ -12,7 +12,7 @@ export async function completePasswordReset(formData: FormData): Promise<never> 
   try {
     receipt = await api<unknown>('/api/v1/auth/local/password-reset/complete', { method: 'POST', body: { token, password } });
   } catch (error) {
-    const code = error instanceof ApiError && error.status === 403 ? 'policy' : 'invalid';
+    const code = error instanceof ApiError && error.status === 403 ? 'policy' : error instanceof ApiError && (error.status === 400 || error.status === 401) ? 'invalid' : 'unavailable';
     redirect(`/reset-password?error=${code}&token=${encodeURIComponent(token)}`);
   }
   if (!isPasswordResetReceipt(receipt)) redirect(`/reset-password?error=unverified&token=${encodeURIComponent(token)}`);
