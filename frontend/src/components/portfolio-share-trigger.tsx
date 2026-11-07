@@ -7,9 +7,9 @@ import { PortfolioShareCardModal } from './portfolio-share-card-modal';
 
 interface PortfolioShareTriggerProps {
   readonly nickname?: string | undefined;
-  readonly totalAssetValue: number;
-  readonly totalProfitAmount: number;
-  readonly profitRatePct: number;
+  readonly totalAssetValue: string;
+  readonly totalProfitAmount: string;
+  readonly profitRateBps: string;
   readonly topStockSymbol?: string | undefined;
   readonly holdingCount: number;
 }
@@ -18,7 +18,7 @@ export function PortfolioShareTrigger({
   nickname,
   totalAssetValue,
   totalProfitAmount,
-  profitRatePct,
+  profitRateBps,
   topStockSymbol,
   holdingCount,
 }: PortfolioShareTriggerProps) {
@@ -30,10 +30,10 @@ export function PortfolioShareTrigger({
         type="button"
         size="sm"
         onClick={() => setModalOpen(true)}
-        className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-black shadow-md hover:shadow-emerald-500/20 gap-1.5 transition-all active:scale-[0.98]"
+        className="min-h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-black shadow-md hover:shadow-emerald-500/20 gap-1.5 transition-all active:scale-[0.98]"
       >
         <Sparkles className="size-3.5 sm:size-4" />
-        <span>1초 진단서 카드 공유</span>
+        <span>포트폴리오 공유 이미지</span>
       </Button>
 
       <PortfolioShareCardModal
@@ -42,7 +42,7 @@ export function PortfolioShareTrigger({
         nickname={nickname}
         totalAssetValue={totalAssetValue}
         totalProfitAmount={totalProfitAmount}
-        profitRatePct={profitRatePct}
+        profitRateBps={profitRateBps}
         topStockSymbol={topStockSymbol}
         holdingCount={holdingCount}
       />

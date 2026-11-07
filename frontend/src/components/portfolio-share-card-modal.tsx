@@ -1,19 +1,20 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { Share2, Download, Copy, Check, Sparkles, TrendingUp, TrendingDown, ShieldCheck } from 'lucide-react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { Share2, Download, Copy, Check, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { formatPortfolioShareSnapshot } from './portfolio-share-format';
 
 interface PortfolioShareCardModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly nickname?: string | undefined;
-  readonly totalAssetValue: number;
-  readonly totalProfitAmount: number;
-  readonly profitRatePct: number;
+  readonly totalAssetValue: string;
+  readonly totalProfitAmount: string;
+  readonly profitRateBps: string;
   readonly topStockSymbol?: string | undefined;
   readonly holdingCount: number;
 }
@@ -24,7 +25,7 @@ export function PortfolioShareCardModal({
   nickname = '월덕 트레이더',
   totalAssetValue,
   totalProfitAmount,
-  profitRatePct,
+  profitRateBps,
   topStockSymbol = 'WDG',
   holdingCount,
 }: PortfolioShareCardModalProps) {
@@ -32,8 +33,11 @@ export function PortfolioShareCardModal({
   const [copied, setCopied] = useState(false);
   const [rendering, setRendering] = useState(true);
 
-  const isProfit = profitRatePct >= 0;
-  const grade = profitRatePct >= 20 ? 'S+' : profitRatePct >= 10 ? 'A' : profitRatePct >= 0 ? 'B' : 'C';
+  const snapshot = useMemo(
+    () => formatPortfolioShareSnapshot(totalAssetValue, totalProfitAmount, profitRateBps),
+    [totalAssetValue, totalProfitAmount, profitRateBps],
+  );
+  const { isProfit, grade } = snapshot;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -92,7 +96,7 @@ export function PortfolioShareCardModal({
 
       ctx.fillStyle = '#8E9BB0';
       ctx.font = '14px monospace';
-      ctx.fillText('OFFICIAL PORTFOLIO RECEIPT // 2026', 490, 75);
+      ctx.fillText('USER-GENERATED PORTFOLIO SNAPSHOT', 490, 75);
 
       // 중앙 사용자 프로필 영역
       ctx.fillStyle = '#FFFFFF';
@@ -136,7 +140,7 @@ export function PortfolioShareCardModal({
 
       ctx.fillStyle = isProfit ? '#00F59B' : '#FF2E5B';
       ctx.font = 'bold 64px monospace';
-      const profitRateStr = `${isProfit ? '+' : ''}${profitRatePct.toFixed(2)}%`;
+      const profitRateStr = snapshot.yieldText;
       ctx.fillText(profitRateStr, 80, 420);
 
       // 핵심 메트릭 박스 2: 평가 금액 & 실현 손익
@@ -150,7 +154,8 @@ export function PortfolioShareCardModal({
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 28px monospace';
-      ctx.fillText(`${totalAssetValue.toLocaleString('ko-KR')} WLD`, 75, 625);
+      ctx.font = `bold ${Math.max(12, Math.min(28, Math.floor(500 / snapshot.assetText.length)))}px monospace`;
+      ctx.fillText(snapshot.assetText, 75, 625);
 
       ctx.fillStyle = '#111522';
       ctx.fillRect(width / 2 + 10, 520, (width - 120) / 2, 170);
@@ -162,7 +167,8 @@ export function PortfolioShareCardModal({
 
       ctx.fillStyle = isProfit ? '#00F59B' : '#FF2E5B';
       ctx.font = 'bold 28px monospace';
-      const profitStr = `${totalProfitAmount >= 0 ? '+' : ''}${totalProfitAmount.toLocaleString('ko-KR')} WLD`;
+      const profitStr = snapshot.profitText;
+      ctx.font = `bold ${Math.max(12, Math.min(28, Math.floor(500 / profitStr.length)))}px monospace`;
       ctx.fillText(profitStr, width / 2 + 35, 625);
 
       // 인증 및 서명 구역
@@ -173,8 +179,8 @@ export function PortfolioShareCardModal({
 
       ctx.fillStyle = '#5A6882';
       ctx.font = '13px monospace';
-      ctx.fillText('VERIFIED BY WOLDEOK INSTITUTIONAL LEDGER ENGINE', 75, 760);
-      ctx.fillText(`BLOCK TIMESTAMP: ${new Date().toISOString()}  // HASH: 0x9f4a...b77f`, 75, 795);
+      ctx.fillText('USER-GENERATED • NOT A LEDGER RECEIPT', 75, 760);
+      ctx.fillText(`CAPTURED AT: ${new Date().toISOString()}`, 75, 795);
 
       // 하단 푸터
       ctx.fillStyle = '#505E78';
@@ -185,16 +191,16 @@ export function PortfolioShareCardModal({
     }, 50);
 
     return () => clearTimeout(timer);
-  }, [isOpen, nickname, totalAssetValue, totalProfitAmount, profitRatePct, topStockSymbol, holdingCount]);
+  }, [isOpen, nickname, snapshot, topStockSymbol, holdingCount, isProfit, grade]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = `woldeok_pnl_receipt_${Date.now()}.png`;
+    link.download = `woldeok_portfolio_snapshot_${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    toast.success('포트폴리오 수익률 진단서 이미지를 다운로드했습니다.');
+    toast.success('포트폴리오 공유 이미지를 다운로드했습니다.');
   };
 
   const handleCopyClipboard = async () => {
@@ -207,7 +213,7 @@ export function PortfolioShareCardModal({
           new ClipboardItem({ 'image/png': blob }),
         ]);
         setCopied(true);
-        toast.success('진단서 이미지가 클립보드에 복사되었습니다! SNS나 채팅방에 바로 붙여넣기(Ctrl+V)하세요.');
+        toast.success('포트폴리오 이미지가 클립보드에 복사되었습니다! SNS나 채팅방에 바로 붙여넣기(Ctrl+V)하세요.');
         setTimeout(() => setCopied(false), 2500);
       });
     } catch {
@@ -217,18 +223,18 @@ export function PortfolioShareCardModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-xl p-6 bg-[#090A0F] border border-zinc-800 text-white rounded-2xl shadow-2xl">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 bg-[#090A0F] border border-zinc-800 text-white rounded-2xl shadow-2xl">
         <DialogHeader className="pb-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
               <Sparkles className="size-4" />
             </div>
             <DialogTitle className="text-lg font-bold text-white">
-              1초 포트폴리오 수익률 진단서 공유
+              포트폴리오 공유 이미지
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-zinc-400">
-            내 투자 성과와 보유 종목 분석을 담은 고해상도 인증 카드를 이미지로 생성했습니다.
+            사용자가 생성한 비공식 공유 이미지입니다. 원장 인증 영수증이 아닙니다.
           </DialogDescription>
         </DialogHeader>
 
@@ -236,11 +242,13 @@ export function PortfolioShareCardModal({
         <div className="relative rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 flex justify-center p-2">
           <canvas
             ref={canvasRef}
+            role="img"
+            aria-label={`비공식 포트폴리오 공유 이미지: 평가액 ${snapshot.assetText}, 손익 ${snapshot.profitText}, 수익률 ${snapshot.yieldText}`}
             className="w-full h-auto max-h-[460px] object-contain rounded-lg shadow-lg"
           />
           {rendering && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs text-zinc-400">
-              진단서 렌더링 중...
+              공유 이미지 렌더링 중...
             </div>
           )}
         </div>
@@ -248,8 +256,8 @@ export function PortfolioShareCardModal({
         {/* 하단 버튼 바 */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
-            <ShieldCheck className="size-4 text-emerald-400" />
-            <span>월덕 거래소 원장 공인 인증</span>
+            <Share2 className="size-4 text-emerald-400" aria-hidden="true" />
+            <span>비공식 공유 이미지 · 원장 인증 아님</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -258,7 +266,7 @@ export function PortfolioShareCardModal({
               variant="outline"
               size="sm"
               onClick={handleCopyClipboard}
-              className="text-xs h-9 px-3 gap-1.5 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white"
+              className="text-xs min-h-11 px-3 gap-1.5 border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white"
             >
               {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
               <span>{copied ? '복사됨' : '이미지 복사'}</span>
@@ -268,7 +276,7 @@ export function PortfolioShareCardModal({
               type="button"
               size="sm"
               onClick={handleDownload}
-              className="text-xs h-9 px-3.5 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-black font-bold"
+              className="text-xs min-h-11 px-3.5 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-black font-bold"
             >
               <Download className="size-3.5" />
               <span>PNG 다운로드</span>

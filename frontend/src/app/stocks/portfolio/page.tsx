@@ -91,9 +91,9 @@ export default async function PortfolioAnalysisPage() {
             <div className="flex items-center gap-2">
               {analysis && analysis.holdings.length > 0 && (
                 <PortfolioShareTrigger
-                  totalAssetValue={Number(analysis.total_market_value) || 0}
-                  totalProfitAmount={Number(analysis.total_unrealized_gain_loss) || 0}
-                  profitRatePct={(Number(analysis.total_gain_loss_bps) || 0) / 100}
+                  totalAssetValue={analysis.total_market_value}
+                  totalProfitAmount={analysis.total_unrealized_gain_loss}
+                  profitRateBps={analysis.total_gain_loss_bps}
                   topStockSymbol={analysis.holdings[0]?.symbol ?? 'WDG'}
                   holdingCount={analysis.holdings.length}
                 />
