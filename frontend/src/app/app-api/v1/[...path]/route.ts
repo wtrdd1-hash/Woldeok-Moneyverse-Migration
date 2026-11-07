@@ -1,3 +1,5 @@
+import { isVerifiedBoardPositionResponse } from '@/lib/board-position-proof';
+import { parseBoardPositionFilter } from '@/app/board/board-position-filter';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -594,6 +596,25 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  // Android cannot trust a filtered success without source-applied proof.
+  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
+      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('position')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+    if (response.ok && request.method === 'GET') {
+      const selected = parseBoardPositionFilter(request.nextUrl.searchParams.get('position'));
+      const payload: unknown = await response.clone().json().catch(() => null);
+      const verified = selected.position !== null && isVerifiedBoardPositionResponse(payload, selected.position);
+      if (!verified) {
+        const blocked = gatewayProblem(503, 'Board filter unavailable', 'BOARD_POSITION_SOURCE_UNVERIFIED', 'Filtered source proof is missing or inconsistent');
+        blocked.headers.set('cache-control', 'no-store');
+        blocked.headers.set('x-robots-tag', 'noindex');
+        blocked.headers.set('referrer-policy', 'no-referrer');
+        return blocked;
+      }
+    }
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

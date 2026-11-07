@@ -85,6 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
+  @ApiQuery({ name: 'position', required: false, enum: ['holder', 'no_position', 'operator_related', 'undisclosed'], description: 'Self-declared stock position, not independently verified holdings' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -93,11 +94,12 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'position')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const position = query.position;
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -113,9 +115,13 @@ export class PublicStockCommunityController {
     ) {
       throw new BadRequestException('invalid board search');
     }
+    if (position !== undefined && (typeof position !== 'string' || !['holder', 'no_position', 'operator_related', 'undisclosed'].includes(position))) {
+      throw new BadRequestException('invalid position disclosure');
+    }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
-    };
+    const posts = position === undefined
+      ? await this.community.publicList(stock as string | undefined, q as string | undefined)
+      : await this.community.publicList(stock as string | undefined, q as string | undefined, position);
+    return { posts, appliedPosition: position ?? null };
   }
 }

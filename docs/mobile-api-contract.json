@@ -5282,10 +5282,21 @@
                 "title"
               ]
             }
+          },
+          "appliedPosition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
-          "posts"
+          "posts",
+          "appliedPosition"
         ]
       },
       "responseCompatibility": {
