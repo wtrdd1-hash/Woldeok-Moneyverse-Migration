@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { SafetyController } from './safety.controller';
 import { SafetyService } from './safety.service';
 import { SafetyRepository } from './safety.repository';
@@ -23,4 +24,14 @@ import type { Queryable } from '../core/db';
   ],
   exports: [SafetyService, SafetyRepository],
 })
-export class SafetyModule {}
+export class SafetyModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Private reports and takedown status need protection even when guards reject a request.
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(SafetyController);
+  }
+}
