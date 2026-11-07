@@ -3009,3 +3009,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1894 — F675-279: 증빙 접근 독립 감사 및 공개 승인 (Feature Addition; 제안)
+- 목적: F675-276~278 제공자 증빙의 조회·내보내기 누락 감사를 방지한다. 준법·개인정보 담당자와 테넌트 감사자는 가명화된 접근 기록을 조회한다. F675-271~278 구현 검증 선행 P1 제안이며 기능 플래그 admin_sla_evidence_access_audit_v1 기본 OFF.
+- 화면: 관리자 > 준법 > 증빙 접근; 사건·가명 행위자·행위·기간·결과 필터, 커서 페이지. CTA 접근 요청, 독립 승인·거절, 철회, 비식별 매니페스트 내보내기, 이상 조사. 상태 REQUESTED/APPROVED/DENIED/EXPIRED/EXECUTING/COMPLETE/REVOKED/BLOCKED; 빈·로딩·오류·색인 지연을 구분한다. 원본 영수증과 수신 주소는 목록에 표시하지 않는다.
+- 권한: 요청자 자기 승인 금지, 위임 관계 포함 실효 신원 분리. 긴급 접근은 사건 ID, 읽기 전용 범위, 짧은 만료, 즉시 독립 통지와 사후 심사를 요구한다. 교차 테넌트 및 일반 관리자 우회 금지.
+- 제안 API(미구현): GET /api/v1/admin/evidence-access/events; POST /requests; POST /requests/:id/decision; POST /requests/:id/revoke; POST /exports; GET /exports/:id. 세션 테넌트, RBAC, 쿠키 쓰기 CSRF, 상태 전이 If-Match, 쓰기 멱등성 키, 필터·속도 제한, 409/412/422/429/503 안전 차단. 내보내기 토큰 단기·단일 목적.
+- PostgreSQL: 테넌트별 access_requests, access_decisions, access_events, export_jobs; 복합 tenant_id 외래키, UNIQUE(tenant_id,idempotency_key,operation), UNIQUE event_uuid, expiry>created_at CHECK와 상태 전이 제약, 활성 요청 및 테넌트·시각 커서 부분 인덱스. 행 잠금 CAS로 불변 범위 해시 검증 후 같은 트랜잭션에 감사·Outbox 기록. SECURITY DEFINER search_path 고정·EXECUTE 명시, 런타임 직접 테이블 쓰기 금지; RLS는 보조 방어.
+- 보안·악용 방지: 테넌트·이벤트·가명 행위자·범위 해시·서명키·이전 해시를 연결한 추가 전용 감사 체인. 외부 고정 전 독립 검증 가능 주장 금지. 거절 조회·내보내기도 기록하고 개인정보·토큰·전체 IP·원본 영수증을 내보내기·로그·분석에서 제거한다. 권한·감사 저장·서명·고정 실패 시 조회 차단. 동시 철회, 중복 Outbox, 키 교체, 커서 변조, 대량 내보내기, 위임 계정 탈취 테스트. 보존명령·삭제 검증서·금융 원장 불변.
+- SEO·모바일·접근성·KPI: 관리자 noindex/no-store, 320px 상세 보기, 키보드 초점·오류 요약, WCAG 2.2 AA, 영한 동등성. 개인 식별 없는 승인율, 심사 지연, 미검토 긴급 접근, 내보내기 실패, 감사 체인 누락 집계.
+- 검증·배포: P0 실제 배포 SHA, /srv/moneyverse 링크 장애, /en·/en/login, DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 검토. P1 실제 Next/Nest/app-api/DB 계약, 격리 PostgreSQL·제공자 샌드박스 Test exact-SHA에서 승인→조회→감사 및 안전 차단, 동시성·테넌트·접근성·모바일·영한 회귀 검증. 추가형 마이그레이션, 기본 OFF, 독립 승인 후 카나리, 롤백 시 조회·내보내기 차단하고 감사 기록 보존. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000; 중복 제거·근거 분류 BLOCKED/IN PROGRESS.
