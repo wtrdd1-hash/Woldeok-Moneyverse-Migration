@@ -349,41 +349,22 @@ export class TelegramAlertService {
   }
 
   // 4. 일반 유저 로그인 알림
-  async notifyUserLogin(payload: UserLoginAlertPayload): Promise<boolean> {
-    const ip = payload.ipAddress ?? payload.ip ?? 'unknown';
-    const lines = [
-      `• 유저 ID: ${payload.userId}`,
-      payload.displayName ? `• 닉네임: ${payload.displayName}` : '',
-      `• 접속 IP: ${ip}`,
-      payload.userAgent ? `• 클라이언트: ${payload.userAgent.slice(0, 80)}` : '',
-    ].filter(Boolean);
-
+  async notifyUserLogin(_payload?: UserLoginAlertPayload): Promise<boolean> {
+    // Even legacy callers passing raw user/IP/agent data cannot export PII.
+    // The controller checks current consent before requesting this event.
     return this.sendAlert({
       category: 'security',
       severity: 'INFO',
       title: '👤 회원 로그인 감지',
-      lines,
+      lines: ['• 인증된 회원 세션 로그인 완료'],
     });
   }
 
   // 5. 신규 회원 가입 알림
-  async notifyUserRegister(payload: UserRegisterAlertPayload): Promise<boolean> {
-    const name = payload.displayName ?? payload.username ?? '신규 회원';
-    const ip = payload.ipAddress ?? payload.ip ?? 'unknown';
-    const lines = [
-      payload.userId ? `• 유저 ID: ${payload.userId}` : '',
-      `• 닉네임: ${name}`,
-      payload.email ? `• 이메일: ${payload.email}` : '',
-      payload.provider ? `• 가입 방식: ${payload.provider}` : '',
-      `• 접속 IP: ${ip}`,
-    ].filter(Boolean);
-
-    return this.sendAlert({
-      category: 'security',
-      severity: 'INFO',
-      title: '🎉 신규 회원 가입 환영',
-      lines,
-    });
+  async notifyUserRegister(_payload: UserRegisterAlertPayload): Promise<boolean> {
+    // No approved verified-registration/consent contract exists for this
+    // third-party transport. Keep legacy callers fail-closed.
+    return false;
   }
 
   async notifyUserRegistered(payload: UserRegisterAlertPayload): Promise<boolean> {
