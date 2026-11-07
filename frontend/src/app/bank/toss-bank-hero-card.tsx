@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useActionState, useTransition } from 'react';
+import React, { useState, useEffect, useActionState } from 'react';
 import { Sparkles, ArrowDownToLine, ArrowUpFromLine, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,10 +29,7 @@ export function TossBankHeroCard({
   annualYieldPct,
   isEn = false,
 }: TossBankHeroCardProps) {
-  // 실시간 라이브 이자 카운팅 애니메이션 상태
-  const baseUnclaimed = Number.parseFloat(unclaimedInterest) || 0;
-  const bankNum = Number.parseFloat(bankBalance) || 0;
-  const [liveInterest, setLiveInterest] = useState<number>(baseUnclaimed);
+  // Only the PostgreSQL owner read certifies claimable interest; client clocks do not.
   const [interestPopped, setInterestPopped] = useState(false);
 
   // 이자 수령 폼 액션
@@ -47,29 +44,17 @@ export function TossBankHeroCard({
   const [depositState, doDeposit] = useActionState(depositAction, IDLE);
   const [withdrawState, doWithdraw] = useActionState(withdrawAction, IDLE);
 
-  // 매 1초마다 실시간으로 누적 이자 수치 시각적 인크리먼트
-  useEffect(() => {
-    if (bankNum <= 0) return;
-    // 초당 이자 = 잔액 * (일일이율% / 100) / 86400
-    const perSecond = (bankNum * (dailyRatePct / 100)) / 86400;
-    const interval = setInterval(() => {
-      setLiveInterest((prev) => prev + perSecond);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [bankNum, dailyRatePct]);
-
   // 이자 수령 성공 시 사운드 및 피드백 애니메이션
   useEffect(() => {
     if (claimState.status === 'ok') {
       playCoinCollectSound();
       setInterestPopped(true);
-      setLiveInterest(0);
       const timer = setTimeout(() => setInterestPopped(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [claimState.status]);
 
-  const canClaim = bankNum > 0 && liveInterest >= 1;
+  const canClaim = BigInt(bankBalance) > 0n && BigInt(unclaimedInterest) >= 1n;
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#131d33] via-[#0e1526] to-[#090d18] p-6 sm:p-8 shadow-2xl space-y-6 text-white">
@@ -91,7 +76,7 @@ export function TossBankHeroCard({
               </span>
             </h2>
             <p className="text-xs text-sky-200/60 font-mono">
-              {isEn ? 'Compound yield accrued in real-time' : '초 단위로 복리 이자가 붙는 통장'}
+              {isEn ? 'Interest from the latest verified bank read' : '최근 은행 조회 시점의 이자 내역'}
             </p>
           </div>
         </div>
@@ -107,7 +92,7 @@ export function TossBankHeroCard({
           {isEn ? 'Current Savings Balance' : '내 예금 잔액'}
         </span>
         <div className="flex flex-wrap items-baseline gap-2">
-          <span className="font-fintech text-4xl sm:text-5xl font-black tracking-tight text-white">
+          <span className="font-fintech text-4xl sm:text-5xl font-black tracking-tight text-white break-all">
             {groupDigits(bankBalance)}
           </span>
           <span className="text-xl sm:text-2xl font-bold text-sky-300/80">WLD</span>
@@ -119,16 +104,16 @@ export function TossBankHeroCard({
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
             <Sparkles className="size-3.5 animate-pulse" />
-            <span>{isEn ? 'Accruing Interest Right Now' : '지금 실시간으로 쌓이는 이자'}</span>
+            <span>{isEn ? 'Verified unclaimed interest' : '조회된 미수령 이자'}</span>
           </div>
-          <div className="font-fintech text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums">
-            +{liveInterest.toFixed(2)}{' '}
+          <div role="status" className="font-fintech text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums break-all">
+            +{groupDigits(unclaimedInterest)}{' '}
             <span className="text-sm font-semibold text-emerald-300/70">WLD</span>
           </div>
           <p className="text-[11px] text-white/50">
             {isEn
-              ? 'Minimum 1 WLD to claim. Added instantly to savings.'
-              : '1 WLD 이상 쌓이면 즉시 받아 복리 효과를 극대화할 수 있어요.'}
+              ? 'Snapshot amount only. Refresh before claiming; settlement is confirmed by the server.'
+              : '조회 시점의 금액입니다. 정산 전 다시 확인하며 실제 지급은 서버에서 확정합니다.'}
           </p>
         </div>
 

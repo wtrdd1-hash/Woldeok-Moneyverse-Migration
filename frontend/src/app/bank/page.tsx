@@ -37,7 +37,8 @@ import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import { SavingsPotCard } from '@/components/savings-pot-card';
 import { TossBankHeroCard } from './toss-bank-hero-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { BankStanding, SavingPocket } from './types';
+import type { SavingPocket } from './types';
+import { parseVerifiedBankStanding } from './bank-standing-proof';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,13 +53,14 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets, creditRating, memberIdentity] = await Promise.all([
-    apiOrNull<BankStanding>('/api/v1/banking/standing'),
+  const [rawStanding, pockets, creditRating, memberIdentity] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
     apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
     apiOrNull<{ userId: string }>('/api/v1/wallet?recent=1'),
   ]);
 
+  const standing = parseVerifiedBankStanding(rawStanding);
   if (!standing) {
     return (
       <div data-page="bank" className="min-h-screen pb-24 space-y-6">
@@ -77,7 +79,11 @@ export default async function BankPage() {
             'しばらくしてからもう一度お試しください。',
             '请稍后重试。',
           )}
-        />
+        >
+          <Link href="/bank" className="inline-flex min-h-11 items-center rounded-md border px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            {localeLabel(locale, '다시 조회', 'Retry', '再試行', '重试')}
+          </Link>
+        </EmptyState>
       </div>
     );
   }
