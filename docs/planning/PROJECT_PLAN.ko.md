@@ -2,6 +2,16 @@
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 
+## v1912 — F675-283 시정·예방 조치 증빙 최신성·독립 심사·종결 경합 보강 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+- **주기:** 이전 Feature Addition v1910 → 현재 Feature Improvement v1912 → 다음 Feature Addition v1914. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03` 시작·게시 전 재확인. 미병합 v1910 위의 문서 제안이며 main 표제는 v1518. 제안 API·테이블은 운영 구현이 아님. `admin_evidence_incident_capa_v1` 기본 OFF, 운영승격 금지.
+- **증빙 최신성:** 검증마다 테넌트·사건 ID/세대·CAPA ID/개정·불변 증빙 ID/세대·정규 SHA-256·제공자 서명키·정책 버전·UTC 검증/만료시각·심사 자격 스냅샷 고정. 증빙 변경, 키 철회, 새 보존명령, 미해결 이상징후 또는 사건 세대 변경 시 승인 무효. VERIFIED는 영구 상태가 아니며 제공자 장애·서명 불명·백업 누락은 UNKNOWN으로 분류하고 종결 차단.
+- **독립 심사:** 위임·서비스 계정까지 실효 신원 추적; 작성자·담당자·실행자·증빙 제출자의 자기 승인 금지. 최신 MFA와 CAPA_REVIEW 권한 요구. 심사 결정 다이제스트·사유·증빙 세대·이해충돌 확인 기록. 이후 심사자 퇴사/권한 철회는 신규 결정만 차단하고 과거 불변 감사 기록을 수정하지 않음. 거절 시 새 세대로 IN_PROGRESS 복귀.
+- **API/화면:** GET 응답에 verificationFreshness(CURRENT/STALE/UNKNOWN/CONFLICT), reviewEligibility, caseGeneration, revision, 사유 코드 포함. POST 검증은 Idempotency-Key/해시, POST 심사는 If-Match/MFA/세대 일치 요구. 종결 요청은 필수 조치 미완료 409, 개정 불일치 412, 증빙 무효 422, 검증자 장애 503. 관리자 사건→시정조치에서 증빙 경과시간·보존명령·심사자·재검증 CTA·경고를 표시하고 검증 전 CLOSED 표시는 금지. 읽기 전용 감사 이력, 키보드 오류 요약, 모바일 320px, WCAG 2.2 AA, 영한 동등성, noindex/no-store, 회원 진입점 없음.
+- **DB/트랜잭션:** 검증 UNIQUE(tenant_id,action_id,action_generation,evidence_generation,digest), 심사 UNIQUE(tenant_id,action_id,action_generation,reviewer_effective_id), 테넌트 복합 FK, 미종결 부분 인덱스 제안. SERIALIZABLE 또는 사건→조치 순서 행 잠금으로 세대·보존명령·필수 조치·서명·심사 독립성 확인, CAS 개정 증가, 불변 감사·Outbox를 단일 트랜잭션에 기록. 직렬화 충돌은 안정적 멱등키로 제한 재시도. SECURITY DEFINER search_path 고정 및 앱 역할 직접 쓰기 권한 제거. 이벤트에 원본 증빙 포함 금지.
+- **장애/백로그:** 제공자 장애·해시 불일치·키 교체·재전송·종결/보존명령 동시성·작업자 중단 시 안전 차단 및 재시도, 롤백에서도 감사 삭제 금지. P0 OPS1912-01 끊어진 /srv/moneyverse 링크를 서명된 배포 매니페스트로 복구하고 SHA·/en·/en/login 확인; SEC1912-02 DB 최소권한/마이그레이션 체크섬/독립 복원; FIN1912-03 원장 대사·국내 법률 승인. P1 PLAN1912-04 미병합 #2867/#2869/#2872/#2874/#2876 정합성; API1912-05 실제 frontend/backend/app-api/DB 계약 대조; CAPA1912-06 증빙 무효화·독립 심사 구현; QA1912-07 실제 PostgreSQL 2테넌트 경합·서명·보존·재전송, 키보드/모바일, 영한, exact-SHA·카나리·롤백 검증. 기획 예약은 런타임 미변경.
+- **외부 근거/검증 게이트:** 신규 독립 레퍼런스 0건, 누적 검증 UNKNOWN/10,000, 중복제거·실근거 분류 BLOCKED / IN PROGRESS. CI·exact-SHA QA·보안 승인·운영 배포 미검증.
+
 ## v1910 — F675-283 증빙 사고 시정·예방 조치 및 재발 검증 (기능 추가 / 초안 / 운영 보류)
 
 - **주기:** 이전 기능 보완 v1908 → 현재 기능 추가 v1910 → 다음 기능 보완 v1912. 기준 origin/main `0b5b2b1385d2a75614d39458dff94f7d3098ed03` (푸시 전 재확인). 문서 제안이며 구현·병합 완료가 아니다. 현재 main의 상단 기획 표기는 v1518로 남아 있고 v1902~1908은 미병합 PR에 있으므로 선행 명세 정합성을 먼저 확인한다.
