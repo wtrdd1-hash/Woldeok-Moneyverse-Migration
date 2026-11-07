@@ -1,4 +1,16 @@
 # 월덕 머니버스 — Living Project Plan
+## v1920 — F675-285 독립 심사자 이해충돌 적격성 최신성·철회 검증 강화 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+- **주기/근거:** Previous Feature Addition v1918 → Current Feature Improvement v1920 → Next Feature Addition v1922. 기준 main b56fdc748dd817eb250b7d5d06019aaf5c299131. 미병합 PR #2889의 F675-285에 종속되며 운영 구현이 아니다.
+- **P0/P1:** P0 운영 심볼릭 링크와 배포 SHA 복구·검증, Test exact-SHA, DB 최소권한·마이그레이션 체크섬, 독립 백업 복원 및 원장 대사. P1 선행 F675-281~285 기획의 정합성을 확인한 후 이해충돌 통제를 개발한다. systemd 활성 상태만으로 사용자 흐름 정상성을 주장하지 않는다.
+- **적격성 최신성:** 승인 시 tenant_id, case_id, case_generation, assignment_id, assignment_revision, 심사자 실효 신원, 위임 그래프·신고 다이제스트, 정책 버전, 검증·만료 시각을 고정한다. 승인 트랜잭션에서 신원/MFA 철회, 신규 이해관계, 사건 담당 변경, 증빙 변경, 신고 만료를 재검증한다. 근거가 누락·만료·충돌하면 ELIGIBILITY_UNKNOWN 또는 BLOCKED로 차단하고 자동 승인하지 않는다.
+- **화면/권한/CTA:** 관리자 → 증빙 사고 → 심사 배정에서 마지막 검증 시각, 무효화 사유, 정책 버전, 비식별 위임 경로 및 교체 대기 상태를 표시한다. '적격성 재검증', '회피', '대체 심사자 요청', '독립 배정 심사'를 COI_DECLARE/COI_ASSIGN/COI_APPROVE로 분리하며 자기·간접 통제 배정 승인을 금지한다. 로딩/빈 상태/오류/만료/오래된 개정과 키보드·320px·WCAG 2.2 AA를 지원한다.
+- **API 제안(미구현):** GET /api/v1/admin/evidence-incidents/:caseId/reviewer-assignments/:assignmentId/eligibility는 개정·다이제스트·검증/만료 시각과 권한별 비식별 사유, no-store를 반환한다. POST /:caseId/reviewer-assignments/:assignmentId/eligibility-rechecks는 COI_ASSIGN/COI_APPROVE, 쿠키 CSRF, Idempotency-Key, If-Match, 호출 제한이 필수다. v1918 결정 API는 동일한 신원·정책·증빙 스냅샷을 커밋 시 재검증한다. 403 권한, 404 타 테넌트, 409 위임 그래프 변경, 412 개정 불일치, 422 잘못된 상태, 429 제한, 503 신원·감사 시스템 장애를 구분한다.
+- **PostgreSQL 제안:** evidence_reviewer_eligibility_snapshot(tenant_id,assignment_id,assignment_revision,case_generation,policy_version,principal_digest,delegation_digest,declaration_digest,checked_at,expires_at,status,reason_code,revision). 테넌트 복합 FK, UNIQUE(tenant_id,assignment_id,assignment_revision,policy_version,delegation_digest), 만료>검증 CHECK, 상태 CHECK, (tenant_id,assignment_id,checked_at DESC) 인덱스와 BLOCKED 부분 인덱스를 적용한다. 민감한 관계 서술은 암호화하고 로그에는 원문 식별자를 남기지 않는다.
+- **원자성/악용 방지:** 단일 트랜잭션에서 배정·사건 세대를 잠그고 권위 있는 신원·위임·신고 상태로 적격성을 재산정, CAS 개정·다이제스트 비교, 불변 감사·Outbox를 함께 기록한다. 클라이언트 판정은 신뢰하지 않는다. 작업자 세대 펜싱과 (테넌트, 배정, 작업, 키) 멱등성을 적용한다. 뒤늦은 신원 철회는 미결 승인을 무효화하고 재심사를 요구하되 과거 서명 기록은 변경하지 않는다. 위임 순환·깊이 제한을 검증하고 감사 장애 시 차단한다.
+- **SEO/KPI:** 최신성 거절률, 회피 후 교체 소요시간, 신원 철회 전파 지연, 오탐 차단률을 개인정보 보호 임계치 20건 이상 집계한다. 관리자 화면은 noindex/no-store/sitemap 제외하며 회원에게 사건 세부정보를 노출하지 않는다.
+- **테스트/배포:** 실제 PostgreSQL 테넌트 격리·FK·인덱스, 정책/신고 만료, 동시 승인·회피, 위임 순환, GET 후 MFA 철회, 사건 세대 변경, 중복 재시도, 감사 장애, 작업자 펜싱, 모바일·스크린리더·영한 동등성 회귀를 요구한다. 별도 구현 브랜치와 공식 Test exact-SHA 이후 카나리 승격하며 admin_evidence_reviewer_coi_v1 기본 OFF 및 즉시 롤백을 유지한다. 기획 회차는 운영 코드를 배포하지 않는다. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건, 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
