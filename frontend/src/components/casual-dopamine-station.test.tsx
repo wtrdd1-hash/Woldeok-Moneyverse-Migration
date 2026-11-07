@@ -60,6 +60,13 @@ describe('CasualDopamineStation', () => {
     expect(screen.queryByText(/투표 완료! 자정/)).toBeNull();
   });
 
+  it('labels the showdown card as local practice without ranking or WLD settlement claims', () => {
+    renderKo(<CasualDopamineStation />);
+    expect(screen.getByText('주사위 연습')).toBeDefined();
+    expect(screen.getByText(/WLD 지급 없이 AI와 연습/)).toBeDefined();
+    expect(screen.queryByText(/랭킹 포인트/)).toBeNull();
+  });
+
   it('opens mini showdown modal when showdown card is clicked', () => {
     renderKo(<CasualDopamineStation />);
 

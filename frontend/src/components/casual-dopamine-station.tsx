@@ -167,7 +167,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Dices className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold text-purple-300 border border-purple-500/30">
-              {t('arcade.showdown.badge', locale, '실시간 결투')}
+              {t('arcade.showdown.badge', locale, '주사위 연습')}
             </span>
           </div>
           <div className="mt-3">
@@ -176,7 +176,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              {t('arcade.showdown.desc', locale, '다른 유저 또는 AI와 3판 2선승 주사위 결투를 펼치고 랭킹 포인트를 올리세요.')}
+              {t('arcade.showdown.desc', locale, 'WLD 지급 없이 AI와 연습하는 3판 2선승 주사위 게임입니다.')}
             </p>
           </div>
         </div>
@@ -280,12 +280,6 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
       <MiniShowdownModal
         isOpen={activeModal === 'showdown'}
         onClose={() => setActiveModal(null)}
-        stake={100}
-        onGameFinish={(won, payout) => {
-          if (won) {
-            showRewardNotice(`주사위 결투 승리! +${payout.toLocaleString()} WLD 획득.`);
-          }
-        }}
       />
 
       {/* Star Drop Modal */}

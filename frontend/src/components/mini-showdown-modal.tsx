@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Dices, Trophy, Shield, X, Swords, User, Bot, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Dices, Trophy, Shield, X, Swords, User, Bot } from 'lucide-react';
 
 interface MiniShowdownModalProps {
   isOpen: boolean;
@@ -10,13 +10,9 @@ interface MiniShowdownModalProps {
   onGameFinish?: (won: boolean, netPayout: number) => void;
 }
 
-import { resolveMiniShowdown } from '@/lib/dopamine-api';
-
 export function MiniShowdownModal({
   isOpen,
   onClose,
-  stake = 100,
-  onGameFinish,
 }: MiniShowdownModalProps) {
   const [playerScore, setPlayerScore] = useState<number>(0);
   const [aiScore, setAiScore] = useState<number>(0);
@@ -36,7 +32,7 @@ export function MiniShowdownModal({
     setRoundWinner(null);
 
     // Roll animation delay
-    setTimeout(async () => {
+    setTimeout(() => {
       const pRoll = Math.floor(Math.random() * 6) + 1;
       const aRoll = Math.floor(Math.random() * 6) + 1;
 
@@ -51,12 +47,6 @@ export function MiniShowdownModal({
 
         if (nextPScore >= 2) {
           setFinalWinner('player');
-          try {
-            await resolveMiniShowdown('win', [pRoll], [aRoll], stake);
-          } catch {
-            // Offline fallback
-          }
-          if (onGameFinish) onGameFinish(true, Math.round(stake * 1.9));
         } else {
           setRound((r) => r + 1);
         }
@@ -67,12 +57,6 @@ export function MiniShowdownModal({
 
         if (nextAScore >= 2) {
           setFinalWinner('ai');
-          try {
-            await resolveMiniShowdown('loss', [pRoll], [aRoll], stake);
-          } catch {
-            // Offline fallback
-          }
-          if (onGameFinish) onGameFinish(false, 0);
         } else {
           setRound((r) => r + 1);
         }
@@ -128,9 +112,9 @@ export function MiniShowdownModal({
         <div className="mt-3 flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-1.5 text-[11px] text-slate-400">
           <span className="flex items-center gap-1">
             <Shield className="h-3.5 w-3.5 text-emerald-400" />
-            100% 가상 시뮬레이터 (WLD 초소액)
+            연습 모드 · WLD 거래 및 지급 없음
           </span>
-          <span className="font-mono text-indigo-400 font-bold">배당: 1.90x (190 WLD)</span>
+          <span className="font-mono text-indigo-400 font-bold">기기 내 주사위 연습 · 정산 없음</span>
         </div>
 
         {/* Score Board Header */}
@@ -232,15 +216,15 @@ export function MiniShowdownModal({
             {finalWinner === 'player' ? (
               <>
                 <Trophy className="h-12 w-12 text-amber-400 animate-bounce" />
-                <h3 className="mt-2 text-lg font-black text-white">🏆 2선승 최종 승리!</h3>
+                <h3 className="mt-2 text-lg font-black text-white">🏆 연습 승리!</h3>
                 <p className="text-xs text-amber-300 font-bold mt-0.5">
-                  +{Math.round(stake * 1.9).toLocaleString()} WLD 획득!
+                  연습 결과입니다. WLD는 지급되지 않습니다.
                 </p>
               </>
             ) : (
               <>
                 <Bot className="h-12 w-12 text-rose-400" />
-                <h3 className="mt-2 text-lg font-black text-white">결투 패배</h3>
+                <h3 className="mt-2 text-lg font-black text-white">연습 패배</h3>
                 <p className="text-xs text-slate-400 mt-0.5">다음 기회에 다시 도전해보세요!</p>
               </>
             )}
