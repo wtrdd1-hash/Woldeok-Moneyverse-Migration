@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## 기획 사이클 v1904 — 2026-11-07 — Feature Improvement — F675-281 사건관리 무결성 보완
+
+**주기:** Previous Feature Addition v1902 → Current Feature Improvement v1904 → Next Feature Addition v1906. **상태:** 명세만 작성 / 미구현 / 운영 배포 HOLD. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 미병합 F675-276~281 기획과 구현 전 정합성 확인 필수.
+
+**P1 증빙 연결·권한:** 사건 증빙 연결은 테넌트, 불변 증빙 세대, 출처 시스템, 출처 레코드 ID, 출처 해시, 정책 버전, 검증 시각을 고정한다. 변경 가능한 최신 증빙을 자동 추적하지 않는다. 조사자는 연결을 요청할 수 있지만 공개·차단에는 실효 신원이 다른 독립 심사자가 필요하다. 위임·서비스 계정·역할 변경을 이용한 자기 승인을 금지한다. 사건 상세·타임라인·공개 심사에 UNKNOWN, STALE, CONFLICTING, VERIFIED 품질을 표시하며 증빙 누락을 사건 해소로 판단하지 않는다.
+
+**API·상태·DB 수용 기준:** 제안 POST /api/v1/admin/evidence-incidents/:id/evidence-links는 고정된 출처 식별자와 테넌트 범위를 검증한다. 제안 POST /:id/disclosure-requests 및 POST /:id/decisions에는 Idempotency-Key, If-Match, 사유 코드가 필수이며 409 중복·충돌, 412 버전 불일치, 422 잘못된 전이, 429 요청 제한, 503 감사 장애를 구분한다. 미해결 보존명령·삭제 예외·독립 승인·Outbox 통지가 남으면 사건 종결을 거부한다. 테넌트 복합 FK, (tenant_id, incident_id, source_kind, source_id, source_generation) 유일성, 불변 출처 해시, (tenant_id, status, updated_at, id) 인덱스를 제안한다. 결정·종결은 행 잠금/CAS로 직렬화하고 감사 이벤트·Outbox를 원자적으로 기록한다. 재개는 기존 결정을 덮어쓰지 않고 새 결정 세대를 만든다.
+
+**안전·화면·QA:** 관리자 경로는 noindex/no-store 및 사이트맵 제외. 모바일 320px, 키보드 조작, 증빙 품질·승인 대기의 스크린리더 알림, 영문·한국어 동등 오류 문구를 요구한다. 개인정보 없는 증빙 검증 소요시간, 오래된 연결 비율, 위험 종결 거부 건수, 공개 철회 지연을 측정한다. 교차 테넌트 연결, 증빙 세대 경합, 위임 자기 승인, 종결·보존 동시 실행, 오래된 If-Match, Outbox 중복, 감사 장애, 내보내기 중 철회, 저장소 부분 실패를 회귀 테스트한다. admin_evidence_incident_casework_v1 기본 OFF. 독립 PostgreSQL/Next/Nest/app-api 계약 검토, Test exact-SHA, 백업 복원, 법률 승인, 카나리 및 롤백 검증 전 운영 활성화 금지.
+
+**P0/P1 백로그:** P0: /srv/moneyverse가 없는 prod-v600을 가리키는 문제 복구·증명, 실제 운영 SHA 및 /en·/en/login 확인, DB 최소권한, 마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 게이트. P1: F675-276~281 열린 PR 중복 검토, 실제 frontend/backend/app-api 경로와 제공자 증빙 지원 확인, 증빙 세대 고정 및 독립 공개 승인 기능을 개발 예약의 별도 브랜치에서 구현. 외부 독립 레퍼런스 신규 검증 0건, 누적 검증 UNKNOWN/10,000건, 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS. 기획 예약은 운영 런타임을 배포하지 않는다.
