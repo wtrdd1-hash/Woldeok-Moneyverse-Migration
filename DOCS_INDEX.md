@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.07.1772 — 국가조폐국 작동 장애·14개 기능 확장 기획
+- [English detailed plan](docs/planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.md) · [한국어](docs/planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md) · [이슈 #2878](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2878) · [작업 기록](docs/worklog/2026-11-07-mint-control-recovery-v1772.md). **기획만 작성**: 원장 집행·운영 배포 확인 아님.
+
+
 ## v2026.11.04.1761.1 — Finance SQL333–336 merged main after full CI, ACTUAL TEST/PROD UNCHANGED
 - [Source merge release EN](docs/releases/v2026.11.04.1761.1-finance-source-merge-hold.md) / [KO](docs/releases/v2026.11.04.1761.1-finance-source-merge-hold.ko.md) · [Start/Mid/End stage log](docs/worklog/2026-11-04-finance-v1761-source-merge.md) · [v1760 source worklog](docs/worklog/2026-11-04-finance-actual-settlement-v1760.md) · [v1761 currency worklog](docs/worklog/2026-11-04-finance-currency-normalization-v1761.md). GitHub source PR #2705 merged 2d1673d937f5a215dfd9efc53a05db241e3caea7 CI41820151596 SUCCESS (SQL333–335). PR #2706 merged b44bd66952b0c1c43c6d1482c31954dd879fca3a CI41822672084 SUCCESS (SQL336 nonmonetary old-W currency metadata normalization). Actual Test/Production still immutable v1742, actual Production DB SQL333 and Test DB SQL332, clone migration application blocked by tool safety inspection, authenticated funded-money E2E not certified. **Do not claim Test/Production release or full SOE/NPS/KDIC/SWF/Mint settlement #2366.**
 
