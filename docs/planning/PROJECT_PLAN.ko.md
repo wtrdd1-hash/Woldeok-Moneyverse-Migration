@@ -1,4 +1,16 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v1914 — F675-284 CAPA 효과성 관찰 및 재발 감시 (기능 추가 / 초안 / 운영 배포 보류)
+
+- **주기·기준:** 이전 기능 보완 v1912 → 현재 기능 추가 v1914 → 다음 기능 보완 v1916. 시작 기준 origin/main `acc5c90a34fed0a51e6bcf7287e09ba26304e793`. 선행 v1912는 미병합 Draft이며 main 기획 상단은 v1518. 문서 제안으로 API·DB·기능이 구현 또는 배포되었다는 뜻이 아니다.
+- **목적·대상·진입:** F675-283의 시정·예방 조치가 실제로 유사 사고의 재발을 줄이는지 종결 이후 확인한다. 권한 있는 사건관리자가 관리자 → 증빙 사고 → 사건 → CAPA → 효과성에서 진입하고 독립 감사자가 결과를 심사한다. 일반 회원 진입·사건정보 공개는 없다. 사건/CAPA 세대, 최신 검증 증빙, 실행자와 구분된 독립 심사자 신원을 선행 검증한다.
+- **화면·CTA·상태:** ‘효과성 심사 예약’에서 관찰기간(7/30/90일), 재발 지문, 비교 기준군, 최소 사건 수와 심사자를 설정한다. ‘신호 확인’에 분자·분모·데이터 최신성·누락 경고를 표시한다. ‘효과 확인’, ‘CAPA 재개’, ‘관찰 연장’은 사유 및 독립 승인을 요구한다. DRAFT → OBSERVING → REVIEW_REQUIRED → EFFECTIVE / INEFFECTIVE / INCONCLUSIVE → REOPENED; 출처 불명·보존명령 충돌 시 BLOCKED. 관측값 0은 자동 성공이 아닌 INCONCLUSIVE. 320px, 키보드 조작, 스크린리더 상태 알림, WCAG 2.2 AA, 영어·한국어 동등성을 적용한다.
+- **API 제안(미구현):** GET /api/v1/admin/evidence-incidents/:caseId/capa/:actionId/effectiveness (EVIDENCE_CAPA_READ); POST /effectiveness/reviews (EVIDENCE_CAPA_MANAGE, Idempotency-Key); POST /effectiveness/:reviewId/decision (EVIDENCE_CAPA_REVIEW, If-Match·최신 MFA); POST /effectiveness/:reviewId/reopen (독립 승인); GET /effectiveness/:reviewId/events (테넌트 한정 서명 커서). private/no-store/noindex, 401/403/404/409/412/422/429/503 명시; 타 테넌트 사건은 404로 은닉. 관리자 페이지는 sitemap·검색 색인에서 제외한다.
+- **DB 제안(미적용):** evidence_capa_effectiveness_review(tenant_id,review_id,case_id,case_generation,action_id,action_generation,window_start_utc,window_end_utc,baseline_digest,rule_version,minimum_sample,status,revision,created_by,reviewer_effective_id); evidence_capa_effectiveness_signal(tenant_id,review_id,event_id,event_generation,fingerprint,observed_at_utc,ingested_at_utc,source_digest); evidence_capa_effectiveness_decision(tenant_id,review_id,decision_generation,outcome,rationale_code,reviewer_effective_id,decision_digest,created_at_utc). 테넌트 복합 FK, UNIQUE(tenant_id,review_id,event_id,event_generation), CHECK(종료>시작, 최소표본>0), 관찰 중 상태 부분 인덱스 및 (tenant_id,review_id,observed_at_utc) 인덱스. 테넌트 교차 조인·중복 신호 금지.
+- **트랜잭션·보안:** 심사 생성·기준 다이제스트·감사·Outbox를 단일 트랜잭션으로 기록한다. 결정은 revision CAS 및 사건/CAPA 세대 잠금, 작업자는 fencing token·멱등 이벤트 처리. 재개해도 이전 승인·증빙 삭제 금지. 수집 워터마크 누락, 서명 오류, 신뢰 불가능한 재발 지문, 위임 철회, 자기 심사, 지연·중복 이벤트, 키 침해 시 안전 차단. 자동 제재·증빙 공개 금지, 테넌트별 쿼리 비용·커서 유효기간·속도 제한, 분석에서 개인 식별자 제거.
+- **KPI·배포:** 적격 심사 수, 출처 완전성 비율, 비교 가능한 노출량 대비 재발률, 오탐률, 독립 결정 소요시간, 데이터 누락 차단 건수. 관리자 집계는 표본 20 이상, 미만은 비공개. P0 OPS1914-01 운영 심볼릭 링크·서명된 SHA 확인, SEC1914-02 최소권한·체크섬, FIN1914-03 독립 복원·원장 대사, REL1914-04 공식 Test exact-SHA·QA·국내 법률 검증. P1 CAPA1914-05 실제 Next/Nest/app-api/DB 계약 및 선행 PR 검토, -06 독립 브랜치 DB/API, -07 관리자 UI·접근성·다국어, -08 중복/지연/역순·테넌트·서머타임·작은 표본·작업자 장애·롤백 회귀, -09 기준선 무결성·개인정보·SEO, -10 관찰 및 단계적 플래그 배포. admin_evidence_capa_effectiveness_v1 기본 OFF, expand/contract 마이그레이션·체크포인트 백필·Test exact-SHA·보안 승인·카나리·즉시 OFF·하위호환 롤백 전 운영 변경 금지. 기획 예약에서 런타임 배포하지 않는다.
+- **외부 독립 레퍼런스:** 신규 실제 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·실제 근거 분류 BLOCKED / IN PROGRESS. 합성 테스트·내부 이벤트는 인정하지 않는다. CI 미검증, 운영 배포 HOLD.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
