@@ -79,6 +79,17 @@ export class ProblemFilter implements ExceptionFilter {
 
   private fromHttpException(exception: HttpException): ProblemDocument {
     const status = exception.getStatus();
+    // Explicit 500 exceptions can wrap database and upstream diagnostics just
+    // like unknown throws. Redact their extension fields in production too;
+    // changing 503 or 4xx contracts here would hide actionable client states.
+    if (this.production && status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      return {
+        type: 'about:blank',
+        title: titleFor(status),
+        status,
+        detail: 'internal server error',
+      };
+    }
     const payload = exception.getResponse();
     const detail = detailOf(payload);
     const code = codeOf(payload);
