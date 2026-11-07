@@ -1,4 +1,14 @@
 # 월덕 머니버스 — Living Project Plan
+## v1916 — F675-284 효과성 심사 분모·근거 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+
+- **주기·정본:** 이전 기능 추가 v1914 → 현재 기능 보완 v1916 → 다음 기능 추가 v1918. 시작 main b56fdc748dd817eb250b7d5d06019aaf5c299131; v1914는 미병합 초안 #2884. main에 기능/API/DB가 구현됐다고 주장하지 않음.
+- **문제·진입:** 재발률의 분자와 적격 노출 분모가 서로 다른 이벤트 마감·정책 세대·대상 집단을 사용하면 잘못된 효과 판정 가능. 관리자 → 증빙 사고 → 사건 → CAPA → 효과성 → “비교 가능한 노출 확인”; 독립 심사자는 서명된 집단 근거를 확인한 후에만 “효과 확인”. 일반 회원 접근 금지, 관리자 noindex/private no-store.
+- **불변 계약:** 테넌트, 사건·조치 세대, UTC 관찰 구간, 표시 전용 IANA 시간대, 기준 집단 정의, 규칙 버전, 이벤트 워터마크, 분모 정의, 증빙 해시를 심사 생성 시 고정. 고정 구간의 적격·중복 제거 노출만 분모에 포함하며 재발 분자는 분모의 부분집합. 노출 0건, 수집 워터마크 누락, 마감 후 지연 이벤트, 분류 변경, 서명 철회, 타 테넌트 증빙이면 INCONCLUSIVE/BLOCKED, EFFECTIVE 자동 처리 금지. 분자/분모·제외 건수·워터마크 경과·집단 비교가능성 표시, “새 심사로 재계산” CTA; 승인 기록 덮어쓰기 금지.
+- **제안 API·DB(미구현):** GET /api/v1/admin/evidence-incidents/:caseId/capa/:actionId/effectiveness/:reviewId/provenance (EVIDENCE_CAPA_READ, 테넌트 결속 서명 커서); POST /effectiveness/:reviewId/rebase (EVIDENCE_CAPA_MANAGE, Idempotency-Key, If-Match, 최신 독립 심사). 제안 심사 스냅샷에 review_cohort_digest, exposure_count, recurrence_count, source_watermark_utc, cutoff_generation, calculation_version, excluded_count 추가; CHECK 건수>=0 및 recurrence_count<=exposure_count, 테넌트 복합 FK, UNIQUE(tenant_id,review_id,cutoff_generation), (tenant_id,status,source_watermark_utc) 인덱스. 실제 스키마 확인 후 확장·백필·축소; 현행 테이블 존재 추정 금지.
+- **트랜잭션·보안·관리:** 집단·건수 스냅샷, 감사, Outbox 원자적 기록 및 revision CAS; 작업자 펜싱·이벤트 멱등성. 실행자와 심사자의 실효 신원 분리(위임 포함). 속도·쿼리 비용 제한, 타 테넌트·커서 재생 차단, 자동 제재·증빙 공개 금지. 320px 대응, WCAG 2.2 AA, 키보드·ARIA 오류 안내, 영한 동등성; KPI 비교가능 심사 완료율·워터마크 지연 차단·거짓 효과 판정률·심사 소요시간, 20명 미만 집계 숨김.
+- **시험·배포:** P0 OPS1916-01 운영 심볼릭 링크/실배포 SHA·롤백, SEC1916-02 DB 권한·체크섬, FIN1916-03 독립 복원·원장 대사, REL1916-04 공식 Test exact-SHA·CI/QA·국내 법률 게이트. P1 CAPA1916-05 #2884 및 실제 Next/Nest/app-api/PG 계약 확인, -06 스냅샷·스키마·API, -07 접근성 관리자 UI, -08 테넌트 격리·중복/지연/역순 이벤트·분모 0·워터마크 공백·정책 세대·동시 재계산·롤백 시험, -09 개인정보/SEO/KPI, -10 단계별 플래그 적용. admin_evidence_capa_effectiveness_v1 기본 OFF. 기획에서 런타임·DB·운영 변경 금지.
+- **외부 근거:** 신규 독립 검증 0건, 누적 UNKNOWN / 10,000건; 수집·중복제거·실제 근거 분류 BLOCKED / IN PROGRESS. 시험은 제안만 했으며 미실행. 운영 보류.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
