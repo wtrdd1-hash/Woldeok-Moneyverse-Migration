@@ -13,7 +13,8 @@ import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
 import type { AdminUser } from '../../types';
 import { LogsSubNav } from '../logs-sub-nav';
-import { TrafficDashboard, type TrafficAnalyticsDashboard } from './traffic-dashboard';
+import { TrafficDashboard } from './traffic-dashboard';
+import { parseTrafficEvidence } from './traffic-evidence';
 import { parseActivityQuery, parseActivityLogs, resolveActivityMember, type ActivityLogRow } from './activity-query';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +65,7 @@ export default async function AdminActivityLogsPage({
   const { granularity, periods, eventType, invalidEventType, limit, page, offset, rawUser } = parseActivityQuery(params);
 
   const [trafficRes, usersResponse] = await Promise.all([
-    apiOrNull<TrafficAnalyticsDashboard>(`/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}`),
+    apiOrNull<unknown>(`/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}`),
     apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
   ]);
 
@@ -76,7 +77,7 @@ export default async function AdminActivityLogsPage({
   const resolvedUser = resolvedUserId ? userList.find((u) => u.user_id.toLowerCase() === resolvedUserId) : null;
 
   let logs: ActivityLogRow[] = [];
-  const traffic: TrafficAnalyticsDashboard | null = trafficRes;
+  const traffic = parseTrafficEvidence(trafficRes, { granularity, periods });
   let loadProblem = invalidEventType ? '허용되지 않은 이벤트 종류입니다. 필터를 다시 선택해 주세요.' : '';
   if (!loadProblem && memberFilter.status !== 'all' && memberFilter.status !== 'resolved') {
     loadProblem = memberFilter.status === 'ambiguous'
@@ -139,7 +140,7 @@ export default async function AdminActivityLogsPage({
           <CardDescription>원시 IP나 전체 referrer URL을 복제하지 않고 페이지 접속·세션·진입 경로를 집계합니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          {traffic ? <TrafficDashboard data={traffic} /> : <EmptyState title="접속 분석을 불러오지 못했습니다." description="집계 API와 관리자 권한을 확인해 주세요." />}
+          {traffic ? <TrafficDashboard data={traffic} /> : <div role="alert" aria-live="polite" className="grid gap-3"><EmptyState title="접속 분석을 확인할 수 없습니다" description="서버 응답이 없거나 접속 분석 원천을 검증할 수 없습니다. 미확인 접속량은 표시하지 않습니다." /><Button asChild variant="outline" className="min-h-11 w-full sm:w-fit"><Link href="/admin/logs/activity">다시 조회</Link></Button></div>}
         </CardContent>
       </Card>
 
