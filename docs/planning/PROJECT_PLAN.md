@@ -1,3 +1,12 @@
+## v1770 — F675-248 SLA incident evidence timeline (Feature Addition; 2026-11-05)
+Cycle: Previous v1768 Feature Improvement → Current v1770 Feature Addition → Next v1772 Feature Improvement. Proposal only; not implemented.
+**Purpose and user journey:** Support supervisors need an immutable chronological explanation of policy drift incidents without direct policy changes. Admin > Support > SLA > Incident timeline; View evidence, Filter and Refresh CTAs. States LOADING, EMPTY, STALE, UNKNOWN, ERROR, ACCESS_DENIED; incomplete evidence never means healthy.
+**API and access:** Proposed GET /api/v1/admin/support/sla-policy/incidents/:id/timeline?cursor=&limit= (1–100), supervisor-only tenant/team authorization on every request, private no-store, signed incident/generation-scoped stable cursor ordered by committed_at and id; 401/403/404/409/429. No PII export or automatic remediation.
+**DB and transaction:** Inspect actual schema before implementation. Proposed EXECUTE-only SECURITY DEFINER read function with locked search_path, scoped index (tenant_id,team_id,incident_id,committed_at,id), REPEATABLE READ snapshot and committed audit/outbox watermark. No writes. Missing audit provenance returns UNKNOWN.
+**Security, UI, SEO and KPI:** Reject IDOR, cross-tenant cursor reuse, revoked roles, stale tokens, unbounded queries and sensitive logs; noindex authenticated admin page. 320px responsive, WCAG 2.2 AA, KO/EN screen-reader chronology. KPI evidence coverage, load p95, investigation time.
+**Verification and release:** Test tenant isolation, permission revocation, missing/out-of-order events, concurrent rollback, replay, limit 100/101, cache leaks and a11y. Feature flag admin_support_sla_incident_timeline_v1 defaults OFF. Additive read-only migration and isolated Test exact-SHA approval required; rollback flag OFF. Dependencies F675-243–247 unverified.
+**P0/P1 and references:** P0 production HTTP 500/deployed SHA, DB least privilege/checksums, authenticated exact-SHA Test E2E, independent restore/ledger reconciliation. P1 actual schema/provenance, scoped API, UI/a11y, security tests, staged rollout. Independent external references newly verified 0; cumulative UNKNOWN/10,000, BLOCKED/IN PROGRESS. GitHub issue #2715.
+
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 

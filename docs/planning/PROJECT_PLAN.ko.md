@@ -1,3 +1,12 @@
+## v1770 — F675-248 관리자 문의 SLA 사고 증빙 타임라인 (기능 추가; 2026-11-05)
+주기: 이전 v1768 기능 보완 → 현재 v1770 기능 추가 → 다음 v1772 기능 보완. 기획 제안이며 미구현.
+**목적·사용 흐름:** 관리자 감독자가 정책 불일치 사고의 불변 근거를 시간순으로 확인한다. 관리자 > 문의 > SLA > 사고 타임라인; 근거 보기, 필터, 새로고침 CTA. 로딩·빈 결과·오래된 근거·근거 불명·오류·권한 없음 상태를 구분하며 근거 누락을 정상으로 표시하지 않는다.
+**API·권한:** 제안 GET /api/v1/admin/support/sla-policy/incidents/:id/timeline?cursor=&limit= (1~100). 매 요청 감독자·테넌트·팀 권한 재검증, private no-store, 사고·정책 세대에 묶인 서명 커서, committed_at/id 안정 정렬, 401/403/404/409/429. 개인정보 내보내기와 자동 정책 복구는 금지.
+**DB·트랜잭션:** 구현 전 실제 스키마 검증. search_path 고정 SECURITY DEFINER 읽기 함수에 EXECUTE만 부여, (tenant_id,team_id,incident_id,committed_at,id) 범위 인덱스, REPEATABLE READ 스냅샷, 커밋된 감사·Outbox 워터마크 적용. 쓰기 없음; 근거 누락 시 UNKNOWN.
+**보안·화면·SEO·KPI:** IDOR, 테넌트 간 커서 재사용, 권한 철회, 오래된 인증, 무제한 조회, 민감 로그 방지. 인증 관리자 화면 noindex, 320px 모바일, WCAG 2.2 AA, 한영 동등 및 스크린리더 순서 제공. KPI 근거 완전성·조회 p95·조사 소요시간.
+**검증·배포:** 테넌트 격리·권한 철회·감사 누락/역순·동시 롤백·커서 재사용·100/101 경계·캐시·접근성 회귀. 기능 스위치 admin_support_sla_incident_timeline_v1 기본 OFF. 읽기 전용 확장 마이그레이션, 격리 Test exact-SHA 승인 필수; 롤백은 스위치 OFF. 선행 F675-243~247 구현 미확인.
+**P0/P1·레퍼런스:** P0 운영 HTTP 500/배포 SHA, DB 최소권한·체크섬, 인증 Test exact-SHA E2E, 독립 복원·원장 대사. P1 실제 스키마·근거 출처, 권한 API, UI·접근성, 보안 회귀, 단계적 활성화. 신규 외부 독립 레퍼런스 검증 0건, 누적 UNKNOWN/10,000건으로 BLOCKED/IN PROGRESS. GitHub 이슈 #2715.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
