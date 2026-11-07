@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { StockController } from './stock.controller';
 import type { StockService } from './stock.service';
@@ -74,5 +74,13 @@ describe('public stock price query contract', () => {
     expect(service.sparkSeries).toHaveBeenNthCalledWith(2, 240);
     expect(service.priceHistory).toHaveBeenNthCalledWith(2, STOCK, 240);
     expect(service.candles).toHaveBeenNthCalledWith(2, STOCK, 300, 400);
+  });
+});
+
+
+describe('stock depth provenance contract', () => {
+  it('rejects an unverified orderbook instead of inventing live bid/ask quantities', async () => {
+    const { subject } = controller();
+    await expect(subject.orderbook(STOCK)).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 });

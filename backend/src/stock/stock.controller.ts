@@ -162,6 +162,17 @@ export class StockController {
     return { events: await this.service().marketEvents() };
   }
 
+  @Get(':id/orderbook')
+  @SkipInternalToken()
+  @ApiOperation({ summary: 'Verified stock order depth; unavailable until a recorded order source exists' })
+  async orderbook(@Param('id', ParseUUIDPipe) _stockId: string): Promise<never> {
+    // Recorded prices and account trades do not establish standing bid/ask orders.
+    throw new ServiceUnavailableException({
+      code: 'stock_orderbook_source_unverified',
+      detail: 'Recorded bid/ask depth and executions are not available from a verified source',
+    });
+  }
+
   @Get(':id/prices')
   @SkipInternalToken()
   @ApiOperation({ summary: 'Recorded price history for one stock' })
