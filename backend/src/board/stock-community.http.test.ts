@@ -8,7 +8,7 @@ describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
-    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
+    expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ', undefined);
   });
   it.each([
     { q: ['a', 'b'] },
@@ -21,4 +21,17 @@ describe('public board title query HTTP validation', () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
+});
+
+describe('public board minimum reply HTTP validation', () => {
+  it('returns the applied minimum and forwards it to the SQL-backed service', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', minReplies: '5' })).resolves.toEqual({ posts: [], minReplies: 5 });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', undefined, 5);
+  });
+  it.each([{ minReplies: ['2', '5'] }, { minReplies: '0' }, { minReplies: '01' }, { minReplies: '11' }, { minReplies: '-1' }, { minReplies: '2', unknown: 'x' }])(
+    'rejects invalid minimum %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
 });

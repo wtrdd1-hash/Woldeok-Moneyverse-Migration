@@ -1,0 +1,5 @@
+# Release gate: HOLD — public board minimum replies (2026-11-02)
+
+Candidate branch: `auto/hourly-a-20261102-0825-board-reply-threshold`. No production promotion is authorized by a successful local test or PR CI alone. Required: exact candidate SHA full CI and image digest; isolated Test matching SHA, real PostgreSQL/authenticated member E2E; independent backup restore and reconciliation; least-privilege P0 fix; security audit policy; GitOps desired/applied/running digest agreement; zero-downtime smoke/login/version/DB and rollback evidence. Any failure => HOLD and preserve branch. Rollback is not executed because nothing was deployed.
+
+Runtime authority: `docs/INFRASTRUCTURE.md` identifies the Debian 13 systemd Test/Production stacks as current public runtime; NixOS/Kubernetes/Flux is a suspended recovery target, not proof of live execution. Promotion must verify the actual Debian release directory, running processes, public SHA and authoritative database; GitOps desired state alone is insufficient. Public Test and Production version endpoints returned `510dbe6bf4d5c2a8089fc06b480776053da7a2e3` during this run, not this candidate.
