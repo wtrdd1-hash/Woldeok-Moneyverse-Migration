@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function SeoulFxPortalPage() {
   const [activeTab, setActiveTab] = useState<'spot' | 'forward' | 'savings' | 'safetynet'>('spot');
+  const [sourceStatus, setSourceStatus] = useState<'checking' | 'verified' | 'unavailable'>('checking');
   const [portalData, setPortalData] = useState<{
     reserves: {
       currency: string;
@@ -93,15 +95,57 @@ export default function SeoulFxPortalPage() {
   }>>([]);
 
   const fetchPortalData = async () => {
+    // The public Nest endpoint currently rejects unverified FX observations with 503.
+    // Never revive synthetic spot rates or settlement controls on network failure.
+    setSourceStatus('checking');
+    setPortalData(null);
+    setWallet(null);
+    setMyForwardContracts([]);
     try {
-      const res = await fetch('/api/v1/fx/portal');
+      const res = await fetch('/api/v1/fx/portal', { cache: 'no-store' });
+      if (!res.ok) throw new Error('FX source unavailable');
       const json = await res.json();
-      if (json.success && json.data) {
+      const evidence = json?.data?.sourceEvidence;
+      const reserves = json?.data?.reserves;
+      if (
+        json?.success === true &&
+        evidence?.spotRateVerified === true &&
+        evidence?.ledgerBacked === true &&
+        evidence?.settlementReady === true &&
+        typeof evidence?.asOf === 'string' &&
+        Number.isFinite(Date.parse(evidence.asOf)) &&
+        typeof reserves?.currentRate === 'number' &&
+        Number.isFinite(reserves.currentRate) &&
+        reserves.currentRate > 0 &&
+        typeof reserves?.updatedAt === 'string' &&
+        Number.isFinite(Date.parse(reserves.updatedAt)) &&
+        typeof reserves.currency === 'string' &&
+        reserves.currency.length > 0 &&
+        typeof reserves.totalReservesUsd === 'number' &&
+        Number.isFinite(reserves.totalReservesUsd) &&
+        reserves.totalReservesUsd >= 0 &&
+        typeof reserves.targetAnchorRate === 'number' &&
+        Number.isFinite(reserves.targetAnchorRate) &&
+        reserves.targetAnchorRate > 0 &&
+        typeof reserves.isHalted === 'boolean' &&
+        Array.isArray(json.data.history) &&
+        json.data.history.every((entry: unknown) => {
+          if (!entry || typeof entry !== 'object') return false;
+          const row = entry as Record<string, unknown>;
+          return typeof row.id === 'string' && typeof row.rate === 'number' &&
+            Number.isFinite(row.rate) && row.rate > 0 &&
+            typeof row.createdAt === 'string' && Number.isFinite(Date.parse(row.createdAt));
+        })
+      ) {
         setPortalData(json.data);
+        setSourceStatus('verified');
+        void fetchWalletAndContracts();
+        return;
       }
-    } catch (e) {
-      console.error('Failed to load FX portal data', e);
+    } catch {
+      // A rejected or unreachable source is not an empty market or a live quote.
     }
+    setSourceStatus('unavailable');
   };
 
   const fetchWalletAndContracts = async () => {
@@ -121,11 +165,45 @@ export default function SeoulFxPortalPage() {
   };
 
   useEffect(() => {
-    fetchPortalData();
-    fetchWalletAndContracts();
+    void fetchPortalData();
   }, []);
 
-  const rate = portalData?.reserves.currentRate ?? 1352.5;
+  if (sourceStatus !== 'verified' || !portalData) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+        <section className="rounded-2xl border border-amber-500/30 bg-slate-950 p-6 text-white shadow-lg sm:p-10">
+          <p className="text-sm font-semibold text-amber-300">Woldeok Moneyverse · FX</p>
+          <h1 className="mt-3 text-2xl font-bold sm:text-3xl">가상 외환시장 이용 상태</h1>
+          <p className="mt-3 text-sm leading-7 text-slate-200">
+            WLD와 USD는 서비스 내 가상 단위입니다. 검증되지 않은 환율, 외환보유액,
+            선물환 계약 또는 거래 완료 내역을 제공하지 않습니다.
+          </p>
+          {sourceStatus === 'checking' ? (
+            <p role="status" aria-live="polite" className="mt-6 rounded-lg bg-slate-800 p-4 text-sm">
+              외환시장 자료의 출처를 확인 중입니다.
+            </p>
+          ) : (
+            <div role="alert" className="mt-6 rounded-lg border border-amber-500/40 bg-amber-950/40 p-4">
+              <p className="font-semibold">외환시장 자료를 조회할 수 없습니다.</p>
+              <p className="mt-2 text-sm leading-6">
+                현재 환율 및 원장 정산 근거가 검증되지 않아 시세 조회와 환전·선물환 거래를 중단했습니다.
+                조회 실패는 환율 0이나 거래 성공을 의미하지 않습니다.
+              </p>
+              <button type="button" onClick={() => void fetchPortalData()}
+                className="mt-4 min-h-11 rounded-lg bg-amber-300 px-5 py-3 font-semibold text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                다시 확인
+              </button>
+            </div>
+          )}
+          <Link href="/guide" className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-sky-300 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+            서비스 안내 보기
+          </Link>
+        </section>
+      </main>
+    );
+  }
+
+  const rate = portalData.reserves.currentRate;
   const isHalted = portalData?.reserves.isHalted ?? false;
   const ews = portalData?.ews;
 
