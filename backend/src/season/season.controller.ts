@@ -21,7 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
-import { SeasonInputError, SeasonRewardLedgerHoldError } from './season.repository';
+import { SeasonInputError, SeasonRewardLedgerHoldError, SeasonSettlementHoldError } from './season.repository';
 import { SeasonService } from './season.service';
 
 export class ConsumeDto {
@@ -113,17 +113,9 @@ export class SeasonController {
 
   @Post('settle')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: '시즌 종료 정산 엔진 (명예의 전당 및 6대 티어 보상 분배)' })
-  async settle(@Body() body: SettleSeasonDto) {
-    try {
-      return await this.service().settle(body.seasonId);
-    } catch (error: unknown) {
-      if (error instanceof SeasonInputError) throw new BadRequestException(error.message);
-      if (isExpectedCommandFailure(error)) {
-        throw new ConflictException('cannot settle season now');
-      }
-      throw error;
-    }
+  @ApiOperation({ summary: 'Season settlement temporarily unavailable pending verified authorization' })
+  async settle(@Body() _body: SettleSeasonDto): Promise<never> {
+    throw new SeasonSettlementHoldError();
   }
 
   @Post('claim-rewards')

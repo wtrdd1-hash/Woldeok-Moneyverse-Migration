@@ -96,21 +96,14 @@ describe('Season Settlement & Hall of Fame Engine', () => {
     expect(hof[0]?.honorees[0]?.trophyCode).toBe('TROPHY_SEASON_CHAMPION_#1');
   });
 
-  it('successfully triggers season settlement engine and generates hall of fame snapshots', async () => {
+  it('holds season settlement rather than invoking the repository', async () => {
     const seasonId = '22222222-2222-4222-8222-222222222222';
-
-    vi.mocked(mockRepo.settle).mockResolvedValueOnce({
-      seasonId,
-      seasonName: '2026 가을 그랜드 시즌',
-      settledCount: 250,
-      hallOfFameCount: 10,
+    vi.mocked(mockRepo.settle).mockClear();
+    await expect(service.settle(seasonId)).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SEASON_SETTLEMENT_UNAVAILABLE' },
     });
-
-    const result = await service.settle(seasonId);
-    expect(result.seasonName).toBe('2026 가을 그랜드 시즌');
-    expect(result.settledCount).toBe(250);
-    expect(result.hallOfFameCount).toBe(10);
-    expect(mockRepo.settle).toHaveBeenCalledWith(seasonId);
+    expect(mockRepo.settle).not.toHaveBeenCalled();
   });
 
   it('successfully claims season reward idempotently', async () => {

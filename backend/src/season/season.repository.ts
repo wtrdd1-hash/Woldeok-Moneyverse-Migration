@@ -24,6 +24,11 @@ export class SeasonRewardLedgerHoldError extends ServiceUnavailableException {
     });
   }
 }
+export class SeasonSettlementHoldError extends ServiceUnavailableException {
+  constructor() {
+    super({ code: 'SEASON_SETTLEMENT_UNAVAILABLE', message: 'Season settlement is unavailable pending authorization and lifecycle verification.' });
+  }
+}
 const id = (value: unknown, field: string): string => {
   if (typeof value !== 'string' || !UUID.test(value))
     throw new SeasonInputError(`${field} must be a UUID`);
@@ -265,37 +270,8 @@ export class PostgresSeasonRepository implements SeasonRepository {
     return Array.from(seasonMap.values());
   }
 
-  async settle(seasonId?: string): Promise<SettleSeasonResult> {
-    let targetSeasonId = seasonId;
-    if (!targetSeasonId) {
-      const active = await queryOne<{ id: string }>(
-        this.pool,
-        `SELECT id::text FROM public.virtual_seasons WHERE active = true ORDER BY starts_at DESC LIMIT 1;`,
-      );
-      if (!active) throw new SeasonInputError('no active season to settle');
-      targetSeasonId = active.id;
-    }
-
-    const sId = id(targetSeasonId, 'season id');
-
-    const row = await queryOne<{
-      settled_count: number;
-      hall_of_fame_count: number;
-      season_name: string;
-    }>(
-      this.pool,
-      `SELECT settled_count, hall_of_fame_count, season_name FROM public.season_settle_rewards($1::uuid);`,
-      [sId],
-    );
-
-    if (!row) throw new Error('failed to settle season rewards');
-
-    return {
-      seasonId: sId,
-      seasonName: row.season_name,
-      settledCount: row.settled_count,
-      hallOfFameCount: row.hall_of_fame_count,
-    };
+  async settle(_seasonId?: string): Promise<SettleSeasonResult> {
+    throw new SeasonSettlementHoldError();
   }
 
   async claimReward(

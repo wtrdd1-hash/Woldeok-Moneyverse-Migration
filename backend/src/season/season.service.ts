@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SeasonInputError } from './season.repository';
+import { SeasonInputError, SeasonSettlementHoldError } from './season.repository';
 import type { WldAmount } from '@moneyverse/contract';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -158,9 +158,8 @@ export class SeasonService {
     return this.repository.hallOfFame();
   }
 
-  settle(seasonId?: unknown): Promise<SettleSeasonResult> {
-    const sId = seasonId ? id(seasonId, 'season id') : undefined;
-    return this.repository.settle(sId);
+  async settle(_seasonId?: unknown): Promise<SettleSeasonResult> {
+    throw new SeasonSettlementHoldError();
   }
 
   claimReward(userId: unknown, seasonId: unknown, idempotencyKey: unknown): Promise<ClaimSeasonRewardResult> {
