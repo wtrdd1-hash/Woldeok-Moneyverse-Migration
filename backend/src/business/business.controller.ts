@@ -4,15 +4,17 @@ import {
   ConflictException,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -72,25 +74,42 @@ export class BusinessController {
     }
   }
 
-  private async availableCatalog(userId: string) {
+  private async availableCatalog(userId: string, maxCost?: string) {
     const [catalog, owned] = await Promise.all([
-      this.service().catalog(),
+      this.service().catalog(maxCost),
       this.service().mineV2(userId),
     ]);
     const ownedTypeIds = new Set(owned.map((item) => item.businessTypeId));
     return catalog.filter((item) => !ownedTypeIds.has(item.id));
   }
 
+  private budget(raw: unknown): string | undefined {
+    if (raw === undefined) return undefined;
+    if (typeof raw !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(raw)) {
+      throw new BadRequestException('maxCost must be a canonical WLD integer up to 18 digits');
+    }
+    return raw;
+  }
+
   @Get('business-types')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiOperation({ summary: 'Business types available to buy, excluding types already owned' })
-  async catalog(@Req() request: RequestWithSession) {
-    return { businessTypes: await this.availableCatalog(requireUserId(request)) };
+  @ApiQuery({ name: 'maxCost', required: false, type: String, description: 'Canonical nonnegative integer WLD acquisition cost cap (up to 18 digits)' })
+  async catalog(@Req() request: RequestWithSession, @Query('maxCost') rawBudget?: unknown) {
+    const maxCost = this.budget(rawBudget);
+    return { businessTypes: await this.availableCatalog(requireUserId(request), maxCost) };
   }
 
   @Get('businesses/catalog')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   @ApiOperation({ summary: 'App API alias: business types available to buy, excluding owned types' })
-  catalogForApp(@Req() request: RequestWithSession) {
-    return this.catalog(request);
+  @ApiQuery({ name: 'maxCost', required: false, type: String, description: 'Canonical nonnegative integer WLD acquisition cost cap (up to 18 digits)' })
+  catalogForApp(@Req() request: RequestWithSession, @Query('maxCost') rawBudget?: unknown) {
+    return this.catalog(request, rawBudget);
   }
 
   @Get('businesses')

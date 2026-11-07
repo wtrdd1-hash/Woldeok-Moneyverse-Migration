@@ -240,6 +240,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
+  const businessBudgetPath = parts.length === 2 && parts[0] === 'businesses' && parts[1] === 'catalog' && request.method === 'GET';
+  const businessBudgetValues = businessBudgetPath ? request.nextUrl.searchParams.getAll('maxCost') : [];
+  if (businessBudgetPath && (businessBudgetValues.length > 1 ||
+      (businessBudgetValues.length === 1 && !/^(?:0|[1-9][0-9]{0,17})$/.test(businessBudgetValues[0]!)) ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'maxCost'))) {
+    return gatewayProblem(400, 'Bad Request', 'business_budget_invalid', 'invalid WLD catalogue budget');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -498,6 +506,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  if (businessBudgetPath && businessBudgetValues.length === 1 && response.ok &&
+      !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'business_budget_unverified', 'catalogue cost evidence is unavailable');
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -508,8 +521,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  const privateBusinesses = parts[0] === 'businesses';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory || privateBusinesses) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory || privateBusinesses) headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -521,6 +535,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (businessBudgetPath && businessBudgetValues.length === 1 && response.ok) {
+        const items = compatible && typeof compatible === 'object' && !Array.isArray(compatible)
+          ? (compatible as { businessTypes?: unknown }).businessTypes : null;
+        const budget = BigInt(businessBudgetValues[0]!);
+        if (!Array.isArray(items) || items.length > 200 || items.some((item: unknown) => {
+          if (!item || typeof item !== 'object' || Array.isArray(item)) return true;
+          const cost = (item as { purchaseCost?: unknown }).purchaseCost;
+          return typeof cost !== 'string' || !/^(?:0|[1-9][0-9]{0,17})$/.test(cost) || BigInt(cost) > budget;
+        })) {
+          return gatewayProblem(503, 'Service Unavailable', 'business_budget_unverified', 'catalogue cost evidence is unavailable');
+        }
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +575,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (businessBudgetPath && businessBudgetValues.length === 1 && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'business_budget_unverified', 'catalogue cost evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -566,6 +595,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'businesses') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

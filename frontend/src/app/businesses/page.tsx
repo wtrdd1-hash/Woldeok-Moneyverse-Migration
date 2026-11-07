@@ -17,6 +17,7 @@ import {
 } from './business-forms';
 import { BusinessGrantBanner } from './business-grant-banner';
 import { SupplyChainWidget } from './supply-chain-widget';
+import { parseBusinessBudget } from './business-budget';
 import type { EquityStanding } from './equity';
 import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity';
 import { canonicalUrl } from '@/lib/seo';
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   title: '가상 사업체 — 게임 내 비즈니스 운영',
   description: '월덕 머니버스 게임 안에서 다양한 가상 사업체를 설립·운영하고 정산 기록과 부스트 아이템을 확인합니다.',
   alternates: { canonical: canonicalUrl('/businesses') },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 interface BusinessType {
@@ -86,11 +87,21 @@ function locked(
   return null;
 }
 
-export default async function BusinessesPage() {
+export default async function BusinessesPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireMember();
+  const params = await searchParams;
+  const budget = parseBusinessBudget(params.maxCost);
 
   const [catalog, mineV2, ladder, capital, inventoryRes] = await Promise.all([
-    apiOrNull<{ businessTypes: BusinessType[] }>('/api/v1/business-types'),
+    budget.invalid
+      ? Promise.resolve(null)
+      : apiOrNull<{ businessTypes: BusinessType[] }>(
+          `/api/v1/business-types${budget.value === null ? '' : `?maxCost=${budget.value}`}`,
+        ),
     apiOrNull<{ businesses: OwnershipV2[] }>('/api/v1/businesses/my-v2'),
     apiOrNull<{ unlocks: EarlyUnlock[] }>('/api/v1/progression/early-game'),
     apiOrNull<{ equity: EquityStanding }>('/api/v1/business-equity'),
@@ -339,12 +350,38 @@ export default async function BusinessesPage() {
           {standing ? (
             <p className="text-xs text-muted-foreground mt-1">{equitySummary(standing)}</p>
           ) : null}
+          <form role="search" method="get" action="/businesses" className="mt-3 flex flex-wrap items-end gap-3">
+            <label htmlFor="business-max-cost" className="grid min-w-0 flex-1 gap-1 text-sm font-semibold">
+              인수 비용 상한 (WLD)
+              <input
+                id="business-max-cost"
+                name="maxCost"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={18}
+                defaultValue={budget.value ?? (typeof params.maxCost === 'string' ? params.maxCost.slice(0, 18) : '')}
+                placeholder="예: 500000"
+                aria-describedby="business-budget-note"
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+              />
+            </label>
+            <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">검색</button>
+            <a href="/businesses" className="inline-flex min-h-11 items-center underline underline-offset-4">초기화</a>
+          </form>
+          <p id="business-budget-note" className="mt-2 text-xs text-muted-foreground">
+            예산은 검색 조건이며 보유 잔액이나 구매 가능 여부를 뜻하지 않습니다.
+          </p>
+          {budget.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">0 이상, 최대 18자리의 정수 WLD를 입력해 주세요.</p>
+          ) : null}
         </div>
 
-        {catalog === null ? (
+        {budget.invalid ? (
+          <EmptyState title="인수 비용 검색 조건을 확인해 주세요." />
+        ) : catalog === null ? (
           <EmptyState title="사업 정보를 불러오지 못했어요." />
         ) : catalog.businessTypes.length === 0 ? (
-          <EmptyState title="등록된 사업이 아직 없어요." />
+          <EmptyState title={budget.value === null ? '등록된 사업이 아직 없어요.' : '선택한 인수 비용 상한에 해당하는 사업이 없어요.'} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {catalog.businessTypes.map((type) => (

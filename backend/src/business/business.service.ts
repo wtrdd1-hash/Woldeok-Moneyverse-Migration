@@ -121,7 +121,7 @@ export interface BusinessApplyBoostInput {
 }
 
 export interface BusinessRepository {
-  catalog(): Promise<readonly BusinessCatalogRow[]>;
+  catalog(maxCost?: string): Promise<readonly BusinessCatalogRow[]>;
   mine(userId: string): Promise<readonly BusinessOwnershipRow[]>;
   mineV2(userId: string): Promise<readonly BusinessOwnershipV2Row[]>;
   equity(userId: string): Promise<BusinessEquityRow | null>;
@@ -176,8 +176,8 @@ export class BusinessService {
     this.repository = repository;
   }
 
-  async catalog(): Promise<BusinessType[]> {
-    const rows = await this.repository.catalog();
+  async catalog(maxCost?: string): Promise<BusinessType[]> {
+    const rows = await this.repository.catalog(maxCost);
     return rows.map(businessType);
   }
 
