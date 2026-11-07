@@ -9,6 +9,8 @@ export interface SeoAuditTelemetry {
 export interface SeoAuditSnapshot {
   readonly timestamp: string;
   readonly candidateUrlCount: number;
+  readonly candidateUrls: readonly string[];
+  readonly candidateDigest: string;
   readonly telemetry: SeoAuditTelemetry | null;
   readonly telemetryStatus: 'observed' | 'unavailable';
   readonly indexingStatus: 'not_measured';
@@ -25,6 +27,30 @@ export interface IndexNowReceipt {
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const MAX_RESPONSE_AGE_MS = 10 * 60 * 1000;
 const MAX_CLOCK_SKEW_MS = 2 * 60 * 1000;
+
+const CANDIDATE_DIGEST = /^[a-f0-9]{64}$/;
+const PRIVATE_PATH = /^\/(?:account|admin|api|chat|dashboard|inventory|login|lobby|profile|register|reset-password|support|verify-email|wallet)(?:\/|$)/;
+const PRIVATE_BANK_PATH = /^\/bank\/?$/;
+const PRIVATE_STOCK_PATH = /^\/stocks\/(?:history|watchlist|portfolio|alerts)(?:\/|$)/;
+
+/** Candidate status is not an indexing certificate; only same-host public-shaped URLs qualify. */
+export function parseIndexNowCandidateUrls(value: unknown): readonly string[] | null {
+  if (!Array.isArray(value) || value.length > 10000) return null;
+  const seen = new Set<string>();
+  const urls: string[] = [];
+  for (const candidate of value) {
+    if (typeof candidate !== 'string' || candidate.length > 2048) return null;
+    let url: URL;
+    try { url = new URL(candidate); } catch { return null; }
+    if (url.protocol !== 'https:' || url.host !== 'easy-scraping.com' ||
+        url.username || url.password || url.search || url.hash ||
+        url.href !== candidate || (PRIVATE_PATH.test(url.pathname) || PRIVATE_BANK_PATH.test(url.pathname)) ||
+        PRIVATE_STOCK_PATH.test(url.pathname) || seen.has(candidate)) return null;
+    seen.add(candidate);
+    urls.push(candidate);
+  }
+  return urls;
+}
 
 const BOT_LABELS = new Set([
   'Googlebot', 'Bingbot', 'DuckDuckBot', 'Baiduspider', 'Applebot',
@@ -66,15 +92,18 @@ export function parseSeoAuditSnapshot(value: unknown): SeoAuditSnapshot | null {
       new Date(value.timestamp).toISOString() !== value.timestamp ||
       Date.now() - Date.parse(value.timestamp) > MAX_RESPONSE_AGE_MS ||
       Date.parse(value.timestamp) - Date.now() > MAX_CLOCK_SKEW_MS ||
-      !count(value.candidateUrlCount) ||
+      !count(value.candidateUrlCount) || !CANDIDATE_DIGEST.test(String(value.candidateDigest)) ||
       value.indexingStatus !== 'not_measured' || value.schemaValidationStatus !== 'not_measured') return null;
+  const candidateUrls = parseIndexNowCandidateUrls(value.candidateUrls);
+  if (candidateUrls === null || candidateUrls.length !== value.candidateUrlCount) return null;
+  const candidateDigest = value.candidateDigest as string;
   if (value.telemetryStatus === 'unavailable' && value.telemetry === null) {
-    return { timestamp: value.timestamp, candidateUrlCount: value.candidateUrlCount,
+    return { timestamp: value.timestamp, candidateUrlCount: value.candidateUrlCount, candidateUrls, candidateDigest,
       telemetry: null, telemetryStatus: 'unavailable', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured' };
   }
   if (value.telemetryStatus !== 'observed') return null;
   const telemetry = parseSeoTelemetry(value.telemetry);
-  return telemetry ? { timestamp: value.timestamp, candidateUrlCount: value.candidateUrlCount,
+  return telemetry ? { timestamp: value.timestamp, candidateUrlCount: value.candidateUrlCount, candidateUrls, candidateDigest,
     telemetry, telemetryStatus: 'observed', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured' } : null;
 }
 

@@ -43,7 +43,7 @@ export function getAllPublicUrlsForIndexNow(): readonly string[] {
   for (const route of publicRoutes) {
     if (!route.path.includes('[')) {
       const clean = route.path.startsWith('/') ? route.path : `/${route.path}`;
-      urls.add(`${base}${clean === '/' ? '' : clean}`);
+      urls.add(`${base}${clean}`);
     }
   }
 

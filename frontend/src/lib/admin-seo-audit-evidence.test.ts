@@ -1,14 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { parseSeoTelemetry, parseSeoAuditSnapshot, parseIndexNowReceipt } from './admin-seo-audit-evidence';
+import { parseSeoTelemetry, parseSeoAuditSnapshot, parseIndexNowReceipt, parseIndexNowCandidateUrls } from './admin-seo-audit-evidence';
+
+import { getAllPublicUrlsForIndexNow } from './indexnow';
 
 const telemetry = { totalHits24h: 12, totalHits7d: 30, avgDurationMs: 87, botDistribution: { Googlebot: 7 } };
-const snapshot = { timestamp: new Date().toISOString(), candidateUrlCount: 2, telemetry,
+const snapshot = { candidateUrls: ['https://easy-scraping.com/', 'https://easy-scraping.com/tools'], candidateDigest: 'a'.repeat(64), timestamp: new Date().toISOString(), candidateUrlCount: 2, telemetry,
   telemetryStatus: 'observed', indexingStatus: 'not_measured', schemaValidationStatus: 'not_measured' };
 
 describe('admin SEO audit evidence', () => {
+  it('accepts the actual repository-generated IndexNow candidate set without private routes', () => {
+    const urls = getAllPublicUrlsForIndexNow();
+    expect(urls.length).toBeGreaterThan(20);
+    expect(urls.filter((url) => parseIndexNowCandidateUrls([url]) === null)).toEqual([]);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(parseIndexNowCandidateUrls(urls)).toEqual(urls);
+    expect(urls.some((url) => url.includes('/admin/') || url.includes('/account/'))).toBe(false);
+  });
   it('accepts bounded crawler measurements without private source fields', () => {
     expect(parseSeoTelemetry({ ...telemetry, privateLog: 'should not leak' })).toEqual(telemetry);
     expect(parseSeoAuditSnapshot(snapshot)?.telemetry?.totalHits24h).toBe(12);
+    expect(parseSeoAuditSnapshot(snapshot)?.candidateUrls).toEqual(snapshot.candidateUrls);
   });
   it('rejects missing, coerced, nonfinite and contradictory totals', () => {
     for (const value of [
@@ -27,6 +38,10 @@ describe('admin SEO audit evidence', () => {
     expect(parseSeoAuditSnapshot({ ...snapshot, timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString() })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, timestamp: new Date(Date.now() + 60 * 60 * 1000).toISOString() })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, candidateUrlCount: -1 })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, candidateDigest: '' })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, candidateUrls: ['https://easy-scraping.com/account/security'] })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, candidateUrls: [snapshot.candidateUrls[0], snapshot.candidateUrls[0]] })).toBeNull();
+    expect(parseSeoAuditSnapshot({ ...snapshot, candidateUrls: [] })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, indexingStatus: 'indexed' })).toBeNull();
     expect(parseSeoAuditSnapshot({ ...snapshot, telemetry: null, telemetryStatus: 'unavailable' })?.telemetry).toBeNull();
   });

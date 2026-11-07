@@ -106,6 +106,19 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('overrides public SEO headers for admin IndexNow review and its BFF', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    for (const source of ['/admin/seo-audit', '/api/admin/seo-audit', '/:locale(en|ja|zh|ko)/admin/seo-audit']) {
+      const headers = groups.find((group) => group.source === source)?.headers;
+      expect(headers).toEqual(expect.arrayContaining([
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'cache-control', value: 'private, no-store' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+      ]));
+    }
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');

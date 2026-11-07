@@ -19,9 +19,10 @@ vi.mock('@/lib/indexnow', () => ({
 
 import { GET, POST } from './route';
 
-const postRequest = (origin = 'https://easy-scraping.com') =>
+const postRequest = (body: unknown = { candidateUrlCount: 2, candidateDigest: '0'.repeat(64) }, origin = 'https://easy-scraping.com') =>
   new Request('https://easy-scraping.com/api/admin/seo-audit', {
-    method: 'POST', headers: { origin, 'sec-fetch-site': 'same-origin' },
+    method: 'POST', headers: { origin, 'sec-fetch-site': 'same-origin', 'content-type': 'application/json' },
+    body: JSON.stringify(body),
   });
 
 describe('admin SEO audit: real authority and honest evidence', () => {
@@ -54,7 +55,7 @@ describe('admin SEO audit: real authority and honest evidence', () => {
   });
 
   it('rejects cross-origin requests before side effects', async () => {
-    const res = await POST(postRequest('https://attacker.invalid'));
+    const res = await POST(postRequest(undefined, 'https://attacker.invalid'));
     expect(res.status).toBe(403);
     expect(submitMock).not.toHaveBeenCalled();
   });
@@ -102,14 +103,16 @@ describe('admin SEO audit: real authority and honest evidence', () => {
 
   it('rejects forged IndexNow success without a valid upstream receipt', async () => {
     submitMock.mockResolvedValueOnce({ success: true, submittedCount: '2', status: 202 });
-    const res = await POST(postRequest());
+    const { candidateDigest } = await (await GET()).json();
+    const res = await POST(postRequest({ candidateUrlCount: 2, candidateDigest }));
     expect(res.status).toBe(502);
     expect((await res.json()).ok).toBe(false);
   });
 
   it('reports IndexNow acceptance, never confirmed indexing', async () => {
     submitMock.mockResolvedValueOnce({ success: true, submittedCount: 2, status: 202 });
-    const res = await POST(postRequest());
+    const { candidateDigest } = await (await GET()).json();
+    const res = await POST(postRequest({ candidateUrlCount: 2, candidateDigest }));
     const body = await res.json();
     expect(res.status).toBe(202);
     expect(body.ok).toBe(true);
@@ -117,9 +120,51 @@ describe('admin SEO audit: real authority and honest evidence', () => {
     expect(body.submittedCount).toBe(2);
   });
 
+
+  it('shows the exact candidate URL preview and binds it to a digest with private HTTP headers', async () => {
+    const res = await GET();
+    const body = await res.json();
+    expect(body.candidateUrls).toEqual(['https://easy-scraping.com/', 'https://easy-scraping.com/tools']);
+    expect(body.candidateDigest).toMatch(/^[a-f0-9]{64}$/);
+    expect(res.headers.get('x-robots-tag')).toContain('noindex');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(res.headers.get('cache-control')).toContain('private');
+  });
+
+  it('rejects unreviewed, stale or malformed candidate confirmation before external submission', async () => {
+    const { candidateDigest } = await (await GET()).json();
+    expect((await POST(postRequest())).status).toBe(409);
+    expect((await POST(postRequest({ candidateUrlCount: 2, candidateDigest: 'not-a-digest' }))).status).toBe(400);
+    expect((await POST(postRequest({ candidateUrlCount: 1, candidateDigest }))).status).toBe(409);
+    urlsMock.mockReturnValueOnce(['https://easy-scraping.com/', 'https://easy-scraping.com/new-tools']);
+    expect((await POST(postRequest({ candidateUrlCount: 2, candidateDigest }))).status).toBe(409);
+    expect((await POST(new Request('https://easy-scraping.com/api/admin/seo-audit', {
+      method: 'POST', headers: { origin: 'https://easy-scraping.com' },
+    }))).status).toBe(400);
+    expect(submitMock).not.toHaveBeenCalled();
+  });
+
+  it('blocks invalid or duplicate candidate URLs instead of submitting unknown targets', async () => {
+    urlsMock.mockReturnValueOnce(['https://easy-scraping.com/account/security']);
+    const res = await GET();
+    expect(res.status).toBe(503);
+    expect(submitMock).not.toHaveBeenCalled();
+  });
+
+  it('submits only the exact reviewed URL list after matching source fingerprint', async () => {
+    const { candidateDigest } = await (await GET()).json();
+    submitMock.mockResolvedValue({ success: true, submittedCount: 2, status: 202 });
+    const res = await POST(postRequest({ candidateUrlCount: 2, candidateDigest }));
+    expect(res.status).toBe(202);
+    expect(submitMock).toHaveBeenCalledWith(['https://easy-scraping.com/', 'https://easy-scraping.com/tools']);
+    expect(res.headers.get('x-robots-tag')).toContain('noindex');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+  });
+
   it('reports failed submissions as failures', async () => {
     submitMock.mockResolvedValueOnce({ success: false, submittedCount: 2, status: 429 });
-    const res = await POST(postRequest());
+    const { candidateDigest } = await (await GET()).json();
+    const res = await POST(postRequest({ candidateUrlCount: 2, candidateDigest }));
     expect(res.status).toBe(502);
     expect((await res.json()).ok).toBe(false);
   });
