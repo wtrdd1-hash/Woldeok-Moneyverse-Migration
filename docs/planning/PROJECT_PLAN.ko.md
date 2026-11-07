@@ -3009,3 +3009,23 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### 기획 주기 v1838 (2026-11-06) — F675-265 예외 만료 독립 상신 영수증 (Feature Addition; 제안만)
+주기: 이전 Feature Improvement v1836 → 현재 Feature Addition v1838 → 다음 Feature Improvement v1840. 최신 main의 AGENTS.md/README와 영문 원본을 기준으로 한다. 기획 문서만 변경하며 런타임·스키마·운영 환경은 변경하지 않는다. 미병합 F675-260~264는 구현된 기능이 아니라 선행 제안이다.
+**목적·권한·진입점:** F675-264 예외의 만료·철회·미해결 시점에 기한이 있는 독립 상신과 증빙 가능한 영수증을 제공한다. 테넌트별 사고 감독자는 알림을 조회·인지하고 별도 실효 신원의 준법 검토자가 종결한다. 관리자 > 증빙 관리 > 재검증 예외 > 상신 및 예외 상세 읽기 전용 링크에서 접근하며 공개·검색 노출은 금지한다.
+**상태·화면:** DETECTED → NOTIFIED → ACKNOWLEDGED → RESOLVED, 증빙 누락·서명 실패 시 BLOCKED_UNKNOWN으로 전이한다. 인지는 예외 기간을 연장하지 않는다. 심각도·UTC/현지 기한·출처 해시·담당자·전송 상태·비식별 감사 타임라인, 로딩/빈 상태/오류/403/404/409를 표시한다. CTA는 인지, 독립 검토 요청, 서명 사유로 종결, 비식별 영수증 내보내기다. 320px 모바일, 44px 터치, 키보드·스크린리더, WCAG 2.2 AA, 한영 동등성을 요구한다.
+**제안 API:** GET /admin/custody/expiry-escalations?cursor=; GET /admin/custody/expiry-escalations/:id; POST /admin/custody/expiry-escalations/:id/acknowledge; POST /admin/custody/expiry-escalations/:id/request-review; POST /admin/custody/expiry-escalations/:id/resolve; GET /admin/custody/expiry-escalations/:id/receipt. 테넌트 RBAC·위임 포함 실효 신원 분리를 적용하고 교차 테넌트 식별자는 404, 권한 거부는 403, 버전/상태 충돌은 409, 증빙 오류는 422로 처리한다. 변경 요청에는 Idempotency-Key, If-Match, 감사 행위자 및 속도 제한이 필수다.
+**DB·트랜잭션:** (tenant_id, escalation_id) 식별자와 (tenant_id, exception_id) 복합 FK, deadline >= detected_at CHECK, 종결 상태 불변, (tenant_id, exception_id, trigger_generation) 활성 부분 UNIQUE, (tenant_id, status, deadline, id) 및 (tenant_id, exception_id, detected_at) 인덱스를 제안한다. CAS 버전·행 잠금, 불변 감사·Outbox 단일 트랜잭션, 결정적 중복 제거 키, 재시도/백오프/데드레터 및 서명 영수증을 적용한다. 전송 실패를 성공으로 표시하지 않는다.
+**보안 불변조건:** 큐 지연·알림 실패·상신 상태와 무관하게 만료/철회 예외는 서버 조회·인가 시 즉시 차단한다. 상신·인지·종결은 원본 증빙 보존·철회·다운로드 금지·재검증 실패를 우회하지 못한다. 서명·키 교체·출처 검증 불능 시 차단하며 위임 신원 자기 검토를 금지한다. 로그·내보내기·분석·알림의 민감정보는 비식별 처리하고 열람·내보내기 불변 감사를 남긴다.
+**지표·검증·배포:** 탐지 지연 p95, SLA 초과 미인지, 중복 알림률, 서명 영수증 검증 성공률, 교차 테넌트 차단 수를 측정한다. 만료/철회/인지 경합, 멱등 재생, 구버전, 작업자 장애·재시도, 키 교체, 증빙 누락, 키보드·모바일, 한영 동등성, noindex를 시험한다. 플래그 `admin_custody_expiry_escalation_v1` 기본 OFF, 추가형 마이그레이션 → 격리 Test exact-SHA·DB 롤백 연습·권한 회귀 → 별도 승인 카나리 순서로 진행한다. 롤백은 플래그·작업자만 중지하고 감사 삭제나 만료 강제 완화는 금지한다.
+**P0/P1·외부 근거:** P0 운영 /en·/en/login, 백엔드 재시작, 깨진 릴리스 심볼릭 링크, 운영 SHA, DB 최소권한·마이그레이션 체크섬, 복원 증빙, 금융 원장 대사, 국내 법률 준수를 재검증한다. P1 미병합 기획 PR 정합성, 실제 frontend/backend/app-api/DB 계약 검증, F675-260~265 별도 개발 브랜치·Test exact-SHA 구현을 수행한다. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건, 중복 제거·출처 분류 BLOCKED/IN PROGRESS이며 달성을 주장하지 않는다.
+
+### v1840 — F675-265 예외 만료 상신 영수증 강화 (Feature Improvement; 2026-11-06)
+주기: 이전 Feature Addition v1838 / 현재 Feature Improvement v1840 / 다음 Feature Addition v1842. 기획만 수정하며 F675-264에 의존; 런타임 배포 금지.
+- P0 안전 불변조건: 상신 영수증은 알림 인지 기록이지 증빙 유효성 확인이나 만료·철회 제한 우회 승인이 아니다. 알림 작업자가 지연돼도 서버는 요청 시점 UTC 만료·철회 상태를 검사한다. 증빙·서명·테넌트 연결 검증 불가 시 BLOCKED_UNKNOWN으로 차단하며 허용으로 전환하지 않는다.
+- P1 권한·상태: 사고 감독자는 ACKNOWLEDGE, 독립 준법 검토자는 REVIEW 및 CLOSE 가능. 요청자·위임 실효 신원·기존 예외 승인자·서비스 계정의 자기 종결 금지. OPEN -> ACKNOWLEDGED -> UNDER_REVIEW -> CLOSED. 재개는 불변 원본 영수증에 연결한 새 버전의 사건으로만 처리한다. 만료·철회 경합 시 인지 여부와 관계없이 접근 제한 유지.
+- P1 관리자 화면: 테넌트별 상신 목록·영수증 상세·증빙 최신성, UTC/현지 만료 시각, 지연·검증불가·철회 구분, 접근 가능한 사유 및 재시도 CTA. 320px 재배치, 키보드 초점, WCAG 2.2 AA; 관리자 검색 제외(noindex)·캐시 금지(no-store), 공개 SEO에 비공개 증빙 노출 금지.
+- P1 API 제안: GET /admin/custody/expiry-escalations (cursor,status), GET /{id}, POST /{id}/acknowledge, POST /{id}/review, POST /{id}/close, GET /{id}/receipt. 테넌트 RBAC·실효 신원 분리, 변경 요청 Idempotency-Key, If-Match 버전 CAS, (created_at,id) 안정 커서, 403/404 은닉, 409 충돌, 422 전이 오류, 속도 제한. 실제 런타임 계약 검증 전 제안임.
+- P1 PostgreSQL: 모든 키·외래키에 tenant_id 포함, UNIQUE(tenant_id,exception_id,escalation_generation), 상태 CHECK, 미종결 부분 인덱스 및 (tenant_id,created_at,id) 조회 인덱스. 이벤트 해시·정책/키 세대를 담은 불변 영수증. 상태+감사+Outbox 단일 트랜잭션; 소비자 중복 제거 키와 작업자 펜싱, 재전송 시 알림 중복·임의 종결 방지.
+- P1 관측·테스트: 실제 만료부터 영속 상신까지 지연, 지연 사건 수, 중복 억제, 독립 검토 SLA를 개인정보 없이 측정. 테넌트 격리·위임 자기 승인·철회/만료/종결 경합·Outbox 유실/역순·작업자 재시작·키 교체·증빙 불능·모바일/a11y·영한 동등성 검증. 기본 OFF 플래그, 카나리, Test exact-SHA, 마이그레이션 롤백 연습, P0 게이트 전 배포 보류.
+- P0 운영 게이트: 과거 /en·/en/login HTTP 500, 백엔드 재시작, /srv/moneyverse 릴리스 심볼릭 링크, 배포 SHA, DB 최소권한·마이그레이션 체크섬, 독립 백업 복원, 원장 대사, 법률 검토를 최신 재검증. 과거 QA는 현재 장애 증명이 아님. 외부 독립 근거 신규 검증 0건, 누적 UNKNOWN/10,000건; BLOCKED/IN PROGRESS.
