@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import {
@@ -40,6 +39,35 @@ interface PublishResult {
   };
 }
 
+interface VerifiedBlogRefresh {
+  readonly success: true;
+  readonly verifiedCount: number;
+  readonly posts: BlogPost[];
+  readonly observedAt: string;
+}
+
+function isVerifiedBlogRefresh(value: unknown): value is VerifiedBlogRefresh {
+  if (!value || typeof value !== 'object') return false;
+  const result = value as Record<string, unknown>;
+  if (result.success !== true || !Array.isArray(result.posts)
+      || result.posts.length > 200 || result.verifiedCount !== result.posts.length
+      || typeof result.observedAt !== 'string' || !Number.isFinite(Date.parse(result.observedAt))) return false;
+  const slugs = new Set<string>();
+  for (const entry of result.posts) {
+    if (!entry || typeof entry !== 'object') return false;
+    const post = entry as Record<string, unknown>;
+    if (typeof post.slug !== 'string' || !/^[a-z0-9-]{10,110}$/.test(post.slug)
+        || slugs.has(post.slug) || typeof post.title !== 'string' || !post.title.trim()
+        || typeof post.categoryLabel !== 'string'
+        || typeof post.publishedAt !== 'string' || !Number.isFinite(Date.parse(post.publishedAt))
+        || !['PUBLISHED', 'WITHDRAWN'].includes(String(post.status))
+        || typeof post.verificationReceipt !== 'string'
+        || !/^[a-f0-9-]{36}$/i.test(post.verificationReceipt)) return false;
+    slugs.add(post.slug);
+  }
+  return true;
+}
+
 const COUNTRY_OPTIONS: ReadonlyArray<{ id: BlogCountry; label: string; flag: string }> = [
   { id: 'KR', label: '대한민국 (KRW)', flag: '🇰🇷' },
   { id: 'US', label: '미국 (USD)', flag: '🇺🇸' },
@@ -53,7 +81,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<'ECONOMY' | 'TECH'>('ECONOMY');
   const [actionSlug, setActionSlug] = useState<string | null>(null);
   const [result, setResult] = useState<PublishResult | null>(null);
-  const router = useRouter();
+  const [refreshMessage, setRefreshMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -61,13 +89,28 @@ export function AdminBlogClient({ initialPosts }: Props) {
   }, [initialPosts]);
 
   const refreshData = async () => {
+    if (isRefreshing) return;
     setIsRefreshing(true);
+    setRefreshMessage(null);
     try {
-      router.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      toast.success('블로그 게시물 및 발행 관제 데이터가 최신으로 동기화되었습니다.');
+      const response = await fetch('/api/admin/blog/verified-refresh', {
+        credentials: 'same-origin', cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('verified blog source unavailable');
+      const payload: unknown = await response.json();
+      if (!isVerifiedBlogRefresh(payload)) throw new Error('invalid verified blog evidence');
+      const verifiedSlugs = new Set(payload.posts.map((post) => post.slug));
+      setPosts((previous) => [
+        ...payload.posts,
+        ...previous.filter((post) => !post.verificationReceipt && !verifiedSlugs.has(post.slug)),
+      ]);
+      const message = `서버에서 검증된 게시물 ${payload.verifiedCount}건을 다시 조회했습니다. 기존 로컬 글은 재조회하지 않았습니다.`;
+      setRefreshMessage({ kind: 'success', text: message });
+      toast.success(`검증된 게시물 ${payload.verifiedCount}건을 서버에서 확인했습니다. 기존 로컬 글은 제외됩니다.`);
     } catch {
-      toast.error('블로그 데이터 갱신에 실패했습니다.');
+      const message = '새로고침에 실패했습니다. 기존 목록은 유지하며, 서버의 최신 게시물 상태는 확인되지 않았습니다.';
+      setRefreshMessage({ kind: 'error', text: message });
+      toast.error(message);
     } finally {
       setIsRefreshing(false);
     }
@@ -269,7 +312,7 @@ export function AdminBlogClient({ initialPosts }: Props) {
                 size="sm"
                 onClick={refreshData}
                 disabled={isRefreshing}
-                className="h-7 px-2.5 text-xs gap-1 border-border/80"
+                className="min-h-11 px-3 text-xs gap-1 border-border/80 focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 <RefreshCw className={`size-3 ${isRefreshing ? 'animate-spin' : ''}`} />
                 새로고침
@@ -281,6 +324,12 @@ export function AdminBlogClient({ initialPosts }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
+          {refreshMessage && (
+            <p role={refreshMessage.kind === 'error' ? 'alert' : 'status'} aria-live="polite"
+              className={`mx-3 my-3 rounded border p-3 text-sm ${refreshMessage.kind === 'error' ? 'border-destructive/40 text-destructive' : 'border-emerald-500/40 text-muted-foreground'}`}>
+              {refreshMessage.text}
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-y border-border/60 bg-muted/40 text-muted-foreground">

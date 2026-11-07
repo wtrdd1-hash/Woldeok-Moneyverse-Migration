@@ -197,6 +197,13 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // Route-handler headers are overwritten by the global Next header policy.
+      // Explicitly protect the elevated administrator blog source even when SEO is enabled.
+      { source: '/api/admin/blog/verified-refresh', headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'cache-control', value: 'private, no-store' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+      ] },
     ];
   },
 
