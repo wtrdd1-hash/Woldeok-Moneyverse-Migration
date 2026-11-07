@@ -15,6 +15,7 @@ import {
   entersState,
 } from '@discordjs/voice';
 import http from 'node:http';
+import { createBroadcastWebhookHandler, validBroadcastSecret } from './broadcast-webhook.js';
 import { MusicManager, MUSIC_COMMANDS } from './music.js';
 import { STOCK_SLASH_COMMANDS, handleStockInteraction } from './stock-commands.js';
 
@@ -64,15 +65,17 @@ async function sendLog(payload) {
     const channel = await client.channels.fetch(LOG_CHANNEL_ID).catch(() => null);
     if (!channel) {
       console.warn(`[Log] Log channel ${LOG_CHANNEL_ID} not found or inaccessible.`);
-      return;
+      return false;
     }
     if (typeof payload === 'string') {
       await channel.send({ content: payload });
     } else {
       await channel.send(payload);
     }
+    return true;
   } catch (err) {
     console.error('[Log] Failed to send log to Discord channel:', err.message);
+    return false;
   }
 }
 
@@ -330,49 +333,36 @@ const BROADCAST_PORT = Number(process.env.DISCORD_BROADCAST_PORT) || 3099;
 let webhookServer = null;
 
 try {
-  webhookServer = http.createServer((req, res) => {
-    if (req.method === 'POST' && req.url === '/broadcast') {
-      let body = '';
-      req.on('data', (chunk) => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const payload = JSON.parse(body);
-          const { title, description, fields = [], color = 0x10b981 } = payload;
-
-          const embed = new EmbedBuilder()
-            .setTitle(title || '📢 [월덕 머니버스] 실시간 금융 브로드캐스트')
-            .setDescription(description || '')
-            .setColor(color)
-            .setTimestamp();
-
-          if (Array.isArray(fields)) {
-            for (const f of fields) {
-              if (f.name && f.value) {
-                embed.addFields({ name: f.name, value: f.value, inline: f.inline ?? true });
-              }
-            }
-          }
-
-          await sendLog({ embeds: [embed] });
-          if (payload.notifyAdminDm) {
-            await sendAdminDM({ embeds: [embed] });
-          }
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: true, status: 'Broadcast sent to Discord' }));
-        } catch (e) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: false, error: e.message }));
-        }
-      });
-    } else {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: false, error: 'Not found' }));
-    }
-  });
-
-  webhookServer.listen(BROADCAST_PORT, '127.0.0.1', () => {
-    console.log(`[Bot] Realtime broadcast webhook listener running on http://127.0.0.1:${BROADCAST_PORT}/broadcast`);
-  });
+  const broadcastSecret = process.env.INTERNAL_API_SECRET;
+  if (!validBroadcastSecret(broadcastSecret)) {
+    // Never start an unauthenticated financial broadcast ingress, even on loopback.
+    console.warn('[Bot] Broadcast webhook disabled: strong INTERNAL_API_SECRET is not configured.');
+  } else {
+    webhookServer = http.createServer(createBroadcastWebhookHandler({
+      secret: broadcastSecret,
+      sendChannel: async (payload) => {
+        const embed = new EmbedBuilder()
+          .setTitle(payload.title)
+          .setColor(payload.color)
+          .setTimestamp();
+        if (payload.description) embed.setDescription(payload.description);
+        if (payload.fields.length) embed.addFields(payload.fields);
+        return sendLog({ embeds: [embed] });
+      },
+      sendAdminDm: async (payload) => {
+        const embed = new EmbedBuilder()
+          .setTitle(payload.title)
+          .setColor(payload.color)
+          .setTimestamp();
+        if (payload.description) embed.setDescription(payload.description);
+        if (payload.fields.length) embed.addFields(payload.fields);
+        return sendAdminDM({ embeds: [embed] });
+      },
+    }));
+    webhookServer.listen(BROADCAST_PORT, '127.0.0.1', () => {
+      console.log(`[Bot] Realtime broadcast webhook listener running on http://127.0.0.1:${BROADCAST_PORT}/broadcast`);
+    });
+  }
 } catch (err) {
   console.warn('[Bot] Failed to bind broadcast webhook server:', err.message);
 }
