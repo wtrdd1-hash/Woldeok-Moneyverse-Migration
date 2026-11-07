@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
