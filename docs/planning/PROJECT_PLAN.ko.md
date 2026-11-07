@@ -1,3 +1,26 @@
+## v2026.11.06.0220 — F675-260 동결 갱신 무결성 강화 (기능 보완 / 운영 보류)
+- 주기: 이전 기능 추가 v1818 → 현재 기능 보완 v1820 → 다음 기능 추가 v1822. 기준 main 0b5b2b1385d2; v1818 로컬 복구는 병합으로 간주하지 않음.
+- **안전:** 만료는 검토 보류만 종료하고 증빙 보존·철회·다운로드 차단·접근권한을 해제하지 않는다. 위임 계정까지 실효 자연인 기준으로 요청·승인·감사 역할 분리. 매 조회·판정·내보내기 시 테넌트/팀 권한, 서명 매니페스트, 신뢰 키 세대, 철회 세대, 동결 버전 재검증. 근거 누락·불일치는 BLOCKED_UNKNOWN, 자동 승인 금지.
+- **상태/API:** ACTIVE → EXPIRING → RENEWAL_PENDING → RENEWED/REJECTED. EXPIRED_REVIEW_ONLY는 증빙 해제가 아니다. 목록·상세는 테넌트 범위 (expiry_at,id) 안정 커서, 갱신/승인/거절/취소 POST는 Idempotency-Key·If-Match·길이 제한 사유 필수. 401/403/404 타 테넌트 비노출, 409 CAS 충돌, 422 잘못된 상태, 429 제한, 503 신뢰 검증 불가. 오류 개인정보 제거.
+- **DB:** 테넌트 복합 FK, 동결별 대기 갱신 부분 UNIQUE, (tenant,actor,operation,idempotency_key) UNIQUE, 만료·사유 CHECK, (tenant,state,expiry_at,id) 인덱스. CAS 행 잠금과 판정·불변 감사·Outbox 단일 트랜잭션. 철회와 갱신 경합 시 철회 우선, 작업자 펜싱·제한 재시도·DLQ·이벤트 UUID 중복 제거.
+- **관리자 화면:** /admin/sla/custody/freezes 상세에서 매니페스트 유효성, UTC/현지 만료, 실효 검토자, 불변 이력 표시. 오래된 CTA 비활성화, 초점·오류 요약·320px·WCAG 2.2 AA·영한 동등성. noindex/no-store, 비식별 내보내기, 호출 제한. KPI 무권한 승인 0건, 만료 지연, CAS 충돌, DLQ, 차단 내보내기.
+- **검증·배포:** 실제 PostgreSQL 고유성·동시 철회/갱신/만료, 위임 자기 승인, 테넌트 열거, 재생, 키 교체, 시각 경계, 작업자 장애, 감사·Outbox 원자성 테스트. 기능 플래그 기본 OFF, 추가형 마이그레이션, Test exact-SHA E2E·롤백 리허설·승인된 단계적 승격만 허용. 기획에서 런타임 배포 금지.
+- **P0:** 과거 Production /en 및 /en/login 500의 최신 시각 재현, 백엔드 재시작·릴리스 링크, 배포 SHA, DB 최소권한·체크섬, 독립 복원, 원장 대사, 국내 법률 게이트. 과거 QA로 현재 장애 단정 금지.
+- **P1:** F675-249~259 미병합 초안 중복 정리, v1818 GitHub 반영 복구, 실제 frontend/backend/app-api/DB 계약·선행 기능 검증 후 개발 예약 별도 PR. 외부 독립 근거 신규 0건, 누적 UNKNOWN/10,000건, 출처·중복 게이트 BLOCKED/IN PROGRESS.
+
+## v2026.11.06.0118 — F675-260 증빙 검토 동결 만료·갱신 독립 확인 (기능 추가 / 제안 / 운영 보류)
+- 주기: 이전 기능 보완 v1816 → 현재 기능 추가 v1818 → 다음 기능 보완 v1820. 기준 main 0b5b2b1385d2. F675-249~259 제안은 병합·구현·배포된 것으로 간주하지 않는다. 기획 전용이며 별도 개발 브랜치와 Test exact-SHA 게이트 필수.
+- **목적·대상:** 이의신청 검토용 동결이 무기한 유지되거나 검증 없이 만료되는 일을 막는다. 사고 감독자, 독립 준법 승인자, 보안 감사자가 대상이다. 만료 가능한 것은 검토 업무상 보류 상태뿐이며 원본 증빙 보존·철회·다운로드 제한은 자동으로 풀리지 않는다. 선행 F675-258/259 구현이 확인되기 전에는 기능 OFF.
+- **진입·화면:** 로그인된 /admin/sla/custody/freezes 목록→상세; 테넌트·사고·만료일·상태 필터. 사고, 서명 매니페스트 해시, 철회 세대, 동결 사유, 만료 시각, 담당 검토자, 감사 이력을 표시. CTA는 갱신 요청, 독립 승인/거절, 요청 취소, 불변 영수증 확인. 상태 ACTIVE, EXPIRING, RENEWAL_PENDING, RENEWED, EXPIRED_REVIEW_ONLY, REJECTED, BLOCKED_UNKNOWN. 빈 화면/로딩/403/409/422/재인증/오류를 정의하며 만료가 다운로드 허용으로 보이지 않도록 한다.
+- **API:** GET /admin/sla/custody/freezes?cursor=&state=, GET /:id, POST /:id/renewal-requests, POST /:id/renewal-requests/:requestId/approve, /reject, /cancel 등 6개. 매 조회·수정·내보내기에 인증, 테넌트·팀 권한, 위임 포함 실효 사용자 분리 검증. 변경에는 Idempotency-Key, If-Match 세대, 길이 제한 사유, 서명 증빙 해시 필요. 409 세대 충돌, 403 권한 없음, 422 불법 상태 전이, 검증 불가 503 안전 차단.
+- **DB·트랜잭션:** custody_freeze_renewal_requests의 (tenant_id,freeze_id) 복합 FK, (tenant_id,freeze_id,request_id) UNIQUE, 동결별 대기 요청 부분 UNIQUE, 만료 시각·사유 CHECK, (tenant_id,state,expiry_at,id) 및 (tenant_id,freeze_id,created_at DESC) 인덱스. 행 잠금/CAS 세대로 판정·불변 감사·Outbox를 단일 트랜잭션 처리. 테넌트·행위자·동작·키별 멱등성. 작업자 펜싱, 제한 재시도, 중복 제거, DLQ. 타이머는 원본 철회·보존·권한을 변경하지 않는다.
+- **보안:** 서명 매니페스트 해시, 신뢰 키 세대, 정책 버전, 철회 세대, 승인자 실효 신원을 결정 및 접근 시 재검증. 키 폐기·근거 누락·불일치 시 BLOCKED_UNKNOWN. 테넌트·사용자별 호출 제한, 교차 테넌트 조회·재생·만료 시각 위조 방지, DB UTC 저장. 관리자 화면 noindex/no-store, 내보내기·로그 개인정보 최소화.
+- **모바일·접근성·지표:** 320px 재배치, 키보드 초점, 44px 터치, WCAG 2.2 AA, 영문·한국어 동등성. KPI는 갱신 처리 중앙값, 기한 초과 건수, 독립 승인 위반 0건, 세대 충돌, DLQ 건수. 분석 식별자는 가명화.
+- **테스트·배포:** PostgreSQL 복합 FK/고유성/CAS 경합, 동시 철회·갱신, 만료 경계·DST, 재생·위임 사칭·테넌트 격리, 작업자 재시작, Outbox 중복 효과 방지, 서명키 폐기 및 안전 차단 테스트. admin_sla_custody_freeze_renewal_v1 기본 OFF; 추가형 호환 마이그레이션, Test exact-SHA E2E·롤백 리허설·보안 검토 후 단계적 활성화. 롤백은 플래그 OFF, 불변 감사 보존, 파괴적 역마이그레이션 금지.
+- **P0:** Production /en 및 /en/login HTTP 500의 시각별 재측정과 프록시·백엔드 추적, 배포 SHA·재시작 루프 확인, 승인된 절차에 따른 /srv/moneyverse 링크 점검, Test exact-SHA, DB 최소권한·체크섬, 독립 복원, 원장 대사, 법률·금융 게이트. 이전 QA는 과거 보고이며 현재 상태 입증은 아님.
+- **P1:** F675-249~259 열린 PR의 main 중복·정합성 조사, 실제 frontend/backend/app-api/DB 및 사용자·관리자 흐름 확인, 선행 기능 구현 후 F675-260 API·DB·UI·작업자 별도 개발 PR과 보안·동시성 회귀 테스트. 기획 예약에서 런타임 배포 금지.
+- **외부 독립 레퍼런스 게이트:** 이번 신규 실검증 0건, 누적 검증 UNKNOWN / 10,000건. 중복 제거·출처 분류 증빙 부족: BLOCKED / IN PROGRESS. 달성 주장 금지.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
