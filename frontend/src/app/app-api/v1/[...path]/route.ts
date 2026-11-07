@@ -1,19 +1,31 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { verifiedPublishedAnnouncements } from '@/lib/pinned-announcement-evidence';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
-import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
+import {
+  parseSecurityEventCategory,
+  parseSecurityEventOrder,
+  securityEventsMatchCategory,
+  securityEventsMatchOrder,
+} from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
-import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
+import {
+  normalizeStockHistoryGrossFloor,
+  isVerifiedStockHistoryGrossResponse,
+} from '@/app/stocks/history/history-window';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
-import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
+import {
+  normalizeWorkReceiptFloor,
+  parseFilteredWorkReceipts,
+} from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
 import {
   APP_API_REQUEST_HEADERS,
@@ -31,8 +43,12 @@ const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
 
 function isWalletDetailPath(parts: readonly string[]): boolean {
-  return parts.length === 4 && parts[0] === 'wallet' && parts[1] === 'activity' &&
-    parts[2] === 'transactions';
+  return (
+    parts.length === 4 &&
+    parts[0] === 'wallet' &&
+    parts[1] === 'activity' &&
+    parts[2] === 'transactions'
+  );
 }
 
 function isVerifiedOldestSupportThreads(payload: unknown): boolean {
@@ -44,10 +60,25 @@ function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   for (const row of rows) {
     if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
     const item = row as Record<string, unknown>;
-    if (typeof item.thread_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.thread_id) || ids.has(item.thread_id)) return false;
-    if (typeof item.subject !== 'string' || item.subject.length > 120 ||
-        !['open', 'waiting_user', 'resolved'].includes(String(item.status))) return false;
-    if (typeof item.last_message_at !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(item.last_message_at)) return false;
+    if (
+      typeof item.thread_id !== 'string' ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        item.thread_id,
+      ) ||
+      ids.has(item.thread_id)
+    )
+      return false;
+    if (
+      typeof item.subject !== 'string' ||
+      item.subject.length > 120 ||
+      !['open', 'waiting_user', 'resolved'].includes(String(item.status))
+    )
+      return false;
+    if (
+      typeof item.last_message_at !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T/.test(item.last_message_at)
+    )
+      return false;
     const time = Date.parse(item.last_message_at);
     // PostgreSQL Date serialization may lose sub-millisecond ordering.
     if (!Number.isFinite(time) || time < previousTime) return false;
@@ -67,7 +98,10 @@ function parseAppVersion(value: string | null): [number, number, number] | null 
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
-function isVersionBelow(current: [number, number, number], minimum: [number, number, number]): boolean {
+function isVersionBelow(
+  current: [number, number, number],
+  minimum: [number, number, number],
+): boolean {
   for (let i = 0; i < 3; i += 1) {
     if (current[i]! !== minimum[i]!) return current[i]! < minimum[i]!;
   }
@@ -77,7 +111,10 @@ function isVersionBelow(current: [number, number, number], minimum: [number, num
 function looksLikeOfficialAndroid(request: NextRequest): boolean {
   const client = request.headers.get('x-moneyverse-client')?.toLowerCase();
   const userAgent = request.headers.get('user-agent') ?? '';
-  return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
+  return (
+    client === 'android' &&
+    /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent)
+  );
 }
 
 function internalToken(): string {
@@ -94,78 +131,177 @@ function contractJson(payload: unknown, init: ResponseInit = {}): NextResponse {
 function gatewayProblem(status: number, title: string, code: string, detail: string): NextResponse {
   return contractJson(
     { type: 'about:blank', title, status, code, detail },
-    { status, headers: { 'content-type': 'application/problem+json', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' } },
+    {
+      status,
+      headers: {
+        'content-type': 'application/problem+json',
+        'cache-control': 'private, no-store',
+        'x-robots-tag': 'noindex',
+        'referrer-policy': 'no-referrer',
+      },
+    },
   );
 }
 
 async function proxy(request: NextRequest, parts: readonly string[]): Promise<NextResponse> {
   if (parts.length === 2 && parts[0] === 'meta' && parts[1] === 'contract') {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return gatewayProblem(405, 'Method Not Allowed', 'app_gateway_method_not_allowed', 'contract metadata is read-only');
+      return gatewayProblem(
+        405,
+        'Method Not Allowed',
+        'app_gateway_method_not_allowed',
+        'contract metadata is read-only',
+      );
     }
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
-    const response = contractJson(appApiContract(origin), { status: 200, headers: { 'cache-control': 'public, max-age=300' } });
-    return request.method === 'HEAD' ? new NextResponse(null, { status: response.status, headers: response.headers }) : response;
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
+    const response = contractJson(appApiContract(origin), {
+      status: 200,
+      headers: { 'cache-control': 'public, max-age=300' },
+    });
+    return request.method === 'HEAD'
+      ? new NextResponse(null, { status: response.status, headers: response.headers })
+      : response;
   }
 
   const path = appGatewayPath(parts);
-  if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  if (!path)
+    return gatewayProblem(
+      404,
+      'Not Found',
+      'app_gateway_path',
+      'this path is not part of the public app API',
+    );
 
-  const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
+  const supportThreadsDatePath =
+    request.method === 'GET' &&
+    parts.length === 2 &&
+    parts[0] === 'support' &&
+    parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
-  const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
-  const supportRange = supportDateRequested && supportQuery.getAll('from').length === 1 && supportQuery.getAll('to').length === 1
-    ? parseSupportDateRange(supportQuery.get('from'), supportQuery.get('to')) : null;
-  if (supportDateRequested && (!supportRange || supportQuery.getAll('status').length > 1 ||
-    supportQuery.getAll('q').length > 1 || supportQuery.getAll('sort').length > 1 ||
-    (supportQuery.has('sort') && supportQuery.get('sort') !== 'oldest') ||
-    (supportQuery.has('status') && !['open', 'waiting_user', 'resolved'].includes(supportQuery.get('status')!)) ||
-    (supportQuery.has('q') && (!supportQuery.get('q')?.trim() || supportQuery.get('q')!.length > 80)))) {
-    return gatewayProblem(400, 'Bad Request', 'support_date_invalid', 'invalid support date window');
+  const supportDateRequested =
+    supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
+  const supportRange =
+    supportDateRequested &&
+    supportQuery.getAll('from').length === 1 &&
+    supportQuery.getAll('to').length === 1
+      ? parseSupportDateRange(supportQuery.get('from'), supportQuery.get('to'))
+      : null;
+  if (
+    supportDateRequested &&
+    (!supportRange ||
+      supportQuery.getAll('status').length > 1 ||
+      supportQuery.getAll('q').length > 1 ||
+      supportQuery.getAll('sort').length > 1 ||
+      (supportQuery.has('sort') && supportQuery.get('sort') !== 'oldest') ||
+      (supportQuery.has('status') &&
+        !['open', 'waiting_user', 'resolved'].includes(supportQuery.get('status')!)) ||
+      (supportQuery.has('q') &&
+        (!supportQuery.get('q')?.trim() || supportQuery.get('q')!.length > 80)))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'support_date_invalid',
+      'invalid support date window',
+    );
   }
 
-  const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
+  const securityEventPath =
+    parts.length === 3 &&
+    parts[0] === 'account' &&
+    parts[1] === 'security' &&
+    parts[2] === 'events';
   const categoryValues = securityEventPath ? request.nextUrl.searchParams.getAll('category') : [];
   const securityCategory = securityEventPath
     ? parseSecurityEventCategory(categoryValues.length > 1 ? categoryValues : categoryValues[0])
     : 'all';
   if (securityEventPath && securityCategory === null) {
-    return gatewayProblem(400, 'Bad Request', 'invalid_security_category', 'security event category must be all, login or settings');
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'invalid_security_category',
+      'security event category must be all, login or settings',
+    );
   }
   const sortValues = securityEventPath ? request.nextUrl.searchParams.getAll('sort') : [];
   const securitySort = securityEventPath
     ? parseSecurityEventOrder(sortValues.length > 1 ? sortValues : sortValues[0])
     : 'recent';
-  if (securityEventPath && (securitySort === null ||
-      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'category' && key !== 'sort'))) {
-    return gatewayProblem(400, 'Bad Request', 'invalid_security_sort', 'security event sort must be recent or oldest');
+  if (
+    securityEventPath &&
+    (securitySort === null ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'category' && key !== 'sort'))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'invalid_security_sort',
+      'security event sort must be recent or oldest',
+    );
   }
 
-  const walletRangeRequest = request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
+  const walletRangeRequest =
+    request.method === 'GET' &&
+    parts.length === 2 &&
+    parts[0] === 'wallet' &&
+    parts[1] === 'activity' &&
     (request.nextUrl.searchParams.has('from') || request.nextUrl.searchParams.has('to'));
   let walletRange: ActivityCalendarRange | null = null;
   if (walletRangeRequest) {
     const query = request.nextUrl.searchParams;
-    if (query.getAll('from').length !== 1 || query.getAll('to').length !== 1 ||
-        query.getAll('period').length > 1 || query.getAll('direction').length > 1 ||
-        (query.has('period') && query.get('period') !== 'all') ||
-        (query.has('direction') && !['all', 'in', 'out', 'neutral'].includes(query.get('direction')!))) {
-      return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters');
+    if (
+      query.getAll('from').length !== 1 ||
+      query.getAll('to').length !== 1 ||
+      query.getAll('period').length > 1 ||
+      query.getAll('direction').length > 1 ||
+      (query.has('period') && query.get('period') !== 'all') ||
+      (query.has('direction') && !['all', 'in', 'out', 'neutral'].includes(query.get('direction')!))
+    ) {
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'wallet_range_invalid',
+        'invalid calendar range filters',
+      );
     }
-    try { walletRange = activityCalendarRange(query.get('from'), query.get('to')); }
-    catch { return gatewayProblem(400, 'Bad Request', 'wallet_range_invalid', 'invalid calendar range filters'); }
+    try {
+      walletRange = activityCalendarRange(query.get('from'), query.get('to'));
+    } catch {
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'wallet_range_invalid',
+        'invalid calendar range filters',
+      );
+    }
   }
 
   const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
   if (minimumVersionRaw) {
     const minimumVersion = parseAppVersion(minimumVersionRaw);
     if (!minimumVersion) {
-      return gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'app_gateway_version_policy_invalid',
+        'the app compatibility policy is unavailable',
+      );
     }
     const currentVersion = parseAppVersion(request.headers.get('x-moneyverse-app-version'));
     if (!currentVersion || isVersionBelow(currentVersion, minimumVersion)) {
-      const response = gatewayProblem(426, 'Upgrade Required', 'app_upgrade_required', `app version ${minimumVersionRaw} or newer is required`);
+      const response = gatewayProblem(
+        426,
+        'Upgrade Required',
+        'app_upgrade_required',
+        `app version ${minimumVersionRaw} or newer is required`,
+      );
       response.headers.set('x-moneyverse-min-app-version', minimumVersionRaw);
       return response;
     }
@@ -191,24 +327,70 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     request.nextUrl.searchParams.get('client') === 'mobile'
   ) {
     const origin = appGatewayOrigin(request.headers);
-    if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
+    if (!origin)
+      return gatewayProblem(
+        400,
+        'Bad Request',
+        'app_gateway_origin',
+        'public origin is unavailable',
+      );
     return contractJson({
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
   }
 
-  const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
-  const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
-  if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
-    return gatewayProblem(400, 'Bad Request', 'work_availability_invalid', 'availableOnly must be 1 when provided');
+  const pinnedAnnouncementPath =
+    parts.length === 2 &&
+    parts[0] === 'content' &&
+    parts[1] === 'announcements' &&
+    request.method === 'GET';
+  const pinnedValues = pinnedAnnouncementPath ? request.nextUrl.searchParams.getAll('pinned') : [];
+  if (
+    pinnedAnnouncementPath &&
+    (pinnedValues.length > 1 ||
+      (pinnedValues.length === 1 && !['true', 'false'].includes(pinnedValues[0]!)))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'pinned_announcements_invalid',
+      'invalid pinned announcement filter',
+    );
   }
 
-  const workReceiptPath = parts.length === 2 && parts[0] === 'work' && parts[1] === 'receipts' && request.method === 'GET';
+  const workAvailability =
+    parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
+  const availabilityValues = workAvailability
+    ? request.nextUrl.searchParams.getAll('availableOnly')
+    : [];
+  if (
+    availabilityValues.length > 1 ||
+    (availabilityValues.length === 1 && availabilityValues[0] !== '1')
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'work_availability_invalid',
+      'availableOnly must be 1 when provided',
+    );
+  }
+
+  const workReceiptPath =
+    parts.length === 2 &&
+    parts[0] === 'work' &&
+    parts[1] === 'receipts' &&
+    request.method === 'GET';
   const workRewardValues = workReceiptPath ? request.nextUrl.searchParams.getAll('minReward') : [];
-  if (workRewardValues.length > 1 ||
-      (workRewardValues.length === 1 && normalizeWorkReceiptFloor(workRewardValues[0]) === null)) {
-    return gatewayProblem(400, 'Bad Request', 'work_receipt_reward_invalid',
-      'minimum reward must be a canonical non-negative WLD integer');
+  if (
+    workRewardValues.length > 1 ||
+    (workRewardValues.length === 1 && normalizeWorkReceiptFloor(workRewardValues[0]) === null)
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'work_receipt_reward_invalid',
+      'minimum reward must be a canonical non-negative WLD integer',
+    );
   }
 
   const receiptAmountFilter =
@@ -227,17 +409,28 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       'shop_receipt_minimum_invalid',
       'minimum WLD must be a canonical positive integer',
     );
-
   }
 
   const stockHistoryPath = parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'history';
   const stockGrossValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('minGross') : [];
-  const stockHistoryLimitValues = stockHistoryPath ? request.nextUrl.searchParams.getAll('limit') : [];
-  if (stockHistoryPath && (stockGrossValues.length > 1 ||
-      (stockGrossValues.length === 1 && normalizeStockHistoryGrossFloor(stockGrossValues[0]) === null) ||
+  const stockHistoryLimitValues = stockHistoryPath
+    ? request.nextUrl.searchParams.getAll('limit')
+    : [];
+  if (
+    stockHistoryPath &&
+    (stockGrossValues.length > 1 ||
+      (stockGrossValues.length === 1 &&
+        normalizeStockHistoryGrossFloor(stockGrossValues[0]) === null) ||
       stockHistoryLimitValues.length > 1 ||
-      (stockHistoryLimitValues.length === 1 && !['50', '100', '200'].includes(stockHistoryLimitValues[0]!)))) {
-    return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
+      (stockHistoryLimitValues.length === 1 &&
+        !['50', '100', '200'].includes(stockHistoryLimitValues[0]!)))
+  ) {
+    return gatewayProblem(
+      400,
+      'Bad Request',
+      'stock_history_gross_invalid',
+      'invalid owner trade history filters',
+    );
   }
 
   const outgoing = new Headers({
@@ -268,15 +461,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   } catch (error: unknown) {
     const name = error instanceof Error ? error.name : '';
     if (name === 'TimeoutError' || name === 'AbortError') {
-      return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
+      return gatewayProblem(
+        504,
+        'Gateway Timeout',
+        'app_gateway_timeout',
+        'the private API did not answer within 15 seconds',
+      );
     }
-    return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+    return gatewayProblem(
+      502,
+      'Bad Gateway',
+      'app_gateway_unavailable',
+      'the private API could not be reached',
+    );
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
   // must not become a verified Android balance or leak extra upstream fields.
-  if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
-      parts[2] === 'snapshot' && request.method === 'GET') {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'banking' &&
+    parts[1] === 'standing' &&
+    parts[2] === 'snapshot' &&
+    request.method === 'GET'
+  ) {
     const privateHeaders = {
       'cache-control': 'private, no-store',
       'x-robots-tag': 'noindex',
@@ -284,49 +492,85 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     };
     if (!response.ok) {
       const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
-      return gatewayProblem(status, 'Bank Snapshot Unavailable', 'bank_snapshot_unavailable',
-        'The owner bank snapshot could not be verified');
+      return gatewayProblem(
+        status,
+        'Bank Snapshot Unavailable',
+        'bank_snapshot_unavailable',
+        'The owner bank snapshot could not be verified',
+      );
     }
     try {
-      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON bank snapshot');
+      if (!isJsonMediaType(response.headers.get('content-type')))
+        throw new Error('non-JSON bank snapshot');
       const snapshot = parseBankStandingSnapshot(await response.clone().json());
       if (!snapshot) throw new Error('unverified bank snapshot');
       return contractJson(snapshot, { status: 200, headers: privateHeaders });
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'bank_snapshot_unverified',
-        'The owner bank snapshot could not be verified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'bank_snapshot_unverified',
+        'The owner bank snapshot could not be verified',
+      );
     }
   }
 
   if (isWalletDetailPath(parts) && request.method === 'GET') {
     if (!response.ok) {
       const status = [400, 401, 403, 404, 429].includes(response.status) ? response.status : 503;
-      return gatewayProblem(status, 'Wallet Detail Unavailable', 'wallet_detail_unavailable',
-        'The owner transaction detail could not be verified');
+      return gatewayProblem(
+        status,
+        'Wallet Detail Unavailable',
+        'wallet_detail_unavailable',
+        'The owner transaction detail could not be verified',
+      );
     }
     try {
-      if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !parseWalletTransactionDetail(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
-          'The owner transaction detail could not be verified');
+      if (
+        !isJsonMediaType(response.headers.get('content-type')) ||
+        !parseWalletTransactionDetail(await response.clone().json())
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'wallet_detail_unverified',
+          'The owner transaction detail could not be verified',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'wallet_detail_unverified',
-        'The owner transaction detail could not be verified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'wallet_detail_unverified',
+        'The owner transaction detail could not be verified',
+      );
     }
   }
 
   if (stockHistoryPath && stockGrossValues.length === 1 && response.ok) {
     try {
-      if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !isVerifiedStockHistoryGrossResponse(await response.clone().json(), stockGrossValues[0]!,
-            Number(stockHistoryLimitValues[0] ?? '50'))) {
-        return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
-          'owner stock trade gross filter could not be verified');
+      if (
+        !isJsonMediaType(response.headers.get('content-type')) ||
+        !isVerifiedStockHistoryGrossResponse(
+          await response.clone().json(),
+          stockGrossValues[0]!,
+          Number(stockHistoryLimitValues[0] ?? '50'),
+        )
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'stock_history_gross_unverified',
+          'owner stock trade gross filter could not be verified',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
-        'owner stock trade gross filter could not be verified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'stock_history_gross_unverified',
+        'owner stock trade gross filter could not be verified',
+      );
     }
   }
 
@@ -334,22 +578,42 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Preserve the HTTP failure class without exposing its untrusted response body.
   if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && !response.ok) {
     const status = response.status >= 500 ? 503 : response.status;
-    return gatewayProblem(status, 'Chat Upload Rejected', 'chat_upload_failed', 'The image upload could not be completed');
+    return gatewayProblem(
+      status,
+      'Chat Upload Rejected',
+      'chat_upload_failed',
+      'The image upload could not be completed',
+    );
   }
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
-      return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'vip_chest_unverified',
+        'VIP reward receipts are unavailable',
+      );
     }
     if (parts[3] === 'status' && request.method === 'GET' && response.ok) {
       try {
         if (!parseVipChestStatus(await response.clone().json())) {
-          return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP entitlement and receipt status are unverified');
+          return gatewayProblem(
+            503,
+            'Service Unavailable',
+            'vip_chest_unverified',
+            'VIP entitlement and receipt status are unverified',
+          );
         }
       } catch {
-        return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP status response is invalid');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'vip_chest_unverified',
+          'VIP status response is invalid',
+        );
       }
     }
   }
@@ -357,107 +621,214 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
   if (supportRange && response.ok) {
     try {
-      if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !isVerifiedSupportDateRows(await response.clone().json(), supportRange,
-            supportQuery.get('status'), supportQuery.get('q')?.trim() ?? null, supportQuery.get('sort'))) {
-        return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
+      if (
+        !isJsonMediaType(response.headers.get('content-type')) ||
+        !isVerifiedSupportDateRows(
+          await response.clone().json(),
+          supportRange,
+          supportQuery.get('status'),
+          supportQuery.get('q')?.trim() ?? null,
+          supportQuery.get('sort'),
+        )
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'support_date_unverified',
+          'support date search is unverified',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'support_date_unverified', 'support date search is unverified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'support_date_unverified',
+        'support date search is unverified',
+      );
     }
   }
 
   // A stale backend can ignore an optional order parameter while returning HTTP 200.
-  if (parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads' &&
-      request.method === 'GET' && request.nextUrl.searchParams.get('sort') === 'oldest' && response.ok) {
+  if (
+    parts.length === 2 &&
+    parts[0] === 'support' &&
+    parts[1] === 'threads' &&
+    request.method === 'GET' &&
+    request.nextUrl.searchParams.get('sort') === 'oldest' &&
+    response.ok
+  ) {
     try {
       if (!isVerifiedOldestSupportThreads(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
-          'support conversation order could not be verified');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'support_order_unverified',
+          'support conversation order could not be verified',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'support_order_unverified',
-        'support conversation order could not be verified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'support_order_unverified',
+        'support conversation order could not be verified',
+      );
     }
   }
 
   // A stale backend must not provide invented owner-private support counts.
-  if (parts.length === 3 && parts[0] === 'support' &&
-      parts[1] === 'threads' && parts[2] === 'summary' && request.method === 'GET' && response.ok) {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'support' &&
+    parts[1] === 'threads' &&
+    parts[2] === 'summary' &&
+    request.method === 'GET' &&
+    response.ok
+  ) {
     try {
       if (!parseSupportSummary(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
-          'support status counts are unavailable');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'support_summary_unverified',
+          'support status counts are unavailable',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'support_summary_unverified',
-        'support status counts are unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'support_summary_unverified',
+        'support status counts are unavailable',
+      );
     }
   }
-
 
   // The Android receipt summary is valid only if it matches the exact owner-scoped rows.
   // Reject legacy/forged HTTP 200 responses rather than inventing spending totals.
-  if (parts.length === 2 && parts[0] === 'shop' && parts[1] === 'purchases' &&
-      request.method === 'GET' && response.ok) {
+  if (
+    parts.length === 2 &&
+    parts[0] === 'shop' &&
+    parts[1] === 'purchases' &&
+    request.method === 'GET' &&
+    response.ok
+  ) {
     try {
       const json = await response.clone().json();
-      if (json && typeof json === 'object' && 'summary' in json && json.summary !== undefined && json.summary !== null) {
+      if (
+        json &&
+        typeof json === 'object' &&
+        'summary' in json &&
+        json.summary !== undefined &&
+        json.summary !== null
+      ) {
         if (!parseShopPurchaseHistory(json)) {
-          return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
+          return gatewayProblem(
+            503,
+            'Service Unavailable',
+            'shop_receipts_unverified',
+            'purchase totals are unavailable',
+          );
         }
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'shop_receipts_unverified', 'purchase totals are unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'shop_receipts_unverified',
+        'purchase totals are unavailable',
+      );
     }
   }
 
-  if (parts.length === 3 && parts[0] === 'shop' && parts[1] === 'purchases' &&
-      parts[2] === 'export' && request.method === 'GET' && response.ok) {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'shop' &&
+    parts[1] === 'purchases' &&
+    parts[2] === 'export' &&
+    request.method === 'GET' &&
+    response.ok
+  ) {
     try {
-      if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !parseShopPurchaseExport(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'shop_export_unverified',
-          'Shop purchase export is unavailable');
+      if (
+        !isJsonMediaType(response.headers.get('content-type')) ||
+        !parseShopPurchaseExport(await response.clone().json())
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'shop_export_unverified',
+          'Shop purchase export is unavailable',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'shop_export_unverified',
-        'Shop purchase export is unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'shop_export_unverified',
+        'Shop purchase export is unavailable',
+      );
     }
   }
 
   if (securityEventPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
-    return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+    return gatewayProblem(
+      503,
+      'Service Unavailable',
+      'security_events_unverified',
+      'security activity evidence is unavailable',
+    );
   }
 
   if (walletRange && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
-    return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+    return gatewayProblem(
+      503,
+      'Service Unavailable',
+      'wallet_range_unverified',
+      'wallet calendar activity evidence is unavailable',
+    );
   }
-
 
   if (workAvailability && availabilityValues.length === 1 && response.ok) {
     try {
       if (!isVerifiedAvailableWorkBoard(await response.clone().json())) {
-        return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'work_availability_unverified',
+          'task availability is unverified',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'work_availability_unverified', 'task availability is unverified');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'work_availability_unverified',
+        'task availability is unverified',
+      );
     }
   }
 
-
-
-
   if (workReceiptPath && workRewardValues.length === 1 && response.ok) {
     try {
-      if (!isJsonMediaType(response.headers.get('content-type')) ||
-          !parseFilteredWorkReceipts(await response.clone().json(), workRewardValues[0]!)) {
-        return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
-          'work receipt reward evidence is unavailable');
+      if (
+        !isJsonMediaType(response.headers.get('content-type')) ||
+        !parseFilteredWorkReceipts(await response.clone().json(), workRewardValues[0]!)
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'work_receipt_reward_unverified',
+          'work receipt reward evidence is unavailable',
+        );
       }
     } catch {
-      return gatewayProblem(503, 'Service Unavailable', 'work_receipt_reward_unverified',
-        'work receipt reward evidence is unavailable');
+      return gatewayProblem(
+        503,
+        'Service Unavailable',
+        'work_receipt_reward_unverified',
+        'work receipt reward evidence is unavailable',
+      );
     }
   }
 
@@ -497,7 +868,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
-
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -508,11 +878,46 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (
+    parts[0] === 'wallet' ||
+    parts[0] === 'privacy' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    parts[0] === 'notifications' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    privateShopReceipts ||
+    privateStockHistory
+  )
+    headers.set('cache-control', 'private, no-store');
+  if (
+    parts[0] === 'wallet' ||
+    parts[0] === 'privacy' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    parts[0] === 'notifications' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    privateShopReceipts ||
+    privateStockHistory
+  )
+    headers.set('x-robots-tag', 'noindex');
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
+  }
+
+  if (
+    pinnedAnnouncementPath &&
+    response.ok &&
+    !isJsonMediaType(response.headers.get('content-type'))
+  ) {
+    return gatewayProblem(
+      503,
+      'Service Unavailable',
+      'pinned_announcements_unverified',
+      'published announcement evidence is unavailable',
+    );
   }
 
   if (isJsonMediaType(response.headers.get('content-type'))) {
@@ -521,39 +926,114 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (
+        pinnedAnnouncementPath &&
+        response.ok &&
+        !verifiedPublishedAnnouncements(compatible, pinnedValues[0] === 'true')
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'pinned_announcements_unverified',
+          'published announcement evidence is unavailable',
+        );
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
-        if (verified === null || securityCategory === null || securitySort === null ||
-            !securityEventsMatchCategory(verified, securityCategory) ||
-            (sortValues.length > 0 && !securityEventsMatchOrder(verified, securitySort))) {
-          return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+        if (
+          verified === null ||
+          securityCategory === null ||
+          securitySort === null ||
+          !securityEventsMatchCategory(verified, securityCategory) ||
+          (sortValues.length > 0 && !securityEventsMatchOrder(verified, securitySort))
+        ) {
+          return gatewayProblem(
+            503,
+            'Service Unavailable',
+            'security_events_unverified',
+            'security activity evidence is unavailable',
+          );
         }
       }
-      if (request.method === 'GET' && parts.length === 2 && parts[0] === 'wallet' && parts[1] === 'activity' &&
-          response.ok && compatible && typeof compatible === 'object' && 'pageSummary' in compatible &&
-          (compatible as { pageSummary?: unknown }).pageSummary !== null &&
-          !verifiedWalletPageSummary(compatible)) {
-        return gatewayProblem(503, 'Service Unavailable', 'wallet_page_summary_unverified', 'wallet page totals could not be verified');
+      if (
+        request.method === 'GET' &&
+        parts.length === 2 &&
+        parts[0] === 'wallet' &&
+        parts[1] === 'activity' &&
+        response.ok &&
+        compatible &&
+        typeof compatible === 'object' &&
+        'pageSummary' in compatible &&
+        (compatible as { pageSummary?: unknown }).pageSummary !== null &&
+        !verifiedWalletPageSummary(compatible)
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'wallet_page_summary_unverified',
+          'wallet page totals could not be verified',
+        );
       }
-      if (walletRange && response.ok && !verifiedWalletCalendarPage(compatible, walletRange, request.nextUrl.searchParams.get('direction') ?? 'all')) {
-        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+      if (
+        walletRange &&
+        response.ok &&
+        !verifiedWalletCalendarPage(
+          compatible,
+          walletRange,
+          request.nextUrl.searchParams.get('direction') ?? 'all',
+        )
+      ) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'wallet_range_unverified',
+          'wallet calendar activity evidence is unavailable',
+        );
       }
-      if (parts[0] === 'content' && parts[1] === 'chat' && parts[2] === 'upload' && response.ok &&
-          compatible !== null && typeof compatible === 'object' && !Array.isArray(compatible)) {
+      if (
+        parts[0] === 'content' &&
+        parts[1] === 'chat' &&
+        parts[2] === 'upload' &&
+        response.ok &&
+        compatible !== null &&
+        typeof compatible === 'object' &&
+        !Array.isArray(compatible)
+      ) {
         // Older backend images returned a redundant internal storage key.
         // Keep the owner-authorized URL but never expose a second raw key field.
         const publicReceipt = { ...compatible } as Record<string, unknown>;
         delete publicReceipt.storageKey;
         delete publicReceipt.storage_key;
-        return new NextResponse(JSON.stringify(publicReceipt), { status: response.status, headers });
+        return new NextResponse(JSON.stringify(publicReceipt), {
+          status: response.status,
+          headers,
+        });
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (pinnedAnnouncementPath && response.ok) {
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'pinned_announcements_unverified',
+          'published announcement evidence is unavailable',
+        );
+      }
       if (securityEventPath && response.ok) {
-        return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'security_events_unverified',
+          'security activity evidence is unavailable',
+        );
       }
       if (walletRange && response.ok) {
-        return gatewayProblem(503, 'Service Unavailable', 'wallet_range_unverified', 'wallet calendar activity evidence is unavailable');
+        return gatewayProblem(
+          503,
+          'Service Unavailable',
+          'wallet_range_unverified',
+          'wallet calendar activity evidence is unavailable',
+        );
       }
       return new NextResponse(bytes, { status: response.status, headers });
     }
@@ -578,20 +1058,49 @@ async function handle(request: NextRequest, context: Context) {
   }
   // Help publication metadata and member-scoped reads must not inherit a
   // cacheable upstream policy, including when the upstream returns an error.
-  if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
+  if (
+    parts[0] === 'help' ||
+    parts[0] === 'work' ||
+    parts[0] === 'support' ||
+    parts[0] === 'collections' ||
+    (parts[0] === 'account' && parts[1] === 'security') ||
+    parts[0] === 'bank' ||
+    parts[0] === 'banking' ||
+    parts[0] === 'chat' ||
+    (parts[0] === 'content' && parts[1] === 'chat')
+  ) {
     response.headers.set('cache-control', 'private, no-store');
-    if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+    if (
+      parts[0] === 'help' ||
+      parts[0] === 'work' ||
+      parts[0] === 'support' ||
+      parts[0] === 'collections' ||
+      (parts[0] === 'account' && parts[1] === 'security') ||
+      parts[0] === 'chat' ||
+      (parts[0] === 'content' && parts[1] === 'chat')
+    )
+      response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'board' &&
+    parts[1] === 'public' &&
+    parts[2] === 'stock-posts' &&
+    request.nextUrl.searchParams.has('q')
+  ) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+  if (
+    parts.length === 3 &&
+    parts[0] === 'board' &&
+    parts[1] === 'public' &&
+    parts[2] === 'stock-posts' &&
+    request.nextUrl.searchParams.has('q')
+  ) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
