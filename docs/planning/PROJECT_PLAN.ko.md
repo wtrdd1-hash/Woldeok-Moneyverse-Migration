@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### 기획 주기 v1776 (2026-11-05) — F675-249 증빙 내보내기 무결성 보완 [P1, 기획 전용]
+이전 v1774 기능 추가 → 현재 v1776 기능 보완 → 다음 v1778 기능 추가. 실제 구현·마이그레이션·배포 완료가 아닌 제안이며 실제 스키마와 ACL 확인이 선행되어야 한다.
+
+- **목적·권한·진입:** 테넌트/팀 감독자가 관리자 > 문의 > SLA 사고 > 증빙 > 내보내기에서 범위·사유를 제출한다. 요청자와 승인자는 서로 달라야 하고 승인 시점에도 권한을 재검증한다. 생성 CTA 전 사고 ID, 범위, 스냅샷 워터마크, 민감도, 만료 및 예상 크기를 표시한다. 상태는 DRAFT/PENDING_APPROVAL/APPROVED/GENERATING/READY/EXPIRED/REVOKED/FAILED/UNKNOWN이며 재시도 성공을 완료 증거로 간주하지 않는다.
+- **API 제안:** POST /api/v1/admin/support/sla-policy/incidents/:id/exports(사유·범위·멱등 키), POST /exports/:exportId/approve(If-Match), GET /exports/:exportId, POST /exports/:exportId/download-grant(일회용 단기 토큰), POST /exports/:exportId/revoke. 영구 공개 다운로드 URL은 제공하지 않는다. 매 요청·다운로드마다 사용자·테넌트·팀·사고·범위를 서버에서 검증한다.
+- **DB·트랜잭션:** 불변 export_request(id, tenant_id, team_id, incident_id, requester_id, approver_id, revision, scope_hash, snapshot_watermark, status, expires_at) 제안. 요청자≠승인자 CHECK, 범위 FK, (tenant_id,idempotency_key) UNIQUE, (tenant_id,team_id,incident_id,created_at DESC,id) 인덱스와 작업자 상태 부분 인덱스를 검토한다. 실제 DB 확인 전 적용 금지. 승인 CAS·감사·Outbox 원자적 커밋, 반복 읽기 스냅샷, 결정적 매니페스트 정렬·해시·서명 검증이 필수다. 근거 누락·지연·충돌은 VERIFIED가 아닌 UNKNOWN으로 표시한다.
+- **작업자·보안:** 임대/펜싱, 임시 객체 암호화, 해시 검증 후 READY 원자적 전환, 장애 재시도·고아 객체 청소. 만료·철회 시 늦게 끝난 작업의 다운로드 권한도 무효화한다. 토큰은 사용자·내보내기·대상·만료·nonce에 결합하고 원자적으로 1회 소모한다. URL·로그·분석·CDN에 개인정보나 토큰 노출 금지. 크기·빈도·동시성 제한, CSRF, 안전한 파일명, 독립 승인 우회 금지.
+- **화면·SEO·지표:** 비공개 noindex/nofollow 및 no-store, 스크린리더 상태 알림, 키보드 포커스, 320px 모바일, 한영 동등성. 요청→승인→준비 지연, UNKNOWN 비율, 실패·재시도, 접근 거부, 만료 정리율을 비식별 집계한다.
+- **검증·승격:** 증빙 0/1/100/101건, 스냅샷 경쟁, 자기 승인, 타 테넌트/팀, 권한 철회, 멱등 중복, 동시 승인, 커밋 전후 작업자 장애, 만료·재사용 토큰, 손상 파일을 검증한다. P0는 운영 500/배포 SHA, DB 최소권한·체크섬, 인증된 exact-SHA Test E2E, 독립 백업 복구·원장 대사를 유지한다. 플래그 기본 OFF, 별도 개발 브랜치·Test 검증·단계 승격·OFF 롤백·객체 철회 증거가 선행되어야 하며 이 회차는 런타임 배포하지 않는다.
+- **외부 근거 게이트:** 신규 독립 검증 0건, 누적 승인 UNKNOWN/10,000건. 중복 제거·출처 분류 증거 전 BLOCKED / IN PROGRESS.
