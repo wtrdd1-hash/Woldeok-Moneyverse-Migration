@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### 기획 v1802 — F675-256 독립 인계 수령 이력 대사 (기능 추가, 2026-11-05)
+이전 기능 보완 v1800; 현재 기능 추가 v1802; 다음 기능 보완 v1804. 제안만 작성, 미구현, 운영 배포 보류. F675-249~255 Draft PR은 main 병합 미확인으로 개발 전 선행 요구사항 통합 필수.
+**목적·대상·권한:** 테넌트 보안 감사자가 수령 영수증과 서명 매니페스트·권위 있는 철회 세대·검토자 권한을 대사한다. 관리자 > SLA 사고 > 인계 > 대사. 요청자와 승인자 분리, 위임 계정 자기 승인 금지.
+**화면·CTA·상태:** 불일치 목록·사고 상세·검증 시각·세대·근거 해시·재시도·비식별 내보내기·독립 확인. 로딩/일치/불일치/누락/오래됨/철회/불명/권한 없음. 수령 확인은 사고 해결의 증명이 아니다.
+**API:** GET /admin/sla/custody/reconciliations?cursor&status, POST /admin/sla/custody/reconciliations/runs, GET /admin/sla/custody/reconciliations/:id, POST /admin/sla/custody/reconciliations/:id/ack. 테넌트·팀 권한, 제한된 커서, 멱등키, 입력 검증, 속도 제한, 불변 감사.
+**DB:** reconciliation_run(tenant_id,id,incident_id,custody_id,revocation_generation,manifest_sha256,status,version,created_at), observation(tenant_id,run_id,source_id,observed_generation,verified_at,proof_digest). 테넌트 복합 FK, 수령·출처·세대별 유일성, 세대 0 이상 CHECK, 미해결 상태·생성일 부분 인덱스, 관측 불변. CAS·작업자 임대 펜싱·중복 재생 방지; 상태·감사·Outbox 단일 트랜잭션.
+**보안:** 서명 누락·키 침해·만료·세대 불일치·권한 철회 시 차단 우선. 다운로드 철회 상태 변경 금지. 테넌트 열거·CSRF·재생 공격 방지, 개인정보 최소화, 보존·내보내기 권한, 관리자 noindex/no-store.
+**모바일·SEO·지표·테스트·배포:** 320px, 키보드·스크린리더 WCAG 2.2 AA, 영·한 동등성. KPI 불일치 건수·해결 지연·오탐률·검토 시간·근거 누락. 테넌트 격리, 동시 승인, 재생, 작업자 장애, 오래된 세대, 키 침해, 접근성, 인증 exact-SHA Test E2E 검증. 기본 플래그 OFF, 게이트 통과 후 점진 배포, 감사 보존하며 플래그 OFF 롤백.
+**P0:** 운영 /en·/en/login HTTP 500 및 실제 배포 SHA, 백엔드 재시작·심볼릭 링크, DB 최소권한·마이그레이션 체크섬, 독립 백업 복원, 원장 대사, 국내 법률 및 인증 Test exact-SHA 게이트 확인. **P1:** Draft PR과 main 불일치 해소, 실제 frontend/backend/app-api/DB 및 최신 QA 조사, 개발 예약의 별도 브랜치에서 구현.
+**외부 독립 근거 10,000건 게이트:** 신규 검증 0건, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 런타임 배포 없음.
