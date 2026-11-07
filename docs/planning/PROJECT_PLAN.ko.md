@@ -3009,3 +3009,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1882 — F675-276 에스컬레이션 전달 대사 및 제공자 장애 원장 (Feature Addition; 기획 전용)
+- 주기: Previous Feature Improvement v1880 → Current Feature Addition v1882 → Next Feature Improvement v1884. 미병합 F675-271~275 선행 의존, 런타임 배포 금지.
+- 목적·대상: 테넌트 준법 담당자가 웹훅 누락·제공자 장애 후 접수 내역, 서명된 전달 콜백, 제공자 내보내기를 대사한다. HTTP 2xx 또는 콜백 부재만으로 전달 완료로 간주하지 않는다.
+- 권한·화면: 관리자 > SLA > 에스컬레이션 > 전달 대사. 읽기 전용 비교 시작, 불일치 검토, 재전송 요청, 비식별 보고서 내보내기 CTA. DRAFT/SCANNING/NEEDS_REVIEW/RECONCILED/BLOCKED/EXPIRED 상태와 원천·최신성·불일치 수·재시도 가능 여부 표시. 키보드·스크린리더·320px 지원, 관리자 noindex.
+- 제안 API(구현 전 실제 라우트 대조): POST /api/v1/admin/sla/delivery-reconciliations(Idempotency-Key), GET /:id, GET /:id/discrepancies(cursor), POST /:id/replay-request(If-Match), POST /:id/approve(독립 검토자), GET /:id/redacted-export. 테넌트 RBAC, 열거 방지 404, 403/409/422/429, 쿠키 인증 CSRF, 호출 제한·감사 적용.
+- DB: reconciliation_runs(tenant_id,id,provider_account_id,generation,source_watermark,state,version,created_by,approved_by), reconciliation_items(tenant_id,run_id,provider_delivery_id,attempt_id,classification), 불변 provider_receipts 및 audit_outbox. 테넌트 복합 FK, 상태 CHECK, (tenant_id,provider_account_id,generation,source_watermark) UNIQUE, (tenant_id,run_id,provider_delivery_id) UNIQUE, 미해결 부분 인덱스 및 (tenant_id,state,created_at) 인덱스.
+- 트랜잭션: 제공자 내보내기 해시·워터마크를 불변 스냅샷으로 저장, CAS 버전 검증, 불일치·감사·Outbox 단일 트랜잭션, 작업자 펜싱 및 유한 백오프·멱등 재전송. 늦은 콜백은 기존 서명 결과를 수정하지 않고 새 세대 생성.
+- 보안: 제공자 계정 소유권, 웹훅 원문 서명·시각, 저장소 해시·보존, 내보내기 스키마 허용목록, 악성 파일 검사, 암호화·수신자 비식별화, SSRF 차단, 재생 공격 방지, 독립 승인, 재발송 전 동의·억제 재검증. 장애는 DELIVERED가 아닌 UNKNOWN.
+- KPI·검증: 대사 범위, UNKNOWN 지연 p95, 거짓 전달완료 0건, 미해결 불일치율, 재전송 성공률·중복 방지. 개인정보 없는 분석. 콜백 누락·역순·중복, 위조 내보내기, 키 교체, 테넌트 격리, 제공자 장애, 동시 승인·재전송, 모바일·접근성·영한 동등 회귀.
+- 배포: admin_sla_delivery_reconciliation_v1 기본 OFF, Test exact-SHA·마이그레이션·카나리·서명된 제공자 픽스처·shadow-read 우선. 롤백은 신규 실행 차단 및 불변 증빙 보존, SLA 확정 기한·금융 원장 불변. 선행 기능과 운영 P0 검증 전 RELEASE HOLD.
+- P0: /srv/moneyverse → 누락된 prod-v600 경로, /en·/en/login 500·백엔드 재시작 현재 재현 확인, DB 최소권한·마이그레이션 체크섬·백업 복원·원장 대사·한국 법률 검토. P1: 미병합 기획 PR·실제 frontend/backend/app-api/DB/Outbox 계약·인증 PR #2822·제공자 내보내기 지원 여부·선행 기능 검토.
+- 외부 독립 근거 게이트: 신규 검증 0건, 누적 UNKNOWN/10,000건. 중복 제거·근거 분류 BLOCKED/IN PROGRESS.
