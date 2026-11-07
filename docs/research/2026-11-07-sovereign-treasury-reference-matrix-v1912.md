@@ -9,7 +9,7 @@
 | ID | Authoritative reference | Relevant operational practice | Planned Moneyverse adoption |
 |---|---|---|---|
 | R01 | [Bank of Korea — Treasury operations](https://www.bok.or.kr/portal/main/contents.do?menuNo=200014) | Cash receipt and payment authorization are distinct; government-bank reconciliation | Separate funding decision, settlement instruction and verified cash receipt |
-| R02 | [Korea Fiscal Information Service — dBrain+](https://fis.kr/ko/major_biz/dbrain_oper/main_func/basic) | Plan→budget→revenue/expenditure→closing, assets and performance | Budget hierarchy, commitment tracking and fiscal closing dashboards |
+| R02 | [Korea Fiscal Information Service — dBrain+](https://www.fis.kr/ko/major_biz/dbrain_oper/main_func) | Plan→budget→revenue/expenditure→closing, assets and performance | Budget hierarchy, commitment tracking and fiscal closing dashboards |
 | R03 | [Bank of Korea — BOK-Wire+](https://www.bok.or.kr/portal/main/contents.do?menuNo=200727) | RTGS/hybrid settlement, finality and intraday liquidity | Finality state, queue, funded bank settlement and error isolation |
 | R04 | [Bank of Korea — issuance versus manufacturing](https://www.bok.or.kr/portal/bbs/P0000547/view.do?depth=200387&menuNo=200387&nttId=10085714&oldMenuNo=201150&programType=newsData&relate=Y) | BOK is issuer; KOMSCO manufactures physical currency | MCB authorizes, Mint executes; graphics or physical token creation is not WLD issuance |
 | R05 | [Korea Minting and Security Printing Corporation Act](https://www.law.go.kr/LSW/lsInfoP.do?ancYnChk=&chrClsCd=010202&efYd=20240517&lsiSeq=251085&urlMode=lsInfoP) | Currency/security-print production scope | Mint certificate provenance and executor-only role |

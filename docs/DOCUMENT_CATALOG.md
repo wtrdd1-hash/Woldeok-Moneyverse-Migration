@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.11.07.1912 — Sovereign Treasury, Central Bank and Mint design (PLANNING / DRAFT)
+- 16-source [official reference matrix](research/2026-11-07-sovereign-treasury-reference-matrix-v1912.md) / [KO](research/2026-11-07-sovereign-treasury-reference-matrix-v1912.ko.md); [detailed operating specification](planning/TREASURY_SOVEREIGN_OPERATING_MODEL_SPEC_v2026.11.07.1912.md) / [KO](planning/TREASURY_SOVEREIGN_OPERATING_MODEL_SPEC_v2026.11.07.1912.ko.md); [worklog](worklog/2026-11-07-treasury-sovereign-design-v1912.md), [changelog](changelog/2026-11-07-treasury-sovereign-design-v1912.md), [GitHub note](updates/v2026.11.07.1912-github.md), [internal note](updates/v2026.11.07.1912-internal.md). Docs-only proposal, not adopted project authority, financial implementation or release.
+
 ## v2026.10.22.1108 — No automatic unpublishing, country blog domain foundation
 - [EN owner supersession](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md) / [KO](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md). 24h or later review delay never auto-hides published article; admin alert only. Four-country risk candidate/domain review-state code and tests developed on isolated branch; publish-first DB/scheduler integration is pending.
 

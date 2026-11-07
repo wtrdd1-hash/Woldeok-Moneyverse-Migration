@@ -9,7 +9,7 @@
 | ID | 공식 참고자료 | 주요 업무 사실 | 머니버스 반영 방향 |
 |---|---|---|---|
 | R01 | [한국은행 — 국고증권·국고업무](https://www.bok.or.kr/portal/main/contents.do?menuNo=200014) | 수입·지출 결정과 국고금 출납 분리, 정부·한국은행 대사 | 예산 결정, 결제 요청, 실제 입금·출금 영수증 분리 |
-| R02 | [한국재정정보원 — dBrain+](https://fis.kr/ko/major_biz/dbrain_oper/main_func/basic) | 계획→예산→세입·세출→결산, 자산·성과 통합 | 예산 계층, 집행약정·결산·성과 대시보드 |
+| R02 | [한국재정정보원 — dBrain+](https://www.fis.kr/ko/major_biz/dbrain_oper/main_func) | 계획→예산→세입·세출→결산, 자산·성과 통합 | 예산 계층, 집행약정·결산·성과 대시보드 |
 | R03 | [한국은행 — 한은금융망](https://www.bok.or.kr/portal/main/contents.do?menuNo=200727) | 실시간총액·혼합형 결제, 결제완결성, 일중 유동성 | 결제완결 시점·대기열·은행별 유동성·실패 격리 |
 | R04 | [한국은행 — 발행과 제조의 차이](https://www.bok.or.kr/portal/bbs/P0000547/view.do?depth=200387&menuNo=200387&nttId=10085714&oldMenuNo=201150&programType=newsData&relate=Y) | 발행기관은 한국은행, 제조는 한국조폐공사 | 중앙은행 승인·조폐국 집행, 제조 이미지와 WLD 발행 구분 |
 | R05 | [한국조폐공사법](https://www.law.go.kr/LSW/lsInfoP.do?ancYnChk=&chrClsCd=010202&efYd=20240517&lsiSeq=251085&urlMode=lsInfoP) | 화폐 제조 및 보안 인쇄 업무 범위 | 조폐 명령·인증서·집행 전용 권한 |

@@ -20,8 +20,8 @@
 - [x] Official-source traceability research matrix and country-to-Moneyverse applicability.
 - [x] Detailed bilingual Treasury/central-bank/mint/settlement/government-finance design, failure states, APIs, data and accounting.
 - [x] Explicit staged implementation and acceptance matrix, without claiming deployed behavior.
-- [ ] Bilingual change record, internal/GitHub updates and documentation index.
-- [ ] MID main/authority refresh, FINISH check, separate commit(s) and GitHub push / optional review PR.
+- [x] Bilingual change record, internal/GitHub updates and documentation index.
+- [x] MID main/authority refresh, FINISH check, separate commit(s) and GitHub push / optional review PR.
 
 ## MID — 2026-11-08 00:15 KST
 
@@ -32,7 +32,13 @@
 - No WLD payment, SQL migration, user balance, policy or deployment changed. Candidate docs still require review; next: changelogs/updates/index and final validation.
 
 
-## FINISH — pending
+## FINISH — 2026-11-08 KST
+
+- Final `origin/main` rechecked; still `0b5b2b1385d2a75614d39458dff94f7d3098ed03`, no concurrent main authority movement during this documentation cycle.
+- Completed paired English/Korean detailed planning, 16 official primary references, bilingual changelog, GitHub/public and internal update notes, both document catalogs, and BEFORE/MID/FINISH logs.
+- Validation: reviewed canonical authority; 14 modified/new maintained documents checked for missing local Markdown link targets (**0 missing**); `git diff --check` clean. No finance DB SQL or runtime tests are claimed for docs-only deliverable.
+- No source code, financial WLD, DB schema, Test or Production was changed. Planning remains DRAFT / not authority-adopted. Review PR is proposed; no merge, Test or Production release authorized.
+
 
 ## Safety / release boundary
 
