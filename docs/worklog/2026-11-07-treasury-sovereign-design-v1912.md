@@ -17,13 +17,20 @@
 ## Planned deliverables
 
 - [x] BEFORE read-only inventory, branch isolation and evidence.
-- [ ] Official-source traceability research matrix and country-to-Moneyverse applicability.
-- [ ] Detailed bilingual Treasury/central-bank/mint/settlement/government-finance design, failure states, APIs, data and accounting.
-- [ ] Explicit staged implementation and acceptance matrix, without claiming deployed behavior.
+- [x] Official-source traceability research matrix and country-to-Moneyverse applicability.
+- [x] Detailed bilingual Treasury/central-bank/mint/settlement/government-finance design, failure states, APIs, data and accounting.
+- [x] Explicit staged implementation and acceptance matrix, without claiming deployed behavior.
 - [ ] Bilingual change record, internal/GitHub updates and documentation index.
 - [ ] MID main/authority refresh, FINISH check, separate commit(s) and GitHub push / optional review PR.
 
-## MID — pending
+## MID — 2026-11-08 00:15 KST
+
+- Refetched origin/main during research: still `0b5b2b1385d2a75614d39458dff94f7d3098ed03`; independent worktree unchanged by other agents.
+- Created bilingual 16-reference official-source traceability matrix; reviewed public finance/TSA, dBrain+ integrated budget and closing, BOK/Mint, BIS PFMI, IMF GFSM, U.S. auctions, Fed and Norway GPFG.
+- Created paired extensive PLANNING / DRAFT documents with end-to-end fiscal receipt, cash and debt ownership, idempotent batch payout state machine, immutable financial core, private API, monetary order/certificate, legacy quarantine, no fake warning for valid-zero Treasury, and staged QA gates.
+- Confirmed v523 institution separation and owner removal of mandatory two-person approval supersede the conflicting historical redistribution design. Main merged SOE/SWF/NPS code is not accepted as exact Production money proof.
+- No WLD payment, SQL migration, user balance, policy or deployment changed. Candidate docs still require review; next: changelogs/updates/index and final validation.
+
 
 ## FINISH — pending
 
