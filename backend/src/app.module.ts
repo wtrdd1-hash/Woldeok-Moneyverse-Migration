@@ -50,6 +50,7 @@ import { SeoModule } from './seo/seo.module';
 import { AdvisorModule } from './advisor/advisor.module';
 import { MintModule } from './mint/mint.module';
 import { CentralBankModule } from './central-bank/central-bank.module';
+import { PredictionModule } from './prediction/prediction.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -100,6 +101,7 @@ const ONE_MINUTE_MS = 60_000;
     SchedulerModule,
     MintModule,
     CentralBankModule,
+    PredictionModule,
     TelegramAlertModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
