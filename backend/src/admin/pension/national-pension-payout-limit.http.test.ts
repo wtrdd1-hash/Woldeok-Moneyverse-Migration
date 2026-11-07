@@ -7,6 +7,7 @@ import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AdminNationalPensionController } from './national-pension.controller';
 import { NationalPensionService } from './national-pension.service';
 
@@ -26,6 +27,8 @@ describe('Admin pension payout history HTTP boundary', () => {
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminGuard).useValue({ canActivate: () => true })
       .overrideGuard(AdminSessionGuard).useValue({ canActivate: () => true })
+      // This suite only tests GET payout-history limits; CSRF write behavior has a separate real-guard HTTP suite.
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = testingModule.createNestApplication();
     await app.init();
