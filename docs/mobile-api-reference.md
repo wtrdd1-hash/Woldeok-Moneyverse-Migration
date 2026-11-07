@@ -154,6 +154,9 @@ Runtime source: production NestJS route map after restart on 2026-09-13. Total b
 | `GET` | `/app-api/v1/board/public/posts/:id` | `/api/board/public/posts/:id` |
 | `GET` | `/app-api/v1/board/public/posts/:id/comments` | `/api/board/public/posts/:id/comments` |
 | `GET` | `/app-api/v1/board/public/stock-posts` | `/api/board/public/stock-posts` |
+
+> **Recent public board minimum replies (Draft/HOLD):** Optional `minReplies=1|5|10` on `GET /app-api/v1/board/public/stock-posts`, combinable with `q` and `stock`. It filters only the latest 50 public posts in PostgreSQL, never the full archive. A filtered success must contain `filters: { minReplies: number, scope: "latest50" }` and matching bounded rows, including verified empty results. Invalid/duplicate values return 400; ignored, missing-proof, malformed, or contradictory upstream successes return 503. Query-specific Android results are `Cache-Control: no-store`, `X-Robots-Tag: noindex`. No new table grant, money write, or production rollout.
+
 | `POST` | `/app-api/v1/board/stock-posts` | `/api/board/stock-posts` |
 | `GET` | `/app-api/v1/businesses/equity` | `/api/business-equity` |
 | `GET` | `/app-api/v1/businesses/catalog` | `/api/business-types` |

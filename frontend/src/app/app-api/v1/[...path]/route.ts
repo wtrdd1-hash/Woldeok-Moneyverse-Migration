@@ -1,3 +1,4 @@
+import { isVerifiedBoardMinimumReplies } from '@/app/board/board-title-search';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -240,6 +241,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'stock_history_gross_invalid', 'invalid owner trade history filters');
   }
 
+  const boardMinRepliesPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardMinRepliesValues = boardMinRepliesPath ? request.nextUrl.searchParams.getAll('minReplies') : [];
+  if (boardMinRepliesValues.length > 1 || (boardMinRepliesValues.length === 1 &&
+      !['1', '5', '10'].includes(boardMinRepliesValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_replies_invalid', 'minimum replies must be 1, 5 or 10');
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
@@ -327,6 +336,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
         'owner stock trade gross filter could not be verified');
+    }
+  }
+
+  // Even an empty HTTP 200 needs source proof: a legacy backend might ignore the filter.
+  if (boardMinRepliesValues.length === 1 && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardMinimumReplies(await response.clone().json(), Number(boardMinRepliesValues[0]))) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_replies_unverified', 'minimum reply filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_replies_unverified', 'minimum reply filter could not be verified');
     }
   }
 
@@ -585,13 +606,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('minReplies'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('minReplies'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

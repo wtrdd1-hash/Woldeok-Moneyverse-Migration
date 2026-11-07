@@ -22,3 +22,17 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+
+describe('public board minimum reply HTTP filter', () => {
+  it('accepts the explicit 5-reply threshold alongside title and stock', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'guide', minReplies: '5' })).resolves.toEqual({ posts: [], filters: { minReplies: 5, scope: 'latest50' } });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'guide', 5);
+  });
+  it.each(['0', '2', '-1', '01', '1.0', '100', ['1', '5']])(
+    'rejects ambiguous or unsupported minimum replies %j', async (minReplies) => {
+      await expect(new PublicStockCommunityController(community).list({ minReplies })).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

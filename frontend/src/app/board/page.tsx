@@ -11,7 +11,7 @@ import { formatDay, formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
-import { parseBoardTitleQuery } from './board-title-search';
+import { isVerifiedBoardMinimumReplies, parseBoardMinimumReplies, parseBoardTitleQuery } from './board-title-search';
 
 export const revalidate = 60;
 
@@ -28,7 +28,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.minReplies !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +66,17 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const replies = parseBoardMinimumReplies(params.minReplies);
+  const invalid = search.invalid || replies.invalid;
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (replies.minimum !== null) query.set('minReplies', String(replies.minimum));
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const upstream = invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; filters?: { minReplies: number; scope: string } }>(`/api/v1/board/public/stock-posts${suffix}`, replies.minimum !== null ? 0 : 60);
+  const data = upstream && (replies.minimum === null || isVerifiedBoardMinimumReplies(upstream, replies.minimum)) ? upstream : null;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +135,16 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-min-replies" className="grid gap-1 text-sm font-semibold">
+              최소 댓글 수
+              <select id="board-min-replies" name="minReplies" defaultValue={replies.minimum?.toString() ?? ''}
+                className="min-h-11 rounded-md border border-input bg-background px-3">
+                <option value="">전체</option>
+                <option value="1">1개 이상</option>
+                <option value="5">5개 이상</option>
+                <option value="10">10개 이상</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,11 +159,11 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건의 제목과 댓글 수만 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
-          {search.invalid ? (
+          {invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
-              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
+              검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다. 최소 댓글 수는 전체·1·5·10개 중 선택해 주세요.
             </p>
           ) : null}
         </CardContent>
@@ -161,14 +175,16 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
+              replies.minimum !== null
+                ? `최근 게시글 50건에서 댓글 ${replies.minimum}개 이상인 글이 없어요.`
+                : search.query
                 ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
