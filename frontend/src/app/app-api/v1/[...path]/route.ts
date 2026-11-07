@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
+import { normalizeGalleryQuery, verifiedGallerySearch } from '@/lib/gallery-search-proof';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
@@ -111,6 +112,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const gallerySearchPath = request.method === 'GET' && (
+    (parts.length === 1 && parts[0] === 'photos') ||
+    (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')
+  );
+  const galleryParams = request.nextUrl.searchParams;
+  const galleryValues = gallerySearchPath ? galleryParams.getAll('q') : [];
+  const galleryQuery = galleryValues.length === 1 ? normalizeGalleryQuery(galleryValues[0]) : undefined;
+  if (gallerySearchPath && (galleryValues.length > 1 ||
+      (galleryValues.length === 1 && galleryQuery === null) ||
+      [...galleryParams.keys()].some(key => key !== 'q'))) {
+    return gatewayProblem(400, 'Bad Request', 'gallery_query_invalid', 'invalid gallery caption query');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -273,6 +287,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
   }
 
+  if (gallerySearchPath && galleryQuery && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedGallerySearch(await response.clone().json(), galleryQuery)) {
+        return gatewayProblem(503, 'Service Unavailable', 'gallery_search_unverified', 'gallery search could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'gallery_search_unverified', 'gallery search could not be verified');
+    }
+  }
+
   // Bank standing is an owner-only observation; a legacy success-shaped response
   // must not become a verified Android balance or leak extra upstream fields.
   if (parts.length === 3 && parts[0] === 'banking' && parts[1] === 'standing' &&
@@ -339,6 +364,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   // Older backend images returned HTTP 200 without an actual WLD posting.
   // Do not let a mobile client interpret that legacy response as a receipt.
+  if (((parts.length === 1 && parts[0] === 'photos') ||
+       (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')) &&
+      request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (isVipChestPath(parts)) {
     if (request.method === 'POST' && response.ok) {
       return gatewayProblem(503, 'Service Unavailable', 'vip_chest_unverified', 'VIP reward receipts are unavailable');
@@ -594,6 +626,13 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (((parts.length === 1 && parts[0] === 'photos') ||
+       (parts.length === 2 && parts[0] === 'content' && parts[1] === 'photos')) &&
+      request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

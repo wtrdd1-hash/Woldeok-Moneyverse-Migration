@@ -2629,12 +2629,14 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| searchApplied | false | boolean |  |
 | photos[] | true | object[] |  |
 | photos[] | true | object |  |
 | photos[].photoId | true | string |  |
 | photos[].imageUrl | true | string |  |
 | photos[].altText | true | string |  |
 | photos[].publishedAt | true | null \| string |  |
+| searchScope | true | string="latest_24" | const="latest_24" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
@@ -3007,12 +3009,14 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| searchApplied | false | boolean |  |
 | photos[] | true | object[] |  |
 | photos[] | true | object |  |
 | photos[].photoId | true | string |  |
 | photos[].imageUrl | true | string |  |
 | photos[].altText | true | string |  |
 | photos[].publishedAt | true | null \| string |  |
+| searchScope | true | string="latest_24" | const="latest_24" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

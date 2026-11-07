@@ -7,28 +7,35 @@ import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
 import { canonicalUrl } from '@/lib/seo';
+import { normalizeGalleryQuery, verifiedGallerySearch, type GalleryPhoto } from '@/lib/gallery-search-proof';
 
 // Publication changes must be visible immediately. The public API query still
 // remains cheap and bounded; caching this page hid freshly approved photos for
 // up to five minutes and made a successful review look like a failure.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '사진 | Gallery',
-  description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
-  alternates: { canonical: canonicalUrl('/gallery') },
-};
+type GalleryParams = { q?: string | string[] };
 
-interface Photo {
-  readonly photoId: string;
-  readonly imageUrl: string;
-  readonly altText: string;
-  readonly publishedAt: string | null;
+export async function generateMetadata({ searchParams }: { searchParams: Promise<GalleryParams> }): Promise<Metadata> {
+  const query = (await searchParams)?.q;
+  return {
+    title: '사진 | Gallery',
+    description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
+    alternates: { canonical: canonicalUrl('/gallery') },
+    ...(query !== undefined ? { robots: { index: false, follow: false } } : {}),
+  };
 }
 
-export default async function GalleryPage() {
-  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 0);
-  const photos = data?.photos ?? [];
+export default async function GalleryPage({ searchParams }: { searchParams?: Promise<GalleryParams> }) {
+  const raw = (await searchParams)?.q;
+  const query = normalizeGalleryQuery(raw);
+  const invalid = query === null;
+  const data = invalid ? null : await publicApi<{ photos: GalleryPhoto[]; searchScope?: string; searchApplied?: boolean }>(
+    `/api/v1/photos${query ? `?q=${encodeURIComponent(query)}` : ''}`, 0,
+  );
+  const verified = query ? verifiedGallerySearch(data, query) : data?.photos;
+  const photos: readonly GalleryPhoto[] = Array.isArray(verified) ? verified : [];
+  const unavailable = !invalid && (data === null || (Boolean(query) && verified === null));
 
   return (
     <div data-page="gallery" className="mv-page mv-page--community grid gap-4">
@@ -62,7 +69,29 @@ export default async function GalleryPage() {
           }
         />
 
-        {data === null ? (
+        <form action="/gallery" method="get" role="search" className="flex flex-wrap items-end gap-2 rounded-xl border bg-card p-3">
+          <div className="grid min-w-0 flex-1 gap-1">
+            <label htmlFor="gallery-caption-search" className="text-sm font-semibold">
+              <T korean="사진 설명 검색" english="Search photo captions" />
+            </label>
+            <input id="gallery-caption-search" type="search" name="q" minLength={2} maxLength={40}
+              defaultValue={typeof raw === 'string' ? raw : ''} autoComplete="off"
+              placeholder="제주 / Sydney" className="min-h-11 w-full rounded-lg border bg-background px-3" />
+          </div>
+          <button type="submit" className="min-h-11 rounded-lg bg-primary px-4 text-primary-foreground">
+            <T korean="검색" english="Search" />
+          </button>
+          <Link href="/gallery" className="inline-flex min-h-11 items-center rounded-lg border px-4">
+            <T korean="초기화" english="Clear" />
+          </Link>
+          <p className="w-full text-xs text-muted-foreground">
+            <T korean="최근 공개 사진 최대 24장의 설명에서만 검색합니다. 전체 사진 검색은 아닙니다."
+              english="Search captions within the 24 newest published photos only, not the entire archive." />
+          </p>
+        </form>
+        {invalid && <p role="alert" className="text-sm text-destructive">검색어는 2~40자의 일반 문자여야 합니다.</p>}
+        {query && !unavailable && <p role="status" className="text-sm text-muted-foreground">최근 24장 중 {photos.length}건이 검색됐습니다.</p>}
+        {invalid ? null : unavailable ? (
           <EmptyState
             title={
               <T

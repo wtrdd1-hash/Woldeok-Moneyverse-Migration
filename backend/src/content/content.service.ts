@@ -331,9 +331,12 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, query }: { limit?: number; query?: string | null } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    const approved = (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    if (!query) return approved;
+    const needle = query.trim().toLocaleLowerCase('ko');
+    return approved.filter(photo => photo.altText.toLocaleLowerCase('ko').includes(needle));
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {
