@@ -171,3 +171,11 @@ For Production identity, require the resolved active release directory basename 
 
 ### v2026.10.31.1536 — Narrow approval for pre-existing financial DML
 The operator's v2026.10.29.1212 acceptance applies only to **existing** full INSERT/UPDATE/DELETE privileges on `accounts`, `account_balances`, `system_treasury_vaults` with actual database `woldeok_moneyverse_dev` and role `moneyverse_app`. The read-only preflight reports explicit `OPERATOR_ACCEPTED_EXISTING_DML` warnings, not silently clean permission flags. Changed or partial privilege shape, different DB/role, new ledger posting/transaction DML and journal imbalance remain BLOCKED. `READY_FOR_OTHER_RELEASE_GATES` means only this narrow projection/grants check passed; Treasury provenance, opening balances, funded settlements, exact authenticated Test, session continuity and Production promotion still require independent evidence. Never grant more rights to force this status.
+
+### P0 effective application TRUNCATE privilege gate — v763 (release HOLD)
+
+Production QA v1475 observed effective `TRUNCATE` privilege for `moneyverse_app` on 213 existing public tables. The owner-approved **INSERT/UPDATE/DELETE** exception on three financial tables does not approve `TRUNCATE`. Run this independent read-only gate using the **actual serving backend database environment file**, after verifying the active systemd EnvironmentFile path:
+
+`node scripts/release/verify-app-table-truncate.mjs --env-file /absolute/path/to/approved/backend.env --expected-db woldeok_moneyverse_dev`
+
+A nonzero exit or `BLOCKED` prohibits promotion. The verifier reads a repeatable-read catalog snapshot, checks all existing public base/partition tables and effective `moneyverse_app` TRUNCATE privileges, rejects partial or contradictory evidence, and never revokes privileges. The `--expected-db` argument is mandatory, not a substitute for confirming the actual service connection. **Do not run migrations or change grants to make this gate green without a separately reviewed forward-only remediation.** This check complements the future default-ACL gate (#2535), existing financial DML checks (#2500), checksum/ledger/backup gates and exact-SHA authenticated Test. Even a green result is not a release authorization.
