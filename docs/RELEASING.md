@@ -160,6 +160,16 @@ Before any money/economy/treasury-affecting Production cutover, perform the *rea
 
 Nonzero exit/`BLOCKED` forbids promotion. 2026-10-16 v717 report shows 5 directly app-writable core financial tables and 19 uncertified ledger/account opening differences. No undocumented waiver, synthetic balancing journal or silent DB corrections. Even a green report is only a narrow prerequisite; certify opening balances, supply/vault, Test parity, v530 authenticated UI and rollback separately. The approved runtime environment file must be confirmed by inspecting current systemd `EnvironmentFiles` before running. [Evidence](worklog/2026-10-16-financial-readiness-v737.md).
 
+### P0 app-role default table ACL drift — read-only release gate (2026-11-02)
+
+QA v1472 found a Production `pg_default_acl` entry that grants `moneyverse_app` ALL table privileges for future objects created by `moneyverse_migrator` in `public`. This is **not** covered by checking grants on existing tables; the official Test database and a clean 323-migration replay did not reproduce this Production default. Before any financial/auth/schema-affecting promotion, confirm the effective active service database and run the independent read-only check against **each** relevant Test/Production connection (never an assumed scratch database):
+
+```sh
+node scripts/release/verify-app-default-acl.mjs --env-file /absolute/path/to/approved/runtime.env --expected-database woldeok_moneyverse_dev --expected-role moneyverse_app
+```
+
+Replace the expected database and role with the independently verified service identity. The verifier reads only PostgreSQL catalog ACLs under a `REPEATABLE READ READ ONLY` transaction and blocks app or PUBLIC default TABLE grants in `public` or global defaults; `BLOCKED`/nonzero exit means **no promotion**. It never revokes privileges. Use `node --test scripts/release/verify-app-default-acl.test.mjs` and `scripts/release/verify-app-default-acl.pg.sh` (disposable PostgreSQL 17.11) for regression evidence. The verifier does not certify existing-table DML/TRUNCATE/trigger grants, default function/sequence grants, migration checksums, financial provenance, exact-SHA Test or restore. Remediation of Production ACL drift remains separately gated under #993; do not issue an unreviewed live `REVOKE`.
+
 ### v2026.10.29.1212 — Owner acceptance of existing financial DML (narrow exception)
 
 The owner explicitly accepts existing moneyverse_app DML on accounts, account_balances and system_treasury_vaults. Do not revoke these rights or repeatedly halt work solely because of these three operator-approved privileges. The original read-only financial readiness report continues to identify their risk; classify precisely these existing findings as OPERATOR_ACCEPTED_EXISTING_DML rather than falsely labeling all checks green. No other grants or ledger/security failures are waived.
