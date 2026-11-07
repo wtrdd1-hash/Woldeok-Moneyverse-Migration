@@ -1,3 +1,13 @@
+## v2026.11.04.1758 — F675-245 관리자 문의 SLA 정책 승인·예약 활성화 (기능 추가 / 초안 / 운영 보류)
+- **주기:** 이전 기능 보완 v1756 → 현재 기능 추가 v1758 → 다음 기능 보완 v1760. 문서만 변경하며 런타임·DB 배포 없음. F675-245는 **미구현**이고 F675-243 위험 분류·F675-244 읽기 전용 미리보기의 선행 구현을 확인해야 함. 영업시간/휴일, 일시정지·재개봉, 실제 발송 완료된 사람 답변, 시간대·정책 발효 경계는 제품 정책 승인 필요.
+- **목적·대상·권한:** 검토되지 않은 SLA 기준 변경으로 문의 우선순위가 바뀌지 않도록 감독자(`support.sla_policy.propose`)가 초안을 작성하고, 해당 리비전 작성에 참여하지 않은 검토자(`support.sla_policy.approve`)가 승인·반려하며, 운영자(`support.sla_policy.activate`)가 활성화를 예약한다. 자기 승인 금지, 테넌트·팀 범위와 권한 철회 시점 재검증. 회원 화면·자동 답변·금융 원장 변경 없음.
+- **화면·CTA·상태:** 관리자 > 문의 > SLA 정책 > `새 제안` → 임계값·시간대·달력·최초 답변 정의·발효 시각 설정 → `영향 미리보기` → `검토 요청`. 검토자는 정책 차이, 미리보기 스냅샷/해시, 표본 영향 수와 근거 부족 경고 확인 후 `승인`/`수정 요청`; 운영자는 `활성화 예약`/`취소`. 불변 상태 `DRAFT → IN_REVIEW → APPROVED → SCHEDULED → ACTIVE → SUPERSEDED`, 예외 종결 `REJECTED/CANCELLED/FAILED`. 제출 후 수정 시 새 리비전. 빈 화면·로딩·권한 거부·충돌·미리보기 만료를 구분하며 승인 근거 없이 게시 불가.
+- **API 제안:** `POST /api/v1/admin/support/sla-policies`, `POST /:id/revisions/:revision/preview|submit|approve|reject|schedule|cancel`, `GET /api/v1/admin/support/sla-policies?cursor=`, `GET /:id/audit`. 쿠키 인증 쓰기 CSRF, RBAC 및 팀 소속, `Idempotency-Key`, `If-Match` ETag, 반려·활성화 사유 필수. 401/403/404/409/422/429 구분, 앱 계정 직접 테이블 조회 금지.
+- **DB·트랜잭션:** `support_sla_policy`, 불변 JSON+SHA-256 해시를 가진 `support_sla_policy_revision`, `support_sla_policy_approval`, `support_sla_policy_activation`, `support_sla_policy_audit` 제안. 테넌트·팀 FK, `(tenant_id,team_id,policy_id,revision)` 유일성, `(tenant_id,actor_id,key)` 멱등 유일성, 테넌트·팀별 활성 정책 부분 유니크 제약. `(tenant_id,team_id,state,effective_at DESC,id)` 및 `(tenant_id,policy_id,occurred_at DESC,id)` 인덱스. 승인·예약·활성화는 범위 잠금, 권한·리비전 해시 확인, 상태·감사·멱등 영수증 원자적 기록. 예약 작업자는 재시도 안전, 발효 구간 중복 금지, 과거 분류 소급 수정 금지, 신규 활성화 전 기존 정책 유지. 실제 스키마·마이그레이션 권한 확인 선행.
+- **보안·SEO·모바일·분석:** 관리자 API/화면 `no-store/noindex`, 개인정보 비식별화, 쓰기·미리보기 속도 제한, 위조 승인·오래된 ETag·테넌트 커서 재사용·권한 철회·재전송·시각 오차·동시 활성화 방어. 320px 모바일, WCAG 2.2 AA 키보드·포커스·오류 요약, 한국어·영어 및 시간대 표시. 제안→미리보기→승인→활성화 전환율, 승인 지연 중앙값, 오래된 미리보기 차단율, 활성화 전후 SLA 분류 변화를 PII 없이 계측.
+- **테스트·배포·롤백:** 상태 전이·자기 승인·리비전 수정·DST/시간대·최초 답변 근거 누락·멱등 중복·동시성 10건 이상·테넌트 격리·스케줄러 재시작·감사 기록 실패·미리보기 만료 검증. F675-243/244 및 기존 문의 필터 회귀. `admin_support_sla_policy_approval_v1` 기본 OFF, 별도 브랜치와 인증된 Test exact-SHA E2E, 마이그레이션/롤백 리허설, 독립 QA 승인 후 카나리. 롤백 시 예약 작업자와 기능 스위치를 끄되 불변 감사 및 기존 활성 정책 보존. 기존 P0 해소 전 **운영 배포 보류**.
+- **백로그·근거 게이트:** P0 운영 HTTP 500/배포 SHA, DB 최소권한·마이그레이션 체크섬, 공식 Test 인증 exact-SHA E2E, 독립 복원·원장 대사. P1 실제 문의 스키마·권한 조사, SLA 달력 승인, 불변 리비전·원자적 승인, API·관리자 UI, 보안/a11y/UTC/DST, 카나리·롤백. 외부 독립 레퍼런스 신규 검증 **0건**, 누적 승인 **UNKNOWN / 10,000건**으로 BLOCKED / IN PROGRESS. 중복 제거된 근거 분류 없이 달성 주장 금지.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
