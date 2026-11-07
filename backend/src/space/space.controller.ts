@@ -348,6 +348,7 @@ export class SpaceController {
 
   @ApiOperation({ summary: '개인 공간 인테리어/레이아웃 저장' })
   @Put(':id/layout')
+  @UseGuards(CsrfGuard)
   async updateLayout(
     @Req() req: RequestWithSession,
     @Param('id', ParseUUIDPipe) spaceId: string,
