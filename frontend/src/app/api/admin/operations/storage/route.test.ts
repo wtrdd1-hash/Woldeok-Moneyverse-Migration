@@ -16,6 +16,7 @@ describe('private storage evidence gateway', () => {
     const result = await GET();
     expect(result.status).toBe(401);
     expect(result.headers.get('cache-control')).toContain('no-store');
+    expect(result.headers.get('referrer-policy')).toBe('no-referrer');
     expect(api).not.toHaveBeenCalled();
   });
   it('returns only validated host evidence, never a forged green response', async () => {
@@ -23,6 +24,7 @@ describe('private storage evidence gateway', () => {
     const ok = await GET();
     expect(ok.status).toBe(200);
     expect(ok.headers.get('x-robots-tag')).toContain('noindex');
+    expect(ok.headers.get('referrer-policy')).toBe('no-referrer');
     expect((await ok.json()).status).toBe('VERIFIED');
     const blocked = await GET();
     expect(blocked.status).toBe(503);
