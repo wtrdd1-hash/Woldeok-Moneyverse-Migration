@@ -4,6 +4,17 @@
 
 # 현재 런타임 기준선
 
+## 2026-11-08 v1770 — 최신 운영 실측
+- **현재 공개 운영** `https://easy-scraping.com`: backend `moneyverse-release-v1770-backend.service` `127.0.0.1:4504`, frontend `moneyverse-release-v1770-frontend.service` `127.0.0.1:4505`. 불변 릴리스 `/srv/moneyverse-data/releases/prod-v2026.11.06.1770-17fde45484`, 실제 앱 SHA `acc5c90a34`. Nginx 운영 라우트 최신 바인딩 완료.
+- **공식 Test 환경**: 3100/3101 포트 가동 유지, Production 및 Test 신원 검사 100% 통과.
+- **주요 가동 및 검증 완료 기능**:
+  - M0 국가조폐국(National Mint Bureau) 실시간 관제탑 및 통화 발행/소각 증명서 원장 정상 운영.
+  - 중앙 국고 벤처 창업 지원금 대국민 포털 접수 및 관리자 심사 관제탑 정상 가동.
+  - PostgreSQL 14일 의무 창업 기한 만료 잔여자금 자동 회수 스케줄러 (`treasury_run_clawback_sweep`) 등록 및 원자적 대차평형 보장.
+  - 블로그 12종 테마 벡터 SVG 히어로 이미지 100% 렌더링 (다국어 308 영구 리다이렉트 정상).
+  - Next.js EPROTO 루프백 프록시 SSL 핸드셰이크 방어 코드(`frontend/src/proxy.ts`) 운영 배포.
+- [운영 승격 및 브랜치 통합 기록](worklog/2026-11-08-branch-merge-and-v1770-promotion.ko.md). 아래 v1622/v1550/v701 등은 과거 시점 기록이며 현행 운영 기준선은 v1770임.
+
 ## 2026-11-02 v1622 — 최신 운영 실측
 - **현재 공개 운영** `https://easy-scraping.com`: backend `moneyverse-release-v1622-backend.service` `127.0.0.1:4194`, frontend `moneyverse-release-v1622-frontend.service` `127.0.0.1:4195`. 불변 릴리스 `/srv/moneyverse-data/releases/prod-v2026.11.02.1622-6fe94aeeebbd`, 실제 앱 SHA `6fe94aeeebbd30c996f7a9f8ddeb02f8c538505e`. Nginx 운영 라우트만 무중단 교체, 구 v1619 서비스 4184/4185 가동 유지하여 롤백 가능.
 - 공식 Test는 3100/3101에서 병합 메인 SHA `6fe94...` 실행. Test·Production 독립 신원 검사 `ok:true,failures:[]`. 후속 문서-only 메인 커밋 `666d1b40...`은 실제 운영 앱 SHA를 바꾸지 않음.

@@ -8,7 +8,11 @@
 
 ## 📝 기획서
 
-- [거시 경제 6대 기둥 총괄 기획서 (실제 실물 경제 레퍼런스)](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
+- [M0 국가조폐국(National Mint Bureau) 실시간 관제탑 및 통화 주조/소각 증명서 원장](../docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md#21-거시-경제--국고-복식부기-원장)
+- [중앙 국고 벤처 창업 지원금 대국민 포털, 관리자 심사 및 14일 의무 창업 환수 데몬](../docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md#21-거시-경제--국고-복식부기-원장)
+- [6대 공공/금융 관제탑 20초 주기 실시간 자동 새로고침(Telemetry Engine)](../docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md#23-금융-컴플라이언스-보안--관리자-관제)
+- [블로그 12종 고해상도 벡터 SVG 히어로 이미지 및 다국어 308 영구 리다이렉트 엔진](../docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md#24-글로벌-다국어-i18n--고성능-seo-엔진)
+- [거시 경제 6대 기둥 총괄 기획서 (실제 실물 경제 레퍼런스) (실제 실물 경제 레퍼런스)](../docs/MACRO_SOVEREIGN_ECONOMIC_SYSTEM_MASTER_SPEC.ko.md)
 - [국고 2,500만 앵커 & 자율 투자 회수 사이클 기획서](../docs/TREASURY_25M_ANCHOR_AUTONOMOUS_CYCLE_SPEC.ko.md)
 - [국고 자금 85% 현금 정상화 회수 & 재정 안전 거버넌스 사양서 (v118)](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)
 - [소셜 바이럴 공유 바 & X(트위터) 자동 트윗 백링크 봇 사양서 (v118)](../docs/worklog/2026-10-07-seo-social-share-and-twitter-bot-v118.ko.md)

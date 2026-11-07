@@ -202,6 +202,9 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-moneyverse-locale', finalLocale);
   const rewriteTarget = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
+  if (rewriteTarget.hostname === "localhost" || rewriteTarget.hostname === "127.0.0.1") {
+    rewriteTarget.protocol = "http:";
+  }
   if (explicitPrefixLocale && targetPath !== pathname) {
     rewriteTarget.searchParams.set(INTERNAL_REWRITE_LOCALE_PARAM, explicitPrefixLocale);
   }

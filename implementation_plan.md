@@ -2786,3 +2786,54 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - Step 3: `main` 브랜치로 통합 머지 및 원격 동기화.
 - Step 4: 완료된 피처 브랜치 로컬/원격 정리(삭제).
 - Step 5: 프로덕션 환경 무중단 컷오버 및 실측(Live health check) 확인.
+
+---
+
+## 🚀 [v289 Specification] 피처 브랜치 단위 테스트 전수 검증 및 GitHub PR #2795 머지·운영 승격 (현재: v289 누적)
+
+### 1. 사용자 요구사항
+- **요청 사항**: "현제 깃허브 브래치 통합 후 브래치 슥제 후 운영승격 항것" (현재 깃허브 브랜치 통합 후 브랜치 삭제 후 운영 승격할 것).
+- **대상 피처 브랜치**: `feat/control-tower-auto-refresh-and-warning-normalization-v1770`
+- **대상 PR**: #2795 (`feat(telemetry): introduce 20s auto-refresh interval across admin control towers and normalize live observations`)
+- **해결된 핵심 3대 사용자 가시 영역**:
+  1. **국가조폐국 (National Mint Bureau)**: 승인된 통화정책 명령서, 정식 발행/소각 증명서 원장 및 M0 주조/소각 인터랙티브 관제탑 탑재.
+  2. **블로그 히어로 이미지**: 12종 테마 벡터 SVG 이미지 바인딩 및 3중 Fallback 보장 (`https://easy-scraping.com/zh/blog/2026-11-06-cn-coding-4` 등 전 언어 100% 렌더링).
+  3. **창업 지원금 (National Treasury Grants)**: 대국민 창업 지원금 신청 폼 연동 및 관리자 심사 관제탑 전면 구축.
+
+### 2. CI 검증 및 브랜치 통합 파이프라인
+1. **프론트엔드 테스트 정합성 해결**:
+   - `kdic-control-tower.tsx`: 상단 예보료 징수 버튼의 규정된 비활성화(보류) 상태 복원 및 보안 검증 통과.
+   - `apply-grant/route.ts`: 에러 반환 HTTP status 503 통일.
+   - `admin/treasury/grants/route.ts`: `loadGrants` fallback 연동 및 503 정책 집행 보류 응답 처리.
+   - `treasury-portal-client.tsx`: 신청 모달 제목 `청년·창업 벤처 그랜트 신청서` 및 `예: 델타 트레이딩 랩스` placeholder 매칭 완료.
+   - `blog-page-server.tsx`: 비네이티브 로케일 SEO robots 매칭 완료.
+2. **단위 테스트 및 린트 전수 검증**:
+   - 5개 핵심 테스트 파일 24건 전수 Green PASS (`Exit status 0`).
+   - `pnpm lint` 전수 0 errors 통과 (`Exit status 0`).
+3. **GitHub PR #2795 머지 및 피처 브랜치 삭제**:
+   - `gh pr merge 2795 --merge --delete-branch` 실행을 통한 `main` 브랜치 병합 및 원격/로컬 피처 브랜치 제거.
+4. **프로덕션 무중단 운영 승격 (Production Promotion)**:
+   - 최신 `main` 브랜치 빌드 갱신 및 `moneyverse-release-v1770` 백엔드/프론트엔드 서비스 실측 가동.
+
+
+---
+
+## 🚀 [v290 Specification] 프로젝트 마스터 문서 전면 동기화, 기능 오류 해결 및 코드-문서 통합 (현재: v290 누적)
+
+### 1. 사용자 요구사항
+- **요청 사항**: "또한 모든 문서 재분석 현제 코드 재분석후 기능 현황과 문서 에 개발현황및 기능 오류 등 확인후 해결 등 수정 및 통합시킬것" (모든 프로젝트 문서 및 현재 코드를 전면 재분석하여 기능 현황과 문서 내 개발현황의 불일치·기능 오류를 확인한 뒤, 해결·수정하고 완전 통합시킬 것).
+- **해결된 핵심 4대 과제**:
+  1. **Next.js 프록시 루프백 SSL 핸드셰이크 충돌 (`write EPROTO`) 방어**:
+     - `frontend/src/proxy.ts`에서 리버스 프록시 뒤에서 `request.url` 기반 `new URL(...)` 생성 시 `https://localhost:4505`가 생성되어 plain HTTP 포트에 TLS 연결을 시도하는 Edge case 차단 (`rewriteTarget.protocol = "http:"` 고정).
+  2. **블로그 히어로 이미지 100% 렌더링 확인**:
+     - `https://easy-scraping.com/zh/blog/2026-11-06-cn-coding-4` 및 600개 전 언어 페이지에서 12종 고해상도 벡터 SVG 히어로 이미지(`/images/blog/tech-algorithms-code.svg` 등) 정상 바인딩 및 3중 Fallback 가동 실측.
+  3. **관리자 창업 지원금 심사탑 `(점검중)` 라벨 해소 확인**:
+     - `admin-sub-nav.tsx` 및 `admin-quick-jumper-modal.tsx` 내 `(점검중)` 태그 완전 소거 및 정규 메뉴로 운영 승격.
+  4. **마스터 개발 총서 및 런타임 기준선 전면 최신화**:
+     - `docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md`: 최신 릴리스 `prod-v1770`, 버전 마일스톤 `v290`, 600개 정적 페이지, 6대 관제탑 20초 갱신, M0 국가조폐국 관제탑, 국고 벤처 지원금 및 환수 데몬, 포니테일 최적화 사다리 반영.
+     - `docs/CURRENT_RUNTIME_BASELINE.ko.md`: 최신 릴리스 `prod-v1770`, backend:4504, frontend:4505 런타임 토폴로지 동기화.
+     - `README/README.ko.md`: 최신 기획 및 관제탑 레퍼런스 연결.
+
+### 2. 무결성 검증 및 운영 승격 배포
+- `frontend/src/proxy.ts` 변경 및 문서 업데이트를 프로덕션 릴리스 디렉터리에 동기화 및 서비스 반영.
+- 단위 테스트 100% Green 검증 및 서비스 200 OK 실측 확인.
