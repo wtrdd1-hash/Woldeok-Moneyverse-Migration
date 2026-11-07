@@ -17009,89 +17009,7 @@
       ],
       "responseMode": "json",
       "responseSchema": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "category": {
-              "type": "string"
-            },
-            "rarity": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "feeWld": {
-              "type": "number"
-            },
-            "materials": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "itemCode": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "quantity": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "itemCode",
-                  "name",
-                  "quantity"
-                ]
-              }
-            },
-            "outputItem": {
-              "type": "object",
-              "properties": {
-                "itemCode": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "category": {
-                  "type": "string"
-                },
-                "rarity": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "itemCode",
-                "name",
-                "category",
-                "rarity",
-                "description"
-              ]
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "category",
-            "rarity",
-            "description",
-            "feeWld",
-            "materials",
-            "outputItem"
-          ]
-        }
+        "type": "never"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
@@ -17124,7 +17042,7 @@
       ],
       "responseMode": "json",
       "responseSchema": {
-        "type": "unknown"
+        "type": "never"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
