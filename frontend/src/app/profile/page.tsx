@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import type { EarnedTitle, ProfileSettings, ProfileView } from './profile';
+import { parseOwnProfile, parseOwnSettings, parseOwnTitles, canEditOwnProfile } from './profile-source-proof';
 import { ProfileImageForm, ProfileSettingsForm } from './profile-forms';
 import { ProfileCard } from './profile-parts';
 
@@ -27,13 +28,14 @@ export default async function ProfilePage() {
   // image the member had made private, because the write replaces the map
   // rather than patching it.
   const [data, stored, awarded] = await Promise.all([
-    apiOrNull<{ profile: ProfileView }>('/api/v1/profile'),
-    apiOrNull<{ settings: ProfileSettings }>('/api/v1/profile/settings'),
-    apiOrNull<{ titles: EarnedTitle[] }>('/api/v1/profile/titles'),
+    apiOrNull<unknown>('/api/v1/profile'),
+    apiOrNull<unknown>('/api/v1/profile/settings'),
+    apiOrNull<unknown>('/api/v1/profile/titles'),
   ]);
-  const profile = data?.profile ?? null;
-  const settings = stored?.settings ?? null;
-  const earnedTitles = awarded?.titles ?? null;
+  const profile = parseOwnProfile(data);
+  const settings = parseOwnSettings(stored);
+  const earnedTitles = parseOwnTitles(awarded);
+  const canEdit = canEditOwnProfile(profile, settings, earnedTitles);
 
   return (
     <div data-page="profile" className="mv-page mv-page--member grid gap-8">
@@ -58,7 +60,9 @@ export default async function ProfilePage() {
           <EmptyState
             title="프로필을 불러오지 못했어요."
             description="저장된 내용을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
-          />
+          >
+            <form action="/profile" method="get"><Button type="submit" variant="outline" className="min-h-11">다시 확인</Button></form>
+          </EmptyState>
         ) : (
           <ProfileCard profile={profile} self />
         )}
@@ -67,7 +71,7 @@ export default async function ProfilePage() {
       <section aria-labelledby="visibility-title" className="grid gap-3">
         <SectionHeader eyebrow="WHO SEES WHAT" title="공개 범위 설정" id="visibility-title" />
 
-        {profile === null || settings === null || earnedTitles === null ? (
+        {!canEdit || profile === null || settings === null || earnedTitles === null ? (
           // Deliberately not a blank form. Saving replaces every column from
           // what the form holds, so an empty one submitted over a failed read
           // would clear the name, the image and the title that are still
@@ -76,7 +80,9 @@ export default async function ProfilePage() {
           <EmptyState
             title="지금은 설정 양식을 열 수 없어요."
             description="저장할 때 프로필 전체가 이 화면의 값으로 다시 저장되기 때문에, 지금 저장된 내용을 확인하기 전에는 양식을 보여 주지 않아요."
-          />
+          >
+            <form action="/profile" method="get"><Button type="submit" variant="outline" className="min-h-11">다시 확인</Button></form>
+          </EmptyState>
         ) : (
           <div className="grid gap-3">
             <Card>

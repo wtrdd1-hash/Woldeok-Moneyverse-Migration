@@ -1,0 +1,27 @@
+# 개발 C v1278 — 회원 프로필 원천 검증
+
+## 시작 — 2026-11-02 00:47 KST
+- Debian 13.6 미니PC 실제 접속; 주요 서비스 7개 및 개발 PostgreSQL 정상.
+- 기준 main `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`; 별도 `auto/hourly-c-profile-readproof-v1278-20261102-0045` 브랜치와 worktree.
+- AGENTS, README, 영문 정본·한국어 통합기획, 열린 PR, A/B/QA/C 선행 기록 확인. 원본 main의 다른 변경은 보호.
+- P1 결함: `/profile`의 세 API 응답이 런타임 검증 없이 설정 양식에 전달됨. 잘못된 공개 범위 맵이 화면을 깨거나 전체 교체 저장 시 기존 비공개 설정을 누락시킬 수 있음. 기존 Nest 인증/동의 API와 DB SECURITY DEFINER 함수를 그대로 사용.
+- #2265는 프로필 HTTP 개인정보 테스트 작업이며 이번 응답 검증과 구분. 다른 작업 수정 금지.
+
+## 계획
+- [ ] 실패 테스트 선작성, 파서 및 페이지 통합.
+- [ ] 영문 정본/한국어 보조 기록과 SHA별 검증.
+- [ ] 모든 필수 게이트 PASS 전 병합/운영배포 금지.
+
+## 중간
+- 00:49~00:52 KST: 순수 파서 RED 1건, 페이지 RED 3건 재현 후 신규 34건 모두 PASS. 기존 프로필 테스트 26건 PASS.
+- 회원 프로필·설정·칭호 API 응답 검증, 서로 다른 응답의 공개 범위 충돌 차단, 44px 이상 재조회 버튼 구현. 기존 Nest/SQL 계약 재사용.
+- main 중간 fetch 결과 기준 SHA 유지. 초기 lint 오류 0·경고 1027, typecheck PASS; 최종 SHA 재검증 필요.
+- 공유 DB/운영/다른 작업 변경 없음.
+
+## 종료
+- Draft PR #2401: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2401 (병합 보류). 개발 코드 SHA `b4fa074ba551b15fac1b3417f563a7e5d915df8d`; 최종 기록 커밋 SHA는 PR에 추가 기록.
+- 빌드·lint(오류 0, 경고 1027)·typecheck PASS, Frontend 2956 PASS, Backend 2978 PASS/2 FAIL/518 SKIP, DB 패키지 62 PASS/5 SKIP, 보안 스크립트 17 PASS, app-api 184개 계약 PASS.
+- 별도 네트워크 차단 PostgreSQL 17.11에서 322/322 마이그레이션 PASS. 앱 역할의 프로필 조회 함수 실행 허용·원본 프로필/칭호 테이블 SELECT 거부, 합성 회원 프로필·설정 조회 성공, 원장 거래 0건 확인. 컨테이너 제거, 공유 DB 불변.
+- 차단: Backend 기존 프로필 HTTP 인증 테스트 2건 401(기대 200), A Draft #2265 담당; 의존성 취약점 낮음 1·보통 8; 전체 경로 QA 증빙 파일 누락; 루트 테스트 60초 시간 초과. 별도 Next HTTP에서 `/profile`의 X-Robots-Tag `index, follow` 노출 확인(기존 공통 헤더 결함). 원격 후보 CI build 진행 중, 공식 인증 E2E·정확 SHA Test·독립 복원 미완료.
+- main 시작·중간·종료 SHA 동일. main 직접 수정/병합/공식 Test·Production 배포/GitOps 변경 없음. 롤백 불필요. 다른 A/B/QA/Gemini 브랜치 삭제·변경 없음.
+- 판정 PARTIAL / RELEASE BLOCKED. 코드와 Draft PR 보존; 모든 필수 PASS 전 운영 승격 금지.
