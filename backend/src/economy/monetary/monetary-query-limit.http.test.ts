@@ -9,6 +9,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import { CentralBankService } from './central-bank.service';
 import { MintBureauService } from './mint-bureau.service';
 import { AutoMonetaryRegulationService } from './auto-monetary-regulation.service';
+import { SessionRepository } from '../../auth/session.repository';
 import { MonetaryController } from './monetary.controller';
 
 const methods = {
@@ -42,6 +43,7 @@ describe('admin monetary listing limits HTTP boundary', () => {
     const testingModule = await Test.createTestingModule({
       controllers: [MonetaryController],
       providers: [
+        { provide: SessionRepository, useValue: { verifyCsrf: vi.fn(), touchAdminSession: vi.fn() } },
         { provide: CentralBankService, useValue: { listPolicyOrders: methods.listPolicyOrders } },
         { provide: MintBureauService, useValue: {
           listMintCertificates: methods.listMintCertificates,
