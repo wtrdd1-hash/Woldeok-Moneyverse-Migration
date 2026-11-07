@@ -1598,6 +1598,9 @@ curl -X POST "https://easy-scraping.com/api/v1/integrations/discord/interactions
 
 **설명:** Published gallery photos
 
+**Optional query (P1 candidate, not released):** `sort=caption` sorts only the **latest 24 approved, publicly published** photos by the exact description bytes (`COLLATE "C"`), then photo UUID; absent `sort` preserves newest publication order. This is not a full-gallery or Korean-locale dictionary sort. Duplicate, unknown or invalid query parameters return HTTP 400. Both `/app-api/v1/photos?sort=caption` and `/app-api/v1/content/photos?sort=caption` must verify source order and reject unverifiable HTTP 200 with 503; query-specific Android responses are `no-store` and `noindex`. No direct table grants or schema changes.
+
+
 - **분류 도메인 (Tag):** `content`
 - **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
 - **엔드포인트 핸들러 ID:** `ContentController_photos`

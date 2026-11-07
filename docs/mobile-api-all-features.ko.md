@@ -118,3 +118,6 @@
 | **제작 워크벤치** | `/app-api/v1/crafting/*` | 4대 레시피 조회(`recipes`), 재료 소모 제작 실행(`execute`) (2종) |
 | **유저 마켓플레이스** | `/app-api/v1/marketplace/*` | 활성 매물 검색(`listings`), 내 출품(`my-listings`), 출품 등록, 즉시 구매, 출품 취소 (5종) |
 | **인앱 알림 센터** | `/app-api/v1/notifications/*` | 알림 피드, 미확인 카운트(`unread-count`), 개별 읽음, 전체 일괄 읽음(`read-all`) (4종) |
+
+
+**P1 갤러리 설명 문자순 정렬(초안, 미배포):** `GET /app-api/v1/photos?sort=caption` 및 정식 공개 콘텐츠 별칭 `GET /app-api/v1/content/photos?sort=caption`은 기존 승인·공개 조회 결과의 최근 24장만 설명 바이트 문자순(동일 설명은 UUID순)으로 정렬합니다. 잘못된/중복 쿼리는 400, 정렬 증거가 없는 성공 응답은 503입니다. 정렬 결과는 no-store/noindex이며 기본 최신순은 유지합니다. 개인 데이터·금융 쓰기·신규 권한·마이그레이션은 없습니다.

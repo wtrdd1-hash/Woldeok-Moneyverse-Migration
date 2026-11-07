@@ -115,3 +115,6 @@ Per explicit user instruction on 2026-09-12, v2026.09.12.33 is merged without th
 | **Crafting Workbench** | `/app-api/v1/crafting/*` | List 4 recipes (`recipes`), execute crafting with item consumption (`execute`) (2 endpoints) |
 | **P2P Marketplace** | `/app-api/v1/marketplace/*` | Browse listings (`listings`), my listings (`my-listings`), create listing, instant buy, cancel (5 endpoints) |
 | **Notification Center** | `/app-api/v1/notifications/*` | Notification feed, unread badge count (`unread-count`), single mark read, batch mark all read (`read-all`) (4 endpoints) |
+
+
+**Draft P1 gallery caption order (not released):** `GET /app-api/v1/photos?sort=caption` and the canonical public-content alias `GET /app-api/v1/content/photos?sort=caption` use the existing approved-gallery read and sort only its latest 24 published photos by bytewise description, with UUID tie-break. Unknown/duplicate query values return 400; invalid or unsorted success payloads return 503. Query-specific results use no-store/noindex; default order is unchanged. No user-owned data, financial write, new grant or migration.

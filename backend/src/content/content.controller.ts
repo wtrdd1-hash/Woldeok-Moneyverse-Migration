@@ -10,12 +10,13 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -173,9 +174,14 @@ export class ContentController {
   }
 
   @Get('photos')
-  @ApiOperation({ summary: 'Published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiOperation({ summary: 'Published gallery photos, optionally sorted by caption within latest 24' })
+  @ApiQuery({ name: 'sort', required: false, enum: ['caption'], description: 'Bytewise caption order within latest 24 approved photos' })
+  async photos(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'sort') ||
+        (query.sort !== undefined && query.sort !== 'caption')) {
+      throw new BadRequestException('invalid gallery sort');
+    }
+    return { photos: await this.service().publicPhotos(query.sort === 'caption' ? { sort: 'caption' } : {}) };
   }
 
   @Get('status')

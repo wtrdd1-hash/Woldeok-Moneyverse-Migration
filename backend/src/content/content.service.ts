@@ -331,9 +331,9 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, sort }: { limit?: number; sort?: 'caption' } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    return (await this.repository.publishedPhotos({ limit: contentLimit, ...(sort ? { sort } : {}) })).map(normalizePhoto);
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {

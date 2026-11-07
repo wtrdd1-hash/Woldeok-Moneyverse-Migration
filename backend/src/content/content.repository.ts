@@ -255,11 +255,14 @@ export class PostgresContentRepository {
     return rows;
   }
 
-  async publishedPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhotoRow[]> {
+  async publishedPhotos({ limit = 24, sort }: { limit?: number; sort?: 'caption' } = {}): Promise<ContentPhotoRow[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
+    // The SECURITY DEFINER function selects only the latest approved 24 photos.
+    // Sort its bounded result, never the underlying table or entire archive.
+    const ordering = sort === 'caption' ? ' ORDER BY alt_text COLLATE "C" ASC, photo_id ASC' : '';
     const { rows } = await this.pool.query<ContentPhotoRow>(
       `SELECT photo_id::text AS photo_id, image_url, alt_text, published_at
-       FROM public.content_list_published_photos($1)`,
+       FROM public.content_list_published_photos($1)${ordering}`,
       [contentLimit],
     );
     return rows;

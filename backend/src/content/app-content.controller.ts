@@ -1,5 +1,5 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 
 @ApiTags('content')
@@ -19,9 +19,14 @@ export class AppContentController {
   }
 
   @Get('photos')
-  @ApiOperation({ summary: 'App API: published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiOperation({ summary: 'App API: latest approved gallery photos' })
+  @ApiQuery({ name: 'sort', required: false, enum: ['caption'], description: 'Bytewise caption order within latest 24 approved photos' })
+  async photos(@Query() query: Record<string, unknown> = {}) {
+    if (Object.keys(query).some((key) => key !== 'sort') ||
+        (query.sort !== undefined && query.sort !== 'caption')) {
+      throw new BadRequestException('invalid gallery sort');
+    }
+    return { photos: await this.service().publicPhotos(query.sort === 'caption' ? { sort: 'caption' } : {}) };
   }
 
   @Get('status')
