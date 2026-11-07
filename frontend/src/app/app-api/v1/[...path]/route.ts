@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseFirstDayFlow } from '@/app/quests/early-events';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -271,6 +272,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // First-day progress comes from an owner-scoped SQL function. Android must
+  // never interpret a stale/malformed 200 or public cache as a completed step.
+  if (parts.length === 2 && parts[0] === 'early-game' && parts[1] === 'first-day' &&
+      request.method === 'GET') {
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'First-day Progress Unavailable', 'first_day_unavailable',
+        'Owner onboarding progress could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON onboarding');
+      const verified = parseFirstDayFlow(await response.clone().json());
+      if (!verified) throw new Error('unverified onboarding');
+      return contractJson(verified, { status: 200, headers: {
+        'cache-control': 'private, no-store',
+        'x-robots-tag': 'noindex',
+        'referrer-policy': 'no-referrer',
+      } });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'first_day_unverified',
+        'Owner onboarding progress could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -581,6 +606,11 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts[0] === 'early-game') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.

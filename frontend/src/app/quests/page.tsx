@@ -5,8 +5,8 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import type { FirstDayStep, TodayEvent } from './early-events';
-import { firstDaySummary } from './early-events';
+import type { TodayEvent } from './early-events';
+import { firstDaySummary, parseFirstDayFlow } from './early-events';
 import { FirstDayFlow, TodayEventCard } from './early-events-parts';
 import type { EarlyGameBoard } from './early-game';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
@@ -68,15 +68,16 @@ export default async function QuestsPage() {
   // early-game read is separate because it is a different kind of answer --
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
-  const [board, earlyGame, today, firstDay, rawVipChest] = await Promise.all([
+  const [board, earlyGame, today, rawFirstDay, rawVipChest] = await Promise.all([
     apiOrNull<EngagementBoard>('/api/v1/engagement'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
-    apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
+    apiOrNull<unknown>('/api/v1/early-game/first-day'),
     apiOrNull<unknown>('/api/v1/engagement/dopamine/vip-chest/status'),
   ]);
 
   const vipChest = parseVipChestStatus(rawVipChest);
+  const firstDay = parseFirstDayFlow(rawFirstDay);
 
   return (
     <div data-page="quests" className="mv-page mv-page--gameplay grid gap-6">

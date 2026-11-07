@@ -65,6 +65,57 @@ export interface FirstDayStep {
   readonly step_done: boolean;
 }
 
+/** Parse the owner-scoped SQL read model, not a browser-supplied completion claim.
+ * 103 limits its metrics and hrefs; repeat the constraints at the web/Android boundary
+ * so a stale or compromised upstream cannot show an invented completed step or link.
+ */
+const FIRST_DAY_HREFS = new Set(['/profile', '/guide', '/work', '/shop', '/progression']);
+const FIRST_DAY_METRICS = new Set([
+  'profile_saved', 'job_sampler', 'job_chosen', 'shop_purchase', 'work_earnings', 'unverified',
+]);
+const PG_BIGINT_MAX = 9223372036854775807n;
+const NONNEGATIVE = /^(0|[1-9]\d{0,18})$/;
+
+export function parseFirstDayFlow(value: unknown): { readonly steps: readonly FirstDayStep[] } | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const input = (value as { steps?: unknown }).steps;
+  if (!Array.isArray(input) || input.length > 50) return null;
+  const seen = new Set<string>();
+  const steps: FirstDayStep[] = [];
+  for (const entry of input) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+    const row = entry as Record<string, unknown>;
+    if (typeof row.step_code !== 'string' || !/^[a-z0-9_]{3,64}$/.test(row.step_code) ||
+        seen.has(row.step_code) ||
+        typeof row.step_label !== 'string' || row.step_label.trim().length === 0 ||
+        row.step_label.length > 80 ||
+        typeof row.step_detail !== 'string' || row.step_detail.trim().length === 0 ||
+        row.step_detail.length > 400 ||
+        typeof row.step_href !== 'string' || !FIRST_DAY_HREFS.has(row.step_href) ||
+        typeof row.step_metric !== 'string' || !FIRST_DAY_METRICS.has(row.step_metric) ||
+        typeof row.step_verified !== 'boolean' ||
+        row.step_verified !== (row.step_metric !== 'unverified') ||
+        typeof row.step_target !== 'string' || !NONNEGATIVE.test(row.step_target) ||
+        typeof row.step_progress !== 'string' || !NONNEGATIVE.test(row.step_progress) ||
+        typeof row.step_unit !== 'string' || row.step_unit.length > 8 ||
+        typeof row.step_done !== 'boolean') return null;
+    const target = BigInt(row.step_target);
+    const progress = BigInt(row.step_progress);
+    if (target > PG_BIGINT_MAX || progress > PG_BIGINT_MAX ||
+        (row.step_metric === 'unverified' && (target !== 0n || progress !== 0n)) ||
+        (row.step_metric !== 'unverified' && target === 0n && row.step_metric !== 'job_sampler') ||
+        row.step_done !== (row.step_verified && progress >= target)) return null;
+    seen.add(row.step_code);
+    steps.push({
+      step_code: row.step_code, step_label: row.step_label, step_detail: row.step_detail,
+      step_href: row.step_href, step_metric: row.step_metric,
+      step_verified: row.step_verified, step_target: row.step_target,
+      step_progress: row.step_progress, step_unit: row.step_unit, step_done: row.step_done,
+    });
+  }
+  return { steps };
+}
+
 const INTEGER = /^-?\d+$/;
 
 function positive(amount: string): boolean {
