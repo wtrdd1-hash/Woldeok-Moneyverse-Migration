@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Newspaper,
@@ -13,7 +13,6 @@ import {
   ShieldAlert,
   ArrowRight,
   Clock,
-  CheckCircle2,
   Landmark,
   Briefcase,
   Share2,
@@ -191,44 +190,6 @@ export function NewspaperView({
 }: NewspaperViewProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<'brief' | 'live'>(initialTab);
-  const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
-  const [hasVoted, setHasVoted] = useState<boolean>(false);
-  const [pollCounts, setPollCounts] = useState<number[]>([142, 98, 45, 31]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem('mv_newspaper_poll_vote_v343');
-      if (saved !== null) {
-        const idx = Number.parseInt(saved, 10);
-        if (!Number.isNaN(idx) && idx >= 0 && idx < 4) {
-          setSelectedPoll(idx);
-          setHasVoted(true);
-        }
-      }
-    } catch {
-      // storage access fallback
-    }
-  }, []);
-
-  const handleVote = (index: number) => {
-    if (hasVoted) return;
-    setSelectedPoll(index);
-    setHasVoted(true);
-    setPollCounts((prev) => {
-      const next = [...prev];
-      next[index] = (next[index] ?? 0) + 1;
-      return next;
-    });
-    try {
-      localStorage.setItem('mv_newspaper_poll_vote_v343', String(index));
-    } catch {
-      // ignore
-    }
-  };
-
-  const totalVotes = pollCounts.reduce((a, b) => a + b, 0);
-
   // Sentiment metrics computation
   const upEvents = events.filter((e) => e.direction === 'up');
   const downEvents = events.filter((e) => e.direction === 'down');
@@ -238,40 +199,6 @@ export function NewspaperView({
 
   const leadEvent = events.find((e) => e.strength === 3) || events[0];
 
-  const pollOptions = [
-    {
-      labelKo: '강력 상승 (Bullish Surge)',
-      labelEn: 'Bullish Surge',
-      labelJa: '強気上昇 (Bullish Surge)',
-      labelZh: '强劲上涨 (Bullish Surge)',
-      descKo: '산업 호재 및 유동성 확대로 전반적 상승세 전망',
-      descEn: 'Overall upward trend led by market catalysts',
-    },
-    {
-      labelKo: '완만한 우상향 (Moderate Up)',
-      labelEn: 'Moderate Upward Trend',
-      labelJa: '緩やかな上昇 (Moderate Up)',
-      labelZh: '温和上涨 (Moderate Up)',
-      descKo: '개별 종목별 실적에 따른 차별화 상승',
-      descEn: 'Gradual gains supported by corporate performance',
-    },
-    {
-      labelKo: '보합 및 횡보 (Sideways Range)',
-      labelEn: 'Sideways Range',
-      labelJa: 'もみ合い・横ばい (Sideways)',
-      labelZh: '震荡盘整 (Sideways Range)',
-      descKo: '호재와 악재 상쇄로 박스권 횡보 지속',
-      descEn: 'Range-bound consolidation with mixed signals',
-    },
-    {
-      labelKo: '조정 및 하락 (Bearish Drop)',
-      labelEn: 'Bearish Correction',
-      labelJa: '調整・下落 (Bearish Correction)',
-      labelZh: '回调下跌 (Bearish Drop)',
-      descKo: '차익 실현 매물 출회 및 조정 리스크',
-      descEn: 'Profit-taking pressure and downside risk',
-    },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-3.5 sm:px-6 py-6 overflow-x-clip">
@@ -640,85 +567,25 @@ export function NewspaperView({
         </div>
       </section>
 
-      {/* 5. Interactive Market Sentiment Poll */}
+      {/* Poll is held until a durable, actor-bound receipt and verified tally exist. */}
       <section aria-labelledby="poll-heading" className="space-y-4">
         <h2 id="poll-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           <Vote className="size-4 text-primary" />
-          {localeLabel(locale, '독자 참여형 시장 전망 투표', 'Community Market Sentiment Poll', '読者参加型 市場見通し投票', '玩家互动：市场走势投票')}
+          {localeLabel(locale, '독자 시장 전망 투표', 'Community Market Sentiment Poll', '読者市場予想投票', '读者市场预测投票')}
         </h2>
-
         <Card className="rounded-2xl border-border/80 bg-card shadow-sm">
-          <CardHeader className="p-5 sm:p-6 pb-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="text-lg sm:text-xl font-bold [word-break:keep-all]">
+          <CardContent className="p-5 sm:p-6" role="status" aria-live="polite">
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="size-5 shrink-0 text-amber-600" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground">
                 {localeLabel(
                   locale,
-                  '다음 주기 월덕 머니버스 주식 시장의 흐름은 어떻게 될까요?',
-                  'How will the Moneyverse stock market move in the next cycle?',
-                  '次サイクルのウォルドク株式市場はどう動くと思いますか？',
-                  '您认为下一个周期月德股市将呈现何种走势？',
+                  '투표 집계와 참여 기능을 확인할 수 없습니다. 검증된 투표 기록과 중복 투표 방지 기능이 준비될 때까지 투표를 받거나 참여자 수를 표시하지 않습니다.',
+                  'Poll results and voting are unavailable. No votes or totals are claimed until verified records and replay protection exist.',
+                  '検証済みの投票記録と重複防止機能が整うまで、投票と集計の表示を停止します。',
+                  '在投票记录和防重复机制通过验证前，暂停投票与票数展示。',
                 )}
-              </CardTitle>
-              <Badge variant="secondary" className="font-mono text-xs w-fit">
-                {localeLabel(locale, `총 참여자 ${totalVotes}명`, `Total Votes: ${totalVotes}`, `総投票数: ${totalVotes}`, `总投票数: ${totalVotes}`)}
-              </Badge>
-            </div>
-            <CardDescription className="text-xs text-muted-foreground">
-              {hasVoted
-                ? localeLabel(locale, '투표에 참여해 주셔서 감사합니다. 실시간 집계 현황입니다.', 'Thank you for voting. Real-time community tally below.', 'ご投票ありがとうございます。現在の集計結果です。', '感谢您的参与，以下为实时统计结果。')
-                : localeLabel(locale, '자신의 시장 전망을 1개 선택하여 투표해 보세요.', 'Cast your projection to see community sentiment.', 'あなたの予想を選択して投票してください。', '请选择您的预测并参与投票。')}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-5 sm:p-6 pt-2 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {pollOptions.map((opt, idx) => {
-                const count = pollCounts[idx] ?? 0;
-                const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-                const isSelected = selectedPoll === idx;
-
-                return (
-                  <button
-                    key={opt.labelEn}
-                    type="button"
-                    onClick={() => handleVote(idx)}
-                    disabled={hasVoted}
-                    className={cn(
-                      'relative overflow-hidden rounded-xl border p-4 text-left transition-all active:scale-[0.98]',
-                      isSelected
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                        : 'border-border/80 bg-background/50 hover:border-border hover:bg-muted/30',
-                      hasVoted ? 'cursor-default' : 'cursor-pointer',
-                    )}
-                  >
-                    {/* Background fill bar for results */}
-                    {hasVoted && (
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary/10 transition-all duration-700 pointer-events-none"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    )}
-
-                    <div className="relative z-10 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
-                          {isSelected && <CheckCircle2 className="size-4 text-primary shrink-0" />}
-                          <span>{localeLabel(locale, opt.labelKo, opt.labelEn, opt.labelJa, opt.labelZh)}</span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
-                          {localeLabel(locale, opt.descKo, opt.descEn)}
-                        </p>
-                      </div>
-
-                      {hasVoted && (
-                        <span className="font-mono text-xs font-extrabold text-primary shrink-0">
-                          {percentage}%
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+              </p>
             </div>
           </CardContent>
         </Card>

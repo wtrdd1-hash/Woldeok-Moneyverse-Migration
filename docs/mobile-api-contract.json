@@ -16530,29 +16530,22 @@
     {
       "method": "GET",
       "path": "/app-api/v1/newspaper/poll",
-      "purpose": "주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회",
-      "callWhen": "신문 화면 진입, 새로고침 시",
-      "authorization": "공개: 로그인 불필요",
-      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "purpose": "Poll tallies are held until verified source evidence exists",
+      "callWhen": "Do not treat unavailable results as zero votes",
+      "authorization": "Public route currently returns HTTP 503",
+      "afterSuccess": "No successful response; HTTP 503 fail-closed until verified evidence exists",
       "backendRoute": "/api/newspaper/poll",
       "operationId": "NewspaperController_getWeeklyPoll",
       "backendOpenApiPath": "/newspaper/poll",
-      "summary": "Get weekly market sentiment opinion poll status",
+      "summary": "Reader poll tally unavailable until source verification",
       "parameters": [],
       "requestBody": null,
-      "successStatuses": [
-        200
-      ],
+      "successStatuses": [],
       "responseMode": "json",
       "responseShape": {
         "kind": "json",
-        "topLevelKeys": [
-          "id",
-          "question",
-          "options",
-          "totalVotes"
-        ],
-        "note": "Controller returns weekly opinion poll status."
+        "topLevelKeys": [],
+        "note": "No successful response; HTTP 503 NEWSPAPER_POLL_SOURCE_UNVERIFIED"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
@@ -16560,111 +16553,28 @@
         "camelCaseAliasesAddedRecursively": true
       },
       "responseSchema": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "question": {
-                "type": "string"
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "votes": {
-                      "type": "number"
-                    },
-                    "percentage": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "label",
-                    "votes",
-                    "percentage"
-                  ]
-                }
-              },
-              "totalVotes": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "id",
-              "question",
-              "options",
-              "totalVotes"
-            ]
-          }
-        },
-        "required": [
-          "success",
-          "data"
-        ]
+        "type": "never"
       }
     },
     {
       "method": "POST",
       "path": "/app-api/v1/newspaper/poll/vote",
-      "purpose": "이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환",
-      "callWhen": "여론조사 보기 선택 후 투표 버튼을 눌렀을 때",
-      "authorization": "로그인 + 최신 동의 + CSRF(변경 요청)",
-      "afterSuccess": "관련 GET을 다시 호출해 서버 상태와 동기화",
+      "purpose": "Poll vote writes are held until durable actor-bound receipts and idempotency exist",
+      "callWhen": "Do not call for voting until the hold is lifted",
+      "authorization": "Public route currently returns HTTP 503; future voting requires authenticated actor, consent and CSRF",
+      "afterSuccess": "No successful response; HTTP 503 fail-closed until verified evidence exists",
       "backendRoute": "/api/newspaper/poll/vote",
       "operationId": "NewspaperController_voteWeeklyPoll",
       "backendOpenApiPath": "/newspaper/poll/vote",
-      "summary": "Cast vote on weekly market outlook poll",
+      "summary": "Reader poll voting unavailable until durable receipt verification",
       "parameters": [],
-      "requestBody": {
-        "type": "object",
-        "dtoName": "NewspaperPollVoteDto",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "optionId": {
-              "type": "string",
-              "enum": [
-                "bullish",
-                "sideways",
-                "bearish",
-                "cash"
-              ],
-              "description": "Selected poll option ID"
-            }
-          },
-          "required": [
-            "optionId"
-          ]
-        }
-      },
-      "successStatuses": [
-        201
-      ],
+      "requestBody": null,
+      "successStatuses": [],
       "responseMode": "json",
       "responseShape": {
         "kind": "json",
-        "topLevelKeys": [
-          "pollId",
-          "optionId",
-          "votes",
-          "totalVotes"
-        ],
-        "note": "Controller returns recorded vote result."
+        "topLevelKeys": [],
+        "note": "No successful response; HTTP 503 NEWSPAPER_POLL_VOTE_UNAVAILABLE"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
@@ -16672,62 +16582,7 @@
         "camelCaseAliasesAddedRecursively": true
       },
       "responseSchema": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "question": {
-                "type": "string"
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "votes": {
-                      "type": "number"
-                    },
-                    "percentage": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "label",
-                    "votes",
-                    "percentage"
-                  ]
-                }
-              },
-              "totalVotes": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "id",
-              "question",
-              "options",
-              "totalVotes"
-            ]
-          }
-        },
-        "required": [
-          "success",
-          "data"
-        ]
+        "type": "never"
       }
     },
     {
