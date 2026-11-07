@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeWorkReceiptFloor,
   parseFilteredWorkReceipts,
+  parseUnfilteredWorkReceipts,
   workReceiptsApiPath,
 } from './work-receipt-reward-floor';
 const row = (reward_amount: string) => ({
@@ -39,5 +40,24 @@ describe('work receipt filter evidence', () => {
       parseFilteredWorkReceipts({ scope: 'recent20', minReward: '2', receipts: [row('2')] }, '2')
         ?.receipts,
     ).toHaveLength(1);
+  });
+});
+
+
+describe('unfiltered owner work receipt evidence', () => {
+  it('accepts a verified empty owner receipt list without inventing a payment', () => {
+    expect(parseUnfilteredWorkReceipts({ receipts: [] })).toEqual({ receipts: [] });
+  });
+  it('preserves exact large integer WLD rewards', () => {
+    expect(parseUnfilteredWorkReceipts({ receipts: [row('9007199254740993')] })?.receipts[0]?.reward_amount)
+      .toBe('9007199254740993');
+  });
+  it.each([null, {}, { receipts: {} }, { receipts: 'none' }, { receipts: Array(21).fill(row('1')) },
+    { receipts: [{ ...row('1'), reward_amount: '-1' }] },
+    { receipts: [{ ...row('1'), receipt_id: 'bad' }] },
+    { receipts: [{ ...row('1'), created_at: 'bad' }] },
+    { receipts: [row('1'), row('1')] },
+  ])('rejects malformed, duplicate or unbounded owner receipt responses', (payload) => {
+    expect(parseUnfilteredWorkReceipts(payload)).toBeNull();
   });
 });

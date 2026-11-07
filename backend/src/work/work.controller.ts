@@ -210,17 +210,38 @@ export class WorkController {
       () => this.repository().receipts(requireUserId(request)),
       'work receipts are unavailable',
     );
-    if (minReward === undefined) return { receipts: rows };
-    // The SECURITY DEFINER read is owner-scoped and limited to the latest 20;
-    // never interpret this filter as an all-time reward history search.
-    if (!Array.isArray(rows) || rows.length > 20 || rows.some((row) =>
-      typeof row.reward_amount !== 'string' || !/^(?:0|[1-9][0-9]{0,18})$/.test(row.reward_amount))) {
+    // pg decodes timestamptz as Date. Normalize to the HTTP ISO contract before validation.
+    const normalizedRows = Array.isArray(rows) ? rows.map((row) => {
+      const timestamp = row?.created_at;
+      return {
+        ...row,
+        created_at: timestamp instanceof Date && Number.isFinite(timestamp.getTime())
+          ? timestamp.toISOString() : timestamp,
+      };
+    }) : rows;
+    // Even without a filter, a malformed DB adapter response cannot certify a payout.
+    // The SECURITY DEFINER read is owner-scoped and limited to the latest 20.
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const amount = /^(?:0|[1-9][0-9]{0,18})$/;
+    if (!Array.isArray(normalizedRows) || normalizedRows.length > 20 || normalizedRows.some((row) =>
+      !row || !uuid.test(row.receipt_id) || !uuid.test(row.assignment_id) ||
+      typeof row.code !== 'string' || row.code.length < 1 || row.code.length > 120 ||
+      typeof row.name !== 'string' || row.name.length < 1 || row.name.length > 240 ||
+      typeof row.reward_amount !== 'string' || !amount.test(row.reward_amount) ||
+      typeof row.experience_amount !== 'string' || !amount.test(row.experience_amount) ||
+      (row.transaction_id !== null && !uuid.test(row.transaction_id)) ||
+      typeof row.created_at !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T/.test(row.created_at) ||
+      !Number.isFinite(Date.parse(row.created_at))) ||
+      new Set(normalizedRows.map((row) => row.receipt_id)).size !== normalizedRows.length) {
       throw new ServiceUnavailableException('work receipt reward evidence is unavailable');
     }
+    if (minReward === undefined) return { receipts: normalizedRows };
+    // A filtered response is a subset of the same verified owner-scoped latest 20.
     return {
       scope: 'recent20' as const,
       minReward,
-      receipts: rows.filter((row) => BigInt(row.reward_amount) >= BigInt(minReward)),
+      receipts: normalizedRows.filter((row) => BigInt(row.reward_amount) >= BigInt(minReward)),
     };
   }
 

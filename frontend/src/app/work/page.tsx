@@ -20,7 +20,7 @@ import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
 import { WorkReceiptRewardFilter } from './work-receipt-filter';
-import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts, workReceiptsApiPath } from '@/lib/work-receipt-reward-floor';
+import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts, parseUnfilteredWorkReceipts, workReceiptsApiPath } from '@/lib/work-receipt-reward-floor';
 import { normalizedWorkAvailableOnly, normalizedWorkDuration, normalizedWorkRewardCeiling, workTasksApiPath } from './work-duration-filter';
 import { CareerQualificationsCard } from './career-qualifications-card';
 import { CareerMasteryCard } from './career-mastery-card';
@@ -32,7 +32,6 @@ import type {
   JobQualificationItem,
   QualificationCatalogItem,
   WorkAssignment,
-  WorkReceipt,
   WorkSummary,
   WorkTask,
 } from './work';
@@ -94,7 +93,7 @@ export default async function WorkPage({ searchParams }: {
   const open = (assignments?.assignments ?? []).filter(isOpen);
   const verifiedReceipts = receiptFloor !== null
     ? parseFilteredWorkReceipts(receipts, receiptFloor)
-    : (receipts as { receipts: readonly WorkReceipt[] } | null);
+    : parseUnfilteredWorkReceipts(receipts);
   const paid = verifiedReceipts?.receipts ?? [];
   const now = Date.now();
   // A filtered board must not erase server-provided durations for active assignments.
@@ -411,7 +410,8 @@ export default async function WorkPage({ searchParams }: {
         selected={typeof receiptFloorRaw === 'string' ? receiptFloorRaw : undefined}
         invalid={receiptFilterInvalid}
         unavailable={!receiptFilterInvalid && verifiedReceipts === null}
-        verifiedEmpty={!receiptFilterInvalid && verifiedReceipts !== null && receiptFloor !== null && paid.length === 0}
+        verifiedEmpty={!receiptFilterInvalid && verifiedReceipts !== null && paid.length === 0}
+        filtered={receiptFloor !== null}
         isEn={isEn}
       />
       {/* 5. 최근 수령 영수증 */}

@@ -4,12 +4,14 @@ export function WorkReceiptRewardFilter({
   invalid,
   unavailable,
   verifiedEmpty,
+  filtered,
   isEn,
 }: {
   readonly selected?: string | undefined;
   readonly invalid: boolean;
   readonly unavailable: boolean;
   readonly verifiedEmpty: boolean;
+  readonly filtered: boolean;
   readonly isEn: boolean;
 }) {
   return (
@@ -57,17 +59,19 @@ export function WorkReceiptRewardFilter({
         </p>
       )}
       {!invalid && unavailable && (
-        <p role="alert" className="text-sm text-destructive">
-          {isEn
-            ? 'Reward evidence is unavailable. Try again.'
-            : '보상 영수증을 확인할 수 없습니다. 다시 시도해 주세요.'}
-        </p>
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">
+          <span>{isEn ? 'Reward evidence is unavailable.' : '보상 영수증을 확인할 수 없습니다.'}</span>
+          <a href={filtered && selected ? `/work?receiptMinReward=${encodeURIComponent(selected)}` : '/work'}
+            className="inline-flex min-h-11 items-center rounded-lg border px-4 underline underline-offset-4">
+            {isEn ? 'Retry' : '다시 조회'}
+          </a>
+        </div>
       )}
       {!invalid && !unavailable && verifiedEmpty && (
         <p role="status" className="text-sm">
           {isEn
-            ? 'No matching receipts among your latest 20.'
-            : '최근 20건 중 조건에 맞는 영수증이 없습니다.'}
+            ? (filtered ? 'No matching receipts among your latest 20.' : 'No recent reward receipts.')
+            : (filtered ? '최근 20건 중 조건에 맞는 영수증이 없습니다.' : '최근 수령한 보상 영수증이 없습니다.')}
         </p>
       )}
     </section>
