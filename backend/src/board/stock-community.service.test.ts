@@ -18,7 +18,7 @@ describe('StockCommunityService public discovery', () => {
     expect(database.query).toHaveBeenCalledTimes(1);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('upper(stock_symbol) = upper($2)');
-    expect(values).toEqual([50, 'wdx', null]);
+    expect(values).toEqual([50, 'wdx', null, false]);
   });
 
   it('rejects malformed symbols before querying PostgreSQL', async () => {
@@ -38,7 +38,7 @@ describe('StockCommunityService recent public title search', () => {
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain('strpos(lower(title), lower($3::text)) > 0');
-    expect(values).toEqual([50, 'wdx', 'WLD %_']);
+    expect(values).toEqual([50, 'wdx', 'WLD %_', false]);
   });
 
   it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
@@ -51,4 +51,21 @@ describe('StockCommunityService recent public title search', () => {
       expect(database.query).not.toHaveBeenCalled();
     },
   );
+});
+
+
+describe('StockCommunityService unanswered public posts', () => {
+  it('filters only the existing 50-row PostgreSQL public snapshot', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList('WDX', '  help  ', true);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('comment_count = 0');
+    expect(values).toEqual([50, 'WDX', 'help', true]);
+  });
+  it('does not accidentally filter the default public board list', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList();
+    expect(vi.mocked(database.query).mock.calls[0]?.[1]).toEqual([50, null, null, false]);
+  });
 });

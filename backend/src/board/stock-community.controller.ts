@@ -92,12 +92,17 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'unanswered', required: false, enum: ['1'], description: 'Only zero-reply posts among the latest 50 public posts' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'unanswered')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const unanswered = query.unanswered;
+    if (unanswered !== undefined && unanswered !== '1') {
+      throw new BadRequestException('unanswered must be 1');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -114,8 +119,12 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
+    const posts = unanswered === '1'
+      ? await this.community.publicList(stock as string | undefined, q as string | undefined, true)
+      : await this.community.publicList(stock as string | undefined, q as string | undefined);
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts,
+      ...(unanswered === '1' ? { appliedFilters: { unansweredOnly: true, scope: 'latest50' } } : {}),
     };
   }
 }

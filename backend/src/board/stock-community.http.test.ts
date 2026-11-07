@@ -22,3 +22,17 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+
+describe('unanswered public board HTTP query', () => {
+  it('accepts unanswered=1 and forwards a true filter to the source', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'help', unanswered: '1' })).resolves.toEqual({ posts: [], appliedFilters: { unansweredOnly: true, scope: 'latest50' } });
+    expect(community.publicList).toHaveBeenLastCalledWith('WDX', 'help', true);
+  });
+  it.each([{ unanswered: '0' }, { unanswered: '' }, { unanswered: ['1','1'] }, { unanswered: 'true' }])(
+    'rejects ambiguous unanswered query %j as HTTP 400', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});
