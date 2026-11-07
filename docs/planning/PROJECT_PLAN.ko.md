@@ -3009,3 +3009,26 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## 기획 사이클 v1902 — 2026-11-07 — Feature Addition — F675-281 증빙 사고 사건관리 및 통제된 공개
+
+**주기:** Previous Feature Improvement v1900 → Current Feature Addition v1902 → Next Feature Improvement v1904. **상태:** 제안 / 미구현, 운영 배포 HOLD. F675-276~280의 계약·독립 승인·증빙 무결성·정확한 SHA 검증이 끝나기 전에는 활성화하지 않는다.
+
+**목적·대상·권한:** 준법 조사 담당자가 제공자 전달 장애, 보존명령, 삭제 예외, 증빙 접근 이상징후, 공개 승인 내역을 하나의 사건에 연결한다. 테넌트별 조사자만 사건을 생성하며 별도 준법 심사자가 증빙 연결·외부 공개·종결을 승인한다. 보안 운영자는 긴급 차단을 요청할 수 있으나 자기 요청을 승인할 수 없다. 실제 실행 시 실효 신원·위임 관계·테넌트 소속을 재검증한다.
+
+**진입점·화면·CTA:** 관리자 → 증빙 → 사고 사건관리에서 검색·심각도·경과시간·담당자·미해결 예외·불변 타임라인을 제공한다. 사건 생성, 증빙 연결, 차단 요청, 공개 요청, 승인/거절, 비식별 패킷 내보내기, 종결 버튼과 사유 확인을 제공한다. 상태는 OPEN → TRIAGED → INVESTIGATING → REVIEW_PENDING → RESOLVED → CLOSED이며 BLOCKED/REOPENED는 감사 가능한 전이만 허용한다. 빈 결과, 로딩, 오래된 자료, 권한 거부, 부분 증빙, 제공자 장애를 명확히 표시한다.
+
+**API 제안(구현된 경로 아님):** POST /api/v1/admin/evidence-incidents; GET 목록(?cursor=) 및 /:id; POST /:id/evidence-links, /:id/containment-requests, /:id/disclosure-requests, /:id/decisions, /:id/close, /:id/reopen. 모든 변경 요청은 권한·테넌트 식별자·사유·Idempotency-Key·If-Match·쿠키 세션 CSRF·크기 제한·감사 연계 ID를 검사한다. 400/403/404/409/412/422/429/503을 구분하고 다른 테넌트의 사건 존재를 노출하지 않는다.
+
+**DB·트랜잭션:** evidence_incident_cases, evidence_incident_links, evidence_incident_decisions, evidence_incident_exports 제안. tenant_id+id 복합 기본키·외래키, UNIQUE(tenant_id,idempotency_key,action), 상태/사유/만료 CHECK, 불변 행위자·결정 증빙, (tenant_id,state,updated_at DESC,id) 및 (tenant_id,case_id,created_at) 인덱스. SECURITY DEFINER 함수에서 테넌트·역할 분리를 강제하고 moneyverse_app의 테이블 직접 권한은 REVOKE, 필요한 EXECUTE만 부여한다. CAS 버전·일관된 잠금 순서로 종결/재개 및 보존/삭제 경쟁을 방지한다. 상태·감사·Outbox는 원자적 커밋, 작업자는 펜싱·멱등 재시도·실패 대기열을 사용한다.
+
+**보안·악용 방지:** 원본 증빙·인증정보·개인식별자를 자동 공개하지 않는다. 필드별 비식별, 허용된 수신처, 단기 일회용 토큰, 서명 매니페스트, 제한된 보존기간 및 이중 승인을 요구한다. 내보내기 실행 시 보존명령·삭제 검증서 철회·접근권한 철회를 재확인한다. 출처 불명, 서명 실패, 오래된 워터마크, 감사 장애, 제공자 장애는 fail-closed. 조회·내보내기·승인에 사용자/테넌트별 속도 제한을 적용하고 거부 로그에 민감한 원문을 남기지 않는다.
+
+**SEO·모바일·접근성:** 관리자 화면은 noindex/no-store, 사이트맵 제외. 320px 단일 열 타임라인, 키보드 승인, 포커스 복원, 스크린리더 상태 안내, 접근 가능한 오류 요약, WCAG 2.2 AA, 영문/한국어 상태·확인 절차 동등성을 적용한다.
+
+**KPI·테스트:** 비식별 KPI는 최초 분류 시간, 독립 결정 시간, 미해결 증빙 수, 오탐 재개율, 차단된 공개, 내보내기 철회. 실제 PostgreSQL에서 테넌트 격리, 위임 자기 승인, 오래된 If-Match, 멱등 중복, 종결/보존/삭제 동시성, 제공자 서명 누락, 부분 내보내기 중단, 작업자 재시작, 토큰 재사용, CSRF, 모바일/a11y, 언어 동등성, 감사/Outbox 원자성을 검증한다. 가짜 통과 수치는 기록하지 않는다.
+
+**배포·롤백:** admin_evidence_incident_casework_v1 기본 OFF. 별도 개발 브랜치에서 구현하고 마이그레이션 체크섬, 최소권한, 독립 백업 복원, Test exact-SHA 통합·보안 부정 테스트를 통과해야 한다. 승인 및 국내 법률 검토 후 카나리 배포하며 롤백은 라우트/작업자를 비활성화하되 사건·감사 기록을 보존한다. 금융 원장이나 파괴적 마이그레이션을 되돌리지 않는다. prod-v600 링크, 운영 /en·/en/login HTTP 500, 독립 승격 게이트가 해결되지 않으면 운영 HOLD.
+
+**P0/P1 백로그:** P0 운영 릴리스 포인터 복구 및 실제 배포 SHA 검증, DB 최소권한·마이그레이션 체크섬·독립 복구·원장 대사·국내 법률 게이트. P1 미병합 기획 PR #2845~2865와 최신 main 정합성 검토, 실제 Next/Nest/app-api/DB 계약 및 F675-276~280 구현 확인, 독립 공개 심사·사건/보존 경쟁·내보내기 중단 복구·접근성 테스트. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건, 중복 제거·근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
