@@ -1928,20 +1928,7 @@ _요청 본문 없음._
 
 ### 성공 응답 필드
 
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| posts[] | true | object[] |  |
-| posts[] | true | object |  |
-| posts[].authorName | true | string |  |
-| posts[].createdAt | true | string |  |
-| posts[].updatedAt | true | null \| string |  |
-| posts[].commentCount | true | number |  |
-| posts[].mine | true | boolean |  |
-| posts[].hasImage | true | boolean |  |
-| posts[].stock | true | null \| object |  |
-| posts[].body | false | string |  |
-| posts[].postId | true | string |  |
-| posts[].title | true | string |  |
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

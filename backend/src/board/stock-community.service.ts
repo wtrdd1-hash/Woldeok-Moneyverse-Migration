@@ -116,7 +116,9 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, limit?: number) {
+    if (limit !== undefined && limit !== 10 && limit !== 25 && limit !== 50)
+      throw new Error('invalid public board limit');
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -136,8 +138,9 @@ export class StockCommunityService {
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+        ${limit === undefined ? '' : "ORDER BY date_trunc('milliseconds', created_at) DESC, post_id DESC LIMIT $4::integer"}`,
+      limit === undefined ? [50, normalized, title] : [50, normalized, title, limit],
     );
     return rows.map(mapped);
   }
