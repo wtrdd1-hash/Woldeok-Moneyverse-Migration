@@ -2,7 +2,7 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.10.30.0125**
+업데이트 버전: **v2026.11.01.0525**
 
 이 문서는 184개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
@@ -2638,7 +2638,7 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
-## `GET` `/app-api/v1/content/status` — 서비스 상태 정보 조회
+## `GET` `/app-api/v1/status` — 서비스 상태 정보 조회
 
 - 인증/권한: 공개: 로그인 불필요
 - 성공 상태: 200
@@ -2648,7 +2648,9 @@ _요청 본문 없음._
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| attentionOnly | query | false | string | enum="1" |
 
 ### 요청 본문
 

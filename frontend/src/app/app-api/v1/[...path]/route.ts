@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { attentionStatusRows, parseStatusRows } from '@/lib/status-response';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const publicStatusPath = parts.length === 1 && parts[0] === 'status';
+  const statusAttentionRequested = publicStatusPath && request.nextUrl.searchParams.has('attentionOnly');
+  if (publicStatusPath && ([...request.nextUrl.searchParams.keys()].some((key) => key !== 'attentionOnly') ||
+      request.nextUrl.searchParams.getAll('attentionOnly').length > 1 ||
+      (statusAttentionRequested && request.nextUrl.searchParams.get('attentionOnly') !== '1'))) {
+    return gatewayProblem(400, 'Bad Request', 'status_attention_invalid', 'attentionOnly must be 1 when provided');
+  }
+  if (statusAttentionRequested && request.method !== 'GET') {
+    return gatewayProblem(405, 'Method Not Allowed', 'status_attention_method', 'filtered status requires GET');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +283,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (publicStatusPath && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON status');
+      const rows = parseStatusRows(await response.clone().json());
+      if (rows === null || (statusAttentionRequested && attentionStatusRows(rows).length !== rows.length)) {
+        throw new Error('unverified status attention response');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'status_attention_unverified',
+        'service status evidence is unavailable');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -566,6 +591,10 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 1 && parts[0] === 'status' && request.nextUrl.searchParams.has('attentionOnly')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');

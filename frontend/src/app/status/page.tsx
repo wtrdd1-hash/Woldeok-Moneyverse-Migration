@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { OVERALL_HEADLINE, STATUS_LABEL, statusAggregateState } from '@/lib/status';
-import { parseStatusRows } from '@/lib/status-response';
+import { attentionStatusRows, parseStatusRows } from '@/lib/status-response';
 import { asStatusState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
 import { canonicalUrl } from '@/lib/seo';
@@ -30,17 +30,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-interface StatusRow {
-  readonly sourceKey: string;
-  readonly displayName: string;
-  readonly state: string;
-  readonly detail: string | null;
-  readonly observedAt: string | null;
-  readonly freshnessState: 'fresh' | 'stale' | 'unknown';
-  readonly ageMs: number | null;
-  readonly policyVersion: string;
-}
-
 /**
  * The badge variant per state. `outage` is the only destructive one; a
  * degraded service is still serving, and reporting both in the same red would
@@ -55,10 +44,14 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
     unknown: 'outline',
   };
 
-export default async function StatusPage() {
+export default async function StatusPage({ searchParams }: {
+  readonly searchParams: Promise<{ readonly attentionOnly?: string }>;
+}) {
+  const attentionOnly = (await searchParams).attentionOnly === '1';
   const data = await publicApi<unknown>('/api/v1/status', 30);
   const parsedRows = parseStatusRows(data);
-  const rows: StatusRow[] = parsedRows ?? [];
+  const rows = parsedRows ?? [];
+  const visibleRows = attentionOnly ? attentionStatusRows(rows) : rows;
   const overall = statusAggregateState(rows);
   const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
@@ -106,15 +99,27 @@ export default async function StatusPage() {
           }
         />
 
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            {attentionOnly ? '확인이 필요한 상태만 표시합니다. 전체 서비스 상태는 위에 유지됩니다.' : '모든 관측 항목을 표시합니다.'}
+          </p>
+          <Link href={attentionOnly ? '/status' : '/status?attentionOnly=1'}
+            className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">
+            {attentionOnly ? '전체 항목 보기' : '확인 필요한 항목만 보기'}
+          </Link>
+        </div>
+
         {parsedRows === null ? (
           <EmptyState title="지금은 상태를 불러올 수 없어요." />
         ) : rows.length === 0 ? (
           <EmptyState title="아직 기록된 상태가 없어요." />
+        ) : visibleRows.length === 0 ? (
+          <EmptyState title="현재 확인이 필요한 항목이 없습니다." description="전체 상태를 확인하려면 전체 항목 보기를 선택하세요." />
         ) : (
           <Card>
             <CardContent>
               <dl className="grid gap-3">
-                {rows.map((row) => {
+                {visibleRows.map((row) => {
                   const state = asStatusState(row.state);
                   const needsFreshness = row.freshnessState !== 'fresh';
                   return (

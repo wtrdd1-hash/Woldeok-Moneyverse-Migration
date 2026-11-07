@@ -5,7 +5,7 @@ const page = readFileSync('src/app/status/page.tsx', 'utf8');
 
 describe('status authoritative freshness UI', () => {
   it('renders the server-owned freshness contract instead of recomputing age in the browser layer', () => {
-    expect(page).toContain("readonly freshnessState: 'fresh' | 'stale' | 'unknown';");
+    expect(page).toContain('parseStatusRows(data)');
     expect(page).toContain("row.freshnessState !== 'fresh'");
     expect(page).toContain('asStatusState(row.state)');
     expect(page).not.toContain('statusWithFreshness(');
@@ -39,5 +39,19 @@ describe('status accessibility and SEO boundaries', () => {
     expect(page).toContain('sm:grid-cols-2');
     expect(page).toContain('<Link href="/announcements"');
     expect(page).toContain("VARIANT[needsFreshness ? 'unknown' : state]");
+  });
+});
+
+describe('status attention filter UX', () => {
+  it('keeps the global summary on the unfiltered source and filters only cards', () => {
+    expect(page).toContain('statusAggregateState(rows)');
+    expect(page).toContain('attentionStatusRows(rows)');
+    expect(page).toContain('visibleRows.map((row) =>');
+    expect(page).toContain('현재 확인이 필요한 항목이 없습니다.');
+  });
+  it('offers keyboard-accessible, reversible query navigation', () => {
+    expect(page).toContain('/status?attentionOnly=1');
+    expect(page).toContain('전체 항목 보기');
+    expect(page).toContain('min-h-11');
   });
 });
