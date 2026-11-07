@@ -1,5 +1,15 @@
 # Woldeok Moneyverse — Integrated Planning Master
-**Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+**Current planning:** v1772.1 Mint control malfunction + 14-feature draft recovery; #2878/#2366; P0 BLOCKED / no runtime release.
+
+## v2026.11.07.1772.1 — Correct retired two-person approval requirement
+- **Policy correction:** The 2026-09-09 Living Plan explicitly retired mandatory two-person approvals in favor of a single superadmin. The 2026-10-30 change retired repeated per-action reauthentication. v1772 erroneously reintroduced both. MINT-03 now requires existing admin session/permission, policy limits, reason, idempotency and immutable audit **without another person**. Current Mint spec and v523 detailed spec clarified. No app/DB/Test/Production change.
+
+## v2026.11.07.1772 — National Mint malfunction and 14-feature recovery roadmap (P0 BLOCKED / PLANNING)
+- **Incident:** Owner screenshot reports nonfunctional mint, retirement and emergency freeze controls even though UI shows “policy DB query complete / 1 approved / mint immediately available”. Operational request success and certified WLD settlement **not verified**. Track [issue #2878](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2878) under financial blocker [#2366](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2366).
+- **Source facts:** Legacy Mint POST fails closed; separate monetary-policy flow inserts orders/certificates but a same-transaction canonical balanced journal/user-account settlement is not evidenced in the inspected code. BFF certificate read failures can appear as empty arrays. Shared Mint UI/BFF worktree has uncommitted concurrent work; do not overwrite.
+- **Design adopted as DRAFT roadmap:** [Detailed English specification](NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.md) / [Korean](NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md). MINT-01..14 cover honest readiness, policy queue, existing single-superadmin authorization, dry-run, atomic funded mint/retire, verifiable certificates, freeze, reconciliation, member impact, internal alerts, mobile UX, sandbox and independent verification. First priority is certified DB settlement, not a decorative enabled badge.
+- **Rollout gate:** Default OFF for new monetary writers; independent restored PG17, full CI, official authenticated exact-SHA Test, backup+rollback, then no-downtime Production promotion if all gates pass. **Current evidence: documentation and issue only; no source code, DB, Test or Production deployment.** New current design supersedes only contrary “read success implies executable” UI interpretation, not the v523 institutional separation or P0 financial holds.
+
 
 ## v2026.10.30.1518 — F675-185 Inventory Lifecycle Source-Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

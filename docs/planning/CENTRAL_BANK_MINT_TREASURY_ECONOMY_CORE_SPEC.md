@@ -212,7 +212,7 @@ Suggested server-only commands:
 - `economy.reconcileSupply`
 - `economy.reconcileTreasury`
 
-No public/mobile client receives mint authority. Admin UI calls policy-level endpoints, never raw balance mutation. High-risk operations require step-up authentication, dual/quorum approval where configured, idempotency, reason, request hash and immutable audit.
+No public/mobile client receives mint authority. Admin UI calls policy-level endpoints, never raw balance mutation. High-risk operations use the current single-superadmin signed-in session and existing authorization/CSRF, idempotency, reason, request hash and immutable audit. Mandatory second-person/quorum approval and per-action repeat reauthentication were retired; do not restore either. (v2026.11.07.1772.1 policy correction.)
 
 ## 11. AI Economy Controller boundary
 

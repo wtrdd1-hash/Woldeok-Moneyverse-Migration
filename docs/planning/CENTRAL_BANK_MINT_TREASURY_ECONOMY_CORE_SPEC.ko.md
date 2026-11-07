@@ -214,7 +214,7 @@ WLD를 국고 금고나 `DEAD`라는 이름의 사용가능 계정으로 옮기�
 - `economy.reconcileSupply`
 - `economy.reconcileTreasury`
 
-Public/mobile에는 조폐권을 제공하지 않는다. 관리자 UI도 raw balance mutation이 아니라 정책 API만 호출한다. 고위험 작업은 step-up 인증, 설정된 dual/quorum 승인, idempotency, 사유, request hash, 불변 감사를 요구한다.
+Public/mobile에는 조폐권을 제공하지 않는다. 관리자 UI도 raw balance mutation이 아니라 정책 API만 호출한다. 고위험 작업은 기존 단일 최고관리자 로그인 세션·권한·CSRF, 멱등성, 사유, 요청 해시, 불변 감사기록을 사용한다. 별도 2인/정족수 결재 및 기능별 반복 재인증은 폐기된 정책이므로 다시 도입하지 않는다. (v2026.11.07.1772.1 정정.)
 
 ## 11. AI 경제컨트롤러 경계
 
