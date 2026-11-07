@@ -4,6 +4,9 @@ import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator'
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { HotTimeService, type HotTimePayload, type HotTimeBuffItem } from './hot-time.service';
 
 export class ToggleHotTimeDto {
@@ -27,7 +30,7 @@ export class HotTimeController {
   }
 
   @Patch('toggle')
-  @UseGuards(SessionGuard, AuthenticatedGuard, AdminGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({
     summary: 'Operator toggle for hot time buffs',
   })
