@@ -22,3 +22,20 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+describe('public board replied-only query HTTP validation', () => {
+  it('passes exact opt-in filter through to the service', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ stock: 'WDX', q: 'news', replied: '1' })).resolves.toEqual({
+      posts: [], appliedFilters: { repliedOnly: true, scope: 'latest50' },
+    });
+    expect(community.publicList).toHaveBeenCalledWith('WDX', 'news', true);
+  });
+  it.each([
+    { replied: '0' }, { replied: 'true' }, { replied: ['1', '1'] },
+    { replied: ['1'] }, { replied: '1', q: ['a', 'b'] },
+  ])('rejects invalid replied filter %j', async (query) => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
+  });
+});

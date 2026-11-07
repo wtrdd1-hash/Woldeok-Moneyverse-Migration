@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedRepliedPosts } from '@/app/board/board-replies-filter';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const boardRepliedPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts' &&
+    request.nextUrl.searchParams.has('replied');
+  const boardQuery = request.nextUrl.searchParams;
+  if (boardRepliedPath && (boardQuery.getAll('replied').length !== 1 ||
+      boardQuery.get('replied') !== '1' ||
+      boardQuery.getAll('stock').length > 1 || boardQuery.getAll('q').length > 1 ||
+      [...boardQuery.keys()].some((key) => !['stock', 'q', 'replied'].includes(key)))) {
+    return gatewayProblem(400, 'Bad Request', 'board_replied_invalid', 'invalid public board reply filter');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +283,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (boardRepliedPath && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedRepliedPosts(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_replied_unverified',
+          'public board reply filter could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_replied_unverified',
+        'public board reply filter could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -594,6 +619,12 @@ async function handle(request: NextRequest, context: Context) {
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
+      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('replied')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

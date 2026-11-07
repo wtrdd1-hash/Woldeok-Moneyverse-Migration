@@ -1930,6 +1930,9 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| appliedFilters | false | object |  |
+| appliedFilters.repliedOnly | true | boolean |  |
+| appliedFilters.scope | true | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

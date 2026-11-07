@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardRepliedFilter, isVerifiedRepliedPosts } from './board-replies-filter';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.replied !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +67,18 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const replied = parseBoardRepliedFilter(params.replied);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (replied.enabled) query.set('replied', '1');
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const payload = search.invalid || replied.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; appliedFilters?: { repliedOnly: boolean; scope: string } }>(
+        `/api/v1/board/public/stock-posts${suffix}`, replied.enabled ? 0 : 60,
+      );
+  const data = replied.enabled && !isVerifiedRepliedPosts(payload) ? null : payload;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +137,11 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold">
+              <input type="checkbox" name="replied" value="1" defaultChecked={replied.enabled}
+                className="size-5 accent-primary" aria-describedby="board-search-scope" />
+              댓글 있는 글만
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,8 +156,13 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건에서 제목과 댓글 여부를 검색합니다. 전체 게시글 검색이 아닙니다.
           </p>
+          {replied.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              댓글 필터 값이 올바르지 않습니다.
+            </p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,15 +177,17 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
+        {search.invalid || replied.invalid ? (
+          <EmptyState title="검색 조건을 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
             title={
-              search.query
-                ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
+              replied.enabled
+                ? '최근 게시글 50건에서 조건에 맞는 댓글 있는 글이 없어요.'
+                : search.query
+                  ? '최근 게시글 50건에서 일치하는 제목이 없어요.'
                 : stock
                   ? `${stock} 토론 글이 아직 없어요.`
                   : '아직 작성된 글이 없어요.'
