@@ -20,6 +20,13 @@ describe('shop holdings owner-scoped API', () => {
     ]);
   });
 
+  it('fails closed on malformed source upkeep values before returning owner data', async () => {
+    const holdings = vi.fn().mockResolvedValue([{ code: 'forged', arrears_due: 9007199254740992 }]);
+    const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);
+    await expect(controller.holdings(request)).rejects.toMatchObject({ status: 503 });
+    expect(holdings).toHaveBeenCalledExactlyOnceWith(actor);
+  });
+
   it('rejects an unsupported filter before reading any private data', async () => {
     const holdings = vi.fn();
     const controller = new ShopController(null, { holdings } as unknown as ShopCatalogRepository);

@@ -37,6 +37,7 @@ import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './sh
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
 import { filterShopUpkeep } from './shop-upkeep-cap';
+import { isVerifiedHoldingCondition } from './shop-holdings-condition';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -353,6 +354,9 @@ export class ShopController {
       () => this.repository().holdings(requireUserId(request)),
       'held items are unavailable',
     );
+    if (!Array.isArray(holdings) || holdings.some((item) => !isVerifiedHoldingCondition(item))) {
+      throw new ServiceUnavailableException('held item condition evidence is unavailable');
+    }
     if (filter === 'attention') {
       holdings = holdings.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
     }

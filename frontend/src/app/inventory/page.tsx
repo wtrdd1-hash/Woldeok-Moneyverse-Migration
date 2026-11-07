@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
@@ -21,7 +22,7 @@ export default async function InventoryPage() {
     apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile'),
   ]);
 
-  const holdings = holdingsData?.holdings || [];
+  const holdings = Array.isArray(holdingsData?.holdings) ? holdingsData.holdings : null;
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
@@ -45,11 +46,13 @@ export default async function InventoryPage() {
         />
       </PageHeader>
 
-      <InventoryView
+      {holdings === null ? (
+        <div role="alert" className="rounded-xl border border-amber-500/50 p-5">보관함 정보를 확인할 수 없습니다. 잠시 후 새로고침해 주세요.</div>
+      ) : <InventoryView
         holdings={holdings}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
-      />
+      />}
     </div>
   );
 }
