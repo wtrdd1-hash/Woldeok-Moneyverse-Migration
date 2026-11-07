@@ -224,6 +224,11 @@ export function proxy(request: NextRequest) {
 
   response.headers.set('x-moneyverse-locale', finalLocale);
 
+  if (targetPath === '/account/privacy') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');
   }
