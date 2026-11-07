@@ -116,7 +116,9 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(
+    stockSymbol?: string, titleQuery?: string, order?: 'newest' | 'oldest',
+  ) {
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -130,14 +132,23 @@ export class StockCommunityService {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
+    if (order !== undefined && order !== 'newest' && order !== 'oldest')
+      throw new Error('invalid board order');
+    // Ordering occurs outside the fixed 50-row SECURITY DEFINER source,
+    // never over the full history. No direct table grants are required.
+    const ordering = order === undefined ? '' : `
+        ORDER BY CASE WHEN $4::text = 'oldest' THEN created_at END ASC NULLS LAST,
+                 CASE WHEN $4::text = 'newest' THEN created_at END DESC NULLS LAST,
+                 CASE WHEN $4::text = 'oldest' THEN post_id END ASC NULLS LAST,
+                 CASE WHEN $4::text = 'newest' THEN post_id END DESC NULLS LAST`;
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)${ordering}`,
+      order === undefined ? [50, normalized, title] : [50, normalized, title, order],
     );
     return rows.map(mapped);
   }

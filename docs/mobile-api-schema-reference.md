@@ -1930,6 +1930,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| order | false | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

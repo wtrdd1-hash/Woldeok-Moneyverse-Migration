@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { isVerifiedBoardOrderPayload, parseBoardOrder } from './board-order';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.order !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -65,14 +66,20 @@ export default async function BoardPage({
 }) {
   const params = await searchParams;
   const stock = selectedStock(params.stock);
-  const search = parseBoardTitleQuery(params.q);
+  const order = parseBoardOrder(params.order);
+  // A sort-only form submits an empty search input; do not turn it into an error.
+  const search = parseBoardTitleQuery(params.q === '' && order.explicit ? undefined : params.q);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (order.explicit && !order.invalid) query.set('order', order.order);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const data = search.invalid || order.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; order?: string }>(`/api/v1/board/public/stock-posts${suffix}`, order.explicit ? 0 : 60);
+
+  const verifiedData = data && (!order.explicit || isVerifiedBoardOrderPayload(data, order.order))
+    ? data : null;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +138,19 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-order" className="grid gap-1 text-sm font-semibold">
+              작성일 정렬
+              <select
+                id="board-order"
+                name="order"
+                defaultValue={order.order}
+                className="min-h-11 rounded-md border border-input bg-background px-3"
+                aria-describedby="board-search-scope"
+              >
+                <option value="newest">최신순</option>
+                <option value="oldest">오래된순</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,8 +165,13 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건의 제목만 검색하고 작성일순으로 정렬합니다. 전체 게시글 검색·정렬이 아닙니다.
           </p>
+          {order.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              정렬 조건을 확인해 주세요. 최신순 또는 오래된순만 사용할 수 있습니다.
+            </p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,11 +186,11 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
-        ) : data === null ? (
+        {search.invalid || order.invalid ? (
+          <EmptyState title="검색·정렬 조건을 확인해 주세요." />
+        ) : verifiedData === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
-        ) : data.posts.length === 0 ? (
+        ) : verifiedData.posts.length === 0 ? (
           <EmptyState
             title={
               search.query
@@ -180,7 +205,7 @@ export default async function BoardPage({
           <Card className="overflow-hidden py-0">
             <CardContent className="px-0">
               <ul>
-                {data.posts.map((post) => (
+                {verifiedData.posts.map((post) => (
                   <li key={post.postId} className="border-b last:border-b-0">
                     <Link
                       href={`/board/${post.postId}`}

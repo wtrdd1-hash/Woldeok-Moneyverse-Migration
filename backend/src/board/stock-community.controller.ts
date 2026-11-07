@@ -92,12 +92,22 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({
+    name: 'order',
+    required: false,
+    enum: ['newest', 'oldest'],
+    description: 'Sort only the latest 50 public posts by creation time',
+  })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'order')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const order = query.order;
+    if (order !== undefined && order !== 'newest' && order !== 'oldest') {
+      throw new BadRequestException('invalid board order');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +125,10 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: order === undefined
+        ? await this.community.publicList(stock as string | undefined, q as string | undefined)
+        : await this.community.publicList(stock as string | undefined, q as string | undefined, order),
+      ...(order === undefined ? {} : { order }),
     };
   }
 }
