@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { parseBondEvidence } from '@/app/admin/bonds/bond-evidence';
+
+const privateHeaders = {
+  'Cache-Control': 'private, no-store',
+  'X-Robots-Tag': 'noindex, nofollow',
+  'Referrer-Policy': 'no-referrer',
+};
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -10,12 +18,15 @@ export async function GET() {
       api('/api/v1/admin/bonds/coupon-logs?limit=30'),
     ]);
     return NextResponse.json(parseBondEvidence({ overview, bonds, couponLogs }), {
-      headers: { 'Cache-Control': 'private, no-store' },
+      headers: privateHeaders,
     });
-  } catch (error: any) {
+  } catch (error) {
+    // Backend owns administrator authorization. Never reflect internal SQL or session diagnostics.
+    const status = error instanceof ApiError && (error.status === 401 || error.status === 403)
+      ? error.status : 503;
     return NextResponse.json(
-      { error: error?.message || '국채 관제 데이터를 불러오는데 실패했습니다.' },
-      { status: error?.status || 503 },
+      { error: status === 401 ? 'Administrator sign-in required' : status === 403 ? 'Administrator access denied' : 'Bond evidence unavailable' },
+      { status, headers: privateHeaders },
     );
   }
 }

@@ -1,43 +1,73 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '@/lib/api';
+
+const { apiMock } = vi.hoisted(() => ({ apiMock: vi.fn() }));
+vi.mock('@/lib/api', () => ({
+  api: apiMock,
+  ApiError: class ApiError extends Error {
+    constructor(public status: number, message: string) { super(message); }
+  },
+}));
+
+import { ApiError } from '@/lib/api';
 import { GET } from './route';
 
-vi.mock('@/lib/api', () => ({ api: vi.fn() }));
-
 const overview = {
-  totalBondsActive: 0,
-  totalFundedWld: '0',
-  totalHoldersCount: 0,
-  totalCouponsPaidWld: '42',
-  benchmark1YYield: '—',
-  benchmark3YYield: '—',
-  benchmark5YYield: '—',
+  totalBondsActive: 0, totalFundedWld: '0', totalHoldersCount: 0,
+  totalCouponsPaidWld: '42', benchmark1YYield: '—', benchmark3YYield: '—', benchmark5YYield: '—',
 };
 
-describe('admin bond overview Next gateway contract', () => {
-  beforeEach(() => vi.clearAllMocks());
+function assertPrivate(response: Response) {
+  expect(response.headers.get('cache-control')).toBe('private, no-store');
+  expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+}
 
-  it('returns verified backend absence sentinel and interest-only aggregate without caching', async () => {
-    vi.mocked(api).mockImplementation(async (path) => {
-      if (path === '/api/v1/admin/bonds/overview') return overview as never;
-      if (path === '/api/v1/admin/bonds/list') return [] as never;
-      if (path === '/api/v1/admin/bonds/coupon-logs?limit=30') return [] as never;
-      throw new Error('unexpected route');
-    });
+describe('administrator bond evidence proxy confidentiality', () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it('only serves verified backend evidence with private response headers', async () => {
+    apiMock.mockResolvedValueOnce(overview).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     const response = await GET();
     expect(response.status).toBe(200);
-    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+    assertPrivate(response);
     expect(await response.json()).toEqual({ overview, bonds: [], couponLogs: [] });
-    expect(api).toHaveBeenCalledTimes(3);
+    expect(apiMock.mock.calls.map(([path]) => path)).toEqual([
+      '/api/v1/admin/bonds/overview',
+      '/api/v1/admin/bonds/list',
+      '/api/v1/admin/bonds/coupon-logs?limit=30',
+    ]);
   });
 
-  it('fails closed on an invalid backend coupon aggregate', async () => {
-    vi.mocked(api).mockImplementation(async (path) => {
-      if (path === '/api/v1/admin/bonds/overview') return { ...overview, totalCouponsPaidWld: 'NaN' } as never;
-      return [] as never;
-    });
+  it.each([401, 403])('preserves backend auth refusal %i without exposing upstream detail', async (status) => {
+    apiMock.mockRejectedValueOnce(new ApiError(status, 'sensitive internal SQL session context'));
+    const response = await GET();
+    expect(response.status).toBe(status);
+    assertPrivate(response);
+    expect(JSON.stringify(await response.json())).not.toMatch(/sensitive|SQL|session context/i);
+  });
+
+  it('does not reflect unexpected upstream statuses or database errors', async () => {
+    apiMock.mockRejectedValueOnce(Object.assign(new Error('permission denied for table secret'), { status: 418 }));
     const response = await GET();
     expect(response.status).toBe(503);
+    assertPrivate(response);
+    expect(JSON.stringify(await response.json())).not.toMatch(/permission|table secret|418/);
+  });
+
+  it('preserves the existing fail-closed coupon aggregate contract', async () => {
+    apiMock.mockResolvedValueOnce({ ...overview, totalCouponsPaidWld: 'NaN' })
+      .mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const response = await GET();
+    expect(response.status).toBe(503);
+    assertPrivate(response);
     expect((await response.json()).error).toBeTruthy();
+  });
+
+  it('does not return a false success on malformed financial evidence', async () => {
+    apiMock.mockResolvedValueOnce({ totalBondsActive: 9 }).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const response = await GET();
+    expect(response.status).toBe(503);
+    assertPrivate(response);
+    expect((await response.json()).overview).toBeUndefined();
   });
 });
