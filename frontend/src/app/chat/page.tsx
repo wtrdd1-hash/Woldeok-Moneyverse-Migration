@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
-import { mutate } from '@/lib/mutate';
 import { requireMember } from '@/lib/session';
 import { getServerLocale } from '@/lib/locale-server';
 import { localeLabel } from '@/lib/locale';
@@ -12,6 +10,7 @@ import type { ChatConversation, ChatMessage } from './actions';
 import { ChatView } from './chat-view';
 import { isChatUuid, verifyChatConversations, verifyChatMessages } from './chat-evidence';
 import { ComposeMessageDialog } from './compose-message-dialog';
+import { PeerConversationStart } from './peer-conversation-start';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,24 +52,13 @@ export default async function ChatPage({
   }
   let selectedId = params.conversationId;
 
-  // 2. If peer query param is passed, find or open conversation
-  if (isChatUuid(params.peer)) {
-    const existing = conversations.find((c) => c.peer_user_id === params.peer);
-    if (existing) {
-      selectedId = existing.conversation_id;
-    } else {
-      let openedId: string | null = null;
-      try {
-        const opened = await mutate<{ conversation_id: string }>('/api/v1/chat/conversations', {
-          body: { peerUserId: params.peer },
-        });
-        if (isChatUuid(opened.conversation_id)) openedId = opened.conversation_id;
-      } catch {
-        // Failed opens must not be treated as successful conversation creation.
-      }
-      if (openedId) redirect(`/chat?conversationId=${encodeURIComponent(openedId)}`);
-    }
-  }
+  // Navigation is read-only. Creating a room is a deliberate POST when the member sends a message.
+  const requestedPeer = isChatUuid(params.peer) ? params.peer : null;
+  const existingPeerRoom = requestedPeer
+    ? conversations.find((c) => c.peer_user_id === requestedPeer) ?? null
+    : null;
+  if (existingPeerRoom) selectedId = existingPeerRoom.conversation_id;
+  const canComposeToPeer = requestedPeer !== null && existingPeerRoom === null;
 
   // 3. Find active conversation
   const activeConversation = selectedId
@@ -105,6 +93,24 @@ export default async function ChatPage({
           '实时安全收发会员间的1对1私密消息。任何不当言论或欺诈行为将受到管理团队的严厉制裁。',
         )}
       </PageHeader>
+
+      {canComposeToPeer && (
+        <section
+          aria-label={localeLabel(locale, '새 쪽지 상대', 'New message recipient', '新規メッセージの宛先', '新私信收件人')}
+          className="grid min-w-0 gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:flex sm:items-center sm:justify-between"
+        >
+          <p className="min-w-0 text-sm text-muted-foreground">
+            {localeLabel(
+              locale,
+              '직접 대화방 열기를 누르기 전에는 대화방을 만들지 않습니다. 열기 후 쪽지를 작성할 수 있습니다.',
+              'No conversation is created until you select Open conversation. You can compose a message afterward.',
+              '「会話を開く」を押すまで会話は作成されません。開いた後にメッセージを作成できます。',
+              '点击“打开对话”之前不会创建对话。打开后即可撰写私信。',
+            )}
+          </p>
+          <PeerConversationStart key={requestedPeer} peerUserId={requestedPeer!} locale={locale} />
+        </section>
+      )}
 
       <ChatView
         initialConversations={conversations}

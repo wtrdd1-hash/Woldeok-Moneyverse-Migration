@@ -115,4 +115,17 @@ describe('security headers', () => {
       'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     );
   });
+  it('keeps private chat pages unindexed and uncached even when public SEO is enabled', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    for (const source of ['/chat', '/:locale(ko|en|ja|zh|vi)/chat']) {
+      const group = groups.find((entry) => entry.source === source);
+      expect(group, source).toBeDefined();
+      const headers = new Map(group!.headers.map(({ key, value }) => [key, value]));
+      expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(headers.get('cache-control')).toBe('private, no-store');
+      expect(headers.get('referrer-policy')).toBe('no-referrer');
+    }
+  });
+
 });
