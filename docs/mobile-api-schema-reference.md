@@ -1920,7 +1920,9 @@ _No request body._
 
 | Name | In | Required | Type | Constraints |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| category | query | false | string | enum="analysis","question","journal","business","system" |
 
 ### Request body
 
@@ -1930,6 +1932,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| categoryFilter | false | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

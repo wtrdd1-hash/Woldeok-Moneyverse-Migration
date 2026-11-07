@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseBoardCategory, isVerifiedBoardCategoryResponse } from '@/lib/board-category';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const boardCategoryPath = parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('category');
+  const boardCategoryValues = boardCategoryPath ? request.nextUrl.searchParams.getAll('category') : [];
+  const boardCategory = boardCategoryPath ? parseBoardCategory(boardCategoryValues.length === 1 ? boardCategoryValues[0] : boardCategoryValues) : null;
+  if (boardCategoryPath && (!boardCategory || boardCategory.invalid || !boardCategory.category)) {
+    return gatewayProblem(400, 'Bad Request', 'board_category_invalid', 'invalid public board category');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -327,6 +335,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     } catch {
       return gatewayProblem(503, 'Service Unavailable', 'stock_history_gross_unverified',
         'owner stock trade gross filter could not be verified');
+    }
+  }
+
+  // A legacy backend can silently ignore category, including when zero rows match.
+  if (boardCategoryPath && response.ok) {
+    try {
+      if (request.method !== 'GET' || !isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardCategoryResponse(await response.clone().json(), boardCategory!.category!)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_category_unverified', 'public board category source is unverified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_category_unverified', 'public board category source is unverified');
     }
   }
 
@@ -585,13 +605,13 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('category'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

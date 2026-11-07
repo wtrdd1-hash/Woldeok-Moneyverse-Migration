@@ -22,3 +22,17 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+
+describe('public board stock category HTTP validation', () => {
+  it('returns an explicit applied filter marker even for zero matches', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ category: 'analysis', q: 'WLD' })).resolves.toEqual({ posts: [], categoryFilter: 'analysis' });
+    expect(community.publicList).toHaveBeenCalledWith(undefined, 'WLD', 'analysis');
+  });
+  it.each([{ category: '' }, { category: 'unknown' }, { category: ['analysis','question'] }, { category: 'analysis', cursor: 'x' }])(
+    'rejects malformed category query %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

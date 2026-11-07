@@ -1920,7 +1920,9 @@ _요청 본문 없음._
 
 | 이름 | 위치 | 필수 | 타입 | 제약 |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| category | query | false | string | enum="analysis","question","journal","business","system" |
 
 ### 요청 본문
 
@@ -1930,6 +1932,7 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| categoryFilter | false | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |
