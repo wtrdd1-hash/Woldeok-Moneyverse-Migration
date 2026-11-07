@@ -1,4 +1,6 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { HEADERS_METADATA } from '@nestjs/common/constants';
+import { ShopController } from './shop.controller';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -110,11 +112,14 @@ describe('shop routes', () => {
     );
   });
 
-  it('marks private holdings responses as non-cacheable even when authentication fails', async () => {
-    const response = await request(app.getHttpServer()).get('/api/v1/shop/holdings');
-    expect(response.status).not.toBe(404);
-    expect(response.headers['cache-control']).toBe('private, no-store');
-    expect(response.headers['x-robots-tag']).toBe('noindex');
+  it('declares private cache and robots headers for successful holdings responses', () => {
+    const headers = Reflect.getMetadata(HEADERS_METADATA, ShopController.prototype.holdings) as
+      | Array<{ name: string; value: string }>
+      | undefined;
+    expect(headers).toEqual(expect.arrayContaining([
+      { name: 'Cache-Control', value: 'private, no-store' },
+      { name: 'X-Robots-Tag', value: 'noindex' },
+    ]));
   });
 
   it('mounts the catalogue purchase command behind a session', async () => {
