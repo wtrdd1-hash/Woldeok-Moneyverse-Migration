@@ -1,3 +1,15 @@
+## v2026.11.06.0322 — F675-261 동결 갱신 판정 영수증 독립 대사 (기능 추가 / 제안 / 운영 보류)
+- **주기·기준:** 이전 기능 보완 v1820 → 현재 기능 추가 v1822 → 다음 기능 보완 v1824. main 0b5b2b1385d2 기준. F675-249~260은 구현 확인 전까지 제안으로 취급. 기획 전용, 런타임·금융 데이터 변경 금지.
+- **목적·권한:** 검토용 동결 갱신의 독립 판정, 감사 기록, Outbox 전달 영수증에서 누락·중복·위조·역순을 탐지. 사고 감독자가 대사 요청, 별도 준법 검토자가 불일치 확인, 보안 감사자가 불변 근거 조회. 위임 계정을 포함해 본인 판정의 자기 확인 금지.
+- **화면·상태:** 인증된 /admin/sla/custody/freezes/:id/receipts 목록·상세, 상태/시각/사고/매니페스트 필터. CTA 대사 실행·서명 증빙 조회·불일치 상신·독립 확인·비식별 보고서. NOT_RUN, QUEUED, VERIFYING, MATCHED, MISMATCH, BLOCKED_UNKNOWN, ACKNOWLEDGED; 빈 화면·로딩·403·409·429·503·재시도 제공. 확인은 원본 증빙 보존·철회·다운로드 제한 해제가 아님.
+- **API 제안 6개:** GET /admin/sla/custody/freezes/:id/receipts, GET /:id/receipts/:receiptId, POST /:id/receipts/reconcile, POST /:id/receipts/:receiptId/escalate, POST /:id/receipts/:receiptId/acknowledge, GET /:id/receipts/:receiptId/export. 각 요청에서 세션·실효 자연인·테넌트/팀 RBAC·서명 신뢰 재검증. 변경은 Idempotency-Key·If-Match 필수, 타 테넌트 404 비노출, 세대 충돌 409, 불법 상태 422, 제한 429, 검증 불가 503. 테넌트별 (created_at,id) 안정 커서.
+- **DB·트랜잭션:** custody_freeze_decision_receipts 제안: (tenant_id,freeze_id) 복합 FK, (tenant_id,freeze_id,decision_generation,receipt_digest) UNIQUE, 해시·상태 CHECK, (tenant_id,freeze_id,created_at DESC,id) 및 미해결 불일치 부분 인덱스. reconciliation_runs의 (tenant_id,freeze_id,source_generation,idempotency_key) UNIQUE. 행 잠금/CAS로 서명·철회 세대·Outbox UUID·불변 감사 대조 후 결과+감사+Outbox 단일 트랜잭션. 원본 증빙 변경 금지. 작업자 펜싱·제한 재시도·DLQ·UUID 중복 제거, 철회 경합 우선.
+- **관리·보안:** 요청자·판정자·확인자 실효 자연인 분리 및 위임 관계 검증. 서명 누락·키 폐기·Outbox 누락·매니페스트 불일치 시 BLOCKED_UNKNOWN 및 내보내기 차단. 테넌트/행위자 호출 제한, 개인정보 비식별 로그, noindex/no-store, 짧은 유효기간의 승인된 내보내기와 감사.
+- **SEO·모바일·접근성·KPI:** 관리자 검색 제외·캐시 금지, 320px 재배치·키보드 초점·WCAG 2.2 AA·영한 동등성·UTC 저장/현지 표시. 불일치율, 탐지 지연, 독립 승인 위반 0건, DLQ 적체, 차단 내보내기, 중복 이벤트 제거 측정.
+- **검증·승격:** 실제 PostgreSQL 테넌트 FK/고유성/CAS 경합, Outbox 누락·중복·역순, 키 철회, 위임 자기 승인, 테넌트 열거, 시각 오차, 작업자 중단, 롤백, 스크린리더/모바일 회귀. 플래그 admin_sla_freeze_receipt_reconciliation_v1 기본 OFF. 추가형 마이그레이션·호환 리더·Test exact-SHA E2E/보안·승인된 카나리·롤백 리허설 필수. 롤백 시 플래그 OFF, 불변 기록 보존.
+- **P0:** 과거 Production /en·/en/login HTTP 500은 현재 시각 인증된 재측정과 프록시/백엔드 로그·실제 배포 SHA 확인 필요. 외부 프로브 HTTP 000은 연결 미확인이지 500 입증 아님. 릴리스 링크, DB 최소권한·체크섬, 독립 복원, 금융 원장, 국내 법률 게이트; 운영 보류.
+- **P1:** 열린 #2777 및 F675-249~260 초안의 main 중복 정리; 실제 Next.js frontend, NestJS backend/admin, app-api, PostgreSQL 마이그레이션 확인 후 선행 기능 구현 및 별도 개발 PR. 외부 독립 근거 신규 검증 0건, 누적 UNKNOWN/10,000, 출처·중복 제거 BLOCKED/IN PROGRESS.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
