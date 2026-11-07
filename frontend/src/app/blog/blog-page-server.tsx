@@ -76,7 +76,7 @@ export function metadataForHub(locale: BlogLocale): Metadata {
     ({ ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' })[l], blogHubUrl(l),
   ]));
   return {
-    title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
+    title: { absolute: PAGE_TITLES[locale] }, description: PAGE_DESCRIPTIONS[locale],
     alternates: { canonical: blogHubUrl(locale), languages },
     openGraph: {
       title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
