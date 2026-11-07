@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -238,14 +239,23 @@ export default async function AdminControlsPage() {
             <CardTitle className="text-base">지금 부여된 역할</CardTitle>
             <CardDescription>
               최고관리자는 한 명뿐이고, 회수가 아니라 다른 계정으로 넘기는 방식으로만 바뀝니다.
-              비어 있다면 최고관리자만 이 목록을 볼 수 있기 때문입니다.
+              권한에 따라 역할 목록을 확인할 수 없을 수 있습니다. 조회 불가와 실제 0건은 구분해 표시합니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
             {overview === null ? (
               <EmptyState title="역할 목록을 불러오지 못했어요." />
+            ) : overview.rolesEvidence === 'RESTRICTED' ? (
+              <p role="status" className="rounded-md border p-4 text-sm text-muted-foreground">
+                이 역할 목록은 최고관리자에게만 공개됩니다. 역할이 0건이라는 뜻은 아닙니다.
+              </p>
+            ) : overview.rolesEvidence === 'UNAVAILABLE' ? (
+              <div role="alert" className="grid gap-2 rounded-md border border-destructive/40 p-4 text-sm">
+                <p>역할 조회 결과를 검증하지 못했습니다. 역할이 없다고 판단하거나 역할 변경을 진행하지 마세요.</p>
+                <Link href="/admin/controls" className="inline-flex min-h-11 w-fit items-center rounded-md border px-4 py-2 font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">다시 조회</Link>
+              </div>
             ) : overview.roles.length === 0 ? (
-              <EmptyState title="표시할 역할이 없습니다." />
+              <EmptyState title="확인된 역할이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
                 <Table className="min-w-[480px]">
@@ -282,7 +292,7 @@ export default async function AdminControlsPage() {
           </CardContent>
         </Card>
 
-        {isSuperadmin && overview !== null && (
+        {isSuperadmin && overview?.rolesEvidence === 'VERIFIED' && (
         <div className="grid gap-3 md:grid-cols-2">
           <Card>
             <CardHeader>

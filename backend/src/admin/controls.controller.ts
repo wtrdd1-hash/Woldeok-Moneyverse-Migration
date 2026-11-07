@@ -31,7 +31,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import { isAuthorizationFailure, isExpectedCommandFailure, isRoleRefusal } from '../core/pg-error';
 import { ControlsInputError, ControlsRepository } from './controls.repository';
 
 /**
@@ -201,13 +201,22 @@ export class AdminControlsController {
       repository.featureSwitches(actor),
       repository.policies(actor),
     ]);
-    // Roles are superadmin-only and every administrator can reach this page,
-    // so a refusal here is an expected answer rather than a failure.
-    const roles = await repository.roles(actor).catch((error: unknown) => {
-      if (isAuthorizationFailure(error) || isExpectedCommandFailure(error)) return [];
-      throw error;
-    });
-    return { featureSwitches, policies, roles };
+    // The SQL role listing is superadmin-only (057). An intentional 42501
+    // refusal must not turn the whole admin console into HTTP 500, nor should
+    // it be represented as a verified empty list. A genuine missing table
+    // privilege (also 42501) is still an infrastructure error and propagates.
+    const roleResult = await repository.roles(actor)
+      .then((roles) => ({ roles, rolesEvidence: 'VERIFIED' as const }))
+      .catch((error: unknown) => {
+        if (isRoleRefusal(error) || isAuthorizationFailure(error)) {
+          return { roles: [], rolesEvidence: 'RESTRICTED' as const };
+        }
+        if (isExpectedCommandFailure(error)) {
+          return { roles: [], rolesEvidence: 'UNAVAILABLE' as const };
+        }
+        throw error;
+      });
+    return { featureSwitches, policies, ...roleResult };
   }
 
   /**
