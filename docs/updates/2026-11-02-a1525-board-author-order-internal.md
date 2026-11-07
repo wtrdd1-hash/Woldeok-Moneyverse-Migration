@@ -1,0 +1,2 @@
+# Internal update — 2026-11-02 A 15:25
+Implementation: bounded public board author-name sorting across Nest/PostgreSQL existing read function, Next web and Android app-api with explicit proof and noindex/no-store. TDD RED/GREEN recorded; generated mobile contract updated. Source main unchanged. Existing backend profile auth, DEV ACL, dependency audit and official Test release gates remain blocked. No deployment. Exact branch/SHA and full gate logs: task evidence.

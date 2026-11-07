@@ -92,12 +92,16 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'sort', required: false, enum: ['author'], description: 'Sort the latest 50 public posts by exact author name (C collation)' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'sort')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    if (query.sort !== undefined && query.sort !== 'author') {
+      throw new BadRequestException('invalid board order');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -114,8 +118,10 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
-    };
+    // Keep the legacy two-argument call unchanged for existing integrations.
+    const posts = query.sort === 'author'
+      ? await this.community.publicList(stock as string | undefined, q as string | undefined, 'author')
+      : await this.community.publicList(stock as string | undefined, q as string | undefined);
+    return { posts, ...(query.sort === 'author' ? { sortApplied: 'author' as const } : {}) };
   }
 }
