@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { requireMember } from '@/lib/session';
 import { parseSecuritySessions, parseLinkedIdentities, parseSecurityEvents } from './account-security-evidence';
+import { securityFeedback } from './security-feedback';
 import {
   beginSecurityReauthentication,
   terminateOtherSessions,
@@ -82,6 +83,15 @@ export default async function AccountSecurityPage({
   const sessionData = parseSecuritySessions(rawSessions);
   const identityData = parseLinkedIdentities(rawIdentities);
   const parsedEvents = parseSecurityEvents(rawEvents);
+  const needsReceiptEvents = params.password === 'changed' || params.email === 'verification-sent';
+  // A filtered activity view cannot attest to a credential mutation. Read the
+  // unfiltered authenticated event source when the redirect requests evidence.
+  const receiptEvents = needsReceiptEvents
+    ? parseSecurityEvents(eventPath === '/api/v1/account/security/events' && !categoryInvalid && !sortInvalid
+      ? rawEvents
+      : await apiOrNull<unknown>('/api/v1/account/security/events'))
+    : null;
+  const feedback = securityFeedback(params, sessionData, receiptEvents);
   const eventData = parsedEvents !== null && !categoryInvalid && !sortInvalid &&
     securityEventsMatchCategory(parsedEvents, eventCategory) &&
     (params.sort === undefined || securityEventsMatchOrder(parsedEvents, eventSort)) ? parsedEvents : null;
@@ -92,7 +102,6 @@ export default async function AccountSecurityPage({
   const events = eventData ?? [];
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
-  const revoked = typeof params.revoked === 'string' ? params.revoked : null;
 
   return (
     <div data-page="account-security" className="mx-auto w-full max-w-4xl space-y-6 pb-16 pt-2 sm:space-y-8 sm:pt-4">
@@ -116,40 +125,12 @@ export default async function AccountSecurityPage({
       </div>
 
       {/* Alerts */}
-      {params.reauth === 'done' && (
-        <Alert className="border-primary/30 bg-primary/5">
-          <ShieldCheck className="size-4 text-primary" />
-          <AlertDescription className="text-xs font-medium">
-            본인 확인이 완료되었습니다. 민감한 보안 작업을 안전하게 계속할 수 있습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.email === 'verification-sent' && (
-        <Alert className="border-primary/30 bg-primary/5">
-          <AlertDescription className="text-xs font-medium">
-            이메일 변경 확인 메일 발송 요청이 접수되었습니다. 새 주소의 받은편지함을 확인해 주세요. 링크 확인 완료 시 모든 세션이 종료됩니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.password === 'changed' && (
-        <Alert className="border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
-          <AlertDescription className="text-xs font-medium">
-            비밀번호를 성공적으로 변경하였으며 다른 로그인 세션을 모두 안전하게 종료했습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {params.session === 'revoked' && (
-        <Alert>
-          <AlertDescription className="text-xs font-medium">
-            선택한 기기의 세션을 원격으로 종료했습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-      {revoked !== null && (
-        <Alert>
-          <AlertDescription className="text-xs font-medium">
-            다른 활성 세션 {revoked}개를 모두 안전하게 종료했습니다.
-          </AlertDescription>
+      {feedback && (
+        <Alert role="status" aria-live="polite" className={feedback.verified ? 'border-primary/30 bg-primary/5' : 'border-amber-500/40 bg-amber-500/5'}>
+          {feedback.verified
+            ? <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
+            : <AlertTriangle className="size-4 text-amber-600" aria-hidden="true" />}
+          <AlertDescription className="text-xs font-medium">{feedback.message}</AlertDescription>
         </Alert>
       )}
       {error && (
