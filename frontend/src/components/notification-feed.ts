@@ -12,12 +12,14 @@ export function parseNotificationFeed(payload: unknown): NotificationItem[] {
   if (!payload || typeof payload !== 'object' || !('notifications' in payload)) throw new Error('Invalid notification envelope');
   const rows = (payload as { notifications: unknown }).notifications;
   if (!Array.isArray(rows)) throw new Error('Invalid notification list');
+  if (rows.length > 100) throw new Error('Oversized notification feed');
   const seen = new Set<string>();
   return rows.map((item: unknown): NotificationItem => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('Invalid notification row');
     const row = item as Record<string, unknown>;
     if (typeof row.id !== 'string' || !uuid.test(row.id) ||
-        typeof row.title !== 'string' || typeof row.body !== 'string' ||
+        typeof row.title !== 'string' || row.title.length > 500 ||
+        typeof row.body !== 'string' || row.body.length > 10000 ||
         typeof row.category !== 'string' || typeof row.is_read !== 'boolean' ||
         typeof row.created_at !== 'string' || !Number.isFinite(Date.parse(row.created_at))) {
       throw new Error('Invalid notification fields');
