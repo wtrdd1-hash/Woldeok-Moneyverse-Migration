@@ -49,6 +49,12 @@ export function ipBlockGate({
           next();
           return;
         }
+        // This denial is derived from a private moderation decision. Never let
+        // a shared intermediary cache or index the response, even if an
+        // upstream middleware supplied permissive headers.
+        response.setHeader('Cache-Control', 'private, no-store');
+        response.setHeader('X-Robots-Tag', 'noindex, nofollow');
+        response.setHeader('Referrer-Policy', 'no-referrer');
         response.status(403).type('application/problem+json').send({
           type: 'about:blank',
           title: 'Forbidden',
