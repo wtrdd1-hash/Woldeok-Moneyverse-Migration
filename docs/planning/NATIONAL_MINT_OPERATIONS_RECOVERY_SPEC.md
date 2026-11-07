@@ -1,11 +1,13 @@
 # National Mint Operations Recovery and Feature Expansion — Detailed Specification
 
-> Version: v2026.11.07.1772
+> Version: v2026.11.07.1772.1 — policy correction
 > Status: PLANNING / P0 BLOCKED / NOT IMPLEMENTED
 > Date: 2026-11-07 KST
 > Canonical language: English; Korean counterpart: [NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md](NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md)
 > Parent: [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 > Incident: [#2878](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2878); existing finance dependency [#2366](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2366)
+
+**Correction v1772.1:** v1772 incorrectly reintroduced a second approver. Existing Living Plan dated 2026-09-09 already defines a single superadmin, with repeated admin action reauthentication removed 2026-10-30. Preserve existing login/session and authorization, policy and supply limits, CSRF, reasons, idempotency, immutable audit and canonical ledger. Do not require a second person or action-by-action relogin.
 
 ## 1. Problem statement, evidence, user impact
 
@@ -29,12 +31,12 @@ Historical SQL migrations are immutable. New schema must use a forward-only coor
 | --- | --- | --- | --- | --- |
 | MINT-01 | P0 | Truthful operational status | Distinguish policy-read, approved order, preflight pass, journal commit, balance projection, certificate and reconciliation | Never claim ready/issued from read or approval alone |
 | MINT-02 | P0 | Policy order command center | List/filter approved, pending, executed, frozen, expired and rejected orders with amount remaining, validity and author/approver audit | 401/403/503 distinct; no false count |
-| MINT-03 | P0 | Two-person policy approval | Proposer and final approver must be distinct qualified admins; signed scope, expiry, reason and risk-bound ceilings | Self-approval/duplicate approvals blocked |
+| MINT-03 | P0 | Single-superadmin policy controls | Existing authenticated superadmin authorizes a policy order with scope, expiry, reason, amount ceiling and immutable actor log; no separate approver | Same operator may propose and approve, with validation and no duplicate execution |
 | MINT-04 | P0 | Safe mint preflight | Dry-run receipt checks exact policy, supply cap, recipient, freeze, source envelope, DB grants, debt/ledger compatibility | Preview never reserves supply or changes balances |
 | MINT-05 | P0 | Canonical atomic mint | Guarded policy claim + double-entry posting + recipient credit where allowed + receipt + immutable certificate in one transaction | Idempotent same payload; collision 409; 0 phantom WLD |
 | MINT-06 | P0 | Funded atomic retirement | Eligible existing WLD source locked and debited with correct MINT/SINK counter-post, immutable retirement receipt and certificate | No unfunded/negative retirement; policy required |
 | MINT-07 | P0 | Honest certificate explorer | Search verified vs unverified mint/retirement receipts, document ID, hash, order and journal references, downloadable redacted audit export | Source failure never shows empty success |
-| MINT-08 | P0 | Emergency freeze control | Immediate fail-closed issuance/retirement freeze, audited reason and ticket, bounded override with distinct approver; confirm backend state after mutation | No UI-only freeze; pending in-flight transactions defined |
+| MINT-08 | P0 | Emergency freeze control | Immediate fail-closed issuance/retirement freeze, audited reason and ticket, existing superadmin authority and deterministic release checks; confirm backend state after mutation | No UI-only freeze; pending in-flight transactions defined |
 | MINT-09 | P1 | Finance reconciliation console | Compare period-scoped certified supply, orders/certs, journals, account balances, historic quarantine and independent source totals | Exact same-snapshot mismatch classification |
 | MINT-10 | P1 | User-impact & recovery ledger | Trace protected member credit/debit receipt, expected balance and Treasury/pension/market effects; read-only incident explanation for members | No personal admin leak; no invalid payout replay |
 | MINT-11 | P1 | Notification and anomaly pipeline | Internal Telegram/Discord alerts only for actionable failures, freeze change, supply spike, E2E recovery or stale source | Deduplicate by incident+window, no token/PII |
@@ -46,12 +48,12 @@ For any unverified feature, show **“Not executable: ledger settlement not cert
 
 ## 4. Precise status and user interactions
 
-Status sequence: UNKNOWN → POLICY_READ_VERIFIED → ORDER_APPROVED → PREFLIGHT_VERIFIED → SETTLEMENT_COMMITTED → PROJECTION_RECONCILED → CERTIFICATE_VERIFIED. This is an evidence model, **not an automatic permission escalation**. A frozen, stale, failed or unsupported stage changes state to FROZEN / STALE / BLOCKED / UNVERIFIED, never to VERIFIED_EMPTY. “Can execute” requires fresh approved policy plus identity, ACL, source, amount, two-person approval and finance core preconditions.
+Status sequence: UNKNOWN → POLICY_READ_VERIFIED → ORDER_APPROVED → PREFLIGHT_VERIFIED → SETTLEMENT_COMMITTED → PROJECTION_RECONCILED → CERTIFICATE_VERIFIED. This is an evidence model, **not an automatic permission escalation**. A frozen, stale, failed or unsupported stage changes state to FROZEN / STALE / BLOCKED / UNVERIFIED, never to VERIFIED_EMPTY. “Can execute” requires fresh approved policy plus identity, ACL, source, amount, existing superadmin authorization and finance core preconditions.
 
 - Dashboard tabs: Overview, Policy orders, Mint wizard, Retirement wizard, Certificates, Reconciliation, Incidents.
-- Mint wizard: select approved order → validated recipient/envelope and amount → read-only preflight with exact cents/units and hash of request → distinct approver review → final typed confirmation → authenticated single POST → immutable journal/certificate proof or explicit failure. No optimistic success or automatic re-POST after timeout; query operation by idempotency key.
-- Retirement wizard: select proven source WLD holdings → policy and enough unencumbered balance → preview impact by M0/supply category → two-person approval → commit and receipt. Source cannot be inferred from total Treasury funds; no arbitrary source_type.
-- Freeze UX: show confirmed server state, actor, reason, time, policy revision and propagation evidence; unfreeze requires new approval and a current finance preflight.
+- Mint wizard: select approved order → validated recipient/envelope and amount → read-only preflight with exact cents/units and hash of request → same authorized superadmin's policy and preflight checks → final typed confirmation → authenticated single POST → immutable journal/certificate proof or explicit failure. No optimistic success or automatic re-POST after timeout; query operation by idempotency key.
+- Retirement wizard: select proven source WLD holdings → policy and enough unencumbered balance → preview impact by M0/supply category → existing superadmin authorization and source verification → commit and receipt. Source cannot be inferred from total Treasury funds; no arbitrary source_type.
+- Freeze UX: show confirmed server state, actor, reason, time, policy revision and propagation evidence; unfreeze requires the current authenticated superadmin, an auditable reason and a current finance preflight; no second operator.
 - Certificates: results tagged PROVEN_CANONICAL / CERTIFICATE_ONLY / LEGACY_UNVERIFIED / SOURCE_UNAVAILABLE. Provide immutable timestamp, SHA256 evidence hash, journal and policy links. VERIFIED_EMPTY only on fully successful authenticated independently scoped query.
 - Refresh every 20s only for bounded read models; show last successful server timestamp, current freshness window, retry and failed subsections. Do not collapse 503 into [] or 0. Cancel stale requests on session/account change; private no-store and noindex all outcomes.
 - Member-facing read-only impact notice: never claim credited WLD until certified user-facing account delta and receipt are reconciled; protect individual balances and explain expected vs actual incident state.
@@ -67,20 +69,20 @@ Existing endpoints are **not certified**. Proposed scoped additions are design-o
 | Preview | POST /api/v1/admin/mint-v2/operations/preflight | validate-only; subject-scoped capability nonce, expiresAt, decision; **no DB mutation** |
 | Execute | POST /api/v1/admin/mint-v2/operations | type MINT/RETIRE, orderId, source, recipient, integer amount, UUID idempotency, preflight fingerprint |
 | Operation proof | GET /api/v1/admin/mint-v2/operations/:id | committed journalTxId, balanced posting hash, account delta, certId, outcome |
-| Approve | POST /api/v1/admin/mint-v2/orders/:id/approve | second distinct approver and scope revision |
-| Freeze | POST /api/v1/admin/mint-v2/freeze | freezeType, reason, ticket, expiry, two-person release |
+| Approve | POST /api/v1/admin/mint-v2/orders/:id/approve | existing superadmin authorization, idempotency, order-state and scope-revision checks; no second-actor requirement |
+| Freeze | POST /api/v1/admin/mint-v2/freeze | freezeType, reason, ticket, expiry, single-superadmin release with audit log |
 | Audit | GET /api/v1/admin/mint-v2/certificates | keyset page, verification status and redacted export reference |
 | Reconcile | GET /api/v1/admin/mint-v2/reconciliation | same-snapshot supply and posting sums, mismatch taxonomy, last successful epoch |
 
 Endpoint names and new migration numbers are **proposals**, not allocated. Preserve backward-compatible safe reads and the legacy 503 hold; switch new writes on only after full validation. Use shared response shape {status, code, evidence, requestId, asOfUtc}; all money as canonical decimal integer strings. Error distinctions: 400 malformed, 401 auth expired, 403 insufficient admin/CSRF/consent, 409 idempotency conflict or revision drift, 410 expired order/preflight, 422 unbalanced/unfunded/out-of-policy, 423 freeze, 429 rate-limited, 503 data/ledger source unavailable. Do not reveal internals to unauthorized callers.
 
-Suggested data relationships: monetary_policy_orders → monetary_policy_approvals (two unique actors) → monetary_execution_attempts (request key+payload hash+status) → canonical economy ledger transaction and two or more journal postings → immutable mint/retirement certificate (unique operation/journal ID, hash) → outbox message → immutable audit events. Add constraints for unique idempotency by actor/scope, proof links, amount >0, ordered state transitions and ledger posting uniqueness. Atomic transaction must check historical quarantine and use DB-owned authorization; no manual row fixes or overwrite of certificates.
+Suggested data relationships: monetary_policy_orders → monetary_policy_approval_receipts (existing superadmin actor, single approval decision) → monetary_execution_attempts (request key+payload hash+status) → canonical economy ledger transaction and two or more journal postings → immutable mint/retirement certificate (unique operation/journal ID, hash) → outbox message → immutable audit events. Add constraints for unique idempotency by actor/scope, proof links, amount >0, ordered state transitions and ledger posting uniqueness. Atomic transaction must check historical quarantine and use DB-owned authorization; no manual row fixes or overwrite of certificates.
 
 ## 6. QA, observability and safe release
 
 - **Source baseline:** inspect exact main at start/mid/end. Shared branch has uncommitted Mint UI/BFF changes; do not transplant or overwrite. Coordinate migration-number owner with concurrent Gemini work. Upstream v1761 SQL334-336 source merge does not establish official Test/Prod rollout.
 - **Read-only baseline:** compare one consistent database snapshot across Treasury, monetary orders, Mint certificates, canonical transactions/postings, member balances and historic archive; collect counts and query IDs without PII. Do not mutate real DB for testing.
-- **PG test matrix:** same idempotency repeated 10x returns identical outcome; same key changed payload 409; 100 parallel identical/different actor requests; abort after each write step; expiry/freeze during contention; two-person spoof; source funds zero; denied raw app role DML; post >2^53 WLD integer handling; journal per-currency balance; policy ceiling; no phantom WLD; certification hash tamper; SQL replay; HTTP 401/403/409/410/422/423/429/503; cert GET source error cannot become [].
+- **PG test matrix:** same idempotency repeated 10x returns identical outcome; same key changed payload 409; 100 parallel identical/different actor requests; abort after each write step; expiry/freeze during contention; forged admin/session; unauthorized actor; source funds zero; denied raw app role DML; post >2^53 WLD integer handling; journal per-currency balance; policy ceiling; no phantom WLD; certification hash tamper; SQL replay; HTTP 401/403/409/410/422/423/429/503; cert GET source error cannot become [].
 - **Frontend:** 320px/200%, focus and keyboard, screen-reader stage descriptions, Korean/English parity, 20-second refresh races, slow network, stale session, duplicate tap, tab return, freezes; all actions require explicit server-confirmed outcome.
 - **Acceptance gates:** all focused and full CI, PostgreSQL 17 independent backup restore, provenance/ACL, invariant comparison before/after in exact Test candidate, authenticated Test E2E with deliberately funded synthetic fixtures only, backend and frontend exact SHA, operation replay and rollback. Only then staged release via immutable build and no-downtime Nginx cutover, verify Production real evidence and member invariants. A documentation PR **must not trigger an app runtime release**.
 - **Metrics:** false-verified actions = 0, unmatched monetary certificates = 0 for newly certified flows, unbalanced journal = 0, double-credit = 0, data-source failure mislabeled as empty = 0, P95 read latency under independently measured budget, audit completeness 100%. All are **targets not test results**.

@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.07.1772.1 — Retired two-person approval correction
+- Single-superadmin policy (living plan 2026-09-09) restored to Mint requirements. [EN worklog](worklog/2026-11-07-mint-single-admin-correction-v1772.1.md) / [KO](worklog/2026-11-07-mint-single-admin-correction-v1772.1.ko.md). Repeated per-action reauth removed 2026-10-30. Draft PR #2879, finance P0 remains unresolved.
+
 ## v2026.11.07.1772 — Mint functionality incident and detailed recovery roadmap
 - **P0 open #2878 / finance #2366.** [EN 14-feature plan](planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.md) · [KO](planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md) · [worklog](worklog/2026-11-07-mint-control-recovery-v1772.md) · [GitHub update](updates/v2026.11.07.1772-mint-github.md) · [internal update](updates/v2026.11.07.1772-mint-internal.md). Planning only; real mint/retirement, authenticated Test and Production not certified.
 

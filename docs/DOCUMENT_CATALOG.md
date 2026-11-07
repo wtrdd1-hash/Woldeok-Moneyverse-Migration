@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.11.07.1772.1 — Retired two-person approval correction
+- Single-superadmin policy (living plan 2026-09-09) restored to Mint requirements. [EN worklog](worklog/2026-11-07-mint-single-admin-correction-v1772.1.md) / [KO](worklog/2026-11-07-mint-single-admin-correction-v1772.1.ko.md). Repeated per-action reauth removed 2026-10-30. Draft PR #2879, finance P0 remains unresolved.
+
 ## v2026.11.07.1772 — Mint operations P0 defect and feature expansion
 - [Canonical English detailed spec](planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.md) / [Korean](planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md) · [Execution log](worklog/2026-11-07-mint-control-recovery-v1772.md) / [한국어](worklog/2026-11-07-mint-control-recovery-v1772.ko.md). Incident #2878, dependency #2366; PLANNING only, no financial writer promotion.
 

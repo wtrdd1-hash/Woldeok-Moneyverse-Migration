@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.07.1772.1 — Retired two-person approval correction
+- Single-superadmin policy (living plan 2026-09-09) restored to Mint requirements. [EN worklog](docs/worklog/2026-11-07-mint-single-admin-correction-v1772.1.md) / [KO](docs/worklog/2026-11-07-mint-single-admin-correction-v1772.1.ko.md). Repeated per-action reauth removed 2026-10-30. Draft PR #2879, finance P0 remains unresolved.
+
 ## v2026.11.07.1772 — 국가조폐국 작동 장애·14개 기능 확장 기획
 - [English detailed plan](docs/planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.md) · [한국어](docs/planning/NATIONAL_MINT_OPERATIONS_RECOVERY_SPEC.ko.md) · [이슈 #2878](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2878) · [작업 기록](docs/worklog/2026-11-07-mint-control-recovery-v1772.md). **기획만 작성**: 원장 집행·운영 배포 확인 아님.
 
