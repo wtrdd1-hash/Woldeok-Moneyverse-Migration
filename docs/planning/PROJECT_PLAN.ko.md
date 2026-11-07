@@ -3009,3 +3009,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1884 — F675-276 전달 대사 증빙·재전송 안전성 보강 (Feature Improvement; 문서 전용)
+- **주기:** Previous Feature Addition v1882 → Current Feature Improvement v1884 → Next Feature Addition v1886. 기준 origin/main 0b5b2b1385d2a75614d39458dff94f7d3098ed03; F675-276은 미병합 PR #2845의 제안으로 배포 증거가 아니다.
+- **증빙 출처:** 제공자 내보내기에 테넌트, 제공자 계정, 스키마 버전, 객체 SHA-256, 추출 시각, UTC [시작,종료) 구간, 제공자 커서, 영수증 서명키 ID를 결합한다. 실제 제공자 내보내기 지원은 미확인/BLOCKED이며 서명 증거를 임의 생성하지 않는다. 시계 오차 허용 범위를 기록하고 서명된 원본 바이트를 암호화 보존한다. 정규화된 데이터만으로 서명 진위를 증명하지 않는다.
+- **분류:** ACCEPTED_BY_PROVIDER, CONFIRMED_DELIVERED, BOUNCED, SUPPRESSED, UNKNOWN, CONFLICTING_EVIDENCE를 구분한다. HTTP 2xx는 접수일 뿐 전달 증거가 아니며 콜백 부재·커서 만료는 UNKNOWN이다. 권위 있는 분류 또는 독립 검토된 UNKNOWN 예외 없이는 RECONCILED로 전환하지 않는다. UNKNOWN을 DELIVERED로 변경하지 않는다.
+- **재전송 보호:** 동의 철회, 발송 억제, 수신자 연결 불일치, 출처 만료, 제공자 장애, 상충 증빙 시 '재전송 요청' 비활성화. 테넌트+원본 시도+세대 UNIQUE 재전송 의도, If-Match, 행위자/테넌트/본문 해시 결합 멱등성 키를 사용한다. 위임을 포함한 실효 신원 기준 요청자와 승인자를 분리한다. 의도·감사·Outbox를 단일 트랜잭션으로 기록하고 작업자 펜싱과 발송 직전 동의 재검증을 적용한다. 제공자 접수 후 타임아웃은 UNKNOWN이며 무조건 자동 재전송하지 않는다.
+- **API·DB:** #2845의 관리자 API 6개는 제안이며 구현된 라우트가 아니다. Nest·Next BFF·Android/app-api 계약을 개발 전에 검증한다. reconciliation_items→runs 및 불변 영수증의 테넌트 복합 FK, UNIQUE(tenant_id,provider_account_id,provider_delivery_id,attempt_id,receipt_digest), UNKNOWN/CONFLICTING 부분 인덱스를 명세한다. 잘못된 커서·오래된 세대, 동일 키의 다른 본문(409), 잘못된 상태 전이(422), 호출 제한(429), 교차 테넌트 조회(404)를 차단한다. SECURITY DEFINER 안전 search_path·최소권한 원칙을 유지한다.
+- **화면·관리:** 관리자 > SLA > 에스컬레이션 > 전달 대사에서 출처 시각, 최신성 경고, 검증/미검증 배지, '재전송 요청'과 '재전송 승인' 분리, 사유 입력, CSV 수식 주입 방지 비식별 내보내기를 제공한다. 로딩·빈 결과·부분·UNKNOWN·충돌·오프라인·403/409/429/503 상태, 320px, 키보드 초점, WCAG 2.2 AA, 영한 동등성, private no-store/noindex.
+- **QA·배포:** 키 교체·철회, 중복·역순 콜백, 악성 CSV, DST/시계 오차, 커서 만료, 접수 후 작업자 장애, 동시 승인, 테넌트·위임 신원 혼동, 동의 경쟁, 1만 행 페이지, 모바일/a11y, Test exact-SHA를 검증한다. KPI는 증빙 포괄률, UNKNOWN 지연 p95, 중복 발송 0, 거짓 DELIVERED 0, 동의 위반 0이며 개인정보를 수집하지 않는다. admin_sla_delivery_reconciliation_v1 기본 OFF, 선행 기능·제공자 증빙·운영 P0/법률/DB/복원/원장 게이트 전 RELEASE HOLD. 롤백은 OFF 및 불변 감사 보존, 금융 원장·SLA 확정 기한 불변.
+- **백로그:** P0 OPS1884-01 누락 /srv/moneyverse 대상 복구·/en 및 /en/login 재검증, SEC1884-02 DB 권한·체크섬·백업 복원, FIN1884-03 원장·국내 법률, REL1884-04 CI/Test exact-SHA. P1 REC1884-05 제공자 내보내기 지원, -06 서명 영수증·불변 DB, -07 Nest/Next/app-api 계약, -08 2인 승인·동시성, -09 UI/a11y/개인정보, -10 격리 회귀·롤백. 모두 제안이며 미구현. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000; 중복 제거·근거 분류 BLOCKED/IN PROGRESS.
