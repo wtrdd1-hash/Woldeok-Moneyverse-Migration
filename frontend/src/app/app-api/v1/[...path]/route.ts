@@ -6,6 +6,7 @@ import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
+import { parseSeasonCalendarEvents } from '@/app/calendar/season-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
 import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
@@ -271,6 +272,28 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // A successful legacy season response is not automatically a verified
+  // calendar. Reuse the exact web parser and never cache member schedule data.
+  if (parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events' &&
+      request.method === 'GET') {
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Season Calendar Unavailable', 'season_calendar_unavailable',
+        'The authenticated season calendar is unavailable');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON season data');
+      const verified = parseSeasonCalendarEvents(await response.clone().json());
+      if (verified === null) throw new Error('unverified season data');
+      return contractJson({ events: verified }, { status: 200, headers: {
+        'cache-control': 'private, no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer',
+      } });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'season_calendar_unverified',
+        'The season calendar could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -566,6 +589,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
