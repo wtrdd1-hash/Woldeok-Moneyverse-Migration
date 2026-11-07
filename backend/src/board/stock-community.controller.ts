@@ -92,12 +92,23 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({
+    name: 'positionDisclosure', required: false, type: String,
+    enum: ['holder', 'no_position', 'operator_related', 'undisclosed'],
+    description: 'Author self-reported position disclosure, not verified holdings',
+  })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'positionDisclosure')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const positionDisclosure = query.positionDisclosure;
+    if (positionDisclosure !== undefined &&
+        (typeof positionDisclosure !== 'string' ||
+          !['holder', 'no_position', 'operator_related', 'undisclosed'].includes(positionDisclosure))) {
+      throw new BadRequestException('invalid position disclosure');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +126,10 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(
+        stock as string | undefined, q as string | undefined, positionDisclosure as string | undefined,
+      ),
+      ...(positionDisclosure === undefined ? {} : { appliedFilters: { positionDisclosure } }),
     };
   }
 }

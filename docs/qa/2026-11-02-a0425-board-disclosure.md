@@ -1,0 +1,15 @@
+# QA — A 04:25 public stock self-disclosure filter
+
+**Draft candidate; release HOLD.** Origin main `a8541927c3a351d980454c66e95a3356c47e0722`; task branch `auto/hourly-a-20261102-0425-board-disclosure`; PR #2425.
+
+- TDD: backend RED 3 and frontend RED 4, then backend 22 PASS and frontend 16 PASS targeted. Changed-file ESLint PASS; contract build, backend/frontend typecheck PASS.
+- Real PostgreSQL 17.11: `BEGIN READ ONLY; SET LOCAL ROLE moneyverse_app;` existing SECURITY DEFINER function EXECUTE allowed; latest public posts 1, self-reported holder 0, undisclosed 0. Prepared query with 4 parameters executed successfully for both filters. ROLLBACK. No real positive multirow filter test.
+- DEV P0 #993: app-role direct UPDATE on `account_balances` and DELETE on `user_items` still true. Production ACL unknown; B #2419 is a separate repair PR.
+- Official Test public backend/frontend SHA `510dbe6bf4d5c2a8089fc06b480776053da7a2e3`, not candidate. `sudo -n` exact-SHA identity preflight returns `ok:false` and six SHA mismatch failures; Test Treasury public status 200. Exact-SHA Test authentication/user E2E BLOCKED. Independent backup restore not run. Production release forbidden.
+- Branch audit start 179 remote branches incl main, 165 unmerged; 162 open PR, 29 conflicts. Virtual merge with A #2417 has 6 content conflicts. Preserve unique changes; delete no branches.
+- Full local Backend 2,987 PASS / 518 SKIP; Frontend first sequential run exceeded 190-second cap (rc 124), rerun with two parallel workers **2,938 PASS / 0 FAIL** (558 files); database 62 PASS / 5 SKIP. Contract 184 endpoints PASS after generated JSON and EN/KO schema regeneration. Backend/frontend build PASS (602 static pages); typecheck PASS; full lint 0 errors / 1,027 warnings; root security-policy tests 34 PASS.
+- Supply chain: `pnpm audit --prod` 0 known vulnerabilities PASS; full `pnpm audit` **FAIL** 9 findings (1 low, 8 moderate), tracked under #1075. Skipped DB tests are not PASS. Authenticated official Test E2E and independent backup restore BLOCKED.
+- Code SHA `f68e4a7f304eb1717cbc34b2b3353b8285e2355a` CI #41342242084 and candidate image #41342168928 initially FAILED because generated mobile contract/schema references drifted. Repaired in `d87f3ab6ed7f0336f2451f29fd4f6ac78cc851f4` (15 generated lines, no runtime logic change); `pnpm api:contract:check` PASS; repair SHA CI #41342706580 and image #41342702518 were pending at documentation preparation. No bypass of CI.
+- Final branch audit: 180 remote branches including main, 166 unmerged and 14 merged tracking refs; 163 open PRs, 29 conflicting. Virtual merge with A #2417 has 6 content conflicts. No branch deletion: unique work, open PR ownership and concurrent agent activity protected.
+- Test/Production public versions both advertised `510dbe6bf4d5c2a8089fc06b480776053da7a2e3` at 04:38 KST; neither runs the candidate. Both Treasury public probes returned HTTP 200, a release blocker. This is public version evidence, not executable provenance.
+- No migration, ledger writes, service restarts, merge, deployment or rollback performed. Final PR SHA/CI disposition to be recorded in PR comment.
