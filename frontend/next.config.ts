@@ -197,6 +197,17 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // Page metadata alone does not override the global index/follow HTTP
+      // header. Audit evidence and privileged retention controls stay private
+      // on both canonical and localized routes, even before authentication.
+      ...['', '/ko', '/en', '/ja', '/zh', '/vi'].map((prefix) => ({
+        source: `${prefix}/admin/logs/integrity`,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
     ];
   },
 

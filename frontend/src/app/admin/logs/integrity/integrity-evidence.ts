@@ -93,10 +93,19 @@ function validRetention(value: unknown): boolean {
     || BigInt(value.expired_rows) > BigInt(value.total_rows)) return false;
   const oldest = value.oldest_expired_sequence;
   const newest = value.newest_expired_sequence;
-  if (!(oldest === null && newest === null)
-    && !(count(oldest) && count(newest) && BigInt(oldest) <= BigInt(newest))) return false;
-  return (value.last_disposition === null || (text(value.last_disposition) && METHODS.has(value.last_disposition)))
-    && (value.last_disposition_at === null || timestamp(value.last_disposition_at));
+  // SQL 065 computes both bounds from the same expired-row predicate as the
+  // count. Contradictory fields must not certify a clean retention state.
+  const expired = BigInt(value.expired_rows);
+  if (expired === 0n) {
+    if (oldest !== null || newest !== null) return false;
+  } else if (!count(oldest) || !count(newest)
+    || BigInt(oldest) < 1n || BigInt(oldest) > BigInt(newest)) return false;
+
+  // SQL 065 joins the latest disposition method and timestamp as one row.
+  if (value.last_disposition === null) return value.last_disposition_at === null;
+  return text(value.last_disposition) && METHODS.has(value.last_disposition)
+    && timestamp(value.last_disposition_at)
+    && Date.parse(value.last_disposition_at) <= Date.now() + 300000;
 }
 
 function validDisposition(value: unknown): boolean {

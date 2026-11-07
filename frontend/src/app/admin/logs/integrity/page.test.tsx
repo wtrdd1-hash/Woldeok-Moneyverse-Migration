@@ -32,6 +32,23 @@ describe('admin audit evidence rendering', () => {
     expect(html).toContain('다시 조회');
   });
 
+  it('does not expose retention policy mutation for contradictory SQL evidence', async () => {
+    apiMock.mockImplementation(async (url: string) => {
+      if (typeof url === 'string' && url.endsWith('/retention')) return { categories: [{
+        category: 'authentication', retention_days: 90,
+        cutoff_at: '2026-10-01T00:00:00.000Z', total_rows: '10',
+        expired_rows: '0', oldest_expired_sequence: '1', newest_expired_sequence: '1',
+        last_disposition: null, last_disposition_at: null,
+      }] };
+      if (typeof url === 'string' && url.endsWith('/verifications')) return { verifications: [] };
+      return { dispositions: [] };
+    });
+    const html = renderToStaticMarkup(await AdminAuditIntegrityPage());
+    expect(html).toContain('조회 실패 또는 응답 무결성 오류');
+    expect(html).not.toContain('Change policy');
+    expect(html).toContain('다시 조회');
+  });
+
   it('distinguishes verified empty evidence from unavailable evidence', async () => {
     apiMock.mockImplementation(async (url: string) => {
       if (typeof url === "string" && url.endsWith('/retention')) return { categories: [] };
