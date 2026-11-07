@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## 기획 사이클 v1786 — 2026-11-05 — 기능 추가 F675-252: 영수증 철회 전파 감시 (제안, 미구현)
+
+**주기:** 이전 v1784 기능 보완 → 현재 v1786 기능 추가 → 다음 v1788 기능 보완. 기준 main 223f256a7425. 선행 F675-249/250/251은 미병합 초안이며 운영 기능이 아니다.
+
+**목적·권한·화면:** 문의 감독자는 확정된 영수증 철회가 모든 등록된 증빙 조회·다운로드 경로에 반영되었는지 검증한다. 감사자는 비식별 근거를 읽기만 하고 감독자는 지연 사고를 확인할 수 있지만 철회 효력을 해제할 수 없다. 관리자 > 문의 > SLA 사고 > 내보내기 > 영수증 > 전파 상태. CTA 새로고침, 경로 보기, 지연 확인. NOT_APPLICABLE, PENDING, VERIFIED, LAGGING, UNKNOWN, ACCESS_DENIED, ERROR 상태. 누락·충돌 근거는 UNKNOWN이며 VERIFIED 금지. 경로별 세대·시각·워터마크만 비식별 표시. 모바일 320px, WCAG 2.2 AA, 키보드·스크린리더 안내, 영한 동등성.
+
+**API:** GET /api/v1/admin/support/sla-policy/receipts/:id/revocation-propagation은 receiptId, authoritativeGeneration, overallStatus, evaluatedAt, watermark, surfaces[{surfaceKey,observedGeneration,verifiedAt,state}] 반환. POST /api/v1/admin/support/sla-policy/receipts/:id/propagation-acknowledgements는 감독자 권한, 사유, If-Match 세대, Idempotency-Key 요구. 확인만으로 VERIFIED 전환 금지. 범위 밖 403/404 비열거, 409 세대 충돌, 422 유효성 오류, 429 요청 제한, 503 근거 불가. 관리자 noindex·no-store, URL·로그·분석 개인정보 금지.
+
+**DB·보안·트랜잭션:** 추가 제안 불변 테이블 receipt_revocation_surface_observations: tenant_id, team_id, receipt_id, revocation_generation, surface_key, observed_generation, verified_at, source_event_id. 범위 복합 FK, UNIQUE(tenant_id,receipt_id,revocation_generation,surface_key,source_event_id), 인덱스(tenant_id,team_id,receipt_id,revocation_generation,verified_at DESC). 필수 경로 등록부 버전 관리 및 누락 시 차단. 고정 search_path SECURITY DEFINER 함수에서 범위 권한 확인, 앱 역할 직접 테이블 권한 금지. 세대 CAS·작업자 임대 펜싱·감사와 Outbox 원자적 커밋. **모든 다운로드는 전파 관측과 별도로 DB의 권위 있는 철회 상태를 동기 검증**한다. CSRF, 테넌트 격리, 권한 재검증, 재사용 차단, 페이지·요청 제한.
+
+**KPI·테스트·배포:** 전파 p50/p95/p99, 지연 건수, UNKNOWN 비율, 철회 후 다운로드 거부율, 거짓 VERIFIED 건수. 경로 0/1/100/101개, 등록부 누락, 구세대, 동시 철회, 작업자 장애, Outbox 재전송, 권한 철회, 타 테넌트, 접근성·320px 회귀. 스위치 admin_support_receipt_revocation_propagation_v1 기본 OFF; 인증된 Test exact-SHA E2E 이후 별도 운영승격 승인, 롤백은 불변 근거 보존하며 OFF. 이번 회차 런타임·DB 배포 없음.
+
+**P0:** 운영 HTTP 500 원인·배포 SHA, DB 최소권한·마이그레이션 체크섬, 인증된 Test exact-SHA E2E, 독립 백업 복원·원장 대사, 법률·금융 안전. **P1:** 실제 영수증·내보내기 스키마/API 조사, F675-249/250/251 선행 구현, 필수 경로 등록부, 권한 DB 함수/API/관리자 UI, 보안·장애 복구 테스트. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건, BLOCKED / IN PROGRESS.
