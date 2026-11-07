@@ -10,7 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import type { Overview } from '../wallet/sides';
+import { dashboardAlerts, dashboardHistory, dashboardPortfolio, dashboardWallet, dashboardWatchlist } from './dashboard-source';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -21,58 +21,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-interface WatchlistRow {
-  readonly stock_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly current_price: string;
-  readonly day_open_price: string;
-}
-
-interface HoldingRow {
-  readonly stock_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly quantity: string;
-  readonly market_value: string;
-  readonly current_price: string;
-}
-
-interface TradeRow {
-  readonly trade_id: string;
-  readonly symbol: string;
-  readonly side: string;
-  readonly quantity: string;
-  readonly gross_amount: string;
-  readonly created_at: string;
-}
-
-interface AlertEvent {
-  readonly event_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly trigger_price: string;
-  readonly trigger_day_change_bps: number;
-  readonly triggered_at: string;
-}
-
 export default async function DashboardPage() {
   await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [wallet, watchlist, portfolio, history, alertEvents] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet?recent=6'),
-    apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
-    apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
-    apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
-    apiOrNull<{ events: AlertEvent[] }>('/api/v1/stocks/alerts/events?limit=5'),
+  const [walletSource, watchlistSource, portfolioSource, historySource, alertEventsSource] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/wallet?recent=6'),
+    apiOrNull<unknown>('/api/v1/stocks/watchlist'),
+    apiOrNull<unknown>('/api/v1/stocks/portfolio'),
+    apiOrNull<unknown>('/api/v1/stocks/history'),
+    apiOrNull<unknown>('/api/v1/stocks/alerts/events?limit=5'),
   ]);
 
-  const watched = watchlist?.stocks ?? [];
-  const holdings = portfolio?.holdings ?? [];
-  const trades = history?.trades.slice(0, 5) ?? [];
-  const events = alertEvents?.events ?? [];
+  const wallet = dashboardWallet(walletSource);
+  const watchlist = dashboardWatchlist(watchlistSource);
+  const portfolio = dashboardPortfolio(portfolioSource);
+  const history = dashboardHistory(historySource);
+  const alertEvents = dashboardAlerts(alertEventsSource);
+  const watched = watchlist ?? [];
+  const holdings = portfolio ?? [];
+  const trades = history?.slice(0, 5) ?? [];
+  const events = alertEvents ?? [];
 
   return (
     <div data-page="dashboard" className="mv-page mv-page--member grid gap-6">
@@ -83,10 +53,10 @@ export default async function DashboardPage() {
       </PageHeader>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label={isEn ? 'Account summary' : '계정 요약'}>
-        <SummaryCard title={isEn ? 'WLD balance' : 'WLD 보유'} value={wallet ? <><Amount value={wallet.balances.totalAvailableAmount} /> {wallet.balances.currency}</> : '—'} />
-        <SummaryCard title={isEn ? 'Watched stocks' : '관심 종목'} value={String(watched.length)} />
-        <SummaryCard title={isEn ? 'Holdings' : '보유 종목'} value={String(holdings.length)} />
-        <SummaryCard title={isEn ? 'Recent alerts' : '최근 발생 알림'} value={String(events.length)} />
+        <SummaryCard title={isEn ? 'WLD balance' : 'WLD 보유'} value={wallet ? <><Amount value={wallet.balances.totalAvailableAmount} /> {wallet.balances.currency}</> : null} isEn={isEn} />
+        <SummaryCard title={isEn ? 'Watched stocks' : '관심 종목'} value={watchlist ? String(watched.length) : null} isEn={isEn} />
+        <SummaryCard title={isEn ? 'Holdings' : '보유 종목'} value={portfolio ? String(holdings.length) : null} isEn={isEn} />
+        <SummaryCard title={isEn ? 'Recent alerts' : '최근 발생 알림'} value={alertEvents ? String(events.length) : null} isEn={isEn} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -129,7 +99,7 @@ export default async function DashboardPage() {
           <CardContent className="grid gap-2">
             {wallet?.recentTransactions.slice(0, 3).map((entry) => <div key={entry.transactionId} className="rounded-md border p-3 text-sm"><div className="flex justify-between gap-3"><span className="font-medium">{entry.label}</span><span><Amount value={entry.netAmount} /> WLD</span></div><time className="text-xs text-muted-foreground" dateTime={entry.occurredAt}>{formatMoment(entry.occurredAt)}</time></div>)}
             {trades.map((trade) => <div key={trade.trade_id} className="rounded-md border p-3 text-sm"><div className="flex justify-between gap-3"><span className="font-medium">{trade.symbol} · {trade.side}</span><span>{trade.quantity} · <Amount value={trade.gross_amount} /> WLD</span></div><time className="text-xs text-muted-foreground" dateTime={trade.created_at}>{formatMoment(trade.created_at)}</time></div>)}
-            {!wallet && history === null ? <LoadFailure isEn={isEn} /> : (wallet?.recentTransactions.length ?? 0) === 0 && trades.length === 0 ? <EmptyState title={isEn ? 'No recent activity.' : '최근 활동이 없어요.'} /> : null}
+            {wallet === null || history === null ? <LoadFailure isEn={isEn} /> : wallet.recentTransactions.length === 0 && trades.length === 0 ? <EmptyState title={isEn ? 'No recent activity.' : '최근 활동이 없어요.'} /> : null}
           </CardContent>
         </Card>
 
@@ -149,10 +119,10 @@ export default async function DashboardPage() {
   );
 }
 
-function SummaryCard({ title, value }: { readonly title: string; readonly value: React.ReactNode }) {
-  return <Card><CardHeader className="pb-2"><CardDescription>{title}</CardDescription><CardTitle className="text-2xl">{value}</CardTitle></CardHeader></Card>;
+function SummaryCard({ title, value, isEn }: { readonly title: string; readonly value: React.ReactNode | null; readonly isEn: boolean }) {
+  return <Card><CardHeader className="pb-2"><CardDescription>{title}</CardDescription><CardTitle className="text-2xl">{value ?? <><span aria-hidden="true">—</span><span className="sr-only">{isEn ? 'Unavailable' : '조회 불가'}</span></>}</CardTitle></CardHeader></Card>;
 }
 
 function LoadFailure({ isEn }: { readonly isEn: boolean }) {
-  return <p className="text-sm text-muted-foreground">{isEn ? 'This section could not be loaded.' : '이 영역을 불러오지 못했어요.'}</p>;
+  return <div role="status" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><span>{isEn ? 'This section could not be loaded.' : '이 영역을 불러오지 못했어요.'}</span><Button asChild variant="outline" size="sm"><Link href="/dashboard">{isEn ? 'Retry' : '다시 조회'}</Link></Button></div>;
 }
