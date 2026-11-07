@@ -12,6 +12,8 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardTitleOrder } from './board-title-order';
+import { isVerifiedBoardTitleOrder } from '@/lib/board-title-order';
 
 export const revalidate = 60;
 
@@ -29,7 +31,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const params = await searchParams;
   const hasSearch = params.q !== undefined;
-  return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
+  const hasTitleSort = params.sort !== undefined;
+  return { ...boardMetadata, robots: { index: !hasSearch && !hasTitleSort, follow: true } };
 }
 
 interface StockContext {
@@ -66,13 +69,16 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const titleSort = parseBoardTitleOrder(params.sort);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (titleSort.order) query.set('sort', titleSort.order);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const result = search.invalid || titleSort.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; sortApplied?: string }>(`/api/v1/board/public/stock-posts${suffix}`, titleSort.order ? 0 : 60);
+  const data = titleSort.order && !isVerifiedBoardTitleOrder(result) ? null : result;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -113,6 +119,7 @@ export default async function BoardPage({
             className="flex flex-wrap items-end gap-3"
           >
             {stock ? <input type="hidden" name="stock" value={stock} /> : null}
+            {titleSort.order ? <input type="hidden" name="sort" value="title" /> : null}
             <label
               htmlFor="board-title-query"
               className="grid min-w-0 flex-1 gap-1 text-sm font-semibold"
@@ -144,9 +151,29 @@ export default async function BoardPage({
               검색 초기화
             </Link>
           </form>
+          <div className="mt-3 flex flex-wrap items-center gap-3" aria-label="게시글 정렬">
+            <span className="text-sm font-semibold">게시글 정렬</span>
+            <Link href={`/board${stock || search.query ? `?${new URLSearchParams({ ...(stock ? { stock } : {}), ...(search.query ? { q: search.query } : {}) })}` : ''}`}
+              aria-current={!titleSort.order ? 'page' : undefined}
+              className="inline-flex min-h-11 items-center rounded-md border px-3 text-sm">
+              최근 작성순
+            </Link>
+            <form method="get" action="/board">
+              {stock ? <input type="hidden" name="stock" value={stock} /> : null}
+              {search.query ? <input type="hidden" name="q" value={search.query} /> : null}
+              <button type="submit" name="sort" value="title"
+                aria-pressed={titleSort.order === 'title'}
+                className="min-h-11 rounded-md border px-3 text-sm">
+                제목 문자순 (UTF-8)
+              </button>
+            </form>
+          </div>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건에서만 검색·정렬합니다. 전체 게시글 검색이나 가나다순 정렬이 아닙니다.
           </p>
+          {titleSort.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">지원하지 않는 게시글 정렬입니다.</p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,8 +188,8 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
-          <EmptyState title="검색어를 확인해 주세요." />
+        {search.invalid || titleSort.invalid ? (
+          <EmptyState title="검색·정렬 조건을 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
