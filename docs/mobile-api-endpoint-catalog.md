@@ -171,7 +171,7 @@ ERROR -> keep last successful state separate from transport/error state
 | Method | App path | Purpose | Auth/CSRF | Request | Success | Response shape | After success |
 |---|---|---|---|---|---|---|---|
 | `GET` | `/app-api/v1/content/announcements` | App API: published announcements | 공개: 로그인 불필요 | 없음 / none | `200` | JSON keys: announcements | 응답을 화면의 서버 기준 상태로 교체 |
-| `GET` | `/app-api/v1/content/photos` | App API: published gallery photos | 공개: 로그인 불필요 | 없음 / none | `200` | JSON keys: photos | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/content/photos` | App API: published gallery photos | 공개: 로그인 불필요 | query q(optional, 2–60 chars; latest 24 approved photos only) | `200` | JSON keys: photos | 응답을 화면의 서버 기준 상태로 교체 |
 | `GET` | `/app-api/v1/content/status` | Server status board | 공개: 로그인 불필요 | 없음 / none | `200` | JSON keys: status | 응답을 화면의 서버 기준 상태로 교체 |
 
 ### early-game — early-game
@@ -200,7 +200,7 @@ ERROR -> keep last successful state separate from transport/error state
 ### photos — photos
 | Method | App path | Purpose | Auth/CSRF | Request | Success | Response shape | After success |
 |---|---|---|---|---|---|---|---|
-| `GET` | `/app-api/v1/photos` | Published gallery photos | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: photos | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/photos` | Published gallery photos | 로그인 필요(기능에 따라 최신 동의 필요) | query q(optional, 2–60 chars; latest 24 approved photos only) | `200` | JSON keys: photos | 응답을 화면의 서버 기준 상태로 교체 |
 | `POST` | `/app-api/v1/photos` | Send an uploaded photo to the gallery for review | 로그인 + 최신 동의 + CSRF(변경 요청) | body PhotoSubmissionDto (application/json) | `201` | direct JSON result; additive fields allowed | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 | `GET` | `/app-api/v1/photos/mine` | The caller’s own submissions and where each one got to | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON keys: submissions | 응답을 화면의 서버 기준 상태로 교체 |
 | `POST` | `/app-api/v1/photos/uploads` | Upload image bytes and receive a storage key | 로그인 + 최신 동의 + CSRF(변경 요청) | body Buffer (application/json) | `201` | direct JSON result; additive fields allowed | 관련 GET을 다시 호출해 서버 상태와 동기화 |

@@ -198,7 +198,7 @@ ERROR
 | Method | 앱 경로 | 기능 | 인증/CSRF | 요청 | 성공 | 응답 형태 | 성공 후 |
 |---|---|---|---|---|---|---|---|
 | `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 키: announcements | 응답을 화면의 서버 기준 상태로 교체 |
-| `GET` | `/app-api/v1/content/photos` | 공개 갤러리 사진 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 키: photos | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/content/photos` | 공개 갤러리 사진 조회 | 공개: 로그인 불필요 | query q(선택, 2~60자; 최근 승인 사진 24장 내) | `200` | JSON 키: photos | 응답을 화면의 서버 기준 상태로 교체 |
 | `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 키: status | 응답을 화면의 서버 기준 상태로 교체 |
 
 ### early-game — 초반 진행
@@ -227,7 +227,7 @@ ERROR
 ### photos — 회원 갤러리 업로드
 | Method | 앱 경로 | 기능 | 인증/CSRF | 요청 | 성공 | 응답 형태 | 성공 후 |
 |---|---|---|---|---|---|---|---|
-| `GET` | `/app-api/v1/photos` | 갤러리 사진 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: photos | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/photos` | 갤러리 사진 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | query q(선택, 2~60자; 최근 승인 사진 24장 내) | `200` | JSON 키: photos | 응답을 화면의 서버 기준 상태로 교체 |
 | `POST` | `/app-api/v1/photos` | 업로드된 사진을 갤러리에 등록 | 로그인 + 최신 동의 + CSRF(변경 요청) | body PhotoSubmissionDto (application/json) | `201` | JSON 직접 반환(필드 추가 허용) | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 | `GET` | `/app-api/v1/photos/mine` | 내가 등록한 갤러리 사진 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | 없음 / none | `200` | JSON 키: submissions | 응답을 화면의 서버 기준 상태로 교체 |
 | `POST` | `/app-api/v1/photos/uploads` | 갤러리 이미지 업로드 | 로그인 + 최신 동의 + CSRF(변경 요청) | body Buffer (application/json) | `201` | JSON 직접 반환(필드 추가 허용) | 관련 GET을 다시 호출해 서버 상태와 동기화 |

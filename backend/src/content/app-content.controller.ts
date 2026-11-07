@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
+import { ContentInputError, parsePhotoCaptionQuery } from './content.repository';
 
 @ApiTags('content')
 @Controller('content')
@@ -20,8 +21,15 @@ export class AppContentController {
 
   @Get('photos')
   @ApiOperation({ summary: 'App API: published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
+  @ApiQuery({ name: 'q', required: false, type: String,
+    description: 'Literal case-insensitive caption substring (2-60 characters) within the latest 24 approved photos' })
+  async photos(@Query() query: Record<string, unknown> = {}) {
+    try {
+      return { photos: await this.service().publicPhotos({ caption: parsePhotoCaptionQuery(query) }) };
+    } catch (error: unknown) {
+      if (error instanceof ContentInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   @Get('status')

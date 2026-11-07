@@ -217,7 +217,7 @@ function normalizePhotoReceipt(row: ContentPhotoReceiptRow): ContentPhotoReceipt
  */
 export interface ContentRepositoryLike {
   publishedAnnouncements(options?: { limit?: number }): Promise<ContentAnnouncementRow[]>;
-  publishedPhotos(options?: { limit?: number }): Promise<ContentPhotoRow[]>;
+  publishedPhotos(options?: { limit?: number; caption?: string | null }): Promise<ContentPhotoRow[]>;
   isPublicStorageKey(storageKey: unknown): Promise<boolean>;
   publicStatus(): Promise<ContentStatusRow[]>;
   saveAnnouncement(input: ContentSaveAnnouncementInput): Promise<ContentAnnouncementReceiptRow>;
@@ -331,9 +331,9 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, caption = null }: { limit?: number; caption?: string | null } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    return (await this.repository.publishedPhotos({ limit: contentLimit, caption })).map(normalizePhoto);
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {

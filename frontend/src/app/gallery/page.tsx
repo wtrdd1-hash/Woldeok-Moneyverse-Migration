@@ -7,17 +7,23 @@ import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
 import { canonicalUrl } from '@/lib/seo';
+import { parseGalleryCaptionQuery, isVerifiedCaptionGallery } from './gallery-caption';
 
 // Publication changes must be visible immediately. The public API query still
 // remains cheap and bounded; caching this page hid freshly approved photos for
 // up to five minutes and made a successful review look like a failure.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '사진 | Gallery',
-  description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
-  alternates: { canonical: canonicalUrl('/gallery') },
-};
+type GallerySearch = { searchParams: Promise<{ q?: string | string[] }> };
+export async function generateMetadata({ searchParams }: GallerySearch): Promise<Metadata> {
+  const query = await searchParams;
+  return {
+    title: '사진 | Gallery',
+    description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
+    alternates: { canonical: canonicalUrl('/gallery') },
+    ...(query.q !== undefined ? { robots: { index: false, follow: false } } : {}),
+  };
+}
 
 interface Photo {
   readonly photoId: string;
@@ -26,9 +32,16 @@ interface Photo {
   readonly publishedAt: string | null;
 }
 
-export default async function GalleryPage() {
-  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 0);
-  const photos = data?.photos ?? [];
+export default async function GalleryPage({ searchParams }: GallerySearch) {
+  const search = await searchParams;
+  const caption = parseGalleryCaptionQuery(search.q);
+  const filtered = typeof caption === 'string' && caption.length > 0;
+  const response = caption === null ? null : await publicApi<{ photos: Photo[] }>(
+    filtered ? `/api/v1/photos?q=${encodeURIComponent(caption)}` : '/api/v1/photos', 0,
+  );
+  // An old backend can ignore q and return an unfiltered HTTP 200.
+  const data = filtered && !isVerifiedCaptionGallery(response, caption) ? null : response;
+  const photos = Array.isArray(data?.photos) ? data.photos : [];
 
   return (
     <div data-page="gallery" className="mv-page mv-page--community grid gap-4">
@@ -50,6 +63,29 @@ export default async function GalleryPage() {
         />
       </PageHeader>
 
+      <form action="/gallery" method="get" role="search"
+        className="flex flex-wrap items-end gap-3 rounded-xl border border-border/50 bg-card p-4">
+        <label htmlFor="gallery-caption-query" className="flex min-w-0 flex-1 flex-col gap-1 text-sm font-semibold">
+          <T korean="사진 설명 검색" english="Search photo captions" />
+          <input id="gallery-caption-query" name="q" type="search" minLength={2} maxLength={60}
+            defaultValue={typeof search.q === 'string' ? search.q : ''}
+            placeholder="제주" className="min-h-11 w-full rounded-lg border bg-background px-3"
+            aria-describedby="gallery-caption-scope" />
+        </label>
+        <button type="submit" className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">
+          <T korean="검색" english="Search" />
+        </button>
+        <Link href="/gallery" className="inline-flex min-h-11 items-center rounded-lg border px-4 font-semibold">
+          <T korean="초기화" english="Clear" />
+        </Link>
+        <p id="gallery-caption-scope" className="w-full text-xs text-muted-foreground">
+          <T korean="최근 공개 승인 사진 24장 내 설명에서만 검색합니다. 전체 과거 사진 검색이 아닙니다."
+            english="Searches captions only within the latest 24 approved public photos, not the full archive." />
+        </p>
+        {caption === null && <p role="alert" className="w-full text-sm text-destructive">
+          <T korean="검색어는 2~60자로 입력해 주세요." english="Enter a caption query of 2–60 characters." />
+        </p>}
+      </form>
       <section aria-labelledby="gallery-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED GALLERY"
@@ -73,7 +109,8 @@ export default async function GalleryPage() {
           />
         ) : photos.length === 0 ? (
           <EmptyState
-            title={<T korean="아직 공개된 사진이 없어요." english="No published photos yet." />}
+            title={<T korean={filtered ? "일치하는 사진이 없어요." : "아직 공개된 사진이 없어요."}
+                english={filtered ? "No matching photos in the recent gallery." : "No published photos yet."} />}
             description={
               <T
                 korean="운영자가 검토해 게시한 사진이 이곳에 나타납니다."

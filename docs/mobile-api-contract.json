@@ -7887,7 +7887,19 @@
       "operationId": "AppContentController_photos",
       "backendOpenApiPath": "/content/photos",
       "summary": "App API: published gallery photos",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "Literal case-insensitive caption substring within the latest 24 approved public photos; 2-60 characters",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200
@@ -8992,7 +9004,19 @@
       "operationId": "ContentController_photos",
       "backendOpenApiPath": "/photos",
       "summary": "Published gallery photos",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "Literal case-insensitive caption substring within the latest 24 approved public photos; 2-60 characters",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200
