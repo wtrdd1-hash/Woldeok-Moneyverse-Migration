@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -168,8 +169,17 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query('q') q?: string, @Query('limit') limit?: string) {
+    if (q !== undefined && (typeof q !== 'string' || q.length > 80 ||
+        !q.trim() || /[\u0000-\u001f\u007f]/.test(q))) {
+      throw new BadRequestException('announcement search must be 1 to 80 printable characters');
+    }
+    if (limit !== undefined && (typeof limit !== 'string' ||
+        !/^(?:[1-9]|[1-4][0-9]|50)$/.test(limit))) {
+      throw new BadRequestException('announcement limit must be a decimal integer between 1 and 50');
+    }
+    const options = { limit: limit === undefined ? 20 : Number(limit), ...(q === undefined ? {} : { q: q.trim() }) };
+    return { announcements: await this.service().publicAnnouncements(options) };
   }
 
   @Get('photos')
