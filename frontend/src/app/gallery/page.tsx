@@ -7,17 +7,25 @@ import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
 import { canonicalUrl } from '@/lib/seo';
+import { parseGallerySort } from './gallery-sort';
 
 // Publication changes must be visible immediately. The public API query still
 // remains cheap and bounded; caching this page hid freshly approved photos for
 // up to five minutes and made a successful review look like a failure.
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+const galleryMetadata: Metadata = {
   title: '사진 | Gallery',
   description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
   alternates: { canonical: canonicalUrl('/gallery') },
 };
+
+export async function generateMetadata({ searchParams }: {
+  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  return { ...galleryMetadata, robots: { index: params?.sort === undefined, follow: true } };
+}
 
 interface Photo {
   readonly photoId: string;
@@ -26,8 +34,13 @@ interface Photo {
   readonly publishedAt: string | null;
 }
 
-export default async function GalleryPage() {
-  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 0);
+export default async function GalleryPage({ searchParams }: {
+  readonly searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const order = parseGallerySort(params?.sort);
+  const endpoint = order.filtered ? `/api/v1/photos?sort=${order.sort}` : '/api/v1/photos';
+  const data = order.invalid ? null : await publicApi<{ photos: Photo[] }>(endpoint, 0);
   const photos = data?.photos ?? [];
 
   return (
@@ -62,7 +75,29 @@ export default async function GalleryPage() {
           }
         />
 
-        {data === null ? (
+        <form method="get" action="/gallery" role="search" className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-3">
+          <div className="grid gap-1">
+            <label htmlFor="gallery-sort" className="text-sm font-semibold">
+              <T korean="게시 순서" english="Publication order" />
+            </label>
+            <select id="gallery-sort" name="sort" defaultValue={order.sort} className="min-h-11 rounded-md border bg-background px-3 text-sm">
+              <option value="newest">최신순 / Newest first</option>
+              <option value="oldest">오래된순 / Oldest first</option>
+            </select>
+          </div>
+          <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">
+            <T korean="정렬" english="Sort" />
+          </button>
+          {order.filtered && <Link href="/gallery" className="py-3 text-sm underline"><T korean="초기화" english="Clear" /></Link>}
+        </form>
+        <p className="text-xs text-muted-foreground">
+          <T korean="최근 승인·공개 사진 최대 24장 내에서만 순서를 바꿉니다. 전체 과거 사진의 오래된순 검색은 아닙니다." english="Sort only the latest 24 approved public photos, not the entire historical gallery." />
+        </p>
+        {order.invalid ? (
+          <p role="alert" className="rounded-lg border border-destructive p-3 text-sm">
+            <T korean="정렬 조건이 올바르지 않습니다. 최신순 또는 오래된순을 선택해 주세요." english="Invalid sort order. Select newest or oldest." />
+          </p>
+        ) : data === null ? (
           <EmptyState
             title={
               <T

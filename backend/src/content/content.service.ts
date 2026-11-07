@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import type { GalleryOrder } from './gallery-order';
 import type {
   ContentAnnouncementReceiptRow,
   ContentAnnouncementRow,
@@ -331,9 +332,25 @@ export class ContentService {
     );
   }
 
-  async publicPhotos({ limit = 24 }: { limit?: number } = {}): Promise<ContentPhoto[]> {
+  async publicPhotos({ limit = 24, sort }: { limit?: number; sort?: GalleryOrder } = {}): Promise<ContentPhoto[]> {
     const contentLimit = requireContentLimit(limit, 'photo limit');
-    return (await this.repository.publishedPhotos({ limit: contentLimit })).map(normalizePhoto);
+    const rows = await this.repository.publishedPhotos({ limit: contentLimit });
+    if (sort && rows.some((row) => row.published_at == null)) {
+      throw new ServiceUnavailableException('gallery publication order is unavailable');
+    }
+    const photos = rows.map(normalizePhoto);
+    if (!sort) return photos;
+    // Sort only the latest approved rows returned by the existing DB boundary.
+    // A missing publication date cannot substantiate a verified time order.
+    if (photos.some((photo) => photo.publishedAt === null || !Number.isFinite(Date.parse(photo.publishedAt)))) {
+      throw new ServiceUnavailableException('gallery publication order is unavailable');
+    }
+    return photos.sort((a, b) => {
+      const dateOrder = a.publishedAt!.localeCompare(b.publishedAt!);
+      const idOrder = a.photoId.localeCompare(b.photoId);
+      const result = dateOrder || idOrder;
+      return sort === 'oldest' ? result : -result;
+    });
   }
 
   async isPublicStorageKey(storageKey: unknown): Promise<boolean> {
