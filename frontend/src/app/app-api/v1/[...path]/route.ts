@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseBoardImageDescription, verifiedImageDescriptionResults } from '@/app/board/board-image-description';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -197,6 +198,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     });
   }
 
+  const boardImageAltPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardImageAltValues = boardImageAltPath ? request.nextUrl.searchParams.getAll('alt') : [];
+  const boardImageAlt = boardImageAltValues.length === 1 ? parseBoardImageDescription(boardImageAltValues[0]) : null;
+  if (boardImageAltValues.length > 1 || (boardImageAltValues.length === 1 && (!boardImageAlt || boardImageAlt.invalid))) {
+    return gatewayProblem(400, 'Bad Request', 'board_image_description_invalid', 'invalid image description query');
+  }
+
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
   if (availabilityValues.length > 1 || (availabilityValues.length === 1 && availabilityValues[0] !== '1')) {
@@ -271,6 +280,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (boardImageAlt?.query && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedImageDescriptionResults(await response.clone().json(), boardImageAlt.query)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_image_description_unverified',
+          'image description results could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_image_description_unverified',
+        'image description results could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -583,17 +605,12 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
-  // Query-specific public board results are not stable crawlable pages.
+  // Filtered public results are transient and must not inherit cacheable upstream headers.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('alt'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
-  }
-  // Query-specific public board results are not stable crawlable pages.
-  if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
-    response.headers.set('cache-control', 'no-store');
-    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');
