@@ -3009,3 +3009,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## 기획 주기 v1908 — 2026-11-07 — Feature Improvement — F675-282 SLA 기한 결정성과 알림 작업자 펜싱
+
+**주기:** 이전 Feature Addition v1906 → 현재 Feature Improvement v1908 → 다음 Feature Addition v1910. **상태:** 명세 전용 / 미구현 / 운영 배포 보류. 영어 문서를 기준으로 동등하게 반영한다. 미병합 F675-281/F675-282 및 선행 PR의 정합성을 확인하기 전 병합하지 않는다.
+
+**목적·대상·진입점·화면.** 테넌트 사건 담당자와 독립 준법 심사자는 관리자 → 증빙 사고 → SLA 타임라인에서 불변 정책 버전, 심각도, 관할 시간대, UTC 마감, 시계 출처, 남은 시간, 상향 단계, 알림 수신증, 담당자를 확인한다. '연장 요청', '독립 승인', '알림 재시도', '감사 보기' CTA를 제공한다. ON_TIME, DUE_SOON, OVERDUE, ESCALATED, DELIVERY_UNKNOWN, BLOCKED, CLOSED 상태를 명확히 구분하며 기한 초과만으로 자동 종결하거나 기한을 초기화하지 않는다. 모바일 320px·키보드·WCAG 2.2 AA·영한 번역을 지원하고 관리자 경로는 noindex 및 사이트맵 제외로 설정한다.
+
+**시간·DB 무결성.** 신뢰 가능한 UTC timestamptz 마감, 정책 버전, IANA 시간대, 최초 마감, 단조 증가 상향 단계, 연장 순번, 심사자, 알림 세대를 저장한다. 브라우저 시간이 아닌 서버/DB 시계를 기준으로 계산하며 시간대는 표시와 정책상 달력 계산에만 사용한다. DST 중복·누락 시간, 공휴일 달력 버전, 시계 오차·역행 처리 규칙을 명시한다. 제안 테이블 incident_sla_deadlines, incident_sla_extensions, incident_sla_escalations, incident_sla_delivery_attempts에 테넌트 복합 외래키, 음수 순번 방지 CHECK, 단계 단조 증가 제약, UNIQUE(tenant_id,incident_id,policy_version,extension_sequence), UNIQUE(tenant_id,incident_id,tier,delivery_generation), 활성 마감 및 대기 알림 부분 인덱스를 둔다. 기존 마감 이력은 보존하며 expand/backfill/validate/contract 순서로 마이그레이션한다. 본 회차에서 운영 DB는 변경하지 않는다.
+
+**API·트랜잭션·악용 방지.** 제안 API GET /api/v1/admin/evidence-incidents/:id/sla, POST /:id/sla/extensions, POST /:id/sla/extensions/:extensionId/decision, POST /:id/sla/escalations/:tier/retry, GET /:id/sla/audit는 미구현 계약이다. 광범위 테이블 GRANT 대신 행위자 검증 SECURITY DEFINER 함수, 테넌트/RBAC, 쿠키 변경 CSRF, If-Match, 멱등성 키, 사유 길이 제한, 호출 빈도 제한을 적용한다. 사건·SLA 행 잠금과 CAS 전이, 불변 감사·Outbox를 단일 트랜잭션으로 커밋한 뒤 외부 통지를 보낸다. 작업자는 세대 펜싱, 지수 백오프, 테넌트/사건/단계/세대 중복 제거를 사용한다. 알림 실패는 DELIVERED가 아니라 DELIVERY_UNKNOWN이고 오래된 작업자는 신규 세대의 성공을 기록할 수 없다. 위임 계정까지 포함하여 연장 요청자의 자기 승인을 금지하고 만료·보존 충돌 시 안전 차단한다. 403/404, 409, 412, 422, 429, 503 오류 계약을 구분한다.
+
+**관리·보안·KPI·검증·승격.** 심사자는 과거 결정·정책 달력·사유·알림 시도를 조회하며 감사/내보내기에서 개인정보를 마스킹하고 민감 조회를 기록한다. KPI는 기한 초과 사건 수, 상향 알림 p95, 중복 전달, 차단된 승인, 연장 남용률, 오래된 작업자 차단 수로 제한한다. 실제 PostgreSQL에서 교차 테넌트, 중복 Outbox, 연장·상향 경합, DST 양방향, 윤일, 시계 오차, 큐 장애, 심사자 권한 철회, 미전달 알림 존재 시 롤백을 테스트한다. P0: 끊어진 /srv/moneyverse 링크, /en·/en/login 실배포 검증, DB 최소권한·체크섬·복원·원장·법률 게이트. P1: PR #2867/#2869/#2872 및 선행 명세 정합성, 실제 frontend/backend/app-api/DB 경로·QA 확인 후 구현. 별도 개발 브랜치, 격리 Test exact-SHA, 독립 보안 심사, 기본 OFF 플래그 admin_evidence_incident_sla_v1, 카나리·큐 관측·플래그 OFF 롤백이 운영승격 필수 조건이다. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건, 중복 제거·근거 분류 BLOCKED / IN PROGRESS.
