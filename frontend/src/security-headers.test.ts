@@ -106,6 +106,17 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('keeps unverified invite codes out of search and referrer caches at the HTTP edge', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const invite = groups.find((group) => group.source === '/invite/:code');
+    expect(invite).toBeDefined();
+    const headers = new Map(invite!.headers.map((header) => [header.key, header.value]));
+    expect(headers.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(headers.get('referrer-policy')).toBe('no-referrer');
+    expect(headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');
