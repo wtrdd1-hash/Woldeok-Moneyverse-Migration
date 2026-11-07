@@ -16,12 +16,14 @@ export function stockHistoryApiPath(window: StockHistoryWindow, minGross?: strin
   return `/api/v1/stocks/history?limit=${window}${minGross ? `&minGross=${encodeURIComponent(minGross)}` : ''}`;
 }
 
-export function isVerifiedStockHistoryGrossResponse(payload: unknown, minGross: string, limit: number): boolean {
+/** Fail closed on untrusted HTTP data before any BigInt, sort, or member-history rendering. */
+export function isVerifiedStockHistoryResponse(payload: unknown, limit: number, minGross?: string): boolean {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload) ||
       !Array.isArray((payload as { trades?: unknown }).trades)) return false;
   const trades = (payload as { trades: unknown[] }).trades;
-  if (trades.length > limit || !normalizeStockHistoryGrossFloor(minGross)) return false;
-  const minimum = BigInt(minGross);
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 200 || trades.length > limit ||
+      (minGross !== undefined && !normalizeStockHistoryGrossFloor(minGross))) return false;
+  const minimum = minGross === undefined ? 0n : BigInt(minGross);
   const seen = new Set<string>();
   for (const raw of trades) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
@@ -32,9 +34,15 @@ export function isVerifiedStockHistoryGrossResponse(payload: unknown, minGross: 
         typeof row.created_at !== 'string' || !Number.isFinite(Date.parse(row.created_at))) return false;
     seen.add(row.trade_id);
     for (const key of ['quantity', 'unit_price', 'gross_amount', 'tax_amount']) {
-      if (typeof row[key] !== 'string' || !/^[0-9]+$/.test(row[key])) return false;
+      if (typeof row[key] !== 'string' || !/^(0|[1-9][0-9]{0,29})$/.test(row[key])) return false;
     }
-    if (BigInt(row.gross_amount as string) < minimum || BigInt(row.quantity as string) === 0n) return false;
+    if (BigInt(row.gross_amount as string) < minimum || BigInt(row.quantity as string) === 0n ||
+        BigInt(row.unit_price as string) === 0n || BigInt(row.gross_amount as string) === 0n) return false;
   }
   return true;
+}
+
+/** Backwards-compatible filtered validator; both paths enforce the same source integrity. */
+export function isVerifiedStockHistoryGrossResponse(payload: unknown, minGross: string, limit: number): boolean {
+  return isVerifiedStockHistoryResponse(payload, limit, minGross);
 }

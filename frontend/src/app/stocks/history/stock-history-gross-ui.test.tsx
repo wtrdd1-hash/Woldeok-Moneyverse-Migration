@@ -28,3 +28,32 @@ describe('owner stock history gross filter empty result UX', () => {
     expect(markup).not.toContain('No trade history yet');
   });
 });
+
+describe('unfiltered stock history failure safety', () => {
+  it('shows unavailable instead of crashing or claiming no trades on invalid BigInt', async () => {
+    const { apiOrNull } = await import('@/lib/api');
+    vi.mocked(apiOrNull).mockResolvedValueOnce({ trades: [{ trade_id: 'invalid', gross_amount: 'NaN' }] });
+    const markup = renderToStaticMarkup(await StockHistoryPage({ searchParams: Promise.resolve({}) }));
+    expect(markup).toContain('Failed to load trade history');
+    expect(markup).not.toContain('No trade history yet');
+  });
+});
+
+describe('verified member history presentation', () => {
+  it('renders exact bigint trade totals without rounding when the owner API is verified', async () => {
+    const { apiOrNull } = await import('@/lib/api');
+    vi.mocked(apiOrNull).mockResolvedValueOnce({ trades: [{
+      trade_id: '11111111-1111-4111-8111-111111111111', symbol: 'MV', side: 'buy',
+      quantity: '9007199254740993', unit_price: '2', gross_amount: '18014398509481986',
+      tax_amount: '0', created_at: '2026-10-31T15:00:00.000Z',
+    }] });
+    const markup = renderToStaticMarkup(await StockHistoryPage({ searchParams: Promise.resolve({}) }));
+    expect(markup).toContain('18,014,398,509,481,986');
+    expect(markup).toContain('MV');
+    expect(markup).not.toContain('Failed to load trade history');
+  });
+  it('marks the member-only page noindex even when the request has no filters', async () => {
+    const { metadata } = await import('./page');
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+  });
+});

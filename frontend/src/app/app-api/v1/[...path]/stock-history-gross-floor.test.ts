@@ -40,3 +40,29 @@ describe('Android owner stock trade gross filter', () => {
     expect((await response.json()).trades[0].gross_amount).toBe('900719925474099312345');
   });
 });
+
+describe('Android default owner stock history source verification', () => {
+  const unfiltered = 'https://easy-scraping.com/app-api/v1/stocks/history?limit=50';
+  it('rejects a malformed successful upstream response without a gross filter', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ trades: [{
+      trade_id: '11111111-1111-4111-8111-111111111111', symbol: 'MV', side: 'buy',
+      quantity: 'NaN', unit_price: '1', gross_amount: '1', tax_amount: '0', created_at: '2026-10-30T00:00:00Z',
+    }] }), { status: 200, headers: { 'content-type': 'application/json' } })));
+    const response = await GET(req(unfiltered), ctx);
+    expect(response.status).toBe(503);
+    expect((await response.json()).code).toBe('stock_history_source_unverified');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+  });
+  it('preserves verified empty owner history and private headers', async () => {
+    vi.stubEnv('INTERNAL_API_TOKEN', 'x'.repeat(32));
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ trades: [] }), {
+      status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(req(unfiltered), ctx);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ trades: [] });
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+});
