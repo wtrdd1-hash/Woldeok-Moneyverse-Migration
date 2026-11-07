@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## v2026.11.08.1924 — F675-286 독립 심사 결정 증빙 묶음 보완 (기능 보완 / 초안 / 배포 보류)
+- 주기: 이전 기능 추가 v1922, 현재 기능 보완 v1924, 다음 기능 추가 v1926. 기준 main b56fdc748dd817eb250b7d5d06019aaf5c299131. 선행 PR #2894는 미병합 별도 의존성. 기능 플래그 `admin_evidence_review_decision_bundle_v1` 기본 OFF, 미구현 제안.
+- 위협 모델·불변조건: 테넌트, 결정 ID/세대, 심사자 실효 신원, 이해충돌 신고 개정, 위임 그래프 해시, 정책 개정, MFA 증명 참조, 원본 증빙 해시, 매니페스트 정규화 버전, 비식별 정책, 서명키 ID 및 만료시각을 결속한다. UTF-8 키 정렬·null 규칙을 고정한 매니페스트를 해시·서명하고 가변 다운로드 URL은 서명하지 않는다. 입력 누락·철회·불명확 시 READY가 아니라 BLOCKED.
+- 화면·상태: 관리자 > 증빙 사고 > 결정 > 증빙 묶음. 불변 버전, 자료 완전성, 비식별 미리보기, 독립성 판정, 만료·철회 사유 표시. 준비·미리보기·독립 승인 요청·일회용 토큰 발급·철회·새 세대 재생성 CTA. REQUESTED > COLLECTING > AWAITING_APPROVAL > READY, READY 이후 EXPIRED/REVOKED만 허용. 자료 변경은 새 세대 BLOCKED로 기록. 로딩·빈화면·403/404/409/412/422/429/503·재인증 안내 영한 동등, 모바일 320px, 터치 44px, WCAG 2.2 AA.
+- 제안 API(미구현): POST /api/v1/admin/evidence/decisions/:id/proof-bundles는 Idempotency-Key·If-Match 필수. GET /:bundleId는 불변 출처·ETag, POST /:bundleId/approve는 독립 심사·최근 MFA, POST /:bundleId/download-token은 제한된 사용권을 원자적으로 소비, POST /:bundleId/revoke는 사유 필수. 401 인증 없음, 403 권한 없음, 404 타 테넌트/없음, 409 세대 충돌, 412 개정 불일치, 422 출처 무효, 429 제한, 503 서명/원장 장애. 응답·CDN 모두 private,no-store,noindex.
+- 제안 DB: 묶음-결정 세대-승인의 테넌트 복합 FK, UNIQUE(tenant_id,decision_id,generation), UNIQUE(tenant_id,idempotency_scope,key_hash), CHECK(만료>생성), READY 대상 (tenant_id,state,expires_at) 부분 인덱스. SECURITY DEFINER 함수 내부에서 실효 권한을 확인하고 search_path를 고정하며 moneyverse_app에 직접 테이블 권한을 주지 않는다. CAS 개정, 감사·Outbox 동일 트랜잭션, 서명 실패 시 READY 롤백. 토큰은 해시만 보관하고 원자 UPDATE ... WHERE consumed_at IS NULL ... RETURNING으로 재사용 차단.
+- 독립성·악용방지: 내보내기 요청자, 증빙 제출자, 결정 작성자, 승인자의 실효 주체 및 순환 위임 통제 관계가 겹치면 차단. 승인·다운로드 시 적격성 재검증, MFA/키 철회·보존명령 불명확 시 fail closed. 최소 공개 원칙, 속도 제한, 비식별 정책·목적·다운로드 시도 감사, 원문 토큰·개인정보 로깅 금지. TTL·보존/삭제 정책 검토 필수.
+- 지표: 적격 내보내기 완료율, 출처 차단율, 승인 거절률, 토큰 재사용 차단, 철회 반영 지연, p95 내보내기 지연을 실제 관측치로 기록. 서명자료 없이 테넌트·결정·묶음 세대 연계 감사.
+- 검증·배포: 실제 PostgreSQL 테넌트 격리, 직접 SELECT 권한 금지, 동시 발급·철회·소비, 서명 장애, 오래된 증빙, 위임 순환, 토큰 재사용, 엣지 캐시, 스크린리더·포커스·영한 동등성 회귀. 별도 개발 브랜치, Test exact-SHA, OFF > 내부 테넌트 > 카나리 > 확대. 롤백 시 발급 중단, 기존 감사·철회 검증 보존. 기획 예약에서 운영 배포 금지.
+- P0: /srv/moneyverse 끊어진 릴리스 링크 복구, 실제 운영 SHA 및 /en·/en/login, DB 최소권한·마이그레이션 체크섬, 독립 복원·원장 대사·법률 검증. P1: 미병합 PR #2889/#2892/#2894 정합성, frontend/backend/app-api 계약 확인, OFF 플래그 기반 API/UI/DB 개발. 외부 독립 레퍼런스 신규 검증 0건, 중복제거 누적 UNKNOWN/10000, 근거 분류 게이트 BLOCKED/IN PROGRESS.
