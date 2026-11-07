@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -23,4 +24,14 @@ import { WorkRepository } from './work.repository';
     },
   ],
 })
-export class WorkModule {}
+export class WorkModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Work is entirely owner-scoped; guard refusals must not inherit public caching.
+    consumer.apply((_request: Request, response: Response, next: NextFunction) => {
+      response.setHeader('Cache-Control', 'private, no-store');
+      response.setHeader('X-Robots-Tag', 'noindex');
+      response.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(WorkController);
+  }
+}
