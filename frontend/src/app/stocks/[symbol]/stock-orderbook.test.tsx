@@ -181,6 +181,7 @@ describe('StockOrderbook & Interactive Chart Suite', () => {
   it('renders StockMarketToast without crashing', () => {
     const { container } = render(
       <StockMarketToast
+        stockId="stock-1"
         symbol="WDG"
         currentPrice="15,000"
         isEn={false}

@@ -126,6 +126,30 @@ export interface LiveTradeData {
   readonly timestamp: string;
 }
 
+/** Socket data is untrusted until it matches the server's completed-trade contract. */
+export function parseVerifiedStockTrade(value: unknown, now = Date.now()): LiveTradeData | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const row = value as Record<string, unknown>;
+  if (
+    typeof row.id !== 'string' || row.id.length < 1 || row.id.length > 128 ||
+    typeof row.stockId !== 'string' || row.stockId.length < 1 || row.stockId.length >= 64 ||
+    typeof row.price !== 'string' || !/^[1-9]\d{0,39}$/.test(row.price) ||
+    typeof row.quantity !== 'number' || !Number.isSafeInteger(row.quantity) || row.quantity <= 0 ||
+    (row.side !== 'BUY' && row.side !== 'SELL') ||
+    typeof row.timestamp !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(row.timestamp)
+  ) return null;
+  const at = Date.parse(row.timestamp);
+  if (!Number.isFinite(at) || at < now - 120_000 || at > now + 30_000) return null;
+  return {
+    id: row.id,
+    stockId: row.stockId,
+    price: row.price,
+    quantity: row.quantity,
+    side: row.side,
+    timestamp: row.timestamp,
+  };
+}
+
 class OrderbookStore {
   private readonly books = new Map<string, LiveOrderbookData>();
   private readonly listeners = new Set<() => void>();
@@ -150,6 +174,9 @@ class OrderbookStore {
   }
 }
 
+// useSyncExternalStore requires a referentially stable empty snapshot.
+const EMPTY_TRADES: readonly LiveTradeData[] = [];
+
 class TradeFeedStore {
   private readonly trades = new Map<string, readonly LiveTradeData[]>();
   private readonly listeners = new Set<() => void>();
@@ -159,14 +186,14 @@ class TradeFeedStore {
     return () => this.listeners.delete(listener);
   };
 
-  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? [];
+  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? EMPTY_TRADES;
 
   apply(payload: unknown): void {
-    if (!payload || typeof payload !== 'object') return;
-    const trade = payload as LiveTradeData;
-    if (!trade.stockId || !trade.price) return;
+    const trade = parseVerifiedStockTrade(payload);
+    if (!trade) return;
 
     const current = this.trades.get(trade.stockId) ?? [];
+    if (current.some((row) => row.id === trade.id)) return;
     const next = [trade, ...current.slice(0, 49)];
     this.trades.set(trade.stockId, next);
     for (const listener of this.listeners) listener();
@@ -252,8 +279,11 @@ export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   useEffect(() => {
     if (!stockId) return;
     const socket = acquireSiteSocket();
-    socket.emit('stock:subscribe', stockId);
+    const subscribe = () => socket.emit('stock:subscribe', stockId);
+    socket.on('connect', subscribe);
+    if (socket.connected) subscribe();
     return () => {
+      socket.off('connect', subscribe);
       if (socket.connected) socket.emit('stock:unsubscribe', stockId);
       releaseSiteSocket();
     };
@@ -262,7 +292,7 @@ export function useStockTrades(stockId: string): readonly LiveTradeData[] {
   return useSyncExternalStore(
     globalTradeStore.subscribe,
     () => globalTradeStore.get(stockId),
-    () => [],
+    () => EMPTY_TRADES,
   );
 }
 
