@@ -1,0 +1,10 @@
+# Development A worklog — 2026-11-01 20:55 KST
+
+- START: Debian 13.6 MCP status and direct shell confirmed backend, frontend, Discord bot, nginx, Docker and DEV DB connected. Fresh main SHA `3d5e321c3d1221febff677469fecdfcb3cf42e7d`; existing local main had unrelated dirty `implementation_plan.md`, left untouched. New clean isolated branch/worktree created.
+- SOURCE: Read repository policies, canonical English/Korean plans, integrated planning, prior QA/worklogs and all open PR/branches. Audit: 122 open PR, 27 conflicting, 125 non-main branches with unique commits. Avoided existing announcement filter PRs and B/C/QA responsibilities.
+- RED: Backend parser test missing module, Frontend order module missing. GREEN: new backend order parser/service/controller and Next/Android gateway tests. No schema, direct SQL or grants changed.
+- FEATURE COMMIT: `f636d193bb6a3d641b2a1734fdbaa6873444e842` (11 source/test files; no DB migrations).
+- MID: main re-fetched unchanged. Typecheck passed. First build failed under 1024MB heap (OOM); 2560MB retry PASS (602 static pages). Backend first full 2973 PASS/2 FAIL/518 SKIP with `NODE_ENV=test` omitted; rerun of the 8 affected profile HTTP tests with correct environment PASS. Full rerun required. DEV DB READ ONLY verified function and flagged broad direct ACL.
+- FRONTEND CORRECTED FULL: `NODE_ENV=test` 2909 PASS / 0 FAIL (557 files); 2560MB Next build PASS. Backend full correct-env rerun 2976 PASS / 0 FAIL / 518 SKIP. DB unit 62 PASS / 4 SKIP, production dependency audit 0 known vulnerabilities, full lint EXIT 0 / 1027 warnings.
+- END AUDIT: Draft PR #2377 `hold`, 125 open PR / 124 Draft / 27 conflicting, 138 actual remote heads including main / 128 non-main with unique commits / 9 without. No deletion (other worker ownership, unmerged history). Final head SHA and CI checks recorded in PR comment.
+- FINAL: See QA evidence and release HOLD record. All tests and SHA results must be independently rechecked after final documentation commit. No merge, official Test/Production deploy, restart, rollback, or branch deletion.

@@ -1,3 +1,5 @@
+import { parseAnnouncementOrder } from '@/lib/announcement-order';
+import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -12,11 +14,27 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
 };
+
+type PageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+function orderQuery(params: Record<string, string | string[] | undefined>): URLSearchParams {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+    else if (value !== undefined) query.append(key, value);
+  }
+  return query;
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const query = orderQuery(await searchParams);
+  return query.has('sort') ? { ...baseMetadata, robots: { index: false, follow: true } } : baseMetadata;
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -28,8 +46,12 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export default async function AnnouncementsPage({ searchParams }: PageProps) {
+  const query = orderQuery(await searchParams);
+  const sort = parseAnnouncementOrder(query);
+  if (sort === null) notFound();
+  const endpoint = sort === 'pinned' ? '/api/v1/announcements' : `/api/v1/announcements?sort=${sort}`;
+  const data = await publicApi<{ announcements: Announcement[] }>(endpoint, sort === 'pinned' ? 60 : 0);
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -56,7 +78,7 @@ export default async function AnnouncementsPage() {
       </PageHeader>
 
       {/* Structured data for the announcement list */}
-      {data && data.announcements.length > 0 && (
+      {sort === 'pinned' && data && data.announcements.length > 0 && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -76,6 +98,21 @@ export default async function AnnouncementsPage() {
           }}
         />
       )}
+
+      <form method="get" action="/announcements" className="flex flex-wrap items-end gap-3 rounded-xl border border-border/50 bg-card p-4">
+        <div className="grid gap-1">
+          <label htmlFor="notice-sort" className="text-sm font-semibold">공지 정렬</label>
+          <select id="notice-sort" name="sort" defaultValue={sort}
+            className="rounded-md border border-border bg-background px-3 py-2 text-sm">
+            <option value="pinned">상단 고정 우선</option>
+            <option value="newest">게시일 최신순</option>
+            <option value="oldest">게시일 오래된순</option>
+          </select>
+        </div>
+        <button type="submit" className="rounded-md bg-amber-600 px-4 py-2 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">적용</button>
+        <Link href="/announcements" className="rounded-md px-3 py-2 text-sm underline">고정 우선으로 초기화</Link>
+        <p className="w-full text-xs text-muted-foreground">정렬은 공개 조회 함수가 반환한 최대 20건의 공지에만 적용됩니다. 기본 목록은 고정 공지 우선이며, 전체 과거 공지를 정렬하지 않습니다.</p>
+      </form>
 
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader

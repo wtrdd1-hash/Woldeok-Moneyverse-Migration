@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { parseAnnouncementOrder } from './announcement-order';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 
 @ApiTags('content')
@@ -13,9 +14,10 @@ export class AppContentController {
   }
 
   @Get('announcements')
+  @ApiQuery({ name: 'sort', required: false, enum: ['pinned', 'newest', 'oldest'] })
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    return { announcements: await this.service().publicAnnouncements({ sort: parseAnnouncementOrder(query) }) };
   }
 
   @Get('photos')
