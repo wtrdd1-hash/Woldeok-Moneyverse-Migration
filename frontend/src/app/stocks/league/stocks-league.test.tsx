@@ -1,35 +1,34 @@
-// @vitest-environment node
-import { readFileSync } from 'node:fs';
-import { describe, it, expect } from 'vitest';
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { StocksLeagueClient } from './stocks-league-client';
 
-const pageSource = readFileSync('src/app/stocks/league/page.tsx', 'utf8');
-const clientSource = readFileSync('src/app/stocks/league/stocks-league-client.tsx', 'utf8');
-const combinedSource = `${pageSource}\n${clientSource}`;
+const uuid = (tail: string) => `12345678-1234-4234-8234-${tail}`;
+const season = { id: uuid('000000000001'), status: 'active', title: 'Autumn season', startsAt: '2026-10-01T00:00:00.000Z', endsAt: '2026-11-01T00:00:00.000Z' };
+const whale = { id: uuid('000000000002'), seasonId: season.id, userId: uuid('000000000003'), userName: 'Verified trader', initialAsset: 100000, currentAsset: 125000, roiRate: 25, rankPosition: 1, tier: 'Gold', isWhale: true, followerCount: 5, createdAt: '2026-10-12T00:00:00.000Z' };
 
-describe('Stocks Copy-Trading League & Whale Leaderboard (/stocks/league)', () => {
-  it('mounts StocksLeagueClient and metadata', () => {
-    expect(pageSource).toContain('StocksLeagueClient');
-    expect(pageSource).toContain('가상 주식 카피 트레이딩 리그');
-    expect(pageSource).toContain('Whale League');
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+
+describe('stock league source-truth UI', () => {
+  it('shows verified source-backed leaderboard and disables unledgered copy trading', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true, season, whales: [whale], leaderboard: [] }) }));
+    render(<StocksLeagueClient />);
+    expect(await screen.findByText('Verified trader')).toBeTruthy();
+    expect(screen.getByText(/카피 트레이딩은 현재 이용할 수 없습니다/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /카피 트레이딩 시작/ })).toBeNull();
+    expect(screen.queryByText('여의도_헤지펀드_마스터')).toBeNull();
   });
-
-  it('renders Whale leaderboard with top return rates and badges', () => {
-    expect(clientSource).toContain('여의도_헤지펀드_마스터');
-    expect(clientSource).toContain('184.2');
-    expect(clientSource).toContain('카피 트레이딩');
-    expect(clientSource).toContain('followersCount');
+  it('never replaces upstream failure with fabricated whales or a fake subscription', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    render(<StocksLeagueClient />);
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /다시 조회/ })).toBeTruthy();
+    expect(screen.queryByText('184.2%')).toBeNull();
   });
-
-  it('provides copy trading subscription dialog with budget and ratio', () => {
-    expect(clientSource).toContain('allocatedBudget');
-    expect(clientSource).toContain('copyRatio');
-    expect(clientSource).toContain('수익 실현 시 1.0% 트레이더 분배');
-    expect(clientSource).toContain('/api/stocks/league/copy-trade/subscribe');
-  });
-
-  it('tracks active subscriptions with profit calculations and cancel action', () => {
-    expect(clientSource).toContain('mySubscriptions');
-    expect(clientSource).toContain('handleUnsubscribe');
-    expect(clientSource).toContain('누적 실현 손익');
+  it('distinguishes verified empty season from a failed request', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true, season: null, whales: [], leaderboard: [] }) }));
+    render(<StocksLeagueClient />);
+    await waitFor(() => expect(screen.getByText(/진행 중인 리그가 없습니다/)).toBeTruthy());
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
