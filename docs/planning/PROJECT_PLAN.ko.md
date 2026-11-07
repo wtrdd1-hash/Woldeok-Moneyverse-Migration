@@ -3009,3 +3009,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## 기획 주기 v1906 — 2026-11-07 — Feature Addition — F675-282 증빙 사고 SLA 단계별 상향 및 기한 무결성
+
+**주기:** 이전 Feature Improvement v1904 → 현재 Feature Addition v1906 → 다음 Feature Improvement v1908. **상태:** 명세 전용 / 미구현 / 운영 배포 보류. F675-281의 제안 확장이며 배포 기능이 아니다. 선행 초안 PR #2867/#2869 및 F675-276~280과 병합 정합성 확인 필수.
+
+**목적·대상·권한·진입점·화면.** 테넌트 준법 조사자가 미해결 증빙 사고의 대응 기한을 관리하되 기한 경과가 사건 자동 종결로 이어지지 않도록 한다. 관리자 증빙 사고 → SLA 탭 및 사건 상세 → 상향 처리에서 심각도, 담당자, 정책 버전, UTC 기준 기한, 남은 시간, 일시중지 사유, 통지 내역과 실패를 표시한다. 조사자는 확인·연장 요청, 독립 준법 승인자는 연장 승인·거절, 보안 관리자는 정책 설정, 작업자는 통지 큐 처리만 가능하다. CTA: 확인, 연장 요청, 승인/거절, 재배정, 상향, 불변 타임라인. 상태 OPEN, ACKNOWLEDGED, EXTENSION_PENDING, EXTENDED, BREACHED, ESCALATED, RESOLVED, BLOCKED. 기한 경과나 작업자 장애만으로 RESOLVED/CLOSED로 변경 금지.
+
+**제안 API·DB.** GET /api/v1/admin/evidence-incidents/sla?cursor=, GET /:id/sla, POST /:id/sla/acknowledge, POST /:id/sla/extension-requests, POST /:id/sla/extension-decisions, POST /:id/sla/escalate, POST /:id/sla/reassign. 테넌트 RBAC, 쿠키 인증 변경 요청 CSRF, 멱등성 키, If-Match 리비전, 서명 페이지 커서; 403/404 권한, 409 충돌, 412 구버전, 422 잘못된 기한, 429 제한, 503 감사 장애. 제안 테이블 incident_sla_policy(테넌트·정책·버전·심각도·대응/해결 초·활성 시각), incident_sla_instance(테넌트·사건·정책버전·리비전·기한·상태·담당자), incident_sla_extension(테넌트·사건·요청·요청자·심사자·요청기한·결정), incident_sla_delivery(테넌트·사건·이벤트키·채널·상태·시도수). 테넌트 복합 외래키, 양수 기간 CHECK, (테넌트,사건,이벤트키) UNIQUE, 활성 기한 및 미전달 Outbox 부분 인덱스. 위임 계정을 포함한 실효 신원 자기 승인 금지. 저장은 UTC, 표시는 현지 시간대.
+
+**트랜잭션·보안·관리·품질.** CAS 리비전 변경, 불변 감사, Outbox를 단일 PostgreSQL 트랜잭션으로 처리한다. 작업자 임대 펜싱, 지수 백오프 재시도, 중복 제거를 적용한다. 통지 직전 사건 상태·법적 보존명령 재검사, 정책 누락·워터마크 지연·감사 실패 시 안전 차단. 테넌트별 임계값 변경은 이중 승인과 불변 정책 버전 및 단계적 활성화 필요. 이메일/웹훅에 민감 증빙 포함 금지, 속도 제한·통지 억제·상향 쿨다운 적용. 관리자 noindex/no-store·사이트맵 제외, 모바일 320px·키보드·WCAG 2.2 AA·영한 동등성·스크린리더 기한 경고. KPI: 기한 내 확인율, 심각도별 위반율, 통지 지연, 오탐 상향, 연장 승인 시간; 분석에 개인정보 제외.
+
+**검증·배포·롤백.** 실제 PostgreSQL 복합 FK/UNIQUE/CAS, 시간 오차·서머타임, 연장/종결 동시성, 중복 통지, Outbox 중단, 위임 자기 승인, 감사 장애, 다국어·접근성 테스트. 구현 전 Next·Nest·app-api·DB 실제 계약 테스트. admin_evidence_incident_sla_v1 기본 OFF. 독립 개발 브랜치, 정확한 SHA의 격리 Test, 독립 QA·보안 승인, 카나리 및 통지 중단 시에도 불변 기록을 유지하는 롤백. 기획 예약은 런타임 미변경.
+
+**P0/P1 백로그.** P0: /srv/moneyverse → 누락 prod-v600 링크 복구, 실제 배포 SHA 및 /en,/en/login 재검증, DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률 게이트. P1: 미병합 F675-276~281 정합성, 실제 Next/Nest/app-api/DB 계약 검증, 선행 기능 이후 F675-282 구현, 상향 정책·독립 승인·재시도·접근성·Test exact-SHA. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN / 10,000건; 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS. 달성 주장 금지.
