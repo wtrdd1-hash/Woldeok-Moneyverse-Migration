@@ -69,7 +69,7 @@ export function StockQuickAlertDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-1.5">
+        <Button variant="outline" className="min-h-11 gap-1.5">
           <BellPlus className="size-4 text-amber-500" />
           {isEn ? 'Set alert' : '조건부 알림 설정'}
         </Button>
