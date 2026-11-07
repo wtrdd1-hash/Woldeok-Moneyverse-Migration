@@ -1,4 +1,5 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, forwardRef } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { Reflector } from '@nestjs/core';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -21,6 +22,16 @@ import { OAuthClient } from './oauth-client';
 import { SessionRepository } from './session.repository';
 import { VerificationEmailSender } from './verification-email.sender';
 import { DualKeyRotationService } from './dual-key-rotation';
+
+export class AuthBootstrapPrivateResponseMiddleware {
+  use(_request: Request, response: Response, next: NextFunction): void {
+    // Session state and CSRF tokens must not be cached, including when a guard rejects the request.
+    response.setHeader('Cache-Control', 'private, no-store');
+    response.setHeader('X-Robots-Tag', 'noindex');
+    response.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  }
+}
 
 const GUARDS = [
   SessionGuard,
@@ -73,4 +84,9 @@ const GUARDS = [
     ...GUARDS,
   ],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Controller mapping also covers versioned /api/v1 routes, unlike raw unprefixed path matching.
+    consumer.apply(AuthBootstrapPrivateResponseMiddleware).forRoutes(AuthBootstrapController);
+  }
+}
