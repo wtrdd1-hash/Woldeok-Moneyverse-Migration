@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Header,
   Inject,
   Post,
   Req,
@@ -39,6 +40,8 @@ export class AuthBootstrapController {
   }
 
   @Get('providers')
+  @Header('Cache-Control', 'no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
   @ApiOperation({ summary: 'Sign-in providers this deployment can offer' })
   providers() {
     return {
