@@ -455,7 +455,9 @@ export class PostgresStockRepository {
     uuid(actorUserId, 'actor user id');
     return queryRows<StockAdminRow>(
       this.pool,
-      'SELECT s.id::text, s.symbol, s.name, s.description, s.current_price::text AS current_price, s.day_open_price::text AS day_open_price, s.shares_outstanding::text AS shares_outstanding, s.shares_available::text AS shares_available, s.holders, s.trades, s.active, coalesce(v.halt_status, \'ACTIVE\') AS halt_status, v.halted_at, s.updated_at FROM public.stock_admin_list($1) s LEFT JOIN public.virtual_stocks v ON v.id = s.id',
+      // The app role cannot SELECT virtual_stocks. Both projections are SECURITY DEFINER;
+      // the halt timestamp is intentionally unknown here (the guarded settlement status API owns it).
+      'SELECT s.id::text, s.symbol, s.name, s.description, s.current_price::text AS current_price, s.day_open_price::text AS day_open_price, s.shares_outstanding::text AS shares_outstanding, s.shares_available::text AS shares_available, s.holders, s.trades, s.active, coalesce(v.halt_status, \'UNKNOWN\') AS halt_status, NULL::timestamptz AS halted_at, s.updated_at FROM public.stock_admin_list($1) s LEFT JOIN public.stock_market_overview() v ON v.id = s.id',
       [actorUserId],
     );
   }
