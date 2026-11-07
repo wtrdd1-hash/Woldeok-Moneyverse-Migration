@@ -74,6 +74,15 @@ export class ProblemFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? this.fromHttpException(exception)
         : this.fromUnknown(exception);
+    // A rejected member/admin request can reveal authorization state. This
+    // global boundary also covers guards that reject before controller or
+    // AuthModule-specific response middleware can run. Override any weaker
+    // cache/index policy set earlier in the request pipeline.
+    if (problem.status === HttpStatus.UNAUTHORIZED || problem.status === HttpStatus.FORBIDDEN) {
+      response.setHeader('Cache-Control', 'private, no-store');
+      response.setHeader('X-Robots-Tag', 'noindex');
+      response.setHeader('Referrer-Policy', 'no-referrer');
+    }
     response.status(problem.status).type('application/problem+json').json(problem);
   }
 
