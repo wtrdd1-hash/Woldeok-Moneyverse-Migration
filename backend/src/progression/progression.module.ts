@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -31,4 +32,15 @@ import { ProgressionRepository } from './progression.repository';
     EARLY_GAME_REPOSITORY_PROVIDER,
   ],
 })
-export class ProgressionModule {}
+export class ProgressionModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Owner growth, credit and loan data must remain private even when a
+    // session, consent or CSRF guard rejects the request before its handler.
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(ProgressionController);
+  }
+}
