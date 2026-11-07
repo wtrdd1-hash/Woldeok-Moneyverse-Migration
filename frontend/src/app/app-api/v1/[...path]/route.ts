@@ -12,6 +12,7 @@ import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
+import { parseLeagueSource } from '@/app/stocks/league/league-source';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
@@ -566,6 +567,22 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  // League reads may contain owner subscriptions. Preserve private edge policy
+  // on success and error, and reject forged success before Android renders it.
+  if (parts[0] === 'stocks' && parts[1] === 'league') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+    if (parts[2] === 'current' && request.method === 'GET' && response.ok) {
+      try {
+        if (parseLeagueSource(await response.clone().json()) === null) {
+          return gatewayProblem(503, 'Service Unavailable', 'stock_league_unverified', 'league source could not be verified');
+        }
+      } catch {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_league_unverified', 'league source could not be verified');
+      }
+    }
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
