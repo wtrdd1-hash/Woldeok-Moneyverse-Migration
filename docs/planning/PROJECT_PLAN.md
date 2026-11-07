@@ -1,4 +1,15 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.11.05.2314 — F675-259 Independent Appeal Freeze-Release Audit (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- Cycle: Previous Improvement v1812 → Current Addition v1814 → Next Improvement v1816. Main 0b5b2b1385d2. F675-249–258 draft prerequisites not merged: implementation BLOCKED.
+- Purpose: incident supervisor requests release of review-only freeze after appeal, independent compliance reviewer approves/rejects, security supervisor revokes. Admin /admin/sla/appeals/:id/freeze-audit; CTAs Request/Approve/Reject/Revoke; FROZEN/REQUESTED/APPROVED/REJECTED/EXPIRED/REVOKED/UNKNOWN. Approval never restores underlying revoked evidence or download rights.
+- APIs: POST/GET /api/v1/admin/sla/appeals/:id/freeze-release-requests, GET /:requestId, POST /:requestId/approve, /reject, /revoke. Require reason, expected_version, manifest_sha256, Idempotency-Key; errors 400/401/403/404/409/422/429/503. Recheck tenant/team/effective actor (including delegation), revocation generation, signature and permissions on every read/write.
+- DB: tenant-scoped requests, composite FK, UUID, CHECK state/expiry/non-self-approval, UNIQUE(tenant_id,appeal_id,idempotency_key), unresolved partial index; row-lock CAS, immutable audit+Outbox in same transaction; worker fencing, dedupe, retry and dead-letter. UNKNOWN fails closed; no ledger/evidence writes.
+- Security/UX/KPI: default OFF flag admin_sla_appeal_freeze_release_audit_v1; block IDOR, replay, stale signature, delegated self-approval, concurrent revoke. Admin noindex/no-store; 320px, WCAG 2.2 AA, EN/KO; aggregate approval latency/expiry/revoke/denial KPI without PII.
+- Tests/release: real PostgreSQL concurrency, cross-tenant, key rotation, expiry, Outbox recovery, revoked-download-negative, accessibility, authenticated E2E. Isolated branch → CI → exact-SHA Test → monitored flag → Production only after P0 gates; rollback OFF with immutable history retained.
+- P0 QA 2026-11-05 22:19: Production /en and /en/login HTTP 500 vs Test 200; backend restarts 123685; dangling /srv/moneyverse link, deployed SHA mismatch; root cause unproven. DB privilege/checksum, backup restore, ledger reconciliation, KR legal and exact-SHA Test unverified: RELEASE HOLD.
+- P1: reconcile F675-249–258 PR stack with main and inspect frontend/backend/admin/app-api/DB actual contracts. Independent external references newly verified 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Docs only.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.10.30.1518 — F675-185 Inventory Lifecycle Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
