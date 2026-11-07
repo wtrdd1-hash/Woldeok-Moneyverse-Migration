@@ -6,6 +6,7 @@ export interface PortfolioHoldingInput {
   readonly average_cost: string;
   readonly market_value: string;
   readonly current_price: string;
+  readonly halt_status?: 'ACTIVE' | 'HALTING' | 'HALTED_SETTLING' | 'HALTED_SETTLED';
 }
 
 export interface PortfolioHoldingAnalysis extends PortfolioHoldingInput {
