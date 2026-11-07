@@ -85,6 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
+  @ApiQuery({ name: 'stance', required: false, enum: ['all', 'bullish', 'neutral', 'bearish', 'none'], description: 'Stock opinion among latest 50 public posts' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -93,10 +94,17 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'stance')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
+    const rawStance = query.stance;
+    if (rawStance !== undefined && (typeof rawStance !== 'string' ||
+        !['all', 'bullish', 'neutral', 'bearish', 'none'].includes(rawStance))) {
+      throw new BadRequestException('invalid board stance');
+    }
+    const stance = rawStance === undefined || rawStance === 'all' ? undefined :
+      rawStance as 'bullish' | 'neutral' | 'bearish' | 'none';
     const q = query.q;
     if (
       stock !== undefined &&
@@ -115,7 +123,8 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(stock as string | undefined, q as string | undefined, stance),
+      ...(stance ? { appliedStance: { value: stance, scope: 'latest50' as const } } : {}),
     };
   }
 }

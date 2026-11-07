@@ -1920,7 +1920,9 @@ _No request body._
 
 | Name | In | Required | Type | Constraints |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| stance | query | false | string | enum="all","bullish","neutral","bearish","none" |
 
 ### Request body
 
@@ -1930,6 +1932,9 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| appliedStance | false | object |  |
+| appliedStance.value | true | string="none" \| string="bullish" \| string="neutral" \| string="bearish" |  |
+| appliedStance.scope | true | string="latest50" | const="latest50" |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |
