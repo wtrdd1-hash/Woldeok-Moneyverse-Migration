@@ -92,12 +92,16 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'withImage', required: false, enum: ['1'], description: 'Image-attached posts among the latest 50 public posts only' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'withImage')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    if (query.withImage !== undefined && query.withImage !== '1') {
+      throw new BadRequestException('invalid image-only filter');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +119,9 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: query.withImage === '1'
+        ? await this.community.publicList(stock as string | undefined, q as string | undefined, true)
+        : await this.community.publicList(stock as string | undefined, q as string | undefined),
     };
   }
 }
