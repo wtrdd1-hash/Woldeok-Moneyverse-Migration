@@ -26,6 +26,13 @@ beforeEach(() => {
 });
 
 describe('admin audit search server-to-PostgreSQL contract', () => {
+  it('does not claim cryptographic hash-chain verification when only row shape was checked', async () => {
+    const markup = renderToStaticMarkup(await page({}));
+    expect(markup).toContain('해시 형식과 조회 순서');
+    expect(markup).toContain('해시 체인 무결성을 인증하지 않습니다');
+    expect(markup).not.toContain('불변 보존');
+  });
+
   it('denies ambiguous nickname instead of searching a first matching member', async () => {
     const result = await page({ member: 'alice' });
     expect(apiMock).not.toHaveBeenCalled();
