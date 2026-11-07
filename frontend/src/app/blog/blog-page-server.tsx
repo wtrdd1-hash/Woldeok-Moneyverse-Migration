@@ -95,7 +95,7 @@ export async function metadataForArticle(slug: string, locale: BlogLocale): Prom
   const hero = resolvePostHeroImage(post);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
-    ...(isBlogDiscoverable(original) ? {} : { robots: { index: false, follow: true } }),
+    ...(isBlogDiscoverable(original) && locale === nativeLocale ? {} : { robots: { index: false, follow: true } }),
     alternates: { canonical, languages: blogAlternateLanguages(original) },
     openGraph: {
       title: post.title, description: post.excerpt, type: 'article',

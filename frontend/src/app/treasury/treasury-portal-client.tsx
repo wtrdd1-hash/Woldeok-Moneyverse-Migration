@@ -336,7 +336,7 @@ export function TreasuryPortalClient({
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-bold text-foreground">
-                      대국민 벤처 창업 지원금 신청
+                      청년·창업 벤처 그랜트 신청서
                     </h2>
                     <p className="text-[11px] text-muted-foreground font-mono">
                       복지금고(VAULT_WELFARE) 원자적 자금 집행 및 14일 의무 창업제
@@ -384,7 +384,7 @@ export function TreasuryPortalClient({
                     <input
                       type="text"
                       required
-                      placeholder="예: 네오스왑 핀테크, 메가물류"
+                      placeholder="예: 델타 트레이딩 랩스, 메가물류"
                       value={grantBusinessName}
                       onChange={(e) => setGrantBusinessName(e.target.value)}
                       className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:ring-1 focus:ring-primary font-medium"

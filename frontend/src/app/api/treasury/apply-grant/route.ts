@@ -28,6 +28,6 @@ export async function POST(request: Request) {
     return NextResponse.json(res, { headers: noStore });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : '창업 지원금 신청 처리 중 오류가 발생했습니다.';
-    return NextResponse.json({ ok: false, message: msg }, { status: 500, headers: noStore });
+    return NextResponse.json({ ok: false, message: msg }, { status: 503, headers: noStore });
   }
 }

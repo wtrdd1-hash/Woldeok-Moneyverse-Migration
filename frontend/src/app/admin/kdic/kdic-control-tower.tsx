@@ -187,10 +187,11 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
             새로고침
           </button>
           <button
-            onClick={() => setCollectModalOpen(true)}
-            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 active:scale-95 transition-all cursor-pointer"
+            disabled
+            title="금융 집행은 인증·원장 무결성 검증 완료 전 보류됩니다"
+            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600/70 text-white shadow-lg shadow-emerald-900/30 cursor-not-allowed"
           >
-            🏛️ 분기별 예보료 징수
+            분기별 예보료 징수 (보류)
           </button>
         </div>
       </div>
