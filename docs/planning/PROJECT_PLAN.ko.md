@@ -1,3 +1,21 @@
+## v2026.11.06.0526 — F675-262 대사 증빙 독립 이의신청 (기능 추가 / 제안 / 운영 배포 보류)
+
+주기: 이전 **기능 보완 v1824** → 현재 **기능 추가 v1826** → 다음 **기능 보완 v1828**. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03`. 기획 전용이며 영문 문서가 원본이다.
+
+**P0 배포 차단:** 과거 운영 /en 및 /en/login HTTP 500, 재시작 반복, 릴리스 심볼릭 링크는 최신 QA로 재검증한다. 과거 보고만으로 현재 장애를 단정하지 않는다. 운영 배포 정확한 SHA, DB 최소권한·마이그레이션 체크섬, 독립 백업 복원, 원장 대사, 국내 법률 검토, 인증된 Test exact-SHA 증빙 없이는 운영 승격을 금지한다.
+
+**P1 목적·권한:** F675-261 영수증 대사 결과가 MISMATCHED, BLOCKED_UNKNOWN 또는 이의가 제기된 ATTESTED일 때 테넌트 담당자가 이의를 신청한다. 권한 있는 담당자는 신청·철회, 독립 준법 검토자는 재관측 요청·인용·기각, 보안 감사자는 비식별 불변 증빙 열람만 가능하다. 위임·서비스 신원을 포함한 실효 사용자 기준으로 원 승인자·신청자와 검토자를 분리한다. 이의신청은 원본 철회·보존·법적 동결·다운로드 제한을 변경하지 않는다.
+
+**화면·상태:** 관리자 > 증빙 관리 > 갱신 영수증 > 대사 > 이의신청. 목록에서 테넌트·상태·기간 필터, 상세에서 영수증 해시·관측 세대·사유·검토자·시각을 표시한다. CTA는 이의신청, 불변 참조 첨부, 재관측 요청, 철회, 인용, 기각, 비식별 결과 내보내기. DRAFT → SUBMITTED → UNDER_REVIEW → UPHELD/REJECTED 또는 WITHDRAWN; 증빙 검증 실패는 BLOCKED_UNKNOWN이며 자동 승인 금지. 로딩·빈 화면·403·버전 충돌·재시도·확인 안내, 키보드 접근성, 320px, WCAG 2.2 AA, 영문 동등성, noindex/nofollow·no-store 필수.
+
+**API:** GET /admin/custody/reconciliation-disputes (커서 필터), POST /admin/custody/reconciliation-disputes (Idempotency-Key), GET /admin/custody/reconciliation-disputes/:id, POST /:id/reobserve, POST /:id/decision (If-Match), POST /:id/withdraw. 모든 호출에 서버 RBAC, 테넌트 격리, 실효 사용자 분리, 속도·본문 크기 제한, 쿠키 세션 CSRF, 감사, 정보 누출 없는 403/404를 적용한다. 충돌 409, 구버전 412, 검증 오류 422, 의존성 장애 503.
+
+**DB·트랜잭션:** dispute(id, tenant_id, reconciliation_id, opened_by_effective_actor, status, evidence_digest, observed_generation, version, created_at, updated_at), 추가 전용 dispute_decision(id, tenant_id, dispute_id, reviewer_actor, outcome, signed_digest, created_at). (tenant_id,id) 복합키·테넌트 일치 FK·상태 CHECK, 진행 중인 (tenant_id,reconciliation_id) 부분 UNIQUE, (tenant_id,status,created_at DESC,id) 및 (tenant_id,reconciliation_id) 인덱스. CAS 버전·행 잠금, 테넌트·행위자·동작 범위 멱등성 키. 판정·불변 감사·Outbox를 한 트랜잭션에 기록하고 작업자 펜싱·중복 제거·독성 이벤트 격리를 적용한다. 재관측은 영수증 해시·서명키·정책 버전·철회 세대를 비교하고 누락·만료 시 차단한다.
+
+**보안·KPI·테스트·배포:** 개인정보 비식별 내보내기, 서명된 만료 참조, 최소권한·보존기한, 공개 검색 차단. 신청 건수·검토 지연·UNKNOWN 비율·중복 판정·테넌트 차단·Outbox 지연을 개인정보 없이 집계한다. PostgreSQL 동시 판정, 재생·멱등성, 위임 자기 승인, 테넌트 격리, 키 철회, 잘못된 커서, 작업자 장애, 모바일/a11y, 영한 계약 및 원본 철회 불변 테스트 필수. `admin_custody_reconciliation_dispute_v1` 기본 OFF. 추가형 마이그레이션·검증된 백필·Test exact-SHA 카나리·별도 개발 브랜치·플래그 OFF 롤백을 요구하며 감사 이력은 삭제하지 않는다. F675-260/261 선행 구현·검증 필수.
+
+**독립 외부 레퍼런스 10,000건 게이트:** 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류는 BLOCKED / IN PROGRESS. 기존 Draft PR 정합성 확인 전 구현 금지. 이번 회차는 런타임 코드 변경 없음.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
