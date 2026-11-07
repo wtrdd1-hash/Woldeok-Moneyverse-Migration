@@ -5,6 +5,7 @@
   Controller,
   Get,
   Header,
+  Param,
   Post,
   Put,
   Query,
@@ -516,6 +517,73 @@ export class FundedTreasuryDonationController {
       body.expenseWld,
       body.reason || '작업 피로도 회복 및 의료 지원',
     );
+  }
+
+
+  @Get("grants")
+  @UseGuards(AuthenticatedGuard, AdminGuard)
+  @Header("Cache-Control", "private, no-store")
+  @ApiOperation({ summary: "관리자 창업 지원금 신청서 전체 목록 조회" })
+  async listTreasuryGrants() {
+    const applications = await this.service.listTreasuryGrants();
+    return { ok: true, applications };
+  }
+
+  @Post("grants/:id/review")
+  @UseGuards(AuthenticatedGuard, AdminGuard, CsrfGuard)
+  @Header("Cache-Control", "private, no-store")
+  @ApiOperation({ summary: "관리자 창업 지원금 심사 승인 또는 반려 처리" })
+  async reviewTreasuryGrant(
+    @Req() req: RequestWithSession,
+    @Param("id") grantId: string,
+    @Body() body: { action: "APPROVE" | "REJECT"; amountWld?: string; vaultCode?: string; reviewNote?: string },
+  ) {
+    const adminId = requireUserId(req);
+    if (body.action === "APPROVE") {
+      const result = await this.service.reviewGrantApprove(
+        adminId,
+        grantId,
+        body.amountWld || "500000",
+        body.vaultCode || "VAULT_WELFARE",
+        body.reviewNote || "창업 지원금 승인 및 원자적 국고 지급",
+      );
+      return { ok: true, message: "창업 지원금이 복식부기로 국고 지급 승인되었습니다.", result };
+    } else {
+      const result = await this.service.reviewGrantReject(
+        adminId,
+        grantId,
+        body.reviewNote || "사업계획서 요건 미충족으로 인한 반려",
+      );
+      return { ok: true, message: "창업 지원금 신청이 반려 처리되었습니다.", result };
+    }
+  }
+
+  @Post("grants/apply")
+  @Header("Cache-Control", "private, no-store")
+  @ApiOperation({ summary: "시민 창업 지원금 신청서 접수 및 1차 AI 스코어링" })
+  async applyTreasuryGrant(
+    @Req() req: RequestWithSession,
+    @Body() body: { applicantName: string; businessName: string; businessPlan: string; category?: string; tier?: string },
+  ) {
+    const userId = requireUserId(req);
+    const result = await this.service.applyGrant(
+      userId,
+      body.applicantName || "익명 창업자",
+      body.businessName,
+      body.businessPlan,
+      body.category || "FINTECH",
+      body.tier || "TIER_1_SEED",
+    );
+    return { ok: true, message: "창업 지원금 신청서가 성공적으로 접수되었습니다.", result };
+  }
+
+  @Get("grants/my")
+  @Header("Cache-Control", "private, no-store")
+  @ApiOperation({ summary: "본인 창업 지원금 신청 상태 조회" })
+  async getMyTreasuryGrant(@Req() req: RequestWithSession) {
+    const userId = requireUserId(req);
+    const grant = await this.service.getUserGrant(userId);
+    return { ok: true, grant };
   }
 
 }

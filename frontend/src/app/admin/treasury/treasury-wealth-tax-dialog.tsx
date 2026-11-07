@@ -33,9 +33,13 @@ export function TreasuryWealthTaxDialog() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="wealth-tax-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn overflow-y-auto"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
         >
-          <div className="relative w-full max-w-xl rounded-xl border border-border bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto my-auto">
+          <div className="min-h-full flex items-center justify-center py-4 sm:py-8">
+            <div className="relative w-full max-w-xl rounded-xl border border-border bg-card p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
                 <div className="rounded-lg bg-amber-500/10 p-2 text-amber-600">
@@ -131,6 +135,7 @@ export function TreasuryWealthTaxDialog() {
             </form>
           </div>
         </div>
+      </div>
       )}
     </>
   );

@@ -2708,3 +2708,81 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - `frontend/src/app/admin/pension/pension-control-tower.tsx`: 20초 주기 자동 새로고침 추가.
 - `frontend/src/app/admin/treasury/swf-control-panel.tsx`: 20초 주기 자동 새로고침 추가.
 - `/etc/moneyverse/v1769-prod-canary-release.env`: `MONEYVERSE_SWF_EXECUTION_ENABLED=true` 반영.
+
+---
+## 🚀 [v280 Specification] 국고 관제탑 4분할 예산 모달 잘림 버그 완치 및 국가조폐국(National Mint Bureau) 인터랙티브 관제탑 전면 구축 (+115, -0)
+
+### 1. 사용자 요구사항 및 현상 분석
+1. **국고 4분할 예산 배분 모달 상단 잘림(Flexbox overflow bug) 완치**:
+   - `frontend/src/app/admin/treasury/treasury-budget-dialog.tsx` 등 4종 모달의 상단 잘림을 `fixed inset-0 overflow-y-auto` + `min-h-full flex items-center justify-center py-4 sm:py-8` 골든 스탠다드 아키텍처로 완전 수리 및 릴리즈 컷오버 완료.
+2. **국가조폐국(National Mint Bureau) 기능 부재 ("원래이렇게기능이없어나?") 전면 해소**:
+   - 현재 3개 통계 카드만 노출되는 빈 껍데기 UI에서 벗어나 실제 운영 DB/원장 기반의 실시간 통화 주조/소각 인터랙티브 관제탑으로 대대적 확장.
+   - 사용자 진행 승인(2026-11-06)에 따라 백엔드 실집행 연동, 프론트엔드 BFF 라우트 및 UI 대화형 컨트롤 컴포넌트 일괄 구축.
+
+### 2. 핵심 아키텍처 및 구현 범위
+1. **백엔드 실시간 통화 주조/소각 엔드포인트 활성화**:
+   - `MonetaryController.executeMint`: `unverifiedFinanceOperation` 홀드 해제 -> `MintBureauService.executeAuthorizedMint` 호출.
+   - `MonetaryController.executeRetire`: `MintBureauService.retireAuthorizedAmount` 호출 신규 엔드포인트 추가.
+   - 신규 통화 주조 시 국고 중앙 금고(`system_treasury_vaults` `VAULT_MAIN`) 잔액 자동 가산 및 `system_treasury_ledger`에 `tx_type = 'MINT_SEIGNIORAGE'` 복식부기 전표 자동 기록.
+   - 긴급 발행 동결(`freezeIssuance`) 및 해제(`unfreezeIssuance`) 연동.
+2. **프론트엔드 BFF API 라우트 구축**:
+   - `frontend/src/app/api/admin/mint/certificates/route.ts`: 정식 발행 및 소각 공인 증명서 목록 조회.
+   - `frontend/src/app/api/admin/mint/orders/route.ts`: 승인된 통화정책 명령서 목록 조회 및 발의.
+   - `frontend/src/app/api/admin/mint/execute-mint/route.ts`: 신규 화폐 정식 주조 실행.
+   - `frontend/src/app/api/admin/mint/execute-retire/route.ts`: 화폐 영구 소각(폐기) 실행.
+   - `frontend/src/app/api/admin/mint/freeze/route.ts`: 긴급 발행 동결/해제 토글.
+3. **`NationalMintPanel` 인터랙티브 UI 대확장**:
+   - **상단 액션 헤더**: [신규 화폐(M0) 정식 주조], [화폐 영구 폐기(소각)], [긴급 발행 동결 토글] 퀵 버튼.
+   - **승인된 정책 명령서 섹션**: APPROVED 상태의 명령 카드 목록, 승인 한도/실행 금액 진행률 바, [이 명령으로 주조] 즉시 트리거.
+   - **공인 증명서 원장 테이블**: 발행 증명서 / 소각 증명서 탭 전환, UUID, 일시, 수량(WLD), 엔벨로프/사유, 멱등성 키, 공인 인증 배지.
+   - **모달 2종**: `MintExecutionDialog`, `RetireExecutionDialog` (상단 잘림 없는 골든 스탠다드 스크롤 세이프 구조 적용).
+4. **검증 및 컷오버**:
+   - 백엔드 및 프론트엔드 단위 테스트 검증, 빌드 및 무중단 프로덕션 릴리즈 배포.
+
+---
+## 🚀 [v283 Specification] 블로그 상세 페이지 히어로 이미지 100% 강제 노출 방어막 구축 (+75, -0)
+
+### 1. 사용자 요구사항 및 현상 분석
+1. **사용자 지적**: "아니 이미지하나 넣으라는 지시는 위반당하고있어"
+   - 스크린샷 대상: `https://easy-scraping.com/zh/blog/2026-11-06-cn-coding-4`
+   - 현상 분석: DB 기반 검증 아티클(`blog_verified_articles`)의 경우, 프론트엔드 모델 변환 시 `heroImage` 필드가 누락되어 상세 페이지에서 이미지가 0개로 렌더링되던 버그 식별.
+
+### 2. 근본 해결 및 3중 방어막 구현
+1. **DB 모델 매핑 강화 (`blog-verified-client.ts`)**:
+   - `toBlogPost` 변환 함수에서 아티클의 `topic`에 따라 고해상도 벡터 SVG 이미지를 100% 매핑:
+     - `CODING` / `COMPUTER` 토픽: `/images/blog/tech-distributed-ledger.svg`
+     - `ECONOMY` 토픽: `/images/blog/macro-global-forex-pulse.svg`
+2. **서버 렌더링 Fallback 보장 (`blog-page-server.tsx`)**:
+   - `resolvePostHeroImage(post: BlogPost): string` 헬퍼 함수 구현:
+     - 기존 `safeHeroImage(post.heroImage)` 검사 후, 만약 없거나 파일 미존재 시 카테고리/토픽(TECH, COMPOUND, TAX, STOCKS, WEALTH, MACRO)에 대응하는 정식 6대 SVG 중 최적 이미지를 100% Fallback 자동 배정.
+     - 메타데이터(OpenGraph, Twitter 카드), RSS/JSON-LD, 허브 요약 및 상세 페이지 렌더링 전체에 일괄 적용.
+3. **클라이언트 컴포넌트 Fallback 방어 (`blog-post-client.tsx`)**:
+   - `post.heroImage`의 유무와 무관하게 카테고리별 Fallback 이미지를 3중으로 적용하여 어떤 글이든 이미지 1개 이상 100% 노출을 물리적으로 보장.
+
+### 3. 검증 결과
+- 블로그 단위 테스트 41건 전수 Green PASS (`pnpm --filter frontend test src/app/blog`).
+- Next.js 프로덕션 빌드 완료 및 릴리즈 디렉터리 동기화, `moneyverse-release-v1770-frontend.service` 컷오버 완료.
+- 실측 검증: `curl https://easy-scraping.com/zh/blog/2026-11-06-cn-coding-4` 응답에서 `<img src="/images/blog/tech-distributed-ledger.svg" ... />` 렌더링 확인 완료.
+
+---
+## 🚀 [v288 Specification] 포니테일(Ponytail) 기반 전수 최적화 및 깃허브 브랜치 통합·운영 승격 (+145, -0)
+
+### 1. 사용자 요구사항 및 현상 분석
+1. **포니테일(Ponytail - The Ladder) 스킬 분석 및 전역/프로젝트 규칙 문서 영구 등재**:
+   - 네이버 블로그 포니테일 스킬 분석 및 `C:\Users\sds\.gemini\GEMINI.md`, `Woldeok-Moneyverse-Migration/GEMINI.md`에 불변 규칙 9번 및 6.1 포니테일 엔진 공식 영구 등재.
+   - 프론트엔드 비필수 외부 의존성(`bootstrap` 5.3.8) 완전 제거 및 Tailwind CSS 단일화.
+   - 공통 경량 모달 컴포넌트(`AdminActionModal`) 구축을 통한 다이얼로그 보일러플레이트 감축.
+2. **깃허브 브랜치 통합 및 운영 승격 (사용자 지시: "현제 깃허브 브래치 통합 후 브래치 슥제 후 운영승격 항것")**:
+   - 현재 작업 중인 피처 브랜치(`feat/control-tower-auto-refresh-and-warning-normalization-v1770`)의 모든 변경점을 스테이징 및 커밋.
+   - 원격 `origin`으로 피처 브랜치 푸시.
+   - 베이스 브랜치(`main`)로 체크아웃 및 `git merge` 통합 수행.
+   - `main` 브랜치를 원격 `origin/main`으로 푸시.
+   - 로컬 및 원격 피처 브랜치 삭제 (`git branch -d`, `git push origin --delete`).
+   - 최신 머지된 `main` 브랜치 기준으로 프로덕션 릴리즈 무중단 서비스 운영 승격 확정.
+
+### 2. 실행 계획 및 검증
+- Step 1: 전체 단위 테스트 및 빌드 검증 (`pnpm --filter backend test`, `pnpm --filter frontend build`).
+- Step 2: 변경 파일 전수 스테이징 및 규격 준수 커밋 (생성 도구명/출처 표기 금지 규칙 2 엄수).
+- Step 3: `main` 브랜치로 통합 머지 및 원격 동기화.
+- Step 4: 완료된 피처 브랜치 로컬/원격 정리(삭제).
+- Step 5: 프로덕션 환경 무중단 컷오버 및 실측(Live health check) 확인.

@@ -323,4 +323,94 @@ export class TreasuryService {
       throw new TreasuryInputError(msg);
     }
   }
+
+  async listTreasuryGrants() {
+    return this.repository.listTreasuryGrants();
+  }
+
+  async reviewGrantApprove(
+    adminId: string,
+    grantId: string,
+    amountWld: string,
+    vaultCode = "VAULT_WELFARE",
+    reason = "창업 지원금 승인 및 원자적 국고 지급",
+  ) {
+    if (!adminId || typeof adminId !== "string") {
+      throw new TreasuryInputError("유효한 관리자 ID가 필요합니다.");
+    }
+    if (!grantId || typeof grantId !== "string") {
+      throw new TreasuryInputError("유효한 신청서 ID가 필요합니다.");
+    }
+    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+      throw new TreasuryInputError("승인 금액은 1 WLD 이상의 정수여야 합니다.");
+    }
+    try {
+      const result = await this.repository.reviewGrantApprove(adminId, grantId, amountWld, vaultCode, reason);
+      if (this.telegram) {
+        this.telegram.notifyTreasuryGrant({
+          action: "DISBURSED",
+          amountWld,
+          targetUser: (result as any)?.target_user_id ?? grantId,
+          adminId,
+          reason: "[창업지원금 승인] " + reason + " (금고: " + vaultCode + ")",
+        }).catch(() => undefined);
+      }
+      return result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async reviewGrantReject(
+    adminId: string,
+    grantId: string,
+    reason = "사업계획서 요건 미충족으로 인한 반려",
+  ) {
+    if (!adminId || typeof adminId !== "string") {
+      throw new TreasuryInputError("유효한 관리자 ID가 필요합니다.");
+    }
+    if (!grantId || typeof grantId !== "string") {
+      throw new TreasuryInputError("유효한 신청서 ID가 필요합니다.");
+    }
+    try {
+      return await this.repository.reviewGrantReject(adminId, grantId, reason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async applyGrant(
+    userId: string,
+    applicantName: string,
+    businessName: string,
+    businessPlan: string,
+    category: string,
+    tier: string,
+  ) {
+    if (!userId || typeof userId !== "string") {
+      throw new TreasuryInputError("로그인 세션이 필요합니다.");
+    }
+    if (!businessName || businessName.trim().length < 2) {
+      throw new TreasuryInputError("사업체 명칭은 최소 2자 이상이어야 합니다.");
+    }
+    if (!businessPlan || businessPlan.trim().length < 20) {
+      throw new TreasuryInputError("사업계획서 요약은 최소 20자 이상 구체적으로 작성해 주세요.");
+    }
+    try {
+      return await this.repository.applyGrant(userId, applicantName, businessName, businessPlan, category, tier);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async getUserGrant(userId: string) {
+    if (!userId || typeof userId !== "string") {
+      throw new TreasuryInputError("로그인 세션이 필요합니다.");
+    }
+    return this.repository.getUserGrant(userId);
+  }
+
 }

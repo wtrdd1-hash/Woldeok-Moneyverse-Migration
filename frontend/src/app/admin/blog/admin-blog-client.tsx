@@ -300,15 +300,25 @@ export function AdminBlogClient({ initialPosts }: Props) {
                   return (
                     <tr key={post.slug} className={`hover:bg-muted/20 ${isWithdrawn ? 'opacity-60 bg-rose-950/10' : ''}`}>
                       <td className="p-3 max-w-xs">
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          className={`font-semibold text-foreground hover:underline line-clamp-1 ${
-                            isWithdrawn ? 'line-through text-muted-foreground' : ''
-                          }`}
-                        >
-                          {post.title}
-                        </Link>
-                        <div className="text-[10px] text-muted-foreground">/blog/{post.slug}</div>
+                        {(() => {
+                          const postLocale = ({ KR: 'ko', US: 'en', JP: 'ja', CN: 'zh' } as Record<string, string>)[post.country || 'KR'] || 'ko';
+                          const articleHref = postLocale === 'ko' ? `/blog/${post.slug}` : `/${postLocale}/blog/${post.slug}`;
+                          return (
+                            <>
+                              <Link
+                                href={articleHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`font-semibold text-foreground hover:underline line-clamp-1 ${
+                                  isWithdrawn ? 'line-through text-muted-foreground' : ''
+                                }`}
+                              >
+                                {post.title}
+                              </Link>
+                              <div className="text-[10px] text-muted-foreground">{articleHref}</div>
+                            </>
+                          );
+                        })()}
                       </td>
                       <td className="p-3">
                         <Badge variant="outline" className="text-[10px]">

@@ -32,6 +32,17 @@ function toBlogPost(row:VerifiedRow):BlogPost {
   } as const;
   const categoryLabel = nativeLabels[row.country][row.topic];
   const tags = [categoryLabel,row.country];
+  const titleLower = (row.title + " " + row.slug).toLowerCase();
+  let heroImage = '/images/blog/tech-distributed-ledger.svg';
+  if (row.topic === 'COMPUTER' || titleLower.includes('network') || titleLower.includes('http') || titleLower.includes('protocol') || titleLower.includes('통신')) {
+    heroImage = '/images/blog/tech-computer-networks.svg';
+  } else if (row.topic === 'CODING' || titleLower.includes('typedarray') || titleLower.includes('buffer') || titleLower.includes('algorithm') || titleLower.includes('编程')) {
+    heroImage = '/images/blog/tech-algorithms-code.svg';
+  } else if (titleLower.includes('fx') || titleLower.includes('forex') || titleLower.includes('환율') || titleLower.includes('외환')) {
+    heroImage = '/images/blog/macro-global-trade-fx.svg';
+  } else if (row.topic === 'ECONOMY') {
+    heroImage = '/images/blog/macro-global-forex-pulse.svg';
+  }
   const translated:BlogTranslation = {
     title:row.title,excerpt:row.excerpt,content:row.content,tags,
   };
@@ -46,6 +57,7 @@ function toBlogPost(row:VerifiedRow):BlogPost {
     relatedCalculatorName:row.topic==='ECONOMY'?'기초 계산':'개발 블로그',
     isAiGenerated:true,views:0,country:row.country as BlogCountry,
     status:row.status==='WITHDRAWN'?'WITHDRAWN':'PUBLISHED',verificationReceipt:row.receipt,
+    heroImage,
     ...(translations ? {translations}:{}),
   };
 }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+    <defs>
+      <linearGradient id="bankbg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0b1718"/>
+        <stop offset="100%" stop-color="#040b0c"/>
+      </linearGradient>
+      <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f59e0b"/>
+        <stop offset="100%" stop-color="#fbbf24"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="630" fill="url(#bankbg)"/>
+    <g transform="translate(600, 260)">
+      <polygon points="0,-120 180,-40 -180,-40" fill="#f59e0b" fill-opacity="0.2" stroke="#f59e0b" stroke-width="4"/>
+      <rect x="-160" y="-40" width="320" height="20" fill="#f59e0b"/>
+      <rect x="-140" y="-20" width="30" height="120" fill="#fbbf24"/>
+      <rect x="-60" y="-20" width="30" height="120" fill="#fbbf24"/>
+      <rect x="30" y="-20" width="30" height="120" fill="#fbbf24"/>
+      <rect x="110" y="-20" width="30" height="120" fill="#fbbf24"/>
+      <rect x="-180" y="100" width="360" height="30" fill="#f59e0b"/>
+    </g>
+    <text x="600" y="440" font-family="monospace" font-size="20" font-weight="900" fill="#fbbf24" text-anchor="middle">BASE MONEY M0 ISSUANCE &amp; PRICE STABILITY</text>
+    <text x="600" y="550" font-family="sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">CENTRAL BANK MONETARY POLICY</text>
+    <text x="600" y="585" font-family="monospace" font-size="14" fill="#f59e0b" text-anchor="middle">NATIONAL TREASURY &amp; RESERVE OPERATIONS</text>
+  </svg>

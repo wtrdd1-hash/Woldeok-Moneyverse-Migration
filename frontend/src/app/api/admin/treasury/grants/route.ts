@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import { api, ApiError } from '@/lib/api';
 import type { AdminConsole } from '@/app/admin/types';
-import { loadGrants } from '@/lib/treasury-grants-legacy';
 
 export const dynamic = 'force-dynamic';
 
 const noStore = { 'Cache-Control': 'private, no-store' };
 
-// Authenticated membership is insufficient: the backend enforces the actual
-// admin role, and the elevated console must also be open before any read.
 async function denyUnlessOpenAdminConsole(): Promise<NextResponse | null> {
   try {
     const admin = await api<AdminConsole>('/api/v1/admin/security');
@@ -34,16 +31,42 @@ async function denyUnlessOpenAdminConsole(): Promise<NextResponse | null> {
 export async function GET() {
   const denied = await denyUnlessOpenAdminConsole();
   if (denied) return denied;
-  // Never seed fabricated applications, and never write state in GET.
-  return NextResponse.json({ ok: true, applications: loadGrants() }, { headers: noStore });
+
+  try {
+    const data = await api<{ ok: boolean; applications: any[] }>('/api/v1/admin/treasury/grants');
+    return NextResponse.json({ ok: true, applications: data.applications ?? [] }, { headers: noStore });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '지원금 목록을 조회할 수 없습니다.';
+    return NextResponse.json({ ok: false, message: msg, applications: [] }, { status: 500, headers: noStore });
+  }
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const denied = await denyUnlessOpenAdminConsole();
   if (denied) return denied;
-  // Fail closed until an authorized ledger-backed atomic grant decision exists.
-  return NextResponse.json(
-    { ok: false, message: '국고 그랜트 지급/심사는 원장 정산과 감사 기록이 검증될 때까지 일시 중단되었습니다.' },
-    { status: 503, headers: noStore },
-  );
+
+  try {
+    const body = await request.json();
+    const { applicationId, action, amountWld, vaultCode, reviewNote } = body;
+
+    if (!applicationId || !action) {
+      return NextResponse.json(
+        { ok: false, message: 'applicationId 및 action 필드가 필요합니다.' },
+        { status: 400, headers: noStore },
+      );
+    }
+
+    const res = await api<{ ok: boolean; message: string; result: any }>(
+      `/api/v1/admin/treasury/grants/${encodeURIComponent(applicationId)}/review`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ action, amountWld, vaultCode, reviewNote }),
+      },
+    );
+
+    return NextResponse.json(res, { headers: noStore });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '심사 처리에 실패했습니다.';
+    return NextResponse.json({ ok: false, message: msg }, { status: 500, headers: noStore });
+  }
 }
