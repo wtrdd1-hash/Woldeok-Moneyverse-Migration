@@ -116,7 +116,8 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, sort: 'recent' | 'discussed' = 'recent') {
+    if (sort !== 'recent' && sort !== 'discussed') throw new Error('invalid board sort');
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -130,14 +131,19 @@ export class StockCommunityService {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
+    // The source function bounds the set to the latest 50 before any ranking.
+    const order = sort === 'discussed'
+      ? "ORDER BY CASE WHEN $4::text = 'discussed' THEN comment_count END DESC NULLS LAST, created_at DESC, post_id DESC"
+      : 'ORDER BY created_at DESC, post_id DESC';
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+        ${order}`,
+      sort === 'discussed' ? [50, normalized, title, sort] : [50, normalized, title],
     );
     return rows.map(mapped);
   }

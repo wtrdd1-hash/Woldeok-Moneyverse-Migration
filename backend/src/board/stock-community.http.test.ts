@@ -22,3 +22,16 @@ describe('public board title query HTTP validation', () => {
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });
   });
 });
+
+describe('public board discussion order HTTP contract', () => {
+  it('accepts discussed sort and echoes the applied source order', async () => {
+    const controller = new PublicStockCommunityController(community);
+    await expect(controller.list({ sort: 'discussed' })).resolves.toEqual({ posts: [], sortApplied: 'discussed' });
+    expect(community.publicList).toHaveBeenCalledWith(undefined, undefined, 'discussed');
+  });
+  it.each([{ sort: ['recent', 'discussed'] }, { sort: 'popular' }, { sort: '' }, { sort: null }])(
+    'rejects invalid or repeated sort as HTTP 400 %j', async (query) => {
+      await expect(new PublicStockCommunityController(community).list(query)).rejects.toMatchObject({ status: 400 });
+    },
+  );
+});

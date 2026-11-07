@@ -1942,6 +1942,7 @@ _No request body._
 | posts[].body | false | string |  |
 | posts[].postId | true | string |  |
 | posts[].title | true | string |  |
+| sortApplied | false | string="recent" \| string="discussed" |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
