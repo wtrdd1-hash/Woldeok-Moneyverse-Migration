@@ -3009,3 +3009,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1890 — F675-278: 증빙 삭제 검증서 및 잔존 복제본 예외 대기열 (기능 추가; 구현 전 제안)
+- **목적·선행조건:** F675-277 보존·삭제 이후 세대별 삭제 검증서 또는 잔존 복제본 예외를 제공한다. F675-271~277 구현·검증이 선행되어야 하며 `admin_sla_purge_attestation_v1` 기본 OFF. 저장소 DELETE 2xx만으로 삭제 성공 판정 금지.
+- **권한·화면:** 테넌트 개인정보 관리자는 관리자 > SLA > 증빙 보존 > 삭제 검증서에서 테넌트·세대·상태·제공자·위험도를 조회한다. 작업자는 서명된 불변 영수증을 제출하고 독립 준법 심사자가 승인·거절한다. CTA 매니페스트 확인, 복제본 재검증, 심사 요청, 비식별 검증서 내려받기, 예외 상향 보고. 상태 PENDING_VERIFICATION, VERIFYING, RESIDUAL_FOUND, REVIEW_REQUIRED, ATTESTED, BLOCKED, REVOKED와 시각·텍스트 상태를 표시한다.
+- **제안 API:** GET /admin/sla/purge-attestations (제한된 커서·상태), GET /admin/sla/purge-attestations/{id}, POST /admin/sla/purge-attestations/{id}/reverify, POST /admin/sla/purge-attestations/{id}/review, GET /admin/sla/purge-attestations/{id}/export, POST /internal/sla/purge-attestations/receipts. 테넌트 RBAC, 멱등키, 심사 If-Match, CSRF, 400/401/403/404/409/412/429/503 계약. 실제 구현 API라는 주장은 아니다.
+- **제안 DB:** purge_attestation(tenant_id,id,evidence_generation_id,purge_intent_id,manifest_sha256,policy_version,state,version,verified_at,reviewer_effective_id), purge_attestation_receipt(tenant_id,attestation_id,provider,object_version,verification_method,observed_at,receipt_sha256,result), purge_attestation_exception(tenant_id,id,attestation_id,replica_locator_digest,severity,status). 테넌트 복합 FK, (tenant_id,purge_intent_id) UNIQUE, (tenant_id,attestation_id,provider,object_version,verification_method) UNIQUE, 상태 CHECK, 미해결 예외 부분 인덱스 및 테넌트·상태·생성시각 커서 인덱스. 객체 위치 해시·암호화.
+- **트랜잭션·판정:** 영수증·CAS 상태 변경·불변 감사·Outbox 단일 트랜잭션과 작업자 펜싱. 서명 매니페스트 기준 원본 버전·복제본·제공자 보존·일관성 지연을 확인한다. 접근 불가 백업·부분 응답·잔존 복제본은 BLOCKED/RESIDUAL_FOUND, ATTESTED 금지. 위임 자기 승인 차단. 반증 발견 시 검증서 REVOKED 및 예외 생성, 과거 서명본은 불변 보존.
+- **보안·악용방지:** 제공자 서명 위조, 재전송, 오래된 세대, 철회 키, 교차 테넌트, 검증 중 신규 보존명령, SSRF·악성 객체 위치를 차단한다. 재검증 속도 제한·내보내기 감사, 삭제 전 독립 법률 승인. 검증서는 기술적 근거이며 확인 불가능한 제3자 복제본의 삭제를 법적으로 보증하지 않는다.
+- **UX·SEO·KPI·테스트:** 관리자 320px, WCAG 2.2 AA 키보드·초점·상태, 영문·한국어 동등성, 인증 및 noindex. 개인정보 없는 검증 지연·잔존 예외율·철회율·심사 SLA. 보존-검증 경합, 최종 일관성, 복제 지연, 중복·역순 영수증, 삭제 없는 2xx, 작업자 펜싱, 자기 승인, 테넌트 격리, 접근성·롤백 테스트.
+- **게이트·백로그:** P0 운영 릴리스 심볼릭 링크와 실제 SHA /en /en/login, DB 최소권한, 마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검토. P1 실제 Nest·Next·app-api·DB 계약, 제공자 복제본/버전 API, F675-271~277 선행 및 미병합 PR 충돌 확인. expand/backfill/contract, 실제 PostgreSQL·제공자 샌드박스 Test exact-SHA, 카나리, 플래그 OFF 롤백(삭제 객체 복구 주장 금지). 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000; 중복 제거·근거 분류 BLOCKED/IN PROGRESS.
