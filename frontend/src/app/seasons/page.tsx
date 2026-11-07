@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
-import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
+import { parseCurrentSeason, parseSeasonEvents, parseSeasonLeaderboard } from './season-evidence';
 import { SeasonPassTrack } from './season-pass-track';
 
 export const dynamic = 'force-dynamic';
@@ -20,38 +20,6 @@ export const metadata: Metadata = {
   title: '시즌 이벤트',
   robots: { index: false, follow: false },
 };
-
-interface SeasonEvent {
-  readonly event_id: string;
-  readonly season_id: string;
-  readonly season_name: string;
-  readonly title: string;
-  readonly description: string;
-  readonly cost_wld: string;
-  readonly points_per_entry: number;
-  readonly ends_at: string | null;
-}
-
-interface CurrentSeasonStatus {
-  readonly seasonId: string;
-  readonly seasonName: string;
-  readonly startsAt: unknown;
-  readonly endsAt: unknown;
-  readonly lifecycleState: string;
-  readonly totalParticipants: number;
-  readonly myRank: number | null;
-  readonly myScore: number;
-  readonly myTier: string;
-  readonly tierRewardWld: number;
-  readonly tierTrophy: string | null;
-}
-
-interface LeaderboardEntry {
-  readonly rank: number;
-  readonly points: string;
-  readonly entries: string;
-  readonly display_name: string;
-}
 
 function getRankBadge(rank: number) {
   if (rank === 1) {
@@ -90,17 +58,17 @@ export default async function SeasonsPage({
   await requireMember();
   const { event: requested } = await searchParams;
 
-  const [data, currentStatus] = await Promise.all([
-    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
-    apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
+  const [rawEvents, rawCurrent] = await Promise.all([
+    apiOrNull<unknown>('/api/v1/seasons/events'),
+    apiOrNull<unknown>('/api/v1/seasons/current'),
   ]);
-
-  const events = data?.events ?? [];
-  const selected = events.find((event) => event.event_id === requested) ?? events[0];
+  const events = parseSeasonEvents(rawEvents);
+  const currentStatus = parseCurrentSeason(rawCurrent);
+  const selected = events?.find((event) => event.event_id === requested) ?? events?.[0];
   const board = selected
-    ? await apiOrNull<{ entries: LeaderboardEntry[] }>(
+    ? parseSeasonLeaderboard(await apiOrNull<unknown>(
         `/api/v1/seasons/events/${selected.event_id}/leaderboard`,
-      )
+      ))
     : null;
 
   return (
@@ -109,17 +77,17 @@ export default async function SeasonsPage({
         WLD 소비와 점수는 게임 안에서만 사용됩니다. 기간 한정 시즌 이벤트에 참여하여 명예 순위와 보상을 쟁취하세요.
       </PageHeader>
 
-      {/* 시즌 랭킹 최종 보상 수령 배너 (정산된 보상이 있는 경우 상단 노출) */}
-      {currentStatus && (
-        <SeasonRewardClaimBanner
-          seasonId={currentStatus.seasonId}
-          seasonName={currentStatus.seasonName}
-          tierRewardWld={currentStatus.tierRewardWld}
-          tierTrophy={currentStatus.tierTrophy}
-          myTier={currentStatus.myTier}
-          myRank={currentStatus.myRank}
-        />
-      )}
+      <section aria-label="현재 시즌 상태" aria-live="polite" className="rounded-xl border p-4 text-sm">
+        {currentStatus ? (
+          <p>
+            현재 시즌: {currentStatus.seasonName} · 참여자 {currentStatus.totalParticipants}명 ·
+            {currentStatus.myRank === null ? ' 내 순위 미확인' : ` 내 순위 ${currentStatus.myRank}위`}.
+            순위는 조회 시점의 기록이며 보상 지급을 보장하지 않습니다.
+          </p>
+        ) : (
+          <p>현재 시즌 정보를 확인할 수 없습니다. <Link href="/seasons" className="underline underline-offset-4 min-h-11 inline-flex items-center">다시 확인</Link></p>
+        )}
+      </section>
 
       {/* 시즌 1: First Capital 명예의 전당 티커 & 아카이브 */}
       <SeasonHallOfFameTicker />
@@ -131,8 +99,8 @@ export default async function SeasonsPage({
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">
           <Calendar className="size-5 text-primary" /> 진행 중인 시즌 이벤트
         </h2>
-        {data === null ? (
-          <EmptyState title="이벤트를 불러오지 못했어요." />
+        {events === null ? (
+          <div role="alert"><EmptyState title="이벤트를 확인할 수 없어요." description="잘못된 참가비나 이벤트를 추측해 표시하지 않습니다." /><Link href="/seasons" className="underline underline-offset-4 min-h-11 inline-flex items-center">다시 확인</Link></div>
         ) : events.length === 0 ? (
           <EmptyState title="진행 중인 이벤트가 없습니다." />
         ) : (
@@ -211,15 +179,15 @@ export default async function SeasonsPage({
 
           <CardContent>
             {board === null ? (
-              <EmptyState title="순위를 불러오지 못했어요." />
-            ) : board.entries.length === 0 ? (
+              <div role="alert"><EmptyState title="순위를 확인할 수 없어요." description="검증되지 않은 순위와 점수는 표시하지 않습니다." /><Link href={`/seasons?event=${selected.event_id}`} className="underline underline-offset-4 min-h-11 inline-flex items-center">다시 확인</Link></div>
+            ) : board.length === 0 ? (
               <EmptyState
                 title="아직 참가자가 없습니다."
                 description="가장 먼저 이벤트에 참여하고 시즌 1위에 이름을 올려보세요!"
               />
             ) : (
               <ol className="grid gap-2">
-                {board.entries.map((entry) => (
+                {board.map((entry) => (
                   <li
                     key={`${entry.rank}-${entry.display_name}`}
                     className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors"
