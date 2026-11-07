@@ -197,6 +197,18 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // Global public SEO headers are applied after route handlers. Explicit
+      // member-profile rules must win at the actual HTTP edge, including
+      // localized rewrites and the Android gateway on every response status.
+      ...[
+        '/profile/:path*', '/ko/profile/:path*', '/en/profile/:path*',
+        '/ja/profile/:path*', '/zh/profile/:path*', '/vi/profile/:path*',
+        '/app-api/v1/profile/:path*', '/api/v1/profile/:path*',
+      ].map((source) => ({ source, headers: [
+        { key: 'x-robots-tag', value: 'noindex, nofollow' },
+        { key: 'cache-control', value: 'private, no-store' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+      ] })),
     ];
   },
 

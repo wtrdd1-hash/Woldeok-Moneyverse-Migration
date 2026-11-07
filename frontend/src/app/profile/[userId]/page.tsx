@@ -10,6 +10,7 @@ import { requireMember } from '@/lib/session';
 import type { ProfileView } from '../profile';
 import { isUuid } from '../profile';
 import { ProfileCard } from '../profile-parts';
+import { parseMemberProfileResponse } from '../public-profile-proof';
 
 /** Somebody else's profile, on their terms. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -51,10 +52,9 @@ async function readProfile(userId: string): Promise<Outcome> {
   if (!isUuid(userId)) return { state: 'hidden' };
 
   try {
-    const { profile } = await api<{ profile: ProfileView }>(
-      `/api/v1/profile/${encodeURIComponent(userId)}`,
-    );
-    return { state: 'shown', profile };
+    const payload = await api<unknown>(`/api/v1/profile/${encodeURIComponent(userId)}`);
+    const verified = parseMemberProfileResponse(payload);
+    return verified ? { state: 'shown', profile: verified.profile } : { state: 'unavailable' };
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return { state: 'hidden' };
     return { state: 'unavailable' };
@@ -110,10 +110,15 @@ export default async function MemberProfilePage({
           description="주소가 잘못됐거나, 이용을 중단한 회원이거나, 프로필을 공개하지 않은 회원이에요."
         />
       ) : (
-        <EmptyState
-          title="프로필을 불러오지 못했어요."
-          description="회원이 공개한 내용이 아니라 요청이 닿지 않았어요. 잠시 후 다시 확인해 주세요."
-        />
+        <div role="status" aria-live="polite" className="grid gap-3">
+          <EmptyState
+            title="프로필을 불러오지 못했어요."
+            description="회원의 공개 범위를 확인하지 못했어요. 잠시 후 다시 조회해 주세요."
+          />
+          <Button asChild variant="outline" className="min-h-11 w-fit">
+            <Link href={`/profile/${encodeURIComponent(userId)}`}>다시 조회</Link>
+          </Button>
+        </div>
       )}
     </div>
   );
