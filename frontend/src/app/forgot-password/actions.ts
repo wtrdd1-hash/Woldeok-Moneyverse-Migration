@@ -1,14 +1,40 @@
 'use server';
-import { redirect } from 'next/navigation';
+
 import { api } from '@/lib/api';
 
-export async function requestPasswordReset(formData: FormData): Promise<never> {
-  const email = String(formData.get('email') ?? '').trim();
-  if (!email) redirect('/forgot-password?error=fields');
+export type PasswordResetRequestState = {
+  readonly status: 'idle' | 'invalid' | 'accepted' | 'unavailable';
+};
+
+/**
+ * Nest deliberately returns the same acceptance for existing and unknown
+ * addresses. This is a request receipt, never evidence that email was sent.
+ */
+export async function requestPasswordReset(
+  _previous: PasswordResetRequestState,
+  formData: FormData,
+): Promise<PasswordResetRequestState> {
+  const field = formData.get('email');
+  const email = typeof field === 'string' ? field.trim() : '';
+  if (
+    email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) return { status: 'invalid' };
+
   try {
-    await api('/api/v1/auth/local/password-reset/request', { method: 'POST', body: { email } });
+    const receipt: unknown = await api('/api/v1/auth/local/password-reset/request', {
+      method: 'POST',
+      body: { email },
+    });
+    if (
+      receipt !== null &&
+      typeof receipt === 'object' &&
+      !Array.isArray(receipt) &&
+      Object.keys(receipt).length === 1 &&
+      (receipt as { accepted?: unknown }).accepted === true
+    ) return { status: 'accepted' };
   } catch {
-    // The recovery surface is deliberately enumeration-resistant.
+    // Do not leak upstream diagnostics or the existence of an account.
   }
-  redirect('/forgot-password?sent=1');
+  return { status: 'unavailable' };
 }

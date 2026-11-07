@@ -192,6 +192,16 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // A password recovery request can include private form state. The
+      // default public indexing policy must never override its page metadata.
+      ...['', '/en', '/ko', '/ja', '/zh', '/vi'].map((prefix) => ({
+        source: `${prefix}/forgot-password`,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
