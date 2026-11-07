@@ -1,5 +1,6 @@
 'use client';
 
+import { clubMutation } from '../club-mutation';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -36,7 +37,7 @@ export default function NewClubPage() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/clubs', {
+      const res = await clubMutation('/api/v1/clubs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

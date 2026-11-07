@@ -1,5 +1,6 @@
 'use client';
 
+import { clubMutation } from '../club-mutation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -76,7 +77,7 @@ export function ClubhouseView({
   const handleJoin = async () => {
     setIsJoining(true);
     try {
-      const res = await fetch(`/api/v1/clubs/${club.id}/join`, { method: 'POST' });
+      const res = await clubMutation(`/api/v1/clubs/${club.id}/join`, { method: 'POST' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || '가입에 실패했습니다.');
@@ -93,7 +94,7 @@ export function ClubhouseView({
     if (!window.confirm('정말 이 클럽에서 탈퇴하시겠습니까?')) return;
     setIsJoining(true);
     try {
-      const res = await fetch(`/api/v1/clubs/${club.id}/leave`, { method: 'POST' });
+      const res = await clubMutation(`/api/v1/clubs/${club.id}/leave`, { method: 'POST' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || '탈퇴에 실패했습니다.');
@@ -123,7 +124,7 @@ export function ClubhouseView({
     setIsFunding(true);
     setFundError(null);
     try {
-      const res = await fetch(`/api/v1/clubs/${club.id}/projects/${selectedProject.id}/contributions`, {
+      const res = await clubMutation(`/api/v1/clubs/${club.id}/projects/${selectedProject.id}/contributions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amountWld: amount }),
@@ -147,7 +148,7 @@ export function ClubhouseView({
 
     setIsPosting(true);
     try {
-      const res = await fetch(`/api/v1/clubs/${club.id}/feed`, {
+      const res = await clubMutation(`/api/v1/clubs/${club.id}/feed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
