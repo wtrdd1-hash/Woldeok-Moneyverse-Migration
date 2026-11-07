@@ -1,4 +1,5 @@
 import type { NavEntry } from '@/lib/navigation';
+import type { Viewer } from '@/lib/viewer-state';
 import { navLabel } from '@/lib/navigation';
 
 export interface SearchEntry extends NavEntry {
@@ -59,3 +60,26 @@ export function filterSearchEntries(
   });
 }
 
+
+
+/** Query strings are untrusted: repeated `q` parameters become arrays in Next.js. */
+export function parseGlobalSearchQuery(value: unknown): { readonly query: string; readonly invalid: boolean } {
+  if (value === undefined) return { query: '', invalid: false };
+  if (typeof value !== 'string') return { query: '', invalid: true };
+  const query = value.normalize('NFC').trim();
+  if ([...query].length > 80 || /[\u0000-\u001f\u007f]/u.test(query)) {
+    return { query: '', invalid: true };
+  }
+  return { query, invalid: false };
+}
+
+/** An unavailable or malformed auth response is not evidence that the user signed out. */
+export function resolveSearchAudience(viewer: Viewer | null): 'unknown' | 'public' | 'member' | 'admin' {
+  if (!viewer || typeof viewer.signedIn !== 'boolean' ||
+      typeof viewer.consentCurrent !== 'boolean' ||
+      !Array.isArray(viewer.adminRoles) || !viewer.adminRoles.every((role) => typeof role === 'string')) {
+    return 'unknown';
+  }
+  if (!viewer.signedIn || !viewer.consentCurrent) return 'public';
+  return viewer.adminRoles.length > 0 ? 'admin' : 'member';
+}
