@@ -192,6 +192,15 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // The owner wallet and its ledger details are never public search or cache content.
+      ...['/wallet/:path*', '/:locale(ko|en|ja|zh)/wallet/:path*'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
