@@ -3009,3 +3009,14 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1880 — F675-275 에스컬레이션 전달 보증 무결성 보완 (Feature Improvement; 기획 전용)
+- 주기: 이전 Feature Addition v1878 / 현재 Feature Improvement v1880 / 다음 Feature Addition v1882. 미병합 PR #2840의 F675-275 제안을 보완하며 F675-271~275가 배포되었다고 간주하지 않는다. F675-271/272/273/274의 독립 구현·검증·활성화가 선행 조건이다.
+- P0 전달 의미: 제공자 접수, 실제 전달, 수신자 확인, 운영자 인증 확인을 별도 상태로 관리한다. 웹훅 2xx는 전송 접수일 뿐 사람의 수신·증빙 유효성·사건 종결·알림 억제를 증명하지 않는다. 영수증이 시간 내 도착하지 않으면 추정 성공 대신 UNKNOWN으로 둔다.
+- P0 신원·재생 방지: 원본 웹훅 바이트의 서명, 타임스탬프 허용 오차, 제공자 계정 귀속을 확인하고 미등록 키·테넌트 간 전달 ID를 거부한다. UNIQUE(tenant_id, provider, provider_event_id), UNIQUE(tenant_id, escalation_id, recipient_id, delivery_generation)를 강제하며 로그에서 연락처·URL·페이로드를 마스킹한다.
+- P0 상태: QUEUED -> SUBMITTED -> ACCEPTED -> DELIVERED/FAILED/UNKNOWN; ACKNOWLEDGED는 별도의 인증된 행위이다. FAILED/UNKNOWN은 최대 횟수·지수 백오프·지터를 적용해 RETRY_SCHEDULED로 전환할 수 있다. 동의 철회·라우팅 종료는 STOPPED이나 미해결 증빙 불일치를 해소하지 않는다. 전환 사유와 시각을 불변 기록한다.
+- P0 트랜잭션: 하나의 DB 트랜잭션에서 에스컬레이션 세대 CAS 잠금, 테넌트·수신 동의 검증, 전달 시도, 불변 감사 영수증, Outbox를 기록한다. 임대 작업자는 펜싱 토큰과 제공자 멱등성 키를 사용하고 오래된 작업자의 확정 전이를 거부한다. 제공자 부작용은 중복될 수 있으므로 정확히 한 번 전달을 보장한다고 주장하지 않는다.
+- P1 관리자 UX: 수신자 유형(개인정보 제외), 제공자 상태, 영수증 경과 시간, 다음 재시도, 억제 사유와 Retry / Review / Escalate CTA를 표시한다. 억제에는 독립 승인자가 필요하며 위임 자기 승인을 거부한다. CSRF, If-Match, Idempotency-Key, RBAC, 속도 제한, 관리자 noindex, 320px 키보드 접근, WCAG 2.2 AA, 영·한 상태 문구를 적용한다.
+- P1 API/DB: 제안 GET /api/v1/admin/sla/escalation-deliveries, GET /:id, POST /:id/retry, POST /:id/suppress, POST /:id/acknowledge, POST /provider-receipts; 구현 전에 실제 NestJS 컨트롤러와 비교한다. 테넌트 복합 FK, CHECK(state), 이벤트 UNIQUE, 미해결 (tenant_id, state, next_retry_at) 부분 인덱스, 행위자 권한을 검증하는 SECURITY DEFINER 함수를 사용하고 moneyverse_app 직접 테이블 쓰기 권한을 부여하지 않는다.
+- P1 지표·검증: 접수-전달 p95, UNKNOWN 비율, 중복 콜백, 재시도 소진, 무단 접근, 독립 승인 완료율을 개인정보 없이 측정한다. 중복·역순 웹훅, 동의 철회, 재생, 제공자 장애, 작업자 재시작, 테넌트 격리, 오래된 세대, 재시도·억제 경합, 모바일·접근성 회귀를 시험한다. 기본 OFF -> Test exact-SHA -> 카나리 -> 운영 승격 순서를 지키고 롤백 시 신규 전송만 중단하며 감사·미해결 사건은 보존한다.
+- P0 운영 게이트: /srv/moneyverse -> prod-v600 대상 누락, 과거 운영 /en 및 /en/login HTTP 500, DB 권한, 마이그레이션 체크섬, 백업 복원, 원장 대사, 법률 검증은 실제 배포 SHA 기준 재확인이 필요하다. 이번 회차 독립 외부 근거 검증 0건, 누적 UNKNOWN / 10,000건; 중복 제거·근거 분류 BLOCKED / IN PROGRESS. 런타임·운영 DB 변경을 승인하지 않는다.
