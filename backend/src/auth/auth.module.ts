@@ -1,4 +1,5 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, forwardRef } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { Reflector } from '@nestjs/core';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
@@ -73,4 +74,14 @@ const GUARDS = [
     ...GUARDS,
   ],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Authentication guards can reject before a controller runs; response headers must not depend on success.
+    consumer.apply((_req: Request, res: Response, next: NextFunction) => {
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      next();
+    }).forRoutes(AuthController, AuthBootstrapController, LocalAuthController);
+  }
+}
