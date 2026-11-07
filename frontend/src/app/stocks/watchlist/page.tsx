@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -10,55 +11,19 @@ import { getServerLocale } from '@/lib/locale-server';
 import { groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { WatchlistToggle } from '../watchlist-toggle';
+import { changeLabel, normalizeWatchlistQuery, normalizeWatchlistSort, parseWatchlistResponse, sortWatchlist } from './watchlist-evidence';
 
-interface WatchlistRow {
-  readonly stock_id: string;
-  readonly symbol: string;
-  readonly name: string;
-  readonly current_price: string;
-  readonly day_open_price: string;
-  readonly created_at: string;
-}
+export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: '내 관심 종목', robots: { index: false, follow: false } };
 
-type WatchlistSort = 'saved' | 'change' | 'price' | 'name';
-
-function changeBasisPoints(stock: WatchlistRow) {
-  const current = BigInt(stock.current_price);
-  const open = BigInt(stock.day_open_price);
-  return open > 0n ? ((current - open) * 10000n) / open : 0n;
-}
-
-function changeLabel(current: string, open: string) {
-  const currentValue = BigInt(current);
-  const openValue = BigInt(open);
-  if (openValue <= 0n) return '—';
-  const basisPoints = ((currentValue - openValue) * 10000n) / openValue;
-  const negative = basisPoints < 0n;
-  const absolute = negative ? -basisPoints : basisPoints;
-  return `${basisPoints > 0n ? '+' : negative ? '-' : ''}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}%`;
-}
-
-function normalizeSort(value: string | undefined): WatchlistSort {
-  return value === 'change' || value === 'price' || value === 'name' ? value : 'saved';
-}
-
-function sortWatchlist(stocks: readonly WatchlistRow[], sort: WatchlistSort) {
-  return [...stocks].sort((a, b) => {
-    if (sort === 'change') return changeBasisPoints(a) > changeBasisPoints(b) ? -1 : changeBasisPoints(a) < changeBasisPoints(b) ? 1 : 0;
-    if (sort === 'price') return BigInt(a.current_price) > BigInt(b.current_price) ? -1 : BigInt(a.current_price) < BigInt(b.current_price) ? 1 : 0;
-    if (sort === 'name') return a.name.localeCompare(b.name);
-    return b.created_at.localeCompare(a.created_at);
-  });
-}
-
-export default async function StockWatchlistPage({ searchParams }: { readonly searchParams: Promise<{ readonly q?: string; readonly sort?: string }> }) {
+export default async function StockWatchlistPage({ searchParams }: { readonly searchParams: Promise<{ readonly q?: string | string[]; readonly sort?: string | string[] }> }) {
   await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
-  const { q = '', sort: sortParam } = await searchParams;
-  const query = q.trim().slice(0, 80);
-  const sort = normalizeSort(sortParam);
-  const watchlist = await apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist');
+  const { q, sort: sortParam } = await searchParams;
+  const query = normalizeWatchlistQuery(q);
+  const sort = normalizeWatchlistSort(sortParam);
+  const watchlist = parseWatchlistResponse(await apiOrNull<unknown>('/api/v1/stocks/watchlist'));
   const filtered = watchlist?.stocks.filter((stock) => `${stock.symbol} ${stock.name}`.toLocaleLowerCase(locale).includes(query.toLocaleLowerCase(locale))) ?? [];
   const visibleStocks = sortWatchlist(filtered, sort);
 
@@ -69,7 +34,7 @@ export default async function StockWatchlistPage({ searchParams }: { readonly se
       </PageHeader>
 
       {watchlist === null ? (
-        <EmptyState title={isEn ? 'Failed to load your watchlist.' : '관심 종목을 불러오지 못했어요.'} description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'} />
+        <div role="alert"><EmptyState title={isEn ? 'Unable to verify your watchlist.' : '관심 종목을 확인할 수 없어요.'} description={isEn ? 'The source is unavailable or invalid. No saved stocks have been inferred.' : '조회 결과를 검증하지 못했습니다. 관심 종목이 없다는 뜻은 아닙니다.'}><Button asChild><Link href="/stocks/watchlist">{isEn ? 'Retry watchlist' : '관심 종목 다시 확인'}</Link></Button></EmptyState></div>
       ) : watchlist.stocks.length === 0 ? (
         <EmptyState title={isEn ? 'Your watchlist is empty.' : '아직 관심 종목이 없습니다.'} description={isEn ? 'Add stocks from the market and they will appear here.' : '거래소에서 관심 종목을 추가하면 이곳에 모아서 볼 수 있습니다.'}>
           <Button asChild><Link href="/stocks">{isEn ? 'Browse market' : '거래소 둘러보기'}</Link></Button>
