@@ -17,13 +17,42 @@ export const PROTECTED_FINANCIAL_TABLES = Object.freeze([
 const ACCEPTED_EXISTING_DML_TABLES = Object.freeze(['account_balances', 'accounts', 'system_treasury_vaults']);
 const DML_KEYS = Object.freeze(['can_insert', 'can_update', 'can_delete']);
 
+// QA #2242: these objects exist in the live DB but not in a clean 316-migration
+// rebuild. A legitimate forward migration must reconcile and review each name
+// before removing it from this denylist. This is NOT a complete schema diff.
+export const UNRECONCILED_PRODUCTION_TABLES = Object.freeze([
+  'daily_attendance_logs', 'economic_hot_time_events', 'in_app_notifications',
+  'marketplace_purchases', 'notification_preferences', 'p2p_wire_transfers',
+  'user_inventory_items', 'user_notifications', 'virtual_casino_theme_plays',
+]);
+const LEGACY_DML_KEYS = Object.freeze([...DML_KEYS, 'can_truncate']);
+
 // Owner approval v2026.10.29.1212 covers only the exact pre-existing grants.
-export function evaluateFinancialReadiness({ grants, ledger, identity }) {
+export function evaluateFinancialReadiness({ grants, ledger, identity, legacyTables }) {
   const blockers = [];
   // A truncated or malformed operator query is never evidence of a safe database.
   // In particular, JavaScript comparisons with undefined/NaN silently evaluate false.
   const validGrants = Array.isArray(grants) ? grants : [];
   if (!Array.isArray(grants)) blockers.push('unverified_financial_grants');
+  // Presence itself is unreconciled schema drift; even a revoked table is not
+  // proof that the clean installation and live backend have equivalent SQL.
+  if (!Array.isArray(legacyTables)) blockers.push('unverified_legacy_schema_grants');
+  const seenLegacy = new Set();
+  for (const row of Array.isArray(legacyTables) ? legacyTables : []) {
+    if (!row || typeof row.name !== 'string' || !UNRECONCILED_PRODUCTION_TABLES.includes(row.name)) {
+      blockers.push('invalid_legacy_schema_row');
+      continue;
+    }
+    if (seenLegacy.has(row.name)) blockers.push('duplicate_legacy_schema_row:' + row.name);
+    seenLegacy.add(row.name);
+    if (LEGACY_DML_KEYS.some(key => typeof row[key] !== 'boolean')) {
+      blockers.push('unverified_legacy_grant_flags:' + row.name);
+    } else if (LEGACY_DML_KEYS.some(key => row[key])) {
+      blockers.push('legacy_table_direct_app_dml:' + row.name);
+    }
+    blockers.push('unreconciled_production_only_table:' + row.name);
+  }
+
   const byTable = new Map();
   for (const row of validGrants) {
     if (!row || typeof row.name !== 'string' || !PROTECTED_FINANCIAL_TABLES.includes(row.name)) {
@@ -94,6 +123,7 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
     blockers,
     warnings,
     summary: {
+      unreconciledLegacyTables: [...seenLegacy].sort(),
       database: identity?.database ?? null,
       role: identity?.role ?? null,
       balanceRows: ledger?.balance_rows ?? null,
@@ -115,6 +145,20 @@ SELECT c.relname AS name,
        has_table_privilege('moneyverse_app', c.oid, 'INSERT') AS can_insert,
        has_table_privilege('moneyverse_app', c.oid, 'UPDATE') AS can_update,
        has_table_privilege('moneyverse_app', c.oid, 'DELETE') AS can_delete
+FROM pg_catalog.pg_class c
+JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+WHERE n.nspname = 'public' AND c.relkind IN ('r','p')
+  AND c.relname = ANY($1::text[])
+ORDER BY c.relname
+`;
+
+// Only catalog metadata, never member rows. Uses the same read-only snapshot.
+const LEGACY_TABLES_SQL = `
+SELECT c.relname AS name,
+       has_table_privilege('moneyverse_app', c.oid, 'INSERT') AS can_insert,
+       has_table_privilege('moneyverse_app', c.oid, 'UPDATE') AS can_update,
+       has_table_privilege('moneyverse_app', c.oid, 'DELETE') AS can_delete,
+       has_table_privilege('moneyverse_app', c.oid, 'TRUNCATE') AS can_truncate
 FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public' AND c.relkind IN ('r','p')
@@ -167,8 +211,9 @@ export async function readFinancialSnapshot(client) {
     await client.query("SET LOCAL statement_timeout = '10000ms'");
     const identity = (await client.query('SELECT current_database() AS database, current_user AS role')).rows[0];
     const grants = (await client.query(GRANTS_SQL, [PROTECTED_FINANCIAL_TABLES])).rows;
+    const legacyTables = (await client.query(LEGACY_TABLES_SQL, [UNRECONCILED_PRODUCTION_TABLES])).rows;
     const ledger = (await client.query(LEDGER_SQL)).rows[0];
-    return { grants, ledger, identity };
+    return { grants, ledger, identity, legacyTables };
   } finally {
     await client.query('ROLLBACK');
   }
