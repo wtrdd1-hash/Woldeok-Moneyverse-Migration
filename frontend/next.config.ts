@@ -192,6 +192,15 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Owner banking routes must not inherit public indexing/cache policy.
+      ...['/bank', '/bank/:path*', '/:locale(ko|en|ja|zh|vi)/bank/:path*'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

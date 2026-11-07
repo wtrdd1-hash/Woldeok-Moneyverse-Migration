@@ -5,6 +5,7 @@ import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
+import { parseSavingPockets } from '@/app/bank/saving-pocket-source';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
 import { activityCalendarRange, type ActivityCalendarRange } from '@/app/wallet/activity/period';
@@ -271,6 +272,30 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Owner saving pockets are a source-verified list, not an arbitrary upstream JSON.
+  if (parts.length === 2 && parts[0] === 'banking' && parts[1] === 'pockets' &&
+      request.method === 'GET') {
+    const privateHeaders = {
+      'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex',
+      'referrer-policy': 'no-referrer',
+    };
+    if (!response.ok) {
+      const status = [400, 401, 403, 429].includes(response.status) ? response.status : 503;
+      return gatewayProblem(status, 'Saving Pockets Unavailable', 'bank_pockets_unavailable',
+        'The owner saving pockets could not be verified');
+    }
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON pocket list');
+      const pockets = parseSavingPockets(await response.clone().json());
+      if (!pockets) throw new Error('unverified pocket list');
+      return contractJson(pockets, { status: 200, headers: privateHeaders });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'bank_pockets_unverified',
+        'The owner saving pockets could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
