@@ -56,6 +56,13 @@ const AUTH_PATH = /^(?:\/api\/v\d+)?\/auth\//i;
  */
 const CHEAP_AUTH_READ = /^(?:\/api\/v\d+)?\/auth\/(?:viewer|session|policy|providers)\/?$/i;
 
+// Linking or removing a login method changes the account's authentication
+// boundary. Its controller lives under /account, not /auth, but it must spend
+// the same tighter budget as other OAuth challenge and credential operations.
+const IDENTITY_LINK = /^(?:\/api\/v\d+)?\/account\/identities\/[^/]+\/link\/?$/i;
+const IDENTITY_UNLINK = /^(?:\/api\/v\d+)?\/account\/identities\/[^/]+\/?$/i;
+
+
 /**
  * The path a tier is decided from, without the query string.
  *
@@ -80,6 +87,10 @@ export function requestPath(request: {
 export function tierFor(pathname: string, method: string): RateLimitTier {
   if (method === 'GET' && CHEAP_AUTH_READ.test(pathname)) {
     return { name: 'read', limit: READ_LIMIT };
+  }
+  if ((method === 'POST' && IDENTITY_LINK.test(pathname))
+    || (method === 'DELETE' && IDENTITY_UNLINK.test(pathname))) {
+    return { name: 'auth', limit: AUTH_LIMIT };
   }
   if (AUTH_PATH.test(pathname)) return { name: 'auth', limit: AUTH_LIMIT };
   if (/^\/api\//i.test(pathname) && method !== 'GET') {
