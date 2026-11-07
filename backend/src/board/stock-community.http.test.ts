@@ -8,6 +8,8 @@ describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
+    await expect(controller.list({ order: 'updated' })).resolves.toEqual({ posts: [], order: 'updated' });
+    await expect(controller.list({ order: 'latest' })).resolves.toEqual({ posts: [] });
     expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
   });
   it.each([
@@ -17,6 +19,9 @@ describe('public board title query HTTP validation', () => {
     { q: 'hello', page: '2' },
     { stock: ['WDX', 'AAA'] },
     { stock: '<bad>' },
+    { order: ['updated', 'updated'] },
+    { order: 'oldest' },
+    { order: '' },
   ])('rejects ambiguous or invalid query %j as HTTP 400', async (query) => {
     const controller = new PublicStockCommunityController(community);
     await expect(controller.list(query)).rejects.toMatchObject({ status: 400 });

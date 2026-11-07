@@ -116,7 +116,8 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, order?: 'updated') {
+    if (order !== undefined && order !== 'updated') throw new Error('invalid board order');
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -130,13 +131,16 @@ export class StockCommunityService {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
+    const orderSql = order === 'updated'
+      ? ' ORDER BY date_trunc(\'milliseconds\', GREATEST(created_at, COALESCE(updated_at, created_at))) DESC, date_trunc(\'milliseconds\', created_at) DESC, post_id DESC'
+      : '';
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)${orderSql}`,
       [50, normalized, title],
     );
     return rows.map(mapped);
