@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireMember } from '@/lib/session';
 import { StockComparison } from '../stock-comparison';
-import type { ComparableStock } from '../stock-comparison';
+import { parseComparableStocksResponse } from '../stock-comparison-source';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -24,8 +26,8 @@ export default async function StockComparePage({
   await requireMember();
   const [locale, query] = await Promise.all([getServerLocale(), searchParams]);
   const isEn = locale === 'en';
-  const market = await apiOrNull<{ stocks: ComparableStock[] }>('/api/v1/stocks');
-  const stocks = market?.stocks ?? [];
+  const market = await apiOrNull<unknown>('/api/v1/stocks');
+  const stocks = parseComparableStocksResponse(market);
   const symbolQuery = Array.isArray(query.symbols) ? query.symbols[0] : query.symbols;
   const initialSymbols = (symbolQuery ?? '')
     .split(',')
@@ -44,11 +46,16 @@ export default async function StockComparePage({
           : '서버가 관리하는 가상 시장 데이터를 나란히 비교합니다. 실제 투자 정보가 아닌 게임 데이터입니다.'}
       </PageHeader>
 
-      {market === null ? (
-        <EmptyState
-          title={isEn ? 'Failed to load stock data.' : '주식 정보를 불러오지 못했어요.'}
-          description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'}
-        />
+      {stocks === null ? (
+        <section role="alert" className="grid gap-3">
+          <EmptyState
+            title={isEn ? 'Verified market data is unavailable.' : '검증된 주식 정보를 불러오지 못했어요.'}
+            description={isEn ? 'Quotes could not be verified. Please retry; no comparison is shown.' : '시세를 검증하지 못해 비교 결과를 표시하지 않습니다. 다시 시도해 주세요.'}
+          />
+          <Button asChild variant="outline" className="min-h-11 w-fit">
+            <Link href="/stocks/compare">{isEn ? 'Retry market data' : '시세 다시 조회'}</Link>
+          </Button>
+        </section>
       ) : stocks.length < 2 ? (
         <EmptyState
           title={isEn ? 'At least two listed stocks are required for comparison.' : '비교하려면 거래 가능한 종목이 2개 이상 필요합니다.'}

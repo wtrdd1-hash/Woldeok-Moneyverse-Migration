@@ -192,6 +192,17 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // A member's stock comparison is private even when public SEO indexing is enabled.
+      // Override the global crawler header at the actual HTTP boundary, including localized aliases.
+      ...['/stocks/compare', '/ko/stocks/compare', '/en/stocks/compare',
+        '/ja/stocks/compare', '/zh/stocks/compare', '/vi/stocks/compare'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
