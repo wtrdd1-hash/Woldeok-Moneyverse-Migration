@@ -1,6 +1,30 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+
+## v1912 — F675-283 시정·예방 조치 증빙 최신성·독립 심사·종결 경합 보강 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+
+- **주기:** 이전 Feature Addition v1910 → 현재 Feature Improvement v1912 → 다음 Feature Addition v1914. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03` 시작·게시 전 재확인. 미병합 v1910 위의 문서 제안이며 main 표제는 v1518. 제안 API·테이블은 운영 구현이 아님. `admin_evidence_incident_capa_v1` 기본 OFF, 운영승격 금지.
+- **증빙 최신성:** 검증마다 테넌트·사건 ID/세대·CAPA ID/개정·불변 증빙 ID/세대·정규 SHA-256·제공자 서명키·정책 버전·UTC 검증/만료시각·심사 자격 스냅샷 고정. 증빙 변경, 키 철회, 새 보존명령, 미해결 이상징후 또는 사건 세대 변경 시 승인 무효. VERIFIED는 영구 상태가 아니며 제공자 장애·서명 불명·백업 누락은 UNKNOWN으로 분류하고 종결 차단.
+- **독립 심사:** 위임·서비스 계정까지 실효 신원 추적; 작성자·담당자·실행자·증빙 제출자의 자기 승인 금지. 최신 MFA와 CAPA_REVIEW 권한 요구. 심사 결정 다이제스트·사유·증빙 세대·이해충돌 확인 기록. 이후 심사자 퇴사/권한 철회는 신규 결정만 차단하고 과거 불변 감사 기록을 수정하지 않음. 거절 시 새 세대로 IN_PROGRESS 복귀.
+- **API/화면:** GET 응답에 verificationFreshness(CURRENT/STALE/UNKNOWN/CONFLICT), reviewEligibility, caseGeneration, revision, 사유 코드 포함. POST 검증은 Idempotency-Key/해시, POST 심사는 If-Match/MFA/세대 일치 요구. 종결 요청은 필수 조치 미완료 409, 개정 불일치 412, 증빙 무효 422, 검증자 장애 503. 관리자 사건→시정조치에서 증빙 경과시간·보존명령·심사자·재검증 CTA·경고를 표시하고 검증 전 CLOSED 표시는 금지. 읽기 전용 감사 이력, 키보드 오류 요약, 모바일 320px, WCAG 2.2 AA, 영한 동등성, noindex/no-store, 회원 진입점 없음.
+- **DB/트랜잭션:** 검증 UNIQUE(tenant_id,action_id,action_generation,evidence_generation,digest), 심사 UNIQUE(tenant_id,action_id,action_generation,reviewer_effective_id), 테넌트 복합 FK, 미종결 부분 인덱스 제안. SERIALIZABLE 또는 사건→조치 순서 행 잠금으로 세대·보존명령·필수 조치·서명·심사 독립성 확인, CAS 개정 증가, 불변 감사·Outbox를 단일 트랜잭션에 기록. 직렬화 충돌은 안정적 멱등키로 제한 재시도. SECURITY DEFINER search_path 고정 및 앱 역할 직접 쓰기 권한 제거. 이벤트에 원본 증빙 포함 금지.
+- **장애/백로그:** 제공자 장애·해시 불일치·키 교체·재전송·종결/보존명령 동시성·작업자 중단 시 안전 차단 및 재시도, 롤백에서도 감사 삭제 금지. P0 OPS1912-01 끊어진 /srv/moneyverse 링크를 서명된 배포 매니페스트로 복구하고 SHA·/en·/en/login 확인; SEC1912-02 DB 최소권한/마이그레이션 체크섬/독립 복원; FIN1912-03 원장 대사·국내 법률 승인. P1 PLAN1912-04 미병합 #2867/#2869/#2872/#2874/#2876 정합성; API1912-05 실제 frontend/backend/app-api/DB 계약 대조; CAPA1912-06 증빙 무효화·독립 심사 구현; QA1912-07 실제 PostgreSQL 2테넌트 경합·서명·보존·재전송, 키보드/모바일, 영한, exact-SHA·카나리·롤백 검증. 기획 예약은 런타임 미변경.
+- **외부 근거/검증 게이트:** 신규 독립 레퍼런스 0건, 누적 검증 UNKNOWN/10,000, 중복제거·실근거 분류 BLOCKED / IN PROGRESS. CI·exact-SHA QA·보안 승인·운영 배포 미검증.
+
+## v1910 — F675-283 증빙 사고 시정·예방 조치 및 재발 검증 (기능 추가 / 초안 / 운영 보류)
+
+- **주기:** 이전 기능 보완 v1908 → 현재 기능 추가 v1910 → 다음 기능 보완 v1912. 기준 origin/main `0b5b2b1385d2a75614d39458dff94f7d3098ed03` (푸시 전 재확인). 문서 제안이며 구현·병합 완료가 아니다. 현재 main의 상단 기획 표기는 v1518로 남아 있고 v1902~1908은 미병합 PR에 있으므로 선행 명세 정합성을 먼저 확인한다.
+- **목적·권한·진입:** F675-281 사고와 F675-282 SLA 지연 사건의 시정·예방 조치(CAPA)를 추적한다. 인가된 조사자가 관리자 → 증빙 사고 → 사건 → 시정 조치에서 진입하고 독립 심사자가 종결을 승인한다. 회원 화면 및 자동 증빙 공개는 없다. F675-276~282 구현·검증 전에는 빈 목록으로 속이지 않고 기능 사용 불가로 표시한다.
+- **화면·CTA·상태:** 사건별 담당자, 위험도, 증빙 링크, UTC 기한, 의존성, 검증 최신성, 상태 및 불변 이력을 표시한다. 조치 생성·배정·검증 첨부·독립 심사 요청·승인/거절·재개 CTA. 401/403/404/409/412/422/429/503, 로딩·빈 상태·부분 실패·차단·권한 철회 처리와 키보드 초점 복원. OPEN → IN_PROGRESS → VERIFICATION_PENDING → VERIFIED → CLOSED 및 REJECTED/REOPENED/BLOCKED. 필수 조치가 미해결이면 사건 종결을 거부하며 사건 세대와 법적 보존명령을 재검증한다.
+- **API 제안(미구현):** GET/POST `/api/v1/admin/evidence-incidents/:caseId/actions`, GET/PATCH `.../actions/:actionId`, POST `.../:actionId/verification`, POST `.../:actionId/review`, POST `.../:actionId/reopen`. 테넌트·세션·행위별 RBAC, 브라우저 변경 CSRF, 멱등성 키, `If-Match`, 제한된 커서 페이지, 엄격한 스키마, 429 제한. BFF는 no-store를 유지하고 권한 정보를 노출하지 않는다.
+- **DB 제안:** `incident_corrective_actions` PK(tenant_id,action_id), FK(tenant_id,case_id), 담당자, due_at timestamptz, 정책 세대, 상태 CHECK, revision bigint CHECK>=0; `incident_action_verifications` PK(tenant_id,verification_id), FK(tenant_id,action_id), 불변 증빙 세대·해시·검증 시각·검증자; `incident_action_reviews` PK(tenant_id,review_id), FK(tenant_id,action_id), 실효 심사자·결정·세대. UNIQUE(tenant_id,action_id,generation,reviewer_id), (tenant_id,case_id,status,due_at), (tenant_id,action_id,verified_at DESC) 인덱스. moneyverse_app 테이블 직접 권한 없이 actor/tenant 검사 및 search_path 고정 SECURITY DEFINER 함수 EXECUTE만 허용한다.
+- **트랜잭션·악용 방지:** 행 잠금 아래 revision CAS와 사건 세대 펜싱, 불변 감사·Outbox 단일 트랜잭션, 중복 이벤트 멱등성, 작업자 펜싱. 요청자·담당자·검증자의 본인 승인과 위임 계정 우회를 금지한다. 증빙 링크는 테넌트·불변 세대·다이제스트에 고정하고 만료·철회·오래됨·누락·충돌·보존명령 시 차단한다. 자동 영구정지·자동 공개 없음, 개인정보 마스킹·최소권한·짧은 접근 기간 적용.
+- **SEO·모바일·분석:** 관리자 noindex/private no-store 및 사이트맵 제외, 320px·44px 터치·WCAG 2.2 AA·스크린리더 상태 알림·영한 동등성. 20명 이상 집계에 한해 검증 소요시간, 기한 초과율, 30일 재발률, 심사 거절률, 데이터 누락률 측정. 원본 증빙과 개인정보는 분석 전송 금지.
+- **테스트·배포:** 격리 실제 PostgreSQL 2테넌트 ACL/SECURITY DEFINER, 동시 종결·재개·보존, 멱등성·Outbox 재처리, 시간대/DST, 오래된 세대, 위임 자기 승인, 서명 불일치, 모바일 키보드/스크린리더, 영한 동등성, no-store/noindex 회귀. 기존 관리자 로그·보안 화면 및 app-api 계약 확인. 별도 개발 브랜치 → 집중 테스트 → Test exact-SHA QA → 보안·법률 승인 → 기본 OFF `admin_evidence_incident_capa_v1` 카나리 → 모니터링. 롤백은 OFF로 하며 감사 기록은 삭제하지 않는다.
+- **P0:** OPS1910-01 깨진 /srv/moneyverse 릴리스 링크의 승인된 복구 및 서명 매니페스트 대조; OPS1910-02 실제 배포 SHA /en·/en/login 스모크; SEC1910-03 앱 DB 권한·마이그레이션 체크섬·독립 복원; FIN1910-04 원장 대사·국내 법률 게이트. **P1:** PLAN1910-05 미병합 #2867/#2869/#2872/#2874 정합성; API1910-06 Next/Nest/BFF/DB 실계약 조사; CAPA1910-07 SQL 함수·인덱스; CAPA1910-08 관리자 UI·접근성; QA1910-09 정확 SHA 보안·동시성·롤백 증거.
+- **근거 게이트:** 이번 회차 신규 외부 독립 검증 0건, 누적 검증 UNKNOWN / 10,000건. 중복 제거·근거 분류 BLOCKED / IN PROGRESS. CI/QA 미실행, 운영승격 금지.
+
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
 - **주기:** 이전 추가 v1516 → 현재 보완 v1518 → 다음 추가 v1520(잠정). 정본 main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` 시작·중간 확인, 선행 #2025, 이슈 #2024, 초안 #2029. 기획 문서만.
 - **소스 근거:** 마이그레이션 123은 현행 유지비*수량*(유예 주)으로 주간 비용·상한을 계산하지만 저장된 체납액/주 수/정지 여부는 행 부재 시 0/0/false가 된다. 완납·주간 실행 증빙 아님. 마이그레이션 104는 한국시간 월요일 04:30 영수증 사용. 정책 변경 시 현재 상한<저장 체납 가능하므로 자동 보정 금지. durable은 영구/유지비와 다르고 효과 만료는 미래 영수증 최대 시각일 뿐 장착·적용 인증 아님. clock_timestamp 다중 호출로 동일 시각 인증 불가.
