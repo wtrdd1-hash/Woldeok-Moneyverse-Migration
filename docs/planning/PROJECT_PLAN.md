@@ -3014,3 +3014,18 @@ Required sequence: full AI inventory -> latest-plan/main/user-instruction rechec
 - Existing Production advertising makes business/tax status and advertising/privacy/overseas-transfer evidence a current operating gate, not a future-only task.
 - Real-money digital goods/subscription/ad-removal remain BLOCKED until seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation, minor-contract and provider reconciliation controls pass.
 - User `ageConfirmed` assertion must not be described as verified age. Commercial messaging remains blocked until Korea consent/suppression/nighttime controls exist. WLD/game-result cash redemption remains prohibited pending new legal review.
+
+### Planning cycle v1738 (2026-11-04) — F675-240 Support reply-template review and approval [PROPOSED]
+Previous: Feature Improvement v1736; Current: Feature Addition v1738; Next: Feature Improvement v1740. Depends on F675-239 (not implemented). Source of truth: main AGENTS.md, README, and this plan. GitHub backlog: #2678.
+
+**Goal and actors:** prevent unreviewed support boilerplate. Support agents draft and submit templates, authorized team reviewers approve or request changes, supervisors audit. Entry: Admin > Support > Templates > Review queue. CTA: Submit, Approve, Request changes, Archive. States DRAFT, IN_REVIEW, CHANGES_REQUESTED, APPROVED, ARCHIVED; every edit creates a new immutable revision and invalidates prior approval. Never auto-send: an agent explicitly inserts approved text and separately sends.
+
+**Authority/API:** tenant/team isolation, reviewer capability, no self-approval, current permissions checked under lock. Proposed POST /admin/support/reply-templates/:id/submit|approve|request-changes and GET /admin/support/reply-template-reviews (signed cursor). Exact routes subject to source inspection. CSRF, Idempotency-Key, strong If-Match, 403 revoked, 409 conflict, 412 stale revision; rate limit and structured safe errors.
+
+**DB and concurrency:** immutable revisions with (template_id,revision) UNIQUE, tenant/team FK, audit decision FK, partial pending-review index, tenant/team/status/created_at/id index. SECURITY DEFINER with fixed search_path, least-privilege EXECUTE, lock template then revision, decision + audit + idempotency receipt atomic. Reject changed revision and cross-tenant references.
+
+**UX/security/SEO/metrics:** plain text only, no member PII or raw text in logs/analytics, admin noindex. 320px mobile, 44px touch target, keyboard/focus/ARIA, English/Korean, empty/loading/offline/403/409/412 states. KPIs review latency p50/p95, approval ratio, correction rate; privacy-preserving aggregation.
+
+**Tests/release:** exact-SHA authenticated Test E2E for role revocation, cross-tenant, self-approval, duplicate/stale/racing approval, Android/app-api non-leakage and a11y. Default OFF flag admin_support_template_review_v1; independent backup restore, DB checksum and privilege gates, canary with rollback switch OFF; no Production promotion until P0 release evidence passes. Planning does not deploy code.
+
+**P0:** Production HTTP 500 and deployed SHA; DB grants/checksums; authenticated exact-SHA Test E2E; independent backup restore and ledger reconciliation. **P1:** inspect actual support/template schema; review state machine/DB; API; accessible UI; security/concurrency tests; staged rollout/rollback. External independent references: newly approved 0; cumulative UNKNOWN / 10,000; BLOCKED/IN PROGRESS. RELEASE HOLD.
