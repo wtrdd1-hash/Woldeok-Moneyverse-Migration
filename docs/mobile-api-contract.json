@@ -10964,6 +10964,9 @@
                 "ends_at"
               ]
             }
+          },
+          "maxCost": {
+            "type": "string"
           }
         },
         "required": [

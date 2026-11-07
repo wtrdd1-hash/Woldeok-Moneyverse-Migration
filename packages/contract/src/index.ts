@@ -1,3 +1,4 @@
+export { normalizeSeasonMaxCost, filterSeasonEventsByCost, isVerifiedSeasonCostResponse } from './season-cost';
 export { normalizeVerifiedHelpQuery } from './help-search';
 export { isWldAmount, wldAmount } from './money';
 export type { WldAmount } from './money';

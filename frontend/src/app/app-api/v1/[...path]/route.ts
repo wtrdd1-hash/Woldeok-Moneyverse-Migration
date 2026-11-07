@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { normalizeSeasonMaxCost, isVerifiedSeasonCostResponse } from '@moneyverse/contract';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -196,6 +197,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
   }
+
+  const seasonEventsPath = parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events' && request.method === 'GET';
+  const seasonCostValues = seasonEventsPath ? request.nextUrl.searchParams.getAll('maxCost') : [];
+  if (seasonEventsPath && (seasonCostValues.length > 1 ||
+      (seasonCostValues.length === 1 && seasonCostValues[0] !== '' && normalizeSeasonMaxCost(seasonCostValues[0]) === null) ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'maxCost'))) {
+    return gatewayProblem(400, 'Bad Request', 'season_cost_invalid', 'maxCost must be a canonical nonnegative WLD integer');
+  }
+  const seasonMaxCost = seasonCostValues[0] || undefined;
 
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
   const availabilityValues = workAvailability ? request.nextUrl.searchParams.getAll('availableOnly') : [];
@@ -435,6 +445,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  if (seasonEventsPath && seasonMaxCost !== undefined && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedSeasonCostResponse(await response.clone().json(), seasonMaxCost)) {
+        return gatewayProblem(503, 'Service Unavailable', 'season_cost_unverified', 'season event affordability evidence is unavailable');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'season_cost_unverified', 'season event affordability evidence is unavailable');
+    }
+  }
+
   if (workAvailability && availabilityValues.length === 1 && response.ok) {
     try {
       if (!isVerifiedAvailableWorkBoard(await response.clone().json())) {
@@ -581,6 +602,12 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'bank' || parts[0] === 'banking' || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) {
     response.headers.set('cache-control', 'private, no-store');
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
+  }
+  // Season event listings are authenticated; never let a stale edge cache a member response.
+  if (parts.length === 2 && parts[0] === 'seasons' && parts[1] === 'events') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
