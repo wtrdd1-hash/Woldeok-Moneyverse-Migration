@@ -139,10 +139,13 @@ const config: NextConfig = {
     // different deployment settings, so read the switch here rather than at
     // module evaluation time. Reviewed public-page advertising defaults on;
     // an explicit false removes all AdSense CSP origins for test/emergency use.
-    const adsEnabled = (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
+    const adsEnabled =
+      (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
     const base =
       process.env.APP_BASE_URL ||
-      (process.env.NODE_ENV === 'production' ? 'https://easy-scraping.com' : 'http://127.0.0.1:3000');
+      (process.env.NODE_ENV === 'production'
+        ? 'https://easy-scraping.com'
+        : 'http://127.0.0.1:3000');
     // The lobby's socket shares this origin. `connect-src 'self'` has never
     // reliably covered ws:/wss: across browsers, so the socket origin is
     // named outright.
@@ -170,7 +173,10 @@ const config: NextConfig = {
       // makes a downgrade fail closed for a year in front of the tunnel.
       { key: 'strict-transport-security', value: 'max-age=63072000; includeSubDomains; preload' },
       { key: 'referrer-policy', value: 'strict-origin-when-cross-origin' },
-      { key: 'permissions-policy', value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()' },
+      {
+        key: 'permissions-policy',
+        value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()',
+      },
       { key: 'x-content-type-options', value: 'nosniff' },
       // Redundant beside frame-ancestors, and kept for browsers that honour
       // only the older header.
@@ -192,11 +198,24 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Member catalogue and holdings are actor-scoped. The global public
+      // X-Robots-Tag otherwise overrides the page's noindex meta on real HTTP.
+      ...['/shop/catalog', '/:locale(ko|en|ja|zh|vi)/shop/catalog'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
-      { source: '/stocks/derivatives', headers: [
-        { key: 'x-robots-tag', value: 'noindex, nofollow' },
-        { key: 'cache-control', value: 'private, no-store' },
-      ] },
+      {
+        source: '/stocks/derivatives',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
     ];
   },
 
@@ -246,4 +265,3 @@ const config: NextConfig = {
 };
 
 export default config;
-
