@@ -19,6 +19,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { parseApiHealthResponse } from './api-health-source';
+import { parseBackupInventory } from './backup-evidence';
 
 export interface DomainHealthData {
   readonly id: string;
@@ -85,25 +87,28 @@ interface ApiHealthDashboardProps {
 }
 
 export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProps) {
-  const [data, setData] = useState<ApiHealthResponse | null>(initialData);
+  const [data, setData] = useState<ApiHealthResponse | null>(() => parseApiHealthResponse(initialData));
   const [backupData, setBackupData] = useState<BackupStatusResponse | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(initialData ? new Date(initialData.serverTime) : null);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(parseApiHealthResponse(initialData) ? new Date(initialData!.serverTime) : null);
 
   const fetchTelemetry = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('/api/admin/api-health/status');
+      const res = await fetch('/api/admin/api-health/status', { cache: 'no-store' });
       if (res.ok) {
-        const json: ApiHealthResponse = await res.json();
-        setData(json);
-        setLastRefreshedAt(new Date());
+        const json: unknown = await res.json();
+        const verified = parseApiHealthResponse(json);
+        setData(verified);
+        setLastRefreshedAt(verified ? new Date() : null);
       } else {
         setData(null);
+        setLastRefreshedAt(null);
       }
     } catch {
       setData(null); // Stale data must not masquerade as current health.
+      setLastRefreshedAt(null);
     } finally {
       setIsRefreshing(false);
     }
@@ -116,8 +121,8 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
         setBackupData(null);
         return;
       }
-      const json: BackupStatusResponse = await res.json();
-      setBackupData(json);
+      const json: unknown = await res.json();
+      setBackupData(parseBackupInventory(json));
     } catch {
       setBackupData(null);
     }
@@ -195,6 +200,12 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
           </Button>
         </div>
       </div>
+
+      {data === null && (
+        <p role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+          {isEn ? 'API measurement evidence unavailable. Do not infer that routes are healthy or down.' : 'API 측정 증빙을 확인할 수 없습니다. 경로가 정상 또는 장애 상태라고 추정하지 마세요.'}
+        </p>
+      )}
 
       {/* 4 Core Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">

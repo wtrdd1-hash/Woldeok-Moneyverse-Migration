@@ -22,6 +22,18 @@ describe('API health dashboard evidence', () => {
     expect(html).not.toContain('초고속 최적화');
   });
 
+  it('does not crash or show fabricated route health on malformed initial SSR evidence', () => {
+    const html = renderToStaticMarkup(<ApiHealthDashboard initialData={{ ...unknownResponse, domains: {} } as unknown as ApiHealthResponse} isEn={false} />);
+    expect(html).toContain('측정되지 않음');
+    expect(html).not.toContain('100.0%');
+  });
+
+  it('does not show fake LIVE metrics from a forged upstream response', () => {
+    const html = renderToStaticMarkup(<ApiHealthDashboard initialData={{ ...unknownResponse, isLiveTelemetry: true, globalSuccessRate: 100 } as ApiHealthResponse} isEn={true} />);
+    expect(html).not.toContain('LIVE METRICS');
+    expect(html).not.toContain('100.0%');
+  });
+
   it('does not show live metrics or success rates when no response exists', () => {
     const html = renderToStaticMarkup(<ApiHealthDashboard initialData={null} isEn={true} />);
     expect(html).not.toContain('LIVE METRICS');
