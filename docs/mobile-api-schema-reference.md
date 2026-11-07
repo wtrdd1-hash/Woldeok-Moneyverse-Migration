@@ -1920,7 +1920,9 @@ _No request body._
 
 | Name | In | Required | Type | Constraints |
 |---|---|---|---|---|
-| stock | query | true | string |  |
+| stock | query | false | string | maxLength=16 |
+| q | query | false | string | maxLength=80 |
+| sort | query | false | string | enum="recent","popular" |
 
 ### Request body
 
@@ -1930,6 +1932,9 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| appliedSort | false | object |  |
+| appliedSort.order | true | string |  |
+| appliedSort.scope | true | string |  |
 | posts[] | true | object[] |  |
 | posts[] | true | object |  |
 | posts[].authorName | true | string |  |

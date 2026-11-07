@@ -85,6 +85,7 @@ export class PublicStockCommunityController {
     type: String,
     description: 'Optional stock symbol, 1-16 characters',
   })
+  @ApiQuery({ name: 'sort', required: false, enum: ['recent', 'popular'], description: 'Recent or most replies among the latest 50 public posts' })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -93,11 +94,15 @@ export class PublicStockCommunityController {
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'sort')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const sort = query.sort;
+    if (sort !== undefined && sort !== 'recent' && sort !== 'popular') {
+      throw new BadRequestException('invalid public board sort');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +120,8 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(stock as string | undefined, q as string | undefined, sort === 'popular' ? 'popular' : 'recent'),
+      ...(sort === 'popular' ? { appliedSort: { order: 'popular', scope: 'latest50' } } : {}),
     };
   }
 }

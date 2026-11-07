@@ -116,7 +116,8 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, sort: 'recent' | 'popular' = 'recent') {
+    if (sort !== 'recent' && sort !== 'popular') throw new Error('invalid public board sort');
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -136,8 +137,10 @@ export class StockCommunityService {
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
-      [50, normalized, title],
+          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)
+        ORDER BY CASE WHEN $4::text = 'popular' THEN comment_count END DESC NULLS LAST,
+                 created_at DESC, post_id DESC`,
+      [50, normalized, title, sort],
     );
     return rows.map(mapped);
   }

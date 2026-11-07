@@ -5172,9 +5172,31 @@
         {
           "name": "stock",
           "in": "query",
-          "required": true,
+          "required": false,
           "schema": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 16
+          }
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "recent",
+              "popular"
+            ]
           }
         }
       ],
@@ -5192,6 +5214,21 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "appliedSort": {
+            "type": "object",
+            "properties": {
+              "order": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "order",
+              "scope"
+            ]
+          },
           "posts": {
             "type": "array",
             "items": {
