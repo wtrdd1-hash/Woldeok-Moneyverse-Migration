@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
+import { parseVerifiedAnnouncements } from '@/lib/announcement-source';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
@@ -18,18 +19,9 @@ export const metadata: Metadata = {
   alternates: { canonical: canonicalUrl('/announcements') },
 };
 
-interface Announcement {
-  readonly announcementId: string;
-  readonly title: string;
-  readonly body: string;
-  readonly imageUrl: string | null;
-  readonly imageAltText: string | null;
-  readonly isPinned?: boolean;
-  readonly publishedAt: string | null;
-}
-
 export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+  const source = await publicApi<unknown>('/api/v1/announcements', 60);
+  const data = parseVerifiedAnnouncements(source);
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },

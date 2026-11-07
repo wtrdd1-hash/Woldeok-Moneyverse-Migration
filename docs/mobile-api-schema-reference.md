@@ -2606,6 +2606,8 @@ _No request body._
 | announcements[].imageAltText | true | null \| string |  |
 | announcements[].isPinned | true | boolean |  |
 | announcements[].publishedAt | true | null \| string |  |
+| count | true | number |  |
+| sourceStatus | true | string="VERIFIED" | const="VERIFIED" |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
