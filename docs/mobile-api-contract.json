@@ -7934,6 +7934,9 @@
                 "publishedAt"
               ]
             }
+          },
+          "month": {
+            "type": "string"
           }
         },
         "required": [
@@ -9039,6 +9042,9 @@
                 "publishedAt"
               ]
             }
+          },
+          "month": {
+            "type": "string"
           }
         },
         "required": [

@@ -2635,6 +2635,7 @@ _No request body._
 | photos[].imageUrl | true | string |  |
 | photos[].altText | true | string |  |
 | photos[].publishedAt | true | null \| string |  |
+| month | false | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
@@ -3013,6 +3014,7 @@ _No request body._
 | photos[].imageUrl | true | string |  |
 | photos[].altText | true | string |  |
 | photos[].publishedAt | true | null \| string |  |
+| month | false | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
