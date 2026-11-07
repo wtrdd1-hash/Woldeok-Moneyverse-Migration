@@ -5,7 +5,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireMember } from '@/lib/session';
 import { StockComparison } from '../stock-comparison';
-import type { ComparableStock } from '../stock-comparison';
+import { parseComparableStockMarket } from '../stock-comparison-source';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -24,8 +24,8 @@ export default async function StockComparePage({
   await requireMember();
   const [locale, query] = await Promise.all([getServerLocale(), searchParams]);
   const isEn = locale === 'en';
-  const market = await apiOrNull<{ stocks: ComparableStock[] }>('/api/v1/stocks');
-  const stocks = market?.stocks ?? [];
+  const market = await apiOrNull<unknown>('/api/v1/stocks');
+  const stocks = parseComparableStockMarket(market);
   const symbolQuery = Array.isArray(query.symbols) ? query.symbols[0] : query.symbols;
   const initialSymbols = (symbolQuery ?? '')
     .split(',')
@@ -44,11 +44,11 @@ export default async function StockComparePage({
           : '서버가 관리하는 가상 시장 데이터를 나란히 비교합니다. 실제 투자 정보가 아닌 게임 데이터입니다.'}
       </PageHeader>
 
-      {market === null ? (
-        <EmptyState
+      {stocks === null ? (
+        <div role="alert" aria-live="polite" className="grid gap-3"><EmptyState
           title={isEn ? 'Failed to load stock data.' : '주식 정보를 불러오지 못했어요.'}
-          description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'}
-        />
+          description={isEn ? 'The market source is unavailable or invalid. No values are shown.' : '시장 원천 응답을 확인할 수 없어 시세를 표시하지 않습니다.'}
+        /><a href="/stocks/compare" className="inline-flex min-h-11 w-fit items-center rounded-md border px-4 py-2 font-medium focus-visible:outline-2 focus-visible:outline-offset-2">{isEn ? 'Retry market comparison' : '종목 비교 다시 조회'}</a></div>
       ) : stocks.length < 2 ? (
         <EmptyState
           title={isEn ? 'At least two listed stocks are required for comparison.' : '비교하려면 거래 가능한 종목이 2개 이상 필요합니다.'}
