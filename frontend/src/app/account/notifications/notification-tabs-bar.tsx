@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bell, CheckCheck, Inbox, RefreshCw } from 'lucide-react';
 import { parseNotificationFeed, type NotificationItem } from '@/components/notification-feed';
+import { verifyNotificationPage } from '@/lib/notification-page-proof';
 
 type Category = 'ALL' | 'TRANSACTIONAL' | 'PRODUCT_ACTIVITY' | 'SEASON_LIVEOPS' |
   'SECURITY_CRITICAL' | 'BUSINESS' | 'BANK' | 'SEASON' | 'SPACE' | 'SECURITY' | 'SYSTEM';
@@ -35,6 +36,7 @@ export function NotificationTabsBar() {
   const [busy, setBusy] = useState(false);
   const [receipt, setReceipt] = useState<string | null>(null);
   const generation = useRef(0);
+  const verifiedItems = useRef<NotificationItem[]>([]);
   const mutationPending = useRef(false);
 
   async function load(category: Category, unread: boolean, read: boolean, nextOffset: number, append: boolean, requestId: number) {
@@ -49,12 +51,22 @@ export function NotificationTabsBar() {
       if (!response.ok) throw new Error('feed unavailable');
       const rows = parseNotificationFeed(await response.json());
       if (generation.current !== requestId) return;
-      setItems((prev) => append ? [...prev, ...rows.slice(0, PAGE_SIZE)] : rows.slice(0, PAGE_SIZE));
+      // A syntactically valid server response can still contradict the selected
+      // owner filter or replay an earlier page. Never append such evidence.
+      verifyNotificationPage(rows, {
+        category, unreadOnly: unread, readOnly: read,
+        previous: append ? verifiedItems.current : [],
+      });
+      const nextItems = append
+        ? [...verifiedItems.current, ...rows.slice(0, PAGE_SIZE)]
+        : rows.slice(0, PAGE_SIZE);
+      verifiedItems.current = nextItems;
+      setItems(nextItems);
       setOffset(nextOffset + PAGE_SIZE);
       setHasMore(rows.length > PAGE_SIZE && nextOffset + PAGE_SIZE <= 5000);
     } catch {
       if (generation.current !== requestId) return;
-      if (!append) setItems([]);
+      if (!append) { verifiedItems.current = []; setItems([]); }
       setError(true);
     } finally {
       if (generation.current === requestId) setLoading(false);
@@ -63,6 +75,7 @@ export function NotificationTabsBar() {
 
   useEffect(() => {
     const id = ++generation.current;
+    verifiedItems.current = [];
     setItems([]);
     setOffset(0);
     setHasMore(false);
@@ -74,6 +87,7 @@ export function NotificationTabsBar() {
 
   const refresh = () => {
     const id = ++generation.current;
+    verifiedItems.current = [];
     setItems([]);
     setOffset(0);
     setHasMore(false);
@@ -155,7 +169,7 @@ export function NotificationTabsBar() {
         </button>
         {CATEGORIES.map(({ id, label }) => (
           <button key={id} type="button" aria-pressed={selectedCat === id}
-            onClick={() => setSelectedCat(id)}
+            onClick={() => { generation.current += 1; setSelectedCat(id); }}
             className={`min-h-11 rounded-xl border px-3 text-sm ${selectedCat === id ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>
             {id === 'ALL' ? <Bell className="mr-1 inline size-4" aria-hidden="true" /> : null}{label}
           </button>

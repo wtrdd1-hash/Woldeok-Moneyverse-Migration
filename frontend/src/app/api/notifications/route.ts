@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { api } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
 import { viewerOrUnknown } from '@/lib/viewer';
+import { parseNotificationFeed } from '@/components/notification-feed';
+import { verifyNotificationPage } from '@/lib/notification-page-proof';
 
 export const dynamic = 'force-dynamic';
 const privateHeaders = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' };
@@ -37,7 +39,11 @@ export async function GET(req: Request): Promise<NextResponse> {
 
   try {
     const items = await api<unknown>(`/api/v1/notifications?limit=${limit}&offset=${offset}${category ? '&category=' + category : ''}${unreadParam !== null ? '&unreadOnly=' + unreadParam : ''}${readParam !== null ? '&readOnly=' + readParam : ''}`);
-    if (!Array.isArray(items)) throw new Error('Invalid feed');
+    const rows = parseNotificationFeed({ notifications: items });
+    verifyNotificationPage(rows, {
+      category: category ?? 'ALL', unreadOnly: unreadParam === 'true',
+      readOnly: readParam === 'true', previous: [], maxRows: Number(limit),
+    });
     return NextResponse.json({ notifications: items }, { headers: privateHeaders });
   } catch {
     return NextResponse.json({ error: 'Notification feed unavailable' }, { status: 503, headers: privateHeaders });
