@@ -3,7 +3,7 @@ import { verifiedConsoleOpen, verifiedConsoleClose } from './console-session-rec
 
 const openReceipt = {
   state: 'open', csrfToken: 'synthetic-csrf-token',
-  expiresAt: '2027-01-01T00:00:00.000Z', idleExpiresAt: '2026-11-01T00:00:00.000Z',
+  expiresAt: new Date(Date.now() + 86400000 * 30).toISOString(), idleExpiresAt: new Date(Date.now() + 3600000).toISOString(),
 };
 const rotated = 'mv_session=synthetic-token; Path=/; HttpOnly; SameSite=Lax; Max-Age=15552000';
 const cleared = 'mv_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
