@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { viewerOrUnknown } from '@/lib/viewer';
 
 export const dynamic = 'force-dynamic';
-const noStore = { 'cache-control': 'private, no-store' };
+const noStore = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow', 'referrer-policy': 'no-referrer' };
 
 /** A notification is not a reward ledger entry; never manufacture a claim receipt. */
 export async function POST(): Promise<NextResponse> {
