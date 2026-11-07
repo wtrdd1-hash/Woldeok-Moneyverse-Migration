@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { api, ApiError } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
+import { verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,11 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const wrongOrigin = verifySeoWriteOrigin(req);
+  if (wrongOrigin) return wrongOrigin;
+  const denied = await verifySeoOperator();
+  if (denied) return denied;
+
   try {
     const body = (await req.json()) as { text?: string };
     const result = await mutate('/api/v1/seo/twitter/test-tweet', {
