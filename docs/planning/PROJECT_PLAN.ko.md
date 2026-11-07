@@ -1,4 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
+## v2026.11.05.2110 — F675-258 예외 판정 독립 이의신청 및 증빙 동결 (FEATURE ADDITION / DRAFT / RELEASE HOLD)
+- **목적/선행:** 실제 구현이 아닌 조건부 제안. F675-249~257 구현·검증이 선행되어야 하며 기존 Draft PR의 main 병합은 확인되지 않았다. 기존 판정을 덮어쓰지 않고 독립 검토자에게 이의신청한다. 신청자·기존 판정자·2차 승인자는 위임 관계를 포함하여 독립이어야 한다. 감사자는 읽기 전용이다.
+- **진입점/화면/상태:** 관리자 → SLA 사고 → 인계 대사 예외 → 판정 → 이의신청. CTA는 이의신청 생성, 서명 증빙 첨부, 제출, 독립 인용/기각, 철회. 상태 `DRAFT → SUBMITTED → UNDER_REVIEW → UPHELD|OVERTURNED|REJECTED`, `WITHDRAWN`, `EXPIRED`, `UNKNOWN`. 원판정·불변 증빙 스냅샷·철회 세대·기한을 표시하며 이의신청은 원본 철회나 다운로드 차단을 해제하지 않는다.
+- **API 제안(실제 NestJS 계약 확인 필요):** `GET /admin/sla/exception-appeals?cursor=&status=`, `GET /admin/sla/exception-appeals/:id`, `POST /admin/sla/custody-exceptions/:id/appeals`, `POST /admin/sla/exception-appeals/:id/submit`, `POST /admin/sla/exception-appeals/:id/decide`, `POST /admin/sla/exception-appeals/:id/withdraw`. 쓰기는 테넌트 권한, Idempotency-Key, If-Match, 매니페스트 해시 검증 필수; 오래된 세대는 409, 타 테넌트 존재 여부 비노출.
+- **DB/트랜잭션:** 제안 테이블 `sla_exception_appeals`에 tenant_id/appeal_id, 복합 FK (tenant_id, exception_id), 원판정 ID, manifest_sha256, 철회 세대, 상태, 기한, row_version, 실효 신청자 및 독립 검토자 저장. 행위자 복합 FK, 상태·자기 승인 CHECK, 활성 이의신청 부분 UNIQUE, (tenant_id,state,deadline,id) 인덱스, (tenant_id,idempotency_key,operation) UNIQUE. CAS 상태 변경·불변 감사·Outbox를 단일 PostgreSQL 트랜잭션으로 처리하고 원판정은 수정하지 않는다.
+- **보안/복구:** 조회·내보내기·승인마다 권위 있는 철회 상태 재검증. 서명 증빙 누락·만료·상충·키 침해 시 UNKNOWN 및 안전 차단. 테넌트/사용자별 호출 제한, 페이로드 제한, PII 제거, 재생 방지 nonce, 작업자 lease fencing, 중복 제거·재시도·데드레터 경보. 위임 계정 경유 자기 승인 차단.
+- **UX/SEO/KPI:** 관리자 noindex/no-store, 키보드 접근, 320px, WCAG 2.2 AA, 영·한 동등 문구. 이의신청 처리 p95, 판정 변경률, 증빙 만료율, 권한 위반, Outbox 중복 및 미처리 건수를 측정하며 원문 증빙은 로깅하지 않는다.
+- **검증/배포:** 실제 PostgreSQL FK/CAS/경합/멱등성/테넌트 격리, 위임 승인, 만료 서명, 동시 철회, Outbox 장애·재처리, 원판정 불변 테스트. 인증된 Test exact-SHA E2E와 영·한 모바일/a11y 회귀. `admin_sla_exception_appeal_v1` 기본 OFF, 확장 우선 마이그레이션, 관리자 카나리, 모니터링 및 플래그 OFF 롤백. 운영 HTTP 500, 배포 SHA, 백업 복원, 원장·법률 및 외부 독립 레퍼런스 10,000건 게이트 충족 전 RELEASE HOLD.
+- **P0/P1 백로그:** P0 운영 `/en`·`/en/login` HTTP 500/Test 200, 재시작 폭증, `/srv/moneyverse` 링크, exact-SHA, DB 최소권한·체크섬, 독립 복원, 원장 대사, 국내 규제 검증. P1 F675-249~257 미병합 PR 정합성, frontend/admin·NestJS 인증/API·app-api·PostgreSQL 마이그레이션 확인, 별도 개발 브랜치에서 API/DB/UI/Outbox 구현. 이번 회차 신규 독립 외부 근거 검증 0건, 누적 UNKNOWN / 10,000건으로 BLOCKED/IN PROGRESS.
+- **작업일지:** v1810 문서 전용, 런타임·DB·원장 변경 없음. Previous Feature Improvement v1808 → Current Feature Addition v1810 → Next Feature Improvement v1812.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
