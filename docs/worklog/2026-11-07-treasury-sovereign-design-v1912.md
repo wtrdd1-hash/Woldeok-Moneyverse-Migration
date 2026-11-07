@@ -37,7 +37,7 @@
 - Final `origin/main` rechecked; still `0b5b2b1385d2a75614d39458dff94f7d3098ed03`, no concurrent main authority movement during this documentation cycle.
 - Completed paired English/Korean detailed planning, 16 official primary references, bilingual changelog, GitHub/public and internal update notes, both document catalogs, and BEFORE/MID/FINISH logs.
 - Validation: reviewed canonical authority; 14 modified/new maintained documents checked for missing local Markdown link targets (**0 missing**); `git diff --check` clean. No finance DB SQL or runtime tests are claimed for docs-only deliverable.
-- No source code, financial WLD, DB schema, Test or Production was changed. Planning remains DRAFT / not authority-adopted. Review PR is proposed; no merge, Test or Production release authorized.
+- No source code, financial WLD, DB schema, Test or Production was changed. Planning remains DRAFT / not authority-adopted. Review PR created as [Draft #2882](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2882); no merge, Test or Production release authorized.
 
 
 ## Safety / release boundary
