@@ -15,6 +15,7 @@ import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } 
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
+import { isVerifiedPublicBoardList } from '@/lib/public-board-list-proof';
 import {
   APP_API_REQUEST_HEADERS,
   APP_API_RESPONSE_HEADERS,
@@ -111,6 +112,8 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  const publicBoardListPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -498,6 +501,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  if (publicBoardListPath && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'public_board_identity_unverified',
+      'public board post identity evidence is unavailable');
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -521,6 +529,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (publicBoardListPath && response.ok &&
+          !isVerifiedPublicBoardList(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'public_board_identity_unverified',
+          'public board post identity evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +562,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (publicBoardListPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'public_board_identity_unverified',
+          'public board post identity evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }

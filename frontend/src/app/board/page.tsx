@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { isVerifiedPublicBoardList } from '@/lib/public-board-list-proof';
 
 export const revalidate = 60;
 
@@ -73,6 +74,8 @@ export default async function BoardPage({
   const data = search.invalid
     ? null
     : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+
+  const verifiedData = data !== null && isVerifiedPublicBoardList(data) ? data : null;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -163,9 +166,9 @@ export default async function BoardPage({
         </h2>
         {search.invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
-        ) : data === null ? (
+        ) : verifiedData === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />
-        ) : data.posts.length === 0 ? (
+        ) : verifiedData.posts.length === 0 ? (
           <EmptyState
             title={
               search.query
@@ -180,7 +183,7 @@ export default async function BoardPage({
           <Card className="overflow-hidden py-0">
             <CardContent className="px-0">
               <ul>
-                {data.posts.map((post) => (
+                {verifiedData.posts.map((post) => (
                   <li key={post.postId} className="border-b last:border-b-0">
                     <Link
                       href={`/board/${post.postId}`}
