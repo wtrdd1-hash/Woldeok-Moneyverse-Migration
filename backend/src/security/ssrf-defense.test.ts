@@ -36,6 +36,19 @@ describe('SSRF Defense Engine', () => {
       expect(isPrivateIp('142.250.190.46')).toBe(false);
     });
 
+    it('blocks IPv6 translation prefixes that can route to private IPv4 destinations', () => {
+      // NAT64 well-known and local-use prefixes can translate a public-looking IPv6 URL
+      // into a private IPv4 destination on networks with a translator.
+      expect(isPrivateIp('64:ff9b::a9fe:a9fe')).toBe(true);
+      expect(isPrivateIp('64:ff9b:1::a9fe:a9fe')).toBe(true);
+      // 6to4 carries the IPv4 destination in the high-order IPv6 bits.
+      expect(isPrivateIp('2002:c0a8:101::')).toBe(true);
+      expect(isPrivateIp('2001:4860:4860::8888')).toBe(false);
+      // Adjacent addresses outside the exact translation prefixes stay usable.
+      expect(isPrivateIp('64:ff9b:2::1')).toBe(false);
+      expect(isPrivateIp('64:ff9b::1:2:3')).toBe(false);
+    });
+
     it('identifies private IPv6 addresses accurately', () => {
       // Loopback
       expect(isPrivateIp('::1')).toBe(true);
@@ -66,6 +79,12 @@ describe('SSRF Defense Engine', () => {
       await expect(assertSafeOutboundUrl('http://169.254.169.254/latest/meta-data/')).rejects.toThrow(SsrffSecurityError);
       await expect(assertSafeOutboundUrl('http://10.0.0.5/secrets')).rejects.toThrow(SsrffSecurityError);
       await expect(assertSafeOutboundUrl('http://192.168.1.1/router')).rejects.toThrow(SsrffSecurityError);
+    });
+
+    it('rejects direct IPv6 transition destinations before making an outbound request', async () => {
+      for (const address of ['64:ff9b::a9fe:a9fe', '64:ff9b:1::a9fe:a9fe', '2002:c0a8:101::']) {
+        await expect(assertSafeOutboundUrl(`http://[${address}]/private`)).rejects.toThrow(SsrffSecurityError);
+      }
     });
 
     it('blocks dangerous hostnames and internal aliases', async () => {

@@ -60,6 +60,23 @@ function isPrivateIPv6(ip: string): boolean {
     return true;
   }
 
+  // IPv6 transition addresses can be translated or tunneled to an IPv4
+  // destination outside this process. Reject the exact NAT64 prefixes and
+  // 6to4 range rather than trusting an IPv6-only private-address check.
+  // URL has already validated and canonicalized the address; expand its
+  // compressed groups to compare prefixes without matching unrelated /32s.
+  const [left, right] = normalized.split('::');
+  const before = left ? left.split(':') : [];
+  const after = right ? right.split(':') : [];
+  const groups = [...before, ...Array(8 - before.length - after.length).fill('0'), ...after]
+    .map((group) => Number.parseInt(group, 16));
+  if (groups.length !== 8 || groups.some((group) => !Number.isInteger(group))) return true;
+  if (groups[0] === 0x2002) return true; // 6to4: 2002::/16
+  if (groups[0] === 0x64 && groups[1] === 0xff9b) {
+    if (groups[2] === 1) return true; // NAT64 local-use: 64:ff9b:1::/48
+    if (groups.slice(2, 6).every((group) => group === 0)) return true; // NAT64 WKP: 64:ff9b::/96
+  }
+
   // ::1 / :: (Loopback / Unspecified)
   if (normalized === '::1' || normalized === '::' || normalized === '0:0:0:0:0:0:0:1' || normalized === '0:0:0:0:0:0:0:0') {
     return true;
