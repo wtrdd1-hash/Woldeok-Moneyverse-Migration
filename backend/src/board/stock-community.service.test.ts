@@ -52,3 +52,14 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+
+describe('exact public board title matching', () => {
+  it('uses equality rather than substring matching within the existing bounded public DB function', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList(undefined, '  제주  ', 'exact');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('lower(title) = lower($3::text)');
+    expect(values).toEqual([50, null, '제주']);
+  });
+});

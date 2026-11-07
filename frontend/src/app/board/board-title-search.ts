@@ -11,3 +11,11 @@ export function parseBoardTitleQuery(value: unknown): { query: string | null; in
   }
   return { query: value.trim(), invalid: false };
 }
+
+
+/** Exact match is opt-in; a bare or partial search preserves legacy behavior. */
+export function parseBoardTitleMatch(value: unknown, query: string | null): { mode: 'exact' | null; invalid: boolean } {
+  if (value === undefined || value === 'partial') return { mode: null, invalid: false };
+  if (value !== 'exact' || query === null) return { mode: null, invalid: true };
+  return { mode: 'exact', invalid: false };
+}

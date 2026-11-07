@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isVerifiedExactBoard } from '@/lib/board-exact-title';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -111,6 +112,12 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+  const exactBoardPath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts' &&
+    request.nextUrl.searchParams.has('match');
+  if (exactBoardPath && request.method === 'HEAD') {
+    return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'HEAD cannot verify exact board rows');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -511,6 +518,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
+  if (exactBoardPath && (response.status === 204 || response.status === 304 ||
+      (response.ok && !isJsonMediaType(response.headers.get('content-type'))))) {
+    return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+  }
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
   }
@@ -521,6 +532,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (response.ok && request.method === 'GET' && parts.length === 3 &&
+          parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts' &&
+          request.nextUrl.searchParams.has('match') &&
+          (request.nextUrl.searchParams.getAll('match').length !== 1 ||
+           request.nextUrl.searchParams.get('match') !== 'exact' ||
+           request.nextUrl.searchParams.getAll('q').length !== 1 ||
+           !isVerifiedExactBoard(compatible, request.nextUrl.searchParams.get('q')?.trim() ?? '', request.nextUrl.searchParams.get('stock')))) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +569,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (exactBoardPath && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_exact_title_unverified', 'exact board title evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -585,15 +608,17 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('match'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') || request.nextUrl.searchParams.has('match'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   if (isVipChestPath(parts)) {
     response.headers.set('cache-control', 'private, no-store');

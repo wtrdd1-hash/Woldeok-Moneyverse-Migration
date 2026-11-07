@@ -116,7 +116,10 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList(stockSymbol?: string, titleQuery?: string) {
+  async publicList(stockSymbol?: string, titleQuery?: string, match?: string) {
+    if (match !== undefined && (match !== 'exact' || titleQuery === undefined)) {
+      throw new Error('invalid title match mode');
+    }
     const normalized = stockSymbol?.trim() || null;
     if (normalized !== null && !STOCK_SYMBOL.test(normalized))
       throw new Error('invalid stock symbol');
@@ -130,13 +133,16 @@ export class StockCommunityService {
       throw new Error('invalid title search');
     }
     const title = titleQuery?.trim() ?? null;
+    const titleCondition = match === 'exact'
+      ? 'lower(title) = lower($3::text)'
+      : 'strpos(lower(title), lower($3::text)) > 0';
     const rows = await queryRows<StockTaggedRow>(
       this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
          FROM public.member_board_public_list_with_stock($1)
         WHERE ($2::text IS NULL OR upper(stock_symbol) = upper($2))
-          AND ($3::text IS NULL OR strpos(lower(title), lower($3::text)) > 0)`,
+          AND ($3::text IS NULL OR ${titleCondition})`,
       [50, normalized, title],
     );
     return rows.map(mapped);

@@ -92,12 +92,17 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'match', required: false, enum: ['exact'], description: 'Exact case-insensitive title match; requires q' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'match')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const match = query.match;
+    if (match !== undefined && (match !== 'exact' || typeof q !== 'string')) {
+      throw new BadRequestException('invalid title match mode');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -114,8 +119,12 @@ export class PublicStockCommunityController {
       throw new BadRequestException('invalid board search');
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
+    const posts = match === 'exact'
+      ? await this.community.publicList(stock as string | undefined, q as string, 'exact')
+      : await this.community.publicList(stock as string | undefined, q as string | undefined);
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts,
+      ...(match === 'exact' ? { titleMatch: 'exact' as const, titleQuery: (q as string).trim() } : {}),
     };
   }
 }
