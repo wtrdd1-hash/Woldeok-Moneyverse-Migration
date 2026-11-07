@@ -7,7 +7,7 @@ const community = { publicList: vi.fn(async () => []) } as unknown as StockCommu
 describe('public board title query HTTP validation', () => {
   it('accepts only q and stock, passes q to the service', async () => {
     const controller = new PublicStockCommunityController(community);
-    await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [] });
+    await expect(controller.list({ stock: 'WDX', q: '  news  ' })).resolves.toEqual({ posts: [], sortApplied: 'recent' });
     expect(community.publicList).toHaveBeenCalledWith('WDX', '  news  ');
   });
   it.each([
