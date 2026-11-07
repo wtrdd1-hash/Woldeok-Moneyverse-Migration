@@ -106,6 +106,17 @@ describe('security headers', () => {
     expect(csp.get('form-action')).toBe("'self'");
   });
 
+  it('overrides the public indexing and referrer defaults for private Android photo submissions', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const privateRoute = groups.find((group) => group.source === '/app-api/v1/photos/mine');
+    expect(privateRoute).toBeDefined();
+    const headers = new Map(privateRoute!.headers.map(({ key, value }) => [key, value]));
+    expect(headers.get('cache-control')).toBe('private, no-store');
+    expect(headers.get('x-robots-tag')).toBe('noindex');
+    expect(headers.get('referrer-policy')).toBe('no-referrer');
+  });
+
   it('refuses indexing unless the environment asks for it', async () => {
     process.env.SEO_INDEXING_ENABLED = 'false';
     expect((await headersFor('https://test.example.com')).get('x-robots-tag')).toBe('noindex, nofollow');

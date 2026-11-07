@@ -192,6 +192,13 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Next applies this global header policy after App Router handlers.
+      // Owner photo submissions must not inherit the public crawler/referrer defaults.
+      { source: '/app-api/v1/photos/mine', headers: [
+        { key: 'x-robots-tag', value: 'noindex' },
+        { key: 'referrer-policy', value: 'no-referrer' },
+        { key: 'cache-control', value: 'private, no-store' },
+      ] },
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
