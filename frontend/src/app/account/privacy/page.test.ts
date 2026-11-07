@@ -16,7 +16,8 @@ describe('account privacy center', () => {
     expect(page).toContain("apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests')");
     expect(page).toContain("export const fetchCache = 'force-no-store'");
     expect(page).toContain('<PrivacyRequestForm />');
-    expect(page).toContain('privacyData.requests.map');
+    expect(page).toContain('parsePrivacyRequestHistory(privacyData, selectedType)');
+    expect(page).toContain('privacyHistory.map');
   });
 
   it('exposes the privacy center from account settings and refreshes it after writes', () => {
