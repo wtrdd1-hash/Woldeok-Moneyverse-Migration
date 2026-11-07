@@ -52,3 +52,21 @@ describe('StockCommunityService recent public title search', () => {
     },
   );
 });
+
+describe('StockCommunityService bounded UTC period', () => {
+  it('filters after the public 50-row DB snapshot using a bound timestamp', async () => {
+    const database = pool();
+    const cutoff = '2026-11-01T11:00:00.000Z';
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, cutoff)).resolves.toEqual([]);
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('created_at >= $4::timestamptz');
+    expect(values).toEqual([50, null, null, cutoff]);
+  });
+
+  it('rejects an invalid cutoff before database access', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'yesterday')).rejects.toThrow('invalid public board cutoff');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
