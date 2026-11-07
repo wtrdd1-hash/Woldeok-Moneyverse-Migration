@@ -74,8 +74,8 @@ export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComp
         <CardTitle>{isEn ? 'Compare Stocks' : '종목 비교'}</CardTitle>
         <CardDescription>
           {isEn
-            ? 'Compare two or three virtual stocks side by side using the latest server prices.'
-            : '최신 서버 시세를 기준으로 가상 주식 2~3개를 한눈에 비교합니다.'}
+            ? 'Compare two or three virtual stocks using the last server-reported prices. Freshness is not verified.'
+            : '서버가 마지막으로 제공한 시세로 가상 주식 2~3개를 비교합니다. 실시간 최신성은 확인되지 않았습니다.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
