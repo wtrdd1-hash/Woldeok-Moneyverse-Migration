@@ -3009,3 +3009,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1896 — F675-279 증빙 접근 승인·실행·철회 안전성 보완 (Feature Improvement; 제안)
+- 이전 Feature Addition v1894; 현재 Feature Improvement v1896; 다음 Feature Addition v1898. P1 미구현이며 F675-271~278 선행 기능 및 미병합 PR 정합성 검토 필요. 권한은 변경 불가능한 테넌트·사건·증빙 세대·목적·동작(조회/내보내기)·필드 마스킹·만료 범위 해시에만 부여한다. 사건 전체 와일드카드 접근이나 신규 증빙으로의 자동 확장을 금지한다.
+- 실효 신원(사람과 위임 경로)을 기준으로 요청자·승인자·대량 내보내기 실행자·긴급 접근 독립 사후 심사자를 분리한다. 요청·승인·실제 조회/내보내기 직전에 테넌트 소속, 역할, 동의, 법적 보존명령, 증빙 세대를 재검증한다. 철회 시 권한 세대를 증가시키고 미사용 다운로드 토큰을 무효화한다. 이미 전달된 데이터는 회수 불가하므로 공개 사실을 감사 기록하고 사고 심사로 연결한다.
+- DB 제안: approval_grants의 (tenant_id,request_id,generation) UNIQUE, (tenant_id,case_id,evidence_generation) 복합 FK, 만료 CHECK, 활성 권한 부분 UNIQUE; access_events의 (tenant_id,event_uuid) UNIQUE 및 테넌트별 순번; export_jobs의 (tenant_id,actor_id,action,key) 멱등 UNIQUE. scope_digest, decision_version, signer_key_id, 이전 감사 해시를 저장하며 테넌트/만료/상태 및 테넌트/생성시각/ID 인덱스를 둔다. search_path 고정 SECURITY DEFINER 함수와 명시적 EXECUTE만 허용하고 앱 계정의 직접 테이블 쓰기는 금지한다.
+- API 계약: POST /api/v1/admin/evidence-access/requests/:id/decision은 If-Match·Idempotency-Key 필수, POST /requests/:id/revoke는 권한 세대 차단, GET /events는 범위 제한 서명 커서, POST /exports는 단일 목적 작업 생성, GET /exports/:id/download는 최신 세션과 단기 1회용 토큰 필수. 교차 테넌트 403, 오래된 세대 409, ETag 불일치 412, 잘못된 범위 422, 속도 제한 429, 감사/서명 장애 503 안전 차단. 원본 영수증을 로그·URL·분석·메일에 남기지 않는다.
+- 트랜잭션: 행 잠금으로 독립 승인과 증빙 세대를 재확인하고 권한 전이·해시 연결 감사·Outbox를 원자적으로 기록한다. 내보내기 작업자는 펜싱 임대 후 청크마다, 다운로드 서명 직전에 권한 세대를 확인한다. 진행 중 철회 시 남은 청크를 중단하고 부분 객체를 격리하며 이미 공개된 범위를 불변 기록한다. 중복 이벤트·재시도는 단일 결과를 보장하며 감사 체인 누락 시 민감 조회를 차단한다.
+- 화면: 관리자 > 준법 > 증빙 접근에서 요청 범위·마스킹 필드·만료·증빙 세대·독립 심사자·이미 공개된 자료는 회수 불가함을 표시한다. 승인/거절/철회/내보내기 CTA는 오래됨·차단·권한 부족 시 접근 가능한 이유와 함께 비활성화한다. 로딩/빈 화면/오류/재시도, 키보드 포커스, 320px, WCAG 2.2 AA, 영한 동등 문구, noindex/no-store, 비식별 집계 KPI를 적용한다.
+- 테스트·승격: 위임 자기 승인, 교차 테넌트, 증빙 교체 후 권한 재사용, 동시 승인/철회, 서명 장애, 감사 체인 누락, 오래된 커서, 1회용 다운로드, 부분 내보내기, 키 교체를 회귀 검증한다. 실제 Next/Nest/app-api/PostgreSQL 계약 및 격리 Test exact-SHA E2E 후에만 카나리 가능. admin_sla_evidence_access_audit_v1 기본 OFF; 롤백은 권한/내보내기를 차단하고 감사 기록과 금융 원장은 보존한다. P0는 /srv/moneyverse 링크 복구와 실제 운영 SHA 기준 /en,/en/login, DB 권한/체크섬, 독립 복원, 원장 대사, 국내 법률 검증이다.
+- 외부 독립 레퍼런스 신규 검증 0건, 중복 제거 누적 UNKNOWN / 10,000건. 근거 분류 게이트 BLOCKED / IN PROGRESS; 달성 주장 금지.
