@@ -4,6 +4,7 @@ import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
 import { parseShopPurchaseExport } from '@/lib/shop-purchase-export';
+import { isVerifiedInventoryAttention } from '@/lib/inventory-attention';
 import { parseBankStandingSnapshot } from '@/app/bank/bank-statement';
 import { parseSecurityEvents } from '@/app/account/security/account-security-evidence';
 import { parseSecurityEventCategory, parseSecurityEventOrder, securityEventsMatchCategory, securityEventsMatchOrder } from '@/lib/security-event-category';
@@ -195,6 +196,17 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return contractJson({
       authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
     });
+  }
+
+  const inventoryPath = parts.length === 2 && parts[0] === 'shop' && parts[1] === 'holdings';
+  const inventoryFilters = inventoryPath ? request.nextUrl.searchParams.getAll('filter') : [];
+  const inventoryAttentionRequested = inventoryFilters.length === 1 && inventoryFilters[0] === 'attention';
+  if (inventoryFilters.length > 1 || (inventoryFilters.length === 1 && !['all', 'attention'].includes(inventoryFilters[0]!)) ||
+      (inventoryPath && [...request.nextUrl.searchParams.keys()].some((key) => key !== 'filter'))) {
+    return gatewayProblem(400, 'Bad Request', 'inventory_filter_invalid', 'invalid owner holdings filter');
+  }
+  if (inventoryAttentionRequested && request.method === 'HEAD') {
+    return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'HEAD cannot prove the attention filter');
   }
 
   const workAvailability = parts.length === 2 && parts[0] === 'work' && parts[1] === 'tasks' && request.method === 'GET';
@@ -507,9 +519,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
+  const privateShopHoldings = parts[0] === 'shop' && parts[1] === 'holdings';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopHoldings || privateStockHistory) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateShopHoldings || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+
+  if (privateShopHoldings) headers.set('referrer-policy', 'no-referrer');
+  // A filtered 206/204/304 cannot prove that the entire owner result was verified.
+  if (inventoryAttentionRequested && response.status !== 200 && (response.ok || response.status === 304)) {
+    return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'partial or empty owner response is not verifiable');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -521,6 +540,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (inventoryAttentionRequested && response.ok && !isVerifiedInventoryAttention(compatible)) {
+        return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'owner holdings attention evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +571,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (inventoryAttentionRequested && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'owner holdings attention evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -559,6 +584,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (inventoryAttentionRequested && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'inventory_attention_unverified', 'owner holdings attention evidence is unavailable');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 

@@ -26,6 +26,7 @@ export interface HeldItem {
 
 interface InventoryViewProps {
   readonly holdings: HeldItem[];
+  readonly attentionHoldings?: HeldItem[] | null | undefined;
   readonly currentUsername?: string | undefined;
   readonly userAvatarUrl?: string | null | undefined;
 }
@@ -46,15 +47,18 @@ const CATEGORIES = [
 
 export function InventoryView({
   holdings,
+  attentionHoldings,
   currentUsername = '모험가',
   userAvatarUrl,
 }: InventoryViewProps) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [attentionOnly, setAttentionOnly] = useState(false);
+  const visibleHoldings = attentionOnly && attentionHoldings ? attentionHoldings : holdings;
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const filtered = holdings.filter((h) => {
+  const filtered = visibleHoldings.filter((h) => {
     if (selectedCategory === 'all') return true;
     return h.category === selectedCategory;
   });
@@ -171,14 +175,31 @@ export function InventoryView({
         </div>
       )}
 
+      {attentionHoldings !== undefined ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border p-3">
+          <button type="button" aria-pressed={attentionOnly} disabled={attentionHoldings === null}
+            onClick={() => setAttentionOnly((previous) => !previous)}
+            className="min-h-11 rounded-md border px-4 font-semibold disabled:opacity-50">
+            관리 필요 아이템만 보기
+          </button>
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {attentionHoldings === null
+              ? '관리 필요 상태를 확인할 수 없습니다. 전체 보관함은 계속 표시합니다.'
+              : attentionOnly
+                ? `확인된 관리 필요 아이템 ${attentionHoldings.length}건 · 별도 조회 시점 기준`
+                : '미납·이용 정지 상태의 아이템을 따로 확인할 수 있습니다.'}
+          </p>
+        </div>
+      ) : null}
+
       {/* Category Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
           const count =
             cat.id === 'all'
-              ? holdings.length
-              : holdings.filter((h) => h.category === cat.id).length;
+              ? visibleHoldings.length
+              : visibleHoldings.filter((h) => h.category === cat.id).length;
 
           return (
             <button
@@ -201,7 +222,7 @@ export function InventoryView({
       {/* Holdings Grid */}
       {filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border/60 p-12 text-center text-muted-foreground bg-card/30">
-          <p className="text-sm font-bold">보유한 아이템이 없습니다.</p>
+          <p className="text-sm font-bold">{attentionOnly ? '확인된 관리 필요 아이템이 없습니다.' : '보유한 아이템이 없습니다.'}</p>
           <p className="text-xs mt-1">상점 2.0에서 마음에 드는 아이템을 둘러보세요!</p>
         </div>
       ) : (

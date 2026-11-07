@@ -16,7 +16,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -37,6 +37,7 @@ import { orderShopCatalog, parseShopPriceOrder, type ShopPriceOrder } from './sh
 import { filterShopByMaxPrice, parseShopMaxPrice } from './shop-price-ceiling';
 import { filterShopMinimumPrice, parseShopMinimumPrice } from './shop-price-floor';
 import { filterShopUpkeep } from './shop-upkeep-cap';
+import { filterShopHoldings } from './shop-holdings-filter';
 
 interface SearchableShopItem {
   readonly code?: unknown;
@@ -345,8 +346,12 @@ export class ShopController {
   @Get('holdings')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Catalogue items the caller holds' })
+  @ApiQuery({ name: 'filter', required: false, enum: ['all', 'attention'], description: 'Owner-only upkeep attention; all is the default' })
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
+  @Header('Referrer-Policy', 'no-referrer')
   async holdings(@Req() request: RequestWithSession, @Query('filter') filter?: unknown) {
-    if (filter !== undefined && filter !== 'attention') {
+    if (filter !== undefined && filter !== 'all' && filter !== 'attention') {
       throw new BadRequestException('invalid holdings filter');
     }
     let holdings = await this.guarded(
@@ -354,9 +359,13 @@ export class ShopController {
       'held items are unavailable',
     );
     if (filter === 'attention') {
-      holdings = holdings.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
+      try {
+        holdings = filterShopHoldings(holdings, 'attention');
+      } catch {
+        throw new ServiceUnavailableException('held item attention evidence is unavailable');
+      }
     }
-    return { holdings };
+    return { holdings, filter: filter === 'attention' ? 'attention' : 'all' };
   }
 
   @Post('catalog/:id/purchases')

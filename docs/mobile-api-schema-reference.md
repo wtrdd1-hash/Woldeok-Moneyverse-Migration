@@ -3858,6 +3858,7 @@ _No request body._
 | holdings[].arrears_due | false | string |  |
 | holdings[].arrears_cap | false | string |  |
 | holdings[].suspended | false | boolean |  |
+| filter | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
