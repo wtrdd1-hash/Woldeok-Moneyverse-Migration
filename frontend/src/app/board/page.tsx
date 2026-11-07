@@ -12,6 +12,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 import { parseBoardTitleQuery } from './board-title-search';
+import { parseBoardRecentPeriod, verifiedBoardRecentPeriod } from './board-recent-period';
 
 export const revalidate = 60;
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearch = params.q !== undefined;
+  const hasSearch = params.q !== undefined || params.period !== undefined;
   return { ...boardMetadata, robots: { index: !hasSearch, follow: true } };
 }
 
@@ -66,13 +67,16 @@ export default async function BoardPage({
   const params = await searchParams;
   const stock = selectedStock(params.stock);
   const search = parseBoardTitleQuery(params.q);
+  const recent = parseBoardRecentPeriod(params.period);
   const query = new URLSearchParams();
   if (stock) query.set('stock', stock);
   if (search.query) query.set('q', search.query);
+  if (recent.period) query.set('period', recent.period);
   const suffix = query.size ? `?${query.toString()}` : '';
-  const data = search.invalid
+  const rawData = search.invalid || recent.invalid
     ? null
-    : await publicApi<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts${suffix}`, 60);
+    : await publicApi<{ posts: PostSummary[]; period?: string; cutoffUtc?: string }>(`/api/v1/board/public/stock-posts${suffix}`, recent.period ? 0 : 60);
+  const data = recent.period && rawData && !verifiedBoardRecentPeriod(rawData, recent.period, Date.now(), { q: search.query, stock }) ? null : rawData;
 
   const boardBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -131,6 +135,16 @@ export default async function BoardPage({
                 aria-describedby="board-search-scope"
               />
             </label>
+            <label htmlFor="board-recent-period" className="grid gap-1 text-sm font-semibold">
+              작성 기간
+              <select id="board-recent-period" name="period" defaultValue={recent.period ?? ''}
+                aria-describedby="board-search-scope" className="min-h-11 rounded-md border border-input bg-background px-3">
+                <option value="">전체 기간</option>
+                <option value="24h">최근 24시간</option>
+                <option value="7d">최근 7일</option>
+                <option value="30d">최근 30일</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground"
@@ -145,8 +159,11 @@ export default async function BoardPage({
             </Link>
           </form>
           <p id="board-search-scope" className="mt-2 text-xs text-muted-foreground">
-            최근 공개 게시글 50건의 제목에서만 검색합니다. 전체 게시글 검색이 아닙니다.
+            최근 공개 게시글 50건 이내에서 제목과 작성 기간을 검색합니다. 과거 전체 게시글 검색이 아닙니다.
           </p>
+          {recent.invalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">작성 기간은 24시간, 7일 또는 30일만 선택할 수 있습니다.</p>
+          ) : null}
           {search.invalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
               검색어는 1~80자이며 제어문자와 꺾쇠괄호를 사용할 수 없습니다.
@@ -161,7 +178,7 @@ export default async function BoardPage({
         <h2 id="posts-title" className="sr-only">
           글 목록
         </h2>
-        {search.invalid ? (
+        {search.invalid || recent.invalid ? (
           <EmptyState title="검색어를 확인해 주세요." />
         ) : data === null ? (
           <EmptyState title="게시글을 불러오지 못했어요." />

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseBoardRecentPeriod, verifiedBoardRecentPeriod } from '@/app/board/board-recent-period';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -123,6 +124,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     (supportQuery.has('status') && !['open', 'waiting_user', 'resolved'].includes(supportQuery.get('status')!)) ||
     (supportQuery.has('q') && (!supportQuery.get('q')?.trim() || supportQuery.get('q')!.length > 80)))) {
     return gatewayProblem(400, 'Bad Request', 'support_date_invalid', 'invalid support date window');
+  }
+
+  const boardPeriodPath = parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardPeriodValues = boardPeriodPath ? request.nextUrl.searchParams.getAll('period') : [];
+  const boardPeriod = parseBoardRecentPeriod(boardPeriodValues.length > 1 ? boardPeriodValues : boardPeriodValues[0]);
+  if (boardPeriodPath && (boardPeriod.invalid ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'period' && key !== 'stock' && key !== 'q') ||
+      request.nextUrl.searchParams.getAll('stock').length > 1 || request.nextUrl.searchParams.getAll('q').length > 1)) {
+    return gatewayProblem(400, 'Bad Request', 'board_period_invalid', 'invalid public board period or search parameters');
   }
 
   const securityEventPath = parts.length === 3 && parts[0] === 'account' && parts[1] === 'security' && parts[2] === 'events';
@@ -271,6 +281,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (boardPeriodPath && boardPeriod.period && request.method === 'GET' && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !verifiedBoardRecentPeriod(await response.clone().json(), boardPeriod.period, Date.now(), {
+            q: request.nextUrl.searchParams.get('q'), stock: request.nextUrl.searchParams.get('stock'),
+          })) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_period_unverified', 'recent public board period was not verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_period_unverified', 'recent public board period was not verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -506,6 +529,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   for (const cookie of response.headers.getSetCookie()) headers.append('set-cookie', cookie);
   // Owner-scoped wallet balances and ledger activity must never inherit an
   // accidentally cacheable upstream response, including on Android clients.
+  if (boardPeriodPath && boardPeriod.period) {
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex');
+    headers.set('referrer-policy', 'no-referrer');
+  }
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
