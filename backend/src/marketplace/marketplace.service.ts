@@ -24,7 +24,9 @@ export class MarketplaceService {
     const limit = query.limit ?? 50;
     const offset = query.offset ?? 0;
     const category = query.category || null;
-    const search = query.search ? `%${query.search}%` : null;
+    // PostgreSQL ILIKE treats %, _ and backslash as pattern syntax.
+    // Escape user text so a literal query cannot broaden the listing set.
+    const search = query.search ? `%${query.search.replace(/[\\%_]/g, '\\$&')}%` : null;
 
     return queryRows(
       this.pool,
