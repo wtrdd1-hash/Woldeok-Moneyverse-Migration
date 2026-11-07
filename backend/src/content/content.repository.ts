@@ -25,6 +25,15 @@ export function optionalContentUuid(value: unknown, field: string): string | nul
   return requireContentUuid(value, field);
 }
 
+export function parseAnnouncementPinnedQuery(query: Record<string, unknown>): boolean {
+  const keys = Object.keys(query);
+  if (keys.length === 0) return false;
+  if (keys.length !== 1 || keys[0] !== 'pinnedOnly' || query.pinnedOnly !== '1') {
+    throw new ContentInputError('pinnedOnly must be the single value 1');
+  }
+  return true;
+}
+
 export function requireContentLimit(value: unknown, field = 'limit'): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 100) {
     throw new ContentInputError(`${field} must be an integer between 1 and 100`);
@@ -243,14 +252,15 @@ export class PostgresContentRepository {
     this.pool = pool;
   }
 
-  async publishedAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publishedAnnouncements({ limit = 20, pinnedOnly = false }: { limit?: number; pinnedOnly?: boolean } = {}): Promise<
     ContentAnnouncementRow[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
     const { rows } = await this.pool.query<ContentAnnouncementRow>(
       `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
-       FROM public.content_list_published_announcements($1)`,
-      [contentLimit],
+       FROM public.content_list_published_announcements($1)
+       WHERE ($2::boolean IS FALSE OR is_pinned IS TRUE)`,
+      [contentLimit, pinnedOnly],
     );
     return rows;
   }

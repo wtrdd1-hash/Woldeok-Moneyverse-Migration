@@ -216,7 +216,7 @@ function normalizePhotoReceipt(row: ContentPhotoReceiptRow): ContentPhotoReceipt
  * this module's static type checking).
  */
 export interface ContentRepositoryLike {
-  publishedAnnouncements(options?: { limit?: number }): Promise<ContentAnnouncementRow[]>;
+  publishedAnnouncements(options?: { limit?: number; pinnedOnly?: boolean }): Promise<ContentAnnouncementRow[]>;
   publishedPhotos(options?: { limit?: number }): Promise<ContentPhotoRow[]>;
   isPublicStorageKey(storageKey: unknown): Promise<boolean>;
   publicStatus(): Promise<ContentStatusRow[]>;
@@ -322,11 +322,11 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, pinnedOnly = false }: { limit?: number; pinnedOnly?: boolean } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
+    return (await this.repository.publishedAnnouncements({ limit: contentLimit, pinnedOnly })).map(
       normalizeAnnouncement,
     );
   }
