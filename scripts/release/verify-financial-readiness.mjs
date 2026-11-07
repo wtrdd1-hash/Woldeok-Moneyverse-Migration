@@ -14,6 +14,11 @@ export const PROTECTED_FINANCIAL_TABLES = Object.freeze([
   'ledger_postings', 'system_treasury_vaults',
 ]);
 
+export const PROTECTED_SENSITIVE_TABLES = Object.freeze([
+  'users', 'identities', 'user_consents', 'user_items', 'audit_logs',
+]);
+const ALL_PROTECTED_TABLES = Object.freeze([...PROTECTED_FINANCIAL_TABLES, ...PROTECTED_SENSITIVE_TABLES]);
+
 const ACCEPTED_EXISTING_DML_TABLES = Object.freeze(['account_balances', 'accounts', 'system_treasury_vaults']);
 const DML_KEYS = Object.freeze(['can_insert', 'can_update', 'can_delete']);
 
@@ -26,7 +31,7 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
   if (!Array.isArray(grants)) blockers.push('unverified_financial_grants');
   const byTable = new Map();
   for (const row of validGrants) {
-    if (!row || typeof row.name !== 'string' || !PROTECTED_FINANCIAL_TABLES.includes(row.name)) {
+    if (!row || typeof row.name !== 'string' || !ALL_PROTECTED_TABLES.includes(row.name)) {
       blockers.push('invalid_financial_grant_row');
       continue;
     }
@@ -52,6 +57,17 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       } else {
         blockers.push('direct_application_financial_dml:' + name);
       }
+    }
+  }
+  for (const name of PROTECTED_SENSITIVE_TABLES) {
+    const row = byTable.get(name);
+    if (!row) {
+      blockers.push('missing_sensitive_table:' + name);
+    } else if (DML_KEYS.some(key => typeof row[key] !== 'boolean')) {
+      blockers.push('unverified_sensitive_grant_flags:' + name);
+    } else if (DML_KEYS.some(key => row[key])) {
+      // Existing financial exceptions never authorize identity, inventory or audit DML.
+      blockers.push('direct_application_sensitive_dml:' + name);
     }
   }
   if (!identity || typeof identity.database !== 'string' || !identity.database.trim() ||
@@ -103,7 +119,10 @@ export function evaluateFinancialReadiness({ grants, ledger, identity }) {
       unexplainedWithoutPostingsDeltaWld: ledger?.unexplained_without_postings_delta_wld ?? null,
       unbalancedTransactions: ledger?.unbalanced_transaction_count ?? null,
       transactionsWithoutPostings: ledger?.transactions_without_postings ?? null,
-      coreTablesWithAppDml: validGrants.filter(x => x && (x.can_insert === true || x.can_update === true || x.can_delete === true))
+      sensitiveTablesWithAppDml: validGrants.filter(x => x && PROTECTED_SENSITIVE_TABLES.includes(x.name)
+        && DML_KEYS.some(key => x[key] === true)).map(x => x.name),
+      coreTablesWithAppDml: validGrants.filter(x => x && PROTECTED_FINANCIAL_TABLES.includes(x.name)
+        && (x.can_insert === true || x.can_update === true || x.can_delete === true))
         .map(x => x.name),
     },
     caveat: 'Opening-balance provenance and treasury/money-supply reconciliation are separate mandatory gates. A zero count here is not approval for Production.',
@@ -166,7 +185,7 @@ export async function readFinancialSnapshot(client) {
   try {
     await client.query("SET LOCAL statement_timeout = '10000ms'");
     const identity = (await client.query('SELECT current_database() AS database, current_user AS role')).rows[0];
-    const grants = (await client.query(GRANTS_SQL, [PROTECTED_FINANCIAL_TABLES])).rows;
+    const grants = (await client.query(GRANTS_SQL, [ALL_PROTECTED_TABLES])).rows;
     const ledger = (await client.query(LEDGER_SQL)).rows[0];
     return { grants, ledger, identity };
   } finally {
