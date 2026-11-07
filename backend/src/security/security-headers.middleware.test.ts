@@ -27,6 +27,20 @@ describe('securityHeaders middleware', () => {
     expect(headers.get('strict-transport-security')).toBe('max-age=31536000; includeSubDomains');
   });
 
+  it('does not weaken a pre-existing no-referrer privacy policy', () => {
+    const headers = new Map<string, string>([['referrer-policy', 'no-referrer']]);
+    const res = {
+      getHeader: vi.fn((key: string) => headers.get(key.toLowerCase())),
+      setHeader: vi.fn((key: string, value: string) => headers.set(key.toLowerCase(), value)),
+    } as unknown as Response;
+    const next = vi.fn();
+
+    securityHeaders({ isProduction: true })({} as Request, res, next);
+
+    expect(headers.get('referrer-policy')).toBe('no-referrer');
+    expect(next).toHaveBeenCalledOnce();
+  });
+
   it('omits HSTS header in non-production local development', () => {
     const middleware = securityHeaders({ isProduction: false });
     const headers = new Map<string, string>();
