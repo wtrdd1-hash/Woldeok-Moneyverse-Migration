@@ -105,6 +105,59 @@ describe('short bounded local prose sections with authoritative metadata', () =>
     expect(client).toHaveBeenCalled();
     expect(client.mock.calls.length).toBeLessThanOrEqual(8);
   });
+  it('does not count digits in the exact official source URL as article claims',()=>{
+    const citedSource={...source,url:'https://example.org/guide/2026/protocol'};
+    const draft=article(slot.country,citedSource.url);
+    expect(checkOriginalArticle(draft,slot,citedSource).reasons)
+      .not.toContain('NUMERICAL_CLAIMS_NEED_INDEPENDENT_PROOF');
+  });
+  it('regenerates a section with unsupported year claims before acceptance',async()=>{
+    let calls=0;
+    const client=vi.fn().mockImplementation(async()=>{
+      calls++;
+      const base=nativeBody[slot.country].trim().replace(/[.!?。]$/,'');
+      const prose=Array.from({length:8},(_,n)=>
+        base+' in a unique explanation of concept '+calls+
+        ' with a carefully distinguished consequence '+(n+1)+'.').join(' ');
+      const content=calls===1 ? prose+' The invented 2026 metric is unsupported.' : prose;
+      return new Response(JSON.stringify({message:{content},done_reason:'stop'}),{status:200});
+    });
+    const result=await generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client});
+    expect(result.content).not.toContain('invented 2026 metric');
+    expect(checkOriginalArticle(result,slot,source).eligible).toBe(true);
+    expect(calls).toBeGreaterThan(5);
+    expect(calls).toBeLessThanOrEqual(10);
+  });
+  it('regenerates a section with repeated model sentences without disabling the gate',async()=>{
+    let calls=0;
+    const client=vi.fn().mockImplementation(async()=>{
+      calls++;
+      const base=nativeBody[slot.country].trim().replace(/[.!?。]$/,'');
+      const prose=Array.from({length:8},(_,n)=>
+        base+' in an independent explanation of idea '+calls+
+        ' with practical implication '+(n+1)+'.').join(' ');
+      const repeated='The very same synthetic sentence appears in every section of this test.';
+      const content=calls===1 ? repeated+' '+repeated+' '+repeated+' '+prose : prose;
+      return new Response(JSON.stringify({message:{content},done_reason:'stop'}),{status:200});
+    });
+    const result=await generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client});
+    expect(result.content).not.toContain('same synthetic sentence');
+    expect(checkOriginalArticle(result,slot,source).eligible).toBe(true);
+    expect(calls).toBeGreaterThan(5);
+    expect(calls).toBeLessThanOrEqual(10);
+  });
+  it('holds publication and limits model calls when numeric hallucinations persist',async()=>{
+    let calls=0;
+    const client=vi.fn().mockImplementation(async()=>{
+      calls++;
+      const base=nativeBody[slot.country].trim().replace(/[.!?。]$/,'');
+      const content=(base+' in an extended explanation without independent proof of 2026 data. ').repeat(5);
+      return new Response(JSON.stringify({message:{content},done_reason:'stop'}),{status:200});
+    });
+    await expect(generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client}))
+      .rejects.toThrow('NUMERICAL_CLAIMS_NEED_INDEPENDENT_PROOF');
+    expect(calls).toBeLessThanOrEqual(3);
+  });
   it('fails closed on empty model output',async()=>{
     const client=vi.fn().mockResolvedValue(new Response(JSON.stringify({
       message:{content:null},done_reason:'stop',
