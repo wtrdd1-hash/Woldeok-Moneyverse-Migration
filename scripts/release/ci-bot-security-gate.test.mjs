@@ -12,3 +12,11 @@ test('runtime CI installs and tests the independently locked Discord bot', () =>
 test('runtime CI audits bot production dependencies at high severity', () => {
   assert.match(workflow, /npm --prefix bot audit --omit=dev --audit-level=high/);
 });
+
+test('CI bot dependency install never downloads yt-dlp from the unauthenticated GitHub releases API', () => {
+  assert.match(
+    workflow,
+    /YOUTUBE_DL_SKIP_DOWNLOAD=1\s+npm --prefix bot ci --no-audit --no-fund/,
+    'CI bot install must not depend on GitHub release API rate limits; runtime installs remain unchanged',
+  );
+});

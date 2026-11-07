@@ -215,6 +215,6 @@ jobs:
         env:
           YOUTUBE_DL_SKIP_DOWNLOAD: 'true'
         run: |
-          npm --prefix bot ci --no-audit --no-fund
+          YOUTUBE_DL_SKIP_DOWNLOAD=1 npm --prefix bot ci --no-audit --no-fund
           npm --prefix bot test
           npm --prefix bot audit --omit=dev --audit-level=high
