@@ -12,6 +12,7 @@ import { verifiedWalletCalendarPage } from '@/lib/wallet-calendar-proof';
 import { verifiedWalletPageSummary } from '@/lib/wallet-page-summary';
 import { parseWalletTransactionDetail } from '@/lib/wallet-transaction-detail';
 import { normalizeStockHistoryGrossFloor, isVerifiedStockHistoryGrossResponse } from '@/app/stocks/history/history-window';
+import { parseVerifiedStockWatchlist } from '@/app/stocks/watchlist/watchlist-evidence';
 import { isVerifiedAvailableWorkBoard } from '@/lib/work-daily-availability';
 import { normalizeWorkReceiptFloor, parseFilteredWorkReceipts } from '@/lib/work-receipt-reward-floor';
 import { NextResponse } from 'next/server';
@@ -508,8 +509,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   // accidentally cacheable upstream response, including on Android clients.
   const privateShopReceipts = parts[0] === 'shop' && parts[1] === 'purchases';
   const privateStockHistory = parts[0] === 'stocks' && parts[1] === 'history';
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
-  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
+  const privateStockWatchlist = parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'watchlist';
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory || privateStockWatchlist) headers.set('cache-control', 'private, no-store');
+  if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory || privateStockWatchlist) headers.set('x-robots-tag', 'noindex');
+
+  if (privateStockWatchlist) headers.set('referrer-policy', 'no-referrer');
+  if (privateStockWatchlist && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'stock_watchlist_unverified', 'owner watchlist source is unavailable');
+  }
 
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
@@ -521,6 +528,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (privateStockWatchlist && response.ok && parseVerifiedStockWatchlist(compatible) === null) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_watchlist_unverified', 'owner watchlist source is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +559,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (privateStockWatchlist && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_watchlist_unverified', 'owner watchlist source is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
