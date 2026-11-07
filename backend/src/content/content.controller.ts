@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -31,6 +32,7 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
 import { ContentService } from './content.service';
+import { parseAnnouncementRecency } from './announcement-recency';
 import { PrivateImageStorage } from './private-image-storage';
 
 export class SaveAnnouncementDto {
@@ -167,9 +169,16 @@ export class ContentController {
   }
 
   @Get('announcements')
-  @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  @ApiOperation({ summary: 'Published announcements, optionally limited by publication age' })
+  async announcements(@Query('recent') recentValue?: unknown) {
+    const recent = parseAnnouncementRecency(recentValue);
+    const asOf = new Date();
+    return {
+      announcements: await this.service().publicAnnouncements({ recent, asOf }),
+      recentApplied: recent,
+      asOfUtc: asOf.toISOString(),
+      scope: 'latest-20-published',
+    };
   }
 
   @Get('photos')

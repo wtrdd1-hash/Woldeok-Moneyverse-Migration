@@ -1,6 +1,7 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
+import { parseAnnouncementRecency } from './announcement-recency';
 
 @ApiTags('content')
 @Controller('content')
@@ -13,9 +14,16 @@ export class AppContentController {
   }
 
   @Get('announcements')
-  @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  @ApiOperation({ summary: 'App API: published announcements by publication age' })
+  async announcements(@Query('recent') recentValue?: unknown) {
+    const recent = parseAnnouncementRecency(recentValue);
+    const asOf = new Date();
+    return {
+      announcements: await this.service().publicAnnouncements({ recent, asOf }),
+      recentApplied: recent,
+      asOfUtc: asOf.toISOString(),
+      scope: 'latest-20-published',
+    };
   }
 
   @Get('photos')

@@ -84,3 +84,28 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('ContentService published announcement recency', () => {
+  const asOf = new Date('2026-11-03T00:00:00.000Z');
+  const id = '64fd119b-f4d4-466f-bd37-5ee296a1474b';
+  const row = (publishedAt: Date | null) => ({
+    announcement_id: id, title: '공지', body: '내용', image_url: null,
+    image_alt_text: null, is_pinned: false, published_at: publishedAt,
+  });
+  it('filters only the bounded published snapshot, preserving no-query behavior', async () => {
+    const repo = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repo.publishedAnnouncements = vi.fn().mockResolvedValue([
+      row(new Date('2026-10-27T00:00:00.000Z')),
+      {...row(new Date('2026-10-01T00:00:00.000Z')), announcement_id: '1e090c86-3cd8-47ca-b7db-4be7d7b8daad'},
+    ]);
+    const service = new ContentService(repo);
+    expect(await service.publicAnnouncements({recent: '7d', asOf})).toHaveLength(1);
+    expect(await service.publicAnnouncements({recent: '30d', asOf})).toHaveLength(1);
+    expect(await service.publicAnnouncements()).toHaveLength(2);
+    expect(repo.publishedAnnouncements).toHaveBeenCalledWith({limit: 20});
+  });
+  it('refuses unverified timestamps instead of claiming a verified empty filter', async () => {
+    const repo = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repo.publishedAnnouncements = vi.fn().mockResolvedValue([row(null)]);
+    await expect(new ContentService(repo).publicAnnouncements({recent: '7d', asOf})).rejects.toThrow();
+  });
+});

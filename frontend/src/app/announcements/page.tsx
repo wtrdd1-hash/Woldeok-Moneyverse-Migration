@@ -9,10 +9,11 @@ import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { parseAnnouncementRecencyQuery, verifiedAnnouncementRecency } from '@/lib/announcement-recency';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
@@ -28,8 +29,25 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export async function generateMetadata({
+  searchParams,
+}: { readonly searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const params = await searchParams;
+  return { ...baseMetadata, robots: { index: params.recent === undefined, follow: true } };
+}
+
+export default async function AnnouncementsPage({
+  searchParams,
+}: { readonly searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const recent = parseAnnouncementRecencyQuery(params.recent);
+  const raw = recent === 'invalid'
+    ? null
+    : await publicApi<{ announcements: Announcement[]; recentApplied?: string | null; scope?: string; asOfUtc?: string }>(
+        '/api/v1/announcements' + (recent ? '?recent=' + recent : ''), 60,
+      );
+  const data = recent && recent !== 'invalid' && raw &&
+    !verifiedAnnouncementRecency(raw, recent) ? null : raw;
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -77,6 +95,20 @@ export default async function AnnouncementsPage() {
         />
       )}
 
+      <form method="get" action="/announcements" role="search" className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+        <label htmlFor="notice-recent" className="grid gap-1 text-sm font-semibold">
+          게시 기간
+          <select id="notice-recent" name="recent" defaultValue={recent === 'invalid' ? '' : recent ?? ''}
+            className="min-h-11 rounded-md border border-input bg-background px-3">
+            <option value="">전체 (최근 20건)</option>
+            <option value="7d">최근 7일</option>
+            <option value="30d">최근 30일</option>
+          </select>
+        </label>
+        <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">적용</button>
+        <Link href="/announcements" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">초기화</Link>
+        <p className="w-full text-xs text-muted-foreground">최근 공개 공지 최대 20건 안에서만 기간을 필터링합니다. 전체 공지 기록 검색이 아닙니다.</p>
+      </form>
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED NOTICE"
@@ -88,7 +120,9 @@ export default async function AnnouncementsPage() {
             </Link>
           }
         />
-        {data === null ? (
+        {recent === 'invalid' ? (
+          <p role="alert" className="text-sm text-destructive">게시 기간을 다시 선택해 주세요.</p>
+        ) : data === null ? (
           <EmptyState
             title="지금은 공지를 불러올 수 없어요."
             description="잠시 후 다시 확인해 주세요."

@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { verifiedAnnouncementRecency } from '@/lib/announcement-recency';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
@@ -112,6 +113,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const announcementRecencyPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  const announcementRecency = announcementRecencyPath ? request.nextUrl.searchParams.getAll('recent') : [];
+  if (announcementRecencyPath &&
+      (announcementRecency.length > 1 ||
+       (announcementRecency.length === 1 && !['7d', '30d'].includes(announcementRecency[0]!)) ||
+       [...request.nextUrl.searchParams.keys()].some((key) => key !== 'recent'))) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_recent_invalid', 'recent must be 7d or 30d');
+  }
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -521,6 +531,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (announcementRecency.length === 1 && response.ok &&
+          !verifiedAnnouncementRecency(compatible, announcementRecency[0] as '7d' | '30d')) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_recent_unverified', 'publication window could not be verified');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +563,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (announcementRecency.length === 1 && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_recent_unverified', 'publication window could not be verified');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -559,6 +576,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (announcementRecency.length === 1 && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcement_recent_unverified', 'publication window could not be verified');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 
@@ -592,6 +612,11 @@ async function handle(request: NextRequest, context: Context) {
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+    response.headers.set('cache-control', 'no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+  }
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('recent')) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
