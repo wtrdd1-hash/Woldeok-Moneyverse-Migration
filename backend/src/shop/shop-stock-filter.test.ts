@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
 import { ShopController, filterShopStock, requireShopStockFilter } from './shop.controller';
 import type { ShopCatalogRepository } from './shop.repository';
 import type { RequestWithSession } from '../auth/session.context';
@@ -45,6 +46,37 @@ describe('member shop stock API ownership and validation', () => {
     const catalog = vi.fn(async () => listed);
     const controller = new ShopController(null, { catalog } as unknown as ShopCatalogRepository);
     await expect(controller.catalog(request, undefined, ['available', 'all'])).rejects.toMatchObject({ status: 400 });
+    expect(catalog).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('stock query route binding', () => {
+  it('binds stock=available from the real HTTP query on both member and public catalogue routes', () => {
+    for (const method of ['catalog', 'publicCatalog']) {
+      const args = Reflect.getMetadata(ROUTE_ARGS_METADATA, ShopController, method) as Record<string, { data?: string }>;
+      expect(Object.values(args).some((entry) => entry.data === 'stock'), method).toBe(true);
+    }
+  });
+
+  it('filters the owner-scoped SQL result only when the stock query parameter is supplied', async () => {
+    const actor = '11111111-1111-4111-8111-111111111111';
+    const request = { session: { user_id: actor } } as unknown as RequestWithSession;
+    const rows = [{ code: 'sold', quantity: 0 }, { code: 'limited', quantity: 1 }, { code: 'unlimited', quantity: null }];
+    const catalog = vi.fn(async () => rows);
+    const controller = new ShopController(null, { catalog } as unknown as ShopCatalogRepository);
+    expect((await controller.catalog(request, undefined, undefined, undefined, undefined, 'available')).catalogItems).toEqual(rows.slice(1));
+    expect(catalog).toHaveBeenCalledWith(actor);
+    expect((await controller.publicCatalog(undefined, undefined, undefined, undefined, 'available')).catalogItems).toEqual(rows.slice(1));
+    expect(catalog).toHaveBeenCalledWith(null);
+  });
+
+  it('rejects duplicates and unsupported stock values before a DB query', async () => {
+    const catalog = vi.fn();
+    const controller = new ShopController(null, { catalog } as unknown as ShopCatalogRepository);
+    for (const invalid of [['available', 'available'], 'sold_out', 'all', '']) {
+      await expect(controller.publicCatalog(undefined, undefined, undefined, undefined, invalid)).rejects.toMatchObject({ status: 400 });
+    }
     expect(catalog).not.toHaveBeenCalled();
   });
 });
