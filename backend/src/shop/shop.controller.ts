@@ -353,6 +353,9 @@ export class ShopController {
       () => this.repository().holdings(requireUserId(request)),
       'held items are unavailable',
     );
+    if (!Array.isArray(holdings)) {
+      throw new ServiceUnavailableException('held items are unavailable');
+    }
     if (filter === 'attention') {
       holdings = holdings.filter((item: any) => item.suspended === true || Number(item.unpaid_weeks ?? 0) > 0);
     }

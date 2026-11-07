@@ -2,26 +2,27 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
+import { api, apiOrNull } from '@/lib/api';
+import { parseVerifiedShopHoldings } from '@/lib/shop-holdings-evidence';
 import { requireMember } from '@/lib/session';
-import { InventoryView, type HeldItem } from './inventory-view';
+import { InventoryView } from './inventory-view';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '내 보관함 · 인벤토리',
   description: '보유한 아이템 및 아바타 프레임, 배경, 효과, 칭호 치장 관리',
+  robots: { index: false, follow: false },
 };
 
 export default async function InventoryPage() {
   await requireMember();
 
-  const [holdingsData, profileData] = await Promise.all([
-    apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
+  const [holdings, profileData] = await Promise.all([
+    api<unknown>('/api/v1/shop/holdings').then(parseVerifiedShopHoldings).catch(() => null),
     apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile'),
   ]);
 
-  const holdings = holdingsData?.holdings || [];
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
@@ -45,11 +46,23 @@ export default async function InventoryPage() {
         />
       </PageHeader>
 
-      <InventoryView
-        holdings={holdings}
-        currentUsername={username}
-        userAvatarUrl={avatarUrl}
-      />
+      {holdings === null ? (
+        <section role="alert" className="rounded-2xl border border-amber-500/50 bg-card p-6">
+          <p className="font-bold">보관함을 불러올 수 없습니다.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            보유 내역을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+          <a href="/inventory" className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-border px-5 font-semibold">
+            다시 시도
+          </a>
+        </section>
+      ) : (
+        <InventoryView
+          holdings={holdings}
+          currentUsername={username}
+          userAvatarUrl={avatarUrl}
+        />
+      )}
     </div>
   );
 }
