@@ -110,6 +110,13 @@ describe('shop routes', () => {
     );
   });
 
+  it('marks private holdings responses as non-cacheable even when authentication fails', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/shop/holdings');
+    expect(response.status).not.toBe(404);
+    expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.headers['x-robots-tag']).toBe('noindex');
+  });
+
   it('mounts the catalogue purchase command behind a session', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/shop/catalog/00000000-0000-4000-8000-000000000000/purchases')

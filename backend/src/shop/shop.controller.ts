@@ -343,6 +343,8 @@ export class ShopController {
   }
 
   @Get('holdings')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'Catalogue items the caller holds' })
   async holdings(@Req() request: RequestWithSession, @Query('filter') filter?: unknown) {
