@@ -58,6 +58,7 @@ export class AdminTreasuryBondController {
   }
 
   @Post('distribute-coupons')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '전체 유저 보유 국채 쿠폰 이자 즉시 일괄 정산 집행' })
   async distributeCoupons() {
     // Manual payouts must not bypass the uncertified ledger and idempotency gates.
@@ -65,6 +66,7 @@ export class AdminTreasuryBondController {
   }
 
   @Put(':id/status')
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: '국채 운영 상태 및 표면금리 변경 (동결/마감 제어)' })
   async updateStatus(
     @Param('id') id: string,
@@ -142,7 +144,7 @@ export class PublicTreasuryBondController {
   }
 
   @Put('holdings/:id/rollover')
-  @UseGuards(SessionGuard, AuthenticatedGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: '만기 시 원금 자동 롤오버 재투자 설정 토글' })
   async toggleAutoRollover(
     @Req() req: RequestWithSession,
