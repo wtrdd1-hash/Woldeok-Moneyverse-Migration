@@ -2587,7 +2587,9 @@ _None._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| withImage | query | false | string | description="Image-attached announcements among the latest 20 published notices"; enum="1" |
 
 ### Request body
 
@@ -2606,6 +2608,8 @@ _No request body._
 | announcements[].imageAltText | true | null \| string |  |
 | announcements[].isPinned | true | boolean |  |
 | announcements[].publishedAt | true | null \| string |  |
+| filterApplied | false | string="with-image" | const="with-image" |
+| sourceLimit | false | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

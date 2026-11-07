@@ -57,6 +57,25 @@ function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   return true;
 }
 
+function isVerifiedImageAnnouncementResponse(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const data = payload as Record<string, unknown>;
+  if (data.filterApplied !== 'with-image' || data.sourceLimit !== 20 ||
+      !Array.isArray(data.announcements) || data.announcements.length > 20) return false;
+  const seen = new Set<string>();
+  for (const item of data.announcements) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    const row = item as Record<string, unknown>;
+    if (typeof row.announcementId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.announcementId) ||
+        seen.has(row.announcementId) || typeof row.title !== 'string' || !row.title.trim() ||
+        typeof row.imageUrl !== 'string' || !/^\/media\/[a-zA-Z0-9._-]+$/.test(row.imageUrl) ||
+        typeof row.publishedAt !== 'string' || !Number.isFinite(Date.parse(row.publishedAt))) return false;
+    seen.add(row.announcementId);
+  }
+  return true;
+}
+
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
 }
@@ -111,6 +130,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const announcementImagePath = parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements';
+  const announcementImageRequested = announcementImagePath && request.nextUrl.searchParams.has('withImage');
+  if (announcementImageRequested && (request.method !== 'GET' ||
+      request.nextUrl.searchParams.getAll('withImage').length !== 1 ||
+      request.nextUrl.searchParams.get('withImage') !== '1' ||
+      [...request.nextUrl.searchParams.keys()].some((key) => key !== 'withImage'))) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_image_invalid', 'invalid announcement image filter');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -271,6 +299,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  if (announcementImageRequested && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedImageAnnouncementResponse(await response.clone().json())) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_image_unverified',
+          'image-only announcements could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'announcement_image_unverified',
+        'image-only announcements could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -583,6 +624,12 @@ async function handle(request: NextRequest, context: Context) {
     if (parts[0] === 'help' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || (parts[0] === 'account' && parts[1] === 'security') || parts[0] === 'chat' || (parts[0] === 'content' && parts[1] === 'chat')) response.headers.set('x-robots-tag', 'noindex');
   }
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('withImage')) {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
       parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {

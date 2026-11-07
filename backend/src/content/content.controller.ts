@@ -7,6 +7,7 @@ import {
   Inject,
   Optional,
   Param,
+  Query,
   ParseUUIDPipe,
   Post,
   Put,
@@ -15,7 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -31,6 +32,7 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
 import { ContentService } from './content.service';
+import { parseAnnouncementImageQuery, type PublicAnnouncementListResponse } from './announcement-image-filter';
 import { PrivateImageStorage } from './private-image-storage';
 
 export class SaveAnnouncementDto {
@@ -168,8 +170,11 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  @ApiQuery({ name: 'withImage', required: false, enum: ['1'], description: 'Image-attached announcements among the latest 20 published notices' })
+  async announcements(@Query() query: Record<string, unknown> = {}): Promise<PublicAnnouncementListResponse> {
+    const imageOnly = parseAnnouncementImageQuery(query);
+    const announcements = await this.service().publicAnnouncements({ imageOnly });
+    return imageOnly ? { announcements, filterApplied: 'with-image', sourceLimit: 20 } : { announcements };
   }
 
   @Get('photos')

@@ -9,14 +9,23 @@ import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { parseAnnouncementImageFilter } from './announcement-image-filter';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
   alternates: { canonical: canonicalUrl('/announcements') },
 };
+
+export async function generateMetadata({ searchParams }: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const hasFilter = params.withImage !== undefined;
+  return { ...baseMetadata, robots: { index: !hasFilter, follow: true } };
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -28,8 +37,21 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-export default async function AnnouncementsPage() {
-  const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
+export default async function AnnouncementsPage({ searchParams }: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const imageFilter = parseAnnouncementImageFilter(params.withImage);
+  const response = imageFilter.invalid ? null : await publicApi<{
+    announcements: Announcement[];
+    filterApplied?: string;
+    sourceLimit?: number;
+  }>(`/api/v1/announcements${imageFilter.imageOnly ? '?withImage=1' : ''}`, imageFilter.imageOnly ? 0 : 60);
+  const data = imageFilter.imageOnly && response &&
+    (response.filterApplied !== 'with-image' || response.sourceLimit !== 20 ||
+      !Array.isArray(response.announcements) || response.announcements.length > 20 ||
+      response.announcements.some((notice) => typeof notice.imageUrl !== 'string' || !notice.imageUrl.startsWith('/media/')))
+    ? null : response;
 
   const announcementsBreadcrumb = breadcrumbJsonLd([
     { name: '홈', path: '/' },
@@ -77,6 +99,16 @@ export default async function AnnouncementsPage() {
         />
       )}
 
+      <form role="search" action="/announcements" method="get" className="flex flex-wrap items-center gap-3 rounded-xl border border-border/50 p-4">
+        <label htmlFor="announcement-image-only" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold">
+          <input id="announcement-image-only" type="checkbox" name="withImage" value="1" defaultChecked={imageFilter.imageOnly} className="size-5 accent-primary" />
+          사진이 첨부된 공지만 보기
+        </label>
+        <button type="submit" className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground">적용</button>
+        <Link href="/announcements" className="inline-flex min-h-11 items-center text-sm underline">초기화</Link>
+        <p className="w-full text-xs text-muted-foreground">최근 공개 공지 20건의 사진 첨부 여부만 확인합니다. 전체 공지 검색이 아닙니다.</p>
+        {imageFilter.invalid && <p role="alert" className="w-full text-sm text-destructive">사진 필터 값이 올바르지 않습니다. 다시 선택해 주세요.</p>}
+      </form>
       <section aria-labelledby="notice-list-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED NOTICE"
@@ -88,14 +120,16 @@ export default async function AnnouncementsPage() {
             </Link>
           }
         />
-        {data === null ? (
+        {imageFilter.invalid ? (
+          <EmptyState title="검색 조건을 확인해 주세요." />
+        ) : data === null ? (
           <EmptyState
             title="지금은 공지를 불러올 수 없어요."
             description="잠시 후 다시 확인해 주세요."
           />
         ) : data.announcements.length === 0 ? (
           <EmptyState
-            title="공개된 운영 소식을 준비하고 있어요."
+            title={imageFilter.imageOnly ? '최근 공개 공지 20건 중 사진이 첨부된 공지가 없어요.' : '공개된 운영 소식을 준비하고 있어요.'}
             description="검토를 마친 공지부터 이곳에 표시됩니다."
           />
         ) : (

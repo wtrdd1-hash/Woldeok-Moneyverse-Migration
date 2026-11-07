@@ -7791,7 +7791,20 @@
       "operationId": "AppContentController_announcements",
       "backendOpenApiPath": "/content/announcements",
       "summary": "App API: published announcements",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "withImage",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "1"
+            ],
+            "description": "Image-attached announcements among the latest 20 published notices"
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200
@@ -7864,6 +7877,13 @@
                 "publishedAt"
               ]
             }
+          },
+          "filterApplied": {
+            "type": "string",
+            "const": "with-image"
+          },
+          "sourceLimit": {
+            "type": "number"
           }
         },
         "required": [
