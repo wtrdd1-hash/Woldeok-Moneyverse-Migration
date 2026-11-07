@@ -53,7 +53,7 @@ describe('support exact receipt authenticated HTTP contract', () => {
     exactMessage.mockResolvedValue(persisted);
     await start();
     const response = await request(app!.getHttpServer()).get(route).expect(200);
-    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.headers['cache-control']).toBe('private, no-store');
     expect(response.body.message).toEqual(persisted);
     expect(exactMessage).toHaveBeenCalledWith(actor, thread, messageId);
   });
