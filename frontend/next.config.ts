@@ -192,6 +192,16 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Administrator enterprise data is private, including localized URLs.
+      // Override the global public indexing policy at the real HTTP edge.
+      ...['/admin/enterprises', '/:locale/admin/enterprises', '/api/admin/enterprises/refresh'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

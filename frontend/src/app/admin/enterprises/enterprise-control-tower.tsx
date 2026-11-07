@@ -157,6 +157,7 @@ export function EnterpriseControlTower({
     return () => clearInterval(timer);
   }, [router]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshNotice, setRefreshNotice] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
   const [governanceReasons, setGovernanceReasons] = useState<Record<string, string>>({});
   const [savingSoe, setSavingSoe] = useState<string | null>(null);
@@ -223,13 +224,25 @@ export function EnterpriseControlTower({
 
 
   const refreshData = async () => {
+    if (isRefreshing) return;
     setIsRefreshing(true);
+    setRefreshNotice('서버 자료를 확인하고 있습니다.');
     try {
+      const response = await fetch('/api/admin/enterprises/refresh', {
+        method: 'GET', credentials: 'same-origin', cache: 'no-store',
+      });
+      const payload: unknown = response.ok ? await response.json() : null;
+      if (!response.ok || !payload || typeof payload !== 'object' || Array.isArray(payload)
+        || (payload as { success?: unknown }).success !== true
+        || (payload as { sourceStatus?: unknown }).sourceStatus !== 'VERIFIED') {
+        throw new Error('Unverified enterprise readback');
+      }
+      setRefreshNotice('서버 자료가 확인되어 화면을 다시 불러옵니다.');
       router.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      toast.success('공기업 및 국가지주회사 관제 데이터가 최신으로 동기화되었습니다.');
+      toast.success('서버에서 공기업 자료를 확인했습니다. 화면을 다시 불러옵니다.');
     } catch {
-      toast.error('데이터 갱신 중 오류가 발생했습니다.');
+      setRefreshNotice('서버 자료를 확인할 수 없습니다. 다시 시도해 주세요.');
+      toast.error('데이터 갱신이 확인되지 않았습니다. 잠시 후 다시 조회해 주세요.');
     } finally {
       setIsRefreshing(false);
     }
@@ -273,11 +286,14 @@ export function EnterpriseControlTower({
                 size="sm"
                 onClick={refreshData}
                 disabled={isRefreshing}
-                className="gap-1.5 text-xs h-9"
+                className="gap-1.5 text-xs min-h-11"
+                aria-busy={isRefreshing}
+                aria-describedby="soe-refresh-status"
               >
                 <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 새로고침
               </Button>
+              <span id="soe-refresh-status" role="status" aria-live="polite" className="sr-only">{refreshNotice}</span>
               <Button
                 size="sm"
                 className="gap-1.5 text-xs h-9 bg-primary text-primary-foreground font-semibold"
