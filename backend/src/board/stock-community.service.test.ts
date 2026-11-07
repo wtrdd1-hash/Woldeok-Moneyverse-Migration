@@ -18,7 +18,7 @@ describe('StockCommunityService public discovery', () => {
     expect(database.query).toHaveBeenCalledTimes(1);
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('upper(stock_symbol) = upper($2)');
-    expect(values).toEqual([50, 'wdx', null]);
+    expect(values).toEqual([50, 'wdx', null, null]);
   });
 
   it('rejects malformed symbols before querying PostgreSQL', async () => {
@@ -38,7 +38,7 @@ describe('StockCommunityService recent public title search', () => {
     const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
     expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
     expect(String(sql)).toContain('strpos(lower(title), lower($3::text)) > 0');
-    expect(values).toEqual([50, 'wdx', 'WLD %_']);
+    expect(values).toEqual([50, 'wdx', 'WLD %_', null]);
   });
 
   it.each(['', '   ', 'x'.repeat(81), 'bad\nline', '<script>'])(
@@ -51,4 +51,28 @@ describe('StockCommunityService recent public title search', () => {
       expect(database.query).not.toHaveBeenCalled();
     },
   );
+});
+
+describe('StockCommunityService public text-only search', () => {
+  it('filters after the bounded public function and never reads private posts directly', async () => {
+    const database = pool();
+    await new StockCommunityService(database).publicList('WDX', '  제주 ', 'text');
+    const [sql, values] = vi.mocked(database.query).mock.calls[0] ?? [];
+    expect(String(sql)).toContain('public.member_board_public_list_with_stock($1)');
+    expect(String(sql)).toContain('image_storage_key IS NULL');
+    expect(values).toEqual([50, 'WDX', '제주', 'text']);
+  });
+  it('rejects unknown filter values before DB access', async () => {
+    const database = pool();
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'images')).rejects.toThrow('invalid media filter');
+    expect(database.query).not.toHaveBeenCalled();
+  });
+});
+
+describe('StockCommunityService text-only evidence integrity', () => {
+  it('does not attest a text-only filter when the database returns an image row', async () => {
+    const database = { query: vi.fn(async () => ({ rows: [{ image_storage_key: 'unexpected.jpg' }], rowCount: 1 })) } as unknown as Queryable;
+    await expect(new StockCommunityService(database).publicList(undefined, undefined, 'text'))
+      .rejects.toThrow('unverified text-only board result');
+  });
 });
