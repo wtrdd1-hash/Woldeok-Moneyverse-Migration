@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseMarketEventDirection, verifiedMarketEvents } from '@/lib/market-event-direction';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -107,6 +108,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     if (!origin) return gatewayProblem(400, 'Bad Request', 'app_gateway_origin', 'public origin is unavailable');
     const response = contractJson(appApiContract(origin), { status: 200, headers: { 'cache-control': 'public, max-age=300' } });
     return request.method === 'HEAD' ? new NextResponse(null, { status: response.status, headers: response.headers }) : response;
+  }
+
+  const marketEventPath = request.method === 'GET' && parts.length === 2 && parts[0] === 'stocks' && parts[1] === 'market-events';
+  const marketEventParams = request.nextUrl.searchParams;
+  const marketEventValues = marketEventPath ? marketEventParams.getAll('direction') : [];
+  if (marketEventPath && (marketEventValues.length > 1 ||
+      [...marketEventParams.keys()].some((key) => key !== 'direction'))) {
+    return gatewayProblem(400, 'Bad Request', 'market_event_direction_invalid', 'invalid market event filter');
+  }
+  let marketEventDirection: 'up' | 'down' | null = null;
+  if (marketEventValues.length === 1) {
+    try { marketEventDirection = parseMarketEventDirection(marketEventValues[0]); }
+    catch { return gatewayProblem(400, 'Bad Request', 'market_event_direction_invalid', 'invalid market event filter'); }
   }
 
   const path = appGatewayPath(parts);
@@ -271,6 +285,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // Never let an older backend ignore Android's direction filter and return HTTP 200.
+  if (marketEventPath && marketEventDirection !== null && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('invalid content type');
+      const rows = verifiedMarketEvents(await response.clone().json(), marketEventDirection);
+      if (rows === null) throw new Error('unverified market events');
+      return contractJson({ events: rows, appliedDirection: marketEventDirection }, { status: 200, headers: { 'cache-control': 'no-store' } });
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'market_event_direction_unverified', 'market event filter could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response

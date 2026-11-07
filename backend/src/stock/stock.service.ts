@@ -58,7 +58,7 @@ export interface StockRepository {
   corporateAction(input: StockCorporateActionInput): Promise<StockCorporateActionResultRow>;
   setPrice(input: StockSetPriceInput): Promise<{ readonly price: string }>;
   remove(input: StockDeleteInput): Promise<{ readonly deleted: boolean }>;
-  marketEvents(): Promise<readonly StockMarketEventRow[]>;
+  marketEvents(direction?: 'up' | 'down'): Promise<readonly StockMarketEventRow[]>;
   adminMarketEvents(actorUserId: unknown, limit?: unknown): Promise<readonly StockMarketEventAdminRow[]>;
   adminDynamics(actorUserId: unknown): Promise<readonly StockDynamicsRow[]>;
   publishMarketEvent(input: StockMarketEventPublishInput): Promise<StockMarketEventReceipt>;
@@ -187,8 +187,8 @@ export class StockService {
   }
 
   /** The news that is running (124). */
-  marketEvents(): Promise<readonly StockMarketEventRow[]> {
-    return this.repository.marketEvents();
+  marketEvents(direction?: 'up' | 'down'): Promise<readonly StockMarketEventRow[]> {
+    return this.repository.marketEvents(direction);
   }
 
   adminMarketEvents(actorUserId: unknown, limit?: unknown): Promise<readonly StockMarketEventAdminRow[]> {
