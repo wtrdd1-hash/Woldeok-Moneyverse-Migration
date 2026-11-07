@@ -115,4 +115,16 @@ describe('security headers', () => {
       'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     );
   });
+  it('overrides public crawler policy for the owner holdings App API at the Next edge', async () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    const groups = await config.headers!();
+    const publicIndex = groups.findIndex((group) => group.source === '/:path*');
+    const ownerIndex = groups.findIndex((group) => group.source === '/app-api/v1/shop/holdings/:path*');
+    expect(ownerIndex).toBeGreaterThan(publicIndex);
+    const ownerHeaders = new Map(groups[ownerIndex]!.headers.map((header) => [header.key, header.value]));
+    expect(ownerHeaders.get('cache-control')).toBe('private, no-store');
+    expect(ownerHeaders.get('x-robots-tag')).toBe('noindex, nofollow');
+    expect(ownerHeaders.get('referrer-policy')).toBe('no-referrer');
+    expect(groups.some((group) => group.source === '/app-api/v1/shop/catalog')).toBe(false);
+  });
 });
