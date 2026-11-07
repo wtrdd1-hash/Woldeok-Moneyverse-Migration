@@ -1,4 +1,4 @@
-import { cleanup, render, fireEvent } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { NewspaperView } from './newspaper-view';
 import type { MarketEvent, StockTickerItem } from './newspaper-view';
@@ -75,27 +75,19 @@ describe('NewspaperView', () => {
     expect(text).toContain('악재 50%');
   });
 
-  it('handles user poll interaction and shows percentage tally', () => {
+  it('refuses to simulate poll participation or community vote totals', () => {
     const { container } = render(<NewspaperView events={MOCK_EVENTS} stocks={MOCK_STOCKS} />);
-    const pollButtons = Array.from(container.querySelectorAll('button')).filter((b) =>
-      b.textContent?.includes('강력 상승') || b.textContent?.includes('Bullish')
-    );
-    expect(pollButtons.length).toBeGreaterThan(0);
-
-    // Click first poll option button
-    if (pollButtons[0]) {
-      fireEvent.click(pollButtons[0]);
-    }
-
     const text = container.textContent ?? '';
-    expect(text).toContain('투표에 참여해 주셔서 감사합니다');
+    expect(text).toContain('투표 결과를 검증할 수 없어');
+    expect(text).not.toContain('총 참여자 316명');
+    expect(text).not.toContain('투표에 참여해 주셔서 감사합니다');
   });
 
   it('renders clean fallback state when no events exist', () => {
     const { container } = render(<NewspaperView events={[]} stocks={[]} />);
     const text = container.textContent ?? '';
 
-    expect(text).toContain('진행 중인 사건: 0건');
-    expect(text).toContain('가상 경제 원장과 시장 수급이 균형을 유지하고 있습니다');
+    expect(text).toContain('확인된 진행 중인 시장 사건이 없습니다');
+    expect(text).not.toContain('시장 수급이 균형을 유지하고 있습니다');
   });
 });

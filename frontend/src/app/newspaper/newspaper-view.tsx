@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Newspaper,
@@ -13,7 +13,6 @@ import {
   ShieldAlert,
   ArrowRight,
   Clock,
-  CheckCircle2,
   Landmark,
   Briefcase,
   Share2,
@@ -57,6 +56,8 @@ interface NewspaperViewProps {
   readonly events: readonly MarketEvent[];
   readonly stocks: readonly StockTickerItem[];
   readonly weeklyBrief?: WeeklyBriefData | undefined;
+  readonly eventsAvailable?: boolean | undefined;
+  readonly stocksAvailable?: boolean | undefined;
   readonly initialTab?: 'brief' | 'live' | undefined;
 }
 
@@ -122,12 +123,12 @@ function StockTickerPopover({
               </div>
             </div>
             <Badge variant="outline" className="font-mono text-[10px]">
-              실시간 호가
+              서버 조회 시세
             </Badge>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[11px] text-muted-foreground">현재 체결가</div>
+            <div className="text-[11px] text-muted-foreground">마지막 서버 가격</div>
             <div className="flex items-baseline justify-between">
               <span className="font-mono text-xl font-extrabold text-foreground">
                 {stock ? groupDigits(stock.current_price) : '—'}{' '}
@@ -147,33 +148,13 @@ function StockTickerPopover({
             </div>
           </div>
 
-          {/* 미니 트렌드 스파크라인 SVG 시각화 */}
-          <div className="rounded-lg bg-muted/40 p-2.5">
-            <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1.5">
-              <span>호가 변동 모멘텀</span>
-              <span>{isUp ? '매수 우세' : isDown ? '매도 우세' : '균형'}</span>
-            </div>
-            <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible" preserveAspectRatio="none">
-              <polyline
-                fill="none"
-                stroke={isUp ? '#10b981' : isDown ? '#f43f5e' : '#6b7280'}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={
-                  isUp
-                    ? '0,20 20,16 40,18 60,10 80,12 100,4'
-                    : isDown
-                    ? '0,6 20,8 40,14 60,12 80,18 100,22'
-                    : '0,12 20,12 40,11 60,13 80,12 100,12'
-                }
-              />
-            </svg>
-          </div>
+          <p role="note" className="rounded-lg bg-muted/40 p-2 text-xs text-muted-foreground">
+            체결 시계열 데이터가 없어 가격 추세 그래프는 표시하지 않습니다. 마지막 서버 조회값이며 실시간 호가가 아닙니다.
+          </p>
 
           <Button asChild size="sm" className="w-full h-9 rounded-xl font-bold text-xs gap-1.5 shadow-sm">
             <Link href={`/stocks/${symbol}`}>
-              <span>가상 거래소에서 주문하기</span>
+              <span>거래소에서 종목 확인</span>
               <ArrowRight className="size-3.5" />
             </Link>
           </Button>
@@ -187,91 +168,20 @@ export function NewspaperView({
   events,
   stocks = [],
   weeklyBrief,
+  eventsAvailable = true,
+  stocksAvailable = true,
   initialTab = 'live',
 }: NewspaperViewProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<'brief' | 'live'>(initialTab);
-  const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
-  const [hasVoted, setHasVoted] = useState<boolean>(false);
-  const [pollCounts, setPollCounts] = useState<number[]>([142, 98, 45, 31]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem('mv_newspaper_poll_vote_v343');
-      if (saved !== null) {
-        const idx = Number.parseInt(saved, 10);
-        if (!Number.isNaN(idx) && idx >= 0 && idx < 4) {
-          setSelectedPoll(idx);
-          setHasVoted(true);
-        }
-      }
-    } catch {
-      // storage access fallback
-    }
-  }, []);
-
-  const handleVote = (index: number) => {
-    if (hasVoted) return;
-    setSelectedPoll(index);
-    setHasVoted(true);
-    setPollCounts((prev) => {
-      const next = [...prev];
-      next[index] = (next[index] ?? 0) + 1;
-      return next;
-    });
-    try {
-      localStorage.setItem('mv_newspaper_poll_vote_v343', String(index));
-    } catch {
-      // ignore
-    }
-  };
-
-  const totalVotes = pollCounts.reduce((a, b) => a + b, 0);
-
   // Sentiment metrics computation
   const upEvents = events.filter((e) => e.direction === 'up');
   const downEvents = events.filter((e) => e.direction === 'down');
   const totalEvents = events.length;
-  const bullRatio = totalEvents > 0 ? Math.round((upEvents.length / totalEvents) * 100) : 50;
-  const bearRatio = totalEvents > 0 ? 100 - bullRatio : 50;
+  const bullRatio = totalEvents > 0 ? Math.round((upEvents.length / totalEvents) * 100) : 0;
+  const bearRatio = totalEvents > 0 ? 100 - bullRatio : 0;
 
   const leadEvent = events.find((e) => e.strength === 3) || events[0];
-
-  const pollOptions = [
-    {
-      labelKo: '강력 상승 (Bullish Surge)',
-      labelEn: 'Bullish Surge',
-      labelJa: '強気上昇 (Bullish Surge)',
-      labelZh: '强劲上涨 (Bullish Surge)',
-      descKo: '산업 호재 및 유동성 확대로 전반적 상승세 전망',
-      descEn: 'Overall upward trend led by market catalysts',
-    },
-    {
-      labelKo: '완만한 우상향 (Moderate Up)',
-      labelEn: 'Moderate Upward Trend',
-      labelJa: '緩やかな上昇 (Moderate Up)',
-      labelZh: '温和上涨 (Moderate Up)',
-      descKo: '개별 종목별 실적에 따른 차별화 상승',
-      descEn: 'Gradual gains supported by corporate performance',
-    },
-    {
-      labelKo: '보합 및 횡보 (Sideways Range)',
-      labelEn: 'Sideways Range',
-      labelJa: 'もみ合い・横ばい (Sideways)',
-      labelZh: '震荡盘整 (Sideways Range)',
-      descKo: '호재와 악재 상쇄로 박스권 횡보 지속',
-      descEn: 'Range-bound consolidation with mixed signals',
-    },
-    {
-      labelKo: '조정 및 하락 (Bearish Drop)',
-      labelEn: 'Bearish Correction',
-      labelJa: '調整・下落 (Bearish Correction)',
-      labelZh: '回调下跌 (Bearish Drop)',
-      descKo: '차익 실현 매물 출회 및 조정 리스크',
-      descEn: 'Profit-taking pressure and downside risk',
-    },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-3.5 sm:px-6 py-6 overflow-x-clip">
@@ -281,14 +191,14 @@ export function NewspaperView({
           <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
             <span className="font-bold text-foreground">WOLDEOK MONEYVERSE</span>
             <span>·</span>
-            <span>{localeLabel(locale, '제343호 주간판', 'Weekly Issue #343', '第343号 週刊版', '第343期 周报')}</span>
+            <span>{localeLabel(locale, '시장 정보 안내', 'Market Source Brief', '市場情報', '市场资讯')}</span>
             <span>·</span>
             <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              {localeLabel(locale, '실시간 월드 펄스', 'Live World Pulse', 'リアルタイム パルス', '实时脉动')}
+              {localeLabel(locale, '서버 조회 시장 정보', 'Server Market Snapshot', 'サーバー市場情報', '服务器市场快照')}
             </span>
           </div>
           <div className="flex items-center justify-center sm:justify-end gap-2">
@@ -384,12 +294,23 @@ export function NewspaperView({
       ) : (
         <>
 
+      {(!eventsAvailable || !stocksAvailable) && (
+        <section role="alert" aria-live="polite" className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-sm">
+          {!eventsAvailable && <p>시장 사건 자료를 확인할 수 없습니다. 조회 장애는 사건이 없다는 뜻이 아닙니다.</p>}
+          {!stocksAvailable && <p>종목 시세를 확인할 수 없습니다. 검증되지 않은 가격을 표시하지 않습니다.</p>}
+          <Link href="/newspaper" className="mt-2 inline-flex min-h-11 items-center rounded-lg border px-4 focus-visible:outline-2 focus-visible:outline-offset-2">시장 정보 다시 조회</Link>
+        </section>
+      )}
+      {eventsAvailable && totalEvents === 0 && (
+        <p role="status" className="rounded-xl border p-4 text-sm">확인된 진행 중인 시장 사건이 없습니다. 이 결과만으로 시장 안정이나 거래 정상 작동을 보증하지 않습니다.</p>
+      )}
+
       {/* 2. Realtime Market Sentiment Bar */}
-      <section aria-labelledby="sentiment-heading" className="space-y-3">
+      {eventsAvailable && totalEvents > 0 && <section aria-labelledby="sentiment-heading" className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 id="sentiment-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
             <Sparkles className="size-4 text-amber-500" />
-            {localeLabel(locale, '실시간 시장 심리 지수', 'Market Sentiment Index', 'リアルタイム市場センチメント', '实时市场情绪指数')}
+            {localeLabel(locale, '시장 사건 방향 비율', 'Market Event Direction Ratio', 'リアルタイム市場センチメント', '实时市场情绪指数')}
           </h2>
           <span className="text-xs font-mono font-semibold text-muted-foreground">
             {localeLabel(locale, `진행 중인 사건: ${totalEvents}건`, `Active Catalysts: ${totalEvents}`, `進行中のイベント: ${totalEvents}件`, `进行中事件: ${totalEvents}件`)}
@@ -439,7 +360,7 @@ export function NewspaperView({
             </div>
           </CardContent>
         </Card>
-      </section>
+      </section>}
 
       {/* 2.5. Realtime Stocks Ticker Rail */}
       {stocks.length > 0 && (
@@ -447,7 +368,7 @@ export function NewspaperView({
           <div className="flex items-center justify-between">
             <h3 id="stocks-rail-heading" className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Activity className="size-3.5 text-primary" />
-              <span>{localeLabel(locale, '관련 가상 상장사 실시간 호가 (클릭 시 미니 호가 차트)', 'Virtual Market Stocks Pulse', '上場銘柄リアルタイム気配値', '挂牌企业实时行情')}</span>
+              <span>{localeLabel(locale, '관련 가상 상장사 마지막 서버 조회 가격', 'Virtual Market Stocks Pulse', '上場銘柄の最終サーバー価格', '挂牌企业服务器最近报价')}</span>
             </h3>
             <span className="text-[11px] font-mono text-muted-foreground">총 {stocks.length}개 종목</span>
           </div>
@@ -463,7 +384,7 @@ export function NewspaperView({
       <section aria-labelledby="lead-story-heading" className="space-y-4">
         <h2 id="lead-story-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           <Newspaper className="size-4 text-primary" />
-          {localeLabel(locale, '1면 헤드라인 & 실시간 속보', 'Front Page & Realtime Briefs', '1面トップ記事・リアルタイム速報', '头版头条与实时快讯')}
+          {localeLabel(locale, '1면 헤드라인 & 조회된 사건', 'Front Page & Server Events', '1面トップ記事・リアルタイム速報', '头版头条与实时快讯')}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -471,9 +392,9 @@ export function NewspaperView({
           <Card className="lg:col-span-2 rounded-2xl border-primary/20 bg-gradient-to-br from-card via-card to-muted/30 shadow-md flex flex-col justify-between">
             <CardHeader className="p-5 sm:p-7 pb-4">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <Badge className={cn('font-bold', leadEvent?.direction === 'up' ? 'bg-emerald-600 hover:bg-emerald-600' : 'bg-rose-600 hover:bg-rose-600')}>
+                {leadEvent && <Badge className={cn('font-bold', leadEvent.direction === 'up' ? 'bg-emerald-600 hover:bg-emerald-600' : 'bg-rose-600 hover:bg-rose-600')}>
                   {leadEvent?.direction === 'up' ? '▲ ' + localeLabel(locale, '핵심 호재', 'Key Catalyst', '主要好材料', '核心利好') : '▼ ' + localeLabel(locale, '주요 악재', 'Market Headwind', '主要悪材料', '重大利空')}
-                </Badge>
+                </Badge>}
                 {leadEvent && (
                   <Badge variant="outline" className="font-mono text-xs">
                     {STRENGTH_LABEL[leadEvent.strength]?.[locale as 'ko'|'en'|'ja'|'zh'] ?? '보통'}
@@ -495,18 +416,18 @@ export function NewspaperView({
               </div>
 
               <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight [word-break:keep-all] text-foreground leading-snug">
-                {leadEvent ? leadEvent.headline : localeLabel(locale, '가상 경제 원장과 시장 수급이 균형을 유지하고 있습니다.', 'Virtual ledger and market liquidity remain balanced.', '仮想経済元帳と市場需給が均衡を維持しています。', '虚拟经济账本与市场供需保持平衡。')}
+                {leadEvent ? leadEvent.headline : localeLabel(locale, '현재 확인된 시장 사건 정보가 없습니다.', 'No verified market event information is available.', '確認された市場イベント情報はありません。', '暂无已确认的市场事件信息。')}
               </CardTitle>
 
               <CardDescription className="mt-3 text-sm sm:text-base leading-relaxed text-muted-foreground [word-break:keep-all]">
-                {leadEvent ? leadEvent.body : localeLabel(locale, '현재 발효 중인 돌발 시장 시나리오가 없으며, 정규 원장 거래 및 자산 거래가 정상 진행 중입니다.', 'No critical market scenarios are currently active. Regular trading operations proceed stably.', '現在発生中の突発的な市場シナリオはなく、正規の取引が安定して行われています。', '目前没有突发的市场事件，常规交易正常平稳进行。')}
+                {leadEvent ? leadEvent.body : localeLabel(locale, '시장 사건 조회 결과만으로 원장 거래 또는 시장의 정상 운영을 판단할 수 없습니다.', 'Market event data alone cannot certify ledger transactions or market operations.', '市場イベントの結果だけでは取引の正常性を保証できません。', '市场事件结果不能证明交易或市场运营正常。')}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="p-5 sm:p-7 pt-0">
               <div className="pt-4 border-t border-border/60 flex items-center justify-between">
                 <span className="text-xs text-muted-foreground font-mono">
-                  {leadEvent?.source ? `출처: ${leadEvent.source}` : '월덕 머니버스 경제 관제 시스템'}
+                  {leadEvent?.source ? `출처: ${leadEvent.source}` : '시장 사건 원본 미제공'}
                 </span>
                 {leadEvent?.symbol ? (
                   <Button asChild size="sm" className="gap-1 text-xs font-semibold">
@@ -530,7 +451,7 @@ export function NewspaperView({
           {/* Side Briefs Stream (1 col) */}
           <div className="space-y-3">
             <div className="text-xs font-mono font-bold uppercase text-muted-foreground tracking-wider">
-              {localeLabel(locale, '실시간 속보 피드', 'Live Scenario Stream', '速報ストリーム', '实时快讯流')}
+              {localeLabel(locale, '조회된 시장 사건', 'Server Event Feed', '速報ストリーム', '实时快讯流')}
             </div>
 
             {events.length > 1 ? (
@@ -561,7 +482,7 @@ export function NewspaperView({
                 <p className="text-xs text-muted-foreground [word-break:keep-all]">
                   {localeLabel(
                     locale,
-                    '추가 발효 중인 이벤트가 없습니다. 안정적인 거래 환경입니다.',
+                    '추가 확인된 시장 사건이 없습니다. 거래 정상 여부는 별도 확인이 필요합니다.',
                     'No additional scenarios currently active.',
                     '追加のイベントはありません。',
                     '暂无其他生效中的事件。',
@@ -640,87 +561,19 @@ export function NewspaperView({
         </div>
       </section>
 
-      {/* 5. Interactive Market Sentiment Poll */}
+      {/* A durable backend poll/receipt does not exist; never simulate community participation. */}
       <section aria-labelledby="poll-heading" className="space-y-4">
         <h2 id="poll-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-          <Vote className="size-4 text-primary" />
-          {localeLabel(locale, '독자 참여형 시장 전망 투표', 'Community Market Sentiment Poll', '読者参加型 市場見通し投票', '玩家互动：市场走势投票')}
+          <Vote aria-hidden="true" className="size-4 text-primary" />
+          {localeLabel(locale, '독자 시장 전망 투표', 'Community Market Sentiment Poll', '市場見通し投票', '市场展望投票')}
         </h2>
-
-        <Card className="rounded-2xl border-border/80 bg-card shadow-sm">
-          <CardHeader className="p-5 sm:p-6 pb-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="text-lg sm:text-xl font-bold [word-break:keep-all]">
-                {localeLabel(
-                  locale,
-                  '다음 주기 월덕 머니버스 주식 시장의 흐름은 어떻게 될까요?',
-                  'How will the Moneyverse stock market move in the next cycle?',
-                  '次サイクルのウォルドク株式市場はどう動くと思いますか？',
-                  '您认为下一个周期月德股市将呈现何种走势？',
-                )}
-              </CardTitle>
-              <Badge variant="secondary" className="font-mono text-xs w-fit">
-                {localeLabel(locale, `총 참여자 ${totalVotes}명`, `Total Votes: ${totalVotes}`, `総投票数: ${totalVotes}`, `总投票数: ${totalVotes}`)}
-              </Badge>
-            </div>
-            <CardDescription className="text-xs text-muted-foreground">
-              {hasVoted
-                ? localeLabel(locale, '투표에 참여해 주셔서 감사합니다. 실시간 집계 현황입니다.', 'Thank you for voting. Real-time community tally below.', 'ご投票ありがとうございます。現在の集計結果です。', '感谢您的参与，以下为实时统计结果。')
-                : localeLabel(locale, '자신의 시장 전망을 1개 선택하여 투표해 보세요.', 'Cast your projection to see community sentiment.', 'あなたの予想を選択して投票してください。', '请选择您的预测并参与投票。')}
+        <Card className="rounded-2xl border-border/80 bg-card">
+          <CardHeader>
+            <CardTitle>시장 전망 투표는 현재 이용할 수 없습니다</CardTitle>
+            <CardDescription role="status" aria-live="polite">
+              투표 결과를 검증할 수 없어 참여 인원과 비율을 표시하지 않습니다. 서버 저장 및 중복 투표 방지 기능이 준비되기 전까지 투표를 접수하지 않습니다.
             </CardDescription>
           </CardHeader>
-
-          <CardContent className="p-5 sm:p-6 pt-2 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {pollOptions.map((opt, idx) => {
-                const count = pollCounts[idx] ?? 0;
-                const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
-                const isSelected = selectedPoll === idx;
-
-                return (
-                  <button
-                    key={opt.labelEn}
-                    type="button"
-                    onClick={() => handleVote(idx)}
-                    disabled={hasVoted}
-                    className={cn(
-                      'relative overflow-hidden rounded-xl border p-4 text-left transition-all active:scale-[0.98]',
-                      isSelected
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                        : 'border-border/80 bg-background/50 hover:border-border hover:bg-muted/30',
-                      hasVoted ? 'cursor-default' : 'cursor-pointer',
-                    )}
-                  >
-                    {/* Background fill bar for results */}
-                    {hasVoted && (
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary/10 transition-all duration-700 pointer-events-none"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    )}
-
-                    <div className="relative z-10 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
-                          {isSelected && <CheckCircle2 className="size-4 text-primary shrink-0" />}
-                          <span>{localeLabel(locale, opt.labelKo, opt.labelEn, opt.labelJa, opt.labelZh)}</span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
-                          {localeLabel(locale, opt.descKo, opt.descEn)}
-                        </p>
-                      </div>
-
-                      {hasVoted && (
-                        <span className="font-mono text-xs font-extrabold text-primary shrink-0">
-                          {percentage}%
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
         </Card>
       </section>
 
