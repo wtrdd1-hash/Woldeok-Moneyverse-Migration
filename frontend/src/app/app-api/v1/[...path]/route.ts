@@ -112,6 +112,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  const publicBoardAuthorPath = request.method === 'GET' && parts.length === 3 &&
+    parts[0] === 'board' && parts[1] === 'public' && parts[2] === 'stock-posts';
+  const authorValues = publicBoardAuthorPath ? request.nextUrl.searchParams.getAll('author') : [];
+  const boardAuthor = authorValues.length === 1 ? authorValues[0]!.trim() : null;
+  if (authorValues.length > 0 && (authorValues.length !== 1 || !boardAuthor ||
+      boardAuthor.length > 80 || /[<>\u0000-\u001f\u007f]/.test(authorValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'board_author_invalid', 'invalid public author filter');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
@@ -271,6 +280,29 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       return gatewayProblem(504, 'Gateway Timeout', 'app_gateway_timeout', 'the private API did not answer within 15 seconds');
     }
     return gatewayProblem(502, 'Bad Gateway', 'app_gateway_unavailable', 'the private API could not be reached');
+  }
+
+  // A stale backend may ignore the author parameter while returning HTTP 200.
+  // Only expose rows demonstrably matching the public display-name filter.
+  if (publicBoardAuthorPath && boardAuthor !== null && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type'))) throw new Error('non-JSON board');
+      const payload: unknown = await response.clone().json();
+      if (!payload || typeof payload !== 'object' || !('posts' in payload) ||
+          !('authorFilter' in payload) || payload.authorFilter !== boardAuthor ||
+          !Array.isArray(payload.posts) || payload.posts.length > 50 ||
+          !payload.posts.every((row: unknown) => {
+            if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+            const author = (row as Record<string, unknown>).authorName;
+            return typeof author === 'string' && author.length <= 120 &&
+              author.toLowerCase().includes(boardAuthor.toLowerCase());
+          })) {
+        throw new Error('unverified board author result');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_author_unverified',
+        'public author search results could not be verified');
+    }
   }
 
   // Bank standing is an owner-only observation; a legacy success-shaped response
@@ -585,13 +617,15 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') ||
+      request.nextUrl.searchParams.has('author'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') ||
+      request.nextUrl.searchParams.has('author'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }

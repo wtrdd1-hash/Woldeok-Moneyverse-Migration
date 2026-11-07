@@ -21,3 +21,20 @@ describe('public board title search', () => {
     expect(page).toContain('robots: { index: !hasSearch');
   });
 });
+
+describe('public board author search', () => {
+  it('parses a single displayed public author without treating it as an identity', async () => {
+    const { parseBoardAuthorQuery } = await import('./board-author-search');
+    expect(parseBoardAuthorQuery(undefined)).toEqual({ query: null, invalid: false });
+    expect(parseBoardAuthorQuery('  김%_  ')).toEqual({ query: '김%_', invalid: false });
+    for (const invalid of ['', ['a', 'b'], 'x'.repeat(81), '<script>', 'a\nb']) {
+      expect(parseBoardAuthorQuery(invalid).invalid).toBe(true);
+    }
+  });
+  it('offers an accessible author filter and noindexes its results', () => {
+    const page = readFileSync('src/app/board/page.tsx', 'utf8');
+    expect(page).toContain('name="author"');
+    expect(page).toContain('작성자 이름 검색');
+    expect(page).toContain('params.author !== undefined');
+  });
+});
