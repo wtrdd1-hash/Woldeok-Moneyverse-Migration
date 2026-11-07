@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Flame, Clock, Sparkles, TrendingUp, Zap, ChevronRight, Coins, Briefcase } from 'lucide-react';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
-import { parseHotTimeEvidence } from '@/lib/hot-time-evidence';
+import { parseCurrentHotTimeEvidence } from '@/lib/hot-time-evidence';
 
 export interface HotTimeBuffItem {
   readonly id: string;
@@ -37,30 +37,39 @@ export function LiveHotTimeBanner({ domainFilter }: { readonly domainFilter?: st
 
   useEffect(() => {
     let isMounted = true;
+    let activeController: AbortController | null = null;
     async function fetchBuffs() {
+      activeController?.abort();
+      // A pending refresh cannot certify the old badge; hide it until a new
+      // source response passes freshness and event-window verification.
+      if (isMounted) { setBuffs([]); setLoaded(false); }
+      const controller = new AbortController();
+      activeController = controller;
       try {
-        const res = await fetch('/app-api/v1/economy/hot-time/active', { cache: 'no-store' });
-        if (res.ok) {
-          const data = parseHotTimeEvidence(await res.json() as unknown);
-          if (isMounted) {
-            setBuffs(data?.activeBuffs ? [...data.activeBuffs] : []);
-            setLoaded(true);
-          }
-        } else if (isMounted) {
-          setBuffs([]);
+        const res = await fetch('/app-api/v1/economy/hot-time/active', { cache: 'no-store', signal: controller.signal });
+        if (!res.ok) throw new Error('hot-time source unavailable');
+        const data = parseCurrentHotTimeEvidence(await res.json() as unknown);
+        if (isMounted && !controller.signal.aborted) {
+          setBuffs(data ? [...data.activeBuffs] : []);
           setLoaded(true);
         }
       } catch {
-        if (isMounted) {
+        if (isMounted && !controller.signal.aborted) {
           setBuffs([]);
           setLoaded(true);
         }
       }
     }
-    fetchBuffs();
-
+    void fetchBuffs();
+    // Never retain a once-live badge indefinitely after the source changes.
+    const timer = window.setInterval(() => void fetchBuffs(), 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void fetchBuffs(); };
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       isMounted = false;
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+      activeController?.abort();
     };
   }, []);
 

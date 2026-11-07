@@ -25,13 +25,21 @@ describe('admin hot-time evidence', () => {
   });
 
   it('renders only verified server events and never offers an unverified mutation', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ activeBuffs: [active], hasActiveHotTime: true, serverTime: '2026-10-27T04:45:00.000Z' }) });
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ activeBuffs: [active], hasActiveHotTime: true, serverTime: new Date().toISOString() }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<HotTimeManagementCard />);
     await waitFor(() => expect(screen.getByText('Verified work bonus')).toBeTruthy());
     expect(screen.getByText(/확인된 활성 버프 1개/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /버프 끄기/ })).toBeNull();
     expect(fetchMock).toHaveBeenCalledWith('/app-api/v1/economy/hot-time/active', expect.objectContaining({ cache: 'no-store' }));
+  });
+
+  it('does not advertise stale historical buff snapshots as currently verified', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ activeBuffs: [active], hasActiveHotTime: true, serverTime: '2026-10-27T04:45:00.000Z' }) }));
+    render(<HotTimeManagementCard />);
+    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    expect(screen.queryByText('Verified work bonus')).toBeNull();
+    expect(screen.queryByText(/확인된 활성 버프 1개/)).toBeNull();
   });
 
   it('shows unavailable rather than zero events when the API fails', async () => {
