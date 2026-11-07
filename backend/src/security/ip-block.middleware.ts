@@ -58,7 +58,13 @@ export function ipBlockGate({
         });
       })
       .catch((error: unknown) => {
-        onFailure(error);
+        // A best-effort telemetry callback must not turn a DB outage into
+        // an unhandled rejection or prevent the request from continuing.
+        try {
+          onFailure(error);
+        } catch {
+          // The original database failure has already been reported.
+        }
         next();
       });
   };
