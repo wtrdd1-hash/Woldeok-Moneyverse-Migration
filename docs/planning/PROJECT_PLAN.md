@@ -1,3 +1,17 @@
+## v2026.11.06.0628 — F675-262 Dispute Hardening (FEATURE IMPROVEMENT / PROPOSAL / RELEASE HOLD)
+
+**Cycle:** Previous Feature Addition v1826 → Current Feature Improvement v1828 → Next Feature Addition v1830. This is a proposal, not an implemented or deployed feature.
+
+**P0 operational gate:** Recheck Production /en and /en/login with dated HTTP probes, backend restart deltas, deployed SHA and release symlink target; independently verify backup restoration, DB least privilege, migration checksums, ledger reconciliation, Korean legal constraints and Test exact-SHA. Service active does not establish application health. Production promotion stays HOLD pending evidence.
+
+**P1 actors and transitions:** Authorized tenant custody operator disputes a versioned F675-261 reconciliation receipt. An independent compliance adjudicator may request re-observation, uphold or reject, but must differ from requester, original attestor and delegated effective principal. Security auditor gets redacted read-only access. DRAFT → SUBMITTED → UNDER_REVIEW → REOBSERVATION_REQUIRED → UNDER_REVIEW → UPHELD/REJECTED; SUBMITTED may become WITHDRAWN before terminal decision. Stale, revoked or missing evidence yields BLOCKED_UNKNOWN. Terminal cases are immutable; subsequent evidence creates a linked new case. Source revocation, retention, legal hold and download denial never change.
+
+**UI and API:** Admin reconciliation detail → Dispute receipt CTA → signed manifest preview → reason/submit → independent review queue → reobserve/uphold/reject; show disabled-CTA reasons. Proposed six endpoints: GET/POST /admin/custody/disputes; GET /admin/custody/disputes/:id; POST /admin/custody/disputes/:id/withdraw, /reobserve, /decision. Every mutation enforces tenant authorization, Idempotency-Key and If-Match, with stable 403, 404 (cross-tenant concealment), 409 (CAS), 422 (invalid transition). No evidence payloads in URLs or analytics.
+
+**DB and recovery:** Composite tenant-scoped foreign keys, state/decision CHECK, partial UNIQUE for active tenant+receipt dispute, (tenant_id,state,created_at DESC,id) index, immutable receipt hash and actor delegation chain. Row-lock and compare source generation in one transaction with immutable audit and outbox. Worker fencing, deduplication, replay protection and backoff/DLQ must be tested.
+
+**Acceptance:** Admin-only noindex; 320px mobile and WCAG 2.2 AA keyboard access; EN/KO parity; KPIs decision latency, BLOCKED_UNKNOWN rate and aggregated authorization failures without PII. Tests cover cross-tenant isolation, delegated self-approval, concurrent decisions, terminal replay, key rotation, missing manifest, outbox retries and locale/a11y. Feature flag default OFF; additive migration, real-PostgreSQL Test exact-SHA, canary and rollback-to-OFF preserving audit. External independent references newly verified 0, cumulative UNKNOWN/10,000: BLOCKED / IN PROGRESS.
+
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 

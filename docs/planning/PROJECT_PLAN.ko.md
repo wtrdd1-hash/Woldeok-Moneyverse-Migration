@@ -1,3 +1,17 @@
+## v2026.11.06.0628 — F675-262 이의신청 계약 강화 (FEATURE IMPROVEMENT / 제안 / RELEASE HOLD)
+
+**주기:** Previous Feature Addition v1826 → Current Feature Improvement v1828 → Next Feature Addition v1830. 구현·배포 완료가 아닌 기획 개선이다.
+
+**P0 운영 게이트:** Production /en·/en/login을 날짜가 있는 HTTP 검사로 재확인하고 백엔드 재시작 증가량, 실제 배포 SHA, 릴리스 심볼릭 링크 대상을 대조한다. 독립 백업 복원, DB 최소권한·마이그레이션 체크섬, 금융 원장 대사, 국내 법률 및 Test exact-SHA도 증빙해야 한다. 서비스 active만으로 정상이라고 단정하지 않으며 운영 승격은 HOLD다.
+
+**P1 권한·상태:** 테넌트 증빙 담당자는 버전이 고정된 F675-261 영수증에 이의를 신청한다. 독립 준법 판정자는 신청자·원 승인자·위임 실효 주체와 달라야 하며 재관측·인용·기각을 처리한다. 보안 감사자는 비식별 읽기 전용 이력만 조회한다. DRAFT → SUBMITTED → UNDER_REVIEW → REOBSERVATION_REQUIRED → UNDER_REVIEW → UPHELD/REJECTED, 종결 전 SUBMITTED → WITHDRAWN을 허용한다. 증빙 만료·철회·누락은 BLOCKED_UNKNOWN으로 차단한다. 종결 판정은 불변이며 신규 증빙은 연결된 별도 사건으로 처리한다. 원본 철회·보존 의무·법적 보존·다운로드 차단은 유지된다.
+
+**화면·API:** 관리자 대사 상세 → 영수증 이의신청 CTA → 서명 매니페스트 → 사유 제출 → 독립 검토함 → 재관측·인용·기각. CTA 비활성 이유를 표시한다. 관리자 API 6개: GET/POST /admin/custody/disputes, GET /admin/custody/disputes/:id, POST /admin/custody/disputes/:id/withdraw, /reobserve, /decision. 변경 요청마다 테넌트 권한·Idempotency-Key·If-Match를 확인하고 403, 404(타 테넌트 은닉), 409(CAS), 422(불법 전이)를 구분한다. 원본 증빙을 URL·분석 이벤트에 포함하지 않는다.
+
+**DB·복구:** 테넌트 복합 외래키, 상태 CHECK, 미종결 테넌트+영수증 부분 UNIQUE, (tenant_id,state,created_at DESC,id) 인덱스, 불변 영수증 해시·위임 이력. 행 잠금·원본 세대 비교·불변 감사·Outbox는 단일 트랜잭션으로 처리한다. 작업자 펜싱, 중복·재생 방지, 백오프·DLQ를 검증한다.
+
+**인수 조건:** 관리자 noindex, 모바일 320px, WCAG 2.2 AA 키보드, 영문·한국어 동등성. KPI 판정 지연·BLOCKED_UNKNOWN 비율·비식별 권한 실패 집계. 타 테넌트, 위임 자기 승인, 동시 판정, 종결 재생, 키 교체, 매니페스트 누락, Outbox 재시도, 언어·접근성 테스트. 기능 플래그 기본 OFF, 추가형 마이그레이션, 실제 PostgreSQL Test exact-SHA, 카나리·기록 보존형 OFF 롤백. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건: BLOCKED / IN PROGRESS.
+
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
