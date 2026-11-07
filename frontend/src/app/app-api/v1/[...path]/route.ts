@@ -112,6 +112,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // A legacy backend may still advertise unledgered crafting success. Never proxy it.
+  if (parts[0] === 'crafting') {
+    return gatewayProblem(503, 'Service Unavailable', 'crafting_ledger_unavailable', 'crafting source and ledger settlement are not verified');
+  }
+
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
   const supportDateRequested = supportThreadsDatePath && (supportQuery.has('from') || supportQuery.has('to'));
