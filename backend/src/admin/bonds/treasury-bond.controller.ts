@@ -27,7 +27,7 @@ import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')
-@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard)
+@UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class AdminTreasuryBondController {
   constructor(private readonly service: TreasuryBondService) {}
 

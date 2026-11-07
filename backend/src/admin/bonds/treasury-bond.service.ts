@@ -10,6 +10,7 @@ import { DiscordAlertService } from '../../discord/discord-alert.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
 import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
+import { BOND_POLICY_WRITE_HOLD_REASON } from './bond-policy-write-hold';
 
 @Injectable()
 export class TreasuryBondService {
@@ -45,8 +46,9 @@ export class TreasuryBondService {
     // Service boundary protects callers even when they bypass the HTTP controller.
     throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
   }
-  async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number) {
-    return this.repository.updateBondStatus(bondId, status, annualCouponRateBps);
+  async updateBondStatus(_bondId: string, _status: string, _annualCouponRateBps?: number): Promise<never> {
+    // Policy changes must not bypass the DB-owned operator authorization and audit receipt.
+    throw new ServiceUnavailableException(BOND_POLICY_WRITE_HOLD_REASON);
   }
 
   async listUserRepoLoans(userId: string) {
