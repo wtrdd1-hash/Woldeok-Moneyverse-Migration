@@ -132,6 +132,19 @@ describe('shop routes', () => {
     );
   });
 
+  it('fails closed for item consumption with a presented cookie and offline session store', async () => {
+    // A forged/presented cookie is not an authenticated member session.
+    // No database connection exists in this suite, so the session guard must
+    // reject the request before the mutation handler can be reached.
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/shop/holdings/00000000-0000-4000-8000-000000000000/consumptions')
+      .set('Cookie', `mv_session=${'a'.repeat(64)}`)
+      .send({ idempotencyKey: '00000000-0000-4000-8000-000000000001' });
+    expect(response.status).toBe(503);
+    expect(response.body.detail).toBe('session store unavailable');
+    expect(response.body.detail).not.toBe('shop catalogue is unavailable');
+  });
+
   it('rejects a malformed catalogue item id before any handler runs', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/shop/catalog/not-a-uuid/purchases')
