@@ -52,9 +52,13 @@ export function TreasuryBudgetDialog({ mainVault }: TreasuryBudgetDialogProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="budget-dialog-title"
-          className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/80 p-3 sm:p-6 backdrop-blur-sm animate-fadeIn overflow-y-auto"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-3 sm:p-6 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
         >
-          <div className="relative w-full max-w-xl rounded-xl border border-border bg-card p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto my-auto mt-6 sm:my-auto">
+          <div className="min-h-full flex items-center justify-center py-4 sm:py-8">
+            <div className="relative w-full max-w-xl rounded-xl border border-border bg-card p-5 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
                 <div className="rounded-lg bg-purple-500/10 p-2 text-purple-600">
@@ -213,6 +217,7 @@ export function TreasuryBudgetDialog({ mainVault }: TreasuryBudgetDialogProps) {
             </form>
           </div>
         </div>
+      </div>
       )}
     </>
   );

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Landmark, Percent, RefreshCw, ShieldAlert, TrendingUp } from 'lucide-react';
@@ -81,6 +81,13 @@ export function CentralBankPanel() {
     return () => abort.abort();
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void reload().catch(() => {});
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
+
   useAdminFinanceRevalidation(async () => {
     setSnapshot(null);
     setError('');
@@ -130,16 +137,22 @@ export function CentralBankPanel() {
           <h2 className="text-xl font-bold">국가중앙은행 (Woldeok Central Bank)</h2>
           <Badge variant="outline">{snapshot ? '정책 DB 연동' : '데이터 확인 중'}</Badge>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleManualRefresh}
-          disabled={isRefreshing || busy}
-          className="text-xs h-8 gap-1.5"
-        >
-          <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          새로고침
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+            <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+            20초 자동 동기화
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={isRefreshing || busy}
+            className="text-xs h-8 gap-1.5"
+          >
+            <RefreshCw className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            새로고침
+          </Button>
+        </div>
       </div>
       <Card>
         <CardHeader className="py-3">

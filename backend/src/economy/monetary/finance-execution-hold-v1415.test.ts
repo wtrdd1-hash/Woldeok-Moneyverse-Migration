@@ -37,14 +37,16 @@ describe('v1415 unsafe finance operations fail closed', () => {
       await expect(call()).rejects.toMatchObject({ status: 503 });
     }
   });
-  it('database mint and unsupported auto-regulation cannot execute on admin API', async () => {
-    const executeAuthorizedMint = vi.fn();
+  it('database mint executes authorized mint and unsupported auto-regulation cannot execute on admin API', async () => {
+    const executeAuthorizedMint = vi.fn().mockResolvedValue({ id: 'cert-1', amount_wld: '10' });
     const evaluateAndExecute = vi.fn();
     const c = new MonetaryController({} as never, { executeAuthorizedMint } as never,
       { evaluateAndExecute } as never);
-    await expect(c.executeMint({} as never, { policy_order_id: 'x', amount_wld: '10', idempotency_key: 'x' })).rejects.toMatchObject(unavailable);
+    const req = { session: { user_id: '00000000-0000-4000-8000-000000000001' } } as never;
+    const res = await c.executeMint(req, { policy_order_id: 'x', amount_wld: '10', idempotency_key: 'x' });
+    expect(res).toEqual({ id: 'cert-1', amount_wld: '10' });
+    expect(executeAuthorizedMint).toHaveBeenCalledWith('00000000-0000-4000-8000-000000000001', 'x', '10', null, 'x');
     await expect(c.runAutoRegulationManually({} as never)).rejects.toMatchObject(unavailable);
-    expect(executeAuthorizedMint).not.toHaveBeenCalled();
     expect(evaluateAndExecute).not.toHaveBeenCalled();
   });
   it('manual SWF rebalance/liquidation fail closed before touching DB state', async () => {

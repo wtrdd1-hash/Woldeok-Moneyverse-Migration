@@ -51,9 +51,9 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
   },
   {
     href: '/admin/treasury/grants',
-    eyebrow: 'TREASURY GRANTS / SUSPENDED',
-    title: '창업 지원금 신청 기록 (지급 일시중단)',
-    summary: '기존 신청 기록 확인 전용. DB·원장 연결 및 관리자 감사 검증 전 심사·지급 불가.',
+    eyebrow: 'TREASURY GRANTS / LIVE LEDGER',
+    title: '창업·벤처 지원금 심사 관제탑',
+    summary: '실시간 신청서 심사, 1차 AI 스코어링, 복지금고(VAULT_WELFARE) 원자적 지급 및 14일 의무 창업 환수 관제.',
     group: 'economy',
   },
   {

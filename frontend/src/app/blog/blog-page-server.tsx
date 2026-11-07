@@ -37,6 +37,40 @@ function safeHeroImage(url?: string): string | undefined {
   return fs.existsSync(path.join(process.cwd(), 'public', url.slice(1))) ? url : undefined;
 }
 
+export function resolvePostHeroImage(post: BlogPost): string {
+  const safe = safeHeroImage(post.heroImage);
+  if (safe) return safe;
+
+  const cat = String(post.category || '').toUpperCase();
+  const label = String(post.categoryLabel || '').toLowerCase();
+  const tagsStr = (post.tags || []).join(' ').toLowerCase();
+
+  if (
+    cat === 'TECH' ||
+    label.includes('코딩') ||
+    label.includes('컴퓨터') ||
+    label.includes('编程') ||
+    label.includes('programming') ||
+    tagsStr.includes('coding') ||
+    tagsStr.includes('computer')
+  ) {
+    return '/images/blog/tech-distributed-ledger.svg';
+  }
+  if (cat === 'COMPOUND' || label.includes('복리') || label.includes('저축') || label.includes('72')) {
+    return '/images/blog/compound-interest-72-rule.svg';
+  }
+  if (cat === 'TAX' || label.includes('절세') || label.includes('세금') || label.includes('연금') || label.includes('isa')) {
+    return '/images/blog/tax-saving-isa-pension.svg';
+  }
+  if (cat === 'STOCKS' || label.includes('주식') || label.includes('투자')) {
+    return '/images/blog/stocks-valuation-dca.svg';
+  }
+  if (cat === 'WEALTH' || label.includes('자산') || label.includes('포트폴리오')) {
+    return '/images/blog/wealth-portfolio-roadmap.svg';
+  }
+  return '/images/blog/macro-global-forex-pulse.svg';
+}
+
 export function metadataForHub(locale: BlogLocale): Metadata {
   const languages = Object.fromEntries((['ko', 'en', 'ja', 'zh'] as const).map(l => [
     ({ ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' })[l], blogHubUrl(l),
@@ -54,13 +88,14 @@ export function metadataForHub(locale: BlogLocale): Metadata {
 export async function metadataForArticle(slug: string, locale: BlogLocale): Promise<Metadata> {
   const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) return { title: 'Article not found', robots: { index: false, follow: false } };
-  const post = getBlogCountryEdition(original, locale);
+  const nativeLocale = (original.country ? ({ KR: "ko", US: "en", JP: "ja", CN: "zh" } as Record<string, BlogLocale>)[original.country] : undefined) ?? locale;
+  const post = getBlogCountryEdition(original, locale) ?? getBlogCountryEdition(original, nativeLocale) ?? original;
   if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
-  const canonical = blogUrl(slug, locale);
-  const hero = safeHeroImage(post.heroImage);
+  const canonical = blogUrl(slug, nativeLocale);
+  const hero = resolvePostHeroImage(post);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
-    ...(isBlogDiscoverable(original) ? {} : { robots: { index: false, follow: true } }),
+    ...(isBlogDiscoverable(original) && locale === nativeLocale ? {} : { robots: { index: false, follow: true } }),
     alternates: { canonical, languages: blogAlternateLanguages(original) },
     openGraph: {
       title: post.title, description: post.excerpt, type: 'article',
@@ -73,8 +108,8 @@ export async function metadataForArticle(slug: string, locale: BlogLocale): Prom
 }
 
 export function summarizeBlogPost(post: BlogPost) {
-  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, heroImage, relatedCalculatorHref, relatedCalculatorName } = post;
-  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:safeHeroImage(heroImage),relatedCalculatorHref,relatedCalculatorName};
+  const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, relatedCalculatorHref, relatedCalculatorName } = post;
+  return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:resolvePostHeroImage(post),relatedCalculatorHref,relatedCalculatorName};
 }
 export async function renderBlogHub(locale: BlogLocale) {
   const posts = countryBlogPosts([...await verifiedPublicArticles(),...getAllBlogPosts()].filter(isBlogDiscoverable), locale);
@@ -125,7 +160,11 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   }
   const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) notFound();
-  const post = getBlogCountryEdition(original, locale);
+  const nativeLocale = (original.country ? ({ KR: "ko", US: "en", JP: "ja", CN: "zh" } as Record<string, BlogLocale>)[original.country] : undefined) ?? locale;
+  if (original.verificationReceipt && original.country && nativeLocale !== locale) {
+    permanentRedirect(blogUrl(slug, nativeLocale));
+  }
+  const post = getBlogCountryEdition(original, locale) ?? getBlogCountryEdition(original, nativeLocale) ?? original;
   if (!post) notFound();
   const canonical = blogUrl(slug, locale);
   const jsonLd = {
@@ -136,7 +175,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
     inLanguage: ({ ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN' })[locale],
     author: { '@type': 'Organization', name: post.author.name },
     publisher: { '@type': 'Organization', name: 'Woldeok Moneyverse', url: 'https://easy-scraping.com' },
-    ...(safeHeroImage(post.heroImage) ? { image: 'https://easy-scraping.com' + safeHeroImage(post.heroImage) } : {}),
+    ...(resolvePostHeroImage(post) ? { image: 'https://easy-scraping.com' + resolvePostHeroImage(post) } : {}),
   };
   return (
     <>
@@ -149,7 +188,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
             보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
           </p>
         )}
-        <BlogPostClient post={{ ...post, heroImage: safeHeroImage(post.heroImage) }} locale={locale} />
+        <BlogPostClient post={{ ...post, heroImage: resolvePostHeroImage(post) }} locale={locale} />
       </div>
     </>
   );

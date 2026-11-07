@@ -168,12 +168,25 @@ export function BlogPostClient({ post, locale }: Props) {
         </div>
       </div>
 
-      {/* 🖼️ 대표 고해상도 인포그래픽 히어로 이미지 (Hero Graphic Asset) */}
-      {post.heroImage && (
+      {/* 🖼️ 대표 고해상도 인포그래픽 히어로 이미지 (Hero Graphic Asset - 전 글 무조건 이미지 1개 이상 100% 노출 보장) */}
+      <div>
         <div className="rounded-2xl overflow-hidden border border-border/70 shadow-lg bg-card/60 backdrop-blur-xs">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={post.heroImage}
+            src={
+              post.heroImage ||
+              (post.category === 'TECH'
+                ? '/images/blog/tech-distributed-ledger.svg'
+                : post.category === 'COMPOUND'
+                ? '/images/blog/compound-interest-72-rule.svg'
+                : post.category === 'TAX'
+                ? '/images/blog/tax-saving-isa-pension.svg'
+                : post.category === 'STOCKS'
+                ? '/images/blog/stocks-valuation-dca.svg'
+                : post.category === 'WEALTH'
+                ? '/images/blog/wealth-portfolio-roadmap.svg'
+                : '/images/blog/macro-global-forex-pulse.svg')
+            }
             alt={activeTitle}
             className="w-full h-auto aspect-[1200/630] object-cover"
             loading="eager"
@@ -183,7 +196,7 @@ export function BlogPostClient({ post, locale }: Props) {
             <span className="text-emerald-400 font-bold">Illustration · not live data</span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* 📊 수학적 금융 인포그래픽 시각화 배너 (선형 원금 대비 복리 기하급수 성장 곡선) */}
       {post.infographicType && <BlogInfographicCard type={post.infographicType} currentLocale={locale} />}

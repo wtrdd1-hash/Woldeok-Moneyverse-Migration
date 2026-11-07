@@ -176,15 +176,46 @@ export class MonetaryController {
   @Post('execute-mint')
   @ApiOperation({ summary: '승인된 명령에 따른 조폐국 정식 발행 실행' })
   async executeMint(
-    @Req() _req: RequestWithSession,
+    @Req() req: RequestWithSession,
     @Body()
-    _body: {
+    body: {
       policy_order_id: string;
       amount_wld: string;
       recipient_user_id?: string | null;
       idempotency_key: string;
     },
   ) {
-    return unverifiedFinanceOperation('MONETARY_SETTLEMENT');
+    const adminId = requireUserId(req);
+    return this.mintBureau.executeAuthorizedMint(
+      adminId,
+      body.policy_order_id,
+      body.amount_wld,
+      body.recipient_user_id || null,
+      body.idempotency_key,
+    );
+  }
+
+  @Post('execute-retire')
+  @ApiOperation({ summary: '조폐국 정식 통화 영구 소각/폐기 실행' })
+  async executeRetire(
+    @Req() req: RequestWithSession,
+    @Body()
+    body: {
+      policy_order_id?: string | null;
+      amount_wld: string;
+      source_type?: string;
+      reason: string;
+      idempotency_key: string;
+    },
+  ) {
+    const adminId = requireUserId(req);
+    return this.mintBureau.retireAuthorizedAmount(
+      adminId,
+      body.policy_order_id || null,
+      body.amount_wld,
+      body.source_type || 'TREASURY_VAULT',
+      body.reason,
+      body.idempotency_key,
+    );
   }
 }

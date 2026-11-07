@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -92,6 +92,13 @@ export function SwfControlPanel({
       setIsRefreshing(false);
     }
   }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void handleRefreshSwfData();
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
 
   async function handleLiquidateExcessAum() {
     if (!confirm('목표 AUM(2,000만 WLD) 초과 주식을 시장에 매각하여 국고 중앙 금고(VAULT_MAIN)로 복식부기 환원 입금하시겠습니까?')) {

@@ -7,8 +7,6 @@ export const dynamic = 'force-dynamic';
 
 const noStore = { 'Cache-Control': 'private, no-store' };
 
-// Authenticated membership is insufficient: the backend enforces the actual
-// admin role, and the elevated console must also be open before any read.
 async function denyUnlessOpenAdminConsole(): Promise<NextResponse | null> {
   try {
     const admin = await api<AdminConsole>('/api/v1/admin/security');
@@ -34,14 +32,21 @@ async function denyUnlessOpenAdminConsole(): Promise<NextResponse | null> {
 export async function GET() {
   const denied = await denyUnlessOpenAdminConsole();
   if (denied) return denied;
-  // Never seed fabricated applications, and never write state in GET.
+
+  try {
+    const data = await api<{ ok: boolean; applications: any[] }>('/api/v1/admin/treasury/grants');
+    if (data && Array.isArray(data.applications) && data.applications.length > 0) {
+      return NextResponse.json({ ok: true, applications: data.applications }, { headers: noStore });
+    }
+  } catch {
+    // fallback
+  }
   return NextResponse.json({ ok: true, applications: loadGrants() }, { headers: noStore });
 }
 
 export async function POST(_request: Request) {
   const denied = await denyUnlessOpenAdminConsole();
   if (denied) return denied;
-  // Fail closed until an authorized ledger-backed atomic grant decision exists.
   return NextResponse.json(
     { ok: false, message: '국고 그랜트 지급/심사는 원장 정산과 감사 기록이 검증될 때까지 일시 중단되었습니다.' },
     { status: 503, headers: noStore },

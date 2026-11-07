@@ -1503,4 +1503,125 @@ export class TreasuryRepository {
     );
     return res.rows[0]?.result;
   }
+
+  async listTreasuryGrants(): Promise<Array<{
+    id: string;
+    userId: string;
+    applicantName: string;
+    applicantMasked: string;
+    businessName: string;
+    businessPlan: string;
+    category: string;
+    tier: string;
+    requestedAmountWld: number;
+    approvedAmountWld: number;
+    fundingVault: string;
+    status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "CLAWBACK_PENDING";
+    aiScore: number;
+    aiEvaluation: string;
+    reviewerId: string | null;
+    reviewNote: string | null;
+    reviewedAt: string | null;
+    disbursedAt: string | null;
+    submittedAt: string;
+    clawbackDeadline: string | null;
+  }>> {
+    const res = await this.pool.query<{
+      id: string;
+      user_id: string;
+      applicant_name: string;
+      applicant_masked: string;
+      business_name: string;
+      business_plan: string;
+      category: string;
+      tier: string;
+      requested_amount_wld: string;
+      approved_amount_wld: string;
+      funding_vault: string;
+      status: string;
+      ai_score: number;
+      ai_evaluation: string;
+      reviewer_id: string | null;
+      review_note: string | null;
+      reviewed_at: Date | null;
+      disbursed_at: Date | null;
+      submitted_at: Date;
+      clawback_deadline: Date | null;
+    }>(
+      "SELECT * FROM public.treasury_grants ORDER BY submitted_at DESC LIMIT 100",
+    );
+
+    return res.rows.map((r) => ({
+      id: r.id,
+      userId: r.user_id,
+      applicantName: r.applicant_name,
+      applicantMasked: r.applicant_masked,
+      businessName: r.business_name,
+      businessPlan: r.business_plan,
+      category: r.category,
+      tier: r.tier,
+      requestedAmountWld: Number(r.requested_amount_wld),
+      approvedAmountWld: Number(r.approved_amount_wld),
+      fundingVault: r.funding_vault,
+      status: r.status as any,
+      aiScore: r.ai_score,
+      aiEvaluation: r.ai_evaluation,
+      reviewerId: r.reviewer_id,
+      reviewNote: r.review_note,
+      reviewedAt: r.reviewed_at ? r.reviewed_at.toISOString() : null,
+      disbursedAt: r.disbursed_at ? r.disbursed_at.toISOString() : null,
+      submittedAt: r.submitted_at.toISOString(),
+      clawbackDeadline: r.clawback_deadline ? r.clawback_deadline.toISOString() : null,
+    }));
+  }
+
+  async reviewGrantApprove(
+    adminId: string,
+    grantId: string,
+    amountWld: string,
+    vaultCode = "VAULT_WELFARE",
+    reason = "창업 지원금 승인 및 원자적 국고 지급",
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      "SELECT public.treasury_disburse_grant_v2($1::uuid, $2::text, $3::text, $4::text, $5::text) AS result",
+      [adminId, grantId, amountWld, vaultCode, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async reviewGrantReject(
+    adminId: string,
+    grantId: string,
+    reason = "사업계획서 요건 미충족으로 인한 반려",
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      "SELECT public.treasury_reject_grant($1::uuid, $2::text, $3::text) AS result",
+      [adminId, grantId, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async applyGrant(
+    userId: string,
+    applicantName: string,
+    businessName: string,
+    businessPlan: string,
+    category: string,
+    tier: string,
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      "SELECT public.treasury_apply_grant($1::uuid, $2::text, $3::text, $4::text, $5::text, $6::text) AS result",
+      [userId, applicantName, businessName, businessPlan, category, tier],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async getUserGrant(userId: string): Promise<any | null> {
+    const res = await this.pool.query(
+      "SELECT * FROM public.treasury_grants WHERE user_id = $1 ORDER BY submitted_at DESC LIMIT 1",
+      [userId],
+    );
+    return res.rows[0] ?? null;
+  }
+
 }

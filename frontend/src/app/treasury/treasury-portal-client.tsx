@@ -52,7 +52,9 @@ export function TreasuryPortalClient({
   // 모달 & 토스트 상태
   const [grantModalOpen, setGrantModalOpen] = useState(false);
   const [grantBusinessName, setGrantBusinessName] = useState('');
-  const [grantAmount, setGrantAmount] = useState('50000');
+  const [grantApplicantName, setGrantApplicantName] = useState('');
+  const [grantTier, setGrantTier] = useState<'TIER_1_SEED' | 'TIER_2_GROWTH' | 'TIER_3_INNOVATION'>('TIER_1_SEED');
+  const [grantCategory, setGrantCategory] = useState<string>('FINTECH');
   const [grantPlan, setGrantPlan] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -124,9 +126,11 @@ export function TreasuryPortalClient({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          applicantName: grantApplicantName,
           businessName: grantBusinessName,
-          requestedAmountWld: Number.parseInt(grantAmount, 10) || 50000,
           businessPlan: grantPlan,
+          category: grantCategory,
+          tier: grantTier,
         }),
       });
       const data = await res.json();
@@ -315,98 +319,211 @@ export function TreasuryPortalClient({
 
       {/* 4. 창업 그랜트 지원 신청 모달 다이얼로그 */}
       {grantModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/50">
-              <div className="space-y-0.5">
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Coins className="size-5 text-sky-400" />
-                  <span>청년·창업 벤처 그랜트 신청서</span>
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  국고 무상 지원금(최대 100,000 WLD) 심사를 위한 프로젝트 기획서 접수
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-3 sm:p-6 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setGrantModalOpen(false);
+          }}
+        >
+          <div className="min-h-full flex items-center justify-center py-4 sm:py-8">
+            <div className="relative w-full max-w-xl rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                    <Coins className="size-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-foreground">
+                      청년·창업 벤처 그랜트 신청서
+                    </h2>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      복지금고(VAULT_WELFARE) 원자적 자금 집행 및 14일 의무 창업제
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setGrantModalOpen(false)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {/* 핵심 안내 배지 */}
+              <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs space-y-1">
+                <div className="font-bold text-sky-400 flex items-center gap-1.5">
+                  <span>💡 3단계 차등 지원 & 1차 AI 스코어링 안내</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  신청서 제출 즉시 1차 AI 적격 스코어링(0~100점)이 산출되며 국고 심사관의 원클릭 검토를 거쳐 복지금고에서 지갑으로 원자적 복식부기 입금됩니다. 승인 후 14일 이내 가상 사업체(/businesses)를 미창업 시 잔여 지원금은 국고로 자동 환수(Clawback)됩니다.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setGrantModalOpen(false)}
-                className="rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-muted/60"
-              >
-                <X className="size-4" />
-              </button>
+
+              <form onSubmit={handleGrantSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-foreground block">
+                      대표자명 / 팀명 <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="예: 홍길동, 퀀트랩팀"
+                      value={grantApplicantName}
+                      onChange={(e) => setGrantApplicantName(e.target.value)}
+                      className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:ring-1 focus:ring-primary font-medium"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-foreground block">
+                      사업체 명칭 <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="예: 델타 트레이딩 랩스, 메가물류"
+                      value={grantBusinessName}
+                      onChange={(e) => setGrantBusinessName(e.target.value)}
+                      className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:ring-1 focus:ring-primary font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* 3단계 티어 선택 */}
+                <div className="space-y-1.5">
+                  <label className="font-bold text-foreground block">
+                    지원금 티어 선택 (WLD) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <label
+                      className={"flex flex-col p-3 rounded-xl border cursor-pointer transition-colors " +
+                        (grantTier === 'TIER_1_SEED'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : 'border-border/60 bg-muted/20 hover:bg-muted/40')}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground">Tier 1 시드</span>
+                        <input
+                          type="radio"
+                          name="tier"
+                          value="TIER_1_SEED"
+                          checked={grantTier === 'TIER_1_SEED'}
+                          onChange={() => setGrantTier('TIER_1_SEED')}
+                          className="text-emerald-500"
+                        />
+                      </div>
+                      <span className="text-sm font-bold font-mono text-emerald-400 mt-1">500,000 WLD</span>
+                      <span className="text-[10px] text-muted-foreground mt-0.5">소상공인·초기 스타트업</span>
+                    </label>
+
+                    <label
+                      className={"flex flex-col p-3 rounded-xl border cursor-pointer transition-colors " +
+                        (grantTier === 'TIER_2_GROWTH'
+                          ? 'border-sky-500 bg-sky-500/10'
+                          : 'border-border/60 bg-muted/20 hover:bg-muted/40')}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground">Tier 2 성장형</span>
+                        <input
+                          type="radio"
+                          name="tier"
+                          value="TIER_2_GROWTH"
+                          checked={grantTier === 'TIER_2_GROWTH'}
+                          onChange={() => setGrantTier('TIER_2_GROWTH')}
+                          className="text-sky-500"
+                        />
+                      </div>
+                      <span className="text-sm font-bold font-mono text-sky-400 mt-1">2,000,000 WLD</span>
+                      <span className="text-[10px] text-muted-foreground mt-0.5">물류·기술형 벤처 기업</span>
+                    </label>
+
+                    <label
+                      className={"flex flex-col p-3 rounded-xl border cursor-pointer transition-colors " +
+                        (grantTier === 'TIER_3_INNOVATION'
+                          ? 'border-purple-500 bg-purple-500/10'
+                          : 'border-border/60 bg-muted/20 hover:bg-muted/40')}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground">Tier 3 혁신형</span>
+                        <input
+                          type="radio"
+                          name="tier"
+                          value="TIER_3_INNOVATION"
+                          checked={grantTier === 'TIER_3_INNOVATION'}
+                          onChange={() => setGrantTier('TIER_3_INNOVATION')}
+                          className="text-purple-500"
+                        />
+                      </div>
+                      <span className="text-sm font-bold font-mono text-purple-400 mt-1">5,000,000 WLD</span>
+                      <span className="text-[10px] text-muted-foreground mt-0.5">대규모 공공·인프라 혁신</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 산업 카테고리 */}
+                <div className="space-y-1">
+                  <label className="font-bold text-foreground block">
+                    업종 분야 <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={grantCategory}
+                    onChange={(e) => setGrantCategory(e.target.value)}
+                    className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:ring-1 focus:ring-primary font-medium"
+                  >
+                    <option value="FINTECH">핀테크 / 분산원장 금융</option>
+                    <option value="LOGISTICS">스마트 운송 및 도시 물류</option>
+                    <option value="AI_TECH">인공지능 및 데이터 퀀트 리서치</option>
+                    <option value="COMMERCE">도시 상업 및 24시 유통</option>
+                    <option value="OTHER">기타 신산업 벤처</option>
+                  </select>
+                </div>
+
+                {/* 사업계획서 요약 */}
+                <div className="space-y-1">
+                  <label className="font-bold text-foreground block">
+                    사업계획서 요약 및 자금 활용처 (최소 20자) <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    minLength={20}
+                    rows={4}
+                    placeholder="창업 비즈니스 모델, 고용 효과, 머니버스 경제 기여도 및 구체적 자금 사용 계획을 20자 이상 기술해 주세요."
+                    value={grantPlan}
+                    onChange={(e) => setGrantPlan(e.target.value)}
+                    className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:ring-1 focus:ring-primary resize-none leading-relaxed"
+                  />
+                  <div className="text-[11px] text-muted-foreground text-right font-mono">
+                    {grantPlan.length} / 최소 20자
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2 border-t border-border/60">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setGrantModalOpen(false)}
+                    className="text-xs h-9 font-medium"
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || grantPlan.trim().length < 20}
+                    className="text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white h-9 shadow-xs"
+                  >
+                    {isSubmitting ? '접수 처리 중...' : (
+                      <>
+                        <Send className="size-3.5 mr-1" />
+                        창업 지원금 공식 접수
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleGrantSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="font-bold text-foreground block">
-                  기업명 또는 프로젝트명 <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="예: 델타 트레이딩 랩스, 머니버스 AMM 거래소"
-                  value={grantBusinessName}
-                  onChange={(e) => setGrantBusinessName(e.target.value)}
-                  className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary font-medium"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="font-bold text-foreground block">
-                  신청 지원금 (WLD) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={1000}
-                  max={100000}
-                  step={1000}
-                  value={grantAmount}
-                  onChange={(e) => setGrantAmount(e.target.value)}
-                  className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary font-mono font-bold"
-                />
-                <span className="text-[11px] text-muted-foreground">
-                  최소 1,000 WLD ~ 최대 100,000 WLD 한도 내에서 신청 가능합니다.
-                </span>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="font-bold text-foreground block">
-                  사업 기획서 및 지원 사유 (최소 10자) <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  placeholder="머니버스 생태계에 어떤 혁신과 가치를 창출할 것인지 구체적으로 기술해 주세요."
-                  value={grantPlan}
-                  onChange={(e) => setGrantPlan(e.target.value)}
-                  className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setGrantModalOpen(false)}
-                  className="text-xs"
-                >
-                  취소
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white"
-                >
-                  {isSubmitting ? '접수 중...' : (
-                    <>
-                      <Send className="size-3.5 mr-1" />
-                      신청서 공식 접수
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
           </div>
         </div>
       )}
