@@ -114,7 +114,7 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '현재 크라우드펀딩 진행 중인 스타트업 피치 목록 조회' })
-  @Header('Cache-Control', 'no-store')
+  @Header('Cache-Control', 'private, no-store')
   @Get('pitches')
   async listPitches() {
     // No persisted, audited funding source exists. A fabricated market is not an empty market.
@@ -122,7 +122,7 @@ export class VenturesController {
   }
 
   @ApiOperation({ summary: '내 VC 엔젤투자 포트폴리오 및 배당금 현황 조회' })
-  @Header('Cache-Control', 'no-store')
+  @Header('Cache-Control', 'private, no-store')
   @Get('investments')
   async listMyInvestments(@Req() req: RequestWithSession) {
     requireUserId(req);
