@@ -3009,3 +3009,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1898 — F675-280 증빙 접근 이상징후 검토 및 접근 차단 (Feature Addition; 제안)
+- 주기: 이전 Feature Improvement v1896; 현재 Feature Addition v1898; 다음 Feature Improvement v1900. P1 미구현. F675-279 권한·감사 이벤트 무결성과 F675-271~278 증빙 생명주기에 종속되며 미병합 PR 정합성 검토가 선행된다. 목적은 비정상 증빙 조회·내보내기 탐지와 독립 검토이며 점수만으로 위반을 단정하지 않는다. 대상은 테넌트 준법·보안 심사자, 진입점은 관리자 > 준법 > 증빙 접근 > 이상징후이다.
+- 화면: 심각도·사유코드·시각·증빙 세대·심사 SLA 목록과 마스킹된 감사 타임라인, 원본 대신 불변 이벤트 ID를 표시한다. 확인, 독립 심사자 지정, 진행 중 내보내기·권한 차단, 재검증, 사유 첨부 오탐 종결 CTA. 상태 NEW, TRIAGED, CONTAINMENT_PENDING, CONTAINED, FALSE_POSITIVE, RESOLVED, BLOCKED. 로딩·빈 화면·오류·오래된 정보·403 처리, 키보드, 320px, WCAG 2.2 AA, 영한 동등 접근성 문구, noindex/no-store.
+- 탐지: 대량 내보내기 급증, 역할 간 위임, 반복 접근 거절, 테넌트 기준선 대비 이례적 시간, 철회 토큰 재사용의 결정론적 규칙. 임계값·규칙 버전·표본 수를 기록하고 이벤트 누락 시 UNKNOWN; 자동 위반 단정·영구 정지·증빙 삭제 금지. 가명화된 행위자 식별자와 보존 통제, 원문 분석 전송 금지. KPI는 확인된 경보 정밀도, 심사 시간, 무단 내보내기 차단 시간, 오탐률, 이벤트 누락률(테넌트별 분모).
+- 제안 API 6개: GET /api/v1/admin/evidence-access/anomalies?status&cursor, GET /anomalies/:id, POST /anomalies/:id/decision, POST /anomalies/:id/contain, GET /anomalies/:id/events, GET /anomalies/metrics. 테넌트 RBAC, 종결·예외 독립 심사, 차단 시 재인증, 쓰기 If-Match·Idempotency-Key. 교차 테넌트 403, 세대 충돌 409, ETag 412, 잘못된 결정 422, 속도 제한 429, 감사 장애 503.
+- DB 제안: anomaly_cases 테넌트/ID PK, (tenant_id,case_id,evidence_generation) 복합 FK, rule_version, event_range_digest, 상태 CHECK, version>0 CHECK, 시작·종료 시각; anomaly_events UNIQUE(tenant_id,anomaly_id,event_uuid), decisions UNIQUE(tenant_id,anomaly_id,decision_generation). 활성 사건 (tenant_id,severity,opened_at DESC) 부분 인덱스 및 담당자/상태 인덱스. 앱 직접 쓰기 금지, search_path 고정 SECURITY DEFINER와 최소 EXECUTE.
+- 트랜잭션: 테넌트별 감사 스트림 커서 소비, 순번 누락 시 BLOCKED 안전 차단, 이벤트 UUID 중복 제거, 사건·감사·Outbox 원자 기록. 행 잠금/CAS와 작업자 펜싱으로 동시 심사 처리. 차단은 F675-279 권한 세대를 철회하고 미사용 토큰을 무효화하며 남은 내보내기 청크를 중지한다. 이미 공개된 바이트는 회수 불가로 기록한다. 외부 통지는 멱등 Outbox를 사용한다.
+- 보안: 자기 종결·위임 자기 승인·테넌트 열거·경보 폭주·규칙 회피 방지, 규칙 기간 제한, 내보내기 속도 제한, 로그 비식별화, 사유 텍스트 HTML 삽입 방지. QA: 급증·중복·역순·누락, 오탐, 동시 결정, 내보내기 중 차단, 철회 토큰, 위임 신원, 320px/a11y, 영한 동등성, 권한·복구 테스트. 별도 개발 브랜치 → 격리 Test exact-SHA E2E → 보안 승인 → 카나리 → 운영승격. 플래그 admin_evidence_access_anomaly_triage_v1 기본 OFF, 롤백 시 탐지·CTA 차단 및 불변 감사 보존.
+- P0: /srv/moneyverse 링크의 prod-v600 대상 부재, 실제 운영 SHA로 /en·/en/login 재검증, DB 최소권한·마이그레이션 체크섬·독립 복원·원장 대사·국내 법률. P1: 실제 Next/Nest/app-api/DB 계약, F675-279 종속성과 미병합 PR, QA 장애 백로그 확인. 외부 독립 레퍼런스 신규 검증 0건, 중복 제거 누적 UNKNOWN / 10,000건, 게이트 BLOCKED / IN PROGRESS; 달성 주장 금지.
