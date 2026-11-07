@@ -3009,3 +3009,14 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1888 — F675-277 증빙 보존·법적 보존명령 무결성 보완 (Feature Improvement; 기획 전용)
+
+- **주기:** 이전 Feature Addition v1886 → 현재 Feature Improvement v1888 → 다음 Feature Addition v1890. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03`. F675-277은 Draft PR #2849 제안이며 병합·구현으로 간주하지 않는다.
+- **목적·권한·화면:** 테넌트 준법 담당자가 관리자 증빙 보존 대기열에서 `보존 요청`(사유·사건 참조·불변 증빙 세대 ID·법적 근거 필수)을 제출하고 독립 심사자가 승인/거절한다. 개인정보 관리자는 삭제 적격성을 검토하고 작업자는 최종 재검증 후 삭제한다. 위임·대리 계정을 포함한 자기 승인을 금지한다. `심사`, `보존 해제`, `삭제 미리보기`, `비식별 감사 내보내기` CTA를 권한별 분리한다. 대기·보존·해제 대기·삭제 적격·삭제 중·삭제 완료·차단·재시도 상태를 색상 외 표시로 구분한다.
+- **법적 근거·기한:** 법률 검토 전 보존기간을 임의 확정하지 않는다. 관할별 버전 정책과 중첩 보존명령 우선순위를 법무·준법 담당자가 승인한다. 요청은 테넌트·증빙 세대·실효 요청자·정책 버전·목적·근거 참조·불변 감사 시각에 결속한다. 오래된 세대/정책은 409, 근거 누락은 BLOCKED로 안전 차단한다. 원본 증빙과 금융 원장은 수정하지 않는다.
+- **제안 API:** `POST /admin/sla/evidence-retention/holds`, `POST /admin/sla/evidence-retention/holds/{id}/decisions`, `POST /admin/sla/evidence-retention/holds/{id}/release`, `GET /admin/sla/evidence-retention/purge-preview`, `POST /admin/sla/evidence-retention/purge-jobs`, `GET /admin/sla/evidence-retention/purge-jobs/{id}`. 실제 라우트가 아닌 제안이며 Nest 계약 확인 후 확정한다. 변경 요청에는 세션/CSRF, 테넌트 권한, Idempotency-Key, If-Match를 적용하고 403/404/409/422/429 응답에서 다른 테넌트 존재 여부를 노출하지 않는다.
+- **DB·원자성:** 보존명령에 `(tenant_id,evidence_generation_id)` 복합 FK, 요청자·심사자 실효 신원, 정책 버전, 생성·만료 시각, 상태 CHECK, `(tenant_id,request_id)` UNIQUE, 유효 보존명령 부분 인덱스를 제안한다. 삭제 의도는 `(tenant_id,evidence_generation_id,storage_object_version)`으로 유일화하고 CAS·작업자 펜싱 토큰으로 오래된 완료 처리를 막는다. 단일 DB 트랜잭션에서 적격 행 잠금→활성 보존명령/정책 세대 재확인→감사·Outbox·삭제 의도 기록을 수행한다. 외부 객체 삭제는 비동기 멱등 처리하며 객체 버전 삭제 및 사후 확인이 끝나야 PURGED로 전환한다. 실패 시 BLOCKED/RETRY. 복제본·백업·객체 잠금 정책은 별도 검증하며 원본 삭제만으로 완전 삭제를 주장하지 않는다.
+- **보안·운영:** 자기 승인, 허위 근거, 재전송, 교차 테넌트, 보존 생성과 삭제의 경합, 임대 만료, 일부 객체 삭제, Outbox 유실, 저장소 타임아웃, 잔존 복제본을 차단·검출한다. 암호화·최소권한·감사·비식별 내보내기·속도 제한 적용. 관리자 SEO noindex, 모바일 320px, WCAG 2.2 AA, 영·한 상태/오류 의미 동등성을 준수한다.
+- **KPI·테스트·배포:** 개인정보 없이 삭제 적격→완료 지연, 차단 수, 활성 보존 수, 경합 충돌, 객체 확인 실패를 측정한다. 동시 보존/삭제, 멱등키 반복, 위임 자기 승인, 테넌트 격리, 심사권한 철회, 저장소 타임아웃, 오래된 펜싱, 복제 지연, 서머타임, 접근성, 번역 회귀 테스트를 요구한다. DB 제약·백필 선행→기능 플래그 `admin_sla_evidence_retention_v1` 기본 OFF→격리 Test exact-SHA E2E·복구 훈련→법률 승인 후 점진 활성화. 롤백은 신규 삭제만 중지하고 유효 보존명령·감사는 보존한다.
+- **P0/P1:** P0 운영 심볼릭 링크 및 실제 배포 SHA의 `/en`·`/en/login` 검증, DB 최소권한, 마이그레이션 체크섬, 독립 복원, 원장 대사, 국내 법률 검토. P1 Draft PR #2845/#2847/#2849 및 F675-271~276 선행 기능 정합성, 실제 Next/Nest/app-api/DB 조사, 별도 개발 브랜치·Test exact-SHA 게이트. 외부 독립 레퍼런스 이번 신규 검증 0건, 누적 UNKNOWN/10,000건, BLOCKED/IN PROGRESS.
