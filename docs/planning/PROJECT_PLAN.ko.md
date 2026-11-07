@@ -3009,3 +3009,18 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## 기획 주기 v1926 — 2026-11-08 — 기능 추가 — F675-287 독립 심사 증빙 묶음 접근 영수증
+
+**주기:** 이전 기능 보완 v1924 → 현재 기능 추가 v1926 → 다음 기능 보완 v1928. **상태:** 명세만 제안 / 미구현 / 운영 배포 보류. 선행 F675-285 이해충돌 심사와 F675-286 서명 증빙 묶음은 미병합 초안이므로 구현 완료로 간주하지 않는다.
+
+**목적·대상·화면:** 테넌트 규정준수 관리자가 독립 심사 증빙 묶음의 접근 목적·주체·시각·승인 근거를 확인하고, 독립 심사자가 고위험 반출을 승인하며 감사자는 변경 불가능한 접근 영수증을 열람한다. 진입: 관리자 → 증빙 사고 → 결정 증빙 묶음 → 접근 이력. CTA: 접근 요청, 요청 심사, 1회 다운로드, 영수증 검증, 대기 접근 철회. 상태 REQUESTED, REVIEW_REQUIRED, APPROVED, REJECTED, TOKEN_ISSUED, CONSUMED, EXPIRED, REVOKED, DELIVERY_UNKNOWN. 전달 결과 불명은 성공이 아니다.
+
+**제안 API(현재 없음):** GET /api/v1/admin/evidence-review-bundles/:bundleId/access-requests (테넌트 격리·커서), POST /:bundleId/access-requests (목적·사유·멱등키), POST /:bundleId/access-requests/:requestId/decision (If-Match·MFA), POST /:bundleId/access-requests/:requestId/token, POST /:bundleId/access-requests/:requestId/consume, GET /:bundleId/access-receipts/:receiptId (비식별 서명 영수증). 오류 400 입력, 401 인증, 403 권한/MFA/이해충돌, 404 테넌트 은닉, 409 세대 불일치·중복 사용, 410 만료·철회, 429 제한, 503 서명 장애. 목록·영수증에는 원본 증빙을 반환하지 않는다.
+
+**제안 DB·트랜잭션:** PostgreSQL evidence_bundle_access_requests(tenant_id,id,bundle_id,requester_id,reviewer_id,purpose_code,status,bundle_generation,policy_version,revision,expires_at), evidence_bundle_access_tokens(tenant_id,request_id,token_digest UNIQUE,consumed_at,expires_at,revoked_at), evidence_bundle_access_receipts(tenant_id,id,request_id,bundle_sha256,access_actor_id,decision_actor_id,consumed_at,signing_key_id,signature_digest,immutable_payload). (tenant_id,bundle_id) 복합 외래키, 상태·시각 CHECK, (tenant_id,request_id,receipt_generation) UNIQUE, 대기 요청·만료 큐 부분 인덱스. RLS 및 최소권한, SECURITY DEFINER 사용 시 search_path 고정. 단일 직렬화 트랜잭션에서 요청·토큰 잠금, 세대·revision 검증, 토큰 해시 1회 소모, 불변 영수증·감사·Outbox 동시 기록; 실패 시 전부 롤백. 외부 전달은 멱등성·작업자 펜싱을 갖춘 최소 1회 처리이며 정확히 1회라고 주장하지 않는다.
+
+**보안·품질:** 요청자 자기 승인과 순환 위임 차단; 결정 및 소비 시 실효 신원·이해충돌·MFA 최신성·서명·보존명령·테넌트·철회 권한 재검증. 토큰 원문 저장·로그 금지, 단기 1회 URL, no-store/noindex, CSP, CSRF 방어, 속도 제한·이상 징후 경보. 모바일 320px, 키보드·포커스, WCAG 2.2 AA, 한영 동등 문구, 관리자 SEO 제외. KPI: 승인~소비 지연, 자기 승인 거절, 토큰 재사용 차단, 서명 영수증 완전성, 서명 장애(테넌트·소규모 집단 비식별).
+
+**검증·배포:** 실제 PostgreSQL RLS/교차 테넌트 404, 동시 소비, 재사용, 시계 오차, 키 교체, 이해충돌 변경, MFA 철회, 서명키 부재, Outbox 장애, 감사 롤백, 보존명령, 접근성·다국어·320px 테스트. 기능 플래그 admin_evidence_bundle_access_receipts_v1 기본 OFF. 기획 회차는 런타임 배포 금지; 별도 개발 브랜치, Test exact-SHA, 마이그레이션 체크섬, 카나리·승인·영수증 보존 롤백 필수. P0 운영 릴리스 링크·실행 SHA, DB 최소권한·체크섬, 독립 복원, 원장 대사, 국내 법률. P1 선행 F675-285/286 PR 정합성, UI/API/DB 계약·영수증 모니터링. 외부 독립 검증 레퍼런스 신규 0건, 누적 UNKNOWN / 10,000건; 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS.
