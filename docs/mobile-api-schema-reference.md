@@ -2668,6 +2668,7 @@ _No request body._
 | status[].freshnessState | true | string="fresh" \| string="stale" \| string="unknown" |  |
 | status[].ageMs | true | null \| number |  |
 | status[].policyVersion | true | string |  |
+| sourceKey | true | null \| string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

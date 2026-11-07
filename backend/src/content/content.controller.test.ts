@@ -43,3 +43,16 @@ describe('administrator publication security boundary', () => {
     });
   }
 });
+
+describe('public status source query', () => {
+  it('rejects duplicate, unknown and malformed source keys without reading DB', async () => {
+    const serviceStatus = vi.fn().mockResolvedValue([]);
+    const controller = new ContentController({ serviceStatus } as never);
+    for (const query of [{ sourceKey: ['backend_api', 'backend_api'] }, { sourceKey: '../secret' }, { sourceKey: 'A' }, { unexpected: '1' }]) {
+      await expect(controller.status(query)).rejects.toThrow();
+    }
+    expect(serviceStatus).not.toHaveBeenCalled();
+    await expect(controller.status({ sourceKey: 'backend_api' })).resolves.toEqual({ status: [], sourceKey: 'backend_api' });
+    expect(serviceStatus).toHaveBeenCalledWith({ sourceKey: 'backend_api' });
+  });
+});

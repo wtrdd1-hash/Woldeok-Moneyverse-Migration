@@ -340,8 +340,10 @@ export class ContentService {
     return this.repository.isPublicStorageKey(storageKey);
   }
 
-  async serviceStatus(): Promise<ContentStatus[]> {
-    return (await this.repository.publicStatus()).map((row) => normalizeStatus(row));
+  async serviceStatus({ sourceKey = null }: { sourceKey?: string | null } = {}): Promise<ContentStatus[]> {
+    const rows = (await this.repository.publicStatus()).map((row) => normalizeStatus(row));
+    // Filter only the published, validated SECURITY DEFINER read result.
+    return sourceKey === null ? rows : rows.filter((row) => row.sourceKey === sourceKey);
   }
 
   async publicPage({

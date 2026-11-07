@@ -84,3 +84,22 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('public status source drill-down', () => {
+  it('returns only the selected source after authoritative freshness normalization', async () => {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repository.publicStatus = vi.fn().mockResolvedValue([
+      { source_key: 'backend_api', display_name: 'Backend', state: 'operational', detail: null, observed_at: null },
+      { source_key: 'frontend_web', display_name: 'Frontend', state: 'unknown', detail: null, observed_at: null },
+    ]);
+    const service = new ContentService(repository);
+    await expect(service.serviceStatus({ sourceKey: 'backend_api' })).rejects.toThrow('inconsistent status snapshot');
+    repository.publicStatus = vi.fn().mockResolvedValue([
+      { source_key: 'backend_api', display_name: 'Backend', state: 'unknown', detail: null, observed_at: null },
+      { source_key: 'frontend_web', display_name: 'Frontend', state: 'unknown', detail: null, observed_at: null },
+    ]);
+    await expect(service.serviceStatus({ sourceKey: 'backend_api' })).resolves.toEqual([
+      expect.objectContaining({ sourceKey: 'backend_api', state: 'unknown', freshnessState: 'unknown' }),
+    ]);
+    await expect(service.serviceStatus({ sourceKey: 'missing_key' })).resolves.toEqual([]);
+  });
+});
