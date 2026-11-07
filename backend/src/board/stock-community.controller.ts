@@ -92,12 +92,17 @@ export class PublicStockCommunityController {
     description:
       'Literal case-insensitive title match within the latest 50 public posts, 1-80 characters',
   })
+  @ApiQuery({ name: 'topic', required: false, enum: ['stock', 'general'], description: 'Filter the latest 50 public posts by presence of a stock context' })
   async list(@Query() query: Record<string, unknown>) {
-    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q')) {
+    if (Object.keys(query).some((key) => key !== 'stock' && key !== 'q' && key !== 'topic')) {
       throw new BadRequestException('invalid board search');
     }
     const stock = query.stock;
     const q = query.q;
+    const topic = query.topic;
+    if (topic !== undefined && topic !== 'stock' && topic !== 'general') {
+      throw new BadRequestException('invalid topic scope');
+    }
     if (
       stock !== undefined &&
       (typeof stock !== 'string' || !/^[A-Za-z0-9._-]{1,16}$/.test(stock.trim()))
@@ -115,7 +120,8 @@ export class PublicStockCommunityController {
     }
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
     return {
-      posts: await this.community.publicList(stock as string | undefined, q as string | undefined),
+      posts: await this.community.publicList(stock as string | undefined, q as string | undefined, topic as 'stock' | 'general' | undefined),
+      appliedTopic: topic ?? null,
     };
   }
 }

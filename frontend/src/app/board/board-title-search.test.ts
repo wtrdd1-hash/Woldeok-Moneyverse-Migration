@@ -21,3 +21,12 @@ describe('public board title search', () => {
     expect(page).toContain('robots: { index: !hasSearch');
   });
 });
+
+describe('board topic filter UI', () => {
+  it('offers a labeled topic select with a bounded source and noindexed filtered results', () => {
+    const page = readFileSync('src/app/board/page.tsx', 'utf8');
+    expect(page).toContain('name="topic"');
+    expect(page).toContain('종목 연결 글');
+    expect(page).toContain('robots: { index: !hasSearch');
+  });
+});
