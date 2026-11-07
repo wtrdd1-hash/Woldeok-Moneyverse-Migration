@@ -67,7 +67,7 @@ export async function POST(req: Request): Promise<NextResponse> {
           !Number.isSafeInteger(receipt?.remainingUnreadCount) || receipt.remainingUnreadCount < 0) {
         throw new Error('Invalid read-all receipt');
       }
-      return NextResponse.json(receipt, { headers: privateHeaders });
+      return NextResponse.json({ updatedCount: receipt.updatedCount, remainingUnreadCount: receipt.remainingUnreadCount }, { headers: privateHeaders });
     }
 
     if (typeof notificationId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(notificationId) && markAll === undefined) {
