@@ -54,4 +54,18 @@ describe('admin money-flow verified server render', () => {
     expect(html).not.toContain('9,007,199,254,740,992');
     expect(html).not.toContain('원장 조회에 실패');
   });
+  it('refuses a contradictory ledger summary instead of rendering fabricated 24-hour metrics', async () => {
+    apiMock.mockResolvedValue({
+      items: [],
+      summary: {
+        total_volume_24h: '50', total_inflow_24h: '40', total_outflow_24h: '20',
+        total_transactions_24h: 0, active_users_24h: 0,
+      },
+      next_cursor: null,
+    });
+    const html = renderToStaticMarkup(await AdminMoneyFlowPage(params));
+    expect(html).toContain('원장 조회에 실패');
+    expect(html).not.toContain('50 WLD');
+    expect(html).not.toContain('최근 24시간 동안 신규 체결된 거래가 없습니다');
+  });
 });

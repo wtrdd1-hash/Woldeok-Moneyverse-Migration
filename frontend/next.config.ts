@@ -197,6 +197,16 @@ const config: NextConfig = {
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
         { key: 'cache-control', value: 'private, no-store' },
       ] },
+      // The authenticated administrator ledger includes member identities and
+      // must never inherit public SEO or intermediary cache defaults.
+      ...['/admin/money-flow', ...['ko', 'en', 'ja', 'zh', 'vi'].map((locale) => `/${locale}/admin/money-flow`)].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
     ];
   },
 

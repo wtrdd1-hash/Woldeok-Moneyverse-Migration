@@ -34,7 +34,7 @@ describe('admin money-flow API evidence', () => {
   });
   it('distinguishes a verified empty ledger from a missing API response', () => {
     expect(validateMoneyFlowResponse(null)).toBeNull();
-    expect(validateMoneyFlowResponse({ ...valid, items: [], summary: { ...valid.summary, total_transactions_24h: 0 } })?.items).toEqual([]);
+    expect(validateMoneyFlowResponse({ ...valid, items: [], summary: { ...valid.summary, total_transactions_24h: 0, active_users_24h: 0, total_volume_24h: '0', total_inflow_24h: '0', total_outflow_24h: '0' } })?.items).toEqual([]);
   });
   it('rejects malformed or incomplete summaries instead of fabricating zeros', () => {
     expect(validateMoneyFlowResponse({ ...valid, summary: null })).toBeNull();
@@ -57,5 +57,16 @@ describe('admin money-flow API evidence', () => {
     expect(parsed).not.toBeNull();
     expect(parsed?.summary.all_time_transactions).toBeUndefined();
     expect(parsed?.summary.all_time_users).toBeUndefined();
+  });
+  it('rejects contradictory 24-hour debit/credit and volume totals instead of claiming financial evidence', () => {
+    expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, total_volume_24h: '9007199254740994' } })).toBeNull();
+    expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, total_inflow_24h: '1' } })).toBeNull();
+  });
+  it('rejects impossible empty activity and lifetime count relations', () => {
+    const zero = { ...valid.summary, total_transactions_24h: 0, active_users_24h: 0 };
+    expect(validateMoneyFlowResponse({ ...valid, summary: zero })).toBeNull();
+    expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, all_time_transactions: 0 } })).toBeNull();
+    expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, all_time_users: 0 } })).toBeNull();
+    expect(validateMoneyFlowResponse({ ...valid, summary: { ...valid.summary, all_time_transactions: 0, last_transaction_at: null } })).toBeNull();
   });
 });

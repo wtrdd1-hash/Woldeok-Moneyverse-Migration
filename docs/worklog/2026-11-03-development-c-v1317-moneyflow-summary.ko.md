@@ -1,0 +1,21 @@
+# 개발 C v1317 — 관리자 자금 흐름 요약 원본 검증
+
+## 시작 — 2026-11-03 03:15 KST
+- 미니PC Debian 13.6 서비스 7개 및 개발 PostgreSQL 연결 확인. 최신 main `f5c3fbedae1c3b3ec2374882b049aac43a655eb4`에서 독립 worktree/브랜치 생성. 다른 작업의 수정 파일은 보호.
+- AGENTS, README 영·한, 통합기획 영문 정본·한국어 보조, 최신 PR·CI·A/B/QA 기록 검토. 동일 관리자 자금흐름 요약 검증 PR 없음.
+- 실제 코드 결함: Backend의 24시간 원장 합계와 누적 건수의 관계를 Next 검증기가 확인하지 않아 모순된 응답을 정상 금융 통계로 표시할 수 있음.
+- 계획: 실패 테스트 선작성 → 최소 수정 → 관리자 접근성·비공개 HTTP·실제 DB 확인 → 최종 SHA 검증. 금융 원장·DB·운영 변경 금지. 상태: 진행 중.
+
+## 중간 — 2026-11-03 03:16 KST
+- TDD 실패 3건 및 비공개 헤더 6경로 실패를 재현. BigInt 기반 합계·건수 검증과 관리자 6경로 HTTP 개인정보 보호 수정 후 집중 테스트 17/17 PASS.
+- 원장·API·DB 쓰기 없음. 모바일 가로 스크롤 표에 키보드 초점과 스크린리더 레이블 추가. main 중간 재확인 SHA 변동 없음. 전체 게이트는 아직 미완료.
+
+## 중간 2 — 2026-11-03 03:18 KST
+- 네트워크 차단 격리 PostgreSQL 17.11에 마이그레이션 328개 적용. 앱 역할은 원장 테이블을 읽을 수 있으나 `member_profiles` SELECT 권한이 없어 기존 Nest 자금흐름 SQL은 `42501` 오류 발생. **기존 P0 데이터 소스 차단** 확인; DB 직접 GRANT 금지, 관리자 범위 `SECURITY DEFINER` 조회 함수가 별도 필요.
+- SQL 오류 세부정보를 노출하지 않는 503 응답과 비공개 헤더 추가. Backend 집중 테스트 28/28 PASS. 검증 컨테이너 제거. 최종 전체 게이트와 공식 Test는 미완료.
+
+## 종료 기록 — 2026-11-03 03:26 KST — PARTIAL / RELEASE BLOCKED
+- 1차 코드 SHA `64d2ff91bf4781c0fbe8e707a3af4fa0660b451c` 검증: Lint 오류 0/경고 1,028, Typecheck·Frontend/Backend Build PASS, Frontend 2,956 PASS, Backend 2,986 PASS/2 FAIL/518 SKIP, DB 패키지 72 PASS/5 SKIP, app-api·보안 스크립트 PASS. 기존 프로필 HTTP 2건은 200 예상/401 실제. 의존성 취약점 9건 및 전체 경로 QA 증빙 누락으로 FAIL.
+- 로컬 Next HTTP 비공개 헤더 확인. 지원 언어가 `zh-CN`이 아닌 `zh`임을 발견해 수정. 로그인 없는 로컬 HTTP 200은 실제 관리자 기능 E2E가 아님. 로컬 버전은 Git SHA 불일치.
+- 공식 Test `2dd507030dc1e461cbcf18f060260959f4c26a8f`, Production `305d7c7fec2e5fe6d6b3ae67a9fe54a20ba1758b`: 후보 SHA와 다름. 격리 PostgreSQL 기존 `member_profiles` 권한 오류는 이슈 #993에 기록. 실제 사용자 E2E·공식 Test exact-SHA·복원 미실행으로 릴리스 보류.
+- Draft PR #2567, 최종 SHA 재검증 및 CI·백업 상세는 PR 기록. main 병합·Test/Production·GitOps·롤백·브랜치 삭제 없음. 다른 A/B/QA/Gemini 및 핵심 예약 5개 변경 없음.
