@@ -3009,3 +3009,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### v1878 — F675-275 SLA 불일치 에스컬레이션 전달 보증 (기능 추가, 기획 전용)
+- **주기:** 이전 v1876 기능 보완 → 현재 v1878 기능 추가 → 다음 v1880 기능 보완. 미병합 F675-271~274 PR 선행; 병합 전 중복·충돌 정리. **P0** `/srv/moneyverse`의 prod-v600 대상 누락과 과거 다국어 500을 운영 SHA로 재검증하고 출시 보류. **P1** 미병합 기획 PR 및 실제 frontend/admin·backend·app-api·DB·outbox 계약 대조.
+- **목적·대상·진입:** 테넌트 준법 관리자가 관리자 > SLA 증빙 > 전달 보증에서 F675-274 기한 초과 에스컬레이션 알림의 전달 실패를 확인. 독립 승인자만 재전달·최종 억제를 승인. 전달 성공을 증빙 유효성으로 간주하거나 F675-273 불일치를 자동 종결하지 않음.
+- **화면·CTA·상태:** 심각도·채널·기한·시도 횟수·영수증·마스킹 실패 사유 목록, 상세 보기/재시도/억제 승인/비식별 감사 내보내기. QUEUED → SENDING → DELIVERED/RETRY_WAIT/FAILED_FINAL, 독립 승인 후 SUPPRESSED, 종결 REVOKED. 빈 화면·로딩·오류·오래된 데이터·권한 거부와 시간대 표시.
+- **제안 API(미구현):** GET /admin/sla/escalation-deliveries?cursor&state, GET /admin/sla/escalation-deliveries/:id, POST /:id/retry, POST /:id/suppress-preview, POST /:id/suppress-approve, GET /:id/audit (모두 동일 관리자 경로 하위). 테넌트 RBAC, 변경 CSRF, Idempotency-Key, If-Match, 제한된 페이지, 403/404/409/422/429, 타 테넌트 존재 정보 비노출.
+- **DB·트랜잭션:** delivery_attempt(식별자·tenant_id·escalation_id·채널·수신자 해시·시도번호·상태·제공자 영수증 해시·다음 시각·버전·생성 시각), 불변 delivery_event, 트랜잭션 outbox. (tenant_id,escalation_id) 복합 FK, (tenant_id,escalation_id,channel,recipient_digest,attempt_no) UNIQUE, 상태/시도번호 CHECK, QUEUED·RETRY_WAIT 부분 인덱스, 제공자 이벤트 중복 UNIQUE. SKIP LOCKED 임대·펜싱·CAS, 감사/outbox 원자 처리; 원문 수신자·토큰 로깅 금지.
+- **보안·악용 방지:** 재시도 상한, 지수 백오프·지터, 테넌트/채널 제한, 실패 대기열, 콜백 서명 검증·키 교체, 실효 신원 기준 요청자/승인자 분리, 동의·전달정책 불명확 시 차단. 억제는 서명 증빙 유효성 변경 불가. 관리자 noindex·사이트맵 제외, 비식별 지표만 사용.
+- **모바일·접근성·KPI:** 320px, 키보드 조작, 의미 있는 상태 표시, WCAG 2.2 AA, 영·한 동등성. 전달 p50/p95, 확인률, 재시도 소진, 중복 방지, 수동 억제, 테넌트별 알림량 측정.
+- **테스트·배포·롤백:** 계약·DB 제약/인덱스/마이그레이션, 테넌트 IDOR, 중복 웹훅, 제공자 장애, 임대 만료, 작업자 중단, 동의 철회, DST, 동시성, 감사 불변성, 접근성 회귀. `admin_sla_escalation_delivery_assurance_v1` 기본 OFF. 별도 개발 브랜치·격리 Test 정확한 SHA·제공자 샌드박스·백업 복원·회귀 후 점진 승격. 롤백은 UI/작업자 비활성화하되 감사/outbox 및 기존 SLA·증빙·원장 불변. 기획 예약은 배포 금지.
+- **외부 독립 근거 게이트:** 이번 신규 검증 0건, 누적 UNKNOWN / 10,000건. 확보·중복 제거·근거 분류 BLOCKED / IN PROGRESS. 분산 기획 파일 추가 없음.
