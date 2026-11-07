@@ -57,6 +57,19 @@ function isVerifiedOldestSupportThreads(payload: unknown): boolean {
   return true;
 }
 
+function isVerifiedShopUpkeepCatalog(payload: unknown, ceiling: string): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+  const rows = (payload as { catalogItems?: unknown }).catalogItems;
+  if (!Array.isArray(rows) || rows.length > 1000) return false;
+  const cap = BigInt(ceiling);
+  return rows.every((row: unknown) => {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+    const amount = (row as { maintenance_cost?: unknown }).maintenance_cost;
+    return typeof amount === 'string' && /^(0|[1-9][0-9]*)$/.test(amount) &&
+      BigInt(amount) <= cap;
+  });
+}
+
 function isVipChestPath(parts: readonly string[]): boolean {
   return parts[0] === 'engagement' && parts[1] === 'dopamine' && parts[2] === 'vip-chest';
 }
@@ -210,6 +223,16 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     return gatewayProblem(400, 'Bad Request', 'work_receipt_reward_invalid',
       'minimum reward must be a canonical non-negative WLD integer');
   }
+
+  const shopCatalogGet = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'shop' && ['catalog', 'public-catalog'].includes(parts[1]!);
+  const upkeepValues = shopCatalogGet ? request.nextUrl.searchParams.getAll('maxUpkeep') : [];
+  if (upkeepValues.length > 1 || (upkeepValues.length === 1 &&
+      !/^(0|[1-9][0-9]{0,29})$/.test(upkeepValues[0]!))) {
+    return gatewayProblem(400, 'Bad Request', 'shop_upkeep_invalid',
+      'maxUpkeep must be a canonical non-negative WLD integer up to 30 digits');
+  }
+  const shopUpkeepCeiling = upkeepValues[0] ?? null;
 
   const receiptAmountFilter =
     parts.length === 2 &&
@@ -511,6 +534,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
+  if (shopUpkeepCeiling !== null && response.ok && !isJsonMediaType(response.headers.get('content-type'))) {
+    return gatewayProblem(503, 'Service Unavailable', 'shop_upkeep_unverified',
+      'shop upkeep evidence is unavailable');
+  }
+
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
   }
@@ -521,6 +549,11 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (shopUpkeepCeiling !== null && response.ok &&
+          !isVerifiedShopUpkeepCatalog(compatible, shopUpkeepCeiling)) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_upkeep_unverified',
+          'shop upkeep evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +582,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (shopUpkeepCeiling !== null && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'shop_upkeep_unverified',
+          'shop upkeep evidence is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -568,6 +605,12 @@ async function handle(request: NextRequest, context: Context) {
   const response = await proxy(request, parts);
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+  if (parts.length === 2 && parts[0] === 'shop' &&
+      (parts[1] === 'catalog' || (parts[1] === 'public-catalog' && request.nextUrl.searchParams.has('maxUpkeep')))) {
+    response.headers.set('cache-control', parts[1] === 'catalog' ? 'private, no-store' : 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');
   }
