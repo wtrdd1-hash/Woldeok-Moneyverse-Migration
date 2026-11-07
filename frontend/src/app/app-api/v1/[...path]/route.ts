@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { isVerifiedBoardStockName, parseBoardStockName } from '@/app/board/board-stock-name-search';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -111,6 +112,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const boardStockNamePath = parts.length === 3 && parts[0] === 'board' &&
+    parts[1] === 'public' && parts[2] === 'stock-posts';
+  const boardStockNameValues = boardStockNamePath ? request.nextUrl.searchParams.getAll('stockName') : [];
+  const boardStockName = boardStockNameValues.length === 1 ? parseBoardStockName(boardStockNameValues[0]) : null;
+  if (boardStockNameValues.length > 0 && (boardStockNameValues.length !== 1 ||
+      !boardStockName || boardStockName.invalid || !boardStockName.query)) {
+    return gatewayProblem(400, 'Bad Request', 'board_stock_name_invalid', 'invalid stock name search');
+  }
+  // HEAD has no response body with which to establish source filtering.
+  if (boardStockNameValues.length > 0 && request.method === 'HEAD') {
+    return gatewayProblem(503, 'Service Unavailable', 'board_stock_name_unverified',
+      'stock-name search proof is unavailable for HEAD');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -354,6 +369,19 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (boardStockName?.query && response.ok) {
+    try {
+      if (!isJsonMediaType(response.headers.get('content-type')) ||
+          !isVerifiedBoardStockName(await response.clone().json(), boardStockName.query)) {
+        return gatewayProblem(503, 'Service Unavailable', 'board_stock_name_unverified',
+          'stock-name filtering could not be verified');
+      }
+    } catch {
+      return gatewayProblem(503, 'Service Unavailable', 'board_stock_name_unverified',
+        'stock-name filtering could not be verified');
+    }
+  }
+
   // Date filters must be enforced by the owner-scoped source, not merely echoed by an old backend.
   if (supportRange && response.ok) {
     try {
@@ -585,13 +613,16 @@ async function handle(request: NextRequest, context: Context) {
   if (parts[0] === 'work') response.headers.set('referrer-policy', 'no-referrer');
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') ||
+      request.nextUrl.searchParams.has('stockName'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
   }
   // Query-specific public board results are not stable crawlable pages.
   if (parts.length === 3 && parts[0] === 'board' && parts[1] === 'public' &&
-      parts[2] === 'stock-posts' && request.nextUrl.searchParams.has('q')) {
+      parts[2] === 'stock-posts' && (request.nextUrl.searchParams.has('q') ||
+      request.nextUrl.searchParams.has('stockName'))) {
     response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
   }
