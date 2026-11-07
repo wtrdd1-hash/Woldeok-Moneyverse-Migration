@@ -22,3 +22,11 @@ describe('admin support responsive and accessibility contract', () => {
     expect(page).toContain("robots: { index: false, follow: false }");
   });
 });
+
+describe('admin support selected thread authorization boundary', () => {
+  it('only selects a thread returned by the authorized thread list', () => {
+    expect(page).toContain('threads.find(thread => thread.thread_id === q.thread)?.thread_id');
+    expect(page).not.toContain('const selected = q.thread ??');
+    expect(page).toContain('encodeURIComponent(selected)');
+  });
+});
