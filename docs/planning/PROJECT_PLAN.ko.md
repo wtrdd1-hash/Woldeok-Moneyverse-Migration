@@ -1,4 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
+
+## v2026.11.07.1900 — F675-280 이상징후 감사 무결성 보완 (기능 보완 / 초안 / 운영 보류)
+- 주기: 이전 기능 추가 v1898 → 현재 기능 보완 v1900 → 다음 기능 추가 v1902. 기준 main SHA 0b5b2b1385d2a75614d39458dff94f7d3098ed03. 기획만 변경하며 이전 F675-280은 미병합·미검증.
+- 목적: 높은 이상 점수만이 아니라 테넌트별 완전하고 진본인 증빙으로 판단한다. 대상은 테넌트 보안·준법 심사자, 진입점 관리자 > 준법 > 증빙 접근 > 이상징후. 탐지는 위반 확정이 아니다. 선행 F675-279의 권한 세대·감사 서명·내보내기 차단 구현 및 정확 SHA 검증 필수.
+- 화면/CTA: 마스킹 증빙 이력, 이벤트 발생·수집 시각, 규칙 버전, 워터마크, 누락 경고, 심각도·독립 심사자 표시; 담당 지정·백필 요청·확인·차단 요청·독립 승인/거절·사유 포함 오탐 종결. 로딩·지연·빈 상태·403·409·오류·부분·차단 상태 구분. 모바일 320px WCAG 2.2 AA, 키보드·스크린리더, 영한 동등성, 관리자 noindex/private no-store.
+- API: v1898 제안 API 6개 유지, GET /api/v1/admin/evidence-access/anomalies/:id/integrity 추가 제안(watermark,missing_ranges,source_digest,rule_version,verified_at,integrity_state 반환, 원본 증빙 제외). 테넌트 RBAC·실효 신원 분리·CSRF·쓰기 If-Match/Idempotency-Key. 권한 세대 충돌 409, 오래된 버전 412, 잘못된 전이 422, 속도 제한 429, 불신 감사 503. 실제 구현으로 주장하지 않는다.
+- DB: anomaly_integrity_snapshots 복합 PK(tenant_id,anomaly_id,snapshot_generation), 테넌트 복합 FK, watermark>=0 CHECK, 이벤트 저널 UNIQUE(tenant_id,partition_id,source_offset), 미해결 사건 부분 인덱스 제안. 단일 트랜잭션에서 테넌트 커서 잠금·UUID 중복 제거·다이제스트/사건/감사/Outbox 기록·오프셋 전진. CAS·작업자 펜싱으로 오래된 쓰기 방지. 외부 통지·철회는 커밋 후 멱등 Outbox 사용.
+- 안전 차단: 오프셋 누락·서명 오류·철회 키·알 수 없는 권한 세대·지연 워터마크는 DATA_GAP/BLOCKED, 불신 증빙에 따른 자동 차단 금지. 긴급 철회는 F675-279의 별도 독립 승인. 지연·역순 이벤트는 결정적으로 재계산하거나 INCOMPLETE 표시, 종결 판단을 몰래 변경하지 않는다. 이미 반출한 바이트는 회수 불가 기록.
+- 보안/KPI/QA: 행위자 가명화, 규칙 기간 제한, 테넌트 격리, 최소 표본 및 원문 개인정보 분석 금지; 탐지 완전성·오탐 정밀도·차단 지연(분모 명시). 누락·재생·지연·시계 오차·서명키 교체·동시 승인·교차 테넌트·내보내기 중 철회·모바일 접근성·영한 동등성·백업·롤백 테스트. 플래그 admin_evidence_access_anomaly_triage_v1 기본 OFF. 별도 개발 브랜치, 격리 PostgreSQL/Next/Nest/app-api 정확 SHA Test, 보안 승인, 카나리·롤백.
+- P0: /srv/moneyverse prod-v600 링크 부재, 실제 배포 SHA와 /en,/en/login, DB 권한·체크섬·독립 복원·원장 대사·국내 법률. P1: 미병합 기획·F675-271~279 정합성, 실제 app-api/DB/감사 계약·최신 QA 확인. 외부 독립 레퍼런스 신규 검증 0건, 중복 제거 누적 UNKNOWN/10,000건, BLOCKED/IN PROGRESS. 운영 보류.
+
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
