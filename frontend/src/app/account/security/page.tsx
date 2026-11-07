@@ -92,7 +92,8 @@ export default async function AccountSecurityPage({
   const events = eventData ?? [];
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
-  const revoked = typeof params.revoked === 'string' ? params.revoked : null;
+  // Navigation parameters are user-controlled hints, never mutation receipts.
+  const revokeNotice = params.revoked !== undefined;
 
   return (
     <div data-page="account-security" className="mx-auto w-full max-w-4xl space-y-6 pb-16 pt-2 sm:space-y-8 sm:pt-4">
@@ -120,35 +121,37 @@ export default async function AccountSecurityPage({
         <Alert className="border-primary/30 bg-primary/5">
           <ShieldCheck className="size-4 text-primary" />
           <AlertDescription className="text-xs font-medium">
-            본인 확인이 완료되었습니다. 민감한 보안 작업을 안전하게 계속할 수 있습니다.
+            본인 확인 상태는 보안 작업 실행 시 서버에서 다시 검사합니다. 필요한 작업을 진행해 주세요.
           </AlertDescription>
         </Alert>
       )}
       {params.email === 'verification-sent' && (
         <Alert className="border-primary/30 bg-primary/5">
           <AlertDescription className="text-xs font-medium">
-            이메일 변경 확인 메일 발송 요청이 접수되었습니다. 새 주소의 받은편지함을 확인해 주세요. 링크 확인 완료 시 모든 세션이 종료됩니다.
+            새 이메일의 받은편지함을 확인해 주세요. 메일 발송 및 주소 변경 완료 여부는 이 주소만으로 확인할 수 없습니다.
           </AlertDescription>
         </Alert>
       )}
       {params.password === 'changed' && (
         <Alert className="border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
           <AlertDescription className="text-xs font-medium">
-            비밀번호를 성공적으로 변경하였으며 다른 로그인 세션을 모두 안전하게 종료했습니다.
+            비밀번호 변경 여부는 아래 보안 활동 기록에서 확인해 주세요. 이 안내만으로 변경 또는 다른 세션 종료를 보장하지 않습니다.
           </AlertDescription>
         </Alert>
       )}
       {params.session === 'revoked' && (
         <Alert>
           <AlertDescription className="text-xs font-medium">
-            선택한 기기의 세션을 원격으로 종료했습니다.
+            기기 목록을 다시 확인해 주세요. 종료 결과는 아래 서버에서 조회한 활성 세션 목록으로 판단해 주세요.
           </AlertDescription>
         </Alert>
       )}
-      {revoked !== null && (
+      {revokeNotice && (
         <Alert>
           <AlertDescription className="text-xs font-medium">
-            다른 활성 세션 {revoked}개를 모두 안전하게 종료했습니다.
+            {sessionData === null
+              ? '다른 기기 종료 결과를 확인할 수 없습니다. 세션 목록을 다시 조회해 주세요.'
+              : `현재 서버에서 확인된 다른 활성 세션 ${otherCount}개입니다. 목록에서 종료 여부를 확인해 주세요.`}
           </AlertDescription>
         </Alert>
       )}

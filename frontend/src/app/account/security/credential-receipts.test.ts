@@ -35,7 +35,7 @@ describe('member local credential mutation receipts', () => {
   });
 
   it('does not promise actual email delivery from an accepted send request', () => {
-    expect(page).toContain('이메일 변경 확인 메일 발송 요청이 접수되었습니다.');
+    expect(page).toContain('메일 발송 및 주소 변경 완료 여부는 이 주소만으로 확인할 수 없습니다.');
     expect(page).not.toContain('새 로그인 이메일로 확인 링크를 보냈습니다.');
     expect(page).toContain('robots: { index: false, follow: false }');
     expect(page).toContain('min-h-11');
