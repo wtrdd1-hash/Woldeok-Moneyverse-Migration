@@ -2957,7 +2957,15 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 6. **P1:** protected-main required checks/ruleset을 실제 machine-enforced gate로 전환.
 7. core correctness → shop/payment/subscription unit economics → SEO/acquisition → retention/growth → accessibility/장기확장. 런타임 구현은 별도 branch/test/exact-SHA/QA/promotion/smoke/rollback 흐름을 따른다.
 
-**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
+**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n## v2026.11.08.1922 — F675-286 독립 심사 결정 증빙 묶음 (기능 추가 / 초안 / 배포 보류)
+- 주기: 이전 기능 보완 v1920, 현재 기능 추가 v1922, 다음 기능 보완 v1924. 기준 main b56fdc748dd817eb250b7d5d06019aaf5c299131, 선행 PR #2892 미병합. 기능 플래그 admin_evidence_review_decision_bundle_v1 기본 OFF. 미구현 제안.
+- 목적·권한·진입: 사건/CAPA/SLA 결정 당시 심사자 적격성을 비식별 증빙으로 재현. 관리자 > 증빙 사고 > 결정 > 증빙 준비. 테넌트 evidence:decision:export 권한 및 최근 MFA 필수, 자기 승인·위임 순환 승인 금지.
+- 화면·상태: 이해충돌 신고 세대, 실효 심사자, 위임 관계 해시, 정책 버전, MFA 확인, 결정 서명, 출처 해시 체크리스트. 준비/독립 승인 요청/다운로드/철회. REQUESTED, COLLECTING, AWAITING_APPROVAL, READY, EXPIRED, REVOKED, BLOCKED. 누락·만료 자료는 BLOCKED. 320px, WCAG 2.2 AA, 영한 동등.
+- 제안 API: POST /api/v1/admin/evidence/decisions/:id/proof-bundles 멱등성 키·If-Match, GET 묶음, POST 승인·철회·1회 다운로드 토큰. 401/403/교차 테넌트 404, 409 세대 충돌, 412 ETag, 422 증빙 오류, 429 제한, 503 원천 장애. 엣지·원본 private no-store/noindex.
+- 제안 DB: review_decision_proof_bundle 테넌트 복합 PK·결정 세대 FK·승인자·매니페스트 SHA256·만료·상태·개정; review_decision_proof_item 복합 FK·출처 세대/해시/비식별 등급; review_decision_proof_download 토큰 해시 UNIQUE·TTL·사용 시각. 멱등 UNIQUE, 상태 CHECK, 대기 부분 인덱스. 세대 CAS·감사·Outbox 원자적 처리, RLS·최소권한, 원장 쓰기 금지.
+- 보안·KPI: 승인 시 신원·이해충돌·위임·서명키 철회 재검증. MFA 비밀·개인정보·원본 비공개, 테넌트 결합 1회 토큰, 정책·권한·사건 변경 시 철회, 조회·다운로드 감사, 속도 제한. 완료율·차단 사유·철회 지연·재사용 시도 집계, 개인정보 집계 최소 20. 관리자 SEO 제외.
+- 테스트·배포: 격리 PostgreSQL RLS/FK, 동시 승인·철회, 세대 변경, 키 철회, 토큰 재사용, 원천 장애, 접근성, 언어, 계정 전환, 엣지 캐시, 복원·롤백은 제안이며 미실행. Test exact-SHA·독립 승인·롤백 증명 전 OFF 유지. P0 운영 prod-v600 링크 손상, DB ACL/체크섬, 독립 복원, 원장 대사, 법률 검토, 배포 SHA. P1 F675-281~285 선행 계약·미병합 PR·frontend/backend/app-api 연동. 외부 근거 신규 0, 누적 UNKNOWN / 10000, 중복 제거·출처 검증 BLOCKED / IN PROGRESS. 운영 배포 없음.
+\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
 
 가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.
 
