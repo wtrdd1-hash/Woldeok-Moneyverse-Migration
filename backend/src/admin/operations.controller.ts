@@ -267,6 +267,16 @@ export function resolveAdminDmConfiguration(
   return { configured: true, adminUserId: explicitRecipient };
 }
 
+/** Test-only labels. Never feed synthetic incidents into production alert formatters. */
+const DM_TEST_PRESETS = {
+  default: '기본 관리자 DM 연동',
+  whale: '고액 이체 감지 시나리오',
+  jackpot: '카지노 잭팟 감지 시나리오',
+  treasury: '국고 준비금 경보 시나리오',
+  killswitch: '긴급 중단 경보 시나리오',
+  bank_delinquency: '대출 연체 경보 시나리오',
+} as const;
+
 @ApiTags('admin')
 @Controller('admin/discord')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -304,63 +314,23 @@ export class AdminDiscordOperationsController {
     const adminUserId = readiness.adminUserId;
     const preset = body?.preset ?? 'default';
 
-    let result: { success: boolean; channelId?: string; error?: string };
-
-    switch (preset) {
-      case 'whale':
-        result = await this.discordAlert.alertWhaleMovement({
-          txId: `tx-whale-${Date.now().toString(36)}`,
-          sender: 'acc-whale-kr-0089',
-          receiver: 'acc-exchange-cold-vault',
-          amount: '85000000',
-          asset: 'WLD',
-        });
-        break;
-      case 'jackpot':
-        result = await this.discordAlert.alertCasinoMegaJackpot({
-          game: '메가 드래곤 777 슬롯머신',
-          userId: actor,
-          betAmount: '500000',
-          winAmount: '120000000',
-          multiplier: 240,
-        });
-        break;
-      case 'treasury':
-        result = await this.discordAlert.alertTreasuryReserveLow({
-          currentBalance: '840000000',
-          threshold: '1000000000',
-          reserveRatio: '14.2%',
-        });
-        break;
-      case 'killswitch':
-        result = await this.discordAlert.alertKillSwitchActivated({
-          controlName: '가상 주식 거래소 체결 엔진',
-          activatedBy: actor,
-          reason: '긴급 시스템 이상 감지 및 시장 안정화 조치',
-          action: 'HALTED',
-        });
-        break;
-      case 'bank_delinquency':
-        result = await this.discordAlert.alertBankDelinquencySpike({
-          delinquentRatio: '8.7% (경보 구간)',
-          defaultedCount: 14,
-          affectedAmount: '42,500,000',
-        });
-        break;
-      case 'default':
-      default:
-        result = await this.discordAlert.sendAdminDirectMessage({
-          title: '🔔 [관리자 DM 연동 확인] 월덕 머니버스 중요 정보 다이렉트 알림',
-          description: '디스코드 봇을 통한 중요 정보(원장 불일치, 음수 잔액, 감사 체인 변조 등) 1:1 전송 파이프라인이 정상 연동되었습니다.',
-          color: 0x10b981,
-          fields: [
-            { name: '수신 관리자 ID', value: `\`${adminUserId}\``, inline: true },
-            { name: '테스트 요청자', value: `\`${actor.slice(0, 8)}...\``, inline: true },
-            { name: '감시 항목', value: '원장 대사 무결성, 계좌 잔액 안전성, 감사 체인 변조, 긴급 관리자 경보', inline: false },
-          ],
-        });
-        break;
+    if (!Object.hasOwn(DM_TEST_PRESETS, preset)) {
+      throw new BadRequestException('unknown administrator DM test preset');
     }
+    const label = DM_TEST_PRESETS[preset as keyof typeof DM_TEST_PRESETS];
+    // This route proves DM transport only. It must never invoke the real incident
+    // formatters with invented transaction ids, balances, jackpot wins or halts.
+    const result = await this.discordAlert.sendAdminDirectMessage({
+      title: `[TEST / 실제 발생 아님] ${label}`,
+      description: '실제 발생 아님 — 관리자 DM 전송 경로를 확인하는 모의 시나리오입니다. 거래, 지급, 장애, 제어 변경은 실행되지 않았습니다.',
+      color: 0x64748b,
+      fields: [
+        { name: '시나리오', value: label, inline: true },
+        { name: '테스트 요청자', value: `${actor.slice(0, 8)}...`, inline: true },
+        { name: '증거 범위', value: 'Discord DM API 수락 여부만 확인. 실제 금융 사건 및 사용자 수신·열람 증명 아님.', inline: false },
+      ],
+      footer: { text: 'Woldeok Moneyverse TEST ONLY — not a real operational incident' },
+    }, adminUserId);
 
     return { ...result, targetUserId: adminUserId, preset };
   }
