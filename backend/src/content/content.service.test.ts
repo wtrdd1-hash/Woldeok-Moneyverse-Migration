@@ -84,3 +84,25 @@ describe('ContentService status freshness contract', () => {
     })]);
   });
 });
+describe('published gallery Seoul-day filter', () => {
+  const image = '/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg';
+  it('selects the KST day from the existing bounded approved-public PostgreSQL read', async () => {
+    const repository = repositoryWithPhoto(image);
+    repository.publishedPhotos.mockResolvedValue([
+      { photo_id: PHOTO_ID, image_url: image, alt_text: 'before midnight', published_at: new Date('2026-09-06T14:59:59.999Z') },
+      { photo_id: '1d5a6db0-c657-4f93-9538-52923c0d56f1', image_url: image, alt_text: 'after midnight', published_at: new Date('2026-09-06T15:00:00.000Z') },
+      { photo_id: '88f46e87-c632-4bc1-8f7b-fb29e563be53', image_url: image, alt_text: 'next day', published_at: new Date('2026-09-07T15:00:00.000Z') },
+    ]);
+    const service = new ContentService(repository);
+    await expect(service.publicPhotos({ day: '2026-09-07' })).resolves.toEqual([
+      expect.objectContaining({ altText: 'after midnight' }),
+    ]);
+    expect(repository.publishedPhotos).toHaveBeenCalledWith({ limit: 24 });
+  });
+  it.each(['2026-02-30', '2025-02-29', '2026-9-07', '2026-09-07Z', '', ['2026-09-07', '2026-09-08']])(
+    'rejects malformed or duplicate gallery day %s', async (day) => {
+      const service = new ContentService(repositoryWithPhoto(image));
+      await expect(service.publicPhotos({ day })).rejects.toThrow();
+    },
+  );
+});
