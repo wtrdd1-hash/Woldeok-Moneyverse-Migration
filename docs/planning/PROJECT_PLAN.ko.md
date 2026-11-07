@@ -1,6 +1,19 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.05.1808 — F675-257 예외 판정 무결성 보완 (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
+- **주기:** 이전 기능 추가 v1806 → 현재 기능 보완 v1808 → 다음 기능 추가 v1810. 기준 main `0b5b2b1385d2a75614d39458dff94f7d3098ed03`; 기획서만 수정. F675-249~257의 main 병합·구현은 확인되지 않았으므로 활성화 금지.
+- **목적·권한·진입:** 테넌트 보안 관리자가 관리자 → SLA 사고 → 인계 이력 대사 → 예외에서 접근. 조사자가 판정을 제안하고 별도의 독립 검토자가 승인·거절하며 감사자는 읽기 전용. 조회·수정·커밋 시 실효 사용자, 위임 관계, 테넌트·팀 범위, 권한 및 계정 상태 재검증.
+- **상태·화면:** `OPEN → INVESTIGATING → PROPOSED → APPROVED|REJECTED`; 증빙 누락·상충·만료는 `UNKNOWN`, 새로운 상충 관측 시 `REOPENED`. 담당 지정, 재관측 요청, 판정 제안, 독립 승인·거절, 재개 CTA. 승인이 철회 해제를 의미하지 않으며 원본 철회 상태에 따른 다운로드 차단 유지.
+- **API 제안(실제 NestJS 라우트 검증 후 구현):** `GET /admin/sla/custody-exceptions?cursor=&status=`, `GET /admin/sla/custody-exceptions/:id`, `POST /admin/sla/custody-exceptions/:id/proposals`, `POST /admin/sla/custody-exceptions/:id/decisions`, `POST /admin/sla/custody-exceptions/:id/reobserve`, `POST /admin/sla/custody-exceptions/:id/reopen`. 변경 요청에 Idempotency-Key, If-Match/버전, 증빙 세대 및 사유 길이 검증; 낡은 상태는 409, 타 테넌트 정보는 403/404에서 노출 금지.
+- **DB·트랜잭션:** 테넌트 포함 사고·대사·행위자 복합 FK, 합법적 상태 전이와 자기 승인 금지 CHECK, 예외별 활성 제안 하나의 부분 UNIQUE, (tenant_id,status,updated_at,id) 인덱스, (tenant_id,idempotency_key,action) 고유성. CAS 상태 변경·불변 감사·Outbox를 단일 트랜잭션으로 처리. 증빙 서명 해시·세대·검토자·정책 버전 보관, 이벤트에 개인정보 원문 금지.
+- **보안·운영:** 승인에 증빙 해시·세대·테넌트·정책 버전을 결합. 만료·서명키 철회 시 승인 대신 UNKNOWN. 작업자 펜싱, Outbox 중복 제거·재시도·데드레터, 사용자·테넌트별 속도 제한. 철회 원본이나 의존 시스템 장애 시 안전 차단. 위임 계정도 자기 승인 금지.
+- **UX·SEO·지표:** 관리자 화면 noindex/no-store, 키보드 접근 가능한 대화상자·상태 알림, 320px 대응, WCAG 2.2 AA, 한영 동등성. 예외 처리 p95, 만료 증빙 비율, 승인 거절률, 권한 위반, 재개율, Outbox 지연 측정; 분석에 개인정보 원문 제외.
+- **테스트·배포:** 단위·실제 PostgreSQL FK/CAS·경합·자기 승인·위임·테넌트 격리·키 침해·만료·재생·Outbox 장애·롤백, 인증된 exact-SHA Test E2E, 모바일·접근성·한영 회귀. 기능 플래그 `admin_sla_custody_exception_disposition_v1` 기본 OFF; 스키마 확장 우선·관리자 카나리·모니터링·플래그 OFF 롤백. 승인 PR·CI·복원·원장 검증 전 운영 승격 금지.
+- **P0 근거(2026-11-05 19:16 KST QA):** 운영 /en, /en/login HTTP 500, Test 200; https://localhost:4495 미들웨어 재작성은 원인 의심이며 확정 아님. 운영 백엔드 재시작 121593회, /srv/moneyverse 심볼릭 링크 대상 없음. 실제 운영 SHA 기준 별도 원인 규명·검증 필요; RELEASE HOLD.
+- **P1 백로그:** F675-249~257 Draft PR과 main 정합성, 실제 frontend/backend/app-api/API/DB 계약 조사, 선행 기능 개발 예약 구현과 exact-SHA Test 검증. **외부 독립 레퍼런스:** 이번 검증 0건, 누적 UNKNOWN / 10,000건; BLOCKED / IN PROGRESS, 달성 아님.
+
+
 ## v2026.10.30.1518 — F675-185 보관함 상태·유지비 근거 강화 (기능 보완 / 초안 / 운영 보류)
 - **주기:** 이전 추가 v1516 → 현재 보완 v1518 → 다음 추가 v1520(잠정). 정본 main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` 시작·중간 확인, 선행 #2025, 이슈 #2024, 초안 #2029. 기획 문서만.
 - **소스 근거:** 마이그레이션 123은 현행 유지비*수량*(유예 주)으로 주간 비용·상한을 계산하지만 저장된 체납액/주 수/정지 여부는 행 부재 시 0/0/false가 된다. 완납·주간 실행 증빙 아님. 마이그레이션 104는 한국시간 월요일 04:30 영수증 사용. 정책 변경 시 현재 상한<저장 체납 가능하므로 자동 보정 금지. durable은 영구/유지비와 다르고 효과 만료는 미래 영수증 최대 시각일 뿐 장착·적용 인증 아님. clock_timestamp 다중 호출로 동일 시각 인증 불가.
