@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ mutate: vi.fn(), read: vi.fn(), revalidate: vi.fn() }));
+const mocks = vi.hoisted(() => ({ mutate: vi.fn(), read: vi.fn(), revalidate: vi.fn(), cookieSet: vi.fn() }));
+vi.mock('next/headers', () => ({ cookies: async () => ({ set: mocks.cookieSet }) }));
 vi.mock('@/lib/mutate', () => ({ mutate: mocks.mutate }));
 vi.mock('@/lib/api', () => ({ api: mocks.read }));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidate }));
@@ -20,15 +21,17 @@ describe('member notification preference persistence', () => {
   it('announces saved only after matching PUT receipt and fresh owner dashboard', async () => {
     mocks.mutate.mockResolvedValue({ notifications_enabled: false });
     mocks.read.mockResolvedValue({ notifications_enabled: false });
-    await expect(saveGoalNotifications(preference('false'))).rejects.toThrow('REDIRECT:/account/notifications?saved=1');
+    await expect(saveGoalNotifications(preference('false'))).rejects.toThrow(/REDIRECT:\/account\/notifications\?saved=[a-f0-9]{32}$/);
     expect(mocks.read).toHaveBeenCalledWith('/api/v1/engagement');
+    expect(mocks.cookieSet).toHaveBeenCalledWith('mv-notification-save-proof', expect.stringMatching(/^[a-f0-9]{32}:0$/), expect.objectContaining({ httpOnly: true, sameSite: 'lax', maxAge: 60 }));
     expect(mocks.revalidate).toHaveBeenCalledWith('/quests');
   });
 
   it('confirms enabled preference with matching backend and database-backed readback', async () => {
     mocks.mutate.mockResolvedValue({ notifications_enabled: true });
     mocks.read.mockResolvedValue({ notifications_enabled: true });
-    await expect(saveGoalNotifications(preference('true'))).rejects.toThrow('REDIRECT:/account/notifications?saved=1');
+    await expect(saveGoalNotifications(preference('true'))).rejects.toThrow(/REDIRECT:\/account\/notifications\?saved=[a-f0-9]{32}$/);
+    expect(mocks.cookieSet).toHaveBeenCalledWith('mv-notification-save-proof', expect.stringMatching(/^[a-f0-9]{32}:1$/), expect.any(Object));
     expect(mocks.mutate).toHaveBeenCalledWith('/api/v1/engagement/preferences', {
       method: 'PUT', body: { notificationsEnabled: true },
     });
@@ -39,6 +42,7 @@ describe('member notification preference persistence', () => {
     mocks.read.mockRejectedValue(new Error('dashboard unavailable'));
     await expect(saveGoalNotifications(preference('true'))).rejects.toThrow('REDIRECT:/account/notifications?error=save');
     expect(mocks.revalidate).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
   });
 
   it.each([null, {}, { notifications_enabled: true }, { notifications_enabled: 'false' }])(
@@ -47,6 +51,7 @@ describe('member notification preference persistence', () => {
       await expect(saveGoalNotifications(preference('false'))).rejects.toThrow('REDIRECT:/account/notifications?error=save');
       expect(mocks.read).not.toHaveBeenCalled();
       expect(mocks.revalidate).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
     },
   );
 
@@ -56,6 +61,7 @@ describe('member notification preference persistence', () => {
       mocks.read.mockResolvedValue(readback);
       await expect(saveGoalNotifications(preference('false'))).rejects.toThrow('REDIRECT:/account/notifications?error=save');
       expect(mocks.revalidate).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
     },
   );
 

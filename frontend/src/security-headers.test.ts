@@ -42,6 +42,19 @@ afterEach(() => {
   else process.env.NEXT_PUBLIC_ADS_ENABLED = ORIGINAL_PUBLIC_ADS;
 });
 
+describe('member notification preference privacy', () => {
+  it('forces private no-store and noindex on direct and localized settings URLs', async () => {
+    const groups = await config.headers!();
+    for (const source of ['/account/notifications', '/:locale/account/notifications']) {
+      const headers = groups.find((entry) => entry.source === source)?.headers;
+      const values = new Map(headers?.map((entry) => [entry.key.toLowerCase(), entry.value]));
+      expect(values.get('x-robots-tag')).toBe('noindex, nofollow');
+      expect(values.get('cache-control')).toBe('private, no-store');
+      expect(values.get('referrer-policy')).toBe('no-referrer');
+    }
+  });
+});
+
 describe('security headers', () => {
   it('names the socket origin derived from the base URL', async () => {
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
