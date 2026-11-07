@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
+import type { AnnouncementDayRange } from './announcement-day';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STORAGE_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
@@ -243,14 +244,19 @@ export class PostgresContentRepository {
     this.pool = pool;
   }
 
-  async publishedAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
-    ContentAnnouncementRow[]
-  > {
+  async publishedAnnouncements(
+    { limit = 20, dayRange = null }: { limit?: number; dayRange?: AnnouncementDayRange | null } = {},
+  ): Promise<ContentAnnouncementRow[]> {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
     const { rows } = await this.pool.query<ContentAnnouncementRow>(
-      `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
-       FROM public.content_list_published_announcements($1)`,
-      [contentLimit],
+      dayRange
+        ? `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
+           FROM public.content_list_published_announcements($1)
+           WHERE published_at >= $2::timestamptz AND published_at < $3::timestamptz
+           ORDER BY is_pinned DESC, published_at DESC, announcement_id DESC`
+        : `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
+           FROM public.content_list_published_announcements($1)`,
+      dayRange ? [contentLimit, dayRange.fromUtc, dayRange.toUtc] : [contentLimit],
     );
     return rows;
   }

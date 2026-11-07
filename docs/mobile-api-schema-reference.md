@@ -2587,7 +2587,9 @@ _None._
 
 ### Path/query parameters
 
-_None._
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| day | query | false | string (date) | pattern="^20[0-9]{2}-[0-9]{2}-[0-9]{2}$"; description="Optional Seoul publication day; searches latest 20 published notices only" |
 
 ### Request body
 
@@ -2597,6 +2599,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| publicationDay | false | string |  |
 | announcements[] | true | object[] |  |
 | announcements[] | true | object |  |
 | announcements[].announcementId | true | string |  |

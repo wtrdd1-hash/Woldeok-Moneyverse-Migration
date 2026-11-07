@@ -2587,7 +2587,9 @@ _None._
 
 ### 경로/쿼리 파라미터
 
-_None._
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| day | query | false | string (date) | pattern="^20[0-9]{2}-[0-9]{2}-[0-9]{2}$"; description="Optional Seoul publication day; searches latest 20 published notices only" |
 
 ### 요청 본문
 
@@ -2597,6 +2599,7 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| publicationDay | false | string |  |
 | announcements[] | true | object[] |  |
 | announcements[] | true | object |  |
 | announcements[].announcementId | true | string |  |

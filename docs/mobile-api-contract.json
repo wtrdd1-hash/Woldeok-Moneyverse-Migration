@@ -7791,7 +7791,19 @@
       "operationId": "AppContentController_announcements",
       "backendOpenApiPath": "/content/announcements",
       "summary": "App API: published announcements",
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "day",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}$",
+            "description": "Optional Seoul publication day; searches latest 20 published notices only"
+          }
+        }
+      ],
       "requestBody": null,
       "successStatuses": [
         200
@@ -7806,6 +7818,9 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "publicationDay": {
+            "type": "string"
+          },
           "announcements": {
             "type": "array",
             "items": {
