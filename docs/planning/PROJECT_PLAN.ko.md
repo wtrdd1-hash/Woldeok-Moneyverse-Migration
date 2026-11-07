@@ -3009,3 +3009,16 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v1886 — F675-277 제공자 전달 증빙 보존기간·법적 보존명령 통제 (Feature Addition; 기획 전용)
+- **주기:** Previous Feature Improvement v1884 → Current Feature Addition v1886 → Next Feature Improvement v1888. 기준 main 0b5b2b1385d2a75614d39458dff94f7d3098ed03. F675-271~276은 미병합 제안이며 구현 완료로 간주하지 않는다.
+- **목적·대상·진입점:** 테넌트 준법 담당자와 독립 검토자가 F675-276 서명된 전달 증빙의 보존·삭제·보존명령을 추적한다. 관리자 > SLA > 에스컬레이션 > 증빙 보존. 일반 회원 접근 불가. 금융 원장, 기존 SLA 기한, 제공자 전달 상태는 변경하지 않는다.
+- **화면·CTA·상태:** 테넌트/제공자/증빙 세대/보존 분류/만료일 필터, 출처 해시·서명키 버전·사유·UTC 만료 표시. '보존 영향 미리보기', '보존 요청', '독립 승인/거절', '해제 요청', '삭제 후보 검토', '비식별 감사 증명서 내보내기'. ACTIVE, HOLD_PENDING, HELD, RELEASE_PENDING, PURGE_ELIGIBLE, PURGING, PURGED, BLOCKED. 감사 묘비 기록은 삭제 금지.
+- **권한:** compliance:read, compliance:hold:request, compliance:hold:approve, compliance:purge:review를 테넌트별 분리. 위임 신원까지 요청자/승인자 동일인 금지. 비상 접근도 기간 제한·독립 승인·불변 감사. 교차 테넌트는 404, 내보내기에서 수신자 주소·토큰·원문 제외.
+- **제안 API(실제 구현 아님):** GET /admin/sla/delivery-evidence/retention?cursor=; GET /admin/sla/delivery-evidence/{id}/retention; POST /admin/sla/delivery-evidence/retention-preview; POST /admin/sla/delivery-evidence/{id}/hold-requests; POST /admin/sla/delivery-evidence/{id}/hold-decisions; POST /admin/sla/delivery-evidence/{id}/release-requests; POST /admin/sla/delivery-evidence/{id}/purge-reviews; GET /admin/sla/delivery-evidence/{id}/audit-export. 변경은 Idempotency-Key·If-Match·CSRF 필수, 403/404/409/422/429 계약. Nest/Next/app-api 실제 경로 대조 후 개발.
+- **DB·제약:** retention_policies(tenant_id,policy_id,version,days,legal_basis), evidence_retention(tenant_id,evidence_id,policy_id,policy_version,expires_at_utc,generation,version,state), evidence_holds(tenant_id,hold_id,evidence_id,requester_effective_id,approver_effective_id,reason_code,valid_until_utc,status), purge_intents(tenant_id,evidence_id,generation,request_key,status), 불변 retention_audit 제안. 테넌트 복합 FK, 보존일수 양수·종료시각 검증 CHECK, (tenant_id,evidence_id,generation) UNIQUE, 삭제 후보 부분 인덱스. 기존 경제 SECURITY DEFINER 권한은 불변.
+- **트랜잭션·장애:** 동일 트랜잭션에서 증빙 세대·정책 스냅샷 잠금 후 활성 보존명령·만료 재검증, CAS·작업자 펜싱, 감사·Outbox 원자 기록. 커밋된 삭제 의도만 객체 저장소에 멱등 삭제하고 삭제 확인 후 PURGED. 실패 시 BLOCKED. 동시 보존/해제/삭제, 시계 오차, 제공자 재전송·복원 경쟁은 안전 차단.
+- **보안·법률:** 저장 암호화, 단기 서명 다운로드, SSRF·CSV 수식 주입 방지, 요청 제한, 사유 코드 검증. 국내 개인정보·보존 법률 검토 전 보존기간 임의 확정 금지. 조사 중 불일치·유효 보존명령은 정기 삭제보다 우선.
+- **SEO·모바일·분석:** 관리자 noindex/sitemap 제외, 320px 반응형, 키보드/스크린리더, WCAG 2.2 AA, 영·한 동등성. KPI는 미삭제 만료 수, 차단 삭제 수, 승인 지연, 확인된 삭제 수의 비식별 집계.
+- **테스트·배포·롤백:** DB 제약·테넌트 격리·위조 승인·보존/삭제 경쟁·키 철회·작업자 중단·오래된 커서·저장소 장애·1만 건 페이지·Android/a11y 회귀. 스키마 추가 후 API, admin_sla_evidence_retention_v1 기본 OFF, Test exact-SHA·독립 백업 복원·감사 묘비 증명·준법 승인 후 카나리. 롤백은 플래그·작업자부터 중지하며 삭제 객체를 무조건 복원하지 않는다. Production HOLD.
+- **백로그:** P0 OPS1886-01 누락 /srv/moneyverse → prod-v600 복구 및 /en,/en/login·재시작 검증, SEC1886-02 DB 최소권한·마이그레이션 체크섬·독립 복원, FIN1886-03 원장 대사·국내 법률, REL1886-04 CI/Test exact-SHA. P1 RET1886-05 제공자 보존·내보내기 지원과 실제 API/DB 대조, RET1886-06 독립 승인·경쟁 테스트, DOC1886-07 미병합 기획 PR·영한 정합성. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건: BLOCKED/IN PROGRESS.
