@@ -14,6 +14,7 @@ import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsIn, IsInt, IsObject, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -100,6 +101,7 @@ export class QuantController {
 
   @ApiOperation({ summary: '노코드 퀀트 전략 신규 생성 및 배포' })
   @Post('strategies')
+  @UseGuards(CsrfGuard)
   async createStrategy(
     @Req() req: RequestWithSession,
     @Body() dto: SaveQuantStrategyDto,
@@ -109,6 +111,7 @@ export class QuantController {
 
   @ApiOperation({ summary: '퀀트 백테스트 (검증된 시세 근거 없으면 503)' })
   @Post('backtest')
+  @UseGuards(CsrfGuard)
   @Header('Cache-Control', 'no-store')
   async runBacktest(
     @Req() req: RequestWithSession,
@@ -120,6 +123,7 @@ export class QuantController {
 
   @ApiOperation({ summary: '퀀트 봇 실시간 자동매매 가동 상태 토글' })
   @Post('strategies/:id/toggle')
+  @UseGuards(CsrfGuard)
   async toggleStrategy(
     @Req() req: RequestWithSession,
     @Param('id') strategyId: string,
