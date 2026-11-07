@@ -6,6 +6,7 @@ import {
   npcOrderMessage,
   preferenceMessage,
   progressLabel,
+  parseEngagementBoard,
   progressMessage,
   stageLabel,
   unlockLines,
@@ -178,5 +179,49 @@ describe('preferenceMessage', () => {
   it('says which way the preference was saved', () => {
     expect(preferenceMessage(true)).toContain('받도록');
     expect(preferenceMessage(false)).toContain('받지 않도록');
+  });
+});
+
+
+/** Guard the wire boundary: a TypeScript generic does not validate HTTP JSON. */
+describe('parseEngagementBoard', () => {
+  const valid = {
+    today_tasks: [{ code: 'first_wage', title: 'First wage', progress: 0 }],
+    weekly_goals: [{ code: 'weekly_variety', title: 'Weekly variety', progress: 2 }],
+    next_unlock: { stage: 'early', requirements: { workCompletions: 5, jobLevel: 1 } },
+    notifications_enabled: false,
+  };
+
+  it('preserves a verified owner dashboard, including zero and disabled preferences', () => {
+    expect(parseEngagementBoard(valid)).toEqual(valid);
+    expect(parseEngagementBoard({ ...valid, today_tasks: [], weekly_goals: [], next_unlock: null, notifications_enabled: true }))
+      .toEqual({ ...valid, today_tasks: [], weekly_goals: [], next_unlock: null, notifications_enabled: true });
+  });
+
+  it.each([null, [], {}, { ...valid, today_tasks: null }, { ...valid, weekly_goals: {} },
+    { ...valid, notifications_enabled: 'false' }, { ...valid, notifications_enabled: null },
+  ])('refuses missing or structurally malformed board %j', (payload) => {
+    expect(parseEngagementBoard(payload)).toBeNull();
+  });
+
+  it.each([-1, 1.5, '2', null, Number.MAX_SAFE_INTEGER + 1])('refuses unverified progress %j', (progress) => {
+    expect(parseEngagementBoard({ ...valid, today_tasks: [{ code: 'first_wage', title: 'First wage', progress }] })).toBeNull();
+  });
+
+  it('refuses duplicate goals, unbounded lists and unsafe catalogue labels', () => {
+    expect(parseEngagementBoard({ ...valid, today_tasks: [valid.today_tasks[0], valid.today_tasks[0]] })).toBeNull();
+    expect(parseEngagementBoard({ ...valid, weekly_goals: Array.from({ length: 4 }, (_, i) => ({ code: `weekly_${i}`, title: 'weekly', progress: 0 })) })).toBeNull();
+    expect(parseEngagementBoard({ ...valid, today_tasks: [{ code: '<img>', title: 'unsafe', progress: 0 }] })).toBeNull();
+    expect(parseEngagementBoard({ ...valid, today_tasks: [{ code: 'first_wage', title: '', progress: 0 }] })).toBeNull();
+  });
+
+  it('refuses invalid unlock evidence instead of showing fabricated completed conditions', () => {
+    for (const next_unlock of [[], {}, { stage: '', requirements: null },
+      { stage: 'early', requirements: { workCompletions: -1 } },
+      { stage: 'early', requirements: { workCompletions: '5' } },
+      { stage: 'early', requirements: { workCompletions: 1.5 } },
+    ]) {
+      expect(parseEngagementBoard({ ...valid, next_unlock })).toBeNull();
+    }
   });
 });

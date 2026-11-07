@@ -43,6 +43,55 @@ export interface EngagementBoard {
   readonly notifications_enabled: boolean;
 }
 
+/** Runtime validation for the owner-scoped SQL dashboard. TypeScript generics do not
+ * verify HTTP responses, and the page must distinguish an unknown source from
+ * a verified empty goal list or an explicitly disabled preference. SQL 082
+ * bounds each catalogue list to three rows. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isCount(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+}
+
+const CODE = /^[a-z][a-z0-9_]{0,63}$/;
+const REQUIREMENT_KEY = /^[a-zA-Z][a-zA-Z0-9_]{0,63}$/;
+
+function isGoal(value: unknown): value is EngagementGoal {
+  if (!isRecord(value)) return false;
+  return typeof value.code === 'string' && CODE.test(value.code) &&
+    typeof value.title === 'string' && value.title.trim().length > 0 &&
+    value.title.length <= 160 && !/[\u0000-\u001f\u007f]/.test(value.title) &&
+    isCount(value.progress);
+}
+
+function isGoalList(value: unknown): value is EngagementGoal[] {
+  if (!Array.isArray(value) || value.length > 3 || !value.every(isGoal)) return false;
+  return new Set(value.map((goal) => goal.code)).size === value.length;
+}
+
+function isUnlock(value: unknown): value is EngagementNextUnlock {
+  if (!isRecord(value) || typeof value.stage !== 'string' || !CODE.test(value.stage)) return false;
+  if (value.requirements === null) return true;
+  if (!isRecord(value.requirements)) return false;
+  const entries = Object.entries(value.requirements);
+  return entries.length <= 20 && entries.every(([key, count]) =>
+    REQUIREMENT_KEY.test(key) && isCount(count));
+}
+
+export function parseEngagementBoard(value: unknown): EngagementBoard | null {
+  if (!isRecord(value) || !isGoalList(value.today_tasks) ||
+      !isGoalList(value.weekly_goals) || typeof value.notifications_enabled !== 'boolean' ||
+      (value.next_unlock !== null && !isUnlock(value.next_unlock))) return null;
+  return {
+    today_tasks: value.today_tasks,
+    weekly_goals: value.weekly_goals,
+    next_unlock: value.next_unlock,
+    notifications_enabled: value.notifications_enabled,
+  };
+}
+
 /** The receipt `POST /api/v1/engagement/goals/{code}/progress` answers with. */
 export interface ProgressReceipt {
   readonly code: string;
