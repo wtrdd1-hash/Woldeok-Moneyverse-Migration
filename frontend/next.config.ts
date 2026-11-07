@@ -192,6 +192,15 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Season rewards and rankings are member-only and must not inherit public SEO or caches.
+      ...['/seasons', '/:locale(ko|en|ja|zh|vi)/seasons'].map((source) => ({
+        source,
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow' },
+          { key: 'cache-control', value: 'private, no-store' },
+          { key: 'referrer-policy', value: 'no-referrer' },
+        ],
+      })),
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },
