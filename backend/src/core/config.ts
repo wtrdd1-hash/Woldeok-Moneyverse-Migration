@@ -376,10 +376,66 @@ function databasePool(env: NodeJS.ProcessEnv): DatabasePoolConfig {
   };
 }
 
+/**
+ * A public Production process must never inherit a Test/DEV connection string.
+ * The expected database is an operator-controlled deployment setting, not a
+ * guess from NODE_ENV or the public hostname. Only the database name is read;
+ * errors deliberately omit the URL, which may contain credentials.
+ *
+ * This is a boot-time configuration boundary, not proof of the live role's
+ * grants or of independent data provenance. Both remain release gates.
+ */
+function assertPublicProductionDatabase(env: NodeJS.ProcessEnv): void {
+  if (env.NODE_ENV !== 'production') {
+    throw new Error('Public production host requires NODE_ENV=production');
+  }
+
+  const expected = env.PRODUCTION_DATABASE_NAME;
+  if (
+    !expected ||
+    !/^[a-z_][a-z0-9_]*$/.test(expected) ||
+    /(?:^|_)(?:dev|test|staging|scratch|restore)(?:_|$)/i.test(expected)
+  ) {
+    throw new Error('PRODUCTION_DATABASE_NAME must name an attested production database');
+  }
+  if (!env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required for the public production database');
+  }
+
+  let actual: string;
+  try {
+    const connection = new URL(env.DATABASE_URL);
+    if (!['postgres:', 'postgresql:'].includes(connection.protocol) || connection.hash) {
+      throw new Error('invalid PostgreSQL URL');
+    }
+    // The pg connection-string parser also accepts query options. Reject
+    // alternative database selectors and unknown options instead of trusting
+    // the pathname while the driver could connect somewhere else.
+    const allowedOptions = new Set(['sslmode', 'application_name', 'connect_timeout']);
+    if ([...connection.searchParams.keys()].some((key) => !allowedOptions.has(key))) {
+      throw new Error('unsupported PostgreSQL connection option');
+    }
+    actual = decodeURIComponent(connection.pathname.slice(1));
+    if (!/^[a-z_][a-z0-9_]*$/.test(actual)) {
+      throw new Error('invalid PostgreSQL database name');
+    }
+  } catch {
+    throw new Error('DATABASE_URL must identify the configured production database');
+  }
+
+  if (actual !== expected) {
+    throw new Error('DATABASE_URL does not match the configured production database');
+  }
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const production = env.NODE_ENV === 'production';
   const baseUrl = parseUrl(env.APP_BASE_URL ?? 'http://127.0.0.1:3000', 'APP_BASE_URL').toString();
   const baseHostname = new URL(baseUrl).hostname;
+  // NODE_ENV alone is insufficient: a mislabelled public deployment must also fail closed.
+  if (baseHostname === 'easy-scraping.com' || baseHostname === 'www.easy-scraping.com') {
+    assertPublicProductionDatabase(env);
+  }
   const localAuthTestVerificationTokenEnabled =
     env.LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED === 'true' &&
     baseHostname === 'test.easy-scraping.com';
