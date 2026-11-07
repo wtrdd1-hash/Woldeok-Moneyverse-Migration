@@ -60,6 +60,17 @@ describe('outbound SSRF DNS rebinding containment', () => {
     expect(request).not.toHaveBeenCalled();
   });
 
+  it('rejects DNS answers containing a special-purpose documentation address', async () => {
+    vi.spyOn(dns, 'lookup').mockResolvedValueOnce([
+      { address: '8.8.8.8', family: 4 },
+      { address: '203.0.113.9', family: 4 },
+    ] as never);
+    const request = vi.fn();
+    vi.stubGlobal('fetch', request);
+    await expect(safeFetch('https://mixed-doc.example/')).rejects.toThrow(SsrffSecurityError);
+    expect(request).not.toHaveBeenCalled();
+  });
+
   it('rejects a redirect whose newly resolved destination is private', async () => {
     vi.spyOn(dns, 'lookup')
       .mockResolvedValueOnce([{ address: '1.1.1.1', family: 4 }] as never)
