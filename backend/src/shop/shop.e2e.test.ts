@@ -43,7 +43,8 @@ describe('shop routes', () => {
   it('does not demand a session for the catalogue', async () => {
     const response = await request(app.getHttpServer()).get('/api/v1/shop/items');
     expect([401, 503]).toContain(response.status);
-    expect(['internal token required', 'shop service is unavailable', 'login required']).toContain(response.body.detail);
+    expect(response.status).toBe(401);
+    expect(response.body.detail).toBe('internal token required');
   });
 
   it('mounts the caller purchase list behind a session', async () => {
@@ -147,7 +148,8 @@ describe('shop routes', () => {
     const legacy = await request(app.getHttpServer()).get('/api/v1/shop/items');
     const catalogue = await request(app.getHttpServer()).get('/api/v1/shop/catalog');
     expect([401, 503]).toContain(legacy.status);
-    expect(['internal token required', 'shop service is unavailable', 'login required']).toContain(legacy.body.detail);
+    expect(legacy.status).toBe(401);
+    expect(legacy.body.detail).toBe('internal token required');
     expect(catalogue.body.detail).not.toBe('shop service is unavailable');
   });
 });
