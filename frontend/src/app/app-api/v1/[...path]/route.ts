@@ -1,3 +1,4 @@
+import { parseAnnouncementBodyFilter, verifiedAnnouncementBody } from '@/lib/announcement-body';
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
 import { parseSupportSummary } from '@/lib/support-summary';
@@ -111,6 +112,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const announcementBodyPath = request.method === 'GET' && parts.length === 2 &&
+    parts[0] === 'content' && parts[1] === 'announcements';
+  const announcementBody = announcementBodyPath ? parseAnnouncementBodyFilter(request.nextUrl.searchParams) : { body: null };
+  if (announcementBodyPath && announcementBody === null) {
+    return gatewayProblem(400, 'Bad Request', 'announcement_body_invalid', 'invalid published announcement body query');
+  }
 
   const supportThreadsDatePath = request.method === 'GET' && parts.length === 2 && parts[0] === 'support' && parts[1] === 'threads';
   const supportQuery = request.nextUrl.searchParams;
@@ -511,6 +519,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('cache-control', 'private, no-store');
   if (parts[0] === 'wallet' || parts[0] === 'privacy' || parts[0] === 'work' || parts[0] === 'support' || parts[0] === 'collections' || parts[0] === 'notifications' || (parts[0] === 'account' && parts[1] === 'security') || privateShopReceipts || privateStockHistory) headers.set('x-robots-tag', 'noindex');
 
+  if (announcementBodyPath && announcementBody?.body && (response.status === 204 || response.status === 304)) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcement_body_unverified', 'published announcement body search is unverified');
+  }
   if (request.method === 'HEAD' || response.status === 204 || response.status === 304) {
     return new NextResponse(null, { status: response.status, headers });
   }
@@ -521,6 +532,10 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      if (announcementBodyPath && announcementBody?.body && response.ok &&
+          !verifiedAnnouncementBody(compatible, announcementBody.body)) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_body_unverified', 'published announcement body search is unverified');
+      }
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +564,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (announcementBodyPath && announcementBody?.body && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'announcement_body_unverified', 'published announcement body search is unverified');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -559,6 +577,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     }
   }
 
+  if (announcementBodyPath && announcementBody?.body && response.ok) {
+    return gatewayProblem(503, 'Service Unavailable', 'announcement_body_unverified', 'published announcement body search is unverified');
+  }
   return new NextResponse(response.body, { status: response.status, headers });
 }
 
@@ -568,6 +589,12 @@ async function handle(request: NextRequest, context: Context) {
   const response = await proxy(request, parts);
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
+  if (parts.length === 2 && parts[0] === 'content' && parts[1] === 'announcements' &&
+      request.nextUrl.searchParams.has('body')) {
+    response.headers.set('cache-control', 'no-store');
     response.headers.set('x-robots-tag', 'noindex');
     response.headers.set('referrer-policy', 'no-referrer');
   }

@@ -1,3 +1,4 @@
+import { filterPublishedAnnouncementBodies } from './announcement-body';
 import { Injectable } from '@nestjs/common';
 import type {
   ContentAnnouncementReceiptRow,
@@ -322,12 +323,13 @@ export class ContentService {
     this.repository = repository;
   }
 
-  async publicAnnouncements({ limit = 20 }: { limit?: number } = {}): Promise<
+  async publicAnnouncements({ limit = 20, body = null }: { limit?: number; body?: string | null } = {}): Promise<
     ContentAnnouncement[]
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
-    return (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(
-      normalizeAnnouncement,
+    return filterPublishedAnnouncementBodies(
+      (await this.repository.publishedAnnouncements({ limit: contentLimit })).map(normalizeAnnouncement),
+      body,
     );
   }
 

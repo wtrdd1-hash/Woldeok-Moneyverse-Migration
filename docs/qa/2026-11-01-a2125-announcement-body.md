@@ -1,0 +1,9 @@
+# Development A QA — 2026-11-01 21:55 KST — DRAFT / HOLD
+
+- Scope: published announcement body search on bounded latest 20 published rows. Web `/announcements/body`, Nest public/Android endpoints, Android gateway stale-200/invalid-query fail-closed. Existing SECURITY DEFINER public read only; no migration or ledger write.
+- Source code SHA: `f14c9b99b87a25b7cd73c0be338202267123565c`; base origin/main: `3d5e321c3d1221febff677469fecdfcb3cf42e7d`; Draft PR #2380; isolated worktree and evidence under `/srv/moneyverse-data/tasks/mv-a-20261101-2125-announcement-body/`.
+- TDD: backend and frontend RED reproduced before implementation. Backend full exact SHA **2,974 PASS / 518 SKIP**, frontend full exact SHA **2,911 PASS**, database unit **62 PASS / 4 SKIP**, backend targeted **4 PASS**, frontend targeted **6 PASS** after non-JSON negative case, typecheck PASS, backend/frontend build PASS, Android API contract **184 endpoints PASS**, security **10 PASS**, lint **0 errors / 1,027 warnings**. Test skips and lint warnings are not PASS.
+- Real DEV PostgreSQL read-only `moneyverse_app`: public function EXECUTE allowed; one published row, zero sample matches; ROLLBACK. Positive real matching-row check NOT VERIFIED; positive unit test PASS. DEV direct `announcements` SELECT remains P0 #993; Production DB state UNKNOWN.
+- Final SHA CI runtime-check and image build pending. Official Test exact-SHA auth/backend/API/DB E2E, backup restore, accessibility full-browser evidence and release GitOps gates BLOCKED / NOT VERIFIED; no PASS claim.
+- End audit: 142 remote branches including main (start 139), 129 open PRs (start 126), 28 conflicts; 132 remote-tracking branches not ancestors of main. No deletion due to unique/unverified ownership; no merge, Test/Production deploy, DB mutation, restart or rollback.
+- **NO MERGE / NO PRODUCTION** until complete authoritative gates and P0 remediation. See companion release HOLD and worklog.

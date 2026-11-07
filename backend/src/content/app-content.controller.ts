@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { parseAnnouncementBodyFilter } from './announcement-body';
+import { Controller, Get, Inject, Query, ServiceUnavailableException } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 
 @ApiTags('content')
@@ -13,9 +14,10 @@ export class AppContentController {
   }
 
   @Get('announcements')
+  @ApiQuery({ name: 'body', required: false, description: 'Substring within the latest 20 published notice bodies (1–80 characters)' })
   @ApiOperation({ summary: 'App API: published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
+  async announcements(@Query() query: Record<string, unknown> = {}) {
+    return { announcements: await this.service().publicAnnouncements({ body: parseAnnouncementBodyFilter(query) }) };
   }
 
   @Get('photos')
