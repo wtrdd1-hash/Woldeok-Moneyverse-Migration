@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { parseVipChestStatus } from '@/app/quests/vip-chest-status';
+import { parseStockAlertRulesResponse, parseStockAlertEventsResponse } from '@/app/stocks/alerts/alert-source';
 import { parseSupportSummary } from '@/lib/support-summary';
 import { parseSupportDateRange, isVerifiedSupportDateRows } from '@/lib/support-date-range';
 import { parseShopPurchaseHistory } from '@/lib/shop-purchase-history';
@@ -498,6 +499,14 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   }
 
 
+  const ownerAlertRead = request.method === 'GET' && parts[0] === 'stocks' && parts[1] === 'alerts' &&
+    (parts.length === 2 || (parts.length === 3 && parts[2] === 'events'));
+  // A 204/304 is not a verified empty list; do not permit a cached private response.
+  if (ownerAlertRead && ((response.status >= 200 && response.status < 400 && response.status !== 200) ||
+      (response.ok && !isJsonMediaType(response.headers.get('content-type'))))) {
+    return gatewayProblem(503, 'Service Unavailable', 'stock_alert_source_unverified', 'owner alert source is unavailable');
+  }
+
   const headers = appendAppContractHeaders(new Headers());
   for (const name of APP_API_RESPONSE_HEADERS) {
     const value = response.headers.get(name);
@@ -521,6 +530,13 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const text = new TextDecoder().decode(bytes);
       const parsed = JSON.parse(text) as unknown;
       const compatible = addAppJsonCompatibility(parsed);
+      // Android owner alerts must never receive a success-shaped malformed list.
+      if (request.method === 'GET' && response.ok && parts[0] === 'stocks' && parts[1] === 'alerts' &&
+          ((parts.length === 2 && parseStockAlertRulesResponse(compatible) === null) ||
+           (parts.length === 3 && parts[2] === 'events' && parseStockAlertEventsResponse(compatible) === null))) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_alert_source_unverified', 'owner alert source is unavailable');
+      }
+
       if (securityEventPath && response.ok) {
         const verified = parseSecurityEvents(compatible);
         if (verified === null || securityCategory === null || securitySort === null ||
@@ -549,6 +565,9 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       }
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
+      if (ownerAlertRead && response.ok) {
+        return gatewayProblem(503, 'Service Unavailable', 'stock_alert_source_unverified', 'owner alert source is unavailable');
+      }
       if (securityEventPath && response.ok) {
         return gatewayProblem(503, 'Service Unavailable', 'security_events_unverified', 'security activity evidence is unavailable');
       }
@@ -566,6 +585,11 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: NextRequest, context: Context) {
   const parts = (await context.params).path;
   const response = await proxy(request, parts);
+  if (parts[0] === 'stocks' && parts[1] === 'alerts') {
+    response.headers.set('cache-control', 'private, no-store');
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('referrer-policy', 'no-referrer');
+  }
   if (parts[0] === 'stocks' && parts[1] === 'history') {
     response.headers.set('cache-control', 'private, no-store');
     response.headers.set('x-robots-tag', 'noindex');
