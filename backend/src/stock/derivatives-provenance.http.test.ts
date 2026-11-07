@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { DerivativesController } from './derivatives.controller';
 
 // Derivatives have no canonical position ledger or verified market feed. A mock
@@ -23,6 +24,9 @@ describe('derivatives API provenance boundary', () => {
       } })
       .overrideGuard(AuthenticatedGuard).useValue({ canActivate: () => true })
       .overrideGuard(ConsentGuard).useValue({ canActivate: () => true })
+      // This suite tests source-truth after the CSRF boundary; the dedicated
+      // derivatives-write-csrf suite exercises the real token verifier.
+      .overrideGuard(CsrfGuard).useValue({ canActivate: () => true })
       .compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
