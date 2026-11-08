@@ -4,6 +4,7 @@ import { FundedTreasuryPensionPanel } from './funded-treasury-pension-panel';
 import { publicApi, api } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { canonicalIntegerString } from '@/lib/money';
+import { canonicalUrl } from '@/lib/seo';
 import {
   PensionPortalClient,
   type NationalPensionOverview,
@@ -17,6 +18,21 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '국가 국민연금공단 (NPS) | 신규 정식 원장 적립·환급 및 과거 내역',
   description: '신규 국민연금 적립·환급은 정식 국고 원장의 복식분개와 불변 영수증으로 처리합니다. 과거 미증빙 납입·정기 지급 내역은 별도 조회하며, 재원 없는 정기 지급은 중단됩니다.',
+  alternates: {
+    canonical: canonicalUrl('/pension'),
+  },
+  openGraph: {
+    title: '국가 국민연금공단 (NPS) 대국민 포털 | 머니버스',
+    description: '정식 국고 원장 복식분개와 불변 영수증 기반 투명 국민연금 공시.',
+    url: canonicalUrl('/pension'),
+    siteName: '월덕 머니버스 (Woldeok Moneyverse)',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '국민연금 (NPS) 대국민 포털 | 머니버스',
+    description: '정식 국고 원장 기반 국민연금 공시 포털.',
+  },
 };
 
 export default async function PublicPensionPage() {

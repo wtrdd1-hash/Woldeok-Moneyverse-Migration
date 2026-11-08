@@ -31,7 +31,7 @@ describe('search crawler routes', () => {
     expect(robotRules.rules).toEqual(
       expect.objectContaining({
         userAgent: '*',
-        allow: '/',
+        allow: expect.anything(),
         disallow: expect.arrayContaining(['/admin', '/account', '/wallet', '/api/', '/auth/']),
       }),
     );

@@ -6,12 +6,28 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicApi } from '@/lib/api';
 import { groupDigits } from '@/lib/money';
+import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '국가 공기업 경영정보 공개 (ALIO) | 머니버스 공공 거버넌스',
   description: '월덱 국가투자공사(WSHC) 산하 3대 국가 기간 공기업(W-Power, W-Net, WDB) 및 민간 상장 기업의 경영실적, 배당 납입, 경영평가 대국민 투명 공시 포털입니다.',
+  alternates: {
+    canonical: canonicalUrl('/enterprises'),
+  },
+  openGraph: {
+    title: '국가 공기업 경영정보 공개 (ALIO) | 머니버스 공공 거버넌스',
+    description: '국가 기간 공기업 경영실적, 배당 납입, 경영평가 대국민 투명 공시.',
+    url: canonicalUrl('/enterprises'),
+    siteName: '월덕 머니버스 (Woldeok Moneyverse)',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '국가 공기업 경영정보 공개 (ALIO) | 머니버스',
+    description: '국가 기간 공기업 경영실적 및 배당 납입 투명 공시 포털.',
+  },
 };
 
 interface PublicEnterpriseResponse {
@@ -92,8 +108,18 @@ export default async function PublicEnterprisesPage() {
     },
   ];
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '' },
+    { name: '국가 공기업 경영정보 공개 (ALIO)', path: '/enterprises' },
+  ]);
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
       {/* 헤더 섹션 */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -220,5 +246,6 @@ export default async function PublicEnterprisesPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
