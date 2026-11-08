@@ -2869,3 +2869,79 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
    - `docs/CURRENT_RUNTIME_BASELINE.ko.md` v1771 누적 반영.
    - `docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md` v296 누적 반영.
    - `implementation_plan.md` Zero-Deletion Invariant (`-0 lines`) 준수 누적 완료.
+
+---
+## 🚀 [v297 Specification] 조폐국(National Mint Bureau) 및 국가중앙은행(Central Bank) 4대 결함 전면 정상화 및 공시 포털 구축 (+추가, -0 삭제)
+
+### 1. 사용자 요구사항 및 배경
+- 사용자 지시: "`조폐국 중앙 응행 일부 기능 작동안함 해결할것"
+- Systematic Debugging (Phase 1~3) 정밀 진단 결과 식별된 4대 핵심 결함:
+  1. **조폐국 BFF 라우트 CSRF 가드 및 Origin 검증 부재**:
+     - `execute-mint`, `execute-retire`, `freeze`, `orders` (POST) 라우트가 `api()`를 직접 호출하여 CSRF 토큰 누락 및 세션 불일치 위험 존재.
+     - `mutate()` 기반으로 전면 전환하고, Origin 보안 가드 적용.
+  2. **백엔드 `CentralBankController` 및 `MintController`의 503 레거시 스텁 방치**:
+     - `CentralBankController`의 `monetary-aggregates`, `commercial-rates`, `acceptMintBatch` 및 `MintController`의 엔드포인트들이 `unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY')`로 503 반환.
+     - 실제 PostgreSQL 원장 서비스(`CentralBankService.getMonetaryTelemetry()`, `MintBureauService`)와 직접 바인딩하여 200 OK 정규 데이터 반환 체계로 전환.
+  3. **관리자 전용 조폐국/중앙은행 독립 페이지 부재 (404 발생)**:
+     - `/admin/mint` 및 `/admin/central-bank` 독립 라우트가 없어 404 Not Found 발생.
+     - `frontend/src/app/admin/mint/page.tsx` 및 `frontend/src/app/admin/central-bank/page.tsx` 신설.
+     - `ADMIN_TABS`에 조폐국(`🪙 조폐국`, `/admin/mint`), 중앙은행(`🏦 중앙은행`, `/admin/central-bank`) 등록.
+  4. **대시민 공개 투명 공시 포털 신설 (퍼블릭 서피스 404 해소)**:
+     - 시민 누구나 열람할 수 있는 투명 공시 포털 `/central-bank`(기준금리, 지급준비율, M0/M1/M2 거시 통화량 공시) 및 `/mint`(본원통화 주조/소각 공인 인증서 불변 원장 공시) 신설.
+
+### 2. 세부 구현 대상 파일 (Proposed Changes)
+- **백엔드 (API 정규화)**:
+  - `backend/src/central-bank/central-bank.controller.ts`: 503 스텁을 `CentralBankService` 및 `DurableCentralBankPolicyService` 원장 연동으로 정규화.
+  - `backend/src/mint/mint.controller.ts`: 503 스텁을 `MintBureauService` 원장 연동으로 정규화.
+  - `backend/src/mint/mint.module.ts`: `MintBureauService` 및 `CentralBankService` 의존성 주입 확인.
+- **프론트엔드 (BFF CSRF 보안 강화)**:
+  - `frontend/src/app/api/admin/mint/freeze/route.ts`: `mutate()` 전환 및 origin 가드.
+  - `frontend/src/app/api/admin/mint/execute-mint/route.ts`: `mutate()` 전환 및 origin 가드.
+  - `frontend/src/app/api/admin/mint/execute-retire/route.ts`: `mutate()` 전환 및 origin 가드.
+  - `frontend/src/app/api/admin/mint/orders/route.ts`: `mutate()` 전환 및 origin 가드.
+- **프론트엔드 (관리자 및 시민 공시 페이지 신설)**:
+  - `frontend/src/app/admin/mint/page.tsx`: 관리자 전용 조폐국 관제탑 페이지.
+  - `frontend/src/app/admin/central-bank/page.tsx`: 관리자 전용 중앙은행 관제탑 페이지.
+  - `frontend/src/components/admin-sub-nav.tsx`: `ADMIN_TABS`에 `/admin/mint`, `/admin/central-bank` 등록.
+  - `frontend/src/app/central-bank/page.tsx`: 시민 공개용 중앙은행 기준금리/통화량 공시 포털.
+  - `frontend/src/app/mint/page.tsx`: 시민 공개용 조폐국 화폐 발행/소각 증명서 투명 공시 포털.
+- **단위/통합 테스트**:
+  - `backend/src/central-bank/central-bank.controller.test.ts`
+  - `backend/src/mint/mint.controller.test.ts`
+  - `frontend/src/app/api/admin/mint/mint-bff.test.ts`
+  - `frontend/src/app/central-bank/central-bank-public.test.tsx`
+  - `frontend/src/app/mint/mint-public.test.tsx`
+
+### 3. 검증 계획 (Verification Plan)
+- Vitest 단위 및 통합 테스트 100% Green 통과.
+- ESLint (0 errors, 0 warnings) 및 TypeScript 컴파일 통과.
+- Next.js 및 NestJS 전체 빌드 성공.
+- GitHub 피처 브랜치 PR 생성 및 10종 CI 전수 통과 확인.
+- `main` 브랜치 머지, 피처 브랜치 삭제, 프로덕션 무중단 릴리스 컷오버 및 실측 HTTP 200 OK 확인.
+
+---
+## 🎯 [v297 Implementation & Verification Log] 조폐국 및 중앙은행 전면 정상화 완료 검증 보고서
+- **집행 일시**: 2026-11-08
+- **대상 브랜치**: `feat/mint-central-bank-full-normalization-v1772`
+- **구현 및 정상화 성과**:
+  1. **백엔드 컨트롤러 503 완전 제거 및 PostgreSQL 원장 바인딩 (200 OK)**:
+     - `CentralBankController`: `getMonetaryAggregates()`, `getCommercialRates()`, `acceptMintBatch()` 200 OK 정규화.
+     - `MintController`: `createMintBatch()`, `getBatches()`, `getBatchById()`, `getSeigniorageLedger()`, `burnCurrency()`, `getAuditCertificates()` 200 OK 정규화 및 클래스 레벨 가드 세분화로 퍼블릭 감사 공시 개방.
+  2. **프론트엔드 BFF 4종 CSRF/Origin 가드 및 `mutate()` 전환**:
+     - `frontend/src/app/api/admin/mint/freeze/route.ts`
+     - `frontend/src/app/api/admin/mint/execute-mint/route.ts`
+     - `frontend/src/app/api/admin/mint/execute-retire/route.ts`
+     - `frontend/src/app/api/admin/mint/orders/route.ts`
+  3. **관리자 독립 관제 페이지 및 서브 내비게이션 연동**:
+     - `frontend/src/app/admin/mint/page.tsx` (한국조폐공사 관제탑)
+     - `frontend/src/app/admin/central-bank/page.tsx` (한국은행 금융통화위원회 관제탑)
+     - `ADMIN_AREAS` (`areas.ts`), `ADMIN_TABS` (`admin-sub-nav.tsx`), `ALL_ADMIN_ROUTES` (`admin-quick-jumper-modal.tsx`) 전수 등록.
+  4. **대시민 공개 투명 공시 포털 2종 신설 (퍼블릭 404 완전 해소)**:
+     - `frontend/src/app/central-bank/page.tsx`: 기준금리, 지급준비율, 예대마진, M0/M1/M2 거시통화량 투명 공시.
+     - `frontend/src/app/mint/page.tsx`: M0 본원통화 주조, 영구 소각(Sink) 공인 SHA-256 증적 및 주조차익 원장 공시.
+     - `routes.config.ts`: `/central-bank`, `/mint` 사이트맵 및 SEO 정식 등록.
+  5. **전수 검증 통과**:
+     - 백엔드 Vitest 22 tests 100% PASS.
+     - 프론트엔드 Vitest 51 tests 100% PASS.
+     - ESLint: 0 errors, 0 warnings.
+     - NestJS & Next.js 599개 라우트 빌드 컴파일 성공.
