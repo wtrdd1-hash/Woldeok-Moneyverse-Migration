@@ -1,5 +1,5 @@
 # 🌐 Woldeok Moneyverse - 통합 개발 진행상황 및 마스터 레퍼런스 총서
-> **최종 개정일**: 2026-11-08 | **최신 배포 릴리스**: `prod-v1770` | **버전 마일스톤**: v291 Complete
+> **최종 개정일**: 2026-11-08 | **최신 배포 릴리스**: `prod-v1770` | **버전 마일스톤**: v294 Complete
 
 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 **누적 개발 진행 상황(v1 ~ v291)**을 한눈에 파악할 수 있도록 종합 정리하고, 시스템 설계에 적용된 **최신 글로벌 엔지니어링 및 핀테크 표준 레퍼런스**를 집대성한 공식 통합 개발 총서입니다.
 
@@ -63,6 +63,8 @@ timeline
 - **가상 국채(KTB) & 레포 거래소**: 가상 만기확정 국채 발행, 일일 이자 지급 및 유동성 레포 창구.
 - **M0 국가조폐국(National Mint Bureau) 실시간 관제탑**: 공식 통화정책 명령서 기반 합법적 통화 주조 및 영구 소각, 승인 증명서 원장(Certificate Ledger) 연동, 긴급 통화 발행 동결(Emergency Freeze) 가드 탑재.
 - **중앙 국고 벤처 창업 지원금(National Treasury Grants) 시스템**: 대국민 창업 사업계획서 접수 모달(`/treasury/portal`), 관리자 2단계 심사 관제탑(`/admin/treasury/grants`), 복식부기 원자적 국고 지급 및 14일 의무 창업 검증, 미창업 잔여금 자동 회수 PostgreSQL `treasury_run_clawback_sweep` 데몬 연동.
+- **창업 지원금 심사 관제탑 점검 해제 및 실집행 가동 (v294)**: 관리자 내비게이션의 `(점검중)` 라벨 완전 소멸, 프론트엔드 BFF(`/api/admin/treasury/grants`)와 백엔드 심사 엔드포인트(`/api/v1/admin/treasury/grants/:id/review`) 실집행 연동, 4대 핵심 지표 카드 및 4종 관리자 액션 모달(승인 집행, 반려 처리, 환수 즉시 집행, AI 심사 심층 분석 보고서) 및 CSV 감사 원장 내보내기 탑재 완료.
+- **가상 국채(KTB) 실집행 포워딩 및 이자 정산 (v294)**: 국채 청약 및 쿠폰 이자 지급(`/api/admin/bonds/distribute-coupons`) 실집행 게이트웨이 개통, PostgreSQL 원자적 복식부기 전표 연동 완료.
 
 ### 2.2 가상 주식 거래소 & 퀀트 트레이딩 엔진
 - **TradingView급 인터랙티브 캔들스틱 & 라인 차트**: 
