@@ -25,7 +25,15 @@
 - [ ] Record MID and recheck main/doc authority while writing.
 - [ ] Bilingual changelog, internal/GitHub notes, index, final validation, isolated GitHub draft PR.
 
-## MID — pending
+## MID — 2026-11-08 KST
+
+- Re-fetched origin/main at 4938d491d9 (v291 disk/docs update PR #2911), after initial b56fdc748d. Authoritative planning docs still v1518. The isolated initial worktree was removed by host maintenance; recovered from the pushed work branch under /home/debian/.mv-tasks/treasury-runtime-v1936; no other agent branch touched.
+- Verified read-only 191055911 WLD in both canonical TREASURY and five-vault sum; 0 unbalanced journal transaction totals. The public BFF says RECONCILED for current fiscal cash, not historic operations.
+- Actual DB: 3 grants (one 500000 WLD approved, not yet disbursed), 1 ledger-linked normal disbursement; SWF 4 positions and 276 events; 3 bond products but no holdings/coupon/repo; pension 1 accumulating and 0 payout; KDIC 1 fund and 0 premium/payout; 1 linked health insurance record; 1 mint certificate.
+- P0 source and DB function body: pension distribution directly inserts account_balances without economy_post_transaction; source SQL341 also bypasses canonical postings. SOE source SQL340 models dividends through MINT→TREASURY and a random UUID each run, without actual enterprise cash or stable period. Do not apply unsafe SQL unchanged; no finance writes performed.
+- Applied migration records stop at 339, while main contains 340 and 341; same-name DB routines already exist, requiring checksum/body and role comparison. /treasury/portal 404 is a missing standalone route while the /treasury page embeds grant form; logged-out admin API 401 is expected.
+- Prepared EN/KO 39-reference primary-source matrix and 48KB EN comprehensive proposal, 43KB KO proposal with 21 domains / 225 numbered requirements, source-backed P0 gates and implementation plan; docs only.
+
 
 ## FINISH — pending
 
