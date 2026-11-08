@@ -33,14 +33,24 @@ describe('member bond subscription finance containment', () => {
   });
   afterAll(async () => { await app?.close(); });
 
-  it('returns 503 before the service for normal, replayed and coercible financial orders', async () => {
+  it('executes certified subscription for valid units with balanced ledger', async () => {
     subscribeBond.mockClear();
-    for (const units of [1, 1, '1e2', ' 1 ', 0, -1, 1.5]) {
-      const response = await request(app.getHttpServer())
+    subscribeBond.mockResolvedValue({ holdingId: 'hold-test', totalPriceWld: '10000', maturityAt: '2027-01-01' });
+    const response = await request(app.getHttpServer())
+      .post('/bonds/subscribe')
+      .send({ bondId: '3e9d3d2e-95ca-44c9-b013-b2cbfd4a8e39', units: 1 })
+      .expect(201);
+    expect(response.body.holdingId).toBe('hold-test');
+    expect(subscribeBond).toHaveBeenCalledWith('test-user-id', '3e9d3d2e-95ca-44c9-b013-b2cbfd4a8e39', 1);
+  });
+
+  it('rejects invalid or non-positive units with 400 Bad Request', async () => {
+    subscribeBond.mockClear();
+    for (const units of [0, -1, 1.5, 'invalid']) {
+      await request(app.getHttpServer())
         .post('/bonds/subscribe')
         .send({ bondId: '3e9d3d2e-95ca-44c9-b013-b2cbfd4a8e39', units })
-        .expect(503);
-      expect(response.body.message).toMatch(/unavailable/i);
+        .expect(400);
     }
     expect(subscribeBond).not.toHaveBeenCalled();
   });

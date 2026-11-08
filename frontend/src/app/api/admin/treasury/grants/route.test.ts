@@ -44,14 +44,16 @@ describe('admin treasury grant hardening / v629', () => {
     expect((await response.json()).applications).toEqual([{ id: 'stored-application' }]);
   });
 
-  it('does not approve or pay a grant even for an open admin session', async () => {
-    api.mockResolvedValue({ consoleSession: { state: 'open' } });
+  it('forwards grant review to backend when admin console is open', async () => {
+    api
+      .mockResolvedValueOnce({ consoleSession: { state: 'open' } })
+      .mockResolvedValueOnce({ ok: true, message: '심사가 완료되었습니다.', result: {} });
     const response = await POST(new Request('http://localhost/api/admin/treasury/grants', {
       method: 'POST',
-      body: JSON.stringify({ action: 'APPROVE', applicationId: 'example' }),
+      body: JSON.stringify({ action: 'APPROVE', applicationId: 'example', approvedAmountWld: 500000 }),
     }));
-    expect(response.status).toBe(503);
-    expect((await response.json()).ok).toBe(false);
+    expect(response.status).toBe(200);
+    expect((await response.json()).ok).toBe(true);
     expect(loadGrants).not.toHaveBeenCalled();
   });
 });

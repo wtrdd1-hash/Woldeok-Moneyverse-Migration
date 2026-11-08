@@ -108,4 +108,18 @@ describe('TreasuryGrantsService', () => {
     expect(res.requested_amount_wld).toBe(2000000);
     expect(res.ai_score).toBe(84);
   });
+
+  it("관리자가 14일 경과 미창업 지원금 즉시 환수(Sweep Now)를 집행하면 정상적으로 회수 결과가 반환되어야 한다", async () => {
+    repository.runClawbackSweepNow = vi.fn().mockResolvedValue({
+      success: true,
+      reclaimed_count: 2,
+      total_reclaimed_wld: "1000000",
+      executed_at: new Date().toISOString(),
+    });
+    const res = await service.runClawbackSweepNow("00000000-0000-0000-0000-000000000099");
+    expect(res.success).toBe(true);
+    expect(res.reclaimed_count).toBe(2);
+    expect(res.total_reclaimed_wld).toBe("1000000");
+    expect(repository.runClawbackSweepNow).toHaveBeenCalled();
+  });
 });

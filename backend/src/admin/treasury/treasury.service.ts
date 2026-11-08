@@ -413,4 +413,26 @@ export class TreasuryService {
     return this.repository.getUserGrant(userId);
   }
 
+  async runClawbackSweepNow(adminId: string) {
+    if (!adminId || typeof adminId !== "string") {
+      throw new TreasuryInputError("유효한 관리자 ID가 필요합니다.");
+    }
+    try {
+      const result = await this.repository.runClawbackSweepNow();
+      if (this.telegram && result.reclaimed_count > 0) {
+        this.telegram.notifyTreasuryGrant({
+          action: "DISBURSED",
+          amountWld: String(result.total_reclaimed_wld),
+          targetUser: "VAULT_WELFARE",
+          adminId,
+          reason: "[미창업 자동환수 즉시 집행] 총 " + result.reclaimed_count + "건, " + result.total_reclaimed_wld + " WLD 회수",
+        }).catch(() => undefined);
+      }
+      return result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
 }

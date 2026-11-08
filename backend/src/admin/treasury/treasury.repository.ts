@@ -1624,4 +1624,11 @@ export class TreasuryRepository {
     return res.rows[0] ?? null;
   }
 
+  async runClawbackSweepNow(): Promise<{ success: boolean; reclaimed_count: number; total_reclaimed_wld: string; executed_at: string }> {
+    const res = await this.pool.query<{ result: any }>(
+      "SELECT public.treasury_run_clawback_sweep() AS result",
+    );
+    return res.rows[0]?.result ?? { success: true, reclaimed_count: 0, total_reclaimed_wld: "0", executed_at: new Date().toISOString() };
+  }
+
 }

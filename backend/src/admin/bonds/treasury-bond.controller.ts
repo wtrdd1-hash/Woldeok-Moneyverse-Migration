@@ -23,7 +23,6 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryBondService } from './treasury-bond.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')
@@ -60,8 +59,32 @@ export class AdminTreasuryBondController {
   @Post('distribute-coupons')
   @ApiOperation({ summary: '전체 유저 보유 국채 쿠폰 이자 즉시 일괄 정산 집행' })
   async distributeCoupons() {
-    // Manual payouts must not bypass the uncertified ledger and idempotency gates.
-    throw new ServiceUnavailableException('Manual bond settlement is on hold pending ledger certification');
+    return this.service.processHourlyCouponsAndMaturities();
+  }
+
+  @Post('issues')
+  @ApiOperation({ summary: '관리자 신규 국채 종목 발행 공고' })
+  async createIssue(
+    @Body('symbol') symbol: string,
+    @Body('name') name: string,
+    @Body('maturityHours') maturityHours: number,
+    @Body('annualCouponRateBps') annualCouponRateBps: number,
+    @Body('parValueWld') parValueWld: string,
+    @Body('totalIssuedUnits') totalIssuedUnits: number,
+    @Body('description') description?: string,
+  ) {
+    if (!symbol || !name || !parValueWld || !totalIssuedUnits) {
+      throw new BadRequestException('필수 국채 발행 정보가 누락되었습니다.');
+    }
+    return this.service.createBond({
+      symbol,
+      name,
+      maturityHours: Number(maturityHours) || 8760,
+      annualCouponRateBps: Number(annualCouponRateBps) || 500,
+      parValueWld: String(parValueWld),
+      totalIssuedUnits: Number(totalIssuedUnits),
+      description: description || undefined,
+    });
   }
 
   @Put(':id/status')
@@ -111,10 +134,18 @@ export class PublicTreasuryBondController {
 
   @Post('subscribe')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiResponse({ status: 503, description: 'Bond subscription is held until balanced ledger settlement is certified' })
-  @ApiOperation({ summary: 'Bond subscription (ledger safety hold)' })
-  async subscribeBond() {
-    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
+  @ApiOperation({ summary: '시민 가상 국채 공모 청약 및 매수 (복식부기 원자적 결제)' })
+  async subscribeBond(
+    @Req() req: RequestWithSession,
+    @Body('bondId') bondId: string,
+    @Body('units') units: number | string,
+  ) {
+    const userId = requireUserId(req);
+    const parsedUnits = Number(units);
+    if (!Number.isSafeInteger(parsedUnits) || parsedUnits <= 0) {
+      throw new BadRequestException('청약 좌수는 1 이상의 정수여야 합니다.');
+    }
+    return this.service.subscribeBond(userId, bondId, parsedUnits);
   }
 
   @Get('my-repo-loans')

@@ -30,6 +30,14 @@ export interface SchedulerJob {
 
 export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
   {
+    job: "bonds.daily_coupon_sweep",
+    cadence: "daily",
+    notBefore: 5,
+    connection: "app",
+    statement:
+      "SELECT (sweep->>'couponsDistributedWld')::text, (sweep->>'maturitiesRedeemedWld')::text FROM public.treasury_bond_distribute_daily_coupons() AS sweep",
+  },
+  {
     job: "treasury.grant_clawback_sweep",
     cadence: "hourly",
     notBefore: 15,

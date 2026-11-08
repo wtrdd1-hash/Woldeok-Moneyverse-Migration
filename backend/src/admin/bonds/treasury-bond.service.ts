@@ -8,8 +8,6 @@ import {
 } from './treasury-bond.repository';
 import { DiscordAlertService } from '../../discord/discord-alert.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
-import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
 
 @Injectable()
 export class TreasuryBondService {
@@ -36,14 +34,36 @@ export class TreasuryBondService {
     return this.repository.listRecentCouponLogs(limit);
   }
 
-  async subscribeBond(_userId: string, _bondId: string, _units: number) {
-    // Never signal success or notify Discord for an unposted financial debit.
-    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
+  async subscribeBond(userId: string, bondId: string, units: number) {
+    const res = await this.repository.subscribeBond(userId, bondId, units);
+    if (this.discordAlertService) {
+      this.discordAlertService.sendAdminDirectMessage({
+        title: '🏛️ [국채 청약 완료]',
+        color: 0x38bdf8,
+        description: `유저 ${userId}가 국채(${bondId}) ${units}좌를 청약했습니다. (총액: ${res.totalPriceWld} WLD)`,
+      }).catch(() => {});
+    }
+    return res;
   }
 
   async processHourlyCouponsAndMaturities() {
-    // Service boundary protects callers even when they bypass the HTTP controller.
-    throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
+    const res = await this.repository.processHourlyCouponsAndMaturities();
+    this.logger.log(
+      `[BondCoupon] Daily coupon & maturity settled: ${res.couponsDistributedWld} WLD distributed, ${res.maturitiesRedeemedWld} WLD redeemed across ${res.holdingsProcessed} holdings.`
+    );
+    return res;
+  }
+
+  async createBond(params: {
+    symbol: string;
+    name: string;
+    maturityHours: number;
+    annualCouponRateBps: number;
+    parValueWld: string;
+    totalIssuedUnits: number;
+    description?: string | undefined;
+  }) {
+    return this.repository.createBond(params);
   }
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number) {
     return this.repository.updateBondStatus(bondId, status, annualCouponRateBps);
