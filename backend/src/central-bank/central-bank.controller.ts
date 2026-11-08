@@ -23,6 +23,7 @@ import {
 } from './central-bank.dto';
 import { CentralBankService } from './central-bank.service';
 import { DurableCentralBankPolicyService } from './durable-policy.service';
+import { unverifiedFinanceOperation } from '../economy/monetary/finance-hold';
 
 @ApiTags('central-bank')
 @Controller('central-bank')
@@ -36,18 +37,17 @@ export class CentralBankController {
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
   @ApiOperation({ summary: '조폐국 주조 화폐 인수 및 국고/시중 유통 승인 (중앙은행 2단계 견제)' })
   async acceptMintBatch(
-    @Param('id') batchId: string,
-    @Body() dto: AcceptMintBatchDto,
-    @Req() req: RequestWithSession,
+    @Param('id') _batchId: string,
+    @Body() _dto: AcceptMintBatchDto,
+    @Req() _req: RequestWithSession,
   ) {
-    const actorId = requireUserId(req);
-    return this.centralBankService.acceptMintBatch(batchId, dto, actorId);
+    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
   }
 
   @Get('monetary-aggregates')
   @ApiOperation({ summary: 'M0(본원통화), M1(협의통화), M2(광의통화) 거시경제 통화량 및 통화승수 조회' })
   async getMonetaryAggregates() {
-    return this.centralBankService.getMonetaryAggregates();
+    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
   }
 
   @Get('base-rate')
@@ -87,21 +87,6 @@ export class CentralBankController {
   @Get('commercial-rates')
   @ApiOperation({ summary: '기준금리 및 지급준비율 연동 시중 상업은행 예대금리(대출/적금) 시뮬레이션 조회' })
   async getCommercialRates() {
-    try {
-      const [basePolicy, reservePolicy] = await Promise.all([
-        this.durablePolicyService.getBaseRate(),
-        this.durablePolicyService.getReserveRequirement(),
-      ]);
-      return this.centralBankService.getCommercialBankRates(
-        100_000_000n,
-        40_000_000n,
-        {
-          ratePercent: basePolicy.ratePercent,
-          ratioPercent: reservePolicy.ratioPercent,
-        },
-      );
-    } catch {
-      return this.centralBankService.getCommercialBankRates();
-    }
+    return unverifiedFinanceOperation('LEGACY_MONETARY_AUTHORITY');
   }
 }
