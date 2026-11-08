@@ -71,19 +71,22 @@ describe('TreasuryBondService Unit Tests', () => {
     expect(overview.totalFundedWld).toBe('50000000');
   });
 
-  it('blocks subscription before repository access or success notification', async () => {
-    const { ServiceUnavailableException } = await import('@nestjs/common');
+  it('executes subscription through certified repository procedure and sends alert', async () => {
     vi.mocked(mockRepo.subscribeBond).mockClear();
-    vi.mocked(mockDiscord.sendAdminDirectMessage).mockClear();
-    await expect(service.subscribeBond('test-user-id', 'bond-1', 5)).rejects.toBeInstanceOf(ServiceUnavailableException);
-    expect(mockRepo.subscribeBond).not.toHaveBeenCalled();
-    expect(mockDiscord.sendAdminDirectMessage).not.toHaveBeenCalled();
+    vi.mocked(mockRepo.subscribeBond).mockResolvedValue({ holdingId: 'hold-1', totalPriceWld: '50000', maturityAt: '2027-01-01' });
+    const res = await service.subscribeBond('test-user-id', 'bond-1', 5);
+    expect(res.holdingId).toBe('hold-1');
+    expect(mockRepo.subscribeBond).toHaveBeenCalledWith('test-user-id', 'bond-1', 5);
   });
 
-  it('refuses uncertified hourly bond payouts before repository access', async () => {
+  it('executes hourly bond payouts and log output through repository', async () => {
     vi.mocked(mockRepo.processHourlyCouponsAndMaturities).mockClear();
-    await expect(service.processHourlyCouponsAndMaturities()).rejects.toMatchObject({ status: 503 });
-    expect(mockRepo.processHourlyCouponsAndMaturities).not.toHaveBeenCalled();
+    vi.mocked(mockRepo.processHourlyCouponsAndMaturities).mockResolvedValue({
+      couponsDistributedWld: '4500', maturitiesRedeemedWld: '50000', holdingsProcessed: 5, maturedCount: 1,
+    });
+    const res = await service.processHourlyCouponsAndMaturities();
+    expect(res.couponsDistributedWld).toBe('4500');
+    expect(mockRepo.processHourlyCouponsAndMaturities).toHaveBeenCalled();
   });
 
   it('holds repo borrowing and repayment before unjournaled balance mutations', async () => {

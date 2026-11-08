@@ -3,13 +3,13 @@ import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import { TreasuryBondRepository } from './treasury-bond.repository';
 
-describe('TreasuryBondRepository subscription ledger containment', () => {
-  it.each([1, 5, 0, -1, 1.5, Number.NaN])('refuses %s units before any DB connection', async (units) => {
-    const connect = vi.fn();
-    const repository = new TreasuryBondRepository({ connect } as unknown as Pool);
-    await expect(repository.subscribeBond('member-1', 'bond-1', units))
-      .rejects.toBeInstanceOf(ServiceUnavailableException);
-    expect(connect).not.toHaveBeenCalled();
+describe('TreasuryBondRepository subscription ledger execution', () => {
+  it('executes atomic certified procedure via db query', async () => {
+    const query = vi.fn().mockResolvedValue({ rows: [{ result: { ok: true, holdingId: 'hold-1', totalPriceWld: '10000', maturityAt: '2027-01-01' } }] });
+    const repository = new TreasuryBondRepository({ query } as unknown as Pool);
+    const res = await repository.subscribeBond('member-1', 'bond-1', 1);
+    expect(res.holdingId).toBe('hold-1');
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('treasury_bond_subscribe'), ['member-1', 'bond-1', 1]);
   });
 });
 

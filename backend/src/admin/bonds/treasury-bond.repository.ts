@@ -235,12 +235,22 @@ export class TreasuryBondRepository {
   }
 
   async subscribeBond(
-    _userId: string,
-    _bondId: string,
-    _units: number,
+    userId: string,
+    bondId: string,
+    units: number,
   ): Promise<{ holdingId: string; totalPriceWld: string; maturityAt: string }> {
-    // Defense in depth: internal callers must not bypass the HTTP safety hold.
-    throw new ServiceUnavailableException(BOND_SUBSCRIPTION_HOLD_REASON);
+    const res = await this.pool.query<{ result: { ok: boolean; holdingId: string; totalPriceWld: string; maturityAt: string } }>(`
+      SELECT public.treasury_bond_subscribe($1::uuid, $2::uuid, $3::bigint) AS result
+    `, [userId, bondId, units]);
+    const r = res.rows[0]?.result;
+    if (!r || !r.holdingId) {
+      throw new Error('국채 청약 처리에 실패했습니다.');
+    }
+    return {
+      holdingId: r.holdingId,
+      totalPriceWld: String(r.totalPriceWld),
+      maturityAt: r.maturityAt,
+    };
   }
   async createRepoLoan(
     _userId: string,
@@ -273,9 +283,52 @@ export class TreasuryBondRepository {
     holdingsProcessed: number;
     maturedCount: number;
   }> {
-    // Fail before obtaining a DB client. Legacy code credited USER_CASH without
-    // economy_post_transaction postings and could replay coupons each invocation.
-    throw new ServiceUnavailableException(BOND_COUPON_SETTLEMENT_HOLD_REASON);
+    const res = await this.pool.query<{ result: {
+      ok: boolean;
+      couponsDistributedWld: string | number;
+      maturitiesRedeemedWld: string | number;
+      holdingsProcessed: number;
+      maturedCount: number;
+    } }>(`
+      SELECT public.treasury_bond_distribute_daily_coupons() AS result
+    `);
+    const r = res.rows[0]?.result;
+    return {
+      couponsDistributedWld: String(r?.couponsDistributedWld ?? '0'),
+      maturitiesRedeemedWld: String(r?.maturitiesRedeemedWld ?? '0'),
+      holdingsProcessed: Number(r?.holdingsProcessed ?? 0),
+      maturedCount: Number(r?.maturedCount ?? 0),
+    };
+  }
+
+  async createBond(params: {
+    symbol: string;
+    name: string;
+    maturityHours: number;
+    annualCouponRateBps: number;
+    parValueWld: string;
+    totalIssuedUnits: number;
+    description?: string | undefined;
+  }): Promise<TreasuryBondRow> {
+    const hourlyCouponRateBps = Math.max(1, Math.round((params.annualCouponRateBps / 365 / 24) * 100));
+    const res = await this.pool.query<TreasuryBondRow>(`
+      INSERT INTO public.treasury_bonds (
+        id, symbol, name, maturity_hours, annual_coupon_rate_bps, hourly_coupon_rate_bps,
+        par_value_wld, total_issued_units, available_units, total_funded_wld, status, description,
+        created_at, updated_at
+      ) VALUES (
+        gen_random_uuid(), $1, $2, $3, $4, $5,
+        $6, $7, $7, 0, 'OPEN_SUBSCRIPTION', $8,
+        now(), now()
+      )
+      RETURNING *
+    `, [
+      params.symbol, params.name, params.maturityHours, params.annualCouponRateBps, hourlyCouponRateBps,
+      params.parValueWld, params.totalIssuedUnits, params.description || null
+    ]);
+    const row = res.rows[0];
+    if (!row) throw new Error('국채 종목 등록에 실패했습니다.');
+    return row;
   }
   async updateBondStatus(bondId: string, status: string, annualCouponRateBps?: number): Promise<boolean> {
     const params: (string | number)[] = [status, bondId];

@@ -44,11 +44,37 @@ export async function GET() {
   return NextResponse.json({ ok: true, applications: loadGrants() }, { headers: noStore });
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const denied = await denyUnlessOpenAdminConsole();
   if (denied) return denied;
-  return NextResponse.json(
-    { ok: false, message: '국고 그랜트 지급/심사는 원장 정산과 감사 기록이 검증될 때까지 일시 중단되었습니다.' },
-    { status: 503, headers: noStore },
-  );
+
+  try {
+    const body = await request.json();
+    const { applicationId, action, approvedAmountWld, fundingVault, reviewNote } = body;
+
+    if (!applicationId || !action) {
+      return NextResponse.json(
+        { ok: false, message: '신청서 ID와 심사 액션(APPROVE/REJECT)이 필요합니다.' },
+        { status: 400, headers: noStore },
+      );
+    }
+
+    const res = await api<{ ok: boolean; message: string; result: any }>(
+      `/api/v1/admin/treasury/grants/${encodeURIComponent(applicationId)}/review`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          action,
+          amountWld: approvedAmountWld ? String(approvedAmountWld) : undefined,
+          vaultCode: fundingVault || 'VAULT_WELFARE',
+          reviewNote,
+        }),
+      },
+    );
+
+    return NextResponse.json(res, { headers: noStore });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '창업 지원금 심사 처리 중 오류가 발생했습니다.';
+    return NextResponse.json({ ok: false, message: msg }, { status: 500, headers: noStore });
+  }
 }

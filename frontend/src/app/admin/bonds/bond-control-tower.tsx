@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
 import { parseBondEvidence } from './bond-evidence';
+import { AdminActionModal } from '@/components/admin/admin-action-modal';
+import { Landmark, Zap, PlusCircle } from 'lucide-react';
 
 export interface TreasuryBondItem {
   id: string;
@@ -74,6 +76,65 @@ export function BondControlTower({
   const [bonds, setBonds] = useState<TreasuryBondItem[]>(initialBonds);
   const [logs, setLogs] = useState<CouponLogItem[]>(initialLogs);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // Form states for issue
+  const [symbol, setSymbol] = useState('KTB-10Y');
+  const [name, setName] = useState('월덱 10년물 혁신성장국채');
+  const [parValueWld, setParValueWld] = useState('10000');
+  const [annualCouponRateBps, setAnnualCouponRateBps] = useState(550);
+  const [maturityHours, setMaturityHours] = useState(8760);
+  const [totalIssuedUnits, setTotalIssuedUnits] = useState(1000);
+  const [description, setDescription] = useState('국가 혁신 성장 및 벤처 자금 조달을 위한 공인 국채');
+
+  const handleCreateIssue = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/bonds/issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbol,
+          name,
+          parValueWld,
+          annualCouponRateBps: Number(annualCouponRateBps),
+          maturityHours: Number(maturityHours),
+          totalIssuedUnits: Number(totalIssuedUnits),
+          description,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '국채 발행 실패');
+      setActionSuccessMsg(`국채 종목 ${symbol} (${name}) ${totalIssuedUnits}좌가 성공적으로 발행 공고되었습니다.`);
+      refreshData();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : '국채 발행 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDistributeCoupons = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/bonds/distribute-coupons', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '쿠폰 이자 집행 실패');
+      setActionSuccessMsg(
+        `일일 쿠폰 이자 및 만기 상환이 복식부기로 집행되었습니다. (지급 이자: +${data.couponsDistributedWld || 0} WLD, 상환 원금: +${data.maturitiesRedeemedWld || 0} WLD, 처리 계좌: ${data.holdingsProcessed || 0}건)`
+      );
+      refreshData();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : '이자 집행 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const refreshData = async () => {
     setIsRefreshing(true);
@@ -119,7 +180,7 @@ export function BondControlTower({
               VIRTUAL BOND CONSOLE
             </Badge>
             <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono text-xs">
-              READ-ONLY EVIDENCE
+              CERTIFIED DOUBLE-ENTRY ENGINE
             </Badge>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground mt-1">
@@ -130,7 +191,26 @@ export function BondControlTower({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setActionSuccessMsg(null); setIsIssueModalOpen(true); }}
+            className="gap-1.5 min-h-11 border-sky-500/30 hover:bg-sky-500/10 text-sky-400 font-bold"
+          >
+            <PlusCircle className="size-4" />
+            신규 국채 발행
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => { setActionSuccessMsg(null); setIsCouponModalOpen(true); }}
+            className="gap-1.5 min-h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-950/40"
+          >
+            <Zap className="size-4" />
+            일일 쿠폰 이자 즉시 집행
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -141,7 +221,6 @@ export function BondControlTower({
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             새로고침
           </Button>
-
         </div>
       </div>
 
@@ -373,6 +452,116 @@ export function BondControlTower({
           </div>
         </CardContent>
       </Card>
+      {/* 🏛️ 신규 국채 종목 발행 공고 모달 */}
+      <AdminActionModal
+        isOpen={isIssueModalOpen}
+        onClose={() => setIsIssueModalOpen(false)}
+        title="신규 국채(KTB) 종목 공모 발행"
+        subtitle="중앙 정부(국고)의 공인 가상 채권을 시장에 신규 공모합니다."
+        icon={<Landmark className="size-4" />}
+        confirmLabel="국채 공모 발행 실행"
+        confirmVariant="primary"
+        isLoading={isSubmitting}
+        successMessage={actionSuccessMsg}
+        onConfirm={handleCreateIssue}
+      >
+        <div className="space-y-4 text-xs">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-slate-400 mb-1 font-mono">종목 심볼</label>
+              <input
+                type="text"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-400 mb-1 font-mono">종목 명칭</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-slate-400 mb-1 font-mono">액면가 (WLD)</label>
+              <input
+                type="text"
+                value={parValueWld}
+                onChange={(e) => setParValueWld(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-400 mb-1 font-mono">표면금리 (bps)</label>
+              <input
+                type="number"
+                value={annualCouponRateBps}
+                onChange={(e) => setAnnualCouponRateBps(Number(e.target.value))}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono"
+              />
+              <span className="text-[10px] text-emerald-400">연 {(annualCouponRateBps / 100).toFixed(2)}%</span>
+            </div>
+            <div>
+              <label className="block text-slate-400 mb-1 font-mono">총 발행좌수</label>
+              <input
+                type="number"
+                value={totalIssuedUnits}
+                onChange={(e) => setTotalIssuedUnits(Number(e.target.value))}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white font-mono"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-slate-400 mb-1 font-mono">발행 목적 및 상세 설명</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+            />
+          </div>
+
+          <div className="p-3 bg-sky-950/30 border border-sky-500/30 rounded-xl text-[11px] text-sky-300">
+            💡 발행된 국채는 즉시 청약 가용 상태(`OPEN_SUBSCRIPTION`)가 되며, 시민들의 청약 대금은 국고 본금고(`VAULT_MAIN`)로 복식부기 자동 입금됩니다.
+          </div>
+        </div>
+      </AdminActionModal>
+
+      {/* ⚡ 일일 쿠폰 이자 즉시 집행 모달 */}
+      <AdminActionModal
+        isOpen={isCouponModalOpen}
+        onClose={() => setIsCouponModalOpen(false)}
+        title="일일 쿠폰 이자 및 만기 원리금 복식부기 집행"
+        subtitle="국고 본금고(VAULT_MAIN)로부터 전체 활성 국채 보유자에게 즉시 이자를 분개 집행합니다."
+        icon={<Zap className="size-4" />}
+        confirmLabel="원자적 이자 집행 승인"
+        confirmVariant="emerald"
+        isLoading={isSubmitting}
+        successMessage={actionSuccessMsg}
+        onConfirm={handleDistributeCoupons}
+      >
+        <div className="space-y-3 text-xs leading-relaxed">
+          <p className="text-slate-300">
+            본 작업은 PostgreSQL 원자적 불변 프로시저(`treasury_bond_distribute_daily_coupons`)를 호출하여:
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-slate-400 font-mono text-[11px]">
+            <li>모든 활성(`ACTIVE`) 국채 보유 계좌에 대해 1일 치 표면이자를 계산합니다.</li>
+            <li>국고 본금고(`treasury`) 계좌에서 차변/대변 대차평형을 맞춰 원자적으로 출금 및 입금합니다.</li>
+            <li>만기(maturity_at &le; now())가 도래한 채권은 원금을 전액 자동 환급하고 상태를 `MATURED`로 갱신합니다.</li>
+            <li>모든 분개 내역은 `economy_post_transaction` 불변 원장에 영구 기록됩니다.</li>
+          </ul>
+          <div className="p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-emerald-300 font-mono text-[11px]">
+            🛡️ 헌법적 무결성: 잔액 직접 수정이 원천 차단되며, 대차평형 불일치 시 0건 롤백됩니다.
+          </div>
+        </div>
+      </AdminActionModal>
     </div>
   );
 }

@@ -558,6 +558,20 @@ export class FundedTreasuryDonationController {
     }
   }
 
+  @Post("grants/clawback")
+  @UseGuards(AuthenticatedGuard, AdminGuard, CsrfGuard)
+  @Header("Cache-Control", "private, no-store")
+  @ApiOperation({ summary: "관리자 14일 경과 미창업 지원금 즉시 환수(Sweep Now) 집행" })
+  async clawbackTreasuryGrants(@Req() req: RequestWithSession) {
+    const adminId = requireUserId(req);
+    const result = await this.service.runClawbackSweepNow(adminId);
+    return {
+      ok: true,
+      message: "미창업 환수 스윕이 성공적으로 집행되었습니다. (회수 건수: " + result.reclaimed_count + "건, 회수 총액: " + result.total_reclaimed_wld + " WLD)",
+      result,
+    };
+  }
+
   @Post("grants/apply")
   @Header("Cache-Control", "private, no-store")
   @ApiOperation({ summary: "시민 창업 지원금 신청서 접수 및 1차 AI 스코어링" })
