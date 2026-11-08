@@ -2,8 +2,6 @@
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../core/pool.provider';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
-import { BOND_COUPON_SETTLEMENT_HOLD_REASON } from './bond-coupon-settlement-hold';
 
 export interface TreasuryBondRow {
   id: string;

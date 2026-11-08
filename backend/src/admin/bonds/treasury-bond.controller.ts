@@ -23,7 +23,6 @@ import type { RequestWithSession } from '../../auth/session.context';
 import { requireUserId } from '../../auth/session.context';
 import { TreasuryBondService } from './treasury-bond.service';
 import { BOND_REPO_LOAN_HOLD_REASON } from './bond-repo-loan-hold';
-import { BOND_SUBSCRIPTION_HOLD_REASON } from './bond-subscription-hold';
 
 @ApiTags('Treasury Bonds & Sovereign Debt Management')
 @Controller('admin/bonds')

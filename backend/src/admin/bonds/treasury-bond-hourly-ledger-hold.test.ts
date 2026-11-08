@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import type { Pool } from 'pg';
-import type { DiscordAlertService } from '../../discord/discord-alert.service';
 import { TreasuryBondRepository } from './treasury-bond.repository';
 import { TreasuryBondService } from './treasury-bond.service';
 

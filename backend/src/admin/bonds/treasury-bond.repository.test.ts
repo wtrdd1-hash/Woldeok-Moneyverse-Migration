@@ -1,4 +1,3 @@
-import { ServiceUnavailableException } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import { TreasuryBondRepository } from './treasury-bond.repository';
