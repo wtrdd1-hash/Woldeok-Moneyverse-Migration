@@ -16,3 +16,5 @@
 
 ## 운영 경계
 실제 DB/금전거래/코드/운영 배포 변경 없음. 설계 문서이므로 완료된 기능으로 오인하지 않는다. 후속 구현 때 문제 SQL을 정방향으로 교체하고 공식 Test·무중단 운영검증 필수.
+
+**Review handoff:** [GitHub Draft PR #2914](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2914) — open, not merged; docs-only.

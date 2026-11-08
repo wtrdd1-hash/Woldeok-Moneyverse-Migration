@@ -16,3 +16,5 @@
 
 ## Deferred
 No SQL or app change, no actual money transaction, official Test, runtime release, Production promotion or authority adoption. Do not deploy SQL340/341 unchanged. New finance commands require isolated implementation, canonical proof, independent restore and exact-SHA Test/Production gates.
+
+**Review handoff:** [GitHub Draft PR #2914](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2914) — open, not merged; docs-only.
