@@ -1,5 +1,10 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+## v2026.11.08.1936 — 국고 현재 상태와 국가경제 225개 세부기능 고도화 기획 (초안 / 미배포)
+- [영어 기준 상세 설계](planning/TREASURY_SERVICE_CURRENT_STATE_AND_DETAILED_FEATURE_ROADMAP_v2026.11.08.1936.md) / [한국어 225개 세부 기능](planning/TREASURY_SERVICE_CURRENT_STATE_AND_DETAILED_FEATURE_ROADMAP_v2026.11.08.1936.ko.md). 21개 서비스, 공식자료 39개, 운영·DB 실제 조사, P0/P1/P2 구현·QA·무중단 승격 계획.
+- [39개 공식 레퍼런스 EN](research/2026-11-08-sovereign-treasury-feature-reference-matrix-v1936.md) / [KO](research/2026-11-08-sovereign-treasury-feature-reference-matrix-v1936.ko.md) · [작업기록 EN](worklog/2026-11-08-treasury-current-state-roadmap-v1936.md) / [KO](worklog/2026-11-08-treasury-current-state-roadmap-v1936.ko.md) · [변경이력 EN](changelog/2026-11-08-treasury-current-state-and-feature-roadmap-v1936.md) / [KO](changelog/2026-11-08-treasury-current-state-and-feature-roadmap-v1936.ko.md) · [GitHub 업데이트](updates/v2026.11.08.1936-github.ko.md) · [내부용](updates/v2026.11.08.1936-internal.ko.md).
+- 주요 P0: 국고 정식잔액과 목적금고 합계 191,055,911 WLD 일치, 연금 직접 잔액변경·MINT 재원 공기업 배당·DB SQL340/341 적용 차이. **기획만 진행; 실제 금융거래/코드/DB/Test/운영 변경 없음.**
+
 ## v2026.10.20.981 — 시스템 안전 캐시 정리 (실기기 검증)
 - [작업기록](worklog/2026-10-20-host-storage-cleanup-v981.ko.md) / [영문](worklog/2026-10-20-host-storage-cleanup-v981.md) · [변경기록](changelog/2026-10-20-host-storage-cleanup-v981.ko.md) · [GitHub](updates/v2026.10.20.981-github.ko.md) · [내부용](updates/v2026.10.20.981-internal.ko.md). 루트 64%→62%, 1.51GB 확보, 앱 배포 없음.
 

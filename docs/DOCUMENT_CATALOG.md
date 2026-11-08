@@ -1,5 +1,10 @@
 # 📚 Document Catalog
 
+## v2026.11.08.1936 — Audited Treasury current state and 225-feature expansion (DRAFT / NOT DEPLOYED)
+- [EN detailed current-state and service design](planning/TREASURY_SERVICE_CURRENT_STATE_AND_DETAILED_FEATURE_ROADMAP_v2026.11.08.1936.md) / [KO](planning/TREASURY_SERVICE_CURRENT_STATE_AND_DETAILED_FEATURE_ROADMAP_v2026.11.08.1936.ko.md). 21 domains, 225 KO-numbered subfeatures, 39 official primary references, proposed state machines, APIs, data contracts, P0/P1/P2 acceptance and release gates.
+- [39-source reference matrix EN](research/2026-11-08-sovereign-treasury-feature-reference-matrix-v1936.md) / [KO](research/2026-11-08-sovereign-treasury-feature-reference-matrix-v1936.ko.md) · [Worklog EN](worklog/2026-11-08-treasury-current-state-roadmap-v1936.md) / [KO](worklog/2026-11-08-treasury-current-state-roadmap-v1936.ko.md) · [Changelog EN](changelog/2026-11-08-treasury-current-state-and-feature-roadmap-v1936.md) / [KO](changelog/2026-11-08-treasury-current-state-and-feature-roadmap-v1936.ko.md) · [GitHub update](updates/v2026.11.08.1936-github.md) / [KO](updates/v2026.11.08.1936-github.ko.md) · [Internal](updates/v2026.11.08.1936-internal.md) / [KO](updates/v2026.11.08.1936-internal.ko.md).
+- P0 evidence: current Treasury 191055911 WLD matches 5 vaults, but NPS payout procedure directly updates balances without canonical posting; SOE dividend path uses MINT and new random keys; source SQL340/341 not recorded applied to linked DB. **Planning only; no application, finance SQL, WLD, Test or Production modification.**
+
 ## v2026.10.22.1108 — No automatic unpublishing, country blog domain foundation
 - [EN owner supersession](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md) / [KO](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md). 24h or later review delay never auto-hides published article; admin alert only. Four-country risk candidate/domain review-state code and tests developed on isolated branch; publish-first DB/scheduler integration is pending.
 
