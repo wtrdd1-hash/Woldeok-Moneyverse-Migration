@@ -1,6 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.08.1936 — F675-289 증빙 보존명령 집행·해제 무결성 강화 (기능 보완 / 초안 / 운영 보류)
+- **주기·근거:** 이전 기능 추가 v1934 → 현재 기능 보완 v1936 → 다음 기능 추가 v1938. main b56fdc748dd817eb250b7d5d06019aaf5c299131, 선행 초안 #2908에 종속. 문서 기획만 수행하며 운영 승격 금지. 운영 심볼릭 링크 대상 누락은 P0이고 서비스 active만으로 정상 배포를 입증하지 못한다.
+- **실패 모델·관리자 화면:** 저장소 잠금 응답만으로 보존 성공으로 판정하지 않고 동일 객체 버전·보존 기한·SHA-256 매니페스트를 저장소에서 독립 재조회한다. 이의제기 상세에 PENDING_STORAGE, VERIFIED_ACTIVE, VERIFY_FAILED, RELEASE_PENDING, RELEASE_BLOCKED, RELEASED 및 검증 시각 표시. 보호 확인·재시도·해제 요청·상위 보고 CTA 제공. ETag 만료, MFA·이해충돌 변경, 증빙 누락, 객체 버전 불일치 시 차단. 320px, 키보드·스크린리더, 영한 동등성, 관리자 noindex/no-store.
+- **제안 API:** GET /api/v1/admin/evidence/holds/:id/verification(권한별 비식별·ETag), POST /api/v1/admin/evidence/holds/:id/reconcile(If-Match·멱등키·호출 제한·202), POST /api/v1/admin/evidence/holds/:id/release-check(독립 심사 증명·사유, 분쟁/법적 보존/미검증 대상이면 409). 401/403 인증·인가, 404 테넌트 정보 은닉, 409 세대 충돌, 422 정책, 429 악용, 503 저장소 검증 불가. 무권한 객체 키 노출 금지.
+- **제안 DB:** 추가 전용 evidence_hold_verification_events(tenant_id,id,hold_id,target_version,provider_lock_mode,provider_retention_until,manifest_sha256,verification_status,verified_at,worker_epoch,created_at). 보존명령·대상에 테넌트 복합 FK, 상태·해시 CHECK, UNIQUE(tenant_id,hold_id,target_version,worker_epoch), 인덱스(tenant_id,hold_id,created_at DESC). 모든 대상 버전 독립 확인 및 저장소 기한 >= 승인 기한일 때만 ACTIVE. 작업자 세대·임대 펜싱으로 오래된 검증 결과 덮어쓰기 방지.
+- **트랜잭션·안전:** 보존명령 revision CAS로 검증 판정·추가 전용 감사·Outbox를 한 DB 트랜잭션에 기록. 외부 저장소 잠금은 트랜잭션 밖에서 멱등 재시도하며 DB·저장소 간 원자 커밋을 주장하지 않는다. 삭제·만료·키 교체·보존 단축 전에 활성 명령 조회, 검증 불가면 삭제·해제 차단. 해제는 2단계이며 법정 보존기한을 단축하지 않고 서명 증빙·묘비 기록 유지.
+- **P0/P1·검증:** P0 운영 릴리스 대상과 실행 SHA 복구·검증, 기존 QA 재시작 장애 원인 및 현재 서비스 단위 확인, DB 최소권한·마이그레이션 체크섬, 독립 백업 복원, 금융 원장 대사, 국내 법률·Test exact-SHA 게이트. P1 선행 기획 정합성 후 관리자 UX·API 3개·RLS/복합 FK·저장소 재조회·삭제 방어·재조정 작업자 구현. KPI 미보호 대상 0, 잘못된 해제 0, 검증 p95, 차단 삭제 건수·재조정 지연(집계만). 실제 PostgreSQL 테넌트·CAS, 저장소 최종 일관성, 객체 버전 혼합, 동시 해제/삭제, 작업자 장애, MFA/키 철회, 재전송, 320px/a11y·영한 회귀. 플래그 admin_evidence_preservation_hold_v1 기본 OFF, 별도 개발 브랜치 → Test exact-SHA → 카나리 → 승인 승격; 롤백 시 보존 유지. 외부 독립 레퍼런스 신규 검증 0, 누적 UNKNOWN/10,000, BLOCKED/IN PROGRESS.
+
+
 ## v2026.11.08.1934 — F675-289 이의제기 증빙 보존명령 (기능 추가 / 초안 / 운영 보류)
 - **주기·기준:** 이전 기능 보완 v1932 → 현재 기능 추가 v1934 → 다음 기능 보완 v1936. 정본 main SHA `b56fdc748dd817eb250b7d5d06019aaf5c299131` 확인. 미병합 v1932/#2904에 종속. 기획만 수행하며 런타임 승격 금지.
 - **목적·대상·진입점:** F675-288 이의제기 심사 중 접근 영수증 증빙이 조기 만료·삭제되지 않도록 보존한다. 테넌트 증빙 담당자가 `/admin/evidence/receipt-disputes/:id`에서 보존 요청, 독립 준법 심사자가 승인·거절, 감사자는 비식별 이력 조회. CTA는 보존 요청·승인·거절·사유 첨부 연장·해제. 상태 REQUESTED → REVIEW_PENDING → ACTIVE → EXTENSION_PENDING → RELEASED / EXPIRED / REJECTED / BLOCKED. 소유권·법적 근거 불명 시 차단한다.
