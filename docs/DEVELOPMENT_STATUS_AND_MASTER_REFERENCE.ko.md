@@ -174,3 +174,17 @@ timeline
 
 ## 4. 맺음말 및 통합 문서 활용 안내
 본 총서는 월덕 머니버스의 모든 기술적 의사결정과 구현 내역이 담긴 **살아있는 단일 진실 공급원(Single Source of Truth)**입니다. 새로운 기능을 개발하거나 시스템을 운영할 때 본 문서와 도메인별 세부 명세서([docs/DOCS_INDEX.md](./DOCS_INDEX.md))를 최우선 기준으로 준수합니다.
+
+---
+
+## 5. 최신 마일스톤 업데이트 (v296 - 2026-11-08)
+- **국고 창업 지원금 대시보드 및 시민 신청 폼 완전 정상화**:
+  - 관리자 관제탑 `/admin/treasury/grants`의 `(점검중)` 표기 해제 및 `AdminActionModal` 승인·반려·환수(Sweep Now)·AI 심사 진단 모달 정식 개통.
+  - 대국민 사업체 페이지 `/businesses`의 `BusinessGrantBanner` 및 유저단 신청 폼 모달 실시간 접수 연동.
+  - `POST /api/treasury/apply-grant` 라우트를 `mutate()` 기반으로 전면 리팩터링하여 백엔드 `FundedTreasuryDonationController`의 `CsrfGuard` 보안 장벽 무결 통과.
+- **14일 의무 창업 환수(Clawback) 자동 스케줄러 등록 및 SQL 문법 정정**:
+  - 14일 기한 경과 시 사업체를 설립하지 않은 수혜자의 가용 잔액을 국고 `VAULT_WELFARE`로 자동 회수하는 `treasury.grant_clawback_sweep` 데몬 작업의 JSONB 필드 추출 연산자 정정(`(sweep->>'reclaimed_count')::text`).
+- **가상 국채(KTB) 이자 분배 및 시민 국고 혜택 라우트 정상화**:
+  - `POST /api/treasury/claim` 503 레거시 하드코딩 제거 및 정책 피드백 200 OK 정규화.
+  - 가상 국채 일일 쿠폰 이자 정산 스케줄러(`bonds.daily_coupon_sweep`) 및 수동 지급 라우트(`POST /api/admin/bonds/distribute-coupons`) 실집행 개통.
+

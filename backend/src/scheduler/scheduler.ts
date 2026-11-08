@@ -43,7 +43,7 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     notBefore: 15,
     connection: "app",
     statement:
-      "SELECT sweep.reclaimed_count::text, sweep.total_reclaimed_wld::text FROM public.treasury_run_clawback_sweep() AS sweep",
+      "SELECT (sweep->>'reclaimed_count')::text, (sweep->>'total_reclaimed_wld')::text FROM public.treasury_run_clawback_sweep() AS sweep",
   },
   {
     job: 'economy.anomaly_sweep',
