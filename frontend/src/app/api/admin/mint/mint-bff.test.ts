@@ -5,6 +5,7 @@ import * as executeMintRoute from './execute-mint/route';
 import * as executeRetireRoute from './execute-retire/route';
 import * as freezeRoute from './freeze/route';
 import { api } from '@/lib/api';
+import { mutate } from '@/lib/mutate';
 
 vi.mock('@/lib/api', () => ({
   api: vi.fn(),
@@ -13,6 +14,10 @@ vi.mock('@/lib/api', () => ({
       super(message);
     }
   },
+}));
+
+vi.mock('@/lib/mutate', () => ({
+  mutate: vi.fn(),
 }));
 
 describe('Admin Mint Bureau BFF Routes', () => {
@@ -44,8 +49,9 @@ describe('Admin Mint Bureau BFF Routes', () => {
   });
 
   it('POST execute-mint executes authorized mint via backend', async () => {
-    vi.mocked(api).mockResolvedValueOnce({ id: 'cert-123', amount_wld: '100000' } as never);
+    vi.mocked(mutate).mockResolvedValueOnce({ id: 'cert-123', amount_wld: '100000' } as never);
     const req = {
+      headers: new Headers(),
       json: async () => ({
         policy_order_id: 'order-1',
         amount_wld: '100000',
@@ -58,14 +64,15 @@ describe('Admin Mint Bureau BFF Routes', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.id).toBe('cert-123');
-    expect(api).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/execute-mint', expect.objectContaining({
+    expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/execute-mint', expect.objectContaining({
       method: 'POST',
     }));
   });
 
   it('POST execute-retire executes retirement via backend', async () => {
-    vi.mocked(api).mockResolvedValueOnce({ id: 'retire-cert-1', amount_wld: '50000' } as never);
+    vi.mocked(mutate).mockResolvedValueOnce({ id: 'retire-cert-1', amount_wld: '50000' } as never);
     const req = {
+      headers: new Headers(),
       json: async () => ({
         policy_order_id: null,
         amount_wld: '50000',
@@ -79,26 +86,40 @@ describe('Admin Mint Bureau BFF Routes', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.id).toBe('retire-cert-1');
-    expect(api).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/execute-retire', expect.objectContaining({
+    expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/execute-retire', expect.objectContaining({
       method: 'POST',
     }));
   });
 
   it('POST freeze toggles freeze or unfreeze correctly', async () => {
-    vi.mocked(api).mockResolvedValueOnce({ is_issuance_frozen: true } as never);
+    vi.mocked(mutate).mockResolvedValueOnce({ is_issuance_frozen: true } as never);
     const freezeReq = {
+      headers: new Headers(),
       json: async () => ({ freeze: true, reason: '긴급 동결' }),
     } as never;
     const freezeRes = await freezeRoute.POST(freezeReq);
     expect(freezeRes.status).toBe(200);
-    expect(api).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/freeze', expect.anything());
+    expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/freeze', expect.anything());
 
-    vi.mocked(api).mockResolvedValueOnce({ is_issuance_frozen: false } as never);
+    vi.mocked(mutate).mockResolvedValueOnce({ is_issuance_frozen: false } as never);
     const unfreezeReq = {
+      headers: new Headers(),
       json: async () => ({ freeze: false }),
     } as never;
     const unfreezeRes = await freezeRoute.POST(unfreezeReq);
     expect(unfreezeRes.status).toBe(200);
-    expect(api).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/unfreeze', expect.anything());
+    expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/unfreeze', expect.anything());
+  });
+  it("POST execute-mint rejects untrusted cross-origin requests", async () => {
+    const headers = new Headers();
+    headers.set("origin", "https://malicious-origin.com");
+    const req = {
+      headers,
+      url: "http://localhost/api/admin/mint/execute-mint",
+      json: async () => ({}),
+    } as never;
+    const res = await executeMintRoute.POST(req);
+    expect(res.status).toBe(403);
+    expect(mutate).not.toHaveBeenCalled();
   });
 });

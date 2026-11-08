@@ -120,6 +120,20 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/mint',
+    eyebrow: 'KOMSCO NATIONAL MINT BUREAU',
+    title: '한국조폐공사 (KOMSCO)',
+    summary: '본원통화(M0) 주조 승인, 영구 소각, 발행 긴급 동결 및 통화량 불변식 전수 검증을 관제합니다.',
+    group: 'economy',
+  },
+  {
+    href: '/admin/central-bank',
+    eyebrow: 'BANK OF KOREA (BOK) MONETARY POLICY',
+    title: '한국은행 (BOK) 금융통화위원회',
+    summary: '기준금리, 지급준비율, 목표 인플레이션 정책 수립 및 M0/M1/M2 거시 통화 지표를 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/treasury',
     eyebrow: 'SYSTEM TREASURY',
     title: '국고 · 비축 자금',
