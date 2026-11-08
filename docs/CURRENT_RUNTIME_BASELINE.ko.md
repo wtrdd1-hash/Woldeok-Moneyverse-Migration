@@ -13,6 +13,8 @@
   - PostgreSQL 14일 의무 창업 기한 만료 잔여자금 자동 회수 스케줄러 (`treasury_run_clawback_sweep`) 등록 및 원자적 대차평형 보장.
   - 블로그 12종 테마 벡터 SVG 히어로 이미지 100% 렌더링 (다국어 308 영구 리다이렉트 정상).
   - Next.js EPROTO 루프백 프록시 SSL 핸드셰이크 방어 코드(`frontend/src/proxy.ts`) 운영 배포.
+- **디스크 및 저장소 정밀 정리 (v291)**: 과거 릴리스 12개 버전 및 완료된 과거 태스크 폴더의 `node_modules`/.next 캐시를 일괄 정리하여 41GB+ 디스크를 즉시 회수함. `/srv/moneyverse-data` 가용 공간 101GB(사용률 47%) 확보.
+- **Git 워크트리 및 브랜치 통합 (v291)**: 126개 고아 워크트리 일괄 해제(`git worktree prune`) 및 머지된 로컬 브랜치 31개 정리 완료.
 - [운영 승격 및 브랜치 통합 기록](worklog/2026-11-08-branch-merge-and-v1770-promotion.ko.md). 아래 v1622/v1550/v701 등은 과거 시점 기록이며 현행 운영 기준선은 v1770임.
 
 ## 2026-11-02 v1622 — 최신 운영 실측
