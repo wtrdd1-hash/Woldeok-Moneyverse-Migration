@@ -173,6 +173,11 @@ export function verifyHostRuntimeIdentity(snapshot) {
       fail('immutable_release_directory_version_mismatch');
     }
   }
+  // Linux /proc/<pid>/cwd appends this marker after the process's release
+  // directory is unlinked. Never accept a deleted live generation as deployable.
+  if (typeof snapshot?.backendCwd === 'string' && snapshot.backendCwd.endsWith(' (deleted)')) {
+    fail('backend_process_directory_deleted');
+  }
   if (!root || snapshot?.backendCwd !== path.join(root, 'backend')) fail('backend_process_directory_mismatch');
   if (!root || snapshot?.frontendCwd !== path.join(root, 'frontend')) fail('frontend_process_directory_mismatch');
 
@@ -192,7 +197,11 @@ function systemdMainPid(service) {
 
 function systemdProcessEvidence(service) {
   const pid = systemdMainPid(service);
-  const cwd = realpathSync(readlinkSync('/proc/' + pid + '/cwd'));
+  const rawCwd = readlinkSync('/proc/' + pid + '/cwd');
+  if (rawCwd.endsWith(' (deleted)')) {
+    throw new Error('deleted live release working directory: ' + service);
+  }
+  const cwd = realpathSync(rawCwd);
   const raw = execFileSync('systemctl', ['show', service, '--property=ExecMainStartTimestamp', '--value'], {
     encoding: 'utf8', timeout: 5000,
   }).trim();

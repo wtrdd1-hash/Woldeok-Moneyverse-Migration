@@ -269,3 +269,11 @@ test('binds active service directory evidence to the actual systemd process, not
   assert.equal(lookup.cwdFor('stale.service'), '/old/release/backend');
   assert.deepEqual(calls, ['current.service', 'stale.service']);
 });
+
+test('rejects a live backend pinned to a deleted release directory', () => {
+  const state = healthy();
+  state.backendCwd += ' (deleted)';
+  const verdict = verifyHostRuntimeIdentity(state);
+  assert.ok(verdict.failures.includes('backend_process_directory_deleted'));
+  assert.ok(verdict.failures.includes('backend_process_directory_mismatch'));
+});
