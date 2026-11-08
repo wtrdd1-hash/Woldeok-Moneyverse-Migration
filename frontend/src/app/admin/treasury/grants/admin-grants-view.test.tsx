@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { AdminGrantsView, GrantApp } from './admin-grants-view';
+import { AdminGrantsView, type GrantApp } from './admin-grants-view';
 
 const mockApps: GrantApp[] = [
   {
