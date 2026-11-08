@@ -1,6 +1,16 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.08.1934 — F675-289 이의제기 증빙 보존명령 (기능 추가 / 초안 / 운영 보류)
+- **주기·기준:** 이전 기능 보완 v1932 → 현재 기능 추가 v1934 → 다음 기능 보완 v1936. 정본 main SHA `b56fdc748dd817eb250b7d5d06019aaf5c299131` 확인. 미병합 v1932/#2904에 종속. 기획만 수행하며 런타임 승격 금지.
+- **목적·대상·진입점:** F675-288 이의제기 심사 중 접근 영수증 증빙이 조기 만료·삭제되지 않도록 보존한다. 테넌트 증빙 담당자가 `/admin/evidence/receipt-disputes/:id`에서 보존 요청, 독립 준법 심사자가 승인·거절, 감사자는 비식별 이력 조회. CTA는 보존 요청·승인·거절·사유 첨부 연장·해제. 상태 REQUESTED → REVIEW_PENDING → ACTIVE → EXTENSION_PENDING → RELEASED / EXPIRED / REJECTED / BLOCKED. 소유권·법적 근거 불명 시 차단한다.
+- **권한·화면:** 테넌트별 RBAC, 요청자 자기 승인 금지, 위임 계정까지 실효 신원 분리, 확정 시 최신 MFA·이해충돌 정책 검증. 영수증·이의제기 세대, 보존 기한, 법적 근거, 사유, 심사자, 원본 체크섬 표시. 오래된 ETag면 CTA 비활성화. 모바일 320px 카드, 키보드 조작, WCAG 2.2 AA 상태 알림, 영·한 오류/상태 동등성. 관리자 noindex·no-store, 분석에 민감 정보 제외.
+- **제안 API:** `POST /api/v1/admin/evidence/receipt-disputes/:id/holds`(사유·법적 근거·기한·Idempotency-Key·If-Match), `GET /api/v1/admin/evidence/receipt-disputes/:id/holds`(커서·권한별 비식별), `POST /api/v1/admin/evidence/holds/:id/decisions`(승인/거절·심사 증명), `POST /api/v1/admin/evidence/holds/:id/extensions`, `POST /api/v1/admin/evidence/holds/:id/release`. 400/401/403/404(타 테넌트 은닉)/409/422/429/503 오류 계약, 변경 요청 멱등키·If-Match 필수, 삭제 API 없음.
+- **제안 PostgreSQL:** `evidence_preservation_holds(tenant_id,id,dispute_id,receipt_generation,status,legal_basis,reason,requested_by,reviewed_by,hold_until,revision,created_at,updated_at)`, `evidence_hold_decisions(tenant_id,id,hold_id,revision,decision,actor_id,proof_sha256,created_at)`, `evidence_hold_targets(tenant_id,hold_id,object_key,object_version,sha256,retention_until)`. 테넌트 복합 FK, revision>0·hold_until>created_at CHECK, 활성 상태별 (tenant_id,dispute_id,receipt_generation) 부분 UNIQUE, (tenant_id,status,hold_until,id)·(tenant_id,hold_id,created_at) 인덱스, RLS. 객체 저장소 버전 잠금·보존 검증 전 ACTIVE 불가.
+- **트랜잭션·보안:** 직렬화 또는 CAS 트랜잭션에서 이의제기 세대·원본 매니페스트·심사 독립성·정책 최신성 검증 후 판정·감사·Outbox 원자 기록. 외부 저장소 보존은 멱등 비동기 적용하며 검증 전 REVIEW_PENDING 유지, 펜싱 토큰·재조정 작업으로 누락 감지. 보존 중 일반 TTL·삭제 작업 차단, 법적 근거상 필요하면 2인 해제 승인, 과거 해시 삭제 금지. 테넌트·행위자·이의제기별 속도 제한, 서명 참조·암호화·악성 파일 검사·개인정보 최소화.
+- **지표·테스트·배포:** 보존 활성화 지연, 미보호 객체 수(목표 0), 독립 승인 위반(0), 오만료·재조정 적체 측정. 실제 PostgreSQL RLS/FK/CAS, 동시 승인·해제, 재전송, 서명 장애, 저장소 잠금 실패, 만료·삭제 경합, 테넌트 격리, 키 교체, 접근성·영한 회귀 테스트. 플래그 `admin_evidence_preservation_hold_v1` 기본 OFF; 별도 개발 브랜치, Test exact-SHA, 확장·백필·축소 마이그레이션, 복원, 카나리·기존 보존명령 유지 롤백. P0: 운영 심볼릭 링크·재시작 QA·금융/법률 게이트, P1: F675-285~288 병합 후 구현. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000 — BLOCKED / IN PROGRESS.
+
+
 ## v2026.11.08.1932 — F675-288 접근 영수증 이의제기 판정 무결성 강화 (기능 보완 / 초안 / 운영 보류)
 - **주기·근거:** 이전 기능 추가 v1930 → 현재 기능 보완 v1932 → 다음 기능 추가 v1934. 정본 origin/main `b56fdc748dd817eb250b7d5d06019aaf5c299131` 시작·중간 확인. 미병합 v1930 PR #2902 위에 적층하며 main 병합으로 주장하지 않음. 기획 문서만 변경; 런타임·원장 변경 없음.
 - **대상·진입점:** F675-288 독립 접근 영수증 이의제기 판정. 관리자 `/admin/evidence/receipt-disputes` 목록·상세, 테넌트별 요청자·독립 판정자·감사자 권한. 증빙 제출·회피 요청·증빙 재검증·판정·재개 CTA. `SUBMITTED/UNDER_REVIEW/INCONCLUSIVE/UPHELD/OVERTURNED/REOPENED/BLOCKED` 상태와 최종 검증 시각·불변 개정·이해충돌·만료 사유 표시. 토큰 소비를 실제 전달 성공으로 추정하지 않음.
