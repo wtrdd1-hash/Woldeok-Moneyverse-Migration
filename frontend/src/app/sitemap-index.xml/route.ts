@@ -15,14 +15,14 @@ export async function GET() {
     });
   }
 
-  const now = new Date().toISOString();
+  const releaseDate = (process.env.APP_RELEASE_DATE ? new Date(process.env.APP_RELEASE_DATE) : new Date('2026-11-08T00:00:00.000Z')).toISOString();
   const latestBlogModification = [...await verifiedPublicArticles(), ...getAllBlogPosts()].map(post => post.updatedAt).sort().at(-1) ?? '2026-10-15T14:00:00.000Z';
   const sitemaps = [
-    { loc: canonicalUrl('/sitemap.xml'), lastmod: now },
-    { loc: canonicalUrl('/sitemap-static.xml'), lastmod: now },
-    { loc: canonicalUrl('/sitemap-announcements.xml'), lastmod: now },
-    { loc: canonicalUrl('/sitemap-board.xml'), lastmod: now },
-    { loc: canonicalUrl('/sitemap-stocks.xml'), lastmod: now },
+    { loc: canonicalUrl('/sitemap.xml'), lastmod: releaseDate },
+    { loc: canonicalUrl('/sitemap-static.xml'), lastmod: releaseDate },
+    { loc: canonicalUrl('/sitemap-announcements.xml'), lastmod: releaseDate },
+    { loc: canonicalUrl('/sitemap-board.xml'), lastmod: releaseDate },
+    { loc: canonicalUrl('/sitemap-stocks.xml'), lastmod: releaseDate },
     { loc: canonicalUrl('/sitemap-blog.xml'), lastmod: new Date(latestBlogModification).toISOString() },
   ];
 

@@ -19,9 +19,9 @@ const MARKET_NAMES: Record<BlogLocale, string> = {
 };
 const PAGE_TITLES: Record<BlogLocale, string> = {
   ko: '월덕 블로그 | 경제 · 코딩 · 컴퓨터',
-  en: 'US Economics, Coding & Computers | Woldeok Moneyverse',
-  ja: '日本の経済・プログラミング・コンピュータ | Woldeok Moneyverse',
-  zh: '经济、编程与计算机知识 | Woldeok Moneyverse',
+  en: 'US Economics, Coding & Computers',
+  ja: '日本の経済・プログラミング・コンピュータ',
+  zh: '经济、编程与计算机知识',
 };
 const PAGE_DESCRIPTIONS: Record<BlogLocale, string> = {
   ko: '경제 원리, 프로그래밍, 네트워크와 컴퓨터 시스템을 국가별 공식 자료와 실제 예제로 학습합니다.',
