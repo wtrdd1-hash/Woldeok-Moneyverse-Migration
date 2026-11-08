@@ -1,6 +1,7 @@
 # [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v296**: [국고 시민 신청 BFF CSRF 방어 연동, 14일 의무 창업 환수 스케줄러 SQL 문법 정상화 및 혜택 수령 라우트 정규화] (+58, -0)
 - **v270**: [블로그 Nginx 라우팅 포트 4225 단일화, JS 청크 404 전멸 및 관리자 블로그 완전 복구, DB 연동(포트 4224) 7건 아티클 서빙, 디스크 129GB 대대적 회수] (+40, -0)
 
 - **v269**: [OWASP Top 10 및 웹 애플리케이션 보안 감사·모의침투 점검 및 CSRF 취약점 7개 컨트롤러 패치, 신규 보안 방어 테스트 11건 및 회귀 테스트 330건 100% 통과] (+44, -0)
@@ -2837,3 +2838,34 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 ### 2. 무결성 검증 및 운영 승격 배포
 - `frontend/src/proxy.ts` 변경 및 문서 업데이트를 프로덕션 릴리스 디렉터리에 동기화 및 서비스 반영.
 - 단위 테스트 100% Green 검증 및 서비스 200 OK 실측 확인.
+
+---
+
+## 🚀 [v296 Specification] 국고 시민 신청 BFF CSRF 방어, 14일 의무 창업 환수 스케줄러 SQL 정상화 및 혜택 수령 라우트 정규화 (현재: v296 누적)
+
+### 1. 개요 및 분석 배경
+- 사용자 지시 "현제모든문서을분석하고 마저하고 모든기능 정상화했는지확인해줘"에 따라 `docs/` 내 전체 기획서(예금보험공사, 거시 국고 순환 아키텍처, 런타임 기준선 등)와 현재 코드베이스 간의 불일치 및 런타임 잠재 결함을 전수 식별 및 해결.
+- 식별된 핵심 3대 해결 영역:
+  1. **국고 창업 지원금 시민 신청 BFF (`frontend/src/app/api/treasury/apply-grant/route.ts`) CSRF 보호 통합**:
+     - 기존 `api()` 직접 호출 시 백엔드 유저단 컨트롤러(`FundedTreasuryDonationController`)의 `CsrfGuard` 보안 장벽에 의해 CSRF 토큰 누락 403 오류가 발생할 수 있던 구조를 `mutate()` 기반으로 전면 전환하여 원-토큰-원-라이트 CSRF 방어선 무결 통과.
+     - 필수 바디(사업체명, 사업계획서) 누락 시 400 Bad Request, 정상 시 200 OK 단위 테스트 완비.
+  2. **14일 의무 창업 자동 환수(Clawback) 스케줄러 SQL 문법 정정 (`backend/src/scheduler/scheduler.ts`)**:
+     - DB 함수 `public.treasury_run_clawback_sweep()`의 반환형(`RETURNS jsonb`)에 맞춰 `(sweep->>'reclaimed_count')::text, (sweep->>'total_reclaimed_wld')::text` 연산자로 정정하여 에러 없는 정기 자동 환수 집행 보장.
+  3. **국고 혜택 수령 라우트 (`frontend/src/app/api/treasury/claim/route.ts`) 503 레거시 하드코딩 제거 및 정상화**:
+     - 과거 503 Service Unavailable 정적 반환을 걷어내고, 시민 기본배당(`CITIZEN_DIVIDEND`), 긴급 구호금(`EMERGENCY_RELIEF`), 국채 부스터(`BOND_YIELD_BOOSTER`) 프로그램별 정책 피드백 및 복식부기 원장 연동 200 OK 응답 체계 정규화.
+     - 단위 테스트 `route.test.ts` 신규 작성 및 4 tests 100% Green PASS.
+
+### 2. 세부 검증 결과
+1. **백엔드 무결성**:
+   - `backend/src/scheduler/scheduler.test.ts` (11 tests): **100% PASS**
+   - `npx eslint src/scheduler/scheduler.ts`: **0 errors, 0 warnings**
+   - `npm run build` (NestJS): **Exit code 0**
+2. **프론트엔드 무결성**:
+   - `src/app/api/treasury/apply-grant/route.test.ts` (3 tests): **100% PASS**
+   - `src/app/api/treasury/claim/route.test.ts` (4 tests): **100% PASS**
+   - 국고 전수 테스트 스위트 (12 files, 60 tests): **100% Green PASS**
+   - `npx eslint src/app/api/treasury/apply-grant/ src/app/api/treasury/claim/`: **0 errors, 0 warnings**
+3. **문서 동기화**:
+   - `docs/CURRENT_RUNTIME_BASELINE.ko.md` v1771 누적 반영.
+   - `docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md` v296 누적 반영.
+   - `implementation_plan.md` Zero-Deletion Invariant (`-0 lines`) 준수 누적 완료.

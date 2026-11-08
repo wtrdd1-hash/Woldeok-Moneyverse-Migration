@@ -121,3 +121,12 @@ Production/Test session continuity, DB 권위, release identity, backup/restore 
 - **HISTORICAL** — 과거 incident/change 증거로만 유지
 
 OS, runtime stack, DB major version, public routing, deployment authority가 바뀌면 이 기준선을 갱신한다.
+
+---
+
+## 🏛️ 2026-11-08 v1771 런타임 갱신 (OBSERVED CURRENT)
+- **국고 창업 지원금 BFF 및 CSRF 방어 통합**: `POST /api/treasury/apply-grant`가 `mutate()` 기반으로 전환되어 `CsrfGuard` 및 세션 토큰을 완전 무결하게 전송함.
+- **국고 복지 혜택 및 배당 청구 라우트 정상화**: `POST /api/treasury/claim`의 503 레거시 하드코딩을 제거하고, 시민 기본배당(`CITIZEN_DIVIDEND`), 긴급 구호금(`EMERGENCY_RELIEF`), 국채 부스터(`BOND_YIELD_BOOSTER`) 정책 피드백 및 원장 연동 체계를 정상화함.
+- **14일 의무 창업 환수(Clawback) 스케줄러 SQL 정정**: `public.treasury_run_clawback_sweep()`의 JSONB 반환형에 맞춰 `(sweep->>'reclaimed_count')::text, (sweep->>'total_reclaimed_wld')::text`로 수정하여 에러 없는 정기 자동 환수 집행 보장.
+- **국채(KTB) 일일 쿠폰 이자 정산 스케줄러 가동**: `bonds.daily_coupon_sweep`의 매일 정산 집행 보장.
+
