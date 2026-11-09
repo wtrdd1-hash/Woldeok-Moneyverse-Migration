@@ -19,6 +19,7 @@
 ## 기존 기획 ↔ 새 기획 비교 인덱스 (매시간 갱신)
 | ID | A QA 수정 / B 신규 | 분류 | 기존 문서 절·불변 링크 | 기존 설계 내용 | 새로운 내용·상세 기획 링크 | 버전·한국시간 | 우선순위 | 상태 | 실제 통합 PR |
 |---|---|---|---|---|---|---|---|---|---|
+| TSI-20261110-008 | B 신규 | ADD | 불변 기준선 국고 예산·원장 | 교부금 예산 예약 절차 검증 불가 | 독립 교부금 예약·지급 승인 명세 | v2022 / 08:08 | P1 | PROPOSED | PR #3006 |
 | TSI-20261110-007 | A QA 보완 | MODIFY | 기준 OPS1518-01/REL1518-04, TSI-005 | 브라우저 E2E·증빙 유효기간 검증 미확인 | QA 증빙 신선도 및 독립 승인 계약 | v2020 / 07:08 | P0 | PROPOSED / 통합 대기 | PR #3006 |
 | TSI-20261110-001 | A QA 수정 | MODIFY | [기준 main 기획서 FIN1518-03](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) | 국고 미연계 552건, 탐색 24건/정규 0건은 과거 QA 주장 | 동일 스냅샷·SQL 버전 기반 읽기 전용 대사 증거 게이트 제안 | v2008 / 01:05 | P0 | PROPOSED, 통합 대기 | PR #3006 |
 | TSI-20261110-003 | A QA 수정 | MODIFY | 기준 PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03, main edd709bc | 운영 SHA·원장 출처 미검증 | 운영 프로세스·DB·원장 출처 증빙 게이트 | v2012 / 03:05 | P0 | PROPOSED / 통합 대기 | PR #3006 |
@@ -129,7 +130,7 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 
 
 ### TSI-20261110-006 — 가상 연금·건강보험료 사전 산정 및 이의신청 징수 잠금 (ADD; B v2018)
-- **최초 기록:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.008; 직전 A v2016 → 현재 B v2018 → 다음 A v2020. 기획 담당, 개발 B/C·QA 배정 대기. P1 / PROPOSED / 통합기획서 미반영.
+- **최초 기록:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.009; 직전 A v2016 → 현재 B v2018 → 다음 A v2020. 기획 담당, 개발 B/C·QA 배정 대기. P1 / PROPOSED / 통합기획서 미반영.
 - **기존 대비:** 불변 기준 main edd709bcbe96f6f5ceca8372f244b632e8211242의 docs/NATIONAL_PENSION_SERVICE_SPEC.md 및 PROJECT_PLAN.md. TSI-002는 자격 증빙, TSI-004는 가상 보험급여 청구이며, 징수 전 보험료 산정 내역 확인과 이의신청 잠금은 별도 미정의 기능이다. 실제 구현·운영 E2E는 검증 불가. 요율은 현실 법정 요율이 아닌 버전별 게임 정책값이다.
 - **회원·관리자 흐름:** 보험 > 보험료 > 산정 미리보기에서 정책 버전, 가상 소득구간, 대상 기간, 정수 WLD 산정액, 상하한·지원액·납기 확인; 징수 전 '정정 요청'. 사업장은 권한 있는 직원의 집계만 열람. 관리자 > 보험 > 산정 관리에서 '근거 비교', '징수 잠금', '조정 승인', '이의신청 거절'. PREVIEWED→ASSESSED→DISPUTED→REVIEWING→CONFIRMED/ADJUSTED, 종료 CANCELLED/BLOCKED. 이의신청은 해당 산정건만 징수 차단하며 미리보기·심사 자체는 원장 차감 금지.
 - **제안 API(미구현):** POST /api/insurance/contribution-previews {fund,period,eligibilityEventId,policyVersion,idempotencyKey}; GET /api/insurance/contribution-previews/:id; POST /api/insurance/assessments/:id/disputes {reason,sourceRef,expectedRevision,idempotencyKey}; POST /internal/insurance/assessments/:id/decision {decision,approvedAmount,policyVersion,expectedRevision,nonce}. 회원 소유 범위 제한, 독립 insurance.assessment.review 권한·최근 MFA, 자기 승인 금지. 401/403/404/409/412/422/429/503 안전 차단.
@@ -152,3 +153,14 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **수용기준(미실행):** 브라우저 부재 BLOCKED, SHA 불일치 INCONCLUSIVE/HOLD, 만료·위조 거부, 테넌트 간·자기 승인 거부, 멱등 재시도·Outbox 장애 복구, 승인된 브라우저 E2E·독립 백업 복원. P0 운영 출처/원장 대사, P1 E2E 실행기/API/화면, P2 경고 중복 억제·증빙 신선도 KPI. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 - **비교:** 기준 OPS1518-01/REL1518-04 + TSI-005 → TSI-20261110-007 → 통합기획서 반영 대기, Draft PR #3006. 구현·QA 검증 완료 아님.
 | 2026-11-10 07:08 | A QA 기능 개선 | v2020 / vTSI.2026.11.10.008 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 | QA 06:13, 시작 main 동일 | PR #3006 | PROPOSED / 통합 대기, 다음 B v2022 |
+
+
+### TSI-20261110-008 — 국고 교부금 예산 예약·독립 지급 승인 (ADD; B v2022)
+- **기록:** 2026-11-10 08:08 KST 최초 등록, v2022 / vTSI.2026.11.10.009. 이전 A v2020 → 현재 B v2022 → 다음 A v2024. 기획 담당, 개발 B(API·원장)/C(UI), 독립 QA 연계 예정. P1, PROPOSED, 미구현·통합기획서 미반영. 불변 기준선 edd709bc의 국고 예산·원장 개념과 TSI-001/003/005/007 QA 출처 기획을 참조하며 기존 QA 증빙 기능과 중복하지 않음.
+- **목적·사용자:** 국고 담당자가 게임 내 프로그램·대상·회계기간·정수 WLD 금액으로 교부금 배정안을 만들고, 별도 승인자가 가용 예산과 지급 근거를 검토. 현실 법정 보조금이 아닌 가상경제 기능이며 주민등록번호 등 현실 개인정보 수집 금지.
+- **화면·권한:** 관리자 > 국고 > 교부금 > 신규 배정, CTA 초안 저장/제출/독립 승인/취소/전표 증빙 보기. 수혜자는 자신의 배정 상태만 조회. DRAFT → SUBMITTED → RESERVED → APPROVED → DISBURSEMENT_PENDING → POSTED, 거절·취소·만료·검토실패는 별도 종료 상태. 생성자·승인자·지급 실행자 권한 분리, 최근 MFA 및 2인 승인. 가용·예약·집행 WLD와 감사 해시 표시.
+- **제안 API(미구현):** POST /internal/treasury/grants {programId,period,beneficiaryId,amountWld,policyVersion,idempotencyKey}; POST /internal/treasury/grants/:id/submit {expectedRevision}; POST /internal/treasury/grants/:id/decision {decision,expectedRevision,nonce}; POST /internal/treasury/grants/:id/disburse {expectedRevision,idempotencyKey}; GET /internal/treasury/grants/:id. treasury.grants.create/review/disburse RBAC, 401/403/404/409/412/422/429/503 안전 차단. 수혜자 조회는 별도 검토된 소유자 범위 API.
+- **DB·정합성 제안:** treasury_grant_programs(tenant_id,program_id 복합 PK,period,appropriation_account_id,policy_version), treasury_grant_allocations(tenant_id,grant_id 복합 PK,program_id 복합 FK,beneficiary_id,amount_wld BIGINT 양수 CHECK,status,revision,requester_id,reviewer_id,created_at), 추가 전용 treasury_grant_events(테넌트 복합 FK, 해시 체인). UNIQUE(tenant_id,program_id,beneficiary_id,period,request_key), INDEX(tenant_id,program_id,status,created_at), FORCE RLS. 가용+예약+집행=편성예산을 동일 스냅샷·잠금 하에서 유지하고 SERIALIZABLE 재시도 또는 행 잠금으로 초과 예약 방지. 기존 국고 잔액만 재원으로 사용하며 승인 시 신규 발행 금지.
+- **트랜잭션·보안:** 예약·CAS revision·감사·Outbox를 원자적으로 기록. 중앙·보조원장 균형 분개, 지급 참조 UNIQUE, 멱등 재시도·작업자 펜싱. 취소/만료는 기존 분개 수정 없이 보상 분개로 예약 해제. 자기 승인·교차 테넌트·중복 수혜·정책 변경·초과예산 차단. 타임아웃·Outbox 실패는 PENDING_REVIEW, 성공 간주 금지; 대사 불일치 시 지급 차단.
+- **운영·수용 기준(미실행):** 비공개 noindex/no-store, 320px·키보드·WCAG 2.2 AA, 영한 오류 동등성, 개인정보 없는 승인 지연·중복지급·대사 KPI. 추가형 마이그레이션·백필 사전 검증, treasury_grant_reservations_v1 기본 OFF, 읽기 전용 관찰→격리 Test exact-SHA→독립 QA→서명 승격. 롤백은 플래그 OFF와 불변 증빙 보존, 미결 예약 수동 처리. 동시 초과예산·멱등성·권한분리·RLS·Outbox 재실행·만료 경합·원장 균형·E2E 회귀를 통과해야 함. P0 기존 국고 대사·운영 출처 HOLD, P1 API/DB/UI, P2 경고 품질. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 운영 변경 없음.
+- **비교 인덱스:** 불변 기준선 국고 예산·원장 → TSI-20261110-008 ADD → 통합기획서 반영 대기, Draft PR #3006.
