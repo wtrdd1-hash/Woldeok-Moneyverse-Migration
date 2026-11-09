@@ -1,3 +1,6 @@
+## v2026.11.09.1946.3 — Mixed-verification publication CI hardening / Test-only evidence
+Exact e318 build and canaries PASS; actual Test DB verified CN/CODING publication at 23:19 KST, receipt present (Test only). Correct `no-unsafe-finally`, add deterministic unverified fallback test and Test/Production JSON path isolation. New exact CI/Production promotion pending.
+
 ## v2026.11.09.1946.2 — Owner-authorized unverified blog visibility and ad inventory (BRANCH CANDIDATE)
 Separate receipt-verified and explicitly unverified `PUBLISHED` editorial articles. Native blog routes/sitemap, dedicated idempotent unverified JSON publisher, visible AI disclosure, public blog ad slot; Google network policy risk documented. Test/CI/Production pending.
 

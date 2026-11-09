@@ -76,7 +76,7 @@ export function publishUnverifiedArticle(
     fs.writeFileSync(temp,JSON.stringify([post,...prior]),{encoding:'utf8',mode:0o600,flag:'wx'});
     fs.renameSync(temp,file);
   } finally {
-    try {fs.unlinkSync(temp);} catch(error) { if ((error as NodeJS.ErrnoException).code!=='ENOENT') throw error; }
+    try { fs.unlinkSync(temp); } catch { /* Best-effort temp cleanup. */ }
   }
   return {inserted:true,slug,status:'PUBLISHED'};
 }

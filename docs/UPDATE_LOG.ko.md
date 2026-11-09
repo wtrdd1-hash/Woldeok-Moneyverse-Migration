@@ -1,3 +1,6 @@
+## v2026.11.09.1946.3 — 혼합 발행 CI 수정·Test 실제 증빙
+e318 빌드/카나리 통과, Test DB CN/CODING 검증 발행 23:19 성공(운영 아님). no-unsafe-finally 수정, 미검증 fallback 단위시험·Test/운영 JSON 분리 보완. 최신 SHA CI/운영 승격 전.
+
 ## v2026.11.09.1946.2 — 미검증 AI 공개·광고 지면 변경 (브랜치 후보)
 검증 DB 영수증과 미검증 `PUBLISHED` 글 분리. 국가별 블로그·사이트맵·별도 멱등 JSON 자동발행·AI 표시·공개 광고 지면. Google 정책 위험 기록. Test/CI/운영 승격 전.
 

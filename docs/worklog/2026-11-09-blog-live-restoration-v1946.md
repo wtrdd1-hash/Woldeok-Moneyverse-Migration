@@ -21,5 +21,11 @@
 - Implemented dedicated `UNVERIFIED` JSON sidecar under shared data, separate fixed Test file, atomic 0600 writes, DB leader lock, period idempotency, no global scheduler activation. Native-country public blog, article, list API and sitemap include explicit PUBLISHED unverified posts; WITHDRAWN excluded, AI/non-verified labels visible. Owner-only withdrawal path and advertisement-path implementation updated.
 - Local focused tests for store and frontend pass; historic sitemap tests updated to restored product policy. Exact source Test/CI, actual unverified publication and Production cutover not yet proven.
 
+## v1946.3 — Test publication and CI repair, 2026-11-09 23:21 KST
+- Exact source e318b131270e build+typecheck PASS; isolated frontend 4579 Production-origin canary: four hubs, verified article details, legacy unverified `PUBLISHED` KR article (200 and indexed), `/api/blog` count14, sitemap 18 URLs, Test 4580 noindex and sitemap 503. No public Nginx cutover yet.
+- Actual Test-only source-grounded worker published CN/CODING for 22:00 via Test DB at 23:19 KST; verified API count 2→3, DB-issued receipt `f44844b0-0978-4124-80cc-3fdbed7bc9d6`. This proves quality-PASS publication, not unverified fallback; Production unmodified.
+- GitHub CI run #42632747441 failed only two ESLint `no-unsafe-finally` violations in new JSON-write cleanup; corrected. Added deterministic unverified fallback test: quality FAIL routes to UNVERIFIED store only, and explicit kill-switch OFF blocks without any verified DB writes; 4/4 tests pass.
+- Test and Prod unverified JSON paths remain fixed and mutually isolated, including frontend reader. New source exact SHA and full CI / Test fallback E2E required before Nginx cutover.
+
 ## END
 Pending.

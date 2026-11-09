@@ -586,7 +586,9 @@ function getBlogStoreFilePath(): string {
 
 // Separate append-only publisher store; never alter legacy records on read.
 function loadUnverifiedAutoPosts(): BlogPost[] {
-  const file = '/srv/moneyverse-data/shared/blog-unverified-posts.json';
+  const file = process.env.BLOG_PUBLISHER_CHANNEL === 'test'
+    ? '/srv/moneyverse-data/shared/blog-unverified-test-posts.json'
+    : '/srv/moneyverse-data/shared/blog-unverified-posts.json';
   try {
     if (!fs.existsSync(file)) return [];
     const info=fs.lstatSync(file);
@@ -697,9 +699,7 @@ export function deleteBlogPost(slug: string, purge = false): boolean {
       fs.writeFileSync(temp,JSON.stringify(updated),{encoding:'utf8',mode:0o600,flag:'wx'});
       fs.renameSync(temp,file);
     } finally {
-      try {fs.unlinkSync(temp);} catch(error) {
-        if ((error as NodeJS.ErrnoException).code!=='ENOENT') throw error;
-      }
+      try { fs.unlinkSync(temp); } catch { /* Best-effort temp cleanup. */ }
     }
     return true;
   }
