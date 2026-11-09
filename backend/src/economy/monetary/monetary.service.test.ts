@@ -40,6 +40,15 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       expect(query).not.toHaveBeenCalled();
     });
 
+    it('maps DB function denial to 403 and invalid domain to 400', async () => {
+      const query = vi.fn().mockRejectedValueOnce({ code: '42501' }).mockRejectedValueOnce({ code: '22023' });
+      const service = new CentralBankService({ query } as unknown as Queryable);
+      await expect(service.proposePolicyOrder('admin-1', 'MINT', 'WORK_REWARD',
+        '10000', '정책 발의 권한 검증용 정상 사유')).rejects.toThrow(ForbiddenException);
+      await expect(service.proposePolicyOrder('admin-1', 'MINT', 'WORK_REWARD',
+        '10000', '정책 발의 제약조건 검증용 사유')).rejects.toThrow(BadRequestException);
+    });
+
     it('successfully proposes and returns a policy order', async () => {
       const mockOrder = {
         id: 'order-uuid-1',
@@ -103,8 +112,7 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       await expect(bureau.executeAuthorizedMint('admin-1', '11111111-1111-4111-8111-111111111111', '5000', null, 'idemp-1'))
         .rejects.toThrow(ForbiddenException);
       expect(query).toHaveBeenCalledTimes(1);
-      expect(query.mock.calls[0]?.[0]).toContain('is_issuance_frozen = false');
-      expect(query.mock.calls[0]?.[0]).toContain('executed_amount_wld::numeric + $2::numeric <= max_amount_wld::numeric');
+      expect(query.mock.calls[0]?.[0]).toContain('admin_monetary_mint_certificate');
     });
 
     it('reserves policy capacity and writes one certificate in the same statement', async () => {
@@ -119,10 +127,17 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       expect(result).toEqual(certificate);
       expect(query).toHaveBeenCalledTimes(1);
       const sql = query.mock.calls[0]?.[0] as string;
-      expect(sql).toContain('WITH reserved AS');
-      expect(sql).toContain('UPDATE public.monetary_policy_orders');
-      expect(sql).toContain('INSERT INTO public.mint_certificates');
-      expect(sql).toContain('FROM reserved');
+      expect(sql).toContain('admin_monetary_mint_certificate');
+      expect(query.mock.calls[0]?.[1]).toEqual(['admin-1', '11111111-1111-4111-8111-111111111111', '3000', null, 'idemp-key-99']);
+    });
+
+    it('turns a denied certificate write into actionable 403/400 instead of an opaque 500', async () => {
+      const query = vi.fn().mockRejectedValueOnce({ code: '42501' }).mockRejectedValueOnce({ code: '22023' });
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      await expect(bureau.executeAuthorizedMint('admin-1','11111111-1111-4111-8111-111111111111','100',null,'key-12345678'))
+        .rejects.toThrow(ForbiddenException);
+      await expect(bureau.executeAuthorizedMint('admin-1','11111111-1111-4111-8111-111111111111','100',null,'key-12345678'))
+        .rejects.toThrow(BadRequestException);
     });
 
     it('successfully records RetirementCertificate for hard sinks', async () => {
@@ -175,7 +190,7 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
               rows: [{ active_orders: '1', mints: '2', retirements: '3' }],
             });
           }
-          if (queryText.includes('INSERT INTO public.monetary_policy_orders')) {
+          if (queryText.includes('admin_monetary_policy_propose')) {
             return Promise.resolve({
               rows: [
                 {
