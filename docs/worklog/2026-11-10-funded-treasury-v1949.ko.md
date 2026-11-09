@@ -21,3 +21,6 @@
 - 네트워크 차단 PG17 복제에서 원본 복원 시 --no-acl 옵션이 기존 344번 앱 SELECT를 빠뜨린 사실 확인. 복원 DB에만 공식 Test와 동일한 READ 권한 재현. 신규 345번 SQL에서 moneyverse_migrator 정책 INSERT 누락도 발견해 명시(일반 moneyverse_app INSERT는 계속 거부).
 - 다시 **깨끗한 독립 Test 복원**부터 수정한 SQL345 SHA `8d9e8bfbf9bcc06cdb0bc6f83fb804e9287be766fd18d04db48819c0c2cfd6c8` 신규 적용, 앱 역할 10만 WLD 정책 발의/승인/발행/동일 키 재전송 및 동결·미권한·다른 금액 중복 키 음성 검증 모두 통과. ROLLBACK 뒤 영수증0·국고0/0/0/0. 공식 Test 및 실제 운영 DB에는 아직 SQL345를 적용하지 않음.
 - 프론트 40·백엔드 40·DB 6·SQL 2 회귀 테스트, 타입 검사, 불변 브랜치 백/프론트 빌드 통과. PR #3007, 공식 CI/Test/운영 게이트 진행 예정.
+
+### 중간 기록 3 — GitHub 전체 CI 실패 복구
+- PR 커밋 `a813ab815f8e184c0a17cee28a26f746d6b24418`, GitHub CI 실행 `42651914412`의 백엔드 테스트 3,648개 통과·1개 실패. 원인은 신규 원장 거래 유형 `TREASURY_AUTHORIZED_MINT`의 회원 지갑 거래내역 한글 라벨이 없어 `경제 활동`으로 표시되는 문제. `backend/src/wallet/wallet.service.ts` 한글 라벨 보강, 금융 원장 로직은 변경하지 않음. 최신 커밋으로 다시 전체 CI 확인.

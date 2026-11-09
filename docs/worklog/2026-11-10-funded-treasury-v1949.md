@@ -25,3 +25,6 @@
 
 ## Safety exclusions
 - No actual signed-in administrator browser POST independently observed, no live Treasury mint performed, no live mint freeze lifted. No automatic trading profit claimed, legacy AUM 20,000,001 WLD is not an investment settlement. Historical archive provenance 552/744 remains unresolved. User-owned donation requires the administrator's own positive cash balance; no owner cash can be credited for free.
+
+### Midpoint 3 — full GitHub CI defect and correction
+- Exact PR commit `a813ab815f8e184c0a17cee28a26f746d6b24418` full GitHub CI run `42651914412` failed exactly one backend regression (3,648 passed, 1 failed, 117 skipped): `src/wallet/ledger-labels.test.ts` found `TREASURY_AUTHORIZED_MINT` transaction label missing and showing `경제 활동`. Added Korean member-visible transaction label in `backend/src/wallet/wallet.service.ts`. No money movement, role, or ledger logic changed by this correction. RED CI evidence is recorded; run targeted then full CI again.
