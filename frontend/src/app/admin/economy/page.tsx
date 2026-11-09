@@ -159,17 +159,23 @@ export default async function AdminEconomyPage({
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
     apiOrNull<{ debate: CouncilDebateData }>('/api/v1/admin/economy/council-debate'),
     apiOrNull<MonetaryTelemetryData>('/api/v1/admin/economy/monetary/telemetry'),
-    apiOrNull<{ orders: MonetaryPolicyOrderItem[] }>('/api/v1/admin/economy/monetary/orders'),
-    apiOrNull<{ mints: MintCertificateItem[] }>('/api/v1/admin/economy/monetary/certificates/mints'),
-    apiOrNull<{ retirements: RetirementCertificateItem[] }>('/api/v1/admin/economy/monetary/certificates/retirements'),
+    apiOrNull<{ orders: MonetaryPolicyOrderItem[] } | MonetaryPolicyOrderItem[]>('/api/v1/admin/economy/monetary/orders'),
+    apiOrNull<{ mints: MintCertificateItem[] } | MintCertificateItem[]>('/api/v1/admin/economy/monetary/certificates/mints'),
+    apiOrNull<{ retirements: RetirementCertificateItem[] } | RetirementCertificateItem[]>('/api/v1/admin/economy/monetary/certificates/retirements'),
     apiOrNull<{
       config: MonetaryAutoRegulationConfigData;
       events: MonetaryRegulationEventItem[];
     }>('/api/v1/admin/economy/monetary/auto-regulation/status'),
   ]);
-  const monetaryOrders = monetaryOrdersRes?.orders ?? [];
-  const monetaryMints = monetaryMintsRes?.mints ?? [];
-  const monetaryRetirements = monetaryRetirementsRes?.retirements ?? [];
+  const monetaryOrders = Array.isArray(monetaryOrdersRes)
+    ? monetaryOrdersRes
+    : (monetaryOrdersRes as { orders?: MonetaryPolicyOrderItem[] })?.orders ?? [];
+  const monetaryMints = Array.isArray(monetaryMintsRes)
+    ? monetaryMintsRes
+    : (monetaryMintsRes as { mints?: MintCertificateItem[] })?.mints ?? [];
+  const monetaryRetirements = Array.isArray(monetaryRetirementsRes)
+    ? monetaryRetirementsRes
+    : (monetaryRetirementsRes as { retirements?: RetirementCertificateItem[] })?.retirements ?? [];
   const autoConfig = autoRegRes?.config ?? null;
   const autoEvents = autoRegRes?.events ?? [];
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');

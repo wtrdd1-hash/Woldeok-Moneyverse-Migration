@@ -24,6 +24,7 @@ import { parseMintStatusEvidence, type MintStatusEvidence } from './mint-status-
 import {
   MintExecutionDialog,
   RetireExecutionDialog,
+  OrderProposalDialog,
   type PolicyOrderSummary,
 } from './mint-dialogs';
 
@@ -59,6 +60,8 @@ export function NationalMintPanel() {
   // Dialog & Action states
   const [mintDialogOpen, setMintDialogOpen] = useState(false);
   const [retireDialogOpen, setRetireDialogOpen] = useState(false);
+  const [orderProposalOpen, setOrderProposalOpen] = useState(false);
+  const [approvingOrderId, setApprovingOrderId] = useState<string | null>(null);
   const [selectedOrderIdForMint, setSelectedOrderIdForMint] = useState<string | null>(null);
   const [freezeLoading, setFreezeLoading] = useState(false);
   const [activeLedgerTab, setActiveLedgerTab] = useState<'MINTS' | 'RETIREMENTS'>('MINTS');
@@ -93,7 +96,9 @@ export function NationalMintPanel() {
 
       if (ordersRes && ordersRes.ok) {
         const data = await ordersRes.json();
-        if (Array.isArray(data.orders)) {
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else if (Array.isArray(data?.orders)) {
           setOrders(data.orders);
         }
       }
@@ -121,6 +126,26 @@ export function NationalMintPanel() {
     }, 20000);
     return () => clearInterval(timer);
   }, [loadAllData]);
+
+  const handleApproveOrder = async (orderId: string) => {
+    if (!confirm('해당 통화정책 명령서를 공식 승인하시겠습니까?')) return;
+    setApprovingOrderId(orderId);
+    try {
+      const res = await fetch("/api/admin/mint/orders/" + encodeURIComponent(orderId) + "/approve", {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || '명령서 승인에 실패했습니다.');
+      } else {
+        await loadAllData();
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다.');
+    } finally {
+      setApprovingOrderId(null);
+    }
+  };
 
   // 긴급 동결 / 동결 해제 핸들러
   const handleToggleFreeze = async () => {
@@ -156,6 +181,7 @@ export function NationalMintPanel() {
   };
 
   const approvedOrders = orders.filter((o) => o.status === 'APPROVED');
+  const proposedOrders = orders.filter((o) => o.status === 'PROPOSED');
 
   const totalMintedWld = mintCerts.reduce(
     (acc, c) => acc + BigInt(c.amount_wld || '0'),
@@ -194,6 +220,16 @@ export function NationalMintPanel() {
             <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
             20초 자동 동기화
           </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setOrderProposalOpen(true)}
+            className="rounded-xl text-xs font-semibold h-8 border-blue-500/40 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+          >
+            <FileText className="size-3.5 mr-1" />
+            정책 명령 발의
+          </Button>
 
           <Button
             size="sm"
@@ -375,8 +411,17 @@ export function NationalMintPanel() {
             </CardHeader>
             <CardContent>
               {approvedOrders.length === 0 ? (
-                <div className="text-center py-8 text-xs text-muted-foreground rounded-xl border border-dashed border-border/60 bg-muted/10">
-                  현재 즉시 주조 가능한 승인 상태의 정책 명령서가 없습니다.
+                <div className="text-center py-8 text-xs text-muted-foreground rounded-xl border border-dashed border-border/60 bg-muted/10 space-y-3">
+                  <p>현재 즉시 주조 가능한 승인 상태의 정책 명령서가 없습니다.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setOrderProposalOpen(true)}
+                    className="h-8 text-xs rounded-xl border-blue-500/40 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                  >
+                    <FileText className="size-3.5 mr-1.5" />
+                    신규 통화정책 명령 발의하기
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -445,6 +490,48 @@ export function NationalMintPanel() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {proposedOrders.length > 0 && (
+                <div className="mt-6 pt-5 border-t border-border/60 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <Clock className="size-3.5 text-blue-400" />
+                      승인 대기 중인 정책 명령서 (Proposed Orders)
+                      <span className="px-2 py-0.5 text-[10px] rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                        {proposedOrders.length}건 대기
+                      </span>
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {proposedOrders.map((pOrder) => (
+                      <div
+                        key={pOrder.id}
+                        className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-3.5 space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-blue-500/20 text-blue-300">
+                            {pOrder.order_type} · {pOrder.target_envelope}
+                          </span>
+                          <span className="text-[11px] font-mono text-muted-foreground">
+                            한도: {BigInt(pOrder.max_amount_wld).toLocaleString('ko-KR')} WLD
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{pOrder.reason}</p>
+                        <div className="flex justify-end pt-1">
+                          <Button
+                            size="sm"
+                            disabled={approvingOrderId === pOrder.id}
+                            onClick={() => handleApproveOrder(pOrder.id)}
+                            className="h-7 text-xs rounded-lg px-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold"
+                          >
+                            {approvingOrderId === pOrder.id ? '승인 결재 중...' : '공식 승인 (Approve)'}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -625,6 +712,12 @@ export function NationalMintPanel() {
           <RetireExecutionDialog
             isOpen={retireDialogOpen}
             onClose={() => setRetireDialogOpen(false)}
+            onSuccess={loadAllData}
+          />
+
+          <OrderProposalDialog
+            isOpen={orderProposalOpen}
+            onClose={() => setOrderProposalOpen(false)}
             onSuccess={loadAllData}
           />
         </>
