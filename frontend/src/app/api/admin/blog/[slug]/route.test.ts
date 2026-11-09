@@ -33,8 +33,8 @@ describe('Admin Blog Delete & Withdraw API', () => {
 
   it('allows administrators to soft-delete (withdraw) an article', async () => {
     adminMock.mockReturnValue(true);
-    const res = await DELETE(deleteRequest('2026-10-14-compound-interest-wealth-secret'), {
-      params: Promise.resolve({ slug: '2026-10-14-compound-interest-wealth-secret' }),
+    const res = await DELETE(deleteRequest('2026-10-14-compound-mv83xp86'), {
+      params: Promise.resolve({ slug: '2026-10-14-compound-mv83xp86' }),
     });
     expect(res.status).toBe(200);
     const data = await res.json();
