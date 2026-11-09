@@ -69,7 +69,7 @@ GRANT SELECT,UPDATE ON public.system_treasury_vaults TO moneyverse_migrator;
 GRANT SELECT,INSERT ON public.system_treasury_ledger TO moneyverse_migrator;
 GRANT SELECT ON public.treasury_fiscal_epochs,public.accounts,public.account_balances,public.ledger_transactions,public.ledger_postings TO moneyverse_migrator;
 GRANT SELECT,INSERT ON public.mint_certificates TO moneyverse_migrator;
-GRANT SELECT,UPDATE ON public.monetary_policy_orders TO moneyverse_migrator;
+GRANT SELECT,INSERT,UPDATE ON public.monetary_policy_orders TO moneyverse_migrator;
 
 CREATE OR REPLACE FUNCTION public.admin_monetary_mint_to_treasury(
   p_actor uuid,p_order_id uuid,p_amount text,p_request_key uuid
