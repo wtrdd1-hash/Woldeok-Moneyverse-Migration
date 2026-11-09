@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { createCountryBlogPost, COUNTRY_EDITION_TOPICS } from './blog-country-editorial';
 import { blogAlternateLanguages, blogUrl, getBlogCountryEdition, canonicalBlogSlug } from './blog-seo';
 import { addBlogPost, getAllBlogPosts, getBlogPostBySlug } from './blog-data';
-import { metadataForArticle, summarizeBlogPost } from './blog-page-server';
+import { metadataForArticle, metadataForHub, summarizeBlogPost } from './blog-page-server';
+import nextConfig from '../../../next.config';
+import { getDisallowedCrawlerRoutes } from '@/config/routes.config';
+import { GET as getSitemapIndex } from '../sitemap-index.xml/route';
 import { isBlogDiscoverable } from './blog-seo';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -46,15 +49,41 @@ describe('country-specific blog and canonical SEO', () => {
     expect(getBlogCountryEdition(post, 'en')?.content).toContain('United States');
   });
 
-  it('returns empty sitemap urlset when blog is sunset for SEO protection', async () => {
+  it('restores self-canonical, indexable blog hubs and native-language discovery', async () => {
+    for (const locale of ['ko','en','ja','zh'] as const) {
+      const metadata = metadataForHub(locale);
+      const expected = locale === 'ko' ? '/blog' : `/${locale}/blog`;
+      expect(metadata.alternates?.canonical).toBe(origin + expected);
+      expect(metadata.robots).not.toMatchObject({index:false});
+    }
     const res = await getBlogSitemap();
     const xml = await res.text();
     expect(res.status).toBe(200);
-    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
-    expect(xml).not.toContain('/en/blog');
-    expect(xml).not.toContain('/ja/blog');
-    expect(xml).not.toContain('/zh/blog');
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
+    for (const locale of ['', '/en', '/ja', '/zh']) expect(xml).toContain(`<loc>${origin}${locale}/blog</loc>`);
     expect(xml).not.toContain('/blog/2026-10-14-compound-interest-wealth-secret');
+    expect(getDisallowedCrawlerRoutes()).not.toContain('/blog');
+    const index = await (await getSitemapIndex()).text();
+    expect(index).toContain('/sitemap-blog.xml');
+  });
+
+  it('does not publish sitemap URLs when the global indexing switch is off', async () => {
+    vi.stubEnv('SEO_INDEXING_ENABLED', 'false');
+    try {
+      const response = await getBlogSitemap();
+      const xml = await response.text();
+      expect(response.headers.get('cache-control')).toBe('no-store');
+      expect(xml).not.toContain('<loc>');
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('does not permanently redirect indexable blog articles and their sitemap to tools', async () => {
+    const redirects = await nextConfig.redirects?.();
+    for (const route of ['/blog', '/blog/:path*', '/:locale(ko|en|ja|zh)/blog', '/:locale(ko|en|ja|zh)/blog/:path*', '/sitemap-blog.xml']) {
+      expect(redirects?.some(redirect => redirect.source === route)).toBe(false);
+    }
   });
 
   it('excludes unrevised legacy AI articles from discovery and makes their URLs noindex without deleting data', async () => {

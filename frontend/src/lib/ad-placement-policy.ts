@@ -4,7 +4,9 @@ export function isEligiblePublicAdPath(pathname: string | null): boolean {
   const path = pathname.replace(/\/$/, '') || '/';
   if (path === '/' || /^\/(en|ja|zh)$/.test(path)) return true;
   const localized = path.replace(/^\/(en|ja|zh)(?=\/)/, '');
-  return /^\/(tools|guide|blog)(\/|$)/.test(localized)
+  // Runtime AI publication receipts do not establish Google ad-review eligibility.
+  // Keep the entire blog outside the global AdSense bootstrap until editorial curation is tracked.
+  return /^\/(tools|guide)(\/|$)/.test(localized)
     || /^\/(gallery|announcements|roadmap)$/.test(localized);
 }
 

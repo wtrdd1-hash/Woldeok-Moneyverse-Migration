@@ -144,9 +144,9 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     label: { ko: '월덕 블로그 (경제·코딩·컴퓨터)', en: 'Woldeok Blog', ja: 'ウォルドクブログ', zh: '月德博客' },
     isPublic: true,
     authRequired: false,
-    indexable: false,
-    sitemapPriority: 0,
-    changeFrequency: 'never',
+    indexable: true,
+    sitemapPriority: 0.75,
+    changeFrequency: 'daily',
     group: 'public',
   },
   {

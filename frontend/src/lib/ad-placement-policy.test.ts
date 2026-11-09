@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { getBlogAdPlan, isEligiblePublicAdPath } from './ad-placement-policy';
 
 describe('advertising content-only allowlist', () => {
-  it.each(['/', '/en', '/ja', '/zh', '/tools', '/en/tools/compound-calculator', '/guide/glossary', '/blog/educational-post', '/gallery', '/announcements'])('allows vetted public content %s', (path) => {
+  it.each(['/', '/en', '/ja', '/zh', '/tools', '/en/tools/compound-calculator', '/guide/glossary', '/gallery', '/announcements'])('allows vetted public content %s', (path) => {
     expect(isEligiblePublicAdPath(path)).toBe(true);
   });
-  it.each(['/admin', '/wallet', '/bank', '/bonds', '/stocks/CHIPS', '/casino', '/arcade', '/account', '/login', '/register', '/privacy', '/chat', '/en/wallet', '/en/stocks/CHIPS', '/guide-malicious', '/tools-malicious'])('excludes decision/sensitive route %s', (path) => {
+  it.each(['/admin', '/wallet', '/bank', '/bonds', '/stocks/CHIPS', '/casino', '/arcade', '/account', '/login', '/register', '/privacy', '/chat', '/en/wallet', '/en/stocks/CHIPS', '/guide-malicious', '/tools-malicious', '/blog', '/blog/educational-post', '/en/blog', '/ja/blog/article', '/zh/blog/article'])('excludes decision/sensitive route %s', (path) => {
     expect(isEligiblePublicAdPath(path)).toBe(false);
   });
   it('fails closed when no path is available', () => expect(isEligiblePublicAdPath(null)).toBe(false));

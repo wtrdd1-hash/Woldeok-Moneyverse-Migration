@@ -21,6 +21,8 @@ export async function GET() {
   const entries: any[] = [];
 
   for (const r of routes) {
+    // The blog has a dedicated, DB-driven sitemap; do not duplicate its hub in the static sitemap.
+    if (r.path === '/blog') continue;
     const loc = canonicalUrl(r.path);
     if (seen.has(loc)) continue;
     seen.add(loc);

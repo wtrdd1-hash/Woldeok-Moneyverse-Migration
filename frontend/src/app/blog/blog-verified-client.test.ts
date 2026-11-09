@@ -24,6 +24,7 @@ describe('DB-verified country blog public projection',()=>{
   const meta=await metadataForArticle(row.slug,'zh');
   expect(meta.title).toBe(row.title);
   expect(meta.alternates?.canonical).toContain('/zh/blog/'+row.slug);
+  expect(meta.robots).not.toMatchObject({index:false});
   const hub=await renderBlogHub('zh');
   const html=renderToStaticMarkup(hub);
   expect(html).toContain(row.slug);
