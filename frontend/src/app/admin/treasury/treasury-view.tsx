@@ -27,6 +27,7 @@ import { TreasuryOperationsDialog } from './treasury-operations-dialog';
 import { TreasuryWealthTaxDialog } from './treasury-wealth-tax-dialog';
 import { NationalMintPanel } from '@/components/admin/national-mint-panel';
 import { CentralBankPanel } from '@/components/admin/central-bank-panel';
+import { AdminTreasuryFundingCard } from './admin-treasury-funding-card';
 
 interface Props {
   readonly overview: AdminTreasuryOverview;
@@ -214,6 +215,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       {institutionalTab === 'CENTRAL_BANK' && <CentralBankPanel />}
       {institutionalTab === 'TREASURY' && (
         <>
+          <AdminTreasuryFundingCard />
           {/* 1. 국고 총 잔액 및 비축률 지표 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border shadow-sm">

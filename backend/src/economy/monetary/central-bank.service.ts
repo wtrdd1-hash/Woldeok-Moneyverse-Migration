@@ -131,7 +131,7 @@ export class CentralBankService {
     // Never let an unsupported UI enum reach PostgreSQL as an opaque HTTP 500.
     const mintEnvelopes = [
       'WORK_REWARD', 'QUEST_REWARD', 'EVENT_REWARD', 'INCIDENT_COMPENSATION',
-      'STABILIZATION_POOL', 'GENERAL_CIRCULATION',
+      'STABILIZATION_POOL', 'GENERAL_CIRCULATION', 'TREASURY_ISSUANCE',
     ];
     if (!((orderType === 'MINT' && mintEnvelopes.includes(targetEnvelope))
       || (orderType === 'RETIRE' && targetEnvelope === 'HARD_SINK_PURGE'))) {
@@ -189,33 +189,23 @@ export class CentralBankService {
   }
 
   async freezeIssuance(adminId: string, reason: string): Promise<{ is_issuance_frozen: boolean }> {
-    if (!reason || reason.trim().length < 5) {
-      throw new BadRequestException('동결 사유는 최소 5자 이상 입력해야 합니다.');
+    if (!reason || reason.trim().length < 10) {
+      throw new BadRequestException('동결 사유는 최소 10자 이상 입력해야 합니다.');
     }
 
     await this.pool.query(
-      `
-      INSERT INTO public.monetary_system_status (id, is_issuance_frozen, freeze_reason, frozen_at, frozen_by, updated_at)
-      VALUES (1, true, $1, NOW(), $2, NOW())
-      ON CONFLICT (id) DO UPDATE SET
-        is_issuance_frozen = true,
-        freeze_reason = EXCLUDED.freeze_reason,
-        frozen_at = NOW(),
-        frozen_by = EXCLUDED.frozen_by,
-        updated_at = NOW()
-    `,
-      [reason, adminId],
+      'SELECT public.admin_monetary_set_issuance_frozen($1::uuid,true,$2::text)',
+      [adminId, reason.trim()],
     );
 
     return { is_issuance_frozen: true };
   }
 
   async unfreezeIssuance(adminId: string): Promise<{ is_issuance_frozen: boolean }> {
-    await this.pool.query(`
-      UPDATE public.monetary_system_status
-      SET is_issuance_frozen = false, freeze_reason = NULL, frozen_at = NULL, frozen_by = NULL, updated_at = NOW()
-      WHERE id = 1
-    `);
+    await this.pool.query(
+      'SELECT public.admin_monetary_set_issuance_frozen($1::uuid,false,$2::text)',
+      [adminId, '관리자 명시적 발행 동결 해제 승인'],
+    );
 
     return { is_issuance_frozen: false };
   }

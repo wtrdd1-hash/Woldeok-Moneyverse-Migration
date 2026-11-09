@@ -85,7 +85,7 @@ export function MintExecutionDialog({
         body: JSON.stringify({
           policy_order_id: effectiveOrderId,
           amount_wld: amountWld,
-          recipient_user_id: null, // 국고 중앙 금고(VAULT_MAIN) 자동 입고
+          recipient_user_id: null, // 증명서 기록만 수행. 국고 입금은 별도 TREASURY_ISSUANCE 처리
           idempotency_key: idempotencyKey,
         }),
       });
@@ -552,7 +552,7 @@ export function OrderProposalDialog({
                   신규 통화정책 명령 발의 (Order Proposal)
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  DB가 지원하는 주조·소각 정책 명령서를 발의합니다. 국고 직접 입금은 아직 지원하지 않습니다.
+                  DB에서 지원하는 주조·소각 정책 명령서를 발의합니다. 별도의 TREASURY_ISSUANCE 승인 명령으로 국고 정본 발행이 가능합니다.
                 </p>
               </div>
             </div>
@@ -615,6 +615,7 @@ export function OrderProposalDialog({
                       <option value="INCIDENT_COMPENSATION">INCIDENT_COMPENSATION (사고 보상)</option>
                       <option value="STABILIZATION_POOL">STABILIZATION_POOL (안정화 풀)</option>
                       <option value="GENERAL_CIRCULATION">GENERAL_CIRCULATION (일반 유통)</option>
+                      <option value="TREASURY_ISSUANCE">TREASURY_ISSUANCE (국고 직접 신규 발행)</option>
                     </>
                   )}
                 </select>

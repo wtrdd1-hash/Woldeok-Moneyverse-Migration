@@ -3,6 +3,7 @@ import * as certificatesRoute from './certificates/route';
 import * as ordersRoute from './orders/route';
 import * as executeMintRoute from './execute-mint/route';
 import * as executeRetireRoute from './execute-retire/route';
+import * as treasuryIssueRoute from './treasury-issue/route';
 import * as freezeRoute from './freeze/route';
 import { api } from '@/lib/api';
 import { mutate } from '@/lib/mutate';
@@ -71,6 +72,56 @@ describe('Admin Mint Bureau BFF Routes', () => {
     expect(res.status).toBe(200);
     expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/orders/propose',
       expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('accepts a separate new Treasury issuance policy but rejects unsupported generic TREASURY', async () => {
+    vi.mocked(mutate).mockResolvedValueOnce({ id: 'new-policy-treasury' } as never);
+    const req = { headers: new Headers(), json: async () => ({order_type:'MINT',
+      target_envelope:'TREASURY_ISSUANCE',max_amount_wld:'1000000',
+      reason:'관리자 국고 발행 승인 정책 감사 사유 충분합니다',valid_duration_hours:24}) } as never;
+    const res = await ordersRoute.POST(req);
+    expect(res.status).toBe(200);
+    expect(mutate).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects cross-origin Treasury mint, invalid request id and forged receipt', async () => {
+    const forged = new Request('https://easy-scraping.com/api/admin/mint/treasury-issue',{
+      method:'POST',headers:{origin:'https://evil.example'},body:'{}'});
+    expect((await treasuryIssueRoute.POST(forged as never)).status).toBe(403);
+    expect(mutate).not.toHaveBeenCalled();
+    const bad = new Request('https://easy-scraping.com/api/admin/mint/treasury-issue',{
+      method:'POST',headers:{origin:'https://easy-scraping.com','sec-fetch-site':'same-origin'},body:JSON.stringify({policy_order_id:'bad',amount_wld:'100',request_key:'bad'})});
+    expect((await treasuryIssueRoute.POST(bad as never)).status).toBe(422);
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it('passes exact successful canonical Treasury mint receipt to the browser, not a certificate-only response', async () => {
+    const key = '33333333-3333-4333-8333-333333333333';
+    const policy = '44444444-4444-4444-8444-444444444444';
+    const receipt = {success:true,code:'TREASURY_MINT_SETTLED',amount_wld:'100000',
+      ledger_transaction_id:'55555555-5555-4555-8555-555555555555',
+      mint_certificate_id:'66666666-6666-4666-8666-666666666666',vault_after_wld:'100000'};
+    vi.mocked(mutate).mockResolvedValueOnce(receipt as never);
+    const req = new Request('https://easy-scraping.com/api/admin/mint/treasury-issue',{
+      method:'POST',headers:{origin:'https://easy-scraping.com','sec-fetch-site':'same-origin'},
+      body:JSON.stringify({policy_order_id:policy,amount_wld:'100000',request_key:key})});
+    const res = await treasuryIssueRoute.POST(req as never);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject(receipt);
+    expect(mutate).toHaveBeenCalledExactlyOnceWith('/api/v1/admin/economy/monetary/execute-treasury-mint', {
+      method:'POST',body:{policy_order_id:policy,amount_wld:'100000',request_key:key},
+    });
+  });
+
+  it('never returns issuance success for a certificate-only response', async () => {
+    vi.mocked(mutate).mockResolvedValueOnce({id:'legacy-only-certificate'} as never);
+    const req = new Request('https://easy-scraping.com/api/admin/mint/treasury-issue',{
+      method:'POST',headers:{origin:'https://easy-scraping.com','sec-fetch-site':'same-origin'},
+      body:JSON.stringify({policy_order_id:'44444444-4444-4444-8444-444444444444',
+        amount_wld:'100000',request_key:'33333333-3333-4333-8333-333333333333'})});
+    const res = await treasuryIssueRoute.POST(req as never);
+    expect(res.status).toBe(503);
+    expect((await res.json()).code).toBe('TREASURY_MINT_RECEIPT_UNVERIFIED');
   });
 
   it('POST execute-mint executes authorized mint via backend', async () => {

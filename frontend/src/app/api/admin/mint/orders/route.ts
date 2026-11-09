@@ -38,13 +38,13 @@ export async function POST(req: NextRequest) {
     }
     const mintEnvelopes = new Set([
       'WORK_REWARD', 'QUEST_REWARD', 'EVENT_REWARD', 'INCIDENT_COMPENSATION',
-      'STABILIZATION_POOL', 'GENERAL_CIRCULATION',
+      'STABILIZATION_POOL', 'GENERAL_CIRCULATION', 'TREASURY_ISSUANCE',
     ]);
     const validPolicy = (body.order_type === 'MINT' && mintEnvelopes.has(body.target_envelope))
       || (body.order_type === 'RETIRE' && body.target_envelope === 'HARD_SINK_PURGE');
     if (!validPolicy) {
       return NextResponse.json({
-        error: '현재 정책 명령 유형/대상 조합을 지원하지 않습니다. 국고 직접 입금은 미지원입니다.',
+        error: '현재 정책 명령 유형/대상 조합을 지원하지 않습니다.',
         code: 'UNSUPPORTED_MONETARY_POLICY',
       }, { status: 422, headers });
     }

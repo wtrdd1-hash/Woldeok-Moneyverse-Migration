@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
@@ -192,6 +193,19 @@ export class MonetaryController {
       body.amount_wld,
       body.recipient_user_id || null,
       body.idempotency_key,
+    );
+  }
+
+  @Post('execute-treasury-mint')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: '승인된 국고 발행 정책에 따른 실제 복식부기 MINT → TREASURY 전입' })
+  async executeTreasuryMint(
+    @Req() req: RequestWithSession,
+    @Body() body: { policy_order_id: string; amount_wld: string; request_key: string },
+  ) {
+    const adminId = requireUserId(req);
+    return this.mintBureau.executeTreasuryMint(
+      adminId, body.policy_order_id, body.amount_wld, body.request_key,
     );
   }
 

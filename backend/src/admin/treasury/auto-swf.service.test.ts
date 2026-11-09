@@ -47,6 +47,15 @@ describe('AutoSovereignWealthFundService', () => {
     expect(mockPool.connect).not.toHaveBeenCalled();
   });
 
+  it('never claims a portfolio was rebalanced merely because admin snapshot succeeded', async () => {
+    const snapshot = {config:{is_enabled:true},portfolios:[],events:[]};
+    mockPool.query = vi.fn().mockResolvedValue({ rows:[{snapshot}] });
+    const result = await service.evaluateAndRebalance('11111111-1111-4111-8111-111111111111');
+    expect(result).toEqual({executed:false,reason:'SWF_SETTLEMENT_SOURCE_UNVERIFIED',snapshot});
+    expect(mockPool.connect).not.toHaveBeenCalled();
+    expect(mockPool.query).toHaveBeenCalledTimes(1);
+  });
+
   it('does not schedule even when the runtime and scheduler flags are both enabled', async () => {
     vi.useFakeTimers();
     process.env.MONEYVERSE_SWF_SCHEDULER_ENABLED = 'true';

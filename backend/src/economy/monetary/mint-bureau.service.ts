@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
-import type { MintCertificate, MonetaryPolicyOrder, RetirementCertificate } from './monetary.types';
+import type { MintCertificate, RetirementCertificate } from './monetary.types';
 
 @Injectable()
 export class MintBureauService {
@@ -44,6 +44,56 @@ export class MintBureauService {
       if (code === '55000') throw new ServiceUnavailableException('정본 금융 원장으로 입증되지 않는 주조 대상은 사용할 수 없습니다.');
       if (error instanceof ForbiddenException) throw error;
       throw new ServiceUnavailableException('주조 인증서 기록을 처리할 수 없습니다.');
+    }
+  }
+
+  /** Dedicated canonical WLD mint to Treasury, not a certificate-only write. */
+  async executeTreasuryMint(
+    actorId: string,
+    policyOrderId: string,
+    amountWld: string,
+    requestKey: string,
+  ): Promise<{
+    success: true;
+    code: 'TREASURY_MINT_SETTLED';
+    amount_wld: string;
+    ledger_transaction_id: string;
+    mint_certificate_id: string;
+    vault_after_wld: string;
+  }> {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuid.test(requestKey) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(policyOrderId)
+      || typeof amountWld !== 'string' || !/^[1-9][0-9]{0,7}$/.test(amountWld)
+      || BigInt(amountWld) > 10000000n) {
+      throw new BadRequestException('국고 발행: 유효한 승인 명령서, 1~10,000,000 WLD, UUID 요청 키가 필요합니다.');
+    }
+    try {
+      const result = await this.pool.query<{ receipt: {
+        success: true;
+        code: 'TREASURY_MINT_SETTLED';
+        amount_wld: string;
+        ledger_transaction_id: string;
+        mint_certificate_id: string;
+        vault_after_wld: string;
+      } }>(
+        'SELECT public.admin_monetary_mint_to_treasury($1::uuid,$2::uuid,$3::text,$4::uuid) AS receipt',
+        [actorId, policyOrderId, amountWld, requestKey],
+      );
+      const receipt = result.rows[0]?.receipt;
+      if (!receipt || receipt.success !== true || receipt.code !== 'TREASURY_MINT_SETTLED'
+        || receipt.amount_wld !== amountWld || typeof receipt.ledger_transaction_id !== 'string'
+        || typeof receipt.mint_certificate_id !== 'string' || !/^(0|[1-9][0-9]*)$/.test(receipt.vault_after_wld)) {
+        throw new ServiceUnavailableException('정본 국고 발행 영수증이 검증되지 않았습니다.');
+      }
+      return receipt;
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code === '42501') throw new ForbiddenException('국고 신규 발행에 대한 관리자 권한이 없습니다.');
+      if (code === '22023') throw new BadRequestException('승인된 국고 발행 정책·발행 한도·유효기간을 확인해 주세요.');
+      if (code === '23505') throw new ConflictException('이미 다른 국고 발행에 사용된 중복 요청 키입니다.');
+      if (code === '55000' || code === '23514') throw new ServiceUnavailableException('화폐 발행이 동결되었거나 국고 정본 증빙이 일치하지 않아 집행할 수 없습니다.');
+      if (error instanceof ServiceUnavailableException) throw error;
+      throw new ServiceUnavailableException('국고 정본 발행을 검증할 수 없습니다.');
     }
   }
 
