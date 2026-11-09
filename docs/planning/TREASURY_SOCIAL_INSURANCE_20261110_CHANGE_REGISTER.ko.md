@@ -101,3 +101,15 @@
 
 ### 회차 기록 / 03:05 KST
 Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE 0 / DEFER 0 / INTEGRATED 0. QA/E2E 미검증.
+
+### TSI-20261110-004 — 가상 보험 급여 청구·독립 심사 (ADD; B v2014)
+- 2026-11-10 04:05 KST 기록; vTSI.2026.11.10.005; P1; PROPOSED. 직전 A v2012 → 현재 B v2014 → 다음 A v2016. 기획 담당, 개발 B/C·QA 배정 대기.
+- 기존: 불변 기준선 사회보험·국민연금 및 main edd709bcbe96f6f5ceca8372f244b632e8211242 통합기획서. TSI-002는 자격 증빙만 담당. 실제 청구 기능 구현·E2E는 검증 불가. 현실 국민건강보험 법정 급여·요율이 아닌 게임 가상경제 기능.
+- 회원 보험 > 급여 > 청구하기: 게임 이벤트 참조, 보장기간, 양의 정수 WLD, 개인정보 안내, 접수증·증빙 보완·심사 전 철회. 관리자 보험 > 청구: 증빙 확인·보완 요청·한도 승인·거절·상급 심사. DRAFT→SUBMITTED→EVIDENCE_PENDING→IN_REVIEW→APPROVED/REJECTED, WITHDRAWN/EXPIRED/BLOCKED 종료. 실제 진단명·주민번호·의료문서 수집 금지. 승인은 지급 인가일 뿐 즉시 입금 아님.
+- 제안 API(미구현): POST /api/insurance/benefit-claims {eventRef,coveragePeriod,amountWld,idempotencyKey}; GET /api/insurance/benefit-claims/:id; POST /internal/insurance/benefit-claims/:id/decision {decision,approvedWld,expectedRevision,nonce}. 소유자 범위 조회, 독립 심사 RBAC, 최신 MFA, 자기 승인 금지, 401/403/404/409/412/422/429/503 안전 차단. 지급은 별도 권한 필요.
+- 제안 DB: insurance_benefit_claims(tenant_id,claim_id 복합 PK,subject_id,event_ref,period_start/end,amount_wld BIGINT >0,approved_wld 0~청구액,status,revision,source_digest,created_at), insurance_benefit_claim_events(테넌트 복합 FK, 불변 감사 이벤트). UNIQUE(tenant_id,subject_id,event_ref,period_start,period_end), UNIQUE(tenant_id,subject_id,idempotency_key), index(tenant_id,status,created_at), FORCE RLS, 최소권한 SECURITY DEFINER, 원자적 Outbox. 추가형 마이그레이션만, 기존 잔액 변경 없음.
+- 정합성: CAS revision·작업자 펜싱, 지급 시 자격 재확인, 청구별 지급 참조 UNIQUE, 이중기장·멱등성. 장애는 UNKNOWN/PENDING_REVIEW, 자동 입금 금지; 취소는 상쇄 분개. 테넌트 격리, 속도 제한, 비식별 감사·경보 중복 억제.
+- 모바일 320px, WCAG 2.2 AA, 한영 동등, noindex/no-store, 심사 지연·중복 거절·미검증 지급 시도 KPI. 미실행 테스트: 상태/RBAC, 격리 PostgreSQL 동시성·RLS·중복·Outbox 장애·자격 철회·이중 지급 차단, E2E 청구→심사→지급인가(원장 변화 0), 접근성·개인정보. 기본 OFF insurance_virtual_benefit_claims_v1, exact-SHA Test·독립 QA/보안 후 카나리, OFF 롤백 감사 보존.
+- P0 운영 출처·국고 대사 HOLD; P1 API/DB/회원·관리자 UI; P2 비식별 KPI. 기준선 사회보험 → TSI-20261110-004 → 통합기획서 반영 대기 / Draft PR #3006. 외부 독립 레퍼런스 신규 검증 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 운영 변경 없음.
+
+| 2026-11-10 04:05 | B 신규 기능 | v2014 / vTSI.2026.11.10.005 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 1 / MODIFY 0 / REMOVE 0 / DEFER 0 | 재확인 필요 | PR #3006 | PROPOSED, 통합 대기 |
