@@ -10,13 +10,21 @@
 
 ## PLAN
 - [x] Add regression tests for all four bond mutation BFFs (valid same-origin request, CSRF-wrapped write, forged/missing origin rejection, error-status preservation).
-- [ ] Show RED before changing production source; replace non-CSRF `api` writes with the existing server-only `mutate` and finance-origin guard, no bypass.
-- [ ] Run focused GREEN tests, typecheck, lint and review code/test diff.
-- [ ] Re-fetch `origin/main`, resolve conflicts without touching concurrent agents' trees, document status and evidence.
-- [ ] Push task branch and open PR; isolated Test and production release only if all financial/idempotency gates pass.
+- [x] Show RED before changing production source; replace non-CSRF `api` writes with the existing server-only `mutate` and finance-origin guard, no bypass.
+- [x] Run focused GREEN tests, typecheck, lint and review code/test diff.
+- [x] Re-fetch `origin/main`, resolve conflicts without touching concurrent agents' trees, document status and evidence.
+- [x] Push task branch and prepare PR; official Test and Production held due unresolved finance/idempotency gates.
 
 ## IN PROGRESS
-- Isolated worktree created from fresh main; 20/20 regression assertions RED against the original handlers (expected 200/403/409 became 500), using isolated frontend dependency links; no runtime code changed.
+- Isolated worktree created from fresh main; 20/20 regression assertions RED against original handlers. Initial test invocation found an empty new worktree node_modules; linked existing project dependencies without changing the original workspace, and reran to reproduce real test failures.
+- Changed four BFF gateway handlers only: server-side mutate for token retrieval and write forwarding; same-origin gating; no-store/noindex on success/denial/error.
+- TDD GREEN 20/20; expanded security/bond regression 43/43; contract build PASS, frontend TypeScript PASS, ESLint 0 errors (four pre-existing any warnings), full Next production build PASS.
+- Launched built frontend on isolated loopback port 4399: forged-origin requests for all four BFF operations returned 403. Preview stopped and listener verified absent.
+- Mid-work main fetch still edd709bcbe96f6f5ceca8372f244b632e8211242; separate v1949 QA and Treasury funding worktrees preserved.
+- No DB migration, SQL execution, balance mutation, user session or Production configuration changed.
 
-## FINISHED
-- Pending verification and exact release-state record.
+## FINISHED — SOURCE VERIFIED, OFFICIAL TEST/PRODUCTION HOLD
+- The visible CSRF omission is corrected in source, and source/proxy security regressions pass. These do NOT prove a funded authenticated purchase settles correctly.
+- Official authenticated Test and exact-SHA Production were not promoted: independent bond QA v1949 (#3008) still reports missing safe retry/idempotency settlement evidence, coupon/maturity ledger integrity and rollover privilege uncertainty; Repo borrowing/repayment intentionally return 503.
+- Production member money, ledger, database, security settings, live application and test instance remain unchanged.
+- Internal/GitHub bilingual updates and release hold report filed under version 2010. PR number/link will be added after creation.
