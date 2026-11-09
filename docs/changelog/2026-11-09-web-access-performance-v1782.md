@@ -1,0 +1,2 @@
+# v2026.11.09.1782 — First-load JS hydration improvement
+**Source candidate; not public CDN fix.** Optional prompts deferred to browser idle and lazy chunks. Main layout JS reduced 202,477→193,569 bytes (-4.4%). Production origin fast, public Cloudflare edge still ~1–2.7s TTFB from host. [Worklog](../worklog/2026-11-09-web-access-performance-v1782.md) / [한국어](2026-11-09-web-access-performance-v1782.ko.md).

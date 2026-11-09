@@ -10,9 +10,8 @@ import { StaleTabNotice } from '@/components/stale-tab-notice';
 import { RouteAwareFloatingUtilities } from '@/components/route-aware-floating-utilities';
 import { ConsentGuard } from '@/components/consent-guard';
 import { SessionKeepAlive } from '@/components/session-keep-alive';
-import { WatchlistPromotionEngine } from '@/components/watchlist-promotion-engine';
-import { FirstTradeOnboardingModal } from '@/components/first-trade-onboarding-modal';
 import { StockAlertPushEngine } from '@/components/stock-alert-push-engine';
+import { DeferredEngagementPrompts } from '@/components/deferred-engagement-prompts';
 import { DeokiAiFloatingAssistant } from '@/components/deoki-ai-floating-assistant';
 import { ViewportScrollGuardian } from '@/components/viewport-scroll-guardian';
 
@@ -351,8 +350,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <StaleTabNotice />
               <RouteAwareFloatingUtilities />
               <SessionKeepAlive />
-              <WatchlistPromotionEngine />
-              <FirstTradeOnboardingModal />
+              <DeferredEngagementPrompts />
               <StockAlertPushEngine />
             </ThemeProvider>
 
