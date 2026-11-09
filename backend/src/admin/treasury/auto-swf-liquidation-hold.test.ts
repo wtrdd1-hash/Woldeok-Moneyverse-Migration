@@ -33,6 +33,24 @@ describe('P0 SWF manual liquidation canonical financial boundary', () => {
     });
   });
 
+  it('holds unbacked valuation liquidation as HTTP 503 and never sends a success alert', async () => {
+    const query = vi.fn().mockRejectedValue({ code: '55000' });
+    const sendAdminDirectMessage = vi.fn();
+    const pool = { query } as unknown as Pool;
+    const service = new AutoSovereignWealthFundService(
+      pool, { sendAdminDirectMessage } as unknown as DiscordAlertService,
+    );
+    await expect(service.liquidateToTreasuryVault('00000000-0000-0000-0000-000000000001', '20000000')).rejects.toMatchObject({
+      status: 503,
+      response: { code: 'SWF_UNFUNDED_LIQUIDATION_HELD' },
+    });
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('public.admin_swf_liquidate_to_vault'),
+      ['00000000-0000-0000-0000-000000000001', '20000000'],
+    );
+    expect(sendAdminDirectMessage).not.toHaveBeenCalled();
+  });
+
   it('invokes canonical admin_swf_liquidate_to_vault procedure and returns immutable ledger receipt', async () => {
     const mockReceipt = {
       success: true,

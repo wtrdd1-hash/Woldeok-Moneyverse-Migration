@@ -257,6 +257,12 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
       if ((error as { code?: string }).code === '42501') {
         throw new ForbiddenException({ code: 'SWF_LIQUIDATION_NOT_AUTHORIZED' });
       }
+      if ((error as { code?: string }).code === '55000') {
+        throw new ServiceUnavailableException({
+          code: 'SWF_UNFUNDED_LIQUIDATION_HELD',
+          message: 'A portfolio valuation is not a verified sale settlement.',
+        });
+      }
       throw error;
     }
 
