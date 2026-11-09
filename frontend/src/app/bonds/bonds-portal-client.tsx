@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { groupDigits } from '@/lib/money';
+import { describeBondHoldingStatus } from './holding-status';
+import { safeBondDescription } from './bond-copy';
 
 export interface PublicBondItem {
   id: string;
@@ -329,19 +331,19 @@ export function BondsPortalClient({
                     {bond.name}
                   </CardTitle>
                   <CardDescription className="text-xs line-clamp-2">
-                    {bond.description}
+                    {safeBondDescription(bond.description)}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
                     <div>
-                      <div className="text-xs text-muted-foreground">확정 표면금리</div>
+                      <div className="text-xs text-muted-foreground">표시 연 금리</div>
                       <div className="text-xl font-mono font-bold text-sky-600 dark:text-sky-400 mt-0.5">
                         연 {(bond.annual_coupon_rate_bps / 100).toFixed(2)}%
                       </div>
                       <div className="text-[10px] text-muted-foreground font-mono">
-                        (시간당 {(bond.hourly_coupon_rate_bps / 100).toFixed(2)}%)
+                        연 기준 표기 · 시간별 지급액 검증 중
                       </div>
                     </div>
                     <div className="text-right">
@@ -461,7 +463,7 @@ export function BondsPortalClient({
             <div>
               <h3 className="text-lg font-bold text-foreground">내 보유 국채 현황</h3>
               <p className="text-xs text-muted-foreground">
-                매시간 확정 쿠폰 이자가 자동으로 적립되며, 긴급 유동성 필요 시 80% 담보 대출을 신청할 수 있습니다.
+                서버에서 확인된 지급 내역만 표시합니다. 자동 재투자와 담보대출은 원장 정산 검증 전까지 이용할 수 없습니다.
               </p>
             </div>
           </div>
@@ -489,12 +491,12 @@ export function BondsPortalClient({
                         <Badge
                           variant="outline"
                           className={
-                            h.status === 'HOLDING'
+                            describeBondHoldingStatus(h.status).active
                               ? 'border-sky-500/30 text-sky-600 dark:text-sky-400'
                               : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
                           }
                         >
-                          {h.status === 'HOLDING' ? '보유중 (이자수령)' : '만기상환 완료'}
+                          {describeBondHoldingStatus(h.status).label}
                         </Badge>
                         {h.collateral_locked && (
                           <Badge variant="outline" className="border-rose-500/40 text-rose-600 font-mono text-[10px]">
@@ -542,22 +544,25 @@ export function BondsPortalClient({
                         variant={h.auto_rollover ? 'secondary' : 'outline'}
                         size="sm"
                         onClick={() => handleToggleRollover(h.id, h.auto_rollover)}
+                        disabled
+                        title="원장 권한 및 만기 처리 검증 전까지 자동 재투자 설정을 변경할 수 없습니다."
                         className="text-xs h-7 gap-1"
                       >
                         <RefreshCw className="h-3 w-3" />
                         자동 재투자: {h.auto_rollover ? 'ON (복리)' : 'OFF'}
                       </Button>
 
-                      {h.status === 'HOLDING' && !h.collateral_locked && (
+                      {describeBondHoldingStatus(h.status).active && !h.collateral_locked && (
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={isProcessingLoan}
+                          disabled
+                          title="레포 대출 정산이 검증되기 전까지 신규 대출이 중단됩니다."
                           onClick={() => handleBorrowRepo(h.id, h.bond_name)}
                           className="text-xs h-7 gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
                         >
                           <Landmark className="h-3 w-3" />
-                          80% 담보대출 신청
+                          담보대출 점검 중
                         </Button>
                       )}
                     </div>
@@ -585,7 +590,7 @@ export function BondsPortalClient({
                 <Landmark className="h-10 w-10 text-muted-foreground mx-auto opacity-40" />
                 <p className="text-sm font-medium">현재 이용 중인 국채 담보 대출이 없습니다.</p>
                 <p className="text-xs text-muted-foreground">
-                  '내 보유 채권' 탭에서 보유 중인 국채의 '80% 담보대출 신청' 버튼을 눌러 즉시 신청할 수 있습니다.
+                  담보대출 신청은 원장 정산 및 중복 처리 검증을 완료한 뒤 제공됩니다.
                 </p>
               </CardContent>
             </Card>
