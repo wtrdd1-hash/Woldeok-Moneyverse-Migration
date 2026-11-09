@@ -203,6 +203,31 @@ const config: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/blog',
+        destination: '/tools',
+        permanent: true,
+      },
+      {
+        source: '/blog/:path*',
+        destination: '/tools',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ko|en|ja|zh)/blog',
+        destination: '/tools',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ko|en|ja|zh)/blog/:path*',
+        destination: '/tools',
+        permanent: true,
+      },
+      {
+        source: '/sitemap-blog.xml',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
         source: '/notices',
         destination: '/announcements',
         permanent: true,

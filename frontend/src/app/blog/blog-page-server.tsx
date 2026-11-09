@@ -72,15 +72,13 @@ export function resolvePostHeroImage(post: BlogPost): string {
 }
 
 export function metadataForHub(locale: BlogLocale): Metadata {
-  const languages = Object.fromEntries((['ko', 'en', 'ja', 'zh'] as const).map(l => [
-    ({ ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' })[l], blogHubUrl(l),
-  ]));
   return {
     title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
-    alternates: { canonical: blogHubUrl(locale), languages },
+    robots: { index: false, follow: false },
+    alternates: { canonical: 'https://easy-scraping.com/tools' },
     openGraph: {
       title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
-      url: blogHubUrl(locale), type: 'website', siteName: 'Woldeok Moneyverse',
+      url: 'https://easy-scraping.com/tools', type: 'website', siteName: 'Woldeok Moneyverse',
     },
   };
 }
@@ -95,7 +93,7 @@ export async function metadataForArticle(slug: string, locale: BlogLocale): Prom
   const hero = resolvePostHeroImage(post);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
-    ...(isBlogDiscoverable(original) && locale === nativeLocale ? {} : { robots: { index: false, follow: true } }),
+    robots: { index: false, follow: false },
     alternates: { canonical, languages: blogAlternateLanguages(original) },
     openGraph: {
       title: post.title, description: post.excerpt, type: 'article',

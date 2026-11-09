@@ -44,13 +44,6 @@ export async function GET() {
       lastmod: RELEASE_TIMESTAMP,
       changefreq: 'daily',
       priority: 0.95,
-      alternates: {
-        'ko-KR': canonicalUrl('/stocks'),
-        'en-US': canonicalUrl('/en/stocks'),
-        'ja-JP': canonicalUrl('/ja/stocks'),
-        'zh-CN': canonicalUrl('/zh/stocks'),
-        'x-default': canonicalUrl('/stocks'),
-      },
     },
   ];
 
@@ -61,13 +54,6 @@ export async function GET() {
       lastmod: RELEASE_TIMESTAMP,
       changefreq: 'daily',
       priority: 0.9,
-      alternates: {
-        'ko-KR': canonicalUrl(cleanPath),
-        'en-US': canonicalUrl(`/en${cleanPath}`),
-        'ja-JP': canonicalUrl(`/ja${cleanPath}`),
-        'zh-CN': canonicalUrl(`/zh${cleanPath}`),
-        'x-default': canonicalUrl(cleanPath),
-      },
     });
   }
 

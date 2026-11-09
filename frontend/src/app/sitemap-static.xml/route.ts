@@ -1,5 +1,6 @@
 import { buildUrlsetXml, canonicalUrl } from '@/lib/seo';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
+import { getVerifiedLocalePaths } from '@/lib/seo-locale-alternates';
 
 export const revalidate = 3600;
 
@@ -17,19 +18,21 @@ export async function GET() {
 
   const routes = getPublicSitemapRoutes();
   const entries = routes.map((r) => {
-    const cleanPath = r.path === '/' ? '' : r.path;
+    const verified = getVerifiedLocalePaths(r.path);
     return {
       loc: canonicalUrl(r.path),
       lastmod: RELEASE_TIMESTAMP,
       changefreq: r.changeFrequency || 'weekly',
       priority: r.sitemapPriority || 0.7,
-      alternates: {
-        'ko-KR': canonicalUrl(cleanPath ? cleanPath : '/'),
-        'en-US': canonicalUrl(`/en${cleanPath}`),
-        'ja-JP': canonicalUrl(`/ja${cleanPath}`),
-        'zh-CN': canonicalUrl(`/zh${cleanPath}`),
-        'x-default': canonicalUrl(cleanPath ? cleanPath : '/'),
-      },
+      ...(verified ? {
+        alternates: {
+          'ko-KR': canonicalUrl(verified.ko),
+          'en-US': canonicalUrl(verified.en),
+          'ja-JP': canonicalUrl(verified.ja),
+          'zh-CN': canonicalUrl(verified.zh),
+          'x-default': canonicalUrl(verified.ko),
+        },
+      } : {}),
     };
   });
 

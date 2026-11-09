@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nest build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "NODE_ENV=test vitest run",
     "start": "node dist/main.js",
     "dev": "nest start --watch"
   },
