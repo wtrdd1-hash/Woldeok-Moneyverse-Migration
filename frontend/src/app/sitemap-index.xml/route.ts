@@ -1,6 +1,4 @@
 import { buildSitemapIndexXml, canonicalUrl } from '@/lib/seo';
-import { getAllBlogPosts } from '@/app/blog/blog-data';
-import { verifiedPublicArticles } from '@/app/blog/blog-verified-client';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -16,14 +14,12 @@ export async function GET() {
   }
 
   const releaseDate = (process.env.APP_RELEASE_DATE ? new Date(process.env.APP_RELEASE_DATE) : new Date('2026-11-08T00:00:00.000Z')).toISOString();
-  const latestBlogModification = [...await verifiedPublicArticles(), ...getAllBlogPosts()].map(post => post.updatedAt).sort().at(-1) ?? '2026-10-15T14:00:00.000Z';
   const sitemaps = [
     { loc: canonicalUrl('/sitemap.xml'), lastmod: releaseDate },
     { loc: canonicalUrl('/sitemap-static.xml'), lastmod: releaseDate },
     { loc: canonicalUrl('/sitemap-announcements.xml'), lastmod: releaseDate },
     { loc: canonicalUrl('/sitemap-board.xml'), lastmod: releaseDate },
     { loc: canonicalUrl('/sitemap-stocks.xml'), lastmod: releaseDate },
-    { loc: canonicalUrl('/sitemap-blog.xml'), lastmod: new Date(latestBlogModification).toISOString() },
   ];
 
   const xml = buildSitemapIndexXml(sitemaps);

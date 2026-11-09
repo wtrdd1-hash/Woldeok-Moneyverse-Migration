@@ -46,16 +46,15 @@ describe('country-specific blog and canonical SEO', () => {
     expect(getBlogCountryEdition(post, 'en')?.content).toContain('United States');
   });
 
-  it('includes only indexable country URLs with reciprocal hreflang in blog sitemap', async () => {
+  it('returns empty sitemap urlset when blog is sunset for SEO protection', async () => {
     const res = await getBlogSitemap();
     const xml = await res.text();
-    expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
-    expect(xml).toContain('/en/blog/country-guide-compound');
-    expect(xml).toContain('/ja/blog/country-guide-compound');
-    expect(xml).toContain('/zh/blog/country-guide-compound');
-    expect(xml).toContain('hreflang="en-US"');
+    expect(res.status).toBe(200);
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(xml).not.toContain('/en/blog');
+    expect(xml).not.toContain('/ja/blog');
+    expect(xml).not.toContain('/zh/blog');
     expect(xml).not.toContain('/blog/2026-10-14-compound-interest-wealth-secret');
-    expect(xml).not.toContain('<lastmod>' + new Date().toISOString() + '</lastmod>');
   });
 
   it('excludes unrevised legacy AI articles from discovery and makes their URLs noindex without deleting data', async () => {

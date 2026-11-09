@@ -1,5 +1,7 @@
 import { VERSION_NEUTRAL } from '@nestjs/common';
 
+process.env.NODE_ENV = 'test';
+
 // Ensure VERSION_NEUTRAL symbol has a clean string representation for template strings
 if (typeof VERSION_NEUTRAL === 'symbol') {
   Object.defineProperty(Symbol.prototype, 'toString', {
