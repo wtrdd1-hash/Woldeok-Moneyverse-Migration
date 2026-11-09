@@ -28,3 +28,6 @@
 
 ### Midpoint 3 — full GitHub CI defect and correction
 - Exact PR commit `a813ab815f8e184c0a17cee28a26f746d6b24418` full GitHub CI run `42651914412` failed exactly one backend regression (3,648 passed, 1 failed, 117 skipped): `src/wallet/ledger-labels.test.ts` found `TREASURY_AUTHORIZED_MINT` transaction label missing and showing `경제 활동`. Added Korean member-visible transaction label in `backend/src/wallet/wallet.service.ts`. No money movement, role, or ledger logic changed by this correction. RED CI evidence is recorded; run targeted then full CI again.
+
+### Midpoint 4 — full Frontend integration test
+- Full local frontend test revealed **11 failing TreasuryView tests** because the new own-cash donation child uses Next `useRouter()` but the existing TreasuryView summary test isolates its other children only and has no router context. New independent actual funding-card tests cover its route and receipt. Added the funding child to the existing summary test mocks, preserving all assertions on main TreasuryView. No production code or financial behavior change. Full CI needs exact new branch SHA rerun.

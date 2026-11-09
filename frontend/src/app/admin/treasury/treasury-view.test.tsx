@@ -11,6 +11,8 @@ vi.mock('./treasury-operations-dialog', () => ({ TreasuryOperationsDialog: () =>
 vi.mock('./treasury-wealth-tax-dialog', () => ({ TreasuryWealthTaxDialog: () => null }));
 vi.mock('@/components/admin/national-mint-panel', () => ({ NationalMintPanel: () => null }));
 vi.mock('@/components/admin/central-bank-panel', () => ({ CentralBankPanel: () => null }));
+// Funding form is independently tested (including its Next navigation and cash receipt).
+vi.mock('./admin-treasury-funding-card', () => ({ AdminTreasuryFundingCard: () => null }));
 
 describe('TreasuryView & isTreasuryOutflow Outflow Accounting Logic', () => {
   const mockOverview: AdminTreasuryOverview = {
