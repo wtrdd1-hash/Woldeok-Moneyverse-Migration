@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, AlertTriangle, ShieldCheck, Flame, Coins, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,22 +32,35 @@ export function MintExecutionDialog({
   initialOrderId,
 }: MintModalProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<string>(
-    initialOrderId || activeOrders[0]?.id || '',
+    initialOrderId || '',
   );
   const [amountWld, setAmountWld] = useState<string>('100000');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedOrderId(initialOrderId || '');
+      setErrorMsg(null);
+    }
+  }, [isOpen, initialOrderId]);
+
   if (!isOpen) return null;
 
-  const selectedOrder = activeOrders.find((o) => o.id === selectedOrderId);
+  // A native select displays its first option even when React's controlled
+  // value is an empty string. Keep submission bound to the visible option,
+  // including after an asynchronous orders fetch or an expired order refresh.
+  const selectedOrder = activeOrders.find((o) => o.id === selectedOrderId)
+    ?? activeOrders.find((o) => o.id === initialOrderId)
+    ?? activeOrders[0];
+  const effectiveOrderId = selectedOrder?.id ?? '';
   const remainingWld = selectedOrder
     ? BigInt(selectedOrder.max_amount_wld) - BigInt(selectedOrder.executed_amount_wld)
     : BigInt(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOrderId) {
+    if (!effectiveOrderId) {
       setErrorMsg('발행할 승인 정책 명령서를 선택해 주세요.');
       return;
     }
@@ -70,14 +83,14 @@ export function MintExecutionDialog({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          policy_order_id: selectedOrderId,
+          policy_order_id: effectiveOrderId,
           amount_wld: amountWld,
           recipient_user_id: null, // 국고 중앙 금고(VAULT_MAIN) 자동 입고
           idempotency_key: idempotencyKey,
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.error || '화폐 발행 실행에 실패했습니다.');
       }
@@ -135,17 +148,18 @@ export function MintExecutionDialog({
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-                승인된 정책 명령서 (APPROVED Order)
+              <label htmlFor="mint-approved-policy-order" className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                승인된 주조 명령서 (APPROVED MINT Order)
               </label>
               {activeOrders.length === 0 ? (
                 <p className="text-xs text-destructive p-3 rounded-lg border border-destructive/30 bg-destructive/5">
-                  현재 즉시 발행 가능한 APPROVED 상태의 정책 명령서가 없습니다.
+                  현재 유효하며 잔여 한도가 있는 APPROVED MINT 명령서가 없습니다.
                 </p>
               ) : (
                 <select
-                  value={selectedOrderId}
-                  onChange={(e) => setSelectedOrderId(e.target.value)}
+                  id="mint-approved-policy-order"
+                  value={effectiveOrderId}
+                  onChange={(e) => { setSelectedOrderId(e.target.value); setErrorMsg(null); }}
                   disabled={loading}
                   className="w-full rounded-xl border border-input bg-background/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                 >
@@ -153,7 +167,7 @@ export function MintExecutionDialog({
                     const rem = BigInt(order.max_amount_wld) - BigInt(order.executed_amount_wld);
                     return (
                       <option key={order.id} value={order.id}>
-                        [{order.target_envelope}] 잔여: {rem.toLocaleString('ko-KR')} WLD (최대 {BigInt(order.max_amount_wld).toLocaleString('ko-KR')} WLD)
+                        [{order.target_envelope}] 잔여 {rem.toLocaleString('ko-KR')} WLD
                       </option>
                     );
                   })}
@@ -192,7 +206,7 @@ export function MintExecutionDialog({
                   WLD
                 </span>
               </div>
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {['50000', '100000', '250000'].map((preset) => (
                   <Button
                     key={preset}
@@ -224,7 +238,7 @@ export function MintExecutionDialog({
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-300 flex items-start gap-2">
               <ShieldCheck className="size-4 shrink-0 text-emerald-400 mt-0.5" />
               <span>
-                주조된 신규 화폐는 <strong>중앙 국고 금고(VAULT_MAIN)</strong>로 자동 전표 입고되며 조폐국 발행 인증서(UUID)가 영구 원장에 기록됩니다.
+                이 단계에서는 승인 한도를 차감하고 <strong>주조 증명서(UUID)</strong>를 기록합니다. 국고 금고(VAULT_MAIN)의 실제 입금 및 정본 화폐 원장 전표는 별도로 검증되지 않았으므로 자동 입금으로 표시하지 않습니다.
               </span>
             </div>
 
@@ -249,7 +263,7 @@ export function MintExecutionDialog({
                     주조 실행 중...
                   </span>
                 ) : (
-                  '정식 주조 집행'
+                  '주조 증명서 기록'
                 )}
               </Button>
             </div>
@@ -303,7 +317,7 @@ export function RetireExecutionDialog({ isOpen, onClose, onSuccess }: RetireModa
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.error || '통화 소각 실행에 실패했습니다.');
       }
@@ -377,7 +391,7 @@ export function RetireExecutionDialog({ isOpen, onClose, onSuccess }: RetireModa
                   WLD
                 </span>
               </div>
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {['10000', '50000', '100000', '500000'].map((preset) => (
                   <Button
                     key={preset}
@@ -459,8 +473,8 @@ export function OrderProposalDialog({
   onClose,
   onSuccess,
 }: OrderProposalModalProps) {
-  const [orderType, setOrderType] = useState<'MINT' | 'EXPAND_LIMIT' | 'REBALANCE'>('MINT');
-  const [targetEnvelope, setTargetEnvelope] = useState<string>('TREASURY');
+  const [orderType, setOrderType] = useState<'MINT' | 'RETIRE'>('MINT');
+  const [targetEnvelope, setTargetEnvelope] = useState<string>('WORK_REWARD');
   const [maxAmountWld, setMaxAmountWld] = useState<string>('10000000');
   const [reason, setReason] = useState<string>('');
   const [durationHours, setDurationHours] = useState<string>('72');
@@ -478,6 +492,11 @@ export function OrderProposalDialog({
     }
     if (!reason || reason.trim().length < 10) {
       setErrorMsg('발의 사유를 10자 이상 구체적으로 입력해 주세요.');
+      return;
+    }
+    if ((orderType === 'RETIRE' && targetEnvelope !== 'HARD_SINK_PURGE')
+      || (orderType === 'MINT' && targetEnvelope === 'HARD_SINK_PURGE')) {
+      setErrorMsg('선택한 명령 유형과 대상이 일치하지 않습니다.');
       return;
     }
 
@@ -533,7 +552,7 @@ export function OrderProposalDialog({
                   신규 통화정책 명령 발의 (Order Proposal)
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  금융통화위원회 결재를 위한 M0 주조/한도확장 정책 명령서를 발의합니다.
+                  DB가 지원하는 주조·소각 정책 명령서를 발의합니다. 국고 직접 입금은 아직 지원하지 않습니다.
                 </p>
               </div>
             </div>
@@ -554,20 +573,25 @@ export function OrderProposalDialog({
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   명령 유형
                 </label>
                 <select
+                  aria-label="명령 유형"
                   value={orderType}
-                  onChange={(e) => setOrderType(e.target.value as 'MINT' | 'EXPAND_LIMIT' | 'REBALANCE')}
+                  onChange={(e) => {
+                    const next = e.target.value as 'MINT' | 'RETIRE';
+                    setOrderType(next);
+                    setTargetEnvelope(next === 'RETIRE' ? 'HARD_SINK_PURGE' : 'WORK_REWARD');
+                    setErrorMsg(null);
+                  }}
                   disabled={loading}
-                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full min-w-0 h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="MINT">MINT (신규 주조)</option>
-                  <option value="EXPAND_LIMIT">EXPAND_LIMIT (한도 확대)</option>
-                  <option value="REBALANCE">REBALANCE (유동성 리밸런싱)</option>
+                  <option value="RETIRE">RETIRE (정책 소각)</option>
                 </select>
               </div>
               <div>
@@ -575,16 +599,24 @@ export function OrderProposalDialog({
                   대상 계정(Envelope)
                 </label>
                 <select
+                  aria-label="대상 계정"
                   value={targetEnvelope}
                   onChange={(e) => setTargetEnvelope(e.target.value)}
                   disabled={loading}
-                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full min-w-0 h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="TREASURY">TREASURY (국고 금고)</option>
-                  <option value="MARKET_LIQUIDITY">MARKET_LIQUIDITY (시장 유동성)</option>
-                  <option value="CITIZEN_DIVIDEND">CITIZEN_DIVIDEND (국민 배당)</option>
-                  <option value="STARTUP_GRANT">STARTUP_GRANT (창업지원금)</option>
-                  <option value="PENSION_FUND">PENSION_FUND (국민연금)</option>
+                  {orderType === 'RETIRE' ? (
+                    <option value="HARD_SINK_PURGE">HARD_SINK_PURGE (정책 소각)</option>
+                  ) : (
+                    <>
+                      <option value="WORK_REWARD">WORK_REWARD (작업 보상)</option>
+                      <option value="QUEST_REWARD">QUEST_REWARD (퀘스트 보상)</option>
+                      <option value="EVENT_REWARD">EVENT_REWARD (이벤트 보상)</option>
+                      <option value="INCIDENT_COMPENSATION">INCIDENT_COMPENSATION (사고 보상)</option>
+                      <option value="STABILIZATION_POOL">STABILIZATION_POOL (안정화 풀)</option>
+                      <option value="GENERAL_CIRCULATION">GENERAL_CIRCULATION (일반 유통)</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -623,7 +655,7 @@ export function OrderProposalDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                   명령 유효 기간
@@ -632,7 +664,7 @@ export function OrderProposalDialog({
                   value={durationHours}
                   onChange={(e) => setDurationHours(e.target.value)}
                   disabled={loading}
-                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full min-w-0 h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="24">24시간 (1일)</option>
                   <option value="72">72시간 (3일, 권장)</option>
@@ -668,7 +700,7 @@ export function OrderProposalDialog({
             <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-3 text-xs text-blue-300 flex items-start gap-2">
               <ShieldCheck className="size-4 shrink-0 text-blue-400 mt-0.5" />
               <span>
-                발의된 정책 명령은 <strong>중앙은행 2단계 견제 정책</strong>에 따라 승인된 이후에만 조폐국 M0 주조가 실행 가능합니다.
+                정책 명령은 관리자 승인 후에만 사용할 수 있습니다. 이 정책 명령 자체는 실제 국고 입금·금융 원장 정산의 증거가 아닙니다.
               </span>
             </div>
 

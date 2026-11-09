@@ -48,6 +48,31 @@ describe('Admin Mint Bureau BFF Routes', () => {
     expect(body.orders).toHaveLength(1);
   });
 
+  it('rejects unsupported TREASURY envelope in policy proposal before any backend mutation', async () => {
+    const req = {
+      headers: new Headers(),
+      json: async () => ({ order_type: 'MINT', target_envelope: 'TREASURY',
+        max_amount_wld: '10000000', reason: '운영 국고 증액 정책 발의 감사 사유', valid_duration_hours: 72 }),
+    } as never;
+    const res = await ordersRoute.POST(req);
+    expect(res.status).toBe(422);
+    expect(await res.json()).toMatchObject({ code: 'UNSUPPORTED_MONETARY_POLICY' });
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it('accepts a supported policy proposal using existing DB constraints', async () => {
+    vi.mocked(mutate).mockResolvedValueOnce({ id: 'new-policy-1' } as never);
+    const req = {
+      headers: new Headers(),
+      json: async () => ({ order_type: 'MINT', target_envelope: 'WORK_REWARD',
+        max_amount_wld: '10000000', reason: '승인 가능한 작업 보상 한도 정책', valid_duration_hours: 72 }),
+    } as never;
+    const res = await ordersRoute.POST(req);
+    expect(res.status).toBe(200);
+    expect(mutate).toHaveBeenCalledWith('/api/v1/admin/economy/monetary/orders/propose',
+      expect.objectContaining({ method: 'POST' }));
+  });
+
   it('POST execute-mint executes authorized mint via backend', async () => {
     vi.mocked(mutate).mockResolvedValueOnce({ id: 'cert-123', amount_wld: '100000' } as never);
     const req = {

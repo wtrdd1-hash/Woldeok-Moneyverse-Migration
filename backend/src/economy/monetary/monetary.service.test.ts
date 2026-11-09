@@ -28,6 +28,18 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('rejects the unsupported Treasury and EXPAND_LIMIT enums before the SQL insert', async () => {
+      const query = vi.fn();
+      const service = new CentralBankService({ query } as unknown as Queryable);
+      await expect(service.proposePolicyOrder('admin-1', 'MINT', 'TREASURY' as never,
+        '10000000', '국고 신규 발행 감사 문서 발의 사유')).rejects.toThrow(BadRequestException);
+      await expect(service.proposePolicyOrder('admin-1', 'EXPAND_LIMIT' as never, 'WORK_REWARD',
+        '10000000', '정책 허용 여부를 테스트하는 사유')).rejects.toThrow(BadRequestException);
+      await expect(service.proposePolicyOrder('admin-1', 'MINT', 'WORK_REWARD',
+        '10000000', '정책 유효시간이 이상한 요청 사유', 100000)).rejects.toThrow(BadRequestException);
+      expect(query).not.toHaveBeenCalled();
+    });
+
     it('successfully proposes and returns a policy order', async () => {
       const mockOrder = {
         id: 'order-uuid-1',

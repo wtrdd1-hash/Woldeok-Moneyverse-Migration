@@ -8,8 +8,13 @@
 - Integrity blocker: current `MintBureauService.executeAuthorizedMint` updates approved limit and inserts `mint_certificates`, but does not call canonical `economy_post_transaction` or increment Treasury vault. UI wrongly claims `VAULT_MAIN` auto deposit. Historical owner-approved Treasury reset v1944 left true Treasury 0; no auto-funding or invented money may be claimed. Treasury target cannot simply be enabled by loosening CHECK without a funded canonical issuance proof and compatible public fiscal release gate (`safeTreasuryEdgeResponse` accepts certified zero only).
 - Scope: real form state repair, validated client/server enums + correct safe feedback, and replace false Treasury credit wording with accurate issuance certificate description or fail-closed where needed. Add regressions. No blind DB CHECK relaxation, no phantom-money issuance, no user balance/ledger mutation. Test / Production release must confirm exact SHA and preserve rollback.
 
-## IN PROGRESS
-- Pending red/green regression and production analysis.
+## IN PROGRESS — 2026-11-09 22:35–22:45 KST
+- Re-fetched `origin/main` after editing; unchanged at `427c5b1eb01c7f6c9ad9920c00e7ab3728eb2450` at recorded midpoint. Other agents' worktrees untouched.
+- MintExecutionDialog: async activeOrders=[] to populated list now derives the effective order for both the controlled HTML select and the payload; stale/removed orders fall back safely. NationalMintPanel excludes expired/fully spent/non-MINT orders. The approved live WORK_REWARD record has 400,000 WLD remaining but no documented canonical Treasury credit.
+- Proposal form: removed schema-invalid defaults `TREASURY` and order types `EXPAND_LIMIT`/`REBALANCE`; allowed MINT purpose envelopes and RETIRE/HARD_SINK_PURGE only. Added backend/Next validation and clear Korean 422/400 on unsupported requests. Current 500 is reproduced by migration 244 database constraints. Mobile stacks select fields and wraps presets.
+- Removed unsupported UI auto-Treasury-credit claim and misleading two-person approval copy; API certificates remain distinct from cash settlement. No ledger writes or mint execution performed by this task.
+- Regression: frontend 17/17, backend 10/10 PASS; typechecks both PASS; scoped ESLint 0 errors (three preexisting backend warnings). Isolated full PG17 restored clone: granted app role exactly the narrow test table permission (pg_restore --no-acl omits grants), tested allowed MINT/WORK_REWARD transaction and unsupported MINT/TREASURY CHECK rejection, both rolled back. Verified no persisted Treasury order and live Treasury 0/0/0/0 unchanged.
+
 
 ## FINISHED
-- Pending exact release evidence.
+- Candidate compiled/tested; CI, official Test and Production status to be appended after deployment evidence. No automatic financial issuance is asserted.

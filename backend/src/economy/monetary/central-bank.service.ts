@@ -127,6 +127,19 @@ export class CentralBankService {
     if (!reason || reason.trim().length < 10) {
       throw new BadRequestException('통화정책 제안 사유는 최소 10자 이상 입력해야 합니다.');
     }
+    // Source-of-truth: migration 244 monetary_policy_orders CHECK constraints.
+    // Never let an unsupported UI enum reach PostgreSQL as an opaque HTTP 500.
+    const mintEnvelopes = [
+      'WORK_REWARD', 'QUEST_REWARD', 'EVENT_REWARD', 'INCIDENT_COMPENSATION',
+      'STABILIZATION_POOL', 'GENERAL_CIRCULATION',
+    ];
+    if (!((orderType === 'MINT' && mintEnvelopes.includes(targetEnvelope))
+      || (orderType === 'RETIRE' && targetEnvelope === 'HARD_SINK_PURGE'))) {
+      throw new BadRequestException('현재 명령 유형/대상 조합은 지원되지 않습니다. 국고 직접 입금은 미지원입니다.');
+    }
+    if (!Number.isInteger(validDurationHours) || validDurationHours < 1 || validDurationHours > 720) {
+      throw new BadRequestException('명령 유효 기간은 1~720시간의 정수여야 합니다.');
+    }
 
     const expiresAt = new Date(Date.now() + validDurationHours * 3600 * 1000);
 
