@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import type { NextConfig } from 'next';
 
@@ -202,31 +202,6 @@ const config: NextConfig = {
 
   async redirects() {
     return [
-      {
-        source: '/blog',
-        destination: '/tools',
-        permanent: true,
-      },
-      {
-        source: '/blog/:path*',
-        destination: '/tools',
-        permanent: true,
-      },
-      {
-        source: '/:locale(ko|en|ja|zh)/blog',
-        destination: '/tools',
-        permanent: true,
-      },
-      {
-        source: '/:locale(ko|en|ja|zh)/blog/:path*',
-        destination: '/tools',
-        permanent: true,
-      },
-      {
-        source: '/sitemap-blog.xml',
-        destination: '/sitemap.xml',
-        permanent: true,
-      },
       {
         source: '/notices',
         destination: '/announcements',

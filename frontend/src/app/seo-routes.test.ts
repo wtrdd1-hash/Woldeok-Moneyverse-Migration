@@ -27,6 +27,7 @@ describe('search crawler routes', () => {
     expect(robotRules.sitemap).toEqual([
       'https://easy-scraping.com/sitemap.xml',
       'https://easy-scraping.com/sitemap-index.xml',
+      'https://easy-scraping.com/sitemap-blog.xml',
     ]);
     expect(robotRules.rules).toEqual(
       expect.objectContaining({

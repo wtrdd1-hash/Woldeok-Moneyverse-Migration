@@ -1,3 +1,9 @@
+## v2026.11.09.1946.3 — Mixed-verification publication CI hardening / Test-only evidence
+Exact e318 build and canaries PASS; actual Test DB verified CN/CODING publication at 23:19 KST, receipt present (Test only). Correct `no-unsafe-finally`, add deterministic unverified fallback test and Test/Production JSON path isolation. New exact CI/Production promotion pending.
+
+## v2026.11.09.1946.2 — Owner-authorized unverified blog visibility and ad inventory (BRANCH CANDIDATE)
+Separate receipt-verified and explicitly unverified `PUBLISHED` editorial articles. Native blog routes/sitemap, dedicated idempotent unverified JSON publisher, visible AI disclosure, public blog ad slot; Google network policy risk documented. Test/CI/Production pending.
+
 ## v2026.11.03.1701 — Internal finance integrity core (isolated DB PASS; production HOLD)
 - Forward SQL329: one canonical ledger plus atomic, immutable JSON proof for Treasury/member/bank/market transactions; read-only reconciler, direct web role denial and no public core HTTP API. Isolated PostgreSQL 17.11 synthetic 5 transfers / four domains, replay/rollback/permissions PASS. Existing legacy direct writes and official Production release are not yet certified.
 

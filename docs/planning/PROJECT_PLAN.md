@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+## v2026.11.09.1946.2 — Blog publication owner override / BRANCH CANDIDATE
+Owner directive 2026-11-09 supersedes only blog visibility/advertisement gates. See [EN/KO addendum](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) and [Korean](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md). Existing monetary, source and Release HOLD gates stay intact.
+
+
 
 ## v2026.10.30.1518 — F675-185 Inventory Lifecycle Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 - **Cycle:** Previous Addition v1516 → Current Improvement v1518 → Next Addition v1520 (provisional). Canonical origin/main `9da6545c4ff4809b5bd84ab6a28b9d2f1db74cef` checked start/mid; stacked on Draft #2025; issue #2024; Draft #2029. Docs-only.

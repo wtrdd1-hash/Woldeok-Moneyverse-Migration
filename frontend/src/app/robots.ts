@@ -23,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: [
       `${base}/sitemap.xml`,
       `${base}/sitemap-index.xml`,
+      `${base}/sitemap-blog.xml`,
     ],
     host: base,
   };

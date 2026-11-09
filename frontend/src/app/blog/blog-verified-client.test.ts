@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { verifiedArticleBySlug, verifiedArticlesForAdmin, verifiedPublicArticles } from './blog-verified-client';
 import { blogAlternateLanguages, hasCountryEdition, isBlogDiscoverable } from './blog-seo';
-import { metadataForArticle, renderBlogHub } from './blog-page-server';
+import { metadataForArticle, metadataForHub, renderBlogHub } from './blog-page-server';
 
 const row = {
   slug:'2026-10-28-cn-coding-5',country:'CN',locale:'zh-CN',topic:'CODING',
@@ -23,12 +23,22 @@ describe('DB-verified country blog public projection',()=>{
     new Response(JSON.stringify({posts:[row],post:row}),{status:200})));
   const meta=await metadataForArticle(row.slug,'zh');
   expect(meta.title).toBe(row.title);
+  expect(meta.robots).toMatchObject({index:true,follow:true});
+  expect(metadataForHub('zh').alternates?.canonical).toBe('https://easy-scraping.com/zh/blog');
+  expect(metadataForHub('zh').robots).toMatchObject({index:true,follow:true});
   expect(meta.alternates?.canonical).toContain('/zh/blog/'+row.slug);
   const hub=await renderBlogHub('zh');
   const html=renderToStaticMarkup(hub);
   expect(html).toContain(row.slug);
   expect(html).toContain(row.title);
   expect((await metadataForArticle(row.slug,'ko')).robots).toMatchObject({index:false});
+ });
+ it('makes explicitly published unverified legacy articles public but never a withdrawn article',()=>{
+  const unreviewed={...row,status:'PUBLISHED',receipt:undefined,isAiGenerated:true} as never;
+  expect(isBlogDiscoverable({status:'PUBLISHED',isAiGenerated:true} as never)).toBe(true);
+  expect(isBlogDiscoverable({status:'WITHDRAWN',isAiGenerated:true} as never)).toBe(false);
+  expect(isBlogDiscoverable({status:undefined,isAiGenerated:true} as never)).toBe(false);
+  expect(unreviewed).toBeDefined();
  });
  it('only renders a verified publication receipt in its native country, without fake analytics',async()=>{
   vi.stubEnv('BLOG_API_ORIGIN','http://127.0.0.1:3000');

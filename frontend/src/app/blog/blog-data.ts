@@ -584,6 +584,26 @@ function getBlogStoreFilePath(): string {
   return path.join(dataDir, 'blog-posts.json');
 }
 
+// Separate append-only publisher store; never alter legacy records on read.
+function loadUnverifiedAutoPosts(): BlogPost[] {
+  const file = process.env.BLOG_PUBLISHER_CHANNEL === 'test'
+    ? '/srv/moneyverse-data/shared/blog-unverified-test-posts.json'
+    : '/srv/moneyverse-data/shared/blog-unverified-posts.json';
+  try {
+    if (!fs.existsSync(file)) return [];
+    const info=fs.lstatSync(file);
+    if (!info.isFile() || info.isSymbolicLink() || info.size > 16_000_000) return [];
+    const raw: unknown = JSON.parse(fs.readFileSync(file,'utf8'));
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((post):post is BlogPost=> Boolean(post && typeof post==='object' &&
+      typeof post.slug==='string' && /^[a-z0-9-]{10,110}$/.test(post.slug) &&
+      post.verificationState==='UNVERIFIED' && post.isAiGenerated===true &&
+      typeof post.title==='string' && typeof post.content==='string' &&
+      post.content.length>=500 && ['PUBLISHED','WITHDRAWN'].includes(post.status) &&
+      ['KR','US','JP','CN'].includes(post.country)));
+  } catch { return []; }
+}
+
 function loadPostsFromDisk(): BlogPost[] {
   try {
     const filePath = getBlogStoreFilePath();
@@ -638,14 +658,14 @@ function savePostsToDisk(posts: BlogPost[]): void {
 }
 
 export function getAllBlogPosts(): readonly BlogPost[] {
-  const posts = loadPostsFromDisk();
+  const posts = [...loadUnverifiedAutoPosts(),...loadPostsFromDisk()];
   return posts
     .filter((post) => isCanonicalBlogSlug(post.slug) && post.status !== 'WITHDRAWN')
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
 
 export function getAllBlogPostsForAdmin(): readonly BlogPost[] {
-  const posts = loadPostsFromDisk();
+  const posts = [...loadUnverifiedAutoPosts(),...loadPostsFromDisk()];
   return posts
     .filter((post) => isCanonicalBlogSlug(post.slug))
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
@@ -654,7 +674,7 @@ export function getAllBlogPostsForAdmin(): readonly BlogPost[] {
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
   // Avoid serving unrelated slugs with a contradictory article canonical.
   if (canonicalBlogSlug(slug) !== slug) return undefined;
-  const post = loadPostsFromDisk().find((p) => p.slug === slug);
+  const post = [...loadUnverifiedAutoPosts(),...loadPostsFromDisk()].find((p) => p.slug === slug);
   if (!post || post.status === 'WITHDRAWN') return undefined;
   return post;
 }
@@ -669,6 +689,20 @@ export function addBlogPost(post: BlogPost): void {
 }
 
 export function deleteBlogPost(slug: string, purge = false): boolean {
+  const automated = loadUnverifiedAutoPosts();
+  if (automated.some(post => post.slug === slug)) {
+    const file='/srv/moneyverse-data/shared/blog-unverified-posts.json';
+    const updated=purge ? automated.filter(p=>p.slug!==slug) : automated.map(p=>
+      p.slug===slug ? {...p,status:'WITHDRAWN' as const,updatedAt:new Date().toISOString()} : p);
+    const temp=file+'.admin-'+process.pid+'-'+Date.now()+'.tmp';
+    try {
+      fs.writeFileSync(temp,JSON.stringify(updated),{encoding:'utf8',mode:0o600,flag:'wx'});
+      fs.renameSync(temp,file);
+    } finally {
+      try { fs.unlinkSync(temp); } catch { /* Best-effort temp cleanup. */ }
+    }
+    return true;
+  }
   const current = loadPostsFromDisk();
   const target = current.find((p) => p.slug === slug);
   if (!target) return false;
