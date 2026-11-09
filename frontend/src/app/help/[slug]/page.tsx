@@ -8,7 +8,7 @@ import { HelpReportForm } from '../report-form';
 import { requireHelpPublicationIdentity } from '../article-identity';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: '검증된 도움말', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: '도움말 상세 안내', robots: { index: false, follow: false } };
 
 type Article = { article_id: string; slug: string; title: string; summary: string; body_plain: string; source_url: string; published_at: string; estimated_reading_minutes?: number; published_revision_id?: string; article_version?: string; content_digest?: string };
 export default async function HelpArticlePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<{ locale?: string }> }) {
