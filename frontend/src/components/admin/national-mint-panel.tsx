@@ -180,7 +180,13 @@ export function NationalMintPanel() {
     }
   };
 
-  const approvedOrders = orders.filter((o) => o.status === 'APPROVED');
+  const approvedOrders = orders.filter((o) => {
+    if (o.status !== 'APPROVED' || o.order_type !== 'MINT') return false;
+    const expiresAt = Date.parse(o.expires_at);
+    return Number.isFinite(expiresAt) && expiresAt > Date.now()
+      && /^\d+$/.test(o.max_amount_wld) && /^\d+$/.test(o.executed_amount_wld)
+      && BigInt(o.max_amount_wld) > BigInt(o.executed_amount_wld);
+  });
   const proposedOrders = orders.filter((o) => o.status === 'PROPOSED');
 
   const totalMintedWld = mintCerts.reduce(

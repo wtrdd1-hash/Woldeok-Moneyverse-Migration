@@ -127,21 +127,36 @@ export class CentralBankService {
     if (!reason || reason.trim().length < 10) {
       throw new BadRequestException('통화정책 제안 사유는 최소 10자 이상 입력해야 합니다.');
     }
+    // Source-of-truth: migration 244 monetary_policy_orders CHECK constraints.
+    // Never let an unsupported UI enum reach PostgreSQL as an opaque HTTP 500.
+    const mintEnvelopes = [
+      'WORK_REWARD', 'QUEST_REWARD', 'EVENT_REWARD', 'INCIDENT_COMPENSATION',
+      'STABILIZATION_POOL', 'GENERAL_CIRCULATION',
+    ];
+    if (!((orderType === 'MINT' && mintEnvelopes.includes(targetEnvelope))
+      || (orderType === 'RETIRE' && targetEnvelope === 'HARD_SINK_PURGE'))) {
+      throw new BadRequestException('현재 명령 유형/대상 조합은 지원되지 않습니다. 국고 직접 입금은 미지원입니다.');
+    }
+    if (!Number.isInteger(validDurationHours) || validDurationHours < 1 || validDurationHours > 720) {
+      throw new BadRequestException('명령 유효 기간은 1~720시간의 정수여야 합니다.');
+    }
 
-    const expiresAt = new Date(Date.now() + validDurationHours * 3600 * 1000);
-
-    const res = await this.pool.query<MonetaryPolicyOrder>(
-      `
-      INSERT INTO public.monetary_policy_orders (
-        order_type, target_envelope, max_amount_wld, status, proposed_by, reason, expires_at
-      )
-      VALUES ($1, $2, $3, 'PROPOSED', $4, $5, $6)
-      RETURNING *
-    `,
-      [orderType, targetEnvelope, maxAmountWld, proposerId, reason, expiresAt],
-    );
-
-    return res.rows[0]!;
+    try {
+      const res = await this.pool.query<MonetaryPolicyOrder>(
+        `SELECT * FROM public.admin_monetary_policy_propose(
+          $1::uuid,$2::text,$3::text,$4::text,$5::text,$6::integer
+        )`,
+        [proposerId, orderType, targetEnvelope, maxAmountWld, reason.trim(), validDurationHours],
+      );
+      if (!res.rows[0]) throw new ServiceUnavailableException('정책 발의 저장 결과를 확인할 수 없습니다.');
+      return res.rows[0];
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code === '42501') throw new ForbiddenException('통화정책 발의 권한이 없습니다.');
+      if (code === '22023') throw new BadRequestException('정책 명령 유형·대상·한도·감사 사유를 확인해 주세요.');
+      if (error instanceof ServiceUnavailableException) throw error;
+      throw new ServiceUnavailableException('정책 발의 저장 서비스를 사용할 수 없습니다.');
+    }
   }
 
   async approvePolicyOrder(approverId: string, orderId: string): Promise<MonetaryPolicyOrder> {
@@ -157,17 +172,20 @@ export class CentralBankService {
       throw new BadRequestException(`현재 상태(${order.status})에서는 승인할 수 없습니다.`);
     }
 
-    const res = await this.pool.query<MonetaryPolicyOrder>(
-      `
-      UPDATE public.monetary_policy_orders
-      SET status = 'APPROVED', approved_by = $1, updated_at = NOW()
-      WHERE id = $2
-      RETURNING *
-    `,
-      [approverId, orderId],
-    );
-
-    return res.rows[0]!;
+    try {
+      const res = await this.pool.query<MonetaryPolicyOrder>(
+        `SELECT * FROM public.admin_monetary_policy_approve($1::uuid,$2::uuid)`,
+        [approverId, orderId],
+      );
+      if (!res.rows[0]) throw new BadRequestException('정책 명령서가 유효하지 않거나 만료되었습니다.');
+      return res.rows[0];
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code === '42501') throw new ForbiddenException('통화정책 승인 권한이 없습니다.');
+      if (code === '22023') throw new BadRequestException('명령서가 유효하지 않거나 이미 처리되었습니다.');
+      if (error instanceof BadRequestException) throw error;
+      throw new ServiceUnavailableException('정책 승인 기록을 확인할 수 없습니다.');
+    }
   }
 
   async freezeIssuance(adminId: string, reason: string): Promise<{ is_issuance_frozen: boolean }> {
