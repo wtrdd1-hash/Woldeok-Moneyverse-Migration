@@ -186,6 +186,62 @@ test('accepts only independently certified current Treasury zero without histori
   assert.ok(verifyHostRuntimeIdentity(snapshot).failures.includes('public_treasury_not_fail_closed'));
 });
 
+test('accepts positive CURRENT treasury only when directly-attested PostgreSQL fiscal equals public and all three ledgers', () => {
+  const state = healthy();
+  state.publicTreasury.status = 200;
+  state.publicTreasury.body = certifiedCurrentZero();
+  state.publicTreasury.body.overview.totalBalanceWld = '30000';
+  state.publicTreasury.body.overview.availableBalanceWld = '30000';
+  state.trustedFiscalProof = {source:'direct-postgres-read-only',vaultTotal:'30000',
+    canonicalTotal:'30000',journalTotal:'30000',invalidNewSources:'0',
+    epochOpenedAt:'1793470411', integrityStatus:'CLEAN'};
+  assert.deepEqual(verifyHostRuntimeIdentity(state),{ok:true,failures:[]});
+  const changes = [
+    (v) => {v.trustedFiscalProof=null;},
+    (v) => {v.trustedFiscalProof.source='public-edge';},
+    (v) => {v.trustedFiscalProof.canonicalTotal='0';},
+    (v) => {v.trustedFiscalProof.journalTotal='20000';},
+    (v) => {v.trustedFiscalProof.invalidNewSources='1';},
+    (v) => {v.trustedFiscalProof.integrityStatus='DEGRADED';},
+    (v) => {v.trustedFiscalProof.epochOpenedAt='';},
+    (v) => {v.publicTreasury.body.overview.totalBalanceWld='40000';},
+    (v) => {v.publicTreasury.body.overview.safeReserveWld='1';},
+    (v) => {v.publicTreasury.body.recentLedger=[{id:'fake-payout'}];},
+  ];
+  for (const mutate of changes) {
+    const v=structuredClone(state);mutate(v);
+    assert.ok(verifyHostRuntimeIdentity(v).failures.includes('public_treasury_not_fail_closed'));
+  }
+});
+
+test('accepts positive CURRENT Treasury only when directly-attested PostgreSQL fiscal equals public and all three ledgers', () => {
+  const state = healthy();
+  state.publicTreasury.status = 200;
+  state.publicTreasury.body = certifiedCurrentZero();
+  state.publicTreasury.body.overview.totalBalanceWld = '30000';
+  state.publicTreasury.body.overview.availableBalanceWld = '30000';
+  state.trustedFiscalProof = {source:'direct-postgres-read-only',vaultTotal:'30000',
+    canonicalTotal:'30000',journalTotal:'30000',invalidNewSources:'0',
+    epochOpenedAt:'1793470411', integrityStatus:'CLEAN'};
+  assert.deepEqual(verifyHostRuntimeIdentity(state),{ok:true,failures:[]});
+  const changes = [
+    (v) => {v.trustedFiscalProof=null;},
+    (v) => {v.trustedFiscalProof.source='public-edge';},
+    (v) => {v.trustedFiscalProof.canonicalTotal='0';},
+    (v) => {v.trustedFiscalProof.journalTotal='20000';},
+    (v) => {v.trustedFiscalProof.invalidNewSources='1';},
+    (v) => {v.trustedFiscalProof.integrityStatus='DEGRADED';},
+    (v) => {v.trustedFiscalProof.epochOpenedAt='';},
+    (v) => {v.publicTreasury.body.overview.totalBalanceWld='40000';},
+    (v) => {v.publicTreasury.body.overview.safeReserveWld='1';},
+    (v) => {v.publicTreasury.body.recentLedger=[{id:'fake-payout'}];},
+  ];
+  for (const mutate of changes) {
+    const v=structuredClone(state);mutate(v);
+    assert.ok(verifyHostRuntimeIdentity(v).failures.includes('public_treasury_not_fail_closed'));
+  }
+});
+
 test('rejects a synthetic public Treasury 200 even when all source identities agree', () => {
   const state = healthy();
   state.publicTreasury.status = 200;

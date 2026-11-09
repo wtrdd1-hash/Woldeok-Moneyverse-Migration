@@ -142,7 +142,8 @@ export function verifyHostRuntimeIdentity(snapshot) {
   // by the public edge. In particular, stale Test builds used to return invented
   // disbursement receipts while the backend advertised the expected SHA.
   const treasury = snapshot?.publicTreasury;
-  if (!safeTreasuryEdgeResponse(treasury?.status, treasury?.cacheControl, treasury?.body)) {
+  if (!safeTreasuryEdgeResponse(treasury?.status, treasury?.cacheControl,
+    treasury?.body, snapshot?.trustedFiscalProof)) {
     fail('public_treasury_not_fail_closed');
   }
 
@@ -212,6 +213,36 @@ export function activeServiceLookup(releasePath, evidenceFor = systemdProcessEvi
   return { releasePath, cwdFor: (service) => evidenceFor(service).cwd };
 }
 
+/** Independently attest only a positive *current fiscal epoch* Treasury balance.
+ * Read via on-host PostgreSQL container, never trust the edge response, cookie,
+ * environment-provided arbitrary database address or a caller-supplied amount.
+ * Nothing is updated, printed as credentials, reset or minted.
+ */
+function readTrustedPositiveFiscalProof(channel) {
+  const dbConfig = {
+    test: {container:'moneyverse-test-db',role:'moneyverse_migrator',database:'wdmv_v761_test_acl_v1544_restore'},
+    prod: {container:'woldeok-moneyverse-dev-db-1',role:'postgres',database:'woldeok_moneyverse_dev'},
+  }[channel];
+  if (!dbConfig) throw new Error('independent Treasury source unavailable for channel');
+  const sql = `BEGIN READ ONLY;
+    SELECT vault_total,canonical_total,journal_total,invalid_new_sources,
+      EXTRACT(EPOCH FROM epoch_opened_at)::bigint::text
+    FROM public.treasury_fiscal_proof_read();
+    SELECT public.finance_integrity_scan()->>'status';
+    COMMIT;`;
+  const stdout = execFileSync('docker', [
+    'exec','-u','postgres',dbConfig.container,'psql','-X','-qAt',
+    '-v','ON_ERROR_STOP=1','-U',dbConfig.role,'-d',dbConfig.database,'-c',sql,
+  ], {encoding:'utf8',timeout:8000});
+  const lines = stdout.trim().split(/\r?\n/);
+  if (lines.length !== 2) throw new Error('independent Treasury proof did not return exact fiscal and integrity rows');
+  const fields = lines[0].split('|');
+  if (fields.length !== 5) throw new Error('independent Treasury fiscal result shape invalid');
+  const [vaultTotal,canonicalTotal,journalTotal,invalidNewSources,epochOpenedAt] = fields;
+  return {source:'direct-postgres-read-only',vaultTotal,canonicalTotal,journalTotal,
+    invalidNewSources,epochOpenedAt,integrityStatus:lines[1]};
+}
+
 async function collectSnapshot(channel, expectedSha) {
   const cfg = CHANNELS[channel];
   const releasePath = realpathSync(cfg.releaseRoot);
@@ -239,6 +270,13 @@ async function collectSnapshot(channel, expectedSha) {
     versionResponse.json(), frontendResponse.json(), treasuryResponse.json(),
   ]);
 
+  // Positives are NOT allowed by the zero-only edge gate without an
+  // independently observed canonical Treasury + journal + integrity proof.
+  const totalFromEdge = treasuryBody?.overview?.totalBalanceWld;
+  const trustedFiscalProof = treasuryResponse.status === 200
+    && typeof totalFromEdge === 'string' && /^[1-9][0-9]*$/.test(totalFromEdge)
+    ? readTrustedPositiveFiscalProof(channel) : null;
+
   const backendProcess = systemdProcessEvidence(backendService);
   const frontendProcess = systemdProcessEvidence(frontendService);
   const backendEnv = activeServiceBuildEvidence(backendService);
@@ -264,6 +302,7 @@ async function collectSnapshot(channel, expectedSha) {
     frontendBuildSha: readFileSync(path.join(releasePath, 'frontend/.next/BUILD_ID'), 'utf8').trim(),
     publicVersionSha: version?.id,
     publicFrontendVersionSha: frontendVersion?.id,
+    trustedFiscalProof,
     publicTreasury: {
       status: treasuryResponse.status,
       cacheControl: treasuryResponse.headers.get('cache-control'),
