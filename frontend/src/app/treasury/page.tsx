@@ -8,7 +8,7 @@ import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '[2026] 대국민 국고(Treasury) 포털 — 현재 회계기와 재정 대사 | 월덕 머니버스',
+  title: '[2026] 대국민 국고(Treasury) 포털 — 현재 회계기와 재정 대사',
   description:
     '정식 복식원장으로 검증된 현재 국고 잔액만 공개합니다. 과거 지급·발권 실적과 수혜 정보는 독립 증빙 전까지 표시하지 않습니다.',
   keywords: ['국고', '재정 대사', '복식부기', '국고 포털', 'WLD', '머니버스'],
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     canonical: canonicalUrl('/treasury'),
   },
   openGraph: {
-    title: '대국민 국고(Treasury) 포털 — 검증된 현재 국고 회계기 | 월덕 머니버스',
+    title: '대국민 국고(Treasury) 포털 — 검증된 현재 국고 회계기',
     description: '정식 복식원장으로 검증된 현재 국고 잔액과 재정 분개 현황을 투명하게 공시합니다.',
     url: canonicalUrl('/treasury'),
     siteName: '월덕 머니버스 (Woldeok Moneyverse)',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '대국민 국고(Treasury) 포털 | 월덕 머니버스',
+    title: '대국민 국고(Treasury) 포털',
     description: '정식 복식원장으로 검증된 현재 국고 잔액과 재정 대사 공시.',
   },
 };

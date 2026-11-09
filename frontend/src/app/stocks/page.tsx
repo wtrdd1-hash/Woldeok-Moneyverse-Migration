@@ -30,7 +30,7 @@ const STOCKS_META_BY_LOCALE = {
     canonical: '/en/stocks',
   },
   ko: {
-    title: '가상 주식 거래소 — 실시간 10단 호가창 & 모의투자 | 월덕 머니버스',
+    title: '가상 주식 거래소 — 실시간 10단 호가창 & 모의투자',
     description: '[토스 증권 스타일] 10대 가상 상장사 실시간 호가, 캔들 차트, 1초 모의투자 시뮬레이터. 가입 즉시 1만 WLD 지급!',
     canonical: '/stocks',
   },
@@ -45,7 +45,7 @@ const STOCKS_META_BY_LOCALE = {
     canonical: '/zh/stocks',
   },
   vi: {
-    title: 'Sàn giao dịch Cổ phiếu ảo | Woldeok Moneyverse',
+    title: 'Sàn giao dịch Cổ phiếu ảo',
     description: 'Trải nghiệm sàn giao dịch cổ phiếu ảo thời gian thực với sổ lệnh khớp giá tốc độ cao.',
     canonical: '/vi/stocks',
   },

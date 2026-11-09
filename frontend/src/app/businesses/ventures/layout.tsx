@@ -3,7 +3,7 @@ import { canonicalUrl, breadcrumbJsonLd, faqPageJsonLd, buildOgImageUrl } from '
 import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
-  title: '가상 스타트업 VC 엔젤투자 & 지분 펀딩 — 6대 유망 벤처 투자 & 배당 수익 | 월덕 머니버스',
+  title: '가상 스타트업 VC 엔젤투자 & 지분 펀딩 — 6대 유망 벤처 투자 & 배당 수익',
   description:
     'AI 퀀트 핀테크, 우주 로켓, 웹3 탈중앙화 등 6대 가상 스타트업에 엔젤투자자로 참여하여 기업 성장 가치 상승에 따른 지분 매각 차익과 주간 고율 배당금을 획득하세요.',
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     canonical: '/businesses/ventures',
   },
   openGraph: {
-    title: '가상 스타트업 VC 엔젤투자 & 펀딩 | 월덕 머니버스',
+    title: '가상 스타트업 VC 엔젤투자 & 펀딩',
     description: '6대 유망 가상 스타트업 엔젤투자, 지분 성장 차익 및 주간 배당금 정산 시스템.',
     url: canonicalUrl('/businesses/ventures'),
     images: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '가상 스타트업 VC 엔젤투자 & 펀딩 | 월덕 머니버스',
+    title: '가상 스타트업 VC 엔젤투자 & 펀딩',
     description: '6대 유망 가상 스타트업 엔젤투자, 지분 성장 차익 및 주간 배당금 정산 시스템.',
   },
 };
