@@ -52,6 +52,10 @@ export interface BlogPost {
   readonly isAiGenerated: boolean;
   /** DB-issued receipt, not an AI-provided string. */
   readonly verificationReceipt?: string | undefined;
+  /** Distinguish public but unverified AI text from DB-proven articles. */
+  readonly verificationState?: 'UNVERIFIED' | 'VERIFIED' | undefined;
+  readonly qualityIssues?: readonly string[] | undefined;
+  readonly periodKey?: string | undefined;
   readonly views: number;
   /** Supplied only by verified analytics, not by the article generator. */
   readonly viewCountVerified?: boolean | undefined;

@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+## v2026.11.09.1946.2 — Blog unverified visibility override / BRANCH CANDIDATE
+Owner directive 2026-11-09 supersedes only blog visibility/advertisement gates. See [EN/KO addendum](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) and [Korean](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md). Existing monetary, source and Release HOLD gates stay intact.
+
+
 
 ## v2026.10.30.1518 — F675-185 Inventory Lifecycle Source-Truth Hardening (FEATURE IMPROVEMENT / DRAFT / RELEASE HOLD)
 

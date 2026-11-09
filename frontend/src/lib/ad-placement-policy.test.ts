@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getBlogAdPlan, isEligiblePublicAdPath } from './ad-placement-policy';
 
 describe('advertising content-only allowlist', () => {
-  it.each(['/', '/en', '/ja', '/zh', '/tools', '/en/tools/compound-calculator', '/guide/glossary', '/blog/educational-post', '/gallery', '/announcements'])('allows vetted public content %s', (path) => {
+  it.each(['/', '/en', '/ja', '/zh', '/tools', '/en/tools/compound-calculator', '/guide/glossary', '/blog', '/en/blog', '/ja/blog/educational-post', '/zh/blog', '/gallery', '/announcements'])('allows vetted public content %s', (path) => {
     expect(isEligiblePublicAdPath(path)).toBe(true);
   });
   it.each(['/admin', '/wallet', '/bank', '/bonds', '/stocks/CHIPS', '/casino', '/arcade', '/account', '/login', '/register', '/privacy', '/chat', '/en/wallet', '/en/stocks/CHIPS', '/guide-malicious', '/tools-malicious'])('excludes decision/sensitive route %s', (path) => {

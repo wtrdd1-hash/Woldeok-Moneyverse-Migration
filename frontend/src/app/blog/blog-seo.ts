@@ -2,13 +2,12 @@ import type { BlogPost } from './blog.types';
 
 export type BlogLocale = 'ko' | 'en' | 'ja' | 'zh';
 
-// Temporary fail-closed editorial policy: migrated AI posts have no review receipt.
-// Never equate an AI-generated article with a source-verified, approved publication.
-// A future explicit approval schema must replace this gate before reviewed AI drafts publish.
+// Public visibility and factual verification are separate states. Owner-approved
+// unreviewed PUBLISHED articles are readable and discoverable without a fake
+// DB verification receipt. A deliberate withdrawal remains authoritative.
 export function isBlogDiscoverable(post: BlogPost): boolean {
-  return post.status !== "WITHDRAWN" && (post.isAiGenerated === false || (post.status === "PUBLISHED" &&
-    typeof post.verificationReceipt === "string" &&
-    /^[a-f0-9-]{36}$/i.test(post.verificationReceipt)));
+  return post.status === 'PUBLISHED' ||
+    (post.status == null && post.isAiGenerated === false);
 }
 
 const ALIASES: Readonly<Record<string, string>> = {
@@ -29,7 +28,7 @@ export function blogHubUrl(locale: BlogLocale): string {
   return 'https://easy-scraping.com' + (locale === 'ko' ? '' : '/' + locale) + '/blog';
 }
 export function hasCountryEdition(post: BlogPost, locale: BlogLocale): boolean {
-  if (post.verificationReceipt) {
+  if (post.verificationReceipt || post.verificationState === 'UNVERIFIED') {
     return ({ KR:'ko', US:'en', JP:'ja', CN:'zh' } as Record<string,string>)[post.country ?? ''] === locale;
   }
   if (locale === 'ko') return true;
@@ -38,7 +37,7 @@ export function hasCountryEdition(post: BlogPost, locale: BlogLocale): boolean {
 export function blogAlternateLanguages(post: BlogPost): Record<string, string> {
   // Original-country AI articles have exactly one native canonical language;
   // do not advertise a nonexistent /blog Korean counterpart for US/JP/CN.
-  if (post.verificationReceipt) {
+  if (post.verificationReceipt || post.verificationState === 'UNVERIFIED') {
     const locale = ({ KR:'ko', US:'en', JP:'ja', CN:'zh' } as Record<string,BlogLocale>)[post.country ?? ''];
     const code = ({ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'} as const)[locale ?? 'ko'];
     return locale ? { [code]:blogUrl(post.slug,locale) } : {};
@@ -51,6 +50,7 @@ export function blogAlternateLanguages(post: BlogPost): Record<string, string> {
 }
 export function getBlogCountryEdition(post: BlogPost, locale: BlogLocale): BlogPost | undefined {
   if (!hasCountryEdition(post, locale)) return undefined;
+  if (post.verificationState === 'UNVERIFIED' && post.country) return post;
   if (locale === 'ko') return post;
   const translated = post.translations?.[locale];
   return translated ? { ...post, ...translated } : undefined;
