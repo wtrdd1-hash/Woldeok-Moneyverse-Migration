@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.004 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.009 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -8,7 +8,7 @@
 ## 최초 상태 — 이번 특별 기간에 새로 기록한 변경
 | 분류 | 건수 | 의미 |
 |---|---:|---|
-| ADD 새 기능 기획 | 1 | 신규 제안 1건, 미구현 |
+| ADD 새 기능 기획 | 4 | 신규 제안 4건, 미구현 |
 | MODIFY 기존 기획 수정 | 4 | QA 기반 기존 기획 수정 4건, 모두 제안 상태 |
 | REMOVE 기존 기획 삭제 | 0 | 삭제 제안 없음 |
 | DEFER 보류 | 0 | 보류 기록 없음 |
