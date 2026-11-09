@@ -17,7 +17,7 @@
 - Existing Production public Treasury HTTP 200 `RECONCILED` **fails** `safeTreasuryEdgeResponse`: `total_zero`, `available_zero`, `reserve_zero` false. No assertions about the correctness of the nonzero amounts were made. Evidence noted on P0 #2153.
 - Existing Production `/api/version` reports `b2980de529` while `/frontend-version` reports timestamp, and the active `production-current/.moneyverse-release.json` is missing. Production identity preflight returns ENOENT. Evidence noted on P0 #2144.
 - Preserved pre-cutover Nginx backup hash `14a7d19539ec01668c07c95b48d97aa43f77ae84e3f0a07a8b56d5b1e0ec7121`; existing production release `prod-v2026.11.09.1777-b2980de529` and services unchanged. Immutable `prod-v2026.11.09.1943-433cbb0ff676` candidate staged but NOT started or routed.
-- Legitimate authenticated pre-existing Test member session continuity and signed-in monetary proposal end-to-end workflow remain NOT TESTED, never inferred from anonymous 401 or DB auth row counts. Exact merged-main push CI #5973 and GitHub build candidate #8287 were IN PROGRESS at this documentation checkpoint; prior PR CI #5972 SUCCESS.
+- Legitimate authenticated pre-existing Test member session continuity and signed-in monetary proposal end-to-end workflow remain NOT TESTED, never inferred from anonymous 401 or DB auth row counts. Exact merged-main push CI #5973 subsequently completed SUCCESS; GitHub Build Test Candidate #8287 remained IN PROGRESS at final recorded check. Prior PR CI #5972 also SUCCESS.
 
 
 ## Finished (code integrated, official Test verified, Production HOLD)
