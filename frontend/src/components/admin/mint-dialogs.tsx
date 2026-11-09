@@ -476,8 +476,8 @@ export function OrderProposalDialog({
       setErrorMsg('명령 한도 수량은 1 WLD 이상이어야 합니다.');
       return;
     }
-    if (!reason || reason.trim().length < 5) {
-      setErrorMsg('발의 사유를 5자 이상 구체적으로 입력해 주세요.');
+    if (!reason || reason.trim().length < 10) {
+      setErrorMsg('발의 사유를 10자 이상 구체적으로 입력해 주세요.');
       return;
     }
 
@@ -651,13 +651,14 @@ export function OrderProposalDialog({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-                정책 발의 사유 (Audit Justification, 5자 이상)
+              <label htmlFor="order-proposal-reason" className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                정책 발의 사유 (Audit Justification, 10자 이상)
               </label>
               <Input
+                id="order-proposal-reason"
                 type="text"
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={(e) => { setReason(e.target.value); setErrorMsg(null); }}
                 placeholder="예: 거시경제 안정화 및 국고 재원 보강을 위한 본원통화 주조"
                 disabled={loading}
                 className="text-sm"
