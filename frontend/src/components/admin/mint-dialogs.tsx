@@ -446,3 +446,259 @@ export function RetireExecutionDialog({ isOpen, onClose, onSuccess }: RetireModa
     </div>
   );
 }
+
+
+interface OrderProposalModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export function OrderProposalDialog({
+  isOpen,
+  onClose,
+  onSuccess,
+}: OrderProposalModalProps) {
+  const [orderType, setOrderType] = useState<'MINT' | 'EXPAND_LIMIT' | 'REBALANCE'>('MINT');
+  const [targetEnvelope, setTargetEnvelope] = useState<string>('TREASURY');
+  const [maxAmountWld, setMaxAmountWld] = useState<string>('10000000');
+  const [reason, setReason] = useState<string>('');
+  const [durationHours, setDurationHours] = useState<string>('72');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = BigInt(maxAmountWld || '0');
+    if (amount <= BigInt(0)) {
+      setErrorMsg('명령 한도 수량은 1 WLD 이상이어야 합니다.');
+      return;
+    }
+    if (!reason || reason.trim().length < 5) {
+      setErrorMsg('발의 사유를 5자 이상 구체적으로 입력해 주세요.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch('/api/admin/mint/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_type: orderType,
+          target_envelope: targetEnvelope,
+          max_amount_wld: maxAmountWld,
+          reason: reason.trim(),
+          valid_duration_hours: Number(durationHours) || 72,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || '통화정책 명령서 발의에 실패했습니다.');
+      }
+
+      onSuccess();
+      onClose();
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : '네트워크 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="proposal-dialog-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) onClose();
+      }}
+    >
+      <div className="flex min-h-full items-center justify-center p-3 sm:p-6">
+        <div className="relative w-full max-w-lg rounded-2xl border border-border/80 bg-card p-6 shadow-2xl transition-all my-8 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between pb-4 border-b border-border/60">
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <ShieldCheck className="size-5" />
+              </div>
+              <div>
+                <h3 id="proposal-dialog-title" className="text-lg font-bold text-foreground">
+                  신규 통화정책 명령 발의 (Order Proposal)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  금융통화위원회 결재를 위한 M0 주조/한도확장 정책 명령서를 발의합니다.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            {errorMsg && (
+              <div role="alert" className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3.5 text-xs text-destructive">
+                <AlertTriangle className="size-4 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  명령 유형
+                </label>
+                <select
+                  value={orderType}
+                  onChange={(e) => setOrderType(e.target.value as 'MINT' | 'EXPAND_LIMIT' | 'REBALANCE')}
+                  disabled={loading}
+                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="MINT">MINT (신규 주조)</option>
+                  <option value="EXPAND_LIMIT">EXPAND_LIMIT (한도 확대)</option>
+                  <option value="REBALANCE">REBALANCE (유동성 리밸런싱)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  대상 계정(Envelope)
+                </label>
+                <select
+                  value={targetEnvelope}
+                  onChange={(e) => setTargetEnvelope(e.target.value)}
+                  disabled={loading}
+                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="TREASURY">TREASURY (국고 금고)</option>
+                  <option value="MARKET_LIQUIDITY">MARKET_LIQUIDITY (시장 유동성)</option>
+                  <option value="CITIZEN_DIVIDEND">CITIZEN_DIVIDEND (국민 배당)</option>
+                  <option value="STARTUP_GRANT">STARTUP_GRANT (창업지원금)</option>
+                  <option value="PENSION_FUND">PENSION_FUND (국민연금)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                최대 승인 한도 (WLD)
+              </label>
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={maxAmountWld}
+                  onChange={(e) => setMaxAmountWld(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="예: 10000000"
+                  disabled={loading}
+                  className="font-mono text-base font-semibold tracking-wide pr-14"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                  WLD
+                </span>
+              </div>
+              <div className="flex gap-2 mt-2">
+                {['1000000', '5000000', '10000000', '50000000'].map((preset) => (
+                  <Button
+                    key={preset}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={loading}
+                    className="text-xs h-7 px-2.5 rounded-lg border-border/80"
+                    onClick={() => setMaxAmountWld(preset)}
+                  >
+                    {Number(preset).toLocaleString('ko-KR')}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  명령 유효 기간
+                </label>
+                <select
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(e.target.value)}
+                  disabled={loading}
+                  className="w-full h-9 rounded-xl border border-border/80 bg-background px-3 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="24">24시간 (1일)</option>
+                  <option value="72">72시간 (3일, 권장)</option>
+                  <option value="168">168시간 (1주일)</option>
+                  <option value="720">720시간 (30일)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  발의 주체
+                </label>
+                <div className="h-9 rounded-xl border border-border/80 bg-muted/40 px-3 flex items-center text-xs text-muted-foreground font-mono">
+                  관리자 감사 세션
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                정책 발의 사유 (Audit Justification, 5자 이상)
+              </label>
+              <Input
+                type="text"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="예: 거시경제 안정화 및 국고 재원 보강을 위한 본원통화 주조"
+                disabled={loading}
+                className="text-sm"
+              />
+            </div>
+
+            <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-3 text-xs text-blue-300 flex items-start gap-2">
+              <ShieldCheck className="size-4 shrink-0 text-blue-400 mt-0.5" />
+              <span>
+                발의된 정책 명령은 <strong>중앙은행 2단계 견제 정책</strong>에 따라 승인된 이후에만 조폐국 M0 주조가 실행 가능합니다.
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={onClose}
+                className="rounded-xl px-4"
+              >
+                취소
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="rounded-xl px-5 bg-blue-600 hover:bg-blue-500 text-white font-semibold"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="size-4 animate-spin" />
+                    발의 등록 중...
+                  </span>
+                ) : (
+                  '정책 명령 발의'
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

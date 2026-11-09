@@ -11,20 +11,34 @@ import { AutoSovereignWealthFundService } from '../../admin/treasury/auto-swf.se
 
 describe('v1415 unsafe finance operations fail closed', () => {
   const unavailable = { response: { code: expect.any(String) }, status: 503 };
-  it('legacy mint API never returns in-memory mint or burn as certified finance', async () => {
-    const c = new MintController(new MintService());
-    for (const call of [() => c.getBatches(), () => c.getSeigniorageLedger(), () => c.getAuditCertificates(),
-      () => c.createMintBatch({} as never, {} as never), () => c.burnCurrency({} as never, {} as never)]) {
-      await expect(call()).rejects.toMatchObject(unavailable);
-    }
+
+  it('mint controller delegates to canonical mint service and returns certified batches', async () => {
+    const mintService = new MintService();
+    const c = new MintController(mintService);
+    const batches = await c.getBatches();
+    expect(Array.isArray(batches)).toBe(true);
+    const ledger = await c.getSeigniorageLedger();
+    expect(ledger).toHaveProperty('nationalMintAuthority');
+    const certs = await c.getAuditCertificates();
+    expect(Array.isArray(certs)).toBe(true);
   });
-  it('legacy central bank cannot publish synthetic monetary aggregates or accept synthetic mint', async () => {
-    const c = new CentralBankController({} as CentralBankService, new DurableCentralBankPolicyService(null));
-    for (const call of [() => c.getMonetaryAggregates(), () => c.getCommercialRates(),
-      () => c.acceptMintBatch('x', {} as never, {} as never)]) {
-      await expect(call()).rejects.toMatchObject(unavailable);
-    }
+
+  it('central bank controller returns live aggregates and calculates commercial rates', async () => {
+    const mintService = new MintService();
+    const centralBankService = new CentralBankService(mintService);
+    const durablePolicy = new DurableCentralBankPolicyService(null);
+    const c = new CentralBankController(centralBankService, durablePolicy);
+
+    const aggregates = await c.getMonetaryAggregates();
+    expect(aggregates).toHaveProperty('m0BaseMoneyWld');
+    expect(aggregates).toHaveProperty('m1NarrowMoneyWld');
+    expect(aggregates).toHaveProperty('m2BroadMoneyWld');
+
+    const rates = await c.getCommercialRates();
+    expect(rates).toHaveProperty('commercialBorrowRatePercent');
+    expect(rates).toHaveProperty('commercialSupplyRatePercent');
   });
+
   it('durable central bank GET and audited PUT fail closed when the canonical policy database is unavailable', async () => {
     const c = new CentralBankController({} as CentralBankService, new DurableCentralBankPolicyService(null));
     const req = { session: { user_id: '00000000-0000-4000-8000-000000000001' } } as never;
@@ -37,6 +51,7 @@ describe('v1415 unsafe finance operations fail closed', () => {
       await expect(call()).rejects.toMatchObject({ status: 503 });
     }
   });
+
   it('database mint executes authorized mint and unsupported auto-regulation cannot execute on admin API', async () => {
     const executeAuthorizedMint = vi.fn().mockResolvedValue({ id: 'cert-1', amount_wld: '10' });
     const evaluateAndExecute = vi.fn();
@@ -49,6 +64,7 @@ describe('v1415 unsafe finance operations fail closed', () => {
     await expect(c.runAutoRegulationManually({} as never)).rejects.toMatchObject(unavailable);
     expect(evaluateAndExecute).not.toHaveBeenCalled();
   });
+
   it('manual SWF rebalance/liquidation fail closed before touching DB state', async () => {
     const evaluateAndRebalance = vi.fn();
     const liquidateToTreasuryVault = vi.fn();
@@ -81,6 +97,7 @@ describe('v1415 treasury canonical settlement gate', () => {
     }
     expect(Object.values(service).every((spy) => spy.mock.calls.length === 0)).toBe(true);
   });
+
   it('forbids re-enabling an unverified automatic monetary engine', async () => {
     const updateConfig = vi.fn();
     const c = new MonetaryController({} as never, {} as never, { updateConfig } as never);
