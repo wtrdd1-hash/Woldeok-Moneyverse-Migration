@@ -27,4 +27,9 @@
 - The visible CSRF omission is corrected in source, and source/proxy security regressions pass. These do NOT prove a funded authenticated purchase settles correctly.
 - Official authenticated Test and exact-SHA Production were not promoted: independent bond QA v1949 (#3008) still reports missing safe retry/idempotency settlement evidence, coupon/maturity ledger integrity and rollover privilege uncertainty; Repo borrowing/repayment intentionally return 503.
 - Production member money, ledger, database, security settings, live application and test instance remain unchanged.
-- Internal/GitHub bilingual updates and release hold report filed under version 2010. PR number/link will be added after creation.
+- Internal/GitHub bilingual updates and release hold report filed under version 2010. Draft PR [#3009](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3009) opened against main for financial-gate review.
+
+## POST-PR RELEASE STATE — 2026-11-10 KST
+- GitHub PR #3009 DRAFT, source implementation pushed. GitHub CI run 6001 (ID 42653275648) is in progress, not counted as passing.
+- The existing official Test backend/frontend are systemd active; public Test /api/version and /frontend-version both 200, reporting prior source SHA a13a18cd70709a6f4df320d4d76ea834baae2331, **not this v2010 candidate**.
+- The actual Production and official Test release generation have not been switched. Further public finance E2E and ledger certification remain blocked; no claim of live incident resolution.
