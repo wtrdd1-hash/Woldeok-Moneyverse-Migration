@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { selectTwoHourBlogSlot } from './blog-two-hour-rotation';
 import { retrievePrimarySource, extractPrimarySourceText, sourceUrlFor } from './blog-primary-sources';
 import { checkOriginalArticle, type OriginalArticle } from './blog-original-quality';
-import { authorVerifiedArticle, generateLocalOriginalArticle } from './blog-original-author';
+import { authorVerifiedArticle, generateLocalOriginalArticle, normalizeVerifiedTitle } from './blog-original-author';
 import { isAllowedSourceDocument } from './blog-source-discovery';
 
 const slot = selectTwoHourBlogSlot(new Date('2026-10-27T04:00:00+09:00'))!;
@@ -77,6 +77,22 @@ describe('general network source selection',()=>{
     expect(isAllowedSourceDocument(root+'/Reference/Status/421',root,cnSlot)).toBe(false);
     expect(isAllowedSourceDocument(root+'/Reference/Headers/Access-Control-Request-Method',root,cnSlot)).toBe(false);
     expect(isAllowedSourceDocument(root+'/Guides/Overview',root,cnSlot)).toBe(true);
+  });
+});
+
+describe('native title guard against invalid 2-hour editorial slots', () => {
+  it('adds semantically safe native wording to valid short CJK titles while preserving strict 25-character quality', () => {
+    for (const [country, short] of [
+      ['KR','돈과 경제를 배우는 기초'], ['JP','資金の流れを学ぶ基礎'],
+      ['CN','程序数据结构组织与系统算法优化的基础理论知识梳理'],
+    ] as const) {
+      const title=normalizeVerifiedTitle(short,country);
+      expect(title.length).toBeGreaterThanOrEqual(25);
+      expect(title).toContain(short);
+    }
+    expect(normalizeVerifiedTitle('Understanding basic economics and financial systems','US'))
+      .toBe('Understanding basic economics and financial systems');
+    expect(() => normalizeVerifiedTitle('too short','CN')).toThrow('TITLE_TEMPLATE_INVALID');
   });
 });
 

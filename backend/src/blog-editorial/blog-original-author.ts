@@ -10,6 +10,20 @@ export interface VerifiedOriginalArticle extends OriginalArticle {
 
 export type ArticleModel = (slot: BlogRotationSlot, source: PrimarySourceEvidence) => Promise<OriginalArticle>;
 
+/** Keep strict editorial-title length without rejecting valid native CJK templates. */
+export function normalizeVerifiedTitle(title: string, country: BlogRotationSlot['country']): string {
+  if (title.trim().length < 10 || title.length > 180) throw new Error('TITLE_TEMPLATE_INVALID');
+  const suffix: Record<BlogRotationSlot['country'], string> = {
+    KR: ' — 핵심 원리와 실제 활용 방법을 이해하는 안내',
+    US: ' — core mechanisms and practical understanding',
+    JP: '：基本概念と実際の仕組みをわかりやすく学ぶための解説',
+    CN: '：核心概念与工程实践基础原理详解',
+  };
+  const canonical = title.length >= 25 ? title : title + suffix[country];
+  if (canonical.length < 25 || canonical.length > 180) throw new Error('TITLE_TEMPLATE_INVALID');
+  return canonical;
+}
+
 function extractJson(text: string): OriginalArticle {
   const cleaned = text.trim().replace(/^```(?:json)?\s*/i,'')
     .replace(/\s*```$/,'').trim();
@@ -145,9 +159,7 @@ export async function generateLocalOriginalArticle(
 
   const pool = countryTitlesPool[slot.country][slot.topic];
   const titleIndex = Math.abs(slot.slotIndex ?? 0) % pool.length;
-  const verifiedTitle = pool[titleIndex];
-
-  if (!verifiedTitle || verifiedTitle.length < 25 || verifiedTitle.length > 180) throw new Error('TITLE_TEMPLATE_INVALID');
+  const verifiedTitle = normalizeVerifiedTitle(pool[titleIndex] ?? '', slot.country);
 
   const sourceData=source.excerpt.slice(0,1250);
   const subjects = [

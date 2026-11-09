@@ -14,5 +14,7 @@
 - Focused branch tests: frontend 47/47 PASS, backend 13/13 PASS after isolated offline install. Added targeted route/sitemap/ads regression tests and model budget assertion. New code remains branch-only; no Test/Production changes, publication timer remains disabled.
 - Pending complete build, Test frontend/API, external GitHub CI and blog-only Production cutover. Do not assume that `blog.rotation_2h` hourly `done` implies a published post.
 
+- Test one-shot actual isolated DB publication at 22:51 KST failed `TITLE_TEMPLATE_INVALID` **before model call** for CN/CODING slot 22:00 (slotIndex 9). This is a new source-confirmed defect, not a successful article. v1946.1 adds native-language safe suffixes only to short original templates, preserving the 25-char minimum and unique per-template title; adds focused regression. Worker timer and Production data untouched.
+
 ## END
 Pending.
