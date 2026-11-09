@@ -1,0 +1,2 @@
+# 2026-11-09 v2026.11.09.1781 — Host storage optimization
+**Operational result:** Removed nine verified historical Next.js task caches, reclaiming 8,434,507,776 allocated bytes (7.85GiB). Data disk 55%→51%; Production and Test web services, Nginx/MCP active; public health HTTP 200. No code or app release changes, no DB or money movement, no authenticated E2E claims. [Worklog](../worklog/2026-11-09-server-storage-optimization-v1781.md) / [한국어](2026-11-09-server-storage-optimization-v1781.ko.md).
