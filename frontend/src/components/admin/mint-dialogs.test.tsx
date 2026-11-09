@@ -85,15 +85,28 @@ describe('v1946 screenshots: async order selection and actual proposal schema', 
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'order-created' }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<OrderProposalDialog isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
-    expect(screen.queryByRole('option', { name: /TREASURY/ })).toBeNull();
+    expect(screen.queryByRole('option', { name: /^TREASURY \(/ })).toBeNull();
+    expect(screen.getByRole('option', { name: /TREASURY_ISSUANCE/ })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /EXPAND_LIMIT/ })).toBeNull();
-    expect(screen.getByText(/국고 직접 입금은 아직 지원하지 않습니다/)).toBeTruthy();
+    expect(screen.getByText(/TREASURY_ISSUANCE 승인 명령으로 국고 정본 발행/)).toBeTruthy();
     fireEvent.change(screen.getByPlaceholderText(/거시경제 안정화/), { target: { value: '작업 보상 정책 감사 사유 충분합니다' } });
     fireEvent.click(screen.getByRole('button', { name: '정책 명령 발의' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body)).toMatchObject({
       order_type: 'MINT', target_envelope: 'WORK_REWARD', max_amount_wld: '10000000', valid_duration_hours: 72,
     });
+  });
+
+  it('submits separate TREASURY_ISSUANCE policy proposal with honest canonical destination', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ok:true,json:async()=>({id:'treasury-policy-1'})});
+    vi.stubGlobal('fetch',fetchMock);
+    render(<OrderProposalDialog isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
+    fireEvent.change(screen.getByRole('combobox', {name:'대상 계정'}), {target:{value:'TREASURY_ISSUANCE'}});
+    fireEvent.change(screen.getByPlaceholderText(/거시경제 안정화/), {target:{value:'관리자 신규 국고 직접 발행 정책 감사 사유'}});
+    fireEvent.click(screen.getByRole('button',{name:'정책 명령 발의'}));
+    await waitFor(()=>expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body)).toMatchObject({
+      order_type:'MINT',target_envelope:'TREASURY_ISSUANCE'});
   });
 
   it('RETIRE policy changes target to HARD_SINK_PURGE and does not submit invalid combinations', async () => {

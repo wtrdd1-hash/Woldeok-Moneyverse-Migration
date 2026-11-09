@@ -64,7 +64,7 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   ) {}
 
   onModuleInit() {
-    this.logger.log('Autonomous SWF service initialized with canonical PostgreSQL ledger support.');
+    this.logger.log('SWF snapshot read initialized; execution requires independently verified exchange settlement.');
   }
 
   onModuleDestroy() {
@@ -160,9 +160,11 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
     }
     if (actorId) {
       const snapshot = await this.getAdminSnapshot(actorId);
+      // Reading an admin snapshot is NOT buying securities, realizing returns,
+      // or reconciling a Treasury journal. Do not emit a false execution result.
       return {
-        executed: true,
-        reason: 'SWF_EVALUATED_AND_REBALANCED',
+        executed: false,
+        reason: 'SWF_SETTLEMENT_SOURCE_UNVERIFIED',
         snapshot,
       };
     }

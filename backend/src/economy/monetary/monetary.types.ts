@@ -7,7 +7,8 @@ export type MonetaryTargetEnvelope =
   | 'INCIDENT_COMPENSATION'
   | 'STABILIZATION_POOL'
   | 'HARD_SINK_PURGE'
-  | 'GENERAL_CIRCULATION';
+  | 'GENERAL_CIRCULATION'
+  | 'TREASURY_ISSUANCE';
 
 export type MonetaryOrderStatus = 'PROPOSED' | 'APPROVED' | 'EXECUTED' | 'CANCELLED' | 'EXPIRED';
 

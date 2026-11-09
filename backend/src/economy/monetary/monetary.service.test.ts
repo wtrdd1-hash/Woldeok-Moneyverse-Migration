@@ -140,6 +140,32 @@ describe('v523 Monetary & Central Bank / Mint Bureau Separation', () => {
         .rejects.toThrow(BadRequestException);
     });
 
+    it('Treasury direct issuance is a bounded separate canonical ledger receipt, not a certificate-only mutation', async () => {
+      const receipt = { success: true, code: 'TREASURY_MINT_SETTLED', amount_wld: '100000',
+        ledger_transaction_id: '11111111-1111-4111-8111-111111111111',
+        mint_certificate_id: '22222222-2222-4222-8222-222222222222',
+        vault_after_wld: '100000' };
+      const query = vi.fn().mockResolvedValue({ rows: [{ receipt }] });
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      const key = '33333333-3333-4333-8333-333333333333';
+      const value = await bureau.executeTreasuryMint('admin-1','44444444-4444-4444-8444-444444444444','100000',key);
+      expect(value).toEqual(receipt);
+      expect(query).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('admin_monetary_mint_to_treasury'),
+        ['admin-1','44444444-4444-4444-8444-444444444444','100000',key]);
+      await expect(bureau.executeTreasuryMint('admin-1','44444444-4444-4444-8444-444444444444','10000001',key))
+        .rejects.toThrow(BadRequestException);
+      expect(query).toHaveBeenCalledTimes(1);
+    });
+
+    it('Treasury direct mint blocks frozen policy at API and never tries certificate-only fallback', async () => {
+      const query = vi.fn().mockRejectedValue({ code: '55000' });
+      const bureau = new MintBureauService({ query } as unknown as Queryable);
+      await expect(bureau.executeTreasuryMint('admin-1','44444444-4444-4444-8444-444444444444',
+        '100000','33333333-3333-4333-8333-333333333333')).rejects.toMatchObject({status:503});
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(query.mock.calls[0]?.[0]).toContain('admin_monetary_mint_to_treasury');
+    });
+
     it('successfully records RetirementCertificate for hard sinks', async () => {
       const mockRetireCert = {
         id: 'retire-uuid-1',

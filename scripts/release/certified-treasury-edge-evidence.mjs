@@ -3,7 +3,11 @@
  * fail-closed historical monetary holds. No other financial 200 response is
  * accepted by this narrow gate.
  */
-export function safeTreasuryEdgeResponse(status, cacheControl, body) {
+/** Positive CURRENT-epoch cash may pass ONLY with independently read PostgreSQL proof.
+ * This does not certify historic payments, legacy SWF valuation or issuance.
+ * Without that proof the established public 503/verified-zero gate is unchanged.
+ */
+export function safeTreasuryEdgeResponse(status, cacheControl, body, trustedFiscalProof = null) {
   const cache = (cacheControl ?? '').toLowerCase().split(',').map((part) => part.trim());
   if (!cache.includes('private') || !cache.includes('no-store')
     || !body || typeof body !== 'object' || Array.isArray(body)
@@ -21,8 +25,17 @@ export function safeTreasuryEdgeResponse(status, cacheControl, body) {
   const u = body.userEligibility;
   // Until independently settled historical payments are certified, the ONLY
   // authenticated public amount is the exact zero current fiscal epoch.
-  if (o?.verified !== true || o.totalBalanceWld !== '0'
-    || o.availableBalanceWld !== '0' || o.safeReserveWld !== '0'
+  const certifiedCurrentZero = o?.totalBalanceWld === '0';
+  const positive = o && /^[1-9][0-9]*$/.test(o.totalBalanceWld ?? '');
+  const certifiedCurrentPositive = positive && trustedFiscalProof?.source === 'direct-postgres-read-only'
+    && trustedFiscalProof.integrityStatus === 'CLEAN'
+    && /^[1-9][0-9]*$/.test(trustedFiscalProof.epochOpenedAt ?? '')
+    && trustedFiscalProof.invalidNewSources === '0'
+    && trustedFiscalProof.vaultTotal === o.totalBalanceWld
+    && trustedFiscalProof.canonicalTotal === o.totalBalanceWld
+    && trustedFiscalProof.journalTotal === o.totalBalanceWld;
+  if (o?.verified !== true || !(certifiedCurrentZero || certifiedCurrentPositive)
+    || o.availableBalanceWld !== o.totalBalanceWld || o.safeReserveWld !== '0'
     || o.totalCumulativeDisbursedWld !== '—' || o.totalBurnedWld !== '—'
     || o.beneficiaryCount !== null || o.activeProgramsCount !== 0
     || o.lastDisbursedAt !== '') return false;

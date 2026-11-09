@@ -19,6 +19,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { TreasuryMintExecutionDialog } from './treasury-mint-execution-dialog';
 import { Button } from '@/components/ui/button';
 import { parseMintStatusEvidence, type MintStatusEvidence } from './mint-status-evidence';
 import {
@@ -59,6 +60,7 @@ export function NationalMintPanel() {
 
   // Dialog & Action states
   const [mintDialogOpen, setMintDialogOpen] = useState(false);
+  const [treasuryMintOpen, setTreasuryMintOpen] = useState(false);
   const [retireDialogOpen, setRetireDialogOpen] = useState(false);
   const [orderProposalOpen, setOrderProposalOpen] = useState(false);
   const [approvingOrderId, setApprovingOrderId] = useState<string | null>(null);
@@ -180,8 +182,14 @@ export function NationalMintPanel() {
     }
   };
 
+  const treasuryApprovedOrders = orders.filter((o) => o.status === 'APPROVED'
+    && o.order_type === 'MINT' && o.target_envelope === 'TREASURY_ISSUANCE'
+    && Number.isFinite(Date.parse(o.expires_at)) && Date.parse(o.expires_at) > Date.now()
+    && /^\d+$/.test(o.max_amount_wld) && /^\d+$/.test(o.executed_amount_wld)
+    && BigInt(o.max_amount_wld) > BigInt(o.executed_amount_wld));
+
   const approvedOrders = orders.filter((o) => {
-    if (o.status !== 'APPROVED' || o.order_type !== 'MINT') return false;
+    if (o.status !== 'APPROVED' || o.order_type !== 'MINT' || o.target_envelope === 'TREASURY_ISSUANCE') return false;
     const expiresAt = Date.parse(o.expires_at);
     return Number.isFinite(expiresAt) && expiresAt > Date.now()
       && /^\d+$/.test(o.max_amount_wld) && /^\d+$/.test(o.executed_amount_wld)
@@ -263,6 +271,10 @@ export function NationalMintPanel() {
           >
             <Coins className="size-3.5 mr-1" />
             신규 통화 주조
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setTreasuryMintOpen(true)}
+            className="min-h-9 rounded-xl border-emerald-500/40 text-xs font-semibold">
+            국고 직접 발행 (정본 원장)
           </Button>
 
           <Button
@@ -707,6 +719,13 @@ export function NationalMintPanel() {
           </Card>
 
           {/* 모달 2종 마운트 */}
+          <TreasuryMintExecutionDialog
+            isOpen={treasuryMintOpen}
+            onClose={() => setTreasuryMintOpen(false)}
+            onSuccess={loadAllData}
+            activeOrders={treasuryApprovedOrders}
+            frozen={evidence?.is_issuance_frozen ?? true}
+          />
           <MintExecutionDialog
             isOpen={mintDialogOpen}
             onClose={() => setMintDialogOpen(false)}
