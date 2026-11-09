@@ -17,10 +17,17 @@ export async function GET() {
   }
 
   const routes = getPublicSitemapRoutes();
-  const entries = routes.map((r) => {
+  const seen = new Set<string>();
+  const entries: any[] = [];
+
+  for (const r of routes) {
+    const loc = canonicalUrl(r.path);
+    if (seen.has(loc)) continue;
+    seen.add(loc);
+
     const verified = getVerifiedLocalePaths(r.path);
-    return {
-      loc: canonicalUrl(r.path),
+    entries.push({
+      loc,
       lastmod: RELEASE_TIMESTAMP,
       changefreq: r.changeFrequency || 'weekly',
       priority: r.sitemapPriority || 0.7,
@@ -33,8 +40,8 @@ export async function GET() {
           'x-default': canonicalUrl(verified.ko),
         },
       } : {}),
-    };
-  });
+    });
+  }
 
   const xml = buildUrlsetXml(entries);
 
