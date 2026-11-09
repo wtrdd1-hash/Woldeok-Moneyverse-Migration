@@ -79,6 +79,8 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   BOND_PURCHASE: '국채 매입',
   BOND_REDEEM: '국채 만기 상환',
   NPS_PENSION_PAYOUT: '공적 연금 지급',
+  PENSION_HOURLY_PAYOUT: '국민연금 정기 수급',
+  PUBLIC_GRANT: '국고 창업지원금 수령',
 });
 
 export class WalletTransactionNotFoundError extends Error {
