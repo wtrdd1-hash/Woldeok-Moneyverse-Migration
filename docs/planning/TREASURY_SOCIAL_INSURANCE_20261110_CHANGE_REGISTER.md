@@ -7,8 +7,8 @@
 ## Executive diff — initial state
 | Category | Count | Meaning |
 |---|---:|---|
-| ADD (newly specified features) | 3 | One new proposal, not implemented |
-| MODIFY (changes to existing plans) | 4 | Historical QA-linked reconciliation amendment |
+| ADD (newly specified features) | 3 | Three proposals, not implemented |
+| MODIFY (changes to existing plans) | 4 | Four QA-linked planning amendments, not implemented |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
 | INTEGRATED into canonical plan | 0 | No incorporation or PR merge claimed |
