@@ -16,6 +16,8 @@
 - Main re-fetched midpoint, unchanged at 8db59f535dc425a86b6fd96ce7068f2a3411210e.
 - Test/Production backend/frontend systemd active; public /api/version HTTP 200. Test ID dfb98c7c5c2279201ab44808f7ea259acb5ac84d, Production b2980de529; neither is this candidate. No Test deployment or production release.
 
-## Finished (candidate validation only)
+## Finished (candidate validation only; 2026-11-09 20:16 KST)
+- GitHub draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2991. Source-fix commit `d90c8a675854acd5174d2d4ce857d3613c6762a3`; CI run #5970 (`42607603502`) has classify/policy PASS and runtime-check IN PROGRESS at the recorded check. PR remains unmerged.
+- Re-fetched origin/main after source edits; unchanged at `8db59f535dc425a86b6fd96ce7068f2a3411210e` as of final documentation pass.
 - Scope: source correction, new UI regression and EN/KO internal/public update notes.
 - Exact candidate SHA, PR and CI/release status to be attached after push. Promotion blocked pending official exact-SHA Test and documented finance/security/release gates. No operation against money or production process performed.

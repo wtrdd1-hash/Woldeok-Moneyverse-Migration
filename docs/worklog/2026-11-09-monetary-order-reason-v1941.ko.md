@@ -14,5 +14,6 @@
 
 ## 종료 (코드 후보 단계)
 - 별도 브랜치의 코드 변경 및 영어/한국어 내부·GitHub 업데이트 문서 작성 완료.
-- PR/정확한 후보 SHA와 테스트 환경 검증·운영 승격 상태는 영어 정본에서 최신 상태 확인.
+- GitHub 초안 PR #2991: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2991. 기능 수정 커밋 `d90c8a675854acd5174d2d4ce857d3613c6762a3`; CI 일부 통과/런타임 검사는 점검 시점 진행 중. 미병합 상태.
+- 최종 문서 확인 시 origin/main `8db59f535dc425a86b6fd96ce7068f2a3411210e` 변화 없음.
 - 공식 Test 배포 및 인증 E2E/금융·보안·릴리스 게이트 전에는 운영 해결 완료로 간주하지 않음.
