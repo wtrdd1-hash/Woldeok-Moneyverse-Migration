@@ -172,9 +172,12 @@ BEGIN
       THEN 'EXECUTED' ELSE 'APPROVED' END,
     updated_at=pg_catalog.clock_timestamp() WHERE id=p_order_id;
   SELECT * INTO v_after_proof FROM public.treasury_fiscal_proof_read();
-  IF v_after_proof.vault_total<>v_after::text
-    OR v_after_proof.canonical_total<>v_after::text
-    OR v_after_proof.journal_total<>v_after::text
+  -- Treasury may own WLD in multiple authorized vaults. Compare the
+  -- WHOLE fiscal total, not VAULT_MAIN alone (which would reject legitimate
+  -- issuance when reserve/welfare vaults hold existing, fully-backed WLD).
+  IF v_after_proof.vault_total<>(v_proof.vault_total::numeric+v_amount)::text
+    OR v_after_proof.canonical_total<>(v_proof.vault_total::numeric+v_amount)::text
+    OR v_after_proof.journal_total<>(v_proof.vault_total::numeric+v_amount)::text
     OR v_after_proof.invalid_new_sources<>'0' THEN
     RAISE EXCEPTION USING ERRCODE='55000',MESSAGE='new Treasury issuance cannot be reconciled';
   END IF;
