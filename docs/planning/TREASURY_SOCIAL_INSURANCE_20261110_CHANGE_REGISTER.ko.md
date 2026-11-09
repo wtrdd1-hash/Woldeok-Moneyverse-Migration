@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.001 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.002 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -55,3 +55,16 @@
 
 ## 문서 관리 원칙
 기존 기록은 수정하여 지우지 않고 새 행·수정 이력으로 보존한다. 매 회차 기존 기획과 대조한 뒤 신규 기능과 기존 수정 사항을 구분한다. 영문과 한국어를 동등하게 관리한다. 초안은 승인·구현·운영 승격을 의미하지 않는다. 기획서는 상위 통합기획서에 리뷰 후 반영한다.
+
+## 2026-11-10 01:05 KST — A회차 QA 기반 보완, v2008 / vTSI.2026.11.10.002
+**TSI-20261110-001 | MODIFY | P0 | PROPOSED | 통합기획서 미반영.** 기존 기준선: main `edd709bcbe96f6f5ceca8372f244b632e8211242`의 `PROJECT_PLAN.md` FIN1518-03. QA v1394 문서상 국고 미연계 552건, 탐색 24건 대 정규 0건 불일치, MINT/SWF 출처 미검증. 이번 회차에서 실운영 재현은 하지 않았으며 실제 원인·영향은 **검증 불가**이다.
+
+**개정안:** 잔액을 자동 수정하거나 WLD를 발행하지 않고, 동일 DB 스냅샷·SQL 버전·계정 범위·마감시각으로 중앙/보조 원장과 거래 출처를 읽기 전용 대사한다. 관리자 국고 > 대사 화면에서 실행 ID, 근거 해시, `PENDING/MATCHED/DISCREPANCY/INCONCLUSIVE/BLOCKED`를 표시하고 비식별 근거 내보내기·동일 스냅샷 재실행·독립 담당자 이관 CTA를 제공한다. 공개 검색 제외, 320px·키보드 접근성 지원.
+
+**제안 내부 API(미구현):** `POST /internal/treasury/reconciliation-runs`(범위·마감·SQL버전·멱등성 키 → 202 실행 ID), `GET /internal/treasury/reconciliation-runs/:id`(건수·해시·출처·페이지), `POST /internal/treasury/reconciliation-runs/:id/escalate`(감사 이벤트). RBAC `treasury.reconcile.read/escalate`, MFA, 독립 승인, 403/409/422/429/503 안전 차단.
+
+**제안 DB(미구현):** 추가 전용 실행/발견 테이블, 테넌트 복합 FK, (테넌트·멱등성 키) UNIQUE, (테넌트·실행·원본항목·발견유형) UNIQUE, 상태·시각 인덱스, 정수 WLD, FORCE RLS, REPEATABLE READ, 원본 해시, 감사 Outbox, 작업자 펜싱·유한 재시도. 추가형 마이그레이션, 기능 OFF 롤백, 감사 보존. 경고는 같은 스냅샷에서 반복 재현된 차이만 승격하고 지문 중복을 억제한다.
+
+**검증·수용:** 동일 스냅샷/SQL에서 결정적 결과, 552 및 24/0 근거 재현 또는 반증, 잔액 무변경, 부분 장애 시 MATCHED 금지, 동시 멱등성, 테넌트 격리·비식별·접근성·복구 시험. 모두 **미실행**. P0 원장 출처·운영 SHA·DB 권한·독립 복원, P1 API/관리자 UI/격리 PG, P2 오탐·처리시간 KPI. 개발 B(DB/API), C(UI), A(통합), QA(재현) 담당 제안이며 배정·승인되지 않았다. 원문 기준선은 불변, 영문 상세 항목과 동등하며 PR #3006에서 검토한다.
+
+**비교 인덱스:** FIN1518-03(기존 QA 미연계/불일치) → TSI-20261110-001(동일 스냅샷 대사 근거 게이트) → 통합기획서 반영 대기. 누적 ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 / INTEGRATED 0. 이전 B v2006 → 현재 A v2008 → 다음 B v2010. 외부 독립 레퍼런스 신규 승인 0, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
