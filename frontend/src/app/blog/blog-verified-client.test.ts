@@ -33,6 +33,13 @@ describe('DB-verified country blog public projection',()=>{
   expect(html).toContain(row.title);
   expect((await metadataForArticle(row.slug,'ko')).robots).toMatchObject({index:false});
  });
+ it('makes explicitly published unverified legacy articles public but never a withdrawn article',()=>{
+  const unreviewed={...row,status:'PUBLISHED',receipt:undefined,isAiGenerated:true} as never;
+  expect(isBlogDiscoverable({status:'PUBLISHED',isAiGenerated:true} as never)).toBe(true);
+  expect(isBlogDiscoverable({status:'WITHDRAWN',isAiGenerated:true} as never)).toBe(false);
+  expect(isBlogDiscoverable({status:undefined,isAiGenerated:true} as never)).toBe(false);
+  expect(unreviewed).toBeDefined();
+ });
  it('only renders a verified publication receipt in its native country, without fake analytics',async()=>{
   vi.stubEnv('BLOG_API_ORIGIN','http://127.0.0.1:3000');
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({posts:[row]}),{status:200})));

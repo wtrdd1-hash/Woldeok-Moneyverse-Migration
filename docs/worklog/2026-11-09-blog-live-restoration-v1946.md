@@ -16,5 +16,10 @@
 
 - Test one-shot actual isolated DB publication at 22:51 KST failed `TITLE_TEMPLATE_INVALID` **before model call** for CN/CODING slot 22:00 (slotIndex 9). This is a new source-confirmed defect, not a successful article. v1946.1 adds native-language safe suffixes only to short original templates, preserving the 25-char minimum and unique per-template title; adds focused regression. Worker timer and Production data untouched.
 
+## OWNER OVERRIDE — v1946.2, 2026-11-09 23:12 KST
+- Owner clarifies that independently UNVERIFIED AI posts shall also publish without human review, with advertising inventory. Google Publisher Policies explicitly disallow Google-served ads on AI-generated content absent manual review/curation, recorded as external compliance/account risk. No verification receipt forgery.
+- Implemented dedicated `UNVERIFIED` JSON sidecar under shared data, separate fixed Test file, atomic 0600 writes, DB leader lock, period idempotency, no global scheduler activation. Native-country public blog, article, list API and sitemap include explicit PUBLISHED unverified posts; WITHDRAWN excluded, AI/non-verified labels visible. Owner-only withdrawal path and advertisement-path implementation updated.
+- Local focused tests for store and frontend pass; historic sitemap tests updated to restored product policy. Exact source Test/CI, actual unverified publication and Production cutover not yet proven.
+
 ## END
 Pending.

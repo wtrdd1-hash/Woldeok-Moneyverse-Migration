@@ -9,7 +9,7 @@
  */
 import 'reflect-metadata';
 import { Pool } from 'pg';
-import { createVerifiedBlogJob } from './blog-verified-job';
+import { createBlogAutoPublicationJob } from './blog-auto-publication';
 import { BlogVerifiedRepository } from './blog-verified.repository';
 import { selectTwoHourBlogSlot } from './blog-two-hour-rotation';
 
@@ -46,7 +46,7 @@ export async function publishAutomaticBlogWindow(
     if (!locked) return { skipped: true, reason: 'PUBLISHER_BUSY', periodKey: slot.periodKey };
 
     const repo = new BlogVerifiedRepository(client);
-    const run = createVerifiedBlogJob(repo, detail => {
+    const run = createBlogAutoPublicationJob(repo, detail => {
       console.warn('VERIFIED_BLOG_GENERATION_FAILED', detail);
     }, () => activePublicationWindow(now));
     const result = await run();

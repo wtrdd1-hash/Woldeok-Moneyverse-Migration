@@ -159,7 +159,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
   const original = getBlogPostBySlug(slug) ?? await verifiedArticleBySlug(slug);
   if (!original) notFound();
   const nativeLocale = (original.country ? ({ KR: "ko", US: "en", JP: "ja", CN: "zh" } as Record<string, BlogLocale>)[original.country] : undefined) ?? locale;
-  if (original.verificationReceipt && original.country && nativeLocale !== locale) {
+  if ((original.verificationReceipt || original.verificationState === 'UNVERIFIED') && original.country && nativeLocale !== locale) {
     permanentRedirect(blogUrl(slug, nativeLocale));
   }
   const post = getBlogCountryEdition(original, locale) ?? getBlogCountryEdition(original, nativeLocale) ?? original;
@@ -183,7 +183,7 @@ export async function renderBlogArticle(slug: string, locale: BlogLocale) {
       <div className="container max-w-5xl mx-auto px-4 py-8">
         {!isBlogDiscoverable(original) && (
           <p role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
-            보관된 기존 AI 생성 글입니다. 출처와 수치의 사실 검증 및 편집 승인이 완료되지 않아 신규 독자에게 추천하지 않으며 검색 색인에서 제외하도록 요청 중입니다.
+            비공개 또는 검증되지 않은 게시물입니다.
           </p>
         )}
         <BlogPostClient post={{ ...post, heroImage: resolvePostHeroImage(post) }} locale={locale} />

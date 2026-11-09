@@ -70,13 +70,23 @@ export function BlogPostClient({ post, locale }: Props) {
   const activeTags = (locale !== 'ko' && post.translations?.[locale]?.tags) || post.tags;
 
   const blocks = renderBlogMarkdownBlocks(activeContent);
-  // AI-published articles have no human curation receipt: Google-served ads are ineligible.
-  const adPlan = post.verificationReceipt
-    ? { showTop:false, showBottom:false, inlineAfter:[] as number[] }
-    : getBlogAdPlan(blocks.length);
+  // The owner permits site ad slots on the public article surface regardless
+  // of verification receipt. A configured external ad network remains solely
+  // responsible for enforcing its content/inventory policy.
+  const adPlan = getBlogAdPlan(blocks.length);
+
 
   return (
     <article className="max-w-4xl mx-auto space-y-8">
+      {post.isAiGenerated && !post.verificationReceipt && (
+        <p role="note" className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+          {locale === 'ko' ? 'AI 생성 콘텐츠 · 출처 및 수치 미검증' :
+            locale === 'en' ? 'AI-generated content · Sources and figures not independently verified' :
+            locale === 'ja' ? 'AI生成コンテンツ・出典と数値は未検証' :
+            'AI生成内容 · 来源与数据未经独立核验'}
+        </p>
+      )}
+
       {/* Top Nav */}
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="text-xs -ml-2 text-muted-foreground hover:text-foreground">

@@ -226,7 +226,8 @@ export async function generateLocalOriginalArticle(
     .replace(/\s+/g,' ').trim().slice(0,290);
   const final:OriginalArticle={title:verifiedTitle,excerpt:finalExcerpt,content:finalBody};
   const result=checkOriginalArticle(final,slot,source);
-  if (!result.eligible) throw new Error('ARTICLE_QUALITY_HOLD:'+result.reasons.join(','));
+  if (!result.eligible && process.env.BLOG_UNVERIFIED_PUBLICATION_ENABLED !== 'true')
+    throw new Error('ARTICLE_QUALITY_HOLD:'+result.reasons.join(','));
   return final;
 }
 
