@@ -1,8 +1,14 @@
+# 현재 런타임 기준선
+
+## 2026-11-09 v1944 — 최신 운영 실측 (OBSERVED CURRENT)
+- 운영 도메인 `https://easy-scraping.com`, SHA `9419827195172117d38cc338fc92ddc62d6e985a`, 불변 릴리스 `prod-v2026.11.09.1944-941982719517`, backend 4564/frontend 4565, Nginx 활성. 새 서비스 부팅 자동시작 enabled, 이전 v1777 4504/4505 롤백 유지.
+- 공식 Test는 동일 소스 SHA 3100/3101 정상. 운영 PostgreSQL 17.11 실제 DB `woldeok_moneyverse_dev` 포트 5433, 343번 마이그레이션 반영. 승인된 복식부기 국고 초기화로 정본·금고·원장 0/0/0, 사용자 현금·은행 합계 4,841,760 WLD 불변. 역사 552 국고 및 744 배당 기록은 미검증 아카이브 보존.
+- 공개 버전과 실행 프로세스 정확히 일치, 릴리스 검사 실패 0. 홈페이지/상태/헬스/국고 API 200, 비로그인 발의 401. 로그인 사용자 기존 세션의 E2E는 직접 검증하지 않았으며 국고 0원이므로 지급 재원 없음.
+- 상세 운영 전/후 백업·롤백 증빙: [v1945 릴리스 기록](releases/v2026.11.09.1945-treasury-fiscal-prod.ko.md). 아래 과거 '최신' 기록은 과거 스냅샷으로 간주. 이 실측은 기획서 자체를 자동 수정하지 않으며 계획-운영 AUTHORITY_DRIFT를 별도 관리.
+
 ## v701 LIVE PUBLIC EXECUTE result — 2026-10-16 운영 확인
 - 실제 운영 v697 소스 SHA `a5a1e9da6fc55ac71c44c4cf6ee138e9442f4e73`, 백/프론트 3213/3214 유지. 운영 PUBLIC 보안 함수 실행권 11→0, 앱 명시적 11개 보존. 잔액 직접 쓰기 권한은 미해결, 운영 데이터/스키마 마이그레이션 없음.
 - 정리된 자체 빌드 파일은 약 2.44GiB. 동시 작업으로 디스크 사용률 약 78~80% 변동, 운영 릴리스·DB·백업 미삭제.
-
-# 현재 런타임 기준선
 
 ## 2026-11-08 v1770 — 최신 운영 실측
 - **현재 공개 운영** `https://easy-scraping.com`: backend `moneyverse-release-v1770-backend.service` `127.0.0.1:4504`, frontend `moneyverse-release-v1770-frontend.service` `127.0.0.1:4505`. 불변 릴리스 `/srv/moneyverse-data/releases/prod-v2026.11.06.1770-17fde45484`, 실제 앱 SHA `acc5c90a34`. Nginx 운영 라우트 최신 바인딩 완료.
