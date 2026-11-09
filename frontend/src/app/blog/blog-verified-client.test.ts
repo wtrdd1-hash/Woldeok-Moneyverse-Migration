@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { verifiedArticleBySlug, verifiedArticlesForAdmin, verifiedPublicArticles } from './blog-verified-client';
 import { blogAlternateLanguages, hasCountryEdition, isBlogDiscoverable } from './blog-seo';
-import { metadataForArticle, renderBlogHub } from './blog-page-server';
+import { metadataForArticle, metadataForHub, renderBlogHub } from './blog-page-server';
 
 const row = {
   slug:'2026-10-28-cn-coding-5',country:'CN',locale:'zh-CN',topic:'CODING',
@@ -23,6 +23,9 @@ describe('DB-verified country blog public projection',()=>{
     new Response(JSON.stringify({posts:[row],post:row}),{status:200})));
   const meta=await metadataForArticle(row.slug,'zh');
   expect(meta.title).toBe(row.title);
+  expect(meta.robots).toMatchObject({index:true,follow:true});
+  expect(metadataForHub('zh').alternates?.canonical).toBe('https://easy-scraping.com/zh/blog');
+  expect(metadataForHub('zh').robots).toMatchObject({index:true,follow:true});
   expect(meta.alternates?.canonical).toContain('/zh/blog/'+row.slug);
   const hub=await renderBlogHub('zh');
   const html=renderToStaticMarkup(hub);

@@ -97,7 +97,10 @@ describe('short bounded local prose sections with authoritative metadata', () =>
         status:200,headers:{'content-type':'application/json'},
       });
     });
+    const timeoutSpy=vi.spyOn(AbortSignal,'timeout');
     const result=await generateLocalOriginalArticle(slot,source,{model:'llama3.2:3b',fetcher:client});
+    expect(timeoutSpy).toHaveBeenCalledWith(180_000);
+    timeoutSpy.mockRestore();
     expect(result.content).toContain(source.url);
     expect(result.content.length).toBeGreaterThanOrEqual(1400);
     expect(result.excerpt.length).toBeGreaterThanOrEqual(65);

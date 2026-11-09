@@ -8,8 +8,11 @@
 - Plan: restore guarded verified blog frontend route, index/sitemap for independently verified posts only; repair AI publisher deadline with bounded retry and isolated Test; exact-SHA branch tests/build; stage blog-only canary and Nginx atomic route cutover with rollback, verify subsequent auto publication.
 - Status: IN PROGRESS; no Production changes performed at START.
 
-## MID
-Pending.
+## MID — 2026-11-09 22:40 KST
+- Rechecked main 427c5b1e, no new owner commit. Confirmed v1944 Next `BLOG_API_ORIGIN=http://127.0.0.1:4504`, SEO true, ads true, and the Nginx :4565 old frontend emits 308 `/tools`; verified API returned 12 receipt-backed public posts.
+- Implemented removal of five conflicting Next blog/sitemap redirects; verified article native SEO index/canonical and blog hub canonical; idempotent receipt-only XML sitemap + robots declaration; block Google ad provider and units on all uncurated blog paths; model generation per-section timeout 80→180 seconds, output bound 490→360 tokens, no relaxation of source/locale/duplicate gates.
+- Focused branch tests: frontend 47/47 PASS, backend 13/13 PASS after isolated offline install. Added targeted route/sitemap/ads regression tests and model budget assertion. New code remains branch-only; no Test/Production changes, publication timer remains disabled.
+- Pending complete build, Test frontend/API, external GitHub CI and blog-only Production cutover. Do not assume that `blog.rotation_2h` hourly `done` implies a published post.
 
 ## END
 Pending.

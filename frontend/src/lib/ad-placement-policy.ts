@@ -4,7 +4,7 @@ export function isEligiblePublicAdPath(pathname: string | null): boolean {
   const path = pathname.replace(/\/$/, '') || '/';
   if (path === '/' || /^\/(en|ja|zh)$/.test(path)) return true;
   const localized = path.replace(/^\/(en|ja|zh)(?=\/)/, '');
-  return /^\/(tools|guide|blog)(\/|$)/.test(localized)
+  return /^\/(tools|guide)(\/|$)/.test(localized)
     || /^\/(gallery|announcements|roadmap)$/.test(localized);
 }
 

@@ -170,11 +170,11 @@ export async function generateLocalOriginalArticle(
   for (let i=0;i<subjects.length;i++) {
     const result=await fetcher(endpoint,{
       method:'POST',
-      signal:AbortSignal.timeout(80_000),
+      signal:AbortSignal.timeout(180_000),
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:input.model,stream:false,keep_alive:'2m',
-        options:{temperature:0.25,num_predict:490,num_ctx:4096,num_thread:4},
+        options:{temperature:0.25,num_predict:360,num_ctx:4096,num_thread:4},
         messages:[
           {role:'system',content:
             'You write original educational explanations in the requested language. Plain prose only, no JSON, no headings or URLs. ' +

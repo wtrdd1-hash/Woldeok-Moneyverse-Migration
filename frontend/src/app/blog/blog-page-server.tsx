@@ -74,11 +74,11 @@ export function resolvePostHeroImage(post: BlogPost): string {
 export function metadataForHub(locale: BlogLocale): Metadata {
   return {
     title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
-    robots: { index: false, follow: false },
-    alternates: { canonical: 'https://easy-scraping.com/tools' },
+    robots: { index: true, follow: true },
+    alternates: { canonical: blogHubUrl(locale) },
     openGraph: {
       title: PAGE_TITLES[locale], description: PAGE_DESCRIPTIONS[locale],
-      url: 'https://easy-scraping.com/tools', type: 'website', siteName: 'Woldeok Moneyverse',
+      url: blogHubUrl(locale), type: 'website', siteName: 'Woldeok Moneyverse',
     },
   };
 }
@@ -93,7 +93,7 @@ export async function metadataForArticle(slug: string, locale: BlogLocale): Prom
   const hero = resolvePostHeroImage(post);
   return {
     title: post.title, description: post.excerpt, keywords: [...post.tags],
-    robots: { index: false, follow: false },
+    robots: { index: isBlogDiscoverable(original) && nativeLocale === locale, follow: isBlogDiscoverable(original) && nativeLocale === locale },
     alternates: { canonical, languages: blogAlternateLanguages(original) },
     openGraph: {
       title: post.title, description: post.excerpt, type: 'article',
