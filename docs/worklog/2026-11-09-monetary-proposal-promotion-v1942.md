@@ -9,8 +9,19 @@
 - Read-only financial readiness from active production backend env: database `woldeok_moneyverse_dev`, role `moneyverse_app`, 43 balance rows, 0 unexplained projections, 0 unbalanced transactions, 0 transactions without postings, result READY_FOR_OTHER_RELEASE_GATES (NOT a full Treasury approval).
 - Workflow: recheck live main; verify full PR CI; build immutable exact source artifact in isolated candidate area; stage official Test without overwriting healthy previous release; verify exact Test frontend/backend SHA, health, authentication/negative cases, finance evidence and session persistence; then only if all pass merge/retest exact main, prepare independent rollback/canary, perform documented zero-downtime cutover and verify public Production. No forced bypass of failed evidence.
 
-## In progress
-- Release gates and isolated candidate build pending.
+## In progress (2026-11-09 KST)
+- Exact PR head `04af1a890723e64f37e8e46bfdda119655d73ab8`: local Nest/frontend builds and `.next/BUILD_ID` PASS; immutable isolated Test candidate staged. Official Test switched from Nov 4 baseline to candidate with preserve-and-rollback script; public backend/frontend exact SHA, public Test treasury disclosure, negative unauthenticated policy order 401, route smoke, service health and host identity PASS.
+- PR #2991 run #5972 CI SUCCESS (policy and runtime-check). PR review-ready and merged with expected SHA; new `origin/main` and merge commit `433cbb0ff67640a1e72a7704d4584c4992f05023`.
+- Re-built exact merged main; staged immutable Test release `test-v2026.11.09.1943-433cbb0ff676`; switched official Test with rollback retained. Initially host preflight identified process-start timestamp rounded before the mtime of newly written final Test environment file; a genuine restart after file creation (without timestamp editing) resolved it. Final public and host identity gates PASS, both version endpoints are exact merged-main SHA, Test services active, unauthenticated policy orders 401, no new sampled error-level service logs.
+- Read-only finance gate on current Production web app DB returned READY_FOR_OTHER_RELEASE_GATES with 43 balances, 0 unexplained projections, 0 unbalanced transactions/orphans; not a full Treasury or session certification.
+- Existing Production public Treasury HTTP 200 `RECONCILED` **fails** `safeTreasuryEdgeResponse`: `total_zero`, `available_zero`, `reserve_zero` false. No assertions about the correctness of the nonzero amounts were made. Evidence noted on P0 #2153.
+- Existing Production `/api/version` reports `b2980de529` while `/frontend-version` reports timestamp, and the active `production-current/.moneyverse-release.json` is missing. Production identity preflight returns ENOENT. Evidence noted on P0 #2144.
+- Preserved pre-cutover Nginx backup hash `14a7d19539ec01668c07c95b48d97aa43f77ae84e3f0a07a8b56d5b1e0ec7121`; existing production release `prod-v2026.11.09.1777-b2980de529` and services unchanged. Immutable `prod-v2026.11.09.1943-433cbb0ff676` candidate staged but NOT started or routed.
+- Legitimate authenticated pre-existing Test member session continuity and signed-in monetary proposal end-to-end workflow remain NOT TESTED, never inferred from anonymous 401 or DB auth row counts. Exact merged-main push CI #5973 and GitHub build candidate #8287 were IN PROGRESS at this documentation checkpoint; prior PR CI #5972 SUCCESS.
 
-## Finished
-- Pending exact Test + Production receipts; deployment status must never be inferred from a successful PR or an HTTP 200 alone.
+
+## Finished (code integrated, official Test verified, Production HOLD)
+- Approved bug-fix source is merged to GitHub main and deployed/verified at exact SHA in official Test; all original Test and Production runtime generations retained. No Production traffic switch, release symlink change, Nginx reload, Production service start/restart, migration, ledger or member-balance mutation occurred.
+- **Release stop:** Current positive fiscal public disclosure lacks narrow acceptance proof, existing Production provenance manifest and frontend source attestation are invalid, and authenticated/session continuity is not certified. Do not bypass those conditions for a cosmetic UI correction.
+- Existing P0 issues #2153 (treasury public truth) and #2144 (production identity) carry contemporary read-only receipts. Fix/certify before a new guarded rollout, then rerun exact-main CI, Test authenticated continuity, independent finance/supply/backup, prod canary, zero-downtime and postcutover public checks.
+- No rollback of Test was needed; rollback is the preexisting immutable candidate/Test artifact. Previous Production remains available and unchanged.
