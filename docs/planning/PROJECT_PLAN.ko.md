@@ -631,10 +631,10 @@
 - **근거:** [v600 작업 기록](../worklog/2026-10-14-authority-runtime-reconciliation-v600.md), [GitHub 업데이트](../updates/v2026.10.14.600-github.ko.md).
 
 
-> **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
+> **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)
 > **현재 통합 버전:** v2026.10.10.543
 > **구현·증거 동기화:** 2026-10-10 (v543/v542 통합 기록)
-> **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
+> **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > **기존 완료도 기록(역사적 증거, 현행 권위 아님):** [기획 공백 해소 및 수용증거 명세](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
@@ -3320,3 +3320,12 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 **PostgreSQL·트랜잭션:** 제안 추가 전용 custody_disclosure_recertification_events(tenant_id,review_id,event_id,decision,actor_id,source_revision,policy_epoch,hold_epoch,grant_epoch,key_epoch,revocation_epoch,recipient_binding_digest,worker_fence,created_at)에 테넌트 복합 FK, FORCE RLS, 결정 CHECK, UNIQUE(tenant_id,review_id,event_id), 활성 검토 부분 UNIQUE 및 (tenant_id,disclosure_id,created_at DESC) 인덱스 적용. 공개→검토 순서 잠금, 커밋 직전 세대 비교, CAS revision·작업자 펜싱, 결정·감사·Outbox 원자 기록. moneyverse_app 직접 쓰기 금지, migrator 소유 SECURITY DEFINER 경계 준수.
 **보안·품질·KPI:** 요청자·수신자·기존 승인자의 독립 심사 금지, 순환 위임·nonce 재사용·오래된 MFA·테넌트 침범·수신자/범위 확대·대량 유출 차단. 증빙 암호화·수신자 해시·비식별 내보내기·행위자/테넌트 제한, 관리자 noindex/no-store, 320px 키보드 접근·WCAG 2.2 AA·한영 오류 상태 동등성. 검토 기한 초과, 오래된 결정 차단, 무단 전달, 철회 후 차단 지연, 잘못된 ACTIVE 표시(목표 0) 측정.
 **회귀·배포·백로그:** 실제 PostgreSQL FORCE RLS, 심사자 경합, 만료 경계, 철회와 대기 전달 경합, 키 교체, 보존 세대 변경, 작업자 재시도, Outbox 장애, 테넌트 격리, 접근성·한국어 회귀. 기본 OFF, 별도 개발 브랜치, Test exact-SHA, 독립 QA·보안, 카나리, 철회 후 전달 0 검증, OFF 롤백(철회 토큰 재활성화 금지). P0 /srv/moneyverse→없는 prod-v600, 실제 Nginx 업스트림/배포 SHA, 독립 백업 복원·원장 대사 확인 전 운영 HOLD. P1 F675-297~306을 frontend/backend/frontend/src/app/app-api/DB와 대조. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000; 중복 제거·실근거 분류 BLOCKED/IN PROGRESS.
+
+
+### v2006 — F675-307 접근권한 재인증 예외의 독립 심사 (Feature Addition, 2026-11-10)
+**주기:** 이전 Feature Improvement v2004 → 현재 Feature Addition v2006 → 다음 Feature Improvement v2008. 문서 기획만 진행; `admin_custody_recert_exception_review_v1` 기본 OFF. 런타임/API/DB 미배포.
+**목적·권한·화면:** F675-306 재인증 거절·만료 후 긴급 예외가 필요하더라도 단일 관리자의 철회 우회를 금지한다. 준법 담당자가 관리자 > 증빙 > 영수증 공개 > 접근권한 재인증 > 예외에서 요청·비식별 사유 첨부·정책 비교·독립 승인/거절·철회·감사 증명 내보내기를 수행한다. 읽기 전용 감사자는 불변 이력을 확인하며 요청자·원 심사자·수신자는 승인 불가. 상태 REQUESTED → EVIDENCE_SEALED → SECOND_REVIEW → APPROVED_LIMITED / DENIED, 별도 EXPIRED/REVOKED/POLICY_BLOCKED/RETRYABLE_FAILURE. 시간 초과 시 자동 승인 금지.
+**API:** POST /api/v1/admin/evidence/disclosures/{disclosureId}/recertifications/{reviewId}/exceptions는 목적·법적 근거·제한 범위·기간·사유 해시·Idempotency-Key·If-Match 수신. GET /exceptions/{id}는 테넌트 비식별 ETag와 정책 세대 조회. POST /exceptions/{id}/decide는 독립 준법 권한·최신 MFA·nonce·원본 revision·정책/보존/키 세대 필요. POST /exceptions/{id}/revoke는 사유와 CAS 필수. 403/404/409/412/422/429/503 안전 차단, no-store, 타 테넌트 404.
+**DB·트랜잭션:** 제안 custody_recert_exception_requests(tenant_id,id,disclosure_id,recert_id,requester_id,reviewer_id,reason_digest,legal_basis_epoch,source_revision,scope_digest,valid_until,revision,state), 추가 전용 custody_recert_exception_events(tenant_id,id,exception_id,sequence,event_digest,actor_id,created_at). 테넌트 복합 FK·FORCE RLS·유효기간 CHECK·(tenant_id,exception_id,sequence) UNIQUE·재인증별 활성 예외 부분 UNIQUE·(tenant_id,disclosure_id,created_at DESC) 인덱스. 공개→재인증→예외 순 잠금, 커밋 시 원본/철회/정책 세대 재검사, CAS·감사/Outbox 원자성·작업자 펜싱. 기존 토큰 재활성화 금지, 독립 승인 후 수신자/범위/기간 제한 신규 권한만 발급.
+**보안·모바일·SEO·KPI:** 자기 승인·순환 위임·오래된 MFA·nonce 재사용·보존명령 우회·수신자 바꿔치기·테넌트 열거·범위 확대·대량 유출 차단. 증빙 암호화·수신자 해시·로그 비식별·사용자/테넌트 요청 제한. 관리자 noindex/no-store, 320px·키보드/스크린리더·WCAG 2.2 AA·한영 상태/오류 동등성. 무단 예외 발급 0, 철회 후 수신 0, 심사 지연 중앙값, 거절률 측정.
+**검증·배포·백로그:** 실제 PostgreSQL RLS·철회/승인 경합·만료 경계·이중 심사·정책/키 변경·Outbox 장애·멱등·테넌트 격리 및 모바일/a11y/한영 회귀. 추가형 마이그레이션과 플래그 OFF → 격리 Test exact-SHA → 독립 QA/보안 → 카나리, 실패 시 플래그 OFF로 롤백하고 불변 이력 보존. P0 prod-v600 대상 누락·운영 SHA/업스트림·독립 백업 복원·금융 원장 대사 검증 전 운영승격 금지. P1 F675-297~307 계약과 실제 frontend/backend/frontend/src/app/app-api/DB 대조 후 별도 개발 브랜치 구현. 외부 독립 레퍼런스 신규 검증 0건, 누적 UNKNOWN/10,000건, BLOCKED/IN PROGRESS.
