@@ -1,3 +1,6 @@
+## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
+PR #3000 merged SHA `a13a18cd70709a6f4df320d4d76ea834baae2331`, CI/Test/Production exact runtime PASSED. Fixed async approved order selection, unsupported MINT/TREASURY proposal 500 and mobile form; SQL344 guard routines handle admin policies/certificates without direct app certificate INSERT. Production BFF uses new 4574 backend; public Treasury 0 WLD/verified, user money unchanged; full before/after backups and SHA attestation. Two automatic rollback attempts recorded before verified v1947 Nginx 4574/4575 promotion. Certificate is not funded canonical WLD issuance. [Proof](releases/v2026.11.10.1948-mint-ui-prod.md).
+
 ## v2026.11.09.1946.3 — Mixed-verification publication CI hardening / Test-only evidence
 Exact e318 build and canaries PASS; actual Test DB verified CN/CODING publication at 23:19 KST, receipt present (Test only). Correct `no-unsafe-finally`, add deterministic unverified fallback test and Test/Production JSON path isolation. New exact CI/Production promotion pending.
 
