@@ -8,14 +8,19 @@
 - No database writes, user money changes, deployment, restart, scheduler enable, or article status changes authorized by this checkpoint.
 
 ## In progress
-- [ ] Map actual Nginx upstreams, current live backend/Next app identities, and publication job scheduling.
-- [ ] Probe public/localhost blog hubs, article pages, verified API, sitemap, canonical, robots, and ads.
-- [ ] Compare code and runtime artifacts to current `origin/main`; inspect the Android application's separate repository.
-- [ ] Root-cause confirmed failures, add regression test before any focused source correction, validate in isolated environment.
-- [ ] Recheck main and avoid concurrent agent changes; record source CI, Test, Production, and release state accurately.
+- [x] Map actual Nginx upstreams, current live backend/Next app identities, and publication job scheduling.
+- [x] Probe actual public-host local Nginx, isolated preview blog hubs, article pages, verified APIs, sitemap, canonical, robots, and ad loader. External HTTPS edge not independently verified.
+- [x] Compare code and runtime artifacts to `origin/main` and inspect the Android app GitHub repository; local Android checkout remains incomplete.
+- [x] Root-cause confirmed failures, add RED→GREEN tests before focused source correction, validate independent miniPC preview including official Test backend read-only data.
+- [x] Recheck main, rebase without clobbering concurrent work, open PR #2982, record CI/official Test/Production state. Official exact-SHA Test release and Production promotion remain pending.
 
-## Finished
-- PENDING.
+## Finished — source and isolated acceptance complete, official Test/Production HOLD
+- GitHub PR [#2982](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/2982) opened from isolated task branch on main `8db59f535d`. Candidate source `2f322cffff64f35b3bc54a200f379a7e80ae209c`; CI run `42590789314` in progress when last checked (classify and policy PASS; runtime-check in progress). No merge/Production deploy asserted.
+- Exact candidate SHA `2f322cffff64f35b3bc54a200f379a7e80ae209c` Next build PASS (BUILD_ID exact SHA). Standalone isolated frontend 127.0.0.1:4605 using **official Test backend 127.0.0.1:3100** (2 PUBLISHED receipts) passed nine local-host HTTP 200 routes: 4 hubs, 2 actual verified article pages, blog+index sitemaps, robots. Preview stopped. Earlier isolated preview against existing backend 3000 (12 PUBLISHED receipts) passed twelve HTTP 200 checks. Live Production backend 4504 also returns 12; no writes performed.
+- The live **Test** `test-main-backend/frontend.service` on 3100/3101 is independently healthy and serves historical Test app versions, **not this PR's exact SHA**; local candidate preview is not the official Test release. The public Production v1777 blog still redirects to `/tools`. No authenticated signed-in continuity, full CI, official exact-SHA Test promotion, new immutable deployment, edge TLS or zero-downtime public release has been proven. These remain release blockers under `docs/RELEASING.md`.
+- Owner's no-mandatory-review/verified automatic publication and no-auto-withdraw policy remains unchanged; v1419 timer remains disabled, generator quality/timeout failures unresolved. No DB schema, ledger, accounts, blog receipts, statuses, Nginx, production systemd or scheduled service changed.
+- Full notes: `docs/updates/v2026.11.09.1778-blog-internal.md`, `docs/updates/v2026.11.09.1778-blog-github.md`, `docs/changelog/2026-11-09-blog-visibility-v1778.md`; English/Korean paired and indexed.
+
 
 ## Midpoint 1 — verified running-route regression
 - Current Nginx config proxies public blog routes to current v1777 frontend **127.0.0.1:4505** and production backend to **127.0.0.1:4504**. Active frontend `/api/version` reports b2980de529, exactly the freshly fetched `main` SHA. The old v1625 unit is not the current public blog upstream; its failure is historical, not proof of a current proxy outage.
