@@ -1,6 +1,6 @@
 # Treasury & Social Insurance — New / Changed Plan Register and Comparison Index
 > **Initiative:** 2026-11-10 to 2026-11-11 06:00 Asia/Seoul
-> **Register version:** vTSI.2026.11.10.007 · **Status:** DRAFT / DOCS ONLY
+> **Register version:** vTSI.2026.11.10.008 · **Status:** DRAFT / DOCS ONLY
 > **Existing baseline:** [Frozen baseline](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.md) · [한국어](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md)
 > **Authority:** current [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), not this tracking document.
 
@@ -8,7 +8,7 @@
 | Category | Count | Meaning |
 |---|---:|---|
 | ADD (newly specified features) | 3 | One new proposal, not implemented |
-| MODIFY (changes to existing plans) | 3 | Historical QA-linked reconciliation amendment |
+| MODIFY (changes to existing plans) | 4 | Historical QA-linked reconciliation amendment |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
 | INTEGRATED into canonical plan | 0 | No incorporation or PR merge claimed |
@@ -18,6 +18,7 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 ## Comparison index (append on every actual planning cycle)
 | ID | Cycle A QA-fix / B New | Type | Existing document & section / immutable link | Previously planned behavior | Newly planned behavior / proposal link | Version / KST | Priority | State | Canonical integration PR |
 |---|---|---|---|---|---|---|---|---|---|
+| TSI-20261110-007 | A QA-fix | MODIFY | Baseline OPS1518-01/REL1518-04; TSI-005 | QA release evidence incomplete, E2E unavailable | Evidence freshness and QA attestation contract; canonical pending | v2020 / 07:08 | P0 | PROPOSED | PR #3006 |
 | TSI-20261110-001 | A QA-fix | MODIFY | [PROJECT_PLAN.md at baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) — FIN1518-03 | Treasury 552 unlinked, MINT/SWF provenance and divergent exploratory vs canonical balance probes unresolved | Propose read-only reconciliation evidence contract, deterministic snapshot and quarantine gate (details below) | vTSI.2026.11.10.004 / 01:05 | P0 | PROPOSED / canonical pending | PR #3006 tracking only |
 
 | TSI-20261110-003 | A QA-fix | MODIFY | Baseline PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03 at main edd709bc | Release SHA and Treasury source unverified | Immutable runtime-to-ledger provenance gate | v2012 / 03:05 | P0 | PROPOSED / canonical pending | PR #3006 |
@@ -136,3 +137,17 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **Test/acceptance (NOT RUN):** isolated synthetic unit crash/reboot/counter-reset, dependency failure, upstream switch and version drift; API RBAC/RLS/tenant isolation, CAS and duplicate run, outbox failure, redaction, no balance writes; mobile 320px, WCAG 2.2 AA, EN/KO parity, private noindex/no-store. Exact-SHA Test plus approved browser E2E and independent QA required before canary. Flag `ops_treasury_service_evidence_v1` OFF; rollback disables UI/collection and retains immutable evidence. P0 verify whether legacy process receives financial writes and reconcile ledger; P1 isolate restart cause, safe evidence collector and QA browser capability; P2 alert false-positive rate, time-to-triage. No service changes in planning run.
 - **Tracking:** baseline OPS1518-01/REL1518-04 → TSI-20261110-005 → canonical integration PENDING; Draft PR #3006, separate implementation PR required. Independent references new verified 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 | 2026-11-10 05:05 | A QA Feature Improvement | v2016 / vTSI.2026.11.10.006 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 | remote main unchanged at start | QA 04:15 / PR #3006 | TSI-005 PROPOSED; canonical pending; tests NOT RUN |
+
+
+### TSI-20261110-007 — Treasury/insurance QA evidence freshness and E2E attestation (MODIFY; A v2020)
+- **Recorded:** 2026-11-10 07:08 KST; v2020 / vTSI.2026.11.10.008; planning owner; QA reproduction, Dev A runtime, Dev B audit API, Dev C admin UI pending; **PROPOSED**, not implemented, canonical integration pending.
+- **Before/source:** immutable baseline main edd709bc (OPS1518-01, REL1518-04), TSI-003/005 release provenance and service evidence; these do not explicitly bind browser E2E attestation, approved test identity, evidence freshness and financial write-path proof to a single gate.
+- **Observed QA:** 2026-11-10 06:13 KST internal QA report: production/test homepage, health and version HTTP 200; both /api/version=a13a18cd versus main edd709bc; legacy unit NRestarts=195020 and auto-restart, broken prod-v600 symlink; no browser executable/Playwright or approved test account. Relative to 04:15 report 193670, counter delta +1350, but uptime/reset context not established. Financial integrity and root cause **UNVERIFIED**; do not claim user loss.
+- **Change / reproduction:** for each scoped Treasury/insurance release gate capture host, UTC time, environment, main/release/runtime SHA, upstream PID/executable digest, DB migration checksum, test identity authorization reference (not secrets), browser-run ID, E2E steps/screenshots/network redacted hashes, QA finding ID, ledger read-only provenance, evidence expiry. Distinguish missing browser runner from actual E2E FAIL. Require independent operator attestation, never infer PASS from HTTP 200.
+- **UX:** Admin > Operations > Treasury/Insurance > QA Evidence; badges NOT_RUN/BLOCKED/FAIL/INCONCLUSIVE/PASS, timestamps, expired evidence banner; Capture read-only, Attach approved E2E, Compare runtime, Escalate CTAs. Only authorized operators can attest; reviewer cannot self-approve. No public indexing; 320px, keyboard, WCAG 2.2 AA, EN/KO.
+- **Proposed APIs (NOT IMPLEMENTED):** POST /internal/ops/financial-qa-evidence-runs {scope,environment,expectedSha,idempotencyKey} -> 202; GET /internal/ops/financial-qa-evidence-runs/:id -> status/provenance; POST /internal/ops/financial-qa-evidence-runs/:id/attest {revision,reviewerId,evidenceDigest,decision} with If-Match, MFA and separation of duties. Errors 401/403/409/412/422/429/503; fail closed on missing/expired evidence.
+- **DB proposal:** ops_financial_qa_runs(tenant_id,run_id PK composite,scope,environment,expected_sha,observed_sha,status,expires_at,revision,created_at,unique(tenant_id,idempotency_key)); ops_financial_qa_events(tenant_id,run_id,event_seq composite FK,actor_id,event_digest,created_at); CHECK status/sha, indexes(tenant_id,status,expires_at), FORCE RLS, immutable append-only audit and atomic outbox; no financial writes.
+- **Safety and deployment:** default-OFF ops_financial_qa_attestation_v1; no change to existing financial flows until separately approved gate rollout; independently verify runtime SHA, isolated Test exact-SHA, PostgreSQL RLS and two-person release approval; if evidence absent HOLD promotion, not auto-disable live transactions. Roll back flag and UI only; never rewrite ledger or erase audit.
+- **Acceptance (NOT RUN):** browser unavailable => BLOCKED not PASS; version mismatch => INCONCLUSIVE/HOLD; expiry and forged attestation rejected; cross-tenant and self-attestation denied; idempotent retries; outbox crash/recovery; isolated approved E2E and backup restore required before release. P0 release identity and ledger provenance, P1 approved E2E runner and attestation API/UI, P2 deduplicated alert metrics and evidence freshness KPI. Independent references new verified 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- **Comparison:** baseline OPS1518-01/REL1518-04 + TSI-005 -> TSI-20261110-007 -> canonical section PENDING, Draft PR #3006; implementation/QA NOT VERIFIED.
+| 2026-11-10 07:08 | A QA Feature Improvement | v2020 / vTSI.2026.11.10.008 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 | QA 06:13, main unchanged at start | PR #3006 | PROPOSED; canonical pending; next B v2022 |

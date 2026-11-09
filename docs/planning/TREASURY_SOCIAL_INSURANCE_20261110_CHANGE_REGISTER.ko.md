@@ -19,6 +19,7 @@
 ## 기존 기획 ↔ 새 기획 비교 인덱스 (매시간 갱신)
 | ID | A QA 수정 / B 신규 | 분류 | 기존 문서 절·불변 링크 | 기존 설계 내용 | 새로운 내용·상세 기획 링크 | 버전·한국시간 | 우선순위 | 상태 | 실제 통합 PR |
 |---|---|---|---|---|---|---|---|---|---|
+| TSI-20261110-007 | A QA 보완 | MODIFY | 기준 OPS1518-01/REL1518-04, TSI-005 | 브라우저 E2E·증빙 유효기간 검증 미확인 | QA 증빙 신선도 및 독립 승인 계약 | v2020 / 07:08 | P0 | PROPOSED / 통합 대기 | PR #3006 |
 | TSI-20261110-001 | A QA 수정 | MODIFY | [기준 main 기획서 FIN1518-03](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) | 국고 미연계 552건, 탐색 24건/정규 0건은 과거 QA 주장 | 동일 스냅샷·SQL 버전 기반 읽기 전용 대사 증거 게이트 제안 | v2008 / 01:05 | P0 | PROPOSED, 통합 대기 | PR #3006 |
 | TSI-20261110-003 | A QA 수정 | MODIFY | 기준 PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03, main edd709bc | 운영 SHA·원장 출처 미검증 | 운영 프로세스·DB·원장 출처 증빙 게이트 | v2012 / 03:05 | P0 | PROPOSED / 통합 대기 | PR #3006 |
 | TSI-20261110-002 | B 신규 | ADD | [기준 NPS 문서](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) | 국민연금 제안은 존재하나 보험 간 자격변경 증빙함은 검증되지 않음 | 건강보험·연금 공통 자격변경 증빙 접수함 신규 제안 | v2010 / 02:05 | P1 | PROPOSED, 통합 대기 | PR #3006 |
@@ -128,7 +129,7 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 
 
 ### TSI-20261110-006 — 가상 연금·건강보험료 사전 산정 및 이의신청 징수 잠금 (ADD; B v2018)
-- **최초 기록:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.007; 직전 A v2016 → 현재 B v2018 → 다음 A v2020. 기획 담당, 개발 B/C·QA 배정 대기. P1 / PROPOSED / 통합기획서 미반영.
+- **최초 기록:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.008; 직전 A v2016 → 현재 B v2018 → 다음 A v2020. 기획 담당, 개발 B/C·QA 배정 대기. P1 / PROPOSED / 통합기획서 미반영.
 - **기존 대비:** 불변 기준 main edd709bcbe96f6f5ceca8372f244b632e8211242의 docs/NATIONAL_PENSION_SERVICE_SPEC.md 및 PROJECT_PLAN.md. TSI-002는 자격 증빙, TSI-004는 가상 보험급여 청구이며, 징수 전 보험료 산정 내역 확인과 이의신청 잠금은 별도 미정의 기능이다. 실제 구현·운영 E2E는 검증 불가. 요율은 현실 법정 요율이 아닌 버전별 게임 정책값이다.
 - **회원·관리자 흐름:** 보험 > 보험료 > 산정 미리보기에서 정책 버전, 가상 소득구간, 대상 기간, 정수 WLD 산정액, 상하한·지원액·납기 확인; 징수 전 '정정 요청'. 사업장은 권한 있는 직원의 집계만 열람. 관리자 > 보험 > 산정 관리에서 '근거 비교', '징수 잠금', '조정 승인', '이의신청 거절'. PREVIEWED→ASSESSED→DISPUTED→REVIEWING→CONFIRMED/ADJUSTED, 종료 CANCELLED/BLOCKED. 이의신청은 해당 산정건만 징수 차단하며 미리보기·심사 자체는 원장 차감 금지.
 - **제안 API(미구현):** POST /api/insurance/contribution-previews {fund,period,eligibilityEventId,policyVersion,idempotencyKey}; GET /api/insurance/contribution-previews/:id; POST /api/insurance/assessments/:id/disputes {reason,sourceRef,expectedRevision,idempotencyKey}; POST /internal/insurance/assessments/:id/decision {decision,approvedAmount,policyVersion,expectedRevision,nonce}. 회원 소유 범위 제한, 독립 insurance.assessment.review 권한·최근 MFA, 자기 승인 금지. 401/403/404/409/412/422/429/503 안전 차단.
@@ -137,3 +138,17 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **품질·출시:** 320px/WCAG 2.2 AA, 영한 동등, 비공개 noindex/no-store; 이의신청률·산정 오류율·중복 징수 방지·심사 지연 KPI. 테스트 미실행: 요율 경계·적용일·정수 반올림·상태 전이, 격리 PostgreSQL RLS/CAS/동시성·중복·Outbox 장애·이의신청/징수 경합·E2E(원장 변경 0건). 플래그 insurance_contribution_assessment_v1 기본 OFF; Test exact-SHA 및 독립 QA/보안 검증 뒤 점진 배포, 롤백은 OFF·감사 보존.
 - **백로그·이력:** P0 운영 출처·원장 대사 HOLD; P1 독립 구현과 런타임 확인; P2 개인정보 보호 KPI. 기준 NPS 정책 개념 → TSI-20261110-006 → 통합기획서 반영 대기, Draft PR #3006 기록 전용. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000건 BLOCKED/IN PROGRESS. 운영 변경 없음.
 | 2026-11-10 06:09 | B 신규 기능 | v2018 / vTSI.2026.11.10.007 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 1 / MODIFY 0 / REMOVE 0 / DEFER 0 | 시작·중간 main 동일 | PR #3006 | PROPOSED, 통합 대기, 테스트 미실행 |
+
+
+### TSI-20261110-007 — 국고·보험 QA 증빙 유효기간 및 E2E 독립 확인 게이트 (MODIFY; A v2020)
+- **최초 기록:** 2026-11-10 07:08 KST, v2020 / vTSI.2026.11.10.008, 기획 담당; QA 재현·개발 A 런타임·개발 B 감사 API·개발 C 관리자 화면은 담당 협의 대기. 상태 PROPOSED, 미구현, 통합기획서 미반영.
+- **기존 기준:** 불변 main edd709bc의 OPS1518-01/REL1518-04와 TSI-003/005에는 운영 출처·서비스 증빙이 있으나 승인된 브라우저 E2E, 테스트 계정 권한, 증빙 유효기간과 금융 쓰기 경로를 하나의 승인 게이트로 연결하는 명세는 불완전.
+- **QA 근거:** 2026-11-10 06:13 내부 QA: 운영·Test 홈페이지/헬스/버전 HTTP 200, 양쪽 /api/version=a13a18cd로 main edd709bc와 다름. 레거시 재시작 누적 195020회, 자동 재시작, prod-v600 링크 대상 없음. 브라우저 실행 파일·Playwright·승인된 테스트 계정 부재로 E2E BLOCKED. 04:15 기록 193670회 대비 +1350회이나 카운터 리셋·측정 조건 불명. 고객 손실·금융 원장 손상·근본원인은 검증 불가.
+- **변경·재현:** 국고/보험 릴리스별 호스트·UTC 시각·환경·main/릴리스/실행 SHA·업스트림 PID/실행 파일 해시·DB 마이그레이션 체크섬·테스트 계정 승인 참조(비밀 제외)·브라우저 실행 ID·마스킹된 E2E 증거 해시·QA 결함 ID·원장 읽기 전용 출처·증빙 만료를 수집. 브라우저 부재는 FAIL이 아닌 BLOCKED로 기록, HTTP 200만으로 PASS 금지.
+- **관리자 UX:** 운영 > 국고/보험 > QA 증빙, NOT_RUN/BLOCKED/FAIL/INCONCLUSIVE/PASS, 만료 배지와 시각; 읽기 전용 수집·승인된 E2E 첨부·실행 SHA 비교·상급 보고 CTA. 권한자만 독립 확인, 자기 승인 금지. 모바일 320px, 키보드, WCAG 2.2 AA, 한영 동등, 비공개 noindex.
+- **제안 API(미구현):** POST /internal/ops/financial-qa-evidence-runs {scope,environment,expectedSha,idempotencyKey} -> 202; GET /internal/ops/financial-qa-evidence-runs/:id; POST /internal/ops/financial-qa-evidence-runs/:id/attest {revision,reviewerId,evidenceDigest,decision}, If-Match/MFA/직무분리. 401/403/409/412/422/429/503 구분, 누락·만료 시 안전 차단.
+- **DB 제안:** ops_financial_qa_runs(tenant_id,run_id 복합 PK, 범위/환경/기대·관측 SHA/상태/만료/개정/시각, unique(tenant_id,idempotency_key)), ops_financial_qa_events(tenant_id,run_id,event_seq 복합 FK, 행위자·증빙 해시·시각). CHECK·상태/만료 인덱스·FORCE RLS·추가 전용 감사·원자적 Outbox. 금융 원장 쓰기 없음.
+- **안전·배포:** ops_financial_qa_attestation_v1 기본 OFF; 별도 승인 전 기존 금융 거래 흐름 변경 금지. 독립 실행 SHA·격리 Test exact-SHA·PostgreSQL RLS·2인 운영승격 확인 필수. 증빙 미확보 시 운영승격 HOLD(기존 거래 자동 중단 금지). 롤백은 플래그/UI만, 원장·감사 삭제 금지.
+- **수용기준(미실행):** 브라우저 부재 BLOCKED, SHA 불일치 INCONCLUSIVE/HOLD, 만료·위조 거부, 테넌트 간·자기 승인 거부, 멱등 재시도·Outbox 장애 복구, 승인된 브라우저 E2E·독립 백업 복원. P0 운영 출처/원장 대사, P1 E2E 실행기/API/화면, P2 경고 중복 억제·증빙 신선도 KPI. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- **비교:** 기준 OPS1518-01/REL1518-04 + TSI-005 → TSI-20261110-007 → 통합기획서 반영 대기, Draft PR #3006. 구현·QA 검증 완료 아님.
+| 2026-11-10 07:08 | A QA 기능 개선 | v2020 / vTSI.2026.11.10.008 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 | QA 06:13, 시작 main 동일 | PR #3006 | PROPOSED / 통합 대기, 다음 B v2022 |
