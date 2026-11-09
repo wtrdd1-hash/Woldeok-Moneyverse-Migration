@@ -24,6 +24,7 @@
 | TSI-20261110-002 | B 신규 | ADD | [기준 NPS 문서](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) | 국민연금 제안은 존재하나 보험 간 자격변경 증빙함은 검증되지 않음 | 건강보험·연금 공통 자격변경 증빙 접수함 신규 제안 | v2010 / 02:05 | P1 | PROPOSED, 통합 대기 | PR #3006 |
 
 ## 누적 상세 기록
+| TSI-20261110-006 | B 신규 | ADD | 기준 NPS 정책 edd709bc | 자격·급여 기능만 존재, 징수 전 산정 이의신청 미확인 | 가상 보험료 사전 산정·이의신청 잠금·독립 심사 | v2018 / 06:09 | P1 | PROPOSED / 통합 대기 | PR #3006 |
 ### TSI-20261110-001 — 국고 대사 증거 게이트 (A, MODIFY, P0)
 - 최초 2026-11-10 01:05 KST / v2008 / vTSI.002. FIN1518-03과 과거 QA v1394의 미연계 552건·탐색 24건/정규 0건을 동일 스냅샷에서 재현할 수 있도록 읽기 전용 대사 실행/발견 테이블, 내부 API 3개, 관리자 비교 화면과 추가 전용 감사 이벤트를 제안. 실제 운영 재현·근본원인·통합 반영은 미검증. 원장 자동 수정·발행 금지. 개발 B DB/API, C 관리자 UI, QA 재현, A 통합 담당 제안; 확정 배정 아님.
 ### TSI-20261110-002 — 보험 간 자격변경 증빙 접수함 (B, ADD, P1)
@@ -124,3 +125,15 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **미실행 수용 테스트:** 격리 환경 재시작·재부팅·카운터 리셋·의존성 장애·업스트림 전환·버전 불일치, API RBAC/RLS/테넌트 격리·동시성 CAS·중복 요청·Outbox 실패·비식별화·원장 변경 0건, 320px·WCAG 2.2 AA·한영 동등·noindex/no-store. 기능 플래그 `ops_treasury_service_evidence_v1` 기본 OFF; Test exact-SHA, 승인된 브라우저 E2E 및 독립 QA 후 카나리, 롤백은 수집/UI OFF·불변 감사 보존. P0 금융 쓰기 경로·원장 대사, P1 재시작 원인·증빙 수집기·브라우저 QA, P2 경보 오탐률/조사시간.
 - **연결:** 기준선 OPS1518-01/REL1518-04 → TSI-20261110-005 → 통합기획서 반영 대기 / Draft PR #3006. 신규 외부 독립 레퍼런스 검증 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 | 2026-11-10 05:05 | A QA 기능 보완 | v2016 / vTSI.2026.11.10.006 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 0 / MODIFY 1 / REMOVE 0 / DEFER 0 | 시작 시 main 동일 | QA 04:15 / PR #3006 | TSI-005 제안, 통합 대기, 테스트 미실행 |
+
+
+### TSI-20261110-006 — 가상 연금·건강보험료 사전 산정 및 이의신청 징수 잠금 (ADD; B v2018)
+- **최초 기록:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.007; 직전 A v2016 → 현재 B v2018 → 다음 A v2020. 기획 담당, 개발 B/C·QA 배정 대기. P1 / PROPOSED / 통합기획서 미반영.
+- **기존 대비:** 불변 기준 main edd709bcbe96f6f5ceca8372f244b632e8211242의 docs/NATIONAL_PENSION_SERVICE_SPEC.md 및 PROJECT_PLAN.md. TSI-002는 자격 증빙, TSI-004는 가상 보험급여 청구이며, 징수 전 보험료 산정 내역 확인과 이의신청 잠금은 별도 미정의 기능이다. 실제 구현·운영 E2E는 검증 불가. 요율은 현실 법정 요율이 아닌 버전별 게임 정책값이다.
+- **회원·관리자 흐름:** 보험 > 보험료 > 산정 미리보기에서 정책 버전, 가상 소득구간, 대상 기간, 정수 WLD 산정액, 상하한·지원액·납기 확인; 징수 전 '정정 요청'. 사업장은 권한 있는 직원의 집계만 열람. 관리자 > 보험 > 산정 관리에서 '근거 비교', '징수 잠금', '조정 승인', '이의신청 거절'. PREVIEWED→ASSESSED→DISPUTED→REVIEWING→CONFIRMED/ADJUSTED, 종료 CANCELLED/BLOCKED. 이의신청은 해당 산정건만 징수 차단하며 미리보기·심사 자체는 원장 차감 금지.
+- **제안 API(미구현):** POST /api/insurance/contribution-previews {fund,period,eligibilityEventId,policyVersion,idempotencyKey}; GET /api/insurance/contribution-previews/:id; POST /api/insurance/assessments/:id/disputes {reason,sourceRef,expectedRevision,idempotencyKey}; POST /internal/insurance/assessments/:id/decision {decision,approvedAmount,policyVersion,expectedRevision,nonce}. 회원 소유 범위 제한, 독립 insurance.assessment.review 권한·최근 MFA, 자기 승인 금지. 401/403/404/409/412/422/429/503 안전 차단.
+- **DB 제안:** insurance_contribution_assessments(tenant_id,assessment_id 복합 PK, subject_id,fund,period_start,period_end,eligibility_event_id,policy_version,amount_wld BIGINT CHECK >=0,revision,status,source_digest,created_at), 불변 insurance_assessment_events(테넌트 복합 FK). UNIQUE(tenant_id,subject_id,fund,period_start,period_end,policy_version), UNIQUE(tenant_id,subject_id,idempotency_key), (tenant_id,status,period_end) 인덱스, FORCE RLS. 정책 테이블은 적용기간 겹침 금지, 정수 분수 요율과 반올림 규칙·가상경제 표기를 명시. 추가형 마이그레이션만 허용.
+- **금융·보안:** 산정은 출금 아님. 후속 징수 시 자격·이의신청·정책 서명 스냅샷·잔액 재확인, 이중기장·UNIQUE 징수 참조·SERIALIZABLE/순서화 잠금·멱등성·트랜잭션 Outbox 필수. 실패 시 PENDING_RETRY/INCONCLUSIVE, 자동 납부 성공 처리 금지; 취소는 보상 분개만. WLD 발행·잔액 직접 수정 금지. 테넌트 격리, 사업장 임의 조회 금지, 비식별 불변 감사, 재시도 제한·중복 경고 억제.
+- **품질·출시:** 320px/WCAG 2.2 AA, 영한 동등, 비공개 noindex/no-store; 이의신청률·산정 오류율·중복 징수 방지·심사 지연 KPI. 테스트 미실행: 요율 경계·적용일·정수 반올림·상태 전이, 격리 PostgreSQL RLS/CAS/동시성·중복·Outbox 장애·이의신청/징수 경합·E2E(원장 변경 0건). 플래그 insurance_contribution_assessment_v1 기본 OFF; Test exact-SHA 및 독립 QA/보안 검증 뒤 점진 배포, 롤백은 OFF·감사 보존.
+- **백로그·이력:** P0 운영 출처·원장 대사 HOLD; P1 독립 구현과 런타임 확인; P2 개인정보 보호 KPI. 기준 NPS 정책 개념 → TSI-20261110-006 → 통합기획서 반영 대기, Draft PR #3006 기록 전용. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000건 BLOCKED/IN PROGRESS. 운영 변경 없음.
+| 2026-11-10 06:09 | B 신규 기능 | v2018 / vTSI.2026.11.10.007 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 1 / MODIFY 0 / REMOVE 0 / DEFER 0 | 시작·중간 main 동일 | PR #3006 | PROPOSED, 통합 대기, 테스트 미실행 |

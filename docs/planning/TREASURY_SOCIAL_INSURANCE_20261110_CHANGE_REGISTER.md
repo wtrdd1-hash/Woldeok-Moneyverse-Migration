@@ -1,14 +1,14 @@
 # Treasury & Social Insurance — New / Changed Plan Register and Comparison Index
 > **Initiative:** 2026-11-10 to 2026-11-11 06:00 Asia/Seoul
-> **Register version:** vTSI.2026.11.10.004 · **Status:** DRAFT / DOCS ONLY
+> **Register version:** vTSI.2026.11.10.007 · **Status:** DRAFT / DOCS ONLY
 > **Existing baseline:** [Frozen baseline](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.md) · [한국어](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md)
 > **Authority:** current [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), not this tracking document.
 
 ## Executive diff — initial state
 | Category | Count | Meaning |
 |---|---:|---|
-| ADD (newly specified features) | 1 | One new proposal, not implemented |
-| MODIFY (changes to existing plans) | 2 | Historical QA-linked reconciliation amendment |
+| ADD (newly specified features) | 3 | One new proposal, not implemented |
+| MODIFY (changes to existing plans) | 3 | Historical QA-linked reconciliation amendment |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
 | INTEGRATED into canonical plan | 0 | No incorporation or PR merge claimed |
@@ -23,6 +23,7 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 | TSI-20261110-003 | A QA-fix | MODIFY | Baseline PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03 at main edd709bc | Release SHA and Treasury source unverified | Immutable runtime-to-ledger provenance gate | v2012 / 03:05 | P0 | PROPOSED / canonical pending | PR #3006 |
 | TSI-20261110-002 | B New | ADD | [NPS baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) / baseline row 9 | Pension concept exists; no verified cross-fund eligibility event bridge | Propose cross-fund eligibility change inbox with evidence-only preview, no automatic collection (below) | vTSI.2026.11.10.004 / 02:05 | P1 | PROPOSED / canonical pending | PR #3006 tracking only |
 
+| TSI-20261110-006 | B New | ADD | Baseline NPS policy at edd709bc | Eligibility and benefit claims, no independently disputed pre-collection assessment | Versioned virtual contribution preview, dispute lock and independent review | v2018 / 06:09 | P1 | PROPOSED / canonical pending | PR #3006 |
 ### TSI-20261110-001 — Treasury reconciliation evidence gate (QA-linked amendment)
 - **First recorded:** 2026-11-10 01:05 KST; **cycle:** A / Feature Improvement; **version:** v2008 + vTSI.2026.11.10.004; **owner:** planning, implementation owner unassigned; **status:** PROPOSED, not integrated or implemented.
 - **Before / immutable source:** main `edd709bcbe96f6f5ceca8372f244b632e8211242`, `PROJECT_PLAN.md` FIN1518-03 and QA v1394 summary. Existing P0 flags 552 Treasury-unlinked records, MINT/SWF source uncertainty, 24 exploratory vs 0 canonical mismatches. Those are **historical QA assertions**, not fresh independently reproduced defects; live production impact UNKNOWN.
@@ -72,6 +73,19 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 | 2026-11-10 01:05 | A QA-based improvement (previous B v2006, next B v2010) | v2008 / vTSI.2026.11.10.004 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 0 / 1 / 0 / 0 | no change at start | PR #3006 / QA v1394 historical summary | PROPOSED; QA not rerun; canonical pending |
 
 | 2026-11-10 02:05 | B new addition (previous A v2008, next A v2012) | v2010 / vTSI.2026.11.10.004 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 1 / 0 / 0 / 0 | no change at mid-run | PR #3006; baseline NPS row 9 | PROPOSED; QA not rerun; canonical pending |
+
+
+### TSI-20261110-006 — Virtual pension/health contribution assessment preview and dispute lock (ADD; B v2018)
+- **Recorded:** 2026-11-10 06:09 KST; v2018 / vTSI.2026.11.10.007; previous A v2016, current B v2018, next A v2020; planning owner; Dev B/C/QA assignment pending. P1; PROPOSED; canonical integration NOT DONE.
+- **Baseline and difference:** frozen main edd709bcbe96f6f5ceca8372f244b632e8211242, docs/NATIONAL_PENSION_SERVICE_SPEC.md and PROJECT_PLAN.md. TSI-002 accepts eligibility evidence, TSI-004 handles virtual benefit claims; neither establishes an independently reviewable **pre-collection contribution assessment and dispute hold**. Current code and production E2E implementation UNVERIFIED. All rates are configurable game-only policy versions; never represent statutory Korean NHIS/NPS rates.
+- **Acceptance/user flow:** Insurance > Contributions > Preview assessment; member sees policy version, eligible virtual income band, period, rounded integer WLD assessment, cap/floor, subsidy and due date; CTA 'Request correction' before collection. Employer sees only authorized workforce aggregate, no private individual medical information. Admin > Insurance > Assessments: 'Compare source', 'Freeze collection', 'Approve adjustment', 'Reject dispute'. States PREVIEWED→ASSESSED→DISPUTED→REVIEWING→CONFIRMED/ADJUSTED; CANCELLED/BLOCKED terminal. Dispute locks collection only for the affected assessment, not unrelated funds. No charge on preview or review.
+- **API proposal (NOT IMPLEMENTED):** POST /api/insurance/contribution-previews {fund,period,eligibilityEventId,policyVersion,idempotencyKey} -> 202 previewId/amount/status; GET /api/insurance/contribution-previews/:id owner-scoped; POST /api/insurance/assessments/:id/disputes {reason,sourceRef,expectedRevision,idempotencyKey}; POST /internal/insurance/assessments/:id/decision {decision,approvedAmount,policyVersion,expectedRevision,nonce}. 401/403/404/409/412/422/429/503 fail closed. Independent insurance.assessment.review RBAC + recent MFA; self approval prohibited.
+- **DB proposal:** insurance_contribution_assessments(tenant_id,assessment_id composite PK,subject_id,fund,period_start,period_end,eligibility_event_id,policy_version,amount_wld BIGINT CHECK >=0,revision,status,source_digest,created_at); insurance_assessment_events(tenant-qualified FK,immutable actor/action/digest/time). UNIQUE(tenant_id,subject_id,fund,period_start,period_end,policy_version), UNIQUE(tenant_id,subject_id,idempotency_key), index(tenant_id,status,period_end), FORCE RLS; separate versioned policy table with effective-range overlap exclusion, integer rational rates, explicit rounding and game-only labels. Additive migration, no backfill ledger mutations.
+- **Financial invariants:** assessment is NOT a ledger debit. Later collection requires fresh eligibility, dispute-free state, signed policy snapshot, sufficient funds and separately approved balanced double-entry transaction; UNIQUE collection reference, SERIALIZABLE/ordered locks, idempotency and transactional outbox. Failed collection -> PENDING_RETRY/INCONCLUSIVE, never silently mark PAID; reversals by compensating journal only. No WLD mint/balance rewriting.
+- **Security/UX/ops:** tenant isolation, no arbitrary employer lookup, redacted immutable audit, bounded retry and deduplicated alerts, 320px responsive/WCAG 2.2 AA, EN/KO parity, private noindex/no-store. KPIs disputed rate, assessment error rate, duplicate collection prevention, median review time; privacy-safe aggregation.
+- **Verification/rollout:** NOT RUN. Unit policy boundaries, effective date, integer rounding and state machine; isolated PostgreSQL RLS/CAS/concurrency, duplicate submissions, outbox crash, dispute vs collection race, tenant isolation; E2E preview→dispute→independent decision with zero ledger writes; exact-SHA Test and independent QA/security gate before canary. Flag insurance_contribution_assessment_v1 OFF; rollback flag OFF while preserving audit. P0 existing production provenance/reconciliation HOLD; P1 implement isolated contracts and verify real runtime; P2 metrics. External independent references newly validated 0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS.
+- **Comparison:** baseline NPS policy concept → TSI-20261110-006 → canonical section pending; Draft PR #3006 tracking only, no implementation PR/commit. No production changes.
+| 2026-11-10 06:09 | B Feature Addition | v2018 / vTSI.2026.11.10.007 | edd709bcbe96f6f5ceca8372f244b632e8211242 | ADD 1 / MODIFY 0 / REMOVE 0 / DEFER 0 | no main change at start/mid | PR #3006 | PROPOSED, canonical pending, tests NOT RUN |
 
 ## Closeout 2026-11-11 05:05 KST (fill using executed results only)
 - Baseline corrections:
