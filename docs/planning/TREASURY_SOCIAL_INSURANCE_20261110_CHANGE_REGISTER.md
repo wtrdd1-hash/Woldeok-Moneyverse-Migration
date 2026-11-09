@@ -1,6 +1,6 @@
 # Treasury & Social Insurance — New / Changed Plan Register and Comparison Index
 > **Initiative:** 2026-11-10 to 2026-11-11 06:00 Asia/Seoul
-> **Register version:** vTSI.2026.11.10.003 · **Status:** DRAFT / DOCS ONLY
+> **Register version:** vTSI.2026.11.10.004 · **Status:** DRAFT / DOCS ONLY
 > **Existing baseline:** [Frozen baseline](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.md) · [한국어](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md)
 > **Authority:** current [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), not this tracking document.
 
@@ -8,7 +8,7 @@
 | Category | Count | Meaning |
 |---|---:|---|
 | ADD (newly specified features) | 1 | One new proposal, not implemented |
-| MODIFY (changes to existing plans) | 1 | Historical QA-linked reconciliation amendment |
+| MODIFY (changes to existing plans) | 2 | Historical QA-linked reconciliation amendment |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
 | INTEGRATED into canonical plan | 0 | No incorporation or PR merge claimed |
@@ -18,12 +18,13 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 ## Comparison index (append on every actual planning cycle)
 | ID | Cycle A QA-fix / B New | Type | Existing document & section / immutable link | Previously planned behavior | Newly planned behavior / proposal link | Version / KST | Priority | State | Canonical integration PR |
 |---|---|---|---|---|---|---|---|---|---|
-| TSI-20261110-001 | A QA-fix | MODIFY | [PROJECT_PLAN.md at baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) — FIN1518-03 | Treasury 552 unlinked, MINT/SWF provenance and divergent exploratory vs canonical balance probes unresolved | Propose read-only reconciliation evidence contract, deterministic snapshot and quarantine gate (details below) | vTSI.2026.11.10.003 / 01:05 | P0 | PROPOSED / canonical pending | PR #3006 tracking only |
+| TSI-20261110-001 | A QA-fix | MODIFY | [PROJECT_PLAN.md at baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) — FIN1518-03 | Treasury 552 unlinked, MINT/SWF provenance and divergent exploratory vs canonical balance probes unresolved | Propose read-only reconciliation evidence contract, deterministic snapshot and quarantine gate (details below) | vTSI.2026.11.10.004 / 01:05 | P0 | PROPOSED / canonical pending | PR #3006 tracking only |
 
-| TSI-20261110-002 | B New | ADD | [NPS baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) / baseline row 9 | Pension concept exists; no verified cross-fund eligibility event bridge | Propose cross-fund eligibility change inbox with evidence-only preview, no automatic collection (below) | vTSI.2026.11.10.003 / 02:05 | P1 | PROPOSED / canonical pending | PR #3006 tracking only |
+| TSI-20261110-003 | A QA-fix | MODIFY | Baseline PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03 at main edd709bc | Release SHA and Treasury source unverified | Immutable runtime-to-ledger provenance gate | v2012 / 03:05 | P0 | PROPOSED / canonical pending | PR #3006 |
+| TSI-20261110-002 | B New | ADD | [NPS baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) / baseline row 9 | Pension concept exists; no verified cross-fund eligibility event bridge | Propose cross-fund eligibility change inbox with evidence-only preview, no automatic collection (below) | vTSI.2026.11.10.004 / 02:05 | P1 | PROPOSED / canonical pending | PR #3006 tracking only |
 
 ### TSI-20261110-001 — Treasury reconciliation evidence gate (QA-linked amendment)
-- **First recorded:** 2026-11-10 01:05 KST; **cycle:** A / Feature Improvement; **version:** v2008 + vTSI.2026.11.10.003; **owner:** planning, implementation owner unassigned; **status:** PROPOSED, not integrated or implemented.
+- **First recorded:** 2026-11-10 01:05 KST; **cycle:** A / Feature Improvement; **version:** v2008 + vTSI.2026.11.10.004; **owner:** planning, implementation owner unassigned; **status:** PROPOSED, not integrated or implemented.
 - **Before / immutable source:** main `edd709bcbe96f6f5ceca8372f244b632e8211242`, `PROJECT_PLAN.md` FIN1518-03 and QA v1394 summary. Existing P0 flags 552 Treasury-unlinked records, MINT/SWF source uncertainty, 24 exploratory vs 0 canonical mismatches. Those are **historical QA assertions**, not fresh independently reproduced defects; live production impact UNKNOWN.
 - **Change / why:** turn ambiguous aggregate failures into a reproducible, read-only reconciliation workflow; do not auto-adjust balances, mint WLD or treat different query scopes as fraud. Priority P0 because erroneous settlement may affect virtual balances. No new financial feature claimed.
 - **Reproduction evidence required:** environment (production/test/dev), immutable frontend/backend/DB migration SHA, SQL/query revision, tenant and account cohort, transaction cut-off, isolation level and single snapshot identifier; expected: identical opening + signed postings = closing balance and central/subledger totals; actual: QA summary reports 552 unlinked and 24-vs-0 probe divergence, with no shared snapshot proof. Root cause **UNVERIFIED**.
@@ -36,7 +37,7 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 - **Cross-team:** no runtime edits; Dev B owns future DB/API proposal, Dev C future admin UX, QA evidence reproduction, Dev A integration; coordinate via separate implementation PR. English/Korean register only; canonical integration pending.
 
 ### TSI-20261110-002 — Cross-fund eligibility change evidence inbox (NEW; B)
-- **First recorded:** 2026-11-10 02:05 KST; v2010 / vTSI.2026.11.10.003; ADD; P1; planning owner, Dev B/C and QA unassigned; **PROPOSED**, canonical NOT integrated. Previous B v2006 → A v2008 → current B v2010 → next A v2012.
+- **First recorded:** 2026-11-10 02:05 KST; v2010 / vTSI.2026.11.10.004; ADD; P1; planning owner, Dev B/C and QA unassigned; **PROPOSED**, canonical NOT integrated. Previous B v2006 → A v2008 → current B v2010 → next A v2012.
 - **Baseline/before:** frozen baseline row 9 references `docs/NATIONAL_PENSION_SERVICE_SPEC.md` at main `edd709bcbe96f6f5ceca8372f244b632e8211242`; retirement/social-security mechanics are proposed, but a cross-fund eligibility evidence inbox is not established by this source. Health insurance implementation and live QA remain **UNVERIFIED**. This is a game-world virtual-economy proposal, not a claim about Korean statutory eligibility or real contribution rates.
 - **Purpose/acceptance:** allow a member or authorized employer to submit a change in virtual eligibility (join, exit, income-band or employer link) and let independent insurance administrators verify source evidence before separate health/pension modules compute future charges. Never mutate ledger, grant benefits, or issue refunds on intake.
 - **UX:** member Insurance > Eligibility > 'Report change' CTA; employer scoped employee roster > 'Submit change'; admin Insurance > Evidence inbox > 'Compare source', 'Request correction', 'Approve effective date', 'Reject'. States `DRAFT → SUBMITTED → EVIDENCE_PENDING → IN_REVIEW → ACCEPTED/REJECTED`, plus `WITHDRAWN`, `EXPIRED`, `BLOCKED`. Show virtual effective date, source authority, and downstream pending impact, not a promised real-world rate. 320px responsive, keyboard focus/labels and WCAG 2.2 AA; private pages noindex/no-store.
@@ -68,9 +69,9 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 |---|---|---|---|---|---|---|---|
 | 2026-11-10, initialization | Setup, not an A/B cycle | vTSI.2026.11.10.001 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 0 / 0 / 0 / 0 | Not claimed | Draft branch and pending PR | Baseline index and change register scaffold only |
 
-| 2026-11-10 01:05 | A QA-based improvement (previous B v2006, next B v2010) | v2008 / vTSI.2026.11.10.003 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 0 / 1 / 0 / 0 | no change at start | PR #3006 / QA v1394 historical summary | PROPOSED; QA not rerun; canonical pending |
+| 2026-11-10 01:05 | A QA-based improvement (previous B v2006, next B v2010) | v2008 / vTSI.2026.11.10.004 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 0 / 1 / 0 / 0 | no change at start | PR #3006 / QA v1394 historical summary | PROPOSED; QA not rerun; canonical pending |
 
-| 2026-11-10 02:05 | B new addition (previous A v2008, next A v2012) | v2010 / vTSI.2026.11.10.003 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 1 / 0 / 0 / 0 | no change at mid-run | PR #3006; baseline NPS row 9 | PROPOSED; QA not rerun; canonical pending |
+| 2026-11-10 02:05 | B new addition (previous A v2008, next A v2012) | v2010 / vTSI.2026.11.10.004 | `edd709bcbe96f6f5ceca8372f244b632e8211242` | 1 / 0 / 0 / 0 | no change at mid-run | PR #3006; baseline NPS row 9 | PROPOSED; QA not rerun; canonical pending |
 
 ## Closeout 2026-11-11 05:05 KST (fill using executed results only)
 - Baseline corrections:
@@ -84,3 +85,17 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 
 ## Editing and governance
 Preserve this register's past entries when refreshing main. Append new IDs; correct errors through a visible correction row. Keep English/Korean semantically equivalent. Each cycle compares old source first, distinguishes historical features from genuine additions, and does not change production code or money. New proposals require review and then canonical plan integration; DRAFT is not approval.
+### TSI-20261110-003 — Treasury release-to-ledger provenance gate
+- **Recorded:** 2026-11-10 03:05 KST / A Feature Improvement / v2012 / vTSI.004 / MODIFY / P0 / planning owner, implementation/QA owners unassigned / PROPOSED.
+- **Before:** Baseline PROJECT_PLAN.md OPS1518-01, REL1518-04, FIN1518-03 require exact-SHA release, restoration and Treasury provenance but lack a single operator evidence handoff linking actual Nginx process, database migrations and immutable ledger source.
+- **QA evidence:** miniPC QA report 2026-11-10 02:16 KST: Production and Test HTTP 200, both /api/version=a13a18cd70709a6f4df320d4d76ea834baae2331 versus main edd709bcbe96f6f5ceca8372f244b632e8211242; legacy backend 192310 restarts, browser E2E BLOCKED. /srv/moneyverse symlink target absent on miniPC. Neither outage nor ledger corruption proven. Root cause and active executable mapping UNVERIFIED. PR #3007 separately proposes Treasury mint/SWF runtime changes; no overlap.
+- **Reproduction:** collect timestamp/host/health/version, Nginx upstream PID/cwd/executable SHA, release manifest, migration checksums, read-only double-entry Treasury source hashes and isolated Test exact-SHA under one run ID. Expected approved immutable runtime/DB/ledger provenance; observed version difference and broken symlink only, active process mapping not yet established.
+- **Admin UX:** Treasury > Release & Ledger Evidence, UNVERIFIED/INCONCLUSIVE/MATCHED/BLOCKED, read-only Capture Evidence, Compare Test SHA, Escalate CTAs; never Force Reconcile or Mint. 320px, keyboard, WCAG 2.2 AA, private noindex/no-store.
+- **API (proposed, not implemented):** POST /internal/treasury/provenance-runs (expectedSha,migrationSet,scope,idempotencyKey) → 202 runId; GET /internal/treasury/provenance-runs/:id → hashes, evidence, status; POST /internal/treasury/provenance-runs/:id/escalate → audit ID. Service-only capture, treasury.provenance.read/escalate RBAC, MFA, 401/403/409/422/429/503, rate limiting.
+- **DB proposal:** append-only treasury_release_provenance_runs/events, tenant-qualified PK/FK, unique(tenant_id,idempotency_key), index(tenant_id,status,created_at), SHA256/status CHECK, FORCE RLS, transactional audit outbox and worker fencing. Read-only REPEATABLE READ snapshot compares central/subledger and receipt source, integer WLD, separate missing evidence from mismatch; no financial writes.
+- **Security/deploy:** default-OFF admin_treasury_release_provenance_v1; UNKNOWN fails closed in newly gated approval workflow, no retroactive changes; two-person escalation, deduplicated hashed alerts, redacted audit, additive migration and feature-OFF rollback retaining evidence. No production edits.
+- **Acceptance (NOT RUN):** isolated Test exact-SHA and independent restore; prove PID→executable SHA, migrations and Treasury source; test broken symlink, timeout, idempotency, tenant isolation, concurrency, read-only invariance and safe-account E2E. P0 release/settlement HOLD, P1 API/DB/admin UI, P2 false-alert and evidence latency KPI. Independent QA required. Canonical integration pending, PR #3006 tracking only.
+- **Coordination:** QA reproduction, Dev A runtime provenance, Dev B API/DB, Dev C admin UX proposed; do not touch PR #3007–3009 runtime work.
+
+### Cycle log / 03:05 KST
+Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE 0 / DEFER 0 / INTEGRATED 0. QA/E2E unverified.

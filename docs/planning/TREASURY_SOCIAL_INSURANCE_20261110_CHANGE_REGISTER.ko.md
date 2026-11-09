@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.003 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.004 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -9,7 +9,7 @@
 | 분류 | 건수 | 의미 |
 |---|---:|---|
 | ADD 새 기능 기획 | 1 | 신규 제안 1건, 미구현 |
-| MODIFY 기존 기획 수정 | 1 | 직전 A회차 국고 대사 보완안 |
+| MODIFY 기존 기획 수정 | 2 | 직전 A회차 국고 대사 보완안 |
 | REMOVE 기존 기획 삭제 | 0 | 삭제 제안 없음 |
 | DEFER 보류 | 0 | 보류 기록 없음 |
 | 통합기획서 반영 완료 | 0 | 실제 병합·반영을 주장하지 않음 |
@@ -20,6 +20,7 @@
 | ID | A QA 수정 / B 신규 | 분류 | 기존 문서 절·불변 링크 | 기존 설계 내용 | 새로운 내용·상세 기획 링크 | 버전·한국시간 | 우선순위 | 상태 | 실제 통합 PR |
 |---|---|---|---|---|---|---|---|---|---|
 | TSI-20261110-001 | A QA 수정 | MODIFY | [기준 main 기획서 FIN1518-03](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) | 국고 미연계 552건, 탐색 24건/정규 0건은 과거 QA 주장 | 동일 스냅샷·SQL 버전 기반 읽기 전용 대사 증거 게이트 제안 | v2008 / 01:05 | P0 | PROPOSED, 통합 대기 | PR #3006 |
+| TSI-20261110-003 | A QA 수정 | MODIFY | 기준 PROJECT_PLAN.md OPS1518-01/REL1518-04/FIN1518-03, main edd709bc | 운영 SHA·원장 출처 미검증 | 운영 프로세스·DB·원장 출처 증빙 게이트 | v2012 / 03:05 | P0 | PROPOSED / 통합 대기 | PR #3006 |
 | TSI-20261110-002 | B 신규 | ADD | [기준 NPS 문서](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/NATIONAL_PENSION_SERVICE_SPEC.md) | 국민연금 제안은 존재하나 보험 간 자격변경 증빙함은 검증되지 않음 | 건강보험·연금 공통 자격변경 증빙 접수함 신규 제안 | v2010 / 02:05 | P1 | PROPOSED, 통합 대기 | PR #3006 |
 
 ## 누적 상세 기록
@@ -70,7 +71,7 @@
 ## 문서 관리 원칙
 기존 기록은 수정하여 지우지 않고 새 행·수정 이력으로 보존한다. 매 회차 기존 기획과 대조한 뒤 신규 기능과 기존 수정 사항을 구분한다. 영문과 한국어를 동등하게 관리한다. 초안은 승인·구현·운영 승격을 의미하지 않는다. 기획서는 상위 통합기획서에 리뷰 후 반영한다.
 
-## 2026-11-10 01:05 KST — A회차 QA 기반 보완, v2008 / vTSI.2026.11.10.003
+## 2026-11-10 01:05 KST — A회차 QA 기반 보완, v2008 / vTSI.2026.11.10.004
 **TSI-20261110-001 | MODIFY | P0 | PROPOSED | 통합기획서 미반영.** 기존 기준선: main `edd709bcbe96f6f5ceca8372f244b632e8211242`의 `PROJECT_PLAN.md` FIN1518-03. QA v1394 문서상 국고 미연계 552건, 탐색 24건 대 정규 0건 불일치, MINT/SWF 출처 미검증. 이번 회차에서 실운영 재현은 하지 않았으며 실제 원인·영향은 **검증 불가**이다.
 
 **개정안:** 잔액을 자동 수정하거나 WLD를 발행하지 않고, 동일 DB 스냅샷·SQL 버전·계정 범위·마감시각으로 중앙/보조 원장과 거래 출처를 읽기 전용 대사한다. 관리자 국고 > 대사 화면에서 실행 ID, 근거 해시, `PENDING/MATCHED/DISCREPANCY/INCONCLUSIVE/BLOCKED`를 표시하고 비식별 근거 내보내기·동일 스냅샷 재실행·독립 담당자 이관 CTA를 제공한다. 공개 검색 제외, 320px·키보드 접근성 지원.
@@ -85,3 +86,18 @@
 
 ## 2026-11-10 02:05 KST 회차 기록
 - Previous A v2008 → Current B v2010 → Next A v2012. ADD 1, MODIFY 누적 1, REMOVE 0, DEFER 0, INTEGRATED 0. 기준선 불변; main edd709b 확인. PR #3006은 문서 추적만 수행하며 QA/구현/배포 완료를 뜻하지 않음.
+
+### TSI-20261110-003 — 국고 배포·원장 출처 증빙 게이트
+- 2026-11-10 03:05 KST / A 기능 개선 / v2012 / vTSI.004 / MODIFY / P0 / 담당 기획, 개발·QA 배정 미확정 / PROPOSED.
+- **기존:** 기준 통합기획서 OPS1518-01·REL1518-04·FIN1518-03의 운영 SHA·정산 출처·독립 복원 HOLD. 기존 계획에는 실제 Nginx 프로세스와 국고 원장 출처를 하나의 불변 증거로 연결하는 관리자 검토 흐름이 부족.
+- **QA 근거:** miniPC QA 2026-11-10 02:16 KST: 운영/Test HTTP 200, 양쪽 /api/version=a13a18cd70709a6f4df320d4d76ea834baae2331, main=edd709bcbe96f6f5ceca8372f244b632e8211242, 레거시 백엔드 재시작 192310, 브라우저 E2E BLOCKED. /srv/moneyverse 심볼릭 링크 대상 부재도 확인. 실제 서비스 장애·원장 훼손은 증명되지 않음. 근본원인 UNVERIFIED. 별도 PR #3007의 국고 발행·SWF 수정과 중복 구현 금지.
+- **재현:** 요청 시각·호스트·health/version·Nginx upstream/PID/cwd/실행 SHA·릴리스 매니페스트·마이그레이션 체크섬·국고 이중기장 출처 해시·Test exact-SHA를 동일 실행 ID로 수집. 기대: 승인 릴리스/DB/원장 출처 일치. 실제: 버전 차이·링크 손상 관측, 실행 프로세스 매핑 미확인.
+- **화면:** 관리자 국고 > 배포·원장 증빙, UNVERIFIED/INCONCLUSIVE/MATCHED/BLOCKED, 읽기 전용 증빙 수집·Test SHA 비교·에스컬레이션 CTA. 원장 조정·발행 버튼 없음. 320px, 키보드, WCAG 2.2 AA, noindex/no-store.
+- **API(미구현):** POST /internal/treasury/provenance-runs (expectedSha,migrationSet,scope,idempotencyKey) → 202 runId; GET /internal/treasury/provenance-runs/:id → 증빙·출처·상태; POST /internal/treasury/provenance-runs/:id/escalate → 감사 ID. 서비스 전용 수집, RBAC treasury.provenance.read/escalate, MFA, 401/403/409/422/429/503, 요청 제한.
+- **DB(제안):** 추가 전용 treasury_release_provenance_runs/events, 테넌트 복합 PK/FK, unique(tenant_id,idempotency_key), index(tenant_id,status,created_at), SHA256/상태 CHECK, FORCE RLS, 감사 outbox 원자성·작업자 펜싱. 읽기 전용 REPEATABLE READ로 중앙·보조원장/영수증 출처 비교, 정수 WLD, 불일치와 증빙 누락 분리, 금액·잔액 변경 금지.
+- **보안·배포:** 기능 플래그 admin_treasury_release_provenance_v1 기본 OFF, 신규 승인 워크플로에서 UNKNOWN은 실패 차단. 2인 에스컬레이션, 해시별 경고 중복 억제, 비식별 감사, 추가형 마이그레이션·OFF 롤백(감사 보존), 운영 변경 없음.
+- **수용 기준/테스트 미실행:** 격리 Test exact-SHA, 독립 백업 복원, 실제 PID→실행 SHA, 마이그레이션·원장 출처 증명, 깨진 링크/시간초과/중복 요청/테넌트 격리/동시성/읽기 전용 원장 불변/E2E. P0 운영 출처·정산 보류, P1 관리자 API/DB/UI, P2 경고 오탐률·증빙 지연 KPI. QA 독립 재검증 필요. 통합 기획서 반영 0건, PR #3006 기록용.
+- **업무 분리:** QA 실제 재현, 개발 A 배포 출처, B API/DB, C 관리자 UI 제안; PR #3007~3009 런타임 변경 침범 금지.
+
+### 회차 기록 / 03:05 KST
+Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE 0 / DEFER 0 / INTEGRATED 0. QA/E2E 미검증.
