@@ -110,7 +110,7 @@ export function AdminSalaryDisburseDialog() {
           💼 관리자 임금 지급
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base font-bold">국고 관리자 임금 복식부기 실지급</DialogTitle>
           <DialogDescription className="text-xs">

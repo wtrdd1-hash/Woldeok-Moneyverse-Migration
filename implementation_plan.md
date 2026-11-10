@@ -3028,3 +3028,25 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
   - `scheduler.ts`에 `pension.hourly_payout_sweep` 1시간 기초연금 자동 지급 작업 활성화.
 - **문서화**:
   - `docs/worklog/2026-11-10-treasury-admin-salary-and-mint-funding.ko.md` 작업 일지 영구 보존.
+
+
+---
+
+## 🏛️ [v300 Specification] 국고 관리자 임금 지급 및 조폐국 충전 UI 연동 & 7대 스킬 체계 확립 완결
+
+### 1. 주요 구현 및 완료 내역
+- **프론트엔드 국고 관리자 UI (`frontend/src/app/admin/treasury/`)**:
+  - `AdminSalaryDisburseDialog`: 관리자 임금 복식부기 실지급 모달 구현 및 텔레그램/디스코드 6자리 OTP 연동.
+  - `AdminMintTopupDialog`: 조폐국 화폐발행 중앙 국고 즉시 충전 모달 구현 및 2FA 연동.
+  - `treasury-view.tsx`: 재정 관제(Fiscal Operations) 툴바에 임금 지급 및 조폐국 충전 버튼 마운트.
+  - `admin-salary-and-mint-dialogs.test.tsx`: 신규 모달 컴포넌트 렌더링 및 트리거 단위 테스트 작성 (2건 전수 통과).
+- **테스트 및 프로덕션 빌드 검증**:
+  - 국고 관리자 테스트 슈트 9개 파일 33건 테스트 전수 통과.
+  - 신규 다이얼로그 테스트 2건 전수 통과 (총 35건 통과).
+  - Next.js 16.4.2 전체 599개 페이지 프로덕션 빌드 성공 (`next build --webpack`).
+- **7대 스킬 및 Felo 오픈소스 스킬 통합**:
+  - `skill-architecture-router`: 도메인 지식, 도구 래퍼, 역질문, 생성기, 검토자, 파이프라인, 메타 스킬 라우팅.
+  - `felo-agent-skills`: Felo AI 오픈소스 코딩 에이전트 스킬 통합.
+- **Git 형상 관리 및 운영 승격**:
+  - 원격 커밋: `e10e16701d`
+  - 로컬 커밋: `20e44eb3`
