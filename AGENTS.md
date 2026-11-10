@@ -484,3 +484,65 @@ reason and the test fails without one.
 | Silencing a gate to make it green | The gate stops meaning anything | Fix the finding. `postcss` was pinned, not exempted. |
 | `pg_catalog.greatest` / `least` / `coalesce` / `nullif` / `extract` | `function pg_catalog.greatest(...) does not exist`, or a syntax error at `FROM` | They are SQL constructs, not functions. Write them bare — `search_path` does not change what they mean. In a plpgsql body it fails at execution, not at deploy: 054 exists because three background jobs failed that way for weeks. |
 | A plpgsql OUT parameter sharing a column name | 42702 at run time, from `ON CONFLICT (…)` or an unqualified reference | plpgsql substitutes parameters into the conflict target too. Rename the OUT parameter, or drop the target when the table has one constraint. |
+
+---
+
+# Development Operating Rules
+
+## Core Principles
+- Prioritize correctness, minimal changes, and token efficiency.
+- Do not invent requirements, APIs, dependencies, or test results.
+- Treat approved specifications as the source of truth.
+- Preserve existing architecture unless changes are necessary.
+
+## Context Management
+- Inspect file paths and search results before opening files.
+- Read only relevant files and necessary sections.
+- Do not repeatedly read unchanged content.
+- Prefer focused diffs over full-file rewrites.
+- Keep a concise progress and decision summary for long tasks.
+- Reuse verified information without assuming it remains valid after changes.
+
+## Planning
+- Separate confirmed requirements from assumptions.
+- Identify dependencies, constraints, and acceptance criteria.
+- For complex changes, create a short implementation plan.
+- Avoid unnecessary abstractions and speculative features.
+
+## Implementation
+- Make the smallest change that fulfills the requirement.
+- Avoid unrelated refactoring.
+- Follow existing code conventions.
+- Do not add dependencies without justification.
+- Never modify secrets or production data without authorization.
+
+## Verification
+- Reproduce bugs and identify evidence before fixing.
+- Run focused tests after changes.
+- Run broader tests when the impact requires them.
+- Never report success without verification.
+- Clearly distinguish passed, failed, and untested checks.
+
+## Reporting
+- State what changed and why.
+- List affected files.
+- Summarize verification results.
+- Report blockers and unresolved risks.
+- Avoid repeating large code blocks or logs unnecessarily.
+
+## Design & UX Rules
+
+- Follow existing design tokens and components.
+- Analyze requirements before designing UI.
+- Do not redesign unrelated screens.
+- Reuse existing components whenever possible.
+- Avoid unnecessary CSS and dependencies.
+- Maintain consistent spacing, colors and typography.
+- Support mobile, tablet and desktop layouts.
+- Verify loading, empty, error and success states.
+- Check keyboard navigation and accessibility.
+- Respect reduced-motion preferences.
+- Never sacrifice functionality for visual appearance.
+- Inspect rendered UI before claiming completion.
+- Run only the design skills relevant to the task.
+- Do not generate multiple design alternatives unless requested.

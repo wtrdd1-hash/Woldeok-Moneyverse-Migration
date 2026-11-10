@@ -38,6 +38,14 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       "SELECT (sweep->>'couponsDistributedWld')::text, (sweep->>'maturitiesRedeemedWld')::text FROM public.treasury_bond_distribute_daily_coupons() AS sweep",
   },
   {
+    job: "pension.hourly_payout_sweep",
+    cadence: "hourly",
+    notBefore: 20,
+    connection: "app",
+    statement:
+      "SELECT (sweep->>'payouts_count')::text AS payouts_count, (sweep->>'total_payout_wld')::text AS total_payout_wld FROM public.admin_pension_distribute_hourly_payouts('5f7b8b44-e4aa-40b8-b93a-800ec0151d20'::uuid) AS sweep",
+  },
+  {
     job: "treasury.grant_clawback_sweep",
     cadence: "hourly",
     notBefore: 15,

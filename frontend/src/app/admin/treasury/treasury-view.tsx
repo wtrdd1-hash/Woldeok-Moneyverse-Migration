@@ -25,6 +25,8 @@ import { TreasuryBuybackDialog } from './treasury-buyback-dialog';
 import { TreasuryDisburseDialog } from './treasury-disburse-dialog';
 import { TreasuryOperationsDialog } from './treasury-operations-dialog';
 import { TreasuryWealthTaxDialog } from './treasury-wealth-tax-dialog';
+import { AdminSalaryDisburseDialog } from './admin-salary-disburse-dialog';
+import { AdminMintTopupDialog } from './admin-mint-topup-dialog';
 import { NationalMintPanel } from '@/components/admin/national-mint-panel';
 import { CentralBankPanel } from '@/components/admin/central-bank-panel';
 import { AdminTreasuryFundingCard } from './admin-treasury-funding-card';
@@ -680,6 +682,8 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
               <TreasuryBuybackDialog mainVault={overview.vaults.find((v) => v.code === 'VAULT_MAIN') ?? overview.vaults[0]} />
               <TreasuryWealthTaxDialog />
               <TreasuryOperationsDialog vaults={overview.vaults} />
+              <AdminSalaryDisburseDialog />
+              <AdminMintTopupDialog />
               <Button
                 variant="outline"
                 size="sm"

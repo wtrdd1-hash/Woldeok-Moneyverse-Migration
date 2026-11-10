@@ -600,4 +600,28 @@ export class FundedTreasuryDonationController {
     return { ok: true, grant };
   }
 
+  @Post("salary/disburse")
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: "국고 관리자 임금 복식부기 실지급" })
+  async disburseAdminSalary(
+    @Req() req: RequestWithSession,
+    @Body() body: { targetAdminId: string; amountWld: string; reason: string },
+  ) {
+    const actorId = requireUserId(req);
+    const result = await this.service.disburseAdminSalary(actorId, body.targetAdminId, body.amountWld, body.reason);
+    return { ok: true, message: "관리자 임금이 성공적으로 국고에서 지급되었습니다.", result };
+  }
+
+  @Post("mint-topup")
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: "조폐국 화폐발행으로 국고 직접 충전" })
+  async topupFromMintDirect(
+    @Req() req: RequestWithSession,
+    @Body() body: { amountWld: string; reason: string; requestKey: string },
+  ) {
+    const actorId = requireUserId(req);
+    const result = await this.service.topupFromMintDirect(actorId, body.amountWld, body.reason, body.requestKey);
+    return { ok: true, message: "조폐국 신규 화폐가 국고로 성공적으로 발행 전입되었습니다.", result };
+  }
+
 }
