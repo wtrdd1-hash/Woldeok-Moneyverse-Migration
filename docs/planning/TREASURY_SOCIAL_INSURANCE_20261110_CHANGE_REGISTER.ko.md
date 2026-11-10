@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.014 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.015 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -210,3 +210,14 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **P0 HOLD:** 동일 스냅샷 중앙·보조원장 대사, 배포 SHA 출처, DB 권한, 복구 및 독립 QA 확인 전 금융 쓰기/운영 승격 금지. **P1:** 개발 A는 구형 서비스 의존성과 배포 SHA 확인, 개발 B는 읽기 전용 국고·보험 거래 출처 확인, QA는 승인된 브라우저 계정과 Test E2E 확보. **P2:** 관측 근거 확립 후 접근성·경고 오탐 억제 지표 검토.
 - **변경 범위:** UI/API/DB/RBAC/마이그레이션 0건, 운영 코드·잔액·배포 변경 없음. 제안 테스트 실행하지 않음. 이번 회차 외부 독립 근거 0건, 누적 중복 제거 수량 UNKNOWN/10,000으로 BLOCKED. 불변 기준선 edd709bc 및 기존 비교 인덱스 유지. 다음 B는 신규 기능 선정 전에 정본 반영·실제 구현 중복을 검사한다.
 - **근거:** 13:02 미니PC 상태, /srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.10.1214-internal.md, 원격 main 3a7c345, 추적 PR #3006. 영문과 동등한 QA 검토 기록이다.
+
+
+### TSI-20261110-012 — 사회보험 급여 중복지급 사전 점검 (B 신규, P1)
+- **기록:** 2026-11-10 14:05 KST; v2034 / vTSI.2026.11.10.015. 이전 A v2032 → 현재 B v2034 → 다음 A v2036. PROPOSED / 정본 미반영 / 구현 미확인. 기존 TSI-001~011 원문 보존. 기획 전용; 개발 B API/DB, 개발 C UI, 독립 QA 미실시.
+- **이전/근거:** 불변 기준선 edd709bc, 최신 원격 main 3a7c345, Draft PR #3006. 기존 TSI-004 급여 심사 및 TSI-011 지급여력 시뮬레이션만으로는 프로그램 간 **중복지급 사전 점검**이 입증되지 않는다. 운영 결함 재현이 아니라 미검증 신규 제안이며 실제 구현 중복 여부는 추가 코드 확인 필요.
+- **회원·관리자 흐름:** 회원 > 급여 > 내 청구 상태에서 본인 결과·심사 사유·이의신청 CTA만 표시. 권한 있는 심사자 > 지급 대기 > 중복 사전 점검 > 마스킹된 증빙 > 별도 지급 승인 또는 독립 심사 보류. PENDING → PREFLIGHT_RUNNING → CLEAR/POSSIBLE_DUPLICATE → INDEPENDENT_REVIEW → RELEASED/BLOCKED. 증거 누락·스냅샷 만료는 INCONCLUSIVE이며 자동 거절 금지. 신청자·심사자·지급 승인자 직무 분리. 실제 한국 보험 법령이 아닌 가상 WLD 정책 버전·적용일 기준.
+- **내부 API 제안(미구현):** POST /internal/insurance/claims/:id/duplicate-preflight {policyVersion,snapshotId,idempotencyKey,expectedRevision} → 202 runId; GET /internal/insurance/claims/:id/duplicate-preflight/:runId → 마스킹된 일치 사유·증거 해시; POST /internal/insurance/claims/:id/duplicate-resolution {runId,decision,reasonCode,expectedRevision} → 별도 심사자 및 최신 MFA 필수. 401/403/404/409/412/422/429/503 fail closed. 공개 타인 조회나 미리보기 지급 쓰기 없음.
+- **정규화 DB 제안:** benefit_preflight_runs(tenant_id,run_id PK,claim_id FK,policy_version,snapshot_id,claim_revision,status,idempotency_key,created_by,created_at,proof_hash, UNIQUE(tenant_id,claim_id,idempotency_key)); benefit_match_evidence(tenant_id,run_id FK,match_id PK,matched_claim_digest,reason_code,window_start,window_end,source_event_digest) 원본 개인정보 미저장; benefit_resolution_events 불변 감사. tenant 복합 FK, FORCE RLS, tenant/claim/status 및 tenant/run 인덱스, 최소권한 SECURITY DEFINER. 파생 민감정보 보존·삭제 정책 보안 검토 필요.
+- **정합성·복구:** 중앙/보조원장과 청구 이벤트의 동일 불변 스냅샷 사용. 동일 원장 거래 ID·청구 이벤트 해시는 지급 보류 후 사람 심사, 유사 일치는 참고용만. SERIALIZABLE 또는 revision fencing, 멱등성·outbox·재시도·불변 감사. 실제 지급은 별도 승인된 기존 원장 경로로만, 정수 WLD 이중기장·발행 금지. 오래된 증거·해시 불일치·큐 장애·부분 마이그레이션 시 INCONCLUSIVE/기능 OFF; 원장 취소는 별도 독립 승인 보상 거래만.
+- **수용 기준(미실행):** 같은 입력의 결정적 해시, 중복·동시 요청 1회 효과, tenant 격리, 자기 승인 거부, 증빙 마스킹, 320px 키보드/WCAG 2.2 AA, 영한 동등, no-store/noindex, 이의신청, 20명 이상 집계 오탐 지표, 만료 증거 지급 차단, 미리보기 원장 쓰기 0. 기본 OFF·추가형 마이그레이션·격리 Test exact-SHA 검증 후 승인. P0 금융/출시 근거 HOLD, P1 보안·구현·QA, P2 집계 분석. 이번 회차 외부 독립 근거 0, 누적 UNKNOWN/10,000 BLOCKED.
+- **비교:** 불변 기준선 급여 통제 → TSI-20261110-012 ADD → PROJECT_PLAN.md / INTEGRATED_PLANNING_MASTER.md 반영 대기; PR #3006은 추적용. 이번 회차 ADD 1/MODIFY 0/REMOVE 0/DEFER 0. 누적 건수는 전체 대장 검증 후 확정. 운영 코드·DB·잔액·배포 변경 없음.
