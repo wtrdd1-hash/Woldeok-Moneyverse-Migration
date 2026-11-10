@@ -435,4 +435,70 @@ export class TreasuryService {
     }
   }
 
+  async disburseAdminSalary(
+    actorId: string,
+    targetAdminId: string,
+    amountWld: string,
+    reason: string,
+  ) {
+    if (!actorId || !targetAdminId) {
+      throw new TreasuryInputError('유효한 관리자 세션이 필요합니다.');
+    }
+    if (!amountWld || !/^[1-9][0-9]{0,7}$/.test(amountWld) || Number(amountWld) > 5000000) {
+      throw new TreasuryInputError('관리자 임금은 1 ~ 5,000,000 WLD 사이의 정수여야 합니다.');
+    }
+    if (!reason || reason.trim().length < 5) {
+      throw new TreasuryInputError('임금 지급 사유는 최소 5자 이상 작성해야 합니다.');
+    }
+    try {
+      const result = await this.repository.disburseAdminSalary(actorId, targetAdminId, amountWld, reason);
+      if (this.telegram && result?.success) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'DISBURSED',
+          amountWld,
+          targetUser: targetAdminId,
+          adminId: actorId,
+          reason: '[국고 관리자 임금 지급] ' + reason,
+        }).catch(() => undefined);
+      }
+      return result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async topupFromMintDirect(
+    actorId: string,
+    amountWld: string,
+    reason: string,
+    requestKey: string,
+  ) {
+    if (!actorId) {
+      throw new TreasuryInputError('유효한 관리자 세션이 필요합니다.');
+    }
+    if (!amountWld || !/^[1-9][0-9]{0,7}$/.test(amountWld) || Number(amountWld) > 10000000) {
+      throw new TreasuryInputError('조폐국 국고 충전액은 1 ~ 10,000,000 WLD 사이여야 합니다.');
+    }
+    if (!requestKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) {
+      throw new TreasuryInputError('유효한 UUID v4 요청 멱등키가 필요합니다.');
+    }
+    try {
+      const result = await this.repository.topupFromMintDirect(actorId, amountWld, reason, requestKey);
+      if (this.telegram && result?.success) {
+        this.telegram.notifyTreasuryGrant({
+          action: 'BUDGET_DISTRIBUTION',
+          amountWld,
+          targetUser: 'VAULT_MAIN',
+          adminId: actorId,
+          reason: '[조폐국 화폐발행 국고 직행 충전] ' + reason,
+        }).catch(() => undefined);
+      }
+      return result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
 }

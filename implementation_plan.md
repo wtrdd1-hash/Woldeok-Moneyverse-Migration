@@ -3007,3 +3007,24 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **프론트엔드 블로그 API**: 0.021초 (21 ms)
 - **Nginx 리버스 프록시 레이턴시**: 0.0056초 (5.6 ms)
 - **서버 I/O Wait**: 0% (완전 해소)
+
+---
+
+## 🚀 [v299 Specification] 국고 관리자 임금 지급, 조폐국 화폐발행 국고 충전 및 피구세 격리 완결 사양
+
+### 1. 주요 구현 완료 내역
+- **국고 관리자 임금(`treasury_disburse_admin_salary`)**:
+  - 관리자 역할(`operator`, `approver`, `superadmin`) 확인 및 1 ~ 5,000,000 WLD 한도 검증.
+  - 국고 30% 불가침 안전 비축금(`EX_INSUFFICIENT_SAFE_RESERVE`) 자동 방어.
+  - `system_treasury_ledger` OUTFLOW 기록 및 `USER_CASH` 계좌 복식부기 전표 원자적 발행.
+  - `treasury_admin_salaries` 감사 테이블에 영구 추적성 확보.
+- **조폐국 화폐발행 국고 직행 충전(`admin_treasury_topup_from_mint_direct`)**:
+  - 통화정책 승인 주문(`TREASURY_ISSUANCE`) 생성 및 `admin_monetary_mint_to_treasury` 연동을 단일 트랜잭션으로 통합.
+  - 비상 시 또는 자금 보충 시 관리자 2FA 승인 하에 최대 10,000,000 WLD 즉각 충전 지원.
+- **카지노 고액 베팅 도박 중독 방지 피구세(1%) 실시간 복지 격리 트리거**:
+  - `virtual_casino_dice_plays` 등에서 10만 WLD 이상 베팅 발생 시 1%를 일반 국고가 아닌 `VAULT_WELFARE`로 즉시 원천징수 직교 이체.
+- **관리자 2FA 채널 OTP (`AdminChannelOtpService`) 및 연금 스케줄러**:
+  - 텔레그램 및 디스코드로 동시 발송되는 6자리 일회용 OTP 인증 파이프라인.
+  - `scheduler.ts`에 `pension.hourly_payout_sweep` 1시간 기초연금 자동 지급 작업 활성화.
+- **문서화**:
+  - `docs/worklog/2026-11-10-treasury-admin-salary-and-mint-funding.ko.md` 작업 일지 영구 보존.

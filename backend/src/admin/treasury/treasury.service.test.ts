@@ -243,4 +243,36 @@ describe('TreasuryService', () => {
     });
     expect(mockRepo.getBackupStatus).not.toHaveBeenCalled();
   });
+
+  it('delegates disburseAdminSalary to repository with validation', async () => {
+    mockRepo.disburseAdminSalary = vi.fn().mockResolvedValueOnce({
+      success: true,
+      code: 'ADMIN_SALARY_DISBURSED',
+      amount_wld: '100000',
+      vault_balance_after_wld: '5000000',
+    });
+
+    const res = await service.disburseAdminSalary('admin-1', 'admin-2', '100000', '11월 정기 운영 임금');
+    expect(res.success).toBe(true);
+    expect(mockRepo.disburseAdminSalary).toHaveBeenCalledWith('admin-1', 'admin-2', '100000', '11월 정기 운영 임금');
+
+    await expect(service.disburseAdminSalary('', 'admin-2', '100000', '사유')).rejects.toThrow();
+    await expect(service.disburseAdminSalary('admin-1', 'admin-2', '0', '사유')).rejects.toThrow();
+  });
+
+  it('delegates topupFromMintDirect to repository with validation', async () => {
+    mockRepo.topupFromMintDirect = vi.fn().mockResolvedValueOnce({
+      success: true,
+      code: 'TREASURY_MINT_SETTLED',
+      amount_wld: '500000',
+      vault_after_wld: '10500000',
+    });
+
+    const uuid = '11111111-2222-4333-8444-555555555555';
+    const res = await service.topupFromMintDirect('admin-1', '500000', '국고 유동성 50만 WLD 충전', uuid);
+    expect(res.success).toBe(true);
+    expect(mockRepo.topupFromMintDirect).toHaveBeenCalledWith('admin-1', '500000', '국고 유동성 50만 WLD 충전', uuid);
+
+    await expect(service.topupFromMintDirect('admin-1', 'invalid', '사유', uuid)).rejects.toThrow();
+  });
 });
