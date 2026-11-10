@@ -104,7 +104,7 @@ export function AdminMintTopupDialog() {
           🏛️ 조폐국 화폐발행 국고 충전
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base font-bold">조폐국 화폐발행 중앙 국고 즉시 충전</DialogTitle>
           <DialogDescription className="text-xs">
