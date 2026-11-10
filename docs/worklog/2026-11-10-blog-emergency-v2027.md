@@ -17,5 +17,9 @@
 - Test API count 3 -> 4; Test frontend :4582 count 11 including new article; /ja/blog native unverified page visible with truthful AI/unverified warning; nonindexable Test sitemap 503.
 - Same worker code paths as remote main (no backend/src/blog-editorial diff since v1946.3 candidate). Production will require zero-downtime timer activation, Production post receipt and public edge validation. No Nginx switch required if current v1949 blog routes render correctly.
 
-## FINISHED
-- Pending Production release acceptance.
+## FINISHED — 2026-11-10 13:59 KST (operational repair complete)
+- Production one-shot same worker successfully published verified CN/COMPUTER at 13:55:52 KST; receipt c5fa1145-c244-40fe-aa93-982c4e88624e, DB 0 -> 1, public list 6 -> 7. HTTPS canonical native article and sitemap 200, sitemap contains new slug; all four blog hubs and public API respond 200. Legacy unsafe /api/blog/generate deliberately returns 503.
+- Enabled active moneyverse-blog-v1946.3-publisher.timer via systemctl; next observable schedule 14:05 KST. Subsequent recurrence is not yet proven. Re-run returned SLOT_ALREADY_CLAIMED and API retained exactly one article.
+- Test 4 verified posts after the one-shot; Test frontend 11; focused Vitest backend 13 PASS and frontend 9 PASS. Production web/backend/Nginx remained active, no routing switch or financial service edits. Sidecar pre-change snapshot under /srv/moneyverse-data/backups/blog-v2027.
+- Rollback: sudo systemctl disable --now moneyverse-blog-v1946.3-publisher.timer; manually withdraw offending post only through protected moderation, never delete financial data.
+- Source main refresh confirmed origin/main 3a7c34507a at mid-work. Branch documentation, bilingual internal/GitHub changelog and PR contain operational evidence. Pending external CI, subsequent timer proof, third-party ad display and authenticated browser E2E are explicit UNKNOWN. This is an operational fix, not a new source artifact promotion.
