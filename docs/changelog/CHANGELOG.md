@@ -1,4 +1,7 @@
-﻿## v2026.11.03.1646 — Telegram false recovery alerts (PRODUCTION_VERIFIED)
+﻿## v2026.11.10.2025 — Branch consolidation audit (RELEASE HOLD)
+- Reconciled seven unpushed local web commits and selected private-holdings/OTP changes in an isolated integration candidate; 42 already-merged web refs and one already-merged Android ref safely removed, all divergent and active work protected. Build/typecheck/lint PASS; backend 3,034 PASS / 518 SKIP; full frontend QA timed out. No main merge, official Test or Production promotion. [Release gate](../releases/v2026.11.10.2025.md) · [Worklog](../worklog/2026-11-10-all-branch-consolidation-v2025.md).
+
+## v2026.11.03.1646 — Telegram false recovery alerts (PRODUCTION_VERIFIED)
 - Prevent bogus disk recovery alerts on stable OK percentages and provisional recovery during in-progress QA. Isolated 30 tests pass; no finance/app data changed. [Issue #2617](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2617); [details](../updates/v2026.11.03.1646-telegram-alert-recovery-github.md).
 
 ## v2026.10.30.1504 — Owner-only wallet transaction detail planning (DRAFT / RELEASE HOLD)
