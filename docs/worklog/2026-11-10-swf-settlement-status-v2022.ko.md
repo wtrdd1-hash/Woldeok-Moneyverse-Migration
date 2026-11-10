@@ -19,3 +19,5 @@
 - 운영/국고 금융 쓰기: 0건. PROD 변경: 없음.
 - 남은 작업: 정확 SHA 공식 Test 및 금융 증빙·운영 QA. 추후 결과를 추가 기록하며 검증 전 운영 승격 보류.
 - 영어 정본/한국어 부본: `docs/updates/v2026.11.10.2022-swf-status-{internal,github}.md` 및 `.ko.md`, 변경 이력 2종.
+
+- GitHub 초안 PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3013 (실제 정산/CI·공식 Test 검증까지 운영 승인 금지).
