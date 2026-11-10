@@ -1,6 +1,6 @@
 # Treasury & Social Insurance — New / Changed Plan Register and Comparison Index
 > **Initiative:** 2026-11-10 to 2026-11-11 06:00 Asia/Seoul
-> **Register version:** vTSI.2026.11.10.009 · **Status:** DRAFT / DOCS ONLY
+> **Register version:** vTSI.2026.11.10.010 · **Status:** DRAFT / DOCS ONLY
 > **Existing baseline:** [Frozen baseline](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.md) · [한국어](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md)
 > **Authority:** current [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), not this tracking document.
 
@@ -8,7 +8,7 @@
 | Category | Count | Meaning |
 |---|---:|---|
 | ADD (newly specified features) | 4 | Four proposals, not implemented |
-| MODIFY (changes to existing plans) | 4 | Four QA-linked planning amendments, not implemented |
+| MODIFY (changes to existing plans) | 5 | Five QA-linked planning amendments, not implemented |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
 | INTEGRATED into canonical plan | 0 | No incorporation or PR merge claimed |
@@ -18,6 +18,7 @@ This register starts as a **tracking scaffold**, not a claim that no plans exist
 ## Comparison index (append on every actual planning cycle)
 | ID | Cycle A QA-fix / B New | Type | Existing document & section / immutable link | Previously planned behavior | Newly planned behavior / proposal link | Version / KST | Priority | State | Canonical integration PR |
 |---|---|---|---|---|---|---|---|---|---|
+| TSI-20261110-009 | A QA-fix | MODIFY | FIN1518-03 and insurance baseline | Cross-fund settlement provenance unverified | Read-only evidence quarantine (below) | v2024 / 09:05 | P0 | PROPOSED | PR #3006 |
 | TSI-20261110-008 | B New | ADD | Frozen baseline treasury budget/ledger chapters at edd709bc | No verified grant appropriation reservation workflow | Independent grant reservation and disbursement authorization (below) | v2022 / 08:08 | P1 | PROPOSED | PR #3006 |
 | TSI-20261110-007 | A QA-fix | MODIFY | Baseline OPS1518-01/REL1518-04; TSI-005 | QA release evidence incomplete, E2E unavailable | Evidence freshness and QA attestation contract; canonical pending | v2020 / 07:08 | P0 | PROPOSED | PR #3006 |
 | TSI-20261110-001 | A QA-fix | MODIFY | [PROJECT_PLAN.md at baseline](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/blob/edd709bcbe96f6f5ceca8372f244b632e8211242/docs/planning/PROJECT_PLAN.md) — FIN1518-03 | Treasury 552 unlinked, MINT/SWF provenance and divergent exploratory vs canonical balance probes unresolved | Propose read-only reconciliation evidence contract, deterministic snapshot and quarantine gate (details below) | vTSI.2026.11.10.004 / 01:05 | P0 | PROPOSED / canonical pending | PR #3006 tracking only |
@@ -164,3 +165,12 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **SEO/a11y/analytics/deploy:** private noindex/no-store, mobile 320px keyboard/WCAG 2.2 AA, EN/KO equivalent errors; privacy-safe metrics reservation rejection rate, double-payment prevention, approval latency, reconciliation exceptions. Additive migration with backfill dry run, default-OFF treasury_grant_reservations_v1, shadow read-only rollout then isolated Test exact-SHA, independent QA and signed promotion; flag-OFF rollback retains immutable records and requires manual resolution of pending reservations.
 - **Acceptance NOT RUN:** concurrent over-budget requests cannot exceed appropriation; same idempotency key yields one reservation/posting; approval separation and tenant RLS enforced; outbox crash/replay, expiry race, rollback, stale policy, ledger balance equality, 320px/a11y and approved E2E grant lifecycle. P0 existing release provenance and Treasury reconciliation remain HOLD; P1 implement API/DB/UI, P2 monitor alert quality. External independent references newly verified 0; cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. No runtime, Production DB or funds changed.
 - **Comparison:** frozen treasury budget/ledger concept → TSI-20261110-008 ADD → canonical integration PENDING, Draft PR #3006; implementation branch/Test exact-SHA required.
+
+### TSI-20261110-009 — Insurance-to-Treasury settlement evidence quarantine (A, MODIFY, P0)
+- First recorded 2026-11-10 09:05 KST; vTSI.2026.11.10.010; Previous B v2022 → Current A v2024 → Next B v2026. Status PROPOSED, canonical NOT INTEGRATED, tests NOT RUN. Owner planning; Dev B future API/DB, Dev C admin UX, QA independent reproduction, Dev A integration. Draft PR #3006 documentation only.
+- Baseline: frozen PROJECT_PLAN.md FIN1518-03, Treasury source-truth and release HOLD; prior TSI-001/003/007. Before: independently verifiable cross-fund insurance posting provenance is not established. After: propose a read-only evidence gate before any future insurance contribution, refund, or treasury subsidy settlement. This is a QA-risk amendment, NOT a freshly reproduced insurance defect. Root cause, affected users, and current implementation UNVERIFIED. Historic Treasury QA v1394 failures cannot establish an insurance failure.
+- Reproduction contract: capture environment, immutable frontend/backend SHA, migration checksum, tenant pseudonym, event ID, policy version, cutoff, SQL revision, shared snapshot ID, expected vs actual signed integer WLD postings in central and subsidiary ledgers. Different snapshots or scopes => INCONCLUSIVE, never VERIFIED. No production mutations.
+- Member UX: Insurance > Charges > View verification status, redact medical/income data. Auditor UX: Settlement Evidence > Compare postings / Quarantine / Request independent review / Export redacted proof. States EVIDENCE_PENDING, VERIFIED, DISCREPANCY, INCONCLUSIVE, BLOCKED; timeout remains pending. No force-pay, mint, or auto-refund CTA. Private noindex/no-store, 320px keyboard and WCAG 2.2 AA.
+- Proposed API: GET /api/insurance/settlements/:id/evidence (owner redacted); POST /internal/insurance/settlement-evidence-runs {scope,cutoff,snapshotId,queryVersion,idempotencyKey} -> 202; GET /internal/insurance/settlement-evidence-runs/:id; POST /internal/insurance/settlement-evidence-runs/:id/quarantine {reason,expectedRevision}. RBAC insurance.settlement.audit and independent treasury.reconcile.escalate; MFA, dual approval, tenant RLS; 403/404/409/422/429/503 fail closed.
+- Proposed DB: append-only insurance_settlement_evidence_runs(tenant_id,run_id,source_event_id,ledger_snapshot_id,source_sha,policy_version,query_version,status,revision,created_at), insurance_settlement_evidence_findings(tenant_id,run_id,entry_id,finding_type,proof_hash); tenant-qualified PK/FK; UNIQUE(tenant_id,source_event_id,ledger_snapshot_id,query_version), UNIQUE(tenant_id,run_id,entry_id,finding_type), INDEX(tenant_id,status,created_at), FORCE RLS. REPEATABLE READ immutable evidence snapshot, balanced double entry, audit/outbox, idempotent fenced retries; additive default-OFF migration, no prior ledger edits.
+- Acceptance NOT RUN: deterministic same-snapshot hashes/counts; duplicate requests one run; lost outbox, partial posting, stale revision, cross-tenant request and concurrent workers never verify or double pay; independent review, privacy export, rollback, restore rehearsal, isolated exact-SHA Test E2E. P0 release provenance/ACL/restore and settlement HOLD; P1 API/DB/UI; P2 privacy-safe discrepancy KPI. Independent external references +0, cumulative UNKNOWN/10,000 BLOCKED/IN PROGRESS. Canonical integration pending.
