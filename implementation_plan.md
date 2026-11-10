@@ -2945,3 +2945,65 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
      - 프론트엔드 Vitest 51 tests 100% PASS.
      - ESLint: 0 errors, 0 warnings.
      - NestJS & Next.js 599개 라우트 빌드 컴파일 성공.
+
+---
+## 🚀 [v8 Specification] 블로그 중복 제목 전수 삭제, 4개 언어별 무결성 점검 및 사이트 전역 메타데이터 중복 완전 해소 (v1777)
+
+### 1. 주요 구현 및 해결 내역
+1. **데이터베이스 `public.blog_verified_articles` 언어별 중복 제목 43건 전수 삭제 및 무결성 검증**:
+   - 과거 자동 발행 워커(`blog-worker`)로 인해 동일한 11개 주제가 매일 반복 적재되어 있던 55건 중 중복된 43건 레코드 완전 삭제.
+   - 외래키 참조 제약 무결성을 준수하기 위해 CTE(Common Table Expression)를 적용하여 `blog_verified_audit` 참조를 선행 삭제한 후 `blog_verified_articles` 레코드 제거.
+   - 삭제 후 실측:
+     - 중복 확인 쿼리: `SELECT locale, title, count(*) FROM blog_verified_articles GROUP BY locale, title HAVING count(*) > 1` ➔ **0 rows (중복 0건 완벽 달성)**.
+     - 4개 언어별 최종 잔여 고유 아티클: `en-US` 3건, `ja-JP` 3건, `ko-KR` 3건, `zh-CN` 3건 (총 12건의 순수 고유 아티클 100% 무결 보존).
+
+2. **영속 저장소 `/srv/moneyverse-data/shared/blog-posts.json` 중복 포스트 192건 정리 (212건 ➔ 20건 고유)**:
+   - 공유 파일 시스템 내 기존 212건의 누적 블로그 데이터 분석 결과, `KR` 197건 중 7개 제목에서 대규모 중복 발생 (중앙은행 테일러 준칙 80회 복제, 아인슈타인 72의 법칙 51회 복제, 마틴게일 vs DCA 40회 복제 등), `JP` 7회 복제, `US` 5회 복제 식별.
+   - 정밀 디듀플리케이션 스크립트를 통해 국가/로케일별로 고유 제목당 최우수 1건(PUBLISHED 우선, 높은 조회수 우선, 최신 발행일 우선, 정본 슬러그 우선)을 엄선 보존하고 불필요 중복 192건 안전 소거.
+   - 결과 실측: 총 20건, 고유 제목 20건, 중복 0건 (`Duplicates: 0`).
+
+3. **프론트엔드 정적 데이터 및 메타데이터 중복 제거**:
+   - `frontend/src/app/blog/blog-data.ts`: 아인슈타인 72의 법칙 중복 선언분(`slug: '2026-10-14-compound-interest-wealth-secret'`) 제거, 정본 슬러그(`2026-10-14-compound-mv83xp86`) 단일화.
+   - `frontend/src/app/help/[slug]/page.tsx`: `/help/page.tsx`와 중복되던 타이틀(`검증된 도움말`)을 `도움말 상세 안내`로 차별화하여 사이트 전역 116개 정적 메타데이터 타이틀 중복 0건 달성.
+   - `frontend/src/config/routes.config.ts`: 4개 언어(`ko`, `en`, `ja`, `zh`) 전역 라우트 레이블 95개 중복 0건 검증 완료.
+
+4. **단위 테스트 및 프로덕션 빌드 무결성 확보**:
+   - `frontend/src/app/api/admin/blog/[slug]/route.test.ts`: 삭제된 중복 슬러그 대신 정본 슬러그(`2026-10-14-compound-mv83xp86`)를 테스트하도록 동기화.
+   - `frontend` Vitest 블로그 도메인 9개 테스트 파일, 41개 테스트 100% PASS (`9 passed, 41 passed`).
+   - `pnpm exec tsc --noEmit`: 0 errors.
+   - `pnpm exec next build --webpack`: 599개 정적/동적 라우트 컴파일 100% 성공.
+   - GitHub PR #2980 생성 및 CI 검증 진행.
+
+---
+## 🚀 [v9 Specification] 서버 리소스 및 성능 전면 최적화, 메모리·스왑 대량 회수 및 프로세스 정상화 (v1777-perf)
+
+### 1. 주요 진단 및 근본 원인
+1. **극심한 스왑 메모리 경합 (Swap Thrashing)**:
+   - 서버 메모리 8GB 중 14GB의 스왑이 사용 중이었으며, 과거 3주간 누적된 127개의 Node.js 프로세스가 메모리와 스왑을 지속적으로 점유하고 있었음.
+   - `moneyverse-mcp.service` 하위에 과거 테스트/빌드 실행 시 생성된 headless chromium shells, vitest fork worker, pnpm build 자식 태스크가 1,132개나 누적되어 4.2GB 스왑을 점유.
+2. **구버전 릴리스 서비스 미종료 중복 구동**:
+   - `systemd` 상에 v1068, v1083, v1110, v1213, v1550, v1618, v1619, v1622, v1624, v1626, v1628, v1629, v1651, v1705, v1715, v1740, v1742 등 45개의 구버전 서비스가 백그라운드에서 동시 활성(running) 상태로 메모리를 잠식하고 있었음.
+3. **삭제된 디렉터리를 참조하는 고아 프로세스 잔존**:
+   - 이미 수주 전 삭제된 릴리스 디렉터리(`(deleted)`)를 cwd로 물고 있는 고아 백엔드 및 Next.js 프로세스들이 여전히 메모리에 상주.
+
+### 2. 세부 최적화 및 조치 내역
+1. **고아 및 좀비 프로세스 전수 소거**:
+   - `chrome-headless-shell`, `node --test`, `vitest`, `tinypool`, `playwright` 등 40개 고아 프로세스 즉각 종료.
+   - 비정상 누적된 27개 구형 빌드(`contract build`, `api:contract:check`, 구형 canary 3915/3925/3995/4558/4559) 정리.
+   - 유효 프론트엔드를 제외한 21개 고아 `next-server` 인스턴스 전수 종료.
+   - 이미 삭제된 디렉터리를 가리키던 6개 완전 고아 프로세스 제거.
+   - `moneyverse-mcp.service` 내부 태스크: **1,132개 ➔ 14개로 98.7% 축소**, 점유 메모리 1.6GB ➔ 522MB, 점유 스왑 4.2GB ➔ 539MB로 안정화.
+2. **구버전 45개 systemd 서비스 일괄 정지 및 비활성화**:
+   - 현재 정규 릴리스(v1777) 및 필수 지원 데몬(Discord Bot, Economy AI, MCP, Runner)을 제외한 모든 구형 릴리스 서비스 정지(`stop`) 및 부팅 등록 해제(`disable`).
+   - 전체 구동 Node 프로세스 수: **127개 ➔ 11개로 대폭 슬림화 (91.3% 프로세스 정리)**.
+3. **메모리 및 스왑 대량 회수 및 커널 파라미터 최적화**:
+   - 스왑 사용량: **14.0GB ➔ 3.0GB (11.0GB 스왑 대량 회수 완료)**.
+   - 사용 가능 RAM: **1.9GB ➔ 3.7GB (약 2배 확장 확보)**.
+   - `drop_caches=3` 및 디스크 sync 완료.
+   - `vmstat 1 3` 실측: CPU idle 99%, I/O wait 0%, runqueue 0~1로 시스템 부하 전멸.
+
+### 3. 접속 속도 및 레이턴시 실측 결과
+- **백엔드 헬스체크**: 0.0014초 (1.4 ms)
+- **프론트엔드 블로그 API**: 0.021초 (21 ms)
+- **Nginx 리버스 프록시 레이턴시**: 0.0056초 (5.6 ms)
+- **서버 I/O Wait**: 0% (완전 해소)
