@@ -1,0 +1,2 @@
+# v1950 — Administrator OTP Planning Correction
+Status: PLANNING (not implemented). Owner directive 2026-11-10. New sensitive admin-page and critical-command OTP delivered via verified Discord DM or Telegram private chat. Routine admin operations remain free of repeated reauthentication. Details: [spec](../planning/ADMIN_DISCORD_TELEGRAM_OTP_STEPUP_SPEC_v2026.11.10.1950.md). No code, runtime, test-server or Production change. Baseline main 727881420a491bb129a1a97258ea8ae67f62bbf8.
