@@ -1,31 +1,32 @@
-# vTSI.2026.11.10.WD001 — Owner withdrawal of special Treasury / insurance planning proposals
+# CORRECTED / VOID — Mistaken Withdrawal Interpretation, vTSI.2026.11.10.WD001
 
-**Date:** 2026-11-10 Asia/Seoul
-**Task:** Honor the owner's direct instruction to remove all features newly added or modified in the 2026-11-10 Treasury, virtual healthcare insurance, pension and social-fund special planning cycle.
-**Scope:** 11 draft feature proposals only; **not** the existing canonical project plans, current implementation, finance ledger, financial records or independent developer changes.
-**Main at start:** `3a7c34507aff858cce71efbb10410a4a2f7c9ef8`
-**Unmerged proposal branch:** `docs/treasury-insurance-planning-history-20261110`
-**Unmerged Draft PR:** [#3006](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3006)
-**Previous proposal HEAD captured before withdrawal:** `da836124fe4e40cc41ca6cca3198971c71b8e4ea`
-**Withdrawal version:** `vTSI.2026.11.10.WD001`
+> **Disposition: VOID / REVERSED — NO OWNER WITHDRAWAL OCCURRED**
+> **Date:** 2026-11-10 (Asia/Seoul)
+> **Reason:** The assistant misread a request to **filter an owner report** as an instruction to delete feature plans. The owner immediately corrected that the special planning must **not** be deleted.
+> **Authority:** the owner's explicit correction governs. This worklog is an accountability record of a mistaken action, not an active plan or cancellation.
 
-## BEFORE — investigation and bounded action
-- [x] Accessed the mandatory miniPC MCP and checked reported service/DEV PostgreSQL connectivity. This is not E2E or Production finance validation.
-- [x] Read the authority hierarchy, `AGENTS.md`, `README.md`, canonical living plan and Treasury baseline in prior planning cycles; rechecked latest main SHA and current dedicated Draft PR metadata before edits.
-- [x] Confirmed PR #3006 has **not merged**; this feature-plan set has **not become approved canonical planning**. Existing `main` already has independent Treasury development/release changes, not to be reverted as part of this instruction.
-- [x] Identified 11 TSI IDs, originally 6 ADD and 5 MODIFY; no source implementation/test evidence for these 11 specific proposed features.
-- [x] Confirmed non-overlapping original baseline records and previous commits are to remain available.
-- [x] Updated the existing automatic planning task: removed the temporary special program from active instructions, preserved ordinary alternating A/B planning and the QA automation, and explicitly barred reintroduction without new owner instruction.
+## Before — what actually happened
+- The owner requested a report excluding features **already implemented or incorporated into the canonical project plan**, i.e. a summary of **not-yet-added and not-yet-implemented planning only**.
+- The assistant incorrectly treated the report filter as a permanent rescission of the temporary Treasury/insurance planning initiative and 11 TSI planning proposals.
+- The mistaken actions were: replacing two EN/KO change registers with cancellation-only entries; temporarily removing temporary instructions from the planning automation; closing Draft PR #3006 as withdrawn.
+- At the time of the error, the canonical `main` had **not** merged PR #3006. No live product, economy DB, real WLD balances or official canonical plans were edited by these mistaken changes.
 
-## IN PROGRESS — expected safe withdrawal procedure
-- [ ] Replace both English canonical and Korean equivalent **active change registers** with a compact cancellation-only index, status `WITHDRAWN_BY_OWNER`, and exactly 0 active TSI feature proposals. Do not leave detailed abandoned specifications in the current branch version.
-- [ ] Keep original immutable baseline files and the historic Git commits, which remain available for audit, while treating the prior 11 feature proposals as rejected, not approved or backlogged.
-- [ ] Re-read both updated register files, main SHA and PR head; close (not merge) Draft PR #3006 with explicit owner withdrawal reason.
-- [ ] Verify automatic planning task retains its ordinary hourly A/B schedule but cannot resume the cancelled special program.
-- [ ] Record the final closeout evidence; do **not** touch existing runtime branches, treasury ledger, national minting, or deployed versions.
+## Mid-work — owner correction and immediate recovery
+- The owner explicitly rejected the deletion interpretation and clarified: **only exclude already implemented/integrated functionality from the REPORT**.
+- Restored `docs/planning/TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md` **byte-for-byte** from immutable commit `da836124fe4e40cc41ca6cca3198971c71b8e4ea`. Original blob SHA `86a9f0ca571d6a9593f36158aadf6f35e53a6a9e`.
+- Restored `docs/planning/TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md` **byte-for-byte** from the same historical commit. Original blob SHA `741aab1cb5599d7806045a51b4c1ad7c8ad7f9b0`.
+- Reinstated the active, hourly, time-limited Treasury/insurance planning task ending 2026-11-11 06:00 KST; kept the existing A/B feature-planning sequence and QA automation unchanged. Added the explicit **report-only filter**, preserving every full original proposal.
+- Reopened `https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3006` in its original DRAFT planning capacity. No merge requested.
+- Baseline EN/KO documents were never modified during the misunderstanding.
 
-## FINISHED — final results
-**Pending until the listed cancellation and verification steps have been executed.**
+## Finished — verified disposition
+- **Active special draft proposals:** 11 (6 ADD, 5 MODIFY) from the pre-mistake historical branch content, subject to normal evidence-grounded new cycle updates.
+- **Proposals withdrawn by owner:** **0**.
+- **User-visible reports:** include only plans with missing verified implementation or canonical incorporation; omit proven-complete items **from reports only** and explain evidence.
+- **Special schedule:** preserved through 2026-11-11 06:00 KST, regular hourly A/B planning active thereafter.
+- **PR #3006:** re-opened, remains draft / not merged.
+- **Production and Test:** no runtime, deployments, financial data or DB mutations made during mistake or recovery.
+- **This correction worklog:** preserved solely to avoid hiding the assistant's mistaken temporary action.
 
-## Safety and traceability
-The 11 withdrawn proposals are kept only as historical git objects at the prior commit and as cancellation tombstones by ID. They are no longer intended as active planning, implementation requests or QA-acceptance criteria. Any unrelated, pre-existing Treasury/insurance policy remains governed by current `PROJECT_PLAN.md` and other reviewed canonical documents. No finance-related Test/Production QA or deployment was performed as part of this owner-directed **planning withdrawal**.
+## Safety
+Do not use the superseded withdrawal record as authority to cancel, delete, reject, or suppress TSI-001…TSI-011. All the original feature details remain in the restored change registers and their history. Any future owner-directed removal requires an unmistakable, separate instruction.
