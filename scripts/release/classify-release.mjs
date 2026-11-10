@@ -9,6 +9,11 @@ import { pathToFileURL } from 'node:url';
 
 export const CLASSIFIER_VERSION = 'release-path-v2';
 
+// P0 provenance exception: a single already-merged branch-inventory artifact.
+// It is not a blanket allowance for TSV, generated code or arbitrary docs data.
+const PINNED_BRANCH_INVENTORY_PATH = 'docs/worklog/2026-11-10-contained-remote-deletions-v2025.tsv';
+const PINNED_BRANCH_INVENTORY_SHA256 = '0bd598120ee16aa07a42c0f66baad895304d3b56b5f914bddda20783fa1951f8';
+
 const DOC_PATHS = [
   /^docs\//,
   /^README(?:-KO)?\.md$/,
@@ -88,6 +93,7 @@ function pathKind(path) {
   // The exact generated API schema is runtime input, never a docs-only bypass.
   // Every other JSON file under docs remains UNKNOWN/fail-closed.
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
+  if (path === PINNED_BRANCH_INVENTORY_PATH) return 'docs';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
     if (path.startsWith('docs/') && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf)$/.test(path)) return 'unknown';
@@ -139,6 +145,17 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function isPinnedBranchInventory(repo, revision) {
+  const path = PINNED_BRANCH_INVENTORY_PATH;
+  // Only the exact non-executable blob and expected cryptographic content digest
+  // may be treated as evidence. Changes, links and removal are release blockers.
+  if (isSafeDocumentBlob(repo, revision, path) !== true) return false;
+  const bytes = execFileSync('git', ['-C', repo, 'show', `${revision}:${path}`], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  return sha256(bytes) === PINNED_BRANCH_INVENTORY_SHA256;
+}
+
 function latestShaForPaths(repo, head, paths) {
   const value = git(repo, ['rev-list', '-1', head, '--', ...paths]);
   return value || null;
@@ -171,6 +188,9 @@ export function buildReleaseInput({ repo = process.cwd(), base, head }) {
   ]).sort();
   const unsafeDocumentBlob = changedPaths.some((path) => {
     if (pathKind(path) !== 'docs' && path !== 'docs/mobile-api-contract.json') return false;
+    if (path === PINNED_BRANCH_INVENTORY_PATH) {
+      return !isPinnedBranchInventory(root, repositoryHeadSha);
+    }
     const before = isSafeDocumentBlob(root, baseSha, path);
     const after = isSafeDocumentBlob(root, repositoryHeadSha, path);
     return (before === null && after === null) || before === false || after === false;

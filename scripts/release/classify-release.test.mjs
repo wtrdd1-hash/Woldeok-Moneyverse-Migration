@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -190,6 +190,39 @@ function withDocumentFixture(run) {
     rmSync(repo, { recursive: true, force: true });
   }
 }
+
+test('the one archived integration TSV is documentation only when exact approved bytes are intact', () => {
+  const trustedPath = 'docs/worklog/2026-11-10-contained-remote-deletions-v2025.tsv';
+  const original = readFileSync(new URL('../../docs/worklog/2026-11-10-contained-remote-deletions-v2025.tsv', import.meta.url));
+  withDocumentFixture(({ repo, commit, base }) => {
+    mkdirSync(join(repo, 'docs', 'worklog'), { recursive: true });
+    const file = join(repo, trustedPath);
+    writeFileSync(file, original);
+    const head = commit('retain archived branch deletion inventory');
+    assert.equal(classifyPaths([trustedPath]), 'DOCS_ONLY');
+    assert.equal(buildReleaseInput({ repo, base, head }).classification, 'DOCS_ONLY');
+    assert.equal(buildReleaseInput({ repo, base, head }).changedPaths.includes(trustedPath), true);
+    mkdirSync(join(repo, 'backend'), { recursive: true });
+    writeFileSync(join(repo, 'backend', 'feature.ts'), 'export const ready = true;\n');
+    const featureHead = commit('runtime plus pinned inventory');
+    assert.equal(buildReleaseInput({ repo, base, head: featureHead }).classification, 'RUNTIME_RELEVANT');
+
+    writeFileSync(file, Buffer.concat([original, Buffer.from('tampered\n')]));
+    const tampered = commit('tamper protected inventory');
+    assert.equal(buildReleaseInput({ repo, base: head, head: tampered }).classification, 'UNKNOWN');
+
+    writeFileSync(file, original);
+    chmodSync(file, 0o755);
+    const executable = commit('make protected inventory executable');
+    assert.equal(buildReleaseInput({ repo, base: tampered, head: executable }).classification, 'UNKNOWN');
+    chmodSync(file, 0o644);
+    unlinkSync(file);
+    const deleted = commit('delete protected inventory');
+    assert.equal(buildReleaseInput({ repo, base: executable, head: deleted }).classification, 'UNKNOWN');
+  });
+  assert.equal(classifyPaths(['docs/worklog/other.tsv']), 'UNKNOWN');
+  assert.equal(classifyPaths(['docs/planning/untrusted.tsv']), 'UNKNOWN');
+});
 
 test('executable and contract-like documentation paths fail closed', () => {
   for (const path of [
