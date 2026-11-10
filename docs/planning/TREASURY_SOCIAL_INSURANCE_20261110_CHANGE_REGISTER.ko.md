@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.018 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.019 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -250,3 +250,10 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **기존/변경:** TSI-003/005/007/009에서 출처·대사·증빙 검증을 이미 제안했으므로 중복 기능 변경 0건. UI/API/DB/RBAC/마이그레이션 변경 0. 기존 제안 PROPOSED, 정본 반영·구현 여부 미검증. 상단의 오래된 ADD 5 표시만 실제 누적 7로 정정(신규 제안 아님).
 - **백로그:** P0 동일 스냅샷 이중기장 대사, 격리 Test exact-SHA, 승인된 브라우저 E2E, 백업 복원, 독립 QA 전 금융 승격 HOLD. P1 CHDIR 서비스 의존성 및 코드·마이그레이션·PR 중복 확인(재시작 금지). P2 접근성·경고 오탐 KPI. 기획 회차에서 수용 테스트 NOT RUN, 운영 원장·코드·배포 변경 없음.
 - **비교 인덱스:** 불변 기준선 → TSI-001..012 변경 없음 → PROJECT_PLAN.md 및 INTEGRATED_PLANNING_MASTER.md 정본 반영 검증 대기 / Draft PR #3006. 누적 ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0, 정본 반영 확인 0, 검증 대기 12. 외부 독립 중복 제거 레퍼런스 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 시작·중간 main/이력 브랜치 SHA 재조회. 다음 B v2042에서 코드·QA 확인 후 신규 ID 판단.
+
+### 2026-11-10 18:05 KST — B형 신규기능 근거 게이트, v2042 / vTSI.2026.11.10.019 (기능 변경 0건)
+- **회차:** 이전 A v2040 → 현재 B v2042 → 다음 A v2044. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. TSI-001~012 원문 모두 보존. 보험 이의신청 증빙 접근 흐름은 TSI-006/012와 중복 가능하며 실제 구현 상태도 검증되지 않아 신규 ID를 만들지 않음.
+- **직전 대비 신규 근거:** `Moneyverse-QA-v2026.11.10.1718-internal.md`에서 운영 `/api/version` `727881420a491bb129a1a97258ea8ae67f62bbf8`, Test `9abb606bad038c7c48ec9055b28a36de5bc259e8`, main `3a7c34507aff858cce71efbb10410a4a2f7c9ef8`로 세 SHA가 상이함. 홈페이지/health/version HTTP 200만 확인. 레거시 백엔드 재시작 202632회, WorkingDirectory 누락; 이전 201955회 대비 +677. 인증 브라우저 E2E·금융원장·마이그레이션/복원·격리 exact-SHA Test 미실행. 국고·보험 결함 신규 재현 없음; 영향 사용자/근본원인 미확인.
+- **B형 신규기능 후보 검토(기능 추가 아님):** 자격 효력일 재처리, 이의신청 증빙 접근, 중복급여 사전차단은 TSI-002/006/012 및 최신 main의 UI/API/DB와 중복 여부를 먼저 대조. 회원/관리자 화면·CTA·API·DB·RBAC 신규 변경 승인 없음. 구현/부분 구현/미구현 판정은 인증 Test 및 코드 확인 전까지 검증 불가.
+- **백로그:** P0 개발 A·QA 운영/Test exact-SHA 및 승인된 격리 브라우저 검증, 개발 B·QA 중앙/보조원장 대사·복원 증빙 확보 후 금융 쓰기 검토. P1 개발 A 레거시 CHDIR 원인 비파괴 조사, 개발 B/C 보험 API·DB 제약·개인정보/RBAC·청구/이의신청 중복 기능 목록화. P2 모바일 접근성·개인정보 최소화 증빙 내보내기·경고 오탐 개선. 본 회차 테스트 미실행, PASS 주장 없음.
+- **비교 인덱스:** 고정 기준선 `edd709bcbe96f6f5ceca8372f244b632e8211242` → TSI-001~012 변경 없음 → 정본 PROJECT_PLAN.md / INTEGRATED_PLANNING_MASTER.md 반영 검증 대기 → Draft PR #3006. 누적 ADD 7, MODIFY 5, REMOVE 0, DEFER 0, 정본·구현 독립 검증 대기 12건. 외부 독립 중복제거 레퍼런스 이번 회차 확인 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 운영 코드/DB/자금 변경 없음.
