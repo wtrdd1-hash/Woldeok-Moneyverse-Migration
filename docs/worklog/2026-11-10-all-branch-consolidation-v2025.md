@@ -27,3 +27,9 @@ Do not merge every old head blindly: divergent old SQL migrations, drafts and ac
 
 ## Checkpoint
 Before-work worklog created, no Production or main mutation. Subsequent checkpoints will record exact commit IDs and evidence.
+
+## In-progress checkpoint 1 (13:xx KST)
+- Clean integration worktree HEAD after local main reconciliation: `aedda1fc5f`; incorporated seven local feature commits into origin/main using a normal, conflict-free merge. The original uncommitted OTP test modification remains untouched.
+- Branch-by-branch Git ancestry and changed-path inventory saved on the host: `web-branch-audit.{csv,json}` and `android-branch-audit.{csv,json}`. Web (597 excluding origin/main): 51 contained, 226 unmerged docs-only, 320 unmerged runtime/active worktree; Android (6 excluding main): 1 contained, 5 unmerged runtime branches.
+- 8 contained web branches still have linked worktrees and must **not** be deleted; the remaining verified-safe contained refs were recorded in a separate frozen SHA manifest before deletion.
+- Production promotion still BLOCKED until every chosen runtime branch and exact-source Test/finance/rollback gates are satisfied.
