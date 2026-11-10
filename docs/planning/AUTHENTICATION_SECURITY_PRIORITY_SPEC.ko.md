@@ -9,7 +9,11 @@
 
 Moneyverse는 계정·경제·커뮤니티 데이터를 다루는 실제 공개 서비스다. 따라서 미구현 기능은 화면의 화려함보다 **계정 무결성 → 개인정보 보호 → DB 최소권한 → 복구 가능성 → 핵심 제품 → 성장/수익화** 순서로 개발한다.
 
-기존 OAuth/OIDC, 서버측 세션, 재인증(Step-Up 2FA), PostgreSQL 보안 경계, append-only audit, Test 우선 배포 구조는 유지한다. (과거 관리자 전용 TOTP는 Migration 197에서 공식 폐기되어 ReauthGuard 및 AdminSessionGuard로 정합화됨) 자체 이메일/비밀번호 로그인은 기존 인증 코어에 `local_email` provider를 추가하는 방식이며 별도의 세션 체계를 만들지 않는다.
+기존 OAuth/OIDC, 서버측 세션, 재인증(Step-Up 2FA), PostgreSQL 보안 경계, append-only audit, Test 우선 배포 구조는 유지한다.
+
+> **[v2026.11.10 관리자 인증 강화 및 기획 정정]**:
+> 1. 관리자 2FA/재인증은 앱 기반 단일 TOTP에 의존하지 않고, **Discord 관리자 채널 및 Telegram 봇을 통한 실시간 6자리 OTP 동시 발송 및 인증 방식**으로 전면 강화·개편된다.
+> 2. **중대한 관리자 페이지 접속**(국고 관제 타워 , 조폐국 , 관리자 권한 부여) 및 **중대한 관리 명령**(국고 대규모 지출, 조폐국 화폐발행 국고 충전, 관리자 임금 지급, 비상 셧다운 토글) 실행 시, 5분 유효기간 및 단일 소모성(Single-Use)을 보장하는 **다채널 OTP 스텝업 인증(Step-Up Authentication)**이 필수 관문(Quality Gate)으로 강제된다. 자체 이메일/비밀번호 로그인은 기존 인증 코어에 `local_email` provider를 추가하는 방식이며 별도의 세션 체계를 만들지 않는다.
 
 ## 1. 미구현 우선순위
 
