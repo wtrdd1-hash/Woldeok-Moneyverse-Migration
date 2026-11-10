@@ -8,10 +8,14 @@
 - 확인된 사실: 백엔드 `evaluateAndRebalance()`는 실거래 실행을 반환하지 않음(`executed:false`); SQL 343은 증빙 없는 평가액 환원을 거부함. UI는 정책 ON을 엔진 정상 가동/원장 연동 완료로 오인시키는 안내와 새로고침 시 원장 동기화 완료로 오인시키는 토스트를 표시함.
 
 ## 작업 중
-- [ ] 실제 유효 원장과 미정산 평가 구분을 테스트로 고정한다(RED).
-- [ ] 정책 허용과 실제 엔진 실행을 분리 표기하고 허위 정산·자동 운용 문구를 제거한다(GREEN).
-- [ ] 프론트 단위 테스트/타입체크/린트와 중간 최신 메인 재확인을 한다.
-- [ ] 독립 테스트 환경 검증과 운영 승격 가능 여부를 확인한다.
+- [x] 실제 유효 원장과 미정산 평가 구분을 테스트로 고정한다(RED).
+- [x] 정책 허용과 실제 엔진 실행을 분리 표기하고 허위 정산·자동 운용 문구를 제거한다(GREEN).
+- [x] 프론트 단위 테스트 3/3 PASS, ESLint PASS, 중간 `origin/main=3a7c34507aff858cce71efbb10410a4a2f7c9ef8` 재확인. TypeScript `tsc --noEmit` PASS, `git diff --check` PASS. 초기 기본 `NODE_ENV`가 production이라 React.act 테스트 환경 오류가 발생해 `NODE_ENV=test`로 수정 후 RED 1건 및 GREEN 3건을 검증.
+- [x] 공식 Test 서비스는 active이나 Test/Production 버전 모두 `727881420a491bb129a1a97258ea8ae67f62bbf8`이며 후보 SHA가 아님을 읽기 전용 확인. 정확 SHA Test 미배포이므로 운영 승격 **보류**.
 
-## 작업 종료
-- 미완료. 실행 결과와 중간/최종 메인 SHA, PR, 배포 상태 기록 예정.
+## 작업 종료 (2026-11-10 KST)
+- 변경 파일 lint PASS; UI 단위 3/3 PASS; 타입 검사 PASS. backend 실거래 정산 구현, 금융 DB 테스트, 전체 CI/브라우저 E2E는 이번 변경에서 미수행·미검증.
+- 메인 재확인: 시작 및 중간/종료 `origin/main=3a7c34507aff858cce71efbb10410a4a2f7c9ef8`. 원래 작업 트리의 다른 작업자 수정 파일은 건드리지 않음.
+- 운영/국고 금융 쓰기: 0건. PROD 변경: 없음.
+- 남은 작업: 정확 SHA 공식 Test 및 금융 증빙·운영 QA. 추후 결과를 추가 기록하며 검증 전 운영 승격 보류.
+- 영어 정본/한국어 부본: `docs/updates/v2026.11.10.2022-swf-status-{internal,github}.md` 및 `.ko.md`, 변경 이력 2종.

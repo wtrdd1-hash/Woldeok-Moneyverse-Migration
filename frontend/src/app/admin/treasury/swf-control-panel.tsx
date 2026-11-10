@@ -67,6 +67,9 @@ export function SwfControlPanel({
       const data = await res.json();
       if (data && data.config) {
         setIsEnabled(Boolean(data.config.is_enabled));
+        if (Number.isFinite(Number(data.config.equity_ratio_pct))) setEquityRatio(Number(data.config.equity_ratio_pct));
+        if (Number.isFinite(Number(data.config.bond_ratio_pct))) setBondRatio(Number(data.config.bond_ratio_pct));
+        if (Number.isFinite(Number(data.config.dividend_ratio_pct))) setDividendRatio(Number(data.config.dividend_ratio_pct));
         if (data.config.reinvestment_ratio_pct !== undefined) {
           setReinvestRatio(Number(data.config.reinvestment_ratio_pct));
         }
@@ -83,7 +86,9 @@ export function SwfControlPanel({
       if (Array.isArray(data?.events)) {
         setEvents(data.events);
       }
-      toast.success('국부펀드 최신 원장 데이터가 동기화되었습니다.');
+      toast.success('국부펀드 정책과 미정산 평가 기록을 새로 조회했습니다.', {
+        description: '실제 투자 체결이나 원장 정산 완료를 확인한 것은 아닙니다.',
+      });
     } catch {
       toast.error('최신 국부펀드 데이터를 불러오는데 실패했습니다.');
     } finally {
@@ -103,6 +108,9 @@ export function SwfControlPanel({
   const [reinvestRatio, setReinvestRatio] = useState<number>(initialConfig?.reinvestment_ratio_pct ?? 15);
   const [maxInvestCap, setMaxInvestCap] = useState<number>(initialConfig?.max_investment_ratio_pct ?? 20);
   const [safeReserve, setSafeReserve] = useState<string>(initialConfig?.safe_reserve_wld || '25000000');
+  const [equityRatio, setEquityRatio] = useState(initialConfig?.equity_ratio_pct ?? 0);
+  const [bondRatio, setBondRatio] = useState(initialConfig?.bond_ratio_pct ?? 0);
+  const [dividendRatio, setDividendRatio] = useState(initialConfig?.dividend_ratio_pct ?? 0);
   const maxSingle = initialConfig?.max_single_investment_wld || '10000000';
 
   // PostgreSQL numeric(38,0) amounts are never rounded through IEEE-754 numbers.
@@ -126,7 +134,7 @@ export function SwfControlPanel({
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        toast.success('국고 자금 투자 비율 및 안전 보존 정책이 저장되었습니다!', {
+        toast.success('국고 투자 허용 정책값이 저장되었습니다. 실제 투자는 집행되지 않았습니다.', {
           description: `투자비율 ${reinvestRatio}% / 최대상한 ${maxInvestCap}% / 국고보존금 ${groupDigits(safeReserve)} WLD`,
         });
       } else {
@@ -173,10 +181,10 @@ export function SwfControlPanel({
                 variant="outline"
                 onClick={handleRefreshSwfData}
                 disabled={isRefreshing}
-                aria-label="국부펀드 최신 원장 동기화"
+                aria-label="국부펀드 미정산 평가 기록 새로고침"
                 className="border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs shrink-0 w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
               >
-                {isRefreshing ? '동기화 중...' : '🔄 최신 원장 동기화'}
+                {isRefreshing ? '조회 중...' : '🔄 평가 기록 새로고침'}
               </Button>
               <Button
                 size="sm"
@@ -192,18 +200,18 @@ export function SwfControlPanel({
 
         <CardContent className="pt-6 space-y-6">
           {isEnabled ? (
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-300 flex items-center justify-between gap-2">
+            <div role="status" className="rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span aria-hidden="true">✅</span>
-                <span>국부펀드 자율 운용 엔진 가동 중: 복식부기 감사 원장 및 불변 영수증과 실시간 연동되어 안전하게 운용됩니다.</span>
+                <span aria-hidden="true">⚠</span>
+                <span>정책상 투자 허용 상태지만 실거래 정산은 보류 중입니다. 자동투자 체결 및 불변 원장 영수증이 확인되지 않았습니다.</span>
               </div>
               <button
                 type="button"
                 onClick={handleRefreshSwfData}
                 disabled={isRefreshing}
-                className="text-[11px] underline text-emerald-400 hover:text-emerald-300 shrink-0 ml-2 py-1 px-1.5"
+                className="text-[11px] underline text-amber-300 hover:text-amber-200 shrink-0 ml-2 py-1 px-1.5"
               >
-                {isRefreshing ? '갱신 중...' : '새로고침'}
+                {isRefreshing ? '조회 중...' : '다시 조회'}
               </button>
             </div>
           ) : (
@@ -226,11 +234,11 @@ export function SwfControlPanel({
           <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2.5">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-                <span>🛡️ 국고 금고 안전 보존:</span>
+                <span>🛡️ 신규 투자 정책상 유보율:</span>
                 <strong className="text-blue-400 font-mono text-sm">{treasuryPreserveRatio}%</strong>
               </span>
               <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-                <span>📈 국부펀드 투자 허용:</span>
+                <span>📈 정책상 투자 허용 비율:</span>
                 <strong className="text-amber-400 font-mono text-sm">{reinvestRatio}%</strong>
               </span>
             </div>
@@ -246,7 +254,7 @@ export function SwfControlPanel({
             </div>
             <div className="flex justify-between text-[11px] text-slate-400">
               <span>✓ 국가 시스템 필수 운영자금 (비상금고 / 인프라 / 지준금)</span>
-              <span>최대 상한 {maxInvestCap}% 초과 시 신규 투자 자동 동결</span>
+              <span>한도 {maxInvestCap}%는 실제 거래 집행 전 사전 검증 조건</span>
             </div>
           </div>
 
@@ -277,7 +285,7 @@ export function SwfControlPanel({
                 <span>50% (상한)</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-snug">
-                초과 세수 중 {reinvestRatio}%만 분산 투자하고, 나머지 {treasuryPreserveRatio}%는 국고에 영구 축적합니다.
+                실거래 엔진 구축 시 적용할 허용 비율 {reinvestRatio}%·유보 비율 {treasuryPreserveRatio}%입니다. 현재 실제 집행은 보류 중입니다.
               </p>
             </div>
 
@@ -306,7 +314,7 @@ export function SwfControlPanel({
                 <span>30% (한도)</span>
               </div>
               <p className="text-[11px] text-slate-400 leading-snug">
-                국부펀드 총 AUM이 국고 총액의 {maxInvestCap}%를 넘으면 신규 매수를 전면 중단합니다.
+                실제 체결 원장이 구축되기 전의 정책 상한입니다. 이 설정은 신규 매수 실행 증빙이 아닙니다.
               </p>
             </div>
 
@@ -349,7 +357,7 @@ export function SwfControlPanel({
                 </button>
               </div>
               <p className="text-[11px] text-slate-400 leading-snug">
-                이 금액 이하의 국고는 어떠한 경우에도 투자하지 않고 금고에 상시 보존합니다.
+                실거래 집행 시 검증할 최소 현금 유보 정책값입니다. 실제 국고 잔액 조회값이 아닙니다.
               </p>
             </div>
           </div>
@@ -359,7 +367,7 @@ export function SwfControlPanel({
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isEnabled ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-200">
-                자율 국부펀드 설정: {isEnabled ? '정책상 활성' : '관리자 수동 동결'} / 실행 엔진: {isEnabled ? '원장 검증 완료 및 정상 가동' : '원장 검증 전 중단'}
+                자율 국부펀드 설정: {isEnabled ? '정책상 활성' : '관리자 수동 동결'} / 실행 엔진: 실거래 정산 보류
               </span>
             </div>
             <div className="flex gap-2">
@@ -385,7 +393,7 @@ export function SwfControlPanel({
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-xl shrink-0">📈</span>
                   <CardTitle className="text-base sm:text-lg font-bold tracking-tight text-white break-keep leading-snug">
-                    국고 복리 성장 국부펀드 (ASWF) 포트폴리오
+                    국고 국부펀드(ASWF) 미정산 평가 기록
                   </CardTitle>
                 </div>
                 <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs shrink-0 whitespace-nowrap">
@@ -446,17 +454,17 @@ export function SwfControlPanel({
                 {groupDigits(aumWld)} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                <span>목표 적정선: 약 2,000만 WLD (총자산의 ~16%)</span>
+                <span>평가액은 미정산 기록으로 국고 가용 현금에 포함되지 않습니다</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/50">
-              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 (Floor Reserve)</div>
+              <div className="text-xs text-slate-400 font-medium">국고 최소 안전 바닥 정책값 (Floor Reserve)</div>
               <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
                 {groupDigits(floorReserve)} <span className="text-sm font-sans font-normal text-slate-400">WLD</span>
               </div>
               <div className="text-xs text-slate-400 mt-1.5 leading-normal pb-0.5">
-                설정 원금 이하 절대 안전 보존 (국가 시스템 우선)
+                실제 집행 엔진에는 별도 원장 기반 하한 검증이 필요합니다
               </div>
             </div>
 
@@ -474,17 +482,17 @@ export function SwfControlPanel({
           {/* 3대 자산 배분 비중 바 */}
           <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/40 space-y-2">
             <div className="flex justify-between items-center text-xs text-slate-300">
-              <span className="font-semibold">헌법적 3대 자산 복리 배분 비중</span>
+              <span className="font-semibold">저장된 자산 배분 정책 (실제 매수 비중 아님)</span>
               <div className="flex gap-4">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 60%</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 30%</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 10%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>WDX 주식 {equityRatio}%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span>국채 예치 {bondRatio}%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>시민 기본소득 {dividendRatio}%</span>
               </div>
             </div>
             <div className="w-full h-2.5 rounded-full bg-slate-700/60 overflow-hidden flex">
-              <div style={{ width: '60%' }} className="bg-blue-500 h-full" />
-              <div style={{ width: '30%' }} className="bg-amber-500 h-full" />
-              <div style={{ width: '10%' }} className="bg-emerald-500 h-full" />
+              <div style={{ width: `${equityRatio}%` }} className="bg-blue-500 h-full" />
+              <div style={{ width: `${bondRatio}%` }} className="bg-amber-500 h-full" />
+              <div style={{ width: `${dividendRatio}%` }} className="bg-emerald-500 h-full" />
             </div>
           </div>
 
@@ -492,7 +500,7 @@ export function SwfControlPanel({
           <div>
             <div className="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">
               <span>🏛️ WDX 4대 대표 섹터 우량주 보유 현황</span>
-              <span className="text-xs text-slate-400">정기 영업 이익 및 법인세 국고 자동 납입 중</span>
+              <span className="text-xs text-slate-400">실제 보유·운용 수익 정산 영수증 미확인</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {portfolios.map((item) => (

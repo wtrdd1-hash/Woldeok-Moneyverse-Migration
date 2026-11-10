@@ -26,3 +26,17 @@ describe('SWF admin manual liquidation truth / C v1136', () => {
     expect(screen.queryByRole('button', { name: /주식 자금 즉시 회수/ })).toBeNull();
   });
 });
+
+
+describe('SWF execution policy and settlement evidence are distinct / v2022', () => {
+  it('never treats an enabled policy as a running ledger-verified trading engine', () => {
+    render(<SwfControlPanel initialConfig={{ is_enabled: true, safe_reserve_wld: '10000000', max_single_investment_wld: '10000000', equity_ratio_pct: 50, bond_ratio_pct: 30, dividend_ratio_pct: 20 }} />);
+    expect(screen.getByRole('status').textContent).toMatch(/실거래.*정산.*보류/);
+    expect(screen.queryByText(/자율 운용 엔진 가동 중/)).toBeNull();
+    expect(screen.queryByText(/원장 검증 완료 및 정상 가동/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /최신 원장 동기화/ })).toBeNull();
+    expect(screen.getByText(/WDX 주식 50%/)).toBeTruthy();
+    expect(screen.getByText(/국채 예치 30%/)).toBeTruthy();
+    expect(screen.getByText(/시민 기본소득 20%/)).toBeTruthy();
+  });
+});
