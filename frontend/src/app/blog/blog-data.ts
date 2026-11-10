@@ -608,37 +608,14 @@ function loadPostsFromDisk(): BlogPost[] {
   try {
     const filePath = getBlogStoreFilePath();
     if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, 'utf-8');
+      const raw = fs.readFileSync(filePath, "utf-8");
       const parsed = JSON.parse(raw) as BlogPost[];
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const existingSlugs = new Set(parsed.map((p) => p.slug));
-        const combined = [...parsed];
-        for (const init of INITIAL_POSTS) {
-          if (!existingSlugs.has(init.slug)) {
-            combined.unshift(init);
-          } else {
-            // 초기 등록 포스트의 심층 콘텐츠, 번역 및 인포그래픽 데이터 갱신
-            const idx = combined.findIndex((p) => p.slug === init.slug);
-            const existing = combined[idx];
-            if (existing) {
-              combined[idx] = {
-                ...existing,
-                title: init.title,
-                excerpt: init.excerpt,
-                content: init.content,
-                tags: init.tags,
-                heroImage: init.heroImage,
-                infographicType: init.infographicType,
-                translations: init.translations,
-              };
-            }
-          }
-        }
-        return combined;
+      if (Array.isArray(parsed)) {
+        return parsed;
       }
     }
   } catch (err) {
-    console.error('[BlogStore] Failed to read blog posts from disk:', err);
+    console.error("[BlogStore] Failed to read blog posts from disk:", err);
   }
   return [...INITIAL_POSTS];
 }
@@ -1346,7 +1323,6 @@ ${renderedReferences}
     academicReferences: targetCategory === 'TECH' ? undefined : template.academicReferences,
   };
 
-  return newPost;
   return newPost;
 }
 

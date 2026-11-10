@@ -10,7 +10,7 @@ const post: BlogTopicForReview = {
 
 describe('AI blog duplicate topic review v976', () => {
   it('blocks normalized title/slug duplicates irrespective of punctuation', () => {
-    const candidate = { ...post, id: 'new', title: '예금이자 계산방법, 총정리!!', slug: 'new-slug' };
+    const candidate = { ...post, id: 'new', title: '예금이자 계산방법, 총정리?!', slug: 'new-slug' };
     expect(reviewBlogDuplicateCandidates(candidate, [post]).status).toBe('BLOCK_EXACT');
     expect(reviewBlogDuplicateCandidates({ ...candidate, slug: post.slug, title: '별개의 제목' }, [post]).status)
       .toBe('BLOCK_EXACT');
@@ -35,8 +35,20 @@ describe('AI blog duplicate topic review v976', () => {
     expect(result).not.toHaveProperty('publish');
   });
   it('flags similar copy even with a distinct title but reserves human review', () => {
-    const other = { ...post, id: 'new', slug: 'different', title: '적금 이자 안내' };
+    const other = { ...post, id: 'new', slug: 'different', title: '연금 이자 안내' };
     const result = reviewBlogDuplicateCandidates(other, [post]);
     expect(result.status).toBe('REVIEW_SIMILAR');
+  });
+  it('flags titles with >= 65% similarity for review or blocking', () => {
+    const similarTitleCandidate = {
+      ...post,
+      id: 'new-similar-title',
+      slug: 'savings-interest-methods-summary',
+      title: '예금 이자 계산 방법 핵심 정리',
+      content: '완전히 새로운 독창적인 내용으로 구성된 단락입니다. 다른 각도에서 심층 분석을 진행합니다.',
+    };
+    const result = reviewBlogDuplicateCandidates(similarTitleCandidate, [post]);
+    expect(result.status).toMatch(/REVIEW_SIMILAR|BLOCK_EXACT/);
+    expect(result.matches.some((m) => m.reason === 'SIMILAR_TITLE')).toBe(true);
   });
 });

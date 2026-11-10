@@ -3050,3 +3050,17 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **Git 형상 관리 및 운영 승격**:
   - 원격 커밋: `e10e16701d`
   - 로컬 커밋: `20e44eb3`
+
+
+---
+
+## 🏛️ [v301 Specification] 전 기능 체계적 결함 점검 & 원장 라벨 누락 버그 해결
+
+### 1. 결함 발견 및 근본 원인 조사 (Systematic Debugging)
+- **증상**: 백엔드 전체 테스트 실행 시 `src/wallet/ledger-labels.test.ts`에서 `TREASURY_ADMIN_SALARY` 타입이 한글 레이블 없이 기본값(`'경제 활동'`)으로 fallback되어 테스트 1건 실패 발생.
+- **근본 원인**: 346번 DB 마이그레이션에서 `TREASURY_ADMIN_SALARY` 원장 트랜잭션 타입이 신규 추가되었으나, `backend/src/wallet/wallet.service.ts`의 `TRANSACTION_LABELS` 매핑 사전에 해당 키가 등록되지 않음.
+- **해결 조치**: `TRANSACTION_LABELS`에 `TREASURY_ADMIN_SALARY: '국고 관리자 임금 지급'` 등록 완료.
+- **검증**: `src/wallet/ledger-labels.test.ts` 39건 테스트 100% 전수 통과 확인.
+- **Git 커밋**:
+  - 원격 커밋: `c6f9cc5bf9`
+  - 로컬 커밋: `96d93895`
