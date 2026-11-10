@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.012 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.014 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -202,3 +202,11 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **정합성/운영:** 중앙·보조원장 동일 불변 스냅샷의 잔액 일치가 전제. CPU/시간·테넌트별 호출 제한, 스냅샷+정책+시나리오 해시로 재현성 확보. 멱등 큐/outbox, fencing worker, 중복 효과 없는 재시도, 오래된 정책/원장은 INCONCLUSIVE. 작성자·검토자 분리, 비식별 불변 감사, 경고는 연속 2회 동일 증거와 최소 표본 기준으로 오탐 억제. 기능 플래그 기본 OFF, 추가형 마이그레이션, 롤백 시 감사 보존.
 - **수용 기준(미실행):** 같은 입력의 같은 증명, 원장 불일치 차단, 테넌트 침범·자기승인·오래된 revision 거부, 오버플로·분모 0·중복 동시 요청·outbox 장애·오래된 정책·누락 스냅샷·음수 준비금 안전 처리, 금융 원장 쓰기 0건. 승인된 exact-SHA 격리 Test E2E, 320px·키보드·WCAG 2.2 AA·영한 UI 동등, 비공개 noindex/no-store. 지표는 비식별 처리 지연·불일치율·오탐률. P0 운영 출처/원장 대사 HOLD, P1 개발·독립 QA, P2 지표. 외부 독립 레퍼런스 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS.
 - **비교 인덱스:** 기존 가상 보험기금 개념 → TSI-20261110-011 ADD → PROJECT_PLAN.md 미반영 / Draft PR #3006 추적. ADD 1 / MODIFY 0 / REMOVE 0 / DEFER 0. 운영 코드·DB·자금·배포 변경 없음.
+
+
+### 2026-11-10 13:05 KST — A QA 근거 재검토, v2032 / vTSI.2026.11.10.014 (기능 변경 0건)
+- **회차:** 직전 B v2030 → 현재 A v2032 → 다음 B v2034. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. TSI-001~011 원문 및 사용자 철회 오해 정정은 그대로 보존한다. 정본 반영이나 실제 구현 완료로 간주하지 않는다.
+- **실제 근거:** 13:02 KST 미니PC 조회에서 백엔드/프론트엔드/Discord/MCP/nginx/docker 활성, 개발용 PostgreSQL 연결. 운영 측 /api/version은 727881420a491bb129a1a97258ea8ae67f62bbf8, 독립 재조회한 원격 main은 3a7c34507aff858cce71efbb10410a4a2f7c9ef8로 다르지만 배포 결함 여부는 미검증. 12:14 QA 보고서는 운영/Test HTTP 200과 버전 일치를 확인했으나 브라우저 E2E, 인증 금융 흐름, 원장 대사, exact-SHA 격리 Test, 백업 복구, CI PASS를 검증하지 못했다. 구형 v1068 백엔드 활성화/재시작 반복 NRestarts=199155는 QA 보고값이며 의존성·영향은 미확인. 국고/보험의 신규 재현 결함 증거가 없어 허구의 수정 기획을 추가하지 않는다.
+- **P0 HOLD:** 동일 스냅샷 중앙·보조원장 대사, 배포 SHA 출처, DB 권한, 복구 및 독립 QA 확인 전 금융 쓰기/운영 승격 금지. **P1:** 개발 A는 구형 서비스 의존성과 배포 SHA 확인, 개발 B는 읽기 전용 국고·보험 거래 출처 확인, QA는 승인된 브라우저 계정과 Test E2E 확보. **P2:** 관측 근거 확립 후 접근성·경고 오탐 억제 지표 검토.
+- **변경 범위:** UI/API/DB/RBAC/마이그레이션 0건, 운영 코드·잔액·배포 변경 없음. 제안 테스트 실행하지 않음. 이번 회차 외부 독립 근거 0건, 누적 중복 제거 수량 UNKNOWN/10,000으로 BLOCKED. 불변 기준선 edd709bc 및 기존 비교 인덱스 유지. 다음 B는 신규 기능 선정 전에 정본 반영·실제 구현 중복을 검사한다.
+- **근거:** 13:02 미니PC 상태, /srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.10.1214-internal.md, 원격 main 3a7c345, 추적 PR #3006. 영문과 동등한 QA 검토 기록이다.
