@@ -224,3 +224,11 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **비교:** 불변 기준선 급여 통제 → TSI-20261110-012 ADD → PROJECT_PLAN.md / INTEGRATED_PLANNING_MASTER.md 반영 대기; PR #3006은 추적용. 이번 회차 ADD 1/MODIFY 0/REMOVE 0/DEFER 0. 누적 건수는 전체 대장 검증 후 확정. 운영 코드·DB·잔액·배포 변경 없음.
 
 **vTSI.015 누적 변경대장 집계:** ADD 7, MODIFY 5, REMOVE 0, DEFER 0, 정본 반영 확인 0, 미반영 12. 이는 제안 기록이며 구현 증거가 아니다.
+
+
+### 2026-11-10 15:05 KST — A형 QA 근거 검토, v2036 / vTSI.2026.11.10.016 (기능 변경 0건)
+- **교대:** 이전 B v2034 → 현재 A v2036 → 다음 B v2038. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. 기존 TSI-001~012 및 불변 기준선 원문 보존. 철회 또는 중복 제안 없음.
+- **근거:** 미니PC 15:02 KST 백엔드·프론트엔드·Discord·MCP·nginx·docker 활성, 개발 DB 연결. 14:11 KST QA 파일 `/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.10.1411-internal.md`에서 운영/Test의 /, /api/health, /api/version HTTP 200 확인; API 버전 `727881420a491bb129a1a97258ea8ae67f62bbf8`, 원격 main `3a7c34507aff858cce71efbb10410a4a2f7c9ef8` 불일치. 레거시 재시작 200494회(+664 보고). 잔액 손실의 증거는 아님. 브라우저 실행기·승인된 테스트 계정 부재로 E2E BLOCKED(PASS 아님).
+- **판정:** 기존 TSI-003/005/007에 배포 증빙·레거시 서비스 생명주기·E2E 검증 기능이 이미 제안되어 있어 신규 결함 기능을 중복 추가하지 않음. P0 금융 배포 HOLD: 정확한 SHA 격리 Test, 중앙·보조원장 대사, 백업 복구, 독립 QA/브라우저 E2E 필요. P1 레거시 재시작 원인·실제 금융 쓰기 경로 조사. P2 증빙 만료 경고 중복 억제. UI/API/DB/RBAC/마이그레이션 변경 0, 기획 회차 테스트 미실행.
+- **추적:** 기준선 `edd709bcbe96f6f5ceca8372f244b632e8211242` → 기존 TSI-003/005/007 유지 → 정본 반영 미검증/대기, Draft PR #3006. 신규 검증 외부 레퍼런스 0, 누적 독립 중복 제거 건수 UNKNOWN/10,000, 게이트 BLOCKED/IN PROGRESS. 운영 변경·배포 없음.
+- **누적:** ADD 7, MODIFY 5, REMOVE 0, DEFER 0, 정본 반영 검증 0, 미반영 12.
