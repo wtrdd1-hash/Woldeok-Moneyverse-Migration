@@ -21,6 +21,8 @@ import { OAuthClient } from './oauth-client';
 import { SessionRepository } from './session.repository';
 import { VerificationEmailSender } from './verification-email.sender';
 import { DualKeyRotationService } from './dual-key-rotation';
+import { AdminChannelOtpService } from './admin-channel-otp.service';
+import { AdminChannelOtpController } from './admin-channel-otp.controller';
 
 const GUARDS = [
   SessionGuard,
@@ -36,7 +38,12 @@ const GUARDS = [
 
 @Module({
   imports: [forwardRef(() => AccountModule)],
-  controllers: [AuthController, AuthBootstrapController, LocalAuthController],
+  controllers: [
+    AuthController,
+    AuthBootstrapController,
+    LocalAuthController,
+    AdminChannelOtpController,
+  ],
   providers: [
     {
       provide: OAuthClient,
@@ -59,6 +66,7 @@ const GUARDS = [
       useFactory: () => new DualKeyRotationService(),
     },
     AdminRolesRepository,
+    AdminChannelOtpService,
     Reflector,
     ...GUARDS,
   ],
@@ -69,6 +77,7 @@ const GUARDS = [
     OAuthClient,
     VerificationEmailSender,
     DualKeyRotationService,
+    AdminChannelOtpService,
     Reflector,
     ...GUARDS,
   ],
