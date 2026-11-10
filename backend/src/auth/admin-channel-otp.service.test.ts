@@ -10,7 +10,7 @@ describe('AdminChannelOtpService (Telegram & Discord OTP Verification)', () => {
 
   beforeEach(() => {
     mockTelegram = {
-      sendDirectAlert: vi.fn().mockResolvedValue(true),
+      sendAlert: vi.fn().mockResolvedValue(true),
     };
     mockDiscord = {
       sendAdminDirectMessage: vi.fn().mockResolvedValue(true),
@@ -27,7 +27,7 @@ describe('AdminChannelOtpService (Telegram & Discord OTP Verification)', () => {
 
     expect(result.success).toBe(true);
     expect(result.expiresAt).toBeGreaterThan(Date.now());
-    expect(mockTelegram.sendDirectAlert).toHaveBeenCalledTimes(1);
+    expect(mockTelegram.sendAlert).toHaveBeenCalledTimes(1);
     expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledTimes(1);
   });
 
