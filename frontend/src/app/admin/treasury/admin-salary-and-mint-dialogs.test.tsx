@@ -52,11 +52,12 @@ describe('AdminSalaryDisburseDialog & AdminMintTopupDialog', () => {
     });
   });
 
-  it('binds salary OTP issuance and financial execution to one recipient and amount', async () => {
+  it('binds salary OTP issuance and financial execution to one recipient, amount and idempotency key', async () => {
     const fetch = vi.fn()
       .mockResolvedValueOnce(apiResponse({ success: true }))
       .mockResolvedValueOnce(apiResponse({ ok: true, result: { ledger_transaction_id: 'receipt' } }));
     vi.stubGlobal('fetch', fetch);
+    vi.stubGlobal('crypto', { randomUUID: () => key });
     render(<AdminSalaryDisburseDialog />);
     fireEvent.click(screen.getByRole('button', { name: /관리자 임금 지급/i }));
     fireEvent.change(screen.getByLabelText(/수령 관리자 ID/i), { target: { value: adminId } });
@@ -67,6 +68,7 @@ describe('AdminSalaryDisburseDialog & AdminMintTopupDialog', () => {
       action: 'treasury_salary_disburse',
       targetAdminId: adminId,
       amountWld: '100000',
+      requestKey: key,
     });
 
     fireEvent.change(screen.getByLabelText(/관리자 2FA/i), { target: { value: '123456' } });
@@ -77,7 +79,25 @@ describe('AdminSalaryDisburseDialog & AdminMintTopupDialog', () => {
       targetAdminId: adminId,
       amountWld: '100000',
       otpCode: '123456',
+      requestKey: key,
     });
+  });
+
+  it('reuses one salary request UUID when retrying OTP for unchanged parameters', async () => {
+    const fetch = vi.fn().mockResolvedValue(apiResponse({ success: true }));
+    vi.stubGlobal('fetch', fetch);
+    const randomUUID = vi.fn(() => key);
+    vi.stubGlobal('crypto', { randomUUID });
+    render(<AdminSalaryDisburseDialog />);
+    fireEvent.click(screen.getByRole('button', { name: /관리자 임금 지급/i }));
+    fireEvent.change(screen.getByLabelText(/수령 관리자 ID/i), { target: { value: adminId } });
+    fireEvent.click(screen.getByRole('button', { name: /OTP 코드 발송/i }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: /재발송 요청/i }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(JSON.parse(fetch.mock.calls[0][1].body).requestKey).toBe(key);
+    expect(JSON.parse(fetch.mock.calls[1][1].body).requestKey).toBe(key);
+    expect(randomUUID).toHaveBeenCalledTimes(1);
   });
 
   it('disables the previously issued code when mint amount changes', async () => {

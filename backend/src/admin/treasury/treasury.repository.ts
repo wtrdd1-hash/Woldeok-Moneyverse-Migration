@@ -1636,10 +1636,11 @@ export class TreasuryRepository {
     targetAdminId: string,
     amountWld: string,
     reason: string,
+    requestKey: string,
   ): Promise<any> {
     const res = await this.pool.query<{ result: any }>(
-      'SELECT public.treasury_disburse_admin_salary(::uuid, ::uuid, ::text, ::text) AS result',
-      [actorId, targetAdminId, amountWld, reason],
+      'SELECT public.treasury_disburse_admin_salary($1::uuid, $2::uuid, $3::text, $4::text, $5::uuid) AS result',
+      [actorId, targetAdminId, amountWld, reason, requestKey],
     );
     return res.rows[0]?.result;
   }
@@ -1651,7 +1652,7 @@ export class TreasuryRepository {
     requestKey: string,
   ): Promise<any> {
     const res = await this.pool.query<{ result: any }>(
-      'SELECT public.admin_treasury_topup_from_mint_direct(::uuid, ::text, ::text, ::uuid) AS result',
+      'SELECT public.admin_treasury_topup_from_mint_direct($1::uuid, $2::text, $3::text, $4::uuid) AS result',
       [actorId, amountWld, reason, requestKey],
     );
     return res.rows[0]?.result;

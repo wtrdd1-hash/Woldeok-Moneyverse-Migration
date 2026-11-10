@@ -440,6 +440,7 @@ export class TreasuryService {
     targetAdminId: string,
     amountWld: string,
     reason: string,
+    requestKey: string,
   ) {
     if (!actorId || !targetAdminId) {
       throw new TreasuryInputError('유효한 관리자 세션이 필요합니다.');
@@ -451,7 +452,7 @@ export class TreasuryService {
       throw new TreasuryInputError('임금 지급 사유는 최소 5자 이상 작성해야 합니다.');
     }
     try {
-      const result = await this.repository.disburseAdminSalary(actorId, targetAdminId, amountWld, reason);
+      const result = await this.repository.disburseAdminSalary(actorId, targetAdminId, amountWld, reason, requestKey);
       if (this.telegram && result?.success) {
         this.telegram.notifyTreasuryGrant({
           action: 'DISBURSED',

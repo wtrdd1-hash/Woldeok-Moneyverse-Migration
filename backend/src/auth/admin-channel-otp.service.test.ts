@@ -14,6 +14,7 @@ const salary = {
   amountWld: '100000',
   reason: 'monthly administrator wage',
   targetAdminId: 'a9461a37-2780-4340-a312-8069c9570831',
+  requestKey: '77e539ef-1019-4e6a-92c5-3d9b405ea609',
 };
 
 describe('AdminChannelOtpService — bound administrator step-up', () => {

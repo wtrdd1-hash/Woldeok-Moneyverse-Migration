@@ -621,18 +621,19 @@ export class FundedTreasuryDonationController {
   @ApiOperation({ summary: "국고 관리자 임금 복식부기 실지급" })
   async disburseAdminSalary(
     @Req() req: RequestWithSession,
-    @Body() body: { targetAdminId: string; amountWld: string; reason: string; otpCode: string },
+    @Body() body: { targetAdminId: string; amountWld: string; reason: string; requestKey: string; otpCode: string },
   ) {
     const intent = parseAdminOtpIntent({
       action: 'treasury_salary_disburse',
       targetAdminId: body.targetAdminId,
       amountWld: body.amountWld,
       reason: body.reason,
+      requestKey: body.requestKey,
     });
     if (intent.action !== 'treasury_salary_disburse') throw new BadRequestException('invalid salary intent');
     this.requireTreasuryOtp(req, intent, body.otpCode);
     const actorId = requireUserId(req);
-    const result = await this.service.disburseAdminSalary(actorId, intent.targetAdminId, intent.amountWld, intent.reason);
+    const result = await this.service.disburseAdminSalary(actorId, intent.targetAdminId, intent.amountWld, intent.reason, intent.requestKey);
     return { ok: true, message: "관리자 임금이 성공적으로 국고에서 지급되었습니다.", result };
   }
 

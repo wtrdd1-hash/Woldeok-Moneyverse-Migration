@@ -22,6 +22,7 @@ export type AdminOtpIntent =
       readonly amountWld: string;
       readonly reason: string;
       readonly targetAdminId: string;
+      readonly requestKey: string;
     };
 
 interface OtpSession {
@@ -52,7 +53,7 @@ export function parseAdminOtpIntent(value: unknown): AdminOtpIntent {
 
   const allowed = action === 'treasury_mint_topup'
     ? ['action', 'amountWld', 'reason', 'requestKey']
-    : ['action', 'amountWld', 'reason', 'targetAdminId'];
+    : ['action', 'amountWld', 'reason', 'targetAdminId', 'requestKey'];
   if (Object.keys(value).length !== allowed.length || Object.keys(value).some((key) => !allowed.includes(key))) {
     throw new BadRequestException('unexpected OTP intent fields');
   }
@@ -75,7 +76,10 @@ export function parseAdminOtpIntent(value: unknown): AdminOtpIntent {
   if (typeof value.targetAdminId !== 'string' || !UUID.test(value.targetAdminId)) {
     throw new BadRequestException('invalid salary recipient');
   }
-  return { action, amountWld, reason: normalizedReason, targetAdminId: value.targetAdminId.toLowerCase() };
+  if (typeof value.requestKey !== 'string' || !UUID.test(value.requestKey)) {
+    throw new BadRequestException('invalid salary idempotency key');
+  }
+  return { action, amountWld, reason: normalizedReason, targetAdminId: value.targetAdminId.toLowerCase(), requestKey: value.requestKey.toLowerCase() };
 }
 
 function binding(intent: AdminOtpIntent): string {

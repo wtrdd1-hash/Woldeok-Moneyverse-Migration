@@ -20,6 +20,7 @@ export function AdminSalaryDisburseDialog() {
   const [amountWld, setAmountWld] = useState('100000');
   const [reason, setReason] = useState('시스템 운영 및 금융 관제 기여 정기 임금');
   const [otpCode, setOtpCode] = useState('');
+  const [requestKey, setRequestKey] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,11 +36,13 @@ export function AdminSalaryDisburseDialog() {
       return;
     }
     setLoading(true);
+    const nextKey = requestKey || crypto.randomUUID();
+    setRequestKey(nextKey);
     try {
       const res = await fetch('/api/admin/auth/channel-otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'treasury_salary_disburse', amountWld: amountWld.trim(), reason: reason.trim(), targetAdminId: targetAdminId.trim() }),
+        body: JSON.stringify({ action: 'treasury_salary_disburse', amountWld: amountWld.trim(), reason: reason.trim(), targetAdminId: targetAdminId.trim(), requestKey: nextKey }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success !== true) {
@@ -68,7 +71,7 @@ export function AdminSalaryDisburseDialog() {
       setError('지급 사유는 최소 5자 이상 작성해야 합니다.');
       return;
     }
-    if (!otpSent) {
+    if (!otpSent || !requestKey) {
       setError('먼저 현재 수령인, 금액과 사유에 대한 OTP 코드를 발급받아 주세요.');
       return;
     }
@@ -90,6 +93,7 @@ export function AdminSalaryDisburseDialog() {
           amountWld: amountWld.trim(),
           reason: reason.trim(),
           otpCode: otpCode.trim(),
+          requestKey,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -139,7 +143,7 @@ export function AdminSalaryDisburseDialog() {
               id="target-admin-id"
               placeholder="예: 5f7b8b44-e4aa-40b8-b93a-800ec0151d20"
               value={targetAdminId}
-              onChange={(e) => { setTargetAdminId(e.target.value); setOtpSent(false); setOtpCode(''); }}
+              onChange={(e) => { setTargetAdminId(e.target.value); setOtpSent(false); setOtpCode(''); setRequestKey(''); }}
               className="mt-1 text-xs"
               required
             />
@@ -153,7 +157,7 @@ export function AdminSalaryDisburseDialog() {
               min="1"
               max="5000000"
               value={amountWld}
-              onChange={(e) => { setAmountWld(e.target.value); setOtpSent(false); setOtpCode(''); }}
+              onChange={(e) => { setAmountWld(e.target.value); setOtpSent(false); setOtpCode(''); setRequestKey(''); }}
               className="mt-1 text-xs font-mono"
               required
             />
@@ -164,7 +168,7 @@ export function AdminSalaryDisburseDialog() {
             <Input
               id="salary-reason"
               value={reason}
-              onChange={(e) => { setReason(e.target.value); setOtpSent(false); setOtpCode(''); }}
+              onChange={(e) => { setReason(e.target.value); setOtpSent(false); setOtpCode(''); setRequestKey(''); }}
               className="mt-1 text-xs"
               required
             />
