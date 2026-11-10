@@ -29,7 +29,7 @@ export function AdminSalaryDisburseDialog() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin/auth/channel-otp/request', {
+      const res = await fetch('/api/admin/auth/channel-otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actionName: `관리자 임금 지급 (${amountWld} WLD)` }),
@@ -71,7 +71,7 @@ export function AdminSalaryDisburseDialog() {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/v1/admin/treasury/salary/disburse', {
+      const res = await fetch('/api/admin/treasury/salary/disburse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

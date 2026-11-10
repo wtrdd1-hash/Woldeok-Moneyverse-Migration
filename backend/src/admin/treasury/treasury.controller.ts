@@ -1,6 +1,7 @@
+import { AdminChannelOtpService } from "../../auth/admin-channel-otp.service";
 ﻿import {
   BadRequestException,
-  ServiceUnavailableException,
+  ServiceUnavailableException, UnauthorizedException,
   Body,
   Controller,
   Get,
@@ -214,6 +215,7 @@ export class AdminTreasuryController {
   constructor(
     private readonly service: TreasuryService,
     private readonly swfService?: AutoSovereignWealthFundService,
+    private readonly otpService?: AdminChannelOtpService,
   ) {}
 
   @Get('overview')
@@ -492,7 +494,10 @@ export class AdminTreasuryController {
 @Controller('treasury')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class FundedTreasuryDonationController {
-  constructor(private readonly service: TreasuryService) {}
+  constructor(
+    private readonly service: TreasuryService,
+    private readonly otpService?: AdminChannelOtpService,
+  ) {}
 
   @Post('donate')
   @Header('Cache-Control', 'private, no-store')
@@ -605,9 +610,14 @@ export class FundedTreasuryDonationController {
   @ApiOperation({ summary: "국고 관리자 임금 복식부기 실지급" })
   async disburseAdminSalary(
     @Req() req: RequestWithSession,
-    @Body() body: { targetAdminId: string; amountWld: string; reason: string },
+    @Body() body: { targetAdminId: string; amountWld: string; reason: string; otpCode?: string },
   ) {
     const actorId = requireUserId(req);
+    if (this.otpService) {
+      if (!body.otpCode || !this.otpService.verifyOtp(actorId, body.otpCode)) {
+        throw new UnauthorizedException("관리자 텔레그램/디스코드 2FA OTP 인증 코드가 올바르지 않거나 만료되었습니다.");
+      }
+    }
     const result = await this.service.disburseAdminSalary(actorId, body.targetAdminId, body.amountWld, body.reason);
     return { ok: true, message: "관리자 임금이 성공적으로 국고에서 지급되었습니다.", result };
   }
@@ -617,9 +627,14 @@ export class FundedTreasuryDonationController {
   @ApiOperation({ summary: "조폐국 화폐발행으로 국고 직접 충전" })
   async topupFromMintDirect(
     @Req() req: RequestWithSession,
-    @Body() body: { amountWld: string; reason: string; requestKey: string },
+    @Body() body: { amountWld: string; reason: string; requestKey: string; otpCode?: string },
   ) {
     const actorId = requireUserId(req);
+    if (this.otpService) {
+      if (!body.otpCode || !this.otpService.verifyOtp(actorId, body.otpCode)) {
+        throw new UnauthorizedException("관리자 텔레그램/디스코드 2FA OTP 인증 코드가 올바르지 않거나 만료되었습니다.");
+      }
+    }
     const result = await this.service.topupFromMintDirect(actorId, body.amountWld, body.reason, body.requestKey);
     return { ok: true, message: "조폐국 신규 화폐가 국고로 성공적으로 발행 전입되었습니다.", result };
   }

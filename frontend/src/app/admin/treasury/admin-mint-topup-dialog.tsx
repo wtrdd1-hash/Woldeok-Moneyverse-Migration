@@ -28,7 +28,7 @@ export function AdminMintTopupDialog() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin/auth/channel-otp/request', {
+      const res = await fetch('/api/admin/auth/channel-otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actionName: `조폐국 화폐발행 국고 즉시 충전 (${amountWld} WLD)` }),
@@ -66,7 +66,7 @@ export function AdminMintTopupDialog() {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/v1/admin/treasury/mint-topup', {
+      const res = await fetch('/api/admin/treasury/mint-topup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
