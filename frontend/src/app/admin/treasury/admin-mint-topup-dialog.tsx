@@ -19,6 +19,7 @@ export function AdminMintTopupDialog() {
   const [amountWld, setAmountWld] = useState('1000000');
   const [reason, setReason] = useState('통화정책 위원회 승인 국고 비상 유동성 즉시 보충');
   const [otpCode, setOtpCode] = useState('');
+  const [requestKey, setRequestKey] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,16 +27,25 @@ export function AdminMintTopupDialog() {
 
   async function handleRequestOtp() {
     setError('');
+    setSuccessMsg('');
+    setOtpSent(false);
+    setOtpCode('');
+    if (!/^[1-9][0-9]{0,7}$/.test(amountWld) || Number(amountWld) > 10_000_000 || reason.trim().length < 5) {
+      setError('유효한 금액과 5자 이상의 발행 사유를 먼저 입력해 주세요.');
+      return;
+    }
+    const key = crypto.randomUUID();
+    setRequestKey(key);
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin/auth/channel-otp/request', {
+      const res = await fetch('/api/admin/auth/channel-otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionName: `조폐국 화폐발행 국고 즉시 충전 (${amountWld} WLD)` }),
+        body: JSON.stringify({ action: 'treasury_mint_topup', amountWld: amountWld.trim(), reason: reason.trim(), requestKey: key }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || 'OTP 발송에 실패했습니다.');
+      if (!res.ok || data.success !== true) {
+        throw new Error(data.error || data.message || 'OTP 발송에 실패했습니다.');
       }
       setOtpSent(true);
       setSuccessMsg('텔레그램 및 디스코드로 6자리 OTP 인증 코드가 발송되었습니다.');
@@ -56,7 +66,11 @@ export function AdminMintTopupDialog() {
       setError('발행 사유는 최소 5자 이상 작성해야 합니다.');
       return;
     }
-    if (!otpCode || otpCode.trim().length !== 6) {
+    if (!otpSent || !requestKey) {
+      setError('먼저 현재 금액과 사유에 대한 OTP 코드를 발급받아 주세요.');
+      return;
+    }
+    if (!/^[0-9]{6}$/.test(otpCode.trim())) {
       setError('텔레그램/디스코드로 수신된 6자리 OTP 코드를 입력해 주세요.');
       return;
     }
@@ -66,18 +80,19 @@ export function AdminMintTopupDialog() {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/v1/admin/treasury/mint-topup', {
+      const res = await fetch('/api/admin/treasury/mint-topup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amountWld: amountWld.trim(),
           reason: reason.trim(),
           otpCode: otpCode.trim(),
+          requestKey,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.message || '조폐국 국고 충전 처리에 실패했습니다.');
+        throw new Error(data.error || data.message || '조폐국 국고 충전 처리에 실패했습니다.');
       }
 
       setSuccessMsg(`조폐국 국고 충전 완결! 전표 ID: ${data.result?.ledger_transaction_id || '기록됨'}`);
@@ -88,6 +103,7 @@ export function AdminMintTopupDialog() {
         setOpen(false);
         setOtpSent(false);
         setOtpCode('');
+        setRequestKey('');
         setSuccessMsg('');
       }, 2000);
     } catch (err: unknown) {
@@ -124,7 +140,7 @@ export function AdminMintTopupDialog() {
               min="1"
               max="10000000"
               value={amountWld}
-              onChange={(e) => setAmountWld(e.target.value)}
+              onChange={(e) => { setAmountWld(e.target.value); setOtpSent(false); setOtpCode(''); }}
               className="mt-1 text-xs font-mono"
               required
             />
@@ -135,7 +151,7 @@ export function AdminMintTopupDialog() {
             <Input
               id="mint-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={(e) => { setReason(e.target.value); setOtpSent(false); setOtpCode(''); }}
               className="mt-1 text-xs"
               required
             />

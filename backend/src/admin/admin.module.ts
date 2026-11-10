@@ -5,6 +5,8 @@ import { AiNewsRepository } from './ai-news.repository';
 import { AiNewsService } from './ai-news.service';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { AdminChannelOtpService } from '../auth/admin-channel-otp.service';
+import { AdminChannelOtpController } from './admin-channel-otp.controller';
 import { SessionRepository } from '../auth/session.repository';
 import { sealingKeyFrom } from '../auth/totp';
 import { AdminLoginPolicyRepository } from './admin-login-policy.repository';
@@ -92,6 +94,7 @@ import { TelegramAlertService } from '../telegram/telegram-alert.service';
     AdminKdicController,
     PublicKdicController,
     AdminShopController,
+    AdminChannelOtpController,
     AdminController,
     AdminAuditController,
     AdminControlsController,
@@ -104,6 +107,12 @@ import { TelegramAlertService } from '../telegram/telegram-alert.service';
     AdminDiscordOperationsController,
   ],
   providers: [
+    {
+      provide: AdminChannelOtpService,
+      inject: [TelegramAlertService, DiscordAlertService],
+      useFactory: (telegram: TelegramAlertService, discord: DiscordAlertService) =>
+        new AdminChannelOtpService(telegram, discord),
+    },
     {
       provide: AdminService,
       inject: [PG_POOL, EncryptionService],

@@ -1,64 +1,103 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AdminChannelOtpService } from './admin-channel-otp.service';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AdminChannelOtpService, parseAdminOtpIntent } from './admin-channel-otp.service';
 import type { TelegramAlertService } from '../telegram/telegram-alert.service';
 import type { DiscordAlertService } from '../discord/discord-alert.service';
 
-describe('AdminChannelOtpService (Telegram & Discord OTP Verification)', () => {
+const mint = {
+  action: 'treasury_mint_topup' as const,
+  amountWld: '1000000',
+  reason: 'approved Treasury liquidity operation',
+  requestKey: '77e539ef-1019-4e6a-92c5-3d9b405ea609',
+};
+const salary = {
+  action: 'treasury_salary_disburse' as const,
+  amountWld: '100000',
+  reason: 'monthly administrator wage',
+  targetAdminId: 'a9461a37-2780-4340-a312-8069c9570831',
+};
+
+describe('AdminChannelOtpService — bound administrator step-up', () => {
+  let telegram: { sendAlert: ReturnType<typeof vi.fn> };
+  let discord: { sendAdminDirectMessage: ReturnType<typeof vi.fn> };
   let service: AdminChannelOtpService;
-  let mockTelegram: Partial<TelegramAlertService>;
-  let mockDiscord: Partial<DiscordAlertService>;
+
+  const extractCode = () => {
+    const embed = discord.sendAdminDirectMessage.mock.calls.at(-1)?.[0] as { description?: string };
+    return /\[ (\d{6}) \]/.exec(embed.description || '')?.[1] || '';
+  };
 
   beforeEach(() => {
-    mockTelegram = {
-      sendAlert: vi.fn().mockResolvedValue(true),
-    };
-    mockDiscord = {
-      sendAdminDirectMessage: vi.fn().mockResolvedValue(true),
-    };
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-10T04:00:00.000Z'));
+    telegram = { sendAlert: vi.fn().mockResolvedValue(true) };
+    discord = { sendAdminDirectMessage: vi.fn().mockResolvedValue({ success: true }) };
     service = new AdminChannelOtpService(
-      mockTelegram as TelegramAlertService,
-      mockDiscord as DiscordAlertService,
+      telegram as unknown as TelegramAlertService,
+      discord as unknown as DiscordAlertService,
     );
   });
+  afterEach(() => vi.useRealTimers());
 
-  it('generates OTP and dispatches to both Telegram and Discord', async () => {
-    const adminId = 'admin-user-uuid-1';
-    const result = await service.requestOtp(adminId, '국고 1억 WLD 지출 승인');
-
+  it('delivers to both channels without returning plaintext and verifies once', async () => {
+    const result = await service.requestOtp('admin-a', 'console-session-a', mint);
     expect(result.success).toBe(true);
-    expect(result.expiresAt).toBeGreaterThan(Date.now());
-    expect(mockTelegram.sendAlert).toHaveBeenCalledTimes(1);
-    expect(mockDiscord.sendAdminDirectMessage).toHaveBeenCalledTimes(1);
+    expect(result).not.toHaveProperty('code');
+    expect(telegram.sendAlert).toHaveBeenCalledTimes(1);
+    expect(discord.sendAdminDirectMessage).toHaveBeenCalledTimes(1);
+    const code = extractCode();
+    expect(code).toMatch(/^\d{6}$/);
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, code)).toBe(true);
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, code)).toBe(false);
   });
 
-  it('rejects OTP verification with wrong code', async () => {
-    const adminId = 'admin-user-uuid-2';
-    await service.requestOtp(adminId);
-
-    const verified = service.verifyOtp(adminId, '000000');
-    expect(verified).toBe(false);
+  it.each([
+    ['Telegram refused', false, { success: true }],
+    ['Discord refused', true, { success: false }],
+  ])('fails closed if %s', async (_description, telegramResult, discordResult) => {
+    telegram.sendAlert.mockResolvedValue(telegramResult);
+    discord.sendAdminDirectMessage.mockResolvedValue(discordResult);
+    await expect(service.requestOtp('admin-a', 'console-session-a', mint)).rejects.toThrow();
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, extractCode())).toBe(false);
   });
 
-  it('successfully verifies correct code and consumes it for single-use', async () => {
-    const adminId = 'admin-user-uuid-3';
-    let interceptedCode = '';
+  it('rejects missing transport rather than skipping delivery', async () => {
+    const unavailable = new AdminChannelOtpService();
+    await expect(unavailable.requestOtp('admin-a', 'console-session-a', mint)).rejects.toThrow();
+  });
 
-    // Mock 디스코드 발송 내용에서 코드 가로채기
-    (mockDiscord.sendAdminDirectMessage as any).mockImplementation((opts: any) => {
-      const match = opts.description.match(/\[ (\d{6}) \]/);
-      if (match) interceptedCode = match[1];
-      return Promise.resolve(true);
-    });
+  it('binds code to the exact administrator, admin session, action, amount and reason', async () => {
+    await service.requestOtp('admin-a', 'console-session-a', mint);
+    const code = extractCode();
+    expect(service.verifyOtp('admin-b', 'console-session-a', mint, code)).toBe(false);
+    expect(service.verifyOtp('admin-a', 'other-session', mint, code)).toBe(false);
+    expect(service.verifyOtp('admin-a', 'console-session-a', salary, code)).toBe(false);
+    expect(service.verifyOtp('admin-a', 'console-session-a', { ...mint, amountWld: '1000001' }, code)).toBe(false);
+    expect(service.verifyOtp('admin-a', 'console-session-a', { ...mint, reason: 'altered reason' }, code)).toBe(false);
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, code)).toBe(true);
+  });
 
-    await service.requestOtp(adminId, '테스트 승인');
-    expect(interceptedCode).toHaveLength(6);
+  it('expires at five minutes', async () => {
+    await service.requestOtp('admin-a', 'console-session-a', mint);
+    const code = extractCode();
+    vi.advanceTimersByTime(300_001);
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, code)).toBe(false);
+  });
 
-    // 1회차 검증: 성공
-    const firstCheck = service.verifyOtp(adminId, interceptedCode);
-    expect(firstCheck).toBe(true);
+  it('invalidates after five attempts and throttles repeat issuance', async () => {
+    await service.requestOtp('admin-a', 'console-session-a', mint);
+    const code = extractCode();
+    await expect(service.requestOtp('admin-a', 'console-session-a', mint)).rejects.toThrow();
+    for (let i = 0; i < 5; i++) {
+      expect(service.verifyOtp('admin-a', 'console-session-a', mint, '000000')).toBe(false);
+    }
+    expect(service.verifyOtp('admin-a', 'console-session-a', mint, code)).toBe(false);
+  });
 
-    // 2회차 재사용 시도: 이미 소모되었으므로 실패해야 함 (Replay Attack 차단)
-    const secondCheck = service.verifyOtp(adminId, interceptedCode);
-    expect(secondCheck).toBe(false);
+  it('rejects invalid or attacker-supplied action/body fields', () => {
+    expect(() => parseAdminOtpIntent({ ...mint, action: 'admin_delete_all' })).toThrow();
+    expect(() => parseAdminOtpIntent({ ...mint, amountWld: '-1' })).toThrow();
+    expect(() => parseAdminOtpIntent({ ...mint, requestKey: 'not-a-uuid' })).toThrow();
+    expect(() => parseAdminOtpIntent({ ...mint, targetAdminId: salary.targetAdminId })).toThrow();
+    expect(() => parseAdminOtpIntent({ ...salary, targetAdminId: 'wrong-id' })).toThrow();
   });
 });

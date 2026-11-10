@@ -27,16 +27,23 @@ export function AdminSalaryDisburseDialog() {
 
   async function handleRequestOtp() {
     setError('');
+    setSuccessMsg('');
+    setOtpSent(false);
+    setOtpCode('');
+    if (!targetAdminId.trim() || !/^[1-9][0-9]{0,7}$/.test(amountWld) || Number(amountWld) > 5_000_000 || reason.trim().length < 5) {
+      setError('수령 관리자 UUID, 유효한 지급액 및 5자 이상의 사유를 입력해 주세요.');
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/admin/auth/channel-otp/request', {
+      const res = await fetch('/api/admin/auth/channel-otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionName: `관리자 임금 지급 (${amountWld} WLD)` }),
+        body: JSON.stringify({ action: 'treasury_salary_disburse', amountWld: amountWld.trim(), reason: reason.trim(), targetAdminId: targetAdminId.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || 'OTP 발송에 실패했습니다.');
+      if (!res.ok || data.success !== true) {
+        throw new Error(data.error || data.message || 'OTP 발송에 실패했습니다.');
       }
       setOtpSent(true);
       setSuccessMsg('텔레그램 및 디스코드로 6자리 OTP 인증 코드가 발송되었습니다.');
@@ -61,7 +68,11 @@ export function AdminSalaryDisburseDialog() {
       setError('지급 사유는 최소 5자 이상 작성해야 합니다.');
       return;
     }
-    if (!otpCode || otpCode.trim().length !== 6) {
+    if (!otpSent) {
+      setError('먼저 현재 수령인, 금액과 사유에 대한 OTP 코드를 발급받아 주세요.');
+      return;
+    }
+    if (!/^[0-9]{6}$/.test(otpCode.trim())) {
       setError('텔레그램/디스코드로 수신된 6자리 OTP 코드를 입력해 주세요.');
       return;
     }
@@ -71,7 +82,7 @@ export function AdminSalaryDisburseDialog() {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/v1/admin/treasury/salary/disburse', {
+      const res = await fetch('/api/admin/treasury/salary/disburse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -83,7 +94,7 @@ export function AdminSalaryDisburseDialog() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.message || '관리자 임금 지급 처리에 실패했습니다.');
+        throw new Error(data.error || data.message || '관리자 임금 지급 처리에 실패했습니다.');
       }
 
       setSuccessMsg(`임금 지급 완결! 전표 ID: ${data.result?.ledger_transaction_id || '기록됨'}`);
@@ -128,7 +139,7 @@ export function AdminSalaryDisburseDialog() {
               id="target-admin-id"
               placeholder="예: 5f7b8b44-e4aa-40b8-b93a-800ec0151d20"
               value={targetAdminId}
-              onChange={(e) => setTargetAdminId(e.target.value)}
+              onChange={(e) => { setTargetAdminId(e.target.value); setOtpSent(false); setOtpCode(''); }}
               className="mt-1 text-xs"
               required
             />
@@ -142,7 +153,7 @@ export function AdminSalaryDisburseDialog() {
               min="1"
               max="5000000"
               value={amountWld}
-              onChange={(e) => setAmountWld(e.target.value)}
+              onChange={(e) => { setAmountWld(e.target.value); setOtpSent(false); setOtpCode(''); }}
               className="mt-1 text-xs font-mono"
               required
             />
@@ -153,7 +164,7 @@ export function AdminSalaryDisburseDialog() {
             <Input
               id="salary-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={(e) => { setReason(e.target.value); setOtpSent(false); setOtpCode(''); }}
               className="mt-1 text-xs"
               required
             />

@@ -1,5 +1,6 @@
 ﻿import {
   BadRequestException,
+  ForbiddenException,
   ServiceUnavailableException,
   Body,
   Controller,
@@ -15,12 +16,14 @@
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../../auth/guards/admin-session.guard';
+import { AdminChannelOtpService, parseAdminOtpIntent, type AdminOtpIntent } from '../../auth/admin-channel-otp.service';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../../auth/guards/consent.guard';
 import { CsrfGuard } from '../../auth/guards/csrf.guard';
 import { SessionGuard } from '../../auth/guards/session.guard';
 import type { RequestWithSession } from '../../auth/session.context';
-import { requireUserId } from '../../auth/session.context';
+import { requireSession, requireUserId } from '../../auth/session.context';
 import { TreasuryService } from './treasury.service';
 import { AutoSovereignWealthFundService, swfLedgerUnavailable } from './auto-swf.service';
 import { decodeTreasuryLedgerCursor, parseTreasuryLedgerLimit } from './treasury-ledger-cursor';
@@ -492,7 +495,20 @@ export class AdminTreasuryController {
 @Controller('treasury')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class FundedTreasuryDonationController {
-  constructor(private readonly service: TreasuryService) {}
+  constructor(
+    private readonly service: TreasuryService,
+    private readonly channelOtp?: AdminChannelOtpService,
+  ) {}
+
+  private requireTreasuryOtp(req: RequestWithSession, intent: AdminOtpIntent, code: unknown): void {
+    if (!req.adminRoles?.includes('superadmin')) {
+      throw new ForbiddenException('superadministrator required');
+    }
+    if (!this.channelOtp) throw new ServiceUnavailableException('administrator OTP service unavailable');
+    if (!this.channelOtp.verifyOtp(requireUserId(req), requireSession(req).id, intent, code)) {
+      throw new ForbiddenException('valid administrator OTP required');
+    }
+  }
 
   @Post('donate')
   @Header('Cache-Control', 'private, no-store')
@@ -601,26 +617,42 @@ export class FundedTreasuryDonationController {
   }
 
   @Post("salary/disburse")
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: "국고 관리자 임금 복식부기 실지급" })
   async disburseAdminSalary(
     @Req() req: RequestWithSession,
-    @Body() body: { targetAdminId: string; amountWld: string; reason: string },
+    @Body() body: { targetAdminId: string; amountWld: string; reason: string; otpCode: string },
   ) {
+    const intent = parseAdminOtpIntent({
+      action: 'treasury_salary_disburse',
+      targetAdminId: body.targetAdminId,
+      amountWld: body.amountWld,
+      reason: body.reason,
+    });
+    if (intent.action !== 'treasury_salary_disburse') throw new BadRequestException('invalid salary intent');
+    this.requireTreasuryOtp(req, intent, body.otpCode);
     const actorId = requireUserId(req);
-    const result = await this.service.disburseAdminSalary(actorId, body.targetAdminId, body.amountWld, body.reason);
+    const result = await this.service.disburseAdminSalary(actorId, intent.targetAdminId, intent.amountWld, intent.reason);
     return { ok: true, message: "관리자 임금이 성공적으로 국고에서 지급되었습니다.", result };
   }
 
   @Post("mint-topup")
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: "조폐국 화폐발행으로 국고 직접 충전" })
   async topupFromMintDirect(
     @Req() req: RequestWithSession,
-    @Body() body: { amountWld: string; reason: string; requestKey: string },
+    @Body() body: { amountWld: string; reason: string; requestKey: string; otpCode: string },
   ) {
+    const intent = parseAdminOtpIntent({
+      action: 'treasury_mint_topup',
+      amountWld: body.amountWld,
+      reason: body.reason,
+      requestKey: body.requestKey,
+    });
+    if (intent.action !== 'treasury_mint_topup') throw new BadRequestException('invalid mint intent');
+    this.requireTreasuryOtp(req, intent, body.otpCode);
     const actorId = requireUserId(req);
-    const result = await this.service.topupFromMintDirect(actorId, body.amountWld, body.reason, body.requestKey);
+    const result = await this.service.topupFromMintDirect(actorId, intent.amountWld, intent.reason, intent.requestKey);
     return { ok: true, message: "조폐국 신규 화폐가 국고로 성공적으로 발행 전입되었습니다.", result };
   }
 
