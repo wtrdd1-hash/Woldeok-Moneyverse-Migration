@@ -24,7 +24,7 @@ for scenario in clean drift missing; do
     drift) [[ $status -ne 0 ]] && grep -q 'DELETE|t|t' "$work/err" ;;
     missing) [[ $status -ne 0 ]] && grep -q 'table missing' "$work/err" ;;
   esac || { echo "FAIL: $scenario status=$status"; exit 1; }
-  grep -Fxq 'BEGIN READ ONLY' "$work/args"
+  grep -Fxq 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY' "$work/args"
   grep -Fxq 'ROLLBACK' "$work/args"
   grep -Fq 'user-items-acl-schema-presence.verify.sql' "$work/args"
   grep -Fq 'user-items-acl-drift.readonly.sql' "$work/args"
