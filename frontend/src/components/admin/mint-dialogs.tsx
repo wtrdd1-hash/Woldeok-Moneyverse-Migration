@@ -483,8 +483,7 @@ export function OrderProposalDialog({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitOrder = async (shouldApprove: boolean) => {
     const amount = BigInt(maxAmountWld || '0');
     if (amount <= BigInt(0)) {
       setErrorMsg('명령 한도 수량은 1 WLD 이상이어야 합니다.');
@@ -521,6 +520,18 @@ export function OrderProposalDialog({
         throw new Error(data.error || '통화정책 명령서 발의에 실패했습니다.');
       }
 
+      // 원스톱 즉시 승인: 발의 직후 자동으로 approve 호출
+      if (shouldApprove && data.id) {
+        const approveRes = await fetch('/api/admin/mint/orders/' + encodeURIComponent(data.id) + '/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!approveRes.ok) {
+          const appData = await approveRes.json().catch(() => ({}));
+          console.warn('Auto approve note:', appData.error);
+        }
+      }
+
       onSuccess();
       onClose();
     } catch (err) {
@@ -528,6 +539,16 @@ export function OrderProposalDialog({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitOrder(false);
+  };
+
+  const handleOneStopSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await submitOrder(true);
   };
 
   return (
@@ -705,7 +726,7 @@ export function OrderProposalDialog({
               </span>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
+            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-border/60">
               <Button
                 type="button"
                 variant="outline"
@@ -718,15 +739,30 @@ export function OrderProposalDialog({
               <Button
                 type="submit"
                 disabled={loading}
-                className="rounded-xl px-5 bg-blue-600 hover:bg-blue-500 text-white font-semibold"
+                className="rounded-xl px-4 border border-border/80 bg-background hover:bg-muted text-foreground font-medium text-xs h-9"
               >
                 {loading ? (
                   <span className="flex items-center gap-1.5">
-                    <Loader2 className="size-4 animate-spin" />
-                    발의 등록 중...
+                    <Loader2 className="size-3.5 animate-spin" />
+                    발의 중...
                   </span>
                 ) : (
                   '정책 명령 발의'
+                )}
+              </Button>
+              <Button
+                type="button"
+                disabled={loading}
+                onClick={handleOneStopSubmit}
+                className="rounded-xl px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs h-9 shadow-md flex items-center gap-1.5"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="size-3.5 animate-spin" />
+                    발의 및 즉시 승인 중...
+                  </span>
+                ) : (
+                  '⚡ 발의 즉시 승인 (원스톱)'
                 )}
               </Button>
             </div>
