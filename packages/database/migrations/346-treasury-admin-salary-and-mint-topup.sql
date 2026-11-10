@@ -243,6 +243,7 @@ END;
 $pigou$;
 
 ALTER FUNCTION public.trigger_casino_pigouvian_welfare_tax() OWNER TO moneyverse_migrator;
+REVOKE ALL ON FUNCTION public.trigger_casino_pigouvian_welfare_tax() FROM PUBLIC;
 
 -- 카지노 주사위 테이블 트리거 연결
 DROP TRIGGER IF EXISTS trg_casino_dice_pigouvian_tax ON public.virtual_casino_dice_plays;

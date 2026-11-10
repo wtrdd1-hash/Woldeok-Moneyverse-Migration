@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   Header,
+  Optional,
   Param,
   Post,
   Put,
@@ -215,7 +216,7 @@ export class AdminTreasuryController {
   constructor(
     private readonly service: TreasuryService,
     private readonly swfService?: AutoSovereignWealthFundService,
-    private readonly otpService?: AdminChannelOtpService,
+    @Optional() private readonly otpService?: AdminChannelOtpService,
   ) {}
 
   @Get('overview')
@@ -496,7 +497,7 @@ export class AdminTreasuryController {
 export class FundedTreasuryDonationController {
   constructor(
     private readonly service: TreasuryService,
-    private readonly otpService?: AdminChannelOtpService,
+    @Optional() private readonly otpService?: AdminChannelOtpService,
   ) {}
 
   @Post('donate')

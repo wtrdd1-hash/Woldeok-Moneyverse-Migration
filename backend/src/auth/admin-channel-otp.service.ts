@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, UnauthorizedException, Optional } from '@nestjs/common';
 import { timingSafeEqual, randomInt } from 'node:crypto';
 import { TelegramAlertService } from '../telegram/telegram-alert.service';
 import { DiscordAlertService } from '../discord/discord-alert.service';
@@ -17,8 +17,8 @@ export class AdminChannelOtpService {
   private readonly TTL_MS = 5 * 60 * 1000; // 5분
 
   constructor(
-    private readonly telegramAlertService?: TelegramAlertService,
-    private readonly discordAlertService?: DiscordAlertService,
+    @Optional() private readonly telegramAlertService?: TelegramAlertService,
+    @Optional() private readonly discordAlertService?: DiscordAlertService,
   ) {}
 
   /**
