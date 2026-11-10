@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.020 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.021 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -264,3 +264,10 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **기존/변경:** TSI-003/005/007/009에 배포 출처·대사·QA 증빙 통제가 이미 제안됨. 국고·사회보험 신규 결함이 독립 재현되지 않아 중복 변경 ID 및 UI/API/DB/RBAC/마이그레이션 변경 없음. 구현 및 정본 반영은 검증 불가, 제안 테스트 미실행.
 - **P0:** 개발 A/QA의 운영·Test 출처 및 승인된 격리 exact-SHA 인증 E2E; 개발 B/QA의 동일 스냅샷 중앙·보조원장 이중기장 대사, outbox 중복 방지, 백업 복원 증빙 전 금융 승격 보류. **P1:** 개발 A의 레거시 CHDIR·의존성 무중단 조사, 개발 B/C의 청구·이의신청 API·스키마·권한 중복 조사. **P2:** P0 이후 모바일 접근성·개인정보 보호형 이상경고 개선.
 - **중간/종료 근거:** 원격 main `3a7c34507aff858cce71efbb10410a4a2f7c9ef8`, 기록 브랜치 작업 전 `e0018ec294e649f20afa237335383a7410e6e586` 확인. 정본 문서 우선, 통합 반영 완료 주장 없음. 고정 기준선 `edd709bcbe96f6f5ceca8372f244b632e8211242` 불변. 누적 ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0, 12개 항목 정본·구현 검증 대기. 독립 중복제거 외부 레퍼런스 이번 검증 0건, 누적 UNKNOWN/10,000: BLOCKED. 코드·운영 DB·자금·배포 변경 없음. 다음 B v2046은 기존 기능과 구분되는 미구현 근거 확보 후 신규 ID 부여.
+
+### 2026-11-10 20:05 KST — B 신규 기능 근거 검토, v2046 / vTSI.2026.11.10.021 (기능 변경 0건)
+- **교대:** 직전 A v2044 → 현재 B v2046 → 다음 A v2048. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. TSI-001~012 원문과 불변 기준선 보존; OWNER_WITHDRAWN 무효. 독립적인 미구현 신규 기능의 증거가 부족해 새 ID를 생성하지 않음.
+- **시작 근거:** 미니PC Debian 13.6의 backend/frontend/bot/MCP/nginx/docker 활성, 개발 PostgreSQL 연결 확인(원장 정합성 증명 아님). 19:18 KST 독립 QA: 운영 API SHA 727881420a491bb129a1a97258ea8ae67f62bbf8, Test e26b9228fdff6e1c8daffc9cc8d1972876b6b3d7(18:17 대비 변경), main 3a7c34507aff858cce71efbb10410a4a2f7c9ef8. HTTP 200은 인증 E2E 통과가 아님. 레거시 v1068 재시작 204003회 및 200/CHDIR; 의존성과 영향 사용자 미확인.
+- **이전/변경 및 범위:** TSI-002/004/006/011/012에 자격, 심사, 이의신청, 지급여력, 중복지급 제안이 이미 존재함. 별도의 근거 있는 기능 공백을 입증하지 못함. 회원/관리자 CTA, API, DB 마이그레이션, RBAC, 원장·감사 변경 없음. 기존 제안은 PROPOSED/구현 미확인. 가상 WLD 정책을 실제 한국 법정 요율로 표현하지 않음.
+- **우선순위/수용기준:** P0 개발 A·QA의 승인된 브라우저·역할 계정, exact-SHA Test 배포 출처와 백업 복원; 개발 B·QA의 동일 스냅샷 중앙/보조원장·outbox·멱등성 검증 후 금융 승격. P1 개발 A 레거시 CHDIR 실제 의존성 비파괴 조사, 개발 B/C 코드 경로·스키마·인가와 TSI-001~012 및 정본 중복 대조. P2 P0 이후 모바일 키보드/WCAG 및 개인정보 보호형 경고 정확도. 이번 기획 회차에서 테스트 미실행, 배포 HOLD.
+- **비교 인덱스:** 고정 기준선 edd709bc → TSI-001~012 불변 → PROJECT_PLAN.md / PROJECT_PLAN.ko.md 및 INTEGRATED_PLANNING_MASTER.md 반영 미검증 → Draft PR #3006. 누적 ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0, 12건 정본 반영·구현 검증 대기. 외부 독립 중복제거 레퍼런스 신규 0, 누적 UNKNOWN/10,000 BLOCKED. 시작·중간 main/브랜치 재조회; 운영 코드·DB·자금·배포 변경 없음.
