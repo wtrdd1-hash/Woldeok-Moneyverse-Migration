@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.010 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.011 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -8,7 +8,7 @@
 ## 최초 상태 — 이번 특별 기간에 새로 기록한 변경
 | 분류 | 건수 | 의미 |
 |---|---:|---|
-| ADD 새 기능 기획 | 4 | 신규 제안 4건, 미구현 |
+| ADD 새 기능 기획 | 5 | 신규 제안 5건, 미구현 |
 | MODIFY 기존 기획 수정 | 5 | QA 기반 기존 기획 수정 5건, 모두 제안 상태 |
 | REMOVE 기존 기획 삭제 | 0 | 삭제 제안 없음 |
 | DEFER 보류 | 0 | 보류 기록 없음 |
@@ -167,10 +167,20 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **비교 인덱스:** 불변 기준선 국고 예산·원장 → TSI-20261110-008 ADD → 통합기획서 반영 대기, Draft PR #3006.
 
 ### TSI-20261110-009 — 보험·국고 정산 증빙 격리 게이트 (A, MODIFY, P0)
-- 최초 기록 2026-11-10 09:05 KST, vTSI.2026.11.10.010. 직전 B v2022 → 현재 A v2024 → 다음 B v2026. PROPOSED, 통합기획서 미반영·시험 미실행. 기획 담당; 향후 Dev B API/DB, Dev C 관리자 UI, QA 독립 재현, Dev A 통합. Draft PR #3006은 문서 기록 전용.
+- 최초 기록 2026-11-10 09:05 KST, vTSI.2026.11.10.011. 직전 B v2022 → 현재 A v2024 → 다음 B v2026. PROPOSED, 통합기획서 미반영·시험 미실행. 기획 담당; 향후 Dev B API/DB, Dev C 관리자 UI, QA 독립 재현, Dev A 통합. Draft PR #3006은 문서 기록 전용.
 - 고정 기준 PROJECT_PLAN.md FIN1518-03 및 TSI-001/003/007의 국고 출처·배포 HOLD. 기존 보험↔국고 분개 출처 독립 검증 불가 → 향후 보험료 납부·환급·국고 지원 정산 전에 읽기 전용 증빙 게이트 추가 제안. 실제 보험 운영 결함을 새로 재현한 것이 아님. 근본원인·영향 사용자·현 구현 검증 불가. 과거 QA v1394 국고 실패를 보험 결함으로 단정하지 않음.
 - QA 재현 계약: 환경, frontend/backend 불변 SHA, 마이그레이션 체크섬, 테넌트 가명, event ID, 정책 버전, cutoff, SQL 버전, 동일 snapshot ID, 중앙·보조원장 정수 WLD 차변/대변 기대·실제 분개. 스냅샷·범위 다르면 INCONCLUSIVE, VERIFIED 금지. 운영 데이터 변경 없음.
 - 회원: 보험 > 부과 내역 > 검증 상태 보기(의료·소득 원문 비공개). 감사자: 정산 증빙 > 분개 비교 / 격리 / 독립 검토 요청 / 비식별 증거 내보내기. EVIDENCE_PENDING/VERIFIED/DISCREPANCY/INCONCLUSIVE/BLOCKED; 타임아웃은 보류. 강제 지급·발행·자동 환급 CTA 없음. noindex/no-store, 320px 키보드/WCAG 2.2 AA.
 - 제안 API: GET /api/insurance/settlements/:id/evidence (본인 비식별); POST /internal/insurance/settlement-evidence-runs {scope,cutoff,snapshotId,queryVersion,idempotencyKey} → 202; GET /internal/insurance/settlement-evidence-runs/:id; POST /internal/insurance/settlement-evidence-runs/:id/quarantine {reason,expectedRevision}. insurance.settlement.audit 및 독립 treasury.reconcile.escalate RBAC, MFA·2인 승인·테넌트 RLS; 403/404/409/422/429/503 안전 차단.
 - 제안 DB: 추가 전용 insurance_settlement_evidence_runs(tenant_id,run_id,source_event_id,ledger_snapshot_id,source_sha,policy_version,query_version,status,revision,created_at), insurance_settlement_evidence_findings(tenant_id,run_id,entry_id,finding_type,proof_hash). 테넌트 복합 PK/FK, UNIQUE(tenant_id,source_event_id,ledger_snapshot_id,query_version), UNIQUE(tenant_id,run_id,entry_id,finding_type), INDEX(tenant_id,status,created_at), FORCE RLS. REPEATABLE READ 증빙 스냅샷·균형 이중기장·불변 감사/Outbox·멱등 펜싱 재시도. 추가형 기본 OFF 마이그레이션, 과거 분개 변경 금지.
 - 수용(미실행): 동일 스냅샷 해시·건수 재현, 중복 요청 1회, Outbox 유실·부분 분개·오래된 revision·테넌트 침범·동시 작업자 시 검증 성공/중복 지급 금지. 독립 심사·비식별 출력·롤백·복원·격리 Test 정확 SHA E2E 필요. P0 배포 출처/ACL/복원·정산 HOLD, P1 API/DB/UI, P2 비식별 불일치 KPI. 외부 독립 근거 신규 0건, 누적 UNKNOWN/10,000 BLOCKED/IN PROGRESS. 통합 반영 대기.
+
+
+### TSI-20261110-010 — 국고 회계기간 마감 및 이월 통제 (B, ADD, P1)
+- **기록:** 2026-11-10 10:08 KST, v2026 / vTSI.2026.11.10.011. 이전 A v2024 → 현재 B v2026 → 다음 A v2028. 기획 담당, 개발 B(API/DB)·C(관리자 UI)·QA 검증 담당 배정 대기. PROPOSED, 통합기획서 미반영, 구현 검증 불가.
+- **기존 대비:** 고정 기준선 edd709bc의 국고 회계 개념과 TSI-008 교부금 예약은 존재하나, 기간 마감·미집행 예약 이월의 독립 검증 절차는 확인되지 않음. 게임 가상화폐 WLD용 신규 설계이며 현실 법률 적용 주장이 아님. 확인 근거는 main 3a7c345와 PR #3006 브랜치 3be9017; 이번 회차 실제 QA 재현은 미수행.
+- **화면/권한:** 관리자 국고 > 회계기간 > 대사 > 마감 미리보기 > 승인 요청 > 독립 승인 > 증빙 내보내기. OPEN → CLOSE_REQUESTED → RECONCILING → APPROVED → CLOSED; 불일치 BLOCKED, 시간초과 REVIEW_REQUIRED. 작성자와 승인자 분리, MFA, treasury.period.close 권한, 감사자 읽기 전용, 개인정보 제외.
+- **제안 API:** POST /internal/treasury/fiscal-periods/:id/close-preview {snapshotId,queryVersion,idempotencyKey}; POST /internal/treasury/fiscal-periods/:id/close-request {expectedRevision}; POST /internal/treasury/fiscal-periods/:id/approve {expectedRevision,proofHash}; GET /internal/treasury/fiscal-periods/:id/close-proof. 401/403/404/409/412/422/429/503 실패 시 차단, 공개 변경 API 없음.
+- **DB 설계:** fiscal_periods(tenant_id,period_id PK,기간,status,revision), fiscal_close_runs(tenant_id,run_id PK,period_id FK,snapshot_id,query_version,proof_hash,status,requested_by,approved_by), fiscal_carryovers(tenant_id,carryover_id PK,source_period_id,target_period_id,appropriation_id,amount_wld BIGINT CHECK >=0,ledger_txn_id UNIQUE), 변경 불가 fiscal_close_events. 테넌트 복합 FK/unique·RLS·상태 인덱스, 기간 잠금과 SERIALIZABLE 재시도, 정수 WLD 이중기장, 기존 잔액만 이월(발행 금지), outbox/멱등성 키, 보상 거래로만 정정.
+- **수용 기준 미실행:** 중앙·보조원장 합계 일치, 미대사 교부금 존재 시 마감 차단, 동시 요청 1회 반영, 교부금 지급과 마감 경합 직렬화, 자기승인·교차 테넌트 거부, 스냅샷 불일치·시간초과 차단, 복구 시 감사 보존, 320px/키보드/WCAG 2.2 AA, 영·한 동등, 비공개 noindex/no-store, 개인정보 없는 오류율 지표. 기본 OFF 확장 마이그레이션, 읽기 전용 미리보기→격리 exact-SHA Test→독립 QA→승인 승격.
+- **비교 인덱스:** 기존 회계기간 개념 → TSI-20261110-010 ADD → PROJECT_PLAN.md 미반영 / PR #3006 추적. P0 대사·배포 증거 HOLD, P1 마감 구현, P2 경보 조정. 외부 독립 근거 이번 회차 0건, 누적 UNKNOWN/10,000 BLOCKED. 운영 코드·DB·잔액 변경 없음.
