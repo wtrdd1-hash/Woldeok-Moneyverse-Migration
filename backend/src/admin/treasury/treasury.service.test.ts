@@ -252,12 +252,14 @@ describe('TreasuryService', () => {
       vault_balance_after_wld: '5000000',
     });
 
-    const res = await service.disburseAdminSalary('admin-1', 'admin-2', '100000', '11월 정기 운영 임금');
+    const key = '11111111-2222-4333-8444-555555555555';
+    const res = await service.disburseAdminSalary('admin-1', 'admin-2', '100000', '11월 정기 운영 임금', key);
     expect(res.success).toBe(true);
-    expect(mockRepo.disburseAdminSalary).toHaveBeenCalledWith('admin-1', 'admin-2', '100000', '11월 정기 운영 임금');
+    expect(mockRepo.disburseAdminSalary).toHaveBeenCalledWith('admin-1', 'admin-2', '100000', '11월 정기 운영 임금', key);
 
-    await expect(service.disburseAdminSalary('', 'admin-2', '100000', '사유')).rejects.toThrow();
-    await expect(service.disburseAdminSalary('admin-1', 'admin-2', '0', '사유')).rejects.toThrow();
+    await expect(service.disburseAdminSalary('', 'admin-2', '100000', '사유', key)).rejects.toThrow();
+    await expect(service.disburseAdminSalary('admin-1', 'admin-2', '0', '사유', key)).rejects.toThrow();
+    await expect(service.disburseAdminSalary('admin-1', 'admin-2', '100000', '11월 정기 운영 임금', 'not-a-uuid')).rejects.toThrow();
   });
 
   it('delegates topupFromMintDirect to repository with validation', async () => {

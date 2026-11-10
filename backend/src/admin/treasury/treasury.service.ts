@@ -451,6 +451,9 @@ export class TreasuryService {
     if (!reason || reason.trim().length < 5) {
       throw new TreasuryInputError('임금 지급 사유는 최소 5자 이상 작성해야 합니다.');
     }
+    if (!requestKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) {
+      throw new TreasuryInputError('관리자 임금 지급 요청 UUID가 유효하지 않습니다.');
+    }
     try {
       const result = await this.repository.disburseAdminSalary(actorId, targetAdminId, amountWld, reason, requestKey);
       if (this.telegram && result?.success) {
