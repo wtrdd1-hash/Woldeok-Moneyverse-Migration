@@ -1,13 +1,13 @@
 # Treasury & Social Insurance — New / Changed Plan Register and Comparison Index
 > **Initiative:** 2026-11-10 to 2026-11-11 06:00 Asia/Seoul
-> **Register version:** vTSI.2026.11.10.015 · **Status:** DRAFT / DOCS ONLY
+> **Register version:** vTSI.2026.11.10.018 · **Status:** DRAFT / DOCS ONLY
 > **Existing baseline:** [Frozen baseline](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.md) · [한국어](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.ko.md)
 > **Authority:** current [PROJECT_PLAN.md](PROJECT_PLAN.md) and [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), not this tracking document.
 
 ## Executive diff — initial state
 | Category | Count | Meaning |
 |---|---:|---|
-| ADD (newly specified features) | 5 | Five proposals, not implemented |
+| ADD (newly specified features) | 7 | Seven proposals; implementation unverified |
 | MODIFY (changes to existing plans) | 5 | Five QA-linked planning amendments, not implemented |
 | REMOVE (withdrawn ideas) | 0 | No withdrawals recorded |
 | DEFER (proposals postponed) | 0 | No deferred entries recorded |
@@ -242,3 +242,11 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **Priority and controls:** P0 HOLD any financial write/release until same-snapshot central/subledger reconciliation, privilege review, restore rehearsal, CI/Test exact-SHA and independent QA; P1 inventory existing appeals/claims APIs, RBAC, migrations, open PR owners and resolve legacy unit CHDIR; P2 privacy-preserving aggregate appeal latency metrics after P0. No code/DB/UI/RBAC/migration changes this cycle. No real Korean statutory premium rate assumed.
 - **Mid/end recheck:** remote main and planning-history branch rechecked before documentation update; integration into PROJECT_PLAN.md / INTEGRATED_PLANNING_MASTER.md NOT CLAIMED. No GitHub PR merge, runtime mutation or deployment. External independently deduplicated references newly verified 0; cumulative count UNKNOWN/10,000 (BLOCKED). All proposed acceptance tests NOT RUN.
 - **Comparison index:** frozen baseline → existing TSI-001..012 unchanged → new ID NONE → canonical integration 0 verified. Cumulative ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0; 12 proposed entries pending canonical integration. Next A v2040 must review fresh QA evidence and avoid duplicate proposals.
+
+
+### 2026-11-10 17:05 KST — A QA evidence refresh, v2040 / vTSI.2026.11.10.018 (zero feature changes)
+- **Cycle:** Previous B v2038 → Current A v2040 → Next B v2042. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. Preserve immutable baseline edd709bc and all TSI-001..012, including owner correction; no withdrawn features.
+- **Fresh evidence:** miniPC status 17:02 KST: primary services active, development PostgreSQL connected. Independent QA report 2026-11-10 16:19 KST (Moneyverse-QA-v2026.11.10.1619-internal.md): production and Test home/health/version HTTP 200, deployed SHA 727881420a491bb129a1a97258ea8ae67f62bbf8 versus GitHub main 3a7c34507aff858cce71efbb10410a4a2f7c9ef8. Legacy release-v1068 backend NRestarts=201955, status=200/CHDIR with missing WorkingDirectory; production dependency unknown. Browser runner and approved credentials unavailable; authenticated E2E BLOCKED. This does not establish financial corruption or a new Treasury/insurance defect.
+- **Before/after and decision:** existing TSI-003/005/007/009 already propose provenance, reconciliation and evidence controls; no independently reproduced new issue warrants a duplicate change. UI/API/DB/RBAC/migration delta 0. Existing proposals remain PROPOSED, canonical integration and implementation UNVERIFIED. Header tally corrected from stale 5 to 7 ADD to match detailed TSI-001..012 and prior cumulative tally; this is a metadata correction, not a new proposal.
+- **Backlog:** P0 HOLD financial release pending same-snapshot double-entry central/subledger proof, exact-SHA isolated Test, authorized browser E2E, backup restore and independent QA; P1 investigate CHDIR service ownership/dependency without restart, inspect deployed code/migration/PR overlap; P2 accessibility and alert-noise metrics after P0. Acceptance tests NOT RUN in this planning cycle; no ledger, runtime or deployment writes.
+- **Trace/index:** baseline → unchanged TSI-001..012 → canonical PROJECT_PLAN.md and INTEGRATED_PLANNING_MASTER.md integration not independently verified / Draft PR #3006. Cumulative ADD 7, MODIFY 5, REMOVE 0, DEFER 0; canonical integration verified 0, 12 pending verification. External independently deduplicated reference count UNKNOWN/10,000, gate BLOCKED/IN PROGRESS. Start/mid main and history remote SHA rechecked. Next B v2042 must check code/QA before proposing a new ID.

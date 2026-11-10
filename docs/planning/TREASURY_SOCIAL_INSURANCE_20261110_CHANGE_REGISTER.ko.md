@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.015 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.018 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -8,7 +8,7 @@
 ## 최초 상태 — 이번 특별 기간에 새로 기록한 변경
 | 분류 | 건수 | 의미 |
 |---|---:|---|
-| ADD 새 기능 기획 | 5 | 신규 제안 5건, 미구현 |
+| ADD 새 기능 기획 | 7 | 신규 제안 7건, 구현 여부 미검증 |
 | MODIFY 기존 기획 수정 | 5 | QA 기반 기존 기획 수정 5건, 모두 제안 상태 |
 | REMOVE 기존 기획 삭제 | 0 | 삭제 제안 없음 |
 | DEFER 보류 | 0 | 보류 기록 없음 |
@@ -242,3 +242,11 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **우선순위:** P0 동일 스냅샷 중앙/보조원장 대사, 최소권한, 백업 복원, CI/Test exact-SHA·독립 QA 전 금융 쓰기/승격 HOLD; P1 기존 이의신청/청구 API·RBAC·마이그레이션·열린 PR 담당 조사 및 legacy CHDIR 원인 확인; P2 P0 이후 개인정보 보호 집계 이의신청 처리시간 지표. 이번 회차 UI/API/DB/RBAC/마이그레이션 변경 0건. 실제 한국 보험료율 추정 없음.
 - **중간·종료:** 기록 전 원격 main/이력 브랜치 재조회; PROJECT_PLAN.md / INTEGRATED_PLANNING_MASTER.md 정본 반영 미확인. PR 병합·운영 변경·배포 없음. 독립 외부 자료 신규 검증 0건, 누적 실측 UNKNOWN/10,000 BLOCKED. 제안 테스트 전부 NOT RUN.
 - **비교 인덱스:** 고정 기준선 → 기존 TSI-001..012 보존 → 신규 ID 없음 → 정본 반영 검증 0. 누적 ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0, 정본 미반영 제안 12건. 다음 A v2040에서 최신 QA 근거 확인 및 중복 기획 방지.
+
+
+### 2026-11-10 17:05 KST — A형 QA 근거 갱신, v2040 / vTSI.2026.11.10.018 (기능 변경 0건)
+- **교대:** 이전 B v2038 → 현재 A v2040 → 다음 B v2042. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. 고정 기준선 edd709bc 및 TSI-001..012 원문 보존, 사용자 철회 오해는 무효.
+- **최신 근거:** 미니PC 17:02 KST 주요 서비스 active, 개발 PostgreSQL 연결. 독립 QA 2026-11-10 16:19 KST 기록(Moneyverse-QA-v2026.11.10.1619-internal.md)에서 운영/Test 홈·health·version HTTP 200, 배포 SHA 727881420a491bb129a1a97258ea8ae67f62bbf8, GitHub main 3a7c34507aff858cce71efbb10410a4a2f7c9ef8 불일치. 레거시 release-v1068 백엔드 재시작 201955회, status=200/CHDIR 및 WorkingDirectory 누락; 운영 의존 여부 미확인. 브라우저 실행기·승인된 계정 부재로 인증 E2E BLOCKED. 금융 손상이나 신규 국고·보험 결함을 입증한 것은 아님.
+- **기존/변경:** TSI-003/005/007/009에서 출처·대사·증빙 검증을 이미 제안했으므로 중복 기능 변경 0건. UI/API/DB/RBAC/마이그레이션 변경 0. 기존 제안 PROPOSED, 정본 반영·구현 여부 미검증. 상단의 오래된 ADD 5 표시만 실제 누적 7로 정정(신규 제안 아님).
+- **백로그:** P0 동일 스냅샷 이중기장 대사, 격리 Test exact-SHA, 승인된 브라우저 E2E, 백업 복원, 독립 QA 전 금융 승격 HOLD. P1 CHDIR 서비스 의존성 및 코드·마이그레이션·PR 중복 확인(재시작 금지). P2 접근성·경고 오탐 KPI. 기획 회차에서 수용 테스트 NOT RUN, 운영 원장·코드·배포 변경 없음.
+- **비교 인덱스:** 불변 기준선 → TSI-001..012 변경 없음 → PROJECT_PLAN.md 및 INTEGRATED_PLANNING_MASTER.md 정본 반영 검증 대기 / Draft PR #3006. 누적 ADD 7 / MODIFY 5 / REMOVE 0 / DEFER 0, 정본 반영 확인 0, 검증 대기 12. 외부 독립 중복 제거 레퍼런스 UNKNOWN/10,000, BLOCKED/IN PROGRESS. 시작·중간 main/이력 브랜치 SHA 재조회. 다음 B v2042에서 코드·QA 확인 후 신규 ID 판단.
