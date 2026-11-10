@@ -1631,4 +1631,30 @@ export class TreasuryRepository {
     return res.rows[0]?.result ?? { success: true, reclaimed_count: 0, total_reclaimed_wld: "0", executed_at: new Date().toISOString() };
   }
 
+  async disburseAdminSalary(
+    actorId: string,
+    targetAdminId: string,
+    amountWld: string,
+    reason: string,
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      'SELECT public.treasury_disburse_admin_salary(::uuid, ::uuid, ::text, ::text) AS result',
+      [actorId, targetAdminId, amountWld, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async topupFromMintDirect(
+    actorId: string,
+    amountWld: string,
+    reason: string,
+    requestKey: string,
+  ): Promise<any> {
+    const res = await this.pool.query<{ result: any }>(
+      'SELECT public.admin_treasury_topup_from_mint_direct(::uuid, ::text, ::text, ::uuid) AS result',
+      [actorId, amountWld, reason, requestKey],
+    );
+    return res.rows[0]?.result;
+  }
+
 }
