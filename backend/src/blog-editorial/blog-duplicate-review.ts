@@ -13,7 +13,7 @@ export interface BlogTopicForReview {
 }
 export interface DuplicateMatch {
   readonly id: string;
-  readonly reason: 'SLUG' | 'EXACT_TITLE' | 'SIMILAR_BODY';
+  readonly reason: 'SLUG' | 'EXACT_TITLE' | 'SIMILAR_TITLE' | 'SIMILAR_BODY';
   readonly similarity: number;
 }
 export type DuplicateScreenStatus = 'BLOCK_EXACT' | 'REVIEW_SIMILAR' | 'CLEAR_FOR_EDITORIAL_REVIEW';
@@ -42,6 +42,34 @@ function jaccard(left: Set<string>, right: Set<string>): number {
   return intersection / (left.size + right.size - intersection);
 }
 
+function calculateTitleSimilarity(left: string, right: string): number {
+  const leftNorm = normalized(left);
+  const rightNorm = normalized(right);
+  if (!leftNorm || !rightNorm) return 0;
+  if (leftNorm === rightNorm) return 1;
+
+  // Character bigrams for short phrase morphology
+  const leftBigrams = new Set<string>();
+  for (let i = 0; i <= leftNorm.length - 2; i++) leftBigrams.add(leftNorm.slice(i, i + 2));
+  const rightBigrams = new Set<string>();
+  for (let i = 0; i <= rightNorm.length - 2; i++) rightBigrams.add(rightNorm.slice(i, i + 2));
+  const bgJaccard = jaccard(leftBigrams, rightBigrams);
+
+  // Word token analysis
+  const leftWords = new Set(left.toLowerCase().split(/[\s\p{P}\p{S}]+/u).filter(Boolean));
+  const rightWords = new Set(right.toLowerCase().split(/[\s\p{P}\p{S}]+/u).filter(Boolean));
+  const wordJaccard = jaccard(leftWords, rightWords);
+
+  let wordIntersection = 0;
+  for (const w of leftWords) {
+    if (rightWords.has(w)) wordIntersection++;
+  }
+  const minWords = Math.min(leftWords.size, rightWords.size);
+  const wordOverlap = minWords > 0 ? wordIntersection / minWords : 0;
+
+  return Math.max(bgJaccard, wordJaccard, wordOverlap >= 0.75 ? wordOverlap * 0.85 : 0);
+}
+
 export function reviewBlogDuplicateCandidates(
   candidate: BlogTopicForReview,
   existing: readonly BlogTopicForReview[],
@@ -61,6 +89,14 @@ export function reviewBlogDuplicateCandidates(
       matches.push({ id: post.id, reason: 'EXACT_TITLE', similarity: 1 });
       continue;
     }
+
+    // Hybrid title similarity screening: 65% threshold for similar titles
+    const titleSimilarity = calculateTitleSimilarity(candidate.title, post.title);
+    if (titleSimilarity >= 0.65) {
+      matches.push({ id: post.id, reason: 'SIMILAR_TITLE', similarity: titleSimilarity });
+      continue;
+    }
+
     // A draft with the same body but a different title is *reviewed*, not
     // automatically rejected: legal/source/jurisdiction differences may matter.
     const similarity = jaccard(body, trigrams(post.content));
@@ -69,8 +105,10 @@ export function reviewBlogDuplicateCandidates(
     }
   }
 
+  const hasExactBlock = matches.some((x) => x.reason === 'SLUG' || x.reason === 'EXACT_TITLE' || (x.reason === 'SIMILAR_TITLE' && x.similarity >= 0.85));
+
   return {
-    status: matches.some((x) => x.reason === 'SLUG' || x.reason === 'EXACT_TITLE')
+    status: hasExactBlock
       ? 'BLOCK_EXACT'
       : matches.length ? 'REVIEW_SIMILAR' : 'CLEAR_FOR_EDITORIAL_REVIEW',
     matches,

@@ -52,7 +52,7 @@ export class AdminChannelOtpService {
     // 1. 텔레그램 관리자 채널 발송
     if (this.telegramAlertService) {
       try {
-        await this.telegramAlertService.sendDirectAlert({
+        await this.telegramAlertService.sendAlert({
           category: 'admin',
           severity: 'CRITICAL',
           title,
