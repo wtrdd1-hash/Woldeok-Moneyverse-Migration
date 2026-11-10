@@ -1,6 +1,6 @@
 # 국고·사회보험 신규·변경 기획 기록 및 비교 인덱스
 > **특별 기간:** 2026-11-10 ~ 2026-11-11 오전 6시 (한국시간)
-> **기록 버전:** vTSI.2026.11.10.011 · **상태:** 초안 / 문서 기록 전용
+> **기록 버전:** vTSI.2026.11.10.012 · **상태:** 초안 / 문서 기록 전용
 > **기존 기준선:** [고정된 기존 기획](TREASURY_SOCIAL_INSURANCE_20261110_BASELINE.ko.md)
 > **원본:** [English canonical](TREASURY_SOCIAL_INSURANCE_20261110_CHANGE_REGISTER.md)
 > **최우선 기획:** [PROJECT_PLAN.md](PROJECT_PLAN.md) 및 [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
@@ -184,3 +184,10 @@ Previous B v2010 → Current A v2012 → Next B v2014. ADD 1 / MODIFY 2 / REMOVE
 - **DB 설계:** fiscal_periods(tenant_id,period_id PK,기간,status,revision), fiscal_close_runs(tenant_id,run_id PK,period_id FK,snapshot_id,query_version,proof_hash,status,requested_by,approved_by), fiscal_carryovers(tenant_id,carryover_id PK,source_period_id,target_period_id,appropriation_id,amount_wld BIGINT CHECK >=0,ledger_txn_id UNIQUE), 변경 불가 fiscal_close_events. 테넌트 복합 FK/unique·RLS·상태 인덱스, 기간 잠금과 SERIALIZABLE 재시도, 정수 WLD 이중기장, 기존 잔액만 이월(발행 금지), outbox/멱등성 키, 보상 거래로만 정정.
 - **수용 기준 미실행:** 중앙·보조원장 합계 일치, 미대사 교부금 존재 시 마감 차단, 동시 요청 1회 반영, 교부금 지급과 마감 경합 직렬화, 자기승인·교차 테넌트 거부, 스냅샷 불일치·시간초과 차단, 복구 시 감사 보존, 320px/키보드/WCAG 2.2 AA, 영·한 동등, 비공개 noindex/no-store, 개인정보 없는 오류율 지표. 기본 OFF 확장 마이그레이션, 읽기 전용 미리보기→격리 exact-SHA Test→독립 QA→승인 승격.
 - **비교 인덱스:** 기존 회계기간 개념 → TSI-20261110-010 ADD → PROJECT_PLAN.md 미반영 / PR #3006 추적. P0 대사·배포 증거 HOLD, P1 마감 구현, P2 경보 조정. 외부 독립 근거 이번 회차 0건, 누적 UNKNOWN/10,000 BLOCKED. 운영 코드·DB·잔액 변경 없음.
+
+
+### 2026-11-10 11:05 KST — A QA 증거 재검토, v2028 / vTSI.2026.11.10.012 (기능 변경 0건)
+- **회차:** 이전 B v2026 → 현재 A v2028 → 다음 B v2030. ADD 0 / MODIFY 0 / REMOVE 0 / DEFER 0. 기존 TSI-001/003/005/007/009는 PROPOSED, 통합기획서 반영 대기. 증거 없는 신규 기능·결함을 만들지 않음.
+- **최신 QA 근거:** 10:15 KST `/srv/moneyverse-data/tasks/Moneyverse-QA-v2026.11.10.1015-internal.md`. 운영·Test `/api/version`은 모두 `727881420a491bb129a1a97258ea8ae67f62bbf8`로 원격 main `3a7c34507aff858cce71efbb10410a4a2f7c9ef8`와 다름. 홈페이지·헬스 HTTP 200은 브라우저 E2E가 아님. 레거시 `moneyverse-release-v1068-backend` NRestarts=197788 및 자동 재시작, 실제 의존성 미확인. 브라우저·Playwright·승인된 테스트 계정 부재로 금융 인증 E2E BLOCKED. main exact-SHA CI PASS 미확인. 신규 국고·보험 결함 및 근본원인 입증 불가.
+- **P0:** 독립 exact-SHA 격리 Test, 중앙·보조원장 동일 스냅샷 대사, 백업 복원, RBAC, QA 증빙 전까지 배포·금융 쓰기 HOLD. **P1:** 개발 A 런타임 SHA/레거시 의존성 비파괴 조사, 개발 B 거래·마이그레이션 증빙, QA 승인된 브라우저 신원으로 재검증. **P2:** 개인정보 비식별 경보·접근성 화면. 기존 TSI-007/009와 중복되므로 UI/API/DB/권한 변경 0건. 테스트 NOT RUN, 외부 독립 레퍼런스 10,000건 확보 실수량 UNKNOWN / BLOCKED·IN PROGRESS.
+- **비교:** 불변 기준선 `edd709bcbe96f6f5ceca8372f244b632e8211242` → 기존 TSI-007/009 변경 없음 → 영어 통합기획서 반영 대기 / Draft PR #3006. 이번 회차는 QA 증거 기록만 수행하며 구현·배포·운영 데이터 변경·PASS 주장 없음. 푸시 전 원격 main/기획 브랜치 재확인.
