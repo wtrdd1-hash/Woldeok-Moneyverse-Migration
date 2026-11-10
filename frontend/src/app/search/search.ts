@@ -46,6 +46,11 @@ export const ROUTE_KEYWORDS: Readonly<Record<string, readonly string[]>> = {
   '/features': ['기능', '핵심기능', '특징', 'features'],
 };
 
+/** Normalize untrusted URL search parameters before rendering the search form. */
+export function normalizeSearchQuery(value: unknown): string {
+  return (typeof value === 'string' ? value : Array.isArray(value) && typeof value[0] === 'string' ? value[0] : '').slice(0, 80);
+}
+
 export function filterSearchEntries(
   entries: readonly SearchEntry[],
   query: string,

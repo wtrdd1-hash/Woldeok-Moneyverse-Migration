@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ADMIN_NAV, MEMBER_NAV, PUBLIC_NAV, navLabel } from '@/lib/navigation';
 import { currentViewer } from '@/lib/viewer';
-import { filterSearchEntries, searchableEntries } from './search';
+import { filterSearchEntries, normalizeSearchQuery, searchableEntries } from './search';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -23,10 +23,10 @@ const ACCESS_LABEL = { public: '공개', member: '회원', admin: '운영' } as 
 export default async function SearchPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string }>;
+  readonly searchParams: Promise<{ readonly q?: string | readonly string[] }>;
 }) {
   const [{ q = '' }, viewer] = await Promise.all([searchParams, currentViewer()]);
-  const query = q.slice(0, 80);
+  const query = normalizeSearchQuery(q);
   const signedIn = viewer.signedIn && viewer.consentCurrent;
   const entries = searchableEntries(
     PUBLIC_NAV,

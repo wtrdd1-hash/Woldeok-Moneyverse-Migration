@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterSearchEntries, searchableEntries } from './search';
+import { filterSearchEntries, normalizeSearchQuery, searchableEntries } from './search';
 
 const publicEntries = [{ href: '/guide', label: '이용 방법' }] as const;
 const memberEntries = [
@@ -9,6 +9,13 @@ const memberEntries = [
 const adminEntries = [{ href: '/admin/logs', label: '감사 로그' }] as const;
 
 describe('global navigation search', () => {
+  it('handles repeated and malformed URL query parameters without crashing', () => {
+    expect(normalizeSearchQuery(['지갑', '관리자'])).toBe('지갑');
+    expect(normalizeSearchQuery([42, '관리자'])).toBe('');
+    expect(normalizeSearchQuery({ bad: true })).toBe('');
+    expect(normalizeSearchQuery('a'.repeat(120))).toHaveLength(80);
+  });
+
   it('never exposes member or admin destinations to signed-out visitors', () => {
     expect(searchableEntries(publicEntries, memberEntries, adminEntries, false, false)).toEqual([
       { href: '/guide', label: '이용 방법', access: 'public' },
