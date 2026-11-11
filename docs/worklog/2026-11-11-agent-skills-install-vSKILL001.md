@@ -47,3 +47,15 @@
 - ChatGPT 자체 스킬 74개와 미니PC 로컬 스킬 31개는 별도이며 합산 설치로 오인하지 않는다.
 - 서버 운영 코드·데이터베이스·배포 변경 없음. Gemini CLI와 Playwright 실제 실행 검증은 별도 작업 사항.
 - GitHub에는 격리된 `docs/skills-20261111-v001` 브랜치의 검토용 작업 기록만 제출한다.
+
+## Follow-up vSKILL.2026.11.11.002 — Reservation integration / 예약 연동
+- Updated the **existing** five enabled ChatGPT automations: Moneyverse automatic planning, development A (full-stack), development B (backend/API/DB), development C (frontend/app/integration), and automatic QA. Existing schedules, roles, user approvals, critical Test/Production gates and enabled states were preserved.
+- Every updated reservation now distinguishes ChatGPT-hosted `skills__list`/`skills__read` entries (rechecked **74**) from miniPC-hosted local skill folders (**31**), looks up actual `SKILL.md` via the authorized `$pc` tools, chooses skill guidance relevant to its own role and records use or BLOCKED with evidence. The prompts do not instruct assistants to run arbitrary downloaded scripts.
+- Post-update automation inspection: **5/5 enabled**, **5/5 local-skill clauses present**. Each scheduled execution's real use of a skill remains to be proven by its future log; saved instructions are not a runtime test.
+- Final explicit miniPC `fs_list_dir` shows **31 actual skill directories**, none marked symbolic links; independent manifest hash verification **31/31 PASS**. ChatGPT `skills__list` independently rechecked **74**.
+- GitHub worklog PR remains draft and documentation-only; no merge, application code update, migration, Test deployment or Production promotion.
+
+### 한국어 예약 연동 요약
+- 기획·개발 A/B/C·QA **5개 예약 지시문 추가 갱신 완료**, 실행 주기 및 활성 상태 유지.
+- ChatGPT 스킬 **74개**와 미니PC 스킬 **31개**를 분리 조회하며 스킬 실제 적용 여부 및 근거 기록 의무화.
+- 해당 예약의 다음 실행에서 실제 스킬 호출/적용 성공 여부를 별도로 확인해야 하며, 예약 수정만으로 E2E·QA PASS를 주장하지 않는다.
