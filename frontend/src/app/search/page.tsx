@@ -79,7 +79,7 @@ export default async function SearchPage({
                 <CardContent className="grid gap-3">
                   <p className="text-sm text-muted-foreground">{navLabel(entry.label, 'en')} · {entry.href}</p>
                   <Button asChild variant="outline" className="min-h-11 w-full">
-                    <Link href={entry.href}>이 화면으로 이동</Link>
+                    <Link href={entry.href} aria-label={`${entry.label} 화면으로 이동`}>이 화면으로 이동</Link>
                   </Button>
                 </CardContent>
               </Card>
