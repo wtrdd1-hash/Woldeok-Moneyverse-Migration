@@ -3013,3 +3013,8 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### QA 점검 v2084 — 2026-11-11 15:05 KST (이전 B/v2082, 현재 A, 다음 B/v2086)
+- 근거: Debian Test upstream 127.0.0.1:3194 연결 거부, Nginx Test /health 및 /api/version의 해당 포트 프록시. 이전 QA #3055는 HTTP 502를 기록했으나 이번 인증 브라우저 E2E와 근본원인은 미검증. 운영 영향과 원장 손실은 입증되지 않음. main 8323d22b36b66dd540282173ca0c7415e0ce4b1b의 OTP CSRF 변경(#3057)은 Test 복구 증거가 아님.
+- P0: 격리 Test 서비스·포트와 정확한 SHA 확인, 운영 DB/API 우회 없이 Test 복구, 외부 health/version·exact-SHA OTP 재사용 거부 인증 E2E·원장/Outbox/멱등성 대사·독립 복원 검증, 불일치 시 롤백. P1 Playwright 브라우저 실행환경·CI·배포 출처, P2 접근성·개인정보 보호 오류 안내. RELEASE HOLD.
+- 기능 ADD/MODIFY/REMOVE/DEFER 0/0/0/0; QA 수용기준만 보완하고 구현·배포하지 않음. 외부 독립 근거 10,000건 검증 수량 미확인(BLOCKED). Superpowers 설치 스킬 목록이 비어 적용 BLOCKED; 증거 기록 docs/worklog/2026-11-11-planning-v2084-test-upstream.md.
