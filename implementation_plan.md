@@ -3174,3 +3174,33 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
    - 백엔드 단위 테스트 및 프론트엔드 빌드 검증.
 4. **Git 커밋, PR 머지, 불변 릴리즈 빌드 및 운영 승격**:
    - 프로덕션 배포 및 라이브 실측 검증.
+
+
+---
+## 🏁 [v308 Final Production Verification & Delivery] 운영 승격 및 완결 보고
+- **PR #3047 머지 완료**: `dd6a42843a` (R2 15분 승격 세션 + R3 1회용 OTP 단일 소모 + 서브내비 2FA 배지 및 잠금 + 국고 상단 원스톱 액션 바)
+- **PR #3049 머지 완료**: `b4a41f40c0` (백엔드 NestJS URI 버저닝 `/api/v1/` 경로 동기화 및 UTF-8 인코딩 무결성 복구)
+- **모든 피처 브랜치 삭제 완료**:
+  - `feat/admin-stepup-otp-r2-r3-v2026.11.11.0955` (삭제 완료)
+  - `fix/channel-otp-api-v1-prefix` (삭제 완료)
+  - 로컬 및 원격 저장소 `main` 브랜치 완전 클린 동기화 완료
+- **불변 프로덕션 릴리즈 배포 완결**:
+  - 릴리즈 명: `prod-v2026.11.11.2200-b4a41f40c0aa`
+  - 배포 경로: `/srv/moneyverse-data/releases/prod-v2026.11.11.2200-b4a41f40c0aa`
+  - systemd 서비스(`moneyverse-release-v1949-backend`, `moneyverse-release-v1949-frontend`) 무중단 재기동 완료 (active)
+- **실서버 프로덕션 실측 결과 (HTTP Status 100% 정상)**:
+  - `https://easy-scraping.com`: HTTP 200 OK
+  - `https://easy-scraping.com/admin/treasury`: HTTP 200 OK (상단 '⚡ 원스톱 국고 신속 집행' 카드 완비)
+  - `https://easy-scraping.com/api/admin/auth/channel-otp/status`: HTTP 401 Unauthorized (`login required`, 정상 가드 동작)
+
+
+---
+## 📚 [v309 Context7 & 필수 개발자 MCP 도구 체계 확장]
+- **인스타그램 릴스 분석 (@creative_of_coding)**:
+  - 5대 핵심 도구: Context7(최신 공식문서 조회), Playwright(실 브라우저 E2E 검증), GitHub MCP(PR/리뷰 관리), Chrome DevTools(런타임/네트워크 디버깅), Filesystem(파일 정밀 조작)
+  - 핵심 통찰: 최신 라이브러리 문법을 직접 읽고 확인하지 않으면 레거시 코드 및 빌드 오류 발생. 필요한 도구만 정밀하게 활성화하여 토큰 낭비 방지.
+- **신규 커스텀 스킬 등록 완결**:
+  - 스킬명: `context7-doc-fetcher` (`C:\Users\sds\.gemini\config\skills\context7-doc-fetcher\SKILL.md`)
+  - 핵심 가이드: Next.js 16+, React 19, NestJS 11+, Vitest 4+ 버전별 Breaking Changes 및 최신 문법 정밀 슬라이싱 조회 전략 구축
+- **마켓플레이스 플러그인 안내**:
+  - Context7 플러그인 카드 연계 (`antigravity-plugins-partners/plugin/context7`)
