@@ -2312,3 +2312,13 @@ v1440 모델을 발전시켜 저장 PK를 (user_id,term_id)로 바꾸고 (user_i
 - 신규 상세 권위: `AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md`; PROJECT_PLAN과 수익화/한국 준수 명세에 v487 상위 대체 게이트를 반영했다.
 - Google AdSense Page RPM/Auto Ads/Experiments/invalid traffic/publisher policy와 국세청 플랫폼 광고수익 세무 안내를 재확인했다. 국세청 1인 미디어 안내를 이 웹사이트의 자동 업종분류 근거로 사용하지 않는다.
 - 기획/문서 전용이며 런타임, 결제, AdSense 설정, Test, Production, 세무분류 확정, 실제 수익달성을 주장하지 않는다.
+
+
+### v2102 — B회차 회원 보유 아이템 획득·사용 이력 (2026-11-12 01:05 KST; 제안 / 배포 보류)
+- **교대:** 이전 A/v2100(미병합 Draft PR #3078), 현재 B/v2102, 다음 A/v2104. main 기준 SHA 53fb23cd2cb86a2cc1029523f557ce312d1d5dba. 구현·운영 재현·승인을 주장하지 않는다.
+- **필요성/대안:** 회원이 보유 수량은 확인해도 획득 및 차감 출처를 모를 수 있다. 새 아이템 변경 엔진 대신 기존 이벤트를 재사용하는 읽기 전용 이력 화면을 제안한다. 원시 감사로그 노출은 개인정보 위험, 미구현 유지에는 고객지원 부담이 있다. 기존 인벤토리/수집/지갑 이력과 중복 여부를 먼저 확인한다.
+- **회원 화면:** 로그인 > 인벤토리 > 아이템 상세 > '이력 보기'. 아이템 식별자·명칭, 확인 가능한 기초 수량, 시간 역순 획득/차감, 정수 수량 증감, 출처(상점/보상/거래/관리자/기타), 참조번호·시각, 대사 가능한 잔량, 페이지네이션과 로딩/빈 목록/오류/부분 이력 상태를 표시한다. 과거 근거가 없으면 검증된 시작일 이전 이력 없음으로 명시하며 가짜 기록을 만들지 않는다. 320px 모바일, 키보드·스크린리더 지원, noindex/no-store.
+- **API 제안:** GET /api/v1/inventory/items/:itemId/history?cursor=&limit=, limit 최대 50, 서버 세션으로 소유권 검사, occurred_at DESC/event_id DESC 불투명 커서. 200 {events,nextCursor,coverageStart,reconciled,asOf}; 400 잘못된 커서, 401 미인증, 404 타인/미존재, 429 제한, 503 근거 조회 불가. 타인 참조정보 노출 금지. 현재 구현된 API가 아닌 제안이다.
+- **DB/정합성:** 기존 테이블과 변경 함수 전수 조사 우선. 불변 이벤트 재사용, 없을 때만 inventory_provenance_event(id PK,owner_id FK,item_id FK,source_type CHECK,source_event_id,delta_qty 정수·0 제외,occurred_at,created_at), UNIQUE(source_type,source_event_id,item_id,owner_id), INDEX(owner_id,item_id,occurred_at DESC,id DESC) 제안. 아이템 변경·이력·outbox를 동일 트랜잭션에서 기록하며 근거 없는 소급 기록 금지. SECURITY DEFINER 소유자 제한 읽기 함수와 최소 EXECUTE 권한, 보호 테이블 직접 SELECT 금지. 동시성 락 순서 고정, 멱등 재시도로 중복 생성 금지.
+- **보안/운영:** 타인 소유권 우회, CSRF/세션, 제한된 페이지네이션, 개인정보 마스킹, 보존/법적 보류, 추가 전용 감사, 재전송 검출. 이벤트 합계와 수량이 불일치하면 fail-closed. 기본 기능 플래그 OFF, 롤백 시 기록 삭제 금지. KPI 이력 조회율·대사 불일치율·활성 인벤토리 1천명당 문의량, 분석 코호트 20명 이상. 인증 화면 검색 노출 금지.
+- **수용/우선순위:** P0 실제 DB·UI/API/App API·QA·동시 PR 조사 및 중복 제거; P1 소유자 제한 함수/API와 원자적 이벤트, 합계 불변식·멱등성·경합·타인 조회 단위/통합 테스트; P2 접근성·모바일·관측성. 격리 Test exact-SHA, 독립 백업 복구, 대사·롤백 검증 전 운영 승격 BLOCKED. 이번 회차 독립 검증 레퍼런스 추가 0/10,000, 누적 실측 미확인으로 BLOCKED. 기획 외 운영 코드·DB·WLD 변경 없음.
