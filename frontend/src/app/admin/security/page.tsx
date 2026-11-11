@@ -9,6 +9,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { parseAdminIpBlocks } from './security-evidence';
+import { AdminOtpChannelPingPanel } from '@/components/admin/admin-otp-channel-ping-panel';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '계정 정지 · IP 차단', robots: { index: false, follow: false } };
@@ -23,6 +24,10 @@ export default async function AdminSecurityPage() {
       <PageHeader eyebrow="ABUSE SECURITY" title="계정 정지 · IP 차단">
         이상 요청의 계정과 네트워크를 서버 진입부에서 관리합니다. 모든 변경은 감사 로그에 남습니다.
       </PageHeader>
+
+      {/* 2FA 메신저(텔레그램 & 디스코드) 연동 진단 및 핑 테스트 */}
+      <AdminOtpChannelPingPanel />
+
       {blocks === null ? (
         <div role="alert" className="grid gap-3 rounded-xl border border-destructive/40 p-4">
           <p className="font-semibold">차단 기록을 확인할 수 없습니다.</p>

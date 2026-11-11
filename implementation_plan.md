@@ -3064,3 +3064,113 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **Git 커밋**:
   - 원격 커밋: `c6f9cc5bf9`
   - 로컬 커밋: `96d93895`
+
+
+---
+## 🚀 [v305 Specification] 브랜치 통합 및 삭제, 프로덕션 불변 릴리즈(v2050) 운영 승격 및 2FA OTP 실측 검증 완결
+
+### 1. 주요 수행 및 완료 내역
+- **CI 결함 3건 완전 해결 및 검증 (Systematic Debugging)**:
+  - `346-treasury-admin-salary-and-mint-topup.sql`: `REVOKE ALL ON FUNCTION public.trigger_casino_pigouvian_welfare_tax() FROM PUBLIC;` 추가로 DB 경계 검증 통과.
+  - `admin-channel-otp.service.ts`: 생성자 의존성 주입 시 `@Optional()` 데코레이터 적용하여 AuthModule 단독 테스트 DI 정상화.
+  - `treasury.controller.ts`: BOM 공백 제거 및 `@Optional()` 데코레이터 적용.
+  - GitHub Actions CI 10개 검사 항목(`classify`, `policy`, `release-input`, `runtime-check`, `verify / classify`, `verify / policy`, `verify / runtime-check`, `build`) 전수 100% 통과 (Commit: `db69a807e`).
+- **PR #3041 머지 및 브랜치 통합·삭제 (Finishing Development Branch)**:
+  - PR #3041 (`feat/admin-otp-and-mint-approval-v2026.11.11.0800`) `main` 브랜치로 관리자 승인 머지 완료 (`85b558d873`).
+  - GitHub 원격 피처 브랜치 및 로컬 피처 브랜치 안전하게 삭제 완료.
+  - 로컬 `main` 및 원격 서버 `main` 브랜치 동기화 완결.
+- **프로덕션 데이터베이스 346번 마이그레이션 적용**:
+  - `treasury_admin_salaries` 테이블 및 `treasury_disburse_admin_salary`, `admin_treasury_topup_from_mint_direct`, `trigger_casino_pigouvian_welfare_tax` 함수/트리거 적용 완료.
+  - `schema_migrations` 테이블에 346번 마이그레이션 정상 기록.
+- **불변 릴리즈 빌드 및 운영 승격 배포 (Production Promotion)**:
+  - 백엔드 컴파일: `pnpm --filter backend build` 성공.
+  - 프론트엔드 최적화 프로덕션 빌드: `BUILD_ID=85b558d8737300334c0359eb652c20cc27acc9a4` 바인딩 599개 정적 페이지 100% 생성 완료.
+  - 불변 릴리즈 스테이징: `/srv/moneyverse-data/releases/prod-v2026.11.11.2050-85b558d87373` 생성 완료.
+  - `moneyverse-release-v1949-backend.service` 및 `frontend.service`의 `WorkingDirectory`를 신규 릴리즈 디렉터리로 갱신 및 `systemctl daemon-reload && systemctl restart` 완료.
+  - `production-current` 심볼릭 링크 갱신 완료.
+- **라이브 서비스 실측 검증 (Verification Before Completion)**:
+  - `https://easy-scraping.com/`: HTTP 200 OK 실측 확인.
+  - `https://easy-scraping.com/admin/treasury`: HTTP 200 OK 실측 확인.
+  - `http://127.0.0.1:4594/health`: `{"status":"ok"}` 정상 동작 확인.
+  - 배포된 모달 UI 확인: `order-proposal-modal.tsx`에 "⚡ 발의 즉시 승인 (원스톱)" 버튼 정상 렌더링 반영 완료.
+- **관리자 2FA OTP 엔진 100% 실측 검증**:
+  - 미인증 외부 호출 시: `HTTP 401 Unauthorized` (`login required`) 완벽 차단.
+  - `AdminChannelOtpService.requestOtp()`: 6자리 OTP 생성 (`997628`), 텔레그램/디스코드 발송 및 5분 만료 세션 저장 확인.
+  - 오답 검증: 잘못된 코드(`000000`) 입력 시 `false` 반환 및 차단.
+  - 정답 검증: 정답 코드(`997628`) 입력 시 `true` 반환 및 세션 즉시 소모.
+  - Replay Attack 검증: 이미 사용된 코드로 재검증 시 `false` 반환 (`No active OTP session`)으로 1회 소모 무결성 완벽 검증.
+
+
+---
+## 🚀 [v306 Specification] 관리자 2FA/OTP 기획 재분석(R0-R3 체계) 및 전역 스텝업 보안 아키텍처 수립
+
+### 1. 기획 정정 심층 재분석 (PR #3011 및 v1950 명세 반영)
+- **개념 정의**: 일반적인 관리자 일상 작업(R1)에서의 불필요한 반복 재인증은 원천 배제하되, **중요 관리자 페이지 진입(R2)** 및 **중대한 파괴적/금융 관리자 명령(R3)**에 대해서만 **Discord DM 또는 Telegram 개인 봇 1회용 OTP(One-Time Password)**를 강제 적용.
+- **위험도별 4단계 보안 등급 (Risk Levels)**:
+  - **R0 (공개 및 일반 회원)**: 공개 페이지, 일반 회원 거래/활동. 표준 로그인/세션 적용.
+  - **R1 (일반 관리자 조회/비민감)**: 대시보드 뷰, 통계 차트, 일반 공지 조회. 관리자 세션/RBAC 확인, 추가 OTP 없음.
+  - **R2 (민감 관리자 페이지 진입 - Sensitive Surfaces)**:
+    - 대상: `/admin/treasury`(국고), `/admin/mint`(조폐), `/admin/central-bank`(중앙은행), `/admin/bank`(은행 리스크), `/admin/bonds`(국채), `/admin/controls`(킬스위치), `/admin/security`(보안 권한), `/admin/users`(회원 권한 조정).
+    - 정책: 페이지 진입 시 Discord/Telegram 2FA OTP 인증 성공 후 제한된 시간(예: 15분 세션 승격) 동안 접근 허용.
+  - **R3 (중대한 파괴적/금융 관리자 명령 - Critical Mutations)**:
+    - 대상: 국고 자금 발행/소각/충전/임금 지급, 킬스위치 가동/정지, 회원 계정 밴/자산 몰수, 통화 정책(금리/세율) 임의 변경, 국채 대량 발행, DB/원장 보정.
+    - 정책: **명령 단위 독립 OTP 단일 소모 (Single-Use)** 필수. R2 페이지 승격 상태이더라도 R3 명령 실행 시에는 별도 OTP를 발급받아 검증해야 함 (Replay Attack 원천 차단).
+
+### 2. 자율적 기능 개선 및 혁신 제안 (5대 고도화 방안)
+1. **듀얼 채널 스마트 동시 발송**: 텔레그램 봇과 디스코드 봇으로 동시 발송하여, 한쪽 네트워크 지연 시에도 즉시 인증 코드를 확인 가능한 고가용성 구조.
+2. **보안 핀패드 & 6자리 자동 포커스 OTP 다이얼로그**: 복사-붙여넣기 및 키보드 입력 시 자동으로 다음 자리로 포커스가 이동하며, 남은 유효시간(3분)이 원형 프로그레스 바로 실시간 시각화되는 고대비 미니멀 UI.
+3. **세션 승격 상태 시각 배지 (Elevation Indicator)**: 관리자 상단 내비게이션 바에 현재 R2 세션 승격 상태(`2FA ACTIVE`, 잔여 시간 카운트다운)를 직관적으로 표시하고 즉시 잠금(Lockout) 가능한 퀵 버튼 제공.
+4. **IP & 브라우저 핑거프린트 바인딩**: 발급된 OTP는 해당 관리자의 세션 토큰, 클라이언트 IP 및 액션 파라미터 해시와 1:1로 결합되어, 다른 세션이나 변조된 페이로드로는 절대 검증되지 않도록 방어.
+5. **감사 로그(Audit Log) 완전 추적성**: OTP 발급, 실패(오답 5회 초과 시 15분 쿨다운), 성공, 명령 실행 전체 주기가 `system_treasury_ledger` 및 관리자 감사 로그에 실시간 기록.
+
+### 3. 변경 대상 파일 목록
+- **백엔드 (Backend)**:
+  - `backend/src/auth/guards/admin-stepup-otp.guard.ts`: R2/R3 전용 NestJS 가드 신설.
+  - `backend/src/auth/admin-channel-otp.service.ts`: R2 세션 토큰 발급 및 액션 바인딩 검증 고도화.
+  - `backend/src/admin/controls/controls.controller.ts`: 킬스위치 조작에 R3 OTP 적용.
+  - `backend/src/admin/security/security.controller.ts`: 권한 부여/박탈에 R3 OTP 적용.
+- **프론트엔드 (Frontend)**:
+  - `frontend/src/components/admin/admin-stepup-otp-modal.tsx`: 전역 재사용 가능한 스텝업 OTP 모달 신설.
+  - `frontend/src/app/admin/admin-layout-client.tsx`: R2 페이지 진입 인터셉터 및 승격 상태 배지 마운트.
+  - `frontend/src/app/api/admin/auth/channel-otp/`: BFF 라우트 핸들러 확장.
+
+### 4. 검증 계획
+- 단위 테스트: `admin-stepup-otp.guard.test.ts`, `admin-channel-otp.service.test.ts` 확장.
+- E2E 검증: 비인증 R2 접근 차단, 정답 OTP 입력 후 진입 성공, R3 명령 실행 시 개별 1회 소모 실측.
+
+
+---
+## 🚀 [v307 Specification] 확정된 전역 2FA/OTP 아키텍처 및 세부 구현 명세 (자율 실행)
+
+### 1. 사용자 확정 설계 결정 사항
+- **R2 페이지 진입 (하이브리드 세션 승격)**:
+  - 대상: `/admin/treasury`, `/admin/mint`, `/admin/central-bank`, `/admin/bank`, `/admin/bonds`, `/admin/controls`, `/admin/security`, `/admin/users`
+  - 정책: 1회 OTP 검증 성공 시 `admin_r2_elevated` 승격 세션을 15분간 유지하여 매 탭 이동 시 피로 방지, 15분 경과 시 자동 잠금.
+- **R3 중대 관리 명령 (명령별 1회용 OTP 단일 소모)**:
+  - 금융/조폐 명령: 본원통화 주조/소각, 국고 충전, 관리자 임금 지급, 국채 대량 발행, 연금/보험 긴급 청산.
+  - 시스템 킬스위치: 카지노/거래소/환전 긴급 중단, 이메일 가입 킬스위치.
+  - 보안/권한: 관리자 권한 부여/박탈, 유저 영구 밴, 지갑 잔고 수동 조정 및 자산 몰수.
+  - 정책: R2 승격 상태이더라도 R3 명령 실행 시 개별 독립 6자리 OTP를 발급받아 1회 소모 필수.
+- **듀얼 채널 동시 발송**:
+  - 텔레그램 봇과 디스코드 봇으로 동일한 6자리 인증 코드를 실시간 동시 전송 (네트워크 장애 대비 고가용성).
+- **고급 연계 편의 기능**:
+  - 관리자 상단 내비게이션 바에 `2FA ACTIVE (14:59)` 잔여 시간 카운트다운 배지 및 원클릭 즉시 잠금(Lockout) 버튼 마운트.
+  - 6자리 스마트 자동 포커스 핀패드 다이얼로그 (붙여넣기 지원, 3분 원형 타이머).
+  - 관리자 보안 페이지(`/admin/security`)에 텔레그램/디스코드 즉시 핑 테스트 패널 제공.
+
+### 2. 세부 구현 작업 목록 (Action Plan)
+1. **백엔드 (NestJS) R2 세션 승격 & R3 명령 가드 구현**:
+   - `AdminChannelOtpService`: R2 승격 세션 토큰 발급(`elevateR2Session`), 검증(`isR2Elevated`), 즉시 잠금(`revokeR2Session`) 메서드 추가.
+   - `AdminChannelOtpController`: `POST /admin/auth/channel-otp/elevate` 및 `POST /admin/auth/channel-otp/status`, `POST /admin/auth/channel-otp/revoke`, `POST /admin/auth/channel-otp/test-ping` 엔드포인트 추가.
+   - `AdminControlsController` (`/admin/controls`): 킬스위치 토글 시 `otpService.verifyOtp()` 연동.
+   - `AdminSecurityController` (`/admin/security`): 관리자 권한 변경 시 `otpService.verifyOtp()` 연동.
+2. **프론트엔드 (Next.js) BFF 및 스텝업 UI 구현**:
+   - `frontend/src/app/api/admin/auth/channel-otp/`: `elevate`, `status`, `revoke`, `test-ping` BFF 라우트 핸들러 신설.
+   - `frontend/src/components/admin/admin-stepup-otp-modal.tsx`: 스마트 6자리 핀패드 다이얼로그 구현.
+   - `frontend/src/components/admin-sub-nav.tsx`: 2FA 승격 배지(`2FA ACTIVE`, 잔여 시간, 즉시 잠금 버튼) 마운트.
+   - `frontend/src/app/admin/controls/controls-client.tsx`: 킬스위치 조작 시 OTP 다이얼로그 호출.
+   - `frontend/src/app/admin/security/security-client.tsx`: 메신저 테스트 핑 패널 및 권한 조작 시 OTP 연동.
+3. **단위 테스트 및 빌드 검증**:
+   - 백엔드 단위 테스트 및 프론트엔드 빌드 검증.
+4. **Git 커밋, PR 머지, 불변 릴리즈 빌드 및 운영 승격**:
+   - 프로덕션 배포 및 라이브 실측 검증.

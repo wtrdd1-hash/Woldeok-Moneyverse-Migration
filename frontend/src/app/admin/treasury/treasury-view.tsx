@@ -217,6 +217,26 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       {institutionalTab === 'CENTRAL_BANK' && <CentralBankPanel />}
       {institutionalTab === 'TREASURY' && (
         <>
+          {/* 원스톱 국고 신속 집행 바 */}
+          <Card className="border border-indigo-500/30 bg-indigo-500/5 shadow-sm">
+            <CardHeader className="p-4 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <CardTitle className="text-sm font-bold">⚡ 원스톱 국고 신속 집행 (One-Stop Treasury Actions)</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    다단계 발의·결재 대기 없이 관리자 텔레그램/디스코드 2FA OTP 인증을 통해 조폐국 화폐발행 국고 충전 및 관리자 임금 지급을 원스톱으로 집행합니다.
+                  </CardDescription>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <AdminMintTopupDialog />
+                  <AdminSalaryDisburseDialog />
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
           <AdminTreasuryFundingCard />
           {/* 1. 국고 총 잔액 및 비축률 지표 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

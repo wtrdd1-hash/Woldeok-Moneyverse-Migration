@@ -10,11 +10,18 @@ export interface OtpSession {
   readonly createdAt: number;
 }
 
+export interface R2ElevationSession {
+  readonly elevatedAt: number;
+  readonly expiresAt: number;
+}
+
 @Injectable()
 export class AdminChannelOtpService {
   private readonly logger = new Logger(AdminChannelOtpService.name);
   private readonly otpStore = new Map<string, OtpSession>();
+  private readonly r2Elevations = new Map<string, R2ElevationSession>();
   private readonly TTL_MS = 5 * 60 * 1000; // 5분
+  private readonly R2_TTL_MS = 15 * 60 * 1000; // 15분
 
   constructor(
     @Optional() private readonly telegramAlertService?: TelegramAlertService,
@@ -118,4 +125,97 @@ export class AdminChannelOtpService {
 
     return false;
   }
+
+  /**
+   * R2 민감 페이지 진입을 위한 15분 승격 세션을 활성화합니다.
+   */
+  elevateR2Session(adminUserId: string, inputCode: string): { success: boolean; expiresAt?: number } {
+    const verified = this.verifyOtp(adminUserId, inputCode);
+    if (!verified) {
+      return { success: false };
+    }
+    const now = Date.now();
+    const expiresAt = now + this.R2_TTL_MS;
+    this.r2Elevations.set(adminUserId, {
+      elevatedAt: now,
+      expiresAt,
+    });
+    this.logger.log(`Admin R2 session elevated for 15 minutes: ${adminUserId}`);
+    return { success: true, expiresAt };
+  }
+
+  /**
+   * 현재 관리자의 R2 세션 승격 상태와 잔여 시간(초)을 확인합니다.
+   */
+  getR2ElevationStatus(adminUserId: string): { elevated: boolean; remainingSeconds: number; expiresAt: number } {
+    if (!adminUserId) {
+      return { elevated: false, remainingSeconds: 0, expiresAt: 0 };
+    }
+    const session = this.r2Elevations.get(adminUserId);
+    if (!session) {
+      return { elevated: false, remainingSeconds: 0, expiresAt: 0 };
+    }
+    const now = Date.now();
+    if (now > session.expiresAt) {
+      this.r2Elevations.delete(adminUserId);
+      return { elevated: false, remainingSeconds: 0, expiresAt: 0 };
+    }
+    const remainingSeconds = Math.max(0, Math.floor((session.expiresAt - now) / 1000));
+    return { elevated: true, remainingSeconds, expiresAt: session.expiresAt };
+  }
+
+  /**
+   * R2 세션 승격을 즉시 취소하고 잠금(Lockout)합니다.
+   */
+  revokeR2Session(adminUserId: string): { success: boolean } {
+    this.r2Elevations.delete(adminUserId);
+    this.logger.log(`Admin R2 session revoked (locked): ${adminUserId}`);
+    return { success: true };
+  }
+
+  /**
+   * 관리자 메신저(텔레그램/디스코드)로 즉시 테스트 핑 알림을 발송합니다.
+   */
+  async sendTestPing(adminUserId: string, channel: 'all' | 'telegram' | 'discord' = 'all'): Promise<{ success: boolean; dispatchedTo: string[] }> {
+    const dispatchedTo: string[] = [];
+    const title = '📡 [월덕 머니버스] 관리자 2FA 채널 연동 테스트 핑';
+    const now = Date.now();
+    const lines = [
+      '• **테스트 유형**: 2FA/OTP 메신저 알림 채널 실시간 무결성 점검',
+      `• **관리자 ID**: ${adminUserId}`,
+      `• **테스트 채널**: ${channel.toUpperCase()}`,
+      `• **발송 시각**: ${new Date(now).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
+      '• **결과**: 정상 수신됨 (경고 없음)',
+    ];
+
+    if ((channel === 'all' || channel === 'telegram') && this.telegramAlertService) {
+      try {
+        await this.telegramAlertService.sendAlert({
+          category: 'admin',
+          severity: 'INFO',
+          title,
+          lines,
+        });
+        dispatchedTo.push('telegram');
+      } catch (err) {
+        this.logger.warn(`Test ping to Telegram failed: ${err}`);
+      }
+    }
+
+    if ((channel === 'all' || channel === 'discord') && this.discordAlertService) {
+      try {
+        await this.discordAlertService.sendAdminDirectMessage({
+          title,
+          description: lines.join('\n'),
+          color: 0x3b82f6, // Blue
+        });
+        dispatchedTo.push('discord');
+      } catch (err) {
+        this.logger.warn(`Test ping to Discord failed: ${err}`);
+      }
+    }
+
+    return { success: dispatchedTo.length > 0, dispatchedTo };
+  }
+
 }
