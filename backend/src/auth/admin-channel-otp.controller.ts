@@ -83,7 +83,7 @@ export class AdminChannelOtpController {
   async revoke(@Req() req: RequestWithSession) {
     const actorId = requireUserId(req);
     const result = this.otpService.revokeR2Session(actorId);
-    return { ok: true, ...result };
+    return { ok: true, revoked: true, ...result };
   }
 
   @Post('test-ping')
