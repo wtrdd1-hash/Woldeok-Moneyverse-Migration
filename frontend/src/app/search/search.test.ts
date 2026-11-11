@@ -35,6 +35,15 @@ describe('global navigation search', () => {
     expect(filterSearchEntries(entries, '호가').map((entry) => entry.href)).toEqual(['/stocks']);
   });
 
+  it('matches multiple Korean, English, and route terms in any order without leaking restricted destinations', () => {
+    const entries = searchableEntries(publicEntries, memberEntries, adminEntries, true, true);
+    expect(filterSearchEntries(entries, '덕지갑 wallet').map((entry) => entry.href)).toEqual(['/wallet']);
+    expect(filterSearchEntries(entries, '  audit   감사  ').map((entry) => entry.href)).toEqual(['/admin/logs']);
+    expect(filterSearchEntries(entries, 'wallet 감사')).toEqual([]);
+    const guestEntries = searchableEntries(publicEntries, memberEntries, adminEntries, false, false);
+    expect(filterSearchEntries(guestEntries, 'wallet 덕지갑')).toEqual([]);
+  });
+
   it('does not return every route for a blank query', () => {
     const entries = searchableEntries(publicEntries, memberEntries, adminEntries, true, true);
     expect(filterSearchEntries(entries, '   ')).toEqual([]);

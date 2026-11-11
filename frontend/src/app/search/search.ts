@@ -50,12 +50,12 @@ export function filterSearchEntries(
   entries: readonly SearchEntry[],
   query: string,
 ): readonly SearchEntry[] {
-  const normalized = query.trim().toLocaleLowerCase();
-  if (!normalized) return [];
+  const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return [];
   return entries.filter((entry) => {
     const keywords = (ROUTE_KEYWORDS[entry.href] ?? []).join(' ').toLocaleLowerCase();
     const labels = `${entry.label} ${navLabel(entry.label, 'en')} ${entry.href} ${keywords}`.toLocaleLowerCase();
-    return labels.includes(normalized);
+    return terms.every((term) => labels.includes(term));
   });
 }
 
