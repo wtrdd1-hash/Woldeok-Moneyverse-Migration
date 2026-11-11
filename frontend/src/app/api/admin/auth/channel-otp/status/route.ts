@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const result = await api<{ ok: boolean; elevated: boolean; remainingSeconds: number; expiresAt: number }>(
-      '/api/admin/auth/channel-otp/status',
+      '/api/v1/admin/auth/channel-otp/status',
     );
     return NextResponse.json(result, {
       status: 200,
