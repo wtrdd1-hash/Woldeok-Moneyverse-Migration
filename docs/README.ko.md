@@ -1,13 +1,16 @@
 # 월덕 머니버스 문서
 
+**DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
+
+
 [English canonical](README.md) | **한국어**
 
 여기서 시작한다. 가장 최신처럼 보이는 파일명, 최신 런타임 커밋, 루트 실행 계획만 보고 현재 제품 진실을 추론하지 않는다.
 
 ## 현재 권위
 
-- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.10.04.523**
-- [중앙은행·조폐국·중앙국고·경제코어 통합 명세](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) / [English](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) — **v2026.10.04.523**
+- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **historical v523 design reference; consult living plan**
+- [중앙은행·조폐국·중앙국고·경제코어 통합 명세](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) / [English](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) — **historical v523 design reference; consult living plan**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
 - [국고 세수 자동 사회 환원 및 재정 선순환 기획](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) / [English](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) — **v2026.10.04.522**
 - [광고 전용 수익화 명세](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) / [English](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) — **v2026.09.30.487**

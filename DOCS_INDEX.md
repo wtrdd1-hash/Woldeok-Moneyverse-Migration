@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+**DOC-2026.11.11.1500 — [Authoritative documentation status](docs/CURRENT_DOCUMENTATION_STATUS.md) / [한국어](docs/CURRENT_DOCUMENTATION_STATUS.ko.md).** Historical entries below are preserved, not current deployment assurances. Test version API HTTP 502 observed; documentation-only change.
+
+
 ## v2026.11.04.1761.1 — Finance SQL333–336 merged main after full CI, ACTUAL TEST/PROD UNCHANGED
 - [Source merge release EN](docs/releases/v2026.11.04.1761.1-finance-source-merge-hold.md) / [KO](docs/releases/v2026.11.04.1761.1-finance-source-merge-hold.ko.md) · [Start/Mid/End stage log](docs/worklog/2026-11-04-finance-v1761-source-merge.md) · [v1760 source worklog](docs/worklog/2026-11-04-finance-actual-settlement-v1760.md) · [v1761 currency worklog](docs/worklog/2026-11-04-finance-currency-normalization-v1761.md). GitHub source PR #2705 merged 2d1673d937f5a215dfd9efc53a05db241e3caea7 CI41820151596 SUCCESS (SQL333–335). PR #2706 merged b44bd66952b0c1c43c6d1482c31954dd879fca3a CI41822672084 SUCCESS (SQL336 nonmonetary old-W currency metadata normalization). Actual Test/Production still immutable v1742, actual Production DB SQL333 and Test DB SQL332, clone migration application blocked by tool safety inspection, authenticated funded-money E2E not certified. **Do not claim Test/Production release or full SOE/NPS/KDIC/SWF/Mint settlement #2366.**
 
