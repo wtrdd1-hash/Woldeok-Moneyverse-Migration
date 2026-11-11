@@ -21,6 +21,8 @@ describe('read-only user_items ACL drift diagnostic', () => {
     expect(withoutComments(comment)).not.toMatch(forbiddenWrite);
     expect('DELETE FROM accounts').toMatch(forbiddenWrite);
     expect('UPDATE accounts SET balance = 0').toMatch(forbiddenWrite);
+    expect('TRUNCATE TABLE accounts').toMatch(forbiddenWrite);
+    expect('SELECT 1').not.toMatch(forbiddenWrite);
   });
   it('cannot change shared database state', () => {
     const executable = withoutComments(sql);

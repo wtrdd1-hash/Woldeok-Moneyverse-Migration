@@ -7,6 +7,7 @@ trap 'rm -rf "$work"' EXIT
 cat > "$work/psql" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$@" > "$ARG_LOG"
+printf '%s\n' "${PGCONNECT_TIMEOUT:-}" > "${ARG_LOG}.timeout"
 case "$MOCK_CASE" in
   clean) printf 'ACL_GATE_COMPLETE_v1\n'; exit 0 ;;
   silent) exit 0 ;;
@@ -33,6 +34,7 @@ for scenario in clean drift silent duplicate missing connection sqlerror; do
   esac || { echo "FAIL: $scenario status=$status"; exit 1; }
   grep -Fxq 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY' "$work/args"
   grep -Fxq 'ROLLBACK' "$work/args"
+  grep -Fxq '10' "$work/args.timeout"
   grep -Fq 'user-items-acl-schema-presence.verify.sql' "$work/args"
   grep -Fq 'user-items-acl-drift.readonly.sql' "$work/args"
   echo "PASS: $scenario"

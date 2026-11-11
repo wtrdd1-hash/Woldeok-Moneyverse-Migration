@@ -2,6 +2,8 @@
 # Read-only fail-closed ACL drift gate; DATABASE_URL must point at the intended DB.
 set -euo pipefail
 : "${DATABASE_URL:?DATABASE_URL is required}"
+# Bound connection establishment; never wait indefinitely on an unreachable database.
+export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-10}"
 command -v psql >/dev/null || { echo 'BLOCKED: psql unavailable' >&2; exit 2; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # psql's ON_ERROR_STOP fails closed on missing role/table and query errors.
