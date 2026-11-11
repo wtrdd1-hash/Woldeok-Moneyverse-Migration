@@ -29,3 +29,8 @@
 ## Implementation checkpoint
 - RED at 2026-11-11 18:29 KST: targeted tests failed exactly on spurious `OK active→running→active` notifications.
 - GREEN candidate edits only `ops/telegram/telegram_bridge.py` plus unit tests.
+
+## GitHub checkpoint
+- Draft PR [#3068](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3068) on branch `fix/telegram-recovery-noise-v2026.11.11.1830` opened from commit `6faf4cb622e44e18e26ce193bda7a82d4d62a8b4`.
+- GitHub non-runtime-summary, policy, release-input and classify checks PASS; runtime-build and runtime-check SKIPPED. Skipped is not passed.
+- PR remains DRAFT / OPEN because official Test HTTP 502, no backend Test attestation. Production is unchanged.

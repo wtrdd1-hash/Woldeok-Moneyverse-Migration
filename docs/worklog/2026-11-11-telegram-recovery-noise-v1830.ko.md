@@ -16,3 +16,8 @@
 - 운영 DB 읽기 전용 관측: AI 시나리오 초안과 같은 시각의 AI 시장 이벤트가 별도 기록으로 존재하나 연계/기사 발행을 단정하지 않음.
 - 공식 Test `/api/health`, `/api/version` HTTP 502, Production 각 200이므로 공식 Test와 운영 승격 보류.
 - 운영 서버 텔레그램 코드 교체·재시작 없음. 운영 중복 알림은 아직 해결되었다고 보고할 수 없음.
+
+## GitHub 중간·종료 기록
+- 독립 브랜치 커밋 `6faf4cb622`, [초안 PR #3068](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3068) 업로드.
+- 정책·비런타임 관련 GitHub 검증 통과, 런타임 빌드/검사는 SKIPPED(통과로 간주하지 않음).
+- 공식 Test 502가 해소되지 않아 PR 초안 유지 및 운영 변경 없음.
