@@ -3013,3 +3013,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v2088 — A회차 Test 업스트림 장애영역 증거 및 안전 복구 게이트 (2026-11-11 17:09 KST)
+- **교대:** 이전 B/v2086 (#3064), 현재 A/v2088, 다음 B/v2090. 제안 단계이며 승인·구현·E2E PASS·운영 승격 아님. 기준 main SHA `9f73c89f3ed18aad42bd0ee019c24a7f86b8f41b`. 기존 A/v2084 (#3060) 검토 중. TSI-001~011 원문 유지. 승인된 ADD/MODIFY/REMOVE/DEFER=0/0/0/0.
+- **실제 QA:** Test 공개 URL HTTP 502, Production URL HTTP 200. Test Nginx의 `/`, `/health`, `/api/version`은 `127.0.0.1:3194`로 프록시하나 `ss -ltn`에서 해당 리스너 부재, 직접 HTTP 확인은 000. 일반 프론트엔드 서비스 3000 활성은 격리 Test 정상 증거가 아님. 과거 canary 실패 서비스 목록만으로 근본원인을 단정하지 않음. 인증 E2E·정확한 SHA 배포·근본원인·운영 기능 동등성 미검증.
+- **P0 운영자 화면:** Test 릴리스 상태 `UNAVAILABLE`, 업스트림 포트, 기대/실제 SHA, 프로세스 ID, 최종 정상 시각, Nginx 검사, 서비스 저널 상관 ID, 배포 작업자를 표시. `진단 수집`은 읽기 전용, `격리 복구 요청`은 권한 및 별도 승인 필요. Test를 Production으로 자동 우회 금지. 사용자 화면은 내부 구조를 숨기는 중립적 503/점검 상태.
+- **P0 내부 API 제안:** `GET /internal/test-readiness`는 `{environment,expectedSha,actualSha,upstreamPort,listenerPresent,healthStatus,checkedAt,evidenceId}`를 반환. mTLS/서비스 인증 또는 관리자 RBAC로 제한하고 외부 공개 금지. Nginx→정확한 SHA의 업스트림→백엔드/DB 의존성→인증 스모크까지 통과해야 PASS. 리스너 부재 또는 SHA 불일치 시 503. 증거는 비밀값 제거·보존기한 제한·추가전용 감사. 현재 구현 API라고 주장하지 않음.
+- **P1 원인 분리:** 재시작 전 unit 정의·배포 manifest·포트 바인딩·마지막 종료 상태·저널 시각·프로세스 소유자를 보존하고 Test 프로세스 부재/바인딩 오류/프록시/반복 종료/DB·인증 의존성 문제를 구분. Nginx 운영 경로 변경, Production 재시작, 운영 자격증명 재사용 금지. 격리 Test 복구는 롤백 아티팩트·exact-SHA·인증/CSRF/RBAC 음성 테스트가 필수.
+- **P1 데이터·멱등성:** 후보 테이블 `test_readiness_observations(id UUID PK, environment, expected_sha, actual_sha, observed_at, probe_result, evidence_digest, actor_id, UNIQUE(environment,expected_sha,observed_at))`, 인덱스 `(environment,observed_at DESC)`. 외부 증거 저장소 사용 시 동등한 추가전용 감사 필요. 수집은 WLD 원장 변경 금지. 마이그레이션 승인 없음.
+- **P2 관측:** 장애 분, readiness 오탐, 검사 신선도, 복구 시도 수는 실제 측정 전 UNKNOWN. 접근성 상태 안내와 모바일 운영자 화면 포함.
+- **완료 기준:** 복구 전후 `ss`·unit/저널·Nginx 설정 해시·HTTP 상태/헤더 증거, 격리 Test exact-SHA 인증/세션/CSRF·지갑 읽기 E2E, 백업 복구, 롤백, Test 재시작 회귀를 SHA/시각/환경에 묶어 확인. 현재 Test 502이므로 승격 HOLD. 외부 독립 레퍼런스 10,000건 검증 수 UNKNOWN/BLOCKED. 기획만 작성하고 코드·DB·운영 배포 변경 없음.
