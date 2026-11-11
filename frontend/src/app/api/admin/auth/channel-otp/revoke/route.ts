@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api';
-import { mutate } from '@/lib/mutate';
+import { mutate } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,11 +17,11 @@ export async function POST() {
       headers: { 'Cache-Control': 'private, no-store' },
     });
 
+    // R2 세션 승격 쿠키 삭제
     response.cookies.delete('admin_r2_elevated');
     return response;
   } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'Revoke failed';
-    return NextResponse.json({ error: message }, { status });
+    const message = error instanceof Error ? error.message : 'Revocation failed';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

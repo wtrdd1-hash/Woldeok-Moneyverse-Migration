@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api';
-import { mutate } from '@/lib/mutate';
+import { mutate } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,19 +20,19 @@ export async function POST(request: Request) {
     });
 
     if (result?.elevated) {
-      // 15�?R2 ?�격 쿠키 ?�정
+      // 15분 R2 세션 승격 쿠키 설정
       response.cookies.set('admin_r2_elevated', 'true', {
         path: '/',
         maxAge: 15 * 60,
         sameSite: 'lax',
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
       });
     }
 
     return response;
   } catch (error) {
-    const status = error instanceof ApiError ? error.status : 500;
-    const message = error instanceof Error ? error.message : 'R2 elevation failed';
-    return NextResponse.json({ error: message }, { status });
+    const message = error instanceof Error ? error.message : 'Elevation failed';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api';
-import { mutate } from '@/lib/mutate';
+import { mutate } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +15,7 @@ export async function POST(request: Request) {
       headers: { 'Cache-Control': 'private, no-store' },
     });
   } catch (error) {
-    const status = error instanceof ApiError ? error.status : 401;
     const message = error instanceof Error ? error.message : 'OTP verification failed';
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
