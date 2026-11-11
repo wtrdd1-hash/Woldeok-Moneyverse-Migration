@@ -34,3 +34,11 @@
 - Draft PR [#3068](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3068) on branch `fix/telegram-recovery-noise-v2026.11.11.1830` opened from commit `6faf4cb622e44e18e26ce193bda7a82d4d62a8b4`.
 - GitHub non-runtime-summary, policy, release-input and classify checks PASS; runtime-build and runtime-check SKIPPED. Skipped is not passed.
 - PR remains DRAFT / OPEN because official Test HTTP 502, no backend Test attestation. Production is unchanged.
+
+## Owner-authorized release continuation (2026-11-11 18:41 KST)
+- Explicit direction: resolve errors and promote through Production, preserving release gates.
+- Main checked at 9f73c89f3e. Task branch PR #3068 stays isolated from Gemini and other agents.
+- Prework required docs checked: AGENTS.md, DOCS_INDEX.md, CURRENT_DOCUMENTATION_STATUS.ko.md, planning/PROJECT_PLAN.ko.md, RELEASING.md, integrated planning master and Telegram evidence.
+- Public Test HTTP 502 reproduced. Nginx Test routes to 3194/3195, neither listening. test-main-backend on 3100 returns 200 locally; frontend 3101 returns 500 with missing .next/prerender-manifest.json in test-v2026.11.10.2032.1-e26b9228fdff.
+- Production public health 200. No live code or financial data changed.
+- Next: investigate valid Test artifacts and upstream drift, restore with backup/no Production traffic impact; verify official Test, then release Telegram candidate safely and observe real cycles.
