@@ -19,4 +19,4 @@ if [[ -n "$result" ]]; then
   printf 'FAIL: future table grants to moneyverse_app detected:\n%s\n' "$result" >&2
   exit 1
 fi
-echo 'PASS: no public default table grants to moneyverse_app'
+echo 'PASS: no public/global default table grants to moneyverse_app or PUBLIC'
