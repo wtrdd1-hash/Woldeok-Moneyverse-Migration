@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 sql=app-default-acl-drift.readonly.sql
 [[ -f "$sql" ]]
-for token in pg_default_acl aclexplode defaclrole defaclnamespace defaclobjtype moneyverse_app 'DELETE' 'INSERT' 'UPDATE' 'TRUNCATE' 'REFERENCES' 'TRIGGER' 'MAINTAIN'; do
+for token in pg_default_acl aclexplode defaclrole defaclnamespace defaclobjtype 'defaclnamespace = 0' '<global>' moneyverse_app 'DELETE' 'INSERT' 'UPDATE' 'TRUNCATE' 'REFERENCES' 'TRIGGER' 'MAINTAIN'; do
   grep -Fq "$token" "$sql"
 done
 ! grep -Eiq '^[[:space:]]*(GRANT|REVOKE|ALTER|INSERT|UPDATE|DELETE|DROP|CREATE|TRUNCATE)[[:space:]]' "$sql"
