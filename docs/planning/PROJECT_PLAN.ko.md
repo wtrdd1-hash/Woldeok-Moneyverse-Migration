@@ -1,5 +1,16 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+
+## A/v2104 — 보관함 조회 실패와 실제 빈 상태 구분 QA 기획 (초안 / 운영 보류)
+- **교대:** 이전 B/v2102 #3079 → 현재 A/v2104 → 다음 B/v2106. main 기준 53fb23cd2cb86a2cc1029523f557ce312d1d5dba 시작·중간 확인. 문서만 수정.
+- **근거:** main `frontend/src/app/inventory/page.tsx`는 `apiOrNull('/api/v1/shop/holdings')` 후 `holdingsData?.holdings || []` 사용. `frontend/src/lib/api.ts`는 예외를 모두 null로 반환. 따라서 401/403/시간초과/5xx가 컴포넌트에 빈 배열로 전달될 수 있음. 소스 근거이며 운영 로그인 재현은 **미검증**. 이슈 #1977의 개발 C 별도 수정 후보와 중복 구현 금지. 기대: 불명/오류와 검증된 빈 상태 분리, 실제: 빈 배열로 혼합. 사용자 신뢰 P1, 소유권·금융 결정에 활용 시 조건부 P0. 영향 인원 미확인.
+- **원인:** 포괄적 예외 삼킴과 검증 없는 기본 빈 배열. 자산 손실이나 원장 오류 증거 아님. 기존 A/v2100·B/v2102는 구현 완료가 아닌 관련 초안.
+- **전→후:** 인증·검증된 200 빈 배열만 `verified_empty`, 200 정상 `loaded`, 401 `unauthorized`, 403 `forbidden`, 5xx/시간초과 `unavailable`, 잘못된 응답 `invalid_response`. 접근 가능한 재시도 UI. 아이템 획득 이력이나 WLD 임의 생성 금지. 기존 본인 조회 GET /api/v1/shop/holdings 유지, 타입·스키마 검증 추가. 새 API/DB/마이그레이션 없음.
+- **보안:** 계정·세션 일치, 계정 전환 후 데이터 혼합 방지, 실제 app-api 엣지 private/no-store/noindex, 민감 식별자 로그 배제, DB ACL 독립 검증.
+- **완료 조건:** 격리 Test 정확 SHA에서 200 데이터/빈 배열, 401/403/500/시간초과/잘못된 JSON/타인 계정/계정 전환 주입. 검증된 빈 상태만 빈 보관함으로 표시. 320px·키보드·스크린리더, 기본 OFF 플래그, 독립 복원·운영 출처 확인 전 승격 금지.
+- **백로그:** P0 REL2104-01 정확 SHA/복원, SEC2104-02 권한·캐시·ACL; P1 UX2104-03 #1977 연계, QA2104-04 회귀; P2 A11Y2104-05 접근성. 개발 C UI, 개발 B API/DB, 독립 QA 검증. 운영 코드 배포 없음.
+- **게이트:** 운영 QA·Test 정확 SHA·독립 복원·외부 독립 중복 제거 10,000건 모두 미확인/BLOCKED. TSI 001~011 보존, 특별 기획은 11월 11일 06:00 종료.
+
 ## v2026.11.09.1946.2 — 블로그 미검증 공개 사용자 변경 지시 / BRANCH CANDIDATE
 2026-11-09 사용자 지시로 블로그 공개·광고 정책만 갱신. [한국어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md), [영어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) 참조. 금융 및 운영 승격 검증 요건 유지.
 

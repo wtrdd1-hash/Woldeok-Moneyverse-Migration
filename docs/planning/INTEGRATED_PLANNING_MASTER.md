@@ -1,5 +1,16 @@
 # Woldeok Moneyverse — Integrated Planning Master
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+
+## A/v2104 — Inventory failure-versus-empty QA correction (DRAFT / RELEASE HOLD)
+- **Cycle:** Previous B/v2102 #3079 → Current A/v2104 → Next B/v2106. Main baseline 53fb23cd2cb86a2cc1029523f557ce312d1d5dba, checked start/mid. Documentation only.
+- **Evidence:** On main, `frontend/src/app/inventory/page.tsx` calls `apiOrNull('/api/v1/shop/holdings')`, then uses `holdingsData?.holdings || []`. `frontend/src/lib/api.ts` catches every error and returns null. Thus 401/403/timeout/5xx can be represented as an empty holdings array at component boundary. This is source-backed, NOT authenticated Production reproduction. Issue #1977 tracks a separate Dev C candidate; avoid duplicate implementation. Expected: unknown/error distinct from verified empty. Actual: conflated empty prop. P1 user-trust impact; P0 conditional if used to decide ownership or monetary actions; affected population unknown.
+- **Root cause:** catch-all nullable transport plus unchecked empty fallback. No proof of lost assets or ledger defects. Prior A/v2100 and B/v2102 are related, not completed implementations.
+- **Before→after design:** distinguish authenticated validated 200-empty (`verified_empty`), 200-nonempty (`loaded`), 401 (`unauthorized`), 403 (`forbidden`), 5xx/timeout (`unavailable`), malformed (`invalid_response`). Accessible retry/error UI; never fabricate an acquisition event, holding or WLD transfer. Use existing owner-scoped GET /api/v1/shop/holdings; typed response and runtime schema checks; no new endpoint, DB table or migration.
+- **Security:** enforce actor/session binding, no cross-account reuse, private/no-store and noindex at real app-api edge, no sensitive IDs in logs. DB owner permissions/ACL verified independently.
+- **Acceptance:** isolated Test exact-SHA injection of 200 populated/empty, 401, 403, 500, timeout, malformed JSON, wrong actor, account switch; only validated 200 empty shows empty inventory. Verify 320px/keyboard/screen-reader, rollback flag OFF, independent restore and production provenance before release.
+- **Backlog:** P0 REL2104-01 exact-SHA/restore, SEC2104-02 owner/cache/ACL; P1 UX2104-03 reconcile #1977, QA2104-04 regression; P2 A11Y2104-05 mobile. Dev C owns UI, Dev B API/DB review, QA independent tests. No runtime deployment.
+- **Gates:** Production QA, exact-SHA Test, restore and independently deduplicated 10,000 external references UNKNOWN/BLOCKED. TSI 001–011 preserved; special window ended Nov 11 06:00 KST.
+
 ## v2026.11.09.1946.2 — Blog unverified visibility override / BRANCH CANDIDATE
 Owner directive 2026-11-09 supersedes only blog visibility/advertisement gates. See [EN/KO addendum](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) and [Korean](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md). Existing monetary, source and Release HOLD gates stay intact.
 
