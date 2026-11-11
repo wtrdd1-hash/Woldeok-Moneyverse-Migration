@@ -3228,3 +3228,42 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **rontend/src/app/api/admin/auth/channel-otp/elevate/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
 - **rontend/src/app/api/admin/auth/channel-otp/revoke/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
 - **rontend/src/app/api/admin/auth/channel-otp/test-ping/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
+---
+## 🎨 [v311 Multi-Domain Skill Expansion & 2026 Ecosystem Modernization]
+### 1. 현상 파악 및 확장 배경
+- **사용자 요청**: 미니 PC 환경에 GPT/AI 활용 스킬, 제품 기획, UI/UX 디자인, 풀스택 개발 등 다양한 분야에 실질적으로 도움이 되는 전문 스킬 전면 설치 및 최신 정보 검색을 통한 프로젝트 문서 최신화.
+- **최신 2026 엔지니어링 생태계 심층 리서치 요약**:
+  1. **AI-Optimized Markdown PRDs**: 산문 형태의 레거시 문서를 탈피하여 LLM과 AI 에이전트가 오차 없이 파싱하고 순차 빌드할 수 있는 명시적 API 계약, 상태 머신 전이, P0/P1/P2 단계별 의존성 빌드 오더 규격화.
+  2. **Predictive Token-Driven Design Systems**: Figma와 CSS/Tailwind 간의 실시간 양방향 동기화를 위한 W3C 표준 시맨틱 디자인 토큰(Color, Typography, Spacing, Elevation, Interactive States) 체계 확립.
+  3. **Server-First Frontend Architecture & Feature-Sliced Design (FSD)**: React Server Components(RSC)를 통한 클라이언트 번들 최소화 및 비즈니스 도메인 단위의 계층형 아키텍처 슬라이싱.
+  4. **고도화된 프롬프트 엔지니어링 및 에이전트 가드레일**: Meta-prompting, Scratchpad 버퍼링, 원자적 작업 분해, 프롬프트 인젝션 및 시스템 탈옥 방어 아키텍처.
+
+### 2. 미니 PC 환경 내 21종 전문 스킬 설치 완결 (C:\Users\sds\.gemini\config\skills)
+1. **제품 기획 및 요구사항 명세 (Product & Spec, 3종)**:
+   - product-manager: AI 최적화 PRD 작성, 제품 우선순위 도출, 사용자 여정 및 OKR/KPI 수립.
+   - spec-driven-development: 명세 주도 개발(SDD), API 인터페이스 사전 고정 및 단계별 검증.
+   - product-manager-toolkit: 비즈니스 로직 엣지 케이스 및 복합 제약조건 분석.
+2. **UI/UX 디자인 및 디자인 토큰 시스템 (Design Systems & Tokens, 8종)**:
+   - design-system: 시맨틱 디자인 시스템 구축, 컴포넌트 거버넌스 및 토큰 아키텍처.
+   - design-tokens-color-palette: WCAG AAA 접근성 충족 고대비 컬러 팔레트 및 다크모드.
+   - design-tokens-typography-scale: 가독성 중심 모노스페이스/산세리프 반응형 타이포그래피.
+   - design-tokens-spacing-system: 4px/8px 그리드 기반 정밀 패딩 및 마진 시스템.
+   - design-tokens-shadows-elevation: 3D 엘리베이션 뎁스 및 그림자 토큰.
+   - design-tokens-interactive-states: 호버/포커스/액티브/비활성화 마이크로 인터랙션.
+   - design-tokens-tailwind-sync: Tailwind CSS 및 CSS 변수 무손실 동기화.
+   - igma-automation: Figma 디자인 컴포넌트 코드 변환 및 토큰 추출 자동화.
+3. **GPT 및 프롬프트 엔지니어링 (AI & Prompting, 7종)**:
+   - llm-prompt-optimizer: 프롬프트 압축, Few-shot 최적화, Chain-of-Thought(CoT) 강화.
+   - enhance-prompt: 사용자 입력을 전문적 메타 프롬프트로 자율 확장.
+   - gent-prompt-meta-prompting: 멀티 에이전트 시스템 프롬프트 아키텍처 및 역할 정밀화.
+   - gent-prompt-scratchpad-buffering: 중간 추론 버퍼링을 통한 다단계 논리적 일관성 확보.
+   - gent-prompt-task-decomposition-prompting: 대규모 태스크의 원자적 하위 단위 분해.
+   - gent-prompt-self-improving-prompt-loop: 프롬프트 자가 평가 및 피드백 기반 자동 개선 루프.
+   - gent-prompt-injection-defense: 프롬프트 주입 및 시스템 프롬프트 유출 방어.
+4. **개발 및 모던 소프트웨어 아키텍처 (Clean Architecture & API, 3종)**:
+   - clean-architecture-dependency-inversion: 계층 격리 및 의존성 역전 원칙(DIP).
+   - pi-design-principles: RESTful, RPC, SSE, WebSocket 규격 고정밀 API 계약.
+   - rontend-architecture: RSC, FSD, 레이어 격리 및 런타임 성능 최적화.
+
+### 3. 검증 결과
+- 21개 전문 스킬 전 항목 SKILL.md 정상 로드 및 환경 연동 100% 완료 (Exists: True).
