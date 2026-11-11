@@ -238,9 +238,10 @@ def reconcile(bridge: Bridge, state: dict, snapshot: dict[str, tuple[str, str]],
             continue
         if prior == current:
             continue
-        if key.startswith("disk:") and prior is not None and prior.get("level") == level:
-            # Percentage changes within the same severity are not recoveries.
-            # Retain the latest reading for summaries without a false alert.
+        if (prior is not None and prior.get("level") == level
+                and (level == "OK" or key.startswith("disk:"))):
+            # Healthy phase changes are not recoveries; disk readings also
+            # fluctuate within an existing warning or critical severity.
             previous[key] = current
             continue
         if level == "OK" and prior is None:

@@ -77,6 +77,26 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(len(self.api.sent), 2)
         self.assertIn("복구", self.api.sent[-1]["text"])
 
+    def test_healthy_market_timer_phases_do_not_send_recovery(self):
+        self.chat.write_text("777")
+        key = "moneyverse-telegram-market.timer"
+        for value in ("active", "running", "active"):
+            reconcile(self.bridge, state_for(self.bridge),
+                      {key: ("OK", value)}, now_day="2026-11-11")
+        self.assertEqual(self.api.sent, [])
+        self.assertEqual(state_for(self.bridge)["last"][key],
+                         {"level": "OK", "value": "active"})
+
+    def test_real_market_recovery_emits_once_after_warning(self):
+        self.chat.write_text("777")
+        key = "moneyverse-telegram-market.timer"
+        for severity, phase in (("WARNING", "inactive"), ("OK", "active"),
+                                ("OK", "running"), ("OK", "active")):
+            reconcile(self.bridge, state_for(self.bridge),
+                      {key: (severity, phase)}, now_day="2026-11-11")
+        self.assertEqual(len(self.api.sent), 2)
+        self.assertIn("[복구]", self.api.sent[1]["text"])
+
     def test_disk_percentage_fluctuation_is_not_recovery(self):
         self.chat.write_text("777")
         key = "disk:/srv/moneyverse-data"
