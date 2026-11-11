@@ -1,13 +1,16 @@
 # 📚 Woldeok Moneyverse Official Master Documentation Index
 
+**DOC-2026.11.11.1500 — [Current evidence/authority navigation](CURRENT_DOCUMENTATION_STATUS.md) / [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md).** This index contains historical descriptions; follow the living project plan and exact runtime evidence rather than treating old release labels as current. Documentation-only; Test version API was HTTP 502 at the recorded time.
+
+
 Branch register v2026.10.27.3: [EN](audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](audits/2026-10-27-current-branches-v2026.10.27.3.ko.md), documentation-only, no deployed changes.
 
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
 > **Current Planning Authority**: **v2026.10 (Macro Sovereign Economic 6-Pillar & Autonomous Treasury Anchor Master)**
-> **Production Baseline**: **WSHC State Enterprise Dividends, National Pension Service (NPS), 3-Tier KTB / Repo Exchange, 25M Treasury Anchor Autonomous Recirculation Promoted**
-> **Status**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — Modeled on Bank of Korea, MOEF, NPS, KRX, and ALIO public real-world economic benchmarks
+> **Historical baseline claim (verify runtime first)**: **WSHC State Enterprise Dividends, National Pension Service (NPS), 3-Tier KTB / Repo Exchange, 25M Treasury Anchor Autonomous Recirculation Promoted**
+> **Historical index status (not a current Production attestation)**: **AUTHORITATIVE_PRODUCTION_INTEGRATED** — Modeled on Bank of Korea, MOEF, NPS, KRX, and ALIO public real-world economic benchmarks
 
 ---
 

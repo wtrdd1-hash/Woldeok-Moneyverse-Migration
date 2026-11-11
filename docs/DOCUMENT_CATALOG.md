@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+**DOC-2026.11.11.1500 — [Current evidence/authority navigation](CURRENT_DOCUMENTATION_STATUS.md) / [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md).** This index contains historical descriptions; follow the living project plan and exact runtime evidence rather than treating old release labels as current. Documentation-only; Test version API was HTTP 502 at the recorded time.
+
+
 ## v2026.10.22.1108 — No automatic unpublishing, country blog domain foundation
 - [EN owner supersession](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.md) / [KO](planning/AI_BLOG_NO_AUTO_UNPUBLISH_ADDENDUM_v2026.10.22.1108.ko.md). 24h or later review delay never auto-hides published article; admin alert only. Four-country risk candidate/domain review-state code and tests developed on isolated branch; publish-first DB/scheduler integration is pending.
 
