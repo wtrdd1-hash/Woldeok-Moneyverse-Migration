@@ -3013,3 +3013,9 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+### v2096 — A회차 Test 준비 증빙 및 거짓 정상 판정 방지 QA (2026-11-11 22:05 KST)
+- **교대·증거:** 이전 B/v2094(브랜치 커밋 f50ca143d8, 미병합) → 현재 A/v2096 → 다음 B/v2098. 시작·중간 origin/main `53fb23cd2cb86a2cc1029523f557ce312d1d5dba`; 2026-11-11 22:04 KST 미니PC backend/frontend/nginx/docker 가동, 개발 DB 연결; 익명 루트 GET 운영 200·Test 200(curl 제한 6초). 인증 E2E·업스트림 정상·배포 exact-SHA·금융정합성 증거는 아님. main #3068/#3070의 Test 장애/복구 기록은 과거 증거이며 현재 전체 PASS 근거가 아님.
+- **QA 위험:** P0 배포 게이트의 거짓 정상 판정. 기대: Test 배포 SHA/산출물 일치, 회원·관리자 인증 흐름, API/DB 마이그레이션, Outbox/원장, 백업복구 증빙. 실제 이번 확인은 익명 루트 HTTP 200 및 서비스 가동뿐. P0는 운영 배포 절차의 증거 공백이며 실제 사용자 장애 재현 확정이 아님. 근본원인·영향 사용자 UNKNOWN; QA 로그/프록시 업스트림/CI 추적 후 확정.
+- **수정 명세:** QA가 변경 불가능한 `{runId, gitSha, environment, observedAt, route, authRole, httpStatus, assertion, artifactDigest, evidenceUri, result}` 증거를 회원·관리자 상점/지갑/환급/접근거부 흐름에 제출하기 전 RELEASE HOLD. 쿠키·비밀·개인정보 제거. 운영 대시보드 `not_run|running|passed|failed|blocked|stale`, 증거 유효기간과 `200 != E2E PASS` 표시. `View evidence`/`Request rerun`은 운영 승격 실행 금지. 내부 API 후보 `GET /internal/qa/readiness?sha=`는 QA/배포 RBAC·no-store·접근감사·미확인 SHA 기본 거부. 기존 QA 이벤트 저장소를 먼저 조사하고 필요성이 입증된 경우에만 append-only `qa_readiness_evidence`, UNIQUE(run_id,assertion), INDEX(git_sha,environment,observed_at) 검토. 직접 테이블 쓰기·광범위 권한 금지, SECURITY DEFINER 최소권한.
+- **수용·테스트:** P0 루트 200이지만 인증 API 실패 시 BLOCKED, SHA 불일치/누락/오래된 증거 BLOCKED, 증빙 내 비밀 없음. P1 회원·관리자 BOLA 403/404, DB 마이그레이션 체크섬, 원장 합계 0·영수증 불변, exact-SHA 백업복구. P2 모바일/a11y 대시보드. 단위: 상태·유효기간; 통합: QA 증빙 멱등·RBAC; E2E: Test exact-SHA→독립 승인→운영 승격 게이트. 이번 회차 운영 코드/DB 변경·배포·Test PASS 없음. 신규 독립 외부 레퍼런스 0/10,000: BLOCKED. TSI-001~011 원문 보존, 특별 기획 06:00 KST 종료.
