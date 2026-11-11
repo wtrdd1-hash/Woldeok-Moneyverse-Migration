@@ -3204,3 +3204,27 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
   - 핵심 가이드: Next.js 16+, React 19, NestJS 11+, Vitest 4+ 버전별 Breaking Changes 및 최신 문법 정밀 슬라이싱 조회 전략 구축
 - **마켓플레이스 플러그인 안내**:
   - Context7 플러그인 카드 연계 (`antigravity-plugins-partners/plugin/context7`)
+
+---
+## 🔐 [v310 Channel OTP & Telegram 2FA CSRF Gate Recovery]
+### 1. 현상 파악 및 오류 추적 (Root Cause Analysis)
+- **사용자 오류 보고**: 관리자 국고/보안 화면에서 2FA OTP 요청 시 텔레그램으로 인증 코드가 발송되지 않는 현상 발생.
+- **다계층 정밀 진단 결과**:
+  1. **텔레그램 API & SSRF 방어 파이프라인 (정상)**:
+     - 서버 내 /var/lib/moneyverse-telegram/telegram.env (Bot Token) 및 chat_id (6250817639) 무결성 확인.
+     - curl 및 Node.js 런타임 직접 호출 테스트 결과 ok: true, message_id 1339, 1340 정상 도달 확인.
+     - 프로덕션 safeFetch를 통한 SSRF DNS Rebinding 방어 필터 통과 테스트 결과 message_id 1341 정상 발송 확인.
+     - 즉, 백엔드 내부의 텔레그램 발송 및 보안 파이프라인은 100% 정상 가동 중이었음.
+  2. **핵심 원인 (Root Cause: CsrfGuard 403 차단)**:
+     - 백엔드 AdminChannelOtpController는 @UseGuards(..., CsrfGuard)로 보호되어 있어 모든 POST 요청에 x-csrf-token 검증을 필수로 요구함.
+     - 프론트엔드 Next.js BFF 라우트 핸들러(rontend/src/app/api/admin/auth/channel-otp/) 5개 엔드포인트(equest, erify, elevate, evoke, 	est-ping)에서 백엔드 pi() 호출 시 csrfToken을 누락하여 전달함.
+     - 결과적으로 브라우저가 OTP 발송을 요청하면 백엔드 CsrfGuard가 403 Forbidden: csrf token required로 요청을 즉각 차단하여, 컨트롤러 내부의 equestOtp() 및 텔레그램 발송 로직에 진입조차 하지 못하고 소멸함.
+
+### 2. 정밀 수정 내역 (Changes Applied)
+- **rontend/src/app/api/admin/auth/channel-otp/request/route.ts**:
+  - esolveCsrfToken 패턴 적용: 클라이언트 x-csrf-token 헤더 우선 추출, 부재 시 서버 세션(/api/v1/auth/session)에서 안전하게 CSRF 토큰을 발급받아 pi() 호출 시 자동 주입.
+  - 에러 응답 객체 정규화 ({ error, message }).
+- **rontend/src/app/api/admin/auth/channel-otp/verify/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
+- **rontend/src/app/api/admin/auth/channel-otp/elevate/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
+- **rontend/src/app/api/admin/auth/channel-otp/revoke/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
+- **rontend/src/app/api/admin/auth/channel-otp/test-ping/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
