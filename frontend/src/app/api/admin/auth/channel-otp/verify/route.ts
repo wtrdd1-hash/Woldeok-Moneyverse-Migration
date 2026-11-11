@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const result = await mutate<unknown>('/api/admin/auth/channel-otp/verify', {
+    const result = await mutate<unknown>('/api/v1/admin/auth/channel-otp/verify', {
       method: 'POST',
       body,
     });

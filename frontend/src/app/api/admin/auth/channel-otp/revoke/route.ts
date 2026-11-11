@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST() {
   try {
     const result = await mutate<{ ok: boolean; revoked: boolean }>(
-      '/api/admin/auth/channel-otp/revoke',
+      '/api/v1/admin/auth/channel-otp/revoke',
       {
         method: 'POST',
       },

@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const result = await mutate<{ ok: boolean; success: boolean; dispatchedTo: string[] }>(
-      '/api/admin/auth/channel-otp/test-ping',
+      '/api/v1/admin/auth/channel-otp/test-ping',
       {
         method: 'POST',
         body,

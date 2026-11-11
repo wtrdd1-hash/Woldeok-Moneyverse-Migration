@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const result = await mutate<{ ok: boolean; elevated: boolean; expiresAt: number }>(
-      '/api/admin/auth/channel-otp/elevate',
+      '/api/v1/admin/auth/channel-otp/elevate',
       {
         method: 'POST',
         body,
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     });
 
     if (result?.elevated) {
-      // 15분 R2 승격 쿠키 설정
+      // 15�?R2 ?�격 쿠키 ?�정
       response.cookies.set('admin_r2_elevated', 'true', {
         path: '/',
         maxAge: 15 * 60,
