@@ -3013,3 +3013,13 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+### v2086 — B회차 회원 거래명세 내보내기 조건부 신규 후보 (2026-11-11 16:09 KST)
+- **교대:** 이전 A/v2084(#3060) → 현재 B/v2086 → 다음 A/v2088. 승인·구현·테스트·배포되지 않은 기획 후보. 기존 TSI-001~011 원문 유지. 승인된 ADD/MODIFY/REMOVE/DEFER **0/0/0/0**.
+- **근거:** 시작 main `9f73c89f3ed18aad42bd0ee019c24a7f86b8f41b`; 16:09 KST 읽기 전용 비로그인 /api/version 확인: 운영 HTTP 200, Test HTTP 502. 이전 A회차에서 Test 업스트림 불가를 기록했지만 근본원인 확정 아님. 회원 본인의 가상 WLD 거래명세를 위변조 감지 가능한 형태로 내보내는 기능 후보. 운영 릴리스 증거·보험 지급내역과 구별하며 전체 API/DB/PR/TSI 중복 조사가 승인 선행조건이다. 일부 문자열 검색에서 발견되지 않았다는 사실은 미구현 증명이 아니다.
+- **회원 UI:** 지갑 → 거래명세 → 최대 90일 기간/CSV·JSON 선택 → 신청 후 `queued|ready|expired|failed` 상태 확인 및 다운로드. 거래 없는 기간도 정상 0건 파일 제공. '가상 WLD이며 은행 거래명세가 아님' 고지. 공개 색인·기본 제3자 공유 금지. 관리자는 집계 작업 상태만 열람하고 개별 명세 접근에는 별도 감사 가능한 지원 권한 필요.
+- **API 제안:** `POST /api/v1/wallet/statements` {from,to,format,clientRequestId} → 202 {requestId,state}; `GET /api/v1/wallet/statements/:id` → 본인 상태/단기 다운로드 토큰; `GET /api/v1/wallet/statements/:id/download` → 첨부파일. 세션 인증·POST CSRF·DB 소유권 검사·쿼터·불투명 ID·로그 민감정보 차단·페이지 제한, 타인 ID는 404. 현재 구현 API라는 뜻이 아니다.
+- **DB/정합성:** `statement_export_requests(id UUID PK,actor_id FK,from_at,to_at,format,status,request_key UNIQUE(actor_id,request_key),snapshot_highwater,created_at,expires_at)`; `(actor_id,created_at DESC)` 인덱스. 사용자 검증 SECURITY DEFINER 읽기 함수만 사용하고 광범위 SELECT 권한 금지. 원장 high-water mark 시점 스냅샷 고정, 거래/차변/대변 연결, 정수 WLD, 기초·기말 잔액 대사, 금전 이동 없음. 요청과 Outbox 작업은 원자적 커밋, 멱등 재시도, 암호화 비공개 저장소·만료기한·접근/만료/실패/취소 감사. 객체 키에 개인정보 금지.
+- **보안/수용:** BOLA/BFLA 부정 테스트, 속도·파일 크기 제한, CSV 수식 주입 방어, 시간대·서머타임 경계, 누락·중복 원장거래 거부, 동일 키 100개 동시 요청 1개 산출물, 만료 토큰 410, 작업 재시도 중 중복/유출 없음, 키보드·스크린리더·모바일, 개인정보 보유기간, 독립 백업 복원 검증. KPI는 신청/완료/실패 건수·P95 지연·무단 접근 시도이며 실측값을 만들지 않는다.
+- **우선순위:** P0 Test HTTP 200 복구, exact-SHA 격리 인증 E2E·원장 대사·백업 복원 전 승격 금지; P1 중복 전수조사·위협 모델·승인·타인 접근 테스트; P2 내보내기 UX/분석. 외부 독립 10,000건 실제 검증 수 UNKNOWN/BLOCKED. Test 502이므로 E2E PASS 아님. RELEASE HOLD. 코드·DB·서비스·운영·WLD 변경 없음.
