@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
+import { api, apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { InventoryView, type HeldItem } from './inventory-view';
 
@@ -17,7 +17,7 @@ export default async function InventoryPage() {
   await requireMember();
 
   const [holdingsData, profileData] = await Promise.all([
-    apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
+    api<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
     apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile'),
   ]);
 
