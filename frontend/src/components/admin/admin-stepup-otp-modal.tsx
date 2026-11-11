@@ -1,26 +1,39 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 export interface AdminStepupOtpModalProps {
-  readonly open: boolean;
-  readonly onOpenChange: (open: boolean) => void;
+  readonly open?: boolean;
+  readonly isOpen?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
+  readonly onClose?: () => void;
   readonly mode?: 'elevate' | 'verify';
   readonly actionName?: string;
-  readonly onVerified: (otpCode: string) => void | Promise<void>;
+  readonly onVerified?: (otpCode: string) => void | Promise<void>;
+  readonly onSuccess?: (otpCode?: string) => void | Promise<void>;
   readonly title?: string;
   readonly description?: string;
 }
 
 export function AdminStepupOtpModal({
   open,
+  isOpen,
   onOpenChange,
+  onClose,
   mode = 'verify',
   actionName = '중대 관리자 작업 승인',
   onVerified,
+  onSuccess,
   title = '🔐 관리자 2FA 채널 보안 인증',
   description = '관리자 텔레그램 봇 및 디스코드 채널로 발송된 6자리 일회용 OTP 코드를 입력해 주세요.',
 }: AdminStepupOtpModalProps) {
+  const isModalOpen = open ?? isOpen ?? false;
+
+  const handleClose = useCallback(() => {
+    onClose?.();
+    onOpenChange?.(false);
+  }, [onClose, onOpenChange]);
+
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [requesting, setRequesting] = useState(false);
@@ -30,7 +43,7 @@ export function AdminStepupOtpModal({
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // OTP 요청 발송
-  const handleRequestOtp = async () => {
+  const handleRequestOtp = useCallback(async () => {
     setRequesting(true);
     setError(null);
     try {
@@ -52,24 +65,57 @@ export function AdminStepupOtpModal({
     } finally {
       setRequesting(false);
     }
-  };
+  }, [actionName]);
 
   // 모달 오픈 시 자동 1회 발송 및 타이머 시작
   useEffect(() => {
-    if (open) {
+    if (isModalOpen) {
       handleRequestOtp();
     }
-  }, [open]);
+  }, [isModalOpen, handleRequestOtp]);
 
   // 타이머 카운트다운
   useEffect(() => {
-    if (!open || timeLeft <= 0) return;
+    if (!isModalOpen || timeLeft <= 0) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => Math.max(0, prev - 1));
       setCanResendAfter((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [open, timeLeft]);
+  }, [isModalOpen, timeLeft]);
+
+  const handleSubmit = useCallback(async (fullCode: string) => {
+    if (loading || fullCode.length !== 6) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (mode === 'elevate') {
+        const res = await fetch('/api/admin/auth/channel-otp/elevate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otpCode: fullCode }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || '승격 인증에 실패했습니다.');
+        }
+      }
+
+      // 콜백 호출
+      if (onVerified) {
+        await onVerified(fullCode);
+      }
+      if (onSuccess) {
+        await onSuccess(fullCode);
+      }
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '인증 처리 실패');
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, mode, onVerified, onSuccess, handleClose]);
 
   // 6자리 완성 시 자동 제출
   useEffect(() => {
@@ -77,7 +123,7 @@ export function AdminStepupOtpModal({
     if (fullCode.length === 6 && digits.every((d) => d.length === 1)) {
       handleSubmit(fullCode);
     }
-  }, [digits]);
+  }, [digits, handleSubmit]);
 
   const handleDigitChange = (index: number, val: string) => {
     const cleaned = val.replace(/\D/g, '');
@@ -97,7 +143,7 @@ export function AdminStepupOtpModal({
     }
 
     const newDigits = [...digits];
-    newDigits[index] = cleaned[cleaned.length - 1];
+    newDigits[index] = cleaned[cleaned.length - 1] ?? '';
     setDigits(newDigits);
 
     // 다음 칸으로 자동 포커스
@@ -114,123 +160,60 @@ export function AdminStepupOtpModal({
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
-    if (pasteData.length > 0) {
-      const split = pasteData.slice(0, 6).split('');
-      const newDigits = [...digits];
-      split.forEach((char, i) => {
-        newDigits[i] = char;
-      });
-      setDigits(newDigits);
-      const nextFocus = Math.min(split.length, 5);
-      inputRefs.current[nextFocus]?.focus();
+    const paste = e.clipboardData.getData('text').replace(/\D/g, '');
+    if (paste.length >= 6) {
+      const split = paste.slice(0, 6).split('');
+      setDigits(split);
+      inputRefs.current[5]?.focus();
     }
   };
 
-  const handleSubmit = async (codeToVerify?: string) => {
-    const code = codeToVerify || digits.join('');
-    if (code.length !== 6) {
-      setError('6자리 숫자를 모두 입력해 주세요.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (mode === 'elevate') {
-        const res = await fetch('/api/admin/auth/channel-otp/elevate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ otpCode: code }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.elevated) {
-          throw new Error(data.error || 'OTP 코드가 일치하지 않거나 만료되었습니다.');
-        }
-      }
-
-      await onVerified(code);
-      onOpenChange(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '인증 실패');
-      setDigits(['', '', '', '', '', '']);
-      inputRefs.current[0]?.focus();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!open) return null;
+  if (!isModalOpen) return null;
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
-  const timerDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
   return (
     <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="admin-stepup-otp-title"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-md bg-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-2xl text-slate-100 flex flex-col gap-5">
+      <div className="relative w-full max-w-md rounded-2xl border border-border/80 bg-slate-950 p-6 shadow-2xl space-y-5 text-foreground">
         {/* 헤더 */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                {mode === 'elevate' ? 'R2 SESSION ELEVATION' : 'R3 CRITICAL MUTATION'}
-              </span>
-            </div>
-            <h3 id="admin-stepup-otp-title" className="text-lg font-bold text-slate-100 tracking-tight">
-              {title}
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="text-slate-500 hover:text-slate-300 transition-colors p-1"
-            aria-label="닫기"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* 듀얼 채널 발송 표시 배지 */}
-        <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 font-medium text-sky-400">
-              <span className="w-2 h-2 rounded-full bg-sky-400" />
-              Telegram
-            </span>
-            <span className="text-slate-600">|</span>
-            <span className="flex items-center gap-1.5 font-medium text-indigo-400">
-              <span className="w-2 h-2 rounded-full bg-indigo-400" />
-              Discord
-            </span>
-          </div>
-          <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-            동시 발송됨
-          </span>
-        </div>
-
-        {/* 6자리 스마트 핀패드 입력 필드 */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-1">
-            <label className="text-xs font-medium text-slate-400">6자리 일회용 인증 코드</label>
-            <span
-              className={`text-xs font-mono font-medium ${
-                timeLeft < 60 ? 'text-red-400 animate-pulse' : 'text-amber-400'
-              }`}
+        <div className="space-y-1.5 text-center">
+          <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 mb-1">
+            <svg
+              className="size-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              ⏱ {timerDisplay}
-            </span>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
           </div>
+          <h2 className="text-lg font-bold tracking-tight">{title}</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {description}
+          </p>
+        </div>
 
-          <div className="flex items-center justify-center gap-2" onPaste={handlePaste}>
+        {/* 대상 작업 안내 배지 */}
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-3.5 py-2.5 text-center space-y-0.5">
+          <span className="text-[11px] font-medium text-indigo-300">인증 대상 조작</span>
+          <p className="text-xs font-bold text-foreground truncate">{actionName}</p>
+        </div>
+
+        {/* 6자리 핀패드 입력 박스 */}
+        <div className="space-y-2">
+          <div className="flex justify-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
             {digits.map((digit, idx) => (
               <input
                 key={idx}
@@ -242,54 +225,69 @@ export function AdminStepupOtpModal({
                 pattern="[0-9]*"
                 maxLength={1}
                 value={digit}
+                disabled={loading || timeLeft <= 0}
                 onChange={(e) => handleDigitChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
-                disabled={loading || timeLeft <= 0}
-                className="w-11 h-13 text-center text-xl font-mono font-bold bg-slate-950 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 disabled:opacity-40 transition-all shadow-inner"
+                className="size-11 sm:size-12 rounded-xl border border-border/80 bg-slate-900/80 text-center font-mono text-lg font-bold text-foreground shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 transition-all"
+                autoComplete="off"
               />
             ))}
           </div>
 
-          {error && (
-            <p className="text-xs text-red-400 font-medium px-1 flex items-center gap-1">
-              ⚠️ {error}
-            </p>
-          )}
+          {/* 타이머 및 채널 안내 */}
+          <div className="flex items-center justify-between text-[11px] px-1 text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className={`size-1.5 rounded-full ${timeLeft > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
+              유효 시간: <strong className={timeLeft <= 60 ? 'text-rose-400 font-mono' : 'font-mono'}>{timeFormatted}</strong>
+            </span>
+            <span className="text-muted-foreground/80">텔레그램 & 디스코드 발송</span>
+          </div>
         </div>
 
-        {/* 하단 버튼 바 */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive text-center font-medium animate-in fade-in">
+            {error}
+          </div>
+        )}
+
+        {/* 하단 액션 버튼 */}
+        <div className="space-y-2 pt-1">
           <button
             type="button"
-            disabled={requesting || canResendAfter > 0}
-            onClick={handleRequestOtp}
-            className="text-xs text-slate-400 hover:text-slate-200 disabled:opacity-40 disabled:hover:text-slate-400 transition-colors font-medium flex items-center gap-1"
+            disabled={loading || digits.join('').length !== 6 || timeLeft <= 0}
+            onClick={() => handleSubmit(digits.join(''))}
+            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
           >
-            {canResendAfter > 0 ? `재발송 (${canResendAfter}초)` : '코드 다시 받기'}
+            {loading ? (
+              <>
+                <svg className="size-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                <span>인증 검증 중...</span>
+              </>
+            ) : (
+              <span>인증 확인 및 승격</span>
+            )}
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between pt-1">
             <button
               type="button"
-              onClick={() => onOpenChange(false)}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              disabled={loading || canResendAfter > 0 || requesting}
+              onClick={handleRequestOtp}
+              className="text-xs text-muted-foreground hover:text-indigo-400 disabled:text-muted-foreground/40 transition-colors"
             >
-              취소
+              {canResendAfter > 0 ? `재발송 가능 (${canResendAfter}s)` : '코드 다시 받기'}
             </button>
             <button
               type="button"
-              disabled={loading || digits.join('').length !== 6 || timeLeft <= 0}
-              onClick={() => handleSubmit()}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 disabled:opacity-40 transition-all shadow-md flex items-center gap-1.5"
+              disabled={loading}
+              onClick={handleClose}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              {loading ? (
-                <>
-                  <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  검증 중...
-                </>
-              ) : (
-                '승인 확인'
-              )}
+              취소
             </button>
           </div>
         </div>

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api';
-import { get } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const result = await get<{ ok: boolean; elevated: boolean; remainingSeconds: number; expiresAt: number }>(
+    const result = await api<{ ok: boolean; elevated: boolean; remainingSeconds: number; expiresAt: number }>(
       '/api/admin/auth/channel-otp/status',
     );
     return NextResponse.json(result, {
