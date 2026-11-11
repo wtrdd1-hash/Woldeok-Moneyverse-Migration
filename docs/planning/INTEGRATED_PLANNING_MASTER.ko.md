@@ -2312,3 +2312,17 @@ v1440 모델을 발전시켜 저장 PK를 (user_id,term_id)로 바꾸고 (user_i
 - 신규 상세 권위: `AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md`; PROJECT_PLAN과 수익화/한국 준수 명세에 v487 상위 대체 게이트를 반영했다.
 - Google AdSense Page RPM/Auto Ads/Experiments/invalid traffic/publisher policy와 국세청 플랫폼 광고수익 세무 안내를 재확인했다. 국세청 1인 미디어 안내를 이 웹사이트의 자동 업종분류 근거로 사용하지 않는다.
 - 기획/문서 전용이며 런타임, 결제, AdSense 설정, Test, Production, 세무분류 확정, 실제 수익달성을 주장하지 않는다.
+
+
+### B/v2106 — 상점 재입고 알림 명시적 신청 (2026-11-12 03:05 KST; 제안 / 출시 보류)
+- **교대:** 이전 A/v2104(Draft PR #3080) → 현재 B/v2106 → 다음 A/v2108. main 기준 `53fb23cd2cb86a2cc1029523f557ce312d1d5dba`. 구현·운영 검증 완료를 뜻하지 않는다.
+- **근거/범위:** `frontend/src/app/shop/shop-store-view.tsx`에 `max_stock: number | null` 타입이 확인되나 실제 재고 상태의 의미와 백엔드 계약은 개발 B가 확인해야 한다. 상점 경로 검색에서 재입고 기능을 확인하지 못했다. B/v2102 획득 이력, A/v2104 보관함 오류 상태와 중복하지 않는다.
+- **회원 흐름:** 인증된 회원만 실제 품절로 검증된 상품에서 '재입고 알림 받기'를 명시적으로 신청·취소한다. 비로그인에는 로그인 안내만 제공한다. 알림은 예약·구매·재고 확보를 보장하지 않고 WLD를 이동하지 않는다.
+- **화면/접근성:** 품절 미신청/신청 중/신청됨/취소됨/오류/재품절 상태를 구분한다. 재고 미확인·서버 오류를 품절로 표시하지 않는다. 키보드, 320px, 스크린리더, 재시도 지원. 상품 공개 페이지와 달리 신청·알림 데이터는 비공개/noindex.
+- **API 제안(미구현):** `GET /api/v1/shop/restock-subscriptions?itemId=<uuid>`, `PUT /api/v1/shop/restock-subscriptions/:itemId`, `DELETE /api/v1/shop/restock-subscriptions/:itemId`. 세션·CSRF·멱등성, 소유자 범위 및 401/403/404/409/429/5xx 처리. 실제 Nest 라우트 관례와 대조 후 확정한다.
+- **DB 제안:** `shop_restock_subscriptions`에 UUID PK, 회원/상품 FK, 상태 CHECK, 생성/변경 시각, 최종 통지 재고 epoch, 낙관적 버전; 회원+상품 UNIQUE, 상태·상품 인덱스. 실제 테이블명/재고원천/마이그레이션 순서 확인 전 SQL 실행 금지.
+- **정합성·보안:** 검증된 품절→재입고 전이에서 epoch fencing, 트랜잭션 outbox 및 (신청ID, epoch) 논리 중복 제거. 취소·동의 철회는 발송 직전 재검사. 회원별 신청 제한, 스팸/열거 방지, 보존 기간, 감사 기록. 기존 알림 인프라 재사용. 이메일/푸시는 실제 수신 동의와 법률·채널 게이트 통과 전 차단; 초기 후보는 앱 내 알림이다.
+- **관리자/RBAC:** 관리자에게 개인별 신청 내역 대신 집계·실패 지표 제공, 지원 열람은 최소 권한·감사. 상품 비활성화 시 임의 재신청 금지. 기본 OFF 기능 플래그, 작업자 안전 중단·롤백.
+- **수용 기준:** 재고 null/epoch 단위 테스트, 다른 회원 조회 거부, CSRF·멱등 PUT/DELETE·동시 신청, 취소 경쟁 조건·outbox 중복 방지, 품절→신청→재입고→1회 통지→취소→재입고 무통지 E2E. 모바일/접근성, 독립 Test exact-SHA·QA·보안·백업복원·운영 SHA·롤백 게이트 필요.
+- **우선순위:** P0 REL2106-01 운영 출처·복구·원장 및 동의 법률 게이트; P1 API2106-02 재고 계약, DB2106-03 원자성, UI2106-04 신청, QA2106-05 E2E; P2 OBS2106-06 신청/발송/취소/중복률. 개발 B는 API/DB, 개발 C는 UI, QA는 독립 검증 담당.
+- **미검증:** 실제 운영 QA·Test 미실행. 외부 독립 레퍼런스 신규 확인 0, 누적 UNKNOWN/10,000, BLOCKED. TSI 001~011 보존, 기간 한정 기획 재개 안 함. 로컬 using-superpowers/brainstorming/writing-plans/doc-coauthoring/verification-before-completion 실제 열람; 호스팅 스킬 목록 비어 있음. 코드 검토·병렬 에이전트는 구현 대상이 없어 생략.
