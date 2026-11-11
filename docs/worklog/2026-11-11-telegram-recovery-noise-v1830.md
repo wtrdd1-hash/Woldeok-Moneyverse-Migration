@@ -42,3 +42,15 @@
 - Public Test HTTP 502 reproduced. Nginx Test routes to 3194/3195, neither listening. test-main-backend on 3100 returns 200 locally; frontend 3101 returns 500 with missing .next/prerender-manifest.json in test-v2026.11.10.2032.1-e26b9228fdff.
 - Production public health 200. No live code or financial data changed.
 - Next: investigate valid Test artifacts and upstream drift, restore with backup/no Production traffic impact; verify official Test, then release Telegram candidate safely and observe real cycles.
+
+## Post-merge release continuation — v2026.11.11.1831
+- Source PR #3068 merged to main at cfc178ab55d95fd4f1e34a62f2d3cf17b932c12a on 2026-11-11 18:58:57 KST. GitHub policy/non-runtime checks PASS, runtime build jobs SKIPPED.
+- Deleted official Test release replaced with new immutable Test candidate; initial candidate d6d1895e exact identity PASS. Rebuilt from exact merged main cfc178ab55d9 and deployed official Test v1831.
+- Test-only Nginx backup and routing correction 3194/3195 to 3100/3101, nginx -t PASS and reload. Official public Test /api/health, /api/version, /frontend-version, /en and /status HTTP 200; unauthorized admin 401 and noindex.
+- Merged-main Test identity initially blocked by an EnvironmentFile mtime in the same second as process start; stopped the false race legitimately by restarting Test services later without changing any file timestamps. Fresh exact-main preflight ok:true, failures:[].
+- Python suite 32 PASS on the exact Test release; fake Telegram delivery: OK active/running/active zero false recoveries, real CRITICAL->OK one recovery.
+- Production 19:04:51 KST: old bridge d69b72c451f3 privately backed up; exact merged source c8ec635318da installed with atomic rename; actual alert oneshot CHECK_OK, Result=success, exit 0; timer active/enabled/waiting.
+- Production public health/version HTTP 200, original Production website release unchanged, no production web restart. No intentional DB/ledger/finance writes, migrations, resets or artificial news.
+- Backups: private protected operations backup of previous bridge and Test-only Nginx config; retain immutable Test v1830 and v1831. Old Test v2032.1 symlink target was already deleted and is not a valid rollback.
+- Release proof EN/KO in docs/releases/v2026.11.11.1831-telegram-alert-prod.md and .ko.md. Do not overclaim full signed-in QA, actual Telegram chat delivery audit or unrelated finance issue recovery.
+- Follow-up scheduled run observation: 19:06:53 and 19:09:03 KST Telegram CHECK_OK; 19:06:13 and 19:08:03 KST market MARKET_OK with zero candidates. On the actually installed Production Python module, fake transport: five OK active/running changes sent 0, actual CRITICAL->OK emitted 2. No external Telegram chat history audit asserted.
