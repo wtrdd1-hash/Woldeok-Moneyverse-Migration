@@ -2333,3 +2333,7 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - New detailed authority: `AD_ONLY_ADVERTISING_REVENUE_SPEC.md`; PROJECT_PLAN and monetization/KR-compliance specs were updated with superseding v487 gates.
 - Official evidence refresh used Google AdSense Page RPM/Auto Ads/Experiments/invalid-traffic/publisher-policy documentation and NTS platform-ad-income tax guidance. NTS one-person-media guidance is not treated as automatic classification of this website.
 - Planning/docs only; no runtime, billing, AdSense-setting, Test, Production, tax-classification or revenue-result claim.
+
+
+## B/v2110 continuation — Private notification pins (DRAFT / RELEASE HOLD)
+Previous A/v2108, current B/v2110 (#3085), next A/v2112 after verification. Base main 53fb23cd2c. Candidate owner-only maximum-20 notification pinboard with idempotent CSRF-protected API, serialized ownership/quota DB invariant, private noindex/no-store, Android account-switch cache invalidation and concurrency/ACL/a11y E2E. Detailed English/Korean authoritative sections in PROJECT_PLAN.md and PROJECT_PLAN.ko.md. P1 draft, P0 ACL gate, independent Production QA, Test exact-SHA, restore and 10,000-reference gate unresolved. No runtime/DB changes.

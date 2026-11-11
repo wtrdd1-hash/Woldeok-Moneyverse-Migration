@@ -3013,3 +3013,11 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+
+## B/v2110 — 비공개 알림 고정 (2026-11-12; 신규 기능; 초안/배포 보류)
+교대: 이전 A/v2108(#3084), 현재 B/v2110(#3085 계속), 다음 A/v2112(문서·증거 검증 후). 기준 main 53fb23cd2cb86a2cc1029523f557ce312d1d5dba. 구현·승인된 기능이 아닌 후보이며 기존 알림 발송·검색·요약·개인정보 내보내기와 중복하지 않는다.
+회원 동선: 인증된 회원이 비공개 알림함에서 본인 알림을 최대 20개 고정/해제하고 상단에서 확인한다. 읽음·전송 상태와 WLD 원장은 변경하지 않는다. 로딩·빈 목록·삭제·오프라인·한도·오류·재시도 화면, 키보드 토글 aria-pressed·스크린리더 안내, Android 로그아웃/계정 변경 캐시 무효화. 공개 SEO 색인 금지, no-store/noindex. 개인정보 없는 집계 KPI는 사용률·성공률·한도 거부·오류.
+제안 API: GET /api/member/notifications/pins는 본인 ID 순서와 한도 반환; PUT/DELETE /api/member/notifications/:id/pin은 세션 인증·CSRF·Origin·속도 제한 필수, 클라이언트 ownerId 금지. 멱등 재시도 200/204, 미인증 401, 권한 403, 타인/삭제 알림 존재를 노출하지 않는 404, 한도 409, 제한 429. 타인 ID·민감 알림 내용 반환 금지.
+제안 DB: member_notification_pins(member_id FK, notification_id FK, pinned_at timestamptz NOT NULL, PRIMARY KEY(member_id,notification_id)), 인덱스(member_id,pinned_at DESC,notification_id). 소유권 확인과 20개 제한을 회원별 잠금 또는 동등한 직렬화 방식의 단일 트랜잭션으로 보장. 중복·고아 행·동시 21개 초과 금지. 기존 스키마와 삭제 정책 확인 후 추가형·롤백 가능한 마이그레이션 및 백업 복구 검증. ACL 감사 없이 SECURITY DEFINER 권한 확대 금지.
+수용 기준: 인증·CSRF·소유권·멱등성 단위/실제 PostgreSQL 통합, 동시 21번째 고정 경합, 401/403/404/409/429, 삭제 알림, 고정→새로고침→해제→로그아웃→타 계정 E2E, 키보드/모바일/Android 검증. 운영 QA 독립 증거, 격리 Test exact-SHA, 복원·롤백 증거 전 배포 금지. P0 기본 ACL 게이트(#3083/#3084) 이후 P1 후보. 외부 독립 10,000건 수량 UNKNOWN/BLOCKED. 구현·배포 완료 아님.
