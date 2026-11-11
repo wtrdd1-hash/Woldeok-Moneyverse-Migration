@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { mutate } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const result = await mutate<{ ok: boolean; elevated: boolean; expiresAt: number }>(
+    const result = await api<{ ok: boolean; elevated: boolean; expiresAt: number }>(
       '/api/v1/admin/auth/channel-otp/elevate',
       {
         method: 'POST',
@@ -32,7 +32,8 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
+    const status = error instanceof ApiError ? error.status : 400;
     const message = error instanceof Error ? error.message : 'Elevation failed';
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: message }, { status });
   }
 }
