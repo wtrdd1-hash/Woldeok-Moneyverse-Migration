@@ -1,0 +1,6 @@
+# A/v2112 start / middle / final evidence
+- Start: miniPC service check active; dev DB connected. Hosted skills catalog returned zero; local using-superpowers, systematic-debugging, writing-plans, verification-before-completion SKILL.md actually read. Local skill application: evidence triage, negative-case matrix, doc verification. No hosted skill applied (unavailable).
+- Start: origin/main 53fb23cd2cb86a2cc1029523f557ce312d1d5dba; AGENTS.md and README reviewed; #3085 B/v2110 draft and #3084/#3083 inspected. Previous B/v2110 -> current A/v2112 -> next B/v2114. This is a docs-only QA plan, not an independent QA run.
+- Middle: main SHA rechecked unchanged; no production pin evidence found; root cause UNKNOWN, exact-SHA Test/restore BLOCKED. Avoid touching developer/QA/Gemini branches. 10k external references UNKNOWN/BLOCKED.
+- Final: EN/KO plan parity and integrated master appendix, P0/P1/P2 evidence matrix; no API/DB/UI changes or deployment. git diff --check required before publication; independent review still pending.
+- Skill matrix: local using-superpowers (workflow), systematic-debugging (do not invent root cause), writing-plans (acceptance steps), verification-before-completion (diff gate). Hosted skills unavailable; other local skills skipped as not necessary for docs-only QA.
