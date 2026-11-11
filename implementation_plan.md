@@ -3267,3 +3267,30 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 
 ### 3. 검증 결과
 - 21개 전문 스킬 전 항목 SKILL.md 정상 로드 및 환경 연동 100% 완료 (Exists: True).
+---
+## 📑 [v312 Comprehensive System Architecture & Documentation Re-baselining]
+### 1. 작업 개요 및 사용자 요구사항
+- **요구사항**: 시스템 전반의 핵심 문서들을 최신 2026 표준과 최근 배포된 모든 기능(국고 원스톱 충전, 2FA 채널 OTP, 조폐국, 중앙은행, 카지노 피구세, 26대 전문 스킬 및 GPT/OpenAI 파이프라인)을 반영하여 처음부터 끝까지 완전하고 깔끔하게 최신화 및 재정리.
+- **문서 재정리 원칙**:
+  - 규칙 Zero-Deletion Invariant (-0 lines): 기존 모든 버전(v1~v311)의 히스토리 100% 완전 보존.
+  - 정본 스펙 일원화: moneyverse_full_system_architecture_spec.md를 1장부터 8장까지 체계적으로 완전 재정리.
+  - 실서버 운영과 100% 일치성 확보: 호스트(easy-scraping.com), 릴리즈 번호, 포트 바인딩, 보안 가드, 스케줄러 동기화.
+
+### 2. 정비 및 최신화 완료 문서 내역
+1. **정본 종합 시스템 아키텍처 스펙 (moneyverse_full_system_architecture_spec.md)**:
+   - **1장**: 국가 3대 금융 기관 및 국고 자금 순환 거버넌스 (국고 5대 금고 환원율 40/30/20/10, 30% 안전 비축금 불변 가드, 국민연금 1시간 자동 스윕).
+   - **2장**: 관리자 보안 & 2FA 채널 OTP 다계층 방어 (Next.js BFF CSRF 자동 주입 esolveCsrfToken, NestJS CsrfGuard, 텔레그램 봇 실시간 발송, R2 15분 승격 세션 / R3 단일 소모, 즉시 잠금).
+   - **3장**: 국고 및 통화정책 원스톱 액션 시스템 (직통 주조 다이얼로그 AdminMintTopupDialog, 발의 즉시 승인 파이프라인).
+   - **4장**: 카지노 도박세(피구세, Pigouvian Tax) 및 거시경제 자동 안정화 (베팅액 10% 자동 원천징수, 4분할 국고 환원).
+   - **5장**: 프론트엔드 다중 뷰포트(320px~1440px+) 반응형 레이아웃 엔진 (수치 클리핑 방지, 44px 터치 타깃, Zero Horizontal Overflow).
+   - **6장**: 2026 모던 엔지니어링 패러다임 (AI-Optimized Markdown PRD, W3C Token-Driven Design Systems, Feature-Sliced Design, RSC).
+   - **7장**: 미니 PC 26대 핵심 전문 스킬 및 GPT/OpenAI 풀파이프라인 매트릭스 (기획 3종, 디자인 8종, GPT 12종, 아키텍처 3종).
+   - **8장**: 프로덕션 불변 릴리즈 및 서비스 배포 운영 명세 (prod-v2026.11.11.2330-ccd699e99a, systemd, Nginx, PostgreSQL 16 튜닝).
+2. **한국어 공식 메인 문서 (README-KO.md)**:
+   - 최신 프로덕션 릴리즈 및 금융 거버넌스 바로가기 허브 구축.
+   - 미니 PC에 설치된 26종 전문 스킬 및 GPT 특화 스킬 목록 정본화.
+3. **프로젝트 루트 implementation_plan.md & 아티팩트 실시간 100% 동기화 완결**.
+
+### 3. 검증 결과
+- 모든 문서의 상호 링크 무결성 검증 완료.
+- 프로덕션 배포 상태(https://easy-scraping.com)와 문서 스펙 100% 일치 확인.
