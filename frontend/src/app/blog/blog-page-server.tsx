@@ -11,7 +11,8 @@ import { getAllBlogPosts, getBlogPostBySlug } from './blog-data';
 import { verifiedPublicArticles, verifiedArticleBySlug } from './blog-verified-client';
 import {
   blogAlternateLanguages, blogHubUrl, blogUrl, canonicalBlogSlug,
-  countryBlogPosts, getBlogCountryEdition, isBlogDiscoverable, type BlogLocale,
+  countryBlogPosts, getBlogCountryEdition, isBlogDiscoverable, nativeBlogLocale,
+  recentWorldwideBlogPosts, type BlogLocale,
 } from './blog-seo';
 
 const MARKET_NAMES: Record<BlogLocale, string> = {
@@ -109,8 +110,19 @@ export function summarizeBlogPost(post: BlogPost) {
   const { slug, title, excerpt, category, categoryLabel, publishedAt, readTimeMinutes, tags, views, viewCountVerified, author, relatedCalculatorHref, relatedCalculatorName } = post;
   return {slug,title,excerpt,category,categoryLabel,publishedAt,readTimeMinutes,tags,views,viewCountVerified,author,heroImage:resolvePostHeroImage(post),relatedCalculatorHref,relatedCalculatorName};
 }
+const WORLDWIDE_PANEL = {
+  ko: { title: '전 세계 최신 발행 글', description: '다른 국가의 새 글입니다. 제목을 누르면 해당 언어의 원문으로 이동합니다.', unverified: 'AI 생성 · 미검증' },
+  en: { title: 'Latest worldwide publications', description: 'Read the original article in its native language.', unverified: 'AI-generated · unverified' },
+  ja: { title: '世界の最新記事', description: '記事はそれぞれの原語版で公開されています。', unverified: 'AI生成 · 未検証' },
+  zh: { title: '全球最新文章', description: '点击标题阅读相应语言的原文。', unverified: 'AI生成 · 未核实' },
+} as const;
+
+const NATIVE_LANGUAGE = { ko: '한국어', en: 'English', ja: '日本語', zh: '中文' } as const;
+
 export async function renderBlogHub(locale: BlogLocale) {
-  const posts = countryBlogPosts([...await verifiedPublicArticles(),...getAllBlogPosts()].filter(isBlogDiscoverable), locale);
+  const publicPosts = [...await verifiedPublicArticles(), ...getAllBlogPosts()].filter(isBlogDiscoverable);
+  const posts = countryBlogPosts(publicPosts, locale);
+  const worldwide = recentWorldwideBlogPosts(publicPosts, locale);
   const canonical = blogHubUrl(locale);
   const freshnessNotice = getBlogFreshnessNotice(posts, locale);
   const jsonLd = {
@@ -140,6 +152,32 @@ export async function renderBlogHub(locale: BlogLocale) {
               </Link>
             ))}
           </nav>
+          {worldwide.length > 0 && (
+            <section aria-label={WORLDWIDE_PANEL[locale].title} className="rounded-xl border border-border/60 bg-card/60 p-4 space-y-3">
+              <h2 className="text-base font-bold text-foreground">{WORLDWIDE_PANEL[locale].title}</h2>
+              <p className="text-xs text-muted-foreground">{WORLDWIDE_PANEL[locale].description}</p>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {worldwide.map(post => {
+                  const native = nativeBlogLocale(post)!;
+                  return (
+                    <li key={post.slug} className="rounded-lg border border-border/50 px-3 py-2.5 space-y-1">
+                      <p className="text-xs text-muted-foreground">
+                        <span lang={native}>{NATIVE_LANGUAGE[native]}</span>
+                        {' · '}{new Date(post.publishedAt).toLocaleDateString(locale)}
+                        {post.verificationState === 'UNVERIFIED' && ` · ${WORLDWIDE_PANEL[locale].unverified}`}
+                      </p>
+                      <Link href={blogUrl(post.slug, native).replace('https://easy-scraping.com', '')}
+                        hrefLang={{ ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' }[native]}
+                        lang={native}
+                        className="block text-sm font-semibold text-foreground hover:text-indigo-400 transition-colors line-clamp-2">
+                        {post.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
           {freshnessNotice && (
             <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-xs sm:text-sm text-muted-foreground">
               {freshnessNotice}

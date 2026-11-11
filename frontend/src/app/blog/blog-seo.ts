@@ -55,6 +55,28 @@ export function getBlogCountryEdition(post: BlogPost, locale: BlogLocale): BlogP
   const translated = post.translations?.[locale];
   return translated ? { ...post, ...translated } : undefined;
 }
+/** Native article locale. A country's post must never gain a fictitious translation. */
+export function nativeBlogLocale(post: Pick<BlogPost, 'country'>): BlogLocale | undefined {
+  return ({ KR: 'ko', US: 'en', JP: 'ja', CN: 'zh' } as Record<string, BlogLocale>)[post.country ?? ''];
+}
+
+/** Read-only cross-country discovery, distinct from each locale's canonical index. */
+export function recentWorldwideBlogPosts(
+  posts: readonly BlogPost[], locale: BlogLocale, limit = 6,
+): BlogPost[] {
+  const seen = new Set<string>();
+  return posts
+    .filter(post => {
+      const native = nativeBlogLocale(post);
+      if (!native || native === locale || !isCanonicalBlogSlug(post.slug) || !isBlogDiscoverable(post)) return false;
+      if (seen.has(post.slug)) return false;
+      seen.add(post.slug);
+      return true;
+    })
+    .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+    .slice(0, Math.max(0, Math.min(12, Math.trunc(limit))));
+}
+
 export function countryBlogPosts(posts: readonly BlogPost[], locale: BlogLocale): BlogPost[] {
   return posts.flatMap(post => {
     const translated = getBlogCountryEdition(post, locale);
