@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as gscClient from './gsc-client';
+import * as ssrfDefense from '../security/ssrf-defense';
 import { SeoService } from './seo.service';
 
 describe('SeoService', () => {
@@ -197,11 +198,12 @@ import type { DiscordAlertService } from '../discord/discord-alert.service';
 
 describe('SeoCrawlerAuditService', () => {
   it('should run crawl audit and generate comprehensive health summary', async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn().mockResolvedValue({
+    // The crawler uses safeFetch, which performs DNS/pinned-IP checks before
+    // reaching global fetch. Stub the security boundary, not the network layer.
+    const safeFetchSpy = vi.spyOn(ssrfDefense, 'safeFetch').mockResolvedValue({
       ok: true,
       status: 200,
-    } as unknown as Response);
+    } as Response);
 
     try {
       const seoService = new SeoService();
@@ -210,12 +212,13 @@ describe('SeoCrawlerAuditService', () => {
       const result = await auditService.runCrawlAudit();
       expect(result).toBeDefined();
       expect(result.totalUrlsChecked).toBeGreaterThan(10);
+      expect(safeFetchSpy).toHaveBeenCalledTimes(result.totalUrlsChecked);
       expect(result.healthyUrls).toBe(result.totalUrlsChecked);
       expect(result.errorUrls).toBe(0);
       expect(result.timestamp).toBeDefined();
       expect(auditService.getLastAuditResult()).toEqual(result);
     } finally {
-      globalThis.fetch = originalFetch;
+      safeFetchSpy.mockRestore();
     }
   });
 });
