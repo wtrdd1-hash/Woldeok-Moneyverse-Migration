@@ -1,5 +1,8 @@
 # 📚 문서 카탈로그 (Document Catalog)
 
+**DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
+
+
 ## v2026.10.20.981 — 시스템 안전 캐시 정리 (실기기 검증)
 - [작업기록](worklog/2026-10-20-host-storage-cleanup-v981.ko.md) / [영문](worklog/2026-10-20-host-storage-cleanup-v981.md) · [변경기록](changelog/2026-10-20-host-storage-cleanup-v981.ko.md) · [GitHub](updates/v2026.10.20.981-github.ko.md) · [내부용](updates/v2026.10.20.981-internal.ko.md). 루트 64%→62%, 1.51GB 확보, 앱 배포 없음.
 

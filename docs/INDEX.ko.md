@@ -1,5 +1,8 @@
 # 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
+**DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
+
+
 Branch register v2026.10.27.3: [EN](audits/2026-10-27-current-branches-v2026.10.27.3.md) / [KO](audits/2026-10-27-current-branches-v2026.10.27.3.ko.md), documentation-only, no deployed changes.
 
 ## F675-06 GSC 실제 색인·검색 증거 기획 — v2026.10.15.688
