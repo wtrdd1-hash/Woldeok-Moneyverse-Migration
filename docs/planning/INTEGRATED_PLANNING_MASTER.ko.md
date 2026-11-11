@@ -2312,3 +2312,13 @@ v1440 모델을 발전시켜 저장 PK를 (user_id,term_id)로 바꾸고 (user_i
 - 신규 상세 권위: `AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md`; PROJECT_PLAN과 수익화/한국 준수 명세에 v487 상위 대체 게이트를 반영했다.
 - Google AdSense Page RPM/Auto Ads/Experiments/invalid traffic/publisher policy와 국세청 플랫폼 광고수익 세무 안내를 재확인했다. 국세청 1인 미디어 안내를 이 웹사이트의 자동 업종분류 근거로 사용하지 않는다.
 - 기획/문서 전용이며 런타임, 결제, AdSense 설정, Test, Production, 세무분류 확정, 실제 수익달성을 주장하지 않는다.
+
+
+### v2094 — B회차 조건부 상점 주문 증빙 타임라인 (2026-11-11 21:05 KST)
+- **교대:** 이전 A/v2092(초안 PR #3069, 미병합) → 현재 B/v2094 → 다음 A/v2096. 시작·중간 main `53fb23cd2cb86a2cc1029523f557ce312d1d5dba`. 승인·구현·배포·Test PASS 아님. 특별 국고·보험 기획은 06:00 KST 종료, TSI-001~011 원문과 기준선 유지.
+- **필요성/중복 게이트:** 회원이 구매·배송·취소·환급의 검증 가능한 증빙을 확인하도록 하는 읽기 전용 후보. 기존 주문/영수증 API·DB 이벤트·화면·열린 PR을 먼저 전수 대조한다. 동등 기능이 있으면 중복 ADD 대신 검증된 결함만 MODIFY한다. 현재 구현 여부 미확인. 역사 이벤트를 만들어내거나 개인정보를 노출하거나 원장을 대체하지 않는다.
+- **화면:** 마이페이지 > 상점 > 주문 상세 > 활동 기록. 실제 증빙이 있는 시각·이벤트·행위자 유형·안전한 사유코드·정수 WLD·영수증 참조만 노출. 320px·키보드·스크린리더·UTC 원본/KST 표시. 상태 loading|ready|empty_verified|unavailable|partial_provenance|error. 불일치 신고 CTA는 기존 분쟁 절차 검증 후에만 연결. 미확인 환급을 완료로 표시 금지. 비공개 noindex/no-store.
+- **API 후보:** `GET /api/v1/me/shop/orders/:orderId/events?cursor&limit` → `{events:[{id,type,occurredAt,recordedAt,amountWld,receiptRef,provenance}],nextCursor,completeness}`. 세션 인증·본인 소유 검증·불투명 커서·페이지 상한·타인 주문 404·속도 제한. 관리자 조회는 별도 제한 RBAC/감사 필요. 승인 전 쓰기 API 없음.
+- **DB/정합성:** 검증된 기존 주문·영수증·Outbox·원장 이벤트 우선 재사용. 누락 증명 시에만 append-only `shop_order_evidence_events(id UUID PK,order_id UUID FK,event_key TEXT,source_kind TEXT,source_id UUID,occurred_at TIMESTAMPTZ,recorded_at TIMESTAMPTZ,amount_wld BIGINT,UNIQUE(order_id,event_key))` 후보 및 `(order_id,occurred_at,id)`, `(source_kind,source_id)` 인덱스 검토. 원본 FK는 실제 스키마 확인 후 확정. SECURITY DEFINER 본인 범위 조회·고정 search_path·최소 EXECUTE, 포괄 GRANT 금지. 이중기장 원장 변경 없음. 원본 확인 후에만 transactional Outbox/멱등 재처리 설계; 불일치는 partial_provenance.
+- **위험/복구:** BOLA·가짜 영수증·중복 이벤트·개인정보·캐시·환불 경쟁조건·과거 데이터 누락. 기록 재작성 금지, 불확실한 이력은 명시. 투영 재구성 실패 시 조회 보류·운영자 감사. 기획 회차에서 운영 DB 변경/배포 없음.
+- **수용/우선순위:** P0 Test exact-SHA·금융 DB 복원·QA 배포 보류(#3025/#3069); P1 기존 기능 중복 조사·원장/영수증 근거·RBAC/개인정보; P2 기본 OFF 기능 구현 후보. 단위: 순서/커서/정수 WLD/중복/누락; 통합: 본인·타인 404·원본 일치·롤백·재실행; E2E: 주문→상세→증빙→신고, 모바일/a11y·접근 거부. KPI 미측정/UNKNOWN. 이번 회차 독립 외부 레퍼런스 검증 0건/10,000 gate BLOCKED. Test PASS 주장 없음.
