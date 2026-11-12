@@ -22,6 +22,22 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('owner inventory app API privacy', () => {
+  it.each([200, 503])('does not cache holdings responses even when upstream is public (%i)', async (status) => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ holdings: [] }), {
+      status, headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' },
+    })));
+    const response = await GET(request('/app-api/v1/shop/holdings', {
+      cookie: 'moneyverse_session=owner-session',
+    }), context('shop', 'holdings'));
+    expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex');
+    expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+  });
+});
+
 describe('app API route compatibility', () => {
   it('keeps owner support status responses private on Android even if upstream is cacheable', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
