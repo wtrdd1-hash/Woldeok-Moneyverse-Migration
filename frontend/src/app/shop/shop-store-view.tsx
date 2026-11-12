@@ -163,7 +163,7 @@ export function ShopStoreView({
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={cn(
-                'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border',
+                'flex items-center gap-1.5 min-h-[44px] sm:min-h-[38px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border shrink-0',
                 isSelected
                   ? 'bg-amber-500 border-amber-500 text-black shadow-md shadow-amber-500/20'
                   : 'bg-card border-border/40 text-muted-foreground hover:bg-surface hover:text-foreground',
@@ -298,7 +298,7 @@ export function ShopStoreView({
                     type="button"
                     aria-pressed={comparisonIds.includes(item.catalog_id)}
                     onClick={() => toggleComparison(item.catalog_id)}
-                    className="mb-2 w-full rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="mb-2 w-full min-h-[44px] sm:min-h-[36px] rounded-xl border border-border px-3 py-2 text-xs font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     {comparisonIds.includes(item.catalog_id) ? '비교 선택 해제' : '비교에 추가'}
                   </button>
@@ -306,7 +306,7 @@ export function ShopStoreView({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPreviewItem(item)}
-                    className="flex-1 py-2 rounded-xl text-xs font-bold bg-surface hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 flex items-center justify-center gap-1 transition-all"
+                    className="flex-1 min-h-[44px] sm:min-h-[38px] py-2 rounded-xl text-xs font-bold bg-surface hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 flex items-center justify-center gap-1 transition-all"
                   >
                     <Eye className="size-3.5" />
                     <span>미리보기</span>
@@ -315,7 +315,7 @@ export function ShopStoreView({
                   {isOwned && item.purchase_limit === 'account_one' ? (
                     <button
                       disabled
-                      className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                      className="flex flex-1 min-h-[44px] sm:min-h-[38px] items-center justify-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                     >
                       <Check className="size-3.5" />
                       <span>보유 중</span>
@@ -328,7 +328,7 @@ export function ShopStoreView({
                         setBuyStatus(null);
                       }}
                       className={cn(
-                        'flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm',
+                        'flex-1 min-h-[44px] sm:min-h-[38px] py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm',
                         canAfford
                           ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
                           : 'bg-muted text-muted-foreground border border-border/40 cursor-not-allowed',

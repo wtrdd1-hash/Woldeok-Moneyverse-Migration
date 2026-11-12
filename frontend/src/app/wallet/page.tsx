@@ -158,11 +158,11 @@ export default async function WalletPage() {
               <span className="text-xs text-muted-foreground block font-medium">가상 주식 평가액</span>
               {stockAnalysis && (
                 <span
-                  className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                  className={`text-[11px] font-mono tabular-nums font-bold px-1.5 py-0.5 rounded ${
                     isStockProfit
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-red-500/10 text-red-600 dark:text-red-400'
                       : isStockLoss
-                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
@@ -183,7 +183,7 @@ export default async function WalletPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           <Button
             asChild
-            className="h-12 rounded-2xl btn-toss font-black text-sm flex items-center justify-center gap-2 shadow-sm"
+            className="min-h-[48px] h-12 rounded-2xl btn-toss font-black text-sm flex items-center justify-center gap-2 shadow-sm"
           >
             <Link href="#wallet-transfer">
               <Send className="size-4" />
@@ -193,7 +193,7 @@ export default async function WalletPage() {
           <Button
             asChild
             variant="outline"
-            className="h-12 rounded-2xl font-black text-sm border-border/80 bg-card hover:bg-muted/40 text-foreground flex items-center justify-center gap-2"
+            className="min-h-[48px] h-12 rounded-2xl font-black text-sm border-border/80 bg-card hover:bg-muted/40 text-foreground flex items-center justify-center gap-2"
           >
             <Link href="/bank">
               <Landmark className="size-4" />
@@ -203,7 +203,7 @@ export default async function WalletPage() {
           <Button
             asChild
             variant="outline"
-            className="h-12 rounded-2xl font-black text-sm border-border/80 bg-card hover:bg-muted/40 text-foreground flex items-center justify-center gap-2"
+            className="min-h-[48px] h-12 rounded-2xl font-black text-sm border-border/80 bg-card hover:bg-muted/40 text-foreground flex items-center justify-center gap-2"
           >
             <Link href="/stocks">
               <TrendingUp className="size-4 text-emerald-500" />
@@ -239,7 +239,7 @@ export default async function WalletPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold gap-1">
+            <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold gap-1">
               <Link href="/stocks/portfolio">
                 <span>포트폴리오 정밀 분석</span>
                 <ChevronRight className="size-3" />
@@ -293,7 +293,7 @@ export default async function WalletPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground font-mono tabular-nums min-w-0">
                       <span>
                         보유: <strong className="text-foreground">{groupDigits(holding.quantity)}</strong>주
                       </span>
@@ -309,7 +309,7 @@ export default async function WalletPage() {
                   </div>
 
                   {/* 우측: 평가금액, 손익 및 원터치 매도/매수 버튼 */}
-                  <div className="flex items-center justify-between md:justify-end gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-border/30 shrink-0">
+                  <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 sm:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-border/30 shrink-0">
                     <div className="text-left md:text-right font-mono">
                       <div className="text-sm sm:text-base font-extrabold text-foreground tabular-nums">
                         {groupDigits(holding.market_value)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -317,9 +317,9 @@ export default async function WalletPage() {
                       <div
                         className={`text-xs font-bold tabular-nums ${
                           isProfit
-                            ? 'text-emerald-600 dark:text-emerald-400'
+                            ? 'text-red-600 dark:text-red-400'
                             : isLoss
-                            ? 'text-rose-600 dark:text-rose-400'
+                            ? 'text-blue-600 dark:text-blue-400'
                             : 'text-muted-foreground'
                         }`}
                       >
@@ -328,7 +328,7 @@ export default async function WalletPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
                       {/* 🔥 즉시 매도 다이얼로그 (판매) */}
                       <TradeDialog
                         stockId={holding.stock_id}
@@ -338,8 +338,8 @@ export default async function WalletPage() {
                         holdingQuantity={holding.quantity}
                         side="sell"
                         triggerLabel="매도"
-                        triggerVariant="outline"
-                        triggerClassName="h-9 px-3.5 text-xs font-bold font-mono text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10 active:scale-95"
+                        triggerVariant="trading-sell"
+                        triggerClassName="min-h-[44px] sm:min-h-[38px] px-3.5 text-xs font-bold font-mono tabular-nums"
                       />
 
                       {/* 추가 매수 다이얼로그 */}
@@ -351,8 +351,8 @@ export default async function WalletPage() {
                         available={balances.cash.availableAmount}
                         side="buy"
                         triggerLabel="추가 매수"
-                        triggerVariant="default"
-                        triggerClassName="h-9 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss"
+                        triggerVariant="trading-buy"
+                        triggerClassName="min-h-[44px] sm:min-h-[38px] px-3.5 text-xs font-bold font-mono tabular-nums"
                       />
 
                       {/* 종목 허브 딥링크 */}
@@ -360,7 +360,7 @@ export default async function WalletPage() {
                         asChild
                         variant="ghost"
                         size="sm"
-                        className="h-9 px-2 text-muted-foreground hover:text-foreground"
+                        className="min-h-[44px] min-w-[44px] sm:min-h-[38px] sm:min-w-[38px] px-2 text-muted-foreground hover:text-foreground"
                         title="종목 허브 상세로 이동"
                       >
                         <Link href={`/stocks/${encodeURIComponent(holding.symbol)}`}>
@@ -420,7 +420,7 @@ export default async function WalletPage() {
               </div>
               <div className="flex items-center gap-2">
                 <ExportLedgerCsvButton transactions={recentTransactions} />
-                <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+                <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold">
                   <Link href="/wallet/activity">최근 기록 더 보기 →</Link>
                 </Button>
               </div>
