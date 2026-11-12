@@ -145,6 +145,15 @@ export function TradeForm({
                 type="button"
                 variant="secondary"
                 size="sm"
+                className="min-h-10 px-3 text-xs font-mono tabular-nums font-semibold rounded-lg active:scale-95"
+                onClick={() => applyPercent(10)}
+              >
+                10%
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
                 className="min-h-10 px-3 text-xs font-mono font-semibold rounded-lg active:scale-95"
                 onClick={() => applyPercent(25)}
               >
@@ -174,7 +183,7 @@ export function TradeForm({
       </Field>
 
       {/* 실시간 예상 결제/정산 내역 카드 */}
-      <div className="rounded-xl border border-border/70 bg-muted/25 p-3.5 space-y-2 text-xs font-mono">
+      <div className="rounded-xl border border-border/70 bg-muted/25 p-3.5 space-y-2 text-xs font-mono tabular-nums">
         <div className="flex items-center justify-between text-muted-foreground">
           <span>{isEn ? 'Order Unit Price' : '주문 기준 단가'}</span>
           <span className="font-bold text-foreground">{groupDigits(quote.price)} WLD</span>
@@ -202,7 +211,7 @@ export function TradeForm({
 
       <ActionAlert state={state} />
       <SubmitButton
-        variant={side === 'buy' ? 'default' : 'destructive'}
+        variant={side === 'buy' ? 'trading-buy' : 'trading-sell'}
         className="min-h-11 font-bold text-sm shadow-sm"
       >
         {isEn ? `Confirm ${label}` : `${label} 주문 확정`}
