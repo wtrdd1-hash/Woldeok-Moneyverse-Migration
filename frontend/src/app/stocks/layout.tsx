@@ -13,7 +13,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
   const locale = await getServerLocale();
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-5 sm:space-y-6 px-3 sm:px-6 py-2 sm:py-4 pb-28 zero-overflow-shield">
+    <div className="mx-auto w-full max-w-[1440px] space-y-5 sm:space-y-6 px-3 sm:px-6 py-2 sm:py-4 pb-28 zero-overflow-shield">
       {/* 1. 주식 거래소 통합 헤더 (5개 언어 완벽 지원) */}
       <div className="space-y-1.5 pt-2">
         <div className="flex items-center gap-2.5">

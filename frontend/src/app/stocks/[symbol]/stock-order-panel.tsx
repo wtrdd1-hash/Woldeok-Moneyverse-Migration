@@ -174,7 +174,7 @@ export function StockOrderPanel({
               onClick={() => handleSideChange('buy')}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 ${
                 side === 'buy'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-red-500 text-white shadow-sm shadow-red-500/25'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -188,7 +188,7 @@ export function StockOrderPanel({
               onClick={() => handleSideChange('sell')}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all min-h-[36px] flex items-center gap-1.5 ${
                 side === 'sell'
-                  ? 'bg-destructive text-destructive-foreground shadow-sm'
+                  ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/25'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -470,7 +470,7 @@ export function StockOrderPanel({
           type="button"
           onClick={() => setIsConfirmOpen(true)}
           disabled={isHalted || (side === 'sell' && maxSellShares <= 0) || qtyNum <= 0 || pending}
-          variant={side === 'buy' ? 'default' : 'destructive'}
+          variant={side === 'buy' ? 'trading-buy' : 'trading-sell'}
           className="w-full h-12 rounded-xl text-sm font-bold shadow-md transition-transform active:scale-[0.99] flex items-center justify-center gap-2"
         >
           <span>
@@ -548,7 +548,7 @@ export function StockOrderPanel({
                   취소
                 </Button>
                 <SubmitButton
-                  variant={side === 'buy' ? 'default' : 'destructive'}
+                  variant={side === 'buy' ? 'trading-buy' : 'trading-sell'}
                   size="sm"
                 >
                   {side === 'buy'

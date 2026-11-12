@@ -107,6 +107,9 @@ export default async function StocksPage({
   const sort = normalizeStockSort(sortParam);
   const stocks = sortMarketStocks(rawStocks, sort);
 
+  const advancingCount = stocks.filter((s) => Number(s.current_price) >= Number(s.day_open_price || s.current_price)).length;
+  const decliningCount = stocks.length - advancingCount;
+
   const filterOptions = [
     { value: 'default', label: localeLabel(locale, '전체 10종목', 'All 10 Stocks', '全10銘柄', '全部10只股票') },
     { value: 'change', label: localeLabel(locale, '급등·급락순', 'Top Movers', '変動率順', '涨跌幅榜') },
@@ -123,6 +126,54 @@ export default async function StocksPage({
           <StockDisclosureTicker />
         </div>
 
+        {/* 1.5 Neo Navy Market Status Strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
+            <p className="text-[11px] font-semibold text-slate-400">
+              {localeLabel(locale, '상장 종목', 'Listed Equities', '上場銘柄', '上市标的')}
+            </p>
+            <p className="text-lg sm:text-xl font-black font-mono tabular-nums text-slate-100 mt-1">
+              {stocks.length}
+              <span className="text-xs font-normal text-slate-400 ml-1">
+                {localeLabel(locale, '종목', 'stocks', '銘柄', '只')}
+              </span>
+            </p>
+          </div>
+          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
+            <p className="text-[11px] font-semibold text-slate-400">
+              {localeLabel(locale, '상승 / 하락 흐름', 'Advancing / Declining', '騰落比率', '涨跌分布')}
+            </p>
+            <p className="text-lg sm:text-xl font-black font-mono tabular-nums mt-1 flex items-center gap-1.5">
+              <span className="text-red-400">{advancingCount}</span>
+              <span className="text-slate-600 text-sm">/</span>
+              <span className="text-blue-400">{decliningCount}</span>
+            </p>
+          </div>
+          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
+            <p className="text-[11px] font-semibold text-slate-400">
+              {localeLabel(locale, '주문 표준 (KRX)', 'Order Semantics', '売買カラー標準', '交易配色规范')}
+            </p>
+            <p className="text-xs sm:text-sm font-bold text-slate-200 mt-1.5 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1 text-red-400">
+                <span className="size-2 rounded-full bg-red-500" />
+                {localeLabel(locale, '매수·상승', 'Buy/Up', '買い・上昇', '买入/上涨')}
+              </span>
+              <span className="inline-flex items-center gap-1 text-blue-400">
+                <span className="size-2 rounded-full bg-blue-500" />
+                {localeLabel(locale, '매도·하락', 'Sell/Down', '売り・下落', '卖出/下跌')}
+              </span>
+            </p>
+          </div>
+          <div className="rounded-2xl bg-[#0f1422] border border-slate-800/80 p-3.5 sm:p-4 min-w-0">
+            <p className="text-[11px] font-semibold text-slate-400">
+              {localeLabel(locale, '트레이딩 워크스페이스', 'Trading Desk', 'デスク構成', '交易界面')}
+            </p>
+            <p className="text-xs sm:text-sm font-bold text-emerald-400 mt-1.5 truncate">
+              {localeLabel(locale, '3단 매트릭스 · 실시간 틱', '3-Col Matrix · Live Tick', '3カラム・リアルタイム', '三栏矩阵 · 实时行情')}
+            </p>
+          </div>
+        </div>
+
         {/* 2. Toss Style Filter Tabs */}
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
@@ -132,7 +183,7 @@ export default async function StocksPage({
                 <Link
                   key={value}
                   href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`}
-                  className={`btn-toss min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all shrink-0 ${
+                  className={`btn-toss inline-flex items-center justify-center min-h-[44px] sm:min-h-[36px] px-3.5 text-xs font-bold rounded-xl transition-all shrink-0 ${
                     isActive
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
                       : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800 hover:bg-slate-800/60'
@@ -155,9 +206,9 @@ export default async function StocksPage({
         </div>
 
         {/* 3. 10 Listed Companies: Toss Clean Card List */}
-        <div className="space-y-2.5">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
           {stocks.length === 0 ? (
-            <div className="toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
+            <div className="xl:col-span-2 toss-card p-10 text-center text-slate-400 text-xs bg-[#0f1422] rounded-2xl">
               {localeLabel(
                 locale,
                 '거래 가능한 종목이 없습니다.',
@@ -208,7 +259,7 @@ export default async function StocksPage({
                       {cur.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">WLD</span>
                     </div>
                     <div className={`text-xs font-extrabold font-fintech tabular-nums mt-0.5 flex items-center justify-end gap-0.5 ${
-                      isPositive ? 'text-emerald-400' : 'text-rose-400'
+                      isPositive ? 'text-red-400' : 'text-blue-400'
                     }`}>
                       {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
                       <span>{isPositive ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`}</span>
@@ -224,8 +275,8 @@ export default async function StocksPage({
                       currentPrice={stock.current_price}
                       side="buy"
                       triggerLabel={localeLabel(locale, '매수', 'Buy', '買い', '买入')}
-                      triggerVariant="default"
-                      triggerClassName="h-9 px-3.5 text-xs font-bold font-mono active:scale-95 btn-toss rounded-xl"
+                      triggerVariant="trading-buy"
+                      triggerClassName="min-h-[44px] sm:min-h-[38px] px-4 text-xs font-bold font-mono tabular-nums active:scale-95 btn-toss rounded-xl shrink-0"
                     />
                   </div>
                 </div>
