@@ -1,9 +1,12 @@
 import React from 'react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { StockTradingConsole } from './stocks/[symbol]/stock-trading-console';
 import { SavingPocketsCard } from './bank/saving-pockets-card';
 import { SiteHeader } from '@/components/site-header';
+import { P2PTransferModal } from '@/components/p2p-transfer-modal';
 
 // next/navigation 및 use-viewer 모킹
 vi.mock('next/navigation', () => ({
@@ -113,5 +116,33 @@ describe('UI Multi-Viewport Resilience & Zero-Clipping Invariants', () => {
     // 버튼 컨테이너에 hidden min-[480px]:inline-flex 가 적용되어 있는지 검증
     const walletButton = sessionWalletLink?.closest('button') || sessionWalletLink;
     expect(walletButton?.className).toContain('hidden min-[480px]:inline-flex');
+  });
+
+  it('P2PTransferModal trigger fills hero row and meets 44px+ touch target', () => {
+    render(<P2PTransferModal triggerText="1:1 간편 송금" />);
+    const trigger = screen.getByRole('button', { name: /1:1 간편 송금/ });
+    expect(trigger.className).toContain('w-full');
+    expect(trigger.className).toContain('min-h-[48px]');
+  });
+
+  it('Phase 3 customer portal hubs preserve semantic colors, tabular-nums, and 44px mobile touch targets', () => {
+    const home = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
+    const wallet = readFileSync(join(__dirname, 'wallet/page.tsx'), 'utf8');
+    const bank = readFileSync(join(__dirname, 'bank/page.tsx'), 'utf8');
+    const shop = readFileSync(join(__dirname, 'shop/page.tsx'), 'utf8');
+    const shopStore = readFileSync(join(__dirname, 'shop/shop-store-view.tsx'), 'utf8');
+
+    expect(home).toContain("isUp ? 'text-red-400' : 'text-blue-400'");
+    expect(home).toContain('min-h-[44px]');
+
+    expect(wallet).toContain('triggerVariant="trading-sell"');
+    expect(wallet).toContain('triggerVariant="trading-buy"');
+    expect(wallet).toContain('min-h-[44px] sm:min-h-[38px]');
+
+    expect(bank).toContain('min-h-[44px] sm:min-h-[36px]');
+    expect(bank).toContain('tabular-nums');
+
+    expect(shop).toContain('min-h-[44px]');
+    expect(shopStore).toContain('min-h-[44px] sm:min-h-[38px]');
   });
 });

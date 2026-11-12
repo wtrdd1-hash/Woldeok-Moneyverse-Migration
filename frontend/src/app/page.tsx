@@ -210,7 +210,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="pt-4 border-t border-slate-800/80 flex items-center gap-3 relative z-10">
+            <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-3 relative z-10">
               <div className="flex-1 min-w-0">
                 <P2PTransferModal triggerText={localeLabel(
                   locale,
@@ -222,7 +222,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/wallet"
-                className="btn-toss flex-1 min-h-[48px] bg-slate-800/90 hover:bg-slate-700 text-slate-100 text-xs sm:text-sm font-extrabold border border-slate-700 rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                className="btn-toss flex-1 min-h-[48px] min-w-[110px] whitespace-nowrap bg-slate-800/90 hover:bg-slate-700 text-slate-100 text-xs sm:text-sm font-extrabold border border-slate-700 rounded-2xl shadow-md transition-all flex items-center justify-center gap-1.5"
               >
                 <span>{localeLabel(locale, '내역 조회', 'History', '履歴照会', '明细查询')}</span>
                 <ArrowRight className="size-4 opacity-70" />
@@ -298,7 +298,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/stocks"
-                className="text-xs font-bold text-slate-400 hover:text-emerald-400 flex items-center gap-0.5 transition-colors"
+                className="text-xs font-bold text-slate-400 hover:text-emerald-400 flex items-center gap-0.5 transition-colors min-h-[44px] px-2 -mr-2 rounded-lg shrink-0"
               >
                 <span>{localeLabel(locale, '전체 보기', 'View All', 'すべて見る', '查看全部')}</span>
                 <ChevronRight className="size-3.5" />
@@ -324,7 +324,7 @@ export default async function HomePage() {
                     <Link
                       key={stock.symbol}
                       href={`/stocks/${encodeURIComponent(stock.symbol)}`}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/60 transition-all group"
+                      className="flex items-center justify-between gap-3 min-w-0 min-h-[56px] p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/60 transition-all group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800 text-slate-200">
@@ -340,7 +340,7 @@ export default async function HomePage() {
                         </div>
                         <div
                           className={`text-xs font-bold tabular-nums flex items-center justify-end gap-0.5 ${
-                            isUp ? 'text-emerald-400' : 'text-rose-400'
+                            isUp ? 'text-red-400' : 'text-blue-400'
                           }`}
                         >
                           {isUp ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}

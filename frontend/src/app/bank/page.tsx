@@ -110,7 +110,7 @@ export default async function BankPage() {
       />
 
       {/* 2. 안전 고지 가이드 (군더더기 없는 슬림 칩 형태) */}
-      <div className="flex items-center justify-between gap-3 p-3.5 px-4 rounded-2xl bg-muted/30 border border-border/40 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between gap-3 p-3.5 px-4 rounded-2xl bg-muted/30 border border-border/40 text-xs text-muted-foreground min-w-0">
         <div className="flex items-center gap-2">
           <ShieldCheck className="size-4 text-sky-500 shrink-0" />
           <span>
@@ -135,14 +135,14 @@ export default async function BankPage() {
 
       {/* 3. 3대 핵심 서브 탭 UI (저축/모으기, 대출/신용, 통계/자산분석) */}
       <Tabs defaultValue="savings" className="space-y-6">
-        <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">
-          <TabsTrigger value="savings" className="rounded-lg text-xs sm:text-sm font-semibold">
+        <TabsList className="grid grid-cols-3 max-w-md w-full min-h-[44px] h-auto p-1 bg-muted/60 rounded-xl">
+          <TabsTrigger value="savings" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
             {localeLabel(locale, '저축 & 모으기', 'Savings & Pockets', '貯蓄＆ポケット', '储蓄与口袋')}
           </TabsTrigger>
-          <TabsTrigger value="loan" className="rounded-lg text-xs sm:text-sm font-semibold">
+          <TabsTrigger value="loan" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
             {localeLabel(locale, '대출 & 신용', 'Loans & Credit', 'ローン＆信用', '贷款与信用')}
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-lg text-xs sm:text-sm font-semibold">
+          <TabsTrigger value="analytics" className="min-h-[38px] min-w-0 px-2 truncate rounded-lg text-xs sm:text-sm font-semibold">
             {localeLabel(locale, '순자산 분석', 'Net Worth', '純資産分析', '净资产分析')}
           </TabsTrigger>
         </TabsList>
@@ -236,11 +236,11 @@ export default async function BankPage() {
         {/* 탭 3: 순자산 분석 & 건전성 (4대 지표 카드 + Kinked 점프 이자율 곡선) */}
         <TabsContent value="analytics" className="space-y-6 focus-visible:outline-none">
           <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
-            <div className="toss-card p-4 space-y-1">
+            <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
                 {localeLabel(locale, '순 금융 자산', 'Net Worth', '純資産分析', '净资产总计')}
               </span>
-              <div className="font-fintech text-lg sm:text-2xl font-black text-foreground">
+              <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-foreground">
                 <Amount value={netFinancialWorth} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
@@ -248,11 +248,11 @@ export default async function BankPage() {
               </span>
             </div>
 
-            <div className="toss-card p-4 space-y-1">
+            <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
                 {localeLabel(locale, '사용 가능 현금', 'Available Cash', '利用可能現金', '可用现金')}
               </span>
-              <div className="font-fintech text-lg sm:text-2xl font-black text-sky-400">
+              <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-sky-400">
                 <Amount value={cash} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
@@ -260,11 +260,11 @@ export default async function BankPage() {
               </span>
             </div>
 
-            <div className="toss-card p-4 space-y-1">
+            <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
                 {localeLabel(locale, '예금 잔액', 'Bank Deposits', '預金残高', '存款余额')}
               </span>
-              <div className="font-fintech text-lg sm:text-2xl font-black text-emerald-400">
+              <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-emerald-400">
                 <Amount value={bank} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
@@ -278,11 +278,11 @@ export default async function BankPage() {
               </span>
             </div>
 
-            <div className="toss-card p-4 space-y-1">
+            <div className="toss-card p-4 space-y-1 min-w-0">
               <span className="text-xs text-muted-foreground">
                 {localeLabel(locale, '신용 대출 한도', 'Credit Limit', '信用融資枠', '信用贷款额度')}
               </span>
-              <div className="font-fintech text-lg sm:text-2xl font-black text-purple-400">
+              <div className="font-fintech text-lg sm:text-2xl font-black tabular-nums text-purple-400">
                 <Amount value={creditLimit} currency />
               </div>
               <span className="text-[10px] text-muted-foreground/80 block">
@@ -318,12 +318,12 @@ export default async function BankPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+          <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold">
             <Link href="/wallet">
               {localeLabel(locale, '내 지갑', 'Wallet', 'ウォレット', '我的钱包')}
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+          <Button asChild variant="outline" size="sm" className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold">
             <Link href="/stocks">
               {localeLabel(locale, '주식 거래소', 'Stocks', '株式取引所', '股票交易所')}
             </Link>

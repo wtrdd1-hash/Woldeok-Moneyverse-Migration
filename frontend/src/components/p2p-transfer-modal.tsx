@@ -172,7 +172,7 @@ export function P2PTransferModal({ triggerText }: { triggerText?: string }) {
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) handleReset(); }}>
       <DialogTrigger asChild>
-        <Button className="h-10 px-4 font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
+        <Button className="w-full min-h-[48px] sm:min-h-[44px] px-4 font-bold rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/10">
           <Send className="h-4 w-4 mr-2" />
           {triggerText || defaultTrigger}
         </Button>

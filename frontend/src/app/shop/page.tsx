@@ -121,14 +121,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               placeholder="제한 없음"
               aria-invalid={cap.invalid}
               aria-describedby={cap.invalid ? 'shop-upkeep-error' : undefined}
-              className="w-32 min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base md:text-sm"
+              className="w-32 min-h-[44px] min-w-0 rounded-xl border border-border bg-card px-3 py-2 text-base tabular-nums md:text-sm"
             />
           </label>
-          <Button type="submit">
+          <Button type="submit" className="min-h-[44px] px-5">
             <T korean="검색" english="Search" />
           </Button>
           {query || cap.value || cap.invalid ? (
-            <Button asChild type="button" variant="outline">
+            <Button asChild type="button" variant="outline" className="min-h-[44px]">
               <Link href="/shop">
                 <T korean="초기화" english="Reset" />
               </Link>
@@ -163,7 +163,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             ))}
           </ul>
           {loggedIn ? (
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="sm" variant="outline" className="min-h-[44px] sm:min-h-[36px]">
               <Link href="/marketplace">
                 <T korean="플레이어 마켓 작업대" english="Marketplace workbench" />
               </Link>
