@@ -445,20 +445,20 @@ export function StockOrderbook({
         {/* 호가 잔량 매수/매도 압력 비율 바 (Order Pressure Ratio) */}
         <div className="pt-2 px-1 space-y-1">
           <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-            <span className="text-rose-600 dark:text-rose-400 font-semibold">
+            <span className="text-[var(--fall)] font-semibold">
               {isEn ? 'Ask' : '매도'} {askRatio}% ({groupDigits(totalAskVolume.toString())})
             </span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span className="text-[var(--rise)] font-semibold">
               {isEn ? 'Bid' : '매수'} {bidRatio}% ({groupDigits(totalBidVolume.toString())})
             </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden flex">
             <div
-              className="h-full bg-rose-500 transition-all duration-500"
+              className="h-full bg-[var(--fall)] transition-all duration-500"
               style={{ width: `${askRatio}%` }}
             />
             <div
-              className="h-full bg-emerald-500 transition-all duration-500"
+              className="h-full bg-[var(--rise)] transition-all duration-500"
               style={{ width: `${bidRatio}%` }}
             />
           </div>
@@ -480,7 +480,7 @@ export function StockOrderbook({
                     className="flex items-center justify-between text-[11px] px-2 py-1 rounded bg-muted/20 border border-border/40 animate-in fade-in"
                   >
                     <span className="text-muted-foreground/80 text-[10px]">{t.time}</span>
-                    <span className={`font-bold ${isTradeBuy ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <span className={`font-bold ${isTradeBuy ? 'text-[var(--rise)]' : 'text-[var(--fall)]'}`}>
                       {groupDigits(t.price)}
                     </span>
                     <span className="text-muted-foreground font-medium text-[10px]">

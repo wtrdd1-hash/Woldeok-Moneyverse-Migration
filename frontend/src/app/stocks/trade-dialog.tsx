@@ -35,7 +35,13 @@ export function TradeDialog({
   readonly holdingQuantity?: string;
   readonly side: 'buy' | 'sell';
   readonly triggerLabel?: React.ReactNode;
-  readonly triggerVariant?: 'default' | 'outline' | 'secondary' | 'destructive';
+  readonly triggerVariant?:
+    | 'default'
+    | 'outline'
+    | 'secondary'
+    | 'destructive'
+    | 'trading-buy'
+    | 'trading-sell';
   readonly triggerClassName?: string;
 }) {
   const { locale } = useLocale();

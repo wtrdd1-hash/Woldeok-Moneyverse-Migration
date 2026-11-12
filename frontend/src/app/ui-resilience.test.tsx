@@ -45,6 +45,32 @@ describe('UI Multi-Viewport Resilience & Zero-Clipping Invariants', () => {
     expect(floatingBar).not.toBeNull();
     expect(floatingBar?.className).toContain('pb-[max(0.75rem,env(safe-area-inset-bottom))]');
     expect(floatingBar?.className).toContain('p-2.5');
+    // 한국형 적색 매수(bg-red-500) · 청색 매도(bg-blue-500) 시맨틱 및 44px 터치 타깃 검증
+    const mobileBuyBtn = floatingBar?.querySelector('button.bg-red-500');
+    const mobileSellBtn = floatingBar?.querySelector('button.bg-blue-500');
+    expect(mobileBuyBtn).not.toBeNull();
+    expect(mobileSellBtn).not.toBeNull();
+    expect(mobileBuyBtn?.className).toContain('min-h-[44px]');
+    expect(mobileSellBtn?.className).toContain('min-h-[44px]');
+  });
+
+  it('StockTradingConsole renders 3-column trading matrix when chartSlot is provided without duplicating order panel', () => {
+    const { container } = render(
+      <StockTradingConsole
+        stockId="stock-1"
+        symbol="CHIPS"
+        name="월덕 반도체"
+        currentPrice="52000"
+        chartSlot={<div data-testid="embedded-chart-slot">차트 슬롯</div>}
+      />
+    );
+
+    const grid = container.querySelector('[data-testid="trading-matrix-grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid?.className).toContain('xl:grid-cols-[minmax(285px,330px)_minmax(0,1fr)_minmax(310px,360px)]');
+    expect(screen.getByTestId('embedded-chart-slot')).toBeTruthy();
+    // 중복 주문 패널 DOM이 제거되어 단일 주문 패널 헤더만 렌더링되어야 함
+    expect(screen.getAllByText('CHIPS 주문')).toHaveLength(1);
   });
 
   it('SavingPocketsCard prevents pocket title and balance clipping with min-w-0 and flex-wrap', () => {

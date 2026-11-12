@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, X } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,6 +27,7 @@ interface StockTradingConsoleProps {
   readonly isHalted?: boolean | undefined;
   readonly isEn?: boolean | undefined;
   readonly receipt?: StockHaltReceiptData | null | undefined;
+  readonly chartSlot?: React.ReactNode | undefined;
 }
 
 export function StockTradingConsole({
@@ -40,6 +41,7 @@ export function StockTradingConsole({
   isHalted = false,
   isEn = false,
   receipt,
+  chartSlot,
 }: StockTradingConsoleProps) {
   const [selectedPrice, setSelectedPrice] = useState<string>(currentPrice);
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
@@ -62,7 +64,7 @@ export function StockTradingConsole({
       <button
         type="button"
         onClick={() => setTradingTab('order')}
-        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+        className={`flex-1 min-h-[40px] sm:min-h-[34px] py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
           tradingTab === 'order'
             ? 'bg-card text-foreground shadow-xs border border-border/80'
             : 'text-muted-foreground hover:text-foreground'
@@ -73,7 +75,7 @@ export function StockTradingConsole({
       <button
         type="button"
         onClick={() => setTradingTab('conditional')}
-        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
+        className={`flex-1 min-h-[40px] sm:min-h-[34px] py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
           tradingTab === 'conditional'
             ? 'bg-card text-foreground shadow-xs border border-border/80'
             : 'text-muted-foreground hover:text-foreground'
@@ -84,12 +86,61 @@ export function StockTradingConsole({
     </div>
   );
 
+  const renderOrderDeck = () => (
+    <>
+      {renderTradingSwitcher()}
+
+      {tradingTab === 'order' ? (
+        <StockOrderPanel
+          stockId={stockId}
+          symbol={symbol}
+          name={name}
+          currentPrice={currentPrice}
+          availableShares={availableShares}
+          holdingQuantity={holdingQuantity}
+          isHalted={isHalted}
+          isEn={isEn}
+          selectedPrice={selectedPrice}
+          activeSide={side}
+          onSideChange={setSide}
+          receipt={receipt}
+        />
+      ) : (
+        <StockConditionalOrders
+          stockId={stockId}
+          symbol={symbol}
+          name={name}
+          currentPrice={currentPrice}
+          holdingQuantity={holdingQuantity}
+          isHalted={isHalted}
+          isEn={isEn}
+        />
+      )}
+    </>
+  );
+
+  const gridClass = chartSlot
+    ? 'grid gap-4 xl:gap-5 lg:grid-cols-[minmax(300px,1.02fr)_minmax(0,0.98fr)] xl:grid-cols-[minmax(285px,330px)_minmax(0,1fr)_minmax(310px,360px)] items-start'
+    : 'grid gap-6 lg:grid-cols-[1.05fr_.95fr] items-start';
+
   return (
     <div className="space-y-6">
-      {/* 본문 2열 트레이딩 그리드 (좌측: 호가창, 우측: 주문패널) */}
-      <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+      {/* 데스크톱 3단 트레이딩 매트릭스 (좌: 호가 / 중: 차트 / 우: 주문덱) 및 반응형 1~2단 폴백 */}
+      <div className={gridClass} data-testid="trading-matrix-grid">
+        {chartSlot && (
+          <div className="order-1 min-w-0 lg:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-start-1">
+            {chartSlot}
+          </div>
+        )}
+
         {/* 좌측 호가창 (웹소켓 실시간 틱 & 플래시 펄스 애니메이션 연동) */}
-        <div>
+        <div
+          className={
+            chartSlot
+              ? 'order-2 min-w-0 xl:order-none xl:col-start-1 xl:row-start-1'
+              : 'min-w-0'
+          }
+        >
           <StockOrderbook
             stockId={stockId}
             currentPrice={currentPrice}
@@ -99,75 +150,15 @@ export function StockTradingConsole({
           />
         </div>
 
-        {/* 우측 주문 패널 (데스크톱에서는 상시 표시) */}
-        <div className="hidden lg:flex flex-col gap-4">
-          {renderTradingSwitcher()}
-
-          {tradingTab === 'order' ? (
-            <StockOrderPanel
-              stockId={stockId}
-              symbol={symbol}
-              name={name}
-              currentPrice={currentPrice}
-              availableShares={availableShares}
-              holdingQuantity={holdingQuantity}
-              isHalted={isHalted}
-              isEn={isEn}
-              selectedPrice={selectedPrice}
-              activeSide={side}
-              onSideChange={setSide}
-              receipt={receipt}
-            />
-          ) : (
-            <StockConditionalOrders
-              stockId={stockId}
-              symbol={symbol}
-              name={name}
-              currentPrice={currentPrice}
-              holdingQuantity={holdingQuantity}
-              isHalted={isHalted}
-              isEn={isEn}
-            />
-          )}
-
-          <StockMicroPortfolio
-            currentSymbol={symbol}
-            currentPrice={currentPrice}
-            holdingQuantity={holdingQuantity}
-            isEn={isEn}
-          />
-        </div>
-
-        {/* 모바일 화면에서는 일반 스크롤 영역에도 주문 패널을 노출 (하단 바와 함께) */}
-        <div className="flex flex-col gap-4 lg:hidden">
-          {renderTradingSwitcher()}
-
-          {tradingTab === 'order' ? (
-            <StockOrderPanel
-              stockId={stockId}
-              symbol={symbol}
-              name={name}
-              currentPrice={currentPrice}
-              availableShares={availableShares}
-              holdingQuantity={holdingQuantity}
-              isHalted={isHalted}
-              isEn={isEn}
-              selectedPrice={selectedPrice}
-              activeSide={side}
-              onSideChange={setSide}
-              receipt={receipt}
-            />
-          ) : (
-            <StockConditionalOrders
-              stockId={stockId}
-              symbol={symbol}
-              name={name}
-              currentPrice={currentPrice}
-              holdingQuantity={holdingQuantity}
-              isHalted={isHalted}
-              isEn={isEn}
-            />
-          )}
+        {/* 우측 주문 덱 & 마이크로 포트폴리오 (단일 인스턴스 유지, xl 이상 sticky 고정) */}
+        <div
+          className={
+            chartSlot
+              ? 'order-3 min-w-0 xl:order-none xl:col-start-3 xl:row-start-1 flex flex-col gap-4 xl:sticky xl:top-20'
+              : 'min-w-0 flex flex-col gap-4'
+          }
+        >
+          {renderOrderDeck()}
 
           <StockMicroPortfolio
             currentSymbol={symbol}
@@ -178,33 +169,34 @@ export function StockTradingConsole({
         </div>
       </div>
 
-      {/* 모바일 320px~768px 하단 고정 원터치 액션 바 (Floating Bottom Action Bar) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border/80 p-2.5 px-3 min-[400px]:p-3 min-[400px]:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-between gap-2 min-[400px]:gap-3">
+      {/* 모바일 320px~768px 하단 고정 원터치 매수/매도 스티키 바 (Floating Bottom Action Bar) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0e17]/95 text-slate-100 backdrop-blur-md border-t border-slate-800/90 p-2.5 px-3 min-[400px]:p-3 min-[400px]:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-between gap-2 min-[400px]:gap-3">
         <div className="flex flex-col min-w-0 shrink-0">
-          <span className="text-[10px] text-muted-foreground font-semibold">{symbol} 현재가</span>
-          <span className="font-mono text-sm font-extrabold text-foreground truncate">
-            {groupDigits(currentPrice)} <span className="text-[10px] font-normal text-muted-foreground">WLD</span>
+          <span className="text-[10px] text-slate-400 font-semibold">{symbol} 현재가</span>
+          <span className="font-mono tabular-nums text-sm font-extrabold text-slate-100 truncate">
+            {groupDigits(currentPrice)} <span className="text-[10px] font-normal text-slate-400">WLD</span>
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 min-[400px]:gap-2 flex-1 min-w-0 max-w-[260px]">
           <Button
             type="button"
+            variant="trading-buy"
             onClick={() => handleOpenMobileOrder('buy')}
             disabled={isHalted}
-            className="flex-1 h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm active:scale-95 transition-all"
+            className="flex-1 min-h-[44px] h-11 rounded-xl font-bold text-xs tabular-nums shadow-sm active:scale-95 transition-all"
           >
-            <ArrowUpRight className="size-3.5 mr-1" />
+            <ArrowUpRight className="size-3.5 mr-1 shrink-0" />
             {isEn ? 'Buy' : '매수'}
           </Button>
           <Button
             type="button"
+            variant="trading-sell"
             onClick={() => handleOpenMobileOrder('sell')}
             disabled={isHalted}
-            variant="destructive"
-            className="flex-1 h-11 rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all"
+            className="flex-1 min-h-[44px] h-11 rounded-xl font-bold text-xs tabular-nums shadow-sm active:scale-95 transition-all"
           >
-            <ArrowDownRight className="size-3.5 mr-1" />
+            <ArrowDownRight className="size-3.5 mr-1 shrink-0" />
             {isEn ? 'Sell' : '매도'}
           </Button>
         </div>
@@ -220,34 +212,7 @@ export function StockTradingConsole({
           </DialogHeader>
 
           <div className="space-y-4">
-            {renderTradingSwitcher()}
-
-            {tradingTab === 'order' ? (
-              <StockOrderPanel
-                stockId={stockId}
-                symbol={symbol}
-                name={name}
-                currentPrice={currentPrice}
-                availableShares={availableShares}
-                holdingQuantity={holdingQuantity}
-                isHalted={isHalted}
-                isEn={isEn}
-                selectedPrice={selectedPrice}
-                activeSide={side}
-                onSideChange={setSide}
-                receipt={receipt}
-              />
-            ) : (
-              <StockConditionalOrders
-                stockId={stockId}
-                symbol={symbol}
-                name={name}
-                currentPrice={currentPrice}
-                holdingQuantity={holdingQuantity}
-                isHalted={isHalted}
-                isEn={isEn}
-              />
-            )}
+            {renderOrderDeck()}
           </div>
         </DialogContent>
       </Dialog>

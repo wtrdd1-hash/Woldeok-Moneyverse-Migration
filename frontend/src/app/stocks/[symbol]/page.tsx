@@ -243,20 +243,22 @@ export default async function StockHubPage({
       />
 
       {/* 1. 상단 네비게이션 & 빠른 티커 스위처 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="h-9 px-2 text-muted-foreground hover:text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Button asChild variant="ghost" size="sm" className="min-h-[44px] sm:min-h-[36px] px-2 text-muted-foreground hover:text-foreground shrink-0">
             <Link href="/stocks" className="flex items-center gap-1.5 text-sm font-medium">
-              <ArrowLeft className="w-4 h-4" />
-              <span>{isEn ? 'Market' : '거래소 목록'}</span>
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span className="hidden xs:inline">{isEn ? 'Market' : '거래소 목록'}</span>
             </Link>
           </Button>
-          <span className="text-muted-foreground/40">|</span>
-          <StockTickerSwitcher
-            stocks={market?.stocks ?? []}
-            currentSymbol={stock.symbol}
-            isEn={isEn}
-          />
+          <span className="text-muted-foreground/40 shrink-0">|</span>
+          <div className="min-w-0 flex-1">
+            <StockTickerSwitcher
+              stocks={market?.stocks ?? []}
+              currentSymbol={stock.symbol}
+              isEn={isEn}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -347,23 +349,8 @@ export default async function StockHubPage({
           </TabsTrigger>
         </TabsList>
 
-        {/* 탭 1: 차트 및 실시간 호가/주문 */}
+        {/* 탭 1: 차트 및 실시간 호가/주문 (데스크톱 3단 트레이딩 매트릭스) */}
         <TabsContent value="trading" className="space-y-6 focus-visible:outline-none">
-          {/* 인터랙티브 차트 (1D/1W/1M/1Y/캔들/라인) */}
-          <div className="toss-card p-4 sm:p-6 overflow-hidden">
-            <StockInteractiveChart
-              currentPrice={stock.current_price}
-              dayOpenPrice={stock.day_open_price}
-              dayHighPrice={stock.day_high_price}
-              dayLowPrice={stock.day_low_price}
-              symbol={stock.symbol}
-              stockId={stock.id}
-              isEn={isEn}
-              newsItems={newsList}
-            />
-          </div>
-
-          {/* 10-Depth 호가창 및 트레이딩 패널 */}
           <StockTradingConsole
             stockId={stock.id}
             symbol={stock.symbol}
@@ -375,6 +362,20 @@ export default async function StockHubPage({
             isHalted={isHalted}
             isEn={isEn}
             receipt={stockReceipt}
+            chartSlot={
+              <div className="toss-card p-3 sm:p-5 bg-[#0f1422]/95 border border-slate-800/80 rounded-2xl overflow-hidden min-w-0">
+                <StockInteractiveChart
+                  currentPrice={stock.current_price}
+                  dayOpenPrice={stock.day_open_price}
+                  dayHighPrice={stock.day_high_price}
+                  dayLowPrice={stock.day_low_price}
+                  symbol={stock.symbol}
+                  stockId={stock.id}
+                  isEn={isEn}
+                  newsItems={newsList}
+                />
+              </div>
+            }
           />
 
           {/* 1-Tap 퀵 호가 체결 시뮬레이터 */}
