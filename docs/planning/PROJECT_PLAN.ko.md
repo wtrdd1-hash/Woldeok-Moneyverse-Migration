@@ -3013,3 +3013,17 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
 - 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
 - `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
+
+## B/v2122 — 회원 지갑 거래명세서 스냅샷 및 무결성 확인증 (2026-11-12 KST)
+
+회차: 이전 A/v2120(Draft #3094), 현재 B/v2122, 다음 A/v2124. 기준 main cac6cb4c152304510e9baf6dd8611a6fa84715a8. 상태: 신규 제안/미구현/승격 보류. 기존 최근 거래 조회 및 페이지네이션과 별개인 회원 요청형 읽기 전용 기능이다. 지갑 경로 조사에서 거래명세서 다운로드 API는 확인되지 않았으며 개발 전 main/PR을 다시 조사한다.
+
+사용자 흐름: 로그인 회원이 지갑 > 거래내역 > 명세서 다운로드에서 최대 12개 완료된 달을 선택하고 건수·입출금 합계 미리보기를 확인한 뒤 CSV 및 무결성 확인증을 요청한다. CTA는 요청, 상태 확인, 다운로드, 확인증 검증, 대기 중 취소. 빈 내역/생성 중/준비됨/만료/실패·재시도/권한 없음/서비스 불가를 구별한다. 관리자에게는 발급 메타데이터·악용 징후만 제공하며 타인 거래내역 열람권은 기본적으로 없다. 모바일·키보드·스크린리더·CSV 수식 삽입 방어를 포함한다.
+
+신규 API 제안(현존 API 아님): POST /api/v1/wallet/statements {fromMonth,toMonth,idempotencyKey}, GET /api/v1/wallet/statements?cursor=, GET /api/v1/wallet/statements/:id, GET /api/v1/wallet/statements/:id/download, POST /api/v1/wallet/statements/:id/cancel. 쓰기 요청은 세션·동의·CSRF 검사, 조회·다운로드는 소유자 권한 검사. 생성 대기 202, 준비 200, 충돌 409, 만료 410, 한도 429, 일시 실패 503을 명확히 처리한다. 민감 응답은 private/no-store, 첨부 CSV와 문자 인코딩을 명시한다. 확인증에는 ID·원장 확정 시점·SHA-256·생성 시각·건수·서명 키 버전만 포함하며 거래 내용은 노출하지 않는다.
+
+DB 제안: statement_requests(id UUID PK, actor_user_id FK, period_start/end, status, source_ledger_watermark, digest, object_key, expires_at, created_at, updated_at, error_code); (actor_user_id,idempotency_key) 유일 제약, (actor_user_id,created_at DESC), (status,created_at) 인덱스. 정수 WLD 및 중앙원장/전표 합계 대사, 확정 원장 컷오프와 (posted_at,ledger_transaction_id,posting_id) 결정적 정렬을 요구한다. SECURITY DEFINER 소유자 한정 읽기 함수를 사용하고 앱 계정에 원장 테이블 직접 권한을 주지 않는다. 작업 큐는 트랜잭션 아웃박스·멱등 재시도, 암호화 저장소·짧은 만료 다운로드 URL·보존 및 파기 정책을 적용한다. 기획만으로 운영 DB·코드를 변경하지 않는다.
+
+운영·보안: 회원별 요청 제한, 전체 워커 예산, 다운로드 시 권한 재검사, CSV 수식 공격·잘못된 날짜·경로 조작 차단, 서명 키 회전, 개인정보 없는 발급/다운로드 감사, 부분 생성 탐지, 실패 재처리. 롤백은 CTA/API/워커를 비활성화하되 기존 확인증은 만료까지 유지한다. 사전 백업 복구 및 전진 전용 마이그레이션 검증 필수. 인증 화면은 noindex, 검색·사이트맵에서 제외. KPI는 발급 성공률, p95 처리 시간, 재시도·만료율, 익명 집계된 권한 위반이다.
+
+수용 기준: P0 타 회원 ID/URL 추측 접근 차단, 원장 동시 기록 중 혼합 시점 합계 방지, 동일 요청 단일 산출물, 원장 스냅샷과 CSV 합계·해시 일치, 오류 상태 정확성, 앱 계정 원장 직접 SELECT 금지. P1 빈/대용량 기간·월말 시간대·CSV 수식 공격·키 회전·취소 경쟁·재시도·페이지네이션·만료·복구/롤백·모바일 접근성. P2 익명 성능 지표. 단위/속성 기반/실제 PG 권한/API 통합/브라우저 E2E/격리 Test exact-SHA/독립 운영 QA 검증 후에만 승격 검토. 개발 담당은 미정이며 개발 A/B/C·Gemini·QA와 중복 변경 금지. 외부 독립 중복 제거 레퍼런스 10,000건 실제 확보 수 미확인으로 BLOCKED. 기한 종료된 TSI 기록은 변경하지 않는다.
