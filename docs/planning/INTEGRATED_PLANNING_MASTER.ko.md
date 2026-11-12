@@ -1,5 +1,24 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+
+## B/v2118 — 회원 신규 세션 보안 알림 (설계만 / DRAFT HOLD, 2026-11-12 KST)
+
+**교대:** 이전 A/v2116 (#3089) → 현재 B/v2118 → 다음 A/v2120. **근거:** 기존 `account-security.controller.ts`는 본인 세션 조회·보안 이벤트·다른 세션 철회를 제공하고, repository는 `account_active_sessions` 및 `account_recent_security_events`를 조회한다. Telegram 테스트의 관리자 로그인 알림은 **회원 신규 세션 알림의 구현 증거가 아니다**. 운영 배포·DB 트리거·채널 구현은 **미검증**이며 #3087 알림 전송 이력 기획 및 기존 세션 화면과 중복 구현하지 않는다.
+
+**목적과 승인 경계:** 회원이 낯선 새 로그인 세션을 인지하고 기존 세션 목록에서 다른 세션을 철회하도록 돕는 동의 기반 보안 알림. 침입 확정·정밀 위치 추적·강제 로그아웃·원장 변경·전송 성공 보장은 범위 밖. 채널·보관 기간·오탐 정책은 소유자 승인 대기. 상시 강제 푸시보다 기존 채널을 재사용하는 선택 동의 방식을 우선하며, 채널 검증 불가 시 앱 내부 알림으로 축소한다.
+
+**화면/흐름:** `/account/security`에 신규 로그인 알림 켜기/끄기, 동의 안내, 변경 시각, 기존 세션 확인/철회 링크를 추가하는 안. 새 브라우저 로그인 시 대략적인 시각·정제된 기기 유형·세션 확인 CTA만 전달한다. IP, 원본 UA, 토큰, 이메일, 위치, 세션 UUID는 알림 본문에 금지. 기기 분류는 추정이며 침입 증거가 아니다. 상태는 UNCONFIGURED/OPTED_OUT/OPTED_IN/PENDING_DELIVERY/SENT_UNCONFIRMED/FAILED_RETRYABLE/SUPPRESSED_DUPLICATE/UNAVAILABLE; 실패를 동의 성공이나 전송 완료로 표시하지 않는다. 링크 진입 시 본인 재인증을 확인한다.
+
+**제안 API(현재 존재하지 않는 계약):** `GET /api/v1/account/security/login-alert-preference`는 `{enabled,updatedAt,channel}`; `PUT`는 `{enabled,channel}`와 CSRF·세션·최근 재인증·멱등 키 및 버전 충돌 409/미검증 채널 422; `GET /api/v1/account/security/login-alerts?cursor=&limit=`는 본인만 볼 수 있는 제한된 요약과 불투명 커서 제공. 실제 Nest prefix/앱 게이트웨이와 경로 조정 필요. 401/403/429/503, 타인 자원은 일관된 404, no-store/noindex/no-referrer.
+
+**DB/정합성:** 기존 outbox/알림 스키마 중복 여부를 먼저 확인하고 필요할 때만 `member_login_alert_preferences(user_id PK/FK,enabled,channel,version,updated_at)` 및 `member_login_alert_events(id PK,user_id FK,session_id nullable FK,event_key UNIQUE,created_at,state,attempt_count,next_attempt_at,delivered_at nullable)` 정규화 테이블을 제안. 본인+시각+ID 인덱스 및 대기 큐 인덱스는 EXPLAIN 확인 후 추가. 세션 생성과 알림 outbox 기록은 가능하면 단일 트랜잭션; `(user_id,event_key)` 유일성, at-least-once 전송·소비자 멱등성·상한 재시도·실패 큐 감사. 알림 장애로 로그인 자체를 실패시키지 않는다. WLD 원장 변화·앱 역할 직접 테이블 권한 부여 금지. SECURITY DEFINER는 고정 search_path, 스키마 명시, PUBLIC EXECUTE 철회, 최소 EXECUTE 및 세션 결속 인증 필수; `p_actor` 단독은 인증이 아니다.
+
+**권한/보안:** 회원 본인만 설정과 알림 이력 조회. 관리자에게 개인 기기 상세를 자동 공개하지 않으며 별도 승인된 사고 절차만 허용. 세션 고정·동시 로그인·웹훅 재생·채널 탈취·알림 폭주·IP/UA 개인정보·계정 열거 대응, 계정/기기별 빈도 제한과 중복 억제 감사, 기본 OFF, 보관 정책 승인 필요. 기존 관리자 Telegram 알림은 변경하지 않는다.
+
+**모바일·접근성·SEO·지표:** 320px, WCAG 2.2 AA 키보드/포커스/오류/동작 줄이기, Android 동일 소유자 인증·디스크 캐시 금지·계정 전환 취소·안전한 딥링크. 비공개 페이지 검색 제외. 동의율, 이벤트→큐 p95, 중복 억제율, 전송 실패율, 알림 이후 세션 철회율을 개인정보 없이 측정.
+
+**수용 기준(계획이며 미실행):** 동의/버전/멱등성 단위, outbox 원자성·롤백 통합, DB 부정 권한·타인 접근 100건, 중복/재생 100건, 동시 로그인 100건, 채널 실패/재시도 50건, 만료 세션/재인증 50건, 동의 OFF 50건, 모바일/a11y/Android E2E. 원장 WLD 불변·민감정보 비노출·타인 이벤트 차단·로그인 가용성 확인. P0: 인증/원자성·독립 QA·격리 Test exact-SHA·백업 복원·롤백; P1: UX/a11y·Android·빈도·보관; P2: 지표·오탐 검토. 플래그 `member_login_alert` 기본 OFF; OFF 롤백 시 신규 큐 적재만 중단하고 세션은 유지. B/C/QA/Gemini와 마이그레이션 번호 조율. 외부 독립 자료 신규 확인 0건, 누적 UNKNOWN / 10,000 게이트 BLOCKED. **운영 코드·DB·배포 변경 없음.**
+
 ## v2026.11.09.1946.2 — 미검증 글 공개 변경 지시 / BRANCH CANDIDATE
 2026-11-09 사용자 지시로 블로그 공개·광고 정책만 갱신. [한국어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md), [영어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) 참조. 금융 및 운영 승격 검증 요건 유지.
 
