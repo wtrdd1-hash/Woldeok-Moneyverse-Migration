@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
   Banknote,
   BarChart3,
@@ -14,7 +13,6 @@ import {
   Coins,
   Cpu,
   Flame,
-  Globe,
   Headphones,
   HeartHandshake,
   History,
@@ -31,7 +29,6 @@ import {
   UserCheck,
   Users,
   Vault,
-  Wallet,
   Zap,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +37,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { getCockpitEvidence } from './admin-cockpit-evidence';
 import { adminConsole } from '@/lib/session';
-import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
+import { ADMIN_AREAS, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
 import { TelemetryPulse } from './components/telemetry-pulse';
@@ -48,7 +45,6 @@ import { AdminTelemetryMetricsTable } from './components/admin-telemetry-metrics
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {
   AdminBusiness,
-  AdminConsole,
   AdminSeasonEvent,
   AdminStock,
   AdminUser,
@@ -105,7 +101,7 @@ function getAreaIcon(href: string) {
     case '/admin/market':
       return <TrendingUp className="size-4 text-emerald-400" />;
     case '/admin/catalog':
-      return <Building2 className="size-4 text-indigo-400" />;
+      return <Building2 className="size-4 text-sky-400" />;
     case '/admin/work':
       return <Briefcase className="size-4 text-blue-400" />;
     case '/admin/bank':
@@ -121,7 +117,7 @@ function getAreaIcon(href: string) {
     case '/admin/logs':
       return <History className="size-4 text-sky-400" />;
     case '/admin/discord':
-      return <Bell className="size-4 text-indigo-400" />;
+      return <Bell className="size-4 text-amber-400" />;
     case '/admin/content':
       return <ImageIcon className="size-4 text-rose-400" />;
     case '/admin/safety':
@@ -135,7 +131,7 @@ function getAreaIcon(href: string) {
     case '/admin/kdic':
       return <Shield className="size-4 text-sky-400" />;
     default:
-      return <Activity className="size-4 text-slate-400" />;
+      return <Activity className="size-4 text-zinc-400" />;
   }
 }
 
@@ -154,7 +150,7 @@ export default async function AdminPage({
 
   if (next) redirect(next);
 
-  const [controls, users, stocks, businesses, events, health] = await Promise.all([
+  const [controls, users, stocks, , , health] = await Promise.all([
     apiOrNull<{ featureSwitches: FeatureSwitch[] }>('/api/v1/admin/controls'),
     apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
     apiOrNull<{ stocks: AdminStock[] }>('/api/v1/admin/stocks'),
@@ -168,57 +164,75 @@ export default async function AdminPage({
   const topUsers = evidence.members.state === 'verified' ? evidence.members.top : [];
 
   return (
-    <div className="w-full max-w-full min-w-0 space-y-6 pb-20">
-      {/* 1. 상단 토스 2026 Admin 대형 관제탑 헤더 */}
-      <div className="toss-card p-6 sm:p-8 space-y-4">
+    <div className="w-full max-w-full min-w-0 space-y-5 pb-20">
+      {/* 1. Precision Monochrome 관제탑 헤더 */}
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/95 p-5 sm:p-7 space-y-4 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-            <div className="size-12 shrink-0 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-              <Cpu className="size-6 animate-pulse" />
+            <div className="size-12 shrink-0 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <Cpu className="size-6" />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-zinc-100 tracking-tight">
                   운영 마스터 관제탑
                 </h1>
-                <Badge className={`${evidence.allVerified ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30'} text-[10px] font-bold px-2 py-0.5`}>
-                  <span aria-hidden="true" className={`size-1.5 rounded-full mr-1.5 inline-block ${evidence.allVerified ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <Badge
+                  className={`${
+                    evidence.allVerified
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/35'
+                      : 'bg-amber-500/15 text-amber-400 border-amber-500/35'
+                  } text-[10px] font-bold px-2.5 py-0.5`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`size-1.5 rounded-full mr-1.5 inline-block ${
+                      evidence.allVerified ? 'bg-emerald-400' : 'bg-amber-400'
+                    }`}
+                  />
                   {evidence.allVerified ? '핵심 지표 조회 완료' : '일부 지표 확인 불가'}
                 </Badge>
-                <Badge variant="outline" className="font-fintech text-[10px]">
+                <Badge variant="outline" className="font-mono tabular-nums text-[10px] border-zinc-700 text-zinc-400">
                   API 전체 가동률 미측정
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                실제 관리자 API에서 조회한 일부 관제 지표입니다. 조회 실패와 정상 0건을 구분하며 전체 시스템 가동률을 의미하지 않습니다.
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                실제 관리자 API에서 조회한 관제 지표입니다. Precision Monochrome Bento Grid로 핵심 거버넌스 상태를 즉각 판독합니다.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <Button asChild size="sm" className="h-10 rounded-xl btn-toss text-xs font-bold gap-1.5 shadow-sm">
-              <Link href="/admin/controls">
-                <Sliders className="size-3.5" />
-                <span>제어 상태 확인</span>
+            <Button asChild variant="stepup" size="sm" className="rounded-xl text-xs font-extrabold gap-1.5">
+              <Link href="/admin/central-bank">
+                <Landmark className="size-3.5" />
+                <span>중앙은행 발의·승인</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="h-10 rounded-xl text-xs font-bold gap-1.5">
+            <Button asChild variant="surface" size="sm" className="rounded-xl text-xs font-bold gap-1.5">
+              <Link href="/admin/controls">
+                <Sliders className="size-3.5 text-rose-400" />
+                <span>킬스위치 제어</span>
+              </Link>
+            </Button>
+            <Button asChild variant="surface" size="sm" className="rounded-xl text-xs font-bold gap-1.5">
               <Link href="/admin/money-flow">
                 <Coins className="size-3.5 text-emerald-400" />
-                <span>유저 자금 흐름</span>
+                <span>자금 흐름</span>
               </Link>
             </Button>
             <CloseConsole />
           </div>
         </div>
 
-        {/* 빠른 유저 검색창 */}
-        <div className="pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* 빠른 유저 검색창 & 원장 스냅샷 상태 */}
+        <div className="pt-3 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="w-full sm:max-w-md min-w-0">
             <AdminQuickUserSearch />
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-fintech shrink-0">
-            <span role="status" className="flex items-center gap-1 font-semibold">
+          <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono tabular-nums shrink-0">
+            <span role="status" className="flex items-center gap-1.5 font-semibold">
+              <span className="size-2 rounded-full bg-emerald-400/80" />
               {evidence.ledger.state === 'verified'
                 ? `원장 정합성 보고 ${formatMoment(evidence.ledger.calculatedAt)} (체인 해시 별도)`
                 : evidence.ledger.state === 'mismatch'
@@ -229,92 +243,151 @@ export default async function AdminPage({
         </div>
       </div>
 
-      {/* 2. 4대 핵심 고대비 KPI 카드 (원장 무결성, 킬스위치, 주식 시장, 회원 인구) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* KPI 1: 원장 무결성 */}
-        <Link href="/admin/economy" className="toss-card p-5 space-y-2 group hover:border-emerald-500/50 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground">복식부기 원장</span>
-            <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <ShieldCheck className="size-4" />
+      {/* 2. 비대칭 Bento Grid 핵심 거버넌스 매트릭스 (12-Column Asymmetric) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Hero Bento Card (5/12): 복식부기 원장 & 국고 5대 금고 환원 비율 */}
+        <Link
+          href="/admin/treasury"
+          className="lg:col-span-5 rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 sm:p-6 flex flex-col justify-between gap-4 hover:border-emerald-500/50 transition-all group"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                TREASURY & LEDGER GOVERNANCE
+              </span>
+              <h2 className="text-lg font-black text-zinc-100 mt-1 flex items-center gap-2">
+                <span>복식부기 원장 · 5대 금고</span>
+                <ArrowRight className="size-4 text-zinc-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
+              </h2>
+            </div>
+            <div className="size-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+              <ShieldCheck className="size-5" />
             </div>
           </div>
+
           <div>
-            <div className={`text-xl sm:text-2xl font-black font-fintech ${evidence.ledger.state === 'verified' ? 'text-emerald-400' : 'text-amber-400'}`}>
+            <div
+              className={`text-2xl sm:text-3xl font-black font-mono tabular-nums tracking-tight ${
+                evidence.ledger.state === 'verified' ? 'text-emerald-400' : 'text-amber-400'
+              }`}
+            >
               {evidence.ledger.state === 'verified'
-                ? '보고된 원장 정합'
-                : evidence.ledger.state === 'mismatch' ? '불일치 보고' : '검증 불가'}
+                ? '100% LEDGER SYNCED'
+                : evidence.ledger.state === 'mismatch'
+                  ? 'LEDGER MISMATCH'
+                  : 'UNVERIFIED'}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">DB 정합성 마지막 보고 · 실시간 체인 증명 아님</p>
-          </div>
-        </Link>
-
-        {/* KPI 2: 비상 킬스위치 */}
-        <Link href="/admin/controls" className="toss-card p-5 space-y-2 group hover:border-amber-500/50 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground">비상 킬스위치</span>
-            <div className="size-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
-              <Sliders className="size-4" />
-            </div>
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-black font-fintech text-foreground">
-              {evidence.controls.state !== 'verified' ? '상태 확인 불가'
-                : evidence.controls.total === 0 ? '등록 스위치 없음'
-                  : evidence.controls.held > 0 ? `${evidence.controls.held}개 제어 중` : '조회된 스위치 정상'}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {evidence.controls.state === 'verified' ? `조회 ${evidence.controls.total}개 스위치` : '서버 응답 미확인'}
+            <p className="text-xs text-zinc-400 mt-1">
+              세수 및 카지노 피구세(10%) 자동 분할 환원 정책 가동 중 (안전비축 30% 불변 가드)
             </p>
           </div>
-        </Link>
 
-        {/* KPI 3: 가상 주식 거래소 */}
-        <Link href="/admin/market" className="toss-card p-5 space-y-2 group hover:border-sky-500/50 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground">가상 주식 시장</span>
-            <div className="size-8 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center">
-              <TrendingUp className="size-4" />
+          {/* 40/30/20/10 국고 5대 금고 환원 비율 스택 바 */}
+          <div className="space-y-2 pt-2 border-t border-zinc-800/70">
+            <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-900 border border-zinc-800">
+              <div className="w-[40%] bg-emerald-500" title="복지 40%" />
+              <div className="w-[30%] bg-zinc-500" title="국고 30%" />
+              <div className="w-[20%] bg-sky-500" title="긴급구호 20%" />
+              <div className="w-[10%] bg-amber-500" title="안전비축 10%" />
             </div>
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-black font-fintech text-sky-400">
-              {evidence.stocks.state === 'verified' ? `${evidence.stocks.active}종목 조회 활성` : '상태 확인 불가'}
+            <div className="grid grid-cols-4 gap-1 text-[10px] font-mono tabular-nums text-zinc-400">
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-emerald-500" />복지 40%</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-zinc-400" />국고 30%</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-sky-500" />구호 20%</span>
+              <span className="flex items-center gap-1"><i className="size-1.5 rounded-full bg-amber-500" />안전 10%</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              {evidence.stocks.state === 'verified' ? `조회된 비활성/정지 ${evidence.stocks.halted}종목` : '서버 응답 미확인'}
-            </p>
           </div>
         </Link>
 
-        {/* KPI 4: 회원 인구 */}
-        <Link href="/admin/users" className="toss-card p-5 space-y-2 group hover:border-indigo-500/50 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground">조회된 회원</span>
-            <div className="size-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
-              <Users className="size-4" />
+        {/* Secondary Telemetry Bento Cards (7/12) */}
+        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* KPI 2: 비상 킬스위치 */}
+          <Link
+            href="/admin/controls"
+            className="rounded-2xl border border-rose-500/25 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-rose-500/60 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-zinc-300">비상 킬스위치</span>
+              <div className="size-8 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center">
+                <Sliders className="size-4" />
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-black font-fintech text-indigo-400">
-              {evidence.members.state === 'verified'
-                ? `${evidence.members.sampledCount.toLocaleString()}명 조회` : '조회 불가'}
+            <div>
+              <div className="text-2xl font-black font-mono tabular-nums text-zinc-100">
+                {evidence.controls.state !== 'verified'
+                  ? '확인 불가'
+                  : evidence.controls.total === 0
+                    ? '0 ACTIVE'
+                    : evidence.controls.held > 0
+                      ? `${evidence.controls.held} HELD`
+                      : 'ALL CLEAR'}
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
+                {evidence.controls.state === 'verified'
+                  ? `총 ${evidence.controls.total}개 플래그 관제`
+                  : '서버 응답 미확인'}
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">최대 100명 조회 · 전체 인구 아님</p>
-          </div>
-        </Link>
+          </Link>
+
+          {/* KPI 3: 가상 주식 거래소 */}
+          <Link
+            href="/admin/market"
+            className="rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-sky-500/50 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-zinc-300">가상 주식 시장</span>
+              <div className="size-8 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center">
+                <TrendingUp className="size-4" />
+              </div>
+            </div>
+            <div>
+              <div className="text-2xl font-black font-mono tabular-nums text-sky-400">
+                {evidence.stocks.state === 'verified' ? `${evidence.stocks.active} LISTED` : '확인 불가'}
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1 font-mono tabular-nums">
+                {evidence.stocks.state === 'verified'
+                  ? `거래 정지 ${evidence.stocks.halted}종목`
+                  : '서버 응답 미확인'}
+              </p>
+            </div>
+          </Link>
+
+          {/* KPI 4: 조회된 회원 */}
+          <Link
+            href="/admin/users"
+            className="rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 flex flex-col justify-between gap-3 hover:border-amber-500/50 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-zinc-300">조회된 회원</span>
+              <div className="size-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+                <Users className="size-4" />
+              </div>
+            </div>
+            <div>
+              <div className="text-2xl font-black font-mono tabular-nums text-amber-400">
+                {evidence.members.state === 'verified'
+                  ? `${evidence.members.sampledCount.toLocaleString()}명`
+                  : '조회 불가'}
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                샘플링 상위 100명 · R2 승격 보호
+              </p>
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* 3. 3대 탭 UI: [원클릭 퀵 런처 & 고래 순위], [27대 서피스 맵], [텔레메트리 펄스] */}
-      <Tabs defaultValue="launcher" className="space-y-6">
-        <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-muted/60 rounded-xl">
-          <TabsTrigger value="launcher" className="rounded-lg text-xs sm:text-sm font-semibold">
+      <Tabs defaultValue="launcher" className="space-y-5">
+        <TabsList className="grid grid-cols-3 max-w-md w-full h-11 p-1 bg-zinc-900/90 border border-zinc-800/80 rounded-xl">
+          <TabsTrigger value="launcher" className="rounded-lg text-xs sm:text-sm font-bold">
             핵심 퀵 런처
           </TabsTrigger>
-          <TabsTrigger value="surfaces" className="rounded-lg text-xs sm:text-sm font-semibold">
+          <TabsTrigger value="surfaces" className="rounded-lg text-xs sm:text-sm font-bold">
             27대 서피스 맵
           </TabsTrigger>
-          <TabsTrigger value="telemetry" className="rounded-lg text-xs sm:text-sm font-semibold">
+          <TabsTrigger value="telemetry" className="rounded-lg text-xs sm:text-sm font-bold">
             텔레메트리 펄스
           </TabsTrigger>
         </TabsList>
@@ -323,25 +396,25 @@ export default async function AdminPage({
         <TabsContent value="launcher" className="space-y-6 focus-visible:outline-none">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* 퀵 런처 9선 */}
-            <div className="lg:col-span-8 toss-card p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border/40">
+            <div className="lg:col-span-8 rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
                   <Zap className="size-4 text-amber-400" />
-                  <h2 className="text-sm font-bold text-foreground">핵심 운영 관제 바로가기</h2>
+                  <h2 className="text-sm font-bold text-zinc-100">핵심 운영 관제 바로가기</h2>
                 </div>
-                <span className="text-xs text-muted-foreground">자주 쓰는 9대 창구</span>
+                <span className="text-xs font-mono text-zinc-400">9 CORE STATIONS</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   { href: '/admin/money-flow', icon: Coins, title: '유저 자금 흐름', desc: '입출금 전수 추적', color: 'text-emerald-400' },
-                  { href: '/admin/treasury', icon: Vault, title: '국고 & 비축금', desc: '기본배당 · 창업그랜트', color: 'text-amber-400' },
-                  { href: '/admin/security', icon: ShieldAlert, title: '보안 · IP 차단', desc: '이상 거래 및 어뷰징', color: 'text-rose-400' },
-                  { href: '/admin/market/ai-news', icon: Radio, title: '주식 속보 제어', desc: '2시간 자동 시나리오', color: 'text-sky-400' },
-                  { href: '/admin/blog', icon: ScrollText, title: 'AI 블로그 관리', desc: '새벽 06:00 자동 발행', color: 'text-emerald-400' },
-                  { href: '/admin/discord', icon: Bell, title: '디스코드 관제', desc: '관리자 1:1 DM 알림', color: 'text-indigo-400' },
+                  { href: '/admin/treasury', icon: Vault, title: '국고 & 비축금', desc: '원스톱 충전 · 5대 금고', color: 'text-amber-400' },
+                  { href: '/admin/security', icon: ShieldAlert, title: '보안 · IP 차단', desc: '2FA OTP · 이상 거래', color: 'text-rose-400' },
+                  { href: '/admin/market/ai-news', icon: Radio, title: '주식 속보 제어', desc: '1시간 자동 시나리오', color: 'text-sky-400' },
+                  { href: '/admin/blog', icon: ScrollText, title: 'AI 블로그 관리', desc: '에디토리얼 자동 발행', color: 'text-emerald-400' },
+                  { href: '/admin/discord', icon: Bell, title: '디스코드 관제', desc: '관리자 1:1 DM 알림', color: 'text-amber-400' },
                   { href: '/admin/bonds', icon: ScrollText, title: 'KTB 국채 발행', desc: '이자 쿠폰 자동 정산', color: 'text-blue-400' },
-                  { href: '/admin/pension', icon: HeartHandshake, title: '국민연금 기금', desc: '연금 배당 분배 관리', color: 'text-rose-400' },
+                  { href: '/admin/pension', icon: HeartHandshake, title: '국민연금 기금', desc: '1시간 정기 지급 스윕', color: 'text-rose-400' },
                   { href: '/admin/kdic', icon: Shield, title: '예금보험공사', desc: '보호 한도 및 대위변제', color: 'text-sky-400' },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -349,13 +422,13 @@ export default async function AdminPage({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="p-3.5 rounded-2xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-all group"
+                      className="min-h-[60px] p-3.5 rounded-xl border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-900 hover:border-zinc-700 transition-all group flex flex-col justify-center"
                     >
-                      <div className="flex items-center gap-2 text-xs font-bold text-foreground group-hover:text-primary">
-                        <Icon className={`size-3.5 ${item.color}`} />
+                      <div className="flex items-center gap-2 text-xs font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
+                        <Icon className={`size-3.5 shrink-0 ${item.color}`} />
                         <span>{item.title}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground mt-1 truncate">{item.desc}</p>
+                      <p className="text-[11px] text-zinc-400 mt-1 truncate">{item.desc}</p>
                     </Link>
                   );
                 })}
@@ -363,32 +436,32 @@ export default async function AdminPage({
             </div>
 
             {/* 우측: 상위 5대 고래 유저 순위 */}
-            <div className="lg:col-span-4 toss-card p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border/40">
+            <div className="lg:col-span-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
                   <Flame className="size-4 text-rose-400" />
-                  <h2 className="text-sm font-bold text-foreground">조회된 회원 자산 순위</h2>
+                  <h2 className="text-sm font-bold text-zinc-100">조회된 회원 자산 순위</h2>
                 </div>
-                <span className="text-xs text-muted-foreground font-mono">조회 범위 TOP 5</span>
+                <span className="text-xs text-zinc-400 font-mono">TOP 5</span>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {evidence.members.state === 'unavailable' ? (
-                  <p role="status" className="text-sm text-muted-foreground">회원 자산 순위를 확인할 수 없습니다.</p>
+                  <p role="status" className="text-sm text-zinc-400">회원 자산 순위를 확인할 수 없습니다.</p>
                 ) : topUsers.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">조회 범위에 표시할 회원이 없습니다.</p>
+                  <p className="text-sm text-zinc-400">조회 범위에 표시할 회원이 없습니다.</p>
                 ) : null}
                 {topUsers.map((u, idx) => (
                   <Link
                     key={u.user_id}
                     href={`/admin/users/${u.user_id}`}
-                    className="flex min-h-11 items-center justify-between p-2.5 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="flex min-h-[44px] items-center justify-between px-3 py-2 rounded-xl border border-zinc-800/60 bg-zinc-900/40 hover:bg-zinc-900 hover:border-zinc-700 transition-all text-xs focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-mono font-bold text-muted-foreground w-4">#{idx + 1}</span>
-                      <span className="font-semibold text-foreground truncate">{u.display_name}</span>
+                      <span className="font-mono font-bold text-zinc-500 w-5 shrink-0">#{idx + 1}</span>
+                      <span className="font-semibold text-zinc-100 truncate">{u.display_name}</span>
                     </div>
-                    <span className="font-fintech font-bold text-primary">
+                    <span className="font-mono tabular-nums font-bold text-emerald-400 shrink-0 ml-2">
                       {groupDigits(u.total_net_worth ?? '0')} WLD
                     </span>
                   </Link>
@@ -400,31 +473,31 @@ export default async function AdminPage({
 
         {/* 탭 2: 27대 전체 서피스 맵 */}
         <TabsContent value="surfaces" className="space-y-6 focus-visible:outline-none">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {AREA_GROUPS.map((group) => {
               const areas = ADMIN_AREAS.filter((a) => a.group === group.key);
               return (
-                <div key={group.key} className="toss-card p-6 space-y-4">
-                  <div className="space-y-1 pb-3 border-b border-border/40">
-                    <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase">
+                <div key={group.key} className="rounded-2xl border border-zinc-800/80 bg-zinc-950/90 p-5 sm:p-6 space-y-4">
+                  <div className="space-y-1 pb-3 border-b border-zinc-800/80">
+                    <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase">
                       {group.eyebrow}
                     </span>
                     <h3 className={`text-base font-bold ${group.color}`}>{group.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{group.description}</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">{group.description}</p>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {areas.map((area) => (
                       <Link
                         key={area.href}
                         href={area.href}
-                        className="flex items-center justify-between p-3 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all group"
+                        className="flex min-h-[44px] items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900 transition-all group"
                       >
-                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground group-hover:text-primary">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200 group-hover:text-emerald-400">
                           {getAreaIcon(area.href)}
                           <span>{area.title}</span>
                         </div>
-                        <ArrowRight className="size-3 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="size-3.5 text-zinc-500 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     ))}
                   </div>
@@ -439,10 +512,10 @@ export default async function AdminPage({
           <TelemetryPulse />
           {evidence.members.state === 'verified'
             ? <AdminTelemetryMetricsTable users={allUsers} sampled />
-            : <p role="status" className="rounded-xl border p-4 text-sm text-muted-foreground">회원 텔레메트리를 확인할 수 없습니다. 서버 조회를 다시 시도하세요.</p>}
-          <div role="status" className="rounded-xl border p-4 text-sm text-muted-foreground">
+            : <p role="status" className="rounded-xl border border-zinc-800 p-4 text-sm text-zinc-400">회원 텔레메트리를 확인할 수 없습니다. 서버 조회를 다시 시도하세요.</p>}
+          <div role="status" className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-400">
             전수 경제·회원 통계는 이 화면에서 검증되지 않았습니다. 한정된 회원 목록을 전체 인구·총자산으로 표시하지 않습니다.
-            <Link href="/admin/analytics" className="ml-2 inline-flex min-h-11 items-center font-semibold underline underline-offset-2">별도 통계 화면 확인</Link>
+            <Link href="/admin/analytics" className="ml-2 inline-flex min-h-11 items-center font-semibold text-emerald-400 underline underline-offset-2">별도 통계 화면 확인</Link>
           </div>
         </TabsContent>
       </Tabs>
@@ -457,13 +530,13 @@ function Gate({
 }) {
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
-      <div className="toss-card max-w-md w-full p-8 text-center space-y-6">
-        <div className="size-16 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/20">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/95 max-w-md w-full p-8 text-center space-y-6 shadow-2xl">
+        <div className="size-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/25">
           <ShieldAlert className="size-8" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-xl font-bold text-foreground">운영 콘솔 게이트</h1>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <h1 className="text-xl font-bold text-zinc-100">운영 콘솔 게이트</h1>
+          <p className="text-xs text-zinc-400 leading-relaxed">
             관리자 관제탑에 접근하려면 관리자 비밀번호 세션 잠금 해제가 필요합니다.
           </p>
         </div>

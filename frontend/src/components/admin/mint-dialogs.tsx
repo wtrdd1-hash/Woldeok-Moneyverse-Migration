@@ -468,6 +468,14 @@ interface OrderProposalModalProps {
   onSuccess: () => void;
 }
 
+const AUDIT_REASON_PRESETS = [
+  '거시경제 유동성 공급 및 국고 재원 확충',
+  '인플레이션 선제 억제를 위한 시중 통화 흡수',
+  '외환·금융시장 급변동 방어 안정화 풀 보강',
+  '대고객 작업·퀘스트 보상 예산 정기 인가',
+  '기준금리 및 지급준비율 연동 통화정책 집행',
+] as const;
+
 export function OrderProposalDialog({
   isOpen,
   onClose,
@@ -557,6 +565,12 @@ export function OrderProposalDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="proposal-dialog-title"
+      onKeyDown={(e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !loading) {
+          e.preventDefault();
+          void submitOrder(true);
+        }
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) onClose();
       }}
@@ -717,6 +731,23 @@ export function OrderProposalDialog({
                 disabled={loading}
                 className="text-sm"
               />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {AUDIT_REASON_PRESETS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => { setReason(preset); setErrorMsg(null); }}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold border transition-colors min-h-[32px] ${
+                      reason === preset
+                        ? 'bg-amber-500/20 border-amber-500/60 text-amber-300'
+                        : 'bg-zinc-900/60 border-border/80 text-muted-foreground hover:text-foreground hover:border-zinc-500'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-3 text-xs text-blue-300 flex items-start gap-2">
@@ -752,18 +783,14 @@ export function OrderProposalDialog({
               </Button>
               <Button
                 type="button"
-                disabled={loading}
+                variant="stepup"
+                size="sm"
+                isLoading={loading}
+                shortcutHint="Ctrl+Enter"
                 onClick={handleOneStopSubmit}
-                className="rounded-xl px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs h-9 shadow-md flex items-center gap-1.5"
+                className="rounded-xl px-4 font-extrabold text-xs"
               >
-                {loading ? (
-                  <span className="flex items-center gap-1.5">
-                    <Loader2 className="size-3.5 animate-spin" />
-                    발의 및 즉시 승인 중...
-                  </span>
-                ) : (
-                  '⚡ 발의 즉시 승인 (원스톱)'
-                )}
+                {loading ? '발의 및 즉시 승인 중...' : '⚡ 발의 즉시 승인 (원스톱)'}
               </Button>
             </div>
           </form>
