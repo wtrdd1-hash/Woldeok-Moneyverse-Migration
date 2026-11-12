@@ -1,5 +1,20 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+
+## A/v2120 — 보유 아이템 개인정보 보호·오류 진실성 독립 QA 게이트 (기획 전용 / Draft HOLD, 2026-11-12 KST)
+
+**교대:** 이전 B/v2118 (Draft #3092) → 현재 A/v2120 → 다음 B/v2122. **기준 main:** 53fb23cd2cb86a2cc1029523f557ce312d1d5dba. 문서만 변경하며 구현·배포하지 않는다. **근거:** #3081 필수 보유 아이템 요청 실패를 빈 목록으로 표시하던 문제(브랜치 타깃 2/2 통과), #3091 Android 게이트웨이가 200/503 응답의 upstream public 캐시 헤더를 전달하던 문제(라우트 테스트 54/54 통과, 전체 빌드 차단), #3090 기존 테이블 ACL 감사(격리 PostgreSQL 진단). 모두 개발 브랜치 보고이며 독립 운영 QA 증거가 아니다. 공식 Test exact-SHA 및 독립 검증은 **미확인**.
+
+**재현·기대·원인:** #3081에서 보유 아이템 GET 오류가 apiOrNull에 의해 []로 바뀌었다고 보고됨. 기대 동작은 검증된 빈 목록과 재시도 가능한 오류를 구분하는 것. #3091에서 Android /app-api/v1/shop/holdings가 성공 및 503 응답의 Cache-Control: public을 전달했다고 보고됨. 기대 동작은 private,no-store/noindex/no-referrer 강제. 실제 운영 노출 여부는 증명되지 않았다. 원인 가설은 필수 요청에 선택적 요청 헬퍼를 재사용한 점과 게이트웨이의 upstream 헤더 무조건 전달이다. 대상은 인증된 보유 아이템 사용자, 심각도는 P1 개인정보·표시 신뢰성. 실제 교차 사용자 캐시 유출 또는 금전 오표시가 입증될 때만 P0 승격.
+
+**기존 → 변경 / 사유:** 기존 오류를 0개로 오인하거나 Android public 캐시가 통과할 수 있는 상태에서, LOADING/VERIFIED_EMPTY/LOADED/RETRYABLE_ERROR/UNAUTHORIZED/UNAVAILABLE 상태를 명확히 분리한다. 웹과 Android 모두 200·401·403·404·429·500·503에 private,no-store, noindex, no-referrer를 강제한다. 이는 #3081/#3091의 중복 개발이 아니라 독립 QA 수용기준 보강이다.
+
+**화면·API·DB·권한:** 웹 인벤토리는 재시도 CTA를 제공하고 오래된 데이터는 stale 표시하며 사용 가능 잔액·재고처럼 취급하지 않는다. GET /api/v1/shop/holdings 및 /app-api/v1/shop/holdings는 안전한 오류 상태와 추적 ID를 보존하되 개인정보를 노출하지 않는다. 교차 계정 조회·캐시·로그 누출을 거부한다. DB는 읽기 전용, 마이그레이션·새 GRANT·원장 변경·SECURITY DEFINER 수정 없음. #3090 감사는 별도 진단이며 수정 완료로 간주하지 않는다.
+
+**검증·우선순위:** P0 독립 QA가 운영 기준 SHA와 익명화 네트워크 증거를 수집하고, 정확한 후보 SHA의 격리 Test에서 보유/검증된 빈 목록/503/401/타인 접근/upstream public/재시도/Android 계정 전환을 검증한다. 백업 복원·롤백·독립 승인이 필요하다. P1 웹·Android 성공/실패 헤더 회귀, 320px WCAG 2.2 AA, noindex, 보안·개인정보 검증. P2 식별자 없는 집계(코호트 20명 이상), 지연·재시도 지표. 잘못된 빈 목록, public 캐시, SHA 미확인, 롤백 실패, 타인 정보 노출 시 승격 금지. 코드 변경은 담당 PR에 맡기고 기획에서는 배포하지 않는다.
+
+**상태:** #3081/#3091 브랜치 구현 보고 / 운영 승격 미확인; 독립 QA BLOCKED; 운영 동작 UNKNOWN; 기획 변경 PROPOSED. P0 QA2120-01/02, P1 QA2120-03/04/05, P2 QA2120-06. 이번 회차 신규 검증 독립 외부 레퍼런스 0건, 누적 고유 10,000건 충족 여부 UNKNOWN/BLOCKED. Test PASS를 주장하지 않는다.
+
 ## v2026.11.09.1946.2 — 블로그 미검증 공개 사용자 변경 지시 / BRANCH CANDIDATE
 2026-11-09 사용자 지시로 블로그 공개·광고 정책만 갱신. [한국어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md), [영어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) 참조. 금융 및 운영 승격 검증 요건 유지.
 
