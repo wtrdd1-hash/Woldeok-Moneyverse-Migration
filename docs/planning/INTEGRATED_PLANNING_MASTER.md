@@ -2333,3 +2333,16 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - New detailed authority: `AD_ONLY_ADVERTISING_REVENUE_SPEC.md`; PROJECT_PLAN and monetization/KR-compliance specs were updated with superseding v487 gates.
 - Official evidence refresh used Google AdSense Page RPM/Auto Ads/Experiments/invalid-traffic/publisher-policy documentation and NTS platform-ad-income tax guidance. NTS one-person-media guidance is not treated as automatic classification of this website.
 - Planning/docs only; no runtime, billing, AdSense-setting, Test, Production, tax-classification or revenue-result claim.
+
+
+## A/v2116 — Worldwide blog visibility QA evidence gate (2026-11-12 KST)
+
+Cycle: Previous B/v2114 (#3087); Current A/v2116; Next B/v2118. Main baseline: 53fb23cd2cb86a2cc1029523f557ce312d1d5dba. Status: PLANNED / HOLD, docs-only. Priority P0 independent QA and release gating, P1 regression, P2 telemetry.
+
+Evidence: Draft PR #3088 reports a CN article present at its native URL, API and sitemap but absent from the Korean blog hub because of edition filtering. The developer reports a previous production failure KOREAN_HUB_MISSING_WORLDWIDE_ARTICLE, 19 targeted passing tests, isolated frontend port 4391, and a read-only check. These are PR author claims, NOT independent QA, official exact-SHA Test or production release proof. Do not confuse a separate model-quality retry with the hub filtering root cause. The implementation remains owned by #3088; no duplicate feature or runtime changes.
+
+Expected: each localized blog hub displays eligible worldwide recent public posts, original-language canonical links and explicit AI-unverified labels without misrepresenting articles as native-edition publications. Reported actual: Korean hub omitted a CN publication. Independent QA must capture article ID/slug, timestamp, locale, API/sitemap response, browser DOM/screenshot, environment, commit SHA and reviewer. Missing evidence means UNKNOWN, never PASS.
+
+Acceptance: P0 independently reproduce before and after on official isolated Test at exact candidate SHA; validate KR/EN/CN/JP hubs, canonical and 308 redirects, native-list nonduplication, public API/sitemap, clear AI labels, rollback to previous proven frontend SHA and post-rollback smoke checks. Require CI, backup restore, isolation proof, production readiness and owner approval before promotion. P1 keyboard/screen-reader/mobile/heading hierarchy, safe public-only access, injection and private-preview protection, SEO metadata, cache freshness and pagination regression. Cover zero posts, one locale, mixed locales, duplicate slugs, delayed indexing, API failure and stale cache; error states must be truthful. P2 track anonymous publication-to-hub latency and error rates without collecting personal data.
+
+No new DB migration, API, RBAC or publisher/admin mutation is approved. QA owns independent reproduction; development C/#3088 owns frontend and read-only QA script; this branch owns planning evidence only. Capture expected/actual, severity, affected locales, reviewer, exact SHA and remediation PR. External 10,000 independent deduplicated references: UNKNOWN/BLOCKED, no verified count. Prior TSI-001 through 011 history remains unchanged after its expiry.
