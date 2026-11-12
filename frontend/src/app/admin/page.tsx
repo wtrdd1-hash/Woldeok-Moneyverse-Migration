@@ -371,7 +371,7 @@ export default async function AdminPage({
                   : '조회 불가'}
               </div>
               <p className="text-[11px] text-zinc-400 mt-1">
-                샘플링 상위 100명 · R2 승격 보호
+                상위 100명 샘플 · 전체 인구 아님 · R2 승격 보호
               </p>
             </div>
           </Link>
