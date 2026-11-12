@@ -183,9 +183,11 @@ export function InventoryView({
           return (
             <button
               key={cat.id}
+              type="button"
+              aria-pressed={isSelected}
               onClick={() => setSelectedCategory(cat.id)}
               className={cn(
-                'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap',
+                'min-h-11 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2',
                 isSelected
                   ? 'bg-amber-500 border-amber-500 text-black shadow-sm'
                   : 'bg-card border-border/40 text-muted-foreground hover:bg-surface',
@@ -197,6 +199,10 @@ export function InventoryView({
           );
         })}
       </div>
+
+      <p role="status" aria-live="polite" className="sr-only">
+        {selectedCategory === 'all' ? '전체' : CATEGORIES.find((cat) => cat.id === selectedCategory)?.label} 카테고리: {filtered.length}개 아이템
+      </p>
 
       {/* Holdings Grid */}
       {filtered.length === 0 ? (
