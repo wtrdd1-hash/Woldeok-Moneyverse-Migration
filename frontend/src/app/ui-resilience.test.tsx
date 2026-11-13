@@ -145,4 +145,33 @@ describe('UI Multi-Viewport Resilience & Zero-Clipping Invariants', () => {
     expect(shop).toContain('min-h-[44px]');
     expect(shopStore).toContain('min-h-[44px] sm:min-h-[38px]');
   });
+
+  it('Phase 4 auxiliary hubs preserve 44px touch targets, tabular-nums, and zero-clipping invariants', () => {
+    const pensionPortal = readFileSync(join(__dirname, 'pension/pension-portal-client.tsx'), 'utf8');
+    const pensionPanel = readFileSync(join(__dirname, 'pension/funded-treasury-pension-panel.tsx'), 'utf8');
+    const bondsPortal = readFileSync(join(__dirname, 'bonds/bonds-portal-client.tsx'), 'utf8');
+    const treasuryCard = readFileSync(join(__dirname, 'treasury/treasury-program-card.tsx'), 'utf8');
+    const arcadeForms = readFileSync(join(__dirname, 'arcade/casino-forms.tsx'), 'utf8');
+    const workForms = readFileSync(join(__dirname, 'work/work-forms.tsx'), 'utf8');
+
+    // 국민연금: 44px 프리셋 및 48px 즉시 납입
+    expect(pensionPortal).toContain('min-h-[44px] sm:min-h-[36px]');
+    expect(pensionPortal).toContain('min-h-[48px]');
+    expect(pensionPortal).toContain('tabular-nums');
+    expect(pensionPanel).toContain('min-h-[44px]');
+
+    // 가상채권: 44px 터치 버튼 및 폰트 수치
+    expect(bondsPortal).toContain('min-h-[44px] sm:min-h-[36px]');
+    expect(bondsPortal).toContain('tabular-nums');
+
+    // 국고 프로그램 카드: 44px 긴급 구제/배당/그랜트 버튼
+    expect(treasuryCard).toContain('w-full min-h-[44px]');
+
+    // 아케이드/카지노: 44px 퀵 베팅 칩 및 슬라이더 버튼
+    expect(arcadeForms).toContain('min-h-[44px] sm:min-h-[36px]');
+
+    // 직업 시스템: 48px 업무 시작 및 44px 전직 버튼
+    expect(workForms).toContain('min-h-[48px]');
+    expect(workForms).toContain('min-h-[44px]');
+  });
 });

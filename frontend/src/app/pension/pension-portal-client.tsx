@@ -400,7 +400,7 @@ export function PensionPortalClient({
                 <Button
                   onClick={handleToggleRetirement}
                   disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading || BigInt(accumulated) < 1000n}
-                  className={`flex-1 font-semibold ${
+                  className={`flex-1 min-h-[44px] font-semibold ${
                     account?.status === 'RETIRED_RECEIVING'
                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -425,7 +425,7 @@ export function PensionPortalClient({
                     size="sm"
                     onClick={handleLiquidate}
                     disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading}
-                    className="text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
+                    className="min-h-[44px] text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
                   >
                     <LogOut className="h-3.5 w-3.5 mr-1" />
                     중도 해지 (95% 환급)
@@ -464,7 +464,7 @@ export function PensionPortalClient({
                     step={1000}
                     value={contributeAmount}
                     onChange={(e) => setContributeAmount(e.target.value)}
-                    className="font-mono pr-12 text-base"
+                    className="font-mono pr-12 text-base tabular-nums"
                     placeholder="납입할 금액 입력 (최소 1,000 WLD)"
                   />
                   <div className="absolute right-3 top-2.5 text-xs text-muted-foreground font-mono">
@@ -478,7 +478,7 @@ export function PensionPortalClient({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
+                    className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                     onClick={() => setContributeAmount('10000')}
                   >
                     +1만
@@ -487,7 +487,7 @@ export function PensionPortalClient({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
+                    className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                     onClick={() => setContributeAmount('50000')}
                   >
                     +5만
@@ -496,7 +496,7 @@ export function PensionPortalClient({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
+                    className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                     onClick={() => setContributeAmount('100000')}
                   >
                     +10만
@@ -505,7 +505,7 @@ export function PensionPortalClient({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
+                    className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                     onClick={() => setContributeAmount(cashBalance.toString())}
                   >
                     전액
@@ -516,7 +516,7 @@ export function PensionPortalClient({
               <Button
                 onClick={handleContribute}
                 disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || contributing || !isLoggedIn}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-10"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold min-h-[48px] h-12"
               >
                 {contributing ? '납입 처리 중...' : '국민연금 기여금 즉시 납입'}
               </Button>
@@ -532,16 +532,16 @@ export function PensionPortalClient({
 
       {/* 탭: 모의 연금 계산기 & 납입/수령 내역 */}
       <Tabs defaultValue="simulator" className="space-y-4">
-        <TabsList className="bg-muted/50 border border-border/50">
-          <TabsTrigger value="simulator" className="gap-1.5">
+        <TabsList className="grid grid-cols-1 sm:grid-cols-3 w-full min-h-[44px] h-auto p-1 bg-muted/50 border border-border/50 rounded-xl">
+          <TabsTrigger value="simulator" className="min-h-[40px] gap-1.5 truncate">
             <Calculator className="h-4 w-4" />
             예상 기초연금 시뮬레이터
           </TabsTrigger>
-          <TabsTrigger value="contributions" className="gap-1.5">
+          <TabsTrigger value="contributions" className="min-h-[40px] gap-1.5 truncate">
             <History className="h-4 w-4" />
             내 기여금 납입 이력 ({contributions.length})
           </TabsTrigger>
-          <TabsTrigger value="payouts" className="gap-1.5">
+          <TabsTrigger value="payouts" className="min-h-[40px] gap-1.5 truncate">
             <Clock className="h-4 w-4" />
             기초연금 수령 내역 ({payouts.length})
           </TabsTrigger>
@@ -579,7 +579,7 @@ export function PensionPortalClient({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7"
+                      className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
                       onClick={() => setSimAmount(val)}
                     >
                       {val >= 1000000 ? `${val / 10000}만` : `${val / 10000}만`}

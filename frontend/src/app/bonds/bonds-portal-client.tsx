@@ -415,13 +415,13 @@ export function BondsPortalClient({
                   max={Number(selectedBond.available_units)}
                   value={unitsToSubscribe}
                   onChange={(e) => setUnitsToSubscribe(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm tabular-nums"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">총 결제 금액 (WLD)</label>
-                <div className="h-9 flex items-center px-3 rounded-md bg-muted/60 font-mono font-bold text-foreground text-base">
+                <div className="h-9 flex items-center px-3 rounded-md bg-muted/60 font-mono font-bold text-foreground text-base tabular-nums">
                   {groupDigits(
                     (BigInt(selectedBond.par_value_wld) * BigInt(unitsToSubscribe)).toString(),
                   )}{' '}
@@ -431,14 +431,14 @@ export function BondsPortalClient({
             </div>
 
             <div className="pt-2 flex justify-end gap-2.5">
-              <Button variant="outline" size="sm" onClick={() => setSelectedBond(null)}>
+              <Button variant="outline" size="sm" onClick={() => setSelectedBond(null)} className="min-h-[44px] sm:min-h-[36px]">
                 닫기
               </Button>
               <Button
                 size="sm"
                 onClick={handleSubscribe}
                 disabled={isSubscribing}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-medium"
+                className="bg-sky-600 hover:bg-sky-700 text-white font-medium min-h-[44px] sm:min-h-[36px]"
               >
                 {isSubscribing ? '처리 중...' : '국채 매수 확정'}
               </Button>
@@ -542,7 +542,7 @@ export function BondsPortalClient({
                         variant={h.auto_rollover ? 'secondary' : 'outline'}
                         size="sm"
                         onClick={() => handleToggleRollover(h.id, h.auto_rollover)}
-                        className="text-xs h-7 gap-1"
+                        className="text-xs min-h-[44px] sm:min-h-[36px] gap-1"
                       >
                         <RefreshCw className="h-3 w-3" />
                         자동 재투자: {h.auto_rollover ? 'ON (복리)' : 'OFF'}
@@ -554,7 +554,7 @@ export function BondsPortalClient({
                           size="sm"
                           disabled={isProcessingLoan}
                           onClick={() => handleBorrowRepo(h.id, h.bond_name)}
-                          className="text-xs h-7 gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
+                          className="text-xs min-h-[44px] sm:min-h-[36px] gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
                         >
                           <Landmark className="h-3 w-3" />
                           80% 담보대출 신청

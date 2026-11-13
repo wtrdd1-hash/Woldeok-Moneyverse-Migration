@@ -121,9 +121,9 @@ export function FundedTreasuryPensionPanel() {
             <div className="flex flex-wrap items-center gap-2">
               <Input aria-label="신규 적립금 납입 WLD" value={amount} onChange={e => {
                 setAmount(e.target.value); pendingFund.current = null;
-              }} className="max-w-40" inputMode="numeric" />
-              <Button disabled={busy || status !== 'verified'} onClick={() => void submit('contribute')}>증빙 납입</Button>
-              <Button variant="outline" disabled={busy || position.funded_principal_wld === '0'}
+              }} className="max-w-40 min-h-[44px] tabular-nums" inputMode="numeric" />
+              <Button className="min-h-[44px]" disabled={busy || status !== 'verified'} onClick={() => void submit('contribute')}>증빙 납입</Button>
+              <Button className="min-h-[44px]" variant="outline" disabled={busy || position.funded_principal_wld === '0'}
                 onClick={() => void submit('withdraw')}>신규 적립금 환급 (95%)</Button>
             </div>
             <p className="text-xs text-muted-foreground">

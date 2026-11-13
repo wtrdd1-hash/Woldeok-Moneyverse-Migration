@@ -110,7 +110,7 @@ export function TreasuryProgramCard({
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-xs font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+              className="w-full min-h-[44px] text-xs font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
               disabled
             >
               <Flame className="size-3.5 mr-1" />
@@ -120,7 +120,7 @@ export function TreasuryProgramCard({
             <Button
               size="sm"
               onClick={onOpenGrantModal}
-              className="w-full text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-xs"
+              className="w-full min-h-[44px] text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-xs"
             >
               <Rocket className="size-3.5 mr-1" />
               {isEn ? 'Apply for Startup Grant' : '창업 그랜트 지원서 작성하기'}
@@ -130,7 +130,7 @@ export function TreasuryProgramCard({
               size="sm"
               onClick={() => onClaim(program.id)}
               disabled={!isClaimable()}
-              className={`w-full text-xs font-bold shadow-xs ${
+              className={`w-full min-h-[44px] text-xs font-bold shadow-xs ${
                 isClaimable()
                   ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                   : 'bg-muted text-muted-foreground'
