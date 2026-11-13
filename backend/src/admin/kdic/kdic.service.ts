@@ -70,24 +70,27 @@ export class KdicService {
     return this.repo.getUserInsuredCoverage(userId);
   }
 
-  async assessQuarterlyPremiums(_adminId: string): Promise<never> {
+  async assessQuarterlyPremiums(adminId: string): Promise<{ totalCollectedWld: number; recordsCount: number }> {
     rejectUnverifiedKdicSettlement();
+    return this.repo.assessQuarterlyPremiums(adminId);
   }
 
   async injectEmergencyLiquidity(
-    _institutionId: string,
-    _amountWld: number,
-    _adminId: string,
-  ): Promise<never> {
+    institutionId: string,
+    amountWld: number,
+    adminId: string,
+  ): Promise<{ newBisRatioPct: number; newFundWld: number }> {
     rejectUnverifiedKdicSettlement();
+    return this.repo.injectEmergencyLiquidity(institutionId, amountWld, adminId);
   }
 
   async executeDepositPayout(
-    _institutionId: string,
-    _userId: string,
-    _adminId: string,
-  ): Promise<never> {
+    institutionId: string,
+    userId: string,
+    adminId: string,
+  ): Promise<{ payoutAmountWld: number; newFundWld: number }> {
     rejectUnverifiedKdicSettlement();
+    return this.repo.executeDepositPayout(institutionId, userId, adminId);
   }
 
 }

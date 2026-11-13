@@ -57,4 +57,28 @@ describe('KDIC legacy financial mutation containment', () => {
     expect(repo.injectEmergencyLiquidity).not.toHaveBeenCalled();
     expect(repo.executeDepositPayout).not.toHaveBeenCalled();
   });
+
+  it('allows financial mutation execution when MONEYVERSE_KDIC_LEDGER_OPERATIONAL is set', async () => {
+    vi.stubEnv('MONEYVERSE_KDIC_LEDGER_OPERATIONAL', 'true');
+    const service = {
+      assessQuarterlyPremiums: vi.fn().mockResolvedValue({ totalCollectedWld: 2000, recordsCount: 1 }),
+      injectEmergencyLiquidity: vi.fn().mockResolvedValue({ newBisRatioPct: 15.0, newFundWld: 10000000 }),
+      executeDepositPayout: vi.fn().mockResolvedValue({ payoutAmountWld: 500000, newFundWld: 9500000 }),
+    };
+    const controller = new AdminKdicController(service as unknown as KdicService);
+    const actor = '285d77b4-8a73-4d85-8edb-e59bad8ad21f';
+    const request = { session: { user_id: actor } } as unknown as RequestWithSession;
+
+    const res1 = await controller.assessPremiums(request);
+    expect(res1.success).toBe(true);
+    expect(service.assessQuarterlyPremiums).toHaveBeenCalledWith(actor);
+
+    const res2 = await controller.injectLiquidity(request);
+    expect(res2.success).toBe(true);
+    expect(service.injectEmergencyLiquidity).toHaveBeenCalled();
+
+    const res3 = await controller.executePayout(request);
+    expect(res3.success).toBe(true);
+    expect(service.executeDepositPayout).toHaveBeenCalled();
+  });
 });

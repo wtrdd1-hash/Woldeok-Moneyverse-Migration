@@ -75,6 +75,7 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
   const [loading, setLoading] = useState(false);
   const [collectModalOpen, setCollectModalOpen] = useState(false);
   const [collectSuccessMsg, setCollectSuccessMsg] = useState<string | null>(null);
+  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_KDIC_OPERATIONAL === 'true';
   const [isCollecting, setIsCollecting] = useState(false);
   const refreshData = async (silent = false) => {
     setLoading(true);
@@ -186,13 +187,22 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
             <RotateCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
             새로고침
           </button>
-          <button
-            disabled
-            title="금융 집행은 인증·원장 무결성 검증 완료 전 보류됩니다"
-            className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600/70 text-white shadow-lg shadow-emerald-900/30 cursor-not-allowed"
-          >
-            분기별 예보료 징수 (보류)
-          </button>
+          {isOperational ? (
+            <button
+              onClick={() => setCollectModalOpen(true)}
+              className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 cursor-pointer active:scale-95 transition-all"
+            >
+              분기별 예보료 징수
+            </button>
+          ) : (
+            <button
+              disabled
+              title="금융 집행은 인증·원장 무결성 검증 완료 전 보류됩니다"
+              className="px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold bg-emerald-600/70 text-white shadow-lg shadow-emerald-900/30 cursor-not-allowed"
+            >
+              분기별 예보료 징수 (보류)
+            </button>
+          )}
         </div>
       </div>
 
