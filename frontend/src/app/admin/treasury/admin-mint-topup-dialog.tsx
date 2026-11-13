@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 
 export function AdminMintTopupDialog() {
   const [open, setOpen] = useState(false);
+  const requestKey = useRef<string | null>(null);
   const [amountWld, setAmountWld] = useState('1000000');
   const [reason, setReason] = useState('통화정책 위원회 승인 국고 비상 유동성 즉시 보충');
   const [otpCode, setOtpCode] = useState('');
@@ -66,6 +67,8 @@ export function AdminMintTopupDialog() {
     setSuccessMsg('');
 
     try {
+      const key = requestKey.current ?? crypto.randomUUID();
+      requestKey.current = key;
       const res = await fetch('/api/admin/treasury/mint-topup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,13 +76,18 @@ export function AdminMintTopupDialog() {
           amountWld: amountWld.trim(),
           reason: reason.trim(),
           otpCode: otpCode.trim(),
+          requestKey: key,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.message || '조폐국 국고 충전 처리에 실패했습니다.');
+        throw new Error(data.error || data.message || '조폐국 국고 충전 처리에 실패했습니다.');
       }
 
+      if (data.ok !== true || typeof data.result?.ledger_transaction_id !== 'string') {
+        throw new Error('국고 충전 원장 영수증을 확인할 수 없습니다. 같은 요청으로 다시 확인하세요.');
+      }
+      requestKey.current = null;
       setSuccessMsg(`조폐국 국고 충전 완결! 전표 ID: ${data.result?.ledger_transaction_id || '기록됨'}`);
       if (typeof window !== 'undefined' && window.location) {
         // 성공 시 데이터 갱신
