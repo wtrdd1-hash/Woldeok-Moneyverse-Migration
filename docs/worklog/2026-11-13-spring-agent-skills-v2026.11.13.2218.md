@@ -6,13 +6,15 @@
 - [x] Accessed Debian mini-PC through the designated MCP.
 - [x] Read repository policy (`AGENTS.md`, `GEMINI.md`), authoritative planning, current document status, Spring draft, and release guide. Read installed `skill-creator` guidance.
 - [x] Fetched `origin/main` and created a dedicated isolated worktree, preserving Gemini's existing Spring planning worktree and untracked draft.
-- [ ] Author portable Spring-specific Agent Skills under `.agents/skills/`.
+- [x] Author portable Spring-specific Agent Skills under `.agents/skills/`.
 - [ ] Install in shared user skills directory without duplicate copies.
 - [ ] Validate metadata, content, namespace and discoverability, record limits.
 - [ ] Document internal/GitHub changes, push isolated branch.
 
 ## In progress
 - Initial record created before implementation. No service, database, release or production changes authorized.
+
+Eight instruction-only portable skills and English/Korean documentation authored; shared-user installation and validation pending.
 
 ## Finished
 - PENDING — update with evidence and exact branch SHA.
