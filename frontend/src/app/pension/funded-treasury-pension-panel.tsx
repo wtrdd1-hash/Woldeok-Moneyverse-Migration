@@ -93,7 +93,7 @@ export function FundedTreasuryPensionPanel() {
   }
 
   return (
-    <Card className="moneyverse-card border-emerald-500/25">
+    <Card id="funded-pension-core" className="moneyverse-card border-emerald-500/25">
       <CardHeader>
         <CardTitle>국고 코어 · 신규 원장 증빙 연금</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ export function FundedTreasuryPensionPanel() {
               <p>신규 연금 에스크로 전체 <strong>{readable(position.escrow_balance_wld)} WLD</strong></p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Input aria-label="신규 적립금 납입 WLD" value={amount} onChange={e => {
+              <Input id="funded-pension-amount-input" aria-label="신규 적립금 납입 WLD" value={amount} onChange={e => {
                 setAmount(e.target.value); pendingFund.current = null;
               }} className="max-w-40 min-h-[44px] tabular-nums" inputMode="numeric" />
               <Button className="min-h-[44px]" disabled={busy || status !== 'verified'} onClick={() => void submit('contribute')}>증빙 납입</Button>

@@ -231,6 +231,21 @@ export function PensionPortalClient({
     }
   };
 
+  const scrollToFundedCore = () => {
+    const el = document.getElementById('funded-pension-core');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const syncToFundedInput = (val: string) => {
+    const input = document.getElementById('funded-pension-amount-input') as HTMLInputElement | null;
+    if (input) {
+      input.value = val;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  };
+
   const currentTier = getTierInfo(account?.tier || 'TIER_1_YOUTH');
   const accumulated = canonicalIntegerString(account?.accumulated_contribution_wld ?? '0') ?? '0';
   const forecast = calculatePensionForecast(accumulated, account?.hourly_payout_rate_bps || 8);
@@ -395,42 +410,52 @@ export function PensionPortalClient({
                 </span>
               </div>
 
-              {/* 은퇴 수령 개시 및 중도 해지 버튼 */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-2">
+              {/* 은퇴 수령 개시 및 중도 해지 버튼 (정식 원장 에스크로 유도) */}
+              <div className="flex flex-col gap-2.5 pt-2">
                 <Button
-                  onClick={handleToggleRetirement}
-                  disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading || BigInt(accumulated) < 1000n}
-                  className={`flex-1 min-h-[44px] font-semibold ${
-                    account?.status === 'RETIRED_RECEIVING'
-                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                  onClick={scrollToFundedCore}
+                  className="w-full min-h-[44px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  {account?.status === 'RETIRED_RECEIVING' ? (
-                    <>
-                      <Clock className="h-4 w-4 mr-1.5" />
-                      연금 수령 일시정지 (적립 모드로 전환)
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-1.5" />
-                      연금 수령 신청 (검증 중)
-                    </>
-                  )}
+                  <Sparkles className="h-4 w-4 mr-1.5" />
+                  정식 원장 연금 에스크로 관리 바로가기
                 </Button>
 
-                {BigInt(accumulated) > 0n && (
+                <div className="flex flex-wrap items-center gap-2.5">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLiquidate}
-                    disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading}
-                    className="min-h-[44px] text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
+                    onClick={handleToggleRetirement}
+                    disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading || BigInt(accumulated) < 1000n}
+                    className={`flex-1 min-h-[44px] font-semibold ${
+                      account?.status === 'RETIRED_RECEIVING'
+                        ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                   >
-                    <LogOut className="h-3.5 w-3.5 mr-1" />
-                    중도 해지 (95% 환급)
+                    {account?.status === 'RETIRED_RECEIVING' ? (
+                      <>
+                        <Clock className="h-4 w-4 mr-1.5" />
+                        연금 수령 일시정지 (적립 모드로 전환)
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-1.5" />
+                        연금 수령 신청 (검증 중)
+                      </>
+                    )}
                   </Button>
-                )}
+
+                  {BigInt(accumulated) > 0n && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLiquidate}
+                      disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || actionLoading}
+                      className="min-h-[44px] text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
+                    >
+                      <LogOut className="h-3.5 w-3.5 mr-1" />
+                      중도 해지 (95% 환급)
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -445,7 +470,7 @@ export function PensionPortalClient({
                 국민연금 기여금 납입하기
               </CardTitle>
               <CardDescription>
-                {PENSION_LEDGER_SETTLEMENT_PAUSED ? PENSION_HOLD_NOTICE : '연금 정산 계약이 승인되기 전에는 납입할 수 없습니다.'}
+                과거 미검증 원장은 동결되어 신규 국고 에스크로(상단 패널)를 통해서만 정식 복식분개 납입 및 환급이 가능합니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -463,7 +488,10 @@ export function PensionPortalClient({
                     min={1000}
                     step={1000}
                     value={contributeAmount}
-                    onChange={(e) => setContributeAmount(e.target.value)}
+                    onChange={(e) => {
+                      setContributeAmount(e.target.value);
+                      syncToFundedInput(e.target.value);
+                    }}
                     className="font-mono pr-12 text-base tabular-nums"
                     placeholder="납입할 금액 입력 (최소 1,000 WLD)"
                   />
@@ -479,7 +507,10 @@ export function PensionPortalClient({
                     variant="outline"
                     size="sm"
                     className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
-                    onClick={() => setContributeAmount('10000')}
+                    onClick={() => {
+                      setContributeAmount('10000');
+                      syncToFundedInput('10000');
+                    }}
                   >
                     +1만
                   </Button>
@@ -488,7 +519,10 @@ export function PensionPortalClient({
                     variant="outline"
                     size="sm"
                     className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
-                    onClick={() => setContributeAmount('50000')}
+                    onClick={() => {
+                      setContributeAmount('50000');
+                      syncToFundedInput('50000');
+                    }}
                   >
                     +5만
                   </Button>
@@ -497,7 +531,10 @@ export function PensionPortalClient({
                     variant="outline"
                     size="sm"
                     className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
-                    onClick={() => setContributeAmount('100000')}
+                    onClick={() => {
+                      setContributeAmount('100000');
+                      syncToFundedInput('100000');
+                    }}
                   >
                     +10만
                   </Button>
@@ -506,7 +543,11 @@ export function PensionPortalClient({
                     variant="outline"
                     size="sm"
                     className="text-xs min-h-[44px] sm:min-h-[36px] font-semibold"
-                    onClick={() => setContributeAmount(cashBalance.toString())}
+                    onClick={() => {
+                      const val = cashBalance.toString();
+                      setContributeAmount(val);
+                      syncToFundedInput(val);
+                    }}
                   >
                     전액
                   </Button>
@@ -514,16 +555,28 @@ export function PensionPortalClient({
               </div>
 
               <Button
-                onClick={handleContribute}
-                disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || contributing || !isLoggedIn}
+                onClick={() => {
+                  syncToFundedInput(contributeAmount);
+                  scrollToFundedCore();
+                }}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold min-h-[48px] h-12"
               >
-                {contributing ? '납입 처리 중...' : '국민연금 기여금 즉시 납입'}
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                상단 정식 국고 에스크로 납입창으로 이동
+              </Button>
+
+              <Button
+                onClick={handleContribute}
+                disabled={PENSION_LEDGER_SETTLEMENT_PAUSED || contributing || !isLoggedIn}
+                variant="outline"
+                className="w-full min-h-[44px] text-xs text-muted-foreground"
+              >
+                {contributing ? '납입 처리 중...' : '국민연금 기여금 즉시 납입 (구형 정산 중단)'}
               </Button>
 
               <div className="p-2.5 rounded bg-muted/30 border border-border/40 text-[11px] text-muted-foreground space-y-1">
-                <p>• 이 구형 납입은 중단됐습니다. 새 적립금은 상단 정식 원장 국민연금 기능으로 납입할 수 있습니다.</p>
-                <p>• 정기 지급은 현재 원장 정산 검증이 끝날 때까지 중단됩니다.</p>
+                <p>• 구형 미검증 납입 경로는 금융안전보증을 위해 영구 차단되었습니다.</p>
+                <p>• 상단 '국고 코어 · 신규 원장 증빙 연금' 패널에서 멱등성 보증 복식분개로 안전하게 납입·환급됩니다.</p>
               </div>
             </CardContent>
           </Card>
