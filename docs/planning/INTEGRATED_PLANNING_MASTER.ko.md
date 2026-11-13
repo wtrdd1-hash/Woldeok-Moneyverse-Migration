@@ -1,6 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 후속 초안 (운영 변경 없음)
+미병합 v2026.11.13.1 설계를 재검토한 보충 기획이며 기존 승인된 금융·블로그·인증 규칙을 임의 대체하지 않는다. 장별 위험 R01~R10과 G0~G6 검증/중단 조건, 경로/스케줄/봇/클라이언트별 단독 소유권, DB fence 금융 기록자, 기존 세션/OTP/Android/Socket.IO 호환, 불변 빌드 아티팩트 공급망·복구 기준을 명시했다. [한국어 상세](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [한국어 아티팩트](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md); [후속 PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). 실제 Java 코드/Test/운영 검증 없음.
+
 ## v2026.11.13.1 — 전 백엔드 Spring Boot 전환 기획 후보 (초안 / 런타임 변경 없음)
 독립 사용자 지시의 아키텍처 작업: API·관리자·금융·게임·외부 연동·봇·스케줄을 모두 G0~G6으로 이관하고 최종 NestJS를 종료한다. 기존 Next.js/React 화면과 PostgreSQL 정식 금융 함수 원장은 유지한다. Spring 모듈형 백엔드와 되돌릴 수 있는 경로별 이전을 권장하며 금융 활성 쓰기 주체 하나, 세션·OTP·CSRF, Android/API 동등성, 정확한 SHA의 격리 Test, 실제 금융 대사, 메모리 예산, 독립 복원, 무중단/롤백을 강제한다. Kubernetes 대 systemd 배포 설명 충돌은 G0 실제 환경 실사 대상이다. 구현·DB·회원데이터·Test·운영·main 변경 없음. [한국어 상세 설계](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md) · [영문](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [작업기록](../worklog/2026-11-13-spring-platform-migration-v2026.11.13.1.ko.md).
 

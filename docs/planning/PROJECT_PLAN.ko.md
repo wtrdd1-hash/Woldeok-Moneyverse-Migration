@@ -1,6 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.13.2 — 스프링 전환 항목별 위험·아티팩트 기획 보강 (초안 / 운영 보류)
+사용자 지시에 따른 v2026.11.13.1 설계 재검토 결과, 기존 1~9장별 우선 위험 R01~R10, G0~G6 상세 실행/승인 조건, 국고·금융 이중 기록 방지 fence, 기존 세션/OTP/Android/실시간 동등성, 정확한 SHA 롤백을 보강했다. [상세 재검토](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [아티팩트·GHCR·조건부 Artifactory 명세](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md). 기존 초안 PR #3142 기반 후속 초안 PR #3144. 실제 G0, Java 구현·Test·운영 승격은 아직 미실시·미승인.
+
 ## v2026.11.13.1 — 전 시스템 Spring Boot 전환 (아키텍처 초안 / 운영 보류)
 사용자 지시로 NestJS/TypeScript **전체 백엔드**를 Java/Spring Boot로 단계적 전환하는 기획을 시작한다. 전체 API·관리자·경제·봇·외부 연동·스케줄과 최종 NestJS 종료를 포함한다. Next.js 화면·Android 계약·PostgreSQL 정식 원장은 유지하며 금융 쓰기 이관은 단일 활성 소유자 조건으로 마지막에 진행한다. [상세 설계](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md) · [영문 정본](../superpowers/specs/2026-11-13-spring-platform-migration-design.md). G0에서 실제 배포/DB 환경·독립 복원·서버 자원·모든 API 계약을 확인한다. Java 코드·Test 배포·운영 승격·main 병합·상세 구현계획 승인 없음.
 

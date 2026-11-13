@@ -1,6 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
+## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
+A separate owner-requested deep review of the v2026.11.13.1 Spring design documents ten prioritized risks (R01–R10) per original section, G0–G6 detailed implementation/acceptance gates, canonical finance single-writer fencing, session/OTP/Android/realtime compatibility and exact-SHA rollback. [Detailed review](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md); [Artifact, GHCR and optional Artifactory policy](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md). Stacked draft PR #3144 depends on open parent PR #3142. G0 measured runtime/DB/client evidence, actual Test, new Java implementation and Production remain unapproved/unverified.
+
 ## v2026.11.13.1 — Spring Boot full-platform migration (ARCHITECTURE DRAFT / RELEASE HOLD)
 Owner requested a staged **full backend** transition from NestJS/TypeScript to Java/Spring Boot, including all API, admin, economy, integrations, bots, jobs and eventual NestJS retirement. Preserve Next.js UI, Android contracts and PostgreSQL canonical ledger; finance commands migrate last with a single active writer. [English architectural draft](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [Korean](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md). G0 actual release/DB topology, restore, resource baseline and full contract inventory are prerequisites. No Java code, test deployment, production promotion, main merge or implementation-plan approval.
 

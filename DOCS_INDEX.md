@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.13.2 — Spring migration reviewed draft (NO RUNTIME CHANGE)
+- [Detailed EN risk/implementation review](docs/planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [한국어](docs/planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) · [Artifact/Artifactory EN](docs/planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [한국어](docs/planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) · [Worklog](docs/worklog/2026-11-13-spring-migration-detailed-review-v2026.11.13.2.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). R01–R10 and G0–G6; parent PR #3142 OPEN, Test/Production NOT DONE.
+
 **DOC-2026.11.11.1500 — [Authoritative documentation status](docs/CURRENT_DOCUMENTATION_STATUS.md) / [한국어](docs/CURRENT_DOCUMENTATION_STATUS.ko.md).** Historical entries below are preserved, not current deployment assurances. Test version API HTTP 502 observed; documentation-only change.
 
 
