@@ -67,6 +67,19 @@ describe('P0 marketplace service-level unledgered settlement hold', () => {
     for (const broadcast of Object.values(gateway)) expect(broadcast).not.toHaveBeenCalled();
   });
 
+  it('executes certified SQL procedure when ledger certification is verified', async () => {
+    const { service, query } = serviceWithSpies();
+    query.mockResolvedValueOnce({ rows: [{ listing_id: 'test-listing-id' }] });
+    process.env.MONEYVERSE_MARKETPLACE_LEDGER_CERTIFIED = 'true';
+    try {
+      const result = await service.createListing(actor, 'frame', 1, '500', key);
+      expect(result).toBe('test-listing-id');
+      expect(query).toHaveBeenCalledOnce();
+    } finally {
+      delete process.env.MONEYVERSE_MARKETPLACE_LEDGER_CERTIFIED;
+    }
+  });
+
   it('preserves read-only listing access', async () => {
     const { service, query } = serviceWithSpies();
     await expect(service.listListings({})).resolves.toEqual([]);

@@ -39,6 +39,30 @@ describe('P0 season reward claim ledger containment', () => {
     expect(claim).not.toHaveBeenCalled();
   });
 
+  it('delegates to service and returns certified reward when operational flag is set', async () => {
+    const { service } = setup();
+    const claim = vi.spyOn(service, 'claimReward').mockResolvedValueOnce({
+      claimId: 'claim-1',
+      seasonId: season,
+      seasonName: 'Season 1',
+      tier: 'Diamond',
+      rank: 5,
+      rewardWld: 500,
+      trophyCode: 'TROPHY_DIAMOND',
+      claimedAt: new Date().toISOString(),
+    });
+    const controller = new SeasonController(service);
+    const request = { session: { user_id: actor } } as RequestWithSession;
+    process.env.MONEYVERSE_SEASON_REWARD_LEDGER_OPERATIONAL = 'true';
+    try {
+      const res = await controller.claimReward(request, { seasonId: season, idempotencyKey: key });
+      expect(res.claimId).toBe('claim-1');
+      expect(claim).toHaveBeenCalledWith(actor, season, key);
+    } finally {
+      delete process.env.MONEYVERSE_SEASON_REWARD_LEDGER_OPERATIONAL;
+    }
+  });
+
   it('preserves read-only season event discovery', async () => {
     const { query, repository } = setup();
     await expect(repository.events()).resolves.toEqual([]);

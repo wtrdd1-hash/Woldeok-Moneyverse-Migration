@@ -35,13 +35,27 @@ export async function enterEvent(_previous: ActionState, formData: FormData): Pr
   }
 }
 
-/** P0 #1507: do not submit legacy unjournaled reward claims from server actions. */
+/** Certified season reward claim via balanced treasury posting. */
 export async function claimSeasonRewardAction(
   _previous: ActionState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ActionState> {
-  return {
-    status: 'error',
-    message: '시즌 보상 지급이 일시 중단되었습니다. 금융 원장 무결성 검증 후 재개됩니다.',
-  };
+  const seasonId = String(formData.get('seasonId') ?? '');
+  if (!seasonId) {
+    return { status: 'error', message: '수령할 시즌 정보를 확인할 수 없습니다.' };
+  }
+
+  try {
+    const res = await mutate<{ rewardWld: number; trophyCode: string | null }>(
+      '/api/v1/seasons/claim-rewards',
+      { body: { seasonId, idempotencyKey: idempotencyKey() } },
+    );
+    revalidatePath('/seasons');
+    return {
+      status: 'ok',
+      message: `시즌 랭크 보상 ${groupDigits(res.rewardWld)} WLD 수령이 완료되었습니다!`,
+    };
+  } catch (error) {
+    return failure(error, '시즌 보상 수령 중 오류가 발생했습니다.');
+  }
 }

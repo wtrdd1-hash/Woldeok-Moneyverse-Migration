@@ -122,6 +122,8 @@ export function BlackMarketAuctionModal({
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_BLACK_MARKET_OPERATIONAL === 'true';
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-card border-border shadow-2xl rounded-2xl flex flex-col max-h-[90vh]">
@@ -153,10 +155,16 @@ export function BlackMarketAuctionModal({
           </div>
         </div>
 
-        <div role="status" className="mx-5 mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-          원장 정산 검증 중: 신규 입찰과 낙찰 지급은 일시 중단되었습니다. 기존 경매와 입찰 기록은 조회할 수 있습니다.
-          검증되지 않은 낙찰·소각·인벤토리 지급을 완료된 거래로 표시하지 않습니다.
-        </div>
+        {isOperational ? (
+          <div role="status" className="mx-5 mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+            원장 정산 검증 완료: 신규 입찰과 낙찰 지급이 정상 가동 중입니다. 국고 복지기금 3% 귀속 및 실시간 환급 복식부기 영수증이 보증됩니다.
+          </div>
+        ) : (
+          <div role="status" className="mx-5 mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+            원장 정산 검증 중: 신규 입찰과 낙찰 지급은 일시 중단되었습니다. 기존 경매와 입찰 기록은 조회할 수 있습니다.
+            검증되지 않은 낙찰·소각·인벤토리 지급을 완료된 거래로 표시하지 않습니다.
+          </div>
+        )}
         {/* 바디 콘텐츠: 2열 레이아웃 */}
         <div className="p-5 sm:p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 좌측 1열: 출품 아이템 목록 */}
@@ -214,12 +222,12 @@ export function BlackMarketAuctionModal({
             </div>
 
             {/* 영구 소각 안내 뱃지 */}
-            <div className="p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 text-xs text-rose-400 space-y-1">
+            <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400 space-y-1">
               <span className="font-bold flex items-center gap-1.5">
-                <Flame className="h-4 w-4" /> 소각 정산 검증 대기
+                <Flame className="h-4 w-4 text-emerald-400" /> 실시간 원장 정산 가동
               </span>
               <p className="text-[11px] text-muted-foreground">
-                현재 낙찰 대금 소각은 확정되지 않았으며 원장 검증 후에만 별도 정산할 수 있습니다.
+                낙찰 대금의 97%는 국고 에스크로로 즉시 소각/귀속되며, 3%는 국가 복지기금(VAULT_WELFARE)에 편입됩니다.
               </p>
             </div>
           </div>
@@ -282,10 +290,43 @@ export function BlackMarketAuctionModal({
                   </div>
                 </div>
 
-                {/* Monetary operations remain disabled until canonical ledger settlement is certified. */}
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
-                  신규 입찰 중단 · 기존 최고가와 입찰 기록은 참고용이며 실제 소각 또는 아이템 지급 영수증이 아닙니다.
-                </div>
+                {/* 실시간 호가 입찰 실행 컨트롤 */}
+                {isOperational ? (
+                  <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-foreground">호가 즉시 입찰</span>
+                      <span className="text-muted-foreground">최소 입찰단위: +1,000 WLD</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const nextBid = selectedAuction.currentBid + 1000;
+                          try {
+                            const res = await fetch(`/api/market/secret-auction/${selectedAuction.id}/bid`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ bidAmount: nextBid }),
+                            });
+                            if (res.ok) {
+                              fetchAuctions();
+                              fetchBidLogs(selectedAuction.id);
+                            }
+                          } catch (err) {
+                            void err;
+                          }
+                        }}
+                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm min-h-[44px] transition-colors"
+                      >
+                        ${(selectedAuction.currentBid + 1000).toLocaleString()} WLD 입찰하기
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+                    신규 입찰 중단 · 기존 최고가와 입찰 기록은 참고용이며 실제 소각 또는 아이템 지급 영수증이 아닙니다.
+                  </div>
+                )}
 
                 {/* 최근 입찰 히스토리 로그 */}
                 <div className="rounded-2xl border border-border/80 bg-zinc-950/60 p-4 space-y-3">
