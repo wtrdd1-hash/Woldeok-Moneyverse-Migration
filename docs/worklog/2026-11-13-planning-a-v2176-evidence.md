@@ -1,0 +1,17 @@
+# A/v2176 — QA incident continuity, evidence-only (2026-11-13 22:05 KST)
+
+## Start / provenance
+Previous completed B/v2174: commit dab46d13c1178469b63210e5c83125118c552b29, Draft #3139. Current A/v2176; next B/v2178 (conditional on completion). Baseline Migration origin/main 90965f1dd84e272e757041eb9afd8a477699eb7c; app main previously observed fc6c353ee413e50428548daf2981c7dd28c5fb45, fresh app remote confirmation NOT VERIFIED. Dedicated documentation-only worktree; no production changes. Local Debian backend, frontend, bot, MCP, nginx, docker active; dev database connection confirmed, not a production settlement certificate.
+
+## Skills and investigation
+Hosted skills__list returned zero entries; hosted using-superpowers read BLOCKED. Local skills directory inventoried. Read actual local SKILL.md using safe shell: using-superpowers (entry), systematic-debugging (root-cause evidence), writing-plans (acceptance criteria), verification-before-completion (no unverified PASS). No code execution from skills. Reviewed origin/main AGENTS.md, README.md, EN/KO PROJECT_PLAN and integrated master headings; full 30-day inventory, comprehensive bilingual parity, external 10,000 references, authenticated E2E NOT VERIFIED. GitHub CLI checked issue #3101, merged PR #3135 and open PRs #3137/#3138/#3139. No independent newly reproduced QA defect.
+
+## Midpoint / verified delta
+P0 INC-2026.11.12.01 issue #3101 remains OPEN. Historic mobile Mint→Treasury 10,000,000 WLD failure and OTP/receipt/ledger outcome remain unverified. Existing main frontend dialog now generates and retains crypto.randomUUID requestKey on retries and displays data.error or data.message (prior #3119). Main 90965f1dd8, merged #3135 on 2026-11-13T10:18:17Z, corrects canonical admin gateway routing. Thus original missing-key/error-hidden source defects are not valid as newly unfixed main defects; historical production settlement and authenticated exact-SHA browser path still need QA verification. Do not duplicate earlier A/v2172 or issue #3101.
+P1 open #3137 owns PUBLIC EXECUTE/SECURITY DEFINER migration 347. Isolated PostgreSQL ACL verification, production migration and Test certification NOT VERIFIED. Do not compete with backend B. Open #3138 and #3139 are documentation-only and not main/production acceptance.
+
+## Acceptance / ownership / risk
+QA owner: pin frontend/backend Test to exact SHA, perform authorized admin Mint→VAULT_MAIN flow without issuing production funds, test OTP valid/expired/replayed, same-key retries and concurrency, failure/timeout, RBAC/CSRF, receipt and balanced ledger journal, reconcile historical account with read-only evidence. Backend B: independently verify migration 347 default ACL and function privileges in isolated DB, test restore/rollback and security regressions before merge. P0 issue stays OPEN pending actual verified closure; P1 release gate remains HOLD. No guessed root cause beyond code-confirmed historic mismatch. No new A planning delta justified.
+
+## End / accounting
+New NET_NEW 0; new IMPROVEMENT 0; duplicates newly verified 0; planning-only adopted 0; runtime implementations by this planning run 0; QA/production verified 0. Source/quality gate BLOCKED (full source coverage, production authenticated E2E, 10,000 references). No change to canonical plan, TSI immutable history, API, schema, runtime or production. Next B/v2178 should investigate distinct candidates, not recycle unverified convenience features. Recheck main SHA and canonical plan hash immediately before publishing; record final values in PR.
