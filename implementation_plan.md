@@ -3294,3 +3294,45 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 ### 3. 검증 결과
 - 모든 문서의 상호 링크 무결성 검증 완료.
 - 프로덕션 배포 상태(https://easy-scraping.com)와 문서 스펙 100% 일치 확인.
+---
+## 🚀 [v313 Specification] 8대 보류 기능 전면 정상 가동 및 국고 복식부기 원장 연동 계획
+### 1. 작업 배경 및 사용자 결정 사항
+- **사용자 요청**: 프로젝트 내 기록된 8대 미구현/보류(HOLD/503) 기능 전면 정상화, 데이터베이스 데이터 무결성 보정 및 초기화 승인, 깃허브 main 단일 통합 및 원격 브랜치 정리 완결.
+- **문답 조율 확정안 (Interactive Alignment 결과)**:
+  1. **원장 정산 방식**: [정식 국고 원장 승인 마이그레이션] 과거 미정산 레코드(연금 238건 등)를 정식 국고 에스크로(treasury_core_post)로 합법 승격·합산하여 데이터 손실 없이 8대 전면 개방.
+  2. **배포 단계**: [3단계 우선순위 일괄 롤링 배포]
+     - 1단계: 사용자 직접 체감 기능 3종 (국민연금 과거 원장 승인 + 국채 레포 대출 503 해제 및 복식분개 연동 + PvP 내기 대결장 원장 트랜잭션 연동)
+     - 2단계: 거래 및 보상 3종 (블랙마켓 경매장 입찰/낙찰 에스크로 + 플레이어 마켓플레이스 거래 연동 + 시즌 랭크 보상 국고 복지기금 지급)
+     - 3단계: 관리자 관제 및 집행 2종 (예보공 KDIC 예보료 강제 징수/대여 집행 503 해제 + 국부펀드 SWF 실거래 리밸런싱 집행)
+  3. **국채 레포 대출 정책**: LTV 80% / 초저리 연 3.5% 즉시 대출/상환 복식부기 정식 가동.
+  4. **수수료 정책**: PvP 대결장 승자 상금 및 블랙마켓 낙찰금의 3%를 국고 복지 에스크로(VAULT_WELFARE)로 자동 귀속.
+  5. **진행 모드**: AI 자율 실행 모드로 원스톱 구현, 테스트 검증, 깃허브 main 머지 및 프로덕션 배포 완료.
+
+### 2. 세부 변경 계획 (Proposed Changes)
+#### [Phase 1: 사용자 직접 체감 기능 3종]
+1. **국민연금 과거 원장 전면 개방**:
+   - backend/src/pension/national-pension.repository.ts: 과거 238건 레코드를 정식 국고 에스크로 승인 처리(treasury_core_post 영수증 발급), assertLedgerSettlementCertified() 통과 보장.
+   - frontend/src/app/pension/pension-portal-client.tsx: PENSION_LEDGER_SETTLEMENT_PAUSED = false 해제, 기여금 납입·수령 신청·중도 해지 활성화.
+2. **가상 국채 레포(Repo) 대출 복식부기 연동 및 503 해제**:
+   - backend/src/admin/bonds/treasury-bond.controller.ts: borrowRepoLoan(), repayRepoLoan()의 503 차단 해제 및 TreasuryBondService 호출 연결.
+   - backend/src/admin/bonds/treasury-bond.service.ts: 국채 담보 80% 대출 및 상환 복식분개(withPgTransaction) 구현.
+   - frontend/src/app/bonds/bonds-portal-client.tsx: 대출 신청/상환 버튼 활성화 및 실시간 트랜잭션 연동.
+3. **PvP 내기 대결장 원장 트랜잭션 연동 및 가동**:
+   - backend/src/casino/pvp-arena.repository.ts: PvpArenaSettlementHoldError 차단 해제, createRoom 시 베팅금 에스크로 잠금, joinAndPlay 시 승패 판정 후 97% 승자 지급 + 3% 국고 복지 에스크로(VAULT_WELFARE) 복식분개 구현.
+   - frontend/src/components/pvp-wager-arena-modal.tsx: PVP_SETTLEMENT_AVAILABLE = true, 대결방 개설 및 참가 버튼 활성화.
+
+#### [Phase 2: 거래 및 보상 3종]
+1. **블랙마켓 경매장**: black-market-auction-modal.tsx 및 백엔드 입찰/낙찰 에스크로 연동.
+2. **플레이어 마켓플레이스**: marketplace/page.tsx 및 백엔드 등록/구매 트랜잭션 활성화.
+3. **시즌 랭크 보상 수령**: season-reward-claim-banner.tsx 및 백엔드 보상 지급 트랜잭션 연동.
+
+#### [Phase 3: 관리자 관제 및 집행 2종]
+1. **예보공(KDIC) 금융 집행**: kdic.controller.ts의 503 해제 및 예보료 징수/긴급대여 실행 연동.
+2. **국부펀드(SWF) 자동 투자**: swf-control-panel.tsx 및 백엔드 리밸런싱 실행 연동.
+
+### 3. 검증 계획 (Verification Plan)
+- 단위/통합 테스트: pnpm exec vitest run (pension, bonds, pvp, ui-resilience 등)
+- TypeScript 타입 검사: pnpm exec tsc --noEmit
+- PR 생성 및 CI 전수 통과 확인
+- squash-merge 후 단일 main 유지 및 작업 브랜치 삭제
+- 프로덕션 무중단 롤링 배포 및 공개 도메인 실측 검증

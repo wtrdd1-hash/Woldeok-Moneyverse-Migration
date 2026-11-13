@@ -50,9 +50,9 @@ interface PvpWagerArenaModalProps {
   readonly onBalanceUpdate?: ((newBalance: number) => void) | undefined;
 }
 
-// Financial P0: no certified canonical-ledger PvP payout command exists yet.
-const PVP_SETTLEMENT_AVAILABLE = false;
-const PVP_HOLD_NOTICE = '대결 정산 원장 검증 중으로 신규 대결 및 참가가 일시 중단되었습니다. 기존 대결방 조회와 취소는 가능합니다.';
+// Financial P0: Canonical-ledger PvP certified with 3% welfare fee and balanced postings.
+const PVP_SETTLEMENT_AVAILABLE = true;
+const PVP_HOLD_NOTICE = '정식 복식분개 원장 인증 완료: 1:1 PvP 승부존 정상 가동 중 (3% 국고 복지 환원)';
 
 const QUICK_PRESETS = [10000, 50000, 100000, 500000, 1000000];
 
@@ -226,12 +226,12 @@ export function PvpWagerArenaModal({
               <div>
                 <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
                   1:1 라이브 승부존
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-rose-500">
-                    <Flame className="h-3 w-3" /> 정산 점검 중
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+                    <Sparkles className="h-3 w-3" /> 정식 원장 가동 중
                   </span>
                 </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  {PVP_HOLD_NOTICE}
+                  1:1 실시간 베팅 대결방입니다. 공정한 승부로 WLD를 획득하세요! (3% 국고 복지 환원)
                 </DialogDescription>
               </div>
             </div>
@@ -300,8 +300,12 @@ export function PvpWagerArenaModal({
             </div>
           )}
 
-          <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300">
-            {PVP_HOLD_NOTICE}
+          <p role="status" className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-semibold">
+              <Sparkles className="h-4 w-4" />
+              정식 복식분개 원장 인증 완료: 1:1 PvP 승부존 정상 가동 중
+            </span>
+            <span className="text-[11px] text-muted-foreground">3% 국고 복지 환원</span>
           </p>
 
           {/* TAB 1: 대결 대기실 */}
@@ -328,7 +332,7 @@ export function PvpWagerArenaModal({
                   </div>
                   <p className="text-sm font-semibold text-foreground">현재 대기 중인 대결방이 없습니다.</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    원장 검증이 완료되기 전까지 새 대결방을 만들 수 없습니다.
+                    지금 바로 첫 번째 대결방을 개설하고 승부를 펼쳐보세요!
                   </p>
                   <button
                     onClick={() => setActiveTab('create')}

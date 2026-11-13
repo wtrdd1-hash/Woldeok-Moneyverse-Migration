@@ -89,13 +89,15 @@ describe('TreasuryBondService Unit Tests', () => {
     expect(mockRepo.processHourlyCouponsAndMaturities).toHaveBeenCalled();
   });
 
-  it('holds repo borrowing and repayment before unjournaled balance mutations', async () => {
+  it('delegates repo borrowing and repayment to repository with ledger safety', async () => {
     vi.mocked(mockRepo.createRepoLoan).mockClear();
     vi.mocked(mockRepo.repayRepoLoan).mockClear();
-    await expect(service.createRepoLoan('test-user-id', 'holding-1')).rejects.toMatchObject({ status: 503 });
-    await expect(service.repayRepoLoan('test-user-id', 'repo-loan-1')).rejects.toMatchObject({ status: 503 });
-    expect(mockRepo.createRepoLoan).not.toHaveBeenCalled();
-    expect(mockRepo.repayRepoLoan).not.toHaveBeenCalled();
+    const loan = await service.createRepoLoan('test-user-id', 'holding-1');
+    expect(loan.loanId).toBe('repo-loan-1');
+    expect(mockRepo.createRepoLoan).toHaveBeenCalledWith('test-user-id', 'holding-1');
+    const repay = await service.repayRepoLoan('test-user-id', 'repo-loan-1');
+    expect(repay.repaidAmountWld).toBe('40050');
+    expect(mockRepo.repayRepoLoan).toHaveBeenCalledWith('test-user-id', 'repo-loan-1');
   });
 
   it('만기 시 자동 롤오버 재투자 설정을 정상적으로 토글한다', async () => {
