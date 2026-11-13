@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.13.2218 — Spring Agent Skills (GPT/Codex + Gemini CLI)
+- [Guide EN](docs/development/SPRING_AGENT_SKILLS.md) / [KO](docs/development/SPRING_AGENT_SKILLS.ko.md) · [Worklog EN](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.md) / [KO](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.ko.md) · [Internal EN](docs/updates/v2026.11.13.2218-spring-skills-internal.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.13.2218-spring-skills-github.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-github.ko.md). Eight portable Spring skills installed for the mini-PC user; no runtime deployment. Gemini CLI interactive activation not tested (binary absent).
+
+
 **DOC-2026.11.11.1500 — [Authoritative documentation status](docs/CURRENT_DOCUMENTATION_STATUS.md) / [한국어](docs/CURRENT_DOCUMENTATION_STATUS.ko.md).** Historical entries below are preserved, not current deployment assurances. Test version API HTTP 502 observed; documentation-only change.
 
 
