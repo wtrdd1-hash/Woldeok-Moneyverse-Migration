@@ -312,7 +312,9 @@ export function BlackMarketAuctionModal({
                               fetchAuctions();
                               fetchBidLogs(selectedAuction.id);
                             }
-                          } catch {}
+                          } catch (err) {
+                            void err;
+                          }
                         }}
                         className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm min-h-[44px] transition-colors"
                       >
