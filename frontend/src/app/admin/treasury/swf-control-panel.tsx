@@ -56,7 +56,7 @@ export function SwfControlPanel({
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
-  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true' || true;
+  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true';
 
   const [isExecutingAction, setIsExecutingAction] = useState(false);
 
@@ -446,24 +446,47 @@ export function SwfControlPanel({
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
               {isEnabled ? (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleTriggerLiquidate}
-                    disabled={isExecutingAction || isRefreshing}
-                    className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
-                  >
-                    {isExecutingAction ? '처리 중...' : '국고 현금 환원 집행'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleTriggerRebalance}
-                    disabled={isExecutingAction || isRefreshing}
-                    className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
-                  >
-                    {isExecutingAction ? '리밸런싱 중...' : '포트폴리오 리밸런싱 집행'}
-                  </Button>
+                  {isSwfOperational ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleTriggerLiquidate}
+                        disabled={isExecutingAction || isRefreshing}
+                        className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
+                      >
+                        {isExecutingAction ? '처리 중...' : '국고 현금 환원 집행'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleTriggerRebalance}
+                        disabled={isExecutingAction || isRefreshing}
+                        className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
+                      >
+                        {isExecutingAction ? '리밸런싱 중...' : '포트폴리오 리밸런싱 집행'}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold"
+                      >
+                        평가액 환원 불가 (정산 증빙 필요)
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold"
+                      >
+                        실거래 검증 전 리밸런싱 보류
+                      </Button>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
