@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+
+## v2026.11.13.1 — Spring Boot full-platform migration (ARCHITECTURE DRAFT / RELEASE HOLD)
+Owner requested a staged **full backend** transition from NestJS/TypeScript to Java/Spring Boot, including all API, admin, economy, integrations, bots, jobs and eventual NestJS retirement. Preserve Next.js UI, Android contracts and PostgreSQL canonical ledger; finance commands migrate last with a single active writer. [English architectural draft](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [Korean](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md). G0 actual release/DB topology, restore, resource baseline and full contract inventory are prerequisites. No Java code, test deployment, production promotion, main merge or implementation-plan approval.
+
 ## v2026.11.09.1946.2 — Blog publication owner override / BRANCH CANDIDATE
 Owner directive 2026-11-09 supersedes only blog visibility/advertisement gates. See [EN/KO addendum](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) and [Korean](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md). Existing monetary, source and Release HOLD gates stay intact.
 

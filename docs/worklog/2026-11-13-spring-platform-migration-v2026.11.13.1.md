@@ -14,6 +14,15 @@
 - Existing QA/finance findings from dated planning docs are **historical**, not fresh live certification.
 - Skills: `using-superpowers`, `brainstorming` (architectural draft/review gate), `using-git-worktrees`, `verification-before-completion`. The detailed implementation-plan gate follows user review of the architectural draft.
 
+
+### Mid-work checkpoint — 2026-11-13 KST
+- Drafted bilingual end-to-end architecture covering all NestJS modules, legacy JS bots, external integrations, Android, DB/security, operations and eventual NestJS retirement. Recommended modular Spring and G0–G6 gated strangler migration; financial writer stays single-owner.
+- Added versioned planning-only release note and bilingual links in current Project/Integrated master plans plus both changelogs. Existing feature drafts were not overwritten.
+- Re-fetched origin/main mid-task: still `90965f1dd84e272e757041eb9afd8a477699eb7c`; no intervening main change at this checkpoint.
+- Adjusted G0 exit: unverified finance provenance blocks finance cutover and Production, not safe isolated read-only groundwork; this is explicitly documented.
+- Created separate internal and GitHub-facing update reports, each in English and Korean, linked from the version note.
+- Current source/tree and deployment were only inspected; no application, DB or runtime mutation.
+
 ## In progress — checkpoints
 - [x] Confirm user goal and classify as an architecture-wide planning task.
 - [x] Inspect primary code/document boundaries and isolate the branch.

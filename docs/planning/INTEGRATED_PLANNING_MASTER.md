@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
+
+## v2026.11.13.1 — Complete Spring Boot platform backend migration candidate (DRAFT / NO RUNTIME CHANGE)
+Independent owner-directed architecture track: replace **all** NestJS API, admin, finance, game, integrations, bot and scheduler functions through G0–G6, culminating in NestJS retirement; retain Next.js/React presentation and canonical PostgreSQL stored-function ledger. Recommended Spring modular backend + reversible strangler routing; single finance writer, session/OTP/CSRF and Android/API parity, isolated exact-SHA Test, real financial reconciliation, resource budget, restore and zero-downtime rollback are hard gates. Real Production routing currently has conflicting Kubernetes vs systemd documentation; G0 must certify live topology. No implementation/DB/data/Test/Production/main mutation. [Full design](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [KO](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md) · [worklog](../worklog/2026-11-13-spring-platform-migration-v2026.11.13.1.md).
+
 ## v2026.11.09.1946.2 — Blog unverified visibility override / BRANCH CANDIDATE
 Owner directive 2026-11-09 supersedes only blog visibility/advertisement gates. See [EN/KO addendum](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) and [Korean](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md). Existing monetary, source and Release HOLD gates stay intact.
 
