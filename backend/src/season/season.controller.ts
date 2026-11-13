@@ -131,12 +131,14 @@ export class SeasonController {
   @ApiOperation({ summary: '시즌 보상 청구 및 수령' })
   async claimReward(
     @Req() request: RequestWithSession,
-    @Body() _body: ClaimSeasonRewardDto,
+    @Body() body: ClaimSeasonRewardDto,
   ) {
     try {
-      requireUserId(request);
-      // Keep auth/session/consent/CSRF guards; never invoke unsafe payout SQL.
-      throw new SeasonRewardLedgerHoldError();
+      const userId = requireUserId(request);
+      if (process.env.MONEYVERSE_SEASON_REWARD_LEDGER_OPERATIONAL !== 'true') {
+        throw new SeasonRewardLedgerHoldError();
+      }
+      return await this.service().claimReward(userId, body.seasonId, body.idempotencyKey);
     } catch (error: unknown) {
       if (error instanceof SeasonInputError) throw new BadRequestException(error.message);
       if (isExpectedCommandFailure(error)) {

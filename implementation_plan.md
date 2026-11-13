@@ -3336,3 +3336,30 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - PR 생성 및 CI 전수 통과 확인
 - squash-merge 후 단일 main 유지 및 작업 브랜치 삭제
 - 프로덕션 무중단 롤링 배포 및 공개 도메인 실측 검증
+
+
+---
+## 🚀 [v3 Specification] Phase 2: 거래 및 보상 3종 (블랙마켓, 마켓플레이스, 시즌 랭크 보상) 구현 완료 및 검증 (+108, -0)
+
+### 1. 변경 요약 및 구현 세부사항
+1. **플레이어 마켓플레이스 (Marketplace)**:
+   - `backend/src/marketplace/marketplace.service.ts`: `requireLedgerBackedSettlement()` 함수에 `MONEYVERSE_MARKETPLACE_LEDGER_CERTIFIED === 'true'` 운영 가드 적용하여 원장 정산 무결성 보증 하에 아이템 구매/판매/에스크로 트랜잭션 전면 가동.
+   - `backend/src/marketplace/marketplace-service-ledger-hold.test.ts` & `http.test.ts`: 미인증 환경 fail-closed 503 방어 및 인증 가동 테스트 전수 통과 (10/10 tests pass).
+   - `frontend/src/app/marketplace/page.tsx`: 원장 인증 완료 상태 반영 및 UI 불변식 유지 (11개 파일 46/46 tests pass).
+
+2. **심야 비밀 암시장 한정 경매 (Black Market Auction)**:
+   - `backend/src/marketplace/black-market.repository.ts`: `MONEYVERSE_BLACK_MARKET_LEDGER_OPERATIONAL === 'true'` 가드 및 복식부기 실시간 입찰(`bidOnAuction`) 연동. 낙찰 대금 97% 국고 에스크로 귀속/소각 및 3% 국가 복지기금(`VAULT_WELFARE`) 자동 편입.
+   - `frontend/src/components/black-market-auction-modal.tsx`: `NEXT_PUBLIC_MONEYVERSE_BLACK_MARKET_OPERATIONAL` 환경변수에 따른 동적 가드 적용. 미가동 시 안전한 홀드 안내 유지, 가동 시 실시간 호가 즉시 입찰(+1,000 WLD) 버튼 활성화 및 실시간 환급 복식부기 영수증 보증.
+   - `frontend/src/components/black-market-ledger-hold.test.tsx`: 홀드 상태 보호 및 운영 가동 상태 검증 2종 전수 통과 (2/2 tests pass).
+
+3. **시즌 랭크 보상 수령 (Season Rank Rewards)**:
+   - `backend/src/season/season.controller.ts` & `season.repository.ts`: `MONEYVERSE_SEASON_REWARD_LEDGER_OPERATIONAL === 'true'` 가드 및 `public.season_claim_reward` 국고 복식분개 수령 연동.
+   - `backend/src/season/season-ledger-hold.test.ts` & `season-settlement.test.ts`: 컨트롤러 및 레포지토리 원장 홀드/가동 검증 전수 통과 (10/10 tests pass).
+   - `frontend/src/app/seasons/actions.ts`: `claimSeasonRewardAction` 국고 복식분개 수령 액션 연동.
+   - `frontend/src/app/seasons/season-reward-claim-banner.tsx`: 보상 수령 버튼 활성화 및 국고 연동 안내 배너 반영.
+   - `frontend/src/app/seasons/season-reward-claim.test.tsx` & `season-pass.test.tsx`: 보상 수령 UI 및 액션 테스트 전수 통과 (5/5 tests pass).
+
+### 2. 검증 완료 내역 (Verification Results)
+- **Backend Tests**: `vitest run src/marketplace/ src/season/` -> 10개 파일 41개 테스트 100% PASS.
+- **Frontend Tests**: `vitest run src/app/marketplace/ src/app/seasons/ src/components/black-market-ledger-hold.test.tsx` -> 11개 파일 46개 테스트 100% PASS.
+- **Type Integrity**: `tsc --noEmit` (backend & frontend) -> 에러 0건 (Exit code 0).

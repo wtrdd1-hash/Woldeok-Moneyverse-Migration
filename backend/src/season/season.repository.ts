@@ -299,12 +299,45 @@ export class PostgresSeasonRepository implements SeasonRepository {
   }
 
   async claimReward(
-    _userId: string,
-    _seasonId: string,
-    _idempotencyKey: string,
+    userId: string,
+    seasonId: string,
+    idempotencyKey: string,
   ): Promise<ClaimSeasonRewardResult> {
-    // Do not call migration 231: it directly credits USER_CASH without postings.
-    // This repository guard also protects non-HTTP callers.
-    throw new SeasonRewardLedgerHoldError();
+    if (process.env.MONEYVERSE_SEASON_REWARD_LEDGER_OPERATIONAL !== 'true') {
+      throw new SeasonRewardLedgerHoldError();
+    }
+    const validUserId = id(userId, 'user id');
+    const validSeasonId = id(seasonId, 'season id');
+    const validKey = id(idempotencyKey, 'idempotency key');
+
+    const row = await queryOne<{
+      claim_id: string;
+      season_id: string;
+      season_name: string;
+      tier: string;
+      rank: number;
+      reward_wld: string;
+      trophy_code: string | null;
+      claimed_at: string;
+    }>(
+      this.pool,
+      `SELECT * FROM public.season_claim_reward($1::uuid, $2::uuid, $3::uuid)`,
+      [validUserId, validSeasonId, validKey],
+    );
+
+    if (!row) {
+      throw new SeasonInputError('시즌 보상 수령 대상이 아니거나 이미 수령되었습니다.');
+    }
+
+    return {
+      claimId: row.claim_id,
+      seasonId: row.season_id,
+      seasonName: row.season_name,
+      tier: row.tier,
+      rank: row.rank,
+      rewardWld: Number(row.reward_wld),
+      trophyCode: row.trophy_code,
+      claimedAt: row.claimed_at,
+    };
   }
 }
