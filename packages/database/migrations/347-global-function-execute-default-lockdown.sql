@@ -14,12 +14,16 @@ DECLARE
   routine record;
 BEGIN
   FOR routine IN
-    SELECT p.oid::regprocedure AS signature
+    SELECT p.oid::regprocedure AS signature, p.prokind
     FROM pg_catalog.pg_proc p
     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname = 'public' AND p.prosecdef
   LOOP
-    EXECUTE pg_catalog.format('REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC', routine.signature);
+    EXECUTE pg_catalog.format(
+      'REVOKE EXECUTE ON %s %s FROM PUBLIC',
+      CASE WHEN routine.prokind = 'p' THEN 'PROCEDURE' ELSE 'FUNCTION' END,
+      routine.signature
+    );
   END LOOP;
 END;
 $lockdown$;
