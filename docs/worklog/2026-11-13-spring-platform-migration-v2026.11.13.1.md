@@ -26,12 +26,18 @@
 ## In progress — checkpoints
 - [x] Confirm user goal and classify as an architecture-wide planning task.
 - [x] Inspect primary code/document boundaries and isolate the branch.
-- [ ] Write English canonical and Korean counterpart design/roadmap with migration waves and strict gates.
-- [ ] Update living/master plan references without overwriting independent work.
-- [ ] Add planning-version release notes and matching internal/GitHub changelog entries.
-- [ ] Re-fetch and compare origin/main mid-task, rebase the isolated branch only if safe.
-- [ ] Verify changed-file scope, bilingual parity, local Markdown links, and Git diff.
-- [ ] Commit/push work to remote branch and propose review (not production release).
+- [x] Write English canonical and Korean counterpart design/roadmap with migration waves and strict gates.
+- [x] Update living/master plan references without overwriting independent work.
+- [x] Add planning-version release notes and matching internal/GitHub changelog entries.
+- [x] Re-fetch and compare origin/main mid-task, rebase the isolated branch only if safe.
+- [x] Verify changed-file scope, bilingual parity, local Markdown links, and Git diff.
+- [x] Commit/push work to remote branch and propose review (not production release).
 
-## Finished state
-PENDING. Planning-only: no Java application implementation, test rollout, production promotion, DB/data mutation, or main merge was performed at the starting checkpoint.
+## Finished state — 2026-11-13 KST
+- **Planning output:** English/Korean architecture with 9 matching sections and G0–G6, bilingual main living/integrated references, changelogs, version notes, separate internal/GitHub updates. These are DRAFT documents, not approved runtime implementation.
+- **Validated:** documentation-only change set; `git diff --cached --check` passed after removing two Markdown trailing spaces; **54 local Markdown references inspected, 0 broken**; bilingual design stage/section/version checks passed; no product source or migration file was staged.
+- **GitHub:** kickoff commit `8e0094f37c`, architecture commit `93073ff96d`, branch `planning/spring-platform-migration-v2026.11.13.1` pushed, [Draft PR #3142](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3142) OPEN / NOT MERGED. This final evidence update is the last worklog checkpoint.
+- **Mid/final main check:** fetched `origin/main` and observed unchanged source base `90965f1dd84e272e757041eb9afd8a477699eb7c` before committing the reviewable draft. No other agent worktree was modified.
+- **Not run:** Java build, TypeScript regression suite, Test deployment, live authenticated QA, actual DB privileges/migration/ledger reconciliation, backup restore, Production promotion. These remain future G0–G6 gates; no claim of compatibility yet.
+- **No runtime impact:** no backend/frontend/bot/DB/Android code changes, service restarts, environment/secret changes, user funds mutation, release tag, GitHub Release or main merge.
+- **Review next:** owner decides backend boundary, modular/strangler architecture and finance-last single-writer policy. After written-spec acceptance only, develop G0/G1 detailed implementation plans; downstream code/deployment requires separate review and evidence.
