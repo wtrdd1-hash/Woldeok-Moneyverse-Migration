@@ -106,7 +106,10 @@ export class NationalPensionRepository {
 
   /** Certified: Historical NPS records reconciled with Treasury Core balanced ledger. */
   private assertLedgerSettlementCertified(): void {
-    return;
+    if (process.env.MONEYVERSE_PENSION_LEDGER_CERTIFIED === 'true') {
+      return;
+    }
+    throw new PensionLedgerSettlementHoldError();
   }
 
   /**
