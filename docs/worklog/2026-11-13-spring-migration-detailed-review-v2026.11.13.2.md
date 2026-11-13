@@ -12,8 +12,12 @@
 - External references under review: official Spring Boot requirements, Spring 4 migration guidance, GitHub artifact attestation/verification documentation.
 - State: STARTED. Create bilingual review/detailed appendix and retain user approval gates; no Java scaffolding, DB migration, Test deploy, or production change.
 
-## Mid-work checkpoint
-- PENDING.
+## Mid-work checkpoint — 2026-11-13 KST
+- Completed English/Korean section-by-section G0–G6 risk review with 10 specific gaps (R01–R10), source-specific implementation plan, stop/rollback rules and exact-evidence template.
+- Completed separate English/Korean artifact/Artifactory policy: JAR, OCI/GHCR, SHA and SBOM/provenance, manifest schema, retention, signing and restore; JFrog conditional rather than assumed installed.
+- Re-fetched origin/main during work: unchanged 90965f1dd84e272e757041eb9afd8a477699eb7c; Spring parent PR #3142 remains OPEN with unchanged SHA.
+- Resource observation corrected as timestamp-dependent (available RAM approximately 2960 MiB vs older snapshot 0.8 GiB); document G0 runtime topology mismatch (historical release v1550 vs observed running v1546 unit) as an unknown to verify.
+- Next: link parent draft and living plans, add bilingual change records, validate local docs and open stacked PR. No runtime/DB/Test/Production mutation.
 
 ## Finished state
 - PENDING. Final results, exact changed files, validation and GitHub state will be recorded here.
