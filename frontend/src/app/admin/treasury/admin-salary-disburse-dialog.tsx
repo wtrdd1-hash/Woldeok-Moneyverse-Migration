@@ -83,7 +83,7 @@ export function AdminSalaryDisburseDialog() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.message || '관리자 임금 지급 처리에 실패했습니다.');
+        throw new Error(data.error || data.message || '관리자 임금 지급 처리에 실패했습니다.');
       }
 
       setSuccessMsg(`임금 지급 완결! 전표 ID: ${data.result?.ledger_transaction_id || '기록됨'}`);

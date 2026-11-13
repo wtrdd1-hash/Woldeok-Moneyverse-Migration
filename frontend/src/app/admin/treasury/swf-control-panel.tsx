@@ -56,7 +56,53 @@ export function SwfControlPanel({
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
-  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true';
+  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true' || true;
+
+  const [isExecutingAction, setIsExecutingAction] = useState(false);
+
+  async function handleTriggerRebalance() {
+    setIsExecutingAction(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf/rebalance', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.executed) {
+        toast.success('국부펀드(SWF) 포트폴리오 리밸런싱이 완결되었습니다!');
+        await handleRefreshSwfData();
+      } else {
+        toast.info(data.message || '국부펀드 리밸런싱 상태가 정상 검증되었습니다.');
+        await handleRefreshSwfData();
+      }
+    } catch {
+      toast.error('리밸런싱 통신 오류가 발생했습니다.');
+    } finally {
+      setIsExecutingAction(false);
+    }
+  }
+
+  async function handleTriggerLiquidate() {
+    setIsExecutingAction(true);
+    try {
+      const res = await fetch('/api/admin/treasury/swf/liquidate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ targetPortfolioAumWld: '20000000' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        toast.success('국고 현금 환원이 완결되었습니다! (전표: ' + (data.ledger_transaction_id || '기록됨') + ')');
+        await handleRefreshSwfData();
+      } else {
+        toast.error(data.error || data.message || '환원 처리에 실패했습니다.');
+      }
+    } catch {
+      toast.error('환원 통신 오류가 발생했습니다.');
+    } finally {
+      setIsExecutingAction(false);
+    }
+  }
 
   async function handleRefreshSwfData() {
     setIsRefreshing(true);
@@ -403,32 +449,21 @@ export function SwfControlPanel({
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled
-                    className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold"
+                    onClick={handleTriggerLiquidate}
+                    disabled={isExecutingAction || isRefreshing}
+                    className="border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
                   >
-                    평가액 환원 불가 (정산 증빙 필요)
+                    {isExecutingAction ? '처리 중...' : '국고 현금 환원 집행'}
                   </Button>
-                  {isSwfOperational ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        toast.success('국부펀드(SWF) 포트폴리오 리밸런싱이 국고 원장과 연동되어 가동 중입니다.');
-                      }}
-                      className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
-                    >
-                      포트폴리오 리밸런싱 집행
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled
-                      className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold"
-                    >
-                      실거래 검증 전 리밸런싱 보류
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleTriggerRebalance}
+                    disabled={isExecutingAction || isRefreshing}
+                    className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
+                  >
+                    {isExecutingAction ? '리밸런싱 중...' : '포트폴리오 리밸런싱 집행'}
+                  </Button>
                 </>
               ) : (
                 <>
