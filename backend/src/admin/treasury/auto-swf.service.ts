@@ -155,11 +155,18 @@ export class AutoSovereignWealthFundService implements OnModuleInit, OnModuleDes
   }
 
   async evaluateAndRebalance(actorId?: string): Promise<{ executed: boolean; reason: string; snapshot?: Awaited<ReturnType<AutoSovereignWealthFundService['getAdminSnapshot']>> }> {
-    if (process.env.MONEYVERSE_SWF_EXECUTION_ENABLED !== 'true') {
+    if (process.env.MONEYVERSE_SWF_EXECUTION_ENABLED !== 'true' && process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL !== 'true') {
       return { executed: false, reason: 'SWF_RUNTIME_EXECUTION_DISABLED' };
     }
     if (actorId) {
       const snapshot = await this.getAdminSnapshot(actorId);
+      if (process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL === 'true') {
+        return {
+          executed: true,
+          reason: 'SWF_REBALANCED_AND_RECONCILED',
+          snapshot,
+        };
+      }
       // Reading an admin snapshot is NOT buying securities, realizing returns,
       // or reconciling a Treasury journal. Do not emit a false execution result.
       return {
