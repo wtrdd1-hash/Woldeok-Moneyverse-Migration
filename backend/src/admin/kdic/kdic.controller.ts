@@ -42,24 +42,33 @@ export class AdminKdicController {
   @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '예보료 징수 — 원장 검증 전 집행 보류' })
-  async assessPremiums() {
+  async assessPremiums(@Req() req?: RequestWithSession) {
     rejectUnverifiedKdicSettlement();
+    const actor = req?.session?.user_id ?? 'system';
+    const data = await this.kdicService.assessQuarterlyPremiums(actor);
+    return { success: true, data };
   }
 
   @Post('liquidity-loan')
   @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '긴급 유동성 대여 — 원장 검증 전 집행 보류' })
-  async injectLiquidity() {
+  async injectLiquidity(@Req() req?: RequestWithSession) {
     rejectUnverifiedKdicSettlement();
+    const actor = req?.session?.user_id ?? 'system';
+    const data = await this.kdicService.injectEmergencyLiquidity('BANK_COMMERCIAL', 1_000_000, actor);
+    return { success: true, data };
   }
 
   @Post('payout')
   @UseGuards(CsrfGuard)
   @ApiResponse({ status: 503, description: 'KDIC_LEDGER_SETTLEMENT_UNVERIFIED: financial settlement suspended' })
   @ApiOperation({ summary: '대위변제 — 원장 검증 전 집행 보류' })
-  async executePayout() {
+  async executePayout(@Req() req?: RequestWithSession) {
     rejectUnverifiedKdicSettlement();
+    const actor = req?.session?.user_id ?? 'system';
+    const data = await this.kdicService.executeDepositPayout('BANK_COMMERCIAL', 'member', actor);
+    return { success: true, data };
   }
 
 }

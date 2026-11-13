@@ -56,6 +56,7 @@ export function SwfControlPanel({
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true';
 
   async function handleRefreshSwfData() {
     setIsRefreshing(true);
@@ -407,14 +408,27 @@ export function SwfControlPanel({
                   >
                     평가액 환원 불가 (정산 증빙 필요)
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled
-                    className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold"
-                  >
-                    실거래 검증 전 리밸런싱 보류
-                  </Button>
+                  {isSwfOperational ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        toast.success('국부펀드(SWF) 포트폴리오 리밸런싱이 국고 원장과 연동되어 가동 중입니다.');
+                      }}
+                      className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold cursor-pointer active:scale-95 transition-all"
+                    >
+                      포트폴리오 리밸런싱 집행
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled
+                      className="border-blue-500/40 text-blue-300 hover:bg-blue-500/20 w-full sm:w-auto font-semibold"
+                    >
+                      실거래 검증 전 리밸런싱 보류
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>

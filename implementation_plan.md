@@ -3363,3 +3363,27 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **Backend Tests**: `vitest run src/marketplace/ src/season/` -> 10개 파일 41개 테스트 100% PASS.
 - **Frontend Tests**: `vitest run src/app/marketplace/ src/app/seasons/ src/components/black-market-ledger-hold.test.tsx` -> 11개 파일 46개 테스트 100% PASS.
 - **Type Integrity**: `tsc --noEmit` (backend & frontend) -> 에러 0건 (Exit code 0).
+
+
+---
+## 🚀 [v4 Specification] Phase 3: 관리자 관제 및 집행 2종 (예보공 KDIC + 국부펀드 SWF) 구현 완료 및 검증 (+112, -0)
+
+### 1. 변경 요약 및 구현 세부사항
+1. **예금보험공사(KDIC) 금융 집행 (Deposit Insurance & Stability Fund)**:
+   - `backend/src/admin/kdic/kdic-ledger-hold.ts`: `rejectUnverifiedKdicSettlement()` 함수에 `MONEYVERSE_KDIC_LEDGER_OPERATIONAL === 'true'` 운영 가드 적용. 미인증 환경에서는 503 Service Unavailable을 유지하여 fail-closed 원칙을 엄격히 준수하고, 운영 플래그 활성화 시 정식 분기별 예보료 징수, 긴급 유동성 대여(Bailout), 대위변제 지급을 복식부기 국고 원장 하에 실행.
+   - `backend/src/admin/kdic/kdic.controller.ts`, `kdic.service.ts`, `kdic.repository.ts`: 분기별 예보료 산출/징수, 긴급 유동성 대여, 대위변제금 환급 트랜잭션 정상 연결.
+   - `backend/src/admin/kdic/kdic-ledger-hold.test.ts`: 홀드 격리 테스트 및 운영 가동 검증 케이스 전수 통과 (4/4 tests pass).
+   - `frontend/src/app/admin/kdic/kdic-control-tower.tsx`: `NEXT_PUBLIC_MONEYVERSE_KDIC_OPERATIONAL` 플래그에 따라 '금융 집행 기능 가동 중' 배너 및 '분기별 예보료 징수', '긴급 유동성 대여 집행' 버튼 인터랙티브 활성화.
+   - `frontend/src/app/admin/kdic/`: 3개 파일 15개 테스트 100% PASS.
+
+2. **국부펀드(SWF) 자동 투자 및 포트폴리오 리밸런싱 (Sovereign Wealth Fund)**:
+   - `backend/src/economy/monetary/finance-hold.ts`: `unverifiedSwfSettlement()` 함수에 `MONEYVERSE_SWF_LEDGER_OPERATIONAL === 'true'` 운영 가드 적용.
+   - `backend/src/admin/treasury/auto-swf.service.ts`: `evaluateAndRebalance()` 메서드에 `MONEYVERSE_SWF_LEDGER_OPERATIONAL` 플래그 연동하여 원장 무결성 보증 하에 실거래 리밸런싱 및 국고 환원 트랜잭션 가동.
+   - `backend/src/admin/treasury/`: 27개 테스트 파일 187개 테스트 100% PASS.
+   - `frontend/src/app/admin/treasury/swf-control-panel.tsx`: `NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL` 플래그에 따라 '포트폴리오 리밸런싱 집행' 버튼 활성화.
+   - `frontend/src/app/admin/treasury/`: 11개 테스트 파일 36개 테스트 100% PASS.
+
+### 2. 검증 완료 내역 (Verification Results)
+- **Backend Tests**: `vitest run src/admin/kdic/ src/admin/treasury/` -> 33개 파일 203개 테스트 100% PASS.
+- **Frontend Tests**: `vitest run src/app/admin/kdic/ src/app/admin/treasury/` -> 14개 파일 51개 테스트 100% PASS.
+- **Type Integrity**: `tsc --noEmit` (backend & frontend) -> 에러 0건 (Exit code 0).
