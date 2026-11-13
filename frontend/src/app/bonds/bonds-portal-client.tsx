@@ -149,17 +149,51 @@ export function BondsPortalClient({
   };
 
   const handleBorrowRepo = async (holdingId: string, bondName: string) => {
-    toast.info(
-      `[국채 레포 대출 안전 보류 안내]\n가상 국채 담보 레포 대출은 미정산 통화 발행 방지를 위해 국고 코어 복식분개 정산 검증 기간 동안 안전하게 일시 보류됩니다.`,
-      { duration: 5000 },
-    );
+    if (!isLoggedIn) {
+      toast.error('로그인이 필요합니다.');
+      return;
+    }
+    setIsProcessingLoan(true);
+    try {
+      const res = await fetch('/api/bonds/repo-loans/borrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ holdingId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '대출 신청 실패');
+
+      toast.success(
+        `[${bondName}] 담보 대출 완료! 액면가 80% 한도 ${groupDigits(data.loanAmountWld)} WLD가 계좌로 입금되었습니다.`,
+      );
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || '대출 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessingLoan(false);
+    }
   };
 
   const handleRepayRepo = async (loanId: string) => {
-    toast.info(
-      `[국채 레포 상환 안내]\n국채 담보 상환은 국고 코어 복식분개 정산 검증 완료 후 정식 처리됩니다.`,
-      { duration: 5000 },
-    );
+    setIsProcessingLoan(true);
+    try {
+      const res = await fetch('/api/bonds/repo-loans/repay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loanId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '상환 실패');
+
+      toast.success(
+        `대출 원리금 ${groupDigits(data.repaidAmountWld)} WLD 상환 완료! 국채 담보 잠금이 해제되었습니다.`,
+      );
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || '상환 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessingLoan(false);
+    }
   };
 
   const handleToggleRollover = async (holdingId: string, current: boolean) => {
@@ -518,13 +552,12 @@ export function BondsPortalClient({
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={true}
+                          disabled={isProcessingLoan}
                           onClick={() => handleBorrowRepo(h.id, h.bond_name)}
-                          className="text-xs min-h-[44px] sm:min-h-[36px] gap-1 border-border/60 text-muted-foreground opacity-75 cursor-not-allowed"
-                          title="국고 코어 복식분개 원장 정산 검증 중 일시 보류"
+                          className="text-xs min-h-[44px] sm:min-h-[36px] gap-1 border-sky-500/40 text-sky-600 dark:text-sky-400"
                         >
-                          <Lock className="h-3 w-3" />
-                          80% 담보대출 (원장 정산 중)
+                          <Landmark className="h-3 w-3" />
+                          80% 담보대출 신청
                         </Button>
                       )}
                     </div>
@@ -546,15 +579,15 @@ export function BondsPortalClient({
             </div>
           </div>
 
-          {/* 국고 복식분개 원장 정산 검증 보류 안내 배너 */}
-          <div className="p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs flex items-start gap-2.5">
-            <Info className="h-4 w-4 text-sky-400 shrink-0 mt-0.5" />
+          {/* 국고 복식분개 원장 정산 완료 안내 배너 */}
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex items-start gap-2.5">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-semibold text-foreground">
-                국고 복식분개 정산 검증에 따른 레포(Repo) 대출 안전 보류 안내
+                국고 복식분개 원장 인증 완료: 초저리 레포(Repo) 대출 정상 가동
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                가상 국채 담보 레포 대출 및 상환 기능은 미정산 통화 발행 방지를 위해 국고 코어 복식분개 원장 정산 검증 기간 동안 안전하게 일시 보류됩니다. 기존 보유 국채의 표면금리 및 만기 이자는 정상 적립됩니다.
+                보유 중인 가상 국채를 담보로 액면가 80% 한도, 연 3.5% 초저리로 즉시 WLD를 대출받을 수 있습니다. 원리금 상환 시 담보 잠금이 즉시 해제되며 이자 수취가 유지됩니다.
               </p>
             </div>
           </div>

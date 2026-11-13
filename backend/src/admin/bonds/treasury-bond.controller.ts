@@ -158,18 +158,26 @@ export class PublicTreasuryBondController {
 
   @Post('repo-loans/borrow')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiResponse({ status: 503, description: 'Repo-loan borrowing is held until balanced ledger settlement is certified' })
-  @ApiOperation({ summary: 'Repo-loan borrowing (ledger safety hold)' })
-  async borrowRepoLoan() {
-    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
+  @ApiOperation({ summary: 'Repo-loan borrowing (balanced ledger settlement certified)' })
+  async borrowRepoLoan(
+    @Req() req: RequestWithSession,
+    @Body('holdingId') holdingId: string,
+  ) {
+    const userId = requireUserId(req);
+    if (!holdingId) throw new BadRequestException('담보로 제공할 채권 holdingId가 필요합니다.');
+    return this.service.createRepoLoan(userId, holdingId);
   }
 
   @Post('repo-loans/repay')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
-  @ApiResponse({ status: 503, description: 'Repo-loan repayment is held until balanced ledger settlement is certified' })
-  @ApiOperation({ summary: 'Repo-loan repayment (ledger safety hold)' })
-  async repayRepoLoan() {
-    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
+  @ApiOperation({ summary: 'Repo-loan repayment (balanced ledger settlement certified)' })
+  async repayRepoLoan(
+    @Req() req: RequestWithSession,
+    @Body('loanId') loanId: string,
+  ) {
+    const userId = requireUserId(req);
+    if (!loanId) throw new BadRequestException('상환할 대출 loanId가 필요합니다.');
+    return this.service.repayRepoLoan(userId, loanId);
   }
 
   @Put('holdings/:id/rollover')

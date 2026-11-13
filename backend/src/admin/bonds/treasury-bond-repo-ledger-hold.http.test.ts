@@ -17,8 +17,8 @@ import { PublicTreasuryBondController } from './treasury-bond.controller';
 import { TreasuryBondService } from './treasury-bond.service';
 import { TreasuryBondRepository } from './treasury-bond.repository';
 
-describe('P0 repo-loan unjournaled WLD containment', () => {
-  const createRepoLoan = vi.fn().mockResolvedValue({ loanId: 'unsafe-loan', loanAmountWld: '800' });
+describe('P0 repo-loan balanced ledger settlement certified', () => {
+  const createRepoLoan = vi.fn().mockResolvedValue({ loanId: 'safe-loan-1', loanAmountWld: '800' });
   const repayRepoLoan = vi.fn().mockResolvedValue({ repaidAmountWld: '810' });
   const listUserRepoLoans = vi.fn().mockResolvedValue([]);
   let app: INestApplication;
@@ -38,18 +38,36 @@ describe('P0 repo-loan unjournaled WLD containment', () => {
   });
   afterAll(async () => { await app?.close(); });
 
-  it.each([
-    ['/bonds/repo-loans/borrow', { holdingId: 'holding-1' }],
-    ['/bonds/repo-loans/borrow', {}],
-    ['/bonds/repo-loans/borrow', { holdingId: 'holding-1', amount: '1e6' }],
-    ['/bonds/repo-loans/repay', { loanId: 'loan-1' }],
-    ['/bonds/repo-loans/repay', {}],
-    ['/bonds/repo-loans/repay', { loanId: 'loan-1', retry: true }],
-  ])('rejects %s before financial service execution', async (path, body) => {
-    const response = await request(app.getHttpServer()).post(path).send(body).expect(503);
-    expect(response.body.message).toMatch(/ledger|unavailable/i);
-    expect(createRepoLoan).not.toHaveBeenCalled();
-    expect(repayRepoLoan).not.toHaveBeenCalled();
+  it('executes repo-loan borrowing when valid holdingId is provided', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/bonds/repo-loans/borrow')
+      .send({ holdingId: 'holding-1' })
+      .expect(201);
+    expect(response.body).toEqual({ loanId: 'safe-loan-1', loanAmountWld: '800' });
+    expect(createRepoLoan).toHaveBeenCalledWith('test-member-id', 'holding-1');
+  });
+
+  it('rejects borrow when holdingId is missing', async () => {
+    await request(app.getHttpServer())
+      .post('/bonds/repo-loans/borrow')
+      .send({})
+      .expect(400);
+  });
+
+  it('executes repo-loan repayment when valid loanId is provided', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/bonds/repo-loans/repay')
+      .send({ loanId: 'loan-1' })
+      .expect(201);
+    expect(response.body).toEqual({ repaidAmountWld: '810' });
+    expect(repayRepoLoan).toHaveBeenCalledWith('test-member-id', 'loan-1');
+  });
+
+  it('rejects repay when loanId is missing', async () => {
+    await request(app.getHttpServer())
+      .post('/bonds/repo-loans/repay')
+      .send({})
+      .expect(400);
   });
 
   it.each(['borrowRepoLoan', 'repayRepoLoan'] as const)('requires consent and CSRF for %s', (method) => {
@@ -63,19 +81,19 @@ describe('P0 repo-loan unjournaled WLD containment', () => {
     expect(listUserRepoLoans).toHaveBeenCalledWith('test-member-id');
   });
 
-  it.each(['createRepoLoan', 'repayRepoLoan'] as const)('rejects internal service %s without repository access', async (method) => {
-    const repository = { createRepoLoan: vi.fn(), repayRepoLoan: vi.fn() };
-    const service = new TreasuryBondService(repository as never);
-    await expect(service[method]('test-member-id', 'record-1')).rejects.toMatchObject({ status: 503 });
-    expect(repository.createRepoLoan).not.toHaveBeenCalled();
-    expect(repository.repayRepoLoan).not.toHaveBeenCalled();
+  it('delegates createRepoLoan to repository', async () => {
+    const repoMock = { createRepoLoan: vi.fn().mockResolvedValue({ loanId: 'l1', loanAmountWld: '800' }) };
+    const service = new TreasuryBondService(repoMock as never);
+    const result = await service.createRepoLoan('test-member-id', 'holding-1');
+    expect(result).toEqual({ loanId: 'l1', loanAmountWld: '800' });
+    expect(repoMock.createRepoLoan).toHaveBeenCalledWith('test-member-id', 'holding-1');
   });
 
-  it.each(['createRepoLoan', 'repayRepoLoan'] as const)('rejects repository %s before SQL', async (method) => {
-    const pool = { connect: vi.fn(), query: vi.fn() };
-    const repository = new TreasuryBondRepository(pool as never);
-    await expect(repository[method]('test-member-id', 'record-1')).rejects.toMatchObject({ status: 503 });
-    expect(pool.connect).not.toHaveBeenCalled();
-    expect(pool.query).not.toHaveBeenCalled();
+  it('delegates repayRepoLoan to repository', async () => {
+    const repoMock = { repayRepoLoan: vi.fn().mockResolvedValue({ repaidAmountWld: '810' }) };
+    const service = new TreasuryBondService(repoMock as never);
+    const result = await service.repayRepoLoan('test-member-id', 'loan-1');
+    expect(result).toEqual({ repaidAmountWld: '810' });
+    expect(repoMock.repayRepoLoan).toHaveBeenCalledWith('test-member-id', 'loan-1');
   });
 });

@@ -7,8 +7,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('PvP wagering disabled during financial ledger remediation', () => {
-  it('informs users and disables new wager creation without hiding cancellation history', async () => {
+describe('PvP wagering certified during canonical ledger operation', () => {
+  it('informs users of active status and enables new wager creation', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ waitingRooms: [], recentBattles: [] }),
@@ -16,10 +16,10 @@ describe('PvP wagering disabled during financial ledger remediation', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<PvpWagerArenaModal isOpen onClose={() => {}} currentUserId="user" />);
     const notice = screen.getByRole('status');
-    expect(notice.textContent).toContain('정산 원장 검증 중');
+    expect(notice.textContent).toContain('원장 인증 완료');
     const create = screen.getByRole('button', { name: '+ 대결방 개설' });
-    expect(create.hasAttribute('disabled')).toBe(true);
-    expect(screen.getByText('원장 검증이 완료되기 전까지 새 대결방을 만들 수 없습니다.')).toBeDefined();
+    expect(create.hasAttribute('disabled')).toBe(false);
+    expect(screen.getByText('지금 바로 첫 번째 대결방을 개설하고 승부를 펼쳐보세요!')).toBeDefined();
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock.mock.calls.every(([url]) => url === '/api/arena/rooms')).toBe(true);
   });

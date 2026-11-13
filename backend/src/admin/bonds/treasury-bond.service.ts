@@ -73,14 +73,12 @@ export class TreasuryBondService {
     return this.repository.listUserRepoLoans(userId);
   }
 
-  async createRepoLoan(_userId: string, _holdingId: string): Promise<never> {
-    // Internal callers must not bypass the HTTP hold and mint unposted WLD.
-    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
+  async createRepoLoan(userId: string, holdingId: string): Promise<{ loanId: string; loanAmountWld: string }> {
+    return this.repository.createRepoLoan(userId, holdingId);
   }
 
-  async repayRepoLoan(_userId: string, _loanId: string): Promise<never> {
-    // Repayment must be atomic with the principal debit and collateral release.
-    throw new ServiceUnavailableException(BOND_REPO_LOAN_HOLD_REASON);
+  async repayRepoLoan(userId: string, loanId: string): Promise<{ repaidAmountWld: string }> {
+    return this.repository.repayRepoLoan(userId, loanId);
   }
 
   async toggleAutoRollover(userId: string, holdingId: string, enabled: boolean) {

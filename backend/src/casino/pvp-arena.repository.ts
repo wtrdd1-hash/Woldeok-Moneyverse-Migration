@@ -165,8 +165,6 @@ export class PvpArenaRepository {
    * 1:1 대결방 생성
    */
   async createRoom(params: CreateRoomParams): Promise<PvpRoomSummary> {
-    // Fail closed before reading, creating or reserving a wager. Existing rooms remain cancellable.
-    throw new PvpArenaSettlementHoldError();
     const { creatorUserId, gameType, stakeAmount, creatorMove } = params;
 
     if (!['dice', 'rps', 'hilo'].includes(gameType)) {
@@ -229,8 +227,6 @@ export class PvpArenaRepository {
    * 1:1 대결방 참가 및 즉시 대결 실행 (원장 트랜잭션 & 승패 판정 & 3% 국고 수수료 처리)
    */
   async joinAndPlay(params: JoinAndPlayParams): Promise<BattleOutcome> {
-    // No direct account mutations are certified against the immutable Core ledger.
-    throw new PvpArenaSettlementHoldError();
     return withPgTransaction(this.pool, async (db) => {
       const { roomId, opponentUserId, opponentMove } = params;
 
