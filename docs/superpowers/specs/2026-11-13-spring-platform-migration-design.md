@@ -4,6 +4,8 @@
 
 [한국어 설계](2026-11-13-spring-platform-migration-design.ko.md) · [Task worklog](../../worklog/2026-11-13-spring-platform-migration-v2026.11.13.1.md)
 
+[v2026.11.13.2 section cautions and detailed implementation plan](../../planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) · [Artifact/Artifactory lifecycle](../../planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) (DRAFT supplement; parent remains review-only).
+
 ## 1. Owner direction, success, and scope
 
 The owner requests a **systematic platform-wide transition from TypeScript/NestJS to Java/Spring Boot**. This design covers **every current backend/API, background worker, integration, administrator function, and scheduled subsystem**, including the exit of NestJS. It does not silently reinterpret "Spring migration" as "move the treasury only."

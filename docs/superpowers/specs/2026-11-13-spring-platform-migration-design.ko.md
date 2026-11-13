@@ -4,6 +4,8 @@
 
 [English canonical](2026-11-13-spring-platform-migration-design.md) · [작업기록](../../worklog/2026-11-13-spring-platform-migration-v2026.11.13.1.ko.md)
 
+[v2026.11.13.2 장별 주의·상세 이행 계획](../../planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) · [아티팩트·Artifactory 보관/롤백](../../planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) (검토용 보완 초안).
+
 ## 1. 사용자 지시·성공 조건·범위
 
 사용자는 기존 TypeScript/NestJS 백엔드를 **전체 시스템 절차에 따라 Java/Spring Boot로 전면 전환**하도록 기획 시작을 지시했다. 대상은 국고만이 아니라 **기존 전체 백엔드/API, 비동기 작업, 외부 연동, 관리자 기능, 예약 작업**, 나아가 NestJS 종료까지다.

@@ -1,5 +1,8 @@
 # 📚 Document Catalog
 
+## v2026.11.13.2 — Spring migration detailed review and artifact policy (DRAFT)
+- [EN section-by-section review](planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [KO](planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) · [EN artifact/Artifactory](planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [KO](planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) · [Worklog](worklog/2026-11-13-spring-migration-detailed-review-v2026.11.13.2.md). Stacked PR #3144 on #3142, no live deployment; G0/G1 remain gated.
+
 **DOC-2026.11.11.1500 — [Current evidence/authority navigation](CURRENT_DOCUMENTATION_STATUS.md) / [한국어](CURRENT_DOCUMENTATION_STATUS.ko.md).** This index contains historical descriptions; follow the living project plan and exact runtime evidence rather than treating old release labels as current. Documentation-only; Test version API was HTTP 502 at the recorded time.
 
 
