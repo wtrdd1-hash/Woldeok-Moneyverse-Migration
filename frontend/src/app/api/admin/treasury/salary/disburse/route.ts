@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const result = await mutate<unknown>('/api/treasury/salary/disburse', {
+    const result = await mutate<unknown>('/api/v1/admin/treasury/salary/disburse', {
       method: 'POST',
       body,
     });

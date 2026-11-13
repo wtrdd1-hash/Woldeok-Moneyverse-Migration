@@ -3387,3 +3387,25 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 - **Backend Tests**: `vitest run src/admin/kdic/ src/admin/treasury/` -> 33개 파일 203개 테스트 100% PASS.
 - **Frontend Tests**: `vitest run src/app/admin/kdic/ src/app/admin/treasury/` -> 14개 파일 51개 테스트 100% PASS.
 - **Type Integrity**: `tsc --noEmit` (backend & frontend) -> 에러 0건 (Exit code 0).
+
+
+---
+## 🚀 [v5 Specification] 조폐국 화폐발행 국고 충전(MINT Topup) 및 관리자 임금 지급 라우트 매핑 404 해결 (+65, -0)
+
+### 1. 현상 분석 및 원인 규명
+- **현상**: 조폐국(MINT) 화폐발행 국고 즉시 충전 모달(AdminMintTopupDialog)에서 유동성 보충(1,000,000 WLD) 및 2FA OTP 입력 후 충전 버튼 클릭 시 `Cannot POST /api/treasury/mint-topup` 에러 발생.
+- **근본 원인**:
+  - NestJS 백엔드 `treasury.controller.ts`는 `@Controller("admin/treasury")`와 `@Post("mint-topup")`, `@Post("salary/disburse")`로 선언되어 있으며, 글로벌 프리픽스 및 버전 프리픽스에 의해 실제 유효 엔드포인트는 `/api/v1/admin/treasury/mint-topup` 및 `/api/v1/admin/treasury/salary/disburse`임.
+  - 그러나 Next.js App Router 프록시 라우트(`frontend/src/app/api/admin/treasury/mint-topup/route.ts` 및 `salary/disburse/route.ts`)에서 백엔드 mutate 호출 경로가 `/api/treasury/mint-topup`, `/api/treasury/salary/disburse`로 축약 작성되어 백엔드 Express에서 404 Route Not Found를 응답함.
+
+### 2. 구현 변경점 (Proposed Changes)
+1. `frontend/src/app/api/admin/treasury/mint-topup/route.ts`:
+   - `mutate<unknown>('/api/treasury/mint-topup')` -> `mutate<unknown>('/api/v1/admin/treasury/mint-topup')`로 엔드포인트 수정.
+2. `frontend/src/app/api/admin/treasury/salary/disburse/route.ts`:
+   - `mutate<unknown>('/api/treasury/salary/disburse')` -> `mutate<unknown>('/api/v1/admin/treasury/salary/disburse')`로 엔드포인트 수정.
+3. `frontend/src/app/api/admin/treasury/mint-topup/route.test.ts` (신규):
+   - 조폐국 국고 충전 라우트가 백엔드 표준 엔드포인트(`/api/v1/admin/treasury/mint-topup`)로 정확한 파라미터(amountWld, reason, otpCode, requestKey)를 전달하는지 검증하는 단위 테스트 추가.
+
+### 3. 검증 결과 (Verification Results)
+- **신규 라우트 계약 테스트**: `vitest run src/app/api/admin/treasury/mint-topup/route.test.ts` -> 1 passed (100% PASS).
+- **기존 모달 UI 계약 테스트**: `vitest run src/app/admin/treasury/admin-mint-topup-contract.test.tsx src/app/admin/treasury/admin-salary-and-mint-dialogs.test.tsx` -> 2 passed, 3 tests (100% PASS).
