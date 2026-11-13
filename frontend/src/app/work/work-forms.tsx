@@ -57,7 +57,7 @@ export function JobSwitchButton({
     <div className="grid gap-1.5 w-full">
       <form action={action} className="w-full">
         <input type="hidden" name="jobType" value={job.code} />
-        <SubmitButton variant="outline" className="w-full text-xs font-medium">
+        <SubmitButton variant="outline" className="w-full min-h-[44px] text-xs font-medium">
           {isEn ? `Switch to ${jobName}` : `${jobName}으로 전직하기`}
         </SubmitButton>
       </form>
@@ -242,7 +242,7 @@ export function TaskCompleteModalButton({
         variant={isActiveJob ? 'default' : 'outline'}
         disabled={!isActiveJob || rewardPaused || Boolean(blockedReason)}
         onClick={handleOpen}
-        className="w-full font-semibold shadow-sm transition-all"
+        className="w-full min-h-[48px] font-semibold shadow-sm transition-all"
       >
         {!isActiveJob
           ? isEn

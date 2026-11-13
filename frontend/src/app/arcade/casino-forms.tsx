@@ -41,35 +41,35 @@ function QuickStakeButtons({
       <button
         type="button"
         onClick={() => onAdd(1000)}
-        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+        className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
       >
         +1,000
       </button>
       <button
         type="button"
         onClick={() => onAdd(5000)}
-        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+        className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
       >
         +5,000
       </button>
       <button
         type="button"
         onClick={() => onAdd(10000)}
-        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+        className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
       >
         +10,000
       </button>
       <button
         type="button"
         onClick={() => onAdd(50000)}
-        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+        className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
       >
         +50,000
       </button>
       <button
         type="button"
         onClick={onMax}
-        className="min-h-9 px-3 py-1 text-xs font-bold rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+        className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-bold rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-all active:scale-95"
       >
         MAX
       </button>
@@ -257,28 +257,28 @@ export function SelfLimitForm() {
             <button
               type="button"
               onClick={() => setBetLimit('0')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               무제한
             </button>
             <button
               type="button"
               onClick={() => setBetLimit('500')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               500 WLD
             </button>
             <button
               type="button"
               onClick={() => setBetLimit('1000')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               1,000 WLD
             </button>
             <button
               type="button"
               onClick={() => setBetLimit('2000')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               2,000 WLD
             </button>
@@ -331,28 +331,28 @@ export function SelfLimitForm() {
             <button
               type="button"
               onClick={() => setLossLimit('0')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               무제한
             </button>
             <button
               type="button"
               onClick={() => setLossLimit('200')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               200 WLD
             </button>
             <button
               type="button"
               onClick={() => setLossLimit('500')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               500 WLD
             </button>
             <button
               type="button"
               onClick={() => setLossLimit('1000')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+              className="min-h-[44px] sm:min-h-[36px] px-3 py-1 text-xs font-semibold rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground transition-all active:scale-95"
             >
               1,000 WLD
             </button>
