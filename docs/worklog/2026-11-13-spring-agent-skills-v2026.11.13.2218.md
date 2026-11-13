@@ -24,4 +24,3 @@ Eight instruction-only portable skills and English/Korean documentation authored
 - Re-fetched `origin/main`: `90965f1dd8`, unchanged during implementation. This task has no Spring build or live app test because it installs only Markdown agent instructions.
 - Installation content commit: `02afbce24c`; final documentation checkpoint may advance branch HEAD.
 - Production and official Test service/data were not touched. No runtime promotion or finance modification claimed.
-
