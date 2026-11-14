@@ -75,7 +75,7 @@ export function KdicControlTower({ initialData, initialLedger = null }: { initia
   const [loading, setLoading] = useState(false);
   const [collectModalOpen, setCollectModalOpen] = useState(false);
   const [collectSuccessMsg, setCollectSuccessMsg] = useState<string | null>(null);
-  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_KDIC_OPERATIONAL !== 'false';
+  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_KDIC_OPERATIONAL === 'true';
   const [isCollecting, setIsCollecting] = useState(false);
   const refreshData = async (silent = false) => {
     setLoading(true);

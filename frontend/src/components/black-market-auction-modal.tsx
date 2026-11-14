@@ -122,7 +122,7 @@ export function BlackMarketAuctionModal({
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_BLACK_MARKET_OPERATIONAL !== 'false';
+  const isOperational = process.env.NEXT_PUBLIC_MONEYVERSE_BLACK_MARKET_OPERATIONAL === 'true';
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
