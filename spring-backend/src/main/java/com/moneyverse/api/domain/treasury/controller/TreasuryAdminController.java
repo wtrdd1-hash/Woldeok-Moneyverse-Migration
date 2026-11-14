@@ -30,7 +30,7 @@ public class TreasuryAdminController {
      * 호환: /api/treasury/mint-topup
      */
     @Operation(summary = "조폐국 화폐발행 국고 직행 충전")
-    @PostMapping(path = {"/api/v1/admin/treasury/mint-topup", "/api/treasury/mint-topup"})
+    @PostMapping(path = {"/api/v1/admin/treasury/mint-topup", "/api/treasury/mint-topup", "/api/v1/treasury/mint-topup"})
     public ApiResponse<TreasuryOperationResult> mintTopup(
             @Valid @RequestBody MintTopupRequest request
     ) {
@@ -45,7 +45,7 @@ public class TreasuryAdminController {
      * 호환: /api/treasury/salary/disburse
      */
     @Operation(summary = "국고 관리자 임금 지급")
-    @PostMapping(path = {"/api/v1/admin/treasury/salary/disburse", "/api/treasury/salary/disburse"})
+    @PostMapping(path = {"/api/v1/admin/treasury/salary/disburse", "/api/treasury/salary/disburse", "/api/v1/treasury/salary/disburse"})
     public ApiResponse<TreasuryOperationResult> disburseSalary(
             @Valid @RequestBody SalaryDisburseRequest request
     ) {
