@@ -210,7 +210,7 @@ export class PublicTreasuryController {
 }
 
 @ApiTags('Admin Treasury')
-@Controller('admin/treasury')
+@Controller(['admin/treasury', 'treasury'])
 @UseGuards(SessionGuard, ConsentGuard, AuthenticatedGuard, AdminGuard)
 export class AdminTreasuryController {
   constructor(

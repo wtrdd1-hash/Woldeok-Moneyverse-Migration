@@ -6,19 +6,23 @@ import com.moneyverse.api.domain.treasury.service.TreasuryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Slf4j
 @RestController
-@RequiredArgsConstructor
 @Tag(name = "Treasury Admin", description = "국고 및 조폐국, 국부펀드 관리자 API")
 public class TreasuryAdminController {
 
+    private static final Logger log = LoggerFactory.getLogger(TreasuryAdminController.class);
+
     private final TreasuryService treasuryService;
+
+    public TreasuryAdminController(TreasuryService treasuryService) {
+        this.treasuryService = treasuryService;
+    }
 
     /**
      * 조폐국(MINT) 화폐발행 국고 직행 충전
@@ -26,7 +30,7 @@ public class TreasuryAdminController {
      * 호환: /api/treasury/mint-topup
      */
     @Operation(summary = "조폐국 화폐발행 국고 직행 충전")
-    @PostMapping(path = {"/api/v1/admin/treasury/mint-topup", "/api/treasury/mint-topup"})
+    @PostMapping(path = {"/api/v1/admin/treasury/mint-topup", "/api/treasury/mint-topup", "/api/v1/treasury/mint-topup"})
     public ApiResponse<TreasuryOperationResult> mintTopup(
             @Valid @RequestBody MintTopupRequest request
     ) {
@@ -41,7 +45,7 @@ public class TreasuryAdminController {
      * 호환: /api/treasury/salary/disburse
      */
     @Operation(summary = "국고 관리자 임금 지급")
-    @PostMapping(path = {"/api/v1/admin/treasury/salary/disburse", "/api/treasury/salary/disburse"})
+    @PostMapping(path = {"/api/v1/admin/treasury/salary/disburse", "/api/treasury/salary/disburse", "/api/v1/treasury/salary/disburse"})
     public ApiResponse<TreasuryOperationResult> disburseSalary(
             @Valid @RequestBody SalaryDisburseRequest request
     ) {

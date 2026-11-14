@@ -36,8 +36,9 @@ class TreasuryAdminControllerTest {
     void setUp() {
         vaultRepository.deleteAll();
         vaultRepository.save(TreasuryVault.builder()
-                .vaultCode("VAULT_MAIN")
-                .balanceWld(5000000L)
+                .code("VAULT_MAIN")
+                .name("중앙 국고 주 금고")
+                .balanceWld("5000000")
                 .description("중앙 국고 주 금고")
                 .build());
     }
