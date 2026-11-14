@@ -4023,3 +4023,35 @@ umericBalanced: true, 불균형 거래 0건 보증 |
   - `GET http://127.0.0.1:4400/api/v1/health` ➔ Node.js(4500) 정상 응답
 - **어드민 관제탑 SSR 실시간 지표 100% 유지**:
   - `HTTP 200 OK`, `100% LEDGER SYNCED`, `ALL CLEAR`, `10 LISTED`, `21명`, `핵심 지표 조회 완료` 완벽 작동.
+
+
+---
+## 🚀 [v29 Specification] 관리자 채널 OTP 라우팅 오류 완전 복구 및 전수 통합 QA (41/41, 100% 통과) 완료
+
+### 1. 관리자 2FA/채널 OTP 장애 원인 규명 및 수정
+- **현상**: 관리자 화면에서 스텝업 인증 및 OTP 발송(`/api/admin/auth/channel-otp/request` 등) 시도 시 지속적인 실패 발생.
+- **근본 원인**:
+  - `AdminChannelOtpController`는 Node.js 백엔드(Port 4500)에만 구현되어 있었으나,
+  - Nginx 설정의 게이트웨이 정규식 및 포트 80 설정에서 `api/admin/auth/channel-otp`가 Spring Boot(Port 4550)로 라우팅되어 `404 Not Found`가 반환됨.
+- **조치 내역**:
+  1. 포트 4400 통합 게이트웨이 및 포트 80 Nginx 설정에서 `channel-otp` 라우팅 대상을 Node.js(`http://prod_node`, Port 4500)로 전격 재배치.
+  2. `nginx -t` 검증 후 `systemctl reload nginx` 무중단 반영.
+- **동작 검증**:
+  - `GET /api/admin/auth/channel-otp/status` ➔ `200 OK` (`{"ok":true,"elevated":false}`)
+  - `POST /api/admin/auth/channel-otp/request` ➔ `200 OK` (`{"ok":true,"success":true,"expiresAt":...}`, 디스코드 알림 채널 정상 디스패치 확인)
+  - `POST /api/admin/auth/channel-otp/test-ping` ➔ `200 OK` (알림 채널 핑 성공)
+
+### 2. `vibecode-production-qa-validator` 기반 5대 페이즈 전수 QA 결과 (41/41, 100% PASS)
+- **Phase 1: 게스트 공개 서피스 (14/14 PASS)**:
+  - `/`, `/login`, `/register`, `/tools`, `/guide`, `/roadmap`, `/terms`, `/privacy`, `/stocks`, `/newspaper`, `/tools/compound-calculator`, `/tools/tax-calculator`, `/robots.txt`, `/sitemap.xml` 모두 정상 응답(200 OK).
+- **Phase 2: 비회원 인가 가드 & 리다이렉트 (5/5 PASS)**:
+  - `/wallet`, `/inventory`, `/account`, `/bank`, `/profile/settings` 비인가 접근 시 안전하게 `/login?error=login_required`로 리다이렉트 또는 세션 가드 통과.
+- **Phase 3: 관리자 11대 서피스 및 관제탑 지표 (16/16 PASS)**:
+  - `/admin` 관제탑 및 하위 10개 서피스(`controls`, `users`, `market`, `economy`, `treasury`, `bank`, `bonds`, `pension`, `kdic`, `security`) 모두 200 OK.
+  - 관제탑 실시간 핵심 지표 5종 전수 검증: `100% LEDGER SYNCED`, `ALL CLEAR`, `10 LISTED`, `21명`, `핵심 지표 조회 완료` 완벽 출력.
+- **Phase 4: 2FA & 채널 OTP 라이프사이클 (3/3 PASS)**:
+  - 상태 조회, OTP 발송, 채널 핑 전 구간 200 OK.
+- **Phase 5: 통합 게이트웨이 & 듀얼 백엔드 헬스 (3/3 PASS)**:
+  - 게이트웨이(Port 4400) ➔ Spring Boot(4550) `/actuator/health` (`UP`)
+  - 게이트웨이(Port 4400) ➔ Spring Boot(4550) `/api/treasury/overview` (`VAULT_MAIN` 잔고 수령)
+  - 게이트웨이(Port 4400) ➔ Node.js(4500) `/api/v1/admin/controls` (7대 피처 스위치 정상 응답)
