@@ -3964,3 +3964,31 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 - **소셜 로그인 (OAuth)**: Google 및 Discord 제공자 모두 정상 작동.
 - **국고 자동 투자**: Spring Boot 국고 스케줄러 가동 확인.
 - **SEO/크롤러**: `/api/seo/status` 200 OK (Googlebot, Yeti 실시간 수집 정상).
+
+
+---
+## 🚀 [v27 Specification] 서버 반응속도 1단계 최적화 완료 (Nginx Keep-Alive 풀링 + Gzip 79% 압축 + 1년 불변 캐시)
+
+### 1. 병목 진단 및 분석
+- **서버 리소스 현황**: AMD Ryzen 7 7735HS (16코어, Load Average 0.08 미만), 메모리 8GB 중 4GB 가용. 하드웨어 스펙은 충분히 여유로움.
+- **내부 응답 레이턴시**: Next.js(2ms), Spring Boot(3ms), Node.js(2ms)로 프로세스 자체의 속도는 초고속.
+- **실제 병목 원인 3가지**:
+  1. **Nginx Gzip 압축 부재**: 리버스 프록시 뒤(`gzip_proxied any;`) 압축 미설정으로 HTML/JS/CSS가 원본(125KB) 그대로 전송됨.
+  2. **정적 자산 브라우저 캐싱 헤더 누락**: 프로덕션 `/_next/static/`에 `Cache-Control`이 설정되지 않아 브라우저가 매번 정적 파일을 재다운로드함.
+  3. **내부 TCP 핸드셰이크 오버헤드**: Nginx와 Next.js/Spring Boot 간에 Keep-Alive 연결 풀링이 없어 매 요청마다 소켓을 맺고 끊음.
+
+### 2. 조치 및 적용 내역
+1. **Nginx 고성능 Upstream Keep-Alive 커넥션 풀 구축**:
+   - `upstream prod_frontend` (keepalive 64), `upstream prod_spring` (keepalive 32), `upstream prod_node` (keepalive 32) 정의.
+   - 프록시 연결 시 `proxy_http_version 1.1` 및 `proxy_set_header Connection "";` 적용하여 내부 TCP 소켓 영구 재사용.
+2. **Gzip 고압축 엔진 활성화**:
+   - `gzip on;`, `gzip_vary on;`, `gzip_proxied any;`, `gzip_comp_level 5;` 및 15개 텍스트/스크립트/폰트/SVG MIME 타입 지정.
+3. **정적 자산 1년 불변 캐시 정책 적용**:
+   - `location ^~ /_next/static/`에 `add_header Cache-Control "public, max-age=31536000, immutable" always;` 부여.
+4. **안전성 검증 및 무중단 리로드**:
+   - `nginx -t` 문법 및 연결성 검사 100% 통과 후 `systemctl reload nginx` 무중단 반영.
+
+### 3. 최적화 측정 결과
+- **메인 페이지 전송 데이터량**: **125 KB ➔ 26 KB (79.1% 절감, 약 100KB 압축)**
+- **정적 자산 캐싱**: Cloudflare Edge 및 유저 브라우저에서 `Cache-Control: public, max-age=31536000, immutable` 및 `cf-cache-status: HIT` 확인 (재방문 시 0ms 로드).
+- **무중단 운영 유지**: 서비스 다운타임 0초.
