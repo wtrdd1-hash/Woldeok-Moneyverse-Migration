@@ -67,7 +67,7 @@ public class PensionService {
 
     @Transactional
     public PensionAccountInfo getOrCreateAccount(String userId) {
-        String findSql = "SELECT * FROM national_pension_accounts WHERE user_id = ?";
+        String findSql = "SELECT * FROM national_pension_accounts WHERE user_id = ?::uuid";
         try {
             return jdbcTemplate.queryForObject(findSql, (rs, rowNum) -> mapAccountRow(rs), userId);
         } catch (EmptyResultDataAccessException e) {
@@ -76,7 +76,7 @@ public class PensionService {
                     id, user_id, tier, status, accumulated_contribution_wld, 
                     total_contributions_count, hourly_payout_rate_bps, total_payout_received_wld, 
                     created_at, updated_at
-                ) VALUES (gen_random_uuid(), ?, 'BRONZE', 'ACTIVE', 0, 0, 50, 0, NOW(), NOW())
+                ) VALUES (gen_random_uuid(), ?::uuid, 'BRONZE', 'ACTIVE', 0, 0, 50, 0, NOW(), NOW())
                 RETURNING *
                 """;
             return jdbcTemplate.queryForObject(insertSql, (rs, rowNum) -> mapAccountRow(rs), userId);
@@ -114,7 +114,7 @@ public class PensionService {
         jdbcTemplate.update("""
             INSERT INTO national_pension_contributions (
                 id, account_id, user_id, amount_wld, note, created_at
-            ) VALUES (gen_random_uuid(), ?::uuid, ?, ?, ?, NOW())
+            ) VALUES (gen_random_uuid(), ?::uuid, ?::uuid, ?, ?, NOW())
             """, account.getId(), userId, amountWld, note != null ? note : "국민연금 정기 기여금 납입");
 
         BigDecimal newVaultBal = jdbcTemplate.queryForObject(

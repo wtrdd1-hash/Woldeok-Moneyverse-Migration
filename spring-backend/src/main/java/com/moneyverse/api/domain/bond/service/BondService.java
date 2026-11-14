@@ -74,7 +74,7 @@ public class BondService {
             SELECT h.*, b.name as bond_name, b.symbol, b.annual_coupon_rate_bps 
             FROM treasury_bond_holdings h
             JOIN treasury_bonds b ON h.bond_id = b.id
-            WHERE h.user_id = ?
+            WHERE h.user_id = ?::uuid
             ORDER BY h.created_at DESC
             """;
         try {
@@ -90,7 +90,6 @@ public class BondService {
             throw new IllegalArgumentException("units must be greater than 0");
         }
 
-        // 국채 정보 확인
         String bondSql = "SELECT * FROM treasury_bonds WHERE id = ?::uuid FOR UPDATE";
         Map<String, Object> bond = jdbcTemplate.queryForMap(bondSql, bondId);
         BigDecimal parValue = (BigDecimal) bond.get("par_value_wld");
@@ -102,19 +101,16 @@ public class BondService {
 
         BigDecimal totalPrice = parValue.multiply(BigDecimal.valueOf(units));
 
-        // 국채 잔여좌수 차감
         jdbcTemplate.update("UPDATE treasury_bonds SET available_units = available_units - ? WHERE id = ?::uuid", units, bondId);
 
-        // 유저 국채 보유 레코드 생성/갱신
         String holdingId = UUID.randomUUID().toString();
         jdbcTemplate.update("""
             INSERT INTO treasury_bond_holdings (
                 id, user_id, bond_id, units, acquired_price_wld, 
                 cumulative_coupons_wld, auto_rollover, created_at, updated_at
-            ) VALUES (?::uuid, ?, ?::uuid, ?, ?, 0, true, NOW(), NOW())
+            ) VALUES (?::uuid, ?::uuid, ?::uuid, ?, ?, 0, true, NOW(), NOW())
             """, holdingId, userId, bondId, units, totalPrice);
 
-        // 중앙 국고 자금 유입
         jdbcTemplate.update("UPDATE fiscal_vaults SET balance_wld = balance_wld + ? WHERE code = 'VAULT_MAIN'", totalPrice);
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -129,20 +125,18 @@ public class BondService {
 
     @Transactional
     public Map<String, Object> createRepoLoan(String userId, String holdingId) {
-        // 국채 담보 대출 실행
-        String holdingSql = "SELECT * FROM treasury_bond_holdings WHERE id = ?::uuid AND user_id = ? FOR UPDATE";
+        String holdingSql = "SELECT * FROM treasury_bond_holdings WHERE id = ?::uuid AND user_id = ?::uuid FOR UPDATE";
         Map<String, Object> holding = jdbcTemplate.queryForMap(holdingSql, holdingId, userId);
         int units = ((Number) holding.get("units")).intValue();
         BigDecimal acquiredPrice = (BigDecimal) holding.get("acquired_price_wld");
 
-        // LTV 70% 대출
         BigDecimal loanAmount = acquiredPrice.multiply(BigDecimal.valueOf(0.7));
 
         String loanId = UUID.randomUUID().toString();
         jdbcTemplate.update("""
             INSERT INTO treasury_bond_repo_loans (
                 id, user_id, holding_id, loan_amount_wld, interest_rate_bps, status, created_at, updated_at
-            ) VALUES (?::uuid, ?, ?::uuid, ?, 350, 'ACTIVE', NOW(), NOW())
+            ) VALUES (?::uuid, ?::uuid, ?::uuid, ?, 350, 'ACTIVE', NOW(), NOW())
             """, loanId, userId, holdingId, loanAmount);
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -157,7 +151,7 @@ public class BondService {
 
     @Transactional
     public Map<String, Object> repayRepoLoan(String userId, String loanId) {
-        String loanSql = "SELECT * FROM treasury_bond_repo_loans WHERE id = ?::uuid AND user_id = ? FOR UPDATE";
+        String loanSql = "SELECT * FROM treasury_bond_repo_loans WHERE id = ?::uuid AND user_id = ?::uuid FOR UPDATE";
         Map<String, Object> loan = jdbcTemplate.queryForMap(loanSql, loanId, userId);
         BigDecimal loanAmount = (BigDecimal) loan.get("loan_amount_wld");
 
