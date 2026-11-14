@@ -8,15 +8,8 @@ group = "com.moneyverse"
 version = "0.0.1-SNAPSHOT"
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -39,10 +32,6 @@ dependencies {
 
     // JSON Date/Time
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

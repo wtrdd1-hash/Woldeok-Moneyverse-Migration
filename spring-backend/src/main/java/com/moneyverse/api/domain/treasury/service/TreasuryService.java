@@ -3,8 +3,8 @@ package com.moneyverse.api.domain.treasury.service;
 import com.moneyverse.api.domain.treasury.dto.TreasuryDtos.*;
 import com.moneyverse.api.domain.treasury.model.TreasuryVault;
 import com.moneyverse.api.domain.treasury.repository.TreasuryVaultRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,15 +14,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class TreasuryService {
+
+    private static final Logger log = LoggerFactory.getLogger(TreasuryService.class);
 
     private final TreasuryVaultRepository vaultRepository;
 
     @Value("${moneyverse.features.swf-operational:true}")
-    private boolean swfOperational;
+    private boolean swfOperational = true;
+
+    public TreasuryService(TreasuryVaultRepository vaultRepository) {
+        this.vaultRepository = vaultRepository;
+    }
 
     /**
      * 조폐국(MINT) 화폐발행 국고 직행 충전
