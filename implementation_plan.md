@@ -3992,3 +3992,34 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 - **메인 페이지 전송 데이터량**: **125 KB ➔ 26 KB (79.1% 절감, 약 100KB 압축)**
 - **정적 자산 캐싱**: Cloudflare Edge 및 유저 브라우저에서 `Cache-Control: public, max-age=31536000, immutable` 및 `cf-cache-status: HIT` 확인 (재방문 시 0ms 로드).
 - **무중단 운영 유지**: 서비스 다운타임 0초.
+
+
+---
+## 🚀 [v28 Specification] Nginx 기반 통합 API 게이트웨이(Port 4400) 구축 및 프론트엔드 단일 통제소 일원화 완료
+
+### 1. 배경 및 설계 의도
+- **기존 구조의 문제점**: 프론트엔드(`frontend/src/lib/api.ts`)에서 30개가 넘는 `path.startsWith(...)` 조건문으로 Spring Boot(4550)와 Node.js(4500)를 일일이 하드코딩 분기하여, 엔드포인트 변경 시 프론트엔드 전체를 재빌드해야 하는 강한 결합도와 유지보수 위험이 상존함.
+- **개선 목표**:
+  1. Nginx 내에 내부 전용 초고속 통합 API 게이트웨이(`127.0.0.1:4400`)를 신설.
+  2. 프론트엔드는 오직 단일 엔드포인트(`http://127.0.0.1:4400`)만 바라보도록 라우팅 로직을 단 1줄(`return API_GATEWAY_ORIGIN;`)로 완전히 추상화.
+  3. Nginx가 C언어 기반의 제로 오버헤드로 금융 엔드포인트(Spring Boot 4550)와 거버넌스/인증/미디어 엔드포인트(Node.js 4500)를 분배 통제.
+
+### 2. 세부 조치 및 적용 내역
+1. **Nginx 통합 API 게이트웨이 (`127.0.0.1:4400`) 선언**:
+   - `/etc/nginx/sites-enabled/moneyverse` 상단에 전용 `server { listen 127.0.0.1:4400; }` 블록 구축.
+   - 금융 엔진 라우팅 정규식: `/(api/treasury|api/banking|api/central-bank|api/bonds|api/pension|api/kdic|api/casino|api/marketplace|api/wallet|api/seasons|health/spring|actuator|api/v1/auth/reset)` ➔ `http://prod_spring` (Keep-Alive 32 소켓 풀링).
+   - 거버넌스/인증/SEO/미디어 라우팅: `location /` ➔ `http://prod_node` (Keep-Alive 32 소켓 풀링).
+2. **프론트엔드 라우팅 로직 일원화**:
+   - `frontend/src/lib/api.ts` 내 30여 줄의 수동 URL 분기 코드를 제거하고, `resolveTargetOrigin(_path)`이 `API_GATEWAY_ORIGIN`(`http://127.0.0.1:4400`)만을 단일 반환하도록 쇄신.
+   - `frontend/.env.local`에 `API_GATEWAY_ORIGIN=http://127.0.0.1:4400` 지정.
+3. **프로덕션 빌드 및 서비스 재기동**:
+   - Next.js 프로덕션 빌드 성공 (오류 0건, 599개 라우트 최적화 완료).
+   - `moneyverse-release-v1546-frontend.service` 무중단 재기동.
+
+### 3. 검증 결과
+- **게이트웨이 분기 정합성**:
+  - `GET http://127.0.0.1:4400/actuator/health` ➔ Spring Boot(4550) 정상 응답 (`{"status":"UP"}`)
+  - `GET http://127.0.0.1:4400/api/treasury/overview` ➔ Spring Boot(4550) 실제 금고 데이터 반환 (`62,436,000 WLD`)
+  - `GET http://127.0.0.1:4400/api/v1/health` ➔ Node.js(4500) 정상 응답
+- **어드민 관제탑 SSR 실시간 지표 100% 유지**:
+  - `HTTP 200 OK`, `100% LEDGER SYNCED`, `ALL CLEAR`, `10 LISTED`, `21명`, `핵심 지표 조회 완료` 완벽 작동.
