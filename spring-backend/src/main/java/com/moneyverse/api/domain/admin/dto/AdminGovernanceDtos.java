@@ -174,6 +174,7 @@ public class AdminGovernanceDtos {
 
         @JsonProperty("wealth_rank")
         @JsonAlias({"wealthRank", "wealth_rank"})
+        @JsonInclude(JsonInclude.Include.ALWAYS)
         private Integer wealthRank;
 
         @JsonProperty("last_login_at")

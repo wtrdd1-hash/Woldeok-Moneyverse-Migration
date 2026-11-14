@@ -204,8 +204,8 @@ public class AdminGovernanceService {
     public AdminStocksResponse listStocks(UUID actorId) {
         List<AdminStockDto> stocks = new ArrayList<>();
         try {
-            String sql = "SELECT id::text, symbol, name, current_price::text, active, halt_status, halt_reason " +
-                         "FROM public.stocks ORDER BY symbol ASC";
+            String sql = "SELECT id::text, symbol, name, current_price::text, active, coalesce(halt_status, 'ACTIVE') AS halt_status, description " +
+                         "FROM public.virtual_stocks ORDER BY symbol ASC";
             stocks = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 AdminStockDto dto = new AdminStockDto();
                 dto.setId(rs.getString("id"));
@@ -213,8 +213,8 @@ public class AdminGovernanceService {
                 dto.setName(rs.getString("name"));
                 dto.setCurrentPrice(rs.getString("current_price") != null ? rs.getString("current_price") : "0");
                 dto.setActive(rs.getBoolean("active"));
-                dto.setHaltStatus(rs.getString("halt_status") != null ? rs.getString("halt_status") : "trading");
-                dto.setHaltReason(rs.getString("halt_reason"));
+                dto.setHaltStatus(rs.getString("halt_status") != null ? rs.getString("halt_status") : "ACTIVE");
+                dto.setHaltReason(rs.getString("description"));
                 return dto;
             });
         } catch (Exception e) {
