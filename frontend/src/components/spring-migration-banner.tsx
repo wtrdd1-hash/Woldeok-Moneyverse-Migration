@@ -5,17 +5,19 @@ import Link from 'next/link';
 
 export function SpringMigrationBanner() {
   const [dismissed, setDismissed] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const isDismissed = sessionStorage.getItem('moneyverse_spring_banner_dismissed') === 'true';
-    if (isDismissed) {
-      setDismissed(true);
+    try {
+      const isDismissed = sessionStorage.getItem('moneyverse_spring_banner_dismissed') === 'true';
+      if (isDismissed) {
+        setDismissed(true);
+      }
+    } catch {
+      // ignore
     }
   }, []);
 
-  if (!mounted || dismissed) {
+  if (dismissed) {
     return null;
   }
 
@@ -51,7 +53,11 @@ export function SpringMigrationBanner() {
             type="button"
             onClick={() => {
               setDismissed(true);
-              sessionStorage.setItem('moneyverse_spring_banner_dismissed', 'true');
+              try {
+                sessionStorage.setItem('moneyverse_spring_banner_dismissed', 'true');
+              } catch {
+                // ignore
+              }
             }}
             className="rounded p-1 text-emerald-400/80 hover:bg-emerald-500/20 hover:text-emerald-200 transition-colors"
             aria-label="배너 닫기"
