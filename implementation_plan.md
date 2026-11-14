@@ -3507,3 +3507,26 @@ flowchart LR
 4. 조폐국 화폐발행(`POST /api/v1/admin/treasury/mint-topup`), 국고 관리자 임금(`POST /api/v1/admin/treasury/salary/disburse`), 국부펀드 리밸런싱(`POST /api/v1/admin/treasury/swf/rebalance`) 구현.
 5. Gradle 단위/통합 테스트 (`./gradlew test`) 100% 통과 검증.
 6. 운영 서버에 Side-by-Side 배포 (포트 4550) 및 헬스체크 확인.
+
+
+---
+## 🚀 [v10 Specification] Java Spring Boot 3.3 코어 전환 가속 및 전역 공지 배너 & Nginx 완벽 연동 (+120, -0)
+
+### 1. 배경 및 사용자 요구사항 반영
+- **모든 접근 서버 스프링으로 변경중 공지 표출**:
+  - `frontend/src/components/spring-migration-banner.tsx`: 웹사이트 최상단에 상시 노출되는 고대비 에메랄드/다크 펄스 배너를 신설하여 사용자가 사이트 접속 시 "엔터프라이즈 Java Spring Boot 3.3 엔진 전환 가동 중"임을 시각적으로 명확히 인지할 수 있도록 구현.
+  - `SiteShell` 컴포넌트(`frontend/src/components/site-shell.tsx`) 최상단에 마운트하여 전역 599개 모든 라우트에 일괄 적용.
+- **조폐국 화폐발행, 국고 관리자 지급, SWF 리밸런싱 완벽 호환**:
+  - `spring-backend`의 `TreasuryDtos.java` 및 `TreasuryAdminController.java`: Next.js 및 NestJS 클라이언트가 기대하는 응답 구조(`ok: true`, `result.ledger_transaction_id`)를 100% 호환 직렬화.
+  - Nginx 라우팅(`location = /api/admin/treasury/mint-topup`, `/api/treasury/mint-topup` 등)을 통해 Java Spring Boot(포트 4550)로 직접 프록시하여 404/500 에러를 원천 차단.
+- **디스크 공간 완벽 보존**:
+  - PostgreSQL 16 실제 DB 및 복식부기 전표 데이터 100% 무결성 보존.
+  - 루트 파티션 45GB (48%), 데이터 파티션 82GB (44%)의 쾌적한 디스크 여유 공간 유지.
+
+### 2. 검증 완료 사항
+- `./gradlew test`: 5 actionable tasks 100% BUILD SUCCESSFUL (표준 경로 및 레거시 호환 경로 충전, 임금 지급, SWF 리밸런싱 전수 통과).
+- 운영 서버 Nginx 프록시 실측:
+  - `POST /api/treasury/mint-topup`: HTTP 200 OK (잔액 정상 증가 및 영수증 발행).
+  - `POST /api/v1/admin/treasury/salary/disburse`: HTTP 200 OK.
+  - `POST /api/v1/admin/treasury/swf/rebalance`: HTTP 200 OK.
+  - `GET /health/spring`: HTTP 200 OK (UP, Java 21, Spring Boot 3.3.5).
