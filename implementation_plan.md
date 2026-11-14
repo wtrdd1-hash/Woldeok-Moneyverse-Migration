@@ -3530,3 +3530,50 @@ flowchart LR
   - `POST /api/v1/admin/treasury/salary/disburse`: HTTP 200 OK.
   - `POST /api/v1/admin/treasury/swf/rebalance`: HTTP 200 OK.
   - `GET /health/spring`: HTTP 200 OK (UP, Java 21, Spring Boot 3.3.5).
+
+
+---
+## 🚀 [v11 Specification] Spring Boot 3.3 조폐국 화폐발행 DTO 호환성 보강 및 실측 검증 완료 (+35, -0)
+
+### 1. 현황 및 이슈 해결
+- **현상**: 모달 UI 및 일부 클라이언트에서 `Cannot POST /api/treasury/mint-topup` 또는 `amount`/`otpToken` 필드로 페이로드 전송 시 400 Bad Request 발생 가능성 식별.
+- **해결 방안**:
+  1. `TreasuryDtos.MintTopupRequest`, `SalaryDisburseRequest`, `SwfLiquidateRequest`에 `@JsonAlias({"amount", "amount_wld", "amountWld"})` 및 `@JsonAlias({"otpToken", "otpCode", "otp_code", "otp_token"})` 적용.
+  2. Nginx `/api/treasury/mint-topup`과 `/api/admin/treasury/mint-topup` 모두 Java Spring Boot 3.3.5(포트 4550)로 직결 프록시 유지.
+  3. Spring 단위 테스트(`TreasuryServiceTest`) 및 실측 curl 검증(100만 WLD 직행 충전, 50만 WLD 충전) 200 OK 통과 확인.
+  4. 복식부기 원장 트랜잭션 전표 ID(`ledger_transaction_id`) 및 `ok: true`, `result` 객체 동시 반환 완벽 보장.
+
+
+---
+## 🚀 [v12 Specification] Node(NestJS) -> Spring Boot 3.3 전면 전환 마스터 아키텍처 및 1차 금융 도메인 구현 명세 (+120, -0)
+
+### 1. 엔터프라이즈 전환 전략 확정 (Interactive Alignment 결과)
+- **전환 모델**: 스트랭글러 피그(Strangler Fig) 무중단 점진 컷오버. Nginx 리버스 프록시를 통해 도메인 엔드포인트별로 Spring Boot(포트 4550)로 실시간 라우팅 전환.
+- **영속성 계층**: Spring Data JPA + 금융 원장 전용 JdbcTemplate 하이브리드 아키텍처.
+- **인증 호환성**: Spring Security 6.3 + JWT Stateless Secret 공유를 통한 기존 유저 무중단 세션 보존.
+- **안정성/감사/모니터링 강화**:
+  - Virtual Threads(Java 21 Loom) 기반 비동기 감사 이벤트(`ApplicationEventPublisher`) 발행.
+  - Spring Actuator 및 Prometheus 메트릭 엔드포인트 활성화.
+  - 일일 복식부기 실시간 대사(Reconciliation) 스케줄러 탑재.
+
+### 2. 1차 최우선 전환 도메인 (금융/원장 그룹)
+1. **국민연금 (Pension)**:
+   - 과거 원장 정산 검증 락(`PENSION_LEDGER_SETTLEMENT_PAUSED = false`) 해제 지원.
+   - 국민연금 기여금 납입, 연금 수령 신청, 중도 해지, 은퇴 전환 복식부기 트랜잭션.
+   - 엔드포인트: `/api/pension/**`
+2. **은행 및 여수신 (Bank)**:
+   - 예금 입출금, 정기예금 가입/해지, 이자 정산, 계좌 이체 트랜잭션.
+   - 엔드포인트: `/api/bank/**`
+3. **가상 국채 및 레포(Repo) 대출 (Bond)**:
+   - 가상 국채 발행/매입, 담보 대출 및 원리금 상환 복식부기 원장 검증.
+   - 엔드포인트: `/api/admin/bonds/**`, `/api/bonds/**`
+4. **중앙은행 및 거시경제 (Central-Bank & Economy)**:
+   - 기준금리 고시, 지급준비율 제어, 거시경제 지표 및 화폐유통량 통계.
+   - 엔드포인트: `/api/central-bank/**`, `/api/economy/**`
+
+### 3. 단계별 실행 계획 (Action Plan)
+- **Step 1**: Spring Boot 의존성 확장 (`build.gradle`에 `spring-boot-starter-security`, `jjwt`, `spring-boot-starter-actuator` 보강).
+- **Step 2**: 국민연금(`domain.pension`), 은행(`domain.bank`), 국채(`domain.bond`), 중앙은행(`domain.centralbank`) 패키지 및 엔티티/서비스/컨트롤러 구현.
+- **Step 3**: 실제 PostgreSQL 원장 프로시저 및 테이블 연동 검증.
+- **Step 4**: Nginx 프록시 라우팅에 신규 금융 도메인 엔드포인트 추가 및 엣지 전환.
+- **Step 5**: 단위/통합 테스트 검증 및 GitHub 메인 통합.
