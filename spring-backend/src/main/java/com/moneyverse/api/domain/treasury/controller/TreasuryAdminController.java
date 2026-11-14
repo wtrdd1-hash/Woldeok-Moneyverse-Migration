@@ -26,6 +26,63 @@ public class TreasuryAdminController {
     }
 
     /**
+     * 국고 총괄 현황 대시보드 조회
+     */
+    @Operation(summary = "국고 총괄 현황 대시보드 조회")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/overview",
+            "/api/admin/treasury/overview",
+            "/api/treasury/overview",
+            "/api/v1/treasury/overview"
+    })
+    public ResponseEntity<Map<String, Object>> getOverview() {
+        log.info("[API] GET treasury overview received");
+        return ResponseEntity.ok(treasuryService.getOverview());
+    }
+
+    /**
+     * 국고 원장 트랜잭션 목록 조회
+     */
+    @Operation(summary = "국고 원장 트랜잭션 목록 조회")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/transactions",
+            "/api/admin/treasury/transactions",
+            "/api/treasury/transactions",
+            "/api/v1/treasury/transactions"
+    })
+    public ResponseEntity<Map<String, Object>> getTransactions() {
+        return ResponseEntity.ok(treasuryService.getTransactions());
+    }
+
+    /**
+     * 국고 세목별 수입 흐름 집계
+     */
+    @Operation(summary = "국고 세목별 수입 흐름 집계")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/revenue",
+            "/api/admin/treasury/revenue",
+            "/api/treasury/revenue",
+            "/api/v1/treasury/revenue"
+    })
+    public ResponseEntity<Map<String, Object>> getRevenue() {
+        return ResponseEntity.ok(treasuryService.getRevenue());
+    }
+
+    /**
+     * 국고 예산 목적별 지출 흐름 집계
+     */
+    @Operation(summary = "국고 예산 목적별 지출 흐름 집계")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/expenditure",
+            "/api/admin/treasury/expenditure",
+            "/api/treasury/expenditure",
+            "/api/v1/treasury/expenditure"
+    })
+    public ResponseEntity<Map<String, Object>> getExpenditure() {
+        return ResponseEntity.ok(treasuryService.getExpenditure());
+    }
+
+    /**
      * 조폐국(MINT) 화폐발행 국고 직행 충전
      * 표준: /api/v1/admin/treasury/mint-topup
      * 호환: /api/admin/treasury/mint-topup, /api/treasury/mint-topup

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { RefreshCw, Sparkles } from 'lucide-react';
+import { RefreshCw, RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function PageError({
@@ -32,6 +32,22 @@ export default function PageError({
     setReloading(false);
   }, [error]);
 
+  const handleForceReset = async () => {
+    setReloading(true);
+    try {
+      await fetch('/api/auth/clear-session', { method: 'POST' });
+      sessionStorage.clear();
+      localStorage.clear();
+      if ('caches' in window) {
+        const names = await window.caches.keys();
+        await Promise.all(names.map((n) => window.caches.delete(n)));
+      }
+    } catch {
+      /* ignore */
+    }
+    window.location.href = '/?reset=1';
+  };
+
   return (
     <div className="grid gap-5 py-16 text-center sm:text-left" role="alert">
       <div className="grid gap-3">
@@ -45,7 +61,7 @@ export default function PageError({
         <p className="max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
           {reloading
             ? '최신 업데이트가 배포되어 화면을 자동으로 새로고침하고 있습니다. 잠시만 기다려 주세요...'
-            : '방금 새로운 서비스 기능이 배포되었거나 일시적인 네트워크 지연이 발생했을 수 있습니다. 새로고침을 누르시면 정상적으로 표시됩니다.'}
+            : '방금 새로운 서비스 기능이 배포되었거나 오래된 쿠키 세션으로 인해 일시적인 오류가 발생했을 수 있습니다. 새로고침 또는 쿠키 초기화를 누르시면 정상적으로 복구됩니다.'}
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-2">
@@ -61,6 +77,14 @@ export default function PageError({
         </Button>
         <Button onClick={reset} variant="outline" className="min-h-11" disabled={reloading}>
           다시 시도
+        </Button>
+        <Button
+          onClick={handleForceReset}
+          variant="outline"
+          className="min-h-11 font-bold inline-flex items-center gap-2 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+        >
+          <RotateCcw className="size-4" />
+          세션/쿠키 강제 초기화 후 복구
         </Button>
       </div>
       {error.digest && (

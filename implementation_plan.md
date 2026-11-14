@@ -1,4 +1,4 @@
-﻿# [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
+# [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v9**: [조폐국 화폐발행 국고 충전, 관리자 임금 지급, SWF 및 8대 보류 기능 전면 실가동 해제, NestJS 컨트롤러 다중 바인딩 및 Next.js 클라이언트 인라인 번들링 최적화] (+85, -0)
@@ -3781,3 +3781,48 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 - `POST /api/admin/treasury/swf/rebalance`: **200 OK** (`executed: true`, 4대 섹터 리밸런싱 완료)
 - `PUT /api/admin/treasury/swf`: **200 OK** (투자비율 15%, 상한 20%, 안전보존금 2,500만 WLD 정상 저장)
 - `GET /admin/treasury`: **200 OK** (국고 관리자 웹 화면 정상 렌더링)
+
+---
+## 🚀 [v7 Specification] 서버단 세션/쿠키 강제 초기화 및 화면 로드 오류(error.tsx) 원천 차단 계획
+
+### 1. 현상 분석 및 근본 원인 (Root Cause Investigation)
+1. **Spring Boot 관리자 보안 및 세션 엔드포인트 누락**:
+   - `/admin`, `/admin/treasury` 등 관리자 페이지 진입 시 Next.js SSR의 `requireAdminConsole()`이 `GET /api/v1/admin/security`를 호출함.
+   - Spring Boot(포트 4550)에 해당 엔드포인트가 미구현 상태여서 **404 Not Found**를 반환.
+   - Next.js의 `session.ts`는 401/403/428이 아닌 404 응답을 수신하면 에러를 re-throw하여 Server Component 렌더링이 즉시 중단되고 `error.tsx` 바운더리로 추락함.
+2. **`error.tsx` 바운더리의 재시도 실패 및 무한 루프**:
+   - `error.tsx`에서 30초 내 자동 새로고침을 1회 시도하지만, 백엔드가 계속 404를 반환하므로 동일 에러가 재발하여 `화면을 불러오지 못했어요. (참조 코드 1788810531 / 3368258021)` 화면에 영구 고착됨.
+3. **구버전 잔여 쿠키 및 세션 꼬임**:
+   - 사용자의 브라우저에 과거 발급되었거나 만료된 `mv_session`, `__Host-mv_session` 쿠키가 잔존할 때, 서버단에서 이를 강제로 일괄 파기(Expire/Clear)하는 전용 엔드포인트가 부재하여 사용자가 새로고침을 해도 동일한 상태로 오류가 반복됨.
+
+### 2. 해결 및 구현 설계 (Implementation Architecture)
+1. **Spring Boot 관리자 보안 컨트롤러 신규 구축 (`AdminSecurityController.java`)**:
+   - `GET /api/v1/admin/security`, `GET /api/admin/security`:
+     - 인증된 관리자 세션: 200 OK `{ roles: ["admin"], consoleSession: { state: "open" }, loginPolicy: { allowlist: [] } }` 반환.
+     - 미인증/세션 만료: 404가 아닌 **401 Unauthorized** (또는 비인증 응답) 반환 ➔ Next.js가 404 크래시 대신 `/login?error=login_required`로 정상적이고 부드러운 리다이렉트 수행.
+   - `GET /api/v1/admin/me`: 200 OK `{ roles: ["admin"] }` 반환.
+   - `POST /api/v1/admin/security/sessions`: 콘솔 세션 진입 200 OK.
+   - `DELETE /api/v1/admin/security/sessions`: 콘솔 세션 종료 200 OK.
+   - `POST /api/v1/admin/security/forced-logouts`: 지정 유저 또는 세션 강제 종료 및 쿠키 소거 헤더 발송.
+2. **Spring Boot 인증 뷰어 및 강제 리셋 엔드포인트 (`AuthController.java`)**:
+   - `GET /api/v1/auth/viewer`, `GET /api/auth/viewer`:
+     - 게스트/비인증 상태에서도 404 대신 200 OK `{ signedIn: false, consentCurrent: true, roles: [] }`를 반환하여 SSR 크래시 원천 차단.
+   - `POST /api/v1/auth/reset`, `GET /api/v1/auth/reset`:
+     - `Set-Cookie` 헤더를 통해 모든 세션 쿠키(`mv_session`, `__Host-mv_session`, `moneyverse_session`, `JSESSIONID`)에 대해 `Max-Age=0`, `Expires=Thu, 01 Jan 1970 00:00:00 GMT`, `Path=/`를 즉시 강제 전송하여 클라이언트 세션을 완벽히 초기화.
+3. **Spring Boot 국고 관리자 조회 폴백 (`TreasuryAdminController.java`)**:
+   - `GET /api/v1/admin/treasury/overview`: 국고 준비금 및 자산 현황 200 OK 서빙.
+   - `GET /api/v1/admin/treasury/transactions`, `/revenue`, `/expenditure`: 기본 원장 및 수입/지출 내역 정상 서빙하여 `/admin/treasury` 화면 무결성 확보.
+4. **Next.js 프론트엔드 쿠키 소거 라우트 핸들러 (`frontend/src/app/api/auth/clear-session/route.ts`)**:
+   - 서버사이드에서 Next.js `cookies().delete()` 및 `Set-Cookie` 만료 헤더를 즉시 발행하는 강제 리셋 라우트 구축.
+   - 클라이언트에서 호출 시 브라우저의 모든 인증 쿠키를 서버단에서 즉각 무효화.
+5. **Next.js 세션 가드 보강 (`frontend/src/lib/session.ts`)**:
+   - `adminConsole()`: 백엔드 호출 실패 또는 404/500 수신 시 무작정 예외를 던져 화면을 터뜨리지 않고, `/admin` 또는 `/login?error=login_required`로 안전하게 리다이렉트하는 방어 로직 추가.
+6. **Next.js 에러 바운더리 자가 복구 UI 강화 (`frontend/src/app/error.tsx` & `global-error.tsx`)**:
+   - "세션 및 캐시 초기화 후 복구 (강제 리셋)" 원클릭 액션 버튼 신설.
+   - 클릭 시 `/api/auth/clear-session` 호출 + 브라우저 캐시 스토리지/세션스토리지/로컬스토리지 소거 후 클린 재접속 유도.
+
+### 3. 검증 계획 (Verification Plan)
+1. 백엔드 빌드 및 배포 후 `GET /api/v1/admin/security` 호출 시 404가 아닌 401(미인증) 또는 200(인증) 응답 확인.
+2. `GET /api/v1/auth/reset` 및 `/api/auth/clear-session` 호출 시 `Set-Cookie: Max-Age=0` 정상 반환 실측.
+3. `/admin` 및 `/admin/treasury` 접속 시 `화면을 불러오지 못했어요` 없이 정상 진입 및 로그인 페이지 안내 확인.
+

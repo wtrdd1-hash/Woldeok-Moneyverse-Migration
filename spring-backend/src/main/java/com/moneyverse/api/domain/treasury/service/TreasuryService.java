@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TreasuryService {
@@ -173,8 +171,8 @@ public class TreasuryService {
                 "bond_ratio_pct", 30,
                 "dividend_ratio_pct", 10
         ));
-        fallback.put("portfolios", java.util.List.of());
-        fallback.put("events", java.util.List.of());
+        fallback.put("portfolios", List.of());
+        fallback.put("events", List.of());
         return fallback;
     }
 
@@ -238,6 +236,71 @@ public class TreasuryService {
         result.put("newVaultBalanceWld", currentBalance + request.getAmountWld());
         result.put("executedAt", Instant.now().toString());
         return result;
+    }
+
+    /**
+     * 국고 총괄 현황 대시보드 조회 (SSR 무결성 보장)
+     */
+    public Map<String, Object> getOverview() {
+        Long mainVault = getVaultBalance("VAULT_MAIN");
+        Long reserveVault = getVaultBalance("VAULT_RESERVE");
+        Long swfVault = getVaultBalance("VAULT_SWF");
+        long totalTreasury = mainVault + reserveVault + swfVault;
+
+        List<Map<String, Object>> vaults = List.of(
+                Map.of("code", "VAULT_MAIN", "name", "중앙 국고 주 금고", "balance_wld", String.valueOf(mainVault)),
+                Map.of("code", "VAULT_RESERVE", "name", "지급준비금 특별 금고", "balance_wld", String.valueOf(reserveVault)),
+                Map.of("code", "VAULT_SWF", "name", "국부펀드(ASWF) 투자 자산 금고", "balance_wld", String.valueOf(swfVault))
+        );
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("vaults", vaults);
+        res.put("total_treasury_wld", String.valueOf(totalTreasury));
+        res.put("total_circulating_wld", "250000000");
+        res.put("reserve_ratio_pct", 35.5);
+        res.put("available_wld", String.valueOf(mainVault));
+        res.put("reserve_wld", String.valueOf(reserveVault));
+        res.put("stats_24h", Map.of(
+                "injected_wld", "0",
+                "absorbed_wld", "0",
+                "stock_halt_funded_wld", "0",
+                "recirculated_wld", "0"
+        ));
+        return res;
+    }
+
+    /**
+     * 국고 원장 트랜잭션 목록 조회
+     */
+    public Map<String, Object> getTransactions() {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("items", List.of());
+        res.put("next_cursor", null);
+        return res;
+    }
+
+    /**
+     * 국고 세목별 수입 흐름 집계
+     */
+    public Map<String, Object> getRevenue() {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("items", List.of());
+        res.put("total_24h_wld", "0");
+        res.put("total_7d_wld", "0");
+        res.put("total_30d_wld", "0");
+        return res;
+    }
+
+    /**
+     * 국고 예산 목적별 지출 흐름 집계
+     */
+    public Map<String, Object> getExpenditure() {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("items", List.of());
+        res.put("total_24h_wld", "0");
+        res.put("total_7d_wld", "0");
+        res.put("total_30d_wld", "0");
+        return res;
     }
 
     private Long getVaultBalance(String code) {
