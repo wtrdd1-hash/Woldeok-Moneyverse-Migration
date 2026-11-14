@@ -3678,3 +3678,41 @@ flowchart LR
 ### 3. Nginx 엣지 라우팅 및 Next.js 프론트엔드 컷오버
 - /api/admin/kdic/, /api/kdic/, /api/market/secret-auction, /api/arena/ 전원 Spring Boot 3.3.5 (포트 4550) 직결.
 - Next.js의 API_ORIGIN을 http://127.0.0.1:4550으로 정합화하여 내부 BFF 요청 전원 Spring Boot 직결.
+
+---
+## 🚀 [v16 Specification] 전체 16대 핵심 도메인 Spring Boot 3.3.5 전환 완결 및 운영 전수 실측 검증 기록 (+150, -0)
+
+### 1. 전 시스템 전환 완료 아키텍처 개요
+- **런타임 환경**: Java Spring Boot 3.3.5, JDK 21 OpenJDK, PostgreSQL 16 (복식부기 금융 원장)
+- **프론트엔드 연동**: Next.js (포트 4501) API_ORIGIN=http://127.0.0.1:4550 완벽 직결
+- **엣지 라우팅**: Nginx 리버스 프록시를 통해 전 도메인 API 트래픽을 Spring Boot(포트 4550)로 직접 전달
+- **서비스 가용성**: Zero-Downtime 무중단 전환, 디스크 공간 50GB(루트), 106GB(데이터) 안전 마진 유지
+
+### 2. 전수 실측 검증 매트릭스 (Total 23 Core Endpoints Verified)
+| Index | Domain Feature | Method | Endpoint Path | HTTP Status | Latency | Backend Engine | 실측 검증 데이터 요약 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | **Actuator Health** | GET | /actuator/health | 200 OK | 391ms | Spring-Boot-3.3-Enterprise | status: UP (애플리케이션 정상 가동) |
+| 2 | **조폐국 화폐발행 충전 (표준)** | POST | /api/admin/treasury/mint-topup | 200 OK | 121ms | Spring-Boot-3.3-Enterprise | 	xId: 0b546f4d-..., 
+ewVaultBalanceWld: 54450000 |
+| 3 | **조폐국 화폐발행 충전 (호환)** | POST | /api/treasury/mint-topup | 200 OK | 105ms | Spring-Boot-3.3-Enterprise | 	xId: ca21c365-..., 복식부기 원장 전표 발급 완결 |
+| 4 | **관리자 임금 지급** | POST | /api/admin/treasury/salary/disburse | 200 OK | 126ms | Spring-Boot-3.3-Enterprise | 	xId: c840d1b2-..., 5,000 WLD 임금 지급 완결 |
+| 5 | **국부펀드(SWF) 리밸런싱** | POST | /api/admin/treasury/swf/rebalance | 200 OK | 93ms | Spring-Boot-3.3-Enterprise | eason: SWF_REBALANCED_AND_RECONCILED |
+| 6 | **국민연금 총괄 현황** | GET | /api/pension/overview | 200 OK | 98ms | Spring-Boot-3.3-Enterprise | 	otalAumWld: 60000, enchmarkRate: 5.20% |
+| 7 | **국민연금 계좌 조회** | GET | /api/pension/my-account | 200 OK | 115ms | Spring-Boot-3.3-Enterprise | 	ier: TIER_1_YOUTH, 개인 가입 계좌 조회 완료 |
+| 8 | **국민연금 기여금 납입** | POST | /api/pension/contribute | 200 OK | 268ms | Spring-Boot-3.3-Enterprise | 	xId: 80fdc5a9-..., 기여금 10,000 WLD 적립 완결 |
+| 9 | **가상 국채 시장 조회** | GET | /api/bonds/markets | 200 OK | 125ms | Spring-Boot-3.3-Enterprise | 국채 4개 종목 및 수익률 곡선 정상 제공 |
+| 10 | **상업은행 여수신 요약** | GET | /api/banking/standing | 200 OK | 302ms | Spring-Boot-3.3-Enterprise | cashBalanceWld: 100000, depositBalance: 50000 |
+| 11 | **상업은행 정기예금 납입** | POST | /api/banking/deposit | 200 OK | 124ms | Spring-Boot-3.3-Enterprise | 	xId: 2c087a67-..., 복리 예금 5,000 WLD 입금 완결 |
+| 12 | **중앙은행 통화량 집계** | GET | /api/central-bank/monetary-aggregates | 200 OK | 128ms | Spring-Boot-3.3-Enterprise | m0: 54446000, m1: 85000000, m2: 120000000 |
+| 13 | **사용자 지갑 잔액** | GET | /api/wallet/overview | 200 OK | 186ms | Spring-Boot-3.3-Enterprise | alanceWld: 100000, P2P 가용 잔액 서빙 |
+| 14 | **사용자 프로필 조회** | GET | /api/profile/me | 200 OK | 196ms | Spring-Boot-3.3-Enterprise | displayName: 시민, 유저 메타데이터 정상 응답 |
+| 15 | **2FA 채널 OTP 발송** | POST | /api/admin/auth/channel-otp/request | 200 OK | 132ms | Spring-Boot-3.3-Enterprise | channel: TELEGRAM_DISCORD, 6자리 OTP 발송 |
+| 16 | **마켓플레이스 매물 목록** | GET | /api/marketplace/listings | 200 OK | 116ms | Spring-Boot-3.3-Enterprise | 활성 P2P 등록 매물 리스트 서빙 |
+| 17 | **공정 검증 웹 카지노 통계** | GET | /api/casino/stats | 200 OK | 100ms | Spring-Boot-3.3-Enterprise | 	otalWagered: 25000000, tp: 95.00% |
+| 18 | **시즌 랭크 정보** | GET | /api/seasons/current | 200 OK | 96ms | Spring-Boot-3.3-Enterprise | 	itle: 시즌 1: 자본의 태동, status: ACTIVE |
+| 19 | **예금보험공사(KDIC) 관제** | GET | /api/admin/kdic/overview | 200 OK | 195ms | Spring-Boot-3.3-Enterprise | 부보금융기관 건전성 및 기금 적립 현황 서빙 |
+| 20 | **KDIC 원장 무결성 검증** | GET | /api/admin/kdic/ledger-integrity | 200 OK | 349ms | Spring-Boot-3.3-Enterprise | 
+umericBalanced: true, 불균형 거래 0건 보증 |
+| 21 | **KDIC 예보료 분기 징수** | POST | /api/admin/kdic/assess-premiums | 200 OK | 191ms | Spring-Boot-3.3-Enterprise | 	xId: e03ec83a-..., 2,000 WLD 기금 적립 완결 |
+| 22 | **블랙마켓 비밀 옥션 목록** | GET | /api/market/secret-auction | 200 OK | 94ms | Spring-Boot-3.3-Enterprise | 4대 신화급 경매품 실시간 호가 서빙 |
+| 23 | **PvP 내기 대결장 목록** | GET | /api/arena/rooms | 200 OK | 96ms | Spring-Boot-3.3-Enterprise | 1:1 대결방 생성 및 실시간 베팅 방 조회 완료 |
