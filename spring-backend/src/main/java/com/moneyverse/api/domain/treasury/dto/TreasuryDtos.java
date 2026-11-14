@@ -3,6 +3,7 @@ package com.moneyverse.api.domain.treasury.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.Map;
 
 public class TreasuryDtos {
 
@@ -56,6 +57,8 @@ public class TreasuryDtos {
         @Min(value = 1, message = "amountWld must be greater than 0")
         private Long amountWld;
 
+        private String targetAdminId;
+        private String reason;
         private String otpCode;
         private String requestKey;
 
@@ -71,17 +74,30 @@ public class TreasuryDtos {
 
         public static class Builder {
             private Long amountWld;
+            private String targetAdminId;
+            private String reason;
             private String otpCode;
             private String requestKey;
 
             public Builder amountWld(Long amountWld) { this.amountWld = amountWld; return this; }
+            public Builder targetAdminId(String targetAdminId) { this.targetAdminId = targetAdminId; return this; }
+            public Builder reason(String reason) { this.reason = reason; return this; }
             public Builder otpCode(String otpCode) { this.otpCode = otpCode; return this; }
             public Builder requestKey(String requestKey) { this.requestKey = requestKey; return this; }
-            public SalaryDisburseRequest build() { return new SalaryDisburseRequest(amountWld, otpCode, requestKey); }
+            public SalaryDisburseRequest build() {
+                SalaryDisburseRequest req = new SalaryDisburseRequest(amountWld, otpCode, requestKey);
+                req.setTargetAdminId(targetAdminId);
+                req.setReason(reason);
+                return req;
+            }
         }
 
         public Long getAmountWld() { return amountWld; }
         public void setAmountWld(Long amountWld) { this.amountWld = amountWld; }
+        public String getTargetAdminId() { return targetAdminId; }
+        public void setTargetAdminId(String targetAdminId) { this.targetAdminId = targetAdminId; }
+        public String getReason() { return reason; }
+        public void setReason(String reason) { this.reason = reason; }
         public String getOtpCode() { return otpCode; }
         public void setOtpCode(String otpCode) { this.otpCode = otpCode; }
         public String getRequestKey() { return requestKey; }
@@ -124,29 +140,43 @@ public class TreasuryDtos {
 
     public static class TreasuryOperationResult {
         private boolean success;
+        private boolean ok;
         private String txId;
+        private String ledgerTransactionId;
         private String vaultCode;
         private Long amountWld;
         private Long newVaultBalanceWld;
         private String reason;
         private String executedAt;
+        private Map<String, Object> result;
 
-        public TreasuryOperationResult() {}
+        public TreasuryOperationResult() {
+            this.success = true;
+            this.ok = true;
+        }
 
         public TreasuryOperationResult(boolean success, String txId, String vaultCode, Long amountWld, Long newVaultBalanceWld, String reason, String executedAt) {
             this.success = success;
+            this.ok = success;
             this.txId = txId;
+            this.ledgerTransactionId = txId;
             this.vaultCode = vaultCode;
             this.amountWld = amountWld;
             this.newVaultBalanceWld = newVaultBalanceWld;
             this.reason = reason;
             this.executedAt = executedAt;
+            this.result = Map.of(
+                "ledger_transaction_id", txId != null ? txId : "",
+                "vault_code", vaultCode != null ? vaultCode : "VAULT_MAIN",
+                "amount_wld", amountWld != null ? amountWld : 0L,
+                "balance_after", newVaultBalanceWld != null ? newVaultBalanceWld : 0L
+            );
         }
 
         public static Builder builder() { return new Builder(); }
 
         public static class Builder {
-            private boolean success;
+            private boolean success = true;
             private String txId;
             private String vaultCode;
             private Long amountWld;
@@ -167,9 +197,13 @@ public class TreasuryDtos {
         }
 
         public boolean isSuccess() { return success; }
-        public void setSuccess(boolean success) { this.success = success; }
+        public void setSuccess(boolean success) { this.success = success; this.ok = success; }
+        public boolean isOk() { return ok; }
+        public void setOk(boolean ok) { this.ok = ok; this.success = ok; }
         public String getTxId() { return txId; }
-        public void setTxId(String txId) { this.txId = txId; }
+        public void setTxId(String txId) { this.txId = txId; this.ledgerTransactionId = txId; }
+        public String getLedgerTransactionId() { return ledgerTransactionId != null ? ledgerTransactionId : txId; }
+        public void setLedgerTransactionId(String ledgerTransactionId) { this.ledgerTransactionId = ledgerTransactionId; this.txId = ledgerTransactionId; }
         public String getVaultCode() { return vaultCode; }
         public void setVaultCode(String vaultCode) { this.vaultCode = vaultCode; }
         public Long getAmountWld() { return amountWld; }
@@ -180,5 +214,7 @@ public class TreasuryDtos {
         public void setReason(String reason) { this.reason = reason; }
         public String getExecutedAt() { return executedAt; }
         public void setExecutedAt(String executedAt) { this.executedAt = executedAt; }
+        public Map<String, Object> getResult() { return result; }
+        public void setResult(Map<String, Object> result) { this.result = result; }
     }
 }
