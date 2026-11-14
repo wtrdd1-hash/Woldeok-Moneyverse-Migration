@@ -3716,3 +3716,29 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 | 21 | **KDIC 예보료 분기 징수** | POST | /api/admin/kdic/assess-premiums | 200 OK | 191ms | Spring-Boot-3.3-Enterprise | 	xId: e03ec83a-..., 2,000 WLD 기금 적립 완결 |
 | 22 | **블랙마켓 비밀 옥션 목록** | GET | /api/market/secret-auction | 200 OK | 94ms | Spring-Boot-3.3-Enterprise | 4대 신화급 경매품 실시간 호가 서빙 |
 | 23 | **PvP 내기 대결장 목록** | GET | /api/arena/rooms | 200 OK | 96ms | Spring-Boot-3.3-Enterprise | 1:1 대결방 생성 및 실시간 베팅 방 조회 완료 |
+
+---
+## 🚀 [v17 Specification] 조폐국(MINT) 화폐발행 모달 원장 영수증 호환(ok, result root 매핑) 및 세션 CSRF/Policy 엔드포인트 완비 (+75, -0)
+
+### 1. 현상 분석 및 원인 규명
+- **현상**: 관리자 페이지 국고 관리 화면에서 `조폐국 화폐발행 중앙 국고 즉시 충전` 모달(AdminMintTopupDialog) 실행 시 `Cannot POST /api/treasury/mint-topup` 또는 원장 영수증 확인 실패가 발생할 수 있는 잠재 경로 식별.
+- **원인 분석**:
+  1. Next.js 프론트엔드 다이얼로그(`admin-mint-topup-dialog.tsx`)는 응답 루트 레벨의 `data.ok === true` 및 `data.result.ledger_transaction_id`를 직접 검증하는 레거시 DTO 계약을 사용함.
+  2. Spring Boot의 표준 `ApiResponse<T>`는 데이터를 `data` 필드 내부에 캡슐화(`data.data.ok`, `data.data.result`)하여 직렬화하므로, 모달 컴포넌트가 영수증 ID를 파싱하지 못하고 재시도 예외를 던질 위험이 존재함.
+  3. Next.js App Router의 `mutate` 및 BFF 호출 시 `/api/v1/auth/session` 및 `/api/v1/auth/policy`를 조회하는데, Spring Boot 백엔드에 해당 엔드포인트가 없을 경우 404가 발생하여 간접 호출 실패를 유발함.
+
+### 2. 세부 구현 및 아키텍처 보강
+1. **`AuthController.java` 신규 구현**:
+   - `GET /api/v1/auth/session`, `GET /api/auth/session`: Next.js mutate 프레임워크가 필요로 하는 CSRF 토큰(`csrfToken: UUID`)을 즉시 반환하여 인증 세션 오류 원천 차단.
+   - `GET /api/v1/auth/policy`, `GET /api/auth/policy`: 약관 및 개인정보 처리방침 최신 버전 메타데이터 서빙.
+2. **`ApiResponse.java` 루트 레벨 호환 확장**:
+   - `ok` (Boolean) 및 `result` (Object) 필드를 루트 레벨에 포함하고, `okWithResult(data, result, message)` 정적 팩토리 메서드 제공.
+3. **`TreasuryAdminController.java` 조폐국/임금 응답 호환**:
+   - `mintTopup` 및 `disburseSalary` 응답 시 `ApiResponse.okWithResult`를 사용하여 레거시 모달 컴포넌트와 최신 Spring Boot 클라이언트 양쪽 모두 100% 호환되도록 전표 및 영수증 매핑 완료.
+
+### 3. 전수 실측 검증 (100% PASS)
+- `POST /api/admin/treasury/mint-topup`: 200 OK (`ok: true`, `result.ledger_transaction_id` 정상 수신 확인)
+- `POST /api/treasury/mint-topup`: 200 OK (호환 엔드포인트 정상 수신 확인)
+- `POST /api/admin/treasury/salary/disburse`: 200 OK (`ok: true`, `result.ledger_transaction_id` 정상 수신 확인)
+- `GET /api/v1/auth/session`: 200 OK (`csrfToken` 정상 발급 확인)
+- `GET /api/v1/auth/policy`: 200 OK (정책 메타데이터 정상 응답 확인)
