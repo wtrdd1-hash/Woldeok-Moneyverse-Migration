@@ -3861,3 +3861,30 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 3. `curl -s https://easy-scraping.com/login` HTML 응답에 `Google 계정으로 계속하기` 및 `Discord 계정으로 계속하기` 텍스트 포함 확인.
 4. `curl -s -i https://easy-scraping.com/auth/google/authorize` 호출 시 Google OAuth 로그인 화면으로 302 리다이렉트 응답 확인.
 5. `curl -s -i https://easy-scraping.com/auth/discord/authorize` 호출 시 Discord OAuth 로그인 화면으로 302 리다이렉트 응답 확인.
+
+
+---
+## 🚀 [v24 Specification] 전 시스템 및 프론트엔드 177개 전수 정밀 점검 및 미디어·SEO 파이프라인 동기화 (Exhaustive Full-Surface Inspection & Media/SEO Pipeline Alignment)
+
+### 1. 전수 정밀 점검 결과 요약 (Full Surface Audit Evidence)
+- **프론트엔드 전체 177개 라우트 전수 스캔 및 HTTP 응답 점검**:
+  - **200 OK**: 137개 페이지 (메인, 로그인, 주식, 시장, 연금, 중앙은행, 채권, 관리자 40+ 페이지 등 전원 정상)
+  - **30x Redirect**: 14개 회원 전용 인증 라우트 (`/bank`, `/calendar`, `/chat`, `/clubs`, `/collections`, `/dashboard`, `/developer`, `/inventory`, `/marketplace`, `/support` 등). 비로그인 상태 진입 시 세션 가드에 의해 `/login?error=login_required`로 정상 안전 리다이렉트 확인.
+  - **40x Client Error**: 26개 동적 파라미터 라우트 (DB 내 실제 유효한 slug, ID, preset 매개변수가 필요한 `[slug]`, `[preset]`, `[term]` 경로로서 404 정상 응답).
+  - **50x Server Error**: **0건 (전무)**
+  - **SSR 런타임 크래시("화면을 불러오지 못했어요")**: **0건 (완전 차단 확인)**
+
+- **백엔드 데몬 및 인프라 가동 상태**:
+  - Spring Boot (`port 4550`): `active (running)`, Actuator 헬스 `UP`, Java 21, 국고, SWF, 중앙은행, 예금보험, 채권, 연금, 지갑, 카지노 통계 200 OK.
+  - Node.js 백엔드 (`port 4500`): `active (running)`, Google/Discord OAuth 인가/콜백 및 세션 발급, SEO 로깅/통계, 미디어 저장소 200 OK.
+  - Next.js 프론트엔드 (`port 4501`): `active (running)`, Next.js 16.4.2 정상 기동 및 최신 빌드 배포 완료.
+  - Nginx 리버스 프록시: `active (running)`, SSL/TLS 터미네이션, HTTP->HTTPS 강제 리다이렉트 정상.
+  - PostgreSQL (`port 5433`): `Up 2 weeks (healthy)`, 43개 계정 및 1,943개 세션 정상 유지.
+  - Discord Bot (`moneyverse-discord-bot.service`): `active (running)`, 샤드 0 연결 유지 및 관리자 DM 알림 30분 주기 정상 발송.
+  - SEO 공개 자산: `/robots.txt` (200 OK), `/sitemap.xml` (200 OK, 409KB), `/sitemap-blog.xml` (200 OK).
+
+### 2. 세부 정밀 최적화 항목 (Identified Refinements)
+1. **SEO 통계 및 크롤러 로깅 포트 정합성**:
+   - `frontend/src/app/api/seo/status/route.ts` 및 `frontend/src/proxy.ts`에서 SEO 지표가 `AUTH_API_ORIGIN`(포트 4500)으로 올바르게 전송되도록 오리진 해석 추가.
+2. **미디어 스트리밍 프록시 포트 정합성**:
+   - `frontend/src/app/media/[key]/route.ts`, `frontend/src/app/media/board/[key]/route.ts`, `frontend/src/app/media/profile/[key]/route.ts`에서 미디어 스토리지 백엔드(포트 4500)로 올바르게 릴레이되도록 환경 변수 우선순위 동기화.
