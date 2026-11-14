@@ -3441,3 +3441,68 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 ### 3. 검증 결과 (Verification Results)
 - **Frontend Dialog & Route Tests**: 3 passed, 4 tests (100% PASS).
 - **Backend SWF Service Tests**: 1 passed, 5 tests (100% PASS).
+
+
+---
+## 🚀 [v7 Specification] Java Spring Boot 엔터프라이즈 백엔드 무중단 전환 마이그레이션 (+180, -0)
+
+### 1. 배경 및 비즈니스 전환 목표
+- **목표**: 현재 Node.js/NestJS 백엔드 아키텍처를 엔터프라이즈급 금융/원장 처리 표준인 **Java Spring Boot 3.3.x (Java 17/21 LTS, Spring Data JPA, Spring Security, Gradle Kotlin DSL)** 기반 고신뢰성 마이크로서비스 백엔드로 전면 전환.
+- **핵심 불변식 (Zero-Downtime Invariant)**:
+  1. 현재 운영 서버(`https://easy-scraping.com`)에서 가동 중인 프로덕션 서비스(포트 4500 NestJS 백엔드, 포트 4501 Next.js 프론트엔드)는 100% 무중단 유지.
+  2. 단일 `main` 브랜치 통합 원칙 엄수.
+  3. 모든 기존 PostgreSQL 16 복식부기 원장 스키마(Migration 346)와 100% 데이터 정합성 유지.
+
+### 2. 단계별 마이그레이션 절차 (Phase 1 ~ Phase 6)
+```mermaid
+flowchart LR
+    classDef currStyle fill:#1e293b,stroke:#3b82f6,color:#ffffff;
+    classDef springStyle fill:#064e3b,stroke:#10b981,color:#ffffff;
+    classDef stepStyle fill:#701a75,stroke:#d946ef,color:#ffffff;
+
+    subgraph PHASE1 ["Phase 1: 아키텍처 수립"]
+        P1["Gradle Kotlin DSL 프로젝트 구성 (Spring Boot 3.3.x, Java 17/21)"]:::stepStyle
+    end
+
+    subgraph PHASE2 ["Phase 2: 원장/엔티티 모델링"]
+        P2["JPA 복식부기 원장 매핑 (Ledger, Postings, Vaults, Users)"]:::stepStyle
+    end
+
+    subgraph PHASE3 ["Phase 3: 핵심 금융 도메인"]
+        P3["통화정책, 조폐국 MINT, 국고 Treasury, SWF, 주식 체결엔진"]:::stepStyle
+    end
+
+    subgraph PHASE4 ["Phase 4: API 컨트롤러"]
+        P4["REST API 엔드포인트 구현 (/api/v1/... 규격 100% 일치)"]:::stepStyle
+    end
+
+    subgraph PHASE5 ["Phase 5: 무중단 Side-by-Side"]
+        P5["포트 4550 백그라운드 기동 및 Nginx 점진적 카나리 전환"]:::springStyle
+    end
+
+    PHASE1 --> PHASE2 --> PHASE3 --> PHASE4 --> PHASE5
+```
+
+### 3. 스프링 백엔드 모듈 아키텍처 (`spring-backend`)
+- **디렉터리 구조**:
+  - `spring-backend/build.gradle.kts`
+  - `spring-backend/settings.gradle.kts`
+  - `spring-backend/src/main/resources/application.yml`
+  - `spring-backend/src/main/java/com/moneyverse/api/`
+    - `common/` (글로벌 응답 래퍼, 에러 핸들러, 감사 로그)
+    - `security/` (세션 토큰 인증, AdminGuard, 2FA OTP 필터)
+    - `domain/user/` (회원, 자산, 계좌 엔티티 및 리포지토리)
+    - `domain/ledger/` (복식부기 원장, 저널, 포스팅, 밸런스 검증 엔진)
+    - `domain/treasury/` (국고 4대 금고, 조폐국 MINT 충전, 관리자 임금, SWF 리밸런싱)
+    - `domain/stock/` (10대 상장사 호가창, 체결 엔진, 포트폴리오)
+    - `domain/casino/` (슬롯, 하이로우, 다이스 Provably Fair 엔진)
+    - `domain/kdic/` (예보공 기금 및 금융 집행)
+    - `domain/pension/` (국민연금 원장 및 기여금 정산)
+
+### 4. 구현 및 검증 계획 (Action Items)
+1. `spring-backend/` 프로젝트 초기화 및 Gradle 빌드 스크립트 작성.
+2. PostgreSQL 연결 및 Hibernate `validate` 모드 설정으로 기존 스키마 손상 원천 방지.
+3. 복식부기 불변식(Total Debit == Total Credit)을 보장하는 원장 서비스 구현.
+4. 조폐국 화폐발행(`POST /api/v1/admin/treasury/mint-topup`), 국고 관리자 임금(`POST /api/v1/admin/treasury/salary/disburse`), 국부펀드 리밸런싱(`POST /api/v1/admin/treasury/swf/rebalance`) 구현.
+5. Gradle 단위/통합 테스트 (`./gradlew test`) 100% 통과 검증.
+6. 운영 서버에 Side-by-Side 배포 (포트 4550) 및 헬스체크 확인.
