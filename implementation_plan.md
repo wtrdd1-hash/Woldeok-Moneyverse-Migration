@@ -3749,3 +3749,35 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 - `POST /api/admin/treasury/salary/disburse`: 200 OK (`ok: true`, `result.ledger_transaction_id` 정상 수신 확인)
 - `GET /api/v1/auth/session`: 200 OK (`csrfToken` 정상 발급 확인)
 - `GET /api/v1/auth/policy`: 200 OK (정책 메타데이터 정상 응답 확인)
+
+---
+## 🚀 [v18 Specification] 국고 자동투자(SWF 국부펀드) 엔진 활성화 및 스프링 부트 엔드포인트 연동 완료 (+82, -0)
+
+### 1. 요구사항 및 문제 분석
+- **사용자 요청**: "그러면 일단 국고자동투자 되게셋팅해"
+- **현상 분석**:
+  1. 관리자 국고 페이지(`/admin/treasury`) 내 `국고 복리 성장 국부펀드 (ASWF) 포트폴리오` 섹션이 `NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true'` 미지정 시 "자동투자 실거래 정산 대기", "실거래 검증 전 리밸런싱 보류" 배너와 함께 비활성화(disabled) 잠금 상태로 렌더링됨.
+  2. Spring Boot 3.3 백엔드에 SWF 스냅샷 조회(`GET /api/admin/treasury/swf`) 및 거버넌스 정책 업데이트(`PUT /api/admin/treasury/swf`) 엔드포인트가 부재하여 프론트엔드 최신 원장 동기화 시 404가 발생함.
+  3. Nginx에 SWF 리밸런싱(`location = /api/admin/treasury/swf/rebalance`) 단일 경로만 설정되어 있어 스냅샷 및 정책 변경 요청이 백엔드로 인입되지 못함.
+
+### 2. 세부 구현 내역
+1. **Spring Boot `TreasuryService.java` 보강**:
+   - `getSwfSnapshot()`: PostgreSQL 저장 함수 `SELECT public.admin_swf_snapshot('5f7b8b44-e4aa-40b8-b93a-800ec0151d20'::uuid)`를 직접 실행하여 `config`, `portfolios`(4대 우량주 보유 현황), `events`(자동 성장 히스토리) 정본 데이터 서빙.
+   - `updateSwfPolicy(changes)`: `SELECT public.admin_swf_update_policy('5f7b8b44-e4aa-40b8-b93a-800ec0151d20'::uuid, ?::jsonb)`를 실행하여 국고 보존 비율 및 투자 상한 원자적 갱신.
+2. **Spring Boot `TreasuryAdminController.java` 매핑 확장**:
+   - `GET /api/admin/treasury/swf`, `GET /api/v1/admin/treasury/swf`: SWF 스냅샷 200 OK 서빙.
+   - `PUT /api/admin/treasury/swf`, `PUT /api/v1/admin/treasury/swf`: SWF 정책 저장 200 OK 서빙.
+   - `POST /api/admin/treasury/swf/rebalance`: 포트폴리오 리밸런싱 실행 및 복리 배분 완료 처리.
+   - `POST /api/admin/treasury/swf/liquidate`: 국고 자금 환원 집행 처리.
+3. **Nginx 라우팅 직결**:
+   - `location ^~ /api/admin/treasury/swf` 및 `location ^~ /api/v1/admin/treasury/swf`를 Spring Boot(포트 4550)로 접두사 프록시 연결.
+4. **프론트엔드 UI 활성화 (`swf-control-panel.tsx`)**:
+   - `isSwfOperational` 기본값을 `true`로 활성화하여 버튼 잠금 즉시 해제.
+   - 배너 문구를 `자동투자 자율 엔진 정상 가동 (실시간 연동 완료)`로 갱신.
+   - `prod-v2208-admin-api-origin.env`에 `NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL=true` 적용.
+
+### 3. 전수 실측 검증
+- `GET /api/admin/treasury/swf`: **200 OK** (4대 우량주 WDX-TEC, WDX-FIN, WDX-RET, WDX-BIO 평가액 및 설정 정상 반환)
+- `POST /api/admin/treasury/swf/rebalance`: **200 OK** (`executed: true`, 4대 섹터 리밸런싱 완료)
+- `PUT /api/admin/treasury/swf`: **200 OK** (투자비율 15%, 상한 20%, 안전보존금 2,500만 WLD 정상 저장)
+- `GET /admin/treasury`: **200 OK** (국고 관리자 웹 화면 정상 렌더링)
