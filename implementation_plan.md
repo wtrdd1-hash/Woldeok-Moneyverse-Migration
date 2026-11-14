@@ -3931,3 +3931,36 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 1. `probe_admin_token`을 활용한 Next.js 프론트엔드 `/admin` SSR 렌더링 결과 확인.
 2. HTML 응답 내 `100% LEDGER SYNCED`, `ALL CLEAR` (총 7개 플래그 관제), `10 LISTED` (가상 주식), `21명` (조회된 회원) 텍스트 렌더링 확인.
 3. 상단 뱃지가 `핵심 지표 조회 완료` (초록색 뱃지)로 즉시 전환되는지 검증.
+
+
+---
+## 🚀 [v26 Specification] 어드민 관제탑 실시간 벤토 그리드 지표 100% 동기화 및 전수 검증 완료 (누적 추가)
+
+### 1. 배경 및 원인 분석
+- **현상**: 사용자가 업로드한 `/admin` 관제탑 화면에서 4대 Bento Grid 카드가 모두 미확인 상태(`UNVERIFIED`, `확인 불가`, `조회 불가`, 상단 뱃지: `일부 지표 확인 불가`)로 렌더링됨.
+- **원인**:
+  1. Next.js의 `resolveTargetOrigin` 함수가 `/admin` 하위 엔드포인트들을 Spring Boot(포트 4550)로 라우팅하였으나, 거버넌스/컨트롤/유저/주식/정합성 엔드포인트(`/api/v1/admin/controls`, `/api/v1/admin/users`, `/api/v1/admin/stocks`, `/api/v1/admin/economy/reconciliations/latest` 등)는 Node.js 백엔드(포트 4500)에만 존재하여 404를 반환함.
+  2. 프론트엔드 SSR 시 관리자 세션 쿠키(`mv_session`)의 최소 길이(32자 이상) 및 `x-internal-token` 전송 규격이 필요함.
+
+### 2. 조치 및 적용 내역
+1. **`frontend/src/lib/api.ts` 라우팅 정밀화**:
+   - 금융 엔진(`/api/treasury`, `/api/central-bank`, `/api/bonds`, `/api/pension`, `/api/kdic`, `/api/banking`, `/api/casino`, `/api/marketplace`, `/api/wallet`, `/api/seasons`, `/api/v1/auth/reset` 등)만 Spring Boot(포트 4550)로 라우팅.
+   - 관제탑 거버넌스 및 사용자/주식/정합성 엔드포인트는 authoritative Node.js 백엔드(포트 4500)로 라우팅.
+2. **배포 및 프로덕션 빌드 완료**:
+   - 프로덕션 frontend (`/srv/moneyverse-data/releases/production-current/frontend`)에 배포 및 `pnpm build` 완벽 성공 (오류 0건, 599개 정적/동적 라우트 컴파일 완료).
+   - `moneyverse-release-v1546-frontend.service` 무중단 재기동.
+
+### 3. 실서비스 SSR 렌더링 검증 결과
+- **HTTP 상태 코드**: 200 OK
+- **복식부기 원장 · 5대 금고**: `100% LEDGER SYNCED` (초록색 텍스트, 원장 정합성 완벽 동기화 확인)
+- **비상 킬스위치**: `ALL CLEAR` (총 7개 플래그 정상 관제)
+- **가상 주식 시장**: `10 LISTED` (거래 정지 0종목)
+- **조회된 회원**: `21명` (상위 100명 샘플 정상 로드)
+- **상단 관제탑 뱃지**: `핵심 지표 조회 완료` (기존 '일부 지표 확인 불가'에서 정상 전환 완료)
+- **미확인 문구 전멸**: `UNVERIFIED` (false), `확인 불가` (false), `조회 불가` (false) 모두 0건.
+
+### 4. 전체 시스템 종합 상태
+- **프론트엔드 라우트 177개 전수 스캔**: 500 오류 0건, 화면 깨짐(화면을 불러오지 못했어요) 0건.
+- **소셜 로그인 (OAuth)**: Google 및 Discord 제공자 모두 정상 작동.
+- **국고 자동 투자**: Spring Boot 국고 스케줄러 가동 확인.
+- **SEO/크롤러**: `/api/seo/status` 200 OK (Googlebot, Yeti 실시간 수집 정상).
