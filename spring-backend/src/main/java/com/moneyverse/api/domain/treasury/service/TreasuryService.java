@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -47,36 +49,18 @@ public class TreasuryService {
         String txId = UUID.randomUUID().toString();
         String reason = request.getReason() != null ? request.getReason() : "통화정책 승인 국고 비상 유동성 즉시 충전";
         UUID requestKey = UUID.randomUUID();
-        boolean procedureSuccess = false;
-
-        // 1. PostgreSQL DB 금융 정본 프로시저 실행 시도 (운영 환경)
         try {
             String sql = "SELECT public.admin_treasury_topup_from_mint_direct(?::uuid, ?::text, ?::text, ?::uuid)::text";
             String rawJson = jdbcTemplate.queryForObject(sql, String.class, CANONICAL_ADMIN_ID, String.valueOf(request.getAmountWld()), reason, requestKey);
-            log.info("[TreasuryService] Mint topup procedure receipt: {}", rawJson);
-
-            if (rawJson != null && !rawJson.isBlank()) {
-                JsonNode root = objectMapper.readTree(rawJson);
-                if (root.has("ledger_transaction_id")) {
-                    txId = root.get("ledger_transaction_id").asText();
-                }
-                procedureSuccess = true;
+            JsonNode receipt = rawJson == null ? null : objectMapper.readTree(rawJson);
+            if (receipt == null || !receipt.hasNonNull("ledger_transaction_id")
+                    || receipt.get("ledger_transaction_id").asText().isBlank()) {
+                throw new IllegalStateException("missing canonical ledger receipt");
             }
+            txId = receipt.get("ledger_transaction_id").asText();
         } catch (Exception e) {
-            log.warn("[TreasuryService] DB procedure topup bypassed or failed, using local vault credit fallback: {}", e.getMessage());
-        }
-
-        // 2. 프로시저 미실행 환경(H2 테스트 등)일 경우 JPA 금고 잔액 직접 갱신
-        if (!procedureSuccess) {
-            TreasuryVault mainVault = vaultRepository.findByCode("VAULT_MAIN")
-                    .orElseGet(() -> TreasuryVault.builder()
-                            .code("VAULT_MAIN")
-                            .name("중앙 국고 주 금고")
-                            .balanceWld("0")
-                            .description("중앙 국고 주 금고")
-                            .build());
-            mainVault.credit(request.getAmountWld());
-            vaultRepository.save(mainVault);
+            log.error("[TreasuryService] Mint topup rejected: canonical ledger operation unavailable", e);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Canonical treasury operation unavailable");
         }
 
         Long newBalance = getVaultBalance("VAULT_MAIN");
@@ -102,34 +86,18 @@ public class TreasuryService {
 
         String txId = UUID.randomUUID().toString();
         String reason = "관리자 국고 노고 치하 정기 임금 지급";
-        boolean procedureSuccess = false;
-
         try {
             String sql = "SELECT public.treasury_disburse_admin_salary(?::uuid, ?::uuid, ?::text, ?::text)::text";
             String rawJson = jdbcTemplate.queryForObject(sql, String.class, CANONICAL_ADMIN_ID, CANONICAL_ADMIN_ID, String.valueOf(request.getAmountWld()), reason);
-            log.info("[TreasuryService] Salary disburse procedure receipt: {}", rawJson);
-
-            if (rawJson != null && !rawJson.isBlank()) {
-                JsonNode root = objectMapper.readTree(rawJson);
-                if (root.has("ledger_transaction_id")) {
-                    txId = root.get("ledger_transaction_id").asText();
-                }
-                procedureSuccess = true;
+            JsonNode receipt = rawJson == null ? null : objectMapper.readTree(rawJson);
+            if (receipt == null || !receipt.hasNonNull("ledger_transaction_id")
+                    || receipt.get("ledger_transaction_id").asText().isBlank()) {
+                throw new IllegalStateException("missing canonical ledger receipt");
             }
+            txId = receipt.get("ledger_transaction_id").asText();
         } catch (Exception e) {
-            log.warn("[TreasuryService] DB procedure disburse bypassed or failed, using local vault debit fallback: {}", e.getMessage());
-        }
-
-        if (!procedureSuccess) {
-            TreasuryVault mainVault = vaultRepository.findByCode("VAULT_MAIN")
-                    .orElseGet(() -> TreasuryVault.builder()
-                            .code("VAULT_MAIN")
-                            .name("중앙 국고 주 금고")
-                            .balanceWld("10000000")
-                            .description("중앙 국고 주 금고")
-                            .build());
-            mainVault.debit(request.getAmountWld());
-            vaultRepository.save(mainVault);
+            log.error("[TreasuryService] Salary disbursement rejected: canonical ledger operation unavailable", e);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Canonical treasury operation unavailable");
         }
 
         Long remainingBalance = getVaultBalance("VAULT_MAIN");
