@@ -492,7 +492,7 @@ export class AdminTreasuryController {
 
 /** Guarded donation is isolated from anonymous public overview DI and disclosure. */
 @ApiTags('Member Treasury')
-@Controller('treasury')
+@Controller(['admin/treasury', 'treasury'])
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class FundedTreasuryDonationController {
   constructor(
