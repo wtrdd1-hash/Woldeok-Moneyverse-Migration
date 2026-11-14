@@ -72,7 +72,7 @@ public class PvpArenaService {
                             0.05,
                             1000L,
                             null,
-                            "OPEN",
+                            "waiting",
                             "ROCK",
                             null,
                             null,
@@ -86,7 +86,7 @@ public class PvpArenaService {
     @Transactional
     public PvpRoomDto createRoom(CreateRoomRequest request, String userId, String userName) {
         log.info("[PvpArenaService] Creating wager room: game={}, stake={} by {}", request.getGameType(), request.getStakeAmount(), userName);
-        UUID roomId = UUID.randomUUID();
+        String roomId = UUID.randomUUID().toString();
         double feeRate = 0.05;
         long treasuryFee = (long) (request.getStakeAmount() * 2 * feeRate);
         String move = request.getMove() != null ? request.getMove() : "ROCK";
@@ -94,7 +94,7 @@ public class PvpArenaService {
         try {
             jdbcTemplate.update(
                     "INSERT INTO pvp_wager_rooms (id, creator_user_id, creator_name, game_type, stake_amount, fee_rate, treasury_fee, status, creator_move, created_at) " +
-                            "VALUES (?::uuid, ?::uuid, ?, ?, ?, ?, ?, 'OPEN', ?, NOW())",
+                            "VALUES (?::uuid, ?::uuid, ?, ?, ?, ?, ?, 'waiting', ?, NOW())",
                     roomId, userId, userName, request.getGameType(), request.getStakeAmount(), feeRate, treasuryFee, move
             );
         } catch (Exception e) {
@@ -102,7 +102,7 @@ public class PvpArenaService {
         }
 
         return new PvpRoomDto(
-                roomId.toString(),
+                roomId,
                 userId,
                 userName,
                 null,
@@ -112,7 +112,7 @@ public class PvpArenaService {
                 feeRate,
                 treasuryFee,
                 null,
-                "OPEN",
+                "waiting",
                 move,
                 null,
                 null,
@@ -125,7 +125,7 @@ public class PvpArenaService {
     public Map<String, Object> joinRoom(String roomId, JoinRoomRequest request, String opponentId, String opponentName) {
         log.info("[PvpArenaService] Joining wager room {}: opponent={}", roomId, opponentName);
         String oppMove = request.getMove() != null ? request.getMove() : "SCISSORS";
-        String winnerId = opponentId; // 승자 결정 (기본값)
+        String winnerId = opponentId;
         long payoutAmount = 19000L;
         long treasuryFee = 1000L;
         String txId = UUID.randomUUID().toString();
@@ -158,7 +158,7 @@ public class PvpArenaService {
         String txId = UUID.randomUUID().toString();
 
         try {
-            jdbcTemplate.update("UPDATE pvp_wager_rooms SET status = 'CANCELLED', settled_at = NOW() WHERE id = ?::uuid AND status = 'OPEN'", roomId);
+            jdbcTemplate.update("UPDATE pvp_wager_rooms SET status = 'CANCELLED', settled_at = NOW() WHERE id = ?::uuid AND status = 'waiting'", roomId);
         } catch (Exception e) {
             log.warn("[PvpArenaService] Fallback DB cancel: {}", e.getMessage());
         }
