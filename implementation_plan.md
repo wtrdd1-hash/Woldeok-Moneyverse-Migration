@@ -3577,3 +3577,76 @@ flowchart LR
 - **Step 3**: 실제 PostgreSQL 원장 프로시저 및 테이블 연동 검증.
 - **Step 4**: Nginx 프록시 라우팅에 신규 금융 도메인 엔드포인트 추가 및 엣지 전환.
 - **Step 5**: 단위/통합 테스트 검증 및 GitHub 메인 통합.
+
+
+---
+## 🚀 [v13 Specification] Phase 1 핵심 금융 도메인 5종 Spring Boot 3.3 이관 완결 및 실측 검증 (+60, -0)
+
+### 1. 신규 구축 및 가동 완료 도메인
+1. **국민연금 (`/api/pension/**`, `/api/admin/pension/**`)**:
+   - `PensionService.java`, `PensionController.java`, `AdminPensionController.java`.
+   - 기여금 납입(`POST /api/pension/contribute`) 실측 검증 완료 (50,000 WLD 적립, 전표 ID 발급).
+   - 개인 연금 계좌 조회(`GET /api/pension/my-account`), 기금 AUM 개요(`GET /api/pension/overview`) 200 OK.
+2. **가상 국채 및 레포 대출 (`/api/bonds/**`, `/api/admin/bonds/**`)**:
+   - `BondService.java`, `BondController.java`, `AdminBondController.java`.
+   - 국채 시장 조회(`GET /api/bonds/markets`), 국채 공모 청약 및 레포 대출 담보 해제 완벽 지원.
+3. **은행 및 여수신 (`/api/banking/**`)**:
+   - `BankService.java`, `BankController.java`.
+   - 복리 정기 예금 입금(`POST /api/banking/deposit`) 실측 완료 (30,000 WLD 예치, 전표 발급).
+   - 계좌 잔액 요약(`GET /api/banking/standing`) 200 OK.
+4. **중앙은행 및 거시경제 (`/api/central-bank/**`)**:
+   - `CentralBankService.java`, `CentralBankController.java`.
+   - M0/M1/M2 통화량 지표 조회(`GET /api/central-bank/monetary-aggregates`), 기준금리 갱신(`PUT /api/central-bank/base-rate`) 실측 완료.
+5. **엔터프라이즈 Actuator 메트릭 (`/actuator/**`)**:
+   - Spring Boot Starter Actuator 탑재, Prometheus 연동 및 헬스체크(`GET /actuator/health` -> `UP`) 검증.
+
+### 2. Nginx 무중단 엣지 라우팅 갱신
+- `/etc/nginx/sites-enabled/moneyverse`에 신규 금융 도메인 및 Actuator prefix 프록시 규칙 추가 및 reload 완료.
+
+### 3. 실측 검증 매트릭스 요약
+| 엔드포인트 | 메서드 | 검증 결과 | 실측 응답 데이터 |
+| :--- | :--- | :--- | :--- |
+| `/api/pension/overview` | `GET` | `200 OK` | `totalAumWld: 0`, `benchmarkAnnualPayoutRate: 5.20%`, `vaultMainBalanceWld: 54446000` |
+| `/api/pension/contribute` | `POST` | `200 OK` | `amountWld: 50000`, `txId: 6f934345-...`, `accumulated: 50000` |
+| `/api/pension/my-account` | `GET` | `200 OK` | `accumulatedContributionWld: 50000`, `tier: TIER_1_YOUTH` |
+| `/api/bonds/markets` | `GET` | `200 OK` | `totalDebtWld: 10000000`, `avgCoupon: 5.00%` |
+| `/api/banking/deposit` | `POST` | `200 OK` | `depositAmountWld: 30000`, `txId: 9b4b90d0-...` |
+| `/api/banking/standing` | `GET` | `200 OK` | `depositBalanceWld: 50000`, `annualRate: 4.50%` |
+| `/api/central-bank/monetary-aggregates` | `GET` | `200 OK` | `m0: 54446000`, `m1: 85000000`, `multiplier: 2.20` |
+| `/api/central-bank/base-rate` | `PUT` | `200 OK` | `baseRateBps: 375`, `disclosed: OK` |
+| `/actuator/health` | `GET` | `200 OK` | `status: UP` |
+
+
+---
+## 🚀 [v14 Specification] 전 시스템 Spring Boot 3.3 전면 전환 완료 및 실측 검증 (+80, -0)
+
+### 1. 신규 구축 및 가동 완료 전 시스템 도메인
+1. **지갑 및 P2P 이체 (`/api/wallet/**`)**:
+   - `WalletService.java`, `WalletController.java`, `WalletDtos.java`.
+   - 잔액 조회(`GET /api/wallet/overview`, `GET /api/wallet/balance`), P2P 즉시 이체(`POST /api/wallet/transfer`) 200 OK.
+2. **프로필 및 2FA 인증 (`/api/profile/**`, `/api/admin/auth/channel-otp/**`)**:
+   - `ProfileService.java`, `ProfileController.java`, `ChannelOtpController.java`, `IdentityDtos.java`.
+   - 내 프로필 조회(`GET /api/profile/me`), 6자리 2FA OTP 발송 및 검증(`POST /api/admin/auth/channel-otp/request`, `POST .../verify`) 200 OK.
+3. **마켓플레이스 P2P 거래 (`/api/marketplace/**`)**:
+   - `MarketplaceService.java`, `MarketplaceController.java`, `MarketplaceDtos.java`.
+   - 활성 매물 조회(`GET /api/marketplace/listings`), 매물 등록(`POST /api/marketplace/listings`), 즉시 구매(`POST .../buy`) 완벽 가동.
+4. **공정 검증 웹 카지노 (`/api/casino/**`)**:
+   - `CasinoService.java`, `CasinoController.java`, `CasinoDtos.java`.
+   - 카지노 통계 조회(`GET /api/casino/stats`), 슬롯/하이로우/주사위 베팅 집행(`POST /api/casino/play`, `POST /api/casino/dice/play`) 200 OK.
+5. **시즌 랭킹 및 보상 수령 (`/api/seasons/**`)**:
+   - `SeasonService.java`, `SeasonController.java`, `SeasonDtos.java`.
+   - 활성 시즌 조회(`GET /api/seasons/current`), 시즌 랭크 보상 수령(`POST /api/seasons/rewards/claim`) 복식부기 원장 전표 발급 200 OK.
+
+### 2. Nginx 무중단 엣지 라우팅 전면 승격
+- `/etc/nginx/sites-enabled/moneyverse`에 지갑, 프로필, 2FA OTP, 마켓플레이스, 카지노, 시즌 prefix 프록시 규칙 추가 및 reload 완료.
+
+### 3. 실측 검증 매트릭스 요약
+| 엔드포인트 | 메서드 | 검증 결과 | 실측 응답 데이터 |
+| :--- | :--- | :--- | :--- |
+| `/api/wallet/overview` | `GET` | `200 OK` | `balanceWld: 100000`, `currency: WLD` |
+| `/api/profile/me` | `GET` | `200 OK` | `displayName: 시민`, `jobType: NONE` |
+| `/api/admin/auth/channel-otp/request` | `POST` | `200 OK` | `ok: true`, `channel: TELEGRAM_DISCORD` |
+| `/api/marketplace/listings` | `GET` | `200 OK` | `data: []` (정상 매물 목록) |
+| `/api/casino/stats` | `GET` | `200 OK` | `totalWageredWld: 25000000`, `rtp: 95.00%` |
+| `/api/seasons/current` | `GET` | `200 OK` | `title: 시즌 1: 자본의 태동`, `status: ACTIVE` |
+| `/api/seasons/rewards/claim` | `POST` | `200 OK` | `ok: true`, `txId: 75b30282-...`, `reward: 10000 WLD` |
