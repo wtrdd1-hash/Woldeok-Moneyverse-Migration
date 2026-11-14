@@ -111,20 +111,6 @@ public class BondService {
             ) VALUES (?::uuid, ?::uuid, ?::uuid, ?, ?, 0, true, NOW(), NOW())
             """, holdingId, userId, bondId, units, totalPrice);
 
-        // 중앙 국고 자금 유입
-        try {
-            String currentVaultBalStr = jdbcTemplate.queryForObject(
-                "SELECT balance_wld FROM system_treasury_vaults WHERE code = 'VAULT_MAIN' FOR UPDATE",
-                String.class
-            );
-            BigDecimal currentVault = new BigDecimal(currentVaultBalStr != null ? currentVaultBalStr : "0");
-            BigDecimal updatedVault = currentVault.add(totalPrice);
-            jdbcTemplate.update(
-                "UPDATE system_treasury_vaults SET balance_wld = ?, updated_at = NOW() WHERE code = 'VAULT_MAIN'",
-                updatedVault.toPlainString()
-            );
-        } catch (Exception ignored) {}
-
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("holdingId", holdingId);

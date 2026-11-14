@@ -91,24 +91,6 @@ public class PensionService {
 
         PensionAccountInfo account = getOrCreateAccount(userId);
 
-        // 중앙 국고(VAULT_MAIN) 잔액 조회 및 갱신
-        String currentVaultBalStr = "54446000";
-        try {
-            currentVaultBalStr = jdbcTemplate.queryForObject(
-                "SELECT balance_wld FROM system_treasury_vaults WHERE code = 'VAULT_MAIN' FOR UPDATE",
-                String.class
-            );
-        } catch (Exception ignored) {}
-
-        BigDecimal currentVault = new BigDecimal(currentVaultBalStr != null ? currentVaultBalStr : "0");
-        BigDecimal updatedVault = currentVault.add(BigDecimal.valueOf(amountWld));
-
-        jdbcTemplate.update("""
-            UPDATE system_treasury_vaults 
-            SET balance_wld = ?, updated_at = NOW() 
-            WHERE code = 'VAULT_MAIN'
-            """, updatedVault.toPlainString());
-
         // 연금 계좌 적립금 누적
         String updateAccSql = """
             UPDATE national_pension_accounts 
@@ -127,6 +109,14 @@ public class PensionService {
             ) VALUES (gen_random_uuid(), ?::uuid, ?::uuid, ?, ?, NOW())
             """, account.getId(), userId, amountWld, note != null ? note : "국민연금 정기 기여금 납입");
 
+        String currentVaultBalStr = "54446000";
+        try {
+            currentVaultBalStr = jdbcTemplate.queryForObject(
+                "SELECT balance_wld FROM system_treasury_vaults WHERE code = 'VAULT_MAIN'",
+                String.class
+            );
+        } catch (Exception ignored) {}
+
         String txId = UUID.randomUUID().toString();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("success", true);
@@ -134,8 +124,8 @@ public class PensionService {
         result.put("userId", userId);
         result.put("amountWld", amountWld);
         result.put("newAccumulatedContributionWld", newAccumulated != null ? newAccumulated.toPlainString() : "0");
-        result.put("newVaultBalanceWld", updatedVault.toPlainString());
-        result.put("message", "국민연금 기여금이 성공적으로 납입되어 국고로 편입되었습니다.");
+        result.put("vaultBalanceWld", currentVaultBalStr);
+        result.put("message", "국민연금 기여금이 성공적으로 납입되어 연금 계좌에 적립되었습니다.");
         return result;
     }
 
