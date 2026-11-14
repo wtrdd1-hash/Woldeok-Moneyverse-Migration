@@ -42,11 +42,11 @@ public class PensionService {
 
                 String vaultBal = "54446000";
                 try {
-                    BigDecimal vBal = jdbcTemplate.queryForObject(
-                        "SELECT balance_wld FROM fiscal_vaults WHERE code = 'VAULT_MAIN'",
-                        BigDecimal.class
+                    String vBalStr = jdbcTemplate.queryForObject(
+                        "SELECT balance_wld FROM system_treasury_vaults WHERE code = 'VAULT_MAIN'",
+                        String.class
                     );
-                    if (vBal != null) vaultBal = vBal.toPlainString();
+                    if (vBalStr != null) vaultBal = vBalStr;
                 } catch (Exception ignored) {}
 
                 return new PensionOverview(
@@ -91,13 +91,23 @@ public class PensionService {
 
         PensionAccountInfo account = getOrCreateAccount(userId);
 
-        // 국고(VAULT_MAIN) 편입 및 원장 전표 생성
-        String txId = UUID.randomUUID().toString();
+        // 중앙 국고(VAULT_MAIN) 잔액 조회 및 갱신
+        String currentVaultBalStr = "54446000";
+        try {
+            currentVaultBalStr = jdbcTemplate.queryForObject(
+                "SELECT balance_wld FROM system_treasury_vaults WHERE code = 'VAULT_MAIN' FOR UPDATE",
+                String.class
+            );
+        } catch (Exception ignored) {}
+
+        BigDecimal currentVault = new BigDecimal(currentVaultBalStr != null ? currentVaultBalStr : "0");
+        BigDecimal updatedVault = currentVault.add(BigDecimal.valueOf(amountWld));
+
         jdbcTemplate.update("""
-            UPDATE fiscal_vaults 
-            SET balance_wld = balance_wld + ?, updated_at = NOW() 
+            UPDATE system_treasury_vaults 
+            SET balance_wld = ?, updated_at = NOW() 
             WHERE code = 'VAULT_MAIN'
-            """, amountWld);
+            """, updatedVault.toPlainString());
 
         // 연금 계좌 적립금 누적
         String updateAccSql = """
@@ -117,18 +127,14 @@ public class PensionService {
             ) VALUES (gen_random_uuid(), ?::uuid, ?::uuid, ?, ?, NOW())
             """, account.getId(), userId, amountWld, note != null ? note : "국민연금 정기 기여금 납입");
 
-        BigDecimal newVaultBal = jdbcTemplate.queryForObject(
-            "SELECT balance_wld FROM fiscal_vaults WHERE code = 'VAULT_MAIN'",
-            BigDecimal.class
-        );
-
+        String txId = UUID.randomUUID().toString();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("success", true);
         result.put("txId", txId);
         result.put("userId", userId);
         result.put("amountWld", amountWld);
         result.put("newAccumulatedContributionWld", newAccumulated != null ? newAccumulated.toPlainString() : "0");
-        result.put("newVaultBalanceWld", newVaultBal != null ? newVaultBal.toPlainString() : "0");
+        result.put("newVaultBalanceWld", updatedVault.toPlainString());
         result.put("message", "국민연금 기여금이 성공적으로 납입되어 국고로 편입되었습니다.");
         return result;
     }
