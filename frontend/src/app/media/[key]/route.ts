@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 
 /**
  * Relays the bytes of a published photo.
@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server';
  * API's answer, and this forwards it: 404 stays 404, so an operator's
  * unreviewed upload is as unreachable through Next as it is directly.
  */
-const API_ORIGIN = process.env.AUTH_API_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:4500';
+const API_ORIGIN = process.env.AUTH_API_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 
 /** Exactly what the store generates: a v4 UUID and one of three extensions. */
 const STORAGE_KEY =

@@ -84,7 +84,7 @@ export async function adminConsole(): Promise<AdminConsole> {
       if (error.status === 401) redirect('/login?error=login_required');
       if (error.status === 428) redirect('/login?error=consent_required');
       if (error.status === 403) redirect('/');
-      if (error.status === 404 || error.status === 500) redirect('/login?error=login_required');
+      if (error.status === 404) redirect('/login?error=login_required');
     }
     throw error;
   }
