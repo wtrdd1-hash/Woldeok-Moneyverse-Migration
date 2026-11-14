@@ -1,5 +1,6 @@
 package com.moneyverse.api.domain.treasury.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,11 +11,13 @@ public class TreasuryDtos {
     public static class MintTopupRequest {
         @NotNull(message = "amountWld is required")
         @Min(value = 1, message = "amountWld must be greater than 0")
+        @JsonAlias({"amount", "amount_wld", "amountWld"})
         private Long amountWld;
 
         @NotBlank(message = "reason must not be blank")
         private String reason;
 
+        @JsonAlias({"otpToken", "otpCode", "otp_code", "otp_token"})
         private String otpCode;
         private String requestKey;
 
@@ -55,6 +58,7 @@ public class TreasuryDtos {
     public static class SalaryDisburseRequest {
         @NotNull(message = "amountWld is required")
         @Min(value = 1, message = "amountWld must be greater than 0")
+        @JsonAlias({"amount", "amount_wld", "amountWld"})
         private Long amountWld;
 
         private String targetAdminId;
@@ -123,6 +127,7 @@ public class TreasuryDtos {
     public static class SwfLiquidateRequest {
         @NotNull(message = "amountWld is required")
         @Min(value = 1, message = "amountWld must be greater than 0")
+        @JsonAlias({"amount", "amount_wld", "amountWld"})
         private Long amountWld;
         private String reason;
 
