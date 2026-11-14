@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -150,40 +152,14 @@ public class TreasuryService {
      * 국부펀드(SWF) 자동투자 및 리밸런싱 실행
      */
     public Map<String, Object> rebalanceSwf(SwfRebalanceRequest request) {
-        log.info("[TreasuryService] SWF rebalance requested: operational={}", swfOperational);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("status", "SUCCESS");
-        result.put("executed", true);
-        result.put("reason", "SWF_REBALANCED_AND_RECONCILED");
-        result.put("totalAumWld", 10000000L);
-        result.put("rebalancedPortfolio", Map.of(
-                "TECH_SECTOR", 35,
-                "FINANCE_SECTOR", 25,
-                "CONSUMER_SECTOR", 20,
-                "LIQUID_CASH", 20
-        ));
-        result.put("executedAt", Instant.now().toString());
-        return result;
+        // No canonical DB receipt, posting, or idempotency contract is wired yet.
+        // Never fabricate a successful financial execution.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SWF_REBALANCE_NOT_IMPLEMENTED");
     }
 
-    /**
-     * 국부펀드(SWF) 평가액 국고 환원
-     */
-    @Transactional
+    /** SWF liquidation must not claim a vault credit without a committed ledger receipt. */
     public Map<String, Object> liquidateSwf(SwfLiquidateRequest request) {
-        log.info("[TreasuryService] SWF liquidation requested: amount={} WLD", request.getAmountWld());
-
-        String txId = UUID.randomUUID().toString();
-        Long currentBalance = getVaultBalance("VAULT_MAIN");
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("txId", txId);
-        result.put("liquidatedAmountWld", request.getAmountWld());
-        result.put("newVaultBalanceWld", currentBalance + request.getAmountWld());
-        result.put("executedAt", Instant.now().toString());
-        return result;
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "SWF_LIQUIDATION_NOT_IMPLEMENTED");
     }
 
     private Long getVaultBalance(String code) {
