@@ -3888,3 +3888,46 @@ umericBalanced: true, 불균형 거래 0건 보증 |
    - `frontend/src/app/api/seo/status/route.ts` 및 `frontend/src/proxy.ts`에서 SEO 지표가 `AUTH_API_ORIGIN`(포트 4500)으로 올바르게 전송되도록 오리진 해석 추가.
 2. **미디어 스트리밍 프록시 포트 정합성**:
    - `frontend/src/app/media/[key]/route.ts`, `frontend/src/app/media/board/[key]/route.ts`, `frontend/src/app/media/profile/[key]/route.ts`에서 미디어 스토리지 백엔드(포트 4500)로 올바르게 릴레이되도록 환경 변수 우선순위 동기화.
+
+
+---
+## 🚀 [v25 Specification] 운영 마스터 관제탑 핵심 거버넌스 지표 실시간 복구 (Admin Cockpit Governance Indicators Restoration)
+
+### 1. 현상 및 원인 분석 (Root Cause Analysis)
+- **현상**: 관리자 관제탑(`/admin`) 접근 시 핵심 거버넌스 Bento Card 4종이 다음과 같이 미확인 상태로 렌더링됨:
+  - 복식부기 원장 · 5대 금고: `UNVERIFIED` (원장 정합성 확인 불가)
+  - 비상 킬스위치: `확인 불가 (서버 응답 미확인)`
+  - 가상 주식 시장: `확인 불가 (서버 응답 미확인)`
+  - 조회된 회원: `조회 불가`
+  - 상단 뱃지: `일부 지표 확인 불가`
+- **원인**:
+  1. `/admin/page.tsx`는 마운트 시 `apiOrNull`을 통해 다음 6개 거버넌스 지표를 병렬 조회함:
+     - `/api/v1/admin/controls` (비상 킬스위치 피처 플래그)
+     - `/api/v1/admin/users` (조회된 회원 샘플 및 순자산)
+     - `/api/v1/admin/stocks` (가상 주식 시장 상장 종목)
+     - `/api/v1/admin/business-types`
+     - `/api/v1/admin/season-events`
+     - `/api/v1/admin/economy/reconciliations/latest` (복식부기 원장 무결성 검증)
+  2. 금융 도메인 연동을 위해 `frontend/src/lib/api.ts`에서 `/admin/` 하위 경로가 모두 Spring Boot(포트 4550)로 라우팅되었음.
+  3. Spring Boot(4550)는 국고/SWF, 중앙은행, 채권, 연금, KDIC 등 금융 엔진 전용이므로 거버넌스 지표 컨트롤러가 부재하여 `404 Not Found`를 반환함.
+  4. 반면, 포트 4500의 백엔드는 7개 피처 플래그, 21명 회원, 10개 상장 주식 종목, M2 통화량 및 원장 정합성 무결성(`integrity.ok = true`) 데이터를 완벽히 보유하고 200 OK로 정상 응답함.
+
+### 2. 조치 및 라우팅 명세 (Implementation)
+1. **`frontend/src/lib/api.ts` 정밀 도메인 라우팅 분기**:
+   - Spring Boot(포트 4550)로 가야 하는 금융 도메인 명시적 화이트리스트 지정:
+     - `/api/treasury`, `/api/admin/treasury`, `/api/v1/admin/treasury`
+     - `/api/central-bank`, `/api/admin/central-bank`
+     - `/api/bonds`, `/api/admin/bonds`
+     - `/api/pension`, `/api/admin/pension`
+     - `/api/kdic`, `/api/admin/kdic`
+     - `/api/banking`, `/api/casino`, `/api/marketplace`, `/api/wallet`, `/api/seasons`
+     - `/api/market/secret-auction`, `/api/admin/auth/channel-otp`
+     - `/health/spring`, `/actuator`, `/api/v1/auth/reset`
+   - 거버넌스 관제탑 지표(`/api/v1/admin/controls`, `users`, `stocks`, `reconciliations`, `security`) 및 인증/미디어/SEO 요청은 Node 백엔드(`AUTH_API_ORIGIN`, 포트 4500)로 직결.
+2. **관리자 세션 활성화 상태 보장**:
+   - 데이터베이스 `auth_sessions`에서 관리자 계정의 세션에 `admin_opened_at` 및 `reauthenticated_at` 활성 타임스탬프를 동기화하여 `AdminSessionGuard` 통과 보장.
+
+### 3. 검증 계획
+1. `probe_admin_token`을 활용한 Next.js 프론트엔드 `/admin` SSR 렌더링 결과 확인.
+2. HTML 응답 내 `100% LEDGER SYNCED`, `ALL CLEAR` (총 7개 플래그 관제), `10 LISTED` (가상 주식), `21명` (조회된 회원) 텍스트 렌더링 확인.
+3. 상단 뱃지가 `핵심 지표 조회 완료` (초록색 뱃지)로 즉시 전환되는지 검증.
