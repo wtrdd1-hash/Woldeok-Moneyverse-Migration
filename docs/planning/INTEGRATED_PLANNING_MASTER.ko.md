@@ -1,5 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
+
+## v2026.11.13.1 — 전 백엔드 Spring Boot 전환 기획 후보 (초안 / 런타임 변경 없음)
+독립 사용자 지시의 아키텍처 작업: API·관리자·금융·게임·외부 연동·봇·스케줄을 모두 G0~G6으로 이관하고 최종 NestJS를 종료한다. 기존 Next.js/React 화면과 PostgreSQL 정식 금융 함수 원장은 유지한다. Spring 모듈형 백엔드와 되돌릴 수 있는 경로별 이전을 권장하며 금융 활성 쓰기 주체 하나, 세션·OTP·CSRF, Android/API 동등성, 정확한 SHA의 격리 Test, 실제 금융 대사, 메모리 예산, 독립 복원, 무중단/롤백을 강제한다. Kubernetes 대 systemd 배포 설명 충돌은 G0 실제 환경 실사 대상이다. 구현·DB·회원데이터·Test·운영·main 변경 없음. [한국어 상세 설계](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md) · [영문](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [작업기록](../worklog/2026-11-13-spring-platform-migration-v2026.11.13.1.ko.md).
+
 ## v2026.11.09.1946.2 — 미검증 글 공개 변경 지시 / BRANCH CANDIDATE
 2026-11-09 사용자 지시로 블로그 공개·광고 정책만 갱신. [한국어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.ko.md), [영어](BLOG_UNVERIFIED_PUBLICATION_OWNER_ADDENDUM_v2026.11.09.1946.md) 참조. 금융 및 운영 승격 검증 요건 유지.
 

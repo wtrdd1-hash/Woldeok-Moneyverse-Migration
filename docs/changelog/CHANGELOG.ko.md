@@ -1,4 +1,7 @@
-﻿## v2026.11.03.1646 — 텔레그램 잘못된 복구 알림 수정 (운영 검증)
+﻿## v2026.11.13.1 — Spring Boot 전체 백엔드 전환 아키텍처 (초안 / 운영 보류)
+- NestJS의 일반 API·관리자·금융·작업·봇·외부 연동 전부를 G0~G6으로 Spring Boot에 옮기는 기획. 기존 Next.js 화면과 PostgreSQL 원장 유지, 단일 금융 쓰기 주체, API/Android/보안 계약, 독립 Test·복원·카나리·롤백 검증 필수. 런타임·DB·Test·운영·main 변경 없음. [설계](../superpowers/specs/2026-11-13-spring-platform-migration-design.ko.md) · [버전 메모](../releases/v2026.11.13.1.ko.md).
+
+## v2026.11.03.1646 — 텔레그램 잘못된 복구 알림 수정 (운영 검증)
 - 디스크 정상 수치 변동 및 실행 중 QA의 임시 성공에 의한 복구 오탐 방지. 격리 테스트 30건 통과, 금융·앱 데이터 변경 없음. [이슈 #2617](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2617); [상세](../updates/v2026.11.03.1646-telegram-alert-recovery-github.ko.md).
 
 ## v2026.10.30.1504 — 회원 전용 지갑 거래 상세 기획 (초안 / 운영 보류)
