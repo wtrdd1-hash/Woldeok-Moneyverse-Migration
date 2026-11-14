@@ -15,53 +15,13 @@ import { cookies, headers } from 'next/headers';
  * same-origin HttpOnly cookie and keeps CSRF a same-origin problem.
  */
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
-const AUTH_API_ORIGIN = process.env.AUTH_API_ORIGIN ?? 'http://127.0.0.1:4500';
+const API_GATEWAY_ORIGIN = process.env.API_GATEWAY_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:4400';
 
-function resolveTargetOrigin(path: string): string {
-  // Explicit financial domain services handled by Spring Boot (Port 4550)
-  if (
-    path.startsWith('/api/treasury') ||
-    path.startsWith('/api/admin/treasury') ||
-    path.startsWith('/api/v1/admin/treasury') ||
-    path.startsWith('/api/central-bank') ||
-    path.startsWith('/api/admin/central-bank') ||
-    path.startsWith('/api/v1/admin/central-bank') ||
-    path.startsWith('/api/bonds') ||
-    path.startsWith('/api/admin/bonds') ||
-    path.startsWith('/api/v1/admin/bonds') ||
-    path.startsWith('/api/pension') ||
-    path.startsWith('/api/admin/pension') ||
-    path.startsWith('/api/v1/admin/pension') ||
-    path.startsWith('/api/kdic') ||
-    path.startsWith('/api/admin/kdic') ||
-    path.startsWith('/api/v1/admin/kdic') ||
-    path.startsWith('/api/banking') ||
-    path.startsWith('/api/admin/banking') ||
-    path.startsWith('/api/v1/admin/banking') ||
-    path.startsWith('/api/casino') ||
-    path.startsWith('/api/admin/casino') ||
-    path.startsWith('/api/v1/admin/casino') ||
-    path.startsWith('/api/marketplace') ||
-    path.startsWith('/api/admin/marketplace') ||
-    path.startsWith('/api/v1/admin/marketplace') ||
-    path.startsWith('/api/wallet') ||
-    path.startsWith('/api/admin/wallet') ||
-    path.startsWith('/api/v1/admin/wallet') ||
-    path.startsWith('/api/seasons') ||
-    path.startsWith('/api/market/secret-auction') ||
-    path.startsWith('/api/admin/auth/channel-otp') ||
-    path.startsWith('/health/spring') ||
-    path.startsWith('/actuator') ||
-    path.startsWith('/api/v1/auth/reset') ||
-    path.startsWith('/api/auth/reset')
-  ) {
-    return API_ORIGIN;
-  }
-
-  // All other endpoints (Authentication, Identity, Admin Cockpit & Governance, SEO, Media)
-  // are handled by the Node backend on AUTH_API_ORIGIN (Port 4500).
-  return AUTH_API_ORIGIN;
+function resolveTargetOrigin(_path: string): string {
+  // All backend domain traffic is unified and dispatched via the high-performance local API Gateway (Port 4400).
+  // The gateway intelligently dispatches financial domains to Spring Boot (Port 4550)
+  // and governance, auth, media, and SEO to Node.js (Port 4500) with zero frontend coupling.
+  return API_GATEWAY_ORIGIN;
 }
 
 const TRANSIENT_API_STATUSES = new Set([502, 503, 504]);
