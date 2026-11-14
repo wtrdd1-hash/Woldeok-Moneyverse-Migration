@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+const API_ORIGIN = process.env.AUTH_API_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 
 export async function GET(

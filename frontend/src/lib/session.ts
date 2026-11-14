@@ -52,7 +52,9 @@ export async function requireAdministrator(): Promise<readonly string[]> {
     if (roles.length === 0) redirect('/');
     return roles;
   } catch (error) {
-    if (error instanceof ApiError && error.status === 403) redirect('/');
+    if (error instanceof ApiError && (error.status === 403 || error.status === 401 || error.status === 404)) {
+      redirect('/');
+    }
     throw error;
   }
 }
@@ -82,6 +84,7 @@ export async function adminConsole(): Promise<AdminConsole> {
       if (error.status === 401) redirect('/login?error=login_required');
       if (error.status === 428) redirect('/login?error=consent_required');
       if (error.status === 403) redirect('/');
+      if (error.status === 404) redirect('/login?error=login_required');
     }
     throw error;
   }

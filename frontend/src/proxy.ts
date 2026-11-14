@@ -14,7 +14,8 @@ function recordCrawlerHitAsync(request: NextRequest, botName: string, statusCode
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
     const path = request.nextUrl.pathname;
 
-    fetch(`${API_ORIGIN}/api/v1/seo/log`, {
+    const SEO_ORIGIN = process.env.AUTH_API_ORIGIN ?? 'http://127.0.0.1:4500';
+    fetch(`${SEO_ORIGIN}/api/v1/seo/log`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

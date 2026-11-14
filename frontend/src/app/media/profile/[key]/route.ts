@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+const API_ORIGIN = process.env.AUTH_API_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const STORAGE_KEY =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
 

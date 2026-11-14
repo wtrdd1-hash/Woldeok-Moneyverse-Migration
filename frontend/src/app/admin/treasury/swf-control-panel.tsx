@@ -435,12 +435,14 @@ export function SwfControlPanel({
                     국고 복리 성장 국부펀드 (ASWF) 포트폴리오
                   </CardTitle>
                 </div>
-                <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs shrink-0 whitespace-nowrap">
-                  자동투자 실거래 정산 대기
+                <Badge className={isSwfOperational ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs shrink-0 whitespace-nowrap" : "bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs shrink-0 whitespace-nowrap"}>
+                  {isSwfOperational ? '자동투자 자율 엔진 정상 가동' : '자동투자 실거래 정산 대기'}
                 </Badge>
               </div>
               <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
-                기록된 포트폴리오 평가는 실제 거래대금이 아닙니다. 신규 자동투자·수익 실현은 정본 시장 체결·자금 출처 증빙이 마련되기 전까지 보류합니다.
+                {isSwfOperational
+                  ? '국고 중앙 금고(VAULT_MAIN)와 연동된 국부펀드(ASWF) 자율 운용 엔진입니다. 포트폴리오 리밸런싱 및 자산 환원 트랜잭션을 실시간 집행할 수 있습니다.'
+                  : '기록된 포트폴리오 평가는 실제 거래대금이 아닙니다. 신규 자동투자·수익 실현은 정본 시장 체결·자금 출처 증빙이 마련되기 전까지 보류합니다.'}
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">

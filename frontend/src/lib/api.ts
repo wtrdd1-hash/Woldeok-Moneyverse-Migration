@@ -15,7 +15,14 @@ import { cookies, headers } from 'next/headers';
  * same-origin HttpOnly cookie and keeps CSRF a same-origin problem.
  */
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+const API_GATEWAY_ORIGIN = process.env.API_GATEWAY_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:4400';
+
+function resolveTargetOrigin(_path: string): string {
+  // All backend domain traffic is unified and dispatched via the high-performance local API Gateway (Port 4400).
+  // The gateway intelligently dispatches financial domains to Spring Boot (Port 4550)
+  // and governance, auth, media, and SEO to Node.js (Port 4500) with zero frontend coupling.
+  return API_GATEWAY_ORIGIN;
+}
 
 const TRANSIENT_API_STATUSES = new Set([502, 503, 504]);
 const API_RETRY_DELAYS_MS = [150, 350] as const;
@@ -158,7 +165,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   }
 
   const response = await fetchInternal(
-    `${API_ORIGIN}${path}`,
+    `${resolveTargetOrigin(path)}${path}`,
     () => ({
       method,
       headers: requestHeaders,
@@ -200,7 +207,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
 export async function publicApi<T>(path: string, revalidate: number): Promise<T | null> {
   try {
     const response = await fetchInternal(
-      `${API_ORIGIN}${path}`,
+      `${resolveTargetOrigin(path)}${path}`,
       () => ({
         headers: { 'x-internal-token': internalToken(), accept: 'application/json' },
         next: { revalidate },
@@ -281,7 +288,7 @@ export async function apiWithCookie<T>(
     requestHeaders['x-public-origin'] = `${proto}://${forwardedHost}`;
   }
 
-  const response = await fetch(`${API_ORIGIN}${path}`, {
+  const response = await fetch(`${resolveTargetOrigin(path)}${path}`, {
     method,
     headers: requestHeaders,
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -313,7 +320,7 @@ export async function apiBytes<T>(
   bytes: ArrayBuffer,
   { contentType, csrfToken }: { readonly contentType: string; readonly csrfToken: string },
 ): Promise<T> {
-  const response = await fetch(`${API_ORIGIN}${path}`, {
+  const response = await fetch(`${resolveTargetOrigin(path)}${path}`, {
     method: 'POST',
     headers: {
       'x-internal-token': internalToken(),

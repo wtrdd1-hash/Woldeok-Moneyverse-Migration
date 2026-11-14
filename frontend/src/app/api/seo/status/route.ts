@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+const API_ORIGIN = process.env.AUTH_API_ORIGIN ?? process.env.API_ORIGIN ?? 'http://127.0.0.1:4500';
 const noStore = { 'Cache-Control': 'no-store' };
 const allowedBotNames = new Set([
   'Googlebot', 'Bingbot', 'Yeti', 'Naver', 'DuckDuckBot',

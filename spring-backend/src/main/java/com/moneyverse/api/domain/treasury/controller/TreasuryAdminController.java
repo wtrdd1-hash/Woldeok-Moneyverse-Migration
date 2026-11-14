@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,6 +23,63 @@ public class TreasuryAdminController {
 
     public TreasuryAdminController(TreasuryService treasuryService) {
         this.treasuryService = treasuryService;
+    }
+
+    /**
+     * 국고 총괄 현황 대시보드 조회
+     */
+    @Operation(summary = "국고 총괄 현황 대시보드 조회")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/overview",
+            "/api/admin/treasury/overview",
+            "/api/treasury/overview",
+            "/api/v1/treasury/overview"
+    })
+    public ResponseEntity<Map<String, Object>> getOverview() {
+        log.info("[API] GET treasury overview received");
+        return ResponseEntity.ok(treasuryService.getOverview());
+    }
+
+    /**
+     * 국고 원장 트랜잭션 목록 조회
+     */
+    @Operation(summary = "국고 원장 트랜잭션 목록 조회")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/transactions",
+            "/api/admin/treasury/transactions",
+            "/api/treasury/transactions",
+            "/api/v1/treasury/transactions"
+    })
+    public ResponseEntity<Map<String, Object>> getTransactions() {
+        return ResponseEntity.ok(treasuryService.getTransactions());
+    }
+
+    /**
+     * 국고 세목별 수입 흐름 집계
+     */
+    @Operation(summary = "국고 세목별 수입 흐름 집계")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/revenue",
+            "/api/admin/treasury/revenue",
+            "/api/treasury/revenue",
+            "/api/v1/treasury/revenue"
+    })
+    public ResponseEntity<Map<String, Object>> getRevenue() {
+        return ResponseEntity.ok(treasuryService.getRevenue());
+    }
+
+    /**
+     * 국고 예산 목적별 지출 흐름 집계
+     */
+    @Operation(summary = "국고 예산 목적별 지출 흐름 집계")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/expenditure",
+            "/api/admin/treasury/expenditure",
+            "/api/treasury/expenditure",
+            "/api/v1/treasury/expenditure"
+    })
+    public ResponseEntity<Map<String, Object>> getExpenditure() {
+        return ResponseEntity.ok(treasuryService.getExpenditure());
     }
 
     /**
@@ -62,6 +120,40 @@ public class TreasuryAdminController {
         log.info("[API] POST salary/disburse received: amount={}", request.getAmountWld());
         TreasuryOperationResult result = treasuryService.disburseSalary(request);
         return ApiResponse.okWithResult(result, result.getResult(), "국고 관리자 임금 지급이 완료되었습니다.");
+    }
+
+    /**
+     * 국부펀드(SWF) 스냅샷 조회 (설정, 포트폴리오 목록, 최근 이벤트)
+     */
+    @Operation(summary = "국부펀드(SWF) 스냅샷 조회")
+    @GetMapping(path = {
+            "/api/v1/admin/treasury/swf",
+            "/api/admin/treasury/swf",
+            "/api/treasury/swf",
+            "/api/v1/treasury/swf"
+    })
+    public ResponseEntity<Map<String, Object>> getSwfSnapshot() {
+        log.info("[API] GET swf snapshot received");
+        Map<String, Object> snapshot = treasuryService.getSwfSnapshot();
+        return ResponseEntity.ok(snapshot);
+    }
+
+    /**
+     * 국부펀드(SWF) 거버넌스 정책 설정 변경
+     */
+    @Operation(summary = "국부펀드(SWF) 정책 설정 변경")
+    @PutMapping(path = {
+            "/api/v1/admin/treasury/swf",
+            "/api/admin/treasury/swf",
+            "/api/treasury/swf",
+            "/api/v1/treasury/swf"
+    })
+    public ResponseEntity<Map<String, Object>> updateSwfPolicy(
+            @RequestBody Map<String, Object> body
+    ) {
+        log.info("[API] PUT swf policy update received: body={}", body);
+        Map<String, Object> result = treasuryService.updateSwfPolicy(body);
+        return ResponseEntity.ok(result);
     }
 
     /**
