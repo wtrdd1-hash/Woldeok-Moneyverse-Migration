@@ -22,7 +22,11 @@ export async function LoginProvidersView({
   const data = await apiOrNull<{ providers: { id: string; enabled: boolean }[] }>(
     '/api/v1/auth/providers',
   );
-  const enabled = new Set((data?.providers ?? []).filter((p) => p.enabled).map((p) => p.id));
+  const rawProviders = data?.providers ?? [
+    { id: 'google', enabled: true },
+    { id: 'discord', enabled: true },
+  ];
+  const enabled = new Set(rawProviders.filter((p) => p.enabled).map((p) => p.id));
   const availableProviders = (['google', 'discord'] as const).filter((id) => enabled.has(id));
 
   return (

@@ -16,6 +16,24 @@ import { cookies, headers } from 'next/headers';
  */
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+const AUTH_API_ORIGIN = process.env.AUTH_API_ORIGIN ?? 'http://127.0.0.1:4500';
+
+function resolveTargetOrigin(path: string): string {
+  // Session reset endpoint is explicitly handled on API_ORIGIN (Spring Boot)
+  if (path.startsWith('/api/v1/auth/reset') || path.startsWith('/api/auth/reset')) {
+    return API_ORIGIN;
+  }
+  // All OAuth journeys, provider discovery, sessions, local credentials, and legal policy
+  // are routed to the authoritative auth backend on AUTH_API_ORIGIN.
+  if (
+    path.startsWith('/auth/') ||
+    path.startsWith('/api/v1/auth/') ||
+    path.startsWith('/api/auth/')
+  ) {
+    return AUTH_API_ORIGIN;
+  }
+  return API_ORIGIN;
+}
 
 const TRANSIENT_API_STATUSES = new Set([502, 503, 504]);
 const API_RETRY_DELAYS_MS = [150, 350] as const;
@@ -158,7 +176,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   }
 
   const response = await fetchInternal(
-    `${API_ORIGIN}${path}`,
+    `${resolveTargetOrigin(path)}${path}`,
     () => ({
       method,
       headers: requestHeaders,
@@ -200,7 +218,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
 export async function publicApi<T>(path: string, revalidate: number): Promise<T | null> {
   try {
     const response = await fetchInternal(
-      `${API_ORIGIN}${path}`,
+      `${resolveTargetOrigin(path)}${path}`,
       () => ({
         headers: { 'x-internal-token': internalToken(), accept: 'application/json' },
         next: { revalidate },
@@ -281,7 +299,7 @@ export async function apiWithCookie<T>(
     requestHeaders['x-public-origin'] = `${proto}://${forwardedHost}`;
   }
 
-  const response = await fetch(`${API_ORIGIN}${path}`, {
+  const response = await fetch(`${resolveTargetOrigin(path)}${path}`, {
     method,
     headers: requestHeaders,
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -313,7 +331,7 @@ export async function apiBytes<T>(
   bytes: ArrayBuffer,
   { contentType, csrfToken }: { readonly contentType: string; readonly csrfToken: string },
 ): Promise<T> {
-  const response = await fetch(`${API_ORIGIN}${path}`, {
+  const response = await fetch(`${resolveTargetOrigin(path)}${path}`, {
     method: 'POST',
     headers: {
       'x-internal-token': internalToken(),

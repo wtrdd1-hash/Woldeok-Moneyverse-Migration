@@ -3826,3 +3826,38 @@ umericBalanced: true, 불균형 거래 0건 보증 |
 2. `GET /api/v1/auth/reset` 및 `/api/auth/clear-session` 호출 시 `Set-Cookie: Max-Age=0` 정상 반환 실측.
 3. `/admin` 및 `/admin/treasury` 접속 시 `화면을 불러오지 못했어요` 없이 정상 진입 및 로그인 페이지 안내 확인.
 
+
+
+---
+## 🚀 [v23 Specification] 구글/디스코드 간편 로그인 및 전체 인증 계층 원복·보강 복구 계획 (OAuth & Auth Dual Routing Restoration)
+
+### 1. 근본 원인 분석 (Root Cause Analysis)
+- **현상**: 로그인 화면(`/login`, `/login/providers`)에서 구글 로그인 및 디스코드 로그인 버튼이 완전히 사라짐.
+- **원인 분석**:
+  1. Next.js 프론트엔드의 `login-providers-view.tsx`는 마운트 시 `apiOrNull('/api/v1/auth/providers')`를 호출하여 지원되는 소셜 로그인 목록을 조회함.
+  2. 금융 도메인 API 연동을 위해 Next.js의 `API_ORIGIN` 환경 변수가 Spring Boot 포트(`http://127.0.0.1:4550`)로 설정됨.
+  3. Spring Boot(4550)에는 `/api/v1/auth/providers` 엔드포인트가 미구현 상태여서 `404 Not Found`가 반환됨.
+  4. 프론트엔드의 `availableProviders`가 빈 배열(`[]`)로 평가되면서 조건부 렌더링 블록(`availableProviders.length > 0`)에 의해 Google/Discord 버튼이 완전히 숨겨짐.
+  5. 또한 사용자가 직접 `/auth/google/authorize`나 `/auth/discord/authorize`로 접근하더라도, 내부에서 호출하는 `POST /api/v1/auth/prelogin-session`과 `GET /auth/[provider]/authorize`가 Spring Boot로 전송되어 실패함.
+  6. 반면, 포트 4500의 Node.js 백엔드는 Google 및 Discord OAuth 인증 클라이언트 자격증명, PKCE 검증, 세션 발급 로직을 온전히 보유하고 정상 동작 중임.
+
+### 2. 아키텍처 해결 방안 (Dual-Target BFF Routing & Fallback Resilience)
+1. **Next.js `src/lib/api.ts` 인증 전용 라우팅 분기**:
+   - `AUTH_API_ORIGIN` 환경 변수 도입 (기본값: `http://127.0.0.1:4500`).
+   - 경로 판별 함수 `resolveOrigin(path)`를 구현:
+     - `/auth/` (OAuth 시작 및 콜백)
+     - `/api/v1/auth/` (단, `/api/v1/auth/reset` 세션 초기화 제외)
+     - `/api/auth/` (인증 관련 엔드포인트)
+     - 위 인증 경로는 `AUTH_API_ORIGIN`으로 내부 직결 전송하여 세션/OAuth/로컬 계정 로직을 100% 정상 작동시킴.
+     - 그 외 모든 금융/관리자/SWF/트레이딩 요청은 `API_ORIGIN` (Spring Boot 포트 4550)으로 라우팅.
+2. **`frontend/src/app/login/login-providers-view.tsx` UI 회복 탄력성 (Defensive Fallback)**:
+   - `apiOrNull('/api/v1/auth/providers')` 호출 실패 또는 빈 응답 시에도 기본 필수 소셜 제공자(`google`, `discord`)를 폴백으로 유지하여 버튼이 사라지지 않도록 방어.
+3. **Spring Boot `AuthController.java` 예비 엔드포인트 제공**:
+   - Spring Boot에도 `GET /api/v1/auth/providers`를 구현하여 `local_email`, `google`, `discord`를 반환하도록 조치 (직접 호출 시 404 원천 차단).
+
+### 3. 검증 계획
+1. `curl http://127.0.0.1:4550/api/v1/auth/providers` 호출 시 200 OK 및 프로바이더 목록 확인.
+2. Next.js 빌드 (`pnpm build`) 및 서비스 재기동.
+3. `curl -s https://easy-scraping.com/login` HTML 응답에 `Google 계정으로 계속하기` 및 `Discord 계정으로 계속하기` 텍스트 포함 확인.
+4. `curl -s -i https://easy-scraping.com/auth/google/authorize` 호출 시 Google OAuth 로그인 화면으로 302 리다이렉트 응답 확인.
+5. `curl -s -i https://easy-scraping.com/auth/discord/authorize` 호출 시 Discord OAuth 로그인 화면으로 302 리다이렉트 응답 확인.

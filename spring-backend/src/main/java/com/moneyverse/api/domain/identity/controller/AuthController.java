@@ -21,6 +21,22 @@ import java.util.UUID;
 public class AuthController {
 
     @GetMapping(path = {
+            "/api/v1/auth/providers",
+            "/api/auth/providers"
+    })
+    @Operation(summary = "사용 가능한 인증 제공자 목록 조회")
+    public Map<String, Object> providers() {
+        Map<String, Object> res = new LinkedHashMap<>();
+        List<Map<String, Object>> providers = List.of(
+                Map.of("id", "local_email", "enabled", true),
+                Map.of("id", "discord", "enabled", true),
+                Map.of("id", "google", "enabled", true)
+        );
+        res.put("providers", providers);
+        return res;
+    }
+
+    @GetMapping(path = {
             "/api/v1/auth/session",
             "/api/auth/session"
     })
