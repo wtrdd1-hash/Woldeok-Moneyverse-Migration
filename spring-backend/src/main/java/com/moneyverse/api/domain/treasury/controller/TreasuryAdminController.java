@@ -41,7 +41,7 @@ public class TreasuryAdminController {
     ) {
         log.info("[API] POST mint-topup received: amount={}", request.getAmountWld());
         TreasuryOperationResult result = treasuryService.mintTopup(request);
-        return ApiResponse.ok(result, "조폐국 화폐발행 국고 직행 충전이 성공적으로 집행되었습니다.");
+        return ApiResponse.okWithResult(result, result.getResult(), "조폐국 화폐발행 국고 직행 충전이 성공적으로 집행되었습니다.");
     }
 
     /**
@@ -61,7 +61,7 @@ public class TreasuryAdminController {
     ) {
         log.info("[API] POST salary/disburse received: amount={}", request.getAmountWld());
         TreasuryOperationResult result = treasuryService.disburseSalary(request);
-        return ApiResponse.ok(result, "국고 관리자 임금 지급이 완료되었습니다.");
+        return ApiResponse.okWithResult(result, result.getResult(), "국고 관리자 임금 지급이 완료되었습니다.");
     }
 
     /**
