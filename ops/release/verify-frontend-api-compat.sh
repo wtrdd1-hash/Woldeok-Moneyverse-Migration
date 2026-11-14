@@ -2,10 +2,15 @@
 # Fail closed if the selected Next.js API backend cannot serve the pre-migration authentication contract.
 set -euo pipefail
 origin="${1:?Usage: verify-frontend-api-compat.sh http://127.0.0.1:PORT}"
-case "$origin" in
-  http://127.0.0.1:[0-9]*|http://localhost:[0-9]*) ;;
-  *) echo 'FAIL: API origin must be an explicit loopback HTTP endpoint' >&2; exit 2 ;;
-esac
+if [[ ! "$origin" =~ ^http://(127[.]0[.]0[.]1|localhost):[0-9]{1,5}$ ]]; then
+  echo 'FAIL: API origin must be an explicit loopback HTTP endpoint' >&2
+  exit 2
+fi
+port="${origin##*:}"
+if (( 10#$port < 1 || 10#$port > 65535 )); then
+  echo 'FAIL: API origin loopback port is invalid' >&2
+  exit 2
+fi
 if [[ ! -n "${INTERNAL_API_TOKEN:-}" ]]; then
   echo 'FAIL: INTERNAL_API_TOKEN is missing' >&2
   exit 2
