@@ -4055,3 +4055,86 @@ umericBalanced: true, 불균형 거래 0건 보증 |
   - 게이트웨이(Port 4400) ➔ Spring Boot(4550) `/actuator/health` (`UP`)
   - 게이트웨이(Port 4400) ➔ Spring Boot(4550) `/api/treasury/overview` (`VAULT_MAIN` 잔고 수령)
   - 게이트웨이(Port 4400) ➔ Node.js(4500) `/api/v1/admin/controls` (7대 피처 스위치 정상 응답)
+
+
+---
+## 🚀 [v30 Specification] Spring Boot 3.3.5 전면 전환 및 잔여 4대 도메인 그룹 순차 마이그레이션 아키텍처
+
+### 1. 사용자 1차 문답 결정 사항 (Interactive Alignment v30)
+- **전환 롤아웃 방식**: **4단계 순차 롤아웃 (Sequential Phased Rollout)**
+  - Phase 1: 관리자 거버넌스 코어 (`controls`, `users`, `stocks` 관리, `economy/reconciliations`, `admin/channel-otp`)
+  - Phase 2: 가상 주식 시장 및 트레이딩 엔진 (`stocks/**`, `stock-leagues/**`, 오더북 및 시세 틱)
+  - Phase 3: 사용자 인증, 계정 및 세션 보안 (`auth/**`, `account/**`, `profile/**`, CSRF/PKCE)
+  - Phase 4: 커뮤니티, 상점 및 부가 도메인 (`board`, `shop`, `work`, `business`, `chat`, `lobby`) 및 Nginx 4400 100% Spring Boot 단일화 & Node.js 완전 데커미셔닝
+- **인증 및 세션 검증 아키텍처**:
+  - `AdminSessionInterceptor` & `AuthSessionInterceptor`: Next.js 세션 쿠키, `x-internal-token`, PostgreSQL `admin_current_roles` 함수 기반 100% 호환 인터셉터 구현.
+- **주식 시세/체결 엔진 전략**:
+  - Spring `@Scheduled` 및 고성능 TaskScheduler 풀을 통한 가상 주식 틱 생성, 오더북 매칭, 배당 정산 일괄 처리.
+- **Nginx 게이트웨이 및 백엔드 단일화**:
+  - 전환 완료 즉시 포트 4400 게이트웨이의 `location /` 업스트림을 `http://prod_spring` (Port 4550) 단일 라우트로 변경하고 Node.js 프로세스 완전 종료 (`systemctl disable --now moneyverse-backend`).
+
+### 2. Phase 1 관리자 거버넌스 코어 엔드포인트 명세
+1. **`AdminControlsController` (`/api/v1/admin/controls`, `/api/admin/controls`)**:
+   - `GET /api/v1/admin/controls`: `SELECT * FROM public.admin_list_feature_switches(?::uuid)` 및 `public.admin_list_economy_policies(?::uuid, 30)` 호출.
+   - `PUT /api/v1/admin/controls/feature-switches/{key}`: `SELECT * FROM public.admin_set_feature_switch(?::uuid, ?::uuid, ?::text, ?::text, ?::text)` 호출.
+2. **`AdminUsersController` (`/api/v1/admin/users`, `/api/admin/users`)**:
+   - `GET /api/v1/admin/users`: `SELECT * FROM public.admin_list_users(?::uuid, ?::int)` 및 `public.activity_user_access_summaries(?::uuid)` 매핑, AES-256-GCM 복호화.
+   - `GET /api/v1/admin/users/{id}/portfolio`: `SELECT public.admin_get_user_portfolio(?::uuid, ?::uuid)` 호출.
+   - `PUT /api/v1/admin/users/{id}/restriction`: `SELECT public.admin_set_user_restriction(?::uuid, ?::uuid, ?::boolean, ?::text)` 호출.
+3. **`AdminStocksController` (`/api/v1/admin/stocks`, `/api/admin/stocks`)**:
+   - `GET /api/v1/admin/stocks`: 상장 주식 목록, 거래 정지 상태, 호가 요약 조회.
+   - `POST /api/v1/admin/stocks`: 신규 가상 주식 상장 등록.
+   - `POST /api/v1/admin/stocks/{id}/halt`: 긴급 매매 정지/서킷브레이커 트리거.
+4. **`AdminEconomyController` (`/api/v1/admin/economy/reconciliations/latest`)**:
+   - `GET /api/v1/admin/economy/reconciliations/latest`: `SELECT * FROM public.admin_latest_economy_reconciliation_health(?::uuid)` 스냅샷 반환.
+5. **`AdminChannelOtpController` (`/api/admin/auth/channel-otp/**`)**:
+   - 텔레그램 / 디스코드 2FA OTP 상태 확인, 발송, 세션 승격 및 테스트 핑 엔드포인트 완벽 포팅.
+
+### 3. 검증 및 롤백 계획 (Verification & Rollback)
+- **단위/통합 테스트**:
+  - `spring-backend/src/test/java/.../AdminGovernanceTest.java`: 컨트롤러 및 서비스 Mock/DB 테스트 작성.
+- **게이트웨이 연동 테스트**:
+  - `curl -H "x-internal-token: ..." http://127.0.0.1:4400/api/v1/admin/controls` -> Spring Boot(4550) 200 OK 검증.
+- **관제탑 E2E 검증**:
+  - 어드민 관제탑 페이지 SSR 렌더링 시 "100% LEDGER SYNCED", "ALL CLEAR", "10 LISTED", "21명" 정상 출력 재확인.
+
+
+---
+## 🚀 [v31 Specification] 2차 심화 결정 사항(DTO 직렬화/RFC 7807/AES-256-GCM/SSRF 방어 RestClient) 및 Phase 1(관리자 거버넌스) 실행 계획
+
+### 1. 2차 심화 문답 결정 사항 (Interactive Alignment v31)
+1. **DTO 필드 네이밍 & 직렬화 정책**:
+   - `@JsonAlias` 및 `@JsonProperty` 이중 바인딩 적용: Next.js 프론트엔드가 요구하는 camelCase와 레거시 DB의 snake_case(`feature_key`, `user_id`, `total_net_worth`)를 100% 동시 지원하여 클라이언트 코드 수정 없이 무결점 호환 보장.
+2. **RFC 7807 호환 오류 응답 (`@RestControllerAdvice`)**:
+   - Node.js 백엔드의 에러 포맷(`{ type, title, status, detail, code }`)과 100% 동일한 `ProblemDetail` 표준을 구현하여 프론트엔드의 `ApiError` 파싱 및 에러 바운더리 오류 0건 달성.
+3. **AES-256-GCM 유저 표시명(`display_name`) 복호화 엔진**:
+   - Java `javax.crypto.Cipher` 기반 AES-256-GCM 복호화 컴포넌트(`EncryptionService.java`)를 구현하여 Node.js 규격(12바이트 IV, 16바이트 Auth Tag, 암호문)과 100% 동일하게 복호화.
+4. **외부 알림 발송 HTTP 클라이언트 (`RestClient` + SSRF Shield)**:
+   - Spring Boot 3.3 최신 `RestClient`를 활용하고, 사설 IP 대역(127.0.0.1, 10.0.0.0/8, 169.254.169.254 등) 차단 로직을 탑재한 `SafeExternalRestClient` 구축.
+5. **Phase 1 즉시 구현 착수**:
+   - 관리자 관제탑에서 현재 "확인 불가" 및 "UNVERIFIED"로 표시되는 4대 코어 API(`controls`, `users`, `stocks`, `reconciliations/latest`) 및 `channel-otp`를 Spring Boot에 즉각 구현하고 게이트웨이 분기 갱신.
+
+### 2. Phase 1 아키텍처 및 패키지 구조
+```
+spring-backend/src/main/java/com/moneyverse/api/domain/admin/
+├── controller/
+│   ├── AdminControlsController.java        # /api/v1/admin/controls, /api/admin/controls
+│   ├── AdminUsersController.java           # /api/v1/admin/users, /api/admin/users
+│   ├── AdminStocksController.java          # /api/v1/admin/stocks, /api/admin/stocks
+│   ├── AdminEconomyController.java         # /api/v1/admin/economy/reconciliations/latest
+│   └── AdminChannelOtpController.java      # /api/admin/auth/channel-otp/**
+├── dto/
+│   └── AdminGovernanceDtos.java            # @JsonAlias 지원 DTO 집합
+├── service/
+│   ├── AdminGovernanceService.java         # DB 프로시저 및 복식부기 원장 연동
+│   ├── AdminChannelOtpService.java         # 2FA 발송, 검증, 세션 승격
+│   └── EncryptionService.java              # AES-256-GCM 복호화 유틸리티
+└── security/
+    └── AdminSessionInterceptor.java        # x-internal-token 및 세션 권한 검증
+```
+
+### 3. 검증 계획
+1. `spring-backend` 빌드 및 단위/통합 테스트 (`./gradlew test`) 100% 통과 확인.
+2. 프로덕션 서버 빌드 및 배포, Spring Boot 무중단 재기동.
+3. Nginx 4400 게이트웨이 라우팅을 Spring Boot로 전환.
+4. `curl` 및 실제 관리자 관제탑 웹 화면에서 "100% LEDGER SYNCED", "ALL CLEAR", "10 LISTED", "21명" 정상 출력 확인.
