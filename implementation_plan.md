@@ -3650,3 +3650,31 @@ flowchart LR
 | `/api/casino/stats` | `GET` | `200 OK` | `totalWageredWld: 25000000`, `rtp: 95.00%` |
 | `/api/seasons/current` | `GET` | `200 OK` | `title: 시즌 1: 자본의 태동`, `status: ACTIVE` |
 | `/api/seasons/rewards/claim` | `POST` | `200 OK` | `ok: true`, `txId: 75b30282-...`, `reward: 10000 WLD` |
+
+---
+## 🚀 [v15 Specification] 3대 잔여 상호작용 도메인(KDIC 예보공, Black Market 경매장, PvP Wager Arena) Spring Boot 3.3 전면 구현 및 전 시스템 컷오버 (+120, -0)
+
+### 1. 개요 및 배경
+- 사용자가 보고한 화면 에러(Cannot POST /api/treasury/mint-topup) 원인 규명: Next.js API_ORIGIN이 레거시 NestJS(4500)를 바라보던 잔여 설정 정합성 수정 및 프론트엔드 BFF 컷오버.
+- 사용자가 보류 해제를 요청한 3대 핵심 상호작용 도메인을 Java Spring Boot 3.3.5로 전면 구현 및 실제 PostgreSQL 16 원장 연동:
+  1) **예금보험공사 (KDIC)**: 503 하드코딩 차단 해제, 예보료 징수, 긴급 유동성 대여(Bailout), 대위변제 및 기금 건전성 총괄 관제.
+  2) **블랙마켓 경매장 (Black Market)**: 비밀 옥션 목록 조회, 신규 입찰 집행, 복식부기 국고 3% 수수료 귀속 및 실시간 환급 트랜잭션.
+  3) **PvP 내기 대결장 (PvP Wager Arena)**: 1:1 베팅 대결방 생성, 참가, 승패 판정 및 5% 플랫폼 수수료 국고 입금 정산.
+
+### 2. 신규 Spring Boot 서비스 및 컨트롤러 아키텍처
+1. **KDIC 도메인 (com.moneyverse.api.domain.kdic)**:
+   - KdicController.java (/api/admin/kdic/**, /api/kdic/**)
+   - KdicService.java: deposit_insurance_funds, insured_institutions, deposit_insurance_premiums, deposit_insurance_payouts 테이블 연동.
+   - ssessPremiums, injectLiquidity, executePayout, getOverview, getLedgerIntegrity.
+2. **블랙마켓 도메인 (com.moneyverse.api.domain.market)**:
+   - BlackMarketController.java (/api/market/secret-auction/**)
+   - BlackMarketService.java: lack_market_auctions, lack_market_bid_logs 테이블 연동.
+   - 옥션 목록 조회, 입찰 이력 조회, 신규 입찰 집행 트랜잭션.
+3. **PvP 대결장 도메인 (com.moneyverse.api.domain.arena)**:
+   - PvpArenaController.java (/api/arena/rooms/**)
+   - PvpArenaService.java: pvp_wager_rooms 테이블 연동.
+   - 대결방 생성, 목록 조회, 참가 및 승패 결정, 취소/환불 원자적 집행.
+
+### 3. Nginx 엣지 라우팅 및 Next.js 프론트엔드 컷오버
+- /api/admin/kdic/, /api/kdic/, /api/market/secret-auction, /api/arena/ 전원 Spring Boot 3.3.5 (포트 4550) 직결.
+- Next.js의 API_ORIGIN을 http://127.0.0.1:4550으로 정합화하여 내부 BFF 요청 전원 Spring Boot 직결.
