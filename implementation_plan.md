@@ -1,4 +1,4 @@
-# [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
+﻿# [Moneyverse] 다국어·연구자료 기반 AI 블로그 엔진 및 관리자 제어 통합 구현 계획서 (v1)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
 - **v9**: [조폐국 화폐발행 국고 충전, 관리자 임금 지급, SWF 및 8대 보류 기능 전면 실가동 해제, NestJS 컨트롤러 다중 바인딩 및 Next.js 클라이언트 인라인 번들링 최적화] (+85, -0)
@@ -3218,12 +3218,16 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
      - 즉, 백엔드 내부의 텔레그램 발송 및 보안 파이프라인은 100% 정상 가동 중이었음.
   2. **핵심 원인 (Root Cause: CsrfGuard 403 차단)**:
      - 백엔드 AdminChannelOtpController는 @UseGuards(..., CsrfGuard)로 보호되어 있어 모든 POST 요청에 x-csrf-token 검증을 필수로 요구함.
-     - 프론트엔드 Next.js BFF 라우트 핸들러(rontend/src/app/api/admin/auth/channel-otp/) 5개 엔드포인트(equest, erify, elevate, evoke, 	est-ping)에서 백엔드 pi() 호출 시 csrfToken을 누락하여 전달함.
-     - 결과적으로 브라우저가 OTP 발송을 요청하면 백엔드 CsrfGuard가 403 Forbidden: csrf token required로 요청을 즉각 차단하여, 컨트롤러 내부의 equestOtp() 및 텔레그램 발송 로직에 진입조차 하지 못하고 소멸함.
+     - 프론트엔드 Next.js BFF 라우트 핸들러(rontend/src/app/api/admin/auth/channel-otp/) 5개 엔드포인트(
+equest, erify, elevate, 
+evoke, 	est-ping)에서 백엔드 pi() 호출 시 csrfToken을 누락하여 전달함.
+     - 결과적으로 브라우저가 OTP 발송을 요청하면 백엔드 CsrfGuard가 403 Forbidden: csrf token required로 요청을 즉각 차단하여, 컨트롤러 내부의 
+equestOtp() 및 텔레그램 발송 로직에 진입조차 하지 못하고 소멸함.
 
 ### 2. 정밀 수정 내역 (Changes Applied)
 - **rontend/src/app/api/admin/auth/channel-otp/request/route.ts**:
-  - esolveCsrfToken 패턴 적용: 클라이언트 x-csrf-token 헤더 우선 추출, 부재 시 서버 세션(/api/v1/auth/session)에서 안전하게 CSRF 토큰을 발급받아 pi() 호출 시 자동 주입.
+  - 
+esolveCsrfToken 패턴 적용: 클라이언트 x-csrf-token 헤더 우선 추출, 부재 시 서버 세션(/api/v1/auth/session)에서 안전하게 CSRF 토큰을 발급받아 pi() 호출 시 자동 주입.
   - 에러 응답 객체 정규화 ({ error, message }).
 - **rontend/src/app/api/admin/auth/channel-otp/verify/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
 - **rontend/src/app/api/admin/auth/channel-otp/elevate/route.ts**: CSRF 토큰 자동 해석 및 주입 적용.
@@ -3280,7 +3284,8 @@ ational_pension_configs 조회 쿼리(2회차) 모킹을 추가하고 expect(res
 ### 2. 정비 및 최신화 완료 문서 내역
 1. **정본 종합 시스템 아키텍처 스펙 (moneyverse_full_system_architecture_spec.md)**:
    - **1장**: 국가 3대 금융 기관 및 국고 자금 순환 거버넌스 (국고 5대 금고 환원율 40/30/20/10, 30% 안전 비축금 불변 가드, 국민연금 1시간 자동 스윕).
-   - **2장**: 관리자 보안 & 2FA 채널 OTP 다계층 방어 (Next.js BFF CSRF 자동 주입 esolveCsrfToken, NestJS CsrfGuard, 텔레그램 봇 실시간 발송, R2 15분 승격 세션 / R3 단일 소모, 즉시 잠금).
+   - **2장**: 관리자 보안 & 2FA 채널 OTP 다계층 방어 (Next.js BFF CSRF 자동 주입 
+esolveCsrfToken, NestJS CsrfGuard, 텔레그램 봇 실시간 발송, R2 15분 승격 세션 / R3 단일 소모, 즉시 잠금).
    - **3장**: 국고 및 통화정책 원스톱 액션 시스템 (직통 주조 다이얼로그 AdminMintTopupDialog, 발의 즉시 승인 파이프라인).
    - **4장**: 카지노 도박세(피구세, Pigouvian Tax) 및 거시경제 자동 안정화 (베팅액 10% 자동 원천징수, 4분할 국고 환원).
    - **5장**: 프론트엔드 다중 뷰포트(320px~1440px+) 반응형 레이아웃 엔진 (수치 클리핑 방지, 44px 터치 타깃, Zero Horizontal Overflow).
@@ -3696,7 +3701,8 @@ flowchart LR
 ewVaultBalanceWld: 54450000 |
 | 3 | **조폐국 화폐발행 충전 (호환)** | POST | /api/treasury/mint-topup | 200 OK | 105ms | Spring-Boot-3.3-Enterprise | 	xId: ca21c365-..., 복식부기 원장 전표 발급 완결 |
 | 4 | **관리자 임금 지급** | POST | /api/admin/treasury/salary/disburse | 200 OK | 126ms | Spring-Boot-3.3-Enterprise | 	xId: c840d1b2-..., 5,000 WLD 임금 지급 완결 |
-| 5 | **국부펀드(SWF) 리밸런싱** | POST | /api/admin/treasury/swf/rebalance | 200 OK | 93ms | Spring-Boot-3.3-Enterprise | eason: SWF_REBALANCED_AND_RECONCILED |
+| 5 | **국부펀드(SWF) 리밸런싱** | POST | /api/admin/treasury/swf/rebalance | 200 OK | 93ms | Spring-Boot-3.3-Enterprise | 
+eason: SWF_REBALANCED_AND_RECONCILED |
 | 6 | **국민연금 총괄 현황** | GET | /api/pension/overview | 200 OK | 98ms | Spring-Boot-3.3-Enterprise | 	otalAumWld: 60000, enchmarkRate: 5.20% |
 | 7 | **국민연금 계좌 조회** | GET | /api/pension/my-account | 200 OK | 115ms | Spring-Boot-3.3-Enterprise | 	ier: TIER_1_YOUTH, 개인 가입 계좌 조회 완료 |
 | 8 | **국민연금 기여금 납입** | POST | /api/pension/contribute | 200 OK | 268ms | Spring-Boot-3.3-Enterprise | 	xId: 80fdc5a9-..., 기여금 10,000 WLD 적립 완결 |
@@ -3708,7 +3714,8 @@ ewVaultBalanceWld: 54450000 |
 | 14 | **사용자 프로필 조회** | GET | /api/profile/me | 200 OK | 196ms | Spring-Boot-3.3-Enterprise | displayName: 시민, 유저 메타데이터 정상 응답 |
 | 15 | **2FA 채널 OTP 발송** | POST | /api/admin/auth/channel-otp/request | 200 OK | 132ms | Spring-Boot-3.3-Enterprise | channel: TELEGRAM_DISCORD, 6자리 OTP 발송 |
 | 16 | **마켓플레이스 매물 목록** | GET | /api/marketplace/listings | 200 OK | 116ms | Spring-Boot-3.3-Enterprise | 활성 P2P 등록 매물 리스트 서빙 |
-| 17 | **공정 검증 웹 카지노 통계** | GET | /api/casino/stats | 200 OK | 100ms | Spring-Boot-3.3-Enterprise | 	otalWagered: 25000000, tp: 95.00% |
+| 17 | **공정 검증 웹 카지노 통계** | GET | /api/casino/stats | 200 OK | 100ms | Spring-Boot-3.3-Enterprise | 	otalWagered: 25000000, 
+tp: 95.00% |
 | 18 | **시즌 랭크 정보** | GET | /api/seasons/current | 200 OK | 96ms | Spring-Boot-3.3-Enterprise | 	itle: 시즌 1: 자본의 태동, status: ACTIVE |
 | 19 | **예금보험공사(KDIC) 관제** | GET | /api/admin/kdic/overview | 200 OK | 195ms | Spring-Boot-3.3-Enterprise | 부보금융기관 건전성 및 기금 적립 현황 서빙 |
 | 20 | **KDIC 원장 무결성 검증** | GET | /api/admin/kdic/ledger-integrity | 200 OK | 349ms | Spring-Boot-3.3-Enterprise | 
