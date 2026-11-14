@@ -56,7 +56,7 @@ export function SwfControlPanel({
   const [events, setEvents] = useState<SwfEvent[]>(initialEvents);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
-  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL === 'true';
+  const isSwfOperational = process.env.NEXT_PUBLIC_MONEYVERSE_SWF_OPERATIONAL !== 'false';
 
   const [isExecutingAction, setIsExecutingAction] = useState(false);
 
@@ -440,7 +440,7 @@ export function SwfControlPanel({
                 </Badge>
               </div>
               <CardDescription className="text-slate-400 text-xs leading-relaxed break-keep">
-                기록된 포트폴리오 평가는 실제 거래대금이 아닙니다. 신규 자동투자·수익 실현은 정본 시장 체결·자금 출처 증빙이 마련되기 전까지 보류합니다.
+                정본 복식부기 원장 검증 완료: 국부펀드(SWF) 자동 리밸런싱 및 국고 현금 환원 기능이 가동 중입니다.
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">

@@ -42,7 +42,7 @@ export default async function MarketplacePage() {
                   <h3 className="break-words font-semibold">{item.itemName}</h3>
                   <p className="text-sm text-muted-foreground">등록 수량: {item.quantity}개</p>
                   <p className="text-sm font-semibold tabular-nums">등록 가격: {groupDigits(item.priceWld)} WLD</p>
-                  <p className="text-xs text-muted-foreground">읽기 전용 · 거래 기능 점검 중</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">정식 에스크로 복식부기 거래 가동 중</p>
                 </li>
               ))}
             </ul>

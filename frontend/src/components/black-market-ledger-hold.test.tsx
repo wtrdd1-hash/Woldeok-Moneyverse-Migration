@@ -9,6 +9,7 @@ afterEach(() => {
 
 describe('secret auction ledger protection in member UI', () => {
   it('explains settlement hold and never offers a new bidding action', async () => {
+    vi.stubEnv('NEXT_PUBLIC_MONEYVERSE_BLACK_MARKET_OPERATIONAL', 'false');
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ auctions: [] }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<BlackMarketAuctionModal isOpen onClose={() => {}} />);
