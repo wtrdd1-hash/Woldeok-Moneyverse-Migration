@@ -4138,3 +4138,23 @@ spring-backend/src/main/java/com/moneyverse/api/domain/admin/
 2. 프로덕션 서버 빌드 및 배포, Spring Boot 무중단 재기동.
 3. Nginx 4400 게이트웨이 라우팅을 Spring Boot로 전환.
 4. `curl` 및 실제 관리자 관제탑 웹 화면에서 "100% LEDGER SYNCED", "ALL CLEAR", "10 LISTED", "21명" 정상 출력 확인.
+
+
+---
+## 🎯 [v32 Specification] 관제탑 UNVERIFIED 해결 및 4대 거버넌스 지표 100% 검증 완료 보고
+
+### 1. 원인 분석 (Root Cause Analysis)
+1. **회원(Users) 지표 `unavailable` 유발 원인**:
+   - `AdminUserDto`의 `wealth_rank` 필드가 상위 클래스의 `@JsonInclude(JsonInclude.Include.NON_NULL)`로 인해 `null`일 때 JSON 직렬화에서 완전히 누락(`undefined`)됨.
+   - 프론트엔드의 `admin-cockpit-evidence.ts`의 `validMember` 함수는 `(u.wealth_rank === null || (typeof u.wealth_rank === 'number' ...))`를 요구하므로, `undefined`인 경우 검증이 실패하여 전체 `members`가 `unavailable`로 판정됨.
+   - **해결**: `@JsonProperty("wealth_rank")`에 `@JsonInclude(JsonInclude.Include.ALWAYS)`를 명시하여 `null`일 때도 반드시 `"wealth_rank": null`이 반환되도록 패치.
+2. **주식(Stocks) 지표 `stocks: []` 원인**:
+   - `AdminGovernanceService.java`에서 `public.stocks` 테이블을 조회하도록 작성되었으나, 실제 PostgreSQL 데이터베이스의 테이블명은 `public.virtual_stocks`임.
+   - 이에 따라 SQL 문법/테이블 부재 에러가 발생하여 빈 배열 `[]`이 반환됨.
+   - **해결**: `SELECT id::text, symbol, name, current_price::text, active, coalesce(halt_status, 'ACTIVE') AS halt_status, description FROM public.virtual_stocks ORDER BY symbol ASC`로 쿼리 수정 및 데이터 매핑 완료.
+3. **4대 지표 검증 결과 (Server E2E Node Validator)**:
+   - Controls (비상 킬스위치): 7개 정상 (검증 통과 `true`)
+   - Users (조회된 회원): 21명 정상, 슈퍼관리자 포함 null 랭크 정상 직렬화 (검증 통과 `true`)
+   - Stocks (가상 주식 시장): 10개 상장 주식 정상 반환 (검증 통과 `true`)
+   - Ledger (복식부기 원장): 불일치 0건, 정합성 100% (검증 통과 `true`)
+   - **종합 검증 (`allVerified`)**: `true` (헤더 뱃지: "핵심 지표 조회 완료" 녹색 표시)
