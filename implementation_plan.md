@@ -4235,3 +4235,52 @@ spring-backend/src/main/java/com/moneyverse/api/domain/stock/
 ### 4. Phase 4 전수 QA 및 잔여 도메인 전환 계획
 - 유저 플로우 QA: 회원가입, 자산 조회, 이체, 주식 매수/매도, 카지노, 상점, 직업 활동
 - 관리자 플로우 QA: 관제탑 지표 확인, 킬스위치 제어, 2FA OTP 발송 및 R2 승격, 중앙은행 발의
+
+
+---
+## 🚀 [v34 Specification] Phase 3 OTP 모듈 머지 준비 및 Phase 4 핵심 게임플레이(Work, Business, Shop) Spring Boot 전환 사양 (+누적, -0 삭제)
+
+### 1. Phase 3 관리자 2FA Channel OTP 전환 및 실서버 실증 완료
+- **PR #3173 생성 및 테스트**:
+  - `AdminChannelOtpDtos`, `AdminChannelOtpService`, `AdminChannelOtpController`, `AdminChannelOtpTest` 구현 완료.
+  - MockMvc 기반 통합 테스트 통과 (`BUILD SUCCESSFUL in 42s`).
+  - Spring Boot 전체 테스트 스위트 100% Pass (`BUILD SUCCESSFUL in 48s`).
+- **실서버 핫 배포 및 게이트웨이 검증 완료**:
+  - `moneyverse-spring-backend.service` 배포 및 재시동 완료.
+  - 외부 80 및 게이트웨이 4400에서 `GET /api/admin/auth/channel-otp/status` 200 OK 실증 (`{"ok":true,"elevated":false,"remainingSeconds":0,"expiresAt":0}`).
+  - "otp인증도안되" 현상 원천 해소.
+
+### 2. Phase 4 핵심 게임플레이 도메인 Spring Boot 전환 아키텍처
+기존 Node.js의 `backend/src/{work,business,shop,crafting,collection}`을 Spring Boot `com.moneyverse.api.domain.{work,business,shop}` 패키지로 100% 무결점 이관:
+
+```
+spring-backend/src/main/java/com/moneyverse/api/domain/
+├── work/
+│   ├── controller/WorkController.java             # /api/v1/work (대시보드/과업수행/급여지급/자격증)
+│   ├── dto/WorkDtos.java                          # 과업, 직업, 일일보상, 대시보드 DTOs
+│   └── service/WorkService.java                   # work_dashboard, work_apply, work_complete DB 연동
+├── business/
+│   ├── controller/BusinessController.java         # /api/v1/business (사업장설립/수익징수/법인세10%)
+│   ├── dto/BusinessDtos.java                      # 사업장, 카탈로그, 수익금, 업그레이드 DTOs
+│   └── service/BusinessService.java               # business_found, business_collect DB 연동
+└── shop/
+    ├── controller/ShopController.java             # /api/v1/shop, /api/v1/collection, /api/v1/crafting
+    ├── dto/ShopDtos.java                          # 상점 아이템, 인벤토리, 제작 레시피 DTOs
+    └── service/ShopService.java                   # shop_purchase, item_craft, my_collection DB 연동
+```
+
+### 3. 데이터베이스 트랜잭션 및 복식부기 불변 가드
+- **Work (직업 활동)**:
+  - `public.work_dashboard(user_id)`: 일일 상한 및 잔여 보상 쿼리
+  - `public.work_complete(user_id, assignment_id)`: 급여 지출 시 국고/고용주 복식부기 원장 분개
+- **Business (사업장)**:
+  - `public.business_collect(user_id, business_id)`: 영업 수익금 정산 시 10% 법인세 국고 자동 납입
+- **Shop & Crafting (상점/제작)**:
+  - `public.shop_purchase(user_id, item_id)`: 물품 구매 시 10% 부가가치세(소비세) 국고 편입
+
+### 4. 자가 검증 및 롤아웃 계획
+1. WorkDtos, BusinessDtos, ShopDtos DTO 레코드 정의
+2. WorkService, BusinessService, ShopService 비즈니스 로직 및 DB 호출 연동
+3. WorkController, BusinessController, ShopController REST API 엔드포인트 바인딩
+4. 통합 테스트 작성 및 Gradle 빌드 통과
+5. Nginx 게이트웨이 `api/work|api/v1/work|api/business|api/v1/business|api/shop|api/v1/shop` 등록 및 트래픽 절체
