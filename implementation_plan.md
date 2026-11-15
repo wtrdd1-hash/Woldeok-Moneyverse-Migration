@@ -4359,3 +4359,42 @@ spring-backend/src/main/java/com/moneyverse/api/domain/
 2. 전체 Gradle 빌드 및 bootJar 프로덕션 아티팩트 빌드
 3. Nginx 4400 게이트웨이 및 포트 80 공용 프록시에 `api/game-clock|api/space|api/mint` 추가
 4. 실서버 라이브 엔드포인트 100% 200 OK 실증
+
+
+---
+
+## 🚀 [v37 Specification] Phase 7: Crafting, Engagement, Advisor, Board, MacroPulse Full Platform Transition (Zero-Deletion)
+
+### 1. 개요 및 목적
+NestJS 백엔드 잔존 전 도메인(아이템 제작 시스템 crafting, 연속 출석 및 도파민 상호작용 engagement, AI 금융 비서 덕이 advisor, 커뮤니티 및 종목 토론 게시판 board, 거시 경제 펄스 및 소각 이벤트 macropulse)을 Spring Boot 3.3.5로 완전 이전하여, Node 백엔드의 모든 비즈니스 로직을 Spring Boot로 100% 통합 완료합니다.
+
+### 2. Spring Boot 3.3.5 신규 도메인 파일 목록
+``
+spring-backend/src/main/java/com/moneyverse/api/domain/
+├── crafting/
+│   ├── controller/CraftingController.java             # /api/crafting, /api/v1/crafting (레시피 조회, 제작 집행)
+│   ├── dto/CraftingDtos.java                          # RecipeItem, ExecuteCraftingResponse DTOs
+│   └── service/CraftingService.java                   # 제작 로직 및 재료/수수료 차감
+├── engagement/
+│   ├── controller/EngagementController.java           # /api/engagement, /api/dopamine (출석 체크, 심리 투표)
+│   ├── dto/EngagementDtos.java                        # StreakStatusResponse, BullBearVote DTOs
+│   └── service/EngagementService.java                 # 스트릭 및 퀘스트 상태 로직
+├── advisor/
+│   ├── controller/AdvisorController.java              # /api/advisor/deoki (포트폴리오 PR-Index 진단, 질의응답)
+│   ├── dto/AdvisorDtos.java                           # DiagnosisResponse, AskDeoki DTOs
+│   └── service/AdvisorService.java                    # 덕이 자산 진단 및 맞춤 포트폴리오 분석
+├── board/
+│   ├── controller/BoardController.java                # /api/board (자유 게시판, 종목 토론방)
+│   ├── dto/BoardDtos.java                             # BoardPostItem, StockPost DTOs
+│   └── service/BoardService.java                      # 게시글 조회 및 작성
+└── macropulse/
+    ├── controller/MacroPulseController.java           # /api/economy (거시 경제 펄스, 통화 소각, 핫타임 버프)
+    ├── dto/MacroPulseDtos.java                        # MacroPulseResponse, BurnEvent DTOs
+    └── service/MacroPulseService.java                 # 경제 지표 및 이벤트 집계
+``
+
+### 3. 검증 계획
+1. Phase7IntegrationTest 통합 테스트 작성 및 100% 통과 (MockMvc 200 OK)
+2. 전체 Gradle 빌드 및 bootJar 프로덕션 아티팩트 빌드
+3. Nginx 4400 게이트웨이 및 포트 80 공용 프록시에 api/crafting|api/engagement|api/dopamine|api/advisor|api/board|api/economy 라우팅 정규식 반영
+4. 실서버 라이브 엔드포인트 100% 200 OK 실증

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Progression & Credit", description = "유저 성장 단계, 신용 등급, 초반 퀘스트 진행도 API")
+@Tag(name = "Progression & Achievements", description = "유저 성장 단계, 업적, 크레딧 및 초심자 가이드 API")
 @RestController
 @RequestMapping({"/api/progression", "/api/v1/progression"})
 public class ProgressionController {
@@ -31,8 +31,8 @@ public class ProgressionController {
         }
     }
 
-    @GetMapping({"", "/"})
-    @Operation(summary = "내 성장 단계 및 해금 기능 조회")
+    @GetMapping({"", "/", "/status"})
+    @Operation(summary = "유저 성장 단계 및 업적 요약 조회")
     public ResponseEntity<ProgressionStatusResponse> status(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
@@ -52,8 +52,8 @@ public class ProgressionController {
     }
 
     @GetMapping("/credits")
-    @Operation(summary = "신용 등급 및 대출 한도 조회")
-    public ResponseEntity<CreditStatusResponse> creditStatus(
+    @Operation(summary = "시스템 크레딧 및 신용 등급 상태 조회")
+    public ResponseEntity<CreditStatusResponse> credits(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
     ) {
@@ -62,7 +62,7 @@ public class ProgressionController {
     }
 
     @GetMapping("/early-game")
-    @Operation(summary = "초반 퀘스트 및 튜토리얼 진행 상태 조회")
+    @Operation(summary = "초심자 온보딩 가이드 및 퀘스트 상태 조회")
     public ResponseEntity<EarlyGameStatusResponse> earlyGame(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId

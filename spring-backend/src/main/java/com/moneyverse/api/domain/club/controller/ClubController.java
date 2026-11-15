@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Club & Cooperatives", description = "클럽/협동조합 목록, 상세, 가입 및 탈퇴 API")
+@Tag(name = "Club & Cooperatives", description = "?대읇/?묐룞議고빀 紐⑸줉, ?곸꽭, 媛??諛??덊눜 API")
 @RestController
 @RequestMapping({"/api/club", "/api/v1/club"})
 public class ClubController {
@@ -31,8 +31,8 @@ public class ClubController {
         }
     }
 
-    @GetMapping("/list")
-    @Operation(summary = "전체 클럽 목록 조회")
+    @GetMapping({"", "/", "/list"})
+    @Operation(summary = "?꾩껜 ?대읇 紐⑸줉 議고쉶")
     public ResponseEntity<ClubListResponse> listClubs(
             @RequestParam(value = "limit", defaultValue = "50") int limit
     ) {
@@ -40,7 +40,7 @@ public class ClubController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "특정 클럽 상세 정보 조회")
+    @Operation(summary = "?뱀젙 ?대읇 ?곸꽭 ?뺣낫 議고쉶")
     public ResponseEntity<ClubDetailResponse> getClub(
             @PathVariable("id") UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
@@ -51,7 +51,7 @@ public class ClubController {
     }
 
     @PostMapping("/{id}/join")
-    @Operation(summary = "클럽 가입 신청")
+    @Operation(summary = "?대읇 媛???좎껌")
     public ResponseEntity<ClubActionResponse> joinClub(
             @PathVariable("id") UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
@@ -62,7 +62,7 @@ public class ClubController {
     }
 
     @PostMapping("/{id}/leave")
-    @Operation(summary = "클럽 탈퇴")
+    @Operation(summary = "?대읇 ?덊눜")
     public ResponseEntity<ClubActionResponse> leaveClub(
             @PathVariable("id") UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
@@ -72,3 +72,4 @@ public class ClubController {
         return ResponseEntity.ok(clubService.leaveClub(userId, id));
     }
 }
+

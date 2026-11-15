@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.util.*;
 
-@Tag(name = "Treasury Bonds", description = "가상 국채 공모 청약 및 레포(Repo) 담보 대출 API")
+@Tag(name = "Treasury Bonds", description = "媛??援?콈 怨듬え 泥?빟 諛??덊룷(Repo) ?대낫 ?異?API")
 @RestController
 @RequestMapping("/api/bonds")
 public class BondController {
@@ -22,26 +22,26 @@ public class BondController {
         this.bondService = bondService;
     }
 
-    @GetMapping("/markets")
-    @Operation(summary = "가상 국채 종목 및 시장 금리 지표 조회")
+    @GetMapping({"", "/", "/markets"})
+    @Operation(summary = "媛??援?콈 醫낅ぉ 諛??쒖옣 湲덈━ 吏??議고쉶")
     public ApiResponse<Map<String, Object>> getMarkets() {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("overview", bondService.getOverview());
         data.put("bonds", bondService.listBonds());
-        data.put("guarantor", "게임 내 가상 WLD 채권이며 국가 신용등급 및 원리금 보증이 적용되지 않습니다.");
+        data.put("guarantor", "寃뚯엫 ??媛??WLD 梨꾧텒?대ŉ 援?? ?좎슜?깃툒 諛??먮━湲?蹂댁쬆???곸슜?섏? ?딆뒿?덈떎.");
         data.put("disclosed_at", Instant.now().toString());
         return ApiResponse.ok(data);
     }
 
     @GetMapping("/my-holdings")
-    @Operation(summary = "내 보유 국채 계좌 현황 조회")
+    @Operation(summary = "??蹂댁쑀 援?콈 怨꾩쥖 ?꾪솴 議고쉶")
     public ApiResponse<List<Map<String, Object>>> getMyHoldings(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
         return ApiResponse.ok(bondService.listUserHoldings(userId));
     }
 
     @PostMapping("/subscribe")
-    @Operation(summary = "시민 가상 국채 공모 청약 및 매수")
+    @Operation(summary = "?쒕? 媛??援?콈 怨듬え 泥?빟 諛?留ㅼ닔")
     public ApiResponse<Map<String, Object>> subscribeBond(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
             @Valid @RequestBody BondSubscribeRequest request) {
@@ -50,14 +50,14 @@ public class BondController {
     }
 
     @GetMapping("/my-repo-loans")
-    @Operation(summary = "내 국채 담보 레포 대출 내역 조회")
+    @Operation(summary = "??援?콈 ?대낫 ?덊룷 ?異??댁뿭 議고쉶")
     public ApiResponse<List<Map<String, Object>>> getMyRepoLoans(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
         return ApiResponse.ok(Collections.emptyList());
     }
 
     @PostMapping("/repo-loans/borrow")
-    @Operation(summary = "국채 담보 레포 대출 실행")
+    @Operation(summary = "援?콈 ?대낫 ?덊룷 ?異??ㅽ뻾")
     public ApiResponse<Map<String, Object>> borrowRepoLoan(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
             @Valid @RequestBody RepoBorrowRequest request) {
@@ -66,7 +66,7 @@ public class BondController {
     }
 
     @PostMapping("/repo-loans/repay")
-    @Operation(summary = "국채 담보 레포 대출 원리금 상환")
+    @Operation(summary = "援?콈 ?대낫 ?덊룷 ?異??먮━湲??곹솚")
     public ApiResponse<Map<String, Object>> repayRepoLoan(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
             @Valid @RequestBody RepoRepayRequest request) {
@@ -74,3 +74,4 @@ public class BondController {
         return ApiResponse.ok(result, (String) result.get("message"));
     }
 }
+
