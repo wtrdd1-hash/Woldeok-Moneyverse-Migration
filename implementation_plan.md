@@ -4138,3 +4138,53 @@ spring-backend/src/main/java/com/moneyverse/api/domain/admin/
 2. 프로덕션 서버 빌드 및 배포, Spring Boot 무중단 재기동.
 3. Nginx 4400 게이트웨이 라우팅을 Spring Boot로 전환.
 4. `curl` 및 실제 관리자 관제탑 웹 화면에서 "100% LEDGER SYNCED", "ALL CLEAR", "10 LISTED", "21명" 정상 출력 확인.
+
+---
+## 🚀 [v32 Specification] 관제탑 실증 및 Phase 2 가상 주식 거래소 & 트레이딩 엔진 Spring Boot 전체 전환
+
+### 1. 관제탑 4대 지표 실서버 라이브 실증 보고 (Live Verification)
+- **점검 결과**: 포트 4400 통합 게이트웨이 및 포트 4550 Spring Boot 3.3.5 실서버 라이브 검증 완료.
+  - controls: 7개 피처 플래그 전체 가동 중 (held: 0, total: 7)
+  - stocks: 10개 가상 기업 상장 및 정상 거래 (ctive: 10, halted: 0)
+  - users: 21명 회원 샘플 무결성 및 wealth_rank: null 보존 검증 완료 (sampledCount: 21)
+  - ledger: 복식부기 원장 890개 트랜잭션 전수 대차 균형 일치 (ok: true, 비균형/불일치 0건)
+  - llVerified: **	rue (100% LEDGER SYNCED, 전 지표 정상)**
+- **브라우저 표출 확인**: Next.js 프론트엔드가 포트 4400 게이트웨이를 경유하여 Spring Boot의 올바른 JSON 페이로드를 전달받아 관제탑 벤토 카드가 정상 표출됨을 확인.
+
+### 2. Phase 2 가상 주식 시장(Stock Market) 및 트레이딩 엔진 전체 전환 아키텍처
+기존 Node.js의 ackend/src/stock/ 도메인을 Spring Boot 3.3.5의 com.moneyverse.api.domain.stock 패키지로 100% 무결점 전환:
+
+`
+spring-backend/src/main/java/com/moneyverse/api/domain/stock/
+├── controller/
+│   ├── StockController.java             # /api/v1/stocks, /api/stocks (호가/차트/주문/포트폴리오)
+│   ├── StockLeagueController.java       # /api/v1/stocks/league (리그 챔피언십 & 카피트레이딩)
+│   └── NewspaperController.java         # /api/v1/newspaper (신문사 펄스 & 시장 심리 지수)
+├── dto/
+│   ├── StockDtos.java                   # 시세/캔들/주문/포트폴리오 DTOs
+│   ├── StockLeagueDtos.java             # 리그/참가/고래/카피트레이딩 DTOs
+│   └── NewspaperDtos.java               # 펄스/여론조사/금융상식 DTOs
+└── service/
+    ├── StockService.java                # DB 스토어드 프로시저 호출 및 체결 트랜잭션
+    ├── StockLeagueService.java          # 리그 랭킹 집계 및 리더보드
+    └── MarketTickerService.java         # @Scheduled 초당 가상 주식 가격 시뮬레이션(어드바이저리 락)
+`
+
+### 3. 데이터베이스 스토어드 프로시저 및 보안 정책
+- public.stock_market_overview(): 10개 상장사 시세, 당일 고가/저가, 발행주식수 조회
+- public.stock_candles(?::uuid, ?::int, ?::int): 1분/5분/1시간/1일 봉 캔들 데이터 산출
+- public.stock_spark_series(?::int): 전 종목 미니 스파크라인 차트 배치 조회
+- public.stock_trade(?::uuid, ?::uuid, ?::uuid, ?::text, ?::int): 멱등성 키 기반 주식 매수/매도 복식부기 체결
+- public.stock_my_watchlist(?::uuid) & public.stock_watchlist_set(?::uuid, ?::uuid, ?::boolean): 관심종목 토글
+- public.stock_my_positions(?::uuid): 사용자 보유 주식 및 평가금액 조회
+- public.stock_my_trades(?::uuid, ?::int): 체결 내역 조회
+- public.stock_market_live_tick(): 시장 체결 가격 워크 시뮬레이션 스텝
+
+### 4. 구현 및 자가 검증 계획
+1. StockDtos.java, StockLeagueDtos.java, NewspaperDtos.java 구현.
+2. StockService.java 및 StockLeagueService.java 구현 (JdbcClient 기반 프로시저 호출).
+3. MarketTickerService.java 구현 (@Scheduled 초당 틱 연동).
+4. StockController.java, StockLeagueController.java, NewspaperController.java 구현.
+5. 단위 및 통합 테스트 (StockTradingTest.java) 작성 및 Gradle 빌드 통과.
+6. 원격 서버 배포 및 Nginx 4400 게이트웨이 라우팅 Spring Boot로 전환.
+7. E2E API 및 프론트엔드 연동 테스트 완료.
