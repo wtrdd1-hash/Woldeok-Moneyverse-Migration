@@ -19,7 +19,7 @@ import java.util.*;
 @RestController
 public class AdminSecurityController {
 
-    @Value("${moneyverse.security.internal-token:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}")
+    @Value("${moneyverse.security.internal-token:}")
     private String internalToken;
 
     @Operation(summary = "관리자 보안 콘솔 세션 상태 및 로그인 정책 조회")
@@ -29,25 +29,12 @@ public class AdminSecurityController {
     })
     public ResponseEntity<?> getSecurityOverview(HttpServletRequest request) {
         String internalHeader = request.getHeader("x-internal-token");
-        String authHeader = request.getHeader("Authorization");
-        Cookie[] cookies = request.getCookies();
-
-        boolean hasSessionCookie = false;
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        hasSessionCookie = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // internal token from Next.js server components or valid session
-        boolean isAuthorized = (internalHeader != null && internalHeader.equals(internalToken)) ||
-                (authHeader != null && authHeader.startsWith("Bearer ")) ||
-                hasSessionCookie;
+        // The Spring Security boundary validates the internal service token before dispatch.
+        // Keep this controller fail-closed for direct invocation as well.
+        boolean isAuthorized = internalToken != null && !internalToken.isBlank()
+                && internalHeader != null && java.security.MessageDigest.isEqual(
+                        internalToken.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        internalHeader.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         if (!isAuthorized) {
             Map<String, Object> err = new LinkedHashMap<>();
