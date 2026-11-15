@@ -4284,3 +4284,47 @@ spring-backend/src/main/java/com/moneyverse/api/domain/
 3. WorkController, BusinessController, ShopController REST API 엔드포인트 바인딩
 4. 통합 테스트 작성 및 Gradle 빌드 통과
 5. Nginx 게이트웨이 `api/work|api/v1/work|api/business|api/v1/business|api/shop|api/v1/shop` 등록 및 트래픽 절체
+
+
+---
+
+## 🚀 [v35 Specification] Phase 5: Notification, Support, Progression, Activity, Chat, Club Enterprise Transition (Zero-Deletion)
+
+### 1. 개요 및 목적
+Node.js Express/Nest 백엔드에 잔존하던 알림(Notification), 고객 지원(Support), 성장 및 신용 체계(Progression), 유저 활동 텔레메트리(Activity), 1:1 쪽지(Chat), 클럽 및 협동조합(Club) 도메인을 Spring Boot 3.3.5로 완전 전환하여, Nginx 게이트웨이를 통한 단일 진입점 라우팅 및 100% 완전 무중단 전환을 완성합니다.
+
+### 2. Spring Boot 3.3.5 신규 도메인 구성 파일
+```
+spring-backend/src/main/java/com/moneyverse/api/domain/
+├── notification/
+│   ├── controller/NotificationController.java       # /api/v1/notifications (알림 목록, 읽음 처리, 미확인 카운트)
+│   ├── dto/NotificationDtos.java                    # NotificationItem, ListResponse, UnreadCount, Receipt DTOs
+│   └── service/NotificationService.java             # in_app_notifications DB 연동
+├── support/
+│   ├── controller/SupportController.java             # /api/v1/support (1:1 고객지원 스레드, 요약, 메시지 이력)
+│   ├── dto/SupportDtos.java                          # SupportThreadItem, SupportMessageItem, DTOs
+│   └── service/SupportService.java                   # support_threads, support_messages DB 연동
+├── progression/
+│   ├── controller/ProgressionController.java         # /api/v1/progression (성장 단계, 신용 등급, 초반 퀘스트)
+│   ├── dto/ProgressionDtos.java                      # ProgressionStatus, CreditStatus, EarlyGame DTOs
+│   └── service/ProgressionService.java               # user_progression DB 연동
+├── activity/
+│   ├── controller/ActivityController.java            # /api/v1/activity/events, /api/v1/admin/activity (텔레메트리/로그)
+│   ├── dto/ActivityDtos.java                         # IngestActivityEventsRequest, ActivityLogItem DTOs
+│   └── service/ActivityService.java                  # user_activity_logs DB 연동
+├── chat/
+│   ├── controller/ChatController.java                # /api/v1/chat (1:1 대화방, 메시지 송수신, 안읽은 개수)
+│   ├── dto/ChatDtos.java                             # ConversationItem, ChatMessageItem DTOs
+│   └── service/ChatService.java                      # private_chat_conversations, private_chat_messages DB 연동
+└── club/
+    ├── controller/ClubController.java                # /api/v1/club (협동조합 목록, 상세, 가입/탈퇴)
+    ├── dto/ClubDtos.java                             # ClubItem, ClubDetailResponse DTOs
+    └── service/ClubService.java                      # clubs, club_members DB 연동
+```
+
+### 3. 자가 검증 및 롤아웃 계획
+1. 6개 도메인 DTO 및 Service, Controller 신규 구현 완료
+2. Phase5IntegrationTest 통합 테스트 작성 및 100% 통과 검증 (MockMvc 200 OK)
+3. 전체 Gradle 테스트 스위트 통과 검증 및 bootJar 프로덕션 아티팩트 빌드
+4. 운영 서버(Debian) 배포 및 Nginx 게이트웨이 라우팅 정규식 갱신
+5. 실서버 라이브 엔드포인트 100% 200 OK 실증 및 전수 QA 수행
