@@ -1,4 +1,4 @@
-package com.moneyverse.api.domain.centralbank.controller;
+﻿package com.moneyverse.api.domain.centralbank.controller;
 
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.centralbank.dto.CentralBankDtos.*;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Tag(name = "Central Bank", description = "중앙은행 통화량 지표 및 기준금리/지급준비율 정책 API")
+@Tag(name = "Central Bank", description = "以묒븰????듯솕??吏??諛?湲곗?湲덈━/吏湲됱?鍮꾩쑉 ?뺤콉 API")
 @RestController
 @RequestMapping("/api/central-bank")
 public class CentralBankController {
@@ -21,20 +21,20 @@ public class CentralBankController {
         this.centralBankService = centralBankService;
     }
 
-    @GetMapping("/monetary-aggregates")
-    @Operation(summary = "M0(본원통화), M1(협의통화), M2(광의통화) 거시경제 통화량 및 통화승수 조회")
+    @GetMapping({"/monetary-aggregates", "/aggregates"})
+    @Operation(summary = "M0(蹂몄썝?듯솕), M1(?묒쓽?듯솕), M2(愿묒쓽?듯솕) 嫄곗떆寃쎌젣 ?듯솕??諛??듯솕?뱀닔 議고쉶")
     public ApiResponse<MonetaryAggregates> getMonetaryAggregates() {
         return ApiResponse.ok(centralBankService.getMonetaryAggregates());
     }
 
     @GetMapping("/base-rate")
-    @Operation(summary = "현재 국가 기준금리(Base Rate) 및 테일러 룰 추정 금리 조회")
+    @Operation(summary = "?꾩옱 援?? 湲곗?湲덈━(Base Rate) 諛??뚯씪??猷?異붿젙 湲덈━ 議고쉶")
     public ApiResponse<Map<String, Object>> getBaseRate() {
         return ApiResponse.ok(centralBankService.getBaseRate());
     }
 
     @PutMapping("/base-rate")
-    @Operation(summary = "국가 기준금리(Base Rate) 결정 및 공시 (금융통화위원회)")
+    @Operation(summary = "援?? 湲곗?湲덈━(Base Rate) 寃곗젙 諛?怨듭떆 (湲덉쑖?듯솕?꾩썝??")
     public ApiResponse<Map<String, Object>> updateBaseRate(
             @RequestHeader(value = "X-Admin-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String adminId,
             @Valid @RequestBody UpdateBaseRateRequest request) {
@@ -43,13 +43,13 @@ public class CentralBankController {
     }
 
     @GetMapping("/reserve-requirement")
-    @Operation(summary = "시중 상업은행 법정 지급준비율(Reserve Requirement Ratio) 조회")
+    @Operation(summary = "?쒖쨷 ?곸뾽???踰뺤젙 吏湲됱?鍮꾩쑉(Reserve Requirement Ratio) 議고쉶")
     public ApiResponse<Map<String, Object>> getReserveRequirement() {
         return ApiResponse.ok(centralBankService.getReserveRequirement());
     }
 
     @PutMapping("/reserve-requirement")
-    @Operation(summary = "시중 상업은행 법정 지급준비율 갱신 및 공시")
+    @Operation(summary = "?쒖쨷 ?곸뾽???踰뺤젙 吏湲됱?鍮꾩쑉 媛깆떊 諛?怨듭떆")
     public ApiResponse<Map<String, Object>> updateReserveRequirement(
             @RequestHeader(value = "X-Admin-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String adminId,
             @Valid @RequestBody UpdateReserveRequirementRequest request) {
@@ -57,3 +57,4 @@ public class CentralBankController {
         return ApiResponse.ok(result, (String) result.get("message"));
     }
 }
+

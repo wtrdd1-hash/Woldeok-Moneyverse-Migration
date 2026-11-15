@@ -1,4 +1,4 @@
-package com.moneyverse.api.domain.progression.controller;
+﻿package com.moneyverse.api.domain.progression.controller;
 
 import com.moneyverse.api.domain.progression.dto.ProgressionDtos.*;
 import com.moneyverse.api.domain.progression.service.ProgressionService;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Tag(name = "Progression & Credit", description = "유저 성장 단계, 신용 등급, 초반 퀘스트 진행도 API")
+@Tag(name = "Progression & Credit", description = "?좎? ?깆옣 ?④퀎, ?좎슜 ?깃툒, 珥덈컲 ?섏뒪??吏꾪뻾??API")
 @RestController
 @RequestMapping({"/api/progression", "/api/v1/progression"})
 public class ProgressionController {
@@ -31,8 +31,8 @@ public class ProgressionController {
         }
     }
 
-    @GetMapping({"", "/"})
-    @Operation(summary = "내 성장 단계 및 해금 기능 조회")
+    @GetMapping({"", "/", "/status"})
+    @Operation(summary = "???깆옣 ?④퀎 諛??닿툑 湲곕뒫 議고쉶")
     public ResponseEntity<ProgressionStatusResponse> status(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
@@ -42,7 +42,7 @@ public class ProgressionController {
     }
 
     @PostMapping("/refreshes")
-    @Operation(summary = "성장 단계 갱신 재계산")
+    @Operation(summary = "?깆옣 ?④퀎 媛깆떊 ?ш퀎??)
     public ResponseEntity<ProgressionRefreshResponse> refresh(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
@@ -52,7 +52,7 @@ public class ProgressionController {
     }
 
     @GetMapping("/credits")
-    @Operation(summary = "신용 등급 및 대출 한도 조회")
+    @Operation(summary = "?좎슜 ?깃툒 諛??異??쒕룄 議고쉶")
     public ResponseEntity<CreditStatusResponse> creditStatus(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
@@ -62,7 +62,7 @@ public class ProgressionController {
     }
 
     @GetMapping("/early-game")
-    @Operation(summary = "초반 퀘스트 및 튜토리얼 진행 상태 조회")
+    @Operation(summary = "珥덈컲 ?섏뒪??諛??쒗넗由ъ뼹 吏꾪뻾 ?곹깭 議고쉶")
     public ResponseEntity<EarlyGameStatusResponse> earlyGame(
             @RequestHeader(value = "X-User-Id", required = false) String xUserId,
             @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
@@ -71,3 +71,4 @@ public class ProgressionController {
         return ResponseEntity.ok(progressionService.earlyGameStatus(userId));
     }
 }
+

@@ -1,4 +1,4 @@
-package com.moneyverse.api.domain.kdic.controller;
+﻿package com.moneyverse.api.domain.kdic.controller;
 
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.kdic.dto.KdicDtos.*;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@Tag(name = "KDIC Deposit Insurance", description = "예금보험공사 기금 및 금융안정 종합 관제 API")
+@Tag(name = "KDIC Deposit Insurance", description = "?덇툑蹂댄뿕怨듭궗 湲곌툑 諛?湲덉쑖?덉젙 醫낇빀 愿??API")
 public class KdicController {
 
     private final KdicService kdicService;
@@ -19,7 +19,7 @@ public class KdicController {
         this.kdicService = kdicService;
     }
 
-    @Operation(summary = "예금보험공사 기금 및 부보금융기관 종합 현황 조회")
+    @Operation(summary = "?덇툑蹂댄뿕怨듭궗 湲곌툑 諛?遺蹂닿툑?듦린愿 醫낇빀 ?꾪솴 議고쉶")
     @GetMapping(path = {
             "/api/admin/kdic/overview",
             "/api/v1/admin/kdic/overview"
@@ -28,7 +28,7 @@ public class KdicController {
         return ApiResponse.ok(kdicService.getOverview());
     }
 
-    @Operation(summary = "KDIC 복식부기 원장 무결성 및 국고 연결 대조 조회")
+    @Operation(summary = "KDIC 蹂듭떇遺湲??먯옣 臾닿껐??諛?援?퀬 ?곌껐 ?議?議고쉶")
     @GetMapping(path = {
             "/api/admin/kdic/ledger-integrity",
             "/api/v1/admin/kdic/ledger-integrity"
@@ -37,7 +37,7 @@ public class KdicController {
         return ApiResponse.ok(kdicService.getLedgerIntegrity());
     }
 
-    @Operation(summary = "분기별 예보료 산출 및 기금 적립 집행")
+    @Operation(summary = "遺꾧린蹂??덈낫猷??곗텧 諛?湲곌툑 ?곷┰ 吏묓뻾")
     @PostMapping(path = {
             "/api/admin/kdic/assess-premiums",
             "/api/v1/admin/kdic/assess-premiums"
@@ -45,10 +45,10 @@ public class KdicController {
     public ApiResponse<Map<String, Object>> assessPremiums(
             @RequestHeader(value = "x-user-id", defaultValue = "admin") String actor
     ) {
-        return ApiResponse.ok(kdicService.assessPremiums(actor), "분기별 예보료가 정상 징수되었습니다.");
+        return ApiResponse.ok(kdicService.assessPremiums(actor), "遺꾧린蹂??덈낫猷뚭? ?뺤긽 吏뺤닔?섏뿀?듬땲??");
     }
 
-    @Operation(summary = "부보 금융기관 긴급 유동성 대여(Bailout) 집행")
+    @Operation(summary = "遺蹂?湲덉쑖湲곌? 湲닿툒 ?좊룞?????Bailout) 吏묓뻾")
     @PostMapping(path = {
             "/api/admin/kdic/liquidity-loan",
             "/api/v1/admin/kdic/liquidity-loan"
@@ -58,28 +58,29 @@ public class KdicController {
             @RequestParam(defaultValue = "1000000") long amountWld,
             @RequestHeader(value = "x-user-id", defaultValue = "admin") String actor
     ) {
-        return ApiResponse.ok(kdicService.injectEmergencyLiquidity(institutionId, amountWld, actor), "긴급 유동성 대여가 집행되었습니다.");
+        return ApiResponse.ok(kdicService.injectEmergencyLiquidity(institutionId, amountWld, actor), "湲닿툒 ?좊룞????ш? 吏묓뻾?섏뿀?듬땲??");
     }
 
-    @Operation(summary = "부실 금융기관 예금자 대위변제 집행")
+    @Operation(summary = "遺??湲덉쑖湲곌? ?덇툑????꾨???吏묓뻾")
     @PostMapping(path = {
             "/api/admin/kdic/payout",
             "/api/v1/admin/kdic/payout"
     })
     public ApiResponse<Map<String, Object>> executePayout(
             @RequestParam(defaultValue = "BANK_COMMERCIAL") String institutionId,
-            @RequestParam(defaultValue = "정리절차 개시") String reason,
+            @RequestParam(defaultValue = "?뺣━?덉감 媛쒖떆") String reason,
             @RequestHeader(value = "x-user-id", defaultValue = "admin") String actor
     ) {
-        return ApiResponse.ok(kdicService.executePayout(institutionId, reason, actor), "예금자 대위변제가 집행되었습니다.");
+        return ApiResponse.ok(kdicService.executePayout(institutionId, reason, actor), "?덇툑????꾨??쒓? 吏묓뻾?섏뿀?듬땲??");
     }
 
-    @Operation(summary = "대국민 공개 예금자보호 포털 조회")
+    @Operation(summary = "?援?? 怨듦컻 ?덇툑?먮낫???ы꽭 議고쉶")
     @GetMapping(path = {
-            "/api/kdic/portal",
+            "/api/kdic/portal", "/api/kdic/overview", "/api/v1/kdic/overview",
             "/api/v1/kdic/portal"
     })
     public ApiResponse<KdicOverviewResponse> getPublicPortalData() {
         return ApiResponse.ok(kdicService.getOverview());
     }
 }
+
