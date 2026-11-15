@@ -4328,3 +4328,34 @@ spring-backend/src/main/java/com/moneyverse/api/domain/
 3. 전체 Gradle 테스트 스위트 통과 검증 및 bootJar 프로덕션 아티팩트 빌드
 4. 운영 서버(Debian) 배포 및 Nginx 게이트웨이 라우팅 정규식 갱신
 5. 실서버 라이브 엔드포인트 100% 200 OK 실증 및 전수 QA 수행
+
+
+---
+
+## 🚀 [v36 Specification] Phase 6: Mint, Space, GameClock Enterprise Transition (Zero-Deletion)
+
+### 1. 개요 및 목적
+국가조폐국 화폐 주조 및 시뇨리지 대시보드(`Mint`), 마이 스페이스 및 부동산 보유세(`Space`), 가상 세계 일/주차 시계 동기화(`GameClock`) 모듈을 Spring Boot 3.3.5로 완전 전환하여, 백엔드 전 도메인의 엔터프라이즈 통합을 완성합니다.
+
+### 2. Spring Boot 3.3.5 신규 도메인 구성 파일
+```
+spring-backend/src/main/java/com/moneyverse/api/domain/
+├── gameclock/
+│   ├── controller/GameClockController.java           # /api/v1/game-clock (서버 일/주차 및 시간 가속 동기화)
+│   ├── dto/GameClockDtos.java                        # ServerGameClockResponse DTO
+│   └── service/GameClockService.java                 # server_game_clock() DB 연동
+├── space/
+│   ├── controller/SpaceController.java               # /api/v1/space (마이 스페이스 조회, 구매, 가구 배치, 보유세)
+│   ├── dto/SpaceDtos.java                            # SpaceItem, MySpaceResponse, ActionResponse DTOs
+│   └── service/SpaceService.java                     # 공간 관리 및 세금 납부 로직
+└── mint/
+    ├── controller/MintController.java                # /api/v1/mint (본원통화 주조, 시뇨리지, 통화 소각)
+    ├── dto/MintDtos.java                             # MintBatchItem, SeigniorageLedgerResponse DTOs
+    └── service/MintService.java                      # 조폐국 원장 및 소각 집행 로직
+```
+
+### 3. 검증 계획
+1. Phase6IntegrationTest 통합 테스트 작성 및 100% 통과 (MockMvc 200 OK)
+2. 전체 Gradle 빌드 및 bootJar 프로덕션 아티팩트 빌드
+3. Nginx 4400 게이트웨이 및 포트 80 공용 프록시에 `api/game-clock|api/space|api/mint` 추가
+4. 실서버 라이브 엔드포인트 100% 200 OK 실증
