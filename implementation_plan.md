@@ -4188,3 +4188,50 @@ spring-backend/src/main/java/com/moneyverse/api/domain/stock/
 5. 단위 및 통합 테스트 (StockTradingTest.java) 작성 및 Gradle 빌드 통과.
 6. 원격 서버 배포 및 Nginx 4400 게이트웨이 라우팅 Spring Boot로 전환.
 7. E2E API 및 프론트엔드 연동 테스트 완료.
+
+
+---
+## 🚀 [v33 Specification] 관제탑 UNVERIFIED 원인 규명 및 Phase 3 관리자 2FA OTP & R2 승격 모듈 Spring Boot 전환 사양 (+누적, -0 삭제)
+
+### 1. 운영 마스터 관제탑 'UNVERIFIED / 확인 불가' 이슈 완벽 규명 및 조치 결과
+- **현상 분석**:
+  - 사용자 보고 스크린샷에서 4대 벤토 카드가 `UNVERIFIED`, `확인 불가`, `조회 불가`로 렌더링됨.
+  - 프론트엔드 관제탑(`frontend/src/app/admin/page.tsx` 및 `admin-cockpit-evidence.ts`)은 SSR 시점에 다음 4개 엔드포인트를 병렬 호출함:
+    1) `/api/v1/admin/controls` (비상 킬스위치)
+    2) `/api/v1/admin/stocks` (가상 주식 시장)
+    3) `/api/v1/admin/users` (조회된 회원)
+    4) `/api/v1/admin/economy/reconciliations/latest` (복식부기 원장)
+  - 이 중 하나라도 실패하거나 응답 스키마가 일치하지 않으면 카드가 `UNVERIFIED`로 처리됨.
+- **근본 원인**:
+  - 프론트엔드 릴리스 빌드 당시 환경변수에 `API_GATEWAY_ORIGIN`이 누락되어 과거 미동작 포트(3000)로의 fallback 시도가 있었고, 이전 Node.js 응답에서 `reconciliations/latest` 및 `wealth_rank: null` 타입 파싱 불일치가 존재했음.
+  - PR #3171 및 PR #3172를 통해 4대 API가 Spring Boot 3.3.5로 전환되었으며, 라이브 서버 검증 결과:
+    - controls: 7개 플래그 정상 활성 (`ALL CLEAR`, total: 7)
+    - stocks: 10개 종목 정상 활성 (`10 LISTED`, halted: 0)
+    - users: 21명 정상 집계 (`21명`)
+    - ledger: 원장 불일치 0건 (`100% LEDGER SYNCED`)
+    - allVerified: **true** 확인 완료. 브라우저 새로고침(F5) 시 정상 출력됨.
+
+### 2. Phase 2 가상 주식 시장 & 시세 틱 엔진 배포 완료
+- **GitHub PR #3172 머지 완료**: `origin/main` (commit `04ef008ae`) 통합 완료.
+- **프로덕션 서버 배포 완료**:
+  - Spring Boot 3.3.5 재빌드 및 배포 완료 (`moneyverse-spring-backend.service`).
+  - Nginx 4400 게이트웨이 `api/stocks|api/v1/stocks|api/newspaper|api/v1/newspaper` 라우팅 등록 및 리로드 완료.
+  - `/api/v1/stocks`, `/api/v1/stocks/league/current`, `/api/v1/newspaper/pulse` 실서버 200 OK 실증 완료.
+
+### 3. Phase 3 관리자 2FA OTP & R2 승격 모듈 Spring Boot 완전 전환 명세
+- **문제점**:
+  - Nginx 게이트웨이에 `api/admin/auth/channel-otp`가 기등록되어 있으나, 백엔드 구현이 Node.js 이전 빌드에만 있어 `404 Cannot GET /api/admin/auth/channel-otp/status` 에러 유발 ("otp인증도안되" 현상).
+- **해결 방안 (Spring Boot 전환)**:
+  - Spring Boot `com.moneyverse.api.domain.admin` 패키지에 관리자 2FA Channel OTP 및 R2 세션 승격 엔진 전면 구축.
+  - 구성 컴포넌트:
+    - `AdminChannelOtpDtos.java`: OTP 요청/검증/승격/상태/테스트 DTO
+    - `AdminChannelOtpService.java`: 6자리 난수 발생(SecureRandom), 5분 만료 TTL, 일회용 원자적 소모, 15분 R2 승격 세션 맵(`ConcurrentHashMap`), 텔레그램 Bot API 및 디스코드 웹훅 연동
+    - `AdminChannelOtpController.java`: `/api/admin/auth/channel-otp/**` 및 `/api/v1/admin/auth/channel-otp/**` REST 엔드포인트 제공
+- **보안 및 무결성 정책**:
+  - 1회용 일회성(Single-use) 즉시 소거 보장
+  - 타이밍 어택 방지: 상수 시간 문자열 비교(`MessageDigest.isEqual`)
+  - 15분 만료 시 자동 강제 강등 및 명시적 즉시 폐기(revoke) 지원
+
+### 4. Phase 4 전수 QA 및 잔여 도메인 전환 계획
+- 유저 플로우 QA: 회원가입, 자산 조회, 이체, 주식 매수/매도, 카지노, 상점, 직업 활동
+- 관리자 플로우 QA: 관제탑 지표 확인, 킬스위치 제어, 2FA OTP 발송 및 R2 승격, 중앙은행 발의
