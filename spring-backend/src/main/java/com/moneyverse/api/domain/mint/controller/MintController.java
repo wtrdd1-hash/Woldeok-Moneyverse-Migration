@@ -31,6 +31,12 @@ public class MintController {
         }
     }
 
+    @GetMapping({"", "/"})
+    @Operation(summary = "조폐국 주조차익 및 배치 현황 개요")
+    public ResponseEntity<SeigniorageLedgerResponse> getMintOverview() {
+        return ResponseEntity.ok(mintService.getSeigniorageLedger());
+    }
+
     @GetMapping("/batches")
     @Operation(summary = "화폐 주조 배치 및 인수 상태 목록 조회")
     public ResponseEntity<MintBatchListResponse> getBatches() {

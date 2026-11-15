@@ -29,17 +29,30 @@ class Phase6IntegrationTest {
     }
 
     @Test
-    @DisplayName("마이 스페이스 목록 조회 테스트")
+    @DisplayName("마이 스페이스 목록 및 부동산 구역 조회 테스트")
     void testSpaceEndpoints() throws Exception {
+        mockMvc.perform(get("/api/space")
+                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ok").value(true));
+
         mockMvc.perform(get("/api/space/my")
                         .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ok").value(true));
+
+        mockMvc.perform(get("/api/spaces/real-estate/districts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.districts").isArray());
     }
 
     @Test
     @DisplayName("조폐국 주조 배치 및 시뇨리지 대시보드 조회 테스트")
     void testMintEndpoints() throws Exception {
+        mockMvc.perform(get("/api/mint"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ok").value(true));
+
         mockMvc.perform(get("/api/mint/batches"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ok").value(true));
