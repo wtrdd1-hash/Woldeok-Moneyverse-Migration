@@ -1,4 +1,4 @@
-﻿package com.moneyverse.api.domain.centralbank.controller;
+package com.moneyverse.api.domain.centralbank.controller;
 
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.centralbank.dto.CentralBankDtos.*;

@@ -1,4 +1,4 @@
-﻿package com.moneyverse.api.domain.club.controller;
+package com.moneyverse.api.domain.club.controller;
 
 import com.moneyverse.api.domain.club.dto.ClubDtos.*;
 import com.moneyverse.api.domain.club.service.ClubService;

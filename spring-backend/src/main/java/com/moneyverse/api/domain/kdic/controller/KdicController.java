@@ -1,4 +1,4 @@
-﻿package com.moneyverse.api.domain.kdic.controller;
+package com.moneyverse.api.domain.kdic.controller;
 
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.kdic.dto.KdicDtos.*;
