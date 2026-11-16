@@ -14,6 +14,17 @@
 - Independent restore of 00:26 encrypted archive into network-none disposable PostgreSQL 17 passed: 276 public tables, 943 ledger transactions, 1,950 postings, 43 account balances, 1653MB restored DB; verified temp DB/container cleanup.
 - Telegram monitor watches backup timer/service, paired chat-id file exists; no induced incident/delivery test. Offsite immutable storage unverified.
 
-## End — pending
+## End — 2026-11-17 01:08 KST
+- Live host correction **PRODUCTION HOST CRON VERIFIED**: retired job absent; new local baseline has zero debian cron entries, encrypted systemd timer stays active/enabled/Result=success, 60 backups intact, Spring health HTTP 200. No app service restart or production promotion was necessary; user and financial data untouched.
+- **RESTORE SMOKE VERIFIED** in disposable PostgreSQL; not full financial/photo/application or external disaster recovery certification. Host data copied into isolated database was deleted afterward; off-host remains BLOCKED by missing independently authorized immutable target and credentials.
+- GitHub source branch pushed at `2eceaf832266b9daab1615335bfcc1ed4844b795`; PR #3208 opened for read-only regression checker, 8 Node tests, runbook and bilingual changes. Live script remains private under repo policy (operational `*.sh` excluded).
+- Tests: 8/8 read-only detector tests, 16/16 Telegram bridge tests, `git diff --check`, live `node scripts/backup/check-legacy-cron.mjs`, isolated pg_restore and table reads. CI for PR pending at log time; **do not claim merged main or exact-SHA Test promotion**.
+- Follow-up: prove off-host immutable encrypted replica, remote checksum, regular full DR restore and financial/account invariants, alert delivery on real failure; no fake completion badges.
 
-## End — pending
+
+## End — 2026-11-17 01:08 KST
+- Live host correction **PRODUCTION HOST CRON VERIFIED**: retired job absent; new local baseline has zero debian cron entries, encrypted systemd timer stays active/enabled/Result=success, 60 backups intact, Spring health HTTP 200. No app service restart or production promotion was necessary; user and financial data untouched.
+- **RESTORE SMOKE VERIFIED** in disposable PostgreSQL; not full financial/photo/application or external disaster recovery certification. Host data copied into isolated database was deleted afterward; off-host remains BLOCKED by missing independently authorized immutable target and credentials.
+- GitHub source branch pushed at `2eceaf832266b9daab1615335bfcc1ed4844b795`; PR #3208 opened for read-only regression checker, 8 Node tests, runbook and bilingual changes. Live script remains private under repo policy (operational `*.sh` excluded).
+- Tests: 8/8 read-only detector tests, 16/16 Telegram bridge tests, `git diff --check`, live `node scripts/backup/check-legacy-cron.mjs`, isolated pg_restore and table reads. CI for PR pending at log time; **do not claim merged main or exact-SHA Test promotion**.
+- Follow-up: prove off-host immutable encrypted replica, remote checksum, regular full DR restore and financial/account invariants, alert delivery on real failure; no fake completion badges.
