@@ -37,6 +37,7 @@ events { worker_connections 128; }
 http {
     access_log off;
     upstream prod_frontend { server 127.0.0.1:4512; }
+    upstream seo_release_frontend { server 127.0.0.1:4512; }
     server {
         listen 127.0.0.1:$PORT;
         server_name _;
