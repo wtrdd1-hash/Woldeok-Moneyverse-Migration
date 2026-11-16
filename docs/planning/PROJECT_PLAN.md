@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Living Project Plan
+## v2026.11.17.1 — Spring engagement session and financial truth candidate (DRAFT / RELEASE HOLD)
+Owner-requested P0 remediation candidate SPR-ENG-2026.11.17.1, based on latest main 2c1ea4cd77. Spring duplicate Dopamine status handlers removed, verified server-side session now required across legacy engagement aliases, and fabricated WLD reward/vote/quest/streak status success changed to explicit 503 pending canonical PostgreSQL receipts; relevant Nest authoritative handlers remain unchanged. TDD RED 5 (4 failing) + 6 (6 failing); GREEN full Spring 114/114 and embedded actual HTTP 401 negatives, bootJar success. This is source-only in an isolated branch, not an adopted finance behavior or a production deployment. Exact-SHA official Test, authenticated owner E2E, session/CSRF contract parity and ledger receipts are outstanding. No DB/WLD writes. See EN/KO worklog dated 2026-11-17 and review PR.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)

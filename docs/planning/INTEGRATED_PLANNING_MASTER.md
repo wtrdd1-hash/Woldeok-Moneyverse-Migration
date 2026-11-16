@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
+## v2026.11.17.1 — Spring engagement fail-closed security/finance candidate
+A separate code repair branch fixes duplicate Dopamine mapping and forbids unverified WLD success, forged member headers and invented feature-progress responses in Spring. Does not implement actual settlement or replace Nest authoritative attendance; keeps existing approved product requirements and project-wide G0-G6 gates. Full isolated Spring suite 114 PASS with real embedded HTTP negative tests. Test/Production HOLD; align documentation and open PR before adopting. Link: docs/worklog/2026-11-17-spring-dopamine-route-v2026.11.17.1.md.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)
