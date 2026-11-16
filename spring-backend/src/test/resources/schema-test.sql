@@ -98,3 +98,27 @@ CREATE TABLE IF NOT EXISTS account_balances (
     balance BIGINT DEFAULT 0,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS photos (
+    id UUID PRIMARY KEY,
+    storage_key TEXT NOT NULL,
+    alt_text TEXT,
+    visibility TEXT DEFAULT 'PRIVATE',
+    uploaded_by UUID,
+    content_state TEXT DEFAULT 'DRAFT',
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS member_board_image_uploads (
+    storage_key TEXT PRIMARY KEY,
+    owner_user_id UUID NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS chat_media_registry (
+    storage_key TEXT PRIMARY KEY,
+    owner_user_id UUID NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
