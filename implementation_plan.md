@@ -4742,3 +4742,43 @@ graph TD
 - **Spring Boot 컨트롤러 수**: 47개 -> **52개** (신규 5개 컨트롤러 공식 가동)
 - **NestJS 컨트롤러 대비 물리적 전환율**: 52.81% -> **58.42% (52 / 89)** 달성
 - **Node.js 잔여 컨트롤러**: 37개 (전환 대상 점진적 축소 지속)
+
+
+---
+
+## 🚀 [v47 Specification] Phase 12 고급 금융·트레이딩·파생상품 & 커뮤니티 전면 전환 완료 및 67.41% 달성
+
+### 1. Phase 12 Spring Boot 전환 아키텍처 및 구현 명세
+- **신규 Spring Boot 트레이딩 & 커뮤니티 컨트롤러 (8개 공식 추가)**:
+  - `DerivativesController.java`: 가상 레버리지 선물/옵션 파생상품 시장, 포지션 및 청산 API (`/stocks/derivatives/markets`, `/positions`, `/open`, `/{id}/close`, `/history`). 금융 조작 방지 표준 503 `DERIVATIVES_DATA_UNVERIFIED` 가드 탑재.
+  - `QuantController.java`: 노코드 퀀트 전략 생성, 백테스트, 자동매매 토글 및 실행 로그 API (`/quant/strategies`, `/backtest`, `/strategies/{id}/toggle`, `/strategies/{id}/logs`). 미검증 시세/체결 차단 표준 503 `QUANT_EVIDENCE_UNAVAILABLE` 가드 탑재.
+  - `AdminFxController.java` & `PublicFxController.java` (`FxService.java`): 대한민국 외환보유액 통합계정, SDR 통화 다변화(USD, EUR, CNY, JPY, GBP), 통화스왑(FRB, ECB), CIP(Covered Interest Parity) 이론 선물환율(1M, 3M, 6M) 산출 및 외환시장 킬스위치 제어 API.
+  - `VenturesController.java`: 스타트업 VC 엔젤투자 크라우드펀딩 피치, 지분/포트폴리오 및 분기 배당금 청구 API (`/businesses/ventures/pitches`, `/investments`, `/invest`, `/claim-dividend`, `/apply-founder`). 표준 503 `VENTURE_EVIDENCE_UNAVAILABLE` 가드 탑재.
+  - `StockAlertController.java` (`StockAlertService.java`): 사용자 지정가 및 일일 변동폭(bps) 실시간 주식 알림 규칙 CRUD 및 알림 이벤트 히스토리 API (`/stocks/alerts`, `/events`, `POST /`, `DELETE /{id}`).
+  - `StockLeagueController.java`: 제1회 월덱 가상주식 챔피언십 리그 현황, 실시간 리더보드, 고래 트레이더 카피트레이딩 해제 및 복식부기 원장 가드(503).
+  - `StockCommunityController.java` & `PublicStockCommunityController.java` (`StockCommunityService.java`): 종목 토론방 분석글/의견 작성 및 키워드/종목별 공개 게시글 검색 API (`/board/stock-posts`, `/board/public/stock-posts`).
+- **엔드투엔드 통합 테스트 및 CI 검증**:
+  - `Phase12TradingAndDerivativesIntegrationTest.java`: 7/7 테스트 100% GREEN 통과 (파생상품 503 가드, 퀀트 503 가드, FX 상태 200/포털 503, 벤처 503, 주식 알림 비인가 401, 주식 리그 200/카피트레이딩 503, 종목 토론방 200/401).
+  - GitHub Actions CI (PR #3187): `build` (3m 52s), `runtime-check` (9m 09s), `verify / runtime-check` (7m 19s) 포함 8대 전수 검사 통과.
+  - `main` 브랜치 스쿼시 머지 완료 (`c0156af14`). 단일 브랜치 유지 정책에 따라 원격 피처 브랜치 자동 삭제 완료.
+
+### 2. 프로덕션 배포 및 Nginx 컷오버 실측
+- **Spring Boot 서비스 배포**: `moneyverse-spring-backend.service` (PID 3172739, Active) 재기동 완료.
+- **Nginx Port 4400 게이트웨이 정규식 갱신**:
+  - `fx|admin/fx|api/fx|api/v1/fx|api/admin/fx|api/v1/admin/fx|quant|api/quant|api/v1/quant|businesses|api/businesses|api/v1/businesses|stocks|board` 라우트를 `prod_spring(:4550)`으로 직접 라우팅 배정.
+  - Nginx 설정 문법 검사 통과 및 무중단 리로드(`sudo systemctl reload nginx`) 완료.
+- **실서버 엔드포인트 실측 결과**:
+  - `GET /stocks/derivatives/markets`: 503 Service Unavailable (Spring DerivativesController 직접 서빙)
+  - `GET /quant/strategies`: 503 Service Unavailable (Spring QuantController 직접 서빙)
+  - `GET /admin/fx/status`: 200 OK (Spring AdminFxController 정상 데이터 반환)
+  - `GET /fx/portal`: 503 Service Unavailable (Spring PublicFxController 직접 서빙)
+  - `GET /businesses/ventures/pitches`: 503 Service Unavailable (Spring VenturesController 직접 서빙)
+  - `GET /stocks/alerts`: 401 Unauthorized (Spring Fail-Closed 세션 보안 가드 작동)
+  - `GET /stocks/league/current`: 200 OK (Spring StockLeagueController 정상 리그 데이터 반환)
+  - `GET /board/public/stock-posts`: 200 OK (Spring PublicStockCommunityController 정상 서빙)
+  - `GET /board/stock-posts`: 405 Method Not Allowed (POST 전용 핸들러 확인)
+
+### 3. 전환율 지표 갱신
+- **Spring Boot 컨트롤러 수**: 52개 -> **60개** (신규 8개 컨트롤러 공식 가동)
+- **NestJS 컨트롤러 대비 물리적 전환율**: 58.42% -> **67.41% (60 / 89)** 달성 (전체 시스템의 3분의 2 돌파!)
+- **Node.js 잔여 컨트롤러**: 29개 (전환 대상 점진적 축소 지속)

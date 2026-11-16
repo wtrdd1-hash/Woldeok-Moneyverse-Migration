@@ -9,7 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Profile", description = "유저 프로필 및 계정 정보 API")
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping(path = {
+        "/api/v1/profile",
+        "/api/profile",
+        "/profile"
+})
 public class ProfileController {
 
     private final ProfileService profileService;
