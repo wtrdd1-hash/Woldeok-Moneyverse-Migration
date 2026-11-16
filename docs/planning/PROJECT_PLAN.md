@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.11.17.6 — Production KDIC/engagement source-truth safety bridge (OPERATION APPLIED; FEATURE HOLD)
+Owner-approved scoped fail-closed Nginx mitigation on 2026-11-17 07:55 KST. Existing Spring v1 KDIC admin endpoints anonymously returned HTTP 200 and old engagement APIs exposed invented WLD progression. Only existing internal :4400 and public port 80 default Nginx gateway scopes received a versioned KDIC prefix and exact known fake engagement-route 503 HOLD. Private backup and deterministic render/tests provide rollback. Synthetic Python tests 4/4 passed; isolated Nginx shadow server protected KDIC/engagement (503) while unrelated paths stayed 204. Initial host reload smoke ran before worker grace and failed, triggering automatic old-config rollback; corrected second run waited 4 seconds and passed. Actual public HTTPS KDIC/engagement returned 503; homepage/version 200, admin/SEO denies 401; Test homepage/version 200. No DB/ledger/WLD mutation, app process restart or Java deployment. This is a temporary protective outage of unverified finance functions, NOT actual feature restoration nor G0–G6 Spring approval. Restore verified canonical ledger and admin-session/OTP contract, isolated exact-SHA Test, backup and rollback evidence before removing bridge. [Runtime receipt](../releases/v2026.11.17.6-finance-edge-hold-prod.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
