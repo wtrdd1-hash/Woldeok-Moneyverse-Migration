@@ -8,3 +8,5 @@
 
 ## 종료 — 2026-11-17 약 08:14 KST
 정확한 공식 Test DB에 이미 GitHub에 있는 마이그레이션 335만 적용했다. 운영 DB/원장/회원 잔액 미수정. 공식 Test 백엔드 재시작 없이 KDIC 공개 포털 500→200, 관리자 비로그인 401 유지. 테스트 홈·버전 200. 실제 금융 지급·출석 기능이나 전체 Spring 공식 배포 승인으로 확장 해석 금지. 정상 로그인·OTP/CSRF 및 독립 복원 검증이 남아 있다.
+
+GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3224

@@ -21,3 +21,5 @@
 - Official Test service was NOT restarted. Direct Test backend :3100 and public https://test.easy-scraping.com/api/v1/kdic/portal changed from HTTP 500 to 200. Anonymous admin KDIC overview remained HTTP 401; official Test homepage and /api/version remained 200.
 - PostgreSQL Test moneyverse_app still has NO direct KDIC financial table SELECT; SECURITY DEFINER readers only. No ledger postings, transfers, financial payouts or Production data changes.
 - This is Test infrastructure/schema readiness, not exact candidate full application promotion. No fake production success claim; current Test may still have other release blockers and positive admin-session E2E not yet done.
+
+GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3224
