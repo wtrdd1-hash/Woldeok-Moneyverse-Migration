@@ -34,12 +34,11 @@ class AdminGovernanceTest {
     }
 
     @Test
-    @DisplayName("x-internal-token 포함하여 /api/v1/admin/controls 호출 시 200 OK와 피처 스위치 목록이 반환된다")
-    void getControlsWithInternalTokenSucceeds() throws Exception {
+    @DisplayName("내부 서비스 토큰만으로 관리자 피처 스위치에 접근할 수 없다")
+    void getControlsWithInternalTokenRequiresAdminActor() throws Exception {
         mockMvc.perform(get("/api/v1/admin/controls")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.featureSwitches").isArray());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -31,6 +31,20 @@ class AdminSecurityBoundaryRegressionTest {
     }
 
     @Test
+    void internalServiceTokenAloneCannotImpersonateAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/me")
+                        .header("x-internal-token", "test-internal-token"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void bearerInternalServiceTokenAloneCannotImpersonateAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/me")
+                        .header("Authorization", "Bearer test-internal-token"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void arbitrarySessionCookieCannotReadAdminSecurityOverview() throws Exception {
         mockMvc.perform(get("/api/v1/admin/security")
                         .cookie(new Cookie("mv_session", "arbitrary-unverified-session")))
