@@ -1,96 +1,72 @@
 package com.moneyverse.api.domain.seo.controller;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.Map;
 
+/**
+ * Fail-closed SEO migration boundary.
+ *
+ * The canonical crawler event log, authenticated Google Search Console client,
+ * admin session authorization and real IndexNow submission currently live in
+ * the retained NestJS SEO module. The internal Nginx gateway must keep SEO
+ * traffic routed there until the Java replacement has independently passed
+ * end-to-end, authenticated source-truth tests. Returning invented successful
+ * crawler counts, GSC analytics, IndexNow receipts or crawler audit records is
+ * prohibited. Do not use the frontend's internal service token as proof of a
+ * human administrator session.
+ */
 @RestController
 public class SeoController {
 
-    private static final String DEFAULT_INDEXNOW_KEY = "8f7b3c2e1a9d4f6b8c0e2a4d6f8a0b2c";
-
-    @GetMapping(path = { "/api/v1/seo/status", "/api/seo/status", "/seo/status" })
-    public ResponseEntity<Map<String, Object>> getStatus() {
-        return ResponseEntity.ok(Map.of(
-                "totalCrawls", 15420,
-                "healthyPercent", 99.8,
-                "lastAuditedAt", new Date().toInstant().toString(),
-                "topBots", List.of("Googlebot", "Bingbot", "YandexBot")
-        ));
+    private ResponseEntity<Map<String, Object>> unavailable() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
+                .header("X-Robots-Tag", "noindex, nofollow")
+                .body(Map.of(
+                        "error", "seo_source_unavailable",
+                        "source", "spring_seo_migration_hold",
+                        "indexingConfirmed", false));
     }
 
-    @GetMapping(path = { "/api/v1/seo/crawl-audit", "/api/seo/crawl-audit", "/seo/crawl-audit" })
-    public ResponseEntity<Map<String, Object>> getCrawlAudit() {
-        return ResponseEntity.ok(Map.of(
-                "timestamp", new Date().toInstant().toString(),
-                "totalUrlsChecked", 148,
-                "healthyUrls", 148,
-                "errorUrls", 0,
-                "issues", Collections.emptyList(),
-                "status", "HEALTHY"
-        ));
+    @GetMapping(path = {
+            "/api/v1/seo/status", "/api/seo/status", "/seo/status",
+            "/api/v1/seo/status/admin", "/api/seo/status/admin", "/seo/status/admin",
+            "/api/v1/seo/crawl-audit", "/api/seo/crawl-audit", "/seo/crawl-audit",
+            "/api/v1/seo/gsc/analytics", "/api/seo/gsc/analytics", "/seo/gsc/analytics",
+            "/api/v1/seo/gsc/digest-report", "/api/seo/gsc/digest-report", "/seo/gsc/digest-report",
+            "/api/v1/seo/twitter/status", "/api/seo/twitter/status", "/seo/twitter/status",
+            "/api/v1/seo/indexnow-key", "/api/seo/indexnow-key", "/seo/indexnow-key"
+    })
+    public ResponseEntity<Map<String, Object>> getSeoUnavailable() {
+        return unavailable();
     }
 
-    @PostMapping(path = { "/api/v1/seo/crawl-audit", "/api/seo/crawl-audit", "/seo/crawl-audit" })
-    public ResponseEntity<Map<String, Object>> triggerCrawlAudit() {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "SEO 감사 작업이 수동 트리거되었습니다.",
-                "triggeredAt", new Date().toInstant().toString()
-        ));
+    @PostMapping(path = {
+            "/api/v1/seo/submit", "/api/seo/submit", "/seo/submit",
+            "/api/v1/seo/crawl-audit", "/api/seo/crawl-audit", "/seo/crawl-audit",
+            "/api/v1/seo/log", "/api/seo/log", "/seo/log",
+            "/api/v1/seo/gsc/sitemap", "/api/seo/gsc/sitemap", "/seo/gsc/sitemap",
+            "/api/v1/seo/gsc/credentials", "/api/seo/gsc/credentials", "/seo/gsc/credentials",
+            "/api/v1/seo/gsc/credentials/delete", "/api/seo/gsc/credentials/delete", "/seo/gsc/credentials/delete",
+            "/api/v1/seo/gsc/digest-report", "/api/seo/gsc/digest-report", "/seo/gsc/digest-report"
+    })
+    public ResponseEntity<Map<String, Object>> rejectUnimplementedSeoWrite() {
+        return unavailable();
     }
 
-    @GetMapping(path = { "/api/v1/seo/gsc/analytics", "/api/seo/gsc/analytics", "/seo/gsc/analytics" })
-    public ResponseEntity<Map<String, Object>> getGscAnalytics() {
-        return ResponseEntity.ok(Map.of(
-                "totalClicks30d", 8450,
-                "totalImpressions30d", 142000,
-                "avgCtr30d", 5.95,
-                "avgPosition30d", 8.4,
-                "topQueries", List.of(
-                        Map.of("query", "가상 주식 모의투자", "clicks", 1240, "impressions", 15200),
-                        Map.of("query", "월덱 머니버스", "clicks", 980, "impressions", 8400)
-                )
-        ));
-    }
-
-    @PostMapping(path = { "/api/v1/seo/submit", "/api/seo/submit", "/seo/submit" })
-    public ResponseEntity<Map<String, Object>> submitUrls(@RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "submittedCount", body != null && body.containsKey("urls") ? ((List<?>) body.get("urls")).size() : 0
-        ));
-    }
-
-    @PostMapping(path = { "/api/v1/seo/log", "/api/seo/log", "/seo/log" })
-    public ResponseEntity<Map<String, Object>> logCrawlerHit(@RequestBody(required = false) Map<String, Object> body) {
-        return ResponseEntity.ok(Map.of("recorded", true));
-    }
-
-    @GetMapping(path = { "/api/v1/seo/indexnow-key", "/api/seo/indexnow-key", "/seo/indexnow-key" })
-    public ResponseEntity<Map<String, Object>> getIndexNowKeyInfo() {
-        return ResponseEntity.ok(Map.of(
-                "key", DEFAULT_INDEXNOW_KEY,
-                "keyLocation", "https://easy-scraping.com/.well-known/indexnow.key"
-        ));
-    }
-
-    @GetMapping(path = { "/api/v1/seo/twitter/status", "/api/seo/twitter/status", "/seo/twitter/status" })
-    public ResponseEntity<Map<String, Object>> getTwitterStatus() {
-        return ResponseEntity.ok(Map.of(
-                "enabled", true,
-                "monthlyQuotaRemaining", 480,
-                "lastPublishedAt", new Date().toInstant().toString()
-        ));
-    }
-
+    /** The actual key is served by the Next.js canonical origin, never a placeholder. */
     @GetMapping(path = "/.well-known/indexnow.key", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> serveIndexNowKey() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Cache-Control", "public, max-age=86400");
-        return ResponseEntity.ok().headers(headers).body(DEFAULT_INDEXNOW_KEY);
+    public ResponseEntity<String> rejectUnconfiguredIndexNowKey() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header("X-Robots-Tag", "noindex, nofollow")
+                .body("seo_source_unavailable");
     }
 }

@@ -1,0 +1,19 @@
+# SEO Completion Follow-up v2026.11.17.3 — worklog (EN)
+
+## Start record — 2026-11-17 KST
+- User explicitly approved further resolution after v2026.11.17.2 partial live Nginx SEO gateway mitigation.
+- Canonical origin/main at start: `86777fb2d5a1f8bbc680453368c0a5f04b5c7715`; based on independent unmerged PR #3206 head `cc8df91c8163dd64df14357fa27ab77cddf1e85b`. No direct main mutation, no modification of other agents' worktrees.
+- Exact current Production frontend is older 2026-11-14 release `43ab5a5110`, with `/frontend-version` `1793751800158`; Nest :4500, Spring :4550, Next :4501, internal edge :4400 are healthy.
+- v2026.11.17.2 end-to-end, read-only Production 13/13 PASS; current Nginx SEO bridge remains operational. This is baseline, NOT evidence that private authorized GSC or IndexNow submissions work.
+- New scope: deploy verified frontend truth/error copy with isolated exact-SHA candidate; remove fabricated direct Spring SEO endpoint responses without exposing admin data, preserve final 503 on source unavailability. Existing 4400 bridge stays until true authenticated Java SEO parity proven.
+- Check authority: AGENTS.md, docs/DOCUMENTATION_POLICY.md, docs/planning/PROJECT_PLAN.md and INTEGRATED_PLANNING_MASTER.md, SEO sitemap standard, previous PR #3206 worklog, test/release guard.
+- Release gate: user approves conditional zero-downtime promotion; do not claim GSC indexing from submission or use unknown credentials; don't touch finance/DB.
+
+## Midpoint record — 2026-11-17 KST
+- Direct Spring SEO responded HTTP 200 with fabricated 15,420 crawler hits, 142,000 GSC impressions, 148/148 crawler audit and false unauthenticated submission success.
+- Four new Java tests RED on old controller then GREEN on strict 503 fail-closed replacement, preserving the independently routed NestJS SEO gateway. Updated legacy Phase13 fake-success test to truthful status, isolated integration PASS.
+- Frontend SEO regression 50/50 PASS across 11 files; TypeScript typecheck PASS. `origin/main` unchanged at midpoint; no other agent worktrees touched.
+
+
+## Closeout
+PENDING.

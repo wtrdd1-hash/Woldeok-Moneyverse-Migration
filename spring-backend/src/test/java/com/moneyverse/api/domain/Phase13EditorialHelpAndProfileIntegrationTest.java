@@ -39,14 +39,14 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     }
 
     @Test
-    @DisplayName("3. SEO 상태 및 IndexNow 호스트 인증 키 서빙 200 OK")
+    @DisplayName("3. Spring SEO 이전 기간 실측 미연결 시 가짜 성공 없이 503 반환")
     void testSeoEndpoints() throws Exception {
         mockMvc.perform(get("/seo/status"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCrawls").isNumber());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.error").value("seo_source_unavailable"));
 
         mockMvc.perform(get("/.well-known/indexnow.key"))
-                .andExpect(status().isOk())
+                .andExpect(status().isServiceUnavailable())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
     }
 
