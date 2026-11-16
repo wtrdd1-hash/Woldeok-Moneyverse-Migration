@@ -7,6 +7,7 @@ import com.moneyverse.api.domain.identity.service.UserAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,27 +28,28 @@ public class SystemLogController {
 
     private final SystemLogService systemLogService;
     private final UserAuthService userAuthService;
+    private final AdminLogConsoleGate consoleGate;
 
     @Autowired
-    public SystemLogController(SystemLogService systemLogService, UserAuthService userAuthService) {
+    public SystemLogController(SystemLogService systemLogService, UserAuthService userAuthService,
+                               AdminLogConsoleGate consoleGate) {
         this.systemLogService = systemLogService;
         this.userAuthService = userAuthService;
+        this.consoleGate = consoleGate;
     }
 
     private void verifyAdmin(HttpServletRequest request) {
-        String internalToken = request.getHeader("x-internal-token");
-        if (internalToken != null && !internalToken.trim().isEmpty()) {
-            return;
-        }
-
         Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
         if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized: Sign in required");
         }
         List<String> roles = sessionOpt.get().getRoles();
-        boolean hasAdmin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r) || "ADMIN".equalsIgnoreCase(r));
+        boolean hasAdmin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r));
         if (!hasAdmin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin access required");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Superadmin required");
+        }
+        if (!consoleGate.isOpen(sessionOpt.get().getSessionId(), sessionOpt.get().getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin console session required");
         }
     }
 
@@ -55,12 +57,29 @@ public class SystemLogController {
     @GetMapping
     public ResponseEntity<SystemLogResponse> getSystemLogs(
             HttpServletRequest request,
+            HttpServletResponse servletResponse,
             @RequestParam(name = "source", required = false, defaultValue = "NGINX_ERROR") String source,
             @RequestParam(name = "lines", required = false, defaultValue = "100") int lines,
             @RequestParam(name = "filter", required = false) String filter) {
+        servletResponse.setHeader("Cache-Control", "private, no-store");
+        servletResponse.setHeader("X-Robots-Tag", "noindex, nofollow");
+        servletResponse.setHeader("Referrer-Policy", "no-referrer");
         verifyAdmin(request);
-        SystemLogSource logSource = SystemLogSource.fromString(source);
-        SystemLogResponse response = systemLogService.getLogs(logSource, lines, filter);
+        if (lines < 1 || lines > 500) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid log line count");
+        }
+        final SystemLogSource logSource;
+        try {
+            logSource = SystemLogSource.fromString(source);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown log source");
+        }
+        final SystemLogResponse response;
+        try {
+            response = systemLogService.getLogs(logSource, lines, filter);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid log filter");
+        }
         return ResponseEntity.ok(response);
     }
 }

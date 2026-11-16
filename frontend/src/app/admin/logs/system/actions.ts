@@ -1,6 +1,7 @@
 'use server';
 
 import { api } from '@/lib/api';
+import { requireAdminConsole } from '@/lib/session';
 
 export interface SystemLogData {
   source: string;
@@ -17,6 +18,11 @@ export async function fetchSystemLogsAction(
   lines: number,
   filter?: string
 ): Promise<{ success: boolean; data?: SystemLogData; error?: string }> {
+  await requireAdminConsole('/admin/logs/system');
+  if (!['NGINX_ERROR', 'NGINX_ACCESS', 'SPRING_BACKEND', 'FRONTEND'].includes(source) ||
+      !Number.isInteger(lines) || lines < 1 || lines > 500 || (filter?.length ?? 0) > 120) {
+    return { success: false, error: 'Invalid log query' };
+  }
   try {
     const query = new URLSearchParams({
       source,
@@ -27,9 +33,11 @@ export async function fetchSystemLogsAction(
     }
 
     const res = await api<SystemLogData>(`/api/v1/admin/logs/system?${query.toString()}`);
+    if (!res || !Array.isArray(res.lines) || !['OK', 'EMPTY', 'UNAVAILABLE'].includes(res.status)) {
+      return { success: false, error: 'Log source returned an invalid response' };
+    }
     return { success: true, data: res };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : '로그 조회 중 오류가 발생했습니다.';
-    return { success: false, error: message };
+    return { success: false, error: 'Log source is unavailable' };
   }
 }

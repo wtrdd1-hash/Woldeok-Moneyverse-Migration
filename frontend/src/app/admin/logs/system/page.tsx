@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
+import { api } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
@@ -18,9 +18,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminSystemLogsPage() {
-  await requireAdminConsole();
+  await requireAdminConsole('/admin/logs/system');
 
-  const initialData = await apiOrNull<SystemLogData>('/api/v1/admin/logs/system?source=NGINX_ERROR&lines=100');
+  const initialData = await api<SystemLogData>('/api/v1/admin/logs/system?source=NGINX_ERROR&lines=100')
+    .catch(() => null);
 
   const fallbackData: SystemLogData = {
     source: 'nginx-error',
@@ -29,7 +30,7 @@ export default async function AdminSystemLogsPage() {
     totalCount: 0,
     truncated: false,
     timestamp: new Date().toISOString(),
-    status: 'EMPTY',
+    status: 'UNAVAILABLE',
   };
 
   return (

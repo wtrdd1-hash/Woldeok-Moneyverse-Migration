@@ -27,6 +27,6 @@ public enum SystemLogSource {
                 return s;
             }
         }
-        return NGINX_ERROR;
+        throw new IllegalArgumentException("Unknown log source");
     }
 }

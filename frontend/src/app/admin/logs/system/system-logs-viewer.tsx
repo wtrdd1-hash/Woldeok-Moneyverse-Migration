@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition, useCallback } from 'react';
+import { useState, useEffect, useTransition, useCallback, useRef } from 'react';
 import {
   Terminal,
   RefreshCw,
@@ -27,7 +27,7 @@ const SOURCES = [
   { id: 'NGINX_ERROR', label: 'Nginx 오류 로그', icon: AlertTriangle, desc: '/var/log/nginx/error.log' },
   { id: 'NGINX_ACCESS', label: 'Nginx 액세스 로그', icon: Globe, desc: '/var/log/nginx/access.log' },
   { id: 'SPRING_BACKEND', label: 'Spring Boot 백엔드', icon: Server, desc: 'moneyverse-spring-backend (:4550)' },
-  { id: 'FRONTEND', label: 'Next.js 프론트엔드', icon: Radio, desc: 'moneyverse-frontend (:4501)' },
+  { id: 'FRONTEND', label: 'Next.js 프론트엔드', icon: Radio, desc: 'moneyverse-release-v1546-frontend (:4501)' },
 ] as const;
 
 const LINE_OPTIONS = [50, 100, 200, 500] as const;
@@ -41,14 +41,22 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
   const [logData, setLogData] = useState<SystemLogData>(initialData);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const latestRequestRef = useRef(0);
 
   const loadLogs = useCallback((targetSource: string, targetLines: number, targetFilter: string) => {
+    const requestId = ++latestRequestRef.current;
     startTransition(async () => {
       const res = await fetchSystemLogsAction(targetSource, targetLines, targetFilter);
+      if (requestId !== latestRequestRef.current) return;
       if (res.success && res.data) {
         setLogData(res.data);
         setErrorMsg(null);
       } else {
+        setLogData({
+          source: targetSource.toLowerCase(), sourceName: targetSource,
+          lines: [], totalCount: 0, truncated: false,
+          timestamp: new Date().toISOString(), status: 'UNAVAILABLE',
+        });
         setErrorMsg(res.error ?? '로그 조회 실패');
       }
     });
@@ -116,6 +124,10 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        로그는 읽기 전용이며, 표시·복사·저장 전에 알려진 인증정보·식별자·URL 매개변수를 가립니다.
+        결과가 비어 있어도 서비스가 정상이라는 뜻은 아닙니다.
+      </p>
       {/* 4대 로그 소스 선택 탭 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {SOURCES.map((s) => {
@@ -154,7 +166,7 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
                 {SOURCES.find((s) => s.id === source)?.label ?? source}
               </CardTitle>
               <Badge variant="outline" className="font-mono text-xs">
-                {logData.totalCount}줄
+                {logData.status === 'UNAVAILABLE' ? '연결 실패' : `${logData.totalCount}줄`}
               </Badge>
               {logData.timestamp && (
                 <span className="text-xs text-muted-foreground">
@@ -171,6 +183,7 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
                     type="text"
                     placeholder="로그 필터 검색..."
                     value={filterText}
+                    maxLength={120}
                     onChange={(e) => setFilterText(e.target.value)}
                     className="h-8 w-44 pl-8 text-xs font-mono"
                   />
@@ -246,9 +259,9 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
         </CardHeader>
 
         <CardContent className="p-0">
-          {errorMsg && (
+          {(errorMsg || logData.status === 'UNAVAILABLE') && (
             <div className="p-4 bg-destructive/10 text-destructive text-xs border-b border-destructive/20">
-              ⚠️ {errorMsg}
+              ⚠️ {errorMsg ?? '로그 원본을 확인할 수 없습니다. 현재 상태를 정상으로 판단하지 마세요.'}
             </div>
           )}
 
@@ -266,9 +279,9 @@ export function SystemLogsViewer({ initialData }: SystemLogsViewerProps) {
                 <Terminal className="h-8 w-8 text-zinc-600" />
                 <p className="text-sm">기록된 로그 라인이 없습니다.</p>
                 <p className="text-xs text-zinc-600">
-                  {source === 'NGINX_ERROR'
-                    ? '현재 Nginx 에러가 0건(Zero Error)으로 매우 정상적인 상태입니다.'
-                    : '조건에 일치하는 로그 항목이 없습니다.'}
+                  {logData.status === 'UNAVAILABLE'
+                    ? '로그 수집에 실패했습니다. 서비스 정상 여부는 확인되지 않았습니다.'
+                    : '선택한 구간 또는 검색 조건에 일치하는 로그가 없습니다.'}
                 </p>
               </div>
             ) : (

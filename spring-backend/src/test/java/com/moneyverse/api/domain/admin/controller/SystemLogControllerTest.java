@@ -28,27 +28,20 @@ public class SystemLogControllerTest {
     }
 
     @Test
-    @DisplayName("내부 게이트웨이 토큰(x-internal-token) 보유 시 200 OK 및 로그 DTO 응답 통과")
-    void testInternalTokenAccess() throws Exception {
+    @DisplayName("Forged nonempty internal header never grants log access")
+    void forgedInternalHeaderIsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/admin/logs/system")
                         .param("source", "NGINX_ERROR")
-                        .param("lines", "50")
-                        .header("x-internal-token", "gateway-internal-secret-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("nginx-error"))
-                .andExpect(jsonPath("$.status").exists())
-                .andExpect(jsonPath("$.lines").isArray());
+                        .header("x-internal-token", "forged-not-a-valid-service-credential"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Spring Boot 백엔드 소스 로그 조회 검증 (200 OK)")
-    void testSpringBootSourceLogs() throws Exception {
+    @DisplayName("Anonymous callers cannot select alternate log sources")
+    void anonymousCannotReadSpringLogs() throws Exception {
         mockMvc.perform(get("/api/v1/admin/logs/system")
                         .param("source", "SPRING_BACKEND")
-                        .param("lines", "30")
-                        .header("x-internal-token", "gateway-internal-secret-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.source").value("spring-backend"))
-                .andExpect(jsonPath("$.lines").isArray());
+                        .header("x-internal-token", "forged-not-a-valid-service-credential"))
+                .andExpect(status().isUnauthorized());
     }
 }

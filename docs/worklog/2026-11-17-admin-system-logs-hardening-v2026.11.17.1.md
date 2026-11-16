@@ -11,14 +11,14 @@ Status: **BEFORE WORK** — 2026-11-17 KST. Independent task branch: `fix/admin-
 - Other security task branches are active: do not edit their worktrees or integrate into main without cross-checking.
 
 ## Plan
-- [ ] Add explicit authenticated superadmin authorization on every log request, including Next.js server actions; reject arbitrary internal headers.
-- [ ] Bound reads and filters; mask secrets and personal data; distinguish source failures from verified empty logs.
-- [ ] Use the observed frontend service as the log source and make source configuration explicit.
-- [ ] Add backend/frontend focused regression tests and run available build/lint/test gates.
+- [x] Add explicit authenticated superadmin authorization on every log request, including Next.js server actions; reject arbitrary internal headers.
+- [x] Bound reads and filters; mask secrets and personal data; distinguish source failures from verified empty logs.
+- [x] Use the observed frontend service as the log source and make source configuration explicit.
+- [x] Add backend/frontend focused regression tests and run available build/lint/test gates.
 - [ ] Re-fetch origin/main mid-work, record deltas and conflicts, push isolated commits, open a PR.
 - [ ] Verify official Test exact candidate, actual HTTP auth rejection, and rollback readiness before any production promotion. Hold production if any gate remains unverified.
 
 ## Checkpoints
 - BEFORE WORK: baseline and risks captured; no runtime, DB, Nginx or production mutations.
-- IN PROGRESS: pending.
+- IN PROGRESS (2026-11-17 00:49 KST): live four source readability verified without emitting raw log text; internal Nginx gateway falls back to Spring; source API not present in currently running Spring jar. Focused Spring security tests 14/14 pass with Java25 ByteBuddy experimental flag, Spring bootJar PASS; frontend server action 3/3 pass, typecheck PASS. Initial 1024MiB Next build OOM; retry with bounded 2304MiB ongoing. GitHub/internal changelogs created, main re-fetched unchanged `86777fb`. No production or official Test mutation.
 - FINISHED: pending.
