@@ -23,3 +23,7 @@
 - This is Test infrastructure/schema readiness, not exact candidate full application promotion. No fake production success claim; current Test may still have other release blockers and positive admin-session E2E not yet done.
 
 GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3224
+
+## POST-CLOSE STORAGE HARDENING
+- Actual Test snapshot encrypted in root-only file actual-test-baseline.dump.enc, ciphertext SHA e9036164e02d4ec301da5bb655a846fdd839c0a3a4286cfe55ca5193eab6c751, plaintext original SHA b140de45a7c16e5c8aa425fc54fbce2b78fa3dc2c5ac81ec68732851f19bd419 verified by full-stream decryption. Earlier default CI Test snapshot likewise encrypted, SHA ffcb60d8a3f4e59681abddc27ed62ae591df80d93233523f93442a3805abaa24. Restricted raw dump files removed, encrypted copies pass SHA256 and PostgreSQL TOC parser.
+- Two temporary QA clones dropped only after checking zero active connections. Official Test DB still serves KDIC portal 200, Production public portal 200, admin financial routes remain held 503.

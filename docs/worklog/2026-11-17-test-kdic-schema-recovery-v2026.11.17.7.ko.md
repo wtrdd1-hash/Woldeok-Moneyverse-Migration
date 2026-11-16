@@ -10,3 +10,6 @@
 정확한 공식 Test DB에 이미 GitHub에 있는 마이그레이션 335만 적용했다. 운영 DB/원장/회원 잔액 미수정. 공식 Test 백엔드 재시작 없이 KDIC 공개 포털 500→200, 관리자 비로그인 401 유지. 테스트 홈·버전 200. 실제 금융 지급·출석 기능이나 전체 Spring 공식 배포 승인으로 확장 해석 금지. 정상 로그인·OTP/CSRF 및 독립 복원 검증이 남아 있다.
 
 GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3224
+
+## 사후 저장 보안
+실제 Test DB 스냅샷은 root 0600 암호화 파일 actual-test-baseline.dump.enc로 보존. 암호문 SHA e9036164e02d4ec301da5bb655a846fdd839c0a3a4286cfe55ca5193eab6c751, 원문 SHA b140de45a7c16e5c8aa425fc54fbce2b78fa3dc2c5ac81ec68732851f19bd419 복호화 대조 완료. 기본 CI 스냅샷도 별도 암호화, 원본 평문 덤프 파일 제거. 임시 테스트 복제 DB 2개는 연결 0건 확인 후 삭제. 공식 Test DB 유지, KDIC 포털 Test/Prod 200 확인.
