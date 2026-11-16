@@ -26,6 +26,11 @@ export async function verifySeoOperator(): Promise<NextResponse | null> {
     if (security.consoleSession?.state !== 'open') {
       return seoResponse({ success: false, error: 'console_locked' }, 403);
     }
+    // The transitional Spring admin/security endpoint can trust an internal
+    // service token. It authenticates the Next process, not the user. A real
+    // human admin must additionally pass Nest's verified cookie/role/console
+    // guards before any SEO dashboard read or external search-engine write.
+    await api('/api/v1/seo/status/admin');
     return null;
   } catch (error) {
     const status =

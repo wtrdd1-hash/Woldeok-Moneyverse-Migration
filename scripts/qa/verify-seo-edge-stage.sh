@@ -52,7 +52,7 @@ import sys
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 base='http://127.0.0.1:'+sys.argv[1]
-for path in ('/admin/seo', '/admin/seo-audit', '/api/admin/seo-audit'):
+for path in ('/admin/seo', '/admin/seo-audit', '/api/admin/seo-audit', '/api/admin/seo/indexing-submit', '/api/admin/seo/gsc-sitemap-submit', '/api/indexnow'):
     for method in ('GET', 'POST'):
         for cookie, expected in (('',401), ('stage_operator=1',200), ('stage_unavailable=1',503)):
             req=Request(base+path, method=method, headers={'Cookie':cookie, 'Host':'easy-scraping.com'})
@@ -60,5 +60,5 @@ for path in ('/admin/seo', '/admin/seo-audit', '/api/admin/seo-audit'):
                 with urlopen(req,timeout=4) as res: status=res.status
             except HTTPError as e: status=e.code
             assert status==expected,(path,method,cookie,status,expected)
-print('PASS=isolated edge auth_request denies 6 anonymous GET/POST and proxies 6 mock-authorized cases')
+print('PASS=isolated edge auth_request denies 12 anonymous GET/POST, proxies 12 simulated authorized, fails closed on 12 upstream errors')
 PY

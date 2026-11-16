@@ -17,3 +17,9 @@
 
 ## Closeout
 PENDING.
+
+## Security escalation / second midpoint
+- New finding: stale direct Next `/api/indexnow` accepted anonymous bulk requests, while helper `verifySeoOperator` trusted Spring's internal service token for `/api/admin/seo/indexing-submit` and `/api/admin/seo/gsc-sitemap-submit`.
+- Five additional regression tests RED before fix, GREEN after adding trusted Origin and independently Nest session/role guard to direct IndexNow and SEO operator helper. No external POST was executed.
+- Independent edge Nginx stage 12 anonymous GET/POST denials, 12 simulated role-authorized passes, 12 authority-unavailable fail-closed cases passed. Promoted edge-only protection for `/api/admin/seo/` and `/api/indexnow` without restarting Next or Spring; actual anonymous GETs returned 401 across four additional paths, baseline 13/13 PASS. Rollback: `/srv/moneyverse-data/reports/seo-completion-v2026.11.17.3/seo-edge-auth-before-v3.conf`.
+- `origin/main` advanced mid-work from `86777fb2...` to `8b3e3aca...` in independent backup-only PR #3208. Compared changed files; none overlap SEO runtime or frontend; do not reset or overwrite main/other agents.

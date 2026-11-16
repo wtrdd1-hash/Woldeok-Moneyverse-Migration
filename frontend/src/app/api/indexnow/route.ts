@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { verifySeoOperator, verifySeoWriteOrigin } from '@/lib/admin-seo-authority';
 import type { NextRequest } from 'next/server';
 import { submitToIndexNow, INDEXNOW_HOST } from '@/lib/indexnow';
 import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
@@ -6,6 +7,13 @@ import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 export async function POST(req: NextRequest) {
+  // This endpoint historically allowed anonymous callers to trigger an
+  // outbound bulk submission. Check both same-origin and the verified human
+  // Nest administrator session before parsing payload or sending a request.
+  const crossOrigin = verifySeoWriteOrigin(req);
+  if (crossOrigin) return crossOrigin;
+  const denied = await verifySeoOperator();
+  if (denied) return denied;
   try {
     const body = await req.json().catch(() => ({}));
     let targetUrls: string[] = [];
@@ -45,6 +53,6 @@ export async function GET() {
     service: 'Moneyverse IndexNow Gateway',
     host: INDEXNOW_HOST,
     totalPseoUrls: ALL_PSEO_POPULAR_SLUGS.length,
-    status: 'operational',
+    status: 'configuration_only',
   });
 }

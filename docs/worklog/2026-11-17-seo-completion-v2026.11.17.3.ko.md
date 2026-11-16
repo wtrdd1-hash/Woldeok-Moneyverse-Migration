@@ -18,3 +18,9 @@
 
 ## 종료 기록
 대기 중.
+
+## 긴급 보안 추가 발견 / 두 번째 중간 기록
+- 구 운영 Next `/api/indexnow`에서 익명 대량 제출을 허용하며 `verifySeoOperator`가 `/api/admin/seo/indexing-submit`, GSC 제출에 Spring 내부 서비스 토큰만 검사하는 문제 확인.
+- 추가 보안 테스트 5건 수정 전 RED, 수정 후 GREEN. 실제 외부 검색엔진 POST 없이 Origin과 Nest 사용자 세션/권한을 필수화.
+- 독립 Nginx 에지 시험: 익명 GET/POST 12건 거부, 모의 정상 운영자 12건 통과, 인증 서버 장애 12건 실패 차단 PASS. 운영에서는 `/api/admin/seo/`, `/api/indexnow` 보호 규칙만 무중단 반영, 4개 신규 경로 익명 401 및 기존 운영 13/13 PASS. 이전 에지 롤백 파일 `/srv/moneyverse-data/reports/seo-completion-v2026.11.17.3/seo-edge-auth-before-v3.conf`.
+- 작업 중 `origin/main`이 `86777fb2...`에서 `8b3e3aca...`(백업 전용 PR #3208)으로 변경. 변경 파일 비교 결과 SEO 프론트/런타임 중복 없음, 타 에이전트 작업 불변.
