@@ -1,6 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.17.3 — SEO 전용 운영 복구 (실제 관측 / 기획-운영 드리프트, 전체 승격 HOLD 유지)
+사용자 승인에 따라 SEO 전용 Nginx/Next.js 긴급 복구를 운영 반영했다. `/admin/seo`, `/admin/seo-audit`, `/api/admin/seo-audit`, `/api/admin/seo/*`, `/api/indexnow`는 소스 SHA `20daef3f6f254f6a0e5b085756a08d4d0d874c9c`의 독립 프론트 4521로 전달하며 홈페이지/기타 기능은 기존 프론트 4501을 유지한다. 실제 SEO 데이터 API는 기존 4400 게이트웨이로 인증된 NestJS 4500을 이용한다. 비인증 401, 개인정보 캐시 금지/noindex, 신규·구 정적 리소스 호환 검증. Spring SEO 가짜 수치/허위 접수 제거 후 503 반환하는 Java 수정은 **브랜치 전용이며 운영 Spring 4550에 미반영**. 운영 읽기전용 독립 QA 26/26, SEO 프론트 테스트 61/61, TypeScript·정확한 SHA Next 빌드, Java 개별 테스트 통과. 그러나 실제 로그인 관리자 E2E, GSC 속성·사이트맵 접수, IndexNow 외부 응답 증거는 미검증. Nest의 수집량은 최근 500건 로그 한도에 따른 표본이며 완전한 24시간 총량이 아니다. 전사적 Test/금전/백업 복구/G0–G6 승인 조건은 계속 **RELEASE HOLD**. [작업 기록](../worklog/2026-11-17-seo-completion-v2026.11.17.3.ko.md) / [EN](../worklog/2026-11-17-seo-completion-v2026.11.17.3.md). 기존 기획·과거 기록 그대로 보존.
+
 ## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 후속 초안 (운영 변경 없음)
 미병합 v2026.11.13.1 설계를 재검토한 보충 기획이며 기존 승인된 금융·블로그·인증 규칙을 임의 대체하지 않는다. 장별 위험 R01~R10과 G0~G6 검증/중단 조건, 경로/스케줄/봇/클라이언트별 단독 소유권, DB fence 금융 기록자, 기존 세션/OTP/Android/Socket.IO 호환, 불변 빌드 아티팩트 공급망·복구 기준을 명시했다. [한국어 상세](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [한국어 아티팩트](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md); [후속 PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). 실제 Java 코드/Test/운영 검증 없음.
 
