@@ -20,3 +20,5 @@
 - 재시작한 일반 앱 서버 없음. 운영/테스트 공개 버전 API 200, Spring 헬스 HTTP 200 유지.
 - 회원 WLD·DB 원장 수정, 금융 트랜잭션, 운영 웹앱 승격 없음.
 - **남은 과제:** 새 아카이브 전체 앱 독립 복원 실증, 외부 불변 암호화 사본 검증, 반복 장기 안정성 확인. 이 작업은 백업 검증기 복구이지 전체 DR 인증이 아니다.
+
+**GitHub PR / 검토 기록:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3220

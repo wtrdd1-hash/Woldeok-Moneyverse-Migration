@@ -29,3 +29,5 @@
 - Synthetic three integrity tests PASS; original candidate live read failed due SIGPIPE 141 with large archive; fixed tar full-drain option and downstream pg_restore stream drain.
 - After patch, synthetic integrity tests 3/3 PASS and live 06:20 existing encrypted archive full checksum/manifest/dump TOC/photo zstd validation PASS with no plaintext disk extraction.
 - Script syntax bash -n PASS; installing only host verifier with restricted rollback copy next.
+
+**GitHub PR / 검토 기록:** https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3220
