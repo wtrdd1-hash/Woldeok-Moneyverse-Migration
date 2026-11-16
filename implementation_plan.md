@@ -4983,3 +4983,15 @@ graph TD
 - **프론트엔드 엔드포인트 실측**: `https://easy-scraping.com/` -> `HTTP/2 200 OK`
 - **백엔드 엔진 헤더 실측**: `x-backend-engine: Spring-Boot-3.3-Enterprise` 실시간 반환 확인.
 - **Nginx 무결성**: 컷오버 이후 현재까지 에러 로그 0건(Error-Zero) 유지.
+
+---
+## 🖥️ [v53 Specification] 관리자 실시간 시스템/런타임 로그 관제 타워 구축
+### 1. 요구사항 및 아키텍처
+- **목적**: Nginx 오류/액세스 로그, Spring Boot 백엔드 로그, Next.js 프론트엔드 SSR 로그를 관리자 페이지에서 실시간 조회·필터링·검색할 수 있는 통합 관제 서피스 구축.
+- **백엔드 엔드포인트**: `GET /api/v1/admin/logs/system` (`SystemLogController.java`)
+  - 소스 열거형: `NGINX_ERROR`, `NGINX_ACCESS`, `SPRING_BACKEND`, `FRONTEND`
+  - 파라미터: `lines` (10~500줄 클램핑), `filter` (Java 메모리 안전 필터링)
+  - 보안: `SUPERADMIN` / `ADMIN` 세션 검증 필수 (Fail-Closed)
+- **프론트엔드 UI**: `/admin/logs/system` (Next.js App Router)
+  - 서브 내비게이션 탭 통합: `🖥️ 시스템 런타임 로그`
+  - 4개 소스별 다크 터미널 뷰어, 실시간 5초 자동 새로고침, 에러/경고 구문 강조, 로그 다운로드 및 클립보드 복사.
