@@ -18,7 +18,10 @@ export async function fetchSystemLogsAction(
   lines: number,
   filter?: string
 ): Promise<{ success: boolean; data?: SystemLogData; error?: string }> {
-  await requireAdminConsole('/admin/logs/system');
+  const consoleSession = await requireAdminConsole('/admin/logs/system');
+  if (!consoleSession.roles.some((role) => role.toLowerCase() === 'superadmin')) {
+    return { success: false, error: '최고관리자 권한이 필요합니다.' };
+  }
   if (!['NGINX_ERROR', 'NGINX_ACCESS', 'SPRING_BACKEND', 'FRONTEND'].includes(source) ||
       !Number.isInteger(lines) || lines < 1 || lines > 500 || (filter?.length ?? 0) > 120) {
     return { success: false, error: 'Invalid log query' };
@@ -37,7 +40,7 @@ export async function fetchSystemLogsAction(
       return { success: false, error: 'Log source returned an invalid response' };
     }
     return { success: true, data: res };
-  } catch (err: unknown) {
+  } catch {
     return { success: false, error: 'Log source is unavailable' };
   }
 }

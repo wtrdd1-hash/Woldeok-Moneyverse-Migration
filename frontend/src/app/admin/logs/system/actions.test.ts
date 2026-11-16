@@ -6,7 +6,7 @@ vi.mock('@/lib/session', () => ({ requireAdminConsole: mocks.requireAdminConsole
 import { fetchSystemLogsAction } from './actions';
 
 describe('system log action authorization', () => {
-  beforeEach(() => { vi.clearAllMocks(); mocks.requireAdminConsole.mockResolvedValue({}); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.requireAdminConsole.mockResolvedValue({ roles: ['superadmin'] }); });
   it('does not call backend when admin console verification fails', async () => {
     mocks.requireAdminConsole.mockRejectedValue(new Error('DENIED'));
     await expect(fetchSystemLogsAction('NGINX_ERROR', 100)).rejects.toThrow('DENIED');
@@ -17,6 +17,12 @@ describe('system log action authorization', () => {
     await fetchSystemLogsAction('SPRING_BACKEND', 50);
     expect(mocks.requireAdminConsole).toHaveBeenCalledWith('/admin/logs/system');
     expect(mocks.api).toHaveBeenCalledOnce();
+  });
+  it('rejects open-console users who are not superadmin', async () => {
+    mocks.requireAdminConsole.mockResolvedValue({ roles: ['admin'] });
+    const result = await fetchSystemLogsAction('SPRING_BACKEND', 100);
+    expect(result.success).toBe(false);
+    expect(mocks.api).not.toHaveBeenCalled();
   });
   it('rejects unknown sources without contacting backend', async () => {
     const result = await fetchSystemLogsAction('../etc/passwd', 50);

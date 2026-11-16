@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { api } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
+import { redirect } from 'next/navigation';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
 import { LogsSubNav } from '../logs-sub-nav';
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminSystemLogsPage() {
-  await requireAdminConsole('/admin/logs/system');
+  const consoleSession = await requireAdminConsole('/admin/logs/system');
+  if (!consoleSession.roles.some((role) => role.toLowerCase() === 'superadmin')) {
+    redirect('/admin');
+  }
 
   const initialData = await api<SystemLogData>('/api/v1/admin/logs/system?source=NGINX_ERROR&lines=100')
     .catch(() => null);

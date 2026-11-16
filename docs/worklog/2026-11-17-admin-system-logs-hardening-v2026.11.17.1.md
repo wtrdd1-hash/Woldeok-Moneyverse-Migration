@@ -15,10 +15,10 @@ Status: **BEFORE WORK** — 2026-11-17 KST. Independent task branch: `fix/admin-
 - [x] Bound reads and filters; mask secrets and personal data; distinguish source failures from verified empty logs.
 - [x] Use the observed frontend service as the log source and make source configuration explicit.
 - [x] Add backend/frontend focused regression tests and run available build/lint/test gates.
-- [ ] Re-fetch origin/main mid-work, record deltas and conflicts, push isolated commits, open a PR.
+- [x] Re-fetch origin/main mid-work, record deltas and conflicts, push isolated commits, open a PR.
 - [ ] Verify official Test exact candidate, actual HTTP auth rejection, and rollback readiness before any production promotion. Hold production if any gate remains unverified.
 
 ## Checkpoints
 - BEFORE WORK: baseline and risks captured; no runtime, DB, Nginx or production mutations.
 - IN PROGRESS (2026-11-17 00:49 KST): live four source readability verified without emitting raw log text; internal Nginx gateway falls back to Spring; source API not present in currently running Spring jar. Focused Spring security tests 14/14 pass with Java25 ByteBuddy experimental flag, Spring bootJar PASS; frontend server action 3/3 pass, typecheck PASS. Initial 1024MiB Next build OOM; retry with bounded 2304MiB ongoing. GitHub/internal changelogs created, main re-fetched unchanged `86777fb`. No production or official Test mutation.
-- FINISHED: pending.
+- FINISHED (candidate, 2026-11-17 KST): Security and UI changes committed to an isolated task branch, no main merge or production release. Full set of focused Spring tests, isolated embedded HTTP negative probes, frontend 4 tests, TypeScript, warning-free targeted ESLint, bootJar and Next production build passed. Base origin/main was re-fetched and unchanged `86777fb`. Official Test backend unit is **inactive**, official Test log page returned 404; no exact candidate SHA deployment, authenticated E2E nor independent rollback validation. Production RELEASE HOLD. Work output is PR-ready, not live.

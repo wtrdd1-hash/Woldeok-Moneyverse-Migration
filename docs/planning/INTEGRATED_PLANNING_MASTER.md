@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
+## v2026.11.17.1 — Admin runtime logs read-only security overlay (ISOLATED CANDIDATE / RELEASE HOLD)
+PR #3201 already merged a four-source log viewer on main `86777fb`; observed Production and official Test log pages returned HTTP 404 because active artifacts have not promoted that code. Dedicated branch `fix/admin-system-logs-hardening-v2026.11.17.1` adds authenticated SUPERADMIN + open console session verification at the Spring boundary, server-action authorization, bounded/masked logs, fail-closed status and HTTP negative tests. No DB/financial/Nginx/Production mutation. Exact-SHA official Test, positive authenticated E2E, independent rollback and release gates remain required before production. [EN worklog](../worklog/2026-11-17-admin-system-logs-hardening-v2026.11.17.1.md) / [KO](../worklog/2026-11-17-admin-system-logs-hardening-v2026.11.17.1.ko.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)
