@@ -5,3 +5,5 @@
 - **Security:** No challenge validation bypass, no credential logging, no change to general authentication precedence or database. OAuth state remains bound to the authoritative DB challenge and session. Cookie expiry is host-only, Secure, HttpOnly, SameSite=Lax.
 - **Evidence:** Public anonymous challenge reproduction; 4 direct node:test regressions and 4 Next handler integration tests passed; frontend TypeScript and full build passed. Production/Test deployment evidence is recorded separately in the task log.
 - **Limitation:** No real consenting Discord account authorization has been executed; cannot claim a verified completed provider sign-in.
+
+- **Runtime compatibility hardening:** Next's HTTP cookie serialization may omit `Max-Age=0` when expiring a cookie. Expiration now explicitly sets the fixed epoch `Expires` date as well; both attributes are regression tested. An empty cookie without expiry is NOT considered a valid cleanup.

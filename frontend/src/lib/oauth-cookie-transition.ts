@@ -6,8 +6,10 @@
  * This scoped transition preserves state binding: it does not relax OAuth
  * challenge verification or change the backend's global cookie precedence.
  */
-const CLEAR_HOST_SESSION = '__Host-mv_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
-const CLEAR_LEGACY_SESSION = 'mv_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
+const CLEAR_HOST_SESSION =
+  '__Host-mv_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
+const CLEAR_LEGACY_SESSION =
+  'mv_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
 
 function issuedSession(setCookie: readonly string[], name: string): boolean {
   return setCookie.some((header) => {

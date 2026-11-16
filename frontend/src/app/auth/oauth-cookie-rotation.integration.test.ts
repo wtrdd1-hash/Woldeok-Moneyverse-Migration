@@ -59,7 +59,11 @@ describe('OAuth cookie compatibility across Spring and Nest', () => {
     const cookies = response.headers.getSetCookie();
     expect(cookies).toContain(springCookie);
     expect(cookies).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^__Host-mv_session=;.*Max-Age=0/)]),
+      expect.arrayContaining([
+        expect.stringMatching(
+          /^__Host-mv_session=;.*Expires=Thu, 01 Jan 1970 00:00:00 GMT.*Max-Age=0/,
+        ),
+      ]),
     );
   });
 
@@ -85,7 +89,10 @@ describe('OAuth cookie compatibility across Spring and Nest', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe('https://easy-scraping.com/?account=signed-in');
     expect(response.headers.getSetCookie()).toEqual(
-      expect.arrayContaining([nestCookie, expect.stringMatching(/^mv_session=;.*Max-Age=0/)]),
+      expect.arrayContaining([
+        nestCookie,
+        expect.stringMatching(/^mv_session=;.*Expires=Thu, 01 Jan 1970 00:00:00 GMT.*Max-Age=0/),
+      ]),
     );
   });
 

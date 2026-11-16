@@ -13,6 +13,7 @@ test('oauth login start invalidates preferred stale host cookie after Spring iss
   assert.equal(cleared.length, 1);
   assert.match(cleared[0], /^__Host-mv_session=;/);
   assert.match(cleared[0], /Max-Age=0/);
+  assert.match(cleared[0], /Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
   assert.match(cleared[0], /Secure/);
   assert.match(cleared[0], /HttpOnly/);
   assert.match(cleared[0], /SameSite=Lax/);
@@ -30,6 +31,7 @@ test('successful Discord/Google sign-in clears stale Spring cookie when Node set
   assert.equal(cleared.length, 1);
   assert.match(cleared[0], /^mv_session=;/);
   assert.match(cleared[0], /Max-Age=0/);
+  assert.match(cleared[0], /Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
   assert.match(cleared[0], /Secure/);
   assert.match(cleared[0], /SameSite=Lax/);
 });

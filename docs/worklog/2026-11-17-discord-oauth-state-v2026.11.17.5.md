@@ -12,3 +12,9 @@
 - Fresh anonymous-only public HTTPS callback with `state` and provider-denied result correctly returned `oauth_cancelled`; a crafted, **valid** stale host cookie alongside a new Spring cookie returned `oauth_state` reproducibly. No real Discord user login or OAuth code was used.
 - Kept local/register Spring auth, global Nest session priorities, and challenge binding unchanged. Scoped OAuth response changes: clear superseded host cookie at anonymous OAuth start when Spring creates a legacy session; clear superseded legacy cookie only upon real successful Nest sign-in.
 - Test-first red: node:test failed to load the not-yet-created transition module.
+
+## Midpoint 2 / Actual HTTP canary discovery
+- Isolated Next server on loopback port 49117 served `/login` and `/status` 200 and completed anonymous provider-denial callback with a single session; direct `/health` was 404 because it is an edge/API health endpoint, not a Next route.
+- However real Next HTTP output transformed the `Set-Cookie` empty deletion header: its `Max-Age=0` was lost, which would leave a new empty cookie and could cause a 401 on return. This was not captured by handler-only tests; production remained unchanged.
+- Added a hard `Expires=Thu, 01 Jan 1970 00:00:00 GMT` to both narrowly scoped deletion cookies, with tests requiring both `Expires` and `Max-Age`. New RED 2 failures, GREEN 8/8.
+- Rebuild and exact-source candidate server HTTP validation are mandatory before promotion. All other linked session flows are unaffected.
