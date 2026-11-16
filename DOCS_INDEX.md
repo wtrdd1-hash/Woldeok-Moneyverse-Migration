@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.17.0657 — AdSense live QA (Test ads-off regression P0; no release)
+- [Findings EN](docs/findings/2026-11-17-live-advertising-audit-v2026.11.17.0657.md) / [KO](docs/findings/2026-11-17-live-advertising-audit-v2026.11.17.0657.ko.md) · [Worklog EN](docs/worklog/2026-11-17-ads-live-v2026.11.17.0657.md) / [KO](docs/worklog/2026-11-17-ads-live-v2026.11.17.0657.ko.md) · [Issue #3217](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3217). Production ad-slot script/DOM present on four reviewed content routes, Test leaks advertising code despite ads-off contract, homepage slot absent; Google ad fill and revenue not verified. Read-only QA; no runtime change.
+
 ## v2026.11.17.1 — Stock admin security bridge (Production Nginx hotfix / authenticated E2E pending)
 - [Release EN](docs/releases/v2026.11.17.1-stock-admin-auth-prod.md) / [KO](docs/releases/v2026.11.17.1-stock-admin-auth-prod.ko.md) · [Worklog EN](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.md) / [KO](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.ko.md) · [Internal EN](docs/updates/v2026.11.17.1-stock-admin-auth-internal.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1-stock-admin-auth-github.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-github.ko.md). Spring anonymous/transport-only admin console gate had HTTP 200 while protected stock API denied real access. Isolated localhost and public-edge Nginx bridges route security/identity to Nest; Test Nginx/API negative gates passed; signed-in admin E2E is NOT certified.
 
