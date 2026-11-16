@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.11.17.2 — Recovery of failed encrypted backup verifier
+Owner-directed runtime repair after merged legacy cron fix #3208. At 06:20 KST, actual six-hour backup failed: /tmp tmpfs extraction exhaustion. Verified new stream-only host verifier against encrypted production-linked archive and synthetic integrity/negative tests, replaced only root-owned verifier with private rollback and restarted only the one-shot backup service. At 07:19 KST the encrypted backup succeeded and timer remained active. No ledger changes or application deployment. Existing backup retention and independent full restore/offhost immutability gates remain authoritative. EN/KO operational receipt and worklog are recorded separately; do not infer disaster recovery certification.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)

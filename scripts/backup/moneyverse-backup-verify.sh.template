@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+# Versioned, secret-free source for the host-only verified backup helper.
+# Installer must keep /etc/moneyverse/backup.key private (0600).
+ARCHIVE="${1:?usage: moneyverse-backup-verify.sh ARCHIVE}"
+BACKUP_KEY_FILE="${BACKUP_KEY_FILE:-/etc/moneyverse/backup.key}"
+BACKUP_DB_CONTAINER="${BACKUP_DB_CONTAINER:-woldeok-moneyverse-dev-db-1}"
+
+die() { echo "verify: $*" >&2; exit 1; }
+for command_name in openssl zstd tar sha256sum awk docker; do
+  command -v "$command_name" >/dev/null || die "missing verifier dependency: $command_name"
+done
+[[ -f "$ARCHIVE" && -f "$ARCHIVE.sha256" ]] || die "archive/checksum missing"
+[[ -f "$BACKUP_KEY_FILE" ]] || die "encryption key missing"
+[[ "$(stat -c '%a' "$BACKUP_KEY_FILE")" == "600" ]] || die "encryption key must be mode 0600"
+
+# First verify the sealed archive, before decrypting anything.
+(cd "$(dirname "$ARCHIVE")" && sha256sum -c "$(basename "$ARCHIVE").sha256")
+
+stream_archive() {
+  openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256     -pass file:"$BACKUP_KEY_FILE" -in "$ARCHIVE" | zstd -q -d
+}
+
+extract_member() {
+  local member="$1"
+  stream_archive | tar -xiOf - "$member"
+}
+
+# A fixed member set prevents path traversal, symlink or unexpected files.
+expected_members="$(printf '%s\n' database.dump photos.tar.zst manifest.txt SHA256SUMS)"
+actual_members="$(stream_archive | tar -tif -)" || die "invalid compressed archive"
+[[ "$actual_members" == "$expected_members" ]] || die "unexpected or missing archive member"
+
+# Store only the small list of expected hashes in temporary memory; never
+# extract the production DB or photos as plaintext files.
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+extract_member SHA256SUMS > "$TMP/SHA256SUMS"
+[[ "$(stat -c '%s' "$TMP/SHA256SUMS")" -le 1024 ]] || die "checksum manifest oversized"
+
+for member in database.dump photos.tar.zst manifest.txt; do
+  expected="$(awk -v name="$member" '$2 == name {print $1}' "$TMP/SHA256SUMS")"
+  [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || die "invalid checksum manifest for $member"
+  actual="$(extract_member "$member" | sha256sum | awk '{print $1}')"
+  [[ "$actual" == "$expected" ]] || die "checksum mismatch for $member"
+done
+
+# Structural checks operate on bounded pipes only. No plaintext archive
+# members are materialized to /tmp, /var/tmp, or the backup destination.
+extract_member database.dump | {
+  docker exec -i "$BACKUP_DB_CONTAINER" sh -lc 'pg_restore -l >/dev/null'
+  cat >/dev/null
+}
+extract_member photos.tar.zst | zstd -q -t
+extract_member manifest.txt | awk '
+  $0 == "format=moneyverse-backup-v1" {ok=1}
+  END {if (!ok) exit 1}
+'
+
+printf 'verify: OK %s\n' "$ARCHIVE"

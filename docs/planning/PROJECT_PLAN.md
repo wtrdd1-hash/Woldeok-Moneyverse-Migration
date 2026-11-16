@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.11.17.2 — Encrypted host backup verifier streaming recovery (OPERATIONS PATCH APPLIED / APP RELEASE HOLD)
+Production systemd backup v1 last run 2026-11-17 06:20 KST failed with exit 2 because decrypted archive verification materialized database.dump and photos.tar.zst under crowded /tmp tmpfs. Host verifier only was replaced by reviewed stream-only equivalent with fixed-member allowlist, outer SHA256, inner SHA256 and structural checks, retaining private key isolation. Real sealed 06:20 archive independently re-verified; synthetic corruption tests 3/3 pass. Owner-approved 07:19 KST manual moneyverse-backup.service run generated a new encrypted and verified archive, Result=success, ExecMainStatus=0, timer active. One retention-eligible encrypted archive was preserved under a restricted directory before normal rotation; original verifier retained privately for rollback. No finance DB/WLD mutations, Nginx or web production code change. Documentation and template source under scripts/backup, paired EN/KO worklogs and release receipt. **Full DR/immutable offsite restore remains UNVERIFIED; this is not full-site Production promotion.**
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
