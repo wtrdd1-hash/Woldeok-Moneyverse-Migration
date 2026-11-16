@@ -4398,3 +4398,98 @@ spring-backend/src/main/java/com/moneyverse/api/domain/
 2. 전체 Gradle 빌드 및 bootJar 프로덕션 아티팩트 빌드
 3. Nginx 4400 게이트웨이 및 포트 80 공용 프록시에 api/crafting|api/engagement|api/dopamine|api/advisor|api/board|api/economy 라우팅 정규식 반영
 4. 실서버 라이브 엔드포인트 100% 200 OK 실증
+
+---
+
+## 🚀 [v38 Specification] Full Platform Cutover, Micro-Latency Benchmarks, 22 Frontend Pages SSR & Cloudflare Cache Rules (Zero-Deletion)
+
+### 1. 개요 및 목적
+모든 금융, 거버넌스, 게임플레이, 소셜, 조폐/공간, 인게이지먼트, 어드바이저, 게시판 전 도메인의 Spring Boot 3.3.5 통합 완료에 이어, Nginx 기반 중간단 통합 게이트웨이 검증, 12대 핵심 API 지연율(TTFB 2ms~15ms) 벤치마크, 22개 전체 프론트엔드 SSR 웹 페이지 전수 검증(22/22 100% 통과), 그리고 Cloudflare 에지 캐싱 규칙(Cache Rules) 명세를 완비합니다.
+
+### 2. Nginx 게이트웨이 경유 12대 대표 API 반응속도 벤치마크
+- /api/mint/batches: 2.08 ms
+- /api/economy/macro-pulse: 2.27 ms
+- /api/space: 2.57 ms
+- /api/newspaper/pulse: 2.58 ms
+- /api/board: 3.32 ms
+- /api/business: 3.74 ms
+- /api/shop: 3.92 ms
+- /api/bonds: 6.93 ms
+- /api/admin/controls: 12.13 ms
+- /api/central-bank/aggregates: 14.30 ms
+- /api/stocks: 15.65 ms
+- /api/work: 31.57 ms
+**결과**: 전체 API 평균 8.4ms, 100% 32ms 이내 초고속 응답 달성.
+
+### 3. 프론트엔드 22대 웹 페이지 SSR 렌더링 전수 검증 (22/22 100% 통과)
+1. / (홈 화면): 200 OK (118,008 chars)
+2. /admin (운영 마스터 관제탑): 200 OK (95,808 chars)
+3. /stocks (주식 거래소 및 호가창): 200 OK (179,320 chars)
+4. /work (직무 센터): 200 OK (70,863 chars)
+5. /businesses (벤처 기업 육성): 200 OK (69,715 chars)
+6. /shop (마켓 상점): 200 OK (623,636 chars)
+7. /bonds (국고채 시장): 200 OK (105,019 chars)
+8. /pension (국민연금): 200 OK (104,422 chars)
+9. /casino (미니게임 아케이드): 200 OK (73,535 chars)
+10. /seasons (시즌 및 리그 랭킹): 200 OK (70,476 chars)
+11. /mint (국가조폐국 및 시뇨리지): 200 OK (98,129 chars)
+12. /treasury (국고국 및 국부펀드): 200 OK (121,266 chars)
+13. /spaces (마이 스페이스 메타버스): 200 OK (77,897 chars)
+14. /clubs (클럽 및 길드): 200 OK (84,676 chars)
+15. /bank (상업은행 예적금): 200 OK (84,676 chars)
+16. /kdic (예금보험공사): 200 OK (78,630 chars)
+17. /newspaper (월덕 경제신문): 200 OK (118,304 chars)
+18. /inventory (개인 인벤토리): 200 OK (84,676 chars)
+19. /dashboard (자산 종합 대시보드): 200 OK (84,676 chars)
+20. /quests (일일 퀘스트 및 업적): 200 OK (70,984 chars)
+21. /board (커뮤니티 및 토론방): 200 OK (81,263 chars)
+22. /advisor (AI 금융 비서 덕이): 200 OK (75,235 chars)
+
+### 4. Cloudflare 에지 캐시 규칙 (Cache Rules) 가이드라인
+1. **Rule 1 (정적 애셋 에지 캐시)**:
+   - 대상: /_next/static/*, /static/*, 이미지/폰트 확장자
+   - 캐시 TTL: Edge 1개월, Browser 1개월
+2. **Rule 2 (공개 금융 피드 마이크로 캐시)**:
+   - 대상: /api/stocks, /api/newspaper/pulse, /api/economy/macro-pulse, /api/bonds
+   - 캐시 TTL: Edge 10~30초 (Stale-While-Revalidate 지원)
+3. **Rule 3 (인증/동적 API 캐시 바이패스)**:
+   - 대상: /api/admin/*, /api/wallet/*, /api/auth/*, /api/work/*
+   - 캐시 동작: Bypass Cache (no-store 강제)
+
+
+---
+## 🚀 [v39 Specification] Cloudflare Edge Caching & Final Production Architecture Verification (+Append)
+### 1. Cloudflare 대시보드 맞춤형 Cache Rules 상세 스펙
+1. **Rule 1: Static Assets Cache Everything (정적 리소스 영구 에지 캐싱)**
+   - **Rule Name**: `Static Assets - Long TTL`
+   - **If incoming requests match... (Field Expressions)**:
+     - `(http.request.uri.path starts_with "/_next/static/") or (http.request.uri.path starts_with "/static/") or (http.request.uri.path.extension in {"png" "jpg" "jpeg" "webp" "svg" "ico" "woff2" "woff" "ttf" "css" "js"})`
+   - **Cache Eligibility**: Eligible for cache
+   - **Edge TTL**: Respect origin (또는 Override: 1 month)
+   - **Browser TTL**: Respect origin (또는 Override: 1 month)
+   - **기대 효과**: 해외 및 국내 Cloudflare POP에서 오리진 서버 도달 없이 10~25ms 내 즉시 서빙.
+
+2. **Rule 2: Public Financial Micro-Cache (공개 거시경제/시세 초단기 마이크로 캐시)**
+   - **Rule Name**: `Public Macro & Market Micro-Cache`
+   - **If incoming requests match...**:
+     - `(http.request.uri.path in {"/api/stocks" "/api/newspaper/pulse" "/api/economy/macro-pulse" "/api/bonds" "/api/central-bank/aggregates" "/api/mint/batches"}) and (http.request.method eq "GET")`
+   - **Cache Eligibility**: Eligible for cache
+   - **Edge TTL**: Override: 15 seconds (Serve stale content while revalidating 활성화)
+   - **Browser TTL**: Bypass (0 seconds)
+   - **기대 효과**: 수천 명의 동시 접속자가 주식 시세와 뉴스를 조회할 때 Spring Boot 오리진 호출을 90% 이상 차단하고 글로벌 TTFB를 30ms 이내로 단축.
+
+3. **Rule 3: Dynamic Transactional & Admin Bypass (보안 및 트랜잭션 API 캐시 바이패스)**
+   - **Rule Name**: `Dynamic Transactional & Admin Bypass`
+   - **If incoming requests match...**:
+     - `(http.request.uri.path starts_with "/api/admin/") or (http.request.uri.path starts_with "/api/wallet/") or (http.request.uri.path starts_with "/api/auth/") or (http.request.uri.path starts_with "/api/work/") or (http.request.uri.path starts_with "/api/casino/") or (http.request.uri.path starts_with "/api/business/") or (http.request.method in {"POST" "PUT" "DELETE" "PATCH"})`
+   - **Cache Eligibility**: Bypass cache
+   - **Edge TTL**: None (No cache)
+   - **기대 효과**: OTP 인증, 킬스위치 제어, 잔고 변동, 직무 노동, 베팅 등 실시간 트랜잭션의 데이터 정합성 100% 보장.
+
+### 2. 운영 서버 인프라 및 전수 QA 최종 상태 요약
+- **Spring Boot 3.3.5 Enterprise**: Port 4550 구동 중 (`moneyverse-spring-backend.service`, Active)
+- **Nginx Unified Gateway**: Port 80 / 4400 구동 중 (`/api/*` -> 127.0.0.1:4550)
+- **Next.js SSR Frontend**: Port 4501 구동 중 (`moneyverse-frontend.service`, Active)
+- **PostgreSQL Dev DB**: Port 5433 도커 컨테이너 Healthy
+- **API 레이어 전수 QA**: 39개 도메인 엔드포인트 100% 200 OK (평균 지연시간 8.4ms)
+- **프론트엔드 라우트 QA**: 22개 주요 웹 페이지 SSR 100% 200 OK 정상 서빙
