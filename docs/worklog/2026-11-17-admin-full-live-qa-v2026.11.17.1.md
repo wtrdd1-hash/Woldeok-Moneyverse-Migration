@@ -19,3 +19,15 @@
 - Current live admin mint status and orders endpoints return 503; test-main-backend inactive, Test treasury API 502, Test mint status 503 and SWF BFF 500. Do not perform money mutations on Production or assume Test isolated before proving connections.
 - On-host evidence under /tmp/mv_adminqa_20261117/{pages,apis}.json contains response status, headers, key names and hashes but not response bodies.
 - NEXT: inspect Next app-api rewrite and finance fallback; add actual safe Test SQL/HTTP checks; finalize precise report.
+
+### Midpoint 2 — financial evidence and comprehensive tests
+- One real production-linked PostgreSQL READ ONLY snapshot: 943 tx, 1950 postings, 43 accounts, 52 linked Treasury rows, 0 unbalanced, 0 stored/journal balance mismatch.
+- Source review found Spring SecurityConfig permitAll/CSRF disable, Spring KDIC hardcoded normal ledger metrics (14250/42/42), KDIC fake payout/liquidity success, SWF false SUCCESS on DB error, Treasury fabricated empty history.
+- Nested source test results: full Nest admin 655 PASS/112 SKIP; Next 968 PASS; Spring Gradle 9 suites/22 PASS. Focused initial 144 Nest are a subset of 655.
+- Full English/Korean findings and GitHub/internal update records generated.
+
+## Finished — 2026-11-17 KST
+- Safe public live HTML/API probes, direct backend comparison, actual canonical PostgreSQL read-only reconciliation and tested code review complete.
+- Blocked: signed-in browser UI/OTP and financial write E2E, disabled Test backend, independent restore, exact artifact Test, production acceptance.
+- Result: P0 FAIL / RELEASE HOLD. Production and Test untouched; no WLD write, no main merge, no production promotion.
+- Evidence: docs/findings/2026-11-17-admin-finance-live-qa-v2026.11.17.1.md and .ko.md, docs/updates/v2026.11.17.1-admin-finance-qa-*.

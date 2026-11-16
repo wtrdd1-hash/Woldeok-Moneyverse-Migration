@@ -17,3 +17,13 @@
 - 금융 불일치: 국고 overview/revenue/expenditure/transactions, 예보 원장, FX는 Spring에서 익명 200, Nest에서 401. 값의 실제 원장 출처 미확인.
 - 운영 조폐국 status/orders 503. Test 백엔드 비활성, 국고 API 502, SWF BFF 500. 운영 금전 변경 없음.
 - GitHub 기록에는 원시 잔고·개인정보·비밀정보 포함하지 않음.
+
+### 중간 기록 2 — 실제 금융·소스 테스트
+- 운영 DB READ ONLY: 거래 943, 전표 1950, 계좌 43, 국고 52, 잔액/원장 대사 불일치 0.
+- Spring 보안 전면 허용/CSRF 비활성, KDIC 고정 정상진단 및 허위 지급 성공, SWF 오류 후 SUCCESS, 국고 거래내역 항상 빈값 확인.
+- Nest 655 통과/112 건너뜀, Next 968 통과, Spring 22 통과. 실운영 금융 인증 E2E 통과를 뜻하지 않음.
+
+## 종료 — 2026-11-17 KST
+- 실제 페이지/API/원장 조회 및 코드 검증 완료. 실 관리자 OTP/금융 POST, Test 복구, 독립 백업 복원·무중단 승격은 미실시.
+- 판정 P0 FAIL / RELEASE HOLD. 운영 돈·DB·배포·main 변경 없음.
+- docs/findings/2026-11-17-admin-finance-live-qa-v2026.11.17.1.md 및 한국어 쌍, docs/updates/v2026.11.17.1-admin-finance-qa-* 기록.
