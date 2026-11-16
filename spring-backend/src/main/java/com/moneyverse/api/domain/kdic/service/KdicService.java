@@ -44,75 +44,38 @@ public class KdicService {
     }
 
     public KdicLedgerEvidenceDto getLedgerIntegrity() {
-        log.info("[KdicService] Verifying double-entry ledger balance and treasury linkage for KDIC");
-        return new KdicLedgerEvidenceDto(
-                true,
-                14250L,
-                0L,
-                0L,
-                42L,
-                0L,
-                0L,
-                42L,
-                Instant.now().toString()
-        );
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> assessPremiums(String actor) {
-        log.info("[KdicService] Assessing quarterly deposit insurance premiums by actor: {}", actor);
-        String txId = UUID.randomUUID().toString();
-        long amountWld = 2000L;
-
-        try {
-            jdbcTemplate.update(
-                    "UPDATE deposit_insurance_funds SET total_fund_wld = total_fund_wld + ?, cumulative_premiums_collected_wld = cumulative_premiums_collected_wld + ?, updated_at = NOW() WHERE id = 'FUND_MAIN'",
-                    amountWld, amountWld
-            );
-        } catch (Exception e) {
-            log.warn("[KdicService] Direct update fallback on H2 or isolated test: {}", e.getMessage());
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("quarter", "2026-Q4");
-        result.put("amountWld", amountWld);
-        result.put("txId", txId);
-        result.put("receiptNumber", "KDIC-FEE-" + Instant.now().toEpochMilli());
-        result.put("message", "2026-Q4 분기 예보료 2,000 WLD가 성공적으로 징수되어 KDIC 기금에 적립되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> injectEmergencyLiquidity(String institutionId, long amountWld, String actor) {
-        log.info("[KdicService] Injecting emergency liquidity bailout: institution={}, amount={} WLD, actor={}", institutionId, amountWld, actor);
-        String txId = UUID.randomUUID().toString();
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("institutionId", institutionId);
-        result.put("amountWld", amountWld);
-        result.put("txId", txId);
-        result.put("message", "가상 금융기관 긴급 유동성 대여(Bailout)가 성공적으로 집행되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> executePayout(String institutionId, String reason, String actor) {
-        log.info("[KdicService] Executing deposit insurance payout for insolvent institution={}, actor={}", institutionId, actor);
-        String txId = UUID.randomUUID().toString();
-        long payoutAmount = 50000L;
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("institutionId", institutionId);
-        result.put("payoutAmountWld", payoutAmount);
-        result.put("txId", txId);
-        result.put("message", "부실 금융기관 예금자 대위변제 집행이 완료되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     private KdicFundDto fetchFund() {
