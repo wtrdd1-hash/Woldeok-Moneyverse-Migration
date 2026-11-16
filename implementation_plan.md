@@ -4680,3 +4680,25 @@ graph TD
 4. Debian 운영 서버 최신 코드 동기화 (`git pull origin main`) 및 `./gradlew bootJar`
 5. Nginx `/socket.io/` 프록시를 Spring Boot Netty-SocketIO 포트(9092)로 라우팅 전환 및 Nginx 리로드
 6. 레거시 Node.js 백엔드 및 봇 데몬 서비스 안전 퇴역 (`systemctl stop moneyverse-backend moneyverse-discord-bot`)
+
+
+---
+## 🛡️ [v44 Specification] Phase 9: P0 Admin Authorization Bypass Fix (#3159 / PR #3182) & GREEN Verification (+Append)
+### 1. 보안 결함(RED) 분석 및 해결 내역
+- **원인 분석**:
+  - 기존 임시 마이그레이션 코드에서 임의의 `Bearer` 접두사나 임의의 `mv_session` 쿠키 존재 시 무조건 인가되는 취약점 확인.
+  - `/api/v1/admin/me` 엔드포인트가 인가 검증 없이 익명 요청에도 `roles: ["admin"]`을 반환하는 결함 확인.
+- **해결 방안 (Fail-Closed Architecture)**:
+  - `AdminAuthService.java` 신설:
+    1. Next.js 서버 컴포넌트 신뢰 토큰(`x-internal-token`) 검증
+    2. 내부 시크릿과 일치하는 Bearer 토큰 검증 (임의의 비인가 Bearer 전면 차단)
+    3. `mv_session` 쿠키의 SHA-256 해시를 `auth_sessions` 및 `admin_roles` 테이블과 대사하여 실제 유효한 관리자 세션만 인가
+    4. 위 조건에 해당하지 않는 모든 익명/위조 요청은 즉시 401 Unauthorized 반환
+  - `AdminSecurityController.java` 및 `AdminControlsController.java`에 `AdminAuthService` 전면 적용.
+
+### 2. 검증 결과
+- `AdminSecurityBoundaryRegressionTest.java`:
+  - `anonymousCannotReadAdminIdentity`: 익명 `/api/v1/admin/me` 401 Unauthorized 통과 (GREEN)
+  - `arbitraryBearerCannotReadAdminSecurityOverview`: 임의 Bearer 401 Unauthorized 통과 (GREEN)
+  - `arbitrarySessionCookieCannotReadAdminSecurityOverview`: 임의 세션 쿠키 401 Unauthorized 통과 (GREEN)
+- 전체 스프링 백엔드 테스트 스위트: 16개 테스트 클래스, 53개 단위/통합 테스트 전수 무결 통과 (`BUILD SUCCESSFUL in 1m 25s`)
