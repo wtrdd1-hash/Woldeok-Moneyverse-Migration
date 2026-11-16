@@ -22,3 +22,14 @@ moneyverse:
     kdic-operational: true
     black-market-operational: true
     pension-operational: true
+  socket:
+    host: 127.0.0.1
+    port: 0
+    boss-threads: 1
+    worker-threads: 2
+    ping-interval: 25000
+    ping-timeout: 60000
+  discord:
+    bot-token: ""
+    log-channel-id: "1542465347364589609"
+    admin-user-id: "889085646768078850"
