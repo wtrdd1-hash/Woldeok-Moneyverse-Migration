@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@Tag(name = "Stock Championship League", description = "가상 주식 챔피언십 리그 및 고래 트레이더 리더보드 API")
+@Tag(name = "Stock Championship League", description = "媛??二쇱떇 梨뷀뵾?몄떗 由ш렇 諛?怨좊옒 ?몃젅?대뜑 由щ뜑蹂대뱶 API")
 @RestController
 public class StockLeagueController {
 
@@ -35,8 +35,8 @@ public class StockLeagueController {
         return DEFAULT_FALLBACK_USER;
     }
 
-    @Operation(summary = "현재 진행 중인 주식 챔피언십 리그 현황 및 리더보드, 고래 트레이더 목록 조회")
-    @GetMapping(path = { "/api/v1/stocks/league/current", "/api/stocks/league/current" })
+    @Operation(summary = "?꾩옱 吏꾪뻾 以묒씤 二쇱떇 梨뷀뵾?몄떗 由ш렇 ?꾪솴 諛?由щ뜑蹂대뱶, 怨좊옒 ?몃젅?대뜑 紐⑸줉 議고쉶")
+    @GetMapping(path = { "/api/v1/stocks/league/current", "/api/stocks/league/current", "/stocks/league/current" })
     public ResponseEntity<CurrentLeagueResponse> getCurrentLeague(
             HttpServletRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
@@ -59,18 +59,18 @@ public class StockLeagueController {
         ));
     }
 
-    @Operation(summary = "주식 챔피언십 리그 참가 신청")
-    @PostMapping(path = { "/api/v1/stocks/league/join", "/api/stocks/league/join" })
+    @Operation(summary = "二쇱떇 梨뷀뵾?몄떗 由ш렇 李멸? ?좎껌")
+    @PostMapping(path = { "/api/v1/stocks/league/join", "/api/stocks/league/join", "/stocks/league/join" })
     public ResponseEntity<?> joinLeague(
             HttpServletRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
         try {
             UUID userId = resolveUserId(request, headerUserId);
-            String userName = "트레이더";
+            String userName = "?몃젅?대뜑";
             StockLeagueParticipantDto participation = leagueService.joinSeason(userId, userName);
 
             return ResponseEntity.ok(new JoinLeagueResponse(
-                    true, participation, "제1회 월덱 가상주식 챔피언십 리그에 성공적으로 참가 등록되었습니다!"
+                    true, participation, "?????붾뜳 媛?곸＜??梨뷀뵾?몄떗 由ш렇???깃났?곸쑝濡?李멸? ?깅줉?섏뿀?듬땲??"
             ));
         } catch (IllegalArgumentException | IllegalStateException e) {
             Map<String, Object> err = new LinkedHashMap<>();
@@ -85,15 +85,15 @@ public class StockLeagueController {
             err.put("type", "about:blank");
             err.put("title", "Internal Server Error");
             err.put("status", 500);
-            err.put("detail", "리그 참가 신청 처리 중 오류가 발생했습니다.");
+            err.put("detail", "由ш렇 李멸? ?좎껌 泥섎━ 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }
 
-    @Operation(summary = "고래 트레이더 카피 트레이딩 구독 신청 (원장 보호 가드)")
-    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/subscribe", "/api/stocks/league/copy-trade/subscribe" })
+    @Operation(summary = "怨좊옒 ?몃젅?대뜑 移댄뵾 ?몃젅?대뵫 援щ룆 ?좎껌 (?먯옣 蹂댄샇 媛??")
+    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/subscribe", "/api/stocks/league/copy-trade/subscribe", "/stocks/league/copy-trade/subscribe" })
     public ResponseEntity<?> subscribeCopyTrading(@RequestBody SubscribeCopyTradingRequest request) {
-        // Node.js 계약과 동일하게 복식부기 원장 정산 증빙 완결 전까지 안전 보호 에러 반환
+        // Node.js 怨꾩빟怨??숈씪?섍쾶 蹂듭떇遺湲??먯옣 ?뺤궛 利앸튃 ?꾧껐 ?꾧퉴吏 ?덉쟾 蹂댄샇 ?먮윭 諛섑솚
         Map<String, Object> err = new LinkedHashMap<>();
         err.put("type", "about:blank");
         err.put("title", "Service Unavailable");
@@ -103,8 +103,8 @@ public class StockLeagueController {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(err);
     }
 
-    @Operation(summary = "카피 트레이딩 구독 취소")
-    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/cancel", "/api/stocks/league/copy-trade/cancel" })
+    @Operation(summary = "移댄뵾 ?몃젅?대뵫 援щ룆 痍⑥냼")
+    @PostMapping(path = { "/api/v1/stocks/league/copy-trade/cancel", "/api/stocks/league/copy-trade/cancel", "/stocks/league/copy-trade/cancel" })
     public ResponseEntity<?> cancelCopyTrading(
             HttpServletRequest request,
             @RequestBody CancelCopyTradingRequest body,
@@ -115,7 +115,8 @@ public class StockLeagueController {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("cancelled", cancelled);
-        res.put("message", cancelled ? "카피 트레이딩 구독이 성공적으로 취소되었습니다." : "취소할 활성 구독 내역이 없습니다.");
+        res.put("message", cancelled ? "移댄뵾 ?몃젅?대뵫 援щ룆???깃났?곸쑝濡?痍⑥냼?섏뿀?듬땲??" : "痍⑥냼???쒖꽦 援щ룆 ?댁뿭???놁뒿?덈떎.");
         return ResponseEntity.ok(res);
     }
 }
+

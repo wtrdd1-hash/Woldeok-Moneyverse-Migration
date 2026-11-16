@@ -4702,3 +4702,43 @@ graph TD
   - `arbitraryBearerCannotReadAdminSecurityOverview`: 임의 Bearer 401 Unauthorized 통과 (GREEN)
   - `arbitrarySessionCookieCannotReadAdminSecurityOverview`: 임의 세션 쿠키 401 Unauthorized 통과 (GREEN)
 - 전체 스프링 백엔드 테스트 스위트: 16개 테스트 클래스, 53개 단위/통합 테스트 전수 무결 통과 (`BUILD SUCCESSFUL in 1m 25s`)
+
+
+---
+
+## 🚀 [v46 Specification] Phase 11 미디어 스트리밍 & 파일 업로드 파이프라인 전면 전환 완료 및 58.42% 달성
+
+### 1. Phase 11 Spring Boot 전환 아키텍처 및 구현 명세
+- **미디어 스토리지 엔진 (`ImageStorageService.java`)**:
+  - 디스크 기반의 영구 스토리지 격리 저장소(`/srv/moneyverse-data/storage/images`) 관리.
+  - 보안 매직 바이트 검증: 파일 확장자 위조를 원천 차단하기 위해 바이너리 헤더 시그니처(PNG: `89 50 4E 47`, JPEG: `FF D8 FF`, WebP: `RIFF...WEBP`)를 100% 엄격 검증.
+  - 안전한 파일명 생성: UUID 기반 키 발급 및 Path Traversal(`../`) 디렉터리 탐색 취약점 원천 차단.
+  - 멀티파트 업로드 파일 저장, 바이너리 읽기, 파일 삭제 및 메타데이터 관리.
+- **신규 Spring Boot 미디어 컨트롤러 (5개 추가)**:
+  - `MediaController.java`: 루트 바이너리 스트리밍 (`/media/{key}`) 제공. 적절한 MIME 타입 자동 판별 및 브라우저 캐시 헤더(`max-age=86400, public, immutable`) 탑재.
+  - `PhotoUploadController.java`: 관리자 전용 사진 업로드 파이프라인 (`POST /api/v1/admin/photos`).
+  - `MemberPhotoController.java`: 회원 프로필 및 활동 사진 관리 (`POST /api/v1/photos/uploads`, `GET /api/v1/photos`, `DELETE /api/v1/photos/withdraw`, `GET /api/v1/photos/mine`).
+  - `ChatUploadController.java`: 채팅 첨부 파일 및 미디어 업로드 (`POST /api/v1/content/chat/upload`, `GET /content/chat/media/{key}`).
+  - `BoardImageController.java`: 커뮤니티 게시판 이미지 업로드 및 서빙 (`POST /api/v1/board/images/uploads`, `GET /api/board/images/{key}`, `GET /api/public/board/images/{key}`).
+- **엔드투엔드 통합 테스트 및 CI 검증**:
+  - `Phase11MediaAndUploadIntegrationTest.java`: 5/5 테스트 100% GREEN 통과 (PNG 매직바이트 검증 및 스트리밍, 위조 파일 차단, 게시판 이미지 업로드/조회, 채팅 업로드/서빙, 인증 가드).
+  - GitHub Actions CI (PR #3186): `build` (4m 37s), `runtime-check` (9m 36s), `verify / runtime-check` (7m 17s) 포함 8대 전수 검사 통과.
+  - `main` 브랜치 스쿼시 머지 완료 (`c4e422e31`). 단일 브랜치 유지 정책에 따라 원격 피처 브랜치 자동 삭제 완료.
+
+### 2. 프로덕션 배포 및 Nginx 컷오버 실측
+- **Spring Boot 서비스 배포**: `moneyverse-spring-backend.service` (PID 3152955, Active) 재기동 완료.
+- **Nginx Port 4400 게이트웨이 정규식 갱신**:
+  - `media|content/chat|api/photos|api/v1/photos|api/admin/photos|api/v1/admin/photos|api/content/chat|api/v1/content/chat|api/public/board/images` 라우트를 `prod_spring(:4550)`으로 직접 라우팅 배정.
+  - Nginx 설정 문법 검사 통과 및 무중단 리로드(`sudo systemctl reload nginx`) 완료.
+- **실서버 엔드포인트 실측 결과**:
+  - `GET /media/test-non-exist.png`: 404 Not Found (Spring MediaController 직접 서빙)
+  - `GET /api/v1/photos/mine`: 401 Unauthorized (Fail-Closed 세션 보안 가드 작동)
+  - `GET /content/chat/media/test.png`: 404 Not Found (Spring ChatUploadController 직접 서빙)
+  - `GET /api/public/board/images/test.jpg`: 404 Not Found (Spring BoardImageController 직접 서빙)
+  - `GET /api/v1/content/chat/upload`: 405 Method Not Allowed (POST 전용 핸들러 확인)
+  - `GET /api/v1/photos/uploads`: 405 Method Not Allowed (POST 전용 핸들러 확인)
+
+### 3. 전환율 지표 갱신
+- **Spring Boot 컨트롤러 수**: 47개 -> **52개** (신규 5개 컨트롤러 공식 가동)
+- **NestJS 컨트롤러 대비 물리적 전환율**: 52.81% -> **58.42% (52 / 89)** 달성
+- **Node.js 잔여 컨트롤러**: 37개 (전환 대상 점진적 축소 지속)
