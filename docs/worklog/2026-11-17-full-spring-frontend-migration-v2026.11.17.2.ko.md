@@ -10,3 +10,9 @@
 - 대기.
 ## 종료
 - 대기. 운영 승격 없음.
+
+### 중간 기록 1 — 실제 Spring 웹 구현
+- origin/main 재조회. Thymeleaf Spring MVC 미리보기 /spring-web, /spring-web/status 구현. 영어 기본·한국어 보조, 안전한 HTML 이스케이프, 반응형 CSS.
+- 공개 상태는 기존 읽기 전용 public.content_public_status() 함수에서만 수집, DB 장애 시 noindex/private HTTP 503. 운영 기본 플래그 비활성, 격리 Test만 활성.
+- TDD 초기 컴파일 실패 확인, Thymeleaf 의존성 온라인 해결, JDK25 Byte Buddy 호환 문제를 Gradle 테스트 JDK21 고정으로 회피.
+- Java 6/6 테스트 통과. 운영/금전 기능 변경 없음. 다음은 177페이지·124 API 표준 경로 현황 작성.

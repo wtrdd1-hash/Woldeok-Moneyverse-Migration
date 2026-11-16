@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" th:lang="${lang}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title th:text="${title} + ' | ' + ${brand}">Service status | Woldeok Moneyverse</title>
+  <link rel="stylesheet" href="/spring-web/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" th:href="@{/spring-web(lang=${lang})}" th:text="${brand}">Woldeok Moneyverse</a>
+    <nav aria-label="Main">
+      <a th:href="@{/spring-web(lang=${lang})}" th:text="${homeLabel}">Home</a>
+      <a th:href="@{/spring-web/status(lang=${lang})}" aria-current="page" th:text="${statusNavLabel}">Service status</a>
+    </nav>
+    <div class="locales" aria-label="Language"><a href="/spring-web/status?lang=en" lang="en">EN</a><a href="/spring-web/status?lang=ko" lang="ko">한국어</a></div>
+  </header>
+  <main id="main" class="page-container">
+    <section class="hero">
+      <p class="eyebrow">SOURCE-VERIFIED SNAPSHOTS</p>
+      <h1 th:text="${title}">Service status</h1>
+      <p class="subtitle" th:text="${subtitle}">Only verified source observations are shown.</p>
+    </section>
+    <section aria-labelledby="observations-title" class="status-section">
+      <h2 id="observations-title" th:text="${observationsLabel}">Observed systems</h2>
+      <p th:if="${sourceUnavailable}" role="alert" class="notice notice--error" th:text="${unavailableLabel}">Status unavailable</p>
+      <p th:if="${!sourceUnavailable and #lists.isEmpty(rows)}" class="notice" th:text="${emptyLabel}">No observations yet.</p>
+      <ul th:if="${!sourceUnavailable and !#lists.isEmpty(rows)}" class="status-list">
+        <li th:each="row : ${rows}" class="status-item">
+          <div class="item-top">
+            <h3 th:text="${row.displayName}">Database</h3>
+            <span class="status-badge" th:classappend="${row.state == 'operational'} ? ' is-operational' : ' is-muted'" th:text="${row.label}">Unknown</span>
+          </div>
+          <p th:if="${row.detail != null}" class="detail" th:text="${row.detail}">Detail</p>
+          <time th:if="${row.observedAt != null}" th:datetime="${row.observedAt}" th:text="${row.observedAt}">Time</time>
+        </li>
+      </ul>
+    </section>
+    <p class="notice" th:text="${previewNotice}">Migration preview.</p>
+  </main>
+</body>
+</html>

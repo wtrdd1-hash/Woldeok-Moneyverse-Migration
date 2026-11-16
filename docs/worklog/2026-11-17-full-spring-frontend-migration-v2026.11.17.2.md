@@ -10,3 +10,10 @@
 - Pending.
 ## Finished
 - Pending. Initial status: no runtime change.
+
+### Midpoint 1 — source-based implementation
+- Refreshed origin/main. Created true Thymeleaf Spring MVC render paths /spring-web and /spring-web/status (non-conflicting preview only) with HTML escaped dynamic data, explicit English/Korean locale, responsive and keyboard accessible CSS.
+- SpringStatusReader delegates to existing read-only DB function public.content_public_status(), which owns freshness and public visibility; no fake source or fabricated success. Source failure triggers private/noindex HTTP 503; observed statuses derived from canonical DB. Controller is conditional on moneyverse.web.preview-enabled=true (OFF in normal Production config; ON in isolated test profile).
+- RED compileTestJava failed for missing new controller/reader as expected, then Gradle Thymeleaf dependencies resolved online; JDK25 is incompatible with current Byte Buddy, so candidate Gradle test JVM is explicitly JDK21.
+- GREEN: isolated Spring Gradle tests 6/6 passed. Database/financial commands unchanged, no Production deployment.
+- Next: deterministic route/BFF inventory and plan supersession; test full bootJar/optional isolated localhost real HTTP; record SKIPs and release HOLD.

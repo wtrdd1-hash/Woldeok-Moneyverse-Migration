@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     java
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
@@ -19,6 +19,8 @@ repositories {
 dependencies {
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
+    // Server-rendered Spring MVC pages replacing the Next.js presentation layer.
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -49,6 +51,11 @@ dependencies {
 }
 
 tasks.withType<Test> {
+    // Gradle's remote-selected JDK25 exceeds Spring Boot 3.3's Byte Buddy support.
+    // Run tests on the deployed supported JDK21 without altering shared Gradle daemons.
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    })
     useJUnitPlatform()
 }
 

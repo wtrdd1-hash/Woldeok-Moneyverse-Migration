@@ -19,6 +19,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 moneyverse:
+  web:
+    preview-enabled: true
   security:
     internal-token: test-internal-token
   features:

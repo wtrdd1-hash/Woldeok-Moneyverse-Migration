@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" th:lang="${lang}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title th:text="${title} + ' | ' + ${brand}">Woldeok Moneyverse | Spring web</title>
+  <link rel="stylesheet" href="/spring-web/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" th:href="@{/spring-web(lang=${lang})}" th:text="${brand}">Woldeok Moneyverse</a>
+    <nav aria-label="Main">
+      <a th:href="@{/spring-web(lang=${lang})}" th:text="${homeLabel}">Home</a>
+      <a th:href="@{/spring-web/status(lang=${lang})}" th:text="${statusNavLabel}">Service status</a>
+    </nav>
+    <div class="locales" aria-label="Language"><a href="/spring-web?lang=en" lang="en">EN</a><a href="/spring-web?lang=ko" lang="ko">한국어</a></div>
+  </header>
+  <main id="main" class="page-container">
+    <section class="hero">
+      <p class="eyebrow">SPRING BOOT · SERVER-SIDE RENDERING</p>
+      <h1 th:text="${title}">Spring-rendered web</h1>
+      <p class="subtitle" th:text="${subtitle}">A web interface.</p>
+      <a class="action" th:href="@{/spring-web/status(lang=${lang})}" th:text="${viewStatusLabel}">View status</a>
+    </section>
+    <p class="notice" th:text="${previewNotice}">Migration preview.</p>
+  </main>
+</body>
+</html>
