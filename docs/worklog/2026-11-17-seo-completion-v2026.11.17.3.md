@@ -29,3 +29,7 @@
 - Rollback snapshot `/srv/moneyverse-data/reports/seo-completion-v2026.11.17.3/nginx-before-seo-v3-20261117T013415.conf`; previous narrow live edge snapshot `seo-edge-auth-before-v3.conf`. Previous full Production symlink and services not changed. No DB/financial writes or external IndexNow/GSC submission was executed.
 - Rechecked origin/main after unrelated merges: `2c1ea4cd7734e67f6047c68eb4ec884940ac7a09` (other agent stock admin authentication #3211); no overlapping SEO source. Work on isolated stacked branch based on existing Draft PR #3206, never direct commit to main.
 - **Unverified/blocked:** authenticated privileged browser session and real Google Search Console property/report or IndexNow external acceptance; crawler metrics limited to last 500 records (sampled 24h); Java full migration/controller global promotion, full release CI and independent off-host restore. IndexNow HTTP request acceptance does not equal actual search indexing. Keep Node canonical route until real Java parity, remove no edge authorization guard, do not assert full SEO search-index success.
+
+## GitHub closeout handoff
+- [Stacked Draft PR #3214](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3214) depends on [parent Draft PR #3206](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3206), with no main merge.
+- Runtime scope is SEO-only Nginx frontend promotion; Java Spring source remains unpromoted. Authenticated operator E2E and real provider response remain unverified.

@@ -30,3 +30,7 @@
 - 원복 파일 `/srv/moneyverse-data/reports/seo-completion-v2026.11.17.3/nginx-before-seo-v3-20261117T013415.conf`, 이전 `seo-edge-auth-before-v3.conf`. 운영 전체 symlink·서비스 중단, DB/금전 변경, 실제 검색엔진 GSC/IndexNow 전송 없음.
 - 작업 전/중/후 메인 확인, 최신 `2c1ea4cd7734e67f6047c68eb4ec884940ac7a09`(타 에이전트 주식 관리자 인증 #3211), SEO 변경과 경로 충돌 없음. 기존 미병합 Draft PR #3206에 종속된 별도 작업 브랜치 사용, main 직접 수정 금지.
 - **미검증/보류:** 실제 로그인 관리자 브라우저 E2E, GSC 속성 실측·IndexNow 외부 접수, 수집 로그 최근 500건 한도의 표본성(정확한 24h 총량 불가), Java 직접 SEO 배포 및 전체 CI/독립 백업 복구. IndexNow 전송 접수는 검색 색인 확정이 아님. Node SEO 권위 및 에지 인증 유지.
+
+## GitHub 종료 인계
+- [후속 Draft PR #3214](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3214) — 기존 [부모 Draft PR #3206](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3206)에 종속, 아직 main 미병합.
+- 운영 실제 승격은 SEO 전용 프론트 Nginx 조치에 한정; Java 소스는 미배포. 인증 실제 E2E와 검색엔진 수신은 미검증 유지.
