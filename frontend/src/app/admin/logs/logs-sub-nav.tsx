@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export interface LogsSubNavProps {
-  readonly current: 'audit' | 'activity' | 'delivery' | 'integrity';
+  readonly current: 'audit' | 'activity' | 'delivery' | 'integrity' | 'system';
 }
 
 export function LogsSubNav({ current }: LogsSubNavProps) {
@@ -39,6 +39,14 @@ export function LogsSubNav({ current }: LogsSubNavProps) {
         asChild
       >
         <Link href="/admin/logs/integrity">🛡️ 해시체인 무결성 검증</Link>
+      </Button>
+      <Button
+        variant={current === 'system' ? 'secondary' : 'ghost'}
+        size="sm"
+        className={current === 'system' ? 'font-bold shadow-xs' : ''}
+        asChild
+      >
+        <Link href="/admin/logs/system">🖥️ 시스템 런타임 로그</Link>
       </Button>
     </div>
   );
