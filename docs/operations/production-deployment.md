@@ -35,6 +35,12 @@ Use stable secret-bearing files `/etc/moneyverse/test-backend.env` and `/etc/mon
 
 Both Test services must resolve through the same `/srv/moneyverse-data/releases/test-current` root. Before restart, verify that root contains a built backend and frontend from one exact SHA; after restart require backend `:3100/health`, public Test `/api/version`, frontend BFF catalog and `X-Robots-Tag: noindex` to pass. A mixed backend/frontend release is a failed gate even when both processes are individually healthy.
 
+## Next.js API-origin legacy-route parity preflight — v2026.11.14.2208
+
+A Spring Boot `/health` 200 does not certify compatibility with all server-side Next.js API calls. The 2026-11-14 incident showed that indiscriminately pointing `API_ORIGIN` at partially migrated Spring Boot produced administrator error digest `237831372` and failed member pages. Keep Next.js pointed at the legacy NestJS API until its session, administrator-security, policy and required member-read routes pass compatibility checks. Migrate individual Spring routes through independently validated edge mappings without weakening existing authentication.
+
+On the authorized host, before any `API_ORIGIN` migration, run `ops/release/verify-frontend-api-compat.sh http://127.0.0.1:<candidate-port>` with `INTERNAL_API_TOKEN` inherited from the protected runtime environment. Never print credentials or embed them in shell commands, CI logs or documentation. The script permits explicit loopback targets only and verifies public auth policy 200, anonymous member session 401, anonymous administrator security 401 and public stocks 200. Failure blocks cutover. This minimal read-only gate never replaces signed-in authorization tests, official exact-SHA Test, immutable build evidence, financial safety and zero-downtime deployment gates.
+
 ## Frontend runtime cache ownership
 
 The host systemd frontend runs as `debian`, while Next.js updates `.next/cache` at runtime for server-side fetch revalidation. A release copied or built as root must therefore prepare only that mutable cache subtree before canary/start; do not recursively change ownership of the immutable application release.
