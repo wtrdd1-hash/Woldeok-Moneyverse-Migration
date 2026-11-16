@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect and redact Moneyverse logs every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+AccuracySec=10s
+Unit=moneyverse-log-collect.service
+
+[Install]
+WantedBy=timers.target

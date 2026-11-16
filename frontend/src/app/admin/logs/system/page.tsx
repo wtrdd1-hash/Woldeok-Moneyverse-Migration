@@ -7,6 +7,7 @@ import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
 import { LogsSubNav } from '../logs-sub-nav';
 import { SystemLogsViewer } from './system-logs-viewer';
+import { SystemLogHistoryViewer } from './system-log-history-viewer';
 import type { SystemLogData } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -51,6 +52,7 @@ export default async function AdminSystemLogsPage() {
       <LogsSubNav current="system" />
 
       <SystemLogsViewer initialData={initialData ?? fallbackData} />
+      <SystemLogHistoryViewer />
     </div>
   );
 }

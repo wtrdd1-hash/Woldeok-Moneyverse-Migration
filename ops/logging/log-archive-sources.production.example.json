@@ -1,0 +1,22 @@
+{
+  "NGINX_ACCESS": {
+    "kind": "file",
+    "path": "/var/log/nginx/access.log"
+  },
+  "NGINX_ERROR": {
+    "kind": "file",
+    "path": "/var/log/nginx/error.log"
+  },
+  "SPRING_BACKEND": {
+    "kind": "journal",
+    "unit": "moneyverse-spring-backend.service"
+  },
+  "FRONTEND": {
+    "kind": "journal",
+    "unit": "moneyverse-release-v1546-frontend.service"
+  },
+  "LEGACY_BACKEND": {
+    "kind": "journal",
+    "unit": "moneyverse-release-v1546-backend.service"
+  }
+}

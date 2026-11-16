@@ -1,0 +1,11 @@
+[Unit]
+Description=Compress and expire Moneyverse routine and important logs hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+AccuracySec=1m
+Unit=moneyverse-log-maintain.service
+
+[Install]
+WantedBy=timers.target

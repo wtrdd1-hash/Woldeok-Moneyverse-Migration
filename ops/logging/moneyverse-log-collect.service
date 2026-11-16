@@ -1,0 +1,21 @@
+[Unit]
+Description=Moneyverse redacted log collector (7-day routine / 30-day important)
+After=systemd-journald.service nginx.service
+Wants=systemd-journald.service
+
+[Service]
+Type=oneshot
+User=root
+Group=moneyverse-logread
+UMask=0027
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /usr/local/libexec/moneyverse-log-lifecycle.py --root /var/lib/moneyverse/log-archive --config /etc/moneyverse/log-archive-sources.json collect
+TimeoutStartSec=45
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/moneyverse/log-archive
+MemoryMax=192M
+TasksMax=40

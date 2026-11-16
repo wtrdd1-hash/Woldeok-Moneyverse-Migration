@@ -4,7 +4,8 @@ public enum SystemLogSource {
     NGINX_ERROR("nginx-error", "/var/log/nginx/error.log", null),
     NGINX_ACCESS("nginx-access", "/var/log/nginx/access.log", null),
     SPRING_BACKEND("spring-backend", null, "moneyverse-spring-backend"),
-    FRONTEND("frontend", null, "moneyverse-release-v1546-frontend");
+    FRONTEND("frontend", null, "moneyverse-release-v1546-frontend"),
+    LEGACY_BACKEND("legacy-backend", null, "moneyverse-release-v1546-backend");
 
     private final String key;
     private final String filePath;

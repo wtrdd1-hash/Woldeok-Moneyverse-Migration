@@ -30,3 +30,71 @@ describe('system log action authorization', () => {
     expect(mocks.api).not.toHaveBeenCalled();
   });
 });
+
+import {
+  fetchSystemLogHistoryAction,
+  requestLogHistoryOtpAction,
+  verifyLogHistoryOtpAction,
+} from './actions';
+
+describe('historical logs and OTP server action boundaries', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.requireAdminConsole.mockResolvedValue({ roles: ['SUPERADMIN'] });
+  });
+
+  const query = () => ({
+    source: 'NGINX_ACCESS',
+    classification: 'routine' as const,
+    start: new Date(Date.now() - 3600000).toISOString(),
+    end: new Date().toISOString(),
+    filter: '',
+    limit: 100,
+  });
+
+  it('denies non-superadmin without backend query', async () => {
+    mocks.requireAdminConsole.mockResolvedValue({ roles: ['ADMIN'] });
+    expect((await fetchSystemLogHistoryAction(query())).success).toBe(false);
+    expect(mocks.api).not.toHaveBeenCalled();
+  });
+
+  it('denies forged path and oversized page without backend query', async () => {
+    expect((await fetchSystemLogHistoryAction({ ...query(), source: '../../etc/passwd' })).success).toBe(false);
+    expect((await fetchSystemLogHistoryAction({ ...query(), limit: 10000 })).success).toBe(false);
+    expect(mocks.api).not.toHaveBeenCalled();
+  });
+
+  it('denies date windows beyond 30 days', async () => {
+    const bad = {
+      ...query(),
+      start: new Date(Date.now() - 31 * 86400000).toISOString(),
+    };
+    expect((await fetchSystemLogHistoryAction(bad)).success).toBe(false);
+    expect(mocks.api).not.toHaveBeenCalled();
+  });
+
+  it('requires verified session before contacting backend', async () => {
+    mocks.requireAdminConsole.mockRejectedValue(new Error('CLOSED'));
+    await expect(fetchSystemLogHistoryAction(query())).rejects.toThrow('CLOSED');
+    expect(mocks.api).not.toHaveBeenCalled();
+  });
+
+  it('queries fixed-history API with no user-selected shell path', async () => {
+    mocks.api.mockResolvedValue({
+      status: 'EMPTY', source: 'NGINX_ACCESS', entries: [], totalCount: 0, nextCursor: null,
+      classification: 'routine', timestamp: new Date().toISOString(),
+    });
+    expect((await fetchSystemLogHistoryAction(query())).success).toBe(true);
+    expect(mocks.api).toHaveBeenCalledOnce();
+    expect(mocks.api.mock.calls[0][0]).toMatch(/^\/api\/v1\/admin\/logs\/system\/history\?/);
+  });
+
+  it('requires a six-digit code before OTP verify and never returns code', async () => {
+    expect((await verifyLogHistoryOtpAction('abc')).success).toBe(false);
+    expect(mocks.api).not.toHaveBeenCalled();
+    mocks.api.mockResolvedValue({ ok: true });
+    expect((await requestLogHistoryOtpAction()).success).toBe(true);
+    expect((await verifyLogHistoryOtpAction('123456')).success).toBe(true);
+    expect(mocks.api.mock.calls[1][1]).toEqual({ method: 'POST', body: { otpCode: '123456' } });
+  });
+});
