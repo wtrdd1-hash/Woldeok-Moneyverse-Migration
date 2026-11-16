@@ -23,3 +23,5 @@
 - Final Nginx config SHA256 5993467abb935d12385810a1d3bb62827dc1b9592312c49ec31e1ce7478ff95b; prior restricted rollback bytes preserved, Nginx active.
 - No Production database writes, ledger or WLD balance changes, Java/Next restart or full Spring frontend/back-end promotion. Route-only operational promotion of existing Nest public read.
 - Not certified: all KDIC data accuracy (e.g. independent fund deposits reconciliation), admin positive session/OTP/CSRF flows, ledger-based KDIC payments, attendance spin atomicity, global SEC1, full exact-SHA Production release. Keep other finance release holds active.
+
+GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3225

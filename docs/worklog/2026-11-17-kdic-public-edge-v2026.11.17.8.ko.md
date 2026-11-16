@@ -10,3 +10,5 @@
 운영 Nginx 원본 보존, 정확한 해시 확인 후 무중단 reload. 운영/내부 공개 KDIC 두 경로 HTTP 200, JSON 내용 및 no-store 헤더 검증; POST 405; 나머지 KDIC 관리자·출석 문제 API 503 유지; 홈/버전 200, 공식 Test 포털/버전 200. 최종 설정 SHA256 5993467abb935d12385810a1d3bb62827dc1b9592312c49ec31e1ce7478ff95b. 운영 DB/원장/WLD·Spring/Next 재배포 없음.
 
 **미완료:** 금융 원장 기반 지급·수금, 실제 관리자 인증·OTP·CSRF 통합, KDIC 자료 독립 정합성 감사, 출석 지급 원자성, 전체 Spring 전환과 G0–G6 검증. 이번 적용은 공개 읽기 포털만 운영 복원한 것이다.
+
+GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3225
