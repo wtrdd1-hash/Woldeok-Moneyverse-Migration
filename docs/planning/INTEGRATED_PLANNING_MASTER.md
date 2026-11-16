@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.11.17.2 — Owner-directed entire frontend-to-Spring target (IN PROGRESS / NOT DEPLOYED)
+The owner superseded the 2026-11-13 draft's Next.js-retention target: **migrate ALL Next pages, browser presentation and Next BFF handlers to Spring Boot MVC**. Existing finance/security/OTP/SEO/Android/release requirements remain binding. Fetched main has 178 Next pages + 124 BFF handlers; 0 fully moved canonical routes and only two isolated disabled-by-default Spring preview paths. P0 security/finance audit #3207 blocks public cutover. See [English full plan](../migration/FULL_SPRING_WEB_MIGRATION_v2026.11.17.2.md) / [Korean](../migration/FULL_SPRING_WEB_MIGRATION_v2026.11.17.2.ko.md) / [route inventory](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.17.2.json).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)

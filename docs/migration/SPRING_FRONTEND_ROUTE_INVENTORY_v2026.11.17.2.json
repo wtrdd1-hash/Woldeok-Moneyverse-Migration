@@ -1,0 +1,2734 @@
+{
+  "schema": "spring-frontend-inventory/v1",
+  "migration_version": "v2026.11.17.2",
+  "source_stack": "Next.js App Router",
+  "target_stack": "Spring Boot MVC SSR + progressive browser JavaScript",
+  "counts": {
+    "next_pages": 178,
+    "next_bff_handlers": 124,
+    "canonical_pages_fully_migrated": 0,
+    "canonical_bff_handlers_fully_migrated": 0,
+    "preview_candidates": 2
+  },
+  "routes": [
+    {
+      "kind": "BFF",
+      "path": "/.well-known/indexnow.key",
+      "next_source": "frontend/src/app/.well-known/indexnow.key/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/account/security/events.csv",
+      "next_source": "frontend/src/app/account/security/events.csv/route.ts",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/activity/events",
+      "next_source": "frontend/src/app/api/activity/events/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/api-health/backup-inventory",
+      "next_source": "frontend/src/app/api/admin/api-health/backup-inventory/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/api-health/status",
+      "next_source": "frontend/src/app/api/admin/api-health/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/elevate",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/elevate/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/request",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/request/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/revoke",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/revoke/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/status",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/test-ping",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/test-ping/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/auth/channel-otp/verify",
+      "next_source": "frontend/src/app/api/admin/auth/channel-otp/verify/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/blog/[slug]",
+      "next_source": "frontend/src/app/api/admin/blog/[slug]/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/blog/publisher-status",
+      "next_source": "frontend/src/app/api/admin/blog/publisher-status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/bonds/distribute-coupons",
+      "next_source": "frontend/src/app/api/admin/bonds/distribute-coupons/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/bonds/issues",
+      "next_source": "frontend/src/app/api/admin/bonds/issues/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/bonds/overview",
+      "next_source": "frontend/src/app/api/admin/bonds/overview/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/central-bank/policy",
+      "next_source": "frontend/src/app/api/admin/central-bank/policy/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/central-bank/status",
+      "next_source": "frontend/src/app/api/admin/central-bank/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/discord/test-dm",
+      "next_source": "frontend/src/app/api/admin/discord/test-dm/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/economy/tax-policy",
+      "next_source": "frontend/src/app/api/admin/economy/tax-policy/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/economy/tax-policy/auto-adjust",
+      "next_source": "frontend/src/app/api/admin/economy/tax-policy/auto-adjust/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/enterprises/harvest",
+      "next_source": "frontend/src/app/api/admin/enterprises/harvest/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/enterprises/status",
+      "next_source": "frontend/src/app/api/admin/enterprises/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/kdic/ledger-integrity",
+      "next_source": "frontend/src/app/api/admin/kdic/ledger-integrity/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/kdic/overview",
+      "next_source": "frontend/src/app/api/admin/kdic/overview/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/certificates",
+      "next_source": "frontend/src/app/api/admin/mint/certificates/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/execute-mint",
+      "next_source": "frontend/src/app/api/admin/mint/execute-mint/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/execute-retire",
+      "next_source": "frontend/src/app/api/admin/mint/execute-retire/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/freeze",
+      "next_source": "frontend/src/app/api/admin/mint/freeze/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/orders",
+      "next_source": "frontend/src/app/api/admin/mint/orders/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/orders/[id]/approve",
+      "next_source": "frontend/src/app/api/admin/mint/orders/[id]/approve/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/status",
+      "next_source": "frontend/src/app/api/admin/mint/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/mint/treasury-issue",
+      "next_source": "frontend/src/app/api/admin/mint/treasury-issue/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/operations/storage",
+      "next_source": "frontend/src/app/api/admin/operations/storage/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/pension/distribute",
+      "next_source": "frontend/src/app/api/admin/pension/distribute/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/pension/overview",
+      "next_source": "frontend/src/app/api/admin/pension/overview/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/pension/recent-payouts",
+      "next_source": "frontend/src/app/api/admin/pension/recent-payouts/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/seo-audit",
+      "next_source": "frontend/src/app/api/admin/seo-audit/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/seo/gsc-sitemap-submit",
+      "next_source": "frontend/src/app/api/admin/seo/gsc-sitemap-submit/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/seo/indexing-submit",
+      "next_source": "frontend/src/app/api/admin/seo/indexing-submit/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/seo/status",
+      "next_source": "frontend/src/app/api/admin/seo/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/seo/twitter",
+      "next_source": "frontend/src/app/api/admin/seo/twitter/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/grants",
+      "next_source": "frontend/src/app/api/admin/treasury/grants/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/grants/clawback",
+      "next_source": "frontend/src/app/api/admin/treasury/grants/clawback/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/mint-topup",
+      "next_source": "frontend/src/app/api/admin/treasury/mint-topup/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/salary/disburse",
+      "next_source": "frontend/src/app/api/admin/treasury/salary/disburse/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/swf",
+      "next_source": "frontend/src/app/api/admin/treasury/swf/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/swf/liquidate",
+      "next_source": "frontend/src/app/api/admin/treasury/swf/liquidate/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/admin/treasury/swf/rebalance",
+      "next_source": "frontend/src/app/api/admin/treasury/swf/rebalance/route.ts",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/advisor/deoki/ask",
+      "next_source": "frontend/src/app/api/advisor/deoki/ask/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/advisor/deoki/diagnose",
+      "next_source": "frontend/src/app/api/advisor/deoki/diagnose/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/advisor/deoki/rebalance/execute",
+      "next_source": "frontend/src/app/api/advisor/deoki/rebalance/execute/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/arena/rooms",
+      "next_source": "frontend/src/app/api/arena/rooms/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/arena/rooms/[id]/cancel",
+      "next_source": "frontend/src/app/api/arena/rooms/[id]/cancel/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/arena/rooms/[id]/join",
+      "next_source": "frontend/src/app/api/arena/rooms/[id]/join/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/attendance/spin",
+      "next_source": "frontend/src/app/api/attendance/spin/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/attendance/status",
+      "next_source": "frontend/src/app/api/attendance/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/auth/clear-session",
+      "next_source": "frontend/src/app/api/auth/clear-session/route.ts",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/blog",
+      "next_source": "frontend/src/app/api/blog/route.ts",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/blog/[slug]",
+      "next_source": "frontend/src/app/api/blog/[slug]/route.ts",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/blog/generate",
+      "next_source": "frontend/src/app/api/blog/generate/route.ts",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/bonds/repo-loans/borrow",
+      "next_source": "frontend/src/app/api/bonds/repo-loans/borrow/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/bonds/repo-loans/repay",
+      "next_source": "frontend/src/app/api/bonds/repo-loans/repay/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/bonds/rollover",
+      "next_source": "frontend/src/app/api/bonds/rollover/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/bonds/subscribe",
+      "next_source": "frontend/src/app/api/bonds/subscribe/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/content/announcements",
+      "next_source": "frontend/src/app/api/content/announcements/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/discord/broadcast",
+      "next_source": "frontend/src/app/api/discord/broadcast/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/events/burn-draw",
+      "next_source": "frontend/src/app/api/events/burn-draw/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/indexnow",
+      "next_source": "frontend/src/app/api/indexnow/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/market/secret-auction",
+      "next_source": "frontend/src/app/api/market/secret-auction/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/market/secret-auction/[id]/bid",
+      "next_source": "frontend/src/app/api/market/secret-auction/[id]/bid/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/notifications",
+      "next_source": "frontend/src/app/api/notifications/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/notifications/claim-all",
+      "next_source": "frontend/src/app/api/notifications/claim-all/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/notifications/search",
+      "next_source": "frontend/src/app/api/notifications/search/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/notifications/unread-count",
+      "next_source": "frontend/src/app/api/notifications/unread-count/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/contribute",
+      "next_source": "frontend/src/app/api/pension/contribute/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/funded/contribute",
+      "next_source": "frontend/src/app/api/pension/funded/contribute/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/funded/position",
+      "next_source": "frontend/src/app/api/pension/funded/position/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/funded/withdraw",
+      "next_source": "frontend/src/app/api/pension/funded/withdraw/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/liquidate",
+      "next_source": "frontend/src/app/api/pension/liquidate/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/pension/toggle-retire",
+      "next_source": "frontend/src/app/api/pension/toggle-retire/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/crawl-audit",
+      "next_source": "frontend/src/app/api/seo/crawl-audit/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/gsc",
+      "next_source": "frontend/src/app/api/seo/gsc/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/gsc/digest-report",
+      "next_source": "frontend/src/app/api/seo/gsc/digest-report/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/metadata",
+      "next_source": "frontend/src/app/api/seo/metadata/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/status",
+      "next_source": "frontend/src/app/api/seo/status/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/seo/submit",
+      "next_source": "frontend/src/app/api/seo/submit/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/shop/purchases",
+      "next_source": "frontend/src/app/api/shop/purchases/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/shop/purchases/export",
+      "next_source": "frontend/src/app/api/shop/purchases/export/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/spaces/real-estate/auction",
+      "next_source": "frontend/src/app/api/spaces/real-estate/auction/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/spaces/real-estate/claim-rent",
+      "next_source": "frontend/src/app/api/spaces/real-estate/claim-rent/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks",
+      "next_source": "frontend/src/app/api/stocks/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks/[id]/candles",
+      "next_source": "frontend/src/app/api/stocks/[id]/candles/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks/league",
+      "next_source": "frontend/src/app/api/stocks/league/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks/league/copy-trade/cancel",
+      "next_source": "frontend/src/app/api/stocks/league/copy-trade/cancel/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks/league/copy-trade/subscribe",
+      "next_source": "frontend/src/app/api/stocks/league/copy-trade/subscribe/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/stocks/league/join",
+      "next_source": "frontend/src/app/api/stocks/league/join/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/transfers/p2p",
+      "next_source": "frontend/src/app/api/transfers/p2p/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/transfers/search",
+      "next_source": "frontend/src/app/api/transfers/search/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/treasury/apply-grant",
+      "next_source": "frontend/src/app/api/treasury/apply-grant/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/treasury/claim",
+      "next_source": "frontend/src/app/api/treasury/claim/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/treasury/donate",
+      "next_source": "frontend/src/app/api/treasury/donate/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/treasury/overview",
+      "next_source": "frontend/src/app/api/treasury/overview/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/treasury/proposals",
+      "next_source": "frontend/src/app/api/treasury/proposals/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/viewer",
+      "next_source": "frontend/src/app/api/viewer/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/api/wallet/summary",
+      "next_source": "frontend/src/app/api/wallet/summary/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/app-api/v1/[...path]",
+      "next_source": "frontend/src/app/app-api/v1/[...path]/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/auth/[provider]/authorize",
+      "next_source": "frontend/src/app/auth/[provider]/authorize/route.ts",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/auth/[provider]/callback",
+      "next_source": "frontend/src/app/auth/[provider]/callback/route.ts",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/bank/statement.csv",
+      "next_source": "frontend/src/app/bank/statement.csv/route.ts",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/feed.xml",
+      "next_source": "frontend/src/app/feed.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/frontend-version",
+      "next_source": "frontend/src/app/frontend-version/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/media/[key]",
+      "next_source": "frontend/src/app/media/[key]/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/media/board/[key]",
+      "next_source": "frontend/src/app/media/board/[key]/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/media/profile/[key]",
+      "next_source": "frontend/src/app/media/profile/[key]/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/moneyverse-indexnow-key-2026.txt",
+      "next_source": "frontend/src/app/moneyverse-indexnow-key-2026.txt/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-announcements.xml",
+      "next_source": "frontend/src/app/sitemap-announcements.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-blog.xml",
+      "next_source": "frontend/src/app/sitemap-blog.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-board.xml",
+      "next_source": "frontend/src/app/sitemap-board.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-index.xml",
+      "next_source": "frontend/src/app/sitemap-index.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-static.xml",
+      "next_source": "frontend/src/app/sitemap-static.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/sitemap-stocks.xml",
+      "next_source": "frontend/src/app/sitemap-stocks.xml/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/support/transcript/[id]",
+      "next_source": "frontend/src/app/support/transcript/[id]/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "BFF",
+      "path": "/support/transcript/[id]/text",
+      "next_source": "frontend/src/app/support/transcript/[id]/text/route.ts",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/",
+      "next_source": "frontend/src/app/page.tsx",
+      "spring_candidate": "/spring-web",
+      "phase": "G2_PUBLIC",
+      "state": "PREVIEW_NOT_PARITY",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/blog",
+      "next_source": "frontend/src/app/[locale]/blog/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/blog/[slug]",
+      "next_source": "frontend/src/app/[locale]/blog/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/guide/glossary",
+      "next_source": "frontend/src/app/[locale]/guide/glossary/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/guide/glossary/[term]",
+      "next_source": "frontend/src/app/[locale]/guide/glossary/[term]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/tools/compound-interest-calculator",
+      "next_source": "frontend/src/app/[locale]/tools/compound-interest-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "next_source": "frontend/src/app/[locale]/tools/compound-interest-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/account",
+      "next_source": "frontend/src/app/account/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/account-deletion",
+      "next_source": "frontend/src/app/account-deletion/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/account/notifications",
+      "next_source": "frontend/src/app/account/notifications/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/account/privacy",
+      "next_source": "frontend/src/app/account/privacy/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/account/security",
+      "next_source": "frontend/src/app/account/security/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin",
+      "next_source": "frontend/src/app/admin/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/analytics",
+      "next_source": "frontend/src/app/admin/analytics/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/api-health",
+      "next_source": "frontend/src/app/admin/api-health/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/bank",
+      "next_source": "frontend/src/app/admin/bank/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/blog",
+      "next_source": "frontend/src/app/admin/blog/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/bonds",
+      "next_source": "frontend/src/app/admin/bonds/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/catalog",
+      "next_source": "frontend/src/app/admin/catalog/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/central-bank",
+      "next_source": "frontend/src/app/admin/central-bank/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/content",
+      "next_source": "frontend/src/app/admin/content/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/controls",
+      "next_source": "frontend/src/app/admin/controls/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/discord",
+      "next_source": "frontend/src/app/admin/discord/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/economy",
+      "next_source": "frontend/src/app/admin/economy/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/economy/scenario-lab",
+      "next_source": "frontend/src/app/admin/economy/scenario-lab/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/enterprises",
+      "next_source": "frontend/src/app/admin/enterprises/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/fx",
+      "next_source": "frontend/src/app/admin/fx/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/help",
+      "next_source": "frontend/src/app/admin/help/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/kdic",
+      "next_source": "frontend/src/app/admin/kdic/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/logs",
+      "next_source": "frontend/src/app/admin/logs/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/logs/activity",
+      "next_source": "frontend/src/app/admin/logs/activity/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/logs/delivery",
+      "next_source": "frontend/src/app/admin/logs/delivery/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/logs/integrity",
+      "next_source": "frontend/src/app/admin/logs/integrity/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/logs/system",
+      "next_source": "frontend/src/app/admin/logs/system/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/market",
+      "next_source": "frontend/src/app/admin/market/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/market/ai-news",
+      "next_source": "frontend/src/app/admin/market/ai-news/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/mint",
+      "next_source": "frontend/src/app/admin/mint/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/money-flow",
+      "next_source": "frontend/src/app/admin/money-flow/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/operations/storage",
+      "next_source": "frontend/src/app/admin/operations/storage/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/pension",
+      "next_source": "frontend/src/app/admin/pension/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/safety",
+      "next_source": "frontend/src/app/admin/safety/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/security",
+      "next_source": "frontend/src/app/admin/security/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/seo",
+      "next_source": "frontend/src/app/admin/seo/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/seo-audit",
+      "next_source": "frontend/src/app/admin/seo-audit/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/shop",
+      "next_source": "frontend/src/app/admin/shop/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/support",
+      "next_source": "frontend/src/app/admin/support/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/treasury",
+      "next_source": "frontend/src/app/admin/treasury/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/treasury/grants",
+      "next_source": "frontend/src/app/admin/treasury/grants/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/users",
+      "next_source": "frontend/src/app/admin/users/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/users/[id]",
+      "next_source": "frontend/src/app/admin/users/[id]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/admin/work",
+      "next_source": "frontend/src/app/admin/work/page.tsx",
+      "spring_candidate": null,
+      "phase": "G5_ADMIN",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/advisor",
+      "next_source": "frontend/src/app/advisor/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/announcements",
+      "next_source": "frontend/src/app/announcements/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/announcements/[announcementId]",
+      "next_source": "frontend/src/app/announcements/[announcementId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/arcade",
+      "next_source": "frontend/src/app/arcade/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/bank",
+      "next_source": "frontend/src/app/bank/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/bank/savings-pot",
+      "next_source": "frontend/src/app/bank/savings-pot/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/blog",
+      "next_source": "frontend/src/app/blog/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/blog/[slug]",
+      "next_source": "frontend/src/app/blog/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/board",
+      "next_source": "frontend/src/app/board/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/board/[postId]",
+      "next_source": "frontend/src/app/board/[postId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/bonds",
+      "next_source": "frontend/src/app/bonds/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/businesses",
+      "next_source": "frontend/src/app/businesses/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/businesses/ventures",
+      "next_source": "frontend/src/app/businesses/ventures/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/calendar",
+      "next_source": "frontend/src/app/calendar/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/casino",
+      "next_source": "frontend/src/app/casino/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/central-bank",
+      "next_source": "frontend/src/app/central-bank/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/chat",
+      "next_source": "frontend/src/app/chat/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/clubs",
+      "next_source": "frontend/src/app/clubs/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/clubs/[clubId]",
+      "next_source": "frontend/src/app/clubs/[clubId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/clubs/[clubId]/members",
+      "next_source": "frontend/src/app/clubs/[clubId]/members/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/clubs/new",
+      "next_source": "frontend/src/app/clubs/new/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/clubs/warfare",
+      "next_source": "frontend/src/app/clubs/warfare/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/collections",
+      "next_source": "frontend/src/app/collections/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/dashboard",
+      "next_source": "frontend/src/app/dashboard/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/data-deletion",
+      "next_source": "frontend/src/app/data-deletion/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/design-preview",
+      "next_source": "frontend/src/app/design-preview/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/developer",
+      "next_source": "frontend/src/app/developer/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/enterprises",
+      "next_source": "frontend/src/app/enterprises/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/features",
+      "next_source": "frontend/src/app/features/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/forgot-password",
+      "next_source": "frontend/src/app/forgot-password/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/fx",
+      "next_source": "frontend/src/app/fx/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/gallery",
+      "next_source": "frontend/src/app/gallery/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/gallery/[photoId]",
+      "next_source": "frontend/src/app/gallery/[photoId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/gallery/submit",
+      "next_source": "frontend/src/app/gallery/submit/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide",
+      "next_source": "frontend/src/app/guide/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/career-mastery",
+      "next_source": "frontend/src/app/guide/career-mastery/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/dopamine-system",
+      "next_source": "frontend/src/app/guide/dopamine-system/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/glossary",
+      "next_source": "frontend/src/app/guide/glossary/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/glossary/[term]",
+      "next_source": "frontend/src/app/guide/glossary/[term]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/stock-trading",
+      "next_source": "frontend/src/app/guide/stock-trading/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/guide/virtual-banking",
+      "next_source": "frontend/src/app/guide/virtual-banking/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/help",
+      "next_source": "frontend/src/app/help/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/help/[slug]",
+      "next_source": "frontend/src/app/help/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/inventory",
+      "next_source": "frontend/src/app/inventory/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/invite/[code]",
+      "next_source": "frontend/src/app/invite/[code]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/kdic",
+      "next_source": "frontend/src/app/kdic/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/lobby",
+      "next_source": "frontend/src/app/lobby/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/login",
+      "next_source": "frontend/src/app/login/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/login/providers",
+      "next_source": "frontend/src/app/login/providers/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/marketplace",
+      "next_source": "frontend/src/app/marketplace/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/marketplace/auction",
+      "next_source": "frontend/src/app/marketplace/auction/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/mint",
+      "next_source": "frontend/src/app/mint/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/newspaper",
+      "next_source": "frontend/src/app/newspaper/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/pension",
+      "next_source": "frontend/src/app/pension/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/prediction",
+      "next_source": "frontend/src/app/prediction/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/privacy",
+      "next_source": "frontend/src/app/privacy/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/profile",
+      "next_source": "frontend/src/app/profile/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/profile/[userId]",
+      "next_source": "frontend/src/app/profile/[userId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/profile/settings",
+      "next_source": "frontend/src/app/profile/settings/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/progression",
+      "next_source": "frontend/src/app/progression/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/progression/prestige",
+      "next_source": "frontend/src/app/progression/prestige/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/quests",
+      "next_source": "frontend/src/app/quests/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/register",
+      "next_source": "frontend/src/app/register/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/reset-password",
+      "next_source": "frontend/src/app/reset-password/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/roadmap",
+      "next_source": "frontend/src/app/roadmap/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/safety",
+      "next_source": "frontend/src/app/safety/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/safety/takedown",
+      "next_source": "frontend/src/app/safety/takedown/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/search",
+      "next_source": "frontend/src/app/search/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/seasons",
+      "next_source": "frontend/src/app/seasons/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/shop",
+      "next_source": "frontend/src/app/shop/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/shop/catalog",
+      "next_source": "frontend/src/app/shop/catalog/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/spaces",
+      "next_source": "frontend/src/app/spaces/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/spaces/real-estate",
+      "next_source": "frontend/src/app/spaces/real-estate/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/status",
+      "next_source": "frontend/src/app/status/page.tsx",
+      "spring_candidate": "/spring-web/status",
+      "phase": "G2_PUBLIC",
+      "state": "PREVIEW_NOT_PARITY",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks",
+      "next_source": "frontend/src/app/stocks/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/[symbol]",
+      "next_source": "frontend/src/app/stocks/[symbol]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/alerts",
+      "next_source": "frontend/src/app/stocks/alerts/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/community",
+      "next_source": "frontend/src/app/stocks/community/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/compare",
+      "next_source": "frontend/src/app/stocks/compare/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/derivatives",
+      "next_source": "frontend/src/app/stocks/derivatives/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/history",
+      "next_source": "frontend/src/app/stocks/history/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/league",
+      "next_source": "frontend/src/app/stocks/league/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/portfolio",
+      "next_source": "frontend/src/app/stocks/portfolio/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/stocks/watchlist",
+      "next_source": "frontend/src/app/stocks/watchlist/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/support",
+      "next_source": "frontend/src/app/support/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/terms",
+      "next_source": "frontend/src/app/terms/page.tsx",
+      "spring_candidate": null,
+      "phase": "G2_PUBLIC",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools",
+      "next_source": "frontend/src/app/tools/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/capital-gains-tax-calculator",
+      "next_source": "frontend/src/app/tools/capital-gains-tax-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/capital-gains-tax-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/capital-gains-tax-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/compound-calculator",
+      "next_source": "frontend/src/app/tools/compound-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/compound-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/compound-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/crypto-apy-calculator",
+      "next_source": "frontend/src/app/tools/crypto-apy-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/dividend-tax-calculator",
+      "next_source": "frontend/src/app/tools/dividend-tax-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/dividend-tax-calculator/[ticker]",
+      "next_source": "frontend/src/app/tools/dividend-tax-calculator/[ticker]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/farming-calculator",
+      "next_source": "frontend/src/app/tools/farming-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/farming-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/farming-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/fire-calculator",
+      "next_source": "frontend/src/app/tools/fire-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/gift-tax-calculator",
+      "next_source": "frontend/src/app/tools/gift-tax-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/gift-tax-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/gift-tax-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/goal-wealth-calculator",
+      "next_source": "frontend/src/app/tools/goal-wealth-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/isa-calculator",
+      "next_source": "frontend/src/app/tools/isa-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/isa-calculator/[slug]",
+      "next_source": "frontend/src/app/tools/isa-calculator/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/kimchi-premium-calculator",
+      "next_source": "frontend/src/app/tools/kimchi-premium-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/kimchi-premium-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/kimchi-premium-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/loan-interest-calculator",
+      "next_source": "frontend/src/app/tools/loan-interest-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/loan-interest-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/loan-interest-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/pension-tax-calculator",
+      "next_source": "frontend/src/app/tools/pension-tax-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/pension-tax-calculator/[slug]",
+      "next_source": "frontend/src/app/tools/pension-tax-calculator/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/quant-studio",
+      "next_source": "frontend/src/app/tools/quant-studio/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/real-estate-calculator",
+      "next_source": "frontend/src/app/tools/real-estate-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/real-estate-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/real-estate-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/retirement-calculator",
+      "next_source": "frontend/src/app/tools/retirement-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/retirement-calculator/[slug]",
+      "next_source": "frontend/src/app/tools/retirement-calculator/[slug]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/salary-calculator",
+      "next_source": "frontend/src/app/tools/salary-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/salary-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/salary-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/stock-calculator",
+      "next_source": "frontend/src/app/tools/stock-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/stock-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/stock-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/tax-calculator",
+      "next_source": "frontend/src/app/tools/tax-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/youth-leap-calculator",
+      "next_source": "frontend/src/app/tools/youth-leap-calculator/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/tools/youth-leap-calculator/[preset]",
+      "next_source": "frontend/src/app/tools/youth-leap-calculator/[preset]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/treasury",
+      "next_source": "frontend/src/app/treasury/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/verify-email",
+      "next_source": "frontend/src/app/verify-email/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/verify-email-change",
+      "next_source": "frontend/src/app/verify-email-change/page.tsx",
+      "spring_candidate": null,
+      "phase": "G3_MEMBER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/wallet",
+      "next_source": "frontend/src/app/wallet/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/wallet/activity",
+      "next_source": "frontend/src/app/wallet/activity/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/wallet/activity/transactions/[transactionId]",
+      "next_source": "frontend/src/app/wallet/activity/transactions/[transactionId]/page.tsx",
+      "spring_candidate": null,
+      "phase": "G4_FINANCE",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    },
+    {
+      "kind": "PAGE",
+      "path": "/work",
+      "next_source": "frontend/src/app/work/page.tsx",
+      "spring_candidate": null,
+      "phase": "G6_OTHER",
+      "state": "NOT_MIGRATED",
+      "production_cutover": false
+    }
+  ],
+  "note": "An inventory is NOT tested route parity. Production remains on the existing frontend."
+}

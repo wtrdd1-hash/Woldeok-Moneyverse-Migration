@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## 2026-11-17 Owner supersession: full Spring frontend scope v2026.11.17.2
+The old backend-only Spring platform draft retaining Next.js is superseded as a final architecture target. The owner directed migrating all 178 web pages and 124 Next BFF handlers into Spring MVC/Thymeleaf, preserving P0 security/financial truth and G0-G6 acceptance. This is an implementation candidate with only two isolated preview routes; no production or canonical route is migrated yet. [EN](../migration/FULL_SPRING_WEB_MIGRATION_v2026.11.17.2.md) / [KO](../migration/FULL_SPRING_WEB_MIGRATION_v2026.11.17.2.ko.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
