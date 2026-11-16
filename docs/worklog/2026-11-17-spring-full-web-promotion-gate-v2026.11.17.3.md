@@ -1,0 +1,19 @@
+# v2026.11.17.3 — Owner-requested Production promotion gate review
+
+## Before action — 2026-11-17 06:50 KST
+- Owner explicitly requested Production promotion of the previous full frontend-to-Spring conversion candidate.
+- Target candidate SHA `e1b2799f3fc2f0914988d5f6f0e8bd23ef09483b` in Draft PR #3213 (`feature/full-spring-web-foundation-v2026.11.17.2`). Verified latest `origin/main` SHA `2c1ea4cd7734e67f6047c68eb4ec884940ac7a09` before evaluation.
+- Source of authority: `AGENTS.md`, `docs/planning/INTEGRATED_PLANNING_MASTER.md`, `docs/planning/PROJECT_PLAN.md`, `docs/RELEASING.md`, candidate G0–G6 plan and tests. No code or runtime operations without gate compliance. Existing Gemini worktrees and service pointers protected.
+
+## In progress — Production/Test/branch preflight
+- Candidate remains an **unmerged Draft PR**, with only 2 preview MVC URL paths and 0/178 original Next pages, 0/124 original Next BFF routes converted. On latest main, Spring MVC preview controller does not exist.
+- Existing candidate full Spring unit/integration run: 110/111 pass, **1 FAIL** on duplicated `/api/engagement/dopamine/status` mapping between EngagementController and DopamineController (last exact-SHA evidence v2026.11.17.2). G0 QA PR #3207 P0 security/financial truth (notably candidate `.anyRequest().permitAll()` + disabled CSRF and fabricated finance receipt paths) remains open. Unit/SSR-only tests cannot prove this is Production-ready.
+- Actual service check at 06:50 KST: `test-main-backend.service` and `test-main-frontend.service` both `active` and serving, but public Test `/spring-web` returned **404**. Production `/spring-web` also **404**: target candidate is not running on the official Test or Production URL. This differs from the earlier inactive Test backend snapshot; use current evidence.
+- Public `/` and `/status` Production returned HTTP 200, but are existing Next pages. Test `/` timed out on one GET, Test `/api/version` returned 200 for `v2026.11.14-spring` backend, public Test `/frontend-version` reported `cfc178ab55d95fd4f1e34a62f2d3cf17b932c12a`, NOT the candidate SHA. Production frontend version was numeric build `1793751800158`, NOT a source SHA.
+- Official `scripts/release/verify-host-runtime-identity.mjs --channel test --sha e1b2799...` attempted read-only verification but could **not complete** due `EACCES` reading `/etc/moneyverse/test-backend.env`. This is an identity-verification blocker; do not claim successful Test SHA attestation.
+- Anonymous read-only HTTP gate: Production `/api/v1/admin/me` 401, `/api/v1/admin/security` 401, **`/api/v1/admin/treasury/overview` 200**. Official Test equivalent three requests all **401**. Production anonymous treasury read and Production/Test inconsistency require an explicit verified access review; HTTP 200 alone does not prove confidential data exposure, but it is not an approved admin-auth negative result. No write/mutation requests were issued.
+
+## Finished — 2026-11-17 KST
+- **Decision: RELEASE HOLD / NO Production promotion.** Gates violated: draft/unmerged candidate, incomplete 178 page/124 BFF parity, full tests failing, actual Test candidate not present, official Test identity preflight unavailable, security/finance findings unresolved, missing authenticated Test browser/OTP/session continuity/real ledger and rollback evidence.
+- No `git merge`, tag, deployment, Nginx switch, systemd restart, DB/WLD write, or Next removal performed. This was an on-host read-only release assessment followed by documentation only.
+- Required next actions: repair admin/finance G0 P0 with separate tested patch, fix duplicate Dopamine mapping with contract and authorization tests, complete full Next frontend parity G2–G6, run exact candidate in isolated Test with backend data isolation and authentic sessions/OTP, finish full CI/ledger/restore and canary continuity; only then approve zero-downtime Production promotion.
