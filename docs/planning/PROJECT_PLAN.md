@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.11.17.8 — Production KDIC public portal canonical route restoration (SCOPED OPERATIONAL PROMOTION)
+After Test DB read-only schema repair v2026.11.17.7 yielded official Test KDIC GET 200, restored ONLY exact read-only /api/kdic/portal and /api/v1/kdic/portal through existing Production Nest :4500 on internal :4400 and public Nginx 80. Preserved all prior v2026.11.17.6 KDIC admin/WLD unsafe-route 503 holds and explicit POST 405. Python renderer tests 4/4, isolated actual Test+Production HTTP shadow 16/16, external HTTPS GET 200, POST 405, JSON public projection and private no-store verified. First guarded attempt rolled back on Python user-agent 403 at final synthetic probe despite curl checks passing; second curl-based release gated and succeeded. Exact active Nginx SHA256 5993467abb935d12385810a1d3bb62827dc1b9592312c49ec31e1ce7478ff95b; root restricted rollback snapshot retained. This is ONLY edge-route public-read restoration; no full Spring/frontend/finance settlement Production approval. [Receipt](../releases/v2026.11.17.8-kdic-public-edge-production.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
