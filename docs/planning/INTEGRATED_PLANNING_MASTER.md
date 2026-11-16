@@ -1,6 +1,9 @@
 # Woldeok Moneyverse — Integrated Planning Master
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
+## v2026.11.16.3 — Security remediation authority-drift ledger (DRAFT / NO DEPLOYMENT)
+Read [EN technical proposal](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.md) / [KO](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.ko.md) against current Spring migration G0–G6, SECURITY_MASTER_PLAN and SECURITY_ASSURANCE_MASTER_PLAN. New main implementation_plan v50–v53 reports 100% full migration, but observed live legacy Node release backend and Discord daemon remain active and source security controls are incomplete. Treat this as **AUTHORITY_DRIFT / P0 HOLD**, not a silent acceptance of historical runtime claims. SEC0–SEC7 are proposed subworkstreams, with no authorization to alter source, Test, Production, database or money.
+
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)
 Explicit supplement to the open v2026.11.13.1 Spring architecture candidate, NOT a silent adoption over current financial, blog or auth plans. Ten section-specific cautions and G0–G6 acceptance gates, precise ownership of all routes/jobs/clients, DB-fenced single financial writer, existing session/OTP/Android/socket compatibility and immutable artifact supply-chain/rollback policy. [Detailed EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md); [Artifacts EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md); [Review PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). No adopted Java code or Test/Production verification.
 

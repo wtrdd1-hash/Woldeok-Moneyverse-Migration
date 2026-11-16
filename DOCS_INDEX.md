@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.16.3 — Spring security policy remediation (OWNER-REQUESTED DRAFT; RELEASE HOLD)
+- [Proposed security architecture EN](docs/planning/SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.md) / [KO](docs/planning/SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.ko.md). Default deny, DB-verified admin and human/service identity separation, CSRF/CORS, Discord/Telegram OTP, financial ledger gates, isolated Test/rollback; issue #3202; **no code or Production change**.
+
+
 ## v2026.11.13.2218 — Spring Agent Skills (GPT/Codex + Gemini CLI)
 - [Guide EN](docs/development/SPRING_AGENT_SKILLS.md) / [KO](docs/development/SPRING_AGENT_SKILLS.ko.md) · [Worklog EN](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.md) / [KO](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.ko.md) · [Internal EN](docs/updates/v2026.11.13.2218-spring-skills-internal.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.13.2218-spring-skills-github.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-github.ko.md). Eight portable Spring skills installed for the mini-PC user; no runtime deployment. Gemini CLI interactive activation not tested (binary absent).
 

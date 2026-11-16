@@ -1,6 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.16.3 — Spring 보안 개선·기획 권위 불일치 기록 (초안 / 배포 없음)
+기존 Spring G0~G6, SECURITY_MASTER_PLAN 및 SECURITY_ASSURANCE_MASTER_PLAN 우선 적용 하에 [상세 KO](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.ko.md) / [EN 정본](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.md) 제안. 루트 implementation_plan v50~v53의 전면 전환 완료 주장과 실제 레거시 Node/Discord 실행 및 미완료 Spring 보안 정책은 불일치한다. 이를 **AUTHORITY_DRIFT / P0 보류**로 유지하며 역사적 완료 표현을 조용히 최신 기획 승인으로 바꾸지 않는다. SEC0~SEC7은 제안된 하위 작업이며 소스·Test·운영·DB·금전 변경 승인이 아니다.
+
 ## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 후속 초안 (운영 변경 없음)
 미병합 v2026.11.13.1 설계를 재검토한 보충 기획이며 기존 승인된 금융·블로그·인증 규칙을 임의 대체하지 않는다. 장별 위험 R01~R10과 G0~G6 검증/중단 조건, 경로/스케줄/봇/클라이언트별 단독 소유권, DB fence 금융 기록자, 기존 세션/OTP/Android/Socket.IO 호환, 불변 빌드 아티팩트 공급망·복구 기준을 명시했다. [한국어 상세](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [한국어 아티팩트](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md); [후속 PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). 실제 Java 코드/Test/운영 검증 없음.
 

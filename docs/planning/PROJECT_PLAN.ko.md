@@ -1,6 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.16.3 — Spring 보안정책 전면 개선 기획 (사용자 요청 초안 / 운영 보류)
+[이슈 #3202](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3202) 기반 [한국어 상세 설계](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.ko.md) / [EN 정본](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.md). DB 검증 사용자/관리자 신원과 내부 서비스 키를 분리하고, 전 경로·별칭 목록, 기본 차단, CSRF/CORS, Discord/Telegram OTP, 금융 작성자 펜스, 정확-SHA 실제 Test 부정검증·롤백 정책을 제안한다. **기획 초안일 뿐 운영 반영·코드 개발/머지 승인·기존 금융/제품 기획 및 G0~G6 대체가 아니다.** 컨트롤러 수 89/89 대응과 Spring 신규 1개는 운영·보안 100% 완료를 뜻하지 않는다.
+
 ## v2026.11.13.2 — 스프링 전환 항목별 위험·아티팩트 기획 보강 (초안 / 운영 보류)
 사용자 지시에 따른 v2026.11.13.1 설계 재검토 결과, 기존 1~9장별 우선 위험 R01~R10, G0~G6 상세 실행/승인 조건, 국고·금융 이중 기록 방지 fence, 기존 세션/OTP/Android/실시간 동등성, 정확한 SHA 롤백을 보강했다. [상세 재검토](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [아티팩트·GHCR·조건부 Artifactory 명세](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md). 기존 초안 PR #3142 기반 후속 초안 PR #3144. 실제 G0, Java 구현·Test·운영 승격은 아직 미실시·미승인.
 

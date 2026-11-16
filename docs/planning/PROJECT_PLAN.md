@@ -1,6 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
+## v2026.11.16.3 — Spring security policy remediation architecture (OWNER-REQUESTED DRAFT / RELEASE HOLD)
+Security response to [issue #3202](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3202): [EN proposed design](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.md) / [KO](SPRING_SECURITY_POLICY_REMEDIATION_v2026.11.16.3.ko.md). Separates DB-verified human user/admin sessions from scoped internal service credentials; inventories every route/alias; proposes deny-by-default, CSRF/CORS, Discord/Telegram step-up, ledger writer fencing, live Test negative gates and isolated rollback. **Not adopted as runtime, not an authorization to implement/merge/promote, and does not supersede existing product/financial authority or G0–G6.** Main-source class inventory 89/89 plus 1 new Spring endpoint does not certify full operational/security parity.
+
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
 A separate owner-requested deep review of the v2026.11.13.1 Spring design documents ten prioritized risks (R01–R10) per original section, G0–G6 detailed implementation/acceptance gates, canonical finance single-writer fencing, session/OTP/Android/realtime compatibility and exact-SHA rollback. [Detailed review](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md); [Artifact, GHCR and optional Artifactory policy](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [KO](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md). Stacked draft PR #3144 depends on open parent PR #3142. G0 measured runtime/DB/client evidence, actual Test, new Java implementation and Production remain unapproved/unverified.
 
