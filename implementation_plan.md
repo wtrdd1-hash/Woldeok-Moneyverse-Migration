@@ -4883,3 +4883,37 @@ graph TD
 - **공식 전환율**: **100.00% (89 / 89)**
 - **GitHub 브랜치 상태**: main 단일 브랜치 (모든 PR 머지 및 로컬/원격 동기화 완료)
 - **시스템 상태**: 프로덕션 가동 100% 정상
+
+---
+## 🌟 [v50 Specification] 레거시 Node.js/NestJS 백엔드 완전 퇴역 및 Spring Boot 3.3.5 단일 런타임 독립 완결
+### 1. 레거시 백엔드 퇴역 및 리소스 회수
+- **중지 및 비활성화된 레거시 서비스 (systemd disabled & dead)**:
+  - moneyverse-release-v1546-backend.service: 구형 v1546 Node/NestJS 백엔드 (PID 1825786 종료, 메모리 약 182MB 및 스왑 회수)
+  - moneyverse-discord-bot.service: 구형 Node.js 디스코드 봇 데몬 (PID 3110225 종료, 메모리 약 80MB 회수)
+  - 	est-main-backend.service: 구형 포트 3100 테스트 백엔드 (PID 4028414 종료, 메모리 약 141MB 회수)
+- **자원 회수 결과**: 불필요한 프로세스 3기 완전 종료로 호스트 시스템 메모리 약 400MB+ 및 CPU 점유 완전 회수.
+
+### 2. Nginx 게이트웨이 완전 전환 (Port 4400)
+- Nginx의 기본 엔드포인트(location /)를 기존 prod_node(Port 4500)에서 prod_spring(Port 4550)으로 완전 전환.
+- 89개 전 도메인 API 뿐만 아니라 /health, /api/version을 포함한 모든 잔여 트래픽까지 Spring Boot 3.3.5가 전담 처리.
+- 무중단 reload 완료 (sudo nginx -s reload).
+
+### 3. 단독 독립 런타임 실서버 실측 검증
+- GET /health: 200 OK (status: UP, runtime: 21.0.12.1, service: moneyverse-spring-backend)
+- GET /api/version: 200 OK (ctiveEngine: Java Spring Boot, framework: Spring Boot 3.3.5, version: v2026.11.14-spring)
+- GET /auth/bootstrap/status: 200 OK (initialized: true, canBootstrap: false)
+- GET /controls/flags: 200 OK (PVP_ARENA_ENABLED: true, STOCK_LEAGUE_ENABLED: true)
+- GET /seo/status: 200 OK (healthyPercent: 99.8)
+- GET /help/categories: 200 OK (categories: [account, wallet, shop, community, support])
+- GET /blog/articles: 200 OK (	otal: 1)
+- GET /clubs/warfare/season/current: 200 OK (seasonName: 2026 영지 쟁탈 대전)
+- GET /economy/hot-time/active: 200 OK (isActive: true, multiplier: 1.5)
+- GET /integrations/discord/guilds/status: 200 OK (connected: true, botUsername: 월덕봇#7601)
+- GET /stocks/league/current: 200 OK (	itle: 제1회 월덱 가상주식 실전 투자 챔피언십)
+- GET /admin/fx/status: 200 OK (eserves: 대한민국 외환보유액 통합계정)
+
+### 4. 최종 시스템 구성 결산
+- **단일 운영 백엔드**: Spring Boot 3.3.5 (moneyverse-spring-backend.service, Port 4550 / 9092)
+- **프론트엔드**: Next.js (moneyverse-frontend.service, Port 3000)
+- **AI 추론 및 게이트웨이**: MCP Gateway (moneyverse-mcp.service, Port 3025)
+- **GitHub 저장소**: main 단일 브랜치 100% 완전 통합
