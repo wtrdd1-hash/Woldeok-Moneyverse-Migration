@@ -22,3 +22,7 @@
 - 사후 드문 auth_request 503이 Nginx 500으로 변환됨을 발견하여, 503 실패 보존 매핑 적용; 별도 RED→GREEN 독립 테스트 후 무중단 재적용.
 - 운영 독립 읽기전용 검증 13/13 PASS; nginx -t PASS; Node/Spring/홈 200. 원복 백업: `/srv/moneyverse-data/reports/seo-recovery-v2026.11.17.2/moneyverse-nginx-before-20261117T004603.conf`, `seo-edge-auth-before-failclosed-503.conf`. 실제 IndexNow 제출 안 함.
 - Spring 직접 :4550 가짜 SEO 구현은 그대로, 운영은 Nginx를 통해 NestJS로 우회. 운영 프론트 정적 퍼널 표시도 그대로이며 현재 소스 개선은 브랜치 전용. 관리자 실제 로그인·실제 GSC 및 전체 CI 미실시; Java 및 프론트 정식 운영 승격 HOLD.
+
+## GitHub 종료 인계
+- Draft PR #3206: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3206
+- PR 검토 대기. Nginx 운영 완화 조치는 반영되었으나 프론트 소스와 Spring 완전 전환은 운영 배포하지 않음.

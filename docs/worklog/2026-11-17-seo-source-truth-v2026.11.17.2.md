@@ -21,3 +21,7 @@
 - Found intermittent auth_request upstream 503 surfaced as 500. Added explicit fail-closed 503 mapping, verified RED→GREEN in stage and applied another Nginx reload.
 - Independent Production read-only checks: **13/13 PASS**, nginx -t PASS, active Node/Spring/homepage healthy. Rollback snapshots: `/srv/moneyverse-data/reports/seo-recovery-v2026.11.17.2/moneyverse-nginx-before-20261117T004603.conf` and `seo-edge-auth-before-failclosed-503.conf`. No real IndexNow submission or database mutation.
 - Direct Spring `:4550` still contains hardcoded SEO responses but the operational 4400 gateway routes SEO away. Existing immutable Production Next still displays static funnel; candidate frontend replacement and BFF defense are only on branch, not deployed. Real authenticated admin E2E, actual Google GSC property response, provider IndexNow receipt and full CI NOT VERIFIED. Frontend and Java full Spring SEO migration remain RELEASE HOLD.
+
+## GitHub closeout handoff
+- Draft review PR #3206: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3206
+- Review pending. Nginx mitigation is operational; candidate frontend and native Spring SEO are NOT promoted.
