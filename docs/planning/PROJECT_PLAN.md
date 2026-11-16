@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
+
+## v2026.11.17.7 — Official Test KDIC read-only schema repair (TEST APPLIED / PRODUCTION HOLD)
+Actual running Test Nest process was bound to isolated PostgreSQL wdmv_v761_test_acl_v1544_restore, not the default CI database. Its KDIC tables existed but migration 335 read-only SECURITY DEFINER functions were absent; public Test KDIC portal responded 500. Took verified restricted 21.9MB pg_dump snapshot, restored the exact DB to a separate Test clone, tested the existing canonical migration 335 and app-role SELECT-denial/EXECUTE-only ACL, then applied migration 335 solely to official Test. HTTP /api/v1/kdic/portal transitioned 500→200 without restart; anonymous admin KDIC remained 401, Test homepage/version 200. No ledger/payment/Production DB change. This is TEST schema repair, NOT complete production feature promotion. [EN worklog](../worklog/2026-11-17-test-kdic-schema-recovery-v2026.11.17.7.md), [KO](../worklog/2026-11-17-test-kdic-schema-recovery-v2026.11.17.7.ko.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration section review and artifact lifecycle (DRAFT / NO RELEASE)
