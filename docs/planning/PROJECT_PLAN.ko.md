@@ -1,6 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.17.3 — Nginx·스프링·프론트엔드 로그 보관/압축 및 관리자 이력·실시간 조회 (사용자 지시 / 초안 / 운영 보류)
+**기획 반영 후보:** Nginx·Spring 백엔드·Next.js 서버 프론트엔드·전환 중인 기존 NestJS 로그에 대해 이벤트 UTC 시각 기준 **일반 7일**, **중요(보안·오류·관리자 주요 명령) 30일** 보관. 매일/크기 기준 순환, 닫힌 파일 zstd 압축(gzip 대체), 체크섬·색인·자동 만료, 용량 경보 및 중요 기록 조기삭제 금지를 요구한다. 금융 원장·DB 백업 보존은 별도다. `/admin/logs/system`에서 권한 검증된 기간/필터/커서 이력 조회, **실시간 SSE와 5초 폴링 대체**, 중요 로그 추가 OTP·이중 서버 권한 검사·마스킹·열람 감사·캐시/색인 방지를 도입한다. [상세 국문 기획](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.ko.md) / [영문 정본](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.md). 병행 중인 관리자 로그 보안 브랜치는 수정하지 않는다. **이번 회차는 문서만 변경:** 실제 로그 삭제·압축 배포·실시간 기능·Test/운영 승격·DB 백업 정책 변경 없음.
+
 ## v2026.11.13.2 — 스프링 전환 항목별 위험·아티팩트 기획 보강 (초안 / 운영 보류)
 사용자 지시에 따른 v2026.11.13.1 설계 재검토 결과, 기존 1~9장별 우선 위험 R01~R10, G0~G6 상세 실행/승인 조건, 국고·금융 이중 기록 방지 fence, 기존 세션/OTP/Android/실시간 동등성, 정확한 SHA 롤백을 보강했다. [상세 재검토](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [아티팩트·GHCR·조건부 Artifactory 명세](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md). 기존 초안 PR #3142 기반 후속 초안 PR #3144. 실제 G0, Java 구현·Test·운영 승격은 아직 미실시·미승인.
 

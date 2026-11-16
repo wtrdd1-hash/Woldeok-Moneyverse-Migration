@@ -2,6 +2,8 @@
 
 [English canonical](README.md) | **한국어**
 
+현재 사용자 지시 관측성 기획: [서버 로그 일반 7일/중요 30일 압축 보관 및 관리자 실시간·이력 조회 v2026.11.17.3](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.ko.md) / [영문 정본](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.md). 기획 초안이며 배포되지 않았다.
+
 현재 living plan과 상세 제품/엔지니어링 명세를 보관합니다.
 
 권위는 [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md) → [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md) → 명시적으로 채택된 최신 상세명세 순서입니다.

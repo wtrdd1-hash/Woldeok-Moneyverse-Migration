@@ -2,6 +2,8 @@
 
 **English canonical** | [한국어](README.ko.md)
 
+Current owner-directed observability planning: [Runtime log retention and secure admin history/live console v2026.11.17.3](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.md) / [Korean](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.ko.md). Draft only; 7-day routine/30-day important, compressed retention; no deployment.
+
 This directory contains current living plans and detailed product/engineering specifications.
 
 Authority starts with [PROJECT_PLAN.md](PROJECT_PLAN.md), then [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md), then the newest explicitly adopted detailed specification.
