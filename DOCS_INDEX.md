@@ -3,6 +3,8 @@
 ## v2026.11.13.2218 — Spring Agent Skills (GPT/Codex + Gemini CLI)
 - [Guide EN](docs/development/SPRING_AGENT_SKILLS.md) / [KO](docs/development/SPRING_AGENT_SKILLS.ko.md) · [Worklog EN](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.md) / [KO](docs/worklog/2026-11-13-spring-agent-skills-v2026.11.13.2218.ko.md) · [Internal EN](docs/updates/v2026.11.13.2218-spring-skills-internal.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.13.2218-spring-skills-github.md) / [KO](docs/updates/v2026.11.13.2218-spring-skills-github.ko.md). Eight portable Spring skills installed for the mini-PC user; no runtime deployment. Gemini CLI interactive activation not tested (binary absent).
 
+## v2026.11.13.2 — Spring migration reviewed draft (NO RUNTIME CHANGE)
+- [Detailed EN risk/implementation review](docs/planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md) / [한국어](docs/planning/SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) · [Artifact/Artifactory EN](docs/planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md) / [한국어](docs/planning/SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) · [Worklog](docs/worklog/2026-11-13-spring-migration-detailed-review-v2026.11.13.2.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). R01–R10 and G0–G6; parent PR #3142 OPEN, Test/Production NOT DONE.
 
 **DOC-2026.11.11.1500 — [Authoritative documentation status](docs/CURRENT_DOCUMENTATION_STATUS.md) / [한국어](docs/CURRENT_DOCUMENTATION_STATUS.ko.md).** Historical entries below are preserved, not current deployment assurances. Test version API HTTP 502 observed; documentation-only change.
 

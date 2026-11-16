@@ -1,4 +1,10 @@
-﻿## v2026.11.03.1646 — Telegram false recovery alerts (PRODUCTION_VERIFIED)
+﻿## v2026.11.13.2 — Spring risk review + artifact lifecycle (DRAFT / NO DEPLOY)
+- Section-by-section R01–R10 warnings, staged G0–G6 domain acceptance, single DB-fenced finance writer, session/Android/bot parity and reversible Test/Production checks. New artifact/conditional Artifactory policy for JAR/OCI digests, SBOM/provenance, manifest, retention and recoverable rollback. No Java code/DB/Test/Production changes. [Details](2026-11-13-spring-migration-review-v2026.11.13.2.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144).
+
+## v2026.11.13.1 — Spring Boot full-backend migration architecture (DRAFT / RELEASE HOLD)
+- Planned G0–G6 replacement of all NestJS backend, admin, finance, jobs, bots and integrations with an initially modular Spring Boot backend while retaining Next.js UI and PostgreSQL ledger authority. Single-writer finance, API/Android/security parity, independent Test/restore/canary and rollback gates; no runtime/DB/Test/Production/main changes. [Design](../superpowers/specs/2026-11-13-spring-platform-migration-design.md) · [Version note](../releases/v2026.11.13.1.md).
+
+## v2026.11.03.1646 — Telegram false recovery alerts (PRODUCTION_VERIFIED)
 - Prevent bogus disk recovery alerts on stable OK percentages and provisional recovery during in-progress QA. Isolated 30 tests pass; no finance/app data changed. [Issue #2617](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/2617); [details](../updates/v2026.11.03.1646-telegram-alert-recovery-github.md).
 
 ## v2026.10.30.1504 — Owner-only wallet transaction detail planning (DRAFT / RELEASE HOLD)
