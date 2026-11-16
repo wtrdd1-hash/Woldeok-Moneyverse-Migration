@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.17.1 — Emergency stock admin console auth alignment (P0; TEST NEGATIVE GATES)
+- [Worklog EN](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.md) / [KO](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.ko.md) · [Internal EN](docs/updates/v2026.11.17.1-stock-admin-auth-internal.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1-stock-admin-auth-github.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-github.ko.md). Spring anonymous/transport-only admin console gate had HTTP 200 while protected stock API denied real access. Isolated Nginx bridge routes security/identity to Nest; Test Nginx/API negative gates passed; signed-in admin E2E is NOT certified.
+
+
 ## v2026.11.17.1 — Encrypted backup cron repair and isolated restore (HOST VERIFIED / off-host P0 OPEN)
 - [Runbook EN](docs/operations/backup-and-recovery.md) / [KO](docs/operations/backup-and-recovery.ko.md) · [Worklog EN](docs/worklog/2026-11-17-backup-recovery-v2026.11.17.1.md) / [KO](docs/worklog/2026-11-17-backup-recovery-v2026.11.17.1.ko.md) · [Internal EN](docs/updates/v2026.11.17.1-backup-recovery-internal.md) / [KO](docs/updates/v2026.11.17.1-backup-recovery-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1-backup-recovery-github.md) / [KO](docs/updates/v2026.11.17.1-backup-recovery-github.ko.md). Exact obsolete 04:00 Debian cron removed after verified encrypted timer health, separate original crontab saved privately, isolated PostgreSQL 17 network-none full dump restored with public table/ledger row checks. **No Production DB change or application release; immutable off-host DR and complete financial/app restore certification remain OPEN.** [Source PR #3208](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3208).
 
