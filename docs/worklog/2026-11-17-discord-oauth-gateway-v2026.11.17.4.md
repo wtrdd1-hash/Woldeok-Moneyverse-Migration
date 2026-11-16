@@ -24,5 +24,10 @@
 - After promotion: Nginx reload only, public-origin authorize must redirect to Discord OAuth endpoint, wrong/missing callback challenge must fail closed, other routes must remain healthy, and rollback must remain available.
 - Real interactive Discord account sign-in cannot be certified without an actual user's provider consent; do not claim that from an authorization redirect alone.
 
+## Canonical OAuth start on www (additional host-only cookie guard)
+- Independently found www `authorize` correctly registers `https://www.easy-scraping.com/auth/discord/callback`, while existing frontend success redirect uses canonical `https://easy-scraping.com`. A host-only cookie minted on www would not accompany the cross-host success navigation.
+- The public-only `ops/nginx/discord-oauth-canonical-start-v2026.11.17.4.conf` redirects **www OAuth starts only** to the canonical authorize path **before** minting any cookie. Callback paths are deliberately not rewritten; the backend remains the only verifier of state and PKCE.
+- New TDD RED->GREEN regression; whole Nginx Python suite **9/9 PASS**. Separate Nginx canary on 4442 syntax PASS; www Discord/Google authorize returns 307 to canonical with zero `set-cookie`; canonical authorize delegates to Discord/Google and issues one cookie; www `/login` preserved; `client=mobile` query preserved; arbitrary host cannot inject a new redirect destination.
+
 ## Status
 - Candidate prepared; operations evidence at `/srv/moneyverse-data/tasks/discord-login-v2026.11.17.4/`.
