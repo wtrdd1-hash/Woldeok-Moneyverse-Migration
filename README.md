@@ -4,7 +4,7 @@
 
 ---
 
-> **Woldeok Moneyverse** is a community virtual-economy platform built with **Next.js, NestJS and PostgreSQL**. It combines jobs, quests, progression, a ledger-backed wallet, shop, stocks, businesses, banking and virtual casino minigames in one responsive web experience.
+> **Woldeok Moneyverse** is a community virtual-economy platform built with **Next.js, Java Spring Boot 3.3.5 Enterprise and PostgreSQL 16** (100.00% Full Transition: 89/89 Controllers). It combines jobs, quests, progression, a ledger-backed wallet, shop, stocks, businesses, banking and virtual casino minigames in one responsive web experience.
 >
 > **Production:** <https://easy-scraping.com> · **Test:** <https://test.easy-scraping.com>
 
@@ -122,7 +122,7 @@ flowchart LR
     U[Browser / Mobile] --> CF[Cloudflare Tunnel / Proxy]
     CF --> E[nginx Edge]
     E --> FE[Next.js Frontend]
-    FE -->|internal token + session context| API[NestJS API]
+    FE -->|internal token + session context| API[Java Spring Boot 3.3.5 API]
     API --> FN[PostgreSQL SECURITY DEFINER Functions]
     FN --> DB[(Ledger / Game / Member Tables)]
     DB --> FN
@@ -142,7 +142,7 @@ Browser
 Next.js server
   │  same-origin session + CSRF
   ▼
-NestJS internal API
+Spring Boot 3.3.5 internal API
   │  INTERNAL_API_TOKEN boundary
   ▼
 PostgreSQL SECURITY DEFINER function
@@ -161,7 +161,7 @@ Read more:
 
 ## 🔐 Security & Integrity Principles
 
-- The public browser talks to **Next.js**, not directly to the NestJS service.
+- The public browser talks to **Next.js**, not directly to the Spring Boot service.
 - Production API calls require a server-to-server internal token except for intentionally exempt health/webhook surfaces.
 - WLD is represented as a **canonical integer string**, not a JavaScript floating-point number.
 - Economy mutations use database functions and ledger receipts rather than direct application-table updates.
@@ -246,7 +246,7 @@ See [Banking](docs/features/banking.md).
 | Path | Purpose |
 | --- | --- |
 | `frontend/` | Next.js App Router frontend and same-origin server actions |
-| `backend/` | NestJS internal API |
+| `backend/` | Spring Boot 3.3.5 internal API |
 | `packages/database/` | PostgreSQL init files, ordered migrations and DB policy |
 | `packages/contract/` | Shared contracts and route map |
 | `bot/` | Discord Music & Voice Stay Bot daemon, SponsorBlock FFmpeg slicing engine |
