@@ -12,6 +12,11 @@ async function authorize(): Promise<NextResponse | null> {
   try {
     const security = await api<{ consoleSession: { state: string } }>('/api/v1/admin/security');
     if (security.consoleSession?.state !== 'open') return reply({ error: 'console_locked' }, 403);
+    // Spring's transitional admin/security endpoint has accepted an internal
+    // service token as administrator authority. That token identifies Next,
+    // not the human operator. Require independent NestJS session/role/console
+    // validation for this SEO read and its IndexNow submission side effect.
+    await api('/api/v1/seo/status/admin');
     return null;
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return reply({ error: 'login_required' }, 401);

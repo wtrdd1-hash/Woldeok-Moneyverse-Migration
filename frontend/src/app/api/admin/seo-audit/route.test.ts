@@ -30,12 +30,29 @@ describe('admin SEO audit: real authority and honest evidence', () => {
     urlsMock.mockReturnValue(['https://easy-scraping.com/', 'https://easy-scraping.com/tools']);
     apiMock.mockImplementation(async (path: string) => {
       if (path === '/api/v1/admin/security') return { consoleSession: { state: 'open' } };
+      if (path === '/api/v1/seo/status/admin') return { recentLogs: [] };
       if (path === '/api/v1/seo/status') return {
         totalHits24h: 12, totalHits7d: 30, avgDurationMs: 87,
         botDistribution: { Googlebot: 7 }, recentLogs: [],
       };
       throw new Error('Unexpected backend route');
     });
+  });
+
+  it('does not trust an open Spring console without SEO backend role proof', async () => {
+    const { ApiError } = await import('@/lib/api');
+    apiMock.mockImplementation(async (path: string) => {
+      if (path === '/api/v1/admin/security') return { consoleSession: { state: 'open' } };
+      if (path === '/api/v1/seo/status/admin') throw new ApiError(401);
+      if (path === '/api/v1/seo/status') return {
+        totalHits24h: 12, totalHits7d: 30, avgDurationMs: 4,
+        botDistribution: { Googlebot: 7 },
+      };
+      throw new Error('Unexpected backend route');
+    });
+    const res = await GET();
+    expect(res.status).toBe(401);
+    expect(urlsMock).not.toHaveBeenCalled();
   });
 
   it('refuses anonymous reads without revealing inventory', async () => {
@@ -81,6 +98,7 @@ describe('admin SEO audit: real authority and honest evidence', () => {
   it('marks telemetry unavailable rather than zero or healthy', async () => {
     apiMock.mockImplementation(async (path: string) => {
       if (path === '/api/v1/admin/security') return { consoleSession: { state: 'open' } };
+      if (path === '/api/v1/seo/status/admin') return { recentLogs: [] };
       throw new Error('SEO backend offline');
     });
     const res = await GET();
