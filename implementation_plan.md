@@ -4917,3 +4917,45 @@ graph TD
 - **프론트엔드**: Next.js (moneyverse-frontend.service, Port 3000)
 - **AI 추론 및 게이트웨이**: MCP Gateway (moneyverse-mcp.service, Port 3025)
 - **GitHub 저장소**: main 단일 브랜치 100% 완전 통합
+
+---
+## 🛡️ [v51 Specification] 프로덕션 런타임 정밀 진단, Netty-SocketIO 3계층 무결성 및 Nginx/Cloudflare 관제 체계 완결
+### 1. 프로덕션 Spring Boot 3.3.5 단일 런타임 실측 지표
+- **서비스 상태**: `moneyverse-spring-backend.service` (Active: running, Main PID: 3207319)
+- **JVM 힙/메모리 실측**: Actuator `jvm.memory.used` 기준 `288.6 MB` (3.0267456E8 bytes)로 초기 314MB 대비 추가 최적화 안정화 달성.
+- **HikariCP 커넥션 풀**: `hikaricp.connections` 기준 `2.0 active connections` (HikariPool-1 정상 연결 유지).
+- **활성 쓰레드 풀**: `jvm.threads.live` 기준 `57.0 threads` (Tomcat HTTP 워커 + Netty 소켓 이벤트 루프 + Discord4J 리액터 쓰레드).
+- **Actuator Health**: `GET /actuator/health` -> `200 OK` (`status: UP`).
+
+### 2. Netty-SocketIO 실시간 웹소켓 3계층(Port 9092, 4400, HTTPS) 핸드셰이크 실측
+- **Spring Boot 내장 서버 (Port 9092)**:
+  - `GET /socket.io/?EIO=4&transport=polling` -> `0{"sid":"bca6339e-56d1-4649-aa1f-51be092b6e82","upgrades":["websocket"],"pingInterval":25000,"pingTimeout":60000}`
+  - 엔진오(EIO=4) 정상 응답, 세션 SID 발급 및 websocket 프로토콜 업그레이드 지원 실측 100% 통과.
+- **Nginx 내부 단일 게이트웨이 (Port 4400)**:
+  - Nginx 4400 서버 블록에 `location /socket.io/` 프록시 라우팅 신규 추가 및 리로드 완료 (`sudo nginx -s reload`).
+  - `GET /socket.io/?EIO=4&transport=polling` -> `0{"sid":"21bf497d-9517-4b26-9da5-09307812c2c9",...}` 100% 정상 통과.
+- **외부 프로덕션 HTTPS 도메인 (test.easy-scraping.com)**:
+  - `GET https://test.easy-scraping.com/socket.io/?EIO=4&transport=polling` -> `0{"sid":"06dc64d4-cacd-478c-bb87-eb552847e76f",...}` 실측 100% 통과.
+
+### 3. 구형 백엔드 서비스 정지 및 Nginx 에러 제로(Zero-Error) 실측
+- **구형 Node.js 백엔드 정지**: `moneyverse-release-v1546-backend.service` 정지 완료 (`inactive (dead)`).
+- **포트 바인딩 무결성**: `ss -tulpn` 점검 결과 구형 포트 4500 리스닝 완전 소멸 확인, 포트 4550(Spring REST) 및 포트 9092(Netty-SocketIO)만 청취 중.
+- **Nginx 에러 로그**: 컷오버 시점(16:56:14) 이후 현재까지 17분 이상 연속 **에러 0건 (Nginx Error Zero)** 유지.
+
+### 4. Cloudflare 에지 프록시 및 SSL/TLS 보안 검증
+- **HTTPS 엔드포인트 실측**:
+  - `GET https://test.easy-scraping.com/health` -> `HTTP/2 200 OK`
+  - `GET https://test.easy-scraping.com/api/version` -> `HTTP/2 200 OK`
+- **보안 헤더 무결성**:
+  - `server: cloudflare`, `cf-cache-status: DYNAMIC`
+  - `strict-transport-security: max-age=31536000; includeSubDomains; preload`
+  - `x-content-type-options: nosniff`, `x-frame-options: DENY`, `x-robots-tag: noindex, nofollow`
+
+### 5. Discord 봇 운영 아키텍처 정밀 분석 및 진단
+- **Spring Boot DiscordBotService 진단**:
+  - Discord 게이트웨이 웹소켓 연결 성공 확인 (`[DiscordBot] Connected to Gateway`).
+  - Discord4J 3.2.6 버전의 Jackson 모듈 역직렬화 이슈 (`ImmutableChannelData` 파싱 시 `Optional cannot be cast to Id` 경고 발생) 식별.
+- **Node.js moneyverse-discord-bot 데몬 분석**:
+  - 월덕봇#7601 (887278005179785218) 계정으로 11개 길드 슬래시 커맨드 및 음성 채널(🔊│음성 1536572442422550538) 상주(`Voice Stay Daemon`) 기능 정상 수행 중.
+  - 음성 스트리밍 및 슬래시 인터랙션 안전성을 위해 당분간 전용 봇 데몬의 격리 분리 운영을 유지하거나, 향후 JDA/Discord4J 최신 패치 및 LavaPlayer 도입을 통한 완전 통합 로드맵 수립.
+
