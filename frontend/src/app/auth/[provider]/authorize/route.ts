@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError, api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie, sessionCookiePair } from '@/lib/cookie-relay';
 import { publicUrl } from '@/lib/public-url';
+import { cookiesToClearAfterOAuthStart } from '@/lib/oauth-cookie-transition';
 
 /**
  * Starts the OAuth round trip.
@@ -36,6 +37,11 @@ export async function GET(
     );
     const response = NextResponse.redirect(authorizationUrl);
     for (const cookie of setCookie) {
+      response.headers.append('set-cookie', cookie);
+    }
+    // Drop a stale Nest cookie only when Spring issued a replacement prelogin
+    // session; otherwise Nest would bind the returning state to the wrong one.
+    for (const cookie of cookiesToClearAfterOAuthStart(setCookie, session.signedIn)) {
       response.headers.append('set-cookie', cookie);
     }
     return response;

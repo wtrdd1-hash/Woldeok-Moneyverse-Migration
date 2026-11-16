@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
 import { publicUrl } from '@/lib/public-url';
+import { cookiesToClearAfterOAuthCompletion } from '@/lib/oauth-cookie-transition';
 import { mobileOAuthCompletionResponse } from '@/lib/mobile-oauth-return';
 
 /**
@@ -73,6 +74,11 @@ export async function GET(
     }
     const response = NextResponse.redirect(destination, 302);
     for (const cookie of setCookie) {
+      response.headers.append('set-cookie', cookie);
+    }
+    // Clear only the superseded Spring prelogin cookie on a genuine successful
+    // Nest sign-in; failed, linked and step-up flows keep their prior cookies.
+    for (const cookie of cookiesToClearAfterOAuthCompletion(setCookie, payload.outcome)) {
       response.headers.append('set-cookie', cookie);
     }
     return response;
