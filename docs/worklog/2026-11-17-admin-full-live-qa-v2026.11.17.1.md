@@ -10,3 +10,12 @@
 - Pending; record each execution checkpoint with redacted evidence.
 ## Finished
 - Pending.
+
+### Midpoint 1 — live HTTP observations (2026-11-17 KST)
+- Anonymous, no Cookie, real public edge: 38 current static admin page paths probed: 37 HTTP 200, one /admin/logs/system HTTP 404; 200 indicates transport rendering only, NOT authorized functional pass. Multiple admin pages expose X-Robots-Tag: index, follow, whereas blog admin page is noindex,nofollow.
+- Anonymous read-only GET inventory of 92 mapped frontend/backend admin API paths: HTTP 200:24, 401:4, 403:1, 404:58, 503:5. Some 404 represent legacy/unimplemented Spring route drift: assess by contract before classifying.
+- Critical security/finance investigation: public anonymous GET /api/v1/admin/security reports open consoleSession and admin/superadmin roles; direct Spring :4550 and Nest :4500 both reject with 401. Public /api/v1/admin/me reports roles while both direct origins reject. Frontend :4501 with HTTPS-aware headers also provides the open-console response.
+- Public anonymous Spring GET /api/v1/admin/treasury/overview, revenue, expenditure, transactions, kdic/ledger-integrity, fx/status return 200 while Nest :4500 rejects with 401. Returned money provenance is NOT CERTIFIED.
+- Current live admin mint status and orders endpoints return 503; test-main-backend inactive, Test treasury API 502, Test mint status 503 and SWF BFF 500. Do not perform money mutations on Production or assume Test isolated before proving connections.
+- On-host evidence under /tmp/mv_adminqa_20261117/{pages,apis}.json contains response status, headers, key names and hashes but not response bodies.
+- NEXT: inspect Next app-api rewrite and finance fallback; add actual safe Test SQL/HTTP checks; finalize precise report.

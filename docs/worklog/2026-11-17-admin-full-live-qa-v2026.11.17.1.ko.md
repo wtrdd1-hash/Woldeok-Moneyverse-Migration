@@ -9,3 +9,11 @@
 - 대기.
 ## 종료
 - 대기. 운영 승격 없음.
+
+### 중간 기록 1 — 운영 HTTP 실측
+- 비로그인 운영 관리자 화면 38경로: 200 37건, 404 1건(/admin/logs/system). HTTP 200은 기능 통과가 아님. 다수 관리자 페이지 index,follow 헤더.
+- 관리자 GET API 92경로: 200 24건, 401 4건, 403 1건, 404 58건, 503 5건. 404 모두를 실제 장애로 단정하지 않음.
+- 인증 불일치: 운영 /api/v1/admin/security는 비로그인에 open 관리자 세션 및 admin 역할 반환, Spring/Nest 직접 경로는 401. /api/v1/admin/me도 운영 200, 두 원본 서버 401.
+- 금융 불일치: 국고 overview/revenue/expenditure/transactions, 예보 원장, FX는 Spring에서 익명 200, Nest에서 401. 값의 실제 원장 출처 미확인.
+- 운영 조폐국 status/orders 503. Test 백엔드 비활성, 국고 API 502, SWF BFF 500. 운영 금전 변경 없음.
+- GitHub 기록에는 원시 잔고·개인정보·비밀정보 포함하지 않음.
