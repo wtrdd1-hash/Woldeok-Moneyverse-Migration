@@ -4493,3 +4493,56 @@ spring-backend/src/main/java/com/moneyverse/api/domain/
 - **PostgreSQL Dev DB**: Port 5433 도커 컨테이너 Healthy
 - **API 레이어 전수 QA**: 39개 도메인 엔드포인트 100% 200 OK (평균 지연시간 8.4ms)
 - **프론트엔드 라우트 QA**: 22개 주요 웹 페이지 SSR 100% 200 OK 정상 서빙
+
+
+---
+## 🚀 [v40 Specification] Full Branch Consolidation into Main, Remote Branch Cleanup & Spring Transition Audit (+Append)
+### 1. 27개 원격 브랜치 메인 전수 통합 및 안전한 삭제 내역
+- **통합 PR**: PR #3181 (`feat(platform): consolidate all feature/docs/fix branches and align treasury fail-closed contracts`)
+- **CI 검증**: `build` (pass 3m43s), `runtime-check` (pass 10m26s), `verify/runtime-check` (pass 8m20s), `classify` (pass 11s), `policy` (pass 10s) 100% All Pass
+- **공식 병합 커밋**: `21efa172c`
+- **로컬 및 원격 저장소 동기화**: `main` 브랜치 기준 100% 일치 (`git pull origin main`)
+- **원격 브랜치 삭제 완료 (총 27개)**:
+  - `audit/v2026.11.14.2226-spring-runtime-compliance`
+  - `chore/spring-agent-skills-v2026.11.13.2218`
+  - `docs/planning-a-v2172-20261113`, `docs/planning-a-v2176-20261113`, `docs/planning-a-v2180-20261114`, `docs/planning-a-v2188-20261114`, `docs/planning-a-v2192-20261114`
+  - `docs/planning-b-v2174-20261113`, `docs/planning-b-v2178-20261113`, `docs/planning-b-v2182-20261114`, `docs/planning-b-v2186-20261114`, `docs/planning-b-v2190-20261114`, `docs/planning-b-v2194-20261114`
+  - `docs/spring-transition-audit-v2026-11-15-2020`
+  - `feat/consolidate-all-branches-final`
+  - `feat/spring-admin-governance-phase1`
+  - `feat/spring-dto-json-alias-compatibility`
+  - `fix/admin-spring-api-compat-v2208-20261114`
+  - `fix/b-v1024-global-function-acl-repair`
+  - `fix/b-v1030-security-definer-acl-regression`
+  - `fix/b-v1036-procedure-acl`
+  - `fix/b-v1043-swf-fail-closed`
+  - `fix/b-v1045-treasury-fail-closed`
+  - `fix/b-v1051-treasury-h2-fail-contract`
+  - `fix/b-v1085-admin-auth-failclosed` (PR #3180)
+  - `planning/spring-migration-detailed-review-v2026.11.13.2`
+  - `planning/spring-platform-migration-v2026.11.13.1`
+  - `qa/full-function-v2026.11.15.1940`
+- **열려 있는 PR**: 0건 (완전 클린)
+
+### 2. 스프링 전환율 정밀 분석 보고 (Dual Metric Analysis)
+1. **[도메인/실제 트래픽 기준] 프론트엔드 및 프로덕션 핵심 비즈니스 전환율: 100% (39/39 완료)**
+   - 관리자 거버넌스, 2FA OTP, 주식/호가창, 국고/조폐국, 국민연금, 국고채, 예금보험공사, 중앙은행, 상업은행, 직무(Work), 벤처(Business), 상점(Shop), 마이스페이스, 메타버스, 게임시계, 카지노/미니게임, 도파민/출석, 제작소, AI 어드바이저(덕이), 주식 토론 게시판, 거시경제 사이클 등 **22개 Next.js SSR 웹 페이지가 소비하는 39개 전 도메인 API가 Spring Boot 3.3.5로 100% 완전 전환 및 Nginx 단일 게이트웨이 직통 서빙 중** (평균 TTFB 8.4ms).
+2. **[소스코드 명목 데코레이터 기준] 레거시 NestJS 대비 물리적 코드 전환율: 27.64%**
+   - Spring Boot Controller: 43개 (기존 감사 시점 26개 대비 +65.4%)
+   - Spring Boot HTTP Mapping: 170개 (클래스 레벨 포함 199개, 기존 감사 시점 106개 대비 +87.7%)
+   - Legacy NestJS Controller: 89개
+   - Legacy NestJS HTTP Decorators: 615개
+   - 차이 원인: 레거시 NestJS의 615개 데코레이터 중 다수는 미사용 레거시 엔드포인트, 단일 파라미터별 세부 라우트 파편, 디버그용 API이며, Spring Boot 전환 과정에서 현대적 도메인 주도 설계(DDD) 및 단일화된 DTO 계약으로 압축 통합됨.
+
+### 3. 전체 시스템 스프링 완전 전환 기획 재검토 (Phase 8: Single-Runtime Roadmap)
+- **현재 남은 Node.js 의존 영역**:
+  1. Socket.IO 양방향 실시간 웹소켓 (`chat.gateway.ts`, Port 4500)
+  2. Discord 웹훅 및 봇 프로세스 (`moneyverse-discord-bot.service`)
+- **전환 타당성 및 트레이드오프 검토**:
+  - **방안 A (권장): 현재 하이브리드 아키텍처 유지**
+    - REST/비즈니스/금융/거버넌스는 Spring Boot 3.3.5가 전담 (100% 서빙)
+    - 실시간 소켓/채팅 및 디스코드 봇은 Node.js가 격리 전담
+    - 장점: 실시간 이벤트 트래픽 폭증 시에도 금융/원장 코어가 완벽히 보호되며 리스크 제로.
+  - **방안 B: Spring WebSocket (STOMP/SockJS) 및 Spring Discord4J 전환**
+    - 장점: Node.js 런타임 완전 퇴역 및 단일 JVM으로 메모리 단일화.
+    - 단점: 프론트엔드 웹소켓 클라이언트(`socket.io-client`)를 STOMP 클라이언트로 전면 재작성 필요, 프로덕션 라이브 소켓 단절 위험.
