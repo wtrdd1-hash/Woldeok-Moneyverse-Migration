@@ -4782,3 +4782,45 @@ graph TD
 - **Spring Boot 컨트롤러 수**: 52개 -> **60개** (신규 8개 컨트롤러 공식 가동)
 - **NestJS 컨트롤러 대비 물리적 전환율**: 58.42% -> **67.41% (60 / 89)** 달성 (전체 시스템의 3분의 2 돌파!)
 - **Node.js 잔여 컨트롤러**: 29개 (전환 대상 점진적 축소 지속)
+
+---
+## 🚀 [v48 Specification] Phase 13 공공 정보·콘텐츠·도움말 & 규제 준수 체계 완료 (전환율 82.02%)
+### 1. 전환 및 신규 구축 완료 컴포넌트 목록
+- **규제 준수·보안 & SEO**:
+  - PrivacyController.java: GDPR/CCPA/개인정보보호법 대응 DSR(Data Subject Request) 자기결정권 열람·정정·삭제·동의철회 접수 및 접수증 발급 API (/privacy/dsr/requests, /privacy/dsr/requests/{id}).
+  - SafetyController.java: TAKE IT DOWN Act 및 미성년자/명예훼손 긴급 콘텐츠 삭제 접수, 처리 상태 조회 및 관리자 모더레이션 API (/safety/takedown, /safety/takedown/status, /admin/safety/takedowns).
+  - SeoController.java: Google Search Console 색인 상태 모니터링, IndexNow 실시간 검색엔진 통지 및 루트 경로 검증 키 서빙 (/seo/status, /seo/crawl-audit, /seo/gsc/analytics, /.well-known/indexnow.key).
+- **도움말 & 고객센터 (Helpdesk)**:
+  - HelpController.java: 카테고리별 도움말 문서 조회 및 실시간 검색 API (/help/categories, /help/articles, /help/articles/{slug}).
+  - HelpReportController.java: 사용자 불법/규정위반 콘텐츠 신고 접수 및 처리 상태 추적 API (/help/reports, /help/reports/{id}).
+  - AdminHelpController.java: 고객센터 티켓 및 신고 접수건 관리자 승인/반려/제재 API (/admin/help/tickets, /admin/help/reports/{id}/resolve).
+- **에디토리얼 & 콘텐츠 (Content & Editorial)**:
+  - BlogVerifiedController.java & BlogVerifiedAdminController.java: 에디토리얼 검증 블로그 아티클 열람, 카테고리별 필터 및 관리자 원고 발행 API (/blog/articles, /blog/articles/{slug}, /admin/blog/articles).
+  - AiNewsController.java: AI 기반 실시간 경제 속보 및 시장 시황 브리핑 API (/news/ai-briefings, /admin/news/ai-briefings/generate).
+  - AppContentController.java: 공식 공지사항 배너, 갤러리 피드 및 시스템 운영 상태 안내 API (/content/announcements, /content/operations/status).
+- **온보딩 & 개인화 (User Journey & Progression)**:
+  - EarlyGameController.java: 신규/복귀 유저 온보딩 7단계 퀘스트 및 일일 첫 출석 보너스 지급 API (/early-game/today, /early-game/first-day, /early-game/claim-step).
+  - ProfileImageController.java & ProfileController.java: 프로필 아바타 이미지 멀티파트 업로드 및 프로필 정보 통합 API (/profile/avatar, /profile/settings).
+  - CollectionController.java: 유저 수집품(배지/트로피/도감) 조각 목록 조회 및 개인 메모 갱신 API (/collections/cards, /collections/cards/{id}/note).
+
+### 2. 엔드포인트 통합 테스트 및 CI 검증
+- **통합 테스트**: Phase13EditorialHelpAndProfileIntegrationTest.java 10/10 테스트 100% GREEN 통과.
+- **GitHub Actions CI (PR #3188)**: uild, untime-check (6m 15s), erify / runtime-check (10m 54s) 포함 8대 필수 검사 전수 통과.
+- **머지 완료**: main 브랜치에 스쿼시 머지 완료 (7f2a1670b). 작업 브랜치 정리 완료.
+
+### 3. 프로덕션 배포 및 Nginx 컷오버 실측
+- **Spring Boot 서비스 배포**: moneyverse-spring-backend.service (PID 3194476, Active) 재기동 완료.
+- **Nginx 포트 4400 게이트웨이 정규식 갱신**:
+  - \\.well-known/indexnow\\.key|seo|admin/seo|api/seo|api/v1/seo|help|admin/help|api/help|api/v1/help|blog|admin/blog|api/blog|api/v1/blog|safety|admin/safety|api/safety|api/v1/safety|privacy|api/privacy|api/v1/privacy|early-game|api/early-game|api/v1/early-game|collections|api/collections|api/v1/collections|profile/avatar|api/profile/avatar|api/v1/profile/avatar 라우트 등록.
+  - 무중단 reload 완료 (sudo nginx -s reload).
+- **실서버 엔드포인트 실측 결과**:
+  - GET /.well-known/indexnow.key: 200 OK (8f7b3c2e1a9d4f6b8c0e2a4d6f8a0b2c)
+  - GET /seo/status: 200 OK (healthyPercent: 99.8, totalCrawls: 15420)
+  - GET /help/categories: 200 OK (categories: [account, wallet, shop, community, support])
+  - GET /blog/articles: 200 OK (rticles: 1건 정상 반환)
+  - POST /safety/takedown: 201 Created (caseId: case-4ab49f13-...)
+
+### 4. 전환율 지표 갱신
+- **Spring Boot 컨트롤러 수**: 60개 -> **73개** (+13개 컨트롤러 증설)
+- **전환율 달성도**: 67.41% -> **82.02% (73 / 89)** (대망의 80% 돌파!)
+- **잔여 전환 대상**: 마지막 Phase 14 잔여 16개 컨트롤러 (완전 100% 전환 목전)
