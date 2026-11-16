@@ -8,4 +8,6 @@
 
 **작업 중:** 안전한 복구 가능 여부 점검 중. 운영 서비스 재시작, Nginx 운영 경로 변경, DB·재무 데이터 변경 없음.
 
-**종료:** 결과 기록 예정.
+**작업 중:** 공식 Test 백엔드 비활성·구형 Nest 구동 방식, Test 일부 상태/버전 API의 운영 Spring 4550 공유, Test 전용 PostgreSQL 컨테이너 별도 존재(실제 Spring 연결 미검증) 확인. 후보 PR의 필수 CI가 당시 진행 중임을 확인. 근본 복구 작업을 [GitHub P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209)에 기록. 운영 서버 및 기존 Test 파일 무변경.
+
+**작업 종료 — 운영 승격 보류 (2026-11-17 KST):** 공식 독립 Test/동일 SHA/실제 최고관리자 세션 및 무중단 원복 검증 미달. 운영 JAR 직접 교체·구형 Node Test 서비스 강제 기동·운영 API 우회 연결은 진행하지 않음. `main` 병합, Test/운영 배포, Nginx·DB·회원 자금·세션 변경 없음. 후속 필수 작업은 Spring 전용 독립 Test 환경 및 정확한 빌드·실제 로그인 QA 복구 후 정식 운영 승격.

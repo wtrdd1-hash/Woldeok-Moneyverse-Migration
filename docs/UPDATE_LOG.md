@@ -1,3 +1,6 @@
+## v2026.11.17.2 — System logs Production promotion (BLOCKED / NO RUNTIME CHANGE)
+Owner authorized Production promotion, but official Test backend3100 was disabled and Test health/version sent to Production Spring4550, while Test auth/log APIs returned 502. Exact-SHA Test attestation FAIL; release withheld pending [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209). No main/Production/Test runtime, DB, accounts, Nginx or financial changes. [Internal](updates/v2026.11.17.2-admin-system-logs-release-internal.md) · [GitHub](updates/v2026.11.17.2-admin-system-logs-release-github.md).
+
 ## v2026.11.17.1 — Admin runtime logs security (ISOLATED CANDIDATE / RELEASE HOLD)
 Main #3201 log viewer existed but Production/Test routes were HTTP 404. This separate branch fixes unvalidated x-internal-token access, requires SUPERADMIN + open admin console, redacts sensitive output, bounds reads and fails closed. Focused Spring 14/14, frontend 4/4, isolated HTTP negatives 2/2 and Spring jar PASS; official Test/Production rollout unverified. [Internal](updates/v2026.11.17.1-admin-system-logs-internal.md) · [GitHub](updates/v2026.11.17.1-admin-system-logs-github.md).
 

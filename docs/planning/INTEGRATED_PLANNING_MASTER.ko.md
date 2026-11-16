@@ -1,4 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.11.17.2 — 관리자 로그 운영 승격 검증 (보류 / 운영 무변경)
+사용자 운영승격 승인 후 확인 결과 공식 Test 백엔드는 구형 Node 실행설정으로 비활성화, Test 상태/버전 API는 운영 Spring 4550을 공유하며 인증·로그 API 502 및 정확한 SHA 검증 실패. 격리된 Spring Test와 실제 인증 API QA가 출시 필수조건. [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209) 기록. main 병합·Test/운영·DB·Nginx 변경 없음. [승격 작업기록](../worklog/2026-11-17-admin-system-logs-production-promotion-v2026.11.17.2.ko.md).
+
 ## v2026.11.17.1 — 관리자 런타임 로그 조회 보안 보완 (격리 후보 / 운영 보류)
 `main` 86777fb의 #3201에서 Nginx·Spring·Next.js 4종 로그 관제가 병합되었으나 운영 및 공식 Test 페이지가 HTTP 404로 확인됨. 독립 브랜치 `fix/admin-system-logs-hardening-v2026.11.17.1`에서 Spring 최고관리자+열린 콘솔 세션, 서버 액션별 권한, 마스킹·조회량 제한·오류 분리, 격리 HTTP 비인가 테스트를 보강. DB·금융·운영 Nginx·운영 서비스는 변경하지 않았고 공식 Test 동일 SHA, 실제 로그인 E2E, 독립 롤백 등 승격 조건 충족 전까지 운영 보류. [작업기록](../worklog/2026-11-17-admin-system-logs-hardening-v2026.11.17.1.ko.md).
 

@@ -22,8 +22,12 @@
 - Production and Test independent readiness gates therefore currently **BLOCKED**; do not bypass them via direct copy, restarts, or Nginx switching.
 - At inspection, PR #3205 runtime-check checks were IN_PROGRESS. No approval or evidence that complete CI passed.
 
-## IN PROGRESS
-- Record exact official Test provisioning blockers and assess whether non-disruptive restoration with an independent Test DB is possible.
+## IN PROGRESS (2026-11-17 KST)
+- Verified the official Test backend is disabled, its systemd entrypoint is still legacy Node `dist/main.js`, and its public `/api/version` and `/health` route to Production Spring 4550. A dedicated Test PostgreSQL container exists (localhost 5580/5585), but its connection has not been verified for Spring; do not substitute the Production connection.
+- GitHub release candidate CI was not fully green for the current PR SHA at checkpoint; prior CI for original code SHA succeeded, but the concurrent Build Test Candidate run was cancelled. The current PR remained draft pending runtime-check and mandatory release gates.
+- Reported the prerequisite as [P0 blocker #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209). Existing runtime, user sessions, Nginx and DB were left untouched.
 
-## FINISHED
-- Pending final evidence and release decision.
+## FINISHED — PRE-PROMOTION BLOCKED (2026-11-17 KST)
+- **Decision: RELEASE HOLD.** Official Test currently provides neither isolated Spring backend, live authenticated session paths, nor exact-source artifact provenance. Rebooting the retired Node service, redirecting Test to Production Spring 4550 or overwriting the Production Spring jar is not acceptable evidence or zero-downtime practice.
+- No candidate was merged into `main`; no Test/Production runtime, Nginx, database, financial data or session mutation occurred. GitHub worklog and issue updated for the next engineering step.
+- Remaining owner-approved scope: independently rebuild the Spring Test stack, pass Test/session/API/full CI and rollback requirements, then only perform zero-downtime Production promotion. This workstream must not claim deployed functionality before the public page and API actually work.
