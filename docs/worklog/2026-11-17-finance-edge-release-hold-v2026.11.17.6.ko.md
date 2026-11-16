@@ -6,3 +6,5 @@
 ## 종료 — 2026-11-17 07:55 KST
 운영/내부 Nginx KDIC·출석 문제 경로 503, 일반 홈페이지·버전 API 200, 비로그인 관리자·SEO 401, 공식 Test 홈페이지/버전 200 확인. 설정 적용 후 SHA 5b5c6bfffb8d4b68c721b00010fa40b31f335c90cbfd5aafbe1f665eca2b4745. 재시작 대신 Nginx reload 적용, 복구 가능한 원본 별도 보관. DB/WLD/원장 수정 없음.
 **남은 과제:** KDIC 정상 원장 결제 및 세션·OTP·CSRF 검증, #3221과 SEC1 통합, 공식 Test 정확한 SHA/백업 복원/무중단 승격 검증. 임시 503은 기능 완성 아님.
+
+GitHub review / 검토 기록: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3223
