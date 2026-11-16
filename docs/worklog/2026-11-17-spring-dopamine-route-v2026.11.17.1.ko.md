@@ -20,3 +20,5 @@
 - 운영 시스템 및 DB 잔액·원장·Nginx·systemd는 변경하지 않았다.
 - 실제 보상 지급 기능 구현이 아니라, 근거 없는 지급 성공을 막는 보안 후보이다.
 - 미완료: 로그인 성공 E2E·CSRF·동의·원장 기반 실제 보상·공식 Test 정확한 SHA·보안 전체 검증·운영 승격.
+
+GitHub 검토 PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3218

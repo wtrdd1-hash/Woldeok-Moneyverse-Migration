@@ -16,7 +16,7 @@
 - Main rechecked at midpoint/final: 2c1ea4cd7734e67f6047c68eb4ec884940ac7a09; other SEC1, SEO, KDIC, logs branches untouched.
 - No database writes, financial transactions, systemd/Nginx changes or production promotion performed.
 - Release HOLD: Spring session/CSRF/consent positive flows, official exact-SHA Test, ledger-backed feature restoration, broader finance P0 and independent full restore still needed.
-- Link to GitHub PR to be appended after creation.
+- GitHub review PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3218.
 
 ## MIDPOINT — ~06:59 KST
 - Confirmed baseline RED: 5 targeted tests, 4 expected failures (duplicate mapping and unjournaled success).
