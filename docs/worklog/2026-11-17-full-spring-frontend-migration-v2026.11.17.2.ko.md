@@ -20,6 +20,20 @@
 ### 중간 기록 2 — 전체 소스·실 HTTP 검증
 - 최신 main은 초기 177(다른 worktree)과 달리 화면 178개, API 124개, 전체 302개. 경로 누락 검사 4/4 통과, 정식 전환 0건.
 - 통합 기획서·PROJECT_PLAN 목표 변경 및 G0~G6 영문/한국어 기획 작성.
-- Spring clean test bootJar 결과: JAR 생성됐으나 107개 테스트 중 1건 FAIL (기존 EngagementController/DopamineController가 /api/engagement/dopamine/status 중복 매핑). 전체 QA 통과 아님.
+- Spring clean test bootJar 결과: JAR 생성됐으나 111개 테스트 중 1건 FAIL (기존 EngagementController/DopamineController가 /api/engagement/dopamine/status 중복 매핑). 전체 QA 통과 아님.
 - 실 HTTP 임베디드 Test에서 한국어 렌더링·CSS·DB 장애 503 검증. 기능 OFF 시 CSS 폴더가 200으로 노출되는 현상을 발견해 별도 /assets 위치로 이동했고, OFF 시 404 테스트로 보호.
 - Spring 새 웹 관련 10/10 PASS, Python 목록 4/4 PASS. 운영 라우팅·금전 변경 없음.
+
+### 중간 기록 3 — 최신 main 반영 및 회귀
+- origin/main 최신 2c1ea4cd77 (관리자 주식 세션 권한 수정 #3211) 재가져와 전환 전용 브랜치 충돌 없이 리베이스. 178개 화면/124개 BFF 목록 검사 4개 재통과.
+- 리베이스 후 Java 전체 111개: 110 PASS, 1 FAIL. 기존 Phase7IntegrationTest /api/engagement/dopamine/status가 EngagementController·DopamineController 매핑 중복으로 실패. 해당 코드에 임의 금융 수정하지 않음.
+- Spring 미리보기 실제 내장 HTTP, ON/OFF, 언어·오류·개인정보 헤더 테스트 10/10 PASS. 79MB JAR 로컬 생성만, 공식 Test/운영 배포 안 함.
+
+## 종료 — v2026.11.17.2 (2026-11-17 KST)
+- [x] 통합/프로젝트/표준·운영 문서 확인, 최신 main 재조회 및 병렬 변경과 충돌 없이 리베이스
+- [x] 독립 브랜치/작업 전·중·종료 이력 EN/KO 기록
+- [x] Spring MVC/Thymeleaf 2개 실제 미리보기, 영어 기본/한국어, 실제 출처 조회·장애 503·CSP/검색제외·반응형 CSS; 10/10 Java 웹 테스트 통과
+- [x] 178 화면/124 BFF 전환 목록·자동 검증 4개 통과, 통합 기획 G0~G6 목표 수정
+- [x] Java 전체 빌드 및 기존 컨트롤러 충돌 재현, 111개 중 110 PASS/1 FAIL; 내부 및 GitHub 업데이트 기록
+- [ ] 미완료: 기존 정식 URL 이전(0/178, 0/124), 로그인/OTP/금전 E2E, P0 보안/금융 복구, 공식 Test 전부 통과·백업 복원·무중단 운영 승격
+- 결과: 독립 코드 후보만 완료, 운영/DB/WLD/기존 Next/main 변경 없음. **RELEASE HOLD**.

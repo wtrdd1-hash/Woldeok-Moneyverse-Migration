@@ -89,3 +89,7 @@ scripts/qa/*.sh
 
 # Retain the systemd scheduled QA runner in source control
 !scripts/qa/moneyverse-hourly-qa.sh
+
+# Python migration tooling cache
+__pycache__/
+*.py[cod]
