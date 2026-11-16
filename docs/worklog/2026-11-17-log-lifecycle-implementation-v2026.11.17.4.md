@@ -26,5 +26,9 @@
 - Security caveat: current API gateway route ownership, OTP cross-application flow, group/file permissions, journald path and 30-day archive capacity all need isolated Test verification before any promotion. Public/private DB backups and money records were unchanged.
 - No edits to other agents' active worktrees, Production runtime, `/etc/logrotate.d/nginx`, systemd configuration, or live logs. No user-money mutation.
 
-## GitHub publication
-Pending commit and review PR reference. Keep all incomplete release gates visible.
+## GitHub publication — completed review publication, not service release
+- Committed candidate source/tests/EN+KO updates as `d30c4b01a92c49b15c3db9ce3d319b45a161e608` on `feat/log-lifecycle-admin-v2026.11.17.4`; exact remote branch SHA was verified after push. Initial source commit covers 25 files; earlier planning documents from v2026.11.17.3 were cherry-picked as separate commits.
+- Created **draft PR #3212**: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3212 , stacked on moving base `fix/admin-system-logs-hardening-v2026.11.17.1` instead of directly changing main. The base was updated by another agent to `a27724522b6c8546f597b0ee08c4dd141eac8056` with release/Test isolation documents; this task did not edit its worktree. Intersecting changed source paths with those new base commits were empty at review creation.
+- Latest `origin/main` reference was independently refreshed before this close-update; no candidate runtime is installed. A green review status (if eventual) would not replace real Test/Production evidence.
+- The separate release conditions remain BLOCKED due Next release build OOM, unverified real Test authenticated API/UI and routing, archive group/safety/restore, actual 7/30-day retention under load, and SSE absence.
+- This close-update commit contains documentation only. No Production, Test, systemd, logrotate, Nginx, database or financial mutation.
