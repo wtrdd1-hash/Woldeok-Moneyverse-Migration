@@ -1,0 +1,399 @@
+package com.moneyverse.api.domain.identity.service;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+@Service
+public class UserAuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserAuthService.class);
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private final JdbcTemplate jdbcTemplate;
+    private final Argon2PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UserAuthService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        // Argon2id configuration matching NestJS: saltLength=16, hashLength=32, parallelism=1, memory=19456, iterations=2
+        this.passwordEncoder = new Argon2PasswordEncoder(16, 32, 1, 19456, 2);
+    }
+
+    public static String sha256(String input) {
+        if (input == null) return null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("SHA-256 digest failed", e);
+        }
+    }
+
+    public static String generateRandomToken() {
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    public static String normalizeEmail(String email) {
+        if (email == null) return "";
+        return email.trim().toLowerCase();
+    }
+
+    /**
+     * Resolves the current session from request cookie or Authorization header.
+     */
+    public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
+        if (request == null) return Optional.empty();
+
+        String rawToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
+                    if (c.getValue() != null && !c.getValue().isBlank()) {
+                        rawToken = c.getValue().trim();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (rawToken == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                rawToken = authHeader.substring(7).trim();
+            }
+        }
+
+        if (rawToken == null || rawToken.isBlank()) {
+            return Optional.empty();
+        }
+
+        String tokenHash = sha256(rawToken);
+        String sql = """
+            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at,
+                   u.email, u.display_name
+            FROM auth_sessions s
+            LEFT JOIN users u ON s.user_id = u.id
+            WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
+            """;
+
+        try {
+            SessionInfo info = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                SessionInfo si = new SessionInfo();
+                si.setSessionId(UUID.fromString(rs.getString("id")));
+                String uid = rs.getString("user_id");
+                if (uid != null) {
+                    si.setUserId(UUID.fromString(uid));
+                }
+                si.setCsrfHash(rs.getString("csrf_hash"));
+                Timestamp exp = rs.getTimestamp("expires_at");
+                if (exp != null) si.setExpiresAt(exp.toInstant());
+                Timestamp reauth = rs.getTimestamp("reauthenticated_at");
+                if (reauth != null) si.setReauthenticatedAt(reauth.toInstant());
+                si.setEmail(rs.getString("email"));
+                si.setDisplayName(rs.getString("display_name"));
+                return si;
+            }, tokenHash);
+
+            if (info != null && info.getUserId() != null) {
+                List<String> roles = findUserRoles(info.getUserId());
+                info.setRoles(roles);
+            }
+            return Optional.ofNullable(info);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        } catch (Exception e) {
+            log.debug("[UserAuthService] resolveSession error: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<String> findUserRoles(UUID userId) {
+        List<String> roles = new ArrayList<>();
+        try {
+            List<String> ur = jdbcTemplate.query(
+                "SELECT role FROM user_roles WHERE user_id = ?",
+                (rs, rowNum) -> rs.getString("role"),
+                userId
+            );
+            roles.addAll(ur);
+        } catch (Exception ignored) {}
+
+        try {
+            List<String> ar = jdbcTemplate.query(
+                "SELECT role FROM admin_roles WHERE user_id = ?",
+                (rs, rowNum) -> rs.getString("role"),
+                userId
+            );
+            roles.addAll(ar);
+        } catch (Exception ignored) {}
+
+        if (roles.isEmpty()) {
+            roles.add("user");
+        }
+        return roles;
+    }
+
+    /**
+     * Creates a prelogin session without an attached user.
+     */
+    @Transactional
+    public PreloginSessionResult createPreloginSession(HttpServletResponse response) {
+        UUID sessionId = UUID.randomUUID();
+        String rawToken = generateRandomToken();
+        String csrfToken = UUID.randomUUID().toString();
+        String tokenHash = sha256(rawToken);
+        String csrfHash = sha256(csrfToken);
+        Instant now = Instant.now();
+        Instant expiresAt = now.plus(30, ChronoUnit.DAYS);
+
+        String sql = """
+            INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed)
+            VALUES (?, ?, ?, NULL, ?, ?, true)
+            """;
+        jdbcTemplate.update(sql, sessionId, tokenHash, csrfHash, Timestamp.from(expiresAt), Timestamp.from(now));
+
+        setSessionCookie(response, rawToken);
+        return new PreloginSessionResult(sessionId, rawToken, csrfToken);
+    }
+
+    /**
+     * Authenticates with email and password, creates an active session.
+     */
+    @Transactional
+    public LoginResult login(String rawEmail, String rawPassword, HttpServletResponse response) {
+        String email = normalizeEmail(rawEmail);
+        String emailH = sha256(email);
+
+        String credSql = "SELECT user_id, password_verifier FROM auth_local_credentials WHERE email_hash = ? AND disabled_at IS NULL";
+        Map<String, Object> cred;
+        try {
+            cred = jdbcTemplate.queryForMap(credSql, emailH);
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalArgumentException("invalid credentials");
+        }
+
+        UUID userId = (UUID) cred.get("user_id");
+        String verifier = (String) cred.get("password_verifier");
+
+        boolean matched = false;
+        try {
+            matched = passwordEncoder.matches(rawPassword, verifier);
+        } catch (Exception e) {
+            log.warn("[UserAuthService] password verification error: {}", e.getMessage());
+            matched = false;
+        }
+
+        if (!matched) {
+            throw new IllegalArgumentException("invalid credentials");
+        }
+
+        // Create new active session
+        UUID sessionId = UUID.randomUUID();
+        String rawToken = generateRandomToken();
+        String csrfToken = UUID.randomUUID().toString();
+        String tokenHash = sha256(rawToken);
+        String csrfHash = sha256(csrfToken);
+        Instant now = Instant.now();
+        Instant expiresAt = now.plus(30, ChronoUnit.DAYS);
+
+        String sessionSql = """
+            INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed, reauthenticated_at)
+            VALUES (?, ?, ?, ?, ?, ?, true, ?)
+            """;
+        jdbcTemplate.update(sessionSql, sessionId, tokenHash, csrfHash, userId, Timestamp.from(expiresAt), Timestamp.from(now), Timestamp.from(now));
+
+        setSessionCookie(response, rawToken);
+
+        // Fetch user profile details
+        String userSql = "SELECT display_name, email FROM users WHERE id = ?";
+        Map<String, Object> userRow = jdbcTemplate.queryForMap(userSql, userId);
+        String displayName = (String) userRow.get("display_name");
+
+        List<String> roles = findUserRoles(userId);
+
+        return new LoginResult(userId, sessionId, rawToken, csrfToken, email, displayName, roles);
+    }
+
+    /**
+     * Registers a new user with email and password.
+     */
+    @Transactional
+    public LoginResult register(String rawEmail, String rawPassword, String displayName, HttpServletResponse response) {
+        String email = normalizeEmail(rawEmail);
+        String emailH = sha256(email);
+
+        // Check duplicate
+        Integer count = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM auth_local_credentials WHERE email_hash = ?",
+            Integer.class,
+            emailH
+        );
+        if (count != null && count > 0) {
+            throw new IllegalStateException("email already registered");
+        }
+
+        UUID userId = UUID.randomUUID();
+        Instant now = Instant.now();
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        // 1. Insert into users
+        String insertUser = "INSERT INTO users (id, email, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(insertUser, userId, email, displayName, Timestamp.from(now), Timestamp.from(now));
+
+        // 2. Insert into profiles
+        try {
+            String insertProfile = "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, ?)";
+            jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
+        } catch (Exception e) {
+            log.debug("[UserAuthService] profile insert skipped or existing: {}", e.getMessage());
+        }
+
+        // 3. Insert into auth_local_credentials
+        String insertCred = """
+            INSERT INTO auth_local_credentials (user_id, email, email_hash, password_verifier, verified_at, changed_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """;
+        jdbcTemplate.update(insertCred, userId, email, emailH, encodedPassword, Timestamp.from(now), Timestamp.from(now));
+
+        // 4. Initialize basic cash account
+        try {
+            UUID accountId = UUID.randomUUID();
+            jdbcTemplate.update(
+                "INSERT INTO accounts (id, account_type, owner_user_id, currency, allow_negative, created_at) VALUES (?, 'USER_CASH', ?, 'WLD', false, ?)",
+                accountId, userId, Timestamp.from(now)
+            );
+            jdbcTemplate.update(
+                "INSERT INTO account_balances (account_id, balance, updated_at) VALUES (?, 1000000, ?)",
+                accountId, Timestamp.from(now)
+            );
+        } catch (Exception e) {
+            log.debug("[UserAuthService] account setup: {}", e.getMessage());
+        }
+
+        // 5. Create active session
+        return login(email, rawPassword, response);
+    }
+
+    /**
+     * Revokes the current session.
+     */
+    @Transactional
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        Optional<SessionInfo> session = resolveSession(request);
+        session.ifPresent(s -> {
+            jdbcTemplate.update("UPDATE auth_sessions SET revoked_at = NOW() WHERE id = ?", s.getSessionId());
+        });
+        clearSessionCookie(response);
+    }
+
+    /**
+     * Re-authenticates the current user's password.
+     */
+    @Transactional
+    public boolean reauthenticate(UUID userId, String password) {
+        String credSql = "SELECT password_verifier FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL";
+        try {
+            String verifier = jdbcTemplate.queryForObject(credSql, String.class, userId);
+            if (verifier == null) return false;
+            boolean matched = passwordEncoder.matches(password, verifier);
+            if (matched) {
+                jdbcTemplate.update("UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE user_id = ? AND revoked_at IS NULL", userId);
+            }
+            return matched;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Changes password.
+     */
+    @Transactional
+    public void changePassword(UUID userId, String newPassword) {
+        String encoded = passwordEncoder.encode(newPassword);
+        Instant now = Instant.now();
+        jdbcTemplate.update(
+            "UPDATE auth_local_credentials SET password_verifier = ?, changed_at = ? WHERE user_id = ?",
+            encoded, Timestamp.from(now), userId
+        );
+    }
+
+    public void setSessionCookie(HttpServletResponse response, String rawToken) {
+        if (response == null) return;
+        Cookie cookie = new Cookie("mv_session", rawToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
+        response.addCookie(cookie);
+    }
+
+    public void clearSessionCookie(HttpServletResponse response) {
+        if (response == null) return;
+        Cookie cookie = new Cookie("mv_session", "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
+    public static class SessionInfo {
+        private UUID sessionId;
+        private UUID userId;
+        private String csrfHash;
+        private Instant expiresAt;
+        private Instant reauthenticatedAt;
+        private String email;
+        private String displayName;
+        private List<String> roles = new ArrayList<>();
+
+        public UUID getSessionId() { return sessionId; }
+        public void setSessionId(UUID sessionId) { this.sessionId = sessionId; }
+        public UUID getUserId() { return userId; }
+        public void setUserId(UUID userId) { this.userId = userId; }
+        public String getCsrfHash() { return csrfHash; }
+        public void setCsrfHash(String csrfHash) { this.csrfHash = csrfHash; }
+        public Instant getExpiresAt() { return expiresAt; }
+        public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
+        public Instant getReauthenticatedAt() { return reauthenticatedAt; }
+        public void setReauthenticatedAt(Instant reauthenticatedAt) { this.reauthenticatedAt = reauthenticatedAt; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getDisplayName() { return displayName; }
+        public void setDisplayName(String displayName) { this.displayName = displayName; }
+        public List<String> getRoles() { return roles; }
+        public void setRoles(List<String> roles) { this.roles = roles; }
+        public boolean isSignedIn() { return userId != null; }
+    }
+
+    public record PreloginSessionResult(UUID sessionId, String token, String csrfToken) {}
+    public record LoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String email, String displayName, List<String> roles) {}
+}
