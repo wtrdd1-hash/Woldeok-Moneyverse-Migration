@@ -60,6 +60,15 @@ for route in "${ROUTES[@]}"; do
     -o /dev/null -w '%{http_code}|%{redirect_url}' "${BASE_URL}${route}" || true)"
   status="${response%%|*}"
   redirect="${response#*|}"
+  # Retry transport failures only; never turn an HTTP error into a pass.
+  # A single intermittent timeout must not invalidate an otherwise healthy hourly smoke.
+  if [[ "$status" == '000' || -z "$status" ]]; then
+    log "[QA_SMOKE_RETRY] route=$route first_transport_failure; retrying_once"
+    response="$(curl --silent --show-error --max-time 20 --connect-timeout 5 \
+      -o /dev/null -w '%{http_code}|%{redirect_url}' "${BASE_URL}${route}" || true)"
+    status="${response%%|*}"
+    redirect="${response#*|}"
+  fi
   if [[ "$status" == '200' ]]; then
     ((passed+=1))
   elif [[ ( "$status" == '307' || "$status" == '308' ) \
