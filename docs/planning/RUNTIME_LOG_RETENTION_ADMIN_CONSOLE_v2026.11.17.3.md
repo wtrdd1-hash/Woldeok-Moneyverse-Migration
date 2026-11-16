@@ -1,0 +1,57 @@
+# Runtime Log Retention, Compression, and Admin Log Console — v2026.11.17.3
+
+**Status:** PLANNING / DRAFT — no implementation, Test verification, or Production promotion.
+**Authority:** Owner instruction, 2026-11-17 KST; adopted by the living Project Plan and Integrated Planning Master in this candidate branch.
+**Language:** English canonical; [Korean counterpart](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.ko.md).
+**Scope:** Host Nginx, Spring Boot API/backend, Next.js SSR/frontend, and legacy NestJS backend while migration is incomplete. Operational log files are not PostgreSQL backups or immutable economic ledgers.
+
+## 1. Classification and non-negotiable retention
+
+The policy applies to each **event** from its UTC event timestamp, not the file creation or last-read time. A classification decision is made at ingestion, with an allowlisted source/event-type rule; escalation is one-way and auditable. Log rotation does not reset the retention clock.
+
+| Source | Routine — retain 7 × 24 h | Important — retain 30 × 24 h |
+| --- | --- | --- |
+| Nginx | Sanitized access, 2xx/3xx/4xx summaries, ordinary warnings and request performance | Error/critical/panic; confirmed outage, 5xx burst, WAF/abuse or rate-limit incident with security relevance |
+| Spring API/backend | Structured application INFO/WARN, health and bounded request metadata | Unhandled exceptions, material API/DB failures, auth/OTP failures, privilege escalation attempts, administrator actions, financial/security incidents |
+| Next.js frontend server | SSR/BFF INFO/WARN, route/load failures of nonincident severity | SSR/BFF unhandled errors, protected-route failures, suspected data leakage, major UI/API availability incidents |
+| Legacy NestJS/backend during migration | Same routine API policy | Same important API/security policy; preserve cross-service correlation |
+
+Browser console output is **not** a durable server log. Client-side error telemetry must be intentionally instrumented, consent/privacy-reviewed, sanitized, sampled and routed to the same classifications; never promise access to arbitrary visitor console output.
+
+**Important** is determined by severity **and security/business impact**, not by containing a text substring such as `ERROR`. Retain important events for **30 days** even if the source process or service changes. Routine logs expire after **7 days**. No silent extension or early deletion. Any legal hold or active incident preservation is a separately approved, restricted copy with owner, case identifier, access audit, encryption, expiry/review and privacy/legal review; not a change of the default 7/30-day window.
+
+Do **not** apply this log deletion policy to immutable PostgreSQL financial/audit records, ledger postings, compliance records, or database backups. Their retention, recovery and integrity policies are independent; no SQL pruning is authorized here.
+
+## 2. Collection, rotation, compression and deletion
+
+1. Use a centralized structured collection/reader abstraction with a fixed source registry (`NGINX_ACCESS`, `NGINX_ERROR`, `SPRING_BACKEND`, `FRONTEND`, `LEGACY_BACKEND` while active). Capture UTC timestamp, severity, service, environment (Production/Test), instance, request/correlation ID, event type and sanitized message. Never ingest raw unredacted secrets.
+2. Nginx file logs rotate on **daily OR size threshold** (proposed 20 MiB per file; final value after real measurement). Reopen files with the Nginx-supported signal; do not truncate an open file. For Spring/Next/legacy systemd journal sources, collect and checkpoint independently; `journalctl` is **not** the 30-day searchable archive and journal vacuum alone cannot enforce separate severity windows. Configure journald's own space/time limits to avoid unintended duplicate retention.
+3. Compress **closed** segments within 24 hours using **zstd** (preferred) or `gzip` (compatibility fallback), with checksum, atomic rename and recoverable index. Live segments stay writable and uncompressed. Preserve metadata/classification, searchable time ranges and cursor offsets outside the compressed content; archived reads must transparently decompress within resource limits.
+4. Purge routine segments/events at `event_time + 7 × 24 h` and important ones at `event_time + 30 × 24 h`, on a scheduled purge at least daily, allowing at most one purge interval of physical deletion lag. Mixed-class segments must be split by class/event time or re-packed, never dropped wholesale while an unexpired important event remains. Record a tamper-evident purge summary (counts, boundaries, checksum/result, executor) in the important audit stream.
+5. Treat malformed timestamps, failed compression, skipped files, checksum failures, collector outages, permissions, and full disks as explicit `DEGRADED` or `UNAVAILABLE` conditions, not empty/successful logs. Quarantine ambiguous events for restricted review; never delete them just to make status green.
+
+**Capacity policy:** measure 7/30-day projected raw/compressed volume, actual host free space, write rate, decompression cost and DB backup headroom in G0 before assigning byte quotas. Provisional limits: dedicated log storage at most 10% of the allocated volume; warnings at 60%, 75%, 85% usage and urgent response at 90%. Reserve the 30-day important-log requirement first; rate-limit noisy routine streams and prioritize critical collection rather than silently shortening their 30-day lifetime. If capacity cannot sustain the contract, mark rollout **BLOCKED** until storage/collection architecture is corrected. Compression savings are a measurement, not a guaranteed percentage. Production and Test must be isolated by ACL, prefix and quota.
+
+## 3. Secure admin log history and live tail
+
+- Entry: existing `/admin/logs/system` console. Display source, environment, routine/important class, UTC event interval with Asia/Seoul display, severity, text search (bounded), request ID, refresh state, segment compression status, latest ingested timestamp, and last source error.
+- Historical query: date/interval and category filters; server-side cursor pagination (maximum **500 events per page**, maximum **30-day authorized lookback**), stable chronological ordering and bounded scan/read/decompression work. The 30-day window applies only to important logs; routine events beyond day 7 must not reappear.
+- Live tail: authenticated, server-authorized **SSE preferred**, with a **5-second bounded polling fallback** when streaming is unsupported. Target visible event latency **≤5 seconds** under measured healthy Test conditions. Incremental signed/opaque cursor, ordered append, reconnect and deduplication, bounded stream buffers/connections, no unbounded client memory. Display `LIVE`, `RECONNECTING`, `DEGRADED`, `SOURCE_UNAVAILABLE` and `NO_MATCH` distinctly. Surface cursor gaps and dropped events; never substitute synthetic healthy log lines. Stop streams on navigation, logout, session revocation, permission expiry or background inactivity.
+- Security: `SUPER_ADMIN` (or approved equivalent verified high-privilege role) **plus a fresh step-up OTP** for viewing important/security logs and for any export, with server-side session/consent/CSRF protections appropriate to the request. Use the existing Discord/Telegram step-up design, never trust `x-internal-token`, arbitrary browser headers, or a frontend guard alone. Enforce route + server action + backend authorization; reject anonymous/ordinary admins, cross-environment and forged source/cursor requests. No shell/path parameter is accepted from users; service-owned allowlists and least-privilege read-only collector identity only.
+- Data minimization: redact authorization/cookie headers, bearer tokens, secrets, OAuth, OTP, full bodies, passwords, finance account numbers, precise user identifiers, and unnecessary personal/IP data **before indexing/storage and again before display/export**. Prefer hashed/tokenized identifiers for operational correlation; prohibit public exposure, search indexing, CDN caching and browser persistent caching. Disable plaintext exports by default; if approved, cap size, watermark, require renewed OTP, audit purpose and generation, and expire download promptly.
+- Record administrator log accesses, failed authorization, search/export activity, retention changes, clock or collector errors, and purges in the **important audit stream (30 days)**; administrators cannot edit or delete entries from the viewer. Limit query rate/total concurrent tails and protect against regex/HTML/ANSI injection, log forging and log-driven XSS.
+
+## 4. Architecture, responsibilities and rollout gates
+
+- **Ops/SRE:** inspect actual systemd units, Nginx log paths, journald settings, disk usage, retention, logrotate state, service identity and permissions; adopt log rotation, compressor/indexer, scheduled purge, resource alarms, restore/replay and disaster recovery. No assumed file paths or deployment topology.
+- **Spring backend:** provide authenticated, bounded historical query and SSE/poll adapter over the allowlisted sources with separated `EMPTY` vs `ERROR` vs `UNAVAILABLE` results, structured redaction and authorization tests. An existing `SystemLogService` reading `tail`/`journalctl` does not by itself satisfy archival history, retention, compression or secure real-time transport.
+- **Next.js frontend:** implement accessible admin console states, filters, stable cursor pagination, live connection cleanup, bounded rendering, ko/en labels, no-store/noindex, keyboard/screen-reader/320px/200% zoom coverage. Browser-origin events require a separate privacy-safe telemetry design.
+- **Migration/QA:** retain correlation across Nginx → Next → Spring and legacy Nest during strangler transition. Do not split financial writer authority or infer runtime readiness from a document.
+
+**Acceptance tests (must be executed before release):** routine event remains searchable at 6d23h59m and expires after 7d; important remains at 29d23h59m and expires after 30d; mixed segment preserves important records; rotation during active writes loses zero events; compression/reopen/checksum and historical search work; a forced full disk/collector crash surfaces failure; Test/Production and user role isolation; secrets/IP/cookies/OTP never appear in returned logs; 401/403 on unauthenticated/unprivileged/direct/cursor/forged requests; OTP expires/revokes; SSE reconnect, duplicate/gap/backpressure, 5s fallback and no leaks; peak-volume resource budget; clock skew/timezone/DST-safe UTC windows; export and audit trails. Verify pre/post actual storage, 7/30-day deletion and independent recovery/replay. **No Production release until Test exact-SHA, independent restoration, authenticated real API/UI E2E, CI/security tests, and rollback are evidenced.**
+
+## 5. Dependencies, exclusions and status
+
+The concurrent `fix/admin-system-logs-hardening-v2026.11.17.1` branch works on viewer authorization and source safety. This planning branch **must not rewrite or merge its uncommitted code**; implementer reconciles the resulting security PR first. Historical `docs/BACKUP.md` describes a retired host and must not be used to infer current retention. Any configuration examples remain proposed until host measurement and owner-approved rollout.
+
+**Deliverable today:** approved planning candidate only; no deployment, no actual 7/30-day cleanup, no verified live-tail functionality, and no change to PostgreSQL backup retention.

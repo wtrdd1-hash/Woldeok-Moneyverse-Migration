@@ -1,6 +1,9 @@
 # 월덕 머니버스 — 통합 기획 마스터
 **현재 기획:** v1518 F675-185 상태·유지비 근거 강화 / 이슈 #2024 / 초안 #2029 / 운영 보류; #2025 종속.
 
+## v2026.11.17.3 — 사용자 지시 통합: 로그 일반 7일/중요 30일 압축 보관 및 관리자 실시간·이력 조회 (초안 / 서버 변경 없음)
+기존 금융·인증 릴리스 게이트를 대체하지 않는 **운영 로그·관리자 기능 추가 요구**다. Nginx·Spring·Next.js SSR·전환 중 NestJS 로그를 UTC 이벤트 시각 기준 일반 **7일**, 중요 보안·오류·관리자·사고 **30일** 보관한다. 일/크기 순환, 체크섬 보호 zstd/gzip 압축, 검색 색인·기한 만료 정리·용량/수집 장애 경보를 요구한다. 관리자 `/admin/logs/system`에 서버 검증된 7/30일 이력·필터/커서 검색, 안전한 SSE 또는 5초 폴링 실시간 보기, 민감정보 마스킹, 최근 OTP, 임의 셸/경로 차단, 관리자 조회 감사를 반영한다. PostgreSQL 불변 금융원장 및 DB 백업 보존은 별도다. [상세 한국어](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.ko.md) / [영문 정본](RUNTIME_LOG_RETENTION_ADMIN_CONSOLE_v2026.11.17.3.md); [작업 기록](../worklog/2026-11-17-log-retention-admin-console-v2026.11.17.3.md). 병행 수정 중인 로그 보안 브랜치와 충돌 금지. 실제 서버 실측·격리 Test E2E·인증 음성 테스트·독립 복원·롤백 전 운영 승격 금지. **문서 기획만 반영**.
+
 ## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 후속 초안 (운영 변경 없음)
 미병합 v2026.11.13.1 설계를 재검토한 보충 기획이며 기존 승인된 금융·블로그·인증 규칙을 임의 대체하지 않는다. 장별 위험 R01~R10과 G0~G6 검증/중단 조건, 경로/스케줄/봇/클라이언트별 단독 소유권, DB fence 금융 기록자, 기존 세션/OTP/Android/Socket.IO 호환, 불변 빌드 아티팩트 공급망·복구 기준을 명시했다. [한국어 상세](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_DETAILED_REVIEW_v2026.11.13.2.md); [한국어 아티팩트](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.ko.md) / [EN](SPRING_PLATFORM_MIGRATION_ARTIFACT_POLICY_v2026.11.13.2.md); [후속 PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144). 실제 Java 코드/Test/운영 검증 없음.
 
