@@ -34,6 +34,20 @@ class SystemLogServiceTest {
     }
 
     @Test
+    void environmentSpecificTargetsCannotCrossNginxDirectoryBoundary() {
+        var env = java.util.Map.of(
+                "MONEYVERSE_LOG_NGINX_ACCESS_PATH", "/var/log/nginx/test-easy-scraping.access.log",
+                "MONEYVERSE_LOG_SPRING_UNIT", "test-main-backend");
+        assertEquals("/var/log/nginx/test-easy-scraping.access.log",
+                SystemLogService.resolveFilePath(SystemLogSource.NGINX_ACCESS, env));
+        assertEquals("test-main-backend", SystemLogService.resolveServiceUnit(SystemLogSource.SPRING_BACKEND, env));
+        assertNull(SystemLogService.resolveFilePath(SystemLogSource.NGINX_ACCESS,
+                java.util.Map.of("MONEYVERSE_LOG_NGINX_ACCESS_PATH", "/var/log/nginx/../../etc/shadow")));
+        assertNull(SystemLogService.resolveServiceUnit(SystemLogSource.SPRING_BACKEND,
+                java.util.Map.of("MONEYVERSE_LOG_SPRING_UNIT", "unit;cat /etc/shadow")));
+    }
+
+    @Test
     void unknownSourceIsNotSilentlyMappedToNginx() {
         assertThrows(IllegalArgumentException.class, () -> SystemLogSource.fromString("UNKNOWN"));
     }

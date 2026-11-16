@@ -11,6 +11,7 @@ public class ApiResponse<T> {
     private Boolean ok = true;
     private T data;
     private Object result;
+    private String id;
     private String error;
     private String message;
     private String timestamp = Instant.now().toString();
@@ -62,6 +63,10 @@ public class ApiResponse<T> {
         resp.setMessage(message);
         return resp;
     }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 
     public boolean isSuccess() {
         return success;

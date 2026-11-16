@@ -1,4 +1,7 @@
 # Woldeok Moneyverse — Integrated Planning Master
+## v2026.11.17.3 — Admin logs Spring Test recovery addendum (CANDIDATE / TEST GATE OPEN)
+Read-only mini-PC Test PostgreSQL connection and isolated Spring 3150 HTTP role tests passed; release remains blocked until official immutable Test, exact-SHA public identity, full login/session, finance/rollback and CI gates. The narrowed log resolver uses existing DB SECURITY DEFINER role function without changing Production roles/grants. [EN](../worklog/2026-11-17-admin-system-logs-test-recovery-v2026.11.17.3.md) · [KO](../worklog/2026-11-17-admin-system-logs-test-recovery-v2026.11.17.3.ko.md).
+
 ## v2026.11.17.2 — Admin runtime logs Production promotion gate (HOLD / NO RUNTIME CHANGE)
 Owner approved promotion of existing v2026.11.17.1 log candidate. Official Test backend is disabled/legacy Node, Test health/version falsely route to Production Spring4550; Test auth and log API 502 and exact-SHA preflight fails. Test isolation is a blocking release condition, not satisfied by dev tests or Prod health. Track prerequisite in [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209). No GitHub main merge or Test/Production/data/Nginx change. [Promotion worklog](../worklog/2026-11-17-admin-system-logs-production-promotion-v2026.11.17.2.md).
 

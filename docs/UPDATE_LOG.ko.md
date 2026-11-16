@@ -1,3 +1,6 @@
+## v2026.11.17.3 — 관리자 서버 로그 Spring Test 격리 후보 (운영 미승격)
+별도 Test DB·Spring 실제 HTTP 최고관리자 200/일반 사용자 403/비인가 401 검증, 환경별 로그 대상·정확한 소스 SHA 준비. 공식 Test/운영 승격은 검증 중. [내부](updates/v2026.11.17.3-admin-logs-test-recovery-internal.ko.md), [GitHub](updates/v2026.11.17.3-admin-logs-test-recovery-github.ko.md).
+
 ## v2026.11.17.2 — 시스템 로그 운영 승격 시도 (차단 / 운영 무변경)
 사용자 승인에 따라 운영 승격을 점검했으나 공식 Test 백엔드 비활성, Test 상태/버전 API 운영 Spring 공유, Test 로그/인증 502, 동일 SHA 검증 실패를 확인. 운영 무중단 전환 금지 및 [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209) 기록. 서비스·코드·DB·회원 돈·Nginx 변경 없음. [내부](updates/v2026.11.17.2-admin-system-logs-release-internal.ko.md) · [GitHub](updates/v2026.11.17.2-admin-system-logs-release-github.ko.md).
 

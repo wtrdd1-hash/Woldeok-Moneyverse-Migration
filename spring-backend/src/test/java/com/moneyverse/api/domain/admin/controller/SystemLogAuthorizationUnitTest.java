@@ -3,7 +3,6 @@ package com.moneyverse.api.domain.admin.controller;
 import com.moneyverse.api.domain.admin.dto.SystemLogResponse;
 import com.moneyverse.api.domain.admin.dto.SystemLogSource;
 import com.moneyverse.api.domain.admin.service.SystemLogService;
-import com.moneyverse.api.domain.identity.service.UserAuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -19,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 class SystemLogAuthorizationUnitTest {
     private final SystemLogService service = mock(SystemLogService.class);
-    private final UserAuthService auth = mock(UserAuthService.class);
+    private final AdminLogIdentityResolver auth = mock(AdminLogIdentityResolver.class);
     private final AdminLogConsoleGate gate = mock(AdminLogConsoleGate.class);
     private final SystemLogController controller = new SystemLogController(service, auth, gate);
     private UUID sessionId;
@@ -28,13 +27,10 @@ class SystemLogAuthorizationUnitTest {
     private final MockHttpServletResponse response = new MockHttpServletResponse();
 
     private void sessionWithRoles(String... roles) {
-        UserAuthService.SessionInfo session = new UserAuthService.SessionInfo();
         userId = UUID.randomUUID();
         sessionId = UUID.randomUUID();
-        session.setUserId(userId);
-        session.setSessionId(sessionId);
-        session.setRoles(List.of(roles));
-        when(auth.resolveSession(request)).thenReturn(Optional.of(session));
+        when(auth.resolve(request)).thenReturn(Optional.of(
+                new AdminLogIdentityResolver.VerifiedSession(sessionId, userId, List.of(roles))));
     }
 
     @Test

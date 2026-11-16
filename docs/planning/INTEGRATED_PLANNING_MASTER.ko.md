@@ -1,4 +1,7 @@
 # 월덕 머니버스 — 통합 기획 마스터
+## v2026.11.17.3 — 관리자 로그 Spring Test 복구 보강 (격리 후보 / 운영 보류)
+Test DB와 별도 Spring 3150 실제 HTTP 최고관리자/일반 사용자 권한을 확인했으나 공식 Test 동일 SHA, 전체 로그인 세션, 금융·원복 및 CI 조건이 필요하다. 관리자 로그는 DB 기존 SECURITY DEFINER 역할 조회를 사용하며 운영 DB 권한을 변경하지 않는다. [작업 기록](../worklog/2026-11-17-admin-system-logs-test-recovery-v2026.11.17.3.ko.md).
+
 ## v2026.11.17.2 — 관리자 로그 운영 승격 검증 (보류 / 운영 무변경)
 사용자 운영승격 승인 후 확인 결과 공식 Test 백엔드는 구형 Node 실행설정으로 비활성화, Test 상태/버전 API는 운영 Spring 4550을 공유하며 인증·로그 API 502 및 정확한 SHA 검증 실패. 격리된 Spring Test와 실제 인증 API QA가 출시 필수조건. [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209) 기록. main 병합·Test/운영·DB·Nginx 변경 없음. [승격 작업기록](../worklog/2026-11-17-admin-system-logs-production-promotion-v2026.11.17.2.ko.md).
 

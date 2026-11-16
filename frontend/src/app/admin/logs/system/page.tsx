@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { AdminBack } from '../../admin-back';
@@ -25,7 +25,16 @@ export default async function AdminSystemLogsPage() {
   }
 
   const initialData = await api<SystemLogData>('/api/v1/admin/logs/system?source=NGINX_ERROR&lines=100')
-    .catch(() => null);
+    .catch((error: unknown) => {
+      // A denied privileged read must never turn into an apparently accessible console.
+      if (error instanceof ApiError && error.status === 401) {
+        redirect('/login?error=login_required');
+      }
+      if (error instanceof ApiError && error.status === 403) {
+        redirect('/admin');
+      }
+      return null;
+    });
 
   const fallbackData: SystemLogData = {
     source: 'nginx-error',

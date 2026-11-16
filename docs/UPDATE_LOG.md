@@ -1,3 +1,6 @@
+## v2026.11.17.3 — Admin system logs Spring Test recovery (candidate / release pending)
+Test-only PostgreSQL and Spring localhost canary connected with real superadmin 200/non-superadmin 403/anonymous 401 security QA, isolated log sources and exact-build identity. Official Test/Production gates pending. [Internal](updates/v2026.11.17.3-admin-logs-test-recovery-internal.md), [GitHub](updates/v2026.11.17.3-admin-logs-test-recovery-github.md).
+
 ## v2026.11.17.2 — System logs Production promotion (BLOCKED / NO RUNTIME CHANGE)
 Owner authorized Production promotion, but official Test backend3100 was disabled and Test health/version sent to Production Spring4550, while Test auth/log APIs returned 502. Exact-SHA Test attestation FAIL; release withheld pending [P0 #3209](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3209). No main/Production/Test runtime, DB, accounts, Nginx or financial changes. [Internal](updates/v2026.11.17.2-admin-system-logs-release-internal.md) · [GitHub](updates/v2026.11.17.2-admin-system-logs-release-github.md).
 

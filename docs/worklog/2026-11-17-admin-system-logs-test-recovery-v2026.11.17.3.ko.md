@@ -9,3 +9,7 @@
 **작업 중:** 구성·Test DB 읽기 전용 점검 중. 운영·테스트 구성 변경 전.
 
 **작업 종료:** 검증 증거에 따라 별도 기록.
+
+**작업 중 (2026-11-17 KST):** 작업 중 `main`이 백업 감사 #3208의 `8b3e3aca`로 변경된 것을 확인하고, 충돌 없이 작업 브랜치에 병합. 별도 Spring 3150 서버가 Test DB `wdmv_v761_test_acl`에 `moneyverse_app`으로 연결돼 `/health`·`/api/version` 200, 익명 로그·관리자 보안 API 401을 확인. Test DB의 users/user_roles 직접 SELECT 금지 대신 기존 보안 함수로 역할 조회하도록 구현 필요. 운영 변경 없음.
+
+**작업 중 (2026-11-17 KST)**: 기존 Test DB 역할 보안 함수 기반 세션 해석, 환경별 로그 소스, 버전 SHA 및 미인가 프론트 화면 거부 수정. Test Spring 3150/DB 5585 실제 HTTP 최고관리자 200, 비최고관리자 403, 익명·위조 401, 잘못된 조회 400, Spring/Next 로그 200. 임시 세션 2건 삭제, 잔여 0. Spring/Next 불변 스테이징 도구 구문 확인. Test Nginx 전용 로그 경로는 아직 구성 전이므로 UNAVAILABLE 정상 표시. 공개 Test 및 운영 변경 전.

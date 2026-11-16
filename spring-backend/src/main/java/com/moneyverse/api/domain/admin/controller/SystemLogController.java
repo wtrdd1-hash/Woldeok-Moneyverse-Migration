@@ -3,7 +3,6 @@ package com.moneyverse.api.domain.admin.controller;
 import com.moneyverse.api.domain.admin.dto.SystemLogResponse;
 import com.moneyverse.api.domain.admin.dto.SystemLogSource;
 import com.moneyverse.api.domain.admin.service.SystemLogService;
-import com.moneyverse.api.domain.identity.service.UserAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,28 +26,28 @@ import java.util.Optional;
 public class SystemLogController {
 
     private final SystemLogService systemLogService;
-    private final UserAuthService userAuthService;
+    private final AdminLogIdentityResolver identityResolver;
     private final AdminLogConsoleGate consoleGate;
 
     @Autowired
-    public SystemLogController(SystemLogService systemLogService, UserAuthService userAuthService,
+    public SystemLogController(SystemLogService systemLogService, AdminLogIdentityResolver identityResolver,
                                AdminLogConsoleGate consoleGate) {
         this.systemLogService = systemLogService;
-        this.userAuthService = userAuthService;
+        this.identityResolver = identityResolver;
         this.consoleGate = consoleGate;
     }
 
     private void verifyAdmin(HttpServletRequest request) {
-        Optional<UserAuthService.SessionInfo> sessionOpt = userAuthService.resolveSession(request);
-        if (sessionOpt.isEmpty() || !sessionOpt.get().isSignedIn()) {
+        Optional<AdminLogIdentityResolver.VerifiedSession> sessionOpt = identityResolver.resolve(request);
+        if (sessionOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized: Sign in required");
         }
-        List<String> roles = sessionOpt.get().getRoles();
+        List<String> roles = sessionOpt.get().roles();
         boolean hasAdmin = roles != null && roles.stream().anyMatch(r -> "SUPERADMIN".equalsIgnoreCase(r));
         if (!hasAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Superadmin required");
         }
-        if (!consoleGate.isOpen(sessionOpt.get().getSessionId(), sessionOpt.get().getUserId())) {
+        if (!consoleGate.isOpen(sessionOpt.get().sessionId(), sessionOpt.get().userId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden: Admin console session required");
         }
     }

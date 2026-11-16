@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Map;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,18 +67,48 @@ public class SystemLogService {
         return value;
     }
 
+    static String resolveFilePath(SystemLogSource source, Map<String, String> environment) {
+        if (source == null || source.getFilePath() == null) return null;
+        String key = source == SystemLogSource.NGINX_ERROR
+                ? "MONEYVERSE_LOG_NGINX_ERROR_PATH" : "MONEYVERSE_LOG_NGINX_ACCESS_PATH";
+        String configured = environment.getOrDefault(key, source.getFilePath());
+        if (configured == null || configured.isBlank() || configured.contains("..")) return null;
+        try {
+            Path path = Path.of(configured).normalize();
+            if (!path.startsWith(Path.of("/var/log/nginx")) ||
+                    path.equals(Path.of("/var/log/nginx"))) return null;
+            return path.toString();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    static String resolveServiceUnit(SystemLogSource source, Map<String, String> environment) {
+        if (source == null || source.getServiceUnit() == null) return null;
+        String key = source == SystemLogSource.SPRING_BACKEND
+                ? "MONEYVERSE_LOG_SPRING_UNIT" : "MONEYVERSE_LOG_FRONTEND_UNIT";
+        String unit = environment.getOrDefault(key, source.getServiceUnit());
+        return unit != null && unit.matches("[A-Za-z0-9_.@-]{1,128}") ? unit : null;
+    }
+
     private ReadResult fetchRawLogs(SystemLogSource source, int lines) {
         if (source == null) return ReadResult.unavailable();
+        String filePath = resolveFilePath(source, System.getenv());
+        String serviceUnit = resolveServiceUnit(source, System.getenv());
         List<String> command;
-        if (source.getFilePath() != null) {
-            File file = new File(source.getFilePath());
+        if (source.getFilePath() != null && filePath == null ||
+                source.getServiceUnit() != null && serviceUnit == null) {
+            return ReadResult.unavailable();
+        }
+        if (filePath != null) {
+            File file = new File(filePath);
             if (!file.isFile() || !file.canRead()) {
                 log.warn("System log source unavailable: {}", source.name());
                 return ReadResult.unavailable();
             }
-            command = List.of("tail", "-n", String.valueOf(lines), "--", source.getFilePath());
-        } else if (source.getServiceUnit() != null) {
-            command = List.of("journalctl", "-q", "-u", source.getServiceUnit(), "-n", String.valueOf(lines), "--no-pager", "--output=short-iso");
+            command = List.of("tail", "-n", String.valueOf(lines), "--", filePath);
+        } else if (serviceUnit != null) {
+            command = List.of("journalctl", "-q", "-u", serviceUnit, "-n", String.valueOf(lines), "--no-pager", "--output=short-iso");
         } else {
             return ReadResult.unavailable();
         }
