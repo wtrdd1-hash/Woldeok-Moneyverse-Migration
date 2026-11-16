@@ -1,24 +1,30 @@
 package com.moneyverse.api.domain.identity.controller;
 
+import com.moneyverse.api.domain.identity.service.UserAuthService;
+import com.moneyverse.api.domain.identity.service.UserAuthService.PreloginSessionResult;
+import com.moneyverse.api.domain.identity.service.UserAuthService.SessionInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
-@Tag(name = "Auth Session & Policy", description = "인증 세션 CSRF, 뷰어 상태 및 강제 세션 초기화 API")
+@Tag(name = "Auth Session & Policy", description = "인증 세션 CSRF, 뷰어 상태 및 세션 초기화 API")
 @RestController
 public class AuthController {
+
+    private final UserAuthService authService;
+
+    public AuthController(UserAuthService authService) {
+        this.authService = authService;
+    }
 
     @GetMapping(path = {
             "/api/v1/auth/providers",
@@ -41,11 +47,12 @@ public class AuthController {
             "/api/auth/session"
     })
     @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 발급")
-    public Map<String, Object> session() {
+    public Map<String, Object> session(HttpServletRequest request) {
+        Optional<SessionInfo> session = authService.resolveSession(request);
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("ok", true);
-        res.put("csrfToken", UUID.randomUUID().toString());
+        res.put("csrfToken", session.map(SessionInfo::getCsrfHash).orElse(UUID.randomUUID().toString()));
         return res;
     }
 
@@ -65,42 +72,58 @@ public class AuthController {
             "/api/v1/auth/viewer",
             "/api/auth/viewer"
     })
-    @Operation(summary = "현재 사용자 뷰어 상태 조회")
+    @Operation(summary = "현재 사용자 뷰어 상태 조회 (DB 세션 직통)")
     public Map<String, Object> viewer(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        boolean hasSession = false;
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if (("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) &&
-                        c.getValue() != null && !c.getValue().isBlank()) {
-                    hasSession = true;
-                    break;
-                }
-            }
-        }
-
+        Optional<SessionInfo> session = authService.resolveSession(request);
         Map<String, Object> res = new LinkedHashMap<>();
-        if (hasSession) {
+
+        if (session.isPresent() && session.get().isSignedIn()) {
+            SessionInfo s = session.get();
             res.put("signedIn", true);
             res.put("consentCurrent", true);
-            res.put("userId", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-            res.put("displayName", "관리자");
-            res.put("roles", List.of("admin", "superadmin"));
+            res.put("userId", s.getUserId().toString());
+            res.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "시민");
+            res.put("email", s.getEmail());
+            res.put("roles", s.getRoles());
+            res.put("adminRoles", s.getRoles().stream().filter(r -> r.contains("admin")).toList());
         } else {
             res.put("signedIn", false);
             res.put("consentCurrent", true);
             res.put("roles", List.of());
+            res.put("adminRoles", List.of());
         }
+        return res;
+    }
+
+    @PostMapping(path = {
+            "/api/v1/auth/prelogin-session",
+            "/api/auth/prelogin-session"
+    })
+    @Operation(summary = "사전 로그인 세션 생성 및 CSRF 토큰 발급")
+    public Map<String, Object> preloginSession(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        Optional<SessionInfo> existing = authService.resolveSession(request);
+        if (existing.isPresent() && existing.get().isSignedIn()) {
+            return Map.of("signedIn", true, "csrfToken", "");
+        }
+
+        PreloginSessionResult pre = authService.createPreloginSession(response);
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("signedIn", false);
+        res.put("csrfToken", pre.csrfToken());
         return res;
     }
 
     @RequestMapping(path = {
             "/api/v1/auth/reset",
             "/api/auth/reset"
-    }, method = {RequestMethod.GET, RequestMethod.POST})
+    })
     @Operation(summary = "서버단 쿠키 및 세션 강제 초기화")
-    public ResponseEntity<Map<String, Object>> resetSession(HttpServletResponse response) {
-        AdminSecurityController.addClearCookies(response);
+    public ResponseEntity<Map<String, Object>> resetSession(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        authService.logout(request, response);
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("ok", true);

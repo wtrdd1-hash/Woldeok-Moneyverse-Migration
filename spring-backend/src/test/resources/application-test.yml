@@ -6,6 +6,10 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password: ""
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-test.sql
   jpa:
     hibernate:
       ddl-auto: create-drop
