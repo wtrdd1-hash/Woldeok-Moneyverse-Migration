@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-const { apiMock, adminMock } = vi.hoisted(() => ({ apiMock: vi.fn(), adminMock: vi.fn() }));
+const { apiMock, adminMock, seoGateMock } = vi.hoisted(() => ({ apiMock: vi.fn(), adminMock: vi.fn(), seoGateMock: vi.fn() }));
 vi.mock('@/lib/api', () => ({ api: apiMock }));
 vi.mock('@/lib/session', () => ({ requireAdminConsole: adminMock }));
+vi.mock('@/lib/admin-seo-authority', () => ({ requireSeoPageOperator: seoGateMock }));
 vi.mock('@/lib/locale-server', () => ({ getServerLocale: async () => 'ko' }));
 vi.mock('./seo-client-view', () => ({
   SeoClientView: ({ initialData }: { initialData: { totalHits24h: number } }) =>
@@ -16,7 +17,14 @@ vi.mock('next/link', () => ({ default: ({ href, children }: { href: string; chil
 import AdminSeoPage, { metadata } from './page';
 
 describe('admin SEO page authoritative data', () => {
-  beforeEach(() => { vi.clearAllMocks(); adminMock.mockResolvedValue(undefined); });
+  beforeEach(() => { vi.clearAllMocks(); adminMock.mockResolvedValue(undefined); seoGateMock.mockResolvedValue(undefined); });
+
+  it('rejects rendering if the Nest human administrator gate denies', async () => {
+    seoGateMock.mockRejectedValueOnce(new Error('auth denied'));
+    await expect(AdminSeoPage()).rejects.toThrow('auth denied');
+    expect(seoGateMock).toHaveBeenCalledTimes(1);
+    expect(apiMock).not.toHaveBeenCalled();
+  });
 
   it('does not downgrade failed administrator authority to public fallback with fake live counters', async () => {
     apiMock.mockRejectedValue(new Error('admin status unavailable'));

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+vi.mock('next/navigation', () => ({ redirect: (path: string): never => { throw new Error(`REDIRECT:${path}`); } }));
 const apiMock = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/api', () => ({
   api: apiMock,
@@ -6,11 +7,21 @@ vi.mock('@/lib/api', () => ({
     constructor(public status: number) { super('denied'); }
   },
 }));
-import { verifySeoOperator } from './admin-seo-authority';
+import { requireSeoPageOperator, verifySeoOperator } from './admin-seo-authority';
 import { ApiError } from '@/lib/api';
 
 describe('SEO operator source of truth', () => {
   beforeEach(() => { vi.clearAllMocks(); });
+  it('blocks even the server-rendered admin page if the real Nest session is absent', async () => {
+    apiMock.mockImplementation(async (path: string) => path === '/api/v1/admin/security'
+      ? { consoleSession: { state: 'open' } } : Promise.reject(new ApiError(401)));
+    await expect(requireSeoPageOperator()).rejects.toThrow('REDIRECT:/login?error=login_required');
+  });
+  it('does not render a successful admin page when its authority service fails', async () => {
+    apiMock.mockImplementation(async (path: string) => path === '/api/v1/admin/security'
+      ? { consoleSession: { state: 'open' } } : Promise.reject(new Error('offline')));
+    await expect(requireSeoPageOperator()).rejects.toThrow('SEO operator authority unavailable');
+  });
   it('cannot authorize a human from an internal service-token Spring console response alone', async () => {
     apiMock.mockImplementation(async (path: string) => {
       if (path === '/api/v1/admin/security') return { consoleSession: { state: 'open' } };

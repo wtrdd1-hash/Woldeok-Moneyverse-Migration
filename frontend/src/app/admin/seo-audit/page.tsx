@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AdminSeoAuditView } from '@/components/admin-seo-audit-view';
 import { requireAdminConsole } from '@/lib/session';
+import { requireSeoPageOperator } from '@/lib/admin-seo-authority';
 
 export const metadata: Metadata = {
   title: '검색엔진 수집 감사 관제 타워 | 월덕 머니버스 관리자',
@@ -9,5 +10,6 @@ export const metadata: Metadata = {
 
 export default async function AdminSeoAuditPage() {
   await requireAdminConsole('/admin/seo-audit');
+  await requireSeoPageOperator();
   return <AdminSeoAuditView />;
 }

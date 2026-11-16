@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 
 const cacheHeaders = { 'Cache-Control': 'private, no-store' };
@@ -54,4 +55,14 @@ export async function verifySeoOperator(): Promise<NextResponse | null> {
       status,
     );
   }
+}
+
+/** Block server-rendered SEO administrator pages, even behind an edge gate. */
+export async function requireSeoPageOperator(): Promise<void> {
+  const denied = await verifySeoOperator();
+  if (!denied) return;
+  if (denied.status === 401) redirect('/login?error=login_required');
+  if (denied.status === 403) redirect('/admin?error=console_locked');
+  // A missing/outage authority is not permission to render an admin page.
+  throw new Error('SEO operator authority unavailable');
 }

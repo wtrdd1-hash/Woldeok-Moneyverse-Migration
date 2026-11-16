@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireAdminConsole } from '@/lib/session';
+import { requireSeoPageOperator } from '@/lib/admin-seo-authority';
 import { api } from '@/lib/api';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
 import { parseSeoObservation } from './seo-observation';
@@ -30,6 +31,7 @@ async function fetchSeoData(): Promise<SeoInitialData | null> {
 
 export default async function AdminSeoPage() {
   await requireAdminConsole();
+  await requireSeoPageOperator();
   const locale = await getServerLocale();
   const initialData = await fetchSeoData();
   const initialNowMs = Date.now();
