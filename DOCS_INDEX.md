@@ -1,7 +1,7 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
-## v2026.11.17.1 — Emergency stock admin console auth alignment (P0; TEST NEGATIVE GATES)
-- [Worklog EN](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.md) / [KO](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.ko.md) · [Internal EN](docs/updates/v2026.11.17.1-stock-admin-auth-internal.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1-stock-admin-auth-github.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-github.ko.md). Spring anonymous/transport-only admin console gate had HTTP 200 while protected stock API denied real access. Isolated localhost and public-edge Nginx bridges route security/identity to Nest; Test Nginx/API negative gates passed; signed-in admin E2E is NOT certified.
+## v2026.11.17.1 — Stock admin security bridge (Production Nginx hotfix / authenticated E2E pending)
+- [Release EN](docs/releases/v2026.11.17.1-stock-admin-auth-prod.md) / [KO](docs/releases/v2026.11.17.1-stock-admin-auth-prod.ko.md) · [Worklog EN](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.md) / [KO](docs/worklog/2026-11-17-stock-admin-auth-v2026.11.17.1.ko.md) · [Internal EN](docs/updates/v2026.11.17.1-stock-admin-auth-internal.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1-stock-admin-auth-github.md) / [KO](docs/updates/v2026.11.17.1-stock-admin-auth-github.ko.md). Spring anonymous/transport-only admin console gate had HTTP 200 while protected stock API denied real access. Isolated localhost and public-edge Nginx bridges route security/identity to Nest; Test Nginx/API negative gates passed; signed-in admin E2E is NOT certified.
 
 
 ## v2026.11.17.1 — Encrypted backup cron repair and isolated restore (HOST VERIFIED / off-host P0 OPEN)

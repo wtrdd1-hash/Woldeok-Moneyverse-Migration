@@ -18,3 +18,6 @@
 
 ## 공개 엣지 보완 발견 — 01:22~01:25 KST
 내부 4400 브리지 적용 뒤에도 공개 `GET /api/v1/admin/security`, `/api/v1/admin/me`는 Next의 API rewrite를 타고 Spring의 고정된 관리자 역할/콘솔 `open` 응답을 쿠키 없이 200으로 노출함을 확인. 공개 80 기본 서버에도 정확한 세 경로만 Nest 보안 검증으로 연결하는 별도 `ops/nginx/stock-admin-public-edge-bridge-v2026.11.17.1.conf`를 추가. 실제 Test 백엔드 3100을 연결한 격리 Nginx 4413에서 해당 익명 API 401 확인, 전체 단위회귀 6/6 통과. 종목 관리자 경로는 기존 공개 게이트웨이가 담당하므로 변경하지 않음.
+
+## 종료 / 운영 적용 확인 — 2026-11-17 01:26+ KST
+내부 게이트웨이와 공개 80에 각각 버전관리된 Nginx 스니펫 설치, 코드와 실제 파일 해시 일치, `nginx -t` 및 무중단 reload 통과, 관련 서비스 5개 모두 active. 공개 HTTPS 비로그인 보안/권한/주식동향 API 401, 헬스·버전·공개 주식 조회 200. 익명 관리자 화면에 로그인 리디렉션 신호 존재, 기존 시장 API 오류 문구 없음. [운영 증빙 영문](../releases/v2026.11.17.1-stock-admin-auth-prod.md) / [한국어](../releases/v2026.11.17.1-stock-admin-auth-prod.ko.md). 인증된 실제 관리자 종목 관리 E2E 미실시로 전체 기능 복구 인증하지 않음. 소스 PR #3211 병합은 CI 및 검토와 별도 진행.
