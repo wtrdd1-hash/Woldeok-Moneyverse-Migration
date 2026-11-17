@@ -13,12 +13,12 @@
 - 계정 변경·금융 변경·비밀값·DB 마이그레이션·정식 경로 변경·운영 배포 없음.
 
 ## 작업 중 (소스 검증 중간 기록)
-- `SpringAccountDeletionController.java` 추가. 별도 플래그로 기본 비활성, 계정 동작 없음.
+- `SpringAccountDeletionController.java` 추가. 별도 플래그로 기본 비활성, 계정 동작 없음. 기존 정적 SPA 폴백이 비활성 프리뷰를 HTML 200으로 오인시키지 않도록 `SpringAccountDeletionPreviewDisabledController.java`의 명시적 404 경로 추가.
 - `templates/spring-web/account-deletion.html`에 양언어 안내·기존 계정/개인정보 링크 제공, 반응형 CSS 추가.
 - 활성/비활성 컨텍스트의 MockMvc/JUnit 테스트 메서드 5개 작성: 언어, 기본 영어 폴백, noindex/CSP/private 헤더, 라우트 비활성 확인. **실행하지 못함**.
 - 기존 Next `DeletionRequestInfo`와 소스를 대조하여 OAuth, 사진, 감사·동의 보관 기간 및 법률 예외 한국어 문구 유지 확인. 이메일 연락처는 HTML 템플릿에 존재함. **소스 비교일 뿐 실제 HTML 실행 검증 아님**.
 - 중간 `main` 재조회 결과 최초와 동일: `e96e8f81f4d6b99b221392a2b6fe46356361b145`.
-- 선행 #3213 브랜치 대비 신규 15파일, 선행 파일 수정 0, #3249와 충돌 파일 0.
+- 선행 #3213 브랜치 대비 처음 신규 15파일, 폴백 보완 후 신규 16파일, 선행 파일 수정 0, #3249와 충돌 파일 0.
 
 ## 작업 종료 (소스 작업만 마감)
 - `feature/full-spring-web-foundation-v2026.11.17.2`를 base로 하는 [초안 PR #3253](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3253) 생성. main 직접 변경 없음. PR 개설 시 선행 브랜치 SHA `859fc315111f25a9d1921bc72b023c8a027647d9`, 후보 브랜치 SHA(종료 기록 전) `9327a0e5f3849eb6885af1e654a8250195da30c9`.
