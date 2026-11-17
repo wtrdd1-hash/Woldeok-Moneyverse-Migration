@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.17.1414 — Game-like App Experience Standard (PLANNING ONLY / RELEASE HOLD)
+- [Full design EN](docs/planning/GAME_LIKE_APP_EXPERIENCE_SPEC_v2026.11.17.1414.md) / [KO](docs/planning/GAME_LIKE_APP_EXPERIENCE_SPEC_v2026.11.17.1414.ko.md) · [Integrated planning master](docs/planning/INTEGRATED_PLANNING_MASTER.md) · [Start/Mid/End Worklog](docs/worklog/2026-11-17-game-like-app-experience-v2026.11.17.1414.md) · [Internal EN](docs/updates/v2026.11.17.1414-game-like-app-internal.md) / [KO](docs/updates/v2026.11.17.1414-game-like-app-internal.ko.md) · [GitHub EN](docs/updates/v2026.11.17.1414-game-like-app-github.md) / [KO](docs/updates/v2026.11.17.1414-game-like-app-github.ko.md). App functionality with coherent game-like world lobby, quests, character/inventory, reward feedback, mobile/Web parity, source-truth security/a11y and detailed GX-01..08 implementation gates. No code/API/DB/WLD changes, no Test/Production release.
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 

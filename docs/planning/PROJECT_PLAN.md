@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.17.1414 — Cross-product game-like app UX directive (DRAFT)
+
+Make the web/PWA/Android application feel like a playable economic world while preserving normal application navigation, precise WLD/ledger receipts, secure sessions, accessibility and truthful back-end states. Screen map, exact placement, reusable components, server-confirmed quests/rewards, mobile/web parity, GX-01..GX-08 coding and verification are defined in [EN spec](GAME_LIKE_APP_EXPERIENCE_SPEC_v2026.11.17.1414.md) and [KO spec](GAME_LIKE_APP_EXPERIENCE_SPEC_v2026.11.17.1414.ko.md). Design only; do not claim any features are implemented or approved for release.
+
 ## v2026.11.17.5 — Spring KDIC and engagement finance P0 integrated candidate (DRAFT / RELEASE HOLD)
 Owner-approved integration of #3218 and #3215 on main cd822aa098: corrected duplicate engagement routing, forged member identity headers, false WLD outcomes and KDIC fabricated financial success. KDIC admin endpoints now require actual DB-resolved signed-in superadmin session; missing KDIC fund, institution, premium, payout or ratio evidence no longer produces fabricated values. Spring test-profile entire clean test bootJar passes 126 tests / 0 fail / 0 skipped with embedded live HTTP anonymous negative checks. The app remains on old Production runtime; no ledger/DB/WLD mutations or official Test/Production deployment. Full global Spring SecurityConfig SEC1, positive MFA/CSRF, verified KDIC ledger settlement, real authenticated Test and independent restore remain P0 and block promotion. [Worklog](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.md).
 
