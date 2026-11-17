@@ -190,6 +190,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/logs/system',
+    eyebrow: 'SYSTEM RUNTIME LOGS',
+    title: '시스템 런타임 로그',
+    summary: 'Nginx 웹서버, 코어 API 백엔드 및 Next.js 프론트엔드의 실시간 런타임 로그를 모니터링합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/logs',
     eyebrow: 'AUDIT TRAIL',
     title: '감사 로그',

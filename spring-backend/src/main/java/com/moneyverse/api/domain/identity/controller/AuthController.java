@@ -85,7 +85,7 @@ public class AuthController {
             res.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "시민");
             res.put("email", s.getEmail());
             res.put("roles", s.getRoles());
-            res.put("adminRoles", s.getRoles().stream().filter(r -> r.contains("admin")).toList());
+            res.put("adminRoles", s.getRoles().stream().filter(r -> r != null && r.toLowerCase().contains("admin")).toList());
         } else {
             res.put("signedIn", false);
             res.put("consentCurrent", true);

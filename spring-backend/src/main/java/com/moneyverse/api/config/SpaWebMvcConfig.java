@@ -76,7 +76,7 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
                 // Security baseline headers
                 response.setHeader("X-Content-Type-Options", "nosniff");
                 response.setHeader("X-Frame-Options", "SAMEORIGIN");
-                response.setHeader("X-Backend-Engine", "Spring-Boot-3.3-Enterprise");
+                // X-Backend-Engine header removed
 
                 filterChain.doFilter(request, response);
             }

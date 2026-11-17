@@ -168,6 +168,24 @@ export default async function AdminLogsPage({
       {/* Navigation Sub-Tabs */}
       <LogsSubNav current="audit" />
 
+      {/* 시스템 런타임 실시간 로그 바로가기 하이라이트 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 shadow-sm">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
+            <h3 className="text-sm font-bold text-cyan-200">🖥️ 시스템 & 서버 런타임 실시간 로그 뷰어</h3>
+          </div>
+          <p className="text-xs text-zinc-400">
+            Nginx 웹서버 에러/액세스 로그, 엔터프라이즈 코어 백엔드 및 Next.js 프론트엔드 런타임 로그를 확인합니다.
+          </p>
+        </div>
+        <Button asChild variant="secondary" size="sm" className="shrink-0 font-bold bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25 min-h-[36px]">
+          <Link href="/admin/logs/system">
+            실시간 시스템 로그 열람 →
+          </Link>
+        </Button>
+      </div>
+
       {/* 스마트 조건 검색 아코디언 폼 */}
       <AuditLogsFilterForm filters={filters} users={directoryComplete ? userList : []} />
 

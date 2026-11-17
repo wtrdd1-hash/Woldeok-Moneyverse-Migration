@@ -66,6 +66,8 @@ public class UserAuthService {
 
     /**
      * Resolves the current session from request cookie or Authorization header.
+     * Accurately supports both mv_session and __Host-mv_session, raw Cookie headers,
+     * URL-decoding, and queries display_name from member_profile_view.
      */
     public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
         if (request == null) return Optional.empty();
@@ -83,6 +85,24 @@ public class UserAuthService {
             }
         }
 
+        // Direct Cookie header parsing fallback (critical for reverse-proxies and SSR)
+        if (rawToken == null) {
+            String cookieHeader = request.getHeader("Cookie");
+            if (cookieHeader != null && !cookieHeader.isBlank()) {
+                String[] parts = cookieHeader.split(";");
+                for (String part : parts) {
+                    int eq = part.indexOf('=');
+                    if (eq > 0) {
+                        String name = part.substring(0, eq).trim();
+                        if ("mv_session".equals(name) || "__Host-mv_session".equals(name)) {
+                            rawToken = part.substring(eq + 1).trim();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         if (rawToken == null) {
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -94,12 +114,17 @@ public class UserAuthService {
             return Optional.empty();
         }
 
+        if (rawToken.length() > 1 && rawToken.charAt(0) == '"' && rawToken.charAt(rawToken.length() - 1) == '"') {
+            rawToken = rawToken.substring(1, rawToken.length() - 1);
+        }
+        try {
+            rawToken = java.net.URLDecoder.decode(rawToken, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {}
+
         String tokenHash = sha256(rawToken);
         String sql = """
-            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at,
-                   u.email, u.display_name
+            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at
             FROM auth_sessions s
-            LEFT JOIN users u ON s.user_id = u.id
             WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
             """;
 
@@ -116,20 +141,40 @@ public class UserAuthService {
                 if (exp != null) si.setExpiresAt(exp.toInstant());
                 Timestamp reauth = rs.getTimestamp("reauthenticated_at");
                 if (reauth != null) si.setReauthenticatedAt(reauth.toInstant());
-                si.setEmail(rs.getString("email"));
-                si.setDisplayName(rs.getString("display_name"));
                 return si;
             }, tokenHash);
 
             if (info != null && info.getUserId() != null) {
-                List<String> roles = findUserRoles(info.getUserId());
+                UUID uid = info.getUserId();
+                // 1) display_name from member_profile_view
+                try {
+                    String dname = jdbcTemplate.queryForObject(
+                        "SELECT profile.display_name FROM public.member_profile_view(?::uuid, ?::uuid) AS profile",
+                        String.class, uid, uid
+                    );
+                    info.setDisplayName(dname != null && !dname.isBlank() ? dname : "시민");
+                } catch (Exception e) {
+                    info.setDisplayName("시민");
+                }
+
+                // 2) email from auth_local_credentials
+                try {
+                    String em = jdbcTemplate.queryForObject(
+                        "SELECT email FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL LIMIT 1",
+                        String.class, uid
+                    );
+                    info.setEmail(em);
+                } catch (Exception ignored) {}
+
+                // 3) roles & admin roles
+                List<String> roles = findUserRoles(uid);
                 info.setRoles(roles);
             }
             return Optional.ofNullable(info);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         } catch (Exception e) {
-            log.debug("[UserAuthService] resolveSession error: {}", e.getMessage());
+            log.warn("[UserAuthService] resolveSession error: {}", e.getMessage());
             return Optional.empty();
         }
     }
@@ -353,6 +398,9 @@ public class UserAuthService {
         cookie.setPath("/");
         cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
     }
 
     public void clearSessionCookie(HttpServletResponse response) {
@@ -363,6 +411,9 @@ public class UserAuthService {
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
     }
 
     public static class SessionInfo {
