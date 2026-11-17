@@ -4805,7 +4805,8 @@ graph TD
 
 ### 2. 엔드포인트 통합 테스트 및 CI 검증
 - **통합 테스트**: Phase13EditorialHelpAndProfileIntegrationTest.java 10/10 테스트 100% GREEN 통과.
-- **GitHub Actions CI (PR #3188)**: uild, untime-check (6m 15s), erify / runtime-check (10m 54s) 포함 8대 필수 검사 전수 통과.
+- **GitHub Actions CI (PR #3188)**: uild, 
+untime-check (6m 15s), erify / runtime-check (10m 54s) 포함 8대 필수 검사 전수 통과.
 - **머지 완료**: main 브랜치에 스쿼시 머지 완료 (7f2a1670b). 작업 브랜치 정리 완료.
 
 ### 3. 프로덕션 배포 및 Nginx 컷오버 실측
@@ -4861,7 +4862,8 @@ graph TD
 
 ### 3. 엔드포인트 통합 테스트 및 CI 검증
 - **통합 테스트**: Phase14FullSystemCompletionIntegrationTest.java 16/16 전수 100% GREEN 통과.
-- **GitHub Actions CI (PR #3189)**: uild, untime-check (8m 43s), erify / runtime-check 포함 8대 필수 검사 전수 통과.
+- **GitHub Actions CI (PR #3189)**: uild, 
+untime-check (8m 43s), erify / runtime-check 포함 8대 필수 검사 전수 통과.
 - **머지 완료**: main 브랜치에 스쿼시 머지 완료 (cf43d3cb4). 잔여 브랜치 전수 정리 완료.
 
 ### 4. 프로덕션 배포 및 Nginx 컷오버 실측 (100% 완결)
@@ -4910,7 +4912,8 @@ graph TD
 - GET /economy/hot-time/active: 200 OK (isActive: true, multiplier: 1.5)
 - GET /integrations/discord/guilds/status: 200 OK (connected: true, botUsername: 월덕봇#7601)
 - GET /stocks/league/current: 200 OK (	itle: 제1회 월덱 가상주식 실전 투자 챔피언십)
-- GET /admin/fx/status: 200 OK (eserves: 대한민국 외환보유액 통합계정)
+- GET /admin/fx/status: 200 OK (
+eserves: 대한민국 외환보유액 통합계정)
 
 ### 4. 최종 시스템 구성 결산
 - **단일 운영 백엔드**: Spring Boot 3.3.5 (moneyverse-spring-backend.service, Port 4550 / 9092)
@@ -5261,3 +5264,32 @@ graph TD
   - 1시간 주기 자동 스케줄러 정상 가동, `treasury_swf_events` DB 기록 및 총 AUM 1,216,301,559 WLD 정상 관리 (PASS)
 - **관리자 401 미인증 보안 계약**:
   - `GET /api/v1/admin/controls` (미인증): 401 Unauthorized, `code: login_required` (PASS)
+
+---
+## 🚀 [v63 Specification] 완전 일원화 (100% Spring Boot 단일화 & Node.js 데몬 완전 폐기)
+- **배경 및 원인 분석**:
+  - 기존 시스템에 남아있던 `test-main-backend.service`(PID 3471480, 포트 3100) 및 `moneyverse-release-v1546-backend.service`(PID 3822723, 구형 NestJS 백엔드) 프로세스가 백그라운드에서 여전히 구동되고 있었음.
+  - Nginx 설정 내 OAuth 브리지 스니펫(`moneyverse-discord-oauth-node-bridge-v2026.11.17.4.conf`)과 SEO 브리지 스니펫(`moneyverse-seo-node-bridge-v2026.11.17.2.conf`)이 `prod_node`를 프록시 패스로 바라보고 있어 완전한 단일화가 이루어지지 못했음.
+  - Spring Boot에 Discord/Google OAuth2 인가(`/auth/{provider}/authorize`) 및 콜백(`/auth/{provider}/callback`) 엔드포인트가 누락되어 있어 로그인 완료 처리가 레거시 노드에 의존하고 있었음.
+- **단행된 조치 내역**:
+  1. **Node.js 데몬 완전 삭제 및 폐기**:
+     - `test-main-backend.service` 및 `moneyverse-release-v1546-backend.service` 즉시 중지(`stop`), 자동 시작 비활성화(`disable`) 및 시스템 마스킹(`mask`).
+     - `/etc/systemd/system/` 내 46개의 레거시 Node.js 백엔드 유닛 파일들을 `/etc/systemd/system/legacy-node-archive/`로 완전 격리 백업 및 폐기.
+     - 시스템 내 살아있는 유일한 백엔드 서비스는 `moneyverse-spring-backend.service` 단 1개만 남김.
+  2. **Spring Boot Discord/OAuth2 컨트롤러 및 세션 완결 포팅**:
+     - `com.moneyverse.api.domain.identity.service.UserAuthService.java`에 `completeOAuthLogin` 메서드 추가: PostgreSQL 저장 프로시저 `auth_complete_oauth_login(?::uuid, ?::identity_provider, ?, ?, ?, ?, ?)` 호출로 유저 생성, 프로필 생성, 계좌(USER_CASH/USER_BANK) 생성, `mv_session` 및 `__Host-mv_session` 쿠키 발급을 원자적 트랜잭션으로 완결.
+     - `com.moneyverse.api.domain.identity.controller.OAuthController.java` 신설:
+       - `GET /auth/{provider}/authorize`: Discord OAuth2 인가 URL 생성 및 사전 세션(Prelogin Session) 발급.
+       - `GET /auth/{provider}/callback`: Discord API를 통해 authorization_code를 access_token으로 교환, `@me` 프로필 조회 후 DB 로그인 세션 발급 완료.
+  3. **Lavaplayer 오디오 모듈 및 24/7 음성 상주 단일 JAR 완결**:
+     - `MusicManager.java`, `LavaPlayerAudioProvider.java`, `TrackScheduler.java`, `MusicSlashCommands.java` 완비.
+     - Lavaplayer 2.2.3 + DAVE E2EE(`natives-linux-x86-64:0.1.2`, `AEAD_AES256_GCM`) 음성 채널(`1536572442422550538`) 24/7 무중단 상주 가동 중.
+  4. **Nginx 프록시 Spring Boot 단일화**:
+     - `prod_node` upstream 완전 제거.
+     - OAuth 브리지 및 SEO 브리지 프록시 패스를 `prod_spring`(포트 4550)으로 전면 교체.
+     - `nginx -t` 구문 검증 완료 및 `systemctl reload nginx` 적용.
+- **실측 검증 결과 (Evidence Before Claims)**:
+  - `ps aux | grep -E 'node|java'`: 레거시 Node.js 백엔드 프로세스 0개 확인. 유일한 백엔드는 `java -Dserver.port=4550 -jar moneyverse-spring-backend-0.0.1-SNAPSHOT.jar` (PID 3960342) 단독 구동 확인.
+  - `curl -i http://127.0.0.1:4550/auth/discord/authorize`: HTTP 200 OK, `mv_session` 쿠키 정상 발급 및 올바른 Discord OAuth2 URL 반환 확인.
+  - `curl -i -H "Host: easy-scraping.com" http://127.0.0.1/auth/discord/authorize`: HTTP 307 Temporary Redirect 정상 작동 확인.
+  - Spring Boot 126개 단위 테스트 100% 통과(`BUILD SUCCESSFUL in 28s`).
