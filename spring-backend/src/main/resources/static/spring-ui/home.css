@@ -1,0 +1,5 @@
+.home-hero {padding-top:82px;max-width:850px}.home-hero h1{max-width:800px}.home-actions{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0 30px}
+.primary-action,.secondary-action {display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:10px 21px;border-radius:12px;font-weight:700}
+.primary-action{background:#82f0d0;color:#061914}.primary-action:hover{background:#b6fce9}.secondary-action{border:1px solid #56758e;color:#e4f7f6;background:#19324a77}
+.tile-symbol{font-size:1.38rem;font-weight:800;color:#8de7d0;min-height:30px}.home-hero .notice{margin-top:30px}
+@media(max-width:460px){.home-hero{padding-top:43px}.home-actions>a{width:100%}}

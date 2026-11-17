@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.0718 — 사용자 지시 Spring 웹 프론트엔드 전환 (브랜치 구현 / 운영 보류)
+2026-11-18 사용자 지시로 기존 백엔드 전환 범위를 **웹 프론트엔드까지 Spring 제공 구조로 확대**했다. Next의 최종 유지 가정은 변경되지만, 아직 이식하지 않은 UI는 과도기적으로 유지하고 React·Android·로그인·금융 보호 기준은 적용한다. 현재 Nginx가 UI/관리자 경로를 Spring의 475바이트 로딩 임시 HTML로 HTTP 200 처리하는 문제를 실측했다. Next 소스 화면 178개(관리자 39개, 동적 33개) 중 `/`, `/guide` 2개만 Spring MVC/Thymeleaf **읽기 전용 후보**이며 기본 꺼짐 스위치와 noindex 검토 경로로만 구현했다. CSRF 비활성/전역 permitAll, 나머지 176개 미이식, 공식 Test·인증/원장/관리자/SEO·복원 게이트가 남아 운영 승격 불가. [상세 한글](SPRING_WEB_FRONTEND_MIGRATION_v2026.11.18.0718.ko.md) / [English](SPRING_WEB_FRONTEND_MIGRATION_v2026.11.18.0718.md) · [기록](../worklog/2026-11-18-spring-web-frontend-v2026.11.18.0718.ko.md).
+
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

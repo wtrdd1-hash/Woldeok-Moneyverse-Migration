@@ -8,12 +8,15 @@
 
 ## Checklist
 - [x] Capture start SHA, governance, live routing and visible regression.
-- [ ] Implement a self-contained Spring-rendered public UI slice, with English/Korean, responsive styling and no placeholder fallback for pilot route.
-- [ ] Write Spring MVC HTTP/SEO/route/auth-negative regression tests and execute locally.
-- [ ] Recheck origin/main and integrate only nonconflicting changes.
-- [ ] Run isolated Test web+backend smoke and document exact SHA.
+- [x] Implement two isolated read-only Spring MVC/Thymeleaf candidate pages, EN/KO and responsive CSS; actual route ownership flags are OFF.
+- [x] Run new route-gate, MVC HTML and embedded real HTTP/H2 loopback tests; 11 focused tests green. No authenticated/finance E2E was claimed.
+- [x] Recheck origin/main mid-task: unchanged `e96e8f81f4d6b99b221392a2b6fe46356361b145`. No source overlap with the existing main checkout.
+- [x] Run embedded in-memory H2 Test profile Spring+Tomcat HTTP on random loopback port; home/guide/CSS responses passed. **Official external Test remains NOT RUN.**
 - [ ] Complete paired EN/KO planning, internal/GitHub update notes and release decision.
 - [ ] Promote only if official Test, complete route inventory, auth/finance, backup/rollback and production checks pass.
 
 ## Checkpoints
 1. **START:** no code modifications; source/reality gap confirmed. Production promotion is blocked until gates pass.
+2. **MIDDLE / IMPLEMENTATION:** `GET /spring-ui/home` and `/spring-ui/guide` added as read-only noindex previews; actual `/` and `/guide` controllers only load when explicitly enabled. CSS 320px-responsive, EN default/KO second, no third-party JS or synthetic financial data. A generated 178-file route ledger explicitly leaves 176 pages unmigrated. Spring `SecurityConfig` remains a known CSRF/permitAll blocker for protected routes.
+3. **MIDDLE / QA:** First focused 5 tests detected one `Content-Language` mismatch caused by framework response locale override; removed the unreliable header and used correct HTML `lang` instead. Focused 11 MVC/flag/real HTTP tests now pass; prior full clean Spring test/bootJar passed before adding home tests. Read-only frontdoor regression script correctly reports 3/3 observed Nginx routes as broken placeholders. Real Test uses H2 only; no Production DB access.
+4. **MIDDLE / AUTHORITY:** `origin/main` re-fetched during work at `e96e8f81f4d6b99b221392a2b6fe46356361b145`; the originally described 2026-11-13 Next preservation target is superseded only for final web frontend scope by user 2026-11-18 direction.
