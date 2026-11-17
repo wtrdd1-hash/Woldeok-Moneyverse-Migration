@@ -32,9 +32,13 @@ public class SystemLogService {
         int clampedLines = Math.max(10, Math.min(500, lines));
         List<String> rawLines = fetchRawLogs(source, clampedLines);
 
+        String effectiveFilter = filter;
+        if ((effectiveFilter == null || effectiveFilter.trim().isEmpty()) && source == SystemLogSource.DISCORD_BOT) {
+            effectiveFilter = "Discord";
+        }
         List<String> filteredLines = rawLines;
-        if (filter != null && !filter.trim().isEmpty()) {
-            String lowerFilter = filter.trim().toLowerCase();
+        if (effectiveFilter != null && !effectiveFilter.trim().isEmpty()) {
+            String lowerFilter = effectiveFilter.trim().toLowerCase();
             filteredLines = rawLines.stream()
                     .filter(line -> line.toLowerCase().contains(lowerFilter))
                     .collect(Collectors.toList());

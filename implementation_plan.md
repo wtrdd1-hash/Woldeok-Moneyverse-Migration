@@ -5081,3 +5081,67 @@ graph TD
   - 로컬 vitest 및 typecheck 통과.
   - PR 생성 -> CI 8대 검사 All Green -> main 스쿼시 머지.
   - 프로덕션 배포 및 curl 엔드포인트 정밀 실측.
+
+
+---
+## 🚀 [v57 Specification] 전 시스템 Spring Boot 3.3.5 단일 런타임 100% 완전 전환 (Frontend SPA 내장 서빙, Discord4J 봇 단일화, Nginx Spring 일원화 및 Node.js 완전 퇴역)
+### 1. 현황 분석 및 의도 재정의 (Background & Intent Mapping)
+- **사용자 핵심 지시**:
+  - "전체 다 스프링 전환 완료되는지 확인해 제대로 처음부터 끝까지 다 전환되는지 확인해 실제 깃허브 등 다 분석해 모든 문서를 분석해. 나는 프론트엔드도 이제 스프링으로 전환하라는 지시했어 분명해, 디스코드도 잘 스프링으로 전환하라고까지 했음. 모든 기능 다 모든 요청 처리가 스프링이어야 돼"
+- **현장 실측 불일치 및 잔여 Node.js 프로세스 식별**:
+  1. **프론트엔드 서빙**: 백엔드 89개 컨트롤러는 Spring Boot 3.3.5로 이관되었으나, Next.js 프론트엔드가 별도의 Node.js 서비스(`moneyverse-release-v1546-frontend.service`, Port 4501)로 가동 중이며, Nginx의 `location /`이 `prod_frontend (4501)`를 바라보고 있음.
+  2. **디스코드 봇**: Spring Boot 내에 `DiscordBotService.java`가 존재하나 Jackson Datatype 역직렬화 이슈(`Optional cannot be cast to Id`)로 인해 기동이 차단되었고, 구버전 Node.js 기반 `moneyverse-discord-bot.service` (PID 3211361)가 독립 데몬으로 상주하고 있음.
+  3. **Nginx 라우팅 잔여 브릿지**: `/etc/nginx/sites-enabled/moneyverse` 내에 구버전 NestJS 백엔드(`prod_node`, 4500)로 향하는 임시 브릿지 라우팅(`location = /api/v1/admin/stocks`, `/api/v1/admin/economy`, `/api/v1/admin/auth/channel-otp`, `/api/v1/admin/users`, `/api/kdic/overview` 등) 및 블로그 Next.js 라우팅(4501)이 여전히 공존함.
+  4. **문서 정합성**: `SPRING_BOOT_MIGRATION_REPORT.md` 및 `DOCS_INDEX.md`의 아키텍처 다이어그램에 프론트엔드가 Next.js Node 서버(4501)로 표기되어 있어, 프론트엔드 및 디스코드 봇까지 스프링으로 완전 통합하라는 지시와 괴리가 존재함.
+
+### 2. 세부 통합 설계 및 아키텍처 (Detailed Architecture Design)
+
+```mermaid
+graph TD
+    User["사용자 브라우저 / 외부 웹 클라이언트"]
+    Discord["Discord Gateway API"]
+    CF["Cloudflare Edge Proxy (WAF / SSL / HSTS / CDN)"]
+    Nginx["Nginx Reverse Proxy (Port 80 / 443 / 4400)"]
+    
+    subgraph SpringBoot["Java Spring Boot 3.3.5 Enterprise Single Fat JAR (Port 4550)"]
+        SpaWebMvc["SpaWebMvcConfig (SPA HTML5 라우터)"]
+        StaticAssets["classpath:/static/ (내장 프론트엔드 에셋)"]
+        Controllers["89개 도메인 REST Controllers (/api/**, /admin/**)"]
+        DiscordBot["DiscordBotService (Discord4J Core v3.2.7)"]
+        NettyIO["Netty-SocketIO Engine (Port 9092)"]
+    end
+    
+    Postgres["PostgreSQL 16 Financial Ledger DB"]
+
+    User --> CF
+    CF --> Nginx
+    Nginx -->|location / (웹/SPA)| SpaWebMvc
+    Nginx -->|location /_next/**, 정적 에셋| StaticAssets
+    Nginx -->|location /api/**, /admin/**| Controllers
+    Nginx -->|location /socket.io/| NettyIO
+    DiscordBot <-->|WebSocket Gateway| Discord
+    Controllers --> Postgres
+```
+
+### 3. 단계별 상세 실행 계획 (Action Plan)
+- **Phase 1: 프론트엔드 정적 산출물 Spring Boot 내장화 (Embedded Frontend)**
+  - 프론트엔드 빌드 산출물(`frontend/out` 또는 정적 에셋)을 `spring-backend/src/main/resources/static/`으로 복사.
+  - `SpaWebMvcConfig.java`의 리소스 핸들러 및 SEO 헤더 필터 동작 정밀 검증.
+  - Spring Boot 내장 서빙 로컬/서버 테스트 (HTTP 200, Content-Type, CSS/JS 번들 로딩).
+- **Phase 2: 디스코드 봇 Discord4J Jackson Datatype 버그 해결 및 스프링 내부 데몬 단일화**
+  - `spring-backend/build.gradle.kts`에 `com.fasterxml.jackson.datatype:jackson-datatype-jdk8` 추가 및 의존성 정합성 보완.
+  - `DiscordBotService.java`의 SmartLifecycle 기동 시 토큰 연결 및 슬래시 커맨드 바인딩 테스트.
+  - 서버의 Node.js 디스코드 봇(`moneyverse-discord-bot.service`) 안전 정지 및 systemd 비활성화 (`systemctl stop && systemctl disable`).
+  - Spring Boot 서비스 재기동 후 Discord Gateway 정상 로그인 (`Successfully connected to Discord Gateway as single-runtime service!`) 실측 증적 확인.
+- **Phase 3: Nginx 리버스 프록시 완전 일원화 및 Node.js 완전 퇴역**
+  - `/etc/nginx/sites-enabled/moneyverse`에서 `upstream prod_node`, `upstream prod_frontend` 제거.
+  - 모든 잔여 브릿지 라우팅(`proxy_pass http://prod_node;`, `proxy_pass http://127.0.0.1:4501;`)을 전면 삭제하고 오직 `prod_spring (4550)` 및 `prod_netty (9092)`로만 모든 요청이 인입되도록 수정.
+  - Nginx 문법 검사(`nginx -t`) 통과 후 `nginx -s reload`.
+  - Node.js 프론트엔드 서비스(`moneyverse-release-v1546-frontend.service`) 안전 정지 및 systemd 비활성화 (`systemctl stop && systemctl disable`).
+- **Phase 4: 관리자 시스템 런타임 로그 관제 타워 확장**
+  - `SystemLogService.java`에 내장 프론트엔드 요청 로그 및 Discord4J 게이트웨이 봇 로그 식별 필터 추가.
+  - `/admin/logs/system` UI에서 프론트엔드 및 봇 로그 상태 실시간 모니터링 연동.
+- **Phase 5: 깃허브 전체 공식 마이그레이션 보고서 및 문서 전수 동기화**
+  - `SPRING_BOOT_MIGRATION_REPORT.md` 전문 업데이트: 백엔드 89개 컨트롤러뿐만 아니라 프론트엔드 내장 서빙, Discord4J 봇, Netty-SocketIO까지 전 시스템 Spring Boot 3.3.5 100% 완전 단일 런타임 통합 아키텍처 및 실측 표 반영.
+  - `DOCS_INDEX.md` 최신 릴리스 및 마이그레이션 결산 항목 반영.
+  - PR 생성 -> CI 8대 검사 All Green 통과 -> `main` 스쿼시 병합 -> 프로덕션 무중단 배포 및 curl/ps 실측 검증.

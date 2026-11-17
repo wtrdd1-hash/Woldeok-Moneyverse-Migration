@@ -27,7 +27,8 @@ const SOURCES = [
   { id: 'NGINX_ERROR', label: 'Nginx 오류 로그', icon: AlertTriangle, desc: '/var/log/nginx/error.log' },
   { id: 'NGINX_ACCESS', label: 'Nginx 액세스 로그', icon: Globe, desc: '/var/log/nginx/access.log' },
   { id: 'SPRING_BACKEND', label: 'Spring Boot 백엔드', icon: Server, desc: 'moneyverse-spring-backend (:4550)' },
-  { id: 'FRONTEND', label: 'Next.js 프론트엔드', icon: Radio, desc: 'moneyverse-frontend (:4501)' },
+  { id: 'FRONTEND', label: 'Spring 내장 프론트엔드', icon: Radio, desc: 'Spring Boot WebMvc (:4550)' },
+  { id: 'DISCORD_BOT', label: 'Spring Discord 봇', icon: Radio, desc: 'Discord4J Daemon (:4550)' },
 ] as const;
 
 const LINE_OPTIONS = [50, 100, 200, 500] as const;

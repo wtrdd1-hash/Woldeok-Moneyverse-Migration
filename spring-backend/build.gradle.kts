@@ -33,6 +33,7 @@ dependencies {
 
     // JSON Date/Time
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 
     // Netty-SocketIO (Real-time Socket.IO v4 protocol compatible engine)
     implementation("com.corundumstudio.socketio:netty-socketio:2.0.12")

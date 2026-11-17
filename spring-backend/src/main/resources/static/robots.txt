@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /stocks
+Allow: /kdic
+Allow: /calculators
+Allow: /announcements
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://easy-scraping.com/sitemap.xml
+Sitemap: https://easy-scraping.com/sitemap-index.xml
