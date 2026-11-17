@@ -5,3 +5,5 @@
 회원 조회 GET/HEAD 8개씩 정확히 공개/내부 Nginx에 연결. Python 5개 테스트와 격리 Nginx :4489 실요청 통과. 원본 설정 SHA 5993467abb935d12385810a1d3bb62827dc1b9592312c49ec31e1ce7478ff95b 및 root 제한 복구 사본 보호.
 ## 종료 — 09:08 KST
 nginx -t 및 무중단 reload/4초 안정화, 운영/내부 HTTPS 비로그인 401, KDIC 관리자와 허위 보상 503, 일반 버전 200 확인. 적용 SHA 2ff3ad42a87ef11162b106e14640e6945370e52034831272cffca3908e692c28. 데이터·잔액 미변경, 회원 로그인 정상 E2E·실제 지급·전체 Spring 승격 미완료.
+
+GitHub PR / 검토: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3226

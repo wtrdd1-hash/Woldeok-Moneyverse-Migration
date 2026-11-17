@@ -18,3 +18,5 @@
 - Public and internal unauthenticated requests return canonical 401 for eight read aliases; sampled public HTTPS direct paths independently 401. KDIC admin and fake WLD/streak paths still 503, version 200.
 - New live site SHA 2ff3ad42a87ef11162b106e14640e6945370e52034831272cffca3908e692c28. Protected rollback original preserved.
 - No DB/ledger/WLD mutation or app server restart. Full signed-in positive E2E and Spring platform promotion remain unverified and held.
+
+GitHub PR / 검토: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3226
