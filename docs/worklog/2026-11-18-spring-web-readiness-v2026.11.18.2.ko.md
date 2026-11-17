@@ -15,3 +15,8 @@
 
 ## 종료
 측정 대기.
+
+### 2026-11-18 07:33 KST — 실제 첫 테스트
+- 독립 JDK21 Gradle `clean test bootJar` 실행. **실패:** 총 116개 테스트 중 1개 실패(`Phase7IntegrationTest` 40행, ServletException/IllegalStateException). Java 및 테스트 컴파일, bootJar 단계는 수행됐으나 전체 릴리스 게이트는 실패함.
+- Spring 웹 선행 브랜치의 공통 조상은 예전 `2c1ea4cd77`; 최신 main은 출석/도파민 중복 라우트 수정 포함. 병합하여 다시 검사할 것.
+- Next 페이지 178개 및 API 핸들러 124개 실제 재집계, 정식 Spring 전체 동등성 미확보. 운영 Next 복구 기능 유지.

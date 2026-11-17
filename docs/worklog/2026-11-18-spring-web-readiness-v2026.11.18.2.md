@@ -15,3 +15,8 @@ Pending measurement.
 
 ## CLOSEOUT
 Pending measurement.
+
+### 2026-11-18 07:33 KST — actual baseline run
+- Actual isolated Java21 Gradle command: `./gradlew --offline --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx1024m -XX:MaxMetaspaceSize=384m" clean test bootJar`.
+- **FAILED:** 116 tests / 1 failed (`Phase7IntegrationTest` line 40, ServletException/IllegalStateException) and 115 not reported failed; `compileJava`, `compileTestJava`, `bootJar` completed but the overall release gate failed. Parent is based on pre-fix main `2c1ea4cd77`, latest main incorporates engagement repair. This failure blocks a release; reconcile with latest main and rerun.
+- Source counts remeasured 178 canonical Next page components and 124 Next API handler components, with no verified full SSR/BFF parity. Production Next recovery remains active.
