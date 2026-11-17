@@ -11,3 +11,10 @@ Parallel SEC1 worktree modifies UserAuthService independently. Do not overwrite 
 
 ## FINISHED
 Pending.
+
+GitHub review / 검토: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3227
+
+## TEST E2E FOLLOW-UP — 2026-11-17 09:21–09:23 KST
+- Staged exact source b1bad92aea2f69dd863b15aaebdc5b0ecbbf15e5 Spring JAR in root-owned isolated Test-only release; HTTP listener 127.0.0.1:3155 with credentials from effective official Test database, not Production, ticker and Discord disabled. Health/version 200, forged/anonymous session 401.
+- Created one ephemeral Test-only DB-backed signed-in superadmin session with short expiration (no production user modification), and compared old Spring :3154 with changed Spring :3155 using the same cryptographic cookie. Old returned 401 to valid session; changed version reached handler and returned 503 for KDIC ledger, KDIC overview and engagement streak because financial sources are deliberately unimplemented. Forged session returned 401.
+- Revoked and deleted temporary Test session via Test DB migrator; counted residual 0 and DELETE exit 0. No WLD/ledger/Production DB changes. The 503 success in authentication does not certify KDIC finance operations or official Test release.
