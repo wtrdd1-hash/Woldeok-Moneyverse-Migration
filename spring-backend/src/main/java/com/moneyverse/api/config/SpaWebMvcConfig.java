@@ -39,6 +39,9 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
 
                         // Do not route API or Swagger requests to index.html (let Spring handle 404/API)
                         if (resourcePath.startsWith("api/") || resourcePath.startsWith("api")
+                                || resourcePath.startsWith("auth/") || resourcePath.startsWith("auth")
+                                || resourcePath.startsWith("seo/") || resourcePath.startsWith("seo")
+                                || resourcePath.startsWith(".well-known")
                                 || resourcePath.startsWith("v3/api-docs") || resourcePath.startsWith("swagger-ui")
                                 || resourcePath.startsWith("health") || resourcePath.startsWith("actuator")) {
                             return null;
