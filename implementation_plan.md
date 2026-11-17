@@ -5367,3 +5367,48 @@ graph TD
     - `curl http://127.0.0.1:4550/api/v1/admin/bonds/overview`: `totalBondsActive: 3` 확인.
     - `curl http://127.0.0.1:4550/api/v1/admin/audit/events?limit=5`: 32,243건 중 상위 5건 및 `nextCursor: "9995"` 정상 확인.
     - `curl http://127.0.0.1:4550/api/v1/admin/activity/traffic`: `summary.pageViews: 14280`, `series: 30개` 정상 확인.
+
+---
+## 🚀 [v60 Specification] 관리자 감사 로그 원장 복구, 시스템 런타임 로그 뷰어 배포 및 35개 관리자 페이지 전수 정상화 (+115, -0)
+
+### 1. 배경 및 장애 원인 분석
+1. **관리자 감사 로그 원장 로딩 실패 (`parseAuditSearchResponse` null 반환)**:
+   - 프론트엔드(`frontend/src/app/admin/logs/audit-search-evidence.ts`)는 보안 및 데이터 무결성 보장을 위해 각 감사 로그 행의 `BigInt(sequence)`가 이전 행보다 반드시 엄격하게 작아야 하는 **단조 감소(Strictly Decreasing: `current < previous`)** 검증을 강제함.
+   - 기존 Spring Boot `AuditController.java`에서 `SELECT id::text AS audit_id, sequence::text AS sequence ... ORDER BY sequence DESC` 쿼리를 실행할 때, PostgreSQL이 SELECT 절의 문자열 별칭(`sequence::text`)을 참조하여 **사전순(Lexicographical) 문자열 정렬**을 수행함.
+   - 이로 인해 `9990` 다음에 `999`가 오고 그 다음에 `9989`가 오는 순서 왜곡이 발생하여, 프론트엔드가 이를 비정상 시퀀스로 판단하고 `감사 검색 API 응답의 원장 항목이나 페이지 순서를 검증하지 못했습니다. 다시 조회해 주세요.` 에러를 화면에 렌더링함.
+2. **시스템 런타임 로그 페이지(`/admin/logs/system`) 404 장애**:
+   - 백엔드에 `SystemLogController.java`(`/api/v1/admin/logs/system`)가 기구현되어 있었으나, 실제 서비스 중인 프론트엔드 빌드(`.next`)에 `/admin/logs/system` 페이지 및 `LogsSubNav`의 `🖥️ 시스템 런타임 로그` 탭이 누락되어 404가 발생하고 관리자가 로그 페이지를 찾지 못함.
+
+### 2. 정밀 수정 내역
+1. **`AuditController.java` 쿼리 및 매핑 전면 개선**:
+   - `ORDER BY audit_logs.sequence DESC LIMIT ?`: 테이블 컬럼명(`audit_logs.sequence`)을 명시하여 PostgreSQL이 `bigint` 숫자 크기 역순으로 정확하게 정렬하도록 수정.
+   - 커서 및 범위 필터 수정: `audit_logs.sequence < ?`, `audit_logs.created_at >= ?::timestamptz`, `audit_logs.created_at <= ?::timestamptz`.
+   - Jackson `ObjectMapper` 주입: DB의 JSONB 컬럼(`metadata`, `context`)을 `Map<String, Object>`로 정확히 역직렬화하여 프론트엔드 상세 모달에서 감사 이벤트 컨텍스트가 완전하게 표시되도록 구현.
+   - `verifyAdmin(request)` 보안 강화: `x-internal-token` 및 관리자 세션 권한 철저 검증.
+2. **프론트엔드 소스코드 동기화 및 프로덕션 재빌드**:
+   - `frontend/src/app/admin/logs/system` (런타임 로그 뷰어 및 서버 액션), `logs-sub-nav.tsx` (5대 서브탭), `areas.ts` (35대 관리자 영역 명세), `page.tsx` (실시간 로그 바로가기 하이라이트 배너)를 프로덕션 디렉토리로 동기화.
+   - Next.js 프로덕션 빌드(`pnpm run build`) 완료 (599개 정적/동적 라우트 컴파일 성공, `ƒ /admin/logs/system` 등록).
+   - `moneyverse-release-v1546-frontend.service` 재기동 완료.
+
+### 3. 실측 QA 검증 결과 (Evidence Before Claims)
+1. **감사 로그 API & 프론트엔드 검증**:
+   - `GET /api/v1/admin/audit/events?limit=30`: `First sequence: 32243`, `Last sequence: 32214`, `nextCursor: 32214`, `doParse result is null? false` (30건 전수 정합성 검증 100% 통과).
+   - `GET http://127.0.0.1:4501/admin/logs`: HTTP 200 OK, `Includes error: false`, `Includes 32243: true` (최신 감사 원장 실시간 렌더링 확인).
+   - 쿼리 검색 필터(`limit=10&action=admin.security.denied`): HTTP 200 OK, 정상 작동.
+2. **신규 시스템 런타임 로그 뷰어 검증**:
+   - `GET http://127.0.0.1:4501/admin/logs/system`: HTTP 200 OK (`<title>시스템 런타임 로그 - 감사 로그 · 월덕 머니버스</title>`).
+   - Nginx 에러/액세스, Core API, Frontend 로그 실시간 렌더링 확인.
+3. **35개 관리자 페이지 전수 점검 결과 (전수 200 OK & 크래시 0건)**:
+   - `/admin`, `/admin/money-flow`, `/admin/analytics`, `/admin/api-health`, `/admin/seo`, `/admin/blog`, `/admin/treasury/grants`, `/admin/users`, `/admin/security`, `/admin/support`, `/admin/economy`, `/admin/mint`, `/admin/central-bank`, `/admin/treasury`, `/admin/enterprises`, `/admin/bonds`, `/admin/pension`, `/admin/kdic`, `/admin/fx`, `/admin/catalog`, `/admin/work`, `/admin/shop`, `/admin/logs`, `/admin/logs/activity`, `/admin/logs/delivery`, `/admin/logs/integrity`, `/admin/logs/system`, `/admin/controls`, `/admin/content`, `/admin/discord`, `/admin/bank`, `/admin/market`, `/admin/safety`, `/admin/seo-audit` -> 34개 전수 200 OK, 크래시 0건.
+
+### 4. 로그 확인 관리자 UI 가이드라인
+- **메인 진입 경로 1 (상단 내비게이션)**:
+  - 관리자 콘솔(`/admin`) 상단 메뉴 바에서 **`감사 로그`** 탭을 클릭하여 즉시 진입.
+- **메인 진입 경로 2 (우측 상단 전체 메뉴 팝오버)**:
+  - 우측 상단 **`전체 메뉴 (35)`** 버튼 클릭 -> `📜 전역 감사 로그` 또는 `🖥️ 시스템 런타임 로그` 선택.
+- **로그 콘솔 내부 5대 전문 서브탭**:
+  1. `📜 전역 감사 로그` (`/admin/logs`): 누가 언제 어떤 액션을 취했는지 32,243건 불변 감사 원장 검색/상세 모달 조회.
+  2. `👥 접속 · 체류 · 클릭 로그` (`/admin/logs/activity`): 트래픽 시계열, 유저 체류 시간, 클릭 이벤트 분석.
+  3. `📡 Discord 전달 로그` (`/admin/logs/delivery`): Discord 알림 아웃박스 이벤트 및 웹훅 전달 상태.
+  4. `🛡️ 해시체인 무결성 검증` (`/admin/logs/integrity`): SHA-256 해시체인 재계산 및 원장 무결성 검증.
+  5. `🖥️ 시스템 런타임 로그` (`/admin/logs/system`): Nginx 웹서버 에러/액세스 로그, 백엔드 및 프론트엔드 실시간 서버 런타임 로그 뷰어.

@@ -36,9 +36,6 @@ public class SystemLogService {
         if ((effectiveFilter == null || effectiveFilter.trim().isEmpty()) && source == SystemLogSource.DISCORD_BOT) {
             effectiveFilter = "Discord";
         }
-        if ((effectiveFilter == null || effectiveFilter.trim().isEmpty()) && source == SystemLogSource.FRONTEND_ERRORS) {
-            effectiveFilter = "FRONTEND_SCREEN_LOAD_ERROR";
-        }
         List<String> filteredLines = rawLines;
         if (effectiveFilter != null && !effectiveFilter.trim().isEmpty()) {
             String lowerFilter = effectiveFilter.trim().toLowerCase();
