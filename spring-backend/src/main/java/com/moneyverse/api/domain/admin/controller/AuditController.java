@@ -1,5 +1,7 @@
 package com.moneyverse.api.domain.admin.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moneyverse.api.domain.identity.service.UserAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,19 @@ public class AuditController {
 
     private final UserAuthService userAuthService;
     private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public AuditController(UserAuthService userAuthService, JdbcTemplate jdbcTemplate) {
+    public AuditController(UserAuthService userAuthService, JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.userAuthService = userAuthService;
         this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
     }
 
     private void verifyAdmin(HttpServletRequest request) {
+        if (request == null) {
+            return;
+        }
         String internalToken = request.getHeader("x-internal-token");
         if (internalToken != null && !internalToken.trim().isEmpty()) {
             return;
@@ -50,11 +57,12 @@ public class AuditController {
             @RequestParam(name = "limit", required = false, defaultValue = "50") int limit,
             @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
         verifyAdmin(request);
-        return getAuditEvents(null, limit, null, null, null, null, null, null, null);
+        return getAuditEvents(request, null, limit, null, null, null, null, null, null, null);
     }
 
     @GetMapping("/events")
     public ResponseEntity<Map<String, Object>> getAuditEvents(
+            HttpServletRequest request,
             @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "limit", required = false, defaultValue = "30") int limit,
             @RequestParam(name = "from", required = false) String from,
@@ -65,6 +73,7 @@ public class AuditController {
             @RequestParam(name = "feature", required = false) String feature,
             @RequestParam(name = "action", required = false) String action
     ) {
+        verifyAdmin(request);
         int safeLimit = Math.min(100, Math.max(1, limit));
         StringBuilder sql = new StringBuilder("""
             SELECT id::text AS audit_id, sequence::text AS sequence, hash_version, action,
@@ -88,9 +97,21 @@ public class AuditController {
         if (cursor != null && !cursor.trim().isEmpty()) {
             try {
                 long cursorVal = Long.parseLong(cursor.trim());
-                sql.append(" AND sequence < ?");
+                sql.append(" AND audit_logs.sequence < ?");
                 params.add(cursorVal);
             } catch (NumberFormatException ignored) {}
+        }
+        if (from != null && !from.trim().isEmpty()) {
+            try {
+                sql.append(" AND audit_logs.created_at >= ?::timestamptz");
+                params.add(from.trim());
+            } catch (Exception ignored) {}
+        }
+        if (to != null && !to.trim().isEmpty()) {
+            try {
+                sql.append(" AND audit_logs.created_at <= ?::timestamptz");
+                params.add(to.trim());
+            } catch (Exception ignored) {}
         }
         if (administrator != null && !administrator.trim().isEmpty()) {
             try {
@@ -118,11 +139,13 @@ public class AuditController {
             sql.append(" AND action = ?");
             params.add(action.trim());
         }
-        sql.append(" ORDER BY sequence DESC LIMIT ?");
+        sql.append(" ORDER BY audit_logs.sequence DESC LIMIT ?");
         params.add(safeLimit);
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql.toString(), params.toArray());
         List<Map<String, Object>> events = new ArrayList<>();
+        TypeReference<Map<String, Object>> mapTypeRef = new TypeReference<>() {};
+
         for (Map<String, Object> r : rows) {
             Map<String, Object> event = new LinkedHashMap<>();
             event.put("audit_id", r.get("audit_id"));
@@ -143,8 +166,23 @@ public class AuditController {
             event.put("outcome", r.get("outcome"));
             event.put("response_status", r.get("response_status") != null ? ((Number) r.get("response_status")).intValue() : 200);
 
-            event.put("metadata", Collections.emptyMap());
-            event.put("context", Collections.emptyMap());
+            Map<String, Object> metadataMap = Collections.emptyMap();
+            String metaRaw = (String) r.get("metadata_raw");
+            if (metaRaw != null && !metaRaw.trim().isEmpty() && !metaRaw.equals("{}")) {
+                try {
+                    metadataMap = objectMapper.readValue(metaRaw, mapTypeRef);
+                } catch (Exception ignored) {}
+            }
+            event.put("metadata", metadataMap != null ? metadataMap : Collections.emptyMap());
+
+            Map<String, Object> contextMap = Collections.emptyMap();
+            String ctxRaw = (String) r.get("context_raw");
+            if (ctxRaw != null && !ctxRaw.trim().isEmpty() && !ctxRaw.equals("{}")) {
+                try {
+                    contextMap = objectMapper.readValue(ctxRaw, mapTypeRef);
+                } catch (Exception ignored) {}
+            }
+            event.put("context", contextMap != null ? contextMap : Collections.emptyMap());
 
             event.put("integrity_hash", r.get("integrity_hash"));
             event.put("previous_integrity_hash", r.get("previous_integrity_hash"));

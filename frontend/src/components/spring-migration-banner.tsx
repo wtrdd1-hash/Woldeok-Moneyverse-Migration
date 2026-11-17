@@ -1,1 +1,3 @@
-export function SpringMigrationBanner() { return null; }
+export function SpringMigrationBanner() {
+  return null;
+}
