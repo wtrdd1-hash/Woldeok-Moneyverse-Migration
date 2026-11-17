@@ -10,10 +10,10 @@
 - Workflow: isolated task branch, test on loopback, negative auth/asset/API probes, fresh main recheck, GitHub PR and documented promotion only after passing gates.
 
 ## In progress
-- [ ] Identify the safest server-side Next.js candidate and test it on an isolated loopback port.
-- [ ] Implement a reversible route/runtime recovery with test-first evidence.
-- [ ] Verify admin login protection, CSS/JS assets, API health, and frontend usability.
-- [ ] Recheck origin/main and release gates before any production modification.
+- [x] Identify the safest server-side Next.js candidate and test it on an isolated loopback port.
+- [x] Implement a reversible route/runtime recovery with test-first evidence.
+- [x] Verify anonymous admin rejection, CSS/JS assets and API health; authenticated operator/browser positive E2E remains pending.
+- [x] Recheck origin/main and release gates; official Test frontend remains 502, so PR integration withheld.
 
 ## Finished
 - Not yet; production unchanged by this task at initial checkpoint.
@@ -25,3 +25,10 @@
 - **Critical access-control finding:** directly requesting standalone Next `/api/v1/admin/users` as anonymous yielded 200 user data; therefore strictly isolate Next to UI only, keep all Spring `/api/v1/*` routes, and enforce `auth_request` to Spring `/api/v1/admin/me` at Nginx for all `/admin*` UI routes. Loopback test gave 302 for unsigned admin and 401 for admin API, with full login HTML and signed-out viewer JSON.
 - Isolated Nginx regression: 8/8 PASS (anonymous admin 302, login 200, viewer 200, admin/me 401, CSS 200, JS 200); CSS/JS MIME verified. Runtime service `moneyverse-p0-admin-ui-recovery.service` active on loopback :4524, without stopping Spring or updating database.
 - Promoting only after production Nginx config backup, syntax validation, and repeat smoke. Authenticated administrator E2E is not available; do not claim it passed.
+
+
+### Finished checkpoint — 2026-11-18 07:27 KST (bounded mitigation only)
+- **Version v2026.11.18.1:** Protected UI routes in Production Nginx now serve an isolated, persistent Next :4524 (enabled), with prior Nginx bytes retained and graceful reload. No Spring/DB restart, no financial writes.
+- **Public HTTP evidence:** Anonymous `/admin`, `/admin/`, `/admin/logs` return 302 login; `/login` 200 actual HTML; `/api/viewer` 200 signed-out; `/api/v1/admin/me` and `/api/v1/admin/users` 401; `/health` 200; CSS/JS 200 including 11/11 browser-UA login assets; canonical private no-store/noindex. All three service units active.
+- **References:** PR #3252; backup `/srv/moneyverse-data/ops-backups/p0-admin-ui-v2026.11.18.1/`; [release evidence](../releases/v2026.11.18.1-admin-ui-recovery-prod.md), [internal changelog](../updates/v2026.11.18.1-admin-ui-recovery-internal.md), [GitHub changelog](../updates/v2026.11.18.1-admin-ui-recovery-github.md).
+- **Remaining P0 and release hold:** Official Test frontend `/` 502, normal homepage and `/wallet` still placeholders, Discord/Google OAuth starts are still placeholders; authenticated administrator sign-in/browser E2E not observed. Do **not** assert complete application restoration or PR integration. Coordinate the parallel Spring-web worker before broadening the edge cutover.
