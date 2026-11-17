@@ -20,3 +20,9 @@
 - Automated link consistency: 12 files checked, 1,090 relative Markdown links, 0 broken; required EN/KO feature terms all present.
 - Staged documentation-only git diff, whitespace verification after trimming Markdown hardbreak spaces; no source code, API, database, currency movement or server changes.
 - Functional/E2E tests: NOT RUN (documentation-only). Test/Production promotion: NOT DONE. Final GitHub branch/PR verification to be recorded separately after publication.
+
+## GitHub publication — 2026-11-17 KST
+- Task commit 6f953fd6719b724f5974cf39e6f576d6d277836f pushed to dedicated branch.
+- Opened **draft PR #3247**: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3247
+- PR targets main; no merge. Code implementation and release gates remain pending by design.
+- This section is the post-publication completion record; it does not claim functional test or Production deployment.
