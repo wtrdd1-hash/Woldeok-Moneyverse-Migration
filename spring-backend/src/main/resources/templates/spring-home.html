@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${language}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" th:content="${pageDescription}">
+  <meta th:if="${preview}" name="robots" content="noindex,nofollow">
+  <title th:text="${pageTitle}">Woldeok Moneyverse</title>
+  <link th:unless="${preview}" rel="canonical" href="https://easy-scraping.com/">
+  <link rel="stylesheet" href="/spring-ui/guide.css">
+  <link rel="stylesheet" href="/spring-ui/home.css">
+</head>
+<body>
+  <a class="skip" href="#main" th:text="${skipLabel}">Skip to content</a>
+  <header class="site-header">
+    <nav class="container nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="Woldeok Moneyverse home"><span aria-hidden="true">✦</span> Woldeok <span>Moneyverse</span></a>
+      <div class="nav-links"><a th:href="${preview ? '/spring-ui/guide' : '/guide'}" th:text="${guideLabel}">Guide</a><a href="/stocks">Stocks</a><a href="/calculators">Calculators</a></div>
+      <div class="languages" aria-label="Language">
+        <a th:href="${preview ? '/spring-ui/home?lang=en' : '/?lang=en'}" th:attr="aria-current=${language == 'en' ? 'true' : null}">EN</a>
+        <a th:href="${preview ? '/spring-ui/home?lang=ko' : '/?lang=ko'}" th:attr="aria-current=${language == 'ko' ? 'true' : null}">한국어</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main" class="container" tabindex="-1">
+    <section class="hero home-hero" aria-labelledby="home-heading">
+      <p class="eyebrow">WOLDEOK MONEYVERSE</p>
+      <h1 id="home-heading" th:text="${heading}">Learn, explore and grow in a virtual economy</h1>
+      <p class="hero-lead" th:text="${intro}">Discover a virtual economy.</p>
+      <div class="home-actions"><a class="primary-action" href="/work" th:text="${startLabel}">Explore activities</a><a class="secondary-action" href="/calculators" th:text="${calculateLabel}">Financial calculators</a></div>
+      <p class="notice" th:text="${virtualOnly}">Virtual data only.</p>
+    </section>
+    <section class="features" aria-labelledby="features-heading">
+      <h2 id="features-heading" th:text="${sectionTitle}">What would you like to try?</h2>
+      <div class="cards">
+        <a class="feature" th:each="tile : ${tiles}" th:href="${tile.path}">
+          <span class="tile-symbol" aria-hidden="true" th:text="${tile.symbol}">✦</span>
+          <strong th:text="${tile.name}">Feature</strong>
+          <span th:text="${tile.body}">Description</span>
+          <span class="action" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="container footer"><span>© Woldeok Moneyverse</span><div><a href="/terms" th:text="${termsLabel}">Terms</a><a href="/privacy" th:text="${privacyLabel}">Privacy</a></div></footer>
+</body>
+</html>

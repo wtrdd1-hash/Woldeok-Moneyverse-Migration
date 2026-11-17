@@ -12,7 +12,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties = {"moneyverse.web.preview-restricted=true",
-        "moneyverse.web.preview-enabled=true", "moneyverse.web.account-deletion-preview-enabled=true"})
+        "moneyverse.web.preview-enabled=true", "moneyverse.web.account-deletion-preview-enabled=true",
+        "moneyverse.web.spring-home-enabled=true", "moneyverse.web.spring-guide-enabled=true"})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class SpringWebPreviewOnlyFilterTest {
@@ -20,6 +21,14 @@ class SpringWebPreviewOnlyFilterTest {
 
     @Test
     void onlyReadOnlySpringWebPreviewCanBeServed() throws Exception {
+        mvc.perform(get("/?lang=ko"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("배우고, 도전하고, 성장하는 가상경제")));
+        mvc.perform(get("/guide?lang=ko"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("머니버스에서 할 수 있는 일")));
+        mvc.perform(get("/spring-ui/home.css")).andExpect(status().isOk());
+        mvc.perform(get("/spring-ui/guide.css")).andExpect(status().isOk());
         mvc.perform(get("/spring-web?lang=ko"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("월덕 머니버스")));
@@ -31,7 +40,7 @@ class SpringWebPreviewOnlyFilterTest {
 
     @Test
     void deniesAllProductionApiMemberAdminMoneyAndMutations() throws Exception {
-        for (String path : new String[]{"/", "/api/version", "/api/v1/admin/me",
+        for (String path : new String[]{"/api/version", "/api/v1/admin/me",
                 "/api/v1/wallet", "/api/v1/stocks", "/account", "/actuator/health",
                 "/_next/static/fake.js", "/admin", "/spring-web/../../api/version"}) {
             mvc.perform(get(path)).andExpect(status().isNotFound())

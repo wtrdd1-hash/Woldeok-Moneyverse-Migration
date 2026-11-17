@@ -14,3 +14,7 @@ Pending.
 
 ## CLOSEOUT
 Pending.
+
+## MIDPOINT — 2026-11-18 08:20 KST
+- Integrated Java Spring controller/model/templates/CSS and real HTTP integration tests for native `/` and `/guide` from the clean parallel agent branch without editing that branch. Enabled canonical route flags only in isolated H2 preview profile and expanded denial filter to allow two canonical guest pages and their CSS while preserving forbidden API/admin/money writes.
+- Rebuilt via Java21 Gradle `clean test bootJar`: BUILD SUCCESSFUL; combined Spring suite and embedded Spring HTTP tests passed. The existing emergency Next.js catch-all remains active until independently verified Spring Test canonical routes. Exact Nginx Test and Production canary snippets and optimistic-concurrency/automatic rollback tool prepared.

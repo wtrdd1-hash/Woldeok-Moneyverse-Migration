@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${language}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" th:content="${metaDescription}">
+  <meta th:if="${preview}" name="robots" content="noindex,nofollow">
+  <title th:text="${pageTitle}">Service guide | Woldeok Moneyverse</title>
+  <link th:unless="${preview}" rel="canonical" href="https://easy-scraping.com/guide">
+  <link rel="stylesheet" href="/spring-ui/guide.css">
+</head>
+<body>
+  <a class="skip" href="#main" th:text="${skipLabel}">Skip to content</a>
+  <header class="site-header">
+    <nav class="container nav" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="Woldeok Moneyverse home"><span aria-hidden="true">✦</span> Woldeok <span>Moneyverse</span></a>
+      <div class="nav-links"><a href="/" th:text="${homeLabel}">Home</a><a class="active" th:href="${preview ? '/spring-ui/guide' : '/guide'}" th:text="${guideLabel}" aria-current="page">Guide</a></div>
+      <div class="languages" th:attr="aria-label=${languageLabel}">
+        <a th:href="${preview ? '/spring-ui/guide?lang=en' : '/guide?lang=en'}" th:attr="aria-current=${language == 'en' ? 'true' : null}">EN</a>
+        <a th:href="${preview ? '/spring-ui/guide?lang=ko' : '/guide?lang=ko'}" th:attr="aria-current=${language == 'ko' ? 'true' : null}">한국어</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main" class="container" tabindex="-1">
+    <section class="hero" aria-labelledby="guide-heading">
+      <p class="eyebrow">WOLDEOK MONEYVERSE</p>
+      <h1 id="guide-heading" th:text="${heading}">Explore Woldeok Moneyverse</h1>
+      <p class="hero-lead" th:text="${introduction}">Explore a virtual economy.</p>
+      <p class="notice" th:text="${virtualOnly}">Virtual data only.</p>
+    </section>
+    <section aria-labelledby="features-heading" class="features">
+      <h2 id="features-heading" th:text="${exploreLabel}">Explore features</h2>
+      <div class="cards">
+        <a class="feature" th:each="card : ${cards}" th:href="${card.path}">
+          <strong th:text="${card.title}">Feature</strong>
+          <span th:text="${card.description}">Description</span>
+          <span class="action" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="container footer">
+    <span>© Woldeok Moneyverse</span>
+    <div><a href="/terms" th:text="${termsLabel}">Terms</a><a href="/privacy" th:text="${privacyLabel}">Privacy</a></div>
+  </footer>
+</body>
+</html>

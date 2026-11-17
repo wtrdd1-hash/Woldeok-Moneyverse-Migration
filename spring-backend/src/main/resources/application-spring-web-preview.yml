@@ -25,6 +25,8 @@ moneyverse:
     preview-enabled: true
     account-deletion-preview-enabled: true
     preview-restricted: true
+    spring-home-enabled: true
+    spring-guide-enabled: true
   features:
     swf-operational: false
     kdic-operational: false
