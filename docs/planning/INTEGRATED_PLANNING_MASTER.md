@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.3 — Spring public-preview release evidence (SCOPED LIVE / FULL PLATFORM HOLD)
+Actual immutable Test :4576 -> Production :4577 sidecar-based Java21 Spring MVC preview now serves `/spring-web` and `/spring-web/account-deletion` (external 200 and secure headers, public CSS 200, forbidden API 404/POST 405); 143/143 isolated Spring tests passed. No canonical 178 Next pages or 124 BFF certified converted, original Nginx default live frontend remains the old loading HTML, full Test frontend-version still 502, and Spring SEC1/finance/OTP/ledger/G0–G6 remain blockers. [Evidence](../releases/v2026.11.18.3-spring-web-public-preview.md).
+
 ## v2026.11.18.2 — Spring SSR repair + complete web inventory checkpoint (SOURCE VERIFIED / RELEASE HOLD)
 After latest-main reconciliation Spring 141/141 isolated Gradle tests pass, including embedded HTTP and preview 404 negatives, but this is NOT actual Test/Production or full feature parity. 178 Next pages and 124 BFF handlers remain canonical; three noncanonical Spring preview paths exist; zero full canonical replacements are certified. G0–G6 authorization/security, finance, Android, source lineage, SEO, restore and zero-downtime gates remain open. Concurrent home/guide and P0 admin recovery branches are untouched. [Inventory](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json) / [worklog](../worklog/2026-11-18-spring-web-readiness-v2026.11.18.2.md).
 

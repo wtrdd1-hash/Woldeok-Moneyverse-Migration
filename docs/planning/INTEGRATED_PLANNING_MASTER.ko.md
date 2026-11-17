@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.18.3 — Spring 공개 미리보기 승격 증거 (제한적 운영 / 전면 전환 보류)
+Java21 Spring MVC 미리보기 불변 JAR을 Test :4576 검증 후 운영 :4577 독립 서비스로 실제 배포. `/spring-web`, `/spring-web/account-deletion` 외부 200 및 보안 헤더·CSS 200, 관리자/API 거부 404 및 POST 405, Spring 143/143 테스트 통과. 정식 Next 페이지 178개·BFF 124개 전환 인증 0, 기존 홈은 로딩 HTML, 공식 Test frontend-version 502 잔존. Spring SEC1·금융·OTP·원장·G0–G6 전면 승격 보류. [증빙](../releases/v2026.11.18.3-spring-web-public-preview.ko.md).
+
 ## v2026.11.18.2 — Spring SSR 수정 및 전체 웹 인벤토리 확인 (소스 테스트 통과 / 운영 보류)
 최신 main 통합 후 Spring JDK21 격리 Gradle 테스트 141/141 통과, 내장 HTTP·미리보기 404 거부 포함. 그러나 공식 Test·운영 또는 전체 기능 동등성은 인증하지 않았습니다. Next 정식 페이지 178개·BFF 124개 유지, 비정식 Spring 미리보기 3개, 정식 경로 대체 인증 0개. G0–G6 인증/보안·금융·Android·소스 버전·SEO·독립 복구·무중단 승격 게이트 미충족. 다른 작업자의 홈·가이드, 관리자 복구 브랜치 미변경. [인벤토리](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json) / [작업 기록](../worklog/2026-11-18-spring-web-readiness-v2026.11.18.2.ko.md).
 

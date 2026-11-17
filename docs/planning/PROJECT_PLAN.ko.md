@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.3 — Spring SSR 공개 미리보기 실제 운영 제한 승격 (전면 운영 보류)
+읽기 전용 Spring SSR `/spring-web`, `/spring-web/account-deletion`을 별도 Test 외부 검증 후 H2-only 격리 서비스와 불변 Java21 JAR로 실제 운영 경로에 배포. 정식 Next 화면 178개와 BFF 124개는 **전체 동등성 검증 미완**; 사이트 전체·관리자·금융·로그인·Android 전환 아님. Spring permitAll/CSRF와 소스 증명·원장·복원 게이트가 전면 승격을 차단함. [릴리스 증빙](../releases/v2026.11.18.3-spring-web-public-preview.ko.md) / [EN](../releases/v2026.11.18.3-spring-web-public-preview.md).
+
 ## v2026.11.18.2 — 전체 Spring 웹·프론트엔드 전환 소스 실측 (G2 후보 / 운영 보류)
 사용자 목표는 기존 Next 웹 페이지 178개, BFF 핸들러 124개를 모두 Spring MVC/Java로 전환하는 것입니다. 세션·SEO·브라우저 상호작용·Android API·PostgreSQL 금융 단일 기록 유지. 본 브랜치의 Spring SSR 프리뷰는 JDK21 격리 테스트 141/141 통과했으나, **정식 페이지·BFF 전환 인증 0개**, 비정식 미리보기 3개만 존재합니다. 운영 Next 관리자 복구를 유지합니다. 공식 Test 동일 SHA, Spring Security/CSRF/MFA, 경로별 동등성, 원장·복원·롤백은 승격 필수 조건입니다. [인벤토리](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json) / [작업 기록](../worklog/2026-11-18-spring-web-readiness-v2026.11.18.2.ko.md).
 

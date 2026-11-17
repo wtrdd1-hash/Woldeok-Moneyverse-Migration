@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.3 — Actual scoped Spring SSR public preview deployed (LIVE SCOPED / FULL RELEASE HOLD)
+Read-only Spring SSR preview `/spring-web` and `/spring-web/account-deletion` now serve actual public Production from an immutable Java21 Spring Boot artifact and isolated H2-only sidecar after separate Test external smoke. Existing canonical Next pages 178 and BFF handlers 124 remain **uncertified as fully migrated**; no full-site, admin, auth, finance or Android cutover. Spring global permitAll/CSRF and source-identity/restore/ledger gates still block broad promotion. [EN release receipt](../releases/v2026.11.18.3-spring-web-public-preview.md) / [KO](../releases/v2026.11.18.3-spring-web-public-preview.ko.md).
+
 ## v2026.11.18.2 — All-Spring web/frontends source-truth checkpoint (G2 candidate / RELEASE HOLD)
 Owner directive retains the target to replace all 178 Next pages and 124 Next BFF handlers with Spring MVC/Java while preserving live sessions, SEO, browser interactions, Android contracts and PostgreSQL financial single-writer. Current branch tests Spring SSR previews successfully (141/141 isolated JDK21 Spring tests) but certifies **0 canonical pages and 0 BFF routes**, with 3 noncanonical preview candidates. Production retains Next admin recovery. Exact-SHA official Test, Spring Security/CSRF/MFA, full route parity, finance ledger, restore and rollback remain hard gates. [Inventory](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json) / [worklog](../worklog/2026-11-18-spring-web-readiness-v2026.11.18.2.md).
 
