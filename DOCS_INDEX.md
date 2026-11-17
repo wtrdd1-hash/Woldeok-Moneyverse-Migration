@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.17.1318.1 — Mobile dashboard WLD/zero-status/overlay incident (P1 OPEN, DOCUMENTATION ONLY)
+- [Incident EN](docs/incidents/2026-11-17-dashboard-mobile-data-ux-inc-1318.md) / [KO](docs/incidents/2026-11-17-dashboard-mobile-data-ux-inc-1318.ko.md) · [Worklog EN](docs/worklog/2026-11-17-dashboard-mobile-triage-v2026.11.17.1318.1.md) / [KO](docs/worklog/2026-11-17-dashboard-mobile-triage-v2026.11.17.1318.1.ko.md) · [Issue #3242](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3242). User screenshot shows WLD unavailable and ambiguous 0 watchlist/holding KPIs; code-level null-to-zero ambiguity confirmed, live backend cause/ledger UNKNOWN. Mobile floating controls require interactive QA. No code change, CI, Test or Production deployment.
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 

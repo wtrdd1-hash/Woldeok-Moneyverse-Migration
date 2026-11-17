@@ -1,0 +1,9 @@
+# v2026.11.17.1318.1 — Mobile dashboard screenshot incident triage: worklog (EN)
+## START — 2026-11-17 ~13:18 KST
+Owner provided mobile Chrome personal dashboard screenshot. Task scoped to detailed permanent recording, not code repair or deployment. Reviewed AGENTS.md, documentation governance, DOCS_INDEX, docs/planning/PROJECT_PLAN.md and INTEGRATED_PLANNING_MASTER.ko.md and current worklog. Inspected miniPC via @miniPC MCP. Shared main worktree had unrelated Gemini/other-agent changes and was 3 commits behind; left intact. GitHub remote main at start e96e8f81f4d6b99b221392a2b6fe46356361b145. Created issue [#3242](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3242) as initial incident record.
+
+## MID — source review and isolation
+Read current GitHub main frontend/src/app/dashboard/page.tsx, frontend/src/lib/api.ts and mobile-bottom-nav.tsx. Confirmed failed watchlist, holdings and alert reads can collapse to success-looking 0; wallet null renders dash; fixed mobile bottom nav is intentional. Actual backend failure, asset/version and ledger remain unverified. Re-read current integrated master and product plan and identified documentation/runtime drift requiring deployed exact-SHA check. Fetched fresh origin/main e96e8f81f4d6b99b221392a2b6fe46356361b145 and created isolated `docs/dashboard-mobile-incident-v2026.11.17.1318.1` worktree; no shared files touched.
+
+## END — documentation only
+Wrote paired EN/KO detailed incident, worklog, changelog, internal and GitHub notes. **Verification performed:** content/path checks and Git source review only. **NOT performed:** authenticated production HTTP requests, backend or database diagnosis, browser E2E, tests/build, Test deploy, Production promotion, financial mutation. Incident remains P1 OPEN. Links: [incident](../incidents/2026-11-17-dashboard-mobile-data-ux-inc-1318.md), [issue #3242](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3242).

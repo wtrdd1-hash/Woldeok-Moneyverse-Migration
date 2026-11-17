@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.17.1318.1 — Mobile dashboard WLD/zero-status/overlay incident (P1 OPEN, DOCUMENTATION ONLY)
+- [Incident EN](incidents/2026-11-17-dashboard-mobile-data-ux-inc-1318.md) / [KO](incidents/2026-11-17-dashboard-mobile-data-ux-inc-1318.ko.md) · [Worklog EN](worklog/2026-11-17-dashboard-mobile-triage-v2026.11.17.1318.1.md) / [KO](worklog/2026-11-17-dashboard-mobile-triage-v2026.11.17.1318.1.ko.md) · [Issue #3242](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3242). User screenshot shows WLD unavailable and ambiguous 0 watchlist/holding KPIs; code-level null-to-zero ambiguity confirmed, live backend cause/ledger UNKNOWN. Mobile floating controls require interactive QA. No code change, CI, Test or Production deployment.
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 
