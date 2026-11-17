@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+    <defs>
+      <linearGradient id="codebg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0f111a"/>
+        <stop offset="100%" stop-color="#07080d"/>
+      </linearGradient>
+      <linearGradient id="purpleG" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="#ec4899"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="630" fill="url(#codebg)"/>
+    <rect x="150" y="100" width="900" height="380" rx="20" fill="#151824" stroke="#a855f7" stroke-width="2"/>
+    <circle cx="185" cy="135" r="7" fill="#ef4444"/>
+    <circle cx="210" cy="135" r="7" fill="#f59e0b"/>
+    <circle cx="235" cy="135" r="7" fill="#10b981"/>
+    <text x="600" y="140" font-family="monospace" font-size="14" fill="#64748b" text-anchor="middle">binary_buffer_typed_array.js</text>
+    <g font-family="monospace" font-size="17" fill="#f8fafc">
+      <text x="190" y="200"><tspan fill="#a855f7">const</tspan> buffer = <tspan fill="#ec4899">new</tspan> ArrayBuffer(32);</text>
+      <text x="190" y="240"><tspan fill="#a855f7">const</tspan> view = <tspan fill="#ec4899">new</tspan> Int32Array(buffer);</text>
+      <text x="190" y="280">view[0] = <tspan fill="#38bdf8">0x2A</tspan>; <tspan fill="#64748b">// 42 decimal raw byte mapping</tspan></text>
+      <text x="190" y="320"><tspan fill="#10b981">console</tspan>.log(view.byteLength, view.BYTES_PER_ELEMENT);</text>
+      <text x="190" y="360"><tspan fill="#64748b">// Zero-copy memory architecture: 10x faster execution</tspan></text>
+      <text x="190" y="410" fill="#38bdf8">&gt; [Int32Array: 8 elements, 32 bytes allocated]</text>
+    </g>
+    <text x="600" y="550" font-family="sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">DATA STRUCTURES &amp; BINARY OPTIMIZATION</text>
+    <text x="600" y="585" font-family="monospace" font-size="14" fill="#ec4899" text-anchor="middle">WOLDEOK MONEYVERSE SOFTWARE ENGINEERING</text>
+  </svg>

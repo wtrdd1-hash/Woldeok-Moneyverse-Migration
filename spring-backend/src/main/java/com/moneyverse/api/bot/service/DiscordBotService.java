@@ -1,6 +1,9 @@
 package com.moneyverse.api.bot.service;
 
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.moneyverse.api.bot.command.StockSlashCommands;
+import discord4j.common.JacksonResources;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -42,9 +45,16 @@ public class DiscordBotService implements SmartLifecycle {
 
         if (isRunning.compareAndSet(false, true)) {
             try {
-                log.info("[DiscordBot] Connecting to Discord Gateway using Discord4J...");
+                log.info("[DiscordBot] Connecting to Discord Gateway using Discord4J (with Jdk8Module support)...");
+
+                // Configure JacksonResources with Jdk8Module and JavaTimeModule
+                JacksonResources jacksonResources = JacksonResources.create();
+                jacksonResources.getObjectMapper()
+                        .registerModule(new Jdk8Module())
+                        .registerModule(new JavaTimeModule());
 
                 DiscordClientBuilder.create(botToken.trim())
+                        .setJacksonResources(jacksonResources)
                         .build()
                         .gateway()
                         .setInitialPresence(ignore -> ClientPresence.online(ClientActivity.watching("월덕 머니버스 실시간 거래소")))
