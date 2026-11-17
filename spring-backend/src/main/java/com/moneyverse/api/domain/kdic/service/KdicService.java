@@ -4,6 +4,8 @@ import com.moneyverse.api.domain.kdic.dto.KdicDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,90 +31,54 @@ public class KdicService {
         List<PremiumRecordDto> recentPremiums = fetchRecentPremiums();
         List<PayoutRecordDto> recentPayouts = fetchRecentPayouts();
 
-        double avgBis = institutions.isEmpty() ? 13.5 :
-                institutions.stream().mapToDouble(i -> i.getReportedBisRatioPct() != null ? i.getReportedBisRatioPct() : 12.0).average().orElse(13.5);
-        double reserveCoverage = (fund.getTotalInsuredDepositsWld() != null && fund.getTotalInsuredDepositsWld() > 0)
-                ? (double) fund.getTotalFundWld() / fund.getTotalInsuredDepositsWld() * 100.0 : 8.5;
-
-        KdicSummaryDto summary = new KdicSummaryDto(
-                institutions.size(),
-                Math.round(avgBis * 100.0) / 100.0,
-                Math.round(reserveCoverage * 100.0) / 100.0
-        );
+        // A missing denominator or no reported BIS values is UNKNOWN, not a
+        // fabricated healthy percentage.
+        java.util.OptionalDouble bis = institutions.stream()
+                .filter(i -> i.getReportedBisRatioPct() != null)
+                .mapToDouble(InsuredInstitutionDto::getReportedBisRatioPct).average();
+        Double avgBis = bis.isPresent() ? Math.round(bis.getAsDouble() * 100.0) / 100.0 : null;
+        Double reserveCoverage = (fund.getTotalInsuredDepositsWld() != null
+                && fund.getTotalInsuredDepositsWld() > 0 && fund.getTotalFundWld() != null)
+                ? Math.round(((double) fund.getTotalFundWld() / fund.getTotalInsuredDepositsWld() * 100.0) * 100.0) / 100.0
+                : null;
+        KdicSummaryDto summary = new KdicSummaryDto(institutions.size(), avgBis, reserveCoverage);
 
         return new KdicOverviewResponse(fund, institutions, summary, recentPremiums, recentPayouts);
     }
 
     public KdicLedgerEvidenceDto getLedgerIntegrity() {
-        log.info("[KdicService] Verifying double-entry ledger balance and treasury linkage for KDIC");
-        return new KdicLedgerEvidenceDto(
-                true,
-                14250L,
-                0L,
-                0L,
-                42L,
-                0L,
-                0L,
-                42L,
-                Instant.now().toString()
-        );
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> assessPremiums(String actor) {
-        log.info("[KdicService] Assessing quarterly deposit insurance premiums by actor: {}", actor);
-        String txId = UUID.randomUUID().toString();
-        long amountWld = 2000L;
-
-        try {
-            jdbcTemplate.update(
-                    "UPDATE deposit_insurance_funds SET total_fund_wld = total_fund_wld + ?, cumulative_premiums_collected_wld = cumulative_premiums_collected_wld + ?, updated_at = NOW() WHERE id = 'FUND_MAIN'",
-                    amountWld, amountWld
-            );
-        } catch (Exception e) {
-            log.warn("[KdicService] Direct update fallback on H2 or isolated test: {}", e.getMessage());
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("quarter", "2026-Q4");
-        result.put("amountWld", amountWld);
-        result.put("txId", txId);
-        result.put("receiptNumber", "KDIC-FEE-" + Instant.now().toEpochMilli());
-        result.put("message", "2026-Q4 분기 예보료 2,000 WLD가 성공적으로 징수되어 KDIC 기금에 적립되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> injectEmergencyLiquidity(String institutionId, long amountWld, String actor) {
-        log.info("[KdicService] Injecting emergency liquidity bailout: institution={}, amount={} WLD, actor={}", institutionId, amountWld, actor);
-        String txId = UUID.randomUUID().toString();
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("institutionId", institutionId);
-        result.put("amountWld", amountWld);
-        result.put("txId", txId);
-        result.put("message", "가상 금융기관 긴급 유동성 대여(Bailout)가 성공적으로 집행되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     @Transactional
     public Map<String, Object> executePayout(String institutionId, String reason, String actor) {
-        log.info("[KdicService] Executing deposit insurance payout for insolvent institution={}, actor={}", institutionId, actor);
-        String txId = UUID.randomUUID().toString();
-        long payoutAmount = 50000L;
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("ok", true);
-        result.put("institutionId", institutionId);
-        result.put("payoutAmountWld", payoutAmount);
-        result.put("txId", txId);
-        result.put("message", "부실 금융기관 예금자 대위변제 집행이 완료되었습니다.");
-        return result;
+        // No journal-backed implementation exists for this operation yet.
+        // Fail closed rather than returning fabricated financial evidence or success.
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger-backed operation is not implemented");
     }
 
     private KdicFundDto fetchFund() {
@@ -132,21 +98,10 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            log.info("[KdicService] Using fallback baseline KDIC Fund data: {}", e.getMessage());
-            return new KdicFundDto(
-                    "FUND_MAIN",
-                    "대한민국 예금보험기금 (가상 머니버스 특수계정)",
-                    850000L,
-                    50000000L,
-                    10000000L,
-                    120000L,
-                    0L,
-                    false,
-                    Instant.now().toString()
-            );
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC fund source unavailable");
         }
     }
-
     private List<InsuredInstitutionDto> fetchInstitutions() {
         try {
             return jdbcTemplate.query(
@@ -162,14 +117,10 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            log.info("[KdicService] Using fallback insured institutions data: {}", e.getMessage());
-            return List.of(
-                    new InsuredInstitutionDto("BANK_COMMERCIAL", "머니버스 제1상업은행", "COMMERCIAL_BANK", 14.8, 6500000L, "HEALTHY", Instant.now().toString()),
-                    new InsuredInstitutionDto("INVEST_SEC", "머니버스 글로벌투자증권", "INVESTMENT_BANK", 12.4, 3500000L, "WATCH", Instant.now().toString())
-            );
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC institution source unavailable");
         }
     }
-
     private List<PremiumRecordDto> fetchRecentPremiums() {
         try {
             return jdbcTemplate.query(
@@ -185,13 +136,10 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return List.of(
-                    new PremiumRecordDto("PRM-001", "BANK_COMMERCIAL", "머니버스 제1상업은행", "2026-Q3", 1300L, "COLLECTED", Instant.now().minusSeconds(86400 * 30).toString()),
-                    new PremiumRecordDto("PRM-002", "INVEST_SEC", "머니버스 글로벌투자증권", "2026-Q3", 700L, "COLLECTED", Instant.now().minusSeconds(86400 * 30).toString())
-            );
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC premium receipt source unavailable");
         }
     }
-
     private List<PayoutRecordDto> fetchRecentPayouts() {
         try {
             return jdbcTemplate.query(
@@ -208,7 +156,8 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return Collections.emptyList();
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC payout receipt source unavailable");
         }
     }
 }

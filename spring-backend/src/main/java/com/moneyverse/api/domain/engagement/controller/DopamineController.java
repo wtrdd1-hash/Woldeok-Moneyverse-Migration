@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = {
@@ -33,42 +34,29 @@ public class DopamineController {
         return sessionOpt.get().getUserId().toString();
     }
 
+    /**
+     * Spring has no verified owner-scoped daily-spin/roulette receipt reader yet.
+     * Never claim that a user can spin, has a streak, or received WLD without
+     * the PostgreSQL-owned settlement and the canonical Nest contract.
+     */
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getDopamineStatus(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        return ResponseEntity.ok(Map.of(
-                "userId", userId,
-                "canSpinToday", true,
-                "spinsRemaining", 1,
-                "currentStreakDays", 5,
-                "maxStreakBonusPercent", 25
-        ));
+        getUserIdOrThrow(request);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Dopamine status requires verified ledger receipts");
     }
 
     @PostMapping("/spin")
     public ResponseEntity<Map<String, Object>> spinDailyRoulette(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        Random random = new Random();
-        int rewardAmount = (random.nextInt(10) + 1) * 5000; // 5,000 ~ 50,000 WLD
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("userId", userId);
-        res.put("rewardWld", rewardAmount);
-        res.put("rewardType", "WLD_CURRENCY");
-        res.put("spinsRemaining", 0);
-        res.put("spunAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        getUserIdOrThrow(request);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "WLD spin rewards require canonical PostgreSQL settlement");
     }
 
     @GetMapping("/streak")
     public ResponseEntity<Map<String, Object>> getStreakBonus(HttpServletRequest request) {
-        String userId = getUserIdOrThrow(request);
-        return ResponseEntity.ok(Map.of(
-                "userId", userId,
-                "streakDays", 5,
-                "nextMilestoneDays", 7,
-                "milestoneRewardWld", 100000
-        ));
+        getUserIdOrThrow(request);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Streak rewards require verified ledger receipts");
     }
 }

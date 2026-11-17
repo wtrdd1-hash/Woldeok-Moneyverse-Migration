@@ -32,15 +32,16 @@ class Phase7IntegrationTest {
     @Test
     @DisplayName("인게이지먼트 연속 출석 및 도파민 상태 조회 테스트")
     void testEngagementEndpoints() throws Exception {
+        // Forged X-User-Id cannot impersonate an active member session.
         mockMvc.perform(get("/api/engagement/streak")
                         .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isUnauthorized());
 
+        // The authenticated DopamineController owns this route; a forged
+        // X-User-Id must never satisfy the real browser session guard.
         mockMvc.perform(get("/api/engagement/dopamine/status")
                         .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

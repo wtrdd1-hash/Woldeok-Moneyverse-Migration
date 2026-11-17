@@ -1,4 +1,11 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.11.17.5 — Spring KDIC and engagement finance P0 integrated candidate (DRAFT / RELEASE HOLD)
+Owner-approved integration of #3218 and #3215 on main cd822aa098: corrected duplicate engagement routing, forged member identity headers, false WLD outcomes and KDIC fabricated financial success. KDIC admin endpoints now require actual DB-resolved signed-in superadmin session; missing KDIC fund, institution, premium, payout or ratio evidence no longer produces fabricated values. Spring test-profile entire clean test bootJar passes 126 tests / 0 fail / 0 skipped with embedded live HTTP anonymous negative checks. The app remains on old Production runtime; no ledger/DB/WLD mutations or official Test/Production deployment. Full global Spring SecurityConfig SEC1, positive MFA/CSRF, verified KDIC ledger settlement, real authenticated Test and independent restore remain P0 and block promotion. [Worklog](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.md).
+
+## v2026.11.17.1 — Spring engagement fail-closed security/finance candidate
+A separate code repair branch fixes duplicate Dopamine mapping and forbids unverified WLD success, forged member headers and invented feature-progress responses in Spring. Does not implement actual settlement or replace Nest authoritative attendance; keeps existing approved product requirements and project-wide G0-G6 gates. Full isolated Spring suite 114 PASS with real embedded HTTP negative tests. Test/Production HOLD; align documentation and open PR before adopting. Link: docs/worklog/2026-11-17-spring-dopamine-route-v2026.11.17.1.md.
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)
