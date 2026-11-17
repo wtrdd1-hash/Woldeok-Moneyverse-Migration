@@ -26,3 +26,11 @@
 - 전체 JDK21 Spring `clean test bootJar` 재실행: **141개 중 1개 실패**. `SpringWebPreviewDisabledTest`에서 비활성 `/spring-web` 예상 404가 기존 SPA 정적 폴백으로 실제 **200** 응답. main 통합으로 Phase7 이전 실패는 해소됨.
 - 실패 재현 후 미리보기 플래그 OFF/미설정에만 적용되는 명시적 404 차단 컨트롤러와 캐시/검색 차단 헤더 및 테스트 보강. 정식 `/`, `/status`, Next, 운영 edge는 변경하지 않음.
 - 경로 인벤토리 단위 테스트 **4/4 통과**. Next 페이지 178개, BFF 124개, 정식 전환 인증 0개, Spring 프리뷰 기존 2개. 전부 완료라고 주장 금지.
+
+## 작업 종료 — 2026-11-18 07:43 KST
+- **Spring 소스 GREEN:** 최신 main 통합 JDK21 `clean test bootJar` 성공. Gradle XML 실측 **36개 스위트, 141개 테스트, 실패 0·오류 0·건너뜀 0**. 실행 JAR 94MB, 테스트 당시 소스 HEAD `0b83f52f6e42764ad6890289e077e8651141815c`에서 SHA256 `268ce25a3eb37d6bc836f19497277abbf818c1ff90c34067a595f19cc4e7130b`. 이후 변경은 문서/경로 인벤토리만 해당.
+- **인벤토리 GREEN:** 계정삭제 프리뷰가 누락된 것을 RED 테스트로 재현, 기존 v2026.11.17.2 문서를 보존하고 v2026.11.18.2를 추가. 인벤토리 검사와 Python 단위 테스트 4/4 통과. Next 정식 페이지 178·BFF 124·Spring 비정식 프리뷰 3·**정식 전환 인증 0**.
+- **공식 외부 경로 실측 07:42 KST:** Test `/api/version` 200이지만 후보 SHA가 아닌 일반 문자열 `v2026.11.14-spring`; Test `/frontend-version` **HTTP 502**. 운영 `/api/version`도 같은 일반 Spring 버전 200, 운영 `/frontend-version`은 버전 증명 대신 **HTTP 200 HTML의 `__next` 로딩 화면** 반환. 정확한 빌드 신원과 프론트엔드 공식 Test 게이트 실패. Spring :4550 `/health` 200. Spring 및 Next 관리자 긴급복구 서비스 계속 가동.
+- **공식 Test 배포·운영 승격 수행 안 함.** 정식 웹/핸들러 동등성 0, Spring 전역 permitAll/CSRF 비활성, 금융/OTP/세션/WLD, 독립 복구·롤백, 브라우저/Android 전체 QA 미충족. Spring 단위 테스트만으로 무중단 전면 전환 근거 부족.
+- 독립 브랜치 `feat/spring-web-readiness-v2026.11.18.2` GitHub 푸시. [적층 초안 PR #3255](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3255) → #3253 → #3213. 다른 AI 관리자 복구 #3252 및 홈·가이드 작업 트리 미변경.
+- 변경 범위 롤백: 브랜치 내 소스 변경뿐, 프리뷰 플래그 기본 OFF. 운영 바이너리·DB·Nginx 변경 없어 운영 롤백 필요 없음. G0–G6 검증 전에 후보 JAR를 운영 :4550에 덮어쓰거나 Next 서비스를 중단하지 말 것.
