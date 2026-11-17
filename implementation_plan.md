@@ -5226,3 +5226,38 @@ graph TD
   - (1) 브라우저 로컬 스토리지 보존: mv_screen_load_errors에 최근 50건의 에러 전체 스택을 JSON으로 영구 저장하여 브라우저 콘솔 및 디버그 화면에서 언제든 열람 가능.
   - (2) 백엔드 감사 API 전송: POST /api/v1/audit/frontend-errors로 실시간 전송.
   - (3) 백엔드 Spring Boot 로그 기록: 백엔드 FrontendAuditController에서 [FRONTEND_SCREEN_LOAD_ERROR] 로거로 시스템 로그에 남겨 journalctl 및 관리자 /admin/logs/system 화면에서 실시간 조회 지원.
+
+---
+## 🚀 [v62 Specification] 프론트엔드 라우트 서빙 전수 복구, 깃허브 메인 통합/브랜치 정리 및 장애 회고 분석서(Post-Mortem) 영구 보존
+
+### 1. 현황 및 요구사항 재정의
+- **요구사항 1 (`/bomds`, `/wprl` 등 페이지 오류 점검 및 정상 복구)**:
+  - Nginx의 `upstream prod_frontend`가 가리키던 4501 포트(`moneyverse-release-v1546-frontend.service`)가 잘못된 빌드(`.next/export-detail.json`의 `success: false`)로 인해 모든 요청에 0바이트 빈 응답을 반환하던 현상 포착.
+  - 검증된 프로덕션 릴리즈(`prod-v2026.11.14.1217-43ab5a5110`)로 `production-current` 심볼릭 링크를 긴급 복원하여, 포트 4501 및 포트 3001 모두 정상 125KB 이상의 HTML을 응답하도록 완전 정상화.
+  - `/bonds` (74,313 bytes), `/work` (258,453 bytes) 정상 200 OK 서빙 확인.
+  - `/bomds`, `/wprl` 등 오타/미존재 URL 접근 시 `not-found.tsx`에서 에러 원인을 `mv_screen_load_errors` 및 백엔드에 자동 로깅하고 3초 카운트다운 후 메인 홈(`/`)으로 자동 안전 이동하도록 UX 보강.
+  - 프론트엔드 상단 Spring Boot 마이그레이션 안내 배너를 사용자 지시에 따라 원천 비노출(`return null;`) 조치.
+- **요구사항 2 (깃허브 메인 통합 및 브랜치 통합/삭제)**:
+  - 원격 저장소(`origin/main`)의 최신 3개 커밋을 로컬 `main`에 패스트 포워드 병합.
+  - 프론트엔드 로그인 영속화, 404 자동 홈 이동, 에러 로거, Spring Boot 디스코드 봇(Lavaplayer+DAVE), 국고 ASWF 자동투자, 126개 단위 테스트 전수 통과 내역을 `feat/unified-spring-frontend-resilience-postmortem` 브랜치로 커밋 및 `origin` 원격 푸시 완료 (GitHub PR 생성 지원).
+  - 이미 `main`에 병합 완료된 55개의 노후 로컬 브랜치 일괄 삭제 정리 및 `git remote prune` 수행.
+- **요구사항 3 (모든 문서 및 오류 문서 심층 분석 및 8대 장애 실수 포스트모템 회고서 영구 보존)**:
+  - 기존 프로젝트의 수십 개 인시던트/복구 문서 및 런타임 로그 전수 조회.
+  - 작업 중 발생한 8대 핵심 실수(Discord DAVE 4017, Lavaplayer UnsatisfiedLinkError, PostgreSQL numeric 타입 불일치, DB 권한 오류, F5 하이드레이션 깜빡임, error.tsx 세션 소거, Next 16 배포본 빌드 실패, AdminAuthService 401/403 계약 불일치)의 원인, 해결책, 재발 방지 체크리스트를 총망라한 `LESSONS_LEARNED_AND_MIGRATION_POSTMORTEM.md` 문서 작성 및 프로젝트 루트 영구 보존.
+
+### 2. 세부 검증 결과 (Evidence Before Claims)
+- **프론트엔드 Nginx 실측 응답 (Port 80)**:
+  - `GET /`: 200 OK, 125,140 bytes (PASS)
+  - `GET /bonds`: 200 OK, 74,313 bytes (PASS)
+  - `GET /work`: 200 OK, 258,453 bytes (PASS)
+  - `GET /bomds`: 404 Not Found, 84,937 bytes (PASS - 3초 자동 홈 이동 안내 화면)
+  - `GET /wprl`: 404 Not Found, 84,936 bytes (PASS - 3초 자동 홈 이동 안내 화면)
+- **Spring Boot 단위 테스트**:
+  - 126 tests completed, 0 failed, `BUILD SUCCESSFUL` in 29s (PASS)
+- **디스코드 봇 및 오디오 24/7 상주**:
+  - `[DiscordBot] Successfully registered 11 guild slash commands` (PASS)
+  - `[VoiceStay] Successfully connected and staying in voice channel: 1536572442422550538` (AEAD_AES256_GCM E2EE) (PASS)
+- **국고 ASWF 자동투자**:
+  - 1시간 주기 자동 스케줄러 정상 가동, `treasury_swf_events` DB 기록 및 총 AUM 1,216,301,559 WLD 정상 관리 (PASS)
+- **관리자 401 미인증 보안 계약**:
+  - `GET /api/v1/admin/controls` (미인증): 401 Unauthorized, `code: login_required` (PASS)
