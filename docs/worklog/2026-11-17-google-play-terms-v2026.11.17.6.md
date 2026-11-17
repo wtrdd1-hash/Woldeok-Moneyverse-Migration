@@ -10,3 +10,10 @@ Clarify on the existing publicly accessible `/terms` page that the terms apply e
 
 ## Gates
 Typecheck/build and public URL checks pending. Official exact-SHA Test, authenticated regression, and zero-downtime Production promotion must precede any runtime release. GitHub PR is review-only until those gates pass. No DB or financial writes.
+
+## Midpoint and closing evidence — 2026-11-17 KST
+- `origin/main` re-fetched before finalizing; compare candidate against current main, with no shared-worktree edits.
+- Frontend `tsc --noEmit --pretty false`: PASS. A first invocation failed because the isolated pnpm worktree lacked its root node_modules link; fixed dependency path without modifying tracked files and reran successfully.
+- `git diff --check`: PASS.
+- Public Production `/terms` and official Test `/terms`: HTTPS 200, TLS verification 0. These checks cover their **currently deployed old content**, not this candidate.
+- No authenticated end-to-end, build, final exact-SHA Test deployment, or Production promotion was performed. Release HOLD pending full gates.
