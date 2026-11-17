@@ -96,10 +96,8 @@ public class UserAuthService {
 
         String tokenHash = sha256(rawToken);
         String sql = """
-            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at,
-                   u.email, u.display_name
+            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at
             FROM auth_sessions s
-            LEFT JOIN users u ON s.user_id = u.id
             WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
             """;
 
@@ -116,8 +114,8 @@ public class UserAuthService {
                 if (exp != null) si.setExpiresAt(exp.toInstant());
                 Timestamp reauth = rs.getTimestamp("reauthenticated_at");
                 if (reauth != null) si.setReauthenticatedAt(reauth.toInstant());
-                si.setEmail(rs.getString("email"));
-                si.setDisplayName(rs.getString("display_name"));
+                // Profile/email are not columns on canonical public.users.
+                // Fetch them separately from an approved owner-scoped read model.
                 return si;
             }, tokenHash);
 
@@ -135,29 +133,36 @@ public class UserAuthService {
     }
 
     public List<String> findUserRoles(UUID userId) {
-        List<String> roles = new ArrayList<>();
-        try {
-            List<String> ur = jdbcTemplate.query(
-                "SELECT role FROM user_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
-                userId
-            );
-            roles.addAll(ur);
-        } catch (Exception ignored) {}
-
-        try {
-            List<String> ar = jdbcTemplate.query(
-                "SELECT role FROM admin_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
-                userId
-            );
-            roles.addAll(ar);
-        } catch (Exception ignored) {}
-
-        if (roles.isEmpty()) {
-            roles.add("user");
+        if (userId == null) {
+            return List.of("user");
         }
-        return roles;
+        try {
+            // Canonical PostgreSQL SECURITY DEFINER boundary (same contract as NestJS).
+            List<String> roles = jdbcTemplate.query(
+                    "SELECT role FROM public.admin_current_roles(?)",
+                    (rs, rowNum) -> rs.getString("role"),
+                    userId);
+            return roles.isEmpty() ? List.of("user") : roles;
+        } catch (Exception e) {
+            // The isolated H2 test schema cannot install PostgreSQL SECURITY DEFINER
+            // functions. NEVER fall back to direct table grants/queries on PostgreSQL.
+            try {
+                if (jdbcTemplate.getDataSource() != null) {
+                    try (var connection = jdbcTemplate.getDataSource().getConnection()) {
+                        if ("H2".equalsIgnoreCase(connection.getMetaData().getDatabaseProductName())) {
+                            List<String> roles = jdbcTemplate.query(
+                                    "SELECT role FROM user_roles WHERE user_id = ?",
+                                    (rs, rowNum) -> rs.getString("role"),
+                                    userId);
+                            return roles.isEmpty() ? List.of("user") : roles;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+                // Role lookup failure is never authorization.
+            }
+            return List.of("user");
+        }
     }
 
     /**

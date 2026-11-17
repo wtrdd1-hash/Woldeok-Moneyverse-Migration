@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.17.12 — Spring 정상 로그인 세션 최소권한 DB 호환성 개선 (검토 / 운영 보류)
+#3221 main 병합 이후 공식 Test DB 계정이 auth_sessions만 조회 가능하고 users/user_roles 조회권한이 없으며 admin_roles 테이블도 없음을 실측했다. 기존 Spring은 users JOIN과 직접 역할 테이블 조회로 정상 관리자 인증이 실패할 수 있다. 병행 SEC1 개발자의 기존 수정안을 원본 작업트리 손대지 않고 독립적으로 재검증, DB SECURITY DEFINER admin_current_roles(uuid)로 역할 확인하고 H2 시험 전용 fallback 유지. 테스트 RED 2/3, GREEN 129/129, 실패/건너뜀 0 및 Spring JAR 빌드 성공. 공식 Test 관리자 정상 로그인 및 운영 SEC1 결합, 원장·MFA·CSRF 검증 전 운영 승격 보류. [작업 기록](../worklog/2026-11-17-spring-session-privilege-v2026.11.17.12.ko.md).
+
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 
