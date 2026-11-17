@@ -70,7 +70,7 @@ public class AdminUsersController {
     })
     public ResponseEntity<?> getUsers(
             HttpServletRequest request,
-            @RequestParam(name = "limit", defaultValue = "51") int limit
+            @RequestParam(name = "limit", defaultValue = "50") int limit
     ) {
         if (!isAuthorized(request)) return unauthorizedResponse();
         AdminUsersResponse response = governanceService.listUsers(null, limit);
