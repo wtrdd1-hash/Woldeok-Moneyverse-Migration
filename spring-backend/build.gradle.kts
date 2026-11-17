@@ -38,8 +38,17 @@ dependencies {
     // Netty-SocketIO (Real-time Socket.IO v4 protocol compatible engine)
     implementation("com.corundumstudio.socketio:netty-socketio:2.0.12")
 
-    // Discord4J Core (Unified Discord Bot service)
+    // Discord4J Core & Voice (Unified Discord Bot service)
     implementation("com.discord4j:discord4j-core:3.3.3")
+    implementation("com.discord4j:discord4j-voice:3.3.3")
+    // Discord DAVE Protocol E2EE Natives (Linux & Windows)
+    implementation("moe.kyokobot.libdave:natives-linux-x86-64:0.1.2")
+    implementation("moe.kyokobot.libdave:natives-win-x86-64:0.1.2")
+
+    // Lavaplayer 2.2.3 & Natives (Audio Engine for Discord Music & Voice Stay)
+    implementation("dev.arbjerg:lavaplayer:2.2.3")
+    implementation("dev.arbjerg:lavaplayer-natives:2.2.3")
+
     // Security Cryptography (Argon2id)
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
@@ -52,4 +61,3 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

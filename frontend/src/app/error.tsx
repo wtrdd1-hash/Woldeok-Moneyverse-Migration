@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { RefreshCw, RotateCcw, Sparkles } from 'lucide-react';
+import { Home, RefreshCw, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logScreenLoadError, type ScreenLoadErrorRecord } from '@/lib/client-error-logger';
 
 export default function PageError({
   error,
@@ -11,85 +12,109 @@ export default function PageError({
   readonly error: Error & { readonly digest?: string };
   readonly reset: () => void;
 }) {
-  const [reloading, setReloading] = useState(true);
+  const [countdown, setCountdown] = useState(3);
+  const [errorRecord, setErrorRecord] = useState<ScreenLoadErrorRecord | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    console.error('Captured page error:', error);
+    // 1. Capture and permanently record error details
+    const record = logScreenLoadError(error, 'PAGE_ERROR');
+    setErrorRecord(record);
 
-    // Production Server Components often hide the original network error and
-    // expose only a generic digest. Treat the first boundary hit as transient:
-    // one automatic reload absorbs the short backend/frontend hand-over during
-    // a deploy. A real application bug is not looped forever; the next hit in
-    // the recovery window is shown to the visitor normally.
-    const lastRecovery = Number(sessionStorage.getItem('wdmv_error_recovery_ts') || '0');
-    const now = Date.now();
-    if (now - lastRecovery > 30000) {
-      sessionStorage.setItem('wdmv_error_recovery_ts', String(now));
-      const timer = setTimeout(() => window.location.reload(), 800);
-      return () => clearTimeout(timer);
+    // 2. Automated countdown for safe redirect to Home
+    // Check if we are already on home to prevent redirect loops
+    const isAlreadyHome = window.location.pathname === '/' || window.location.pathname === '';
+    if (isAlreadyHome) {
+      return; // Do not auto-loop if error happened on home itself
     }
 
-    setReloading(false);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          window.location.href = '/';
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [error]);
 
-  const handleForceReset = async () => {
-    setReloading(true);
-    try {
-      await fetch('/api/auth/clear-session', { method: 'POST' });
-      sessionStorage.clear();
-      localStorage.clear();
-      if ('caches' in window) {
-        const names = await window.caches.keys();
-        await Promise.all(names.map((n) => window.caches.delete(n)));
-      }
-    } catch {
-      /* ignore */
-    }
-    window.location.href = '/?reset=1';
+  const handleGoHome = () => {
+    window.location.href = '/';
   };
 
   return (
-    <div className="grid gap-5 py-16 text-center sm:text-left" role="alert">
-      <div className="grid gap-3">
-        <p className="eyebrow flex items-center justify-center sm:justify-start gap-1.5 text-amber-500">
-          <Sparkles className="size-3.5" />
-          <span>{reloading ? 'System Update' : 'Something went wrong'}</span>
-        </p>
-        <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-black tracking-tight">
-          {reloading ? '새로운 버전을 불러오고 있어요.' : '화면을 불러오지 못했어요.'}
+    <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:text-left" role="alert">
+      <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-6 sm:p-8 backdrop-blur-sm">
+        <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-400 font-semibold mb-3">
+          <AlertTriangle className="size-5" />
+          <span className="text-sm tracking-wide">화면 로드 예외 감지</span>
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-3">
+          화면을 정상적으로 불러오지 못했어요.
         </h1>
-        <p className="max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-          {reloading
-            ? '최신 업데이트가 배포되어 화면을 자동으로 새로고침하고 있습니다. 잠시만 기다려 주세요...'
-            : '방금 새로운 서비스 기능이 배포되었거나 오래된 쿠키 세션으로 인해 일시적인 오류가 발생했을 수 있습니다. 새로고침 또는 쿠키 초기화를 누르시면 정상적으로 복구됩니다.'}
+
+        <p className="text-muted-foreground leading-relaxed mb-6 text-sm sm:text-base [word-break:keep-all]">
+          요청하신 페이지를 렌더링하는 중 예외가 발생했습니다. 원인 및 시스템 로그는 안전하게 기록되었으며,{' '}
+          <strong className="text-amber-400 font-bold">{countdown}초 후 홈으로 자동 이동</strong>합니다.
         </p>
+
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+          <Button
+            onClick={handleGoHome}
+            className="min-h-11 font-extrabold inline-flex items-center gap-2 bg-amber-500 text-black hover:bg-amber-400"
+          >
+            <Home className="size-4" />
+            홈으로 즉시 이동 ({countdown}s)
+          </Button>
+          <Button
+            onClick={reset}
+            variant="outline"
+            className="min-h-11 font-bold inline-flex items-center gap-2 border-white/20 hover:bg-white/10"
+          >
+            <RefreshCw className="size-4" />
+            다시 시도
+          </Button>
+          <Button
+            onClick={() => setShowDetails(!showDetails)}
+            variant="ghost"
+            className="min-h-11 text-xs text-muted-foreground hover:text-white"
+          >
+            {showDetails ? (
+              <>
+                <ChevronUp className="size-4 mr-1" />
+                오류 상세 접기
+              </>
+            ) : (
+              <>
+                <ChevronDown className="size-4 mr-1" />
+                오류 상세 원인 보기
+              </>
+            )}
+          </Button>
+        </div>
+
+        {showDetails && errorRecord && (
+          <div className="mt-6 rounded-lg bg-black/60 p-4 text-left border border-white/10 text-xs font-mono">
+            <div className="text-amber-400 font-bold mb-1">기록 ID: {errorRecord.id}</div>
+            <div className="text-muted-foreground mb-1">발생 시간: {errorRecord.timestampKst}</div>
+            <div className="text-muted-foreground mb-1">발생 경로: {errorRecord.path}</div>
+            <div className="text-red-400 font-bold mb-2">오류 내용: {errorRecord.errorMessage}</div>
+            {errorRecord.digest && (
+              <div className="text-yellow-400 mb-2">참조 코드 (Digest): {errorRecord.digest}</div>
+            )}
+            {errorRecord.errorStack && (
+              <pre className="max-h-48 overflow-y-auto rounded bg-black/80 p-2 text-[11px] text-gray-300 leading-tight">
+                {errorRecord.errorStack}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
-      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-2">
-        <Button
-          onClick={() => {
-            setReloading(true);
-            window.location.reload();
-          }}
-          className="min-h-11 font-extrabold inline-flex items-center gap-2 bg-amber-500 text-black hover:bg-amber-400"
-        >
-          <RefreshCw className={`size-4 ${reloading ? 'animate-spin' : ''}`} />
-          {reloading ? '불러오는 중...' : '지금 새로고침'}
-        </Button>
-        <Button onClick={reset} variant="outline" className="min-h-11" disabled={reloading}>
-          다시 시도
-        </Button>
-        <Button
-          onClick={handleForceReset}
-          variant="outline"
-          className="min-h-11 font-bold inline-flex items-center gap-2 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-        >
-          <RotateCcw className="size-4" />
-          세션/쿠키 강제 초기화 후 복구
-        </Button>
-      </div>
-      {error.digest && (
-        <p className="tabular text-xs text-muted-foreground">참조 코드 {error.digest}</p>
-      )}
     </div>
   );
 }
