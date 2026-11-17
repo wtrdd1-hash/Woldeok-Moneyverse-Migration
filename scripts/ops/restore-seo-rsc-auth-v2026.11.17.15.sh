@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v2026.11.17.15: ensure the SEO authorization subrequest is JSON, not a Next RSC render.
+# v2026.11.17.15.1: verify the SEO JSON authorization patch and allow graceful Nginx worker handover.
 set -Eeuo pipefail
 readonly CONFIG=/etc/nginx/snippets/moneyverse-seo-v3-edge-auth.conf
 readonly BACKUP=/srv/moneyverse-data/ops-backups/p0-admin-seo-v2026.11.17.15/seo-v3-edge-auth.conf.before
@@ -43,6 +43,21 @@ build_candidate() {
   [[ "$(grep -c 'proxy_set_header RSC "";' "$target")" == 1 ]]
 }
 
+is_installed() {
+  # Refuse partial or repeated edits; these headers only belong inside the auth subrequest.
+  [[ "$(grep -c '^[[:space:]]*proxy_set_header RSC "";' "$CONFIG" || true)" == 1 ]] &&
+    [[ "$(grep -c '^[[:space:]]*proxy_set_header Next-Router-Prefetch "";' "$CONFIG" || true)" == 1 ]] &&
+    [[ "$(grep -c '^[[:space:]]*proxy_set_header Next-Router-State-Tree "";' "$CONFIG" || true)" == 1 ]]
+}
+
+verify_public() {
+  status /admin/seo standard
+  status '/admin/seo?_rsc=canary' rsc
+  status '/admin/seo-audit?_rsc=canary' rsc
+  status '/api/admin/seo/status' standard
+  [[ "$(curl -sS -m 8 -o /dev/null -w '%{http_code}' "$PROD/health")" == 200 ]]
+}
+
 rollback() {
   if [[ -f "$BACKUP" ]]; then
     sudo -n install -o root -g root -m 0644 "$BACKUP" "$CONFIG"
@@ -55,6 +70,12 @@ rollback() {
 case "$1" in
   --check)
     preflight
+    if is_installed; then
+      sudo -n nginx -t
+      verify_public
+      echo 'PASS: already installed once, public deny checks and backend health confirmed'
+      exit 0
+    fi
     temp="$(mktemp)"
     trap 'rm -f "$temp"' EXIT
     build_candidate "$temp"
@@ -62,6 +83,12 @@ case "$1" in
     ;;
   --apply)
     preflight
+    if is_installed; then
+      sudo -n nginx -t
+      verify_public
+      echo 'PASS: already installed and verified; no config rewrite or reload'
+      exit 0
+    fi
     temp="$(mktemp)"
     trap 'rm -f "$temp"' EXIT
     build_candidate "$temp"
@@ -75,11 +102,9 @@ case "$1" in
     trap 'rollback' ERR
     sudo -n nginx -t
     sudo -n systemctl reload nginx
-    status /admin/seo standard
-    status '/admin/seo?_rsc=canary' rsc
-    status '/admin/seo-audit?_rsc=canary' rsc
-    status '/api/admin/seo/status' standard
-    [[ "$(curl -sS -m 8 -o /dev/null -w '%{http_code}' "$PROD/health")" == 200 ]]
+    # systemctl reload returns before replacement workers always serve new requests.
+    sleep 2
+    verify_public
     trap - ERR
     echo "PASS: RSC navigation fails closed as 401, Nginx reloaded, backup $BACKUP"
     ;;
