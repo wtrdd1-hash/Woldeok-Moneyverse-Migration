@@ -16,3 +16,5 @@ Scope: allow only exactly four KDIC admin GET/HEAD read aliases via canonical Ne
 - Real internal 4400, public localhost and public HTTPS: four KDIC admin GETs anonymous 401. Public KDIC payout/premiums POST and unverified WLD/engagement legacy paths 503. Public KDIC portal /api/kdic/portal 200, /api/version 200, signed-in engagement read anonymous 401, admin security and SEO anonymous 401, official Test version 200.
 - New Nginx on-disk SHA256 6a89b4e4b73f58a09e2f9c224ca5708f7c32c9a82ebf2d711d18b57281eb9300; Nginx active. Rollback: only if current SHA unchanged, restore root-protected nginx-before.conf atomically, nginx -t, graceful reload and exact smoke.
 - No Spring/Next service restart, financial DB/WLD/ledger mutation or change to unreviewed finance POSTs. Test positive superadmin reads and Test session zero residual were verified, but no real Production signed-in superadmin positive E2E was performed. Full Spring migration and financial settlement release gates remain HOLD.
+
+GitHub review / 검토: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3228

@@ -5,3 +5,5 @@
 GET/HEAD 네 주소만 정식 Nest 4500 연결할 수 있는 독립 브랜치 구축. Python 테스트 4개 통과, 격리 Nginx 4493 실요청 GET 401/POST 405 확인. 원본 설정 안전한 별도 디렉터리 보존, 기존 설정 삭제 0줄.
 ## 종료 — 09:26 KST
 운영/내부 Nginx 정확한 해시 비교 후 무중단 reload. 공개 HTTPS 4개 관리자 조회 비로그인 401, KDIC 돈 관련 POST 및 미검증 WLD 503, 공개 KDIC 포털/버전 200, 테스트 사이트 200. 운영 설정 SHA 6a89b4e4b73f58a09e2f9c224ca5708f7c32c9a82ebf2d711d18b57281eb9300. DB/원장/돈·앱 프로세스 변경 없음. 운영 최고관리자 실계정 정상조회 및 지급 명령 E2E와 전체 Spring 운영 승격은 미완료.
+
+GitHub review / 검토: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3228
