@@ -24,6 +24,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // SWF routes have no verified session/CSRF/step-up binding yet.
+                        // Deny all aliases until the real authorization boundary is implemented.
+                        .requestMatchers(
+                                "/api/v1/admin/treasury/swf", "/api/v1/admin/treasury/swf/**",
+                                "/api/admin/treasury/swf", "/api/admin/treasury/swf/**",
+                                "/api/treasury/swf", "/api/treasury/swf/**",
+                                "/api/v1/treasury/swf", "/api/v1/treasury/swf/**"
+                        ).denyAll()
                         .requestMatchers(
                                 "/",
                                 "/index.html",

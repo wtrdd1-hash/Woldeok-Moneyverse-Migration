@@ -46,6 +46,16 @@ describe('P0 autonomous SWF ledger containment', () => {
     service.onModuleDestroy();
   });
 
+  it('manual rebalance never returns success for an unverified settlement', async () => {
+    const swf = { evaluateAndRebalance: vi.fn().mockResolvedValue({
+      executed: false, reason: 'SWF_SETTLEMENT_SOURCE_UNVERIFIED',
+    }) };
+    const controller = new AdminTreasuryController({} as never, swf as never);
+    await expect(controller.triggerSwfRebalance({
+      session: { user_id: '11111111-1111-4111-8111-111111111111' },
+    } as never)).rejects.toMatchObject({ status: 503 });
+  });
+
   it('requires CSRF guard on the admin rebalance mutation boundary', () => {
     const guards = Reflect.getMetadata('__guards__', AdminTreasuryController.prototype.triggerSwfRebalance);
     expect(guards).toContain(CsrfGuard);

@@ -445,7 +445,17 @@ export class AdminTreasuryController {
     if (!this.swfService) {
       throw new ServiceUnavailableException({ code: 'SWF_SERVICE_UNAVAILABLE' });
     }
-    return this.swfService.evaluateAndRebalance(actorId);
+    const result = await this.swfService.evaluateAndRebalance(actorId);
+    // A status flag or portfolio snapshot is not an immutable ledger receipt.
+    const transactionId = (result as { ledger_transaction_id?: unknown }).ledger_transaction_id;
+    if (!result.executed || typeof transactionId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transactionId)) {
+      throw new ServiceUnavailableException({
+        code: 'SWF_SETTLEMENT_UNVERIFIED',
+        message: 'SWF rebalance has no canonical ledger receipt.',
+      });
+    }
+    return result;
   }
 
   @Post('swf/liquidate')

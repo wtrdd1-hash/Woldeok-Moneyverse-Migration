@@ -21,6 +21,20 @@ class TreasurySwfFailClosedTest {
     private final TreasuryService service = new TreasuryService(vaults, jdbc, new ObjectMapper());
 
     @Test
+    void snapshotCannotFabricatePortfolioOrUseHardcodedAdminIdentity() {
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
+                assertThrows(ResponseStatusException.class, service::getSwfSnapshot).getStatusCode());
+        verifyNoInteractions(vaults);
+    }
+
+    @Test
+    void governanceCannotClaimSuccessWithoutVerifiedAdminAndDatabaseReceipt() {
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
+                assertThrows(ResponseStatusException.class, () -> service.updateSwfPolicy(java.util.Map.of("is_enabled", true))).getStatusCode());
+        verifyNoInteractions(vaults);
+    }
+
+    @Test
     void rebalanceCannotReportExecutionWithoutLedgerEvidence() {
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
                 assertThrows(ResponseStatusException.class, () -> service.rebalanceSwf(new SwfRebalanceRequest())).getStatusCode());

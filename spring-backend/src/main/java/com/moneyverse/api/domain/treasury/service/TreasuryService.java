@@ -118,54 +118,19 @@ public class TreasuryService {
      * 국부펀드(SWF) 스냅샷 조회 (설정, 포트폴리오, 감사 이벤트)
      */
     public Map<String, Object> getSwfSnapshot() {
-        log.info("[TreasuryService] getSwfSnapshot requested");
-        try {
-            String sql = "SELECT public.admin_swf_snapshot(?::uuid)::text";
-            String rawJson = jdbcTemplate.queryForObject(sql, String.class, CANONICAL_ADMIN_ID);
-            if (rawJson != null && !rawJson.isBlank()) {
-                return objectMapper.readValue(rawJson, Map.class);
-            }
-        } catch (Exception e) {
-            log.warn("[TreasuryService] DB procedure admin_swf_snapshot error, using fallback: {}", e.getMessage());
-        }
-
-        Map<String, Object> fallback = new HashMap<>();
-        fallback.put("config", Map.of(
-                "id", "current",
-                "is_enabled", true,
-                "reinvestment_ratio_pct", 15,
-                "max_investment_ratio_pct", 20,
-                "safe_reserve_wld", "25000000",
-                "max_single_investment_wld", "10000000",
-                "equity_ratio_pct", 60,
-                "bond_ratio_pct", 30,
-                "dividend_ratio_pct", 10
-        ));
-        fallback.put("portfolios", List.of());
-        fallback.put("events", List.of());
-        return fallback;
+        // No verified session principal is bound to this Spring controller yet.
+        // A hardcoded privileged actor and synthetic values must never represent member money.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "SWF_ADMIN_IDENTITY_NOT_VERIFIED");
     }
 
     /**
-     * 국부펀드(SWF) 거버넌스 정책 업데이트
+     * SWF governance remains unavailable until a verified session actor,
+     * DB authorization and an audited DB receipt are bound end-to-end.
      */
     public Map<String, Object> updateSwfPolicy(Map<String, Object> changes) {
-        log.info("[TreasuryService] updateSwfPolicy requested: changes={}", changes);
-        try {
-            String jsonStr = objectMapper.writeValueAsString(changes);
-            String sql = "SELECT public.admin_swf_update_policy(?::uuid, ?::jsonb)::text";
-            String rawJson = jdbcTemplate.queryForObject(sql, String.class, CANONICAL_ADMIN_ID, jsonStr);
-            if (rawJson != null && !rawJson.isBlank()) {
-                return objectMapper.readValue(rawJson, Map.class);
-            }
-        } catch (Exception e) {
-            log.warn("[TreasuryService] DB procedure admin_swf_update_policy error: {}", e.getMessage());
-        }
-
-        Map<String, Object> result = new HashMap<>(changes);
-        result.put("status", "SUCCESS");
-        result.put("updated_at", Instant.now().toString());
-        return result;
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "SWF_GOVERNANCE_IDENTITY_NOT_VERIFIED");
     }
 
     /**

@@ -151,7 +151,7 @@ public class TreasuryAdminController {
     public ResponseEntity<Map<String, Object>> updateSwfPolicy(
             @RequestBody Map<String, Object> body
     ) {
-        log.info("[API] PUT swf policy update received: body={}", body);
+        log.info("[API] PUT swf policy update received");
         Map<String, Object> result = treasuryService.updateSwfPolicy(body);
         return ResponseEntity.ok(result);
     }

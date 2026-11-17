@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutoSovereignWealthFundService } from './auto-swf.service';
 import type { Pool } from 'pg';
 import type { DiscordAlertService } from '../../discord/discord-alert.service';
+import { unverifiedSwfSettlement } from '../../economy/monetary/finance-hold';
 
 describe('AutoSovereignWealthFundService', () => {
   let service: AutoSovereignWealthFundService;
@@ -54,6 +55,33 @@ describe('AutoSovereignWealthFundService', () => {
     expect(result).toEqual({executed:false,reason:'SWF_SETTLEMENT_SOURCE_UNVERIFIED',snapshot});
     expect(mockPool.connect).not.toHaveBeenCalled();
     expect(mockPool.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('never reports a rebalance as executed even with a legacy ledger operational flag', async () => {
+    process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL = 'true';
+    try {
+      const snapshot = { config: { is_enabled: true }, portfolios: [], events: [] };
+      mockPool.query = vi.fn().mockResolvedValue({ rows: [{ snapshot }] });
+      const result = await service.evaluateAndRebalance('11111111-1111-4111-8111-111111111111');
+      expect(result).toEqual({
+        executed: false,
+        reason: 'SWF_SETTLEMENT_SOURCE_UNVERIFIED',
+        snapshot,
+      });
+      expect(mockPool.query).toHaveBeenCalledTimes(1);
+      expect(mockPool.connect).not.toHaveBeenCalled();
+    } finally {
+      delete process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL;
+    }
+  });
+
+  it('never treats a legacy environment flag as proof of settled SWF trades', () => {
+    process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL = 'true';
+    try {
+      expect(() => unverifiedSwfSettlement()).toThrow();
+    } finally {
+      delete process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL;
+    }
   });
 
   it('does not schedule even when the runtime and scheduler flags are both enabled', async () => {

@@ -20,7 +20,7 @@ describe('v641 SWF manual execution canonical ledger dispatch', () => {
     vault_main_balance: '185055982',
     ledger_transaction_id: 'a0000000-0000-0000-0000-000000000001',
   };
-  const evaluateAndRebalance = vi.fn().mockResolvedValue({ executed: true, reason: 'SWF_EVALUATED_AND_REBALANCED' });
+  const evaluateAndRebalance = vi.fn().mockResolvedValue({ executed: true, reason: 'SWF_EVALUATED_AND_REBALANCED', ledger_transaction_id: 'a0000000-0000-0000-0000-000000000001' });
   const liquidateToTreasuryVault = vi.fn().mockResolvedValue(mockReceipt);
 
   beforeAll(async () => {

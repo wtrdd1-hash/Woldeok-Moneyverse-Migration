@@ -9,10 +9,8 @@ export function unverifiedFinanceOperation(scope: 'LEGACY_MONETARY_AUTHORITY' | 
 }
 
 /** Manual SWF actions cannot claim settlement without a canonical ledger receipt. */
-export function unverifiedSwfSettlement(): void {
-  if (process.env.MONEYVERSE_SWF_LEDGER_OPERATIONAL === 'true') {
-    return;
-  }
+export function unverifiedSwfSettlement(): never {
+  // Environment configuration is not an authenticated ledger receipt.
   throw new ServiceUnavailableException({
     code: 'SWF_LEDGER_SETTLEMENT_UNAVAILABLE',
     message: 'SWF settlement and immutable ledger evidence are unavailable.',

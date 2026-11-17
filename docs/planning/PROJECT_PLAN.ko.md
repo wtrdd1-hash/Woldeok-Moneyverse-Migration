@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.17.16 — 국부펀드 자동투자 안전성 (개발 후보 / 운영 보류)
+격리 브랜치에서 환경변수만으로 SWF 집행 성공을 표시하는 경로를 제거하고 Nest/Next 영수증 없는 성공 응답과 Spring의 허위 SWF 조회·정책 변경 성공, 비인증 SWF 호환 경로를 차단했다. 실제 자동투자 활성화는 아니다. 집중 테스트 통과와 별도로 실거래 PostgreSQL 원장 검증·공식 정확 SHA Test·독립 복원은 미완료 운영 게이트다. WLD/DB/기능·스케줄/공식 Test/운영 변경 없음. [영문](../worklog/2026-11-17-swf-autoinvest-financial-truth-v2026.11.17.16.md) / [국문](../worklog/2026-11-17-swf-autoinvest-financial-truth-v2026.11.17.16.ko.md).
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

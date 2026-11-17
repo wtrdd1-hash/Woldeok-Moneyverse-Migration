@@ -72,8 +72,7 @@ export function SwfControlPanel({
         toast.success('국부펀드(SWF) 포트폴리오 리밸런싱이 완결되었습니다!');
         await handleRefreshSwfData();
       } else {
-        toast.info(data.message || '국부펀드 리밸런싱 상태가 정상 검증되었습니다.');
-        await handleRefreshSwfData();
+        toast.error('원장 영수증이 검증되지 않아 자동투자가 집행되지 않았습니다.');
       }
     } catch {
       toast.error('리밸런싱 통신 오류가 발생했습니다.');

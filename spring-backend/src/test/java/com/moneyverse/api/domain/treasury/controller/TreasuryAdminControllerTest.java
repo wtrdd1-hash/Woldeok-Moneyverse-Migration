@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -97,11 +98,27 @@ class TreasuryAdminControllerTest {
     }
 
     @Test
-    @DisplayName("국부펀드 리밸런싱 /api/v1/admin/treasury/swf/rebalance 호출 시 원장 부재로 503이다")
+    @DisplayName("미인증 SWF 조회 및 정책 변경은 모든 호환 경로에서 거부된다")
+    void unauthenticatedSwfRoutesMustBeForbidden() throws Exception {
+        for (String base : java.util.List.of(
+                "/api/v1/admin/treasury/swf", "/api/admin/treasury/swf",
+                "/api/treasury/swf", "/api/v1/treasury/swf")) {
+            mockMvc.perform(get(base)).andExpect(status().isForbidden());
+            mockMvc.perform(put(base)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}")) .andExpect(status().isForbidden());
+            mockMvc.perform(post(base + "/rebalance")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}")) .andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    @DisplayName("미인증 SWF 리밸런싱 요청은 원장 접근 전에 403으로 거부한다")
     void swfRebalanceFailsClosedWithoutLedger() throws Exception {
         mockMvc.perform(post("/api/v1/admin/treasury/swf/rebalance")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isForbidden());
     }
 }
