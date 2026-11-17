@@ -23,3 +23,5 @@
 ## 작업 중 — 2026-11-18 08:20 KST
 - 다른 에이전트의 깨끗한 독립 브랜치에서 Spring 홈·가이드 컨트롤러/모델/Thymeleaf 템플릿·CSS·실제 HTTP 테스트를 복사해 새 독립 브랜치에 통합. 원래 브랜치는 변경하지 않음. 별도 H2 프로파일에서만 정식 `/`와 `/guide` 활성화, CSS 허용, 관리자·금융·API 쓰기 차단 필터 유지.
 - Java21 Gradle `clean test bootJar` BUILD SUCCESSFUL. Spring 전체 테스트·내장 실제 HTTP 테스트 통과. 별도 Spring Test 검증 전까지 기존 Next 긴급복구 라우팅 유지. Test/운영 정확한 경로 전용 Nginx 소스 및 동시수정 감지·자동롤백 도구 준비.
+
+- GitHub: [초안 PR #3258](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3258), #3256 기반. 테스트된 JAR 소스 SHA 이후 기록 커밋만 추가되며 빌드 아티팩트 불변.
