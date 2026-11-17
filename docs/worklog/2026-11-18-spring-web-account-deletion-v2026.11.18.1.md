@@ -13,15 +13,15 @@
 - No account/finance mutation, secrets, canonical redirect, DB migration or runtime promotion.
 
 ## IN PROGRESS (source checkpoint)
-- Added `SpringAccountDeletionController.java` with independent property gate; default disabled, no account action.
+- Added `SpringAccountDeletionController.java` with independent property gate; default disabled, no account action. Added `SpringAccountDeletionPreviewDisabledController.java` to guarantee 404 instead of HTML from the broad legacy static SPA fallback.
 - Added `templates/spring-web/account-deletion.html` with bilingual policy presentation and live Next account/privacy links; added supplemental responsive CSS.
 - Authored 5 MockMvc/JUnit test methods across enabled- and disabled-preview contexts, including locale fallback and noindex/CSP/private requirements. These tests have **not been run**.
 - Compared GitHub original `DeletionRequestInfo` to Spring text/HTML: original OAuth, photo, audit/consent retention and legal exception Korean texts all preserved; contact email also preserved in Thymeleaf. This is a **source inspection**, not rendered HTML verification.
 - Midpoint merged `main` rechecked: `e96e8f81f4d6b99b221392a2b6fe46356361b145` unchanged.
-- Compared with PR #3213 base: 15 files added, 0 parent files changed, 0 collisions with PR #3249.
+- Compared with PR #3213 base: initially 15 files added; after fallback hardening 16 new files, 0 parent files changed, 0 collisions with PR #3249.
 
 ## FINISHED (source-only closeout)
-- Created draft stacked [PR #3253](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3253) targeting `feature/full-spring-web-foundation-v2026.11.17.2`, not main. Parent head at PR creation `859fc315111f25a9d1921bc72b023c8a027647d9`; candidate head before closeout worklog commit `9327a0e5f3849eb6885af1e654a8250195da30c9`.
+- Opened draft stacked [PR #3253](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3253) targeting `feature/full-spring-web-foundation-v2026.11.17.2`, not main. Parent head at PR creation `859fc315111f25a9d1921bc72b023c8a027647d9`; candidate head before closeout worklog commit `9327a0e5f3849eb6885af1e654a8250195da30c9`.
 - Source and documentation changes are recorded in EN/KO migration spec, changelog, GitHub-facing and internal updates.
 - No Gradle test pass asserted: mini-PC remote devices OFFLINE. No official Test rollout, signed-in/browser verification, bank ledger changes, production promotion, service restart or Nginx changes.
 - **RELEASE HOLD:** Spring SecurityConfig global permissive/CSRF risks, authenticated and financial G0 tests, exact-SHA Test and rollback/restore evidence are still unresolved. Existing canonical Next page and all 178 pages/124 BFF migration requirements remain.
