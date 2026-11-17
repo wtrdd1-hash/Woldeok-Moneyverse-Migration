@@ -14,8 +14,13 @@ GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issue
 - [ ] 확인된 경우에만 Nginx 무중단 reload.
 - [ ] 운영 검증 및 최종 기록.
 
-## 작업 종료
-- **아직 완료 아님.** 운영 반영과 실제 인증 사용자 화면은 검증 후 기록.
+## 작업 종료 — 2026-11-17 13:08 KST (SEO 업스트림 범위)
+- PR #3237 main 병합 b8e6b6c5852db9484d0170a481a4c4bd0278a2b5, 정책 CI 통과.
+- SEO Next 연결 :4550 → :4521 수정, Nginx 문법 검사 및 무중단 reload 통과, Spring/Next 기존 PID 유지.
+- 롤백: /srv/moneyverse-data/ops-backups/p0-admin-seo-v2026.11.17.14/moneyverse.nginx.before.
+- 공개 /, /admin, /health 200, SEO 화면 익명 401/no-store/noindex, HTTPS 401, Next 후보 SEO 화면 200, CSS 200; 잘못된 Spring 임시 문구 경로 복구.
+- 남은 P0 RSC 탐색 503은 #3238/v2026.11.17.15에서 별도 처리. 로그인 사용자 긍정 E2E는 미검증.
+
 
 ### 중간 점검 — 2026-11-17 13:05 KST
 - 전용 브랜치에서 Nginx 한 부분만 변경하는 복구 스크립트·분리 테스트 설정 작성; 운영 미변경.

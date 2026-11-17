@@ -15,8 +15,13 @@ Issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3236
 - [ ] Record backup and rollback file; verify public authenticated SEO UI if safe authorized session is available.
 - [ ] Monitor edge, backend, frontend and incident log.
 
-## Finished
-- **NOT YET COMPLETE.** Deployment and success claims require fresh evidence. Document current production state precisely.
+## Finished — 2026-11-17 13:08 KST (upstream restoration only)
+- PR #3237 merged on main b8e6b6c5852db9484d0170a481a4c4bd0278a2b5; GitHub policy CI passed.
+- SEO Next upstream :4550 -> :4521; nginx -t PASS, zero-downtime reload PASS. Spring PID 3841715 and Next stage PID 3488515 unchanged.
+- Immutable rollback: /srv/moneyverse-data/ops-backups/p0-admin-seo-v2026.11.17.14/moneyverse.nginx.before.
+- After release /, /admin, /admin/security, /health, /api/version 200; SEO and audit anonymous 401/no-store/noindex; HTTPS /admin/seo 401; direct Next SEO pages 200; public CSS 200. No placeholder on changed route.
+- Residual P0: RSC client navigation 503 caused by Next auth 307, tracked in #3238/v2026.11.17.15. Authenticated-positive browser E2E remains UNVERIFIED.
+
 
 ### In-progress checkpoint — 2026-11-17 13:05 KST
 - Guarded patch candidate and localhost-only Nginx Test config written on isolated branch; no Production mutation.
