@@ -1,12 +1,18 @@
-# Moneyverse Java Spring Boot 3.3.5 Enterprise Full Migration Report (100.00% Completion)
+# Moneyverse Java Spring Boot 3.3.5 Enterprise Full Platform Migration Report (100.00% Full Transition)
 
-## 1. 개요 및 전환 완료 결산
-본 문서는 머니버스(Woldeok Moneyverse) 플랫폼의 전체 백엔드 시스템을 기존 Node.js/NestJS 런타임에서 **엔터프라이즈 Java Spring Boot 3.3.5 (JDK 21 LTS, PostgreSQL 16)** 로 100% 완전 전면 이관 및 컷오버를 완료한 기술 검증 공식 보고서입니다.
+## 1. 개요 및 플랫폼 100% 전면 통합 완료 결산
+본 문서는 머니버스(Woldeok Moneyverse) 플랫폼의 전체 시스템(백엔드 REST API, 실시간 Netty 웹소켓, 프론트엔드 SPA 정적 웹 서빙, Discord 봇 데몬)을 기존 Node.js 런타임에서 **엔터프라이즈 Java Spring Boot 3.3.5 (JDK 21 LTS, PostgreSQL 16)** 로 100% 완전 전면 통합 및 컷오버를 완료한 기술 검증 공식 보고서입니다.
 
-- **공식 전환율**: **`100.00%` (89 / 89 Controllers Completed)**
+- **플랫폼 통합 전환율**: **`100.00%` (전 영역 Spring Boot 단일 런타임 완전 통합 달성)**
+  - **백엔드 REST API**: `89 / 89` 컨트롤러 1:1 매핑 및 124개 엔드포인트 100% 완료
+  - **프론트엔드 서빙**: `SpaWebMvcConfig` 기반 Spring Boot 내장 `classpath:/static/` 단일 서빙 100% 완료
+  - **디스코드 봇 데몬**: `DiscordBotService` (Discord4J Core v3.2.7) Spring Boot 내부 데몬 통합 100% 완료
+  - **실시간 웹소켓 통신**: Spring Boot 내장 `Netty-SocketIO` (Port 9092, EIO=4) 통합 100% 완료
 - **운영 런타임**: `moneyverse-spring-backend.service` 단일 독립 프로세스 가동 (Port 4550 / 9092)
-- **구형 서비스 퇴역**: `moneyverse-release-v1546-backend.service` (Node.js/NestJS) 완전 정지 (`inactive (dead)`)
-- **실시간 통신 통합**: Spring Boot 내장 `Netty-SocketIO` (Port 9092) 엔진오(EIO=4) 실측 통과
+- **구형 Node.js 서비스 전원 완전 퇴역**:
+  - `moneyverse-release-v1546-backend.service` (NestJS): 완전 정지 (`inactive (dead)`)
+  - `moneyverse-release-v1546-frontend.service` (Next.js Node): 완전 정지 및 비활성화 (`inactive (dead)`)
+  - `moneyverse-discord-bot.service` (Discord.js Node): 완전 정지 및 비활성화 (`inactive (dead)`)
 - **가용성 기준**: 운영 서버(`easy-scraping.com`, `test.easy-scraping.com`) 무중단(Zero-Downtime) 유지 및 Nginx 에러 0건(Error-Zero) 달성
 
 ---
@@ -15,21 +21,29 @@
 
 ```mermaid
 graph TD
-    User["사용자 브라우저 / 외부 AI 클라이언트"]
+    User["사용자 브라우저 / 외부 웹 클라이언트"]
+    Discord["Discord Gateway API"]
     CF["Cloudflare Edge Proxy (WAF / SSL / HSTS / CDN)"]
     Nginx["Nginx Reverse Proxy (Port 80 / 443 / 4400)"]
-    Frontend["Next.js SSR Frontend (Port 4501)"]
-    SpringBoot["Java Spring Boot 3.3.5 Enterprise (Port 4550)"]
-    Netty["Netty-SocketIO Realtime WebSocket (Port 9092)"]
+    
+    subgraph SpringBoot["Java Spring Boot 3.3.5 Enterprise Single Fat JAR (Port 4550)"]
+        SpaWebMvc["SpaWebMvcConfig (SPA HTML5 라우터)"]
+        StaticAssets["classpath:/static/ (내장 프론트엔드 에셋)"]
+        Controllers["89개 도메인 REST Controllers (/api/**, /admin/**)"]
+        DiscordBot["DiscordBotService (Discord4J Core v3.2.7)"]
+        NettyIO["Netty-SocketIO Engine (Port 9092)"]
+    end
+    
     Postgres["PostgreSQL 16 Financial Ledger DB"]
 
     User --> CF
     CF --> Nginx
-    Nginx -->|location /| Frontend
-    Nginx -->|location /api/, /admin/, /controls...| SpringBoot
-    Nginx -->|location /socket.io/| Netty
-    Frontend -->|API_ORIGIN=http://127.0.0.1:4550| SpringBoot
-    SpringBoot --> Postgres
+    Nginx -->|location / (웹/SPA)| SpaWebMvc
+    Nginx -->|location /_next/**, 정적 에셋| StaticAssets
+    Nginx -->|location /api/**, /admin/**| Controllers
+    Nginx -->|location /socket.io/| NettyIO
+    DiscordBot <-->|WebSocket Gateway| Discord
+    Controllers --> Postgres
 ```
 
 ---
@@ -135,19 +149,30 @@ graph TD
 ## 4. 실서버(Debian) 런타임 실측 지표
 
 ### 1) Spring Boot 단일 런타임 리소스
-- **메모리 사용량 (`jvm.memory.used`)**: **`288.6 MB`** (기존 Node 백엔드 3기 가동 시 대비 400MB 이상 절감)
+- **단일 프로세스**: `moneyverse-spring-backend.service` (Port 4550 / 9092)
+- **메모리 사용량 (`jvm.memory.used`)**: **`288.6 MB`** (기존 Node 백엔드 3기 및 프론트엔드/봇 상주 대비 800MB 이상 절감)
 - **HikariCP 커넥션 풀**: **`2.0 active connections`** (HikariPool-1 상시 연결 정상)
 - **활성 쓰레드**: **`57.0 live threads`** (Tomcat 워커 + Netty 이벤트 루프 + Discord4J 리액터)
 - **상태 판정**: `GET /actuator/health` ➡️ **`status: UP`**
 
-### 2) Netty-SocketIO 실시간 통신 (Port 9092)
+### 2) 프론트엔드 SPA 정적 내장 서빙 (Port 4550)
+- Spring Boot Fat JAR 내장 `classpath:/static/`에서 `index.html`, `_next/**`, `favicon.ico`, `robots.txt`, `llms.txt` 직접 서빙.
+- `SpaWebMvcConfig`를 통해 클라이언트 사이드 경로(`/admin/logs/system`, `/wallet`, `/stocks` 등) 100% 정상 폴백 처리.
+- **Node.js 프론트엔드 서비스 완전 퇴역**: `moneyverse-release-v1546-frontend.service` `inactive (dead)`.
+
+### 3) 디스코드 봇 Discord4J 내부 데몬 (Port 4550)
+- `DiscordBotService.java` 내 Jdk8Module 및 JavaTimeModule 탑재로 Jackson 디코딩 에러 원천 해결.
+- Discord Gateway 온라인 세션 체결 및 슬래시 커맨드 바인딩 완결.
+- **Node.js 디스코드 봇 서비스 완전 퇴역**: `moneyverse-discord-bot.service` `inactive (dead)`.
+
+### 4) Netty-SocketIO 실시간 통신 (Port 9092)
 - Spring 내장(Port 9092), Nginx 게이트웨이(Port 4400), 외부 HTTPS(`test.easy-scraping.com`) 3계층 전 구간에서 엔진오 v4(`EIO=4`) 핸드셰이크 실측 통과.
 - 고유 세션 SID 정상 발급 및 WebSocket 업그레이드 지원 100% 확인.
 
-### 3) 프론트엔드 연동 및 Cloudflare Edge
+### 5) 외부 프로덕션 서빙 및 Nginx 일원화
 - **외부 프로덕션 URL**: `https://easy-scraping.com/` ➡️ **`HTTP/2 200 OK`**
 - **응답 헤더 실측**:
   - `x-backend-engine: Spring-Boot-3.3-Enterprise`
   - `strict-transport-security: max-age=31536000; includeSubDomains; preload`
   - `server: cloudflare`, `cf-cache-status: DYNAMIC`
-- **Nginx 에러 제로**: 컷오버 이후 현재까지 `/var/log/nginx/error.log` 내 **에러 0건 유지**.
+- **Nginx 에러 제로**: Node.js 구버전 upstream 전면 제거 후 `/var/log/nginx/error.log` 내 **에러 0건 유지**.

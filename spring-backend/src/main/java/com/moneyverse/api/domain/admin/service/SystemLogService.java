@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,27 +23,47 @@ public class SystemLogService {
 
     private static final Logger log = LoggerFactory.getLogger(SystemLogService.class);
 
+    private static final Pattern TOKEN_PATTERN =
+            Pattern.compile("(?i)(password|token|secret|apiKey|x-internal-token|cookie)\\s*[:=]\\s*([\"']?)([^\\s\"',;]+)(\\2)");
+    private static final Pattern BEARER_PATTERN =
+            Pattern.compile("(?i)Bearer\\s+([A-Za-z0-9._~+/-]+)");
+
     public SystemLogResponse getLogs(SystemLogSource source, int lines, String filter) {
         int clampedLines = Math.max(10, Math.min(500, lines));
         List<String> rawLines = fetchRawLogs(source, clampedLines);
 
+        String effectiveFilter = filter;
+        if ((effectiveFilter == null || effectiveFilter.trim().isEmpty()) && source == SystemLogSource.DISCORD_BOT) {
+            effectiveFilter = "Discord";
+        }
         List<String> filteredLines = rawLines;
-        if (filter != null && !filter.trim().isEmpty()) {
-            String lowerFilter = filter.trim().toLowerCase();
+        if (effectiveFilter != null && !effectiveFilter.trim().isEmpty()) {
+            String lowerFilter = effectiveFilter.trim().toLowerCase();
             filteredLines = rawLines.stream()
                     .filter(line -> line.toLowerCase().contains(lowerFilter))
                     .collect(Collectors.toList());
         }
 
+        // Apply regex masking for sensitive credentials and tokens
+        List<String> sanitizedLines = filteredLines.stream()
+                .map(SystemLogService::maskSensitiveData)
+                .collect(Collectors.toList());
+
         return new SystemLogResponse(
                 source.getKey(),
                 source.name(),
-                filteredLines,
-                filteredLines.size(),
+                sanitizedLines,
+                sanitizedLines.size(),
                 rawLines.size() >= clampedLines,
                 Instant.now().toString(),
-                filteredLines.isEmpty() ? "EMPTY" : "OK"
+                sanitizedLines.isEmpty() ? "EMPTY" : "OK"
         );
+    }
+
+    public static String maskSensitiveData(String line) {
+        if (line == null) return null;
+        String masked = BEARER_PATTERN.matcher(line).replaceAll("Bearer [REDACTED]");
+        return TOKEN_PATTERN.matcher(masked).replaceAll("$1=[REDACTED]");
     }
 
     private List<String> fetchRawLogs(SystemLogSource source, int lines) {

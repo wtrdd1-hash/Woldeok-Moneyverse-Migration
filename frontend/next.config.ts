@@ -192,6 +192,63 @@ const config: NextConfig = {
 
     return [
       { source: '/:path*', headers: security },
+      // Private administrative and authenticated routes must never inherit public indexing headers
+      {
+        source: '/admin',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        source: '/admin/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'no-store, max-age=0' },
+        ],
+      },
+      {
+        source: '/account',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+      {
+        source: '/account/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+      {
+        source: '/wallet/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+      {
+        source: '/profile/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
+      {
+        source: '/auth/:path*',
+        headers: [
+          { key: 'x-robots-tag', value: 'noindex, nofollow, no-store' },
+          { key: 'cache-control', value: 'private, no-store' },
+        ],
+      },
       // The derivatives page is authenticated and must not inherit the public indexing header.
       { source: '/stocks/derivatives', headers: [
         { key: 'x-robots-tag', value: 'noindex, nofollow' },

@@ -1,0 +1,23 @@
+# Woldeok Moneyverse (easy-scraping.com)
+> 대한민국 가상 금융 생태계 및 주식 시뮬레이션 플랫폼
+
+## Overview
+Woldeok Moneyverse는 가상화폐, 주식 시장, 부동산 벤처 투자, 예금보험공사(KDIC) 기반 금융 보호 시스템을 제공하는 실시간 모의 금융 플랫폼입니다.
+단일 Spring Boot 3.3.5 Enterprise 바이너리와 Netty-SocketIO 실시간 엔진으로 구동됩니다.
+
+## Public Services
+- **메인 포털**: https://easy-scraping.com/
+- **주식 거래소**: https://easy-scraping.com/stocks
+- **KDIC 예금보호 포털**: https://easy-scraping.com/kdic
+- **금융 계산기**: https://easy-scraping.com/calculators
+- **공지사항 & 업데이트**: https://easy-scraping.com/announcements
+
+## API & Documentation
+- **시스템 상태**: https://easy-scraping.com/api/v1/system/status
+- **OpenAPI 3.0 명세**: https://easy-scraping.com/v3/api-docs
+- **Swagger UI**: https://easy-scraping.com/swagger-ui.html
+
+## Crawler Policy
+- Public Content: Allowed
+- Private User Data & Admin: Disallowed (X-Robots-Tag: noindex, nofollow, no-store)
+- Contact: support@easy-scraping.com
