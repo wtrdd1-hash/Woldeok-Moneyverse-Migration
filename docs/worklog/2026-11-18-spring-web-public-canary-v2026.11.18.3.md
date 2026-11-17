@@ -24,3 +24,5 @@ Pending.
 ## MIDPOINT — 2026-11-18 07:53 KST
 - Implemented an isolated `spring-web-preview` profile with H2 memory datasource, fixture schema and local socket on an ephemeral port, never operational PostgreSQL. Added fail-closed request filter which rejects all non-GET/HEAD and all paths except three preview pages, their two CSS resources and `/health`, including admin, API, wallet and writes.
 - Added MockMvc allow/deny tests, versioned least-privilege systemd unit template and five exact-match + fallback Nginx preview routes. Cookie, authorization and internal actor token headers are stripped at the edge. Test source and official edge smoke to follow; production untouched.
+
+- GitHub isolated release candidate: [Draft PR #3256](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3256), stacked on #3255, head before this record `c6c9a7acc61f24f5ecd271e8fcac754aaff364b4`. Full-site rollout remains HOLD.

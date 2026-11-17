@@ -24,3 +24,5 @@
 ## 작업 중 — 2026-11-18 07:53 KST
 - 운영 PostgreSQL 대신 H2 메모리 DB, 격리 스키마·로컬 임의 소켓만 사용하는 `spring-web-preview` 프로파일 구축. 미리보기 페이지 3개·CSS 2개·`/health`의 GET/HEAD 외 관리자·API·금융·쓰기 요청 전부 차단하는 필터 및 MockMvc 테스트 추가.
 - 최소 권한 systemd 단위 템플릿, Nginx 정확한 경로 5개·나머지 preview 404 차단 스니펫 추가. edge에서 사용자 쿠키·인증·내부 토큰 헤더 전달 차단. 현재까지 운영 변경 없음, 검증 후 단계적 적용.
+
+- GitHub 릴리스 독립 브랜치: [초안 PR #3256](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3256), #3255 적층. 이 기록 전 head `c6c9a7acc61f24f5ecd271e8fcac754aaff364b4`. 전체 전환 운영 보류 유지.
