@@ -17,3 +17,11 @@
 
 ## Finished
 - Not yet; production unchanged by this task at initial checkpoint.
+
+### In-progress checkpoint — 2026-11-18 07:24 KST
+- Created task branch `fix/p0-admin-ui-recovery-v2026.11.18.1`, pushed worklog and protected runtime patch; PR #3252 opened. `origin/main` rechecked unchanged at `e96e8f81f4`.
+- Most recent Nov 17 Next bundle did not boot (stale `next` symlink), then returned 500 because of missing Next server modules. Do not deploy that unverified build.
+- Last-known approved frontend release `prod-v2026.11.14.1217-43ab5a5110` runs correctly when using bundled standalone Next 16.4.2 module via `NODE_PATH`, existing private frontend env file and proper Host / X-Forwarded-Proto; validated `/admin`, `/admin/logs`, `/login`, `/api/viewer` 200 on isolated port 4524.
+- **Critical access-control finding:** directly requesting standalone Next `/api/v1/admin/users` as anonymous yielded 200 user data; therefore strictly isolate Next to UI only, keep all Spring `/api/v1/*` routes, and enforce `auth_request` to Spring `/api/v1/admin/me` at Nginx for all `/admin*` UI routes. Loopback test gave 302 for unsigned admin and 401 for admin API, with full login HTML and signed-out viewer JSON.
+- Isolated Nginx regression: 8/8 PASS (anonymous admin 302, login 200, viewer 200, admin/me 401, CSS 200, JS 200); CSS/JS MIME verified. Runtime service `moneyverse-p0-admin-ui-recovery.service` active on loopback :4524, without stopping Spring or updating database.
+- Promoting only after production Nginx config backup, syntax validation, and repeat smoke. Authenticated administrator E2E is not available; do not claim it passed.
