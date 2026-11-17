@@ -447,4 +447,93 @@ public class UserAuthService {
 
     public record PreloginSessionResult(UUID sessionId, String token, String csrfToken) {}
     public record LoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String email, String displayName, List<String> roles) {}
+
+    /**
+     * Completes an OAuth login using the database stored procedure auth_complete_oauth_login.
+     * Generates a new secure session, sets session cookies, and returns the login result.
+     */
+    @Transactional
+    public OAuthLoginResult completeOAuthLogin(
+            UUID preAuthSessionId,
+            String provider,
+            String subject,
+            String displayName,
+            HttpServletResponse response) {
+
+        String safeProvider = (provider != null) ? provider.trim().toLowerCase() : "discord";
+        String safeSubject = (subject != null) ? subject.trim() : "";
+        String safeName = (displayName != null && !displayName.isBlank()) ? displayName.trim() : "시민";
+        if (safeName.length() > 120) safeName = safeName.substring(0, 120);
+
+        String subjectHash = sha256(safeProvider + ":" + safeSubject);
+        String rawToken = generateRandomToken();
+        String csrfToken = UUID.randomUUID().toString();
+        String tokenHash = sha256(rawToken);
+        String csrfHash = sha256(csrfToken);
+
+        // Ensure active pre-login session
+        UUID effectivePreSessionId = preAuthSessionId;
+        if (effectivePreSessionId == null) {
+            effectivePreSessionId = UUID.randomUUID();
+            String preTokenHash = sha256(generateRandomToken());
+            String preCsrfHash = sha256(UUID.randomUUID().toString());
+            jdbcTemplate.update(
+                "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true)",
+                effectivePreSessionId, preTokenHash, preCsrfHash
+            );
+        } else {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth_sessions WHERE id = ? AND user_id IS NULL AND revoked_at IS NULL AND expires_at > NOW()",
+                Integer.class, effectivePreSessionId
+            );
+            if (count == null || count == 0) {
+                jdbcTemplate.update(
+                    "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true) ON CONFLICT (id) DO UPDATE SET revoked_at = NULL, expires_at = NOW() + INTERVAL '1 day', user_id = NULL",
+                    effectivePreSessionId, sha256(generateRandomToken()), sha256(UUID.randomUUID().toString())
+                );
+            }
+        }
+
+        String sql = "SELECT user_id, session_id, is_new FROM auth_complete_oauth_login(?::uuid, ?::identity_provider, ?, ?, ?, ?, ?)";
+        Map<String, Object> row = jdbcTemplate.queryForMap(
+            sql,
+            effectivePreSessionId,
+            safeProvider,
+            safeSubject,
+            subjectHash,
+            safeName,
+            tokenHash,
+            csrfHash
+        );
+
+        UUID userId = (UUID) row.get("user_id");
+        UUID sessionId = (UUID) row.get("session_id");
+        Boolean isNew = (Boolean) row.get("is_new");
+
+        // Mark reauthenticated
+        jdbcTemplate.update(
+            "UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ?",
+            sessionId
+        );
+
+        // Ensure profile display name
+        try {
+            jdbcTemplate.update(
+                "UPDATE users SET display_name = ? WHERE id = ? AND (display_name IS NULL OR display_name = '')",
+                safeName, userId
+            );
+            jdbcTemplate.update(
+                "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, NOW()) ON CONFLICT (id) DO NOTHING",
+                userId, safeName
+            );
+        } catch (Exception ignored) {}
+
+        // Set session cookies
+        setSessionCookie(response, rawToken);
+
+        return new OAuthLoginResult(userId, sessionId, rawToken, csrfToken, safeName, isNew != null && isNew);
+    }
+
+    public record OAuthLoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String displayName, boolean isNew) {}
 }
+
