@@ -165,7 +165,7 @@ export function ApiHealthDashboard({ initialData, isEn }: ApiHealthDashboardProp
           <span className="text-xs text-muted-foreground hidden sm:inline">|</span>
           <span className="text-xs text-muted-foreground font-mono hidden sm:inline">
             {isEn ? 'Last sync: ' : '최근 동기화: '}
-            {lastRefreshedAt?.toLocaleTimeString() ?? '—'}
+            <span suppressHydrationWarning>{lastRefreshedAt?.toLocaleTimeString() ?? '—'}</span>
           </span>
         </div>
 
