@@ -5053,3 +5053,31 @@ graph TD
 - **Step 2**: 서버 저장소 git pull origin main으로 최신 코드 동기화.
 - **Step 3**: 서버에서 Spring Boot 최신 빌드 및 서비스 재기동 (moneyverse-spring-backend.service).
 - **Step 4**: 사이트 정상 복구 및 정밀 실측 QA (curl HTTP 상태코드, x-backend-engine, Nginx 에러 로그 0건 실측).
+
+
+---
+## 🚀 [v56 Specification] SEO 전면 최적화(GSC 실측 연동, Canonical/X-Robots-Tag 정상화) 및 이슈 #3229 Discord OAuth 세션 충돌 해결
+### 1. 현황 및 장애 원인 분석 (RCA)
+- **GSC 28일/7일 실적 및 SEO 결함**:
+  - 사용자 실측 GSC 28일: 노출 1.05만, 클릭 83회, CTR 0.8%, 평균 순위 18.1 / 7일: 노출 3.74천, 클릭 21회.
+  - 결함 1: /admin 경로가 HTML meta는 noindex인데 HTTP 응답 헤더 X-Robots-Tag가 index, follow로 반환되어 크롤러 신호 불일치 발생.
+  - 결함 2: layout.tsx 루트 generateMetadata에 alternates.canonical: '/'가 하드코딩되어 하위 라우트로 잘못 상속되어 Google canonical 쏠림 위험.
+  - 결함 3: sitemap-index.xml의 lastmod가 2026-11-08로 정체되어 크롤러에게 최신성 전달 미흡.
+- **이슈 #3229 (P0 Auth) Discord OAuth 세션 쿠키 충돌**:
+  - Spring prelogin 경로는 mv_session을 발급하는 반면, Nest/Next OAuth callback은 __Host-mv_session을 우선 사용하여 동일 브라우저에 2개 쿠키 공존 시 다른 세션으로 oauth_state를 검증하여 HTTP 400 oauth_state 오류 및 HTTP 401 발생.
+  - OAuth 시작(authorize) 시점에 기존 잔여 세션 쿠키를 확실하게 무효화하고, 콜백(callback) 호출 시에도 올바른 세션 쿠키가 전달되도록 정제 필요.
+
+### 2. 세부 구현 계획
+- **Part A: SEO 전면 최적화**
+  - next.config.ts headers(): /admin/**, /api/**, /account/**, /wallet/**, /profile/**, /auth/**에 X-Robots-Tag: noindex, nofollow, no-store 강력 강제.
+  - layout.tsx: 루트 canonical을 조건부로 분리하여 하위 페이지 오상속 차단.
+  - sitemap-index.xml/route.ts: lastmod를 현재 릴리스 일자(2026-11-17)로 최신화.
+  - admin/seo/seo-funnel-card.tsx: GSC 실측 캡처 데이터(28일 노출 1.05만/클릭 83, 7일 노출 3.74천/클릭 21)를 진실된 실측 지표로 연동 표시.
+- **Part B: 이슈 #3229 로그인 및 OAuth 보안 강화**
+  - oauth-cookie-transition.ts & authorize/route.ts: prelogin 시작 시 브라우저 내 구버전 세션 쿠키(__Host-mv_session, mv_session)를 확실히 만료시키는 Set-Cookie 헤더 추가.
+  - callback/route.ts: 콜백 API 호출 시 세션 쿠키 정제 및 성공 시 구버전 prelogin 쿠키 소거 보장.
+  - 관련 단위 테스트 및 회귀 테스트 통과 검증.
+- **Part C: CI 검증, 배포 및 정밀 실측 QA**
+  - 로컬 vitest 및 typecheck 통과.
+  - PR 생성 -> CI 8대 검사 All Green -> main 스쿼시 머지.
+  - 프로덕션 배포 및 curl 엔드포인트 정밀 실측.

@@ -6,9 +6,9 @@
  * This scoped transition preserves state binding: it does not relax OAuth
  * challenge verification or change the backend's global cookie precedence.
  */
-const CLEAR_HOST_SESSION =
+export const CLEAR_HOST_SESSION =
   '__Host-mv_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
-const CLEAR_LEGACY_SESSION =
+export const CLEAR_LEGACY_SESSION =
   'mv_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
 
 function issuedSession(setCookie: readonly string[], name: string): boolean {
@@ -19,20 +19,37 @@ function issuedSession(setCookie: readonly string[], name: string): boolean {
   });
 }
 
-/** A new anonymous Spring session must be the only cookie Nest sees on callback. */
+/**
+ * When starting OAuth round trip, clear any conflicting sessions so Nest & Spring
+ * agree on the exact prelogin session ID bound to the PKCE/state challenge.
+ */
 export function cookiesToClearAfterOAuthStart(
   setCookie: readonly string[],
   signedIn: boolean,
 ): readonly string[] {
-  return !signedIn && issuedSession(setCookie, 'mv_session') ? [CLEAR_HOST_SESSION] : [];
+  if (!signedIn) {
+    if (issuedSession(setCookie, 'mv_session')) {
+      return [CLEAR_HOST_SESSION];
+    }
+    if (issuedSession(setCookie, '__Host-mv_session')) {
+      return [CLEAR_LEGACY_SESSION];
+    }
+  }
+  return [];
 }
 
-/** After Nest replaces the session, Spring must not read the stale prelogin cookie. */
+/** After provider replaces the session on callback, clear the superseded prelogin cookie. */
 export function cookiesToClearAfterOAuthCompletion(
   setCookie: readonly string[],
   outcome: 'signed-in' | 'linked' | 'reauthenticated' | null | undefined,
 ): readonly string[] {
-  return outcome === 'signed-in' && issuedSession(setCookie, '__Host-mv_session')
-    ? [CLEAR_LEGACY_SESSION]
-    : [];
+  if (outcome === 'signed-in') {
+    if (issuedSession(setCookie, '__Host-mv_session')) {
+      return [CLEAR_LEGACY_SESSION];
+    }
+    if (issuedSession(setCookie, 'mv_session')) {
+      return [CLEAR_HOST_SESSION];
+    }
+  }
+  return [];
 }
