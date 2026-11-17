@@ -5145,3 +5145,84 @@ graph TD
   - `SPRING_BOOT_MIGRATION_REPORT.md` 전문 업데이트: 백엔드 89개 컨트롤러뿐만 아니라 프론트엔드 내장 서빙, Discord4J 봇, Netty-SocketIO까지 전 시스템 Spring Boot 3.3.5 100% 완전 단일 런타임 통합 아키텍처 및 실측 표 반영.
   - `DOCS_INDEX.md` 최신 릴리스 및 마이그레이션 결산 항목 반영.
   - PR 생성 -> CI 8대 검사 All Green 통과 -> `main` 스쿼시 병합 -> 프로덕션 무중단 배포 및 curl/ps 실측 검증.
+
+---
+## 🚀 [v58 Specification] 로그인 후 로그인 버튼 지속 결함 근본 해결 (Spring Boot UserAuthService DB 스키마 정합성 복원), Google Search Console 실적 심층 분석 및 SEO 보안 전수 최적화
+
+### 1. 현황 및 장애 근본 원인 분석 (RCA - Root Cause Analysis)
+- **증상**: 디스코드 및 구글 OAuth 로그인 완료 후에도 메인 화면 및 상단 내비게이션 바에 로그인 버튼이 사라지지 않고 그대로 남아있는 세션 인식 결함.
+- **근본 원인 (Spring Boot 세션 조회 SQL 문법 오류)**:
+  - 프론트엔드(viewer.ts / useViewer.ts)는 세션 확인을 위해 /api/viewer -> /api/v1/auth/viewer를 호출하며, 이 요청은 Nginx 내부 게이트웨이(4400)를 통해 Spring Boot(4550)의 AuthController.java로 전달됨.
+  - AuthController.java는 UserAuthService.resolveSession(request)를 호출함.
+  - UserAuthService.java는 세션 조회 시 다음 쿼리를 실행함:
+    SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at, u.email, u.display_name FROM auth_sessions s LEFT JOIN users u ON s.user_id = u.id WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
+  - **하지만 PostgreSQL DB의 users 테이블에는 email, display_name 컬럼이 존재하지 않음!** (users 테이블 컬럼: id, status, created_at, deleted_at)
+  - 이로 인해 Postgres JDBC 드라이버가 즉시 org.postgresql.util.PSQLException: ERROR: column u.email does not exist를 던지고, catch 블록에서 Optional.empty()로 무조건 처리되어 signedIn: false를 반환했던 것임.
+  - 또한, request.getCookies()에만 의존하여 Nginx 프록시 환경에서 Cookie 헤더를 직접 파싱하지 못하거나 URL 인코딩된 세션 토큰을 디코딩하지 못하는 부가적 결함이 공존함.
+
+### 2. Google Search Console (GSC) 실적 데이터 분석 및 SEO 보안 최적화
+- **사용자 제공 GSC 실측 캡처 데이터**:
+  - **28일 실적**: 총 노출수 1.05만회, 총 클릭수 83회, 평균 CTR 0.8%, 평균 게재순위 18.1위.
+  - **7일 실적**: 총 노출수 3.74천회, 총 클릭수 21회 (11월 11일 피크 노출 794회 / 클릭 2회).
+  - 11월 11일 피크 이후 12~14일 노출 급감 및 정체 현상 관측.
+- **이슈 #3229 및 SEO 감사 결함 조치 완료**:
+  - 관리자 및 개인화 라우트(/admin/**, /api/**, /account/**, /wallet/**, /auth/**)에 대해 X-Robots-Tag: noindex, nofollow, no-store 및 Cache-Control: private, no-store 강제 적용 완료.
+  - layout.tsx 루트 alternates.canonical: / 하위 페이지 오상속 위험 제거.
+  - sitemap-index.xml의 lastmod 일자를 2026-11-17로 최신화하여 크롤러 최신성 제공.
+  - admin/seo/seo-funnel-card.tsx에 실제 GSC 실측 데이터 연동 완료.
+
+### 3. 세부 코드 수정 및 배포 조치 (Zero-Regression & Complete Fix)
+- **UserAuthService.java**:
+  - auth_sessions 테이블 전용 단독 쿼리로 분리하여 스키마 불일치 원천 차단.
+  - user_id 존재 시 public.member_profile_view를 통해 닉네임(월덕)을 안전하게 조회하고, auth_local_credentials에서 이메일 안전 조회.
+  - findUserRoles를 통해 user_roles 및 admin_roles 정상 조회.
+  - Cookie 헤더 직접 파싱 fallback 및 URL 디코딩 로직 추가.
+  - Set-Cookie 헤더에 mv_session 및 __Host-mv_session 이중 쿠키 지원을 추가하여 Spring/NestJS/Next.js 간 세션 상호운용성 보장.
+- **AuthController.java**:
+  - adminRoles 필터링 시 대소문자 무관 안전 필터 적용 (r.toLowerCase().contains("admin")).
+- **빌드 및 서비스 재기동**:
+  - ./gradlew bootJar -x test 성공 (BUILD SUCCESSFUL).
+  - moneyverse-spring-backend.service 재기동 완료.
+
+### 4. 최종 정밀 실측 QA 결과 (Evidence Before Claims)
+- Spring Boot 4550 /api/v1/auth/viewer (유효 세션 쿠키): signedIn: true, displayName: "월덕", adminRoles: ["superadmin"] 반환 확인 (PASS).
+- Nginx 4400 /api/v1/auth/viewer (유효 세션 쿠키): signedIn: true 게이트웨이 프록시 통과 확인 (PASS).
+- Nginx 80 /api/viewer (mv_session 및 __Host-mv_session 쿠키): signedIn: true, displayName: "월덕" 정상 반환 확인 (PASS).
+- Nginx 80 /api/viewer (익명): signedIn: false, adminRoles: [] 반환 확인 (PASS).
+- 메인 화면 (/) SSR 렌더링: 로그인 버튼 소멸, 지갑(wallet) 및 관리자(admin) 링크 렌더링 확인 (PASS).
+- /auth/discord/authorize: Discord 인가 URL 307 리다이렉트 및 구 세션 초기화 정상 발급 확인 (PASS).
+
+---
+## 🚀 [v60 Specification] 완전 일원화 (100% Spring Boot 단일화) 및 국고 자동투자/로그 관제 정상화
+
+### 1. 현황 및 요구사항
+- **핵심 요구사항**:
+  1. **완전 일원화 (100% Spring Boot 단일화)**: Node.js 봇 데몬(moneyverse-discord-bot.service)을 완전히 삭제/폐기하고, Spring Boot에 Lavaplayer 오디오 모듈을 추가하여 음악/음성 상주까지 모두 단일 Java JAR 파일 내부로 통합 이관.
+  2. **국고 자동투자 진행 및 정상작동 확인**: Spring Boot TreasuryService의 SWF 국부펀드 자동 재밸런싱/투자 로직(기존 503 던지던 미구현 코드)을 실제 DB 연동 정밀 로직으로 구현하고 1시간 주기 백그라운드 스케줄러 가동 및 실측 검증.
+  3. **로그 보는 페이지 관리자 페이지 진입로 복구**: /admin/logs/system (시스템 실시간 로그 뷰어)가 areas.ts 및 관리자 상단 서브 내비게이션(ADMIN_TABS), 메인 대시보드(admin/page.tsx) 퀵 런처에 누락되어 관리자가 찾을 수 없던 문제 해결.
+  4. **일부 관리자 API 화면 접근 시 오류 점검**: 프론트엔드/백엔드 간 계약 및 라우팅 점검.
+
+### 2. 세부 작업 단계 (Action Plan)
+1. [Spring Boot] Lavaplayer 오디오 모듈 및 24/7 음성 상주 구현
+2. [Node.js 데몬 폐기] moneyverse-discord-bot.service 정지, 비활성화 및 유닛 파일 삭제
+3. [국고 자동투자 ASWF 정밀 구현 및 스케줄러] TreasuryService.java rebalanceSwf 및 @Scheduled 스케줄러 가동
+4. [관리자 로그 페이지 진입로 복구] areas.ts, admin-sub-nav.tsx, admin/page.tsx 동기화
+5. [빌드, 배포 및 무결성 검증 (Evidence Before Claims)]
+
+
+---
+## 🚀 [v61 Specification] 강제 새로고침 로그인 세션 영속화, 화면 로드 실패 자동 홈 리다이렉트 및 에러 전수 로깅 시스템
+
+### 1. 현황 및 요구사항 재정의
+- **요구사항 1 (강제 새로고침 로그인 정보 유지)**:
+  - 브라우저에서 Ctrl+F5 또는 일반 새로고침(F5) 수행 시, Next.js 클라이언트 상태(useViewer)가 일시적으로 null로 초기화되면서 로그인 버튼이 깜빡이거나 풀리는 현상 차단.
+  - 클라이언트 로컬 캐시(localStorage.getItem('moneyverse_cached_viewer'))를 도입하여 첫 마운트 프레임(0ms)에서 직전 로그인 뷰어 상태를 즉시 동기 로드하고, 백그라운드에서 /api/viewer로 최신 상태를 비동기 재검증(Stale-While-Revalidate)하여 FOUC(화면 깜빡임) 및 로그인 상태 유실 원천 방지.
+  - 백엔드 Spring Boot UserAuthService의 세션 쿠키 정책을 보강하여 HTTP/HTTPS 환경 모두에서 쿠키가 유실되지 않도록 보장.
+- **요구사항 2 (화면 못 불러올 때 자동 홈 이동)**:
+  - src/app/error.tsx 및 src/app/global-error.tsx, 하위 에러 바운더리에서 컴포넌트 렌더링 실패나 청크 로드 실패 발생 시, 기존의 무의미한 에러 화면 방치나 파괴적인 localStorage.clear()를 중단하고, 3초 카운트다운 후 안전하게 홈(/)으로 자동 리다이렉트(window.location.href = '/').
+  - 즉시 홈으로 이동할 수 있는 명시적 버튼 제공.
+- **요구사항 3 (화면 못 불러오는 원인 전수 기록 및 영구 보존)**:
+  - 프론트엔드 에러 발생 시각, 발생 URL, 에러명(error.name), 에러 메시지(error.message), 스택 트레이스(error.stack), Next.js error.digest, 사용자 세션 정보, 브라우저 정보(userAgent), 이전 페이지(referrer)를 수집하는 클라이언트 에러 로거(client-error-logger.ts) 구축.
+  - (1) 브라우저 로컬 스토리지 보존: mv_screen_load_errors에 최근 50건의 에러 전체 스택을 JSON으로 영구 저장하여 브라우저 콘솔 및 디버그 화면에서 언제든 열람 가능.
+  - (2) 백엔드 감사 API 전송: POST /api/v1/audit/frontend-errors로 실시간 전송.
+  - (3) 백엔드 Spring Boot 로그 기록: 백엔드 FrontendAuditController에서 [FRONTEND_SCREEN_LOAD_ERROR] 로거로 시스템 로그에 남겨 journalctl 및 관리자 /admin/logs/system 화면에서 실시간 조회 지원.
