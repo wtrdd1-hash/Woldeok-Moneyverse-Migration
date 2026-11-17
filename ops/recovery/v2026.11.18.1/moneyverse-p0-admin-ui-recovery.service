@@ -1,0 +1,18 @@
+[Unit]
+Description=Woldeok Moneyverse P0 isolated Next.js admin frontend recovery v2026.11.18.1
+After=network.target moneyverse-spring-backend.service
+Wants=moneyverse-spring-backend.service
+
+[Service]
+Type=simple
+User=debian
+WorkingDirectory=/srv/moneyverse-data/releases/prod-v2026.11.14.1217-43ab5a5110/frontend/.next/standalone/frontend
+EnvironmentFile=/srv/moneyverse-data/releases/prod-v2026.11.14.1217-43ab5a5110/frontend/.env.local
+ExecStart=/srv/moneyverse-data/ops/recovery/v2026.11.18.1/start-frontend.sh
+Restart=on-failure
+RestartSec=5
+MemoryMax=1073741824
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
