@@ -1,4 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
+
+## v2026.11.17.9 — Authenticated engagement read-only Production edge restoration (SCOPED OPERATIONAL PROMOTION)
+Owner-approved narrow Nginx routing recovery on 2026-11-17. Old Production Spring returned 404 for member early-game, attendance and daily-quest read paths and 503 for engagement root. Canonical NestJS :4500 and official Test enforce session/consent/CSRF guards, rejecting anonymous 401. Eight GET/HEAD exact routes for /api/(v1/)engagement, early-game, dopamine/attendance/status and dopamine/daily-quest/status now map to Nest in Production public and internal :4400 Nginx. Python 5/5 and shadow Nginx tests passed, then nginx -t and graceful reload passed. Public HTTPS anonymous requests returned 401 while unsupported finance routes remained 503 and /api/version remained 200. This is ROUTING and NEGATIVE-AUTH promotion, not successful signed-in member E2E nor a full Spring migration. No DB, WLD or app server change. [Receipt](../releases/v2026.11.17.9-engagement-canonical-read-prod.md).
+
 **Current planning:** v1518 F675-185 source-truth hardening / issue #2024 / Draft #2029 / RELEASE HOLD; stacked on #2025.
 
 ## v2026.11.13.2 — Spring migration risk + artifact governance follow-up (DRAFT / NO RUNTIME)
