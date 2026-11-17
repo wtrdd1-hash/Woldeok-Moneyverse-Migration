@@ -14,3 +14,8 @@ Pending tests.
 
 ## CLOSEOUT
 Pending.
+
+## MIDPOINT — 2026-11-18 08:39 KST (RED/diagnosis)
+- Python deterministic legal-source parity RED first: missing Spring templates; after generator implementation, **2/2 Python tests PASS** for 4 EN/KO documents. They compare each policy article's complete literal text nodes, anchors and heading order, including original EN-vs-KO legal differences, and assert canonical metadata/HTML semantics. This is not a newly invented or abridged legal policy.
+- First Java21 full Spring `clean test bootJar` completed **161 tests with 2 FAIL**; did NOT deploy. Exact reasons: one assertion mistakenly demanded HTML-escaped `&amp;` when Thymeleaf preserves source literal `&` (display content itself correct); second existing preview-only filter test did not opt into the new default-OFF policy and account canonical flags, so its GET found the legacy 475-byte SPA fallback. Updated only those test expectations/flags; production preview routes and feature flags unchanged. Rerun required.
+- Added independent default-OFF canonical Spring MVC terms/privacy controller and canonical account-deletion controller sharing the current preview's **same source-policy copy**, with a preview-only notice and noindex conditional. 4 generated bilingual Thymeleaf policy templates, mobile/focus CSS, H2-only GET/HEAD allowlist expansion, independent Test/Prod exact-match Nginx source and atomic versioned rollback tool. Refused any operational PostgreSQL, financial API, OAuth/auth/session changes.

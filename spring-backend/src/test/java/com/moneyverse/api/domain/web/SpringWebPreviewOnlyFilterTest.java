@@ -13,7 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(properties = {"moneyverse.web.preview-restricted=true",
         "moneyverse.web.preview-enabled=true", "moneyverse.web.account-deletion-preview-enabled=true",
-        "moneyverse.web.spring-home-enabled=true", "moneyverse.web.spring-guide-enabled=true"})
+        "moneyverse.web.spring-home-enabled=true", "moneyverse.web.spring-guide-enabled=true",
+        "moneyverse.web.spring-policy-enabled=true", "moneyverse.web.account-deletion-canonical-enabled=true"})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class SpringWebPreviewOnlyFilterTest {
@@ -29,6 +30,13 @@ class SpringWebPreviewOnlyFilterTest {
                 .andExpect(content().string(containsString("머니버스에서 할 수 있는 일")));
         mvc.perform(get("/spring-ui/home.css")).andExpect(status().isOk());
         mvc.perform(get("/spring-ui/guide.css")).andExpect(status().isOk());
+        mvc.perform(get("/terms?lang=ko")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("제8조 탈퇴, 책임과 문의")));
+        mvc.perform(get("/privacy?lang=ko")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("개인정보 보호책임자")));
+        mvc.perform(get("/account-deletion?lang=ko")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("삭제 및 보관 기준")));
+        mvc.perform(get("/spring-policy/policy.css")).andExpect(status().isOk());
         mvc.perform(get("/spring-web?lang=ko"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("월덕 머니버스")));
@@ -48,6 +56,8 @@ class SpringWebPreviewOnlyFilterTest {
                     .andExpect(header().string("X-Robots-Tag", "noindex, nofollow"));
         }
         mvc.perform(post("/spring-web/account-deletion")).andExpect(status().isNotFound());
+        mvc.perform(post("/account-deletion")).andExpect(status().isNotFound());
+        mvc.perform(post("/terms")).andExpect(status().isNotFound());
         mvc.perform(post("/api/v1/treasury/transfer")).andExpect(status().isNotFound());
     }
 }

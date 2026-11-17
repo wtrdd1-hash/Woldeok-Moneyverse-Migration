@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
+  <meta th:if="${preview}" name="robots" content="noindex,nofollow">
+  <meta th:unless="${preview}" name="description" content="How to request deletion of a Woldeok Moneyverse account and related data.">
+  <link th:unless="${preview}" rel="canonical" href="https://easy-scraping.com/account-deletion">
   <title th:text="${copy.title} + ' | ' + ${brand}">Account deletion request | Woldeok Moneyverse</title>
   <link rel="stylesheet" href="/assets/spring-web-site.css">
   <link rel="stylesheet" href="/assets/spring-web-account-deletion.css">
@@ -11,14 +13,15 @@
 <body>
   <a class="skip" href="#main" th:text="${copy.skip}">Skip to content</a>
   <header class="site-header">
-    <a class="brand" th:href="@{/spring-web(lang=${lang})}" th:text="${brand}">Woldeok Moneyverse</a>
+    <a class="brand" th:href="@{${homePath}(lang=${lang})}" th:text="${brand}">Woldeok Moneyverse</a>
     <nav aria-label="Main">
-      <a th:href="@{/spring-web(lang=${lang})}" th:text="${copy.home}">Home</a>
-      <a th:href="@{/spring-web/status(lang=${lang})}" th:text="${copy.status}">Status</a>
+      <a th:href="@{${homePath}(lang=${lang})}" th:text="${copy.home}">Home</a>
+      <a th:if="${preview}" th:href="@{/spring-web/status(lang=${lang})}" th:text="${copy.status}">Status</a>
+      <a th:unless="${preview}" href="/privacy" th:text="${copy.privacyLink}">Privacy</a>
     </nav>
     <div class="locales" aria-label="Language">
-      <a href="/spring-web/account-deletion?lang=en" lang="en" th:attr="aria-current=${lang == 'en'} ? 'page' : null">EN</a>
-      <a href="/spring-web/account-deletion?lang=ko" lang="ko" th:attr="aria-current=${lang == 'ko'} ? 'page' : null">한국어</a>
+      <a th:href="@{${deletionPath}(lang='en')}" lang="en" th:attr="aria-current=${lang == 'en'} ? 'page' : null">EN</a>
+      <a th:href="@{${deletionPath}(lang='ko')}" lang="ko" th:attr="aria-current=${lang == 'ko'} ? 'page' : null">한국어</a>
     </div>
   </header>
   <main id="main" class="page-container">
@@ -56,7 +59,7 @@
         <p><span th:text="${copy.privacyBefore}">Read the </span><a href="/privacy" th:text="${copy.privacyLink}">Privacy Policy</a><span th:text="${copy.privacyAfter}">.</span></p>
       </section>
     </article>
-    <p class="notice" role="status" th:text="${copy.preview}">This is a migration preview.</p>
+    <p th:if="${preview}" class="notice" role="status" th:text="${copy.preview}">This is a migration preview.</p>
   </main>
 </body>
 </html>

@@ -79,15 +79,24 @@ public final class SpringAccountDeletionController {
     @GetMapping("/spring-web/account-deletion")
     public String accountDeletion(@RequestParam(name = "lang", required = false) String lang,
                                   Model model, HttpServletResponse response) {
+        return render(lang, model, response, true);
+    }
+
+    static String render(String lang, Model model, HttpServletResponse response, boolean preview) {
         // Only the explicit Korean code is selected; all other inputs use English.
         boolean korean = "ko".equalsIgnoreCase(lang);
         response.setHeader("Cache-Control", "private, no-store");
-        response.setHeader("X-Robots-Tag", "noindex, nofollow");
+        if (preview) {
+            response.setHeader("X-Robots-Tag", "noindex, nofollow");
+        }
         response.setHeader("Referrer-Policy", "no-referrer");
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Content-Security-Policy",
                 "default-src 'none'; style-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'none'");
         model.addAttribute("lang", korean ? "ko" : "en");
+        model.addAttribute("preview", preview);
+        model.addAttribute("homePath", preview ? "/spring-web" : "/");
+        model.addAttribute("deletionPath", preview ? "/spring-web/account-deletion" : "/account-deletion");
         model.addAttribute("brand", korean ? "월덕 머니버스" : "Woldeok Moneyverse");
         model.addAttribute("copy", korean ? KO : EN);
         return VIEW;

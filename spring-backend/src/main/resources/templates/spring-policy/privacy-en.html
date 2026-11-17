@@ -1,0 +1,119 @@
+<!doctype html>
+<!-- Java Spring MVC / Thymeleaf SSR; literal source: frontend/src/components/policy/privacy-document.tsx (en) -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Privacy Policy and user data protection commitments of Woldeok Moneyverse.">
+  <title>Privacy Policy | Woldeok Moneyverse</title>
+  <link rel="canonical" href="https://easy-scraping.com/privacy">
+  <link rel="stylesheet" href="/spring-policy/policy.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="policy-header">
+    <nav class="policy-nav" aria-label="Primary navigation">
+      <a class="brand" href="/">Woldeok <strong>Moneyverse</strong></a>
+      <div class="policy-nav-links"><a href="/">Home</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/account-deletion">Account deletion</a></div>
+      <div class="lang-links" aria-label="Language"><a lang="en" href="/privacy?lang=en" aria-current="page">EN</a><a lang="ko" href="/privacy?lang=ko">한국어</a></div>
+    </nav>
+  </header>
+  <main id="content" class="policy-container" tabindex="-1">
+    <header class="policy-hero"><p class="policy-kicker">WOLDEOK MONEYVERSE</p><h1>Privacy Policy</h1><p class="policy-description">Privacy Policy and user data protection commitments of Woldeok Moneyverse.</p><p class="document-tag">Official service policy · 2026-09-02</p></header>
+    <article class="policy-document grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 [overflow-wrap:anywhere]">
+        <p class="section-label">WOLDEOK MONEYVERSE · PRIVACY POLICY</p>
+        <p class="max-w-prose text-sm text-muted-foreground">
+          Woldeok Moneyverse processes personal data on a strict data-minimization basis, limited to authentication, ledger integrity, and security operations.
+          This document details what data is collected, why it is processed, and our retention schedules.
+        </p>
+        <dl class="grid gap-2 rounded-lg border bg-card p-4 text-sm sm:grid-cols-3" aria-label="Document Metadata">
+          <div><dt>Version</dt><dd>2026-09-02</dd></div>
+          <div><dt>Effective Date</dt><dd>September 2, 2026</dd></div>
+          <div><dt>Status</dt><dd>Production Release</dd></div>
+        </dl>
+        <aside class="rounded-lg border-l-4 border-l-primary bg-card p-4" aria-label="Key Privacy Principle">
+          <strong>Core Privacy Tenet</strong>
+          <p>
+            OAuth access/refresh tokens and raw email addresses are not stored long-term.
+            Access IP addresses are encrypted and stored solely for fraud prevention and cyber incident response.
+            Public pages may feature Google AdSense displays subject to Google&apos;s standard cookie and advertising policies.
+          </p>
+        </aside>
+        <nav class="rounded-lg border bg-card p-4 text-sm" aria-label="Table of Contents">
+          <p class="font-semibold mb-2">Table of Contents</p>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li><a href="#privacy-data" class="hover:underline">1. Collected Data, Purpose & Retention Periods</a></li>
+            <li><a href="#privacy-sharing" class="hover:underline">2. Third-Party Sharing & Cross-Border Transfers</a></li>
+            <li><a href="#privacy-cookies" class="hover:underline">3. Cookies & Session Storage</a></li>
+            <li><a href="#privacy-rights" class="hover:underline">4. User Rights & Data Portability</a></li>
+            <li><a href="#privacy-contact" class="hover:underline">5. Contact Information & Policy Updates</a></li>
+          </ol>
+        </nav>
+        <section id="privacy-data">
+          <h2>1. Data Categories, Processing Purposes & Retention</h2>
+          <p>We process only the minimum information necessary to provide services.</p>
+          <div class="overflow-x-auto rounded-lg border" tabindex="0" aria-label="Personal Data Table">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="border-b bg-muted/40">
+                <tr>
+                  <th scope="col" class="p-2 sm:p-3">Category</th>
+                  <th scope="col" class="p-2 sm:p-3">Collected Items</th>
+                  <th scope="col" class="p-2 sm:p-3">Processing Purpose</th>
+                  <th scope="col" class="p-2 sm:p-3">Retention Period</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border/40">
+                <tr>
+                  <th scope="row" class="p-2 sm:p-3 font-semibold">OAuth Login</th>
+                  <td class="p-2 sm:p-3">Provider ID, Display Name</td>
+                  <td class="p-2 sm:p-3">User authentication, anti-fraud</td>
+                  <td class="p-2 sm:p-3">Purged within 30 days of deletion</td>
+                </tr>
+                <tr>
+                  <th scope="row" class="p-2 sm:p-3 font-semibold">Virtual Ledger</th>
+                  <td class="p-2 sm:p-3">Internal UID, WLD transactions</td>
+                  <td class="p-2 sm:p-3">Simulation ledger reconciliation</td>
+                  <td class="p-2 sm:p-3">De-identified or retained up to 1 year</td>
+                </tr>
+                <tr>
+                  <th scope="row" class="p-2 sm:p-3 font-semibold">Security Audit</th>
+                  <td class="p-2 sm:p-3">Masked IP, User-Agent, API method</td>
+                  <td class="p-2 sm:p-3">DDoS mitigation, anomaly detection</td>
+                  <td class="p-2 sm:p-3">General logs 90 days; audit 1 year</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section id="privacy-sharing">
+          <h2>2. Third-Party Sharing & Disclosures</h2>
+          <p>
+            Woldeok Moneyverse does not sell or lease user data to third parties.
+            External integrations are limited to OAuth identity providers (Discord, Google) and hosting infrastructure (Cloudflare, Supabase).
+          </p>
+        </section>
+        <section id="privacy-cookies">
+          <h2>3. Cookies & Session Management</h2>
+          <p>
+            We use secure HTTP-only session cookies strictly necessary to maintain authentication state.
+            Third-party analytics and advertising cookies are managed under opt-out preferences.
+          </p>
+        </section>
+        <section id="privacy-rights">
+          <h2>4. User Rights & Data Deletion</h2>
+          <p>
+            Users possess the right to view, correct, or permanently expunge their personal records at any time.
+            Self-service deletion is accessible via <a href="/account" class="text-primary hover:underline">Account Settings</a> or by contacting the Privacy Officer.
+          </p>
+        </section>
+        <section id="privacy-contact">
+          <h2>5. Privacy Officer & Inquiries</h2>
+          <p>
+            Data Protection Officer: Hong Jong-hwan (<a href="mailto:jungchwimisaenghwal63@gmail.com" class="text-primary hover:underline">jungchwimisaenghwal63@gmail.com</a>).
+          </p>
+        </section>
+      </article>
+  </main>
+  <footer class="policy-footer"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/account-deletion">Account deletion</a><span>© Woldeok Moneyverse</span></footer>
+</body>
+</html>

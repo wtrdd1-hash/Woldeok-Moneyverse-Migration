@@ -23,6 +23,7 @@ import java.util.Set;
 @ConditionalOnProperty(prefix = "moneyverse.web", name = "preview-restricted", havingValue = "true")
 public final class SpringWebPreviewOnlyFilter extends OncePerRequestFilter {
     private static final Set<String> READ_ONLY = Set.of(
+            "/terms", "/privacy", "/account-deletion", "/spring-policy/policy.css",
             "/", "/guide", "/spring-ui/home", "/spring-ui/guide",
             "/spring-ui/home.css", "/spring-ui/guide.css",
             "/spring-web",

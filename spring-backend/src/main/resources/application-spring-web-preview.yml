@@ -27,6 +27,8 @@ moneyverse:
     preview-restricted: true
     spring-home-enabled: true
     spring-guide-enabled: true
+    spring-policy-enabled: true
+    account-deletion-canonical-enabled: true
   features:
     swf-operational: false
     kdic-operational: false
