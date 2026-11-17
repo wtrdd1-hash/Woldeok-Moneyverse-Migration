@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.7 — 정식 Spring 정책 3경로 추가 (Spring 5경로 실제 운영 / 전면 보류)
+사용자 지시 전체 웹 전환 진행: Java Spring MVC/Thymeleaf가 정식 `/`, `/guide`, `/terms`, `/privacy`, `/account-deletion`을 실제 공개 서빙. 영/한 정책 원문 1:1 검증, Java21 161/161, Test→운영 실제 HTTPS·CSS 200. Next 소스 178페이지/BFF124 유지, Spring 정식 일부 운영 5, 나머지 Next 173, 전체 언어/상호작용/인증/데이터 동등성 인증 **0**. Cloudflare 이메일 자동 난독화로 공개 `mailto:`가 변환되고 정책 CSP가 이를 푸는 JS 차단 — **연락처 P0**, 다음 패치 필요. Spring permitAll/CSRF 비활성, OAuth 시작 200/475, 금융·OTP·Android·G0~G6 전면 승격 차단. [릴리스](../releases/v2026.11.18.7-spring-public-policy.ko.md) · [인벤토리](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.7.json).
+
 ## v2026.11.18.6 — 사용자 지시 정식 Spring 프론트엔드 경로 승격 (2개 운영, 전면 전환 보류)
 사용자 지시는 프론트엔드 전체 Spring MVC 전환이며 Next 임시복구는 P0 응급 대응일 뿐 전환이 아님. Java21 Spring SSR가 공개 정식 `/`, `/guide`를 H2-only로 실제 서비스하고, Test 한/영 화면/CSS·Spring 154/154 통과. **운영에 2경로를 전환했지만 원본의 모든 기능 동등성은 아직 미인증**. 나머지 Next 화면·BFF 124개, OAuth/로그인, Spring 전역 SEC1/CSRF, 금융·Android·세션·복원 G0–G6 잔존. 검증된 Spring 대체가 없는 경로는 Next 임시 호환 유지. [증빙](../releases/v2026.11.18.6-spring-canonical-home-guide.ko.md).
 

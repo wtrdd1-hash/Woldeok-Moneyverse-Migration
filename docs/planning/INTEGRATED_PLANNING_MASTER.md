@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.7 — Verified public legal source-parity Spring SSR candidate LIVE (5 partial / full release HOLD)
+Bilingual literal source-equivalent legal SSR for `/terms`, `/privacy`, `/account-deletion` added to the earlier Spring `/` and `/guide`; independently isolated Test :4580 → Production :4581 with Java21 161/161 full tests, real public 5×2 HTML and 3 CSS 200, policy POST405, no financial/administrator route mutation. Immutable source SHA 86497e60a4e and artifact checksum recorded. Cloudflare rewrites legal operator email and injects an email-decoder script disallowed by CSP, **contact remains P0 broken pending v18.8 patch**. Full route inventory: 178 Next pages, 124 Next BFF, five Spring canonical partial only, zero fully parity certified; OAuth/SEC1/CSRF/finance/OTP/restore G0–G6 unchanged. [Release evidence](../releases/v2026.11.18.7-spring-public-policy.md).
+
 ## v2026.11.18.6 — Actual canonical Spring MVC home/guide production release (PARTIAL / FULL PLATFORM HOLD)
 User explicitly rejects prior Next fallback as the intended migration. Separate Java Spring MVC Thymeleaf + mobile CSS for public `/` and `/guide` now physically serve live Production (source SHA 7df50a94d038, Java21 154/154 tests, Test→Production 200 bilingual and CSS). Guest landing is NOT equivalent to all original Next interactions; 178 page/124 BFF full parity uncertified. OAuth start still wrong 200/475 placeholder, SEC1 CSRF/financial session/OTP/G0–G6 blocked. Preserve legacy Next for unconverted routes. [Release evidence](../releases/v2026.11.18.6-spring-canonical-home-guide.md).
 

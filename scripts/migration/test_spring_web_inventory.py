@@ -17,7 +17,14 @@ class MigrationInventoryTest(unittest.TestCase):
         self.assertEqual(data["counts"]["canonical_pages_fully_migrated"], 0)
         self.assertEqual(data["counts"]["canonical_bff_handlers_fully_migrated"], 0)
         self.assertEqual(data["counts"]["preview_candidates"], 3)
-        self.assertTrue(all(not row["production_cutover"] for row in data["routes"]))
+        self.assertEqual(data["counts"]["spring_canonical_live_partial_routes"], 5)
+        self.assertEqual(data["counts"]["legacy_next_canonical_page_routes_pending"], 173)
+        self.assertEqual({x["path"] for x in data["routes"] if x["production_cutover"]},
+                         {"/", "/guide", "/terms", "/privacy", "/account-deletion"})
+        self.assertTrue(all(x["phase"] == "G2_PUBLIC" for x in data["routes"]
+                            if x["production_cutover"]))
+        self.assertTrue(all(not x["production_cutover"] for x in data["routes"]
+                            if x["kind"] == "BFF"))
         preview = {x["path"]: x["spring_candidate"] for x in data["routes"] if x["spring_candidate"]}
         self.assertEqual(preview, {"/": "/spring-web", "/status": "/spring-web/status",
                                    "/account-deletion": "/spring-web/account-deletion"})

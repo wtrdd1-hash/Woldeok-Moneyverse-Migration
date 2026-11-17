@@ -11,7 +11,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 NEXT_ROOT = ROOT / "frontend" / "src" / "app"
-MANIFEST = ROOT / "docs/migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json"
+MANIFEST = ROOT / "docs/migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.7.json"
+
+# These canonical routes are actually served from the v2026.11.18.7 isolated Spring
+# Production edge, but full Next feature/locale/client parity is NOT yet certified.
+CANONICAL_SPRING_LIVE_PARTIAL = {"/", "/guide", "/terms", "/privacy", "/account-deletion"}
 
 PUBLIC = {"", "announcements", "gallery", "status", "terms", "privacy", "account-deletion", "features",
           "roadmap", "guide", "help", "blog", "search", "newspaper"}
@@ -60,9 +64,11 @@ def build_manifest() -> dict:
                 "path": path,
                 "next_source": file.relative_to(ROOT).as_posix(),
                 "spring_candidate": preview,
+                "spring_canonical_route": path if kind == "PAGE" and path in CANONICAL_SPRING_LIVE_PARTIAL else None,
                 "phase": phase_for(path),
-                "state": "PREVIEW_NOT_PARITY" if preview else "NOT_MIGRATED",
-                "production_cutover": False
+                "state": "SPRING_CANONICAL_LIVE_PARTIAL" if kind == "PAGE" and path in CANONICAL_SPRING_LIVE_PARTIAL
+                         else "PREVIEW_NOT_PARITY" if preview else "NOT_MIGRATED",
+                "production_cutover": kind == "PAGE" and path in CANONICAL_SPRING_LIVE_PARTIAL
             })
     items.sort(key=lambda x: (x["kind"], x["path"], x["next_source"]))
     distinct = {(x["kind"], x["path"]) for x in items}
@@ -70,7 +76,7 @@ def build_manifest() -> dict:
         raise ValueError("Duplicate effective Next routes; review groups manually")
     return {
         "schema": "spring-frontend-inventory/v1",
-        "migration_version": "v2026.11.18.2",
+        "migration_version": "v2026.11.18.7",
         "source_stack": "Next.js App Router",
         "target_stack": "Spring Boot MVC SSR + progressive browser JavaScript",
         "counts": {
@@ -78,10 +84,12 @@ def build_manifest() -> dict:
             "next_bff_handlers": sum(x["kind"] == "BFF" for x in items),
             "canonical_pages_fully_migrated": 0,
             "canonical_bff_handlers_fully_migrated": 0,
-            "preview_candidates": sum(x["state"] == "PREVIEW_NOT_PARITY" for x in items)
+            "spring_canonical_live_partial_routes": sum(x["state"] == "SPRING_CANONICAL_LIVE_PARTIAL" for x in items),
+            "legacy_next_canonical_page_routes_pending": sum(x["kind"] == "PAGE" and not x["production_cutover"] for x in items),
+            "preview_candidates": sum(x["spring_candidate"] is not None for x in items)
         },
         "routes": items,
-        "note": "An inventory is NOT tested route parity. Production remains on the existing frontend."
+        "note": "Five G2 canonical URLs are live via Spring SSR but FULL source locale/client/function parity is unverified. 173 other pages and 124 BFF remain on Next. Public Cloudflare email obfuscation is a known v2026.11.18.7 contact-link defect; tracked for v2026.11.18.8. No financial/admin route owner switched."
     }
 
 def main() -> None:

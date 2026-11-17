@@ -1,0 +1,5 @@
+# Changelog v2026.11.18.7 — Spring bilingual policy frontend SSR
+
+**English primary** · [KO](2026-11-18-spring-public-policy-v2026.11.18.7.ko.md) · **5 canonical routes Spring LIVE PARTIAL; full route/financial release HOLD**
+
+Added Spring MVC canonical `/terms`, `/privacy` and `/account-deletion` plus source-exact EN/KO Thymeleaf legal text, responsive and accessible CSS and strict read-only H2 isolation. Kept previously deployed Java `/` and `/guide` within one new immutable Spring sidecar. 161/161 Java21 Gradle tests; 2/2 legal source-text parity tests; 4/4 route inventory tests. Actual Test and Production external Spring HTML/CSS 200 with version headers; POST policy routes 405. Next remains for 173 other canonical pages and 124 BFF handlers; original API and financial source unchanged. Cloudflare email protection rewrites contact and injects a JS decoder blocked by page CSP; **contact link defect remains** for next patch. [Release evidence](../releases/v2026.11.18.7-spring-public-policy.md).

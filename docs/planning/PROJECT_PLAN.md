@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.7 — 3 native Spring policy canonical paths added (5 Spring paths LIVE / FULL PLATFORM HOLD)
+Owner-directed full web migration continues: real Java Spring MVC/Thymeleaf on public `/`, `/guide`, `/terms`, `/privacy`, `/account-deletion`, after exact-source bilingual static text parity, Java21 161/161 tests, Test→Production live HTTPS 200 and CSS. 178 Next pages/124 BFF remain original source; 5 Spring canonical partial routes live, 173 other Next routes active, **0 fully certified cross-locale/interactive/auth/data parity**. Cloudflare public email obfuscation rewrites contact `mailto:` and injects JS blocked by legal CSP — **P0 contact defect**, next patch before declaring policy QA finished. Spring global `permitAll`, CSRF disabled, OAuth start 200/475 loader, money/OTP/Android/G0–G6 remain blocking. [Release](../releases/v2026.11.18.7-spring-public-policy.md) · [Inventory](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.7.json).
+
 ## v2026.11.18.6 — Owner-directed canonical Spring frontend route promotion (2 LIVE, TOTAL MIGRATION HOLD)
 The owner's requirement is full Spring MVC frontend; reverting to Next was only a P0 stopgap. Actual immutable Java21 Spring SSR now owns public canonical `/` and `/guide` using isolated H2 profile, after Test English/Korean page/CSS and 154/154 Spring tests. **These two paths are live, not yet proven original full-feature parity**. All remaining Next pages/124 BFF, OAuth/login, Spring global SEC1/CSRF, finance, Android, session and restore G0–G6 remain outstanding. Existing Next compatibility is preserved for routes lacking verified Spring replacements. [Evidence](../releases/v2026.11.18.6-spring-canonical-home-guide.md).
 

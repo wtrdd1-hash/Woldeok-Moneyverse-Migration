@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.18.7 — 법적 원문 동등 Spring SSR 실제 운영 (정식 부분 5 / 전체 보류)
+영/한 원문 그대로의 `/terms`, `/privacy`, `/account-deletion` Spring SSR를 기존 Spring `/`, `/guide`와 합쳐 독립 Test :4580→운영 :4581 실제 배포. Java21 전체 161/161, 실제 외부 5×2 HTML·CSS 3개 200, POST 정책405, 금융·관리자 경로 미변경. 소스 SHA 86497e60a4e 및 불변 아티팩트 해시 저장. Cloudflare가 운영 문의 이메일을 난독화하고 CSP에서 차단되는 복호화 JS를 주입하므로 **연락처 P0 미해결, v18.8 후속 패치 필요**. 경로 인벤토리 Next 페이지 178·BFF124, Spring 정식 일부 운영 5, 완전 동등성 인증 0. OAuth·SEC1·CSRF·금융·OTP·독립복원 G0–G6 기존 차단 유지. [릴리스 증빙](../releases/v2026.11.18.7-spring-public-policy.ko.md).
+
 ## v2026.11.18.6 — 정식 Spring MVC 홈·가이드 실제 운영 승격 (부분 / 전면 보류)
 사용자는 이전 Next 복구를 Spring 전환 지시 위반이라 명시함. Java Spring MVC Thymeleaf·모바일 CSS를 사용한 정식 `/`, `/guide`가 실제 운영에 배포됨(소스 SHA 7df50a94d038, Java21 154/154, Test→운영 영/한 HTML·CSS 200). 단순 비회원 소개 화면으로 기존 Next 모든 상호작용과 동등하지 않음. Next 178페이지·BFF124 전체 동등성 미인증, OAuth 시작 200/475 가짜 로딩 잔존, SEC1 CSRF·금융·세션/OTP·G0–G6 차단. 미구현 화면에 한해 기존 Next 임시호환 유지. [릴리스 증빙](../releases/v2026.11.18.6-spring-canonical-home-guide.ko.md).
 
