@@ -1,47 +1,47 @@
 package com.moneyverse.api.domain.wallet.controller;
 
-import com.moneyverse.api.common.response.ApiResponse;
-import com.moneyverse.api.domain.wallet.dto.WalletDtos.*;
-import com.moneyverse.api.domain.wallet.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@Tag(name = "Wallet", description = "유저 WLD 지갑 잔액 조회 및 P2P 이체 API")
+/**
+ * Deprecated Spring wallet endpoints used a caller-supplied/default user id and a
+ * separate wallets table. They are disabled until an owner-bound ledger write
+ * contract is implemented. The verified read-only web contract is /api/v1/wallet.
+ */
+@Tag(name = "Wallet Legacy Routes", description = "기존 신원 위조 가능 지갑 API 격리")
 @RestController
 @RequestMapping("/api/wallet")
 public class WalletController {
-
-    private final WalletService walletService;
-
-    public WalletController(WalletService walletService) {
-        this.walletService = walletService;
-    }
-
     @GetMapping("/overview")
-    @Operation(summary = "내 지갑 종합 잔액 및 최근 거래 내역 조회")
-    public ApiResponse<WalletOverview> getOverview(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        return ApiResponse.ok(walletService.getOverview(userId));
+    @Operation(summary = "폐기된 지갑 개요 (원장 정합성 미검증으로 중단)")
+    public ResponseEntity<Map<String, Object>> overview() {
+        return retired();
     }
 
     @GetMapping("/balance")
-    @Operation(summary = "내 지갑 가용 잔액 단순 조회")
-    public ApiResponse<Map<String, Object>> getBalance(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        WalletOverview ov = walletService.getOverview(userId);
-        return ApiResponse.ok(Map.of("balanceWld", ov.getBalanceWld(), "currency", "WLD"));
+    @Operation(summary = "폐기된 잔액 조회 (원장 정합성 미검증으로 중단)")
+    public ResponseEntity<Map<String, Object>> balance() {
+        return retired();
     }
 
     @PostMapping("/transfer")
-    @Operation(summary = "유저 간 WLD P2P 즉시 전송")
-    public ApiResponse<Map<String, Object>> transfer(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody TransferRequest request) {
-        Map<String, Object> result = walletService.transfer(userId, request.getRecipientUserId(), request.getAmountWld(), request.getMemo());
-        return ApiResponse.ok(result, (String) result.get("message"));
+    @Operation(summary = "폐기된 지갑 직접 SQL 이체 (실집행 중단)")
+    public ResponseEntity<Map<String, Object>> transfer() {
+        return retired();
+    }
+
+    private static ResponseEntity<Map<String, Object>> retired() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Cache-Control", "private, no-store")
+            .header("X-Robots-Tag", "noindex, nofollow")
+            .body(Map.of("ok", false, "code", "WALLET_LEGACY_ENDPOINT_DISABLED"));
     }
 }

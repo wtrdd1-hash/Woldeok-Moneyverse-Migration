@@ -61,8 +61,8 @@ class StockTradingTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/stocks/{id}/orders 정상 매수 주문 체결 시 200 OK와 영수증이 반환된다")
-    void orderBuySuccessReturnsOk() throws Exception {
+    @DisplayName("POST /api/v1/stocks/{id}/orders 비인증 요청은 주문 체결하지 않고 401 반환")
+    void anonymousOrderCannotTrade() throws Exception {
         String stockId = UUID.randomUUID().toString();
         String idempotencyKey = UUID.randomUUID().toString();
 
@@ -71,10 +71,7 @@ class StockTradingTest {
         mockMvc.perform(post("/api/v1/stocks/" + stockId + "/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.trade_id").exists())
-                .andExpect(jsonPath("$.unit_price").exists())
-                .andExpect(jsonPath("$.gross_amount").exists());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

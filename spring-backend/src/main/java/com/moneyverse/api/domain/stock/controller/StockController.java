@@ -2,6 +2,8 @@ package com.moneyverse.api.domain.stock.controller;
 
 import com.moneyverse.api.domain.stock.dto.StockDtos.*;
 import com.moneyverse.api.domain.stock.service.StockService;
+import com.moneyverse.api.domain.identity.service.UserAuthService;
+import com.moneyverse.api.domain.identity.service.UserAuthService.SessionInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -21,22 +24,24 @@ import java.util.*;
 public class StockController {
 
     private static final Logger log = LoggerFactory.getLogger(StockController.class);
-    private static final UUID DEFAULT_FALLBACK_USER = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+
     private static final Set<Integer> ALLOWED_CANDLE_INTERVALS = Set.of(60, 300, 1800, 3600, 7200, 14400, 86400, 604800);
 
     private final StockService stockService;
+    private final UserAuthService authService;
 
-    public StockController(StockService stockService) {
+    public StockController(StockService stockService, UserAuthService authService) {
         this.stockService = stockService;
+        this.authService = authService;
     }
 
-    private UUID resolveUserId(HttpServletRequest request, String headerUserId) {
-        if (headerUserId != null && !headerUserId.isBlank()) {
-            try {
-                return UUID.fromString(headerUserId.trim());
-            } catch (Exception ignored) {}
-        }
-        return DEFAULT_FALLBACK_USER;
+    private UUID resolveUserId(HttpServletRequest request, String ignoredHeaderUserId) {
+        // Caller-owned stock data and orders must be bound to the verified session;
+        // neither X-User-Id nor a demo user may select the financial identity.
+        return authService.resolveSession(request)
+            .filter(SessionInfo::isSignedIn)
+            .map(SessionInfo::getUserId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "login required"));
     }
 
     @Operation(summary = "상장 종목 전체 시세 및 당일 등락 개요")
@@ -193,6 +198,8 @@ public class StockController {
                     userId, stockId, body.getSide(), body.getQuantity(), idempotencyKey
             );
             return ResponseEntity.ok(result);
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (IllegalStateException e) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("type", "about:blank");

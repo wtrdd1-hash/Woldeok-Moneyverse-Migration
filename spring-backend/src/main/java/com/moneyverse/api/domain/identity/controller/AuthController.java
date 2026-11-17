@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,13 +48,18 @@ public class AuthController {
             "/api/auth/session"
     })
     @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 발급")
-    public Map<String, Object> session(HttpServletRequest request) {
-        Optional<SessionInfo> session = authService.resolveSession(request);
+    public ResponseEntity<Map<String, Object>> session(HttpServletRequest request) {
+        Optional<SessionInfo> session = authService.resolveSession(request).filter(SessionInfo::isSignedIn);
+        if (session.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header("Cache-Control", "private, no-store")
+                .body(Map.of("ok", false, "code", "AUTH_REQUIRED"));
+        }
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("ok", true);
-        res.put("csrfToken", session.map(SessionInfo::getCsrfHash).orElse(UUID.randomUUID().toString()));
-        return res;
+        res.put("csrfToken", session.get().getCsrfHash());
+        return ResponseEntity.ok().header("Cache-Control", "private, no-store").body(res);
     }
 
     @GetMapping(path = {

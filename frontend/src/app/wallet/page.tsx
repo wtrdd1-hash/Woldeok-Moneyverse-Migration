@@ -77,10 +77,20 @@ export default async function WalletPage() {
   if (!wallet) {
     return (
       <div data-page="wallet" className="min-h-screen pb-24 space-y-6">
-        <EmptyState
-          title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
-          description={<T korean="잠시 후 다시 확인해 주세요." english="Please try again in a few moments." />}
-        />
+        <div role="alert" className="mx-auto max-w-lg space-y-4">
+          <EmptyState
+            title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}
+            description={<T korean="잔액을 확인할 수 없어 임의 금액을 표시하지 않습니다. 연결 상태를 확인하고 다시 시도해 주세요." english="Your balance is unavailable, so no estimated amount is shown. Check the connection and retry." />}
+          />
+          <div className="flex flex-wrap items-center justify-center gap-3 px-4">
+            <Button asChild className="min-h-11 min-w-32 rounded-xl">
+              <a href="/wallet"><T korean="지갑 다시 불러오기" english="Retry wallet" /></a>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11 min-w-32 rounded-xl">
+              <Link href="/help"><T korean="고객 지원" english="Get support" /></Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
