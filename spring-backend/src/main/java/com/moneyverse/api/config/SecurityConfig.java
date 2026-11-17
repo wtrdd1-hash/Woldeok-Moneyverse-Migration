@@ -25,6 +25,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/favicon.ico",
+                                "/robots.txt",
+                                "/sitemap.xml",
+                                "/llms.txt",
+                                "/static/**",
+                                "/assets/**",
+                                "/_next/**",
                                 "/health",
                                 "/api/version",
                                 "/v3/api-docs/**",
@@ -40,7 +49,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://easy-scraping.com",
+                "https://www.easy-scraping.com",
+                "http://localhost:3000",
+                "http://localhost:4501",
+                "http://127.0.0.1:4501",
+                "http://127.0.0.1:4550",
+                "http://localhost:4550"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

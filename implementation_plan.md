@@ -4995,3 +4995,61 @@ graph TD
 - **프론트엔드 UI**: `/admin/logs/system` (Next.js App Router)
   - 서브 내비게이션 탭 통합: `🖥️ 시스템 런타임 로그`
   - 4개 소스별 다크 터미널 뷰어, 실시간 5초 자동 새로고침, 에러/경고 구문 강조, 로그 다운로드 및 클립보드 복사.
+---
+## 🚀 [v54 Specification] 깃허브 전체 브랜치 안전 통합, 보안(SEC-P0~P3)·SEO 무결성 확립, 프론트엔드 단일 Fat JAR 스프링 통합 및 QA 재발 방지 거버넌스 수립
+### 1. 근본 원인 분석 (RCA: Root Cause Analysis) 및 재발 방지 규칙
+- **과거 실패 요인 진단**:
+  - 사용자 지시(정밀하고 세밀한 QA 실측) 미준수: 정적 타입체크 및 로컬 단위 테스트 통과에만 의존하여 실제 런타임 응답 및 DB 데이터 정합성을 철저히 실측하지 않고 성급히 '완료'로 보고함.
+  - 가짜/모의(Mock) 데이터 잔존: SEO 화면 등에 하드코딩된 임시 지표(GSC 순위, CTR 등)가 남아있어 시스템 신뢰도를 저해함.
+  - 브랜치 파편화: 긴급 수정 사항들이 개별 feature/fix 브랜치로 분산 생성된 채 main 브랜치로 체계적으로 병합·검증되지 못함.
+- **재발 방지 확정 규격 (Evidence Before Claims)**:
+  - '완료 보고' 시 반드시 실제 로컬 및 서버 런타임의 curl 응답 상태코드(HTTP 200/401/403 등), 실제 데이터 페이로드, Nginx 및 Spring Boot 에러 로그 0건 실측 결과를 표와 함께 의무 첨부함.
+  - Mock/가짜 데이터는 코드베이스 전체에서 원천 금지하며, 실제 데이터 소스가 없는 경우 명확히 '미연동/준비중' 상태를 반환하도록 설계함.
+
+### 2. 깃허브 브랜치 2단계 안전 분할 통합 계획
+- **1단계: P0 긴급 보안·인증·금융 브랜치 검증 및 main 통합**:
+  - `PR #3222` (`fix/discord-oauth-state-v2026.11.17.5`): Discord OAuth 쿠키 중복 방지 및 세션 안정화
+  - `PR #3221` (`fix/p0-finance-auth-integration-v2026.11.17.5`): KDIC 예금보험공사 회계 무결성 및 관리자 세션 인가
+  - `PR #3218` (`fix/spring-dopamine-finance-failclosed-v2026.11.17.1`): 도파민/인게이지먼트 위조 세션 차단, Fail-Closed 적용
+- **2단계: SEO 무결성 및 시스템 관리 브랜치 통합**:
+  - `PR #3205` / `PR #3212`: 관리자 시스템 로그 뷰어 보안 강화 및 압축 보관
+  - `PR #3206` / `PR #3214`: SEO 허위 데이터 제거, 소스 진실성 복구, 크롤러/색인 최적화
+
+### 3. 보안(Security) 아키텍처 핵심 강화 (SEC-P0 ~ SEC-P3)
+- **SEC-P0 (DB 세션 기반 엄격 인가 & Fail-Closed)**:
+  - 클라이언트가 임의로 전송하는 헤더/쿠키를 신뢰하지 않고, PostgreSQL DB `user_sessions` 및 사용자 Role(`SUPERADMIN`, `ADMIN`, `USER`)을 실시간 조회하여 인가 수행.
+  - 권한 미달 시 500 에러나 빈 배열 반환 대신 즉시 `401 Unauthorized` 또는 `403 Forbidden` Deny 강제.
+- **SEC-P1 (세션 위조 및 Discord OAuth 쿠키 유실 방지)**:
+  - OAuth 콜백 시 중복 세션 쿠키 충돌 방지 및 세션 하이재킹 차단.
+- **SEC-P2 (금융 트랜잭션 무결성)**:
+  - 도파민/인게이지먼트 위조 세션 차단, KDIC 회계 장부 단일 작성자(Single-Writer) 원칙 준수.
+- **SEC-P3 (CSRF & CORS 명시적 화이트리스트)**:
+  - SameSite 쿠키 정책 강제 및 허용된 오리진 외 CORS 완전 거부.
+
+### 4. SEO / GEO 검색 최적화 및 무결성 확립
+- **허위 모의 데이터 전면 제거**: 하드코딩된 임의 수치 제거 및 실제 데이터베이스/Search Console API 연동.
+- **검색엔진 & AI 크롤러 최적화**: `robots.txt`, `sitemap.xml`, `llms.txt`의 정합성 확보 및 IndexNow API 실연동.
+- **관리자/비공개 영역 보호**: `/admin/*`, `/api/*` 경로에 `X-Robots-Tag: noindex, nofollow, no-store` 강력 강제.
+
+### 5. 프론트엔드 Spring Boot 단일 Executable Fat JAR 완전 통합
+- **단일 런타임 아키텍처**:
+  - Next.js 프론트엔드 산출물을 정적 빌드(`export` / `dist`)하여 Spring Boot `src/main/resources/static/`에 번들링.
+  - Spring Boot `WebMvcConfigurer`를 통해 SPA 클라이언트 라우팅(Fallback `forward:/index.html`) 지원.
+  - 124개 API/BFF 라우트를 Spring Boot Controller로 완전 일원화하여 Node.js 런타임 프로세스 완전 퇴역.
+- **결과**: 단일 실행 바이너리(`moneyverse-spring-backend.jar`) 하나로 프론트엔드 UI 서빙 + 백엔드 REST API + 실시간 웹소켓(Netty-SocketIO)을 100% 통합 처리.
+
+---
+## 🚀 [v55 Specification] 전체 스프링 통합 검증, 런타임 로그 열람 및 DB 7일 백업 보관 확정
+### 1. 현황 분석 및 의도 재정의
+- **프론트엔드 포함 스프링 완전 전환 확인**: Next.js 프론트엔드 정적 애셋 및 SPA 라우팅을 Spring Boot 3.3의 WebMvc/Static 리소스 매퍼(SpaWebMvcConfig)로 흡수하여 단일 Executable Fat JAR로 일원화.
+- **로그 저장 및 열람 시스템 실측**: 관리자 시스템 로그(/admin/logs/system, /api/v1/admin/logs/system)에서 Nginx 오류/액세스 로그, Spring Boot 로그, Next.js 프론트엔드 로그를 실시간 안전 조회 및 토큰/비밀번호 마스킹 동작 검증.
+- **데이터베이스 백업 시스템 확인 및 7일(1주일) 보관 확정**:
+  - moneyverse-backup.service의 BACKUP_RETENTION_DAYS를 기존 14일에서 7일로 변경 적용 완료.
+  - systemctl daemon-reload 완료 및 7일 초과 백업 파일 56개 정리 완료.
+  - 현재 2026-11-09 ~ 2026-11-17 (정확히 7일치, 33개 아카이브) 보관 상태 실측 확인.
+
+### 2. 세부 검증 및 배포 파이프라인
+- **Step 1**: 로컬 변경사항(SEO 수정, 정적 SPA 설정, 로그 마스킹) 커밋 및 원격 브랜치 푸시, PR 머지.
+- **Step 2**: 서버 저장소 git pull origin main으로 최신 코드 동기화.
+- **Step 3**: 서버에서 Spring Boot 최신 빌드 및 서비스 재기동 (moneyverse-spring-backend.service).
+- **Step 4**: 사이트 정상 복구 및 정밀 실측 QA (curl HTTP 상태코드, x-backend-engine, Nginx 에러 로그 0건 실측).
