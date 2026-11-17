@@ -14,18 +14,59 @@ export default function robots(): MetadataRoute.Robots {
   const disallowedRoutes = getDisallowedCrawlerRoutes();
   const disallowList = Array.from(new Set(disallowedRoutes));
 
+  const publicAllow = [
+    '/',
+    '/tools',
+    '/tools/*',
+    '/calculators',
+    '/calculators/*',
+    '/stocks',
+    '/stocks/*',
+    '/bonds',
+    '/kdic',
+    '/blog',
+    '/blog/*',
+    '/guide',
+    '/guide/*',
+    '/announcements',
+    '/roadmap',
+    '/account-deletion',
+    '/businesses/ventures',
+    '/llms.txt',
+    '/feed.xml',
+    '/rss.xml',
+  ];
+
   return {
-    rules: {
-      userAgent: '*',
-      allow: ['/', '/account-deletion', '/businesses/ventures'],
-      disallow: disallowList,
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow: publicAllow,
+        disallow: disallowList,
+      },
+      {
+        userAgent: [
+          'GPTBot',
+          'OAI-SearchBot',
+          'ChatGPT-User',
+          'ClaudeBot',
+          'anthropic-ai',
+          'PerplexityBot',
+          'Applebot-Extended',
+          'Google-Extended',
+          'Yeti',
+          'Bingbot',
+        ],
+        allow: publicAllow,
+        disallow: disallowList,
+      },
+    ],
     sitemap: [
       `${base}/sitemap.xml`,
       `${base}/sitemap-index.xml`,
       `${base}/sitemap-blog.xml`,
+      `${base}/feed.xml`,
     ],
     host: base,
   };
 }
-

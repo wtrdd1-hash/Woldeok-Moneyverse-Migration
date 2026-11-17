@@ -32,7 +32,7 @@ export function AdSenseAd({
 }) {
   const viewer = useViewer();
   const pathname = usePathname();
-  const canDisplay = viewer !== null && !isAdministrator(viewer) && isEligiblePublicAdPath(pathname);
+  const canDisplay = (!viewer || !isAdministrator(viewer)) && isEligiblePublicAdPath(pathname);
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
   const [status, setStatus] = useState<AdStatus>('pending');
