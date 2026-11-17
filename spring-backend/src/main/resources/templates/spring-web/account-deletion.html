@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" th:lang="${lang}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title th:text="${copy.title} + ' | ' + ${brand}">Account deletion request | Woldeok Moneyverse</title>
+  <link rel="stylesheet" href="/assets/spring-web-site.css">
+  <link rel="stylesheet" href="/assets/spring-web-account-deletion.css">
+</head>
+<body>
+  <a class="skip" href="#main" th:text="${copy.skip}">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" th:href="@{/spring-web(lang=${lang})}" th:text="${brand}">Woldeok Moneyverse</a>
+    <nav aria-label="Main">
+      <a th:href="@{/spring-web(lang=${lang})}" th:text="${copy.home}">Home</a>
+      <a th:href="@{/spring-web/status(lang=${lang})}" th:text="${copy.status}">Status</a>
+    </nav>
+    <div class="locales" aria-label="Language">
+      <a href="/spring-web/account-deletion?lang=en" lang="en" th:attr="aria-current=${lang == 'en'} ? 'page' : null">EN</a>
+      <a href="/spring-web/account-deletion?lang=ko" lang="ko" th:attr="aria-current=${lang == 'ko'} ? 'page' : null">한국어</a>
+    </div>
+  </header>
+  <main id="main" class="page-container">
+    <section class="hero" aria-labelledby="deletion-title">
+      <p class="eyebrow">ACCOUNT &amp; DATA</p>
+      <h1 id="deletion-title" th:text="${copy.title}">Account deletion request</h1>
+      <p class="subtitle" th:text="${copy.summary}">Request deletion of an account.</p>
+    </section>
+    <article class="policy-layout">
+      <section class="policy-card" aria-labelledby="service-title">
+        <h2 id="service-title" th:text="${copy.serviceTitle}">Covered service</h2>
+        <dl class="policy-facts">
+          <div><dt th:text="${copy.appLabel}">App</dt><dd th:text="${brand}">Woldeok Moneyverse</dd></div>
+          <div><dt th:text="${copy.operatorLabel}">Operator and developer</dt><dd>홍종환</dd></div>
+        </dl>
+      </section>
+      <section class="policy-card" aria-labelledby="steps-title">
+        <h2 id="steps-title" th:text="${copy.stepsTitle}">How to request deletion</h2>
+        <ol class="policy-list">
+          <li><span th:text="${copy.step1Before}">After signing in open </span><a href="/account" th:text="${copy.accountLink}">My account</a><span th:text="${copy.step1After}">.</span></li>
+          <li th:text="${copy.step2}">Review the account-deletion section and submit a request.</li>
+          <li><span th:text="${copy.step3Before}">If you cannot sign in, email </span><a href="mailto:jungchwimisaenghwal63@gmail.com">jungchwimisaenghwal63@gmail.com</a><span th:text="${copy.step3After}">.</span></li>
+        </ol>
+        <p class="policy-safety" th:text="${copy.secretWarning}">Do not send passwords or tokens by email.</p>
+      </section>
+      <section class="policy-card" aria-labelledby="retention-title">
+        <h2 id="retention-title" th:text="${copy.retentionTitle}">Deletion and retention</h2>
+        <ul class="policy-list">
+          <li th:text="${copy.retention1}">OAuth records: 30 days.</li>
+          <li th:text="${copy.retention2}">Photos: 30 days.</li>
+          <li th:text="${copy.retention3}">Economy records: one year.</li>
+          <li th:text="${copy.retention4}">Audit records: retained when required.</li>
+        </ul>
+        <p th:text="${copy.exception}">Legal retention exceptions apply.</p>
+        <p><span th:text="${copy.privacyBefore}">Read the </span><a href="/privacy" th:text="${copy.privacyLink}">Privacy Policy</a><span th:text="${copy.privacyAfter}">.</span></p>
+      </section>
+    </article>
+    <p class="notice" role="status" th:text="${copy.preview}">This is a migration preview.</p>
+  </main>
+</body>
+</html>
