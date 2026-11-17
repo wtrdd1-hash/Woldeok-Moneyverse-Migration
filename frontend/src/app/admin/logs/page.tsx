@@ -168,7 +168,26 @@ export default async function AdminLogsPage({
       {/* Navigation Sub-Tabs */}
       <LogsSubNav current="audit" />
 
-      {/* 시스템 런타임 실시간 로그 바로가기 하이라이트 배너 */}
+            {/* 화면 로드 & 시스템 장애 로그 원장 바로가기 하이라이트 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-red-500/40 bg-red-950/25 shadow-sm">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-sm font-bold text-red-200">🚨 화면 로드 & 시스템 장애 로그 원장</h3>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 font-medium">시간별 · 날짜별 · 오류코드별 정밀 분석</span>
+          </div>
+          <p className="text-xs text-zinc-300">
+            화면 튕김, 렌더링 예외, React 에러, 런타임 크래시 기록을 시간별·날짜별·오류코드별 구조화 테이블로 즉시 조회합니다.
+          </p>
+        </div>
+        <Button asChild variant="secondary" size="sm" className="shrink-0 font-bold bg-red-500/20 border border-red-500/50 text-red-200 hover:bg-red-500/30 min-h-[36px]">
+          <Link href="/admin/logs/errors">
+            장애 로그 원장 조회 →
+          </Link>
+        </Button>
+      </div>
+
+{/* 시스템 런타임 실시간 로그 바로가기 하이라이트 배너 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 shadow-sm">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">

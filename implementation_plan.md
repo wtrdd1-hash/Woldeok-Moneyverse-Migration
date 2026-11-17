@@ -5412,3 +5412,41 @@ graph TD
   3. `📡 Discord 전달 로그` (`/admin/logs/delivery`): Discord 알림 아웃박스 이벤트 및 웹훅 전달 상태.
   4. `🛡️ 해시체인 무결성 검증` (`/admin/logs/integrity`): SHA-256 해시체인 재계산 및 원장 무결성 검증.
   5. `🖥️ 시스템 런타임 로그` (`/admin/logs/system`): Nginx 웹서버 에러/액세스 로그, 백엔드 및 프론트엔드 실시간 서버 런타임 로그 뷰어.
+
+---
+## 🚀 [v63 Specification] 스프링 100% 완전 일원화, 프론트엔드 에러 원장 텔레메트리, 자동 홈 복구, 포스트모템 및 깃허브 메인 통합
+
+### 1. 배경 및 사용자 핵심 요구사항
+1. **스프링 100% 완전 일원화 (Single Backend Engine)**:
+   - Node.js 데몬을 완전히 삭제/폐기하고, 백엔드는 Spring Boot 3.3 단일 엔진 체제로 100% 가동.
+   - 단, 사용자의 강력한 지시("스프링 사용한다고 프론트엔드에 띄우지 마")에 따라, 상단 배너 및 기술 스택 노출 문구를 클라이언트 화면에서 완전히 제거.
+2. **Nginx UI 라우트 프록시 정상화 (백색 더미 화면 원천 차단)**:
+   - `/admin/blog` 및 `/blog` 접속 시 Spring Boot index.html fallback 화면("단일 엔진 구동 중")이 출력되던 Nginx misconfiguration을 해결하고, 모든 UI 라우트를 프론트엔드(`prod_frontend` - 4501)로 복구.
+3. **화면 로드 실패 전수 로그 저장 및 관리자 열람 시스템 구축**:
+   - 화면 로드/렌더링 실패 시 원인(경로, 에러명, 에러메시지, 스택, 유저 에이전트, 타임스탬프)을 서버 로그 원장(`/var/log/moneyverse/frontend-errors.log`)에 영구 저장.
+   - 관리자 콘솔 시스템 런타임 로그(`/admin/logs/system`)의 `화면 로드 실패 전수 로그` 카드를 클릭했을 때 즉시 실시간 열람 가능하도록 Spring Boot 백엔드 연동.
+4. **강제 새로고침 세션 유지 및 3초 자동 홈 복구**:
+   - 강제 새로고침 시에도 인증 토큰(`mv_auth_token`, `wldk_session`) 보존.
+   - 렌더링 예외 발생 시 안내 메시지와 함께 3초 후 안전하게 홈(`/`)으로 자동 복구 이동.
+5. **학습용 포스트모템 및 실수 재발 방지 지침서 작성**:
+   - `docs/incidents/2026-11-17-unified-spring-and-resilience-postmortem-learnings.ko.md`
+   - `docs/incidents/2026-11-17-unified-spring-and-resilience-postmortem-learnings.md`
+6. **GitHub main 브랜치 통합 및 PR 병합**:
+   - PR #3249 생성 및 CI 검증 후 main 병합.
+
+### 2. 정밀 엔지니어링 구현 내역
+1. **스프링 배너 완전 제거 및 화면 정제**:
+   - `frontend/src/components/site-shell.tsx`: 상단 `SpringMigrationBannerServer` 호출 제거.
+   - `frontend/src/components/spring-migration-banner*.tsx`: 컴포넌트 `return null;`로 무효화.
+   - Nginx `/etc/nginx/sites-enabled/moneyverse`: `X-Platform-Migration`, `X-Backend-Engine` 헤더 제거 및 리로드.
+2. **Nginx UI 프록시 전면 정상화**:
+   - `/admin/blog/` 등 10개 UI 블록의 `proxy_pass http://127.0.0.1:4550;`를 `proxy_pass http://prod_frontend;`로 일괄 복구.
+   - 35개 관리자 페이지 전수 200 OK 및 실제 React UI 렌더링 검증 완료.
+3. **클라이언트 에러 텔레메트리 파이프라인 구축**:
+   - `frontend/src/app/api/v1/telemetry/client-error/route.ts`: 클라이언트 에러를 `/var/log/moneyverse/frontend-errors.log`에 원자적 Append.
+   - `frontend/src/components/client-error-reporter.tsx`: 전역 에러 리포터 및 세션 토큰 유지.
+   - `frontend/src/app/error.tsx` & `frontend/src/app/global-error.tsx`: 3초 자동 홈 복구 에러 바운더리.
+   - `spring-backend/src/main/java/com/moneyverse/api/domain/admin/dto/SystemLogSource.java`: `FRONTEND_ERRORS`의 filePath를 `/var/log/moneyverse/frontend-errors.log`로 연결.
+   - Spring Boot JAR 재빌드 및 서비스 재기동 완료.
+4. **포스트모템 및 방지 가이드 문서화**:
+   - `docs/incidents/2026-11-17-unified-spring-and-resilience-postmortem-learnings.ko.md` 작성 완료.

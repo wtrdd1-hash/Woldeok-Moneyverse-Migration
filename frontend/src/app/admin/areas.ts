@@ -190,6 +190,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/logs/errors',
+    eyebrow: 'INCIDENT & ERROR AUDIT',
+    title: '오류 & 장애 로그 원장',
+    summary: '화면 로드 실패, 런타임 크래시 및 시스템 장애 기록을 시간별, 날짜별, 오류 코드별로 정밀 분석합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/logs/system',
     eyebrow: 'SYSTEM RUNTIME LOGS',
     title: '시스템 런타임 로그',
