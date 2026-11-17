@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.6 — 사용자 지시 정식 Spring 프론트엔드 경로 승격 (2개 운영, 전면 전환 보류)
+사용자 지시는 프론트엔드 전체 Spring MVC 전환이며 Next 임시복구는 P0 응급 대응일 뿐 전환이 아님. Java21 Spring SSR가 공개 정식 `/`, `/guide`를 H2-only로 실제 서비스하고, Test 한/영 화면/CSS·Spring 154/154 통과. **운영에 2경로를 전환했지만 원본의 모든 기능 동등성은 아직 미인증**. 나머지 Next 화면·BFF 124개, OAuth/로그인, Spring 전역 SEC1/CSRF, 금융·Android·세션·복원 G0–G6 잔존. 검증된 Spring 대체가 없는 경로는 Next 임시 호환 유지. [증빙](../releases/v2026.11.18.6-spring-canonical-home-guide.ko.md).
+
 ## v2026.11.18.3 — Spring SSR 공개 미리보기 실제 운영 제한 승격 (전면 운영 보류)
 읽기 전용 Spring SSR `/spring-web`, `/spring-web/account-deletion`을 별도 Test 외부 검증 후 H2-only 격리 서비스와 불변 Java21 JAR로 실제 운영 경로에 배포. 정식 Next 화면 178개와 BFF 124개는 **전체 동등성 검증 미완**; 사이트 전체·관리자·금융·로그인·Android 전환 아님. Spring permitAll/CSRF와 소스 증명·원장·복원 게이트가 전면 승격을 차단함. [릴리스 증빙](../releases/v2026.11.18.3-spring-web-public-preview.ko.md) / [EN](../releases/v2026.11.18.3-spring-web-public-preview.md).
 

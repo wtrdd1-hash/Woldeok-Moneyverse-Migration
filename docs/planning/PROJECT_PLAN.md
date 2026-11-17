@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.6 — Owner-directed canonical Spring frontend route promotion (2 LIVE, TOTAL MIGRATION HOLD)
+The owner's requirement is full Spring MVC frontend; reverting to Next was only a P0 stopgap. Actual immutable Java21 Spring SSR now owns public canonical `/` and `/guide` using isolated H2 profile, after Test English/Korean page/CSS and 154/154 Spring tests. **These two paths are live, not yet proven original full-feature parity**. All remaining Next pages/124 BFF, OAuth/login, Spring global SEC1/CSRF, finance, Android, session and restore G0–G6 remain outstanding. Existing Next compatibility is preserved for routes lacking verified Spring replacements. [Evidence](../releases/v2026.11.18.6-spring-canonical-home-guide.md).
+
 ## v2026.11.18.3 — Actual scoped Spring SSR public preview deployed (LIVE SCOPED / FULL RELEASE HOLD)
 Read-only Spring SSR preview `/spring-web` and `/spring-web/account-deletion` now serve actual public Production from an immutable Java21 Spring Boot artifact and isolated H2-only sidecar after separate Test external smoke. Existing canonical Next pages 178 and BFF handlers 124 remain **uncertified as fully migrated**; no full-site, admin, auth, finance or Android cutover. Spring global permitAll/CSRF and source-identity/restore/ledger gates still block broad promotion. [EN release receipt](../releases/v2026.11.18.3-spring-web-public-preview.md) / [KO](../releases/v2026.11.18.3-spring-web-public-preview.ko.md).
 

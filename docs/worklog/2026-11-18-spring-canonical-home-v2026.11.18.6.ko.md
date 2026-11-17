@@ -12,8 +12,13 @@
 ## 작업 중
 대기.
 
-## 종료
-대기.
+## 종료 — 2026-11-18 08:23 KST: 정식 Spring 경로 실제 운영, 전체 전환 미완
+- **코드·QA:** 독립 `feat/spring-canonical-home-v2026.11.18.6` 브랜치에서 다른 작업자의 Spring 구현을 원본 수정 없이 통합. 배포 소스 커밋 `7df50a94d038fe2d311bd312d37c9083169beb07`, 불변 JAR SHA256 `16cae5c03c8a115f06b86e40cdaa0dc20b0bb3abe2d40b090bf283c67feb2d33` 실제 검증. Java21 Gradle `clean test bootJar` **41개 스위트·154개 테스트·실패/오류/건너뜀 0**. H2-only 프리뷰 필터는 API·금융·관리자·인증 요청 404 차단.
+- **Test→운영:** 독립 Test :4578 기동, 공식 외부 Test `/?lang=ko/en`, `/guide?lang=ko/en` 진짜 Thymeleaf 200·CSS 두 개 200·버전 헤더. Test 통과 후 같은 불변 JAR의 운영 :4579 기동, 로컬 Java SSR/CSS 200과 API/관리자 404 확인. Nginx 정확한 홈 경로만 이전 v2026.11.18.4 Next에서 v2026.11.18.6 Spring으로 전환하고 정확한 가이드/CSS 경로 추가. 문법 검사 통과·무중단 reload. 실제 공개 영/한 `/`, `/guide` **200 진짜 Spring SSR**, 가짜 475바이트 로딩 HTML 없음, CSS 200, 버전 헤더. 두 Spring 서비스 재부팅 자동시작 등록.
+- **유지:** 기존 Spring :4550, Next 복구 :4524, H2 프리뷰 :4577, API·관리자·금융·세션 라우팅 유지. `/login`, `/wallet`, `/stocks`, `/account-deletion` 기존 SSR 200, `/admin` 302, `/health`·`/api/version` 200. 운영 DB·원장·기존 프로세스 중단/재시작 없음.
+- **롤백:** 소스 `scripts/release/spring-canonical-home-v20261118.py`, 원본 백업 `/srv/moneyverse-data/ops/recovery/spring-canonical-home-v2026.11.18.6/`. 원복 명령 `sudo -n python3 /srv/moneyverse-data/tasks/spring-canonical-home-v20261118/worktree/scripts/release/spring-canonical-home-v20261118.py prod disable` 및 `sudo -n systemctl disable --now moneyverse-spring-canonical-prod-v20261118.service`; `sudo -n nginx -t` 검증. 정상 운영 배포를 실제 되돌리지는 않음.
+- **미완·P0 로그인:** `/auth/discord/authorize`, `/auth/google/authorize`는 기존 정규식 Nginx 프록시 때문에 Spring 가짜 200/475바이트 화면 발생. Next 직접 무쿠키 요청도 공급자가 아닌 로그인 오류 307로 이동해 OAuth 시작 정상 인증 미확인. 기존 Next의 로그인 후 지갑·게임 등 홈 기능 동등성 미완, Next 정식 화면 178·BFF124 기능 전환 미완. Spring 전역 permitAll/CSRF 비활성, 세션·MFA·OTP·원장·Android·SEO·G0–G6 운영 보류. 다시 흰 화면을 만들지 않도록 미전환 경로는 기존 Next 임시호환. 사용자의 **Spring 전체 전환 지시 자체는 아직 완료되지 않았음**.
+
 
 ## 작업 중 — 2026-11-18 08:20 KST
 - 다른 에이전트의 깨끗한 독립 브랜치에서 Spring 홈·가이드 컨트롤러/모델/Thymeleaf 템플릿·CSS·실제 HTTP 테스트를 복사해 새 독립 브랜치에 통합. 원래 브랜치는 변경하지 않음. 별도 H2 프로파일에서만 정식 `/`와 `/guide` 활성화, CSS 허용, 관리자·금융·API 쓰기 차단 필터 유지.

@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.6 — Actual canonical Spring MVC home/guide production release (PARTIAL / FULL PLATFORM HOLD)
+User explicitly rejects prior Next fallback as the intended migration. Separate Java Spring MVC Thymeleaf + mobile CSS for public `/` and `/guide` now physically serve live Production (source SHA 7df50a94d038, Java21 154/154 tests, Test→Production 200 bilingual and CSS). Guest landing is NOT equivalent to all original Next interactions; 178 page/124 BFF full parity uncertified. OAuth start still wrong 200/475 placeholder, SEC1 CSRF/financial session/OTP/G0–G6 blocked. Preserve legacy Next for unconverted routes. [Release evidence](../releases/v2026.11.18.6-spring-canonical-home-guide.md).
+
 ## v2026.11.18.3 — Spring public-preview release evidence (SCOPED LIVE / FULL PLATFORM HOLD)
 Actual immutable Test :4576 -> Production :4577 sidecar-based Java21 Spring MVC preview now serves `/spring-web` and `/spring-web/account-deletion` (external 200 and secure headers, public CSS 200, forbidden API 404/POST 405); 143/143 isolated Spring tests passed. No canonical 178 Next pages or 124 BFF certified converted, original Nginx default live frontend remains the old loading HTML, full Test frontend-version still 502, and Spring SEC1/finance/OTP/ledger/G0–G6 remain blockers. [Evidence](../releases/v2026.11.18.3-spring-web-public-preview.md).
 

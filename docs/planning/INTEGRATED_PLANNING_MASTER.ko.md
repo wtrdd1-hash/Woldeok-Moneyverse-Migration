@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.18.6 — 정식 Spring MVC 홈·가이드 실제 운영 승격 (부분 / 전면 보류)
+사용자는 이전 Next 복구를 Spring 전환 지시 위반이라 명시함. Java Spring MVC Thymeleaf·모바일 CSS를 사용한 정식 `/`, `/guide`가 실제 운영에 배포됨(소스 SHA 7df50a94d038, Java21 154/154, Test→운영 영/한 HTML·CSS 200). 단순 비회원 소개 화면으로 기존 Next 모든 상호작용과 동등하지 않음. Next 178페이지·BFF124 전체 동등성 미인증, OAuth 시작 200/475 가짜 로딩 잔존, SEC1 CSRF·금융·세션/OTP·G0–G6 차단. 미구현 화면에 한해 기존 Next 임시호환 유지. [릴리스 증빙](../releases/v2026.11.18.6-spring-canonical-home-guide.ko.md).
+
 ## v2026.11.18.3 — Spring 공개 미리보기 승격 증거 (제한적 운영 / 전면 전환 보류)
 Java21 Spring MVC 미리보기 불변 JAR을 Test :4576 검증 후 운영 :4577 독립 서비스로 실제 배포. `/spring-web`, `/spring-web/account-deletion` 외부 200 및 보안 헤더·CSS 200, 관리자/API 거부 404 및 POST 405, Spring 143/143 테스트 통과. 정식 Next 페이지 178개·BFF 124개 전환 인증 0, 기존 홈은 로딩 HTML, 공식 Test frontend-version 502 잔존. Spring SEC1·금융·OTP·원장·G0–G6 전면 승격 보류. [증빙](../releases/v2026.11.18.3-spring-web-public-preview.ko.md).
 
