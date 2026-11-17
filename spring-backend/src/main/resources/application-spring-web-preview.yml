@@ -1,0 +1,43 @@
+# Isolated read-only SSR preview: deliberately NO operational PostgreSQL or money writer.
+server:
+  address: 127.0.0.1
+spring:
+  application:
+    name: moneyverse-spring-web-preview
+  datasource:
+    url: jdbc:h2:mem:moneyverse_web_preview;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-web-preview.sql
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+moneyverse:
+  web:
+    preview-enabled: true
+    account-deletion-preview-enabled: true
+    preview-restricted: true
+  features:
+    swf-operational: false
+    kdic-operational: false
+    black-market-operational: false
+    pension-operational: false
+  security:
+    internal-token: "spring-web-preview-no-privileged-api"
+  socket:
+    host: 127.0.0.1
+    port: 0
+    boss-threads: 1
+    worker-threads: 1
+  discord:
+    bot-token: ""
+    log-channel-id: ""
+    admin-user-id: ""

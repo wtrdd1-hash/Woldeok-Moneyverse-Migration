@@ -28,7 +28,8 @@ dependencies {
 
     // Database
     runtimeOnly("org.postgresql:postgresql:42.7.4")
-    testImplementation("com.h2database:h2:2.3.232")
+    // Only used by the isolated, loopback-bound, read-only Spring web preview profile.
+    runtimeOnly("com.h2database:h2:2.3.232")
 
     // OpenAPI 3.0 / Swagger UI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")

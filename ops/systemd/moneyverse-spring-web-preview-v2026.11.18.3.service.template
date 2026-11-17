@@ -1,0 +1,32 @@
+# v2026.11.18.3 — substitute @@SERVICE@@, @@JAR_PATH@@, @@PORT@@ for test/prod.
+[Unit]
+Description=Moneyverse isolated Spring MVC preview v2026.11.18.3 (@@SERVICE@@)
+After=network.target
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+WorkingDirectory=/srv/moneyverse-data
+ExecStart=/usr/bin/java -Xms96m -Xmx384m -Dserver.port=@@PORT@@ -Dspring.profiles.active=spring-web-preview -jar @@JAR_PATH@@
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+PrivateDevices=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+UMask=0077
+MemoryMax=700M
+LimitNOFILE=16384
+# Refuse all external network connections; local Nginx and ephemeral SocketIO only.
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=multi-user.target
