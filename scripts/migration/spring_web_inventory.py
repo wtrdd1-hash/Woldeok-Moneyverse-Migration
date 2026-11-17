@@ -11,9 +11,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 NEXT_ROOT = ROOT / "frontend" / "src" / "app"
-MANIFEST = ROOT / "docs/migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.17.2.json"
+MANIFEST = ROOT / "docs/migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json"
 
-PUBLIC = {"", "announcements", "gallery", "status", "terms", "privacy", "features",
+PUBLIC = {"", "announcements", "gallery", "status", "terms", "privacy", "account-deletion", "features",
           "roadmap", "guide", "help", "blog", "search", "newspaper"}
 AUTH = {"account", "auth", "login", "register", "forgot-password",
         "reset-password", "verify-email", "verify-email-change", "profile", "settings"}
@@ -53,6 +53,7 @@ def build_manifest() -> dict:
             path = route_path(file, marker)
             # Only preview URLs exist; neither canonical URL has been replaced.
             preview = ("/spring-web/status" if kind == "PAGE" and path == "/status"
+                       else "/spring-web/account-deletion" if kind == "PAGE" and path == "/account-deletion"
                        else "/spring-web" if kind == "PAGE" and path == "/" else None)
             items.append({
                 "kind": kind,
@@ -69,7 +70,7 @@ def build_manifest() -> dict:
         raise ValueError("Duplicate effective Next routes; review groups manually")
     return {
         "schema": "spring-frontend-inventory/v1",
-        "migration_version": "v2026.11.17.2",
+        "migration_version": "v2026.11.18.2",
         "source_stack": "Next.js App Router",
         "target_stack": "Spring Boot MVC SSR + progressive browser JavaScript",
         "counts": {

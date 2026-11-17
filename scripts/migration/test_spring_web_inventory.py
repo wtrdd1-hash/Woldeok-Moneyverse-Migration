@@ -16,10 +16,13 @@ class MigrationInventoryTest(unittest.TestCase):
         data = build_manifest()
         self.assertEqual(data["counts"]["canonical_pages_fully_migrated"], 0)
         self.assertEqual(data["counts"]["canonical_bff_handlers_fully_migrated"], 0)
-        self.assertEqual(data["counts"]["preview_candidates"], 2)
+        self.assertEqual(data["counts"]["preview_candidates"], 3)
         self.assertTrue(all(not row["production_cutover"] for row in data["routes"]))
         preview = {x["path"]: x["spring_candidate"] for x in data["routes"] if x["spring_candidate"]}
-        self.assertEqual(preview, {"/": "/spring-web", "/status": "/spring-web/status"})
+        self.assertEqual(preview, {"/": "/spring-web", "/status": "/spring-web/status",
+                                   "/account-deletion": "/spring-web/account-deletion"})
+        self.assertEqual(next(x["phase"] for x in data["routes"]
+                              if x["kind"] == "PAGE" and x["path"] == "/account-deletion"), "G2_PUBLIC")
     def test_checked_in_manifest_matches_source(self):
         target = json.loads(MANIFEST.read_text())
         self.assertEqual(target, build_manifest())

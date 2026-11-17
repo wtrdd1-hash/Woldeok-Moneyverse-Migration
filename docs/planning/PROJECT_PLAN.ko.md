@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.2 — 전체 Spring 웹·프론트엔드 전환 소스 실측 (G2 후보 / 운영 보류)
+사용자 목표는 기존 Next 웹 페이지 178개, BFF 핸들러 124개를 모두 Spring MVC/Java로 전환하는 것입니다. 세션·SEO·브라우저 상호작용·Android API·PostgreSQL 금융 단일 기록 유지. 본 브랜치의 Spring SSR 프리뷰는 JDK21 격리 테스트 141/141 통과했으나, **정식 페이지·BFF 전환 인증 0개**, 비정식 미리보기 3개만 존재합니다. 운영 Next 관리자 복구를 유지합니다. 공식 Test 동일 SHA, Spring Security/CSRF/MFA, 경로별 동등성, 원장·복원·롤백은 승격 필수 조건입니다. [인벤토리](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.2.json) / [작업 기록](../worklog/2026-11-18-spring-web-readiness-v2026.11.18.2.ko.md).
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 
