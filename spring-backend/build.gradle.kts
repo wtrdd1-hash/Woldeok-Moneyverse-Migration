@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     java
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
@@ -39,7 +39,7 @@ dependencies {
     implementation("com.corundumstudio.socketio:netty-socketio:2.0.12")
 
     // Discord4J Core (Unified Discord Bot service)
-    implementation("com.discord4j:discord4j-core:3.2.6")
+    implementation("com.discord4j:discord4j-core:3.3.3")
     // Security Cryptography (Argon2id)
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
