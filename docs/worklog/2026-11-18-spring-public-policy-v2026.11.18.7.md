@@ -1,0 +1,16 @@
+# v2026.11.18.7 — Full Spring frontend migration: authoritative public policy pages
+
+**English canonical** | [한국어](2026-11-18-spring-public-policy-v2026.11.18.7.ko.md) | STARTED / PR AND RELEASE NOT YET APPROVED
+
+## BEFORE — 2026-11-18 08:33 KST
+- Owner's standing goal is *all* web frontend and BFF in Spring MVC/Java, with no Next at end state. v2026.11.18.6 genuinely deployed only canonical `/` and `/guide`; it does not provide interactive/dashboard parity. Existing Next :4524 remains required for other pages. No claim of complete migration until route-by-route G0–G6 exact-SHA contract checks pass.
+- Refreshed `origin/main` SHA `e96e8f81f4d6b99b221392a2b6fe46356361b145`, verified independent previous Spring branch `feat/spring-canonical-home-v2026.11.18.6` and its recent merged-in source state. Reviewed `AGENTS.md`, `docs/CURRENT_DOCUMENTATION_STATUS.md`, `docs/DOCUMENTATION_POLICY.md`, `docs/RELEASING.md`, `docs/planning/PROJECT_PLAN.md` and `docs/planning/INTEGRATED_PLANNING_MASTER.md`; the latter prevails as integrated technical release authority alongside living plan. Current migration target [EN](../migration/FULL_SPRING_WEB_MIGRATION_v2026.11.17.2.md) / KO includes 178 Next pages and 124 BFF handlers, 0 complete parity gates and severe Spring SEC1/CSRF/finance/auth debt.
+- This isolated branch/worktree is stacked on source PR #3258 for preview + Spring canonical home; other agent's branches (home/guide, P0 admin) untouched. Runtime production: Spring :4550; separate H2-only Spring canonical Test :4578 / Production :4579; old Next recovery :4524; all active; public `/terms`, `/privacy`, `/account-deletion` still Next 200 (not Java). OAuth `/auth/discord/authorize` still returns false 200/475-byte loading HTML and is a separate P0.
+- Exact authoritative UI content: `frontend/src/components/policy/terms-document.tsx`, `privacy-document.tsx` (each static bilingual React markup), and `frontend/src/components/deletion-request-info.tsx`, plus page files and existing `SpringAccountDeletionController` preview content. Legal/retention language MUST preserve original text; no invented periods, consent success or delete completion. Default EN, explicit KO locale. Preserve original Next SEO canonical and semantic headings; mobile min 320px, 200% zoom, keyboard focus, no JavaScript necessity.
+- Plan: TDD route tests RED; implement separately feature-gated real Spring MVC Thymeleaf legal pages `/terms`, `/privacy`, `/account-deletion` while keeping all other routes, API, finance and account actions unchanged. Use deterministic extract of static Next policy components into Thymeleaf templates, text-parity tool, no JSX/Next runtime dependency. Expand only the read-only H2 preview filter allowed paths; validate no active member DB / writes / auth endpoints. Rebuild exact immutable jar; Test external actual SSR and privacy/canonical/CSS; Production exact-route canary only if all pass, preserving verified rollback and removing only our own Nginx version markers. English-first and Korean-second worklog/changelog/internal/GitHub updates and latest main midpoint check required.
+
+## MIDPOINT
+Pending tests.
+
+## CLOSEOUT
+Pending.
