@@ -7,16 +7,16 @@ export interface ScreenLoadErrorRecord {
   readonly path: string;
   readonly errorName: string;
   readonly errorMessage: string;
-  readonly errorStack?: string;
-  readonly digest?: string;
-  readonly context?: string;
+  readonly errorStack?: string | undefined;
+  readonly digest?: string | undefined;
+  readonly context?: string | undefined;
   readonly userAgent: string;
   readonly referrer: string;
   readonly cachedUser?: {
-    readonly userId?: string;
-    readonly displayName?: string;
-    readonly email?: string;
-  };
+    readonly userId?: string | undefined;
+    readonly displayName?: string | undefined;
+    readonly email?: string | undefined;
+  } | undefined;
 }
 
 const ERROR_HISTORY_KEY = 'mv_screen_load_errors';
@@ -70,48 +70,44 @@ export function logScreenLoadError(
     cachedUser,
   };
 
-  // 1. Permanent Local Storage Logging
+  // 1. Save to local storage for local diagnostics
   if (typeof window !== 'undefined') {
     try {
       const existingRaw = localStorage.getItem(ERROR_HISTORY_KEY);
-      const list: ScreenLoadErrorRecord[] = existingRaw ? JSON.parse(existingRaw) : [];
-      list.unshift(record);
-      if (list.length > MAX_ERROR_HISTORY) {
-        list.length = MAX_ERROR_HISTORY;
+      const history: ScreenLoadErrorRecord[] = existingRaw ? JSON.parse(existingRaw) : [];
+      history.unshift(record);
+      if (history.length > MAX_ERROR_HISTORY) {
+        history.length = MAX_ERROR_HISTORY;
       }
-      localStorage.setItem(ERROR_HISTORY_KEY, JSON.stringify(list));
+      localStorage.setItem(ERROR_HISTORY_KEY, JSON.stringify(history));
     } catch {
-      /* ignore storage quota errors */
+      /* ignore */
     }
 
-    // Console output for immediate developer / browser inspection
-    console.error('[ScreenLoadFailure] Captured error record:', record);
-
-    // 2. Asynchronous dispatch to backend audit endpoint
+    // 2. Dispatch telemetry beacon to server
     try {
-      const payload = JSON.stringify(record);
-      if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon('/api/v1/audit/frontend-errors', blob);
-      } else {
-        void fetch('/api/v1/audit/frontend-errors', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: payload,
-          keepalive: true,
-        }).catch(() => undefined);
-      }
+      fetch('/api/v1/telemetry/client-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          route: window.location.pathname,
+          errorName: record.errorName,
+          errorMessage: record.errorMessage,
+          stack: record.errorStack,
+          userAgent: record.userAgent,
+        }),
+        keepalive: true,
+      }).catch(() => {
+        /* telemetry failure should not cascade */
+      });
     } catch {
-      /* silent fail on transport */
+      /* ignore */
     }
   }
 
   return record;
 }
 
-/**
- * Retrieves the recorded screen loading errors from localStorage.
- */
 export function getScreenLoadErrors(): ScreenLoadErrorRecord[] {
   if (typeof window === 'undefined') return [];
   try {
