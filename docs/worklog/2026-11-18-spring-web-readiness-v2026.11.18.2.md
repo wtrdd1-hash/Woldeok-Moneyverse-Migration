@@ -20,3 +20,9 @@ Pending measurement.
 - Actual isolated Java21 Gradle command: `./gradlew --offline --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx1024m -XX:MaxMetaspaceSize=384m" clean test bootJar`.
 - **FAILED:** 116 tests / 1 failed (`Phase7IntegrationTest` line 40, ServletException/IllegalStateException) and 115 not reported failed; `compileJava`, `compileTestJava`, `bootJar` completed but the overall release gate failed. Parent is based on pre-fix main `2c1ea4cd77`, latest main incorporates engagement repair. This failure blocks a release; reconcile with latest main and rerun.
 - Source counts remeasured 178 canonical Next page components and 124 Next API handler components, with no verified full SSR/BFF parity. Production Next recovery remains active.
+
+### 2026-11-18 07:35 KST — reconciliation and second RED
+- Merged latest authoritative main `e96e8f81f4...` into the isolated branch, resolving **two English planning-document conflicts** by preserving BOTH the latest main v2026.11.17.5 finance/security RELEASE HOLD and the owner-directed v2026.11.17.2 full-web scope; Korean current main planning unchanged. Merge commit `65cd987b78`.
+- Reran full Java21 Spring `clean test bootJar`: **141 tests / 1 FAILED**, specifically `SpringWebPreviewDisabledTest` expected HTTP 404 but got **200**, with the legacy SPA resource fallback serving index for inactive `/spring-web` route. The earlier Phase7 failure was cleared by latest main.
+- TDD GREEN candidate now adds conditional explicit 404 controller for OFF/missing Spring preview flag at `/spring-web` and `/spring-web/status`, with privacy/noindex headers; expanded the failing test to assert headers. This is preview-only and does not change canonical `/`, `/status`, Next, or Production edge.
+- Independent route inventory test ran **4/4 PASS**, parity check PASS (178 Next pages, 124 BFF, 0 fully certified, 2 original Spring previews). Do not call full migration complete.

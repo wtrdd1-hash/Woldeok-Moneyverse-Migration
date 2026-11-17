@@ -20,3 +20,9 @@
 - 독립 JDK21 Gradle `clean test bootJar` 실행. **실패:** 총 116개 테스트 중 1개 실패(`Phase7IntegrationTest` 40행, ServletException/IllegalStateException). Java 및 테스트 컴파일, bootJar 단계는 수행됐으나 전체 릴리스 게이트는 실패함.
 - Spring 웹 선행 브랜치의 공통 조상은 예전 `2c1ea4cd77`; 최신 main은 출석/도파민 중복 라우트 수정 포함. 병합하여 다시 검사할 것.
 - Next 페이지 178개 및 API 핸들러 124개 실제 재집계, 정식 Spring 전체 동등성 미확보. 운영 Next 복구 기능 유지.
+
+### 2026-11-18 07:35 KST — 최신 main 통합·두 번째 RED
+- 최신 main `e96e8f81f4...`를 독립 브랜치에 병합. 영어 기획 충돌 2개를 최신 main v2026.11.17.5 금융/보안 RELEASE HOLD와 사용자 전체 웹 전환 지시 v2026.11.17.2를 **둘 다 보존**하며 해결. 한국어 최신 main 본문 유지. 병합 커밋 `65cd987b78`.
+- 전체 JDK21 Spring `clean test bootJar` 재실행: **141개 중 1개 실패**. `SpringWebPreviewDisabledTest`에서 비활성 `/spring-web` 예상 404가 기존 SPA 정적 폴백으로 실제 **200** 응답. main 통합으로 Phase7 이전 실패는 해소됨.
+- 실패 재현 후 미리보기 플래그 OFF/미설정에만 적용되는 명시적 404 차단 컨트롤러와 캐시/검색 차단 헤더 및 테스트 보강. 정식 `/`, `/status`, Next, 운영 edge는 변경하지 않음.
+- 경로 인벤토리 단위 테스트 **4/4 통과**. Next 페이지 178개, BFF 124개, 정식 전환 인증 0개, Spring 프리뷰 기존 2개. 전부 완료라고 주장 금지.

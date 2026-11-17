@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @SpringBootTest(properties = "moneyverse.web.preview-enabled=false")
 @ActiveProfiles("test")
@@ -20,7 +21,12 @@ class SpringWebPreviewDisabledTest {
     @Test
     void templateRoutesDoNotReplaceProductionWhenFlagIsOff() throws Exception {
         org.junit.jupiter.api.Assertions.assertFalse(applicationContext.containsBean("springWebController"));
-        mvc.perform(get("/spring-web")).andExpect(status().isNotFound());
-        mvc.perform(get("/spring-web/status")).andExpect(status().isNotFound());
+        mvc.perform(get("/spring-web"))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Cache-Control", "private, no-store"))
+                .andExpect(header().string("X-Robots-Tag", "noindex, nofollow"));
+        mvc.perform(get("/spring-web/status"))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Referrer-Policy", "no-referrer"));
     }
 }
