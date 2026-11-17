@@ -19,3 +19,11 @@
 - RED: 분리 Nginx 일반 401 대비 RSC 500; Next 인증 상태 RSC 307, 운영 RSC 503.
 - GREEN: 분리 Nginx의 두 관리자 SEO 경로 일반·RSC·프리페치 모두 익명 401, 백엔드 200, 실제 후보 UI 200, 문법·사전검사 통과.
 - 내부 인증 헤더 외 인증·쿠키·권한 검사 유지.
+
+## 운영 최종 기록 — 2026-11-17 13:15 KST
+- PR #3239 main 병합 c2b426a901b66e8bd8a805a510247b1ab25c56af, GitHub 정책 CI 통과.
+- 첫 Nginx reload 직후 구 작업자 응답 503을 즉시 감지하여 자동 롤백. 기존 v14 SEO 화면 연결은 유지. 동일한 검토된 설정을 백업 보존 상태에서 재적용, 문법 검사·무중단 reload·작업자 전환 2초 후 정상 확인.
+- 운영 SEO RSC 요청 3회 연속 익명 401. 일반 및 RSC/프리페치 SEO 관리자·감사 화면 401 및 no-store/noindex, 외부 HTTPS RSC 401. 메인·관리자·보안·헬스·버전 200, 실제 Next SEO 화면·CSS 200. 관련 서비스 네 개 active.
+- 롤백: /srv/moneyverse-data/ops-backups/p0-admin-seo-v2026.11.17.15/seo-v3-edge-auth.conf.before 및 v14 전체 Nginx 백업. DB·원장·WLD 미수정.
+- 미검증: 관리자 로그인 긍정 E2E/세션 연속성, 별도 /admin/stocks 및 /admin/settings 404. 앱 전체 승격 완료라고 주장하지 않음.
+- v2026.11.17.15.1에서 Nginx 작업자 교체 대기 및 반복 검증 스크립트 보완.
