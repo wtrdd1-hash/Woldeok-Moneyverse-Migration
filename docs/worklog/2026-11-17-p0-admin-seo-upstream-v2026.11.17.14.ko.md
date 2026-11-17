@@ -16,3 +16,9 @@ GitHub 이슈: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issue
 
 ## 작업 종료
 - **아직 완료 아님.** 운영 반영과 실제 인증 사용자 화면은 검증 후 기록.
+
+### 중간 점검 — 2026-11-17 13:05 KST
+- 전용 브랜치에서 Nginx 한 부분만 변경하는 복구 스크립트·분리 테스트 설정 작성; 운영 미변경.
+- bash 문법 및 사전 검사 성공. 테스트 Nginx 문법 성공, /health 200, 관리자 SEO 두 경로 익명 401, 직접 렌더 테스트 200, 정적 CSS 운영 엣지 200.
+- 기존 SEO 인증 서브요청 307 흔적 발견. 로그인 사용자 긍정 E2E는 미확인으로 남김.
+- main dcc47a0b550492502b73421a45c681b9c482aa87 재확인. 후보 UI SHA 20daef3f6f254f6a0e5b085756a08d4d0d874c9c.

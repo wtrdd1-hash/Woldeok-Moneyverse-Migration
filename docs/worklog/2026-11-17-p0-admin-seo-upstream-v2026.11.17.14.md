@@ -17,3 +17,10 @@ Issue: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/issues/3236
 
 ## Finished
 - **NOT YET COMPLETE.** Deployment and success claims require fresh evidence. Document current production state precisely.
+
+### In-progress checkpoint — 2026-11-17 13:05 KST
+- Guarded patch candidate and localhost-only Nginx Test config written on isolated branch; no Production mutation.
+- bash -n and patch --check PASS; candidate changes exactly the single SEO upstream reference.
+- Isolated Nginx -t PASS; /health 200; /admin/seo 401; /admin/seo-audit 401; /__test-render 200 with real SEO HTML. Headers private/no-store, noindex; no Spring placeholder. Static CSS at public Nginx edge HTTP 200.
+- Security follow-up: some actual /admin/seo RSC requests logged auth_request unexpected 307. Anonymous status 401 PASS; signed-in positive E2E cannot be inferred from this.
+- Current main re-read dcc47a0b550492502b73421a45c681b9c482aa87. Stage Next release source SHA 20daef3f6f254f6a0e5b085756a08d4d0d874c9c.
