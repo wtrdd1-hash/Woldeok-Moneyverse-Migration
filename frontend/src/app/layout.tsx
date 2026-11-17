@@ -178,7 +178,6 @@ export async function generateMetadata(): Promise<Metadata> {
     category: meta.category,
     keywords: meta.keywords,
     alternates: {
-      canonical: '/',
       languages: {
         'ko-KR': '/',
         'en-US': '/en',
