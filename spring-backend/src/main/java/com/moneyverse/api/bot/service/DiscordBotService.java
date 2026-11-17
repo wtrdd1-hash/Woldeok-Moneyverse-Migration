@@ -45,16 +45,9 @@ public class DiscordBotService implements SmartLifecycle {
 
         if (isRunning.compareAndSet(false, true)) {
             try {
-                log.info("[DiscordBot] Connecting to Discord Gateway using Discord4J (with Jdk8Module support)...");
-
-                // Configure JacksonResources with Jdk8Module and JavaTimeModule
-                JacksonResources jacksonResources = JacksonResources.create();
-                jacksonResources.getObjectMapper()
-                        .registerModule(new Jdk8Module())
-                        .registerModule(new JavaTimeModule());
+                log.info("[DiscordBot] Connecting to Discord Gateway using Discord4J 3.3.3...");
 
                 DiscordClientBuilder.create(botToken.trim())
-                        .setJacksonResources(jacksonResources)
                         .build()
                         .gateway()
                         .setInitialPresence(ignore -> ClientPresence.online(ClientActivity.watching("월덕 머니버스 실시간 거래소")))
