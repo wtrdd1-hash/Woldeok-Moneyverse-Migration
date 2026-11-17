@@ -94,6 +94,21 @@ class SpringPublicPolicyControllerTest {
     }
 
     @Test
+    void strictCspKeepsMailtoFunctionalWithoutCloudflareDecoderJavascript() throws Exception {
+        for (String path : new String[]{"/terms?lang=en", "/terms?lang=ko", "/privacy?lang=en",
+                "/privacy?lang=ko", "/account-deletion?lang=en", "/account-deletion?lang=ko",
+                "/spring-web/account-deletion?lang=ko"}) {
+            mvc.perform(get(path))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("<!--email_off-->")))
+                    .andExpect(content().string(containsString("<!--/email_off-->")))
+                    .andExpect(content().string(containsString("mailto:jungchwimisaenghwal63@gmail.com")))
+                    .andExpect(content().string(not(containsString("<script"))))
+                    .andExpect(header().string("Content-Security-Policy", containsString("default-src 'none'")));
+        }
+    }
+
+    @Test
     void previewStaysNoindexedAfterCanonicalRouteAdded() throws Exception {
         mvc.perform(get("/spring-web/account-deletion?lang=ko"))
                 .andExpect(status().isOk())

@@ -43,7 +43,7 @@
         <ol class="policy-list">
           <li><span th:text="${copy.step1Before}">After signing in open </span><a href="/account" th:text="${copy.accountLink}">My account</a><span th:text="${copy.step1After}">.</span></li>
           <li th:text="${copy.step2}">Review the account-deletion section and submit a request.</li>
-          <li><span th:text="${copy.step3Before}">If you cannot sign in, email </span><a href="mailto:jungchwimisaenghwal63@gmail.com">jungchwimisaenghwal63@gmail.com</a><span th:text="${copy.step3After}">.</span></li>
+          <li><span th:text="${copy.step3Before}">If you cannot sign in, email </span><!--email_off--><a href="mailto:jungchwimisaenghwal63@gmail.com">jungchwimisaenghwal63@gmail.com</a><!--/email_off--><span th:text="${copy.step3After}">.</span></li>
         </ol>
         <p class="policy-safety" th:text="${copy.secretWarning}">Do not send passwords or tokens by email.</p>
       </section>

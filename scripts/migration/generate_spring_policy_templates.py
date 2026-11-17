@@ -30,6 +30,13 @@ def article(name: str, lang: str) -> str:
             .replace('className=', 'class=').replace('tabIndex={0}', 'tabindex="0"'))
     if re.search(r'\{[^{}]*\}|</?Link\b|className=',part):
         raise ValueError('Dynamic JSX in legal source requires explicit human review')
+    # Cloudflare rewrites plain visible emails into JS-decoded tokens even though
+    # this legal page deliberately forbids all scripts via CSP. Scope Cloudflare's
+    # documented HTML email_off bypass to ONLY the unchanged operator mailto link.
+    email_pattern = re.compile(r'(<a href="mailto:jungchwimisaenghwal63@gmail\.com"[^>]*>[^<]*</a>)')
+    part, count = email_pattern.subn(lambda m: '<!--email_off-->' + m.group(1) + '<!--/email_off-->', part)
+    if count != 1:
+        raise ValueError(f'Unexpected operator contact anchor count for {name}/{lang}: {count}')
     return part
 
 def make(name: str, lang: str) -> str:

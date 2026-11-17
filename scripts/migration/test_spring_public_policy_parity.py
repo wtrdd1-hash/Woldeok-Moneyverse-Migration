@@ -53,6 +53,22 @@ class TestSpringPolicyParity(unittest.TestCase):
                     self.assertEqual(source.headers, output.headers)
                     self.assertGreater(len(source.text), 20)
 
+    def test_every_legal_operator_mailto_is_scoped_out_of_cloudflare_js_obfuscation(self):
+        from html import unescape
+        for name in ('terms', 'privacy'):
+            for locale in ('en', 'ko'):
+                with self.subTest(name=name, locale=locale):
+                    html = (TPL / f'{name}-{locale}.html').read_text('utf8')
+                    self.assertIn('<!--email_off--><a href="mailto:jungchwimisaenghwal63@gmail.com"', html)
+                    self.assertIn('</a><!--/email_off-->', html)
+                    self.assertEqual(html.count('<!--email_off-->'), 1)
+                    self.assertEqual(html.count('<!--/email_off-->'), 1)
+        account = (ROOT / 'spring-backend/src/main/resources/templates/spring-web/account-deletion.html').read_text('utf8')
+        self.assertIn('<!--email_off--><a href="mailto:jungchwimisaenghwal63@gmail.com"', account)
+        self.assertIn('</a><!--/email_off-->', account)
+        self.assertEqual(account.count('<!--email_off-->'), 1)
+        self.assertEqual(account.count('<!--/email_off-->'), 1)
+
     def test_templates_retain_canonical_metadata_and_semantic_structure(self):
         for name in ('terms', 'privacy'):
             for locale in ('en', 'ko'):
