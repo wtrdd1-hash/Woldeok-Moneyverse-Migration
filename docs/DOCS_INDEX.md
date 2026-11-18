@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.12 — 180개 전체 화면 PC·모바일 디자인 시안 (PLANNING / 운영 변경 없음)
+
+[상세기획 한국어](planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md) · [영문 정본](planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) · [180개 화면 이미지 카탈로그](design/all-pages-v2026.11.18.12/README.md) · [작업 기록](worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.ko.md). main 178개 + 미니PC 별도 작업본 2개 후보. 기존 프론트엔드·API·테스트/운영 미변경.
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 

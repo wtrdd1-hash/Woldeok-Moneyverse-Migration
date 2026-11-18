@@ -1,5 +1,15 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.12 — 180-Route PC/Mobile Redesign Visual Planning (DRAFT; NO FRONTEND OR RUNTIME CHANGE)
+
+Owner direction: preserve the current frontend, design visual concepts for every existing site page, and add them to integrated planning *before development*. The source-inventory union has **180 screens**: **178 on GitHub main (0590fac4...)** and **2 mini-PC working-checkout-only routes** (/admin/logs/errors and /calculators), explicitly marked provisional. Exactly **180 route-level SVG concepts**, each containing desktop and mobile compositions, plus a route-image manifest and offline gallery. These are *planning images, not live screenshots*; synthetic values do not establish working finances, API or production UX.
+
+- [English detailed spec](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) / [한국어](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md)
+- [180 route/image gallery](../design/all-pages-v2026.11.18.12/README.md) / [manifest](../design/all-pages-v2026.11.18.12/routes-manifest.json)
+- [Worklog](../worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.md) / [한국어 기록](../worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.ko.md)
+
+Future frontend implementation requires a separate approval, isolated branch, owner/contract reconciliation and exact-SHA Test. No merges, no deployment, no server/frontend/DB modifications.
+
 ## v2026.11.17.5 — Spring KDIC and engagement finance P0 integrated candidate (DRAFT / RELEASE HOLD)
 Owner-approved integration of #3218 and #3215 on main cd822aa098: corrected duplicate engagement routing, forged member identity headers, false WLD outcomes and KDIC fabricated financial success. KDIC admin endpoints now require actual DB-resolved signed-in superadmin session; missing KDIC fund, institution, premium, payout or ratio evidence no longer produces fabricated values. Spring test-profile entire clean test bootJar passes 126 tests / 0 fail / 0 skipped with embedded live HTTP anonymous negative checks. The app remains on old Production runtime; no ledger/DB/WLD mutations or official Test/Production deployment. Full global Spring SecurityConfig SEC1, positive MFA/CSRF, verified KDIC ledger settlement, real authenticated Test and independent restore remain P0 and block promotion. [Worklog](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.md).
 

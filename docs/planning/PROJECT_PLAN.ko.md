@@ -1,5 +1,15 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.12 — 전체 180개 화면 PC·모바일 리디자인 시각 기획 (초안 / 프론트엔드·런타임 변경 없음)
+
+사용자 지시: **현재 프론트엔드를 건드리지 않고**, 사이트 전체 페이지 이미지를 제작해 통합 기획에 반영한 뒤 별도로 개발 여부를 결정한다. 경로 합집합은 **180개**이며, GitHub main에 **178개(0590fac4...)**, 미니PC 작업본에만 **2개**(/admin/logs/errors, /calculators)가 있어 해당 2개는 미병합 후보로 별도 표시한다. **180개 SVG 화면 시안** 각각에 PC·모바일 레이아웃을 모두 제공하고, 경로-이미지 매니페스트와 오프라인 갤러리를 추가한다. 시안 수치는 예시이며 운영 화면, 금융·API 작동을 뜻하지 않는다.
+
+- [상세 기획 한국어](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md) / [English canonical](ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md)
+- [180개 화면 이미지 목록](../design/all-pages-v2026.11.18.12/README.md) / [경로 매니페스트](../design/all-pages-v2026.11.18.12/routes-manifest.json)
+- [작업 기록 한국어](../worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.ko.md) / [English](../worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.md)
+
+프론트엔드 실제 구현은 별도 승인 및 테스트·소유권·권한 검증 후의 미래 단계다. main 병합, 서버·DB·운영·테스트 배포는 이번 단계에서 하지 않는다.
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

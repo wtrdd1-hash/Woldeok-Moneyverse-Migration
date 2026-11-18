@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.12 — All 180 Screen Visual Concepts (PLANNING / NO RUNTIME CHANGE)
+
+[English specification](docs/planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) · [한국어 상세](docs/planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md) · [PC+Mobile visual catalog (180 images)](docs/design/all-pages-v2026.11.18.12/README.md) · [worklog](docs/worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.md). GitHub main 178 pages + two unmerged mini-PC-only conceptual routes. Existing frontend, APIs, Test and Production unchanged.
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 

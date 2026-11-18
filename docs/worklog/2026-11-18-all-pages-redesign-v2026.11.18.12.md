@@ -17,8 +17,15 @@ Baseline main SHA: 0590fac4e8a82bc986ba1b8c64f014d18daca9e9
 - Do not touch frontend/, spring-backend/, backend/, database, application containers, Nginx, Test or Production. No financial writes or feature switches.
 - Next: create per-route desktop/mobile visual planning previews and dual-language detail spec; reconcile with master plan in branch; verify paths/counts and record mid/end evidence.
 
-## MID
-PENDING
+## MID — artifact creation and authority re-check
+- Rechecked GitHub main SHA 0590fac4e8a82bc986ba1b8c64f014d18daca9e9. Other open PRs did not modify this workspace.
+- Reconciled 178 main routes with 2 mini-PC working-checkout-only provisional routes; generated 180 route-level desktop+mobile SVGs.
+- Generated route manifest, README per-screen links and offline gallery.html; no existing frontend or runtime modifications.
+- Linked this design version in both authoritative plans and both docs hubs.
 
-## END
-PENDING
+## END — visual/document validation and branch handoff
+- Re-checked GitHub main SHA 0590fac4e8a82bc986ba1b8c64f014d18daca9e9, keeping current mini-PC main checkout untouched.
+- Verified 180 distinct screen routes, 180 individual XML-valid SVGs, 0 duplicates and ZIP archive with 183 entries (180 images + index, manifest, gallery).
+- Updated both authoritative plans and bilingual detailed specs, internal/GitHub change records and changelog.
+- No frontend/backend/DB/Nginx/member/ledger edits; no Test or Production runtime QA/deployment performed.
+- This design proposal is ready for review, NOT approved per-screen implementation or a deployment receipt.
