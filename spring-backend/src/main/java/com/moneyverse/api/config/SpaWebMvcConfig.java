@@ -42,6 +42,12 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
         return new String[]{"file:"+candidate.toString()+"/", legacyLocations[0], legacyLocations[1]};
     }
 
+    /** Versioned release HTML must never silently hide a valid legacy route. */
+    static boolean allowSpaFallback(String resourceLocation, String configuredReleaseDir) {
+        if (configuredReleaseDir == null || configuredReleaseDir.isBlank()) return true;
+        return !resourceLocation.startsWith(resourceLocations(configuredReleaseDir)[0]);
+    }
+
     static boolean isStaticFile(String resourcePath) {
         if (resourcePath == null) return false;
         String normalized=resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
@@ -118,6 +124,9 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
 
                         // Missing files, JS bundles and fonts MUST return 404, never SPA HTML200.
                         if (isStaticFile(cleanPath)) return null;
+
+                        // A versioned release may only provide exact routes, never hijack legacy pages.
+                        if (!allowSpaFallback(location.getURI().toString(), immutableFrontendReleaseDir)) return null;
 
                         // 5. Fallback for client-side SPA routing -> index.html
                         Resource indexHtml = location.createRelative("index.html");
