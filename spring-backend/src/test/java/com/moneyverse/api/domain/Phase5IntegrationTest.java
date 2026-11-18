@@ -46,22 +46,12 @@ class Phase5IntegrationTest {
     }
 
     @Test
-    @DisplayName("성장 단계 및 신용 등급, 초반 퀘스트 조회 테스트")
+    @DisplayName("성장 단계 및 신용 등급은 위조 사용자 헤더만으로 조회 불가")
     void testProgressionEndpoints() throws Exception {
-        mockMvc.perform(get("/api/progression")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
-        mockMvc.perform(get("/api/progression/credits")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
-        mockMvc.perform(get("/api/progression/early-game")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+        for (String path : new String[] {"/api/progression", "/api/progression/credits", "/api/progression/early-game"}) {
+            mockMvc.perform(get(path).header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Test

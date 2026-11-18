@@ -36,6 +36,19 @@ class FalseSuccessRegressionTest {
         verifyNoInteractions(jdbc);
     }
 
+    @Test void privateSpaceGrowthCreditsAndAdvisorCannotInventSuccess() {
+        var space = new com.moneyverse.api.domain.space.service.SpaceService(jdbc);
+        var progression = new com.moneyverse.api.domain.progression.service.ProgressionService(jdbc);
+        var advisor = new com.moneyverse.api.domain.advisor.service.AdvisorService(jdbc);
+        var actor = UUID.randomUUID();
+        assertThrows(ResponseStatusException.class, () -> space.getMySpaces(actor));
+        assertThrows(ResponseStatusException.class, () -> progression.status(actor));
+        assertThrows(ResponseStatusException.class, () -> progression.creditStatus(actor));
+        assertThrows(ResponseStatusException.class, () -> progression.earlyGameStatus(actor));
+        assertThrows(ResponseStatusException.class, () -> advisor.diagnoseUserPortfolio(actor));
+        verifyNoInteractions(jdbc);
+    }
+
     @Test void absentSeoEvidenceCannotGenerateFakeCrawlerSuccess() {
         when(jdbc.queryForList(anyString())).thenReturn(Collections.emptyList());
         var seo = new SeoController(jdbc);

@@ -102,6 +102,37 @@ class SensitiveApiBoundaryFilterTest {
         assertNotNull(chain.getRequest());
     }
 
+    @Test void privateGrowthSpaceAndAdvisorPathsMustNotTrustHeaderIds() throws Exception {
+        for (String path : new String[] {
+                "/api/space/my", "/api/v1/space/my", "/api/spaces/my",
+                "/api/v1/spaces/my", "/api/v1/progression", "/api/progression/credits",
+                "/api/v1/progression/status", "/api/v1/advisor/diagnose",
+                "/api/advisor/deoki/diagnose", "/api/v1/advisor/deoki/ask"}) {
+            var req = new MockHttpServletRequest("GET", path);
+            req.addHeader("X-User-Id", UUID.randomUUID().toString());
+            var res = new MockHttpServletResponse();
+            var chain = new MockFilterChain();
+            filter.doFilter(req, res, chain);
+            assertEquals(401, res.getStatus(), path);
+            assertNull(chain.getRequest(), path);
+        }
+    }
+
+    @Test void verifiedMemberCannotUseUnverifiedSpaceTaxOrAdvisorFinance() throws Exception {
+        when(identity.resolveSession(any())).thenReturn(Optional.of(session(UUID.randomUUID())));
+        for (String path : new String[] {
+                "/api/v1/space/purchase", "/api/v1/space/bogus/tax",
+                "/api/v1/progression/refreshes", "/api/v1/advisor/ask"}) {
+            var req = new MockHttpServletRequest("POST", path);
+            req.addHeader("X-CSRF-Token", "valid-csrf");
+            var res = new MockHttpServletResponse();
+            var chain = new MockFilterChain();
+            filter.doFilter(req, res, chain);
+            assertEquals(503, res.getStatus(), path);
+            assertNull(chain.getRequest(), path);
+        }
+    }
+
     @Test void browserCorsPreflightKeepsExistingOriginPolicy() throws Exception {
         var req = new MockHttpServletRequest("OPTIONS", "/api/v1/support/threads");
         req.addHeader("Origin", "https://easy-scraping.com");
