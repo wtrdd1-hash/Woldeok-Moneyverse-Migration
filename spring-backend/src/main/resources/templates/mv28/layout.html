@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Woldeok Moneyverse Spring native calculators, no login required, with accessible standard HTML forms.">
+  <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
+  <link rel="stylesheet" href="/mv-spring/v28/styles.css">
+</head>
+<body>
+<header class="site-header" th:fragment="header">
+  <div class="shell header-row">
+    <a class="brand" href="/" aria-label="Woldeok Moneyverse home"><span class="brand-symbol" aria-hidden="true">W</span><span>WOLDEOK <b>MONEYVERSE</b></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="/tools" th:text="${ko} ? '계산기' : 'Calculators'">Calculators</a>
+      <a href="/stocks" th:text="${ko} ? '거래소' : 'Market'">Market</a>
+      <a href="/shop" th:text="${ko} ? '상점' : 'Shop'">Shop</a>
+      <a href="/guide" th:text="${ko} ? '안내' : 'Guide'">Guide</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="language" th:href="@{${calculatorPath}(lang='en')}" hreflang="en" th:attr="aria-current=${ko} ? null : 'page'">EN</a>
+      <a class="language" th:href="@{${calculatorPath}(lang='ko')}" hreflang="ko" th:attr="aria-current=${ko} ? 'page' : null">KO</a>
+    </div>
+  </div>
+</header>
+<footer th:fragment="footer" class="site-footer">
+  <div class="shell footer-row">
+    <p>© Woldeok Moneyverse <span class="footer-tag">Spring MVC · Native Web · v28</span></p>
+    <nav aria-label="Footer"><a href="/privacy" th:text="${ko} ? '개인정보' : 'Privacy'">Privacy</a><a href="/terms" th:text="${ko} ? '이용약관' : 'Terms'">Terms</a><a href="/support" th:text="${ko} ? '지원' : 'Support'">Support</a></nav>
+  </div>
+  <a class="floating-help" href="/support" th:attr="aria-label=${ko} ? '지원 및 문의 보기(로그인이 필요할 수 있음)' : 'Open help and support (sign-in may be required)'">
+    <span class="help-symbol" aria-hidden="true">?</span><span th:text="${ko} ? '문의' : 'Help'">Help</span>
+  </a>
+</footer>
+</body>
+</html>
