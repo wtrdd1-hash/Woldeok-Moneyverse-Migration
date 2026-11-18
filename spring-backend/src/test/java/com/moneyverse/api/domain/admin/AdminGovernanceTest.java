@@ -35,47 +35,41 @@ class AdminGovernanceTest {
 
     @Test
     @DisplayName("x-internal-token 포함하여 /api/v1/admin/controls 호출 시 200 OK와 피처 스위치 목록이 반환된다")
-    void getControlsWithInternalTokenSucceeds() throws Exception {
+    void getControlsWithInternalTokenMustFailWithoutSession() throws Exception {
         mockMvc.perform(get("/api/v1/admin/controls")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.featureSwitches").isArray());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("x-internal-token 포함하여 /api/v1/admin/users 호출 시 200 OK와 사용자 디렉토리가 반환된다")
-    void getUsersWithInternalTokenSucceeds() throws Exception {
+    void getUsersWithInternalTokenMustFailWithoutSession() throws Exception {
         mockMvc.perform(get("/api/v1/admin/users")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.users").isArray());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("x-internal-token 포함하여 /api/v1/admin/stocks 호출 시 200 OK와 주식 목록이 반환된다")
-    void getStocksWithInternalTokenSucceeds() throws Exception {
+    void getStocksWithInternalTokenMustFailWithoutSession() throws Exception {
         mockMvc.perform(get("/api/v1/admin/stocks")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stocks").isArray());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("x-internal-token 포함하여 /api/v1/admin/economy/reconciliations/latest 호출 시 200 OK와 건전성 스냅샷이 반환된다")
-    void getReconciliationHealthWithInternalTokenSucceeds() throws Exception {
+    void getReconciliationHealthWithInternalTokenMustFailWithoutSession() throws Exception {
         mockMvc.perform(get("/api/v1/admin/economy/reconciliations/latest")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.available").value(true))
-                .andExpect(jsonPath("$.integrity.ok").value(true));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("x-internal-token 포함하여 /api/admin/auth/channel-otp/status 호출 시 200 OK와 승격 상태가 반환된다")
-    void getChannelOtpStatusWithInternalTokenSucceeds() throws Exception {
+    void getChannelOtpStatusWithInternalTokenMustFailWithoutSession() throws Exception {
         mockMvc.perform(get("/api/admin/auth/channel-otp/status")
                         .header("x-internal-token", internalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isUnauthorized());
     }
 }

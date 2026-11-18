@@ -2,72 +2,65 @@ package com.moneyverse.api.domain.business.controller;
 
 import com.moneyverse.api.domain.business.dto.BusinessDtos.*;
 import com.moneyverse.api.domain.business.service.BusinessService;
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
-@Tag(name = "Business & Enterprises", description = "사업장 창업, 지분 보유, 일일 정산 및 10% 법인세 납입 API")
+@Tag(name = "Business & Enterprises", description = "Canonical business reads and owner-scoped receipts")
 @RestController
 @RequestMapping({"/api/business", "/api/v1/business"})
 public class BusinessController {
-
     private final BusinessService businessService;
+    private final MemberApiGuard memberApiGuard;
 
-    public BusinessController(BusinessService businessService) {
+    public BusinessController(BusinessService businessService, MemberApiGuard memberApiGuard) {
         this.businessService = businessService;
-    }
-
-    private String resolveUserId(String xUserId, String xActorUserId) {
-        if (xUserId != null && !xUserId.isBlank()) return xUserId.trim();
-        if (xActorUserId != null && !xActorUserId.isBlank()) return xActorUserId.trim();
-        return "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+        this.memberApiGuard = memberApiGuard;
     }
 
     @GetMapping("/catalog")
-    @Operation(summary = "설립 가능한 사업장 업종 카탈로그 조회")
+    @Operation(summary = "Canonical public business catalog")
     public ResponseEntity<BusinessCatalogResponse> getCatalog() {
         return ResponseEntity.ok(businessService.getCatalog());
     }
 
     @GetMapping({"", "/", "/my"})
-    @Operation(summary = "내가 소유한 사업장 목록 및 미수령 영업수익 조회")
-    public ResponseEntity<BusinessOwnershipListResponse> getMyBusinesses(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        return ResponseEntity.ok(businessService.getMyBusinesses(userId));
+    @Operation(summary = "Authenticated owner's business holdings")
+    public ResponseEntity<BusinessOwnershipListResponse> getMyBusinesses(HttpServletRequest request) {
+        return ResponseEntity.ok(businessService.getMyBusinesses(memberApiGuard.actor(request).toString()));
     }
 
     @PostMapping("/purchase")
-    @Operation(summary = "신규 사업장 설립 및 영업권 취득")
-    public ResponseEntity<BusinessPurchaseResponse> purchaseBusiness(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId,
-            @RequestBody BusinessPurchaseRequest request
-    ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        if (request == null || request.typeId() == null || request.typeId().isBlank()) {
-            return ResponseEntity.badRequest().body(BusinessPurchaseResponse.fail("type_id is required"));
+    @Operation(summary = "Purchase with verified owner, CSRF, idempotency and canonical receipt")
+    public ResponseEntity<BusinessPurchaseResponse> purchaseBusiness(HttpServletRequest request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String keyHeader,
+            @RequestBody(required = false) BusinessPurchaseRequest body) {
+        UUID owner = memberApiGuard.verifiedMutationActor(request);
+        UUID key = memberApiGuard.idempotencyKey(keyHeader);
+        if (body == null || body.typeId() == null || body.typeId().isBlank()) {
+            return ResponseEntity.badRequest().body(BusinessPurchaseResponse.fail("TYPE_ID_REQUIRED"));
         }
-        String name = (request.name() != null && !request.name().isBlank()) ? request.name() : "신규 사업장";
-        BusinessPurchaseResponse response = businessService.purchaseBusiness(userId, request.typeId(), name);
-        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+        var response = businessService.purchaseBusiness(owner.toString(), body.typeId(), body.name(), key);
+        return response.success() ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
     @PostMapping("/collect")
-    @Operation(summary = "사업장 영업수익금 수령 및 10% 법인세 국고 자동 원천징수")
-    public ResponseEntity<BusinessCollectResponse> collectRevenue(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId,
-            @RequestBody BusinessCollectRequest request
-    ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        if (request == null || request.businessId() == null || request.businessId().isBlank()) {
-            return ResponseEntity.badRequest().body(BusinessCollectResponse.fail("business_id is required"));
+    @Operation(summary = "Blocked until canonical settlement tax receipt is certified")
+    public ResponseEntity<BusinessCollectResponse> collectRevenue(HttpServletRequest request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String keyHeader,
+            @RequestBody(required = false) BusinessCollectRequest body) {
+        UUID owner = memberApiGuard.verifiedMutationActor(request);
+        UUID key = memberApiGuard.idempotencyKey(keyHeader);
+        if (body == null || body.businessId() == null || body.businessId().isBlank()) {
+            return ResponseEntity.badRequest().body(BusinessCollectResponse.fail("BUSINESS_ID_REQUIRED"));
         }
-        BusinessCollectResponse response = businessService.collectRevenue(userId, request.businessId());
-        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+        var response = businessService.collectRevenue(owner.toString(), body.businessId(), key);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 }

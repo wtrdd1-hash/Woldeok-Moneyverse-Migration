@@ -42,16 +42,13 @@ public class ProfileService {
                 p.setJoinedAt(rs.getTimestamp("joined_at") != null ? rs.getTimestamp("joined_at").toInstant().toString() : Instant.now().toString());
                 return p;
             }, userId);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND, "PROFILE_NOT_FOUND");
         } catch (Exception e) {
-            log.warn("[ProfileService] fallback for user {}: {}", userId, e.getMessage());
-            UserProfile fallback = new UserProfile();
-            fallback.setId(userId);
-            fallback.setDisplayName("시민");
-            fallback.setJobType("NONE");
-            fallback.setJobLevel(1);
-            fallback.setVisibility("PUBLIC");
-            fallback.setJoinedAt(Instant.now().toString());
-            return fallback;
+            log.warn("[ProfileService] canonical profile query unavailable");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "PROFILE_SOURCE_NOT_VERIFIED");
         }
     }
 }

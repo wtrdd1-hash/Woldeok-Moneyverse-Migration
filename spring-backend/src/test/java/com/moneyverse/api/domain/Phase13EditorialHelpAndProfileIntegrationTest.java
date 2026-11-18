@@ -104,9 +104,8 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     @Test
     @DisplayName("9. 프로필 조회 - 내 프로필 조회 200 OK")
     void testProfileEndpoints() throws Exception {
-        mockMvc.perform(get("/profile/me"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+        mockMvc.perform(get("/api/v1/profile/me"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

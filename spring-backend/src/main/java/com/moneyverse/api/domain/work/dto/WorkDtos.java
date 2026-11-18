@@ -104,7 +104,7 @@ public final class WorkDtos {
             return new WorkCompleteResponse(true, rewardPaid, experienceGained, receiptId, "과업 완료 및 급여 지급이 완료되었습니다.", null);
         }
         public static WorkCompleteResponse fail(String error) {
-            return new WorkCompleteResponse(false, "0", "0", null, null, error);
+            return new WorkCompleteResponse(false, null, null, null, null, error);
         }
     }
 }
