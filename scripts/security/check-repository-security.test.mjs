@@ -12,7 +12,7 @@ test('rejects tracked runtime and private operational artifacts', () => {
   for (const path of [
     'packages/database/migrations/001.sql', '.env.example',
     'docs/worklog/2026-11-18-redacted.md', 'scripts/security/check-repository-security.mjs',
-    'ops/systemd/template.service',
+    'ops/systemd/template.service', '.npmrc',
   ]) assert.equal(forbiddenTrackedPath(path), false, path);
 });
 
@@ -21,7 +21,7 @@ test('blocks new or modified internal and raw audit records but not redacted pub
     'docs/updates/v2026.11.18-internal.md',
     'docs/worklog/2026-11-18-internal.ko.md',
     'docs/changelog/finance-internal.md',
-    'docs/worklog/mcp-raw-2026.json',
+    'docs/worklog/mcp-raw-2026.json', '.npmrc',
   ]) assert.equal(forbiddenChangedPath(path), true, path);
   assert.equal(forbiddenChangedPath('docs/worklog/2026-11-18-public-redacted.md'), false);
 });
