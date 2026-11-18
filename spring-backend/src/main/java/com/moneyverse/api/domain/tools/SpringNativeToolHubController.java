@@ -85,6 +85,10 @@ public class SpringNativeToolHubController {
         model.addAttribute("toolCount",TOOLS.size());
         model.addAttribute("verifiedCount",TOOLS.stream().filter(Tool::verified).count());
         model.addAttribute("resultCount",shown.size());
+        // Structured data is constant and contains NO user-provided search input.
+        model.addAttribute("schemaJson", """
+                {"@context":"https://schema.org","@type":"CollectionPage","name":"Woldeok Moneyverse financial calculators", "url":"https://easy-scraping.com/%s","mainEntity":{"@type":"ItemList","numberOfItems":17}}
+                """.formatted(compact ? "tools" : "calculators").strip());
         return "mv30/hub";
     }
 }

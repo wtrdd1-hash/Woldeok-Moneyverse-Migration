@@ -24,6 +24,7 @@ class SpringNativeToolHubTest {
                 .andExpect(content().string(containsString("data-spring-page=\"tools-hub\"")))
                 .andExpect(content().string(containsString("<html lang=\"en\"")))
                 .andExpect(content().string(containsString("data-total-tools=\"17\"")))
+                .andExpect(content().string(containsString("application/ld+json")))
                 .andExpect(content().string(containsString("href=\"/tools/stock-calculator\"")))
                 .andExpect(content().string(containsString("href=\"/tools/compound-calculator\"")))
                 .andExpect(content().string(not(containsString("/_next/static/"))))

@@ -5,6 +5,14 @@
   <meta name="theme-color" content="#0b1020">
   <meta name="description" th:content="${ko} ? '월덕 머니버스 금융 계산기, 복리 및 주식 평균단가와 17개 기존 도구 탐색.' : 'Moneyverse financial calculators and 17 source-listed financial tools, with verified native Spring capabilities clearly identified.'">
   <link rel="canonical" th:href="${isCompact} ? 'https://easy-scraping.com/tools' : 'https://easy-scraping.com/calculators'">
+  <link rel="alternate" hreflang="en-US" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=en'}">
+  <link rel="alternate" hreflang="ko-KR" th:href="${'https://easy-scraping.com' + calculatorPath + '?lang=ko'}">
+  <link rel="alternate" hreflang="x-default" th:href="${'https://easy-scraping.com' + calculatorPath}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" th:content="${pageTitle} + ' | Woldeok Moneyverse'">
+  <meta property="og:description" th:content="${ko} ? '17종 금융 계산기 및 정확한 검증 상태 제공.' : '17 financial tool routes with truthful verification status.'">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json" th:utext="${schemaJson}">{"@context":"https://schema.org","@type":"CollectionPage","name":"Woldeok Moneyverse financial calculators","mainEntity":{"@type":"ItemList","numberOfItems":17}}</script>
   <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Financial tools | Woldeok Moneyverse</title>
   <link rel="stylesheet" href="/mv-spring/v28/styles.css">
   <link rel="stylesheet" href="/mv-spring/v30/hubs.css">
