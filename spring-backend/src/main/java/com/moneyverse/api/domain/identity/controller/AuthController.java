@@ -46,13 +46,30 @@ public class AuthController {
             "/api/v1/auth/session",
             "/api/auth/session"
     })
-    @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 발급")
+    @Operation(summary = "현재 세션의 CSRF 토큰 조회 및 로그인 상태 반환")
     public Map<String, Object> session(HttpServletRequest request) {
         Optional<SessionInfo> session = authService.resolveSession(request);
         Map<String, Object> res = new LinkedHashMap<>();
+        boolean signedIn = session.isPresent() && session.get().isSignedIn();
         res.put("success", true);
         res.put("ok", true);
+        res.put("authenticated", signedIn);
+        res.put("signedIn", signedIn);
         res.put("csrfToken", session.map(SessionInfo::getCsrfHash).orElse(UUID.randomUUID().toString()));
+        if (signedIn) {
+            SessionInfo s = session.get();
+            Map<String, Object> u = new LinkedHashMap<>();
+            u.put("id", s.getUserId().toString());
+            u.put("userId", s.getUserId().toString());
+            u.put("username", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("name", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+            u.put("email", s.getEmail());
+            u.put("roles", s.getRoles());
+            res.put("user", u);
+        } else {
+            res.put("user", null);
+        }
         return res;
     }
 
