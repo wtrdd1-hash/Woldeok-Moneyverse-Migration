@@ -35,17 +35,14 @@ class Phase5IntegrationTest {
     }
 
     @Test
-    @DisplayName("고객 지원 스레드 및 요약 조회 테스트")
+    @DisplayName("고객 지원 스레드 및 요약은 위조 사용자 헤더만으로 읽을 수 없다")
     void testSupportEndpoints() throws Exception {
         mockMvc.perform(get("/api/support/threads")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/support/threads/summary")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                        .header("x-actor-user-id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -97,17 +94,14 @@ class Phase5IntegrationTest {
     }
 
     @Test
-    @DisplayName("1:1 대화방 및 미확인 쪽지 건수 조회 테스트")
+    @DisplayName("1:1 채팅 목록/읽지 않은 수는 위조 회원 ID 헤더로 노출되지 않는다")
     void testChatEndpoints() throws Exception {
         mockMvc.perform(get("/api/chat/conversations")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/chat/unread-count")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

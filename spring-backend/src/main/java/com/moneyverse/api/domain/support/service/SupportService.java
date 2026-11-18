@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -58,7 +60,7 @@ public class SupportService {
             return new ThreadListResponse(true, threads, threads.size());
         } catch (Exception ex) {
             log.warn("Failed to query support_threads for user {}: {}", userId, ex.getMessage());
-            return new ThreadListResponse(true, List.of(), 0);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support source unavailable");
         }
     }
 
@@ -94,7 +96,7 @@ public class SupportService {
             );
         } catch (Exception ex) {
             log.warn("Failed to query support summary for user {}: {}", userId, ex.getMessage());
-            return new ThreadSummaryResponse(true, 0, 0, 0, 0);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support source unavailable");
         }
     }
 
@@ -136,9 +138,7 @@ public class SupportService {
             return new ThreadCreateResponse(true, item);
         } catch (Exception ex) {
             log.warn("Failed to create support thread for user {}: {}", userId, ex.getMessage());
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            SupportThreadItem fallback = new SupportThreadItem(threadId, userId, req.subject(), "open", now, now, now);
-            return new ThreadCreateResponse(true, fallback);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support persistence unavailable");
         }
     }
 
@@ -165,7 +165,7 @@ public class SupportService {
             return new MessageListResponse(true, messages);
         } catch (Exception ex) {
             log.warn("Failed to query messages for thread {}: {}", threadId, ex.getMessage());
-            return new MessageListResponse(true, List.of());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support source unavailable");
         }
     }
 }

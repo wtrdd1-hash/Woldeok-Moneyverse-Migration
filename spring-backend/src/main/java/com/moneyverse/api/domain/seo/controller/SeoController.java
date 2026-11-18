@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -80,7 +82,8 @@ public class SeoController {
                 """;
             rawLogs = jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
-            log.warn("[SeoController] DB query failed, falling back: {}", e.getMessage());
+            log.warn("[SeoController] crawler source unavailable (fail closed)");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Crawler observations unavailable");
         }
 
         // External crawler filtering (exclude internal sentinel)
@@ -119,26 +122,10 @@ public class SeoController {
             }
         }
 
-        // If logs24h is empty or low, seed realistic verified crawler counts ensuring mathematical invariants
+        // Never fabricate Search Engine crawler counts or average response time.
         int totalHits24h = logs24h.size();
         int totalHits7d = logs7d.size();
-        if (totalHits24h < 10) {
-            totalHits24h = 42;
-            totalHits7d = 286;
-            botDist.clear();
-            botDist.put("Googlebot", 24);
-            botDist.put("Naver Yeti", 12);
-            botDist.put("Bingbot", 6);
-
-            statusDist.clear();
-            statusDist.put("200", 38);
-            statusDist.put("304", 4);
-            totalDurationMs = 42 * 32;
-        } else if (totalHits7d < totalHits24h) {
-            totalHits7d = totalHits24h * 4;
-        }
-
-        int avgDurationMs = totalHits24h > 0 ? (int) (totalDurationMs / totalHits24h) : 28;
+        int avgDurationMs = totalHits24h > 0 ? (int) (totalDurationMs / totalHits24h) : 0;
 
         // Build targetUrls
         List<Map<String, Object>> targetUrls = new ArrayList<>();
@@ -171,13 +158,11 @@ public class SeoController {
                 if ("stock".equals(def.category())) stockIndexed++;
                 if ("guide".equals(def.category())) guideIndexed++;
             } else {
-                // Synthetic healthy status within 24h
-                target.put("lastVisitedAt", now.minus(3, ChronoUnit.HOURS).toString());
-                target.put("lastBot", "Googlebot");
-                target.put("lastStatusCode", 200);
-                target.put("healthStatus", "healthy");
-                if ("stock".equals(def.category())) stockIndexed++;
-                if ("guide".equals(def.category())) guideIndexed++;
+                // No source crawler receipt: unobserved, not indexed or healthy by assumption.
+                target.put("lastVisitedAt", null);
+                target.put("lastBot", null);
+                target.put("lastStatusCode", null);
+                target.put("healthStatus", "warning");
             }
             targetUrls.add(target);
         }
@@ -201,21 +186,6 @@ public class SeoController {
             formattedLogs.add(item);
         }
 
-        if (formattedLogs.isEmpty()) {
-            for (int i = 0; i < 5; i++) {
-                Map<String, Object> dummy = new LinkedHashMap<>();
-                dummy.put("id", UUID.randomUUID().toString());
-                dummy.put("botName", i % 2 == 0 ? "Googlebot" : "Naver Yeti");
-                dummy.put("path", i % 2 == 0 ? "/stocks/CHIPS" : "/guide/stock-trading");
-                dummy.put("statusCode", 200);
-                dummy.put("durationMs", 25 + i * 2);
-                dummy.put("ipAddress", "66.249.66.1");
-                dummy.put("userAgent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)");
-                dummy.put("createdAt", now.minus(i * 15, ChronoUnit.MINUTES).toString());
-                formattedLogs.add(dummy);
-            }
-        }
-
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("totalHits24h", totalHits24h);
         res.put("totalCrawls", totalHits24h);
@@ -229,6 +199,8 @@ public class SeoController {
         res.put("recentLogs", formattedLogs);
         res.put("indexNowKey", DEFAULT_INDEXNOW_KEY);
         res.put("sitemapUrl", BASE_URL + "/sitemap.xml");
+        res.put("coverageSourceVerified", false);
+        res.put("observationSource", "seo_crawler_logs");
 
         return res;
     }
@@ -237,44 +209,24 @@ public class SeoController {
     public ResponseEntity<Map<String, Object>> getCrawlAudit() {
         return ResponseEntity.ok(Map.of(
                 "timestamp", Instant.now().toString(),
-                "totalUrlsChecked", 18,
-                "healthyUrls", 18,
+                "totalUrlsChecked", 0,
+                "healthyUrls", 0,
                 "errorUrls", 0,
                 "issues", Collections.emptyList(),
-                "status", "HEALTHY"
+                "status", "UNKNOWN"
         ));
     }
 
     @PostMapping(path = { "/api/v1/seo/crawl-audit", "/api/seo/crawl-audit", "/seo/crawl-audit" })
     public ResponseEntity<Map<String, Object>> triggerCrawlAudit() {
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "SEO 감사 작업이 성공적으로 실행되었습니다.",
-                "triggeredAt", Instant.now().toString()
-        ));
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Crawl audit scheduler receipt not verified");
     }
 
     @GetMapping(path = { "/api/v1/seo/gsc/analytics", "/api/seo/gsc/analytics", "/seo/gsc/analytics" })
     public ResponseEntity<Map<String, Object>> getGscAnalytics() {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("hasCredentials", true);
-        res.put("clientEmail", "service-account@moneyverse-gsc.iam.gserviceaccount.com");
-        res.put("propertyUrl", "sc-domain:easy-scraping.com");
-        res.put("source", "live_gsc");
-        res.put("syncError", "");
-        res.put("totalClicks30d", 8450);
-        res.put("totalImpressions30d", 142000);
-        res.put("avgCtr30d", 5.95);
-        res.put("avgPosition30d", 8.4);
-        res.put("timeSeries", List.of(
-                Map.of("date", "2026-11-15", "clicks", 280, "impressions", 4800, "ctr", 5.8, "position", 8.2),
-                Map.of("date", "2026-11-16", "clicks", 310, "impressions", 5100, "ctr", 6.1, "position", 7.9)
-        ));
-        res.put("topQueries", List.of(
-                Map.of("query", "가상 주식 모의투자", "clicks", 1240, "impressions", 15200, "ctr", 8.16, "position", 2.3),
-                Map.of("query", "월덱 머니버스", "clicks", 980, "impressions", 8400, "ctr", 11.67, "position", 1.1)
-        ));
-        return ResponseEntity.ok(res);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "Verified Google Search Console analytics unavailable");
     }
 
     @PostMapping(path = { "/api/v1/seo/submit", "/api/seo/submit", "/seo/submit" })

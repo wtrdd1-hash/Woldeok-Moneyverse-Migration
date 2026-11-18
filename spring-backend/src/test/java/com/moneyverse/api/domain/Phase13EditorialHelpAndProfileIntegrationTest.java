@@ -41,9 +41,9 @@ public class Phase13EditorialHelpAndProfileIntegrationTest {
     @Test
     @DisplayName("3. SEO 상태 및 IndexNow 호스트 인증 키 서빙 200 OK")
     void testSeoEndpoints() throws Exception {
+        // SEO administrative crawler logs and diagnostics are never public.
         mockMvc.perform(get("/seo/status"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCrawls").isNumber());
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/.well-known/indexnow.key"))
                 .andExpect(status().isOk())

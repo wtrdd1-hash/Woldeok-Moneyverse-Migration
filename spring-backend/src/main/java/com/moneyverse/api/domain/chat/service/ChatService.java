@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -45,21 +47,23 @@ public class ChatService {
             return new ConversationListResponse(true, list, totalUnreadCount(userId));
         } catch (Exception ex) {
             log.warn("Failed to query private_chat_conversations for user {}: {}", userId, ex.getMessage());
-            return new ConversationListResponse(true, List.of(), 0);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Private chat source unavailable");
         }
     }
 
     public int totalUnreadCount(UUID userId) {
-        return 0;
+        // No verified unread receipt read model exists yet: never invent zero unread.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Unread chat count unverified");
     }
 
     public MessageListResponse listMessages(UUID userId, UUID conversationId, int limit) {
         try {
             int sanitizedLimit = Math.min(Math.max(limit, 1), 100);
-            String sql = "SELECT id, conversation_id, sender_id, body, sequence, created_at " +
-                    "FROM private_chat_messages " +
-                    "WHERE conversation_id = ? " +
-                    "ORDER BY sequence ASC LIMIT ?";
+            String sql = "SELECT m.id, m.conversation_id, m.sender_id, m.body, m.sequence, m.created_at " +
+                    "FROM private_chat_messages m " +
+                    "JOIN private_chat_conversations c ON c.id = m.conversation_id " +
+                    "WHERE m.conversation_id = ? AND (c.user1_id = ? OR c.user2_id = ?) " +
+                    "ORDER BY m.sequence ASC LIMIT ?";
 
             List<ChatMessageItem> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 UUID id = (UUID) rs.getObject("id");
@@ -71,43 +75,19 @@ public class ChatService {
                 OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
 
                 return new ChatMessageItem(id, cid, sender, body, seq, cat);
-            }, conversationId, sanitizedLimit);
+            }, conversationId, userId, userId, sanitizedLimit);
 
             return new MessageListResponse(true, list);
         } catch (Exception ex) {
             log.warn("Failed to query private_chat_messages for cid {}: {}", conversationId, ex.getMessage());
-            return new MessageListResponse(true, List.of());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Private chat source unavailable");
         }
     }
 
     @Transactional
     public SendMessageResponse sendMessage(UUID userId, UUID conversationId, SendMessageRequest req) {
-        UUID msgId = UUID.randomUUID();
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        long nextSeq = System.currentTimeMillis();
-
-        try {
-            jdbcTemplate.update(
-                    "INSERT INTO private_chat_messages (id, conversation_id, sender_id, body, sequence, created_at) " +
-                            "VALUES (?, ?, ?, ?, ?, NOW())",
-                    msgId,
-                    conversationId,
-                    userId,
-                    req.body(),
-                    nextSeq
-            );
-
-            jdbcTemplate.update(
-                    "UPDATE private_chat_conversations SET updated_at = NOW() WHERE id = ?",
-                    conversationId
-            );
-
-            ChatMessageItem item = new ChatMessageItem(msgId, conversationId, userId, req.body(), nextSeq, now);
-            return new SendMessageResponse(true, item);
-        } catch (Exception ex) {
-            log.warn("Failed to insert message into conversation {}: {}", conversationId, ex.getMessage());
-            ChatMessageItem fallback = new ChatMessageItem(msgId, conversationId, userId, req.body(), nextSeq, now);
-            return new SendMessageResponse(true, fallback);
-        }
+        // Authorization alone is insufficient: canonical owner-scoped writer, idempotency and
+        // persisted message receipt must be verified before resuming user-facing send.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Private chat write receipt unverified");
     }
 }
