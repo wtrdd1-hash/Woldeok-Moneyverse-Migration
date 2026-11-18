@@ -29,3 +29,8 @@
 - 영문/한국어 통합 기획서 및 세부 기획, 내부·GitHub 변경 기록, 변경 이력 추가.
 - 프론트엔드/백엔드/DB/Nginx/회원·금융 데이터 미변경. Test·Production QA/배포 미실시.
 - 디자인은 상세 검토 후보이며 구현·운영에 반영된 상태가 아님. PR은 코드와 분리하여 검토 후 판단한다.
+
+## PR 제출 이후 확인
+- 기획 전용 Draft PR #3268: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3268
+- 180개 SVG + 합본 ZIP/갤러리와 양쪽 권위 기획서를 별도 브랜치에 제출함. main 자동 병합·운영 승격 없음.
+- 내부용 업데이트 내역서는 기존 .gitignore의 docs/updates/*internal*.md 차단 정책을 우회하지 않고 미니PC 격리 작업 폴더에만 유지. GitHub 공개용 업데이트 내역서는 PR에 포함.

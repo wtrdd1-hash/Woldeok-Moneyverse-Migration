@@ -29,3 +29,8 @@ Baseline main SHA: 0590fac4e8a82bc986ba1b8c64f014d18daca9e9
 - Updated both authoritative plans and bilingual detailed specs, internal/GitHub change records and changelog.
 - No frontend/backend/DB/Nginx/member/ledger edits; no Test or Production runtime QA/deployment performed.
 - This design proposal is ready for review, NOT approved per-screen implementation or a deployment receipt.
+
+## Pull request handoff
+- Design-only DRAFT PR #3268: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3268
+- 180 unique SVG concepts, ZIP/gallery and both authority plans submitted to the isolated branch; no auto-merge or production promotion.
+- Internal update notes remain on the mini-PC isolated worktree, intentionally not pushed because .gitignore blocks docs/updates/*internal*.md; the public GitHub update is included in this PR. Never bypass secret-upload protection.
