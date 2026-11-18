@@ -16,7 +16,7 @@ const SECRET_PATTERNS = [
 ];
 
 const PRIVATE_DIRECTORY = /(^|\/)(?:ops\/(?:private|recovery)|docs\/(?:internal|private)|\.internal|\.secrets|secrets\/runtime)(?:\/|$)/i;
-const PRIVATE_ARTIFACT = /(?:^|\/)(?:id_rsa|id_ed25519|\.pgpass|\.npmrc)$|\.(?:pem|key|p12|pfx|jks|keystore|age)$|\.(?:tar\.zst\.enc|sql\.(?:gz|zst|xz)|dump(?:\.gz)?|backup(?:\.gz)?|db|sqlite3?)$/i;
+const PRIVATE_ARTIFACT = /(?:^|\/)(?:id_rsa|id_ed25519|\.pgpass)$|\.(?:pem|key|p12|pfx|jks|keystore|age)$|\.(?:tar\.zst\.enc|sql\.(?:gz|zst|xz)|dump(?:\.gz)?|backup(?:\.gz)?|db|sqlite3?)$/i;
 
 export function forbiddenTrackedPath(path) {
   if (/(^|\/)\.env($|\.)/.test(path) && !/\.example$/.test(path)) return true;
@@ -30,6 +30,7 @@ export function forbiddenTrackedPath(path) {
 // internal/private copies without making the pre-existing baseline retroactively fail.
 export function forbiddenChangedPath(path) {
   return forbiddenTrackedPath(path)
+    || /(^|\/)\.npmrc$/i.test(path)
     || /^docs\/(?:updates|worklog|changelog)\/[^/]*internal[^/]*\.(?:md|txt|json|log)$/i.test(path)
     || /(^|\/)(?:audit-raw|mcp-raw|ops-secret)[^/]*\.(?:json|md|txt|log)$/i.test(path);
 }
