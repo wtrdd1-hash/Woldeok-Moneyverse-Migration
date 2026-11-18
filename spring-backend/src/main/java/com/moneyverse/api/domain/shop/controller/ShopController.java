@@ -39,9 +39,23 @@ public class ShopController {
     }
 
     @GetMapping({"", "/", "/catalog", "/items"})
-    @Operation(summary = "상점에서 판매 중인 물품 목록 및 재고 조회")
-    public ResponseEntity<ShopCatalogListResponse> getCatalog() {
-        return ResponseEntity.ok(shopService.getCatalog());
+    @Operation(summary = "정본 아이템 카탈로그: 기존 API items 및 신규 UI catalogItems")
+    public ResponseEntity<ShopCatalogListResponse> getCatalog(
+            HttpServletRequest request,
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "maxUpkeep", required = false) String maxUpkeep) {
+        // Signed-in owner catalogue includes only the DB-verified session's ownership,
+        // while guest catalogue keeps the public NULL-actor source contract.
+        UUID actor = verifiedMember(request).map(UserAuthService.SessionInfo::getUserId).orElse(null);
+        return ResponseEntity.ok(shopService.getCatalog(actor, query, maxUpkeep));
+    }
+
+    @GetMapping("/public-catalog")
+    @Operation(summary = "새 상점 UI 전용 공개 실제 DB 상품 조회, 방문자의 회원 소유정보 없음")
+    public ResponseEntity<ShopCatalogListResponse> getPublicCatalog(
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "maxUpkeep", required = false) String maxUpkeep) {
+        return ResponseEntity.ok(shopService.getCatalog(null, query, maxUpkeep));
     }
 
     @GetMapping({"/inventory", "/my-items"})

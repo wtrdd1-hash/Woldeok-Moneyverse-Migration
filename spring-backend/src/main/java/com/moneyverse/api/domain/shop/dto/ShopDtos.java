@@ -19,10 +19,16 @@ public final class ShopDtos {
             @JsonProperty("stock_remaining") int stockRemaining
     ) implements Serializable {}
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ShopCatalogListResponse(
             @JsonProperty("success") boolean success,
-            @JsonProperty("items") List<ShopCatalogItem> items
-    ) implements Serializable {}
+            @JsonProperty("items") List<ShopCatalogItem> items,
+            @JsonProperty("catalogItems") List<java.util.Map<String, Object>> catalogItems
+    ) implements Serializable {
+        public ShopCatalogListResponse(boolean success, List<ShopCatalogItem> items) {
+            this(success, items, null);
+        }
+    }
 
     public record ShopInventoryItem(
             @JsonProperty("inventory_id") String inventoryId,
