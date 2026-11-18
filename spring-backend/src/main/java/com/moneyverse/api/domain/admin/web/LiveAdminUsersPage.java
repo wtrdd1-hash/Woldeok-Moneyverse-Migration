@@ -118,17 +118,20 @@ public class LiveAdminUsersPage {
         return text != null && text.toLowerCase(Locale.ROOT).contains(needle.toLowerCase(Locale.ROOT));
     }
 
-    private static String escape(String value) {
+    static String escape(String value) {
         if (value == null) return "—";
         return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private static String document(boolean korean, String search, String body) {
-        String title = korean ? "사용자 관리 — Woldeok Moneyverse" : "Member directory — Woldeok Moneyverse";
+        return renderPage(korean, korean ? "사용자 관리" : "Member directory", body);
+    }
+
+    static String renderPage(boolean korean, String title, String body) {
         return "<!doctype html><html lang=\"" + (korean ? "ko" : "en")
                 + "\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                + "<meta name=\"robots\" content=\"noindex,nofollow\"><title>" + title + "</title>"
+                + "<meta name=\"robots\" content=\"noindex,nofollow\"><title>" + escape(title) + " — Woldeok Moneyverse</title>"
                 + "<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1224;color:#f5f7ff;font-family:system-ui,Arial,sans-serif;line-height:1.55}"
                 + "a{color:#c6a8ff}header{background:#111e3a;border-bottom:1px solid #283455;padding:13px clamp(14px,4vw,38px)}nav{display:flex;gap:16px;align-items:center;flex-wrap:wrap}"
                 + "nav .brand{font-weight:750;color:#fff;text-decoration:none;margin-right:auto}main{max-width:1180px;margin:28px auto;padding:0 14px}.panel{padding:clamp(18px,3vw,32px);border:1px solid #293857;border-radius:18px;background:#15213a;box-shadow:0 15px 32px #0002}"
