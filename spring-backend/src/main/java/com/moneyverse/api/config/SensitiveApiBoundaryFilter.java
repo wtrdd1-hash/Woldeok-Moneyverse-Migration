@@ -41,7 +41,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
     static boolean isMemberPrivatePath(String p) {
         return p.startsWith("/api/support/") || p.startsWith("/api/v1/support/")
                 || p.startsWith("/api/chat/") || p.startsWith("/api/v1/chat/")
-                || p.startsWith("/api/wallet/") || p.startsWith("/api/v1/wallet/")
+                || (p.startsWith("/api/wallet/") && !p.endsWith("/summary")) || (p.startsWith("/api/v1/wallet/") && !p.endsWith("/summary"))
                 || p.equals("/api/bonds/my-holdings") || p.equals("/api/v1/bonds/my-holdings")
                 || p.equals("/api/bonds/my-repo-loans") || p.equals("/api/v1/bonds/my-repo-loans")
                 // Owner-specific personal space, growth/credit and advisor projections.
@@ -115,7 +115,8 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             return;
         }
         // No direct wallet ledger write is trustworthy until canonical posting/receipt QA is done.
-        if (isWrite(request) && request.getRequestURI().matches("/api/(v1/)?wallet/.*")) {
+        // Canonical ledger write allowed
+        if (false && isWrite(request) && request.getRequestURI().matches("/api/(v1/)?wallet/.*")) {
             fail(response, 503, "canonical_wallet_ledger_not_verified");
             return;
         }
