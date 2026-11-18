@@ -56,8 +56,8 @@ public class OAuthController {
             "/auth/{provider}/authorize",
             "/api/v1/auth/{provider}/authorize"
     })
-    @Operation(summary = "OAuth 인가 URL 생성 및 발급")
-    public ResponseEntity<Map<String, Object>> authorize(
+    @Operation(summary = "OAuth 인가 URL 생성 및 브라우저 302 리다이렉트")
+    public ResponseEntity<?> authorize(
             @PathVariable String provider,
             @RequestParam(required = false) String client,
             HttpServletRequest request,
@@ -88,8 +88,17 @@ public class OAuthController {
                     URLEncoder.encode(state, StandardCharsets.UTF_8)
             );
         } else {
-            // Google OAuth placeholder
             authorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+        }
+
+        String accept = request.getHeader("Accept");
+        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"))
+                || (accept != null && accept.contains("application/json") && !accept.contains("text/html"));
+
+        if (!wantsJson) {
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(authorizationUrl))
+                    .build();
         }
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -102,7 +111,7 @@ public class OAuthController {
             "/api/v1/auth/{provider}/callback"
     })
     @Operation(summary = "OAuth 콜백 처리, 토큰 교환 및 세션 쿠키 발급")
-    public ResponseEntity<Map<String, Object>> callback(
+    public ResponseEntity<?> callback(
             @PathVariable String provider,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
@@ -111,17 +120,30 @@ public class OAuthController {
             HttpServletResponse response) {
 
         String p = provider.trim().toLowerCase();
+        String accept = request.getHeader("Accept");
+        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"))
+                || (accept != null && accept.contains("application/json") && !accept.contains("text/html"));
+
         if (error != null && !error.isBlank()) {
             log.warn("[OAuth] Provider reported error: {}", error);
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_cancelled")).build();
+            }
             return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_cancelled"));
         }
 
         if (code == null || code.isBlank()) {
             log.warn("[OAuth] No authorization code received");
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_response")).build();
+            }
             return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_response"));
         }
 
         if (!"discord".equals(p)) {
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=unsupported_provider")).build();
+            }
             return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "unsupported_provider"));
         }
 
@@ -146,6 +168,9 @@ public class OAuthController {
             HttpResponse<String> tokenResponse = httpClient.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
             if (tokenResponse.statusCode() < 200 || tokenResponse.statusCode() >= 300) {
                 log.error("[OAuth] Discord token exchange failed: status={}, body={}", tokenResponse.statusCode(), tokenResponse.body());
+                if (!wantsJson) {
+                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                }
                 return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
             }
 
@@ -153,6 +178,9 @@ public class OAuthController {
             String accessToken = tokenJson.path("access_token").asText(null);
             if (accessToken == null || accessToken.isBlank()) {
                 log.error("[OAuth] Invalid Discord access token in response: {}", tokenResponse.body());
+                if (!wantsJson) {
+                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_verification")).build();
+                }
                 return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
             }
 
@@ -168,6 +196,9 @@ public class OAuthController {
             HttpResponse<String> userResponse = httpClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
             if (userResponse.statusCode() < 200 || userResponse.statusCode() >= 300) {
                 log.error("[OAuth] Discord user profile fetch failed: status={}, body={}", userResponse.statusCode(), userResponse.body());
+                if (!wantsJson) {
+                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
+                }
                 return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
             }
 
@@ -179,6 +210,9 @@ public class OAuthController {
 
             if (discordId == null || discordId.isBlank()) {
                 log.error("[OAuth] No discord user id in @me response: {}", userResponse.body());
+                if (!wantsJson) {
+                    return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=oauth_profile")).build();
+                }
                 return ResponseEntity.badRequest().body(Map.of("outcome", "error", "error", "oauth_verification"));
             }
 
@@ -206,6 +240,10 @@ public class OAuthController {
             log.info("[OAuth] Successfully logged in user via Discord: userId={}, displayName={}, isNew={}",
                     result.userId(), result.displayName(), result.isNew());
 
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/")).build();
+            }
+
             Map<String, Object> res = new LinkedHashMap<>();
             res.put("outcome", "signed-in");
             res.put("provider", "discord");
@@ -214,6 +252,9 @@ public class OAuthController {
 
         } catch (Exception e) {
             log.error("[OAuth] Unexpected callback error", e);
+            if (!wantsJson) {
+                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/login?error=server_error")).build();
+            }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("outcome", "error", "error", "oauth_login", "message", e.getMessage()));
         }
