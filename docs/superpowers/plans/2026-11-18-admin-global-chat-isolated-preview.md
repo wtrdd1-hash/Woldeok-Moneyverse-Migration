@@ -47,4 +47,4 @@
 ### Task 5: Test/PR handoff
 - [x] Node tests, Python SVG/XML + missing asset + screenshot marker tests and `git diff --check` all pass; verify original frontend untouched.
 - [x] Serve preview on loopback isolated ephemeral HTTP endpoint and check it responds, without touching running Nginx/Spring or public Test.
-- [ ] Push isolated branch and create DRAFT stacked PR targeting the prior design branch; never merge or deploy on this iteration.
+- [x] Push isolated branch and create DRAFT stacked PR targeting the prior design branch; never merge or deploy on this iteration. ([Draft PR #3270](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3270))
