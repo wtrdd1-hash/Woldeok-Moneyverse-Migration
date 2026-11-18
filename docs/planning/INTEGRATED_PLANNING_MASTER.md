@@ -1,5 +1,10 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.28 — OWNER SUPERSEDING DIRECTIVE: ALL WEB FRONTEND MUST BE SPRING BOOT (IN PROGRESS; FULL RELEASE HOLD)
+The owner explicitly requires **all website frontend pages and backend APIs to be implemented and served by Java Spring Boot**, with the previously approved new UI everywhere. This supersedes earlier architectural notes saying *retain Next.js/React as the production presentation runtime*; those older sections remain historical reference only. Spring MVC + Thymeleaf server-rendered frontend, semantic/progressive modern HTML/CSS and verified role/owner data is the target; no Node/Next runtime dependency after migration. Video `7F_TQyV-3C4` refers to GoogleChrome **Modern Web Guidance 1.0** (browser practice guidance, not a substitute framework). Current v27.1 Production is only **partially Spring** (13 Next static captures + 1 native Spring stocks screen), React calculator #418 and 28 fail-closed API503 aliases remain. Treat all UI/API adoption and any new Production promotion as evidence-gated; do not misrepresent unresolved routes as complete.
+[English full directive](SPRING_ONLY_FRONTEND_OWNER_DIRECTIVE_v2026.11.18.28.md) / [한국어](SPRING_ONLY_FRONTEND_OWNER_DIRECTIVE_v2026.11.18.28.ko.md).
+
+
 ## v2026.11.18.20 — Spring + frontend integration QA (INTERNAL TEST ONLY / PRODUCTION HOLD)
 Code SHA `9d7377cfd5a552840d728ad2d16487abdd011de4` builds and isolated Spring has 174/174 JUnit PASS. New pension no-create GET, Android missing-api SPA protection and Next shop unknown-state UI, plus committed API-v4 fixes and frontend v17 admin/chat candidate. Next build/TS and focused shop/support 121 PASS; full frontend regression timeout/advertising-SEO failures. Official local Test Nginx 20 GET (200=15/401=2/404=1/503=2/502=0), isolated read-only, not public. Browser dynamic Next /admin /shop not served from Spring static assets. Financial authenticated/Android/restore/rollback requirements G0–G6 are not satisfied; **no Production deployment**. [EN/KO QA](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md).
 

@@ -1,0 +1,8 @@
+# v2026.11.18.28 → v2026.11.18.28.1 — Owner Supersedes Next Runtime, Native Spring Tools
+
+**2026-11-18 START → 2026-11-19 00:03 KST Production · scoped PASS, full migration HOLD.**
+
+- **v28.0 PLAN:** owner says ALL web frontend/API Spring, current old plan retaining Next runtime explicitly superseded at top of both living docs plus EN/KO ADR. Video Modern Web Guidance 1.0 actual metadata and Chrome official guidance reviewed. CLI v1.0.1 local scoped scan 0/52 rule matches, retrieved forms/accessibility/responsive/CSS guides (not whole-site assurance). Independent MiniPC worktree/branch, latest main/Gemini checkout unchanged.
+- **v28.1 CODE:** Spring Boot 3.3.5 Thymeleaf starter, Java SSR + pure math for `/tools/compound-calculator` and `/tools/stock-calculator`, navy/violet EN→KO shared HTML/CSS, native GET/no-JS calculator, readable error400, no Next bundles/Flight or financial writes. Initial TDD5 RED→GREEN + 5 math contract tests; final Spring **226/226 JUnit PASS**, 58 suites, bootJar.
+- **v28.1 TEST/PRODUCTION:** immutable JAR `e0f8ac8be500321efdfc8c60450e9a42f8205c37d04b58dcbd838e020b939f57`, Test readonly Spring4652/Prod readonly4653, old Java4550 retained, independent Nginx4453 QA. Two pages×EN/KO×320/390/1440 Chromium12/12, no-JS form2/2, invalid400, old tools links2/2; external HTTPS33/33 statuses/contracts PASS, Nginx syntax/graceful reload and 0600 backups. Other 21 exact static paths and P0 money/auth guards unchanged.
+- **RELEASE HOLD:** 28 real API503 (14 source families), 177 not-certified Next-source route patterns of 180, v17 admin/member/global chat incomplete, 5 dynamic public areas, actual signed-in/finance E2E, official external Test403, all-viewport/rollback and true Spring parity. No claim all APIs or all frontend done.
