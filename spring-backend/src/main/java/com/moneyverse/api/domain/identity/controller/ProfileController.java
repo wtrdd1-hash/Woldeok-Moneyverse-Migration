@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,15 +38,11 @@ public class ProfileController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private String resolveUserId(HttpServletRequest request, String fallbackHeader) {
-        Optional<UserAuthService.SessionInfo> sess = authService.resolveSession(request);
-        if (sess.isPresent() && sess.get().getUserId() != null) {
-            return sess.get().getUserId().toString();
-        }
-        if (fallbackHeader != null && !fallbackHeader.isBlank()) {
-            return fallbackHeader;
-        }
-        return "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+    private String resolveUserId(HttpServletRequest request, String ignoredUntrustedHeader) {
+        return authService.resolveSession(request)
+                .filter(UserAuthService.SessionInfo::isSignedIn)
+                .map(session -> session.getUserId().toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED"));
     }
 
     private Map<String, Object> toProfileContract(UserProfile p) {
@@ -124,16 +122,19 @@ public class ProfileController {
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             HttpServletRequest request) {
 
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("titles", Collections.emptyList());
-        return ResponseEntity.ok(res);
+        resolveUserId(request, headerUserId);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "TITLES_SOURCE_NOT_VERIFIED");
     }
 
     @GetMapping("/{id:[0-9a-fA-F-]{36}}")
     @Operation(summary = "특정 사용자 UUID 공개 프로필 조회")
     public ResponseEntity<Map<String, Object>> getUserProfileById(@PathVariable("id") String targetUserId) {
         UserProfile p = profileService.getProfile(targetUserId);
+        if (!"PUBLIC".equalsIgnoreCase(p.getVisibility())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PROFILE_NOT_PUBLIC");
+        }
         Map<String, Object> contract = toProfileContract(p);
+        contract.remove("email"); // email must not be exposed in public profiles
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("profile", contract);
         return ResponseEntity.ok(res);
@@ -146,26 +147,9 @@ public class ProfileController {
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             HttpServletRequest request) {
 
-        String userId = resolveUserId(request, headerUserId);
-
-        String displayName = (String) body.getOrDefault("displayName", body.get("display_name"));
-        String imageUrl = (String) body.getOrDefault("imageUrl", body.get("image_url"));
-        String visibility = (String) body.get("visibility");
-
-        try {
-            if (displayName != null) {
-                jdbcTemplate.update("UPDATE profiles SET display_name = ? WHERE id = ?::uuid", displayName, userId);
-            }
-            if (imageUrl != null) {
-                jdbcTemplate.update("UPDATE profiles SET image_url = ? WHERE id = ?::uuid", imageUrl, userId);
-            }
-            if (visibility != null) {
-                jdbcTemplate.update("UPDATE profiles SET visibility = ? WHERE id = ?::uuid", visibility.toUpperCase(), userId);
-            }
-        } catch (Exception e) {
-            log.warn("[ProfileController] update error: {}", e.getMessage());
-        }
-
-        return getProfileSettings(headerUserId, request);
+        resolveUserId(request, headerUserId);
+        // No verified owner-scoped stored-procedure and CSRF receipt contract is available.
+        // Never execute direct app-table DML or report a fabricated successful profile update.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "PROFILE_UPDATE_SOURCE_NOT_VERIFIED");
     }
 }

@@ -67,19 +67,16 @@ class GameplayIntegrationTest {
     @Test
     @DisplayName("Shop 도메인 카탈로그, 인벤토리 및 제작 레시피 API 통합 검증")
     void testShopDomainEndpoints() throws Exception {
+        // H2 has no canonical PostgreSQL shop read function; never return demo items as real.
         mockMvc.perform(get("/api/v1/shop/catalog"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.items").isArray());
+                .andExpect(status().isServiceUnavailable());
 
+        // Private inventory belongs to a verified server-side session, not an arbitrary header.
         mockMvc.perform(get("/api/v1/shop/inventory"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.inventory").isArray());
+                .andExpect(status().isUnauthorized());
 
+        // Crafting must not advertise fabricated recipe data without a source.
         mockMvc.perform(get("/api/v1/shop/crafting/recipes"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.recipes").isArray());
+                .andExpect(status().isServiceUnavailable());
     }
 }

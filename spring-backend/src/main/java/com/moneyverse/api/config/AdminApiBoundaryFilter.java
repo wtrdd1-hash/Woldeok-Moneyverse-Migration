@@ -33,6 +33,14 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Robots-Tag", "noindex, nofollow, no-store");
+        // Browser preflight does not carry session cookies. Delegate it to the configured
+        // Spring CORS origin/method policy; this never authorizes an actual API operation.
+        if ("OPTIONS".equals(request.getMethod())
+                && request.getHeader("Origin") != null
+                && request.getHeader("Access-Control-Request-Method") != null) {
+            chain.doFilter(request, response);
+            return;
+        }
         if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) {
             fail(response, HttpServletResponse.SC_UNAUTHORIZED, "login_required");
             return;

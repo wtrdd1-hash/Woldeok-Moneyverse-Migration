@@ -97,12 +97,10 @@ class Phase5IntegrationTest {
                 .andExpect(jsonPath("$.ok").value(true));
 
         mockMvc.perform(get("/api/admin/activity/traffic"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/api/admin/activity/logs"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -38,6 +38,16 @@ class AdminApiBoundaryFilterTest {
         assertNotNull(chain.getRequest());
     }
 
+    @Test void corsPreflightIsDelegatedToCorsPolicyWithoutSession() throws Exception {
+        var req = new MockHttpServletRequest("OPTIONS", "/api/v1/admin/users");
+        req.addHeader("Origin", "https://easy-scraping.com");
+        req.addHeader("Access-Control-Request-Method", "GET");
+        var res = new MockHttpServletResponse();
+        var chain = new MockFilterChain();
+        filter.doFilter(req, res, chain);
+        assertNotNull(chain.getRequest());
+    }
+
     @Test void verifiedAdminCannotWriteWithoutMatchingCsrf() throws Exception {
         var req = new MockHttpServletRequest("PUT", "/api/v1/admin/controls/feature-switches/casino");
         var res = new MockHttpServletResponse();
