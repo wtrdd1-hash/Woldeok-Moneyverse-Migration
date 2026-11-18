@@ -1,5 +1,8 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.8 — Spring 공개 법적 문의 링크·강한 CSP 복구 (Test·운영 실측 / 전체 전환 보류)
+정식 Spring 공개 5개 경로를 불변 Java21/H2-only v18.8에 배포, Java 테스트 162/162, 영/한 원문 일치 및 공식 Test→운영 외부 `mailto` 검사 각각 6/6 통과. 이메일 한 태그만 `<!--email_off-->` 예외 처리하여 Cloudflare 난독화·주입 JS 제거, `default-src 'none'` CSP 유지. Nginx 참조 없는 구형 v18.6 서비스만 종료, v18.7 Test/운영은 원복용 유지. **Next 나머지 173화면·BFF124 미전환, 원래 전체 UI/권한 동등성 0/178**. SEC1/CSRF, OAuth 가짜 로딩, 금융·OTP·Android G0–G6 보류. [릴리스](../releases/v2026.11.18.8-spring-policy-email-csp.ko.md).
+
 ## v2026.11.18.7 — 정식 Spring 정책 3경로 추가 (Spring 5경로 실제 운영 / 전면 보류)
 사용자 지시 전체 웹 전환 진행: Java Spring MVC/Thymeleaf가 정식 `/`, `/guide`, `/terms`, `/privacy`, `/account-deletion`을 실제 공개 서빙. 영/한 정책 원문 1:1 검증, Java21 161/161, Test→운영 실제 HTTPS·CSS 200. Next 소스 178페이지/BFF124 유지, Spring 정식 일부 운영 5, 나머지 Next 173, 전체 언어/상호작용/인증/데이터 동등성 인증 **0**. Cloudflare 이메일 자동 난독화로 공개 `mailto:`가 변환되고 정책 CSP가 이를 푸는 JS 차단 — **연락처 P0**, 다음 패치 필요. Spring permitAll/CSRF 비활성, OAuth 시작 200/475, 금융·OTP·Android·G0~G6 전면 승격 차단. [릴리스](../releases/v2026.11.18.7-spring-public-policy.ko.md) · [인벤토리](../migration/SPRING_FRONTEND_ROUTE_INVENTORY_v2026.11.18.7.json).
 

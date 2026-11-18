@@ -23,7 +23,9 @@ for PAGE in terms privacy account-deletion; do
       printf 'CF email rewrite or script injection still present at %s\n' "$URL" >&2;exit 4
     fi
     grep -Fiq "default-src 'none'" "$TMP/headers" || { printf 'missing strict CSP %s\n' "$URL" >&2; exit 5; }
-    grep -Fq '<!--email_off-->' "$TMP/body" || { printf 'email scope comment absent %s\n' "$URL" >&2;exit 6; }
+    # Cloudflare consumes/strips its <!--email_off--> control comments at the edge.
+    # Source-level Python/Java tests assert comments; LIVE edge tests assert only
+    # the user-visible contract: real mailto, no obfuscation/decoder, strong CSP.
     case "$LANG" in
       ko) grep -Fq '<html lang="ko"' "$TMP/body" ;;
       en) grep -Fq '<html lang="en"' "$TMP/body" ;;

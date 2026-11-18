@@ -1,0 +1,5 @@
+# Changelog v2026.11.18.8 — Spring public policy mailto edge correction
+
+**English primary** · [한국어](2026-11-18-spring-policy-contact-v2026.11.18.8.ko.md) · **CONTACT TEST/PROD ACCEPTED; ALL SPRING MIGRATION INCOMPLETE**
+
+Fixed a real Cloudflare HTML rewrite / strict-CSP mismatch for Java Spring public `/terms`, `/privacy`, `/account-deletion` in both English and Korean, preserving original Next legal copy and all canonical routes. Per-email opt-out without relaxing CSP or enabling JavaScript; cloud edge now preserves real mailto. JDK21 Spring full suite **162/162 green**, literal-source parity **3/3**, inventory **4/4**; official Test and actual Production external HTTP contact checks **6/6 each green**, no injected script or obfuscated link. Same immutable H2-only JAR staged Test :4582 then Prod :4583, exact-route graceful Nginx cutover with backups. Retired only old v18.6 unreferenced test/prod Spring sidecars to reduce RAM; v18.7 retained hot rollback. Next 173 pages and BFF 124 and G0–G6 security/finance remain incomplete. [Evidence](../releases/v2026.11.18.8-spring-policy-email-csp.md).

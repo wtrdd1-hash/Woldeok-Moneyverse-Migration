@@ -1,5 +1,8 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.18.8 — Spring 실제 운영 법적 문의·CSP 보안 공존 검증 (전면 플랫폼 보류)
+사용자의 Spring 전체 프론트엔드 지시 유지. Java/Thymeleaf 정식 `/`, `/guide`, `/terms`, `/privacy`, `/account-deletion`을 검증된 불변 v18.8 JAR에서 실제 제공(Spring 162/162, 법적 원문 일치, 공식 Test·운영 각각 영/한 문의 링크 6개 온전, Cloudflare 복호화 JS 0, CSP 변경 없음). Test :4582→운영 :4583 Nginx 정확한 8경로 무중단 reload, v18.7 즉시 원복 서비스 유지·설정 원본 백업. 미참조 구형 v18.6만 중단해 RAM 확보. **Spring 정식 공개 5경로뿐이며 나머지 Next 173페이지·BFF124 미전환, 원본 완전 기능 동등성 인증 0**. OAuth 시작/SEC1/CSRF/MFA·금융·Android·복원 G0–G6 운영 전면 차단. [증거](../releases/v2026.11.18.8-spring-policy-email-csp.ko.md).
+
 ## v2026.11.18.7 — 법적 원문 동등 Spring SSR 실제 운영 (정식 부분 5 / 전체 보류)
 영/한 원문 그대로의 `/terms`, `/privacy`, `/account-deletion` Spring SSR를 기존 Spring `/`, `/guide`와 합쳐 독립 Test :4580→운영 :4581 실제 배포. Java21 전체 161/161, 실제 외부 5×2 HTML·CSS 3개 200, POST 정책405, 금융·관리자 경로 미변경. 소스 SHA 86497e60a4e 및 불변 아티팩트 해시 저장. Cloudflare가 운영 문의 이메일을 난독화하고 CSP에서 차단되는 복호화 JS를 주입하므로 **연락처 P0 미해결, v18.8 후속 패치 필요**. 경로 인벤토리 Next 페이지 178·BFF124, Spring 정식 일부 운영 5, 완전 동등성 인증 0. OAuth·SEC1·CSRF·금융·OTP·독립복원 G0–G6 기존 차단 유지. [릴리스 증빙](../releases/v2026.11.18.7-spring-public-policy.ko.md).
 
