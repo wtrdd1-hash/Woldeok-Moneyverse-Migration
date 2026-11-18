@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>가상 은행 & 복리 예금 · 월덕 머니버스</title>
+  <meta name="description" content="실시간 복리 이자가 붙는 월덕뱅크 가상 은행. WLD 정기예금, 저축 팟, 가상 신용 대출 시뮬레이션">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/_next/static/css/8bbd23f36a44eb75.css">
+  <style>
+    :root {
+      --bg-primary: #090a0f;
+      --card-bg: rgba(18, 22, 34, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-violet: #8b5cf6;
+    }
+    body {
+      background-color: var(--bg-primary);
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .bank-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bank-card:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.15);
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: scale(1.02);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
+  <!-- Global Navigation Header -->
+  <header class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#090a0f]/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <span class="text-white font-black text-sm">W</span>
+          </div>
+          <span class="font-extrabold text-lg tracking-tight text-white group-hover:text-blue-400 transition-colors">월덕 머니버스</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-zinc-400">
+          <a href="/bank" class="px-3 py-1.5 rounded-lg text-white bg-white/5">은행</a>
+          <a href="/stocks" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-all">거래소</a>
+          <a href="/work" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-all">직업</a>
+          <a href="/arcade" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-all">아케이드</a>
+          <a href="/tools" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-all">계산기</a>
+          <a href="/status" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-all">시스템 상태</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/login" class="btn-action btn-primary text-xs sm:text-sm py-2 px-4">로그인</a>
+        <a href="/register" class="btn-action btn-secondary text-xs sm:text-sm py-2 px-4 hidden sm:inline-flex">회원가입</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Bank Dashboard -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
+    <!-- Hero Header Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-950/30 to-purple-950/20 border border-blue-500/20 p-8 sm:p-12 mb-10">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold mb-4">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          실시간 복식부기 불변 원장 가동 중
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
+          실시간 복리 이자가<br>
+          <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">매초 불어나는 월덕뱅크</span>
+        </h1>
+        <p class="text-zinc-400 text-base sm:text-lg mb-8 leading-relaxed">
+          가상화폐 WLD를 안전하게 예치하고, 매초 실시간으로 쌓이는 복리 이자를 체감해 보세요. 
+          100% 모의 가상경제 엔진으로 운영되어 원금 손실 위험 없이 금융 복리의 원리를 배울 수 있습니다.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="/login" class="btn-action btn-primary">
+            내 가상 통장 개설하기
+          </a>
+          <a href="/tools/compound-calculator" class="btn-action btn-secondary">
+            복리 이자 시뮬레이터 실행
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Bento Grid Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <!-- Card 1: 복리 예금 -->
+      <div class="bank-card flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <span class="badge-pill bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-2">실시간 복리</span>
+          <h3 class="text-xl font-bold text-white mb-2">WLD 정기예금</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+            최대 연 5.8% 복리 수익률. 원하는 금액을 자유롭게 입출금하며 복리 효과를 직접 체감하세요.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500 font-medium">
+          <span>최소 예치: 100 WLD</span>
+          <span class="text-emerald-400 font-bold">즉시 인출 가능</span>
+        </div>
+      </div>
+
+      <!-- Card 2: 스마트 저축 팟 -->
+      <div class="bank-card flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+          <span class="badge-pill bg-purple-500/10 text-purple-400 border border-purple-500/20 mb-2">목표 저축</span>
+          <h3 class="text-xl font-bold text-white mb-2">스마트 저축 팟</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+            내 집 마련, 주식 시드머니 등 목적별 저축 통장을 개설하고 달성 보너스를 획득하세요.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500 font-medium">
+          <span>최대 5개 포켓</span>
+          <span class="text-purple-400 font-bold">+2.0% 달성 보너스</span>
+        </div>
+      </div>
+
+      <!-- Card 3: 가상 신용 대출 -->
+      <div class="bank-card flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <span class="badge-pill bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">신용 평가</span>
+          <h3 class="text-xl font-bold text-white mb-2">가상 신용 대출</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+            모의 거래 실적과 직업 소득을 바탕으로 산정되는 가상 신용등급으로 시드머니를 레버리지하세요.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500 font-medium">
+          <span>신용 1~10등급</span>
+          <span class="text-emerald-400 font-bold">최대 5,000만 WLD</span>
+        </div>
+      </div>
+
+      <!-- Card 4: 가상 채권 -->
+      <div class="bank-card flex flex-col justify-between">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          </div>
+          <span class="badge-pill bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">확정 금리</span>
+          <h3 class="text-xl font-bold text-white mb-2">국채 시뮬레이터</h3>
+          <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+            만기 시 원금과 확정 이자를 보장받는 3개월, 6개월, 1년 단위 가상 국채 투자 시뮬레이션.
+          </p>
+        </div>
+        <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs text-zinc-500 font-medium">
+          <span>한국은행 기준금리 연동</span>
+          <span class="text-amber-400 font-bold">확정 쿠폰 지급</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety Notice Banner -->
+    <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center text-xs text-zinc-500 leading-relaxed">
+      <p class="font-bold text-zinc-400 mb-1">🛡️ 100% 안전한 금융 시뮬레이션 고지</p>
+      월덕 머니버스의 모든 화폐(WLD), 예금, 대출 및 이자 시스템은 경제 교육 및 오락을 위한 모의 시뮬레이터입니다.<br>
+      실제 현금, 금융 투자 상품, 암호화폐 또는 도박과 아무런 관련이 없으며 현실 통화로 교환되지 않습니다.
+    </div>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="border-t border-white/5 bg-[#090a0f] py-8 text-center text-xs text-zinc-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p>© 2026 Woldeok Moneyverse. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="/terms" class="hover:text-zinc-300 transition-colors">이용약관</a>
+        <a href="/privacy" class="hover:text-zinc-300 transition-colors">개인정보처리방침</a>
+        <a href="/status" class="hover:text-zinc-300 transition-colors">시스템 상태</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

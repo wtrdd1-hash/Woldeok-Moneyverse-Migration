@@ -20,8 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = {
         "/api/v1/admin/logs/system",
-        "/api/admin/logs/system",
-        "/admin/logs/system"
+        "/api/admin/logs/system"
 })
 public class SystemLogController {
 
