@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -18,6 +20,11 @@ import java.util.UUID;
 public class NotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
+    private static ResponseStatusException unavailable(String source) {
+        log.warn("Notification source unavailable: {}", source);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "NOTIFICATION_SOURCE_UNAVAILABLE");
+    }
+
     private final JdbcTemplate jdbcTemplate;
 
     public NotificationService(JdbcTemplate jdbcTemplate) {
@@ -54,7 +61,8 @@ public class NotificationService {
                 Timestamp readAtTs = rs.getTimestamp("read_at");
                 OffsetDateTime readAt = readAtTs != null ? readAtTs.toInstant().atOffset(ZoneOffset.UTC) : null;
                 Timestamp createdAtTs = rs.getTimestamp("created_at");
-                OffsetDateTime createdAt = createdAtTs != null ? createdAtTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+                if (createdAtTs == null) throw new IllegalStateException("NOTIFICATION_CREATED_AT_MISSING");
+                OffsetDateTime createdAt = createdAtTs.toInstant().atOffset(ZoneOffset.UTC);
 
                 return new NotificationItem(id, uid, category, title, body, link, dedupeKey, isRead, readAt, createdAt);
             }, params);
@@ -62,8 +70,7 @@ public class NotificationService {
             int unread = unreadCount(userId);
             return new NotificationListResponse(true, list, list.size(), unread);
         } catch (Exception ex) {
-            log.warn("Failed to query in_app_notifications for user {}: {}", userId, ex.getMessage());
-            return new NotificationListResponse(true, List.of(), 0, 0);
+            throw unavailable("notification_list");
         }
     }
 
@@ -74,10 +81,10 @@ public class NotificationService {
                     Integer.class,
                     userId
             );
-            return count != null ? count : 0;
+            if (count == null) throw unavailable("unread_count_null");
+            return count;
         } catch (Exception ex) {
-            log.warn("Failed to query unread count for user {}: {}", userId, ex.getMessage());
-            return 0;
+            throw unavailable("unread_count");
         }
     }
 
@@ -91,8 +98,7 @@ public class NotificationService {
             );
             return new MarkReadResponse(updated > 0, notificationId, true);
         } catch (Exception ex) {
-            log.warn("Failed to mark notification {} read for user {}: {}", notificationId, userId, ex.getMessage());
-            return new MarkReadResponse(false, notificationId, false);
+            throw unavailable("mark_read");
         }
     }
 
@@ -105,8 +111,7 @@ public class NotificationService {
             );
             return new MarkAllReadReceiptResponse(true, updated, 0);
         } catch (Exception ex) {
-            log.warn("Failed to mark all notifications read for user {}: {}", userId, ex.getMessage());
-            return new MarkAllReadReceiptResponse(true, 0, 0);
+            throw unavailable("mark_all_read");
         }
     }
 }

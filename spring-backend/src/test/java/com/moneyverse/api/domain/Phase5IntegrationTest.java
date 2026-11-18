@@ -23,22 +23,15 @@ class Phase5IntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("인앱 알림 목록 및 미확인 건수 조회 테스트")
+    @DisplayName("알림은 사용자 헤더만으로 조회/읽음 처리할 수 없다")
     void testNotificationEndpoints() throws Exception {
         mockMvc.perform(get("/api/notifications")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
-        mockMvc.perform(get("/api/notifications/unread-count")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
-        mockMvc.perform(post("/api/notifications/read-all")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/notifications/unread-count"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/notifications/read-all"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -118,15 +111,14 @@ class Phase5IntegrationTest {
     }
 
     @Test
-    @DisplayName("클럽 목록 및 특정 클럽 상세 조회 테스트")
+    @DisplayName("H2의 미구현 클럽 소스는 실제 목록/상세 대신 503")
     void testClubEndpoints() throws Exception {
         mockMvc.perform(get("/api/club/list"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
-
-        mockMvc.perform(get("/api/club/a0000000-0000-0000-0000-000000000001")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
+        mockMvc.perform(get("/api/club/a0000000-0000-0000-0000-000000000001"))
+                .andExpect(status().isServiceUnavailable());
+        mockMvc.perform(post("/api/club/a0000000-0000-0000-0000-000000000001/join")
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
     }
 }

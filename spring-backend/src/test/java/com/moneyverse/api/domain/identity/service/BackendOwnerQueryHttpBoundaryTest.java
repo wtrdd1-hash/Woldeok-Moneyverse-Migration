@@ -21,7 +21,8 @@ class BackendOwnerQueryHttpBoundaryTest {
         for (String path : new String[] {
                 "/api/v1/work", "/api/v1/work/tasks", "/api/v1/work/assignments",
                 "/api/v1/business/my", "/api/v1/stocks/portfolio",
-                "/api/v1/stocks/watchlist", "/api/v1/stocks/history" }) {
+                "/api/v1/stocks/watchlist", "/api/v1/stocks/history",
+                "/api/v1/notifications", "/api/v1/notifications/unread-count" }) {
             mockMvc.perform(get(path).header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
                     .andExpect(status().isUnauthorized());
         }
@@ -37,6 +38,12 @@ class BackendOwnerQueryHttpBoundaryTest {
                         .header("X-User-Id", "00000000-0000-0000-0000-000000000101")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"type_id\":\"00000000-0000-0000-0000-000000000202\"}"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/v1/notifications/read-all")
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/v1/club/00000000-0000-0000-0000-000000000303/join")
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(post("/api/v1/stocks/00000000-0000-0000-0000-000000000303/orders")
                         .header("X-User-Id", "00000000-0000-0000-0000-000000000101")
