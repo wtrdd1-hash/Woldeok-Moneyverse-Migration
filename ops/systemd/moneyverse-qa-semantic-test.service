@@ -1,0 +1,29 @@
+# v2026.11.18.16 — independent, read-only Test semantic QA probe.
+# This is NOT moneyverse-qa.service, not authorized Production functional QA.
+[Unit]
+Description=Moneyverse Semantic QA Read-Only Companion (Test environment only)
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/srv/moneyverse-data/qa-scheduler-releases/v2026.11.18.16/scripts/qa/scheduled-semantic-qa.mjs
+
+[Service]
+Type=oneshot
+User=debian
+Group=debian
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /srv/moneyverse-data/qa-scheduler-releases/v2026.11.18.16/scripts/qa/scheduled-semantic-qa.mjs --base-url https://test.easy-scraping.com --label test
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=110
+Restart=no
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+UMask=0077
+MemoryMax=128M
+CPUQuota=25%

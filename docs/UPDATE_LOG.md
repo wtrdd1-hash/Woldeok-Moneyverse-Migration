@@ -1,3 +1,6 @@
+## v2026.11.18.16 — scheduled Test semantic QA and six-post research (Test monitor active, app Production HOLD)
+Separate 7-GET Test-only hourly :20 timer enabled; legacy :00 QA unchanged. Node tests 4/4 PASS; official Test 1/7 PASS, Production public diagnostic 4/7 PASS, both FAIL overall; no functional certification or app deployment. See [runbook](operations/QA_SCHEDULED_SEMANTIC_RUNBOOK_v2026.11.18.16.md), [source research](planning/QA_PUBLIC_PROFILE_REFERENCE_v2026.11.18.16.md), [worklog](worklog/2026-11-18-scheduled-qa-learning-v2026.11.18.16.md).
+
 ## v2026.11.10.1948 — National Mint UI/monetary policy verified in real Production v1947
 PR #3000 merged SHA `a13a18cd70709a6f4df320d4d76ea834baae2331`, CI/Test/Production exact runtime PASSED. Fixed async approved order selection, unsupported MINT/TREASURY proposal 500 and mobile form; SQL344 guard routines handle admin policies/certificates without direct app certificate INSERT. Production BFF uses new 4574 backend; public Treasury 0 WLD/verified, user money unchanged; full before/after backups and SHA attestation. Two automatic rollback attempts recorded before verified v1947 Nginx 4574/4575 promotion. Certificate is not funded canonical WLD issuance. [Proof](releases/v2026.11.10.1948-mint-ui-prod.md).
 

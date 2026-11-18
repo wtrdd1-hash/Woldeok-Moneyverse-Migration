@@ -1,3 +1,6 @@
+## v2026.11.18.16 — Test 예약 시맨틱 QA·프로필 공개 릴스 6개 조사 (Test 관측만 활성, 앱 운영 보류)
+별도 읽기 전용 매시 20분 예약 활성화, 기존 정각 QA 보존. Node 테스트 4/4 PASS, 공식 Test 1/7 PASS·운영 공개 진단 4/7 PASS로 두 환경 모두 전체 FAIL. 실제 전체 기능 QA 인증/앱 운영 배포 없음. [실행서](operations/QA_SCHEDULED_SEMANTIC_RUNBOOK_v2026.11.18.16.ko.md), [출처 문서](planning/QA_PUBLIC_PROFILE_REFERENCE_v2026.11.18.16.ko.md), [기록](worklog/2026-11-18-scheduled-qa-learning-v2026.11.18.16.ko.md).
+
 ## v2026.11.10.1948 — 조폐국 UI/정책 제한형 DB 함수 v1947 실제 운영 승격
 PR #3000 메인 SHA `a13a18cd70709a6f4df320d4d76ea834baae2331` CI·테스트·운영 검증. 비동기 승인 선택/DB 미지원 MINT/TREASURY 500/모바일 폼 수정, SQL344 관리자 보안 함수·증명서 직접 INSERT 방지, 새 BFF 백엔드4574 일치. 국고0/유저잔액 보존/운영 전후 백업. 자동 롤백 2회 후 표준 v1947 4574/4575 운영 전환 성공. 증명서는 실제 신규 WLD/국고 입금이 아님. [증빙](releases/v2026.11.10.1948-mint-ui-prod.ko.md).
 

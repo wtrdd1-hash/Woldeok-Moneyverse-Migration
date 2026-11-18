@@ -1,0 +1,14 @@
+# v2026.11.18.16 — hourly at minute 20, separate from legacy QA :00.
+# Read-only official Test probes; never deploy to production without G0-G6 gates.
+[Unit]
+Description=Schedule Moneyverse Test semantic QA every hour (not release certification)
+
+[Timer]
+OnCalendar=*-*-* *:20:00
+RandomizedDelaySec=30s
+AccuracySec=1min
+Persistent=true
+Unit=moneyverse-qa-semantic-test.service
+
+[Install]
+WantedBy=timers.target

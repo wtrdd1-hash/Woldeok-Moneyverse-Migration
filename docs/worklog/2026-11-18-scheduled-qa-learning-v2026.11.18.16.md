@@ -23,3 +23,12 @@ Status: IN PROGRESS / ISOLATED CANDIDATE / DO NOT CLAIM RELEASE.
 
 ## Midpoint/final
 Pending.
+
+## Midpoint — 2026-11-18 KST
+- Refetched authoritative origin/main at midpoint; same 0590fac4e8a82bc986ba1b8c64f014d18daca9e9, no drift. Existing parallel worktrees unchanged.
+- Public profile research: six public embedded captions reviewed, including three additional practical themes (unit/integration/E2E, nine team roles, nine mobile screen states); full 74-post inventory not verified, no user secrets.
+- Test-driven code: initial expected RED (module absent); 4 scenario integration tests GREEN, syntax and systemd-analyze verify PASS.
+- Executed on real official Test HTTPS: 1 PASS/6 FAIL, no simulated pass. Public Production GET diagnosis: 4 PASS/3 FAIL, no writes. Sanitized reports stored internally at /srv/moneyverse-data/qa-reports/v2026.11.18.16-semantic-readonly (not GitHub).
+- New independent, immutable v2026.11.18.16 Test-only script sha256 19bf5851fb16f76518bc6945d2ae9bec937550537da4bb86403d9054b1533979; new moneyverse-qa-semantic-test.timer active+enabled. First actual systemd oneshot logged FAIL (1/7 PASS) with exit 1; next scheduled 2026-11-18 16:20:10 KST. Existing moneyverse-qa.timer active+enabled, still next :00.
+- NO application deployment, backend/Test UI repair, Spring/APK/money/DB modification or Production QA certification. CI/PR and final validation pending.
+- Defect triage: existing P0 official Test 502 and functional QA issue #3265; new P1 public semantic fallback issue #3271. Both remain OPEN. No unrelated incident fix or release claim.

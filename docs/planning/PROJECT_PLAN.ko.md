@@ -1,5 +1,9 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.18.16 — 예약 시맨틱 QA·공개 QA 자료 조사 (Test 전용·애플리케이션 운영 승격 보류)
+QA 절차 문서화와 실제 예약 QA에 의미 기반 HTTP 검사를 추가. 기존 정각 QA 타이머는 그대로 유지하고, 별도 읽기 전용 Test 예약을 매시 20분에 실행한다. Node 테스트 4/4 PASS, 공식 Test 실측 1 PASS/6 FAIL(웹/로그인/관리자 502), 운영 공개 GET 진단 4 PASS/3 FAIL(robots/sitemap/없는 경로 200 HTML). 따라서 전체 사용자 기능·금융·Discord·Android QA와 운영 앱 승격은 BLOCKED/NOT_TESTED. 한국어 계정 QA실무노트(@qaonetop) 공개 릴스 설명 6개를 확인, 전체 계정과 동명 해외 기업은 확인하지 않았다. [프로필 자료](QA_PUBLIC_PROFILE_REFERENCE_v2026.11.18.16.ko.md) / [EN](QA_PUBLIC_PROFILE_REFERENCE_v2026.11.18.16.md), [예약 QA 실행서](../operations/QA_SCHEDULED_SEMANTIC_RUNBOOK_v2026.11.18.16.ko.md) / [EN](../operations/QA_SCHEDULED_SEMANTIC_RUNBOOK_v2026.11.18.16.md), [작업기록](../worklog/2026-11-18-scheduled-qa-learning-v2026.11.18.16.ko.md).
+
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

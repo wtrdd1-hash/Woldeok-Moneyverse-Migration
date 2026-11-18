@@ -23,3 +23,12 @@
 
 ## 중간/종료
 진행 중.
+
+## 중간 기록 — 2026-11-18 KST
+- 최신 origin/main 재조회: 0590fac4e8a82bc986ba1b8c64f014d18daca9e9 불변. 병렬 워크트리 미침범.
+- 공개 프로필 임베드 릴스 설명 6개 분석. 신규 단위·통합·E2E, 협업 9직무, 앱 화면 9유형 확인. 전체 게시물 74개 전수 확인 주장은 하지 않음.
+- RED(모듈 없음) → GREEN 실제 HTTP 모의 시나리오 4건, Node 구문·systemd-analyze verify 통과.
+- 실제 공식 Test HTTPS 1 PASS/6 FAIL, 운영 익명 GET 진단 4 PASS/3 FAIL. 비식별 JSON 실측 근거 /srv/moneyverse-data/qa-reports/v2026.11.18.16-semantic-readonly 보관(GitHub 업로드 금지).
+- 완전 분리한 v2026.11.18.16 불변 Test 전용 실행 파일 SHA256 19bf5851fb16f76518bc6945d2ae9bec937550537da4bb86403d9054b1533979. 새 타이머 active/enabled, 최초 systemd 서비스 FAIL (실제 1/7만 정상, exit 1), 다음 2026-11-18 16:20:10 KST. 기존 정각 QA 타이머 active/enabled 유지.
+- 앱 운영·DB·금융·Android·Spring 변경 없고, 공식 Test 502/운영 200 HTML 오동작 해결되지 않음. CI/PR 및 최종 확인 대기.
+- 결함 추적: 공식 Test 502 및 전체 기능 QA 기존 P0 이슈 #3265, 운영 200 HTML 폴백 신규 P1 이슈 #3271. 둘 다 미해결. 별도 앱 장애 복구/운영 승격 완료 주장 금지.
