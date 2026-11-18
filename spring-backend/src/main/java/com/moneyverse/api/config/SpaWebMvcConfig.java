@@ -24,6 +24,18 @@ import java.io.IOException;
 @Configuration
 public class SpaWebMvcConfig implements WebMvcConfigurer {
 
+    static boolean isBackendRoute(String path) {
+        if (path == null) return false;
+        String normalized = path.startsWith("/") ? path.substring(1) : path;
+        return normalized.equals("api") || normalized.startsWith("api/")
+                || normalized.equals("app-api") || normalized.startsWith("app-api/")
+                || normalized.equals("auth") || normalized.startsWith("auth/")
+                || normalized.equals("seo") || normalized.startsWith("seo/")
+                || normalized.startsWith(".well-known")
+                || normalized.startsWith("v3/api-docs") || normalized.startsWith("swagger-ui")
+                || normalized.equals("health") || normalized.startsWith("actuator");
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
@@ -32,15 +44,8 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
                 .addResolver(new PathResourceResolver() {
                     @Override
                     protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                        // 0. API and internal paths must NOT be handled by static resource resolver
-                        if (resourcePath.startsWith("api/") || resourcePath.startsWith("api")
-                                || resourcePath.startsWith("auth/") || resourcePath.startsWith("auth")
-                                || resourcePath.startsWith("seo/") || resourcePath.startsWith("seo")
-                                || resourcePath.startsWith(".well-known")
-                                || resourcePath.startsWith("v3/api-docs") || resourcePath.startsWith("swagger-ui")
-                                || resourcePath.startsWith("health") || resourcePath.startsWith("actuator")) {
-                            return null;
-                        }
+                        // Never let a missing API/Android gateway silently become HTTP 200 HTML.
+                        if (isBackendRoute(resourcePath)) return null;
 
                         String cleanPath = resourcePath;
                         if (cleanPath.startsWith("/")) {

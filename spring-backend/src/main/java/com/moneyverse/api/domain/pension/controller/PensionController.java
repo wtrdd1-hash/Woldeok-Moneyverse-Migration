@@ -3,6 +3,10 @@ package com.moneyverse.api.domain.pension.controller;
 import com.moneyverse.api.common.response.ApiResponse;
 import com.moneyverse.api.domain.pension.dto.PensionDtos.*;
 import com.moneyverse.api.domain.pension.service.PensionService;
+import com.moneyverse.api.domain.identity.service.UserAuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import java.util.Optional;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,9 +21,26 @@ import java.util.Map;
 public class PensionController {
 
     private final PensionService pensionService;
+    private final UserAuthService userAuthService;
 
-    public PensionController(PensionService pensionService) {
+    public PensionController(PensionService pensionService, UserAuthService userAuthService) {
         this.pensionService = pensionService;
+        this.userAuthService = userAuthService;
+    }
+
+    private Optional<UserAuthService.SessionInfo> verifiedMember(HttpServletRequest request) {
+        return userAuthService.resolveSession(request).filter(UserAuthService.SessionInfo::isSignedIn);
+    }
+
+    private ResponseEntity<?> unauthenticated() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("code", "SESSION_REQUIRED", "message", "Sign-in required"));
+    }
+
+    private ResponseEntity<?> sourceUnavailable() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("code", "PENSION_LEDGER_NOT_CERTIFIED",
+                        "message", "Pension writes and balance claims are temporarily unavailable"));
     }
 
     @GetMapping("/overview")
@@ -29,33 +50,37 @@ public class PensionController {
     }
 
     @GetMapping("/my-account")
-    @Operation(summary = "내 국민연금 계좌, 적립금, 등급, 은퇴 수령 상태 조회")
-    public ApiResponse<PensionAccountInfo> getMyAccount(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        return ApiResponse.ok(pensionService.getOrCreateAccount(userId));
+    @Operation(summary = "DB 검증된 본인 국민연금 계좌 조회; GET에서 계좌 생성 금지")
+    public ResponseEntity<?> getMyAccount(HttpServletRequest request) {
+        var member = verifiedMember(request);
+        if (member.isEmpty()) return unauthenticated();
+        return pensionService.readExistingAccount(member.get().getUserId().toString())
+                .<ResponseEntity<?>>map(account -> ResponseEntity.ok(ApiResponse.ok(account)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("code", "PENSION_ACCOUNT_NOT_FOUND")));
     }
 
     @PostMapping("/contribute")
-    @Operation(summary = "국민연금 기여금 납입 (지갑 차감 -> 국고 편입)")
-    public ApiResponse<Map<String, Object>> contribute(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId,
-            @Valid @RequestBody PensionContributeRequest request) {
-        Map<String, Object> result = pensionService.contribute(userId, request.getAmountWld(), request.getNote());
-        return ApiResponse.ok(result, (String) result.get("message"));
+    @Operation(summary = "정본 금융 원장 검증 전 납입 중단")
+    public ResponseEntity<?> contribute(HttpServletRequest request,
+            @RequestBody(required = false) PensionContributeRequest body) {
+        if (verifiedMember(request).isEmpty()) return unauthenticated();
+        // Until the canonical ledger receipt and CSRF/idempotency flow are certified, never post funds.
+        return sourceUnavailable();
     }
 
     @PostMapping("/toggle-retirement")
-    @Operation(summary = "은퇴 상태 전환 토글")
-    public ApiResponse<Map<String, Object>> toggleRetirement(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        Map<String, Object> result = pensionService.toggleRetirement(userId);
-        return ApiResponse.ok(result, (String) result.get("message"));
+    @Operation(summary = "실제 원장 및 CSRF 검증 전 은퇴 상태 변경 중단")
+    public ResponseEntity<?> toggleRetirement(HttpServletRequest request) {
+        if (verifiedMember(request).isEmpty()) return unauthenticated();
+        return sourceUnavailable();
     }
 
     @GetMapping("/funded/position")
-    @Operation(summary = "정식 원장으로 증명된 신규 국민연금 에스크로 적립금 조회")
-    public ApiResponse<FundedPositionResponse> getFundedPosition(
-            @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
-        return ApiResponse.ok(pensionService.getFundedPosition(userId));
+    @Operation(summary = "연금 원장 증명 전 자산 0으로 허위 표시 금지")
+    public ResponseEntity<?> getFundedPosition(HttpServletRequest request) {
+        if (verifiedMember(request).isEmpty()) return unauthenticated();
+        return sourceUnavailable();
     }
+
 }
