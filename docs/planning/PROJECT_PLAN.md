@@ -1,5 +1,13 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.17 — Spring-served Frontend Admin/Chat Transition Candidate (SOURCE TEST PASS / RELEASE HOLD)
+
+Owner approved moving the approved admin redesign and global inquiry concept into actual frontend code. The new, isolated Spring-repair-based worktree implements a scoped navy/violet admin layout and single 56px floating support entry per route: on /admin* a **read-only safe admin help dock** (no ticket or DM transport); on member pages the existing real Support/Direct widget remains, with accessible 56px trigger and mobile safe-area clearance. **No API, ledger or permission logic is altered.**
+
+[English design/transition contract](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) / [한국어](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [English QA](../qa/2026-11-18-spring-frontend-admin-chat-v17.md) / [한국어 QA](../qa/2026-11-18-spring-frontend-admin-chat-v17.ko.md) · [worklog](../worklog/2026-11-18-frontend-transition-v2026.11.18.17.md).
+
+Evidence: TDD 20 focused PASS; contract + TS typecheck PASS, Next full build PASS (603 static generation step), Spring bootJar PASS, Spring admin boundary tests 3/3 PASS; ESLint 0 errors/9 pre-existing warnings in legacy support component. Full frontend suite timed out at 105s, observed failures in unrelated ad/SEO cases — NOT GREEN. **Spring UI migration remains BLOCKED:** Next /admin and /support are dynamic, current Spring static jar contains old exported HTML; new UI is not served by Spring on Test/Production. Spring support/chat identity-header/fixed UUID and false-success paths remain P0. No Production/Test promotion, no runtime/DB deployment.
+
 ## v2026.11.17.5 — Spring KDIC and engagement finance P0 integrated candidate (DRAFT / RELEASE HOLD)
 Owner-approved integration of #3218 and #3215 on main cd822aa098: corrected duplicate engagement routing, forged member identity headers, false WLD outcomes and KDIC fabricated financial success. KDIC admin endpoints now require actual DB-resolved signed-in superadmin session; missing KDIC fund, institution, premium, payout or ratio evidence no longer produces fabricated values. Spring test-profile entire clean test bootJar passes 126 tests / 0 fail / 0 skipped with embedded live HTTP anonymous negative checks. The app remains on old Production runtime; no ledger/DB/WLD mutations or official Test/Production deployment. Full global Spring SecurityConfig SEC1, positive MFA/CSRF, verified KDIC ledger settlement, real authenticated Test and independent restore remain P0 and block promotion. [Worklog](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.md).
 

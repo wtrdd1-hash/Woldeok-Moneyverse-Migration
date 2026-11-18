@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.17 — 관리자/전역 채팅 실제 UI 코드 전환 (격리 개발 / Spring 정적 연결·운영 보류)
+
+[상세 기획](planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [English](planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [QA](qa/2026-11-18-spring-frontend-admin-chat-v17.ko.md) · [작업 기록](worklog/2026-11-18-frontend-transition-v2026.11.18.17.ko.md). 집중 테스트 20 통과, Next/Java 빌드 통과. /admin Next 동적 화면이 Spring 정적 JAR에 포함되지 않아 운영 전환 HOLD.
+
 **DOC-2026.11.11.1500 — [최신 문서·권위·검증 현황](CURRENT_DOCUMENTATION_STATUS.ko.md) / [English](CURRENT_DOCUMENTATION_STATUS.md).** 아래 과거 기록은 현재 운영 기능 인증이 아님. 통합기획서와 실측 영수증을 우선하며, 기록 시점 테스트 버전 API는 HTTP 502였음. 문서만 변경.
 
 

@@ -1,5 +1,13 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.18.17 — Spring 프론트엔드 관리자 디자인·전역 채팅 코드 전환 (소스 검증 / 운영 HOLD)
+
+사용자가 승인한 관리자 디자인과 전역 문의 UI를 **실제 프론트엔드 소스**에 구현하되 기존 운영 화면은 유지한다. Spring 복구 브랜치 기반 독립 worktree에서 관리자 네이비/보라 공통 테마와 단일 56px 둥근 버튼을 구현했다. 관리자 /admin*에서는 인증 검증 전 **읽기 전용 지원 안내창**만 표시(문의/DM API 미연결), 일반 회원 화면에서는 기존 문의/1:1 채팅 위젯을 유지하며 접근성·모바일 세이프에어리어 개선. 금융/권한/API 로직은 변경하지 않음.
+
+[상세 기획 한국어](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) / [English](FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [QA 한국어](../qa/2026-11-18-spring-frontend-admin-chat-v17.ko.md) / [EN](../qa/2026-11-18-spring-frontend-admin-chat-v17.md) · [작업 기록](../worklog/2026-11-18-frontend-transition-v2026.11.18.17.ko.md).
+
+증빙: 집중 TDD 20개 PASS, 계약/타입 검사·Next 전체 빌드·Spring bootJar PASS, Spring 관리자 인증 단위 3 PASS, ESLint 오류 0/기존 경고 9. 전체 프론트 회귀는 105초 제한 및 광고·SEO 테스트 실패 관찰로 **미통과**. **Spring UI 운영 전환 BLOCKED:** Next /admin,/support는 동적 렌더링인데 Spring 정적 JAR은 기존 HTML을 탑재하므로 새로운 화면 미제공. Spring 문의/쪽지 신원 헤더·고정 UUID·허위 성공은 보안 P0. Test/운영 배포·DB 변경 없음.
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.17 — Admin/Chat Real Frontend Source Candidate (SPRING STATIC HANDOFF HOLD)
+
+[English canonical spec](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [한국어](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [QA](docs/qa/2026-11-18-spring-frontend-admin-chat-v17.md) · [Worklog](docs/worklog/2026-11-18-frontend-transition-v2026.11.18.17.md). 20 UI tests pass and Next/Spring source builds pass; no exact-SHA updated admin HTML in Spring static JAR. Release HOLD.
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 
