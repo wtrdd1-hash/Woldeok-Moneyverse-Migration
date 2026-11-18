@@ -112,8 +112,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
 
-      - name: Reject a committed secret
+      - name: Reject private files and credential leakage in tracked changes
+        env:
+          SECURITY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           node --test scripts/security/check-repository-security.test.mjs
           node scripts/security/check-repository-security.mjs
