@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.20 — Spring/Frontend Test recovery (INTERNAL TEST / RELEASE HOLD)
+- [QA English](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md) / [한국어](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.ko.md). Spring 174 JUnit PASS, Next build PASS/121 focused PASS, full frontend regression incomplete; locally restricted Test route 20 GET no 502, **new frontend dynamic SSR not in Spring static release**. No Production deployment.
+
 ## v2026.11.18.17 — Admin/Chat Real Frontend Source Candidate (SPRING STATIC HANDOFF HOLD)
 
 [English canonical spec](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [한국어](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [QA](docs/qa/2026-11-18-spring-frontend-admin-chat-v17.md) · [Worklog](docs/worklog/2026-11-18-frontend-transition-v2026.11.18.17.md). 20 UI tests pass and Next/Spring source builds pass; no exact-SHA updated admin HTML in Spring static JAR. Release HOLD.

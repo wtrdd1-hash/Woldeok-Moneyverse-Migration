@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
+## v2026.11.18.20 — Spring + frontend integration QA (INTERNAL TEST ONLY / PRODUCTION HOLD)
+Code SHA `9d7377cfd5a552840d728ad2d16487abdd011de4` builds and isolated Spring has 174/174 JUnit PASS. New pension no-create GET, Android missing-api SPA protection and Next shop unknown-state UI, plus committed API-v4 fixes and frontend v17 admin/chat candidate. Next build/TS and focused shop/support 121 PASS; full frontend regression timeout/advertising-SEO failures. Official local Test Nginx 20 GET (200=15/401=2/404=1/503=2/502=0), isolated read-only, not public. Browser dynamic Next /admin /shop not served from Spring static assets. Financial authenticated/Android/restore/rollback requirements G0–G6 are not satisfied; **no Production deployment**. [EN/KO QA](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md).
+
 ## v2026.11.18.17 — Spring-served Frontend Admin/Chat Transition Candidate (SOURCE TEST PASS / RELEASE HOLD)
 
 Owner approved moving the approved admin redesign and global inquiry concept into actual frontend code. The new, isolated Spring-repair-based worktree implements a scoped navy/violet admin layout and single 56px floating support entry per route: on /admin* a **read-only safe admin help dock** (no ticket or DM transport); on member pages the existing real Support/Direct widget remains, with accessible 56px trigger and mobile safe-area clearance. **No API, ledger or permission logic is altered.**

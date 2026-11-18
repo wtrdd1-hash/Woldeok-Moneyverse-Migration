@@ -1,5 +1,8 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.20 — Combined Spring/API and frontend Test candidate (VERIFIED INTERNAL TEST / RELEASE HOLD)
+The owner requested backend+frontend fixes and conditional Production promotion. Isolated code SHA `9d7377cfd5a552840d728ad2d16487abdd011de4` integrates committed API-v4 with frontend v17; pension GET may not create account, app-api missing routes no longer show 200 HTML, and Next shop now signals source unavailability. Spring 174 JUnit PASS; Next build/typecheck PASS and shop/support 121 focused PASS; **full frontend suite timed out with observed failures**. Test Nginx internally routes to a persistent read-only Spring candidate with 20 GET checks (15 200, 2 401, 1 404, 2 503, 0 502); public Test remains restricted. New dynamic Next UI not served by Spring static frontend. Exact-SHA Production, authenticated browser/mobile, finance ledger, rollback and G0–G6 remain BLOCKED. No Production app/database changes. [Evidence](../qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md).
+
 ## v2026.11.18.17 — Spring-served Frontend Admin/Chat Transition Candidate (SOURCE TEST PASS / RELEASE HOLD)
 
 Owner approved moving the approved admin redesign and global inquiry concept into actual frontend code. The new, isolated Spring-repair-based worktree implements a scoped navy/violet admin layout and single 56px floating support entry per route: on /admin* a **read-only safe admin help dock** (no ticket or DM transport); on member pages the existing real Support/Direct widget remains, with accessible 56px trigger and mobile safe-area clearance. **No API, ledger or permission logic is altered.**
