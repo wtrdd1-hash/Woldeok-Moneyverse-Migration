@@ -57,11 +57,11 @@ public class ProfileController {
         map.put("joined_at", p.getJoinedAt());
         map.put("jobType", p.getJobType());
         map.put("job_type", p.getJobType());
-        map.put("jobLevel", p.getJobLevel() > 0 ? p.getJobLevel() : 1);
-        map.put("job_level", p.getJobLevel() > 0 ? p.getJobLevel() : 1);
-        map.put("workCompletions", "0");
-        map.put("work_completions", "0");
-        map.put("visibility", p.getVisibility() != null ? p.getVisibility().toLowerCase() : "public");
+        map.put("jobLevel", p.getJobLevel());
+        map.put("job_level", p.getJobLevel());
+        map.put("workCompletions", p.getWorkCompletions());
+        map.put("work_completions", p.getWorkCompletions());
+        map.put("visibility", p.getVisibility() == null ? null : p.getVisibility().toLowerCase());
         map.put("featuredTitle", p.getFeaturedTitle());
         map.put("featured_title", p.getFeaturedTitle());
         return map;
@@ -101,7 +101,7 @@ public class ProfileController {
         UserProfile p = profileService.getProfile(userId);
 
         Map<String, Object> settings = new LinkedHashMap<>();
-        settings.put("visibility", p.getVisibility() != null ? p.getVisibility().toLowerCase() : "public");
+        settings.put("visibility", p.getVisibility() != null ? p.getVisibility().toLowerCase() : null);
         settings.put("displayName", p.getDisplayName());
         settings.put("display_name", p.getDisplayName());
         settings.put("imageUrl", p.getImageUrl());
@@ -128,8 +128,13 @@ public class ProfileController {
 
     @GetMapping("/{id:[0-9a-fA-F-]{36}}")
     @Operation(summary = "특정 사용자 UUID 공개 프로필 조회")
-    public ResponseEntity<Map<String, Object>> getUserProfileById(@PathVariable("id") String targetUserId) {
-        UserProfile p = profileService.getProfile(targetUserId);
+    public ResponseEntity<Map<String, Object>> getUserProfileById(@PathVariable("id") String targetUserId,
+            HttpServletRequest request) {
+        UUID viewer = authService.resolveSession(request)
+                .filter(UserAuthService.SessionInfo::isSignedIn)
+                .map(UserAuthService.SessionInfo::getUserId)
+                .orElse(null);
+        UserProfile p = profileService.getProfile(targetUserId, viewer);
         if (!"PUBLIC".equalsIgnoreCase(p.getVisibility())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PROFILE_NOT_PUBLIC");
         }
