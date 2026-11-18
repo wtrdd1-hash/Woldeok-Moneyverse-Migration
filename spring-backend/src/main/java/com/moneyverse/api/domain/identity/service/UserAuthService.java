@@ -182,18 +182,9 @@ public class UserAuthService {
     public List<String> findUserRoles(UUID userId) {
         List<String> roles = new ArrayList<>();
         try {
-            List<String> ur = jdbcTemplate.query(
-                "SELECT role FROM user_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
-                userId
-            );
-            roles.addAll(ur);
-        } catch (Exception ignored) {}
-
-        try {
             List<String> ar = jdbcTemplate.query(
-                "SELECT role FROM admin_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
+                "SELECT role::text FROM admin_role_designations WHERE target_user_id = ? AND operation = 'GRANT'",
+                (rs, rowNum) -> rs.getString(1),
                 userId
             );
             roles.addAll(ar);
@@ -511,22 +502,14 @@ public class UserAuthService {
         Boolean isNew = (Boolean) row.get("is_new");
 
         // Mark reauthenticated
-        jdbcTemplate.update(
-            "UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ?",
-            sessionId
-        );
-
-        // Ensure profile display name
         try {
             jdbcTemplate.update(
-                "UPDATE users SET display_name = ? WHERE id = ? AND (display_name IS NULL OR display_name = '')",
-                safeName, userId
+                "UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ?",
+                sessionId
             );
-            jdbcTemplate.update(
-                "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, NOW()) ON CONFLICT (id) DO NOTHING",
-                userId, safeName
-            );
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            log.warn("[UserAuthService] Failed to update reauthenticated_at: {}", e.getMessage());
+        }
 
         // Set session cookies
         setSessionCookie(response, rawToken);
