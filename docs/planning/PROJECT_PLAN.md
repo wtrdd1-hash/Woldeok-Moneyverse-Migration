@@ -1,5 +1,11 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.13 — Admin Console Reference Designs + Site-wide Round Support/DM Preview (ISOLATED / RELEASE HOLD)
+
+Owner request: add an administrator PC/mobile design image and improve page-wide round inquiry/1:1 chat convenience WITHOUT touching the existing frontend. Added [English detailed spec](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md) / [한국어 기획](ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.ko.md), [desktop SVG](../design/admin-chat-v2026.11.18.13/references/admin-console-desktop.svg), [mobile SVG](../design/admin-chat-v2026.11.18.13/references/admin-console-mobile.svg) and [standalone interactive preview](../design/admin-chat-v2026.11.18.13/preview/index.html). The preview supports page switching with an in-memory persistent inquiry/DM dock, accessible mobile layout and no real submission.
+
+**Existing production component:** floating support already exists, but /admin excludes it. **Security release blockers:** Spring support/chat currently trust actor identity headers, default to a fixed UUID, and support write errors can emit false success. Live API integration cannot proceed until identity/session and failure-state controls pass authenticated QA. No current frontend/Spring/DB/Nginx modifications or deployment. This is a stacked candidate on design v2026.11.18.12, not a production release.
+
 ## v2026.11.18.12 — 180-Route PC/Mobile Redesign Visual Planning (DRAFT; NO FRONTEND OR RUNTIME CHANGE)
 
 Owner direction: preserve the current frontend, design visual concepts for every existing site page, and add them to integrated planning *before development*. The source-inventory union has **180 screens**: **178 on GitHub main (0590fac4...)** and **2 mini-PC working-checkout-only routes** (/admin/logs/errors and /calculators), explicitly marked provisional. Exactly **180 route-level SVG concepts**, each containing desktop and mobile compositions, plus a route-image manifest and offline gallery. These are *planning images, not live screenshots*; synthetic values do not establish working finances, API or production UX.

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.13 — 관리자 디자인 + 전역 둥근 문의/채팅 시안 (독립 구현 / 운영 변경 없음)
+
+[관리자 PC 이미지](design/admin-chat-v2026.11.18.13/references/admin-console-desktop.svg) · [모바일 이미지](design/admin-chat-v2026.11.18.13/references/admin-console-mobile.svg) · [독립 데모](design/admin-chat-v2026.11.18.13/preview/index.html) · [기획서 한국어](planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.ko.md) / [EN](planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md). 기존 프론트엔드/서버 미변경, Spring 채팅 인증 P0에 따라 운영 연결 보류.
+
 ## v2026.11.18.12 — 180개 전체 화면 PC·모바일 디자인 시안 (PLANNING / 운영 변경 없음)
 
 [상세기획 한국어](planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md) · [영문 정본](planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) · [180개 화면 이미지 카탈로그](design/all-pages-v2026.11.18.12/README.md) · [작업 기록](worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.ko.md). main 178개 + 미니PC 별도 작업본 2개 후보. 기존 프론트엔드·API·테스트/운영 미변경.

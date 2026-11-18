@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.13 — Admin Desktop/Mobile Designs and Global Floating Chat (ISOLATED PREVIEW ONLY)
+
+[Admin desktop design](docs/design/admin-chat-v2026.11.18.13/references/admin-console-desktop.svg) · [Mobile design](docs/design/admin-chat-v2026.11.18.13/references/admin-console-mobile.svg) · [Interactive preview](docs/design/admin-chat-v2026.11.18.13/preview/index.html) · [English canonical](docs/planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md) / [한국어](docs/planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.ko.md). No existing frontend change; live API use blocked until Spring chat identity and false-success issues are fixed.
+
 ## v2026.11.18.12 — All 180 Screen Visual Concepts (PLANNING / NO RUNTIME CHANGE)
 
 [English specification](docs/planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.md) · [한국어 상세](docs/planning/ALL_PAGES_RESPONSIVE_REDESIGN_v2026.11.18.12.ko.md) · [PC+Mobile visual catalog (180 images)](docs/design/all-pages-v2026.11.18.12/README.md) · [worklog](docs/worklog/2026-11-18-all-pages-redesign-v2026.11.18.12.md). GitHub main 178 pages + two unmerged mini-PC-only conceptual routes. Existing frontend, APIs, Test and Production unchanged.
