@@ -1,4 +1,7 @@
-﻿## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 (초안 / 미배포)
+## v2026.11.18.17 — 전체 API 실제 HTTP 검증 (문서 전용 / 운영 보류)
+- OpenAPI 903 경로/982 작업, 실제 GET 520회(200 270 / 401 210 / 503 38 / 500 1 / 406 1). 공식 Test 18개 중 16개 502, Android JSON 미응답, Spring 관리자 권한·상점 허위 성공 P0. 변경 작업 400개 미검증. 연금 GET 운영 호출 1회 잠재 DB 변경 여부 불명. 코드·운영 승격 없음. [한국어 QA](../qa/2026-11-18-all-api-real-http-v2026.11.18.17.ko.md).
+
+## v2026.11.13.2 — 스프링 전환 위험·아티팩트 보강 (초안 / 미배포)
 - 기존 1~9장별 위험 R01~R10, G0~G6 세부 검증, DB 단독 금융 기록자, 인증/Android/봇 동등성, 무중단·복귀 기준 추가. JAR/OCI digest, SBOM/출처, 매니페스트·보관·조건부 Artifactory 관리 정책 별도 작성. Java 코드·DB·Test·운영 변경 없음. [상세](2026-11-13-spring-migration-review-v2026.11.13.2.ko.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144).
 
 ## v2026.11.13.1 — Spring Boot 전체 백엔드 전환 아키텍처 (초안 / 운영 보류)

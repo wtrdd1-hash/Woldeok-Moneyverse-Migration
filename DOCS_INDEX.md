@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.18.17 — All API real HTTP QA / 전체 API 실동작 QA (RELEASE HOLD)
+- [English canonical matrix](docs/qa/2026-11-18-all-api-real-http-v2026.11.18.17.md) · [한국어 검증 보고서](docs/qa/2026-11-18-all-api-real-http-v2026.11.18.17.ko.md). OpenAPI 903 paths/982 operations; real isolated QA GET 520 (200 270 / 401 210 / 503 38 / 500 1 / 406 1), official Test 16/18 502, Android API non-JSON, Spring source-truth and security P0. 400 mutation operations untested; no service promotion.
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 

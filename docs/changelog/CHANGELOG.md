@@ -1,4 +1,7 @@
-﻿## v2026.11.13.2 — Spring risk review + artifact lifecycle (DRAFT / NO DEPLOY)
+## v2026.11.18.17 — All-API HTTP QA inventory (AUDIT / RELEASE HOLD)
+- 903 OpenAPI paths/982 methods; 520 real isolated GET checks (270 200/210 401/38 503/1 500/1 406); official Test 16/18 functional 502. Android non-JSON gateway, Spring admin auth and shop false-success source errors block release. Audit-only docs; 400 mutations untested. Potential mutating pension GET was probed once; DB change unknown. [Report](../qa/2026-11-18-all-api-real-http-v2026.11.18.17.md).
+
+## v2026.11.13.2 — Spring risk review + artifact lifecycle (DRAFT / NO DEPLOY)
 - Section-by-section R01–R10 warnings, staged G0–G6 domain acceptance, single DB-fenced finance writer, session/Android/bot parity and reversible Test/Production checks. New artifact/conditional Artifactory policy for JAR/OCI digests, SBOM/provenance, manifest, retention and recoverable rollback. No Java code/DB/Test/Production changes. [Details](2026-11-13-spring-migration-review-v2026.11.13.2.md) · [PR #3144](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3144).
 
 ## v2026.11.13.1 — Spring Boot full-backend migration architecture (DRAFT / RELEASE HOLD)
