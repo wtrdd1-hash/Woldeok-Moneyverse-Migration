@@ -43,3 +43,5 @@
 ## Release-blocked acceptance gates
 - The Spring JAR still embeds the OLD static admin HTML; Next admin and support are dynamic, so new UI is not Spring-served.
 - Full frontend test timed out; actual authenticated chat and multi-viewport real browser QA not completed. Do not promote.
+
+PR review URL: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3275 (DRAFT; security and Spring static handoff HOLD).

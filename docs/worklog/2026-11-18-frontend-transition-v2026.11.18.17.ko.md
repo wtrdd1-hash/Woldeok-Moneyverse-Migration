@@ -34,3 +34,8 @@
 - 전체 프론트 테스트는 105초 타임아웃 및 광고/검색 실패로 미통과. 새로운 Next 동적 관리자/고객센터 페이지는 Spring 정적 JAR에 반영되지 않아 운영 승격 차단.
 - Spring 문의 신원/허위 성공 P0 미해결로 실제 관리자 메시지 미연결. Nginx/DB/원장/운영 미변경.
 - 내부 업데이트 파일은 GitHub 차단 정책을 준수해 미니PC에만 유지. 별도 Draft PR 후보로 검토.
+
+## GitHub PR 제출
+- 별도 코드 브랜치의 검토용 Draft PR #3275: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3275
+- Spring 복구 PR #3267 위에 쌓아 충돌 방지. main 미병합, 운영 미배포, 코드 레벨 전환까지만 완료.
+- 내부 업데이트는 .gitignore 정책대로 로컬만, GitHub에는 영/한 기획·QA·공개 내역만 게시.

@@ -34,3 +34,8 @@ Main SHA at start: 0590fac4e8a82bc986ba1b8c64f014d18daca9e9.
 - Full frontend test suite NOT GREEN (105 second timeout, ad/search failures). New Next dynamic admin/support pages NOT included in Spring static JAR, so live Spring UI handoff BLOCKED.
 - Actual chat API identity and false-success P0 problems unresolved, so admin dock remains read-only. No Nginx/DB/ledger/production changes.
 - Local private updates remain excluded from GitHub by the repository ignore policy. Candidate to be reviewed in stacked Draft PR, not merged or deployed.
+
+## GitHub review handoff
+- Stacked DRAFT PR #3275: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3275
+- Based on Spring repair #3267 to avoid conflicting security-owner files; not merged or deployed. Code-level candidate only.
+- Internal notes remain locally ignored; public bilingual planning, QA and changelog published to GitHub.
