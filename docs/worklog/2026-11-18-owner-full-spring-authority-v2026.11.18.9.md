@@ -12,4 +12,8 @@
 - Latest `main` recheck required prior to writing/integration. Protect independent agent PR/worktrees and previous release evidence; changes confined to isolated branch.
 
 ## End / 종료
-- To be recorded with concrete GitHub write receipts and PR status.
+- Rechecked main before PR: `e96e8f81f4d6b99b221392a2b6fe46356361b145` (baseline unchanged: `e96e8f81f4d6b99b221392a2b6fe46356361b145`).
+- Updated four authoritative EN/KO planning documents as additive top-of-file corrections; preserved all historical sections. Verified four writes completed (commits `adea29ac`, `c2d5e7fe`, `7907ee1f`, `2c1672e3`).
+- Created six bilingual internal/GitHub-facing update and changelog notes. Final PR review pending. No code/Test/Production/DB/ledger release or migration.
+- v9-01 baseline; v9-02 isolated branch/start log; v9-03 four plan corrections; v9-04 update/changelog + mid/final main check; v9-05 PR.
+
