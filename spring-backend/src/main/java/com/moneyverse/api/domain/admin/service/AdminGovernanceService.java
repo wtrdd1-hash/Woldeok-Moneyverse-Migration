@@ -205,18 +205,21 @@ public class AdminGovernanceService {
      * 상장 주식 관리 목록 조회
      */
     public AdminStocksResponse listStocks(UUID actorId) {
+        requireActor(actorId);
         List<AdminStockDto> stocks = new ArrayList<>();
         try {
-            String sql = "SELECT id::text, symbol, name, current_price::text, active, coalesce(halt_status, 'ACTIVE') AS halt_status, description " +
-                         "FROM public.virtual_stocks ORDER BY symbol ASC";
+            String sql = "SELECT id::text, symbol, name, current_price::text, halt_status, description " +
+                         "FROM public.stock_market_overview() ORDER BY symbol ASC";
             stocks = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 AdminStockDto dto = new AdminStockDto();
                 dto.setId(rs.getString("id"));
                 dto.setSymbol(rs.getString("symbol"));
                 dto.setName(rs.getString("name"));
                 dto.setCurrentPrice(requiredAmount(rs, "current_price"));
-                dto.setActive(rs.getBoolean("active"));
-                dto.setHaltStatus(rs.getString("halt_status") != null ? rs.getString("halt_status") : "ACTIVE");
+                String haltStatus = rs.getString("halt_status");
+                if (haltStatus == null) throw new IllegalStateException("STOCK_HALT_STATUS_UNKNOWN");
+                dto.setActive("ACTIVE".equalsIgnoreCase(haltStatus));
+                dto.setHaltStatus(haltStatus);
                 dto.setHaltReason(rs.getString("description"));
                 return dto;
             });
@@ -266,6 +269,10 @@ public class AdminGovernanceService {
                 return h;
             }, actor);
 
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            // Authenticated actor, source call succeeded but no record: no healthy snapshot.
+            dto.setAvailable(false);
+            return dto;
         } catch (Exception e) {
             // A missing reconciliation report is UNKNOWN, never a healthy zero-delta ledger.
             throw sourceUnavailable("ledger_reconciliation");

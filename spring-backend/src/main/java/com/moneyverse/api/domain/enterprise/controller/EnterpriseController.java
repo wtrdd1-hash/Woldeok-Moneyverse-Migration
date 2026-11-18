@@ -13,8 +13,7 @@ import java.util.*;
 @RestController
 @RequestMapping(path = {
         "/api/v1/admin/enterprises",
-        "/api/admin/enterprises",
-        "/admin/enterprises"
+        "/api/admin/enterprises"
 })
 public class EnterpriseController {
 
@@ -40,27 +39,9 @@ public class EnterpriseController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> listEnterprises(HttpServletRequest request) {
         verifyAdmin(request);
-        List<Map<String, Object>> enterprises = List.of(
-                Map.of(
-                        "id", "ent-korail-wld",
-                        "name", "한국철도공사 (월덱)",
-                        "code", "KORAIL_WLD",
-                        "stateSharePercent", 100.0,
-                        "marketValuationWld", 50000000000L,
-                        "quarterlyDividendWld", 250000000L,
-                        "status", "STATE_OWNED"
-                ),
-                Map.of(
-                        "id", "ent-kepco-wld",
-                        "name", "한국전력공사 (월덱)",
-                        "code", "KEPCO_WLD",
-                        "stateSharePercent", 80.0,
-                        "marketValuationWld", 80000000000L,
-                        "quarterlyDividendWld", 400000000L,
-                        "status", "PUBLIC_HYBRID"
-                )
-        );
-        return ResponseEntity.ok(Map.of("enterprises", enterprises, "total", enterprises.size()));
+        // No canonical enterprise ownership ledger is approved for this migrated API.
+        // Do not expose fictional public companies, valuations or state dividend amounts.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ENTERPRISE_SOURCE_NOT_VERIFIED");
     }
 
     @PostMapping("/{id}/privatize")
@@ -73,13 +54,8 @@ public class EnterpriseController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sharesToOfferPercent is required");
         }
 
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("enterpriseId", id);
-        res.put("sharesOfferedPercent", body.get("sharesToOfferPercent"));
-        res.put("ipoStatus", "OFFERED");
-        res.put("processedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        // IPO share operations require canonical ledger receipts, never synthetic success.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "PRIVATIZATION_LEDGER_NOT_VERIFIED");
     }
 
     @PostMapping("/{id}/dividends/disburse")
@@ -87,12 +63,7 @@ public class EnterpriseController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("enterpriseId", id);
-        res.put("status", "DISBURSED");
-        res.put("disbursedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "DIVIDEND_LEDGER_NOT_VERIFIED");
     }
 
     @GetMapping("/{id}/governance")
@@ -100,12 +71,6 @@ public class EnterpriseController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> gov = new LinkedHashMap<>();
-        gov.put("enterpriseId", id);
-        gov.put("boardSeats", 7);
-        gov.put("governmentAppointedSeats", 5);
-        gov.put("publicShareholderSeats", 2);
-        gov.put("auditCommitteeRating", "AAA");
-        return ResponseEntity.ok(gov);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "GOVERNANCE_SOURCE_NOT_VERIFIED");
     }
 }
