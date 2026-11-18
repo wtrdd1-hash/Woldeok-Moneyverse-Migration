@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${language}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" th:content="${ko} ? '월덕 머니버스 금융 계산기, 복리 및 주식 평균단가와 17개 기존 도구 탐색.' : 'Moneyverse financial calculators and 17 source-listed financial tools, with verified native Spring capabilities clearly identified.'">
+  <link rel="canonical" th:href="${isCompact} ? 'https://easy-scraping.com/tools' : 'https://easy-scraping.com/calculators'">
+  <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Financial tools | Woldeok Moneyverse</title>
+  <link rel="stylesheet" href="/mv-spring/v28/styles.css">
+  <link rel="stylesheet" href="/mv-spring/v30/hubs.css">
+</head>
+<body th:attr="data-spring-page=${hubType},data-ui-release='v2026.11.19.30.1',data-total-tools=${toolCount},data-results=${resultCount}">
+<header th:replace="~{mv28/layout :: header}"></header>
+<main class="shell content">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/" th:text="${ko} ? '홈' : 'Home'">Home</a><span aria-hidden="true">/</span><span th:text="${pageTitle}">Tools</span></nav>
+  <section class="hero hub-hero" aria-labelledby="hub-title"><div class="hero-text">
+    <p class="eyebrow">MONEYVERSE / SPRING NATIVE / WEB PLATFORM</p>
+    <h1 id="hub-title" th:text="${ko} ? (${isCompact} ? '하나의 공간, 금융 도구 탐색' : '내 손안의 금융 계산기 센터') : (${isCompact} ? 'Financial tools, all in one place' : 'Your financial calculator center')">Explore financial tools</h1>
+    <p th:text="${ko} ? '지금 Spring에서 실제 검증된 계산기와 전환 중인 기존 도구를 명확히 구분합니다. 검색과 필터는 JavaScript 없이 서버에서 작동합니다.' : 'Explore independently verified Spring calculators alongside legacy tools still awaiting full verification. Search and filters work on the server with JavaScript disabled.'">Native Spring tools</p>
+    <div class="hero-tags"><span class="chip chip-primary" th:text="${ko} ? 'Spring 검증 완료 ' + ${verifiedCount} + '개' : ${verifiedCount} + ' Spring-verified tools'">2 Spring-verified</span><span class="chip" th:text="${ko} ? '기존 도구 전체 ' + ${toolCount} + '개' : ${toolCount} + ' listed tool routes'">17 routes</span></div>
+  </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">✦</span><span class="hero-icon-line"></span></div></section>
+  <section class="panel hub-controls" aria-labelledby="tools-filter-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="tools-filter-title" th:text="${ko} ? '원하는 금융 도구 찾기' : 'Find the right financial tool'">Find tools</h2><p th:text="${ko} ? '검색/카테고리는 실제 서버에서 필터링합니다.' : 'Native server-side search and category filters.'">Native search</p></div></div>
+    <form class="hub-search" th:action="${calculatorPath}" method="get" role="search">
+      <input type="hidden" name="lang" th:value="${language}">
+      <div class="form-field"><label for="hub-q" th:text="${ko} ? '이름·내용 검색' : 'Search titles and details'">Search</label><input id="hub-q" name="q" type="search" maxlength="64" autocomplete="off" th:value="${searchTerm}" th:placeholder="${ko} ? '예: 복리, 주식, 세금' : 'E.g. compound, stock, tax'" aria-describedby="hub-search-help"><small id="hub-search-help" th:text="${ko} ? '한국어·영어 검색 지원' : 'Search works with English and Korean terms'">Search</small></div>
+      <div class="form-field"><label for="hub-category" th:text="${ko} ? '카테고리' : 'Category'">Category</label><select id="hub-category" name="category"><option value="all" th:selected="${selectedCategory == 'all'}" th:text="${ko} ? '전체 도구' : 'All tools'">All</option><option value="investing" th:selected="${selectedCategory == 'investing'}" th:text="${ko} ? '투자·복리' : 'Investing &amp; compound'">Investing</option><option value="tax" th:selected="${selectedCategory == 'tax'}" th:text="${ko} ? '세금·소득' : 'Taxes &amp; income'">Taxes</option><option value="retirement" th:selected="${selectedCategory == 'retirement'}" th:text="${ko} ? '연금·은퇴' : 'Pension &amp; retirement'">Retirement</option><option value="lending" th:selected="${selectedCategory == 'lending'}" th:text="${ko} ? '대출·부동산' : 'Loans &amp; property'">Loans</option><option value="simulation" th:selected="${selectedCategory == 'simulation'}" th:text="${ko} ? '가상자산·게임' : 'Crypto &amp; simulation'">Simulation</option></select></div>
+      <div class="hub-search-actions"><button class="primary-button" type="submit" th:text="${ko} ? '검색하기' : 'Search tools'">Search tools</button><a class="secondary-button" th:href="@{${calculatorPath}(lang=${language})}" th:text="${ko} ? '초기화' : 'Reset'">Reset</a></div>
+    </form>
+  </section>
+  <section class="hub-results" aria-labelledby="tools-results-title"><div class="hub-results-heading"><div><p class="eyebrow">CURATED FINANCIAL UTILITIES</p><h2 id="tools-results-title" th:text="${ko} ? '계산기 목록' : 'Calculator library'">Calculator library</h2></div><span class="hub-result-count" role="status" th:text="${ko} ? '검색 결과 ' + ${resultCount} + '개' : ${resultCount} + ' matching tools'">Results</span></div>
+    <p class="notice" th:if="${#lists.isEmpty(tools)}" th:text="${ko} ? '일치하는 도구가 없습니다. 검색어를 바꿔 주세요.' : 'No matching tools. Try a different search or category.'">No tools found</p>
+    <ul class="hub-tool-grid" th:unless="${#lists.isEmpty(tools)}">
+      <li th:each="tool : ${tools}" th:attr="data-tool-id=${tool.id},data-status=${tool.status},data-category=${tool.category}">
+        <article class="hub-tool-card" th:classappend="${tool.verified} ? ' is-certified' : ' is-legacy'">
+          <div class="hub-card-head"><span class="hub-symbol" aria-hidden="true" th:text="${tool.verified} ? '✦' : '○'">✦</span><span class="hub-tool-state" th:classappend="${tool.verified} ? ' certified' : ' legacy'" th:text="${tool.verified} ? (${ko} ? 'Spring 검증' : 'Spring verified') : (${ko} ? '기존 화면 · QA 대기' : 'Legacy · QA pending')">Status</span></div>
+          <h3 th:text="${tool.title(ko)}">Financial calculator</h3><p th:text="${tool.description(ko)}">Financial calculation</p>
+          <a class="hub-card-link" th:href="${tool.href()}" th:attr="aria-label=${ko} ? ${tool.title(ko)} + ' 화면으로 이동' : 'Open ' + ${tool.title(ko)}" th:text="${ko} ? '도구 열기 ↗' : 'Open calculator ↗'">Open calculator</a>
+        </article>
+      </li>
+    </ul>
+  </section>
+  <section class="panel hub-help" aria-labelledby="hub-help-title"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="hub-help-title" th:text="${ko} ? '서비스 품질 및 확인 기준' : 'Reliability and verification'">Reliability</h2><p th:text="${ko} ? '방문할 수 있는 주소와 모든 기능 검증은 다릅니다.' : 'A navigable link is not the same as fully verified functionality.'">Verification</p></div></div>
+    <details><summary th:text="${ko} ? 'Spring 검증과 기존 화면의 차이는?' : 'What do Spring verified and legacy mean?'">Status details</summary><p th:text="${ko} ? 'Spring 검증은 실제 Java 서버 계산·입력·반응형·영어/한국어 UI를 실브라우저로 확인한 도구입니다. 기존 화면은 경로를 보존했지만 모든 상호작용과 API가 아직 확인된 것은 아닙니다.' : 'Spring verified means the Java server UI, calculation, forms, responsive layouts and languages were exercised in a browser. Legacy routes are retained for navigation but their full interactions and APIs are not yet certified.'">Explanation</p></details>
+    <div class="hub-quick-links"><a class="secondary-button" href="/stocks" th:text="${ko} ? 'Spring 주식 거래소 보기' : 'Explore Spring stock market'">Stocks</a><a class="secondary-button" href="/status" th:text="${ko} ? '실제 서비스 상태 보기' : 'View source-backed service status'">Status</a><a class="secondary-button" href="/support" th:text="${ko} ? '문의 및 지원' : 'Support &amp; help'">Support</a></div>
+  </section>
+</main>
+<footer th:replace="~{mv28/layout :: footer}"></footer>
+</body></html>
