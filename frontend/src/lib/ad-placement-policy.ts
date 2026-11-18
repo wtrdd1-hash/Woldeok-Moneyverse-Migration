@@ -1,10 +1,10 @@
-/** Reviewed public-content ad inventory, not a license to advertise on financial actions. */
+/** Content-only advertising: never target financial decisions, balances, portfolios or authentication. */
 export function isEligiblePublicAdPath(pathname: string | null): boolean {
   if (!pathname) return false;
   const path = pathname.replace(/\/$/, '') || '/';
   if (path === '/' || /^\/(en|ja|zh)$/.test(path)) return true;
   const localized = path.replace(/^\/(en|ja|zh)(?=\/)/, '');
-  return /^\/(tools|calculators|guide|blog|stocks|bonds|kdic|economy)(\/|$)/.test(localized)
+  return /^\/(tools|calculators|guide|blog)(\/|$)/.test(localized)
     || /^\/(gallery|announcements|roadmap)$/.test(localized);
 }
 

@@ -38,34 +38,17 @@ export default function robots(): MetadataRoute.Robots {
   ];
 
   return {
-    rules: [
-      {
-        userAgent: '*',
-        allow: publicAllow,
-        disallow: disallowList,
-      },
-      {
-        userAgent: [
-          'GPTBot',
-          'OAI-SearchBot',
-          'ChatGPT-User',
-          'ClaudeBot',
-          'anthropic-ai',
-          'PerplexityBot',
-          'Applebot-Extended',
-          'Google-Extended',
-          'Yeti',
-          'Bingbot',
-        ],
-        allow: publicAllow,
-        disallow: disallowList,
-      },
-    ],
+    // One explicit robots policy applies to every crawler. Sensitive routes stay disallowed
+    // for search engines and AI crawlers alike; do not publish an inconsistent AI exception.
+    rules: {
+      userAgent: '*',
+      allow: publicAllow,
+      disallow: disallowList,
+    },
     sitemap: [
       `${base}/sitemap.xml`,
       `${base}/sitemap-index.xml`,
       `${base}/sitemap-blog.xml`,
-      `${base}/feed.xml`,
     ],
     host: base,
   };
