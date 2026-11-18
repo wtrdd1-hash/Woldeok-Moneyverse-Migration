@@ -91,9 +91,8 @@ public class OAuthController {
             authorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         }
 
-        String accept = request.getHeader("Accept");
-        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"))
-                || (accept != null && accept.contains("application/json") && !accept.contains("text/html"));
+        // Browser OAuth start must always 302 redirect unless explicit format=json parameter is set
+        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"));
 
         if (!wantsJson) {
             return ResponseEntity.status(HttpStatus.FOUND)
@@ -120,9 +119,7 @@ public class OAuthController {
             HttpServletResponse response) {
 
         String p = provider.trim().toLowerCase();
-        String accept = request.getHeader("Accept");
-        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"))
-                || (accept != null && accept.contains("application/json") && !accept.contains("text/html"));
+        boolean wantsJson = "json".equalsIgnoreCase(request.getParameter("format"));
 
         if (error != null && !error.isBlank()) {
             log.warn("[OAuth] Provider reported error: {}", error);
@@ -241,7 +238,30 @@ public class OAuthController {
                     result.userId(), result.displayName(), result.isNew());
 
             if (!wantsJson) {
-                return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/")).build();
+                org.springframework.http.ResponseCookie sessionCookie = org.springframework.http.ResponseCookie
+                        .from("mv_session", result.token())
+                        .path("/")
+                        .maxAge(Duration.ofDays(30))
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("Lax")
+                        .build();
+
+                org.springframework.http.ResponseCookie hostCookie = org.springframework.http.ResponseCookie
+                        .from("__Host-mv_session", result.token())
+                        .path("/")
+                        .maxAge(Duration.ofDays(30))
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("Lax")
+                        .build();
+
+                org.springframework.http.HttpHeaders redirectHeaders = new org.springframework.http.HttpHeaders();
+                redirectHeaders.setLocation(URI.create("/"));
+                redirectHeaders.add(org.springframework.http.HttpHeaders.SET_COOKIE, sessionCookie.toString());
+                redirectHeaders.add(org.springframework.http.HttpHeaders.SET_COOKIE, hostCookie.toString());
+
+                return new ResponseEntity<>(redirectHeaders, HttpStatus.FOUND);
             }
 
             Map<String, Object> res = new LinkedHashMap<>();

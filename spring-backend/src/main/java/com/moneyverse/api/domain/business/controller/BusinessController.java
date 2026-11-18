@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Tag(name = "Business & Enterprises", description = "Canonical business reads and owner-scoped receipts")
 @RestController
-@RequestMapping({"/api/business", "/api/v1/business"})
+@RequestMapping({"/api/business", "/api/v1/business", "/api/businesses", "/api/v1/businesses", "/api/business-types", "/api/v1/business-types"})
 public class BusinessController {
     private final BusinessService businessService;
     private final MemberApiGuard memberApiGuard;

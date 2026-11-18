@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Tag(name = "Wallet", description = "유저 WLD 지갑 잔액 조회 및 P2P 이체 API")
 @RestController
-@RequestMapping("/api/wallet")
+@RequestMapping(path = {"/api/wallet", "/api/v1/wallet"})
 public class WalletController {
 
     private final WalletService walletService;
@@ -21,7 +21,7 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @GetMapping("/overview")
+    @GetMapping(path = {"", "/", "/overview"})
     @Operation(summary = "내 지갑 종합 잔액 및 최근 거래 내역 조회")
     public ApiResponse<WalletOverview> getOverview(
             @RequestHeader(value = "X-User-Id", defaultValue = "5f7b8b44-e4aa-40b8-b93a-800ec0151d20") String userId) {
