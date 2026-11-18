@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Full Route UI & Functional QA Specification
 
+## v2026.11.18.15 — Supplemental test design (five-pass gate unchanged)
+Use the [QA process/test-design addendum](QA_METHOD_AND_TEST_DESIGN_ADDENDUM_v2026.11.18.15.md) / [KO](QA_METHOD_AND_TEST_DESIGN_ADDENDUM_v2026.11.18.15.ko.md) for requirement-to-case traceability, partitions, transitions, negative cases, defect lifecycle and actual API/DB assertions. No waiver to the exact-candidate inventory, five complete full-route passes, administrator scope or fail-closed acceptance below. Planning only; no new Test evidence.
+
+
 > Version: v2026.09.25.442
 > Status: PLANNING / authoritative detailed QA contract
 > Date: 2026-09-25

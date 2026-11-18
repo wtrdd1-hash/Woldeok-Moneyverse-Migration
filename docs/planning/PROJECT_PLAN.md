@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+## v2026.11.18.15 — QA process and test-design evidence addendum (DOC ONLY / RELEASE HOLD)
+Owner-supplied QAonTOP public Instagram captions informed the 12-stage testing workflow and 12 test-design concepts. Adopt the separate Moneyverse-specific [QA process and evidence addendum](QA_METHOD_AND_TEST_DESIGN_ADDENDUM_v2026.11.18.15.md) / [KO](QA_METHOD_AND_TEST_DESIGN_ADDENDUM_v2026.11.18.15.ko.md) as a supplemental test-planning contract. Existing exact-SHA Test, five full-route passes, security, canonical ledger and Spring G0–G6 release gates are unchanged. No runtime, Test or QA-pass claim. [Worklog](../worklog/2026-11-18-qa-learning-v2026.11.18.15.md).
+
+
 ## v2026.11.17.5 — Spring KDIC and engagement finance P0 integrated candidate (DRAFT / RELEASE HOLD)
 Owner-approved integration of #3218 and #3215 on main cd822aa098: corrected duplicate engagement routing, forged member identity headers, false WLD outcomes and KDIC fabricated financial success. KDIC admin endpoints now require actual DB-resolved signed-in superadmin session; missing KDIC fund, institution, premium, payout or ratio evidence no longer produces fabricated values. Spring test-profile entire clean test bootJar passes 126 tests / 0 fail / 0 skipped with embedded live HTTP anonymous negative checks. The app remains on old Production runtime; no ledger/DB/WLD mutations or official Test/Production deployment. Full global Spring SecurityConfig SEC1, positive MFA/CSRF, verified KDIC ledger settlement, real authenticated Test and independent restore remain P0 and block promotion. [Worklog](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.md).
 
