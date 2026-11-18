@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Spring Boot Single Fat JAR WebMvc & SPA Router Configuration
@@ -23,6 +25,30 @@ import java.io.IOException;
  */
 @Configuration
 public class SpaWebMvcConfig implements WebMvcConfigurer {
+
+    /** Immutable frontend bundle root (source-controlled deployment property, never HTTP-derived). */
+    @Value("${moneyverse.frontend.release-dir:}")
+    private String immutableFrontendReleaseDir = "";
+
+    static String[] resourceLocations(String configuredReleaseDir) {
+        String[] legacyLocations={"file:/srv/moneyverse-data/frontend-static/", "classpath:/static/"};
+        if (configuredReleaseDir == null || configuredReleaseDir.isBlank()) return legacyLocations;
+        Path candidate=Path.of(configuredReleaseDir).toAbsolutePath().normalize();
+        Path approvedRoot=Path.of("/srv/moneyverse-data/releases");
+        if (!candidate.startsWith(approvedRoot) ||
+                !"frontend-static".equals(candidate.getFileName().toString())) {
+            throw new IllegalArgumentException("Frontend release root must be an immutable versioned release directory");
+        }
+        return new String[]{"file:"+candidate.toString()+"/", legacyLocations[0], legacyLocations[1]};
+    }
+
+    static boolean isStaticFile(String resourcePath) {
+        if (resourcePath == null) return false;
+        String normalized=resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+        if (normalized.startsWith("_next/")) return true;
+        String name=normalized.substring(normalized.lastIndexOf('/')+1);
+        return name.contains(".");
+    }
 
     static boolean isBackendRoute(String path) {
         if (path == null) return false;
@@ -39,7 +65,7 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
-                .addResourceLocations("file:/srv/moneyverse-data/frontend-static/", "classpath:/static/")
+                .addResourceLocations(resourceLocations(immutableFrontendReleaseDir))
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
                     @Override
@@ -89,6 +115,9 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
                         if (subIndexCandidate.exists() && subIndexCandidate.isReadable()) {
                             return subIndexCandidate;
                         }
+
+                        // Missing files, JS bundles and fonts MUST return 404, never SPA HTML200.
+                        if (isStaticFile(cleanPath)) return null;
 
                         // 5. Fallback for client-side SPA routing -> index.html
                         Resource indexHtml = location.createRelative("index.html");

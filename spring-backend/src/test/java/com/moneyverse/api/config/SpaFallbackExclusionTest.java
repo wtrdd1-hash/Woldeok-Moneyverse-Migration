@@ -12,4 +12,21 @@ class SpaFallbackExclusionTest {
         assertFalse(SpaWebMvcConfig.isBackendRoute("admin"));
         assertFalse(SpaWebMvcConfig.isBackendRoute("assets/site.css"));
     }
+    @Test
+    void immutableFrontendReleasePrecedesLegacyForStaticAssets() {
+        String base="/srv/moneyverse-data/releases/web-v2026.11.18.24-sample/frontend-static";
+        String[] roots=SpaWebMvcConfig.resourceLocations(base);
+        assertEquals("file:"+base+"/",roots[0]);
+        assertEquals("file:/srv/moneyverse-data/frontend-static/",roots[1]);
+        assertEquals("classpath:/static/",roots[2]);
+    }
+
+    @Test
+    void unconfiguredServiceKeepsCurrentAssetsAndUnknownChunksNeverBecome200Html() {
+        assertEquals(2,SpaWebMvcConfig.resourceLocations("").length);
+        assertTrue(SpaWebMvcConfig.isStaticFile("_next/static/chunks/missing.js"));
+        assertTrue(SpaWebMvcConfig.isStaticFile("images/logo.png"));
+        assertFalse(SpaWebMvcConfig.isStaticFile("tools/compound-calculator"));
+        assertThrows(IllegalArgumentException.class,()->SpaWebMvcConfig.resourceLocations("/etc/ssh"));
+    }
 }
