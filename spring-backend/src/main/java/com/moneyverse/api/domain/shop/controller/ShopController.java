@@ -2,6 +2,13 @@ package com.moneyverse.api.domain.shop.controller;
 
 import com.moneyverse.api.domain.shop.dto.ShopDtos.*;
 import com.moneyverse.api.domain.shop.service.ShopService;
+import com.moneyverse.api.domain.identity.service.UserAuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
+import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +20,22 @@ import org.springframework.web.bind.annotation.*;
 public class ShopController {
 
     private final ShopService shopService;
+    private final UserAuthService userAuthService;
 
-    public ShopController(ShopService shopService) {
+    public ShopController(ShopService shopService, UserAuthService userAuthService) {
         this.shopService = shopService;
+        this.userAuthService = userAuthService;
     }
 
-    private String resolveUserId(String xUserId, String xActorUserId) {
-        if (xUserId != null && !xUserId.isBlank()) return xUserId.trim();
-        if (xActorUserId != null && !xActorUserId.isBlank()) return xActorUserId.trim();
-        return "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+    private Optional<UserAuthService.SessionInfo> verifiedMember(HttpServletRequest request) {
+        return userAuthService.resolveSession(request).filter(UserAuthService.SessionInfo::isSignedIn);
+    }
+
+    private boolean verifiedCsrf(UserAuthService.SessionInfo session, String supplied) {
+        if (supplied == null || supplied.isBlank() || session.getCsrfHash() == null) return false;
+        byte[] expected = session.getCsrfHash().getBytes(StandardCharsets.UTF_8);
+        byte[] actual = UserAuthService.sha256(supplied).getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(expected, actual);
     }
 
     @GetMapping({"", "/", "/catalog", "/items"})
@@ -31,29 +45,32 @@ public class ShopController {
     }
 
     @GetMapping({"/inventory", "/my-items"})
-    @Operation(summary = "내가 소유한 아이템 인벤토리 및 도감 조회")
-    public ResponseEntity<ShopInventoryResponse> getMyInventory(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId
-    ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        return ResponseEntity.ok(shopService.getMyItems(userId));
+    @Operation(summary = "인증된 본인 계정의 아이템 인벤토리")
+    public ResponseEntity<?> getMyInventory(HttpServletRequest request) {
+        var session = verifiedMember(request);
+        if (session.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of("code", "SESSION_REQUIRED"));
+        return ResponseEntity.ok(shopService.getMyItems(session.get().getUserId().toString()));
     }
 
     @PostMapping("/purchase")
-    @Operation(summary = "아이템 구매 (국고 10% 부가가치세 자동 편입)")
-    public ResponseEntity<ShopPurchaseResponse> purchaseItem(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId,
-            @RequestBody ShopPurchaseRequest request
+    @Operation(summary = "검증된 소유자 및 멱등 키 기반 아이템 구매")
+    public ResponseEntity<?> purchaseItem(
+            HttpServletRequest httpRequest,
+            @RequestHeader(value="X-CSRF-Token", required=false) String csrf,
+            @RequestHeader(value="Idempotency-Key", required=false) String idempotencyKey,
+            @RequestBody(required=false) ShopPurchaseRequest request
     ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        if (request == null || request.itemId() == null || request.itemId().isBlank()) {
-            return ResponseEntity.badRequest().body(ShopPurchaseResponse.fail("item_id is required"));
-        }
-        int quantity = request.quantity() > 0 ? request.quantity() : 1;
-        ShopPurchaseResponse response = shopService.purchaseItem(userId, request.itemId(), quantity);
-        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+        var session = verifiedMember(httpRequest);
+        if (session.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of("code", "SESSION_REQUIRED"));
+        if (!verifiedCsrf(session.get(), csrf)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body(java.util.Map.of("code", "CSRF_REQUIRED"));
+        if (request == null || request.itemId() == null || request.itemId().isBlank())
+            return ResponseEntity.badRequest().body(ShopPurchaseResponse.fail("ITEM_ID_REQUIRED"));
+        UUID key;
+        try { key = UUID.fromString(idempotencyKey); }
+        catch (Exception e) { return ResponseEntity.badRequest().body(ShopPurchaseResponse.fail("IDEMPOTENCY_KEY_REQUIRED")); }
+        ShopPurchaseResponse response = shopService.purchaseItem(session.get().getUserId().toString(), request.itemId(), request.quantity(), key);
+        return response.success() ? ResponseEntity.ok(response) :
+                ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
     @GetMapping("/crafting/recipes")
@@ -63,17 +80,16 @@ public class ShopController {
     }
 
     @PostMapping("/crafting/craft")
-    @Operation(summary = "레시피 기반 아이템 제작 실행")
-    public ResponseEntity<CraftExecuteResponse> executeCraft(
-            @RequestHeader(value = "X-User-Id", required = false) String xUserId,
-            @RequestHeader(value = "x-actor-user-id", required = false) String xActorUserId,
-            @RequestBody CraftExecuteRequest request
+    @Operation(summary = "제작 원장 검증 대기")
+    public ResponseEntity<?> executeCrafting(
+            HttpServletRequest httpRequest,
+            @RequestHeader(value="X-CSRF-Token",required=false) String csrf,
+            @RequestBody(required=false) CraftExecuteRequest request
     ) {
-        String userId = resolveUserId(xUserId, xActorUserId);
-        if (request == null || request.recipeId() == null || request.recipeId().isBlank()) {
-            return ResponseEntity.badRequest().body(CraftExecuteResponse.fail("recipe_id is required"));
-        }
-        CraftExecuteResponse response = shopService.executeCrafting(userId, request.recipeId());
-        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+        var session = verifiedMember(httpRequest);
+        if (session.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of("code", "SESSION_REQUIRED"));
+        if (!verifiedCsrf(session.get(), csrf)) return ResponseEntity.status(HttpStatus.FORBIDDEN).body(java.util.Map.of("code", "CSRF_REQUIRED"));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(CraftExecuteResponse.fail("CRAFTING_LEDGER_NOT_VERIFIED"));
     }
 }

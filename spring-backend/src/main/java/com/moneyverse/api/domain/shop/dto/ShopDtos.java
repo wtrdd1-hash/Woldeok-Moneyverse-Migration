@@ -53,7 +53,7 @@ public final class ShopDtos {
             @JsonProperty("error") String error
     ) implements Serializable {
         public static ShopPurchaseResponse ok(String purchaseId, String totalPrice, String taxPaid) {
-            return new ShopPurchaseResponse(true, purchaseId, totalPrice, taxPaid, "아이템 구매 및 10% 소비세 국고 편입이 완료되었습니다.", null);
+            return new ShopPurchaseResponse(true, purchaseId, totalPrice, taxPaid, "구매 영수증을 받았습니다. 세금 정산 내역은 별도의 원장 검증이 필요합니다.", null);
         }
         public static ShopPurchaseResponse fail(String error) {
             return new ShopPurchaseResponse(false, null, "0", "0", null, error);

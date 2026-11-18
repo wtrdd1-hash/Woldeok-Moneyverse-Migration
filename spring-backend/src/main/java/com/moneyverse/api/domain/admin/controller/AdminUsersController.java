@@ -2,12 +2,12 @@ package com.moneyverse.api.domain.admin.controller;
 
 import com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.AdminUsersResponse;
 import com.moneyverse.api.domain.admin.service.AdminGovernanceService;
+import com.moneyverse.api.domain.admin.service.AdminAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,35 +22,13 @@ public class AdminUsersController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminUsersController.class);
 
-    @Value("${moneyverse.security.internal-token:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}")
-    private String internalToken;
 
     private final AdminGovernanceService governanceService;
+    private final AdminAuthService adminAuthService;
 
-    public AdminUsersController(AdminGovernanceService governanceService) {
+    public AdminUsersController(AdminGovernanceService governanceService, AdminAuthService adminAuthService) {
         this.governanceService = governanceService;
-    }
-
-    private boolean isAuthorized(HttpServletRequest request) {
-        String internalHeader = request.getHeader("x-internal-token");
-        String authHeader = request.getHeader("Authorization");
-        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
-
-        boolean hasSessionCookie = false;
-        if (cookies != null) {
-            for (jakarta.servlet.http.Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        hasSessionCookie = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return (internalHeader != null && internalHeader.equals(internalToken)) ||
-                (authHeader != null && authHeader.startsWith("Bearer ")) ||
-                hasSessionCookie;
+        this.adminAuthService = adminAuthService;
     }
 
     private ResponseEntity<?> unauthorizedResponse() {
@@ -72,8 +50,8 @@ public class AdminUsersController {
             HttpServletRequest request,
             @RequestParam(name = "limit", defaultValue = "50") int limit
     ) {
-        if (!isAuthorized(request)) return unauthorizedResponse();
-        AdminUsersResponse response = governanceService.listUsers(null, limit);
+        if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) return unauthorizedResponse();
+        AdminUsersResponse response = governanceService.listUsers(adminAuthService.resolveVerifiedAdminActor(request).orElseThrow(), limit);
         return ResponseEntity.ok(response);
     }
 
@@ -86,15 +64,9 @@ public class AdminUsersController {
             HttpServletRequest request,
             @PathVariable("id") String userId
     ) {
-        if (!isAuthorized(request)) return unauthorizedResponse();
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("userId", userId);
-        res.put("portfolio", Map.of(
-                "cash", "0",
-                "bank", "0",
-                "bonds", "0",
-                "stocks", "0"
-        ));
-        return ResponseEntity.ok(res);
+        if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) return unauthorizedResponse();
+        // No canonical owner-scoped portfolio read path is certified for this migration.
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("code", "PORTFOLIO_SOURCE_NOT_VERIFIED"));
     }
 }

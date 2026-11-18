@@ -127,6 +127,44 @@ public class AdminAuthService {
         return false;
     }
 
+    /** A valid, unexpired database session AND current DB-backed admin role are both required.
+     * Never accept cookie/header presence or an unscoped internal credential as an actor.
+     */
+    /** CSRF validation binds a state-changing command to an active session cookie.
+     * The server stores only a SHA-256 hash. Never trust caller identity headers.
+     */
+    public boolean hasVerifiedSessionCsrf(HttpServletRequest request) {
+        if (request == null) return false;
+        String rawSession = extractSessionToken(request);
+        String supplied = request.getHeader("X-CSRF-Token");
+        if (rawSession == null || supplied == null || supplied.isBlank()) return false;
+        try {
+            String expected = jdbcTemplate.queryForObject(
+                "SELECT csrf_hash FROM auth_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() AND user_id IS NOT NULL",
+                String.class, sha256(rawSession));
+            if (expected == null) return false;
+            return MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),
+                    sha256(supplied).getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Optional<UUID> resolveVerifiedAdminActor(HttpServletRequest request) {
+        Optional<UUID> actor = resolveAdminUserId(request);
+        if (actor.isEmpty()) return Optional.empty();
+        try {
+            List<String> currentRoles = jdbcTemplate.query(
+                "SELECT role::text FROM public.admin_current_roles(?::uuid)",
+                (rs, rowNum) -> rs.getString(1), actor.get()
+            );
+            return currentRoles.isEmpty() ? Optional.empty() : actor;
+        } catch (Exception e) {
+            log.warn("[AdminAuth] verified actor role lookup failed (fail closed)");
+            return Optional.empty();
+        }
+    }
+
     public Optional<UUID> resolveAdminUserId(HttpServletRequest request) {
         if (request == null) return Optional.empty();
         String sessionToken = extractSessionToken(request);
