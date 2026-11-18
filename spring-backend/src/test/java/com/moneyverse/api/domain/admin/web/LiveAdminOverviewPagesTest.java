@@ -53,6 +53,7 @@ class LiveAdminOverviewPagesTest {
 
     @Test void controlsAndEconomyHaveReadOnlyTruthfulViews() {
         UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        when(auth.hasVerifiedRole(actor, "approver")).thenReturn(true);
         when(governance.getFeatureSwitchesOverview(actor)).thenReturn(new FeatureSwitchOverviewResponse(
                 List.of(new FeatureSwitchDto("safe_feature","disabled","Feature",null,null,null,null)), List.of(), List.of()));
         EconomyReconciliationHealthDto snapshot=new EconomyReconciliationHealthDto();snapshot.setAvailable(false);
@@ -61,6 +62,14 @@ class LiveAdminOverviewPagesTest {
         assertTrue(pages.show(req("/admin/controls"),"en").getBody().contains("safe_feature"));
         assertTrue(pages.show(req("/admin/economy"),"ko").getBody().contains("UNVERIFIED"));
         assertTrue(pages.show(req("/admin/economy/scenario-lab"),"en").getBody().contains("READ-ONLY"));
+    }
+
+    @Test void financeOverviewRequiresActualApproverRoleEvenForAdministrator() {
+        UUID actor=UUID.randomUUID();when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.of(actor));
+        when(auth.hasVerifiedRole(actor,"approver")).thenReturn(false);
+        ResponseEntity<String> out=pages.show(req("/admin/economy"),"en");
+        assertEquals(403,out.getStatusCode().value());
+        verify(governance,never()).getLatestReconciliationHealth(any());
     }
 
     @Test void noDatabaseProofMeans503NeverFabricatedAdminSuccess() {

@@ -150,6 +150,20 @@ public class AdminAuthService {
         }
     }
 
+    /** Financial/privileged operations require an actual current DB role; no user_roles fallback. */
+    public boolean hasVerifiedRole(UUID actor, String role) {
+        if (actor == null || role == null || role.isBlank()) return false;
+        try {
+            List<String> current = jdbcTemplate.query(
+                "SELECT role::text FROM public.admin_current_roles(?::uuid)",
+                (rs, n) -> rs.getString(1), actor);
+            return current.stream().anyMatch(value -> role.equalsIgnoreCase(value));
+        } catch (Exception e) {
+            log.warn("[AdminAuth] role assertion unavailable (fail closed)");
+            return false;
+        }
+    }
+
     public Optional<UUID> resolveVerifiedAdminActor(HttpServletRequest request) {
         Optional<UUID> actor = resolveAdminUserId(request);
         if (actor.isEmpty()) return Optional.empty();

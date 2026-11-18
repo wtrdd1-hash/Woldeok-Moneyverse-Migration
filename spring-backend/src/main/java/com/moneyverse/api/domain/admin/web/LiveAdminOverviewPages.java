@@ -53,6 +53,13 @@ public class LiveAdminOverviewPages {
         }
         boolean ko = "ko".equalsIgnoreCase(language);
         String title = title(uri, ko);
+        if (uri.startsWith("/admin/economy") && !auth.hasVerifiedRole(actor, "approver")) {
+            String denial = ko ? "이 원장 조회에는 활성 approver 권한이 필요합니다."
+                    : "An active approver role is required for the financial ledger view.";
+            return new ResponseEntity<>(LiveAdminUsersPage.renderPage(ko, title,
+                    "<section class=\"panel\"><h1>403 — " + denial + "</h1></section>"),
+                    headers, HttpStatus.FORBIDDEN);
+        }
         String body;
         try {
             body = switch (uri) {
