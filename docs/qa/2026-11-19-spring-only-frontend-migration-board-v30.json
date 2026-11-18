@@ -1,0 +1,1471 @@
+{
+  "ownerDirective": "All web frontend must be Spring Boot: v2026.11.19.30",
+  "scope": "Next route source inventory is NOT same as all live runtime URLs or full positive API tests",
+  "totalSourceRoutes": 180,
+  "verifiedSpringRenderedRedesign": 5,
+  "notYetCertified": 175,
+  "knownSourceApiUnavailable503Aliases": 28,
+  "importantNote": "No generic Next home HTML200, anonymous401 or failclosed503 counts as feature acceptance. New Admin v17 and global chat not complete.",
+  "routes": [
+    {
+      "sourceNextRoute": "/[locale]/blog/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/[locale]/blog",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/[locale]/guide/glossary/[term]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/[locale]/guide/glossary",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/[locale]/tools/compound-interest-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/[locale]/tools/compound-interest-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/account/notifications",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/account",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/account/privacy",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/account/security",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/account-deletion",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/analytics",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/api-health",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/bank",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/blog",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/bonds",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/catalog",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/central-bank",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/content",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/controls",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/discord",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/economy",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/economy/scenario-lab",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/enterprises",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/fx",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/help",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/kdic",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs/activity",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs/delivery",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs/errors",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs/integrity",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/logs/system",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/market/ai-news",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/market",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/mint",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/money-flow",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/operations/storage",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/pension",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/safety",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/security",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/seo",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/seo-audit",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/shop",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/support",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/treasury/grants",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/treasury",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/users/[id]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/users",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/admin/work",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/advisor",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/announcements/[announcementId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/announcements",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/arcade",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/bank",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/bank/savings-pot",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/blog/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/blog",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/board/[postId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/board",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/bonds",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/businesses",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/businesses/ventures",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/calculators",
+      "verification": "VERIFIED_SPRING_RUNTIME_AND_DESIGN",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": {
+        "version": "v2026.11.19.30.1",
+        "frontend": "Spring MVC + Thymeleaf SSR",
+        "qa": "Real public HTTPS EN/KO 320/390/1440 and JS-disabled search+filters, 17 links, 2 certified/15 legacy, 237 JUnit"
+      }
+    },
+    {
+      "sourceNextRoute": "/calendar",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/casino",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/central-bank",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/chat",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/clubs/[clubId]/members",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/clubs/[clubId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/clubs/new",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/clubs",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/clubs/warfare",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/collections",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/dashboard",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/data-deletion",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/design-preview",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/developer",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/enterprises",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/features",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/forgot-password",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/fx",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/gallery/[photoId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/gallery",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/gallery/submit",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/career-mastery",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/dopamine-system",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/glossary/[term]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/glossary",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/stock-trading",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/guide/virtual-banking",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/help/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/help",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/inventory",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/invite/[code]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/kdic",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/lobby",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/login",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/login/providers",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/marketplace/auction",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/marketplace",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/mint",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/newspaper",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/pension",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/prediction",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/privacy",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/profile/[userId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/profile",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/profile/settings",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/progression",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/progression/prestige",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/quests",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/register",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/reset-password",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/roadmap",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/safety",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/safety/takedown",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/search",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/seasons",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/shop/catalog",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/shop",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/spaces",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/spaces/real-estate",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/status",
+      "verification": "VERIFIED_SPRING_RUNTIME_AND_DESIGN",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": {
+        "version": "v2026.11.19.29.1",
+        "frontend": "Spring MVC + Thymeleaf + public PostgreSQL content-status collector",
+        "qa": "Real public 3 source rows, stale->unknown policy, Chromium EN/KO 320/390/1440, live HTTPS, 232 JUnit"
+      }
+    },
+    {
+      "sourceNextRoute": "/stocks/[symbol]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/alerts",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/community",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/compare",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/derivatives",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/history",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/league",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks",
+      "verification": "VERIFIED_SPRING_RUNTIME_AND_DESIGN",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": {
+        "version": "v2026.11.18.27.1",
+        "frontend": "Spring MVC",
+        "qa": "Canonical real 10 stocks, Chromium EN/KO 320/390/1440, real HTTPS"
+      }
+    },
+    {
+      "sourceNextRoute": "/stocks/portfolio",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/stocks/watchlist",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/support",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/terms",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/capital-gains-tax-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/capital-gains-tax-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/compound-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/compound-calculator",
+      "verification": "VERIFIED_SPRING_RUNTIME_AND_DESIGN",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": {
+        "version": "v2026.11.18.28.1",
+        "frontend": "Spring MVC + Thymeleaf",
+        "qa": "Chromium EN/KO 320/390/1440, no-JS form, 226 JUnit, real HTTPS"
+      }
+    },
+    {
+      "sourceNextRoute": "/tools/crypto-apy-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/dividend-tax-calculator/[ticker]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/dividend-tax-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/farming-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/farming-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/fire-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/gift-tax-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/gift-tax-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/goal-wealth-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/isa-calculator/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/isa-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/kimchi-premium-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/kimchi-premium-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/loan-interest-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/loan-interest-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/pension-tax-calculator/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/pension-tax-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/quant-studio",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/real-estate-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/real-estate-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/retirement-calculator/[slug]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/retirement-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/salary-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/salary-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/stock-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/stock-calculator",
+      "verification": "VERIFIED_SPRING_RUNTIME_AND_DESIGN",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": {
+        "version": "v2026.11.18.28.1",
+        "frontend": "Spring MVC + Thymeleaf",
+        "qa": "Chromium EN/KO 320/390/1440, no-JS form, 226 JUnit, real HTTPS"
+      }
+    },
+    {
+      "sourceNextRoute": "/tools/tax-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "V24_RELEASE",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/youth-leap-calculator/[preset]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/tools/youth-leap-calculator",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/treasury",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/verify-email",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/verify-email-change",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/wallet/activity",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/wallet/activity/transactions/[transactionId]",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "PARAMETERIZED_NO_FIXTURE",
+      "dynamicPathParametersNeedFixture": true,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/wallet",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    },
+    {
+      "sourceNextRoute": "/work",
+      "verification": "NOT_CERTIFIED",
+      "expectedProductionRenderer": "Spring Boot MVC / Thymeleaf",
+      "knownPriorStatus": "LEGACY_OR_OTHER",
+      "dynamicPathParametersNeedFixture": false,
+      "verifiedDetails": null
+    }
+  ]
+}
