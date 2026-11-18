@@ -89,3 +89,25 @@ scripts/qa/*.sh
 
 # Retain the systemd scheduled QA runner in source control
 !scripts/qa/moneyverse-hourly-qa.sh
+
+# v2026.11.18.11 — private operational/audit inputs: local only; publish sanitized public summaries
+ops/private/
+ops/recovery/
+docs/private/
+docs/internal/
+.internal/
+.secrets/
+*.tar.zst.enc
+*.age
+*.jks
+*.keystore
+.pgpass
+.npmrc
+*.jsonl
+*.ndjson
+*.log
+*.log.*
+*.sqlite-journal
+docs/updates/*internal*.md
+docs/worklog/*internal*.md
+docs/changelog/*internal*.md
