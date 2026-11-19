@@ -14,5 +14,6 @@ Stack on existing v38 shared Java admin and Thymeleaf implementation, not on the
 - [x] Java clean test bootJar, Node tests, real isolated random-port H2 HTTP native page, CSP and static resource, branch diff check.
 - [x] Run real Chromium 10/10 on local synthetic UI fixture at 320/390/768/1440. Captures not required; actual Java/admin/finance visual parity NOT CERTIFIED.
 - [x] Document exact source, limitations, English canonical/Korean second plan, 180-image matrix cross-links, changes, QA, MID/END. Recheck Gemini and main.
-- [ ] Publish clean stacked Draft PR, no production promotion if auth/security/visual/rollback gates incomplete.
+- [x] Published stacked DRAFT PR #3297 on Spring admin PR #3295; no Production promotion due missing authenticated finance/180 route/rollback gates.
 \n## Release acceptance\n- Full 262 Spring Java + Node 7 + Spring H2 HTTP 5 + isolated Chromium 10 PASS. User whole-site goal remains open. Official authenticated Test/rollback and 180 route proof not available; no Production change.\n
+PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3297. Do not auto-merge. Parallel core responsive member PR #3296 remains independent.

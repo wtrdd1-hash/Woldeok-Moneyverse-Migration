@@ -32,3 +32,9 @@ GitHub main at start: c131ef1039fddbba064e04a9c07bbba06e0a38a2
 - Historical 180-page design PNG matrix remains NOT CERTIFIED. Shared v39 module covers native Spring calculator, hub, status and admin shell; simultaneous PR #3296 covers eight member page families in separate sources. No double ownership or merge of unapproved historical local-main commits.
 - 5 supported locales and explicit Auto/manual preference implemented in UI; native JA/ZH/VI body translations **not complete**. User original full-site target is only partially fulfilled.
 - Real authenticated financial/ledger/quest/chat API E2E, current security baseline integration, public exact-SHA Test, global 180 route visual/browser parity, atomic rollback and Production promotion NOT RUN. No Nginx/DB/member/ledger/run process mutations; release HOLD.
+
+## GitHub review handoff
+- Isolated stacked DRAFT PR #3297: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3297 / based on Spring administrator PR #3295.
+- Cross-member locale preferences with concurrent core-8-page PR #3296, zero overlapping owned static files.
+- Changed 31 files, Node7/Java clean262/actual H2 HTTP5/fixture Chromium10 PASS; no main merge or Production deployment.
+- Public current main and collaboration branches rechecked. Actual authenticated/ledger/all-180-browser/exact Test/rollback remain unverified, release HOLD.
