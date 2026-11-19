@@ -16,3 +16,8 @@ test('v349 preserves ledger read-only app boundary on existing tables', () => {
   assert.match(sql, /GRANT SELECT ON TABLE public\.ledger_transactions, public\.ledger_postings TO moneyverse_app/i);
   assert.doesNotMatch(sql, /GRANT\s+(?:ALL|INSERT|UPDATE|DELETE|TRUNCATE).*ledger_/i);
 });
+
+test('v349 revokes additive global and schema-specific default table privileges', () => {
+  assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app/i);
+  assert.match(sql, /ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app/i);
+});

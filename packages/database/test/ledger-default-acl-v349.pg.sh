@@ -23,7 +23,9 @@ GRANT USAGE, CREATE ON SCHEMA public TO moneyverse_migrator;
 CREATE TABLE public.ledger_transactions (id bigint PRIMARY KEY);
 CREATE TABLE public.ledger_postings (id bigint PRIMARY KEY);
 GRANT ALL PRIVILEGES ON TABLE public.ledger_transactions, public.ledger_postings TO moneyverse_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO moneyverse_app;
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO moneyverse_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE moneyverse_migrator GRANT ALL ON TABLES TO moneyverse_app;
 ALTER DEFAULT PRIVILEGES FOR ROLE moneyverse_migrator IN SCHEMA public GRANT ALL ON TABLES TO moneyverse_app;
 SQL
 # Precondition must actually be vulnerable; otherwise the test is meaningless.

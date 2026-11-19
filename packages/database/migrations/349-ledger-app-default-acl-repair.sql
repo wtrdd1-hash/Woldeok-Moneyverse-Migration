@@ -11,6 +11,11 @@ DECLARE creator text;
 BEGIN
   FOREACH creator IN ARRAY ARRAY['postgres', 'moneyverse_migrator'] LOOP
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = creator) THEN
+      -- Global defaults are additive to per-schema defaults; both must be revoked.
+      EXECUTE format(
+        'ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app',
+        creator
+      );
       EXECUTE format(
         'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app',
         creator
