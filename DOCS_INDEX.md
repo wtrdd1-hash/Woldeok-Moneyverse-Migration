@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.32 — Design Preview Promoted to Homepage (INCIDENT DOCUMENTED / NO DEPLOY)
+
+The three-option exploratory screen ("신규 사용자 유입을 위한 홈 화면 3안") was observed at the public home route, although the agreed direction is a navy/violet game-like economy UI. Root/source/mini-PC-only QA evidence is documented, with authorship and end-to-end QA explicitly unverified. **Documentation only; no frontend, Spring, Test or Production modifications.** [Incident EN](docs/findings/2026-11-19-design-preview-homepage-incident-v2026.11.19.32.md) / [한국어](docs/findings/2026-11-19-design-preview-homepage-incident-v2026.11.19.32.ko.md) · [Worklog EN](docs/worklog/2026-11-19-ui-preview-homepage-incident-v2026.11.19.32.md) / [한국어](docs/worklog/2026-11-19-ui-preview-homepage-incident-v2026.11.19.32.ko.md) · Internal updates remain on the mini-PC only under the repository ignore policy · [GitHub EN](docs/updates/v2026.11.19.32-ui-preview-homepage-github.md) / [한국어](docs/updates/v2026.11.19.32-ui-preview-homepage-github.ko.md).
+
+
 ## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
 
 - [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
@@ -451,11 +456,11 @@
 
 이 문서는 진단/검토용이며 취약점 수정·운영 배포 완료를 의미하지 않는다.
 
-> **단일 진실 공급원 (Single Source of Truth)**  
+> **단일 진실 공급원 (Single Source of Truth)**
 > 본 문서는 월덕 머니버스(Woldeok Moneyverse) 플랫폼의 금융 아키텍처, 대국민 국고 생태계, 가상 주식 거래소, API 계약, 관리자 관제, 모바일 규격, 인프라 운영 가이드를 총망라하는 통합 문서 색인 허브입니다.
 
 > [!TIP]
-> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v209 최신판)](docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**  
+> 🌟 **[통합 개발 진행상황 및 마스터 레퍼런스 총서 (v1~v209 최신판)](docs/DEVELOPMENT_STATUS_AND_MASTER_REFERENCE.ko.md)**
 > 프로젝트 전체 개발 로드맵, 최신 누적 릴리스(prod-v590) 성과 지표, 그리고 시스템에 적용된 최신 글로벌 공인 엔지니어링 표준(복식부기 원장, 대국민 국고 DAO 예산 투표제, 기술적 분석 작도 수식, Next.js/NestJS 아키텍처, 예금자보호 규제)을 한 번에 확인하실 수 있습니다.
 
 ---

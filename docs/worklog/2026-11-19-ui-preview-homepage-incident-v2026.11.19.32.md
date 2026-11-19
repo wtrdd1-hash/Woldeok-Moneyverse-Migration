@@ -17,12 +17,12 @@
 - [x] Inspect user evidence and current documentation hierarchy.
 - [x] Identify source, QA declaration, live root marker, and differences against agreed planning.
 - [x] Isolate this document-only task to a new branch/worktree; leave other agents' uncommitted and local-only work untouched.
-- [ ] Publish incident analysis and action/acceptance checklist in English and Korean.
+- [x] Publish incident analysis and action/acceptance checklist in English and Korean.
 - [ ] Re-fetch remote main, validate document consistency and links, update log, and open a review PR (no merge or production promotion).
 - [ ] Record final validation and change notes.
 
 ## In progress
-Initial checkpoint recorded before publishing the incident report. Changes to UI assets or runtime are explicitly **out of scope**. Neither the authorship of the screenshot design nor completion of API functional tests can be inferred from the supplied screenshot.
+Initial checkpoint recorded before publishing the incident report. At intermediate checkpoint, published bilingual findings and GitHub update notes in the master index. Both internal updates remain on mini-PC only per .gitignore; do not force-add. Changes to UI assets or runtime are explicitly **out of scope**. Neither the authorship of the screenshot design nor completion of API functional tests can be inferred from the supplied screenshot.
 
 ## Finished
 Pending.
