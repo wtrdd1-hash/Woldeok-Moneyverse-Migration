@@ -29,8 +29,11 @@
 - [x] Write RED tests for Thymeleaf footer dock and mobile safe-area styles; implement shared style and update fragment; rerun GREEN.
 - [x] Run focused tests, full Spring Java tests & bootJar, isolated Test if possible, visually verify browser and server output.
 - [x] Reconfirm GitHub main and collaborators; write MID/END logs, bilingual planning/QA/changelog updates, commit in isolated branch, attempt clean PR if baseline available.
-- [ ] Only scoped Production promotion if exact-SHA full security/browser/functional/rollback gates clear; otherwise record HOLD and keep services unchanged.
+- [x] Keep Production unchanged because browser/auth/finance/rollback gates are unverified; record explicit RELEASE HOLD.
 
 ## Evidence gate note
 - Full Java clean test bootJar 251/251 passed on local integrated baseline, 4 H2 random-port HTTP checks passed, as of 2026-11-19 ~14:33 KST.
 - No Chrome/browser screenshot, authenticated positive finance/DM, exact official Test or rollback evidence. Production promotion is blocked; do not confuse user authorization with acceptance testing.
+
+### Clean PR base
+- Published source parent 46275239f5; cherry-picked v38 feature-only SHA 086084c136; exact-source Java 251/251 PASS, PR JAR sha256 50eb48f7...525f44d93. Full 180 UI release not claimed.

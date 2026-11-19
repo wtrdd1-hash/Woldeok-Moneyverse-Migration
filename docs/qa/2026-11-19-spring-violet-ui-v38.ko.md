@@ -34,3 +34,7 @@
 **릴리스 판정: HOLD / 운영 화면 미교체.** 현재 빌드·실 HTTP 성공은 Spring 화면 구현의 일부 증거이며 전 페이지 인증·반응형·금융·운영 승격 완료 증거가 아니다. 사용자 운영 승인은 수용했으나 미검증 운영 서비스 재시작·DB 변경·Nginx 재배포를 실행하지 않는다.
 
 [상세 설계 한국어](../planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) / [English](../planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md).
+
+## 공개 Spring 라우팅 브랜치 기반 깨끗한 PR 및 독립 재검증
+
+로컬 통합 main의 Gemini/보안 관련 8개 미공개 커밋을 새 PR에 섞지 않도록 **공개 원격 Spring 라우팅 기준** `46275239f5d707aed52b38fe91d959da59df0977`에서 별도 worktree를 만든 뒤 이번 v38 구현 커밋만 cherry-pick했다. 결과 **깨끗한 PR 소스 SHA** `086084c13608a1aecbffb690e7b4b23708862d7d`, 상위 브랜치 대비 **파일 30개 변경**뿐이다. 해당 정확한 PR 브랜치에서 `./gradlew clean test bootJar --offline --no-daemon -Dorg.gradle.workers.max=2`를 다시 수행하여 **251/251 PASS·실패0·건너뜀0**, 격리 JAR SHA256 `50eb48f788a3e5f4ade587e537981312989d2db8329bd366c80209a525f44d93` 확인. 기반 SHA가 달라 산출물 해시도 달라지며 어느 것도 운영 JAR은 아니다. PR에서 영/한 기획·QA·180 행렬의 **상대경로 205개 전부 실존** 확인. 공개 Spring 라우팅 브랜치에는 다른 작업자의 최신 보안 수정이 아직 포함되지 않을 수 있으므로 보안 통합/격리 Test 검증 없이 이 PR을 운영에 승격 금지.
