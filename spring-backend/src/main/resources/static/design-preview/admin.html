@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+  <title>운영 마스터 관제탑 (Admin Console & Control Tower) · 월덕 머니버스</title>
+  <meta name="description" content="월덕 머니버스 다크 네이비/바이올렛 관리자 관제탑 및 가상경제 이상 감시 콘솔" />
+  <link rel="stylesheet" href="/_next/static/css/828951deb2af2cbe.css" />
+  <link rel="stylesheet" href="/_next/static/css/516a37fdf90e5903.css" />
+  <link rel="stylesheet" href="/_next/static/css/cb6a106b181e3de7.css" />
+  <link rel="stylesheet" href="/material-symbols.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    body {
+      background-color: #0c101d;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .admin-card {
+      background-color: #121829;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .admin-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .floating-dock-56 {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+      display: grid;
+      place-items: center;
+      color: white;
+      z-index: 50;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .floating-dock-56:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6);
+    }
+    @media (max-width: 768px) {
+      .floating-dock-56 {
+        right: 16px;
+        bottom: calc(env(safe-area-inset-bottom) + 80px);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col selection:bg-purple-500/20 selection:text-purple-300">
+
+  <!-- 상단 데모 알림 띠배너 -->
+  <aside class="bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 border-b border-purple-500/30 px-4 py-2 text-xs font-bold flex items-center justify-between text-purple-200">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm text-amber-400">admin_panel_settings</span>
+      <span>[관리자 콘솔 공식 프리뷰] 승인된 다크 네이비 / 시맨틱 바이올렛 인터랙티브 관제탑 화면입니다.</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="hidden sm:inline text-purple-300/70">Spring Boot 3.3.5 단일 런타임</span>
+      <a href="/login" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-[11px] transition-all">
+        실제 2FA 로그인 &rarr;
+      </a>
+    </div>
+  </aside>
+
+  <!-- 메인 콘솔 헤더 -->
+  <header class="border-b border-purple-900/40 bg-[#0e1424]/90 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="size-9 rounded-xl bg-purple-600 text-white grid place-items-center font-black text-lg shadow-md shadow-purple-600/30">
+        W
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+          <span>월덕 머니버스</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-300 font-mono">
+            ADMIN COCKPIT
+          </span>
+        </h1>
+        <p class="text-[11px] text-slate-400">국고 원장, 실시간 호가 감시 및 중앙은행 관제 시스템</p>
+      </div>
+    </div>
+
+    <!-- 우측 제어 툴바 -->
+    <div class="flex items-center gap-2.5">
+      <span class="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-mono">
+        <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> SYSTEM HEALTH: 100%
+      </span>
+      <a href="/" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs font-bold text-white transition-all">
+        홈으로 돌아가기
+      </a>
+    </div>
+  </header>
+
+  <!-- 관리자 콘솔 본문 레이아웃 (사이드바 + 메인 대시보드) -->
+  <div class="flex-1 flex flex-col lg:flex-row w-full max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 gap-6">
+
+    <!-- 좌측 사이드바 (7대 관리 모듈) -->
+    <nav class="w-full lg:w-64 shrink-0 flex flex-col gap-1.5">
+      <p class="text-[11px] font-bold text-purple-400/80 px-3 py-1 tracking-wider uppercase">CORE MODULES</p>
+      <a href="#overview" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 font-bold text-xs sm:text-sm">
+        <span class="material-symbols-outlined text-lg">dashboard</span> 통합 관제 대시보드
+      </a>
+      <a href="#users" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">groups</span> 회원 및 2FA 권한 관리
+      </a>
+      <a href="#economy" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">account_balance</span> 가상경제 복식부기 원장
+      </a>
+      <a href="#stocks" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">monitoring</span> 실시간 주식 호가 감시
+      </a>
+      <a href="#content" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">newspaper</span> 공시 및 AI 뉴스 브리프
+      </a>
+      <a href="#security" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">shield</span> 보안 감사 및 접근 제어
+      </a>
+      <a href="#logs" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 font-semibold text-xs sm:text-sm transition-all">
+        <span class="material-symbols-outlined text-lg">terminal</span> 스프링 런타임 실시간 로그
+      </a>
+    </nav>
+
+    <!-- 메인 대시보드 컨텐츠 -->
+    <main class="flex-1 flex flex-col gap-6 min-w-0">
+
+      <!-- 4대 실시간 KPI 카드 그리드 -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        
+        <div class="admin-card p-4 sm:p-5 flex flex-col justify-between min-h-[120px]">
+          <div class="flex items-center justify-between text-purple-400">
+            <span class="text-xs font-bold tracking-tight">국고 국부펀드(ASWF) 총액</span>
+            <span class="material-symbols-outlined text-lg">savings</span>
+          </div>
+          <div class="mt-3">
+            <div class="text-xl sm:text-2xl font-black font-mono tracking-tight text-white tabular-nums">
+              100,000,000,000,000 <span class="text-xs text-purple-300 font-normal">WLD</span>
+            </div>
+            <span class="text-[11px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-xs">trending_up</span> 중앙은행 복식부기 검증 완료
+            </span>
+          </div>
+        </div>
+
+        <div class="admin-card p-4 sm:p-5 flex flex-col justify-between min-h-[120px]">
+          <div class="flex items-center justify-between text-blue-400">
+            <span class="text-xs font-bold tracking-tight">실시간 등록 회원수</span>
+            <span class="material-symbols-outlined text-lg">person</span>
+          </div>
+          <div class="mt-3">
+            <div class="text-xl sm:text-2xl font-black font-mono tracking-tight text-white tabular-nums">
+              12,840 <span class="text-xs text-slate-400 font-normal">명</span>
+            </div>
+            <span class="text-[11px] text-blue-400 font-bold flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-xs">bolt</span> 활성 세션: 1,420 명
+            </span>
+          </div>
+        </div>
+
+        <div class="admin-card p-4 sm:p-5 flex flex-col justify-between min-h-[120px]">
+          <div class="flex items-center justify-between text-emerald-400">
+            <span class="text-xs font-bold tracking-tight">24시간 주식 거래량</span>
+            <span class="material-symbols-outlined text-lg">candlestick_chart</span>
+          </div>
+          <div class="mt-3">
+            <div class="text-xl sm:text-2xl font-black font-mono tracking-tight text-white tabular-nums">
+              3,482,910,000 <span class="text-xs text-emerald-300 font-normal">WLD</span>
+            </div>
+            <span class="text-[11px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-xs">sensors</span> 10단 호가 Netty 9092 스트림
+            </span>
+          </div>
+        </div>
+
+        <div class="admin-card p-4 sm:p-5 flex flex-col justify-between min-h-[120px]">
+          <div class="flex items-center justify-between text-amber-400">
+            <span class="text-xs font-bold tracking-tight">보안 이상 징후</span>
+            <span class="material-symbols-outlined text-lg">gshield</span>
+          </div>
+          <div class="mt-3">
+            <div class="text-xl sm:text-2xl font-black font-mono tracking-tight text-white tabular-nums">
+              0 <span class="text-xs text-slate-400 font-normal">건</span>
+            </div>
+            <span class="text-[11px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-xs">verified_user</span> 2FA 스텝업 가드 정상
+            </span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 가상경제 및 주식 거래소 실시간 감시 테이블 -->
+      <section class="admin-card p-5 sm:p-6 flex flex-col gap-4">
+        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-purple-400">query_stats</span>
+              10대 상장사 실시간 시세 및 거래 현황
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Spring Boot 백엔드(/api/v1/stocks)에서 초당 1회 집계된 실제 주식 데이터입니다.</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
+            10 TICKERS ACTIVE
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead>
+              <tr class="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider">
+                <th class="py-2.5 px-3">종목 코드</th>
+                <th class="py-2.5 px-3">기업명</th>
+                <th class="py-2.5 px-3 text-right">현재가 (WLD)</th>
+                <th class="py-2.5 px-3 text-right">당일 고가</th>
+                <th class="py-2.5 px-3 text-right">당일 저가</th>
+                <th class="py-2.5 px-3 text-center">상태</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 font-mono">
+              <tr class="hover:bg-white/5">
+                <td class="py-3 px-3 font-bold text-purple-300">CHIMU314</td>
+                <td class="py-3 px-3 font-sans font-medium text-white">치무전자 (반도체 대장주)</td>
+                <td class="py-3 px-3 text-right font-bold text-emerald-400">139,696,001</td>
+                <td class="py-3 px-3 text-right text-slate-300">140,299,705</td>
+                <td class="py-3 px-3 text-right text-slate-300">136,905,345</td>
+                <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs">ACTIVE</span></td>
+              </tr>
+              <tr class="hover:bg-white/5">
+                <td class="py-3 px-3 font-bold text-purple-300">SPACE</td>
+                <td class="py-3 px-3 font-sans font-medium text-white">월덱 우주항공 (황제주)</td>
+                <td class="py-3 px-3 text-right font-bold text-rose-400">8,835,370</td>
+                <td class="py-3 px-3 text-right text-slate-300">9,037,371</td>
+                <td class="py-3 px-3 text-right text-slate-300">8,750,093</td>
+                <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs">ACTIVE</span></td>
+              </tr>
+              <tr class="hover:bg-white/5">
+                <td class="py-3 px-3 font-bold text-purple-300">DUCK</td>
+                <td class="py-3 px-3 font-sans font-medium text-white">덕덕 물산 (종합상사)</td>
+                <td class="py-3 px-3 text-right font-bold text-emerald-400">3,234,530</td>
+                <td class="py-3 px-3 text-right text-slate-300">3,275,381</td>
+                <td class="py-3 px-3 text-right text-slate-300">3,207,577</td>
+                <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs">ACTIVE</span></td>
+              </tr>
+              <tr class="hover:bg-white/5">
+                <td class="py-3 px-3 font-bold text-purple-300">WFIN</td>
+                <td class="py-3 px-3 font-sans font-medium text-white">월덱 파이낸셜 (금융지주)</td>
+                <td class="py-3 px-3 text-right font-bold text-slate-200">634,438</td>
+                <td class="py-3 px-3 text-right text-slate-300">647,793</td>
+                <td class="py-3 px-3 text-right text-slate-300">626,701</td>
+                <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs">ACTIVE</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 우측 하단 56px 규격 전역 지원 독 (Global Floating Dock Button) -->
+  <div class="floating-dock-56" title="관리자 지원 및 실시간 소통 독" onclick="alert('관리자 지원 채널 및 디스코드 관제 채널에 연결됩니다.')">
+    <span class="material-symbols-outlined text-2xl">support_agent</span>
+  </div>
+
+</body>
+</html>
