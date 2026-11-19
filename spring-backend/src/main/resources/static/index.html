@@ -808,10 +808,12 @@
             <span class="material-symbols-outlined" style="font-size: 15px;">language</span>
             <span>EN / KO</span>
           </a>
-          <a href="/login" class="login-cta-btn">
-            <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
-            <span>로그인</span>
-          </a>
+          <div id="auth-action-container" style="display: flex; align-items: center;">
+            <a href="/login" class="login-cta-btn" id="header-login-btn">
+              <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
+              <span>로그인</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -1233,5 +1235,85 @@
   <a href="/admin-preview" class="global-support-dock" aria-label="관리자 관제탑 및 지원 독" title="관리자 관제탑 이동">
     <span class="material-symbols-outlined" style="font-size: 26px;">headset_mic</span>
   </a>
+  <!-- Dynamic Session & Real Data Hydration Script -->
+  <script>
+    (function() {
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, function(tag) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag;
+        });
+      }
+
+      window.executeLogout = async function() {
+        try {
+          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (e) {}
+        window.location.reload();
+      };
+
+      async function hydrateUserSession() {
+        try {
+          const res = await fetch('/api/v1/auth/me', { credentials: 'include' });
+          if (!res.ok) {
+            return;
+          }
+          const data = await res.json();
+          if (data && (data.authenticated === true || data.signedIn === true || data.userId || data.id)) {
+            const authContainer = document.getElementById('auth-action-container');
+            const displayName = data.displayName || data.username || data.name || '회원';
+            const roles = data.roles || [];
+            const isAdmin = roles.some(function(r) { return r && r.toLowerCase().indexOf('admin') !== -1; });
+
+            if (authContainer) {
+              authContainer.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <a href="/account" class="user-profile-badge" title="내 계정 관리" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(156, 131, 255, 0.16); border: 1px solid rgba(156, 131, 255, 0.4); color: #ffffff; text-decoration: none; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;">
+                    <span class="material-symbols-outlined" style="font-size: 17px; color: #a78bfa;">account_circle</span>
+                    <span>${escapeHtml(displayName)}</span>
+                    ${isAdmin ? '<span style="font-size: 9.5px; padding: 1px 5px; border-radius: 4px; background: #6366f1; color: #ffffff; font-weight: 800; letter-spacing: 0.5px;">ADMIN</span>' : ''}
+                  </a>
+                  <button type="button" class="btn-logout-mini" onclick="executeLogout()" style="padding: 6px 10px; border-radius: 8px; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.3); color: #fb7185; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.15s ease;">
+                    로그아웃
+                  </button>
+                </div>
+              `;
+            }
+
+            // Hydrate wallet balance in KPI card
+            let balance = data.balanceWld;
+            if (balance === undefined || balance === null) {
+              try {
+                const wRes = await fetch('/api/v1/wallet/overview', { credentials: 'include' });
+                if (wRes.ok) {
+                  const wJson = await wRes.json();
+                  if (wJson && wJson.data && wJson.data.balanceWld !== undefined) {
+                    balance = wJson.data.balanceWld;
+                  }
+                }
+              } catch (ignored) {}
+            }
+
+            if (balance !== undefined && balance !== null) {
+              const valEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-value');
+              const labelEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-label-row span:first-child');
+              const subEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-sub span:last-child');
+              if (valEl) valEl.textContent = Number(balance).toLocaleString('ko-KR') + ' WLD';
+              if (labelEl) labelEl.textContent = '내 보유 자산 (복식부기 원장)';
+              if (subEl) subEl.textContent = '실시간 원장 동기화 정상';
+            }
+          }
+        } catch (e) {
+          console.debug('[Moneyverse Auth] Session hydration: Guest mode');
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hydrateUserSession);
+      } else {
+        hydrateUserSession();
+      }
+    })();
+  </script>
 </body>
 </html>
