@@ -309,14 +309,9 @@ public class TreasuryService {
 
     /** SWF liquidation must not claim a vault credit without a committed ledger receipt. */
     public Map<String, Object> liquidateSwf(SwfLiquidateRequest request) {
-        long amt = request != null && request.getAmountWld() != null ? request.getAmountWld() : 100000L;
-        return Map.of(
-                "success", true,
-                "liquidatedAmountWld", amt,
-                "vaultBalance", getVaultBalance("VAULT_MAIN"),
-                "status", "COMPLETED",
-                "message", "SWF 포지션이 성공적으로 국고 금고로 환입 청산되었습니다."
-        );
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "SWF liquidation requires verified ledger journal receipt");
     }
 
     /**

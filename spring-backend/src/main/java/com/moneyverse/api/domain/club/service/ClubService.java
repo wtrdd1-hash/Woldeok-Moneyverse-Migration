@@ -97,11 +97,13 @@ public class ClubService {
         }
     }
 
+    @Transactional
     public ClubActionResponse joinClub(UUID userId, UUID clubId) {
-        return new ClubActionResponse(true, "클럽에 성공적으로 가입되었습니다.");
+        throw unavailable("club_join_unimplemented");
     }
 
+    @Transactional
     public ClubActionResponse leaveClub(UUID userId, UUID clubId) {
-        return new ClubActionResponse(true, "클럽에서 탈퇴하였습니다.");
+        throw unavailable("club_leave_unimplemented");
     }
 }

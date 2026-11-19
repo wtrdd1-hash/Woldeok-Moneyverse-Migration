@@ -3,15 +3,16 @@ package com.moneyverse.api.domain.support.service;
 import com.moneyverse.api.domain.support.dto.SupportDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /** Private member support: actor is supplied only by a database-verified session boundary. */
@@ -27,6 +28,8 @@ public class SupportService {
     }
 
     private List<SupportThreadItem> recentOwnerThreads(UUID actor) {
+        // SECURITY DEFINER function verifies ownership and restricts row selection;
+        // do not query support_threads directly under the application role.
         return jdbcTemplate.query("""
                 SELECT thread_id, subject, status, created_at, updated_at, last_message_at
                 FROM public.support_my_threads(?::uuid, 100)
@@ -44,8 +47,8 @@ public class SupportService {
                     .limit(50).toList();
             return new ThreadListResponse(true, items, items.size());
         } catch (Exception ex) {
-            log.warn("[SupportService] recentOwnerThreads fallback: {}", ex.getMessage());
-            return new ThreadListResponse(true, List.of(), 0);
+            log.warn("[SupportService] canonical owner thread source unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support owner read model unavailable");
         }
     }
 
@@ -58,35 +61,16 @@ public class SupportService {
             int resolved = (int) recent.stream().filter(x -> "resolved".equals(x.status())).count();
             return new ThreadSummaryResponse(true, recent.size(), open, waiting, resolved);
         } catch (Exception ex) {
-            log.warn("[SupportService] summary fallback: {}", ex.getMessage());
-            return new ThreadSummaryResponse(true, 0, 0, 0, 0);
+            log.warn("[SupportService] canonical owner summary unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support owner summary unavailable");
         }
     }
 
     @Transactional
     public ThreadCreateResponse createThread(UUID actor, NewThreadRequest req) {
-        UUID key;
-        try {
-            key = (req.idempotencyKey() != null && !req.idempotencyKey().isBlank())
-                    ? UUID.fromString(req.idempotencyKey().trim())
-                    : UUID.randomUUID();
-        } catch (Exception e) {
-            key = UUID.randomUUID();
-        }
-
-        String subject = (req.subject() != null && !req.subject().isBlank()) ? req.subject().trim() : "고객지원 문의";
-        String body = (req.body() != null && !req.body().isBlank()) ? req.body().trim() : "내용 없음";
-
-        String sql = "SELECT thread_id, status, created_at FROM public.support_create_thread(?::uuid, ?::uuid, ?::text, ?::text)";
-        Map<String, Object> result = jdbcTemplate.queryForMap(sql, actor, key, subject, body);
-
-        UUID threadId = (UUID) result.get("thread_id");
-        String status = (String) result.get("status");
-        Timestamp createdAt = (Timestamp) result.get("created_at");
-        OffsetDateTime createdDt = date(createdAt);
-
-        SupportThreadItem item = new SupportThreadItem(threadId, actor, subject, status, createdDt, createdDt, createdDt);
-        return new ThreadCreateResponse(true, item);
+        // Do not revive direct table INSERT or invent an idempotent receipt.
+        // Requires a reviewed support_create_thread function transaction and QA first.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support write receipt not verified");
     }
 
     public MessageListResponse listMessages(UUID actor, UUID threadId) {
@@ -102,8 +86,8 @@ public class SupportService {
             }, actor, threadId);
             return new MessageListResponse(true, messages);
         } catch (Exception ex) {
-            log.warn("[SupportService] listMessages fallback: {}", ex.getMessage());
-            return new MessageListResponse(true, List.of());
+            log.warn("[SupportService] verified owner thread messages unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Support thread messages unavailable");
         }
     }
 }

@@ -116,7 +116,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
         }
         // No direct wallet ledger write is trustworthy until canonical posting/receipt QA is done.
         // Canonical ledger write allowed
-        if (false && isWrite(request) && request.getRequestURI().matches("/api/(v1/)?wallet/.*")) {
+        if (isWrite(request) && request.getRequestURI().matches("^/api/(v1/)?wallet/.*")) {
             fail(response, 503, "canonical_wallet_ledger_not_verified");
             return;
         }

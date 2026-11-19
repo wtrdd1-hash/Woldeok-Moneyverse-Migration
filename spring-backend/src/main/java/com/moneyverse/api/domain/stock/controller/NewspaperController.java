@@ -33,15 +33,13 @@ public class NewspaperController {
     @Operation(summary = "주간 경제 보고서 (검증된 지표 제공 전까지 가드)")
     @GetMapping(path = { "/api/v1/newspaper/weekly-brief", "/api/newspaper/weekly-brief" })
     public ResponseEntity<?> getWeeklyBrief() {
-        Map<String, Object> brief = Map.of(
-                "success", true,
-                "headline", "월덕 가상경제 주간 리포트: 우량주 중심 완만한 반등세 시현",
-                "summary", "치무전자와 월덱 테크를 중심으로 외국인 및 커뮤니티 기관 수급 유입. 복리 예치금 총액 500억 WLD 돌파.",
-                "topGainers", List.of(Map.of("code", "CHIMU314", "name", "치무전자", "changePct", 8.4)),
-                "macroNote", "한국은행 기준금리 동결 전망 우세, 시장 심리는 방어적 분산 투자(Risk-Off) 유지",
-                "publishedAt", new Date().toInstant().toString()
-        );
-        return ResponseEntity.ok(brief);
+        Map<String, Object> err = new LinkedHashMap<>();
+        err.put("type", "about:blank");
+        err.put("title", "Service Unavailable");
+        err.put("status", 503);
+        err.put("code", "NEWSPAPER_WEEKLY_BRIEF_UNVERIFIED");
+        err.put("detail", "Weekly economic report is unavailable until its statistics and leaderboards are verified.");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(err);
     }
 
     @Operation(summary = "진행 중인 가상시장 이벤트에 근거한 현재 시장 심리 조회")

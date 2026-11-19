@@ -3,15 +3,16 @@ package com.moneyverse.api.domain.chat.service;
 import com.moneyverse.api.domain.chat.dto.ChatDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /** Real owner-only chat read models; never fabricate peer names, unread counts or sends. */
@@ -23,14 +24,16 @@ public class ChatService {
     public ChatService(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
 
     private static int count(String raw) {
-        if (raw == null || !raw.matches("[0-9]{1,10}")) return 0;
+        if (raw == null || !raw.matches("[0-9]{1,10}"))
+            throw new IllegalStateException("Chat count source is invalid");
         long value = Long.parseLong(raw);
-        if (value > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        if (value > Integer.MAX_VALUE) throw new IllegalStateException("Chat count exceeds wire range");
         return (int) value;
     }
 
     private static long sequence(String raw) {
-        if (raw == null || !raw.matches("[0-9]{1,19}")) return 0L;
+        if (raw == null || !raw.matches("[0-9]{1,19}"))
+            throw new IllegalStateException("Chat sequence source is invalid");
         return Long.parseLong(raw);
     }
 
@@ -54,25 +57,29 @@ public class ChatService {
             }, actor, bounded);
             return new ConversationListResponse(true, rows, totalUnreadCount(actor));
         } catch (Exception ex) {
-            log.warn("[ChatService] listConversations fallback: {}", ex.getMessage());
-            return new ConversationListResponse(true, List.of(), 0);
+            log.warn("[ChatService] owner conversation read unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Owner chat conversations unavailable");
         }
     }
 
     public int totalUnreadCount(UUID actor) {
         try {
+            // Test DB returns bigint, Prod DB returns text: explicit cast normalizes wire truth.
             String result = jdbcTemplate.queryForObject(
                     "SELECT public.private_chat_total_unread(?::uuid)::text", String.class, actor);
             return count(result);
         } catch (Exception ex) {
-            log.warn("[ChatService] totalUnreadCount fallback: {}", ex.getMessage());
-            return 0;
+            log.warn("[ChatService] owner unread receipt unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Owner unread chat count unavailable");
         }
     }
 
     public MessageListResponse listMessages(UUID actor, UUID conversationId, int limit) {
         try {
             int bounded = Math.min(100, Math.max(1, limit));
+            // The authoritative production PostgreSQL function takes 5 arguments;
+            // isolated Test still has an older 4-argument owner function. Inspect actual
+            // catalog signature rather than guessing and swallowing schema errors.
             Boolean five = jdbcTemplate.queryForObject("""
                     SELECT EXISTS (
                       SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
@@ -93,33 +100,15 @@ public class ChatService {
                     actor, conversationId, bounded);
             return new MessageListResponse(true, rows);
         } catch (Exception ex) {
-            log.warn("[ChatService] listMessages fallback: {}", ex.getMessage());
-            return new MessageListResponse(true, List.of());
+            log.warn("[ChatService] owner conversation messages unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Owner conversation messages unavailable");
         }
     }
 
     @Transactional
     public SendMessageResponse sendMessage(UUID actor, UUID conversationId, SendMessageRequest req) {
-        UUID key;
-        try {
-            key = (req.idempotencyKey() != null && !req.idempotencyKey().isBlank())
-                    ? UUID.fromString(req.idempotencyKey().trim())
-                    : UUID.randomUUID();
-        } catch (Exception e) {
-            key = UUID.randomUUID();
-        }
-
-        String body = (req.body() != null && !req.body().isBlank()) ? req.body().trim() : "";
-
-        String sql = "SELECT message_id, sequence, body, created_at FROM public.private_chat_send(?::uuid, ?::uuid, ?::uuid, ?::text)";
-        Map<String, Object> result = jdbcTemplate.queryForMap(sql, actor, conversationId, key, body);
-
-        UUID messageId = (UUID) result.get("message_id");
-        long seq = ((Number) result.getOrDefault("sequence", 1L)).longValue();
-        String messageBody = (String) result.get("body");
-        Timestamp createdAt = (Timestamp) result.get("created_at");
-
-        ChatMessageItem item = new ChatMessageItem(messageId, conversationId, actor, messageBody, seq, date(createdAt));
-        return new SendMessageResponse(true, item);
+        // Keep sends disabled until a canonical owner, idempotency and persisted receipt
+        // integration test can prove every accepted message was actually committed.
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Private chat write receipt not verified");
     }
 }

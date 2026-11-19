@@ -146,11 +146,7 @@ public class ShopService {
 
     // Crafting source contract is not verified: do not expose fabricated recipes or rewards.
     public CraftingRecipesResponse getCraftingRecipes() {
-        List<CraftingRecipe> recipes = List.of(
-                new CraftingRecipe("recipe-001", "황금 복리 행운의 부적", "행운의 부적", "1000 WLD", 85),
-                new CraftingRecipe("recipe-002", "스탑로스 자동감시 라이선스", "자동감시 라이선스", "5000 WLD", 95)
-        );
-        return new CraftingRecipesResponse(true, recipes);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CRAFTING_RECIPES_SOURCE_UNAVAILABLE");
     }
 
     public CraftExecuteResponse executeCrafting(String userId, String recipeId) {

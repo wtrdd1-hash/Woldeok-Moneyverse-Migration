@@ -32,9 +32,9 @@ public class StockMarketSocketStreamer {
 
         try {
             String sql = """
-                SELECT symbol, name, current_price, day_open_price, initial_price, halt_status
-                FROM virtual_stocks
-                WHERE active = true
+                SELECT symbol, name, current_price, day_open_price
+                FROM stock_list_active()
+                
                 ORDER BY symbol ASC
                 LIMIT 18
                 """;
