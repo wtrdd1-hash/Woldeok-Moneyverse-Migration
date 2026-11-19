@@ -317,9 +317,14 @@ public class UserAuthService {
         setSessionCookie(response, rawToken);
 
         // Fetch user profile details
-        String userSql = "SELECT display_name, email FROM users WHERE id = ?";
-        Map<String, Object> userRow = jdbcTemplate.queryForMap(userSql, userId);
-        String displayName = (String) userRow.get("display_name");
+        String displayName = "시민";
+        try {
+            String dname = jdbcTemplate.queryForObject(
+                "SELECT display_name FROM member_profiles WHERE user_id = ?",
+                String.class, userId
+            );
+            if (dname != null && !dname.isBlank()) displayName = dname;
+        } catch (Exception ignored) {}
 
         List<String> roles = findUserRoles(userId);
 
@@ -349,16 +354,12 @@ public class UserAuthService {
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
         // 1. Insert into users
-        String insertUser = "INSERT INTO users (id, email, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insertUser, userId, email, displayName, Timestamp.from(now), Timestamp.from(now));
+        String insertUser = "INSERT INTO users (id, status, created_at) VALUES (?, 'active'::user_status, ?)";
+        jdbcTemplate.update(insertUser, userId, Timestamp.from(now));
 
-        // 2. Insert into profiles
-        try {
-            String insertProfile = "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, ?)";
-            jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
-        } catch (Exception e) {
-            log.debug("[UserAuthService] profile insert skipped or existing: {}", e.getMessage());
-        }
+        // 2. Insert into member_profiles
+        String insertProfile = "INSERT INTO member_profiles (user_id, display_name, visibility, field_visibility, updated_at) VALUES (?, ?, 'public'::profile_visibility, '{}'::jsonb, ?)";
+        jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
 
         // 3. Insert into auth_local_credentials
         String insertCred = """
@@ -371,11 +372,11 @@ public class UserAuthService {
         try {
             UUID accountId = UUID.randomUUID();
             jdbcTemplate.update(
-                "INSERT INTO accounts (id, account_type, owner_user_id, currency, allow_negative, created_at) VALUES (?, 'USER_CASH', ?, 'WLD', false, ?)",
+                "INSERT INTO accounts (id, account_type, owner_user_id, currency, status, allow_negative, created_at) VALUES (?, 'USER_CASH'::account_type, ?, 'WLD', 'active'::account_status, false, ?)",
                 accountId, userId, Timestamp.from(now)
             );
             jdbcTemplate.update(
-                "INSERT INTO account_balances (account_id, balance, updated_at) VALUES (?, 1000000, ?)",
+                "INSERT INTO account_balances (account_id, available_amount, updated_at) VALUES (?, 1000000, ?)",
                 accountId, Timestamp.from(now)
             );
         } catch (Exception e) {
