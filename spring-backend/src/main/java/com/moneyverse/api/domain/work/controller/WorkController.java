@@ -53,7 +53,7 @@ public class WorkController {
         }
         WorkAssignResponse response = workService.assignTask(actor.toString(), request.taskId(), key);
         return response.success() ? ResponseEntity.ok(response)
-                : ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+                : ResponseEntity.badRequest().body(response);
     }
 
     @PostMapping("/completions")
@@ -68,6 +68,6 @@ public class WorkController {
         }
         WorkCompleteResponse response = workService.completeTask(actor.toString(), request.assignmentId(), key);
         return response.success() ? ResponseEntity.ok(response)
-                : ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+                : ResponseEntity.badRequest().body(response);
     }
 }

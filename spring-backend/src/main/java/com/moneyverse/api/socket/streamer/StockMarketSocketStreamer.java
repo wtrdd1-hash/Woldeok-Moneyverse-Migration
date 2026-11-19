@@ -32,14 +32,27 @@ public class StockMarketSocketStreamer {
 
         try {
             String sql = """
-                SELECT symbol, name, current_price, day_open_price, day_high_price, day_low_price, volume
-                FROM stocks
+                SELECT symbol, name, current_price, day_open_price, initial_price, halt_status
+                FROM virtual_stocks
+                WHERE active = true
                 ORDER BY symbol ASC
                 LIMIT 18
                 """;
 
-            List<Map<String, Object>> stocks = jdbcTemplate.queryForList(sql);
-            if (stocks.isEmpty()) return;
+            List<Map<String, Object>> rawStocks = jdbcTemplate.queryForList(sql);
+            if (rawStocks.isEmpty()) return;
+
+            List<Map<String, Object>> stocks = new ArrayList<>();
+            for (Map<String, Object> r : rawStocks) {
+                Map<String, Object> item = new HashMap<>(r);
+                long current = ((Number) r.getOrDefault("current_price", 0L)).longValue();
+                long open = ((Number) r.getOrDefault("day_open_price", current)).longValue();
+                long change = current - open;
+                double changeRate = open > 0 ? ((double) change / open) * 100.0 : 0.0;
+                item.put("change", change);
+                item.put("change_rate", Math.round(changeRate * 100.0) / 100.0);
+                stocks.add(item);
+            }
 
             SocketIOServer server = socketIoService.getServer();
             if (server == null) return;
@@ -54,7 +67,7 @@ public class StockMarketSocketStreamer {
                 socketIoService.broadcastStockQuote(symbol, s);
             }
         } catch (Exception e) {
-            log.debug("[StockMarketSocketStreamer] Error streaming quotes: {}", e.getMessage());
+            log.warn("[StockMarketSocketStreamer] Error streaming quotes: {}", e.getMessage());
         }
     }
 }

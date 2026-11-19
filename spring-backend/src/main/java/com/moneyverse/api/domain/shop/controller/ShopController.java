@@ -84,7 +84,7 @@ public class ShopController {
         catch (Exception e) { return ResponseEntity.badRequest().body(ShopPurchaseResponse.fail("IDEMPOTENCY_KEY_REQUIRED")); }
         ShopPurchaseResponse response = shopService.purchaseItem(session.get().getUserId().toString(), request.itemId(), request.quantity(), key);
         return response.success() ? ResponseEntity.ok(response) :
-                ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+                ResponseEntity.badRequest().body(response);
     }
 
     @GetMapping("/crafting/recipes")
