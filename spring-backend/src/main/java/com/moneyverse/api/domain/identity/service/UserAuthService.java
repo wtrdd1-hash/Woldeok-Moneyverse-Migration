@@ -75,17 +75,7 @@ public class UserAuthService {
     public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
         if (request == null) return Optional.empty();
 
-        String internalHeader = request.getHeader("x-internal-token");
-        if (internalHeader != null && !internalHeader.isBlank() && internalHeader.trim().equals(internalToken.trim())) {
-            UUID adminUid = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
-            SessionInfo adminSession = new SessionInfo();
-            adminSession.setSessionId(UUID.randomUUID());
-            adminSession.setUserId(adminUid);
-            adminSession.setDisplayName("월덕");
-            adminSession.setRoles(findUserRoles(adminUid));
-            adminSession.setExpiresAt(java.time.Instant.now().plus(1, java.time.temporal.ChronoUnit.DAYS));
-            return Optional.of(adminSession);
-        }
+// Security hardline: Never synthesize an admin session from untrusted client headers.
 
         String rawToken = null;
         Cookie[] cookies = request.getCookies();

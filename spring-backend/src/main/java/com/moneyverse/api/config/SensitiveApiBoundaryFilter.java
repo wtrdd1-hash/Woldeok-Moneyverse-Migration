@@ -41,6 +41,9 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
     static boolean isMemberPrivatePath(String p) {
         return p.startsWith("/api/support/") || p.startsWith("/api/v1/support/")
                 || p.startsWith("/api/chat/") || p.startsWith("/api/v1/chat/")
+                || p.startsWith("/api/account") || p.startsWith("/api/v1/account")
+                || p.startsWith("/api/banking/pockets") || p.startsWith("/api/v1/banking/pockets")
+                || (p.startsWith("/api/photos") && !p.contains("/uploads")) || (p.startsWith("/api/v1/photos") && !p.contains("/uploads"))
                 || (p.startsWith("/api/wallet/") && !p.endsWith("/summary")) || (p.startsWith("/api/v1/wallet/") && !p.endsWith("/summary"))
                 || p.equals("/api/bonds/my-holdings") || p.equals("/api/v1/bonds/my-holdings")
                 || p.equals("/api/bonds/my-repo-loans") || p.equals("/api/v1/bonds/my-repo-loans")
