@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.20.42.1 — 읽기 전용 Spring Test 271/271 · 관리자 직접 JSON P0 수리 · HTML 2경로 운영 수정 (전체 승격 보류)
+- [QA 한국어](docs/qa/2026-11-20-spring-web-promotion-v42.1.ko.md) / [English](docs/qa/2026-11-20-spring-web-promotion-v42.1.md) · [작업기록 국문](docs/worklog/2026-11-20-spring-web-promotion-v42.1.ko.md) / [EN](docs/worklog/2026-11-20-spring-web-promotion-v42.1.md) · [GitHub 업데이트](docs/updates/v2026.11.20.42.1-spring-web-github.ko.md). 실제 미니PC Test Spring+읽기 전용 DB 기동, 전체 271/271, 정적HTML281경로×5회 GET1,405·비모의 Chromium 홈30/30. Java 옛 관리자 JSON13주소 직접 익명 200→401, HTML 405 충돌 2건 해결. 실제 **운영 적용은** Nginx HTML 2개 URL만 405→302. 공식 Test403, 15개 API503, 실관리자·금융 영수증·G442 웹 180페이지×5 전체 인터랙션 및 복구 미검증으로 **전체 Java/프론트엔드 미승격**.
+
+
 ## v2026.11.19.41 — 운영 관리자 접근 보호 2건 실제 반영 + Java API 실데이터 수정 후보 (전체 운영 승격 보류)
 - [운영 변경 영문](docs/operations/2026-11-19-scoped-admin-edge-v41.md) / [한국어](docs/operations/2026-11-19-scoped-admin-edge-v41.ko.md) · [API 208건 운영 QA 영문](docs/findings/2026-11-19-public-api-matrix-v41.md) / [한국어](docs/findings/2026-11-19-public-api-matrix-v41.ko.md) · [소스/JUnit/Chromium QA](docs/qa/2026-11-19-spring-api-source-truth-v41.md) / [KO](docs/qa/2026-11-19-spring-api-source-truth-v41.ko.md) · [작업로그](docs/worklog/2026-11-19-web-api-promotion-v41.ko.md) · [업데이트](docs/updates/v2026.11.19.41-web-api-github.ko.md). 실제 운영 Nginx는 관리자 시안4주소·블로그4주소 익명 접근302로 보호. API·회원·관리자·보안 통합 Java 266/266, Chromium 회원16/관리자13/게시판6 및 5언어 검증은 **소스/픽스처 후보**. 공식 Test403·약180화면×5회·실관리자/원장·무중단 롤백 미검증, Java/프론트엔드 신규 버전은 **운영 배포 안 됨**.
 

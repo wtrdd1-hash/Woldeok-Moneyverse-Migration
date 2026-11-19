@@ -39,7 +39,7 @@ public class AdminHtmlBoundaryFilter extends OncePerRequestFilter {
             "/admin/enterprises", "/admin/economy/scenario-lab", "/admin-preview"
     );
 
-    private static boolean isSensitiveAdminPath(String raw) {
+    static boolean isSensitiveAdminPath(String raw) {
         if(raw==null)return false;
         String path=raw.toLowerCase(java.util.Locale.ROOT);
         if(path.equals("/admin")||path.equals("/admin/")||path.equals("/admin.html")
