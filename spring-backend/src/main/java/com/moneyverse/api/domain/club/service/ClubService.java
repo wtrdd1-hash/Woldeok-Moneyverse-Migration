@@ -98,10 +98,14 @@ public class ClubService {
     }
 
     public ClubActionResponse joinClub(UUID userId, UUID clubId) {
-        return new ClubActionResponse(true, "클럽에 성공적으로 가입되었습니다.");
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "Owner-scoped club membership receipt unavailable");
     }
 
     public ClubActionResponse leaveClub(UUID userId, UUID clubId) {
-        return new ClubActionResponse(true, "클럽에서 탈퇴하였습니다.");
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                "Owner-scoped club membership removal receipt unavailable");
     }
 }

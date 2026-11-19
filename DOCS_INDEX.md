@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
+- [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
+
+
 ## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
 - [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
 

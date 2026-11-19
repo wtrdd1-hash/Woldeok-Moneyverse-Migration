@@ -29,17 +29,16 @@ public class WalletController {
         this.authService = authService;
     }
 
-    private String resolveUserId(HttpServletRequest request, String headerUserId) {
+    /** Owner identity MUST originate from the verified server session, never from a client header. */
+    private String resolveUserId(HttpServletRequest request, String ignoredClientUserId) {
         if (request != null) {
             Optional<UserAuthService.SessionInfo> sess = authService.resolveSession(request);
             if (sess.isPresent() && sess.get().isSignedIn() && sess.get().getUserId() != null) {
                 return sess.get().getUserId().toString();
             }
         }
-        if (headerUserId != null && !headerUserId.isBlank()) {
-            return headerUserId.trim();
-        }
-        return "5f7b8b44-e4aa-40b8-b93a-800ec0151d20";
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "verified wallet session required");
     }
 
     @GetMapping(path = {"/summary", "/api/wallet/summary", "/api/v1/wallet/summary"})
@@ -52,10 +51,6 @@ public class WalletController {
         UUID userId = null;
         if (sess.isPresent() && sess.get().isSignedIn() && sess.get().getUserId() != null) {
             userId = sess.get().getUserId();
-        } else if (headerUserId != null && !headerUserId.isBlank()) {
-            try {
-                userId = UUID.fromString(headerUserId.trim());
-            } catch (Exception ignored) {}
         }
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -99,9 +94,17 @@ public class WalletController {
     public ApiResponse<Map<String, Object>> transfer(
             HttpServletRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String stableRequestKey,
             @Valid @RequestBody TransferRequest req) {
         String userId = resolveUserId(request, headerUserId);
-        Map<String, Object> result = walletService.transfer(userId, req.getRecipientUserId(), req.getAmountWld(), req.getMemo());
+        UUID key;
+        try { key = UUID.fromString(stableRequestKey); }
+        catch (Exception e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "valid Idempotency-Key UUID required");
+        }
+        Map<String, Object> result = walletService.transferWithIdempotencyKey(
+                userId, req.getRecipientUserId(), req.getAmountWld(), req.getMemo(), key);
         return ApiResponse.ok(result, (String) result.get("message"));
     }
 }

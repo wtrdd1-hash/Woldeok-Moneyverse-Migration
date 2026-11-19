@@ -42,6 +42,9 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
         return p.startsWith("/api/support/") || p.startsWith("/api/v1/support/")
                 || p.startsWith("/api/chat/") || p.startsWith("/api/v1/chat/")
                 || p.startsWith("/api/account") || p.startsWith("/api/v1/account")
+                // A legacy wallet root/overview/balance is always a private, session-owned read.
+                // Exclude /summary: guests receive signedIn=false/null, and server refuses identity headers.
+                || p.matches("^/api/(v1/)?wallet(/(overview|balance)/?)?$")
                 || p.startsWith("/api/banking/pockets") || p.startsWith("/api/v1/banking/pockets")
                 || (p.startsWith("/api/photos") && !p.contains("/uploads")) || (p.startsWith("/api/v1/photos") && !p.contains("/uploads"))
                 || p.startsWith("/api/wallet/transfer") || p.startsWith("/api/v1/wallet/transfer")
@@ -117,10 +120,11 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
             fail(response, 503, "source_receipt_not_verified");
             return;
         }
-        // No direct wallet ledger write is trustworthy until canonical posting/receipt QA is done.
-        // Canonical ledger write allowed
-        if (false && isWrite(request) && request.getRequestURI().matches("/api/(v1/)?wallet/.*")) {
-            fail(response, 503, "canonical_wallet_ledger_not_verified");
+        // Legacy wallet-transfer clients supply no stable idempotency key. Block only
+        // that unsafe alias. The /api/v1/wallet/transfer controller demands a
+        // caller-stable UUID and a verified session + CSRF before any ledger SQL.
+        if (isWrite(request) && request.getRequestURI().equals("/api/wallet/transfer")) {
+            fail(response, 503, "legacy_wallet_transfer_idempotency_not_verified");
             return;
         }
 

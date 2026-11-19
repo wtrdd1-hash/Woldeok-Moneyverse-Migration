@@ -4,6 +4,8 @@ import com.moneyverse.api.domain.kdic.dto.KdicDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,61 +34,37 @@ public class KdicService {
         java.util.OptionalDouble bis = institutions.stream()
                 .filter(i -> i.getReportedBisRatioPct() != null)
                 .mapToDouble(InsuredInstitutionDto::getReportedBisRatioPct).average();
-        Double avgBis = bis.isPresent() ? Math.round(bis.getAsDouble() * 100.0) / 100.0 : 12.5;
+        Double avgBis = bis.isPresent() ? Math.round(bis.getAsDouble() * 100.0) / 100.0 : null;
         Double reserveCoverage = (fund.getTotalInsuredDepositsWld() != null
                 && fund.getTotalInsuredDepositsWld() > 0 && fund.getTotalFundWld() != null)
                 ? Math.round(((double) fund.getTotalFundWld() / fund.getTotalInsuredDepositsWld() * 100.0) * 100.0) / 100.0
-                : 15.8;
+                : null;
         KdicSummaryDto summary = new KdicSummaryDto(institutions.size(), avgBis, reserveCoverage);
 
         return new KdicOverviewResponse(fund, institutions, summary, recentPremiums, recentPayouts);
     }
 
     public KdicLedgerEvidenceDto getLedgerIntegrity() {
-        return new KdicLedgerEvidenceDto(
-            true,
-            1250L,
-            0L,
-            0L,
-            580L,
-            0L,
-            0L,
-            120L,
-            Instant.now().toString()
-        );
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC ledger evidence has not been reconciled with canonical postings");
     }
 
     @Transactional
     public Map<String, Object> assessPremiums(String actor) {
-        return Map.of(
-            "ok", true,
-            "message", "2026년 4분기 예금보험료 정기 부과 및 수납이 완료되었습니다.",
-            "assessedInstitutionsCount", 4,
-            "totalAssessedWld", 25_000_000L,
-            "assessedAt", Instant.now().toString()
-        );
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC premium payment receipts are not verified");
     }
 
     @Transactional
     public Map<String, Object> injectEmergencyLiquidity(String institutionId, long amountWld, String actor) {
-        return Map.of(
-            "ok", true,
-            "message", "금융안정기금 긴급 유동성 공급이 집행되었습니다.",
-            "institutionId", institutionId != null ? institutionId : "INST-01",
-            "injectedAmountWld", amountWld > 0 ? amountWld : 50_000_000L,
-            "injectedAt", Instant.now().toString()
-        );
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC emergency funding requires canonical ledger posting");
     }
 
     @Transactional
     public Map<String, Object> executePayout(String institutionId, String reason, String actor) {
-        return Map.of(
-            "ok", true,
-            "message", "예금자보호법 제31조에 따른 예금보험금 대위변제 지급이 승인되었습니다.",
-            "institutionId", institutionId != null ? institutionId : "INST-FAILED",
-            "protectionLimitPerUser", 50_000_000L,
-            "payoutAt", Instant.now().toString()
-        );
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "KDIC payouts require verified deposit-insurance receipts");
     }
 
     private KdicFundDto fetchFund() {
@@ -106,17 +84,9 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return new KdicFundDto(
-                "KDIC-DEFAULT",
-                "예금보험기금 안전준비금",
-                100_000_000_000L,
-                50_000_000L,
-                500_000_000_000L,
-                15_000_000_000L,
-                0L,
-                false,
-                Instant.now().toString()
-            );
+            log.warn("KDIC authoritative fund unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC reserve unavailable", e);
         }
     }
 
@@ -135,11 +105,9 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return List.of(
-                new InsuredInstitutionDto("INST-1", "월덕중앙은행", "BANK", 14.2, 300_000_000_000L, "NORMAL", Instant.now().toString()),
-                new InsuredInstitutionDto("INST-2", "가상상호저축은행", "SAVINGS_BANK", 11.8, 120_000_000_000L, "NORMAL", Instant.now().toString()),
-                new InsuredInstitutionDto("INST-3", "덕덕투자증권", "SECURITIES", 15.5, 80_000_000_000L, "NORMAL", Instant.now().toString())
-            );
+            log.warn("KDIC institution source unavailable");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified insured institutions unavailable", e);
         }
     }
 
@@ -158,7 +126,8 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return List.of();
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC finance records unavailable", e);
         }
     }
 
@@ -178,7 +147,8 @@ public class KdicService {
                     )
             );
         } catch (Exception e) {
-            return List.of();
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Verified KDIC finance records unavailable", e);
         }
     }
 }

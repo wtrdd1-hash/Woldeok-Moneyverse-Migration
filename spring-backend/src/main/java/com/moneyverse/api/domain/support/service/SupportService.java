@@ -44,8 +44,9 @@ public class SupportService {
                     .limit(50).toList();
             return new ThreadListResponse(true, items, items.size());
         } catch (Exception ex) {
-            log.warn("[SupportService] recentOwnerThreads fallback: {}", ex.getMessage());
-            return new ThreadListResponse(true, List.of(), 0);
+            log.warn("[SupportService] canonical owner threads unavailable");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "SUPPORT_THREADS_UNAVAILABLE", ex);
         }
     }
 
@@ -58,8 +59,8 @@ public class SupportService {
             int resolved = (int) recent.stream().filter(x -> "resolved".equals(x.status())).count();
             return new ThreadSummaryResponse(true, recent.size(), open, waiting, resolved);
         } catch (Exception ex) {
-            log.warn("[SupportService] summary fallback: {}", ex.getMessage());
-            return new ThreadSummaryResponse(true, 0, 0, 0, 0);
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "SUPPORT_SUMMARY_UNAVAILABLE", ex);
         }
     }
 

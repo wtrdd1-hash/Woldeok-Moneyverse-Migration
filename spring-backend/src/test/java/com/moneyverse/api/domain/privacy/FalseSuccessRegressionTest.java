@@ -33,7 +33,19 @@ class FalseSuccessRegressionTest {
         assertThrows(ResponseStatusException.class, () -> wallet.getOverview(UUID.randomUUID().toString()));
         assertThrows(ResponseStatusException.class,
                 () -> wallet.transfer(UUID.randomUUID().toString(), UUID.randomUUID().toString(), 12L, "unit-test"));
-        verifyNoInteractions(jdbc);
+        // A wallet query MAY read canonical ledger rows to determine source health.
+        // It must NEVER write or call a transfer function when source evidence is missing.
+        // The old no-interactions assertion incorrectly classified legitimate SELECT as mutation.
+        for (var invocation : mockingDetails(jdbc).getInvocations()) {
+            String method = invocation.getMethod().getName();
+            assertFalse(method.equals("update") || method.equals("execute") || method.equals("batchUpdate"),
+                    "Never mutate an unverified wallet ledger");
+            Object[] args = invocation.getArguments();
+            if (args.length > 0 && args[0] instanceof String sql) {
+                assertFalse(sql.toLowerCase(java.util.Locale.ROOT).contains("economy_transfer("),
+                        "No idempotency-free posting is permitted");
+            }
+        }
     }
 
     @Test void privateSpaceGrowthCreditsAndAdvisorCannotInventSuccess() {
