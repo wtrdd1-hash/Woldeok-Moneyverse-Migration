@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
+- [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
+
+
 ## v2026.11.19.32.1 — Live Homepage NOT Showing Approved Spring UI (P0 / DOCUMENTED ONLY)
 
 Actual public site \`/\` serves the design three-concept gallery, not functional production home, independently verified via HTTPS and mini-PC static HTML. [Read-only findings + home/mobile/admin design images EN](docs/findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) / [한국어](docs/findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) · [Spring implementation acceptance plan](docs/planning/SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.md) · [QA](docs/qa/2026-11-19-home-ui-design-gap-v32.md). No runtime changes; no release.

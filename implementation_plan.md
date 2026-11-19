@@ -5145,3 +5145,10 @@ graph TD
   - `SPRING_BOOT_MIGRATION_REPORT.md` 전문 업데이트: 백엔드 89개 컨트롤러뿐만 아니라 프론트엔드 내장 서빙, Discord4J 봇, Netty-SocketIO까지 전 시스템 Spring Boot 3.3.5 100% 완전 단일 런타임 통합 아키텍처 및 실측 표 반영.
   - `DOCS_INDEX.md` 최신 릴리스 및 마이그레이션 결산 항목 반영.
   - PR 생성 -> CI 8대 검사 All Green 통과 -> `main` 스쿼시 병합 -> 프로덕션 무중단 배포 및 curl/ps 실측 검증.
+
+
+## v2026.11.19.34 — Personal-assets-first real-data UI planning for desktop and mobile (documentation only)
+- Detailed specification: [Korean](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [English](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md). Preserve all existing integrated functions and route specifications; apply these requirements to every screen.
+- Treasury, issuance, server health and ledger-verification indicators belong in the authorized admin experience, not member homepage KPIs. Member home centers on their authenticated wallet balance, available money, positions, valuation P/L, transactions and quests; prohibit hardcoded/mock amounts, fake LIVE labels and fabricated frontend success states.
+- **Do not show ordinary users the Spring Boot version, API source names/URLs, sync diagnostics, data-source checklists, server availability, or internal monitoring.** Remove sensitive diagnostics from server payloads as well as UI; expose admin diagnostics only via server-enforced authentication and authorization.
+- Real-data accounting, guest/authorization/empty/error states, desktop/mobile QA, official Spring Test and Production release remain unverified and pending. Twelve new chat-generated design mockups are not yet uploaded or verified as project artifacts; mockups are not implementation evidence.
