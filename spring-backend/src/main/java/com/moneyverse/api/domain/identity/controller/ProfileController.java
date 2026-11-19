@@ -1,6 +1,6 @@
 package com.moneyverse.api.domain.identity.controller;
 
-import com.moneyverse.api.common.response.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moneyverse.api.domain.identity.dto.IdentityDtos.UserProfile;
 import com.moneyverse.api.domain.identity.service.ProfileService;
 import com.moneyverse.api.domain.identity.service.UserAuthService;
@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Tag(name = "Profile", description = "유저 프로필 및 계정 정보 API")
@@ -31,11 +31,13 @@ public class ProfileController {
     private final ProfileService profileService;
     private final UserAuthService authService;
     private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper;
 
-    public ProfileController(ProfileService profileService, UserAuthService authService, JdbcTemplate jdbcTemplate) {
+    public ProfileController(ProfileService profileService, UserAuthService authService, JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.profileService = profileService;
         this.authService = authService;
         this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
     }
 
     private String resolveUserId(HttpServletRequest request, String ignoredUntrustedHeader) {
@@ -101,7 +103,7 @@ public class ProfileController {
         UserProfile p = profileService.getProfile(userId);
 
         Map<String, Object> settings = new LinkedHashMap<>();
-        settings.put("visibility", p.getVisibility() != null ? p.getVisibility().toLowerCase() : null);
+        settings.put("visibility", p.getVisibility() != null ? p.getVisibility().toLowerCase() : "members");
         settings.put("displayName", p.getDisplayName());
         settings.put("display_name", p.getDisplayName());
         settings.put("imageUrl", p.getImageUrl());
@@ -122,8 +124,24 @@ public class ProfileController {
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             HttpServletRequest request) {
 
-        resolveUserId(request, headerUserId);
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "TITLES_SOURCE_NOT_VERIFIED");
+        String userId = resolveUserId(request, headerUserId);
+        String sql = "SELECT t.code, t.name, ut.awarded_at " +
+                     "FROM public.user_titles ut " +
+                     "JOIN public.member_titles t ON ut.title_id = t.id " +
+                     "WHERE ut.user_id = ?::uuid ORDER BY ut.awarded_at ASC";
+
+        List<Map<String, Object>> titles = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("code", rs.getString("code"));
+            item.put("name", rs.getString("name"));
+            Timestamp ts = rs.getTimestamp("awarded_at");
+            item.put("awardedAt", ts == null ? null : ts.toInstant().toString());
+            return item;
+        }, UUID.fromString(userId));
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("titles", titles);
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/{id:[0-9a-fA-F-]{36}}")
@@ -148,13 +166,58 @@ public class ProfileController {
     @PutMapping(path = {"", "/"})
     @Operation(summary = "프로필 정보 수정")
     public ResponseEntity<Map<String, Object>> updateProfile(
-            @RequestBody Map<String, Object> body,
+            @RequestBody(required = false) Map<String, Object> body,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             HttpServletRequest request) {
 
-        resolveUserId(request, headerUserId);
-        // No verified owner-scoped stored-procedure and CSRF receipt contract is available.
-        // Never execute direct app-table DML or report a fabricated successful profile update.
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "PROFILE_UPDATE_SOURCE_NOT_VERIFIED");
+        String userId = resolveUserId(request, headerUserId);
+        if (body == null) body = Collections.emptyMap();
+
+        String visibility = (String) body.getOrDefault("visibility", "members");
+        if (visibility == null || visibility.isBlank()) visibility = "members";
+        visibility = visibility.trim().toLowerCase();
+
+        String displayName = (String) body.getOrDefault("display_name", body.get("displayName"));
+        String imageUrl = (String) body.getOrDefault("image_url", body.get("imageUrl"));
+        String featuredTitle = (String) body.getOrDefault("featured_title", body.get("featuredTitle"));
+
+        Object fieldVisObj = body.getOrDefault("field_visibility", body.get("fieldVisibility"));
+        String fieldVisJson = "{}";
+        try {
+            if (fieldVisObj != null) {
+                fieldVisJson = objectMapper.writeValueAsString(fieldVisObj);
+            }
+        } catch (Exception ignored) {}
+
+        String sql = "SELECT visibility::text, display_name, image_url, field_visibility::text, featured_title " +
+                     "FROM public.member_update_profile(?::uuid, ?::text, ?::text, ?::text, ?::jsonb, ?::text)";
+
+        try {
+            Map<String, Object> updated = jdbcTemplate.queryForMap(
+                    sql,
+                    UUID.fromString(userId),
+                    visibility,
+                    displayName,
+                    imageUrl,
+                    fieldVisJson,
+                    featuredTitle
+            );
+
+            Map<String, Object> settings = new LinkedHashMap<>();
+            settings.put("visibility", updated.get("visibility"));
+            settings.put("displayName", updated.get("display_name"));
+            settings.put("display_name", updated.get("display_name"));
+            settings.put("imageUrl", updated.get("image_url"));
+            settings.put("image_url", updated.get("image_url"));
+            settings.put("featuredTitle", updated.get("featured_title"));
+            settings.put("featured_title", updated.get("featured_title"));
+
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("settings", settings);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            log.error("[ProfileController] Failed to update profile: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PROFILE_UPDATE_FAILED: " + e.getMessage());
+        }
     }
 }
