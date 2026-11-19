@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.40 — 관리자·회원 공통 Java Spring **반응형 웹** (신규 소스 후보 · 운영 승격 보류)
+- [영문 상세 기획](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [한국어](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) · [관리자 PC/모바일 실제 Chromium 픽스처 화면](docs/design/mv40/README.md) · [실제 검증](docs/qa/2026-11-19-spring-admin-member-web-v40.md) · [작업기록](docs/worklog/2026-11-19-spring-admin-member-web-v40.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.11.19.40-admin-member-web-github.ko.md). 관리자 Spring SSR와 HTML 접근 보호, 사용자 홈 일관성, 자동/수동 5개 언어 반영. 전체 Java 247중 38개 실패, 공식 Test 403·180페이지/실계정 원장 미검증. **운영 배포 아님**.
+
+
 ## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
 - [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
 
