@@ -23,6 +23,15 @@ class LiveAdminUsersPageTest {
     private final LiveAdminUsersPage page = new LiveAdminUsersPage(auth, governance);
     private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/users");
 
+    @Test void adminCspAllowsOnlySelfHostedV38StylesheetsNotExternalScript() {
+        var response = page.show(request,30,"","en");
+        var csp = response.getHeaders().getFirst("Content-Security-Policy");
+        assertNotNull(csp);
+        assertTrue(csp.contains("style-src 'self' 'unsafe-inline'"));
+        assertTrue(csp.contains("default-src 'none'"));
+        assertFalse(csp.contains("script-src 'unsafe-inline'"));
+    }
+
     @Test void anonymousUserIsRedirectedToLoginWithoutReadingAnyUserData() {
         when(auth.resolveVerifiedAdminActor(any())).thenReturn(Optional.empty());
         ResponseEntity<String> result = page.show(request, 30, "", "en");

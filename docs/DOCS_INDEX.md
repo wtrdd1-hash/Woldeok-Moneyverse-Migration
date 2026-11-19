@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.38.1 — 승인 신규 UI Spring 실제 소스 구현 (251 PASS / 운영 보류)
+
+[관리자 PC·모바일 디자인 포함 한국어 상세 기획](planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) · [EN](planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md) · [180개 이미지 URL별 미인증 현황](qa/SPRING_DESIGN_ROUTE_MATRIX_v2026.11.19.38.1.md) · [QA](qa/2026-11-19-spring-violet-ui-v38.ko.md). Java 서버 실제 관리자 공통·안전 문의 동글 소스 구현, 180 전체 기능/운영 승격은 미완료.
+
 ## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
 
 - [180 PC+mobile route PNG designs](design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.

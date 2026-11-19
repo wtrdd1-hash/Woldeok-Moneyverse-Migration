@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.19.38.1 — 승인 이미지 기반 실제 Spring 관리자 공통 UI·전역 문의 구현 (소스 QA PASS / 운영 HOLD)
+
+사용자가 다시 **전체 180개 페이지+관리자 이미지 UI를 전부 Java Spring MVC+Thymeleaf 실서비스로 만들고 미니PC 개발·운영 승격** 승인함. 충돌 없는 첫 실제 코드 단위로 관리자 서버 HTML 공통 240px 왼쪽 메뉴·모바일 가로 메뉴·네이비/보라 스타일, Spring 금융 계산기/도구/상태 공통 **JavaScript 없는 단일 56px 원형 도움 동글** 구현. 기존 유효 세션·관리자 역할/재무 approver·실데이터·302/403/503·원장 근거 유지. 보안 미검증 채팅 전송·허위 금액/정상 배지 불가. 관리자 CSP는 새 자사 CSS만 허용하고 외부 스크립트 허용하지 않음. **운영 / 홈·정적 /admin 시안은 다른 작업자의 영역이며 180 PNG가 곧 180기능 완료는 아님.**
+
+미니PC TDD 초기 6 RED, 상태 CSS 누락 1 RED, 관리자 CSS CSP 2 RED를 확인 후 모두 GREEN. 최종 Spring `clean test bootJar` **251개 전체 PASS·실패0·건너뜀0**, 격리 H2·랜덤포트 실제 HTTP **4 PASS**, JAR SHA256 `ba94b7b999be97f59b2c13e40fd4618fb3859885aeb7d202bb54d616dafd09ef`(운영 아닌 격리 산출물). 원본 승인 이미지 픽셀 동등성·실 Chrome 320~1440/200% 확대·정상 관리자/금융/채팅 인증 E2E·공식 Test Nginx·독립 롤백 **미검증**이므로 운영 승격 미진행. GitHub 공개 main c131ef1과 미니PC 통합 main ec22442가 달라 무단 main 병합 금지, 깔끔한 후속 브랜치 필요.
+
+[한국어 상세 기획·관리자 PC/모바일 시안](SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) / [EN](SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md) · [전체 180개 이미지별 작업/검증 현황](../qa/SPRING_DESIGN_ROUTE_MATRIX_v2026.11.19.38.1.md) · [QA 한국어](../qa/2026-11-19-spring-violet-ui-v38.ko.md) / [EN](../qa/2026-11-19-spring-violet-ui-v38.md) · [작업 기록](../worklog/2026-11-19-spring-shared-ui-v38.ko.md).
+
 ## v2026.11.18.17 — Spring 프론트엔드 관리자 디자인·전역 채팅 코드 전환 (소스 검증 / 운영 HOLD)
 
 사용자가 승인한 관리자 디자인과 전역 문의 UI를 **실제 프론트엔드 소스**에 구현하되 기존 운영 화면은 유지한다. Spring 복구 브랜치 기반 독립 worktree에서 관리자 네이비/보라 공통 테마와 단일 56px 둥근 버튼을 구현했다. 관리자 /admin*에서는 인증 검증 전 **읽기 전용 지원 안내창**만 표시(문의/DM API 미연결), 일반 회원 화면에서는 기존 문의/1:1 채팅 위젯을 유지하며 접근성·모바일 세이프에어리어 개선. 금융/권한/API 로직은 변경하지 않음.

@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.38.1 — Approved Spring Native Violet UI Source (251 PASS / Production HOLD)
+
+[Spring visual implementation and real admin concept images](docs/planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md) · [한국어](docs/planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) · [180 design-route evidence matrix](docs/qa/SPRING_DESIGN_ROUTE_MATRIX_v2026.11.19.38.1.md) · [QA](docs/qa/2026-11-19-spring-violet-ui-v38.md). Real server-rendered admin/Thymeleaf safe round help tested. Full web conversion/Chrome/real-auth/Production not certified.
+
 ## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
 
 - [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.

@@ -7,6 +7,7 @@
   <meta name="description" content="Woldeok Moneyverse Spring native calculators, no login required, with accessible standard HTML forms.">
   <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
   <link rel="stylesheet" href="/mv-spring/v28/styles.css">
+  <link rel="stylesheet" href="/mv-spring/v38/shared-ui.css">
 </head>
 <body>
 <header class="site-header" th:fragment="header">
@@ -29,9 +30,20 @@
     <p>© Woldeok Moneyverse <span class="footer-tag">Spring MVC · Native Web · v28</span></p>
     <nav aria-label="Footer"><a href="/privacy" th:text="${ko} ? '개인정보' : 'Privacy'">Privacy</a><a href="/terms" th:text="${ko} ? '이용약관' : 'Terms'">Terms</a><a href="/support" th:text="${ko} ? '지원' : 'Support'">Support</a></nav>
   </div>
-  <a class="floating-help" href="/support" th:attr="aria-label=${ko} ? '지원 및 문의 보기(로그인이 필요할 수 있음)' : 'Open help and support (sign-in may be required)'">
-    <span class="help-symbol" aria-hidden="true">?</span><span th:text="${ko} ? '문의' : 'Help'">Help</span>
-  </a>
+  <!-- v38: Spring-only no-JavaScript help; no unverified member message transport. -->
+  <details class="mv-support-dock">
+    <summary th:attr="aria-label=${ko} ? '문의 및 고객지원 열기' : 'Open support and help'">
+      <span aria-hidden="true">?</span><span th:text="${ko} ? '문의' : 'Help'">Help</span>
+    </summary>
+    <section class="mv-support-panel" th:attr="aria-label=${ko} ? '고객지원 안내' : 'Support information'">
+      <h2 th:text="${ko} ? '도움 및 문의' : 'Help and support'">Help and support</h2>
+      <p class="mv-support-warning" th:text="${ko} ? '보안 확인 전 채팅 메시지 전송은 제공하지 않습니다. 실제 문의는 고객센터를 확인하세요.' : 'Chat message sending is disabled pending security verification. Use the support center for available contact options.'">Chat unavailable pending security verification / 보안 확인 전 전송 비활성</p>
+      <nav aria-label="Support destinations">
+        <a href="/support" th:text="${ko} ? '고객센터 보기' : 'Open support center'">Open support center</a>
+        <a href="/help" th:text="${ko} ? '도움말 보기' : 'Open help'">Open help</a>
+      </nav>
+    </section>
+  </details>
 </footer>
 </body>
 </html>

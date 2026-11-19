@@ -1,0 +1,284 @@
+/* Scoped Spring MVC administrator redesign v2026.11.19.38.1.
+   Preserves every authenticated source, escaped row, role and failure status. */
+body[data-spring-admin-ui] {
+  --mv-bg:#0b1223;
+  --mv-card:#171f36;
+  --mv-line:#344464;
+  --mv-purple:#9d7bff;
+  --mv-blue:#63ccf7;
+  --mv-text:#f3f6ff;
+  background:
+    radial-gradient(ellipse 75% 37% at 48% -8%,#372a657a,transparent 76%),
+    var(--mv-bg);
+  color:var(--mv-text);
+  min-width:0;
+  overflow-x:clip;
+}
+body[data-spring-admin-ui] .mv-admin-header {
+  border-bottom:1px solid #38416a;
+  padding:15px clamp(12px,2.5vw,35px);
+  background:linear-gradient(125deg,#1b2240,#121b31);
+  box-shadow:0 8px 29px #0409163b;
+}
+body[data-spring-admin-ui] .mv-admin-header nav {
+  width:min(100%,1480px);
+  margin-inline:auto;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+}
+body[data-spring-admin-ui] .mv-admin-header .brand {
+  margin-right:0;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  font-size:13px;
+  line-height:1.22;
+  letter-spacing:-.01em;
+}
+body[data-spring-admin-ui] .mv-admin-header .brand b {color:#b197ff;display:block;}
+body[data-spring-admin-ui] .mv-admin-mark {
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:linear-gradient(125deg,#785be0,#56b9f6);
+  font-weight:900;
+  font-size:27px;
+  color:white;
+  box-shadow:0 9px 24px #6659cc55;
+}
+body[data-spring-admin-ui] .mv-admin-header-title {
+  display:grid;
+  flex:1;
+  min-width:140px;
+  gap:3px;
+  padding-left:clamp(0px,1vw,12px);
+}
+body[data-spring-admin-ui] .mv-admin-header-title span {
+  color:#aa94fa;
+  font-size:10px;
+  font-weight:780;
+  letter-spacing:.13em;
+}
+body[data-spring-admin-ui] .mv-admin-header-title strong {
+  font-size:clamp(17px,1.55vw,23px);
+  letter-spacing:-.03em;
+  color:#f5f5ff;
+}
+body[data-spring-admin-ui] .mv-admin-nav-links {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+}
+body[data-spring-admin-ui] .mv-admin-nav-links a {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  min-height:44px;
+  padding:8px 13px;
+  color:#cbd5ef;
+  text-decoration:none;
+  border:1px solid transparent;
+  border-radius:11px;
+  font-weight:650;
+  font-size:13px;
+}
+body[data-spring-admin-ui] .mv-admin-nav-links a:hover,
+body[data-spring-admin-ui] .mv-admin-nav-links a:focus-visible {
+  border-color:#766ac8;
+  background:#403770;
+  color:#fff;
+}
+body[data-spring-admin-ui] main.mv-admin-workspace {
+  display:block;
+  width:min(100%,1380px);
+  max-width:100%;
+  min-width:0;
+  margin:28px auto 0;
+  padding:0 clamp(12px,2.5vw,34px) 130px;
+}
+body[data-spring-admin-ui] .panel {
+  background:linear-gradient(150deg,#1b2440,#131c33);
+  border:1px solid #3c4a70;
+  box-shadow:0 17px 45px #0307136b;
+  border-radius:20px;
+}
+body[data-spring-admin-ui] .panel h1,
+body[data-spring-admin-ui] .panel h2 {
+  color:#f3f6ff;
+  letter-spacing:-.035em;
+}
+body[data-spring-admin-ui] .eyebrow {color:#ba9bff;}
+body[data-spring-admin-ui] .total {
+  background:#33285d;
+  color:#e6dfff;
+  border:1px solid #67568c;
+}
+body[data-spring-admin-ui] .filters input {
+  background:#0f172b;
+  border-color:#52607c;
+}
+body[data-spring-admin-ui] .filters button {
+  background:linear-gradient(108deg,#765de4,#9a68e9);
+  box-shadow:0 8px 24px #6552ba55;
+}
+body[data-spring-admin-ui] .tablewrap {
+  border:1px solid #3c4c6d;
+  border-radius:15px;
+}
+body[data-spring-admin-ui] th {background:#2b2b4e;color:#d4c2ff;}
+body[data-spring-admin-ui] tr:hover td {background:#252b4c;}
+body[data-spring-admin-ui] .mv-admin-footer {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  border-top:1px solid #303c59;
+  padding:18px clamp(12px,2.5vw,34px);
+  color:#9faecb;
+  font-size:11px;
+  letter-spacing:.04em;
+}
+body[data-spring-admin-ui] a:focus-visible,
+body[data-spring-admin-ui] button:focus-visible,
+body[data-spring-admin-ui] summary:focus-visible {
+  outline:3px solid #7fddff;
+  outline-offset:3px;
+}
+@media (max-width:760px) {
+  body[data-spring-admin-ui] .mv-admin-header-title {flex:1;}
+  body[data-spring-admin-ui] .mv-admin-nav-links {
+    width:100%;
+    overflow-x:auto;
+    scrollbar-width:thin;
+    flex-wrap:nowrap;
+    padding:3px 0;
+  }
+  body[data-spring-admin-ui] .mv-admin-nav-links a {flex:0 0 auto;}
+  body[data-spring-admin-ui] main.mv-admin-workspace {margin-top:16px;}
+}
+@media (max-width:390px) {
+  body[data-spring-admin-ui] .mv-admin-header {padding:12px;}
+  body[data-spring-admin-ui] .mv-admin-mark {width:40px;height:40px;flex-basis:40px;}
+  body[data-spring-admin-ui] .mv-admin-header-title {padding:0;}
+  body[data-spring-admin-ui] .panel {padding:16px;}
+  body[data-spring-admin-ui] .mv-admin-footer {padding-bottom:100px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  body[data-spring-admin-ui] *,
+  body[data-spring-admin-ui] *::before,
+  body[data-spring-admin-ui] *::after {transition-duration:.01ms!important;animation-duration:.01ms!important;}
+}
+
+/* Layout implementation of the approved desktop left-rail concept. */
+@media (min-width:981px) {
+  body[data-spring-admin-ui] {
+    display:grid;
+    grid-template-columns:240px minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) auto;
+    min-height:100svh;
+    align-items:stretch;
+  }
+  body[data-spring-admin-ui] .mv-admin-header {
+    grid-column:1;
+    grid-row:1 / span 2;
+    min-width:0;
+    padding:22px 14px;
+    background:#111a2e;
+    border-right:1px solid #313b58;
+    border-bottom:0;
+  }
+  body[data-spring-admin-ui] .mv-admin-header nav {
+    position:sticky;
+    top:0;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:21px;
+    padding-top:6px;
+  }
+  body[data-spring-admin-ui] .mv-admin-header .brand {padding:0 6px;font-size:13px;}
+  body[data-spring-admin-ui] .mv-admin-header-title {
+    flex:0 0 auto;
+    min-width:0;
+    padding:0 10px;
+    gap:5px;
+  }
+  body[data-spring-admin-ui] .mv-admin-header-title strong {font-size:17px;}
+  body[data-spring-admin-ui] .mv-admin-nav-links {
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    align-items:stretch;
+  }
+  body[data-spring-admin-ui] .mv-admin-nav-links a {
+    width:100%;
+    justify-content:flex-start;
+    padding:12px 13px;
+    background:#1a2540;
+    border-color:#293650;
+    color:#bfcae3;
+  }
+  body[data-spring-admin-ui] .mv-admin-nav-links a:hover {
+    background:#3d3268;
+    border-color:#775eac;
+    color:white;
+  }
+  body[data-spring-admin-ui] main.mv-admin-workspace {
+    grid-column:2;
+    grid-row:1;
+    margin:0;
+    padding:0 clamp(18px,2.5vw,38px) 105px;
+    align-self:start;
+    width:100%;
+  }
+  body[data-spring-admin-ui] .mv-admin-footer {grid-column:2;grid-row:2;}
+}
+body[data-spring-admin-ui] .mv-admin-page-head {
+  display:grid;
+  gap:6px;
+  border-bottom:1px solid #344061;
+  padding:22px 0 23px;
+  margin-bottom:23px;
+}
+body[data-spring-admin-ui] .mv-admin-page-head .mv-admin-kicker {
+  color:#ad95ff;
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.13em;
+}
+body[data-spring-admin-ui] .mv-admin-page-head strong {
+  font-size:clamp(19px,2.2vw,29px);
+  color:white;
+}
+body[data-spring-admin-ui] .mv-admin-page-head small {
+  color:#a4b6d3;
+  font-size:12px;
+}
+@media (max-width:980px) {
+  body[data-spring-admin-ui] {
+    display:block;
+  }
+  body[data-spring-admin-ui] .mv-admin-header nav {
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  body[data-spring-admin-ui] .mv-admin-nav-links {
+    max-width:100%;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+  }
+  body[data-spring-admin-ui] main.mv-admin-workspace {
+    display:block;
+    padding-bottom:125px;
+  }
+}

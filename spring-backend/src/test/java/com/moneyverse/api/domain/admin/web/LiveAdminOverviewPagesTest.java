@@ -23,6 +23,15 @@ class LiveAdminOverviewPagesTest {
     private final LiveAdminOverviewPages pages=new LiveAdminOverviewPages(auth,governance,business);
     private MockHttpServletRequest req(String uri) {return new MockHttpServletRequest("GET",uri);}
 
+    @Test void adminCspAllowsOnlySelfHostedV38StylesheetsNotExternalScript() {
+        var response = pages.show(req("/admin/market"),"en");
+        var csp = response.getHeaders().getFirst("Content-Security-Policy");
+        assertNotNull(csp);
+        assertTrue(csp.contains("style-src 'self' 'unsafe-inline'"));
+        assertTrue(csp.contains("default-src 'none'"));
+        assertFalse(csp.contains("script-src 'unsafe-inline'"));
+    }
+
     @Test void allSensitiveAdminScreensRedirectBeforeDataLookup() {
         for(String path: new String[]{"/admin/market","/admin/economy","/admin/controls","/admin/enterprises","/admin/economy/scenario-lab"}) {
             ResponseEntity<String> out=pages.show(req(path),"en");

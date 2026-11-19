@@ -43,7 +43,7 @@ public class LiveAdminUsersPage {
         headers.set("X-Content-Type-Options", "nosniff");
         headers.set("X-Frame-Options", "DENY");
         headers.set("Referrer-Policy", "same-origin");
-        headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        headers.set("Content-Security-Policy", "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
         headers.setContentType(MediaType.parseMediaType("text/html;charset=UTF-8"));
 
         UUID actor = adminAuthService.resolveVerifiedAdminActor(request).orElse(null);
@@ -139,10 +139,40 @@ public class LiveAdminUsersPage {
                 + ".subtle,.hint{color:#b0bfd7}.total{background:#272c4b;border-radius:999px;padding:8px 14px;align-self:center;font-variant-numeric:tabular-nums}.filters{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:21px}.filters label{display:block;font-size:13px;color:#d8dff8}input{padding:11px;border:1px solid #53627e;border-radius:10px;background:#101a31;color:#fff;min-height:44px;max-width:100%}input[type=search]{width:min(100%,320px)}input[type=number]{width:95px}button{background:#805ee5;color:#fff;border:0;border-radius:10px;min-height:44px;padding:9px 24px;cursor:pointer;font-weight:650}"
                 + "button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #e9bc76;outline-offset:3px}.tablewrap{overflow:auto;border-radius:10px;margin-top:20px;border:1px solid #354665}table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;padding:13px;border-bottom:1px solid #34415f;overflow-wrap:anywhere}th{color:#c2a9ff;background:#202d4a;font-weight:650}tr:hover td{background:#1b2945}.mono{font-family:ui-monospace,monospace;font-size:12px}.empty{text-align:center;padding:32px}"
                 + "@media(max-width:420px){header{padding:12px}nav{gap:10px}.filters{display:grid;grid-template-columns:1fr}.filters label{margin-top:4px}input[type=search]{width:100%}}"
-                + "</style></head><body><header><nav><a href=\"/admin\" class=\"brand\">WOLDEOK / ADMIN</a>"
-                + "<a href=\"/admin\">" + (korean ? "대시보드" : "Dashboard") + "</a><a href=\"/admin/users\">" + (korean ? "회원" : "Members") + "</a>"
-                + "<a href=\"/admin/support\">" + (korean ? "지원" : "Support") + "</a>"
-                + "<a href=\"/admin/users?lang=" + (korean ? "en" : "ko") + "\">" + (korean ? "English" : "한국어") + "</a></nav></header><main>"
-                + body + "</main></body></html>";
+                + "</style><link rel=\"stylesheet\" href=\"/mv-spring/v38/shared-ui.css\">"
+                + "<link rel=\"stylesheet\" href=\"/mv-spring/v38/admin-ui.css\"></head>"
+                + "<body data-spring-admin-ui=\"v2026.11.19.38.1\">"
+                + "<header class=\"mv-admin-header\"><nav aria-label=\"Admin navigation\">"
+                + "<a href=\"/admin\" class=\"brand\"><span class=\"mv-admin-mark\" aria-hidden=\"true\">W</span>"
+                + "<span>WOLDEOK <b>MONEYVERSE</b></span></a>"
+                + "<div class=\"mv-admin-header-title\"><span>ADMIN CONTROL CENTER</span><strong>"
+                + (korean ? "관리자 관제 센터" : "Administrator console") + "</strong></div>"
+                + "<div class=\"mv-admin-nav-links\"><a href=\"/admin\">" + (korean ? "대시보드" : "Dashboard")
+                + "</a><a href=\"/admin/users\">" + (korean ? "회원" : "Members")
+                + "</a><a href=\"/admin/economy\">" + (korean ? "경제" : "Economy")
+                + "</a><a href=\"/admin/controls\">" + (korean ? "설정" : "Controls")
+                + "</a><a href=\"/admin/support\">" + (korean ? "지원" : "Support")
+                + "</a><a href=\"/admin/users?lang=" + (korean ? "en" : "ko") + "\">"
+                + (korean ? "English" : "한국어") + "</a></div></nav></header>"
+                + "<main class=\"mv-admin-workspace\"><div class=\"mv-admin-page-head\">"
+                + "<span class=\"mv-admin-kicker\">WOLDEOK / ADMIN / SPRING</span>"
+                + "<strong>" + escape(title) + "</strong>"
+                + "<small>" + (korean ? "실제 서버 데이터·권한 기준" : "Verified server data and permissions") + "</small>"
+                + "</div>"
+                + body + "</main><footer class=\"mv-admin-footer\"><span>WOLDEOK / SPRING MVC</span>"
+                + "<span>" + (korean ? "검증된 데이터 원천 기준" : "Authoritative data only") + "</span></footer>"
+                + "<details class=\"mv-support-dock\"><summary aria-label=\""
+                + (korean ? "관리자 지원 창 열기" : "Open admin support") + "\">"
+                + "<span aria-hidden=\"true\">?</span><span>" + (korean ? "문의" : "Help") + "</span></summary>"
+                + "<section class=\"mv-support-panel\" aria-label=\""
+                + (korean ? "관리자 고객지원 안내" : "Administrator help and support") + "\">"
+                + "<h2>" + (korean ? "관리자 도움 및 문의" : "Admin help & support") + "</h2>"
+                + "<p class=\"mv-support-warning\">" + (korean
+                    ? "보안 확인 전 문의 메시지 전송은 비활성입니다. 관리자 지원 화면에서 현황을 확인하세요."
+                    : "Message sending is unavailable pending security verification. Review the admin support queue.")
+                + "</p><nav aria-label=\"Support destinations\">"
+                + "<a href=\"/admin/support\">" + (korean ? "관리자 고객지원" : "Admin support queue") + "</a>"
+                + "<a href=\"/help\">" + (korean ? "도움말" : "Help center") + "</a></nav></section></details>"
+                + "</body></html>";
     }
 }
