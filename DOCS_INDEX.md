@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
+
+- [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
+
 ## v2026.11.18.20 — Spring/Frontend Test recovery (INTERNAL TEST / RELEASE HOLD)
 - [QA English](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md) / [한국어](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.ko.md). Spring 174 JUnit PASS, Next build PASS/121 focused PASS, full frontend regression incomplete; locally restricted Test route 20 GET no 502, **new frontend dynamic SSR not in Spring static release**. No Production deployment.
 
