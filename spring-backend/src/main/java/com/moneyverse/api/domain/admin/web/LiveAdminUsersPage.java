@@ -43,7 +43,7 @@ public class LiveAdminUsersPage {
         headers.set("X-Content-Type-Options", "nosniff");
         headers.set("X-Frame-Options", "DENY");
         headers.set("Referrer-Policy", "same-origin");
-        headers.set("Content-Security-Policy", "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        headers.set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
         headers.setContentType(MediaType.parseMediaType("text/html;charset=UTF-8"));
 
         UUID actor = adminAuthService.resolveVerifiedAdminActor(request).orElse(null);
@@ -140,7 +140,9 @@ public class LiveAdminUsersPage {
                 + "button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #e9bc76;outline-offset:3px}.tablewrap{overflow:auto;border-radius:10px;margin-top:20px;border:1px solid #354665}table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;padding:13px;border-bottom:1px solid #34415f;overflow-wrap:anywhere}th{color:#c2a9ff;background:#202d4a;font-weight:650}tr:hover td{background:#1b2945}.mono{font-family:ui-monospace,monospace;font-size:12px}.empty{text-align:center;padding:32px}"
                 + "@media(max-width:420px){header{padding:12px}nav{gap:10px}.filters{display:grid;grid-template-columns:1fr}.filters label{margin-top:4px}input[type=search]{width:100%}}"
                 + "</style><link rel=\"stylesheet\" href=\"/mv-spring/v38/shared-ui.css\">"
-                + "<link rel=\"stylesheet\" href=\"/mv-spring/v38/admin-ui.css\"></head>"
+                + "<link rel=\"stylesheet\" href=\"/mv-spring/v38/admin-ui.css\">"
+                + "<link rel=\"stylesheet\" href=\"/mv-spring/v39/language-picker.css\">"
+                + "<script type=\"module\" src=\"/mv-spring/v39/language-picker.mjs\"></script></head>"
                 + "<body data-spring-admin-ui=\"v2026.11.19.38.1\">"
                 + "<header class=\"mv-admin-header\"><nav aria-label=\"Admin navigation\">"
                 + "<a href=\"/admin\" class=\"brand\"><span class=\"mv-admin-mark\" aria-hidden=\"true\">W</span>"
@@ -152,8 +154,17 @@ public class LiveAdminUsersPage {
                 + "</a><a href=\"/admin/economy\">" + (korean ? "경제" : "Economy")
                 + "</a><a href=\"/admin/controls\">" + (korean ? "설정" : "Controls")
                 + "</a><a href=\"/admin/support\">" + (korean ? "지원" : "Support")
-                + "</a><a href=\"/admin/users?lang=" + (korean ? "en" : "ko") + "\">"
-                + (korean ? "English" : "한국어") + "</a></div></nav></header>"
+                + "</a></div><div class=\"mv-language-slot\" data-mv-language-slot data-mv-native-translations=\"en,ko\">"
+                + "<details><summary aria-label=\"Choose language\">🌐 Language</summary>"
+                + "<div class=\"mv-language-fallback-links\">"
+                + "<a data-mv-auto href=\"?lang=en&amp;mv_auto=1\">Auto (EN fallback)</a>"
+                + "<a data-lang=\"en\" lang=\"en\" href=\"?lang=en\">English</a>"
+                + "<a data-lang=\"ko\" lang=\"ko\" href=\"?lang=ko\">한국어</a>"
+                + "<a data-lang=\"ja\" lang=\"ja\" href=\"?lang=ja\">日本語</a>"
+                + "<a data-lang=\"zh\" lang=\"zh\" href=\"?lang=zh\">简体中文</a>"
+                + "<a data-lang=\"vi\" lang=\"vi\" href=\"?lang=vi\">Tiếng Việt</a>"
+                + "<p class=\"mv-language-fallback\">JA/ZH/VI: native page content may still be English.</p>"
+                + "</div></details></div></nav></header>"
                 + "<main class=\"mv-admin-workspace\"><div class=\"mv-admin-page-head\">"
                 + "<span class=\"mv-admin-kicker\">WOLDEOK / ADMIN / SPRING</span>"
                 + "<strong>" + escape(title) + "</strong>"

@@ -8,6 +8,8 @@
   <title th:text="${pageTitle} + ' | Woldeok Moneyverse'">Woldeok Moneyverse</title>
   <link rel="stylesheet" href="/mv-spring/v28/styles.css">
   <link rel="stylesheet" href="/mv-spring/v38/shared-ui.css">
+  <link rel="stylesheet" href="/mv-spring/v39/language-picker.css">
+  <script type="module" src="/mv-spring/v39/language-picker.mjs"></script>
 </head>
 <body>
 <header class="site-header" th:fragment="header">
@@ -19,9 +21,21 @@
       <a href="/shop" th:text="${ko} ? '상점' : 'Shop'">Shop</a>
       <a href="/guide" th:text="${ko} ? '안내' : 'Guide'">Guide</a>
     </nav>
-    <div class="nav-actions">
-      <a class="language" th:href="@{${calculatorPath}(lang='en')}" hreflang="en" th:attr="aria-current=${ko} ? null : 'page'">EN</a>
-      <a class="language" th:href="@{${calculatorPath}(lang='ko')}" hreflang="ko" th:attr="aria-current=${ko} ? 'page' : null">KO</a>
+    <!-- v39 Progressive enhancement: all five languages clickable without JavaScript.
+         JS adds Auto/browser preference and stores manual choice; no financial data touched. -->
+    <div class="mv-language-slot" data-mv-language-slot data-mv-native-translations="en,ko">
+      <details>
+        <summary aria-label="Choose language">🌐 Language</summary>
+        <div class="mv-language-fallback-links">
+          <a data-mv-auto href="?lang=en&amp;mv_auto=1">Auto (EN fallback)</a>
+          <a data-lang="en" href="?lang=en" lang="en">English</a>
+          <a data-lang="ko" href="?lang=ko" lang="ko">한국어</a>
+          <a data-lang="ja" href="?lang=ja" lang="ja">日本語</a>
+          <a data-lang="zh" href="?lang=zh" lang="zh">简体中文</a>
+          <a data-lang="vi" href="?lang=vi" lang="vi">Tiếng Việt</a>
+          <p class="mv-language-fallback">JA/ZH/VI: some native Spring content is still in English.</p>
+        </div>
+      </details>
     </div>
   </div>
 </header>

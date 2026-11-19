@@ -1,5 +1,13 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
+## v2026.11.19.39.1 — 실제 Spring PC·모바일 5언어 자동/수동 선택기 및 반응형 (소스 QA PASS / 운영 HOLD)
+
+사용자는 승인 디자인 이미지 기반 **PC·모바일 전체 반응형 Spring 프론트엔드 새 구축·실데이터·운영 승격** 승인. 실제 지원 언어 **영어(en)·한국어(ko)·일본어(ja)·중국어 간체(zh)·베트남어(vi)**, 자동 브라우저 감지 및 수동 선택이다. 이번 v39는 실제 Java 관리자·Thymeleaf 계산기/상태/도구 허브에 같은 5언어/자동 선택기, 쿠키 wdmv_locale·로컬 저장 wdmv_locale_preference(동시 [핵심 8화면 PR #3296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3296)와 동일), 320/390/768/1440 반응형·44px 터치·Escape·하단 56px 문의 버튼 비겹침을 구현. 기존 Java 본문 EN/KO 외 JA/ZH/VI는 **영어 대체 안내로 표시**하여 전체 번역 완료처럼 보이지 않게 한다.
+
+**재현 검증:** 전체 Java clean test bootJar **262/262 PASS**, Node 로케일 7/7 PASS, 격리 Spring H2 실제 HTTP 5/5 PASS, 로컬 합성 UI 픽스처 진짜 Chromium 10/10 PASS. JAR SHA256 2f876f422d7b7ba97277a8b29634913857ec9b65dc36d0368b864dd2ebae7b0b (운영 아님). [관리자 공통 Spring PR #3295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3295) 위에 스택하며 PR #3296 홈·지갑 등 소유 파일 미변경. **전체 180페이지 기능·5언어 본문·실 회원/금융/원장/채팅 E2E·정확 SHA 공식 Test·롤백은 미인증**, 따라서 전체 운영 승격 HOLD.
+
+[한국어 상세 기획](SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.ko.md) / [English](SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.md) · [한국어 실제 QA](../qa/2026-11-19-spring-five-locale-browser-v39.ko.md) / [EN](../qa/2026-11-19-spring-five-locale-browser-v39.md) · [영·한 작업 기록](../worklog/2026-11-19-spring-i18n-responsive-v39.ko.md).
+
 ## v2026.11.19.38.1 — 승인 이미지 기반 실제 Spring 관리자 공통 UI·전역 문의 구현 (소스 QA PASS / 운영 HOLD)
 
 사용자가 다시 **전체 180개 페이지+관리자 이미지 UI를 전부 Java Spring MVC+Thymeleaf 실서비스로 만들고 미니PC 개발·운영 승격** 승인함. 충돌 없는 첫 실제 코드 단위로 관리자 서버 HTML 공통 240px 왼쪽 메뉴·모바일 가로 메뉴·네이비/보라 스타일, Spring 금융 계산기/도구/상태 공통 **JavaScript 없는 단일 56px 원형 도움 동글** 구현. 기존 유효 세션·관리자 역할/재무 approver·실데이터·302/403/503·원장 근거 유지. 보안 미검증 채팅 전송·허위 금액/정상 배지 불가. 관리자 CSP는 새 자사 CSS만 허용하고 외부 스크립트 허용하지 않음. **운영 / 홈·정적 /admin 시안은 다른 작업자의 영역이며 180 PNG가 곧 180기능 완료는 아님.**
