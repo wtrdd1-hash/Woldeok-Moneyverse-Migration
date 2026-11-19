@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.41 — 운영 관리자 접근 보호 2건 실제 반영 + Java API 실데이터 수정 후보 (전체 운영 승격 보류)
+- [운영 변경 영문](docs/operations/2026-11-19-scoped-admin-edge-v41.md) / [한국어](docs/operations/2026-11-19-scoped-admin-edge-v41.ko.md) · [API 208건 운영 QA 영문](docs/findings/2026-11-19-public-api-matrix-v41.md) / [한국어](docs/findings/2026-11-19-public-api-matrix-v41.ko.md) · [소스/JUnit/Chromium QA](docs/qa/2026-11-19-spring-api-source-truth-v41.md) / [KO](docs/qa/2026-11-19-spring-api-source-truth-v41.ko.md) · [작업로그](docs/worklog/2026-11-19-web-api-promotion-v41.ko.md) · [업데이트](docs/updates/v2026.11.19.41-web-api-github.ko.md). 실제 운영 Nginx는 관리자 시안4주소·블로그4주소 익명 접근302로 보호. API·회원·관리자·보안 통합 Java 266/266, Chromium 회원16/관리자13/게시판6 및 5언어 검증은 **소스/픽스처 후보**. 공식 Test403·약180화면×5회·실관리자/원장·무중단 롤백 미검증, Java/프론트엔드 신규 버전은 **운영 배포 안 됨**.
+
+
 ## v2026.11.19.40 — 관리자·회원 공통 Java Spring **반응형 웹** (신규 소스 후보 · 운영 승격 보류)
 - [영문 상세 기획](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [한국어](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) · [관리자 PC/모바일 실제 Chromium 픽스처 화면](docs/design/mv40/README.md) · [실제 검증](docs/qa/2026-11-19-spring-admin-member-web-v40.md) · [작업기록](docs/worklog/2026-11-19-spring-admin-member-web-v40.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.11.19.40-admin-member-web-github.ko.md). 관리자 Spring SSR와 HTML 접근 보호, 사용자 홈 일관성, 자동/수동 5개 언어 반영. 전체 Java 247중 38개 실패, 공식 Test 403·180페이지/실계정 원장 미검증. **운영 배포 아님**.
 

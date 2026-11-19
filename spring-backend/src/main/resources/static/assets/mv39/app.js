@@ -131,7 +131,13 @@
     fetchJson(url).then(source=>{
       if(!validNow(gen))return;
       const entries=kind==='shop'?source&&source.items:source&&source.posts;
-      if (!Array.isArray(entries)) {container.replaceChildren(state(t('unavailable')));return;}
+      // A 200 response is not proof of a verified board read. Explicit ok:true is required.
+      const canonicalBoardId=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+      if ((kind!=='shop' && (!source || source.ok!==true)) || !Array.isArray(entries)
+          || (kind==='board' && entries.some(item=> !item || typeof item.id!=='string'
+              || !canonicalBoardId.test(item.id) || typeof item.title!=='string' || !item.title.trim()))) {
+        container.replaceChildren(state(t('unavailable')));return;
+      }
       container.replaceChildren();
       entries.slice(0,limit).forEach(item=>{
         if (!item||typeof item!=='object') return;
@@ -142,7 +148,9 @@
           if(item.description)entry.appendChild(elt('p','feed-summary',item.description));
         } else {
           entry.appendChild(elt('div','feed-title',item.title||t('recentPosts')));
-          entry.appendChild(elt('div','feed-meta',item.authorName||'—'));
+          const date=item.createdAt&&Number.isFinite(Date.parse(item.createdAt))
+            ?new Date(item.createdAt).toLocaleDateString(document.documentElement.lang||'en') :null;
+          entry.appendChild(elt('div','feed-meta', [item.authorName||'—',date].filter(Boolean).join(' · ')));
           if(item.body)entry.appendChild(elt('p','feed-summary',item.body));
         }
         container.appendChild(entry);
@@ -186,9 +194,9 @@
     root.appendChild(grid('two',box(t('marketTitle'),stockTable(8),link('/stocks',t('viewAll'))),
       box(t('trendTitle'),state(t('trendUnavailable')))));
     root.appendChild(sectionTitle(t('recentPosts')));
-    // Spring BoardService currently emits fictional 'post-wld-*' entries on DB errors/empty.
-    // Until canonical Board reads fail closed, public home must not claim those as real posts.
-    root.appendChild(box(t('board'),state(t('postsPending')),link('/board',t('seeAll'))));
+    // The v41 Spring board API now reads the canonical public DB source only and returns
+    // 503 instead of fake articles; the home renders verified source results or Unavailable.
+    root.appendChild(box(t('board'),listFeed('/api/v1/board',4,'board'),link('/board',t('seeAll'))));
   }
   function renderWallet() {
     root.appendChild(personalSummary());

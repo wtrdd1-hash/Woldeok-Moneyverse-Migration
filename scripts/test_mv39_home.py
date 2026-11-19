@@ -21,7 +21,7 @@ if (ASSET/'app.js').exists():
  js=(ASSET/'app.js').read_text()
  checks.extend([
   ('Authenticated wallet only, never fake', "'/api/v1/wallet/summary'" in js and 'isSignedIn()' in js and 'totalAvailableAmount' in js),
-  ('No invented board posts on homepage (BoardService fallback risk)', "listFeed('/api/v1/board',4,'board')" not in js and "state(t('postsPending'))" in js),
+  ('Verified canonical board feed only and false-success blocked', "listFeed('/api/v1/board',4,'board')" in js and 'source.ok!==true' in js and 'post-wld-' not in js),
   ('No personal stock fetch while Spring owner scope is unverified', "fetchJson('/api/v1/stocks/portfolio')" not in js),
   ('No fake chart, no fabricated gain', all(token not in js for token in ['Math.random','fakeTrend','syntheticGain'])),
   ('Session reset cancels data on account switching', 'epoch++' in js and 'sessionEpoch' in js and 'visibilitychange' in js),

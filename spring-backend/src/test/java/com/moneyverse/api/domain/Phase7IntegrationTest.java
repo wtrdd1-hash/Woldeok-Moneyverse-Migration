@@ -53,16 +53,18 @@ class Phase7IntegrationTest {
     }
 
     @Test
-    @DisplayName("커뮤니티 및 종목 토론 게시판 조회 테스트")
+    @DisplayName("게시판 원천 함수가 없는 H2 환경은 허위 200 대신 HTTP503으로 실패한다")
     void testBoardEndpoints() throws Exception {
+        // Integration H2 fixture intentionally lacks the PostgreSQL-only canonical
+        // public.member_board_public_list_with_stock(int) function.
+        // A successful 200 with fabricated `post-wld-*` records is a security/accuracy defect.
         mockMvc.perform(get("/api/board"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.posts").isArray());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(result -> org.junit.jupiter.api.Assertions.assertFalse(
+                        result.getResponse().getContentAsString().contains("post-wld-")));
 
         mockMvc.perform(get("/api/board/stock-posts?stockSymbol=WDX"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
