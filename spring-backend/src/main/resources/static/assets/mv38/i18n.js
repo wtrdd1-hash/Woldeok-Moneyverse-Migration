@@ -101,8 +101,8 @@
   };
   const supports = code => SUPPORTED.includes(code);
   const storage = {
-    read() { try { return root.localStorage.getItem(STORE_KEY); } catch (_) { return null; } },
-    put(value) { try { root.localStorage.setItem(STORE_KEY, value); } catch (_) {} }
+    read() { try { return root.localStorage.getItem(STORE_KEY); } catch { return null; } },
+    put(value) { try { root.localStorage.setItem(STORE_KEY, value); return true; } catch { return false; } }
   };
   function readCookie() {
     const found = (root.document && root.document.cookie || '').split(';').map(s=>s.trim()).find(s=>s.startsWith(COOKIE_KEY+'='));

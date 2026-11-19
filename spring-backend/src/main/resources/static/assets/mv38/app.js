@@ -1,4 +1,4 @@
-/* Spring Boot serves this dependency-free browser frontend; no Next.js runtime is required. */
+/* Shared UI behavior for independently rendered site pages. */
 (function () {
   'use strict';
   const locale = window.MV38Locale;
@@ -23,7 +23,6 @@
     });
     return element;
   }
-  function contentNode(text, className='') { return elt('span',className,text); }
   function link(href, label, className='inline-link') {
     const a=elt('a',className,label);
     a.href=href;
@@ -69,9 +68,6 @@
     return (value>=0?'+':'')+value.toFixed(2)+'%';
   }
   function isSignedIn() { return checkedSession&&Boolean(session&&(session.signedIn===true||session.authenticated===true)&&session.user); }
-  function failClosedMember(node) {
-    node.replaceChildren(state(!checkedSession?t('loading'):isSignedIn()?t('unavailable'):t('loggedOut'),isSignedIn()?null:'/login',t('signInAction')));
-  }
   async function fetchJson(url) {
     const response=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
     if (!response.ok) throw new Error('unavailable');
@@ -79,11 +75,7 @@
     if (!type.includes('application/json')) throw new Error('unavailable');
     return response.json();
   }
-  function unwrap(raw) { return raw&&typeof raw==='object'&&raw.data&&typeof raw.data==='object'?raw.data:raw; }
   function validNow(generation) { return generation===epoch; }
-  function replaceAfter(target,generation,element) {
-    if (validNow(generation)) target.replaceChildren(element);
-  }
   function action(href,label) {
     const a=elt('a','action-card');a.href=href;
     withChildren(a,elt('span','',label),elt('span','action-chevron','›'));
@@ -336,7 +328,7 @@
     try {
       const raw=await fetchJson('/api/v1/auth/session');
       if(raw&&raw.user&&(raw.signedIn===true||raw.authenticated===true))result=raw;
-    } catch (_) {}
+    } catch { result=null; }
     if(requestToken!==sessionEpoch)return;
     session=result;
     checkedSession=true;
