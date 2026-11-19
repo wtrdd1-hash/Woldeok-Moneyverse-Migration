@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.32.1 — Live Homepage NOT Showing Approved Spring UI (P0 / DOCUMENTED ONLY)
+
+Actual public site \`/\` serves the design three-concept gallery, not functional production home, independently verified via HTTPS and mini-PC static HTML. [Read-only findings + home/mobile/admin design images EN](docs/findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) / [한국어](docs/findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) · [Spring implementation acceptance plan](docs/planning/SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.md) · [QA](docs/qa/2026-11-19-home-ui-design-gap-v32.md). No runtime changes; no release.
+
 ## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
 
 - [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.

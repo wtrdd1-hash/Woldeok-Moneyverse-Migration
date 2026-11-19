@@ -1,5 +1,13 @@
 # 월덕 머니버스 — Living Project Plan
 
+## v2026.11.19.32.1 — 운영 홈에 ‘3안 디자인 갤러리’ 노출: 실제 Spring 신규 UI 미반영 (P0 확인 / 문서만 변경)
+
+사용자가 올린 **783×1536** 모바일 `easy-scraping.com` 캡처에서 **‘신규 사용자 유입을 위한 홈 화면 3안’**이 실제 홈페이지로 출력된다. 2026-11-19 약 11:11 KST 별도 공개 HTTPS GET도 **HTTP 200·HTML 113,884바이트**에서 같은 제목과 ‘실시간 라이브 연동’·‘Chrome Modern Web 1.0’ 배지를 확인했다. 미니PC 배포 정적 `/srv/moneyverse-data/frontend-static/index.html`(11:07 수정·113,825바이트)에 동일 문구가 있어 **휴대폰 캐시만의 문제로 볼 수 없다.** GitHub main v31 복구 완료 **180개 PC/모바일 합본 PNG+관리자 2종**은 기획용 이미지이지, 실제 Spring HTML/CSS·회원·원장·채팅 기능 구현/배포가 아니다. 최초 대화에서 생성한 사용자 승인 이미지와 픽셀 동일성도 미검증이다. 녹색 빈 사각형·플로팅 겹침·실시간 배지 근거·소스/실배포 SHA·금융/로그인 API와 전 경로 QA가 남아 있다.
+
+**최신 사용자 지시 우선:** 모든 웹 프론트·API Java Spring MVC+Thymeleaf, 영어 기본/한국어 2차, 실제 API·권한/원장, 정확한 Test/Chrome QA, 무중단/롤백 운영. 과거 ‘Next 유지’ 지시는 역사 참고만. 로컬 v30 JSON의 180 PASS는 같은 로컬 기획의 5 네이티브/175 미인증 수치와 충돌하므로 **180개 완료 주장 금지**. 이번에는 프론트·Spring·Nginx·DB·Test·운영 변경 없이 실제 증거와 이미지·한계·필수 수정 기준만 기록했다.
+
+[상세 운영 비교 보고서·GitHub 원본 디자인 5종 이미지(한국어)](../findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.ko.md) / [English](../findings/LIVE_HOME_APPROVED_UI_GAP_v2026.11.19.32.1.md) · [Spring 구현·QA 계획 한국어](SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.ko.md) / [EN](SPRING_HOME_VISUAL_IMPLEMENTATION_GATES_v2026.11.19.32.1.md) · [QA](../qa/2026-11-19-home-ui-design-gap-v32.ko.md).
+
 ## v2026.11.17.5 — Spring KDIC·출석 금융 보안 통합 수정안 (검토 중 / 운영 보류)
 main cd822aa09 기준 기존 #3218·#3215 수정 통합. 사용자 헤더 위조·도파민 중복 라우팅·근거 없는 WLD 성공·KDIC 금융 허위성공 제거. KDIC 관리자 조회/명령은 실제 DB 세션의 superadmin 권한을 확인하며, 원천 장애 시 가짜 기금 잔액·기관·보험료·지급 목록과 재무비율을 반환하지 않는다. Spring 격리 테스트 126개 전부 통과·실패 0, 실제 내장 HTTP 비인증 거부 검증. 운영 구버전 유지, DB/원장/WLD 변경 및 공식 Test·운영 배포 없음. SEC1, 정상 관리자 MFA/CSRF, 실제 원장 결제, 독립 복원 등 P0 남아 운영 승격 보류. [작업 기록](../worklog/2026-11-17-p0-finance-auth-integration-v2026.11.17.5.ko.md).
 
