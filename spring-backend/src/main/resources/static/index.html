@@ -268,6 +268,61 @@
       transition: all 0.15s;
     }
 
+    
+    /* Dynamic Auth Session Styles (v92) */
+    .user-session-capsule {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-profile-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: rgba(156, 131, 255, 0.12);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .user-profile-chip:hover {
+      background: rgba(156, 131, 255, 0.22);
+      border-color: rgba(156, 131, 255, 0.55);
+      transform: translateY(-1px);
+    }
+    .user-profile-chip .user-role-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-logout:hover {
+      background: rgba(244, 63, 94, 0.2);
+      border-color: rgba(244, 63, 94, 0.5);
+      transform: translateY(-1px);
+    }
+
     .login-cta-btn:hover {
       opacity: 0.92;
       transform: translateY(-1px);
@@ -780,7 +835,7 @@
           </a>
         </li>
       </ul>
-      <div style="margin-top: auto; padding: 12px; border-radius: 8px; background: rgba(156, 131, 255, 0.05); border: 1px solid rgba(156, 131, 255, 0.2); font-size: 11px; color: var(--mv-muted);">
+      <div id="sidebar-auth-section" style="margin-top: auto; padding: 12px; border-radius: 8px; background: rgba(156, 131, 255, 0.05); border: 1px solid rgba(156, 131, 255, 0.2); font-size: 11px; color: var(--mv-muted);">
         <div style="font-weight: 700; color: var(--mv-primary); margin-bottom: 2px;">Spring Boot 3.3.5</div>
         <div>복식부기 원장 동기화 정상</div>
       </div>
@@ -808,10 +863,12 @@
             <span class="material-symbols-outlined" style="font-size: 15px;">language</span>
             <span>EN / KO</span>
           </a>
-          <a href="/login" class="login-cta-btn">
-            <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
-            <span>로그인</span>
-          </a>
+          <div id="auth-action-container">
+            <a href="/login" class="login-cta-btn" id="guest-login-btn">
+              <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
+              <span>로그인</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -927,7 +984,7 @@
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--mv-muted); border-top: 1px solid var(--mv-border); padding-top: 10px;">
             <span>기준일: 2026-11-19</span>
-            <span>지수: <strong style="color: #ffffff;">2,540.21 (+2.41%)</strong></span>
+            <span>지수: <strong id="market-index-display" style="color: #ffffff;">2,540.21 (+2.41%)</strong></span>
             <span>가용성: <strong style="color: var(--mv-green);">99.99%</strong></span>
           </div>
         </div>
@@ -981,7 +1038,7 @@
                 <th>거래</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="stocks-table-body">
               <tr>
                 <td class="ticker-symbol">CHIMU314</td>
                 <td style="font-weight: 700;">치무전자</td>
@@ -1233,5 +1290,191 @@
   <a href="/admin-preview" class="global-support-dock" aria-label="관리자 관제탑 및 지원 독" title="관리자 관제탑 이동">
     <span class="material-symbols-outlined" style="font-size: 26px;">headset_mic</span>
   </a>
+  <!-- Client-side Dynamic Session Hydration (v92) -->
+  <script>
+    (function() {
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, function(tag) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '\'': '&#39;',
+            '"': '&quot;'
+          }[tag] || tag;
+        });
+      }
+
+      window.executeLogout = async function() {
+        try {
+          const res = await fetch('/api/v1/auth/logout', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          window.location.reload();
+        } catch (err) {
+          console.warn('[Auth] 로그아웃 리다이렉트 대체:', err);
+          window.location.href = '/api/v1/auth/reset';
+        }
+      };
+
+      async function hydrateSession() {
+        try {
+          const res = await fetch('/api/v1/auth/session', { credentials: 'same-origin' });
+          if (!res.ok) {
+            const el = document.getElementById("sidebar-user-wallet-val");
+            if (el) el.textContent = "원장 연동 완료";
+            return;
+          }
+          const data = await res.json();
+          if (data && (data.authenticated === true || data.signedIn === true) && data.user) {
+            renderAuthenticatedUI(data.user);
+            hydrateWalletBalance();
+          }
+        } catch (e) {
+          console.debug('[Auth] Guest mode active:', e);
+        }
+      }
+
+      window.renderAuthenticatedUI = function(user) {
+        const authContainer = document.getElementById('auth-action-container');
+        const displayName = user.displayName || user.username || user.name || '시민';
+        const roles = user.roles || [];
+        const isAdmin = roles.some(function(r) { return r && r.toLowerCase().indexOf('admin') !== -1; });
+
+        if (authContainer) {
+          authContainer.innerHTML = `
+            <div class="user-session-capsule">
+              <a href="/account" class="user-profile-chip" title="내 계정 관리" aria-label="계정 관리">
+                <span class="material-symbols-outlined" style="font-size: 16px; color: #a78bfa;">account_circle</span>
+                <span class="user-display-name-text">${escapeHtml(displayName)}</span>
+                ${isAdmin ? '<span class="user-role-badge">ADMIN</span>' : ''}
+              </a>
+              <button type="button" class="btn-logout" onclick="executeLogout()" title="로그아웃" aria-label="로그아웃">
+                <span class="material-symbols-outlined" style="font-size: 14px;">logout</span>
+                <span>로그아웃</span>
+              </button>
+            </div>
+          `;
+        }
+
+        const sidebarAuth = document.getElementById('sidebar-auth-section');
+        if (sidebarAuth) {
+          sidebarAuth.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-outlined" style="font-size: 18px; color: #9c83ff;">account_circle</span>
+                <span style="font-weight: 700; color: #ffffff; font-size: 12px;">${escapeHtml(displayName)}</span>
+              </div>
+              <span style="font-size: 9px; padding: 2px 5px; border-radius: 4px; background: rgba(156, 131, 255, 0.2); color: #9c83ff; font-weight: 700;">
+                ${isAdmin ? 'ADMIN' : 'CITIZEN'}
+              </span>
+            </div>
+            <div style="font-size: 11px; color: var(--mv-muted); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>내 보유 WLD</span>
+              <span id="sidebar-user-wallet-val" style="color: #64b7ff; font-weight: 700; font-family: monospace;">조회 중...</span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <a href="/account" style="flex: 1; text-align: center; padding: 4px 0; border-radius: 4px; background: rgba(156, 131, 255, 0.15); border: 1px solid rgba(156, 131, 255, 0.3); color: #c4b5fd; text-decoration: none; font-size: 10px; font-weight: 600;">계정</a>
+              <button type="button" onclick="executeLogout()" style="flex: 1; padding: 4px 0; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.25); color: #f43f5e; font-size: 10px; font-weight: 600; cursor: pointer;">로그아웃</button>
+            </div>
+          `;
+        }
+      }
+
+      
+      async function fetchAndRenderStocks() {
+        try {
+          const res = await fetch("/api/v1/stocks");
+          if (!res.ok) return;
+          const data = await res.json();
+          const stocks = data.stocks || [];
+          if (!stocks.length) return;
+
+          const tbody = document.getElementById("stocks-table-body");
+          if (tbody) {
+            let html = "";
+            let totalPct = 0;
+            let validPctCount = 0;
+
+            stocks.forEach(function(s) {
+              const cur = Number(s.current_price) || 0;
+              const open = Number(s.day_open_price) || cur;
+              const diff = cur - open;
+              const pctNum = open > 0 ? (diff / open) * 100 : 0;
+              const isPos = diff >= 0;
+              const pctStr = (isPos ? "+" : "") + pctNum.toFixed(2) + "%";
+              const colorClass = isPos ? "text-green font-bold" : "text-rose font-bold";
+              const statusClass = s.halt_status === "ACTIVE" ? "status-badge status-active" : "status-badge status-halted";
+              const desc = s.description ? s.description : "가상 상장사";
+
+              totalPct += pctNum;
+              validPctCount++;
+
+              html += "<tr>" +
+                "<td class=\"ticker-symbol\">" + escapeHtml(s.symbol) + "</td>" +
+                "<td style=\"font-weight: 700;\">" + escapeHtml(s.name) + "</td>" +
+                "<td style=\"max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;\">" + escapeHtml(desc) + "</td>" +
+                "<td class=\"ticker-price\">" + cur.toLocaleString("ko-KR") + "</td>" +
+                "<td class=\"" + colorClass + "\">" + pctStr + "</td>" +
+                "<td><span class=\"" + statusClass + "\">" + escapeHtml(s.halt_status || "ACTIVE") + "</span></td>" +
+                "<td><a href=\"/stocks/" + encodeURIComponent(s.symbol) + "\" style=\"color: var(--mv-primary); font-weight: 700; text-decoration: none;\">호가창</a></td>" +
+              "</tr>";
+            });
+            tbody.innerHTML = html;
+
+            if (validPctCount > 0) {
+              const avgPct = (totalPct / validPctCount).toFixed(2);
+              const isAvgPos = totalPct >= 0;
+              const avgPctStr = (isAvgPos ? "+" : "") + avgPct + "%";
+
+              const kpiEl = document.getElementById("market-change-badge");
+              if (kpiEl) {
+                kpiEl.textContent = avgPctStr;
+                kpiEl.className = isAvgPos ? "kpi-val text-green" : "kpi-val text-rose";
+              }
+
+              const idxEl = document.getElementById("market-index-display");
+              if (idxEl) {
+                const baseIdx = 2500 + Number(avgPct) * 15;
+                idxEl.textContent = baseIdx.toFixed(2) + " (" + avgPctStr + ")";
+                idxEl.style.color = isAvgPos ? "#4ade80" : "#fb7185";
+              }
+            }
+          }
+        } catch (err) {
+          console.debug("[Stocks] Real data fetch error:", err);
+        }
+      }
+
+      async function hydrateWalletBalance() {
+        try {
+          const res = await fetch('/api/v1/wallet/summary', { credentials: 'same-origin' });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && data.signedIn && data.totalAvailableAmount !== undefined && data.totalAvailableAmount !== null) {
+            const el = document.getElementById('sidebar-user-wallet-val');
+            if (el) {
+              const num = Number(data.totalAvailableAmount);
+              el.textContent = isNaN(num) ? data.totalAvailableAmount + ' WLD' : num.toLocaleString('ko-KR') + ' WLD';
+            }
+          }
+        } catch (e) {
+          console.debug('[Wallet] Balance check error:', e);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hydrateSession);
+      } else {
+        hydrateSession();
+        fetchAndRenderStocks();
+        setInterval(fetchAndRenderStocks, 10000);
+      }
+    })();
+  </script>
+
 </body>
 </html>

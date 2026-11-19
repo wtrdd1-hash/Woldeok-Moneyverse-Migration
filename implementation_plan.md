@@ -5527,3 +5527,63 @@ graph TD
    - 비인가자 `/admin` 접근 시 `/login?error=login_required`로 자동 리다이렉트되어 Fail-Closed 보안 인가 통과.
    - `/admin.html` 및 `/admin-preview`: 스크린샷 `admin_cockpit_audit_20261119.png`, `admin_preview_audit_20261119.png`.
    - 7대 핵심 관리자 카테고리(통합 관제, 2FA 권한, 복식부기 원장, 주식 호가, 공시 뉴스, 보안 감사, 스프링 로그), 4대 KPI 게이지(ASWF 100조 WLD, 12,840명, 428.5억 WLD, 보안 위협 0건), 10개 상장사 호가 테이블 100% 정상 작동 확인.
+
+---
+
+## 🚀 [v92 Specification] 실시간 인증 상태 동적 하이드레이션(Dynamic Session Hydration) 및 개인화 대시보드 렌더링
+
+### 1. 배경 및 문제 정의
+- **현상**: 사용자가 웹 브라우저를 통해 `/login`에서 정상적으로 로그인을 완료하였음에도, 메인 홈 대시보드(`https://easy-scraping.com/`)에 접속하면 우측 상단 헤더에 보라색 `[->] 로그인` CTA 버튼이 계속해서 표시되어 마치 로그인이 풀렸거나 되지 않은 것처럼 보이는 현상 보고 (스크린샷 첨부 확인).
+- **원인 분석**:
+  - `index.html`이 순수 정적 마크업으로 구성되어 있어, 클라이언트 브라우저가 보유한 HTTP-Only 세션 쿠키(`SESSION` / `JSESSIONID`)의 유효성을 백엔드 세션 API(`/api/v1/auth/session`)와 동기화하여 UI를 교체하는 클라이언트 사이드 하이드레이션(Hydration) 스크립트가 누락되어 있었음.
+  - 백엔드(`AuthController`, `WalletController`)에는 이미 세션 기반 로그인 상태 검증 엔드포인트(`GET /api/v1/auth/session`, `GET /api/v1/auth/viewer`) 및 개인 지갑 요약 엔드포인트(`GET /api/v1/wallet/summary`), 세션 소거 로그아웃 엔드포인트(`POST /api/v1/auth/logout`)가 완벽히 구축되어 있으나 프론트엔드 연동이 체결되지 않음.
+
+### 2. 세부 구현 사양
+1. **헤더 액션 컨테이너 동적 전환 (`#auth-action-container`)**:
+   - 게스트 상태 (미인증): 기존의 보라색 그라디언트 `[->] 로그인` 버튼 마크업 유지 (서버 정적 렌더링 무결성 및 빠른 초기 렌더링 보장).
+   - 로그인 상태 (인증 완료):
+     - 브라우저 로드 시 즉시 `fetch("/api/v1/auth/session", { credentials: "same-origin" })` 호출.
+     - 응답의 `authenticated: true` 확인 시 우측 상단 영역을 **사용자 프로필 캡슐**로 동적 전환:
+       - 아바타 아이콘 (Material Symbols `account_circle`) + 사용자 표시명(`displayName`).
+       - 유저 역할에 따른 배지 (관리자 권한 보유 시 `ADMIN` 배지 자동 활성화).
+       - 프로필 캡슐 클릭 시 개인 설정 및 자산 관리를 위한 `/account` 경로로 부드러운 연결.
+       - 고대비 마이크로 상호작용 로그아웃 버튼 (`executeLogout()`): 클릭 시 `POST /api/v1/auth/logout` 호출 및 안전한 페이지 새로고침.
+2. **사이드바 개인화 계정 카드 동적 연동 (`#sidebar-auth-section`)**:
+   - 로그인 시 좌측 사이드바 하단 영역을 일반 정적 버전 문구에서 "내 계정 미니 프로필 카드"로 자동 승격:
+     - 회원 닉네임 및 권한 태그 표시.
+     - `GET /api/v1/wallet/summary` 비동기 조회를 통해 실제 회원의 가용 WLD 잔액(`totalAvailableAmount`)을 천 단위 콤마(`toLocaleString("ko-KR")`)로 포맷팅하여 실시간 수치 바인딩.
+     - 사이드바 내 원클릭 로그아웃 버튼 추가 제공.
+3. **보안 및 예외 안전성 (Fail-Safe)**:
+   - 네트워크 단절, 세션 만료, 401/403/500 에러 발생 시 부드러운 게스트 모드 유지(콘솔 오류 차단 및 크래시 방지).
+   - XSS 방지를 위한 사용자 닉네임 HTML 이스케이프(`escapeHtml`) 처리 의무화.
+   - 단일 런타임 원칙 준수: 외부 Node.js 의존성 없이 Spring Boot 3.3.5 정적 서빙 및 라이브 JAR에 즉각 핫패치/동기화 배포.
+
+---
+
+## 🚀 [v93 Specification] 실데이터 기반 프론트엔드 실시간 연동 원칙 확립 및 전수 바인딩 (Full Real-Data Binding Invariant)
+
+### 1. 사용자 절대 지시사항 및 문제 정의
+- **지시사항**: `실제 데이터 과 프론트엔드 쓰게항상그렇게 해 알겠지?`
+- **진단 및 반성**:
+  - 기존 프론트엔드 정적 페이지들(`index.html`, `stocks/index.html` 등)이 초기 빌드 당시의 정적 HTML 마크업에만 의존하여, 백엔드에 완벽하게 살아 숨쉬고 있는 실제 PostgreSQL 데이터베이스(10대 상장사 실시간 시세, 실제 변동률, 실제 거래량, 실제 인증 세션 등)와 동적으로 연결되지 않고 하드코딩된 수치로 렌더링되던 구조적 결함 확인.
+  - 가짜 목업(Mock) 데이터 및 하드코딩된 정적 텍스트를 원천 배제하고, 모든 프론트엔드 서피스가 백엔드 단일 런타임의 실제 REST API(`/api/v1/stocks`, `/api/v1/auth/session`, `/api/v1/wallet/summary` 등)를 호출하여 살아있는 데이터를 실시간 바인딩하도록 강제.
+
+### 2. 세부 구현 및 실데이터 바인딩 명세
+1. **메인 홈 대시보드 (`index.html`) 실데이터 전수 바인딩**:
+   - **10대 상장사 실시간 시세 테이블 (`#stocks-table-body`)**:
+     - `GET /api/v1/stocks` 호출하여 실제 DB의 10대 상장사(건전지 AAA, 치무전자 CHIMU314, 덕덕물산 DUCK, 뮤야엔터 MYUY, 월덱우주항공 SPACE 등) 목록 수신.
+     - 실제 현재가(`current_price`), 시가(`day_open_price`) 기반 실시간 등락률 계산:
+       `diff = current_price - day_open_price; pct = (diff / day_open_price * 100).toFixed(2);`
+       양수 시 초록색(`text-green font-bold`)과 `+` 기호, 음수 시 빨간색(`text-rose font-bold`)과 `-` 기호 동적 렌더링.
+     - 실제 상장 상태(`halt_status`) 뱃지 바인딩 (ACTIVE/HALTED).
+     - 10초 주기 실시간 폴링(Live Polling)을 적용하여 서버 DB의 시세 변동이 화면에 무깜빡임(Flicker-Free)으로 실시간 갱신.
+   - **핵심 KPI 통계 카드 실시간 수치 동기화**:
+     - 상장 10대 기업의 실제 시가총액(`current_price * shares_outstanding`) 총합을 실시간 집계하여 대시보드 지표에 바인딩.
+     - 실제 24시간 가중평균 등락률 계산 및 표시.
+   - **실시간 종합 지수 SVG 차트 매핑**:
+     - 상장사들의 실제 가격 스케일을 계산하여 SVG 차트 정점(Path 좌표)에 실데이터 기반으로 렌더링.
+2. **주식 거래소 페이지 (`stocks/index.html`) 실데이터 연동**:
+   - 하드코딩된 정적 주식 목록을 배제하고 `GET /api/v1/stocks` 실데이터 동적 바인딩 스크립트 탑재.
+   - 인증 상태 하이드레이션 헤더 공유.
+3. **불변 원칙 (Invariant)**:
+   - "Mock 금지, 실제 API 및 DB 데이터 전수 바인딩": 앞으로 개발 및 유지보수되는 모든 프론트엔드 페이지는 예외 없이 백엔드 실제 엔드포인트를 호출하여 실데이터를 기반으로 렌더링해야 함.
