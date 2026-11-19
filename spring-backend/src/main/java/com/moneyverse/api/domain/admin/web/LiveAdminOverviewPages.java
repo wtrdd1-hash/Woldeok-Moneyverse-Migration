@@ -44,7 +44,7 @@ public class LiveAdminOverviewPages {
         headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
         headers.set("X-Frame-Options", "DENY");
         headers.set("X-Content-Type-Options", "nosniff");
-        headers.set("Content-Security-Policy", "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        headers.set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
         String uri = request.getRequestURI();
         UUID actor = auth.resolveVerifiedAdminActor(request).orElse(null);
         if (actor == null) {

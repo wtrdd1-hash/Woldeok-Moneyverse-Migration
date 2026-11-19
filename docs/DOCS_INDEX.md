@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.39.1 — 실제 Spring 반응형 5언어 자동/수동 선택기 (운영 HOLD)
+
+[한국어 상세 기획](planning/SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.ko.md) / [EN](planning/SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.md) · [QA](qa/2026-11-19-spring-five-locale-browser-v39.ko.md). EN/KO/JA/ZH/VI + 자동 및 수동, PC·모바일, Node 7/Java 262/실 Spring H2 HTTP 5/격리 Chrome 10 PASS. 8개 회원 화면 PR #3296과 언어 설정 연계. 운영/180개 전체 완료 아님.
+
 ## v2026.11.19.38.1 — 승인 신규 UI Spring 실제 소스 구현 (251 PASS / 운영 보류)
 
 [관리자 PC·모바일 디자인 포함 한국어 상세 기획](planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) · [EN](planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md) · [180개 이미지 URL별 미인증 현황](qa/SPRING_DESIGN_ROUTE_MATRIX_v2026.11.19.38.1.md) · [QA](qa/2026-11-19-spring-violet-ui-v38.ko.md). Java 서버 실제 관리자 공통·안전 문의 동글 소스 구현, 180 전체 기능/운영 승격은 미완료.

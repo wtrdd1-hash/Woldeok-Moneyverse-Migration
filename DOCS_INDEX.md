@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.39.1 — Actual Spring Five-Language Auto/Manual Responsive UI (LOCAL QA / RELEASE HOLD)
+
+[EN detailed spec](docs/planning/SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.md) / [한국어](docs/planning/SPRING_RESPONSIVE_FIVE_LOCALE_UI_v2026.11.19.39.1.ko.md) · [QA](docs/qa/2026-11-19-spring-five-locale-browser-v39.md): Java 262 PASS, Node 7 PASS, H2 HTTP 5 PASS, isolated Chromium 10 PASS. Shared language preference with [member 8-screen PR #3296](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3296); whole 180 routes and Production not released.
+
 ## v2026.11.19.38.1 — Approved Spring Native Violet UI Source (251 PASS / Production HOLD)
 
 [Spring visual implementation and real admin concept images](docs/planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.md) · [한국어](docs/planning/SPRING_NATIVE_VISUAL_SHELL_v2026.11.19.38.1.ko.md) · [180 design-route evidence matrix](docs/qa/SPRING_DESIGN_ROUTE_MATRIX_v2026.11.19.38.1.md) · [QA](docs/qa/2026-11-19-spring-violet-ui-v38.md). Real server-rendered admin/Thymeleaf safe round help tested. Full web conversion/Chrome/real-auth/Production not certified.
