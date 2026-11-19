@@ -1,5 +1,8 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.40 — 관리자·회원 공통 Java Spring **반응형 웹** (신규 소스 후보 · 운영 승격 보류)
+- [영문 상세 기획](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [한국어](docs/planning/SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) · [관리자 PC/모바일 실제 Chromium 픽스처 화면](docs/design/mv40/README.md) · [실제 검증](docs/qa/2026-11-19-spring-admin-member-web-v40.md) · [작업기록](docs/worklog/2026-11-19-spring-admin-member-web-v40.ko.md) · [GitHub 공개 업데이트](docs/updates/v2026.11.19.40-admin-member-web-github.ko.md). 관리자 Spring SSR와 HTML 접근 보호, 사용자 홈 일관성, 자동/수동 5개 언어 반영. 전체 Java 247중 38개 실패, 공식 Test 403·180페이지/실계정 원장 미검증. **운영 배포 아님**.
+
 ## v2026.11.19.39 — Spring safety remediation: scoped Production privacy HOTFIX, full frontend release HOLD
 - [QA EN](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.md) / [QA KO](docs/qa/2026-11-19-spring-safety-and-frontend-release-v39.ko.md) · [Worklog KO](docs/worklog/2026-11-19-mv39-production-readiness.ko.md) · [GitHub notes](docs/updates/v2026.11.19.39-github.md). Real public Nginx protection for anonymous wallet/pension and spoofed headers (10/10); separate immutable read-only Spring Test API 21/21 and 243/243 Java tests. Full 180-route/5-pass/official-Test/signed-in Finance QA NOT complete; backend/full new UI Production not promoted.
 
