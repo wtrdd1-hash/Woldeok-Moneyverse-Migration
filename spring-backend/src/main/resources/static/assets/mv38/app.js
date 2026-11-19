@@ -271,6 +271,7 @@
   }
   function renderAuthControls() {
     const container=document.getElementById('auth-actions');container.replaceChildren();
+    container.closest('.topbar').classList.toggle('member-authenticated',isSignedIn());
     if (!isSignedIn()) {container.appendChild(link('/login',t('login'),'auth-link'));return;}
     const profile=link('/account',session.user.displayName||session.user.username||t('account'),'auth-link auth-profile');
     profile.title=t('account');

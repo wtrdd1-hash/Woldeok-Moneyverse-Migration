@@ -21,6 +21,15 @@ async function run(){
  await page.waitForFunction(()=>document.body.innerText.includes('12,345,678,901,234,567,890 WLD'));
  assert.ok((await page.locator('#auth-actions').innerText()).includes('Member A'));
  assert.equal(await page.locator('a[data-admin="true"]').count(),0);
+ await page.setViewportSize({width:320,height:800});
+ const compact=await page.evaluate(()=>{
+   const get=(selector)=>{const r=document.querySelector(selector).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
+   return {viewport:innerWidth,document:document.documentElement.scrollWidth,title:get('.topbar h1'),auth:get('#auth-actions'),logout:get('.auth-logout'),lang:get('#language-selector')};
+ });
+ assert.ok(compact.logout.width>=44,'log out tap target below 44px: '+JSON.stringify(compact));
+ assert.ok(compact.auth.top>=compact.title.bottom+4,'member controls not moved onto a safe second row: '+JSON.stringify(compact));
+ assert.ok(compact.document<=compact.viewport+1,'horizontal overflow: '+JSON.stringify(compact));
+ console.log('PASS 320px authenticated admin header rows, touch targets and zero overflow');
  console.log('PASS simulated member A receives exact large decimal WLD, never integer rounding');
  identity='B'; await page.reload({waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>document.body.innerText.includes('42 WLD'));

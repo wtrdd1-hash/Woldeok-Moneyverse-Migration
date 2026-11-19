@@ -69,6 +69,14 @@ class MoneyverseResponsiveUiContracts(unittest.TestCase):
             self.assertIn(term,compact)
         self.assertNotIn('overflow-x: hidden !important', css)
 
+    def test_authenticated_small_mobile_header_uses_two_rows_and_minimum_touch_targets(self):
+        css=(ASSETS/'site.css').read_text()
+        js=(ASSETS/'app.js').read_text()
+        self.assertIn('.topbar.member-authenticated',css)
+        self.assertIn('.topbar.member-authenticated .auth-actions',css)
+        self.assertIn('.topbar.member-authenticated .auth-logout{min-width:84px;min-height:44px;',css)
+        self.assertIn("classList.toggle('member-authenticated',isSignedIn())",js)
+
     def test_real_data_error_states_and_verified_admin_visibility(self):
         js=(ASSETS/'app.js').read_text()
         for value in ('loggedOut','unavailable','admin','aria-expanded','Escape','fetchJson',

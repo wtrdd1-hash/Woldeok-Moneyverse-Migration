@@ -17,5 +17,7 @@
 
 ## QA / blockers
 - Run `python3 scripts/test_mv38_frontend.py`, `node scripts/test_mv38_locale.js`, `node --check spring-backend/src/main/resources/static/assets/mv38/app.js`.
-- In isolated read-only Spring Test, run Playwright `scripts/qa_mv38_browser.js` and simulated identity-only UI `scripts/qa_mv38_account_switch.js` (install `playwright` as a dev-only tool or set `MV_PLAYWRIGHT_MODULE` to an existing local Playwright package path and `PLAYWRIGHT_BROWSERS_PATH` to an installed Chromium directory). Exact candidate r3 manifest is local-only; no Production secrets logged.
+- In isolated read-only Spring Test, run Playwright `scripts/qa_mv38_browser.js` and simulated identity-only UI `scripts/qa_mv38_account_switch.js` (install `playwright` as a dev-only tool or set `MV_PLAYWRIGHT_MODULE` to an existing local Playwright package path and `PLAYWRIGHT_BROWSERS_PATH` to an installed Chromium directory). Exact candidate r6 manifest is local-only; no Production secrets logged.
 - Before source main integration or an official Test/Production promotion: reconcile Gemini's unmerged local `main` and GitHub origin, verify exact merged source SHA against running JAR + static assets, audit signed-in DB-ledger asset/positions, backend security for default-actor APIs, all remaining legacy routes and browser parity, canonical Test signed-in session continuity, rollback and CI. If any fails, release HOLD.
+
+Mobile signed-in state: `.topbar.member-authenticated` uses a deliberate second row at <=480px; do not force both the language selector and verified account/logout into one compressed 320px row. The long-name/ADMIN 320px case was regression-tested with intercepted test identities, not real Production member data.
