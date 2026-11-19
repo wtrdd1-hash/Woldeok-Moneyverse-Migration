@@ -5147,8 +5147,8 @@ graph TD
   - PR 생성 -> CI 8대 검사 All Green 통과 -> `main` 스쿼시 병합 -> 프로덕션 무중단 배포 및 curl/ps 실측 검증.
 
 
-## v2026.11.19.34 — 전체 PC·모바일 개인자산 우선·실데이터·일반회원 기술정보 비노출 기획 추가 (문서 전용)
-- 공식 상세 규격: [한국어](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [English](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md). 기존 통합 기능/화면 기획을 보존하며 전 라우트에 추가 적용.
-- 국고·발행·서버·원장검증 지표는 관리자 전용; 일반회원 홈은 본인 지갑 잔액·보유포지션·평가손익·거래·퀘스트. 하드코딩/mock 수치, 가짜 LIVE 및 프론트 성공 연출 금지.
-- **일반 사용자에게 Spring Boot 버전, API 소스/URL, 동기화·데이터 출처 검사 체크리스트, 서버 가용률·내부 모니터링을 표시하지 말 것.** 서버 응답에서도 제거, 별도 인증 관리자 내부 진단만 허용.
-- PC/모바일 화면별 실제 데이터 오류·미로그인·권한·빈 상태·원장 합계 정확성 QA 및 공식 Spring Test/운영 배포는 미완료. 새 대화 시안 이미지 12개는 저장/검증 전이며 구현 증거가 아님.
+## v2026.11.19.34 — Personal-assets-first real-data UI planning for desktop and mobile (documentation only)
+- Detailed specification: [Korean](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [English](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md). Preserve all existing integrated functions and route specifications; apply these requirements to every screen.
+- Treasury, issuance, server health and ledger-verification indicators belong in the authorized admin experience, not member homepage KPIs. Member home centers on their authenticated wallet balance, available money, positions, valuation P/L, transactions and quests; prohibit hardcoded/mock amounts, fake LIVE labels and fabricated frontend success states.
+- **Do not show ordinary users the Spring Boot version, API source names/URLs, sync diagnostics, data-source checklists, server availability, or internal monitoring.** Remove sensitive diagnostics from server payloads as well as UI; expose admin diagnostics only via server-enforced authentication and authorization.
+- Real-data accounting, guest/authorization/empty/error states, desktop/mobile QA, official Spring Test and Production release remain unverified and pending. Twelve new chat-generated design mockups are not yet uploaded or verified as project artifacts; mockups are not implementation evidence.
