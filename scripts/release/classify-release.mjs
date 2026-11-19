@@ -93,7 +93,7 @@ function pathKind(path) {
   if (path === 'docs/mobile-api-contract.json') return 'runtime';
   if (matchesAny(path, DOC_PATHS)) {
     // An executable or machine-readable payload inside docs must not bypass release verification.
-    if ((path.startsWith('docs/') || path.startsWith('.agents/')) && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf)$/.test(path)) return 'unknown';
+    if ((path.startsWith('docs/') || path.startsWith('.agents/')) && !/\.(?:md|mdx|txt|png|jpe?g|gif|webp|pdf|json)$/.test(path)) return 'unknown';
     return 'docs';
   }
   if (matchesAny(path, CONTROL_PATHS)) return 'control';
