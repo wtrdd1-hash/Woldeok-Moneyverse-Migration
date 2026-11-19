@@ -1,4 +1,4 @@
-# v2026.11.19.0958 — Full-function read-only runtime audit (IN PROGRESS)
+# v2026.11.19.0958 — Full-function read-only runtime audit (AUDIT FINISHED)
 
 ## Before work — 2026-11-19 09:58 KST
 - Owner request: verify all functions, failure modes, and preserve evidence. No assumption that HTTP 200 means a working feature.
@@ -32,3 +32,11 @@
 - [ ] Full Test/Production identical SHA and independent restore evidence
 
 **Decision:** FULL FUNCTION QA `NOT CERTIFIED`; production promotion `BLOCKED` pending complete security, runtime, functional and rollback gates. This is a documentation-only task branch; it does not alter deployed systems.
+
+## Finished — 2026-11-19 10:17 KST
+- Published two raw CSV matrices, bilingual QA reports, bilingual worklogs, bilingual GitHub updates and bilingual changelogs to this isolated task branch.
+- Final measured totals: web 180 = 103/40/30/5/2; GET 637 = 282/307/47/1. Debit and credit each total 450,856,461; zero unbalanced transactions. Confidential evidence remains host-only with 0700 directory/0600 file permissions.
+- GitHub `origin/main` stayed `0590fac4e8a82bc986ba1b8c64f014d18daca9e9` at initial, intermediate and final checks. The independent Debian local shared `main` moved from `45cfa7a898` to `b988877285` during concurrent work; this task did not change that branch.
+- Spring process PID 1111664 still has its 09:51 KST startup provenance. No inference that the new local source commit was promoted to Production.
+- **Final status: evidence documentation complete; full functional acceptance NOT CERTIFIED; financial/security/Android/identity gaps block whole-system promotion.** No application code, TEST/Production rollout, DB mutation, or service restart performed by this audit.
+- Remediation must use independent task branches and exact-SHA isolated Test with real positive and negative functional evidence before any reviewed release.
