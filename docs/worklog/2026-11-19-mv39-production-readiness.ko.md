@@ -18,3 +18,8 @@
 ## 종료 2026-11-19 KST
 - **긴급 Nginx 운영 차단 실제 성공.** 전체 Java 신규 JAR·Spring PC/모바일 프론트엔드 운영 승격은 P0 acceptance gate 부재로 **보류**. 어떠한 Java Production 재시작·프론트 정적 파일 덮어쓰기·DB 금융 쓰기도 하지 않음.
 - 작업 변경·QA·내부 실행 파일/백업은 별도 브랜치/miniPC에 유지하고 PR 검토·GitHub CI 통과 후 정식 Test/회원·원장/전수 QA를 통해 운영 승격해야 함. 녹색 단위테스트만으로 기능 완성/운영 100% 선언하지 않음.
+
+## GitHub 업로드 및 CI (2026-11-19 KST)
+- 별도 보안 복구 PR **#3302**: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3302 (초안, 실제 운영 Java/프론트 배포 아님). 최초 HEAD 4ebdfd676fadf0d6ff92efd979b10e54a9e7bbd3.
+- 최초 브랜치 생성 `verify / policy` 실패는 새 브랜치 이벤트의 `SECURITY_BASE_SHA=000000...`와 `git cat-file` 미존재 객체로 발생. 소스 보안 스캔 자체는 로컬 PASS 및 GitHub 별도 `policy` PASS. 정책 우회를 하지 않고 작업 기록만 추가한 두 번째 push에서 유효한 이전 SHA로 다시 검사할 것.
+- Java 243/243 통과·Nginx 운영 게이트 10/10·격리 Test 21/21 통과 외에 공식 Test/실계정·180 라우트 5회·롤백/코드 병합 게이트가 없어 **PR Draft 유지, 운영 전체 승격 HOLD**.
