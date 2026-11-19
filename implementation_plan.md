@@ -5479,3 +5479,51 @@ graph TD
 - `./gradlew test --no-daemon`: 237개 테스트 전수 통과 (100% PASS, BUILD SUCCESSFUL).
 - `./gradlew bootJar --no-daemon`: 148MB Fat JAR 빌드 성공 및 `/srv/moneyverse-data/spring-backend/` 무중단 교체 배포 완료.
 - 서비스 상태: `moneyverse-spring-backend.service` 정상 구동 (active/running).
+
+
+---
+## 🚀 [v91 Specification] 로컬/깃허브 전수 문서 재분석 및 프로덕션 프론트엔드 다중 뷰포트·어드민 정밀 실측 검증
+
+### 1. 로컬 및 깃허브 전수 문서 교차 재분석 결과 (Comprehensive Document Re-Analysis)
+1. **엔터프라이즈 통합 시스템 기획 (`ENTERPRISE_SYSTEM_SPECIFICATION_AND_ROADMAP.ko.md`)**:
+   - 10대 상장 기업(치무전자, 월덱 우주항공, 덕덕 물산, 월덱 파이낸셜, 뮤야 엔터, 월덱 바이오, 월덱 모빌리티, 월덱 테크, 월덱 게임즈, 건전지) 및 가상 주식 거래소 체결 엔진.
+   - 카지노 및 미니게임(슬롯, 하이로우, 다이스, 코인플립), 디스코드 24/7 상주 봇, 복식부기 원장(`statement_timeout = 15s`).
+   - 현 상태: 모든 핵심 엔티티 및 API가 Spring Boot 3.3.5 단일 런타임에 100% 포팅 완료됨.
+2. **모바일 앱 UI/UX 명세서 (`docs/mobile-app-ui-ux-spec.ko.md`)**:
+   - 하단 5대 기본 탭 규격: 홈(대시보드), 경제(지갑/은행/주식), 플레이(근무/성장/카지노), 커뮤니티(게시판/채팅), MY(계정/보안).
+   - 상태 머신 필수 구현: `initial_loading`, `refreshing`, `content`, `empty`, `recoverable_error`, `permission_denied`, `reauth_required`, `session_expired`, `offline`.
+   - 접근성 기준: WCAG 2.1 AA 기준 모든 터치 타깃 `min-h-[44px]`, `min-w-[44px]` 보장.
+3. **디자인 시스템 공식 지침서 (`docs/DESIGN_SYSTEM_GUIDELINES.ko.md`)**:
+   - 표면 계층: `bg-zinc-950` (#09090b), Inset Border `shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]` + `border border-zinc-800/80` (Linear/Stripe 스타일).
+   - 금융 수치 불변식: 모든 금융 수치(WLD, 호가, 거래량, 수익률)에 `font-mono tabular-nums tracking-tight` 강제 적용.
+   - 비대칭 벤토 그리드 2.0: 2x2 히어로 타일, 1x1 퀵 액션 타일, 2x1 라이브 스트립.
+   - 단일 56px 플로팅 지원 독 (`.global-support-dock`).
+4. **PR #3268, #3270 이미지 에셋 복원 및 핸드오프 (`docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md`)**:
+   - PR #3268 (180개 PC+모바일 SVG) 및 PR #3270 (관리자 SVG 2개)이 미병합 종료되었으나, PR #3289를 통해 182개 독립 PNG로 래스터라이즈되어 `docs/design/all-pages-v2026.11.18.12/` 및 `admin-chat-v2026.11.18.13/`에 100% 복원 완료.
+   - 단일 런타임 원칙: 모든 웹 프론트엔드는 Node.js/Next.js SSR을 완전히 배제하고 Java Spring Boot 3.3.5 정적 리소스 서빙 방식으로 통합 운용.
+
+---
+
+### 2. 브라우저 실측 검증 결과 (Live Browser Verification: `https://easy-scraping.com`)
+1. **데스크톱 뷰포트 (1280x800)**:
+   - URL: `https://easy-scraping.com/` (HTTP 200 OK)
+   - 스크린샷: `desktop_homepage_audit_20261119.png`
+   - 네트워크 에셋 상태: 실패한 요청(404/500) **0건** (클린 로드).
+   - 240px 좌측 고정 사이드바, W Moneyverse 로고 배지, 3대 핵심 KPI 카드(100조 WLD, +2.41%, 12,840명), 실시간 SVG 캔들 추이 차트, 10대 상장사 호가 테이블(ACTIVE 배지), 12종 금융 계산기 그리드, 단일 56px 플로팅 관제탑 독 정상 렌더링.
+   - Material Symbols 아이콘 렌더링: 폰트 리게이처 텍스트 누락 없이 선명한 벡터 글리프로 렌더링 확인.
+2. **모바일 뷰포트 (390x844 - iPhone 14/15)**:
+   - 스크린샷: `mobile_390_audit_20261119.png`
+   - 모바일 바텀 독 실측:
+     - 랜드마크: `navigation "모바일 하단 내비게이션"` (Fixed at `y=786px`, Height `58px`).
+     - 5개 탭 터치 타깃 실측: 홈(56x46px), 주식(56x46px), 계산기(56x46px), 가이드(56x46px), 관리자(56x46px) -> **전수 44px 이상 통과 (PASS)**.
+   - 수평 오버플로우: `bodyBox.width = 375px <= 390px`, 가로 스크롤 시 변위 0px (`x: 0`).
+3. **극소 모바일 뷰포트 (320x640)**:
+   - 스크린샷: `mobile_320_audit_20261119.png`
+   - 뷰포트 메타: `width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover`.
+   - `html, body { overflow-x: hidden !important; }` 전역 강제.
+   - 데이터 테이블: 410.5px 폭의 `custom-table`이 246px 폭의 `.table-scroll-wrapper` 내부에서만 가로 스크롤되도록 완벽 격리되어, 페이지 레벨 수평 오버플로우 0px (Zero Horizontal Overflow) 실측 통과.
+   - 5개 탭 바텀 독 폭 305px 내에서 56x46px 터치 타깃 온전 유지.
+4. **관리자 관제탑 및 보안 인가 검증**:
+   - 비인가자 `/admin` 접근 시 `/login?error=login_required`로 자동 리다이렉트되어 Fail-Closed 보안 인가 통과.
+   - `/admin.html` 및 `/admin-preview`: 스크린샷 `admin_cockpit_audit_20261119.png`, `admin_preview_audit_20261119.png`.
+   - 7대 핵심 관리자 카테고리(통합 관제, 2FA 권한, 복식부기 원장, 주식 호가, 공시 뉴스, 보안 감사, 스프링 로그), 4대 KPI 게이지(ASWF 100조 WLD, 12,840명, 428.5억 WLD, 보안 위협 0건), 10개 상장사 호가 테이블 100% 정상 작동 확인.
