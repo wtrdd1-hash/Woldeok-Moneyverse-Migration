@@ -34,8 +34,8 @@ The page-mounted global chat launcher is a 56px round icon at bottom-right on de
 ## What is implemented in this change
 A self-contained **offline runnable preview** lives at `docs/design/admin-chat-v2026.11.18.13/preview/`. It uses no existing frontend JavaScript/CSS, Spring service or production traffic. Demo navigation imitates multiple site route families and maintains a floating support state across those screen switches. Inquiry and DM are simulated **only inside the preview**: any draft/submit action is explicitly marked PREVIEW / NOT SENT, no network mutation, no storage. Self-contained administrative desktop/mobile reference SVGs are attached in `references/` and embedded in this plan.
 
-![Admin desktop and floating chat concept](../design/admin-chat-v2026.11.18.13/references/admin-console-desktop.svg)
-![Admin mobile and floating chat concept](../design/admin-chat-v2026.11.18.13/references/admin-console-mobile.svg)
+![Admin desktop and floating chat concept](../design/admin-chat-v2026.11.18.13/references/admin-console-desktop.png)
+![Admin mobile and floating chat concept](../design/admin-chat-v2026.11.18.13/references/admin-console-mobile.png)
 
 ## Future gated integration (not approved as a release)
 1. Security owners fix identity mapping to the validated signed-in server session; remove hardcoded UUID fallback and client identity headers. Use DB tenant/member ownership checks and CSRF/authorization, with negative cross-user tests.

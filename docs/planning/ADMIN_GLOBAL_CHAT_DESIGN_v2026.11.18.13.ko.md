@@ -30,8 +30,8 @@ PC 관리자 화면: 왼쪽 메뉴(대시보드·회원·경제/원장·아이�
 - 고객지원/관리자 DM 권한은 분리한다. 관리자가 다른 회원의 대화를 임의 열람하게 만들지 않는다.
 
 ## 시안 이미지 첨부
-![관리자 PC + 플로팅 채팅 디자인](../design/admin-chat-v2026.11.18.13/references/admin-console-desktop.svg)
-![관리자 모바일 + 채팅 디자인](../design/admin-chat-v2026.11.18.13/references/admin-console-mobile.svg)
+![관리자 PC + 플로팅 채팅 디자인](../design/admin-chat-v2026.11.18.13/references/admin-console-desktop.png)
+![관리자 모바일 + 채팅 디자인](../design/admin-chat-v2026.11.18.13/references/admin-console-mobile.png)
 
 ## 별도 개발 범위
 `docs/design/admin-chat-v2026.11.18.13/preview/`에 기존 프론트엔드 코드와 분리된 동작 가능한 독립 웹 미리보기를 구현한다. 화면 전환 시 문의 패널·작성 내용 상태 유지, 둥근 버튼·두 가지 탭·단축 분류, 미전송 경고를 구현한다. 실제 DB·회원 정보·채팅 API 호출 없음. 운영 화면 반영·배포와 동일시하지 않는다.

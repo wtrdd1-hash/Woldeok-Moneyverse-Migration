@@ -1,5 +1,10 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.31 — Restored Design Image Handoff (DOCS ONLY / Spring UI IMPLEMENTATION PENDING)
+
+- [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
+
+
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.
 

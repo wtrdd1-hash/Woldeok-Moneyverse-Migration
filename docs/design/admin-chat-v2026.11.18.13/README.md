@@ -8,22 +8,18 @@ The existing frontend was **not edited**. Do not deploy the preview as a product
 
 ## Administrator reference concepts
 
-- [Desktop administrator console and global chat concept](references/admin-console-desktop.svg)
+- [Desktop administrator console and global chat concept](references/admin-console-desktop.png)
 
-![Administrator desktop design](references/admin-console-desktop.svg)
+![Administrator desktop design](references/admin-console-desktop.png)
 
-- [Mobile administrator console and global round chat launcher concept](references/admin-console-mobile.svg)
+- [Mobile administrator console and global round chat launcher concept](references/admin-console-mobile.png)
 
-![Administrator mobile design](references/admin-console-mobile.svg)
+![Administrator mobile design](references/admin-console-mobile.png)
 - [English specification](../../planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.md) / [한국어 기획](../../planning/ADMIN_GLOBAL_CHAT_DESIGN_v2026.11.18.13.ko.md)
 
-## Interactive preview
+## Prototype review archive (not carried into main)
 
-- [Open the prototype HTML](preview/index.html) with an ordinary static HTTP server (direct `file://` may block ES modules).
-- On the mini-PC worktree: `python3 -m http.server 18943 --bind 127.0.0.1 --directory docs/design/admin-chat-v2026.11.18.13/preview` (test preview only, do not publish).
-- Open `http://127.0.0.1:18943/`. Click the floating circular 문의 icon and switch the customer-support / 1:1 chat tabs; navigate between Administrator, Wallet, Quests, Board and Support. In-progress drafts persist **in memory** between those simulated page switches.
-- Click `로그인 상태: 시뮬레이션` in the preview sidebar to test guest state; this is **not an actual login**. No user content is written to browser storage or sent to any server.
-- Use `node --test docs/design/admin-chat-v2026.11.18.13/preview/*.test.mjs` for deterministic behavior and safe-preview checks.
+The historical animated/static preview and original editable SVG assets remain only in closed PR #3270 Git object history. They were excluded from this CI-conforming main handoff because the repository intentionally disallows executable or vector documents inside `docs/` as a release security gate. The actual PNGs in this directory are safe visual references **only**; the Spring UI, authentication, chat backend and real routes must be implemented/tested separately.
 
 ## Implementation and QA boundary
 

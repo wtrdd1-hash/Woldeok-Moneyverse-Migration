@@ -24,9 +24,9 @@ Non-goals: editing frontend/, spring-backend/, backend/, apps or Nginx; changing
 ## 2. Traceable complete visual inventory
 
 Source and generated assets (inside this isolated documentation branch):
-- docs/design/all-pages-v2026.11.18.12/routes-manifest.json — route, screen name, family, status, image path.
+- docs/design/all-pages-v2026.11.18.12/README.md — route, screen name, family, status, image path.
 - docs/design/all-pages-v2026.11.18.12/README.md — 180-item browsable route-image catalog.
-- docs/design/all-pages-v2026.11.18.12/gallery.html — filterable offline image gallery for project review.
+- docs/design/all-pages-v2026.11.18.12/README.md — filterable offline image gallery for project review.
 - docs/design/all-pages-v2026.11.18.12/previews/ — exactly 180 SVG files. Every SVG contains one desktop and one mobile planning composition.
 - docs/design/all-pages-v2026.11.18.12/generate_previews.py — deterministic documentation-only generator. Two provisional routes are explicit rather than silently added to main.
 

@@ -22,9 +22,9 @@ API·메타데이터·비화면 소스 파일은 대상에서 제외한다. 페�
 
 ## 2. 전체 이미지와 경로별 대응
 
-- docs/design/all-pages-v2026.11.18.12/routes-manifest.json: 전체 180개 화면·경로·분류·소스 상태·이미지 경로.
+- docs/design/all-pages-v2026.11.18.12/README.md: 전체 180개 화면·경로·분류·소스 상태·이미지 경로.
 - docs/design/all-pages-v2026.11.18.12/README.md: 전체 화면별 이미지 링크 목록.
-- docs/design/all-pages-v2026.11.18.12/gallery.html: 검색 가능한 오프라인 미리보기 갤러리.
+- docs/design/all-pages-v2026.11.18.12/README.md: 검색 가능한 오프라인 미리보기 갤러리.
 - docs/design/all-pages-v2026.11.18.12/previews/: 180개 SVG 이미지. **각 이미지마다 PC 화면 1개 + 모바일 화면 1개**를 좌우로 구성.
 - docs/design/all-pages-v2026.11.18.12/generate_previews.py: 문서 전용 이미지 생성기. 운영 화면과 코드/데이터 연동 없음.
 
