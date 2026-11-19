@@ -59,6 +59,10 @@ public class SpringNativeToolHubController {
         if(rawQuery.length()>64||rawQuery.indexOf('\u0000')>=0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"INVALID_TOOL_SEARCH");
         String query=rawQuery.strip();
+        String verifiedArg=args.getOrDefault("verified", "");
+        if(!verifiedArg.isEmpty() && !"true".equals(verifiedArg))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"INVALID_VERIFIED_FILTER");
+        boolean verifiedOnly="true".equals(verifiedArg);
         String category=args.getOrDefault("category","all");
         if(!CATEGORIES.contains(category))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"INVALID_TOOL_CATEGORY");
         boolean ko="ko".equalsIgnoreCase(args.getOrDefault("lang","en"));
@@ -66,6 +70,7 @@ public class SpringNativeToolHubController {
         String needle=query.toLowerCase(Locale.ROOT);
         List<Tool> shown=TOOLS.stream()
                 .filter(t->"all".equals(category)||t.category().equals(category))
+                .filter(t->!verifiedOnly||t.verified())
                 .filter(t->needle.isBlank()||String.join(" ",t.titleEn(),t.titleKo(),t.descriptionEn(),t.descriptionKo()).toLowerCase(Locale.ROOT).contains(needle))
                 .toList();
         response.setHeader("X-MV-UI-Release",RELEASE);
@@ -81,6 +86,7 @@ public class SpringNativeToolHubController {
         model.addAttribute("isCompact",compact);
         model.addAttribute("searchTerm",query);
         model.addAttribute("selectedCategory",category);
+        model.addAttribute("verifiedOnly",verifiedOnly);
         model.addAttribute("tools",shown);
         model.addAttribute("toolCount",TOOLS.size());
         model.addAttribute("verifiedCount",TOOLS.stream().filter(Tool::verified).count());
