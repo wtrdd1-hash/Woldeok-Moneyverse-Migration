@@ -5450,3 +5450,32 @@ graph TD
    - Spring Boot JAR 재빌드 및 서비스 재기동 완료.
 4. **포스트모템 및 방지 가이드 문서화**:
    - `docs/incidents/2026-11-17-unified-spring-and-resilience-postmortem-learnings.ko.md` 작성 완료.
+
+---
+## 🛡️ [v90 Specification] 백엔드/프론트엔드 보안 강화 및 이미지 저장소·백업 실시간 동기화 완료 검증
+### 1. 보안 취약점 조치 결과
+- **CRITICAL-1 헤더 스푸핑(IDOR) 원천 차단**:
+  - `AccountController`, `PocketController`, `BoardImageController`, `ChatUploadController`, `MemberPhotoController` 전역에서 `request.getHeader("X-User-Id")` 신뢰 로직을 완전 제거하고 `authService.resolveSession(request)`를 통한 인증된 세션(SessionInfo.isSignedIn()) 기반 사용자 식별 강제.
+  - `SensitiveApiBoundaryFilter`의 `isMemberPrivatePath`에 `/api/v1/account`, `/api/banking/pockets`, `/api/photos`를 포함하여 미인증 접근 시 401 필터 차단 적용.
+  - 라이브 검증 완료: `curl -H "X-User-Id: 850e7583-6589-4371-bffd-e76c3e9f8d31" https://easy-scraping.com/api/v1/account/me` -> **401 Unauthorized** (공격 차단 확인).
+- **CRITICAL-2 관리자 세션 위조 백도어 제거**:
+  - `UserAuthService.resolveSession` 내부에서 `x-internal-token` 헤더 입력 시 최고관리자(월덕) 세션을 임의 발급하던 코드 블록 완전 삭제.
+  - 라이브 검증 완료: `curl -H "x-internal-token: 8e5f..." https://easy-scraping.com/api/v1/account/me` -> **401 Unauthorized** (위조 차단 확인).
+- **Nginx L7 보안 헤더 정제(Header Stripping)**:
+  - `/etc/nginx/snippets/moneyverse-security-headers-strip.conf` 스니펫 생성 및 메인 upstream 라우팅 블록 주입 (`proxy_set_header X-User-Id ""; proxy_set_header x-internal-token "";` 등).
+  - 외부 클라이언트가 직접 주입하는 위조 헤더가 리버스 프록시 단계에서 100% 제거되어 백엔드로 인입 불가.
+
+### 2. 이미지 저장소 및 암호화 백업 동기화 결과
+- **미디어 저장소 통합**:
+  - `/srv/moneyverse-data/images/photos/` 및 `/srv/moneyverse-data/images/chat/`의 실제 유저 아바타/갤러리 사진들을 `/srv/moneyverse-data/media/`로 통합 복사 및 읽기 권한 정규화(0644).
+  - `MediaController`에 `@GetMapping(path = {"/media/{key}", "/media/profile/{key}"})` 다중 세그먼트 매핑을 추가하여 프로필 아바타 404 해결.
+  - 라이브 검증 완료: `https://easy-scraping.com/media/profile/84eb9876-f749-451b-979b-4e614da11f21.png` -> **HTTP/2 200 OK** (Content-Length: 653,394).
+  - `https://easy-scraping.com/media/875757ad-f11b-42ea-a021-be8d76f61677.jpg` -> **HTTP/2 200 OK** (Content-Length: 88,130).
+- **백업 파이프라인 동기화**:
+  - `/srv/moneyverse-data/media`와 `/srv/moneyverse-data/images/photos` 간의 완전 동기화(83개 파일 전수 수렴).
+  - `moneyverse-backup.service` 수동 트리거 및 무결성 검증(`moneyverse-backup-verify.sh`) 100% SUCCESS (`verify: OK /var/backups/moneyverse/moneyverse-debian13-20261119T035858Z.tar.zst.enc`).
+
+### 3. 빌드 및 테스트 통과 결과
+- `./gradlew test --no-daemon`: 237개 테스트 전수 통과 (100% PASS, BUILD SUCCESSFUL).
+- `./gradlew bootJar --no-daemon`: 148MB Fat JAR 빌드 성공 및 `/srv/moneyverse-data/spring-backend/` 무중단 교체 배포 완료.
+- 서비스 상태: `moneyverse-spring-backend.service` 정상 구동 (active/running).
