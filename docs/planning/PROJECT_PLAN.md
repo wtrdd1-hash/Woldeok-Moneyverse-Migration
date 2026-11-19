@@ -1,5 +1,9 @@
 # Woldeok Moneyverse — Living Project Plan
 
+### v2026.11.19.40.1 — Finance security + admin/member web integration PASS (SOURCE-ONLY HOLD)
+Detached Test worktree paired security `a04f3228f76166ce20c89a4bee69170a098e7919` with web `23c6f43675fdebfe9afed6a6897f00f26fe91298`; Java source conflict 0, DOCS_INDEX headings reconciled locally. Spring clean test bootJar **253/253 PASS**, NOT merged or deployed. No real authenticated multi-role/finance DB receipts, official HTTPS Test SHA (403), 180-route parity or independent zero-downtime rollback. **Production release HOLD.** [QA](../qa/2026-11-19-spring-admin-security-integration-v40.1.md).
+
+
 ## v2026.11.19.40 — OWNER SCOPE / ADMIN + MEMBER WEB VISUAL AND VERIFIED DATA / RELEASE HOLD
 Spring PC and mobile browser **web** only, not app. This isolated candidate adds secure role-backed Spring MVC admin home, shared navy/violet CSS with member v39.1 homepage and 5 auto/manual languages. Nonexistent DB data cannot become money figures, fake user totals, chart points or success. A new HTML-only gate requires verified admin session for static HTML aliases without disrupting `/admin/...` JSON API 401. Real browser fixtures admin 13/13 and member 16/16; entire Java 247 run/38 FAIL (same known baseline failure count); official HTTPS Test version 403. All admin actions and 180 web pages are NOT certified, secure finance PR #3302 is separately owned. **Do not merge or promote** until real admin/member Test/DB/source proofs, full passing regression, exact SHA, rollback and conflict gates. [EN spec](SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.md) / [KO](SPRING_ADMIN_MEMBER_WEB_UI_v2026.11.19.40.ko.md) / [QA](../qa/2026-11-19-spring-admin-member-web-v40.md).
 
