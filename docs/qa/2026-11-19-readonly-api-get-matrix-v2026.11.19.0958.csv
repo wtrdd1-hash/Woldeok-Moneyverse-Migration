@@ -1,0 +1,638 @@
+path,status,result,operationId,tags,mime
+/api/profile/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileRoot,Profile,text/html
+/api/profile,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileRoot_1,Profile,text/html
+/api/v1/profile/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileRoot_2,Profile,text/html
+/api/v1/profile,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileRoot_3,Profile,text/html
+/api/v1/admin/treasury/swf,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSwfSnapshot,Treasury Admin,application/json
+/api/admin/treasury/swf,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSwfSnapshot_1,Treasury Admin,application/json
+/api/treasury/swf,200,HTTP_200_UNAUTH_GET,getSwfSnapshot_2,Treasury Admin,application/json
+/api/v1/treasury/swf,200,HTTP_200_UNAUTH_GET,getSwfSnapshot_3,Treasury Admin,application/json
+/admin/ai-news/settings,200,HTTP_200_UNAUTH_GET,getSettings,ai-news-controller,application/json
+/api/admin/ai-news/settings,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSettings_1,ai-news-controller,application/json
+/api/v1/admin/ai-news/settings,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSettings_2,ai-news-controller,application/json
+/api/central-bank/reserve-requirement,200,HTTP_200_UNAUTH_GET,getReserveRequirement,Central Bank,application/json
+/api/central-bank/base-rate,200,HTTP_200_UNAUTH_GET,getBaseRate,Central Bank,application/json
+/api/v1/work/assignments,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAssignments,Work & Careers,text/html
+/api/work/assignments,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAssignments_1,Work & Careers,text/html
+/api/support/threads,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listThreads,Customer Support,application/json
+/api/v1/support/threads,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listThreads_1,Customer Support,application/json
+/api/stocks/alerts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list,stock-alert-controller,text/html
+/stocks/alerts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list_1,stock-alert-controller,text/html
+/api/v1/stocks/alerts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list_2,stock-alert-controller,text/html
+/api/v1/seo/crawl-audit,200,HTTP_200_UNAUTH_GET,getCrawlAudit,seo-controller,application/json
+/seo/crawl-audit,200,HTTP_200_UNAUTH_GET,getCrawlAudit_1,seo-controller,application/json
+/api/seo/crawl-audit,200,HTTP_200_UNAUTH_GET,getCrawlAudit_2,seo-controller,application/json
+/api/v1/quant/strategies,200,HTTP_200_UNAUTH_GET,listStrategies,quant-controller,application/json
+/api/quant/strategies,200,HTTP_200_UNAUTH_GET,listStrategies_1,quant-controller,application/json
+/quant/strategies,200,HTTP_200_UNAUTH_GET,listStrategies_2,quant-controller,application/json
+/api/v1/privacy/requests,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list_5,privacy-controller,text/html
+/privacy/requests,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list_6,privacy-controller,text/html
+/api/privacy/requests,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,list_7,privacy-controller,text/html
+/api/mint/batches,200,HTTP_200_UNAUTH_GET,getBatches,National Mint & Currency Sinks,application/json
+/api/v1/mint/batches,200,HTTP_200_UNAUTH_GET,getBatches_1,National Mint & Currency Sinks,application/json
+/api/v1/market/secret-auction/{auctionId}/bid,,NO_FIXTURE_PATH_PARAM,listBidLogs,Black Market Auctions,
+/api/market/secret-auction/{auctionId}/bid,,NO_FIXTURE_PATH_PARAM,listBidLogs_1,Black Market Auctions,
+/api/v1/chat/conversations/{id}/messages,,NO_FIXTURE_PATH_PARAM,listMessages_2,Direct Chat & Messages,
+/api/chat/conversations/{id}/messages,,NO_FIXTURE_PATH_PARAM,listMessages_3,Direct Chat & Messages,
+/api/board/stock-posts,200,HTTP_200_UNAUTH_GET,listStockPosts_1,Community & Discussion Board,application/json
+/api/v1/board/stock-posts,200,HTTP_200_UNAUTH_GET,listStockPosts_3,Community & Discussion Board,application/json
+/api/v1/board,200,HTTP_200_UNAUTH_GET,listPosts,Community & Discussion Board,application/json
+/api/v1/board/,200,HTTP_200_UNAUTH_GET,listPosts_1,Community & Discussion Board,application/json
+/api/board,200,HTTP_200_UNAUTH_GET,listPosts_2,Community & Discussion Board,application/json
+/api/board/,200,HTTP_200_UNAUTH_GET,listPosts_3,Community & Discussion Board,application/json
+/api/banking/pockets,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listPockets,Banking Pockets,application/json
+/api/v1/banking/pockets,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listPockets_1,Banking Pockets,application/json
+/api/v1/audit/frontend-errors,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecentFrontendErrors_1,Frontend Audit Logs,application/json
+/api/audit/frontend-errors,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecentFrontendErrors_2,Frontend Audit Logs,application/json
+/api/v1/arena/rooms,200,HTTP_200_UNAUTH_GET,listRooms,PvP Wager Arena,application/json
+/api/arena/rooms,200,HTTP_200_UNAUTH_GET,listRooms_1,PvP Wager Arena,application/json
+/api/admin/shop/items,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listAdminItems,admin-shop-controller,application/json
+/api/v1/admin/shop/items,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listAdminItems_1,admin-shop-controller,application/json
+/admin/shop/items,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listAdminItems_2,admin-shop-controller,text/html
+/admin/games/catalog,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listGames,game-catalog-controller,text/html
+/api/admin/games/catalog,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listGames_1,game-catalog-controller,application/json
+/api/v1/admin/games/catalog,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listGames_2,game-catalog-controller,application/json
+/admin/blog/articles,200,HTTP_200_UNAUTH_GET,listAdminArticles,blog-verified-admin-controller,application/json
+/api/v1/admin/blog/articles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listAdminArticles_1,blog-verified-admin-controller,application/json
+/api/admin/blog/articles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listAdminArticles_2,blog-verified-admin-controller,application/json
+/api/marketplace/listings,200,HTTP_200_UNAUTH_GET,listListings,Marketplace,application/json
+/api/account/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyAccount,Account,application/json
+/api/v1/account/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyAccount_1,Account,application/json
+/media/{key},,NO_FIXTURE_PATH_PARAM,getMedia,Media,
+/health,200,HTTP_200_UNAUTH_GET,health,health-controller,application/json
+/api/version,200,HTTP_200_UNAUTH_GET,version,health-controller,application/json
+/api/v1/work/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTaskBoard,Work & Careers,text/html
+/api/work/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTaskBoard_1,Work & Careers,text/html
+/api/v1/work/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard,Work & Careers,text/html
+/api/work,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard_1,Work & Careers,text/html
+/api/work/dashboard,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard_2,Work & Careers,text/html
+/api/v1/work/dashboard,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard_3,Work & Careers,text/html
+/api/work/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard_4,Work & Careers,text/html
+/api/v1/work,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDashboard_5,Work & Careers,text/html
+/api/v1/wallet/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview,Wallet,application/json
+/api/wallet,200,HTTP_200_UNAUTH_GET,getOverview_1,Wallet,application/json
+/api/v1/wallet,200,HTTP_200_UNAUTH_GET,getOverview_2,Wallet,application/json
+/api/wallet/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_3,Wallet,application/json
+/api/wallet/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_4,Wallet,application/json
+/api/v1/wallet/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_5,Wallet,application/json
+/api/v1/wallet/balance,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBalance,Wallet,application/json
+/api/wallet/balance,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBalance_1,Wallet,application/json
+/api/v1/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary,Wallet,application/json
+/api/wallet/api/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary_1,Wallet,application/json
+/api/v1/wallet/api/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary_2,Wallet,application/json
+/api/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary_3,Wallet,application/json
+/api/wallet/api/v1/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary_4,Wallet,application/json
+/api/v1/wallet/api/v1/wallet/summary,200,HTTP_200_UNAUTH_GET,getSummary_5,Wallet,application/json
+/api/support/threads/{id}/messages,,NO_FIXTURE_PATH_PARAM,listMessages,Customer Support,
+/api/v1/support/threads/{id}/messages,,NO_FIXTURE_PATH_PARAM,listMessages_1,Customer Support,
+/api/support/threads/summary,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,summary,Customer Support,application/json
+/api/v1/support/threads/summary,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,summary_1,Customer Support,application/json
+/api/stocks/{id}/prices,,NO_FIXTURE_PATH_PARAM,prices,Stock Market,
+/api/v1/stocks/{id}/prices,,NO_FIXTURE_PATH_PARAM,prices_1,Stock Market,
+/api/stocks/{id}/candles,,NO_FIXTURE_PATH_PARAM,candles,Stock Market,
+/api/v1/stocks/{id}/candles,,NO_FIXTURE_PATH_PARAM,candles_1,Stock Market,
+/api/v1/stocks/watchlist,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,watchlist,Stock Market,text/html
+/api/stocks/watchlist,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,watchlist_1,Stock Market,text/html
+/api/v1/stocks/sparklines,200,HTTP_200_UNAUTH_GET,sparklines,Stock Market,application/json
+/api/stocks/sparklines,200,HTTP_200_UNAUTH_GET,sparklines_1,Stock Market,application/json
+/api/v1/stocks/portfolio,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,portfolio,Stock Market,text/html
+/api/stocks/portfolio,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,portfolio_1,Stock Market,text/html
+/api/stocks/market-events,200,HTTP_200_UNAUTH_GET,marketEvents,Stock Market,application/json
+/api/v1/stocks/market-events,200,HTTP_200_UNAUTH_GET,marketEvents_1,Stock Market,application/json
+/stocks/league/current,200,HTTP_200_UNAUTH_GET,getCurrentLeague,Stock Championship League,application/json
+/api/v1/stocks/league/current,200,HTTP_200_UNAUTH_GET,getCurrentLeague_1,Stock Championship League,application/json
+/api/stocks/league/current,200,HTTP_200_UNAUTH_GET,getCurrentLeague_2,Stock Championship League,application/json
+/api/v1/stocks/history,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,history,Stock Market,text/html
+/api/stocks/history,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,history_1,Stock Market,text/html
+/api/stocks/halt-receipts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,haltReceipts,Stock Market,text/html
+/api/v1/stocks/halt-receipts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,haltReceipts_1,Stock Market,text/html
+/stocks/alerts/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,events,stock-alert-controller,text/html
+/api/v1/stocks/alerts/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,events_1,stock-alert-controller,text/html
+/api/stocks/alerts/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,events_2,stock-alert-controller,text/html
+/api/v1/stocks,200,HTTP_200_UNAUTH_GET,list_3,Stock Market,application/json
+/api/stocks,200,HTTP_200_UNAUTH_GET,list_4,Stock Market,application/json
+/api/v1/status,200,HTTP_200_UNAUTH_GET,api,status-source-truth-controller,application/json
+/api/status,200,HTTP_200_UNAUTH_GET,api_1,status-source-truth-controller,application/json
+/api/space/real-estate/districts,200,HTTP_200_UNAUTH_GET,listDistricts,Personal Space & Real Estate,application/json
+/api/spaces/real-estate/districts,200,HTTP_200_UNAUTH_GET,listDistricts_1,Personal Space & Real Estate,application/json
+/api/v1/spaces/real-estate/districts,200,HTTP_200_UNAUTH_GET,listDistricts_2,Personal Space & Real Estate,application/json
+/api/v1/space/real-estate/districts,200,HTTP_200_UNAUTH_GET,listDistricts_3,Personal Space & Real Estate,application/json
+/api/v1/spaces/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMySpaces,Personal Space & Real Estate,application/json
+/api/v1/space/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMySpaces_1,Personal Space & Real Estate,application/json
+/api/spaces/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMySpaces_2,Personal Space & Real Estate,application/json
+/api/space/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMySpaces_3,Personal Space & Real Estate,application/json
+/api/v1/spaces,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot,Personal Space & Real Estate,application/json
+/api/v1/space,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_1,Personal Space & Real Estate,application/json
+/api/v1/space/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_2,Personal Space & Real Estate,application/json
+/api/spaces,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_3,Personal Space & Real Estate,application/json
+/api/space,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_4,Personal Space & Real Estate,application/json
+/api/v1/spaces/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_5,Personal Space & Real Estate,application/json
+/api/space/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_6,Personal Space & Real Estate,application/json
+/api/spaces/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSpacesRoot_7,Personal Space & Real Estate,application/json
+/api/v1/shop/public-catalog,200,HTTP_200_UNAUTH_GET,getPublicCatalog,"Shop, Inventory & Crafting",application/json
+/api/shop/public-catalog,200,HTTP_200_UNAUTH_GET,getPublicCatalog_1,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/inventory,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyInventory,"Shop, Inventory & Crafting",application/json
+/api/shop/my-items,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyInventory_1,"Shop, Inventory & Crafting",application/json
+/api/shop/inventory,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyInventory_2,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/my-items,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyInventory_3,"Shop, Inventory & Crafting",application/json
+/api/shop/crafting/recipes,200,HTTP_200_UNAUTH_GET,getCraftingRecipes,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/crafting/recipes,200,HTTP_200_UNAUTH_GET,getCraftingRecipes_1,"Shop, Inventory & Crafting",application/json
+/api/shop/,200,HTTP_200_UNAUTH_GET,getCatalog,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_1,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/,200,HTTP_200_UNAUTH_GET,getCatalog_2,"Shop, Inventory & Crafting",application/json
+/api/shop/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_3,"Shop, Inventory & Crafting",application/json
+/api/shop/items,200,HTTP_200_UNAUTH_GET,getCatalog_4,"Shop, Inventory & Crafting",application/json
+/api/v1/shop,200,HTTP_200_UNAUTH_GET,getCatalog_5,"Shop, Inventory & Crafting",application/json
+/api/v1/shop/items,200,HTTP_200_UNAUTH_GET,getCatalog_6,"Shop, Inventory & Crafting",application/json
+/api/shop,200,HTTP_200_UNAUTH_GET,getCatalog_7,"Shop, Inventory & Crafting",application/json
+/api/seo/twitter/status,200,HTTP_200_UNAUTH_GET,getTwitterStatus,seo-controller,application/json
+/api/v1/seo/twitter/status,200,HTTP_200_UNAUTH_GET,getTwitterStatus_1,seo-controller,application/json
+/seo/twitter/status,200,HTTP_200_UNAUTH_GET,getTwitterStatus_2,seo-controller,application/json
+/api/seo/status/admin,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus,seo-controller,application/json
+/api/v1/seo/status/admin,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus_1,seo-controller,application/json
+/api/v1/seo/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus_2,seo-controller,application/json
+/seo/status/admin,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus_3,seo-controller,application/json
+/api/seo/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus_4,seo-controller,application/json
+/seo/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminStatus_5,seo-controller,application/json
+/api/seo/indexnow-key,200,HTTP_200_UNAUTH_GET,getIndexNowKeyInfo,seo-controller,application/json
+/seo/indexnow-key,200,HTTP_200_UNAUTH_GET,getIndexNowKeyInfo_1,seo-controller,application/json
+/api/v1/seo/indexnow-key,200,HTTP_200_UNAUTH_GET,getIndexNowKeyInfo_2,seo-controller,application/json
+/api/seo/gsc/analytics,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getGscAnalytics,seo-controller,application/json
+/seo/gsc/analytics,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getGscAnalytics_1,seo-controller,application/json
+/api/v1/seo/gsc/analytics,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getGscAnalytics_2,seo-controller,application/json
+/quant/strategies/{id}/logs,,NO_FIXTURE_PATH_PARAM,getStrategyLogs,quant-controller,
+/api/quant/strategies/{id}/logs,,NO_FIXTURE_PATH_PARAM,getStrategyLogs_1,quant-controller,
+/api/v1/quant/strategies/{id}/logs,,NO_FIXTURE_PATH_PARAM,getStrategyLogs_2,quant-controller,
+/api/board/images/{key},,NO_FIXTURE_PATH_PARAM,getBoardImage,Board Images,
+/api/public/board/images/{key},,NO_FIXTURE_PATH_PARAM,getBoardImage_1,Board Images,
+/api/v1/board/images/{key},,NO_FIXTURE_PATH_PARAM,getBoardImage_2,Board Images,
+/api/v1/public/board/images/{key},,NO_FIXTURE_PATH_PARAM,getBoardImage_3,Board Images,
+/api/progression/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status,Progression & Achievements,application/json
+/api/v1/progression/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_1,Progression & Achievements,application/json
+/api/v1/progression,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_2,Progression & Achievements,application/json
+/api/progression/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_3,Progression & Achievements,application/json
+/api/v1/progression/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_4,Progression & Achievements,application/json
+/api/progression,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_5,Progression & Achievements,application/json
+/api/v1/progression/early-game,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,earlyGame,Progression & Achievements,application/json
+/api/progression/early-game,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,earlyGame_1,Progression & Achievements,application/json
+/api/progression/credits,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,credits,Progression & Achievements,application/json
+/api/v1/progression/credits,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,credits_1,Progression & Achievements,application/json
+/api/v1/profile/{id},,NO_FIXTURE_PATH_PARAM,getUserProfileById,Profile,
+/api/profile/{id},,NO_FIXTURE_PATH_PARAM,getUserProfileById_1,Profile,
+/api/profile/titles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileTitles,Profile,text/html
+/api/v1/profile/titles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileTitles_1,Profile,text/html
+/api/v1/profile/settings,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileSettings,Profile,text/html
+/api/profile/settings,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getProfileSettings_1,Profile,text/html
+/api/profile/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyProfile,Profile,text/html
+/api/v1/profile/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyProfile_1,Profile,text/html
+/api/v1/photos/mine,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,mine,Member Photo Submissions,application/json
+/api/photos/mine,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,mine_1,Member Photo Submissions,application/json
+/api/notifications/unread-count,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,unreadCount,Notification System,text/html
+/api/v1/notifications/unread-count,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,unreadCount_1,Notification System,text/html
+/api/v1/notifications/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listNotifications,Notification System,text/html
+/api/notifications/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listNotifications_1,Notification System,text/html
+/api/notifications,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listNotifications_2,Notification System,text/html
+/api/v1/notifications,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listNotifications_3,Notification System,text/html
+/api/newspaper/weekly-brief,200,HTTP_200_UNAUTH_GET,getWeeklyBrief,Newspaper,application/json
+/api/v1/newspaper/weekly-brief,200,HTTP_200_UNAUTH_GET,getWeeklyBrief_1,Newspaper,application/json
+/api/newspaper/pulse,200,HTTP_200_UNAUTH_GET,getMarketPulse,Newspaper,application/json
+/api/v1/newspaper/pulse,200,HTTP_200_UNAUTH_GET,getMarketPulse_1,Newspaper,application/json
+/api/v1/newspaper/poll,200,HTTP_200_UNAUTH_GET,getPoll,Newspaper,application/json
+/api/newspaper/poll,200,HTTP_200_UNAUTH_GET,getPoll_1,Newspaper,application/json
+/api/newspaper/lore,200,HTTP_200_UNAUTH_GET,getLore,Newspaper,application/json
+/api/v1/newspaper/lore,200,HTTP_200_UNAUTH_GET,getLore_1,Newspaper,application/json
+/api/v1/mint/seigniorage,200,HTTP_200_UNAUTH_GET,getSeigniorageLedger,National Mint & Currency Sinks,application/json
+/api/mint/seigniorage,200,HTTP_200_UNAUTH_GET,getSeigniorageLedger_1,National Mint & Currency Sinks,application/json
+/api/mint/batches/{id},,NO_FIXTURE_PATH_PARAM,getBatchById,National Mint & Currency Sinks,
+/api/v1/mint/batches/{id},,NO_FIXTURE_PATH_PARAM,getBatchById_1,National Mint & Currency Sinks,
+/api/v1/mint/,200,HTTP_200_UNAUTH_GET,getMintOverview,National Mint & Currency Sinks,application/json
+/api/mint,200,HTTP_200_UNAUTH_GET,getMintOverview_1,National Mint & Currency Sinks,application/json
+/api/v1/mint,200,HTTP_200_UNAUTH_GET,getMintOverview_2,National Mint & Currency Sinks,application/json
+/api/mint/,200,HTTP_200_UNAUTH_GET,getMintOverview_3,National Mint & Currency Sinks,application/json
+/api/market/secret-auction,200,HTTP_200_UNAUTH_GET,listAuctions,Black Market Auctions,application/json
+/api/v1/market/secret-auction,200,HTTP_200_UNAUTH_GET,listAuctions_1,Black Market Auctions,application/json
+/api/v1/kdic/portal,200,HTTP_200_UNAUTH_GET,getPublicPortalData,KDIC Deposit Insurance,application/json
+/api/kdic/overview,200,HTTP_200_UNAUTH_GET,getPublicPortalData_1,KDIC Deposit Insurance,application/json
+/api/kdic/portal,200,HTTP_200_UNAUTH_GET,getPublicPortalData_2,KDIC Deposit Insurance,application/json
+/api/v1/kdic/overview,200,HTTP_200_UNAUTH_GET,getPublicPortalData_3,KDIC Deposit Insurance,application/json
+/integrations/discord/guilds/status,200,HTTP_200_UNAUTH_GET,getGuildStatus,discord-controller,application/json
+/api/integrations/discord/guilds/status,200,HTTP_200_UNAUTH_GET,getGuildStatus_1,discord-controller,application/json
+/api/v1/integrations/discord/guilds/status,200,HTTP_200_UNAUTH_GET,getGuildStatus_2,discord-controller,application/json
+/api/v1/help/categories,200,HTTP_200_UNAUTH_GET,categories,help-controller,application/json
+/api/help/categories,200,HTTP_200_UNAUTH_GET,categories_1,help-controller,application/json
+/help/categories,200,HTTP_200_UNAUTH_GET,categories_2,help-controller,application/json
+/help/articles/{locale}/{slug},,NO_FIXTURE_PATH_PARAM,article,help-controller,
+/api/help/articles/{locale}/{slug},,NO_FIXTURE_PATH_PARAM,article_1,help-controller,
+/api/v1/help/articles/{locale}/{slug},,NO_FIXTURE_PATH_PARAM,article_2,help-controller,
+/api/v1/game-clock/,200,HTTP_200_UNAUTH_GET,current,Game Clock,application/json
+/api/game-clock/,200,HTTP_200_UNAUTH_GET,current_1,Game Clock,application/json
+/api/game-clock,200,HTTP_200_UNAUTH_GET,current_2,Game Clock,application/json
+/api/v1/game-clock,200,HTTP_200_UNAUTH_GET,current_3,Game Clock,application/json
+/api/fx/portal,200,HTTP_200_UNAUTH_GET,getPublicPortalData_4,public-fx-controller,application/json
+/fx/portal,200,HTTP_200_UNAUTH_GET,getPublicPortalData_5,public-fx-controller,application/json
+/api/v1/fx/portal,200,HTTP_200_UNAUTH_GET,getPublicPortalData_6,public-fx-controller,application/json
+/api/v1/fx/my-wallet,200,HTTP_200_UNAUTH_GET,getMyFxWallet,public-fx-controller,application/json
+/api/fx/my-wallet,200,HTTP_200_UNAUTH_GET,getMyFxWallet_1,public-fx-controller,application/json
+/fx/my-wallet,200,HTTP_200_UNAUTH_GET,getMyFxWallet_2,public-fx-controller,application/json
+/api/fx/forward/rates,200,HTTP_200_UNAUTH_GET,getForwardRates,public-fx-controller,application/json
+/fx/forward/rates,200,HTTP_200_UNAUTH_GET,getForwardRates_1,public-fx-controller,application/json
+/api/v1/fx/forward/rates,200,HTTP_200_UNAUTH_GET,getForwardRates_2,public-fx-controller,application/json
+/api/fx/forward/my-contracts,200,HTTP_200_UNAUTH_GET,getMyForwardContracts,public-fx-controller,application/json
+/api/v1/fx/forward/my-contracts,200,HTTP_200_UNAUTH_GET,getMyForwardContracts_1,public-fx-controller,application/json
+/fx/forward/my-contracts,200,HTTP_200_UNAUTH_GET,getMyForwardContracts_2,public-fx-controller,application/json
+/api/v1/engagement,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus,Engagement & Dopamine,text/html
+/api/engagement/streak,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_1,Engagement & Dopamine,text/html
+/api/v1/engagement/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_2,Engagement & Dopamine,text/html
+/api/engagement/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_3,Engagement & Dopamine,text/html
+/api/v1/dopamine/streak,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_4,Engagement & Dopamine,text/html
+/api/dopamine/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_5,Engagement & Dopamine,text/html
+/api/dopamine/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_6,Engagement & Dopamine,text/html
+/api/v1/dopamine/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_7,Engagement & Dopamine,text/html
+/api/engagement/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_8,Engagement & Dopamine,text/html
+/api/v1/dopamine,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_9,Engagement & Dopamine,text/html
+/api/v1/engagement/streak,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_10,Engagement & Dopamine,text/html
+/api/v1/engagement/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_11,Engagement & Dopamine,text/html
+/api/engagement,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_12,Engagement & Dopamine,text/html
+/api/dopamine/streak,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_13,Engagement & Dopamine,text/html
+/api/v1/dopamine/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_14,Engagement & Dopamine,text/html
+/api/dopamine,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStreakStatus_15,Engagement & Dopamine,text/html
+/api/v1/dopamine/features,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDopamineStatus,Engagement & Dopamine,text/html
+/api/engagement/features,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDopamineStatus_1,Engagement & Dopamine,text/html
+/api/dopamine/features,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDopamineStatus_2,Engagement & Dopamine,text/html
+/api/v1/engagement/features,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDopamineStatus_3,Engagement & Dopamine,text/html
+/engagement/dopamine/streak,200,HTTP_200_UNAUTH_GET,getStreakBonus,dopamine-controller,application/json
+/api/engagement/dopamine/streak,200,HTTP_200_UNAUTH_GET,getStreakBonus_1,dopamine-controller,application/json
+/api/v1/engagement/dopamine/streak,200,HTTP_200_UNAUTH_GET,getStreakBonus_2,dopamine-controller,application/json
+/api/engagement/dopamine/status,200,HTTP_200_UNAUTH_GET,getDopamineStatus_4,dopamine-controller,application/json
+/engagement/dopamine/status,200,HTTP_200_UNAUTH_GET,getDopamineStatus_5,dopamine-controller,application/json
+/api/v1/engagement/dopamine/status,200,HTTP_200_UNAUTH_GET,getDopamineStatus_6,dopamine-controller,application/json
+/api/v1/economy,200,HTTP_200_UNAUTH_GET,getMacroPulse,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/pulse,200,HTTP_200_UNAUTH_GET,getMacroPulse_1,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/,200,HTTP_200_UNAUTH_GET,getMacroPulse_2,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/,200,HTTP_200_UNAUTH_GET,getMacroPulse_3,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/macro-pulse,200,HTTP_200_UNAUTH_GET,getMacroPulse_4,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/pulse,200,HTTP_200_UNAUTH_GET,getMacroPulse_5,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/macro-pulse,200,HTTP_200_UNAUTH_GET,getMacroPulse_6,Macroeconomic Pulse & Burn Events,application/json
+/api/economy,200,HTTP_200_UNAUTH_GET,getMacroPulse_7,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/hot-time/schedule,200,HTTP_200_UNAUTH_GET,getWeeklySchedule,hot-time-controller,application/json
+/economy/hot-time/schedule,200,HTTP_200_UNAUTH_GET,getWeeklySchedule_1,hot-time-controller,application/json
+/api/v1/economy/hot-time/schedule,200,HTTP_200_UNAUTH_GET,getWeeklySchedule_2,hot-time-controller,application/json
+/economy/hot-time/active,200,HTTP_200_UNAUTH_GET,getActiveHotTime,hot-time-controller,application/json
+/api/v1/economy/hot-time/active,200,HTTP_200_UNAUTH_GET,getActiveHotTime_1,hot-time-controller,application/json
+/api/economy/hot-time/active,200,HTTP_200_UNAUTH_GET,getActiveHotTime_2,hot-time-controller,application/json
+/api/economy/hot-time,200,HTTP_200_UNAUTH_GET,getHotTimeStatus,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/events/hot-time,200,HTTP_200_UNAUTH_GET,getHotTimeStatus_1,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/hot-time,200,HTTP_200_UNAUTH_GET,getHotTimeStatus_2,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/events/hot-time,200,HTTP_200_UNAUTH_GET,getHotTimeStatus_3,Macroeconomic Pulse & Burn Events,application/json
+/economy/events/burn-draw/stats,200,HTTP_200_UNAUTH_GET,getCumulativeStats,burn-event-controller,application/json
+/api/v1/economy/events/burn-draw/stats,200,HTTP_200_UNAUTH_GET,getCumulativeStats_1,burn-event-controller,application/json
+/api/economy/events/burn-draw/stats,200,HTTP_200_UNAUTH_GET,getCumulativeStats_2,burn-event-controller,application/json
+/api/v1/economy/events/burn-draw/current,200,HTTP_200_UNAUTH_GET,getCurrentBurnEvent,burn-event-controller,application/json
+/economy/events/burn-draw/current,200,HTTP_200_UNAUTH_GET,getCurrentBurnEvent_1,burn-event-controller,application/json
+/api/economy/events/burn-draw/current,200,HTTP_200_UNAUTH_GET,getCurrentBurnEvent_2,burn-event-controller,application/json
+/api/v1/economy/burn,200,HTTP_200_UNAUTH_GET,getBurnEvents,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/burn-events,200,HTTP_200_UNAUTH_GET,getBurnEvents_1,Macroeconomic Pulse & Burn Events,application/json
+/api/economy/burn,200,HTTP_200_UNAUTH_GET,getBurnEvents_2,Macroeconomic Pulse & Burn Events,application/json
+/api/v1/economy/burn-events,200,HTTP_200_UNAUTH_GET,getBurnEvents_3,Macroeconomic Pulse & Burn Events,application/json
+/early-game/today,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,today,early-game-controller,text/html
+/api/v1/early-game/today,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,today_1,early-game-controller,text/html
+/api/early-game/today,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,today_2,early-game-controller,text/html
+/early-game/first-day,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,firstDay,early-game-controller,text/html
+/api/early-game/first-day,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,firstDay_1,early-game-controller,text/html
+/api/v1/early-game/first-day,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,firstDay_2,early-game-controller,text/html
+/derivatives/overview,200,HTTP_200_UNAUTH_GET,getDerivativesOverview,derivatives-controller,application/json
+/api/derivatives,200,HTTP_200_UNAUTH_GET,getDerivativesOverview_1,derivatives-controller,application/json
+/derivatives,200,HTTP_200_UNAUTH_GET,getDerivativesOverview_2,derivatives-controller,application/json
+/api/derivatives/overview,200,HTTP_200_UNAUTH_GET,getDerivativesOverview_3,derivatives-controller,application/json
+/api/v1/derivatives,200,HTTP_200_UNAUTH_GET,getDerivativesOverview_4,derivatives-controller,application/json
+/api/v1/derivatives/overview,200,HTTP_200_UNAUTH_GET,getDerivativesOverview_5,derivatives-controller,application/json
+/api/v1/crafting/recipes,200,HTTP_200_UNAUTH_GET,listRecipes,Crafting System,application/json
+/api/crafting/,200,HTTP_200_UNAUTH_GET,listRecipes_1,Crafting System,application/json
+/api/v1/crafting/,200,HTTP_200_UNAUTH_GET,listRecipes_2,Crafting System,application/json
+/api/crafting,200,HTTP_200_UNAUTH_GET,listRecipes_3,Crafting System,application/json
+/api/crafting/recipes,200,HTTP_200_UNAUTH_GET,listRecipes_4,Crafting System,application/json
+/api/v1/crafting,200,HTTP_200_UNAUTH_GET,listRecipes_5,Crafting System,application/json
+/api/content/popups,200,HTTP_200_UNAUTH_GET,getActivePopups,content-controller,application/json
+/api/v1/content/popups,200,HTTP_200_UNAUTH_GET,getActivePopups_1,content-controller,application/json
+/content/popups,200,HTTP_200_UNAUTH_GET,getActivePopups_2,content-controller,application/json
+/api/content/pages/{slug},,NO_FIXTURE_PATH_PARAM,getStaticPage,content-controller,
+/api/v1/content/pages/{slug},,NO_FIXTURE_PATH_PARAM,getStaticPage_1,content-controller,
+/content/pages/{slug},,NO_FIXTURE_PATH_PARAM,getStaticPage_2,content-controller,
+/api/v1/content/chat/media/{key},,NO_FIXTURE_PATH_PARAM,getChatMedia,Chat Upload,
+/api/content/chat/media/{key},,NO_FIXTURE_PATH_PARAM,getChatMedia_1,Chat Upload,
+/content/chat/media/{key},,NO_FIXTURE_PATH_PARAM,getChatMedia_2,Chat Upload,
+/collections,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listCollections,collection-controller,text/html
+/api/v1/collections,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listCollections_1,collection-controller,text/html
+/api/collections,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listCollections_2,collection-controller,text/html
+/api/v1/clubs/warfare/territories,200,HTTP_200_UNAUTH_GET,listTerritories,warfare-controller,application/json
+/api/clubs/warfare/territories,200,HTTP_200_UNAUTH_GET,listTerritories_1,warfare-controller,application/json
+/clubs/warfare/territories,200,HTTP_200_UNAUTH_GET,listTerritories_2,warfare-controller,application/json
+/api/v1/clubs/warfare/season/current,200,HTTP_200_UNAUTH_GET,getCurrentSeason,warfare-controller,application/json
+/api/clubs/warfare/season/current,200,HTTP_200_UNAUTH_GET,getCurrentSeason_1,warfare-controller,application/json
+/clubs/warfare/season/current,200,HTTP_200_UNAUTH_GET,getCurrentSeason_2,warfare-controller,application/json
+/api/club/{id},,NO_FIXTURE_PATH_PARAM,getClub,Club & Cooperatives,
+/api/v1/club/{id},,NO_FIXTURE_PATH_PARAM,getClub_1,Club & Cooperatives,
+/api/club/,200,HTTP_200_UNAUTH_GET,listClubs,Club & Cooperatives,application/json
+/api/club/list,200,HTTP_200_UNAUTH_GET,listClubs_1,Club & Cooperatives,application/json
+/api/club,200,HTTP_200_UNAUTH_GET,listClubs_2,Club & Cooperatives,application/json
+/api/v1/club/list,200,HTTP_200_UNAUTH_GET,listClubs_3,Club & Cooperatives,application/json
+/api/v1/club,200,HTTP_200_UNAUTH_GET,listClubs_4,Club & Cooperatives,application/json
+/api/v1/club/,200,HTTP_200_UNAUTH_GET,listClubs_5,Club & Cooperatives,application/json
+/api/v1/chat/unread-count,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,unreadCount_2,Direct Chat & Messages,application/json
+/api/chat/unread-count,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,unreadCount_3,Direct Chat & Messages,application/json
+/api/chat/conversations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listConversations,Direct Chat & Messages,application/json
+/api/v1/chat/conversations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listConversations_1,Direct Chat & Messages,application/json
+/api/v1/businesses/ventures/pitches,200,HTTP_200_UNAUTH_GET,listPitches,ventures-controller,application/json
+/businesses/ventures/pitches,200,HTTP_200_UNAUTH_GET,listPitches_1,ventures-controller,application/json
+/api/businesses/ventures/pitches,200,HTTP_200_UNAUTH_GET,listPitches_2,ventures-controller,application/json
+/businesses/ventures/investments,200,HTTP_200_UNAUTH_GET,listMyInvestments,ventures-controller,application/json
+/api/v1/businesses/ventures/investments,200,HTTP_200_UNAUTH_GET,listMyInvestments_1,ventures-controller,application/json
+/api/businesses/ventures/investments,200,HTTP_200_UNAUTH_GET,listMyInvestments_2,ventures-controller,application/json
+/api/businesses,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses,Business & Enterprises,text/html
+/api/v1/businesses/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_1,Business & Enterprises,text/html
+/api/business/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_2,Business & Enterprises,text/html
+/api/v1/business/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_3,Business & Enterprises,text/html
+/api/business,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_4,Business & Enterprises,text/html
+/api/businesses/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_5,Business & Enterprises,text/html
+/api/businesses/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_6,Business & Enterprises,text/html
+/api/v1/business,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_7,Business & Enterprises,text/html
+/api/v1/business-types/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_8,Business & Enterprises,text/html
+/api/v1/business/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_9,Business & Enterprises,text/html
+/api/v1/businesses/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_10,Business & Enterprises,text/html
+/api/business-types/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_11,Business & Enterprises,text/html
+/api/v1/business-types/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_12,Business & Enterprises,text/html
+/api/business-types,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_13,Business & Enterprises,text/html
+/api/business/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_14,Business & Enterprises,text/html
+/api/v1/business-types,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_15,Business & Enterprises,text/html
+/api/business-types/my,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_16,Business & Enterprises,text/html
+/api/v1/businesses,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyBusinesses_17,Business & Enterprises,text/html
+/api/v1/business-types/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_8,Business & Enterprises,application/json
+/api/v1/business/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_9,Business & Enterprises,application/json
+/api/v1/businesses/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_10,Business & Enterprises,application/json
+/api/business/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_11,Business & Enterprises,application/json
+/api/businesses/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_12,Business & Enterprises,application/json
+/api/business-types/catalog,200,HTTP_200_UNAUTH_GET,getCatalog_13,Business & Enterprises,application/json
+/api/v1/board/stocks,200,HTTP_200_UNAUTH_GET,listStockPosts,Community & Discussion Board,application/json
+/api/board/stocks,200,HTTP_200_UNAUTH_GET,listStockPosts_2,Community & Discussion Board,application/json
+/api/v1/board/public/stock-posts,200,HTTP_200_UNAUTH_GET,list_8,public-stock-community-controller,application/json
+/board/public/stock-posts,200,HTTP_200_UNAUTH_GET,list_9,public-stock-community-controller,application/json
+/api/board/public/stock-posts,200,HTTP_200_UNAUTH_GET,list_10,public-stock-community-controller,application/json
+/api/v1/blog/categories,200,HTTP_200_UNAUTH_GET,listCategories,blog-verified-controller,application/json
+/api/blog/categories,200,HTTP_200_UNAUTH_GET,listCategories_1,blog-verified-controller,application/json
+/blog/categories,200,HTTP_200_UNAUTH_GET,listCategories_2,blog-verified-controller,application/json
+/api/v1/blog/articles/{slug},,NO_FIXTURE_PATH_PARAM,getArticle,blog-verified-controller,
+/api/blog/articles/{slug},,NO_FIXTURE_PATH_PARAM,getArticle_1,blog-verified-controller,
+/blog/articles/{slug},,NO_FIXTURE_PATH_PARAM,getArticle_2,blog-verified-controller,
+/blog/articles,200,HTTP_200_UNAUTH_GET,listArticles,blog-verified-controller,application/json
+/api/v1/blog/articles,200,HTTP_200_UNAUTH_GET,listArticles_1,blog-verified-controller,application/json
+/api/blog/articles,200,HTTP_200_UNAUTH_GET,listArticles_2,blog-verified-controller,application/json
+/api/v1/bank/loans,200,HTTP_200_UNAUTH_GET,getStanding,Banking,application/json
+/api/v1/banking/standing,200,HTTP_200_UNAUTH_GET,getStanding_1,Banking,application/json
+/api/bank/standing,200,HTTP_200_UNAUTH_GET,getStanding_2,Banking,application/json
+/api/v1/banking/loans,200,HTTP_200_UNAUTH_GET,getStanding_3,Banking,application/json
+/api/banking/standing,200,HTTP_200_UNAUTH_GET,getStanding_4,Banking,application/json
+/api/v1/banking,200,HTTP_200_UNAUTH_GET,getStanding_5,Banking,application/json
+/api/v1/bank/standing,200,HTTP_200_UNAUTH_GET,getStanding_6,Banking,application/json
+/api/banking,200,HTTP_200_UNAUTH_GET,getStanding_7,Banking,application/json
+/api/bank/loans,200,HTTP_200_UNAUTH_GET,getStanding_8,Banking,application/json
+/api/banking/loans,200,HTTP_200_UNAUTH_GET,getStanding_9,Banking,application/json
+/api/v1/bank,200,HTTP_200_UNAUTH_GET,getStanding_10,Banking,application/json
+/api/bank,200,HTTP_200_UNAUTH_GET,getStanding_11,Banking,application/json
+/api/v1/auth/{provider}/callback,,NO_FIXTURE_PATH_PARAM,callback,OAuth2 Identity Provider,
+/auth/{provider}/callback,,NO_FIXTURE_PATH_PARAM,callback_1,OAuth2 Identity Provider,
+/api/v1/auth/{provider}/authorize,,NO_FIXTURE_PATH_PARAM,authorize,OAuth2 Identity Provider,
+/auth/{provider}/authorize,,NO_FIXTURE_PATH_PARAM,authorize_1,OAuth2 Identity Provider,
+/api/v1/auth/viewer,200,HTTP_200_UNAUTH_GET,viewer,Auth Session & Policy,application/json
+/api/auth/viewer,200,HTTP_200_UNAUTH_GET,viewer_1,Auth Session & Policy,application/json
+/api/auth/session,200,HTTP_200_UNAUTH_GET,session,Auth Session & Policy,application/json
+/api/v1/auth/session,200,HTTP_200_UNAUTH_GET,session_1,Auth Session & Policy,application/json
+/api/auth/providers,200,HTTP_200_UNAUTH_GET,providers,Auth Session & Policy,application/json
+/api/v1/auth/providers,200,HTTP_200_UNAUTH_GET,providers_1,Auth Session & Policy,application/json
+/api/auth/policy,200,HTTP_200_UNAUTH_GET,policy,Auth Session & Policy,application/json
+/api/v1/auth/policy,200,HTTP_200_UNAUTH_GET,policy_1,Auth Session & Policy,application/json
+/auth/bootstrap/status,200,HTTP_200_UNAUTH_GET,getBootstrapStatus,bootstrap-controller,application/json
+/api/v1/auth/bootstrap/status,200,HTTP_200_UNAUTH_GET,getBootstrapStatus_1,bootstrap-controller,application/json
+/api/auth/bootstrap/status,200,HTTP_200_UNAUTH_GET,getBootstrapStatus_2,bootstrap-controller,application/json
+/announcements/status,200,HTTP_200_UNAUTH_GET,status_6,app-content-controller,application/json
+/content/status,200,HTTP_200_UNAUTH_GET,status_7,app-content-controller,application/json
+/api/v1/announcements/status,200,HTTP_200_UNAUTH_GET,status_8,app-content-controller,application/json
+/api/v1/content/status,200,HTTP_200_UNAUTH_GET,status_9,app-content-controller,application/json
+/api/announcements/status,200,HTTP_200_UNAUTH_GET,status_10,app-content-controller,application/json
+/api/content/status,200,HTTP_200_UNAUTH_GET,status_11,app-content-controller,application/json
+/announcements/photos,200,HTTP_200_UNAUTH_GET,photos,app-content-controller,application/json
+/api/v1/content/photos,200,HTTP_200_UNAUTH_GET,photos_1,app-content-controller,application/json
+/content/photos,200,HTTP_200_UNAUTH_GET,photos_2,app-content-controller,application/json
+/api/v1/announcements/photos,200,HTTP_200_UNAUTH_GET,photos_3,app-content-controller,application/json
+/api/content/photos,200,HTTP_200_UNAUTH_GET,photos_4,app-content-controller,application/json
+/api/announcements/photos,200,HTTP_200_UNAUTH_GET,photos_5,app-content-controller,application/json
+/api/v1/announcements,200,HTTP_200_UNAUTH_GET,announcements,app-content-controller,application/json
+/api/v1/content/,200,HTTP_200_UNAUTH_GET,announcements_1,app-content-controller,application/json
+/api/v1/content/announcements,200,HTTP_200_UNAUTH_GET,announcements_2,app-content-controller,application/json
+/api/content/announcements,200,HTTP_200_UNAUTH_GET,announcements_3,app-content-controller,application/json
+/content,200,HTTP_200_UNAUTH_GET,announcements_4,app-content-controller,application/json
+/api/v1/announcements/,200,HTTP_200_UNAUTH_GET,announcements_5,app-content-controller,application/json
+/announcements/announcements,200,HTTP_200_UNAUTH_GET,announcements_6,app-content-controller,application/json
+/api/v1/content,200,HTTP_200_UNAUTH_GET,announcements_7,app-content-controller,application/json
+/api/v1/announcements/announcements,200,HTTP_200_UNAUTH_GET,announcements_8,app-content-controller,application/json
+/announcements/,200,HTTP_200_UNAUTH_GET,announcements_9,app-content-controller,application/json
+/api/announcements/,200,HTTP_200_UNAUTH_GET,announcements_10,app-content-controller,application/json
+/api/content/,200,HTTP_200_UNAUTH_GET,announcements_11,app-content-controller,application/json
+/api/content,200,HTTP_200_UNAUTH_GET,announcements_12,app-content-controller,application/json
+/announcements,200,HTTP_200_UNAUTH_GET,announcements_13,app-content-controller,application/json
+/api/announcements,200,HTTP_200_UNAUTH_GET,announcements_14,app-content-controller,application/json
+/api/announcements/announcements,200,HTTP_200_UNAUTH_GET,announcements_15,app-content-controller,application/json
+/content/,200,HTTP_200_UNAUTH_GET,announcements_16,app-content-controller,application/json
+/content/announcements,200,HTTP_200_UNAUTH_GET,announcements_17,app-content-controller,application/json
+/api/advisor/deoki,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis,AI Financial Advisor,application/json
+/api/advisor/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_1,AI Financial Advisor,application/json
+/api/advisor/deoki/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_2,AI Financial Advisor,application/json
+/api/v1/advisor/deoki,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_3,AI Financial Advisor,application/json
+/api/v1/advisor/diagnose,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_4,AI Financial Advisor,application/json
+/api/v1/advisor,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_5,AI Financial Advisor,application/json
+/api/v1/advisor/deoki/diagnose,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_6,AI Financial Advisor,application/json
+/api/advisor,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_7,AI Financial Advisor,application/json
+/api/advisor/deoki/diagnose,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_8,AI Financial Advisor,application/json
+/api/v1/advisor/deoki/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_9,AI Financial Advisor,application/json
+/api/v1/advisor/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_10,AI Financial Advisor,application/json
+/api/advisor/diagnose,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiagnosis_11,AI Financial Advisor,application/json
+/api/admin/users/{id}/portfolio,,NO_FIXTURE_PATH_PARAM,getUserPortfolio,Admin Users,
+/api/v1/admin/users/{id}/portfolio,,NO_FIXTURE_PATH_PARAM,getUserPortfolio_1,Admin Users,
+/api/admin/users,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getUsers,Admin Users,application/json
+/api/v1/admin/users,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getUsers_1,Admin Users,application/json
+/api/v1/treasury/transactions,200,HTTP_200_UNAUTH_GET,getTransactions,Treasury Admin,application/json
+/api/v1/admin/treasury/transactions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTransactions_1,Treasury Admin,application/json
+/api/admin/treasury/transactions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTransactions_2,Treasury Admin,application/json
+/api/treasury/transactions,200,HTTP_200_UNAUTH_GET,getTransactions_3,Treasury Admin,application/json
+/api/treasury/revenue,200,HTTP_200_UNAUTH_GET,getRevenue,Treasury Admin,application/json
+/api/v1/treasury/revenue,200,HTTP_200_UNAUTH_GET,getRevenue_1,Treasury Admin,application/json
+/api/v1/admin/treasury/revenue,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRevenue_2,Treasury Admin,application/json
+/api/admin/treasury/revenue,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRevenue_3,Treasury Admin,application/json
+/api/v1/treasury/overview,200,HTTP_200_UNAUTH_GET,getOverview_6,Treasury Admin,application/json
+/api/v1/admin/treasury/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_7,Treasury Admin,application/json
+/api/treasury/overview,200,HTTP_200_UNAUTH_GET,getOverview_8,Treasury Admin,application/json
+/api/admin/treasury/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_9,Treasury Admin,application/json
+/api/treasury/expenditure,200,HTTP_200_UNAUTH_GET,getExpenditure,Treasury Admin,application/json
+/api/v1/admin/treasury/expenditure,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getExpenditure_1,Treasury Admin,application/json
+/api/v1/treasury/expenditure,200,HTTP_200_UNAUTH_GET,getExpenditure_2,Treasury Admin,application/json
+/api/admin/treasury/expenditure,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getExpenditure_3,Treasury Admin,application/json
+/api/v1/admin/stocks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStocks,Admin Stocks,application/json
+/api/admin/stocks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStocks_1,Admin Stocks,application/json
+/api/v1/admin/security/ip-blocks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getIpBlocks,Admin Security & Sessions,application/json
+/api/admin/security/ip-blocks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getIpBlocks_1,Admin Security & Sessions,application/json
+/api/v1/admin/security/abuse/rules,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRules,abuse-security-controller,application/json
+/admin/security/abuse/rules,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRules_1,abuse-security-controller,text/html
+/api/admin/security/abuse/rules,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRules_2,abuse-security-controller,application/json
+/api/admin/security,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSecurityOverview,Admin Security & Sessions,application/json
+/api/v1/admin/security,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSecurityOverview_1,Admin Security & Sessions,application/json
+/api/v1/admin/safety/takedowns,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,adminListTakedowns,safety-controller,application/json
+/admin/safety/takedowns,200,HTTP_200_UNAUTH_GET,adminListTakedowns_1,safety-controller,application/json
+/api/admin/safety/takedowns,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,adminListTakedowns_2,safety-controller,application/json
+/api/v1/admin/safety/chat-reports/{id},,NO_FIXTURE_PATH_PARAM,adminGetChatReport,safety-controller,
+/admin/safety/chat-reports/{id},,NO_FIXTURE_PATH_PARAM,adminGetChatReport_1,safety-controller,
+/api/admin/safety/chat-reports/{id},,NO_FIXTURE_PATH_PARAM,adminGetChatReport_2,safety-controller,
+/api/admin/safety/chat-reports,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,adminListChatReports,safety-controller,application/json
+/api/v1/admin/safety/chat-reports,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,adminListChatReports_1,safety-controller,application/json
+/admin/safety/chat-reports,200,HTTP_200_UNAUTH_GET,adminListChatReports_2,safety-controller,application/json
+/api/admin/work/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listTasks,operations-controller,application/json
+/api/admin/operations/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listTasks_1,operations-controller,application/json
+/api/v1/admin/work/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listTasks_2,operations-controller,application/json
+/api/v1/admin/operations/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listTasks_3,operations-controller,application/json
+/admin/operations/tasks,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listTasks_4,operations-controller,text/html
+/api/admin/storage/headroom/tables,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTopTables,storage-headroom-controller,application/json
+/api/v1/admin/operations/storage-headroom/tables,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTopTables_1,storage-headroom-controller,application/json
+/api/admin/operations/storage-headroom/tables,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTopTables_2,storage-headroom-controller,application/json
+/api/v1/admin/storage/headroom/tables,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTopTables_3,storage-headroom-controller,application/json
+/admin/storage/headroom/tables,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTopTables_4,storage-headroom-controller,text/html
+/api/admin/operations/storage-headroom,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus,storage-headroom-controller,application/json
+/api/v1/admin/storage/headroom/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_1,storage-headroom-controller,application/json
+/api/v1/admin/operations/storage-headroom/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_2,storage-headroom-controller,application/json
+/api/admin/storage/headroom/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_3,storage-headroom-controller,application/json
+/api/v1/admin/operations/storage-headroom,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_4,storage-headroom-controller,application/json
+/admin/storage/headroom/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_5,storage-headroom-controller,text/html
+/api/admin/storage/headroom,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_6,storage-headroom-controller,application/json
+/api/admin/operations/storage-headroom/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_7,storage-headroom-controller,application/json
+/api/v1/admin/storage/headroom,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_8,storage-headroom-controller,application/json
+/admin/storage/headroom,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStorageStatus_9,storage-headroom-controller,text/html
+/api/v1/admin/operations/storage-headroom/recommendations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecommendations,storage-headroom-controller,application/json
+/api/admin/storage/headroom/recommendations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecommendations_1,storage-headroom-controller,application/json
+/admin/storage/headroom/recommendations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecommendations_2,storage-headroom-controller,text/html
+/api/v1/admin/storage/headroom/recommendations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecommendations_3,storage-headroom-controller,application/json
+/api/admin/operations/storage-headroom/recommendations,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecommendations_4,storage-headroom-controller,application/json
+/api/v1/admin/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminMe,Admin Security & Sessions,application/json
+/api/admin/me,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAdminMe_1,Admin Security & Sessions,application/json
+/api/v1/admin/logs/system,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSystemLogs,Admin System Logs,application/json
+/api/admin/logs/system,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getSystemLogs_1,Admin System Logs,application/json
+/api/v1/admin/logs/frontend-errors,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecentFrontendErrors,Frontend Audit Logs,application/json
+/api/admin/kdic/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_10,KDIC Deposit Insurance,application/json
+/api/v1/admin/kdic/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_11,KDIC Deposit Insurance,application/json
+/api/admin/kdic/ledger-integrity,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getLedgerIntegrity,KDIC Deposit Insurance,application/json
+/api/v1/admin/kdic/ledger-integrity,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getLedgerIntegrity_1,KDIC Deposit Insurance,application/json
+/api/v1/admin/help/articles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listArticles_3,admin-help-controller,application/json
+/admin/help/articles,200,HTTP_200_UNAUTH_GET,listArticles_4,admin-help-controller,application/json
+/api/admin/help/articles,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listArticles_5,admin-help-controller,application/json
+/api/admin/fx/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStatus,admin-fx-controller,application/json
+/admin/fx/status,200,HTTP_200_UNAUTH_GET,getStatus_1,admin-fx-controller,application/json
+/api/v1/admin/fx/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStatus_2,admin-fx-controller,application/json
+/api/admin/enterprises/{id}/governance,,NO_FIXTURE_PATH_PARAM,getGovernance,enterprise-controller,
+/api/v1/admin/enterprises/{id}/governance,,NO_FIXTURE_PATH_PARAM,getGovernance_1,enterprise-controller,
+/api/admin/enterprises,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listEnterprises,enterprise-controller,application/json
+/api/v1/admin/enterprises,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listEnterprises_1,enterprise-controller,application/json
+/api/v1/admin/economy/reconciliation/latest,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getReconciliationHealth,Admin Economy & Reconciliation,application/json
+/api/v1/admin/economy/reconciliations/latest,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getReconciliationHealth_1,Admin Economy & Reconciliation,application/json
+/api/admin/economy/reconciliations/latest,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getReconciliationHealth_2,Admin Economy & Reconciliation,application/json
+/api/admin/economy/reconciliation/latest,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getReconciliationHealth_3,Admin Economy & Reconciliation,application/json
+/api/v1/admin/discord-outbox-events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiscordOutboxEvents,Admin Discord & Delivery,application/json
+/admin/discord-outbox-events,200,HTTP_200_UNAUTH_GET,getDiscordOutboxEvents_1,Admin Discord & Delivery,application/json
+/api/admin/discord-outbox-events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDiscordOutboxEvents_2,Admin Discord & Delivery,application/json
+/api/v1/admin/controls/public/kill-switches,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getKillSwitches,controls-controller,application/json
+/api/controls/kill-switches,200,HTTP_200_UNAUTH_GET,getKillSwitches_1,controls-controller,application/json
+/api/admin/controls/public/kill-switches,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getKillSwitches_2,controls-controller,application/json
+/api/v1/controls/kill-switches,200,HTTP_200_UNAUTH_GET,getKillSwitches_3,controls-controller,application/json
+/controls/kill-switches,200,HTTP_200_UNAUTH_GET,getKillSwitches_4,controls-controller,application/json
+/api/admin/controls/public/flags,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getPublicFlags,controls-controller,application/json
+/api/controls/flags,200,HTTP_200_UNAUTH_GET,getPublicFlags_1,controls-controller,application/json
+/api/v1/controls/flags,200,HTTP_200_UNAUTH_GET,getPublicFlags_2,controls-controller,application/json
+/api/v1/admin/controls/public/flags,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getPublicFlags_3,controls-controller,application/json
+/controls/flags,200,HTTP_200_UNAUTH_GET,getPublicFlags_4,controls-controller,application/json
+/api/v1/admin/controls,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getControlsOverview,Admin Controls,application/json
+/api/admin/controls,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getControlsOverview_1,Admin Controls,application/json
+/api/admin/bonds/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_12,Admin Treasury Bonds,application/json
+/api/v1/admin/bonds/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_13,Admin Treasury Bonds,application/json
+/api/admin/bonds/list,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listBonds,Admin Treasury Bonds,application/json
+/api/v1/admin/bonds/list,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listBonds_1,Admin Treasury Bonds,application/json
+/api/v1/admin/bonds/coupon-logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getCouponLogs,Admin Treasury Bonds,application/json
+/api/admin/bonds/coupon-logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getCouponLogs_1,Admin Treasury Bonds,application/json
+/admin/blog-verified,200,HTTP_200_UNAUTH_GET,getVerifiedBlogPosts,Admin Verified Blog,application/json
+/api/v1/admin/blog-verified,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getVerifiedBlogPosts_1,Admin Verified Blog,application/json
+/api/admin/blog-verified,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getVerifiedBlogPosts_2,Admin Verified Blog,application/json
+/api/v1/admin/backups/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupStatus,admin-backup-controller,application/json
+/api/admin/backups/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupStatus_1,admin-backup-controller,application/json
+/admin/backups/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupStatus_2,admin-backup-controller,text/html
+/api/admin/backups/files,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listBackupFiles,admin-backup-controller,application/json
+/admin/backups/files,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listBackupFiles_1,admin-backup-controller,text/html
+/api/v1/admin/backups/files,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listBackupFiles_2,admin-backup-controller,application/json
+/api/v1/admin/backups,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory,admin-backup-controller,application/json
+/api/v1/admin/backups/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_1,admin-backup-controller,application/json
+/admin/backups/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_2,admin-backup-controller,text/html
+/api/admin/backups,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_3,admin-backup-controller,application/json
+/api/admin/backups/,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_4,admin-backup-controller,application/json
+/admin/backups,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_5,admin-backup-controller,text/html
+/api/v1/admin/auth/channel-otp/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_12,admin-channel-otp-controller,application/json
+/api/admin/auth/channel-otp/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,status_13,admin-channel-otp-controller,application/json
+/api/v1/admin/audit/verifications,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getVerifications,audit-controller,application/json
+/api/admin/audit/verifications,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getVerifications_1,audit-controller,application/json
+/admin/audit/verifications,200,HTTP_200_UNAUTH_GET,getVerifications_2,audit-controller,application/json
+/admin/audit/retention,200,HTTP_200_UNAUTH_GET,getRetention,audit-controller,application/json
+/api/admin/audit/retention,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRetention_1,audit-controller,application/json
+/api/v1/admin/audit/retention,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRetention_2,audit-controller,application/json
+/admin/audit/logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs,audit-controller,text/html
+/api/v1/admin/audit/logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs_1,audit-controller,application/json
+/api/admin/audit,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs_2,audit-controller,application/json
+/api/v1/admin/audit,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs_3,audit-controller,application/json
+/api/admin/audit/logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs_4,audit-controller,application/json
+/admin/audit,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditLogs_5,audit-controller,text/html
+/admin/audit/financial-events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getFinancialEvents,audit-controller,text/html
+/api/v1/admin/audit/financial-events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getFinancialEvents_1,audit-controller,application/json
+/api/admin/audit/financial-events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getFinancialEvents_2,audit-controller,application/json
+/api/v1/admin/audit/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditEvents,audit-controller,application/json
+/admin/audit/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditEvents_1,audit-controller,text/html
+/api/admin/audit/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getAuditEvents_2,audit-controller,application/json
+/api/admin/audit/dispositions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDispositions,audit-controller,application/json
+/api/v1/admin/audit/dispositions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getDispositions_1,audit-controller,application/json
+/admin/audit/dispositions,200,HTTP_200_UNAUTH_GET,getDispositions_2,audit-controller,application/json
+/api/v1/admin/api-health/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStatus_3,Admin API Health,application/json
+/api/admin/api-health/status,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getStatus_4,Admin API Health,application/json
+/admin/api-health/status,200,HTTP_200_UNAUTH_GET,getStatus_5,Admin API Health,application/json
+/api/admin/api-health/backup-inventory,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_6,Admin API Health,application/json
+/api/v1/admin/api-health/backup-inventory,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getBackupInventory_7,Admin API Health,application/json
+/admin/api-health/backup-inventory,200,HTTP_200_UNAUTH_GET,getBackupInventory_8,Admin API Health,application/json
+/api/v1/admin/ai-news/templates,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTemplates,ai-news-controller,application/json
+/api/admin/ai-news/templates,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getTemplates_1,ai-news-controller,application/json
+/admin/ai-news/templates,200,HTTP_200_UNAUTH_GET,getTemplates_2,ai-news-controller,application/json
+/api/admin/activity/traffic,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,traffic,Activity & Telemetry,application/json
+/api/v1/admin/activity/traffic,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,traffic_1,Activity & Telemetry,application/json
+/api/v1/admin/activity/logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listLogsV1,Activity & Telemetry,application/json
+/api/account/security/sessions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listSessions,Account Security,application/json
+/api/v1/account/security/sessions,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listSessions_1,Account Security,application/json
+/api/v1/account/security/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listSecurityEvents,Account Security,application/json
+/api/account/security/events,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listSecurityEvents_1,Account Security,application/json
+/api/account/identities,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listIdentities,Account,application/json
+/api/v1/account/identities,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listIdentities_1,Account,application/json
+/api/seasons/current,200,HTTP_200_UNAUTH_GET,getCurrentSeason_3,Season,application/json
+/api/pension/overview,200,HTTP_200_UNAUTH_GET,getOverview_14,National Pension,application/json
+/api/pension/my-account,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyAccount_2,National Pension,application/json
+/api/pension/funded/position,200,HTTP_200_UNAUTH_GET,getFundedPosition,National Pension,application/json
+/api/central-bank/aggregates,200,HTTP_200_UNAUTH_GET,getMonetaryAggregates,Central Bank,application/json
+/api/central-bank/monetary-aggregates,200,HTTP_200_UNAUTH_GET,getMonetaryAggregates_1,Central Bank,application/json
+/api/casino/stats,200,HTTP_200_UNAUTH_GET,getStats,Casino,application/json
+/api/bonds/my-repo-loans,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyRepoLoans,Treasury Bonds,application/json
+/api/bonds/my-holdings,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getMyHoldings,Treasury Bonds,application/json
+/api/bonds,200,HTTP_200_UNAUTH_GET,getMarkets,Treasury Bonds,application/json
+/api/bonds/markets,200,HTTP_200_UNAUTH_GET,getMarkets_1,Treasury Bonds,application/json
+/api/bonds/,200,HTTP_200_UNAUTH_GET,getMarkets_2,Treasury Bonds,application/json
+/api/admin/pension/recent-payouts,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getRecentPayouts,Admin National Pension,application/json
+/api/admin/pension/overview,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,getOverview_15,Admin National Pension,application/json
+/api/admin/activity/logs,401,EXPECTED_AUTH_BLOCK_UNVERIFIED,listLogs,Activity & Telemetry,application/json
+/.well-known/indexnow.key,406,OTHER_HTTP,serveIndexNowKey,seo-controller,text/html
+/api/v1/auth/reset,200,HTTP_200_UNAUTH_GET,resetSession,Auth Session & Policy,application/json
+/api/auth/reset,200,HTTP_200_UNAUTH_GET,resetSession_7,Auth Session & Policy,application/json
