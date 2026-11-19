@@ -74,6 +74,42 @@ public class AuthController {
     }
 
     @GetMapping(path = {
+            "/api/v1/auth/me",
+            "/api/auth/me"
+    })
+    @Operation(summary = "현재 로그인 사용자 상세 정보 및 원장 잔액 조회")
+    public ResponseEntity<Map<String, Object>> me(HttpServletRequest request) {
+        Optional<SessionInfo> session = authService.resolveSession(request);
+        if (session.isEmpty() || !session.get().isSignedIn()) {
+            Map<String, Object> unauth = new LinkedHashMap<>();
+            unauth.put("authenticated", false);
+            unauth.put("signedIn", false);
+            unauth.put("user", null);
+            unauth.put("message", "Unauthorized");
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(unauth);
+        }
+
+        SessionInfo s = session.get();
+        Map<String, Object> u = new LinkedHashMap<>();
+        u.put("id", s.getUserId().toString());
+        u.put("userId", s.getUserId().toString());
+        u.put("username", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("name", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("displayName", s.getDisplayName() != null ? s.getDisplayName() : "회원");
+        u.put("email", s.getEmail());
+        u.put("roles", s.getRoles());
+        u.put("authenticated", true);
+        u.put("signedIn", true);
+
+        Long balance = authService.getUserCashBalance(s.getUserId());
+        u.put("balanceWld", balance != null ? balance : 0L);
+
+        Map<String, Object> res = new LinkedHashMap<>(u);
+        res.put("user", u);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(path = {
             "/api/v1/auth/policy",
             "/api/auth/policy"
     })

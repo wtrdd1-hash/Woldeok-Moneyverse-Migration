@@ -456,6 +456,23 @@ public class UserAuthService {
             "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
     }
 
+    public Long getUserCashBalance(UUID userId) {
+        if (userId == null) return 0L;
+        String sql = """
+            SELECT COALESCE(ab.balance, 0)
+            FROM accounts a
+            JOIN account_balances ab ON ab.account_id = a.id
+            WHERE a.owner_user_id = ? AND a.account_type = 'USER_CASH' AND a.currency = 'WLD'
+            LIMIT 1
+            """;
+        try {
+            Long b = jdbcTemplate.queryForObject(sql, Long.class, userId);
+            return b != null ? b : 0L;
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
     public static class SessionInfo {
         private UUID sessionId;
         private UUID userId;

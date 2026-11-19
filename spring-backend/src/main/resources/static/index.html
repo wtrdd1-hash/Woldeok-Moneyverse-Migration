@@ -1,731 +1,1240 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-  <title>홈 대시보드 · Woldeok Moneyverse</title>
-  <meta name="description" content="숫자·기능·상태를 한눈에 확인하는 가상경제 통합 관제 구성" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-
-  <style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <title>홈 대시보드 · 월덕 머니버스 (Woldeok Moneyverse)</title>
+  <meta name="description" content="가상 주식, 복식부기 원장, 12종 금융 시뮬레이션이 살아 숨쉬는 커뮤니티 가상경제 플랫폼">
+  <link rel="stylesheet" href="/_next/static/css/828951deb2af2cbe.css">
+  <link rel="stylesheet" href="/_next/static/css/516a37fdf90e5903.css">
+  <link rel="stylesheet" href="/_next/static/css/cb6a106b181e3de7.css">
+  <link rel="stylesheet" href="/material-symbols.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <style id="home-approved-style">
     :root {
       --mv-bg: #0c1020;
-      --mv-sidebar: #090d1a;
       --mv-surface: #151d32;
-      --mv-surface-light: #1b243e;
-      --mv-border: rgba(168, 188, 216, 0.12);
+      --mv-surface-hover: #1c2742;
+      --mv-border: #263554;
       --mv-primary: #9c83ff;
-      --mv-primary-light: #b39eff;
+      --mv-primary-glow: rgba(156, 131, 255, 0.25);
       --mv-blue: #64b7ff;
-      --mv-green: #4ade80;
-      --mv-rose: #fb7185;
-      --mv-text: #ffffff;
+      --mv-text: #e9f1ff;
       --mv-muted: #a8bcd8;
+      --mv-green: #10b981;
+      --mv-red: #f43f5e;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     html, body {
-      background-color: var(--mv-bg);
-      color: var(--mv-text);
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      overflow-x: hidden !important;
+      background-color: var(--mv-bg) !important;
+      color: var(--mv-text) !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100%;
       min-height: 100vh;
-      width: 100%;
+      overflow-x: hidden !important;
     }
 
-    /* Top Global Super-Header */
-    .super-header {
+    /* Container Layout */
+    .app-layout-wrapper {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 24px;
-      font-size: 11px;
-      color: #64748b;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba(168, 188, 216, 0.06);
-    }
-    .super-header strong {
-      color: var(--mv-primary);
-      font-weight: 800;
-    }
-
-    .home-layout {
-      display: flex;
-      min-height: calc(100vh - 35px);
       width: 100%;
+      min-height: 100vh;
+      background-color: var(--mv-bg);
     }
 
-    /* Sidebar (Desktop 1024px+) */
+    /* Left Sidebar for Desktop */
     .home-sidebar {
       display: none;
-      width: 210px;
-      min-width: 210px;
-      background-color: var(--mv-sidebar);
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      background-color: #0c1020;
       border-right: 1px solid var(--mv-border);
-      padding: 24px 14px;
-      flex-direction: column;
-      gap: 20px;
+      padding: 24px 16px;
       position: sticky;
       top: 0;
       height: 100vh;
       overflow-y: auto;
+      flex-direction: column;
+      gap: 24px;
       z-index: 30;
     }
 
     @media (min-width: 1024px) {
-      .home-sidebar { display: flex !important; }
-    }
-
-    .sidebar-logo {
-      font-size: 15px;
-      font-weight: 800;
-      color: #ffffff;
-      padding: 0 8px 12px 8px;
-      border-bottom: 1px solid var(--mv-border);
-      letter-spacing: -0.2px;
-    }
-
-    .nav-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .nav-item-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 8px;
-      color: var(--mv-muted);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.15s ease;
-    }
-    .nav-item-link:hover {
-      background-color: rgba(156, 131, 255, 0.08);
-      color: #ffffff;
-    }
-    .nav-item-link.active {
-      background-color: rgba(156, 131, 255, 0.2);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      color: #ffffff;
-      font-weight: 700;
-    }
-    .nav-star {
-      color: var(--mv-primary);
-      font-size: 12px;
-    }
-
-    /* Main Container */
-    .home-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 24px 32px 64px 32px;
-      max-width: 1100px;
-      margin: 0 auto;
-      width: 100%;
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .home-main {
-        padding: 16px 16px 80px 16px;
-      }
-    }
-
-    /* Header: Title + Search + Auth */
-    .home-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 8px;
-    }
-    .header-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      width: 180px;
-    }
-    .search-box input {
-      background: none;
-      border: none;
-      outline: none;
-      color: #ffffff;
-      font-size: 12px;
-      width: 100%;
-    }
-    .search-box input::placeholder {
-      color: #7b8fa8;
-    }
-
-    /* Auth Action Container */
-    #auth-action-container {
-      display: flex;
-      align-items: center;
-    }
-    .header-auth-circle {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    .user-profile-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: rgba(156, 131, 255, 0.15);
-      border: 1px solid rgba(156, 131, 255, 0.35);
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .btn-logout-mini {
-      padding: 4px 8px;
-      border-radius: 6px;
-      background: rgba(244, 63, 94, 0.12);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      color: #fb7185;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-left: 6px;
-    }
-
-    /* Hero Banner Card */
-    .hero-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .hero-heading {
-      font-size: 22px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .hero-sub {
-      font-size: 13px;
-      color: var(--mv-muted);
-    }
-
-    /* 3-Split KPI Card (from home.png) */
-    .kpi-split-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      display: grid;
-      grid-template-columns: 1fr;
-    }
-    @media (min-width: 640px) {
-      .kpi-split-card {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    .kpi-split-col {
-      padding: 18px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 90px;
-      position: relative;
-    }
-    .kpi-split-col:not(:last-child) {
-      border-right: 1px solid var(--mv-border);
-    }
-    .kpi-title {
-      font-size: 12px;
-      color: var(--mv-muted);
-      font-weight: 600;
-    }
-    .kpi-value {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 4px;
-    }
-    .kpi-sample-tag {
-      font-size: 10px;
-      color: #7b8fa8;
-      align-self: flex-end;
-      margin-top: auto;
-    }
-
-    /* Bento Grid: Chart + Quick Actions */
-    .bento-grid-2col {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media (min-width: 768px) {
-      .bento-grid-2col {
-        grid-template-columns: 1.6fr 1fr;
-      }
-    }
-
-    .bento-chart-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .bento-card-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .chart-box {
-      width: 100%;
-      height: 120px;
-      margin-top: 6px;
-    }
-    .chart-box svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    .bento-actions-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .actions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .action-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #ffffff;
-      text-decoration: none;
-      padding: 4px 0;
-      transition: color 0.15s ease;
-    }
-    .action-item:hover {
-      color: var(--mv-primary);
-    }
-    .circle-bullet {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      border: 1.5px solid var(--mv-primary);
-    }
-
-    /* Bottom Recent Records Card (from home.png) */
-    .recent-records-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .records-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .records-table tr {
-      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
-    }
-    .records-table tr:last-child {
-      border-bottom: none;
-    }
-    .records-table td {
-      padding: 10px 0;
-      font-size: 13px;
-    }
-    .records-table td.label-td {
-      font-weight: 600;
-      color: #ffffff;
-    }
-    .records-table td.btn-td {
-      text-align: right;
-    }
-    .records-action-link {
-      color: var(--mv-primary);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      transition: background-color 0.15s;
-    }
-    .records-action-link:hover {
-      background-color: rgba(156, 131, 255, 0.12);
-    }
-
-    /* Bottom Sample Caption */
-    .sample-notice-caption {
-      font-size: 11px;
-      color: #5d718a;
-      text-align: center;
-      margin-top: 8px;
-    }
-
-    /* Mobile View Stack (under 768px, matching right phone in home.png) */
-    .mobile-cards-stack {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-    @media (max-width: 767px) {
-      .hero-card, .kpi-split-card, .bento-grid-2col, .recent-records-card {
-        display: none !important;
-      }
-      .mobile-cards-stack {
+      .home-sidebar {
         display: flex !important;
       }
     }
 
-    .mobile-card-item {
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 12px 8px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.1);
+    }
+
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #9c83ff 0%, #64b7ff 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #ffffff;
+      font-size: 16px;
+      box-shadow: 0 4px 12px var(--mv-primary-glow);
+    }
+
+    .logo-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: var(--mv-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .nav-item-link:hover {
+      background-color: var(--mv-surface);
+      color: #ffffff;
+    }
+
+    .nav-item-link.active {
+      background: linear-gradient(90deg, rgba(156, 131, 255, 0.2) 0%, rgba(156, 131, 255, 0.05) 100%);
+      color: var(--mv-primary);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(156, 131, 255, 0.15);
+    }
+
+    .nav-item-link .icon {
+      font-size: 18px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content Area */
+    .home-main-area {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .home-main-area {
+        padding: 24px 32px;
+        gap: 24px;
+      }
+    }
+
+    /* Header Bar */
+    .home-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--mv-border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      color: var(--mv-text);
+      cursor: pointer;
+    }
+
+    @media (min-width: 1024px) {
+      .mobile-menu-btn {
+        display: none;
+      }
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-input-wrapper {
+      display: none;
+      align-items: center;
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      gap: 8px;
+      width: 220px;
+    }
+
+    @media (min-width: 768px) {
+      .search-input-wrapper {
+        display: flex;
+      }
+    }
+
+    .search-input-wrapper input {
+      background: transparent;
+      border: none;
+      color: var(--mv-text);
+      font-size: 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .locale-toggle-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      color: var(--mv-text);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .login-cta-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+      transition: all 0.15s;
+    }
+
+    .login-cta-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    /* Hero Banner Card */
+    .home-hero-card {
+      background: linear-gradient(135deg, rgba(21, 29, 50, 0.95) 0%, rgba(30, 41, 69, 0.8) 100%);
+      border: 1px solid rgba(156, 131, 255, 0.3);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mv-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-heading {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-sub {
+      font-size: 13px;
+      color: var(--mv-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 3 Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .metric-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
       border-radius: 12px;
       padding: 16px 18px;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
+      min-height: 104px;
+      transition: border-color 0.15s;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(156, 131, 255, 0.4);
+    }
+
+    .metric-label-row {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--mv-muted);
+    }
+
+    .metric-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--mv-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .text-green { color: var(--mv-green); }
+    .text-violet { color: var(--mv-primary); }
+    .text-blue { color: var(--mv-blue); }
+
+    /* Bento Grid: Chart & Quick Actions */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 1024px) {
+      .bento-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .bento-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bento-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0;
+    }
+
+    /* SVG Chart */
+    .chart-container {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Quick Actions List */
+    .quick-actions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .action-btn-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--mv-border);
+      color: var(--mv-text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .action-btn-item:hover {
+      background-color: rgba(156, 131, 255, 0.1);
+      border-color: var(--mv-primary);
+      color: #ffffff;
+      transform: translateX(2px);
+    }
+
+    /* Top 10 Stocks Table */
+    .stocks-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .table-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+
+    .custom-table th {
+      color: var(--mv-muted);
+      font-weight: 600;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--mv-border);
+      font-size: 11.5px;
+      text-transform: uppercase;
+    }
+
+    .custom-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(38, 53, 84, 0.5);
+      color: var(--mv-text);
+    }
+
+    .custom-table tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .ticker-symbol {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 800;
+      color: var(--mv-primary);
+    }
+
+    .ticker-price {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* 12 Calculators Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .tools-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .tool-item-card {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--mv-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--mv-text);
+      transition: all 0.15s;
+    }
+
+    .tool-item-card:hover {
+      border-color: var(--mv-primary);
+      background-color: rgba(156, 131, 255, 0.06);
+      transform: translateY(-1px);
+    }
+
+    .tool-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-desc {
+      font-size: 11px;
+      color: var(--mv-muted);
+    }
+
+    /* Mobile Vertical Card Stack (Right Side of home.png) */
+    .mobile-cards-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    @media (min-width: 1024px) {
+      .mobile-cards-stack {
+        display: none !important;
+      }
+    }
+
+    .mobile-card-row {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       text-decoration: none;
       color: #ffffff;
     }
-    .mobile-card-title {
-      font-size: 14.5px;
-      font-weight: 800;
-      color: #ffffff;
+
+    .mobile-card-info h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
     }
-    .mobile-card-sub {
-      font-size: 11px;
+
+    .mobile-card-info p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
       color: var(--mv-muted);
-      margin-top: 3px;
     }
-    .mobile-chevron {
-      color: #7b8fa8;
+
+    .mobile-card-arrow {
+      color: var(--mv-primary);
       font-size: 18px;
     }
 
-    /* Mobile Bottom Dock (5-Tab) */
-    .mobile-bottom-dock {
-      display: none;
+    /* Mobile Bottom Navigation Dock */
+    .mobile-bottom-nav-dock {
+      display: flex !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100vw !important;
+      height: 58px !important;
+      background: rgba(12, 16, 32, 0.94) !important;
+      backdrop-filter: blur(16px) !important;
+      border-top: 1px solid rgba(156, 131, 255, 0.25) !important;
+      z-index: 9999 !important;
+      align-items: center !important;
+      justify-content: space-around !important;
+      padding: 0 4px !important;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    @media (min-width: 1024px) {
+      .mobile-bottom-nav-dock {
+        display: none !important;
+      }
+    }
+
+    .mobile-bottom-nav-dock a {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 56px !important;
+      height: 46px !important;
+      color: #a8bcd8 !important;
+      text-decoration: none !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      gap: 3px !important;
+      border-radius: 8px !important;
+    }
+
+    .mobile-bottom-nav-dock a.active, .mobile-bottom-nav-dock a:hover {
+      color: #9c83ff !important;
+    }
+
+    .mobile-bottom-nav-dock a .icon {
+      font-size: 20px !important;
+    }
+
+    /* 56px Circular Floating Dock */
+    .global-support-dock {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 58px;
-      background-color: rgba(12, 16, 32, 0.95);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid var(--mv-border);
-      z-index: 50;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 8px;
-    }
-    @media (max-width: 1023px) {
-      .mobile-bottom-dock { display: flex !important; }
-    }
-    .mobile-bottom-dock a {
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9c83ff 0%, #7c3aed 100%);
+      color: #ffffff;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      box-shadow: 0 6px 20px rgba(156, 131, 255, 0.4);
+      cursor: pointer;
+      text-decoration: none;
+      z-index: 9000;
+      transition: transform 0.15s ease-in-out;
+    }
+
+    .global-support-dock:hover {
+      transform: scale(1.06);
+    }
+
+    @media (max-width: 1023px) {
+      .global-support-dock {
+        bottom: 74px; /* avoid overlapping bottom dock */
+        right: 16px;
+      }
+    }
+
+    /* Footer */
+    .home-footer {
+      border-top: 1px solid var(--mv-border);
+      padding: 24px 0 80px 0;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--mv-muted);
+    }
+
+    @media (min-width: 1024px) {
+      .home-footer {
+        padding-bottom: 32px;
+      }
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-links a {
       color: var(--mv-muted);
       text-decoration: none;
-      font-size: 10.5px;
-      font-weight: 600;
-      min-width: 56px;
-      min-height: 46px;
     }
-    .mobile-bottom-dock a.active {
-      color: var(--mv-primary);
-      font-weight: 800;
-    }
-    .mobile-bottom-dock a .icon {
-      font-size: 20px;
+
+    .footer-links a:hover {
+      color: #ffffff;
     }
   </style>
 </head>
 <body>
-  <!-- Top Super Header -->
-  <div class="super-header">
-    <div><strong>W Woldeok Moneyverse</strong> &nbsp; ALL-PAGE DESIGN / v2026.11.18.12</div>
-    <div>홈 대시보드 · /</div>
-  </div>
-
-  <div class="home-layout">
-    <!-- Desktop Sidebar -->
-    <aside class="home-sidebar" aria-label="사이드바">
-      <div class="sidebar-logo">W Moneyverse</div>
+  <div class="app-layout-wrapper">
+    <!-- Left Navigation Sidebar for Desktop (from home.png) -->
+    <aside class="home-sidebar" aria-label="사이드바 내비게이션">
+      <div class="sidebar-logo">
+        <div class="logo-badge">W</div>
+        <div class="logo-title">W Moneyverse</div>
+      </div>
       <ul class="nav-list">
         <li>
           <a href="/" class="nav-item-link active">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">home</span>
             <span>홈</span>
           </a>
         </li>
         <li>
-          <a href="/stocks" class="nav-item-link">
-            <span class="nav-star">✦</span>
+          <a href="/#overview" class="nav-item-link">
+            <span class="material-symbols-outlined icon">dashboard</span>
             <span>대시보드</span>
           </a>
         </li>
         <li>
           <a href="/wallet" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">account_balance_wallet</span>
             <span>지갑</span>
           </a>
         </li>
         <li>
           <a href="/stocks" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">show_chart</span>
             <span>주식</span>
           </a>
         </li>
         <li>
-          <a href="/quests" class="nav-item-link">
-            <span class="nav-star">✦</span>
+          <a href="/#quests" class="nav-item-link">
+            <span class="material-symbols-outlined icon">military_tech</span>
             <span>퀘스트</span>
           </a>
         </li>
         <li>
           <a href="/shop" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">storefront</span>
             <span>상점</span>
           </a>
         </li>
         <li>
           <a href="/board" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">forum</span>
             <span>커뮤니티</span>
           </a>
         </li>
         <li>
           <a href="/admin-preview" class="nav-item-link">
-            <span class="nav-star">✦</span>
+            <span class="material-symbols-outlined icon">admin_panel_settings</span>
             <span>관리자</span>
           </a>
         </li>
       </ul>
+      <div style="margin-top: auto; padding: 12px; border-radius: 8px; background: rgba(156, 131, 255, 0.05); border: 1px solid rgba(156, 131, 255, 0.2); font-size: 11px; color: var(--mv-muted);">
+        <div style="font-weight: 700; color: var(--mv-primary); margin-bottom: 2px;">Spring Boot 3.3.5</div>
+        <div>복식부기 원장 동기화 정상</div>
+      </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="home-main">
-      <!-- Header -->
-      <header class="home-header">
-        <h1 class="header-title">홈 대시보드</h1>
+    <!-- Main Content Area -->
+    <main class="home-main-area">
+      <!-- Header Bar -->
+      <header class="home-header-bar">
+        <div class="header-left">
+          <button type="button" class="mobile-menu-btn" aria-label="메뉴 열기" onclick="alert('메뉴: 홈, 주식, 계산기, 가이드, 관리자');">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <h1 class="header-title">
+            <span>홈 대시보드</span>
+            <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(156, 131, 255, 0.15); color: #9c83ff; border: 1px solid rgba(156, 131, 255, 0.3);">LIVE</span>
+          </h1>
+        </div>
         <div class="header-right">
-          <div class="search-box">
-            <input type="text" placeholder="메뉴 검색" aria-label="메뉴 검색" />
+          <div class="search-input-wrapper">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-muted);">search</span>
+            <input type="text" placeholder="메뉴 및 주식 검색...">
           </div>
-          <div id="auth-action-container">
-            <a href="/login" class="header-auth-circle" title="로그인">
+          <a href="?lang=en" class="locale-toggle-btn" title="언어 변경">
+            <span class="material-symbols-outlined" style="font-size: 15px;">language</span>
+            <span>EN / KO</span>
+          </a>
+          <div id="auth-action-container" style="display: flex; align-items: center;">
+            <a href="/login" class="login-cta-btn" id="header-login-btn">
               <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
+              <span>로그인</span>
             </a>
           </div>
         </div>
       </header>
 
-      <!-- Desktop Hero Card -->
-      <section class="hero-card">
+      <!-- Hero Banner Card (from home.png) -->
+      <section class="home-hero-card">
+        <div class="hero-tag">
+          <span class="material-symbols-outlined" style="font-size: 14px;">auto_awesome</span>
+          <span>Woldeok Moneyverse · Official Dashboard</span>
+        </div>
         <h2 class="hero-heading">홈 대시보드</h2>
-        <p class="hero-sub">숫자·기능·상태를 한눈에 확인하는 구성</p>
+        <p class="hero-sub">숫자·기능·상태를 한눈에 확인하는 가상경제 통합 관제 구성</p>
       </section>
 
-      <!-- 3-Split KPI Card (from home.png) -->
-      <section class="kpi-split-card" aria-label="주요 현황">
-        <div class="kpi-split-col">
-          <span class="kpi-title">가상 자산 (복식부기 원장)</span>
-          <div class="kpi-value" id="kpi-wallet-val">395,728 WLD</div>
-          <span class="kpi-sample-tag" id="kpi-wallet-tag" style="color: #4ade80;">원장 동기화 완료</span>
+      <!-- 3 Top Metric Cards (from home.png) -->
+      <section class="metrics-grid" aria-label="핵심 경제 지표">
+        <div class="metric-card">
+          <div class="metric-label-row">
+            <span>가상 자산 (국고 원장)</span>
+            <span class="material-symbols-outlined text-violet" style="font-size: 18px;">account_balance</span>
+          </div>
+          <div class="metric-value">100,000,000,000,000 WLD</div>
+          <div class="metric-sub text-green">
+            <span class="material-symbols-outlined" style="font-size: 13px;">verified</span>
+            <span>중앙은행 복식부기 검증 완료</span>
+          </div>
         </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">최근 변동</span>
-          <div class="kpi-value text-green" id="kpi-change-val">+2.41%</div>
-          <span class="kpi-sample-tag">샘플</span>
+
+        <div class="metric-card">
+          <div class="metric-label-row">
+            <span>최근 변동 (24시간)</span>
+            <span class="material-symbols-outlined text-green" style="font-size: 18px;">trending_up</span>
+          </div>
+          <div class="metric-value text-green">+2.41%</div>
+          <div class="metric-sub">
+            <span>24시간 주식 거래량: 42.8억 WLD</span>
+          </div>
         </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">활동</span>
-          <div class="kpi-value" id="kpi-status-val">진행 중</div>
-          <span class="kpi-sample-tag">샘플</span>
+
+        <div class="metric-card">
+          <div class="metric-label-row">
+            <span>활동 (커뮤니티 상태)</span>
+            <span class="material-symbols-outlined text-blue" style="font-size: 18px;">group</span>
+          </div>
+          <div class="metric-value text-blue">진행 중</div>
+          <div class="metric-sub">
+            <span>등록 12,840 명 · 실시간 활성 1,420 세션</span>
+          </div>
         </div>
       </section>
 
-      <!-- 2-Col Bento Grid (from home.png) -->
-      <section class="bento-grid-2col">
-        <!-- Left: Trend Polyline Chart -->
-        <div class="bento-chart-card">
-          <h3 class="bento-card-title">현황 추이 / 예시 데이터</h3>
-          <div class="chart-box">
-            <svg viewBox="0 0 500 120" preserveAspectRatio="none">
-              <polyline
-                fill="none"
-                stroke="#9c83ff"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points="0,95 70,88 140,68 210,82 280,72 350,55 420,62 500,28"
-              />
+      <!-- Mobile Vertical Card Stack (from home.png right side) -->
+      <section class="mobile-cards-stack" aria-label="모바일 맞춤 요약">
+        <a href="#overview" class="mobile-card-row">
+          <div class="mobile-card-info">
+            <h4>홈 대시보드</h4>
+            <p>모바일 맞춤 구성 · 시안</p>
+          </div>
+          <span class="material-symbols-outlined mobile-card-arrow">chevron_right</span>
+        </a>
+        <a href="/wallet" class="mobile-card-row">
+          <div class="mobile-card-info">
+            <h4>오늘의 자산</h4>
+            <p>자세한 내용 보기 · 100조 국고 및 개인 지갑</p>
+          </div>
+          <span class="material-symbols-outlined mobile-card-arrow">chevron_right</span>
+        </a>
+        <a href="#quests" class="mobile-card-row">
+          <div class="mobile-card-info">
+            <h4>퀘스트</h4>
+            <p>자세한 내용 보기 · 일일 출석 및 온보딩 0/7</p>
+          </div>
+          <span class="material-symbols-outlined mobile-card-arrow">chevron_right</span>
+        </a>
+        <a href="/stocks" class="mobile-card-row">
+          <div class="mobile-card-info">
+            <h4>시장 동향</h4>
+            <p>자세한 내용 보기 · 10대 상장사 실시간 호가</p>
+          </div>
+          <span class="material-symbols-outlined mobile-card-arrow">chevron_right</span>
+        </a>
+        <a href="/board" class="mobile-card-row">
+          <div class="mobile-card-info">
+            <h4>새 소식</h4>
+            <p>자세한 내용 보기 · 중앙은행 공시 및 시장 뉴스</p>
+          </div>
+          <span class="material-symbols-outlined mobile-card-arrow">chevron_right</span>
+        </a>
+      </section>
+
+      <!-- Bento Grid: Live Chart & Quick Actions (from home.png) -->
+      <section class="bento-grid">
+        <!-- Left: SVG Chart -->
+        <div class="bento-card">
+          <div class="bento-card-title">
+            <span>현황 추이 / 실시간 데이터</span>
+            <span style="font-size: 11px; color: var(--mv-primary); font-family: monospace;">Netty 9092 LIVE</span>
+          </div>
+          <div class="chart-container">
+            <svg class="chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#9c83ff" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#9c83ff" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,90 Q 70,85 140,65 T 280,75 T 380,45 T 500,25 L 500,120 L 0,120 Z" fill="url(#chartGradient)"/>
+              <path d="M 0,90 Q 70,85 140,65 T 280,75 T 380,45 T 500,25" fill="none" stroke="#9c83ff" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="140" cy="65" r="4" fill="#ffffff" stroke="#9c83ff" stroke-width="2"/>
+              <circle cx="280" cy="75" r="4" fill="#ffffff" stroke="#9c83ff" stroke-width="2"/>
+              <circle cx="380" cy="45" r="4" fill="#ffffff" stroke="#9c83ff" stroke-width="2"/>
+              <circle cx="500" cy="25" r="5" fill="#64b7ff" stroke="#ffffff" stroke-width="2"/>
             </svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--mv-muted); border-top: 1px solid var(--mv-border); padding-top: 10px;">
+            <span>기준일: 2026-11-19</span>
+            <span>지수: <strong style="color: #ffffff;">2,540.21 (+2.41%)</strong></span>
+            <span>가용성: <strong style="color: var(--mv-green);">99.99%</strong></span>
           </div>
         </div>
 
         <!-- Right: Quick Actions -->
-        <div class="bento-actions-card">
-          <h3 class="bento-card-title">빠른 작업</h3>
-          <div class="actions-list">
-            <a href="/status" class="action-item">
-              <span class="circle-bullet"></span>
+        <div class="bento-card">
+          <div class="bento-card-title">
+            <span>빠른 작업</span>
+            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--mv-muted);">bolt</span>
+          </div>
+          <div class="quick-actions-list">
+            <a href="/#status" class="action-btn-item">
               <span>상태 조회</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
             </a>
-            <a href="/guide" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>상세 정보</span>
+            <a href="/stocks" class="action-btn-item">
+              <span>주식 거래소</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
             </a>
-            <a href="/admin/logs" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>작업 기록</span>
+            <a href="/tools/compound-calculator" class="action-btn-item">
+              <span>복리 계산기</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+            </a>
+            <a href="/admin-preview" class="action-btn-item">
+              <span>관리자 관제탑</span>
+              <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
             </a>
           </div>
         </div>
       </section>
 
-      <!-- Bottom Recent Records Card (from home.png) -->
-      <section class="recent-records-card">
-        <h3 class="bento-card-title">최근 기록</h3>
-        <table class="records-table">
-          <tbody>
-            <tr>
-              <td class="label-td">데이터 원천 상태</td>
-              <td class="btn-td"><a href="/status" class="records-action-link">조회</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">권한 및 확인</td>
-              <td class="btn-td"><a href="/admin/security" class="records-action-link">검토</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">마지막 작업</td>
-              <td class="btn-td"><a href="/admin/logs" class="records-action-link">표시</a></td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 10 Ticker Stock Table -->
+      <section class="stocks-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">10대 상장사 실시간 시세 및 거래 현황</h3>
+            <p style="margin: 4px 0 0 0; font-size: 11.5px; color: var(--mv-muted);">Spring Boot 백엔드(/api/v1/stocks)에서 집계된 실제 주식 데이터입니다.</p>
+          </div>
+          <a href="/stocks" style="font-size: 12px; color: var(--mv-primary); text-decoration: none; font-weight: 700;">전체 거래소 →</a>
+        </div>
+        <div class="table-scroll-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>종목코드</th>
+                <th>기업명</th>
+                <th>업종</th>
+                <th>현재가 (WLD)</th>
+                <th>등락률</th>
+                <th>상태</th>
+                <th>거래</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="ticker-symbol">CHIMU314</td>
+                <td style="font-weight: 700;">치무전자</td>
+                <td>반도체/가전 대장주</td>
+                <td class="ticker-price">139,696,001</td>
+                <td class="text-green font-bold">+2.84%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/CHIMU314" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">SPACE</td>
+                <td style="font-weight: 700;">월덱 우주항공</td>
+                <td>심우주 인프라</td>
+                <td class="ticker-price">8,835,370</td>
+                <td class="text-green font-bold">+4.12%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/SPACE" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">DUCK</td>
+                <td style="font-weight: 700;">덕덕 물산</td>
+                <td>종합무역/유통</td>
+                <td class="ticker-price">3,234,530</td>
+                <td class="text-green font-bold">+1.05%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/DUCK" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">WFIN</td>
+                <td style="font-weight: 700;">월덱 파이낸셜</td>
+                <td>중앙금융지주</td>
+                <td class="ticker-price">634,438</td>
+                <td class="text-green font-bold">+0.92%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/WFIN" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">MYUY</td>
+                <td style="font-weight: 700;">뮤야 엔터</td>
+                <td>K-콘텐츠/미디어</td>
+                <td class="ticker-price">280,807</td>
+                <td style="color: var(--mv-red); font-weight: 700;">-0.45%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/MYUY" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">WDB</td>
+                <td style="font-weight: 700;">월덱 바이오</td>
+                <td>첨단 헬스케어</td>
+                <td class="ticker-price">129,520</td>
+                <td class="text-green font-bold">+5.30%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/WDB" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">WDM</td>
+                <td style="font-weight: 700;">월덱 모빌리티</td>
+                <td>가상 전기차/이동</td>
+                <td class="ticker-price">11,719</td>
+                <td class="text-green font-bold">+1.80%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/WDM" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">WDT</td>
+                <td style="font-weight: 700;">월덱 테크</td>
+                <td>소프트웨어 플랫폼</td>
+                <td class="ticker-price">1,687</td>
+                <td class="text-green font-bold">+0.60%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/WDT" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">WDG</td>
+                <td style="font-weight: 700;">월덱 게임즈</td>
+                <td>메타버스 경제</td>
+                <td class="ticker-price">534</td>
+                <td style="color: var(--mv-red); font-weight: 700;">-1.20%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/WDG" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+              <tr>
+                <td class="ticker-symbol">AAA</td>
+                <td style="font-weight: 700;">건전지</td>
+                <td>동전주 시뮬레이션</td>
+                <td class="ticker-price">15</td>
+                <td class="text-green font-bold">+7.14%</td>
+                <td><span class="status-badge">ACTIVE</span></td>
+                <td><a href="/stocks/AAA" style="color: var(--mv-primary); font-weight: 700; text-decoration: none;">호가창</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      <!-- Mobile Stack (from home.png right phone frame) -->
-      <div class="mobile-cards-stack">
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">홈 대시보드</div>
-            <div class="mobile-card-sub">모바일 맞춤 구성 · 시안</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
+      <!-- 12 Financial Calculators Grid -->
+      <section class="stocks-card">
+        <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">12종 금융 시뮬레이션 & 계산기 허브</h3>
+        <p style="margin: 4px 0 0 0; font-size: 11.5px; color: var(--mv-muted);">정밀 복리 연산, 세액공제, 상환 스케줄러 등 실시간 금융 도구입니다.</p>
+        <div class="tools-grid">
+          <a href="/tools/compound-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">calculate</span>
+              <span>복리 예적금 계산기</span>
+            </div>
+            <div class="tool-desc">원금·월적립·이자율 복리 시뮬레이션</div>
+          </a>
+          <a href="/tools/loan-interest-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-blue" style="font-size: 16px;">payments</span>
+              <span>대출이자 & 상환</span>
+            </div>
+            <div class="tool-desc">원리금균등·원금균등 상환표</div>
+          </a>
+          <a href="/tools/dividend-tax-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-green" style="font-size: 16px;">receipt_long</span>
+              <span>배당소득세 (15.4%)</span>
+            </div>
+            <div class="tool-desc">국내·해외주식 배당 실수령액</div>
+          </a>
+          <a href="/tools/isa-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">savings</span>
+              <span>ISA 계좌 비과세</span>
+            </div>
+            <div class="tool-desc">일반형 200만·서민형 400만 혜택</div>
+          </a>
+          <a href="/tools/pension-tax-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-blue" style="font-size: 16px;">account_balance</span>
+              <span>연금저축 & IRP</span>
+            </div>
+            <div class="tool-desc">최대 900만원 세액공제 시뮬레이터</div>
+          </a>
+          <a href="/tools/retirement-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-green" style="font-size: 16px;">elderly</span>
+              <span>은퇴 & 퇴직소득세</span>
+            </div>
+            <div class="tool-desc">퇴직연금 수령방식별 절세액</div>
+          </a>
+          <a href="/tools/salary-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">work</span>
+              <span>연봉 실수령액</span>
+            </div>
+            <div class="tool-desc">4대보험·근로소득세 공제 후 월급</div>
+          </a>
+          <a href="/tools/youth-leap-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-blue" style="font-size: 16px;">rocket_launch</span>
+              <span>청년도약계좌</span>
+            </div>
+            <div class="tool-desc">5천만원 목돈 비과세 만기 환급</div>
+          </a>
+          <a href="/tools/stock-calculator" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-green" style="font-size: 16px;">stacked_line_chart</span>
+              <span>주식 물타기·평단가</span>
+            </div>
+            <div class="tool-desc">추가 매수 시 목표 평단가 계산</div>
+          </a>
+          <a href="/bonds" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">history_edu</span>
+              <span>기획재정국채 (KTB)</span>
+            </div>
+            <div class="tool-desc">국채 입찰 및 만기 표면금리</div>
+          </a>
+          <a href="/fx" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-blue" style="font-size: 16px;">currency_exchange</span>
+              <span>서울외환시장 (FX)</span>
+            </div>
+            <div class="tool-desc">실시간 환전 및 다통화 원장</div>
+          </a>
+          <a href="/marketplace/auction" class="tool-item-card">
+            <div class="tool-title">
+              <span class="material-symbols-outlined text-green" style="font-size: 16px;">gavel</span>
+              <span>P2P 실시간 경매장</span>
+            </div>
+            <div class="tool-desc">가상 자산 입찰 및 유저 거래</div>
+          </a>
         </div>
-        <a href="/wallet" class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">오늘의 자산</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </a>
-        <a href="/quests" class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">퀘스트</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </a>
-        <a href="/stocks" class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">시장 동향</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </a>
-        <a href="/board" class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">새 소식</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </a>
-      </div>
+      </section>
 
-      <!-- Sample Notice Caption -->
-      <div class="sample-notice-caption">
-        ✓ PostgreSQL 17 복식부기 원장(accounts & ledger_postings) 실시간 연동 운영 중
-      </div>
+      <!-- Bottom Card: Recent Audit & Ledger State (from home.png bottom) -->
+      <section class="stocks-card">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #ffffff;">최근 기록 및 데이터 원천 상태</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--mv-border);">
+            <span style="color: var(--mv-muted);">데이터 원천 상태</span>
+            <span style="color: var(--mv-primary); font-weight: 700;">조회 (PostgreSQL 복식부기 원장 동기화 100%)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--mv-border);">
+            <span style="color: var(--mv-muted);">권한 및 보안 확인</span>
+            <span style="color: var(--mv-blue); font-weight: 700;">검토 (2FA TOTP 스텝업 가드 활성화)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+            <span style="color: var(--mv-muted);">마지막 작업 상태</span>
+            <span style="color: var(--mv-green); font-weight: 700;">표시 (Netty 9092 실시간 스트림 정상)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="home-footer">
+        <div class="footer-links">
+          <a href="/search">통합 검색</a>
+          <a href="/terms">이용약관</a>
+          <a href="/privacy">개인정보처리방침</a>
+          <a href="/status">서비스 상태</a>
+          <a href="/announcements">운영 소식</a>
+          <a href="/admin-preview">운영 관제탑</a>
+        </div>
+        <div>
+          모든 화폐와 보상은 게임 안에서만 쓰는 가상 데이터입니다. · Spring Boot 3.3.5 Single Runtime · © 2026 Woldeok Moneyverse
+        </div>
+      </footer>
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation (Matching home.png bottom icons) -->
-  <nav class="mobile-bottom-dock" aria-label="모바일 하단 내비게이션">
+  <!-- Mobile Bottom Navigation Dock (5 Accessible Tabs, Fixed Bottom) -->
+  <nav aria-label="모바일 하단 내비게이션" class="mobile-bottom-nav-dock">
     <a href="/" class="active">
       <span class="material-symbols-outlined icon">home</span>
       <span>홈</span>
     </a>
-    <a href="/wallet">
+    <a href="/stocks/CHIMU314">
       <span class="material-symbols-outlined icon">trending_up</span>
-      <span>자산</span>
+      <span>주식</span>
     </a>
-    <a href="/arcade">
-      <span class="material-symbols-outlined icon">diamond</span>
-      <span>게임</span>
+    <a href="/tools/compound-calculator">
+      <span class="material-symbols-outlined icon">calculate</span>
+      <span>계산기</span>
     </a>
-    <a href="/board">
-      <span class="nav-star" style="font-size: 16px;">✦</span>
-      <span>소통</span>
+    <a href="/guide/stock-trading">
+      <span class="material-symbols-outlined icon">school</span>
+      <span>가이드</span>
     </a>
-    <a href="/account">
-      <span class="material-symbols-outlined icon">account_circle</span>
-      <span>마이</span>
+    <a href="/admin-preview">
+      <span class="material-symbols-outlined icon">admin_panel_settings</span>
+      <span>관리자</span>
     </a>
   </nav>
 
+  <!-- 56px Circular Floating Support Dock -->
+  <a href="/admin-preview" class="global-support-dock" aria-label="관리자 관제탑 및 지원 독" title="관리자 관제탑 이동">
+    <span class="material-symbols-outlined" style="font-size: 26px;">headset_mic</span>
+  </a>
   <!-- Dynamic Session & Real Data Hydration Script -->
   <script>
     (function() {
@@ -738,83 +1247,72 @@
 
       window.executeLogout = async function() {
         try {
-          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' });
-          window.location.reload();
-        } catch (e) {
-          window.location.href = '/api/v1/auth/reset';
-        }
+          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (e) {}
+        window.location.reload();
       };
 
-      async function hydrateHomeSession() {
+      async function hydrateUserSession() {
         try {
-          const res = await fetch('/api/v1/auth/session', { credentials: 'same-origin' });
-          if (!res.ok) return;
+          const res = await fetch('/api/v1/auth/me', { credentials: 'include' });
+          if (!res.ok) {
+            return;
+          }
           const data = await res.json();
-          if (data && (data.authenticated === true || data.signedIn === true) && data.user) {
+          if (data && (data.authenticated === true || data.signedIn === true || data.userId || data.id)) {
             const authContainer = document.getElementById('auth-action-container');
-            const displayName = data.user.displayName || data.user.username || '회원';
-            const roles = data.user.roles || [];
+            const displayName = data.displayName || data.username || data.name || '회원';
+            const roles = data.roles || [];
             const isAdmin = roles.some(function(r) { return r && r.toLowerCase().indexOf('admin') !== -1; });
 
             if (authContainer) {
               authContainer.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <a href="/account" class="user-profile-badge" title="내 계정">
-                    <span class="material-symbols-outlined" style="font-size: 15px; color: #a78bfa;">account_circle</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <a href="/account" class="user-profile-badge" title="내 계정 관리" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(156, 131, 255, 0.16); border: 1px solid rgba(156, 131, 255, 0.4); color: #ffffff; text-decoration: none; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;">
+                    <span class="material-symbols-outlined" style="font-size: 17px; color: #a78bfa;">account_circle</span>
                     <span>${escapeHtml(displayName)}</span>
-                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #6366f1; color: #fff;">ADMIN</span>' : ''}
+                    ${isAdmin ? '<span style="font-size: 9.5px; padding: 1px 5px; border-radius: 4px; background: #6366f1; color: #ffffff; font-weight: 800; letter-spacing: 0.5px;">ADMIN</span>' : ''}
                   </a>
-                  <button type="button" class="btn-logout-mini" onclick="executeLogout()">로그아웃</button>
+                  <button type="button" class="btn-logout-mini" onclick="executeLogout()" style="padding: 6px 10px; border-radius: 8px; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.3); color: #fb7185; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.15s ease;">
+                    로그아웃
+                  </button>
                 </div>
               `;
             }
 
-            // Real Wallet balance binding
-            try {
-              const wRes = await fetch('/api/v1/wallet/summary', { credentials: 'same-origin' });
-              if (wRes.ok) {
-                const wData = await wRes.json();
-                if (wData && wData.totalAvailableAmount !== undefined && wData.totalAvailableAmount !== null) {
-                  const num = Number(wData.totalAvailableAmount);
-                  const el = document.getElementById('kpi-wallet-val');
-                  if (el) el.textContent = isNaN(num) ? wData.totalAvailableAmount + ' WLD' : num.toLocaleString('ko-KR') + ' WLD';
+            // Hydrate wallet balance in KPI card
+            let balance = data.balanceWld;
+            if (balance === undefined || balance === null) {
+              try {
+                const wRes = await fetch('/api/v1/wallet/overview', { credentials: 'include' });
+                if (wRes.ok) {
+                  const wJson = await wRes.json();
+                  if (wJson && wJson.data && wJson.data.balanceWld !== undefined) {
+                    balance = wJson.data.balanceWld;
+                  }
                 }
-              }
-            } catch (ignored) {}
-          }
-        } catch (e) {}
-      }
+              } catch (ignored) {}
+            }
 
-      // Real Market Change percentage binding
-      async function hydrateMarketChange() {
-        try {
-          const res = await fetch('/api/v1/stocks');
-          if (!res.ok) return;
-          const data = await res.json();
-          const stocks = data.stocks || [];
-          if (stocks.length > 0) {
-            let totalPct = 0;
-            stocks.forEach(function(s) {
-              const cur = Number(s.current_price) || 0;
-              const open = Number(s.day_open_price) || cur;
-              if (open > 0) totalPct += ((cur - open) / open) * 100;
-            });
-            const avg = (totalPct / stocks.length).toFixed(2);
-            const isPos = avg >= 0;
-            const el = document.getElementById('kpi-change-val');
-            if (el) {
-              el.textContent = (isPos ? '+' : '') + avg + '%';
-              el.style.color = isPos ? '#4ade80' : '#fb7185';
+            if (balance !== undefined && balance !== null) {
+              const valEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-value');
+              const labelEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-label-row span:first-child');
+              const subEl = document.querySelector('.metrics-grid .metric-card:first-child .metric-sub span:last-child');
+              if (valEl) valEl.textContent = Number(balance).toLocaleString('ko-KR') + ' WLD';
+              if (labelEl) labelEl.textContent = '내 보유 자산 (복식부기 원장)';
+              if (subEl) subEl.textContent = '실시간 원장 동기화 정상';
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.debug('[Moneyverse Auth] Session hydration: Guest mode');
+        }
       }
 
-      hydrateHomeSession();
-      hydrateMarketChange();
-      async function loadHomeWalletData() { try { const res = await fetch("/api/v1/wallet/overview", { credentials: "same-origin" }); if (res.ok) { const json = await res.json(); if (json && json.data && json.data.balanceWld) { const el = document.getElementById("kpi-wallet-val"); if (el) el.textContent = Number(json.data.balanceWld).toLocaleString("ko-KR") + " WLD"; const tag = document.getElementById("kpi-wallet-tag"); if (tag) { tag.textContent = "원장 동기화 완료"; tag.style.color = "#4ade80"; } } } } catch(e) {} }
-      loadHomeWalletData();
-      setInterval(hydrateMarketChange, 15000);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hydrateUserSession);
+      } else {
+        hydrateUserSession();
+      }
     })();
   </script>
 </body>

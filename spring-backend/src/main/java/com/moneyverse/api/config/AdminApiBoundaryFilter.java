@@ -25,6 +25,9 @@ public class AdminApiBoundaryFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        if (path.startsWith("/api/v1/blog/notify") || path.startsWith("/api/blog/notify")) {
+            return true;
+        }
         return !(path.startsWith("/api/v1/admin/") || path.startsWith("/api/admin/"));
     }
 
