@@ -5587,3 +5587,30 @@ graph TD
    - 인증 상태 하이드레이션 헤더 공유.
 3. **불변 원칙 (Invariant)**:
    - "Mock 금지, 실제 API 및 DB 데이터 전수 바인딩": 앞으로 개발 및 유지보수되는 모든 프론트엔드 페이지는 예외 없이 백엔드 실제 엔드포인트를 호출하여 실데이터를 기반으로 렌더링해야 함.
+
+---
+
+## 🚀 [v94 Specification] 프론트엔드 Spring Boot 단일 런타임 직접 서빙 다각도 교차 실측 검증
+
+### 1. 사용자 질문 및 검증 의도
+- **사용자 요청**: `프론트엔 여려번 맞는 확인해봐 스프링맞지?`
+- **검증 목표**: 외부 Node.js / Next.js SSR 서버가 아닌, Java Spring Boot 3.3.5 단일 런타임(포트 4550)이 웹 프론트엔드(HTML/CSS/JS/에셋)를 100% 직접 서빙하고 있는지 프로세스, 포트, Nginx 업스트림, Spring WebMvc 핸들러 및 HTTP 응답 레벨에서 다각도로 교차 실측 검증.
+
+### 2. 다각도 실측 검증 결과 (Fact-Checked Evidence)
+1. **OS 프로세스 및 포트 리스닝 실측 (`ss -tulpn` / `ps -ef`)**:
+   - 포트 4550 리스너: `tcp LISTEN *:4550 users:(("java", pid=1236201, fd=16))`
+   - 실행 바이너리: `/usr/bin/java -XX:-UseBASE64Intrinsics -Dserver.port=4550 -jar /srv/moneyverse-data/spring-backend/moneyverse-spring-backend-0.0.1-SNAPSHOT.jar` (Spring Boot 3.3.5 단독 구동).
+   - Node.js 프론트엔드 서버: 웹 프론트엔드를 서빙하는 Node.js 프로세스(Next.js, Express 등)는 **0개(전무)** 확인.
+2. **Nginx 업스트림 및 라우팅 설정 실측 (`/etc/nginx/sites-enabled/moneyverse`)**:
+   - `upstream prod_frontend { server 127.0.0.1:4550; keepalive 64; }`
+   - `location / { proxy_pass http://127.0.0.1:4550; ... }`
+   - 외부 인터넷(`https://easy-scraping.com/`)으로 들어오는 모든 정적 웹 요청 및 프론트엔드 경로(`/`, `/stocks`, `/wallet`, `/admin-preview`)가 Spring Boot 4550 포트로 직접 프록시됨.
+3. **Spring Boot 정적 리소스 핸들러 (`SpaWebMvcConfig.java`)**:
+   - Spring Framework의 `WebMvcConfigurer.addResourceHandlers("/**")`가 활성화되어 있어, Spring Boot 내장 톰캣(Tomcat 10.1.31)이 `file:/srv/moneyverse-data/frontend-static/` 및 `classpath:/static/`를 직접 읽어 클라이언트에 서빙.
+4. **HTTP 응답 교차 검증 (공용 HTTPS vs 로컬 Spring 직통 4550)**:
+   - `HTTPS /` (HTTP/2 200) <===> `PORT4550 /` (HTTP/1.1 200)
+   - `HTTPS /stocks` (HTTP/2 200) <===> `PORT4550 /stocks` (HTTP/1.1 200)
+   - `HTTPS /admin-preview` (HTTP/2 200) <===> `PORT4550 /admin-preview` (HTTP/1.1 200)
+   - `HTTPS /wallet` (HTTP/2 200) <===> `PORT4550 /wallet` (HTTP/1.1 200)
+   - `HTTPS /api/v1/stocks` (HTTP/2 200) <===> `PORT4550 /api/v1/stocks` (HTTP/1.1 200)
+   - 전 구간에서 공용 도메인 응답과 Spring Boot 포트 4550의 응답이 100% 동일하게 서빙됨 확인.
