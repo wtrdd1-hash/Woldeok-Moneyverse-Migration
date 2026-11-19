@@ -18,6 +18,7 @@
       --mv-surface-light: #1b243e;
       --mv-border: rgba(168, 188, 216, 0.12);
       --mv-primary: #9c83ff;
+      --mv-primary-glow: rgba(156, 131, 255, 0.35);
       --mv-primary-light: #b39eff;
       --mv-teal: #2dd4bf;
       --mv-green: #4ade80;
@@ -47,7 +48,7 @@
       border-bottom: 1px solid rgba(168, 188, 216, 0.06);
     }
     .super-header strong {
-      color: var(--mv-teal);
+      color: var(--mv-primary);
       font-weight: 800;
     }
 
@@ -123,17 +124,17 @@
       transition: all 0.15s ease;
     }
     .nav-item-link:hover {
-      background-color: rgba(45, 212, 191, 0.08);
+      background-color: rgba(156, 131, 255, 0.08);
       color: #ffffff;
     }
     .nav-item-link.active {
-      background-color: rgba(45, 212, 191, 0.18);
-      border: 1px solid rgba(45, 212, 191, 0.35);
+      background-color: rgba(156, 131, 255, 0.18);
+      border: 1px solid rgba(156, 131, 255, 0.35);
       color: #ffffff;
       font-weight: 700;
     }
     .nav-star {
-      color: var(--mv-teal);
+      color: var(--mv-primary);
       font-size: 12px;
     }
 
@@ -170,7 +171,11 @@
       font-size: 20px;
       font-weight: 800;
       color: #ffffff;
-    }
+    
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
     .live-badge {
       display: inline-flex;
       align-items: center;
@@ -198,7 +203,7 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -214,8 +219,8 @@
       gap: 6px;
       padding: 4px 10px;
       border-radius: 8px;
-      background: rgba(45, 212, 191, 0.15);
-      border: 1px solid rgba(45, 212, 191, 0.35);
+      background: rgba(156, 131, 255, 0.15);
+      border: 1px solid rgba(156, 131, 255, 0.35);
       color: #ffffff;
       text-decoration: none;
       font-size: 12px;
@@ -246,7 +251,7 @@
     .hero-meta {
       font-size: 11px;
       font-weight: 700;
-      color: var(--mv-teal);
+      color: var(--mv-primary);
       letter-spacing: 0.5px;
     }
     .hero-heading {
@@ -367,7 +372,7 @@
       transition: border-color 0.15s ease;
     }
     .form-input:focus {
-      border-color: var(--mv-teal);
+      border-color: var(--mv-primary); box-shadow: 0 0 0 3px rgba(156, 131, 255, 0.25);
     }
     .quick-amount-pills {
       display: flex;
@@ -377,21 +382,33 @@
     .amount-pill {
       background: rgba(168, 188, 216, 0.08);
       border: 1px solid var(--mv-border);
-      border-radius: 6px;
+      border-radius: 8px;
       color: var(--mv-muted);
-      font-size: 11px;
-      padding: 4px 8px;
+      font-size: 13px;
+      padding: 10px 14px;
       cursor: pointer;
       font-weight: 600;
+      min-height: 44px !important;
+      min-width: 44px !important;
+      height: 44px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
       transition: all 0.15s;
     }
+    .amount-pill:hover, .amount-pill:active {
+      background: rgba(156, 131, 255, 0.15);
+      border-color: var(--mv-primary);
+      color: #ffffff;
+    }
     .amount-pill:hover {
-      background: rgba(45, 212, 191, 0.15);
-      border-color: var(--mv-teal);
+      background: rgba(156, 131, 255, 0.15);
+      border-color: var(--mv-primary); box-shadow: 0 0 0 3px rgba(156, 131, 255, 0.25);
       color: #ffffff;
     }
     .btn-transfer {
-      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
       color: #ffffff;
       border: none;
       border-radius: 8px;
@@ -512,8 +529,8 @@
       gap: 10px;
       padding: 12px 16px;
       border-radius: 8px;
-      background: rgba(45, 212, 191, 0.08);
-      border: 1px solid rgba(45, 212, 191, 0.25);
+      background: rgba(156, 131, 255, 0.08);
+      border: 1px solid rgba(156, 131, 255, 0.25);
       color: #5eead4;
       font-size: 12px;
       font-weight: 600;
@@ -552,12 +569,18 @@
       min-height: 46px;
     }
     .mobile-bottom-dock a.active {
-      color: var(--mv-teal);
+      color: var(--mv-primary);
       font-weight: 800;
     }
     .mobile-bottom-dock a .icon {
       font-size: 20px;
     }
+      /* Mobile Search Box Optimization */
+    @media (max-width: 640px) {
+      .search-box { display: none !important; }
+      .header-title { font-size: 17px !important; }
+    }
+    
   </style>
 </head>
 <body>
@@ -654,7 +677,7 @@
         <div class="kpi-split-col">
           <div class="kpi-title-row">
             <span class="kpi-title">총 보유 자산</span>
-            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-teal);">account_balance_wallet</span>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-primary);">account_balance_wallet</span>
           </div>
           <div class="kpi-value" id="kpi-total-val">0 WLD</div>
           <div class="kpi-status-tag">
@@ -689,7 +712,7 @@
         <!-- Left: Quick Transfer Form -->
         <div class="bento-card">
           <h2 class="bento-card-title">
-            <span class="material-symbols-outlined" style="color: var(--mv-teal); font-size: 18px;">send</span>
+            <span class="material-symbols-outlined" style="color: var(--mv-primary); font-size: 18px;">send</span>
             즉시 원장 송금 (복식부기 트랜잭션)
           </h2>
           <form class="transfer-form" onsubmit="executeWalletTransfer(event)">
@@ -701,10 +724,10 @@
               <label class="form-label" for="transfer-amount">송금 금액 (WLD)</label>
               <input type="number" id="transfer-amount" class="form-input" min="1" step="1" placeholder="예: 5000" required />
               <div class="quick-amount-pills">
-                <button type="button" class="amount-pill" onclick="setTransferAmount(5000)">+5,000</button>
-                <button type="button" class="amount-pill" onclick="setTransferAmount(10000)">+10,000</button>
-                <button type="button" class="amount-pill" onclick="setTransferAmount(50000)">+50,000</button>
-                <button type="button" class="amount-pill" onclick="setTransferAll()">전액</button>
+                <button type="button" class="amount-pill" style="min-height: 44px; min-width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; font-size: 13px;" onclick="setTransferAmount(5000)">+5,000</button>
+                <button type="button" class="amount-pill" style="min-height: 44px; min-width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; font-size: 13px;" onclick="setTransferAmount(10000)">+10,000</button>
+                <button type="button" class="amount-pill" style="min-height: 44px; min-width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; font-size: 13px;" onclick="setTransferAmount(50000)">+50,000</button>
+                <button type="button" class="amount-pill" style="min-height: 44px; min-width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; font-size: 13px;" onclick="setTransferAll()">전액</button>
               </div>
             </div>
             <button type="submit" class="btn-transfer" id="btn-submit-transfer">
@@ -749,7 +772,7 @@
       <!-- Ledger Transactions History Card -->
       <section class="transactions-card">
         <h2 class="bento-card-title">
-          <span class="material-symbols-outlined" style="color: var(--mv-teal); font-size: 18px;">receipt_long</span>
+          <span class="material-symbols-outlined" style="color: var(--mv-primary); font-size: 18px;">receipt_long</span>
           최근 복식부기 원장 거래 내역 (Double-Entry Postings)
         </h2>
         <div class="table-container">
@@ -986,7 +1009,7 @@
                   <a href="/account" class="user-profile-badge" title="내 계정">
                     <span class="material-symbols-outlined" style="font-size: 15px; color: #2dd4bf;">account_circle</span>
                     <span>${escapeHtml(displayName)}</span>
-                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #0d9488; color: #fff;">ADMIN</span>' : ''}
+                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #7c3aed; color: #fff;">ADMIN</span>' : ''}
                   </a>
                   <button type="button" class="btn-logout-mini" onclick="executeLogout()">로그아웃</button>
                 </div>

@@ -18,6 +18,7 @@
       --mv-surface-light: #1b243e;
       --mv-border: rgba(168, 188, 216, 0.12);
       --mv-primary: #9c83ff;
+      --mv-primary-glow: rgba(156, 131, 255, 0.35);
       --mv-primary-light: #b39eff;
       --mv-blue: #64b7ff;
       --mv-green: #4ade80;
@@ -524,6 +525,12 @@
     .mobile-admin-dock a .icon {
       font-size: 20px;
     }
+      /* Mobile Search Box Optimization */
+    @media (max-width: 640px) {
+      .search-box { display: none !important; }
+      .header-title { font-size: 17px !important; }
+    }
+    
   </style>
 </head>
 <body>

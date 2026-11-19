@@ -15,7 +15,7 @@ class AdminProtectedEndpointsNegativeTest {
     void usersRejectArbitraryBearer() {
         var request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer non-session-invalid-token");
-        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class));
+        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class), mock(org.springframework.jdbc.core.JdbcTemplate.class));
         assertEquals(401, controller.getUsers(request, 1).getStatusCode().value());
     }
 
@@ -23,7 +23,7 @@ class AdminProtectedEndpointsNegativeTest {
     void usersRejectArbitrarySessionCookie() {
         var request = new MockHttpServletRequest();
         request.setCookies(new Cookie("mv_session", "non-session-invalid-cookie"));
-        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class));
+        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class), mock(org.springframework.jdbc.core.JdbcTemplate.class));
         assertEquals(401, controller.getUsers(request, 1).getStatusCode().value());
     }
 
@@ -31,7 +31,7 @@ class AdminProtectedEndpointsNegativeTest {
     void usersRejectFakeInternalToken() {
         var request = new MockHttpServletRequest();
         request.addHeader("x-internal-token", "invalid-internal-token");
-        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class));
+        var controller = new AdminUsersController(mock(AdminGovernanceService.class), mock(AdminAuthService.class), mock(org.springframework.jdbc.core.JdbcTemplate.class));
         assertEquals(401, controller.getUsers(request, 1).getStatusCode().value());
     }
 

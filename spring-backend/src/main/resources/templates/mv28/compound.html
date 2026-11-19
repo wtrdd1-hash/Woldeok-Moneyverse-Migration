@@ -35,4 +35,50 @@
   </section>
   <section class="faq panel"><h2 th:text="${ko} ? '계산 방법' : 'How the calculation works'">How the calculation works</h2><details><summary th:text="${ko} ? '복리와 월 납입금은 어떻게 처리되나요?' : 'How are compounding and deposits handled?'">About compounding</summary><p th:text="${ko} ? '초기 원금에 지정한 복리 주기를 적용하고, 매월 말 납입한 적립금을 남은 기간만큼 복리 계산합니다.' : 'Initial principal compounds at the selected frequency. Each monthly contribution is added at the end of its month, then grows over the remaining period.'">Explanation</p></details></section>
 </main><footer th:replace="~{mv28/layout :: footer}"></footer>
+
+<script>
+(function() {
+  var pInput = document.getElementById("principal");
+  var mInput = document.getElementById("monthlyDeposit");
+  var rInput = document.getElementById("annualRate");
+  var yInput = document.getElementById("years");
+  var fInput = document.getElementById("frequency");
+  if (!pInput || !mInput || !rInput || !yInput || !fInput) return;
+
+  function recalculate() {
+    var totalFinalEl = document.querySelector('[data-testid="total-final"] strong');
+    var totalContribEl = document.querySelector('[data-testid="total-contributed"] strong');
+    var totalInterestEl = document.querySelector('[data-testid="total-interest"] strong');
+
+    var P = parseFloat(pInput.value) || 0;
+    var PMT = parseFloat(mInput.value) || 0;
+    var annualRate = (parseFloat(rInput.value) || 0) / 100;
+    var years = parseFloat(yInput.value) || 0;
+
+    var totalMonths = Math.round(years * 12);
+    var ratePerMonth = annualRate / 12;
+
+    var futureValue = P;
+    if (totalMonths > 0) {
+      if (ratePerMonth > 0) {
+        futureValue = P * Math.pow(1 + ratePerMonth, totalMonths) + PMT * ((Math.pow(1 + ratePerMonth, totalMonths) - 1) / ratePerMonth);
+      } else {
+        futureValue = P + PMT * totalMonths;
+      }
+    }
+    var totalPrincipal = P + PMT * totalMonths;
+    var totalInterest = Math.max(0, futureValue - totalPrincipal);
+
+    if (totalFinalEl) totalFinalEl.textContent = Math.round(futureValue).toLocaleString();
+    if (totalContribEl) totalContribEl.textContent = Math.round(totalPrincipal).toLocaleString();
+    if (totalInterestEl) totalInterestEl.textContent = Math.round(totalInterest).toLocaleString();
+  }
+
+  [pInput, mInput, rInput, yInput, fInput].forEach(function(el) {
+    el.addEventListener("input", recalculate);
+    el.addEventListener("change", recalculate);
+  });
+})();
+</script>
+
 </body></html>

@@ -72,7 +72,7 @@ public class SpringNativeToolHubController {
         response.setHeader("X-Content-Type-Options","nosniff");
         response.setHeader("Cache-Control","private,no-store");
         response.setHeader("Content-Language",ko?"ko":"en");
-        response.setHeader("Content-Security-Policy","default-src 'none'; style-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+        response.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self';");
         model.addAttribute("ko",ko);
         model.addAttribute("language",ko?"ko":"en");
         model.addAttribute("pageTitle",ko?(compact?"금융 도구":"금융 계산기 센터"):(compact?"Financial tools":"Calculator center"));
