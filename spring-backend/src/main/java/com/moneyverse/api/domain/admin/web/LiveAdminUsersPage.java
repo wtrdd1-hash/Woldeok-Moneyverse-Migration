@@ -43,7 +43,7 @@ public class LiveAdminUsersPage {
         headers.set("X-Content-Type-Options", "nosniff");
         headers.set("X-Frame-Options", "DENY");
         headers.set("Referrer-Policy", "same-origin");
-        headers.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self';");
         headers.setContentType(MediaType.parseMediaType("text/html;charset=UTF-8"));
 
         UUID actor = adminAuthService.resolveVerifiedAdminActor(request).orElse(null);

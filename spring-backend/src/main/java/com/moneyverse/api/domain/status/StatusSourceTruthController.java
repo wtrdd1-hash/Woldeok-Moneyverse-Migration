@@ -43,7 +43,7 @@ public class StatusSourceTruthController {
         response.setHeader("X-Content-Type-Options","nosniff");
         response.setHeader("X-MV-UI-Release",RELEASE);
         response.setHeader("Content-Language",ko?"ko":"en");
-        response.setHeader("Content-Security-Policy","default-src 'none'; style-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        response.setHeader("Content-Security-Policy","default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self';");
         model.addAttribute("ko",ko);
         model.addAttribute("language",ko?"ko":"en");
         model.addAttribute("pageTitle",ko?"서비스 상태":"Service status");
