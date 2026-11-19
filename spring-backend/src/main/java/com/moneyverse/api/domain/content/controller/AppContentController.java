@@ -9,11 +9,14 @@ import java.util.*;
 @RequestMapping(path = {
         "/api/v1/content",
         "/api/content",
-        "/content"
+        "/content",
+        "/api/v1/announcements",
+        "/api/announcements",
+        "/announcements"
 })
 public class AppContentController {
 
-    @GetMapping("/announcements")
+    @GetMapping(path = {"", "/", "/announcements"})
     public ResponseEntity<Map<String, Object>> announcements() {
         return ResponseEntity.ok(Map.of(
                 "announcements", List.of(

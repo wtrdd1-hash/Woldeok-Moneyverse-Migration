@@ -7,10 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,11 +28,57 @@ public class LocalAuthController {
         this.authService = authService;
     }
 
-    @PostMapping(path = {
-            "/api/v1/auth/local/login",
-            "/api/auth/local/login"
-    })
-    @Operation(summary = "이메일/비밀번호 로그인")
+    /**
+     * Serves the login page for browser GET requests (/login, /login/).
+     */
+    @GetMapping(path = {"/login", "/login/"})
+    @Operation(summary = "로그인 HTML 페이지 제공")
+    public void serveLoginPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        request.getRequestDispatcher("/login.html").forward(request, response);
+    }
+
+    /**
+     * Standard Form POST for browser forms (/login)
+     */
+    @PostMapping(
+            path = {"/login", "/api/v1/auth/local/login", "/api/auth/local/login", "/api/v1/auth/login", "/api/auth/login"},
+            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}
+    )
+    @Operation(summary = "브라우저 폼 기반 이메일/비밀번호 로그인 및 홈 리다이렉트")
+    public ResponseEntity<?> formLogin(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password,
+            HttpServletResponse response) {
+        if (email == null || password == null || email.isBlank() || password.isBlank()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("/login?error=missing_credentials"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+
+        try {
+            LoginResult result = authService.login(email, password, response);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("/"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } catch (IllegalArgumentException e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("/login?error=invalid_credentials"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } catch (Exception e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("/login?error=server_error"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+    }
+
+    /**
+     * JSON POST for AJAX / API callers
+     */
+    @PostMapping(
+            path = {"/login", "/api/v1/auth/local/login", "/api/auth/local/login", "/api/v1/auth/login", "/api/auth/login"},
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "JSON 기반 이메일/비밀번호 로그인")
     public ResponseEntity<Map<String, Object>> login(
             @RequestBody Map<String, String> body,
             HttpServletResponse response) {

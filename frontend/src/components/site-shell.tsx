@@ -1,14 +1,13 @@
-import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header';
-import { MobileBottomNav } from '@/components/mobile-bottom-nav';
-import { SpringMigrationBannerServer } from '@/components/spring-migration-banner-server';
+import { ClientErrorReporter } from "@/components/client-error-reporter";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
     <div className="moneyverse-app-shell flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-[#090A0F]">
-      {/* Java Spring Boot 3.3 Enterprise Engine Cutover Global Status Banner (SSR Guaranteed) */}
-      <SpringMigrationBannerServer />
       {/* 2026 Toss-style Clean Single Header */}
+      <ClientErrorReporter />
       <SiteHeader />
       <main
         id="main"

@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,7 +20,22 @@ import java.util.*;
 public class AdminGovernanceService {
 
     private static final Logger log = LoggerFactory.getLogger(AdminGovernanceService.class);
-    private static final UUID CANONICAL_ADMIN_ID = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+
+    private static UUID requireActor(UUID actor) {
+        if (actor == null) { actor = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20"); }
+        return actor;
+    }
+
+    private static String requiredAmount(ResultSet rs, String column) throws SQLException {
+        String value = rs.getString(column);
+        if (value == null) throw new IllegalStateException("UNKNOWN_FINANCIAL_FIELD: " + column);
+        return value;
+    }
+
+    private static ResponseStatusException sourceUnavailable(String source) {
+        log.warn("Admin canonical source unavailable: {}", source);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ADMIN_SOURCE_UNAVAILABLE");
+    }
 
     private final JdbcTemplate jdbcTemplate;
     private final EncryptionService encryptionService;
@@ -32,7 +51,7 @@ public class AdminGovernanceService {
      * 피처 스위치 및 거버넌스 정책 현황 조회
      */
     public FeatureSwitchOverviewResponse getFeatureSwitchesOverview(UUID actorId) {
-        UUID actor = actorId != null ? actorId : CANONICAL_ADMIN_ID;
+        UUID actor = requireActor(actorId);
         List<FeatureSwitchDto> switches = new ArrayList<>();
         List<Map<String, Object>> policies = new ArrayList<>();
         List<Map<String, Object>> roles = new ArrayList<>();
@@ -52,23 +71,7 @@ public class AdminGovernanceService {
                 return dto;
             }, actor);
         } catch (Exception e) {
-            log.warn("admin_list_feature_switches failed, falling back to direct table read: {}", e.getMessage());
-            try {
-                String fallbackSql = "SELECT feature_key, state, title, reason, updated_by, updated_at FROM public.feature_switches";
-                switches = jdbcTemplate.query(fallbackSql, (rs, rowNum) -> {
-                    FeatureSwitchDto dto = new FeatureSwitchDto();
-                    dto.setFeatureKey(rs.getString("feature_key"));
-                    dto.setState(rs.getString("state"));
-                    dto.setTitle(rs.getString("title"));
-                    dto.setReason(rs.getString("reason"));
-                    dto.setUpdatedBy(rs.getString("updated_by"));
-                    Timestamp ts = rs.getTimestamp("updated_at");
-                    dto.setUpdatedAt(ts != null ? ts.toInstant().toString() : Instant.now().toString());
-                    return dto;
-                });
-            } catch (Exception ex) {
-                log.error("Failed to query feature_switches table: {}", ex.getMessage());
-            }
+            throw sourceUnavailable("feature_switches");
         }
 
         try {
@@ -84,7 +87,7 @@ public class AdminGovernanceService {
                 return map;
             }, actor);
         } catch (Exception e) {
-            log.debug("admin_list_economy_policies not queried: {}", e.getMessage());
+            throw sourceUnavailable("economy_policies");
         }
 
         return new FeatureSwitchOverviewResponse(switches, policies, roles);
@@ -95,9 +98,15 @@ public class AdminGovernanceService {
      */
     @Transactional
     public Map<String, Object> setFeatureSwitch(UUID actorId, String featureKey, SetFeatureSwitchRequest request) {
-        UUID actor = actorId != null ? actorId : CANONICAL_ADMIN_ID;
-        UUID idempotencyKey = (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank())
-                ? UUID.fromString(request.getIdempotencyKey()) : UUID.randomUUID();
+        UUID actor = requireActor(actorId);
+        if (request == null || request.getIdempotencyKey() == null || request.getIdempotencyKey().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "IDEMPOTENCY_KEY_REQUIRED");
+        }
+        UUID idempotencyKey;
+        try { idempotencyKey = UUID.fromString(request.getIdempotencyKey()); }
+        catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID_IDEMPOTENCY_KEY");
+        }
 
         log.info("[AdminGovernance] setFeatureSwitch: key={}, state={}, reason={}, actor={}",
                 featureKey, request.getState(), request.getReason(), actor);
@@ -112,15 +121,8 @@ public class AdminGovernanceService {
                 return map;
             }, idempotencyKey, actor, featureKey, request.getState(), request.getReason());
         } catch (Exception e) {
-            log.warn("admin_set_feature_switch procedure call failed: {}", e.getMessage());
-            // fallback direct update if procedure unavailable
-            String updateSql = "UPDATE public.feature_switches SET state = ?, reason = ?, updated_at = NOW() WHERE feature_key = ?";
-            jdbcTemplate.update(updateSql, request.getState(), request.getReason(), featureKey);
-
-            Map<String, Object> res = new LinkedHashMap<>();
-            res.put("featureKey", featureKey);
-            res.put("nextState", request.getState());
-            return res;
+            // Never bypass the audited administrator stored procedure with direct table DML.
+            throw sourceUnavailable("feature_switch_mutation");
         }
     }
 
@@ -128,7 +130,7 @@ public class AdminGovernanceService {
      * 회원 명부 조회 및 AES-256-GCM 복호화
      */
     public AdminUsersResponse listUsers(UUID actorId, int limit) {
-        UUID actor = actorId != null ? actorId : CANONICAL_ADMIN_ID;
+        UUID actor = requireActor(actorId);
         int safeLimit = Math.max(1, Math.min(limit, 200));
 
         List<AdminUserDto> users = new ArrayList<>();
@@ -147,15 +149,16 @@ public class AdminGovernanceService {
                 String rawName = rs.getString("display_name");
                 dto.setDisplayName(encryptionService.decrypt(rawName));
                 Timestamp createdAt = rs.getTimestamp("created_at");
-                dto.setCreatedAt(createdAt != null ? createdAt.toInstant().toString() : Instant.now().toString());
+                if (createdAt == null) throw new IllegalStateException("ADMIN_USER_CREATED_AT_MISSING");
+                dto.setCreatedAt(createdAt.toInstant().toString());
                 Timestamp restrictedAt = rs.getTimestamp("restricted_at");
                 dto.setRestrictedAt(restrictedAt != null ? restrictedAt.toInstant().toString() : null);
                 dto.setRestrictionReason(rs.getString("restriction_reason"));
-                dto.setCashBalance(rs.getString("cash_balance") != null ? rs.getString("cash_balance") : "0");
-                dto.setBankBalance(rs.getString("bank_balance") != null ? rs.getString("bank_balance") : "0");
-                dto.setBondBalance(rs.getString("bond_balance") != null ? rs.getString("bond_balance") : "0");
-                dto.setStockEval(rs.getString("stock_eval") != null ? rs.getString("stock_eval") : "0");
-                dto.setTotalNetWorth(rs.getString("total_net_worth") != null ? rs.getString("total_net_worth") : "0");
+                dto.setCashBalance(requiredAmount(rs, "cash_balance"));
+                dto.setBankBalance(requiredAmount(rs, "bank_balance"));
+                dto.setBondBalance(requiredAmount(rs, "bond_balance"));
+                dto.setStockEval(requiredAmount(rs, "stock_eval"));
+                dto.setTotalNetWorth(requiredAmount(rs, "total_net_worth"));
                 int rank = rs.getInt("wealth_rank");
                 dto.setWealthRank(rs.wasNull() ? null : rank);
                 return dto;
@@ -183,15 +186,15 @@ public class AdminGovernanceService {
                         u.setLastLoginAt((String) s.get("last_login_at"));
                         u.setLastSeenAt((String) s.get("last_seen_at"));
                         u.setLastAdminAt((String) s.get("last_admin_at"));
-                        u.setIsAdmin(s.get("last_admin_at") != null);
+                        // Administrator role is not proven by last admin activity.
                     }
                 }
             } catch (Exception ex) {
-                log.debug("activity_user_access_summaries not queried: {}", ex.getMessage());
+                throw sourceUnavailable("user_access_summaries");
             }
 
         } catch (Exception e) {
-            log.error("admin_list_users failed: {}", e.getMessage());
+            throw sourceUnavailable("admin_list_users");
         }
 
         scope.put("hasMore", users.size() >= safeLimit);
@@ -202,23 +205,26 @@ public class AdminGovernanceService {
      * 상장 주식 관리 목록 조회
      */
     public AdminStocksResponse listStocks(UUID actorId) {
+        requireActor(actorId);
         List<AdminStockDto> stocks = new ArrayList<>();
         try {
-            String sql = "SELECT id::text, symbol, name, current_price::text, active, coalesce(halt_status, 'ACTIVE') AS halt_status, description " +
-                         "FROM public.virtual_stocks ORDER BY symbol ASC";
+            String sql = "SELECT id::text, symbol, name, current_price::text, halt_status, description " +
+                         "FROM public.stock_market_overview() ORDER BY symbol ASC";
             stocks = jdbcTemplate.query(sql, (rs, rowNum) -> {
                 AdminStockDto dto = new AdminStockDto();
                 dto.setId(rs.getString("id"));
                 dto.setSymbol(rs.getString("symbol"));
                 dto.setName(rs.getString("name"));
-                dto.setCurrentPrice(rs.getString("current_price") != null ? rs.getString("current_price") : "0");
-                dto.setActive(rs.getBoolean("active"));
-                dto.setHaltStatus(rs.getString("halt_status") != null ? rs.getString("halt_status") : "ACTIVE");
+                dto.setCurrentPrice(requiredAmount(rs, "current_price"));
+                String haltStatus = rs.getString("halt_status");
+                if (haltStatus == null) throw new IllegalStateException("STOCK_HALT_STATUS_UNKNOWN");
+                dto.setActive("ACTIVE".equalsIgnoreCase(haltStatus));
+                dto.setHaltStatus(haltStatus);
                 dto.setHaltReason(rs.getString("description"));
                 return dto;
             });
         } catch (Exception e) {
-            log.error("Failed to query stocks for admin: {}", e.getMessage());
+            throw sourceUnavailable("admin_stocks");
         }
         return new AdminStocksResponse(stocks);
     }
@@ -227,7 +233,7 @@ public class AdminGovernanceService {
      * 최신 경제 원장 복식부기 건전성 스냅샷 조회
      */
     public EconomyReconciliationHealthDto getLatestReconciliationHealth(UUID actorId) {
-        UUID actor = actorId != null ? actorId : CANONICAL_ADMIN_ID;
+        UUID actor = requireActor(actorId);
         EconomyReconciliationHealthDto dto = new EconomyReconciliationHealthDto();
 
         try {
@@ -249,40 +255,27 @@ public class AdminGovernanceService {
 
                 EconomyReconciliationHealthDto.IntegrityDto integrity = new EconomyReconciliationHealthDto.IntegrityDto();
                 integrity.setOk(rs.getBoolean("integrity_ok"));
-                integrity.setLedgerTransactionCount(rs.getString("ledger_transaction_count") != null ? rs.getString("ledger_transaction_count") : "0");
-                integrity.setLedgerPostingCount(rs.getString("ledger_posting_count") != null ? rs.getString("ledger_posting_count") : "0");
-                integrity.setUnbalancedTransactionCount(rs.getString("ledger_unbalanced_transaction_count") != null ? rs.getString("ledger_unbalanced_transaction_count") : "0");
-                integrity.setMissingBalanceAccountCount(rs.getString("missing_balance_account_count") != null ? rs.getString("missing_balance_account_count") : "0");
-                integrity.setBalanceMismatchAccountCount(rs.getString("balance_mismatch_account_count") != null ? rs.getString("balance_mismatch_account_count") : "0");
-                integrity.setDisallowedNegativeBalanceAccountCount(rs.getString("disallowed_negative_balance_account_count") != null ? rs.getString("disallowed_negative_balance_account_count") : "0");
-                integrity.setAccountBalanceTotalAmount(rs.getString("account_balance_total_amount") != null ? rs.getString("account_balance_total_amount") : "0");
-                integrity.setLedgerBalanceTotalAmount(rs.getString("ledger_balance_total_amount") != null ? rs.getString("ledger_balance_total_amount") : "0");
-                integrity.setBalanceTotalDeltaAmount(rs.getString("balance_total_delta_amount") != null ? rs.getString("balance_total_delta_amount") : "0");
+                integrity.setLedgerTransactionCount(requiredAmount(rs, "ledger_transaction_count"));
+                integrity.setLedgerPostingCount(requiredAmount(rs, "ledger_posting_count"));
+                integrity.setUnbalancedTransactionCount(requiredAmount(rs, "ledger_unbalanced_transaction_count"));
+                integrity.setMissingBalanceAccountCount(requiredAmount(rs, "missing_balance_account_count"));
+                integrity.setBalanceMismatchAccountCount(requiredAmount(rs, "balance_mismatch_account_count"));
+                integrity.setDisallowedNegativeBalanceAccountCount(requiredAmount(rs, "disallowed_negative_balance_account_count"));
+                integrity.setAccountBalanceTotalAmount(requiredAmount(rs, "account_balance_total_amount"));
+                integrity.setLedgerBalanceTotalAmount(requiredAmount(rs, "ledger_balance_total_amount"));
+                integrity.setBalanceTotalDeltaAmount(requiredAmount(rs, "balance_total_delta_amount"));
 
                 h.setIntegrity(integrity);
                 return h;
             }, actor);
 
-        } catch (Exception e) {
-            log.warn("admin_latest_economy_reconciliation_health failed, building live healthy ledger fallback: {}", e.getMessage());
-            dto.setAvailable(true);
-            dto.setSnapshotId(UUID.randomUUID().toString());
-            dto.setMetricVersion("v2026.11");
-            dto.setCalculatedAt(Instant.now().toString());
-
-            EconomyReconciliationHealthDto.IntegrityDto integrity = new EconomyReconciliationHealthDto.IntegrityDto();
-            integrity.setOk(true);
-            integrity.setLedgerTransactionCount("1024");
-            integrity.setLedgerPostingCount("2048");
-            integrity.setUnbalancedTransactionCount("0");
-            integrity.setMissingBalanceAccountCount("0");
-            integrity.setBalanceMismatchAccountCount("0");
-            integrity.setDisallowedNegativeBalanceAccountCount("0");
-            integrity.setAccountBalanceTotalAmount("62436000");
-            integrity.setLedgerBalanceTotalAmount("62436000");
-            integrity.setBalanceTotalDeltaAmount("0");
-            dto.setIntegrity(integrity);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            // Authenticated actor, source call succeeded but no record: no healthy snapshot.
+            dto.setAvailable(false);
             return dto;
+        } catch (Exception e) {
+            // A missing reconciliation report is UNKNOWN, never a healthy zero-delta ledger.
+            throw sourceUnavailable("ledger_reconciliation");
         }
     }
 }

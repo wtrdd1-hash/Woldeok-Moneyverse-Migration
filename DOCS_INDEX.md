@@ -12,6 +12,12 @@ Actual public site \`/\` serves the design three-concept gallery, not functional
 
 - [180 PC+mobile route PNG designs](docs/design/all-pages-v2026.11.18.12/README.md) · [Administrator desktop/mobile PNG](docs/design/admin-chat-v2026.11.18.13/README.md) · [EN handoff](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.md) / [한국어](docs/design/UI_IMAGE_IMPLEMENTATION_HANDOFF_v2026.11.19.31.ko.md). Source SVGs were recovered from closed unmerged PR #3268/#3270 and rasterized to pass fail-closed documentation CI. Spring UI implementation and Production deployment are not part of this documentation-only change.
 
+## v2026.11.18.20 — Spring/Frontend Test recovery (INTERNAL TEST / RELEASE HOLD)
+- [QA English](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.md) / [한국어](docs/qa/2026-11-18-spring-frontend-test-recovery-v2026.11.18.20.ko.md). Spring 174 JUnit PASS, Next build PASS/121 focused PASS, full frontend regression incomplete; locally restricted Test route 20 GET no 502, **new frontend dynamic SSR not in Spring static release**. No Production deployment.
+
+## v2026.11.18.17 — Admin/Chat Real Frontend Source Candidate (SPRING STATIC HANDOFF HOLD)
+
+[English canonical spec](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.md) · [한국어](docs/planning/FRONTEND_ADMIN_CHAT_TRANSITION_v2026.11.18.17.ko.md) · [QA](docs/qa/2026-11-18-spring-frontend-admin-chat-v17.md) · [Worklog](docs/worklog/2026-11-18-frontend-transition-v2026.11.18.17.md). 20 UI tests pass and Next/Spring source builds pass; no exact-SHA updated admin HTML in Spring static JAR. Release HOLD.
 
 ## v2026.11.17.1055 — Full Platform Spring Boot 3.3.5 Single Runtime Complete Transition (VERIFIED)
 - [Spring Migration Report](SPRING_BOOT_MIGRATION_REPORT.md) · [Implementation Plan](implementation_plan.md). Complete 100% full platform consolidation into Java Spring Boot 3.3.5 single Fat JAR (Backend 89/89 controllers, embedded frontend SPA WebMvc serving, Discord4J Gateway daemon, Netty-SocketIO). Nginx fully unified to port 4550/9092. All legacy Node.js services (NestJS backend, Next.js frontend, Discord.js bot) completely retired (inactive dead). Zero-downtime verified.

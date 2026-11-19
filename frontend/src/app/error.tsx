@@ -1,8 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { RefreshCw, RotateCcw, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { Home, RefreshCw, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function sendTelemetry(error: Error & { readonly digest?: string }) {
+  try {
+    const payload = {
+      route: typeof window !== "undefined" ? window.location.pathname + window.location.search : "SSR",
+      errorName: error.name || "PageError",
+      errorMessage: error.message || "Unknown page error",
+      stack: error.stack || "",
+      digest: error.digest || "",
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      timestamp: new Date().toISOString(),
+      userId: typeof localStorage !== "undefined" ? (localStorage.getItem("userId") || "anonymous") : "anonymous"
+    };
+
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      navigator.sendBeacon("/api/v1/telemetry/client-error", blob);
+    } else {
+      fetch("/api/v1/telemetry/client-error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(() => {});
+    }
+  } catch {
+    // ignore telemetry error
+  }
+}
 
 export default function PageError({
   error,
@@ -11,84 +40,74 @@ export default function PageError({
   readonly error: Error & { readonly digest?: string };
   readonly reset: () => void;
 }) {
-  const [reloading, setReloading] = useState(true);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
-    console.error('Captured page error:', error);
+    sendTelemetry(error);
 
-    // Production Server Components often hide the original network error and
-    // expose only a generic digest. Treat the first boundary hit as transient:
-    // one automatic reload absorbs the short backend/frontend hand-over during
-    // a deploy. A real application bug is not looped forever; the next hit in
-    // the recovery window is shown to the visitor normally.
-    const lastRecovery = Number(sessionStorage.getItem('wdmv_error_recovery_ts') || '0');
-    const now = Date.now();
-    if (now - lastRecovery > 30000) {
-      sessionStorage.setItem('wdmv_error_recovery_ts', String(now));
-      const timer = setTimeout(() => window.location.reload(), 800);
-      return () => clearTimeout(timer);
-    }
-
-    setReloading(false);
-  }, [error]);
-
-  const handleForceReset = async () => {
-    setReloading(true);
     try {
-      await fetch('/api/auth/clear-session', { method: 'POST' });
-      sessionStorage.clear();
-      localStorage.clear();
-      if ('caches' in window) {
-        const names = await window.caches.keys();
-        await Promise.all(names.map((n) => window.caches.delete(n)));
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      if (token) {
+        if (!localStorage.getItem("token")) localStorage.setItem("token", token);
+        if (!sessionStorage.getItem("token")) sessionStorage.setItem("token", token);
       }
     } catch {
-      /* ignore */
+      // ignore
     }
-    window.location.href = '/?reset=1';
-  };
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          window.location.href = "/";
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [error]);
 
   return (
-    <div className="grid gap-5 py-16 text-center sm:text-left" role="alert">
+    <div className="grid gap-5 py-16 text-center sm:text-left max-w-xl mx-auto" role="alert">
       <div className="grid gap-3">
-        <p className="eyebrow flex items-center justify-center sm:justify-start gap-1.5 text-amber-500">
-          <Sparkles className="size-3.5" />
-          <span>{reloading ? 'System Update' : 'Something went wrong'}</span>
+        <p className="eyebrow flex items-center justify-center sm:justify-start gap-1.5 text-red-400 font-semibold text-xs">
+          <AlertCircle className="size-4 text-red-500" />
+          <span>화면 로드 실패 및 원인 기록 완료</span>
         </p>
-        <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-black tracking-tight">
-          {reloading ? '새로운 버전을 불러오고 있어요.' : '화면을 불러오지 못했어요.'}
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          화면을 정상적으로 불러오지 못했습니다.
         </h1>
-        <p className="max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-          {reloading
-            ? '최신 업데이트가 배포되어 화면을 자동으로 새로고침하고 있습니다. 잠시만 기다려 주세요...'
-            : '방금 새로운 서비스 기능이 배포되었거나 오래된 쿠키 세션으로 인해 일시적인 오류가 발생했을 수 있습니다. 새로고침 또는 쿠키 초기화를 누르시면 정상적으로 복구됩니다.'}
+        <p className="leading-relaxed text-zinc-400 text-sm [word-break:keep-all]">
+          요청하신 페이지 로드 중 예외가 감지되어 상세 원인이 시스템 원장에 자동 기록되었습니다.
+          방문자의 원활한 이용을 위해 <strong className="text-primary font-bold">{countdown}초 후 홈 화면으로 자동 이동</strong>합니다.
         </p>
       </div>
-      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-2">
+
+      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
         <Button
-          onClick={() => {
-            setReloading(true);
-            window.location.reload();
-          }}
-          className="min-h-11 font-extrabold inline-flex items-center gap-2 bg-amber-500 text-black hover:bg-amber-400"
+          onClick={() => { window.location.href = "/"; }}
+          className="min-h-11 font-bold inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <RefreshCw className={`size-4 ${reloading ? 'animate-spin' : ''}`} />
-          {reloading ? '불러오는 중...' : '지금 새로고침'}
+          <Home className="size-4" />
+          홈으로 즉시 이동 ({countdown}s)
         </Button>
-        <Button onClick={reset} variant="outline" className="min-h-11" disabled={reloading}>
+        <Button
+          onClick={() => { window.location.reload(); }}
+          variant="outline"
+          className="min-h-11 font-medium inline-flex items-center gap-2"
+        >
+          <RefreshCw className="size-4" />
+          새로고침 (로그인 유지)
+        </Button>
+        <Button onClick={reset} variant="ghost" className="min-h-11 text-zinc-400">
           다시 시도
         </Button>
-        <Button
-          onClick={handleForceReset}
-          variant="outline"
-          className="min-h-11 font-bold inline-flex items-center gap-2 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-        >
-          <RotateCcw className="size-4" />
-          세션/쿠키 강제 초기화 후 복구
-        </Button>
       </div>
+
       {error.digest && (
-        <p className="tabular text-xs text-muted-foreground">참조 코드 {error.digest}</p>
+        <p className="tabular text-xs text-zinc-500 font-mono">오류 참조 코드: {error.digest}</p>
       )}
     </div>
   );

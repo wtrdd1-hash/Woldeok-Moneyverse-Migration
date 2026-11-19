@@ -1,0 +1,38 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${language}" lang="en">
+<head th:replace="~{mv28/layout :: head}"></head>
+<body data-spring-page="compound" data-ui-release="v2026.11.18.28.1">
+<header th:replace="~{mv28/layout :: header}"></header>
+<main class="shell content">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="/tools" th:text="${ko} ? '도구' : 'Tools'">Tools</a><span aria-hidden="true">/</span><span th:text="${pageTitle}">Compound interest calculator</span></nav>
+  <section class="hero" aria-labelledby="page-heading">
+    <div class="hero-text"><p class="eyebrow">THE MONEYVERSE LAB / SPRING NATIVE</p><h1 id="page-heading" th:text="${pageTitle}">Compound interest calculator</h1>
+      <p th:text="${pageIntro}">Project compound growth with regular deposits and annual milestones.</p>
+      <div class="hero-tags"><span class="chip chip-primary" th:text="${ko} ? '로그인 불필요' : 'No account needed'">No account needed</span><span class="chip" th:text="${ko} ? '순수 HTML 계산' : 'No React hydration'">No React hydration</span></div>
+    </div><div class="hero-icon" aria-hidden="true"><span class="hero-icon-number">%</span><span class="hero-icon-line"></span></div>
+  </section>
+  <div class="main-grid">
+    <section class="panel form-panel" aria-labelledby="calc-form-title"><div class="panel-header"><span class="panel-step">01</span><div><h2 id="calc-form-title" th:text="${ko} ? '계산 조건' : 'Projection inputs'">Projection inputs</h2><p th:text="${ko} ? '값을 변경한 후 계산 버튼을 누르세요.' : 'Adjust the values, then calculate.'">Adjust inputs</p></div></div>
+      <div th:if="${error != null}" class="alert" role="alert"><strong th:text="${ko} ? '입력값을 확인하세요.' : 'Please correct the input.'">Please correct the input.</strong><span th:text="${error}">Input error</span></div>
+      <form method="get" action="/tools/compound-calculator" aria-labelledby="calc-form-title" class="calculator-form">
+        <input type="hidden" name="lang" th:value="${language}">
+        <div class="form-field"><label for="principal" th:text="${ko} ? '초기 투자 금액' : 'Initial principal'">Initial principal</label><input id="principal" name="principal" type="number" inputmode="decimal" min="0" max="1000000000000" step="0.01" required th:value="${values.principal}" value="100000"><small th:text="${ko} ? '통화 단위는 입력값에 따릅니다.' : 'Use a consistent currency across all inputs.'">Currency</small></div>
+        <div class="form-field"><label for="monthlyDeposit" th:text="${ko} ? '매월 적립 금액' : 'Monthly deposit'">Monthly deposit</label><input id="monthlyDeposit" name="monthlyDeposit" type="number" inputmode="decimal" min="0" max="1000000000000" step="0.01" required th:value="${values.monthlyDeposit}" value="10000"></div>
+        <div class="field-row"><div class="form-field"><label for="annualRate" th:text="${ko} ? '연이율 (%)' : 'Annual rate (%)'">Annual rate (%)</label><input id="annualRate" name="annualRate" type="number" inputmode="decimal" min="0" max="100" step="0.01" required th:value="${values.annualRate}" value="8.5"></div>
+          <div class="form-field"><label for="years" th:text="${ko} ? '기간 (년)' : 'Duration (years)'">Duration</label><input id="years" name="years" type="number" inputmode="numeric" min="1" max="50" step="1" required th:value="${values.years}" value="3"></div></div>
+        <div class="form-field"><label for="frequency" th:text="${ko} ? '복리 계산 주기' : 'Compounding frequency'">Compounding frequency</label>
+          <select id="frequency" name="frequency"><option value="monthly" th:selected="${values.frequency == 'monthly'}" th:text="${ko} ? '매월' : 'Monthly'">Monthly</option><option value="daily" th:selected="${values.frequency == 'daily'}" th:text="${ko} ? '매일' : 'Daily'">Daily</option><option value="annually" th:selected="${values.frequency == 'annually'}" th:text="${ko} ? '매년' : 'Annually'">Annually</option></select></div>
+        <div class="form-actions"><button class="primary-button" type="submit" th:text="${ko} ? '계산하기' : 'Calculate projection'">Calculate projection</button><a class="secondary-button" th:href="@{/tools/compound-calculator(lang=${language})}" th:text="${ko} ? '초기화' : 'Reset'">Reset</a></div>
+      </form>
+    </section>
+    <section class="panel result-panel" aria-labelledby="calc-results-title" th:if="${error == null}"><div class="panel-header"><span class="panel-step">02</span><div><h2 id="calc-results-title" th:text="${ko} ? '예상 결과' : 'Projection summary'">Projection summary</h2><p th:text="${ko} ? '입력한 가정에 따른 계산입니다.' : 'Calculated from your assumptions.'">Results</p></div></div>
+      <div class="results-grid" role="status" aria-live="polite"><div class="result-card" th:each="metric : ${result.metrics()}" th:classappend="${metric.key() == 'total-final'} ? ' is-primary' : ''" th:attr="data-testid=${metric.key()}"><span class="result-label" th:text="${ko} ? ${metric.ko()} : ${metric.en()}">Metric</span><strong th:text="${metric.value()} + ${metric.suffix()}">0</strong></div></div>
+      <div class="notice" th:text="${ko} ? ${result.descriptionKo()} : ${result.descriptionEn()}">Illustrative projection only.</div>
+    </section>
+  </div>
+  <section class="panel milestones" th:if="${error == null}" aria-labelledby="milestones-title"><div class="panel-header"><span class="panel-step">03</span><div><h2 id="milestones-title" th:text="${ko} ? '연도별 성장' : 'Year-by-year growth'">Year-by-year growth</h2><p th:text="${ko} ? '연말 기준 예상 현황입니다.' : 'Estimated end-of-year values.'">Milestones</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th scope="col" th:text="${ko} ? '연도' : 'Year'">Year</th><th scope="col" th:text="${ko} ? '납입 원금' : 'Contributed'">Contributed</th><th scope="col" th:text="${ko} ? '총 예상 금액' : 'Projected value'">Projected value</th><th scope="col" th:text="${ko} ? '이자' : 'Interest'">Interest</th></tr></thead><tbody><tr th:each="m : ${result.yearly()}"><th scope="row" th:text="${m.year()}">1</th><td th:text="${m.contributed()}">0</td><td th:text="${m.projected()}">0</td><td th:text="${m.interest()}">0</td></tr></tbody></table></div>
+  </section>
+  <section class="faq panel"><h2 th:text="${ko} ? '계산 방법' : 'How the calculation works'">How the calculation works</h2><details><summary th:text="${ko} ? '복리와 월 납입금은 어떻게 처리되나요?' : 'How are compounding and deposits handled?'">About compounding</summary><p th:text="${ko} ? '초기 원금에 지정한 복리 주기를 적용하고, 매월 말 납입한 적립금을 남은 기간만큼 복리 계산합니다.' : 'Initial principal compounds at the selected frequency. Each monthly contribution is added at the end of its month, then grows over the remaining period.'">Explanation</p></details></section>
+</main><footer th:replace="~{mv28/layout :: footer}"></footer>
+</body></html>

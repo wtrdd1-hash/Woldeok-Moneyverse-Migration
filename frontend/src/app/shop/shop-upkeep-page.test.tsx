@@ -43,6 +43,17 @@ beforeEach(() => {
 });
 
 describe('shop upkeep ceiling server-rendered flow', () => {
+  it('does not misrepresent an unavailable catalogue as an empty store', async () => {
+    mocks.apiOrNull.mockResolvedValue(null);
+    const html = renderToStaticMarkup(
+      await ShopPage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(html).toContain('상점 정보를 불러올 수 없습니다');
+    expect(html).toContain('role="alert"');
+    expect(html).not.toContain('data-items="0"');
+    expect(html).not.toContain('data-vip="false"');
+  });
+
   it('sends combined text/upkeep filter to member API while retaining VIP from unfiltered catalogue', async () => {
     const html = renderToStaticMarkup(
       await ShopPage({ searchParams: Promise.resolve({ q: 'hat', maxUpkeep: '0' }) }),

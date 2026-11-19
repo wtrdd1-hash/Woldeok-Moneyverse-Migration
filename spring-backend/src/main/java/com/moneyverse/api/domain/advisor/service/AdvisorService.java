@@ -1,19 +1,14 @@
 package com.moneyverse.api.domain.advisor.service;
 
 import com.moneyverse.api.domain.advisor.dto.AdvisorDtos.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AdvisorService {
 
-    private static final Logger log = LoggerFactory.getLogger(AdvisorService.class);
     private final JdbcTemplate jdbcTemplate;
 
     public AdvisorService(JdbcTemplate jdbcTemplate) {
@@ -21,30 +16,22 @@ public class AdvisorService {
     }
 
     public DiagnosisResponse diagnoseUserPortfolio(UUID userId) {
-        return new DiagnosisResponse(
-                true,
-                88,
-                "MODERATE_AGGRESSIVE",
-                "현재 포트폴리오는 국채 및 우량 성장주 위주로 안정적인 배당 및 이자 흐름을 창출하고 있습니다.",
-                List.of(
-                        "단기 유동성 확보를 위해 현금 비중을 15% 이상 유지하는 것을 권장합니다.",
-                        "주간 인플레이션율 상승에 대비하여 물가연동 채권 매수를 검토하세요."
-                ),
-                Map.of(
-                        "stocksRatioPercent", 55,
-                        "bondsRatioPercent", 30,
-                        "cashRatioPercent", 15
-                )
+        List<String> recommendations = List.of(
+                "가상 주식 비중이 45%로 적정 수준이나, 우량주 분산 투자를 추천합니다.",
+                "복리 예금에 10% 추가 예치 시 안정적 일일 이자 창출 가능"
         );
+        Map<String, Object> breakdown = Map.of(
+                "stocksPct", 45.0,
+                "depositsPct", 35.0,
+                "cashPct", 20.0
+        );
+        return new DiagnosisResponse(true, 85, "STABLE_GROWTH", "안정 성장형 우수 포트폴리오", recommendations, breakdown);
     }
 
     public AskDeokiResponse askDeoki(UUID userId, AskDeokiRequest req) {
-        String query = (req.question() != null) ? req.question() : "";
-        String answer = "안녕하세요! 금융 비서 덕이입니다. 현재 중앙은행 기준금리는 3.25% 동결 기조이며, 국채 스프레드는 안정적입니다. 질의하신 [" + query + "]에 대해 맞춤형 분산 투자를 추천해 드립니다.";
-        return new AskDeokiResponse(
-                true,
-                answer,
-                List.of("현재 최고 수익률 국채 상품 보기", "주식 시장 리그 상위 종목 확인", "국가연금 납부 현황 점검")
-        );
+        String answer = "안녕하세요! 금융 AI 비서 덕이입니다. 현재 회원님의 포트폴리오 건전성은 매우 양호합니다. "
+                + "변동성이 큰 장세에서는 복리 예금과 저PBR 가치주를 적절히 혼합하여 리스크를 관리하는 전략을 권장드립니다.";
+        List<String> actions = List.of("복리 예금 상품 보러가기", "실시간 호가창 확인", "12종 금융 계산기 사용");
+        return new AskDeokiResponse(true, answer, actions);
     }
 }

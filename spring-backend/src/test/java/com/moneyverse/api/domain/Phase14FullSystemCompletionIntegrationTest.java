@@ -65,8 +65,9 @@ public class Phase14FullSystemCompletionIntegrationTest {
     @Test
     @DisplayName("7. EnterpriseController - 비인가 세션 차단 검증 (401)")
     void testEnterpriseUnauthorized() throws Exception {
+        // Admin browser pages redirect to login; no data is returned to anonymous callers.
         mockMvc.perform(get("/admin/enterprises"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection());
     }
 
     @Test

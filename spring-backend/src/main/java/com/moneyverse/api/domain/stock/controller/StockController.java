@@ -2,6 +2,8 @@ package com.moneyverse.api.domain.stock.controller;
 
 import com.moneyverse.api.domain.stock.dto.StockDtos.*;
 import com.moneyverse.api.domain.stock.service.StockService;
+import com.moneyverse.api.domain.identity.service.MemberApiGuard;
+import org.springframework.web.server.ResponseStatusException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -21,22 +23,18 @@ import java.util.*;
 public class StockController {
 
     private static final Logger log = LoggerFactory.getLogger(StockController.class);
-    private static final UUID DEFAULT_FALLBACK_USER = UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
     private static final Set<Integer> ALLOWED_CANDLE_INTERVALS = Set.of(60, 300, 1800, 3600, 7200, 14400, 86400, 604800);
 
     private final StockService stockService;
+    private final MemberApiGuard memberApiGuard;
 
-    public StockController(StockService stockService) {
+    public StockController(StockService stockService, MemberApiGuard memberApiGuard) {
         this.stockService = stockService;
+        this.memberApiGuard = memberApiGuard;
     }
 
-    private UUID resolveUserId(HttpServletRequest request, String headerUserId) {
-        if (headerUserId != null && !headerUserId.isBlank()) {
-            try {
-                return UUID.fromString(headerUserId.trim());
-            } catch (Exception ignored) {}
-        }
-        return DEFAULT_FALLBACK_USER;
+    private UUID resolveUserId(HttpServletRequest request, String ignoredHeaderUserId) {
+        return memberApiGuard.actor(request);
     }
 
     @Operation(summary = "상장 종목 전체 시세 및 당일 등락 개요")
@@ -63,7 +61,7 @@ public class StockController {
             @PathVariable("id") String stockIdStr,
             @RequestBody WatchlistRequest body,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
-        UUID userId = resolveUserId(request, headerUserId);
+        UUID userId = memberApiGuard.verifiedMutationActor(request);
         UUID stockId = UUID.fromString(stockIdStr);
         boolean watching = stockService.setWatchlist(userId, stockId, body.isWatching());
         return ResponseEntity.ok(new WatchlistToggleResponse(watching));
@@ -184,8 +182,9 @@ public class StockController {
             @PathVariable("id") String stockIdStr,
             @Valid @RequestBody OrderRequest body,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
+        // Reject caller-supplied identity before entering exception handlers.
+        UUID userId = memberApiGuard.verifiedMutationActor(request);
         try {
-            UUID userId = resolveUserId(request, headerUserId);
             UUID stockId = UUID.fromString(stockIdStr);
             UUID idempotencyKey = UUID.fromString(body.getIdempotencyKey());
 
@@ -193,6 +192,8 @@ public class StockController {
                     userId, stockId, body.getSide(), body.getQuantity(), idempotencyKey
             );
             return ResponseEntity.ok(result);
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (IllegalStateException e) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("type", "about:blank");
@@ -201,13 +202,13 @@ public class StockController {
             err.put("detail", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
         } catch (Exception e) {
-            log.error("Stock order execution error: {}", e.getMessage(), e);
+            log.warn("Stock order failed without a certified receipt");
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("type", "about:blank");
-            err.put("title", "Conflict");
-            err.put("status", 409);
-            err.put("detail", "this trade cannot be completed now: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
+            err.put("title", "Service Unavailable");
+            err.put("status", 503);
+            err.put("detail", "STOCK_ORDER_SOURCE_UNAVAILABLE");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(err);
         }
     }
 }

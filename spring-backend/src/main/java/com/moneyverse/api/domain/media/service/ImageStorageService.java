@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class ImageStorageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImageStorageService.class);
-    private static final Pattern KEY_PATTERN = Pattern.compile("^[0-9a-f-]{36}\\.(png|jpg|webp)$");
+    private static final Pattern KEY_PATTERN = Pattern.compile("^(chat_)?[0-9a-f-]{36}\\.(png|jpg|jpeg|webp)$");
     private static final long MAX_BYTES = 8 * 1024 * 1024; // 8 MiB
 
     private final Path storageDirectory;

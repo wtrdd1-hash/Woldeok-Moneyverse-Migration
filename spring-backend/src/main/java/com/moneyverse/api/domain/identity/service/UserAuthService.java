@@ -29,6 +29,9 @@ public class UserAuthService {
     private final JdbcTemplate jdbcTemplate;
     private final Argon2PasswordEncoder passwordEncoder;
 
+    @org.springframework.beans.factory.annotation.Value("${moneyverse.internal-api-token:${INTERNAL_API_TOKEN:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}}")
+    private String internalToken = "8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f";
+
     @Autowired
     public UserAuthService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -66,9 +69,13 @@ public class UserAuthService {
 
     /**
      * Resolves the current session from request cookie or Authorization header.
+     * Accurately supports both mv_session and __Host-mv_session, raw Cookie headers,
+     * URL-decoding, and queries display_name from member_profile_view.
      */
     public Optional<SessionInfo> resolveSession(HttpServletRequest request) {
         if (request == null) return Optional.empty();
+
+// Security hardline: Never synthesize an admin session from untrusted client headers.
 
         String rawToken = null;
         Cookie[] cookies = request.getCookies();
@@ -78,6 +85,24 @@ public class UserAuthService {
                     if (c.getValue() != null && !c.getValue().isBlank()) {
                         rawToken = c.getValue().trim();
                         break;
+                    }
+                }
+            }
+        }
+
+        // Direct Cookie header parsing fallback (critical for reverse-proxies and SSR)
+        if (rawToken == null) {
+            String cookieHeader = request.getHeader("Cookie");
+            if (cookieHeader != null && !cookieHeader.isBlank()) {
+                String[] parts = cookieHeader.split(";");
+                for (String part : parts) {
+                    int eq = part.indexOf('=');
+                    if (eq > 0) {
+                        String name = part.substring(0, eq).trim();
+                        if ("mv_session".equals(name) || "__Host-mv_session".equals(name)) {
+                            rawToken = part.substring(eq + 1).trim();
+                            break;
+                        }
                     }
                 }
             }
@@ -94,12 +119,17 @@ public class UserAuthService {
             return Optional.empty();
         }
 
+        if (rawToken.length() > 1 && rawToken.charAt(0) == '"' && rawToken.charAt(rawToken.length() - 1) == '"') {
+            rawToken = rawToken.substring(1, rawToken.length() - 1);
+        }
+        try {
+            rawToken = java.net.URLDecoder.decode(rawToken, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {}
+
         String tokenHash = sha256(rawToken);
         String sql = """
-            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at,
-                   u.email, u.display_name
+            SELECT s.id, s.user_id, s.csrf_hash, s.expires_at, s.reauthenticated_at
             FROM auth_sessions s
-            LEFT JOIN users u ON s.user_id = u.id
             WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > NOW()
             """;
 
@@ -116,48 +146,103 @@ public class UserAuthService {
                 if (exp != null) si.setExpiresAt(exp.toInstant());
                 Timestamp reauth = rs.getTimestamp("reauthenticated_at");
                 if (reauth != null) si.setReauthenticatedAt(reauth.toInstant());
-                si.setEmail(rs.getString("email"));
-                si.setDisplayName(rs.getString("display_name"));
                 return si;
             }, tokenHash);
 
             if (info != null && info.getUserId() != null) {
-                List<String> roles = findUserRoles(info.getUserId());
+                UUID uid = info.getUserId();
+                // 1) display_name from member_profile_view
+                try {
+                    String dname = jdbcTemplate.queryForObject(
+                        "SELECT profile.display_name FROM public.member_profile_view(?::uuid, ?::uuid) AS profile",
+                        String.class, uid, uid
+                    );
+                    info.setDisplayName(dname != null && !dname.isBlank() ? dname : "시민");
+                } catch (Exception e) {
+                    info.setDisplayName("시민");
+                }
+
+                // 2) email from auth_local_credentials
+                try {
+                    String em = jdbcTemplate.queryForObject(
+                        "SELECT email FROM auth_local_credentials WHERE user_id = ? AND disabled_at IS NULL LIMIT 1",
+                        String.class, uid
+                    );
+                    info.setEmail(em);
+                } catch (Exception ignored) {}
+
+                // 3) roles & admin roles
+                List<String> roles = findUserRoles(uid);
                 info.setRoles(roles);
             }
             return Optional.ofNullable(info);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         } catch (Exception e) {
-            log.debug("[UserAuthService] resolveSession error: {}", e.getMessage());
+            log.warn("[UserAuthService] resolveSession error: {}", e.getMessage());
             return Optional.empty();
         }
     }
 
     public List<String> findUserRoles(UUID userId) {
-        List<String> roles = new ArrayList<>();
+        if (userId == null) return List.of("user");
+        Set<String> roles = new LinkedHashSet<>();
+
+        // 1. Check admin_current_roles(?::uuid)
         try {
-            List<String> ur = jdbcTemplate.query(
-                "SELECT role FROM user_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
+            List<String> acr = jdbcTemplate.query(
+                "SELECT role::text FROM public.admin_current_roles(?::uuid)",
+                (rs, rowNum) -> rs.getString(1),
                 userId
             );
-            roles.addAll(ur);
+            for (String r : acr) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
         } catch (Exception ignored) {}
 
+        // 2. Check user_roles table
         try {
-            List<String> ar = jdbcTemplate.query(
-                "SELECT role FROM admin_roles WHERE user_id = ?",
-                (rs, rowNum) -> rs.getString("role"),
+            List<String> ur = jdbcTemplate.query(
+                "SELECT role::text FROM user_roles WHERE user_id = ?",
+                (rs, rowNum) -> rs.getString(1),
                 userId
             );
-            roles.addAll(ar);
+            for (String r : ur) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
         } catch (Exception ignored) {}
+
+        // 3. Check admin_role_designations
+        try {
+            List<String> ar = jdbcTemplate.query(
+                "SELECT role::text FROM admin_role_designations WHERE target_user_id = ? AND operation = 'GRANT'",
+                (rs, rowNum) -> rs.getString(1),
+                userId
+            );
+            for (String r : ar) {
+                roles.add(r.toLowerCase());
+                roles.add(r.toUpperCase());
+            }
+        } catch (Exception ignored) {}
+
+        // Map superadmin / server_operator / approver / operator to ADMIN and SUPERADMIN
+        if (roles.contains("superadmin") || roles.contains("SUPERADMIN")) {
+            roles.add("ADMIN");
+            roles.add("admin");
+            roles.add("SUPERADMIN");
+            roles.add("superadmin");
+        }
+        if (roles.contains("operator") || roles.contains("server_operator") || roles.contains("approver")) {
+            roles.add("ADMIN");
+            roles.add("admin");
+        }
 
         if (roles.isEmpty()) {
             roles.add("user");
         }
-        return roles;
+        return new ArrayList<>(roles);
     }
 
     /**
@@ -232,9 +317,14 @@ public class UserAuthService {
         setSessionCookie(response, rawToken);
 
         // Fetch user profile details
-        String userSql = "SELECT display_name, email FROM users WHERE id = ?";
-        Map<String, Object> userRow = jdbcTemplate.queryForMap(userSql, userId);
-        String displayName = (String) userRow.get("display_name");
+        String displayName = "시민";
+        try {
+            String dname = jdbcTemplate.queryForObject(
+                "SELECT display_name FROM member_profiles WHERE user_id = ?",
+                String.class, userId
+            );
+            if (dname != null && !dname.isBlank()) displayName = dname;
+        } catch (Exception ignored) {}
 
         List<String> roles = findUserRoles(userId);
 
@@ -264,16 +354,12 @@ public class UserAuthService {
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
         // 1. Insert into users
-        String insertUser = "INSERT INTO users (id, email, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(insertUser, userId, email, displayName, Timestamp.from(now), Timestamp.from(now));
+        String insertUser = "INSERT INTO users (id, status, created_at) VALUES (?, 'active'::user_status, ?)";
+        jdbcTemplate.update(insertUser, userId, Timestamp.from(now));
 
-        // 2. Insert into profiles
-        try {
-            String insertProfile = "INSERT INTO profiles (id, display_name, visibility, job_type, job_level, joined_at) VALUES (?, ?, 'PUBLIC', 'NONE', 1, ?)";
-            jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
-        } catch (Exception e) {
-            log.debug("[UserAuthService] profile insert skipped or existing: {}", e.getMessage());
-        }
+        // 2. Insert into member_profiles
+        String insertProfile = "INSERT INTO member_profiles (user_id, display_name, visibility, field_visibility, updated_at) VALUES (?, ?, 'public'::profile_visibility, '{}'::jsonb, ?)";
+        jdbcTemplate.update(insertProfile, userId, displayName, Timestamp.from(now));
 
         // 3. Insert into auth_local_credentials
         String insertCred = """
@@ -286,11 +372,11 @@ public class UserAuthService {
         try {
             UUID accountId = UUID.randomUUID();
             jdbcTemplate.update(
-                "INSERT INTO accounts (id, account_type, owner_user_id, currency, allow_negative, created_at) VALUES (?, 'USER_CASH', ?, 'WLD', false, ?)",
+                "INSERT INTO accounts (id, account_type, owner_user_id, currency, status, allow_negative, created_at) VALUES (?, 'USER_CASH'::account_type, ?, 'WLD', 'active'::account_status, false, ?)",
                 accountId, userId, Timestamp.from(now)
             );
             jdbcTemplate.update(
-                "INSERT INTO account_balances (account_id, balance, updated_at) VALUES (?, 1000000, ?)",
+                "INSERT INTO account_balances (account_id, available_amount, updated_at) VALUES (?, 1000000, ?)",
                 accountId, Timestamp.from(now)
             );
         } catch (Exception e) {
@@ -353,6 +439,9 @@ public class UserAuthService {
         cookie.setPath("/");
         cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=" + rawToken + "; Path=/; Max-Age=" + (30 * 24 * 60 * 60) + "; HttpOnly; Secure; SameSite=Lax");
     }
 
     public void clearSessionCookie(HttpServletResponse response) {
@@ -363,6 +452,26 @@ public class UserAuthService {
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+
+        response.addHeader("Set-Cookie",
+            "__Host-mv_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax");
+    }
+
+    public Long getUserCashBalance(UUID userId) {
+        if (userId == null) return 0L;
+        String sql = """
+            SELECT COALESCE(ab.balance, 0)
+            FROM accounts a
+            JOIN account_balances ab ON ab.account_id = a.id
+            WHERE a.owner_user_id = ? AND a.account_type = 'USER_CASH' AND a.currency = 'WLD'
+            LIMIT 1
+            """;
+        try {
+            Long b = jdbcTemplate.queryForObject(sql, Long.class, userId);
+            return b != null ? b : 0L;
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
     public static class SessionInfo {
@@ -396,4 +505,85 @@ public class UserAuthService {
 
     public record PreloginSessionResult(UUID sessionId, String token, String csrfToken) {}
     public record LoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String email, String displayName, List<String> roles) {}
+
+    /**
+     * Completes an OAuth login using the database stored procedure auth_complete_oauth_login.
+     * Generates a new secure session, sets session cookies, and returns the login result.
+     */
+    @Transactional
+    public OAuthLoginResult completeOAuthLogin(
+            UUID preAuthSessionId,
+            String provider,
+            String subject,
+            String displayName,
+            HttpServletResponse response) {
+
+        String safeProvider = (provider != null) ? provider.trim().toLowerCase() : "discord";
+        String safeSubject = (subject != null) ? subject.trim() : "";
+        String safeName = (displayName != null && !displayName.isBlank()) ? displayName.trim() : "시민";
+        if (safeName.length() > 120) safeName = safeName.substring(0, 120);
+
+        String subjectHash = sha256(safeProvider + ":" + safeSubject);
+        String rawToken = generateRandomToken();
+        String csrfToken = UUID.randomUUID().toString();
+        String tokenHash = sha256(rawToken);
+        String csrfHash = sha256(csrfToken);
+
+        // Ensure active pre-login session
+        UUID effectivePreSessionId = preAuthSessionId;
+        if (effectivePreSessionId == null) {
+            effectivePreSessionId = UUID.randomUUID();
+            String preTokenHash = sha256(generateRandomToken());
+            String preCsrfHash = sha256(UUID.randomUUID().toString());
+            jdbcTemplate.update(
+                "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true)",
+                effectivePreSessionId, preTokenHash, preCsrfHash
+            );
+        } else {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth_sessions WHERE id = ? AND user_id IS NULL AND revoked_at IS NULL AND expires_at > NOW()",
+                Integer.class, effectivePreSessionId
+            );
+            if (count == null || count == 0) {
+                jdbcTemplate.update(
+                    "INSERT INTO auth_sessions (id, token_hash, csrf_hash, user_id, expires_at, created_at, prelogin_age_confirmed) VALUES (?, ?, ?, NULL, NOW() + INTERVAL '1 day', NOW(), true) ON CONFLICT (id) DO UPDATE SET revoked_at = NULL, expires_at = NOW() + INTERVAL '1 day', user_id = NULL",
+                    effectivePreSessionId, sha256(generateRandomToken()), sha256(UUID.randomUUID().toString())
+                );
+            }
+        }
+
+        String sql = "SELECT user_id, session_id, is_new FROM auth_complete_oauth_login(?::uuid, ?::identity_provider, ?, ?, ?, ?, ?)";
+        Map<String, Object> row = jdbcTemplate.queryForMap(
+            sql,
+            effectivePreSessionId,
+            safeProvider,
+            safeSubject,
+            subjectHash,
+            safeName,
+            tokenHash,
+            csrfHash
+        );
+
+        UUID userId = (UUID) row.get("user_id");
+        UUID sessionId = (UUID) row.get("session_id");
+        Boolean isNew = (Boolean) row.get("is_new");
+
+        // Mark reauthenticated
+        try {
+            jdbcTemplate.update(
+                "UPDATE auth_sessions SET reauthenticated_at = NOW() WHERE id = ?",
+                sessionId
+            );
+        } catch (Exception e) {
+            log.warn("[UserAuthService] Failed to update reauthenticated_at: {}", e.getMessage());
+        }
+
+        // Set session cookies
+        setSessionCookie(response, rawToken);
+
+        return new OAuthLoginResult(userId, sessionId, rawToken, csrfToken, safeName, isNew != null && isNew);
+    }
+
+    public record OAuthLoginResult(UUID userId, UUID sessionId, String token, String csrfToken, String displayName, boolean isNew) {}
 }
+

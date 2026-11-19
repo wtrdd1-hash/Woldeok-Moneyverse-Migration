@@ -6,6 +6,7 @@ import { Accent } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiOrNull, publicApi } from '@/lib/api';
+import { EmptyState } from '@/components/empty-state';
 import { isLoggedInMember } from '@/lib/session';
 import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 const PRINCIPLES = [
-  { ko: '11개 카테고리 78종 상품 완비', en: '11 categories & 78 items' },
+  { ko: '검증된 판매 상품만 표시', en: 'Only verified catalog items are displayed' },
   { ko: '60fps 무지연 실시간 피팅룸', en: '60fps zero-lag fitting room' },
   { ko: '구매 시 100% 영구 소각(Sink)', en: '100% permanently burned (Sink)' },
   { ko: '현금 교환·환전 불가', en: 'No cash exchange' },
@@ -61,8 +62,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       : null,
   ]);
 
-  const items = catalogData?.catalogItems || [];
+  const catalogueUnavailable = !cap.invalid && !Array.isArray(catalogData?.catalogItems);
+  const items = Array.isArray(catalogData?.catalogItems) ? catalogData.catalogItems : [];
   const userBalance = cashBalanceFromWallet(walletData);
+  const membershipKnown = !catalogueUnavailable && (!needsUnfilteredMembership || membershipData !== null);
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 
@@ -146,7 +149,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             주간 유지비 {cap.value} WLD 이하 상품만 표시합니다.
           </p>
         ) : null}
-        {query && !cap.invalid ? (
+        {query && !cap.invalid && !catalogueUnavailable ? (
           <p className="text-sm text-muted-foreground">
             “{query}” 검색 결과 {items.length}개
           </p>
@@ -173,15 +176,28 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       {/* Moneyverse Plus VIP Membership Tier Card */}
-      <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+      {membershipKnown ? (
+        <ShopMembershipSection userBalance={userBalance} isPlusMember={isPlusMember} />
+      ) : null}
 
-      <ShopStoreView
-        items={items}
-        allowCompare={loggedIn}
-        userBalance={userBalance}
-        currentUsername={username}
-        userAvatarUrl={avatarUrl}
-      />
+      {catalogueUnavailable ? (
+        <div role="alert" aria-live="polite" className="rounded-xl border border-amber-500/40 bg-card p-6">
+          <EmptyState
+            title={<T korean="상점 정보를 불러올 수 없습니다" english="Shop data is unavailable" />}
+            description={<T korean="실제 상품 정보를 확인하지 못했습니다. 상품이 없는 것으로 처리하지 않으며, 구매도 일시적으로 중단합니다." english="The verified catalogue could not be loaded. No products are shown and purchases remain unavailable." />}
+          >
+            <Button asChild variant="outline"><Link href="/shop"><T korean="다시 조회" english="Retry" /></Link></Button>
+          </EmptyState>
+        </div>
+      ) : (
+        <ShopStoreView
+          items={items}
+          allowCompare={loggedIn}
+          userBalance={userBalance}
+          currentUsername={username}
+          userAvatarUrl={avatarUrl}
+        />
+      )}
     </div>
   );
 }

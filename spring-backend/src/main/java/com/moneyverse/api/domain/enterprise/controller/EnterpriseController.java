@@ -13,8 +13,7 @@ import java.util.*;
 @RestController
 @RequestMapping(path = {
         "/api/v1/admin/enterprises",
-        "/api/admin/enterprises",
-        "/admin/enterprises"
+        "/api/admin/enterprises"
 })
 public class EnterpriseController {
 
@@ -41,26 +40,12 @@ public class EnterpriseController {
     public ResponseEntity<Map<String, Object>> listEnterprises(HttpServletRequest request) {
         verifyAdmin(request);
         List<Map<String, Object>> enterprises = List.of(
-                Map.of(
-                        "id", "ent-korail-wld",
-                        "name", "한국철도공사 (월덱)",
-                        "code", "KORAIL_WLD",
-                        "stateSharePercent", 100.0,
-                        "marketValuationWld", 50000000000L,
-                        "quarterlyDividendWld", 250000000L,
-                        "status", "STATE_OWNED"
-                ),
-                Map.of(
-                        "id", "ent-kepco-wld",
-                        "name", "한국전력공사 (월덱)",
-                        "code", "KEPCO_WLD",
-                        "stateSharePercent", 80.0,
-                        "marketValuationWld", 80000000000L,
-                        "quarterlyDividendWld", 400000000L,
-                        "status", "PUBLIC_HYBRID"
-                )
+            Map.of("id", "ENT-01", "name", "한국가상전력공사", "sector", "에너지·전력", "stateSharePct", 85.0, "valuationWld", 150_000_000_000L, "status", "PUBLIC_OWNED"),
+            Map.of("id", "ENT-02", "name", "월덕가상철도공사", "sector", "교통·물류", "stateSharePct", 100.0, "valuationWld", 80_000_000_000L, "status", "PUBLIC_OWNED"),
+            Map.of("id", "ENT-03", "name", "한국가상가스공사", "sector", "자원·에너지", "stateSharePct", 70.0, "valuationWld", 60_000_000_000L, "status", "PUBLIC_OWNED"),
+            Map.of("id", "ENT-04", "name", "월덕우체국금융공사", "sector", "금융·우편", "stateSharePct", 100.0, "valuationWld", 120_000_000_000L, "status", "PUBLIC_OWNED")
         );
-        return ResponseEntity.ok(Map.of("enterprises", enterprises, "total", enterprises.size()));
+        return ResponseEntity.ok(Map.of("ok", true, "enterprises", enterprises, "total", enterprises.size()));
     }
 
     @PostMapping("/{id}/privatize")
@@ -72,14 +57,13 @@ public class EnterpriseController {
         if (body == null || !body.containsKey("sharesToOfferPercent")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sharesToOfferPercent is required");
         }
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("enterpriseId", id);
-        res.put("sharesOfferedPercent", body.get("sharesToOfferPercent"));
-        res.put("ipoStatus", "OFFERED");
-        res.put("processedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        double pct = ((Number) body.get("sharesToOfferPercent")).doubleValue();
+        return ResponseEntity.ok(Map.of(
+            "ok", true,
+            "enterpriseId", id,
+            "privatizedPct", pct,
+            "message", "공기업 지분 " + pct + "% 민영화 공모 절차가 승인되었습니다."
+        ));
     }
 
     @PostMapping("/{id}/dividends/disburse")
@@ -87,12 +71,12 @@ public class EnterpriseController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("success", true);
-        res.put("enterpriseId", id);
-        res.put("status", "DISBURSED");
-        res.put("disbursedAt", new Date().toInstant().toString());
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(Map.of(
+            "ok", true,
+            "enterpriseId", id,
+            "disbursedAmountWld", 5_000_000_000L,
+            "message", "국고 및 주주 대상 배당금 지급이 완료되었습니다."
+        ));
     }
 
     @GetMapping("/{id}/governance")
@@ -100,12 +84,12 @@ public class EnterpriseController {
             HttpServletRequest request,
             @PathVariable("id") String id) {
         verifyAdmin(request);
-        Map<String, Object> gov = new LinkedHashMap<>();
-        gov.put("enterpriseId", id);
-        gov.put("boardSeats", 7);
-        gov.put("governmentAppointedSeats", 5);
-        gov.put("publicShareholderSeats", 2);
-        gov.put("auditCommitteeRating", "AAA");
-        return ResponseEntity.ok(gov);
+        return ResponseEntity.ok(Map.of(
+            "ok", true,
+            "enterpriseId", id,
+            "boardMembers", List.of("김상임 (이사장)", "박이사 (정부파견)", "이사외 (사외이사)"),
+            "auditStatus", "QUALIFIED",
+            "lastAuditedAt", "2026-10-31T00:00:00Z"
+        ));
     }
 }

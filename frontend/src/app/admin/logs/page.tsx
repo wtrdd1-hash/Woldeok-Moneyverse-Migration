@@ -168,6 +168,43 @@ export default async function AdminLogsPage({
       {/* Navigation Sub-Tabs */}
       <LogsSubNav current="audit" />
 
+            {/* 화면 로드 & 시스템 장애 로그 원장 바로가기 하이라이트 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-red-500/40 bg-red-950/25 shadow-sm">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-sm font-bold text-red-200">🚨 화면 로드 & 시스템 장애 로그 원장</h3>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 font-medium">시간별 · 날짜별 · 오류코드별 정밀 분석</span>
+          </div>
+          <p className="text-xs text-zinc-300">
+            화면 튕김, 렌더링 예외, React 에러, 런타임 크래시 기록을 시간별·날짜별·오류코드별 구조화 테이블로 즉시 조회합니다.
+          </p>
+        </div>
+        <Button asChild variant="secondary" size="sm" className="shrink-0 font-bold bg-red-500/20 border border-red-500/50 text-red-200 hover:bg-red-500/30 min-h-[36px]">
+          <Link href="/admin/logs/errors">
+            장애 로그 원장 조회 →
+          </Link>
+        </Button>
+      </div>
+
+{/* 시스템 런타임 실시간 로그 바로가기 하이라이트 배너 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 shadow-sm">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
+            <h3 className="text-sm font-bold text-cyan-200">🖥️ 시스템 & 서버 런타임 실시간 로그 뷰어</h3>
+          </div>
+          <p className="text-xs text-zinc-400">
+            Nginx 웹서버 에러/액세스 로그, 엔터프라이즈 코어 백엔드 및 Next.js 프론트엔드 런타임 로그를 확인합니다.
+          </p>
+        </div>
+        <Button asChild variant="secondary" size="sm" className="shrink-0 font-bold bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25 min-h-[36px]">
+          <Link href="/admin/logs/system">
+            실시간 시스템 로그 열람 →
+          </Link>
+        </Button>
+      </div>
+
       {/* 스마트 조건 검색 아코디언 폼 */}
       <AuditLogsFilterForm filters={filters} users={directoryComplete ? userList : []} />
 

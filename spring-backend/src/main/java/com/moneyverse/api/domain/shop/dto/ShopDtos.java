@@ -19,10 +19,16 @@ public final class ShopDtos {
             @JsonProperty("stock_remaining") int stockRemaining
     ) implements Serializable {}
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ShopCatalogListResponse(
             @JsonProperty("success") boolean success,
-            @JsonProperty("items") List<ShopCatalogItem> items
-    ) implements Serializable {}
+            @JsonProperty("items") List<ShopCatalogItem> items,
+            @JsonProperty("catalogItems") List<java.util.Map<String, Object>> catalogItems
+    ) implements Serializable {
+        public ShopCatalogListResponse(boolean success, List<ShopCatalogItem> items) {
+            this(success, items, null);
+        }
+    }
 
     public record ShopInventoryItem(
             @JsonProperty("inventory_id") String inventoryId,
@@ -53,7 +59,7 @@ public final class ShopDtos {
             @JsonProperty("error") String error
     ) implements Serializable {
         public static ShopPurchaseResponse ok(String purchaseId, String totalPrice, String taxPaid) {
-            return new ShopPurchaseResponse(true, purchaseId, totalPrice, taxPaid, "아이템 구매 및 10% 소비세 국고 편입이 완료되었습니다.", null);
+            return new ShopPurchaseResponse(true, purchaseId, totalPrice, taxPaid, "구매 영수증을 받았습니다. 세금 정산 내역은 별도의 원장 검증이 필요합니다.", null);
         }
         public static ShopPurchaseResponse fail(String error) {
             return new ShopPurchaseResponse(false, null, "0", "0", null, error);

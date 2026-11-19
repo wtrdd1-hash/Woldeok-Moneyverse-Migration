@@ -35,12 +35,8 @@ public class MemberPhotoController {
 
     private Optional<UUID> resolveUserId(HttpServletRequest request) {
         Optional<SessionInfo> session = authService.resolveSession(request);
-        if (session.isPresent() && session.get().isSignedIn()) {
+        if (session.isPresent() && session.get().isSignedIn() && session.get().getUserId() != null) {
             return Optional.of(session.get().getUserId());
-        }
-        String headerUid = request.getHeader("X-User-Id");
-        if (headerUid != null && !headerUid.isBlank()) {
-            try { return Optional.of(UUID.fromString(headerUid)); } catch (Exception ignored) {}
         }
         return Optional.empty();
     }

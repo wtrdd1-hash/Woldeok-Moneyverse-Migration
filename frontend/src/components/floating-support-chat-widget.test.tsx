@@ -26,6 +26,14 @@ describe('FloatingSupportChatWidget (통합 고객지원 & 1:1 쪽지 허브)', 
     vi.clearAllMocks();
   });
 
+  it('uses one accessible circular 56px launcher above mobile safe area', () => {
+    render(<FloatingSupportChatWidget />);
+    const trigger = screen.getByLabelText('1:1 채팅 및 고객센터 열기/닫기');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger.className).toContain('size-14');
+    expect(trigger.closest('[data-support-launcher]')?.className).toContain('safe-area-inset-bottom');
+  });
+
   it('플로팅 트리거 버블 버튼이 정상 렌더링된다', () => {
     render(<FloatingSupportChatWidget />);
     const trigger = screen.getByLabelText('1:1 채팅 및 고객센터 열기/닫기');

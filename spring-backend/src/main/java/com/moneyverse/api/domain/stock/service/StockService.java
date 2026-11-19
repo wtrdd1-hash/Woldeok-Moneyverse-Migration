@@ -7,6 +7,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Array;
 import java.sql.Timestamp;
@@ -17,6 +19,11 @@ import java.util.*;
 public class StockService {
 
     private static final Logger log = LoggerFactory.getLogger(StockService.class);
+
+    private static ResponseStatusException unavailable(String origin) {
+        log.warn("Stock canonical source unavailable: {}", origin);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "STOCK_SOURCE_UNAVAILABLE");
+    }
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -56,19 +63,10 @@ public class StockService {
                 );
             });
         } catch (Exception e) {
-            log.warn("stock_market_overview() query error, using fallback catalog: {}", e.getMessage());
-            return getFallbackStocks();
+            throw unavailable("market_overview");
         }
     }
 
-    private List<StockMarketRow> getFallbackStocks() {
-        String now = Instant.now().toString();
-        return List.of(
-                new StockMarketRow("7a6d8b80-eb76-476d-a4a2-f390cce7dacd", "AAA", "건전지", "초소형 필수 소비재", "15", "15", "16", "14", "1000000", "950000", "ACTIVE", now),
-                new StockMarketRow("d6a6da97-2611-4822-a2d9-dc6ad5dbeab5", "CHIMU314", "치무전자", "초대형 반도체 대장주", "138870438", "135000000", "140000000", "134000000", "500000", "480000", "ACTIVE", now),
-                new StockMarketRow("4683378b-d86a-4c9e-93c6-e77c249519ee", "DUCK", "덕덕 물산", "글로벌 종합 무역", "3165751", "3100000", "3200000", "3050000", "2000000", "1900000", "ACTIVE", now)
-        );
-    }
 
     /**
      * 유저 관심 종목 목록 조회
@@ -92,8 +90,8 @@ public class StockService {
                 );
             }, userId);
         } catch (Exception e) {
-            log.warn("stock_my_watchlist query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("stock_my_watchlist{}");
         }
     }
 
@@ -106,8 +104,7 @@ public class StockService {
             Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, userId, stockId, watching);
             return Boolean.TRUE.equals(result);
         } catch (Exception e) {
-            log.warn("stock_watchlist_set query error: {}", e.getMessage());
-            return watching;
+            throw unavailable("watchlist_write");
         }
     }
 
@@ -133,8 +130,8 @@ public class StockService {
                     rs.getString("halt_status")
             ), userId);
         } catch (Exception e) {
-            log.warn("stock_my_positions query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("stock_my_positions{}");
         }
     }
 
@@ -167,8 +164,8 @@ public class StockService {
                 );
             }, userId);
         } catch (Exception e) {
-            log.warn("haltSettlementReceipts query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("haltSettlementReceipts{}");
         }
     }
 
@@ -198,8 +195,8 @@ public class StockService {
                 );
             }, userId, boundedLimit);
         } catch (Exception e) {
-            log.warn("stock_my_trades query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("stock_my_trades{}");
         }
     }
 
@@ -228,8 +225,8 @@ public class StockService {
                 return new StockSparkSeriesRow(stockId, prices);
             }, boundedLimit);
         } catch (Exception e) {
-            log.warn("sparkSeries query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("sparkSeries{}");
         }
     }
 
@@ -262,8 +259,8 @@ public class StockService {
                 );
             });
         } catch (Exception e) {
-            log.warn("marketEvents query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("marketEvents{}");
         }
     }
 
@@ -281,8 +278,8 @@ public class StockService {
                 return new StockPriceHistoryRow(recordedAt, rs.getString("price"));
             }, stockId, boundedLimit);
         } catch (Exception e) {
-            log.warn("stock_price_history query error: {}", e.getMessage());
-            return Collections.emptyList();
+
+            throw unavailable("stock_price_history{}");
         }
     }
 
@@ -309,9 +306,7 @@ public class StockService {
                 );
             }, stockId, intervalSeconds, boundedLimit);
         } catch (Exception e) {
-            log.warn("stock_candles query error: {}", e.getMessage());
-            String now = Instant.now().toString();
-            return List.of(new StockCandleRow(now, "100", "120", "95", "110"));
+            throw unavailable("candles");
         }
     }
 
@@ -332,7 +327,7 @@ public class StockService {
                     rs.getString("first_trade_date")
             ), stockId);
         } catch (Exception e) {
-            return new StockRangeRow("150", "80", "200", "50", "2026-01-01");
+            throw unavailable("price_range");
         }
     }
 
@@ -341,37 +336,40 @@ public class StockService {
      */
     @Transactional
     public TradeResultResponse trade(UUID userId, UUID stockId, String side, int quantity, UUID idempotencyKey) {
+        if (userId == null || stockId == null || idempotencyKey == null || side == null
+                || !("buy".equalsIgnoreCase(side) || "sell".equalsIgnoreCase(side)) || quantity <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "INVALID_STOCK_ORDER");
+        }
         String checkHaltSql = "SELECT coalesce(halt_status, 'ACTIVE') AS halt_status " +
                 "FROM public.stock_market_overview() WHERE id = ?::uuid";
+        String haltStatus;
         try {
-            String haltStatus = jdbcTemplate.queryForObject(checkHaltSql, String.class, stockId);
-            if (haltStatus != null && !"ACTIVE".equalsIgnoreCase(haltStatus)) {
-                throw new IllegalStateException("stock is currently halted");
-            }
-        } catch (IllegalStateException e) {
-            throw e;
+            haltStatus = jdbcTemplate.queryForObject(checkHaltSql, String.class, stockId);
         } catch (Exception e) {
-            log.debug("Halt check query skipped: {}", e.getMessage());
+            throw unavailable("trade_halt_check");
         }
-
+        if (haltStatus == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "STOCK_NOT_FOUND");
+        }
+        if (!"ACTIVE".equalsIgnoreCase(haltStatus)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "STOCK_HALTED");
+        }
         String tradeSql = "SELECT trade_id::text, unit_price::text, gross_amount::text, " +
                 "tax_amount::text, current_price::text " +
-                "FROM public.stock_trade(?::uuid, ?::uuid, ?::uuid, ?::text, ?::int)";
-
+                "FROM public.stock_trade(?::uuid, ?::uuid, ?::uuid, ?::text, ?::bigint)";
         try {
-            return jdbcTemplate.queryForObject(tradeSql, (rs, rowNum) -> new TradeResultResponse(
-                    rs.getString("trade_id"),
-                    rs.getString("unit_price"),
-                    rs.getString("gross_amount"),
-                    rs.getString("tax_amount"),
-                    rs.getString("current_price")
-            ), idempotencyKey, userId, stockId, side.toLowerCase(), quantity);
+            TradeResultResponse receipt = jdbcTemplate.queryForObject(tradeSql, (rs, rowNum) ->
+                    new TradeResultResponse(rs.getString("trade_id"), rs.getString("unit_price"),
+                            rs.getString("gross_amount"), rs.getString("tax_amount"),
+                            rs.getString("current_price")),
+                    idempotencyKey, userId, stockId, side.toLowerCase(java.util.Locale.ROOT), quantity);
+            if (receipt == null || receipt.getTradeId() == null || receipt.getUnitPrice() == null
+                    || receipt.getGrossAmount() == null || receipt.getTaxAmount() == null) {
+                throw unavailable("trade_receipt_missing");
+            }
+            return receipt;
         } catch (Exception e) {
-            log.warn("stock_trade query failed (H2 fallback): {}", e.getMessage());
-            long unitPrice = 100L;
-            long gross = unitPrice * quantity;
-            long tax = gross / 100L;
-            return new TradeResultResponse(idempotencyKey.toString(), String.valueOf(unitPrice), String.valueOf(gross), String.valueOf(tax), String.valueOf(unitPrice));
+            throw unavailable("trade_receipt");
         }
     }
 
@@ -384,8 +382,7 @@ public class StockService {
             String moved = jdbcTemplate.queryForObject(sql, String.class);
             return moved != null ? Integer.parseInt(moved) : 0;
         } catch (Exception e) {
-            log.debug("liveTick error or lock busy: {}", e.getMessage());
-            return 0;
+            throw unavailable("market_tick");
         }
     }
 }

@@ -16,7 +16,7 @@ public final class BusinessDtos {
             @JsonProperty("category") String category,
             @JsonProperty("base_price") String basePrice,
             @JsonProperty("daily_yield") String dailyYield,
-            @JsonProperty("max_tier") int maxTier
+            @JsonProperty("max_tier") Integer maxTier
     ) implements Serializable {}
 
     public record BusinessCatalogResponse(
@@ -29,7 +29,7 @@ public final class BusinessDtos {
             @JsonProperty("type_id") String typeId,
             @JsonProperty("name") String name,
             @JsonProperty("type_name") String typeName,
-            @JsonProperty("tier") int tier,
+            @JsonProperty("tier") Integer tier,
             @JsonProperty("daily_yield") String dailyYield,
             @JsonProperty("uncollected_revenue") String uncollectedRevenue,
             @JsonProperty("last_collected_at") String lastCollectedAt,
@@ -78,7 +78,7 @@ public final class BusinessDtos {
             return new BusinessCollectResponse(true, collected, tax, net, "사업장 수익금 정산 및 법인세(10%) 자동 원천징수가 완료되었습니다.", null);
         }
         public static BusinessCollectResponse fail(String error) {
-            return new BusinessCollectResponse(false, "0", "0", "0", null, error);
+            return new BusinessCollectResponse(false, null, null, null, null, error);
         }
     }
 }

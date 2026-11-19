@@ -3,15 +3,14 @@ package com.moneyverse.api.domain.progression.service;
 import com.moneyverse.api.domain.progression.dto.ProgressionDtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProgressionService {
@@ -24,88 +23,91 @@ public class ProgressionService {
     }
 
     public ProgressionStatusResponse status(UUID userId) {
-        try {
-            String sql = "SELECT stage_code, reached_at, updated_at FROM user_progression WHERE user_id = ?";
-            List<ProgressionStatus> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
-                String stage = rs.getString("stage_code");
-                Timestamp reachedAtTs = rs.getTimestamp("reached_at");
-                OffsetDateTime reachedAt = reachedAtTs != null ? reachedAtTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
-                Timestamp updatedAtTs = rs.getTimestamp("updated_at");
-                OffsetDateTime updatedAt = updatedAtTs != null ? updatedAtTs.toInstant().atOffset(ZoneOffset.UTC) : reachedAt;
-
-                int level = mapStageToLevel(stage);
-                return new ProgressionStatus(
-                        userId,
-                        stage != null ? stage : "STAGE_1_NOVICE",
-                        level,
-                        1500L,
-                        5000L,
-                        reachedAt,
-                        updatedAt,
-                        List.of("WORK", "SHOP", "MARKET", "BANK")
-                );
-            }, userId);
-
-            if (!list.isEmpty()) {
-                return new ProgressionStatusResponse(true, list.get(0));
-            }
-
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ProgressionStatus fallback = new ProgressionStatus(
-                    userId,
-                    "STAGE_1_NOVICE",
-                    1,
-                    0L,
-                    1000L,
-                    now,
-                    now,
-                    List.of("WORK", "SHOP", "MARKET")
-            );
-            return new ProgressionStatusResponse(true, fallback);
-        } catch (Exception ex) {
-            log.warn("Failed to query user_progression for user {}: {}", userId, ex.getMessage());
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ProgressionStatus fallback = new ProgressionStatus(
-                    userId,
-                    "STAGE_1_NOVICE",
-                    1,
-                    0L,
-                    1000L,
-                    now,
-                    now,
-                    List.of("WORK", "SHOP", "MARKET")
-            );
-            return new ProgressionStatusResponse(true, fallback);
-        }
+        ProgressionStatus status = getOrCreateProgression(userId);
+        return new ProgressionStatusResponse(true, status);
     }
 
     public ProgressionRefreshResponse refresh(UUID userId) {
-        ProgressionStatusResponse curr = status(userId);
-        return new ProgressionRefreshResponse(true, curr.progression(), false);
+        ProgressionStatus status = getOrCreateProgression(userId);
+        return new ProgressionRefreshResponse(true, status, false);
     }
 
     public CreditStatusResponse creditStatus(UUID userId) {
-        return new CreditStatusResponse(
-                true,
-                "A",
-                820,
-                50_000_000L,
-                0L,
-                List.of()
-        );
+        String grade = "A+";
+        int score = 850;
+        long maxLimit = 50_000_000L;
+        long activeBalance = 0L;
+
+        try {
+            Long loanSum = jdbcTemplate.queryForObject(
+                "SELECT COALESCE(SUM(remaining_principal), 0) FROM loans WHERE user_id = ? AND status = 'ACTIVE'",
+                Long.class, userId
+            );
+            if (loanSum != null) {
+                activeBalance = loanSum;
+            }
+        } catch (Exception ignored) {}
+
+        return new CreditStatusResponse(true, grade, score, maxLimit, activeBalance, List.of());
     }
 
     public EarlyGameStatusResponse earlyGameStatus(UUID userId) {
-        return new EarlyGameStatusResponse(
-                true,
-                "COMPLETED",
-                true,
-                List.of(
-                        Map.of("questId", "FIRST_WORK", "title", "첫 아르바이트 완료", "status", "CLAIMED"),
-                        Map.of("questId", "FIRST_STOCK", "title", "첫 주식 매수", "status", "CLAIMED"),
-                        Map.of("questId", "FIRST_DEPOSIT", "title", "첫 정기예금 가입", "status", "CLAIMED")
-                )
+        List<Map<String, Object>> quests = List.of(
+            Map.of("id", "QUEST_1", "step", 1, "title", "로그인 및 이용 동의", "rewardWld", 10000, "isCompleted", true),
+            Map.of("id", "QUEST_2", "step", 2, "title", "실전 복리 계산기 체험", "rewardWld", 5000, "isCompleted", true),
+            Map.of("id", "QUEST_3", "step", 3, "title", "가상 주식 10단 호가창 조회", "rewardWld", 5000, "isCompleted", true),
+            Map.of("id", "QUEST_4", "step", 4, "title", "가상 주식 모의투자 첫 체결", "rewardWld", 20000, "isCompleted", false),
+            Map.of("id", "QUEST_5", "step", 5, "title", "일일 직업 파밍 루틴 수행", "rewardWld", 10000, "isCompleted", false),
+            Map.of("id", "QUEST_6", "step", 6, "title", "1:1 스마트 P2P 간편 송금", "rewardWld", 15000, "isCompleted", false),
+            Map.of("id", "QUEST_7", "step", 7, "title", "핀테크 금융 상식 퀴즈 정답", "rewardWld", 10000, "isCompleted", false)
         );
+
+        return new EarlyGameStatusResponse(true, "STEP_4_TRADING", false, quests);
+    }
+
+    private ProgressionStatus getOrCreateProgression(UUID userId) {
+        final UUID effectiveUserId = (userId != null) ? userId : UUID.fromString("5f7b8b44-e4aa-40b8-b93a-800ec0151d20");
+
+        String sql = "SELECT stage_code, reached_at, updated_at FROM user_progression WHERE user_id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                String stage = rs.getString("stage_code");
+                int level = mapStageToLevel(stage);
+                Timestamp rAt = rs.getTimestamp("reached_at");
+                Timestamp uAt = rs.getTimestamp("updated_at");
+                OffsetDateTime reachedAt = rAt != null ? rAt.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime updatedAt = uAt != null ? uAt.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+
+                return new ProgressionStatus(
+                    effectiveUserId,
+                    stage != null ? stage : "STAGE_1_NOVICE",
+                    level,
+                    150L,
+                    1000L,
+                    reachedAt,
+                    updatedAt,
+                    List.of("STOCKS", "BANK", "WORK", "SUPPORT")
+                );
+            }, effectiveUserId);
+        } catch (EmptyResultDataAccessException e) {
+            try {
+                jdbcTemplate.update(
+                    "INSERT INTO user_progression (user_id, stage_code, reached_at, updated_at) VALUES (?, 'STAGE_1_NOVICE', NOW(), NOW()) ON CONFLICT (user_id) DO NOTHING",
+                    effectiveUserId
+                );
+            } catch (Exception ignored) {}
+
+            return new ProgressionStatus(
+                effectiveUserId,
+                "STAGE_1_NOVICE",
+                1,
+                0L,
+                500L,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                OffsetDateTime.now(ZoneOffset.UTC),
+                List.of("STOCKS", "BANK", "WORK")
+            );
+        }
     }
 
     private int mapStageToLevel(String stage) {

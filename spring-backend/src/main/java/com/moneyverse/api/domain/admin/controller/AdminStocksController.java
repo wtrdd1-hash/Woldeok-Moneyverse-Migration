@@ -2,18 +2,20 @@ package com.moneyverse.api.domain.admin.controller;
 
 import com.moneyverse.api.domain.admin.dto.AdminGovernanceDtos.AdminStocksResponse;
 import com.moneyverse.api.domain.admin.service.AdminGovernanceService;
+import com.moneyverse.api.domain.admin.service.AdminAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Tag(name = "Admin Stocks", description = "관리자 상장 주식 및 시장 서킷브레이커 제어 API")
 @RestController
@@ -21,35 +23,14 @@ public class AdminStocksController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminStocksController.class);
 
-    @Value("${moneyverse.security.internal-token:8e5f2a1b9c3d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f}")
-    private String internalToken;
-
     private final AdminGovernanceService governanceService;
+    private final AdminAuthService adminAuthService;
+    private final JdbcTemplate jdbcTemplate;
 
-    public AdminStocksController(AdminGovernanceService governanceService) {
+    public AdminStocksController(AdminGovernanceService governanceService, AdminAuthService adminAuthService, JdbcTemplate jdbcTemplate) {
         this.governanceService = governanceService;
-    }
-
-    private boolean isAuthorized(HttpServletRequest request) {
-        String internalHeader = request.getHeader("x-internal-token");
-        String authHeader = request.getHeader("Authorization");
-        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
-
-        boolean hasSessionCookie = false;
-        if (cookies != null) {
-            for (jakarta.servlet.http.Cookie c : cookies) {
-                if ("mv_session".equals(c.getName()) || "__Host-mv_session".equals(c.getName())) {
-                    if (c.getValue() != null && !c.getValue().isBlank()) {
-                        hasSessionCookie = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return (internalHeader != null && internalHeader.equals(internalToken)) ||
-                (authHeader != null && authHeader.startsWith("Bearer ")) ||
-                hasSessionCookie;
+        this.adminAuthService = adminAuthService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private ResponseEntity<?> unauthorizedResponse() {
@@ -68,8 +49,8 @@ public class AdminStocksController {
             "/api/admin/stocks"
     })
     public ResponseEntity<?> getStocks(HttpServletRequest request) {
-        if (!isAuthorized(request)) return unauthorizedResponse();
-        AdminStocksResponse response = governanceService.listStocks(null);
+        if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) return unauthorizedResponse();
+        AdminStocksResponse response = governanceService.listStocks(adminAuthService.resolveVerifiedAdminActor(request).orElseThrow());
         return ResponseEntity.ok(response);
     }
 
@@ -83,11 +64,39 @@ public class AdminStocksController {
             @PathVariable("id") String stockId,
             @RequestBody(required = false) Map<String, Object> body
     ) {
-        if (!isAuthorized(request)) return unauthorizedResponse();
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("stockId", stockId);
-        res.put("halted", true);
-        res.put("message", "주식 매매가 긴급 정지되었습니다.");
-        return ResponseEntity.ok(res);
+        if (adminAuthService.resolveVerifiedAdminActor(request).isEmpty()) return unauthorizedResponse();
+
+        UUID sid;
+        try {
+            sid = UUID.fromString(stockId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "INVALID_STOCK_ID"));
+        }
+
+        try {
+            String currentStatus = jdbcTemplate.queryForObject(
+                "SELECT COALESCE(halt_status, 'ACTIVE') FROM virtual_stocks WHERE id = ?",
+                String.class, sid
+            );
+
+            boolean shouldHalt = !"HALTED".equalsIgnoreCase(currentStatus);
+            String nextStatus = shouldHalt ? "HALTED" : "ACTIVE";
+
+            jdbcTemplate.update(
+                "UPDATE virtual_stocks SET halt_status = ?, halted_at = CASE WHEN ? = 'HALTED' THEN NOW() ELSE NULL END, updated_at = NOW() WHERE id = ?",
+                nextStatus, nextStatus, sid
+            );
+
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("ok", true);
+            res.put("stockId", stockId);
+            res.put("haltStatus", nextStatus);
+            res.put("active", !shouldHalt);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            log.error("[AdminStocksController] haltStock error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "FAILED_TO_UPDATE_STOCK_HALT"));
+        }
     }
 }

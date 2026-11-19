@@ -45,12 +45,11 @@ class Phase7IntegrationTest {
     }
 
     @Test
-    @DisplayName("AI 금융 비서 덕이 포트폴리오 진단 조회 테스트")
+    @DisplayName("금융 비서의 개인 진단은 임의 사용자 헤더만으로 조회 불가")
     void testAdvisorEndpoints() throws Exception {
         mockMvc.perform(get("/api/advisor/deoki/diagnose")
-                        .header("X-User-Id", "5f7b8b44-e4aa-40b8-b93a-800ec0151d20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                        .header("X-User-Id", "00000000-0000-0000-0000-000000000101"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

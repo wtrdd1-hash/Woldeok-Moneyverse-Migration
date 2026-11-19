@@ -14,10 +14,35 @@ export default function robots(): MetadataRoute.Robots {
   const disallowedRoutes = getDisallowedCrawlerRoutes();
   const disallowList = Array.from(new Set(disallowedRoutes));
 
+  const publicAllow = [
+    '/',
+    '/tools',
+    '/tools/*',
+    '/calculators',
+    '/calculators/*',
+    '/stocks',
+    '/stocks/*',
+    '/bonds',
+    '/kdic',
+    '/blog',
+    '/blog/*',
+    '/guide',
+    '/guide/*',
+    '/announcements',
+    '/roadmap',
+    '/account-deletion',
+    '/businesses/ventures',
+    '/llms.txt',
+    '/feed.xml',
+    '/rss.xml',
+  ];
+
   return {
+    // One explicit robots policy applies to every crawler. Sensitive routes stay disallowed
+    // for search engines and AI crawlers alike; do not publish an inconsistent AI exception.
     rules: {
       userAgent: '*',
-      allow: ['/', '/account-deletion', '/businesses/ventures'],
+      allow: publicAllow,
       disallow: disallowList,
     },
     sitemap: [
@@ -28,4 +53,3 @@ export default function robots(): MetadataRoute.Robots {
     host: base,
   };
 }
-

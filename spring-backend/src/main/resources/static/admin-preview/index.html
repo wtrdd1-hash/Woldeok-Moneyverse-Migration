@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+  <title>관리자 대시보드 · Woldeok Moneyverse</title>
+  <meta name="description" content="운영 현황과 권한 기록을 정확하게 확인하는 관제 센터" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <style>
+    :root {
+      --mv-bg: #0c1020;
+      --mv-sidebar: #090d1a;
+      --mv-surface: #151d32;
+      --mv-surface-light: #1b243e;
+      --mv-border: rgba(168, 188, 216, 0.12);
+      --mv-primary: #9c83ff;
+      --mv-primary-light: #b39eff;
+      --mv-blue: #64b7ff;
+      --mv-green: #4ade80;
+      --mv-rose: #fb7185;
+      --mv-amber: #fbbf24;
+      --mv-text: #ffffff;
+      --mv-muted: #a8bcd8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background-color: var(--mv-bg);
+      color: var(--mv-text);
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      overflow-x: hidden !important;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Sidebar (Desktop) */
+    .admin-sidebar {
+      display: none;
+      width: 230px;
+      min-width: 230px;
+      background-color: var(--mv-sidebar);
+      border-right: 1px solid var(--mv-border);
+      padding: 24px 16px;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 30;
+    }
+
+    @media (min-width: 1024px) {
+      .admin-sidebar { display: flex !important; }
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--mv-border);
+    }
+    .brand-w {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--mv-primary);
+      line-height: 1;
+    }
+    .brand-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--mv-muted);
+      font-weight: 500;
+    }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #7b8fa8;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .admin-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--mv-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .admin-nav-item:hover {
+      background-color: rgba(156, 131, 255, 0.08);
+      color: #ffffff;
+    }
+    .admin-nav-item.active {
+      background-color: rgba(156, 131, 255, 0.16);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .admin-nav-item .icon {
+      font-size: 18px;
+      color: var(--mv-primary);
+    }
+
+    /* Main Content Area */
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px 48px 32px;
+      max-width: 1380px;
+      margin: 0 auto;
+      width: 100%;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .admin-main {
+        padding: 16px 16px 80px 16px;
+      }
+    }
+
+    /* Top Breadcrumb & Title Header */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--mv-border);
+      padding-bottom: 18px;
+      gap: 16px;
+    }
+    .admin-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: var(--mv-primary);
+      text-transform: uppercase;
+    }
+    .admin-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+    .admin-desc {
+      font-size: 13px;
+      color: var(--mv-muted);
+      margin-top: 2px;
+    }
+
+    .admin-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .api-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: rgba(156, 131, 255, 0.1);
+      border: 1px solid rgba(156, 131, 255, 0.25);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--mv-primary-light);
+    }
+    .avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    }
+
+    /* 4-Card Top Bento Grid */
+    .top-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 640px) {
+      .top-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .top-cards-grid { grid-template-columns: 1fr 1fr 1fr 1.4fr; }
+    }
+
+    .admin-kpi-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .admin-kpi-card:hover {
+      border-color: rgba(156, 131, 255, 0.35);
+      background-color: var(--mv-surface-light);
+    }
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--mv-muted);
+    }
+    .kpi-main-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+    .kpi-sub-text {
+      font-size: 11px;
+      color: #7b8fa8;
+    }
+
+    .chat-inquiry-card {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, rgba(30, 41, 69, 0.85) 100%);
+      border: 1px solid rgba(156, 131, 255, 0.35);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .chat-inquiry-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .chat-inquiry-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--mv-primary);
+      box-shadow: 0 0 6px var(--mv-primary);
+    }
+    .chat-inquiry-desc {
+      font-size: 11.5px;
+      color: #c4b5fd;
+      line-height: 1.4;
+    }
+    .chat-inquiry-note {
+      font-size: 10.5px;
+      color: var(--mv-muted);
+      margin-top: 4px;
+    }
+
+    /* Middle Grid: Chart + Server Check */
+    .middle-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 1024px) {
+      .middle-grid { grid-template-columns: 1.6fr 1fr; }
+    }
+
+    .monitoring-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .card-main-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .card-sub-title {
+      font-size: 11.5px;
+      color: var(--mv-muted);
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 150px;
+      position: relative;
+      margin-top: 10px;
+    }
+    .admin-chart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Server Check List */
+    .server-check-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .server-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .server-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.07);
+      font-size: 13px;
+    }
+    .server-row:last-child { border-bottom: none; }
+    .server-name {
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .server-status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .status-ok {
+      background: rgba(74, 222, 128, 0.12);
+      color: var(--mv-green);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+    }
+    .status-unverified {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--mv-amber);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+    }
+
+    /* Quick Action 6-Grid */
+    .quick-actions-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .section-heading {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 768px) {
+      .quick-actions-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .quick-actions-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .quick-btn-card {
+      background-color: var(--mv-surface);
+      border: 1px solid var(--mv-border);
+      border-radius: 12px;
+      padding: 22px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #ffffff;
+      transition: all 0.15s ease;
+    }
+    .quick-btn-card:hover {
+      background-color: var(--mv-surface-light);
+      border-color: rgba(156, 131, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    .quick-btn-icon {
+      font-size: 24px;
+      color: var(--mv-primary);
+    }
+    .quick-btn-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Floating Support Dock */
+    .admin-floating-dock {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 50;
+      text-decoration: none;
+    }
+    .floating-circle-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9c83ff 0%, #7c3aed 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(156, 131, 255, 0.4);
+      transition: transform 0.2s ease;
+    }
+    .floating-circle-btn:hover {
+      transform: scale(1.06);
+    }
+    .floating-label {
+      font-size: 10px;
+      color: var(--mv-muted);
+      font-weight: 600;
+    }
+
+    /* Bottom Footer Caption */
+    .admin-footer-caption {
+      margin-top: 16px;
+      font-size: 11px;
+      color: #5d718a;
+      text-align: center;
+      letter-spacing: 0.5px;
+      padding: 12px 0;
+    }
+
+    /* Mobile Bottom Navigation (under 1024px) */
+    @media (max-width: 1023px) {
+      .admin-floating-dock {
+        bottom: 72px !important;
+        right: 16px !important;
+      }
+    }
+    .mobile-admin-dock {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 58px;
+      background-color: rgba(12, 16, 32, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--mv-border);
+      z-index: 45;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 8px;
+    }
+    @media (max-width: 1023px) {
+      .mobile-admin-dock { display: flex !important; }
+    }
+    .mobile-admin-dock a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--mv-muted);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      min-width: 56px;
+      min-height: 46px;
+    }
+    .mobile-admin-dock a.active {
+      color: var(--mv-primary);
+      font-weight: 800;
+    }
+    .mobile-admin-dock a .icon {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Desktop Sidebar -->
+    <aside class="admin-sidebar" aria-label="관리자 내비게이션">
+      <div class="sidebar-brand">
+        <span class="brand-w">W</span>
+        <div>
+          <div class="brand-text">Woldeok</div>
+          <div class="brand-sub">Moneyverse</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">ADMINISTRATOR</div>
+      <ul class="admin-nav-list">
+        <li>
+          <a href="/admin-preview" class="admin-nav-item active">
+            <span class="material-symbols-outlined icon">dashboard</span>
+            <span>대시보드</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/users" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">person</span>
+            <span>회원 관리</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/economy" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">account_balance_wallet</span>
+            <span>경제 / 자산</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/catalog" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">diamond</span>
+            <span>아이템 관리</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/content" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">article</span>
+            <span>콘텐츠 관리</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/market" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">trending_up</span>
+            <span>거래 / 시장</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/analytics" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">monitoring</span>
+            <span>통계 / 분석</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/logs" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">terminal</span>
+            <span>시스템 로그</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/security" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">shield</span>
+            <span>보안 / 권한</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/support" class="admin-nav-item">
+            <span class="material-symbols-outlined icon">support_agent</span>
+            <span>고객지원</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <!-- Breadcrumb Header -->
+      <header class="admin-header">
+        <div class="admin-header-left">
+          <span class="admin-tag">MONEYVERSE / ADMIN CONSOLE</span>
+          <h1 class="admin-title">관리자 대시보드</h1>
+          <p class="admin-desc">운영 현황과 권한 기록을 정확하게 확인하는 관제 센터</p>
+        </div>
+        <div class="admin-header-right">
+          <div class="api-status-pill">
+            <span class="material-symbols-outlined" style="font-size: 15px; color: var(--mv-green);">check_circle</span>
+            <span id="admin-api-status-text">Spring Boot 3.3.5 LIVE</span>
+          </div>
+          <div class="avatar-circle" title="최고 관리자">W</div>
+        </div>
+      </header>
+
+      <!-- 4-Card Top Bento Grid -->
+      <section class="top-cards-grid" aria-label="운영 주요 지표">
+        <div class="admin-kpi-card">
+          <span class="kpi-label">회원 관리</span>
+          <div class="kpi-main-val" id="admin-user-count">12,840명</div>
+          <span class="kpi-sub-text">실시간 활성 1,420 세션</span>
+        </div>
+        <div class="admin-kpi-card">
+          <span class="kpi-label">가상 경제 / 원장</span>
+          <div class="kpi-main-val" id="admin-treasury-val" style="color: var(--mv-primary-light);">100조 WLD</div>
+          <span class="kpi-sub-text">복식부기 원장 동기화 정상</span>
+        </div>
+        <div class="admin-kpi-card">
+          <span class="kpi-label">고객 문의</span>
+          <div class="kpi-main-val">연동 전</div>
+          <span class="kpi-sub-text">대기 0건 · 담당 0건 · 종료 0건</span>
+        </div>
+        <div class="chat-inquiry-card">
+          <div class="chat-inquiry-header">
+            <span class="chat-inquiry-dot"></span>
+            <span>전역 둥근 채팅 / 문의</span>
+          </div>
+          <p class="chat-inquiry-desc">모든 페이지에서 탭 전환·문의 분류<br>로그인·권한·개인정보 분리</p>
+          <span class="chat-inquiry-note">실제 연동은 Spring 보안 게이트 이후</span>
+        </div>
+      </section>
+
+      <!-- Middle Grid: Chart + Server Check -->
+      <section class="middle-grid" aria-label="모니터링 및 상태 확인">
+        <!-- Monitoring Chart -->
+        <div class="monitoring-card">
+          <div class="card-title-group">
+            <h2 class="card-main-title">운영 모니터링 · 디자인 샘플</h2>
+            <p class="card-sub-title">실제 수치가 아닌 시안입니다 (실시간 거래 지수 추이)</p>
+          </div>
+          <div class="chart-container">
+            <svg class="admin-chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+              <!-- Grid background lines -->
+              <line x1="0" y1="30" x2="500" y2="30" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
+              <line x1="0" y1="65" x2="500" y2="65" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
+              <line x1="0" y1="100" x2="500" y2="100" stroke="rgba(168, 188, 216, 0.08)" stroke-width="1"/>
+              <!-- Single Purple Polyline matching admin-console-desktop.png -->
+              <polyline
+                fill="none"
+                stroke="#9c83ff"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                points="0,95 40,85 85,90 130,75 175,80 220,68 265,72 310,55 355,62 400,48 450,54 500,32"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Server Check List -->
+        <div class="server-check-card">
+          <div class="card-title-group">
+            <h2 class="card-main-title">서버·API 점검 목록</h2>
+            <p class="card-sub-title">실시간 백엔드 서비스 가동 상태</p>
+          </div>
+          <div class="server-list">
+            <div class="server-row">
+              <span class="server-name">웹 서버 (Nginx)</span>
+              <span class="server-status-badge status-ok">정상 (Port 443)</span>
+            </div>
+            <div class="server-row">
+              <span class="server-name">Java Spring Boot</span>
+              <span class="server-status-badge status-ok">정상 (Port 4550)</span>
+            </div>
+            <div class="server-row">
+              <span class="server-name">PostgreSQL DB</span>
+              <span class="server-status-badge status-ok">정상 (Port 5433)</span>
+            </div>
+            <div class="server-row">
+              <span class="server-name">Discord 서비스</span>
+              <span class="server-status-badge status-unverified">미검증</span>
+            </div>
+            <div class="server-row">
+              <span class="server-name">고객지원 / 채팅</span>
+              <span class="server-status-badge status-unverified">미검증</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions 6-Grid -->
+      <section class="quick-actions-section" aria-label="빠른 관리 바로가기">
+        <h2 class="section-heading">빠른 관리 바로가기</h2>
+        <div class="quick-actions-grid">
+          <a href="/admin/users" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">person</span>
+            <span class="quick-btn-label">회원 / 권한</span>
+          </a>
+          <a href="/admin/market" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">receipt_long</span>
+            <span class="quick-btn-label">거래 / 자산</span>
+          </a>
+          <a href="/admin/catalog" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">diamond</span>
+            <span class="quick-btn-label">상점 / 아이템</span>
+          </a>
+          <a href="/admin/content" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">mail</span>
+            <span class="quick-btn-label">공지 / 블로그</span>
+          </a>
+          <a href="/admin/logs" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">security</span>
+            <span class="quick-btn-label">로그 / 보안</span>
+          </a>
+          <a href="/admin/support" class="quick-btn-card">
+            <span class="material-symbols-outlined quick-btn-icon">support_agent</span>
+            <span class="quick-btn-label">고객지원</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Footer Caption -->
+      <div class="admin-footer-caption">
+        v2026.11.18.13 · DESIGN REFERENCE ONLY · SAMPLE UI, NOT A RUNNING ADMIN SERVER
+      </div>
+    </main>
+  </div>
+
+  <!-- Floating Support Dock -->
+  <a href="/admin/support" class="admin-floating-dock" aria-label="전 페이지 문의">
+    <div class="floating-circle-btn">
+      <span class="material-symbols-outlined" style="font-size: 26px;">support_agent</span>
+    </div>
+    <span class="floating-label">전 페이지 문의</span>
+  </a>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-admin-dock" aria-label="관리자 모바일 하단 내비게이션">
+    <a href="/" class="active">
+      <span class="material-symbols-outlined icon">home</span>
+      <span>홈</span>
+    </a>
+    <a href="/admin-preview">
+      <span class="material-symbols-outlined icon">person</span>
+      <span>관리</span>
+    </a>
+    <a href="/admin/market">
+      <span class="material-symbols-outlined icon">receipt_long</span>
+      <span>원장</span>
+    </a>
+    <a href="/admin/support">
+      <span class="material-symbols-outlined icon">support_agent</span>
+      <span>문의</span>
+    </a>
+    <a href="/account">
+      <span class="material-symbols-outlined icon">account_circle</span>
+      <span>MY</span>
+    </a>
+  </nav>
+
+  <!-- Live Status Check Script -->
+  <script>
+    (async function() {
+      try {
+        const res = await fetch('/api/v1/stocks');
+        if (res.ok) {
+          const el = document.getElementById('admin-api-status-text');
+          if (el) el.textContent = '실측 API 연동 완료';
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

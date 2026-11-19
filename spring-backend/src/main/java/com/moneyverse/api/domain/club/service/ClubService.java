@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -17,6 +19,11 @@ import java.util.UUID;
 public class ClubService {
 
     private static final Logger log = LoggerFactory.getLogger(ClubService.class);
+    private static ResponseStatusException unavailable(String source) {
+        log.warn("Club source unavailable: {}", source);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "CLUB_SOURCE_UNAVAILABLE");
+    }
+
     private final JdbcTemplate jdbcTemplate;
 
     public ClubService(JdbcTemplate jdbcTemplate) {
@@ -42,15 +49,15 @@ public class ClubService {
                 long exp = rs.getLong("experience");
                 int mc = rs.getInt("member_count");
                 Timestamp catTs = rs.getTimestamp("created_at");
-                OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+                if (catTs == null) throw new IllegalStateException("CLUB_CREATED_AT_MISSING");
+                OffsetDateTime cat = catTs.toInstant().atOffset(ZoneOffset.UTC);
 
                 return new ClubItem(id, tag, name, desc, charter, ownerId, jm, st, lvl, exp, mc, cat);
             }, sanitizedLimit);
 
             return new ClubListResponse(true, list, list.size());
         } catch (Exception ex) {
-            log.warn("Failed to query clubs: {}", ex.getMessage());
-            return new ClubListResponse(true, List.of(), 0);
+            throw unavailable("club_list");
         }
     }
 
@@ -72,7 +79,8 @@ public class ClubService {
                 long exp = rs.getLong("experience");
                 int mc = rs.getInt("member_count");
                 Timestamp catTs = rs.getTimestamp("created_at");
-                OffsetDateTime cat = catTs != null ? catTs.toInstant().atOffset(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC);
+                if (catTs == null) throw new IllegalStateException("CLUB_CREATED_AT_MISSING");
+                OffsetDateTime cat = catTs.toInstant().atOffset(ZoneOffset.UTC);
 
                 return new ClubItem(id, tag, name, desc, charter, ownerId, jm, st, lvl, exp, mc, cat);
             }, clubId);
@@ -81,23 +89,18 @@ public class ClubService {
                 return new ClubDetailResponse(true, list.get(0), false, "visitor");
             }
 
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ClubItem fallback = new ClubItem(clubId, "CLB", "기본 협동조합", "상생 금융 커뮤니티", "헌장", userId, "public", "active", 1, 0L, 1, now);
-            return new ClubDetailResponse(true, fallback, false, "visitor");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "CLUB_NOT_FOUND");
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception ex) {
-            log.warn("Failed to query club detail {}: {}", clubId, ex.getMessage());
-            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-            ClubItem fallback = new ClubItem(clubId, "CLB", "기본 협동조합", "상생 금융 커뮤니티", "헌장", userId, "public", "active", 1, 0L, 1, now);
-            return new ClubDetailResponse(true, fallback, false, "visitor");
+            throw unavailable("club_detail");
         }
     }
 
-    @Transactional
     public ClubActionResponse joinClub(UUID userId, UUID clubId) {
-        return new ClubActionResponse(true, "클럽에 정상적으로 가입되었습니다.");
+        return new ClubActionResponse(true, "클럽에 성공적으로 가입되었습니다.");
     }
 
-    @Transactional
     public ClubActionResponse leaveClub(UUID userId, UUID clubId) {
         return new ClubActionResponse(true, "클럽에서 탈퇴하였습니다.");
     }
