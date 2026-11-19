@@ -37,3 +37,5 @@
 
 ### Clean PR base
 - Published source parent 46275239f5; cherry-picked v38 feature-only SHA 086084c136; exact-source Java 251/251 PASS, PR JAR sha256 50eb48f7...525f44d93. Full 180 UI release not claimed.
+
+Draft PR: https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3295. Post-PR public edge: v38 CSS HTTP 404, admin still v2026.11.18.22-readonly; Production not promoted.

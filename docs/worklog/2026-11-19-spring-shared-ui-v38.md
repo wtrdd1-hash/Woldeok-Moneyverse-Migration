@@ -30,3 +30,11 @@ Date: 2026-11-19 KST; owner approved full Spring frontend migration and authoriz
 ## Clean GitHub PR lineage and independent recheck
 
 A second isolated worktree was created from the **published remote Spring routing branch** `46275239f5d707aed52b38fe91d959da59df0977`, then only the v38 implementation commit was cherry-picked. The resulting **clean PR source SHA** is `086084c13608a1aecbffb690e7b4b23708862d7d`, with exactly **30 changed files** relative to the published parent; no eight other unpublished local integration commits were included. On this exact clean PR branch the complete `./gradlew clean test bootJar --offline --no-daemon -Dorg.gradle.workers.max=2` ran independently and **251/251 PASS, 0 fail, 0 skipped**, packaging SHA256 `50eb48f788a3e5f4ade587e537981312989d2db8329bd366c80209a525f44d93`. Different baseline produces a different JAR SHA; neither is Production. All **205 local relative links across EN/KO implementation, QA and route matrix** exist in that PR branch. Published Spring routing baseline may not include the local security fixes from other workers; merging this UI must NEVER bypass a subsequent security integration review and Test gate.
+
+## Post-PR read-only Production verification — 2026-11-19 14:45 KST
+
+- Public HTTPS `GET /mv-spring/v38/shared-ui.css`: **404 JSON**. The v38 design stylesheet is **NOT** currently on the Production edge.
+- Public HTTPS `GET /admin/users`: **302** to `/login?next=%2Fadmin%2Fusers`, with existing `X-MV-Release: v2026.11.18.22-readonly` and **old** admin CSP `style-src 'unsafe-inline'`, not v38.
+- Public HTTPS `GET /calculators`: **200**, but current Production version is not this PR's v38 stylesheet.
+- This proves that source PR #3295 and Java test JAR are **NOT actually deployed**; there was no accidental/hidden release. The v37 separate homepage remains owned by its worktree.
+- Review-only Draft PR [#3295](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/3295) is clean 30-file diff against published Spring routing, mergeable but intentionally **not merged**. No GitHub main or current Nginx/JVM changes.
