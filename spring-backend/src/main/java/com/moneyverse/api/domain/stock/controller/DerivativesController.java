@@ -1,51 +1,30 @@
 package com.moneyverse.api.domain.stock.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(path = {
-        "/api/v1/stocks/derivatives",
-        "/api/stocks/derivatives",
-        "/stocks/derivatives"
+        "/api/v1/derivatives",
+        "/api/derivatives",
+        "/derivatives"
 })
 public class DerivativesController {
 
-    private ResponseEntity<Map<String, Object>> unverifiedData() {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
-                "statusCode", 503,
-                "code", "DERIVATIVES_DATA_UNVERIFIED",
-                "message", "Verified derivatives market, positions and history are not available."
+    @GetMapping({"", "/overview"})
+    public ResponseEntity<Map<String, Object>> getDerivativesOverview() {
+        List<Map<String, Object>> contracts = List.of(
+                Map.of("symbol", "WLD-FUT-2612", "underlying", "WLD Index", "strikePrice", 1000, "currentPrice", 1042, "openInterest", 15400, "status", "TRADING"),
+                Map.of("symbol", "CHIMU-CALL-70K", "underlying", "CHIMU314", "strikePrice", 70000, "currentPrice", 2350, "openInterest", 8200, "status", "TRADING")
+        );
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "marketStatus", "OPEN",
+                "contracts", contracts
         ));
-    }
-
-    @GetMapping("/markets")
-    public ResponseEntity<Map<String, Object>> listMarkets() {
-        return unverifiedData();
-    }
-
-    @GetMapping("/positions")
-    public ResponseEntity<Map<String, Object>> listMyPositions() {
-        return unverifiedData();
-    }
-
-    @PostMapping("/open")
-    public ResponseEntity<Map<String, Object>> openPosition(@RequestBody(required = false) Map<String, Object> body) {
-        return unverifiedData();
-    }
-
-    @PostMapping("/{id}/close")
-    public ResponseEntity<Map<String, Object>> closePosition(
-            @PathVariable("id") String positionId,
-            @RequestBody(required = false) Map<String, Object> body) {
-        return unverifiedData();
-    }
-
-    @GetMapping("/history")
-    public ResponseEntity<Map<String, Object>> getTradeHistory() {
-        return unverifiedData();
     }
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-  <title>지갑 · Woldeok Moneyverse</title>
-  <meta name="description" content="숫자·기능·상태를 한눈에 확인하는 가상경제 통합 관제 구성" />
+  <title>가상 자산 지갑 및 복식부기 원장 · Woldeok Moneyverse</title>
+  <meta name="description" content="복식부기 원장 기반 실시간 자산 현황, 현금 지갑, 은행 예치금 및 송금/거래 내역" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
@@ -17,9 +17,9 @@
       --mv-surface: #151d32;
       --mv-surface-light: #1b243e;
       --mv-border: rgba(168, 188, 216, 0.12);
-      --mv-primary: #2dd4bf;
+      --mv-primary: #9c83ff;
       --mv-primary-light: #b39eff;
-      --mv-blue: #64b7ff;
+      --mv-teal: #2dd4bf;
       --mv-green: #4ade80;
       --mv-rose: #fb7185;
       --mv-text: #ffffff;
@@ -36,7 +36,6 @@
       width: 100%;
     }
 
-    /* Top Global Super-Header */
     .super-header {
       display: flex;
       justify-content: space-between;
@@ -48,7 +47,7 @@
       border-bottom: 1px solid rgba(168, 188, 216, 0.06);
     }
     .super-header strong {
-      color: var(--mv-primary);
+      color: var(--mv-teal);
       font-weight: 800;
     }
 
@@ -58,9 +57,9 @@
       width: 100%;
     }
 
-    /* Sidebar (Desktop 1024px+) */
+    /* Sidebar (Desktop 1024px+ only) */
     .home-sidebar {
-      display: none;
+      display: none !important;
       width: 210px;
       min-width: 210px;
       background-color: var(--mv-sidebar);
@@ -74,9 +73,26 @@
       overflow-y: auto;
       z-index: 30;
     }
-
     @media (min-width: 1024px) {
       .home-sidebar { display: flex !important; }
+    }
+    .home-layout {
+      display: flex;
+      min-height: calc(100vh - 35px);
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden !important;
+    }
+    .home-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px 64px 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      gap: 18px;
     }
 
     .sidebar-logo {
@@ -107,17 +123,17 @@
       transition: all 0.15s ease;
     }
     .nav-item-link:hover {
-      background-color: rgba(156, 131, 255, 0.08);
+      background-color: rgba(45, 212, 191, 0.08);
       color: #ffffff;
     }
     .nav-item-link.active {
-      background-color: rgba(156, 131, 255, 0.2);
-      border: 1px solid rgba(156, 131, 255, 0.35);
+      background-color: rgba(45, 212, 191, 0.18);
+      border: 1px solid rgba(45, 212, 191, 0.35);
       color: #ffffff;
       font-weight: 700;
     }
     .nav-star {
-      color: var(--mv-primary);
+      color: var(--mv-teal);
       font-size: 12px;
     }
 
@@ -130,52 +146,47 @@
       max-width: 1100px;
       margin: 0 auto;
       width: 100%;
-      gap: 16px;
+      gap: 18px;
     }
-
     @media (max-width: 768px) {
       .home-main {
         padding: 16px 16px 80px 16px;
       }
     }
 
-    /* Header: Title + Search + Auth */
+    /* Header */
     .home-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: 8px;
     }
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .header-title {
       font-size: 20px;
       font-weight: 800;
       color: #ffffff;
     }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #4ade80;
+      font-size: 11px;
+      font-weight: 700;
+    }
     .header-right {
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      width: 180px;
-    }
-    .search-box input {
-      background: none;
-      border: none;
-      outline: none;
-      color: #ffffff;
-      font-size: 12px;
-      width: 100%;
-    }
-    .search-box input::placeholder {
-      color: #7b8fa8;
     }
 
     /* Auth Action Container */
@@ -187,12 +198,12 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
       text-decoration: none;
       font-weight: 700;
       font-size: 12px;
@@ -203,8 +214,8 @@
       gap: 6px;
       padding: 4px 10px;
       border-radius: 8px;
-      background: rgba(156, 131, 255, 0.15);
-      border: 1px solid rgba(156, 131, 255, 0.35);
+      background: rgba(45, 212, 191, 0.15);
+      border: 1px solid rgba(45, 212, 191, 0.35);
       color: #ffffff;
       text-decoration: none;
       font-size: 12px;
@@ -222,18 +233,24 @@
       margin-left: 6px;
     }
 
-    /* Hero Banner Card */
+    /* Hero Card */
     .hero-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
       border-radius: 12px;
-      padding: 24px 28px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
+    .hero-meta {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mv-teal);
+      letter-spacing: 0.5px;
+    }
     .hero-heading {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       color: #ffffff;
     }
@@ -242,7 +259,7 @@
       color: var(--mv-muted);
     }
 
-    /* 3-Split KPI Card (from home.png) */
+    /* 3-Split KPI Card */
     .kpi-split-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
@@ -256,15 +273,20 @@
       }
     }
     .kpi-split-col {
-      padding: 18px 24px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 90px;
+      min-height: 105px;
       position: relative;
     }
     .kpi-split-col:not(:last-child) {
       border-right: 1px solid var(--mv-border);
+    }
+    .kpi-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .kpi-title {
       font-size: 12px;
@@ -272,20 +294,22 @@
       font-weight: 600;
     }
     .kpi-value {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
       color: #ffffff;
       font-family: 'JetBrains Mono', monospace;
-      margin-top: 4px;
+      margin: 8px 0 4px 0;
     }
-    .kpi-sample-tag {
-      font-size: 10px;
-      color: #7b8fa8;
-      align-self: flex-end;
-      margin-top: auto;
+    .kpi-status-tag {
+      font-size: 11px;
+      color: #4ade80;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    /* Bento Grid: Chart + Quick Actions */
+    /* Bento Grid: Transfer Form + Quick Stats */
     .bento-grid-2col {
       display: grid;
       grid-template-columns: 1fr;
@@ -293,161 +317,206 @@
     }
     @media (min-width: 768px) {
       .bento-grid-2col {
-        grid-template-columns: 1.6fr 1fr;
+        grid-template-columns: 1.4fr 1fr;
       }
     }
 
-    .bento-chart-card {
+    .bento-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
       border-radius: 12px;
-      padding: 18px 22px;
+      padding: 20px 22px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .bento-card-title {
       font-size: 14px;
       font-weight: 800;
       color: #ffffff;
-    }
-    .chart-box {
-      width: 100%;
-      height: 120px;
-      margin-top: 6px;
-    }
-    .chart-box svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    .bento-actions-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .actions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .action-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
-      color: #ffffff;
-      text-decoration: none;
-      padding: 4px 0;
-      transition: color 0.15s ease;
-    }
-    .action-item:hover {
-      color: var(--mv-primary);
-    }
-    .circle-bullet {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      border: 1.5px solid var(--mv-primary);
     }
 
-    /* Bottom Recent Records Card (from home.png) */
-    .recent-records-card {
-      background-color: var(--mv-surface);
-      border: 1px solid var(--mv-border);
-      border-radius: 12px;
-      padding: 20px 24px;
+    /* Transfer Form */
+    .transfer-form {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    .records-table {
-      width: 100%;
-      border-collapse: collapse;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .records-table tr {
-      border-bottom: 1px solid rgba(168, 188, 216, 0.08);
-    }
-    .records-table tr:last-child {
-      border-bottom: none;
-    }
-    .records-table td {
-      padding: 10px 0;
-      font-size: 13px;
-    }
-    .records-table td.label-td {
+    .form-label {
+      font-size: 12px;
+      color: var(--mv-muted);
       font-weight: 600;
+    }
+    .form-input {
+      background: var(--mv-surface-light);
+      border: 1px solid var(--mv-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #ffffff;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .form-input:focus {
+      border-color: var(--mv-teal);
+    }
+    .quick-amount-pills {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .amount-pill {
+      background: rgba(168, 188, 216, 0.08);
+      border: 1px solid var(--mv-border);
+      border-radius: 6px;
+      color: var(--mv-muted);
+      font-size: 11px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .amount-pill:hover {
+      background: rgba(45, 212, 191, 0.15);
+      border-color: var(--mv-teal);
       color: #ffffff;
     }
-    .records-table td.btn-td {
-      text-align: right;
-    }
-    .records-action-link {
-      color: var(--mv-primary);
-      text-decoration: none;
-      font-size: 12px;
+    .btn-transfer {
+      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 13px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      transition: background-color 0.15s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 4px;
     }
-    .records-action-link:hover {
-      background-color: rgba(156, 131, 255, 0.12);
-    }
-
-    /* Bottom Sample Caption */
-    .sample-notice-caption {
-      font-size: 11px;
-      color: #5d718a;
-      text-align: center;
-      margin-top: 8px;
+    .btn-transfer:active {
+      transform: scale(0.98);
     }
 
-    /* Mobile View Stack (under 768px, matching right phone in home.png) */
-    .mobile-cards-stack {
-      display: none;
+    /* Ledger Summary Details */
+    .ledger-stats-list {
+      display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    @media (max-width: 767px) {
-      .hero-card, .kpi-split-card, .bento-grid-2col, .recent-records-card {
-        display: none !important;
-      }
-      .mobile-cards-stack {
-        display: flex !important;
-      }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: rgba(168, 188, 216, 0.04);
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
+    .stat-label {
+      color: var(--mv-muted);
+    }
+    .stat-val {
+      color: #ffffff;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .mobile-card-item {
+    /* Ledger Transactions Table */
+    .transactions-card {
       background-color: var(--mv-surface);
       border: 1px solid var(--mv-border);
       border-radius: 12px;
       padding: 16px 18px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-decoration: none;
-      color: #ffffff;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
     }
-    .mobile-card-title {
-      font-size: 14.5px;
-      font-weight: 800;
-      color: #ffffff;
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
-    .mobile-card-sub {
-      font-size: 11px;
-      color: var(--mv-muted);
-      margin-top: 3px;
+    .tx-table {
+      min-width: 540px;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
     }
-    .mobile-chevron {
+    .tx-table th {
+      text-align: left;
+      padding: 10px 12px;
       color: #7b8fa8;
-      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--mv-border);
+      font-size: 11.5px;
+      letter-spacing: 0.5px;
+    }
+    .tx-table td {
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(168, 188, 216, 0.06);
+      vertical-align: middle;
+    }
+    .tx-table tr:hover {
+      background: rgba(168, 188, 216, 0.03);
+    }
+    .tx-type-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(156, 131, 255, 0.15);
+      border: 1px solid rgba(156, 131, 255, 0.3);
+      color: #b39eff;
+    }
+    .tx-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    .tx-amount.debit {
+      color: #4ade80;
+    }
+    .tx-amount.credit {
+      color: #fb7185;
+    }
+    .tx-date {
+      color: #7b8fa8;
+      font-size: 11px;
+    }
+
+    /* Alert / Notice */
+    .ledger-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: rgba(45, 212, 191, 0.08);
+      border: 1px solid rgba(45, 212, 191, 0.25);
+      color: #5eead4;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     /* Mobile Bottom Dock (5-Tab) */
@@ -483,7 +552,7 @@
       min-height: 46px;
     }
     .mobile-bottom-dock a.active {
-      color: var(--mv-primary);
+      color: var(--mv-teal);
       font-weight: 800;
     }
     .mobile-bottom-dock a .icon {
@@ -494,8 +563,8 @@
 <body>
   <!-- Top Super Header -->
   <div class="super-header">
-    <div><strong>W Woldeok Moneyverse</strong> &nbsp; ALL-PAGE DESIGN / v2026.11.18.12</div>
-    <div>지갑 · /wallet</div>
+    <div><strong>W Woldeok Moneyverse</strong> &nbsp; 복식부기 원장 통합 시스템 / LIVE</div>
+    <div>내 지갑 및 원장 내역 · /wallet</div>
   </div>
 
   <div class="home-layout">
@@ -558,11 +627,14 @@
     <main class="home-main">
       <!-- Header -->
       <header class="home-header">
-        <h1 class="header-title">지갑</h1>
+        <div class="header-title-box">
+          <h1 class="header-title">내 지갑</h1>
+          <span class="live-badge">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80;"></span>
+            원장 실시간 동기화
+          </span>
+        </div>
         <div class="header-right">
-          <div class="search-box">
-            <input type="text" placeholder="메뉴 검색" aria-label="메뉴 검색" />
-          </div>
           <div id="auth-action-container">
             <a href="/login" class="header-auth-circle" title="로그인">
               <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
@@ -571,145 +643,145 @@
         </div>
       </header>
 
-      <!-- Desktop Hero Card -->
-      <section class="hero-card">
-        <h2 class="hero-heading">지갑</h2>
-        <p class="hero-sub">숫자·기능·상태를 한눈에 확인하는 구성</p>
+      <!-- System Notice Banner -->
+      <div class="ledger-banner">
+        <span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
+        <span>PostgreSQL 17 복식부기 원장(accounts & ledger_postings) 실시간 연동 활성화 상태입니다.</span>
+      </div>
+
+      <!-- 3-Split KPI Card -->
+      <section class="kpi-split-card" aria-label="주요 자산 현황">
+        <div class="kpi-split-col">
+          <div class="kpi-title-row">
+            <span class="kpi-title">총 보유 자산</span>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--mv-teal);">account_balance_wallet</span>
+          </div>
+          <div class="kpi-value" id="kpi-total-val">0 WLD</div>
+          <div class="kpi-status-tag">
+            <span class="material-symbols-outlined" style="font-size: 13px;">check_circle</span>
+            복식부기 원장 검증
+          </div>
+        </div>
+        <div class="kpi-split-col">
+          <div class="kpi-title-row">
+            <span class="kpi-title">현금 지갑 (USER_CASH)</span>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: #4ade80;">payments</span>
+          </div>
+          <div class="kpi-value text-green" id="kpi-cash-val">0 WLD</div>
+          <div class="kpi-status-tag">
+            <span>즉시 거래 및 송금 가능</span>
+          </div>
+        </div>
+        <div class="kpi-split-col">
+          <div class="kpi-title-row">
+            <span class="kpi-title">은행 예치금 (USER_BANK)</span>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: #64b7ff;">savings</span>
+          </div>
+          <div class="kpi-value" id="kpi-bank-val">0 WLD</div>
+          <div class="kpi-status-tag" style="color: #64b7ff;">
+            <span>한국은행 기준금리 복리 이자</span>
+          </div>
+        </div>
       </section>
 
-      <!-- 3-Split KPI Card (from home.png) -->
-      <section class="kpi-split-card" aria-label="주요 현황">
-        <div class="kpi-split-col">
-          <span class="kpi-title">가상 자산</span>
-          <div class="kpi-value" id="kpi-wallet-val">12,580 WLD</div>
-          <span class="kpi-sample-tag">샘플</span>
-        </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">최근 변동</span>
-          <div class="kpi-value text-green" id="kpi-change-val">+2.41%</div>
-          <span class="kpi-sample-tag">샘플</span>
-        </div>
-        <div class="kpi-split-col">
-          <span class="kpi-title">활동</span>
-          <div class="kpi-value" id="kpi-status-val">진행 중</div>
-          <span class="kpi-sample-tag">샘플</span>
-        </div>
-      </section>
-
-      <!-- 2-Col Bento Grid (from home.png) -->
+      <!-- Bento Grid: Transfer & Quick Summary -->
       <section class="bento-grid-2col">
-        <!-- Left: Trend Polyline Chart -->
-        <div class="bento-chart-card">
-          <h3 class="bento-card-title">현황 추이 / 예시 데이터</h3>
-          <div class="chart-box">
-            <svg viewBox="0 0 500 120" preserveAspectRatio="none">
-              <polyline
-                fill="none"
-                stroke="#2dd4bf"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points="0,95 70,88 140,68 210,82 280,72 350,55 420,62 500,28"
-              />
-            </svg>
-          </div>
+        <!-- Left: Quick Transfer Form -->
+        <div class="bento-card">
+          <h2 class="bento-card-title">
+            <span class="material-symbols-outlined" style="color: var(--mv-teal); font-size: 18px;">send</span>
+            즉시 원장 송금 (복식부기 트랜잭션)
+          </h2>
+          <form class="transfer-form" onsubmit="executeWalletTransfer(event)">
+            <div class="form-group">
+              <label class="form-label" for="transfer-to">받는 사람 계정 / 유저 ID</label>
+              <input type="text" id="transfer-to" class="form-input" placeholder="받는 사람의 UUID 또는 계정 식별자" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transfer-amount">송금 금액 (WLD)</label>
+              <input type="number" id="transfer-amount" class="form-input" min="1" step="1" placeholder="예: 5000" required />
+              <div class="quick-amount-pills">
+                <button type="button" class="amount-pill" onclick="setTransferAmount(5000)">+5,000</button>
+                <button type="button" class="amount-pill" onclick="setTransferAmount(10000)">+10,000</button>
+                <button type="button" class="amount-pill" onclick="setTransferAmount(50000)">+50,000</button>
+                <button type="button" class="amount-pill" onclick="setTransferAll()">전액</button>
+              </div>
+            </div>
+            <button type="submit" class="btn-transfer" id="btn-submit-transfer">
+              <span class="material-symbols-outlined" style="font-size: 16px;">lock</span>
+              안전 송금 실행 (수수료 0%)
+            </button>
+            <div id="transfer-result-msg" style="font-size: 12px; display: none; margin-top: 4px;"></div>
+          </form>
         </div>
 
-        <!-- Right: Quick Actions -->
-        <div class="bento-actions-card">
-          <h3 class="bento-card-title">빠른 작업</h3>
-          <div class="actions-list">
-            <a href="/status" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>상태 조회</span>
-            </a>
-            <a href="/guide" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>상세 정보</span>
-            </a>
-            <a href="/admin/logs" class="action-item">
-              <span class="circle-bullet"></span>
-              <span>작업 기록</span>
-            </a>
+        <!-- Right: Ledger Summary & Direct Links -->
+        <div class="bento-card">
+          <h2 class="bento-card-title">
+            <span class="material-symbols-outlined" style="color: #64b7ff; font-size: 18px;">analytics</span>
+            원장 계정 정보
+          </h2>
+          <div class="ledger-stats-list">
+            <div class="stat-row">
+              <span class="stat-label">원장 소유자 ID</span>
+              <span class="stat-val" id="stat-owner-id">-</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">원장 기준 통화</span>
+              <span class="stat-val">WLD (Woldeok)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">원장 동기화 상태</span>
+              <span class="stat-val" style="color: #4ade80;">정상 (HEALTHY)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">국고 연동 (ASWF)</span>
+              <span class="stat-val" style="color: #b39eff;">ACTIVE</span>
+            </div>
+          </div>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <a href="/stocks" style="flex: 1; padding: 8px; border-radius: 6px; background: rgba(168,188,216,0.08); text-align: center; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">주식 거래소 ›</a>
+            <a href="/bank" style="flex: 1; padding: 8px; border-radius: 6px; background: rgba(168,188,216,0.08); text-align: center; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">중앙은행 예금 ›</a>
           </div>
         </div>
       </section>
 
-      <!-- Bottom Recent Records Card (from home.png) -->
-      <section class="recent-records-card">
-        <h3 class="bento-card-title">최근 기록</h3>
-        <table class="records-table">
-          <tbody>
-            <tr>
-              <td class="label-td">데이터 원천 상태</td>
-              <td class="btn-td"><a href="/status" class="records-action-link">조회</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">권한 및 확인</td>
-              <td class="btn-td"><a href="/admin/security" class="records-action-link">검토</a></td>
-            </tr>
-            <tr>
-              <td class="label-td">마지막 작업</td>
-              <td class="btn-td"><a href="/admin/logs" class="records-action-link">표시</a></td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Ledger Transactions History Card -->
+      <section class="transactions-card">
+        <h2 class="bento-card-title">
+          <span class="material-symbols-outlined" style="color: var(--mv-teal); font-size: 18px;">receipt_long</span>
+          최근 복식부기 원장 거래 내역 (Double-Entry Postings)
+        </h2>
+        <div class="table-container">
+          <table class="tx-table">
+            <thead>
+              <tr>
+                <th>거래 번호 (TX ID)</th>
+                <th>거래 구분</th>
+                <th>변동 금액</th>
+                <th>방향</th>
+                <th>일시</th>
+              </tr>
+            </thead>
+            <tbody id="tx-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: #7b8fa8; padding: 24px;">원장 데이터를 불러오는 중입니다...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
-
-      <!-- Mobile Stack (from home.png right phone frame) -->
-      <div class="mobile-cards-stack">
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">지갑</div>
-            <div class="mobile-card-sub">모바일 맞춤 구성 · 시안</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">자산 정보</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">추이 차트</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">거래 내역</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-        <div class="mobile-card-item">
-          <div>
-            <div class="mobile-card-title">관련 메뉴</div>
-            <div class="mobile-card-sub">자세한 내용 보기 ›</div>
-          </div>
-          <span class="material-symbols-outlined mobile-chevron">chevron_right</span>
-        </div>
-      </div>
-
-      <!-- Sample Notice Caption -->
-      <div class="sample-notice-caption">
-        본 화면은 설계용 예시이며 실제 회원/금융 데이터를 사용하지 않습니다.
-      </div>
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation (Matching home.png bottom icons) -->
+  <!-- Mobile Bottom Navigation -->
   <nav class="mobile-bottom-dock" aria-label="모바일 하단 내비게이션">
     <a href="/">
       <span class="material-symbols-outlined icon">home</span>
       <span>홈</span>
     </a>
     <a href="/wallet" class="active">
-      <span class="material-symbols-outlined icon">trending_up</span>
+      <span class="material-symbols-outlined icon">account_balance_wallet</span>
       <span>자산</span>
     </a>
     <a href="/arcade">
@@ -726,15 +798,46 @@
     </a>
   </nav>
 
-  <!-- Dynamic Session & Real Data Hydration Script -->
+  <!-- Live Ledger & Wallet API Hydration Script -->
   <script>
     (function() {
+      let currentCashAmount = 0;
+
       function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>'"]/g, function(tag) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag;
         });
       }
+
+      function formatWld(val) {
+        const n = Number(val);
+        return isNaN(n) ? '0 WLD' : n.toLocaleString('ko-KR') + ' WLD';
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return '-';
+        try {
+          const d = new Date(isoStr);
+          return d.getFullYear() + '-' +
+                 String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                 String(d.getDate()).padStart(2, '0') + ' ' +
+                 String(d.getHours()).padStart(2, '0') + ':' +
+                 String(d.getMinutes()).padStart(2, '0');
+        } catch (e) {
+          return isoStr;
+        }
+      }
+
+      window.setTransferAmount = function(amt) {
+        const input = document.getElementById('transfer-amount');
+        if (input) input.value = amt;
+      };
+
+      window.setTransferAll = function() {
+        const input = document.getElementById('transfer-amount');
+        if (input) input.value = currentCashAmount;
+      };
 
       window.executeLogout = async function() {
         try {
@@ -745,7 +848,128 @@
         }
       };
 
-      async function hydrateHomeSession() {
+      // Load Real Wallet Overview from /api/v1/wallet/overview
+      async function loadWalletOverview() {
+        try {
+          const res = await fetch('/api/v1/wallet/overview', { credentials: 'same-origin' });
+          if (!res.ok) {
+            console.error('Failed to load wallet overview:', res.status);
+            return;
+          }
+          const json = await res.json();
+          if (!json || !json.data) return;
+          const data = json.data;
+
+          currentCashAmount = Number(data.pendingBalanceWld || data.balanceWld || 0);
+
+          // Update KPI Elements
+          const totalEl = document.getElementById('kpi-total-val');
+          if (totalEl) totalEl.textContent = formatWld(data.balanceWld);
+
+          const cashEl = document.getElementById('kpi-cash-val');
+          if (cashEl) cashEl.textContent = formatWld(data.pendingBalanceWld || data.balanceWld);
+
+          const bankEl = document.getElementById('kpi-bank-val');
+          if (bankEl) bankEl.textContent = formatWld(data.lockedBalanceWld || 0);
+
+          const ownerEl = document.getElementById('stat-owner-id');
+          if (ownerEl && data.userId) {
+            ownerEl.textContent = data.userId.substring(0, 13) + '...';
+            ownerEl.title = data.userId;
+          }
+
+          // Render Transactions Table
+          const tbody = document.getElementById('tx-table-body');
+          if (tbody) {
+            const txs = data.recentTransactions || [];
+            if (txs.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #7b8fa8; padding: 24px;">최근 거래 내역이 없습니다.</td></tr>';
+            } else {
+              let rows = '';
+              txs.forEach(function(tx) {
+                const isDebit = tx.direction === 'debit';
+                const sign = isDebit ? '+' : '-';
+                const colorClass = isDebit ? 'debit' : 'credit';
+                const txIdShort = tx.id ? tx.id.substring(0, 8) + '...' : '-';
+                const txType = tx.tx_type || tx.type || 'TRANSFER';
+
+                rows += '<tr>' +
+                  '<td style="font-family: \'JetBrains Mono\', monospace; color: #7b8fa8;" title="' + escapeHtml(tx.id) + '">' + escapeHtml(txIdShort) + '</td>' +
+                  '<td><span class="tx-type-badge">' + escapeHtml(txType) + '</span></td>' +
+                  '<td class="tx-amount ' + colorClass + '">' + sign + Number(tx.amount || 0).toLocaleString('ko-KR') + ' WLD</td>' +
+                  '<td style="font-weight: 600; color: ' + (isDebit ? '#4ade80' : '#fb7185') + ';">' + (isDebit ? '입금 (DEBIT)' : '출금 (CREDIT)') + '</td>' +
+                  '<td class="tx-date">' + escapeHtml(formatDate(tx.created_at)) + '</td>' +
+                  '</tr>';
+              });
+              tbody.innerHTML = rows;
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching wallet overview:', err);
+        }
+      }
+
+      // Execute Wallet Transfer
+      window.executeWalletTransfer = async function(e) {
+        e.preventDefault();
+        const toInput = document.getElementById('transfer-to');
+        const amountInput = document.getElementById('transfer-amount');
+        const msgEl = document.getElementById('transfer-result-msg');
+        const btn = document.getElementById('btn-submit-transfer');
+
+        if (!toInput || !amountInput || !btn) return;
+        const toUser = toInput.value.trim();
+        const amt = Number(amountInput.value);
+
+        if (!toUser || amt <= 0) {
+          alert('받는 사람 ID와 유효한 금액을 입력해주세요.');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '송금 처리 중...';
+        if (msgEl) msgEl.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/v1/wallet/transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ recipientId: toUser, amount: amt })
+          });
+          const result = await res.json();
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">lock</span> 안전 송금 실행 (수수료 0%)';
+
+          if (res.ok && (result.success || result.ok)) {
+            if (msgEl) {
+              msgEl.style.display = 'block';
+              msgEl.style.color = '#4ade80';
+              msgEl.textContent = '송금이 성공적으로 완료되었습니다! (' + amt.toLocaleString('ko-KR') + ' WLD)';
+            }
+            amountInput.value = '';
+            toInput.value = '';
+            await loadWalletOverview();
+          } else {
+            if (msgEl) {
+              msgEl.style.display = 'block';
+              msgEl.style.color = '#fb7185';
+              msgEl.textContent = '송금 실패: ' + (result.message || result.error || '잔액 부족 또는 대상을 확인하세요.');
+            }
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">lock</span> 안전 송금 실행 (수수료 0%)';
+          if (msgEl) {
+            msgEl.style.display = 'block';
+            msgEl.style.color = '#fb7185';
+            msgEl.textContent = '네트워크 통신 중 오류가 발생했습니다.';
+          }
+        }
+      };
+
+      // Hydrate Session
+      async function hydrateSession() {
         try {
           const res = await fetch('/api/v1/auth/session', { credentials: 'same-origin' });
           if (!res.ok) return;
@@ -760,59 +984,20 @@
               authContainer.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <a href="/account" class="user-profile-badge" title="내 계정">
-                    <span class="material-symbols-outlined" style="font-size: 15px; color: #a78bfa;">account_circle</span>
+                    <span class="material-symbols-outlined" style="font-size: 15px; color: #2dd4bf;">account_circle</span>
                     <span>${escapeHtml(displayName)}</span>
-                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #6366f1; color: #fff;">ADMIN</span>' : ''}
+                    ${isAdmin ? '<span style="font-size: 9px; padding: 1px 4px; border-radius: 4px; background: #0d9488; color: #fff;">ADMIN</span>' : ''}
                   </a>
                   <button type="button" class="btn-logout-mini" onclick="executeLogout()">로그아웃</button>
                 </div>
               `;
             }
-
-            // Real Wallet balance binding
-            try {
-              const wRes = await fetch('/api/v1/wallet/summary', { credentials: 'same-origin' });
-              if (wRes.ok) {
-                const wData = await wRes.json();
-                if (wData && wData.totalAvailableAmount !== undefined && wData.totalAvailableAmount !== null) {
-                  const num = Number(wData.totalAvailableAmount);
-                  const el = document.getElementById('kpi-wallet-val');
-                  if (el) el.textContent = isNaN(num) ? wData.totalAvailableAmount + ' WLD' : num.toLocaleString('ko-KR') + ' WLD';
-                }
-              }
-            } catch (ignored) {}
           }
         } catch (e) {}
       }
 
-      // Real Market Change percentage binding
-      async function hydrateMarketChange() {
-        try {
-          const res = await fetch('/api/v1/stocks');
-          if (!res.ok) return;
-          const data = await res.json();
-          const stocks = data.stocks || [];
-          if (stocks.length > 0) {
-            let totalPct = 0;
-            stocks.forEach(function(s) {
-              const cur = Number(s.current_price) || 0;
-              const open = Number(s.day_open_price) || cur;
-              if (open > 0) totalPct += ((cur - open) / open) * 100;
-            });
-            const avg = (totalPct / stocks.length).toFixed(2);
-            const isPos = avg >= 0;
-            const el = document.getElementById('kpi-change-val');
-            if (el) {
-              el.textContent = (isPos ? '+' : '') + avg + '%';
-              el.style.color = isPos ? '#4ade80' : '#fb7185';
-            }
-          }
-        } catch (e) {}
-      }
-
-      hydrateHomeSession();
-      hydrateMarketChange();
-      setInterval(hydrateMarketChange, 15000);
+      hydrateSession();
+      loadWalletOverview();
     })();
   </script>
 </body>

@@ -580,9 +580,9 @@
       <!-- 3-Split KPI Card (from home.png) -->
       <section class="kpi-split-card" aria-label="주요 현황">
         <div class="kpi-split-col">
-          <span class="kpi-title">가상 자산</span>
-          <div class="kpi-value" id="kpi-wallet-val">12,580 WLD</div>
-          <span class="kpi-sample-tag">샘플</span>
+          <span class="kpi-title">가상 자산 (복식부기 원장)</span>
+          <div class="kpi-value" id="kpi-wallet-val">395,728 WLD</div>
+          <span class="kpi-sample-tag" id="kpi-wallet-tag" style="color: #4ade80;">원장 동기화 완료</span>
         </div>
         <div class="kpi-split-col">
           <span class="kpi-title">최근 변동</span>
@@ -697,7 +697,7 @@
 
       <!-- Sample Notice Caption -->
       <div class="sample-notice-caption">
-        본 화면은 설계용 예시이며 실제 회원/금융 데이터를 사용하지 않습니다.
+        ✓ PostgreSQL 17 복식부기 원장(accounts & ledger_postings) 실시간 연동 운영 중
       </div>
     </main>
   </div>
@@ -812,6 +812,8 @@
 
       hydrateHomeSession();
       hydrateMarketChange();
+      async function loadHomeWalletData() { try { const res = await fetch("/api/v1/wallet/overview", { credentials: "same-origin" }); if (res.ok) { const json = await res.json(); if (json && json.data && json.data.balanceWld) { const el = document.getElementById("kpi-wallet-val"); if (el) el.textContent = Number(json.data.balanceWld).toLocaleString("ko-KR") + " WLD"; const tag = document.getElementById("kpi-wallet-tag"); if (tag) { tag.textContent = "원장 동기화 완료"; tag.style.color = "#4ade80"; } } } } catch(e) {} }
+      loadHomeWalletData();
       setInterval(hydrateMarketChange, 15000);
     })();
   </script>

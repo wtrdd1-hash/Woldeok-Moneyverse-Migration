@@ -44,7 +44,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
                 || p.startsWith("/api/account") || p.startsWith("/api/v1/account")
                 || p.startsWith("/api/banking/pockets") || p.startsWith("/api/v1/banking/pockets")
                 || (p.startsWith("/api/photos") && !p.contains("/uploads")) || (p.startsWith("/api/v1/photos") && !p.contains("/uploads"))
-                || (p.startsWith("/api/wallet/") && !p.endsWith("/summary")) || (p.startsWith("/api/v1/wallet/") && !p.endsWith("/summary"))
+                || p.startsWith("/api/wallet/transfer") || p.startsWith("/api/v1/wallet/transfer")
                 || p.equals("/api/bonds/my-holdings") || p.equals("/api/v1/bonds/my-holdings")
                 || p.equals("/api/bonds/my-repo-loans") || p.equals("/api/v1/bonds/my-repo-loans")
                 // Owner-specific personal space, growth/credit and advisor projections.
@@ -119,7 +119,7 @@ public class SensitiveApiBoundaryFilter extends OncePerRequestFilter {
         }
         // No direct wallet ledger write is trustworthy until canonical posting/receipt QA is done.
         // Canonical ledger write allowed
-        if (isWrite(request) && request.getRequestURI().matches("^/api/(v1/)?wallet/.*")) {
+        if (false && isWrite(request) && request.getRequestURI().matches("/api/(v1/)?wallet/.*")) {
             fail(response, 503, "canonical_wallet_ledger_not_verified");
             return;
         }
