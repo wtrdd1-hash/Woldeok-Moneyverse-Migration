@@ -1,5 +1,9 @@
 # 📚 Woldeok Moneyverse - 공식 통합 문서 허브 (Master Docs Hub)
 
+## v2026.11.19.38 — Spring-served desktop/mobile five-language frontend foundation (Test verified; Production HOLD)
+- [Implementation plan](docs/planning/RESPONSIVE_SPRING_REALDATA_I18N_v2026.11.19.38.md) · [Worklog](docs/worklog/2026-11-19-full-responsive-spring-i18n-v38.md) · [QA EN](docs/qa/2026-11-19-responsive-v38-test-report.md) / [QA KO](docs/qa/2026-11-19-responsive-v38-test-report.ko.md) · [PC/mobile preview images](docs/design/mv38/README.md). Five existing locales EN/KO/JA/ZH/VI with browser auto plus persistent manual selection, no fake balance/internal diagnostics, eight core page features across nine static entrypoints. Local read-only Spring Test / 39 Playwright checks pass; signed-in finance E2E and all 180 route coverage NOT complete; Production not changed.
+
+
 ## v2026.11.19.34 — Personal-assets desktop/mobile real-data contract & public diagnostics removal (SPEC ONLY)
 - [Detailed KO spec](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.ko.md) / [EN](docs/planning/PERSONAL_ASSETS_REAL_DATA_UI_v2026.11.19.34.md) · [Worklog](docs/worklog/2026-11-19-personal-ui-real-data-v2026.11.19.34.ko.md) · [Internal local-only, not tracked] · [GitHub update](docs/updates/v2026.11.19.34-personal-ui-github.md). All user money/graphs/transactions must use real authenticated Spring/ledger data. No member-facing runtime version/API/DB/sync/system diagnostic information; Treasury is admin-only. Existing design catalog reused; newly generated chat images not yet transferred. No code or Production release.
 
