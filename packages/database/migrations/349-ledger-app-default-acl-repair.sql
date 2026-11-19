@@ -4,10 +4,21 @@ BEGIN;
 
 -- Default privileges are creator-specific; both observed creators had
 -- overbroad future-table grants to the application role.
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
-  REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE moneyverse_migrator IN SCHEMA public
-  REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app;
+-- Fresh CI databases may have no postgres or moneyverse_migrator role.
+-- Guard each creator independently; on DEV both exist and must be repaired.
+DO $acl$
+DECLARE creator text;
+BEGIN
+  FOREACH creator IN ARRAY ARRAY['postgres', 'moneyverse_migrator'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = creator) THEN
+      EXECUTE format(
+        'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL PRIVILEGES ON TABLES FROM moneyverse_app',
+        creator
+      );
+    END IF;
+  END LOOP;
+END
+$acl$;
 
 -- Default privilege changes do not affect tables that already exist.
 REVOKE ALL PRIVILEGES ON TABLE public.ledger_transactions, public.ledger_postings FROM moneyverse_app;
